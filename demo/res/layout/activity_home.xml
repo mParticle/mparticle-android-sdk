@@ -1,0 +1,244 @@
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/scrollView1"
+    android:layout_width="match_parent"
+    android:layout_height="fill_parent" >
+
+    <RelativeLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical" >
+
+        <TextView
+            android:id="@+id/textView1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Event/Data Inputs"
+            android:textSize="22dp" />
+
+        <Button
+            android:id="@+id/buttonA"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_below="@+id/textView1"
+            android:onClick="pressButtonA"
+            android:text="Button A" />
+
+        <Button
+            android:id="@+id/buttonB"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBaseline="@+id/buttonA"
+            android:layout_alignBottom="@+id/buttonA"
+            android:layout_toRightOf="@+id/buttonA"
+            android:onClick="pressButtonB"
+            android:text="Button B" />
+
+        <ToggleButton
+            android:id="@+id/buttonC"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@+id/buttonB"
+            android:layout_alignTop="@+id/buttonB"
+            android:layout_toRightOf="@+id/buttonB"
+            android:onClick="pressButtonC"
+            android:text="Button C"
+            android:textOff="Button C OFF"
+            android:textOn="Button C ON" />
+
+        <LinearLayout
+            android:id="@+id/userIdInputs"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/buttonA" >
+
+            <TextView
+                android:id="@+id/userLabel"
+                android:layout_width="100dp"
+                android:layout_height="wrap_content"
+                android:text="User ID"
+                android:textSize="18dp" />
+
+            <EditText
+                android:id="@+id/editUserId"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:ems="10"
+                android:imeOptions="actionSend|actionGo"
+                android:inputType="textPersonName" >
+            </EditText>
+
+            <Button
+                android:id="@+id/buttonSetUserId"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:onClick="pressSetUserId"
+                android:text="Set" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/userVarInputs"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/userIdInputs" >
+
+            <TextView
+                android:id="@+id/userVarLabel"
+                android:layout_width="100dp"
+                android:layout_height="wrap_content"
+                android:text="User Var"
+                android:textSize="18dp" />
+
+            <EditText
+                android:id="@+id/editUserVar"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:ems="10"
+                android:inputType="text" />
+
+            <Button
+                android:id="@+id/buttonSetUserVar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:onClick="pressSetUserVar"
+                android:text="Set" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/sessionVarInputs"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/userVarInputs" >
+
+            <TextView
+                android:id="@+id/sessionVarLabel"
+                android:layout_width="100dp"
+                android:layout_height="wrap_content"
+                android:text="Session Var"
+                android:textSize="18dp" />
+
+            <EditText
+                android:id="@+id/editSessionVar"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:ems="10"
+                android:inputType="text" />
+
+            <Button
+                android:id="@+id/buttonSetSessionVar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:onClick="pressSetSessionVar"
+                android:text="Set" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/textControls"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/sessionVarInputs"
+            android:text="Controls"
+            android:textSize="22dp" />
+
+        <Button
+            android:id="@+id/buttonStartSession"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/textControls"
+            android:onClick="pressStartSession"
+            android:text="Start Session" />
+
+        <Button
+            android:id="@+id/buttonEndSession"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/textControls"
+            android:layout_toRightOf="@+id/buttonStartSession"
+            android:onClick="pressEndSession"
+            android:text="End Session" />
+
+        <Button
+            android:id="@+id/buttonUpload"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/buttonStartSession"
+            android:onClick="pressUpload"
+            android:text="Upload" />
+
+        <Button
+            android:id="@+id/buttonCrash"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/buttonStartSession"
+            android:layout_toRightOf="@+id/buttonUpload"
+            android:onClick="pressCrash"
+            android:text="Crash" />
+
+        <Button
+            android:id="@+id/buttonGetUserSegment"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/buttonStartSession"
+            android:layout_toRightOf="@+id/buttonCrash"
+            android:onClick="pressGetUserSegment"
+            android:text="Get Segment" />
+
+        <Button
+            android:id="@+id/buttonUpdateLocation"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/buttonUpload"
+            android:onClick="pressUpdateLocation"
+            android:text="Update Location" />
+
+        <CheckBox
+            android:id="@+id/checkBoxOptOut"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/buttonUpdateLocation"
+            android:onClick="pressOptOut"
+            android:text="OptOut" />
+
+        <CheckBox
+            android:id="@+id/checkBoxDebugMode"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBaseline="@+id/checkBoxOptOut"
+            android:layout_alignBottom="@+id/checkBoxOptOut"
+            android:layout_toRightOf="@+id/checkBoxOptOut"
+            android:onClick="pressDebug"
+            android:text="Debug" />
+
+        <CheckBox
+            android:id="@+id/checkBoxPushRegistration"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBaseline="@+id/checkBoxDebugMode"
+            android:layout_alignBottom="@+id/checkBoxDebugMode"
+            android:layout_toRightOf="@+id/checkBoxDebugMode"
+            android:onClick="pressPushRegistration"
+            android:text="Push Notify" />
+
+        <TextView
+            android:id="@+id/textDiagnosticsLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/checkBoxPushRegistration"
+            android:text="Diagnostics"
+            android:textSize="22dp" />
+
+        <TextView
+            android:id="@+id/textDiagnostics"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/textDiagnosticsLabel"
+            android:contentDescription="Diagnostics info"
+            android:textSize="18dp" />
+    </RelativeLayout>
+
+</ScrollView>
