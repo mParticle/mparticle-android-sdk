@@ -14,24 +14,31 @@ public class MParticleAPI {
     private static final String TAG = "mParticleAPI";
     private static boolean optOutFlag = false;
     public static boolean debugMode = true; // TODO: this will default to false
-
+    private static Map<String, MParticleAPI> sInstanceMap = new HashMap<String, MParticleAPI>();
     private Context mContext;
 
     private MParticleAPI(Context context, String api_key, String secret) {
         this.mContext = context;
     }
 
-    public static MParticleAPI getInstance(Context context) {
-        return new MParticleAPI(context, null, null);
+    public static MParticleAPI getInstance(Context context, String api_key, String secret,
+            int uploadInterval) {
+        MParticleAPI apiInstance;
+        if (sInstanceMap.containsKey(api_key)) {
+            apiInstance = sInstanceMap.get(api_key);
+        } else {
+            apiInstance = new MParticleAPI(context, api_key, secret);
+            sInstanceMap.put(api_key, apiInstance);
+        }
+        return apiInstance;
     }
 
     public static MParticleAPI getInstance(Context context, String api_key, String secret) {
-        return new MParticleAPI(context, api_key, secret);
+        return MParticleAPI.getInstance(context, api_key, secret, 0);
     }
 
-    public static MParticleAPI getInstance(Context context, String api_key, String secret,
-            int uploadInterval) {
-        return new MParticleAPI(context, api_key, secret);
+    public static MParticleAPI getInstance(Context context) {
+        return MParticleAPI.getInstance(context, null, null, 0);
     }
 
     public void startSession() {
