@@ -2,7 +2,9 @@ package com.mparticle;
 
 import java.net.URL;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import android.content.Context;
 import android.provider.Settings;
@@ -11,42 +13,94 @@ import android.widget.Toast;
 
 public class MParticleAPI {
 
+    private static final String VERSION = "0.1";
+
     private static final String TAG = "mParticleAPI";
     private static boolean optOutFlag = false;
     public static boolean debugMode = true; // TODO: this will default to false
     private static Map<String, MParticleAPI> sInstanceMap = new HashMap<String, MParticleAPI>();
-    private Context mContext;
 
-    private MParticleAPI(Context context, String api_key, String secret) {
+    private Context mContext;
+    private String mApiKey;
+    private String mSecret;
+    private UUID mSessionID;
+    private int mSessionTimeout = 30*60*1000;
+    private long mSessionStartTime = 0;
+    private long mSessionEndTime = 0;
+    private long mLastEventTime = 0;
+
+    private MParticleAPI(Context context, String apiKey, String secret) {
         this.mContext = context;
+        this.mApiKey = apiKey;
+        this.mSecret = secret;
     }
 
-    public static MParticleAPI getInstance(Context context, String api_key, String secret,
+    public static MParticleAPI getInstance(Context context, String apiKey, String secret,
             int uploadInterval) {
         MParticleAPI apiInstance;
-        if (sInstanceMap.containsKey(api_key)) {
-            apiInstance = sInstanceMap.get(api_key);
+        if (sInstanceMap.containsKey(apiKey)) {
+            apiInstance = sInstanceMap.get(apiKey);
         } else {
-            apiInstance = new MParticleAPI(context, api_key, secret);
-            sInstanceMap.put(api_key, apiInstance);
+            apiInstance = new MParticleAPI(context, apiKey, secret);
+            sInstanceMap.put(apiKey, apiInstance);
         }
         return apiInstance;
     }
 
-    public static MParticleAPI getInstance(Context context, String api_key, String secret) {
-        return MParticleAPI.getInstance(context, api_key, secret, 0);
+    public static MParticleAPI getInstance(Context context, String apiKey, String secret) {
+        return MParticleAPI.getInstance(context, apiKey, secret, 0);
     }
 
     public static MParticleAPI getInstance(Context context) {
         return MParticleAPI.getInstance(context, null, null, 0);
     }
 
-    public void startSession() {
-        this.debugLog("Start Session");
+    // possible new method - for testing only right now
+    public void setSessionTimeout(int sessionTimeout) {
+        this.mSessionTimeout = sessionTimeout;
+    }
+
+    public void start() {
+        this.checkSessionTimeout();
+    }
+
+    public void stop() {
+        this.mLastEventTime = System.currentTimeMillis();
+        this.debugLog("Stop Session");
+    }
+
+    public void newSession() {
+        if (0!=this.mSessionStartTime) {
+            this.endSession();
+        }
+        this.start();
     }
 
     public void endSession() {
-        this.debugLog("End Session");
+        // generate session-end message
+        this.debugLog("Explicit End Session");
+        // reset agent to unstarted state
+        this.mSessionStartTime = 0;
+    }
+
+    private void checkSessionTimeout() {
+        long now = System.currentTimeMillis();
+        if (0==this.mSessionStartTime) {
+            this.beginSession();
+        } else if (this.mSessionTimeout < now-this.mLastEventTime) {
+            this.debugLog("Session Timed Out");
+            this.endSession();
+            this.beginSession();
+        } else {
+            this.debugLog("Resuming Existing Session");
+        }
+    }
+
+    private void beginSession() {
+        this.mSessionStartTime = System.currentTimeMillis();
+        this.mLastEventTime = this.mSessionStartTime;
+        this.mSessionID = UUID.randomUUID();
+        this.debugLog("Start New Session");
     }
 
     public void upload() {
@@ -58,6 +112,8 @@ public class MParticleAPI {
     }
 
     public void logEvent(String eventName, Map<String, String> eventData) {
+        this.checkSessionTimeout();
+        this.mLastEventTime = System.currentTimeMillis();
         this.debugLog("Logged event: " + eventName + " with data " + eventData);
     }
 
@@ -66,6 +122,8 @@ public class MParticleAPI {
     }
 
     public void logScreenView(String screenName, Map<String, String> eventData) {
+        this.checkSessionTimeout();
+        this.mLastEventTime = System.currentTimeMillis();
         this.debugLog("Logged screen: " + screenName + " with data " + eventData);
     }
 
@@ -74,6 +132,8 @@ public class MParticleAPI {
     }
 
     public void logErrorEvent(String eventName, Map<String, String> data) {
+        this.checkSessionTimeout();
+        this.mLastEventTime = System.currentTimeMillis();
         this.debugLog("Logged error: " + eventName);
     }
 
@@ -85,14 +145,19 @@ public class MParticleAPI {
     }
 
     public void identifyUser(String key, String userId) {
+        this.checkSessionTimeout();
+        this.mLastEventTime = System.currentTimeMillis();
         this.debugLog("Identified user: " + userId);
     }
 
     public void setLocation(double longitude, double latitude) {
+        this.checkSessionTimeout();
+        this.mLastEventTime = System.currentTimeMillis();
         this.debugLog("Set Location: " + longitude + " " + latitude);
     }
 
     public void setSessionProperty(String key, String value) {
+        this.checkSessionTimeout();
         this.debugLog("Set Session: " + key + "=" + value);
     }
 
@@ -152,7 +217,16 @@ public class MParticleAPI {
     }
 
     public Map<String, Object> collectDeviceProperties() {
-        Map<String, Object> properties = new HashMap<String, Object>();
+        Map<String, Object> properties = new LinkedHashMap<String, Object>();
+
+        properties.put("mparticle_sdk_version", MParticleAPI.VERSION);
+        properties.put("api_key", this.mApiKey);
+        properties.put("secret", this.mSecret);
+        properties.put("session_timeout", this.mSessionTimeout);
+        properties.put("session_id", this.mSessionID);
+        properties.put("session_start", this.mSessionStartTime);
+        properties.put("last_event", this.mLastEventTime);
+        properties.put("session_end", this.mSessionEndTime);
 
         properties.put("ANDROID_ID", Settings.Secure.getString(mContext.getContentResolver(),
                 Settings.Secure.ANDROID_ID));
