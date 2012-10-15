@@ -26,7 +26,7 @@ public class HomeActivity extends Activity {
         setContentView(R.layout.activity_home);
         diagnosticsTextView = (TextView) findViewById(R.id.textDiagnostics);
 
-        mParticleAPI = MParticleAPI.getInstance(this, "01234567890123456789012345678901", "secret");
+        mParticleAPI = MParticleAPI.getInstance(this, "TestAppKey", "secret");
         mParticleAPI.setSessionTimeout(10*1000);
     }
 
