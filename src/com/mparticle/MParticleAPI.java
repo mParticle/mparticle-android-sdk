@@ -6,6 +6,9 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.UUID;
 
+import com.mparticle.MessageManager.MessageKey;
+import com.mparticle.MessageManager.MessageType;
+
 import android.content.Context;
 import android.provider.Settings;
 import android.util.Log;
@@ -83,7 +86,7 @@ public class MParticleAPI {
         this.debugLog("Explicit End Session");
         Map<String, String> sessionData=new HashMap<String, String>();
         sessionData.put("duration", ""+(System.currentTimeMillis()-mSessionStartTime));
-        this.mMessageManager.handleEvent("session-ended", sessionData);
+        this.mMessageManager.handleMessage(MessageType.SESSION_END, sessionData);
         // reset agent to unstarted state
         this.mSessionStartTime = 0;
     }
@@ -104,7 +107,7 @@ public class MParticleAPI {
         this.mLastEventTime = this.mSessionStartTime;
         this.mSessionID = UUID.randomUUID();
         this.debugLog("Start New Session");
-        this.mMessageManager.handleEvent("session-begin", null);
+        this.mMessageManager.handleMessage(MessageType.SESSION_START, null);
     }
 
     public void upload() {
@@ -112,29 +115,33 @@ public class MParticleAPI {
     }
 
     public void logEvent(String eventName) {
-        logEvent(eventName, null);
+        logEvent(eventName, new HashMap<String, String>());
     }
 
     public void logEvent(String eventName, Map<String, String> eventData) {
         this.checkSessionTimeout();
         this.mLastEventTime = System.currentTimeMillis();
+        // TODO: should not be modifying eventData here
+        eventData.put(MessageKey.NAME, eventName);
         this.debugLog("Logged event: " + eventName + " with data " + eventData);
-        this.mMessageManager.handleEvent(eventName, eventData);
+        this.mMessageManager.handleMessage(MessageType.CUSTOM_EVENT, eventData);
     }
 
     public void logScreenView(String screenName) {
-        logScreenView(screenName, null);
+        logScreenView(screenName, new HashMap<String, String>());
     }
 
     public void logScreenView(String screenName, Map<String, String> eventData) {
         this.checkSessionTimeout();
         this.mLastEventTime = System.currentTimeMillis();
+        // TODO: should not be modifying eventData here
+        eventData.put(MessageKey.NAME, screenName);
         this.debugLog("Logged screen: " + screenName + " with data " + eventData);
-        this.mMessageManager.handleEvent(screenName, eventData);
+        this.mMessageManager.handleMessage(MessageType.SCREEN_VIEW, eventData);
     }
 
     public void logErrorEvent(String eventName) {
-        logErrorEvent(eventName, null);
+        logErrorEvent(eventName, new HashMap<String, String>());
     }
 
     public void logErrorEvent(String eventName, Map<String, String> data) {
