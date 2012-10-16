@@ -30,7 +30,7 @@ public class MParticleAPI {
     private long mLastEventTime = 0;
 
     private MParticleAPI(Context context, String apiKey, String secret) {
-        this.mContext = context;
+        this.mContext = context.getApplicationContext();
         this.mApiKey = apiKey;
         this.mSecret = secret;
     }
