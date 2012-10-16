@@ -196,6 +196,15 @@
             android:onClick="pressUpdateLocation"
             android:text="Update Location" />
 
+        <Button
+            android:id="@+id/buttonShowPendingMessages"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/buttonUpload"
+            android:layout_toRightOf="@+id/buttonUpdateLocation"
+            android:onClick="pressShowPendingMessages"
+            android:text="Show Messages" />
+
         <CheckBox
             android:id="@+id/checkBoxOptOut"
             android:layout_width="wrap_content"

@@ -23,6 +23,7 @@ public class MParticleAPI {
     private Context mContext;
     private String mApiKey;
     private String mSecret;
+    private MessageManager mMessageManager;
     private UUID mSessionID;
     private int mSessionTimeout = 30*60*1000;
     private long mSessionStartTime = 0;
@@ -33,6 +34,7 @@ public class MParticleAPI {
         this.mContext = context.getApplicationContext();
         this.mApiKey = apiKey;
         this.mSecret = secret;
+        this.mMessageManager = MessageManager.getInstance(mContext);
     }
 
     public static MParticleAPI getInstance(Context context, String apiKey, String secret,
@@ -66,7 +68,7 @@ public class MParticleAPI {
 
     public void stop() {
         this.mLastEventTime = System.currentTimeMillis();
-        this.debugLog("Stop Session");
+        this.debugLog("Stop Called");
     }
 
     public void newSession() {
@@ -79,6 +81,9 @@ public class MParticleAPI {
     public void endSession() {
         // generate session-end message
         this.debugLog("Explicit End Session");
+        Map<String, String> sessionData=new HashMap<String, String>();
+        sessionData.put("duration", ""+(System.currentTimeMillis()-mSessionStartTime));
+        this.mMessageManager.handleEvent("session-ended", sessionData);
         // reset agent to unstarted state
         this.mSessionStartTime = 0;
     }
@@ -91,8 +96,6 @@ public class MParticleAPI {
             this.debugLog("Session Timed Out");
             this.endSession();
             this.beginSession();
-        } else {
-            this.debugLog("Resuming Existing Session");
         }
     }
 
@@ -101,6 +104,7 @@ public class MParticleAPI {
         this.mLastEventTime = this.mSessionStartTime;
         this.mSessionID = UUID.randomUUID();
         this.debugLog("Start New Session");
+        this.mMessageManager.handleEvent("session-begin", null);
     }
 
     public void upload() {
@@ -115,6 +119,7 @@ public class MParticleAPI {
         this.checkSessionTimeout();
         this.mLastEventTime = System.currentTimeMillis();
         this.debugLog("Logged event: " + eventName + " with data " + eventData);
+        this.mMessageManager.handleEvent(eventName, eventData);
     }
 
     public void logScreenView(String screenName) {
@@ -125,6 +130,7 @@ public class MParticleAPI {
         this.checkSessionTimeout();
         this.mLastEventTime = System.currentTimeMillis();
         this.debugLog("Logged screen: " + screenName + " with data " + eventData);
+        this.mMessageManager.handleEvent(screenName, eventData);
     }
 
     public void logErrorEvent(String eventName) {

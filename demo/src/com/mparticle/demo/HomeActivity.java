@@ -6,6 +6,7 @@ import java.util.Map.Entry;
 import java.util.Random;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.CheckBox;
@@ -27,7 +28,8 @@ public class HomeActivity extends Activity {
         diagnosticsTextView = (TextView) findViewById(R.id.textDiagnostics);
 
         mParticleAPI = MParticleAPI.getInstance(this, "TestAppKey", "secret");
-        mParticleAPI.setSessionTimeout(10*1000);
+        // for testing, the timeout is 1 minute
+        mParticleAPI.setSessionTimeout(60*1000);
     }
 
     @Override
@@ -108,6 +110,10 @@ public class HomeActivity extends Activity {
     public void pressGetUserSegment(View view) {
         String userSegment = mParticleAPI.getUserSegment();
         Toast.makeText(view.getContext(), "Got User Segment: " + userSegment, Toast.LENGTH_SHORT).show();
+    }
+    public void pressShowPendingMessages(View view) {
+        Intent intent = new Intent(this, PendingMessagesActivity.class);
+        startActivity(intent);
     }
     public void pressUpdateLocation(View view) {
         Random r = new Random();

@@ -2,5 +2,6 @@
 
     <string name="app_name">mParticleDemo</string>
     <string name="title_activity_home">mParticle Demo</string>
+    <string name="title_activity_pending_messages">Pending Messages</string>
 
 </resources>
