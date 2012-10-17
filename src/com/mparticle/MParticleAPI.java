@@ -94,7 +94,7 @@ public class MParticleAPI {
         this.debugLog("Explicit End Session");
         Map<String, String> sessionData=new HashMap<String, String>();
         sessionData.put("duration", ""+(System.currentTimeMillis()-mSessionStartTime));
-        this.mMessageManager.handleMessage(MessageType.SESSION_END, sessionData);
+        this.mMessageManager.storeMessage(MessageType.SESSION_END, sessionData);
         // reset agent to unstarted state
         this.mSessionStartTime = 0;
     }
@@ -115,7 +115,7 @@ public class MParticleAPI {
         this.mLastEventTime = this.mSessionStartTime;
         this.mSessionID = UUID.randomUUID();
         this.debugLog("Start New Session");
-        this.mMessageManager.handleMessage(MessageType.SESSION_START, null);
+        this.mMessageManager.storeMessage(MessageType.SESSION_START, null);
     }
 
     public void upload() {
@@ -132,7 +132,7 @@ public class MParticleAPI {
         // TODO: should not be modifying eventData here
         eventData.put(MessageKey.NAME, eventName);
         this.debugLog("Logged event: " + eventName + " with data " + eventData);
-        this.mMessageManager.handleMessage(MessageType.CUSTOM_EVENT, eventData);
+        this.mMessageManager.storeMessage(MessageType.CUSTOM_EVENT, eventData);
     }
 
     public void logScreenView(String screenName) {
@@ -145,7 +145,7 @@ public class MParticleAPI {
         // TODO: should not be modifying eventData here
         eventData.put(MessageKey.NAME, screenName);
         this.debugLog("Logged screen: " + screenName + " with data " + eventData);
-        this.mMessageManager.handleMessage(MessageType.SCREEN_VIEW, eventData);
+        this.mMessageManager.storeMessage(MessageType.SCREEN_VIEW, eventData);
     }
 
     public void logErrorEvent(String eventName) {
