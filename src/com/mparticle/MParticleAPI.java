@@ -14,7 +14,9 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.provider.Settings;
 import android.telephony.TelephonyManager;
+import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.WindowManager;
 import android.widget.Toast;
 
 import com.mparticle.MessageManager.MessageKey;
@@ -262,7 +264,12 @@ public class MParticleAPI {
         properties.put(MessageKey.OS_VERSION, android.os.Build.VERSION.SDK_INT);
         properties.put(MessageKey.MODEL, android.os.Build.MODEL);
 
-        // TODO: screen height/width
+        // screen height/width
+        WindowManager windowManager = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
+        DisplayMetrics metrics = new DisplayMetrics();
+        windowManager.getDefaultDisplay().getMetrics(metrics);
+        properties.put(MessageKey.SCREEN_HEIGHT, metrics.heightPixels);
+        properties.put(MessageKey.SCREEN_WIDTH, metrics.widthPixels);
 
         // locales
         Locale locale = Locale.getDefault();
@@ -290,6 +297,9 @@ public class MParticleAPI {
         } else {
             properties.put(MessageKey.DATA_CONNECTION, "Forbidden");
         }
+
+        properties.put("extra_screen_orientation", windowManager.getDefaultDisplay().getRotation());
+        properties.put("extra_screen_metrics", metrics);
 
         properties.put("device", android.os.Build.DEVICE);
         properties.put("display", android.os.Build.DISPLAY);
