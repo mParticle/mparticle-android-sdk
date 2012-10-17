@@ -1,4 +1,4 @@
-package com.mparticle.test;
+package com.mparticle;
 
 import com.mparticle.MParticleAPI;
 
@@ -11,15 +11,15 @@ public class MParticleAPITest extends AndroidTestCase {
       super.setUp();
     }
 
-    public void testGetInstance() {
-
+    public void testGetSameInstance() {
         MParticleAPI mParticleAPI1 = MParticleAPI.getInstance(getContext(), "01234567890123456789012345678901", "secret");
         MParticleAPI mParticleAPI2 = MParticleAPI.getInstance(getContext(), "01234567890123456789012345678901", "secret");
-
         assertSame(mParticleAPI1, mParticleAPI2);
+    }
 
+    public void testGetDifferentInstance() {
+        MParticleAPI mParticleAPI1 = MParticleAPI.getInstance(getContext(), "01234567890123456789012345678901", "secret");
         MParticleAPI mParticleAPI3 = MParticleAPI.getInstance(getContext(), "99999999999999999999999999999999", "secret");
-
         assertNotSame(mParticleAPI1, mParticleAPI3);
     }
 
