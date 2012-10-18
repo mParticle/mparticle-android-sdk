@@ -248,9 +248,9 @@ public class MParticleAPI {
             String packageName = mContext.getPackageName();
             PackageInfo pInfo = mContext.getPackageManager().getPackageInfo(packageName, 0);
             properties.put(MessageKey.APPLICATION_VERSION, pInfo.versionName);
-		} catch (PackageManager.NameNotFoundException e) {
-	        properties.put(MessageKey.APPLICATION_VERSION, "Unknown");
-		}
+        } catch (PackageManager.NameNotFoundException e) {
+            properties.put(MessageKey.APPLICATION_VERSION, "Unknown");
+        }
 
         properties.put(MessageKey.MPARTICLE_VERSION, MParticleAPI.VERSION);
 
@@ -293,8 +293,8 @@ public class MParticleAPI {
         // NOTE: this requires ACCESS_NETWORK_STATE permission - which should already be granted. possibly move check elsewhere.
         if (PackageManager.PERMISSION_GRANTED ==
                 mContext.checkCallingOrSelfPermission(android.Manifest.permission.ACCESS_NETWORK_STATE)) {
-	        NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
-	        properties.put(MessageKey.DATA_CONNECTION, networkInfo.getTypeName());
+            NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
+            properties.put(MessageKey.DATA_CONNECTION, networkInfo.getTypeName());
         } else {
             properties.put(MessageKey.DATA_CONNECTION, "Forbidden");
         }

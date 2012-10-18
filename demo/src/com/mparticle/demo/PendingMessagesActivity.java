@@ -17,7 +17,7 @@ public class PendingMessagesActivity extends ListActivity {
         MessageManager mm=MessageManager.getInstance(this.getApplicationContext());
 
         ArrayAdapter<JSONObject> adapter = new ArrayAdapter<JSONObject>(this,
-        		  android.R.layout.simple_list_item_1, android.R.id.text1, mm.messages);
+                  android.R.layout.simple_list_item_1, android.R.id.text1, mm.messages);
         setListAdapter(adapter);
     }
 

@@ -36,7 +36,7 @@ public class MParticleAPITest extends AndroidTestCase {
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
-	public void testEventLogging() {
+    public void testEventLogging() {
         // create mock MessageManager & set MParticleAPI to use it
         MessageManager mockMessageManager = mock(MessageManager.class);
         MParticleAPI mParticleAPI = new MParticleAPI(getContext(),"test","secret", mockMessageManager);
@@ -59,7 +59,7 @@ public class MParticleAPITest extends AndroidTestCase {
         assertEquals("testValue2",eventDataArgument.getValue().get("testKey2"));
     }
 
-	public void testSessionDataLogging() {
+    public void testSessionDataLogging() {
 
     }
 
