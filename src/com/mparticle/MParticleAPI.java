@@ -74,7 +74,7 @@ public class MParticleAPI {
     }
 
     public void start() {
-        this.checkSessionTimeout();
+        this.ensureActiveSession();
     }
 
     public void stop() {
@@ -84,29 +84,29 @@ public class MParticleAPI {
 
     public void newSession() {
         if (0!=this.mSessionStartTime) {
-            this.endSession();
+            closeSession(System.currentTimeMillis());
         }
         this.start();
     }
 
     public void endSession() {
-        // generate session-end message
+        closeSession(System.currentTimeMillis());
         this.debugLog("Explicit End Session");
-        Map<String, String> sessionData=new HashMap<String, String>();
-        sessionData.put("duration", ""+(System.currentTimeMillis()-mSessionStartTime));
-        this.mMessageManager.storeMessage(MessageType.SESSION_END, sessionData);
-        // reset agent to unstarted state
-        this.mSessionStartTime = 0;
     }
 
-    private void checkSessionTimeout() {
-        long now = System.currentTimeMillis();
+    private void ensureActiveSession() {
+        checkEndSession();
         if (0==this.mSessionStartTime) {
             this.beginSession();
-        } else if (this.mSessionTimeout < now-this.mLastEventTime) {
+        }
+        this.mLastEventTime = System.currentTimeMillis();
+    }
+
+    /* package-private */ void checkEndSession() {
+        long now = System.currentTimeMillis();
+        if (0!=this.mSessionStartTime && (this.mSessionTimeout < now-this.mLastEventTime) ){
             this.debugLog("Session Timed Out");
-            this.endSession();
-            this.beginSession();
+            this.closeSession(this.mLastEventTime);
         }
     }
 
@@ -118,6 +118,19 @@ public class MParticleAPI {
         this.mMessageManager.storeMessage(MessageType.SESSION_START, null);
     }
 
+    private void closeSession(long endTime) {
+        long sessionEndTime = endTime;
+        if (0==sessionEndTime) {
+            Log.w(TAG, "Session end time was unknown");
+            sessionEndTime = System.currentTimeMillis();
+        }
+        Map<String, String> sessionData=new HashMap<String, String>();
+        sessionData.put("duration", ""+(sessionEndTime-mSessionStartTime));
+        this.mMessageManager.storeMessage(MessageType.SESSION_END, sessionData);
+        // reset agent to unstarted state
+        this.mSessionStartTime = 0;
+    }
+
     public void upload() {
         this.debugLog("Upload");
     }
@@ -127,8 +140,7 @@ public class MParticleAPI {
     }
 
     public void logEvent(String eventName, Map<String, String> eventData) {
-        this.checkSessionTimeout();
-        this.mLastEventTime = System.currentTimeMillis();
+        this.ensureActiveSession();
         // TODO: should not be modifying eventData here
         eventData.put(MessageKey.NAME, eventName);
         this.debugLog("Logged event: " + eventName + " with data " + eventData);
@@ -140,8 +152,7 @@ public class MParticleAPI {
     }
 
     public void logScreenView(String screenName, Map<String, String> eventData) {
-        this.checkSessionTimeout();
-        this.mLastEventTime = System.currentTimeMillis();
+        this.ensureActiveSession();
         // TODO: should not be modifying eventData here
         eventData.put(MessageKey.NAME, screenName);
         this.debugLog("Logged screen: " + screenName + " with data " + eventData);
@@ -153,8 +164,7 @@ public class MParticleAPI {
     }
 
     public void logErrorEvent(String eventName, Map<String, String> data) {
-        this.checkSessionTimeout();
-        this.mLastEventTime = System.currentTimeMillis();
+        this.ensureActiveSession();
         this.debugLog("Logged error: " + eventName);
     }
 
@@ -166,19 +176,17 @@ public class MParticleAPI {
     }
 
     public void identifyUser(String key, String userId) {
-        this.checkSessionTimeout();
-        this.mLastEventTime = System.currentTimeMillis();
+        this.ensureActiveSession();
         this.debugLog("Identified user: " + userId);
     }
 
     public void setLocation(double longitude, double latitude) {
-        this.checkSessionTimeout();
-        this.mLastEventTime = System.currentTimeMillis();
+        this.ensureActiveSession();
         this.debugLog("Set Location: " + longitude + " " + latitude);
     }
 
     public void setSessionProperty(String key, String value) {
-        this.checkSessionTimeout();
+        this.ensureActiveSession();
         this.debugLog("Set Session: " + key + "=" + value);
     }
 
