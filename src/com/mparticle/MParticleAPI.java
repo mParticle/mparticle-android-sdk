@@ -1,6 +1,7 @@
 package com.mparticle;
 
 import java.net.URL;
+
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Locale;
@@ -20,7 +21,6 @@ import android.view.WindowManager;
 import android.widget.Toast;
 
 import com.mparticle.MessageManager.MessageKey;
-import com.mparticle.MessageManager.MessageType;
 
 public class MParticleAPI {
 
@@ -36,7 +36,7 @@ public class MParticleAPI {
     private String mSecret;
     private MessageManager mMessageManager;
 
-    /* package-private */ UUID mSessionID;
+    /* package-private */ String mSessionID;
     /* package-private */ int mSessionTimeout = 30 * 60 * 1000;
     /* package-private */ long mSessionStartTime = 0;
     /* package-private */ long mLastEventTime = 0;
@@ -95,14 +95,14 @@ public class MParticleAPI {
     }
 
     private void ensureActiveSession() {
-        checkEndSession();
+        checkSessionTimeout();
         if (0==this.mSessionStartTime) {
             this.beginSession();
         }
         this.mLastEventTime = System.currentTimeMillis();
     }
 
-    /* package-private */ void checkEndSession() {
+    /* package-private */ void checkSessionTimeout() {
         long now = System.currentTimeMillis();
         if (0!=this.mSessionStartTime && (this.mSessionTimeout < now-this.mLastEventTime) ){
             this.debugLog("Session Timed Out");
@@ -113,9 +113,9 @@ public class MParticleAPI {
     private void beginSession() {
         this.mSessionStartTime = System.currentTimeMillis();
         this.mLastEventTime = this.mSessionStartTime;
-        this.mSessionID = UUID.randomUUID();
+        this.mSessionID = UUID.randomUUID().toString();
+        this.mMessageManager.beginSession(mSessionID, mSessionStartTime, null);
         this.debugLog("Start New Session");
-        this.mMessageManager.storeMessage(MessageType.SESSION_START, null);
     }
 
     private void closeSession(long endTime) {
@@ -126,7 +126,8 @@ public class MParticleAPI {
         }
         Map<String, String> sessionData=new HashMap<String, String>();
         sessionData.put("duration", ""+(sessionEndTime-mSessionStartTime));
-        this.mMessageManager.storeMessage(MessageType.SESSION_END, sessionData);
+        this.mMessageManager.closeSession(mSessionID, sessionEndTime, sessionData);
+
         // reset agent to unstarted state
         this.mSessionStartTime = 0;
     }
@@ -141,10 +142,8 @@ public class MParticleAPI {
 
     public void logEvent(String eventName, Map<String, String> eventData) {
         this.ensureActiveSession();
-        // TODO: should not be modifying eventData here
-        eventData.put(MessageKey.NAME, eventName);
+        this.mMessageManager.logCustomEvent(this.mSessionID, this.mLastEventTime, eventName, eventData);
         this.debugLog("Logged event: " + eventName + " with data " + eventData);
-        this.mMessageManager.storeMessage(MessageType.CUSTOM_EVENT, eventData);
     }
 
     public void logScreenView(String screenName) {
@@ -153,10 +152,8 @@ public class MParticleAPI {
 
     public void logScreenView(String screenName, Map<String, String> eventData) {
         this.ensureActiveSession();
-        // TODO: should not be modifying eventData here
-        eventData.put(MessageKey.NAME, screenName);
+        this.mMessageManager.logScreenView(this.mSessionID, this.mLastEventTime, screenName, eventData);
         this.debugLog("Logged screen: " + screenName + " with data " + eventData);
-        this.mMessageManager.storeMessage(MessageType.SCREEN_VIEW, eventData);
     }
 
     public void logErrorEvent(String eventName) {

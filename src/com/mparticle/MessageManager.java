@@ -89,12 +89,16 @@ public class MessageManager {
         return MessageManager.sMessageManager;
     }
 
-    public void storeMessage(String messageType, Map<String, String> eventData) {
+    private void storeMessage(String messageType, String sessionId, long time, String name, Map<String, String> eventData) {
         try {
             JSONObject eventObject = new JSONObject();
             eventObject.put(MessageKey.TYPE, messageType);
+            eventObject.put(MessageKey.SESSION_ID, sessionId);
             eventObject.put(MessageKey.ID, UUID.randomUUID().toString());
-            eventObject.put(MessageKey.TIMESTAMP, System.currentTimeMillis());
+            eventObject.put(MessageKey.TIMESTAMP, time);
+            if (null != name) {
+                eventObject.put(MessageKey.NAME, name);
+            }
             if (null != eventData) {
                 eventObject.put(MessageKey.ATTRIBUTES, eventData);
             }
@@ -106,6 +110,20 @@ public class MessageManager {
             e.printStackTrace();
         }
     }
+
+    public void beginSession(String sessionId, long time, Map<String, String> sessionData) {
+        storeMessage(MessageType.SESSION_START, sessionId, time, null, null);
+    }
+    public void closeSession(String sessionId, long time, Map<String, String> sessionData) {
+        storeMessage(MessageType.SESSION_END, sessionId, time, null, null);
+    }
+    public void logCustomEvent(String sessionId, long time, String eventName, Map<String, String> eventData) {
+        storeMessage(MessageType.CUSTOM_EVENT, sessionId, time, eventName, eventData);
+    }
+    public void logScreenView(String sessionId, long time, String screenName, Map<String, String> eventData) {
+        storeMessage(MessageType.SCREEN_VIEW, sessionId, time, screenName, eventData);
+    }
+
 
     public static final class MessageHandler extends Handler {
         private MessageDatabase mDB;
