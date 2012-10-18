@@ -39,7 +39,6 @@ public class MParticleAPI {
     /* package-private */ UUID mSessionID;
     /* package-private */ int mSessionTimeout = 30 * 60 * 1000;
     /* package-private */ long mSessionStartTime = 0;
-    /* package-private */ long mSessionEndTime = 0;
     /* package-private */ long mLastEventTime = 0;
 
     /* package-private */ MParticleAPI(Context context, String apiKey, String secret, MessageManager messageManager) {
@@ -314,7 +313,6 @@ public class MParticleAPI {
         properties.put("session_id", this.mSessionID);
         properties.put("session_start", this.mSessionStartTime);
         properties.put("last_event", this.mLastEventTime);
-        properties.put("session_end", this.mSessionEndTime);
 
         return properties;
     }
