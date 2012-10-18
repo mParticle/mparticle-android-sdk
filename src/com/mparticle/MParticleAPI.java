@@ -35,17 +35,18 @@ public class MParticleAPI {
     private String mApiKey;
     private String mSecret;
     private MessageManager mMessageManager;
-    private UUID mSessionID;
-    private int mSessionTimeout = 30*60*1000;
-    private long mSessionStartTime = 0;
-    private long mSessionEndTime = 0;
-    private long mLastEventTime = 0;
 
-    private MParticleAPI(Context context, String apiKey, String secret) {
+    /* package-private */ UUID mSessionID;
+    /* package-private */ int mSessionTimeout = 30 * 60 * 1000;
+    /* package-private */ long mSessionStartTime = 0;
+    /* package-private */ long mSessionEndTime = 0;
+    /* package-private */ long mLastEventTime = 0;
+
+    /* package-private */ MParticleAPI(Context context, String apiKey, String secret, MessageManager messageManager) {
         this.mContext = context.getApplicationContext();
         this.mApiKey = apiKey;
         this.mSecret = secret;
-        this.mMessageManager = MessageManager.getInstance(mContext);
+        this.mMessageManager = messageManager;
     }
 
     public static MParticleAPI getInstance(Context context, String apiKey, String secret,
@@ -54,7 +55,7 @@ public class MParticleAPI {
         if (sInstanceMap.containsKey(apiKey)) {
             apiInstance = sInstanceMap.get(apiKey);
         } else {
-            apiInstance = new MParticleAPI(context, apiKey, secret);
+            apiInstance = new MParticleAPI(context, apiKey, secret, MessageManager.getInstance(context));
             sInstanceMap.put(apiKey, apiInstance);
         }
         return apiInstance;
