@@ -23,7 +23,6 @@ import android.telephony.TelephonyManager;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.WindowManager;
-import android.widget.Toast;
 
 import com.mparticle.MessageManager.MessageKey;
 
@@ -335,9 +334,6 @@ public class MParticleAPI {
     private void debugLog(String message) {
         if (MParticleAPI.debugMode) {
             Log.d(TAG, this.mSessionID + ": " + message);
-            // temporarily show Toast messages in debug mode.
-            // this will be removed.
-            Toast.makeText(mContext, message, Toast.LENGTH_SHORT).show();
         }
     }
 
