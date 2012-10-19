@@ -20,6 +20,7 @@ import android.os.Process;
 import android.util.Log;
 
 import com.mparticle.MessageDatabase.MessageTable;
+import com.mparticle.MessageDatabase.SessionTable;
 
 public class MessageManager {
 
@@ -73,6 +74,10 @@ public class MessageManager {
         public static final String MOBILE_NETWORK_CODE = "mnc";
         public static final String MOBILE_COUNTRY_CODE = "mcc";
     }
+    private interface UploadStatus {
+        static final int PENDING = 0;
+        static final int READY = 1;
+    }
 
     private MessageManager(Context context) {
         mContext = context.getApplicationContext();
@@ -89,7 +94,7 @@ public class MessageManager {
         return MessageManager.sMessageManager;
     }
 
-    private void storeMessage(String messageType, String sessionId, long time, String name, Map<String, String> eventData) {
+    private void storeMessage(String messageType, String sessionId, long time, String name, Map<String, String> eventData, int uploadStatus) {
         try {
             JSONObject eventObject = new JSONObject();
             eventObject.put(MessageKey.TYPE, messageType);
@@ -104,7 +109,7 @@ public class MessageManager {
             }
             messages.add(eventObject);
 
-            mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, eventObject));
+            mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, uploadStatus, 0, eventObject));
 
         } catch (JSONException e) {
             e.printStackTrace();
@@ -112,31 +117,30 @@ public class MessageManager {
     }
 
     public void beginSession(String sessionId, long time, Map<String, String> sessionData) {
-        storeMessage(MessageType.SESSION_START, sessionId, time, null, null);
+        storeMessage(MessageType.SESSION_START, sessionId, time, null, null, UploadStatus.PENDING);
+        mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_SESSION, UploadStatus.PENDING, 0, sessionId));
     }
     public void closeSession(String sessionId, long time, Map<String, String> sessionData) {
-        storeMessage(MessageType.SESSION_END, sessionId, time, null, null);
+        storeMessage(MessageType.SESSION_END, sessionId, time, null, null, UploadStatus.PENDING);
     }
     public void logCustomEvent(String sessionId, long time, String eventName, Map<String, String> eventData) {
-        storeMessage(MessageType.CUSTOM_EVENT, sessionId, time, eventName, eventData);
+        storeMessage(MessageType.CUSTOM_EVENT, sessionId, time, eventName, eventData, UploadStatus.READY);
     }
     public void logScreenView(String sessionId, long time, String screenName, Map<String, String> eventData) {
-        storeMessage(MessageType.SCREEN_VIEW, sessionId, time, screenName, eventData);
+        storeMessage(MessageType.SCREEN_VIEW, sessionId, time, screenName, eventData, UploadStatus.READY);
     }
-
 
     public static final class MessageHandler extends Handler {
         private MessageDatabase mDB;
         private Context mContext;
 
         public static final int STORE_MESSAGE = 0;
+        public static final int STORE_SESSION = 1;
 
         public MessageHandler(Context context, Looper looper) {
             super(looper);
             mContext = context;
             mDB = new MessageDatabase(mContext);
-
-            Log.i(TAG, "Instatiated a message handler");
         }
 
         @Override
@@ -152,7 +156,9 @@ public class MessageManager {
                     ContentValues values = new ContentValues();
                     values.put(MessageTable.MESSAGE_TYPE, eventObject.getString(MessageKey.TYPE));
                     values.put(MessageTable.MESSAGE_TIME, eventObject.getLong(MessageKey.TIMESTAMP));
+                    values.put(MessageTable.SESSION_ID, eventObject.getString(MessageKey.SESSION_ID));
                     values.put(MessageTable.UUID, eventObject.getString(MessageKey.ID));
+                    values.put(MessageTable.UPLOAD_STATUS, msg.arg1);
                     values.put(MessageTable.MESSAGE, eventObject.toString());
                     db.insert("messages", null, values);
                 } catch (SQLiteException e) {
@@ -163,6 +169,20 @@ public class MessageManager {
                     mDB.close();
                 }
                 break;
+            case STORE_SESSION:
+                try {
+                    SQLiteDatabase db = mDB.getWritableDatabase();
+                    ContentValues values = new ContentValues();
+                    values.put(SessionTable.SESSION_ID, (String) msg.obj);
+                    values.put(SessionTable.START_TIME, System.currentTimeMillis());
+                    values.put(SessionTable.END_TIME, System.currentTimeMillis());
+                    values.put(SessionTable.UPLOAD_STATUS, msg.arg1);
+                    db.insert("sessions", null, values);
+                } catch (SQLiteException e) {
+                    Log.e(TAG, "Error saving session to mParticle DB", e);
+                } finally {
+                    mDB.close();
+                }
 
             default:
                 break;
