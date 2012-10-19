@@ -13,6 +13,11 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.Handler;
+import android.os.HandlerThread;
+import android.os.Looper;
+import android.os.Message;
+import android.os.Process;
 import android.provider.Settings;
 import android.telephony.TelephonyManager;
 import android.util.DisplayMetrics;
@@ -35,6 +40,7 @@ public class MParticleAPI {
     private String mApiKey;
     private String mSecret;
     private MessageManager mMessageManager;
+    private Handler mTimeoutHandler;
 
     /* package-private */ String mSessionID;
     /* package-private */ int mSessionTimeout = 30 * 60 * 1000;
@@ -46,6 +52,9 @@ public class MParticleAPI {
         this.mApiKey = apiKey;
         this.mSecret = secret;
         this.mMessageManager = messageManager;
+        HandlerThread timeoutHandlerThread = new HandlerThread("SessionTimeoutHandler", Process.THREAD_PRIORITY_BACKGROUND);
+        timeoutHandlerThread.start();
+        this.mTimeoutHandler = new SessionTimeoutHandler(this, timeoutHandlerThread.getLooper());
     }
 
     public static MParticleAPI getInstance(Context context, String apiKey, String secret,
@@ -104,7 +113,7 @@ public class MParticleAPI {
 
     /* package-private */ void checkSessionTimeout() {
         long now = System.currentTimeMillis();
-        if (0!=this.mSessionStartTime && (this.mSessionTimeout < now-this.mLastEventTime) ){
+        if (0!=this.mSessionStartTime && (this.mSessionTimeout < now-this.mLastEventTime) ) {
             this.debugLog("Session Timed Out");
             this.closeSession(this.mLastEventTime);
         }
@@ -115,6 +124,7 @@ public class MParticleAPI {
         this.mLastEventTime = this.mSessionStartTime;
         this.mSessionID = UUID.randomUUID().toString();
         this.mMessageManager.beginSession(mSessionID, mSessionStartTime, null);
+        this.mTimeoutHandler.sendEmptyMessageDelayed(0, this.mSessionTimeout);
         this.debugLog("Start New Session");
     }
 
@@ -324,11 +334,28 @@ public class MParticleAPI {
 
     private void debugLog(String message) {
         if (MParticleAPI.debugMode) {
-            Log.d(TAG, message);
+            Log.d(TAG, this.mSessionID + ": " + message);
             // temporarily show Toast messages in debug mode.
             // this will be removed.
             Toast.makeText(mContext, message, Toast.LENGTH_SHORT).show();
         }
     }
 
+    public static final class SessionTimeoutHandler extends Handler {
+        private MParticleAPI mParticleAPI;
+        public SessionTimeoutHandler(MParticleAPI mParticleAPI, Looper looper) {
+            super(looper);
+            this.mParticleAPI = mParticleAPI;
+        }
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            mParticleAPI.checkSessionTimeout();
+            if (0!=mParticleAPI.mSessionStartTime) {
+                // just check once every session timeout period
+                this.sendEmptyMessageDelayed(0, mParticleAPI.mSessionTimeout);
+                // or... use lastEventTime to decide when to check next
+            }
+        }
+    }
 }

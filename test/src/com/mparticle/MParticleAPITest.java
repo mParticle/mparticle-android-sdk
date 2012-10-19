@@ -154,6 +154,23 @@ public class MParticleAPITest extends AndroidTestCase {
         verify(mMockMessageManager, times(1)).closeSession(eq(sessionUUID), eq(lastEventTime), anyMap());
     }
 
+    // check for a timeout situation that ends a session but does not start a new session
+    @SuppressWarnings("unchecked")
+    public void testSessionTimeoutBackground() throws InterruptedException {
+        mMParticleAPI.setSessionTimeout(50);
+        mMParticleAPI.start();
+        mMParticleAPI.logEvent("test1");
+        Thread.sleep(10);
+        mMParticleAPI.logEvent("test2");
+        String sessionUUID = mMParticleAPI.mSessionID;
+        long lastEventTime = mMParticleAPI.mLastEventTime;
+        Thread.sleep(200);
+        // mMParticleAPI.checkSessionTimeout();
+        assertTrue(0 == mMParticleAPI.mSessionStartTime);
+        verify(mMockMessageManager, times(1)).beginSession(anyString(), anyLong(), anyMap());
+        verify(mMockMessageManager, times(1)).closeSession(anyString(), anyLong(), anyMap());
+        verify(mMockMessageManager, times(1)).closeSession(eq(sessionUUID), eq(lastEventTime), anyMap());
+    }
 
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
