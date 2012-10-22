@@ -16,4 +16,34 @@ public class APISetupTests extends AndroidTestCase {
         assertNotSame(api1, api2);
     }
 
+    public void testInvalidContext() {
+        Exception expected = null;
+        try {
+            MParticleAPI.getInstance(null, null, null);
+        } catch (Exception e) {
+            expected = e;
+        }
+        assertNotNull("Excpetion expected for null context", expected);
+    }
+
+    public void testInvalidKey() {
+        Exception expected = null;
+        try {
+            MParticleAPI.getInstance(getContext(), null, "secret");
+        } catch (Exception e) {
+            expected = e;
+        }
+        assertNotNull("Excpetion expected for null context", expected);
+    }
+
+    public void testInvalidSecret() {
+        Exception expected = null;
+        try {
+            MParticleAPI.getInstance(getContext(), "invalidSecret", null);
+        } catch (Exception e) {
+            expected = e;
+        }
+        assertNotNull("Excpetion expected for null context", expected);
+    }
+
 }

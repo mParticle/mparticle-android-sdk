@@ -69,6 +69,14 @@ public class MParticleAPI {
      */
     public static MParticleAPI getInstance(Context context, String apiKey, String secret,
             int uploadInterval) {
+
+        if (null==context) {
+            throw new IllegalArgumentException("context is required");
+        }
+        if (null==apiKey || null==secret) {
+            throw new IllegalArgumentException("apiKey and secret are required");
+        }
+
         MParticleAPI apiInstance;
         if (sInstanceMap.containsKey(apiKey)) {
             apiInstance = sInstanceMap.get(apiKey);
@@ -225,6 +233,10 @@ public class MParticleAPI {
      * @param eventData a Map of data attributes
      */
     public void logEvent(String eventName, Map<String, String> eventData) {
+        if (null==eventName) {
+            Log.w(TAG,"eventName is required for logEvent");
+            return;
+        }
         this.ensureActiveSession();
         this.mMessageManager.logCustomEvent(this.mSessionID, this.mLastEventTime, eventName, eventData);
         this.debugLog("Logged event: " + eventName + " with data " + eventData);
@@ -244,6 +256,10 @@ public class MParticleAPI {
      * @param eventData a Map of data attributes
      */
     public void logScreenView(String screenName, Map<String, String> eventData) {
+        if (null==screenName) {
+            Log.w(TAG,"screenName is required for logScreenView");
+            return;
+        }
         this.ensureActiveSession();
         this.mMessageManager.logScreenView(this.mSessionID, this.mLastEventTime, screenName, eventData);
         this.debugLog("Logged screen: " + screenName + " with data " + eventData);
@@ -263,6 +279,10 @@ public class MParticleAPI {
      * @param eventData a Map of data attributes
      */
     public void logErrorEvent(String eventName, Map<String, String> data) {
+        if (null==eventName) {
+            Log.w(TAG,"eventName is required for logErrorEvent");
+            return;
+        }
         this.ensureActiveSession();
         this.debugLog("Logged error: " + eventName);
     }
@@ -291,6 +311,14 @@ public class MParticleAPI {
      * @param userId the user identity
      */
     public void identifyUser(String key, String userId) {
+        if (null==userId) {
+            Log.w(TAG,"userId is required for identifyUser");
+            return;
+        }
+        if (null==key) {
+            Log.w(TAG,"key is required for identifyUser");
+            return;
+        }
         this.ensureActiveSession();
         this.debugLog("Identified user: " + userId);
     }

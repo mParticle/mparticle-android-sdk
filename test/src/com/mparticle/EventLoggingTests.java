@@ -22,6 +22,11 @@ public class EventLoggingTests extends AndroidTestCase {
       mMParticleAPI = new MParticleAPI(getContext(),"test","secret", mMockMessageManager);
     }
 
+    // should fail silently. a warning message is logged but the application continues.
+    public void testInvalidEventName() {
+        mMParticleAPI.logEvent(null);
+    }
+
     @SuppressWarnings({ "rawtypes", "unchecked" })
     public void testEventLogging() {
         // log an event with data
