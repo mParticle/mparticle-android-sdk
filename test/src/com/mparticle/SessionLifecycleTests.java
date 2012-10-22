@@ -153,7 +153,7 @@ public class SessionLifecycleTests extends AndroidTestCase {
         String sessionUUID = mMParticleAPI.mSessionID;
         long lastEventTime = mMParticleAPI.mLastEventTime;
         Thread.sleep(200);
-        // mMParticleAPI.checkSessionTimeout();
+        mMParticleAPI.checkSessionTimeout();
         assertTrue(0 == mMParticleAPI.mSessionStartTime);
         verify(mMockMessageManager, times(1)).beginSession(anyString(), anyLong(), anyMap());
         verify(mMockMessageManager, times(1)).closeSession(anyString(), anyLong(), anyMap());
