@@ -2,7 +2,6 @@ package com.mparticle;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 import org.json.JSONException;
@@ -94,7 +93,7 @@ public class MessageManager {
         return MessageManager.sMessageManager;
     }
 
-    private void storeMessage(String messageType, String sessionId, long time, String name, Map<String, String> eventData, int uploadStatus) {
+    private void storeMessage(String messageType, String sessionId, long time, String name, JSONObject eventData, int uploadStatus) {
         try {
             JSONObject eventObject = new JSONObject();
             eventObject.put(MessageKey.TYPE, messageType);
@@ -116,17 +115,17 @@ public class MessageManager {
         }
     }
 
-    public void beginSession(String sessionId, long time, Map<String, String> sessionData) {
+    public void beginSession(String sessionId, long time) {
         storeMessage(MessageType.SESSION_START, sessionId, time, null, null, UploadStatus.PENDING);
         mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_SESSION, UploadStatus.PENDING, 0, sessionId));
     }
-    public void closeSession(String sessionId, long time, Map<String, String> sessionData) {
+    public void closeSession(String sessionId, long time) {
         storeMessage(MessageType.SESSION_END, sessionId, time, null, null, UploadStatus.PENDING);
     }
-    public void logCustomEvent(String sessionId, long time, String eventName, Map<String, String> eventData) {
+    public void logCustomEvent(String sessionId, long time, String eventName, JSONObject eventData) {
         storeMessage(MessageType.CUSTOM_EVENT, sessionId, time, eventName, eventData, UploadStatus.READY);
     }
-    public void logScreenView(String sessionId, long time, String screenName, Map<String, String> eventData) {
+    public void logScreenView(String sessionId, long time, String screenName, JSONObject eventData) {
         storeMessage(MessageType.SCREEN_VIEW, sessionId, time, screenName, eventData, UploadStatus.READY);
     }
 

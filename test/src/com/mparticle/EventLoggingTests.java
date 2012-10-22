@@ -2,9 +2,8 @@ package com.mparticle;
 
 import static org.mockito.Mockito.*;
 
-import java.util.HashMap;
-import java.util.Map;
-
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 
@@ -27,19 +26,18 @@ public class EventLoggingTests extends AndroidTestCase {
         mMParticleAPI.logEvent(null);
     }
 
-    @SuppressWarnings({ "rawtypes", "unchecked" })
-    public void testEventLogging() {
+    public void testEventLogging() throws JSONException {
         // log an event with data
-        Map<String, String> eventData=new HashMap<String, String>();
+        JSONObject eventData=new JSONObject();
         eventData.put("testKey1", "testValue1");
         eventData.put("testKey2", "testValue2");
         mMParticleAPI.logEvent("testEvent", eventData);
 
         // make sure the MockMessageManager got called with the correct parameters in the correct order
         InOrder inOrder = inOrder(mMockMessageManager);
-        inOrder.verify(mMockMessageManager, times(1)).beginSession(anyString(), anyLong(), anyMap());
+        inOrder.verify(mMockMessageManager, times(1)).beginSession(anyString(), anyLong());
 
-        ArgumentCaptor<Map> eventDataArgument = ArgumentCaptor.forClass(Map.class);
+        ArgumentCaptor<JSONObject> eventDataArgument = ArgumentCaptor.forClass(JSONObject.class);
         inOrder.verify(mMockMessageManager).logCustomEvent(eq(mMParticleAPI.mSessionID), anyLong(), anyString(), eventDataArgument.capture());
 
         assertEquals("testValue1",eventDataArgument.getValue().get("testKey1"));

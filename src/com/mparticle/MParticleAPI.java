@@ -1,12 +1,13 @@
 package com.mparticle;
 
 import java.net.URL;
-
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
+
+import org.json.JSONObject;
 
 import android.content.Context;
 import android.content.pm.PackageInfo;
@@ -189,7 +190,7 @@ public class MParticleAPI {
         this.mSessionStartTime = System.currentTimeMillis();
         this.mLastEventTime = this.mSessionStartTime;
         this.mSessionID = UUID.randomUUID().toString();
-        this.mMessageManager.beginSession(mSessionID, mSessionStartTime, null);
+        this.mMessageManager.beginSession(mSessionID, mSessionStartTime);
         this.mTimeoutHandler.sendEmptyMessageDelayed(0, this.mSessionTimeout);
         this.debugLog("Start New Session");
     }
@@ -204,9 +205,7 @@ public class MParticleAPI {
             Log.w(TAG, "Session end time was unknown");
             sessionEndTime = System.currentTimeMillis();
         }
-        Map<String, String> sessionData=new HashMap<String, String>();
-        sessionData.put("duration", ""+(sessionEndTime-mSessionStartTime));
-        this.mMessageManager.closeSession(mSessionID, sessionEndTime, sessionData);
+        this.mMessageManager.closeSession(mSessionID, sessionEndTime);
 
         // reset agent to unstarted state
         this.mSessionStartTime = 0;
@@ -224,7 +223,7 @@ public class MParticleAPI {
      * @param eventName the name of the event to be tracked
      */
     public void logEvent(String eventName) {
-        logEvent(eventName, new HashMap<String, String>());
+        logEvent(eventName, new JSONObject());
     }
 
     /**
@@ -232,7 +231,7 @@ public class MParticleAPI {
      * @param eventName the name of the event to be tracked
      * @param eventData a Map of data attributes
      */
-    public void logEvent(String eventName, Map<String, String> eventData) {
+    public void logEvent(String eventName, JSONObject eventData) {
         if (null==eventName) {
             Log.w(TAG,"eventName is required for logEvent");
             return;
@@ -247,7 +246,7 @@ public class MParticleAPI {
      * @param screenName the name of the View to be tracked
      */
     public void logScreenView(String screenName) {
-        logScreenView(screenName, new HashMap<String, String>());
+        logScreenView(screenName, null);
     }
 
     /**
@@ -255,7 +254,7 @@ public class MParticleAPI {
      * @param screenName the name of the View to be tracked
      * @param eventData a Map of data attributes
      */
-    public void logScreenView(String screenName, Map<String, String> eventData) {
+    public void logScreenView(String screenName, JSONObject eventData) {
         if (null==screenName) {
             Log.w(TAG,"screenName is required for logScreenView");
             return;
@@ -270,7 +269,7 @@ public class MParticleAPI {
      * @param eventName the name of the error event to be tracked
      */
     public void logErrorEvent(String eventName) {
-        logErrorEvent(eventName, new HashMap<String, String>());
+        logErrorEvent(eventName, null);
     }
 
     /**
@@ -278,7 +277,7 @@ public class MParticleAPI {
      * @param eventName the name of the error event to be tracked
      * @param eventData a Map of data attributes
      */
-    public void logErrorEvent(String eventName, Map<String, String> data) {
+    public void logErrorEvent(String eventName, JSONObject data) {
         if (null==eventName) {
             Log.w(TAG,"eventName is required for logErrorEvent");
             return;
@@ -293,7 +292,7 @@ public class MParticleAPI {
      * @param eventData a Map of data attributes
      */
     // TODO: this method may be dropped - will decide in a later iteration
-    public void logErrorEvent(String eventName, Map<String, String> data, Exception e) {
+    public void logErrorEvent(String eventName, JSONObject data, Exception e) {
     }
 
     /**
@@ -347,7 +346,7 @@ public class MParticleAPI {
      * Set a collection of session attributes
      * @param data key/value pairs of session attributes
      */
-    public void setSessionProperties(Map<String, String> data) {
+    public void setSessionProperties(JSONObject data) {
     }
 
     /**
@@ -363,7 +362,7 @@ public class MParticleAPI {
      * Set a collection of user attributes
      * @param data key/value pairs of user attributes
      */
-    public void setUserProperties(Map<String, String> data) {
+    public void setUserProperties(JSONObject data) {
     }
 
     /**
@@ -446,7 +445,7 @@ public class MParticleAPI {
          * Called on a periodic interval to provide event data
          * @return a map of key/value pairs to be logged with the event
          */
-        Map<String, String> provideEventData();
+        JSONObject provideEventData();
     }
 
     /**

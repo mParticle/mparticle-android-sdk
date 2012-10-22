@@ -1,9 +1,11 @@
 package com.mparticle.demo;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -64,9 +66,9 @@ public class HomeActivity extends Activity {
         mParticleAPI.logEvent("ButtonBPressed");
         refreshDiagnostics();
     }
-    public void pressButtonC(View view) {
+    public void pressButtonC(View view) throws JSONException {
         boolean on = ((ToggleButton) view).isChecked();
-        Map<String, String> eventData=new HashMap<String, String>();
+        JSONObject eventData=new JSONObject();
         eventData.put("button_state", on ? "on":"off");
         mParticleAPI.logEvent("ButtonCPressed", eventData);
         refreshDiagnostics();
