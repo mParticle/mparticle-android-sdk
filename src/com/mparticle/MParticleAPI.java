@@ -26,13 +26,16 @@ import android.view.WindowManager;
 
 import com.mparticle.MessageManager.MessageKey;
 
+/**
+ * This class provides access to the mParticle API.
+ */
 public class MParticleAPI {
 
     private static final String VERSION = "0.1";
 
     private static final String TAG = "mParticleAPI";
     private static boolean optOutFlag = false;
-    public static boolean debugMode = true; // TODO: this will default to false
+    private static boolean debugMode = false;
     private static Map<String, MParticleAPI> sInstanceMap = new HashMap<String, MParticleAPI>();
 
     private Context mContext;
@@ -56,6 +59,14 @@ public class MParticleAPI {
         this.mTimeoutHandler = new SessionTimeoutHandler(this, timeoutHandlerThread.getLooper());
     }
 
+    /**
+     * Initialize or return an instance of the mParticle SDK with a specific upload interval
+     * @param context the Activity that is creating the instance
+     * @param apiKey the API key for your account
+     * @param secret the API secret for your account
+     * @param uploadInterval the upload interval (in seconds)
+     * @return An instance of the mParticle SDK configured with your API key
+     */
     public static MParticleAPI getInstance(Context context, String apiKey, String secret,
             int uploadInterval) {
         MParticleAPI apiInstance;
@@ -68,28 +79,64 @@ public class MParticleAPI {
         return apiInstance;
     }
 
+    /**
+     * Initialize or return an instance of the mParticle SDK
+     * @param context the Activity that is creating the instance
+     * @param apiKey the API key for your account
+     * @param secret the API secret for your account
+     * @return an instance of the mParticle SDK configured with your API key
+     */
     public static MParticleAPI getInstance(Context context, String apiKey, String secret) {
         return MParticleAPI.getInstance(context, apiKey, secret, 0);
     }
 
+    /**
+     * Initialize or return an instance of the mParticle SDK.
+     *
+     * The instance will be configured using settings from the configuration file.
+     */
+    // TODO: implement configuration-file based settings
     public static MParticleAPI getInstance(Context context) {
         return MParticleAPI.getInstance(context, null, null, 0);
     }
 
-    // possible new method - for testing only right now
+    /**
+     * Set the user session timeout interval.
+     *
+     * A session is ended when no events (logged events or start/stop events) has occurred
+     * within the session timeout interval.
+     *
+     * @param sessionTimeout
+     */
     public void setSessionTimeout(int sessionTimeout) {
         this.mSessionTimeout = sessionTimeout;
     }
 
+    /**
+     * Starts tracking a user session. If a session is already active, it will be resumed.
+     *
+     * This method should be called from an Activity's onStart() method.
+     */
     public void start() {
         this.ensureActiveSession();
     }
 
+    /**
+     * Stop tracking a user session. If the session is restarted before the session timeout it will be resumed.
+     *
+     * This method should be called from an Activity's onStop() method.
+     *
+     * To explicitly end a session use the endSession() method.
+     * @see endSession
+     */
     public void stop() {
         this.mLastEventTime = System.currentTimeMillis();
         this.debugLog("Stop Called");
     }
 
+    /**
+     * Begin tracking a new session. Ends the current session.
+     */
     public void newSession() {
         if (0!=this.mSessionStartTime) {
             closeSession(System.currentTimeMillis());
@@ -97,11 +144,17 @@ public class MParticleAPI {
         this.start();
     }
 
+    /**
+     * Explicitly terminates the user session.
+     */
     public void endSession() {
         closeSession(System.currentTimeMillis());
         this.debugLog("Explicit End Session");
     }
 
+    /**
+     * Ensures a session is active.
+     */
     private void ensureActiveSession() {
         checkSessionTimeout();
         if (0==this.mSessionStartTime) {
@@ -110,6 +163,9 @@ public class MParticleAPI {
         this.mLastEventTime = System.currentTimeMillis();
     }
 
+    /**
+     * Check current session timeout and end the session if needed. Will not start a new session.
+     */
     /* package-private */ void checkSessionTimeout() {
         long now = System.currentTimeMillis();
         if (0!=this.mSessionStartTime && (this.mSessionTimeout < now-this.mLastEventTime) ) {
@@ -118,6 +174,9 @@ public class MParticleAPI {
         }
     }
 
+    /**
+     * Creates a new session and generates the start-session message.
+     */
     private void beginSession() {
         this.mSessionStartTime = System.currentTimeMillis();
         this.mLastEventTime = this.mSessionStartTime;
@@ -127,6 +186,10 @@ public class MParticleAPI {
         this.debugLog("Start New Session");
     }
 
+    /**
+     * End the current session and generate the end-session message.
+     * @param endTime the timestamp of the last event in the session (if known)
+     */
     private void closeSession(long endTime) {
         long sessionEndTime = endTime;
         if (0==sessionEndTime) {
@@ -141,110 +204,227 @@ public class MParticleAPI {
         this.mSessionStartTime = 0;
     }
 
+    /**
+     * Upload queued messages to the mParticle server.
+     */
     public void upload() {
         this.debugLog("Upload");
     }
 
+    /**
+     * Log an event
+     * @param eventName the name of the event to be tracked
+     */
     public void logEvent(String eventName) {
         logEvent(eventName, new HashMap<String, String>());
     }
 
+    /**
+     * Log an event with data attributes
+     * @param eventName the name of the event to be tracked
+     * @param eventData a Map of data attributes
+     */
     public void logEvent(String eventName, Map<String, String> eventData) {
         this.ensureActiveSession();
         this.mMessageManager.logCustomEvent(this.mSessionID, this.mLastEventTime, eventName, eventData);
         this.debugLog("Logged event: " + eventName + " with data " + eventData);
     }
 
+    /**
+     * Log a screen view event
+     * @param screenName the name of the View to be tracked
+     */
     public void logScreenView(String screenName) {
         logScreenView(screenName, new HashMap<String, String>());
     }
 
+    /**
+     * Log a screen view event with data attributes
+     * @param screenName the name of the View to be tracked
+     * @param eventData a Map of data attributes
+     */
     public void logScreenView(String screenName, Map<String, String> eventData) {
         this.ensureActiveSession();
         this.mMessageManager.logScreenView(this.mSessionID, this.mLastEventTime, screenName, eventData);
         this.debugLog("Logged screen: " + screenName + " with data " + eventData);
     }
 
+    /**
+     * Log an error event
+     * @param eventName the name of the error event to be tracked
+     */
     public void logErrorEvent(String eventName) {
         logErrorEvent(eventName, new HashMap<String, String>());
     }
 
+    /**
+     * Log an error event with data attributes
+     * @param eventName the name of the error event to be tracked
+     * @param eventData a Map of data attributes
+     */
     public void logErrorEvent(String eventName, Map<String, String> data) {
         this.ensureActiveSession();
         this.debugLog("Logged error: " + eventName);
     }
 
+    /**
+     * Log an error event with data attributes and an exception
+     * @param eventName the name of the error event to be tracked
+     * @param eventData a Map of data attributes
+     */
+    // TODO: this method may be dropped - will decide in a later iteration
     public void logErrorEvent(String eventName, Map<String, String> data, Exception e) {
     }
 
+    /**
+     * Identify the current user
+     * @param userId the primary id of the current application user
+     */
     public void identifyUser(String userId) {
         identifyUser("user_id", userId);
     }
 
+    /**
+     * Identify user with an alternate identifier.
+     * Can be used to track multiple aliases or accounts from more than one provider.
+     * @param key the identify provider
+     * @param userId the user identity
+     */
     public void identifyUser(String key, String userId) {
         this.ensureActiveSession();
         this.debugLog("Identified user: " + userId);
     }
 
+    /**
+     * Set the current location of the active session.
+     * @param longitude
+     * @param latitude
+     */
     public void setLocation(double longitude, double latitude) {
         this.ensureActiveSession();
         this.debugLog("Set Location: " + longitude + " " + latitude);
     }
 
+    /**
+     * Set a single session attribute. The property will combined with any existing attributes.
+     * @param key the attribute key
+     * @param value the attribute value
+     */
     public void setSessionProperty(String key, String value) {
         this.ensureActiveSession();
         this.debugLog("Set Session: " + key + "=" + value);
     }
 
+    /**
+     * Set a collection of session attributes
+     * @param data key/value pairs of session attributes
+     */
     public void setSessionProperties(Map<String, String> data) {
     }
 
+    /**
+     * Set a single user attribute. The property will combined with any existing attributes.
+     * @param key the attribute key
+     * @param value the attribute value
+     */
     public void setUserProperty(String key, String value) {
         this.debugLog("Set User: " + key + "=" + value);
     }
 
+    /**
+     * Set a collection of user attributes
+     * @param data key/value pairs of user attributes
+     */
     public void setUserProperties(Map<String, String> data) {
     }
 
+    /**
+     * Get the current user segment as determined by mParticle.
+     * This method makes a synchronous call to the mParticle server so you should manage threads accordingly.
+     * @return the user segment
+     */
     public String getUserSegment() {
         return "default";
     }
 
+    /**
+     * Control the opt-in/opt-out status for the application.
+     * @param optOutFlag set to <code>true</code> to opt out of event tracking
+     */
     public void setOptOut(boolean optOutFlag) {
         MParticleAPI.optOutFlag = optOutFlag;
         this.debugLog("Set Opt Out: " + MParticleAPI.optOutFlag);
     }
 
+    /**
+     * Get the current opt-out status for the application.
+     * @return the opt-out status
+     */
     public boolean getOptOut() {
         return MParticleAPI.optOutFlag;
     }
 
+    /**
+     * Turn on or off debug mode for mParticle.
+     * In debug mode, the mParticle SDK will output informational messages to LogCat.
+     * @param debugMode
+     */
     public void setDebug(boolean debugMode) {
         MParticleAPI.debugMode = debugMode;
         this.debugLog("Set Debug Mode: " + MParticleAPI.debugMode);
     }
 
+    /**
+     * Enable mParticle exception handling to automatically log events on uncaught exceptions
+     */
     public void handleExceptions() {
     }
 
+    /**
+     * Set the referral URL for the user session.
+     * @param url the referral URL
+     */
     public void setReferralURL(URL url) {
     }
 
+    /**
+     * Register the application to receive push notifications from mParticle
+     * @param token TBD
+     */
     public void setPushRegistrationId(String token) {
         this.debugLog("Set Push Token: " + token);
     }
 
+    /**
+     * Unregister the application from receiving push notifications
+     */
     public void clearPushRegistrationId() {
         this.debugLog("Clear Push Token");
     }
 
+    /**
+     * Register an event collector to generate log events on a periodic basis.
+     * @param collector an instance of the EventCollectorIterface which provides event information
+     * @param timeInterval the time interval (in seconds)
+     */
     public void registerEventCollector(EventCollectorInterface collector, int timeInterval) {
     }
 
+    /**
+     * Used to provide event data for recurring events
+     */
     public interface EventCollectorInterface {
+        /**
+         * Called on a periodic interval to provide event data
+         * @return a map of key/value pairs to be logged with the event
+         */
         Map<String, String> provideEventData();
     }
 
+    /**
+     * Generates a collection of device properties
+     * @return a Map of device-specific attributes
+     */
     public Map<String, Object> collectDeviceProperties() {
         Map<String, Object> properties = new LinkedHashMap<String, Object>();
 
@@ -331,7 +511,7 @@ public class MParticleAPI {
         }
     }
 
-    public static final class SessionTimeoutHandler extends Handler {
+    private static final class SessionTimeoutHandler extends Handler {
         private MParticleAPI mParticleAPI;
         public SessionTimeoutHandler(MParticleAPI mParticleAPI, Looper looper) {
             super(looper);

@@ -25,7 +25,6 @@ public class HomeActivityTest extends ActivityInstrumentationTestCase2<HomeActiv
     }
 
     public void testPreConditions() {
-        assertTrue(MParticleAPI.debugMode);
         assertFalse(mParticleAPI.getOptOut());
     }
 
