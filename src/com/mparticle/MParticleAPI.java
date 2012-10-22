@@ -210,12 +210,6 @@ public class MParticleAPI {
         return "default";
     }
 
-    public void setUserAge(int age) {
-    }
-
-    public void setUserGender(String gender) {
-    }
-
     public void setOptOut(boolean optOutFlag) {
         MParticleAPI.optOutFlag = optOutFlag;
         this.debugLog("Set Opt Out: " + MParticleAPI.optOutFlag);
