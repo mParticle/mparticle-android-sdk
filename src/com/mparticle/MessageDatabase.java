@@ -31,7 +31,7 @@ public class MessageDatabase extends SQLiteOpenHelper {
     public interface SessionTable {
         public final static String SESSION_ID = "session_id";
         public final static String START_TIME = "start_time";
-        public final static String END_TIME = "start_time";
+        public final static String END_TIME = "end_time";
         public final static String ATTRIBUTES = "attributes";
         public final static String UPLOAD_STATUS = "upload_status";
     }
