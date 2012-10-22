@@ -10,7 +10,7 @@ import org.mockito.InOrder;
 
 import android.test.AndroidTestCase;
 
-public class MParticleAPITest extends AndroidTestCase {
+public class SessionLifecycleTests extends AndroidTestCase {
 
     private MessageManager mMockMessageManager;
     private MParticleAPI mMParticleAPI;
@@ -20,18 +20,6 @@ public class MParticleAPITest extends AndroidTestCase {
       super.setUp();
       mMockMessageManager = mock(MessageManager.class);
       mMParticleAPI = new MParticleAPI(getContext(),"test","secret", mMockMessageManager);
-    }
-
-    public void testGetSameInstance() {
-        MParticleAPI api1 = MParticleAPI.getInstance(getContext(), "apiKey", "secret");
-        MParticleAPI api2 = MParticleAPI.getInstance(getContext(), "apiKey", "secret");
-        assertSame(api1, api2);
-    }
-
-    public void testGetDifferentInstance() {
-        MParticleAPI api1 = MParticleAPI.getInstance(getContext(), "apiKey1", "secret");
-        MParticleAPI api2 = MParticleAPI.getInstance(getContext(), "apiKey2", "secret");
-        assertNotSame(api1, api2);
     }
 
     // start new session on on start() call if one was not running
