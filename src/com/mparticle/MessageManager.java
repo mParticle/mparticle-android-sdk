@@ -150,9 +150,8 @@ public class MessageManager {
 
             switch (msg.what) {
             case STORE_MESSAGE:
-                JSONObject eventObject = (JSONObject) msg.obj;
-
                 try {
+                    JSONObject eventObject = (JSONObject) msg.obj;
                     SQLiteDatabase db = mDB.getWritableDatabase();
                     ContentValues values = new ContentValues();
                     values.put(MessageTable.MESSAGE_TYPE, eventObject.getString(MessageKey.TYPE));
@@ -175,8 +174,10 @@ public class MessageManager {
                     SQLiteDatabase db = mDB.getWritableDatabase();
                     ContentValues values = new ContentValues();
                     values.put(SessionTable.SESSION_ID, (String) msg.obj);
-                    values.put(SessionTable.START_TIME, System.currentTimeMillis());
-                    values.put(SessionTable.END_TIME, System.currentTimeMillis());
+                    // TODO: this should use the time from the API call, not current time
+                    long sessionStartTime = System.currentTimeMillis();
+                    values.put(SessionTable.START_TIME, sessionStartTime);
+                    values.put(SessionTable.END_TIME, sessionStartTime);
                     values.put(SessionTable.UPLOAD_STATUS, msg.arg1);
                     db.insert("sessions", null, values);
                 } catch (SQLiteException e) {
@@ -192,9 +193,7 @@ public class MessageManager {
                     ContentValues values = new ContentValues();
                     values.put(SessionTable.END_TIME, System.currentTimeMillis());
                     String[] whereArgs = new String[]{(String) msg.obj};
-                    int rowsUpdated = db.update("sessions", values, SessionTable.SESSION_ID+"=?", whereArgs);
-                    // TODO: remove
-                    Log.d(TAG, "Update "+rowsUpdated+" rows matching session_id: "+msg.obj);
+                    db.update("sessions", values, SessionTable.SESSION_ID+"=?", whereArgs);
                 } catch (SQLiteException e) {
                     Log.e(TAG, "Error updating session end time in mParticle DB", e);
                 } finally {
