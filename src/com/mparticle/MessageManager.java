@@ -111,15 +111,15 @@ public class MessageManager {
         }
     }
 
-    public void beginSession(String sessionId, long time) {
+    public void startSession(String sessionId, long time) {
         storeMessage(MessageType.SESSION_START, sessionId, time, null, null, UploadStatus.PENDING);
         mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_SESSION, UploadStatus.PENDING, 0, sessionId));
     }
-    public void closeSession(String sessionId, long time) {
+    public void stopSession(String sessionId, long time) {
         mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.UPDATE_SESSION_END, sessionId));
     }
     public void endSession(String sessionId, long time) {
-        closeSession(sessionId, time);
+        stopSession(sessionId, time);
         mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.CREATE_SESSION_END_MESSAGE, sessionId));
     }
     public void logCustomEvent(String sessionId, long time, String eventName, JSONObject eventData) {

@@ -35,7 +35,7 @@ public class EventLoggingTests extends AndroidTestCase {
 
         // make sure the MockMessageManager got called with the correct parameters in the correct order
         InOrder inOrder = inOrder(mMockMessageManager);
-        inOrder.verify(mMockMessageManager, times(1)).beginSession(anyString(), anyLong());
+        inOrder.verify(mMockMessageManager, times(1)).startSession(anyString(), anyLong());
 
         ArgumentCaptor<JSONObject> eventDataArgument = ArgumentCaptor.forClass(JSONObject.class);
         inOrder.verify(mMockMessageManager).logCustomEvent(eq(mMParticleAPI.mSessionID), anyLong(), anyString(), eventDataArgument.capture());

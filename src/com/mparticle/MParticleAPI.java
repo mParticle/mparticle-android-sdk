@@ -140,7 +140,7 @@ public class MParticleAPI {
      */
     public void stop() {
         this.mLastEventTime = System.currentTimeMillis();
-        this.mMessageManager.closeSession(mSessionID, mLastEventTime);
+        this.mMessageManager.stopSession(mSessionID, mLastEventTime);
         this.debugLog("Stop Called");
     }
 
@@ -193,7 +193,7 @@ public class MParticleAPI {
         this.mSessionStartTime = System.currentTimeMillis();
         this.mLastEventTime = this.mSessionStartTime;
         this.mSessionID = UUID.randomUUID().toString();
-        this.mMessageManager.beginSession(mSessionID, mSessionStartTime);
+        this.mMessageManager.startSession(mSessionID, mSessionStartTime);
         this.mTimeoutHandler.sendEmptyMessageDelayed(0, this.mSessionTimeout);
         this.debugLog("Start New Session");
     }
@@ -208,7 +208,7 @@ public class MParticleAPI {
             Log.w(TAG, "Session end time was unknown");
             sessionEndTime = System.currentTimeMillis();
         }
-        this.mMessageManager.closeSession(mSessionID, sessionEndTime);
+        this.mMessageManager.stopSession(mSessionID, sessionEndTime);
 
         // reset agent to unstarted state
         this.mSessionStartTime = 0;
