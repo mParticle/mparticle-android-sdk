@@ -28,6 +28,10 @@
             android:name=".PendingMessagesActivity"
             android:label="@string/title_activity_pending_messages" >
         </activity>
+        <activity
+            android:name=".SessionsListActivity"
+            android:label="@string/title_sessions_list" >
+        </activity>
     </application>
 
 </manifest>

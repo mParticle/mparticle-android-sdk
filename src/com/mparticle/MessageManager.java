@@ -1,7 +1,5 @@
 package com.mparticle;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
 import org.json.JSONException;
@@ -30,8 +28,6 @@ public class MessageManager {
     private static HandlerThread sMessageHandlerThread;
 
     private Context mContext;
-    // temporary list for development/testing
-    public List<JSONObject> messages = new ArrayList<JSONObject>();
 
     private MessageHandler mMessageHandler;
 
@@ -107,7 +103,6 @@ public class MessageManager {
             if (null != eventData) {
                 eventObject.put(MessageKey.ATTRIBUTES, eventData);
             }
-            messages.add(eventObject);
 
             mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, uploadStatus, 0, eventObject));
 

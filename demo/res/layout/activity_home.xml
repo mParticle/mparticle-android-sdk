@@ -145,22 +145,56 @@
             android:text="Controls"
             android:textSize="22dp" />
 
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/textControls" >
+
+        </LinearLayout>
+
         <Button
             android:id="@+id/buttonStartSession"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@+id/textControls"
             android:onClick="pressStartSession"
-            android:text="Start Session" />
+            android:text="Start" />
+
+        <Button
+            android:id="@+id/buttonStopSession"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/textControls"
+            android:layout_toRightOf="@+id/buttonStartSession"
+            android:onClick="pressStopSession"
+            android:text="Stop" />
+
+        <Button
+            android:id="@+id/buttonNewSession"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/textControls"
+            android:layout_toRightOf="@+id/buttonStopSession"
+            android:onClick="pressNewSession"
+            android:text="New" />
 
         <Button
             android:id="@+id/buttonEndSession"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@+id/textControls"
-            android:layout_toRightOf="@+id/buttonStartSession"
+            android:layout_toRightOf="@+id/buttonNewSession"
             android:onClick="pressEndSession"
-            android:text="End Session" />
+            android:text="End" />
+
+        <Button
+            android:id="@+id/buttonListSessions"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/textControls"
+            android:layout_toRightOf="@+id/buttonEndSession"
+            android:onClick="pressListSessions"
+            android:text="List" />
 
         <Button
             android:id="@+id/buttonUpload"
@@ -171,45 +205,45 @@
             android:text="Upload" />
 
         <Button
-            android:id="@+id/buttonCrash"
+            android:id="@+id/buttonShowPendingMessages"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@+id/buttonStartSession"
             android:layout_toRightOf="@+id/buttonUpload"
-            android:onClick="pressCrash"
-            android:text="Crash" />
+            android:onClick="pressShowPendingMessages"
+            android:text="Show Messages" />
 
         <Button
-            android:id="@+id/buttonGetUserSegment"
+            android:id="@+id/buttonCrash"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/buttonStartSession"
-            android:layout_toRightOf="@+id/buttonCrash"
-            android:onClick="pressGetUserSegment"
-            android:text="Get Segment" />
+            android:layout_below="@+id/buttonUpload"
+            android:onClick="pressCrash"
+            android:text="Crash" />
 
         <Button
             android:id="@+id/buttonUpdateLocation"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@+id/buttonUpload"
+            android:layout_toRightOf="@+id/buttonCrash"
             android:onClick="pressUpdateLocation"
             android:text="Update Location" />
 
         <Button
-            android:id="@+id/buttonShowPendingMessages"
+            android:id="@+id/buttonGetUserSegment"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@+id/buttonUpload"
             android:layout_toRightOf="@+id/buttonUpdateLocation"
-            android:onClick="pressShowPendingMessages"
-            android:text="Show Messages" />
+            android:onClick="pressGetUserSegment"
+            android:text="Get Segment" />
 
         <CheckBox
             android:id="@+id/checkBoxOptOut"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/buttonUpdateLocation"
+            android:layout_below="@+id/buttonCrash"
             android:onClick="pressOptOut"
             android:text="OptOut" />
 

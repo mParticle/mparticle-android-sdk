@@ -36,17 +36,13 @@ public class HomeActivity extends Activity {
 
     @Override
     public void onStart() {
-      super.onStart();
-      mParticleAPI.start();
-      mParticleAPI.logScreenView("Screen1");
-      refreshDiagnostics();
+        super.onStart();
+        refreshDiagnostics();
     }
 
     @Override
     public void onStop() {
-      super.onStop();
-      mParticleAPI.stop();
-      refreshDiagnostics();
+        super.onStop();
     }
 
     private void refreshDiagnostics() {
@@ -97,9 +93,21 @@ public class HomeActivity extends Activity {
         mParticleAPI.start();
         refreshDiagnostics();
     }
+    public void pressStopSession(View view) {
+        mParticleAPI.stop();
+        refreshDiagnostics();
+    }
+    public void pressNewSession(View view) {
+        mParticleAPI.newSession();
+        refreshDiagnostics();
+    }
     public void pressEndSession(View view) {
         mParticleAPI.endSession();
         refreshDiagnostics();
+    }
+    public void pressListSessions(View view) {
+        Intent intent = new Intent(this, SessionsListActivity.class);
+        startActivity(intent);
     }
     public void pressUpload(View view) {
         mParticleAPI.upload();
