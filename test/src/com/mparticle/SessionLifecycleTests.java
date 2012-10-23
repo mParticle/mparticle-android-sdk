@@ -30,14 +30,18 @@ public class SessionLifecycleTests extends AndroidTestCase {
     }
 
     // do not start a new session if start() called with delay < timeout
-    public void testSessionStartResume() {
+    public void testSessionStartResume() throws InterruptedException {
+        mMParticleAPI.setSessionTimeout(5000);
         mMParticleAPI.start();
         String sessionUUID = mMParticleAPI.mSessionID;
         long sessionStartTime = mMParticleAPI.mSessionStartTime;
+        mMParticleAPI.stop();
+        Thread.sleep(20);
         mMParticleAPI.start();
         assertSame(sessionUUID, mMParticleAPI.mSessionID);
         assertEquals(sessionStartTime, mMParticleAPI.mSessionStartTime);
         verify(mMockMessageManager, times(1)).beginSession(anyString(), anyLong());
+        verify(mMockMessageManager, times(1)).closeSession(anyString(), anyLong());
     }
 
     // do start a new session if start() called with delay > timeout and also end last session
@@ -106,6 +110,18 @@ public class SessionLifecycleTests extends AndroidTestCase {
         verify(mMockMessageManager, times(1)).closeSession(eq(sessionUUID), anyLong());
     }
 
+    // track a session stop event but do not end the session
+    public void testSessionStop() {
+        mMParticleAPI.start();
+        String sessionUUID = mMParticleAPI.mSessionID;
+        mMParticleAPI.stop();
+        assertFalse(mMParticleAPI.mSessionStartTime == 0);
+        verify(mMockMessageManager, times(1)).beginSession(anyString(), anyLong());
+        verify(mMockMessageManager, times(1)).closeSession(anyString(), anyLong());
+        verify(mMockMessageManager, times(1)).closeSession(eq(sessionUUID), anyLong());
+        verify(mMockMessageManager, never()).endSession(anyString(), anyLong());
+    }
+
     // do start a new session if endSession() called explicitly
     public void testSessionEndExplicit() {
         mMParticleAPI.start();
@@ -115,6 +131,8 @@ public class SessionLifecycleTests extends AndroidTestCase {
         verify(mMockMessageManager, times(1)).beginSession(anyString(), anyLong());
         verify(mMockMessageManager, times(1)).closeSession(anyString(), anyLong());
         verify(mMockMessageManager, times(1)).closeSession(eq(sessionUUID), anyLong());
+        verify(mMockMessageManager, times(1)).endSession(anyString(), anyLong());
+        verify(mMockMessageManager, times(1)).endSession(eq(sessionUUID), anyLong());
     }
 
     // check for a timeout situation that ends a session but does not start a new session

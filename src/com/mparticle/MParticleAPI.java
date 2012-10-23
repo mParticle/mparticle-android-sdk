@@ -140,6 +140,7 @@ public class MParticleAPI {
      */
     public void stop() {
         this.mLastEventTime = System.currentTimeMillis();
+        this.mMessageManager.closeSession(mSessionID, mLastEventTime);
         this.debugLog("Stop Called");
     }
 
@@ -157,7 +158,9 @@ public class MParticleAPI {
      * Explicitly terminates the user session.
      */
     public void endSession() {
-        closeSession(System.currentTimeMillis());
+        long sessionEndTime=System.currentTimeMillis();
+        closeSession(sessionEndTime);
+        this.mMessageManager.endSession(mSessionID, sessionEndTime);
         this.debugLog("Explicit End Session");
     }
 
