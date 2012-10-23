@@ -73,11 +73,13 @@ public class MessageManager {
     private interface UploadStatus {
         static final int PENDING = 0;
         static final int READY = 1;
+        static final int ENDED = 2;
     }
 
     private MessageManager(Context context) {
         mContext = context.getApplicationContext();
         mMessageHandler = new MessageHandler(mContext, sMessageHandlerThread.getLooper());
+        mMessageHandler.sendEmptyMessage(MessageHandler.END_ORPHAN_SESSIONS);
     }
 
     public static MessageManager getInstance(Context context) {
@@ -137,6 +139,7 @@ public class MessageManager {
         public static final int STORE_SESSION = 1;
         public static final int UPDATE_SESSION_END = 2;
         public static final int CREATE_SESSION_END_MESSAGE = 3;
+        public static final int END_ORPHAN_SESSIONS = 4;
 
         public MessageHandler(Context context, Looper looper) {
             super(looper);
@@ -153,14 +156,21 @@ public class MessageManager {
                 try {
                     JSONObject eventObject = (JSONObject) msg.obj;
                     SQLiteDatabase db = mDB.getWritableDatabase();
-                    ContentValues values = new ContentValues();
-                    values.put(MessageTable.MESSAGE_TYPE, eventObject.getString(MessageKey.TYPE));
-                    values.put(MessageTable.MESSAGE_TIME, eventObject.getLong(MessageKey.TIMESTAMP));
-                    values.put(MessageTable.SESSION_ID, eventObject.getString(MessageKey.SESSION_ID));
-                    values.put(MessageTable.UUID, eventObject.getString(MessageKey.ID));
-                    values.put(MessageTable.UPLOAD_STATUS, msg.arg1);
-                    values.put(MessageTable.MESSAGE, eventObject.toString());
-                    db.insert("messages", null, values);
+                    ContentValues messageValues = new ContentValues();
+                    messageValues.put(MessageTable.MESSAGE_TYPE, eventObject.getString(MessageKey.TYPE));
+                    messageValues.put(MessageTable.MESSAGE_TIME, eventObject.getLong(MessageKey.TIMESTAMP));
+                    messageValues.put(MessageTable.SESSION_ID, eventObject.getString(MessageKey.SESSION_ID));
+                    messageValues.put(MessageTable.UUID, eventObject.getString(MessageKey.ID));
+                    messageValues.put(MessageTable.UPLOAD_STATUS, msg.arg1);
+                    messageValues.put(MessageTable.MESSAGE, eventObject.toString());
+                    db.insert("messages", null, messageValues);
+
+                    ContentValues sessionValues = new ContentValues();
+                    sessionValues.put(SessionTable.END_TIME, eventObject.getLong(MessageKey.TIMESTAMP));
+                    String[] whereArgs = {eventObject.getString(MessageKey.SESSION_ID),
+                            eventObject.getString(MessageKey.TIMESTAMP) };
+                    db.update("sessions", sessionValues, SessionTable.SESSION_ID + "=? and " +
+                                                                SessionTable.END_TIME+"<?", whereArgs);
                 } catch (SQLiteException e) {
                     Log.e(TAG, "Error saving event to mParticle DB", e);
                 } catch (JSONException e) {
@@ -233,6 +243,13 @@ public class MessageManager {
                     values.put(MessageTable.UPLOAD_STATUS, UploadStatus.READY);
                     values.put(MessageTable.MESSAGE, endMessageAttrs.toString());
                     db.insert("messages", null, values);
+
+                    // update session status
+                    ContentValues sessionValues = new ContentValues();
+                    sessionValues.put(SessionTable.UPLOAD_STATUS, UploadStatus.ENDED);
+                    String[] whereArgs = {sessionId };
+                    db.update("sessions", sessionValues, SessionTable.SESSION_ID + "=?", whereArgs);
+
                 } catch (SQLiteException e) {
                     Log.e(TAG, "Error creating session end message in mParticle DB", e);
                 } catch (JSONException e) {
@@ -241,12 +258,27 @@ public class MessageManager {
                     mDB.close();
                 }
                 break;
+            case END_ORPHAN_SESSIONS:
+                try {
+                    // find sessions without session-end message and create them
+                    SQLiteDatabase db = mDB.getWritableDatabase();
+                    String[] sessionColumns = new String[]{SessionTable.SESSION_ID};
+                    Cursor selectCursor = db.query("sessions", sessionColumns,
+                            SessionTable.UPLOAD_STATUS+"!="+UploadStatus.ENDED, null, null, null, null);
+                    // NOTE: there should be at most one orphan. but process any that are found
+                    while (selectCursor.moveToNext()) {
+                        String sessionId = selectCursor.getString(0);
+                        sendMessage(obtainMessage(MessageHandler.CREATE_SESSION_END_MESSAGE, sessionId));
+                    }
+                } catch (SQLiteException e) {
+                    Log.e(TAG, "Error processing initialization in mParticle DB", e);
+                } finally {
+                    mDB.close();
+                }
+                break;
             default:
                 break;
             }
-
         }
-
     }
-
 }
