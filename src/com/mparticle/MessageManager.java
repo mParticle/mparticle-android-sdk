@@ -92,30 +92,33 @@ public class MessageManager {
         return MessageManager.sMessageManager;
     }
 
-    private void storeMessage(String messageType, String sessionId, long time, String name, JSONObject eventData, int uploadStatus) {
-        try {
-            JSONObject eventObject = new JSONObject();
-            eventObject.put(MessageKey.TYPE, messageType);
-            eventObject.put(MessageKey.SESSION_ID, sessionId);
-            eventObject.put(MessageKey.ID, UUID.randomUUID().toString());
-            eventObject.put(MessageKey.TIMESTAMP, time);
+    /* package-private */ static JSONObject createMessage(String messageType, String sessionId, long time, String name, JSONObject attributes) throws JSONException {
+            JSONObject message = new JSONObject();
+            message.put(MessageKey.TYPE, messageType);
+            message.put(MessageKey.TIMESTAMP, time);
+            if (MessageType.SESSION_START==messageType) {
+                message.put(MessageKey.ID, sessionId);
+            } else {
+                message.put(MessageKey.SESSION_ID, sessionId);
+                message.put(MessageKey.ID, UUID.randomUUID().toString());
+            }
             if (null != name) {
-                eventObject.put(MessageKey.NAME, name);
+                message.put(MessageKey.NAME, name);
             }
-            if (null != eventData) {
-                eventObject.put(MessageKey.ATTRIBUTES, eventData);
+            if (null != attributes) {
+                message.put(MessageKey.ATTRIBUTES, attributes);
             }
-
-            mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, uploadStatus, 0, eventObject));
-
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
+            return message;
     }
 
     public void startSession(String sessionId, long time) {
-        storeMessage(MessageType.SESSION_START, sessionId, time, null, null, UploadStatus.PENDING);
-        mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_SESSION, UploadStatus.PENDING, 0, sessionId));
+        try {
+            JSONObject message = createMessage(MessageType.SESSION_START, sessionId, time, null, null);
+            mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, UploadStatus.PENDING, 0, message));
+            mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_SESSION, UploadStatus.PENDING, 0, sessionId));
+        } catch (JSONException e) {
+            Log.w(TAG, "Failed to create mParticle start session message");
+        }
     }
     public void stopSession(String sessionId, long time) {
         mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.UPDATE_SESSION_END, sessionId));
@@ -124,11 +127,21 @@ public class MessageManager {
         stopSession(sessionId, time);
         mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.CREATE_SESSION_END_MESSAGE, sessionId));
     }
-    public void logCustomEvent(String sessionId, long time, String eventName, JSONObject eventData) {
-        storeMessage(MessageType.CUSTOM_EVENT, sessionId, time, eventName, eventData, UploadStatus.READY);
+    public void logCustomEvent(String sessionId, long time, String eventName, JSONObject attributes) {
+        try {
+            JSONObject message = createMessage(MessageType.CUSTOM_EVENT, sessionId, time, eventName, attributes);
+            mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, UploadStatus.READY, 0, message));
+        } catch (JSONException e) {
+            Log.w(TAG, "Failed to create mParticle start event message");
+        }
     }
-    public void logScreenView(String sessionId, long time, String screenName, JSONObject eventData) {
-        storeMessage(MessageType.SCREEN_VIEW, sessionId, time, screenName, eventData, UploadStatus.READY);
+    public void logScreenView(String sessionId, long time, String screenName, JSONObject attributes) {
+        try {
+            JSONObject message = createMessage(MessageType.SCREEN_VIEW, sessionId, time, screenName, attributes);
+            mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, UploadStatus.READY, 0, message));
+        } catch (JSONException e) {
+            Log.w(TAG, "Failed to create mParticle screen view message");
+        }
     }
 
     public static final class MessageHandler extends Handler {
@@ -154,21 +167,14 @@ public class MessageManager {
             switch (msg.what) {
             case STORE_MESSAGE:
                 try {
-                    JSONObject eventObject = (JSONObject) msg.obj;
+                    JSONObject message = (JSONObject) msg.obj;
                     SQLiteDatabase db = mDB.getWritableDatabase();
-                    ContentValues messageValues = new ContentValues();
-                    messageValues.put(MessageTable.MESSAGE_TYPE, eventObject.getString(MessageKey.TYPE));
-                    messageValues.put(MessageTable.MESSAGE_TIME, eventObject.getLong(MessageKey.TIMESTAMP));
-                    messageValues.put(MessageTable.SESSION_ID, eventObject.getString(MessageKey.SESSION_ID));
-                    messageValues.put(MessageTable.UUID, eventObject.getString(MessageKey.ID));
-                    messageValues.put(MessageTable.UPLOAD_STATUS, msg.arg1);
-                    messageValues.put(MessageTable.MESSAGE, eventObject.toString());
-                    db.insert("messages", null, messageValues);
+                    insertMessage(db, message, msg.arg1);
 
                     ContentValues sessionValues = new ContentValues();
-                    sessionValues.put(SessionTable.END_TIME, eventObject.getLong(MessageKey.TIMESTAMP));
-                    String[] whereArgs = {eventObject.getString(MessageKey.SESSION_ID),
-                            eventObject.getString(MessageKey.TIMESTAMP) };
+                    sessionValues.put(SessionTable.END_TIME, message.getLong(MessageKey.TIMESTAMP));
+                    String[] whereArgs = {getMessageSessionId(message),
+                            message.getString(MessageKey.TIMESTAMP) };
                     db.update("sessions", sessionValues, SessionTable.SESSION_ID + "=? and " +
                                                                 SessionTable.END_TIME+"<?", whereArgs);
                 } catch (SQLiteException e) {
@@ -222,33 +228,20 @@ public class MessageManager {
                     selectCursor.moveToFirst();
                     long start = selectCursor.getLong(0);
                     long end = selectCursor.getLong(1);
-                    String sessionAttributes = selectCursor.getString(2);
+                    // NOTE: not currently using session attributes
+                    // String sessionAttributes = selectCursor.getString(2);
 
-                    // create a session-end message
-                    JSONObject endMessageAttrs = new JSONObject();
-                    String endMessageId = UUID.randomUUID().toString();
-                    endMessageAttrs.put(MessageKey.TYPE, MessageType.SESSION_END);
-                    endMessageAttrs.put(MessageKey.ID, endMessageId);
-                    endMessageAttrs.put(MessageKey.TIMESTAMP, end);
-                    endMessageAttrs.put(MessageKey.SESSION_ID, sessionId);
-                    endMessageAttrs.put(MessageKey.SESSION_LENGTH, (end-start)/1000);
-                    endMessageAttrs.put(MessageKey.ATTRIBUTES, sessionAttributes);
+                    // create a session-end message and add the calculated duration
+                    JSONObject endMessage = MessageManager.createMessage(MessageType.SESSION_END, sessionId, end, null, null);
+                    endMessage.put(MessageKey.SESSION_LENGTH, (end-start)/1000);
 
                     // insert the record into messages with duration
-                    ContentValues values = new ContentValues();
-                    values.put(MessageTable.MESSAGE_TYPE, MessageType.SESSION_END);
-                    values.put(MessageTable.MESSAGE_TIME, end);
-                    values.put(MessageTable.SESSION_ID, sessionId);
-                    values.put(MessageTable.UUID, endMessageId);
-                    values.put(MessageTable.UPLOAD_STATUS, UploadStatus.READY);
-                    values.put(MessageTable.MESSAGE, endMessageAttrs.toString());
-                    db.insert("messages", null, values);
+                    insertMessage(db, endMessage, UploadStatus.READY);
 
                     // update session status
                     ContentValues sessionValues = new ContentValues();
                     sessionValues.put(SessionTable.UPLOAD_STATUS, UploadStatus.ENDED);
-                    String[] whereArgs = {sessionId };
-                    db.update("sessions", sessionValues, SessionTable.SESSION_ID + "=?", whereArgs);
+                    db.update("sessions", sessionValues, SessionTable.SESSION_ID + "=?", new String[]{sessionId});
 
                 } catch (SQLiteException e) {
                     Log.e(TAG, "Error creating session end message in mParticle DB", e);
@@ -279,6 +272,30 @@ public class MessageManager {
             default:
                 break;
             }
+        }
+
+        private void insertMessage(SQLiteDatabase db, JSONObject message, int status) throws JSONException {
+            String messageType = message.getString(MessageKey.TYPE);
+            ContentValues contentValues = new ContentValues();
+            contentValues.put(MessageTable.MESSAGE_TYPE, messageType);
+            contentValues.put(MessageTable.MESSAGE_TIME, message.getLong(MessageKey.TIMESTAMP));
+            contentValues.put(MessageTable.UUID, message.getString(MessageKey.ID));
+            contentValues.put(MessageTable.SESSION_ID, getMessageSessionId(message));
+            contentValues.put(MessageTable.MESSAGE, message.toString());
+            contentValues.put(MessageTable.UPLOAD_STATUS, status);
+            db.insert("messages", null, contentValues);
+        }
+
+        // helper method for getting a session id out of a message since session-start messages use the id field
+        private String getMessageSessionId(JSONObject message) throws JSONException {
+            String sessionId;
+            if (MessageType.SESSION_START==message.getString(MessageKey.TYPE)) {
+                sessionId= message.getString(MessageKey.ID);
+            } else {
+                sessionId= message.getString(MessageKey.SESSION_ID);
+            }
+            return sessionId;
+
         }
     }
 }
