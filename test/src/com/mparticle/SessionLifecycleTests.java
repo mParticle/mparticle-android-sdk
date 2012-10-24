@@ -69,7 +69,7 @@ public class SessionLifecycleTests extends AndroidTestCase {
         mMParticleAPI.logEvent("test1");
         String sessionUUID = mMParticleAPI.mSessionID;
         long sessionStartTime = mMParticleAPI.mSessionStartTime;
-        Thread.sleep(100);
+        Thread.sleep(200);
         mMParticleAPI.logEvent("test2");
         assertNotSame(sessionUUID, mMParticleAPI.mSessionID);
         assertTrue(sessionStartTime < mMParticleAPI.mSessionStartTime);
@@ -137,7 +137,7 @@ public class SessionLifecycleTests extends AndroidTestCase {
         mMParticleAPI.logEvent("test1");
         String sessionUUID = mMParticleAPI.mSessionID;
         long lastEventTime = mMParticleAPI.mLastEventTime;
-        Thread.sleep(100);
+        Thread.sleep(200);
         mMParticleAPI.checkSessionTimeout();
         assertTrue(0 == mMParticleAPI.mSessionStartTime);
         verify(mMockMessageManager, times(1)).startSession(anyString(), anyLong());
