@@ -149,9 +149,9 @@ public class MParticleAPI {
      */
     public void newSession() {
         if (0!=this.mSessionStartTime) {
-            closeSession(System.currentTimeMillis());
+            endSession();
         }
-        this.start();
+        this.beginSession();
     }
 
     /**
@@ -169,10 +169,10 @@ public class MParticleAPI {
      */
     private void ensureActiveSession() {
         checkSessionTimeout();
+        this.mLastEventTime = System.currentTimeMillis();
         if (0==this.mSessionStartTime) {
             this.beginSession();
         }
-        this.mLastEventTime = System.currentTimeMillis();
     }
 
     /**
