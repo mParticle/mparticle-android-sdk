@@ -115,12 +115,12 @@ public class MessageManager {
         try {
             JSONObject message = createMessage(MessageType.SESSION_START, sessionId, time, null, null);
             mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, UploadStatus.PENDING, 0, message));
-            mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_SESSION, UploadStatus.PENDING, 0, sessionId));
         } catch (JSONException e) {
             Log.w(TAG, "Failed to create mParticle start session message");
         }
     }
     public void stopSession(String sessionId, long time) {
+        // TODO: this should pass the time value
         mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.UPDATE_SESSION_END, sessionId));
     }
     public void endSession(String sessionId, long time) {
@@ -149,10 +149,9 @@ public class MessageManager {
         private Context mContext;
 
         public static final int STORE_MESSAGE = 0;
-        public static final int STORE_SESSION = 1;
-        public static final int UPDATE_SESSION_END = 2;
-        public static final int CREATE_SESSION_END_MESSAGE = 3;
-        public static final int END_ORPHAN_SESSIONS = 4;
+        public static final int UPDATE_SESSION_END = 1;
+        public static final int CREATE_SESSION_END_MESSAGE = 2;
+        public static final int END_ORPHAN_SESSIONS = 3;
 
         public MessageHandler(Context context, Looper looper) {
             super(looper);
@@ -168,15 +167,23 @@ public class MessageManager {
             case STORE_MESSAGE:
                 try {
                     JSONObject message = (JSONObject) msg.obj;
+                    int messageStatus = msg.arg1;
+                    String messageType = message.getString(MessageKey.TYPE);
                     SQLiteDatabase db = mDB.getWritableDatabase();
-                    insertMessage(db, message, msg.arg1);
+                    // handle the special case of session-start by creating the session record first
+                    if (MessageType.SESSION_START==messageType) {
+                        insertSession(db, message);
+                    }
+                    insertMessage(db, message, messageStatus);
 
-                    ContentValues sessionValues = new ContentValues();
-                    sessionValues.put(SessionTable.END_TIME, message.getLong(MessageKey.TIMESTAMP));
-                    String[] whereArgs = {getMessageSessionId(message),
-                            message.getString(MessageKey.TIMESTAMP) };
-                    db.update("sessions", sessionValues, SessionTable.SESSION_ID + "=? and " +
-                                                                SessionTable.END_TIME+"<?", whereArgs);
+                    if (MessageType.SESSION_START!=messageType) {
+                        ContentValues sessionValues = new ContentValues();
+                        sessionValues.put(SessionTable.END_TIME, message.getLong(MessageKey.TIMESTAMP));
+                        String[] whereArgs = {getMessageSessionId(message),
+                                message.getString(MessageKey.TIMESTAMP) };
+                        db.update("sessions", sessionValues, SessionTable.SESSION_ID + "=? and " +
+                                                                    SessionTable.END_TIME+"<?", whereArgs);
+                    }
                 } catch (SQLiteException e) {
                     Log.e(TAG, "Error saving event to mParticle DB", e);
                 } catch (JSONException e) {
@@ -185,25 +192,9 @@ public class MessageManager {
                     mDB.close();
                 }
                 break;
-            case STORE_SESSION:
-                try {
-                    SQLiteDatabase db = mDB.getWritableDatabase();
-                    ContentValues values = new ContentValues();
-                    values.put(SessionTable.SESSION_ID, (String) msg.obj);
-                    // TODO: this should use the time from the API call, not current time
-                    long sessionStartTime = System.currentTimeMillis();
-                    values.put(SessionTable.START_TIME, sessionStartTime);
-                    values.put(SessionTable.END_TIME, sessionStartTime);
-                    values.put(SessionTable.UPLOAD_STATUS, msg.arg1);
-                    db.insert("sessions", null, values);
-                } catch (SQLiteException e) {
-                    Log.e(TAG, "Error saving session to mParticle DB", e);
-                } finally {
-                    mDB.close();
-                }
-                break;
             case UPDATE_SESSION_END:
                 // TODO: consider verifying that the time > time-in-table
+                // TODO: use the requested time rather than the system time
                 try {
                     SQLiteDatabase db = mDB.getWritableDatabase();
                     ContentValues values = new ContentValues();
@@ -272,6 +263,16 @@ public class MessageManager {
             default:
                 break;
             }
+        }
+
+        private void insertSession(SQLiteDatabase db, JSONObject message) throws JSONException {
+            ContentValues values = new ContentValues();
+            values.put(SessionTable.SESSION_ID,  message.getString(MessageKey.ID));
+            long sessionStartTime =  message.getLong(MessageKey.TIMESTAMP);
+            values.put(SessionTable.START_TIME, sessionStartTime);
+            values.put(SessionTable.END_TIME, sessionStartTime);
+            values.put(SessionTable.UPLOAD_STATUS, UploadStatus.PENDING);
+            db.insert("sessions", null, values);
         }
 
         private void insertMessage(SQLiteDatabase db, JSONObject message, int status) throws JSONException {
