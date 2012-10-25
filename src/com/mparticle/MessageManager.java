@@ -26,7 +26,7 @@ import com.mparticle.Constants.UploadStatus;
 
 public class MessageManager {
 
-    private final static String TAG = "MParticle";
+    private static final String TAG = "mParticleAPI";
 
     private static MessageManager sMessageManager;
     private static HandlerThread sMessageHandlerThread;
