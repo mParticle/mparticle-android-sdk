@@ -45,7 +45,7 @@ public class SessionLifecycleTests extends AndroidTestCase {
         mMParticleAPI.start();
         String sessionUUID = mMParticleAPI.mSessionID;
         long sessionStartTime = mMParticleAPI.mSessionStartTime;
-        Thread.sleep(20);
+        Thread.sleep(200);
         mMParticleAPI.start();
         assertNotSame(sessionUUID, mMParticleAPI.mSessionID);
         assertTrue(sessionStartTime < mMParticleAPI.mSessionStartTime);
