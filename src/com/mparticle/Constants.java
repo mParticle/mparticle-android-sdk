@@ -8,22 +8,26 @@ package com.mparticle;
         public static final String CUSTOM_EVENT = "e";
         public static final String SCREEN_VIEW = "v";
         public static final String OPT_OUT = "o";
+        public static final String ERROR = "x";
     }
 
     public interface MessageKey {
+        // common
         public static final String TYPE = "dt";
         public static final String ID = "id";
         public static final String TIMESTAMP = "ct";
-        public static final String APPLICATION_KEY = "a";
-        public static final String APPLICATION_VERSION = "av";
-        public static final String MPARTICLE_VERSION = "sdk";
-        public static final String DATA_CONNECTION = "dct";
-        public static final String LATITUDE = "lat";
-        public static final String LONGITUDE = "lng";
         public static final String SESSION_ID = "sid";
         public static final String SESSION_LENGTH = "sls";
         public static final String ATTRIBUTES = "attrs";
         public static final String NAME = "n";
+        // location
+        public static final String DATA_CONNECTION = "dct";
+        public static final String LATITUDE = "lat";
+        public static final String LONGITUDE = "lng";
+        // batch details
+        public static final String APPLICATION_KEY = "a";
+        public static final String APPLICATION_VERSION = "av";
+        public static final String MPARTICLE_VERSION = "sdk";
         // device keys
         public static final String DEVICE_ID = "duid";
         public static final String MANUFACTURER = "dma";
@@ -40,6 +44,10 @@ package com.mparticle;
         public static final String NETWORK_CARRIER = "nca";
         public static final String MOBILE_NETWORK_CODE = "mnc";
         public static final String MOBILE_COUNTRY_CODE = "mcc";
+        // errors
+        public static final String ERROR_TYPE = "t";
+        public static final String ERROR_MESSAGE = "m";
+        public static final String ERROR_STACK_TRACE = "st";
     }
 
     public interface UploadStatus {
