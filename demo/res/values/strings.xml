@@ -4,5 +4,6 @@
     <string name="title_activity_home">mParticle Demo</string>
     <string name="title_activity_pending_messages">Pending Messages</string>
     <string name="title_sessions_list">Sessions</string>
+    <string name="title_uploads_list">Uploads</string>
 
 </resources>

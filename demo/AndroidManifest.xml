@@ -33,6 +33,10 @@
             android:name=".SessionsListActivity"
             android:label="@string/title_sessions_list" >
         </activity>
+        <activity
+            android:name=".UploadsListActivity"
+            android:label="@string/title_uploads_list" >
+        </activity>
     </application>
 
 </manifest>

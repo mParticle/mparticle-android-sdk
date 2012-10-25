@@ -220,6 +220,7 @@ public class MParticleAPI {
      */
     public void upload() {
         this.debugLog("Upload");
+        this.mMessageManager.doUpload();
     }
 
     /**

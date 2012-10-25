@@ -138,19 +138,43 @@
         </LinearLayout>
 
         <TextView
-            android:id="@+id/textControls"
+            android:id="@+id/textData"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@+id/sessionVarInputs"
-            android:text="Controls"
+            android:text="Data"
             android:textSize="22dp" />
-
-        <LinearLayout
+        <Button
+            android:id="@+id/buttonListSessions"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@id/textControls" >
+            android:layout_below="@+id/textData"
+            android:onClick="pressListSessions"
+            android:text="Sessions" />
+        <Button
+            android:id="@+id/buttonShowPendingMessages"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/textData"
+            android:layout_toRightOf="@+id/buttonListSessions"
+            android:onClick="pressShowPendingMessages"
+            android:text="Messages" />
+        <Button
+            android:id="@+id/buttonListUploads"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/textData"
+            android:layout_toRightOf="@+id/buttonShowPendingMessages"
+            android:onClick="pressListUploads"
+            android:text="Uploads" />
 
-        </LinearLayout>
+        <TextView
+            android:id="@+id/textControls"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/buttonListSessions"
+            android:text="Controls"
+            android:textSize="22dp" />
 
         <Button
             android:id="@+id/buttonStartSession"
@@ -188,30 +212,12 @@
             android:text="End" />
 
         <Button
-            android:id="@+id/buttonListSessions"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/textControls"
-            android:layout_toRightOf="@+id/buttonEndSession"
-            android:onClick="pressListSessions"
-            android:text="List" />
-
-        <Button
             android:id="@+id/buttonUpload"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@+id/buttonStartSession"
             android:onClick="pressUpload"
             android:text="Upload" />
-
-        <Button
-            android:id="@+id/buttonShowPendingMessages"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/buttonStartSession"
-            android:layout_toRightOf="@+id/buttonUpload"
-            android:onClick="pressShowPendingMessages"
-            android:text="Show Messages" />
 
         <Button
             android:id="@+id/buttonCrash"

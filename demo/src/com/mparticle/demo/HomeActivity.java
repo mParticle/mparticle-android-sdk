@@ -117,6 +117,11 @@ public class HomeActivity extends Activity {
         Intent intent = new Intent(this, SessionsListActivity.class);
         startActivity(intent);
     }
+    public void pressListUploads(View view) {
+        Intent intent = new Intent(this, UploadsListActivity.class);
+        startActivity(intent);
+    }
+
     public void pressUpload(View view) {
         mParticleAPI.upload();
         refreshDiagnostics();

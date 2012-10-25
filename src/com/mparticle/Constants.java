@@ -9,6 +9,9 @@ package com.mparticle;
         public static final String SCREEN_VIEW = "v";
         public static final String OPT_OUT = "o";
         public static final String ERROR = "x";
+        public static final String REQUEST_HEADER = "h";
+        public static final String RESPONSE_HEADER = "rh";
+        public static final String HTTP_COMMAND = "hc";
     }
 
     public interface MessageKey {
@@ -48,12 +51,19 @@ package com.mparticle;
         public static final String ERROR_TYPE = "t";
         public static final String ERROR_MESSAGE = "m";
         public static final String ERROR_STACK_TRACE = "st";
+        // uploading
+        public static final String MESSAGES = "msgs";
+        public static final String URL = "u";
+        public static final String METHOD = "m";
+        public static final String POST = "d";
+
     }
 
     public interface UploadStatus {
         static final int PENDING = 0;
         static final int READY = 1;
         static final int ENDED = 2;
+        static final int PROCESSED = 3;
     }
 
 }

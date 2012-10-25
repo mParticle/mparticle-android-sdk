@@ -6,7 +6,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 public class MessageDatabase extends SQLiteOpenHelper {
 
-    private static final int DB_VERSION = 2;
+    private static final int DB_VERSION = 3;
     private static final String DB_NAME = "mparticle.db";
 
     public interface MessageTable {
@@ -44,6 +44,20 @@ public class MessageDatabase extends SQLiteOpenHelper {
                SessionTable.ATTRIBUTES + " TEXT," +
                SessionTable.UPLOAD_STATUS + " INTEGER" +
              ");";
+    public interface UploadTable {
+        public final static String UPLOAD_ID = "upload_id";
+        public final static String MESSAGE = "message";
+        public final static String MESSAGE_TIME = "message_time";
+        public final static String UPLOAD_STATUS = "upload_status";
+    }
+    private static final String CREATE_UPLOADS_DDL =
+            "CREATE TABLE uploads (" +
+               "_id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+               UploadTable.UPLOAD_ID + " STRING NOT NULL, " +
+               UploadTable.MESSAGE + " TEXT," +
+               UploadTable.MESSAGE_TIME + " INTEGER NOT NULL," +
+               UploadTable.UPLOAD_STATUS + " INTEGER" +
+             ");";
 
     public MessageDatabase(Context context) {
         super(context, DB_NAME, null, DB_VERSION);
@@ -53,6 +67,7 @@ public class MessageDatabase extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase db) {
         db.execSQL(CREATE_MESSAGES_DDL);
         db.execSQL(CREATE_SESSIONS_DDL);
+        db.execSQL(CREATE_UPLOADS_DDL);
     }
 
     @Override
@@ -61,6 +76,8 @@ public class MessageDatabase extends SQLiteOpenHelper {
         db.execSQL(CREATE_MESSAGES_DDL);
         db.execSQL("DROP TABLE IF EXISTS sessions");
         db.execSQL(CREATE_SESSIONS_DDL);
+        db.execSQL("DROP TABLE IF EXISTS uploads");
+        db.execSQL(CREATE_UPLOADS_DDL);
     }
 
 }
