@@ -137,12 +137,12 @@ public class MessageManager {
                     SQLiteDatabase db = mDB.getWritableDatabase();
                     // handle the special case of session-start by creating the session record first
                     if (MessageType.SESSION_START==messageType) {
-                        insertSession(db, message);
+                        dbInsertSession(db, message);
                     }
-                    insertMessage(db, message, messageStatus);
+                    dbInsertMessage(db, message, messageStatus);
 
                     if (MessageType.SESSION_START!=messageType) {
-                        updateSessionEndTime(db, getMessageSessionId(message), message.getLong(MessageKey.TIMESTAMP));
+                        dbUpdateSessionEndTime(db, getMessageSessionId(message), message.getLong(MessageKey.TIMESTAMP));
                     }
                 } catch (SQLiteException e) {
                     Log.e(TAG, "Error saving event to mParticle DB", e);
@@ -158,7 +158,7 @@ public class MessageManager {
                     String sessionId = sessionTiming.getString(MessageKey.SESSION_ID);
                     long time = sessionTiming.getLong(MessageKey.TIMESTAMP);
                     SQLiteDatabase db = mDB.getWritableDatabase();
-                    updateSessionEndTime(db, sessionId, time);
+                    dbUpdateSessionEndTime(db, sessionId, time);
                 } catch (SQLiteException e) {
                     Log.e(TAG, "Error updating session end time in mParticle DB", e);
                 } catch (JSONException e) {
@@ -178,7 +178,7 @@ public class MessageManager {
                     selectCursor.moveToFirst();
                     long start = selectCursor.getLong(0);
                     long end = selectCursor.getLong(1);
-                    // NOTE: not currently using session attributes
+                    // TODO: not yet using session attributes
                     // String sessionAttributes = selectCursor.getString(2);
 
                     // create a session-end message and add the calculated duration
@@ -186,7 +186,7 @@ public class MessageManager {
                     endMessage.put(MessageKey.SESSION_LENGTH, (end-start)/1000);
 
                     // insert the record into messages with duration
-                    insertMessage(db, endMessage, UploadStatus.READY);
+                    dbInsertMessage(db, endMessage, UploadStatus.READY);
 
                     // update session status
                     ContentValues sessionValues = new ContentValues();
@@ -224,7 +224,7 @@ public class MessageManager {
             }
         }
 
-        private void insertSession(SQLiteDatabase db, JSONObject message) throws JSONException {
+        private void dbInsertSession(SQLiteDatabase db, JSONObject message) throws JSONException {
             ContentValues values = new ContentValues();
             values.put(SessionTable.SESSION_ID,  message.getString(MessageKey.ID));
             long sessionStartTime =  message.getLong(MessageKey.TIMESTAMP);
@@ -234,7 +234,7 @@ public class MessageManager {
             db.insert("sessions", null, values);
         }
 
-        private void insertMessage(SQLiteDatabase db, JSONObject message, int status) throws JSONException {
+        private void dbInsertMessage(SQLiteDatabase db, JSONObject message, int status) throws JSONException {
             String messageType = message.getString(MessageKey.TYPE);
             ContentValues contentValues = new ContentValues();
             contentValues.put(MessageTable.MESSAGE_TYPE, messageType);
@@ -246,7 +246,7 @@ public class MessageManager {
             db.insert("messages", null, contentValues);
         }
 
-        private void updateSessionEndTime(SQLiteDatabase db, String sessionId, long endTime) {
+        private void dbUpdateSessionEndTime(SQLiteDatabase db, String sessionId, long endTime) {
             ContentValues sessionValues = new ContentValues();
             sessionValues.put(SessionTable.END_TIME, endTime);
             String[] whereArgs = {sessionId, Long.toString(endTime) };
