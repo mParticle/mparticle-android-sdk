@@ -12,6 +12,7 @@ import org.json.JSONObject;
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.location.Location;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Handler;
@@ -332,6 +333,10 @@ public class MParticleAPI {
      */
     public void setLocation(double longitude, double latitude) {
         this.ensureActiveSession();
+        Location location = new Location("user");
+        location.setLatitude(latitude);
+        location.setLongitude(longitude);
+        MessageManager.setLocation(location);
         this.debugLog("Set Location: " + longitude + " " + latitude);
     }
 

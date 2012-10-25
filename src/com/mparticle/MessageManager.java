@@ -10,6 +10,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
+import android.location.Location;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
@@ -32,6 +33,7 @@ public class MessageManager {
     private static HandlerThread sMessageHandlerThread;
 
     private Context mContext;
+    private static Location sLocation;
 
     private MessageHandler mMessageHandler;
 
@@ -51,7 +53,7 @@ public class MessageManager {
         return MessageManager.sMessageManager;
     }
 
-    /* package-private */ static JSONObject createMessage(String messageType, String sessionId, long time, String name, JSONObject attributes) throws JSONException {
+    /* package-private */ static JSONObject createMessage(String messageType, String sessionId, long time, String name, JSONObject attributes, boolean includeLocation) throws JSONException {
             JSONObject message = new JSONObject();
             message.put(MessageKey.TYPE, messageType);
             message.put(MessageKey.TIMESTAMP, time);
@@ -67,12 +69,17 @@ public class MessageManager {
             if (null != attributes) {
                 message.put(MessageKey.ATTRIBUTES, attributes);
             }
+            if (includeLocation && null!=sLocation) {
+                message.put(MessageKey.DATA_CONNECTION, sLocation.getProvider());
+                message.put(MessageKey.LATITUDE, sLocation.getLatitude());
+                message.put(MessageKey.LONGITUDE, sLocation.getLongitude());
+            }
             return message;
     }
 
     public void startSession(String sessionId, long time) {
         try {
-            JSONObject message = createMessage(MessageType.SESSION_START, sessionId, time, null, null);
+            JSONObject message = createMessage(MessageType.SESSION_START, sessionId, time, null, null, true);
             mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, UploadStatus.PENDING, 0, message));
         } catch (JSONException e) {
             Log.w(TAG, "Failed to create mParticle start session message");
@@ -94,7 +101,7 @@ public class MessageManager {
     }
     public void logCustomEvent(String sessionId, long time, String eventName, JSONObject attributes) {
         try {
-            JSONObject message = createMessage(MessageType.CUSTOM_EVENT, sessionId, time, eventName, attributes);
+            JSONObject message = createMessage(MessageType.CUSTOM_EVENT, sessionId, time, eventName, attributes, true);
             mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, UploadStatus.READY, 0, message));
         } catch (JSONException e) {
             Log.w(TAG, "Failed to create mParticle start event message");
@@ -102,11 +109,15 @@ public class MessageManager {
     }
     public void logScreenView(String sessionId, long time, String screenName, JSONObject attributes) {
         try {
-            JSONObject message = createMessage(MessageType.SCREEN_VIEW, sessionId, time, screenName, attributes);
+            JSONObject message = createMessage(MessageType.SCREEN_VIEW, sessionId, time, screenName, attributes, true);
             mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, UploadStatus.READY, 0, message));
         } catch (JSONException e) {
             Log.w(TAG, "Failed to create mParticle screen view message");
         }
+    }
+
+    public static void setLocation(Location location) {
+        sLocation=location;
     }
 
     public static final class MessageHandler extends Handler {
@@ -182,7 +193,7 @@ public class MessageManager {
                     // String sessionAttributes = selectCursor.getString(2);
 
                     // create a session-end message and add the calculated duration
-                    JSONObject endMessage = MessageManager.createMessage(MessageType.SESSION_END, sessionId, end, null, null);
+                    JSONObject endMessage = MessageManager.createMessage(MessageType.SESSION_END, sessionId, end, null, null, true);
                     endMessage.put(MessageKey.SESSION_LENGTH, (end-start)/1000);
 
                     // insert the record into messages with duration

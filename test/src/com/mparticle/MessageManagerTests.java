@@ -1,10 +1,12 @@
 package com.mparticle;
 
+import java.util.Random;
 import java.util.UUID;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.location.Location;
 import android.test.AndroidTestCase;
 
 import com.mparticle.Constants.MessageType;
@@ -21,11 +23,12 @@ public class MessageManagerTests extends AndroidTestCase {
         super.setUp();
         mSessionId = UUID.randomUUID().toString();
         mMsgTime = System.currentTimeMillis();
+        MessageManager.setLocation(null);
     }
 
     // creates an 'ss' message - with no 'sid' property
     public void testCreateSessionStartMessage() throws JSONException {
-        JSONObject message = MessageManager.createMessage(MessageType.SESSION_START, mSessionId, mMsgTime, null, null);
+        JSONObject message = MessageManager.createMessage(MessageType.SESSION_START, mSessionId, mMsgTime, null, null, true);
         assertNotNull(message.toString());
         assertSame(MessageType.SESSION_START, message.getString(MessageKey.TYPE));
         assertEquals(mSessionId, message.getString(MessageKey.ID));
@@ -38,7 +41,7 @@ public class MessageManagerTests extends AndroidTestCase {
     // creates an 'se' message without attributes
     // NOTE: duration is added to the message at insert time and not tested here
     public void testCreateSessionEndMessage() throws JSONException {
-        JSONObject message = MessageManager.createMessage(MessageType.SESSION_END, mSessionId, mMsgTime, null, null);
+        JSONObject message = MessageManager.createMessage(MessageType.SESSION_END, mSessionId, mMsgTime, null, null, true);
         assertNotNull(message.toString());
         assertEquals(MessageType.SESSION_END, message.getString(MessageKey.TYPE));
         assertTrue(message.has(MessageKey.ID));
@@ -52,7 +55,7 @@ public class MessageManagerTests extends AndroidTestCase {
     // creates an 'e' message without attributes
     public void testCreateCustomEventMessage() throws JSONException {
         String eventName = "event1";
-        JSONObject message = MessageManager.createMessage(MessageType.CUSTOM_EVENT, mSessionId, mMsgTime, eventName, null);
+        JSONObject message = MessageManager.createMessage(MessageType.CUSTOM_EVENT, mSessionId, mMsgTime, eventName, null, true);
         assertNotNull(message.toString());
         assertEquals(MessageType.CUSTOM_EVENT, message.getString(MessageKey.TYPE));
         assertTrue(message.has(MessageKey.ID));
@@ -68,7 +71,7 @@ public class MessageManagerTests extends AndroidTestCase {
         String eventName = "event2";
         JSONObject eventAttrs=new JSONObject("{key1:'value1'}");
 
-        JSONObject message = MessageManager.createMessage(MessageType.CUSTOM_EVENT, mSessionId, mMsgTime, eventName, eventAttrs);
+        JSONObject message = MessageManager.createMessage(MessageType.CUSTOM_EVENT, mSessionId, mMsgTime, eventName, eventAttrs, true);
         assertNotNull(message.toString());
         assertEquals(MessageType.CUSTOM_EVENT, message.getString(MessageKey.TYPE));
         assertTrue(message.has(MessageKey.ID));
@@ -83,7 +86,7 @@ public class MessageManagerTests extends AndroidTestCase {
     public void testCreateScreenViewMessage() throws JSONException {
         String viewName = "view1";
 
-        JSONObject message = MessageManager.createMessage(MessageType.SCREEN_VIEW, mSessionId, mMsgTime, viewName, null);
+        JSONObject message = MessageManager.createMessage(MessageType.SCREEN_VIEW, mSessionId, mMsgTime, viewName, null, true);
         assertNotNull(message.toString());
         assertEquals(MessageType.SCREEN_VIEW, message.getString(MessageKey.TYPE));
         assertTrue(message.has(MessageKey.ID));
@@ -99,7 +102,7 @@ public class MessageManagerTests extends AndroidTestCase {
         String viewName = "view2";
         JSONObject eventAttrs=new JSONObject("{key2:'value2'}");
 
-        JSONObject message = MessageManager.createMessage(MessageType.SCREEN_VIEW, mSessionId, mMsgTime, viewName, eventAttrs);
+        JSONObject message = MessageManager.createMessage(MessageType.SCREEN_VIEW, mSessionId, mMsgTime, viewName, eventAttrs, true);
         assertNotNull(message.toString());
         assertEquals(MessageType.SCREEN_VIEW, message.getString(MessageKey.TYPE));
         assertTrue(message.has(MessageKey.ID));
@@ -112,7 +115,7 @@ public class MessageManagerTests extends AndroidTestCase {
 
     // creates an 'o' message
     public void testCreateOptOutMessage() throws JSONException {
-        JSONObject message = MessageManager.createMessage(MessageType.OPT_OUT, null, mMsgTime, null, null);
+        JSONObject message = MessageManager.createMessage(MessageType.OPT_OUT, null, mMsgTime, null, null, false);
         assertNotNull(message.toString());
         assertEquals(MessageType.OPT_OUT, message.getString(MessageKey.TYPE));
         assertTrue(message.has(MessageKey.ID));
@@ -124,7 +127,7 @@ public class MessageManagerTests extends AndroidTestCase {
 
     // creates an 'x' message with attributes
     public void testCreateErrorMessage() throws JSONException {
-        JSONObject message = MessageManager.createMessage(MessageType.ERROR, null, mMsgTime, null, null);
+        JSONObject message = MessageManager.createMessage(MessageType.ERROR, null, mMsgTime, null, null, false);
         assertNotNull(message.toString());
         assertEquals(MessageType.ERROR, message.getString(MessageKey.TYPE));
         assertTrue(message.has(MessageKey.ID));
@@ -137,4 +140,54 @@ public class MessageManagerTests extends AndroidTestCase {
         // assertTrue(message.has(MessageKey.ERROR_MESSAGE));
         // assertTrue(message.has(MessageKey.ERROR_STACK_TRACE));
     }
+
+    // creates a message with location provided and requested
+    public void testCreateWithLocationMessage() throws JSONException {
+        Location testLocation=new Location("test");
+        Random r = new Random();
+        double testLatitude = ( 360.0 * r.nextDouble() - 180.0);
+        double testLongitude = ( 360.0 * r.nextDouble() - 180.0);
+        testLocation.setLatitude(testLatitude);
+        testLocation.setLongitude(testLongitude);
+        MessageManager.setLocation(testLocation);
+
+        JSONObject message = MessageManager.createMessage(MessageType.SESSION_START, mSessionId, mMsgTime, null, null, true);
+        assertNotNull(message.toString());
+        assertSame(MessageType.SESSION_START, message.getString(MessageKey.TYPE));
+        assertEquals("test", message.getString(MessageKey.DATA_CONNECTION));
+        assertTrue(message.has(MessageKey.LATITUDE));
+        assertEquals(testLatitude, message.getDouble(MessageKey.LATITUDE));
+        assertTrue(message.has(MessageKey.LONGITUDE));
+        assertEquals(testLongitude, message.getDouble(MessageKey.LONGITUDE));
+    }
+
+
+    // creates a message with location provided but not requested
+    public void testCreateWithLocationIgnoredMessage() throws JSONException {
+        Location testLocation=new Location("test");
+        Random r = new Random();
+        double testLatitude = ( 360.0 * r.nextDouble() - 180.0);
+        double testLongitude = ( 360.0 * r.nextDouble() - 180.0);
+        testLocation.setLatitude(testLatitude);
+        testLocation.setLongitude(testLongitude);
+        MessageManager.setLocation(testLocation);
+
+        JSONObject message = MessageManager.createMessage(MessageType.OPT_OUT, mSessionId, mMsgTime, null, null, false);
+        assertNotNull(message.toString());
+        assertSame(MessageType.OPT_OUT, message.getString(MessageKey.TYPE));
+        assertFalse(message.has(MessageKey.DATA_CONNECTION));
+        assertFalse(message.has(MessageKey.LATITUDE));
+        assertFalse(message.has(MessageKey.LONGITUDE));
+    }
+
+    // creates a message with location requested but unavailable
+    public void testCreateWithLocationMissingMessage() throws JSONException {
+        JSONObject message = MessageManager.createMessage(MessageType.SESSION_START, mSessionId, mMsgTime, null, null, true);
+        assertNotNull(message.toString());
+        assertSame(MessageType.SESSION_START, message.getString(MessageKey.TYPE));
+        assertFalse(message.has(MessageKey.DATA_CONNECTION));
+        assertFalse(message.has(MessageKey.LATITUDE));
+        assertFalse(message.has(MessageKey.LONGITUDE));
+    }
+
 }
