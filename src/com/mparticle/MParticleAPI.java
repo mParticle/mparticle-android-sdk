@@ -227,7 +227,7 @@ public class MParticleAPI {
      * @param eventName the name of the event to be tracked
      */
     public void logEvent(String eventName) {
-        logEvent(eventName, new JSONObject());
+        logEvent(eventName, null);
     }
 
     /**
