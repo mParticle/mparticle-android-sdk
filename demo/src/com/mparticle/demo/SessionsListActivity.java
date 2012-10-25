@@ -34,6 +34,7 @@ public class SessionsListActivity extends ListActivity {
                 from, to);
 
         setListAdapter(adapter);
+        db.close();
 
     }
 

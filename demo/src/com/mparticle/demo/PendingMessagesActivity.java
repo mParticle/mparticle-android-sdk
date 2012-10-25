@@ -34,6 +34,7 @@ public class PendingMessagesActivity extends ListActivity {
                 from, to);
 
         setListAdapter(adapter);
+        db.close();
 
     }
 
