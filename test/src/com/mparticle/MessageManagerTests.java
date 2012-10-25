@@ -7,8 +7,8 @@ import org.json.JSONObject;
 
 import android.test.AndroidTestCase;
 
-import com.mparticle.MessageManager.MessageKey;
-import com.mparticle.MessageManager.MessageType;
+import com.mparticle.Constants.MessageType;
+import com.mparticle.Constants.MessageKey;
 
 public class MessageManagerTests extends AndroidTestCase {
 

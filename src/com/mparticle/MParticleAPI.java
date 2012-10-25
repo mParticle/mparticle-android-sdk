@@ -25,7 +25,7 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.WindowManager;
 
-import com.mparticle.MessageManager.MessageKey;
+import com.mparticle.Constants.MessageKey;
 
 /**
  * This class provides access to the mParticle API.
