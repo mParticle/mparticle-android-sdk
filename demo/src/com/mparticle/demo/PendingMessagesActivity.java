@@ -18,14 +18,12 @@ public class PendingMessagesActivity extends ListActivity {
         MessageDatabase mmDB = new MessageDatabase(this);
         SQLiteDatabase db = mmDB.getReadableDatabase();
 
-        String[] messageColumns = new String[] { "_id", MessageTable.SESSION_ID, MessageTable.MESSAGE_TIME,
-                MessageTable.MESSAGE_TYPE, MessageTable.MESSAGE, MessageTable.UUID };
-        Cursor selectCursor = db.query("messages", messageColumns, null, null, null, null, MessageTable.MESSAGE_TIME
+        Cursor selectCursor = db.query("messages", null, null, null, null, null, MessageTable.MESSAGE_TIME
                 + " desc, _id desc");
 
         String[] from = new String[] { MessageTable.SESSION_ID, MessageTable.MESSAGE_TIME, MessageTable.MESSAGE_TYPE,
-                MessageTable.MESSAGE, MessageTable.UUID };
-        int[] to = { R.id.sessionId, R.id.msgTime, R.id.msgType, R.id.msgMsg, R.id.msgId };
+                MessageTable.MESSAGE, MessageTable.UUID, MessageTable.UPLOAD_STATUS };
+        int[] to = { R.id.sessionId, R.id.msgTime, R.id.msgType, R.id.msgMsg, R.id.msgId, R.id.msgStatus };
 
         // NOTE: this Activity is doing SQL directly on the main UI thread,
         // which you would never do in production code
