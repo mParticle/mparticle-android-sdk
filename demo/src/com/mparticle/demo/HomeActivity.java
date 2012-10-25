@@ -22,16 +22,24 @@ public class HomeActivity extends Activity {
 
     private MParticleAPI mParticleAPI;
     private TextView diagnosticsTextView;
+    private CheckBox optOutCheckBox;
+    private CheckBox debugModeCheckBox;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
         diagnosticsTextView = (TextView) findViewById(R.id.textDiagnostics);
+        optOutCheckBox = (CheckBox) findViewById(R.id.checkBoxOptOut);
+        debugModeCheckBox = (CheckBox) findViewById(R.id.checkBoxDebugMode);
 
         mParticleAPI = MParticleAPI.getInstance(this, "TestAppKey", "secret");
         // for testing, the timeout is 1 minute
         mParticleAPI.setSessionTimeout(60*1000);
+        mParticleAPI.setDebug(true);
+
+        debugModeCheckBox.setChecked(true);
+        optOutCheckBox.setChecked(mParticleAPI.getOptOut());
     }
 
     @Override
