@@ -21,7 +21,7 @@ public class PendingMessagesActivity extends ListActivity {
         String[] messageColumns = new String[] { "_id", MessageTable.SESSION_ID, MessageTable.MESSAGE_TIME,
                 MessageTable.MESSAGE_TYPE, MessageTable.MESSAGE, MessageTable.UUID };
         Cursor selectCursor = db.query("messages", messageColumns, null, null, null, null, MessageTable.MESSAGE_TIME
-                + " desc");
+                + " desc, _id desc");
 
         String[] from = new String[] { MessageTable.SESSION_ID, MessageTable.MESSAGE_TIME, MessageTable.MESSAGE_TYPE,
                 MessageTable.MESSAGE, MessageTable.UUID };

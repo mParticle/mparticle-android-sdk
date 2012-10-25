@@ -79,8 +79,14 @@ public class MessageManager {
         }
     }
     public void stopSession(String sessionId, long time) {
-        // TODO: this should pass the time value
-        mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.UPDATE_SESSION_END, sessionId));
+        try {
+            JSONObject sessionTiming=new JSONObject();
+            sessionTiming.put(MessageKey.SESSION_ID, sessionId);
+            sessionTiming.put(MessageKey.TIMESTAMP, time);
+            mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.UPDATE_SESSION_END, sessionTiming));
+        } catch (JSONException e) {
+            Log.w(TAG, "Failed to send update session end message");
+        }
     }
     public void endSession(String sessionId, long time) {
         stopSession(sessionId, time);
@@ -136,12 +142,7 @@ public class MessageManager {
                     insertMessage(db, message, messageStatus);
 
                     if (MessageType.SESSION_START!=messageType) {
-                        ContentValues sessionValues = new ContentValues();
-                        sessionValues.put(SessionTable.END_TIME, message.getLong(MessageKey.TIMESTAMP));
-                        String[] whereArgs = {getMessageSessionId(message),
-                                message.getString(MessageKey.TIMESTAMP) };
-                        db.update("sessions", sessionValues, SessionTable.SESSION_ID + "=? and " +
-                                                                    SessionTable.END_TIME+"<?", whereArgs);
+                        updateSessionEndTime(db, getMessageSessionId(message), message.getLong(MessageKey.TIMESTAMP));
                     }
                 } catch (SQLiteException e) {
                     Log.e(TAG, "Error saving event to mParticle DB", e);
@@ -152,22 +153,21 @@ public class MessageManager {
                 }
                 break;
             case UPDATE_SESSION_END:
-                // TODO: consider verifying that the time > time-in-table
-                // TODO: use the requested time rather than the system time
                 try {
+                    JSONObject sessionTiming = (JSONObject) msg.obj;
+                    String sessionId = sessionTiming.getString(MessageKey.SESSION_ID);
+                    long time = sessionTiming.getLong(MessageKey.TIMESTAMP);
                     SQLiteDatabase db = mDB.getWritableDatabase();
-                    ContentValues values = new ContentValues();
-                    values.put(SessionTable.END_TIME, System.currentTimeMillis());
-                    String[] whereArgs = new String[]{(String) msg.obj};
-                    db.update("sessions", values, SessionTable.SESSION_ID+"=?", whereArgs);
+                    updateSessionEndTime(db, sessionId, time);
                 } catch (SQLiteException e) {
                     Log.e(TAG, "Error updating session end time in mParticle DB", e);
+                } catch (JSONException e) {
+                    Log.e(TAG, "Error with JSON object", e);
                 } finally {
                     mDB.close();
                 }
                 break;
             case CREATE_SESSION_END_MESSAGE:
-                // TODO: this is possibly an upload handler message
                 try {
                     String sessionId = (String) msg.obj;
                     SQLiteDatabase db = mDB.getWritableDatabase();
@@ -196,7 +196,7 @@ public class MessageManager {
                 } catch (SQLiteException e) {
                     Log.e(TAG, "Error creating session end message in mParticle DB", e);
                 } catch (JSONException e) {
-                    Log.e(TAG, "Error creating session end message in mParticle DB", e);
+                    Log.e(TAG, "Error with JSON object", e);
                 } finally {
                     mDB.close();
                 }
@@ -208,7 +208,7 @@ public class MessageManager {
                     String[] sessionColumns = new String[]{SessionTable.SESSION_ID};
                     Cursor selectCursor = db.query("sessions", sessionColumns,
                             SessionTable.UPLOAD_STATUS+"!="+UploadStatus.ENDED, null, null, null, null);
-                    // NOTE: there should be at most one orphan. but process any that are found
+                    // NOTE: there should be at most one orphan - but process any that are found
                     while (selectCursor.moveToNext()) {
                         String sessionId = selectCursor.getString(0);
                         sendMessage(obtainMessage(MessageHandler.CREATE_SESSION_END_MESSAGE, sessionId));
@@ -244,6 +244,15 @@ public class MessageManager {
             contentValues.put(MessageTable.MESSAGE, message.toString());
             contentValues.put(MessageTable.UPLOAD_STATUS, status);
             db.insert("messages", null, contentValues);
+        }
+
+        private void updateSessionEndTime(SQLiteDatabase db, String sessionId, long endTime) {
+            ContentValues sessionValues = new ContentValues();
+            sessionValues.put(SessionTable.END_TIME, endTime);
+            String[] whereArgs = {sessionId, Long.toString(endTime) };
+            db.update("sessions", sessionValues, SessionTable.SESSION_ID + "=? and " +
+                                                        SessionTable.END_TIME+"<?", whereArgs);
+
         }
 
         // helper method for getting a session id out of a message since session-start messages use the id field
