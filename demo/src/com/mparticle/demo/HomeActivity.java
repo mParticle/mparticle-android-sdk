@@ -135,7 +135,7 @@ public class HomeActivity extends Activity {
     }
     public void pressUpdateLocation(View view) {
         Random r = new Random();
-        mParticleAPI.setLocation(r.nextLong(), r.nextLong());
+        mParticleAPI.setLocation((360.0*r.nextDouble()-180.0), (360.0*r.nextDouble()-180.0));
         refreshDiagnostics();
     }
 
