@@ -161,10 +161,7 @@ import com.mparticle.MessageDatabase.UploadTable;
                     // post message to mParticle service
                     HttpPost httpPost = new HttpPost(SERVICE_ENDPOINT);
                     httpPost.setHeader("Content-type", "application/json");
-                    // StringEntity messageEntity = new StringEntity(message, "UTF8");
-                    byte[] messageBytes = message.getBytes();
-                    ByteArrayEntity messageEntity = new ByteArrayEntity(messageBytes);
-                    httpPost.setEntity(messageEntity);
+                    httpPost.setEntity(new ByteArrayEntity(message.getBytes()));
 
                     httpPost.setHeader(HEADER_APPKEY, "TestAppKey");
                     httpPost.setHeader(HEADER_SIGNATURE, hmacSha256Encode("secret", message));
@@ -174,15 +171,12 @@ import com.mparticle.MessageDatabase.UploadTable;
                     try {
 
                         String response = mHttpClient.execute(httpPost, new BasicResponseHandler(), mHttpContext);
-                        Log.d(TAG, "Got response 2xx with body string:" + response);
-                        List<Cookie> cookies = mCookieStore.getCookies();
-                        Log.d(TAG, "Got cookies:" + cookies);
                         // store responses in DB
                         // TODO: parse responses
-                        // temporarily strip extra BOM (3 bytes) from response body
-                        String cleanResponse = response.substring(response.indexOf('{'));
-                        JSONObject responseJSON = new JSONObject(cleanResponse);
-                        Log.d(TAG, "Got responseJSON:" + responseJSON.toString());
+                        JSONObject responseJSON = new JSONObject(response);
+                        Log.d(TAG, "Got 2xx response with JSON:" + responseJSON.toString());
+                        List<Cookie> cookies = mCookieStore.getCookies();
+                        Log.d(TAG, "Got cookies:" + cookies);
                         if (responseJSON.has(MessageKey.MESSAGES)) {
                             Log.d(TAG, "Response has messages to be processed");
                             // TODO: store and process command messages
