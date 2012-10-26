@@ -18,7 +18,7 @@ public class EventLoggingTests extends AndroidTestCase {
     protected void setUp() throws Exception {
       super.setUp();
       mMockMessageManager = mock(MessageManager.class);
-      mMParticleAPI = new MParticleAPI(getContext(),"test","secret", mMockMessageManager);
+      mMParticleAPI = new MParticleAPI(mMockMessageManager);
     }
 
     // should fail silently. a warning message is logged but the application continues.

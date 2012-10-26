@@ -13,7 +13,7 @@ public class SessionLifecycleTests extends AndroidTestCase {
     protected void setUp() throws Exception {
       super.setUp();
       mMockMessageManager = mock(MessageManager.class);
-      mMParticleAPI = new MParticleAPI(getContext(),"test","secret", mMockMessageManager);
+      mMParticleAPI = new MParticleAPI(mMockMessageManager);
     }
 
     // start new session on on start() call if one was not running

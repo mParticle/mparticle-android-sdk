@@ -25,6 +25,8 @@ import com.mparticle.Constants.MessageType;
 import com.mparticle.Constants.MessageKey;
 import com.mparticle.Constants.UploadStatus;
 
+//TODO: this should be package-private but is accessed from the demo
+@SuppressWarnings("javadoc")
 public class MessageManager {
 
     private static final String TAG = "mParticleAPI";
@@ -38,14 +40,14 @@ public class MessageManager {
     private Context mContext;
     private static Location sLocation;
 
-    private MessageManager(Context context) {
+    private MessageManager(Context context, String apiKey, String secret) {
         mContext = context.getApplicationContext();
         mMessageHandler = new MessageHandler(mContext, sMessageHandlerThread.getLooper());
         mMessageHandler.sendEmptyMessage(MessageHandler.END_ORPHAN_SESSIONS);
-        mUploadHandler = new UploadHandler(mContext, sUploadHandlerThread.getLooper());
+        mUploadHandler = new UploadHandler(mContext, sUploadHandlerThread.getLooper(), apiKey, secret);
     }
 
-    public static MessageManager getInstance(Context context) {
+    public static MessageManager getInstance(Context context, String apiKey, String secret) {
         if (null == MessageManager.sMessageManager) {
             sMessageHandlerThread = new HandlerThread("mParticleMessageHandlerThread",
                     Process.THREAD_PRIORITY_BACKGROUND);
@@ -53,7 +55,7 @@ public class MessageManager {
             sUploadHandlerThread = new HandlerThread("mParticleUploadHandlerThread",
                     Process.THREAD_PRIORITY_BACKGROUND);
             sUploadHandlerThread.start();
-            MessageManager.sMessageManager = new MessageManager(context);
+            MessageManager.sMessageManager = new MessageManager(context, apiKey, secret);
         }
         return MessageManager.sMessageManager;
     }

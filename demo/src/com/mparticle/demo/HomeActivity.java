@@ -1,5 +1,6 @@
 package com.mparticle.demo;
 
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
@@ -10,6 +11,7 @@ import org.json.JSONObject;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.TextView;
@@ -19,6 +21,8 @@ import android.widget.ToggleButton;
 import com.mparticle.MParticleAPI;
 
 public class HomeActivity extends Activity {
+
+    private static final String TAG = "mParticleDemo";
 
     private MParticleAPI mParticleAPI;
     private TextView diagnosticsTextView;
@@ -54,10 +58,18 @@ public class HomeActivity extends Activity {
     }
 
     private void refreshDiagnostics() {
-        Map<String, Object> props = mParticleAPI.collectDeviceProperties();
         StringBuffer diagnosticMessage=new StringBuffer();
-        for (Entry<String, Object> entry : props.entrySet()) {
-            diagnosticMessage.append(entry.getKey() + "=" + entry.getValue()+"\n");
+        JSONObject mDeviceAttributes = MParticleAPI.collectDeviceProperties(this.getApplicationContext());
+        try {
+            if (mDeviceAttributes.length() > 0) {
+                Iterator<?> deviceKeys = mDeviceAttributes.keys();
+                while( deviceKeys.hasNext() ){
+                    String key = (String)deviceKeys.next();
+                    diagnosticMessage.append(key + "=" + mDeviceAttributes.get(key)+"\n");
+                }
+            }
+        } catch (Exception e) {
+            Log.d(TAG, "Error parsing device attributes JSON");
         }
         diagnosticsTextView.setText(diagnosticMessage.toString());
     }

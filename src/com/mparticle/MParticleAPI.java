@@ -2,19 +2,17 @@ package com.mparticle;
 
 import java.net.URL;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.location.Location;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
@@ -40,9 +38,6 @@ public class MParticleAPI {
     private static boolean debugMode = false;
     private static Map<String, MParticleAPI> sInstanceMap = new HashMap<String, MParticleAPI>();
 
-    private Context mContext;
-    private String mApiKey;
-    private String mSecret;
     private MessageManager mMessageManager;
     private Handler mTimeoutHandler;
 
@@ -51,10 +46,7 @@ public class MParticleAPI {
     /* package-private */ long mSessionStartTime = 0;
     /* package-private */ long mLastEventTime = 0;
 
-    /* package-private */ MParticleAPI(Context context, String apiKey, String secret, MessageManager messageManager) {
-        this.mContext = context.getApplicationContext();
-        this.mApiKey = apiKey;
-        this.mSecret = secret;
+    /* package-private */ MParticleAPI(MessageManager messageManager) {
         this.mMessageManager = messageManager;
         HandlerThread timeoutHandlerThread = new HandlerThread("SessionTimeoutHandler", Process.THREAD_PRIORITY_BACKGROUND);
         timeoutHandlerThread.start();
@@ -83,7 +75,7 @@ public class MParticleAPI {
         if (sInstanceMap.containsKey(apiKey)) {
             apiInstance = sInstanceMap.get(apiKey);
         } else {
-            apiInstance = new MParticleAPI(context, apiKey, secret, MessageManager.getInstance(context));
+            apiInstance = new MParticleAPI(MessageManager.getInstance(context, apiKey, secret));
             sInstanceMap.put(apiKey, apiInstance);
         }
         return apiInstance;
@@ -104,6 +96,8 @@ public class MParticleAPI {
      * Initialize or return an instance of the mParticle SDK.
      *
      * The instance will be configured using settings from the configuration file.
+     * @param context the Activity that is creating the instance
+     * @return an instance of the mParticle SDK configured with your API key
      */
     // TODO: implement configuration-file based settings
     public static MParticleAPI getInstance(Context context) {
@@ -137,7 +131,6 @@ public class MParticleAPI {
      * This method should be called from an Activity's onStop() method.
      *
      * To explicitly end a session use the endSession() method.
-     * @see endSession
      */
     public void stop() {
         this.mLastEventTime = System.currentTimeMillis();
@@ -280,7 +273,7 @@ public class MParticleAPI {
     /**
      * Log an error event with data attributes
      * @param eventName the name of the error event to be tracked
-     * @param eventData a Map of data attributes
+     * @param data a Map of data attributes
      */
     public void logErrorEvent(String eventName, JSONObject data) {
         if (null==eventName) {
@@ -294,7 +287,8 @@ public class MParticleAPI {
     /**
      * Log an error event with data attributes and an exception
      * @param eventName the name of the error event to be tracked
-     * @param eventData a Map of data attributes
+     * @param data a Map of data attributes
+     * @param e an Exception
      */
     // TODO: this method may be dropped - will decide in a later iteration
     public void logErrorEvent(String eventName, JSONObject data, Exception e) {
@@ -459,84 +453,58 @@ public class MParticleAPI {
 
     /**
      * Generates a collection of device properties
-     * @return a Map of device-specific attributes
+     * @param context the application context
+     * @return a JSONObject of device-specific attributes
      */
-    public Map<String, Object> collectDeviceProperties() {
-        Map<String, Object> properties = new LinkedHashMap<String, Object>();
-
-        // TODO: verify this is the correct value for this key
-        properties.put(MessageKey.APPLICATION_KEY, this.mApiKey);
+    public static JSONObject collectDeviceProperties(Context context) {
+        JSONObject properties = new JSONObject();
 
         try {
-            String packageName = mContext.getPackageName();
-            PackageInfo pInfo = mContext.getPackageManager().getPackageInfo(packageName, 0);
-            properties.put(MessageKey.APPLICATION_VERSION, pInfo.versionName);
-        } catch (PackageManager.NameNotFoundException e) {
-            properties.put(MessageKey.APPLICATION_VERSION, "Unknown");
+            try {
+                String packageName = context.getPackageName();
+                PackageInfo pInfo = context.getPackageManager().getPackageInfo(packageName, 0);
+                properties.put(MessageKey.APPLICATION_VERSION, pInfo.versionName);
+            } catch (PackageManager.NameNotFoundException e) {
+                properties.put(MessageKey.APPLICATION_VERSION, "Unknown");
+            }
+
+            properties.put(MessageKey.MPARTICLE_VERSION, MParticleAPI.VERSION);
+
+            // device IDs
+            properties.put(MessageKey.DEVICE_ID, Settings.Secure.getString(context.getContentResolver(),
+                    Settings.Secure.ANDROID_ID));
+            // TODO: get network MAC addresses?
+
+            // device/OS properties
+            properties.put(MessageKey.MANUFACTURER, android.os.Build.MANUFACTURER);
+            properties.put(MessageKey.PLATFORM, "Android");
+            properties.put(MessageKey.OS_VERSION, android.os.Build.VERSION.SDK_INT);
+            properties.put(MessageKey.MODEL, android.os.Build.MODEL);
+
+            // screen height/width
+            WindowManager windowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+            DisplayMetrics metrics = new DisplayMetrics();
+            windowManager.getDefaultDisplay().getMetrics(metrics);
+            properties.put(MessageKey.SCREEN_HEIGHT, metrics.heightPixels);
+            properties.put(MessageKey.SCREEN_WIDTH, metrics.widthPixels);
+
+            // locales
+            Locale locale = Locale.getDefault();
+            properties.put(MessageKey.DEVICE_COUNTRY, locale.getDisplayCountry());
+            properties.put(MessageKey.DEVICE_LOCALE_COUNTRY, locale.getCountry());
+            properties.put(MessageKey.DEVICE_LOCALE_LANGUAGE, locale.getLanguage());
+
+            // TODO: network
+            TelephonyManager telephonyManager = (TelephonyManager)context.getSystemService(Context.TELEPHONY_SERVICE);
+            properties.put(MessageKey.NETWORK_CARRIER, telephonyManager.getNetworkOperatorName());
+            properties.put(MessageKey.NETWORK_COUNTRY, telephonyManager.getNetworkCountryIso());
+            // TODO: android appears to combine MNC+MCC into network operator
+            properties.put(MessageKey.MOBILE_NETWORK_CODE, telephonyManager.getNetworkOperator());
+            // properties.put(MessageKey.MOBILE_COUNTRY_CODE, telephonyManager.getNetworkOperator());
+
+        } catch (JSONException e) {
+            // ignore JSON exceptions
         }
-
-        properties.put(MessageKey.MPARTICLE_VERSION, MParticleAPI.VERSION);
-
-        // device IDs
-        properties.put(MessageKey.DEVICE_ID, Settings.Secure.getString(mContext.getContentResolver(),
-                Settings.Secure.ANDROID_ID));
-        // TODO: get network MAC addresses?
-
-        // device/OS properties
-        properties.put(MessageKey.MANUFACTURER, android.os.Build.MANUFACTURER);
-        properties.put(MessageKey.PLATFORM, "Android");
-        properties.put(MessageKey.OS_VERSION, android.os.Build.VERSION.SDK_INT);
-        properties.put(MessageKey.MODEL, android.os.Build.MODEL);
-
-        // screen height/width
-        WindowManager windowManager = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
-        DisplayMetrics metrics = new DisplayMetrics();
-        windowManager.getDefaultDisplay().getMetrics(metrics);
-        properties.put(MessageKey.SCREEN_HEIGHT, metrics.heightPixels);
-        properties.put(MessageKey.SCREEN_WIDTH, metrics.widthPixels);
-
-        // locales
-        Locale locale = Locale.getDefault();
-        properties.put(MessageKey.DEVICE_COUNTRY, locale.getDisplayCountry());
-        properties.put(MessageKey.DEVICE_LOCALE_COUNTRY, locale.getCountry());
-        properties.put(MessageKey.DEVICE_LOCALE_LANGUAGE, locale.getLanguage());
-
-        // TODO: network
-        TelephonyManager telephonyManager = (TelephonyManager)mContext.getSystemService(Context.TELEPHONY_SERVICE);
-        properties.put(MessageKey.NETWORK_CARRIER, telephonyManager.getNetworkOperatorName());
-        properties.put(MessageKey.NETWORK_COUNTRY, telephonyManager.getNetworkCountryIso());
-        // TODO: android appears to combine MNC+MCC into network operator
-        properties.put(MessageKey.MOBILE_NETWORK_CODE, telephonyManager.getNetworkOperator());
-        properties.put(MessageKey.MOBILE_COUNTRY_CODE, telephonyManager.getNetworkOperator());
-
-        // additional info available but possibly not needed
-        ConnectivityManager connectivityManager = (ConnectivityManager)mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
-        properties.put("extra_mobile_network_type", telephonyManager.getNetworkType());
-
-        // NOTE: this requires ACCESS_NETWORK_STATE permission - which should already be granted. possibly move check elsewhere.
-        if (PackageManager.PERMISSION_GRANTED ==
-                mContext.checkCallingOrSelfPermission(android.Manifest.permission.ACCESS_NETWORK_STATE)) {
-            NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
-            properties.put(MessageKey.DATA_CONNECTION, networkInfo.getTypeName());
-        } else {
-            properties.put(MessageKey.DATA_CONNECTION, "Forbidden");
-        }
-
-        properties.put("extra_screen_orientation", windowManager.getDefaultDisplay().getRotation());
-        properties.put("extra_screen_metrics", metrics);
-
-        properties.put("device", android.os.Build.DEVICE);
-        properties.put("display", android.os.Build.DISPLAY);
-        properties.put("hardware", android.os.Build.HARDWARE);
-        properties.put("build_id", android.os.Build.ID);
-        properties.put("product", android.os.Build.PRODUCT);
-
-        // internal diagnostics for development, to be removed
-        properties.put("secret", this.mSecret);
-        properties.put("session_timeout", this.mSessionTimeout);
-        properties.put("session_id", this.mSessionID);
-        properties.put("session_start", this.mSessionStartTime);
-        properties.put("last_event", this.mLastEventTime);
 
         return properties;
     }

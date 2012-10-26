@@ -3,6 +3,7 @@ package com.mparticle;
 import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 
@@ -47,9 +48,13 @@ import com.mparticle.MessageDatabase.UploadTable;
 
     private MessageDatabase mDB;
     private Context mContext;
+    private String mApiKey;
+    private String mSecret;
+
     private AndroidHttpClient mHttpClient;
     private HttpContext mHttpContext;
     private BasicCookieStore mCookieStore;
+    private JSONObject mDeviceAttributes;
 
     public static final int PREPARE_BATCHES = 0;
     public static final int PROCESS_BATCHES = 1;
@@ -62,15 +67,19 @@ import com.mparticle.MessageDatabase.UploadTable;
     public static int BATCH_SIZE = 10;
     public static String SERVICE_ENDPOINT = "http://api.dev.mparticle.com/v1/events";
 
-    public UploadHandler(Context context, Looper looper) {
+    public UploadHandler(Context context, Looper looper, String apiKey, String secret) {
         super(looper);
         mContext = context;
+        mApiKey = apiKey;
+        mSecret = secret;
+
         mDB = new MessageDatabase(mContext);
         mHttpClient = AndroidHttpClient.newInstance("mParticleSDK", mContext);
         mHttpContext  = new BasicHttpContext();
         mCookieStore = new BasicCookieStore();
         mHttpContext.setAttribute(ClientContext.COOKIE_STORE, mCookieStore);
 
+        mDeviceAttributes = MParticleAPI.collectDeviceProperties(context);
         // TODO: temporary - for development only
         HttpHost proxy = new HttpHost("192.168.1.100", 8080);
         mHttpClient.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY, proxy);
@@ -122,12 +131,7 @@ import com.mparticle.MessageDatabase.UploadTable;
                     }
                     if( messagesArray.length()>=BATCH_SIZE || (readyMessagesCursor.isLast() && messagesArray.length()>0)) {
                         // create upload message
-                        JSONObject uploadMessage =  new JSONObject();
-                        uploadMessage.put(MessageKey.TYPE, MessageType.REQUEST_HEADER);
-                        uploadMessage.put(MessageKey.ID, UUID.randomUUID().toString());
-                        uploadMessage.put(MessageKey.TIMESTAMP, System.currentTimeMillis()/1000);
-                        uploadMessage.put(MessageKey.MESSAGES, messagesArray);
-                        // TODO: add additional attributes for device
+                        JSONObject uploadMessage = createUploadMessage(messagesArray);
                         // store in uploads table
                         dbInsertUpload(db, uploadMessage);
                         // update message processed status
@@ -143,6 +147,28 @@ import com.mparticle.MessageDatabase.UploadTable;
         } finally {
             mDB.close();
         }
+    }
+
+    private JSONObject createUploadMessage(JSONArray messagesArray) throws JSONException {
+        JSONObject uploadMessage= new JSONObject();
+        uploadMessage.put(MessageKey.TYPE, MessageType.REQUEST_HEADER);
+        uploadMessage.put(MessageKey.ID, UUID.randomUUID().toString());
+        uploadMessage.put(MessageKey.TIMESTAMP, System.currentTimeMillis()/1000);
+        uploadMessage.put(MessageKey.MESSAGES, messagesArray);
+        uploadMessage.put(MessageKey.APPLICATION_KEY, mApiKey);
+
+        // TODO: add additional attributes for device
+        // NOTE: this would be simpler if we kept the deviceAttributes as a separate element in the header
+        // like... uploadMessage.put(MessageKey.DEVICE_ATTRIBUTES, mDeviceAttributes);
+        if (mDeviceAttributes.length() > 0) {
+            Iterator<?> deviceKeys = mDeviceAttributes.keys();
+            while( deviceKeys.hasNext() ){
+                String key = (String)deviceKeys.next();
+                uploadMessage.put(key,mDeviceAttributes.get(key));
+            }
+        }
+
+        return uploadMessage;
     }
 
     void processBatches() {
@@ -163,8 +189,8 @@ import com.mparticle.MessageDatabase.UploadTable;
                     httpPost.setHeader("Content-type", "application/json");
                     httpPost.setEntity(new ByteArrayEntity(message.getBytes()));
 
-                    httpPost.setHeader(HEADER_APPKEY, "TestAppKey");
-                    httpPost.setHeader(HEADER_SIGNATURE, hmacSha256Encode("secret", message));
+                    httpPost.setHeader(HEADER_APPKEY, mApiKey);
+                    httpPost.setHeader(HEADER_SIGNATURE, hmacSha256Encode(mSecret, message));
                     // TODO: remove - debug mode only
                     httpPost.setHeader("x-mp-debugmode", "true");
 
