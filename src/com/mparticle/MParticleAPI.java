@@ -93,18 +93,6 @@ public class MParticleAPI {
     }
 
     /**
-     * Initialize or return an instance of the mParticle SDK.
-     *
-     * The instance will be configured using settings from the configuration file.
-     * @param context the Activity that is creating the instance
-     * @return an instance of the mParticle SDK configured with your API key
-     */
-    // TODO: implement configuration-file based settings
-    public static MParticleAPI getInstance(Context context) {
-        return MParticleAPI.getInstance(context, null, null, 0);
-    }
-
-    /**
      * Set the user session timeout interval.
      *
      * A session is ended when no events (logged events or start/stop events) has occurred
