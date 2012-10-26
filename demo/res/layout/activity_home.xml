@@ -23,7 +23,7 @@
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
             android:layout_below="@+id/textView1"
-            android:onClick="pressButtonA"
+            android:onClick="pressEventButton"
             android:text="Button A" />
 
         <Button
@@ -33,7 +33,7 @@
             android:layout_alignBaseline="@+id/buttonA"
             android:layout_alignBottom="@+id/buttonA"
             android:layout_toRightOf="@+id/buttonA"
-            android:onClick="pressButtonB"
+            android:onClick="pressEventButton"
             android:text="Button B" />
 
         <ToggleButton
@@ -41,18 +41,36 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignBottom="@+id/buttonB"
-            android:layout_alignTop="@+id/buttonB"
+            android:layout_alignTop="@+id/buttonA"
             android:layout_toRightOf="@+id/buttonB"
-            android:onClick="pressButtonC"
+            android:onClick="pressEventButton"
             android:text="Button C"
             android:textOff="Button C OFF"
             android:textOn="Button C ON" />
+
+        <Button
+            android:id="@+id/viewA"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_below="@+id/buttonA"
+            android:onClick="pressEventButton"
+            android:text="View A" />
+
+        <Button
+            android:id="@+id/viewB"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/buttonA"
+            android:layout_toRightOf="@+id/viewA"
+            android:onClick="pressEventButton"
+            android:text="View B" />
 
         <LinearLayout
             android:id="@+id/userIdInputs"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/buttonA" >
+            android:layout_below="@+id/viewA" >
 
             <TextView
                 android:id="@+id/userLabel"
@@ -75,7 +93,7 @@
                 android:id="@+id/buttonSetUserId"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:onClick="pressSetUserId"
+                android:onClick="pressSetVariable"
                 android:text="Set" />
         </LinearLayout>
 
@@ -104,7 +122,7 @@
                 android:id="@+id/buttonSetUserVar"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:onClick="pressSetUserVar"
+                android:onClick="pressSetVariable"
                 android:text="Set" />
         </LinearLayout>
 
@@ -133,7 +151,7 @@
                 android:id="@+id/buttonSetSessionVar"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:onClick="pressSetSessionVar"
+                android:onClick="pressSetVariable"
                 android:text="Set" />
         </LinearLayout>
 
@@ -149,7 +167,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@+id/textData"
-            android:onClick="pressListSessions"
+            android:onClick="pressDataButton"
             android:text="Sessions" />
         <Button
             android:id="@+id/buttonShowPendingMessages"
@@ -157,7 +175,7 @@
             android:layout_height="wrap_content"
             android:layout_below="@+id/textData"
             android:layout_toRightOf="@+id/buttonListSessions"
-            android:onClick="pressShowPendingMessages"
+            android:onClick="pressDataButton"
             android:text="Messages" />
         <Button
             android:id="@+id/buttonListUploads"
@@ -165,7 +183,7 @@
             android:layout_height="wrap_content"
             android:layout_below="@+id/textData"
             android:layout_toRightOf="@+id/buttonShowPendingMessages"
-            android:onClick="pressListUploads"
+            android:onClick="pressDataButton"
             android:text="Uploads" />
 
         <TextView
@@ -181,7 +199,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@+id/textControls"
-            android:onClick="pressStartSession"
+            android:onClick="pressSessionButton"
             android:text="Start" />
 
         <Button
@@ -190,7 +208,7 @@
             android:layout_height="wrap_content"
             android:layout_below="@+id/textControls"
             android:layout_toRightOf="@+id/buttonStartSession"
-            android:onClick="pressStopSession"
+            android:onClick="pressSessionButton"
             android:text="Stop" />
 
         <Button
@@ -199,7 +217,7 @@
             android:layout_height="wrap_content"
             android:layout_below="@+id/textControls"
             android:layout_toRightOf="@+id/buttonStopSession"
-            android:onClick="pressNewSession"
+            android:onClick="pressSessionButton"
             android:text="New" />
 
         <Button
@@ -208,22 +226,23 @@
             android:layout_height="wrap_content"
             android:layout_below="@+id/textControls"
             android:layout_toRightOf="@+id/buttonNewSession"
-            android:onClick="pressEndSession"
+            android:onClick="pressSessionButton"
             android:text="End" />
 
         <Button
             android:id="@+id/buttonUpload"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/buttonStartSession"
-            android:onClick="pressUpload"
+            android:layout_below="@+id/textControls"
+            android:layout_toRightOf="@+id/buttonEndSession"
+            android:onClick="pressSessionButton"
             android:text="Upload" />
 
         <Button
             android:id="@+id/buttonCrash"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/buttonUpload"
+            android:layout_below="@+id/buttonStartSession"
             android:onClick="pressCrash"
             android:text="Crash" />
 

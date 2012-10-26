@@ -46,16 +46,6 @@ public class HomeActivity extends Activity {
         collectDeviceProperties();
     }
 
-    @Override
-    public void onStart() {
-        super.onStart();
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-    }
-
     private void collectDeviceProperties() {
         StringBuffer diagnosticMessage=new StringBuffer();
         JSONObject mDeviceAttributes = MParticleAPI.collectDeviceProperties(this.getApplicationContext());
@@ -73,59 +63,85 @@ public class HomeActivity extends Activity {
         diagnosticsTextView.setText(diagnosticMessage.toString());
     }
 
-    public void pressButtonA(View view) {
-        mParticleAPI.logEvent("ButtonAPressed");
-    }
-    public void pressButtonB(View view) {
-        mParticleAPI.logEvent("ButtonBPressed");
-    }
-    public void pressButtonC(View view) throws JSONException {
-        boolean on = ((ToggleButton) view).isChecked();
-        JSONObject eventData=new JSONObject();
-        eventData.put("button_state", on ? "on":"off");
-        mParticleAPI.logEvent("ButtonCPressed", eventData);
-    }
-
-    public void pressSetUserId(View view) {
-        TextView editView = (TextView) findViewById(R.id.editUserId);
-        String userId = editView.getText().toString();
-        mParticleAPI.identifyUser(userId);
-    }
-    public void pressSetUserVar(View view) {
-        TextView editView = (TextView) findViewById(R.id.editUserVar);
-        String userVar = editView.getText().toString();
-        mParticleAPI.setUserProperty("user_var", userVar);
-    }
-    public void pressSetSessionVar(View view) {
-        TextView editView = (TextView) findViewById(R.id.editSessionVar);
-        String sessionVar = editView.getText().toString();
-        mParticleAPI.setUserProperty("session_var", sessionVar);
+    public void pressEventButton(View view) throws JSONException {
+        switch (view.getId()) {
+        case R.id.buttonA:
+            mParticleAPI.logEvent("ButtonAPressed");
+            break;
+        case R.id.buttonB:
+            mParticleAPI.logEvent("ButtonBPressed");
+            break;
+        case R.id.buttonC:
+            boolean on = ((ToggleButton) view).isChecked();
+            JSONObject eventData=new JSONObject("{button_state:"+(on ? "on":"off")+"}");
+            mParticleAPI.logEvent("ButtonCPressed", eventData);
+            break;
+        case R.id.viewA:
+            mParticleAPI.logScreenView("View A");
+            break;
+        case R.id.viewB:
+            mParticleAPI.logScreenView("View B", new JSONObject("{key1:value1, key2:value2}"));
+            break;
+        }
     }
 
-    public void pressStartSession(View view) {
-        mParticleAPI.start();
-    }
-    public void pressStopSession(View view) {
-        mParticleAPI.stop();
-    }
-    public void pressNewSession(View view) {
-        mParticleAPI.newSession();
-    }
-    public void pressEndSession(View view) {
-        mParticleAPI.endSession();
-    }
-    public void pressListSessions(View view) {
-        Intent intent = new Intent(this, SessionsListActivity.class);
-        startActivity(intent);
-    }
-    public void pressListUploads(View view) {
-        Intent intent = new Intent(this, UploadsListActivity.class);
-        startActivity(intent);
+    public void pressDataButton(View view) {
+        switch (view.getId()) {
+        case R.id.buttonListSessions:
+            startActivity(new Intent(this, SessionsListActivity.class));
+            break;
+        case R.id.buttonShowPendingMessages:
+            startActivity(new Intent(this, PendingMessagesActivity.class));
+            break;
+        case R.id.buttonListUploads:
+            startActivity(new Intent(this, UploadsListActivity.class));
+            break;
+        }
     }
 
-    public void pressUpload(View view) {
-        mParticleAPI.upload();
+    public void pressSessionButton(View view) {
+        switch (view.getId()) {
+        case R.id.buttonStartSession:
+            mParticleAPI.start();
+            break;
+        case R.id.buttonStopSession:
+            mParticleAPI.stop();
+            break;
+        case R.id.buttonNewSession:
+            mParticleAPI.newSession();
+            break;
+        case R.id.buttonEndSession:
+            mParticleAPI.endSession();
+            break;
+        case R.id.buttonUpload:
+            mParticleAPI.upload();
+            break;
+        }
     }
+
+    public void pressSetVariable(View view) {
+        switch (view.getId()) {
+        case R.id.buttonSetUserId: {
+            TextView editView = (TextView) findViewById(R.id.editUserId);
+            String userId = editView.getText().toString();
+            mParticleAPI.identifyUser(userId);
+            break;
+        }
+        case R.id.buttonSetUserVar: {
+            TextView editView = (TextView) findViewById(R.id.editUserVar);
+            String userVar = editView.getText().toString();
+            mParticleAPI.setUserProperty("user_var", userVar);
+            break;
+        }
+        case R.id.buttonSetSessionVar: {
+            TextView editView = (TextView) findViewById(R.id.editSessionVar);
+            String sessionVar = editView.getText().toString();
+            mParticleAPI.setUserProperty("session_var", sessionVar);
+            break;
+        }
+        }
+    }
+
     public void pressCrash(View view) {
         mParticleAPI.logErrorEvent("ErrorOccurred");
         throw new Error("Intentionally crashing demo app");
@@ -133,10 +149,6 @@ public class HomeActivity extends Activity {
     public void pressGetUserSegment(View view) {
         String userSegment = mParticleAPI.getUserSegment();
         Toast.makeText(view.getContext(), "Got User Segment: " + userSegment, Toast.LENGTH_SHORT).show();
-    }
-    public void pressShowPendingMessages(View view) {
-        Intent intent = new Intent(this, PendingMessagesActivity.class);
-        startActivity(intent);
     }
     public void pressUpdateLocation(View view) {
         Random r = new Random();
