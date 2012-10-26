@@ -1,8 +1,7 @@
 package com.mparticle.demo;
 
 import java.util.Iterator;
-import java.util.Map;
-import java.util.Map.Entry;
+
 import java.util.Random;
 
 import org.json.JSONException;
@@ -44,12 +43,12 @@ public class HomeActivity extends Activity {
 
         debugModeCheckBox.setChecked(true);
         optOutCheckBox.setChecked(mParticleAPI.getOptOut());
+        collectDeviceProperties();
     }
 
     @Override
     public void onStart() {
         super.onStart();
-        refreshDiagnostics();
     }
 
     @Override
@@ -57,7 +56,7 @@ public class HomeActivity extends Activity {
         super.onStop();
     }
 
-    private void refreshDiagnostics() {
+    private void collectDeviceProperties() {
         StringBuffer diagnosticMessage=new StringBuffer();
         JSONObject mDeviceAttributes = MParticleAPI.collectDeviceProperties(this.getApplicationContext());
         try {
@@ -76,54 +75,44 @@ public class HomeActivity extends Activity {
 
     public void pressButtonA(View view) {
         mParticleAPI.logEvent("ButtonAPressed");
-        refreshDiagnostics();
     }
     public void pressButtonB(View view) {
         mParticleAPI.logEvent("ButtonBPressed");
-        refreshDiagnostics();
     }
     public void pressButtonC(View view) throws JSONException {
         boolean on = ((ToggleButton) view).isChecked();
         JSONObject eventData=new JSONObject();
         eventData.put("button_state", on ? "on":"off");
         mParticleAPI.logEvent("ButtonCPressed", eventData);
-        refreshDiagnostics();
     }
 
     public void pressSetUserId(View view) {
         TextView editView = (TextView) findViewById(R.id.editUserId);
         String userId = editView.getText().toString();
         mParticleAPI.identifyUser(userId);
-        refreshDiagnostics();
     }
     public void pressSetUserVar(View view) {
         TextView editView = (TextView) findViewById(R.id.editUserVar);
         String userVar = editView.getText().toString();
         mParticleAPI.setUserProperty("user_var", userVar);
-        refreshDiagnostics();
     }
     public void pressSetSessionVar(View view) {
         TextView editView = (TextView) findViewById(R.id.editSessionVar);
         String sessionVar = editView.getText().toString();
         mParticleAPI.setUserProperty("session_var", sessionVar);
-        refreshDiagnostics();
     }
 
     public void pressStartSession(View view) {
         mParticleAPI.start();
-        refreshDiagnostics();
     }
     public void pressStopSession(View view) {
         mParticleAPI.stop();
-        refreshDiagnostics();
     }
     public void pressNewSession(View view) {
         mParticleAPI.newSession();
-        refreshDiagnostics();
     }
     public void pressEndSession(View view) {
         mParticleAPI.endSession();
-        refreshDiagnostics();
     }
     public void pressListSessions(View view) {
         Intent intent = new Intent(this, SessionsListActivity.class);
@@ -136,7 +125,6 @@ public class HomeActivity extends Activity {
 
     public void pressUpload(View view) {
         mParticleAPI.upload();
-        refreshDiagnostics();
     }
     public void pressCrash(View view) {
         mParticleAPI.logErrorEvent("ErrorOccurred");
@@ -153,18 +141,15 @@ public class HomeActivity extends Activity {
     public void pressUpdateLocation(View view) {
         Random r = new Random();
         mParticleAPI.setLocation((360.0*r.nextDouble()-180.0), (360.0*r.nextDouble()-180.0));
-        refreshDiagnostics();
     }
 
     public void pressOptOut(View view) {
         boolean optOut = ((CheckBox) view).isChecked();
         mParticleAPI.setOptOut(optOut);
-        refreshDiagnostics();
     }
     public void pressDebug(View view) {
         boolean debugMode = ((CheckBox) view).isChecked();
         mParticleAPI.setDebug(debugMode);
-        refreshDiagnostics();
     }
     public void pressPushRegistration(View view) {
         boolean pushRegistration = ((CheckBox) view).isChecked();
@@ -173,11 +158,6 @@ public class HomeActivity extends Activity {
         } else {
             mParticleAPI.clearPushRegistrationId();
         }
-        refreshDiagnostics();
-    }
-
-    public void pressRefreshDiagnostics(View view) {
-        this.refreshDiagnostics();
     }
 
 }
