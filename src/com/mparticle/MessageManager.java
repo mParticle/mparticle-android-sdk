@@ -58,15 +58,21 @@ public class MessageManager {
         return MessageManager.sMessageManager;
     }
 
-    /* package-private */ static JSONObject createMessage(String messageType, String sessionId, long time, String name, JSONObject attributes, boolean includeLocation) throws JSONException {
+    /* package-private */ static JSONObject createMessage(String messageType, String sessionId, long sessionStart, long time, String name, JSONObject attributes, boolean includeLocation) throws JSONException {
             JSONObject message = new JSONObject();
             message.put(MessageKey.TYPE, messageType);
-            message.put(MessageKey.TIMESTAMP, time);
+            message.put(MessageKey.TIMESTAMP, time/1000);
             if (MessageType.SESSION_START==messageType) {
                 message.put(MessageKey.ID, sessionId);
             } else {
                 message.put(MessageKey.SESSION_ID, sessionId);
                 message.put(MessageKey.ID, UUID.randomUUID().toString());
+                if (sessionStart>0) {
+                    message.put(MessageKey.SESSION_START_TIMESTAMP, sessionStart/1000);
+                }
+            }
+            if (MessageType.SESSION_END==messageType) {
+                message.put(MessageKey.SESSION_LENGTH, (time-sessionStart)/1000);
             }
             if (null != name) {
                 message.put(MessageKey.NAME, name);
@@ -84,13 +90,13 @@ public class MessageManager {
 
     public void startSession(String sessionId, long time) {
         try {
-            JSONObject message = createMessage(MessageType.SESSION_START, sessionId, time, null, null, true);
+            JSONObject message = createMessage(MessageType.SESSION_START, sessionId, time, time, null, null, true);
             mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, UploadStatus.PENDING, 0, message));
         } catch (JSONException e) {
             Log.w(TAG, "Failed to create mParticle start session message");
         }
     }
-    public void stopSession(String sessionId, long time) {
+    public void stopSession(String sessionId, long sessionStartTime, long time) {
         try {
             JSONObject sessionTiming=new JSONObject();
             sessionTiming.put(MessageKey.SESSION_ID, sessionId);
@@ -100,21 +106,21 @@ public class MessageManager {
             Log.w(TAG, "Failed to send update session end message");
         }
     }
-    public void endSession(String sessionId, long time) {
-        stopSession(sessionId, time);
+    public void endSession(String sessionId, long sessionStartTime, long time) {
+        stopSession(sessionId, sessionStartTime, time);
         mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.CREATE_SESSION_END_MESSAGE, sessionId));
     }
-    public void logCustomEvent(String sessionId, long time, String eventName, JSONObject attributes) {
+    public void logCustomEvent(String sessionId, long sessionStartTime, long time, String eventName, JSONObject attributes) {
         try {
-            JSONObject message = createMessage(MessageType.CUSTOM_EVENT, sessionId, time, eventName, attributes, true);
+            JSONObject message = createMessage(MessageType.CUSTOM_EVENT, sessionId, sessionStartTime, time, eventName, attributes, true);
             mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, UploadStatus.READY, 0, message));
         } catch (JSONException e) {
             Log.w(TAG, "Failed to create mParticle start event message");
         }
     }
-    public void logScreenView(String sessionId, long time, String screenName, JSONObject attributes) {
+    public void logScreenView(String sessionId, long sessionStartTime, long time, String screenName, JSONObject attributes) {
         try {
-            JSONObject message = createMessage(MessageType.SCREEN_VIEW, sessionId, time, screenName, attributes, true);
+            JSONObject message = createMessage(MessageType.SCREEN_VIEW, sessionId, sessionStartTime, time, screenName, attributes, true);
             mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, UploadStatus.READY, 0, message));
         } catch (JSONException e) {
             Log.w(TAG, "Failed to create mParticle screen view message");
@@ -201,9 +207,8 @@ public class MessageManager {
                     // TODO: not yet using session attributes
                     // String sessionAttributes = selectCursor.getString(2);
 
-                    // create a session-end message and add the calculated duration
-                    JSONObject endMessage = MessageManager.createMessage(MessageType.SESSION_END, sessionId, end, null, null, true);
-                    endMessage.put(MessageKey.SESSION_LENGTH, (end-start)/1000);
+                    // create a session-end message
+                    JSONObject endMessage = MessageManager.createMessage(MessageType.SESSION_END, sessionId, start, end, null, null, true);
 
                     // insert the record into messages with duration
                     dbInsertMessage(db, endMessage, UploadStatus.READY);

@@ -38,7 +38,7 @@ public class EventLoggingTests extends AndroidTestCase {
         inOrder.verify(mMockMessageManager, times(1)).startSession(anyString(), anyLong());
 
         ArgumentCaptor<JSONObject> eventDataArgument = ArgumentCaptor.forClass(JSONObject.class);
-        inOrder.verify(mMockMessageManager).logCustomEvent(eq(mMParticleAPI.mSessionID), anyLong(), anyString(), eventDataArgument.capture());
+        inOrder.verify(mMockMessageManager).logCustomEvent(eq(mMParticleAPI.mSessionID), anyLong(), anyLong(), anyString(), eventDataArgument.capture());
 
         assertEquals("testValue1",eventDataArgument.getValue().get("testKey1"));
         assertEquals("testValue2",eventDataArgument.getValue().get("testKey2"));

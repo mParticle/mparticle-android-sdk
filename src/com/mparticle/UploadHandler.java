@@ -125,7 +125,7 @@ import com.mparticle.MessageDatabase.UploadTable;
                         JSONObject uploadMessage =  new JSONObject();
                         uploadMessage.put(MessageKey.TYPE, MessageType.REQUEST_HEADER);
                         uploadMessage.put(MessageKey.ID, UUID.randomUUID().toString());
-                        uploadMessage.put(MessageKey.TIMESTAMP, System.currentTimeMillis());
+                        uploadMessage.put(MessageKey.TIMESTAMP, System.currentTimeMillis()/1000);
                         uploadMessage.put(MessageKey.MESSAGES, messagesArray);
                         // TODO: add additional attributes for device
                         // store in uploads table

@@ -141,7 +141,7 @@ public class MParticleAPI {
      */
     public void stop() {
         this.mLastEventTime = System.currentTimeMillis();
-        this.mMessageManager.stopSession(mSessionID, mLastEventTime);
+        this.mMessageManager.stopSession(mSessionID, mSessionStartTime, mLastEventTime);
         this.debugLog("Stop Called");
     }
 
@@ -161,7 +161,7 @@ public class MParticleAPI {
     public void endSession() {
         long sessionEndTime=System.currentTimeMillis();
         closeSession(sessionEndTime);
-        this.mMessageManager.endSession(mSessionID, sessionEndTime);
+        this.mMessageManager.endSession(mSessionID, mSessionStartTime, sessionEndTime);
         this.debugLog("Explicit End Session");
     }
 
@@ -209,7 +209,7 @@ public class MParticleAPI {
             Log.w(TAG, "Session end time was unknown");
             sessionEndTime = System.currentTimeMillis();
         }
-        this.mMessageManager.stopSession(mSessionID, sessionEndTime);
+        this.mMessageManager.stopSession(mSessionID, mSessionStartTime, sessionEndTime);
 
         // reset agent to unstarted state
         this.mSessionStartTime = 0;
@@ -242,7 +242,7 @@ public class MParticleAPI {
             return;
         }
         this.ensureActiveSession();
-        this.mMessageManager.logCustomEvent(this.mSessionID, this.mLastEventTime, eventName, eventData);
+        this.mMessageManager.logCustomEvent(mSessionID, mSessionStartTime, mLastEventTime, eventName, eventData);
         this.debugLog("Logged event: " + eventName + " with data " + eventData);
     }
 
@@ -265,7 +265,7 @@ public class MParticleAPI {
             return;
         }
         this.ensureActiveSession();
-        this.mMessageManager.logScreenView(this.mSessionID, this.mLastEventTime, screenName, eventData);
+        this.mMessageManager.logScreenView(mSessionID, mSessionStartTime, mLastEventTime, screenName, eventData);
         this.debugLog("Logged screen: " + screenName + " with data " + eventData);
     }
 
