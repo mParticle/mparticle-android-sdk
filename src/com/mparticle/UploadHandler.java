@@ -1,18 +1,23 @@
 package com.mparticle;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.UUID;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.StatusLine;
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
+
+import org.apache.http.HttpHost;
+import org.apache.http.client.HttpResponseException;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.protocol.ClientContext;
+import org.apache.http.conn.params.ConnRoutePNames;
 import org.apache.http.cookie.Cookie;
-import org.apache.http.entity.StringEntity;
+import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.impl.client.BasicCookieStore;
+import org.apache.http.impl.client.BasicResponseHandler;
 import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.protocol.HttpContext;
 import org.json.JSONArray;
@@ -36,7 +41,7 @@ import com.mparticle.Constants.UploadStatus;
 import com.mparticle.MessageDatabase.MessageTable;
 import com.mparticle.MessageDatabase.UploadTable;
 
-public final class UploadHandler extends Handler {
+/* package-private */ final class UploadHandler extends Handler {
 
     private static final String TAG = "mParticleAPI";
 
@@ -55,17 +60,20 @@ public final class UploadHandler extends Handler {
     public static final String HEADER_SIGNATURE = "x-mp-signature";
 
     public static int BATCH_SIZE = 10;
-    public static final String SERVICE_ENDPOINT = "http://api.dev.mparticle.com/v1/events";
+    public static String SERVICE_ENDPOINT = "http://api.dev.mparticle.com/v1/events";
 
     public UploadHandler(Context context, Looper looper) {
         super(looper);
         mContext = context;
         mDB = new MessageDatabase(mContext);
         mHttpClient = AndroidHttpClient.newInstance("mParticleSDK", mContext);
-        mHttpClient.enableCurlLogging(TAG, Log.DEBUG);
         mHttpContext  = new BasicHttpContext();
         mCookieStore = new BasicCookieStore();
         mHttpContext.setAttribute(ClientContext.COOKIE_STORE, mCookieStore);
+
+        // TODO: temporary - for development only
+        HttpHost proxy = new HttpHost("192.168.1.100", 8080);
+        mHttpClient.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY, proxy);
     }
 
     @Override
@@ -75,7 +83,8 @@ public final class UploadHandler extends Handler {
         case PREPARE_BATCHES:
             // create uploads records for batches of messages and mark the messages as processed
             prepareBatches();
-            break;
+            // TODO: restore this break - for development only
+            // break;
         case PROCESS_BATCHES:
             // post upload messages to server and mark the uploads as processed. store response commands to be processed.
             processBatches();
@@ -91,55 +100,6 @@ public final class UploadHandler extends Handler {
             // delete completed uploads, messages, and sessions
             // TODO: cleanupDatabase();
             break;
-        }
-
-    }
-
-    void processBatches() {
-        try {
-            // read batches ready to upload
-            SQLiteDatabase db = mDB.getWritableDatabase();
-            String[] selectionArgs = new String[]{Integer.toString(UploadStatus.PROCESSED)};
-            String[] selectionColumns = new String[]{ "_id", UploadTable.MESSAGE };
-            Cursor readyUploadsCursor = db.query("uploads", selectionColumns, UploadTable.UPLOAD_STATUS+"!=?", selectionArgs, null, null, UploadTable.MESSAGE_TIME+" , _id");
-            if (readyUploadsCursor.getCount()>0) {
-                while (readyUploadsCursor.moveToNext()) {
-                    int uploadId=  readyUploadsCursor.getInt(0);
-                    String message = readyUploadsCursor.getString(1);
-                    // prepare cookies
-                    // TODO: verify cookies are setup correctly
-                    // post message to mParticle service
-                    HttpPost httpPost = new HttpPost(SERVICE_ENDPOINT);
-                    httpPost.setEntity(new StringEntity(message));
-                    httpPost.addHeader(HEADER_APPKEY, "TestAppKey");
-                    // String signature = encode("secret", message);
-                    // httpPost.addHeader(HEADER_SIGNATURE, signature);
-                    HttpResponse response;
-                    try {
-                        response = mHttpClient.execute(httpPost, mHttpContext);
-                        // store responses in DB
-                        StatusLine statusLine = response.getStatusLine();
-                        int statusCode = statusLine.getStatusCode();
-                        HttpEntity responseEntity = response.getEntity();
-
-                        Log.d(TAG, "Got response code: " + statusCode);
-                        List<Cookie> cookies = mCookieStore.getCookies();
-                        Log.d(TAG, "Got cookies:" + cookies);
-                        // TODO: parse response and store messages in UPLOAD_RESPONSES
-                        // update batch status
-                        dbUpdateUploadStatus(db, uploadId);
-                    } catch (IOException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
-                    }
-                }
-            }
-        } catch (SQLiteException e) {
-            Log.e(TAG, "Error preparing batch upload in mParticle DB", e);
-        } catch (UnsupportedEncodingException e) {
-            Log.e(TAG, "Error encoding entity", e);
-        } finally {
-            mDB.close();
         }
     }
 
@@ -185,6 +145,72 @@ public final class UploadHandler extends Handler {
         }
     }
 
+    void processBatches() {
+        try {
+            // read batches ready to upload
+            SQLiteDatabase db = mDB.getWritableDatabase();
+            String[] selectionArgs = new String[]{Integer.toString(UploadStatus.PROCESSED)};
+            String[] selectionColumns = new String[]{ "_id", UploadTable.MESSAGE };
+            Cursor readyUploadsCursor = db.query("uploads", selectionColumns, UploadTable.UPLOAD_STATUS+"!=?", selectionArgs, null, null, UploadTable.MESSAGE_TIME+" , _id");
+            if (readyUploadsCursor.getCount()>0) {
+                while (readyUploadsCursor.moveToNext()) {
+                    int uploadId=  readyUploadsCursor.getInt(0);
+                    String message = readyUploadsCursor.getString(1);
+                    // prepare cookies
+                    // TODO: verify cookies are setup correctly
+                    // post message to mParticle service
+                    HttpPost httpPost = new HttpPost(SERVICE_ENDPOINT);
+                    httpPost.setHeader("Content-type", "application/json");
+                    // StringEntity messageEntity = new StringEntity(message, "UTF8");
+                    byte[] messageBytes = message.getBytes();
+                    ByteArrayEntity messageEntity = new ByteArrayEntity(messageBytes);
+                    httpPost.setEntity(messageEntity);
+
+                    httpPost.setHeader(HEADER_APPKEY, "TestAppKey");
+                    httpPost.setHeader(HEADER_SIGNATURE, hmacSha256Encode("secret", message));
+                    // TODO: remove - debug mode only
+                    httpPost.setHeader("x-mp-debugmode", "true");
+
+                    try {
+
+                        String response = mHttpClient.execute(httpPost, new BasicResponseHandler(), mHttpContext);
+                        Log.d(TAG, "Got response 2xx with body string:" + response);
+                        List<Cookie> cookies = mCookieStore.getCookies();
+                        Log.d(TAG, "Got cookies:" + cookies);
+                        // store responses in DB
+                        // TODO: parse responses
+                        // temporarily strip extra BOM (3 bytes) from response body
+                        String cleanResponse = response.substring(response.indexOf('{'));
+                        JSONObject responseJSON = new JSONObject(cleanResponse);
+                        Log.d(TAG, "Got responseJSON:" + responseJSON.toString());
+                        if (responseJSON.has(MessageKey.MESSAGES)) {
+                            Log.d(TAG, "Response has messages to be processed");
+                            // TODO: store and process command messages
+                        }
+
+                    } catch (HttpResponseException e) {
+                        Log.d(TAG, "Request failed:" + e.getMessage());
+                    } catch (IOException e) {
+                        Log.d(TAG, "Request failed:" + e.getMessage());
+                    } catch (JSONException e) {
+                        Log.d(TAG, "Failed to process response message JSON");
+                    } finally {
+                        // TODO: process failures differently
+                        dbUpdateUploadStatus(db, uploadId);
+                    }
+                }
+            }
+        } catch (SQLiteException e) {
+            Log.e(TAG, "Error preparing batch upload in mParticle DB", e);
+        } catch (InvalidKeyException e) {
+            Log.e(TAG, "Error signing message", e);
+        } catch (NoSuchAlgorithmException e) {
+            Log.e(TAG, "Error signing message", e);
+        } finally {
+            mDB.close();
+        }
+    }
+
     private void dbInsertUpload(SQLiteDatabase db, JSONObject message) throws JSONException {
         ContentValues contentValues = new ContentValues();
         contentValues.put(UploadTable.UPLOAD_ID, message.getString(MessageKey.ID));
@@ -209,13 +235,22 @@ public final class UploadHandler extends Handler {
     }
 
     // From Stack Overflow: http://stackoverflow.com/questions/7124735/hmac-sha256-algorithm-for-signature-calculation
-    // NOTE: requires apache commons codec -
-    // TODO: hex encoding needs to be implemented
-    // public static String encode(String key, String data) throws NoSuchAlgorithmException, InvalidKeyException {
-    //    Mac sha256_HMAC = Mac.getInstance("HmacSHA256");
-    //    SecretKeySpec secret_key = new SecretKeySpec(key.getBytes(), "HmacSHA256");
-    //    sha256_HMAC.init(secret_key);
-    //
-    //    return Hex.encodeHexString(sha256_HMAC.doFinal(data.getBytes()));
-    // }
+     private static String hmacSha256Encode(String key, String data) throws NoSuchAlgorithmException, InvalidKeyException {
+        Mac sha256_HMAC = Mac.getInstance("HmacSHA256");
+        SecretKeySpec secret_key = new SecretKeySpec(key.getBytes(), "HmacSHA256");
+        sha256_HMAC.init(secret_key);
+        return asHex(sha256_HMAC.doFinal(data.getBytes()));
+     }
+
+     // From Stack Overflow: http://stackoverflow.com/questions/923863/converting-a-string-to-hexadecimal-in-java
+     private static final char[] HEX_CHARS = "0123456789abcdef".toCharArray();
+     private static String asHex(byte[] buf) {
+         char[] chars = new char[2 * buf.length];
+         for (int i = 0; i < buf.length; ++i)
+         {
+             chars[2 * i] = HEX_CHARS[(buf[i] & 0xF0) >>> 4];
+             chars[2 * i + 1] = HEX_CHARS[buf[i] & 0x0F];
+         }
+         return new String(chars);
+     }
 }
