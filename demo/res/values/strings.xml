@@ -5,5 +5,32 @@
     <string name="title_activity_pending_messages">Pending Messages</string>
     <string name="title_sessions_list">Sessions</string>
     <string name="title_uploads_list">Uploads</string>
+    <string name="label_event_data_inputs">Event/Data Inputs</string>
+    <string name="button_a">Button A</string>
+    <string name="button_b">Button B</string>
+    <string name="button_c">Button C</string>
+    <string name="view_a">View A</string>
+    <string name="view_b">View B</string>
+    <string name="label_user_id">User ID</string>
+    <string name="button_set">Set</string>
+    <string name="label_user_var">User Var</string>
+    <string name="label_session_var">Session Var</string>
+    <string name="label_data">Data</string>
+    <string name="sessions">Sessions</string>
+    <string name="messages">Messages</string>
+    <string name="uploads">Uploads</string>
+    <string name="controls">Controls</string>
+    <string name="start">Start</string>
+    <string name="stop">Stop</string>
+    <string name="label_new">New</string>
+    <string name="upload">Upload</string>
+    <string name="end">End</string>
+    <string name="crash">Crash</string>
+    <string name="update_location">Update Location</string>
+    <string name="get_segment">Get Segment</string>
+    <string name="debug">Debug</string>
+    <string name="optout">OptOut</string>
+    <string name="push_notify">Push Notify</string>
+    <string name="device_attributes">Device Attributes</string>
 
 </resources>
