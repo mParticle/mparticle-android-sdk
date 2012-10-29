@@ -10,6 +10,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.location.Location;
@@ -31,7 +32,7 @@ import com.mparticle.Constants.MessageKey;
  */
 public class MParticleAPI {
 
-    private static final String VERSION = "0.1";
+    /* package-private */ static final String VERSION = "0.1";
 
     private static final String TAG = "mParticleAPI";
     private static boolean optOutFlag = false;
@@ -462,30 +463,57 @@ public class MParticleAPI {
     }
 
     /**
+     * Generates a collection of application properties
+     * @param context the application context
+     * @return a JSONObject of application-specific attributes
+     */
+    public static JSONObject collectAppInfo(Context context) {
+        JSONObject properties = new JSONObject();
+
+        try {
+            PackageManager packageManager = context.getPackageManager();
+            String packageName = context.getPackageName();
+            properties.put(MessageKey.APP_PACKAGE_NAME, packageName);
+            String installerPackageName = packageManager.getInstallerPackageName(packageName);
+            if (null!=installerPackageName) {
+                properties.put(MessageKey.APP_INSTALLER_NAME, installerPackageName);
+            }
+            try {
+                ApplicationInfo appInfo = packageManager.getApplicationInfo(packageName,0);
+                properties.put(MessageKey.APP_NAME, packageManager.getApplicationLabel(appInfo));
+            } catch (PackageManager.NameNotFoundException e) {
+                properties.put(MessageKey.APP_NAME, "Unknown");
+            }
+            try {
+                PackageInfo pInfo = packageManager.getPackageInfo(packageName, 0);
+                properties.put(MessageKey.APP_VERSION, pInfo.versionName);
+            } catch (PackageManager.NameNotFoundException e) {
+                properties.put(MessageKey.APP_VERSION, "Unknown");
+            }
+        } catch (JSONException e) {
+            // ignore JSON exceptions
+        }
+        return properties;
+    }
+
+    /**
      * Generates a collection of device properties
      * @param context the application context
      * @return a JSONObject of device-specific attributes
      */
-    public static JSONObject collectDeviceProperties(Context context) {
+    public static JSONObject collectDeviceInfo(Context context) {
         JSONObject properties = new JSONObject();
 
         try {
-            try {
-                String packageName = context.getPackageName();
-                PackageInfo pInfo = context.getPackageManager().getPackageInfo(packageName, 0);
-                properties.put(MessageKey.APPLICATION_VERSION, pInfo.versionName);
-            } catch (PackageManager.NameNotFoundException e) {
-                properties.put(MessageKey.APPLICATION_VERSION, "Unknown");
-            }
-
-            properties.put(MessageKey.MPARTICLE_VERSION, MParticleAPI.VERSION);
-
             // device IDs
             properties.put(MessageKey.DEVICE_ID, Settings.Secure.getString(context.getContentResolver(),
                     Settings.Secure.ANDROID_ID));
             // TODO: get network MAC addresses?
 
             // device/OS properties
+            properties.put(MessageKey.BRAND, android.os.Build.BRAND);
+            properties.put(MessageKey.PRODUCT, android.os.Build.PRODUCT);
+            properties.put(MessageKey.DEVICE, android.os.Build.DEVICE);
             properties.put(MessageKey.MANUFACTURER, android.os.Build.MANUFACTURER);
             properties.put(MessageKey.PLATFORM, "Android");
             properties.put(MessageKey.OS_VERSION, android.os.Build.VERSION.SDK_INT);

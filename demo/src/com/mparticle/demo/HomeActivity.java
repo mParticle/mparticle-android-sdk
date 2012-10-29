@@ -48,17 +48,29 @@ public class HomeActivity extends Activity {
 
     private void collectDeviceProperties() {
         StringBuffer diagnosticMessage=new StringBuffer();
-        JSONObject mDeviceAttributes = MParticleAPI.collectDeviceProperties(this.getApplicationContext());
+        JSONObject appInfo = MParticleAPI.collectAppInfo(this.getApplicationContext());
         try {
-            if (mDeviceAttributes.length() > 0) {
-                Iterator<?> deviceKeys = mDeviceAttributes.keys();
+            if (appInfo.length() > 0) {
+                Iterator<?> deviceKeys = appInfo.keys();
                 while( deviceKeys.hasNext() ){
                     String key = (String)deviceKeys.next();
-                    diagnosticMessage.append(key + "=" + mDeviceAttributes.get(key)+"\n");
+                    diagnosticMessage.append(key + "=" + appInfo.get(key)+"\n");
                 }
             }
         } catch (Exception e) {
-            Log.d(TAG, "Error parsing device attributes JSON");
+            Log.d(TAG, "Error parsing app info JSON");
+        }
+        JSONObject deviceInfo = MParticleAPI.collectDeviceInfo(this.getApplicationContext());
+        try {
+            if (deviceInfo.length() > 0) {
+                Iterator<?> deviceKeys = deviceInfo.keys();
+                while( deviceKeys.hasNext() ){
+                    String key = (String)deviceKeys.next();
+                    diagnosticMessage.append(key + "=" + deviceInfo.get(key)+"\n");
+                }
+            }
+        } catch (Exception e) {
+            Log.d(TAG, "Error parsing device info JSON");
         }
         diagnosticsTextView.setText(diagnosticMessage.toString());
     }

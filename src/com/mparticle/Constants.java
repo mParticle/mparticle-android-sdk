@@ -30,9 +30,19 @@ package com.mparticle;
         public static final String LONGITUDE = "lng";
         // batch details
         public static final String APPLICATION_KEY = "a";
-        public static final String APPLICATION_VERSION = "av";
         public static final String MPARTICLE_VERSION = "sdk";
-        // device keys
+        public static final String APP_INFO = "ai";
+        public static final String DEVICE_INFO = "di";
+        public static final String USER_ATTRIBUTES = "ua";
+        // application info
+        public static final String APP_NAME = "a";
+        public static final String APP_VERSION = "av";
+        public static final String APP_PACKAGE_NAME = "apn";
+        public static final String APP_INSTALLER_NAME = "ain";
+        // device info
+        public static final String BRAND = "b";
+        public static final String PRODUCT = "p";
+        public static final String DEVICE = "dn";
         public static final String DEVICE_ID = "duid";
         public static final String MANUFACTURER = "dma";
         public static final String PLATFORM = "dp";

@@ -5,7 +5,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 
@@ -56,7 +55,8 @@ import com.mparticle.MessageDatabase.UploadTable;
     private AndroidHttpClient mHttpClient;
     private HttpContext mHttpContext;
     private BasicCookieStore mCookieStore;
-    private JSONObject mDeviceAttributes;
+    private JSONObject mAppInfo;
+    private JSONObject mDeviceInfo;
 
     public static final int PREPARE_BATCHES = 0;
     public static final int PROCESS_BATCHES = 1;
@@ -83,7 +83,8 @@ import com.mparticle.MessageDatabase.UploadTable;
         mCookieStore = new BasicCookieStore();
         mHttpContext.setAttribute(ClientContext.COOKIE_STORE, mCookieStore);
 
-        mDeviceAttributes = MParticleAPI.collectDeviceProperties(context);
+        mAppInfo = MParticleAPI.collectAppInfo(context);
+        mDeviceInfo = MParticleAPI.collectDeviceInfo(context);
         // TODO: temporary - for development only
         HttpHost proxy = new HttpHost("192.168.1.100", 8080);
         mHttpClient.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY, proxy);
@@ -158,19 +159,14 @@ import com.mparticle.MessageDatabase.UploadTable;
         uploadMessage.put(MessageKey.TYPE, MessageType.REQUEST_HEADER);
         uploadMessage.put(MessageKey.ID, UUID.randomUUID().toString());
         uploadMessage.put(MessageKey.TIMESTAMP, System.currentTimeMillis());
-        uploadMessage.put(MessageKey.MESSAGES, messagesArray);
-        uploadMessage.put(MessageKey.APPLICATION_KEY, mApiKey);
 
-        // TODO: add additional attributes for device
-        // NOTE: this would be simpler if we kept the deviceAttributes as a separate element in the header
-        // like... uploadMessage.put(MessageKey.DEVICE_ATTRIBUTES, mDeviceAttributes);
-        if (mDeviceAttributes.length() > 0) {
-            Iterator<?> deviceKeys = mDeviceAttributes.keys();
-            while( deviceKeys.hasNext() ){
-                String key = (String)deviceKeys.next();
-                uploadMessage.put(key,mDeviceAttributes.get(key));
-            }
-        }
+        uploadMessage.put(MessageKey.APPLICATION_KEY, mApiKey);
+        uploadMessage.put(MessageKey.MPARTICLE_VERSION, MParticleAPI.VERSION);
+
+        uploadMessage.put(MessageKey.APP_INFO, mAppInfo);
+        uploadMessage.put(MessageKey.DEVICE_INFO, mDeviceInfo);
+
+        uploadMessage.put(MessageKey.MESSAGES, messagesArray);
 
         return uploadMessage;
     }
