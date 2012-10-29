@@ -1,6 +1,8 @@
 package com.mparticle;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Iterator;
@@ -65,7 +67,9 @@ import com.mparticle.MessageDatabase.UploadTable;
     public static final String HEADER_SIGNATURE = "x-mp-signature";
 
     public static int BATCH_SIZE = 10;
-    public static String SERVICE_ENDPOINT = "http://api.dev.mparticle.com/v1/events";
+    public static String SERVICE_SCHEME = "http";
+    public static String SERVICE_HOST = "api.dev.mparticle.com";
+    public static String SERVICE_VERSION = "v1";
 
     public UploadHandler(Context context, Looper looper, String apiKey, String secret) {
         super(looper);
@@ -185,17 +189,14 @@ import com.mparticle.MessageDatabase.UploadTable;
                     // prepare cookies
                     // TODO: verify cookies are setup correctly
                     // post message to mParticle service
-                    HttpPost httpPost = new HttpPost(SERVICE_ENDPOINT);
+                    HttpPost httpPost = new HttpPost(makeServiceUri("events"));
                     httpPost.setHeader("Content-type", "application/json");
                     httpPost.setEntity(new ByteArrayEntity(message.getBytes()));
-
-                    httpPost.setHeader(HEADER_APPKEY, mApiKey);
                     httpPost.setHeader(HEADER_SIGNATURE, hmacSha256Encode(mSecret, message));
                     // TODO: remove - debug mode only
                     httpPost.setHeader("x-mp-debugmode", "true");
 
                     try {
-
                         String response = mHttpClient.execute(httpPost, new BasicResponseHandler(), mHttpContext);
                         // store responses in DB
                         // TODO: parse responses
@@ -226,9 +227,15 @@ import com.mparticle.MessageDatabase.UploadTable;
             Log.e(TAG, "Error signing message", e);
         } catch (NoSuchAlgorithmException e) {
             Log.e(TAG, "Error signing message", e);
+        } catch (URISyntaxException e) {
+            Log.e(TAG, "Error constructing service URI", e);
         } finally {
             mDB.close();
         }
+    }
+
+    private URI makeServiceUri(String method) throws URISyntaxException {
+        return new URI(SERVICE_SCHEME, SERVICE_HOST, "/"+SERVICE_VERSION+"/"+mApiKey+"/"+method, null);
     }
 
     private void dbInsertUpload(SQLiteDatabase db, JSONObject message) throws JSONException {
