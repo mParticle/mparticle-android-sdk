@@ -34,7 +34,7 @@ public class MessageManagerTests extends AndroidTestCase {
         assertNotNull(message.toString());
         assertSame(MessageType.SESSION_START, message.getString(MessageKey.TYPE));
         assertEquals(mSessionId, message.getString(MessageKey.ID));
-        assertEquals(mSessionStartTime/1000, message.getLong(MessageKey.TIMESTAMP));
+        assertEquals(mSessionStartTime, message.getLong(MessageKey.TIMESTAMP));
         assertFalse(message.has(MessageKey.SESSION_ID));
         assertFalse(message.has(MessageKey.NAME));
         assertFalse(message.has(MessageKey.ATTRIBUTES));
@@ -47,9 +47,9 @@ public class MessageManagerTests extends AndroidTestCase {
         assertNotNull(message.toString());
         assertEquals(MessageType.SESSION_END, message.getString(MessageKey.TYPE));
         assertTrue(message.has(MessageKey.ID));
-        assertEquals(mMsgTime/1000, message.getLong(MessageKey.TIMESTAMP));
-        assertEquals(mSessionStartTime/1000, message.getLong(MessageKey.SESSION_START_TIMESTAMP));
-        assertEquals((mMsgTime-mSessionStartTime)/1000, message.getLong(MessageKey.SESSION_LENGTH));
+        assertEquals(mMsgTime, message.getLong(MessageKey.TIMESTAMP));
+        assertEquals(mSessionStartTime, message.getLong(MessageKey.SESSION_START_TIMESTAMP));
+        assertEquals((mMsgTime-mSessionStartTime), message.getLong(MessageKey.SESSION_LENGTH));
         assertEquals(mSessionId, message.getString(MessageKey.SESSION_ID));
         assertNotSame(mSessionId, message.getString(MessageKey.ID));
         assertFalse(message.has(MessageKey.NAME));
@@ -63,8 +63,8 @@ public class MessageManagerTests extends AndroidTestCase {
         assertNotNull(message.toString());
         assertEquals(MessageType.CUSTOM_EVENT, message.getString(MessageKey.TYPE));
         assertTrue(message.has(MessageKey.ID));
-        assertEquals(mMsgTime/1000, message.getLong(MessageKey.TIMESTAMP));
-        assertEquals(mSessionStartTime/1000, message.getLong(MessageKey.SESSION_START_TIMESTAMP));
+        assertEquals(mMsgTime, message.getLong(MessageKey.TIMESTAMP));
+        assertEquals(mSessionStartTime, message.getLong(MessageKey.SESSION_START_TIMESTAMP));
         assertEquals(mSessionId, message.getString(MessageKey.SESSION_ID));
         assertNotSame(mSessionId, message.getString(MessageKey.ID));
         assertEquals(eventName, message.getString(MessageKey.NAME));
@@ -80,8 +80,8 @@ public class MessageManagerTests extends AndroidTestCase {
         assertNotNull(message.toString());
         assertEquals(MessageType.CUSTOM_EVENT, message.getString(MessageKey.TYPE));
         assertTrue(message.has(MessageKey.ID));
-        assertEquals(mMsgTime/1000, message.getLong(MessageKey.TIMESTAMP));
-        assertEquals(mSessionStartTime/1000, message.getLong(MessageKey.SESSION_START_TIMESTAMP));
+        assertEquals(mMsgTime, message.getLong(MessageKey.TIMESTAMP));
+        assertEquals(mSessionStartTime, message.getLong(MessageKey.SESSION_START_TIMESTAMP));
         assertEquals(mSessionId, message.getString(MessageKey.SESSION_ID));
         assertNotSame(mSessionId, message.getString(MessageKey.ID));
         assertEquals(eventName, message.getString(MessageKey.NAME));
@@ -96,8 +96,8 @@ public class MessageManagerTests extends AndroidTestCase {
         assertNotNull(message.toString());
         assertEquals(MessageType.SCREEN_VIEW, message.getString(MessageKey.TYPE));
         assertTrue(message.has(MessageKey.ID));
-        assertEquals(mMsgTime/1000, message.getLong(MessageKey.TIMESTAMP));
-        assertEquals(mSessionStartTime/1000, message.getLong(MessageKey.SESSION_START_TIMESTAMP));
+        assertEquals(mMsgTime, message.getLong(MessageKey.TIMESTAMP));
+        assertEquals(mSessionStartTime, message.getLong(MessageKey.SESSION_START_TIMESTAMP));
         assertEquals(mSessionId, message.getString(MessageKey.SESSION_ID));
         assertNotSame(mSessionId, message.getString(MessageKey.ID));
         assertEquals(viewName, message.getString(MessageKey.NAME));
@@ -113,8 +113,8 @@ public class MessageManagerTests extends AndroidTestCase {
         assertNotNull(message.toString());
         assertEquals(MessageType.SCREEN_VIEW, message.getString(MessageKey.TYPE));
         assertTrue(message.has(MessageKey.ID));
-        assertEquals(mMsgTime/1000, message.getLong(MessageKey.TIMESTAMP));
-        assertEquals(mSessionStartTime/1000, message.getLong(MessageKey.SESSION_START_TIMESTAMP));
+        assertEquals(mMsgTime, message.getLong(MessageKey.TIMESTAMP));
+        assertEquals(mSessionStartTime, message.getLong(MessageKey.SESSION_START_TIMESTAMP));
         assertEquals(mSessionId, message.getString(MessageKey.SESSION_ID));
         assertNotSame(mSessionId, message.getString(MessageKey.ID));
         assertEquals(viewName, message.getString(MessageKey.NAME));
@@ -127,7 +127,7 @@ public class MessageManagerTests extends AndroidTestCase {
         assertNotNull(message.toString());
         assertEquals(MessageType.OPT_OUT, message.getString(MessageKey.TYPE));
         assertTrue(message.has(MessageKey.ID));
-        assertEquals(mMsgTime/1000, message.getLong(MessageKey.TIMESTAMP));
+        assertEquals(mMsgTime, message.getLong(MessageKey.TIMESTAMP));
         assertFalse(message.has(MessageKey.SESSION_START_TIMESTAMP));
         assertFalse(message.has(MessageKey.SESSION_ID));
         assertFalse(message.has(MessageKey.NAME));
@@ -141,7 +141,7 @@ public class MessageManagerTests extends AndroidTestCase {
         assertEquals(MessageType.ERROR, message.getString(MessageKey.TYPE));
         assertTrue(message.has(MessageKey.ID));
         assertFalse(message.has(MessageKey.SESSION_ID));
-        assertEquals(mMsgTime/1000, message.getLong(MessageKey.TIMESTAMP));
+        assertEquals(mMsgTime, message.getLong(MessageKey.TIMESTAMP));
         assertFalse(message.has(MessageKey.SESSION_START_TIMESTAMP));
         assertFalse(message.has(MessageKey.NAME));
         assertFalse(message.has(MessageKey.ATTRIBUTES));

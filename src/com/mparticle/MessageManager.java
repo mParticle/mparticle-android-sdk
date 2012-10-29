@@ -63,18 +63,18 @@ public class MessageManager {
     /* package-private */ static JSONObject createMessage(String messageType, String sessionId, long sessionStart, long time, String name, JSONObject attributes, boolean includeLocation) throws JSONException {
             JSONObject message = new JSONObject();
             message.put(MessageKey.TYPE, messageType);
-            message.put(MessageKey.TIMESTAMP, time/1000);
+            message.put(MessageKey.TIMESTAMP, time);
             if (MessageType.SESSION_START==messageType) {
                 message.put(MessageKey.ID, sessionId);
             } else {
                 message.put(MessageKey.SESSION_ID, sessionId);
                 message.put(MessageKey.ID, UUID.randomUUID().toString());
                 if (sessionStart>0) {
-                    message.put(MessageKey.SESSION_START_TIMESTAMP, sessionStart/1000);
+                    message.put(MessageKey.SESSION_START_TIMESTAMP, sessionStart);
                 }
             }
             if (MessageType.SESSION_END==messageType) {
-                message.put(MessageKey.SESSION_LENGTH, (time-sessionStart)/1000);
+                message.put(MessageKey.SESSION_LENGTH, (time-sessionStart));
             }
             if (null != name) {
                 message.put(MessageKey.NAME, name);
