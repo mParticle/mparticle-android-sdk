@@ -21,7 +21,7 @@ package com.mparticle;
         public static final String TIMESTAMP = "ct";
         public static final String SESSION_START_TIMESTAMP = "sct";
         public static final String SESSION_ID = "sid";
-        public static final String SESSION_LENGTH = "sls";
+        public static final String SESSION_LENGTH = "sl";
         public static final String ATTRIBUTES = "attrs";
         public static final String NAME = "n";
         // location

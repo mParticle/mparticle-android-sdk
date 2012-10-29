@@ -8,7 +8,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 @SuppressWarnings("javadoc")
 public class MessageDatabase extends SQLiteOpenHelper {
 
-    private static final int DB_VERSION = 3;
+    private static final int DB_VERSION = 4;
     private static final String DB_NAME = "mparticle.db";
 
     public interface MessageTable {
@@ -34,6 +34,7 @@ public class MessageDatabase extends SQLiteOpenHelper {
         public final static String SESSION_ID = "session_id";
         public final static String START_TIME = "start_time";
         public final static String END_TIME = "end_time";
+        public final static String SESSION_LENGTH = "session_length";
         public final static String ATTRIBUTES = "attributes";
         public final static String UPLOAD_STATUS = "upload_status";
     }
@@ -43,6 +44,7 @@ public class MessageDatabase extends SQLiteOpenHelper {
                SessionTable.SESSION_ID + " STRING NOT NULL, " +
                SessionTable.START_TIME + " INTEGER NOT NULL," +
                SessionTable.END_TIME + " INTEGER NOT NULL," +
+               SessionTable.SESSION_LENGTH + " INTEGER NOT NULL," +
                SessionTable.ATTRIBUTES + " TEXT," +
                SessionTable.UPLOAD_STATUS + " INTEGER" +
              ");";

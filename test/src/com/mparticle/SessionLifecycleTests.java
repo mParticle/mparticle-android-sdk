@@ -142,7 +142,7 @@ public class SessionLifecycleTests extends AndroidTestCase {
         assertTrue(0 == mMParticleAPI.mSessionStartTime);
         verify(mMockMessageManager, times(1)).startSession(anyString(), anyLong());
         verify(mMockMessageManager, times(1)).stopSession(anyString(), anyLong(), anyLong());
-        verify(mMockMessageManager, times(1)).stopSession(eq(sessionUUID), anyLong(), eq(lastEventTime));
+        verify(mMockMessageManager, times(1)).stopSession(eq(sessionUUID), eq(lastEventTime), anyLong());
     }
 
     // check for a timeout situation that ends a session but does not start a new session
@@ -159,7 +159,7 @@ public class SessionLifecycleTests extends AndroidTestCase {
         assertTrue(0 == mMParticleAPI.mSessionStartTime);
         verify(mMockMessageManager, times(1)).startSession(anyString(), anyLong());
         verify(mMockMessageManager, times(1)).stopSession(anyString(), anyLong(), anyLong());
-        verify(mMockMessageManager, times(1)).stopSession(eq(sessionUUID), anyLong(), eq(lastEventTime));
+        verify(mMockMessageManager, times(1)).stopSession(eq(sessionUUID), eq(lastEventTime), anyLong());
     }
 
 }

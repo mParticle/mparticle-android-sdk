@@ -73,9 +73,6 @@ public class MessageManager {
                     message.put(MessageKey.SESSION_START_TIMESTAMP, sessionStart);
                 }
             }
-            if (MessageType.SESSION_END==messageType) {
-                message.put(MessageKey.SESSION_LENGTH, (time-sessionStart));
-            }
             if (null != name) {
                 message.put(MessageKey.NAME, name);
             }
@@ -90,6 +87,12 @@ public class MessageManager {
             return message;
     }
 
+    /* package-private */ static JSONObject createMessageSessionEnd(String sessionId, long start, long end, long length) throws JSONException {
+        JSONObject message = MessageManager.createMessage(MessageType.SESSION_END, sessionId, start, end, null, null, true);
+        message.put(MessageKey.SESSION_LENGTH, length);
+        return message;
+    }
+
     public void startSession(String sessionId, long time) {
         try {
             JSONObject message = createMessage(MessageType.SESSION_START, sessionId, time, time, null, null, true);
@@ -98,18 +101,19 @@ public class MessageManager {
             Log.w(TAG, "Failed to create mParticle start session message");
         }
     }
-    public void stopSession(String sessionId, long sessionStartTime, long time) {
+    public void stopSession(String sessionId, long stopTime, long sessionLength) {
         try {
             JSONObject sessionTiming=new JSONObject();
             sessionTiming.put(MessageKey.SESSION_ID, sessionId);
-            sessionTiming.put(MessageKey.TIMESTAMP, time);
+            sessionTiming.put(MessageKey.TIMESTAMP, stopTime);
+            sessionTiming.put(MessageKey.SESSION_LENGTH, sessionLength);
             mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.UPDATE_SESSION_END, sessionTiming));
         } catch (JSONException e) {
             Log.w(TAG, "Failed to send update session end message");
         }
     }
-    public void endSession(String sessionId, long sessionStartTime, long time) {
-        stopSession(sessionId, sessionStartTime, time);
+    public void endSession(String sessionId, long stopTime, long sessionLength) {
+        stopSession(sessionId, stopTime, sessionLength);
         mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.CREATE_SESSION_END_MESSAGE, sessionId));
     }
     public void logCustomEvent(String sessionId, long sessionStartTime, long time, String eventName, JSONObject attributes) {
@@ -170,7 +174,7 @@ public class MessageManager {
                     dbInsertMessage(db, message, messageStatus);
 
                     if (MessageType.SESSION_START!=messageType) {
-                        dbUpdateSessionEndTime(db, getMessageSessionId(message), message.getLong(MessageKey.TIMESTAMP));
+                        dbUpdateSessionEndTime(db, getMessageSessionId(message), message.getLong(MessageKey.TIMESTAMP), 0);
                     }
                 } catch (SQLiteException e) {
                     Log.e(TAG, "Error saving event to mParticle DB", e);
@@ -185,8 +189,9 @@ public class MessageManager {
                     JSONObject sessionTiming = (JSONObject) msg.obj;
                     String sessionId = sessionTiming.getString(MessageKey.SESSION_ID);
                     long time = sessionTiming.getLong(MessageKey.TIMESTAMP);
+                    long sessionLength = sessionTiming.getLong(MessageKey.SESSION_LENGTH);
                     SQLiteDatabase db = mDB.getWritableDatabase();
-                    dbUpdateSessionEndTime(db, sessionId, time);
+                    dbUpdateSessionEndTime(db, sessionId, time, sessionLength);
                 } catch (SQLiteException e) {
                     Log.e(TAG, "Error updating session end time in mParticle DB", e);
                 } catch (JSONException e) {
@@ -201,16 +206,17 @@ public class MessageManager {
                     SQLiteDatabase db = mDB.getWritableDatabase();
                     // select the session and get the start/end times
                     String[] selectionArgs = new String[]{sessionId};
-                    String[] sessionColumns = new String[]{SessionTable.START_TIME, SessionTable.END_TIME, SessionTable.ATTRIBUTES};
+                    String[] sessionColumns = new String[]{SessionTable.START_TIME, SessionTable.END_TIME, SessionTable.SESSION_LENGTH, SessionTable.ATTRIBUTES};
                     Cursor selectCursor = db.query("sessions", sessionColumns, SessionTable.SESSION_ID+"=?", selectionArgs, null, null, null);
                     selectCursor.moveToFirst();
                     long start = selectCursor.getLong(0);
                     long end = selectCursor.getLong(1);
+                    long length = selectCursor.getLong(2);
                     // TODO: not yet using session attributes
-                    // String sessionAttributes = selectCursor.getString(2);
+                    // String sessionAttributes = selectCursor.getString(3);
 
                     // create a session-end message
-                    JSONObject endMessage = MessageManager.createMessage(MessageType.SESSION_END, sessionId, start, end, null, null, true);
+                    JSONObject endMessage = MessageManager.createMessageSessionEnd(sessionId, start, end, length);
 
                     // insert the record into messages with duration
                     dbInsertMessage(db, endMessage, UploadStatus.READY);
@@ -257,6 +263,7 @@ public class MessageManager {
             long sessionStartTime =  message.getLong(MessageKey.TIMESTAMP);
             values.put(SessionTable.START_TIME, sessionStartTime);
             values.put(SessionTable.END_TIME, sessionStartTime);
+            values.put(SessionTable.SESSION_LENGTH, 0);
             values.put(SessionTable.UPLOAD_STATUS, UploadStatus.PENDING);
             db.insert("sessions", null, values);
         }
@@ -273,13 +280,14 @@ public class MessageManager {
             db.insert("messages", null, contentValues);
         }
 
-        private void dbUpdateSessionEndTime(SQLiteDatabase db, String sessionId, long endTime) {
+        private void dbUpdateSessionEndTime(SQLiteDatabase db, String sessionId, long endTime, long sessionLength) {
             ContentValues sessionValues = new ContentValues();
             sessionValues.put(SessionTable.END_TIME, endTime);
-            String[] whereArgs = {sessionId, Long.toString(endTime) };
-            db.update("sessions", sessionValues, SessionTable.SESSION_ID + "=? and " +
-                                                        SessionTable.END_TIME+"<?", whereArgs);
-
+            if (sessionLength>0) {
+                sessionValues.put(SessionTable.SESSION_LENGTH, sessionLength);
+            }
+            String[] whereArgs = {sessionId };
+            db.update("sessions", sessionValues, SessionTable.SESSION_ID + "=?", whereArgs);
         }
 
         // helper method for getting a session id out of a message since session-start messages use the id field

@@ -43,13 +43,14 @@ public class MessageManagerTests extends AndroidTestCase {
 
     // creates an 'se' message without attributes
     public void testCreateSessionEndMessage() throws JSONException {
-        JSONObject message = MessageManager.createMessage(MessageType.SESSION_END, mSessionId, mSessionStartTime, mMsgTime, null, null, true);
+        long sessionLength= mMsgTime - mSessionStartTime;
+        JSONObject message = MessageManager.createMessageSessionEnd(mSessionId, mSessionStartTime, mMsgTime, sessionLength);
         assertNotNull(message.toString());
         assertEquals(MessageType.SESSION_END, message.getString(MessageKey.TYPE));
         assertTrue(message.has(MessageKey.ID));
         assertEquals(mMsgTime, message.getLong(MessageKey.TIMESTAMP));
         assertEquals(mSessionStartTime, message.getLong(MessageKey.SESSION_START_TIMESTAMP));
-        assertEquals((mMsgTime-mSessionStartTime), message.getLong(MessageKey.SESSION_LENGTH));
+        assertEquals(sessionLength, message.getLong(MessageKey.SESSION_LENGTH));
         assertEquals(mSessionId, message.getString(MessageKey.SESSION_ID));
         assertNotSame(mSessionId, message.getString(MessageKey.ID));
         assertFalse(message.has(MessageKey.NAME));

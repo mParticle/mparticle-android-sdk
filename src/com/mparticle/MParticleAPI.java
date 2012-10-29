@@ -45,6 +45,8 @@ public class MParticleAPI {
     /* package-private */ int mSessionTimeout = 30 * 60 * 1000;
     /* package-private */ long mSessionStartTime = 0;
     /* package-private */ long mLastEventTime = 0;
+    /* package-private */ long mSessionActiveStart = 0;
+    /* package-private */ long mSessionLength = 0;
 
     /* package-private */ MParticleAPI(MessageManager messageManager) {
         this.mMessageManager = messageManager;
@@ -121,8 +123,10 @@ public class MParticleAPI {
      * To explicitly end a session use the endSession() method.
      */
     public void stop() {
-        this.mLastEventTime = System.currentTimeMillis();
-        this.mMessageManager.stopSession(mSessionID, mSessionStartTime, mLastEventTime);
+        long stopTime = System.currentTimeMillis();
+        this.mLastEventTime = stopTime;
+        stopActiveSession(mLastEventTime);
+        this.mMessageManager.stopSession(mSessionID, stopTime, mSessionLength);
         this.debugLog("Stop Called");
     }
 
@@ -142,7 +146,7 @@ public class MParticleAPI {
     public void endSession() {
         long sessionEndTime=System.currentTimeMillis();
         closeSession(sessionEndTime);
-        this.mMessageManager.endSession(mSessionID, mSessionStartTime, sessionEndTime);
+        this.mMessageManager.endSession(mSessionID, sessionEndTime, mSessionLength);
         this.debugLog("Explicit End Session");
     }
 
@@ -154,6 +158,22 @@ public class MParticleAPI {
         this.mLastEventTime = System.currentTimeMillis();
         if (0==this.mSessionStartTime) {
             this.beginSession();
+        }
+        if (0==this.mSessionActiveStart) {
+            this.mSessionActiveStart=this.mLastEventTime;
+        }
+    }
+
+    private void stopActiveSession(long stopTime) {
+        if (0!=mSessionActiveStart) {
+            Log.d(TAG, String.format("Updating active session: %s %s %s %s",
+                    mSessionLength,
+                    mSessionActiveStart,
+                    stopTime,
+                    stopTime-mSessionActiveStart)
+            );
+            mSessionLength += stopTime-mSessionActiveStart;
+            mSessionActiveStart = 0;
         }
     }
 
@@ -175,6 +195,7 @@ public class MParticleAPI {
         this.mSessionStartTime = System.currentTimeMillis();
         this.mLastEventTime = this.mSessionStartTime;
         this.mSessionID = UUID.randomUUID().toString();
+        this.mSessionLength = 0;
         this.mMessageManager.startSession(mSessionID, mSessionStartTime);
         this.mTimeoutHandler.sendEmptyMessageDelayed(0, this.mSessionTimeout);
         this.debugLog("Start New Session");
@@ -190,7 +211,8 @@ public class MParticleAPI {
             Log.w(TAG, "Session end time was unknown");
             sessionEndTime = System.currentTimeMillis();
         }
-        this.mMessageManager.stopSession(mSessionID, mSessionStartTime, sessionEndTime);
+        stopActiveSession(sessionEndTime);
+        this.mMessageManager.stopSession(mSessionID, sessionEndTime, mSessionLength);
 
         // reset agent to unstarted state
         this.mSessionStartTime = 0;

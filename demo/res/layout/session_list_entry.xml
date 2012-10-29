@@ -23,6 +23,12 @@
         android:text="End Time" />
 
     <TextView
+        android:id="@+id/sessionLength"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Session Length" />
+
+    <TextView
         android:id="@+id/status"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
