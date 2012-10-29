@@ -32,5 +32,7 @@
     <string name="optout">OptOut</string>
     <string name="push_notify">Push Notify</string>
     <string name="device_attributes">Device Attributes</string>
+    <string name="use_dev_proxy">Use Dev Proxy</string>
+    <string name="close_demo">Close Demo</string>
 
 </resources>

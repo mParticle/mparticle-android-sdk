@@ -85,9 +85,6 @@ import com.mparticle.MessageDatabase.UploadTable;
 
         mAppInfo = MParticleAPI.collectAppInfo(context);
         mDeviceInfo = MParticleAPI.collectDeviceInfo(context);
-        // TODO: temporary - for development only
-        HttpHost proxy = new HttpHost("192.168.1.100", 8080);
-        mHttpClient.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY, proxy);
     }
 
     @Override
@@ -255,6 +252,12 @@ import com.mparticle.MessageDatabase.UploadTable;
         contentValues.put(UploadTable.UPLOAD_STATUS, UploadStatus.PROCESSED);
         String[] whereArgs = { Long.toString(uploadId) };
         db.update("uploads", contentValues, "_id=?", whereArgs);
+    }
+
+    /* Possibly for development only */
+    public void setConnectionProxy(String host, int port) {
+        HttpHost proxy = new HttpHost(host, port);
+        mHttpClient.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY, proxy);
     }
 
     // From Stack Overflow: http://stackoverflow.com/questions/7124735/hmac-sha256-algorithm-for-signature-calculation

@@ -307,6 +307,23 @@
             android:layout_below="@+id/textDeviceAttributes"
             android:textSize="18dp" />
 
-      </RelativeLayout>
+        <Button
+            android:id="@+id/buttonUseDevProxy"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/textDiagnostics"
+            android:onClick="pressUseDevProxy"
+            android:text="@string/use_dev_proxy" />
+
+        <Button
+            android:id="@+id/closeDemo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/textDiagnostics"
+            android:layout_toRightOf="@+id/buttonUseDevProxy"
+            android:onClick="pressCloseDemo"
+            android:text="@string/close_demo" />
+
+        </RelativeLayout>
 
 </ScrollView>

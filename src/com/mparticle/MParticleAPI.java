@@ -10,6 +10,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -19,6 +20,7 @@ import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
 import android.os.Process;
+import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.telephony.TelephonyManager;
 import android.util.DisplayMetrics;
@@ -41,6 +43,9 @@ public class MParticleAPI {
 
     private MessageManager mMessageManager;
     private Handler mTimeoutHandler;
+    private SharedPreferences mPreferences;
+    private Context mContext;
+    private String mApiKey;
 
     /* package-private */ String mSessionID;
     /* package-private */ int mSessionTimeout = 30 * 60 * 1000;
@@ -49,11 +54,17 @@ public class MParticleAPI {
     /* package-private */ long mSessionActiveStart = 0;
     /* package-private */ long mSessionLength = 0;
 
-    /* package-private */ MParticleAPI(MessageManager messageManager) {
+    /* package-private */ MParticleAPI(Context context, String apiKey, MessageManager messageManager) {
+        this.mContext = context.getApplicationContext();
+        this.mApiKey = apiKey;
         this.mMessageManager = messageManager;
         HandlerThread timeoutHandlerThread = new HandlerThread("SessionTimeoutHandler", Process.THREAD_PRIORITY_BACKGROUND);
         timeoutHandlerThread.start();
         this.mTimeoutHandler = new SessionTimeoutHandler(this, timeoutHandlerThread.getLooper());
+
+        mPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
+        MParticleAPI.debugMode = mPreferences.getBoolean("mp::debug::"+mApiKey, false);
+        MParticleAPI.optOutFlag = mPreferences.getBoolean("mp::optout::"+mApiKey, false);
     }
 
     /**
@@ -78,7 +89,7 @@ public class MParticleAPI {
         if (sInstanceMap.containsKey(apiKey)) {
             apiInstance = sInstanceMap.get(apiKey);
         } else {
-            apiInstance = new MParticleAPI(MessageManager.getInstance(context, apiKey, secret));
+            apiInstance = new MParticleAPI(context, apiKey, MessageManager.getInstance(context, apiKey, secret));
             sInstanceMap.put(apiKey, apiInstance);
         }
         return apiInstance;
@@ -394,6 +405,7 @@ public class MParticleAPI {
      */
     public void setOptOut(boolean optOutFlag) {
         MParticleAPI.optOutFlag = optOutFlag;
+        mPreferences.edit().putBoolean("mp::optout::"+mApiKey, optOutFlag).commit();
         this.debugLog("Set Opt Out: " + MParticleAPI.optOutFlag);
     }
 
@@ -412,7 +424,16 @@ public class MParticleAPI {
      */
     public void setDebug(boolean debugMode) {
         MParticleAPI.debugMode = debugMode;
+        mPreferences.edit().putBoolean("mp::debug::"+mApiKey, debugMode).commit();
         this.debugLog("Set Debug Mode: " + MParticleAPI.debugMode);
+    }
+
+    /**
+     * Get the current debug mode status for mParticle
+     * @return the debug mode
+     */
+    public boolean getDebug() {
+        return MParticleAPI.debugMode;
     }
 
     /**
@@ -570,4 +591,10 @@ public class MParticleAPI {
             }
         }
     }
+
+    /// Possibly for development only
+    public void setConnectionProxy(String host, int port) {
+        mMessageManager.setConnectionProxy(host, port);
+    }
+
 }

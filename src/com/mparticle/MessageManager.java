@@ -302,4 +302,10 @@ public class MessageManager {
 
         }
     }
+
+    /* Possibly for development only */
+    public void setConnectionProxy(String host, int port) {
+        mUploadHandler.setConnectionProxy(host, port);
+    }
+
 }

@@ -39,9 +39,8 @@ public class HomeActivity extends Activity {
         mParticleAPI = MParticleAPI.getInstance(this, "TestAppKey", "secret");
         // for testing, the timeout is 1 minute
         mParticleAPI.setSessionTimeout(60*1000);
-        mParticleAPI.setDebug(true);
 
-        debugModeCheckBox.setChecked(true);
+        debugModeCheckBox.setChecked(mParticleAPI.getDebug());
         optOutCheckBox.setChecked(mParticleAPI.getOptOut());
         collectDeviceProperties();
     }
@@ -182,6 +181,15 @@ public class HomeActivity extends Activity {
         } else {
             mParticleAPI.clearPushRegistrationId();
         }
+    }
+
+    public void pressUseDevProxy(View view) {
+        // for debugging only
+        mParticleAPI.setConnectionProxy("192.168.1.100", 8080);
+        Toast.makeText(this, "Now proxying requests to 192.168.1.100 port 8080", Toast.LENGTH_LONG).show();
+    }
+    public void pressCloseDemo(View view) {
+        this.finish();
     }
 
 }
