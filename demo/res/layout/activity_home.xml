@@ -170,7 +170,7 @@
             android:onClick="pressDataButton"
             android:text="@string/sessions" />
         <Button
-            android:id="@+id/buttonShowPendingMessages"
+            android:id="@+id/buttonListMessages"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@+id/textData"
@@ -182,7 +182,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@+id/textData"
-            android:layout_toRightOf="@+id/buttonShowPendingMessages"
+            android:layout_toRightOf="@+id/buttonListMessages"
             android:onClick="pressDataButton"
             android:text="@string/uploads" />
 

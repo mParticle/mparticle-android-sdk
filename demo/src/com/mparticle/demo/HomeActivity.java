@@ -101,8 +101,8 @@ public class HomeActivity extends Activity {
         case R.id.buttonListSessions:
             startActivity(new Intent(this, SessionsListActivity.class));
             break;
-        case R.id.buttonShowPendingMessages:
-            startActivity(new Intent(this, PendingMessagesActivity.class));
+        case R.id.buttonListMessages:
+            startActivity(new Intent(this, MessagesListActivity.class));
             break;
         case R.id.buttonListUploads:
             startActivity(new Intent(this, UploadsListActivity.class));

@@ -9,7 +9,7 @@ import android.widget.SimpleCursorAdapter;
 import com.mparticle.MessageDatabase;
 import com.mparticle.MessageDatabase.MessageTable;
 
-public class PendingMessagesActivity extends ListActivity {
+public class MessagesListActivity extends ListActivity {
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
