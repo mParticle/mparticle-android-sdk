@@ -8,7 +8,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 @SuppressWarnings("javadoc")
 public class MessageDatabase extends SQLiteOpenHelper {
 
-    private static final int DB_VERSION = 4;
+    private static final int DB_VERSION = 5;
     private static final String DB_NAME = "mparticle.db";
 
     public interface MessageTable {
@@ -50,6 +50,7 @@ public class MessageDatabase extends SQLiteOpenHelper {
                SessionTable.ATTRIBUTES + " TEXT," +
                SessionTable.UPLOAD_STATUS + " INTEGER" +
              ");";
+
     public interface UploadTable {
         public final static String TABLE_NAME = "uploads";
         public final static String UPLOAD_ID = "upload_id";
@@ -66,6 +67,24 @@ public class MessageDatabase extends SQLiteOpenHelper {
                UploadTable.UPLOAD_STATUS + " INTEGER" +
              ");";
 
+    public interface CommandTable {
+        public final static String TABLE_NAME = "commands";
+        public final static String COMMAND_ID = "command_id";
+        public final static String URL = "url";
+        public final static String METHOD = "method";
+        public final static String POST_DATA = "post_data";
+        public final static String UPLOAD_STATUS = "upload_status";
+    }
+    private static final String CREATE_COMMANDS_DDL =
+            "CREATE TABLE "+ CommandTable.TABLE_NAME+" (" +
+               "_id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+               CommandTable.COMMAND_ID + " STRING NOT NULL, " +
+               CommandTable.URL + " STRING NOT NULL, " +
+               CommandTable.METHOD + " STRING NOT NULL, " +
+               CommandTable.POST_DATA + " TEXT, " +
+               CommandTable.UPLOAD_STATUS + " INTEGER" +
+             ");";
+
     public MessageDatabase(Context context) {
         super(context, DB_NAME, null, DB_VERSION);
     }
@@ -75,6 +94,7 @@ public class MessageDatabase extends SQLiteOpenHelper {
         db.execSQL(CREATE_MESSAGES_DDL);
         db.execSQL(CREATE_SESSIONS_DDL);
         db.execSQL(CREATE_UPLOADS_DDL);
+        db.execSQL(CREATE_COMMANDS_DDL);
     }
 
     @Override
@@ -85,6 +105,8 @@ public class MessageDatabase extends SQLiteOpenHelper {
         db.execSQL(CREATE_SESSIONS_DDL);
         db.execSQL("DROP TABLE IF EXISTS " + UploadTable.TABLE_NAME);
         db.execSQL(CREATE_UPLOADS_DDL);
+        db.execSQL("DROP TABLE IF EXISTS " + CommandTable.TABLE_NAME);
+        db.execSQL(CREATE_COMMANDS_DDL);
     }
 
 }

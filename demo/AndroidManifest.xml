@@ -27,7 +27,7 @@
         </activity>
         <activity
             android:name=".MessagesListActivity"
-            android:label="@string/title_activity_pending_messages" >
+            android:label="@string/title_messages_list" >
         </activity>
         <activity
             android:name=".SessionsListActivity"
@@ -37,6 +37,10 @@
             android:name=".UploadsListActivity"
             android:label="@string/title_uploads_list" >
         </activity>
-    </application>
+        <activity
+            android:name=".CommandsListActivity"
+            android:label="@string/title_commands_list" >
+        </activity>
+        </application>
 
 </manifest>

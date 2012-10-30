@@ -107,6 +107,9 @@ public class HomeActivity extends Activity {
         case R.id.buttonListUploads:
             startActivity(new Intent(this, UploadsListActivity.class));
             break;
+        case R.id.buttonListCommands:
+            startActivity(new Intent(this, CommandsListActivity.class));
+            break;
         }
     }
 

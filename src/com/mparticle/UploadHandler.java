@@ -39,6 +39,7 @@ import android.util.Log;
 import com.mparticle.Constants.MessageKey;
 import com.mparticle.Constants.MessageType;
 import com.mparticle.Constants.UploadStatus;
+import com.mparticle.MessageDatabase.CommandTable;
 import com.mparticle.MessageDatabase.MessageTable;
 import com.mparticle.MessageDatabase.UploadTable;
 
@@ -66,7 +67,6 @@ import com.mparticle.MessageDatabase.UploadTable;
     public static final String HEADER_APPKEY = "x-mp-appkey";
     public static final String HEADER_SIGNATURE = "x-mp-signature";
 
-    public static int BATCH_SIZE = 10;
     public static String SERVICE_SCHEME = "http";
     public static String SERVICE_HOST = "api.dev.mparticle.com";
     public static String SERVICE_VERSION = "v1";
@@ -143,17 +143,14 @@ import com.mparticle.MessageDatabase.UploadTable;
                         messagesArray.put(msgObject);
                         lastReadyMessage = readyMessagesCursor.getInt(4);
                     }
-                    // TODO: decide how to deal with batch sizes and "batch" upload mode
-                    // if( messagesArray.length()>=BATCH_SIZE || (readyMessagesCursor.isLast() && messagesArray.length()>0)) {
-                    if (readyMessagesCursor.isLast() && messagesArray.length()>0) {
-                        // create upload message
-                        JSONObject uploadMessage = createUploadMessage(messagesArray);
-                        // store in uploads table
-                        dbInsertUpload(db, uploadMessage);
-                        // delete processed messages
-                        dbDeleteProcessedMessages(db, lastReadyMessage);
-                        messagesArray = new JSONArray();
-                    }
+                }
+                if (messagesArray.length() > 0) {
+                    // create upload message
+                    JSONObject uploadMessage = createUploadMessage(messagesArray);
+                    // store in uploads table
+                    dbInsertUpload(db, uploadMessage);
+                    // delete processed messages
+                    dbDeleteProcessedMessages(db, lastReadyMessage);
                 }
             }
         } catch (SQLiteException e) {
@@ -188,12 +185,13 @@ import com.mparticle.MessageDatabase.UploadTable;
             SQLiteDatabase db = mDB.getWritableDatabase();
             String[] selectionArgs = new String[]{Integer.toString(UploadStatus.PROCESSED)};
             String[] selectionColumns = new String[]{ "_id", UploadTable.MESSAGE };
-            Cursor readyUploadsCursor = db.query(UploadTable.TABLE_NAME, selectionColumns, UploadTable.UPLOAD_STATUS+"!=?", selectionArgs, null, null, UploadTable.MESSAGE_TIME+" , _id");
+            Cursor readyUploadsCursor = db.query(UploadTable.TABLE_NAME, selectionColumns,
+                    UploadTable.UPLOAD_STATUS + "!=?", selectionArgs, null, null, UploadTable.MESSAGE_TIME + " , _id");
             if (readyUploadsCursor.getCount()>0) {
                 while (readyUploadsCursor.moveToNext()) {
                     int uploadId=  readyUploadsCursor.getInt(0);
                     String message = readyUploadsCursor.getString(1);
-                    // post message to mParticle service
+                    // POST message to mParticle service
                     HttpPost httpPost = new HttpPost(makeServiceUri("events"));
                     httpPost.setHeader("Content-type", "application/json");
                     httpPost.setEntity(new ByteArrayEntity(message.getBytes()));
@@ -201,14 +199,23 @@ import com.mparticle.MessageDatabase.UploadTable;
 
                     try {
                         String response = mHttpClient.execute(httpPost, new BasicResponseHandler(), mHttpContext);
+                        dbDeleteUpload(db, uploadId);
+
+                        // TODO: separate response processing errors from upload errors
                         JSONObject responseJSON = new JSONObject(response);
                         Log.d(TAG, "Got 2xx response with JSON:" + responseJSON.toString());
+
+                        // TODO: remove this debug sample once the server is responding with commands
+                        debugGenerateResponseMsgs(responseJSON);
+
                         // store responses in DB
                         if (responseJSON.has(MessageKey.MESSAGES)) {
-                            Log.d(TAG, "Response has messages to be processed");
-                            // TODO: store and process command messages
+                            JSONArray responseCommands = responseJSON.getJSONArray(MessageKey.MESSAGES);
+                            for (int i = 0; i < responseCommands.length(); i++) {
+                                JSONObject commandObject = responseCommands.getJSONObject(i);
+                                dbInsertCommand(db, commandObject);
+                            }
                         }
-                        dbDeleteUpload(db, uploadId);
 
                     } catch (Exception e) {
                         // TODO: process failures differently
@@ -218,7 +225,7 @@ import com.mparticle.MessageDatabase.UploadTable;
                 }
             }
         } catch (SQLiteException e) {
-            Log.e(TAG, "Error preparing batch upload in mParticle DB", e);
+            Log.e(TAG, "Error processing batch uploads in mParticle DB", e);
         } catch (InvalidKeyException e) {
             Log.e(TAG, "Error signing message", e);
         } catch (NoSuchAlgorithmException e) {
@@ -284,6 +291,17 @@ import com.mparticle.MessageDatabase.UploadTable;
         db.delete(UploadTable.TABLE_NAME, "_id=?", whereArgs);
     }
 
+    private void dbInsertCommand(SQLiteDatabase db, JSONObject command) throws JSONException {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(CommandTable.COMMAND_ID, command.getString(MessageKey.ID));
+        contentValues.put(CommandTable.URL, command.getString(MessageKey.URL));
+        contentValues.put(CommandTable.METHOD, command.getString(MessageKey.METHOD));
+        // TODO: decide between null and empty string
+        contentValues.put(CommandTable.POST_DATA, command.optString(MessageKey.POST));
+        contentValues.put(CommandTable.UPLOAD_STATUS, UploadStatus.PENDING);
+        db.insert(CommandTable.TABLE_NAME, null, contentValues);
+    }
+
     /* Possibly for development only */
     public void setConnectionProxy(String host, int port) {
         HttpHost proxy = new HttpHost(host, port);
@@ -309,4 +327,26 @@ import com.mparticle.MessageDatabase.UploadTable;
          }
          return new String(chars);
      }
+
+     // TODO: remove this debug method
+     private void debugGenerateResponseMsgs(JSONObject responseJSON) throws JSONException, URISyntaxException {
+         JSONObject command1=new JSONObject();
+         command1.put(MessageKey.ID, "testpost::" + UUID.randomUUID().toString());
+         command1.put(MessageKey.URL, makeServiceUri("testpost"));
+         command1.put(MessageKey.METHOD, "POST");
+         command1.put(MessageKey.POST, "post data goes here");
+
+         JSONObject command2=new JSONObject();
+         command2.put(MessageKey.ID, "testget::" + UUID.randomUUID().toString());
+         command2.put(MessageKey.URL, makeServiceUri("testget"));
+         command2.put(MessageKey.METHOD, "GET");
+         command2.put(MessageKey.POST, null);
+
+         JSONArray commandArray = new JSONArray();
+         commandArray.put(command1);
+         commandArray.put(command2);
+
+         responseJSON.put(MessageKey.MESSAGES, commandArray);
+     }
+
 }
