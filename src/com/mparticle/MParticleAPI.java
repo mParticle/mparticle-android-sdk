@@ -136,6 +136,9 @@ public class MParticleAPI {
      * To explicitly end a session use the endSession() method.
      */
     public void stop() {
+        if (this.mSessionStartTime==0) {
+            return;
+        }
         long stopTime = System.currentTimeMillis();
         this.mLastEventTime = stopTime;
         stopActiveSession(mLastEventTime);
@@ -147,16 +150,17 @@ public class MParticleAPI {
      * Begin tracking a new session. Ends the current session.
      */
     public void newSession() {
-        if (0!=this.mSessionStartTime) {
-            endSession();
-        }
-        this.beginSession();
+        endSession();
+        beginSession();
     }
 
     /**
      * Explicitly terminates the user session.
      */
     public void endSession() {
+        if (this.mSessionStartTime==0) {
+            return;
+        }
         long sessionEndTime=System.currentTimeMillis();
         closeSession(sessionEndTime);
         this.mMessageManager.endSession(mSessionID, sessionEndTime, mSessionLength);
