@@ -67,14 +67,17 @@ package com.mparticle;
         public static final String URL = "u";
         public static final String METHOD = "m";
         public static final String POST = "d";
+        // config
+        public static final String SESSION_UPLOAD = "su";
 
     }
 
     public interface UploadStatus {
         static final int PENDING = 0;
         static final int READY = 1;
-        static final int ENDED = 2;
-        static final int PROCESSED = 3;
+        static final int BATCH_READY = 2;
+        static final int ENDED = 10;
+        static final int PROCESSED = 100;
     }
 
 }

@@ -13,6 +13,7 @@ import javax.crypto.spec.SecretKeySpec;
 
 import org.apache.http.HttpHost;
 import org.apache.http.client.HttpResponseException;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.protocol.ClientContext;
 import org.apache.http.conn.params.ConnRoutePNames;
@@ -62,6 +63,7 @@ import com.mparticle.MessageDatabase.UploadTable;
     public static final int PROCESS_BATCHES = 1;
     public static final int PROCESS_RESULTS = 2;
     public static final int CLEANUP = 3;
+    public static final int FETCH_CONFIG = 4;
 
     public static final String HEADER_APPKEY = "x-mp-appkey";
     public static final String HEADER_SIGNATURE = "x-mp-signature";
@@ -70,6 +72,8 @@ import com.mparticle.MessageDatabase.UploadTable;
     public static String SERVICE_SCHEME = "http";
     public static String SERVICE_HOST = "api.dev.mparticle.com";
     public static String SERVICE_VERSION = "v1";
+
+    private static String mUploadMode = "batch";
 
     public UploadHandler(Context context, Looper looper, String apiKey, String secret) {
         super(looper);
@@ -111,6 +115,10 @@ import com.mparticle.MessageDatabase.UploadTable;
             // delete completed uploads, messages, and sessions
             // TODO: cleanupDatabase();
             break;
+        case FETCH_CONFIG:
+            // get the application configuration and process it
+            fetchConfig();
+            break;
         }
     }
 
@@ -118,9 +126,15 @@ import com.mparticle.MessageDatabase.UploadTable;
         try {
             // select messages ready to upload (limited number)
             SQLiteDatabase db = mDB.getWritableDatabase();
-            String[] selectionArgs = new String[]{Integer.toString(UploadStatus.PROCESSED)};
+            String[] selectionArgs = new String[]{Integer.toString(UploadStatus.BATCH_READY)};
+            String selection;
+            if (("batch").equals(mUploadMode)) {
+                selection = MessageTable.UPLOAD_STATUS + "=?";
+            } else {
+                selection = MessageTable.UPLOAD_STATUS + "<=?";
+            }
             String[] selectionColumns = new String[]{MessageTable.UUID, MessageTable.MESSAGE, MessageTable.UPLOAD_STATUS, MessageTable.MESSAGE_TIME, "_id"};
-            Cursor readyMessagesCursor = db.query("messages", selectionColumns, MessageTable.UPLOAD_STATUS+"!=?", selectionArgs, null, null, MessageTable.MESSAGE_TIME+" , _id");
+            Cursor readyMessagesCursor = db.query("messages", selectionColumns, selection, selectionArgs, null, null, MessageTable.MESSAGE_TIME+" , _id");
             if (readyMessagesCursor.getCount()>0) {
                 JSONArray messagesArray = new JSONArray();
                 int lastReadyMessage = 0;
@@ -131,7 +145,9 @@ import com.mparticle.MessageDatabase.UploadTable;
                         messagesArray.put(msgObject);
                         lastReadyMessage = readyMessagesCursor.getInt(4);
                     }
-                    if( messagesArray.length()>=BATCH_SIZE || (readyMessagesCursor.isLast() && messagesArray.length()>0)) {
+                    // TODO: decide how to deal with batch sizes and "batch" upload mode
+                    // if( messagesArray.length()>=BATCH_SIZE || (readyMessagesCursor.isLast() && messagesArray.length()>0)) {
+                    if (readyMessagesCursor.isLast() && messagesArray.length()>0) {
                         // create upload message
                         JSONObject uploadMessage = createUploadMessage(messagesArray);
                         // store in uploads table
@@ -224,6 +240,30 @@ import com.mparticle.MessageDatabase.UploadTable;
             Log.e(TAG, "Error constructing service URI", e);
         } finally {
             mDB.close();
+        }
+    }
+
+    void fetchConfig() {
+        try {
+            HttpGet httpGet = new HttpGet(makeServiceUri("config"));
+            String response = mHttpClient.execute(httpGet, new BasicResponseHandler(), mHttpContext);
+            JSONObject responseJSON = new JSONObject(response);
+            if (responseJSON.has(MessageKey.SESSION_UPLOAD)) {
+                String sessionUploadMode = responseJSON.getString(MessageKey.SESSION_UPLOAD);
+                if ("batch".equalsIgnoreCase(sessionUploadMode)) {
+                    mUploadMode = "batch";
+                } else {
+                    mUploadMode = "stream";
+                }
+            }
+        } catch (HttpResponseException e) {
+            Log.w(TAG, "Request failed:" + e.getMessage());
+        } catch (IOException e) {
+            Log.w(TAG, "Request failed:" + e.getMessage());
+        } catch (JSONException e) {
+            Log.w(TAG, "Failed to process response message JSON");
+        } catch (URISyntaxException e) {
+            Log.e(TAG, "Error constructing service URI", e);
         }
     }
 

@@ -45,6 +45,7 @@ public class MessageManager {
         mMessageHandler = new MessageHandler(mContext, sMessageHandlerThread.getLooper());
         mMessageHandler.sendEmptyMessage(MessageHandler.END_ORPHAN_SESSIONS);
         mUploadHandler = new UploadHandler(mContext, sUploadHandlerThread.getLooper(), apiKey, secret);
+        mUploadHandler.sendEmptyMessage(UploadHandler.FETCH_CONFIG);
     }
 
     public static MessageManager getInstance(Context context, String apiKey, String secret) {
@@ -221,6 +222,9 @@ public class MessageManager {
                     // insert the record into messages with duration
                     dbInsertMessage(db, endMessage, UploadStatus.READY);
 
+                    // mark session messages ready for BATCH mode upload
+                    dbUpdateMessageStatus(db, sessionId, UploadStatus.BATCH_READY);
+
                     // update session status
                     ContentValues sessionValues = new ContentValues();
                     sessionValues.put(SessionTable.UPLOAD_STATUS, UploadStatus.ENDED);
@@ -278,6 +282,13 @@ public class MessageManager {
             contentValues.put(MessageTable.MESSAGE, message.toString());
             contentValues.put(MessageTable.UPLOAD_STATUS, status);
             db.insert("messages", null, contentValues);
+        }
+
+        private void dbUpdateMessageStatus(SQLiteDatabase db, String sessionId, long status) {
+            ContentValues contentValues = new ContentValues();
+            contentValues.put(MessageTable.UPLOAD_STATUS, status);
+            String[] whereArgs = {sessionId };
+            db.update("messages", contentValues, MessageTable.SESSION_ID + "=?", whereArgs);
         }
 
         private void dbUpdateSessionEndTime(SQLiteDatabase db, String sessionId, long endTime, long sessionLength) {
