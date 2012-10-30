@@ -38,7 +38,7 @@ import android.util.Log;
 
 import com.mparticle.Constants.MessageKey;
 import com.mparticle.Constants.MessageType;
-import com.mparticle.Constants.UploadStatus;
+import com.mparticle.Constants.Status;
 import com.mparticle.MessageDatabase.CommandTable;
 import com.mparticle.MessageDatabase.MessageTable;
 import com.mparticle.MessageDatabase.UploadTable;
@@ -58,9 +58,9 @@ import com.mparticle.MessageDatabase.UploadTable;
     private JSONObject mAppInfo;
     private JSONObject mDeviceInfo;
 
-    public static final int PREPARE_BATCHES = 0;
-    public static final int PROCESS_BATCHES = 1;
-    public static final int PROCESS_RESULTS = 2;
+    public static final int PREPARE_UPLOADS = 0;
+    public static final int PROCESS_UPLOADS = 1;
+    public static final int PROCESS_COMMANDS = 2;
     public static final int CLEANUP = 3;
     public static final int FETCH_CONFIG = 4;
 
@@ -93,21 +93,21 @@ import com.mparticle.MessageDatabase.UploadTable;
     public void handleMessage(Message msg) {
         super.handleMessage(msg);
         switch (msg.what) {
-        case PREPARE_BATCHES:
+        case PREPARE_UPLOADS:
             // create uploads records for batches of messages and mark the messages as processed
-            prepareBatches();
+            prepareUploads();
             // TODO: restore this break - for development only
             // break;
-        case PROCESS_BATCHES:
+        case PROCESS_UPLOADS:
             // post upload messages to server and mark the uploads as processed. store response commands to be processed.
-            processBatches();
+            processUploads();
             break;
-        case PROCESS_RESULTS:
+        case PROCESS_COMMANDS:
             // read responses with upload messages
             // post response to server
             // handle cookies
             // update response process status
-            // TODO: processResults();
+            // TODO: processCommands();
             break;
         case CLEANUP:
             // delete completed uploads, messages, and sessions
@@ -120,25 +120,25 @@ import com.mparticle.MessageDatabase.UploadTable;
         }
     }
 
-    void prepareBatches() {
+    void prepareUploads() {
         try {
             // select messages ready to upload (limited number)
             SQLiteDatabase db = mDB.getWritableDatabase();
-            String[] selectionArgs = new String[]{Integer.toString(UploadStatus.BATCH_READY)};
+            String[] selectionArgs = new String[]{Integer.toString(Status.BATCH_READY)};
             String selection;
             if (("batch").equals(mUploadMode)) {
-                selection = MessageTable.UPLOAD_STATUS + "=?";
+                selection = MessageTable.STATUS + "=?";
             } else {
-                selection = MessageTable.UPLOAD_STATUS + "<=?";
+                selection = MessageTable.STATUS + "<=?";
             }
-            String[] selectionColumns = new String[]{MessageTable.UUID, MessageTable.MESSAGE, MessageTable.UPLOAD_STATUS, MessageTable.MESSAGE_TIME, "_id"};
+            String[] selectionColumns = new String[]{MessageTable.UUID, MessageTable.MESSAGE, MessageTable.STATUS, MessageTable.MESSAGE_TIME, "_id"};
             Cursor readyMessagesCursor = db.query(MessageTable.TABLE_NAME, selectionColumns, selection, selectionArgs, null, null, MessageTable.MESSAGE_TIME+" , _id");
             if (readyMessagesCursor.getCount()>0) {
                 JSONArray messagesArray = new JSONArray();
                 int lastReadyMessage = 0;
                 while (readyMessagesCursor.moveToNext()) {
                     // NOTE: this could be simpler if we ignore PENDING status on start-session message
-                    if (!readyMessagesCursor.isLast() || UploadStatus.PENDING!=readyMessagesCursor.getInt(2)) {
+                    if (!readyMessagesCursor.isLast() || Status.PENDING!=readyMessagesCursor.getInt(2)) {
                         JSONObject msgObject = new JSONObject(readyMessagesCursor.getString(1));
                         messagesArray.put(msgObject);
                         lastReadyMessage = readyMessagesCursor.getInt(4);
@@ -179,14 +179,14 @@ import com.mparticle.MessageDatabase.UploadTable;
         return uploadMessage;
     }
 
-    void processBatches() {
+    void processUploads() {
         try {
             // read batches ready to upload
             SQLiteDatabase db = mDB.getWritableDatabase();
-            String[] selectionArgs = new String[]{Integer.toString(UploadStatus.PROCESSED)};
+            String[] selectionArgs = new String[]{Integer.toString(Status.PROCESSED)};
             String[] selectionColumns = new String[]{ "_id", UploadTable.MESSAGE };
             Cursor readyUploadsCursor = db.query(UploadTable.TABLE_NAME, selectionColumns,
-                    UploadTable.UPLOAD_STATUS + "!=?", selectionArgs, null, null, UploadTable.MESSAGE_TIME + " , _id");
+                    UploadTable.STATUS + "!=?", selectionArgs, null, null, UploadTable.MESSAGE_TIME + " , _id");
             if (readyUploadsCursor.getCount()>0) {
                 while (readyUploadsCursor.moveToNext()) {
                     int uploadId=  readyUploadsCursor.getInt(0);
@@ -220,7 +220,7 @@ import com.mparticle.MessageDatabase.UploadTable;
                     } catch (Exception e) {
                         // TODO: process failures differently
                         Log.d(TAG, "Request failed:" + e.getMessage());
-                        dbUpdateUploadStatus(db, uploadId, UploadStatus.READY);
+                        dbUpdateUploadStatus(db, uploadId, Status.READY);
                     }
                 }
             }
@@ -270,7 +270,7 @@ import com.mparticle.MessageDatabase.UploadTable;
         contentValues.put(UploadTable.UPLOAD_ID, message.getString(MessageKey.ID));
         contentValues.put(UploadTable.MESSAGE_TIME, message.getLong(MessageKey.TIMESTAMP));
         contentValues.put(UploadTable.MESSAGE, message.toString());
-        contentValues.put(UploadTable.UPLOAD_STATUS, UploadStatus.PENDING);
+        contentValues.put(UploadTable.STATUS, Status.PENDING);
         db.insert(UploadTable.TABLE_NAME, null, contentValues);
     }
 
@@ -281,7 +281,7 @@ import com.mparticle.MessageDatabase.UploadTable;
 
     private void dbUpdateUploadStatus(SQLiteDatabase db, int uploadId, int status) {
         ContentValues contentValues = new ContentValues();
-        contentValues.put(UploadTable.UPLOAD_STATUS, status);
+        contentValues.put(UploadTable.STATUS, status);
         String[] whereArgs = { Long.toString(uploadId) };
         db.update(UploadTable.TABLE_NAME, contentValues, "_id=?", whereArgs);
     }
@@ -298,7 +298,7 @@ import com.mparticle.MessageDatabase.UploadTable;
         contentValues.put(CommandTable.METHOD, command.getString(MessageKey.METHOD));
         // TODO: decide between null and empty string
         contentValues.put(CommandTable.POST_DATA, command.optString(MessageKey.POST));
-        contentValues.put(CommandTable.UPLOAD_STATUS, UploadStatus.PENDING);
+        contentValues.put(CommandTable.STATUS, Status.PENDING);
         db.insert(CommandTable.TABLE_NAME, null, contentValues);
     }
 

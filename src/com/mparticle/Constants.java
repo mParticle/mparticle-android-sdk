@@ -74,7 +74,7 @@ package com.mparticle;
 
     }
 
-    public interface UploadStatus {
+    public interface Status {
         static final int PENDING = 0;
         static final int READY = 1;
         static final int BATCH_READY = 2;

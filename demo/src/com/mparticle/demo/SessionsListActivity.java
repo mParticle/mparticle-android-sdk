@@ -21,7 +21,7 @@ public class SessionsListActivity extends ListActivity {
         Cursor selectCursor = db.query("sessions", null, null, null, null, null, SessionTable.START_TIME + " desc");
 
         String[] from = new String[] { SessionTable.SESSION_ID, SessionTable.START_TIME, SessionTable.END_TIME,
-                SessionTable.SESSION_LENGTH, SessionTable.UPLOAD_STATUS };
+                SessionTable.SESSION_LENGTH, SessionTable.STATUS };
         int[] to = { R.id.sessionId, R.id.startTime, R.id.endTime, R.id.sessionLength, R.id.status };
 
         // NOTE: this Activity is doing SQL directly on the main UI thread,

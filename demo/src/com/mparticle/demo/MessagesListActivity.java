@@ -22,7 +22,7 @@ public class MessagesListActivity extends ListActivity {
                 + " desc, _id desc");
 
         String[] from = new String[] { MessageTable.SESSION_ID, MessageTable.MESSAGE_TIME, MessageTable.MESSAGE_TYPE,
-                MessageTable.MESSAGE, MessageTable.UUID, MessageTable.UPLOAD_STATUS };
+                MessageTable.MESSAGE, MessageTable.UUID, MessageTable.STATUS };
         int[] to = { R.id.sessionId, R.id.msgTime, R.id.msgType, R.id.msgMsg, R.id.msgId, R.id.msgStatus };
 
         // NOTE: this Activity is doing SQL directly on the main UI thread,

@@ -21,8 +21,8 @@ public class CommandsListActivity extends ListActivity {
         Cursor selectCursor = db.query(CommandTable.TABLE_NAME, null, null, null, null, null, "_id desc");
 
         String[] from = new String[] { CommandTable.COMMAND_ID, CommandTable.URL, CommandTable.METHOD,
-                CommandTable.POST_DATA, CommandTable.UPLOAD_STATUS };
-        int[] to = { R.id.commandId, R.id.url, R.id.method, R.id.postData, R.id.uploadStatus };
+                CommandTable.POST_DATA, CommandTable.STATUS };
+        int[] to = { R.id.commandId, R.id.url, R.id.method, R.id.postData, R.id.status };
 
         // NOTE: this Activity is doing SQL directly on the main UI thread,
         // which you would never do in production code

@@ -23,7 +23,7 @@ import com.mparticle.MessageDatabase.SessionTable;
 
 import com.mparticle.Constants.MessageType;
 import com.mparticle.Constants.MessageKey;
-import com.mparticle.Constants.UploadStatus;
+import com.mparticle.Constants.Status;
 
 //TODO: this should be package-private but is accessed from the demo
 @SuppressWarnings("javadoc")
@@ -97,7 +97,7 @@ public class MessageManager {
     public void startSession(String sessionId, long time) {
         try {
             JSONObject message = createMessage(MessageType.SESSION_START, sessionId, time, time, null, null, true);
-            mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, UploadStatus.PENDING, 0, message));
+            mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, Status.PENDING, 0, message));
         } catch (JSONException e) {
             Log.w(TAG, "Failed to create mParticle start session message");
         }
@@ -120,7 +120,7 @@ public class MessageManager {
     public void logCustomEvent(String sessionId, long sessionStartTime, long time, String eventName, JSONObject attributes) {
         try {
             JSONObject message = createMessage(MessageType.CUSTOM_EVENT, sessionId, sessionStartTime, time, eventName, attributes, true);
-            mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, UploadStatus.READY, 0, message));
+            mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, Status.READY, 0, message));
         } catch (JSONException e) {
             Log.w(TAG, "Failed to create mParticle start event message");
         }
@@ -128,14 +128,14 @@ public class MessageManager {
     public void logScreenView(String sessionId, long sessionStartTime, long time, String screenName, JSONObject attributes) {
         try {
             JSONObject message = createMessage(MessageType.SCREEN_VIEW, sessionId, sessionStartTime, time, screenName, attributes, true);
-            mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, UploadStatus.READY, 0, message));
+            mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, Status.READY, 0, message));
         } catch (JSONException e) {
             Log.w(TAG, "Failed to create mParticle screen view message");
         }
     }
 
     public void doUpload() {
-        mUploadHandler.sendEmptyMessage(UploadHandler.PREPARE_BATCHES);
+        mUploadHandler.sendEmptyMessage(UploadHandler.PREPARE_UPLOADS);
     }
 
     public static void setLocation(Location location) {
@@ -220,10 +220,10 @@ public class MessageManager {
                     JSONObject endMessage = MessageManager.createMessageSessionEnd(sessionId, start, end, length);
 
                     // insert the record into messages with duration
-                    dbInsertMessage(db, endMessage, UploadStatus.READY);
+                    dbInsertMessage(db, endMessage, Status.READY);
 
                     // mark session messages ready for BATCH mode upload
-                    dbUpdateMessageStatus(db, sessionId, UploadStatus.BATCH_READY);
+                    dbUpdateMessageStatus(db, sessionId, Status.BATCH_READY);
 
                     // delete the processed session record
                     db.delete(SessionTable.TABLE_NAME, SessionTable.SESSION_ID + "=?", new String[]{sessionId});
@@ -242,7 +242,7 @@ public class MessageManager {
                     SQLiteDatabase db = mDB.getWritableDatabase();
                     String[] sessionColumns = new String[]{SessionTable.SESSION_ID};
                     Cursor selectCursor = db.query(SessionTable.TABLE_NAME, sessionColumns,
-                            SessionTable.UPLOAD_STATUS+"!="+UploadStatus.ENDED, null, null, null, null);
+                            SessionTable.STATUS+"!="+Status.ENDED, null, null, null, null);
                     // NOTE: there should be at most one orphan - but process any that are found
                     while (selectCursor.moveToNext()) {
                         String sessionId = selectCursor.getString(0);
@@ -266,7 +266,7 @@ public class MessageManager {
             values.put(SessionTable.START_TIME, sessionStartTime);
             values.put(SessionTable.END_TIME, sessionStartTime);
             values.put(SessionTable.SESSION_LENGTH, 0);
-            values.put(SessionTable.UPLOAD_STATUS, UploadStatus.PENDING);
+            values.put(SessionTable.STATUS, Status.PENDING);
             db.insert(SessionTable.TABLE_NAME, null, values);
         }
 
@@ -278,13 +278,13 @@ public class MessageManager {
             contentValues.put(MessageTable.UUID, message.getString(MessageKey.ID));
             contentValues.put(MessageTable.SESSION_ID, getMessageSessionId(message));
             contentValues.put(MessageTable.MESSAGE, message.toString());
-            contentValues.put(MessageTable.UPLOAD_STATUS, status);
+            contentValues.put(MessageTable.STATUS, status);
             db.insert(MessageTable.TABLE_NAME, null, contentValues);
         }
 
         private void dbUpdateMessageStatus(SQLiteDatabase db, String sessionId, long status) {
             ContentValues contentValues = new ContentValues();
-            contentValues.put(MessageTable.UPLOAD_STATUS, status);
+            contentValues.put(MessageTable.STATUS, status);
             String[] whereArgs = {sessionId };
             db.update(MessageTable.TABLE_NAME, contentValues, MessageTable.SESSION_ID + "=?", whereArgs);
         }

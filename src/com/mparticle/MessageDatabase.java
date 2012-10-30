@@ -8,7 +8,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 @SuppressWarnings("javadoc")
 public class MessageDatabase extends SQLiteOpenHelper {
 
-    private static final int DB_VERSION = 5;
+    private static final int DB_VERSION = 6;
     private static final String DB_NAME = "mparticle.db";
 
     public interface MessageTable {
@@ -18,7 +18,7 @@ public class MessageDatabase extends SQLiteOpenHelper {
         public final static String UUID = "uuid";
         public final static String MESSAGE_TIME = "message_time";
         public final static String MESSAGE = "message";
-        public final static String UPLOAD_STATUS = "upload_status";
+        public final static String STATUS = "status";
     }
     private static final String CREATE_MESSAGES_DDL =
                "CREATE TABLE "+ MessageTable.TABLE_NAME+" (" +
@@ -28,7 +28,7 @@ public class MessageDatabase extends SQLiteOpenHelper {
                   MessageTable.UUID + " STRING NOT NULL, " +
                   MessageTable.MESSAGE_TIME + " INTEGER NOT NULL," +
                   MessageTable.MESSAGE + " TEXT," +
-                  MessageTable.UPLOAD_STATUS + " INTEGER" +
+                  MessageTable.STATUS + " INTEGER" +
                 ");";
 
     public interface SessionTable {
@@ -38,7 +38,7 @@ public class MessageDatabase extends SQLiteOpenHelper {
         public final static String END_TIME = "end_time";
         public final static String SESSION_LENGTH = "session_length";
         public final static String ATTRIBUTES = "attributes";
-        public final static String UPLOAD_STATUS = "upload_status";
+        public final static String STATUS = "status";
     }
     private static final String CREATE_SESSIONS_DDL =
             "CREATE TABLE "+ SessionTable.TABLE_NAME+" (" +
@@ -48,7 +48,7 @@ public class MessageDatabase extends SQLiteOpenHelper {
                SessionTable.END_TIME + " INTEGER NOT NULL," +
                SessionTable.SESSION_LENGTH + " INTEGER NOT NULL," +
                SessionTable.ATTRIBUTES + " TEXT," +
-               SessionTable.UPLOAD_STATUS + " INTEGER" +
+               SessionTable.STATUS + " INTEGER" +
              ");";
 
     public interface UploadTable {
@@ -56,7 +56,7 @@ public class MessageDatabase extends SQLiteOpenHelper {
         public final static String UPLOAD_ID = "upload_id";
         public final static String MESSAGE = "message";
         public final static String MESSAGE_TIME = "message_time";
-        public final static String UPLOAD_STATUS = "upload_status";
+        public final static String STATUS = "status";
     }
     private static final String CREATE_UPLOADS_DDL =
             "CREATE TABLE "+ UploadTable.TABLE_NAME+" (" +
@@ -64,7 +64,7 @@ public class MessageDatabase extends SQLiteOpenHelper {
                UploadTable.UPLOAD_ID + " STRING NOT NULL, " +
                UploadTable.MESSAGE + " TEXT," +
                UploadTable.MESSAGE_TIME + " INTEGER NOT NULL," +
-               UploadTable.UPLOAD_STATUS + " INTEGER" +
+               UploadTable.STATUS + " INTEGER" +
              ");";
 
     public interface CommandTable {
@@ -73,7 +73,7 @@ public class MessageDatabase extends SQLiteOpenHelper {
         public final static String URL = "url";
         public final static String METHOD = "method";
         public final static String POST_DATA = "post_data";
-        public final static String UPLOAD_STATUS = "upload_status";
+        public final static String STATUS = "status";
     }
     private static final String CREATE_COMMANDS_DDL =
             "CREATE TABLE "+ CommandTable.TABLE_NAME+" (" +
@@ -82,7 +82,7 @@ public class MessageDatabase extends SQLiteOpenHelper {
                CommandTable.URL + " STRING NOT NULL, " +
                CommandTable.METHOD + " STRING NOT NULL, " +
                CommandTable.POST_DATA + " TEXT, " +
-               CommandTable.UPLOAD_STATUS + " INTEGER" +
+               CommandTable.STATUS + " INTEGER" +
              ");";
 
     public MessageDatabase(Context context) {

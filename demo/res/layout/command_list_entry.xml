@@ -38,7 +38,7 @@
         android:text="Post Data" />
 
     <TextView
-        android:id="@+id/uploadStatus"
+        android:id="@+id/status"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
