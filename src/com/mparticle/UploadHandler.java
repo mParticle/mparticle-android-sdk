@@ -132,7 +132,7 @@ import com.mparticle.MessageDatabase.UploadTable;
                 selection = MessageTable.UPLOAD_STATUS + "<=?";
             }
             String[] selectionColumns = new String[]{MessageTable.UUID, MessageTable.MESSAGE, MessageTable.UPLOAD_STATUS, MessageTable.MESSAGE_TIME, "_id"};
-            Cursor readyMessagesCursor = db.query("messages", selectionColumns, selection, selectionArgs, null, null, MessageTable.MESSAGE_TIME+" , _id");
+            Cursor readyMessagesCursor = db.query(MessageTable.TABLE_NAME, selectionColumns, selection, selectionArgs, null, null, MessageTable.MESSAGE_TIME+" , _id");
             if (readyMessagesCursor.getCount()>0) {
                 JSONArray messagesArray = new JSONArray();
                 int lastReadyMessage = 0;
@@ -188,7 +188,7 @@ import com.mparticle.MessageDatabase.UploadTable;
             SQLiteDatabase db = mDB.getWritableDatabase();
             String[] selectionArgs = new String[]{Integer.toString(UploadStatus.PROCESSED)};
             String[] selectionColumns = new String[]{ "_id", UploadTable.MESSAGE };
-            Cursor readyUploadsCursor = db.query("uploads", selectionColumns, UploadTable.UPLOAD_STATUS+"!=?", selectionArgs, null, null, UploadTable.MESSAGE_TIME+" , _id");
+            Cursor readyUploadsCursor = db.query(UploadTable.TABLE_NAME, selectionColumns, UploadTable.UPLOAD_STATUS+"!=?", selectionArgs, null, null, UploadTable.MESSAGE_TIME+" , _id");
             if (readyUploadsCursor.getCount()>0) {
                 while (readyUploadsCursor.moveToNext()) {
                     int uploadId=  readyUploadsCursor.getInt(0);
@@ -264,24 +264,24 @@ import com.mparticle.MessageDatabase.UploadTable;
         contentValues.put(UploadTable.MESSAGE_TIME, message.getLong(MessageKey.TIMESTAMP));
         contentValues.put(UploadTable.MESSAGE, message.toString());
         contentValues.put(UploadTable.UPLOAD_STATUS, UploadStatus.PENDING);
-        db.insert("uploads", null, contentValues);
+        db.insert(UploadTable.TABLE_NAME, null, contentValues);
     }
 
     private void dbDeleteProcessedMessages(SQLiteDatabase db, int lastReadyMessage) {
         String[] whereArgs = { Long.toString(lastReadyMessage) };
-        db.delete("messages", "_id<=?", whereArgs);
+        db.delete(MessageTable.TABLE_NAME, "_id<=?", whereArgs);
     }
 
     private void dbUpdateUploadStatus(SQLiteDatabase db, int uploadId, int status) {
         ContentValues contentValues = new ContentValues();
         contentValues.put(UploadTable.UPLOAD_STATUS, status);
         String[] whereArgs = { Long.toString(uploadId) };
-        db.update("uploads", contentValues, "_id=?", whereArgs);
+        db.update(UploadTable.TABLE_NAME, contentValues, "_id=?", whereArgs);
     }
 
     private void dbDeleteUpload(SQLiteDatabase db, int uploadId) {
         String[] whereArgs = { Long.toString(uploadId) };
-        db.delete("uploads", "_id=?", whereArgs);
+        db.delete(UploadTable.TABLE_NAME, "_id=?", whereArgs);
     }
 
     /* Possibly for development only */

@@ -208,7 +208,7 @@ public class MessageManager {
                     // select the session and get the start/end times
                     String[] selectionArgs = new String[]{sessionId};
                     String[] sessionColumns = new String[]{SessionTable.START_TIME, SessionTable.END_TIME, SessionTable.SESSION_LENGTH, SessionTable.ATTRIBUTES};
-                    Cursor selectCursor = db.query("sessions", sessionColumns, SessionTable.SESSION_ID+"=?", selectionArgs, null, null, null);
+                    Cursor selectCursor = db.query(SessionTable.TABLE_NAME, sessionColumns, SessionTable.SESSION_ID+"=?", selectionArgs, null, null, null);
                     selectCursor.moveToFirst();
                     long start = selectCursor.getLong(0);
                     long end = selectCursor.getLong(1);
@@ -226,7 +226,7 @@ public class MessageManager {
                     dbUpdateMessageStatus(db, sessionId, UploadStatus.BATCH_READY);
 
                     // delete the processed session record
-                    db.delete("sessions", SessionTable.SESSION_ID + "=?", new String[]{sessionId});
+                    db.delete(SessionTable.TABLE_NAME, SessionTable.SESSION_ID + "=?", new String[]{sessionId});
 
                 } catch (SQLiteException e) {
                     Log.e(TAG, "Error creating session end message in mParticle DB", e);
@@ -241,7 +241,7 @@ public class MessageManager {
                     // find sessions without session-end message and create them
                     SQLiteDatabase db = mDB.getWritableDatabase();
                     String[] sessionColumns = new String[]{SessionTable.SESSION_ID};
-                    Cursor selectCursor = db.query("sessions", sessionColumns,
+                    Cursor selectCursor = db.query(SessionTable.TABLE_NAME, sessionColumns,
                             SessionTable.UPLOAD_STATUS+"!="+UploadStatus.ENDED, null, null, null, null);
                     // NOTE: there should be at most one orphan - but process any that are found
                     while (selectCursor.moveToNext()) {
@@ -267,7 +267,7 @@ public class MessageManager {
             values.put(SessionTable.END_TIME, sessionStartTime);
             values.put(SessionTable.SESSION_LENGTH, 0);
             values.put(SessionTable.UPLOAD_STATUS, UploadStatus.PENDING);
-            db.insert("sessions", null, values);
+            db.insert(SessionTable.TABLE_NAME, null, values);
         }
 
         private void dbInsertMessage(SQLiteDatabase db, JSONObject message, int status) throws JSONException {
@@ -279,14 +279,14 @@ public class MessageManager {
             contentValues.put(MessageTable.SESSION_ID, getMessageSessionId(message));
             contentValues.put(MessageTable.MESSAGE, message.toString());
             contentValues.put(MessageTable.UPLOAD_STATUS, status);
-            db.insert("messages", null, contentValues);
+            db.insert(MessageTable.TABLE_NAME, null, contentValues);
         }
 
         private void dbUpdateMessageStatus(SQLiteDatabase db, String sessionId, long status) {
             ContentValues contentValues = new ContentValues();
             contentValues.put(MessageTable.UPLOAD_STATUS, status);
             String[] whereArgs = {sessionId };
-            db.update("messages", contentValues, MessageTable.SESSION_ID + "=?", whereArgs);
+            db.update(MessageTable.TABLE_NAME, contentValues, MessageTable.SESSION_ID + "=?", whereArgs);
         }
 
         private void dbUpdateSessionEndTime(SQLiteDatabase db, String sessionId, long endTime, long sessionLength) {
@@ -296,7 +296,7 @@ public class MessageManager {
                 sessionValues.put(SessionTable.SESSION_LENGTH, sessionLength);
             }
             String[] whereArgs = {sessionId };
-            db.update("sessions", sessionValues, SessionTable.SESSION_ID + "=?", whereArgs);
+            db.update(SessionTable.TABLE_NAME, sessionValues, SessionTable.SESSION_ID + "=?", whereArgs);
         }
 
         // helper method for getting a session id out of a message since session-start messages use the id field
