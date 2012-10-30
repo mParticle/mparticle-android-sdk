@@ -53,6 +53,7 @@ public class MParticleAPI {
     /* package-private */ long mLastEventTime = 0;
     /* package-private */ long mSessionActiveStart = 0;
     /* package-private */ long mSessionLength = 0;
+    /* package-private */ long mEventCount = 0;
 
     /* package-private */ MParticleAPI(Context context, String apiKey, MessageManager messageManager) {
         this.mContext = context.getApplicationContext();
@@ -208,6 +209,7 @@ public class MParticleAPI {
         this.mLastEventTime = this.mSessionStartTime;
         this.mSessionID = UUID.randomUUID().toString();
         this.mSessionLength = 0;
+        this.mEventCount = 0;
         this.mMessageManager.startSession(mSessionID, mSessionStartTime);
         this.mTimeoutHandler.sendEmptyMessageDelayed(0, this.mSessionTimeout);
         this.debugLog("Start New Session");
@@ -257,8 +259,10 @@ public class MParticleAPI {
             return;
         }
         this.ensureActiveSession();
-        this.mMessageManager.logCustomEvent(mSessionID, mSessionStartTime, mLastEventTime, eventName, eventData);
-        this.debugLog("Logged event: " + eventName + " with data " + eventData);
+        if (checkEventLimit()) {
+            this.mMessageManager.logCustomEvent(mSessionID, mSessionStartTime, mLastEventTime, eventName, eventData);
+            this.debugLog("Logged event: " + eventName + " with data " + eventData);
+        }
     }
 
     /**
@@ -280,8 +284,10 @@ public class MParticleAPI {
             return;
         }
         this.ensureActiveSession();
-        this.mMessageManager.logScreenView(mSessionID, mSessionStartTime, mLastEventTime, screenName, eventData);
-        this.debugLog("Logged screen: " + screenName + " with data " + eventData);
+        if (checkEventLimit()) {
+            this.mMessageManager.logScreenView(mSessionID, mSessionStartTime, mLastEventTime, screenName, eventData);
+            this.debugLog("Logged screen: " + screenName + " with data " + eventData);
+        }
     }
 
     /**
@@ -566,6 +572,21 @@ public class MParticleAPI {
         }
 
         return properties;
+    }
+
+    /**
+     * This method checks the event count is below the limit and increments the event count.
+     * A warning is logged if the limit has been reached.
+     * @return true if event count is below limit
+     */
+    private boolean checkEventLimit() {
+        if ( this.mEventCount < Constants.EVENT_LIMIT) {
+            this.mEventCount++;
+            return true;
+        } else {
+            Log.w(TAG,"The event limit has been exceeded for this session.");
+            return false;
+        }
     }
 
     private void debugLog(String message) {

@@ -2,6 +2,8 @@ package com.mparticle;
 
 /* package-private */ class Constants {
 
+    public static final long EVENT_LIMIT = 1000;
+
     public interface MessageType {
         public static final String SESSION_START = "ss";
         public static final String SESSION_END = "se";
