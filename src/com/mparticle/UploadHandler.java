@@ -5,21 +5,19 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.util.List;
 import java.util.UUID;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 
 import org.apache.http.HttpHost;
+import org.apache.http.client.CookieStore;
 import org.apache.http.client.HttpResponseException;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.protocol.ClientContext;
 import org.apache.http.conn.params.ConnRoutePNames;
-import org.apache.http.cookie.Cookie;
 import org.apache.http.entity.ByteArrayEntity;
-import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.BasicResponseHandler;
 import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.protocol.HttpContext;
@@ -55,7 +53,7 @@ import com.mparticle.MessageDatabase.UploadTable;
 
     private AndroidHttpClient mHttpClient;
     private HttpContext mHttpContext;
-    private BasicCookieStore mCookieStore;
+    private CookieStore mCookieStore;
     private JSONObject mAppInfo;
     private JSONObject mDeviceInfo;
 
@@ -84,7 +82,7 @@ import com.mparticle.MessageDatabase.UploadTable;
         mDB = new MessageDatabase(mContext);
         mHttpClient = AndroidHttpClient.newInstance("mParticleSDK", mContext);
         mHttpContext  = new BasicHttpContext();
-        mCookieStore = new BasicCookieStore();
+        mCookieStore = new PersistentCookieStore(context);
         mHttpContext.setAttribute(ClientContext.COOKIE_STORE, mCookieStore);
 
         mAppInfo = MParticleAPI.collectAppInfo(context);
@@ -195,15 +193,11 @@ import com.mparticle.MessageDatabase.UploadTable;
                 while (readyUploadsCursor.moveToNext()) {
                     int uploadId=  readyUploadsCursor.getInt(0);
                     String message = readyUploadsCursor.getString(1);
-                    // prepare cookies
-                    // TODO: verify cookies are setup correctly
                     // post message to mParticle service
                     HttpPost httpPost = new HttpPost(makeServiceUri("events"));
                     httpPost.setHeader("Content-type", "application/json");
                     httpPost.setEntity(new ByteArrayEntity(message.getBytes()));
                     httpPost.setHeader(HEADER_SIGNATURE, hmacSha256Encode(mSecret, message));
-                    // TODO: remove - debug mode only
-                    httpPost.setHeader("x-mp-debugmode", "true");
 
                     try {
                         String response = mHttpClient.execute(httpPost, new BasicResponseHandler(), mHttpContext);
@@ -211,8 +205,6 @@ import com.mparticle.MessageDatabase.UploadTable;
                         // TODO: parse responses
                         JSONObject responseJSON = new JSONObject(response);
                         Log.d(TAG, "Got 2xx response with JSON:" + responseJSON.toString());
-                        List<Cookie> cookies = mCookieStore.getCookies();
-                        Log.d(TAG, "Got cookies:" + cookies);
                         if (responseJSON.has(MessageKey.MESSAGES)) {
                             Log.d(TAG, "Response has messages to be processed");
                             // TODO: store and process command messages
