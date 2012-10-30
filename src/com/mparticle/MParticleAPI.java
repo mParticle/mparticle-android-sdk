@@ -56,12 +56,12 @@ public class MParticleAPI {
     /* package-private */ long mEventCount = 0;
 
     /* package-private */ MParticleAPI(Context context, String apiKey, MessageManager messageManager) {
-        this.mContext = context.getApplicationContext();
-        this.mApiKey = apiKey;
-        this.mMessageManager = messageManager;
+        mContext = context.getApplicationContext();
+        mApiKey = apiKey;
+        mMessageManager = messageManager;
         HandlerThread timeoutHandlerThread = new HandlerThread("SessionTimeoutHandler", Process.THREAD_PRIORITY_BACKGROUND);
         timeoutHandlerThread.start();
-        this.mTimeoutHandler = new SessionTimeoutHandler(this, timeoutHandlerThread.getLooper());
+        mTimeoutHandler = new SessionTimeoutHandler(this, timeoutHandlerThread.getLooper());
 
         mPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
         MParticleAPI.debugMode = mPreferences.getBoolean("mp::debug::"+mApiKey, false);
@@ -116,7 +116,7 @@ public class MParticleAPI {
      * @param sessionTimeout
      */
     public void setSessionTimeout(int sessionTimeout) {
-        this.mSessionTimeout = sessionTimeout;
+        mSessionTimeout = sessionTimeout;
     }
 
     /**
@@ -125,7 +125,7 @@ public class MParticleAPI {
      * This method should be called from an Activity's onStart() method.
      */
     public void start() {
-        this.ensureActiveSession();
+        ensureActiveSession();
     }
 
     /**
@@ -136,14 +136,14 @@ public class MParticleAPI {
      * To explicitly end a session use the endSession() method.
      */
     public void stop() {
-        if (this.mSessionStartTime==0) {
+        if (mSessionStartTime==0) {
             return;
         }
         long stopTime = System.currentTimeMillis();
-        this.mLastEventTime = stopTime;
+        mLastEventTime = stopTime;
         stopActiveSession(mLastEventTime);
-        this.mMessageManager.stopSession(mSessionID, stopTime, mSessionLength);
-        this.debugLog("Stop Called");
+        mMessageManager.stopSession(mSessionID, stopTime, mSessionLength);
+        debugLog("Stop Called");
     }
 
     /**
@@ -158,13 +158,13 @@ public class MParticleAPI {
      * Explicitly terminates the user session.
      */
     public void endSession() {
-        if (this.mSessionStartTime==0) {
+        if (mSessionStartTime==0) {
             return;
         }
         long sessionEndTime=System.currentTimeMillis();
         closeSession(sessionEndTime);
-        this.mMessageManager.endSession(mSessionID, sessionEndTime, mSessionLength);
-        this.debugLog("Explicit End Session");
+        mMessageManager.endSession(mSessionID, sessionEndTime, mSessionLength);
+        debugLog("Explicit End Session");
     }
 
     /**
@@ -172,12 +172,12 @@ public class MParticleAPI {
      */
     private void ensureActiveSession() {
         checkSessionTimeout();
-        this.mLastEventTime = System.currentTimeMillis();
-        if (0==this.mSessionStartTime) {
-            this.beginSession();
+        mLastEventTime = System.currentTimeMillis();
+        if (0==mSessionStartTime) {
+            beginSession();
         }
-        if (0==this.mSessionActiveStart) {
-            this.mSessionActiveStart=this.mLastEventTime;
+        if (0==mSessionActiveStart) {
+            mSessionActiveStart=mLastEventTime;
         }
     }
 
@@ -199,9 +199,9 @@ public class MParticleAPI {
      */
     /* package-private */ void checkSessionTimeout() {
         long now = System.currentTimeMillis();
-        if (0!=this.mSessionStartTime && (this.mSessionTimeout < now-this.mLastEventTime) ) {
-            this.debugLog("Session Timed Out");
-            this.closeSession(this.mLastEventTime);
+        if (0!=mSessionStartTime && (mSessionTimeout < now-mLastEventTime) ) {
+            debugLog("Session Timed Out");
+            closeSession(mLastEventTime);
         }
     }
 
@@ -209,14 +209,14 @@ public class MParticleAPI {
      * Creates a new session and generates the start-session message.
      */
     private void beginSession() {
-        this.mSessionStartTime = System.currentTimeMillis();
-        this.mLastEventTime = this.mSessionStartTime;
-        this.mSessionID = UUID.randomUUID().toString();
-        this.mSessionLength = 0;
-        this.mEventCount = 0;
-        this.mMessageManager.startSession(mSessionID, mSessionStartTime);
-        this.mTimeoutHandler.sendEmptyMessageDelayed(0, this.mSessionTimeout);
-        this.debugLog("Start New Session");
+        mSessionStartTime = System.currentTimeMillis();
+        mLastEventTime = mSessionStartTime;
+        mSessionID = UUID.randomUUID().toString();
+        mSessionLength = 0;
+        mEventCount = 0;
+        mMessageManager.startSession(mSessionID, mSessionStartTime);
+        mTimeoutHandler.sendEmptyMessageDelayed(0, mSessionTimeout);
+        debugLog("Start New Session");
     }
 
     /**
@@ -230,18 +230,18 @@ public class MParticleAPI {
             sessionEndTime = System.currentTimeMillis();
         }
         stopActiveSession(sessionEndTime);
-        this.mMessageManager.stopSession(mSessionID, sessionEndTime, mSessionLength);
+        mMessageManager.stopSession(mSessionID, sessionEndTime, mSessionLength);
 
         // reset agent to unstarted state
-        this.mSessionStartTime = 0;
+        mSessionStartTime = 0;
     }
 
     /**
      * Upload queued messages to the mParticle server.
      */
     public void upload() {
-        this.debugLog("Upload");
-        this.mMessageManager.doUpload();
+        debugLog("Upload");
+        mMessageManager.doUpload();
     }
 
     /**
@@ -262,10 +262,10 @@ public class MParticleAPI {
             Log.w(TAG,"eventName is required for logEvent");
             return;
         }
-        this.ensureActiveSession();
+        ensureActiveSession();
         if (checkEventLimit()) {
-            this.mMessageManager.logCustomEvent(mSessionID, mSessionStartTime, mLastEventTime, eventName, eventData);
-            this.debugLog("Logged event: " + eventName + " with data " + eventData);
+            mMessageManager.logCustomEvent(mSessionID, mSessionStartTime, mLastEventTime, eventName, eventData);
+            debugLog("Logged event: " + eventName + " with data " + eventData);
         }
     }
 
@@ -287,10 +287,10 @@ public class MParticleAPI {
             Log.w(TAG,"screenName is required for logScreenView");
             return;
         }
-        this.ensureActiveSession();
+        ensureActiveSession();
         if (checkEventLimit()) {
-            this.mMessageManager.logScreenView(mSessionID, mSessionStartTime, mLastEventTime, screenName, eventData);
-            this.debugLog("Logged screen: " + screenName + " with data " + eventData);
+            mMessageManager.logScreenView(mSessionID, mSessionStartTime, mLastEventTime, screenName, eventData);
+            debugLog("Logged screen: " + screenName + " with data " + eventData);
         }
     }
 
@@ -312,8 +312,8 @@ public class MParticleAPI {
             Log.w(TAG,"eventName is required for logErrorEvent");
             return;
         }
-        this.ensureActiveSession();
-        this.debugLog("Logged error: " + eventName);
+        ensureActiveSession();
+        debugLog("Logged error: " + eventName);
     }
 
     /**
@@ -349,8 +349,8 @@ public class MParticleAPI {
             Log.w(TAG,"key is required for identifyUser");
             return;
         }
-        this.ensureActiveSession();
-        this.debugLog("Identified user: " + userId);
+        ensureActiveSession();
+        debugLog("Identified user: " + userId);
     }
 
     /**
@@ -359,12 +359,12 @@ public class MParticleAPI {
      * @param latitude
      */
     public void setLocation(double longitude, double latitude) {
-        this.ensureActiveSession();
+        ensureActiveSession();
         Location location = new Location("user");
         location.setLatitude(latitude);
         location.setLongitude(longitude);
         MessageManager.setLocation(location);
-        this.debugLog("Set Location: " + longitude + " " + latitude);
+        debugLog("Set Location: " + longitude + " " + latitude);
     }
 
     /**
@@ -373,8 +373,8 @@ public class MParticleAPI {
      * @param value the attribute value
      */
     public void setSessionProperty(String key, String value) {
-        this.ensureActiveSession();
-        this.debugLog("Set Session: " + key + "=" + value);
+        ensureActiveSession();
+        debugLog("Set Session: " + key + "=" + value);
     }
 
     /**
@@ -390,7 +390,7 @@ public class MParticleAPI {
      * @param value the attribute value
      */
     public void setUserProperty(String key, String value) {
-        this.debugLog("Set User: " + key + "=" + value);
+        debugLog("Set User: " + key + "=" + value);
     }
 
     /**
@@ -416,7 +416,7 @@ public class MParticleAPI {
     public void setOptOut(boolean optOutFlag) {
         MParticleAPI.optOutFlag = optOutFlag;
         mPreferences.edit().putBoolean("mp::optout::"+mApiKey, optOutFlag).commit();
-        this.debugLog("Set Opt Out: " + MParticleAPI.optOutFlag);
+        debugLog("Set Opt Out: " + MParticleAPI.optOutFlag);
     }
 
     /**
@@ -435,7 +435,7 @@ public class MParticleAPI {
     public void setDebug(boolean debugMode) {
         MParticleAPI.debugMode = debugMode;
         mPreferences.edit().putBoolean("mp::debug::"+mApiKey, debugMode).commit();
-        this.debugLog("Set Debug Mode: " + MParticleAPI.debugMode);
+        debugLog("Set Debug Mode: " + MParticleAPI.debugMode);
     }
 
     /**
@@ -464,14 +464,14 @@ public class MParticleAPI {
      * @param token TBD
      */
     public void setPushRegistrationId(String token) {
-        this.debugLog("Set Push Token: " + token);
+        debugLog("Set Push Token: " + token);
     }
 
     /**
      * Unregister the application from receiving push notifications
      */
     public void clearPushRegistrationId() {
-        this.debugLog("Clear Push Token");
+        debugLog("Clear Push Token");
     }
 
     /**
@@ -584,8 +584,8 @@ public class MParticleAPI {
      * @return true if event count is below limit
      */
     private boolean checkEventLimit() {
-        if ( this.mEventCount < Constants.EVENT_LIMIT) {
-            this.mEventCount++;
+        if ( mEventCount < Constants.EVENT_LIMIT) {
+            mEventCount++;
             return true;
         } else {
             Log.w(TAG,"The event limit has been exceeded for this session.");
@@ -595,7 +595,7 @@ public class MParticleAPI {
 
     private void debugLog(String message) {
         if (MParticleAPI.debugMode) {
-            Log.d(TAG, this.mSessionID + ": " + message);
+            Log.d(TAG, mSessionID + ": " + message);
         }
     }
 
@@ -611,7 +611,7 @@ public class MParticleAPI {
             mParticleAPI.checkSessionTimeout();
             if (0!=mParticleAPI.mSessionStartTime) {
                 // just check once every session timeout period
-                this.sendEmptyMessageDelayed(0, mParticleAPI.mSessionTimeout);
+                sendEmptyMessageDelayed(0, mParticleAPI.mSessionTimeout);
                 // or... use lastEventTime to decide when to check next
             }
         }
