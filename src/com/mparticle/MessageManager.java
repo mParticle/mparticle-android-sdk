@@ -225,10 +225,8 @@ public class MessageManager {
                     // mark session messages ready for BATCH mode upload
                     dbUpdateMessageStatus(db, sessionId, UploadStatus.BATCH_READY);
 
-                    // update session status
-                    ContentValues sessionValues = new ContentValues();
-                    sessionValues.put(SessionTable.UPLOAD_STATUS, UploadStatus.ENDED);
-                    db.update("sessions", sessionValues, SessionTable.SESSION_ID + "=?", new String[]{sessionId});
+                    // delete the processed session record
+                    db.delete("sessions", SessionTable.SESSION_ID + "=?", new String[]{sessionId});
 
                 } catch (SQLiteException e) {
                     Log.e(TAG, "Error creating session end message in mParticle DB", e);

@@ -150,8 +150,8 @@ import com.mparticle.MessageDatabase.UploadTable;
                         JSONObject uploadMessage = createUploadMessage(messagesArray);
                         // store in uploads table
                         dbInsertUpload(db, uploadMessage);
-                        // update message processed status
-                        dbUpdateMessagesStatus(db, lastReadyMessage);
+                        // delete processed messages
+                        dbDeleteProcessedMessages(db, lastReadyMessage);
                         messagesArray = new JSONArray();
                     }
                 }
@@ -201,24 +201,19 @@ import com.mparticle.MessageDatabase.UploadTable;
 
                     try {
                         String response = mHttpClient.execute(httpPost, new BasicResponseHandler(), mHttpContext);
-                        // store responses in DB
-                        // TODO: parse responses
                         JSONObject responseJSON = new JSONObject(response);
                         Log.d(TAG, "Got 2xx response with JSON:" + responseJSON.toString());
+                        // store responses in DB
                         if (responseJSON.has(MessageKey.MESSAGES)) {
                             Log.d(TAG, "Response has messages to be processed");
                             // TODO: store and process command messages
                         }
+                        dbDeleteUpload(db, uploadId);
 
-                    } catch (HttpResponseException e) {
-                        Log.d(TAG, "Request failed:" + e.getMessage());
-                    } catch (IOException e) {
-                        Log.d(TAG, "Request failed:" + e.getMessage());
-                    } catch (JSONException e) {
-                        Log.d(TAG, "Failed to process response message JSON");
-                    } finally {
+                    } catch (Exception e) {
                         // TODO: process failures differently
-                        dbUpdateUploadStatus(db, uploadId);
+                        Log.d(TAG, "Request failed:" + e.getMessage());
+                        dbUpdateUploadStatus(db, uploadId, UploadStatus.READY);
                     }
                 }
             }
@@ -272,18 +267,21 @@ import com.mparticle.MessageDatabase.UploadTable;
         db.insert("uploads", null, contentValues);
     }
 
-    private void dbUpdateMessagesStatus(SQLiteDatabase db, int lastReadyMessage) {
-        ContentValues contentValues = new ContentValues();
-        contentValues.put(MessageTable.UPLOAD_STATUS, UploadStatus.PROCESSED);
+    private void dbDeleteProcessedMessages(SQLiteDatabase db, int lastReadyMessage) {
         String[] whereArgs = { Long.toString(lastReadyMessage) };
-        db.update("messages", contentValues, "_id<=?", whereArgs);
+        db.delete("messages", "_id<=?", whereArgs);
     }
 
-    private void dbUpdateUploadStatus(SQLiteDatabase db, int uploadId) {
+    private void dbUpdateUploadStatus(SQLiteDatabase db, int uploadId, int status) {
         ContentValues contentValues = new ContentValues();
-        contentValues.put(UploadTable.UPLOAD_STATUS, UploadStatus.PROCESSED);
+        contentValues.put(UploadTable.UPLOAD_STATUS, status);
         String[] whereArgs = { Long.toString(uploadId) };
         db.update("uploads", contentValues, "_id=?", whereArgs);
+    }
+
+    private void dbDeleteUpload(SQLiteDatabase db, int uploadId) {
+        String[] whereArgs = { Long.toString(uploadId) };
+        db.delete("uploads", "_id=?", whereArgs);
     }
 
     /* Possibly for development only */
