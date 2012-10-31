@@ -15,6 +15,7 @@ import org.apache.http.client.CookieStore;
 import org.apache.http.client.HttpResponseException;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.protocol.ClientContext;
 import org.apache.http.conn.params.ConnRoutePNames;
 import org.apache.http.entity.ByteArrayEntity;
@@ -101,13 +102,11 @@ import com.mparticle.MessageDatabase.UploadTable;
         case PROCESS_UPLOADS:
             // post upload messages to server and mark the uploads as processed. store response commands to be processed.
             processUploads();
-            break;
+            // TODO: restore this break - for development only
+            // break;
         case PROCESS_COMMANDS:
-            // read responses with upload messages
-            // post response to server
-            // handle cookies
-            // update response process status
-            // TODO: processCommands();
+            // post commands to vendor services
+            processCommands();
             break;
         case CLEANUP:
             // delete completed uploads, messages, and sessions
@@ -189,7 +188,7 @@ import com.mparticle.MessageDatabase.UploadTable;
                     UploadTable.STATUS + "!=?", selectionArgs, null, null, UploadTable.MESSAGE_TIME + " , _id");
             if (readyUploadsCursor.getCount()>0) {
                 while (readyUploadsCursor.moveToNext()) {
-                    int uploadId=  readyUploadsCursor.getInt(0);
+                    int id = readyUploadsCursor.getInt(0);
                     String message = readyUploadsCursor.getString(1);
                     // POST message to mParticle service
                     HttpPost httpPost = new HttpPost(makeServiceUri("events"));
@@ -199,7 +198,7 @@ import com.mparticle.MessageDatabase.UploadTable;
 
                     try {
                         String response = mHttpClient.execute(httpPost, new BasicResponseHandler(), mHttpContext);
-                        dbDeleteUpload(db, uploadId);
+                        dbDeleteUpload(db, id);
 
                         // TODO: separate response processing errors from upload errors
                         JSONObject responseJSON = new JSONObject(response);
@@ -220,7 +219,7 @@ import com.mparticle.MessageDatabase.UploadTable;
                     } catch (Exception e) {
                         // TODO: process failures differently
                         Log.d(TAG, "Request failed:" + e.getMessage());
-                        dbUpdateUploadStatus(db, uploadId, Status.READY);
+                        dbUpdateUploadStatus(db, id, Status.READY);
                     }
                 }
             }
@@ -237,6 +236,46 @@ import com.mparticle.MessageDatabase.UploadTable;
         }
     }
 
+    void processCommands() {
+        try {
+            // read batches ready to upload
+            SQLiteDatabase db = mDB.getWritableDatabase();
+            String[] selectionArgs = new String[]{Integer.toString(Status.PROCESSED)};
+            String[] selectionColumns = new String[]{ "_id", CommandTable.URL, CommandTable.METHOD, CommandTable.POST_DATA };
+            Cursor readyComandsCursor = db.query(CommandTable.TABLE_NAME, selectionColumns,
+                    CommandTable.STATUS + "!=?", selectionArgs, null, null, "_id");
+            while (readyComandsCursor.moveToNext()) {
+                int id = readyComandsCursor.getInt(0);
+                String url = readyComandsCursor.getString(1);
+                String method = readyComandsCursor.getString(2);
+                String postData = readyComandsCursor.getString(3);
+
+                HttpUriRequest request;
+                if ("POST".equalsIgnoreCase(method)) {
+                    request = new HttpPost(url);
+                    ((HttpPost)request).setEntity(new ByteArrayEntity(postData.getBytes()));
+                } else {
+                    request = new HttpGet(url);
+                }
+
+                try {
+                    // NOTE: this currently uses the same httpClient as mParticle requests (useragent, proxy, threads?)
+                    // but not the httpContext (cookiestore)
+                    mHttpClient.execute(request);
+                } catch (Exception e) {
+                    // TODO: process failures differently
+                    Log.d(TAG, "Request failed:" + e.getMessage());
+                } finally {
+                    dbDeleteCommand(db, id);
+                }
+
+            }
+        } catch (SQLiteException e) {
+            Log.e(TAG, "Error processing command uploads in mParticle DB", e);
+        } finally {
+            mDB.close();
+        }
+    }
     void fetchConfig() {
         try {
             HttpGet httpGet = new HttpGet(makeServiceUri("config"));
@@ -279,16 +318,21 @@ import com.mparticle.MessageDatabase.UploadTable;
         db.delete(MessageTable.TABLE_NAME, "_id<=?", whereArgs);
     }
 
-    private void dbUpdateUploadStatus(SQLiteDatabase db, int uploadId, int status) {
+    private void dbUpdateUploadStatus(SQLiteDatabase db, int id, int status) {
         ContentValues contentValues = new ContentValues();
         contentValues.put(UploadTable.STATUS, status);
-        String[] whereArgs = { Long.toString(uploadId) };
+        String[] whereArgs = { Long.toString(id) };
         db.update(UploadTable.TABLE_NAME, contentValues, "_id=?", whereArgs);
     }
 
-    private void dbDeleteUpload(SQLiteDatabase db, int uploadId) {
-        String[] whereArgs = { Long.toString(uploadId) };
+    private void dbDeleteUpload(SQLiteDatabase db, int id) {
+        String[] whereArgs = { Long.toString(id) };
         db.delete(UploadTable.TABLE_NAME, "_id=?", whereArgs);
+    }
+
+    private void dbDeleteCommand(SQLiteDatabase db, int id) {
+        String[] whereArgs = { Long.toString(id) };
+        db.delete(CommandTable.TABLE_NAME, "_id=?", whereArgs);
     }
 
     private void dbInsertCommand(SQLiteDatabase db, JSONObject command) throws JSONException {
