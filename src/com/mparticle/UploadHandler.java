@@ -5,6 +5,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.util.Date;
 import java.util.UUID;
 
 import javax.crypto.Mac;
@@ -20,6 +21,7 @@ import org.apache.http.client.protocol.ClientContext;
 import org.apache.http.conn.params.ConnRoutePNames;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.impl.client.BasicResponseHandler;
+import org.apache.http.impl.cookie.DateUtils;
 import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.protocol.HttpContext;
 import org.json.JSONArray;
@@ -194,7 +196,8 @@ import com.mparticle.MessageDatabase.UploadTable;
                     HttpPost httpPost = new HttpPost(makeServiceUri("events"));
                     httpPost.setHeader("Content-type", "application/json");
                     httpPost.setEntity(new ByteArrayEntity(message.getBytes()));
-                    httpPost.setHeader(HEADER_SIGNATURE, hmacSha256Encode(mSecret, message));
+
+                    addMessageSignature(httpPost, message);
 
                     try {
                         String response = mHttpClient.execute(httpPost, new BasicResponseHandler(), mHttpContext);
@@ -225,15 +228,36 @@ import com.mparticle.MessageDatabase.UploadTable;
             }
         } catch (SQLiteException e) {
             Log.e(TAG, "Error processing batch uploads in mParticle DB", e);
-        } catch (InvalidKeyException e) {
-            Log.e(TAG, "Error signing message", e);
-        } catch (NoSuchAlgorithmException e) {
-            Log.e(TAG, "Error signing message", e);
         } catch (URISyntaxException e) {
             Log.e(TAG, "Error constructing service URI", e);
         } finally {
             mDB.close();
         }
+    }
+
+    private void addMessageSignature(HttpUriRequest request, String message) {
+        try {
+            String method = request.getMethod();
+            String dateHeader = DateUtils.formatDate(new Date());
+            String path = request.getURI().getPath();
+
+            String signatureMessage = method + "\n" + dateHeader + "\n" + path;
+            if ("POST".equalsIgnoreCase(method) && null!=message) {
+                signatureMessage += message;
+            }
+
+            request.setHeader("Date", dateHeader);
+            // TODO: swap signature to new algorithm once server is updated
+            if (null!=message) {
+                request.setHeader(HEADER_SIGNATURE, hmacSha256Encode(mSecret, message));
+            }
+            request.setHeader(HEADER_SIGNATURE+"-new", hmacSha256Encode(mSecret, signatureMessage));
+        } catch (InvalidKeyException e) {
+            Log.e(TAG, "Error signing message", e);
+        } catch (NoSuchAlgorithmException e) {
+            Log.e(TAG, "Error signing message", e);
+        }
+
     }
 
     void processCommands() {
@@ -280,6 +304,8 @@ import com.mparticle.MessageDatabase.UploadTable;
         try {
             HttpGet httpGet = new HttpGet(makeServiceUri("config"));
             String response = mHttpClient.execute(httpGet, new BasicResponseHandler(), mHttpContext);
+            addMessageSignature(httpGet, null);
+
             JSONObject responseJSON = new JSONObject(response);
             if (responseJSON.has(MessageKey.SESSION_UPLOAD)) {
                 String sessionUploadMode = responseJSON.getString(MessageKey.SESSION_UPLOAD);
