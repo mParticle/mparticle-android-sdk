@@ -37,7 +37,7 @@ public class MParticleAPI {
     /* package-private */ static final String VERSION = "0.1";
 
     private static final String TAG = "mParticleAPI";
-    private static boolean optOutFlag = false;
+    private static boolean optOutStatus = false;
     private static boolean debugMode = false;
     private static Map<String, MParticleAPI> sInstanceMap = new HashMap<String, MParticleAPI>();
 
@@ -65,7 +65,7 @@ public class MParticleAPI {
 
         mPreferences = mContext.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
         MParticleAPI.debugMode = mPreferences.getBoolean("mp::debug::"+mApiKey, false);
-        MParticleAPI.optOutFlag = mPreferences.getBoolean("mp::optout::"+mApiKey, false);
+        MParticleAPI.optOutStatus = mPreferences.getBoolean("mp::optout::"+mApiKey, false);
 
         if (!mPreferences.contains("mp::ict")) {
             mPreferences.edit().putLong("mp::ict", System.currentTimeMillis()).commit();
@@ -417,12 +417,15 @@ public class MParticleAPI {
 
     /**
      * Control the opt-in/opt-out status for the application.
-     * @param optOutFlag set to <code>true</code> to opt out of event tracking
+     * @param optOutStatus set to <code>true</code> to opt out of event tracking
      */
-    public void setOptOut(boolean optOutFlag) {
-        MParticleAPI.optOutFlag = optOutFlag;
-        mPreferences.edit().putBoolean("mp::optout::"+mApiKey, optOutFlag).commit();
-        debugLog("Set Opt Out: " + MParticleAPI.optOutFlag);
+    public void setOptOut(boolean optOutStatus) {
+        // TODO: for now, require an active session so the message has a session id. may want to remove this requirement.
+        ensureActiveSession();
+        MParticleAPI.optOutStatus = optOutStatus;
+        mPreferences.edit().putBoolean("mp::optout::"+mApiKey, optOutStatus).commit();
+        mMessageManager.optOut(mSessionID, mSessionStartTime, System.currentTimeMillis(), optOutStatus);
+        debugLog("Set Opt Out: " + MParticleAPI.optOutStatus);
     }
 
     /**
@@ -430,7 +433,7 @@ public class MParticleAPI {
      * @return the opt-out status
      */
     public boolean getOptOut() {
-        return MParticleAPI.optOutFlag;
+        return MParticleAPI.optOutStatus;
     }
 
     /**

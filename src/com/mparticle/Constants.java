@@ -74,6 +74,8 @@ package com.mparticle;
         // config
         public static final String SESSION_UPLOAD = "su";
         public static final String TIMEZONE = "tz";
+        // opt-out
+        public static final String OPT_OUT_STATUS = "s";
 
     }
 

@@ -133,6 +133,16 @@ public class MessageManager {
             Log.w(TAG, "Failed to create mParticle screen view message");
         }
     }
+    public void optOut(String sessionId, long sessionStartTime, long time, boolean optOutStatus) {
+        try {
+            JSONObject message = createMessage(MessageType.OPT_OUT, sessionId, sessionStartTime, time, null, null, false);
+            message.put(MessageKey.OPT_OUT_STATUS, optOutStatus);
+            mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, Status.READY, 0, message));
+        } catch (JSONException e) {
+            Log.w(TAG, "Failed to create mParticle screen view message");
+        }
+
+    }
 
     public void doUpload() {
         mUploadHandler.sendEmptyMessage(UploadHandler.PREPARE_UPLOADS);
@@ -308,7 +318,6 @@ public class MessageManager {
                 sessionId= message.getString(MessageKey.SESSION_ID);
             }
             return sessionId;
-
         }
     }
 
