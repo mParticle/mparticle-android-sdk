@@ -4,6 +4,7 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.TimeZone;
 import java.util.UUID;
 
 import org.json.JSONException;
@@ -571,6 +572,8 @@ public class MParticleAPI {
             properties.put(MessageKey.MOBILE_NETWORK_CODE, telephonyManager.getNetworkOperator());
             // properties.put(MessageKey.MOBILE_COUNTRY_CODE, telephonyManager.getNetworkOperator());
 
+            // timezone
+            properties.put(MessageKey.TIMEZONE, TimeZone.getDefault().getRawOffset()/(1000*60*60));
         } catch (JSONException e) {
             // ignore JSON exceptions
         }

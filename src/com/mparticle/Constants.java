@@ -71,6 +71,7 @@ package com.mparticle;
         public static final String POST = "d";
         // config
         public static final String SESSION_UPLOAD = "su";
+        public static final String TIMEZONE = "tz";
 
     }
 
