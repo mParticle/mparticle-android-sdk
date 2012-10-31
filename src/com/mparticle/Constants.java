@@ -73,6 +73,8 @@ package com.mparticle;
         public static final String URL = "u";
         public static final String METHOD = "m";
         public static final String POST = "d";
+        public static final String CLEAR_HEADERS = "d";
+        public static final String HEADERS = "h";
         // config
         public static final String SESSION_UPLOAD = "su";
         public static final String TIMEZONE = "tz";

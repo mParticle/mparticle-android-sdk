@@ -8,7 +8,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 @SuppressWarnings("javadoc")
 public class MessageDatabase extends SQLiteOpenHelper {
 
-    private static final int DB_VERSION = 6;
+    private static final int DB_VERSION = 7;
     private static final String DB_NAME = "mparticle.db";
 
     public interface MessageTable {
@@ -73,6 +73,8 @@ public class MessageDatabase extends SQLiteOpenHelper {
         public final static String URL = "url";
         public final static String METHOD = "method";
         public final static String POST_DATA = "post_data";
+        public final static String CLEAR_HEADERS = "clear_headers";
+        public final static String HEADERS = "headers";
         public final static String STATUS = "status";
     }
     private static final String CREATE_COMMANDS_DDL =
@@ -82,6 +84,8 @@ public class MessageDatabase extends SQLiteOpenHelper {
                CommandTable.URL + " STRING NOT NULL, " +
                CommandTable.METHOD + " STRING NOT NULL, " +
                CommandTable.POST_DATA + " TEXT, " +
+               CommandTable.CLEAR_HEADERS + " INTEGER NOT NULL, " +
+               CommandTable.HEADERS + " TEXT, " +
                CommandTable.STATUS + " INTEGER" +
              ");";
 

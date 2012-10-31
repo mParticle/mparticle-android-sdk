@@ -6,11 +6,14 @@ import java.net.URISyntaxException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.UUID;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 
+import org.apache.http.Header;
+import org.apache.http.HeaderIterator;
 import org.apache.http.HttpHost;
 import org.apache.http.client.CookieStore;
 import org.apache.http.client.HttpResponseException;
@@ -269,7 +272,7 @@ import com.mparticle.MessageDatabase.UploadTable;
             // read batches ready to upload
             SQLiteDatabase db = mDB.getWritableDatabase();
             String[] selectionArgs = new String[]{Integer.toString(Status.PROCESSED)};
-            String[] selectionColumns = new String[]{ "_id", CommandTable.URL, CommandTable.METHOD, CommandTable.POST_DATA };
+            String[] selectionColumns = new String[]{ "_id", CommandTable.URL, CommandTable.METHOD, CommandTable.POST_DATA, CommandTable.CLEAR_HEADERS, CommandTable.HEADERS };
             Cursor readyComandsCursor = db.query(CommandTable.TABLE_NAME, selectionColumns,
                     CommandTable.STATUS + "!=?", selectionArgs, null, null, "_id");
             while (readyComandsCursor.moveToNext()) {
@@ -277,6 +280,8 @@ import com.mparticle.MessageDatabase.UploadTable;
                 String url = readyComandsCursor.getString(1);
                 String method = readyComandsCursor.getString(2);
                 String postData = readyComandsCursor.getString(3);
+                int clearHeaders = readyComandsCursor.getInt(4);
+                String headers = readyComandsCursor.getString(5);
 
                 HttpUriRequest request;
                 if ("POST".equalsIgnoreCase(method)) {
@@ -284,6 +289,26 @@ import com.mparticle.MessageDatabase.UploadTable;
                     ((HttpPost)request).setEntity(new ByteArrayEntity(postData.getBytes()));
                 } else {
                     request = new HttpGet(url);
+                }
+
+                if (clearHeaders!=0) {
+                    HeaderIterator headerIterator = request.headerIterator();
+                    while(headerIterator.hasNext()) {
+                        Header header= headerIterator.nextHeader();
+                        request.removeHeader(header);
+                    }
+                }
+                try {
+                    // TODO: make sure the header is valid
+                    JSONObject headersJSON = new JSONObject(headers);
+                    for (Iterator<?> iter=  headersJSON.keys(); iter.hasNext(); ) {
+                        String headerName = (String) iter.next();
+                        String headerValue = headersJSON.getString(headerName);
+                        request.setHeader(headerName, headerValue);
+                    }
+                } catch (JSONException e1) {
+                    // TODO: decide how to deal with this situation - for now, continue
+                    Log.w(TAG, "Problem parsing command headers");
                 }
 
                 try {
@@ -372,6 +397,8 @@ import com.mparticle.MessageDatabase.UploadTable;
         contentValues.put(CommandTable.METHOD, command.getString(MessageKey.METHOD));
         // TODO: decide between null and empty string
         contentValues.put(CommandTable.POST_DATA, command.optString(MessageKey.POST));
+        contentValues.put(CommandTable.CLEAR_HEADERS, command.getBoolean(MessageKey.CLEAR_HEADERS));
+        contentValues.put(CommandTable.HEADERS, command.getString(MessageKey.HEADERS));
         contentValues.put(CommandTable.STATUS, Status.PENDING);
         db.insert(CommandTable.TABLE_NAME, null, contentValues);
     }
@@ -409,12 +436,16 @@ import com.mparticle.MessageDatabase.UploadTable;
          command1.put(MessageKey.URL, makeServiceUri("testpost"));
          command1.put(MessageKey.METHOD, "POST");
          command1.put(MessageKey.POST, "post data goes here");
+         command1.put(MessageKey.CLEAR_HEADERS, true);
+         command1.put(MessageKey.HEADERS, "{ \"Content-Type\" : \"application/json\",\"Set-Cookie\" : \"test\",\"User-Agent\" : \"testagent\" }");
 
          JSONObject command2=new JSONObject();
          command2.put(MessageKey.ID, "testget::" + UUID.randomUUID().toString());
          command2.put(MessageKey.URL, makeServiceUri("testget"));
          command2.put(MessageKey.METHOD, "GET");
          command2.put(MessageKey.POST, null);
+         command2.put(MessageKey.CLEAR_HEADERS, true);
+         command2.put(MessageKey.HEADERS, "{ \"Content-Type\" : \"application/json\",\"Set-Cookie\" : \"test\",\"User-Agent\" : \"testagent\" }");
 
          JSONArray commandArray = new JSONArray();
          commandArray.put(command1);
