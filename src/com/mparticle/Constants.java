@@ -3,6 +3,7 @@ package com.mparticle;
 /* package-private */ class Constants {
 
     public static final long EVENT_LIMIT = 1000;
+    public static final String PREFS_FILE = "mParticlePrefs";
 
     public interface MessageType {
         public static final String SESSION_START = "ss";
@@ -33,6 +34,7 @@ package com.mparticle;
         // batch details
         public static final String APPLICATION_KEY = "a";
         public static final String MPARTICLE_VERSION = "sdk";
+        public static final String MPARTICLE_INSTALL_TIME = "ict";
         public static final String APP_INFO = "ai";
         public static final String DEVICE_INFO = "di";
         public static final String USER_ATTRIBUTES = "ua";

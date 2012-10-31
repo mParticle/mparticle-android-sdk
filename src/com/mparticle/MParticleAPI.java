@@ -21,7 +21,6 @@ import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
 import android.os.Process;
-import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.telephony.TelephonyManager;
 import android.util.DisplayMetrics;
@@ -64,9 +63,14 @@ public class MParticleAPI {
         timeoutHandlerThread.start();
         mTimeoutHandler = new SessionTimeoutHandler(this, timeoutHandlerThread.getLooper());
 
-        mPreferences = PreferenceManager.getDefaultSharedPreferences(mContext);
+        mPreferences = mContext.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
         MParticleAPI.debugMode = mPreferences.getBoolean("mp::debug::"+mApiKey, false);
         MParticleAPI.optOutFlag = mPreferences.getBoolean("mp::optout::"+mApiKey, false);
+
+        if (!mPreferences.contains("mp::ict")) {
+            mPreferences.edit().putLong("mp::ict", System.currentTimeMillis()).commit();
+        }
+
     }
 
     /**
@@ -94,6 +98,7 @@ public class MParticleAPI {
             apiInstance = new MParticleAPI(context, apiKey, MessageManager.getInstance(context, apiKey, secret));
             sInstanceMap.put(apiKey, apiInstance);
         }
+
         return apiInstance;
     }
 

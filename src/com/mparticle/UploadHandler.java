@@ -30,6 +30,7 @@ import org.json.JSONObject;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
@@ -51,6 +52,7 @@ import com.mparticle.MessageDatabase.UploadTable;
     private static final String TAG = "mParticleAPI";
 
     private MessageDatabase mDB;
+    private SharedPreferences mPreferences;
     private Context mContext;
     private String mApiKey;
     private String mSecret;
@@ -83,6 +85,7 @@ import com.mparticle.MessageDatabase.UploadTable;
         mSecret = secret;
 
         mDB = new MessageDatabase(mContext);
+        mPreferences = context.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
         mHttpClient = AndroidHttpClient.newInstance("mParticleSDK", mContext);
         mHttpContext  = new BasicHttpContext();
         mCookieStore = new PersistentCookieStore(context);
@@ -171,6 +174,7 @@ import com.mparticle.MessageDatabase.UploadTable;
 
         uploadMessage.put(MessageKey.APPLICATION_KEY, mApiKey);
         uploadMessage.put(MessageKey.MPARTICLE_VERSION, MParticleAPI.VERSION);
+        uploadMessage.put(MessageKey.MPARTICLE_INSTALL_TIME, mPreferences.getLong("mp::ict", 0));
 
         uploadMessage.put(MessageKey.APP_INFO, mAppInfo);
         uploadMessage.put(MessageKey.DEVICE_INFO, mDeviceInfo);
