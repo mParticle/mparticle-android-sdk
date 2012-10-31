@@ -81,9 +81,12 @@ public class MessageManager {
                 message.put(MessageKey.ATTRIBUTES, attributes);
             }
             if (includeLocation && null!=sLocation) {
-                message.put(MessageKey.DATA_CONNECTION, sLocation.getProvider());
-                message.put(MessageKey.LATITUDE, sLocation.getLatitude());
-                message.put(MessageKey.LONGITUDE, sLocation.getLongitude());
+                JSONObject locJSON = new JSONObject();
+                locJSON.put(MessageKey.DATA_CONNECTION, sLocation.getProvider());
+                locJSON.put(MessageKey.LATITUDE, sLocation.getLatitude());
+                locJSON.put(MessageKey.LONGITUDE, sLocation.getLongitude());
+                locJSON.put(MessageKey.ACCURACY, sLocation.getAccuracy());
+                message.put(MessageKey.LOCATION, locJSON);
             }
             return message;
     }

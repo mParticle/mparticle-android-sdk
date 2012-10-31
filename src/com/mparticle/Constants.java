@@ -28,9 +28,11 @@ package com.mparticle;
         public static final String ATTRIBUTES = "attrs";
         public static final String NAME = "n";
         // location
+        public static final String LOCATION = "lc";
         public static final String DATA_CONNECTION = "dct";
         public static final String LATITUDE = "lat";
         public static final String LONGITUDE = "lng";
+        public static final String ACCURACY = "acc";
         // batch details
         public static final String APPLICATION_KEY = "a";
         public static final String MPARTICLE_VERSION = "sdk";
