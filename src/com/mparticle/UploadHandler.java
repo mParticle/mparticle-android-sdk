@@ -45,6 +45,7 @@ import android.util.Log;
 
 import com.mparticle.Constants.MessageKey;
 import com.mparticle.Constants.MessageType;
+import com.mparticle.Constants.PrefKeys;
 import com.mparticle.Constants.Status;
 import com.mparticle.MessageDatabase.CommandTable;
 import com.mparticle.MessageDatabase.MessageTable;
@@ -176,12 +177,12 @@ import com.mparticle.MessageDatabase.UploadTable;
 
         uploadMessage.put(MessageKey.APPLICATION_KEY, mApiKey);
         uploadMessage.put(MessageKey.MPARTICLE_VERSION, MParticleAPI.VERSION);
-        uploadMessage.put(MessageKey.MPARTICLE_INSTALL_TIME, mPreferences.getLong("mp::ict", 0));
+        uploadMessage.put(MessageKey.MPARTICLE_INSTALL_TIME, mPreferences.getLong(PrefKeys.INSTALL_TIME, 0));
 
         uploadMessage.put(MessageKey.APP_INFO, mAppInfo);
         uploadMessage.put(MessageKey.DEVICE_INFO, mDeviceInfo);
 
-        String userAttrs = mPreferences.getString("mp::user_attrs::"+mApiKey, null);
+        String userAttrs = mPreferences.getString(PrefKeys.USER_ATTRS+mApiKey, null);
         if(null!=userAttrs) {
             uploadMessage.put(MessageKey.USER_ATTRIBUTES, new JSONObject(userAttrs));
         }

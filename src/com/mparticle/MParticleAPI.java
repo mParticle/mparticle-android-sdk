@@ -29,6 +29,7 @@ import android.util.Log;
 import android.view.WindowManager;
 
 import com.mparticle.Constants.MessageKey;
+import com.mparticle.Constants.PrefKeys;
 
 /**
  * This class provides access to the mParticle API.
@@ -67,9 +68,8 @@ public class MParticleAPI {
         mTimeoutHandler = new SessionTimeoutHandler(this, timeoutHandlerThread.getLooper());
 
         mPreferences = mContext.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
-        MParticleAPI.debugMode = mPreferences.getBoolean("mp::debug::"+mApiKey, false);
-        MParticleAPI.optOutStatus = mPreferences.getBoolean("mp::optout::"+mApiKey, false);
-        String userAttrs = mPreferences.getString("mp::user_attrs::"+mApiKey, null);
+        MParticleAPI.optOutStatus = mPreferences.getBoolean(PrefKeys.OPTOUT+mApiKey, false);
+        String userAttrs = mPreferences.getString(PrefKeys.USER_ATTRS+mApiKey, null);
         if (null!=userAttrs) {
             try {
                 mUserAttributes = new JSONObject(userAttrs);
@@ -78,8 +78,8 @@ public class MParticleAPI {
             }
         }
 
-        if (!mPreferences.contains("mp::ict")) {
-            mPreferences.edit().putLong("mp::ict", System.currentTimeMillis()).commit();
+        if (!mPreferences.contains(PrefKeys.INSTALL_TIME)) {
+            mPreferences.edit().putLong(PrefKeys.INSTALL_TIME, System.currentTimeMillis()).commit();
         }
 
     }
@@ -429,7 +429,7 @@ public class MParticleAPI {
         debugLog("Set User: " + key + "=" + value);
         try {
             mUserAttributes.put(key, value);
-            mPreferences.edit().putString("mp::user_attrs::"+mApiKey, mUserAttributes.toString()).commit();
+            mPreferences.edit().putString(PrefKeys.USER_ATTRS+mApiKey, mUserAttributes.toString()).commit();
         } catch (JSONException e) {
             Log.w(TAG, "Failed to save user attribute: "+key);
         }
@@ -469,7 +469,7 @@ public class MParticleAPI {
         // TODO: for now, require an active session so the message has a session id. may want to remove this requirement.
         ensureActiveSession();
         MParticleAPI.optOutStatus = optOutStatus;
-        mPreferences.edit().putBoolean("mp::optout::"+mApiKey, optOutStatus).commit();
+        mPreferences.edit().putBoolean(PrefKeys.OPTOUT+mApiKey, optOutStatus).commit();
         mMessageManager.optOut(mSessionID, mSessionStartTime, System.currentTimeMillis(), optOutStatus);
         debugLog("Set Opt Out: " + MParticleAPI.optOutStatus);
     }
@@ -489,16 +489,7 @@ public class MParticleAPI {
      */
     public void setDebug(boolean debugMode) {
         MParticleAPI.debugMode = debugMode;
-        mPreferences.edit().putBoolean("mp::debug::"+mApiKey, debugMode).commit();
         debugLog("Set Debug Mode: " + MParticleAPI.debugMode);
-    }
-
-    /**
-     * Get the current debug mode status for mParticle
-     * @return the debug mode
-     */
-    public boolean getDebug() {
-        return MParticleAPI.debugMode;
     }
 
     /**

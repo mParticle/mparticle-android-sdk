@@ -83,6 +83,14 @@ package com.mparticle;
 
     }
 
+    public interface PrefKeys {
+        // common
+        public static final String INSTALL_TIME = "mp::ict";
+        // app-key specific (append appKey to the key)
+        public static final String OPTOUT = "mp::optout::";
+        public static final String USER_ATTRS = "mp::user_attrs::";
+    }
+
     public interface Status {
         static final int PENDING = 0;
         static final int READY = 1;
