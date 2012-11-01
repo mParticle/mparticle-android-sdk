@@ -550,14 +550,16 @@ public class MParticleAPI {
                 ApplicationInfo appInfo = packageManager.getApplicationInfo(packageName,0);
                 properties.put(MessageKey.APP_NAME, packageManager.getApplicationLabel(appInfo));
             } catch (PackageManager.NameNotFoundException e) {
-                properties.put(MessageKey.APP_NAME, "Unknown");
+                // ignore missing data
             }
             try {
                 PackageInfo pInfo = packageManager.getPackageInfo(packageName, 0);
                 properties.put(MessageKey.APP_VERSION, pInfo.versionName);
             } catch (PackageManager.NameNotFoundException e) {
-                properties.put(MessageKey.APP_VERSION, "Unknown");
+                // ignore missing data
             }
+            SharedPreferences preferences = context.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
+            properties.put(MessageKey.MPARTICLE_INSTALL_TIME, preferences.getLong(PrefKeys.INSTALL_TIME, 0));
         } catch (JSONException e) {
             // ignore JSON exceptions
         }
@@ -576,7 +578,6 @@ public class MParticleAPI {
             // device IDs
             properties.put(MessageKey.DEVICE_ID, Settings.Secure.getString(context.getContentResolver(),
                     Settings.Secure.ANDROID_ID));
-            // TODO: get network MAC addresses?
 
             // device/OS properties
             properties.put(MessageKey.BRAND, android.os.Build.BRAND);

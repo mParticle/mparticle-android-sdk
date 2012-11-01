@@ -177,7 +177,6 @@ import com.mparticle.MessageDatabase.UploadTable;
 
         uploadMessage.put(MessageKey.APPLICATION_KEY, mApiKey);
         uploadMessage.put(MessageKey.MPARTICLE_VERSION, MParticleAPI.VERSION);
-        uploadMessage.put(MessageKey.MPARTICLE_INSTALL_TIME, mPreferences.getLong(PrefKeys.INSTALL_TIME, 0));
 
         uploadMessage.put(MessageKey.APP_INFO, mAppInfo);
         uploadMessage.put(MessageKey.DEVICE_INFO, mDeviceInfo);
