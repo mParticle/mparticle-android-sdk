@@ -39,8 +39,6 @@ public class MParticleAPI {
     /* package-private */ static final String VERSION = "0.1";
 
     private static final String TAG = "mParticleAPI";
-    private static boolean optOutStatus = false;
-    private static boolean debugMode = false;
     private static Map<String, MParticleAPI> sInstanceMap = new HashMap<String, MParticleAPI>();
 
     private MessageManager mMessageManager;
@@ -48,6 +46,8 @@ public class MParticleAPI {
     private SharedPreferences mPreferences;
     private Context mContext;
     private String mApiKey;
+    private boolean mOptOutStatus = false;
+    private boolean mDebugMode = false;
 
     /* package-private */ String mSessionID;
     /* package-private */ int mSessionTimeout = 30 * 60 * 1000;
@@ -68,7 +68,7 @@ public class MParticleAPI {
         mTimeoutHandler = new SessionTimeoutHandler(this, timeoutHandlerThread.getLooper());
 
         mPreferences = mContext.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
-        MParticleAPI.optOutStatus = mPreferences.getBoolean(PrefKeys.OPTOUT+mApiKey, false);
+        mOptOutStatus = mPreferences.getBoolean(PrefKeys.OPTOUT+mApiKey, false);
         String userAttrs = mPreferences.getString(PrefKeys.USER_ATTRS+mApiKey, null);
         if (null!=userAttrs) {
             try {
@@ -468,10 +468,10 @@ public class MParticleAPI {
     public void setOptOut(boolean optOutStatus) {
         // TODO: for now, require an active session so the message has a session id. may want to remove this requirement.
         ensureActiveSession();
-        MParticleAPI.optOutStatus = optOutStatus;
+        mOptOutStatus = optOutStatus;
         mPreferences.edit().putBoolean(PrefKeys.OPTOUT+mApiKey, optOutStatus).commit();
         mMessageManager.optOut(mSessionID, mSessionStartTime, System.currentTimeMillis(), optOutStatus);
-        debugLog("Set Opt Out: " + MParticleAPI.optOutStatus);
+        debugLog("Set Opt Out: " + mOptOutStatus);
     }
 
     /**
@@ -479,7 +479,7 @@ public class MParticleAPI {
      * @return the opt-out status
      */
     public boolean getOptOut() {
-        return MParticleAPI.optOutStatus;
+        return mOptOutStatus;
     }
 
     /**
@@ -488,8 +488,8 @@ public class MParticleAPI {
      * @param debugMode
      */
     public void setDebug(boolean debugMode) {
-        MParticleAPI.debugMode = debugMode;
-        debugLog("Set Debug Mode: " + MParticleAPI.debugMode);
+        mDebugMode = debugMode;
+        debugLog("Set Debug Mode: " + mDebugMode);
     }
 
     /**
@@ -642,7 +642,7 @@ public class MParticleAPI {
     }
 
     private void debugLog(String message) {
-        if (MParticleAPI.debugMode) {
+        if (mDebugMode) {
             Log.d(TAG, mSessionID + ": " + message);
         }
     }
