@@ -333,8 +333,8 @@ import com.mparticle.MessageDatabase.UploadTable;
     void fetchConfig() {
         try {
             HttpGet httpGet = new HttpGet(makeServiceUri("config"));
-            String response = mHttpClient.execute(httpGet, new BasicResponseHandler(), mHttpContext);
             addMessageSignature(httpGet, null);
+            String response = mHttpClient.execute(httpGet, new BasicResponseHandler(), mHttpContext);
 
             JSONObject responseJSON = new JSONObject(response);
             if (responseJSON.has(MessageKey.SESSION_UPLOAD)) {
