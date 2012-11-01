@@ -263,15 +263,6 @@
             android:onClick="pressUpdateLocation"
             android:text="@string/update_location" />
 
-        <Button
-            android:id="@+id/buttonGetUserSegment"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/buttonUpload"
-            android:layout_toRightOf="@+id/buttonUpdateLocation"
-            android:onClick="pressGetUserSegment"
-            android:text="@string/get_segment" />
-
         <CheckBox
             android:id="@+id/checkBoxOptOut"
             android:layout_width="wrap_content"

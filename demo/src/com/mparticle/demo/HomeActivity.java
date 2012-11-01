@@ -168,10 +168,6 @@ public class HomeActivity extends Activity {
         mParticleAPI.logErrorEvent("ErrorOccurred");
         throw new Error("Intentionally crashing demo app");
     }
-    public void pressGetUserSegment(View view) {
-        String userSegment = mParticleAPI.getUserSegment();
-        Toast.makeText(view.getContext(), "Got User Segment: " + userSegment, Toast.LENGTH_SHORT).show();
-    }
     public void pressUpdateLocation(View view) {
         Random r = new Random();
         mParticleAPI.setLocation((360.0*r.nextDouble()-180.0), (360.0*r.nextDouble()-180.0));

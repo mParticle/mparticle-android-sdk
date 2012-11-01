@@ -453,15 +453,6 @@ public class MParticleAPI {
     }
 
     /**
-     * Get the current user segment as determined by mParticle.
-     * This method makes a synchronous call to the mParticle server so you should manage threads accordingly.
-     * @return the user segment
-     */
-    public String getUserSegment() {
-        return "default";
-    }
-
-    /**
      * Control the opt-in/opt-out status for the application.
      * @param optOutStatus set to <code>true</code> to opt out of event tracking
      */
