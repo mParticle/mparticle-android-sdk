@@ -44,7 +44,7 @@ public class MessageManagerTests extends AndroidTestCase {
     // creates an 'se' message without attributes
     public void testCreateSessionEndMessage() throws JSONException {
         long sessionLength= mMsgTime - mSessionStartTime;
-        JSONObject message = MessageManager.createMessageSessionEnd(mSessionId, mSessionStartTime, mMsgTime, sessionLength);
+        JSONObject message = MessageManager.createMessageSessionEnd(mSessionId, mSessionStartTime, mMsgTime, sessionLength, null);
         assertNotNull(message.toString());
         assertEquals(MessageType.SESSION_END, message.getString(MessageKey.TYPE));
         assertTrue(message.has(MessageKey.ID));
@@ -165,11 +165,12 @@ public class MessageManagerTests extends AndroidTestCase {
         JSONObject message = MessageManager.createMessage(MessageType.SESSION_START, mSessionId, mSessionStartTime, mSessionStartTime, null, null, true);
         assertNotNull(message.toString());
         assertSame(MessageType.SESSION_START, message.getString(MessageKey.TYPE));
-        assertEquals("test", message.getString(MessageKey.DATA_CONNECTION));
-        assertTrue(message.has(MessageKey.LATITUDE));
-        assertEquals(testLatitude, message.getDouble(MessageKey.LATITUDE));
-        assertTrue(message.has(MessageKey.LONGITUDE));
-        assertEquals(testLongitude, message.getDouble(MessageKey.LONGITUDE));
+        JSONObject locationObj = message.getJSONObject(MessageKey.LOCATION);
+        assertEquals("test", locationObj.getString(MessageKey.DATA_CONNECTION));
+        assertTrue(locationObj.has(MessageKey.LATITUDE));
+        assertEquals(testLatitude, locationObj.getDouble(MessageKey.LATITUDE));
+        assertTrue(locationObj.has(MessageKey.LONGITUDE));
+        assertEquals(testLongitude, locationObj.getDouble(MessageKey.LONGITUDE));
     }
 
 
@@ -186,6 +187,7 @@ public class MessageManagerTests extends AndroidTestCase {
         JSONObject message = MessageManager.createMessage(MessageType.OPT_OUT, mSessionId, 0, mMsgTime, null, null, false);
         assertNotNull(message.toString());
         assertSame(MessageType.OPT_OUT, message.getString(MessageKey.TYPE));
+        assertFalse(message.has(MessageKey.LOCATION));
         assertFalse(message.has(MessageKey.DATA_CONNECTION));
         assertFalse(message.has(MessageKey.LATITUDE));
         assertFalse(message.has(MessageKey.LONGITUDE));
