@@ -221,9 +221,6 @@ import com.mparticle.MessageDatabase.UploadTable;
                         JSONObject responseJSON = new JSONObject(response);
                         Log.d(TAG, "Got 2xx response with JSON:" + responseJSON.toString());
 
-                        // TODO: remove this debug sample once the server is responding with commands
-                        debugGenerateResponseMsgs(responseJSON);
-
                         // store responses in DB
                         if (responseJSON.has(MessageKey.MESSAGES)) {
                             JSONArray responseCommands = responseJSON.getJSONArray(MessageKey.MESSAGES);
@@ -261,11 +258,8 @@ import com.mparticle.MessageDatabase.UploadTable;
             }
 
             request.setHeader("Date", dateHeader);
-            // TODO: swap signature to new algorithm once server is updated
-            if (null!=message) {
-                request.setHeader(HEADER_SIGNATURE, hmacSha256Encode(mSecret, message));
-            }
-            request.setHeader(HEADER_SIGNATURE+"-new", hmacSha256Encode(mSecret, signatureMessage));
+            request.setHeader(HEADER_SIGNATURE, hmacSha256Encode(mSecret, signatureMessage));
+
         } catch (InvalidKeyException e) {
             Log.e(TAG, "Error signing message", e);
         } catch (NoSuchAlgorithmException e) {
@@ -404,8 +398,8 @@ import com.mparticle.MessageDatabase.UploadTable;
         contentValues.put(CommandTable.METHOD, command.getString(MessageKey.METHOD));
         // TODO: decide between null and empty string
         contentValues.put(CommandTable.POST_DATA, command.optString(MessageKey.POST));
-        contentValues.put(CommandTable.CLEAR_HEADERS, command.getBoolean(MessageKey.CLEAR_HEADERS));
-        contentValues.put(CommandTable.HEADERS, command.getString(MessageKey.HEADERS));
+        contentValues.put(CommandTable.CLEAR_HEADERS, command.optBoolean(MessageKey.CLEAR_HEADERS,false));
+        contentValues.put(CommandTable.HEADERS, command.optString(MessageKey.HEADERS));
         contentValues.put(CommandTable.STATUS, Status.PENDING);
         db.insert(CommandTable.TABLE_NAME, null, contentValues);
     }
@@ -434,31 +428,6 @@ import com.mparticle.MessageDatabase.UploadTable;
              chars[2 * i + 1] = HEX_CHARS[buf[i] & 0x0F];
          }
          return new String(chars);
-     }
-
-     // TODO: remove this debug method
-     private void debugGenerateResponseMsgs(JSONObject responseJSON) throws JSONException, URISyntaxException {
-         JSONObject command1=new JSONObject();
-         command1.put(MessageKey.ID, "testpost::" + UUID.randomUUID().toString());
-         command1.put(MessageKey.URL, makeServiceUri("testpost"));
-         command1.put(MessageKey.METHOD, "POST");
-         command1.put(MessageKey.POST, "post data goes here");
-         command1.put(MessageKey.CLEAR_HEADERS, true);
-         command1.put(MessageKey.HEADERS, "{ \"Content-Type\" : \"application/json\",\"Set-Cookie\" : \"test\",\"User-Agent\" : \"testagent\" }");
-
-         JSONObject command2=new JSONObject();
-         command2.put(MessageKey.ID, "testget::" + UUID.randomUUID().toString());
-         command2.put(MessageKey.URL, makeServiceUri("testget"));
-         command2.put(MessageKey.METHOD, "GET");
-         command2.put(MessageKey.POST, null);
-         command2.put(MessageKey.CLEAR_HEADERS, true);
-         command2.put(MessageKey.HEADERS, "{ \"Content-Type\" : \"application/json\",\"Set-Cookie\" : \"test\",\"User-Agent\" : \"testagent\" }");
-
-         JSONArray commandArray = new JSONArray();
-         commandArray.put(command1);
-         commandArray.put(command2);
-
-         responseJSON.put(MessageKey.MESSAGES, commandArray);
      }
 
 }
