@@ -45,4 +45,20 @@
         android:layout_below="@+id/postData"
         android:text="Status" />
 
+    <TextView
+        android:id="@+id/clearHeaders"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/status"
+        android:text="Clear Headers" />
+
+    <TextView
+        android:id="@+id/headers"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/clearHeaders"
+        android:text="Headers" />
+
 </RelativeLayout>
