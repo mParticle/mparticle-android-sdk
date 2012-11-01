@@ -9,6 +9,7 @@ import org.json.JSONObject;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -27,6 +28,7 @@ public class HomeActivity extends Activity {
     private TextView diagnosticsTextView;
     private CheckBox optOutCheckBox;
     private CheckBox debugModeCheckBox;
+    private SharedPreferences mPreferences;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -36,11 +38,15 @@ public class HomeActivity extends Activity {
         optOutCheckBox = (CheckBox) findViewById(R.id.checkBoxOptOut);
         debugModeCheckBox = (CheckBox) findViewById(R.id.checkBoxDebugMode);
 
+        mPreferences = getSharedPreferences("mParticleDemoPrefs", MODE_PRIVATE);
+
         mParticleAPI = MParticleAPI.getInstance(this, "TestAppKey", "secret");
         // for testing, the timeout is 1 minute
         mParticleAPI.setSessionTimeout(60*1000);
 
-        debugModeCheckBox.setChecked(mParticleAPI.getDebug());
+        boolean debugMode = mPreferences.getBoolean("debug_mode", true);
+        mParticleAPI.setDebug(debugMode);
+        debugModeCheckBox.setChecked(debugMode);
         optOutCheckBox.setChecked(mParticleAPI.getOptOut());
         collectDeviceProperties();
     }
@@ -177,6 +183,8 @@ public class HomeActivity extends Activity {
     }
     public void pressDebug(View view) {
         boolean debugMode = ((CheckBox) view).isChecked();
+        mPreferences.edit().putBoolean("debug_mode", debugMode).commit();
+
         mParticleAPI.setDebug(debugMode);
     }
     public void pressPushRegistration(View view) {
