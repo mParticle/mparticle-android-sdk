@@ -575,7 +575,7 @@ public class MParticleAPI {
         JSONObject properties = new JSONObject();
 
         try {
-            // device IDs
+            // device ID
             properties.put(MessageKey.DEVICE_ID, Settings.Secure.getString(context.getContentResolver(),
                     Settings.Secure.ANDROID_ID));
 
@@ -601,13 +601,26 @@ public class MParticleAPI {
             properties.put(MessageKey.DEVICE_LOCALE_COUNTRY, locale.getCountry());
             properties.put(MessageKey.DEVICE_LOCALE_LANGUAGE, locale.getLanguage());
 
-            // TODO: network
+            // network
             TelephonyManager telephonyManager = (TelephonyManager)context.getSystemService(Context.TELEPHONY_SERVICE);
-            properties.put(MessageKey.NETWORK_CARRIER, telephonyManager.getNetworkOperatorName());
-            properties.put(MessageKey.NETWORK_COUNTRY, telephonyManager.getNetworkCountryIso());
-            // TODO: android appears to combine MNC+MCC into network operator
-            properties.put(MessageKey.MOBILE_NETWORK_CODE, telephonyManager.getNetworkOperator());
-            // properties.put(MessageKey.MOBILE_COUNTRY_CODE, telephonyManager.getNetworkOperator());
+            int phoneType = telephonyManager.getPhoneType();
+            if (phoneType!=TelephonyManager.PHONE_TYPE_NONE) {
+                // NOTE: network properties can be empty if phone is in airplane mode and will not be set
+                String networkCarrier = telephonyManager.getNetworkOperatorName();
+                if (0!=networkCarrier.length()) {
+                    properties.put(MessageKey.NETWORK_CARRIER, networkCarrier);
+                }
+                String networkCountry = telephonyManager.getNetworkCountryIso();
+                if (0!=networkCountry.length()) {
+                    properties.put(MessageKey.NETWORK_COUNTRY, networkCountry);
+                }
+                // android combines MNC+MCC into network operator
+                String networkOperator = telephonyManager.getNetworkOperator();
+                if (6==networkOperator.length()) {
+                    properties.put(MessageKey.MOBILE_NETWORK_CODE, networkOperator.substring(0, 3));
+                    properties.put(MessageKey.MOBILE_COUNTRY_CODE, networkOperator.substring(3, 5));
+                }
+            }
 
             // timezone
             properties.put(MessageKey.TIMEZONE, TimeZone.getDefault().getRawOffset()/(1000*60*60));
