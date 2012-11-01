@@ -81,6 +81,8 @@ public class HomeActivity extends Activity {
             break;
         case R.id.buttonB:
             mParticleAPI.logEvent("ButtonBPressed");
+            mParticleAPI.setSessionProperty("testSessionProp1", "testValue1");
+            mParticleAPI.setSessionProperty("testSessionProp2", "testValue1");
             break;
         case R.id.buttonC:
             boolean on = ((ToggleButton) view).isChecked();
@@ -150,7 +152,7 @@ public class HomeActivity extends Activity {
         case R.id.buttonSetSessionVar: {
             TextView editView = (TextView) findViewById(R.id.editSessionVar);
             String sessionVar = editView.getText().toString();
-            mParticleAPI.setUserProperty("session_var", sessionVar);
+            mParticleAPI.setSessionProperty("session_var", sessionVar);
             break;
         }
         }

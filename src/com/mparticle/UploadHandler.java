@@ -110,8 +110,7 @@ import com.mparticle.MessageDatabase.UploadTable;
         case PROCESS_UPLOADS:
             // post upload messages to server and mark the uploads as processed. store response commands to be processed.
             processUploads();
-            // TODO: restore this break - for development only
-            // break;
+            break;
         case PROCESS_COMMANDS:
             // post commands to vendor services
             processCommands();
@@ -182,6 +181,11 @@ import com.mparticle.MessageDatabase.UploadTable;
         uploadMessage.put(MessageKey.APP_INFO, mAppInfo);
         uploadMessage.put(MessageKey.DEVICE_INFO, mDeviceInfo);
 
+        String userAttrs = mPreferences.getString("mp::user_attrs::"+mApiKey, null);
+        if(null!=userAttrs) {
+            uploadMessage.put(MessageKey.USER_ATTRIBUTES, new JSONObject(userAttrs));
+        }
+
         uploadMessage.put(MessageKey.MESSAGES, messagesArray);
 
         return uploadMessage;
@@ -207,6 +211,8 @@ import com.mparticle.MessageDatabase.UploadTable;
                     addMessageSignature(httpPost, message);
 
                     try {
+                        Log.d(TAG, "Sending message to mParticle server:");
+                        Log.d(TAG, message);
                         String response = mHttpClient.execute(httpPost, new BasicResponseHandler(), mHttpContext);
                         dbDeleteUpload(db, id);
 

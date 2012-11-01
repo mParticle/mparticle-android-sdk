@@ -91,8 +91,8 @@ public class MessageManager {
             return message;
     }
 
-    /* package-private */ static JSONObject createMessageSessionEnd(String sessionId, long start, long end, long length) throws JSONException {
-        JSONObject message = MessageManager.createMessage(MessageType.SESSION_END, sessionId, start, end, null, null, true);
+    /* package-private */ static JSONObject createMessageSessionEnd(String sessionId, long start, long end, long length, JSONObject attributes) throws JSONException {
+        JSONObject message = MessageManager.createMessage(MessageType.SESSION_END, sessionId, start, end, null, attributes, true);
         message.put(MessageKey.SESSION_LENGTH, length);
         return message;
     }
@@ -144,7 +144,16 @@ public class MessageManager {
         } catch (JSONException e) {
             Log.w(TAG, "Failed to create mParticle screen view message");
         }
-
+    }
+    public void setSessionAttributes(String sessionId, JSONObject mSessionAttributes) {
+        try {
+            JSONObject sessionAttributes=new JSONObject();
+            sessionAttributes.put(MessageKey.SESSION_ID, sessionId);
+            sessionAttributes.put(MessageKey.ATTRIBUTES, mSessionAttributes);
+            mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.UPDATE_SESSION_ATTRIBUTES, sessionAttributes));
+        } catch (JSONException e) {
+            Log.w(TAG, "Failed to send update session attributes message");
+        }
     }
 
     public void doUpload() {
@@ -160,9 +169,10 @@ public class MessageManager {
         private Context mContext;
 
         public static final int STORE_MESSAGE = 0;
-        public static final int UPDATE_SESSION_END = 1;
-        public static final int CREATE_SESSION_END_MESSAGE = 2;
-        public static final int END_ORPHAN_SESSIONS = 3;
+        public static final int UPDATE_SESSION_ATTRIBUTES = 2;
+        public static final int UPDATE_SESSION_END = 3;
+        public static final int CREATE_SESSION_END_MESSAGE = 4;
+        public static final int END_ORPHAN_SESSIONS = 5;
 
         public MessageHandler(Context context, Looper looper) {
             super(looper);
@@ -198,6 +208,21 @@ public class MessageManager {
                     mDB.close();
                 }
                 break;
+            case UPDATE_SESSION_ATTRIBUTES:
+                try {
+                    JSONObject sessionAttributes = (JSONObject) msg.obj;
+                    String sessionId = sessionAttributes.getString(MessageKey.SESSION_ID);
+                    String attributes = sessionAttributes.getString(MessageKey.ATTRIBUTES);
+                    SQLiteDatabase db = mDB.getWritableDatabase();
+                    dbUpdateSessionAttributes(db, sessionId, attributes);
+                } catch (SQLiteException e) {
+                    Log.e(TAG, "Error updating session attributes in mParticle DB", e);
+                } catch (JSONException e) {
+                    Log.e(TAG, "Error with JSON object", e);
+                } finally {
+                    mDB.close();
+                }
+                break;
             case UPDATE_SESSION_END:
                 try {
                     JSONObject sessionTiming = (JSONObject) msg.obj;
@@ -218,7 +243,6 @@ public class MessageManager {
                 try {
                     String sessionId = (String) msg.obj;
                     SQLiteDatabase db = mDB.getWritableDatabase();
-                    // select the session and get the start/end times
                     String[] selectionArgs = new String[]{sessionId};
                     String[] sessionColumns = new String[]{SessionTable.START_TIME, SessionTable.END_TIME, SessionTable.SESSION_LENGTH, SessionTable.ATTRIBUTES};
                     Cursor selectCursor = db.query(SessionTable.TABLE_NAME, sessionColumns, SessionTable.SESSION_ID+"=?", selectionArgs, null, null, null);
@@ -226,11 +250,14 @@ public class MessageManager {
                     long start = selectCursor.getLong(0);
                     long end = selectCursor.getLong(1);
                     long length = selectCursor.getLong(2);
-                    // TODO: not yet using session attributes
-                    // String sessionAttributes = selectCursor.getString(3);
+                    String attributes = selectCursor.getString(3);
+                    JSONObject sessionAttributes=null;
+                    if (null!=attributes) {
+                        sessionAttributes= new JSONObject(attributes);
+                    }
 
                     // create a session-end message
-                    JSONObject endMessage = MessageManager.createMessageSessionEnd(sessionId, start, end, length);
+                    JSONObject endMessage = MessageManager.createMessageSessionEnd(sessionId, start, end, length, sessionAttributes);
 
                     // insert the record into messages with duration
                     dbInsertMessage(db, endMessage, Status.READY);
@@ -300,6 +327,13 @@ public class MessageManager {
             contentValues.put(MessageTable.STATUS, status);
             String[] whereArgs = {sessionId };
             db.update(MessageTable.TABLE_NAME, contentValues, MessageTable.SESSION_ID + "=?", whereArgs);
+        }
+
+        private void dbUpdateSessionAttributes(SQLiteDatabase db, String sessionId, String attributes) {
+            ContentValues sessionValues = new ContentValues();
+            sessionValues.put(SessionTable.ATTRIBUTES, attributes);
+            String[] whereArgs = {sessionId };
+            db.update(SessionTable.TABLE_NAME, sessionValues, SessionTable.SESSION_ID + "=?", whereArgs);
         }
 
         private void dbUpdateSessionEndTime(SQLiteDatabase db, String sessionId, long endTime, long sessionLength) {

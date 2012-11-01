@@ -2,6 +2,7 @@ package com.mparticle;
 
 import java.net.URL;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
@@ -54,6 +55,8 @@ public class MParticleAPI {
     /* package-private */ long mSessionActiveStart = 0;
     /* package-private */ long mSessionLength = 0;
     /* package-private */ long mEventCount = 0;
+    /* package-private */ JSONObject mUserAttributes = new JSONObject();
+    /* package-private */ JSONObject mSessionAttributes;
 
     /* package-private */ MParticleAPI(Context context, String apiKey, MessageManager messageManager) {
         mContext = context.getApplicationContext();
@@ -66,6 +69,14 @@ public class MParticleAPI {
         mPreferences = mContext.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
         MParticleAPI.debugMode = mPreferences.getBoolean("mp::debug::"+mApiKey, false);
         MParticleAPI.optOutStatus = mPreferences.getBoolean("mp::optout::"+mApiKey, false);
+        String userAttrs = mPreferences.getString("mp::user_attrs::"+mApiKey, null);
+        if (null!=userAttrs) {
+            try {
+                mUserAttributes = new JSONObject(userAttrs);
+            } catch (JSONException e) {
+                // carry on without user attributes
+            }
+        }
 
         if (!mPreferences.contains("mp::ict")) {
             mPreferences.edit().putLong("mp::ict", System.currentTimeMillis()).commit();
@@ -220,6 +231,7 @@ public class MParticleAPI {
         mSessionID = UUID.randomUUID().toString();
         mSessionLength = 0;
         mEventCount = 0;
+        mSessionAttributes = new JSONObject();
         mMessageManager.startSession(mSessionID, mSessionStartTime);
         mTimeoutHandler.sendEmptyMessageDelayed(0, mSessionTimeout);
         debugLog("Start New Session");
@@ -337,7 +349,7 @@ public class MParticleAPI {
      * @param userId the primary id of the current application user
      */
     public void identifyUser(String userId) {
-        identifyUser("user_id", userId);
+        identifyUser("app", userId);
     }
 
     /**
@@ -356,6 +368,7 @@ public class MParticleAPI {
             return;
         }
         ensureActiveSession();
+        setUserProperty("mp::id::"+key, userId);
         debugLog("Identified user: " + userId);
     }
 
@@ -380,6 +393,13 @@ public class MParticleAPI {
      */
     public void setSessionProperty(String key, String value) {
         ensureActiveSession();
+        // TODO: needs constraints checks
+        try {
+            mSessionAttributes.put(key, value);
+            mMessageManager.setSessionAttributes(mSessionID, mSessionAttributes);
+        } catch (JSONException e) {
+            Log.w(TAG, "Failed to add session attribute");
+        }
         debugLog("Set Session: " + key + "=" + value);
     }
 
@@ -388,6 +408,16 @@ public class MParticleAPI {
      * @param data key/value pairs of session attributes
      */
     public void setSessionProperties(JSONObject data) {
+        ensureActiveSession();
+        try {
+            for (Iterator<?> iter=  data.keys(); iter.hasNext(); ) {
+                String key = (String) iter.next();
+                mSessionAttributes.put(key, data.getString(key));
+            }
+            mMessageManager.setSessionAttributes(mSessionID, mSessionAttributes);
+        } catch (JSONException e) {
+            Log.w(TAG, "Failed to add session attribute");
+        }
     }
 
     /**
@@ -397,6 +427,12 @@ public class MParticleAPI {
      */
     public void setUserProperty(String key, String value) {
         debugLog("Set User: " + key + "=" + value);
+        try {
+            mUserAttributes.put(key, value);
+            mPreferences.edit().putString("mp::user_attrs::"+mApiKey, mUserAttributes.toString()).commit();
+        } catch (JSONException e) {
+            Log.w(TAG, "Failed to save user attribute: "+key);
+        }
     }
 
     /**
@@ -404,6 +440,16 @@ public class MParticleAPI {
      * @param data key/value pairs of user attributes
      */
     public void setUserProperties(JSONObject data) {
+        try {
+            for (Iterator<?> iter=  data.keys(); iter.hasNext(); ) {
+                String key = (String) iter.next();
+                setUserProperty(key, data.getString(key));
+            }
+        } catch (JSONException e) {
+            Log.w(TAG, "Failed to add session attribute");
+        }
+
+
     }
 
     /**
