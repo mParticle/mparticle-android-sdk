@@ -7,11 +7,15 @@
         android:minSdkVersion="8"
         android:targetSdkVersion="15" />
 
+    <!-- Required if using the NETWORK location provider -->
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <!-- Required only if using the GPS or PASSIVE location provider -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+
+    <!-- Required for posting data to the server -->
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- Required for off-line checks -->
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
 
     <application
         android:label="@string/app_name"

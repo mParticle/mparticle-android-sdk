@@ -17,6 +17,8 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.location.LocationListener;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
@@ -27,6 +29,7 @@ import android.telephony.TelephonyManager;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.WindowManager;
+import android.location.LocationManager;
 
 import com.mparticle.Constants.MessageKey;
 import com.mparticle.Constants.PrefKeys;
@@ -43,6 +46,7 @@ public class MParticleAPI {
 
     private MessageManager mMessageManager;
     private Handler mTimeoutHandler;
+    private MParticleLocationListener mLocationListener;
     private SharedPreferences mPreferences;
     private Context mContext;
     private String mApiKey;
@@ -381,6 +385,29 @@ public class MParticleAPI {
         debugLog("Identified user: " + userId);
     }
 
+    public void enableLocationTracking(String provider, long minTime, long minDistance) {
+        try {
+            LocationManager locationManager = (LocationManager) mContext.getSystemService(Context.LOCATION_SERVICE);
+            if (!locationManager.isProviderEnabled(provider)) {
+                Log.w(TAG, "That requested location provider is not available");
+                return;
+            };
+            if (mLocationListener==null) {
+                mLocationListener = new MParticleLocationListener(this);
+            } else {
+                // clear the location listener, so it can be added again
+                locationManager.removeUpdates(mLocationListener);
+            }
+            locationManager.requestLocationUpdates(provider, minTime, minDistance, mLocationListener);
+        } catch (SecurityException e) {
+            Log.w(TAG, "The app must require the appropriate permissions to track location using this provider");
+        }
+    }
+
+    public void setLocation(Location location) {
+        MessageManager.setLocation(location);
+    }
+
     /**
      * Set the current location of the active session.
      * @param longitude
@@ -675,6 +702,29 @@ public class MParticleAPI {
                 // or... use lastEventTime to decide when to check next
             }
         }
+    }
+
+    private static final class MParticleLocationListener implements LocationListener {
+        private MParticleAPI mParticleAPI;
+
+        public MParticleLocationListener(MParticleAPI mParticleAPI) {
+            this.mParticleAPI = mParticleAPI;
+        }
+
+        @Override
+        public void onLocationChanged(Location location) {
+            mParticleAPI.setLocation(location);
+        }
+
+        @Override
+        public void onProviderDisabled(String provider) { }
+
+        @Override
+        public void onProviderEnabled(String provider) { }
+
+        @Override
+        public void onStatusChanged(String provider, int status, Bundle extras) { }
+
     }
 
     /// Possibly for development only

@@ -10,6 +10,7 @@ import org.json.JSONObject;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -43,6 +44,7 @@ public class HomeActivity extends Activity {
         mParticleAPI = MParticleAPI.getInstance(this, "TestAppKey", "secret", 60);
         // for testing, the timeout is 1 minute
         mParticleAPI.setSessionTimeout(60*1000);
+        mParticleAPI.enableLocationTracking(LocationManager.PASSIVE_PROVIDER, 15*1000, 50);
 
         boolean debugMode = mPreferences.getBoolean("debug_mode", true);
         mParticleAPI.setDebug(debugMode);
