@@ -180,6 +180,14 @@ public class MParticleAPI {
             return;
         }
         long sessionEndTime=System.currentTimeMillis();
+        endSession(sessionEndTime);
+    }
+
+    /**
+     * Explicitly end the session at the given time
+     * @param sessionEndTime
+     */
+    private void endSession(long sessionEndTime) {
         closeSession(sessionEndTime);
         mMessageManager.endSession(mSessionID, sessionEndTime, mSessionLength);
         debugLog("Explicit End Session");
@@ -219,7 +227,7 @@ public class MParticleAPI {
         long now = System.currentTimeMillis();
         if (0!=mSessionStartTime && (mSessionTimeout < now-mLastEventTime) ) {
             debugLog("Session Timed Out");
-            closeSession(mLastEventTime);
+            endSession(mLastEventTime);
         }
     }
 
