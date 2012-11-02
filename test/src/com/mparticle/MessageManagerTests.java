@@ -166,7 +166,6 @@ public class MessageManagerTests extends AndroidTestCase {
         assertNotNull(message.toString());
         assertSame(MessageType.SESSION_START, message.getString(MessageKey.TYPE));
         JSONObject locationObj = message.getJSONObject(MessageKey.LOCATION);
-        assertEquals("test", locationObj.getString(MessageKey.DATA_CONNECTION));
         assertTrue(locationObj.has(MessageKey.LATITUDE));
         assertEquals(testLatitude, locationObj.getDouble(MessageKey.LATITUDE));
         assertTrue(locationObj.has(MessageKey.LONGITUDE));
@@ -188,7 +187,6 @@ public class MessageManagerTests extends AndroidTestCase {
         assertNotNull(message.toString());
         assertSame(MessageType.OPT_OUT, message.getString(MessageKey.TYPE));
         assertFalse(message.has(MessageKey.LOCATION));
-        assertFalse(message.has(MessageKey.DATA_CONNECTION));
         assertFalse(message.has(MessageKey.LATITUDE));
         assertFalse(message.has(MessageKey.LONGITUDE));
     }
@@ -198,7 +196,6 @@ public class MessageManagerTests extends AndroidTestCase {
         JSONObject message = MessageManager.createMessage(MessageType.SESSION_START, mSessionId, mSessionStartTime, mSessionStartTime, null, null, true);
         assertNotNull(message.toString());
         assertSame(MessageType.SESSION_START, message.getString(MessageKey.TYPE));
-        assertFalse(message.has(MessageKey.DATA_CONNECTION));
         assertFalse(message.has(MessageKey.LATITUDE));
         assertFalse(message.has(MessageKey.LONGITUDE));
     }
