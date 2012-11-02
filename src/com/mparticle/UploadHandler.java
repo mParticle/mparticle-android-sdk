@@ -1,8 +1,12 @@
 package com.mparticle;
 
 import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.InetSocketAddress;
+import java.net.Proxy;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Date;
@@ -12,8 +16,6 @@ import java.util.UUID;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 
-import org.apache.http.Header;
-import org.apache.http.HeaderIterator;
 import org.apache.http.HttpHost;
 import org.apache.http.client.CookieStore;
 import org.apache.http.client.HttpResponseException;
@@ -68,6 +70,7 @@ import com.mparticle.MessageDatabase.UploadTable;
     private CookieStore mCookieStore;
     private JSONObject mAppInfo;
     private JSONObject mDeviceInfo;
+    private Proxy mProxy;
 
     public static final int PREPARE_UPLOADS = 0;
     public static final int PROCESS_UPLOADS = 1;
@@ -113,7 +116,8 @@ import com.mparticle.MessageDatabase.UploadTable;
         case PROCESS_UPLOADS:
             // post upload messages to server and mark the uploads as processed. store response commands to be processed.
             processUploads();
-            break;
+            // TODO: restore this break - for development only
+            // break;
         case PROCESS_COMMANDS:
             // post commands to vendor services
             processCommands();
@@ -279,57 +283,54 @@ import com.mparticle.MessageDatabase.UploadTable;
         try {
             // read batches ready to upload
             SQLiteDatabase db = mDB.getWritableDatabase();
-            String[] selectionArgs = new String[]{Integer.toString(Status.PROCESSED)};
-            String[] selectionColumns = new String[]{ "_id", CommandTable.URL, CommandTable.METHOD, CommandTable.POST_DATA, CommandTable.CLEAR_HEADERS, CommandTable.HEADERS };
+            String[] selectionArgs = new String[] { Integer.toString(Status.PROCESSED) };
+            String[] selectionColumns = new String[] { "_id", CommandTable.URL, CommandTable.METHOD,
+                    CommandTable.POST_DATA, CommandTable.HEADERS };
             Cursor readyComandsCursor = db.query(CommandTable.TABLE_NAME, selectionColumns,
                     CommandTable.STATUS + "!=?", selectionArgs, null, null, "_id");
             while (readyComandsCursor.moveToNext()) {
                 int id = readyComandsCursor.getInt(0);
-                String url = readyComandsCursor.getString(1);
+                String commandUrl = readyComandsCursor.getString(1);
                 String method = readyComandsCursor.getString(2);
                 String postData = readyComandsCursor.getString(3);
-                int clearHeaders = readyComandsCursor.getInt(4);
-                String headers = readyComandsCursor.getString(5);
-
-                HttpUriRequest request;
-                if ("POST".equalsIgnoreCase(method)) {
-                    request = new HttpPost(url);
-                    ((HttpPost)request).setEntity(new ByteArrayEntity(postData.getBytes()));
-                } else {
-                    request = new HttpGet(url);
-                }
-
-                if (clearHeaders!=0) {
-                    HeaderIterator headerIterator = request.headerIterator();
-                    while(headerIterator.hasNext()) {
-                        Header header= headerIterator.nextHeader();
-                        request.removeHeader(header);
-                    }
-                }
-                try {
-                    // TODO: make sure the header is valid
-                    JSONObject headersJSON = new JSONObject(headers);
-                    for (Iterator<?> iter=  headersJSON.keys(); iter.hasNext(); ) {
-                        String headerName = (String) iter.next();
-                        String headerValue = headersJSON.getString(headerName);
-                        request.setHeader(headerName, headerValue);
-                    }
-                } catch (JSONException e1) {
-                    // TODO: decide how to deal with this situation - for now, continue
-                    Log.w(TAG, "Problem parsing command headers");
-                }
+                String headers = readyComandsCursor.getString(4);
 
                 try {
-                    // NOTE: this currently uses the same httpClient as mParticle requests (useragent, proxy, threads?)
-                    // but not the httpContext (cookiestore)
-                    mHttpClient.execute(request);
-                } catch (Exception e) {
-                    // TODO: process failures differently
-                    Log.d(TAG, "Command request failed:" + e.getMessage());
+                    URL url = new URL(commandUrl);
+                    HttpURLConnection urlConnection;
+                    if (mProxy==null) {
+                        urlConnection = (HttpURLConnection) url.openConnection();
+                    } else {
+                        urlConnection = (HttpURLConnection) url.openConnection(mProxy);
+                    }
+                    try {
+                        try {
+                            JSONObject headersJSON = new JSONObject(headers);
+                            for (Iterator<?> iter = headersJSON.keys(); iter.hasNext();) {
+                                String headerName = (String) iter.next();
+                                String headerValue = headersJSON.getString(headerName);
+                                urlConnection.setRequestProperty(headerName, headerValue);
+                            }
+                        } catch (JSONException e1) {
+                            // TODO: decide how to deal with this situation - for now, continue
+                            Log.w(TAG, "Problem parsing command headers");
+                        }
+                        if ("POST".equalsIgnoreCase(method)) {
+                            urlConnection.setDoOutput(true);
+                            urlConnection.setFixedLengthStreamingMode(postData.length());
+                            urlConnection.getOutputStream().write(postData.getBytes());
+                        }
+                        Log.d(TAG, "Got opening connection for : "+ commandUrl);
+                        int responseCode = urlConnection.getResponseCode();
+                        Log.d(TAG, "Got response: "+ responseCode);
+                    } finally {
+                        urlConnection.disconnect();
+                    }
+                } catch (Throwable t) {
+                    Log.e(TAG, "Command processing failed:" + t.getMessage());
                 } finally {
                     dbDeleteCommand(db, id);
                 }
-
             }
         } catch (SQLiteException e) {
             Log.e(TAG, "Error processing command uploads in mParticle DB", e);
@@ -337,6 +338,7 @@ import com.mparticle.MessageDatabase.UploadTable;
             mDB.close();
         }
     }
+
     void fetchConfig() {
         if (!isNetworkAvailable()) {
             return;
@@ -427,6 +429,7 @@ import com.mparticle.MessageDatabase.UploadTable;
     public void setConnectionProxy(String host, int port) {
         HttpHost proxy = new HttpHost(host, port);
         mHttpClient.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY, proxy);
+        mProxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(host, port));
     }
 
     // From Stack Overflow: http://stackoverflow.com/questions/7124735/hmac-sha256-algorithm-for-signature-calculation
