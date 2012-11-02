@@ -36,15 +36,15 @@ package com.mparticle;
         // batch details
         public static final String APPLICATION_KEY = "a";
         public static final String MPARTICLE_VERSION = "sdk";
-        public static final String MPARTICLE_INSTALL_TIME = "ict";
         public static final String APP_INFO = "ai";
         public static final String DEVICE_INFO = "di";
         public static final String USER_ATTRIBUTES = "ua";
         // application info
-        public static final String APP_NAME = "a";
+        public static final String APP_NAME = "an";
         public static final String APP_VERSION = "av";
         public static final String APP_PACKAGE_NAME = "apn";
         public static final String APP_INSTALLER_NAME = "ain";
+        public static final String MPARTICLE_INSTALL_TIME = "ict";
         // device info
         public static final String BRAND = "b";
         public static final String PRODUCT = "p";
