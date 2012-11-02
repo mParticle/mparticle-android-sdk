@@ -37,6 +37,8 @@ import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.http.AndroidHttpClient;
 import android.os.Handler;
 import android.os.Looper;
@@ -163,7 +165,7 @@ import com.mparticle.MessageDatabase.UploadTable;
         } catch (SQLiteException e) {
             Log.e(TAG, "Error preparing batch upload in mParticle DB", e);
         } catch (JSONException e) {
-            Log.e(TAG, "Error with JSON object", e);
+            Log.e(TAG, "Error with upload JSON object", e);
         } finally {
             mDB.close();
         }
@@ -192,6 +194,9 @@ import com.mparticle.MessageDatabase.UploadTable;
     }
 
     void processUploads() {
+        if (!isNetworkAvailable()) {
+            return;
+        }
         try {
             // read batches ready to upload
             SQLiteDatabase db = mDB.getWritableDatabase();
@@ -231,7 +236,7 @@ import com.mparticle.MessageDatabase.UploadTable;
 
                     } catch (Exception e) {
                         // TODO: process failures differently
-                        Log.d(TAG, "Request failed:" + e.getMessage());
+                        Log.d(TAG, "Upload request failed:" + e.getMessage());
                         dbUpdateUploadStatus(db, id, Status.READY);
                     }
                 }
@@ -239,7 +244,7 @@ import com.mparticle.MessageDatabase.UploadTable;
         } catch (SQLiteException e) {
             Log.e(TAG, "Error processing batch uploads in mParticle DB", e);
         } catch (URISyntaxException e) {
-            Log.e(TAG, "Error constructing service URI", e);
+            Log.e(TAG, "Error constructing upload service URI", e);
         } finally {
             mDB.close();
         }
@@ -268,6 +273,9 @@ import com.mparticle.MessageDatabase.UploadTable;
     }
 
     void processCommands() {
+        if (!isNetworkAvailable()) {
+            return;
+        }
         try {
             // read batches ready to upload
             SQLiteDatabase db = mDB.getWritableDatabase();
@@ -317,7 +325,7 @@ import com.mparticle.MessageDatabase.UploadTable;
                     mHttpClient.execute(request);
                 } catch (Exception e) {
                     // TODO: process failures differently
-                    Log.d(TAG, "Request failed:" + e.getMessage());
+                    Log.d(TAG, "Command request failed:" + e.getMessage());
                 } finally {
                     dbDeleteCommand(db, id);
                 }
@@ -330,6 +338,9 @@ import com.mparticle.MessageDatabase.UploadTable;
         }
     }
     void fetchConfig() {
+        if (!isNetworkAvailable()) {
+            return;
+        }
         try {
             HttpGet httpGet = new HttpGet(makeServiceUri("config"));
             addMessageSignature(httpGet, null);
@@ -345,13 +356,13 @@ import com.mparticle.MessageDatabase.UploadTable;
                 }
             }
         } catch (HttpResponseException e) {
-            Log.w(TAG, "Request failed:" + e.getMessage());
+            Log.w(TAG, "Config request failed:" + e.getMessage());
         } catch (IOException e) {
-            Log.w(TAG, "Request failed:" + e.getMessage());
+            Log.w(TAG, "Config request failed w/ IO:" + e.getMessage());
         } catch (JSONException e) {
-            Log.w(TAG, "Failed to process response message JSON");
+            Log.w(TAG, "Config request failed to process response message JSON");
         } catch (URISyntaxException e) {
-            Log.e(TAG, "Error constructing service URI", e);
+            Log.e(TAG, "Error constructing config service URI", e);
         }
     }
 
@@ -401,6 +412,15 @@ import com.mparticle.MessageDatabase.UploadTable;
         contentValues.put(CommandTable.HEADERS, command.optString(MessageKey.HEADERS));
         contentValues.put(CommandTable.STATUS, Status.PENDING);
         db.insert(CommandTable.TABLE_NAME, null, contentValues);
+    }
+
+    private boolean isNetworkAvailable() {
+        ConnectivityManager connectivyManager = (ConnectivityManager)mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = connectivyManager.getActiveNetworkInfo();
+        if (networkInfo != null) {
+            return networkInfo.isConnectedOrConnecting();
+        }
+        return false;
     }
 
     /* Possibly for development only */
