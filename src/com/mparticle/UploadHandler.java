@@ -64,6 +64,7 @@ import com.mparticle.MessageDatabase.UploadTable;
     private Context mContext;
     private String mApiKey;
     private String mSecret;
+    private long mUploadInterval;
 
     private AndroidHttpClient mHttpClient;
     private HttpContext mHttpContext;
@@ -77,6 +78,7 @@ import com.mparticle.MessageDatabase.UploadTable;
     public static final int PROCESS_COMMANDS = 2;
     public static final int CLEANUP = 3;
     public static final int FETCH_CONFIG = 4;
+    public static final int PERIODIC_UPLOAD = 5;
 
     public static final String HEADER_APPKEY = "x-mp-appkey";
     public static final String HEADER_SIGNATURE = "x-mp-signature";
@@ -87,11 +89,12 @@ import com.mparticle.MessageDatabase.UploadTable;
 
     private static String mUploadMode = "batch";
 
-    public UploadHandler(Context context, Looper looper, String apiKey, String secret) {
+    public UploadHandler(Context context, Looper looper, String apiKey, String secret, long uploadInterval) {
         super(looper);
         mContext = context;
         mApiKey = apiKey;
         mSecret = secret;
+        mUploadInterval = uploadInterval;
 
         mDB = new MessageDatabase(mContext);
         mPreferences = context.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
@@ -130,6 +133,15 @@ import com.mparticle.MessageDatabase.UploadTable;
             // get the application configuration and process it
             fetchConfig();
             break;
+        case PERIODIC_UPLOAD:
+            // do all the upload steps and trigger another upload check unless configured for manual uploads
+            Log.d(TAG, "Doing periodic upload check");
+            if (mUploadInterval>0) {
+                prepareUploads();
+                processUploads();
+                processCommands();
+                this.sendEmptyMessageDelayed(PERIODIC_UPLOAD, mUploadInterval);
+            }
         }
     }
 

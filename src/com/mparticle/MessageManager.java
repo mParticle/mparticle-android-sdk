@@ -47,15 +47,16 @@ public class MessageManager {
     private static String sActiveNetworkName;
     private static Location sLocation;
 
-    private MessageManager(Context context, String apiKey, String secret) {
+    private MessageManager(Context context, String apiKey, String secret, long uploadInterval) {
         mContext = context;
         mMessageHandler = new MessageHandler(mContext, sMessageHandlerThread.getLooper());
         mMessageHandler.sendEmptyMessage(MessageHandler.END_ORPHAN_SESSIONS);
-        mUploadHandler = new UploadHandler(mContext, sUploadHandlerThread.getLooper(), apiKey, secret);
+        mUploadHandler = new UploadHandler(mContext, sUploadHandlerThread.getLooper(), apiKey, secret, uploadInterval);
         mUploadHandler.sendEmptyMessage(UploadHandler.FETCH_CONFIG);
+        mUploadHandler.sendEmptyMessageDelayed(UploadHandler.PERIODIC_UPLOAD, Constants.INITIAL_UPLOAD_DELAY);
     }
 
-    public static MessageManager getInstance(Context context, String apiKey, String secret) {
+    public static MessageManager getInstance(Context context, String apiKey, String secret, long uploadInterval) {
         if (null == MessageManager.sMessageManager) {
             sMessageHandlerThread = new HandlerThread("mParticleMessageHandlerThread",
                     Process.THREAD_PRIORITY_BACKGROUND);
@@ -63,7 +64,7 @@ public class MessageManager {
             sUploadHandlerThread = new HandlerThread("mParticleUploadHandlerThread",
                     Process.THREAD_PRIORITY_BACKGROUND);
             sUploadHandlerThread.start();
-            MessageManager.sMessageManager = new MessageManager(context, apiKey, secret);
+            MessageManager.sMessageManager = new MessageManager(context, apiKey, secret, uploadInterval);
 
             IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
             BroadcastReceiver receiver = new NetworkStatusBroadcastReceiver((MessageManager)sMessageManager);

@@ -92,8 +92,7 @@ public class MParticleAPI {
      * @param uploadInterval the upload interval (in seconds)
      * @return An instance of the mParticle SDK configured with your API key
      */
-    public static MParticleAPI getInstance(Context context, String apiKey, String secret,
-            int uploadInterval) {
+    public static MParticleAPI getInstance(Context context, String apiKey, String secret, long uploadInterval) {
 
         if (null==context) {
             throw new IllegalArgumentException("context is required");
@@ -108,7 +107,7 @@ public class MParticleAPI {
         } else {
             Context appContext = context.getApplicationContext();
             apiInstance = new MParticleAPI(appContext, apiKey,
-                    MessageManager.getInstance(appContext, apiKey, secret));
+                    MessageManager.getInstance(appContext, apiKey, secret, Math.abs(uploadInterval*1000)));
             sInstanceMap.put(apiKey, apiInstance);
         }
 
@@ -123,7 +122,7 @@ public class MParticleAPI {
      * @return an instance of the mParticle SDK configured with your API key
      */
     public static MParticleAPI getInstance(Context context, String apiKey, String secret) {
-        return MParticleAPI.getInstance(context, apiKey, secret, 0);
+        return MParticleAPI.getInstance(context, apiKey, secret, Constants.DEFAULT_UPLOAD_INTERVAL);
     }
 
     /**

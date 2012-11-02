@@ -40,7 +40,7 @@ public class HomeActivity extends Activity {
 
         mPreferences = getSharedPreferences("mParticleDemoPrefs", MODE_PRIVATE);
 
-        mParticleAPI = MParticleAPI.getInstance(this, "TestAppKey", "secret");
+        mParticleAPI = MParticleAPI.getInstance(this, "TestAppKey", "secret", 60);
         // for testing, the timeout is 1 minute
         mParticleAPI.setSessionTimeout(60*1000);
 
