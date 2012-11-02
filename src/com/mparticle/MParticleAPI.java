@@ -60,7 +60,7 @@ public class MParticleAPI {
     /* package-private */ JSONObject mSessionAttributes;
 
     /* package-private */ MParticleAPI(Context context, String apiKey, MessageManager messageManager) {
-        mContext = context.getApplicationContext();
+        mContext = context;
         mApiKey = apiKey;
         mMessageManager = messageManager;
         HandlerThread timeoutHandlerThread = new HandlerThread("SessionTimeoutHandler", Process.THREAD_PRIORITY_BACKGROUND);
@@ -106,7 +106,9 @@ public class MParticleAPI {
         if (sInstanceMap.containsKey(apiKey)) {
             apiInstance = sInstanceMap.get(apiKey);
         } else {
-            apiInstance = new MParticleAPI(context, apiKey, MessageManager.getInstance(context, apiKey, secret));
+            Context appContext = context.getApplicationContext();
+            apiInstance = new MParticleAPI(appContext, apiKey,
+                    MessageManager.getInstance(appContext, apiKey, secret));
             sInstanceMap.put(apiKey, apiInstance);
         }
 
@@ -448,8 +450,6 @@ public class MParticleAPI {
         } catch (JSONException e) {
             Log.w(TAG, "Failed to add session attribute");
         }
-
-
     }
 
     /**
@@ -618,7 +618,7 @@ public class MParticleAPI {
                 String networkOperator = telephonyManager.getNetworkOperator();
                 if (6==networkOperator.length()) {
                     properties.put(MessageKey.MOBILE_NETWORK_CODE, networkOperator.substring(0, 3));
-                    properties.put(MessageKey.MOBILE_COUNTRY_CODE, networkOperator.substring(3, 5));
+                    properties.put(MessageKey.MOBILE_COUNTRY_CODE, networkOperator.substring(3));
                 }
             }
 

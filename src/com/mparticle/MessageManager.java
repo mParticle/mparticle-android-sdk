@@ -1,16 +1,22 @@
 package com.mparticle;
 
+import java.lang.ref.WeakReference;
 import java.util.UUID;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.content.BroadcastReceiver;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.location.Location;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
@@ -18,12 +24,11 @@ import android.os.Message;
 import android.os.Process;
 import android.util.Log;
 
+import com.mparticle.Constants.MessageKey;
+import com.mparticle.Constants.MessageType;
+import com.mparticle.Constants.Status;
 import com.mparticle.MessageDatabase.MessageTable;
 import com.mparticle.MessageDatabase.SessionTable;
-
-import com.mparticle.Constants.MessageType;
-import com.mparticle.Constants.MessageKey;
-import com.mparticle.Constants.Status;
 
 //TODO: this should be package-private but is accessed from the demo
 @SuppressWarnings("javadoc")
@@ -38,10 +43,12 @@ public class MessageManager {
     private UploadHandler mUploadHandler;
 
     private Context mContext;
+
+    private static String sActiveNetworkName;
     private static Location sLocation;
 
     private MessageManager(Context context, String apiKey, String secret) {
-        mContext = context.getApplicationContext();
+        mContext = context;
         mMessageHandler = new MessageHandler(mContext, sMessageHandlerThread.getLooper());
         mMessageHandler.sendEmptyMessage(MessageHandler.END_ORPHAN_SESSIONS);
         mUploadHandler = new UploadHandler(mContext, sUploadHandlerThread.getLooper(), apiKey, secret);
@@ -57,6 +64,11 @@ public class MessageManager {
                     Process.THREAD_PRIORITY_BACKGROUND);
             sUploadHandlerThread.start();
             MessageManager.sMessageManager = new MessageManager(context, apiKey, secret);
+
+            IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
+            BroadcastReceiver receiver = new NetworkStatusBroadcastReceiver((MessageManager)sMessageManager);
+            context.registerReceiver(receiver, filter);
+
         }
         return MessageManager.sMessageManager;
     }
@@ -80,9 +92,11 @@ public class MessageManager {
             if (null != attributes) {
                 message.put(MessageKey.ATTRIBUTES, attributes);
             }
+            if (null != sActiveNetworkName) {
+                message.put(MessageKey.DATA_CONNECTION, sActiveNetworkName);
+            }
             if (includeLocation && null!=sLocation) {
                 JSONObject locJSON = new JSONObject();
-                locJSON.put(MessageKey.DATA_CONNECTION, sLocation.getProvider());
                 locJSON.put(MessageKey.LATITUDE, sLocation.getLatitude());
                 locJSON.put(MessageKey.LONGITUDE, sLocation.getLongitude());
                 locJSON.put(MessageKey.ACCURACY, sLocation.getAccuracy());
@@ -361,6 +375,33 @@ public class MessageManager {
     /* Possibly for development only */
     public void setConnectionProxy(String host, int port) {
         mUploadHandler.setConnectionProxy(host, port);
+    }
+
+    private static class NetworkStatusBroadcastReceiver extends BroadcastReceiver {
+        WeakReference<MessageManager> mWeakMessageManager;
+        public NetworkStatusBroadcastReceiver(MessageManager messageManager) {
+            super();
+            mWeakMessageManager = new WeakReference<MessageManager>(messageManager);
+        }
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (ConnectivityManager.CONNECTIVITY_ACTION.equals(intent.getAction())) {
+                ConnectivityManager connectivyManager = (ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE);
+                NetworkInfo activeNetwork = connectivyManager.getActiveNetworkInfo();
+                MessageManager messageManager = mWeakMessageManager.get();
+                if (messageManager!=null) {
+                    messageManager.setDataConnection(activeNetwork);
+                }
+            }
+        }
+    }
+
+    public void setDataConnection(NetworkInfo activeNetwork) {
+        if (null!=activeNetwork) {
+            sActiveNetworkName = activeNetwork.getTypeName().toLowerCase();
+        } else {
+            sActiveNetworkName = null;
+        }
     }
 
 }
