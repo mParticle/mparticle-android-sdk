@@ -317,8 +317,9 @@ import com.mparticle.MessageDatabase.UploadTable;
                         }
                         if ("POST".equalsIgnoreCase(method)) {
                             urlConnection.setDoOutput(true);
-                            urlConnection.setFixedLengthStreamingMode(postData.length());
-                            urlConnection.getOutputStream().write(postData.getBytes());
+                            byte[] postDataBytes = Base64.decode(postData.getBytes());
+                            urlConnection.setFixedLengthStreamingMode(postDataBytes.length);
+                            urlConnection.getOutputStream().write(postDataBytes);
                         }
                         Log.d(TAG, "Got opening connection for : "+ commandUrl);
                         int responseCode = urlConnection.getResponseCode();
