@@ -293,8 +293,13 @@ public class MParticleAPI {
             Log.w(TAG,"eventName is required for logEvent");
             return;
         }
+        if (eventName.length()>Constants.LIMIT_NAME) {
+            Log.w(TAG,"The event name was too long. Discarding event.");
+            return;
+        }
         ensureActiveSession();
         if (checkEventLimit()) {
+            eventData = enforceAttributeConstraints(eventData);
             mMessageManager.logCustomEvent(mSessionID, mSessionStartTime, mLastEventTime, eventName, eventData);
             debugLog("Logged event: " + eventName + " with data " + eventData);
         }
@@ -318,8 +323,13 @@ public class MParticleAPI {
             Log.w(TAG,"screenName is required for logScreenView");
             return;
         }
+        if (screenName.length()>Constants.LIMIT_NAME) {
+            Log.w(TAG,"The screen name was too long. Discarding event.");
+            return;
+        }
         ensureActiveSession();
         if (checkEventLimit()) {
+            eventData = enforceAttributeConstraints(eventData);
             mMessageManager.logScreenView(mSessionID, mSessionStartTime, mLastEventTime, screenName, eventData);
             debugLog("Logged screen: " + screenName + " with data " + eventData);
         }
@@ -424,14 +434,10 @@ public class MParticleAPI {
      * @param key the attribute key
      * @param value the attribute value
      */
-    public void setSessionProperty(String key, String value) {
+    public void setSessionProperty(String key, Object value) {
         ensureActiveSession();
-        // TODO: needs constraints checks
-        try {
-            mSessionAttributes.put(key, value);
+        if (setCheckedAttribute(mSessionAttributes, key, value)) {
             mMessageManager.setSessionAttributes(mSessionID, mSessionAttributes);
-        } catch (JSONException e) {
-            Log.w(TAG, "Failed to add session attribute");
         }
         debugLog("Set Session: " + key + "=" + value);
     }
@@ -458,13 +464,10 @@ public class MParticleAPI {
      * @param key the attribute key
      * @param value the attribute value
      */
-    public void setUserProperty(String key, String value) {
+    public void setUserProperty(String key, Object value) {
         debugLog("Set User: " + key + "=" + value);
-        try {
-            mUserAttributes.put(key, value);
+        if (setCheckedAttribute(mUserAttributes, key, value)) {
             mPreferences.edit().putString(PrefKeys.USER_ATTRS+mApiKey, mUserAttributes.toString()).commit();
-        } catch (JSONException e) {
-            Log.w(TAG, "Failed to save user attribute: "+key);
         }
     }
 
@@ -481,6 +484,11 @@ public class MParticleAPI {
         } catch (JSONException e) {
             Log.w(TAG, "Failed to add session attribute");
         }
+    }
+
+    /* package-private */ void clearUserProperties() {
+        mUserAttributes = new JSONObject();
+        mPreferences.edit().putString(PrefKeys.USER_ATTRS+mApiKey, mUserAttributes.toString()).commit();
     }
 
     /**
@@ -675,6 +683,55 @@ public class MParticleAPI {
             Log.w(TAG,"The event limit has been exceeded for this session.");
             return false;
         }
+    }
+
+    /**
+     * This method makes sure the constraints on event attributes are enforced. A cloned version of the attributes
+     * is return with data that exceeds the limits removed.
+     * NOTE: Non-string attributes are not converted to strings, currently.
+     * @param attributes the user-provided JSONObject
+     * @return a cleansed copy of the JSONObject
+     */
+    /* package-private */ JSONObject enforceAttributeConstraints(JSONObject attributes) {
+        if (null==attributes) {
+            return null;
+        }
+        JSONObject checkedAttributes = new JSONObject();
+        for (Iterator<?> iter = attributes.keys(); iter.hasNext();) {
+            String attrName = (String) iter.next();
+            try {
+                Object attrObject = attributes.get(attrName);
+                setCheckedAttribute(checkedAttributes, attrName, attrObject);
+            } catch (JSONException e) {
+                Log.w(TAG, "JSON error processing attributes. Discarding attribute: " + attrName);
+            }
+        }
+        return checkedAttributes;
+    }
+
+    /* package-private */ boolean setCheckedAttribute(JSONObject attributes, String key, Object value) {
+        if (null==attributes || null==key ) {
+            return false;
+        }
+        try {
+            if (null!=value && Constants.LIMIT_ATTR_COUNT==attributes.length()) {
+                Log.w(TAG, "Attribute count exceeds limit. Discarding attribute: " + key);
+                return false;
+            }
+            if (null!=value && value.toString().length()>Constants.LIMIT_ATTR_VALUE) {
+                Log.w(TAG, "Attribute value length exceeds limit. Discarding attribute: " + key);
+                return false;
+            }
+            if (key.length()>Constants.LIMIT_ATTR_NAME) {
+                Log.w(TAG, "Attribute name length exceeds limit. Discarding attribute: " + key);
+                return false;
+            }
+            attributes.put(key, value);
+        } catch (JSONException e) {
+            Log.w(TAG, "JSON error processing attributes. Discarding attribute: " + key);
+            return false;
+        }
+        return true;
     }
 
     private void debugLog(String message) {
