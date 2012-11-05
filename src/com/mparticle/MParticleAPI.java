@@ -188,13 +188,20 @@ public class MParticleAPI {
     }
 
     /**
-     * Explicitly end the session at the given time
+     * Explicitly end the session at the given time and generate the end-session message
      * @param sessionEndTime
      */
     private void endSession(long sessionEndTime) {
-        closeSession(sessionEndTime);
-        mMessageManager.endSession(mSessionID, sessionEndTime, mSessionLength);
         debugLog("Explicit End Session");
+        if (0==sessionEndTime) {
+            Log.w(TAG, "Session end time was unknown");
+            sessionEndTime = System.currentTimeMillis();
+        }
+        stopActiveSession(sessionEndTime);
+        mMessageManager.stopSession(mSessionID, sessionEndTime, mSessionLength);
+        mMessageManager.endSession(mSessionID, sessionEndTime, mSessionLength);
+        // reset agent to unstarted state
+        mSessionStartTime = 0;
     }
 
     /**
@@ -213,12 +220,6 @@ public class MParticleAPI {
 
     private void stopActiveSession(long stopTime) {
         if (0!=mSessionActiveStart) {
-            Log.d(TAG, String.format("Updating active session: %s %s %s %s",
-                    mSessionLength,
-                    mSessionActiveStart,
-                    stopTime,
-                    stopTime-mSessionActiveStart)
-            );
             mSessionLength += stopTime-mSessionActiveStart;
             mSessionActiveStart = 0;
         }
@@ -248,23 +249,6 @@ public class MParticleAPI {
         mMessageManager.startSession(mSessionID, mSessionStartTime);
         mTimeoutHandler.sendEmptyMessageDelayed(0, mSessionTimeout);
         debugLog("Start New Session");
-    }
-
-    /**
-     * End the current session and generate the end-session message.
-     * @param endTime the timestamp of the last event in the session (if known)
-     */
-    private void closeSession(long endTime) {
-        long sessionEndTime = endTime;
-        if (0==sessionEndTime) {
-            Log.w(TAG, "Session end time was unknown");
-            sessionEndTime = System.currentTimeMillis();
-        }
-        stopActiveSession(sessionEndTime);
-        mMessageManager.stopSession(mSessionID, sessionEndTime, mSessionLength);
-
-        // reset agent to unstarted state
-        mSessionStartTime = 0;
     }
 
     /**
