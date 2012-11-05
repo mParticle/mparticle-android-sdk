@@ -10,6 +10,7 @@ import org.json.JSONObject;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.util.Log;
@@ -172,7 +173,11 @@ public class HomeActivity extends Activity {
     }
     public void pressUpdateLocation(View view) {
         Random r = new Random();
-        mParticleAPI.setLocation((360.0*r.nextDouble()-180.0), (360.0*r.nextDouble()-180.0));
+        Location location = new Location("user");
+        location.setLatitude( 360.0 * r.nextDouble() - 180.0 );
+        location.setLongitude( 360.0 * r.nextDouble() - 180.0 );
+        location.setAccuracy( 50.0f * r.nextFloat() );
+        mParticleAPI.setLocation(location);
     }
 
     public void pressOptOut(View view) {

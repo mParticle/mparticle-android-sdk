@@ -385,6 +385,13 @@ public class MParticleAPI {
         debugLog("Identified user: " + userId);
     }
 
+    /**
+     * Enables location tracking given a provider and update frequency criteria. The provider must be available
+     * and the correct permissions must have been requested during installation.
+     * @param provider the provider key
+     * @param minTime the minimum time (in milliseconds) to trigger an update
+     * @param minDistance the minimum distance (in meters) to trigger an update
+     */
     public void enableLocationTracking(String provider, long minTime, long minDistance) {
         try {
             LocationManager locationManager = (LocationManager) mContext.getSystemService(Context.LOCATION_SERVICE);
@@ -404,22 +411,12 @@ public class MParticleAPI {
         }
     }
 
-    public void setLocation(Location location) {
-        MessageManager.setLocation(location);
-    }
-
     /**
      * Set the current location of the active session.
-     * @param longitude
-     * @param latitude
+     * @param location
      */
-    public void setLocation(double longitude, double latitude) {
-        ensureActiveSession();
-        Location location = new Location("user");
-        location.setLatitude(latitude);
-        location.setLongitude(longitude);
+    public void setLocation(Location location) {
         MessageManager.setLocation(location);
-        debugLog("Set Location: " + longitude + " " + latitude);
     }
 
     /**
