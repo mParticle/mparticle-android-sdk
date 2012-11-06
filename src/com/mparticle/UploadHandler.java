@@ -220,28 +220,44 @@ import com.mparticle.MessageDatabase.UploadTable;
             String[] selectionColumns = new String[]{ "_id", UploadTable.MESSAGE };
             Cursor readyUploadsCursor = db.query(UploadTable.TABLE_NAME, selectionColumns,
                     UploadTable.STATUS + "!=?", selectionArgs, null, null, UploadTable.MESSAGE_TIME + " , _id");
-            if (readyUploadsCursor.getCount()>0) {
-                while (readyUploadsCursor.moveToNext()) {
-                    int id = readyUploadsCursor.getInt(0);
-                    String message = readyUploadsCursor.getString(1);
-                    // POST message to mParticle service
-                    HttpPost httpPost = new HttpPost(makeServiceUri("events"));
-                    httpPost.setHeader("Content-type", "application/json");
-                    httpPost.setEntity(new ByteArrayEntity(message.getBytes()));
+            while (readyUploadsCursor.moveToNext()) {
+                int id = readyUploadsCursor.getInt(0);
+                String message = readyUploadsCursor.getString(1);
+                // POST message to mParticle service
+                HttpPost httpPost = new HttpPost(makeServiceUri("events"));
+                httpPost.setHeader("Content-type", "application/json");
+                httpPost.setEntity(new ByteArrayEntity(message.getBytes()));
 
-                    addMessageSignature(httpPost, message);
+                addMessageSignature(httpPost, message);
 
-                    try {
-                        Log.d(TAG, "Sending message to mParticle server:");
-                        Log.d(TAG, message);
-                        String response = mHttpClient.execute(httpPost, new BasicResponseHandler(), mHttpContext);
+                String response = null;
+                int responseCode = -1;
+                try {
+                    Log.d(TAG, "Sending message to mParticle server:");
+                    Log.d(TAG, message);
+                    response = mHttpClient.execute(httpPost, new BasicResponseHandler(), mHttpContext);
+                    responseCode = 202;
+                    Log.d(TAG, "Message upload successuful");
+                } catch (HttpResponseException httpResponseException) {
+                    responseCode = httpResponseException.getStatusCode();
+                    Log.w(TAG, "Message upload failed with response code:" + responseCode);
+                } catch (IOException e) {
+                    // IOExceptions (such as timeouts) will be retried
+                    Log.w(TAG, "Message upload failed with IO exception");
+                } catch (Throwable t) {
+                    // Some other exception occurred.
+                    Log.e(TAG, "Message upload failed with IO exception",t);
+                } finally {
+                    if (202==responseCode || (responseCode>=400 && responseCode<500)) {
                         dbDeleteUpload(db, id);
+                    } else {
+                        dbUpdateUploadStatus(db, id, Status.READY);
+                    }
+                }
 
-                        // TODO: separate response processing errors from upload errors
+                if (responseCode == 202) {
+                    try {
                         JSONObject responseJSON = new JSONObject(response);
-                        Log.d(TAG, "Got 2xx response with JSON:" + responseJSON.toString());
-
-                        // store responses in DB
                         if (responseJSON.has(MessageKey.MESSAGES)) {
                             JSONArray responseCommands = responseJSON.getJSONArray(MessageKey.MESSAGES);
                             for (int i = 0; i < responseCommands.length(); i++) {
@@ -249,13 +265,11 @@ import com.mparticle.MessageDatabase.UploadTable;
                                 dbInsertCommand(db, commandObject);
                             }
                         }
-
-                    } catch (Exception e) {
-                        // TODO: process failures differently
-                        Log.d(TAG, "Upload request failed:" + e.getMessage());
-                        dbUpdateUploadStatus(db, id, Status.READY);
+                    } catch (JSONException e) {
+                        // ignore problems parsing response commands
                     }
                 }
+
             }
         } catch (SQLiteException e) {
             Log.e(TAG, "Error processing batch uploads in mParticle DB", e);
@@ -307,6 +321,7 @@ import com.mparticle.MessageDatabase.UploadTable;
                 String postData = readyComandsCursor.getString(3);
                 String headers = readyComandsCursor.getString(4);
 
+                int responseCode = -1;
                 try {
                     URL url = new URL(commandUrl);
                     HttpURLConnection urlConnection;
@@ -316,16 +331,11 @@ import com.mparticle.MessageDatabase.UploadTable;
                         urlConnection = (HttpURLConnection) url.openConnection(mProxy);
                     }
                     try {
-                        try {
-                            JSONObject headersJSON = new JSONObject(headers);
-                            for (Iterator<?> iter = headersJSON.keys(); iter.hasNext();) {
-                                String headerName = (String) iter.next();
-                                String headerValue = headersJSON.getString(headerName);
-                                urlConnection.setRequestProperty(headerName, headerValue);
-                            }
-                        } catch (JSONException e1) {
-                            // TODO: decide how to deal with this situation - for now, continue
-                            Log.w(TAG, "Problem parsing command headers");
+                        JSONObject headersJSON = new JSONObject(headers);
+                        for (Iterator<?> iter = headersJSON.keys(); iter.hasNext();) {
+                            String headerName = (String) iter.next();
+                            String headerValue = headersJSON.getString(headerName);
+                            urlConnection.setRequestProperty(headerName, headerValue);
                         }
                         if ("POST".equalsIgnoreCase(method)) {
                             urlConnection.setDoOutput(true);
@@ -334,7 +344,7 @@ import com.mparticle.MessageDatabase.UploadTable;
                             urlConnection.getOutputStream().write(postDataBytes);
                         }
                         Log.d(TAG, "Got opening connection for : "+ commandUrl);
-                        int responseCode = urlConnection.getResponseCode();
+                        responseCode = urlConnection.getResponseCode();
                         Log.d(TAG, "Got response: "+ responseCode);
                     } finally {
                         urlConnection.disconnect();
@@ -342,7 +352,9 @@ import com.mparticle.MessageDatabase.UploadTable;
                 } catch (Throwable t) {
                     Log.e(TAG, "Command processing failed:" + t.getMessage());
                 } finally {
-                    dbDeleteCommand(db, id);
+                    if (responseCode>-1) {
+                        dbDeleteCommand(db, id);
+                    }
                 }
             }
         } catch (SQLiteException e) {
