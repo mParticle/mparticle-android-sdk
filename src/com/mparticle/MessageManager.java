@@ -42,16 +42,13 @@ public class MessageManager {
     private static HandlerThread sUploadHandlerThread;
     private UploadHandler mUploadHandler;
 
-    private Context mContext;
-
     private static String sActiveNetworkName;
     private static Location sLocation;
 
     private MessageManager(Context context, String apiKey, String secret, long uploadInterval) {
-        mContext = context;
-        mMessageHandler = new MessageHandler(mContext, sMessageHandlerThread.getLooper());
+        mMessageHandler = new MessageHandler(context, sMessageHandlerThread.getLooper());
         mMessageHandler.sendEmptyMessage(MessageHandler.END_ORPHAN_SESSIONS);
-        mUploadHandler = new UploadHandler(mContext, sUploadHandlerThread.getLooper(), apiKey, secret, uploadInterval);
+        mUploadHandler = new UploadHandler(context, sUploadHandlerThread.getLooper(), apiKey, secret, uploadInterval);
         mUploadHandler.sendEmptyMessage(UploadHandler.FETCH_CONFIG);
         mUploadHandler.sendEmptyMessageDelayed(UploadHandler.PERIODIC_UPLOAD, Constants.INITIAL_UPLOAD_DELAY);
     }
