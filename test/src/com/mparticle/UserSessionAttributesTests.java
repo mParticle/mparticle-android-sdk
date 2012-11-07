@@ -98,14 +98,6 @@ public class UserSessionAttributesTests extends AndroidTestCase {
         assertFalse(mMParticleAPI.mUserAttributes.has("testKeyToClear"));
     }
 
-    public void testUserIdentity() throws JSONException {
-        mMParticleAPI.identifyUser("appUser1");
-        mMParticleAPI.identifyUser("service1","appUser2");
-
-        assertEquals("appUser1", mMParticleAPI.mUserAttributes.get("mp::id::"+"app"));
-        assertEquals("appUser2", mMParticleAPI.mUserAttributes.get("mp::id::"+"service1"));
-    }
-
     public void testSessionAttributesCleared() throws JSONException {
         mMParticleAPI.start();
         mMParticleAPI.setSessionProperty("testKey1", "testValue1");

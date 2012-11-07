@@ -352,34 +352,6 @@ public class MParticleAPI {
     }
 
     /**
-     * Identify the current user
-     * @param userId the primary id of the current application user
-     */
-    public void identifyUser(String userId) {
-        identifyUser("app", userId);
-    }
-
-    /**
-     * Identify user with an alternate identifier.
-     * Can be used to track multiple aliases or accounts from more than one provider.
-     * @param key the identify provider
-     * @param userId the user identity
-     */
-    public void identifyUser(String key, String userId) {
-        if (null==userId) {
-            Log.w(TAG,"userId is required for identifyUser");
-            return;
-        }
-        if (null==key) {
-            Log.w(TAG,"key is required for identifyUser");
-            return;
-        }
-        ensureActiveSession();
-        setUserProperty("mp::id::"+key, userId);
-        debugLog("Identified user: " + userId);
-    }
-
-    /**
      * Enables location tracking given a provider and update frequency criteria. The provider must be available
      * and the correct permissions must have been requested during installation.
      * @param provider the provider key

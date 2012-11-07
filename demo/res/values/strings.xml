@@ -12,7 +12,7 @@
     <string name="button_c">Button C</string>
     <string name="view_a">View A</string>
     <string name="view_b">View B</string>
-    <string name="label_user_id">User ID</string>
+    <string name="eventEndUpload">Event+End+Upload</string>
     <string name="button_set">Set</string>
     <string name="label_user_var">User Var</string>
     <string name="label_session_var">Session Var</string>

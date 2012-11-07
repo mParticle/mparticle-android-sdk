@@ -104,6 +104,11 @@ public class HomeActivity extends Activity {
         case R.id.viewB:
             mParticleAPI.logScreenView("View B", new JSONObject("{key1:value1, key2:value2}"));
             break;
+        case R.id.eventEndUpload:
+            mParticleAPI.logEvent("TestEvent", new JSONObject("{key1:value1, key2:value2}"));
+            mParticleAPI.endSession();
+            mParticleAPI.upload();
+            break;
         }
     }
 
@@ -146,12 +151,6 @@ public class HomeActivity extends Activity {
 
     public void pressSetVariable(View view) {
         switch (view.getId()) {
-        case R.id.buttonSetUserId: {
-            TextView editView = (TextView) findViewById(R.id.editUserId);
-            String userId = editView.getText().toString();
-            mParticleAPI.identifyUser(userId);
-            break;
-        }
         case R.id.buttonSetUserVar: {
             TextView editView = (TextView) findViewById(R.id.editUserVar);
             String userVar = editView.getText().toString();

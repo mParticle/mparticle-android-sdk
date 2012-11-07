@@ -66,42 +66,20 @@
             android:onClick="pressEventButton"
             android:text="@string/view_b" />
 
-        <LinearLayout
-            android:id="@+id/userIdInputs"
+        <Button
+            android:id="@+id/eventEndUpload"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/viewA" >
-
-            <TextView
-                android:id="@+id/userLabel"
-                android:layout_width="100dp"
-                android:layout_height="wrap_content"
-                android:text="@string/label_user_id"
-                android:textSize="18dp" />
-
-            <EditText
-                android:id="@+id/editUserId"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:ems="10"
-                android:imeOptions="actionSend|actionGo"
-                android:inputType="textPersonName" >
-            </EditText>
-
-            <Button
-                android:id="@+id/buttonSetUserId"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:onClick="pressSetVariable"
-                android:text="@string/button_set" />
-        </LinearLayout>
+            android:layout_below="@+id/buttonA"
+            android:layout_toRightOf="@+id/viewB"
+            android:onClick="pressEventButton"
+            android:text="@string/eventEndUpload" />
 
         <LinearLayout
             android:id="@+id/userVarInputs"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/userIdInputs" >
+            android:layout_below="@+id/viewA" >
 
             <TextView
                 android:id="@+id/userVarLabel"
