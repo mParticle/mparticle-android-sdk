@@ -25,7 +25,7 @@ import com.mparticle.Constants.Status;
 @SuppressWarnings("javadoc")
 public class MessageManager {
 
-    private static final String TAG = "mParticleAPI";
+    private static final String TAG = Constants.LOG_TAG;
 
     private static MessageManager sMessageManager;
     private static HandlerThread sMessageHandlerThread;

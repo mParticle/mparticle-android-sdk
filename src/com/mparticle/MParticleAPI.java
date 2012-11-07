@@ -41,7 +41,7 @@ public class MParticleAPI {
 
     /* package-private */ static final String VERSION = "0.1";
 
-    private static final String TAG = "mParticleAPI";
+    private static final String TAG = Constants.LOG_TAG;
     private static Map<String, MParticleAPI> sInstanceMap = new HashMap<String, MParticleAPI>();
 
     private MessageManager mMessageManager;

@@ -57,7 +57,7 @@ import com.mparticle.MessageDatabase.UploadTable;
 
 /* package-private */ final class UploadHandler extends Handler {
 
-    private static final String TAG = "mParticleAPI";
+    private static final String TAG = Constants.LOG_TAG;
 
     private MessageDatabase mDB;
     private SharedPreferences mPreferences;

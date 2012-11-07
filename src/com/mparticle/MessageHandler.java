@@ -21,7 +21,7 @@ import com.mparticle.MessageDatabase.SessionTable;
 
 /* package-private */ final class MessageHandler extends Handler {
 
-    private static final String TAG = "mParticleAPI";
+    private static final String TAG = Constants.LOG_TAG;
 
     private MessageDatabase mDB;
     private Context mContext;
