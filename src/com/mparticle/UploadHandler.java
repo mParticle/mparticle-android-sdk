@@ -137,6 +137,7 @@ import com.mparticle.MessageDatabase.UploadTable;
             // do all the upload steps and trigger another upload check unless configured for manual uploads
             Log.d(TAG, "Doing periodic upload check");
             if (mUploadInterval>0) {
+                fetchConfig();
                 prepareUploads();
                 processUploads();
                 processCommands();
