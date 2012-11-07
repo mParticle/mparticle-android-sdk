@@ -103,8 +103,8 @@ import com.mparticle.MessageDatabase.UploadTable;
         mCookieStore = new PersistentCookieStore(context);
         mHttpContext.setAttribute(ClientContext.COOKIE_STORE, mCookieStore);
 
-        mAppInfo = MParticleAPI.collectAppInfo(context);
-        mDeviceInfo = MParticleAPI.collectDeviceInfo(context);
+        mAppInfo = DeviceProperties.collectAppInfo(context);
+        mDeviceInfo = DeviceProperties.collectDeviceInfo(context);
     }
 
     @Override

@@ -22,6 +22,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
+import com.mparticle.DeviceProperties;
 import com.mparticle.MParticleAPI;
 
 public class HomeActivity extends Activity {
@@ -79,7 +80,7 @@ public class HomeActivity extends Activity {
 
     private void collectDeviceProperties() {
         StringBuffer diagnosticMessage=new StringBuffer();
-        JSONObject appInfo = MParticleAPI.collectAppInfo(this.getApplicationContext());
+        JSONObject appInfo = DeviceProperties.collectAppInfo(this.getApplicationContext());
         try {
             if (appInfo.length() > 0) {
                 Iterator<?> deviceKeys = appInfo.keys();
@@ -91,7 +92,7 @@ public class HomeActivity extends Activity {
         } catch (Exception e) {
             Log.d(TAG, "Error parsing app info JSON");
         }
-        JSONObject deviceInfo = MParticleAPI.collectDeviceInfo(this.getApplicationContext());
+        JSONObject deviceInfo = DeviceProperties.collectDeviceInfo(this.getApplicationContext());
         try {
             if (deviceInfo.length() > 0) {
                 Iterator<?> deviceKeys = deviceInfo.keys();
