@@ -6,6 +6,8 @@
     <string name="title_sessions_list">Sessions</string>
     <string name="title_uploads_list">Uploads</string>
     <string name="title_commands_list">Commands</string>
+    <string name="menu_proxy">Proxy</string>
+    <string name="menu_close">Close</string>
     <string name="label_event_data_inputs">Event/Data Inputs</string>
     <string name="button_a">Button A</string>
     <string name="button_b">Button B</string>
@@ -34,7 +36,5 @@
     <string name="optout">OptOut</string>
     <string name="push_notify">Push Notify</string>
     <string name="device_attributes">Device Attributes</string>
-    <string name="use_dev_proxy">Use Dev Proxy</string>
-    <string name="close_demo">Close Demo</string>
 
 </resources>

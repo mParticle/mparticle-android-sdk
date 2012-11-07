@@ -1,0 +1,10 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/menuProxy"
+        android:title="@string/menu_proxy"
+        android:orderInCategory="100"
+        android:showAsAction="ifRoom|withText" />
+    <item android:id="@+id/menuClose"
+        android:title="@string/menu_close"
+        android:orderInCategory="110"
+        android:showAsAction="ifRoom|withText" />
+</menu>

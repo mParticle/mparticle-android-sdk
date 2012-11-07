@@ -14,6 +14,8 @@ import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.TextView;
@@ -52,6 +54,27 @@ public class HomeActivity extends Activity {
         debugModeCheckBox.setChecked(debugMode);
         optOutCheckBox.setChecked(mParticleAPI.getOptOut());
         collectDeviceProperties();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.activity_home, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+        case R.id.menuProxy:
+            mParticleAPI.setConnectionProxy("192.168.1.100", 8080);
+            Toast.makeText(this, "Now proxying requests to 192.168.1.100 port 8080", Toast.LENGTH_LONG).show();
+            return true;
+        case R.id.menuClose:
+            this.finish();
+            return true;
+        default:
+            return super.onOptionsItemSelected(item);
+        }
     }
 
     private void collectDeviceProperties() {
@@ -196,15 +219,6 @@ public class HomeActivity extends Activity {
         } else {
             mParticleAPI.clearPushRegistrationId();
         }
-    }
-
-    public void pressUseDevProxy(View view) {
-        // for debugging only
-        mParticleAPI.setConnectionProxy("192.168.1.100", 8080);
-        Toast.makeText(this, "Now proxying requests to 192.168.1.100 port 8080", Toast.LENGTH_LONG).show();
-    }
-    public void pressCloseDemo(View view) {
-        this.finish();
     }
 
 }
