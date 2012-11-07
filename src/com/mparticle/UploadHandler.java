@@ -255,7 +255,10 @@ import com.mparticle.MessageDatabase.UploadTable;
                     }
                 }
 
-                if (responseCode == 202) {
+                if (responseCode != 202) {
+                    // if any upload fails, stop trying and wait for the next cycle
+                    break;
+                } else {
                     try {
                         JSONObject responseJSON = new JSONObject(response);
                         if (responseJSON.has(MessageKey.MESSAGES)) {
