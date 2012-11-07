@@ -195,7 +195,7 @@ import com.mparticle.MessageDatabase.UploadTable;
         uploadMessage.put(MessageKey.TIMESTAMP, System.currentTimeMillis());
 
         uploadMessage.put(MessageKey.APPLICATION_KEY, mApiKey);
-        uploadMessage.put(MessageKey.MPARTICLE_VERSION, MParticleAPI.VERSION);
+        uploadMessage.put(MessageKey.MPARTICLE_VERSION, Constants.MPARTICLE_VERSION);
 
         uploadMessage.put(MessageKey.APP_INFO, mAppInfo);
         uploadMessage.put(MessageKey.DEVICE_INFO, mDeviceInfo);

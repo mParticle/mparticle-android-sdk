@@ -4,6 +4,9 @@ package com.mparticle;
 
     /* package-private */ final static String LOG_TAG = "mParticleAPI";
 
+    /* package-private */ static final String MPARTICLE_VERSION = "0.1";
+
+
     // maximum number of events per session
     public static final int EVENT_LIMIT = 1000;
     // delay (millis) before processing uploads to allow app to get started
