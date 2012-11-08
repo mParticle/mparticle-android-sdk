@@ -21,7 +21,7 @@ import com.mparticle.Constants.MessageKey;
 import com.mparticle.Constants.MessageType;
 import com.mparticle.Constants.Status;
 
-//TODO: this should be package-private but is accessed from the demo
+//TODO: this should be package-private but is accessed from the tests
 @SuppressWarnings("javadoc")
 public class MessageManager {
 
@@ -33,7 +33,7 @@ public class MessageManager {
     private static HandlerThread sUploadHandlerThread;
     private UploadHandler mUploadHandler;
 
-    private static String sActiveNetworkName;
+    private static String sActiveNetworkName = "offline";
     private static Location sLocation;
 
     private MessageManager(Context appContext, String apiKey, String secret, long uploadInterval) {
@@ -57,12 +57,11 @@ public class MessageManager {
             IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
             BroadcastReceiver receiver = new NetworkStatusBroadcastReceiver((MessageManager)sMessageManager);
             appContext.registerReceiver(receiver, filter);
-
         }
         return MessageManager.sMessageManager;
     }
 
-    /* package-private */ static JSONObject createMessage(String messageType, String sessionId, long sessionStart, long time, String name, JSONObject attributes, boolean includeLocation) throws JSONException {
+    /* package-private */ static JSONObject createMessage(String messageType, String sessionId, long sessionStart, long time, String name, JSONObject attributes, boolean includeConnLoc) throws JSONException {
             JSONObject message = new JSONObject();
             message.put(MessageKey.TYPE, messageType);
             message.put(MessageKey.TIMESTAMP, time);
@@ -81,15 +80,15 @@ public class MessageManager {
             if (null != attributes) {
                 message.put(MessageKey.ATTRIBUTES, attributes);
             }
-            if (null != sActiveNetworkName) {
+            if (includeConnLoc) {
                 message.put(MessageKey.DATA_CONNECTION, sActiveNetworkName);
-            }
-            if (includeLocation && null!=sLocation) {
-                JSONObject locJSON = new JSONObject();
-                locJSON.put(MessageKey.LATITUDE, sLocation.getLatitude());
-                locJSON.put(MessageKey.LONGITUDE, sLocation.getLongitude());
-                locJSON.put(MessageKey.ACCURACY, sLocation.getAccuracy());
-                message.put(MessageKey.LOCATION, locJSON);
+                if (null!=sLocation) {
+                    JSONObject locJSON = new JSONObject();
+                    locJSON.put(MessageKey.LATITUDE, sLocation.getLatitude());
+                    locJSON.put(MessageKey.LONGITUDE, sLocation.getLongitude());
+                    locJSON.put(MessageKey.ACCURACY, sLocation.getAccuracy());
+                    message.put(MessageKey.LOCATION, locJSON);
+                }
             }
             return message;
     }
@@ -193,9 +192,13 @@ public class MessageManager {
 
     public void setDataConnection(NetworkInfo activeNetwork) {
         if (null!=activeNetwork) {
-            sActiveNetworkName = activeNetwork.getTypeName().toLowerCase();
+            String activeNetworkName = activeNetwork.getTypeName();
+            if (0!=activeNetwork.getSubtype()) {
+                activeNetworkName += "/" + activeNetwork.getSubtypeName();
+            }
+            sActiveNetworkName = activeNetworkName.toLowerCase();
         } else {
-            sActiveNetworkName = null;
+            sActiveNetworkName = "offline";
         }
     }
 
