@@ -23,15 +23,15 @@ public class DeviceProperties {
 
     /**
      * Generates a collection of application properties
-     * @param context the application context
+     * @param appContext the application context
      * @return a JSONObject of application-specific attributes
      */
-    public static JSONObject collectAppInfo(Context context) {
+    public static JSONObject collectAppInfo(Context appContext) {
         JSONObject properties = new JSONObject();
 
         try {
-            PackageManager packageManager = context.getPackageManager();
-            String packageName = context.getPackageName();
+            PackageManager packageManager = appContext.getPackageManager();
+            String packageName = appContext.getPackageName();
             properties.put(MessageKey.APP_PACKAGE_NAME, packageName);
             String installerPackageName = packageManager.getInstallerPackageName(packageName);
             if (null!=installerPackageName) {
@@ -49,7 +49,7 @@ public class DeviceProperties {
             } catch (PackageManager.NameNotFoundException e) {
                 // ignore missing data
             }
-            SharedPreferences preferences = context.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
+            SharedPreferences preferences = appContext.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
             properties.put(MessageKey.MPARTICLE_INSTALL_TIME, preferences.getLong(PrefKeys.INSTALL_TIME, 0));
         } catch (JSONException e) {
             // ignore JSON exceptions
@@ -59,15 +59,15 @@ public class DeviceProperties {
 
     /**
      * Generates a collection of device properties
-     * @param context the application context
+     * @param appContext the application context
      * @return a JSONObject of device-specific attributes
      */
-    public static JSONObject collectDeviceInfo(Context context) {
+    public static JSONObject collectDeviceInfo(Context appContext) {
         JSONObject properties = new JSONObject();
 
         try {
             // device ID
-            properties.put(MessageKey.DEVICE_ID, Settings.Secure.getString(context.getContentResolver(),
+            properties.put(MessageKey.DEVICE_ID, Settings.Secure.getString(appContext.getContentResolver(),
                     Settings.Secure.ANDROID_ID));
 
             // device/OS properties
@@ -80,7 +80,7 @@ public class DeviceProperties {
             properties.put(MessageKey.MODEL, android.os.Build.MODEL);
 
             // screen height/width
-            WindowManager windowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+            WindowManager windowManager = (WindowManager) appContext.getSystemService(Context.WINDOW_SERVICE);
             DisplayMetrics metrics = new DisplayMetrics();
             windowManager.getDefaultDisplay().getMetrics(metrics);
             properties.put(MessageKey.SCREEN_HEIGHT, metrics.heightPixels);
@@ -93,7 +93,7 @@ public class DeviceProperties {
             properties.put(MessageKey.DEVICE_LOCALE_LANGUAGE, locale.getLanguage());
 
             // network
-            TelephonyManager telephonyManager = (TelephonyManager)context.getSystemService(Context.TELEPHONY_SERVICE);
+            TelephonyManager telephonyManager = (TelephonyManager)appContext.getSystemService(Context.TELEPHONY_SERVICE);
             int phoneType = telephonyManager.getPhoneType();
             if (phoneType!=TelephonyManager.PHONE_TYPE_NONE) {
                 // NOTE: network properties can be empty if phone is in airplane mode and will not be set

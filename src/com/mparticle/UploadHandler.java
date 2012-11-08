@@ -61,7 +61,6 @@ import com.mparticle.MessageDatabase.UploadTable;
 
     private MessageDatabase mDB;
     private SharedPreferences mPreferences;
-    private Context mContext;
     private String mApiKey;
     private String mSecret;
     private long mUploadInterval;
@@ -72,6 +71,7 @@ import com.mparticle.MessageDatabase.UploadTable;
     private JSONObject mAppInfo;
     private JSONObject mDeviceInfo;
     private Proxy mProxy;
+    private ConnectivityManager mConnectivyManager;
 
     public static final int PREPARE_UPLOADS = 0;
     public static final int PROCESS_UPLOADS = 1;
@@ -89,22 +89,23 @@ import com.mparticle.MessageDatabase.UploadTable;
 
     private static String mUploadMode = "batch";
 
-    public UploadHandler(Context context, Looper looper, String apiKey, String secret, long uploadInterval) {
+    public UploadHandler(Context appContext, Looper looper, String apiKey, String secret, long uploadInterval) {
         super(looper);
-        mContext = context;
         mApiKey = apiKey;
         mSecret = secret;
         mUploadInterval = uploadInterval;
 
-        mDB = new MessageDatabase(mContext);
-        mPreferences = context.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
-        mHttpClient = AndroidHttpClient.newInstance("mParticleSDK", mContext);
+        mDB = new MessageDatabase(appContext);
+        mPreferences = appContext.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
+        mHttpClient = AndroidHttpClient.newInstance("mParticleSDK", appContext);
         mHttpContext  = new BasicHttpContext();
-        mCookieStore = new PersistentCookieStore(context);
+        mCookieStore = new PersistentCookieStore(appContext);
         mHttpContext.setAttribute(ClientContext.COOKIE_STORE, mCookieStore);
 
-        mAppInfo = DeviceProperties.collectAppInfo(context);
-        mDeviceInfo = DeviceProperties.collectDeviceInfo(context);
+        mConnectivyManager = (ConnectivityManager) appContext.getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        mAppInfo = DeviceProperties.collectAppInfo(appContext);
+        mDeviceInfo = DeviceProperties.collectDeviceInfo(appContext);
     }
 
     @Override
@@ -446,8 +447,7 @@ import com.mparticle.MessageDatabase.UploadTable;
     }
 
     private boolean isNetworkAvailable() {
-        ConnectivityManager connectivyManager = (ConnectivityManager)mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo networkInfo = connectivyManager.getActiveNetworkInfo();
+        NetworkInfo networkInfo = mConnectivyManager.getActiveNetworkInfo();
         if (networkInfo != null) {
             return networkInfo.isConnectedOrConnecting();
         }

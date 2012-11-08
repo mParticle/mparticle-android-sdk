@@ -36,15 +36,15 @@ public class MessageManager {
     private static String sActiveNetworkName;
     private static Location sLocation;
 
-    private MessageManager(Context context, String apiKey, String secret, long uploadInterval) {
-        mMessageHandler = new MessageHandler(context, sMessageHandlerThread.getLooper());
+    private MessageManager(Context appContext, String apiKey, String secret, long uploadInterval) {
+        mMessageHandler = new MessageHandler(appContext, sMessageHandlerThread.getLooper());
         mMessageHandler.sendEmptyMessage(MessageHandler.END_ORPHAN_SESSIONS);
-        mUploadHandler = new UploadHandler(context, sUploadHandlerThread.getLooper(), apiKey, secret, uploadInterval);
+        mUploadHandler = new UploadHandler(appContext, sUploadHandlerThread.getLooper(), apiKey, secret, uploadInterval);
         mUploadHandler.sendEmptyMessage(UploadHandler.FETCH_CONFIG);
         mUploadHandler.sendEmptyMessageDelayed(UploadHandler.PERIODIC_UPLOAD, Constants.INITIAL_UPLOAD_DELAY);
     }
 
-    public static MessageManager getInstance(Context context, String apiKey, String secret, long uploadInterval) {
+    public static MessageManager getInstance(Context appContext, String apiKey, String secret, long uploadInterval) {
         if (null == MessageManager.sMessageManager) {
             sMessageHandlerThread = new HandlerThread("mParticleMessageHandlerThread",
                     Process.THREAD_PRIORITY_BACKGROUND);
@@ -52,11 +52,11 @@ public class MessageManager {
             sUploadHandlerThread = new HandlerThread("mParticleUploadHandlerThread",
                     Process.THREAD_PRIORITY_BACKGROUND);
             sUploadHandlerThread.start();
-            MessageManager.sMessageManager = new MessageManager(context, apiKey, secret, uploadInterval);
+            MessageManager.sMessageManager = new MessageManager(appContext, apiKey, secret, uploadInterval);
 
             IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
             BroadcastReceiver receiver = new NetworkStatusBroadcastReceiver((MessageManager)sMessageManager);
-            context.registerReceiver(receiver, filter);
+            appContext.registerReceiver(receiver, filter);
 
         }
         return MessageManager.sMessageManager;
@@ -179,9 +179,9 @@ public class MessageManager {
             mWeakMessageManager = new WeakReference<MessageManager>(messageManager);
         }
         @Override
-        public void onReceive(Context context, Intent intent) {
+        public void onReceive(Context appContext, Intent intent) {
             if (ConnectivityManager.CONNECTIVITY_ACTION.equals(intent.getAction())) {
-                ConnectivityManager connectivyManager = (ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE);
+                ConnectivityManager connectivyManager = (ConnectivityManager)appContext.getSystemService(Context.CONNECTIVITY_SERVICE);
                 NetworkInfo activeNetwork = connectivyManager.getActiveNetworkInfo();
                 MessageManager messageManager = mWeakMessageManager.get();
                 if (messageManager!=null) {

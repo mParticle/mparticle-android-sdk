@@ -36,7 +36,7 @@ public class MParticleAPI {
     private Handler mTimeoutHandler;
     private MParticleLocationListener mLocationListener;
     private SharedPreferences mPreferences;
-    private Context mContext;
+    private Context mAppContext;
     private String mApiKey;
     private boolean mOptOutStatus = false;
     private boolean mDebugMode = false;
@@ -51,15 +51,15 @@ public class MParticleAPI {
     /* package-private */ JSONObject mUserAttributes = new JSONObject();
     /* package-private */ JSONObject mSessionAttributes;
 
-    /* package-private */ MParticleAPI(Context context, String apiKey, MessageManager messageManager) {
-        mContext = context;
+    /* package-private */ MParticleAPI(Context appContext, String apiKey, MessageManager messageManager) {
+        mAppContext = appContext;
         mApiKey = apiKey;
         mMessageManager = messageManager;
         HandlerThread timeoutHandlerThread = new HandlerThread("SessionTimeoutHandler", Process.THREAD_PRIORITY_BACKGROUND);
         timeoutHandlerThread.start();
         mTimeoutHandler = new SessionTimeoutHandler(this, timeoutHandlerThread.getLooper());
 
-        mPreferences = mContext.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
+        mPreferences = mAppContext.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
         mOptOutStatus = mPreferences.getBoolean(PrefKeys.OPTOUT+mApiKey, false);
         String userAttrs = mPreferences.getString(PrefKeys.USER_ATTRS+mApiKey, null);
         if (null!=userAttrs) {
@@ -348,7 +348,7 @@ public class MParticleAPI {
      */
     public void enableLocationTracking(String provider, long minTime, long minDistance) {
         try {
-            LocationManager locationManager = (LocationManager) mContext.getSystemService(Context.LOCATION_SERVICE);
+            LocationManager locationManager = (LocationManager) mAppContext.getSystemService(Context.LOCATION_SERVICE);
             if (!locationManager.isProviderEnabled(provider)) {
                 Log.w(TAG, "That requested location provider is not available");
                 return;

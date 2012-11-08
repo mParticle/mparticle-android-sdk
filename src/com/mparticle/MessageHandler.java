@@ -24,7 +24,6 @@ import com.mparticle.MessageDatabase.SessionTable;
     private static final String TAG = Constants.LOG_TAG;
 
     private MessageDatabase mDB;
-    private Context mContext;
 
     public static final int STORE_MESSAGE = 0;
     public static final int UPDATE_SESSION_ATTRIBUTES = 2;
@@ -32,10 +31,9 @@ import com.mparticle.MessageDatabase.SessionTable;
     public static final int CREATE_SESSION_END_MESSAGE = 4;
     public static final int END_ORPHAN_SESSIONS = 5;
 
-    public MessageHandler(Context context, Looper looper) {
+    public MessageHandler(Context appContext, Looper looper) {
         super(looper);
-        mContext = context;
-        mDB = new MessageDatabase(mContext);
+        mDB = new MessageDatabase(appContext);
     }
 
     @Override
