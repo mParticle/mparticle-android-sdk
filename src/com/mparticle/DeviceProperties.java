@@ -71,6 +71,7 @@ public class DeviceProperties {
                     Settings.Secure.ANDROID_ID));
 
             // device/OS properties
+            properties.put(MessageKey.BUILD_ID, android.os.Build.ID);
             properties.put(MessageKey.BRAND, android.os.Build.BRAND);
             properties.put(MessageKey.PRODUCT, android.os.Build.PRODUCT);
             properties.put(MessageKey.DEVICE, android.os.Build.DEVICE);
