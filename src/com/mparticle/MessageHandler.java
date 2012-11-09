@@ -134,11 +134,12 @@ import com.mparticle.MessageDatabase.SessionTable;
             break;
         case END_ORPHAN_SESSIONS:
             try {
-                // find sessions without session-end message and create them
+                // find left-over sessions that exist during startup and end them
                 SQLiteDatabase db = mDB.getWritableDatabase();
+                String[] selectionArgs = new String[]{Long.toString(Status.READY)};
                 String[] sessionColumns = new String[]{SessionTable.SESSION_ID};
                 Cursor selectCursor = db.query(SessionTable.TABLE_NAME, sessionColumns,
-                        SessionTable.STATUS+"!="+Status.ENDED, null, null, null, null);
+                        SessionTable.STATUS+"=?", selectionArgs, null, null, null);
                 // NOTE: there should be at most one orphan - but process any that are found
                 while (selectCursor.moveToNext()) {
                     String sessionId = selectCursor.getString(0);

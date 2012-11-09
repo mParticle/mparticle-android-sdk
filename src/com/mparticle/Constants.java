@@ -112,7 +112,6 @@ package com.mparticle;
     public interface Status {
         static final int READY = 1;
         static final int BATCH_READY = 2;
-        static final int ENDED = 10;
     }
 
 }
