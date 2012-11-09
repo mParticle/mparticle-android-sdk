@@ -17,13 +17,12 @@ import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 
 import org.apache.http.HttpHost;
-import org.apache.http.client.CookieStore;
 import org.apache.http.client.HttpResponseException;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.protocol.ClientContext;
-import org.apache.http.conn.params.ConnRoutePNames;
+import org.apache.http.conn.params.ConnRouteParams;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.impl.client.BasicResponseHandler;
 import org.apache.http.impl.cookie.DateUtils;
@@ -67,7 +66,6 @@ import com.mparticle.MessageDatabase.UploadTable;
 
     private AndroidHttpClient mHttpClient;
     private HttpContext mHttpContext;
-    private CookieStore mCookieStore;
     private JSONObject mAppInfo;
     private JSONObject mDeviceInfo;
     private Proxy mProxy;
@@ -95,8 +93,7 @@ import com.mparticle.MessageDatabase.UploadTable;
         mPreferences = appContext.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
         mHttpClient = AndroidHttpClient.newInstance("mParticleSDK", appContext);
         mHttpContext  = new BasicHttpContext();
-        mCookieStore = new PersistentCookieStore(appContext);
-        mHttpContext.setAttribute(ClientContext.COOKIE_STORE, mCookieStore);
+        mHttpContext.setAttribute(ClientContext.COOKIE_STORE, new PersistentCookieStore(appContext));
 
         mConnectivyManager = (ConnectivityManager) appContext.getSystemService(Context.CONNECTIVITY_SERVICE);
 
@@ -251,10 +248,10 @@ import com.mparticle.MessageDatabase.UploadTable;
                     Log.w(TAG, "Message upload failed with response code:" + responseCode);
                 } catch (IOException e) {
                     // IOExceptions (such as timeouts) will be retried
-                    Log.w(TAG, "Message upload failed with IO exception");
+                    Log.e(TAG, "Message upload failed with IO exception", e);
                 } catch (Throwable t) {
                     // Some other exception occurred.
-                    Log.e(TAG, "Message upload failed with IO exception",t);
+                    Log.e(TAG, "Message upload failed with exception",t);
                 } finally {
                     if (202==responseCode || (responseCode>=400 && responseCode<500)) {
                         dbDeleteUpload(db, id);
@@ -428,7 +425,7 @@ import com.mparticle.MessageDatabase.UploadTable;
     /* Possibly for development only */
     public void setConnectionProxy(String host, int port) {
         HttpHost proxy = new HttpHost(host, port);
-        mHttpClient.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY, proxy);
+        ConnRouteParams.setDefaultProxy(mHttpClient.getParams(),proxy);
         mProxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(host, port));
     }
 
