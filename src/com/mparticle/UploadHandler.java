@@ -17,16 +17,30 @@ import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 
 import org.apache.http.HttpHost;
+import org.apache.http.HttpVersion;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.HttpResponseException;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.protocol.ClientContext;
+import org.apache.http.conn.ClientConnectionManager;
 import org.apache.http.conn.params.ConnRouteParams;
+import org.apache.http.conn.scheme.PlainSocketFactory;
+import org.apache.http.conn.scheme.Scheme;
+import org.apache.http.conn.scheme.SchemeRegistry;
+import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.impl.client.BasicResponseHandler;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
 import org.apache.http.impl.cookie.DateUtils;
+import org.apache.http.params.BasicHttpParams;
+import org.apache.http.params.HttpConnectionParams;
+import org.apache.http.params.HttpParams;
+import org.apache.http.params.HttpProtocolParams;
 import org.apache.http.protocol.BasicHttpContext;
+import org.apache.http.protocol.HTTP;
 import org.apache.http.protocol.HttpContext;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -40,7 +54,6 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.net.http.AndroidHttpClient;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -64,7 +77,7 @@ import com.mparticle.MessageDatabase.UploadTable;
     private String mSecret;
     private long mUploadInterval;
 
-    private AndroidHttpClient mHttpClient;
+    private HttpClient mHttpClient;
     private HttpContext mHttpContext;
     private JSONObject mAppInfo;
     private JSONObject mDeviceInfo;
@@ -91,7 +104,7 @@ import com.mparticle.MessageDatabase.UploadTable;
 
         mDB = new MessageDatabase(appContext);
         mPreferences = appContext.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
-        mHttpClient = AndroidHttpClient.newInstance("mParticleSDK", appContext);
+        mHttpClient = setupHttpClient();
         mHttpContext  = new BasicHttpContext();
         mHttpContext.setAttribute(ClientContext.COOKIE_STORE, new PersistentCookieStore(appContext));
 
@@ -150,7 +163,7 @@ import com.mparticle.MessageDatabase.UploadTable;
         } catch (HttpResponseException e) {
             Log.w(TAG, "Config request failed:" + e.getMessage());
         } catch (IOException e) {
-            Log.w(TAG, "Config request failed w/ IO:" + e.getMessage());
+            Log.e(TAG, "Config request failed w/ IO exception:", e);
         } catch (JSONException e) {
             Log.w(TAG, "Config request failed to process response message JSON");
         } catch (URISyntaxException e) {
@@ -422,10 +435,28 @@ import com.mparticle.MessageDatabase.UploadTable;
         return false;
     }
 
+    private HttpClient setupHttpClient() {
+        HttpParams params = new BasicHttpParams();
+        HttpProtocolParams.setVersion(params, HttpVersion.HTTP_1_1);
+        HttpProtocolParams.setContentCharset(params, HTTP.DEFAULT_CONTENT_CHARSET);
+        HttpProtocolParams.setUseExpectContinue(params, true);
+
+        HttpConnectionParams.setConnectionTimeout(params, 10*1000);
+        HttpConnectionParams.setSoTimeout(params, 10*1000);
+
+        SchemeRegistry registry = new SchemeRegistry();
+        registry.register(new Scheme("http", PlainSocketFactory.getSocketFactory(), 80));
+        registry.register(new Scheme("https", SSLSocketFactory.getSocketFactory(), 443));
+
+        ClientConnectionManager connman = new ThreadSafeClientConnManager(params, registry);
+        HttpClient client = new DefaultHttpClient(connman, params);
+        return client;
+    }
+
     /* Possibly for development only */
     public void setConnectionProxy(String host, int port) {
-        HttpHost proxy = new HttpHost(host, port);
-        ConnRouteParams.setDefaultProxy(mHttpClient.getParams(),proxy);
+        // http client and urlConnection use separate proxies
+        ConnRouteParams.setDefaultProxy(mHttpClient.getParams(), new HttpHost(host, port));
         mProxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(host, port));
     }
 
