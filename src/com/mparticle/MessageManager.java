@@ -105,7 +105,7 @@ public class MessageManager {
     public void startSession(String sessionId, long time) {
         try {
             JSONObject message = createMessage(MessageType.SESSION_START, sessionId, time, time, null, null, true);
-            mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, Status.PENDING, 0, message));
+            mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, Status.READY, 0, message));
         } catch (JSONException e) {
             Log.w(TAG, "Failed to create mParticle start session message");
         }

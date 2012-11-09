@@ -149,7 +149,7 @@ import com.mparticle.MessageDatabase.UploadTable;
 
     void prepareUploads() {
         try {
-            // select messages ready to upload (limited number)
+            // select messages ready to upload
             SQLiteDatabase db = mDB.getWritableDatabase();
             String[] selectionArgs = new String[]{Integer.toString(Status.BATCH_READY)};
             String selection;
@@ -158,27 +158,22 @@ import com.mparticle.MessageDatabase.UploadTable;
             } else {
                 selection = MessageTable.STATUS + "<=?";
             }
-            String[] selectionColumns = new String[]{MessageTable.UUID, MessageTable.MESSAGE, MessageTable.STATUS, MessageTable.MESSAGE_TIME, "_id"};
+            String[] selectionColumns = new String[]{"_id", MessageTable.MESSAGE, MessageTable.STATUS, MessageTable.MESSAGE_TIME};
             Cursor readyMessagesCursor = db.query(MessageTable.TABLE_NAME, selectionColumns, selection, selectionArgs, null, null, MessageTable.MESSAGE_TIME+" , _id");
             if (readyMessagesCursor.getCount()>0) {
                 JSONArray messagesArray = new JSONArray();
                 int lastReadyMessage = 0;
                 while (readyMessagesCursor.moveToNext()) {
-                    // NOTE: this could be simpler if we ignore PENDING status on start-session message
-                    if (!readyMessagesCursor.isLast() || Status.PENDING!=readyMessagesCursor.getInt(2)) {
-                        JSONObject msgObject = new JSONObject(readyMessagesCursor.getString(1));
-                        messagesArray.put(msgObject);
-                        lastReadyMessage = readyMessagesCursor.getInt(4);
-                    }
+                    lastReadyMessage = readyMessagesCursor.getInt(0);
+                    JSONObject msgObject = new JSONObject(readyMessagesCursor.getString(1));
+                    messagesArray.put(msgObject);
                 }
-                if (messagesArray.length() > 0) {
-                    // create upload message
-                    JSONObject uploadMessage = createUploadMessage(messagesArray);
-                    // store in uploads table
-                    dbInsertUpload(db, uploadMessage);
-                    // delete processed messages
-                    dbDeleteProcessedMessages(db, lastReadyMessage);
-                }
+                // create upload message
+                JSONObject uploadMessage = createUploadMessage(messagesArray);
+                // store in uploads table
+                dbInsertUpload(db, uploadMessage);
+                // delete processed messages
+                dbDeleteProcessedMessages(db, lastReadyMessage);
             }
         } catch (SQLiteException e) {
             Log.e(TAG, "Error preparing batch upload in mParticle DB", e);
@@ -202,7 +197,7 @@ import com.mparticle.MessageDatabase.UploadTable;
         uploadMessage.put(MessageKey.DEVICE_INFO, mDeviceInfo);
 
         String userAttrs = mPreferences.getString(PrefKeys.USER_ATTRS+mApiKey, null);
-        if(null!=userAttrs) {
+        if (null!=userAttrs) {
             uploadMessage.put(MessageKey.USER_ATTRIBUTES, new JSONObject(userAttrs));
         }
 
@@ -407,7 +402,7 @@ import com.mparticle.MessageDatabase.UploadTable;
         contentValues.put(UploadTable.UPLOAD_ID, message.getString(MessageKey.ID));
         contentValues.put(UploadTable.MESSAGE_TIME, message.getLong(MessageKey.TIMESTAMP));
         contentValues.put(UploadTable.MESSAGE, message.toString());
-        contentValues.put(UploadTable.STATUS, Status.PENDING);
+        contentValues.put(UploadTable.STATUS, Status.READY);
         db.insert(UploadTable.TABLE_NAME, null, contentValues);
     }
 
@@ -442,7 +437,7 @@ import com.mparticle.MessageDatabase.UploadTable;
         contentValues.put(CommandTable.POST_DATA, command.optString(MessageKey.POST));
         contentValues.put(CommandTable.CLEAR_HEADERS, command.optBoolean(MessageKey.CLEAR_HEADERS,false));
         contentValues.put(CommandTable.HEADERS, command.optString(MessageKey.HEADERS));
-        contentValues.put(CommandTable.STATUS, Status.PENDING);
+        contentValues.put(CommandTable.STATUS, Status.READY);
         db.insert(CommandTable.TABLE_NAME, null, contentValues);
     }
 

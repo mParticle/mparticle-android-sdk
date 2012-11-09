@@ -162,7 +162,7 @@ import com.mparticle.MessageDatabase.SessionTable;
         values.put(SessionTable.START_TIME, sessionStartTime);
         values.put(SessionTable.END_TIME, sessionStartTime);
         values.put(SessionTable.SESSION_LENGTH, 0);
-        values.put(SessionTable.STATUS, Status.PENDING);
+        values.put(SessionTable.STATUS, Status.READY);
         db.insert(SessionTable.TABLE_NAME, null, values);
     }
 
