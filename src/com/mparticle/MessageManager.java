@@ -40,8 +40,7 @@ public class MessageManager {
         mMessageHandler = new MessageHandler(appContext, sMessageHandlerThread.getLooper());
         mMessageHandler.sendEmptyMessage(MessageHandler.END_ORPHAN_SESSIONS);
         mUploadHandler = new UploadHandler(appContext, sUploadHandlerThread.getLooper(), apiKey, secret, uploadInterval);
-        mUploadHandler.sendEmptyMessage(UploadHandler.FETCH_CONFIG);
-        mUploadHandler.sendEmptyMessageDelayed(UploadHandler.PERIODIC_UPLOAD, Constants.INITIAL_UPLOAD_DELAY);
+        mUploadHandler.sendEmptyMessageDelayed(UploadHandler.UPLOAD_MESSAGES, Constants.INITIAL_UPLOAD_DELAY);
     }
 
     public static MessageManager getInstance(Context appContext, String apiKey, String secret, long uploadInterval) {
@@ -110,6 +109,7 @@ public class MessageManager {
             Log.w(TAG, "Failed to create mParticle start session message");
         }
     }
+
     public void stopSession(String sessionId, long stopTime, long sessionLength) {
         try {
             JSONObject sessionTiming=new JSONObject();
@@ -121,10 +121,12 @@ public class MessageManager {
             Log.w(TAG, "Failed to send update session end message");
         }
     }
+
     public void endSession(String sessionId, long stopTime, long sessionLength) {
         stopSession(sessionId, stopTime, sessionLength);
         mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.CREATE_SESSION_END_MESSAGE, sessionId));
     }
+
     public void logCustomEvent(String sessionId, long sessionStartTime, long time, String eventName, JSONObject attributes) {
         try {
             JSONObject message = createMessage(MessageType.CUSTOM_EVENT, sessionId, sessionStartTime, time, eventName, attributes, true);
@@ -133,6 +135,7 @@ public class MessageManager {
             Log.w(TAG, "Failed to create mParticle start event message");
         }
     }
+
     public void logScreenView(String sessionId, long sessionStartTime, long time, String screenName, JSONObject attributes) {
         try {
             JSONObject message = createMessage(MessageType.SCREEN_VIEW, sessionId, sessionStartTime, time, screenName, attributes, true);
@@ -141,6 +144,7 @@ public class MessageManager {
             Log.w(TAG, "Failed to create mParticle screen view message");
         }
     }
+
     public void optOut(String sessionId, long sessionStartTime, long time, boolean optOutStatus) {
         try {
             JSONObject message = createMessage(MessageType.OPT_OUT, sessionId, sessionStartTime, time, null, null, false);
@@ -150,6 +154,7 @@ public class MessageManager {
             Log.w(TAG, "Failed to create mParticle screen view message");
         }
     }
+
     public void logErrorEvent(String sessionId, long sessionStartTime, long time, String errorMessage, JSONObject attributes, Throwable t) {
         try {
             JSONObject message = createMessage(MessageType.ERROR, sessionId, sessionStartTime, time, null, attributes, false);
@@ -181,7 +186,7 @@ public class MessageManager {
     }
 
     public void doUpload() {
-        mUploadHandler.sendEmptyMessage(UploadHandler.PREPARE_UPLOADS);
+        mUploadHandler.sendMessage(mUploadHandler.obtainMessage(UploadHandler.UPLOAD_MESSAGES, 1, 0));
     }
 
     public static void setLocation(Location location) {

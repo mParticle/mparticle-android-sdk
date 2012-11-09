@@ -73,12 +73,8 @@ import com.mparticle.MessageDatabase.UploadTable;
     private Proxy mProxy;
     private ConnectivityManager mConnectivyManager;
 
-    public static final int PREPARE_UPLOADS = 0;
-    public static final int PROCESS_UPLOADS = 1;
-    public static final int PROCESS_COMMANDS = 2;
-    public static final int CLEANUP = 3;
-    public static final int FETCH_CONFIG = 4;
-    public static final int PERIODIC_UPLOAD = 5;
+    public static final int UPLOAD_MESSAGES = 1;
+    public static final int CLEANUP = 2;
 
     public static final String HEADER_APPKEY = "x-mp-appkey";
     public static final String HEADER_SIGNATURE = "x-mp-signature";
@@ -112,38 +108,56 @@ import com.mparticle.MessageDatabase.UploadTable;
     public void handleMessage(Message msg) {
         super.handleMessage(msg);
         switch (msg.what) {
-        case PREPARE_UPLOADS:
-            // create uploads records for batches of messages and mark the messages as processed
-            prepareUploads();
-            // TODO: restore this break - for development only
-            // break;
-        case PROCESS_UPLOADS:
-            // post upload messages to server and mark the uploads as processed. store response commands to be processed.
-            processUploads();
-            // TODO: restore this break - for development only
-            // break;
-        case PROCESS_COMMANDS:
-            // post commands to vendor services
-            processCommands();
-            break;
-        case CLEANUP:
-            // delete completed uploads, messages, and sessions
-            // TODO: cleanupDatabase();
-            break;
-        case FETCH_CONFIG:
-            // get the application configuration and process it
-            fetchConfig();
-            break;
-        case PERIODIC_UPLOAD:
-            // do all the upload steps and trigger another upload check unless configured for manual uploads
-            Log.d(TAG, "Doing periodic upload check");
-            if (mUploadInterval>0) {
+        case UPLOAD_MESSAGES:
+            if (msg.arg1==0) {
+                Log.d(TAG, "Doing periodic upload check");
+            } else {
+                Log.d(TAG, "Doing manual upload");
+            }
+            // do all the upload steps
+            if (mUploadInterval>0 || msg.arg1==1) {
                 fetchConfig();
                 prepareUploads();
                 processUploads();
                 processCommands();
-                this.sendEmptyMessageDelayed(PERIODIC_UPLOAD, mUploadInterval);
             }
+            // trigger another upload check unless configured for manual uploads
+            if (mUploadInterval > 0 && msg.arg1==0) {
+                this.sendEmptyMessageDelayed(UPLOAD_MESSAGES, mUploadInterval);
+            }
+        case CLEANUP:
+            // delete completed uploads, messages, and sessions
+            // TODO: cleanupDatabase();
+            break;
+        }
+    }
+
+    void fetchConfig() {
+        if (!isNetworkAvailable()) {
+            return;
+        }
+        try {
+            HttpGet httpGet = new HttpGet(makeServiceUri("config"));
+            addMessageSignature(httpGet, null);
+            String response = mHttpClient.execute(httpGet, new BasicResponseHandler(), mHttpContext);
+
+            JSONObject responseJSON = new JSONObject(response);
+            if (responseJSON.has(MessageKey.SESSION_UPLOAD)) {
+                String sessionUploadMode = responseJSON.getString(MessageKey.SESSION_UPLOAD);
+                if ("batch".equalsIgnoreCase(sessionUploadMode)) {
+                    mUploadMode = "batch";
+                } else {
+                    mUploadMode = "stream";
+                }
+            }
+        } catch (HttpResponseException e) {
+            Log.w(TAG, "Config request failed:" + e.getMessage());
+        } catch (IOException e) {
+            Log.w(TAG, "Config request failed w/ IO:" + e.getMessage());
+        } catch (JSONException e) {
+            Log.w(TAG, "Config request failed to process response message JSON");
+        } catch (URISyntaxException e) {
+            Log.e(TAG, "Error constructing config service URI", e);
         }
     }
 
@@ -158,7 +172,7 @@ import com.mparticle.MessageDatabase.UploadTable;
             } else {
                 selection = MessageTable.STATUS + "<=?";
             }
-            String[] selectionColumns = new String[]{"_id", MessageTable.MESSAGE, MessageTable.STATUS, MessageTable.MESSAGE_TIME};
+            String[] selectionColumns = new String[]{"_id", MessageTable.MESSAGE, MessageTable.MESSAGE_TIME};
             Cursor readyMessagesCursor = db.query(MessageTable.TABLE_NAME, selectionColumns, selection, selectionArgs, null, null, MessageTable.MESSAGE_TIME+" , _id");
             if (readyMessagesCursor.getCount()>0) {
                 JSONArray messagesArray = new JSONArray();
@@ -189,14 +203,12 @@ import com.mparticle.MessageDatabase.UploadTable;
         uploadMessage.put(MessageKey.TYPE, MessageType.REQUEST_HEADER);
         uploadMessage.put(MessageKey.ID, UUID.randomUUID().toString());
         uploadMessage.put(MessageKey.TIMESTAMP, System.currentTimeMillis());
-
         uploadMessage.put(MessageKey.APPLICATION_KEY, mApiKey);
         uploadMessage.put(MessageKey.MPARTICLE_VERSION, Constants.MPARTICLE_VERSION);
-
         uploadMessage.put(MessageKey.APP_INFO, mAppInfo);
         uploadMessage.put(MessageKey.DEVICE_INFO, mDeviceInfo);
 
-        String userAttrs = mPreferences.getString(PrefKeys.USER_ATTRS+mApiKey, null);
+        String userAttrs = mPreferences.getString(PrefKeys.USER_ATTRS + mApiKey, null);
         if (null!=userAttrs) {
             uploadMessage.put(MessageKey.USER_ATTRIBUTES, new JSONObject(userAttrs));
         }
@@ -268,7 +280,6 @@ import com.mparticle.MessageDatabase.UploadTable;
                         // ignore problems parsing response commands
                     }
                 }
-
             }
         } catch (SQLiteException e) {
             Log.e(TAG, "Error processing batch uploads in mParticle DB", e);
@@ -284,21 +295,17 @@ import com.mparticle.MessageDatabase.UploadTable;
             String method = request.getMethod();
             String dateHeader = DateUtils.formatDate(new Date());
             String path = request.getURI().getPath();
-
             String signatureMessage = method + "\n" + dateHeader + "\n" + path;
             if ("POST".equalsIgnoreCase(method) && null!=message) {
                 signatureMessage += message;
             }
-
             request.setHeader("Date", dateHeader);
             request.setHeader(HEADER_SIGNATURE, hmacSha256Encode(mSecret, signatureMessage));
-
         } catch (InvalidKeyException e) {
             Log.e(TAG, "Error signing message", e);
         } catch (NoSuchAlgorithmException e) {
             Log.e(TAG, "Error signing message", e);
         }
-
     }
 
     void processCommands() {
@@ -359,35 +366,6 @@ import com.mparticle.MessageDatabase.UploadTable;
             Log.e(TAG, "Error processing command uploads in mParticle DB", e);
         } finally {
             mDB.close();
-        }
-    }
-
-    void fetchConfig() {
-        if (!isNetworkAvailable()) {
-            return;
-        }
-        try {
-            HttpGet httpGet = new HttpGet(makeServiceUri("config"));
-            addMessageSignature(httpGet, null);
-            String response = mHttpClient.execute(httpGet, new BasicResponseHandler(), mHttpContext);
-
-            JSONObject responseJSON = new JSONObject(response);
-            if (responseJSON.has(MessageKey.SESSION_UPLOAD)) {
-                String sessionUploadMode = responseJSON.getString(MessageKey.SESSION_UPLOAD);
-                if ("batch".equalsIgnoreCase(sessionUploadMode)) {
-                    mUploadMode = "batch";
-                } else {
-                    mUploadMode = "stream";
-                }
-            }
-        } catch (HttpResponseException e) {
-            Log.w(TAG, "Config request failed:" + e.getMessage());
-        } catch (IOException e) {
-            Log.w(TAG, "Config request failed w/ IO:" + e.getMessage());
-        } catch (JSONException e) {
-            Log.w(TAG, "Config request failed to process response message JSON");
-        } catch (URISyntaxException e) {
-            Log.e(TAG, "Error constructing config service URI", e);
         }
     }
 
@@ -466,8 +444,7 @@ import com.mparticle.MessageDatabase.UploadTable;
      private static final char[] HEX_CHARS = "0123456789abcdef".toCharArray();
      private static String asHex(byte[] buf) {
          char[] chars = new char[2 * buf.length];
-         for (int i = 0; i < buf.length; ++i)
-         {
+         for (int i = 0; i < buf.length; ++i) {
              chars[2 * i] = HEX_CHARS[(buf[i] & 0xF0) >>> 4];
              chars[2 * i + 1] = HEX_CHARS[buf[i] & 0x0F];
          }
