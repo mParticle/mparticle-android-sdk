@@ -98,6 +98,17 @@ public class UserSessionAttributesTests extends AndroidTestCase {
         assertFalse(mMParticleAPI.mUserAttributes.has("testKeyToClear"));
     }
 
+    public void testUpdateUserAttribute() throws JSONException {
+        mMParticleAPI.setUserProperty("testKeyToUpdate","testValue1");
+        for (int i = 0; i < Constants.LIMIT_ATTR_COUNT + 1; i++) {
+            mMParticleAPI.setUserProperty("testKey"+i, "testValue"+i);
+        }
+        assertEquals(Constants.LIMIT_ATTR_COUNT,mMParticleAPI.mUserAttributes.length());
+        assertTrue(mMParticleAPI.mUserAttributes.has("testKeyToUpdate"));
+        mMParticleAPI.setUserProperty("testKeyToUpdate","testValueUpdated");
+        assertEquals("testValueUpdated", mMParticleAPI.mUserAttributes.get("testKeyToUpdate"));
+    }
+
     public void testSessionAttributesCleared() throws JSONException {
         mMParticleAPI.start();
         mMParticleAPI.setSessionProperty("testKey1", "testValue1");

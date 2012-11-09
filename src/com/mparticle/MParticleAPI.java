@@ -559,7 +559,7 @@ public class MParticleAPI {
             return false;
         }
         try {
-            if (null!=value && Constants.LIMIT_ATTR_COUNT==attributes.length()) {
+            if (Constants.LIMIT_ATTR_COUNT==attributes.length() && !attributes.has(key)) {
                 Log.w(TAG, "Attribute count exceeds limit. Discarding attribute: " + key);
                 return false;
             }
