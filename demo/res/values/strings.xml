@@ -30,6 +30,7 @@
     <string name="upload">Upload</string>
     <string name="end">End</string>
     <string name="crash">Crash</string>
+    <string name="error">Error</string>
     <string name="update_location">Update Location</string>
     <string name="get_segment">Get Segment</string>
     <string name="debug">Debug</string>

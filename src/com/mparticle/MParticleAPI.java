@@ -321,12 +321,7 @@ public class MParticleAPI {
      * @param data a Map of data attributes
      */
     public void logErrorEvent(String eventName, JSONObject data) {
-        if (null==eventName) {
-            Log.w(TAG,"eventName is required for logErrorEvent");
-            return;
-        }
-        ensureActiveSession();
-        debugLog("Logged error: " + eventName);
+        logErrorEvent(eventName, data, null);
     }
 
     /**
@@ -337,6 +332,13 @@ public class MParticleAPI {
      */
     // TODO: this method may be dropped - will decide in a later iteration
     public void logErrorEvent(String eventName, JSONObject data, Exception e) {
+        if (null==eventName) {
+            Log.w(TAG,"eventName is required for logErrorEvent");
+            return;
+        }
+        ensureActiveSession();
+        mMessageManager.logErrorEvent(mSessionID, mSessionStartTime, mLastEventTime, eventName, data, e);
+        debugLog("Logged error: " + eventName);
     }
 
     /**

@@ -82,7 +82,8 @@ package com.mparticle;
         public static final String MOBILE_NETWORK_CODE = "mnc";
         public static final String MOBILE_COUNTRY_CODE = "mcc";
         // errors
-        public static final String ERROR_TYPE = "t";
+        public static final String ERROR_SEVERITY = "s";
+        public static final String ERROR_CLASS = "c";
         public static final String ERROR_MESSAGE = "m";
         public static final String ERROR_STACK_TRACE = "st";
         // uploading

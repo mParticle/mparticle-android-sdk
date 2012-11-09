@@ -175,25 +175,26 @@ public class HomeActivity extends Activity {
 
     public void pressSetVariable(View view) {
         switch (view.getId()) {
-        case R.id.buttonSetUserVar: {
-            TextView editView = (TextView) findViewById(R.id.editUserVar);
-            String userVar = editView.getText().toString();
+        case R.id.buttonSetUserVar:
+            TextView editUserView = (TextView) findViewById(R.id.editUserVar);
+            String userVar = editUserView.getText().toString();
             mParticleAPI.setUserProperty("user_var", userVar);
             break;
-        }
-        case R.id.buttonSetSessionVar: {
-            TextView editView = (TextView) findViewById(R.id.editSessionVar);
-            String sessionVar = editView.getText().toString();
+        case R.id.buttonSetSessionVar:
+            TextView editSessionView = (TextView) findViewById(R.id.editSessionVar);
+            String sessionVar = editSessionView.getText().toString();
             mParticleAPI.setSessionProperty("session_var", sessionVar);
             break;
         }
-        }
     }
 
-    public void pressCrash(View view) {
+    public void pressError(View view) {
         mParticleAPI.logErrorEvent("ErrorOccurred");
+    }
+    public void pressCrash(View view) {
         throw new Error("Intentionally crashing demo app");
     }
+
     public void pressUpdateLocation(View view) {
         Random r = new Random();
         Location location = new Location("user");
@@ -210,7 +211,6 @@ public class HomeActivity extends Activity {
     public void pressDebug(View view) {
         boolean debugMode = ((CheckBox) view).isChecked();
         mPreferences.edit().putBoolean("debug_mode", debugMode).commit();
-
         mParticleAPI.setDebug(debugMode);
     }
     public void pressPushRegistration(View view) {

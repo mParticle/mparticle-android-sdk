@@ -57,6 +57,9 @@ public class MessageManager {
             IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
             BroadcastReceiver receiver = new NetworkStatusBroadcastReceiver((MessageManager)sMessageManager);
             appContext.registerReceiver(receiver, filter);
+
+            ExceptionHandler exHandler = new ExceptionHandler(MessageManager.sMessageManager, Thread.getDefaultUncaughtExceptionHandler());
+            Thread.currentThread().setUncaughtExceptionHandler(exHandler);
         }
         return MessageManager.sMessageManager;
     }
@@ -147,6 +150,25 @@ public class MessageManager {
             Log.w(TAG, "Failed to create mParticle screen view message");
         }
     }
+    public void logErrorEvent(String sessionId, long sessionStartTime, long time, String errorMessage, JSONObject attributes, Throwable t) {
+        try {
+            JSONObject message = createMessage(MessageType.ERROR, sessionId, sessionStartTime, time, null, attributes, false);
+            if (null!=t) {
+                message.put(MessageKey.ERROR_SEVERITY, "Exception");
+                message.put(MessageKey.ERROR_CLASS, t.getClass().getCanonicalName());
+                message.put(MessageKey.ERROR_MESSAGE, t.getMessage());
+                message.put(MessageKey.ERROR_STACK_TRACE, "TBD");
+                // TODO: stack trace
+            } else {
+                message.put(MessageKey.ERROR_SEVERITY, "Error");
+                message.put(MessageKey.ERROR_MESSAGE, errorMessage);
+            }
+            mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, Status.READY, 0, message));
+        } catch (JSONException e) {
+            Log.w(TAG, "Failed to create mParticle error message");
+        }
+    }
+
     public void setSessionAttributes(String sessionId, JSONObject mSessionAttributes) {
         try {
             JSONObject sessionAttributes=new JSONObject();

@@ -225,10 +225,19 @@
             android:text="@string/upload" />
 
         <Button
+            android:id="@+id/buttonError"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/buttonStartSession"
+            android:onClick="pressError"
+            android:text="@string/error" />
+
+        <Button
             android:id="@+id/buttonCrash"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@+id/buttonStartSession"
+            android:layout_toRightOf="@+id/buttonError"
             android:onClick="pressCrash"
             android:text="@string/crash" />
 
@@ -236,7 +245,7 @@
             android:id="@+id/buttonUpdateLocation"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/buttonUpload"
+            android:layout_below="@+id/buttonStartSession"
             android:layout_toRightOf="@+id/buttonCrash"
             android:onClick="pressUpdateLocation"
             android:text="@string/update_location" />
@@ -245,7 +254,7 @@
             android:id="@+id/checkBoxOptOut"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/buttonCrash"
+            android:layout_below="@+id/buttonError"
             android:onClick="pressOptOut"
             android:text="@string/optout" />
 
