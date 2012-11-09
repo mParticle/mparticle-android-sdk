@@ -213,10 +213,9 @@ import com.mparticle.MessageDatabase.UploadTable;
         try {
             // read batches ready to upload
             SQLiteDatabase db = mDB.getWritableDatabase();
-            String[] selectionArgs = new String[]{Integer.toString(Status.PROCESSED)};
             String[] selectionColumns = new String[]{ "_id", UploadTable.MESSAGE };
             Cursor readyUploadsCursor = db.query(UploadTable.TABLE_NAME, selectionColumns,
-                    UploadTable.STATUS + "!=?", selectionArgs, null, null, UploadTable.MESSAGE_TIME + " , _id");
+                    null, null, null, null, UploadTable.MESSAGE_TIME + " , _id");
             while (readyUploadsCursor.moveToNext()) {
                 int id = readyUploadsCursor.getInt(0);
                 String message = readyUploadsCursor.getString(1);
@@ -309,17 +308,16 @@ import com.mparticle.MessageDatabase.UploadTable;
         try {
             // read batches ready to upload
             SQLiteDatabase db = mDB.getWritableDatabase();
-            String[] selectionArgs = new String[] { Integer.toString(Status.PROCESSED) };
             String[] selectionColumns = new String[] { "_id", CommandTable.URL, CommandTable.METHOD,
                     CommandTable.POST_DATA, CommandTable.HEADERS };
-            Cursor readyComandsCursor = db.query(CommandTable.TABLE_NAME, selectionColumns,
-                    CommandTable.STATUS + "!=?", selectionArgs, null, null, "_id");
-            while (readyComandsCursor.moveToNext()) {
-                int id = readyComandsCursor.getInt(0);
-                String commandUrl = readyComandsCursor.getString(1);
-                String method = readyComandsCursor.getString(2);
-                String postData = readyComandsCursor.getString(3);
-                String headers = readyComandsCursor.getString(4);
+            Cursor commandsCursor = db.query(CommandTable.TABLE_NAME, selectionColumns,
+                    null, null, null, null, "_id");
+            while (commandsCursor.moveToNext()) {
+                int id = commandsCursor.getInt(0);
+                String commandUrl = commandsCursor.getString(1);
+                String method = commandsCursor.getString(2);
+                String postData = commandsCursor.getString(3);
+                String headers = commandsCursor.getString(4);
 
                 int responseCode = -1;
                 try {
