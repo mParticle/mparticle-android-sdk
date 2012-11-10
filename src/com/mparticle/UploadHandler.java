@@ -1,5 +1,6 @@
 package com.mparticle;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -15,6 +16,7 @@ import java.util.Iterator;
 import java.util.Scanner;
 import java.util.UUID;
 import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
@@ -256,7 +258,19 @@ import com.mparticle.MessageDatabase.UploadTable;
                 httpPost.setHeader("Content-type", "application/json");
                 httpPost.setHeader("Accept-Encoding", "gzip");
 
-                httpPost.setEntity(new ByteArrayEntity(message.getBytes()));
+                try {
+                    byte[] messageBytes = message.getBytes();
+                    ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream(messageBytes.length);
+                    GZIPOutputStream gzipOutputStream = new GZIPOutputStream(byteArrayOutputStream);
+                    gzipOutputStream.write(messageBytes);
+                    gzipOutputStream.finish();
+                    gzipOutputStream.flush();
+                    httpPost.setEntity(new ByteArrayEntity(byteArrayOutputStream.toByteArray()));
+                    httpPost.setHeader("Content-Encoding", "gzip");
+                } catch (IOException e1) {
+                    Log.w(TAG, "Failed to compress request. Sending uncompressed");
+                    httpPost.setEntity(new ByteArrayEntity(message.getBytes()));
+                }
 
                 addMessageSignature(httpPost, message);
 
