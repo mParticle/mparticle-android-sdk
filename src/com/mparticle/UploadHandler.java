@@ -1,6 +1,7 @@
 package com.mparticle;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
@@ -11,12 +12,16 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.Scanner;
 import java.util.UUID;
+import java.util.zip.GZIPInputStream;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 
+import org.apache.http.Header;
 import org.apache.http.HttpHost;
+import org.apache.http.HttpResponse;
 import org.apache.http.HttpVersion;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.HttpResponseException;
@@ -31,7 +36,6 @@ import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.scheme.SchemeRegistry;
 import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.entity.ByteArrayEntity;
-import org.apache.http.impl.client.BasicResponseHandler;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
 import org.apache.http.impl.cookie.DateUtils;
@@ -148,16 +152,22 @@ import com.mparticle.MessageDatabase.UploadTable;
         }
         try {
             HttpGet httpGet = new HttpGet(makeServiceUri("config"));
-            addMessageSignature(httpGet, null);
-            String response = mHttpClient.execute(httpGet, new BasicResponseHandler(), mHttpContext);
+            httpGet.setHeader("Accept-Encoding", "gzip");
 
-            JSONObject responseJSON = new JSONObject(response);
-            if (responseJSON.has(MessageKey.SESSION_UPLOAD)) {
-                String sessionUploadMode = responseJSON.getString(MessageKey.SESSION_UPLOAD);
-                if ("batch".equalsIgnoreCase(sessionUploadMode)) {
-                    mUploadMode = "batch";
-                } else {
-                    mUploadMode = "stream";
+            addMessageSignature(httpGet, null);
+
+            HttpResponse httpResponse = mHttpClient.execute(httpGet, mHttpContext);
+
+            if (null!=httpResponse.getStatusLine() && 202==httpResponse.getStatusLine().getStatusCode()) {
+                String response = extractResponseBody(httpResponse);
+                JSONObject responseJSON = new JSONObject(response);
+                if (responseJSON.has(MessageKey.SESSION_UPLOAD)) {
+                    String sessionUploadMode = responseJSON.getString(MessageKey.SESSION_UPLOAD);
+                    if ("batch".equalsIgnoreCase(sessionUploadMode)) {
+                        mUploadMode = "batch";
+                    } else {
+                        mUploadMode = "stream";
+                    }
                 }
             }
         } catch (HttpResponseException e) {
@@ -244,6 +254,8 @@ import com.mparticle.MessageDatabase.UploadTable;
                 // POST message to mParticle service
                 HttpPost httpPost = new HttpPost(makeServiceUri("events"));
                 httpPost.setHeader("Content-type", "application/json");
+                httpPost.setHeader("Accept-Encoding", "gzip");
+
                 httpPost.setEntity(new ByteArrayEntity(message.getBytes()));
 
                 addMessageSignature(httpPost, message);
@@ -253,18 +265,18 @@ import com.mparticle.MessageDatabase.UploadTable;
                 try {
                     Log.d(TAG, "Sending message to mParticle server:");
                     Log.d(TAG, message);
-                    response = mHttpClient.execute(httpPost, new BasicResponseHandler(), mHttpContext);
-                    responseCode = 202;
+                    HttpResponse httpResponse = mHttpClient.execute(httpPost, mHttpContext);
+                    if (null!=httpResponse.getStatusLine()) {
+                        responseCode = httpResponse.getStatusLine().getStatusCode();
+                        response = extractResponseBody(httpResponse);
+                    }
                     Log.d(TAG, "Message upload successuful");
-                } catch (HttpResponseException httpResponseException) {
-                    responseCode = httpResponseException.getStatusCode();
-                    Log.w(TAG, "Message upload failed with response code:" + responseCode);
                 } catch (IOException e) {
                     // IOExceptions (such as timeouts) will be retried
                     Log.e(TAG, "Message upload failed with IO exception", e);
                 } catch (Throwable t) {
                     // Some other exception occurred.
-                    Log.e(TAG, "Message upload failed with exception",t);
+                    Log.e(TAG, "Message upload failed with exception", t);
                 } finally {
                     if (202==responseCode || (responseCode>=400 && responseCode<500)) {
                         dbDeleteUpload(db, id);
@@ -298,6 +310,18 @@ import com.mparticle.MessageDatabase.UploadTable;
         } finally {
             mDB.close();
         }
+    }
+
+    // helper method to convert response body to a string whether or not it is compressed
+    private String extractResponseBody(HttpResponse httpResponse) throws IllegalStateException, IOException {
+        InputStream inputStream = httpResponse.getEntity().getContent();
+        Header contentEncoding = httpResponse.getFirstHeader("Content-Encoding");
+        if (contentEncoding != null && contentEncoding.getValue().equalsIgnoreCase("gzip")) {
+            inputStream = new GZIPInputStream(inputStream);
+        }
+        // From Stack Overflow: http://stackoverflow.com/questions/309424/read-convert-an-inputstream-to-a-string
+        Scanner s = new Scanner(inputStream).useDelimiter("\\A");
+        return s.hasNext() ? s.next() : "";
     }
 
     private void addMessageSignature(HttpUriRequest request, String message) {
@@ -439,7 +463,6 @@ import com.mparticle.MessageDatabase.UploadTable;
         HttpParams params = new BasicHttpParams();
         HttpProtocolParams.setVersion(params, HttpVersion.HTTP_1_1);
         HttpProtocolParams.setContentCharset(params, HTTP.DEFAULT_CONTENT_CHARSET);
-        HttpProtocolParams.setUseExpectContinue(params, true);
 
         HttpConnectionParams.setConnectionTimeout(params, 10*1000);
         HttpConnectionParams.setSoTimeout(params, 10*1000);
