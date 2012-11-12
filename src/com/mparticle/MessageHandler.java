@@ -209,7 +209,7 @@ import com.mparticle.MessageDatabase.SessionTable;
         if (MessageType.SESSION_START==message.getString(MessageKey.TYPE)) {
             sessionId= message.getString(MessageKey.ID);
         } else {
-            sessionId= message.getString(MessageKey.SESSION_ID);
+            sessionId= message.optString(MessageKey.SESSION_ID, "NO-SESSION");
         }
         return sessionId;
     }

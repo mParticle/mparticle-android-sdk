@@ -442,8 +442,6 @@ public class MParticleAPI {
      * @param optOutStatus set to <code>true</code> to opt out of event tracking
      */
     public void setOptOut(boolean optOutStatus) {
-        // TODO: for now, require an active session so the message has a session id. may want to remove this requirement.
-        ensureActiveSession();
         mOptOutStatus = optOutStatus;
         mPreferences.edit().putBoolean(PrefKeys.OPTOUT+mApiKey, optOutStatus).commit();
         mMessageManager.optOut(mSessionID, mSessionStartTime, System.currentTimeMillis(), optOutStatus);
