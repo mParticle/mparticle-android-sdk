@@ -38,7 +38,7 @@ public class MParticleAPI {
     private SharedPreferences mPreferences;
     private Context mAppContext;
     private String mApiKey;
-    private boolean mOptOutStatus = false;
+    private boolean mOptedOut = false;
     private boolean mDebugMode = false;
 
     /* package-private */ String mSessionID;
@@ -60,7 +60,7 @@ public class MParticleAPI {
         mTimeoutHandler = new SessionTimeoutHandler(this, timeoutHandlerThread.getLooper());
 
         mPreferences = mAppContext.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
-        mOptOutStatus = mPreferences.getBoolean(PrefKeys.OPTOUT+mApiKey, false);
+        mOptedOut = mPreferences.getBoolean(PrefKeys.OPTOUT+mApiKey, false);
         String userAttrs = mPreferences.getString(PrefKeys.USER_ATTRS+mApiKey, null);
         if (null!=userAttrs) {
             try {
@@ -135,6 +135,9 @@ public class MParticleAPI {
      * This method should be called from an Activity's onStart() method.
      */
     public void start() {
+        if (mOptedOut) {
+            return;
+        }
         ensureActiveSession();
     }
 
@@ -146,7 +149,7 @@ public class MParticleAPI {
      * To explicitly end a session use the endSession() method.
      */
     public void stop() {
-        if (mSessionStartTime==0) {
+        if (mSessionStartTime==0 || mOptedOut) {
             return;
         }
         long stopTime = System.currentTimeMillis();
@@ -160,6 +163,9 @@ public class MParticleAPI {
      * Begin tracking a new session. Ends the current session.
      */
     public void newSession() {
+        if (mOptedOut) {
+            return;
+        }
         endSession();
         beginSession();
     }
@@ -168,7 +174,7 @@ public class MParticleAPI {
      * Explicitly terminates the user session.
      */
     public void endSession() {
-        if (mSessionStartTime==0) {
+        if (mSessionStartTime==0 || mOptedOut) {
             return;
         }
         long sessionEndTime=System.currentTimeMillis();
@@ -261,6 +267,9 @@ public class MParticleAPI {
      * @param eventData a Map of data attributes
      */
     public void logEvent(String eventName, JSONObject eventData) {
+        if (mOptedOut) {
+            return;
+        }
         if (null==eventName) {
             Log.w(TAG,"eventName is required for logEvent");
             return;
@@ -291,6 +300,9 @@ public class MParticleAPI {
      * @param eventData a Map of data attributes
      */
     public void logScreenView(String screenName, JSONObject eventData) {
+        if (mOptedOut) {
+            return;
+        }
         if (null==screenName) {
             Log.w(TAG,"screenName is required for logScreenView");
             return;
@@ -332,6 +344,9 @@ public class MParticleAPI {
      */
     // TODO: this method may be dropped - will decide in a later iteration
     public void logErrorEvent(String eventName, JSONObject data, Exception e) {
+        if (mOptedOut) {
+            return;
+        }
         if (null==eventName) {
             Log.w(TAG,"eventName is required for logErrorEvent");
             return;
@@ -349,6 +364,9 @@ public class MParticleAPI {
      * @param minDistance the minimum distance (in meters) to trigger an update
      */
     public void enableLocationTracking(String provider, long minTime, long minDistance) {
+        if (mOptedOut) {
+            return;
+        }
         try {
             LocationManager locationManager = (LocationManager) mAppContext.getSystemService(Context.LOCATION_SERVICE);
             if (!locationManager.isProviderEnabled(provider)) {
@@ -381,6 +399,9 @@ public class MParticleAPI {
      * @param value the attribute value
      */
     public void setSessionProperty(String key, Object value) {
+        if (mOptedOut) {
+            return;
+        }
         ensureActiveSession();
         if (setCheckedAttribute(mSessionAttributes, key, value)) {
             mMessageManager.setSessionAttributes(mSessionID, mSessionAttributes);
@@ -393,6 +414,9 @@ public class MParticleAPI {
      * @param data key/value pairs of session attributes
      */
     public void setSessionProperties(JSONObject data) {
+        if (mOptedOut) {
+            return;
+        }
         ensureActiveSession();
         try {
             for (Iterator<?> iter=  data.keys(); iter.hasNext(); ) {
@@ -411,6 +435,9 @@ public class MParticleAPI {
      * @param value the attribute value
      */
     public void setUserProperty(String key, Object value) {
+        if (mOptedOut) {
+            return;
+        }
         debugLog("Set User: " + key + "=" + value);
         if (setCheckedAttribute(mUserAttributes, key, value)) {
             mPreferences.edit().putString(PrefKeys.USER_ATTRS+mApiKey, mUserAttributes.toString()).commit();
@@ -422,6 +449,9 @@ public class MParticleAPI {
      * @param data key/value pairs of user attributes
      */
     public void setUserProperties(JSONObject data) {
+        if (mOptedOut) {
+            return;
+        }
         try {
             for (Iterator<?> iter=  data.keys(); iter.hasNext(); ) {
                 String key = (String) iter.next();
@@ -442,10 +472,21 @@ public class MParticleAPI {
      * @param optOutStatus set to <code>true</code> to opt out of event tracking
      */
     public void setOptOut(boolean optOutStatus) {
-        mOptOutStatus = optOutStatus;
-        mPreferences.edit().putBoolean(PrefKeys.OPTOUT+mApiKey, optOutStatus).commit();
+        if (optOutStatus==mOptedOut) {
+            return;
+        }
+        if (!optOutStatus) {
+            ensureActiveSession();
+        }
         mMessageManager.optOut(mSessionID, mSessionStartTime, System.currentTimeMillis(), optOutStatus);
-        debugLog("Set Opt Out: " + mOptOutStatus);
+        if (optOutStatus && mSessionStartTime>0) {
+            endSession();
+        }
+
+        mPreferences.edit().putBoolean(PrefKeys.OPTOUT+mApiKey, optOutStatus).commit();
+        mOptedOut = optOutStatus;
+
+        debugLog("Set Opt Out: " + mOptedOut);
     }
 
     /**
@@ -453,7 +494,7 @@ public class MParticleAPI {
      * @return the opt-out status
      */
     public boolean getOptOut() {
-        return mOptOutStatus;
+        return mOptedOut;
     }
 
     /**
