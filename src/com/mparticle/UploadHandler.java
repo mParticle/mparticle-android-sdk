@@ -26,12 +26,10 @@ import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpVersion;
 import org.apache.http.client.HttpClient;
-import org.apache.http.client.HttpResponseException;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.protocol.ClientContext;
-import org.apache.http.conn.ClientConnectionManager;
 import org.apache.http.conn.params.ConnRouteParams;
 import org.apache.http.conn.scheme.PlainSocketFactory;
 import org.apache.http.conn.scheme.Scheme;
@@ -39,7 +37,6 @@ import org.apache.http.conn.scheme.SchemeRegistry;
 import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
 import org.apache.http.impl.cookie.DateUtils;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpConnectionParams;
@@ -83,8 +80,8 @@ import com.mparticle.MessageDatabase.UploadTable;
     private String mSecret;
     private long mUploadInterval;
 
-    private HttpClient mHttpClient;
     private HttpContext mHttpContext;
+    private HttpHost mProxyHost;
     private JSONObject mAppInfo;
     private JSONObject mDeviceInfo;
     private Proxy mProxy;
@@ -110,7 +107,6 @@ import com.mparticle.MessageDatabase.UploadTable;
 
         mDB = new MessageDatabase(appContext);
         mPreferences = appContext.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
-        mHttpClient = setupHttpClient();
         mHttpContext  = new BasicHttpContext();
         mHttpContext.setAttribute(ClientContext.COOKIE_STORE, new PersistentCookieStore(appContext));
 
@@ -153,14 +149,17 @@ import com.mparticle.MessageDatabase.UploadTable;
             return;
         }
         try {
+            HttpClient httpClient = setupHttpClient();
             HttpGet httpGet = new HttpGet(makeServiceUri("config"));
             httpGet.setHeader("Accept-Encoding", "gzip");
-
             addMessageSignature(httpGet, null);
 
-            HttpResponse httpResponse = mHttpClient.execute(httpGet, mHttpContext);
-
-            if (null!=httpResponse.getStatusLine() && 202==httpResponse.getStatusLine().getStatusCode()) {
+            HttpResponse httpResponse = httpClient.execute(httpGet, mHttpContext);
+            int responseCode = -1;
+            if (null!=httpResponse.getStatusLine()) {
+                responseCode = httpResponse.getStatusLine().getStatusCode();
+            }
+            if (responseCode >=200 && responseCode<300) {
                 String response = extractResponseBody(httpResponse);
                 JSONObject responseJSON = new JSONObject(response);
                 if (responseJSON.has(MessageKey.SESSION_UPLOAD)) {
@@ -172,8 +171,6 @@ import com.mparticle.MessageDatabase.UploadTable;
                     }
                 }
             }
-        } catch (HttpResponseException e) {
-            Log.w(TAG, "Config request failed:" + e.getMessage());
         } catch (IOException e) {
             Log.e(TAG, "Config request failed w/ IO exception:", e);
         } catch (JSONException e) {
@@ -245,6 +242,8 @@ import com.mparticle.MessageDatabase.UploadTable;
             return;
         }
         try {
+            HttpClient httpClient = setupHttpClient();
+
             // read batches ready to upload
             SQLiteDatabase db = mDB.getWritableDatabase();
             String[] selectionColumns = new String[]{ "_id", UploadTable.MESSAGE };
@@ -279,7 +278,7 @@ import com.mparticle.MessageDatabase.UploadTable;
                 try {
                     Log.d(TAG, "Sending message to mParticle server:");
                     Log.d(TAG, message);
-                    HttpResponse httpResponse = mHttpClient.execute(httpPost, mHttpContext);
+                    HttpResponse httpResponse = httpClient.execute(httpPost, mHttpContext);
                     if (null!=httpResponse.getStatusLine()) {
                         responseCode = httpResponse.getStatusLine().getStatusCode();
                         response = extractResponseBody(httpResponse);
@@ -485,15 +484,18 @@ import com.mparticle.MessageDatabase.UploadTable;
         registry.register(new Scheme("http", PlainSocketFactory.getSocketFactory(), 80));
         registry.register(new Scheme("https", SSLSocketFactory.getSocketFactory(), 443));
 
-        ClientConnectionManager connman = new ThreadSafeClientConnManager(params, registry);
-        HttpClient client = new DefaultHttpClient(connman, params);
+        if (null!=mProxyHost) {
+            ConnRouteParams.setDefaultProxy(params, mProxyHost);
+        }
+        // ClientConnectionManager connman = new ThreadSafeClientConnManager(params, registry);
+        HttpClient client = new DefaultHttpClient(params);
         return client;
     }
 
     /* Possibly for development only */
     public void setConnectionProxy(String host, int port) {
         // http client and urlConnection use separate proxies
-        ConnRouteParams.setDefaultProxy(mHttpClient.getParams(), new HttpHost(host, port));
+        mProxyHost = new HttpHost(host, port);
         mProxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(host, port));
     }
 
