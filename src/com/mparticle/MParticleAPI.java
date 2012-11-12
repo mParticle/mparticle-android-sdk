@@ -410,26 +410,6 @@ public class MParticleAPI {
     }
 
     /**
-     * Set a collection of session attributes
-     * @param data key/value pairs of session attributes
-     */
-    public void setSessionProperties(JSONObject data) {
-        if (mOptedOut) {
-            return;
-        }
-        ensureActiveSession();
-        try {
-            for (Iterator<?> iter=  data.keys(); iter.hasNext(); ) {
-                String key = (String) iter.next();
-                mSessionAttributes.put(key, data.getString(key));
-            }
-            mMessageManager.setSessionAttributes(mSessionID, mSessionAttributes);
-        } catch (JSONException e) {
-            Log.w(TAG, "Failed to add session attribute");
-        }
-    }
-
-    /**
      * Set a single user attribute. The property will combined with any existing attributes.
      * @param key the attribute key
      * @param value the attribute value
@@ -441,24 +421,6 @@ public class MParticleAPI {
         debugLog("Set User: " + key + "=" + value);
         if (setCheckedAttribute(mUserAttributes, key, value)) {
             mPreferences.edit().putString(PrefKeys.USER_ATTRS+mApiKey, mUserAttributes.toString()).commit();
-        }
-    }
-
-    /**
-     * Set a collection of user attributes
-     * @param data key/value pairs of user attributes
-     */
-    public void setUserProperties(JSONObject data) {
-        if (mOptedOut) {
-            return;
-        }
-        try {
-            for (Iterator<?> iter=  data.keys(); iter.hasNext(); ) {
-                String key = (String) iter.next();
-                setUserProperty(key, data.getString(key));
-            }
-        } catch (JSONException e) {
-            Log.w(TAG, "Failed to add session attribute");
         }
     }
 
