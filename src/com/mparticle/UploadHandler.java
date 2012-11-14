@@ -341,6 +341,10 @@ import com.mparticle.MessageDatabase.UploadTable;
         try {
             String method = request.getMethod();
             String dateHeader = DateUtils.formatDate(new Date());
+            if (dateHeader.length()>DateUtils.PATTERN_RFC1123.length()) {
+                // handle a problem on some devices where TZ offset is appended
+                dateHeader = dateHeader.substring(0, DateUtils.PATTERN_RFC1123.length());
+            }
             String path = request.getURI().getPath();
             String signatureMessage = method + "\n" + dateHeader + "\n" + path;
             if ("POST".equalsIgnoreCase(method) && null!=message) {
