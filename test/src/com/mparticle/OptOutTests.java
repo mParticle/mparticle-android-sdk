@@ -26,6 +26,12 @@ public class OptOutTests extends AndroidTestCase {
       mMParticleAPI = new MParticleAPI(getContext(), "TestAppKey", mMockMessageManager);
     }
 
+    @Override
+    protected void tearDown() throws Exception {
+      super.tearDown();
+      mPrefs.edit().remove(PrefKeys.OPTOUT+"TestAppKey").commit();
+    }
+
     public void testOptedOutMessages() throws JSONException {
         JSONObject eventData=new JSONObject();
         eventData.put("testKey1", "testValue1");
