@@ -1,7 +1,8 @@
 /*
  * NOTICE: This class is taken from the Android Async HTTP project. Apache Licensed.
  * https://github.com/loopj/android-async-http
- * The code has been modified to make SerializableCookie an inner class
+ * The code has been modified to make SerializableCookie an inner class and change
+ * the class visibility
  */
 
 /*
@@ -22,7 +23,7 @@
  limitations under the License.
  */
 
-package com.mparticle.util;
+package com.mparticle;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -53,7 +54,7 @@ import android.text.TextUtils;
  * {@link AsyncHttpClient#setCookieStore}, but can also be used with a regular
  * old Apache HttpClient/HttpContext if you prefer.
  */
-public class PersistentCookieStore implements CookieStore {
+/* package-private */ class PersistentCookieStore implements CookieStore {
     private static final String COOKIE_PREFS = "CookiePrefsFile";
     private static final String COOKIE_NAME_STORE = "names";
     private static final String COOKIE_NAME_PREFIX = "cookie_";

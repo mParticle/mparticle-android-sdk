@@ -1,9 +1,9 @@
 /* This class is from the MiGBase64 and is BSD-licensed.
  * http://migbase64.sourceforge.net/
- * The only modification to the class has been to change the package.
+ * The only modifications to the class have been to change the package and visibility.
  */
 
-package com.mparticle.util;
+package com.mparticle;
 
 import java.util.Arrays;
 
@@ -75,7 +75,7 @@ import java.util.Arrays;
  *         Time: 11:31:11
  */
 
-public class Base64
+/* package-private */ class Base64
 {
     private static final char[] CA = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/".toCharArray();
     private static final int[] IA = new int[256];
