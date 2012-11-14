@@ -82,6 +82,7 @@ import com.mparticle.MessageDatabase.UploadTable;
 
     private HttpContext mHttpContext;
     private HttpHost mProxyHost;
+    private String mServiceScheme = SERVICE_SCHEME;
     private JSONObject mAppInfo;
     private JSONObject mDeviceInfo;
     private Proxy mProxy;
@@ -93,9 +94,9 @@ import com.mparticle.MessageDatabase.UploadTable;
     public static final String HEADER_APPKEY = "x-mp-appkey";
     public static final String HEADER_SIGNATURE = "x-mp-signature";
 
-    public static String SERVICE_SCHEME = "http";
-    public static String SERVICE_HOST = "api.dev.mparticle.com";
-    public static String SERVICE_VERSION = "v1";
+    public static final String SERVICE_SCHEME = "http";
+    public static final String SERVICE_HOST = "api.dev.mparticle.com";
+    public static final String SERVICE_VERSION = "v1";
 
     private static String mUploadMode = "batch";
 
@@ -421,7 +422,7 @@ import com.mparticle.MessageDatabase.UploadTable;
     }
 
     private URI makeServiceUri(String method) throws URISyntaxException {
-        return new URI(SERVICE_SCHEME, SERVICE_HOST, "/"+SERVICE_VERSION+"/"+mApiKey+"/"+method, null);
+        return new URI(mServiceScheme, SERVICE_HOST, "/"+SERVICE_VERSION+"/"+mApiKey+"/"+method, null);
     }
 
     private void dbInsertUpload(SQLiteDatabase db, JSONObject message) throws JSONException {
@@ -501,6 +502,10 @@ import com.mparticle.MessageDatabase.UploadTable;
         // http client and urlConnection use separate proxies
         mProxyHost = new HttpHost(host, port);
         mProxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(host, port));
+    }
+
+    public void setConnectionScheme(String scheme) {
+        mServiceScheme = scheme;
     }
 
     // From Stack Overflow: http://stackoverflow.com/questions/7124735/hmac-sha256-algorithm-for-signature-calculation

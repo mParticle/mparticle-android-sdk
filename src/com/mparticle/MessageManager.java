@@ -209,6 +209,10 @@ public class MessageManager {
         mUploadHandler.setConnectionProxy(host, port);
     }
 
+    public void setConnectionScheme(String scheme) {
+        mUploadHandler.setConnectionScheme(scheme);
+    }
+
     private static class NetworkStatusBroadcastReceiver extends BroadcastReceiver {
         WeakReference<MessageManager> mWeakMessageManager;
         public NetworkStatusBroadcastReceiver(MessageManager messageManager) {

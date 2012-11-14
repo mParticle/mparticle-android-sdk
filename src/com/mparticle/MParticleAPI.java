@@ -466,6 +466,20 @@ public class MParticleAPI {
     }
 
     /**
+     * Turn on or off debug mode for mParticle.
+     * The protocol scheme to use for uploading data
+     * @param scheme either "http" or "https"
+     */
+    public void setConnectionScheme(String scheme) {
+        if ("https".equals(scheme) || "http".equals(scheme)) {
+            mMessageManager.setConnectionScheme(scheme);
+            debugLog("Set upload scheme: " + scheme);
+        } else {
+            Log.w(TAG, "Only http and https schemes are supported");
+        }
+    }
+
+    /**
      * Enable mParticle exception handling to automatically log events on uncaught exceptions
      */
     public void handleExceptions() {
