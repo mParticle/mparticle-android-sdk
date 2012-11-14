@@ -21,9 +21,7 @@ import com.mparticle.Constants.MessageKey;
 import com.mparticle.Constants.MessageType;
 import com.mparticle.Constants.Status;
 
-//TODO: this should be package-private but is accessed from the tests
-@SuppressWarnings("javadoc")
-public class MessageManager {
+/* package-private */ class MessageManager {
 
     private static final String TAG = Constants.LOG_TAG;
 
@@ -35,6 +33,9 @@ public class MessageManager {
 
     private static String sActiveNetworkName = "offline";
     private static Location sLocation;
+
+    // This constructor is needed to enable mocking with Mockito and Dexmaker and should never be called
+    /* package-private */ MessageManager() { throw new UnsupportedOperationException(); }
 
     private MessageManager(Context appContext, String apiKey, String secret, long uploadInterval) {
         mMessageHandler = new MessageHandler(appContext, sMessageHandlerThread.getLooper());

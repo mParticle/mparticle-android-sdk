@@ -19,7 +19,7 @@ public class EventLoggingTests extends AndroidTestCase {
     @Override
     protected void setUp() throws Exception {
       super.setUp();
-      mMockMessageManager = mock(MessageManager.class);
+      mMockMessageManager = mock(TestMessageManager.class);
       mMParticleAPI = new MParticleAPI(getContext(), "TestAppKey", mMockMessageManager);
     }
 

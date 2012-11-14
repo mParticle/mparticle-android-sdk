@@ -22,7 +22,7 @@ public class OptOutTests extends AndroidTestCase {
     @Override
     protected void setUp() throws Exception {
       super.setUp();
-      mMockMessageManager = mock(MessageManager.class);
+      mMockMessageManager = mock(TestMessageManager.class);
       mPrefs = getContext().getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
       mPrefs.edit().remove(PrefKeys.OPTOUT+"TestAppKey").commit();
       mMParticleAPI = new MParticleAPI(getContext(), "TestAppKey", mMockMessageManager);

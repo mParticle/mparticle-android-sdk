@@ -4,7 +4,7 @@ import java.lang.Thread.UncaughtExceptionHandler;
 
 import android.util.Log;
 
-public class ExceptionHandler implements UncaughtExceptionHandler {
+/* package-private */ class ExceptionHandler implements UncaughtExceptionHandler {
 
     private static final String TAG = Constants.LOG_TAG;
     private UncaughtExceptionHandler mDefaultUncaughtExceptionHandler;

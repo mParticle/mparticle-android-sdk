@@ -19,7 +19,7 @@ import android.view.WindowManager;
 import com.mparticle.Constants.MessageKey;
 import com.mparticle.Constants.PrefKeys;
 
-public class DeviceProperties {
+/* package-private */ class DeviceProperties {
 
     /**
      * Generates a collection of application properties
