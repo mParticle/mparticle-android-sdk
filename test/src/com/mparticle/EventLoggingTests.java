@@ -2,6 +2,8 @@ package com.mparticle;
 
 import static org.mockito.Mockito.*;
 
+import java.util.HashMap;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.mockito.ArgumentCaptor;
@@ -38,10 +40,10 @@ public class EventLoggingTests extends AndroidTestCase {
 
     public void testEventLogging() throws JSONException {
         // log an event with data
-        JSONObject eventData=new JSONObject();
+        HashMap<String, String> eventData= new HashMap<String, String>();
         eventData.put("testKey1", "testValue1");
         eventData.put("testKey2", "testValue2");
-        eventData.put("testKeyInt", 42);
+        eventData.put("testKeyInt", "42");
         mMParticleAPI.logEvent("testEvent", eventData);
 
         // make sure the MockMessageManager got called with the correct parameters in the correct order
@@ -54,11 +56,11 @@ public class EventLoggingTests extends AndroidTestCase {
         JSONObject loggedAttributes = eventDataArgument.getValue();
         assertEquals("testValue1",loggedAttributes.get("testKey1"));
         assertEquals("testValue2",loggedAttributes.get("testKey2"));
-        assertEquals(42,loggedAttributes.get("testKeyInt"));
+        assertEquals("42",loggedAttributes.get("testKeyInt"));
     }
 
     public void testTooManyAttributes() throws JSONException {
-        JSONObject eventData=new JSONObject();
+        HashMap<String, String> eventData= new HashMap<String, String>();
         for (int i = 0; i < Constants.LIMIT_ATTR_COUNT + 1; i++) {
             eventData.put("testKey"+i, "testValue"+i);
         }
@@ -67,12 +69,12 @@ public class EventLoggingTests extends AndroidTestCase {
         verify(mMockMessageManager).logCustomEvent(eq(mMParticleAPI.mSessionID), anyLong(), anyLong(), anyString(), eventDataArgument.capture());
 
         JSONObject loggedAttributes = eventDataArgument.getValue();
-        assertTrue(eventData.length()>Constants.LIMIT_ATTR_COUNT);
+        assertTrue(eventData.size()>Constants.LIMIT_ATTR_COUNT);
         assertEquals(Constants.LIMIT_ATTR_COUNT,loggedAttributes.length());
     }
 
     public void testAttributesValueTooLarge() throws JSONException {
-        JSONObject eventData=new JSONObject();
+        HashMap<String, String> eventData= new HashMap<String, String>();
         String longString="ABCDEFGHIJKLMNOPQRSTUVWXYZ";
         while (longString.length()<Constants.LIMIT_ATTR_VALUE) {
             longString += longString;
@@ -87,7 +89,7 @@ public class EventLoggingTests extends AndroidTestCase {
     }
 
     public void testAttributesKeyTooLarge() throws JSONException {
-        JSONObject eventData=new JSONObject();
+        HashMap<String, String> eventData= new HashMap<String, String>();
         String longString="ABCDEFGHIJKLMNOPQRSTUVWXYZ";
         while (longString.length()<Constants.LIMIT_ATTR_VALUE) {
             longString += longString;
@@ -98,7 +100,7 @@ public class EventLoggingTests extends AndroidTestCase {
         verify(mMockMessageManager).logCustomEvent(eq(mMParticleAPI.mSessionID), anyLong(), anyLong(), anyString(), eventDataArgument.capture());
 
         JSONObject loggedAttributes = eventDataArgument.getValue();
-        assertEquals(1,eventData.length());
+        assertEquals(1,eventData.size());
         assertEquals(0,loggedAttributes.length());
     }
 

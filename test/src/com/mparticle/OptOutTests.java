@@ -2,6 +2,8 @@ package com.mparticle;
 
 import static org.mockito.Mockito.*;
 
+import java.util.HashMap;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -33,7 +35,7 @@ public class OptOutTests extends AndroidTestCase {
     }
 
     public void testOptedOutMessages() throws JSONException {
-        JSONObject eventData=new JSONObject();
+        HashMap<String, String> eventData= new HashMap<String, String>();
         eventData.put("testKey1", "testValue1");
         mMParticleAPI.setOptOut(true);
         mMParticleAPI.start();
@@ -45,8 +47,8 @@ public class OptOutTests extends AndroidTestCase {
         mMParticleAPI.logScreenView("view1");
         mMParticleAPI.logScreenView("view2", eventData);
         mMParticleAPI.logErrorEvent("error1");
-        mMParticleAPI.logErrorEvent("error2", eventData);
-        mMParticleAPI.logErrorEvent("error3", eventData, new Exception("exception1"));
+        mMParticleAPI.logErrorEvent("error2");
+        mMParticleAPI.logErrorEvent("error3", null, new Exception("exception1"));
         mMParticleAPI.stop();
         mMParticleAPI.endSession();
         verify(mMockMessageManager, times(1)).optOut(anyString(), anyLong(), anyLong(), eq(true));

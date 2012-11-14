@@ -2,7 +2,6 @@ package com.mparticle;
 
 import java.net.URL;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.UUID;
 
@@ -13,6 +12,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.location.Location;
 import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -20,7 +20,6 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.Process;
 import android.util.Log;
-import android.location.LocationManager;
 
 import com.mparticle.Constants.PrefKeys;
 
@@ -266,7 +265,7 @@ public class MParticleAPI {
      * @param eventName the name of the event to be tracked
      * @param eventData a Map of data attributes
      */
-    public void logEvent(String eventName, JSONObject eventData) {
+    public void logEvent(String eventName, Map<String, String> eventData) {
         if (mOptedOut) {
             return;
         }
@@ -280,8 +279,8 @@ public class MParticleAPI {
         }
         ensureActiveSession();
         if (checkEventLimit()) {
-            eventData = enforceAttributeConstraints(eventData);
-            mMessageManager.logCustomEvent(mSessionID, mSessionStartTime, mLastEventTime, eventName, eventData);
+            JSONObject eventDataJSON = enforceAttributeConstraints(eventData);
+            mMessageManager.logCustomEvent(mSessionID, mSessionStartTime, mLastEventTime, eventName, eventDataJSON);
             debugLog("Logged event: " + eventName + " with data " + eventData);
         }
     }
@@ -299,7 +298,7 @@ public class MParticleAPI {
      * @param screenName the name of the View to be tracked
      * @param eventData a Map of data attributes
      */
-    public void logScreenView(String screenName, JSONObject eventData) {
+    public void logScreenView(String screenName, Map<String, String> eventData) {
         if (mOptedOut) {
             return;
         }
@@ -313,8 +312,8 @@ public class MParticleAPI {
         }
         ensureActiveSession();
         if (checkEventLimit()) {
-            eventData = enforceAttributeConstraints(eventData);
-            mMessageManager.logScreenView(mSessionID, mSessionStartTime, mLastEventTime, screenName, eventData);
+            JSONObject eventDataJSON = enforceAttributeConstraints(eventData);
+            mMessageManager.logScreenView(mSessionID, mSessionStartTime, mLastEventTime, screenName, eventDataJSON);
             debugLog("Logged screen: " + screenName + " with data " + eventData);
         }
     }
@@ -532,25 +531,21 @@ public class MParticleAPI {
     }
 
     /**
-     * This method makes sure the constraints on event attributes are enforced. A cloned version of the attributes
+     * This method makes sure the constraints on event attributes are enforced. A JSONObject version of the attributes
      * is return with data that exceeds the limits removed.
      * NOTE: Non-string attributes are not converted to strings, currently.
      * @param attributes the user-provided JSONObject
      * @return a cleansed copy of the JSONObject
      */
-    /* package-private */ JSONObject enforceAttributeConstraints(JSONObject attributes) {
+    /* package-private */ JSONObject enforceAttributeConstraints(Map<String, String> attributes) {
         if (null==attributes) {
             return null;
         }
         JSONObject checkedAttributes = new JSONObject();
-        for (Iterator<?> iter = attributes.keys(); iter.hasNext();) {
-            String attrName = (String) iter.next();
-            try {
-                Object attrObject = attributes.get(attrName);
-                setCheckedAttribute(checkedAttributes, attrName, attrObject);
-            } catch (JSONException e) {
-                Log.w(TAG, "JSON error processing attributes. Discarding attribute: " + attrName);
-            }
+        for (Map.Entry<String, String> entry : attributes.entrySet()) {
+            String key = entry.getKey();
+            String value = entry.getValue();
+            setCheckedAttribute(checkedAttributes, key, value);
         }
         return checkedAttributes;
     }

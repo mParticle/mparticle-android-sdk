@@ -1,5 +1,6 @@
 package com.mparticle.demo;
 
+import java.util.HashMap;
 import java.util.Iterator;
 
 import java.util.Random;
@@ -117,22 +118,32 @@ public class HomeActivity extends Activity {
             mParticleAPI.setSessionProperty("testSessionProp1", "testValue1");
             mParticleAPI.setSessionProperty("testSessionProp2", "testValue1");
             break;
-        case R.id.buttonC:
+        case R.id.buttonC: {
             boolean on = ((ToggleButton) view).isChecked();
-            JSONObject eventData=new JSONObject("{button_state:"+(on ? "on":"off")+"}");
+            HashMap<String, String> eventData= new HashMap<String, String>();
+            eventData.put("button_state", on ? "on":"off");
             mParticleAPI.logEvent("ButtonCPressed", eventData);
             break;
+        }
         case R.id.viewA:
             mParticleAPI.logScreenView("View A");
             break;
-        case R.id.viewB:
-            mParticleAPI.logScreenView("View B", new JSONObject("{key1:value1, key2:value2}"));
+        case R.id.viewB: {
+            HashMap<String, String> eventData= new HashMap<String, String>();
+            eventData.put("key1", "value1");
+            eventData.put("key2", "value2");
+            mParticleAPI.logScreenView("View B", eventData);
             break;
-        case R.id.eventEndUpload:
-            mParticleAPI.logEvent("TestEvent", new JSONObject("{key1:value1, key2:value2}"));
+        }
+        case R.id.eventEndUpload: {
+            HashMap<String, String> eventData= new HashMap<String, String>();
+            eventData.put("key1", "value1");
+            eventData.put("key2", "value2");
+            mParticleAPI.logEvent("TestEvent", eventData);
             mParticleAPI.endSession();
             mParticleAPI.upload();
             break;
+        }
         }
     }
 
