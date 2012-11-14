@@ -479,18 +479,46 @@ public class MParticleAPI {
     }
 
     /**
-     * Register the application to receive push notifications from mParticle
-     * @param token TBD
+     * Register the application for GCM notifications and start a listener
+     * @param senderId the SENDER_ID for the application
      */
-    public void setPushRegistrationId(String token) {
-        debugLog("Set Push Token: " + token);
+    void enablePushNotifications(String senderId) {
+
     }
 
     /**
-     * Unregister the application from receiving push notifications
+     * Register the application for GCM notifications
+     * @param senderId the SENDER_ID for the application
+     */
+    void registerForPushNotifications(String senderId) {
+
+    }
+
+    /**
+     * Deregister the application from GCM notifications and stop listening for messages
+     * @param senderId the SENDER_ID for the application
+     */
+    void clearPushNotifications(String senderId) {
+
+    }
+
+    /**
+     * Manually register the device token for receiving push notifications from mParticle
+     * @param token the device registration id
+     */
+    public void setPushRegistrationId(String token) {
+        debugLog("Set Push Token: " + token);
+        mMessageManager.setPushRegistrationId(mSessionID, mSessionStartTime, System.currentTimeMillis(), token, true);
+    }
+
+    /**
+     * Manually un-register the device token for receiving push notifications from mParticle
      */
     public void clearPushRegistrationId() {
         debugLog("Clear Push Token");
+        // TODO: see if we can determine the existing registration ID - GCM not currently in build process
+        String token = null; // GCMRegistrar.getRegistrationId(this);
+        mMessageManager.setPushRegistrationId(mSessionID, mSessionStartTime, System.currentTimeMillis(), token, false);
     }
 
     /**

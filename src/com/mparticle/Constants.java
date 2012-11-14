@@ -28,6 +28,7 @@ package com.mparticle;
         public static final String SCREEN_VIEW = "v";
         public static final String OPT_OUT = "o";
         public static final String ERROR = "x";
+        public static final String PUSH_REGISTRATION = "pr";
         public static final String REQUEST_HEADER = "h";
         public static final String RESPONSE_HEADER = "rh";
         public static final String HTTP_COMMAND = "hc";
@@ -98,7 +99,9 @@ package com.mparticle;
         public static final String TIMEZONE = "tz";
         // opt-out
         public static final String OPT_OUT_STATUS = "s";
-
+        // push-notifications
+        public static final String PUSH_TOKEN = "to";
+        public static final String PUSH_REGISTER_FLAG = "r";
     }
 
     public interface PrefKeys {

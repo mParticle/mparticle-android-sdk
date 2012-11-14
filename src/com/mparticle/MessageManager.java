@@ -174,6 +174,17 @@ public class MessageManager {
         }
     }
 
+    public void setPushRegistrationId(String sessionId, long sessionStartTime, long time, String token, boolean registeringFlag) {
+        try {
+            JSONObject message = createMessage(MessageType.PUSH_REGISTRATION, sessionId, sessionStartTime, time, null, null, false);
+            message.put(MessageKey.PUSH_TOKEN, token);
+            message.put(MessageKey.PUSH_REGISTER_FLAG, registeringFlag);
+            mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, Status.READY, 0, message));
+        } catch (JSONException e) {
+            Log.w(TAG, "Failed to create mParticle error message");
+        }
+    }
+
     public void setSessionAttributes(String sessionId, JSONObject mSessionAttributes) {
         try {
             JSONObject sessionAttributes=new JSONObject();
