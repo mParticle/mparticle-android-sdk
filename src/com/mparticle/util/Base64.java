@@ -3,7 +3,7 @@
  * The only modification to the class has been to change the package.
  */
 
-package com.mparticle;
+package com.mparticle.util;
 
 import java.util.Arrays;
 

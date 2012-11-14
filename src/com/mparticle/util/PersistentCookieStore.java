@@ -22,7 +22,7 @@
  limitations under the License.
  */
 
-package com.mparticle;
+package com.mparticle.util;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;

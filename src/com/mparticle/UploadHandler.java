@@ -69,6 +69,8 @@ import com.mparticle.Constants.Status;
 import com.mparticle.MessageDatabase.CommandTable;
 import com.mparticle.MessageDatabase.MessageTable;
 import com.mparticle.MessageDatabase.UploadTable;
+import com.mparticle.util.Base64;
+import com.mparticle.util.PersistentCookieStore;
 
 /* package-private */ final class UploadHandler extends Handler {
 
