@@ -6,8 +6,8 @@ import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.widget.SimpleCursorAdapter;
 
-import com.mparticle.MessageDatabase;
-import com.mparticle.MessageDatabase.SessionTable;
+import com.mparticle.DemoMessageDatabase;
+import com.mparticle.DemoMessageDatabase.SessionTable;
 
 public class SessionsListActivity extends ListActivity {
 
@@ -15,7 +15,7 @@ public class SessionsListActivity extends ListActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        MessageDatabase mmDB = new MessageDatabase(this);
+        DemoMessageDatabase mmDB = new DemoMessageDatabase(this);
         SQLiteDatabase db = mmDB.getReadableDatabase();
 
         Cursor selectCursor = db.query("sessions", null, null, null, null, null, SessionTable.START_TIME + " desc");

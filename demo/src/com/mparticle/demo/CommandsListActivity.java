@@ -6,8 +6,8 @@ import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.widget.SimpleCursorAdapter;
 
-import com.mparticle.MessageDatabase;
-import com.mparticle.MessageDatabase.CommandTable;
+import com.mparticle.DemoMessageDatabase;
+import com.mparticle.DemoMessageDatabase.CommandTable;
 
 public class CommandsListActivity extends ListActivity {
 
@@ -15,7 +15,7 @@ public class CommandsListActivity extends ListActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        MessageDatabase mmDB = new MessageDatabase(this);
+        DemoMessageDatabase mmDB = new DemoMessageDatabase(this);
         SQLiteDatabase db = mmDB.getReadableDatabase();
 
         Cursor selectCursor = db.query(CommandTable.TABLE_NAME, null, null, null, null, null, "_id desc");

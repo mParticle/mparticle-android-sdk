@@ -4,9 +4,7 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
-// TODO: this should be package-private but is accessed from the demo
-@SuppressWarnings("javadoc")
-public class MessageDatabase extends SQLiteOpenHelper {
+/* package-private */ class MessageDatabase extends SQLiteOpenHelper {
 
     private static final int DB_VERSION = 7;
     private static final String DB_NAME = "mparticle.db";

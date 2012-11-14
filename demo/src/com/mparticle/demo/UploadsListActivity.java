@@ -7,8 +7,8 @@ import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.widget.SimpleCursorAdapter;
 
-import com.mparticle.MessageDatabase;
-import com.mparticle.MessageDatabase.UploadTable;
+import com.mparticle.DemoMessageDatabase;
+import com.mparticle.DemoMessageDatabase.UploadTable;
 
 public class UploadsListActivity extends ListActivity {
 
@@ -16,7 +16,7 @@ public class UploadsListActivity extends ListActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        MessageDatabase mmDB = new MessageDatabase(this);
+        DemoMessageDatabase mmDB = new DemoMessageDatabase(this);
         SQLiteDatabase db = mmDB.getReadableDatabase();
 
         Cursor selectCursor = db.query("uploads", null, null, null, null, null, UploadTable.MESSAGE_TIME + " desc");
