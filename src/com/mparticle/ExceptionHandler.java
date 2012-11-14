@@ -20,7 +20,7 @@ public class ExceptionHandler implements UncaughtExceptionHandler {
         try {
             Log.e(TAG, "Caught uncaught exception", ex);
             long now = System.currentTimeMillis();
-            mMessageManager.logErrorEvent(null, now, now, "Uncaught Exception", null, ex);
+            mMessageManager.logErrorEvent(null, now, now, null, ex);
             mDefaultUncaughtExceptionHandler.uncaughtException(thread, ex);
         } catch (Throwable t) {
             Log.e(TAG, "Failed to log uncaught exception", t);

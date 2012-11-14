@@ -155,17 +155,17 @@ public class MessageManager {
         }
     }
 
-    public void logErrorEvent(String sessionId, long sessionStartTime, long time, String errorMessage, JSONObject attributes, Throwable t) {
+    public void logErrorEvent(String sessionId, long sessionStartTime, long time, String errorMessage, Throwable t) {
         try {
-            JSONObject message = createMessage(MessageType.ERROR, sessionId, sessionStartTime, time, null, attributes, false);
+            JSONObject message = createMessage(MessageType.ERROR, sessionId, sessionStartTime, time, null, null, false);
             if (null!=t) {
-                message.put(MessageKey.ERROR_SEVERITY, "Exception");
+                message.put(MessageKey.ERROR_SEVERITY, "fatal");
                 message.put(MessageKey.ERROR_CLASS, t.getClass().getCanonicalName());
                 message.put(MessageKey.ERROR_MESSAGE, t.getMessage());
                 message.put(MessageKey.ERROR_STACK_TRACE, "TBD");
                 // TODO: stack trace
             } else {
-                message.put(MessageKey.ERROR_SEVERITY, "Error");
+                message.put(MessageKey.ERROR_SEVERITY, "error");
                 message.put(MessageKey.ERROR_MESSAGE, errorMessage);
             }
             mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, Status.READY, 0, message));

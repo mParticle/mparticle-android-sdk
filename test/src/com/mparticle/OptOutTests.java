@@ -47,8 +47,7 @@ public class OptOutTests extends AndroidTestCase {
         mMParticleAPI.logScreenView("view1");
         mMParticleAPI.logScreenView("view2", eventData);
         mMParticleAPI.logErrorEvent("error1");
-        mMParticleAPI.logErrorEvent("error2");
-        mMParticleAPI.logErrorEvent("error3", null, new Exception("exception1"));
+        mMParticleAPI.logErrorEvent(new Exception("exception1"));
         mMParticleAPI.stop();
         mMParticleAPI.endSession();
         verify(mMockMessageManager, times(1)).optOut(anyString(), anyLong(), anyLong(), eq(true));
@@ -56,7 +55,7 @@ public class OptOutTests extends AndroidTestCase {
         verify(mMockMessageManager, never()).setSessionAttributes(anyString(), any(JSONObject.class));
         verify(mMockMessageManager, never()).logScreenView(anyString(), anyLong(), anyLong(), anyString(), any(JSONObject.class));
         verify(mMockMessageManager, never()).logCustomEvent(anyString(), anyLong(), anyLong(), anyString(), any(JSONObject.class));
-        verify(mMockMessageManager, never()).logErrorEvent(anyString(), anyLong(), anyLong(), anyString(), any(JSONObject.class), any(Throwable.class));
+        verify(mMockMessageManager, never()).logErrorEvent(anyString(), anyLong(), anyLong(), anyString(), any(Exception.class));
         verify(mMockMessageManager, never()).stopSession(anyString(), anyLong(), anyLong());
         verify(mMockMessageManager, never()).endSession(anyString(), anyLong(), anyLong());
     }

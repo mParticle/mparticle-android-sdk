@@ -111,4 +111,24 @@ public class EventLoggingTests extends AndroidTestCase {
         verify(mMockMessageManager, times(Constants.EVENT_LIMIT)).logCustomEvent(eq(mMParticleAPI.mSessionID), anyLong(), anyLong(), anyString(), any(JSONObject.class));
     }
 
+    public void testLogErrorMessage() {
+        mMParticleAPI.logErrorEvent("errorMessage1");
+        verify(mMockMessageManager, times(1)).logErrorEvent(anyString(), anyLong(), anyLong(), eq("errorMessage1"), any(Throwable.class));
+    }
+
+    public void testLogNullErrorMessage() {
+        mMParticleAPI.logErrorEvent((String)null);
+        verify(mMockMessageManager, times(0)).logErrorEvent(anyString(), anyLong(), anyLong(), anyString(), any(Throwable.class));
+    }
+
+    public void testLogException() {
+        mMParticleAPI.logErrorEvent(new Exception("testException"));
+        verify(mMockMessageManager, times(1)).logErrorEvent(anyString(), anyLong(), anyLong(), eq((String)null), any(Throwable.class));
+    }
+
+    public void testLogNullException() {
+        mMParticleAPI.logErrorEvent((Exception)null);
+        verify(mMockMessageManager, times(0)).logErrorEvent(anyString(), anyLong(), anyLong(), anyString(), any(Throwable.class));
+    }
+
 }

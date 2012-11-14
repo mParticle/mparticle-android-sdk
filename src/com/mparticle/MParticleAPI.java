@@ -319,40 +319,37 @@ public class MParticleAPI {
     }
 
     /**
-     * Log an error event
-     * @param eventName the name of the error event to be tracked
+     * Log an error event with a message
+     * @param message the name of the error event to be tracked
      */
-    public void logErrorEvent(String eventName) {
-        logErrorEvent(eventName, null);
-    }
-
-    /**
-     * Log an error event with data attributes
-     * @param eventName the name of the error event to be tracked
-     * @param data a Map of data attributes
-     */
-    public void logErrorEvent(String eventName, JSONObject data) {
-        logErrorEvent(eventName, data, null);
-    }
-
-    /**
-     * Log an error event with data attributes and an exception
-     * @param eventName the name of the error event to be tracked
-     * @param data a Map of data attributes
-     * @param e an Exception
-     */
-    // TODO: this method may be dropped - will decide in a later iteration
-    public void logErrorEvent(String eventName, JSONObject data, Exception e) {
+    public void logErrorEvent(String message) {
         if (mOptedOut) {
             return;
         }
-        if (null==eventName) {
+        if (null==message) {
+            Log.w(TAG,"message is required for logErrorEvent");
+            return;
+        }
+        ensureActiveSession();
+        mMessageManager.logErrorEvent(mSessionID, mSessionStartTime, mLastEventTime, message, null);
+        debugLog("Logged error with message: " + message);
+    }
+
+    /**
+     * Log an error event with an exception
+     * @param exception an Exception
+     */
+    public void logErrorEvent(Exception exception) {
+        if (mOptedOut) {
+            return;
+        }
+        if (null==exception) {
             Log.w(TAG,"eventName is required for logErrorEvent");
             return;
         }
         ensureActiveSession();
-        mMessageManager.logErrorEvent(mSessionID, mSessionStartTime, mLastEventTime, eventName, data, e);
-        debugLog("Logged error: " + eventName);
+        mMessageManager.logErrorEvent(mSessionID, mSessionStartTime, mLastEventTime, null, exception);
+        debugLog("Logged exception: " + exception.getMessage());
     }
 
     /**
