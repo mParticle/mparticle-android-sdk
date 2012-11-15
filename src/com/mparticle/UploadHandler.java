@@ -186,11 +186,11 @@ import com.mparticle.MessageDatabase.UploadTable;
             // select messages ready to upload
             SQLiteDatabase db = mDB.getWritableDatabase();
             String[] selectionArgs = new String[]{Integer.toString(Status.BATCH_READY)};
-            String selection;
+            String selection = MessageTable.SESSION_ID + "='NO-SESSION' or ";
             if (("batch").equals(mUploadMode)) {
-                selection = MessageTable.STATUS + "=?";
+                selection += MessageTable.STATUS + "=?";
             } else {
-                selection = MessageTable.STATUS + "<=?";
+                selection += MessageTable.STATUS + "<=?";
             }
             String[] selectionColumns = new String[]{"_id", MessageTable.MESSAGE, MessageTable.MESSAGE_TIME};
             Cursor readyMessagesCursor = db.query(MessageTable.TABLE_NAME, selectionColumns, selection, selectionArgs, null, null, MessageTable.MESSAGE_TIME+" , _id");
@@ -436,7 +436,7 @@ import com.mparticle.MessageDatabase.UploadTable;
 
     private void dbDeleteProcessedMessages(SQLiteDatabase db, int lastReadyMessage) {
         String[] whereArgs = { Long.toString(lastReadyMessage) };
-        db.delete(MessageTable.TABLE_NAME, "_id<=?", whereArgs);
+        db.delete(MessageTable.TABLE_NAME, "_id<=? or " +  MessageTable.SESSION_ID + "='NO-SESSION'", whereArgs);
     }
 
     private void dbUpdateUploadStatus(SQLiteDatabase db, int id, int status) {
