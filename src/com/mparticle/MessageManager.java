@@ -1,6 +1,7 @@
 package com.mparticle;
 
 import java.lang.ref.WeakReference;
+import java.util.Locale;
 import java.util.UUID;
 
 import org.json.JSONException;
@@ -242,7 +243,7 @@ import com.mparticle.Constants.Status;
             if (0!=activeNetwork.getSubtype()) {
                 activeNetworkName += "/" + activeNetwork.getSubtypeName();
             }
-            sActiveNetworkName = activeNetworkName.toLowerCase();
+            sActiveNetworkName = activeNetworkName.toLowerCase(Locale.US);
         } else {
             sActiveNetworkName = "offline";
         }
