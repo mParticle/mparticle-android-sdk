@@ -131,6 +131,9 @@ import com.mparticle.Constants.Status;
     public void logCustomEvent(String sessionId, long sessionStartTime, long time, String eventName, JSONObject attributes) {
         try {
             JSONObject message = createMessage(MessageType.CUSTOM_EVENT, sessionId, sessionStartTime, time, eventName, attributes, true);
+            // NOTE: event timing is not supported (yet) but the server expects this data
+            message.put(MessageKey.EVENT_START_TIME, time);
+            message.put(MessageKey.EVENT_DURATION, 0);
             mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, Status.READY, 0, message));
         } catch (JSONException e) {
             Log.w(TAG, "Failed to create mParticle start event message");

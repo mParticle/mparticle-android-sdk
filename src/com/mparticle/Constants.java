@@ -44,6 +44,9 @@ package com.mparticle;
         public static final String SESSION_LENGTH = "sl";
         public static final String ATTRIBUTES = "attrs";
         public static final String NAME = "n";
+        // event timing
+        public static final String EVENT_START_TIME = "est";
+        public static final String EVENT_DURATION = "el";
         // location
         public static final String LOCATION = "lc";
         public static final String DATA_CONNECTION = "dct";
