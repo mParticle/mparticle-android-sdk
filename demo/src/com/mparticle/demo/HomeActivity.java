@@ -152,6 +152,12 @@ public class HomeActivity extends Activity {
             mParticleAPI.upload();
             break;
         }
+        case R.id.buttonError:
+            mParticleAPI.logErrorEvent("Test Error Occurred");
+            break;
+        case R.id.buttonException:
+            mParticleAPI.logErrorEvent(new Exception("Test Exception Occurred"));
+            break;
         }
     }
 
@@ -189,6 +195,16 @@ public class HomeActivity extends Activity {
         case R.id.buttonUpload:
             mParticleAPI.upload();
             break;
+        case R.id.buttonCrash:
+            throw new Error("Intentionally crashing demo app");
+        case R.id.buttonUpdateLocation:
+            Random r = new Random();
+            Location location = new Location("user");
+            location.setLatitude( 360.0 * r.nextDouble() - 180.0 );
+            location.setLongitude( 360.0 * r.nextDouble() - 180.0 );
+            location.setAccuracy( 50.0f * r.nextFloat() );
+            mParticleAPI.setLocation(location);
+            break;
         }
     }
 
@@ -207,36 +223,28 @@ public class HomeActivity extends Activity {
         }
     }
 
-    public void pressError(View view) {
-        mParticleAPI.logErrorEvent("ErrorOccurred");
-    }
-    public void pressCrash(View view) {
-        throw new Error("Intentionally crashing demo app");
-    }
-
-    public void pressUpdateLocation(View view) {
-        Random r = new Random();
-        Location location = new Location("user");
-        location.setLatitude( 360.0 * r.nextDouble() - 180.0 );
-        location.setLongitude( 360.0 * r.nextDouble() - 180.0 );
-        location.setAccuracy( 50.0f * r.nextFloat() );
-        mParticleAPI.setLocation(location);
-    }
-
-    public void pressOptOut(View view) {
-        boolean optOut = ((CheckBox) view).isChecked();
-        mParticleAPI.setOptOut(optOut);
-    }
-    public void pressDebug(View view) {
-        boolean debugMode = ((CheckBox) view).isChecked();
-        mPreferences.edit().putBoolean(PREFS_DEBUG, debugMode).commit();
-        mParticleAPI.setDebug(debugMode);
-    }
-
-    public void pressExceptions(View view) {
-        boolean exceptionsMode = ((CheckBox) view).isChecked();
-        mPreferences.edit().putBoolean(PREFS_EXCEPTION, exceptionsMode).commit();
-        setupExceptionsLogging(exceptionsMode);
+    public void pressToggleOption(View view) {
+        boolean optionValue = ((CheckBox) view).isChecked();
+        switch (view.getId()) {
+        case R.id.checkBoxOptOut:
+            mParticleAPI.setOptOut(optionValue);
+            break;
+        case R.id.checkBoxDebugMode:
+            mPreferences.edit().putBoolean(PREFS_DEBUG, optionValue).commit();
+            mParticleAPI.setDebug(optionValue);
+            break;
+        case R.id.checkBoxExceptionsMode:
+            mPreferences.edit().putBoolean(PREFS_EXCEPTION, optionValue).commit();
+            setupExceptionsLogging(optionValue);
+            break;
+        case R.id.checkBoxPushRegistration:
+            if (optionValue) {
+                mParticleAPI.setPushRegistrationId("TOKEN");
+            } else {
+                mParticleAPI.clearPushRegistrationId();
+            }
+            break;
+        }
     }
 
     private void setupExceptionsLogging(boolean exceptionsMode) {
@@ -244,15 +252,6 @@ public class HomeActivity extends Activity {
             mParticleAPI.enableUncaughtExceptionLogging();
         } else {
             mParticleAPI.disableUncaughtExceptionLogging();
-        }
-    }
-
-    public void pressPushRegistration(View view) {
-        boolean pushRegistration = ((CheckBox) view).isChecked();
-        if (pushRegistration) {
-            mParticleAPI.setPushRegistrationId("TOKEN");
-        } else {
-            mParticleAPI.clearPushRegistrationId();
         }
     }
 

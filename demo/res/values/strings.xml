@@ -22,7 +22,7 @@
     <string name="sessions">Sessions</string>
     <string name="messages">Msgs</string>
     <string name="uploads">Uploads</string>
-    <string name="commands">Cmds</string>
+    <string name="commands">Commands</string>
     <string name="controls">Controls</string>
     <string name="start">Start</string>
     <string name="stop">Stop</string>
@@ -31,12 +31,13 @@
     <string name="end">End</string>
     <string name="crash">Crash</string>
     <string name="error">Error</string>
+    <string name="exception">Exception</string>
     <string name="update_location">Update Location</string>
     <string name="get_segment">Get Segment</string>
     <string name="debug">Debug</string>
-    <string name="exceptions">Exceptions</string>
+    <string name="exceptions">Handle Exceptions</string>
     <string name="optout">OptOut</string>
-    <string name="push_notify">Push</string>
+    <string name="push_notify">Push Notifications</string>
     <string name="device_attributes">Device Attributes</string>
     <string name="session_id">Session ID</string>
     <string name="message_id">Message ID</string>

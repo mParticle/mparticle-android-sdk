@@ -1,7 +1,9 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/scrollView1"
     android:layout_width="match_parent"
-    android:layout_height="fill_parent" >
+    android:layout_height="fill_parent"
+    tools:context=".HomeActivity" >
 
     <RelativeLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
@@ -67,11 +69,28 @@
             android:text="@string/view_b" />
 
         <Button
-            android:id="@+id/eventEndUpload"
+            android:id="@+id/buttonError"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@+id/buttonA"
             android:layout_toRightOf="@+id/viewB"
+            android:onClick="pressEventButton"
+            android:text="@string/error" />
+
+        <Button
+            android:id="@+id/buttonException"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/buttonA"
+            android:layout_toRightOf="@+id/buttonError"
+            android:onClick="pressEventButton"
+            android:text="@string/exception" />
+
+        <Button
+            android:id="@+id/eventEndUpload"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/viewA"
             android:onClick="pressEventButton"
             android:text="@string/eventEndUpload" />
 
@@ -79,7 +98,7 @@
             android:id="@+id/userVarInputs"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/viewA" >
+            android:layout_below="@+id/eventEndUpload" >
 
             <TextView
                 android:id="@+id/userVarLabel"
@@ -140,6 +159,7 @@
             android:layout_below="@+id/sessionVarInputs"
             android:text="@string/label_data"
             android:textSize="22sp" />
+
         <Button
             android:id="@+id/buttonListSessions"
             android:layout_width="wrap_content"
@@ -147,6 +167,7 @@
             android:layout_below="@+id/textData"
             android:onClick="pressDataButton"
             android:text="@string/sessions" />
+
         <Button
             android:id="@+id/buttonListMessages"
             android:layout_width="wrap_content"
@@ -155,6 +176,7 @@
             android:layout_toRightOf="@+id/buttonListSessions"
             android:onClick="pressDataButton"
             android:text="@string/messages" />
+
         <Button
             android:id="@+id/buttonListUploads"
             android:layout_width="wrap_content"
@@ -163,6 +185,7 @@
             android:layout_toRightOf="@+id/buttonListMessages"
             android:onClick="pressDataButton"
             android:text="@string/uploads" />
+
         <Button
             android:id="@+id/buttonListCommands"
             android:layout_width="wrap_content"
@@ -225,20 +248,11 @@
             android:text="@string/upload" />
 
         <Button
-            android:id="@+id/buttonError"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/buttonStartSession"
-            android:onClick="pressError"
-            android:text="@string/error" />
-
-        <Button
             android:id="@+id/buttonCrash"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@+id/buttonStartSession"
-            android:layout_toRightOf="@+id/buttonError"
-            android:onClick="pressCrash"
+            android:onClick="pressSessionButton"
             android:text="@string/crash" />
 
         <Button
@@ -247,15 +261,15 @@
             android:layout_height="wrap_content"
             android:layout_below="@+id/buttonStartSession"
             android:layout_toRightOf="@+id/buttonCrash"
-            android:onClick="pressUpdateLocation"
+            android:onClick="pressSessionButton"
             android:text="@string/update_location" />
 
         <CheckBox
             android:id="@+id/checkBoxOptOut"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/buttonError"
-            android:onClick="pressOptOut"
+            android:layout_below="@+id/buttonUpdateLocation"
+            android:onClick="pressToggleOption"
             android:text="@string/optout" />
 
         <CheckBox
@@ -265,7 +279,7 @@
             android:layout_alignBaseline="@+id/checkBoxOptOut"
             android:layout_alignBottom="@+id/checkBoxOptOut"
             android:layout_toRightOf="@+id/checkBoxOptOut"
-            android:onClick="pressDebug"
+            android:onClick="pressToggleOption"
             android:text="@string/debug" />
 
         <CheckBox
@@ -275,17 +289,15 @@
             android:layout_alignBaseline="@+id/checkBoxOptOut"
             android:layout_alignBottom="@+id/checkBoxOptOut"
             android:layout_toRightOf="@+id/checkBoxDebugMode"
-            android:onClick="pressExceptions"
+            android:onClick="pressToggleOption"
             android:text="@string/exceptions" />
 
         <CheckBox
             android:id="@+id/checkBoxPushRegistration"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignBaseline="@+id/checkBoxOptOut"
-            android:layout_alignBottom="@+id/checkBoxOptOut"
-            android:layout_toRightOf="@+id/checkBoxExceptionsMode"
-            android:onClick="pressPushRegistration"
+            android:layout_below="@+id/checkBoxOptOut"
+            android:onClick="pressToggleOption"
             android:text="@string/push_notify" />
 
         <TextView
@@ -302,7 +314,6 @@
             android:layout_height="wrap_content"
             android:layout_below="@+id/textDeviceAttributes"
             android:textSize="18sp" />
-
-  </RelativeLayout>
+    </RelativeLayout>
 
 </ScrollView>
