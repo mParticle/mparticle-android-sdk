@@ -269,12 +269,22 @@
             android:text="@string/debug" />
 
         <CheckBox
+            android:id="@+id/checkBoxExceptionsMode"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBaseline="@+id/checkBoxOptOut"
+            android:layout_alignBottom="@+id/checkBoxOptOut"
+            android:layout_toRightOf="@+id/checkBoxDebugMode"
+            android:onClick="pressExceptions"
+            android:text="@string/exceptions" />
+
+        <CheckBox
             android:id="@+id/checkBoxPushRegistration"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignBaseline="@+id/checkBoxDebugMode"
-            android:layout_alignBottom="@+id/checkBoxDebugMode"
-            android:layout_toRightOf="@+id/checkBoxDebugMode"
+            android:layout_alignBaseline="@+id/checkBoxOptOut"
+            android:layout_alignBottom="@+id/checkBoxOptOut"
+            android:layout_toRightOf="@+id/checkBoxExceptionsMode"
             android:onClick="pressPushRegistration"
             android:text="@string/push_notify" />
 

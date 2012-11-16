@@ -1,5 +1,6 @@
 package com.mparticle;
 
+import java.lang.Thread.UncaughtExceptionHandler;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
@@ -34,6 +35,7 @@ public class MParticleAPI {
     private MessageManager mMessageManager;
     private Handler mTimeoutHandler;
     private MParticleLocationListener mLocationListener;
+    private ExceptionHandler mExHandler;
     private SharedPreferences mPreferences;
     private Context mAppContext;
     private String mApiKey;
@@ -482,8 +484,29 @@ public class MParticleAPI {
     /**
      * Enable mParticle exception handling to automatically log events on uncaught exceptions
      */
-    public void handleExceptions() {
+    public void enableUncaughtExceptionLogging() {
+        if (null==mExHandler) {
+            UncaughtExceptionHandler currentUncaughtExceptionHandler = Thread.getDefaultUncaughtExceptionHandler();
+            if (!(currentUncaughtExceptionHandler instanceof ExceptionHandler)) {
+                mExHandler = new ExceptionHandler(mMessageManager, currentUncaughtExceptionHandler);
+                Thread.setDefaultUncaughtExceptionHandler(mExHandler);
+            }
+        }
     }
+
+    /**
+     * Disables mParticle exception handling and restores the original UncaughtExceptionHandler
+     */
+    public void disableUncaughtExceptionLogging() {
+        if (null!=mExHandler) {
+            UncaughtExceptionHandler currentUncaughtExceptionHandler = Thread.getDefaultUncaughtExceptionHandler();
+            if (currentUncaughtExceptionHandler instanceof ExceptionHandler) {
+                Thread.setDefaultUncaughtExceptionHandler(mExHandler.getOriginalExceptionHandler());
+                mExHandler = null;
+            }
+        }
+    }
+
 
     /**
      * Set the referral URL for the user session.

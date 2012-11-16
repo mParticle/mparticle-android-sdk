@@ -34,8 +34,9 @@
     <string name="update_location">Update Location</string>
     <string name="get_segment">Get Segment</string>
     <string name="debug">Debug</string>
+    <string name="exceptions">Exceptions</string>
     <string name="optout">OptOut</string>
-    <string name="push_notify">Push Notify</string>
+    <string name="push_notify">Push</string>
     <string name="device_attributes">Device Attributes</string>
 
 </resources>

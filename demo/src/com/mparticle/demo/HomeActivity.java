@@ -33,7 +33,11 @@ public class HomeActivity extends Activity {
     private TextView diagnosticsTextView;
     private CheckBox optOutCheckBox;
     private CheckBox debugModeCheckBox;
+    private CheckBox exceptionsModeCheckBox;
     private SharedPreferences mPreferences;
+
+    private static final String PREFS_EXCEPTION = "exceptions_mode";
+    private static final String PREFS_DEBUG = "debug_mode";
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -42,6 +46,7 @@ public class HomeActivity extends Activity {
         diagnosticsTextView = (TextView) findViewById(R.id.textDiagnostics);
         optOutCheckBox = (CheckBox) findViewById(R.id.checkBoxOptOut);
         debugModeCheckBox = (CheckBox) findViewById(R.id.checkBoxDebugMode);
+        exceptionsModeCheckBox = (CheckBox) findViewById(R.id.checkBoxExceptionsMode);
 
         mPreferences = getSharedPreferences("mParticleDemoPrefs", MODE_PRIVATE);
 
@@ -50,7 +55,11 @@ public class HomeActivity extends Activity {
         mParticleAPI.setSessionTimeout(60*1000);
         mParticleAPI.enableLocationTracking(LocationManager.PASSIVE_PROVIDER, 15*1000, 50);
 
-        boolean debugMode = mPreferences.getBoolean("debug_mode", true);
+        boolean exceptionsMode = mPreferences.getBoolean(PREFS_EXCEPTION, true);
+        exceptionsModeCheckBox.setChecked(exceptionsMode);
+        setupExceptionsLogging(exceptionsMode);
+
+        boolean debugMode = mPreferences.getBoolean(PREFS_DEBUG, true);
         mParticleAPI.setDebug(debugMode);
         debugModeCheckBox.setChecked(debugMode);
         optOutCheckBox.setChecked(mParticleAPI.getOptOut());
@@ -220,9 +229,24 @@ public class HomeActivity extends Activity {
     }
     public void pressDebug(View view) {
         boolean debugMode = ((CheckBox) view).isChecked();
-        mPreferences.edit().putBoolean("debug_mode", debugMode).commit();
+        mPreferences.edit().putBoolean(PREFS_DEBUG, debugMode).commit();
         mParticleAPI.setDebug(debugMode);
     }
+
+    public void pressExceptions(View view) {
+        boolean exceptionsMode = ((CheckBox) view).isChecked();
+        mPreferences.edit().putBoolean(PREFS_EXCEPTION, exceptionsMode).commit();
+        setupExceptionsLogging(exceptionsMode);
+    }
+
+    private void setupExceptionsLogging(boolean exceptionsMode) {
+        if (exceptionsMode) {
+            mParticleAPI.enableUncaughtExceptionLogging();
+        } else {
+            mParticleAPI.disableUncaughtExceptionLogging();
+        }
+    }
+
     public void pressPushRegistration(View view) {
         boolean pushRegistration = ((CheckBox) view).isChecked();
         if (pushRegistration) {

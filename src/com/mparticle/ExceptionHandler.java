@@ -7,25 +7,31 @@ import android.util.Log;
 /* package-private */ class ExceptionHandler implements UncaughtExceptionHandler {
 
     private static final String TAG = Constants.LOG_TAG;
-    private UncaughtExceptionHandler mDefaultUncaughtExceptionHandler;
+    private UncaughtExceptionHandler mOriginalUncaughtExceptionHandler;
     private MessageManager mMessageManager;
 
-    public ExceptionHandler(MessageManager messageManager, UncaughtExceptionHandler defaultUncaughtExceptionHandler) {
+    public ExceptionHandler(MessageManager messageManager, UncaughtExceptionHandler originalUncaughtExceptionHandler) {
         mMessageManager = messageManager;
-        mDefaultUncaughtExceptionHandler = Thread.getDefaultUncaughtExceptionHandler();
+        mOriginalUncaughtExceptionHandler = originalUncaughtExceptionHandler;
     }
 
     @Override
     public void uncaughtException(Thread thread, Throwable ex) {
         try {
-            Log.e(TAG, "Caught uncaught exception", ex);
-            long now = System.currentTimeMillis();
-            mMessageManager.logErrorEvent(null, now, now, null, ex);
-            mDefaultUncaughtExceptionHandler.uncaughtException(thread, ex);
+            mMessageManager.logErrorEvent(null, 0, System.currentTimeMillis(), null, ex);
+            if (null!=mOriginalUncaughtExceptionHandler) {
+                mOriginalUncaughtExceptionHandler.uncaughtException(thread, ex);
+            } else {
+                Thread.getDefaultUncaughtExceptionHandler().uncaughtException(thread, ex);
+            }
         } catch (Throwable t) {
-            Log.e(TAG, "Failed to log uncaught exception", t);
+            Log.e(TAG, "Failed to log error event for uncaught exception", t);
             // we tried. don't make things worse.
         }
+    }
+
+    public UncaughtExceptionHandler getOriginalExceptionHandler() {
+        return mOriginalUncaughtExceptionHandler;
     }
 
 }

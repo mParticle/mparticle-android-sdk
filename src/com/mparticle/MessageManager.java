@@ -58,9 +58,6 @@ import com.mparticle.Constants.Status;
             IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
             BroadcastReceiver receiver = new NetworkStatusBroadcastReceiver((MessageManager)sMessageManager);
             appContext.registerReceiver(receiver, filter);
-
-            ExceptionHandler exHandler = new ExceptionHandler(MessageManager.sMessageManager, Thread.getDefaultUncaughtExceptionHandler());
-            Thread.currentThread().setUncaughtExceptionHandler(exHandler);
         }
         return MessageManager.sMessageManager;
     }
