@@ -468,8 +468,7 @@ public class MParticleAPI {
     }
 
     /**
-     * Turn on or off debug mode for mParticle.
-     * The protocol scheme to use for uploading data
+     * Set the connection protocol scheme to use for uploading data
      * @param scheme either "http" or "https"
      */
     public void setConnectionScheme(String scheme) {
