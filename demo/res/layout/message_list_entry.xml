@@ -11,7 +11,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
-        android:text="Type" />
+        android:text="@string/type" />
 
     <TextView
         android:id="@+id/msgId"
@@ -20,7 +20,7 @@
         android:layout_alignParentTop="true"
         android:layout_toRightOf="@+id/msgType"
         android:paddingLeft="10dip"
-        android:text="Message ID" />
+        android:text="@string/message_id" />
 
     <TextView
         android:id="@+id/sessionId"
@@ -28,7 +28,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_below="@+id/msgType"
-        android:text="Session ID" />
+        android:text="@string/session_id" />
 
     <TextView
         android:id="@+id/msgTime"
@@ -36,7 +36,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_below="@+id/sessionId"
-        android:text="Time" />
+        android:text="@string/time" />
 
     <TextView
         android:id="@+id/msgStatus"
@@ -44,7 +44,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_below="@+id/msgTime"
-        android:text="Status" />
+        android:text="@string/status" />
 
     <TextView
         android:id="@+id/msgMsg"
@@ -52,6 +52,6 @@
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_below="@+id/msgStatus"
-        android:text="Message" />
+        android:text="@string/message" />
 
 </RelativeLayout>

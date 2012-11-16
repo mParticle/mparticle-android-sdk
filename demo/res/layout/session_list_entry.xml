@@ -8,30 +8,30 @@
         android:id="@+id/sessionId"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Session ID" />
+        android:text="@string/session_id" />
 
     <TextView
         android:id="@+id/startTime"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Start Time" />
+        android:text="@string/start_time" />
 
     <TextView
         android:id="@+id/endTime"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="End Time" />
+        android:text="@string/end_time" />
 
     <TextView
         android:id="@+id/sessionLength"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Session Length" />
+        android:text="@string/session_length" />
 
     <TextView
         android:id="@+id/status"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="End Time" />
+        android:text="@string/status" />
 
 </LinearLayout>

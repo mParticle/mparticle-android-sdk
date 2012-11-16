@@ -38,5 +38,19 @@
     <string name="optout">OptOut</string>
     <string name="push_notify">Push</string>
     <string name="device_attributes">Device Attributes</string>
+    <string name="session_id">Session ID</string>
+    <string name="message_id">Message ID</string>
+    <string name="command_id">Command ID</string>
+    <string name="status">Status</string>
+    <string name="time">Time</string>
+    <string name="type">Type</string>
+    <string name="message">Message</string>
+    <string name="start_time">Start Time</string>
+    <string name="end_time">End Time</string>
+    <string name="session_length">Session Length</string>
+    <string name="post_data">Post Data</string>
+    <string name="url">URL</string>
+    <string name="method">Method</string>
+    <string name="headers">Headers</string>
 
 </resources>

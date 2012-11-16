@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<previews>
+
+    <preview
+        name="Config1"
+        config="layout-sw600dp-w600dp-h961dp-large-notlong-port-notnight-tvdpi-finger-keyssoft-nokeys-navhidden-nonav-1280x800-v17"
+        device="Nexus 7"
+        devicestate="Portrait"
+        target="Android 4.2"
+        theme="@style/AppTheme" >
+    </preview>
+    <preview
+        name="Config2"
+        config="layout-sw600dp-w961dp-h600dp-large-notlong-land-notnight-tvdpi-finger-keyssoft-nokeys-navhidden-nonav-1280x800-v17"
+        device="Nexus 7"
+        devicestate="Portrait"
+        target="Android 4.2"
+        theme="@style/AppTheme" >
+    </preview>
+
+</previews>

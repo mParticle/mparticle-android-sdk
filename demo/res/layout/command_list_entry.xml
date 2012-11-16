@@ -11,7 +11,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
-        android:text="Command ID" />
+        android:text="@string/command_id" />
 
     <TextView
         android:id="@+id/url"
@@ -19,7 +19,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_below="@+id/commandId"
-        android:text="URL" />
+        android:text="@string/url" />
 
     <TextView
         android:id="@+id/method"
@@ -27,7 +27,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_below="@+id/url"
-        android:text="Method" />
+        android:text="@string/method" />
 
     <TextView
         android:id="@+id/postData"
@@ -35,7 +35,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_below="@+id/method"
-        android:text="Post Data" />
+        android:text="@string/post_data" />
 
     <TextView
         android:id="@+id/status"
@@ -43,22 +43,14 @@
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_below="@+id/postData"
-        android:text="Status" />
-
-    <TextView
-        android:id="@+id/clearHeaders"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_below="@+id/status"
-        android:text="Clear Headers" />
+        android:text="@string/status" />
 
     <TextView
         android:id="@+id/headers"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
-        android:layout_below="@+id/clearHeaders"
-        android:text="Headers" />
+        android:layout_below="@+id/status"
+        android:text="@string/headers" />
 
 </RelativeLayout>

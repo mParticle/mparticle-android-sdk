@@ -15,7 +15,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/label_event_data_inputs"
-            android:textSize="22dp" />
+            android:textSize="22sp" />
 
         <Button
             android:id="@+id/buttonA"
@@ -86,7 +86,7 @@
                 android:layout_width="100dp"
                 android:layout_height="wrap_content"
                 android:text="@string/label_user_var"
-                android:textSize="18dp" />
+                android:textSize="18sp" />
 
             <EditText
                 android:id="@+id/editUserVar"
@@ -115,7 +115,7 @@
                 android:layout_width="100dp"
                 android:layout_height="wrap_content"
                 android:text="@string/label_session_var"
-                android:textSize="18dp" />
+                android:textSize="18sp" />
 
             <EditText
                 android:id="@+id/editSessionVar"
@@ -139,7 +139,7 @@
             android:layout_height="wrap_content"
             android:layout_below="@+id/sessionVarInputs"
             android:text="@string/label_data"
-            android:textSize="22dp" />
+            android:textSize="22sp" />
         <Button
             android:id="@+id/buttonListSessions"
             android:layout_width="wrap_content"
@@ -178,7 +178,7 @@
             android:layout_height="wrap_content"
             android:layout_below="@+id/buttonListSessions"
             android:text="@string/controls"
-            android:textSize="22dp" />
+            android:textSize="22sp" />
 
         <Button
             android:id="@+id/buttonStartSession"
@@ -294,14 +294,14 @@
             android:layout_height="wrap_content"
             android:layout_below="@+id/checkBoxPushRegistration"
             android:text="@string/device_attributes"
-            android:textSize="22dp" />
+            android:textSize="22sp" />
 
         <TextView
             android:id="@+id/textDiagnostics"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@+id/textDeviceAttributes"
-            android:textSize="18dp" />
+            android:textSize="18sp" />
 
   </RelativeLayout>
 
