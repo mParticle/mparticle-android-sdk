@@ -4,7 +4,9 @@ import android.app.ListActivity;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.SimpleCursorAdapter;
+import android.widget.TextView;
 
 import com.mparticle.DemoMessageDatabase;
 import com.mparticle.DemoMessageDatabase.CommandTable;
@@ -29,6 +31,15 @@ public class CommandsListActivity extends ListActivity {
         @SuppressWarnings("deprecation")
         SimpleCursorAdapter adapter = new SimpleCursorAdapter(this, R.layout.command_list_entry, selectCursor,
                 from, to);
+        adapter.setViewBinder(new SimpleCursorAdapter.ViewBinder() {
+            public boolean setViewValue(View view, Cursor cursor, int columnIndex) {
+                if(view.getId() == R.id.status) {
+                    ((TextView) view).setText(cursor.getInt(columnIndex)==1?"Ready":"Unknown");
+                    return true;
+                }
+                return false;
+            }
+        });
 
         setListAdapter(adapter);
         db.close();

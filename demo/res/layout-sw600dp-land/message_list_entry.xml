@@ -11,32 +11,48 @@
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
-        android:layout_marginRight="10dp"
         android:text="@string/time" />
+
+    <TextView
+        android:id="@+id/sessionId"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@+id/msgTime"
+        android:paddingLeft="10dip"
+        android:text="@string/session_id" />
+
+    <TextView
+        android:id="@+id/msgId"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@+id/sessionId"
+        android:paddingLeft="10dip"
+        android:text="@string/message_id" />
+
+    <TextView
+        android:id="@+id/msgType"
+        android:layout_width="20dip"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/msgTime"
+        android:text="@string/type" />
 
     <TextView
         android:id="@+id/msgStatus"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_toRightOf="@+id/msgTime"
-        android:layout_marginRight="10dp"
+        android:layout_toRightOf="@+id/msgType"
+        android:layout_alignBaseline="@+id/msgType"
+        android:paddingLeft="10dip"
         android:text="@string/status" />
-
-    <TextView
-        android:id="@+id/uploadId"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_toRightOf="@+id/msgStatus"
-        android:text="@string/upload_id" />
 
     <TextView
         android:id="@+id/msgMsg"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_below="@+id/uploadId"
+        android:layout_alignTop="@+id/msgType"
+        android:layout_toRightOf="@+id/msgStatus"
+        android:paddingLeft="10dip"
         android:text="@string/message" />
 
 </RelativeLayout>

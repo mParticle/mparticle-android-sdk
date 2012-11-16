@@ -6,51 +6,51 @@
     android:orientation="vertical" >
 
     <TextView
-        android:id="@+id/commandId"
+        android:id="@+id/status"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
+        android:layout_marginRight="10dp"
+        android:text="@string/status" />
+
+    <TextView
+        android:id="@+id/commandId"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@+id/status"
         android:text="@string/command_id" />
+
+    <TextView
+        android:id="@+id/method"
+        android:layout_width="40sp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/status"
+        android:text="@string/method" />
 
     <TextView
         android:id="@+id/url"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_below="@+id/commandId"
+        android:layout_toRightOf="@+id/method"
+        android:layout_below="@+id/status"
         android:text="@string/url" />
-
-    <TextView
-        android:id="@+id/method"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_below="@+id/url"
-        android:text="@string/method" />
-
-    <TextView
-        android:id="@+id/postData"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_below="@+id/method"
-        android:text="@string/post_data" />
-
-    <TextView
-        android:id="@+id/status"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_below="@+id/postData"
-        android:text="@string/status" />
 
     <TextView
         android:id="@+id/headers"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
-        android:layout_below="@+id/status"
+        android:layout_below="@+id/url"
         android:text="@string/headers" />
+
+    <TextView
+        android:id="@+id/postData"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/headers"
+        android:text="@string/post_data" />
 
 </RelativeLayout>

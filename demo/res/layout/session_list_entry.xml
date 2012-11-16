@@ -1,37 +1,57 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/RelativeLayout1"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical" >
 
     <TextView
+        android:id="@+id/status"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:text="@string/status" />
+
+    <TextView
         android:id="@+id/sessionId"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_toRightOf="@+id/status"
+        android:paddingLeft="10dip"
         android:text="@string/session_id" />
 
     <TextView
         android:id="@+id/startTime"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/status"
         android:text="@string/start_time" />
 
     <TextView
         android:id="@+id/endTime"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/startTime"
         android:text="@string/end_time" />
 
     <TextView
         android:id="@+id/sessionLength"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/endTime"
         android:text="@string/session_length" />
 
     <TextView
-        android:id="@+id/status"
+        android:id="@+id/attributes"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/status" />
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/sessionLength"
+        android:text="@string/attributes" />
 
-</LinearLayout>
+</RelativeLayout>

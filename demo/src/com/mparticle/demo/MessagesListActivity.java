@@ -1,15 +1,23 @@
 package com.mparticle.demo;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+
 import android.app.ListActivity;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.SimpleCursorAdapter;
+import android.widget.TextView;
 
 import com.mparticle.DemoMessageDatabase;
 import com.mparticle.DemoMessageDatabase.MessageTable;
 
 public class MessagesListActivity extends ListActivity {
+
+    private static final SimpleDateFormat sFormatter = new SimpleDateFormat("HH:mm:ss:SSS", Locale.US);
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -30,7 +38,19 @@ public class MessagesListActivity extends ListActivity {
         @SuppressWarnings("deprecation")
         SimpleCursorAdapter adapter = new SimpleCursorAdapter(this, R.layout.message_list_entry, selectCursor,
                 from, to);
-
+        adapter.setViewBinder(new SimpleCursorAdapter.ViewBinder() {
+            public boolean setViewValue(View view, Cursor cursor, int columnIndex) {
+                if(view.getId() == R.id.msgTime) {
+                    ((TextView) view).setText(sFormatter.format(new Date(cursor.getLong(columnIndex))));
+                    return true;
+                }
+                if(view.getId() == R.id.msgStatus) {
+                    ((TextView) view).setText(cursor.getInt(columnIndex)==1?"Ready":"Batch-ready");
+                    return true;
+                }
+                return false;
+            }
+        });
         setListAdapter(adapter);
         db.close();
 
