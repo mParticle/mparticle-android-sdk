@@ -77,6 +77,7 @@ package com.mparticle;
         public static final String MODEL = "dmdl";
         public static final String SCREEN_HEIGHT = "dsh";
         public static final String SCREEN_WIDTH = "dsw";
+        public static final String SCREEN_DPI = "dpi";
         public static final String DEVICE_COUNTRY = "dc";
         public static final String DEVICE_LOCALE_COUNTRY = "dlc";
         public static final String DEVICE_LOCALE_LANGUAGE = "dll";

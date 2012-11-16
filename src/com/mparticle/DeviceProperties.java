@@ -86,6 +86,7 @@ import com.mparticle.Constants.PrefKeys;
             windowManager.getDefaultDisplay().getMetrics(metrics);
             properties.put(MessageKey.SCREEN_HEIGHT, metrics.heightPixels);
             properties.put(MessageKey.SCREEN_WIDTH, metrics.widthPixels);
+            properties.put(MessageKey.SCREEN_DPI, metrics.densityDpi);
 
             // locales
             Locale locale = Locale.getDefault();
