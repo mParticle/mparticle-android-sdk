@@ -384,6 +384,17 @@ public class MParticleAPI {
     }
 
     /**
+     * Disables any mParticle location tracking that had been started
+     */
+    public void disableLocationTracking() {
+        if (mLocationListener!=null) {
+            LocationManager locationManager = (LocationManager) mAppContext.getSystemService(Context.LOCATION_SERVICE);
+            locationManager.removeUpdates(mLocationListener);
+            mLocationListener = null;
+        }
+    }
+
+    /**
      * Set the current location of the active session.
      * @param location
      */

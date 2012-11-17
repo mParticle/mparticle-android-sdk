@@ -300,11 +300,90 @@
             android:onClick="pressToggleOption"
             android:text="@string/push_notify" />
 
+        <RelativeLayout
+            android:id="@+id/locationListener"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/checkBoxPushRegistration" >
+
+            <TextView
+                android:id="@+id/lblLocationTracking"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:text="Location Tracking"
+                android:textSize="22sp" />
+
+            <ToggleButton
+                android:id="@+id/enableLocationTracking"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/lblLocationTracking"
+                android:layout_marginTop="15dp"
+                android:onClick="pressToggleLocationTracking"
+                android:text="Track Location" />
+
+            <TextView
+                android:id="@+id/lblProvider"
+                android:layout_width="100dp"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/lblLocationTracking"
+                android:layout_toRightOf="@+id/enableLocationTracking"
+                android:text="Provider"
+                android:textSize="16sp" />
+
+            <TextView
+                android:id="@+id/lblLocMinTime"
+                android:layout_width="100dp"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/lblLocationTracking"
+                android:layout_toRightOf="@+id/lblProvider"
+                android:text="Time (secs)"
+                android:textSize="16sp" />
+
+            <TextView
+                android:id="@+id/lblLocMinDistance"
+                android:layout_width="100dp"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/lblLocationTracking"
+                android:layout_toRightOf="@+id/lblLocMinTime"
+                android:text="Dist. (meters)"
+                android:textSize="16sp" />
+
+            <Spinner
+                android:id="@+id/spinLocationProvider"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignLeft="@+id/lblProvider"
+                android:layout_below="@+id/lblProvider"
+                android:ems="4" />
+
+            <EditText
+                android:id="@+id/editLocMinTime"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignLeft="@+id/lblLocMinTime"
+                android:layout_below="@+id/lblLocMinTime"
+                android:ems="4"
+                android:inputType="number"
+                android:text="30" />
+
+            <EditText
+                android:id="@+id/editLocMinDistance"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignLeft="@+id/lblLocMinDistance"
+                android:layout_below="@+id/lblLocMinDistance"
+                android:ems="4"
+                android:inputType="number"
+                android:text="50" />
+
+        </RelativeLayout>
+
         <TextView
             android:id="@+id/textDeviceAttributes"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/checkBoxPushRegistration"
+            android:layout_below="@+id/locationListener"
             android:text="@string/device_attributes"
             android:textSize="22sp" />
 

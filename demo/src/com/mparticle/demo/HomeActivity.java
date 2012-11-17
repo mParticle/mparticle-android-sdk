@@ -17,7 +17,9 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
@@ -30,10 +32,7 @@ public class HomeActivity extends Activity {
     private static final String TAG = "mParticleDemo";
 
     private MParticleAPI mParticleAPI;
-    private TextView diagnosticsTextView;
-    private CheckBox optOutCheckBox;
-    private CheckBox debugModeCheckBox;
-    private CheckBox exceptionsModeCheckBox;
+
     private SharedPreferences mPreferences;
 
     private static final String PREFS_EXCEPTION = "exceptions_mode";
@@ -43,25 +42,32 @@ public class HomeActivity extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
-        diagnosticsTextView = (TextView) findViewById(R.id.textDiagnostics);
-        optOutCheckBox = (CheckBox) findViewById(R.id.checkBoxOptOut);
-        debugModeCheckBox = (CheckBox) findViewById(R.id.checkBoxDebugMode);
-        exceptionsModeCheckBox = (CheckBox) findViewById(R.id.checkBoxExceptionsMode);
 
         mPreferences = getSharedPreferences("mParticleDemoPrefs", MODE_PRIVATE);
 
         mParticleAPI = MParticleAPI.getInstance(this, "TestAppKey", "secret", 60);
         // for testing, the timeout is 1 minute
         mParticleAPI.setSessionTimeout(60*1000);
-        mParticleAPI.enableLocationTracking(LocationManager.PASSIVE_PROVIDER, 15*1000, 50);
+
+        Spinner locationProviderSpinner = (Spinner) findViewById(R.id.spinLocationProvider);
+        ArrayAdapter<String> locProviderAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item);
+        locProviderAdapter.add(LocationManager.NETWORK_PROVIDER);
+        locProviderAdapter.add(LocationManager.GPS_PROVIDER);
+        locProviderAdapter.add(LocationManager.PASSIVE_PROVIDER);
+        locProviderAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        locationProviderSpinner.setAdapter(locProviderAdapter);
 
         boolean exceptionsMode = mPreferences.getBoolean(PREFS_EXCEPTION, true);
+        CheckBox exceptionsModeCheckBox = (CheckBox) findViewById(R.id.checkBoxExceptionsMode);
         exceptionsModeCheckBox.setChecked(exceptionsMode);
         setupExceptionsLogging(exceptionsMode);
 
         boolean debugMode = mPreferences.getBoolean(PREFS_DEBUG, true);
         mParticleAPI.setDebug(debugMode);
+        CheckBox debugModeCheckBox = (CheckBox) findViewById(R.id.checkBoxDebugMode);
         debugModeCheckBox.setChecked(debugMode);
+
+        CheckBox optOutCheckBox = (CheckBox) findViewById(R.id.checkBoxOptOut);
         optOutCheckBox.setChecked(mParticleAPI.getOptOut());
         collectDeviceProperties();
     }
@@ -113,6 +119,7 @@ public class HomeActivity extends Activity {
         } catch (Exception e) {
             Log.d(TAG, "Error parsing device info JSON");
         }
+        TextView diagnosticsTextView = (TextView) findViewById(R.id.textDiagnostics);
         diagnosticsTextView.setText(diagnosticMessage.toString());
     }
 
@@ -244,6 +251,22 @@ public class HomeActivity extends Activity {
                 mParticleAPI.clearPushRegistrationId();
             }
             break;
+        }
+    }
+
+    public void pressToggleLocationTracking(View view) {
+        if (((ToggleButton) view).isChecked()) {
+            Spinner locationProviderSpinner = (Spinner) findViewById(R.id.spinLocationProvider);
+            TextView editLocMinTime = (TextView) findViewById(R.id.editLocMinTime);
+            TextView editLocMinDistance = (TextView) findViewById(R.id.editLocMinDistance);
+
+            String selectedProvider = ((TextView) locationProviderSpinner.getSelectedView()).getText().toString();
+            String minTime = editLocMinTime.getText().toString();
+            String minDistance = editLocMinDistance.getText().toString();
+
+            mParticleAPI.enableLocationTracking(selectedProvider, 1000*Integer.parseInt(minTime), Integer.parseInt(minDistance));
+        } else {
+            mParticleAPI.disableLocationTracking();
         }
     }
 
