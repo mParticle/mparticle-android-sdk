@@ -310,7 +310,7 @@
                 android:id="@+id/lblLocationTracking"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:text="Location Tracking"
+                android:text="@string/location_tracking"
                 android:textSize="22sp" />
 
             <ToggleButton
@@ -320,7 +320,7 @@
                 android:layout_below="@+id/lblLocationTracking"
                 android:layout_marginTop="15dp"
                 android:onClick="pressToggleLocationTracking"
-                android:text="Track Location" />
+                android:text="@string/track_location" />
 
             <TextView
                 android:id="@+id/lblProvider"
@@ -328,7 +328,7 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/lblLocationTracking"
                 android:layout_toRightOf="@+id/enableLocationTracking"
-                android:text="Provider"
+                android:text="@string/provider"
                 android:textSize="16sp" />
 
             <TextView
@@ -337,7 +337,7 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/lblLocationTracking"
                 android:layout_toRightOf="@+id/lblProvider"
-                android:text="Time (secs)"
+                android:text="@string/loc_min_time"
                 android:textSize="16sp" />
 
             <TextView
@@ -346,7 +346,7 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/lblLocationTracking"
                 android:layout_toRightOf="@+id/lblLocMinTime"
-                android:text="Dist. (meters)"
+                android:text="@string/loc_min_dist"
                 android:textSize="16sp" />
 
             <Spinner
@@ -365,7 +365,7 @@
                 android:layout_below="@+id/lblLocMinTime"
                 android:ems="4"
                 android:inputType="number"
-                android:text="30" />
+                android:text="@string/loc_min_time_default" />
 
             <EditText
                 android:id="@+id/editLocMinDistance"
@@ -375,7 +375,7 @@
                 android:layout_below="@+id/lblLocMinDistance"
                 android:ems="4"
                 android:inputType="number"
-                android:text="50" />
+                android:text="@string/loc_min_dist_default" />
 
         </RelativeLayout>
 

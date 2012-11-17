@@ -55,5 +55,12 @@
     <string name="url">URL</string>
     <string name="method">Method</string>
     <string name="headers">Headers</string>
+    <string name="location_tracking">Location Tracking</string>
+    <string name="track_location">Track Location</string>
+    <string name="provider">Provider</string>
+    <string name="loc_min_time">Time (secs)</string>
+    <string name="loc_min_dist">Dist. (meters)</string>
+    <string name="loc_min_time_default">30</string>
+    <string name="loc_min_dist_default">50</string>
 
 </resources>
