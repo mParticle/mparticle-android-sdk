@@ -34,6 +34,7 @@ import com.mparticle.Constants.Status;
 
     private static String sActiveNetworkName = "offline";
     private static Location sLocation;
+    private static boolean sDebugMode;
 
     // This constructor is needed to enable mocking with Mockito and Dexmaker and should never be called
     /* package-private */ MessageManager() { throw new UnsupportedOperationException(); }
@@ -204,6 +205,9 @@ import com.mparticle.Constants.Status;
 
     public static void setLocation(Location location) {
         sLocation=location;
+        if (sDebugMode) {
+            Log.d(TAG, "Received location update: " + location);
+        }
     }
 
     /* Possibly for development only */
@@ -244,6 +248,14 @@ import com.mparticle.Constants.Status;
         } else {
             sActiveNetworkName = "offline";
         }
+        if (sDebugMode) {
+            Log.d(TAG, "Active network has changed: " + sActiveNetworkName);
+        }
+    }
+
+    /* package-private */ void setDebugMode(boolean debugMode) {
+        sDebugMode = debugMode;
+        mUploadHandler.setDebugMode(debugMode);
     }
 
 }

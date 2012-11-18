@@ -139,7 +139,11 @@ public class MParticleAPI {
         if (mOptedOut) {
             return;
         }
+        long initialStartTime = mSessionStartTime;
         ensureActiveSession();
+        if (initialStartTime==mSessionStartTime) {
+            debugLog("Resumed session");
+        }
     }
 
     /**
@@ -157,7 +161,7 @@ public class MParticleAPI {
         mLastEventTime = stopTime;
         stopActiveSession(mLastEventTime);
         mMessageManager.stopSession(mSessionID, stopTime, mSessionLength);
-        debugLog("Stop Called");
+        debugLog("Stopped session");
     }
 
     /**
@@ -187,9 +191,8 @@ public class MParticleAPI {
      * @param sessionEndTime
      */
     private void endSession(long sessionEndTime) {
-        debugLog("Explicit End Session");
+        debugLog("Ended session");
         if (0==sessionEndTime) {
-            Log.w(TAG, "Session end time was unknown");
             sessionEndTime = System.currentTimeMillis();
         }
         stopActiveSession(sessionEndTime);
@@ -226,7 +229,7 @@ public class MParticleAPI {
     /* package-private */ void checkSessionTimeout() {
         long now = System.currentTimeMillis();
         if (0!=mSessionStartTime && (mSessionTimeout < now-mLastEventTime) ) {
-            debugLog("Session Timed Out");
+            debugLog("Session timed out");
             endSession(mLastEventTime);
         }
     }
@@ -243,14 +246,13 @@ public class MParticleAPI {
         mSessionAttributes = new JSONObject();
         mMessageManager.startSession(mSessionID, mSessionStartTime);
         mTimeoutHandler.sendEmptyMessageDelayed(0, mSessionTimeout);
-        debugLog("Start New Session");
+        debugLog("Started new session");
     }
 
     /**
      * Upload queued messages to the mParticle server.
      */
     public void upload() {
-        debugLog("Upload");
         mMessageManager.doUpload();
     }
 
@@ -283,7 +285,11 @@ public class MParticleAPI {
         if (checkEventLimit()) {
             JSONObject eventDataJSON = enforceAttributeConstraints(eventData);
             mMessageManager.logCustomEvent(mSessionID, mSessionStartTime, mLastEventTime, eventName, eventDataJSON);
-            debugLog("Logged event: " + eventName + " with data " + eventData);
+            if (null==eventDataJSON) {
+                debugLog("Logged event: " + eventName);
+            } else {
+                debugLog("Logged event: " + eventName + " with data " + eventDataJSON);
+            }
         }
     }
 
@@ -316,7 +322,11 @@ public class MParticleAPI {
         if (checkEventLimit()) {
             JSONObject eventDataJSON = enforceAttributeConstraints(eventData);
             mMessageManager.logScreenView(mSessionID, mSessionStartTime, mLastEventTime, screenName, eventDataJSON);
-            debugLog("Logged screen: " + screenName + " with data " + eventData);
+            if (null==eventDataJSON) {
+                debugLog("Logged screen: " + screenName);
+            } else {
+                debugLog("Logged screen: " + screenName + " with data " + eventDataJSON);
+            }
         }
     }
 
@@ -346,7 +356,7 @@ public class MParticleAPI {
             return;
         }
         if (null==exception) {
-            Log.w(TAG,"eventName is required for logErrorEvent");
+            Log.w(TAG,"exception is required for logErrorEvent");
             return;
         }
         ensureActiveSession();
@@ -412,10 +422,10 @@ public class MParticleAPI {
             return;
         }
         ensureActiveSession();
+        debugLog("Set session property: " + key + "=" + value);
         if (setCheckedAttribute(mSessionAttributes, key, value)) {
             mMessageManager.setSessionAttributes(mSessionID, mSessionAttributes);
         }
-        debugLog("Set Session: " + key + "=" + value);
     }
 
     /**
@@ -427,7 +437,7 @@ public class MParticleAPI {
         if (mOptedOut) {
             return;
         }
-        debugLog("Set User: " + key + "=" + value);
+        debugLog("Set user property: " + key + "=" + value);
         if (setCheckedAttribute(mUserAttributes, key, value)) {
             mPreferences.edit().putString(PrefKeys.USER_ATTRS+mApiKey, mUserAttributes.toString()).commit();
         }
@@ -457,7 +467,7 @@ public class MParticleAPI {
         mPreferences.edit().putBoolean(PrefKeys.OPTOUT+mApiKey, optOutStatus).commit();
         mOptedOut = optOutStatus;
 
-        debugLog("Set Opt Out: " + mOptedOut);
+        debugLog("Set opt-out: " + mOptedOut);
     }
 
     /**
@@ -475,7 +485,7 @@ public class MParticleAPI {
      */
     public void setDebug(boolean debugMode) {
         mDebugMode = debugMode;
-        debugLog("Set Debug Mode: " + mDebugMode);
+        mMessageManager.setDebugMode(debugMode);
     }
 
     /**
@@ -554,7 +564,7 @@ public class MParticleAPI {
      * @param token the device registration id
      */
     public void setPushRegistrationId(String token) {
-        debugLog("Set Push Token: " + token);
+        debugLog("Set push registration token: " + token);
         mMessageManager.setPushRegistrationId(mSessionID, mSessionStartTime, System.currentTimeMillis(), token, true);
     }
 
@@ -562,7 +572,7 @@ public class MParticleAPI {
      * Manually un-register the device token for receiving push notifications from mParticle
      */
     public void clearPushRegistrationId() {
-        debugLog("Clear Push Token");
+        debugLog("Cleared push registration token");
         // TODO: see if we can determine the existing registration ID - GCM not currently in build process
         String token = null; // GCMRegistrar.getRegistrationId(this);
         mMessageManager.setPushRegistrationId(mSessionID, mSessionStartTime, System.currentTimeMillis(), token, false);
@@ -649,7 +659,11 @@ public class MParticleAPI {
 
     private void debugLog(String message) {
         if (mDebugMode) {
-            Log.d(TAG, mSessionID + ": " + message);
+            if (null!=mSessionID) {
+                Log.d(TAG, mSessionID + ": " + message);
+            } else {
+                Log.d(TAG, message);
+            }
         }
     }
 

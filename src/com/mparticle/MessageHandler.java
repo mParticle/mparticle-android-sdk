@@ -151,8 +151,6 @@ import com.mparticle.MessageDatabase.SessionTable;
                 mDB.close();
             }
             break;
-        default:
-            break;
         }
     }
 
