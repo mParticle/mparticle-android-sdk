@@ -228,7 +228,7 @@ public class MParticleAPI {
      */
     /* package-private */ void checkSessionTimeout() {
         long now = System.currentTimeMillis();
-        if (0!=mSessionStartTime && (mSessionTimeout < now-mLastEventTime) ) {
+        if (0!=mSessionStartTime && (mSessionTimeout > 0) && (mSessionTimeout < now-mLastEventTime) ) {
             debugLog("Session timed out");
             endSession(mLastEventTime);
         }

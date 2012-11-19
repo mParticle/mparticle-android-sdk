@@ -41,11 +41,11 @@ public class SessionLifecycleTests extends AndroidTestCase {
 
     // do start a new session if start() called with delay > timeout and also end last session
     public void testSessionStartRestart() throws InterruptedException {
-        mMParticleAPI.setSessionTimeout(10);
+        mMParticleAPI.setSessionTimeout(50);
         mMParticleAPI.start();
         String sessionUUID = mMParticleAPI.mSessionID;
         long sessionStartTime = mMParticleAPI.mSessionStartTime;
-        Thread.sleep(200);
+        Thread.sleep(250);
         mMParticleAPI.start();
         // at this point, disable the timeout it doesn't check again before the assertions
         mMParticleAPI.setSessionTimeout(0);
