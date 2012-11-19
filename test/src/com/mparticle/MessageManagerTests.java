@@ -15,9 +15,9 @@ import com.mparticle.Constants.MessageKey;
 public class MessageManagerTests extends AndroidTestCase {
 
     // commonly used test values - not used by every case
-    String mSessionId;
-    long mMsgTime;
-    long mSessionStartTime;
+    private String mSessionId;
+    private long mMsgTime;
+    private long mSessionStartTime;
 
     @Override
     protected void setUp() throws Exception {
@@ -135,23 +135,6 @@ public class MessageManagerTests extends AndroidTestCase {
         assertFalse(message.has(MessageKey.ATTRIBUTES));
     }
 
-    // creates an 'x' message with attributes
-    public void testCreateErrorMessage() throws JSONException {
-        JSONObject message = MessageManager.createMessage(MessageType.ERROR, null, 0, mMsgTime, null, null, false);
-        assertNotNull(message.toString());
-        assertEquals(MessageType.ERROR, message.getString(MessageKey.TYPE));
-        assertTrue(message.has(MessageKey.ID));
-        assertFalse(message.has(MessageKey.SESSION_ID));
-        assertEquals(mMsgTime, message.getLong(MessageKey.TIMESTAMP));
-        assertFalse(message.has(MessageKey.SESSION_START_TIMESTAMP));
-        assertFalse(message.has(MessageKey.NAME));
-        assertFalse(message.has(MessageKey.ATTRIBUTES));
-        // TODO: implement error message tests when ready
-        // assertTrue(message.has(MessageKey.ERROR_TYPE));
-        // assertTrue(message.has(MessageKey.ERROR_MESSAGE));
-        // assertTrue(message.has(MessageKey.ERROR_STACK_TRACE));
-    }
-
     // creates a message with location provided and requested
     public void testCreateWithLocationMessage() throws JSONException {
         Location testLocation=new Location("test");
@@ -171,7 +154,6 @@ public class MessageManagerTests extends AndroidTestCase {
         assertTrue(locationObj.has(MessageKey.LONGITUDE));
         assertEquals(testLongitude, locationObj.getDouble(MessageKey.LONGITUDE));
     }
-
 
     // creates a message with location provided but not requested
     public void testCreateWithLocationIgnoredMessage() throws JSONException {
