@@ -1,5 +1,7 @@
 package com.mparticle;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.lang.ref.WeakReference;
 import java.util.Locale;
 import java.util.UUID;
@@ -170,8 +172,9 @@ import com.mparticle.Constants.Status;
                 message.put(MessageKey.ERROR_SEVERITY, "fatal");
                 message.put(MessageKey.ERROR_CLASS, t.getClass().getCanonicalName());
                 message.put(MessageKey.ERROR_MESSAGE, t.getMessage());
-                message.put(MessageKey.ERROR_STACK_TRACE, "TBD");
-                // TODO: stack trace
+                StringWriter stringWriter = new StringWriter();
+                t.printStackTrace(new PrintWriter(stringWriter));
+                message.put(MessageKey.ERROR_STACK_TRACE, stringWriter.toString());
             } else {
                 message.put(MessageKey.ERROR_SEVERITY, "error");
                 message.put(MessageKey.ERROR_MESSAGE, errorMessage);
