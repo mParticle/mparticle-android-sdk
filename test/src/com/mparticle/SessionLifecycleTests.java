@@ -47,6 +47,8 @@ public class SessionLifecycleTests extends AndroidTestCase {
         long sessionStartTime = mMParticleAPI.mSessionStartTime;
         Thread.sleep(200);
         mMParticleAPI.start();
+        // at this point, disable the timeout it doesn't check again before the assertions
+        mMParticleAPI.setSessionTimeout(0);
         assertNotSame(sessionUUID, mMParticleAPI.mSessionID);
         assertTrue(sessionStartTime < mMParticleAPI.mSessionStartTime);
         verify(mMockMessageManager, times(2)).startSession(anyString(), anyLong());
