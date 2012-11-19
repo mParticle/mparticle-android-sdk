@@ -28,8 +28,9 @@ import com.mparticle.Constants.Status;
 
     private static MessageManager sMessageManager;
     private static HandlerThread sMessageHandlerThread;
-    private MessageHandler mMessageHandler;
     private static HandlerThread sUploadHandlerThread;
+
+    private MessageHandler mMessageHandler;
     private UploadHandler mUploadHandler;
 
     private static String sActiveNetworkName = "offline";
@@ -39,22 +40,26 @@ import com.mparticle.Constants.Status;
     // This constructor is needed to enable mocking with Mockito and Dexmaker and should never be called
     /* package-private */ MessageManager() { throw new UnsupportedOperationException(); }
 
-    private MessageManager(Context appContext, String apiKey, String secret, long uploadInterval) {
-        mMessageHandler = new MessageHandler(appContext, sMessageHandlerThread.getLooper());
-        mMessageHandler.sendEmptyMessage(MessageHandler.END_ORPHAN_SESSIONS);
-        mUploadHandler = new UploadHandler(appContext, sUploadHandlerThread.getLooper(), apiKey, secret, uploadInterval);
-        mUploadHandler.sendEmptyMessageDelayed(UploadHandler.UPLOAD_MESSAGES, Constants.INITIAL_UPLOAD_DELAY);
+    // Package-private constructor for unit tests. Use getInstance to return the MessageManager
+    /* package-private */ MessageManager(MessageHandler messageHandler, UploadHandler uploadHandler) {
+        mMessageHandler = messageHandler;
+        mUploadHandler = uploadHandler;
     }
 
     public static MessageManager getInstance(Context appContext, String apiKey, String secret, long uploadInterval) {
         if (null == MessageManager.sMessageManager) {
-            sMessageHandlerThread = new HandlerThread("mParticleMessageHandlerThread",
-                    Process.THREAD_PRIORITY_BACKGROUND);
+            sMessageHandlerThread = new HandlerThread("mParticleMessageHandler", Process.THREAD_PRIORITY_BACKGROUND);
+            sUploadHandlerThread = new HandlerThread("mParticleUploadHandler", Process.THREAD_PRIORITY_BACKGROUND);
             sMessageHandlerThread.start();
-            sUploadHandlerThread = new HandlerThread("mParticleUploadHandlerThread",
-                    Process.THREAD_PRIORITY_BACKGROUND);
             sUploadHandlerThread.start();
-            MessageManager.sMessageManager = new MessageManager(appContext, apiKey, secret, uploadInterval);
+
+            MessageHandler messageHandler = new MessageHandler(appContext, sMessageHandlerThread.getLooper());
+            UploadHandler uploadHandler = new UploadHandler(appContext, sUploadHandlerThread.getLooper(), apiKey, secret, uploadInterval);
+
+            MessageManager.sMessageManager = new MessageManager(messageHandler, uploadHandler);
+
+            messageHandler.sendEmptyMessage(MessageHandler.END_ORPHAN_SESSIONS);
+            uploadHandler.sendEmptyMessageDelayed(UploadHandler.UPLOAD_MESSAGES, Constants.INITIAL_UPLOAD_DELAY);
 
             IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
             BroadcastReceiver receiver = new NetworkStatusBroadcastReceiver((MessageManager)sMessageManager);
@@ -96,7 +101,7 @@ import com.mparticle.Constants.Status;
     }
 
     /* package-private */ static JSONObject createMessageSessionEnd(String sessionId, long start, long end, long length, JSONObject attributes) throws JSONException {
-        JSONObject message = MessageManager.createMessage(MessageType.SESSION_END, sessionId, start, end, null, attributes, true);
+        JSONObject message = createMessage(MessageType.SESSION_END, sessionId, start, end, null, attributes, true);
         message.put(MessageKey.SESSION_LENGTH, length);
         return message;
     }
