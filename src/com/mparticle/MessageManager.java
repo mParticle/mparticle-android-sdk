@@ -28,9 +28,8 @@ import com.mparticle.Constants.Status;
 
     private static final String TAG = Constants.LOG_TAG;
 
-    private static MessageManager sMessageManager;
-    private static HandlerThread sMessageHandlerThread;
-    private static HandlerThread sUploadHandlerThread;
+    private static HandlerThread sMessageHandlerThread = new HandlerThread("mParticleMessageHandler", Process.THREAD_PRIORITY_BACKGROUND);
+    private static HandlerThread sUploadHandlerThread = new HandlerThread("mParticleUploadHandler", Process.THREAD_PRIORITY_BACKGROUND);
 
     private MessageHandler mMessageHandler;
     private UploadHandler mUploadHandler;
@@ -49,25 +48,29 @@ import com.mparticle.Constants.Status;
     }
 
     public static MessageManager getInstance(Context appContext, String apiKey, String secret, long uploadInterval) {
-        if (null == MessageManager.sMessageManager) {
-            sMessageHandlerThread = new HandlerThread("mParticleMessageHandler", Process.THREAD_PRIORITY_BACKGROUND);
-            sUploadHandlerThread = new HandlerThread("mParticleUploadHandler", Process.THREAD_PRIORITY_BACKGROUND);
+        if (!sMessageHandlerThread.isAlive()) {
+            // TODO: find a better way to start these or detect initialization
             sMessageHandlerThread.start();
             sUploadHandlerThread.start();
-
-            MessageHandler messageHandler = new MessageHandler(appContext, sMessageHandlerThread.getLooper());
-            UploadHandler uploadHandler = new UploadHandler(appContext, sUploadHandlerThread.getLooper(), apiKey, secret, uploadInterval);
-
-            MessageManager.sMessageManager = new MessageManager(messageHandler, uploadHandler);
-
-            messageHandler.sendEmptyMessage(MessageHandler.END_ORPHAN_SESSIONS);
-            uploadHandler.sendEmptyMessageDelayed(UploadHandler.UPLOAD_MESSAGES, Constants.INITIAL_UPLOAD_DELAY);
-
-            IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
-            BroadcastReceiver receiver = new NetworkStatusBroadcastReceiver((MessageManager)sMessageManager);
-            appContext.registerReceiver(receiver, filter);
         }
-        return MessageManager.sMessageManager;
+
+        // TODO: this *could* keep a map of apiKey-> messageManager
+        //       - but it should only be called once by a single mparticle api instance
+
+        MessageHandler messageHandler = new MessageHandler(appContext, sMessageHandlerThread.getLooper(), apiKey);
+        UploadHandler uploadHandler = new UploadHandler(appContext, sUploadHandlerThread.getLooper(), apiKey, secret, uploadInterval);
+
+        MessageManager messageManager = new MessageManager(messageHandler, uploadHandler);
+
+        messageHandler.sendEmptyMessage(MessageHandler.END_ORPHAN_SESSIONS);
+        uploadHandler.sendEmptyMessageDelayed(UploadHandler.UPLOAD_MESSAGES, Constants.INITIAL_UPLOAD_DELAY);
+
+        // TODO: make the NSBR not require a MM instance
+        IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
+        BroadcastReceiver receiver = new NetworkStatusBroadcastReceiver(messageManager);
+        appContext.registerReceiver(receiver, filter);
+
+        return messageManager;
     }
 
     /* package-private */ static JSONObject createMessage(String messageType, String sessionId, long sessionStart, long time, String name, JSONObject attributes, boolean includeConnLoc) throws JSONException {

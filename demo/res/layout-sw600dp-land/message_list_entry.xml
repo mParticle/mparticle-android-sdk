@@ -14,10 +14,18 @@
         android:text="@string/time" />
 
     <TextView
-        android:id="@+id/sessionId"
+        android:id="@+id/apiKey"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_toRightOf="@+id/msgTime"
+        android:paddingLeft="10dip"
+        android:text="@string/api_key" />
+
+    <TextView
+        android:id="@+id/sessionId"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@+id/apiKey"
         android:paddingLeft="10dip"
         android:text="@string/session_id" />
 

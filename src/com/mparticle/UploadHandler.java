@@ -89,7 +89,6 @@ import com.mparticle.MessageDatabase.UploadTable;
     private Proxy mProxy;
     private ConnectivityManager mConnectivyManager;
 
-
     public static final int UPLOAD_MESSAGES = 1;
     public static final int CLEANUP = 2;
 
@@ -191,8 +190,8 @@ import com.mparticle.MessageDatabase.UploadTable;
             } else {
                 selection += MessageTable.STATUS + "<=?";
             }
-            String[] selectionColumns = new String[]{"_id", MessageTable.MESSAGE, MessageTable.MESSAGE_TIME};
-            Cursor readyMessagesCursor = db.query(MessageTable.TABLE_NAME, selectionColumns, selection, selectionArgs, null, null, MessageTable.MESSAGE_TIME+" , _id");
+            String[] selectionColumns = new String[]{"_id", MessageTable.MESSAGE, MessageTable.CREATED_AT};
+            Cursor readyMessagesCursor = db.query(MessageTable.TABLE_NAME, selectionColumns, selection, selectionArgs, null, null, MessageTable.CREATED_AT+" , _id");
             if (readyMessagesCursor.getCount()>0) {
                 if (mDebugMode) {
                     Log.i(TAG, "Processing " + readyMessagesCursor.getCount() + " events for upload");
@@ -251,7 +250,7 @@ import com.mparticle.MessageDatabase.UploadTable;
             SQLiteDatabase db = mDB.getWritableDatabase();
             String[] selectionColumns = new String[]{ "_id", UploadTable.MESSAGE };
             Cursor readyUploadsCursor = db.query(UploadTable.TABLE_NAME, selectionColumns,
-                    null, null, null, null, UploadTable.MESSAGE_TIME + " , _id");
+                    null, null, null, null, UploadTable.CREATED_AT + " , _id");
             while (readyUploadsCursor.moveToNext()) {
                 int id = readyUploadsCursor.getInt(0);
                 String message = readyUploadsCursor.getString(1);
@@ -433,8 +432,9 @@ import com.mparticle.MessageDatabase.UploadTable;
 
     private void dbInsertUpload(SQLiteDatabase db, JSONObject message) throws JSONException {
         ContentValues contentValues = new ContentValues();
+        contentValues.put(UploadTable.API_KEY, mApiKey);
         contentValues.put(UploadTable.UPLOAD_ID, message.getString(MessageKey.ID));
-        contentValues.put(UploadTable.MESSAGE_TIME, message.getLong(MessageKey.TIMESTAMP));
+        contentValues.put(UploadTable.CREATED_AT, message.getLong(MessageKey.TIMESTAMP));
         contentValues.put(UploadTable.MESSAGE, message.toString());
         contentValues.put(UploadTable.STATUS, Status.READY);
         db.insert(UploadTable.TABLE_NAME, null, contentValues);
@@ -472,6 +472,7 @@ import com.mparticle.MessageDatabase.UploadTable;
         contentValues.put(CommandTable.CLEAR_HEADERS, command.optBoolean(MessageKey.CLEAR_HEADERS,false));
         contentValues.put(CommandTable.HEADERS, command.optString(MessageKey.HEADERS));
         contentValues.put(CommandTable.STATUS, Status.READY);
+        contentValues.put(CommandTable.CREATED_AT, System.currentTimeMillis());
         db.insert(CommandTable.TABLE_NAME, null, contentValues);
     }
 

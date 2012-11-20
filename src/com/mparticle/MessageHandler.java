@@ -24,6 +24,7 @@ import com.mparticle.MessageDatabase.SessionTable;
     private static final String TAG = Constants.LOG_TAG;
 
     private MessageDatabase mDB;
+    private String mApiKey;
 
     public static final int STORE_MESSAGE = 0;
     public static final int UPDATE_SESSION_ATTRIBUTES = 2;
@@ -31,9 +32,10 @@ import com.mparticle.MessageDatabase.SessionTable;
     public static final int CREATE_SESSION_END_MESSAGE = 4;
     public static final int END_ORPHAN_SESSIONS = 5;
 
-    public MessageHandler(Context appContext, Looper looper) {
+    public MessageHandler(Context appContext, Looper looper, String apiKey) {
         super(looper);
         mDB = new MessageDatabase(appContext);
+        mApiKey = apiKey;
     }
 
     @Override
@@ -155,22 +157,24 @@ import com.mparticle.MessageDatabase.SessionTable;
     }
 
     private void dbInsertSession(SQLiteDatabase db, JSONObject message) throws JSONException {
-        ContentValues values = new ContentValues();
-        values.put(SessionTable.SESSION_ID,  message.getString(MessageKey.ID));
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(SessionTable.API_KEY, mApiKey);
+        contentValues.put(SessionTable.SESSION_ID, message.getString(MessageKey.ID));
         long sessionStartTime =  message.getLong(MessageKey.TIMESTAMP);
-        values.put(SessionTable.START_TIME, sessionStartTime);
-        values.put(SessionTable.END_TIME, sessionStartTime);
-        values.put(SessionTable.SESSION_LENGTH, 0);
-        values.put(SessionTable.STATUS, Status.READY);
-        db.insert(SessionTable.TABLE_NAME, null, values);
+        contentValues.put(SessionTable.START_TIME, sessionStartTime);
+        contentValues.put(SessionTable.END_TIME, sessionStartTime);
+        contentValues.put(SessionTable.SESSION_LENGTH, 0);
+        contentValues.put(SessionTable.STATUS, Status.READY);
+        db.insert(SessionTable.TABLE_NAME, null, contentValues);
     }
 
     private void dbInsertMessage(SQLiteDatabase db, JSONObject message, int status) throws JSONException {
         String messageType = message.getString(MessageKey.TYPE);
         ContentValues contentValues = new ContentValues();
+        contentValues.put(MessageTable.API_KEY, mApiKey);
         contentValues.put(MessageTable.MESSAGE_TYPE, messageType);
-        contentValues.put(MessageTable.MESSAGE_TIME, message.getLong(MessageKey.TIMESTAMP));
-        contentValues.put(MessageTable.UUID, message.getString(MessageKey.ID));
+        contentValues.put(MessageTable.CREATED_AT, message.getLong(MessageKey.TIMESTAMP));
+        contentValues.put(MessageTable.MESSAGE_ID, message.getString(MessageKey.ID));
         contentValues.put(MessageTable.SESSION_ID, getMessageSessionId(message));
         contentValues.put(MessageTable.MESSAGE, message.toString());
         contentValues.put(MessageTable.STATUS, status);

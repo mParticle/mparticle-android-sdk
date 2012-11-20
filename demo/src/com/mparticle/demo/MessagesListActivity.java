@@ -26,12 +26,12 @@ public class MessagesListActivity extends ListActivity {
         DemoMessageDatabase mmDB = new DemoMessageDatabase(this);
         SQLiteDatabase db = mmDB.getReadableDatabase();
 
-        Cursor selectCursor = db.query("messages", null, null, null, null, null, MessageTable.MESSAGE_TIME
+        Cursor selectCursor = db.query("messages", null, null, null, null, null, MessageTable.CREATED_AT
                 + " desc, _id desc");
 
-        String[] from = new String[] { MessageTable.SESSION_ID, MessageTable.MESSAGE_TIME, MessageTable.MESSAGE_TYPE,
-                MessageTable.MESSAGE, MessageTable.UUID, MessageTable.STATUS };
-        int[] to = { R.id.sessionId, R.id.msgTime, R.id.msgType, R.id.msgMsg, R.id.msgId, R.id.msgStatus };
+        String[] from = new String[] { MessageTable.SESSION_ID, MessageTable.API_KEY, MessageTable.CREATED_AT, MessageTable.MESSAGE_TYPE,
+                MessageTable.MESSAGE, MessageTable.MESSAGE_ID, MessageTable.STATUS };
+        int[] to = { R.id.sessionId, R.id.apiKey, R.id.msgTime, R.id.msgType, R.id.msgMsg, R.id.msgId, R.id.msgStatus };
 
         // NOTE: this Activity is doing SQL directly on the main UI thread,
         // which you would never do in production code

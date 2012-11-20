@@ -6,12 +6,19 @@
     android:orientation="vertical" >
 
     <TextView
-        android:id="@+id/status"
+        android:id="@+id/msgTime"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
-        android:layout_marginRight="10dp"
+        android:text="@string/time" />
+
+    <TextView
+        android:id="@+id/status"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@+id/msgTime"
+        android:layout_marginLeft="10dp"
         android:text="@string/status" />
 
     <TextView
@@ -19,6 +26,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_toRightOf="@+id/status"
+        android:layout_marginLeft="10dp"
         android:text="@string/command_id" />
 
     <TextView
