@@ -49,13 +49,14 @@ import com.mparticle.MessageDatabase.SessionTable;
                 int messageStatus = msg.arg1;
                 String messageType = message.getString(MessageKey.TYPE);
                 SQLiteDatabase db = mDB.getWritableDatabase();
-                // handle the special case of session-start by creating the session record first
-                if (MessageType.SESSION_START==messageType) {
+                // handle the special case of session-start by creating the
+                // session record first
+                if (MessageType.SESSION_START == messageType) {
                     dbInsertSession(db, message);
                 }
                 dbInsertMessage(db, message, messageStatus);
 
-                if (MessageType.SESSION_START!=messageType) {
+                if (MessageType.SESSION_START != messageType) {
                     dbUpdateSessionEndTime(db, getMessageSessionId(message), message.getLong(MessageKey.TIMESTAMP), 0);
                 }
             } catch (SQLiteException e) {
@@ -101,21 +102,24 @@ import com.mparticle.MessageDatabase.SessionTable;
             try {
                 String sessionId = (String) msg.obj;
                 SQLiteDatabase db = mDB.getWritableDatabase();
-                String[] selectionArgs = new String[]{sessionId};
-                String[] sessionColumns = new String[]{SessionTable.START_TIME, SessionTable.END_TIME, SessionTable.SESSION_LENGTH, SessionTable.ATTRIBUTES};
-                Cursor selectCursor = db.query(SessionTable.TABLE_NAME, sessionColumns, SessionTable.SESSION_ID+"=?", selectionArgs, null, null, null);
+                String[] selectionArgs = new String[] { sessionId };
+                String[] sessionColumns = new String[] { SessionTable.START_TIME, SessionTable.END_TIME,
+                        SessionTable.SESSION_LENGTH, SessionTable.ATTRIBUTES };
+                Cursor selectCursor = db.query(SessionTable.TABLE_NAME, sessionColumns, SessionTable.SESSION_ID + "=?",
+                        selectionArgs, null, null, null);
                 selectCursor.moveToFirst();
                 long start = selectCursor.getLong(0);
                 long end = selectCursor.getLong(1);
                 long length = selectCursor.getLong(2);
                 String attributes = selectCursor.getString(3);
-                JSONObject sessionAttributes=null;
-                if (null!=attributes) {
-                    sessionAttributes= new JSONObject(attributes);
+                JSONObject sessionAttributes = null;
+                if (null != attributes) {
+                    sessionAttributes = new JSONObject(attributes);
                 }
 
                 // create a session-end message
-                JSONObject endMessage = MessageManager.createMessageSessionEnd(sessionId, start, end, length, sessionAttributes);
+                JSONObject endMessage = MessageManager.createMessageSessionEnd(sessionId, start, end, length,
+                        sessionAttributes);
 
                 // insert the record into messages with duration
                 dbInsertMessage(db, endMessage, Status.READY);
@@ -124,7 +128,7 @@ import com.mparticle.MessageDatabase.SessionTable;
                 dbUpdateMessageStatus(db, sessionId, Status.BATCH_READY);
 
                 // delete the processed session record
-                db.delete(SessionTable.TABLE_NAME, SessionTable.SESSION_ID + "=?", new String[]{sessionId});
+                db.delete(SessionTable.TABLE_NAME, SessionTable.SESSION_ID + "=?", new String[] { sessionId });
 
             } catch (SQLiteException e) {
                 Log.e(TAG, "Error creating session end message in mParticle DB", e);
@@ -136,13 +140,16 @@ import com.mparticle.MessageDatabase.SessionTable;
             break;
         case END_ORPHAN_SESSIONS:
             try {
-                // find left-over sessions that exist during startup and end them
+                // find left-over sessions that exist during startup and end
+                // them
                 SQLiteDatabase db = mDB.getWritableDatabase();
-                String[] selectionArgs = new String[]{Long.toString(Status.READY)};
-                String[] sessionColumns = new String[]{SessionTable.SESSION_ID};
+                String[] selectionArgs = new String[] { mApiKey, Long.toString(Status.READY) };
+                String[] sessionColumns = new String[] { SessionTable.SESSION_ID };
                 Cursor selectCursor = db.query(SessionTable.TABLE_NAME, sessionColumns,
-                        SessionTable.STATUS+"=?", selectionArgs, null, null, null);
-                // NOTE: there should be at most one orphan - but process any that are found
+                        SessionTable.API_KEY + "=? and " + SessionTable.STATUS + "=?",
+                        selectionArgs, null, null, null);
+                // NOTE: there should be at most one orphan per api key - but
+                // process any that are found
                 while (selectCursor.moveToNext()) {
                     String sessionId = selectCursor.getString(0);
                     sendMessage(obtainMessage(MessageHandler.CREATE_SESSION_END_MESSAGE, sessionId));
@@ -160,7 +167,7 @@ import com.mparticle.MessageDatabase.SessionTable;
         ContentValues contentValues = new ContentValues();
         contentValues.put(SessionTable.API_KEY, mApiKey);
         contentValues.put(SessionTable.SESSION_ID, message.getString(MessageKey.ID));
-        long sessionStartTime =  message.getLong(MessageKey.TIMESTAMP);
+        long sessionStartTime = message.getLong(MessageKey.TIMESTAMP);
         contentValues.put(SessionTable.START_TIME, sessionStartTime);
         contentValues.put(SessionTable.END_TIME, sessionStartTime);
         contentValues.put(SessionTable.SESSION_LENGTH, 0);
@@ -184,34 +191,35 @@ import com.mparticle.MessageDatabase.SessionTable;
     private void dbUpdateMessageStatus(SQLiteDatabase db, String sessionId, long status) {
         ContentValues contentValues = new ContentValues();
         contentValues.put(MessageTable.STATUS, status);
-        String[] whereArgs = {sessionId };
+        String[] whereArgs = { sessionId };
         db.update(MessageTable.TABLE_NAME, contentValues, MessageTable.SESSION_ID + "=?", whereArgs);
     }
 
     private void dbUpdateSessionAttributes(SQLiteDatabase db, String sessionId, String attributes) {
         ContentValues sessionValues = new ContentValues();
         sessionValues.put(SessionTable.ATTRIBUTES, attributes);
-        String[] whereArgs = {sessionId };
+        String[] whereArgs = { sessionId };
         db.update(SessionTable.TABLE_NAME, sessionValues, SessionTable.SESSION_ID + "=?", whereArgs);
     }
 
     private void dbUpdateSessionEndTime(SQLiteDatabase db, String sessionId, long endTime, long sessionLength) {
         ContentValues sessionValues = new ContentValues();
         sessionValues.put(SessionTable.END_TIME, endTime);
-        if (sessionLength>0) {
+        if (sessionLength > 0) {
             sessionValues.put(SessionTable.SESSION_LENGTH, sessionLength);
         }
-        String[] whereArgs = {sessionId };
+        String[] whereArgs = { sessionId };
         db.update(SessionTable.TABLE_NAME, sessionValues, SessionTable.SESSION_ID + "=?", whereArgs);
     }
 
-    // helper method for getting a session id out of a message since session-start messages use the id field
+    // helper method for getting a session id out of a message since
+    // session-start messages use the id field
     private String getMessageSessionId(JSONObject message) throws JSONException {
         String sessionId;
-        if (MessageType.SESSION_START==message.getString(MessageKey.TYPE)) {
-            sessionId= message.getString(MessageKey.ID);
+        if (MessageType.SESSION_START == message.getString(MessageKey.TYPE)) {
+            sessionId = message.getString(MessageKey.ID);
         } else {
-            sessionId= message.optString(MessageKey.SESSION_ID, "NO-SESSION");
+            sessionId = message.optString(MessageKey.SESSION_ID, "NO-SESSION");
         }
         return sessionId;
     }

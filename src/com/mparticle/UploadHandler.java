@@ -123,8 +123,8 @@ import com.mparticle.MessageDatabase.UploadTable;
         super.handleMessage(msg);
         switch (msg.what) {
         case UPLOAD_MESSAGES:
-            if (mDebugMode && msg.arg1==0) {
-                Log.d(TAG, "Performing periodic upload");
+            if (mDebugMode) {
+                Log.d(TAG, "Performing " + (msg.arg1==0?"periodic":"manual") +" upload for " + mApiKey);
             }
             // execute all the upload steps
             if (mUploadInterval>0 || msg.arg1==1) {
@@ -183,12 +183,12 @@ import com.mparticle.MessageDatabase.UploadTable;
         try {
             // select messages ready to upload
             SQLiteDatabase db = mDB.getWritableDatabase();
-            String[] selectionArgs = new String[]{Integer.toString(Status.BATCH_READY)};
-            String selection = MessageTable.SESSION_ID + "='NO-SESSION' or ";
+            String[] selectionArgs = new String[]{mApiKey, Integer.toString(Status.BATCH_READY)};
+            String selection = MessageTable.API_KEY + "=? and (" + MessageTable.SESSION_ID + "='NO-SESSION' or ";
             if (("batch").equals(mUploadMode)) {
-                selection += MessageTable.STATUS + "=?";
+                selection += MessageTable.STATUS + "=?)";
             } else {
-                selection += MessageTable.STATUS + "<=?";
+                selection += MessageTable.STATUS + "<=?)";
             }
             String[] selectionColumns = new String[]{"_id", MessageTable.MESSAGE, MessageTable.CREATED_AT};
             Cursor readyMessagesCursor = db.query(MessageTable.TABLE_NAME, selectionColumns, selection, selectionArgs, null, null, MessageTable.CREATED_AT+" , _id");
@@ -441,8 +441,8 @@ import com.mparticle.MessageDatabase.UploadTable;
     }
 
     private void dbDeleteProcessedMessages(SQLiteDatabase db, int lastReadyMessage) {
-        String[] whereArgs = { Long.toString(lastReadyMessage) };
-        db.delete(MessageTable.TABLE_NAME, "_id<=? or " +  MessageTable.SESSION_ID + "='NO-SESSION'", whereArgs);
+        String[] whereArgs = { mApiKey, Long.toString(lastReadyMessage) };
+        db.delete(MessageTable.TABLE_NAME, MessageTable.API_KEY + "=? and (_id<=? or " + MessageTable.SESSION_ID + "='NO-SESSION')", whereArgs);
     }
 
     private void dbUpdateUploadStatus(SQLiteDatabase db, int id, int status) {

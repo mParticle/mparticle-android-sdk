@@ -8,6 +8,7 @@
     <string name="title_commands_list">Commands</string>
     <string name="menu_proxy">Proxy</string>
     <string name="menu_close">Close</string>
+    <string name="label_api_key_secret">API Key/Secret:</string>
     <string name="label_event_data_inputs">Event/Data Inputs</string>
     <string name="button_a">Button A</string>
     <string name="button_b">Button B</string>

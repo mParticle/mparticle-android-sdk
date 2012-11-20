@@ -13,10 +13,43 @@
         android:orientation="vertical" >
 
         <TextView
-            android:id="@+id/textView1"
+            android:id="@+id/lblApiKeySecret"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/label_api_key_secret"
+            android:textSize="22sp" />
+
+        <Spinner
+            android:id="@+id/spinnerApiKey"
+            android:layout_width="wrap_content"
+            android:layout_toRightOf="@+id/lblApiKeySecret"
+            android:layout_height="wrap_content" />
+
+        <CheckBox
+            android:id="@+id/checkBoxOptOut"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/lblApiKeySecret"
+            android:layout_marginLeft="40dp"
+            android:onClick="pressToggleOption"
+            android:text="@string/optout" />
+
+        <CheckBox
+            android:id="@+id/checkBoxDebugMode"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBaseline="@+id/checkBoxOptOut"
+            android:layout_alignBottom="@+id/checkBoxOptOut"
+            android:layout_toRightOf="@+id/checkBoxOptOut"
+            android:onClick="pressToggleOption"
+            android:text="@string/debug" />
+
+        <TextView
+            android:id="@+id/lblEventsData"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/label_event_data_inputs"
+            android:layout_below="@+id/checkBoxOptOut"
             android:textSize="22sp" />
 
         <Button
@@ -24,7 +57,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
-            android:layout_below="@+id/textView1"
+            android:layout_below="@+id/lblEventsData"
             android:onClick="pressEventButton"
             android:text="@string/button_a" />
 
@@ -265,46 +298,26 @@
             android:text="@string/update_location" />
 
         <CheckBox
-            android:id="@+id/checkBoxOptOut"
+            android:id="@+id/checkBoxPushRegistration"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@+id/buttonUpdateLocation"
             android:onClick="pressToggleOption"
-            android:text="@string/optout" />
-
-        <CheckBox
-            android:id="@+id/checkBoxDebugMode"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignBaseline="@+id/checkBoxOptOut"
-            android:layout_alignBottom="@+id/checkBoxOptOut"
-            android:layout_toRightOf="@+id/checkBoxOptOut"
-            android:onClick="pressToggleOption"
-            android:text="@string/debug" />
+            android:text="@string/push_notify" />
 
         <CheckBox
             android:id="@+id/checkBoxExceptionsMode"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignBaseline="@+id/checkBoxOptOut"
-            android:layout_alignBottom="@+id/checkBoxOptOut"
-            android:layout_toRightOf="@+id/checkBoxDebugMode"
+            android:layout_below="@+id/checkBoxPushRegistration"
             android:onClick="pressToggleOption"
             android:text="@string/exceptions" />
-
-        <CheckBox
-            android:id="@+id/checkBoxPushRegistration"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/checkBoxOptOut"
-            android:onClick="pressToggleOption"
-            android:text="@string/push_notify" />
 
         <RelativeLayout
             android:id="@+id/locationListener"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/checkBoxPushRegistration" >
+            android:layout_below="@+id/checkBoxExceptionsMode" >
 
             <TextView
                 android:id="@+id/lblLocationTracking"

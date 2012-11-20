@@ -17,6 +17,8 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.Spinner;
@@ -27,7 +29,7 @@ import android.widget.ToggleButton;
 import com.mparticle.DemoDeviceProperties;
 import com.mparticle.MParticleAPI;
 
-public class HomeActivity extends Activity {
+public class HomeActivity extends Activity implements OnItemSelectedListener {
 
     private static final String TAG = "mParticleDemo";
 
@@ -45,9 +47,14 @@ public class HomeActivity extends Activity {
 
         mPreferences = getSharedPreferences("mParticleDemoPrefs", MODE_PRIVATE);
 
-        mParticleAPI = MParticleAPI.getInstance(this, "TestAppKey", "secret", 60);
-        // for testing, the timeout is 1 minute
-        mParticleAPI.setSessionTimeout(60*1000);
+        Spinner spinnerApiKey = (Spinner) findViewById(R.id.spinnerApiKey);
+        spinnerApiKey.setOnItemSelectedListener(this);
+        ArrayAdapter<String> apiKeysAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item);
+        apiKeysAdapter.add("TestAppKey/secret");
+        apiKeysAdapter.add("NoSdkKey/NoSdkSecret");
+        apiKeysAdapter.add("ApsalarKey/ApsalarSecret");
+        apiKeysAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerApiKey.setAdapter(apiKeysAdapter);
 
         Spinner locationProviderSpinner = (Spinner) findViewById(R.id.spinLocationProvider);
         ArrayAdapter<String> locProviderAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item);
@@ -56,6 +63,16 @@ public class HomeActivity extends Activity {
         locProviderAdapter.add(LocationManager.PASSIVE_PROVIDER);
         locProviderAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         locationProviderSpinner.setAdapter(locProviderAdapter);
+
+        setupApiInstance("TestAppKey", "secret", 60);
+
+        collectDeviceProperties();
+    }
+
+    private void setupApiInstance(String apiKey, String secret, int uploadInterval) {
+        mParticleAPI = MParticleAPI.getInstance(this, apiKey, secret, uploadInterval);
+        // for testing, the timeout is 1 minute
+        mParticleAPI.setSessionTimeout(60*1000);
 
         boolean exceptionsMode = mPreferences.getBoolean(PREFS_EXCEPTION, true);
         CheckBox exceptionsModeCheckBox = (CheckBox) findViewById(R.id.checkBoxExceptionsMode);
@@ -69,7 +86,7 @@ public class HomeActivity extends Activity {
 
         CheckBox optOutCheckBox = (CheckBox) findViewById(R.id.checkBoxOptOut);
         optOutCheckBox.setChecked(mParticleAPI.getOptOut());
-        collectDeviceProperties();
+
     }
 
     @Override
@@ -278,6 +295,18 @@ public class HomeActivity extends Activity {
         } else {
             mParticleAPI.disableUncaughtExceptionLogging();
         }
+    }
+
+    @Override
+    public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
+        String keySelection = (String) parent.getItemAtPosition(pos);
+        String[] keyParts = keySelection.split("/");
+        setupApiInstance(keyParts[0], keyParts[1], 60);
+    }
+
+    @Override
+    public void onNothingSelected(AdapterView<?> parent) {
+        // no-op
     }
 
 }
