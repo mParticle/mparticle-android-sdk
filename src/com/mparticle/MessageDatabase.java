@@ -9,26 +9,6 @@ import android.database.sqlite.SQLiteOpenHelper;
     private static final int DB_VERSION = 7;
     private static final String DB_NAME = "mparticle.db";
 
-    public interface MessageTable {
-        public final static String TABLE_NAME = "messages";
-        public final static String MESSAGE_TYPE = "message_type";
-        public final static String SESSION_ID = "session_id";
-        public final static String UUID = "uuid";
-        public final static String MESSAGE_TIME = "message_time";
-        public final static String MESSAGE = "message";
-        public final static String STATUS = "status";
-    }
-    private static final String CREATE_MESSAGES_DDL =
-               "CREATE TABLE "+ MessageTable.TABLE_NAME+" (" +
-                  "_id INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                  MessageTable.MESSAGE_TYPE + " STRING NOT NULL," +
-                  MessageTable.SESSION_ID + " STRING NOT NULL, " +
-                  MessageTable.UUID + " STRING NOT NULL, " +
-                  MessageTable.MESSAGE_TIME + " INTEGER NOT NULL," +
-                  MessageTable.MESSAGE + " TEXT," +
-                  MessageTable.STATUS + " INTEGER" +
-                ");";
-
     public interface SessionTable {
         public final static String TABLE_NAME = "sessions";
         public final static String SESSION_ID = "session_id";
@@ -48,6 +28,26 @@ import android.database.sqlite.SQLiteOpenHelper;
                SessionTable.ATTRIBUTES + " TEXT," +
                SessionTable.STATUS + " INTEGER" +
              ");";
+
+    public interface MessageTable {
+        public final static String TABLE_NAME = "messages";
+        public final static String MESSAGE_TYPE = "message_type";
+        public final static String SESSION_ID = "session_id";
+        public final static String UUID = "uuid";
+        public final static String MESSAGE_TIME = "message_time";
+        public final static String MESSAGE = "message";
+        public final static String STATUS = "status";
+    }
+    private static final String CREATE_MESSAGES_DDL =
+               "CREATE TABLE "+ MessageTable.TABLE_NAME+" (" +
+                  "_id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                  MessageTable.MESSAGE_TYPE + " STRING NOT NULL," +
+                  MessageTable.SESSION_ID + " STRING NOT NULL, " +
+                  MessageTable.UUID + " STRING NOT NULL, " +
+                  MessageTable.MESSAGE_TIME + " INTEGER NOT NULL," +
+                  MessageTable.MESSAGE + " TEXT," +
+                  MessageTable.STATUS + " INTEGER" +
+                ");";
 
     public interface UploadTable {
         public final static String TABLE_NAME = "uploads";
@@ -93,18 +93,18 @@ import android.database.sqlite.SQLiteOpenHelper;
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        db.execSQL(CREATE_MESSAGES_DDL);
         db.execSQL(CREATE_SESSIONS_DDL);
+        db.execSQL(CREATE_MESSAGES_DDL);
         db.execSQL(CREATE_UPLOADS_DDL);
         db.execSQL(CREATE_COMMANDS_DDL);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        db.execSQL("DROP TABLE IF EXISTS " + MessageTable.TABLE_NAME);
-        db.execSQL(CREATE_MESSAGES_DDL);
         db.execSQL("DROP TABLE IF EXISTS " + SessionTable.TABLE_NAME);
         db.execSQL(CREATE_SESSIONS_DDL);
+        db.execSQL("DROP TABLE IF EXISTS " + MessageTable.TABLE_NAME);
+        db.execSQL(CREATE_MESSAGES_DDL);
         db.execSQL("DROP TABLE IF EXISTS " + UploadTable.TABLE_NAME);
         db.execSQL(CREATE_UPLOADS_DDL);
         db.execSQL("DROP TABLE IF EXISTS " + CommandTable.TABLE_NAME);
