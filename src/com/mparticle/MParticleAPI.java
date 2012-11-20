@@ -31,6 +31,7 @@ public class MParticleAPI {
 
     private static final String TAG = Constants.LOG_TAG;
     private static Map<String, MParticleAPI> sInstanceMap = new HashMap<String, MParticleAPI>();
+    private static HandlerThread sTimeoutHandlerThread = new HandlerThread("mParticleSessionTimeoutHandler", Process.THREAD_PRIORITY_BACKGROUND);
 
     private MessageManager mMessageManager;
     private Handler mTimeoutHandler;
@@ -56,9 +57,10 @@ public class MParticleAPI {
         mAppContext = appContext;
         mApiKey = apiKey;
         mMessageManager = messageManager;
-        HandlerThread timeoutHandlerThread = new HandlerThread("SessionTimeoutHandler", Process.THREAD_PRIORITY_BACKGROUND);
-        timeoutHandlerThread.start();
-        mTimeoutHandler = new SessionTimeoutHandler(this, timeoutHandlerThread.getLooper());
+        if (!sTimeoutHandlerThread.isAlive()) {
+            sTimeoutHandlerThread.start();
+        }
+        mTimeoutHandler = new SessionTimeoutHandler(this, sTimeoutHandlerThread.getLooper());
 
         mPreferences = mAppContext.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
         mOptedOut = mPreferences.getBoolean(PrefKeys.OPTOUT+mApiKey, false);
@@ -74,7 +76,6 @@ public class MParticleAPI {
         if (!mPreferences.contains(PrefKeys.INSTALL_TIME)) {
             mPreferences.edit().putLong(PrefKeys.INSTALL_TIME, System.currentTimeMillis()).commit();
         }
-
     }
 
     /**
@@ -660,9 +661,9 @@ public class MParticleAPI {
     private void debugLog(String message) {
         if (mDebugMode) {
             if (null!=mSessionID) {
-                Log.d(TAG, mSessionID + ": " + message);
+                Log.d(TAG, mApiKey + ": " + mSessionID + ": " + message);
             } else {
-                Log.d(TAG, message);
+                Log.d(TAG, mApiKey + ": " +message);
             }
         }
     }
@@ -677,10 +678,9 @@ public class MParticleAPI {
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
             mParticleAPI.checkSessionTimeout();
-            if (0!=mParticleAPI.mSessionStartTime) {
-                // just check once every session timeout period
-                sendEmptyMessageDelayed(0, mParticleAPI.mSessionTimeout);
-                // or... use lastEventTime to decide when to check next
+            if (0!=mParticleAPI.mSessionStartTime && mParticleAPI.mSessionTimeout>0) {
+                long nextCheck = mParticleAPI.mLastEventTime - System.currentTimeMillis() + mParticleAPI.mSessionTimeout;
+                sendEmptyMessageDelayed(0, 1000 + nextCheck);
             }
         }
     }
