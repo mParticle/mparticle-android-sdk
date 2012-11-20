@@ -2,7 +2,6 @@ package com.mparticle;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.lang.ref.WeakReference;
 import java.util.Locale;
 import java.util.UUID;
 
@@ -31,12 +30,12 @@ import com.mparticle.Constants.Status;
     private static HandlerThread sMessageHandlerThread = new HandlerThread("mParticleMessageHandler", Process.THREAD_PRIORITY_BACKGROUND);
     private static HandlerThread sUploadHandlerThread = new HandlerThread("mParticleUploadHandler", Process.THREAD_PRIORITY_BACKGROUND);
 
-    private MessageHandler mMessageHandler;
-    private UploadHandler mUploadHandler;
-
     private static String sActiveNetworkName = "offline";
     private static Location sLocation;
     private static boolean sDebugMode;
+
+    private MessageHandler mMessageHandler;
+    private UploadHandler mUploadHandler;
 
     // This constructor is needed to enable mocking with Mockito and Dexmaker and should never be called
     /* package-private */ MessageManager() { throw new UnsupportedOperationException(); }
@@ -52,10 +51,11 @@ import com.mparticle.Constants.Status;
             // TODO: find a better way to start these or detect initialization
             sMessageHandlerThread.start();
             sUploadHandlerThread.start();
-        }
 
-        // TODO: this *could* keep a map of apiKey-> messageManager
-        //       - but it should only be called once by a single mparticle api instance
+            IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
+            BroadcastReceiver receiver = new NetworkStatusBroadcastReceiver();
+            appContext.registerReceiver(receiver, filter);
+        }
 
         MessageHandler messageHandler = new MessageHandler(appContext, sMessageHandlerThread.getLooper(), apiKey);
         UploadHandler uploadHandler = new UploadHandler(appContext, sUploadHandlerThread.getLooper(), apiKey, secret, uploadInterval);
@@ -64,11 +64,6 @@ import com.mparticle.Constants.Status;
 
         messageHandler.sendEmptyMessage(MessageHandler.END_ORPHAN_SESSIONS);
         uploadHandler.sendEmptyMessageDelayed(UploadHandler.UPLOAD_MESSAGES, Constants.INITIAL_UPLOAD_DELAY);
-
-        // TODO: make the NSBR not require a MM instance
-        IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
-        BroadcastReceiver receiver = new NetworkStatusBroadcastReceiver(messageManager);
-        appContext.registerReceiver(receiver, filter);
 
         return messageManager;
     }
@@ -231,25 +226,17 @@ import com.mparticle.Constants.Status;
     }
 
     private static class NetworkStatusBroadcastReceiver extends BroadcastReceiver {
-        WeakReference<MessageManager> mWeakMessageManager;
-        public NetworkStatusBroadcastReceiver(MessageManager messageManager) {
-            super();
-            mWeakMessageManager = new WeakReference<MessageManager>(messageManager);
-        }
         @Override
         public void onReceive(Context appContext, Intent intent) {
             if (ConnectivityManager.CONNECTIVITY_ACTION.equals(intent.getAction())) {
                 ConnectivityManager connectivyManager = (ConnectivityManager)appContext.getSystemService(Context.CONNECTIVITY_SERVICE);
                 NetworkInfo activeNetwork = connectivyManager.getActiveNetworkInfo();
-                MessageManager messageManager = mWeakMessageManager.get();
-                if (messageManager!=null) {
-                    messageManager.setDataConnection(activeNetwork);
-                }
+                MessageManager.setDataConnection(activeNetwork);
             }
         }
     }
 
-    public void setDataConnection(NetworkInfo activeNetwork) {
+    public static void setDataConnection(NetworkInfo activeNetwork) {
         if (null!=activeNetwork) {
             String activeNetworkName = activeNetwork.getTypeName();
             if (0!=activeNetwork.getSubtype()) {
