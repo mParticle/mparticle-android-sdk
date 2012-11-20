@@ -82,8 +82,10 @@ public class HomeActivity extends Activity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
         case R.id.menuProxy:
-            mParticleAPI.setConnectionProxy("192.168.1.100", 8080);
-            Toast.makeText(this, "Now proxying requests to 192.168.1.100 port 8080", Toast.LENGTH_LONG).show();
+            // String proxyIp = "192.168.1.100";
+            String proxyIp = "192.168.1.16";
+            mParticleAPI.setConnectionProxy(proxyIp, 8080);
+            Toast.makeText(this, "Now proxying requests to " + proxyIp + " port 8080", Toast.LENGTH_LONG).show();
             return true;
         case R.id.menuClose:
             this.finish();
