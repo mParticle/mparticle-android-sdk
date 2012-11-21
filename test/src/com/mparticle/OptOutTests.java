@@ -38,9 +38,9 @@ public class OptOutTests extends AndroidTestCase {
         HashMap<String, String> eventData= new HashMap<String, String>();
         eventData.put("testKey1", "testValue1");
         mMParticleAPI.setOptOut(true);
-        mMParticleAPI.start();
-        mMParticleAPI.setSessionProperty("testKey1", "testValue1");
-        mMParticleAPI.setUserProperty("testKey1", "testValue1");
+        mMParticleAPI.startActivity();
+        mMParticleAPI.setSessionAttribute("testKey1", "testValue1");
+        mMParticleAPI.setUserAttribute("testKey1", "testValue1");
         mMParticleAPI.logEvent("event1");
         mMParticleAPI.logEvent("event2", eventData);
         mMParticleAPI.newSession();
@@ -48,7 +48,7 @@ public class OptOutTests extends AndroidTestCase {
         mMParticleAPI.logScreenView("view2", eventData);
         mMParticleAPI.logErrorEvent("error1");
         mMParticleAPI.logErrorEvent(new Exception("exception1"));
-        mMParticleAPI.stop();
+        mMParticleAPI.stopActivity();
         mMParticleAPI.endSession();
         verify(mMockMessageManager, times(1)).optOut(anyString(), anyLong(), anyLong(), eq(true));
         verify(mMockMessageManager, never()).startSession(anyString(), anyLong());
@@ -63,17 +63,17 @@ public class OptOutTests extends AndroidTestCase {
     public void testOptedOutActiveSession() throws JSONException {
         JSONObject eventData=new JSONObject();
         eventData.put("testKey1", "testValue1");
-        mMParticleAPI.start();
-        mMParticleAPI.setSessionProperty("testKey1", "testValue1");
+        mMParticleAPI.startActivity();
+        mMParticleAPI.setSessionAttribute("testKey1", "testValue1");
         mMParticleAPI.logEvent("event1");
         mMParticleAPI.setOptOut(true);
         mMParticleAPI.logEvent("event2");
-        mMParticleAPI.stop();
+        mMParticleAPI.stopActivity();
         mMParticleAPI.endSession();
-        mMParticleAPI.start();
-        mMParticleAPI.setSessionProperty("testKey1", "testValue1");
+        mMParticleAPI.startActivity();
+        mMParticleAPI.setSessionAttribute("testKey1", "testValue1");
         mMParticleAPI.logEvent("event1");
-        mMParticleAPI.stop();
+        mMParticleAPI.stopActivity();
         mMParticleAPI.endSession();
 
         verify(mMockMessageManager, times(1)).optOut(anyString(), anyLong(), anyLong(), eq(true));
@@ -84,22 +84,22 @@ public class OptOutTests extends AndroidTestCase {
     }
 
     public void testOptOutAndIn() throws JSONException {
-        mMParticleAPI.start();
-        mMParticleAPI.setSessionProperty("testKey1", "testValue1");
-        mMParticleAPI.setUserProperty("testKey1", "testValue1");
+        mMParticleAPI.startActivity();
+        mMParticleAPI.setSessionAttribute("testKey1", "testValue1");
+        mMParticleAPI.setUserAttribute("testKey1", "testValue1");
         mMParticleAPI.logEvent("event1");
         mMParticleAPI.setOptOut(true);
-        mMParticleAPI.setSessionProperty("testKey2", "testValue1");
-        mMParticleAPI.setUserProperty("testKey2", "testValue1");
+        mMParticleAPI.setSessionAttribute("testKey2", "testValue1");
+        mMParticleAPI.setUserAttribute("testKey2", "testValue1");
         mMParticleAPI.logEvent("event2");
         mMParticleAPI.endSession();
-        mMParticleAPI.start();
-        mMParticleAPI.setSessionProperty("testKey3", "testValue2");
-        mMParticleAPI.setUserProperty("testKey3", "testValue2");
+        mMParticleAPI.startActivity();
+        mMParticleAPI.setSessionAttribute("testKey3", "testValue2");
+        mMParticleAPI.setUserAttribute("testKey3", "testValue2");
         mMParticleAPI.logEvent("event3");
         mMParticleAPI.setOptOut(false);
-        mMParticleAPI.setSessionProperty("testKey4", "testValue2");
-        mMParticleAPI.setUserProperty("testKey4", "testValue2");
+        mMParticleAPI.setSessionAttribute("testKey4", "testValue2");
+        mMParticleAPI.setUserAttribute("testKey4", "testValue2");
         mMParticleAPI.logEvent("event4");
         mMParticleAPI.endSession();
 
@@ -119,7 +119,7 @@ public class OptOutTests extends AndroidTestCase {
 
     public void testMultipleCallsToOptOut() throws JSONException {
         mMParticleAPI.setOptOut(false);
-        mMParticleAPI.start();
+        mMParticleAPI.startActivity();
         mMParticleAPI.setOptOut(true);
         mMParticleAPI.logEvent("event1");
         mMParticleAPI.setOptOut(true);

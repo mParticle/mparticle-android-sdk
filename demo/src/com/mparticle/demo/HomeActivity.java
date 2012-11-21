@@ -26,7 +26,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
-import com.mparticle.DemoDeviceProperties;
+import com.mparticle.DemoDeviceAttributes;
 import com.mparticle.MParticleAPI;
 
 public class HomeActivity extends Activity implements OnItemSelectedListener {
@@ -114,7 +114,7 @@ public class HomeActivity extends Activity implements OnItemSelectedListener {
 
     private void collectDeviceProperties() {
         StringBuffer diagnosticMessage=new StringBuffer();
-        JSONObject appInfo = DemoDeviceProperties.collectAppInfo(this.getApplicationContext());
+        JSONObject appInfo = DemoDeviceAttributes.collectAppInfo(this.getApplicationContext());
         try {
             if (appInfo.length() > 0) {
                 Iterator<?> deviceKeys = appInfo.keys();
@@ -126,7 +126,7 @@ public class HomeActivity extends Activity implements OnItemSelectedListener {
         } catch (Exception e) {
             Log.d(TAG, "Error parsing app info JSON");
         }
-        JSONObject deviceInfo = DemoDeviceProperties.collectDeviceInfo(this.getApplicationContext());
+        JSONObject deviceInfo = DemoDeviceAttributes.collectDeviceInfo(this.getApplicationContext());
         try {
             if (deviceInfo.length() > 0) {
                 Iterator<?> deviceKeys = deviceInfo.keys();
@@ -149,8 +149,8 @@ public class HomeActivity extends Activity implements OnItemSelectedListener {
             break;
         case R.id.buttonB:
             mParticleAPI.logEvent("ButtonBPressed");
-            mParticleAPI.setSessionProperty("testSessionProp1", "testValue1");
-            mParticleAPI.setSessionProperty("testSessionProp2", "testValue1");
+            mParticleAPI.setSessionAttribute("testSessionAttr1", "testValue1");
+            mParticleAPI.setSessionAttribute("testSessionAttr2", "testValue1");
             break;
         case R.id.buttonC: {
             boolean on = ((ToggleButton) view).isChecked();
@@ -207,10 +207,10 @@ public class HomeActivity extends Activity implements OnItemSelectedListener {
     public void pressSessionButton(View view) {
         switch (view.getId()) {
         case R.id.buttonStartSession:
-            mParticleAPI.start();
+            mParticleAPI.startActivity();
             break;
         case R.id.buttonStopSession:
-            mParticleAPI.stop();
+            mParticleAPI.stopActivity();
             break;
         case R.id.buttonNewSession:
             mParticleAPI.newSession();
@@ -239,12 +239,12 @@ public class HomeActivity extends Activity implements OnItemSelectedListener {
         case R.id.buttonSetUserVar:
             TextView editUserView = (TextView) findViewById(R.id.editUserVar);
             String userVar = editUserView.getText().toString();
-            mParticleAPI.setUserProperty("user_var", userVar);
+            mParticleAPI.setUserAttribute("user_var", userVar);
             break;
         case R.id.buttonSetSessionVar:
             TextView editSessionView = (TextView) findViewById(R.id.editSessionVar);
             String sessionVar = editSessionView.getText().toString();
-            mParticleAPI.setSessionProperty("session_var", sessionVar);
+            mParticleAPI.setSessionAttribute("session_var", sessionVar);
             break;
         }
     }

@@ -114,8 +114,8 @@ import com.mparticle.MessageDatabase.UploadTable;
 
         mConnectivyManager = (ConnectivityManager) appContext.getSystemService(Context.CONNECTIVITY_SERVICE);
 
-        mAppInfo = DeviceProperties.collectAppInfo(appContext);
-        mDeviceInfo = DeviceProperties.collectDeviceInfo(appContext);
+        mAppInfo = DeviceAttributes.collectAppInfo(appContext);
+        mDeviceInfo = DeviceAttributes.collectDeviceInfo(appContext);
     }
 
     @Override

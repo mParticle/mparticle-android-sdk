@@ -136,7 +136,7 @@ public class MParticleAPI {
      *
      * This method should be called from an Activity's onStart() method.
      */
-    public void start() {
+    public void startActivity() {
         if (mOptedOut) {
             return;
         }
@@ -154,7 +154,7 @@ public class MParticleAPI {
      *
      * To explicitly end a session use the endSession() method.
      */
-    public void stop() {
+    public void stopActivity() {
         if (mSessionStartTime==0 || mOptedOut) {
             return;
         }
@@ -414,37 +414,37 @@ public class MParticleAPI {
     }
 
     /**
-     * Set a single session attribute. The property will combined with any existing attributes.
+     * Set a single session attribute. The attribute will combined with any existing attributes.
      * @param key the attribute key
      * @param value the attribute value
      */
-    public void setSessionProperty(String key, Object value) {
+    public void setSessionAttribute(String key, String value) {
         if (mOptedOut) {
             return;
         }
         ensureActiveSession();
-        debugLog("Set session property: " + key + "=" + value);
+        debugLog("Set session attribute: " + key + "=" + value);
         if (setCheckedAttribute(mSessionAttributes, key, value)) {
             mMessageManager.setSessionAttributes(mSessionID, mSessionAttributes);
         }
     }
 
     /**
-     * Set a single user attribute. The property will combined with any existing attributes.
+     * Set a single user attribute. The attribute will combined with any existing attributes.
      * @param key the attribute key
      * @param value the attribute value
      */
-    public void setUserProperty(String key, Object value) {
+    public void setUserAttribute(String key, String value) {
         if (mOptedOut) {
             return;
         }
-        debugLog("Set user property: " + key + "=" + value);
+        debugLog("Set user attribute: " + key + "=" + value);
         if (setCheckedAttribute(mUserAttributes, key, value)) {
             mPreferences.edit().putString(PrefKeys.USER_ATTRS+mApiKey, mUserAttributes.toString()).commit();
         }
     }
 
-    /* package-private */ void clearUserProperties() {
+    /* package-private */ void clearUserAttributes() {
         mUserAttributes = new JSONObject();
         mPreferences.edit().putString(PrefKeys.USER_ATTRS+mApiKey, mUserAttributes.toString()).commit();
     }
@@ -490,16 +490,12 @@ public class MParticleAPI {
     }
 
     /**
-     * Set the connection protocol scheme to use for uploading data
-     * @param scheme either "http" or "https"
+     * Enable SSL transport when uploading data
+     * @param sslEnabled true to turn on SSL transport, false to use non-SSL transport
      */
-    public void setConnectionScheme(String scheme) {
-        if ("https".equals(scheme) || "http".equals(scheme)) {
-            mMessageManager.setConnectionScheme(scheme);
-            debugLog("Set upload scheme: " + scheme);
-        } else {
-            Log.w(TAG, "Only http and https schemes are supported");
-        }
+    public void setSecureTransport(boolean sslEnabled) {
+        mMessageManager.setConnectionScheme( sslEnabled ? "https" : "http" );
+        debugLog("Set secure transport: " + sslEnabled);
     }
 
     /**
