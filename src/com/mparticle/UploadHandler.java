@@ -88,6 +88,7 @@ import com.mparticle.MessageDatabase.UploadTable;
     private JSONObject mDeviceInfo;
     private Proxy mProxy;
     private ConnectivityManager mConnectivyManager;
+    private String mUploadMode = "batch";
 
     public static final int UPLOAD_MESSAGES = 1;
     public static final int CLEANUP = 2;
@@ -99,7 +100,8 @@ import com.mparticle.MessageDatabase.UploadTable;
     public static final String SERVICE_HOST = "api.dev.mparticle.com";
     public static final String SERVICE_VERSION = "v1";
 
-    private static String mUploadMode = "batch";
+    // for development usage - set to false to prevent gzip compression
+    private static final boolean USE_COMPRESSION = true;
 
     public UploadHandler(Context appContext, Looper looper, String apiKey, String secret, long uploadInterval) {
         super(looper);
@@ -151,7 +153,9 @@ import com.mparticle.MessageDatabase.UploadTable;
         try {
             HttpClient httpClient = setupHttpClient();
             HttpGet httpGet = new HttpGet(makeServiceUri("config"));
-            httpGet.setHeader("Accept-Encoding", "gzip");
+            if (USE_COMPRESSION) {
+                httpGet.setHeader("Accept-Encoding", "gzip");
+            }
             addMessageSignature(httpGet, null);
 
             HttpResponse httpResponse = httpClient.execute(httpGet, mHttpContext);
@@ -257,21 +261,27 @@ import com.mparticle.MessageDatabase.UploadTable;
                 // POST message to mParticle service
                 HttpPost httpPost = new HttpPost(makeServiceUri("events"));
                 httpPost.setHeader("Content-type", "application/json");
-                httpPost.setHeader("Accept-Encoding", "gzip");
 
-                try {
-                    byte[] messageBytes = message.getBytes();
-                    ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream(messageBytes.length);
-                    GZIPOutputStream gzipOutputStream = new GZIPOutputStream(byteArrayOutputStream);
-                    gzipOutputStream.write(messageBytes);
-                    gzipOutputStream.finish();
-                    gzipOutputStream.flush();
-                    httpPost.setEntity(new ByteArrayEntity(byteArrayOutputStream.toByteArray()));
-                    httpPost.setHeader("Content-Encoding", "gzip");
-                } catch (IOException ioException) {
-                    Log.w(TAG, "Failed to compress request. Sending uncompressed");
-                    httpPost.setEntity(new ByteArrayEntity(message.getBytes()));
+                ByteArrayEntity postEntity=null;
+                byte[] messageBytes = message.getBytes();
+                if (USE_COMPRESSION) {
+                    httpPost.setHeader("Accept-Encoding", "gzip");
+                    try {
+                        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream(messageBytes.length);
+                        GZIPOutputStream gzipOutputStream = new GZIPOutputStream(byteArrayOutputStream);
+                        gzipOutputStream.write(messageBytes);
+                        gzipOutputStream.finish();
+                        gzipOutputStream.flush();
+                        postEntity = new ByteArrayEntity(byteArrayOutputStream.toByteArray());
+                        httpPost.setHeader("Content-Encoding", "gzip");
+                    } catch (IOException ioException) {
+                        Log.w(TAG, "Failed to compress request. Sending uncompressed");
+                    }
                 }
+                if (null==postEntity) {
+                    postEntity = new ByteArrayEntity(messageBytes);
+                }
+                httpPost.setEntity(postEntity);
 
                 addMessageSignature(httpPost, message);
 
