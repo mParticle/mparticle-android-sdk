@@ -576,25 +576,6 @@ public class MParticleAPI {
     }
 
     /**
-     * Register an event collector to generate log events on a periodic basis.
-     * @param collector an instance of the EventCollectorIterface which provides event information
-     * @param timeInterval the time interval (in seconds)
-     */
-    public void registerEventCollector(EventCollectorInterface collector, int timeInterval) {
-    }
-
-    /**
-     * Used to provide event data for recurring events
-     */
-    public interface EventCollectorInterface {
-        /**
-         * Called on a periodic interval to provide event data
-         * @return a map of key/value pairs to be logged with the event
-         */
-        JSONObject provideEventData();
-    }
-
-    /**
      * This method checks the event count is below the limit and increments the event count.
      * A warning is logged if the limit has been reached.
      * @return true if event count is below limit
