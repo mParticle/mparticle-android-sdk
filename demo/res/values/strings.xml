@@ -34,7 +34,6 @@
     <string name="error">Error</string>
     <string name="exception">Exception</string>
     <string name="update_location">Update Location</string>
-    <string name="get_segment">Get Segment</string>
     <string name="debug">Debug</string>
     <string name="exceptions">Handle Exceptions</string>
     <string name="optout">OptOut</string>

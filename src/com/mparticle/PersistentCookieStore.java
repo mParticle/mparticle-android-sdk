@@ -2,7 +2,7 @@
  * NOTICE: This class is taken from the Android Async HTTP project. Apache Licensed.
  * https://github.com/loopj/android-async-http
  * The code has been modified to make SerializableCookie an inner class and change
- * the class visibility
+ * the class visibility. Also toUpperCase now uses the US locale to prevent variations.
  */
 
 /*
@@ -34,6 +34,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.http.client.CookieStore;
@@ -195,7 +196,7 @@ import android.text.TextUtils;
             }
             sb.append(Integer.toHexString(v));
         }
-        return sb.toString().toUpperCase();
+        return sb.toString().toUpperCase(Locale.US);
     }
 
     protected byte[] hexStringToByteArray(String s) {
