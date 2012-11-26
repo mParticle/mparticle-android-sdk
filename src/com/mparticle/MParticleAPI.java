@@ -35,8 +35,8 @@ import com.mparticle.Constants.PrefKeys;
 public class MParticleAPI {
 
     private static final String TAG = Constants.LOG_TAG;
-    private static Map<String, MParticleAPI> sInstanceMap = new HashMap<String, MParticleAPI>();
-    private static HandlerThread sTimeoutHandlerThread = new HandlerThread("mParticleSessionTimeoutHandler", Process.THREAD_PRIORITY_BACKGROUND);
+    private static final Map<String, MParticleAPI> sInstanceMap = new HashMap<String, MParticleAPI>();
+    private static final HandlerThread sTimeoutHandlerThread = new HandlerThread("mParticleSessionTimeoutHandler", Process.THREAD_PRIORITY_BACKGROUND);
 
     private MessageManager mMessageManager;
     private Handler mTimeoutHandler;
@@ -667,7 +667,7 @@ public class MParticleAPI {
     }
 
     private static final class SessionTimeoutHandler extends Handler {
-        private MParticleAPI mParticleAPI;
+        private final MParticleAPI mParticleAPI;
         public SessionTimeoutHandler(MParticleAPI mParticleAPI, Looper looper) {
             super(looper);
             this.mParticleAPI = mParticleAPI;
@@ -684,7 +684,7 @@ public class MParticleAPI {
     }
 
     private static final class MParticleLocationListener implements LocationListener {
-        private MParticleAPI mParticleAPI;
+        private final MParticleAPI mParticleAPI;
 
         public MParticleLocationListener(MParticleAPI mParticleAPI) {
             this.mParticleAPI = mParticleAPI;

@@ -74,10 +74,10 @@ import com.mparticle.MessageDatabase.UploadTable;
 
     private static final String TAG = Constants.LOG_TAG;
 
-    private MessageDatabase mDB;
-    private SharedPreferences mPreferences;
-    private String mApiKey;
-    private String mSecret;
+    private final MessageDatabase mDB;
+    private final SharedPreferences mPreferences;
+    private final String mApiKey;
+    private final String mSecret;
     private long mUploadInterval = Constants.DEFAULT_UPLOAD_INTERVAL;
     private boolean mDebugMode = false;
 
@@ -87,7 +87,7 @@ import com.mparticle.MessageDatabase.UploadTable;
     private JSONObject mAppInfo;
     private JSONObject mDeviceInfo;
     private Proxy mProxy;
-    private ConnectivityManager mConnectivyManager;
+    private final ConnectivityManager mConnectivyManager;
     private String mUploadMode = "batch";
 
     public static final int UPLOAD_MESSAGES = 1;

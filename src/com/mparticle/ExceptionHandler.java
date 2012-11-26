@@ -7,8 +7,8 @@ import android.util.Log;
 /* package-private */ class ExceptionHandler implements UncaughtExceptionHandler {
 
     private static final String TAG = Constants.LOG_TAG;
-    private UncaughtExceptionHandler mOriginalUncaughtExceptionHandler;
-    private MessageManager mMessageManager;
+    private final UncaughtExceptionHandler mOriginalUncaughtExceptionHandler;
+    private final MessageManager mMessageManager;
 
     public ExceptionHandler(MessageManager messageManager, UncaughtExceptionHandler originalUncaughtExceptionHandler) {
         mMessageManager = messageManager;

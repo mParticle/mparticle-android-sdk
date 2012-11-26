@@ -27,15 +27,15 @@ import com.mparticle.Constants.Status;
 
     private static final String TAG = Constants.LOG_TAG;
 
-    private static HandlerThread sMessageHandlerThread = new HandlerThread("mParticleMessageHandler", Process.THREAD_PRIORITY_BACKGROUND);
-    private static HandlerThread sUploadHandlerThread = new HandlerThread("mParticleUploadHandler", Process.THREAD_PRIORITY_BACKGROUND);
+    private static final HandlerThread sMessageHandlerThread = new HandlerThread("mParticleMessageHandler", Process.THREAD_PRIORITY_BACKGROUND);
+    private static final HandlerThread sUploadHandlerThread = new HandlerThread("mParticleUploadHandler", Process.THREAD_PRIORITY_BACKGROUND);
 
     private static String sActiveNetworkName = "offline";
     private static Location sLocation;
     private static boolean sDebugMode;
 
-    private MessageHandler mMessageHandler;
-    private UploadHandler mUploadHandler;
+    private final MessageHandler mMessageHandler;
+    private final UploadHandler mUploadHandler;
 
     // This constructor is needed to enable mocking with Mockito and Dexmaker and should never be called
     /* package-private */ MessageManager() { throw new UnsupportedOperationException(); }

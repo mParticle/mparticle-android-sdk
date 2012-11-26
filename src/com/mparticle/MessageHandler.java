@@ -23,8 +23,8 @@ import com.mparticle.MessageDatabase.SessionTable;
 
     private static final String TAG = Constants.LOG_TAG;
 
-    private MessageDatabase mDB;
-    private String mApiKey;
+    private final MessageDatabase mDB;
+    private final String mApiKey;
 
     public static final int STORE_MESSAGE = 0;
     public static final int UPDATE_SESSION_ATTRIBUTES = 2;
