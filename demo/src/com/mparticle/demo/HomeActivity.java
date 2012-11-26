@@ -26,6 +26,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
+import com.mparticle.Attributes;
 import com.mparticle.DemoDeviceAttributes;
 import com.mparticle.MParticleAPI;
 
@@ -149,7 +150,7 @@ public class HomeActivity extends Activity implements OnItemSelectedListener {
         case R.id.buttonB:
             mParticleAPI.logEvent("ButtonBPressed");
             mParticleAPI.setSessionAttribute("testSessionAttr1", "testValue1");
-            mParticleAPI.setSessionAttribute("testSessionAttr2", "testValue1");
+            mParticleAPI.setSessionAttribute(Attributes.GENDER, "male");
             break;
         case R.id.buttonC: {
             boolean on = ((ToggleButton) view).isChecked();
