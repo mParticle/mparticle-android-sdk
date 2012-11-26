@@ -49,12 +49,12 @@ public class MParticleAPI {
     private boolean mDebugMode = false;
 
     /* package-private */ String mSessionID;
-    /* package-private */ int mSessionTimeout = 30 * 60 * 1000;
     /* package-private */ long mSessionStartTime = 0;
     /* package-private */ long mLastEventTime = 0;
-    /* package-private */ long mSessionActiveStart = 0;
-    /* package-private */ long mSessionLength = 0;
-    /* package-private */ long mEventCount = 0;
+    private int mSessionTimeout = 30 * 60 * 1000;
+    private long mSessionActiveStart = 0;
+    private int mSessionLength = 0;
+    private int mEventCount = 0;
     /* package-private */ JSONObject mUserAttributes = new JSONObject();
     /* package-private */ JSONObject mSessionAttributes;
 

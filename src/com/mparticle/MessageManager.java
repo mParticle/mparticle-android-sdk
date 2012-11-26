@@ -255,7 +255,7 @@ import com.mparticle.Constants.Status;
         }
     }
 
-    /* package-private */ void setDebugMode(boolean debugMode) {
+    public void setDebugMode(boolean debugMode) {
         sDebugMode = debugMode;
         mUploadHandler.setDebugMode(debugMode);
     }

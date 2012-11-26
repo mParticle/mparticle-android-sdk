@@ -145,7 +145,7 @@ import com.mparticle.MessageDatabase.UploadTable;
         }
     }
 
-    void fetchConfig() {
+    private void fetchConfig() {
         if (!isNetworkAvailable()) {
             return;
         }
@@ -182,7 +182,7 @@ import com.mparticle.MessageDatabase.UploadTable;
         }
     }
 
-    void prepareUploads() {
+    private void prepareUploads() {
         try {
             // select messages ready to upload
             SQLiteDatabase db = mDB.getWritableDatabase();
@@ -242,7 +242,7 @@ import com.mparticle.MessageDatabase.UploadTable;
         return uploadMessage;
     }
 
-    void processUploads() {
+    private void processUploads() {
         if (!isNetworkAvailable()) {
             return;
         }
@@ -371,7 +371,7 @@ import com.mparticle.MessageDatabase.UploadTable;
         }
     }
 
-    void processCommands() {
+    private void processCommands() {
         if (!isNetworkAvailable()) {
             return;
         }
