@@ -99,8 +99,7 @@ public class HomeActivity extends Activity implements OnItemSelectedListener {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
         case R.id.menuProxy:
-            // String proxyIp = "192.168.1.100";
-            String proxyIp = "192.168.1.16";
+            String proxyIp = "192.168.1.100";
             mParticleAPI.setConnectionProxy(proxyIp, 8080);
             Toast.makeText(this, "Now proxying requests to " + proxyIp + " port 8080", Toast.LENGTH_LONG).show();
             return true;
