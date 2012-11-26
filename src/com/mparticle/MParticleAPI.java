@@ -1,9 +1,13 @@
 package com.mparticle;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 import java.util.UUID;
 
 import org.json.JSONException;
@@ -11,6 +15,7 @@ import org.json.JSONObject;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.res.AssetManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -83,10 +88,9 @@ public class MParticleAPI {
      * @param context the Activity that is creating the instance
      * @param apiKey the API key for your account
      * @param secret the API secret for your account
-     * @param uploadInterval the upload interval (in seconds)
      * @return An instance of the mParticle SDK configured with your API key
      */
-    public static MParticleAPI getInstance(Context context, String apiKey, String secret, long uploadInterval) {
+    public static MParticleAPI getInstance(Context context, String apiKey, String secret) {
 
         if (null==context) {
             throw new IllegalArgumentException("context is required");
@@ -99,24 +103,41 @@ public class MParticleAPI {
         if (sInstanceMap.containsKey(apiKey)) {
             apiInstance = sInstanceMap.get(apiKey);
         } else {
+
+            AssetManager assetManager = context.getResources().getAssets();
+            Properties properties = new Properties();
+            try {
+                InputStream inputStream = assetManager.open("mparticle.properties");
+                properties.load(inputStream);
+            } catch (FileNotFoundException e) {
+                Log.d(TAG, "No mparticle.properties file found in the assets directory. Using defaults.");
+            } catch (IOException e) {
+                Log.w(TAG, "Failed to parse mparticle.properties file from assets directory");
+            }
+
             Context appContext = context.getApplicationContext();
-            apiInstance = new MParticleAPI(appContext, apiKey,
-                    MessageManager.getInstance(appContext, apiKey, secret, Math.abs(uploadInterval*1000)));
+            MessageManager messageManager = MessageManager.getInstance(appContext, apiKey, secret);
+            if (properties.contains("upload_interval")) {
+                try {
+                    messageManager.setUploadInterval(1000 * Integer.parseInt(properties.getProperty("upload_interval")));
+                } catch (Throwable t) {
+                    // ignore
+                }
+            }
+
+            apiInstance = new MParticleAPI(appContext, apiKey, messageManager);
+
+            try {
+                apiInstance.setSessionTimeout(1000 * Integer.parseInt(properties.getProperty("session_timeout", "60")));
+            } catch (Throwable t) {
+                // ignore
+            }
+
             sInstanceMap.put(apiKey, apiInstance);
+
         }
 
         return apiInstance;
-    }
-
-    /**
-     * Initialize or return an instance of the mParticle SDK
-     * @param context the Activity that is creating the instance
-     * @param apiKey the API key for your account
-     * @param secret the API secret for your account
-     * @return an instance of the mParticle SDK configured with your API key
-     */
-    public static MParticleAPI getInstance(Context context, String apiKey, String secret) {
-        return MParticleAPI.getInstance(context, apiKey, secret, Constants.DEFAULT_UPLOAD_INTERVAL);
     }
 
     /**

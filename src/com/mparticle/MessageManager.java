@@ -46,7 +46,7 @@ import com.mparticle.Constants.Status;
         mUploadHandler = uploadHandler;
     }
 
-    public static MessageManager getInstance(Context appContext, String apiKey, String secret, long uploadInterval) {
+    public static MessageManager getInstance(Context appContext, String apiKey, String secret) {
         if (!sMessageHandlerThread.isAlive()) {
             // TODO: find a better way to start these or detect initialization
             sMessageHandlerThread.start();
@@ -58,7 +58,7 @@ import com.mparticle.Constants.Status;
         }
 
         MessageHandler messageHandler = new MessageHandler(appContext, sMessageHandlerThread.getLooper(), apiKey);
-        UploadHandler uploadHandler = new UploadHandler(appContext, sUploadHandlerThread.getLooper(), apiKey, secret, uploadInterval);
+        UploadHandler uploadHandler = new UploadHandler(appContext, sUploadHandlerThread.getLooper(), apiKey, secret);
 
         MessageManager messageManager = new MessageManager(messageHandler, uploadHandler);
 
@@ -223,6 +223,10 @@ import com.mparticle.Constants.Status;
 
     public void setConnectionScheme(String scheme) {
         mUploadHandler.setConnectionScheme(scheme);
+    }
+
+    public void setUploadInterval(int uploadInterval) {
+        mUploadHandler.setUploadInterval(uploadInterval);
     }
 
     private static class NetworkStatusBroadcastReceiver extends BroadcastReceiver {

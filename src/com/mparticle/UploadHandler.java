@@ -78,7 +78,7 @@ import com.mparticle.MessageDatabase.UploadTable;
     private SharedPreferences mPreferences;
     private String mApiKey;
     private String mSecret;
-    private long mUploadInterval;
+    private long mUploadInterval = Constants.DEFAULT_UPLOAD_INTERVAL;
     private boolean mDebugMode = false;
 
     private HttpContext mHttpContext;
@@ -103,11 +103,10 @@ import com.mparticle.MessageDatabase.UploadTable;
     // for development usage - set to false to prevent gzip compression
     private static final boolean USE_COMPRESSION = true;
 
-    public UploadHandler(Context appContext, Looper looper, String apiKey, String secret, long uploadInterval) {
+    public UploadHandler(Context appContext, Looper looper, String apiKey, String secret) {
         super(looper);
         mApiKey = apiKey;
         mSecret = secret;
-        mUploadInterval = uploadInterval;
 
         mDB = new MessageDatabase(appContext);
         mPreferences = appContext.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
@@ -521,6 +520,10 @@ import com.mparticle.MessageDatabase.UploadTable;
 
     public void setConnectionScheme(String scheme) {
         mServiceScheme = scheme;
+    }
+
+    public void setUploadInterval(int uploadInterval) {
+        mUploadInterval = uploadInterval;
     }
 
     // From Stack Overflow: http://stackoverflow.com/questions/7124735/hmac-sha256-algorithm-for-signature-calculation

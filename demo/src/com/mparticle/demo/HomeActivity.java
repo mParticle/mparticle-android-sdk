@@ -64,13 +64,13 @@ public class HomeActivity extends Activity implements OnItemSelectedListener {
         locProviderAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         locationProviderSpinner.setAdapter(locProviderAdapter);
 
-        setupApiInstance("TestAppKey", "secret", 60);
+        setupApiInstance("TestAppKey", "secret");
 
         collectDeviceProperties();
     }
 
-    private void setupApiInstance(String apiKey, String secret, int uploadInterval) {
-        mParticleAPI = MParticleAPI.getInstance(this, apiKey, secret, uploadInterval);
+    private void setupApiInstance(String apiKey, String secret) {
+        mParticleAPI = MParticleAPI.getInstance(this, apiKey, secret);
         // for testing, the timeout is 1 minute
         mParticleAPI.setSessionTimeout(60*1000);
 
@@ -301,7 +301,7 @@ public class HomeActivity extends Activity implements OnItemSelectedListener {
     public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
         String keySelection = (String) parent.getItemAtPosition(pos);
         String[] keyParts = keySelection.split("/");
-        setupApiInstance(keyParts[0], keyParts[1], 60);
+        setupApiInstance(keyParts[0], keyParts[1]);
     }
 
     @Override
