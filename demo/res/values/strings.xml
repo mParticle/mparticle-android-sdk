@@ -7,6 +7,8 @@
     <string name="title_uploads_list">Uploads</string>
     <string name="title_commands_list">Commands</string>
     <string name="menu_proxy">Proxy</string>
+    <string name="menu_app_info">App Info</string>
+    <string name="menu_device_info">Device Info</string>
     <string name="menu_close">Close</string>
     <string name="label_api_key_secret">API Key/Secret:</string>
     <string name="label_event_data_inputs">Event/Data Inputs</string>

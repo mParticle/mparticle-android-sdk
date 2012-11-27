@@ -1,19 +1,18 @@
 package com.mparticle.demo;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Random;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -31,8 +30,6 @@ import com.mparticle.DemoDeviceAttributes;
 import com.mparticle.MParticleAPI;
 
 public class HomeActivity extends Activity implements OnItemSelectedListener {
-
-    private static final String TAG = "mParticleDemo";
 
     private MParticleAPI mParticleAPI;
 
@@ -66,8 +63,6 @@ public class HomeActivity extends Activity implements OnItemSelectedListener {
         locationProviderSpinner.setAdapter(locProviderAdapter);
 
         setupApiInstance("TestAppKey", "secret");
-
-        collectDeviceProperties();
     }
 
     private void setupApiInstance(String apiKey, String secret) {
@@ -103,43 +98,32 @@ public class HomeActivity extends Activity implements OnItemSelectedListener {
             String proxyIp = "192.168.1.100";
             mParticleAPI.setConnectionProxy(proxyIp, 8080);
             Toast.makeText(this, "Now proxying requests to " + proxyIp + " port 8080", Toast.LENGTH_LONG).show();
-            return true;
+            break;
+        case R.id.menuDeviceInfo:
+            try {
+                JSONObject info = DemoDeviceAttributes.collectDeviceInfo(this.getApplicationContext());
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder.setTitle("Device Info").setMessage(info.toString(2)).show();
+            } catch (JSONException e) {
+                Toast.makeText(this, "Failed to parse device info JSON", Toast.LENGTH_LONG).show();
+            }
+            break;
+        case R.id.menuAppInfo:
+            try {
+                JSONObject info = DemoDeviceAttributes.collectAppInfo(this.getApplicationContext());
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder.setTitle("App Info").setMessage(info.toString(2)).show();
+            } catch (JSONException e) {
+                Toast.makeText(this, "Failed to parse device info JSON", Toast.LENGTH_LONG).show();
+            }
+            break;
         case R.id.menuClose:
             this.finish();
-            return true;
+            break;
         default:
             return super.onOptionsItemSelected(item);
         }
-    }
-
-    private void collectDeviceProperties() {
-        StringBuffer diagnosticMessage=new StringBuffer();
-        JSONObject appInfo = DemoDeviceAttributes.collectAppInfo(this.getApplicationContext());
-        try {
-            if (appInfo.length() > 0) {
-                Iterator<?> deviceKeys = appInfo.keys();
-                while( deviceKeys.hasNext() ){
-                    String key = (String)deviceKeys.next();
-                    diagnosticMessage.append(key + "=" + appInfo.get(key)+"\n");
-                }
-            }
-        } catch (Exception e) {
-            Log.d(TAG, "Error parsing app info JSON");
-        }
-        JSONObject deviceInfo = DemoDeviceAttributes.collectDeviceInfo(this.getApplicationContext());
-        try {
-            if (deviceInfo.length() > 0) {
-                Iterator<?> deviceKeys = deviceInfo.keys();
-                while( deviceKeys.hasNext() ){
-                    String key = (String)deviceKeys.next();
-                    diagnosticMessage.append(key + "=" + deviceInfo.get(key)+"\n");
-                }
-            }
-        } catch (Exception e) {
-            Log.d(TAG, "Error parsing device info JSON");
-        }
-        TextView diagnosticsTextView = (TextView) findViewById(R.id.textDiagnostics);
-        diagnosticsTextView.setText(diagnosticMessage.toString());
+        return true;
     }
 
     public void pressEventButton(View view) throws JSONException {
