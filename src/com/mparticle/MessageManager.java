@@ -3,6 +3,7 @@ package com.mparticle;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Locale;
+import java.util.Properties;
 import java.util.UUID;
 
 import org.json.JSONException;
@@ -19,6 +20,7 @@ import android.os.HandlerThread;
 import android.os.Process;
 import android.util.Log;
 
+import com.mparticle.Constants.ConfigKeys;
 import com.mparticle.Constants.MessageKey;
 import com.mparticle.Constants.MessageType;
 import com.mparticle.Constants.Status;
@@ -46,7 +48,7 @@ import com.mparticle.Constants.Status;
         mUploadHandler = uploadHandler;
     }
 
-    public static MessageManager getInstance(Context appContext, String apiKey, String secret) {
+    public static MessageManager getInstance(Context appContext, String apiKey, String secret, Properties config) {
         if (!sMessageHandlerThread.isAlive()) {
             // TODO: find a better way to start these or detect initialization
             sMessageHandlerThread.start();
@@ -61,6 +63,37 @@ import com.mparticle.Constants.Status;
         UploadHandler uploadHandler = new UploadHandler(appContext, sUploadHandlerThread.getLooper(), apiKey, secret);
 
         MessageManager messageManager = new MessageManager(messageHandler, uploadHandler);
+
+        if (config.containsKey(ConfigKeys.UPLOAD_INTERVAL)) {
+            try {
+                messageManager.setUploadInterval(1000 * Integer.parseInt(config.getProperty(ConfigKeys.UPLOAD_INTERVAL)));
+            } catch (Throwable t) {
+                Log.w(TAG, "Failed to configure mParticle with '" + ConfigKeys.UPLOAD_INTERVAL + "' setting");
+            }
+        }
+        if (config.containsKey(ConfigKeys.ENABLE_SSL)) {
+            try {
+                messageManager.setSecureTransport(Boolean.parseBoolean(config.getProperty(ConfigKeys.ENABLE_SSL)));
+            } catch (Throwable t) {
+                Log.w(TAG, "Failed to configure mParticle with '" + ConfigKeys.ENABLE_SSL + "' setting");
+            }
+        }
+        if (config.containsKey(ConfigKeys.PROXY_HOST) && config.containsKey(ConfigKeys.PROXY_PORT) ) {
+            try {
+                messageManager.setConnectionProxy(config.getProperty(ConfigKeys.PROXY_HOST),
+                        Integer.parseInt(config.getProperty(ConfigKeys.PROXY_PORT)));
+            } catch (Throwable t) {
+                Log.w(TAG, "Failed to configure mParticle with '" + ConfigKeys.PROXY_HOST +
+                        "' and '" + ConfigKeys.PROXY_PORT + "' settings");
+            }
+        }
+        if (config.containsKey(ConfigKeys.ENABLE_COMPRESSION)) {
+            try {
+                uploadHandler.setCompressionEnabled(Boolean.parseBoolean(config.getProperty(ConfigKeys.ENABLE_COMPRESSION)));
+            } catch (Throwable t) {
+                Log.w(TAG, "Failed to configure mParticle with '" + ConfigKeys.ENABLE_COMPRESSION + "' setting");
+            }
+        }
 
         messageHandler.sendEmptyMessage(MessageHandler.END_ORPHAN_SESSIONS);
         uploadHandler.sendEmptyMessageDelayed(UploadHandler.UPLOAD_MESSAGES, Constants.INITIAL_UPLOAD_DELAY);
@@ -216,13 +249,12 @@ import com.mparticle.Constants.Status;
         }
     }
 
-    /* Possibly for development only */
     public void setConnectionProxy(String host, int port) {
         mUploadHandler.setConnectionProxy(host, port);
     }
 
-    public void setConnectionScheme(String scheme) {
-        mUploadHandler.setConnectionScheme(scheme);
+    public void setSecureTransport(boolean sslEnabled) {
+        mUploadHandler.setConnectionScheme( sslEnabled ? "https" : "http" );
     }
 
     public void setUploadInterval(int uploadInterval) {

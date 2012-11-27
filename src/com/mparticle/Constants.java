@@ -120,4 +120,20 @@ package com.mparticle;
         static final int BATCH_READY = 2;
     }
 
+    // keys used in the (optional) mparticle.properties config file
+    public interface ConfigKeys {
+        // mParticleAPI
+        public static final String API_KEY = "api_key";
+        public static final String API_SECRET = "api_secret";
+        public static final String DEBUG_MODE = "debug_mode";
+        public static final String SESSION_TIMEOUT = "session_timeout";
+        public static final String ENABLE_CRASH_REPORTING = "enable_crash_reporting";
+        // MessageManager
+        public static final String UPLOAD_INTERVAL = "upload_interval";
+        public static final String ENABLE_SSL = "enable_secure_transport";
+        public static final String PROXY_HOST = "proxy_host";
+        public static final String PROXY_PORT = "proxy_port";
+        public static final String ENABLE_COMPRESSION = "enable_compression";
+    }
+
 }

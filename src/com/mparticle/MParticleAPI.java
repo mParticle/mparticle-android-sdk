@@ -2,7 +2,6 @@ package com.mparticle;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.net.URL;
 import java.util.HashMap;
@@ -15,7 +14,6 @@ import org.json.JSONObject;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.content.res.AssetManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -27,6 +25,7 @@ import android.os.Message;
 import android.os.Process;
 import android.util.Log;
 
+import com.mparticle.Constants.ConfigKeys;
 import com.mparticle.Constants.PrefKeys;
 
 /**
@@ -37,12 +36,13 @@ public class MParticleAPI {
     private static final String TAG = Constants.LOG_TAG;
     private static final Map<String, MParticleAPI> sInstanceMap = new HashMap<String, MParticleAPI>();
     private static final HandlerThread sTimeoutHandlerThread = new HandlerThread("mParticleSessionTimeoutHandler", Process.THREAD_PRIORITY_BACKGROUND);
+    private static SharedPreferences sPreferences;
+    private static Properties sDefaultSettings;
 
     private MessageManager mMessageManager;
     private Handler mTimeoutHandler;
     private MParticleLocationListener mLocationListener;
     private ExceptionHandler mExHandler;
-    private SharedPreferences mPreferences;
     private Context mAppContext;
     private String mApiKey;
     private boolean mOptedOut = false;
@@ -67,9 +67,8 @@ public class MParticleAPI {
         }
         mTimeoutHandler = new SessionTimeoutHandler(this, sTimeoutHandlerThread.getLooper());
 
-        mPreferences = mAppContext.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
-        mOptedOut = mPreferences.getBoolean(PrefKeys.OPTOUT+mApiKey, false);
-        String userAttrs = mPreferences.getString(PrefKeys.USER_ATTRS+mApiKey, null);
+        mOptedOut = sPreferences.getBoolean(PrefKeys.OPTOUT+mApiKey, false);
+        String userAttrs = sPreferences.getString(PrefKeys.USER_ATTRS+mApiKey, null);
         if (null!=userAttrs) {
             try {
                 mUserAttributes = new JSONObject(userAttrs);
@@ -78,13 +77,13 @@ public class MParticleAPI {
             }
         }
 
-        if (!mPreferences.contains(PrefKeys.INSTALL_TIME)) {
-            mPreferences.edit().putLong(PrefKeys.INSTALL_TIME, System.currentTimeMillis()).commit();
+        if (!sPreferences.contains(PrefKeys.INSTALL_TIME)) {
+            sPreferences.edit().putLong(PrefKeys.INSTALL_TIME, System.currentTimeMillis()).commit();
         }
     }
 
     /**
-     * Initialize or return an instance of the mParticle SDK with a specific upload interval
+     * Initialize or return an instance of the mParticle SDK
      * @param context the Activity that is creating the instance
      * @param apiKey the API key for your account
      * @param secret the API secret for your account
@@ -95,8 +94,27 @@ public class MParticleAPI {
         if (null==context) {
             throw new IllegalArgumentException("context is required");
         }
+        // initialize static objects
+        if (null == sDefaultSettings) {
+            sDefaultSettings = new Properties();
+            try {
+                sDefaultSettings.load(context.getResources().getAssets().open("mparticle.properties"));
+            } catch (FileNotFoundException e) {
+                Log.d(TAG, "No mparticle.properties file found in the assets directory. Using defaults.");
+            } catch (IOException e) {
+                Log.w(TAG, "Failed to parse mparticle.properties file from assets directory");
+            }
+        }
+        if (null == sPreferences) {
+            sPreferences = context.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
+        }
+
         if (null==apiKey || null==secret) {
-            throw new IllegalArgumentException("apiKey and secret are required");
+            apiKey = sDefaultSettings.getProperty(ConfigKeys.API_KEY);
+            secret = sDefaultSettings.getProperty(ConfigKeys.API_SECRET);
+            if (null==apiKey || null==secret) {
+                throw new IllegalArgumentException("apiKey and secret are required");
+            }
         }
 
         MParticleAPI apiInstance;
@@ -104,33 +122,29 @@ public class MParticleAPI {
             apiInstance = sInstanceMap.get(apiKey);
         } else {
 
-            AssetManager assetManager = context.getResources().getAssets();
-            Properties properties = new Properties();
-            try {
-                InputStream inputStream = assetManager.open("mparticle.properties");
-                properties.load(inputStream);
-            } catch (FileNotFoundException e) {
-                Log.d(TAG, "No mparticle.properties file found in the assets directory. Using defaults.");
-            } catch (IOException e) {
-                Log.w(TAG, "Failed to parse mparticle.properties file from assets directory");
-            }
-
             Context appContext = context.getApplicationContext();
-            MessageManager messageManager = MessageManager.getInstance(appContext, apiKey, secret);
-            if (properties.contains("upload_interval")) {
-                try {
-                    messageManager.setUploadInterval(1000 * Integer.parseInt(properties.getProperty("upload_interval")));
-                } catch (Throwable t) {
-                    // ignore
-                }
-            }
+            MessageManager messageManager = MessageManager.getInstance(appContext, apiKey, secret, sDefaultSettings);
 
             apiInstance = new MParticleAPI(appContext, apiKey, messageManager);
 
-            try {
-                apiInstance.setSessionTimeout(1000 * Integer.parseInt(properties.getProperty("session_timeout", "60")));
-            } catch (Throwable t) {
-                // ignore
+            if (sDefaultSettings.containsKey(ConfigKeys.DEBUG_MODE)) {
+                try {
+                    apiInstance.setDebug(Boolean.parseBoolean(sDefaultSettings.getProperty(ConfigKeys.DEBUG_MODE)));
+                } catch (Throwable t) {
+                    Log.w(TAG, "Failed to configure mParticle with '"+ConfigKeys.DEBUG_MODE+"' setting");
+                }
+            }
+            if (sDefaultSettings.containsKey(ConfigKeys.SESSION_TIMEOUT)) {
+                try {
+                    apiInstance.setSessionTimeout(1000 * Integer.parseInt(sDefaultSettings.getProperty(ConfigKeys.SESSION_TIMEOUT, "60")));
+                } catch (Throwable t) {
+                    Log.w(TAG, "Failed to configure mParticle with '"+ConfigKeys.SESSION_TIMEOUT+"' setting");
+                }
+            }
+            if (sDefaultSettings.containsKey(ConfigKeys.ENABLE_CRASH_REPORTING)) {
+                if (Boolean.parseBoolean(sDefaultSettings.getProperty(ConfigKeys.ENABLE_CRASH_REPORTING))) {
+                    apiInstance.enableUncaughtExceptionLogging();
+                }
             }
 
             sInstanceMap.put(apiKey, apiInstance);
@@ -138,6 +152,16 @@ public class MParticleAPI {
         }
 
         return apiInstance;
+    }
+
+    /**
+     * Initialize or return an instance of the mParticle SDK using api_key
+     * and api_secret from the mparticle.properties file.
+     * @param context the Activity that is creating the instance
+     * @return An instance of the mParticle SDK configured with your API key
+     */
+    public static MParticleAPI getInstance(Context context) {
+        return getInstance(context, null, null);
     }
 
     /**
@@ -461,13 +485,13 @@ public class MParticleAPI {
         }
         debugLog("Set user attribute: " + key + "=" + value);
         if (setCheckedAttribute(mUserAttributes, key, value)) {
-            mPreferences.edit().putString(PrefKeys.USER_ATTRS+mApiKey, mUserAttributes.toString()).commit();
+            sPreferences.edit().putString(PrefKeys.USER_ATTRS+mApiKey, mUserAttributes.toString()).commit();
         }
     }
 
     /* package-private */ void clearUserAttributes() {
         mUserAttributes = new JSONObject();
-        mPreferences.edit().putString(PrefKeys.USER_ATTRS+mApiKey, mUserAttributes.toString()).commit();
+        sPreferences.edit().putString(PrefKeys.USER_ATTRS+mApiKey, mUserAttributes.toString()).commit();
     }
 
     /**
@@ -486,7 +510,7 @@ public class MParticleAPI {
             endSession();
         }
 
-        mPreferences.edit().putBoolean(PrefKeys.OPTOUT+mApiKey, optOutStatus).commit();
+        sPreferences.edit().putBoolean(PrefKeys.OPTOUT+mApiKey, optOutStatus).commit();
         mOptedOut = optOutStatus;
 
         debugLog("Set opt-out: " + mOptedOut);
@@ -515,7 +539,7 @@ public class MParticleAPI {
      * @param sslEnabled true to turn on SSL transport, false to use non-SSL transport
      */
     public void setSecureTransport(boolean sslEnabled) {
-        mMessageManager.setConnectionScheme( sslEnabled ? "https" : "http" );
+        mMessageManager.setSecureTransport(sslEnabled);
         debugLog("Set secure transport: " + sslEnabled);
     }
 

@@ -89,6 +89,7 @@ import com.mparticle.MessageDatabase.UploadTable;
     private Proxy mProxy;
     private final ConnectivityManager mConnectivyManager;
     private String mUploadMode = "batch";
+    private boolean mCompressionEnabled = true;
 
     public static final int UPLOAD_MESSAGES = 1;
     public static final int CLEANUP = 2;
@@ -99,9 +100,6 @@ import com.mparticle.MessageDatabase.UploadTable;
     public static final String SERVICE_SCHEME = "http";
     public static final String SERVICE_HOST = "api.dev.mparticle.com";
     public static final String SERVICE_VERSION = "v1";
-
-    // for development usage - set to false to prevent gzip compression
-    private static final boolean USE_COMPRESSION = true;
 
     public UploadHandler(Context appContext, Looper looper, String apiKey, String secret) {
         super(looper);
@@ -152,7 +150,7 @@ import com.mparticle.MessageDatabase.UploadTable;
         try {
             HttpClient httpClient = setupHttpClient();
             HttpGet httpGet = new HttpGet(makeServiceUri("config"));
-            if (USE_COMPRESSION) {
+            if (mCompressionEnabled) {
                 httpGet.setHeader("Accept-Encoding", "gzip");
             }
             addMessageSignature(httpGet, null);
@@ -263,7 +261,7 @@ import com.mparticle.MessageDatabase.UploadTable;
 
                 ByteArrayEntity postEntity=null;
                 byte[] messageBytes = message.getBytes();
-                if (USE_COMPRESSION) {
+                if (mCompressionEnabled) {
                     httpPost.setHeader("Accept-Encoding", "gzip");
                     try {
                         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream(messageBytes.length);
@@ -545,8 +543,12 @@ import com.mparticle.MessageDatabase.UploadTable;
          return new String(chars);
      }
 
-    public void setDebugMode(boolean debugMode) {
-        mDebugMode = debugMode;
-    }
+     public void setDebugMode(boolean debugMode) {
+         mDebugMode = debugMode;
+     }
+
+     public void setCompressionEnabled(boolean compressionEnabled) {
+         mCompressionEnabled = compressionEnabled;
+     }
 
 }

@@ -67,8 +67,6 @@ public class HomeActivity extends Activity implements OnItemSelectedListener {
 
     private void setupApiInstance(String apiKey, String secret) {
         mParticleAPI = MParticleAPI.getInstance(this, apiKey, secret);
-        // for testing, the timeout is 1 minute
-        mParticleAPI.setSessionTimeout(60*1000);
 
         boolean exceptionsMode = mPreferences.getBoolean(PREFS_EXCEPTION, true);
         CheckBox exceptionsModeCheckBox = (CheckBox) findViewById(R.id.checkBoxExceptionsMode);
@@ -82,7 +80,6 @@ public class HomeActivity extends Activity implements OnItemSelectedListener {
 
         CheckBox optOutCheckBox = (CheckBox) findViewById(R.id.checkBoxOptOut);
         optOutCheckBox.setChecked(mParticleAPI.getOptOut());
-
     }
 
     @Override
