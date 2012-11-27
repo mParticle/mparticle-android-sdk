@@ -31,7 +31,7 @@ public class UploadsListActivity extends ListActivity {
 
         Cursor selectCursor = db.query("uploads", null, null, null, null, null, UploadTable.CREATED_AT + " desc");
 
-        String[] from = new String[] { UploadTable.UPLOAD_ID, UploadTable.API_KEY, UploadTable.CREATED_AT,
+        String[] from = new String[] { UploadTable.MESSAGE, UploadTable.API_KEY, UploadTable.CREATED_AT,
                 UploadTable.STATUS, UploadTable.MESSAGE };
         int[] to = { R.id.uploadId, R.id.apiKey, R.id.msgTime, R.id.msgStatus, R.id.msgMsg };
 
@@ -42,25 +42,37 @@ public class UploadsListActivity extends ListActivity {
                 from, to);
         adapter.setViewBinder(new SimpleCursorAdapter.ViewBinder() {
             public boolean setViewValue(View view, Cursor cursor, int columnIndex) {
-                if(view.getId() == R.id.msgTime ) {
+                switch (view.getId()) {
+                case R.id.msgTime:
                     ((TextView) view).setText(sFormatter.format(new Date(cursor.getLong(columnIndex))));
-                    return true;
-                }
-                if(view.getId() == R.id.msgStatus) {
+                    break;
+                case R.id.msgStatus:
                     ((TextView) view).setText(cursor.getInt(columnIndex)==1?"Ready":"Unknown");
-                    return true;
-                }
-                if(view.getId() == R.id.msgMsg) {
+                    break;
+                case R.id.msgMsg: {
                     String message = cursor.getString(columnIndex);
                     try {
                         JSONObject messageJSON = new JSONObject(message);
                         ((TextView) view).setText(messageJSON.toString(2));
-                        return true;
+                        break;
                     } catch (JSONException e) {
-                        // just print the string
+                        return false;
                     }
                 }
-                return false;
+                case R.id.uploadId: {
+                    String message = cursor.getString(columnIndex);
+                    try {
+                        JSONObject messageJSON = new JSONObject(message);
+                        ((TextView) view).setText(messageJSON.getString("id"));
+                        break;
+                    } catch (JSONException e) {
+                        return false;
+                    }
+                }
+                default:
+                    return false;
+                }
+                return true;
             }
         });
 

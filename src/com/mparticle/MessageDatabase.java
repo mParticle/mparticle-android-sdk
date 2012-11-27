@@ -6,7 +6,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 /* package-private */ class MessageDatabase extends SQLiteOpenHelper {
 
-    private static final int DB_VERSION = 8;
+    private static final int DB_VERSION = 9;
     private static final String DB_NAME = "mparticle.db";
 
     public interface SessionTable {
@@ -33,8 +33,6 @@ import android.database.sqlite.SQLiteOpenHelper;
 
     public interface MessageTable {
         public final static String TABLE_NAME = "messages";
-        public final static String MESSAGE_ID = "message_id";
-        public final static String MESSAGE_TYPE = "message_type";
         public final static String SESSION_ID = "session_id";
         public final static String API_KEY = "api_key";
         public final static String MESSAGE = "message";
@@ -44,8 +42,6 @@ import android.database.sqlite.SQLiteOpenHelper;
     private static final String CREATE_MESSAGES_DDL =
                "CREATE TABLE "+ MessageTable.TABLE_NAME+" (" +
                   "_id INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                  MessageTable.MESSAGE_ID + " STRING NOT NULL, " +
-                  MessageTable.MESSAGE_TYPE + " STRING NOT NULL," +
                   MessageTable.SESSION_ID + " STRING NOT NULL, " +
                   MessageTable.API_KEY + " STRING NOT NULL, " +
                   MessageTable.MESSAGE + " TEXT," +
@@ -55,7 +51,6 @@ import android.database.sqlite.SQLiteOpenHelper;
 
     public interface UploadTable {
         public final static String TABLE_NAME = "uploads";
-        public final static String UPLOAD_ID = "upload_id";
         public final static String API_KEY = "api_key";
         public final static String MESSAGE = "message";
         public final static String CREATED_AT = "created_at";
@@ -64,7 +59,6 @@ import android.database.sqlite.SQLiteOpenHelper;
     private static final String CREATE_UPLOADS_DDL =
             "CREATE TABLE "+ UploadTable.TABLE_NAME+" (" +
                "_id INTEGER PRIMARY KEY AUTOINCREMENT, " +
-               UploadTable.UPLOAD_ID + " STRING NOT NULL, " +
                UploadTable.API_KEY + " STRING NOT NULL, " +
                UploadTable.MESSAGE + " TEXT," +
                UploadTable.STATUS + " INTEGER," +
@@ -73,11 +67,9 @@ import android.database.sqlite.SQLiteOpenHelper;
 
     public interface CommandTable {
         public final static String TABLE_NAME = "commands";
-        public final static String COMMAND_ID = "command_id";
         public final static String URL = "url";
         public final static String METHOD = "method";
         public final static String POST_DATA = "post_data";
-        public final static String CLEAR_HEADERS = "clear_headers";
         public final static String HEADERS = "headers";
         public final static String STATUS = "status";
         public final static String CREATED_AT = "created_at";
@@ -85,11 +77,9 @@ import android.database.sqlite.SQLiteOpenHelper;
     private static final String CREATE_COMMANDS_DDL =
             "CREATE TABLE "+ CommandTable.TABLE_NAME+" (" +
                "_id INTEGER PRIMARY KEY AUTOINCREMENT, " +
-               CommandTable.COMMAND_ID + " STRING NOT NULL, " +
                CommandTable.URL + " STRING NOT NULL, " +
                CommandTable.METHOD + " STRING NOT NULL, " +
                CommandTable.POST_DATA + " TEXT, " +
-               CommandTable.CLEAR_HEADERS + " INTEGER NOT NULL, " +
                CommandTable.HEADERS + " TEXT, " +
                CommandTable.STATUS + " INTEGER," +
                CommandTable.CREATED_AT + " INTEGER" +

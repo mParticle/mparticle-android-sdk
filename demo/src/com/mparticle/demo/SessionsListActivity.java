@@ -39,22 +39,24 @@ public class SessionsListActivity extends ListActivity {
                 from, to);
         adapter.setViewBinder(new SimpleCursorAdapter.ViewBinder() {
             public boolean setViewValue(View view, Cursor cursor, int columnIndex) {
-                if(view.getId() == R.id.startTime || view.getId() == R.id.endTime ) {
+                switch (view.getId()) {
+                case R.id.startTime:
+                case R.id.endTime:
                     long time = cursor.getLong(columnIndex);
                     if (time>0) {
                         ((TextView) view).setText(sFormatter.format(new Date(time)));
-                        return true;
                     }
-                }
-                if(view.getId() == R.id.sessionLength ) {
+                    break;
+                case R.id.sessionLength:
                     ((TextView) view).setText(cursor.getLong(columnIndex)/1000 + " seconds");
-                    return true;
-                }
-                if(view.getId() == R.id.status) {
+                    break;
+                case R.id.status:
                     ((TextView) view).setText(cursor.getInt(columnIndex)==1?"Active":"Ended");
-                    return true;
+                    break;
+                default:
+                    return false;
                 }
-                return false;
+                return true;
             }
         });
 

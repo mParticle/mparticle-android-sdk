@@ -176,12 +176,9 @@ import com.mparticle.MessageDatabase.SessionTable;
     }
 
     private void dbInsertMessage(SQLiteDatabase db, JSONObject message, int status) throws JSONException {
-        String messageType = message.getString(MessageKey.TYPE);
         ContentValues contentValues = new ContentValues();
         contentValues.put(MessageTable.API_KEY, mApiKey);
-        contentValues.put(MessageTable.MESSAGE_TYPE, messageType);
         contentValues.put(MessageTable.CREATED_AT, message.getLong(MessageKey.TIMESTAMP));
-        contentValues.put(MessageTable.MESSAGE_ID, message.getString(MessageKey.ID));
         contentValues.put(MessageTable.SESSION_ID, getMessageSessionId(message));
         contentValues.put(MessageTable.MESSAGE, message.toString());
         contentValues.put(MessageTable.STATUS, status);

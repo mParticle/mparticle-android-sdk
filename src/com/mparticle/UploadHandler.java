@@ -440,7 +440,6 @@ import com.mparticle.MessageDatabase.UploadTable;
     private void dbInsertUpload(SQLiteDatabase db, JSONObject message) throws JSONException {
         ContentValues contentValues = new ContentValues();
         contentValues.put(UploadTable.API_KEY, mApiKey);
-        contentValues.put(UploadTable.UPLOAD_ID, message.getString(MessageKey.ID));
         contentValues.put(UploadTable.CREATED_AT, message.getLong(MessageKey.TIMESTAMP));
         contentValues.put(UploadTable.MESSAGE, message.toString());
         contentValues.put(UploadTable.STATUS, Status.READY);
@@ -471,12 +470,9 @@ import com.mparticle.MessageDatabase.UploadTable;
 
     private void dbInsertCommand(SQLiteDatabase db, JSONObject command) throws JSONException {
         ContentValues contentValues = new ContentValues();
-        contentValues.put(CommandTable.COMMAND_ID, command.getString(MessageKey.ID));
         contentValues.put(CommandTable.URL, command.getString(MessageKey.URL));
         contentValues.put(CommandTable.METHOD, command.getString(MessageKey.METHOD));
-        // TODO: decide between null and empty string
         contentValues.put(CommandTable.POST_DATA, command.optString(MessageKey.POST));
-        contentValues.put(CommandTable.CLEAR_HEADERS, command.optBoolean(MessageKey.CLEAR_HEADERS,false));
         contentValues.put(CommandTable.HEADERS, command.optString(MessageKey.HEADERS));
         contentValues.put(CommandTable.STATUS, Status.READY);
         contentValues.put(CommandTable.CREATED_AT, System.currentTimeMillis());

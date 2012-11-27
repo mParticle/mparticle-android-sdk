@@ -22,14 +22,6 @@
         android:text="@string/status" />
 
     <TextView
-        android:id="@+id/commandId"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_toRightOf="@+id/status"
-        android:layout_marginLeft="10dp"
-        android:text="@string/command_id" />
-
-    <TextView
         android:id="@+id/method"
         android:layout_width="40sp"
         android:layout_height="wrap_content"
