@@ -29,7 +29,7 @@
             android:id="@+id/checkBoxOptOut"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/lblApiKeySecret"
+            android:layout_below="@+id/spinnerApiKey"
             android:layout_marginLeft="40dp"
             android:onClick="pressToggleOption"
             android:text="@string/optout" />

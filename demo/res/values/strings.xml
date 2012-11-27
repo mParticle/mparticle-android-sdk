@@ -40,7 +40,6 @@
     <string name="exceptions">Handle Exceptions</string>
     <string name="optout">OptOut</string>
     <string name="push_notify">Push Notifications</string>
-    <string name="device_attributes">Device Attributes</string>
     <string name="session_id">Session ID</string>
     <string name="message_id">Message ID</string>
     <string name="command_id">Command ID</string>
