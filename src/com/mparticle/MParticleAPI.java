@@ -126,7 +126,8 @@ public class MParticleAPI {
                 }
 
                 Context appContext = context.getApplicationContext();
-                MessageManager messageManager = MessageManager.getInstance(appContext, apiKey, secret, sDefaultSettings);
+                MessageManager messageManager = new MessageManager(appContext, apiKey, secret, sDefaultSettings);
+                messageManager.start(appContext);
 
                 apiInstance = new MParticleAPI(appContext, apiKey, messageManager);
 

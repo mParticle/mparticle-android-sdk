@@ -36,55 +36,50 @@ import com.mparticle.Constants.Status;
     private static String sActiveNetworkName = "offline";
     private static Location sLocation;
     private static boolean sDebugMode;
+    private static BroadcastReceiver sNetworkStatusBroadcastReceiver;
 
     private final MessageHandler mMessageHandler;
     private final UploadHandler mUploadHandler;
 
+    static {
+        // ideally these threads would not be started in a static initializer
+        // block. but this is cleaner than checking if they have been started in
+        // the constructor.
+        sMessageHandlerThread.start();
+        sUploadHandlerThread.start();
+    }
+
     // This constructor is needed to enable mocking with Mockito and Dexmaker and should never be called
     /* package-private */ MessageManager() { throw new UnsupportedOperationException(); }
 
-    // Package-private constructor for unit tests. Use getInstance to return the MessageManager
+    // Package-private constructor for unit tests only
     /* package-private */ MessageManager(MessageHandler messageHandler, UploadHandler uploadHandler) {
         mMessageHandler = messageHandler;
         mUploadHandler = uploadHandler;
     }
 
-    public static MessageManager getInstance(Context appContext, String apiKey, String secret, Properties config) {
-        if (!sMessageHandlerThread.isAlive()) {
-            sMessageHandlerThread.start();
-            sUploadHandlerThread.start();
+    public MessageManager(Context appContext, String apiKey, String secret, Properties config) {
 
-            // note: if permissions are not correct all messages will be tagged as 'offline'
-            if (PackageManager.PERMISSION_GRANTED ==
-                    appContext.checkCallingOrSelfPermission(android.Manifest.permission.ACCESS_NETWORK_STATE)) {
-                IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
-                BroadcastReceiver receiver = new NetworkStatusBroadcastReceiver();
-                appContext.registerReceiver(receiver, filter);
-            }
-        }
-
-        MessageHandler messageHandler = new MessageHandler(appContext, sMessageHandlerThread.getLooper(), apiKey);
-        UploadHandler uploadHandler = new UploadHandler(appContext, sUploadHandlerThread.getLooper(), apiKey, secret);
-
-        MessageManager messageManager = new MessageManager(messageHandler, uploadHandler);
+        mMessageHandler = new MessageHandler(appContext, sMessageHandlerThread.getLooper(), apiKey);
+        mUploadHandler = new UploadHandler(appContext, sUploadHandlerThread.getLooper(), apiKey, secret);
 
         if (config.containsKey(ConfigKeys.UPLOAD_INTERVAL)) {
             try {
-                messageManager.setUploadInterval(1000 * Integer.parseInt(config.getProperty(ConfigKeys.UPLOAD_INTERVAL)));
+                this.setUploadInterval(1000 * Integer.parseInt(config.getProperty(ConfigKeys.UPLOAD_INTERVAL)));
             } catch (Throwable t) {
                 Log.w(TAG, "Failed to configure mParticle with '" + ConfigKeys.UPLOAD_INTERVAL + "' setting");
             }
         }
         if (config.containsKey(ConfigKeys.ENABLE_SSL)) {
             try {
-                messageManager.setSecureTransport(Boolean.parseBoolean(config.getProperty(ConfigKeys.ENABLE_SSL)));
+                this.setSecureTransport(Boolean.parseBoolean(config.getProperty(ConfigKeys.ENABLE_SSL)));
             } catch (Throwable t) {
                 Log.w(TAG, "Failed to configure mParticle with '" + ConfigKeys.ENABLE_SSL + "' setting");
             }
         }
         if (config.containsKey(ConfigKeys.PROXY_HOST) && config.containsKey(ConfigKeys.PROXY_PORT) ) {
             try {
-                messageManager.setConnectionProxy(config.getProperty(ConfigKeys.PROXY_HOST),
+                this.setConnectionProxy(config.getProperty(ConfigKeys.PROXY_HOST),
                         Integer.parseInt(config.getProperty(ConfigKeys.PROXY_PORT)));
             } catch (Throwable t) {
                 Log.w(TAG, "Failed to configure mParticle with '" + ConfigKeys.PROXY_HOST +
@@ -93,17 +88,27 @@ import com.mparticle.Constants.Status;
         }
         if (config.containsKey(ConfigKeys.ENABLE_COMPRESSION)) {
             try {
-                uploadHandler.setCompressionEnabled(Boolean.parseBoolean(config.getProperty(ConfigKeys.ENABLE_COMPRESSION)));
+                mUploadHandler.setCompressionEnabled(Boolean.parseBoolean(config.getProperty(ConfigKeys.ENABLE_COMPRESSION)));
             } catch (Throwable t) {
                 Log.w(TAG, "Failed to configure mParticle with '" + ConfigKeys.ENABLE_COMPRESSION + "' setting");
             }
         }
 
-        messageHandler.sendEmptyMessage(MessageHandler.END_ORPHAN_SESSIONS);
-        uploadHandler.sendEmptyMessageDelayed(UploadHandler.UPLOAD_MESSAGES, Constants.INITIAL_UPLOAD_DELAY);
-        uploadHandler.sendEmptyMessageDelayed(UploadHandler.CLEANUP, Constants.INITIAL_UPLOAD_DELAY);
+    }
 
-        return messageManager;
+    public void start(Context appContext) {
+        if (null == sNetworkStatusBroadcastReceiver) {
+            sNetworkStatusBroadcastReceiver = new NetworkStatusBroadcastReceiver();
+            // NOTE: if permissions are not correct all messages will be tagged as 'offline'
+            if (PackageManager.PERMISSION_GRANTED == appContext
+                    .checkCallingOrSelfPermission(android.Manifest.permission.ACCESS_NETWORK_STATE)) {
+                IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
+                appContext.registerReceiver(sNetworkStatusBroadcastReceiver, filter);
+            }
+        }
+        mMessageHandler.sendEmptyMessage(MessageHandler.END_ORPHAN_SESSIONS);
+        mUploadHandler.sendEmptyMessageDelayed(UploadHandler.UPLOAD_MESSAGES, Constants.INITIAL_UPLOAD_DELAY);
+        mUploadHandler.sendEmptyMessageDelayed(UploadHandler.CLEANUP, Constants.INITIAL_UPLOAD_DELAY);
     }
 
     /* package-private */ static JSONObject createMessage(String messageType, String sessionId, long sessionStart, long time, String name, JSONObject attributes, boolean includeConnLoc) throws JSONException {
