@@ -13,6 +13,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.location.Location;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -53,9 +54,13 @@ import com.mparticle.Constants.Status;
             sMessageHandlerThread.start();
             sUploadHandlerThread.start();
 
-            IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
-            BroadcastReceiver receiver = new NetworkStatusBroadcastReceiver();
-            appContext.registerReceiver(receiver, filter);
+            // note: if permissions are not correct all messages will be tagged as 'offline'
+            if (PackageManager.PERMISSION_GRANTED ==
+                    appContext.checkCallingOrSelfPermission(android.Manifest.permission.ACCESS_NETWORK_STATE)) {
+                IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
+                BroadcastReceiver receiver = new NetworkStatusBroadcastReceiver();
+                appContext.registerReceiver(receiver, filter);
+            }
         }
 
         MessageHandler messageHandler = new MessageHandler(appContext, sMessageHandlerThread.getLooper(), apiKey);

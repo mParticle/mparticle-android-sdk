@@ -52,6 +52,7 @@ import org.json.JSONObject;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
@@ -91,6 +92,7 @@ import com.mparticle.MessageDatabase.UploadTable;
     private final ConnectivityManager mConnectivyManager;
     private String mUploadMode = "batch";
     private boolean mCompressionEnabled = true;
+    private boolean mAccessNetworkStateAvailable = true;
 
     public static final int UPLOAD_MESSAGES = 1;
     public static final int CLEANUP = 2;
@@ -116,6 +118,11 @@ import com.mparticle.MessageDatabase.UploadTable;
 
         mAppInfo = DeviceAttributes.collectAppInfo(appContext);
         mDeviceInfo = DeviceAttributes.collectDeviceInfo(appContext);
+
+        if (PackageManager.PERMISSION_GRANTED != appContext.checkCallingOrSelfPermission(android.Manifest.permission.ACCESS_NETWORK_STATE) ) {
+            Log.w(TAG, "Application manifest should require ACCESS_NETWORK_STATE permission");
+            mAccessNetworkStateAvailable = false;
+        }
     }
 
     @Override
@@ -492,6 +499,10 @@ import com.mparticle.MessageDatabase.UploadTable;
     }
 
     private boolean isNetworkAvailable() {
+        if (!mAccessNetworkStateAvailable) {
+            return true;
+        }
+
         NetworkInfo networkInfo = mConnectivyManager.getActiveNetworkInfo();
         if (networkInfo != null) {
             return networkInfo.isConnectedOrConnecting();
