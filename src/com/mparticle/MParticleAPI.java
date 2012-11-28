@@ -93,13 +93,15 @@ public class MParticleAPI {
         }
         // initialize static objects
         if (null == sDefaultSettings) {
-            sDefaultSettings = new Properties();
+            Properties defaultSettings = new Properties();
             try {
-                sDefaultSettings.load(context.getResources().getAssets().open("mparticle.properties"));
+                defaultSettings.load(context.getResources().getAssets().open("mparticle.properties"));
             } catch (FileNotFoundException e) {
                 Log.d(TAG, "No mparticle.properties file found in the assets directory. Using defaults.");
             } catch (IOException e) {
                 Log.w(TAG, "Failed to parse mparticle.properties file from assets directory");
+            } finally {
+                sDefaultSettings = defaultSettings;
             }
         }
         if (null == sPreferences) {
@@ -115,40 +117,41 @@ public class MParticleAPI {
         }
 
         MParticleAPI apiInstance;
-        if (sInstanceMap.containsKey(apiKey)) {
-            apiInstance = sInstanceMap.get(apiKey);
-        } else {
-            if (!sTimeoutHandlerThread.isAlive()) {
-                sTimeoutHandlerThread.start();
-            }
-
-            Context appContext = context.getApplicationContext();
-            MessageManager messageManager = MessageManager.getInstance(appContext, apiKey, secret, sDefaultSettings);
-
-            apiInstance = new MParticleAPI(appContext, apiKey, messageManager);
-
-            if (sDefaultSettings.containsKey(ConfigKeys.DEBUG_MODE)) {
-                try {
-                    apiInstance.setDebug(Boolean.parseBoolean(sDefaultSettings.getProperty(ConfigKeys.DEBUG_MODE)));
-                } catch (Throwable t) {
-                    Log.w(TAG, "Failed to configure mParticle with '"+ConfigKeys.DEBUG_MODE+"' setting");
+        synchronized (sInstanceMap) {
+            if (sInstanceMap.containsKey(apiKey)) {
+                apiInstance = sInstanceMap.get(apiKey);
+            } else {
+                if (!sTimeoutHandlerThread.isAlive()) {
+                    sTimeoutHandlerThread.start();
                 }
-            }
-            if (sDefaultSettings.containsKey(ConfigKeys.SESSION_TIMEOUT)) {
-                try {
-                    apiInstance.setSessionTimeout(1000 * Integer.parseInt(sDefaultSettings.getProperty(ConfigKeys.SESSION_TIMEOUT, "60")));
-                } catch (Throwable t) {
-                    Log.w(TAG, "Failed to configure mParticle with '"+ConfigKeys.SESSION_TIMEOUT+"' setting");
-                }
-            }
-            if (sDefaultSettings.containsKey(ConfigKeys.ENABLE_CRASH_REPORTING)) {
-                if (Boolean.parseBoolean(sDefaultSettings.getProperty(ConfigKeys.ENABLE_CRASH_REPORTING))) {
-                    apiInstance.enableUncaughtExceptionLogging();
-                }
-            }
 
-            sInstanceMap.put(apiKey, apiInstance);
+                Context appContext = context.getApplicationContext();
+                MessageManager messageManager = MessageManager.getInstance(appContext, apiKey, secret, sDefaultSettings);
 
+                apiInstance = new MParticleAPI(appContext, apiKey, messageManager);
+
+                if (sDefaultSettings.containsKey(ConfigKeys.DEBUG_MODE)) {
+                    try {
+                        apiInstance.setDebug(Boolean.parseBoolean(sDefaultSettings.getProperty(ConfigKeys.DEBUG_MODE)));
+                    } catch (Throwable t) {
+                        Log.w(TAG, "Failed to configure mParticle with '"+ConfigKeys.DEBUG_MODE+"' setting");
+                    }
+                }
+                if (sDefaultSettings.containsKey(ConfigKeys.SESSION_TIMEOUT)) {
+                    try {
+                        apiInstance.setSessionTimeout(1000 * Integer.parseInt(sDefaultSettings.getProperty(ConfigKeys.SESSION_TIMEOUT, "60")));
+                    } catch (Throwable t) {
+                        Log.w(TAG, "Failed to configure mParticle with '"+ConfigKeys.SESSION_TIMEOUT+"' setting");
+                    }
+                }
+                if (sDefaultSettings.containsKey(ConfigKeys.ENABLE_CRASH_REPORTING)) {
+                    if (Boolean.parseBoolean(sDefaultSettings.getProperty(ConfigKeys.ENABLE_CRASH_REPORTING))) {
+                        apiInstance.enableUncaughtExceptionLogging();
+                    }
+                }
+
+                sInstanceMap.put(apiKey, apiInstance);
+            }
         }
 
         return apiInstance;
