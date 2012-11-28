@@ -62,9 +62,6 @@ public class MParticleAPI {
         mAppContext = appContext;
         mApiKey = apiKey;
         mMessageManager = messageManager;
-        if (!sTimeoutHandlerThread.isAlive()) {
-            sTimeoutHandlerThread.start();
-        }
         mTimeoutHandler = new SessionTimeoutHandler(this, sTimeoutHandlerThread.getLooper());
 
         mOptedOut = sPreferences.getBoolean(PrefKeys.OPTOUT+mApiKey, false);
@@ -121,6 +118,9 @@ public class MParticleAPI {
         if (sInstanceMap.containsKey(apiKey)) {
             apiInstance = sInstanceMap.get(apiKey);
         } else {
+            if (!sTimeoutHandlerThread.isAlive()) {
+                sTimeoutHandlerThread.start();
+            }
 
             Context appContext = context.getApplicationContext();
             MessageManager messageManager = MessageManager.getInstance(appContext, apiKey, secret, sDefaultSettings);

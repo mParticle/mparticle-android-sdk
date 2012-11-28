@@ -50,7 +50,6 @@ import com.mparticle.Constants.Status;
 
     public static MessageManager getInstance(Context appContext, String apiKey, String secret, Properties config) {
         if (!sMessageHandlerThread.isAlive()) {
-            // TODO: find a better way to start these or detect initialization
             sMessageHandlerThread.start();
             sUploadHandlerThread.start();
 
