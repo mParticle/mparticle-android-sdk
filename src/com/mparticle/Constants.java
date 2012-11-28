@@ -20,6 +20,9 @@ package com.mparticle;
     public static final int LIMIT_ATTR_VALUE=255;
     public static final int LIMIT_NAME=255;
 
+    public static final int DB_CLEANUP_EXPIRATION = 3 * 24 * 60 * 60 * 1000; // 3 days old
+    public static final long DB_CLEANUP_INTERVAL = 1 * 24 * 60 * 60 * 1000; // 1 day
+
     public interface MessageType {
         public static final String SESSION_START = "ss";
         public static final String SESSION_END = "se";

@@ -27,10 +27,10 @@ import com.mparticle.MessageDatabase.SessionTable;
     private final String mApiKey;
 
     public static final int STORE_MESSAGE = 0;
-    public static final int UPDATE_SESSION_ATTRIBUTES = 2;
-    public static final int UPDATE_SESSION_END = 3;
-    public static final int CREATE_SESSION_END_MESSAGE = 4;
-    public static final int END_ORPHAN_SESSIONS = 5;
+    public static final int UPDATE_SESSION_ATTRIBUTES = 1;
+    public static final int UPDATE_SESSION_END = 2;
+    public static final int CREATE_SESSION_END_MESSAGE = 3;
+    public static final int END_ORPHAN_SESSIONS = 4;
 
     public MessageHandler(Context appContext, Looper looper, String apiKey) {
         super(looper);
@@ -140,8 +140,7 @@ import com.mparticle.MessageDatabase.SessionTable;
             break;
         case END_ORPHAN_SESSIONS:
             try {
-                // find left-over sessions that exist during startup and end
-                // them
+                // find left-over sessions that exist during startup and end them
                 SQLiteDatabase db = mDB.getWritableDatabase();
                 String[] selectionArgs = new String[] { mApiKey, Long.toString(Status.READY) };
                 String[] sessionColumns = new String[] { SessionTable.SESSION_ID };
@@ -167,9 +166,8 @@ import com.mparticle.MessageDatabase.SessionTable;
         ContentValues contentValues = new ContentValues();
         contentValues.put(SessionTable.API_KEY, mApiKey);
         contentValues.put(SessionTable.SESSION_ID, message.getString(MessageKey.ID));
-        long sessionStartTime = message.getLong(MessageKey.TIMESTAMP);
-        contentValues.put(SessionTable.START_TIME, sessionStartTime);
-        contentValues.put(SessionTable.END_TIME, sessionStartTime);
+        contentValues.put(SessionTable.START_TIME, message.getLong(MessageKey.TIMESTAMP));
+        contentValues.put(SessionTable.END_TIME, message.getLong(MessageKey.TIMESTAMP));
         contentValues.put(SessionTable.SESSION_LENGTH, 0);
         contentValues.put(SessionTable.STATUS, Status.READY);
         db.insert(SessionTable.TABLE_NAME, null, contentValues);

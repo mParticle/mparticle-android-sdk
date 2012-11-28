@@ -68,6 +68,7 @@ import com.mparticle.Constants.PrefKeys;
 import com.mparticle.Constants.Status;
 import com.mparticle.MessageDatabase.CommandTable;
 import com.mparticle.MessageDatabase.MessageTable;
+import com.mparticle.MessageDatabase.SessionTable;
 import com.mparticle.MessageDatabase.UploadTable;
 
 /* package-private */ final class UploadHandler extends Handler {
@@ -136,9 +137,11 @@ import com.mparticle.MessageDatabase.UploadTable;
             if (mUploadInterval > 0 && msg.arg1==0) {
                 this.sendEmptyMessageDelayed(UPLOAD_MESSAGES, mUploadInterval);
             }
+            break;
         case CLEANUP:
-            // delete completed uploads, messages, and sessions
-            // TODO: cleanupDatabase();
+            // delete stale commands, uploads, messages, and sessions
+            cleanupDatabase(Constants.DB_CLEANUP_EXPIRATION);
+            this.sendEmptyMessageDelayed(CLEANUP, Constants.DB_CLEANUP_INTERVAL);
             break;
         }
     }
@@ -431,6 +434,15 @@ import com.mparticle.MessageDatabase.UploadTable;
         } finally {
             mDB.close();
         }
+    }
+
+    private void cleanupDatabase(int expirationPeriod) {
+        SQLiteDatabase db = mDB.getWritableDatabase();
+        String[] whereArgs = {Long.toString(System.currentTimeMillis() - expirationPeriod)};
+        db.delete(CommandTable.TABLE_NAME, CommandTable.CREATED_AT + "<?", whereArgs);
+        db.delete(UploadTable.TABLE_NAME, UploadTable.CREATED_AT + "<?", whereArgs);
+        db.delete(MessageTable.TABLE_NAME, MessageTable.CREATED_AT + "<?", whereArgs);
+        db.delete(SessionTable.TABLE_NAME, SessionTable.END_TIME + "<?", whereArgs);
     }
 
     private URI makeServiceUri(String method) throws URISyntaxException {

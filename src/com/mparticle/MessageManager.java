@@ -96,6 +96,7 @@ import com.mparticle.Constants.Status;
 
         messageHandler.sendEmptyMessage(MessageHandler.END_ORPHAN_SESSIONS);
         uploadHandler.sendEmptyMessageDelayed(UploadHandler.UPLOAD_MESSAGES, Constants.INITIAL_UPLOAD_DELAY);
+        uploadHandler.sendEmptyMessageDelayed(UploadHandler.CLEANUP, Constants.INITIAL_UPLOAD_DELAY);
 
         return messageManager;
     }
