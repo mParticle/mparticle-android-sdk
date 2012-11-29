@@ -12,13 +12,16 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.location.Location;
 import android.location.LocationManager;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -30,6 +33,8 @@ import com.mparticle.DemoDeviceAttributes;
 import com.mparticle.MParticleAPI;
 
 public class HomeActivity extends Activity implements OnItemSelectedListener {
+
+    private static final String TAG = "mParticleDemo";
 
     private MParticleAPI mParticleAPI;
 
@@ -64,6 +69,7 @@ public class HomeActivity extends Activity implements OnItemSelectedListener {
         locationProviderSpinner.setAdapter(locProviderAdapter);
 
         setupApiInstance("TestAppKey", "secret");
+        updatePushControls();
     }
 
     private void setupApiInstance(String apiKey, String secret) {
@@ -81,6 +87,16 @@ public class HomeActivity extends Activity implements OnItemSelectedListener {
 
         CheckBox optOutCheckBox = (CheckBox) findViewById(R.id.checkBoxOptOut);
         optOutCheckBox.setChecked(mParticleAPI.getOptOut());
+    }
+
+    private void updatePushControls() {
+        String pushId = mParticleAPI.getPushRegistrationId();
+        TextView pushIdView = (TextView) findViewById(R.id.editPushRegistrationId);
+        pushIdView.setText(pushId);
+        ((Button) findViewById(R.id.buttonPushAutoRegister)).setEnabled(null==pushId);
+        ((Button) findViewById(R.id.buttonPushAutoUnregister)).setEnabled(null!=pushId);
+        ((Button) findViewById(R.id.buttonPushManualRegister)).setEnabled(null==pushId);
+        ((Button) findViewById(R.id.buttonPushManualUnregister)).setEnabled(null!=pushId);
     }
 
     @Override
@@ -231,6 +247,57 @@ public class HomeActivity extends Activity implements OnItemSelectedListener {
         }
     }
 
+    public void pressNotifyButton(View view) {
+        switch (view.getId()) {
+        case R.id.buttonPushAutoRegister:
+            mParticleAPI.registerForPushNotifications(SENDER_ID);
+            new PushRegChangeDetectorTask().execute();
+            break;
+        case R.id.buttonPushAutoUnregister:
+            mParticleAPI.clearPushNotifications();
+            new PushRegChangeDetectorTask().execute();
+            break;
+        case R.id.buttonPushManualRegister:
+            TextView pushIdView = (TextView) findViewById(R.id.editPushRegistrationId);
+            mParticleAPI.setPushRegistrationId(pushIdView.getText().toString());
+            updatePushControls();
+            break;
+        case R.id.buttonPushManualUnregister:
+            mParticleAPI.clearPushRegistrationId();
+            updatePushControls();
+            break;
+        case R.id.buttonPushRefresh:
+            updatePushControls();
+            break;
+        }
+    }
+
+    // this async task polls the registration id for up to 5 seconds to see if
+    // it changes and updates the controls
+    private class PushRegChangeDetectorTask extends AsyncTask<Void, Void, Boolean> {
+        @Override
+        protected Boolean doInBackground(Void... params) {
+            try {
+                String initialPushId = mParticleAPI.getPushRegistrationId();
+                for(int i=0; i<5; i++) {
+                    Thread.sleep(1000);
+                    String currentPushId = mParticleAPI.getPushRegistrationId();
+                    if (currentPushId!=initialPushId) {
+                        return true;
+                    }
+                }
+            } catch (InterruptedException e) {
+                Log.w(TAG, "Push reg checker died");
+            }
+            return false;
+        }
+        protected void onPostExecute(Boolean regUpdated) {
+            if (regUpdated) {
+                updatePushControls();
+            }
+        }
+    }
+
     public void pressToggleOption(View view) {
         boolean optionValue = ((CheckBox) view).isChecked();
         switch (view.getId()) {
@@ -244,13 +311,6 @@ public class HomeActivity extends Activity implements OnItemSelectedListener {
         case R.id.checkBoxExceptionsMode:
             mPreferences.edit().putBoolean(PREFS_EXCEPTION, optionValue).commit();
             setupExceptionsLogging(optionValue);
-            break;
-        case R.id.checkBoxPushRegistration:
-            if (optionValue) {
-                mParticleAPI.registerForPushNotifications(SENDER_ID);
-            } else {
-                mParticleAPI.clearPushNotifications();
-            }
             break;
         }
     }

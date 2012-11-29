@@ -39,10 +39,14 @@
     <string name="debug">Debug</string>
     <string name="exceptions">Handle Exceptions</string>
     <string name="optout">OptOut</string>
-    <string name="push_notify">Push Notifications</string>
+    <string name="push_notifications">Push Notifications</string>
+    <string name="push_auto_reg">Register</string>
+    <string name="push_auto_unreg">Unregister</string>
+    <string name="push_man_reg">Set ID</string>
+    <string name="push_man_unreg">Clear ID</string>
+    <string name="refresh">Refresh</string>
     <string name="session_id">Session ID</string>
     <string name="message_id">Message ID</string>
-    <string name="command_id">Command ID</string>
     <string name="upload_id">Upload ID</string>
     <string name="api_key">API Key</string>
     <string name="status">Status</string>
@@ -64,5 +68,6 @@
     <string name="loc_min_dist">Dist. (meters)</string>
     <string name="loc_min_time_default">30</string>
     <string name="loc_min_dist_default">50</string>
+
 
 </resources>

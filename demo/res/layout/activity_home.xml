@@ -22,8 +22,8 @@
         <Spinner
             android:id="@+id/spinnerApiKey"
             android:layout_width="wrap_content"
-            android:layout_toRightOf="@+id/lblApiKeySecret"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@+id/lblApiKeySecret" />
 
         <CheckBox
             android:id="@+id/checkBoxOptOut"
@@ -48,8 +48,8 @@
             android:id="@+id/lblEventsData"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/label_event_data_inputs"
             android:layout_below="@+id/checkBoxOptOut"
+            android:text="@string/label_event_data_inputs"
             android:textSize="22sp" />
 
         <Button
@@ -298,26 +298,85 @@
             android:text="@string/update_location" />
 
         <CheckBox
-            android:id="@+id/checkBoxPushRegistration"
+            android:id="@+id/checkBoxExceptionsMode"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@+id/buttonUpdateLocation"
             android:onClick="pressToggleOption"
-            android:text="@string/push_notify" />
+            android:text="@string/exceptions" />
 
-        <CheckBox
-            android:id="@+id/checkBoxExceptionsMode"
+        <RelativeLayout
+            android:id="@+id/pushNotifications"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/checkBoxPushRegistration"
-            android:onClick="pressToggleOption"
-            android:text="@string/exceptions" />
+            android:layout_below="@+id/checkBoxExceptionsMode"
+            android:background="#e8e8e8"
+            android:paddingBottom="5dp"
+            android:paddingTop="5dp" >
+
+            <TextView
+                android:id="@+id/lblPushNotifications"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/push_notifications"
+                android:textSize="22sp" />
+
+            <Button
+                android:id="@+id/buttonPushAutoRegister"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/lblPushNotifications"
+                android:onClick="pressNotifyButton"
+                android:text="@string/push_auto_reg" />
+
+            <Button
+                android:id="@+id/buttonPushAutoUnregister"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/lblPushNotifications"
+                android:layout_toRightOf="@+id/buttonPushAutoRegister"
+                android:onClick="pressNotifyButton"
+                android:text="@string/push_auto_unreg" />
+
+            <Button
+                android:id="@+id/buttonPushRefresh"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/lblPushNotifications"
+                android:layout_toRightOf="@+id/buttonPushAutoUnregister"
+                android:onClick="pressNotifyButton"
+                android:text="@string/refresh" />
+
+            <EditText
+                android:id="@+id/editPushRegistrationId"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/buttonPushAutoRegister"
+                android:inputType="text|textNoSuggestions" />
+
+            <Button
+                android:id="@+id/buttonPushManualRegister"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/editPushRegistrationId"
+                android:onClick="pressNotifyButton"
+                android:text="@string/push_man_reg" />
+
+            <Button
+                android:id="@+id/buttonPushManualUnregister"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/editPushRegistrationId"
+                android:layout_toRightOf="@+id/buttonPushManualRegister"
+                android:onClick="pressNotifyButton"
+                android:text="@string/push_man_unreg" />
+        </RelativeLayout>
 
         <RelativeLayout
             android:id="@+id/locationListener"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/checkBoxExceptionsMode" >
+            android:layout_below="@+id/pushNotifications" >
 
             <TextView
                 android:id="@+id/lblLocationTracking"
@@ -389,9 +448,7 @@
                 android:ems="4"
                 android:inputType="number"
                 android:text="@string/loc_min_dist_default" />
-
         </RelativeLayout>
-
     </RelativeLayout>
 
 </ScrollView>

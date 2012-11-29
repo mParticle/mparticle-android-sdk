@@ -660,8 +660,14 @@ public class MParticleAPI {
         }
     }
 
-    // TODO: should this be public?
-    private String getPushRegistrationId() {
+
+    /**
+     * Retrieve the push registration id if it has been setup for this device
+     * using either setPushRegistrationId or registerForPushNotifications
+     *
+     * @return the push registration id
+     */
+    public String getPushRegistrationId() {
         return sPreferences.getString(PrefKeys.PUSH_REGISTRATION_ID, null);
     }
 
