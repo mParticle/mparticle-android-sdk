@@ -29,7 +29,9 @@ public class APISetupTests extends AndroidTestCase {
         assertNotNull("Excpetion expected for null context", expected);
     }
 
-    public void testInvalidKey() {
+    // These 2 tests are disabled because the demo app has an mparticle.properties file that provides a key
+    // TODO: separate test app from demo app
+    public void skip_testInvalidKey() {
         Exception expected = null;
         try {
             MParticleAPI.getInstance(getContext(), null, "secret");
@@ -39,14 +41,14 @@ public class APISetupTests extends AndroidTestCase {
         assertNotNull("Excpetion expected for null context", expected);
     }
 
-    public void testInvalidSecret() {
+    public void skip_testInvalidSecret() {
         Exception expected = null;
         try {
             MParticleAPI.getInstance(getContext(), "invalidSecret", null);
         } catch (Exception e) {
             expected = e;
         }
-        assertNotNull("Excpetion expected for null context", expected);
+        assertNotNull("Excpetion expected for null secret", expected);
     }
 
     public void testMultithreadGetInstance() {
