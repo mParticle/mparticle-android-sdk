@@ -171,18 +171,6 @@ public class MParticleAPI {
     }
 
     /**
-     * Set the user session timeout interval.
-     *
-     * A session is ended when no events (logged events or start/stop events) has occurred
-     * within the session timeout interval.
-     *
-     * @param sessionTimeout
-     */
-    public void setSessionTimeout(int sessionTimeout) {
-        mSessionTimeout = sessionTimeout;
-    }
-
-    /**
      * Starts tracking a user session. If a session is already active, it will be resumed.
      *
      * This method should be called from an Activity's onStart() method.
@@ -541,12 +529,41 @@ public class MParticleAPI {
     }
 
     /**
+     * Set the user session timeout interval.
+     *
+     * A session is ended when no events (logged events or start/stop events) has occurred
+     * within the session timeout interval.
+     *
+     * @param sessionTimeout
+     */
+    public void setSessionTimeout(int sessionTimeout) {
+        mSessionTimeout = sessionTimeout;
+    }
+
+    /**
+     * Set the upload interval period to control how frequently uploads occur.
+     * @param uploadInterval the number of seconds between uploads
+     */
+    public void setUploadInterval(int uploadInterval) {
+        mMessageManager.setUploadInterval(uploadInterval);
+    }
+
+    /**
      * Enable SSL transport when uploading data
      * @param sslEnabled true to turn on SSL transport, false to use non-SSL transport
      */
     public void setSecureTransport(boolean sslEnabled) {
         mMessageManager.setSecureTransport(sslEnabled);
         debugLog("Set secure transport: " + sslEnabled);
+    }
+
+    /**
+     * Configure the data upload to use a proxy server
+     * @param host the proxy host name or IP address
+     * @param port the proxy port number
+     */
+    public void setConnectionProxy(String host, int port) {
+        mMessageManager.setConnectionProxy(host, port);
     }
 
     /**
@@ -756,11 +773,6 @@ public class MParticleAPI {
         @Override
         public void onStatusChanged(String provider, int status, Bundle extras) { }
 
-    }
-
-    /// Possibly for development only
-    public void setConnectionProxy(String host, int port) {
-        mMessageManager.setConnectionProxy(host, port);
     }
 
 }
