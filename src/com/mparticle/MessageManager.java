@@ -24,7 +24,6 @@ import android.util.Log;
 import com.mparticle.Constants.ConfigKeys;
 import com.mparticle.Constants.MessageKey;
 import com.mparticle.Constants.MessageType;
-import com.mparticle.Constants.Status;
 
 /* package-private */ class MessageManager {
 
@@ -152,7 +151,7 @@ import com.mparticle.Constants.Status;
     public void startSession(String sessionId, long time) {
         try {
             JSONObject message = createMessage(MessageType.SESSION_START, sessionId, time, time, null, null, true);
-            mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, Status.READY, 0, message));
+            mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
         } catch (JSONException e) {
             Log.w(TAG, "Failed to create mParticle start session message");
         }
@@ -181,7 +180,7 @@ import com.mparticle.Constants.Status;
             // NOTE: event timing is not supported (yet) but the server expects this data
             message.put(MessageKey.EVENT_START_TIME, time);
             message.put(MessageKey.EVENT_DURATION, 0);
-            mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, Status.READY, 0, message));
+            mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
         } catch (JSONException e) {
             Log.w(TAG, "Failed to create mParticle start event message");
         }
@@ -190,7 +189,7 @@ import com.mparticle.Constants.Status;
     public void logScreenView(String sessionId, long sessionStartTime, long time, String screenName, JSONObject attributes) {
         try {
             JSONObject message = createMessage(MessageType.SCREEN_VIEW, sessionId, sessionStartTime, time, screenName, attributes, true);
-            mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, Status.READY, 0, message));
+            mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
         } catch (JSONException e) {
             Log.w(TAG, "Failed to create mParticle screen view message");
         }
@@ -200,7 +199,7 @@ import com.mparticle.Constants.Status;
         try {
             JSONObject message = createMessage(MessageType.OPT_OUT, sessionId, sessionStartTime, time, null, null, false);
             message.put(MessageKey.OPT_OUT_STATUS, optOutStatus);
-            mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, Status.READY, 0, message));
+            mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
         } catch (JSONException e) {
             Log.w(TAG, "Failed to create mParticle screen view message");
         }
@@ -220,7 +219,7 @@ import com.mparticle.Constants.Status;
                 message.put(MessageKey.ERROR_SEVERITY, "error");
                 message.put(MessageKey.ERROR_MESSAGE, errorMessage);
             }
-            mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, Status.READY, 0, message));
+            mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
         } catch (JSONException e) {
             Log.w(TAG, "Failed to create mParticle error message");
         }
@@ -231,7 +230,7 @@ import com.mparticle.Constants.Status;
             JSONObject message = createMessage(MessageType.PUSH_REGISTRATION, sessionId, sessionStartTime, time, null, null, false);
             message.put(MessageKey.PUSH_TOKEN, token);
             message.put(MessageKey.PUSH_REGISTER_FLAG, registeringFlag);
-            mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, Status.READY, 0, message));
+            mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
         } catch (JSONException e) {
             Log.w(TAG, "Failed to create mParticle error message");
         }

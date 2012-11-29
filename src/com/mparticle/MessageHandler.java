@@ -46,7 +46,6 @@ import com.mparticle.MessageDatabase.SessionTable;
         case STORE_MESSAGE:
             try {
                 JSONObject message = (JSONObject) msg.obj;
-                int messageStatus = msg.arg1;
                 String messageType = message.getString(MessageKey.TYPE);
                 SQLiteDatabase db = mDB.getWritableDatabase();
                 // handle the special case of session-start by creating the
@@ -54,7 +53,7 @@ import com.mparticle.MessageDatabase.SessionTable;
                 if (MessageType.SESSION_START == messageType) {
                     dbInsertSession(db, message);
                 }
-                dbInsertMessage(db, message, messageStatus);
+                dbInsertMessage(db, message);
 
                 if (MessageType.SESSION_START != messageType) {
                     dbUpdateSessionEndTime(db, getMessageSessionId(message), message.getLong(MessageKey.TIMESTAMP), 0);
@@ -122,7 +121,7 @@ import com.mparticle.MessageDatabase.SessionTable;
                         sessionAttributes);
 
                 // insert the record into messages with duration
-                dbInsertMessage(db, endMessage, Status.READY);
+                dbInsertMessage(db, endMessage);
 
                 // mark session messages ready for BATCH mode upload
                 dbUpdateMessageStatus(db, sessionId, Status.BATCH_READY);
@@ -173,13 +172,13 @@ import com.mparticle.MessageDatabase.SessionTable;
         db.insert(SessionTable.TABLE_NAME, null, contentValues);
     }
 
-    private void dbInsertMessage(SQLiteDatabase db, JSONObject message, int status) throws JSONException {
+    private void dbInsertMessage(SQLiteDatabase db, JSONObject message) throws JSONException {
         ContentValues contentValues = new ContentValues();
         contentValues.put(MessageTable.API_KEY, mApiKey);
         contentValues.put(MessageTable.CREATED_AT, message.getLong(MessageKey.TIMESTAMP));
         contentValues.put(MessageTable.SESSION_ID, getMessageSessionId(message));
         contentValues.put(MessageTable.MESSAGE, message.toString());
-        contentValues.put(MessageTable.STATUS, status);
+        contentValues.put(MessageTable.STATUS, Status.READY);
         db.insert(MessageTable.TABLE_NAME, null, contentValues);
     }
 
