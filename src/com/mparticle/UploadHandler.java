@@ -90,7 +90,7 @@ import com.mparticle.MessageDatabase.UploadTable;
     private JSONObject mDeviceInfo;
     private Proxy mProxy;
     private final ConnectivityManager mConnectivyManager;
-    private String mUploadMode = "batch";
+    private int mUploadMode = Status.BATCH_READY;
     private boolean mCompressionEnabled = true;
     private boolean mAccessNetworkStateAvailable = true;
 
@@ -175,7 +175,7 @@ import com.mparticle.MessageDatabase.UploadTable;
                 JSONObject responseJSON = new JSONObject(response);
                 if (responseJSON.has(MessageKey.SESSION_UPLOAD)) {
                     String sessionUploadMode = responseJSON.getString(MessageKey.SESSION_UPLOAD);
-                    mUploadMode = ("batch".equalsIgnoreCase(sessionUploadMode)) ? "batch" : "stream";
+                    mUploadMode = ("batch".equalsIgnoreCase(sessionUploadMode)) ? Status.BATCH_READY : Status.READY;
                 }
             }
         } catch (java.net.SocketTimeoutException e) {
@@ -194,13 +194,9 @@ import com.mparticle.MessageDatabase.UploadTable;
         try {
             // select messages ready to upload
             SQLiteDatabase db = mDB.getWritableDatabase();
-            String[] selectionArgs = new String[]{mApiKey, Integer.toString(Status.BATCH_READY)};
-            String selection = MessageTable.API_KEY + "=? and (" + MessageTable.SESSION_ID + "='NO-SESSION' or ";
-            if (("batch").equals(mUploadMode)) {
-                selection += MessageTable.STATUS + "=?)";
-            } else {
-                selection += MessageTable.STATUS + "<=?)";
-            }
+            String selection = String.format("%s=? and (%s='NO-SESSION' or %s>=?)",
+                    MessageTable.API_KEY, MessageTable.SESSION_ID, MessageTable.STATUS);
+            String[] selectionArgs = new String[]{mApiKey, Integer.toString(mUploadMode)};
             String[] selectionColumns = new String[]{"_id", MessageTable.MESSAGE, MessageTable.CREATED_AT};
             Cursor readyMessagesCursor = db.query(MessageTable.TABLE_NAME, selectionColumns, selection, selectionArgs, null, null, MessageTable.CREATED_AT+" , _id");
             if (readyMessagesCursor.getCount()>0) {
