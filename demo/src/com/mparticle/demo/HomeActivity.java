@@ -35,6 +35,7 @@ public class HomeActivity extends Activity implements OnItemSelectedListener {
 
     private SharedPreferences mPreferences;
 
+    public static String SENDER_ID = "31005546127";
     private static final String PREFS_EXCEPTION = "exceptions_mode";
     private static final String PREFS_DEBUG = "debug_mode";
 
@@ -246,9 +247,9 @@ public class HomeActivity extends Activity implements OnItemSelectedListener {
             break;
         case R.id.checkBoxPushRegistration:
             if (optionValue) {
-                mParticleAPI.setPushRegistrationId("TOKEN");
+                mParticleAPI.registerForPushNotifications(SENDER_ID);
             } else {
-                mParticleAPI.clearPushRegistrationId();
+                mParticleAPI.clearPushNotifications();
             }
             break;
         }

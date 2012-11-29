@@ -12,7 +12,9 @@ import java.util.UUID;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.location.Location;
 import android.location.LocationListener;
@@ -573,7 +575,6 @@ public class MParticleAPI {
         }
     }
 
-
     /**
      * Set the referral URL for the user session.
      * @param url the referral URL
@@ -582,36 +583,50 @@ public class MParticleAPI {
     }
 
     /**
-     * Register the application for GCM notifications and start a listener
-     * @param senderId the SENDER_ID for the application
-     */
-    void enablePushNotifications(String senderId) {
-
-    }
-
-    /**
      * Register the application for GCM notifications
      * @param senderId the SENDER_ID for the application
      */
-    void registerForPushNotifications(String senderId) {
-
+    public void registerForPushNotifications(String senderId) {
+        checkDefaultApiInstance();
+        if (null==getPushRegistrationId()) {
+            Intent registrationIntent = new Intent("com.google.android.c2dm.intent.REGISTER");
+            registrationIntent.putExtra("app", PendingIntent.getBroadcast(mAppContext, 0, new Intent(), 0));
+            registrationIntent.putExtra("sender", senderId);
+            mAppContext.startService(registrationIntent);
+        }
     }
 
     /**
-     * Deregister the application from GCM notifications and stop listening for messages
-     * @param senderId the SENDER_ID for the application
+     * Unregister the device from GCM notifications
      */
-    void clearPushNotifications(String senderId) {
+    public void clearPushNotifications() {
+        checkDefaultApiInstance();
+        if (null!=getPushRegistrationId()) {
+            Intent unregIntent = new Intent("com.google.android.c2dm.intent.UNREGISTER");
+            unregIntent.putExtra("app", PendingIntent.getBroadcast(mAppContext, 0, new Intent(), 0));
+            mAppContext.startService(unregIntent);
+        }
+    }
 
+    // This method will log warnings but
+    private void checkDefaultApiInstance() {
+        String defaultApiKey = sDefaultSettings.getProperty(ConfigKeys.API_KEY);
+        String defaultSecret = sDefaultSettings.getProperty(ConfigKeys.API_SECRET);
+        if (null==defaultApiKey || null==defaultSecret) {
+            Log.w(TAG, "mParticle default API key/secret are not set in the mparticle.properties file");
+        } else if (!mApiKey.equals(defaultApiKey)) {
+            Log.w(TAG, "mParticle instance API key does not match the default from the mparticle.properties file");
+        }
     }
 
     /**
      * Manually register the device token for receiving push notifications from mParticle
-     * @param token the device registration id
+     * @param registrationId the device registration id
      */
-    public void setPushRegistrationId(String token) {
-        debugLog("Set push registration token: " + token);
-        mMessageManager.setPushRegistrationId(mSessionID, mSessionStartTime, System.currentTimeMillis(), token, true);
+    public void setPushRegistrationId(String registrationId) {
+        debugLog("Set push registration token: " + registrationId);
+        sPreferences.edit().putString(PrefKeys.PUSH_REGISTRATION_ID, registrationId).commit();
+        mMessageManager.setPushRegistrationId(mSessionID, mSessionStartTime, System.currentTimeMillis(), registrationId, true);
     }
 
     /**
@@ -619,9 +634,18 @@ public class MParticleAPI {
      */
     public void clearPushRegistrationId() {
         debugLog("Cleared push registration token");
-        // TODO: see if we can determine the existing registration ID - GCM not currently in build process
-        String token = null; // GCMRegistrar.getRegistrationId(this);
-        mMessageManager.setPushRegistrationId(mSessionID, mSessionStartTime, System.currentTimeMillis(), token, false);
+        String registrationId = getPushRegistrationId();
+        if (null!=registrationId) {
+            sPreferences.edit().putString(PrefKeys.PUSH_REGISTRATION_ID, null).commit();
+            mMessageManager.setPushRegistrationId(mSessionID, mSessionStartTime, System.currentTimeMillis(), registrationId, false);
+        } else {
+            Log.i(TAG, "Clear push registration requested but device is not registered");
+        }
+    }
+
+    // TODO: should this be public?
+    private String getPushRegistrationId() {
+        return sPreferences.getString(PrefKeys.PUSH_REGISTRATION_ID, null);
     }
 
     /**

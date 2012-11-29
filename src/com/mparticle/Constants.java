@@ -113,6 +113,7 @@ package com.mparticle;
     public interface PrefKeys {
         // common
         public static final String INSTALL_TIME = "mp::ict";
+        public static final String PUSH_REGISTRATION_ID = "mp::push_reg_id";
         // app-key specific (append appKey to the key)
         public static final String OPTOUT = "mp::optout::";
         public static final String USER_ATTRS = "mp::user_attrs::";

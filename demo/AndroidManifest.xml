@@ -17,6 +17,18 @@
     <!-- Required for off-line checks -->
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
+    <permission
+        android:name="com.mparticle.demo.permission.C2D_MESSAGE"
+        android:protectionLevel="signature" />
+
+    <uses-permission android:name="com.mparticle.demo.permission.C2D_MESSAGE" />
+    <!-- App receives GCM messages. -->
+    <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
+    <!-- GCM requires a Google account. -->
+    <uses-permission android:name="android.permission.GET_ACCOUNTS" />
+    <!-- Keeps the processor from sleeping when a message is received. -->
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+
     <application
         android:label="@string/app_name"
         android:theme="@style/AppTheme"
@@ -46,6 +58,18 @@
             android:name=".CommandsListActivity"
             android:label="@string/title_commands_list" >
         </activity>
-        </application>
+
+        <receiver
+            android:name="com.mparticle.GCMBroadcastReceiver"
+            android:permission="com.google.android.c2dm.permission.SEND" >
+            <intent-filter>
+                <action android:name="com.google.android.c2dm.intent.REGISTRATION" />
+                <action android:name="com.google.android.c2dm.intent.RECEIVE" />
+                <category android:name="com.mparticle.demo" />
+            </intent-filter>
+        </receiver>
+       <service android:name="com.mparticle.GCMIntentService" />
+
+    </application>
 
 </manifest>
