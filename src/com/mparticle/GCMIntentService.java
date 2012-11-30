@@ -1,5 +1,7 @@
 package com.mparticle;
 
+import com.mparticle.Constants.GCMNotificationKeys;
+
 import android.app.IntentService;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -81,8 +83,8 @@ public class GCMIntentService extends IntentService {
 
     private void handleMessage(Intent intent) {
         Bundle extras = intent.getExtras();
-        String title = extras.getString("mp::notification::title");
-        String text = extras.getString("mp::notification::text");
+        String title = extras.getString(GCMNotificationKeys.TITLE);
+        String text = extras.getString(GCMNotificationKeys.TEXT);
 
         PackageManager packageManager = getPackageManager();
         String packageName = getPackageName();

@@ -2,9 +2,9 @@ package com.mparticle;
 
 /* package-private */ class Constants {
 
-    /* package-private */ final static String LOG_TAG = "mParticleAPI";
+    public final static String LOG_TAG = "mParticleAPI";
 
-    /* package-private */ static final String MPARTICLE_VERSION = "0.1";
+    public static final String MPARTICLE_VERSION = "0.1";
 
     // maximum number of events per session
     public static final int EVENT_LIMIT = 1000;
@@ -138,6 +138,12 @@ package com.mparticle;
         public static final String PROXY_HOST = "proxy_host";
         public static final String PROXY_PORT = "proxy_port";
         public static final String ENABLE_COMPRESSION = "enable_compression";
+    }
+
+    // these keys are expected by the GCMIntentService for push notifications
+    public interface GCMNotificationKeys {
+        public static final String TITLE = "mp::notification::title";
+        public static final String TEXT = "mp::notification::text";
     }
 
 }
