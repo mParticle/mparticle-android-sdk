@@ -1,8 +1,13 @@
 package com.mparticle;
 
 import android.app.IntentService;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Bundle;
 import android.os.PowerManager;
 import android.util.Log;
@@ -47,9 +52,6 @@ public class GCMIntentService extends IntentService {
     }
 
     private void handleRegistration(Intent intent) {
-        String registrationId = intent.getStringExtra("registration_id");
-        String error = intent.getStringExtra("error");
-        String unregistered = intent.getStringExtra("unregistered");
 
         MParticleAPI mParticleAPI;
         try {
@@ -59,33 +61,52 @@ public class GCMIntentService extends IntentService {
             // and a warning message will already have been logged
             return;
         }
-        // registration succeeded
+
+        String registrationId = intent.getStringExtra("registration_id");
+        String unregistered = intent.getStringExtra("unregistered");
+        String error = intent.getStringExtra("error");
+
         if (registrationId != null) {
+            // registration succeeded
             mParticleAPI.setPushRegistrationId(registrationId);
-        }
-
-        // unregistration succeeded
-        if (unregistered != null) {
+        } else  if (unregistered != null) {
+            // unregistration succeeded
             mParticleAPI.clearPushRegistrationId();
+        } else if (error != null) {
+            // Unrecoverable error, log it
+            Log.i(TAG, "GCM registration error: " + error);
         }
 
-        // last operation (registration or unregistration) returned an error;
-        if (error != null) {
-            if ("SERVICE_NOT_AVAILABLE".equals(error)) {
-               // optionally retry using exponential back-off
-               // (see Advanced Topics)
-            } else {
-                // Unrecoverable error, log it
-                Log.i(TAG, "GCM registration error: " + error);
-            }
-        }
     }
 
-    // TODO: implement better notification stuff here
     private void handleMessage(Intent intent) {
         Bundle extras = intent.getExtras();
-        String message = extras.getString("mparticle_message_key1");
-        Log.i(TAG, "Received GCM message: " + message);
+        String title = extras.getString("mp::notification::title");
+        String text = extras.getString("mp::notification::text");
+
+        PackageManager packageManager = getPackageManager();
+        String packageName = getPackageName();
+
+        int applicationIcon = 0;
+        try {
+            applicationIcon = packageManager.getApplicationInfo(packageName, 0).icon;
+        } catch (NameNotFoundException e) {
+            // use the ic_dialog_alert icon if the app's can not be found
+        }
+        if (0==applicationIcon) {
+            applicationIcon = android.R.drawable.ic_dialog_alert;
+        }
+
+        Intent launchIntent = packageManager.getLaunchIntentForPackage(packageName);
+        PendingIntent notifyIntent = PendingIntent.getActivity(this, 0, launchIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT);
+
+        Notification notification = new Notification(applicationIcon, text, System.currentTimeMillis());
+        notification.flags |= Notification.FLAG_AUTO_CANCEL;
+        notification.setLatestEventInfo(this, title, text, notifyIntent);
+
+        NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        notificationManager.notify(1, notification);
     }
 
 }
