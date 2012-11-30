@@ -132,6 +132,8 @@ package com.mparticle;
         public static final String DEBUG_MODE = "debug_mode";
         public static final String SESSION_TIMEOUT = "session_timeout";
         public static final String ENABLE_CRASH_REPORTING = "enable_crash_reporting";
+        public static final String ENABLE_PUSH_NOTIFICATIONS = "enable_push_notifications";
+        public static final String PUSH_NOTIFICATION_SENDER_ID = "push_notification_sender_id";
         // MessageManager
         public static final String UPLOAD_INTERVAL = "upload_interval";
         public static final String ENABLE_SSL = "enable_secure_transport";

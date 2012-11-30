@@ -152,6 +152,12 @@ public class MParticleAPI {
                         apiInstance.enableUncaughtExceptionLogging();
                     }
                 }
+                if (sDefaultSettings.containsKey(ConfigKeys.ENABLE_PUSH_NOTIFICATIONS)) {
+                    if (Boolean.parseBoolean(sDefaultSettings.getProperty(ConfigKeys.ENABLE_PUSH_NOTIFICATIONS))) {
+                        String senderId = sDefaultSettings.getProperty(ConfigKeys.PUSH_NOTIFICATION_SENDER_ID);
+                        apiInstance.enablePushNotifications(senderId);
+                    }
+                }
 
                 sInstanceMap.put(apiKey, apiInstance);
             }
@@ -603,7 +609,7 @@ public class MParticleAPI {
      * Register the application for GCM notifications
      * @param senderId the SENDER_ID for the application
      */
-    public void registerForPushNotifications(String senderId) {
+    public void enablePushNotifications(String senderId) {
         checkDefaultApiInstance();
         if (null==getPushRegistrationId()) {
             Intent registrationIntent = new Intent("com.google.android.c2dm.intent.REGISTER");

@@ -250,7 +250,7 @@ public class HomeActivity extends Activity implements OnItemSelectedListener {
     public void pressNotifyButton(View view) {
         switch (view.getId()) {
         case R.id.buttonPushAutoRegister:
-            mParticleAPI.registerForPushNotifications(SENDER_ID);
+            mParticleAPI.enablePushNotifications(SENDER_ID);
             new PushRegChangeDetectorTask().execute();
             break;
         case R.id.buttonPushAutoUnregister:
