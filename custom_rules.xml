@@ -5,7 +5,7 @@
         <delete dir="doc" verbose="${verbose}" />
     </target>
 
-    <target name="-post-build"  depends="copyjar, docs"/>
+    <target name="-post-build"  depends="copyjar, docs, srcjar"/>
 
     <target name="copyjar">
         <copy file="bin/classes.jar" tofile="bin/mparticle-0.1.jar" verbose="true" />
@@ -25,6 +25,10 @@
                 <path path="${sdk.dir}/platforms/${target}/android.jar" />
             </classpath>
         </javadoc>
+    </target>
+
+    <target name="srcjar">
+        <jar destfile="bin/mparticle-0.1-src.jar" basedir="src" />
     </target>
 
 </project>
