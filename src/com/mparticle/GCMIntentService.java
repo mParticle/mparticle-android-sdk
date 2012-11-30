@@ -57,7 +57,7 @@ public class GCMIntentService extends IntentService {
 
         MParticleAPI mParticleAPI;
         try {
-            mParticleAPI = MParticleAPI.getInstance(getApplicationContext());
+            mParticleAPI = MParticleAPI.getInstance(this);
         } catch (Throwable t) {
             // failure to instantiate mParticle likely means that the mparticle.properties file is not correct
             // and a warning message will already have been logged
