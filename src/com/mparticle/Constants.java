@@ -114,6 +114,7 @@ package com.mparticle;
         // common
         public static final String INSTALL_TIME = "mp::ict";
         public static final String PUSH_REGISTRATION_ID = "mp::push_reg_id";
+        public static final String INSTALL_REFERRER = "mp::install_referrer";
         // app-key specific (append appKey to the key)
         public static final String OPTOUT = "mp::optout::";
         public static final String USER_ATTRS = "mp::user_attrs::";
@@ -134,6 +135,7 @@ package com.mparticle;
         public static final String ENABLE_CRASH_REPORTING = "enable_crash_reporting";
         public static final String ENABLE_PUSH_NOTIFICATIONS = "enable_push_notifications";
         public static final String PUSH_NOTIFICATION_SENDER_ID = "push_notification_sender_id";
+        public static final String ENABLE_REFERRER_TRACKING = "enable_referrer_tracking";
         // MessageManager
         public static final String UPLOAD_INTERVAL = "upload_interval";
         public static final String ENABLE_SSL = "enable_secure_transport";

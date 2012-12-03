@@ -13,4 +13,8 @@ public class Attributes {
     public static final String AGE = "mp::uage";
     public static final String GENDER = "mp::ugender";
 
+    // referrers
+    public static final String URI = "mp::uri";
+    public static final String REFERRER = "mp::referrer";
+
 }

@@ -3,7 +3,6 @@ package com.mparticle;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.Thread.UncaughtExceptionHandler;
-import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -12,6 +11,7 @@ import java.util.UUID;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.app.Activity;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
@@ -145,6 +145,12 @@ public class MParticleAPI {
                         apiInstance.setSessionTimeout(1000 * Integer.parseInt(sDefaultSettings.getProperty(ConfigKeys.SESSION_TIMEOUT, "60")));
                     } catch (Throwable t) {
                         Log.w(TAG, "Failed to configure mParticle with '"+ConfigKeys.SESSION_TIMEOUT+"' setting");
+                    }
+                }
+                if (sDefaultSettings.containsKey(ConfigKeys.ENABLE_REFERRER_TRACKING)) {
+                    if (Boolean.parseBoolean(sDefaultSettings.getProperty(ConfigKeys.ENABLE_REFERRER_TRACKING)) &&
+                            (context instanceof Activity)) {
+                        apiInstance.trackReferrer(((Activity) context).getIntent());
                     }
                 }
                 if (sDefaultSettings.containsKey(ConfigKeys.ENABLE_CRASH_REPORTING)) {
@@ -600,10 +606,41 @@ public class MParticleAPI {
 
     /**
      * Set the referral URL for the user session.
-     * @param url the referral URL
+     * @param uri the referral URI
      */
-    public void setReferralURL(URL url) {
+    public void setReferralURI(String uri) {
+        // TODO: decide how the mparticle server wants to receive install/launch data or if this method should be dropped
+        setSessionAttribute(Attributes.URI, uri);
     }
+
+    /**
+     * Track the launch or installation referrer data based on the URI from the Intent
+     * @param intent the intent that launched the activity
+     */
+    public void trackReferrer(Intent intent) {
+        String action = intent.getAction();
+        String dataString = intent.getDataString();
+        String referrer = intent.getStringExtra("referrer");
+
+        HashMap<String, String> referralData = new HashMap<String, String>();
+        if (null!=dataString) {
+            referralData.put(Attributes.URI, dataString);
+        }
+        if (null!=referrer) {
+            referralData.put(Attributes.REFERRER, referrer);
+        }
+
+        // TODO: decide how the mparticle server wants to receive install/launch data
+        if ("android.intent.action.VIEW".equals(action) || "android.intent.action.MAIN".equals(action)) {
+            logEvent("launch", referralData);
+            setSessionAttribute(Attributes.URI, dataString);
+            setSessionAttribute(Attributes.REFERRER, referrer);
+        } else if ("com.android.vending.INSTALL_REFERRER".equals(action)) {
+            sPreferences.edit().putString(PrefKeys.INSTALL_REFERRER, referrer).commit();
+            logEvent("installation", referralData);
+        }
+    }
+
 
     /**
      * Register the application for GCM notifications

@@ -29,7 +29,7 @@ public class GCMIntentService extends IntentService {
         synchronized(LOCK) {
             if (sWakeLock == null) {
                 PowerManager pm = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
-                sWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "my_wakelock");
+                sWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
             }
         }
         sWakeLock.acquire();
