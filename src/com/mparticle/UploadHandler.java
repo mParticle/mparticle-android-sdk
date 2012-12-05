@@ -257,9 +257,10 @@ import com.mparticle.MessageDatabase.UploadTable;
 
             // read batches ready to upload
             SQLiteDatabase db = mDB.getWritableDatabase();
+            String[] selectionArgs = new String[]{ mApiKey };
             String[] selectionColumns = new String[]{ "_id", UploadTable.MESSAGE };
             Cursor readyUploadsCursor = db.query(UploadTable.TABLE_NAME, selectionColumns,
-                    null, null, null, null, UploadTable.CREATED_AT + " , _id");
+                   UploadTable.API_KEY + "=?", selectionArgs, null, null, UploadTable.CREATED_AT);
             while (readyUploadsCursor.moveToNext()) {
                 int id = readyUploadsCursor.getInt(0);
                 String message = readyUploadsCursor.getString(1);
