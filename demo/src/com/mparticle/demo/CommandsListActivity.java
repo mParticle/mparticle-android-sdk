@@ -29,8 +29,8 @@ public class CommandsListActivity extends ListActivity {
         Cursor selectCursor = db.query(CommandTable.TABLE_NAME, null, null, null, null, null, "_id desc");
 
         String[] from = new String[] { CommandTable.URL, CommandTable.METHOD,
-                CommandTable.POST_DATA, CommandTable.HEADERS, CommandTable.STATUS, CommandTable.CREATED_AT };
-        int[] to = { R.id.url, R.id.method, R.id.postData, R.id.headers, R.id.status, R.id.msgTime };
+                CommandTable.POST_DATA, CommandTable.HEADERS, CommandTable.CREATED_AT };
+        int[] to = { R.id.url, R.id.method, R.id.postData, R.id.headers, R.id.msgTime };
 
         // NOTE: this Activity is doing SQL directly on the main UI thread,
         // which you would never do in production code
@@ -42,9 +42,6 @@ public class CommandsListActivity extends ListActivity {
                 switch (view.getId()) {
                 case R.id.msgTime:
                     ((TextView) view).setText(sFormatter.format(new Date(cursor.getLong(columnIndex))));
-                    break;
-                case R.id.status:
-                    ((TextView) view).setText(cursor.getInt(columnIndex)==1?"Ready":"Unknown");
                     break;
                 default:
                     return false;

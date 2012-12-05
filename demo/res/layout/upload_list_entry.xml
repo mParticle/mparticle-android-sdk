@@ -14,20 +14,11 @@
         android:text="@string/time" />
 
     <TextView
-        android:id="@+id/msgStatus"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_toRightOf="@+id/msgTime"
-        android:layout_marginLeft="10dp"
-        android:text="@string/status" />
-
-    <TextView
         android:id="@+id/apiKey"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
-        android:layout_toRightOf="@+id/msgStatus"
+        android:layout_toRightOf="@+id/msgTime"
         android:layout_marginLeft="10dp"
         android:text="@string/api_key" />
 

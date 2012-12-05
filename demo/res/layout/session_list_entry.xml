@@ -6,21 +6,12 @@
     android:orientation="vertical" >
 
     <TextView
-        android:id="@+id/status"
+        android:id="@+id/apiKey"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
         android:text="@string/status" />
-
-    <TextView
-        android:id="@+id/apiKey"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_toRightOf="@+id/status"
-        android:paddingLeft="10dip"
-        android:text="@string/api_key" />
 
     <TextView
         android:id="@+id/sessionId"
@@ -36,7 +27,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
-        android:layout_below="@+id/status"
+        android:layout_below="@+id/apiKey"
         android:text="@string/start_time" />
 
     <TextView

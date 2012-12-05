@@ -141,10 +141,10 @@ import com.mparticle.MessageDatabase.SessionTable;
             try {
                 // find left-over sessions that exist during startup and end them
                 SQLiteDatabase db = mDB.getWritableDatabase();
-                String[] selectionArgs = new String[] { mApiKey, Long.toString(Status.READY) };
+                String[] selectionArgs = new String[] { mApiKey };
                 String[] sessionColumns = new String[] { SessionTable.SESSION_ID };
                 Cursor selectCursor = db.query(SessionTable.TABLE_NAME, sessionColumns,
-                        SessionTable.API_KEY + "=? and " + SessionTable.STATUS + "=?",
+                        SessionTable.API_KEY + "=?",
                         selectionArgs, null, null, null);
                 // NOTE: there should be at most one orphan per api key - but
                 // process any that are found
@@ -168,7 +168,6 @@ import com.mparticle.MessageDatabase.SessionTable;
         contentValues.put(SessionTable.START_TIME, message.getLong(MessageKey.TIMESTAMP));
         contentValues.put(SessionTable.END_TIME, message.getLong(MessageKey.TIMESTAMP));
         contentValues.put(SessionTable.SESSION_LENGTH, 0);
-        contentValues.put(SessionTable.STATUS, Status.READY);
         db.insert(SessionTable.TABLE_NAME, null, contentValues);
     }
 

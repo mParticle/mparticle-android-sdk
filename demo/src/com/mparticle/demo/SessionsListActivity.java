@@ -29,8 +29,8 @@ public class SessionsListActivity extends ListActivity {
         Cursor selectCursor = db.query("sessions", null, null, null, null, null, SessionTable.START_TIME + " desc");
 
         String[] from = new String[] { SessionTable.SESSION_ID, SessionTable.API_KEY, SessionTable.START_TIME, SessionTable.END_TIME,
-                SessionTable.SESSION_LENGTH, SessionTable.STATUS, SessionTable.ATTRIBUTES };
-        int[] to = { R.id.sessionId, R.id.apiKey, R.id.startTime, R.id.endTime, R.id.sessionLength, R.id.status, R.id.attributes };
+                SessionTable.SESSION_LENGTH, SessionTable.ATTRIBUTES };
+        int[] to = { R.id.sessionId, R.id.apiKey, R.id.startTime, R.id.endTime, R.id.sessionLength,  R.id.attributes };
 
         // NOTE: this Activity is doing SQL directly on the main UI thread,
         // which you would never do in production code
@@ -49,9 +49,6 @@ public class SessionsListActivity extends ListActivity {
                     break;
                 case R.id.sessionLength:
                     ((TextView) view).setText(cursor.getLong(columnIndex)/1000 + " seconds");
-                    break;
-                case R.id.status:
-                    ((TextView) view).setText(cursor.getInt(columnIndex)==1?"Active":"Ended");
                     break;
                 default:
                     return false;

@@ -6,7 +6,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 /* package-private */ class MessageDatabase extends SQLiteOpenHelper {
 
-    private static final int DB_VERSION = 9;
+    private static final int DB_VERSION = 10;
     private static final String DB_NAME = "mparticle.db";
 
     public interface SessionTable {
@@ -17,7 +17,6 @@ import android.database.sqlite.SQLiteOpenHelper;
         public final static String END_TIME = "end_time";
         public final static String SESSION_LENGTH = "session_length";
         public final static String ATTRIBUTES = "attributes";
-        public final static String STATUS = "status";
     }
     private static final String CREATE_SESSIONS_DDL =
             "CREATE TABLE "+ SessionTable.TABLE_NAME+" (" +
@@ -27,8 +26,7 @@ import android.database.sqlite.SQLiteOpenHelper;
                SessionTable.START_TIME + " INTEGER NOT NULL," +
                SessionTable.END_TIME + " INTEGER NOT NULL," +
                SessionTable.SESSION_LENGTH + " INTEGER NOT NULL," +
-               SessionTable.ATTRIBUTES + " TEXT," +
-               SessionTable.STATUS + " INTEGER" +
+               SessionTable.ATTRIBUTES + " TEXT" +
              ");";
 
     public interface MessageTable {
@@ -54,14 +52,12 @@ import android.database.sqlite.SQLiteOpenHelper;
         public final static String API_KEY = "api_key";
         public final static String MESSAGE = "message";
         public final static String CREATED_AT = "created_at";
-        public final static String STATUS = "status";
     }
     private static final String CREATE_UPLOADS_DDL =
             "CREATE TABLE "+ UploadTable.TABLE_NAME+" (" +
                "_id INTEGER PRIMARY KEY AUTOINCREMENT, " +
                UploadTable.API_KEY + " STRING NOT NULL, " +
                UploadTable.MESSAGE + " TEXT," +
-               UploadTable.STATUS + " INTEGER," +
                UploadTable.CREATED_AT + " INTEGER NOT NULL" +
              ");";
 
@@ -71,7 +67,6 @@ import android.database.sqlite.SQLiteOpenHelper;
         public final static String METHOD = "method";
         public final static String POST_DATA = "post_data";
         public final static String HEADERS = "headers";
-        public final static String STATUS = "status";
         public final static String CREATED_AT = "created_at";
     }
     private static final String CREATE_COMMANDS_DDL =
@@ -81,7 +76,6 @@ import android.database.sqlite.SQLiteOpenHelper;
                CommandTable.METHOD + " STRING NOT NULL, " +
                CommandTable.POST_DATA + " TEXT, " +
                CommandTable.HEADERS + " TEXT, " +
-               CommandTable.STATUS + " INTEGER," +
                CommandTable.CREATED_AT + " INTEGER" +
              ");";
 

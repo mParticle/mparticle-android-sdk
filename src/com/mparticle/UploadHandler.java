@@ -199,7 +199,8 @@ import com.mparticle.MessageDatabase.UploadTable;
 
             String[] selectionArgs = new String[]{mApiKey, Integer.toString(mUploadMode)};
             String[] selectionColumns = new String[]{"_id", MessageTable.MESSAGE, MessageTable.CREATED_AT};
-            Cursor readyMessagesCursor = db.query(MessageTable.TABLE_NAME, selectionColumns, SQL_UPLOADABLE_MESSAGES, selectionArgs, null, null, MessageTable.CREATED_AT+" , _id");
+            Cursor readyMessagesCursor = db.query(MessageTable.TABLE_NAME, selectionColumns, SQL_UPLOADABLE_MESSAGES,
+                    selectionArgs, null, null, MessageTable.CREATED_AT+" , _id");
             if (readyMessagesCursor.getCount()>0) {
                 if (mDebugMode) {
                     Log.i(TAG, "Processing " + readyMessagesCursor.getCount() + " events for upload");
@@ -308,7 +309,6 @@ import com.mparticle.MessageDatabase.UploadTable;
                     if (202==responseCode || (responseCode>=400 && responseCode<500)) {
                         dbDeleteUpload(db, id);
                     } else {
-                        dbUpdateUploadStatus(db, id, Status.READY);
                         if (mDebugMode) {
                             Log.d(TAG, "Upload failed and will be retried.");
                         }
@@ -458,7 +458,6 @@ import com.mparticle.MessageDatabase.UploadTable;
         contentValues.put(UploadTable.API_KEY, mApiKey);
         contentValues.put(UploadTable.CREATED_AT, message.getLong(MessageKey.TIMESTAMP));
         contentValues.put(UploadTable.MESSAGE, message.toString());
-        contentValues.put(UploadTable.STATUS, Status.READY);
         db.insert(UploadTable.TABLE_NAME, null, contentValues);
     }
 
@@ -466,13 +465,6 @@ import com.mparticle.MessageDatabase.UploadTable;
         String[] whereArgs = new String[]{mApiKey, Integer.toString(mUploadMode), Long.toString(lastMessageId)};
         String whereClause = SQL_UPLOADABLE_MESSAGES + " and _id<=?";
         db.delete(MessageTable.TABLE_NAME, whereClause, whereArgs);
-    }
-
-    private void dbUpdateUploadStatus(SQLiteDatabase db, int id, int status) {
-        ContentValues contentValues = new ContentValues();
-        contentValues.put(UploadTable.STATUS, status);
-        String[] whereArgs = { Long.toString(id) };
-        db.update(UploadTable.TABLE_NAME, contentValues, "_id=?", whereArgs);
     }
 
     private void dbDeleteUpload(SQLiteDatabase db, int id) {
@@ -491,7 +483,6 @@ import com.mparticle.MessageDatabase.UploadTable;
         contentValues.put(CommandTable.METHOD, command.getString(MessageKey.METHOD));
         contentValues.put(CommandTable.POST_DATA, command.optString(MessageKey.POST));
         contentValues.put(CommandTable.HEADERS, command.optString(MessageKey.HEADERS));
-        contentValues.put(CommandTable.STATUS, Status.READY);
         contentValues.put(CommandTable.CREATED_AT, System.currentTimeMillis());
         db.insert(CommandTable.TABLE_NAME, null, contentValues);
     }
