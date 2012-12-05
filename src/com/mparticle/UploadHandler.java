@@ -97,7 +97,6 @@ import com.mparticle.MessageDatabase.UploadTable;
     public static final int UPLOAD_MESSAGES = 1;
     public static final int CLEANUP = 2;
 
-    public static final String HEADER_APPKEY = "x-mp-appkey";
     public static final String HEADER_SIGNATURE = "x-mp-signature";
 
     public static final String SERVICE_SCHEME = "http";
