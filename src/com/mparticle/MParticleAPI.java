@@ -648,7 +648,7 @@ public class MParticleAPI {
     public void setPushRegistrationId(String registrationId) {
         debugLog("Set push registration token: " + registrationId);
         sPreferences.edit().putString(PrefKeys.PUSH_REGISTRATION_ID, registrationId).commit();
-        mMessageManager.setPushRegistrationId(mSessionID, mSessionStartTime, System.currentTimeMillis(), registrationId, true);
+        mMessageManager.setPushRegistrationId(registrationId, true);
     }
 
     /**
@@ -659,7 +659,7 @@ public class MParticleAPI {
         String registrationId = getPushRegistrationId();
         if (null!=registrationId) {
             sPreferences.edit().putString(PrefKeys.PUSH_REGISTRATION_ID, null).commit();
-            mMessageManager.setPushRegistrationId(mSessionID, mSessionStartTime, System.currentTimeMillis(), registrationId, false);
+            mMessageManager.setPushRegistrationId(registrationId, false);
         } else {
             Log.i(TAG, "Clear push registration requested but device is not registered");
         }

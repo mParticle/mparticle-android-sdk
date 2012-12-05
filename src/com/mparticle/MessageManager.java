@@ -226,9 +226,9 @@ import com.mparticle.Constants.MessageType;
         }
     }
 
-    public void setPushRegistrationId(String sessionId, long sessionStartTime, long time, String token, boolean registeringFlag) {
+    public void setPushRegistrationId(String token, boolean registeringFlag) {
         try {
-            JSONObject message = createMessage(MessageType.PUSH_REGISTRATION, sessionId, sessionStartTime, time, null, null, false);
+            JSONObject message = createMessage(MessageType.PUSH_REGISTRATION, null, 0, System.currentTimeMillis(), null, null, false);
             message.put(MessageKey.PUSH_TOKEN, token);
             message.put(MessageKey.PUSH_REGISTER_FLAG, registeringFlag);
             mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
