@@ -31,12 +31,12 @@ public class PushNotificationTests extends AndroidTestCase {
 
     public void testSetPushRegistrationId() {
         mMParticleAPI.setPushRegistrationId("TOKEN1");
-        verify(mMockMessageManager, times(1)).setPushRegistrationId(anyString(), anyLong(), anyLong(), eq("TOKEN1"), eq(true));
+        verify(mMockMessageManager, times(1)).setPushRegistrationId(eq("TOKEN1"), eq(true));
     }
 
     public void testClearPushRegistrationId() {
         mMParticleAPI.clearPushRegistrationId();
-        verify(mMockMessageManager, times(1)).setPushRegistrationId(anyString(), anyLong(), anyLong(), anyString(), eq(false));
+        verify(mMockMessageManager, times(1)).setPushRegistrationId(anyString(), eq(false));
     }
 
 }

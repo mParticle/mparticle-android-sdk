@@ -1,5 +1,6 @@
 package com.mparticle;
 
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.*;
 
 import java.util.HashMap;
@@ -48,7 +49,7 @@ public class EventLoggingTests extends AndroidTestCase {
 
         // make sure the MockMessageManager got called with the correct parameters in the correct order
         InOrder inOrder = inOrder(mMockMessageManager);
-        inOrder.verify(mMockMessageManager, times(1)).startSession(anyString(), anyLong());
+        inOrder.verify(mMockMessageManager, times(1)).startSession(anyString(), anyLong(), anyString());
 
         ArgumentCaptor<JSONObject> eventDataArgument = ArgumentCaptor.forClass(JSONObject.class);
         inOrder.verify(mMockMessageManager).logCustomEvent(eq(mMParticleAPI.mSessionID), anyLong(), anyLong(), anyString(), eventDataArgument.capture());

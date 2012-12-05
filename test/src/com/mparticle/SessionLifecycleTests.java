@@ -1,5 +1,6 @@
 package com.mparticle;
 
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.*;
 
 import android.test.AndroidTestCase;
@@ -21,7 +22,7 @@ public class SessionLifecycleTests extends AndroidTestCase {
         mMParticleAPI.startActivity();
         assertNotNull(mMParticleAPI.mSessionID);
         assertTrue(mMParticleAPI.mSessionStartTime > 0);
-        verify(mMockMessageManager, times(1)).startSession(eq(mMParticleAPI.mSessionID), eq(mMParticleAPI.mSessionStartTime));
+        verify(mMockMessageManager, times(1)).startSession(eq(mMParticleAPI.mSessionID), eq(mMParticleAPI.mSessionStartTime), anyString());
     }
 
     // do not start a new session if start() called with delay < timeout
@@ -35,7 +36,7 @@ public class SessionLifecycleTests extends AndroidTestCase {
         mMParticleAPI.startActivity();
         assertSame(sessionUUID, mMParticleAPI.mSessionID);
         assertEquals(sessionStartTime, mMParticleAPI.mSessionStartTime);
-        verify(mMockMessageManager, times(1)).startSession(anyString(), anyLong());
+        verify(mMockMessageManager, times(1)).startSession(anyString(), anyLong(), anyString());
         verify(mMockMessageManager, times(1)).stopSession(anyString(), anyLong(), anyLong());
     }
 
@@ -51,7 +52,7 @@ public class SessionLifecycleTests extends AndroidTestCase {
         mMParticleAPI.setSessionTimeout(0);
         assertNotSame(sessionUUID, mMParticleAPI.mSessionID);
         assertTrue(sessionStartTime < mMParticleAPI.mSessionStartTime);
-        verify(mMockMessageManager, times(2)).startSession(anyString(), anyLong());
+        verify(mMockMessageManager, times(2)).startSession(anyString(), anyLong(), anyString());
         verify(mMockMessageManager, times(1)).stopSession(anyString(), anyLong(), anyLong());
         verify(mMockMessageManager, times(1)).stopSession(eq(sessionUUID), anyLong(), anyLong());
     }
@@ -61,7 +62,7 @@ public class SessionLifecycleTests extends AndroidTestCase {
         mMParticleAPI.logEvent("test");
         assertNotNull(mMParticleAPI.mSessionID);
         assertTrue(mMParticleAPI.mSessionStartTime>0);
-        verify(mMockMessageManager, times(1)).startSession(anyString(), anyLong());
+        verify(mMockMessageManager, times(1)).startSession(anyString(), anyLong(), anyString());
     }
 
     // do start a new session if events logged with delay > timeout and also end last session
@@ -75,7 +76,7 @@ public class SessionLifecycleTests extends AndroidTestCase {
         mMParticleAPI.logEvent("test2");
         assertNotSame(sessionUUID, mMParticleAPI.mSessionID);
         assertTrue(sessionStartTime < mMParticleAPI.mSessionStartTime);
-        verify(mMockMessageManager, times(2)).startSession(anyString(), anyLong());
+        verify(mMockMessageManager, times(2)).startSession(anyString(), anyLong(), anyString());
         verify(mMockMessageManager, times(1)).stopSession(anyString(), anyLong(), anyLong());
         verify(mMockMessageManager, times(1)).stopSession(eq(sessionUUID), anyLong(), anyLong());
     }
@@ -89,7 +90,7 @@ public class SessionLifecycleTests extends AndroidTestCase {
         mMParticleAPI.logEvent("test2");
         mMParticleAPI.logEvent("test3");
         assertTrue(mMParticleAPI.mLastEventTime > mMParticleAPI.mSessionStartTime);
-        verify(mMockMessageManager, times(1)).startSession(anyString(), anyLong());
+        verify(mMockMessageManager, times(1)).startSession(anyString(), anyLong(), anyString());
         verify(mMockMessageManager, never()).stopSession(anyString(), anyLong(), anyLong());
     }
 
@@ -102,7 +103,7 @@ public class SessionLifecycleTests extends AndroidTestCase {
         mMParticleAPI.newSession();
         assertNotSame(sessionUUID, mMParticleAPI.mSessionID);
         assertTrue(sessionStartTime < mMParticleAPI.mSessionStartTime);
-        verify(mMockMessageManager, times(2)).startSession(anyString(), anyLong());
+        verify(mMockMessageManager, times(2)).startSession(anyString(), anyLong(), anyString());
         verify(mMockMessageManager, times(1)).stopSession(anyString(), anyLong(), anyLong());
         verify(mMockMessageManager, times(1)).stopSession(eq(sessionUUID), anyLong(), anyLong());
     }
@@ -113,7 +114,7 @@ public class SessionLifecycleTests extends AndroidTestCase {
         String sessionUUID = mMParticleAPI.mSessionID;
         mMParticleAPI.stopActivity();
         assertFalse(mMParticleAPI.mSessionStartTime == 0);
-        verify(mMockMessageManager, times(1)).startSession(anyString(), anyLong());
+        verify(mMockMessageManager, times(1)).startSession(anyString(), anyLong(), anyString());
         verify(mMockMessageManager, times(1)).stopSession(anyString(), anyLong(), anyLong());
         verify(mMockMessageManager, times(1)).stopSession(eq(sessionUUID), anyLong(), anyLong());
         verify(mMockMessageManager, never()).endSession(anyString(), anyLong(), anyLong());
@@ -125,7 +126,7 @@ public class SessionLifecycleTests extends AndroidTestCase {
         String sessionUUID = mMParticleAPI.mSessionID;
         mMParticleAPI.endSession();
         assertTrue(mMParticleAPI.mSessionStartTime == 0);
-        verify(mMockMessageManager, times(1)).startSession(anyString(), anyLong());
+        verify(mMockMessageManager, times(1)).startSession(anyString(), anyLong(), anyString());
         verify(mMockMessageManager, times(1)).stopSession(anyString(), anyLong(), anyLong());
         verify(mMockMessageManager, times(1)).stopSession(eq(sessionUUID), anyLong(), anyLong());
         verify(mMockMessageManager, times(1)).endSession(anyString(), anyLong(), anyLong());
@@ -142,7 +143,7 @@ public class SessionLifecycleTests extends AndroidTestCase {
         Thread.sleep(200);
         mMParticleAPI.checkSessionTimeout();
         assertTrue(0 == mMParticleAPI.mSessionStartTime);
-        verify(mMockMessageManager, times(1)).startSession(anyString(), anyLong());
+        verify(mMockMessageManager, times(1)).startSession(anyString(), anyLong(), anyString());
         verify(mMockMessageManager, times(1)).stopSession(anyString(), anyLong(), anyLong());
         verify(mMockMessageManager, times(1)).stopSession(eq(sessionUUID), eq(lastEventTime), anyLong());
     }
@@ -159,7 +160,7 @@ public class SessionLifecycleTests extends AndroidTestCase {
         Thread.sleep(200);
         mMParticleAPI.checkSessionTimeout();
         assertTrue(0 == mMParticleAPI.mSessionStartTime);
-        verify(mMockMessageManager, times(1)).startSession(anyString(), anyLong());
+        verify(mMockMessageManager, times(1)).startSession(anyString(), anyLong(), anyString());
         verify(mMockMessageManager, times(1)).stopSession(anyString(), anyLong(), anyLong());
         verify(mMockMessageManager, times(1)).stopSession(eq(sessionUUID), eq(lastEventTime), anyLong());
     }

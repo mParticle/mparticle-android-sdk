@@ -51,7 +51,7 @@ public class OptOutTests extends AndroidTestCase {
         mMParticleAPI.stopActivity();
         mMParticleAPI.endSession();
         verify(mMockMessageManager, times(1)).optOut(anyString(), anyLong(), anyLong(), eq(true));
-        verify(mMockMessageManager, never()).startSession(anyString(), anyLong());
+        verify(mMockMessageManager, never()).startSession(anyString(), anyLong(), anyString());
         verify(mMockMessageManager, never()).setSessionAttributes(anyString(), any(JSONObject.class));
         verify(mMockMessageManager, never()).logScreenView(anyString(), anyLong(), anyLong(), anyString(), any(JSONObject.class));
         verify(mMockMessageManager, never()).logCustomEvent(anyString(), anyLong(), anyLong(), anyString(), any(JSONObject.class));
@@ -77,7 +77,7 @@ public class OptOutTests extends AndroidTestCase {
         mMParticleAPI.endSession();
 
         verify(mMockMessageManager, times(1)).optOut(anyString(), anyLong(), anyLong(), eq(true));
-        verify(mMockMessageManager, times(1)).startSession(anyString(), anyLong());
+        verify(mMockMessageManager, times(1)).startSession(anyString(), anyLong(), anyString());
         verify(mMockMessageManager, times(1)).logCustomEvent(anyString(), anyLong(), anyLong(), anyString(), any(JSONObject.class));
         verify(mMockMessageManager, times(1)).stopSession(anyString(), anyLong(), anyLong());
         verify(mMockMessageManager, times(1)).endSession(anyString(), anyLong(), anyLong());
@@ -106,7 +106,7 @@ public class OptOutTests extends AndroidTestCase {
         verify(mMockMessageManager, times(2)).optOut(anyString(), anyLong(), anyLong(), anyBoolean());
         verify(mMockMessageManager, times(1)).optOut(anyString(), anyLong(), anyLong(), eq(true));
         verify(mMockMessageManager, times(1)).optOut(anyString(), anyLong(), anyLong(), eq(false));
-        verify(mMockMessageManager, times(2)).startSession(anyString(), anyLong());
+        verify(mMockMessageManager, times(2)).startSession(anyString(), anyLong(), anyString());
         verify(mMockMessageManager, times(2)).logCustomEvent(anyString(), anyLong(), anyLong(), anyString(), any(JSONObject.class));
         verify(mMockMessageManager, times(1)).logCustomEvent(anyString(), anyLong(), anyLong(), eq("event1"), any(JSONObject.class));
         verify(mMockMessageManager, times(0)).logCustomEvent(anyString(), anyLong(), anyLong(), eq("event2"), any(JSONObject.class));
@@ -133,7 +133,7 @@ public class OptOutTests extends AndroidTestCase {
         verify(mMockMessageManager, times(2)).optOut(anyString(), anyLong(), anyLong(), anyBoolean());
         verify(mMockMessageManager, times(1)).optOut(anyString(), anyLong(), anyLong(), eq(true));
         verify(mMockMessageManager, times(1)).optOut(anyString(), anyLong(), anyLong(), eq(false));
-        verify(mMockMessageManager, times(2)).startSession(anyString(), anyLong());
+        verify(mMockMessageManager, times(2)).startSession(anyString(), anyLong(), anyString());
         verify(mMockMessageManager, times(2)).logCustomEvent(anyString(), anyLong(), anyLong(), anyString(), any(JSONObject.class));
         verify(mMockMessageManager, times(0)).logCustomEvent(anyString(), anyLong(), anyLong(), eq("event1"), any(JSONObject.class));
         verify(mMockMessageManager, times(0)).logCustomEvent(anyString(), anyLong(), anyLong(), eq("event2"), any(JSONObject.class));
