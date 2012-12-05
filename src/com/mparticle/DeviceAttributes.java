@@ -51,6 +51,7 @@ import com.mparticle.Constants.PrefKeys;
             }
             SharedPreferences preferences = appContext.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
             attributes.put(MessageKey.MPARTICLE_INSTALL_TIME, preferences.getLong(PrefKeys.INSTALL_TIME, 0));
+            attributes.put(MessageKey.INSTALL_REFERRER, preferences.getString(PrefKeys.INSTALL_REFERRER, null));
         } catch (JSONException e) {
             // ignore JSON exceptions
         }

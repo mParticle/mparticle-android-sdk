@@ -59,6 +59,7 @@ public class MParticleAPI {
     private int mEventCount = 0;
     /* package-private */ JSONObject mUserAttributes = new JSONObject();
     /* package-private */ JSONObject mSessionAttributes;
+    private String mLaunchUri;
 
     /* package-private */ MParticleAPI(Context appContext, String apiKey, MessageManager messageManager) {
         mAppContext = appContext;
@@ -132,6 +133,9 @@ public class MParticleAPI {
                 messageManager.start(appContext);
 
                 apiInstance = new MParticleAPI(appContext, apiKey, messageManager);
+                if (context instanceof Activity) {
+                    apiInstance.mLaunchUri = ((Activity) context).getIntent().getDataString();
+                }
 
                 if (sDefaultSettings.containsKey(ConfigKeys.DEBUG_MODE)) {
                     try {
@@ -145,12 +149,6 @@ public class MParticleAPI {
                         apiInstance.setSessionTimeout(1000 * Integer.parseInt(sDefaultSettings.getProperty(ConfigKeys.SESSION_TIMEOUT, "60")));
                     } catch (Throwable t) {
                         Log.w(TAG, "Failed to configure mParticle with '"+ConfigKeys.SESSION_TIMEOUT+"' setting");
-                    }
-                }
-                if (sDefaultSettings.containsKey(ConfigKeys.ENABLE_REFERRER_TRACKING)) {
-                    if (Boolean.parseBoolean(sDefaultSettings.getProperty(ConfigKeys.ENABLE_REFERRER_TRACKING)) &&
-                            (context instanceof Activity)) {
-                        apiInstance.trackReferrer(((Activity) context).getIntent());
                     }
                 }
                 if (sDefaultSettings.containsKey(ConfigKeys.ENABLE_CRASH_REPORTING)) {
@@ -296,9 +294,11 @@ public class MParticleAPI {
         mSessionLength = 0;
         mEventCount = 0;
         mSessionAttributes = new JSONObject();
-        mMessageManager.startSession(mSessionID, mSessionStartTime);
+        mMessageManager.startSession(mSessionID, mSessionStartTime, mLaunchUri);
         mTimeoutHandler.sendEmptyMessageDelayed(0, mSessionTimeout);
         debugLog("Started new session");
+        // clear the launch URI so it isn't sent on future sessions
+        mLaunchUri = null;
     }
 
     /**
@@ -603,44 +603,6 @@ public class MParticleAPI {
             }
         }
     }
-
-    /**
-     * Set the referral URL for the user session.
-     * @param uri the referral URI
-     */
-    public void setReferralURI(String uri) {
-        // TODO: decide how the mparticle server wants to receive install/launch data or if this method should be dropped
-        setSessionAttribute(Attributes.URI, uri);
-    }
-
-    /**
-     * Track the launch or installation referrer data based on the URI from the Intent
-     * @param intent the intent that launched the activity
-     */
-    public void trackReferrer(Intent intent) {
-        String action = intent.getAction();
-        String dataString = intent.getDataString();
-        String referrer = intent.getStringExtra("referrer");
-
-        HashMap<String, String> referralData = new HashMap<String, String>();
-        if (null!=dataString) {
-            referralData.put(Attributes.URI, dataString);
-        }
-        if (null!=referrer) {
-            referralData.put(Attributes.REFERRER, referrer);
-        }
-
-        // TODO: decide how the mparticle server wants to receive install/launch data
-        if ("android.intent.action.VIEW".equals(action) || "android.intent.action.MAIN".equals(action)) {
-            logEvent("launch", referralData);
-            setSessionAttribute(Attributes.URI, dataString);
-            setSessionAttribute(Attributes.REFERRER, referrer);
-        } else if ("com.android.vending.INSTALL_REFERRER".equals(action)) {
-            sPreferences.edit().putString(PrefKeys.INSTALL_REFERRER, referrer).commit();
-            logEvent("installation", referralData);
-        }
-    }
-
 
     /**
      * Register the application for GCM notifications

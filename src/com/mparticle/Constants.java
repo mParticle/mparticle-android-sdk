@@ -46,6 +46,8 @@ package com.mparticle;
         public static final String SESSION_LENGTH = "sl";
         public static final String ATTRIBUTES = "attrs";
         public static final String NAME = "n";
+        // referrer
+        public static final String LAUNCH_URI = "lu";
         // event timing
         public static final String EVENT_START_TIME = "est";
         public static final String EVENT_DURATION = "el";
@@ -67,6 +69,7 @@ package com.mparticle;
         public static final String APP_PACKAGE_NAME = "apn";
         public static final String APP_INSTALLER_NAME = "ain";
         public static final String MPARTICLE_INSTALL_TIME = "ict";
+        public static final String INSTALL_REFERRER = "ir";
         // device info
         public static final String BUILD_ID = "bid";
         public static final String BRAND = "b";
@@ -135,7 +138,6 @@ package com.mparticle;
         public static final String ENABLE_CRASH_REPORTING = "enable_crash_reporting";
         public static final String ENABLE_PUSH_NOTIFICATIONS = "enable_push_notifications";
         public static final String PUSH_NOTIFICATION_SENDER_ID = "push_notification_sender_id";
-        public static final String ENABLE_REFERRER_TRACKING = "enable_referrer_tracking";
         // MessageManager
         public static final String UPLOAD_INTERVAL = "upload_interval";
         public static final String ENABLE_SSL = "enable_secure_transport";
