@@ -47,7 +47,7 @@ package com.mparticle;
         public static final String ATTRIBUTES = "attrs";
         public static final String NAME = "n";
         // referrer
-        public static final String LAUNCH_URI = "lu";
+        public static final String LAUNCH_REFERRER = "lr";
         // event timing
         public static final String EVENT_START_TIME = "est";
         public static final String EVENT_DURATION = "el";

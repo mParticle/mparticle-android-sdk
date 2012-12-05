@@ -151,7 +151,7 @@ import com.mparticle.Constants.MessageType;
     public void startSession(String sessionId, long time, String launchUri) {
         try {
             JSONObject message = createMessage(MessageType.SESSION_START, sessionId, time, time, null, null, true);
-            message.put(MessageKey.LAUNCH_URI, launchUri);
+            message.put(MessageKey.LAUNCH_REFERRER, launchUri);
             mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
         } catch (JSONException e) {
             Log.w(TAG, "Failed to create mParticle start session message");
