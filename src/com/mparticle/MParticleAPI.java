@@ -16,6 +16,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -94,6 +95,12 @@ public class MParticleAPI {
         if (null==context) {
             throw new IllegalArgumentException("context is required");
         }
+
+        if (PackageManager.PERMISSION_DENIED == context
+                .checkCallingOrSelfPermission(android.Manifest.permission.INTERNET)) {
+            throw new IllegalArgumentException("mParticle requires android.permission.INTERNET permission");
+        }
+
         // initialize static objects
         if (null == sDefaultSettings) {
             Properties defaultSettings = new Properties();
