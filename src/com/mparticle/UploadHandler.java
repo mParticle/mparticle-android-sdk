@@ -103,6 +103,9 @@ import com.mparticle.MessageDatabase.UploadTable;
     public static final String SERVICE_HOST = "api.dev.mparticle.com";
     public static final String SERVICE_VERSION = "v1";
 
+    public static final String SQL_UPLOADABLE_MESSAGES = String.format("%s=? and (%s='NO-SESSION' or %s>=?)",
+            MessageTable.API_KEY, MessageTable.SESSION_ID, MessageTable.STATUS);
+
     public UploadHandler(Context appContext, Looper looper, String apiKey, String secret) {
         super(looper);
         mApiKey = apiKey;
@@ -193,19 +196,18 @@ import com.mparticle.MessageDatabase.UploadTable;
         try {
             // select messages ready to upload
             SQLiteDatabase db = mDB.getWritableDatabase();
-            String selection = String.format("%s=? and (%s='NO-SESSION' or %s>=?)",
-                    MessageTable.API_KEY, MessageTable.SESSION_ID, MessageTable.STATUS);
+
             String[] selectionArgs = new String[]{mApiKey, Integer.toString(mUploadMode)};
             String[] selectionColumns = new String[]{"_id", MessageTable.MESSAGE, MessageTable.CREATED_AT};
-            Cursor readyMessagesCursor = db.query(MessageTable.TABLE_NAME, selectionColumns, selection, selectionArgs, null, null, MessageTable.CREATED_AT+" , _id");
+            Cursor readyMessagesCursor = db.query(MessageTable.TABLE_NAME, selectionColumns, SQL_UPLOADABLE_MESSAGES, selectionArgs, null, null, MessageTable.CREATED_AT+" , _id");
             if (readyMessagesCursor.getCount()>0) {
                 if (mDebugMode) {
                     Log.i(TAG, "Processing " + readyMessagesCursor.getCount() + " events for upload");
                 }
                 JSONArray messagesArray = new JSONArray();
-                int lastReadyMessage = 0;
+                int lastMessageId = 0;
                 while (readyMessagesCursor.moveToNext()) {
-                    lastReadyMessage = readyMessagesCursor.getInt(0);
+                    lastMessageId = readyMessagesCursor.getInt(0);
                     JSONObject msgObject = new JSONObject(readyMessagesCursor.getString(1));
                     messagesArray.put(msgObject);
                 }
@@ -214,7 +216,7 @@ import com.mparticle.MessageDatabase.UploadTable;
                 // store in uploads table
                 dbInsertUpload(db, uploadMessage);
                 // delete processed messages
-                dbDeleteProcessedMessages(db, lastReadyMessage);
+                dbDeleteProcessedMessages(db, lastMessageId);
             }
         } catch (SQLiteException e) {
             Log.e(TAG, "Error preparing batch upload in mParticle DB", e);
@@ -460,9 +462,10 @@ import com.mparticle.MessageDatabase.UploadTable;
         db.insert(UploadTable.TABLE_NAME, null, contentValues);
     }
 
-    private void dbDeleteProcessedMessages(SQLiteDatabase db, int lastReadyMessage) {
-        String[] whereArgs = { mApiKey, Long.toString(lastReadyMessage) };
-        db.delete(MessageTable.TABLE_NAME, MessageTable.API_KEY + "=? and (_id<=? or " + MessageTable.SESSION_ID + "='NO-SESSION')", whereArgs);
+    private void dbDeleteProcessedMessages(SQLiteDatabase db, int lastMessageId) {
+        String[] whereArgs = new String[]{mApiKey, Integer.toString(mUploadMode), Long.toString(lastMessageId)};
+        String whereClause = SQL_UPLOADABLE_MESSAGES + " and _id<=?";
+        db.delete(MessageTable.TABLE_NAME, whereClause, whereArgs);
     }
 
     private void dbUpdateUploadStatus(SQLiteDatabase db, int id, int status) {
