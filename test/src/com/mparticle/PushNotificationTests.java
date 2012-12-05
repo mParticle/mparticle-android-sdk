@@ -19,14 +19,14 @@ public class PushNotificationTests extends AndroidTestCase {
       super.setUp();
       mMockMessageManager = mock(TestMessageManager.class);
       mPrefs = getContext().getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
-      mPrefs.edit().remove(PrefKeys.OPTOUT+"TestAppKey").commit();
+      mPrefs.edit().remove(PrefKeys.PUSH_REGISTRATION_ID).commit();
       mMParticleAPI = new MParticleAPI(getContext(), "TestAppKey", mMockMessageManager);
     }
 
     @Override
     protected void tearDown() throws Exception {
       super.tearDown();
-      mPrefs.edit().remove(PrefKeys.OPTOUT+"TestAppKey").commit();
+      mPrefs.edit().remove(PrefKeys.PUSH_REGISTRATION_ID).commit();
     }
 
     public void testSetPushRegistrationId() {
@@ -35,8 +35,9 @@ public class PushNotificationTests extends AndroidTestCase {
     }
 
     public void testClearPushRegistrationId() {
+        mPrefs.edit().putString(PrefKeys.PUSH_REGISTRATION_ID, "TOKEN2").commit();
         mMParticleAPI.clearPushRegistrationId();
-        verify(mMockMessageManager, times(1)).setPushRegistrationId(anyString(), eq(false));
+        verify(mMockMessageManager, times(1)).setPushRegistrationId(eq("TOKEN2"), eq(false));
     }
 
 }
