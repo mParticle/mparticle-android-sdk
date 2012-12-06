@@ -718,7 +718,7 @@ public class MParticleAPI {
         return checkedAttributes;
     }
 
-    /* package-private */ boolean setCheckedAttribute(JSONObject attributes, String key, Object value) {
+    /* package-private */ boolean setCheckedAttribute(JSONObject attributes, String key, String value) {
         if (null==attributes || null==key ) {
             return false;
         }
