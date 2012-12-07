@@ -18,7 +18,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
-        android:layout_toRightOf="@+id/apiKey"
+        android:layout_toRightOf="@id/apiKey"
         android:paddingLeft="10dip"
         android:text="@string/session_id" />
 
@@ -27,7 +27,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
-        android:layout_below="@+id/apiKey"
+        android:layout_below="@id/apiKey"
         android:text="@string/start_time" />
 
     <TextView
@@ -35,7 +35,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
-        android:layout_below="@+id/startTime"
+        android:layout_below="@id/startTime"
         android:text="@string/end_time" />
 
     <TextView
@@ -43,7 +43,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
-        android:layout_below="@+id/endTime"
+        android:layout_below="@id/endTime"
         android:text="@string/session_length" />
 
     <TextView
@@ -51,7 +51,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
-        android:layout_below="@+id/sessionLength"
+        android:layout_below="@id/sessionLength"
         android:text="@string/attributes" />
 
 </RelativeLayout>

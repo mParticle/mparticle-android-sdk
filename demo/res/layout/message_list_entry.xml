@@ -18,7 +18,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
-        android:layout_toRightOf="@+id/msgType"
+        android:layout_toRightOf="@id/msgType"
         android:paddingLeft="10dip"
         android:text="@string/message_id" />
 
@@ -27,15 +27,15 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
-        android:layout_below="@+id/msgType"
+        android:layout_below="@id/msgType"
         android:text="@string/api_key" />
 
     <TextView
         android:id="@+id/sessionId"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_toRightOf="@+id/apiKey"
-        android:layout_below="@+id/msgType"
+        android:layout_toRightOf="@id/apiKey"
+        android:layout_below="@id/msgType"
         android:paddingLeft="10dip"
         android:text="@string/session_id" />
 
@@ -44,7 +44,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
-        android:layout_below="@+id/sessionId"
+        android:layout_below="@id/sessionId"
         android:text="@string/time" />
 
     <TextView
@@ -52,7 +52,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
-        android:layout_below="@+id/msgTime"
+        android:layout_below="@id/msgTime"
         android:text="@string/status" />
 
     <TextView
@@ -60,7 +60,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
-        android:layout_below="@+id/msgStatus"
+        android:layout_below="@id/msgStatus"
         android:text="@string/message" />
 
 </RelativeLayout>

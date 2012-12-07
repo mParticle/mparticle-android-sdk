@@ -23,13 +23,13 @@
             android:id="@+id/spinnerApiKey"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_toRightOf="@+id/lblApiKeySecret" />
+            android:layout_toRightOf="@id/lblApiKeySecret" />
 
         <CheckBox
             android:id="@+id/checkBoxOptOut"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/spinnerApiKey"
+            android:layout_below="@id/spinnerApiKey"
             android:layout_marginLeft="40dp"
             android:onClick="pressToggleOption"
             android:text="@string/optout" />
@@ -38,9 +38,9 @@
             android:id="@+id/checkBoxDebugMode"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignBaseline="@+id/checkBoxOptOut"
-            android:layout_alignBottom="@+id/checkBoxOptOut"
-            android:layout_toRightOf="@+id/checkBoxOptOut"
+            android:layout_alignBaseline="@id/checkBoxOptOut"
+            android:layout_alignBottom="@id/checkBoxOptOut"
+            android:layout_toRightOf="@id/checkBoxOptOut"
             android:onClick="pressToggleOption"
             android:text="@string/debug" />
 
@@ -48,7 +48,7 @@
             android:id="@+id/lblEventsData"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/checkBoxOptOut"
+            android:layout_below="@id/checkBoxOptOut"
             android:text="@string/label_event_data_inputs"
             android:textSize="22sp" />
 
@@ -57,7 +57,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
-            android:layout_below="@+id/lblEventsData"
+            android:layout_below="@id/lblEventsData"
             android:onClick="pressEventButton"
             android:text="@string/button_a" />
 
@@ -65,9 +65,9 @@
             android:id="@+id/buttonB"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignBaseline="@+id/buttonA"
-            android:layout_alignBottom="@+id/buttonA"
-            android:layout_toRightOf="@+id/buttonA"
+            android:layout_alignBaseline="@id/buttonA"
+            android:layout_alignBottom="@id/buttonA"
+            android:layout_toRightOf="@id/buttonA"
             android:onClick="pressEventButton"
             android:text="@string/button_b" />
 
@@ -75,9 +75,9 @@
             android:id="@+id/buttonC"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignBottom="@+id/buttonB"
-            android:layout_alignTop="@+id/buttonA"
-            android:layout_toRightOf="@+id/buttonB"
+            android:layout_alignBottom="@id/buttonB"
+            android:layout_alignTop="@id/buttonA"
+            android:layout_toRightOf="@id/buttonB"
             android:onClick="pressEventButton"
             android:text="@string/button_c"
             android:textOff="Button C OFF"
@@ -88,7 +88,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
-            android:layout_below="@+id/buttonA"
+            android:layout_below="@id/buttonA"
             android:onClick="pressEventButton"
             android:text="@string/view_a" />
 
@@ -96,8 +96,8 @@
             android:id="@+id/viewB"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/buttonA"
-            android:layout_toRightOf="@+id/viewA"
+            android:layout_below="@id/buttonA"
+            android:layout_toRightOf="@id/viewA"
             android:onClick="pressEventButton"
             android:text="@string/view_b" />
 
@@ -105,8 +105,8 @@
             android:id="@+id/buttonError"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/buttonA"
-            android:layout_toRightOf="@+id/viewB"
+            android:layout_below="@id/buttonA"
+            android:layout_toRightOf="@id/viewB"
             android:onClick="pressEventButton"
             android:text="@string/error" />
 
@@ -114,8 +114,8 @@
             android:id="@+id/buttonException"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/buttonA"
-            android:layout_toRightOf="@+id/buttonError"
+            android:layout_below="@id/buttonA"
+            android:layout_toRightOf="@id/buttonError"
             android:onClick="pressEventButton"
             android:text="@string/exception" />
 
@@ -123,7 +123,7 @@
             android:id="@+id/eventEndUpload"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/viewA"
+            android:layout_below="@id/viewA"
             android:onClick="pressEventButton"
             android:text="@string/eventEndUpload" />
 
@@ -131,7 +131,7 @@
             android:id="@+id/userVarInputs"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/eventEndUpload" >
+            android:layout_below="@id/eventEndUpload" >
 
             <TextView
                 android:id="@+id/userVarLabel"
@@ -160,7 +160,7 @@
             android:id="@+id/sessionVarInputs"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/userVarInputs" >
+            android:layout_below="@id/userVarInputs" >
 
             <TextView
                 android:id="@+id/sessionVarLabel"
@@ -189,7 +189,7 @@
             android:id="@+id/textData"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/sessionVarInputs"
+            android:layout_below="@id/sessionVarInputs"
             android:text="@string/label_data"
             android:textSize="22sp" />
 
@@ -197,7 +197,7 @@
             android:id="@+id/buttonListSessions"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/textData"
+            android:layout_below="@id/textData"
             android:onClick="pressDataButton"
             android:text="@string/sessions" />
 
@@ -205,8 +205,8 @@
             android:id="@+id/buttonListMessages"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/textData"
-            android:layout_toRightOf="@+id/buttonListSessions"
+            android:layout_below="@id/textData"
+            android:layout_toRightOf="@id/buttonListSessions"
             android:onClick="pressDataButton"
             android:text="@string/messages" />
 
@@ -214,8 +214,8 @@
             android:id="@+id/buttonListUploads"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/textData"
-            android:layout_toRightOf="@+id/buttonListMessages"
+            android:layout_below="@id/textData"
+            android:layout_toRightOf="@id/buttonListMessages"
             android:onClick="pressDataButton"
             android:text="@string/uploads" />
 
@@ -223,8 +223,8 @@
             android:id="@+id/buttonListCommands"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/textData"
-            android:layout_toRightOf="@+id/buttonListUploads"
+            android:layout_below="@id/textData"
+            android:layout_toRightOf="@id/buttonListUploads"
             android:onClick="pressDataButton"
             android:text="@string/commands" />
 
@@ -232,7 +232,7 @@
             android:id="@+id/textControls"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/buttonListSessions"
+            android:layout_below="@id/buttonListSessions"
             android:text="@string/controls"
             android:textSize="22sp" />
 
@@ -240,7 +240,7 @@
             android:id="@+id/buttonStartSession"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/textControls"
+            android:layout_below="@id/textControls"
             android:onClick="pressSessionButton"
             android:text="@string/start" />
 
@@ -248,8 +248,8 @@
             android:id="@+id/buttonStopSession"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/textControls"
-            android:layout_toRightOf="@+id/buttonStartSession"
+            android:layout_below="@id/textControls"
+            android:layout_toRightOf="@id/buttonStartSession"
             android:onClick="pressSessionButton"
             android:text="@string/stop" />
 
@@ -257,8 +257,8 @@
             android:id="@+id/buttonNewSession"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/textControls"
-            android:layout_toRightOf="@+id/buttonStopSession"
+            android:layout_below="@id/textControls"
+            android:layout_toRightOf="@id/buttonStopSession"
             android:onClick="pressSessionButton"
             android:text="@string/label_new" />
 
@@ -266,8 +266,8 @@
             android:id="@+id/buttonEndSession"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/textControls"
-            android:layout_toRightOf="@+id/buttonNewSession"
+            android:layout_below="@id/textControls"
+            android:layout_toRightOf="@id/buttonNewSession"
             android:onClick="pressSessionButton"
             android:text="@string/end" />
 
@@ -275,8 +275,8 @@
             android:id="@+id/buttonUpload"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/textControls"
-            android:layout_toRightOf="@+id/buttonEndSession"
+            android:layout_below="@id/textControls"
+            android:layout_toRightOf="@id/buttonEndSession"
             android:onClick="pressSessionButton"
             android:text="@string/upload" />
 
@@ -284,7 +284,7 @@
             android:id="@+id/buttonCrash"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/buttonStartSession"
+            android:layout_below="@id/buttonStartSession"
             android:onClick="pressSessionButton"
             android:text="@string/crash" />
 
@@ -292,8 +292,8 @@
             android:id="@+id/buttonUpdateLocation"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/buttonStartSession"
-            android:layout_toRightOf="@+id/buttonCrash"
+            android:layout_below="@id/buttonStartSession"
+            android:layout_toRightOf="@id/buttonCrash"
             android:onClick="pressSessionButton"
             android:text="@string/update_location" />
 
@@ -301,7 +301,7 @@
             android:id="@+id/checkBoxExceptionsMode"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/buttonUpdateLocation"
+            android:layout_below="@id/buttonUpdateLocation"
             android:onClick="pressToggleOption"
             android:text="@string/exceptions" />
 
@@ -309,7 +309,7 @@
             android:id="@+id/pushNotifications"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/checkBoxExceptionsMode"
+            android:layout_below="@id/checkBoxExceptionsMode"
             android:background="#e8e8e8"
             android:paddingBottom="5dp"
             android:paddingTop="5dp" >
@@ -325,7 +325,7 @@
                 android:id="@+id/buttonPushAutoRegister"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@+id/lblPushNotifications"
+                android:layout_below="@id/lblPushNotifications"
                 android:onClick="pressNotifyButton"
                 android:text="@string/push_auto_reg" />
 
@@ -333,8 +333,8 @@
                 android:id="@+id/buttonPushAutoUnregister"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@+id/lblPushNotifications"
-                android:layout_toRightOf="@+id/buttonPushAutoRegister"
+                android:layout_below="@id/lblPushNotifications"
+                android:layout_toRightOf="@id/buttonPushAutoRegister"
                 android:onClick="pressNotifyButton"
                 android:text="@string/push_auto_unreg" />
 
@@ -342,8 +342,8 @@
                 android:id="@+id/buttonPushRefresh"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@+id/lblPushNotifications"
-                android:layout_toRightOf="@+id/buttonPushAutoUnregister"
+                android:layout_below="@id/lblPushNotifications"
+                android:layout_toRightOf="@id/buttonPushAutoUnregister"
                 android:onClick="pressNotifyButton"
                 android:text="@string/refresh" />
 
@@ -351,14 +351,14 @@
                 android:id="@+id/editPushRegistrationId"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@+id/buttonPushAutoRegister"
+                android:layout_below="@id/buttonPushAutoRegister"
                 android:inputType="text|textNoSuggestions" />
 
             <Button
                 android:id="@+id/buttonPushManualRegister"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@+id/editPushRegistrationId"
+                android:layout_below="@id/editPushRegistrationId"
                 android:onClick="pressNotifyButton"
                 android:text="@string/push_man_reg" />
 
@@ -366,8 +366,8 @@
                 android:id="@+id/buttonPushManualUnregister"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@+id/editPushRegistrationId"
-                android:layout_toRightOf="@+id/buttonPushManualRegister"
+                android:layout_below="@id/editPushRegistrationId"
+                android:layout_toRightOf="@id/buttonPushManualRegister"
                 android:onClick="pressNotifyButton"
                 android:text="@string/push_man_unreg" />
         </RelativeLayout>
@@ -376,7 +376,7 @@
             android:id="@+id/locationListener"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/pushNotifications" >
+            android:layout_below="@id/pushNotifications" >
 
             <TextView
                 android:id="@+id/lblLocationTracking"
@@ -389,7 +389,7 @@
                 android:id="@+id/enableLocationTracking"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@+id/lblLocationTracking"
+                android:layout_below="@id/lblLocationTracking"
                 android:layout_marginTop="15dp"
                 android:onClick="pressToggleLocationTracking"
                 android:text="@string/track_location" />
@@ -398,8 +398,8 @@
                 android:id="@+id/lblProvider"
                 android:layout_width="100dp"
                 android:layout_height="wrap_content"
-                android:layout_below="@+id/lblLocationTracking"
-                android:layout_toRightOf="@+id/enableLocationTracking"
+                android:layout_below="@id/lblLocationTracking"
+                android:layout_toRightOf="@id/enableLocationTracking"
                 android:text="@string/provider"
                 android:textSize="16sp" />
 
@@ -407,8 +407,8 @@
                 android:id="@+id/lblLocMinTime"
                 android:layout_width="100dp"
                 android:layout_height="wrap_content"
-                android:layout_below="@+id/lblLocationTracking"
-                android:layout_toRightOf="@+id/lblProvider"
+                android:layout_below="@id/lblLocationTracking"
+                android:layout_toRightOf="@id/lblProvider"
                 android:text="@string/loc_min_time"
                 android:textSize="16sp" />
 
@@ -416,8 +416,8 @@
                 android:id="@+id/lblLocMinDistance"
                 android:layout_width="100dp"
                 android:layout_height="wrap_content"
-                android:layout_below="@+id/lblLocationTracking"
-                android:layout_toRightOf="@+id/lblLocMinTime"
+                android:layout_below="@id/lblLocationTracking"
+                android:layout_toRightOf="@id/lblLocMinTime"
                 android:text="@string/loc_min_dist"
                 android:textSize="16sp" />
 
@@ -425,16 +425,16 @@
                 android:id="@+id/spinLocationProvider"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignLeft="@+id/lblProvider"
-                android:layout_below="@+id/lblProvider"
+                android:layout_alignLeft="@id/lblProvider"
+                android:layout_below="@id/lblProvider"
                 android:ems="4" />
 
             <EditText
                 android:id="@+id/editLocMinTime"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignLeft="@+id/lblLocMinTime"
-                android:layout_below="@+id/lblLocMinTime"
+                android:layout_alignLeft="@id/lblLocMinTime"
+                android:layout_below="@id/lblLocMinTime"
                 android:ems="4"
                 android:inputType="number"
                 android:text="@string/loc_min_time_default" />
@@ -443,8 +443,8 @@
                 android:id="@+id/editLocMinDistance"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignLeft="@+id/lblLocMinDistance"
-                android:layout_below="@+id/lblLocMinDistance"
+                android:layout_alignLeft="@id/lblLocMinDistance"
+                android:layout_below="@id/lblLocMinDistance"
                 android:ems="4"
                 android:inputType="number"
                 android:text="@string/loc_min_dist_default" />
@@ -454,7 +454,7 @@
             android:id="@+id/browserIntegration"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/locationListener"
+            android:layout_below="@id/locationListener"
             android:background="#e8e8e8" >
 
             <TextView
@@ -469,7 +469,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentLeft="true"
-                android:layout_below="@+id/lblBrowserIntegration"
+                android:layout_below="@id/lblBrowserIntegration"
                 android:onClick="pressBrowserButton"
                 android:text="@string/button_browser_status" />
 
@@ -477,8 +477,8 @@
                 android:id="@+id/buttonBrowserClearCookie"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@+id/lblBrowserIntegration"
-                android:layout_toRightOf="@+id/buttonBrowserStatus"
+                android:layout_below="@id/lblBrowserIntegration"
+                android:layout_toRightOf="@id/buttonBrowserStatus"
                 android:onClick="pressBrowserButton"
                 android:text="@string/button_browser_clear_cookie" />
 
@@ -487,7 +487,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentLeft="true"
-                android:layout_below="@+id/buttonBrowserStatus"
+                android:layout_below="@id/buttonBrowserStatus"
                 android:onClick="pressBrowserButton"
                 android:text="@string/button_browser_set_cookie_pixel" />
 
@@ -495,7 +495,7 @@
                 android:id="@+id/buttonBrowserSetCookieRedirect"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@+id/buttonBrowserStatus"
+                android:layout_below="@id/buttonBrowserStatus"
                 android:layout_toRightOf="@id/buttonBrowserSetCookiePixel"
                 android:onClick="pressBrowserButton"
                 android:text="@string/button_browser_set_cookie_redirect" />
@@ -505,7 +505,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentLeft="true"
-                android:layout_below="@+id/buttonBrowserSetCookiePixel"
+                android:layout_below="@id/buttonBrowserSetCookiePixel"
                 android:onClick="pressBrowserButton"
                 android:text="@string/button_browser_set_return_custom" />
 
@@ -514,7 +514,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentLeft="true"
-                android:layout_below="@+id/buttonBrowserSetAndReturnCustom"
+                android:layout_below="@id/buttonBrowserSetAndReturnCustom"
                 android:onClick="pressBrowserButton"
                 android:text="@string/button_browser_set_return_http" />
 
