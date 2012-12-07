@@ -449,6 +449,76 @@
                 android:inputType="number"
                 android:text="@string/loc_min_dist_default" />
         </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/browserIntegration"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/locationListener"
+            android:background="#e8e8e8" >
+
+            <TextView
+                android:id="@+id/lblBrowserIntegration"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/browser_integration"
+                android:textSize="22sp" />
+
+            <Button
+                android:id="@+id/buttonBrowserStatus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_below="@+id/lblBrowserIntegration"
+                android:onClick="pressBrowserButton"
+                android:text="@string/button_browser_status" />
+
+            <Button
+                android:id="@+id/buttonBrowserClearCookie"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/lblBrowserIntegration"
+                android:layout_toRightOf="@+id/buttonBrowserStatus"
+                android:onClick="pressBrowserButton"
+                android:text="@string/button_browser_clear_cookie" />
+
+            <Button
+                android:id="@+id/buttonBrowserSetCookiePixel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_below="@+id/buttonBrowserStatus"
+                android:onClick="pressBrowserButton"
+                android:text="@string/button_browser_set_cookie_pixel" />
+
+            <Button
+                android:id="@+id/buttonBrowserSetCookieRedirect"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/buttonBrowserStatus"
+                android:layout_toRightOf="@id/buttonBrowserSetCookiePixel"
+                android:onClick="pressBrowserButton"
+                android:text="@string/button_browser_set_cookie_redirect" />
+
+            <Button
+                android:id="@+id/buttonBrowserSetAndReturnCustom"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_below="@+id/buttonBrowserSetCookiePixel"
+                android:onClick="pressBrowserButton"
+                android:text="@string/button_browser_set_return_custom" />
+
+            <Button
+                android:id="@+id/buttonBrowserSetAndReturnHttp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_below="@+id/buttonBrowserSetAndReturnCustom"
+                android:onClick="pressBrowserButton"
+                android:text="@string/button_browser_set_return_http" />
+
+            </RelativeLayout>
     </RelativeLayout>
 
 </ScrollView>

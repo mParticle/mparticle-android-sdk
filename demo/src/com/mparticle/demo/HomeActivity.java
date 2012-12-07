@@ -12,6 +12,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.location.Location;
 import android.location.LocationManager;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -270,6 +271,41 @@ public class HomeActivity extends Activity implements OnItemSelectedListener {
             updatePushControls();
             break;
         }
+    }
+
+    public void pressBrowserButton(View view) {
+        String url = "http://www.gynn.org/mp/";
+        String mp_token = "unknown";
+        // NOTE: we could expose a getMParticleToken() method from the API
+        JSONObject info = DemoDeviceAttributes.collectDeviceInfo(this.getApplicationContext());
+        try {
+            mp_token = info.getString("duid");
+        } catch (JSONException e) {
+        }
+
+        switch (view.getId()) {
+        case R.id.buttonBrowserStatus:
+            url += "mp_client.php";
+            break;
+        case R.id.buttonBrowserClearCookie:
+            url += "mp_client.php?mp_token=";
+            break;
+        case R.id.buttonBrowserSetCookiePixel:
+            url += "mp_client.php?mp_token=" + mp_token;
+            break;
+        case R.id.buttonBrowserSetCookieRedirect:
+            url += "mp.php?mp_token=" + mp_token + "&mp_location=http://www.gynn.org/mp/mp_client.php";
+            break;
+        case R.id.buttonBrowserSetAndReturnCustom:
+            url += "mp.php?mp_token=" + mp_token + "&mp_location=mparticledemo://test/abc?def=ghi";
+            break;
+        case R.id.buttonBrowserSetAndReturnHttp:
+            url += "mp.php?mp_token=" + mp_token + "&mp_location=http://demo.mparticle.com/testreferrer/abc?def=ghi";
+            break;
+        }
+        Uri uriUrl = Uri.parse(url);
+        Intent launchBrowser = new Intent(Intent.ACTION_VIEW, uriUrl);
+        startActivity(launchBrowser);
     }
 
     // this async task polls the registration id for up to 5 seconds to see if

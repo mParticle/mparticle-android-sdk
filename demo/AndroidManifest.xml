@@ -52,7 +52,7 @@
                 <category android:name="android.intent.category.BROWSABLE" />
             </intent-filter>
             <intent-filter>
-                <data android:scheme="mparticle.demo.scheme" />
+                <data android:scheme="mparticledemo" />
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
