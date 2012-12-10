@@ -20,9 +20,9 @@ mParticle Browser Integration</h1>
 <li>RED - No cookie has been received</li>
 </ul>
 <?php
-$pixel_path = "/mp/mp.php" . ( isset($_GET['mp_token']) ? "?mp_token=".$_GET['mp_token'] : "");
+$pixel_path = "/mp/mp.php?time=". time() . ( isset($_GET['mp_token']) ? "&mp_token=".$_GET['mp_token'] : "");
 ?>
-<a href="mp_client.php"><img src="<?php echo $pixel_path; ?>" style="border: 1px solid black;"></a>
+<a href="mp_client.php"><img src="<?php echo $pixel_path; ?>" style="border: 1px solid black;" width="100%"></a>
 <br/>
 <i>Image source: <?php echo $pixel_path; ?></i>
 
