@@ -1,11 +1,15 @@
 <?php
-// This generates a 300x100 gif with the background set 
-// based on the value of an "mp_cookie" cookie
+// This generates a gif with the background color set 
+// based on the value of an "mp_cookie" cookie and some 
+// info about the params and current state
 // It also sets or clears the cookie based on the "mp_token" param
 
 $mp_cookie = $_COOKIE['mp_cookie'];
 $mp_token = $_GET['mp_token'];
 $agent = $_SERVER['HTTP_USER_AGENT'];
+
+$WIDTH = 400;
+$HEIGHT = 100;
 
 if (isset($_GET['mp_token'])) {
   if (strlen($mp_token) == 0 ) {
@@ -21,18 +25,18 @@ if (isset($_GET['mp_location'])) {
     header( 'Location: ' . $_GET['mp_location'] ) ;
   }
 } else {
-  $im = imagecreatetruecolor(300, 100);
+  $im = imagecreatetruecolor($WIDTH, $HEIGHT);
   if (isset($_COOKIE['mp_cookie'])) {
     if ($mp_cookie==$mp_token || !isset($_GET['mp_token'])) {
       // GREEN - cookie set and matches
-      imagefilledrectangle($im, 0, 0, 299, 99, 0x1BA608);
+      imagefilledrectangle($im, 0, 0, $WIDTH-1 , $HEIGHT-1 , 0x1BA608);
     } else {
       // YELLOW - cookie being reset or cleared
-      imagefilledrectangle($im, 0, 0, 299, 99, 0xE8E841);
+      imagefilledrectangle($im, 0, 0, $WIDTH-1 , $HEIGHT-1 , 0xDEDE18);
     }
   } else {
     // RED - no cookie set
-    imagefilledrectangle($im, 0, 0, 299, 99, 0xFF0000);
+    imagefilledrectangle($im, 0, 0, $WIDTH-1 , $HEIGHT-1 , 0xFF0000);
   }
   imagestring($im, 3, 20, 15, 'mp_cookie: ' . $mp_cookie, 0xFFFFFF);
   imagestring($im, 3, 20, 45, 'mp_token: ' . $mp_token, 0xFFFFFF);
