@@ -5,6 +5,7 @@
 
 $mp_cookie = $_COOKIE['mp_cookie'];
 $mp_token = $_GET['mp_token'];
+$agent = $_SERVER['HTTP_USER_AGENT'];
 
 if (isset($_GET['mp_token'])) {
   if (strlen($mp_token) == 0 ) {
@@ -14,7 +15,11 @@ if (isset($_GET['mp_token'])) {
   }
 }
 if (isset($_GET['mp_location'])) {
-  header( 'Location: ' . $_GET['mp_location'] ) ;
+  if(preg_match('/AppleWebKit/i',$agent)){
+    echo "<script>window.location='" . $_GET['mp_location'] . "';</script>";
+  } else {
+    header( 'Location: ' . $_GET['mp_location'] ) ;
+  }
 } else {
   $im = imagecreatetruecolor(300, 100);
   if (isset($_COOKIE['mp_cookie'])) {
@@ -36,5 +41,4 @@ if (isset($_GET['mp_location'])) {
   imagegif($im);
   imagedestroy($im);
 }
-
 ?>
