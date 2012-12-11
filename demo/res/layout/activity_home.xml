@@ -1,137 +1,145 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/scrollView1"
     android:layout_width="match_parent"
     android:layout_height="fill_parent"
     tools:context=".HomeActivity" >
 
-    <RelativeLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:tools="http://schemas.android.com/tools"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical" >
 
-        <TextView
-            android:id="@+id/lblApiKeySecret"
-            android:layout_width="wrap_content"
+        <RelativeLayout
+            android:id="@+id/layoutApiPicker"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/label_api_key_secret"
-            android:textSize="22sp" />
+            android:orientation="vertical" >
 
-        <Spinner
-            android:id="@+id/spinnerApiKey"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_toRightOf="@id/lblApiKeySecret" />
+            <TextView
+                android:id="@+id/lblApiKeySecret"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/label_api_key_secret"
+                android:textSize="22sp" />
 
-        <CheckBox
-            android:id="@+id/checkBoxOptOut"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/spinnerApiKey"
-            android:layout_marginLeft="40dp"
-            android:onClick="pressToggleOption"
-            android:text="@string/optout" />
+            <Spinner
+                android:id="@+id/spinnerApiKey"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_toRightOf="@id/lblApiKeySecret" />
 
-        <CheckBox
-            android:id="@+id/checkBoxDebugMode"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignBaseline="@id/checkBoxOptOut"
-            android:layout_alignBottom="@id/checkBoxOptOut"
-            android:layout_toRightOf="@id/checkBoxOptOut"
-            android:onClick="pressToggleOption"
-            android:text="@string/debug" />
+            <CheckBox
+                android:id="@+id/checkBoxOptOut"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/spinnerApiKey"
+                android:layout_marginLeft="40dp"
+                android:onClick="pressToggleOption"
+                android:text="@string/optout" />
 
-        <TextView
-            android:id="@+id/lblEventsData"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/checkBoxOptOut"
-            android:text="@string/label_event_data_inputs"
-            android:textSize="22sp" />
-
-        <Button
-            android:id="@+id/buttonA"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_below="@id/lblEventsData"
-            android:onClick="pressEventButton"
-            android:text="@string/button_a" />
-
-        <Button
-            android:id="@+id/buttonB"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignBaseline="@id/buttonA"
-            android:layout_alignBottom="@id/buttonA"
-            android:layout_toRightOf="@id/buttonA"
-            android:onClick="pressEventButton"
-            android:text="@string/button_b" />
-
-        <ToggleButton
-            android:id="@+id/buttonC"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignBottom="@id/buttonB"
-            android:layout_alignTop="@id/buttonA"
-            android:layout_toRightOf="@id/buttonB"
-            android:onClick="pressEventButton"
-            android:text="@string/button_c"
-            android:textOff="Button C OFF"
-            android:textOn="Button C ON" />
-
-        <Button
-            android:id="@+id/viewA"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_below="@id/buttonA"
-            android:onClick="pressEventButton"
-            android:text="@string/view_a" />
-
-        <Button
-            android:id="@+id/viewB"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/buttonA"
-            android:layout_toRightOf="@id/viewA"
-            android:onClick="pressEventButton"
-            android:text="@string/view_b" />
-
-        <Button
-            android:id="@+id/buttonError"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/buttonA"
-            android:layout_toRightOf="@id/viewB"
-            android:onClick="pressEventButton"
-            android:text="@string/error" />
-
-        <Button
-            android:id="@+id/buttonException"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/buttonA"
-            android:layout_toRightOf="@id/buttonError"
-            android:onClick="pressEventButton"
-            android:text="@string/exception" />
-
-        <Button
-            android:id="@+id/eventEndUpload"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/viewA"
-            android:onClick="pressEventButton"
-            android:text="@string/eventEndUpload" />
+            <CheckBox
+                android:id="@+id/checkBoxDebugMode"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignBaseline="@id/checkBoxOptOut"
+                android:layout_alignBottom="@id/checkBoxOptOut"
+                android:layout_toRightOf="@id/checkBoxOptOut"
+                android:onClick="pressToggleOption"
+                android:text="@string/debug" />
+        </RelativeLayout>
 
         <LinearLayout
-            android:id="@+id/userVarInputs"
-            android:layout_width="wrap_content"
+            android:id="@+id/layoutEvents"
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@id/eventEndUpload" >
+            android:background="#e8e8e8"
+            android:orientation="vertical" >
+
+            <TextView
+                android:id="@+id/lblEventsData"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/label_event_data_inputs"
+                android:textSize="22sp" />
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" >
+
+                <Button
+                    android:id="@+id/buttonA"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:onClick="pressEventButton"
+                    android:text="@string/button_a" />
+
+                <Button
+                    android:id="@+id/buttonB"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:onClick="pressEventButton"
+                    android:text="@string/button_b" />
+
+                <ToggleButton
+                    android:id="@+id/buttonC"
+                    android:layout_width="wrap_content"
+                    android:layout_height="fill_parent"
+                    android:onClick="pressEventButton"
+                    android:text="@string/button_c"
+                    android:textOff="Button C OFF"
+                    android:textOn="Button C ON" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" >
+
+                <Button
+                    android:id="@+id/viewA"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:onClick="pressEventButton"
+                    android:text="@string/view_a" />
+
+                <Button
+                    android:id="@+id/viewB"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:onClick="pressEventButton"
+                    android:text="@string/view_b" />
+
+                <Button
+                    android:id="@+id/buttonError"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:onClick="pressEventButton"
+                    android:text="@string/error" />
+
+                <Button
+                    android:id="@+id/buttonException"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:onClick="pressEventButton"
+                    android:text="@string/exception" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" >
+
+                <Button
+                    android:id="@+id/eventEndUpload"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:onClick="pressEventButton"
+                    android:text="@string/eventEndUpload" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/layoutUserAttributes"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" >
 
             <TextView
                 android:id="@+id/userVarLabel"
@@ -157,13 +165,11 @@
         </LinearLayout>
 
         <LinearLayout
-            android:id="@+id/sessionVarInputs"
+            android:id="@+id/layoutSessionAttributes"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/userVarInputs" >
+            android:layout_height="wrap_content" >
 
             <TextView
-                android:id="@+id/sessionVarLabel"
                 android:layout_width="100dp"
                 android:layout_height="wrap_content"
                 android:text="@string/label_session_var"
@@ -185,131 +191,137 @@
                 android:text="@string/button_set" />
         </LinearLayout>
 
-        <TextView
-            android:id="@+id/textData"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:id="@+id/layoutDatabase"
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@id/sessionVarInputs"
-            android:text="@string/label_data"
-            android:textSize="22sp" />
+            android:background="#e8e8e8"
+            android:orientation="vertical" >
 
-        <Button
-            android:id="@+id/buttonListSessions"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/textData"
-            android:onClick="pressDataButton"
-            android:text="@string/sessions" />
+            <TextView
+                android:id="@+id/textData"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/label_data"
+                android:textSize="22sp" />
 
-        <Button
-            android:id="@+id/buttonListMessages"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/textData"
-            android:layout_toRightOf="@id/buttonListSessions"
-            android:onClick="pressDataButton"
-            android:text="@string/messages" />
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" >
 
-        <Button
-            android:id="@+id/buttonListUploads"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/textData"
-            android:layout_toRightOf="@id/buttonListMessages"
-            android:onClick="pressDataButton"
-            android:text="@string/uploads" />
+                <Button
+                    android:id="@+id/buttonListSessions"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:onClick="pressDataButton"
+                    android:text="@string/sessions" />
 
-        <Button
-            android:id="@+id/buttonListCommands"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/textData"
-            android:layout_toRightOf="@id/buttonListUploads"
-            android:onClick="pressDataButton"
-            android:text="@string/commands" />
+                <Button
+                    android:id="@+id/buttonListMessages"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:onClick="pressDataButton"
+                    android:text="@string/messages" />
 
-        <TextView
-            android:id="@+id/textControls"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/buttonListSessions"
-            android:text="@string/controls"
-            android:textSize="22sp" />
+                <Button
+                    android:id="@+id/buttonListUploads"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:onClick="pressDataButton"
+                    android:text="@string/uploads" />
 
-        <Button
-            android:id="@+id/buttonStartSession"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/textControls"
-            android:onClick="pressSessionButton"
-            android:text="@string/start" />
+                <Button
+                    android:id="@+id/buttonListCommands"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:onClick="pressDataButton"
+                    android:text="@string/commands" />
+            </LinearLayout>
+        </LinearLayout>
 
-        <Button
-            android:id="@+id/buttonStopSession"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:id="@+id/layoutSessionControls"
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@id/textControls"
-            android:layout_toRightOf="@id/buttonStartSession"
-            android:onClick="pressSessionButton"
-            android:text="@string/stop" />
+            android:orientation="vertical" >
 
-        <Button
-            android:id="@+id/buttonNewSession"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/textControls"
-            android:layout_toRightOf="@id/buttonStopSession"
-            android:onClick="pressSessionButton"
-            android:text="@string/label_new" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/controls"
+                android:textSize="22sp" />
 
-        <Button
-            android:id="@+id/buttonEndSession"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/textControls"
-            android:layout_toRightOf="@id/buttonNewSession"
-            android:onClick="pressSessionButton"
-            android:text="@string/end" />
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" >
 
-        <Button
-            android:id="@+id/buttonUpload"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/textControls"
-            android:layout_toRightOf="@id/buttonEndSession"
-            android:onClick="pressSessionButton"
-            android:text="@string/upload" />
+                <Button
+                    android:id="@+id/buttonStartSession"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:onClick="pressSessionButton"
+                    android:text="@string/start" />
 
-        <Button
-            android:id="@+id/buttonCrash"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/buttonStartSession"
-            android:onClick="pressSessionButton"
-            android:text="@string/crash" />
+                <Button
+                    android:id="@+id/buttonStopSession"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:onClick="pressSessionButton"
+                    android:text="@string/stop" />
 
-        <Button
-            android:id="@+id/buttonUpdateLocation"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/buttonStartSession"
-            android:layout_toRightOf="@id/buttonCrash"
-            android:onClick="pressSessionButton"
-            android:text="@string/update_location" />
+                <Button
+                    android:id="@+id/buttonNewSession"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:onClick="pressSessionButton"
+                    android:text="@string/label_new" />
 
-        <CheckBox
-            android:id="@+id/checkBoxExceptionsMode"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/buttonUpdateLocation"
-            android:onClick="pressToggleOption"
-            android:text="@string/exceptions" />
+                <Button
+                    android:id="@+id/buttonEndSession"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:onClick="pressSessionButton"
+                    android:text="@string/end" />
+
+                <Button
+                    android:id="@+id/buttonUpload"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:onClick="pressSessionButton"
+                    android:text="@string/upload" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" >
+
+                <Button
+                    android:id="@+id/buttonCrash"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:onClick="pressSessionButton"
+                    android:text="@string/crash" />
+
+                <Button
+                    android:id="@+id/buttonUpdateLocation"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:onClick="pressSessionButton"
+                    android:text="@string/update_location" />
+            </LinearLayout>
+
+            <CheckBox
+                android:id="@+id/checkBoxExceptionsMode"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:onClick="pressToggleOption"
+                android:text="@string/exceptions" />
+        </LinearLayout>
 
         <RelativeLayout
-            android:id="@+id/pushNotifications"
+            android:id="@+id/layoutPushNotifications"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@id/checkBoxExceptionsMode"
             android:background="#e8e8e8"
             android:paddingBottom="5dp"
             android:paddingTop="5dp" >
@@ -373,10 +385,9 @@
         </RelativeLayout>
 
         <RelativeLayout
-            android:id="@+id/locationListener"
+            android:id="@+id/layoutLocation"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/pushNotifications" >
+            android:layout_height="wrap_content" >
 
             <TextView
                 android:id="@+id/lblLocationTracking"
@@ -451,10 +462,9 @@
         </RelativeLayout>
 
         <RelativeLayout
-            android:id="@+id/browserIntegration"
+            android:id="@+id/layoutInstallTracker"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@id/locationListener"
             android:background="#e8e8e8" >
 
             <TextView
@@ -489,8 +499,7 @@
                 android:layout_below="@id/buttonBrowserStatus"
                 android:onClick="pressBrowserButton"
                 android:text="@string/button_browser_track_install_http" />
-
-            </RelativeLayout>
-    </RelativeLayout>
+        </RelativeLayout>
+    </LinearLayout>
 
 </ScrollView>
