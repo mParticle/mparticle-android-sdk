@@ -16,7 +16,7 @@ public class ExceptionHandlerTests extends AndroidTestCase {
     protected void setUp() throws Exception {
       super.setUp();
       mOriginalUEH = Thread.getDefaultUncaughtExceptionHandler();
-      mMockMessageManager = mock(TestMessageManager.class);
+      mMockMessageManager = mock(MockableMessageManager.class);
       mMParticleAPI = new MParticleAPI(getContext(), "TestAppKey", mMockMessageManager);
     }
 

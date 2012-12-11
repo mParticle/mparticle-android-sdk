@@ -17,7 +17,7 @@ public class PushNotificationTests extends AndroidTestCase {
     @Override
     protected void setUp() throws Exception {
       super.setUp();
-      mMockMessageManager = mock(TestMessageManager.class);
+      mMockMessageManager = mock(MockableMessageManager.class);
       mPrefs = getContext().getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
       mPrefs.edit().remove(PrefKeys.PUSH_REGISTRATION_ID).commit();
       mMParticleAPI = new MParticleAPI(getContext(), "TestAppKey", mMockMessageManager);
