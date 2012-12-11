@@ -665,7 +665,7 @@ public class MParticleAPI {
         debugLog("Cleared push registration token");
         String registrationId = getPushRegistrationId();
         if (null!=registrationId) {
-            sPreferences.edit().putString(PrefKeys.PUSH_REGISTRATION_ID, null).commit();
+            sPreferences.edit().remove(PrefKeys.PUSH_REGISTRATION_ID).commit();
             mMessageManager.setPushRegistrationId(registrationId, false);
         } else {
             Log.i(TAG, "Clear push registration requested but device is not registered");
