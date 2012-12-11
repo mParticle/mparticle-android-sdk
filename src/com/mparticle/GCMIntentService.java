@@ -16,14 +16,22 @@ import android.util.Log;
 
 public class GCMIntentService extends IntentService {
 
-    public GCMIntentService() {
-        super("com.mparticle.GCMIntentService");
-    }
-
     private static final String TAG = Constants.LOG_TAG;
 
     private static PowerManager.WakeLock sWakeLock;
     private static final Object LOCK = GCMIntentService.class;
+
+    private MParticleAPI mMParticleAPI;
+
+    public GCMIntentService() {
+        super("com.mparticle.GCMIntentService");
+    }
+
+    // for unit tests
+    /* package-private */ GCMIntentService(MParticleAPI mParticleAPI) {
+        this();
+        mMParticleAPI = mParticleAPI;
+    }
 
     static void runIntentInService(Context context, Intent intent) {
         synchronized(LOCK) {
@@ -48,16 +56,19 @@ public class GCMIntentService extends IntentService {
             }
         } finally {
             synchronized(LOCK) {
-                sWakeLock.release();
+                if (sWakeLock != null) {
+                    sWakeLock.release();
+                }
             }
         }
     }
 
     private void handleRegistration(Intent intent) {
 
-        MParticleAPI mParticleAPI;
         try {
-            mParticleAPI = MParticleAPI.getInstance(this);
+            if (null==mMParticleAPI) {
+                mMParticleAPI = MParticleAPI.getInstance(this);
+            }
         } catch (Throwable t) {
             // failure to instantiate mParticle likely means that the mparticle.properties file is not correct
             // and a warning message will already have been logged
@@ -70,10 +81,10 @@ public class GCMIntentService extends IntentService {
 
         if (registrationId != null) {
             // registration succeeded
-            mParticleAPI.setPushRegistrationId(registrationId);
+            mMParticleAPI.setPushRegistrationId(registrationId);
         } else  if (unregistered != null) {
             // unregistration succeeded
-            mParticleAPI.clearPushRegistrationId();
+            mMParticleAPI.clearPushRegistrationId();
         } else if (error != null) {
             // Unrecoverable error, log it
             Log.i(TAG, "GCM registration error: " + error);
