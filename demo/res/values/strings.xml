@@ -70,10 +70,7 @@
     <string name="loc_min_dist_default">50</string>
     <string name="browser_integration">Browser Integration</string>
     <string name="button_browser_status">Check Status</string>
-    <string name="button_browser_clear_cookie">Clear Cookie</string>
-    <string name="button_browser_set_cookie_pixel">Set Cookie (pixel)</string>
-    <string name="button_browser_set_cookie_redirect">Set Cookie (redirect)</string>
-    <string name="button_browser_set_return_http">Set Cookie and Return (http)</string>
-    <string name="button_browser_set_return_custom">Set Cookie and Return (custom)</string>
+    <string name="button_browser_track_install">Track Install</string>
+    <string name="button_browser_track_install_http">Track Install (http)</string>
 
 </resources>

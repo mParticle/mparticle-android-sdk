@@ -287,19 +287,10 @@ public class HomeActivity extends Activity implements OnItemSelectedListener {
         case R.id.buttonBrowserStatus:
             url += "mp_client.php";
             break;
-        case R.id.buttonBrowserClearCookie:
-            url += "mp_client.php?mp_token=";
-            break;
-        case R.id.buttonBrowserSetCookiePixel:
-            url += "mp_client.php?mp_token=" + mp_token;
-            break;
-        case R.id.buttonBrowserSetCookieRedirect:
-            url += "mp.php?mp_token=" + mp_token + "&mp_location=http://www.gynn.org/mp/mp_client.php";
-            break;
-        case R.id.buttonBrowserSetAndReturnCustom:
+        case R.id.buttonBrowserTrackInstall:
             url += "mp.php?mp_token=" + mp_token + "&mp_location=mparticledemo://test/abc?def=ghi";
             break;
-        case R.id.buttonBrowserSetAndReturnHttp:
+        case R.id.buttonBrowserTrackInstallHttp:
             url += "mp.php?mp_token=" + mp_token + "&mp_location=http://demo.mparticle.com/testreferrer/abc?def=ghi";
             break;
         }
