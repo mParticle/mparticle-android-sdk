@@ -32,6 +32,10 @@ import com.mparticle.MessageDatabase.SessionTable;
     public static final int CREATE_SESSION_END_MESSAGE = 3;
     public static final int END_ORPHAN_SESSIONS = 4;
 
+    // boolean flag used in unit tests to wait until processing is finished.
+    // this is not used in the normal execution.
+    /* package-private */ boolean mIsProcessingMessage = false;
+
     public MessageHandler(Context appContext, Looper looper, String apiKey) {
         super(looper);
         mDB = new MessageDatabase(appContext);
@@ -40,7 +44,7 @@ import com.mparticle.MessageDatabase.SessionTable;
 
     @Override
     public void handleMessage(Message msg) {
-        super.handleMessage(msg);
+        mIsProcessingMessage = true;
 
         switch (msg.what) {
         case STORE_MESSAGE:
@@ -140,7 +144,7 @@ import com.mparticle.MessageDatabase.SessionTable;
         case END_ORPHAN_SESSIONS:
             try {
                 // find left-over sessions that exist during startup and end them
-                SQLiteDatabase db = mDB.getWritableDatabase();
+                SQLiteDatabase db = mDB.getReadableDatabase();
                 String[] selectionArgs = new String[] { mApiKey };
                 String[] sessionColumns = new String[] { SessionTable.SESSION_ID };
                 Cursor selectCursor = db.query(SessionTable.TABLE_NAME, sessionColumns,
@@ -159,6 +163,7 @@ import com.mparticle.MessageDatabase.SessionTable;
             }
             break;
         }
+        mIsProcessingMessage = false;
     }
 
     private void dbInsertSession(SQLiteDatabase db, JSONObject message) throws JSONException {
