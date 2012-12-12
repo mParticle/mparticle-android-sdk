@@ -71,7 +71,7 @@ public class MessageHandlerTests extends AndroidTestCase {
         sMessageManager1.startSession(mSessionId, 1000, null);
 
         Thread.sleep(SLEEP_DELAY);
-        while (sMessageHandler1.hasMessages(MessageHandler.STORE_MESSAGE)) {
+        while (sMessageHandler1.mIsProcessingMessage || sMessageHandler1.hasMessages(MessageHandler.STORE_MESSAGE)) {
             Log.d(Constants.LOG_TAG, "Still processing messages...");
             Thread.sleep(SLEEP_DELAY);
         }

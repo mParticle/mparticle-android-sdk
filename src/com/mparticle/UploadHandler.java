@@ -192,7 +192,7 @@ import com.mparticle.MessageDatabase.UploadTable;
         }
     }
 
-    private void prepareUploads() {
+    /* package-private */ void prepareUploads() {
         try {
             // select messages ready to upload
             SQLiteDatabase db = mDB.getWritableDatabase();
@@ -558,6 +558,10 @@ import com.mparticle.MessageDatabase.UploadTable;
 
      public void setCompressionEnabled(boolean compressionEnabled) {
          mCompressionEnabled = compressionEnabled;
+     }
+
+     /* package-private */ public void setUploadMode(int uploadMode) {
+         mUploadMode = uploadMode;
      }
 
 }
