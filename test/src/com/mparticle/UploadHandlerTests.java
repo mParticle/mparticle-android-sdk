@@ -69,10 +69,10 @@ public class UploadHandlerTests extends AndroidTestCase {
     public void testPrepareUploadsBatch() throws InterruptedException, JSONException  {
 
         sMessageManager1.startSession(mSessionId, 1000, null);
-        sMessageManager1.logCustomEvent(mSessionId, 1000, 2000, "event1", null);
+        sMessageManager1.logEvent(mSessionId, 1000, 2000, "event1", null);
         sMessageManager1.endSession(mSessionId, 3000, 2000);
         sMessageManager1.startSession(mSessionId+"-2", 4000, null);
-        sMessageManager1.logCustomEvent(mSessionId+"-2", 4000, 5000, "event1", null);
+        sMessageManager1.logEvent(mSessionId+"-2", 4000, 5000, "event1", null);
 
         while ( sMessageHandler1.mIsProcessingMessage ||
                 sMessageHandler1.hasMessages(MessageHandler.STORE_MESSAGE) ) {
@@ -112,10 +112,10 @@ public class UploadHandlerTests extends AndroidTestCase {
     public void testPrepareUploadsStream() throws InterruptedException, JSONException  {
 
         sMessageManager1.startSession(mSessionId, 1000, null);
-        sMessageManager1.logCustomEvent(mSessionId, 1000, 2000, "event1", null);
+        sMessageManager1.logEvent(mSessionId, 1000, 2000, "event1", null);
         sMessageManager1.endSession(mSessionId, 3000, 2000);
         sMessageManager1.startSession(mSessionId+"-2", 4000, null);
-        sMessageManager1.logCustomEvent(mSessionId+"-2", 4000, 5000, "event1", null);
+        sMessageManager1.logEvent(mSessionId+"-2", 4000, 5000, "event1", null);
 
         while ( sMessageHandler1.mIsProcessingMessage ||
                 sMessageHandler1.hasMessages(MessageHandler.STORE_MESSAGE) ) {
@@ -151,9 +151,9 @@ public class UploadHandlerTests extends AndroidTestCase {
     public void testPrepareUploadsMixed() throws InterruptedException, JSONException  {
 
         sMessageManager1.startSession(mSessionId, 1000, null);
-        sMessageManager1.logCustomEvent(mSessionId, 1000, 2000, "event1", null);
+        sMessageManager1.logEvent(mSessionId, 1000, 2000, "event1", null);
         sMessageManager1.setPushRegistrationId("token1", true);
-        sMessageManager1.logCustomEvent(mSessionId, 1000, 3000, "event2", null);
+        sMessageManager1.logEvent(mSessionId, 1000, 3000, "event2", null);
 
         while ( sMessageHandler1.mIsProcessingMessage ||
                 sMessageHandler1.hasMessages(MessageHandler.STORE_MESSAGE)) {
@@ -195,8 +195,8 @@ public class UploadHandlerTests extends AndroidTestCase {
         sMessageManager1.startSession(mSessionId, 1000, null);
         sMessageManager2.startSession(mSessionId+"-2", 1500, null);
 
-        sMessageManager1.logCustomEvent(mSessionId, 1000, 2000, "event1", null);
-        sMessageManager2.logCustomEvent(mSessionId+"-2", 1500, 2500, "event1", null);
+        sMessageManager1.logEvent(mSessionId, 1000, 2000, "event1", null);
+        sMessageManager2.logEvent(mSessionId+"-2", 1500, 2500, "event1", null);
 
         sMessageManager1.endSession(mSessionId, 3000, 2000);
         sMessageManager2.endSession(mSessionId+"-2", 3500, 2000);
@@ -204,8 +204,8 @@ public class UploadHandlerTests extends AndroidTestCase {
         sMessageManager1.startSession(mSessionId+"-B", 4000, null);
         sMessageManager2.startSession(mSessionId+"-2B", 4500, null);
 
-        sMessageManager1.logCustomEvent(mSessionId+"-B", 4000, 5000, "event1", null);
-        sMessageManager2.logCustomEvent(mSessionId+"-2B", 4500, 5500, "event1", null);
+        sMessageManager1.logEvent(mSessionId+"-B", 4000, 5000, "event1", null);
+        sMessageManager2.logEvent(mSessionId+"-2B", 4500, 5500, "event1", null);
 
         while ( sMessageHandler1.mIsProcessingMessage ||
                 sMessageHandler1.hasMessages(MessageHandler.STORE_MESSAGE) ||

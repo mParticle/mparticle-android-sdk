@@ -27,7 +27,7 @@ public class EventLoggingTests extends AndroidTestCase {
     // should fail silently. a warning message is logged but the application continues.
     public void testEventNameIsNull() {
         mMParticleAPI.logEvent(null);
-        verify(mMockMessageManager, never()).logCustomEvent(eq(mMParticleAPI.mSessionID), anyLong(), anyLong(), anyString(), any(JSONObject.class));
+        verify(mMockMessageManager, never()).logEvent(eq(mMParticleAPI.mSessionID), anyLong(), anyLong(), anyString(), any(JSONObject.class));
     }
 
     public void testEventNameTooLong() {
@@ -36,7 +36,7 @@ public class EventLoggingTests extends AndroidTestCase {
             longString += longString;
         }
         mMParticleAPI.logEvent(longString);
-        verify(mMockMessageManager, never()).logCustomEvent(eq(mMParticleAPI.mSessionID), anyLong(), anyLong(), anyString(), any(JSONObject.class));
+        verify(mMockMessageManager, never()).logEvent(eq(mMParticleAPI.mSessionID), anyLong(), anyLong(), anyString(), any(JSONObject.class));
     }
 
     public void testEventLogging() throws JSONException {
@@ -52,7 +52,7 @@ public class EventLoggingTests extends AndroidTestCase {
         inOrder.verify(mMockMessageManager, times(1)).startSession(anyString(), anyLong(), anyString());
 
         ArgumentCaptor<JSONObject> eventDataArgument = ArgumentCaptor.forClass(JSONObject.class);
-        inOrder.verify(mMockMessageManager).logCustomEvent(eq(mMParticleAPI.mSessionID), anyLong(), anyLong(), anyString(), eventDataArgument.capture());
+        inOrder.verify(mMockMessageManager).logEvent(eq(mMParticleAPI.mSessionID), anyLong(), anyLong(), anyString(), eventDataArgument.capture());
 
         JSONObject loggedAttributes = eventDataArgument.getValue();
         assertEquals("testValue1",loggedAttributes.get("testKey1"));
@@ -67,7 +67,7 @@ public class EventLoggingTests extends AndroidTestCase {
         }
         mMParticleAPI.logEvent("testEvent", eventData);
         ArgumentCaptor<JSONObject> eventDataArgument = ArgumentCaptor.forClass(JSONObject.class);
-        verify(mMockMessageManager).logCustomEvent(eq(mMParticleAPI.mSessionID), anyLong(), anyLong(), anyString(), eventDataArgument.capture());
+        verify(mMockMessageManager).logEvent(eq(mMParticleAPI.mSessionID), anyLong(), anyLong(), anyString(), eventDataArgument.capture());
 
         JSONObject loggedAttributes = eventDataArgument.getValue();
         assertTrue(eventData.size()>Constants.LIMIT_ATTR_COUNT);
@@ -83,7 +83,7 @@ public class EventLoggingTests extends AndroidTestCase {
         eventData.put("testKey1", longString);
         mMParticleAPI.logEvent("testEvent", eventData);
         ArgumentCaptor<JSONObject> eventDataArgument = ArgumentCaptor.forClass(JSONObject.class);
-        verify(mMockMessageManager).logCustomEvent(eq(mMParticleAPI.mSessionID), anyLong(), anyLong(), anyString(), eventDataArgument.capture());
+        verify(mMockMessageManager).logEvent(eq(mMParticleAPI.mSessionID), anyLong(), anyLong(), anyString(), eventDataArgument.capture());
 
         JSONObject loggedAttributes = eventDataArgument.getValue();
         assertFalse(loggedAttributes.has("testKey1"));
@@ -98,7 +98,7 @@ public class EventLoggingTests extends AndroidTestCase {
         eventData.put(longString, "testValue1");
         mMParticleAPI.logEvent("testEvent", eventData);
         ArgumentCaptor<JSONObject> eventDataArgument = ArgumentCaptor.forClass(JSONObject.class);
-        verify(mMockMessageManager).logCustomEvent(eq(mMParticleAPI.mSessionID), anyLong(), anyLong(), anyString(), eventDataArgument.capture());
+        verify(mMockMessageManager).logEvent(eq(mMParticleAPI.mSessionID), anyLong(), anyLong(), anyString(), eventDataArgument.capture());
 
         JSONObject loggedAttributes = eventDataArgument.getValue();
         assertEquals(1,eventData.size());
@@ -109,7 +109,7 @@ public class EventLoggingTests extends AndroidTestCase {
         for (int i = 0; i < 1 + Constants.EVENT_LIMIT; i++) {
             mMParticleAPI.logEvent("testEvent");
         }
-        verify(mMockMessageManager, times(Constants.EVENT_LIMIT)).logCustomEvent(eq(mMParticleAPI.mSessionID), anyLong(), anyLong(), anyString(), any(JSONObject.class));
+        verify(mMockMessageManager, times(Constants.EVENT_LIMIT)).logEvent(eq(mMParticleAPI.mSessionID), anyLong(), anyLong(), anyString(), any(JSONObject.class));
     }
 
     public void testLogErrorMessage() {

@@ -60,9 +60,9 @@ public class MessageManagerTests extends AndroidTestCase {
     // creates an 'e' message without attributes
     public void testCreateCustomEventMessage() throws JSONException {
         String eventName = "event1";
-        JSONObject message = MessageManager.createMessage(MessageType.CUSTOM_EVENT, mSessionId, mSessionStartTime, mMsgTime, eventName, null, true);
+        JSONObject message = MessageManager.createMessage(MessageType.EVENT, mSessionId, mSessionStartTime, mMsgTime, eventName, null, true);
         assertNotNull(message.toString());
-        assertEquals(MessageType.CUSTOM_EVENT, message.getString(MessageKey.TYPE));
+        assertEquals(MessageType.EVENT, message.getString(MessageKey.TYPE));
         assertTrue(message.has(MessageKey.ID));
         assertEquals(mMsgTime, message.getLong(MessageKey.TIMESTAMP));
         assertEquals(mSessionStartTime, message.getLong(MessageKey.SESSION_START_TIMESTAMP));
@@ -77,9 +77,9 @@ public class MessageManagerTests extends AndroidTestCase {
         String eventName = "event2";
         JSONObject eventAttrs=new JSONObject("{key1:'value1'}");
 
-        JSONObject message = MessageManager.createMessage(MessageType.CUSTOM_EVENT, mSessionId, mSessionStartTime, mMsgTime, eventName, eventAttrs, true);
+        JSONObject message = MessageManager.createMessage(MessageType.EVENT, mSessionId, mSessionStartTime, mMsgTime, eventName, eventAttrs, true);
         assertNotNull(message.toString());
-        assertEquals(MessageType.CUSTOM_EVENT, message.getString(MessageKey.TYPE));
+        assertEquals(MessageType.EVENT, message.getString(MessageKey.TYPE));
         assertTrue(message.has(MessageKey.ID));
         assertEquals(mMsgTime, message.getLong(MessageKey.TIMESTAMP));
         assertEquals(mSessionStartTime, message.getLong(MessageKey.SESSION_START_TIMESTAMP));

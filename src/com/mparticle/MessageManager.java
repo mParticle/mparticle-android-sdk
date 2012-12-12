@@ -175,9 +175,9 @@ import com.mparticle.Constants.MessageType;
         mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.CREATE_SESSION_END_MESSAGE, sessionId));
     }
 
-    public void logCustomEvent(String sessionId, long sessionStartTime, long time, String eventName, JSONObject attributes) {
+    public void logEvent(String sessionId, long sessionStartTime, long time, String eventName, JSONObject attributes) {
         try {
-            JSONObject message = createMessage(MessageType.CUSTOM_EVENT, sessionId, sessionStartTime, time, eventName, attributes, true);
+            JSONObject message = createMessage(MessageType.EVENT, sessionId, sessionStartTime, time, eventName, attributes, true);
             // NOTE: event timing is not supported (yet) but the server expects this data
             message.put(MessageKey.EVENT_START_TIME, time);
             message.put(MessageKey.EVENT_DURATION, 0);

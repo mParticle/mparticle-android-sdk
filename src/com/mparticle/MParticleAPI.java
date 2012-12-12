@@ -343,7 +343,7 @@ public class MParticleAPI {
         ensureActiveSession();
         if (checkEventLimit()) {
             JSONObject eventDataJSON = enforceAttributeConstraints(eventData);
-            mMessageManager.logCustomEvent(mSessionID, mSessionStartTime, mLastEventTime, eventName, eventDataJSON);
+            mMessageManager.logEvent(mSessionID, mSessionStartTime, mLastEventTime, eventName, eventDataJSON);
             if (null==eventDataJSON) {
                 debugLog("Logged event: " + eventName);
             } else {

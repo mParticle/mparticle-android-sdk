@@ -26,7 +26,7 @@ package com.mparticle;
     public interface MessageType {
         public static final String SESSION_START = "ss";
         public static final String SESSION_END = "se";
-        public static final String CUSTOM_EVENT = "e";
+        public static final String EVENT = "e";
         public static final String SCREEN_VIEW = "v";
         public static final String OPT_OUT = "o";
         public static final String ERROR = "x";
