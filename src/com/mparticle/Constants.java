@@ -10,15 +10,15 @@ package com.mparticle;
     public static final int EVENT_LIMIT = 1000;
     // delay (millis) before processing uploads to allow app to get started
     public static final long INITIAL_UPLOAD_DELAY = 30 * 1000;  // 30 seconds
-    // interval (seconds) between uploads if not specified
-    public static final long DEFAULT_UPLOAD_INTERVAL =  10 * 60 * 1000; // 10 minutes
+    // interval (millis) between uploads if not specified
+    public static final long DEFAULT_UPLOAD_INTERVAL =  60 * 60 * 1000; // 60 minutes
     // name of the preferences file
     public static final String PREFS_FILE = "mParticlePrefs";
 
-    public static final int LIMIT_ATTR_COUNT=10;
-    public static final int LIMIT_ATTR_NAME=255;
-    public static final int LIMIT_ATTR_VALUE=255;
-    public static final int LIMIT_NAME=255;
+    public static final int LIMIT_ATTR_COUNT = 10;
+    public static final int LIMIT_ATTR_NAME = 255;
+    public static final int LIMIT_ATTR_VALUE = 255;
+    public static final int LIMIT_NAME = 255;
 
     public static final int DB_CLEANUP_EXPIRATION = 3 * 24 * 60 * 60 * 1000; // 3 days old
     public static final long DB_CLEANUP_INTERVAL = 1 * 24 * 60 * 60 * 1000; // 1 day
