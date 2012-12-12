@@ -67,16 +67,16 @@ import com.mparticle.Constants.MessageKey;
 import com.mparticle.Constants.MessageType;
 import com.mparticle.Constants.PrefKeys;
 import com.mparticle.Constants.Status;
-import com.mparticle.MessageDatabase.CommandTable;
-import com.mparticle.MessageDatabase.MessageTable;
-import com.mparticle.MessageDatabase.SessionTable;
-import com.mparticle.MessageDatabase.UploadTable;
+import com.mparticle.MParticleDatabase.CommandTable;
+import com.mparticle.MParticleDatabase.MessageTable;
+import com.mparticle.MParticleDatabase.SessionTable;
+import com.mparticle.MParticleDatabase.UploadTable;
 
 /* package-private */ final class UploadHandler extends Handler {
 
     private static final String TAG = Constants.LOG_TAG;
 
-    private final MessageDatabase mDB;
+    private final MParticleDatabase mDB;
     private final SharedPreferences mPreferences;
     private final String mApiKey;
     private final String mSecret;
@@ -111,7 +111,7 @@ import com.mparticle.MessageDatabase.UploadTable;
         mApiKey = apiKey;
         mSecret = secret;
 
-        mDB = new MessageDatabase(appContext);
+        mDB = new MParticleDatabase(appContext);
         mPreferences = appContext.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
         mHttpContext  = new BasicHttpContext();
         mHttpContext.setAttribute(ClientContext.COOKIE_STORE, new PersistentCookieStore(appContext));

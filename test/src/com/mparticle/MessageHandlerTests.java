@@ -10,14 +10,14 @@ import android.test.AndroidTestCase;
 import android.util.Log;
 
 import com.mparticle.Constants.Status;
-import com.mparticle.MessageDatabase.CommandTable;
-import com.mparticle.MessageDatabase.MessageTable;
-import com.mparticle.MessageDatabase.SessionTable;
-import com.mparticle.MessageDatabase.UploadTable;
+import com.mparticle.MParticleDatabase.CommandTable;
+import com.mparticle.MParticleDatabase.MessageTable;
+import com.mparticle.MParticleDatabase.SessionTable;
+import com.mparticle.MParticleDatabase.UploadTable;
 
 public class MessageHandlerTests extends AndroidTestCase {
 
-    private static MessageDatabase sDB;
+    private static MParticleDatabase sDB;
     private static MessageHandler sMessageHandler1, sMessageHandler2;
     private static MessageManager sMessageManager1, sMessageManager2;
 
@@ -40,7 +40,7 @@ public class MessageHandlerTests extends AndroidTestCase {
     }
 
     private void initalSetup() throws Exception {
-        sDB = new MessageDatabase(getContext());
+        sDB = new MParticleDatabase(getContext());
 
         sMessageHandler1 = new MessageHandler(getContext(), Looper.getMainLooper(), "test-api-1");
         sMessageManager1 = new MessageManager(sMessageHandler1,null);

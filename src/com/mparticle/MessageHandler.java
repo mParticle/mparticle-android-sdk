@@ -16,14 +16,14 @@ import android.util.Log;
 import com.mparticle.Constants.MessageKey;
 import com.mparticle.Constants.MessageType;
 import com.mparticle.Constants.Status;
-import com.mparticle.MessageDatabase.MessageTable;
-import com.mparticle.MessageDatabase.SessionTable;
+import com.mparticle.MParticleDatabase.MessageTable;
+import com.mparticle.MParticleDatabase.SessionTable;
 
 /* package-private */ final class MessageHandler extends Handler {
 
     private static final String TAG = Constants.LOG_TAG;
 
-    private final MessageDatabase mDB;
+    private final MParticleDatabase mDB;
     private final String mApiKey;
 
     public static final int STORE_MESSAGE = 0;
@@ -38,7 +38,7 @@ import com.mparticle.MessageDatabase.SessionTable;
 
     public MessageHandler(Context appContext, Looper looper, String apiKey) {
         super(looper);
-        mDB = new MessageDatabase(appContext);
+        mDB = new MParticleDatabase(appContext);
         mApiKey = apiKey;
     }
 

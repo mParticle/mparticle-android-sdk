@@ -4,7 +4,7 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
-/* package-private */ class MessageDatabase extends SQLiteOpenHelper {
+/* package-private */ class MParticleDatabase extends SQLiteOpenHelper {
 
     private static final int DB_VERSION = 10;
     private static final String DB_NAME = "mparticle.db";
@@ -79,7 +79,7 @@ import android.database.sqlite.SQLiteOpenHelper;
                CommandTable.CREATED_AT + " INTEGER" +
              ");";
 
-    public MessageDatabase(Context context) {
+    public MParticleDatabase(Context context) {
         super(context, DB_NAME, null, DB_VERSION);
     }
 

@@ -16,8 +16,8 @@ import android.view.View;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 
-import com.mparticle.DemoMessageDatabase;
-import com.mparticle.DemoMessageDatabase.MessageTable;
+import com.mparticle.DemoMParticleDatabase;
+import com.mparticle.DemoMParticleDatabase.MessageTable;
 
 public class MessagesListActivity extends ListActivity {
 
@@ -29,7 +29,7 @@ public class MessagesListActivity extends ListActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        DemoMessageDatabase mmDB = new DemoMessageDatabase(this);
+        DemoMParticleDatabase mmDB = new DemoMParticleDatabase(this);
         SQLiteDatabase db = mmDB.getReadableDatabase();
 
         Cursor selectCursor = db.query("messages", null, null, null, null, null, MessageTable.CREATED_AT

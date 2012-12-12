@@ -12,8 +12,8 @@ import android.view.View;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 
-import com.mparticle.DemoMessageDatabase;
-import com.mparticle.DemoMessageDatabase.SessionTable;
+import com.mparticle.DemoMParticleDatabase;
+import com.mparticle.DemoMParticleDatabase.SessionTable;
 
 public class SessionsListActivity extends ListActivity {
 
@@ -23,7 +23,7 @@ public class SessionsListActivity extends ListActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        DemoMessageDatabase mmDB = new DemoMessageDatabase(this);
+        DemoMParticleDatabase mmDB = new DemoMParticleDatabase(this);
         SQLiteDatabase db = mmDB.getReadableDatabase();
 
         Cursor selectCursor = db.query("sessions", null, null, null, null, null, SessionTable.START_TIME + " desc");
