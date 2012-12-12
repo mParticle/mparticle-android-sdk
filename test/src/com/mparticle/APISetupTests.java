@@ -1,11 +1,30 @@
 package com.mparticle;
 
 import java.util.ArrayList;
+import java.util.Properties;
+
+import com.mparticle.Constants.ConfigKeys;
 
 import android.content.Context;
 import android.test.AndroidTestCase;
 
 public class APISetupTests extends AndroidTestCase {
+
+    private static final Properties sEmptySettings = new Properties();
+    private Properties mRestoreSettings;
+
+    @Override
+    protected void setUp() throws Exception {
+        mRestoreSettings = MParticleAPI.sDefaultSettings;
+        MParticleAPI.sDefaultSettings = sEmptySettings;
+    }
+
+    @Override
+    protected void tearDown() throws Exception {
+        if (null!=mRestoreSettings) {
+            MParticleAPI.sDefaultSettings = mRestoreSettings;
+        }
+    }
 
     public void testGetSameInstance() {
         MParticleAPI api1 = MParticleAPI.getInstance(getContext(), "apiKey", "secret");
@@ -26,29 +45,54 @@ public class APISetupTests extends AndroidTestCase {
         } catch (Exception e) {
             expected = e;
         }
-        assertNotNull("Excpetion expected for null context", expected);
+        assertNotNull("Exception expected for null context", expected);
+        assertTrue(expected instanceof IllegalArgumentException);
     }
 
-    // These 2 tests are disabled because the demo app has an mparticle.properties file that provides a key
-    // TODO: separate test app from demo app
-    public void skip_testInvalidKey() {
+    public void testInvalidKey() {
         Exception expected = null;
         try {
             MParticleAPI.getInstance(getContext(), null, "secret");
         } catch (Exception e) {
             expected = e;
         }
-        assertNotNull("Excpetion expected for null context", expected);
+        assertNotNull("Exception expected for null API key", expected);
+        assertTrue(expected instanceof IllegalArgumentException);
     }
 
-    public void skip_testInvalidSecret() {
+    public void testInvalidSecret() {
         Exception expected = null;
         try {
             MParticleAPI.getInstance(getContext(), "invalidSecret", null);
         } catch (Exception e) {
             expected = e;
         }
-        assertNotNull("Excpetion expected for null secret", expected);
+        assertNotNull("Exception expected for null secret", expected);
+        assertTrue(expected instanceof IllegalArgumentException);
+    }
+
+    public void testConfigFromSettings() {
+        Properties testSettings = new Properties();
+        testSettings.put(ConfigKeys.API_KEY, "test-api-key");
+        testSettings.put(ConfigKeys.API_SECRET, "test-api-secret");
+        MParticleAPI.sDefaultSettings = testSettings;
+
+        MParticleAPI api1 = MParticleAPI.getInstance(getContext());
+        MParticleAPI api2 = MParticleAPI.getInstance(getContext(),
+                testSettings.getProperty(ConfigKeys.API_KEY),
+                testSettings.getProperty(ConfigKeys.API_SECRET));
+        assertSame(api1, api2);
+    }
+
+    public void testConfigMissingApiKey() {
+        Exception expected = null;
+        try {
+            MParticleAPI.getInstance(getContext());
+        } catch (Exception e) {
+            expected = e;
+        }
+        assertNotNull("Exception expected for missing API Key", expected);
+        assertTrue(expected instanceof IllegalArgumentException);
     }
 
     public void testMultithreadGetInstance() {

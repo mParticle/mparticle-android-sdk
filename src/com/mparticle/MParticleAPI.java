@@ -40,7 +40,7 @@ public class MParticleAPI {
     private static final Map<String, MParticleAPI> sInstanceMap = new HashMap<String, MParticleAPI>();
     private static final HandlerThread sTimeoutHandlerThread = new HandlerThread("mParticleSessionTimeoutHandler", Process.THREAD_PRIORITY_BACKGROUND);
     private static SharedPreferences sPreferences;
-    private static Properties sDefaultSettings;
+    /* package-private */ static Properties sDefaultSettings;
 
     private MessageManager mMessageManager;
     private Handler mTimeoutHandler;
