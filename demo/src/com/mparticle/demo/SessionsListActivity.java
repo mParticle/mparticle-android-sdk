@@ -28,9 +28,9 @@ public class SessionsListActivity extends ListActivity {
 
         Cursor selectCursor = db.query("sessions", null, null, null, null, null, SessionTable.START_TIME + " desc");
 
-        String[] from = new String[] { SessionTable.SESSION_ID, SessionTable.API_KEY, SessionTable.START_TIME, SessionTable.END_TIME,
-                SessionTable.SESSION_LENGTH, SessionTable.ATTRIBUTES };
-        int[] to = { R.id.sessionId, R.id.apiKey, R.id.startTime, R.id.endTime, R.id.sessionLength,  R.id.attributes };
+        String[] from = new String[] { SessionTable.SESSION_ID, SessionTable.API_KEY, SessionTable.START_TIME,
+                SessionTable.END_TIME, SessionTable.SESSION_LENGTH, SessionTable.ATTRIBUTES };
+        int[] to = { R.id.sessionId, R.id.apiKey, R.id.startTime, R.id.endTime, R.id.sessionLength, R.id.attributes };
 
         // NOTE: this Activity is doing SQL directly on the main UI thread,
         // which you would never do in production code
@@ -43,12 +43,12 @@ public class SessionsListActivity extends ListActivity {
                 case R.id.startTime:
                 case R.id.endTime:
                     long time = cursor.getLong(columnIndex);
-                    if (time>0) {
+                    if (time > 0) {
                         ((TextView) view).setText(sFormatter.format(new Date(time)));
                     }
                     break;
                 case R.id.sessionLength:
-                    ((TextView) view).setText(cursor.getLong(columnIndex)/1000 + " seconds");
+                    ((TextView) view).setText(cursor.getLong(columnIndex) / 1000 + " seconds");
                     break;
                 default:
                     return false;

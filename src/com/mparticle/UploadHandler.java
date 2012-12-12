@@ -72,7 +72,7 @@ import com.mparticle.MParticleDatabase.MessageTable;
 import com.mparticle.MParticleDatabase.SessionTable;
 import com.mparticle.MParticleDatabase.UploadTable;
 
-/* package-private */ final class UploadHandler extends Handler {
+/* package-private */final class UploadHandler extends Handler {
 
     private static final String TAG = Constants.LOG_TAG;
 
@@ -113,7 +113,7 @@ import com.mparticle.MParticleDatabase.UploadTable;
 
         mDB = new MParticleDatabase(appContext);
         mPreferences = appContext.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
-        mHttpContext  = new BasicHttpContext();
+        mHttpContext = new BasicHttpContext();
         mHttpContext.setAttribute(ClientContext.COOKIE_STORE, new PersistentCookieStore(appContext));
 
         mConnectivyManager = (ConnectivityManager) appContext.getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -121,7 +121,8 @@ import com.mparticle.MParticleDatabase.UploadTable;
         mAppInfo = DeviceAttributes.collectAppInfo(appContext);
         mDeviceInfo = DeviceAttributes.collectDeviceInfo(appContext);
 
-        if (PackageManager.PERMISSION_GRANTED != appContext.checkCallingOrSelfPermission(android.Manifest.permission.ACCESS_NETWORK_STATE) ) {
+        if (PackageManager.PERMISSION_GRANTED != appContext
+                .checkCallingOrSelfPermission(android.Manifest.permission.ACCESS_NETWORK_STATE)) {
             Log.w(TAG, "Application manifest should require ACCESS_NETWORK_STATE permission");
             mAccessNetworkStateAvailable = false;
         }
@@ -133,17 +134,17 @@ import com.mparticle.MParticleDatabase.UploadTable;
         switch (msg.what) {
         case UPLOAD_MESSAGES:
             if (mDebugMode) {
-                Log.d(TAG, "Performing " + (msg.arg1==0?"periodic":"manual") +" upload for " + mApiKey);
+                Log.d(TAG, "Performing " + (msg.arg1 == 0 ? "periodic" : "manual") + " upload for " + mApiKey);
             }
             // execute all the upload steps
-            if (mUploadInterval>0 || msg.arg1==1) {
+            if (mUploadInterval > 0 || msg.arg1 == 1) {
                 fetchConfig();
                 prepareUploads();
                 processUploads();
                 processCommands();
             }
             // trigger another upload check unless configured for manual uploads
-            if (mUploadInterval > 0 && msg.arg1==0) {
+            if (mUploadInterval > 0 && msg.arg1 == 0) {
                 this.sendEmptyMessageDelayed(UPLOAD_MESSAGES, mUploadInterval);
             }
             break;
@@ -169,10 +170,10 @@ import com.mparticle.MParticleDatabase.UploadTable;
 
             HttpResponse httpResponse = httpClient.execute(httpGet, mHttpContext);
             int responseCode = -1;
-            if (null!=httpResponse.getStatusLine()) {
+            if (null != httpResponse.getStatusLine()) {
                 responseCode = httpResponse.getStatusLine().getStatusCode();
             }
-            if (responseCode >=200 && responseCode<300) {
+            if (responseCode >= 200 && responseCode < 300) {
                 String response = extractResponseBody(httpResponse);
                 JSONObject responseJSON = new JSONObject(response);
                 if (responseJSON.has(MessageKey.SESSION_UPLOAD)) {
@@ -181,7 +182,8 @@ import com.mparticle.MParticleDatabase.UploadTable;
                 }
             }
         } catch (java.net.SocketTimeoutException e) {
-            // this is caught separately from IOException to prevent this common exception from logging a stack trace
+            // this is caught separately from IOException to prevent this common
+            // exception from logging a stack trace
             Log.w(TAG, "Config request timed out");
         } catch (IOException e) {
             Log.w(TAG, "Config request failed with IO exception:", e);
@@ -192,16 +194,16 @@ import com.mparticle.MParticleDatabase.UploadTable;
         }
     }
 
-    /* package-private */ void prepareUploads() {
+    /* package-private */void prepareUploads() {
         try {
             // select messages ready to upload
             SQLiteDatabase db = mDB.getWritableDatabase();
 
-            String[] selectionArgs = new String[]{mApiKey, Integer.toString(mUploadMode)};
-            String[] selectionColumns = new String[]{"_id", MessageTable.MESSAGE, MessageTable.CREATED_AT};
+            String[] selectionArgs = new String[] { mApiKey, Integer.toString(mUploadMode) };
+            String[] selectionColumns = new String[] { "_id", MessageTable.MESSAGE, MessageTable.CREATED_AT };
             Cursor readyMessagesCursor = db.query(MessageTable.TABLE_NAME, selectionColumns, SQL_UPLOADABLE_MESSAGES,
-                    selectionArgs, null, null, MessageTable.CREATED_AT+" , _id");
-            if (readyMessagesCursor.getCount()>0) {
+                    selectionArgs, null, null, MessageTable.CREATED_AT + " , _id");
+            if (readyMessagesCursor.getCount() > 0) {
                 if (mDebugMode) {
                     Log.i(TAG, "Processing " + readyMessagesCursor.getCount() + " events for upload");
                 }
@@ -229,7 +231,7 @@ import com.mparticle.MParticleDatabase.UploadTable;
     }
 
     private JSONObject createUploadMessage(JSONArray messagesArray) throws JSONException {
-        JSONObject uploadMessage= new JSONObject();
+        JSONObject uploadMessage = new JSONObject();
         uploadMessage.put(MessageKey.TYPE, MessageType.REQUEST_HEADER);
         uploadMessage.put(MessageKey.ID, UUID.randomUUID().toString());
         uploadMessage.put(MessageKey.TIMESTAMP, System.currentTimeMillis());
@@ -239,7 +241,7 @@ import com.mparticle.MParticleDatabase.UploadTable;
         uploadMessage.put(MessageKey.DEVICE_INFO, mDeviceInfo);
 
         String userAttrs = mPreferences.getString(PrefKeys.USER_ATTRS + mApiKey, null);
-        if (null!=userAttrs) {
+        if (null != userAttrs) {
             uploadMessage.put(MessageKey.USER_ATTRIBUTES, new JSONObject(userAttrs));
         }
 
@@ -257,10 +259,10 @@ import com.mparticle.MParticleDatabase.UploadTable;
 
             // read batches ready to upload
             SQLiteDatabase db = mDB.getWritableDatabase();
-            String[] selectionArgs = new String[]{ mApiKey };
-            String[] selectionColumns = new String[]{ "_id", UploadTable.MESSAGE };
+            String[] selectionArgs = new String[] { mApiKey };
+            String[] selectionColumns = new String[] { "_id", UploadTable.MESSAGE };
             Cursor readyUploadsCursor = db.query(UploadTable.TABLE_NAME, selectionColumns,
-                   UploadTable.API_KEY + "=?", selectionArgs, null, null, UploadTable.CREATED_AT);
+                    UploadTable.API_KEY + "=?", selectionArgs, null, null, UploadTable.CREATED_AT);
             while (readyUploadsCursor.moveToNext()) {
                 int id = readyUploadsCursor.getInt(0);
                 String message = readyUploadsCursor.getString(1);
@@ -268,7 +270,7 @@ import com.mparticle.MParticleDatabase.UploadTable;
                 HttpPost httpPost = new HttpPost(makeServiceUri("events"));
                 httpPost.setHeader("Content-type", "application/json");
 
-                ByteArrayEntity postEntity=null;
+                ByteArrayEntity postEntity = null;
                 byte[] messageBytes = message.getBytes();
                 if (mCompressionEnabled) {
                     httpPost.setHeader("Accept-Encoding", "gzip");
@@ -284,7 +286,7 @@ import com.mparticle.MParticleDatabase.UploadTable;
                         Log.w(TAG, "Failed to compress request. Sending uncompressed");
                     }
                 }
-                if (null==postEntity) {
+                if (null == postEntity) {
                     postEntity = new ByteArrayEntity(messageBytes);
                 }
                 httpPost.setEntity(postEntity);
@@ -299,7 +301,7 @@ import com.mparticle.MParticleDatabase.UploadTable;
                         Log.d(TAG, message);
                     }
                     HttpResponse httpResponse = httpClient.execute(httpPost, mHttpContext);
-                    if (null!=httpResponse.getStatusLine()) {
+                    if (null != httpResponse.getStatusLine()) {
                         responseCode = httpResponse.getStatusLine().getStatusCode();
                         response = extractResponseBody(httpResponse);
                     }
@@ -307,7 +309,7 @@ import com.mparticle.MParticleDatabase.UploadTable;
                     // IOExceptions (such as timeouts) will be retried
                     Log.w(TAG, "Upload failed with IO exception: " + e.getClass().getName());
                 } finally {
-                    if (202==responseCode || (responseCode>=400 && responseCode<500)) {
+                    if (202 == responseCode || (responseCode >= 400 && responseCode < 500)) {
                         dbDeleteUpload(db, id);
                     } else {
                         if (mDebugMode) {
@@ -343,14 +345,16 @@ import com.mparticle.MParticleDatabase.UploadTable;
         }
     }
 
-    // helper method to convert response body to a string whether or not it is compressed
+    // helper method to convert response body to a string whether or not it is
+    // compressed
     private String extractResponseBody(HttpResponse httpResponse) throws IllegalStateException, IOException {
         InputStream inputStream = httpResponse.getEntity().getContent();
         Header contentEncoding = httpResponse.getFirstHeader("Content-Encoding");
         if (contentEncoding != null && contentEncoding.getValue().equalsIgnoreCase("gzip")) {
             inputStream = new GZIPInputStream(inputStream);
         }
-        // From Stack Overflow: http://stackoverflow.com/questions/309424/read-convert-an-inputstream-to-a-string
+        // From Stack Overflow:
+        // http://stackoverflow.com/questions/309424/read-convert-an-inputstream-to-a-string
         Scanner s = new Scanner(inputStream).useDelimiter("\\A");
         return s.hasNext() ? s.next() : "";
     }
@@ -359,13 +363,13 @@ import com.mparticle.MParticleDatabase.UploadTable;
         try {
             String method = request.getMethod();
             String dateHeader = DateUtils.formatDate(new Date());
-            if (dateHeader.length()>DateUtils.PATTERN_RFC1123.length()) {
+            if (dateHeader.length() > DateUtils.PATTERN_RFC1123.length()) {
                 // handle a problem on some devices where TZ offset is appended
                 dateHeader = dateHeader.substring(0, DateUtils.PATTERN_RFC1123.length());
             }
             String path = request.getURI().getPath();
             String signatureMessage = method + "\n" + dateHeader + "\n" + path;
-            if ("POST".equalsIgnoreCase(method) && null!=message) {
+            if ("POST".equalsIgnoreCase(method) && null != message) {
                 signatureMessage += message;
             }
             request.setHeader("Date", dateHeader);
@@ -402,7 +406,7 @@ import com.mparticle.MParticleDatabase.UploadTable;
                     }
                     URL url = new URL(commandUrl);
                     HttpURLConnection urlConnection;
-                    if (mProxy==null) {
+                    if (mProxy == null) {
                         urlConnection = (HttpURLConnection) url.openConnection();
                     } else {
                         urlConnection = (HttpURLConnection) url.openConnection(mProxy);
@@ -427,7 +431,7 @@ import com.mparticle.MParticleDatabase.UploadTable;
                 } catch (Throwable t) {
                     // fail silently. a message will be logged if debug mode is enabled
                 } finally {
-                    if (responseCode>-1) {
+                    if (responseCode > -1) {
                         dbDeleteCommand(db, id);
                     } else if (mDebugMode) {
                         Log.w(TAG, "Partner processing failed and will be retried.");
@@ -443,7 +447,7 @@ import com.mparticle.MParticleDatabase.UploadTable;
 
     private void cleanupDatabase(int expirationPeriod) {
         SQLiteDatabase db = mDB.getWritableDatabase();
-        String[] whereArgs = {Long.toString(System.currentTimeMillis() - expirationPeriod)};
+        String[] whereArgs = { Long.toString(System.currentTimeMillis() - expirationPeriod) };
         db.delete(CommandTable.TABLE_NAME, CommandTable.CREATED_AT + "<?", whereArgs);
         db.delete(UploadTable.TABLE_NAME, UploadTable.CREATED_AT + "<?", whereArgs);
         db.delete(MessageTable.TABLE_NAME, MessageTable.CREATED_AT + "<?", whereArgs);
@@ -451,7 +455,7 @@ import com.mparticle.MParticleDatabase.UploadTable;
     }
 
     private URI makeServiceUri(String method) throws URISyntaxException {
-        return new URI(mServiceScheme, SERVICE_HOST, "/"+SERVICE_VERSION+"/"+mApiKey+"/"+method, null);
+        return new URI(mServiceScheme, SERVICE_HOST, "/" + SERVICE_VERSION + "/" + mApiKey + "/" + method, null);
     }
 
     private void dbInsertUpload(SQLiteDatabase db, JSONObject message) throws JSONException {
@@ -463,7 +467,7 @@ import com.mparticle.MParticleDatabase.UploadTable;
     }
 
     private void dbDeleteProcessedMessages(SQLiteDatabase db, int lastMessageId) {
-        String[] whereArgs = new String[]{mApiKey, Integer.toString(mUploadMode), Long.toString(lastMessageId)};
+        String[] whereArgs = new String[] { mApiKey, Integer.toString(mUploadMode), Long.toString(lastMessageId) };
         String whereClause = SQL_UPLOADABLE_MESSAGES + " and _id<=?";
         db.delete(MessageTable.TABLE_NAME, whereClause, whereArgs);
     }
@@ -505,14 +509,14 @@ import com.mparticle.MParticleDatabase.UploadTable;
         HttpProtocolParams.setVersion(params, HttpVersion.HTTP_1_1);
         HttpProtocolParams.setContentCharset(params, HTTP.DEFAULT_CONTENT_CHARSET);
 
-        HttpConnectionParams.setConnectionTimeout(params, 10*1000);
-        HttpConnectionParams.setSoTimeout(params, 10*1000);
+        HttpConnectionParams.setConnectionTimeout(params, 10 * 1000);
+        HttpConnectionParams.setSoTimeout(params, 10 * 1000);
 
         SchemeRegistry registry = new SchemeRegistry();
         registry.register(new Scheme("http", PlainSocketFactory.getSocketFactory(), 80));
         registry.register(new Scheme("https", SSLSocketFactory.getSocketFactory(), 443));
 
-        if (null!=mProxyHost) {
+        if (null != mProxyHost) {
             ConnRouteParams.setDefaultProxy(params, mProxyHost);
         }
         HttpClient client = new DefaultHttpClient(params);
@@ -533,35 +537,39 @@ import com.mparticle.MParticleDatabase.UploadTable;
         mUploadInterval = uploadInterval;
     }
 
-    // From Stack Overflow: http://stackoverflow.com/questions/7124735/hmac-sha256-algorithm-for-signature-calculation
-     private static String hmacSha256Encode(String key, String data) throws NoSuchAlgorithmException, InvalidKeyException {
+    // From Stack Overflow:
+    // http://stackoverflow.com/questions/7124735/hmac-sha256-algorithm-for-signature-calculation
+    private static String hmacSha256Encode(String key, String data) throws NoSuchAlgorithmException,
+            InvalidKeyException {
         Mac sha256_HMAC = Mac.getInstance("HmacSHA256");
         SecretKeySpec secret_key = new SecretKeySpec(key.getBytes(), "HmacSHA256");
         sha256_HMAC.init(secret_key);
         return asHex(sha256_HMAC.doFinal(data.getBytes()));
-     }
+    }
 
-     // From Stack Overflow: http://stackoverflow.com/questions/923863/converting-a-string-to-hexadecimal-in-java
-     private static final char[] HEX_CHARS = "0123456789abcdef".toCharArray();
-     private static String asHex(byte[] buf) {
-         char[] chars = new char[2 * buf.length];
-         for (int i = 0; i < buf.length; ++i) {
-             chars[2 * i] = HEX_CHARS[(buf[i] & 0xF0) >>> 4];
-             chars[2 * i + 1] = HEX_CHARS[buf[i] & 0x0F];
-         }
-         return new String(chars);
-     }
+    // From Stack Overflow:
+    // http://stackoverflow.com/questions/923863/converting-a-string-to-hexadecimal-in-java
+    private static final char[] HEX_CHARS = "0123456789abcdef".toCharArray();
 
-     public void setDebugMode(boolean debugMode) {
-         mDebugMode = debugMode;
-     }
+    private static String asHex(byte[] buf) {
+        char[] chars = new char[2 * buf.length];
+        for (int i = 0; i < buf.length; ++i) {
+            chars[2 * i] = HEX_CHARS[(buf[i] & 0xF0) >>> 4];
+            chars[2 * i + 1] = HEX_CHARS[buf[i] & 0x0F];
+        }
+        return new String(chars);
+    }
 
-     public void setCompressionEnabled(boolean compressionEnabled) {
-         mCompressionEnabled = compressionEnabled;
-     }
+    public void setDebugMode(boolean debugMode) {
+        mDebugMode = debugMode;
+    }
 
-     /* package-private */ public void setUploadMode(int uploadMode) {
-         mUploadMode = uploadMode;
-     }
+    public void setCompressionEnabled(boolean compressionEnabled) {
+        mCompressionEnabled = compressionEnabled;
+    }
+
+    /* package-private */public void setUploadMode(int uploadMode) {
+        mUploadMode = uploadMode;
+    }
 
 }

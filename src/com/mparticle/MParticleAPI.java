@@ -38,9 +38,10 @@ public class MParticleAPI {
 
     private static final String TAG = Constants.LOG_TAG;
     private static final Map<String, MParticleAPI> sInstanceMap = new HashMap<String, MParticleAPI>();
-    private static final HandlerThread sTimeoutHandlerThread = new HandlerThread("mParticleSessionTimeoutHandler", Process.THREAD_PRIORITY_BACKGROUND);
+    private static final HandlerThread sTimeoutHandlerThread = new HandlerThread("mParticleSessionTimeoutHandler",
+            Process.THREAD_PRIORITY_BACKGROUND);
     private static SharedPreferences sPreferences;
-    /* package-private */ static Properties sDefaultSettings;
+    /* package-private */static Properties sDefaultSettings;
 
     private MessageManager mMessageManager;
     private Handler mTimeoutHandler;
@@ -51,26 +52,26 @@ public class MParticleAPI {
     private boolean mOptedOut = false;
     private boolean mDebugMode = false;
 
-    /* package-private */ String mSessionID;
-    /* package-private */ long mSessionStartTime = 0;
-    /* package-private */ long mLastEventTime = 0;
+    /* package-private */String mSessionID;
+    /* package-private */long mSessionStartTime = 0;
+    /* package-private */long mLastEventTime = 0;
     private int mSessionTimeout = 30 * 60 * 1000;
     private long mSessionActiveStart = 0;
     private int mSessionLength = 0;
     private int mEventCount = 0;
-    /* package-private */ JSONObject mUserAttributes = new JSONObject();
-    /* package-private */ JSONObject mSessionAttributes;
+    /* package-private */JSONObject mUserAttributes = new JSONObject();
+    /* package-private */JSONObject mSessionAttributes;
     private String mLaunchUri;
 
-    /* package-private */ MParticleAPI(Context appContext, String apiKey, MessageManager messageManager) {
+    /* package-private */MParticleAPI(Context appContext, String apiKey, MessageManager messageManager) {
         mAppContext = appContext;
         mApiKey = apiKey;
         mMessageManager = messageManager;
         mTimeoutHandler = new SessionTimeoutHandler(this, sTimeoutHandlerThread.getLooper());
 
-        mOptedOut = sPreferences.getBoolean(PrefKeys.OPTOUT+mApiKey, false);
-        String userAttrs = sPreferences.getString(PrefKeys.USER_ATTRS+mApiKey, null);
-        if (null!=userAttrs) {
+        mOptedOut = sPreferences.getBoolean(PrefKeys.OPTOUT + mApiKey, false);
+        String userAttrs = sPreferences.getString(PrefKeys.USER_ATTRS + mApiKey, null);
+        if (null != userAttrs) {
             try {
                 mUserAttributes = new JSONObject(userAttrs);
             } catch (JSONException e) {
@@ -85,14 +86,18 @@ public class MParticleAPI {
 
     /**
      * Initialize or return an instance of the mParticle SDK
-     * @param context the Activity that is creating the instance
-     * @param apiKey the API key for your account
-     * @param secret the API secret for your account
+     *
+     * @param context
+     *            the Activity that is creating the instance
+     * @param apiKey
+     *            the API key for your account
+     * @param secret
+     *            the API secret for your account
      * @return An instance of the mParticle SDK configured with your API key
      */
     public static MParticleAPI getInstance(Context context, String apiKey, String secret) {
 
-        if (null==context) {
+        if (null == context) {
             throw new IllegalArgumentException("context is required");
         }
 
@@ -118,10 +123,10 @@ public class MParticleAPI {
             sPreferences = context.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
         }
 
-        if (null==apiKey || null==secret) {
+        if (null == apiKey || null == secret) {
             apiKey = sDefaultSettings.getProperty(ConfigKeys.API_KEY);
             secret = sDefaultSettings.getProperty(ConfigKeys.API_SECRET);
-            if (null==apiKey || null==secret) {
+            if (null == apiKey || null == secret) {
                 throw new IllegalArgumentException("apiKey and secret are required");
             }
         }
@@ -148,14 +153,15 @@ public class MParticleAPI {
                     try {
                         apiInstance.setDebug(Boolean.parseBoolean(sDefaultSettings.getProperty(ConfigKeys.DEBUG_MODE)));
                     } catch (Throwable t) {
-                        Log.w(TAG, "Failed to configure mParticle with '"+ConfigKeys.DEBUG_MODE+"' setting");
+                        Log.w(TAG, "Failed to configure mParticle with '" + ConfigKeys.DEBUG_MODE + "' setting");
                     }
                 }
                 if (sDefaultSettings.containsKey(ConfigKeys.SESSION_TIMEOUT)) {
                     try {
-                        apiInstance.setSessionTimeout(1000 * Integer.parseInt(sDefaultSettings.getProperty(ConfigKeys.SESSION_TIMEOUT, "60")));
+                        apiInstance.setSessionTimeout(1000 * Integer.parseInt(sDefaultSettings.getProperty(
+                                ConfigKeys.SESSION_TIMEOUT, "60")));
                     } catch (Throwable t) {
-                        Log.w(TAG, "Failed to configure mParticle with '"+ConfigKeys.SESSION_TIMEOUT+"' setting");
+                        Log.w(TAG, "Failed to configure mParticle with '" + ConfigKeys.SESSION_TIMEOUT + "' setting");
                     }
                 }
                 if (sDefaultSettings.containsKey(ConfigKeys.ENABLE_CRASH_REPORTING)) {
@@ -178,9 +184,11 @@ public class MParticleAPI {
     }
 
     /**
-     * Initialize or return an instance of the mParticle SDK using api_key
-     * and api_secret from the mparticle.properties file.
-     * @param context the Activity that is creating the instance
+     * Initialize or return an instance of the mParticle SDK using api_key and api_secret from the
+     * mparticle.properties file.
+     *
+     * @param context
+     *            the Activity that is creating the instance
      * @return An instance of the mParticle SDK configured with your API key
      */
     public static MParticleAPI getInstance(Context context) {
@@ -198,20 +206,21 @@ public class MParticleAPI {
         }
         long initialStartTime = mSessionStartTime;
         ensureActiveSession();
-        if (initialStartTime==mSessionStartTime) {
+        if (initialStartTime == mSessionStartTime) {
             debugLog("Resumed session");
         }
     }
 
     /**
-     * Stop tracking a user session. If the session is restarted before the session timeout it will be resumed.
+     * Stop tracking a user session. If the session is restarted before the session timeout it will
+     * be resumed.
      *
      * This method should be called from an Activity's onStop() method.
      *
      * To explicitly end a session use the endSession() method.
      */
     public void stopActivity() {
-        if (mSessionStartTime==0 || mOptedOut) {
+        if (mSessionStartTime == 0 || mOptedOut) {
             return;
         }
         long stopTime = System.currentTimeMillis();
@@ -236,20 +245,21 @@ public class MParticleAPI {
      * Explicitly terminates the user session.
      */
     public void endSession() {
-        if (mSessionStartTime==0 || mOptedOut) {
+        if (mSessionStartTime == 0 || mOptedOut) {
             return;
         }
-        long sessionEndTime=System.currentTimeMillis();
+        long sessionEndTime = System.currentTimeMillis();
         endSession(sessionEndTime);
     }
 
     /**
      * Explicitly end the session at the given time and generate the end-session message
+     *
      * @param sessionEndTime
      */
     private void endSession(long sessionEndTime) {
         debugLog("Ended session");
-        if (0==sessionEndTime) {
+        if (0 == sessionEndTime) {
             sessionEndTime = System.currentTimeMillis();
         }
         stopActiveSession(sessionEndTime);
@@ -265,17 +275,17 @@ public class MParticleAPI {
     private void ensureActiveSession() {
         checkSessionTimeout();
         mLastEventTime = System.currentTimeMillis();
-        if (0==mSessionStartTime) {
+        if (0 == mSessionStartTime) {
             beginSession();
         }
-        if (0==mSessionActiveStart) {
-            mSessionActiveStart=mLastEventTime;
+        if (0 == mSessionActiveStart) {
+            mSessionActiveStart = mLastEventTime;
         }
     }
 
     private void stopActiveSession(long stopTime) {
-        if (0!=mSessionActiveStart) {
-            mSessionLength += stopTime-mSessionActiveStart;
+        if (0 != mSessionActiveStart) {
+            mSessionLength += stopTime - mSessionActiveStart;
             mSessionActiveStart = 0;
         }
     }
@@ -283,9 +293,9 @@ public class MParticleAPI {
     /**
      * Check current session timeout and end the session if needed. Will not start a new session.
      */
-    /* package-private */ void checkSessionTimeout() {
+    /* package-private */void checkSessionTimeout() {
         long now = System.currentTimeMillis();
-        if (0!=mSessionStartTime && (mSessionTimeout > 0) && (mSessionTimeout < now-mLastEventTime) ) {
+        if (0 != mSessionStartTime && (mSessionTimeout > 0) && (mSessionTimeout < now - mLastEventTime)) {
             debugLog("Session timed out");
             endSession(mLastEventTime);
         }
@@ -317,7 +327,9 @@ public class MParticleAPI {
 
     /**
      * Log an event
-     * @param eventName the name of the event to be tracked
+     *
+     * @param eventName
+     *            the name of the event to be tracked
      */
     public void logEvent(String eventName) {
         logEvent(eventName, null);
@@ -325,26 +337,29 @@ public class MParticleAPI {
 
     /**
      * Log an event with data attributes
-     * @param eventName the name of the event to be tracked
-     * @param eventData a Map of data attributes
+     *
+     * @param eventName
+     *            the name of the event to be tracked
+     * @param eventData
+     *            a Map of data attributes
      */
     public void logEvent(String eventName, Map<String, String> eventData) {
         if (mOptedOut) {
             return;
         }
-        if (null==eventName) {
-            Log.w(TAG,"eventName is required for logEvent");
+        if (null == eventName) {
+            Log.w(TAG, "eventName is required for logEvent");
             return;
         }
-        if (eventName.length()>Constants.LIMIT_NAME) {
-            Log.w(TAG,"The event name was too long. Discarding event.");
+        if (eventName.length() > Constants.LIMIT_NAME) {
+            Log.w(TAG, "The event name was too long. Discarding event.");
             return;
         }
         ensureActiveSession();
         if (checkEventLimit()) {
             JSONObject eventDataJSON = enforceAttributeConstraints(eventData);
             mMessageManager.logEvent(mSessionID, mSessionStartTime, mLastEventTime, eventName, eventDataJSON);
-            if (null==eventDataJSON) {
+            if (null == eventDataJSON) {
                 debugLog("Logged event: " + eventName);
             } else {
                 debugLog("Logged event: " + eventName + " with data " + eventDataJSON);
@@ -354,7 +369,9 @@ public class MParticleAPI {
 
     /**
      * Log a screen view event
-     * @param screenName the name of the View to be tracked
+     *
+     * @param screenName
+     *            the name of the View to be tracked
      */
     public void logScreenView(String screenName) {
         logScreenView(screenName, null);
@@ -362,26 +379,29 @@ public class MParticleAPI {
 
     /**
      * Log a screen view event with data attributes
-     * @param screenName the name of the View to be tracked
-     * @param eventData a Map of data attributes
+     *
+     * @param screenName
+     *            the name of the View to be tracked
+     * @param eventData
+     *            a Map of data attributes
      */
     public void logScreenView(String screenName, Map<String, String> eventData) {
         if (mOptedOut) {
             return;
         }
-        if (null==screenName) {
-            Log.w(TAG,"screenName is required for logScreenView");
+        if (null == screenName) {
+            Log.w(TAG, "screenName is required for logScreenView");
             return;
         }
-        if (screenName.length()>Constants.LIMIT_NAME) {
-            Log.w(TAG,"The screen name was too long. Discarding event.");
+        if (screenName.length() > Constants.LIMIT_NAME) {
+            Log.w(TAG, "The screen name was too long. Discarding event.");
             return;
         }
         ensureActiveSession();
         if (checkEventLimit()) {
             JSONObject eventDataJSON = enforceAttributeConstraints(eventData);
             mMessageManager.logScreenView(mSessionID, mSessionStartTime, mLastEventTime, screenName, eventDataJSON);
-            if (null==eventDataJSON) {
+            if (null == eventDataJSON) {
                 debugLog("Logged screen: " + screenName);
             } else {
                 debugLog("Logged screen: " + screenName + " with data " + eventDataJSON);
@@ -391,14 +411,16 @@ public class MParticleAPI {
 
     /**
      * Log an error event with a message
-     * @param message the name of the error event to be tracked
+     *
+     * @param message
+     *            the name of the error event to be tracked
      */
     public void logErrorEvent(String message) {
         if (mOptedOut) {
             return;
         }
-        if (null==message) {
-            Log.w(TAG,"message is required for logErrorEvent");
+        if (null == message) {
+            Log.w(TAG, "message is required for logErrorEvent");
             return;
         }
         ensureActiveSession();
@@ -408,14 +430,16 @@ public class MParticleAPI {
 
     /**
      * Log an error event with an exception
-     * @param exception an Exception
+     *
+     * @param exception
+     *            an Exception
      */
     public void logErrorEvent(Exception exception) {
         if (mOptedOut) {
             return;
         }
-        if (null==exception) {
-            Log.w(TAG,"exception is required for logErrorEvent");
+        if (null == exception) {
+            Log.w(TAG, "exception is required for logErrorEvent");
             return;
         }
         ensureActiveSession();
@@ -424,11 +448,15 @@ public class MParticleAPI {
     }
 
     /**
-     * Enables location tracking given a provider and update frequency criteria. The provider must be available
-     * and the correct permissions must have been requested during installation.
-     * @param provider the provider key
-     * @param minTime the minimum time (in milliseconds) to trigger an update
-     * @param minDistance the minimum distance (in meters) to trigger an update
+     * Enables location tracking given a provider and update frequency criteria. The provider must
+     * be available and the correct permissions must have been requested during installation.
+     *
+     * @param provider
+     *            the provider key
+     * @param minTime
+     *            the minimum time (in milliseconds) to trigger an update
+     * @param minDistance
+     *            the minimum distance (in meters) to trigger an update
      */
     public void enableLocationTracking(String provider, long minTime, long minDistance) {
         if (mOptedOut) {
@@ -439,8 +467,9 @@ public class MParticleAPI {
             if (!locationManager.isProviderEnabled(provider)) {
                 Log.w(TAG, "That requested location provider is not available");
                 return;
-            };
-            if (mLocationListener==null) {
+            }
+
+            if (null == mLocationListener) {
                 mLocationListener = new MParticleLocationListener(this);
             } else {
                 // clear the location listener, so it can be added again
@@ -456,7 +485,7 @@ public class MParticleAPI {
      * Disables any mParticle location tracking that had been started
      */
     public void disableLocationTracking() {
-        if (mLocationListener!=null) {
+        if (null != mLocationListener) {
             LocationManager locationManager = (LocationManager) mAppContext.getSystemService(Context.LOCATION_SERVICE);
             locationManager.removeUpdates(mLocationListener);
             mLocationListener = null;
@@ -465,6 +494,7 @@ public class MParticleAPI {
 
     /**
      * Set the current location of the active session.
+     *
      * @param location
      */
     public void setLocation(Location location) {
@@ -473,8 +503,11 @@ public class MParticleAPI {
 
     /**
      * Set a single session attribute. The attribute will combined with any existing attributes.
-     * @param key the attribute key
-     * @param value the attribute value
+     *
+     * @param key
+     *            the attribute key
+     * @param value
+     *            the attribute value
      */
     public void setSessionAttribute(String key, String value) {
         if (mOptedOut) {
@@ -489,8 +522,11 @@ public class MParticleAPI {
 
     /**
      * Set a single user attribute. The attribute will combined with any existing attributes.
-     * @param key the attribute key
-     * @param value the attribute value
+     *
+     * @param key
+     *            the attribute key
+     * @param value
+     *            the attribute value
      */
     public void setUserAttribute(String key, String value) {
         if (mOptedOut) {
@@ -498,32 +534,34 @@ public class MParticleAPI {
         }
         debugLog("Set user attribute: " + key + "=" + value);
         if (setCheckedAttribute(mUserAttributes, key, value)) {
-            sPreferences.edit().putString(PrefKeys.USER_ATTRS+mApiKey, mUserAttributes.toString()).commit();
+            sPreferences.edit().putString(PrefKeys.USER_ATTRS + mApiKey, mUserAttributes.toString()).commit();
         }
     }
 
-    /* package-private */ void clearUserAttributes() {
+    /* package-private */void clearUserAttributes() {
         mUserAttributes = new JSONObject();
-        sPreferences.edit().putString(PrefKeys.USER_ATTRS+mApiKey, mUserAttributes.toString()).commit();
+        sPreferences.edit().putString(PrefKeys.USER_ATTRS + mApiKey, mUserAttributes.toString()).commit();
     }
 
     /**
      * Control the opt-in/opt-out status for the application.
-     * @param optOutStatus set to <code>true</code> to opt out of event tracking
+     *
+     * @param optOutStatus
+     *            set to <code>true</code> to opt out of event tracking
      */
     public void setOptOut(boolean optOutStatus) {
-        if (optOutStatus==mOptedOut) {
+        if (optOutStatus == mOptedOut) {
             return;
         }
         if (!optOutStatus) {
             ensureActiveSession();
         }
         mMessageManager.optOut(mSessionID, mSessionStartTime, System.currentTimeMillis(), optOutStatus);
-        if (optOutStatus && mSessionStartTime>0) {
+        if (optOutStatus && mSessionStartTime > 0) {
             endSession();
         }
 
-        sPreferences.edit().putBoolean(PrefKeys.OPTOUT+mApiKey, optOutStatus).commit();
+        sPreferences.edit().putBoolean(PrefKeys.OPTOUT + mApiKey, optOutStatus).commit();
         mOptedOut = optOutStatus;
 
         debugLog("Set opt-out: " + mOptedOut);
@@ -531,6 +569,7 @@ public class MParticleAPI {
 
     /**
      * Get the current opt-out status for the application.
+     *
      * @return the opt-out status
      */
     public boolean getOptOut() {
@@ -538,8 +577,9 @@ public class MParticleAPI {
     }
 
     /**
-     * Turn on or off debug mode for mParticle.
-     * In debug mode, the mParticle SDK will output informational messages to LogCat.
+     * Turn on or off debug mode for mParticle. In debug mode, the mParticle SDK will output
+     * informational messages to LogCat.
+     *
      * @param debugMode
      */
     public void setDebug(boolean debugMode) {
@@ -550,8 +590,8 @@ public class MParticleAPI {
     /**
      * Set the user session timeout interval.
      *
-     * A session is ended when no events (logged events or start/stop events) has occurred
-     * within the session timeout interval.
+     * A session is ended when no events (logged events or start/stop events) has occurred within
+     * the session timeout interval.
      *
      * @param sessionTimeout
      */
@@ -561,7 +601,9 @@ public class MParticleAPI {
 
     /**
      * Set the upload interval period to control how frequently uploads occur.
-     * @param uploadInterval the number of seconds between uploads
+     *
+     * @param uploadInterval
+     *            the number of seconds between uploads
      */
     public void setUploadInterval(int uploadInterval) {
         mMessageManager.setUploadInterval(uploadInterval);
@@ -569,7 +611,9 @@ public class MParticleAPI {
 
     /**
      * Enable SSL transport when uploading data
-     * @param sslEnabled true to turn on SSL transport, false to use non-SSL transport
+     *
+     * @param sslEnabled
+     *            true to turn on SSL transport, false to use non-SSL transport
      */
     public void setSecureTransport(boolean sslEnabled) {
         mMessageManager.setSecureTransport(sslEnabled);
@@ -578,8 +622,11 @@ public class MParticleAPI {
 
     /**
      * Configure the data upload to use a proxy server
-     * @param host the proxy host name or IP address
-     * @param port the proxy port number
+     *
+     * @param host
+     *            the proxy host name or IP address
+     * @param port
+     *            the proxy port number
      */
     public void setConnectionProxy(String host, int port) {
         mMessageManager.setConnectionProxy(host, port);
@@ -589,7 +636,7 @@ public class MParticleAPI {
      * Enable mParticle exception handling to automatically log events on uncaught exceptions
      */
     public void enableUncaughtExceptionLogging() {
-        if (null==mExHandler) {
+        if (null == mExHandler) {
             UncaughtExceptionHandler currentUncaughtExceptionHandler = Thread.getDefaultUncaughtExceptionHandler();
             if (!(currentUncaughtExceptionHandler instanceof ExceptionHandler)) {
                 mExHandler = new ExceptionHandler(mMessageManager, currentUncaughtExceptionHandler);
@@ -602,7 +649,7 @@ public class MParticleAPI {
      * Disables mParticle exception handling and restores the original UncaughtExceptionHandler
      */
     public void disableUncaughtExceptionLogging() {
-        if (null!=mExHandler) {
+        if (null != mExHandler) {
             UncaughtExceptionHandler currentUncaughtExceptionHandler = Thread.getDefaultUncaughtExceptionHandler();
             if (currentUncaughtExceptionHandler instanceof ExceptionHandler) {
                 Thread.setDefaultUncaughtExceptionHandler(mExHandler.getOriginalExceptionHandler());
@@ -613,11 +660,13 @@ public class MParticleAPI {
 
     /**
      * Register the application for GCM notifications
-     * @param senderId the SENDER_ID for the application
+     *
+     * @param senderId
+     *            the SENDER_ID for the application
      */
     public void enablePushNotifications(String senderId) {
         checkDefaultApiInstance();
-        if (null==getPushRegistrationId()) {
+        if (null == getPushRegistrationId()) {
             Intent registrationIntent = new Intent("com.google.android.c2dm.intent.REGISTER");
             registrationIntent.putExtra("app", PendingIntent.getBroadcast(mAppContext, 0, new Intent(), 0));
             registrationIntent.putExtra("sender", senderId);
@@ -630,7 +679,7 @@ public class MParticleAPI {
      */
     public void clearPushNotifications() {
         checkDefaultApiInstance();
-        if (null!=getPushRegistrationId()) {
+        if (null != getPushRegistrationId()) {
             Intent unregIntent = new Intent("com.google.android.c2dm.intent.UNREGISTER");
             unregIntent.putExtra("app", PendingIntent.getBroadcast(mAppContext, 0, new Intent(), 0));
             mAppContext.startService(unregIntent);
@@ -641,7 +690,7 @@ public class MParticleAPI {
     private void checkDefaultApiInstance() {
         String defaultApiKey = sDefaultSettings.getProperty(ConfigKeys.API_KEY);
         String defaultSecret = sDefaultSettings.getProperty(ConfigKeys.API_SECRET);
-        if (null==defaultApiKey || null==defaultSecret) {
+        if (null == defaultApiKey || null == defaultSecret) {
             Log.w(TAG, "mParticle default API key/secret are not set in the mparticle.properties file");
         } else if (!mApiKey.equals(defaultApiKey)) {
             Log.w(TAG, "mParticle instance API key does not match the default from the mparticle.properties file");
@@ -650,7 +699,9 @@ public class MParticleAPI {
 
     /**
      * Manually register the device token for receiving push notifications from mParticle
-     * @param registrationId the device registration id
+     *
+     * @param registrationId
+     *            the device registration id
      */
     public void setPushRegistrationId(String registrationId) {
         debugLog("Set push registration token: " + registrationId);
@@ -664,7 +715,7 @@ public class MParticleAPI {
     public void clearPushRegistrationId() {
         debugLog("Cleared push registration token");
         String registrationId = getPushRegistrationId();
-        if (null!=registrationId) {
+        if (null != registrationId) {
             sPreferences.edit().remove(PrefKeys.PUSH_REGISTRATION_ID).commit();
             mMessageManager.setPushRegistrationId(registrationId, false);
         } else {
@@ -672,10 +723,9 @@ public class MParticleAPI {
         }
     }
 
-
     /**
-     * Retrieve the push registration id if it has been setup for this device
-     * using either setPushRegistrationId or registerForPushNotifications
+     * Retrieve the push registration id if it has been setup for this device using either
+     * setPushRegistrationId or registerForPushNotifications
      *
      * @return the push registration id
      */
@@ -684,29 +734,32 @@ public class MParticleAPI {
     }
 
     /**
-     * This method checks the event count is below the limit and increments the event count.
-     * A warning is logged if the limit has been reached.
+     * This method checks the event count is below the limit and increments the event count. A
+     * warning is logged if the limit has been reached.
+     *
      * @return true if event count is below limit
      */
     private boolean checkEventLimit() {
-        if ( mEventCount < Constants.EVENT_LIMIT) {
+        if (mEventCount < Constants.EVENT_LIMIT) {
             mEventCount++;
             return true;
         } else {
-            Log.w(TAG,"The event limit has been exceeded for this session.");
+            Log.w(TAG, "The event limit has been exceeded for this session.");
             return false;
         }
     }
 
     /**
-     * This method makes sure the constraints on event attributes are enforced. A JSONObject version of the attributes
-     * is return with data that exceeds the limits removed.
-     * NOTE: Non-string attributes are not converted to strings, currently.
-     * @param attributes the user-provided JSONObject
+     * This method makes sure the constraints on event attributes are enforced. A JSONObject version
+     * of the attributes is return with data that exceeds the limits removed. NOTE: Non-string
+     * attributes are not converted to strings, currently.
+     *
+     * @param attributes
+     *            the user-provided JSONObject
      * @return a cleansed copy of the JSONObject
      */
-    /* package-private */ JSONObject enforceAttributeConstraints(Map<String, String> attributes) {
-        if (null==attributes) {
+    /* package-private */JSONObject enforceAttributeConstraints(Map<String, String> attributes) {
+        if (null == attributes) {
             return null;
         }
         JSONObject checkedAttributes = new JSONObject();
@@ -718,20 +771,20 @@ public class MParticleAPI {
         return checkedAttributes;
     }
 
-    /* package-private */ boolean setCheckedAttribute(JSONObject attributes, String key, String value) {
-        if (null==attributes || null==key ) {
+    /* package-private */boolean setCheckedAttribute(JSONObject attributes, String key, String value) {
+        if (null == attributes || null == key) {
             return false;
         }
         try {
-            if (Constants.LIMIT_ATTR_COUNT==attributes.length() && !attributes.has(key)) {
+            if (Constants.LIMIT_ATTR_COUNT == attributes.length() && !attributes.has(key)) {
                 Log.w(TAG, "Attribute count exceeds limit. Discarding attribute: " + key);
                 return false;
             }
-            if (null!=value && value.toString().length()>Constants.LIMIT_ATTR_VALUE) {
+            if (null != value && value.toString().length() > Constants.LIMIT_ATTR_VALUE) {
                 Log.w(TAG, "Attribute value length exceeds limit. Discarding attribute: " + key);
                 return false;
             }
-            if (key.length()>Constants.LIMIT_ATTR_NAME) {
+            if (key.length() > Constants.LIMIT_ATTR_NAME) {
                 Log.w(TAG, "Attribute name length exceeds limit. Discarding attribute: " + key);
                 return false;
             }
@@ -745,26 +798,29 @@ public class MParticleAPI {
 
     private void debugLog(String message) {
         if (mDebugMode) {
-            if (null!=mSessionID) {
+            if (null != mSessionID) {
                 Log.d(TAG, mApiKey + ": " + mSessionID + ": " + message);
             } else {
-                Log.d(TAG, mApiKey + ": " +message);
+                Log.d(TAG, mApiKey + ": " + message);
             }
         }
     }
 
     private static final class SessionTimeoutHandler extends Handler {
         private final MParticleAPI mParticleAPI;
+
         public SessionTimeoutHandler(MParticleAPI mParticleAPI, Looper looper) {
             super(looper);
             this.mParticleAPI = mParticleAPI;
         }
+
         @Override
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
             mParticleAPI.checkSessionTimeout();
-            if (0!=mParticleAPI.mSessionStartTime && mParticleAPI.mSessionTimeout>0) {
-                long nextCheck = mParticleAPI.mLastEventTime - System.currentTimeMillis() + mParticleAPI.mSessionTimeout;
+            if (0 != mParticleAPI.mSessionStartTime && mParticleAPI.mSessionTimeout > 0) {
+                long nextCheck = mParticleAPI.mLastEventTime - System.currentTimeMillis()
+                        + mParticleAPI.mSessionTimeout;
                 sendEmptyMessageDelayed(0, 1000 + nextCheck);
             }
         }
@@ -783,13 +839,16 @@ public class MParticleAPI {
         }
 
         @Override
-        public void onProviderDisabled(String provider) { }
+        public void onProviderDisabled(String provider) {
+        }
 
         @Override
-        public void onProviderEnabled(String provider) { }
+        public void onProviderEnabled(String provider) {
+        }
 
         @Override
-        public void onStatusChanged(String provider, int status, Bundle extras) { }
+        public void onStatusChanged(String provider, int status, Bundle extras) {
+        }
 
     }
 

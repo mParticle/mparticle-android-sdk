@@ -14,16 +14,16 @@ public class ExceptionHandlerTests extends AndroidTestCase {
 
     @Override
     protected void setUp() throws Exception {
-      super.setUp();
-      mOriginalUEH = Thread.getDefaultUncaughtExceptionHandler();
-      mMockMessageManager = mock(MockableMessageManager.class);
-      mMParticleAPI = new MParticleAPI(getContext(), "TestAppKey", mMockMessageManager);
+        super.setUp();
+        mOriginalUEH = Thread.getDefaultUncaughtExceptionHandler();
+        mMockMessageManager = mock(MockableMessageManager.class);
+        mMParticleAPI = new MParticleAPI(getContext(), "TestAppKey", mMockMessageManager);
     }
 
     @Override
     protected void tearDown() throws Exception {
-      super.tearDown();
-      Thread.setDefaultUncaughtExceptionHandler(mOriginalUEH);
+        super.tearDown();
+        Thread.setDefaultUncaughtExceptionHandler(mOriginalUEH);
     }
 
     public void testEnableUncaughtExceptionHandling() {

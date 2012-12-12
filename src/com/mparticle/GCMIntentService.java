@@ -28,13 +28,13 @@ public class GCMIntentService extends IntentService {
     }
 
     // for unit tests
-    /* package-private */ GCMIntentService(MParticleAPI mParticleAPI) {
+    /* package-private */GCMIntentService(MParticleAPI mParticleAPI) {
         this();
         mMParticleAPI = mParticleAPI;
     }
 
     static void runIntentInService(Context context, Intent intent) {
-        synchronized(LOCK) {
+        synchronized (LOCK) {
             if (sWakeLock == null) {
                 PowerManager pm = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
                 sWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
@@ -55,7 +55,7 @@ public class GCMIntentService extends IntentService {
                 handleMessage(intent);
             }
         } finally {
-            synchronized(LOCK) {
+            synchronized (LOCK) {
                 if (sWakeLock != null) {
                     sWakeLock.release();
                 }
@@ -66,11 +66,12 @@ public class GCMIntentService extends IntentService {
     private void handleRegistration(Intent intent) {
 
         try {
-            if (null==mMParticleAPI) {
+            if (null == mMParticleAPI) {
                 mMParticleAPI = MParticleAPI.getInstance(this);
             }
         } catch (Throwable t) {
-            // failure to instantiate mParticle likely means that the mparticle.properties file is not correct
+            // failure to instantiate mParticle likely means that the
+            // mparticle.properties file is not correct
             // and a warning message will already have been logged
             return;
         }
@@ -82,7 +83,7 @@ public class GCMIntentService extends IntentService {
         if (registrationId != null) {
             // registration succeeded
             mMParticleAPI.setPushRegistrationId(registrationId);
-        } else  if (unregistered != null) {
+        } else if (unregistered != null) {
             // unregistration succeeded
             mMParticleAPI.clearPushRegistrationId();
         } else if (error != null) {
@@ -106,7 +107,7 @@ public class GCMIntentService extends IntentService {
         } catch (NameNotFoundException e) {
             // use the ic_dialog_alert icon if the app's can not be found
         }
-        if (0==applicationIcon) {
+        if (0 == applicationIcon) {
             applicationIcon = android.R.drawable.ic_dialog_alert;
         }
 

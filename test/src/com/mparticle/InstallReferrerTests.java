@@ -13,15 +13,15 @@ public class InstallReferrerTests extends AndroidTestCase {
 
     @Override
     protected void setUp() throws Exception {
-      super.setUp();
-      mPrefs = getContext().getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
-      mPrefs.edit().remove(PrefKeys.INSTALL_REFERRER).commit();
+        super.setUp();
+        mPrefs = getContext().getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
+        mPrefs.edit().remove(PrefKeys.INSTALL_REFERRER).commit();
     }
 
     @Override
     protected void tearDown() throws Exception {
-      super.tearDown();
-      mPrefs.edit().remove(PrefKeys.INSTALL_REFERRER).commit();
+        super.tearDown();
+        mPrefs.edit().remove(PrefKeys.INSTALL_REFERRER).commit();
     }
 
     public void testRegistrationReceived() {
@@ -32,7 +32,7 @@ public class InstallReferrerTests extends AndroidTestCase {
 
         installReferrerTracker.onReceive(getContext(), installIntent);
 
-        assertEquals(TEST_REFERRER,mPrefs.getString(PrefKeys.INSTALL_REFERRER,null));
+        assertEquals(TEST_REFERRER, mPrefs.getString(PrefKeys.INSTALL_REFERRER, null));
     }
 
 }

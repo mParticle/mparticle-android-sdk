@@ -32,7 +32,7 @@ public class UploadHandlerTests extends AndroidTestCase {
     protected void setUp() throws Exception {
         super.setUp();
         mSessionId = "session-" + sSessionCounter++;
-        if (null==sDB) {
+        if (null == sDB) {
             initalSetup();
         }
     }
@@ -59,23 +59,23 @@ public class UploadHandlerTests extends AndroidTestCase {
 
     private void clearDatabase() {
         SQLiteDatabase db = sDB.getWritableDatabase();
-        db.delete(SessionTable.TABLE_NAME, null,  null);
-        db.delete(MessageTable.TABLE_NAME, null,  null);
-        db.delete(UploadTable.TABLE_NAME, null,  null);
-        db.delete(CommandTable.TABLE_NAME, null,  null);
+        db.delete(SessionTable.TABLE_NAME, null, null);
+        db.delete(MessageTable.TABLE_NAME, null, null);
+        db.delete(UploadTable.TABLE_NAME, null, null);
+        db.delete(CommandTable.TABLE_NAME, null, null);
     }
 
     // only process messages from ended sessions
-    public void testPrepareUploadsBatch() throws InterruptedException, JSONException  {
+    public void testPrepareUploadsBatch() throws InterruptedException, JSONException {
 
         sMessageManager1.startSession(mSessionId, 1000, null);
         sMessageManager1.logEvent(mSessionId, 1000, 2000, "event1", null);
         sMessageManager1.endSession(mSessionId, 3000, 2000);
-        sMessageManager1.startSession(mSessionId+"-2", 4000, null);
-        sMessageManager1.logEvent(mSessionId+"-2", 4000, 5000, "event1", null);
+        sMessageManager1.startSession(mSessionId + "-2", 4000, null);
+        sMessageManager1.logEvent(mSessionId + "-2", 4000, 5000, "event1", null);
 
-        while ( sMessageHandler1.mIsProcessingMessage ||
-                sMessageHandler1.hasMessages(MessageHandler.STORE_MESSAGE) ) {
+        while (sMessageHandler1.mIsProcessingMessage ||
+                sMessageHandler1.hasMessages(MessageHandler.STORE_MESSAGE)) {
             Log.d(Constants.LOG_TAG, "Still processing messages...");
             Thread.sleep(SLEEP_DELAY);
         }
@@ -89,14 +89,14 @@ public class UploadHandlerTests extends AndroidTestCase {
         Cursor sessionsCursor = db.query(SessionTable.TABLE_NAME, columns, null, null, null, null, null);
         assertEquals(1, sessionsCursor.getCount());
         sessionsCursor.moveToFirst();
-        assertEquals(mSessionId+"-2",  sessionsCursor.getString(0));
+        assertEquals(mSessionId + "-2", sessionsCursor.getString(0));
 
         columns = new String[] { MessageTable.SESSION_ID, MessageTable.STATUS };
         Cursor messagesCursor = db.query(MessageTable.TABLE_NAME, columns, null, null, null, null, null);
         assertEquals(2, messagesCursor.getCount());
         while (messagesCursor.moveToNext()) {
-            assertEquals(mSessionId+"-2",  messagesCursor.getString(0));
-            assertEquals(Status.READY,  messagesCursor.getInt(1));
+            assertEquals(mSessionId + "-2", messagesCursor.getString(0));
+            assertEquals(Status.READY, messagesCursor.getInt(1));
         }
 
         columns = new String[] { UploadTable.MESSAGE };
@@ -109,16 +109,16 @@ public class UploadHandlerTests extends AndroidTestCase {
     }
 
     // process all messages from active and ended sessions
-    public void testPrepareUploadsStream() throws InterruptedException, JSONException  {
+    public void testPrepareUploadsStream() throws InterruptedException, JSONException {
 
         sMessageManager1.startSession(mSessionId, 1000, null);
         sMessageManager1.logEvent(mSessionId, 1000, 2000, "event1", null);
         sMessageManager1.endSession(mSessionId, 3000, 2000);
-        sMessageManager1.startSession(mSessionId+"-2", 4000, null);
-        sMessageManager1.logEvent(mSessionId+"-2", 4000, 5000, "event1", null);
+        sMessageManager1.startSession(mSessionId + "-2", 4000, null);
+        sMessageManager1.logEvent(mSessionId + "-2", 4000, 5000, "event1", null);
 
-        while ( sMessageHandler1.mIsProcessingMessage ||
-                sMessageHandler1.hasMessages(MessageHandler.STORE_MESSAGE) ) {
+        while (sMessageHandler1.mIsProcessingMessage ||
+                sMessageHandler1.hasMessages(MessageHandler.STORE_MESSAGE)) {
             Log.d(Constants.LOG_TAG, "Still processing messages...");
             Thread.sleep(SLEEP_DELAY);
         }
@@ -132,7 +132,7 @@ public class UploadHandlerTests extends AndroidTestCase {
         Cursor sessionsCursor = db.query(SessionTable.TABLE_NAME, columns, null, null, null, null, null);
         assertEquals(1, sessionsCursor.getCount());
         sessionsCursor.moveToFirst();
-        assertEquals(mSessionId+"-2",  sessionsCursor.getString(0));
+        assertEquals(mSessionId + "-2", sessionsCursor.getString(0));
 
         columns = new String[] { MessageTable.SESSION_ID, MessageTable.STATUS };
         Cursor messagesCursor = db.query(MessageTable.TABLE_NAME, columns, null, null, null, null, null);
@@ -148,14 +148,14 @@ public class UploadHandlerTests extends AndroidTestCase {
     }
 
     // process messages without sessions immediately, even in batch mode
-    public void testPrepareUploadsMixed() throws InterruptedException, JSONException  {
+    public void testPrepareUploadsMixed() throws InterruptedException, JSONException {
 
         sMessageManager1.startSession(mSessionId, 1000, null);
         sMessageManager1.logEvent(mSessionId, 1000, 2000, "event1", null);
         sMessageManager1.setPushRegistrationId("token1", true);
         sMessageManager1.logEvent(mSessionId, 1000, 3000, "event2", null);
 
-        while ( sMessageHandler1.mIsProcessingMessage ||
+        while (sMessageHandler1.mIsProcessingMessage ||
                 sMessageHandler1.hasMessages(MessageHandler.STORE_MESSAGE)) {
             Log.d(Constants.LOG_TAG, "Still processing messages...");
             Thread.sleep(SLEEP_DELAY);
@@ -170,14 +170,14 @@ public class UploadHandlerTests extends AndroidTestCase {
         Cursor sessionsCursor = db.query(SessionTable.TABLE_NAME, columns, null, null, null, null, null);
         assertEquals(1, sessionsCursor.getCount());
         sessionsCursor.moveToFirst();
-        assertEquals(mSessionId,  sessionsCursor.getString(0));
+        assertEquals(mSessionId, sessionsCursor.getString(0));
 
         columns = new String[] { MessageTable.SESSION_ID, MessageTable.STATUS };
         Cursor messagesCursor = db.query(MessageTable.TABLE_NAME, columns, null, null, null, null, null);
         assertEquals(3, messagesCursor.getCount());
         while (messagesCursor.moveToNext()) {
-            assertEquals(mSessionId,  messagesCursor.getString(0));
-            assertEquals(Status.READY,  messagesCursor.getInt(1));
+            assertEquals(mSessionId, messagesCursor.getString(0));
+            assertEquals(Status.READY, messagesCursor.getInt(1));
         }
 
         columns = new String[] { UploadTable.MESSAGE };
@@ -189,28 +189,29 @@ public class UploadHandlerTests extends AndroidTestCase {
 
     }
 
-    // ensure inter-mixed messages between two SDK instances get processed correctly
-    public void testPrepareUploadsMultipleInstances() throws InterruptedException, JSONException  {
+    // ensure inter-mixed messages between two SDK instances get processed
+    // correctly
+    public void testPrepareUploadsMultipleInstances() throws InterruptedException, JSONException {
 
         sMessageManager1.startSession(mSessionId, 1000, null);
-        sMessageManager2.startSession(mSessionId+"-2", 1500, null);
+        sMessageManager2.startSession(mSessionId + "-2", 1500, null);
 
         sMessageManager1.logEvent(mSessionId, 1000, 2000, "event1", null);
-        sMessageManager2.logEvent(mSessionId+"-2", 1500, 2500, "event1", null);
+        sMessageManager2.logEvent(mSessionId + "-2", 1500, 2500, "event1", null);
 
         sMessageManager1.endSession(mSessionId, 3000, 2000);
-        sMessageManager2.endSession(mSessionId+"-2", 3500, 2000);
+        sMessageManager2.endSession(mSessionId + "-2", 3500, 2000);
 
-        sMessageManager1.startSession(mSessionId+"-B", 4000, null);
-        sMessageManager2.startSession(mSessionId+"-2B", 4500, null);
+        sMessageManager1.startSession(mSessionId + "-B", 4000, null);
+        sMessageManager2.startSession(mSessionId + "-2B", 4500, null);
 
-        sMessageManager1.logEvent(mSessionId+"-B", 4000, 5000, "event1", null);
-        sMessageManager2.logEvent(mSessionId+"-2B", 4500, 5500, "event1", null);
+        sMessageManager1.logEvent(mSessionId + "-B", 4000, 5000, "event1", null);
+        sMessageManager2.logEvent(mSessionId + "-2B", 4500, 5500, "event1", null);
 
-        while ( sMessageHandler1.mIsProcessingMessage ||
+        while (sMessageHandler1.mIsProcessingMessage ||
                 sMessageHandler1.hasMessages(MessageHandler.STORE_MESSAGE) ||
                 sMessageHandler2.mIsProcessingMessage ||
-                sMessageHandler2.hasMessages(MessageHandler.STORE_MESSAGE) ) {
+                sMessageHandler2.hasMessages(MessageHandler.STORE_MESSAGE)) {
             Log.d(Constants.LOG_TAG, "Still processing messages...");
             Thread.sleep(SLEEP_DELAY);
         }
@@ -230,19 +231,21 @@ public class UploadHandlerTests extends AndroidTestCase {
         Cursor messagesCursor = db.query(MessageTable.TABLE_NAME, columns, null, null, null, null, null);
         assertEquals(2, messagesCursor.getCount());
         while (messagesCursor.moveToNext()) {
-            assertEquals(mSessionId+"-B",  messagesCursor.getString(0));
-            assertEquals(Status.READY,  messagesCursor.getInt(1));
+            assertEquals(mSessionId + "-B", messagesCursor.getString(0));
+            assertEquals(Status.READY, messagesCursor.getInt(1));
         }
 
         columns = new String[] { UploadTable.MESSAGE };
-        String whereClause = UploadTable.API_KEY+"=?";
-        Cursor uploadsCursor = db.query(UploadTable.TABLE_NAME, columns, whereClause, new String[] {"test-api-1"}, null, null, null);
+        String whereClause = UploadTable.API_KEY + "=?";
+        Cursor uploadsCursor = db.query(UploadTable.TABLE_NAME, columns, whereClause, new String[] { "test-api-1" },
+                null, null, null);
         assertEquals(1, uploadsCursor.getCount());
         uploadsCursor.moveToFirst();
         JSONObject uploadMessage = new JSONObject(uploadsCursor.getString(0));
         assertEquals(3, uploadMessage.getJSONArray(MessageKey.MESSAGES).length());
 
-        uploadsCursor = db.query(UploadTable.TABLE_NAME, columns, whereClause, new String[] {"test-api-2"}, null, null, null);
+        uploadsCursor = db.query(UploadTable.TABLE_NAME, columns, whereClause, new String[] { "test-api-2" }, null,
+                null, null);
         assertEquals(1, uploadsCursor.getCount());
         uploadsCursor.moveToFirst();
         uploadMessage = new JSONObject(uploadsCursor.getString(0));

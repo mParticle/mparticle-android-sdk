@@ -19,7 +19,7 @@ import com.mparticle.Constants.Status;
 import com.mparticle.MParticleDatabase.MessageTable;
 import com.mparticle.MParticleDatabase.SessionTable;
 
-/* package-private */ final class MessageHandler extends Handler {
+/* package-private */final class MessageHandler extends Handler {
 
     private static final String TAG = Constants.LOG_TAG;
 
@@ -34,7 +34,7 @@ import com.mparticle.MParticleDatabase.SessionTable;
 
     // boolean flag used in unit tests to wait until processing is finished.
     // this is not used in the normal execution.
-    /* package-private */ boolean mIsProcessingMessage = false;
+    /* package-private */boolean mIsProcessingMessage = false;
 
     public MessageHandler(Context appContext, Looper looper, String apiKey) {
         super(looper);

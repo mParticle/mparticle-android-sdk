@@ -8,9 +8,16 @@ public class DemoMParticleDatabase extends MParticleDatabase {
         super(context);
     }
 
-    public interface MessageTable extends MParticleDatabase.MessageTable {};
-    public interface CommandTable extends MParticleDatabase.CommandTable {};
-    public interface SessionTable extends MParticleDatabase.SessionTable {};
-    public interface UploadTable extends MParticleDatabase.UploadTable {};
+    public interface MessageTable extends MParticleDatabase.MessageTable {
+    };
+
+    public interface CommandTable extends MParticleDatabase.CommandTable {
+    };
+
+    public interface SessionTable extends MParticleDatabase.SessionTable {
+    };
+
+    public interface UploadTable extends MParticleDatabase.UploadTable {
+    };
 
 }

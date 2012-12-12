@@ -21,7 +21,7 @@ public class APISetupTests extends AndroidTestCase {
 
     @Override
     protected void tearDown() throws Exception {
-        if (null!=mRestoreSettings) {
+        if (null != mRestoreSettings) {
             MParticleAPI.sDefaultSettings = mRestoreSettings;
         }
     }
@@ -101,27 +101,27 @@ public class APISetupTests extends AndroidTestCase {
         final ArrayList<MParticleAPI> apiInstances = new ArrayList<MParticleAPI>(THREAD_COUNT);
         final Context context = getContext();
         final String testApiKey = "TestMT" + System.currentTimeMillis();
-        for( int i = 0; i < threads.length; i++ ) {
-            threads[i] = new Thread( new Runnable() {
+        for (int i = 0; i < threads.length; i++) {
+            threads[i] = new Thread(new Runnable() {
                 public void run() {
                     apiInstances.add(MParticleAPI.getInstance(context, testApiKey, "secret"));
                 }
             });
         }
-        for( Thread thread : threads ) {
+        for (Thread thread : threads) {
             thread.start();
         }
         boolean done = false;
-        while( !done ) {
+        while (!done) {
             done = true;
-            for( Thread thread : threads ) {
-                if( thread.isAlive() ) {
+            for (Thread thread : threads) {
+                if (thread.isAlive()) {
                     done = false;
                 }
             }
         }
-        for( int i = 0; i < apiInstances.size() - 1; i++ ) {
-            assertSame(apiInstances.get(i),apiInstances.get(i+1));
+        for (int i = 0; i < apiInstances.size() - 1; i++) {
+            assertSame(apiInstances.get(i), apiInstances.get(i + 1));
         }
     }
 }

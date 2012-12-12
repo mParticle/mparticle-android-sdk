@@ -18,8 +18,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
-        android:layout_toRightOf="@id/msgTime"
         android:layout_marginLeft="10dp"
+        android:layout_toRightOf="@id/msgTime"
         android:text="@string/api_key" />
 
     <TextView
@@ -27,8 +27,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
-        android:layout_toRightOf="@id/apiKey"
         android:layout_marginLeft="10dp"
+        android:layout_toRightOf="@id/apiKey"
         android:text="@string/upload_id" />
 
     <TextView

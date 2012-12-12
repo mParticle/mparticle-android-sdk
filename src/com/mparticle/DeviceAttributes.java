@@ -19,11 +19,13 @@ import android.view.WindowManager;
 import com.mparticle.Constants.MessageKey;
 import com.mparticle.Constants.PrefKeys;
 
-/* package-private */ class DeviceAttributes {
+/* package-private */class DeviceAttributes {
 
     /**
      * Generates a collection of application attributes
-     * @param appContext the application context
+     *
+     * @param appContext
+     *            the application context
      * @return a JSONObject of application-specific attributes
      */
     public static JSONObject collectAppInfo(Context appContext) {
@@ -34,11 +36,11 @@ import com.mparticle.Constants.PrefKeys;
             String packageName = appContext.getPackageName();
             attributes.put(MessageKey.APP_PACKAGE_NAME, packageName);
             String installerPackageName = packageManager.getInstallerPackageName(packageName);
-            if (null!=installerPackageName) {
+            if (null != installerPackageName) {
                 attributes.put(MessageKey.APP_INSTALLER_NAME, installerPackageName);
             }
             try {
-                ApplicationInfo appInfo = packageManager.getApplicationInfo(packageName,0);
+                ApplicationInfo appInfo = packageManager.getApplicationInfo(packageName, 0);
                 attributes.put(MessageKey.APP_NAME, packageManager.getApplicationLabel(appInfo));
             } catch (PackageManager.NameNotFoundException e) {
                 // ignore missing data
@@ -60,7 +62,9 @@ import com.mparticle.Constants.PrefKeys;
 
     /**
      * Generates a collection of device attributes
-     * @param appContext the application context
+     *
+     * @param appContext
+     *            the application context
      * @return a JSONObject of device-specific attributes
      */
     public static JSONObject collectDeviceInfo(Context appContext) {
@@ -96,28 +100,30 @@ import com.mparticle.Constants.PrefKeys;
             attributes.put(MessageKey.DEVICE_LOCALE_LANGUAGE, locale.getLanguage());
 
             // network
-            TelephonyManager telephonyManager = (TelephonyManager)appContext.getSystemService(Context.TELEPHONY_SERVICE);
+            TelephonyManager telephonyManager = (TelephonyManager) appContext
+                    .getSystemService(Context.TELEPHONY_SERVICE);
             int phoneType = telephonyManager.getPhoneType();
-            if (phoneType!=TelephonyManager.PHONE_TYPE_NONE) {
-                // NOTE: network attributes can be empty if phone is in airplane mode and will not be set
+            if (phoneType != TelephonyManager.PHONE_TYPE_NONE) {
+                // NOTE: network attributes can be empty if phone is in airplane
+                // mode and will not be set
                 String networkCarrier = telephonyManager.getNetworkOperatorName();
-                if (0!=networkCarrier.length()) {
+                if (0 != networkCarrier.length()) {
                     attributes.put(MessageKey.NETWORK_CARRIER, networkCarrier);
                 }
                 String networkCountry = telephonyManager.getNetworkCountryIso();
-                if (0!=networkCountry.length()) {
+                if (0 != networkCountry.length()) {
                     attributes.put(MessageKey.NETWORK_COUNTRY, networkCountry);
                 }
                 // android combines MNC+MCC into network operator
                 String networkOperator = telephonyManager.getNetworkOperator();
-                if (6==networkOperator.length()) {
+                if (6 == networkOperator.length()) {
                     attributes.put(MessageKey.MOBILE_NETWORK_CODE, networkOperator.substring(0, 3));
                     attributes.put(MessageKey.MOBILE_COUNTRY_CODE, networkOperator.substring(3));
                 }
             }
 
             // timezone
-            attributes.put(MessageKey.TIMEZONE, TimeZone.getDefault().getRawOffset()/(1000*60*60));
+            attributes.put(MessageKey.TIMEZONE, TimeZone.getDefault().getRawOffset() / (1000 * 60 * 60));
         } catch (JSONException e) {
             // ignore JSON exceptions
         }

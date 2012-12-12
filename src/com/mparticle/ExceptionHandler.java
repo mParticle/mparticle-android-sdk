@@ -4,7 +4,7 @@ import java.lang.Thread.UncaughtExceptionHandler;
 
 import android.util.Log;
 
-/* package-private */ class ExceptionHandler implements UncaughtExceptionHandler {
+/* package-private */class ExceptionHandler implements UncaughtExceptionHandler {
 
     private static final String TAG = Constants.LOG_TAG;
     private final UncaughtExceptionHandler mOriginalUncaughtExceptionHandler;
@@ -19,7 +19,7 @@ import android.util.Log;
     public void uncaughtException(Thread thread, Throwable ex) {
         try {
             mMessageManager.logErrorEvent(null, 0, System.currentTimeMillis(), null, ex);
-            if (null!=mOriginalUncaughtExceptionHandler) {
+            if (null != mOriginalUncaughtExceptionHandler) {
                 mOriginalUncaughtExceptionHandler.uncaughtException(thread, ex);
             } else {
                 Thread.getDefaultUncaughtExceptionHandler().uncaughtException(thread, ex);

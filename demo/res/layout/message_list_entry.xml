@@ -34,8 +34,8 @@
         android:id="@+id/sessionId"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_toRightOf="@id/apiKey"
         android:layout_below="@id/msgType"
+        android:layout_toRightOf="@id/apiKey"
         android:paddingLeft="10dip"
         android:text="@string/session_id" />
 

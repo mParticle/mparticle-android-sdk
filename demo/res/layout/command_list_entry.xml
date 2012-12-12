@@ -25,8 +25,8 @@
         android:id="@+id/url"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_toRightOf="@+id/method"
         android:layout_below="@id/msgTime"
+        android:layout_toRightOf="@+id/method"
         android:text="@string/url" />
 
     <TextView

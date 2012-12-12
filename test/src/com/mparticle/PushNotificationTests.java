@@ -17,17 +17,17 @@ public class PushNotificationTests extends AndroidTestCase {
 
     @Override
     protected void setUp() throws Exception {
-      super.setUp();
-      mMockMessageManager = mock(MockableMessageManager.class);
-      mPrefs = getContext().getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
-      mPrefs.edit().remove(PrefKeys.PUSH_REGISTRATION_ID).commit();
-      mMParticleAPI = new MParticleAPI(getContext(), "TestAppKey", mMockMessageManager);
+        super.setUp();
+        mMockMessageManager = mock(MockableMessageManager.class);
+        mPrefs = getContext().getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
+        mPrefs.edit().remove(PrefKeys.PUSH_REGISTRATION_ID).commit();
+        mMParticleAPI = new MParticleAPI(getContext(), "TestAppKey", mMockMessageManager);
     }
 
     @Override
     protected void tearDown() throws Exception {
-      super.tearDown();
-      mPrefs.edit().remove(PrefKeys.PUSH_REGISTRATION_ID).commit();
+        super.tearDown();
+        mPrefs.edit().remove(PrefKeys.PUSH_REGISTRATION_ID).commit();
     }
 
     private void setupInitialToken(String token) {
@@ -40,7 +40,7 @@ public class PushNotificationTests extends AndroidTestCase {
         mMParticleAPI.setPushRegistrationId(TEST_REG_ID);
 
         verify(mMockMessageManager, times(1)).setPushRegistrationId(eq(TEST_REG_ID), eq(true));
-        assertEquals(TEST_REG_ID,mPrefs.getString(PrefKeys.PUSH_REGISTRATION_ID,null));
+        assertEquals(TEST_REG_ID, mPrefs.getString(PrefKeys.PUSH_REGISTRATION_ID, null));
     }
 
     public void testClearPushRegistrationId() {
@@ -62,7 +62,7 @@ public class PushNotificationTests extends AndroidTestCase {
         gcmIntentService.onHandleIntent(registrationReceivedIntent);
 
         verify(mMockMessageManager, times(1)).setPushRegistrationId(eq(TEST_REG_ID), eq(true));
-        assertEquals(TEST_REG_ID,mPrefs.getString(PrefKeys.PUSH_REGISTRATION_ID,null));
+        assertEquals(TEST_REG_ID, mPrefs.getString(PrefKeys.PUSH_REGISTRATION_ID, null));
     }
 
     public void testUnregistrationReceived() {

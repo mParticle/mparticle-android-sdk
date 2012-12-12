@@ -1,6 +1,6 @@
 package com.mparticle;
 
-/* package-private */ class Constants {
+/* package-private */class Constants {
 
     public final static String LOG_TAG = "mParticleAPI";
 
@@ -9,9 +9,9 @@ package com.mparticle;
     // maximum number of events per session
     public static final int EVENT_LIMIT = 1000;
     // delay (millis) before processing uploads to allow app to get started
-    public static final long INITIAL_UPLOAD_DELAY = 30 * 1000;  // 30 seconds
+    public static final long INITIAL_UPLOAD_DELAY = 30 * 1000; // 30 seconds
     // interval (millis) between uploads if not specified
-    public static final long DEFAULT_UPLOAD_INTERVAL =  60 * 60 * 1000; // 60 minutes
+    public static final long DEFAULT_UPLOAD_INTERVAL = 60 * 60 * 1000; // 60 minutes
     // name of the preferences file
     public static final String PREFS_FILE = "mParticlePrefs";
 

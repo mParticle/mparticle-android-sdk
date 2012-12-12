@@ -31,7 +31,8 @@ public class UploadsListActivity extends ListActivity {
 
         Cursor selectCursor = db.query("uploads", null, null, null, null, null, UploadTable.CREATED_AT + " desc");
 
-        String[] from = new String[] { UploadTable.MESSAGE, UploadTable.API_KEY, UploadTable.CREATED_AT, UploadTable.MESSAGE };
+        String[] from = new String[] { UploadTable.MESSAGE, UploadTable.API_KEY, UploadTable.CREATED_AT,
+                UploadTable.MESSAGE };
         int[] to = { R.id.uploadId, R.id.apiKey, R.id.msgTime, R.id.msgMsg };
 
         // NOTE: this Activity is doing SQL directly on the main UI thread,

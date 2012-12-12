@@ -12,9 +12,9 @@ public class SessionLifecycleTests extends AndroidTestCase {
 
     @Override
     protected void setUp() throws Exception {
-      super.setUp();
-      mMockMessageManager = mock(MockableMessageManager.class);
-      mMParticleAPI = new MParticleAPI(getContext(), "TestAppKey", mMockMessageManager);
+        super.setUp();
+        mMockMessageManager = mock(MockableMessageManager.class);
+        mMParticleAPI = new MParticleAPI(getContext(), "TestAppKey", mMockMessageManager);
     }
 
     // start new session on on start() call if one was not running
@@ -22,7 +22,8 @@ public class SessionLifecycleTests extends AndroidTestCase {
         mMParticleAPI.startActivity();
         assertNotNull(mMParticleAPI.mSessionID);
         assertTrue(mMParticleAPI.mSessionStartTime > 0);
-        verify(mMockMessageManager, times(1)).startSession(eq(mMParticleAPI.mSessionID), eq(mMParticleAPI.mSessionStartTime), anyString());
+        verify(mMockMessageManager, times(1)).startSession(eq(mMParticleAPI.mSessionID),
+                eq(mMParticleAPI.mSessionStartTime), anyString());
     }
 
     // do not start a new session if start() called with delay < timeout
@@ -40,7 +41,8 @@ public class SessionLifecycleTests extends AndroidTestCase {
         verify(mMockMessageManager, times(1)).stopSession(anyString(), anyLong(), anyLong());
     }
 
-    // do start a new session if start() called with delay > timeout and also end last session
+    // do start a new session if start() called with delay > timeout and also
+    // end last session
     public void testSessionStartRestart() throws InterruptedException {
         mMParticleAPI.setSessionTimeout(50);
         mMParticleAPI.startActivity();
@@ -48,7 +50,8 @@ public class SessionLifecycleTests extends AndroidTestCase {
         long sessionStartTime = mMParticleAPI.mSessionStartTime;
         Thread.sleep(250);
         mMParticleAPI.startActivity();
-        // at this point, disable the timeout it doesn't check again before the assertions
+        // at this point, disable the timeout it doesn't check again before the
+        // assertions
         mMParticleAPI.setSessionTimeout(0);
         assertNotSame(sessionUUID, mMParticleAPI.mSessionID);
         assertTrue(sessionStartTime < mMParticleAPI.mSessionStartTime);
@@ -61,11 +64,12 @@ public class SessionLifecycleTests extends AndroidTestCase {
     public void testSessionStartOnEvent() {
         mMParticleAPI.logEvent("test");
         assertNotNull(mMParticleAPI.mSessionID);
-        assertTrue(mMParticleAPI.mSessionStartTime>0);
+        assertTrue(mMParticleAPI.mSessionStartTime > 0);
         verify(mMockMessageManager, times(1)).startSession(anyString(), anyLong(), anyString());
     }
 
-    // do start a new session if events logged with delay > timeout and also end last session
+    // do start a new session if events logged with delay > timeout and also end
+    // last session
     public void testSessionEventTimeout() throws InterruptedException {
         mMParticleAPI.setSessionTimeout(50);
         mMParticleAPI.startActivity();
@@ -94,8 +98,9 @@ public class SessionLifecycleTests extends AndroidTestCase {
         verify(mMockMessageManager, never()).stopSession(anyString(), anyLong(), anyLong());
     }
 
-    // start a new session if newSession() called explicitly and also end last session
-    public void testSessionNewSession() throws InterruptedException{
+    // start a new session if newSession() called explicitly and also end last
+    // session
+    public void testSessionNewSession() throws InterruptedException {
         mMParticleAPI.startActivity();
         String sessionUUID = mMParticleAPI.mSessionID;
         long sessionStartTime = mMParticleAPI.mSessionStartTime;
@@ -133,7 +138,8 @@ public class SessionLifecycleTests extends AndroidTestCase {
         verify(mMockMessageManager, times(1)).endSession(eq(sessionUUID), anyLong(), anyLong());
     }
 
-    // check for a timeout situation that ends a session but does not start a new session
+    // check for a timeout situation that ends a session but does not start a
+    // new session
     public void testSessionTimeoutStandalone() throws InterruptedException {
         mMParticleAPI.setSessionTimeout(50);
         mMParticleAPI.startActivity();
@@ -148,7 +154,8 @@ public class SessionLifecycleTests extends AndroidTestCase {
         verify(mMockMessageManager, times(1)).stopSession(eq(sessionUUID), eq(lastEventTime), anyLong());
     }
 
-    // check for a timeout situation that ends a session but does not start a new session
+    // check for a timeout situation that ends a session but does not start a
+    // new session
     public void testSessionTimeoutBackground() throws InterruptedException {
         mMParticleAPI.setSessionTimeout(50);
         mMParticleAPI.startActivity();

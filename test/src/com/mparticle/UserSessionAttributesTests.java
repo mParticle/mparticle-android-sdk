@@ -13,47 +13,47 @@ public class UserSessionAttributesTests extends AndroidTestCase {
 
     @Override
     protected void setUp() throws Exception {
-      super.setUp();
-      mMockMessageManager = mock(MockableMessageManager.class);
-      mMParticleAPI = new MParticleAPI(getContext(), "TestAppKey", mMockMessageManager);
-      mMParticleAPI.clearUserAttributes();
+        super.setUp();
+        mMockMessageManager = mock(MockableMessageManager.class);
+        mMParticleAPI = new MParticleAPI(getContext(), "TestAppKey", mMockMessageManager);
+        mMParticleAPI.clearUserAttributes();
     }
 
     public void testSetUserProperty() throws JSONException {
         mMParticleAPI.setUserAttribute("testKey1", "testValue1");
         mMParticleAPI.setUserAttribute("testKey2", "testValue2");
-        assertEquals("testValue1",mMParticleAPI.mUserAttributes.getString("testKey1"));
-        assertEquals("testValue2",mMParticleAPI.mUserAttributes.getString("testKey2"));
+        assertEquals("testValue1", mMParticleAPI.mUserAttributes.getString("testKey1"));
+        assertEquals("testValue2", mMParticleAPI.mUserAttributes.getString("testKey2"));
     }
 
     public void testTooManyAttributes() throws JSONException {
         for (int i = 0; i < Constants.LIMIT_ATTR_COUNT + 1; i++) {
-            mMParticleAPI.setUserAttribute("testKey"+i, "testValue"+i);
+            mMParticleAPI.setUserAttribute("testKey" + i, "testValue" + i);
         }
-        mMParticleAPI.setUserAttribute("testKeyOverLimit","testValue");
+        mMParticleAPI.setUserAttribute("testKeyOverLimit", "testValue");
 
-        assertEquals(Constants.LIMIT_ATTR_COUNT,mMParticleAPI.mUserAttributes.length());
+        assertEquals(Constants.LIMIT_ATTR_COUNT, mMParticleAPI.mUserAttributes.length());
         assertFalse(mMParticleAPI.mUserAttributes.has("testKeyOverLimit"));
     }
 
     public void testAttributesValueTooLarge() throws JSONException {
-        String longString="ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-        while (longString.length()<Constants.LIMIT_ATTR_VALUE) {
+        String longString = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        while (longString.length() < Constants.LIMIT_ATTR_VALUE) {
             longString += longString;
         }
-        mMParticleAPI.setUserAttribute("testKeyLongString",longString);
+        mMParticleAPI.setUserAttribute("testKeyLongString", longString);
 
         assertFalse(mMParticleAPI.mUserAttributes.has("testKeyLongString"));
     }
 
     public void testAttributesKeyTooLarge() throws JSONException {
-        String longString="ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-        while (longString.length()<Constants.LIMIT_ATTR_VALUE) {
+        String longString = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        while (longString.length() < Constants.LIMIT_ATTR_VALUE) {
             longString += longString;
         }
 
         mMParticleAPI.setUserAttribute(longString, "testValue2");
-        assertEquals(0,mMParticleAPI.mUserAttributes.length());
+        assertEquals(0, mMParticleAPI.mUserAttributes.length());
     }
 
     public void testUserAttributesShared() throws JSONException {
@@ -63,24 +63,24 @@ public class UserSessionAttributesTests extends AndroidTestCase {
     }
 
     public void testClearUserAttribute() throws JSONException {
-        mMParticleAPI.setUserAttribute("testKeyToClear","testValue");
+        mMParticleAPI.setUserAttribute("testKeyToClear", "testValue");
         for (int i = 0; i < Constants.LIMIT_ATTR_COUNT + 1; i++) {
-            mMParticleAPI.setUserAttribute("testKey"+i, "testValue"+i);
+            mMParticleAPI.setUserAttribute("testKey" + i, "testValue" + i);
         }
-        assertEquals(Constants.LIMIT_ATTR_COUNT,mMParticleAPI.mUserAttributes.length());
+        assertEquals(Constants.LIMIT_ATTR_COUNT, mMParticleAPI.mUserAttributes.length());
         assertTrue(mMParticleAPI.mUserAttributes.has("testKeyToClear"));
-        mMParticleAPI.setUserAttribute("testKeyToClear",null);
+        mMParticleAPI.setUserAttribute("testKeyToClear", null);
         assertFalse(mMParticleAPI.mUserAttributes.has("testKeyToClear"));
     }
 
     public void testUpdateUserAttribute() throws JSONException {
-        mMParticleAPI.setUserAttribute("testKeyToUpdate","testValue1");
+        mMParticleAPI.setUserAttribute("testKeyToUpdate", "testValue1");
         for (int i = 0; i < Constants.LIMIT_ATTR_COUNT + 1; i++) {
-            mMParticleAPI.setUserAttribute("testKey"+i, "testValue"+i);
+            mMParticleAPI.setUserAttribute("testKey" + i, "testValue" + i);
         }
-        assertEquals(Constants.LIMIT_ATTR_COUNT,mMParticleAPI.mUserAttributes.length());
+        assertEquals(Constants.LIMIT_ATTR_COUNT, mMParticleAPI.mUserAttributes.length());
         assertTrue(mMParticleAPI.mUserAttributes.has("testKeyToUpdate"));
-        mMParticleAPI.setUserAttribute("testKeyToUpdate","testValueUpdated");
+        mMParticleAPI.setUserAttribute("testKeyToUpdate", "testValueUpdated");
         assertEquals("testValueUpdated", mMParticleAPI.mUserAttributes.get("testKeyToUpdate"));
     }
 

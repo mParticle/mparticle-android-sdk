@@ -16,11 +16,11 @@ public class HomeActivityTest extends ActivityInstrumentationTestCase2<HomeActiv
 
     @Override
     protected void setUp() throws Exception {
-      super.setUp();
+        super.setUp();
 
-      setActivityInitialTouchMode(false);
-      mActivity = getActivity();
-      mParticleAPI = MParticleAPI.getInstance(mActivity, "01234567890123456789012345678901", "secret");
+        setActivityInitialTouchMode(false);
+        mActivity = getActivity();
+        mParticleAPI = MParticleAPI.getInstance(mActivity, "01234567890123456789012345678901", "secret");
 
     }
 

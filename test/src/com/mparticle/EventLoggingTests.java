@@ -19,117 +19,129 @@ public class EventLoggingTests extends AndroidTestCase {
 
     @Override
     protected void setUp() throws Exception {
-      super.setUp();
-      mMockMessageManager = mock(MockableMessageManager.class);
-      mMParticleAPI = new MParticleAPI(getContext(), "TestAppKey", mMockMessageManager);
+        super.setUp();
+        mMockMessageManager = mock(MockableMessageManager.class);
+        mMParticleAPI = new MParticleAPI(getContext(), "TestAppKey", mMockMessageManager);
     }
 
     // should fail silently. a warning message is logged but the application continues.
     public void testEventNameIsNull() {
         mMParticleAPI.logEvent(null);
-        verify(mMockMessageManager, never()).logEvent(eq(mMParticleAPI.mSessionID), anyLong(), anyLong(), anyString(), any(JSONObject.class));
+        verify(mMockMessageManager, never()).logEvent(eq(mMParticleAPI.mSessionID), anyLong(), anyLong(), anyString(),
+                any(JSONObject.class));
     }
 
     public void testEventNameTooLong() {
-        String longString="ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-        while (longString.length()<Constants.LIMIT_NAME) {
+        String longString = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        while (longString.length() < Constants.LIMIT_NAME) {
             longString += longString;
         }
         mMParticleAPI.logEvent(longString);
-        verify(mMockMessageManager, never()).logEvent(eq(mMParticleAPI.mSessionID), anyLong(), anyLong(), anyString(), any(JSONObject.class));
+        verify(mMockMessageManager, never()).logEvent(eq(mMParticleAPI.mSessionID), anyLong(), anyLong(), anyString(),
+                any(JSONObject.class));
     }
 
     public void testEventLogging() throws JSONException {
         // log an event with data
-        HashMap<String, String> eventData= new HashMap<String, String>();
+        HashMap<String, String> eventData = new HashMap<String, String>();
         eventData.put("testKey1", "testValue1");
         eventData.put("testKey2", "testValue2");
         eventData.put("testKeyInt", "42");
         mMParticleAPI.logEvent("testEvent", eventData);
 
-        // make sure the MockMessageManager got called with the correct parameters in the correct order
+        // make sure the MockMessageManager got called with the correct
+        // parameters in the correct order
         InOrder inOrder = inOrder(mMockMessageManager);
         inOrder.verify(mMockMessageManager, times(1)).startSession(anyString(), anyLong(), anyString());
 
         ArgumentCaptor<JSONObject> eventDataArgument = ArgumentCaptor.forClass(JSONObject.class);
-        inOrder.verify(mMockMessageManager).logEvent(eq(mMParticleAPI.mSessionID), anyLong(), anyLong(), anyString(), eventDataArgument.capture());
+        inOrder.verify(mMockMessageManager).logEvent(eq(mMParticleAPI.mSessionID), anyLong(), anyLong(), anyString(),
+                eventDataArgument.capture());
 
         JSONObject loggedAttributes = eventDataArgument.getValue();
-        assertEquals("testValue1",loggedAttributes.get("testKey1"));
-        assertEquals("testValue2",loggedAttributes.get("testKey2"));
-        assertEquals("42",loggedAttributes.get("testKeyInt"));
+        assertEquals("testValue1", loggedAttributes.get("testKey1"));
+        assertEquals("testValue2", loggedAttributes.get("testKey2"));
+        assertEquals("42", loggedAttributes.get("testKeyInt"));
     }
 
     public void testTooManyAttributes() throws JSONException {
-        HashMap<String, String> eventData= new HashMap<String, String>();
+        HashMap<String, String> eventData = new HashMap<String, String>();
         for (int i = 0; i < Constants.LIMIT_ATTR_COUNT + 1; i++) {
-            eventData.put("testKey"+i, "testValue"+i);
+            eventData.put("testKey" + i, "testValue" + i);
         }
         mMParticleAPI.logEvent("testEvent", eventData);
         ArgumentCaptor<JSONObject> eventDataArgument = ArgumentCaptor.forClass(JSONObject.class);
-        verify(mMockMessageManager).logEvent(eq(mMParticleAPI.mSessionID), anyLong(), anyLong(), anyString(), eventDataArgument.capture());
+        verify(mMockMessageManager).logEvent(eq(mMParticleAPI.mSessionID), anyLong(), anyLong(), anyString(),
+                eventDataArgument.capture());
 
         JSONObject loggedAttributes = eventDataArgument.getValue();
-        assertTrue(eventData.size()>Constants.LIMIT_ATTR_COUNT);
-        assertEquals(Constants.LIMIT_ATTR_COUNT,loggedAttributes.length());
+        assertTrue(eventData.size() > Constants.LIMIT_ATTR_COUNT);
+        assertEquals(Constants.LIMIT_ATTR_COUNT, loggedAttributes.length());
     }
 
     public void testAttributesValueTooLarge() throws JSONException {
-        HashMap<String, String> eventData= new HashMap<String, String>();
-        String longString="ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-        while (longString.length()<Constants.LIMIT_ATTR_VALUE) {
+        HashMap<String, String> eventData = new HashMap<String, String>();
+        String longString = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        while (longString.length() < Constants.LIMIT_ATTR_VALUE) {
             longString += longString;
         }
         eventData.put("testKey1", longString);
         mMParticleAPI.logEvent("testEvent", eventData);
         ArgumentCaptor<JSONObject> eventDataArgument = ArgumentCaptor.forClass(JSONObject.class);
-        verify(mMockMessageManager).logEvent(eq(mMParticleAPI.mSessionID), anyLong(), anyLong(), anyString(), eventDataArgument.capture());
+        verify(mMockMessageManager).logEvent(eq(mMParticleAPI.mSessionID), anyLong(), anyLong(), anyString(),
+                eventDataArgument.capture());
 
         JSONObject loggedAttributes = eventDataArgument.getValue();
         assertFalse(loggedAttributes.has("testKey1"));
     }
 
     public void testAttributesKeyTooLarge() throws JSONException {
-        HashMap<String, String> eventData= new HashMap<String, String>();
-        String longString="ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-        while (longString.length()<Constants.LIMIT_ATTR_VALUE) {
+        HashMap<String, String> eventData = new HashMap<String, String>();
+        String longString = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        while (longString.length() < Constants.LIMIT_ATTR_VALUE) {
             longString += longString;
         }
         eventData.put(longString, "testValue1");
         mMParticleAPI.logEvent("testEvent", eventData);
         ArgumentCaptor<JSONObject> eventDataArgument = ArgumentCaptor.forClass(JSONObject.class);
-        verify(mMockMessageManager).logEvent(eq(mMParticleAPI.mSessionID), anyLong(), anyLong(), anyString(), eventDataArgument.capture());
+        verify(mMockMessageManager).logEvent(eq(mMParticleAPI.mSessionID), anyLong(), anyLong(), anyString(),
+                eventDataArgument.capture());
 
         JSONObject loggedAttributes = eventDataArgument.getValue();
-        assertEquals(1,eventData.size());
-        assertEquals(0,loggedAttributes.length());
+        assertEquals(1, eventData.size());
+        assertEquals(0, loggedAttributes.length());
     }
 
     public void testEventCountExceeded() {
         for (int i = 0; i < 1 + Constants.EVENT_LIMIT; i++) {
             mMParticleAPI.logEvent("testEvent");
         }
-        verify(mMockMessageManager, times(Constants.EVENT_LIMIT)).logEvent(eq(mMParticleAPI.mSessionID), anyLong(), anyLong(), anyString(), any(JSONObject.class));
+        verify(mMockMessageManager, times(Constants.EVENT_LIMIT)).logEvent(eq(mMParticleAPI.mSessionID), anyLong(),
+                anyLong(), anyString(), any(JSONObject.class));
     }
 
     public void testLogErrorMessage() {
         mMParticleAPI.logErrorEvent("errorMessage1");
-        verify(mMockMessageManager, times(1)).logErrorEvent(anyString(), anyLong(), anyLong(), eq("errorMessage1"), any(Throwable.class));
+        verify(mMockMessageManager, times(1)).logErrorEvent(anyString(), anyLong(), anyLong(), eq("errorMessage1"),
+                any(Throwable.class));
     }
 
     public void testLogNullErrorMessage() {
-        mMParticleAPI.logErrorEvent((String)null);
-        verify(mMockMessageManager, times(0)).logErrorEvent(anyString(), anyLong(), anyLong(), anyString(), any(Throwable.class));
+        mMParticleAPI.logErrorEvent((String) null);
+        verify(mMockMessageManager, times(0)).logErrorEvent(anyString(), anyLong(), anyLong(), anyString(),
+                any(Throwable.class));
     }
 
     public void testLogException() {
         mMParticleAPI.logErrorEvent(new Exception("testException"));
-        verify(mMockMessageManager, times(1)).logErrorEvent(anyString(), anyLong(), anyLong(), eq((String)null), any(Throwable.class));
+        verify(mMockMessageManager, times(1)).logErrorEvent(anyString(), anyLong(), anyLong(), eq((String) null),
+                any(Throwable.class));
     }
 
     public void testLogNullException() {
-        mMParticleAPI.logErrorEvent((Exception)null);
-        verify(mMockMessageManager, times(0)).logErrorEvent(anyString(), anyLong(), anyLong(), anyString(), any(Throwable.class));
+        mMParticleAPI.logErrorEvent((Exception) null);
+        verify(mMockMessageManager, times(0)).logErrorEvent(anyString(), anyLong(), anyLong(), anyString(),
+                any(Throwable.class));
     }
 
 }
