@@ -215,7 +215,7 @@ import com.mparticle.Constants.MessageType;
             message.put(MessageKey.OPT_OUT_STATUS, optOutStatus);
             mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
         } catch (JSONException e) {
-            Log.w(TAG, "Failed to create mParticle screen view message");
+            Log.w(TAG, "Failed to create mParticle opt out message");
         }
     }
 
