@@ -19,7 +19,7 @@ public class UserSessionAttributesTests extends AndroidTestCase {
         mMParticleAPI.clearUserAttributes();
     }
 
-    public void testSetUserProperty() throws JSONException {
+    public void testSetUserAttributes() throws JSONException {
         mMParticleAPI.setUserAttribute("testKey1", "testValue1");
         mMParticleAPI.setUserAttribute("testKey2", "testValue2");
         assertEquals("testValue1", mMParticleAPI.mUserAttributes.getString("testKey1"));
