@@ -1,9 +1,10 @@
 package com.mparticle;
 
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.*;
 
 import android.test.AndroidTestCase;
+
+import com.mparticle.MParticleAPI.EventType;
 
 public class SessionLifecycleTests extends AndroidTestCase {
 
@@ -62,7 +63,7 @@ public class SessionLifecycleTests extends AndroidTestCase {
 
     // start new session on on start() call if event logged on unstarted session
     public void testSessionStartOnEvent() {
-        mMParticleAPI.logEvent("test");
+        mMParticleAPI.logEvent("test", EventType.ACTION);
         assertNotNull(mMParticleAPI.mSessionID);
         assertTrue(mMParticleAPI.mSessionStartTime > 0);
         verify(mMockMessageManager, times(1)).startSession(anyString(), anyLong(), anyString());
@@ -73,11 +74,11 @@ public class SessionLifecycleTests extends AndroidTestCase {
     public void testSessionEventTimeout() throws InterruptedException {
         mMParticleAPI.setSessionTimeout(50);
         mMParticleAPI.startActivity();
-        mMParticleAPI.logEvent("test1");
+        mMParticleAPI.logEvent("test1", EventType.ACTION);
         String sessionUUID = mMParticleAPI.mSessionID;
         long sessionStartTime = mMParticleAPI.mSessionStartTime;
         Thread.sleep(200);
-        mMParticleAPI.logEvent("test2");
+        mMParticleAPI.logEvent("test2", EventType.ACTION);
         assertNotSame(sessionUUID, mMParticleAPI.mSessionID);
         assertTrue(sessionStartTime < mMParticleAPI.mSessionStartTime);
         verify(mMockMessageManager, times(2)).startSession(anyString(), anyLong(), anyString());
@@ -90,9 +91,9 @@ public class SessionLifecycleTests extends AndroidTestCase {
         mMParticleAPI.setSessionTimeout(5000);
         mMParticleAPI.startActivity();
         Thread.sleep(5);
-        mMParticleAPI.logEvent("test1");
-        mMParticleAPI.logEvent("test2");
-        mMParticleAPI.logEvent("test3");
+        mMParticleAPI.logEvent("test1", EventType.ACTION);
+        mMParticleAPI.logEvent("test2", EventType.ACTION);
+        mMParticleAPI.logEvent("test3", EventType.ACTION);
         assertTrue(mMParticleAPI.mLastEventTime > mMParticleAPI.mSessionStartTime);
         verify(mMockMessageManager, times(1)).startSession(anyString(), anyLong(), anyString());
         verify(mMockMessageManager, never()).stopSession(anyString(), anyLong(), anyLong());
@@ -143,7 +144,7 @@ public class SessionLifecycleTests extends AndroidTestCase {
     public void testSessionTimeoutStandalone() throws InterruptedException {
         mMParticleAPI.setSessionTimeout(50);
         mMParticleAPI.startActivity();
-        mMParticleAPI.logEvent("test1");
+        mMParticleAPI.logEvent("test1", EventType.ACTION);
         String sessionUUID = mMParticleAPI.mSessionID;
         long lastEventTime = mMParticleAPI.mLastEventTime;
         Thread.sleep(200);
@@ -159,9 +160,9 @@ public class SessionLifecycleTests extends AndroidTestCase {
     public void testSessionTimeoutBackground() throws InterruptedException {
         mMParticleAPI.setSessionTimeout(50);
         mMParticleAPI.startActivity();
-        mMParticleAPI.logEvent("test1");
+        mMParticleAPI.logEvent("test1", EventType.ACTION);
         Thread.sleep(10);
-        mMParticleAPI.logEvent("test2");
+        mMParticleAPI.logEvent("test2", EventType.ACTION);
         String sessionUUID = mMParticleAPI.mSessionID;
         long lastEventTime = mMParticleAPI.mLastEventTime;
         Thread.sleep(200);

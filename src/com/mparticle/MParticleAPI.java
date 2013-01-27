@@ -4,6 +4,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.UUID;
@@ -330,9 +331,11 @@ public class MParticleAPI {
      *
      * @param eventName
      *            the name of the event to be tracked
+     * @param eventType
+     *            the type of the event to be tracked
      */
-    public void logEvent(String eventName) {
-        logEvent(eventName, null);
+    public void logEvent(String eventName, EventType eventType) {
+        logEvent(eventName, eventType, null);
     }
 
     /**
@@ -340,10 +343,12 @@ public class MParticleAPI {
      *
      * @param eventName
      *            the name of the event to be tracked
+     * @param eventType
+     *            the type of the event to be tracked
      * @param eventData
      *            a Map of data attributes
      */
-    public void logEvent(String eventName, Map<String, String> eventData) {
+    public void logEvent(String eventName, EventType eventType, Map<String, String> eventData) {
         if (mOptedOut) {
             return;
         }
@@ -358,7 +363,7 @@ public class MParticleAPI {
         ensureActiveSession();
         if (checkEventLimit()) {
             JSONObject eventDataJSON = enforceAttributeConstraints(eventData);
-            mMessageManager.logEvent(mSessionID, mSessionStartTime, mLastEventTime, eventName, eventDataJSON);
+            mMessageManager.logEvent(mSessionID, mSessionStartTime, mLastEventTime, eventName, eventType, eventDataJSON);
             if (null == eventDataJSON) {
                 debugLog("Logged event: " + eventName);
             } else {
@@ -850,6 +855,13 @@ public class MParticleAPI {
         public void onStatusChanged(String provider, int status, Bundle extras) {
         }
 
+    }
+
+    public enum EventType {
+        NAVIGATION, PAGEVIEW, SEARCH, PURCHASE, ACTION, OTHER;
+        public String toString() {
+            return name().toLowerCase(Locale.US);
+        }
     }
 
 }

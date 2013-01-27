@@ -10,6 +10,7 @@ import android.test.AndroidTestCase;
 import android.util.Log;
 
 import com.mparticle.Constants.Status;
+import com.mparticle.MParticleAPI.EventType;
 import com.mparticle.MParticleDatabase.CommandTable;
 import com.mparticle.MParticleDatabase.MessageTable;
 import com.mparticle.MParticleDatabase.SessionTable;
@@ -99,9 +100,9 @@ public class MessageHandlerTests extends AndroidTestCase {
     public void testStoreSessionEvent() throws InterruptedException {
 
         sMessageManager1.startSession(mSessionId, 1000, null);
-        sMessageManager1.logEvent(mSessionId, 1000, 2000, "event1", null);
-        sMessageManager1.logEvent(mSessionId, 1000, 3000, "event2", null);
-        sMessageManager1.logEvent(mSessionId, 1000, 4000, "event3", null);
+        sMessageManager1.logEvent(mSessionId, 1000, 2000, "event1", EventType.ACTION, null);
+        sMessageManager1.logEvent(mSessionId, 1000, 3000, "event2", EventType.ACTION, null);
+        sMessageManager1.logEvent(mSessionId, 1000, 4000, "event3", EventType.ACTION, null);
 
         while (sMessageHandler1.mIsProcessingMessage || sMessageHandler1.hasMessages(MessageHandler.STORE_MESSAGE)) {
             Log.d(Constants.LOG_TAG, "Still processing messages...");
@@ -158,9 +159,9 @@ public class MessageHandlerTests extends AndroidTestCase {
     public void testSessionStop() throws InterruptedException {
 
         sMessageManager1.startSession(mSessionId, 1000, null);
-        sMessageManager1.logEvent(mSessionId, 1000, 2000, "event1", null);
+        sMessageManager1.logEvent(mSessionId, 1000, 2000, "event1", EventType.ACTION, null);
         sMessageManager1.stopSession(mSessionId, 3000, 250);
-        sMessageManager1.logEvent(mSessionId, 1000, 4000, "event2", null);
+        sMessageManager1.logEvent(mSessionId, 1000, 4000, "event2", EventType.ACTION, null);
         sMessageManager1.stopSession(mSessionId, 5000, 3500);
 
         while (sMessageHandler1.mIsProcessingMessage ||
@@ -188,9 +189,9 @@ public class MessageHandlerTests extends AndroidTestCase {
     // session-end message should be added, messages marked as batch-ready
     public void testSessionEnd() throws InterruptedException {
         sMessageManager1.startSession(mSessionId, 1000, null);
-        sMessageManager1.logEvent(mSessionId, 1000, 2000, "event1", null);
+        sMessageManager1.logEvent(mSessionId, 1000, 2000, "event1", EventType.ACTION, null);
         sMessageManager1.stopSession(mSessionId, 3000, 1500);
-        sMessageManager1.logEvent(mSessionId, 1000, 4000, "event2", null);
+        sMessageManager1.logEvent(mSessionId, 1000, 4000, "event2", EventType.ACTION, null);
         sMessageManager1.endSession(mSessionId, 5000, 2500);
 
         while (sMessageHandler1.mIsProcessingMessage ||
@@ -216,10 +217,10 @@ public class MessageHandlerTests extends AndroidTestCase {
     public void testEndOrphans() throws JSONException, InterruptedException {
 
         sMessageManager1.startSession(mSessionId, 1000, null);
-        sMessageManager1.logEvent(mSessionId, 1000, 2000, "event1", null);
+        sMessageManager1.logEvent(mSessionId, 1000, 2000, "event1", EventType.ACTION, null);
 
         sMessageManager2.startSession(mSessionId + "-2", 1500, null);
-        sMessageManager2.logEvent(mSessionId + "-2", 1500, 2500, "event1", null);
+        sMessageManager2.logEvent(mSessionId + "-2", 1500, 2500, "event1", EventType.ACTION, null);
 
         while (sMessageHandler1.mIsProcessingMessage ||
                 sMessageHandler1.hasMessages(MessageHandler.STORE_MESSAGE) ||

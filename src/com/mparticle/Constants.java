@@ -45,6 +45,7 @@ package com.mparticle;
         public static final String SESSION_ID = "sid";
         public static final String SESSION_LENGTH = "sl";
         public static final String ATTRIBUTES = "attrs";
+        public static final String EVENT_TYPE = "et";
         public static final String NAME = "n";
         // referrer
         public static final String LAUNCH_REFERRER = "lr";

@@ -24,6 +24,7 @@ import android.util.Log;
 import com.mparticle.Constants.ConfigKeys;
 import com.mparticle.Constants.MessageKey;
 import com.mparticle.Constants.MessageType;
+import com.mparticle.MParticleAPI.EventType;
 
 /* package-private */class MessageManager {
 
@@ -184,10 +185,11 @@ import com.mparticle.Constants.MessageType;
                 .sendMessage(mMessageHandler.obtainMessage(MessageHandler.CREATE_SESSION_END_MESSAGE, sessionId));
     }
 
-    public void logEvent(String sessionId, long sessionStartTime, long time, String eventName, JSONObject attributes) {
+    public void logEvent(String sessionId, long sessionStartTime, long time, String eventName, EventType eventType, JSONObject attributes) {
         try {
             JSONObject message = createMessage(MessageType.EVENT, sessionId, sessionStartTime, time, eventName,
                     attributes, true);
+            message.put(MessageKey.EVENT_TYPE, eventType);
             // NOTE: event timing is not supported (yet) but the server expects this data
             message.put(MessageKey.EVENT_START_TIME, time);
             message.put(MessageKey.EVENT_DURATION, 0);
@@ -202,6 +204,7 @@ import com.mparticle.Constants.MessageType;
         try {
             JSONObject message = createMessage(MessageType.SCREEN_VIEW, sessionId, sessionStartTime, time, screenName,
                     attributes, true);
+            message.put(MessageKey.EVENT_TYPE, "pageview");
             mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
         } catch (JSONException e) {
             Log.w(TAG, "Failed to create mParticle screen view message");

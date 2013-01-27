@@ -8,6 +8,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.mparticle.Constants.PrefKeys;
+import com.mparticle.MParticleAPI.EventType;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -41,8 +42,8 @@ public class OptOutTests extends AndroidTestCase {
         mMParticleAPI.startActivity();
         mMParticleAPI.setSessionAttribute("testKey1", "testValue1");
         mMParticleAPI.setUserAttribute("testKey1", "testValue1");
-        mMParticleAPI.logEvent("event1");
-        mMParticleAPI.logEvent("event2", eventData);
+        mMParticleAPI.logEvent("event1", EventType.ACTION);
+        mMParticleAPI.logEvent("event2", EventType.ACTION, eventData);
         mMParticleAPI.newSession();
         mMParticleAPI.logScreenView("view1");
         mMParticleAPI.logScreenView("view2", eventData);
@@ -56,7 +57,7 @@ public class OptOutTests extends AndroidTestCase {
         verify(mMockMessageManager, never()).logScreenView(anyString(), anyLong(), anyLong(), anyString(),
                 any(JSONObject.class));
         verify(mMockMessageManager, never()).logEvent(anyString(), anyLong(), anyLong(), anyString(),
-                any(JSONObject.class));
+                any(EventType.class), any(JSONObject.class));
         verify(mMockMessageManager, never()).logErrorEvent(anyString(), anyLong(), anyLong(), anyString(),
                 any(Exception.class));
         verify(mMockMessageManager, never()).stopSession(anyString(), anyLong(), anyLong());
@@ -68,21 +69,21 @@ public class OptOutTests extends AndroidTestCase {
         eventData.put("testKey1", "testValue1");
         mMParticleAPI.startActivity();
         mMParticleAPI.setSessionAttribute("testKey1", "testValue1");
-        mMParticleAPI.logEvent("event1");
+        mMParticleAPI.logEvent("event1", EventType.ACTION);
         mMParticleAPI.setOptOut(true);
-        mMParticleAPI.logEvent("event2");
+        mMParticleAPI.logEvent("event2", EventType.ACTION);
         mMParticleAPI.stopActivity();
         mMParticleAPI.endSession();
         mMParticleAPI.startActivity();
         mMParticleAPI.setSessionAttribute("testKey1", "testValue1");
-        mMParticleAPI.logEvent("event1");
+        mMParticleAPI.logEvent("event1", EventType.ACTION);
         mMParticleAPI.stopActivity();
         mMParticleAPI.endSession();
 
         verify(mMockMessageManager, times(1)).optOut(anyString(), anyLong(), anyLong(), eq(true));
         verify(mMockMessageManager, times(1)).startSession(anyString(), anyLong(), anyString());
         verify(mMockMessageManager, times(1)).logEvent(anyString(), anyLong(), anyLong(), anyString(),
-                any(JSONObject.class));
+                any(EventType.class), any(JSONObject.class));
         verify(mMockMessageManager, times(1)).stopSession(anyString(), anyLong(), anyLong());
         verify(mMockMessageManager, times(1)).endSession(anyString(), anyLong(), anyLong());
     }
@@ -91,20 +92,20 @@ public class OptOutTests extends AndroidTestCase {
         mMParticleAPI.startActivity();
         mMParticleAPI.setSessionAttribute("testKey1", "testValue1");
         mMParticleAPI.setUserAttribute("testKey1", "testValue1");
-        mMParticleAPI.logEvent("event1");
+        mMParticleAPI.logEvent("event1", EventType.ACTION);
         mMParticleAPI.setOptOut(true);
         mMParticleAPI.setSessionAttribute("testKey2", "testValue1");
         mMParticleAPI.setUserAttribute("testKey2", "testValue1");
-        mMParticleAPI.logEvent("event2");
+        mMParticleAPI.logEvent("event2", EventType.ACTION);
         mMParticleAPI.endSession();
         mMParticleAPI.startActivity();
         mMParticleAPI.setSessionAttribute("testKey3", "testValue2");
         mMParticleAPI.setUserAttribute("testKey3", "testValue2");
-        mMParticleAPI.logEvent("event3");
+        mMParticleAPI.logEvent("event3", EventType.ACTION);
         mMParticleAPI.setOptOut(false);
         mMParticleAPI.setSessionAttribute("testKey4", "testValue2");
         mMParticleAPI.setUserAttribute("testKey4", "testValue2");
-        mMParticleAPI.logEvent("event4");
+        mMParticleAPI.logEvent("event4", EventType.ACTION);
         mMParticleAPI.endSession();
 
         verify(mMockMessageManager, times(2)).optOut(anyString(), anyLong(), anyLong(), anyBoolean());
@@ -112,15 +113,15 @@ public class OptOutTests extends AndroidTestCase {
         verify(mMockMessageManager, times(1)).optOut(anyString(), anyLong(), anyLong(), eq(false));
         verify(mMockMessageManager, times(2)).startSession(anyString(), anyLong(), anyString());
         verify(mMockMessageManager, times(2)).logEvent(anyString(), anyLong(), anyLong(), anyString(),
-                any(JSONObject.class));
+                any(EventType.class), any(JSONObject.class));
         verify(mMockMessageManager, times(1)).logEvent(anyString(), anyLong(), anyLong(), eq("event1"),
-                any(JSONObject.class));
+                any(EventType.class), any(JSONObject.class));
         verify(mMockMessageManager, times(0)).logEvent(anyString(), anyLong(), anyLong(), eq("event2"),
-                any(JSONObject.class));
+                any(EventType.class), any(JSONObject.class));
         verify(mMockMessageManager, times(0)).logEvent(anyString(), anyLong(), anyLong(), eq("event3"),
-                any(JSONObject.class));
+                any(EventType.class), any(JSONObject.class));
         verify(mMockMessageManager, times(1)).logEvent(anyString(), anyLong(), anyLong(), eq("event4"),
-                any(JSONObject.class));
+                any(EventType.class), any(JSONObject.class));
         verify(mMockMessageManager, times(2)).setSessionAttributes(anyString(), any(JSONObject.class));
         verify(mMockMessageManager, times(2)).stopSession(anyString(), anyLong(), anyLong());
         verify(mMockMessageManager, times(2)).endSession(anyString(), anyLong(), anyLong());
@@ -130,13 +131,13 @@ public class OptOutTests extends AndroidTestCase {
         mMParticleAPI.setOptOut(false);
         mMParticleAPI.startActivity();
         mMParticleAPI.setOptOut(true);
-        mMParticleAPI.logEvent("event1");
+        mMParticleAPI.logEvent("event1", EventType.ACTION);
         mMParticleAPI.setOptOut(true);
-        mMParticleAPI.logEvent("event2");
+        mMParticleAPI.logEvent("event2", EventType.ACTION);
         mMParticleAPI.setOptOut(false);
-        mMParticleAPI.logEvent("event3");
+        mMParticleAPI.logEvent("event3", EventType.ACTION);
         mMParticleAPI.setOptOut(false);
-        mMParticleAPI.logEvent("event4");
+        mMParticleAPI.logEvent("event4", EventType.ACTION);
         mMParticleAPI.endSession();
 
         verify(mMockMessageManager, times(2)).optOut(anyString(), anyLong(), anyLong(), anyBoolean());
@@ -144,15 +145,15 @@ public class OptOutTests extends AndroidTestCase {
         verify(mMockMessageManager, times(1)).optOut(anyString(), anyLong(), anyLong(), eq(false));
         verify(mMockMessageManager, times(2)).startSession(anyString(), anyLong(), anyString());
         verify(mMockMessageManager, times(2)).logEvent(anyString(), anyLong(), anyLong(), anyString(),
-                any(JSONObject.class));
+                any(EventType.class), any(JSONObject.class));
         verify(mMockMessageManager, times(0)).logEvent(anyString(), anyLong(), anyLong(), eq("event1"),
-                any(JSONObject.class));
+                any(EventType.class), any(JSONObject.class));
         verify(mMockMessageManager, times(0)).logEvent(anyString(), anyLong(), anyLong(), eq("event2"),
-                any(JSONObject.class));
+                any(EventType.class), any(JSONObject.class));
         verify(mMockMessageManager, times(1)).logEvent(anyString(), anyLong(), anyLong(), eq("event3"),
-                any(JSONObject.class));
+                any(EventType.class), any(JSONObject.class));
         verify(mMockMessageManager, times(1)).logEvent(anyString(), anyLong(), anyLong(), eq("event4"),
-                any(JSONObject.class));
+                any(EventType.class), any(JSONObject.class));
         verify(mMockMessageManager, times(2)).endSession(anyString(), anyLong(), anyLong());
     }
 
