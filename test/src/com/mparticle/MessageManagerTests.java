@@ -93,41 +93,6 @@ public class MessageManagerTests extends AndroidTestCase {
         assertTrue(message.has(MessageKey.ATTRIBUTES));
     }
 
-    // creates a 'v' message with attributes
-    public void testCreateScreenViewMessage() throws JSONException {
-        String viewName = "view1";
-
-        JSONObject message = MessageManager.createMessage(MessageType.SCREEN_VIEW, mSessionId, mSessionStartTime,
-                mMsgTime, viewName, null, true);
-        assertNotNull(message.toString());
-        assertEquals(MessageType.SCREEN_VIEW, message.getString(MessageKey.TYPE));
-        assertTrue(message.has(MessageKey.ID));
-        assertEquals(mMsgTime, message.getLong(MessageKey.TIMESTAMP));
-        assertEquals(mSessionStartTime, message.getLong(MessageKey.SESSION_START_TIMESTAMP));
-        assertEquals(mSessionId, message.getString(MessageKey.SESSION_ID));
-        assertNotSame(mSessionId, message.getString(MessageKey.ID));
-        assertEquals(viewName, message.getString(MessageKey.NAME));
-        assertFalse(message.has(MessageKey.ATTRIBUTES));
-    }
-
-    // creates a 'v' message with attributes
-    public void testCreateScreenViewWithAttributesMessage() throws JSONException {
-        String viewName = "view2";
-        JSONObject eventAttrs = new JSONObject("{key2:'value2'}");
-
-        JSONObject message = MessageManager.createMessage(MessageType.SCREEN_VIEW, mSessionId, mSessionStartTime,
-                mMsgTime, viewName, eventAttrs, true);
-        assertNotNull(message.toString());
-        assertEquals(MessageType.SCREEN_VIEW, message.getString(MessageKey.TYPE));
-        assertTrue(message.has(MessageKey.ID));
-        assertEquals(mMsgTime, message.getLong(MessageKey.TIMESTAMP));
-        assertEquals(mSessionStartTime, message.getLong(MessageKey.SESSION_START_TIMESTAMP));
-        assertEquals(mSessionId, message.getString(MessageKey.SESSION_ID));
-        assertNotSame(mSessionId, message.getString(MessageKey.ID));
-        assertEquals(viewName, message.getString(MessageKey.NAME));
-        assertTrue(message.has(MessageKey.ATTRIBUTES));
-    }
-
     // creates an 'o' message
     public void testCreateOptOutMessage() throws JSONException {
         JSONObject message = MessageManager.createMessage(MessageType.OPT_OUT, null, 0, mMsgTime, null, null, false);

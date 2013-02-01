@@ -195,20 +195,13 @@ import com.mparticle.MParticleAPI.EventType;
             message.put(MessageKey.EVENT_DURATION, 0);
             mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
         } catch (JSONException e) {
-            Log.w(TAG, "Failed to create mParticle start event message");
+            Log.w(TAG, "Failed to create mParticle log event message");
         }
     }
 
     public void logScreenView(String sessionId, long sessionStartTime, long time, String screenName,
             JSONObject attributes) {
-        try {
-            JSONObject message = createMessage(MessageType.SCREEN_VIEW, sessionId, sessionStartTime, time, screenName,
-                    attributes, true);
-            message.put(MessageKey.EVENT_TYPE, "pageview");
-            mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
-        } catch (JSONException e) {
-            Log.w(TAG, "Failed to create mParticle screen view message");
-        }
+        logEvent(sessionId, sessionStartTime, time, screenName, EventType.PAGEVIEW, attributes);
     }
 
     public void optOut(String sessionId, long sessionStartTime, long time, boolean optOutStatus) {
