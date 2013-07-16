@@ -12,6 +12,7 @@ import android.util.Log;
 import com.mparticle.Constants.MessageKey;
 import com.mparticle.Constants.Status;
 import com.mparticle.MParticleAPI.EventType;
+import com.mparticle.MParticleAPI.IdentityType;
 import com.mparticle.MParticleDatabase.CommandTable;
 import com.mparticle.MParticleDatabase.MessageTable;
 import com.mparticle.MParticleDatabase.SessionTable;
@@ -23,6 +24,7 @@ public class UploadHandlerTests extends AndroidTestCase {
     private static MessageHandler sMessageHandler1, sMessageHandler2;
     private static UploadHandler sUploadHandler1, sUploadHandler2;
     private static MessageManager sMessageManager1, sMessageManager2;
+    private static MParticleAPI sMParticleAPI;
 
     private static final int SLEEP_DELAY = 200;
     private static int sSessionCounter = 0;
@@ -41,6 +43,8 @@ public class UploadHandlerTests extends AndroidTestCase {
     private void initalSetup() throws Exception {
         sDB = new MParticleDatabase(getContext());
 
+        sMParticleAPI = new MParticleAPI(getContext(), "test-api-1", sMessageManager1);
+        
         sMessageHandler1 = new MessageHandler(getContext(), Looper.getMainLooper(), "test-api-1");
         sUploadHandler1 = new UploadHandler(getContext(), Looper.getMainLooper(), "test-api-1", "secret1");
         sMessageManager1 = new MessageManager(sMessageHandler1, sUploadHandler1);
@@ -69,6 +73,8 @@ public class UploadHandlerTests extends AndroidTestCase {
     // only process messages from ended sessions
     public void testPrepareUploadsBatch() throws InterruptedException, JSONException {
 
+    	sMParticleAPI.identify("tbreffni@mparticle.com", IdentityType.MICROSOFT);
+    	
         sMessageManager1.startSession(mSessionId, 1000, null);
         sMessageManager1.logEvent(mSessionId, 1000, 2000, "event1", EventType.ACTION, null);
         sMessageManager1.endSession(mSessionId, 3000, 2000);
@@ -106,7 +112,7 @@ public class UploadHandlerTests extends AndroidTestCase {
         uploadsCursor.moveToFirst();
         JSONObject uploadMessage = new JSONObject(uploadsCursor.getString(0));
         assertEquals(3, uploadMessage.getJSONArray(MessageKey.MESSAGES).length());
-
+        assertEquals("tbreffni@mparticle.com", ((JSONObject)uploadMessage.getJSONArray(MessageKey.USER_IDENTITIES).get(0)).get(MessageKey.IDENTITY_VALUE));
     }
 
     // process all messages from active and ended sessions

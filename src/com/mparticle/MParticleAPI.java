@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.UUID;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -30,6 +31,7 @@ import android.os.Process;
 import android.util.Log;
 
 import com.mparticle.Constants.ConfigKeys;
+import com.mparticle.Constants.MessageKey;
 import com.mparticle.Constants.PrefKeys;
 
 /**
@@ -60,6 +62,7 @@ public class MParticleAPI {
     private long mSessionActiveStart = 0;
     private int mSessionLength = 0;
     private int mEventCount = 0;
+    /* package-private */JSONArray mUserIdentities = new JSONArray();
     /* package-private */JSONObject mUserAttributes = new JSONObject();
     /* package-private */JSONObject mSessionAttributes;
     private String mLaunchUri;
@@ -79,7 +82,16 @@ public class MParticleAPI {
                 // carry on without user attributes
             }
         }
-
+        
+        String userIds = sPreferences.getString(PrefKeys.USER_IDENTITIES + mApiKey, null);
+        if (null != userIds) {
+            try {
+                mUserIdentities = new JSONArray(userIds);
+            } catch (JSONException e) {
+                // carry on without user identities
+            }
+        }
+        
         if (!sPreferences.contains(PrefKeys.INSTALL_TIME)) {
             sPreferences.edit().putLong(PrefKeys.INSTALL_TIME, System.currentTimeMillis()).commit();
         }
@@ -542,6 +554,33 @@ public class MParticleAPI {
             sPreferences.edit().putString(PrefKeys.USER_ATTRS + mApiKey, mUserAttributes.toString()).commit();
         }
     }
+    
+    public void identify(String id, IdentityType identityType) {
+    	if(mOptedOut){
+    		return;
+    	}
+    	
+    	debugLog("Setting user identity: " + id);
+    	
+    	if (null != id && id.length() > Constants.LIMIT_ATTR_VALUE) {
+            Log.w(TAG, "Id value length exceeds limit. Discarding id: " + id);
+            return;
+        }
+    	
+    	try {
+    		JSONObject identity = new JSONObject();
+    		identity.put(MessageKey.IDENTITY_NAME, identityType.value);
+    		identity.put(MessageKey.IDENTITY_VALUE, id);
+    		
+    		mUserIdentities.put(identity);
+    	}
+    	catch(JSONException e) {
+    		Log.w(TAG, "Error setting identity: " + id);
+            return;
+    	}
+    	
+    	sPreferences.edit().putString(PrefKeys.USER_IDENTITIES + mApiKey, mUserIdentities.toString()).commit();
+    }
 
     /* package-private */void clearUserAttributes() {
         mUserAttributes = new JSONObject();
@@ -863,5 +902,24 @@ public class MParticleAPI {
             return name().toLowerCase(Locale.US);
         }
     }
-
+    
+    public enum IdentityType {
+    	OTHER(0),
+    	CUSTOMERID(1),
+    	FACEBOOK(2),
+    	TWITTER(3),
+    	GOOGLE(4),
+    	MICROSOFT(5),
+    	YAHOO(6);
+    	
+    	private final int value;
+    	
+    	private IdentityType(int value) {
+    		this.value = value;
+    	}
+    	
+    	public int getValue() {
+    		return value;
+    	}
+    }
 }

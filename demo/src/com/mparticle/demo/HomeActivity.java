@@ -19,6 +19,9 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.webkit.WebChromeClient;
+import android.webkit.WebSettings;
+import android.webkit.WebView;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
@@ -33,6 +36,7 @@ import com.mparticle.Attributes;
 import com.mparticle.DemoDeviceAttributes;
 import com.mparticle.MParticleAPI;
 import com.mparticle.MParticleAPI.EventType;
+import com.mparticle.MParticleJSInterface;
 
 public class HomeActivity extends Activity implements OnItemSelectedListener {
 
@@ -72,6 +76,21 @@ public class HomeActivity extends Activity implements OnItemSelectedListener {
 
         setupApiInstance("TestAppKey", "secret");
         updatePushControls();
+        
+        WebView myWebView = (WebView)this.findViewById(R.id.webView1);
+        myWebView.setWebChromeClient(new WebChromeClient() {
+        	public void onConsoleMessage(String message, int lineNumber, String sourceID) {
+        		Log.d("MParticle.JS", message);
+        	}
+        });
+        
+        WebSettings webSettings = myWebView.getSettings();
+        webSettings.setJavaScriptEnabled(true);
+        
+        myWebView.loadUrl("http://10.0.0.11");
+        
+        MParticleJSInterface jsInstance = new MParticleJSInterface(this, mParticleAPI);
+        myWebView.addJavascriptInterface(jsInstance, "mParticleAndroid");
     }
 
     private void setupApiInstance(String apiKey, String secret) {

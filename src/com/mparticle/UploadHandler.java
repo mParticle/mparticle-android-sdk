@@ -244,6 +244,11 @@ import com.mparticle.MParticleDatabase.UploadTable;
         if (null != userAttrs) {
             uploadMessage.put(MessageKey.USER_ATTRIBUTES, new JSONObject(userAttrs));
         }
+        
+        String userIds = mPreferences.getString(PrefKeys.USER_IDENTITIES + mApiKey, null);
+        if (null != userIds) {
+            uploadMessage.put(MessageKey.USER_IDENTITIES, new JSONArray(userIds));
+        }
 
         uploadMessage.put(MessageKey.MESSAGES, messagesArray);
 

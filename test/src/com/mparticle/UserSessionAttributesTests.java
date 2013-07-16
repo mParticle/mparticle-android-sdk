@@ -3,8 +3,13 @@ package com.mparticle;
 import static org.mockito.Mockito.*;
 
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import android.test.AndroidTestCase;
+
+import com.mparticle.Constants.MessageKey;
+import com.mparticle.MParticleAPI;
+import com.mparticle.MParticleAPI.IdentityType;
 
 public class UserSessionAttributesTests extends AndroidTestCase {
 
@@ -24,6 +29,13 @@ public class UserSessionAttributesTests extends AndroidTestCase {
         mMParticleAPI.setUserAttribute("testKey2", "testValue2");
         assertEquals("testValue1", mMParticleAPI.mUserAttributes.getString("testKey1"));
         assertEquals("testValue2", mMParticleAPI.mUserAttributes.getString("testKey2"));
+    }
+    
+    public void testSetUserIdentity() throws JSONException {
+    	mMParticleAPI.identify("tbreffni@mparticle.com", IdentityType.MICROSOFT);
+    	
+    	assertEquals("tbreffni@mparticle.com", ((JSONObject)mMParticleAPI.mUserIdentities.get(0)).get(MessageKey.IDENTITY_VALUE));
+    	assertEquals(IdentityType.MICROSOFT.getValue(), ((JSONObject)mMParticleAPI.mUserIdentities.get(0)).get(MessageKey.IDENTITY_NAME));
     }
 
     public void testTooManyAttributes() throws JSONException {

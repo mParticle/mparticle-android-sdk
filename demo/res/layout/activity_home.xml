@@ -500,6 +500,21 @@
                 android:onClick="pressBrowserButton"
                 android:text="@string/button_browser_track_install_http" />
         </RelativeLayout>
+
+        <LinearLayout
+            android:id="@+id/layoutWebBrowser"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" >
+
+            <WebView
+                android:id="@+id/webView1"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:minHeight="200px" />
+
+        </LinearLayout>
+
     </LinearLayout>
 
 </ScrollView>
