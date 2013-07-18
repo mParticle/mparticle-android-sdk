@@ -33,6 +33,7 @@ package com.mparticle;
         public static final String REQUEST_HEADER = "h";
         public static final String RESPONSE_HEADER = "rh";
         public static final String HTTP_COMMAND = "hc";
+        public static final String FIRST_RUN = "fr";
     }
 
     public interface MessageKey {
@@ -125,6 +126,7 @@ package com.mparticle;
         public static final String OPTOUT = "mp::optout::";
         public static final String USER_ATTRS = "mp::user_attrs::";
         public static final String USER_IDENTITIES = "mp::user_ids::";
+        public static final String FIRSTRUN = "mp::firstrun::";
     }
 
     public interface Status {

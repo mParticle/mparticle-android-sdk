@@ -60,7 +60,7 @@ public class HomeActivity extends Activity implements OnItemSelectedListener {
         Spinner spinnerApiKey = (Spinner) findViewById(R.id.spinnerApiKey);
         spinnerApiKey.setOnItemSelectedListener(this);
         ArrayAdapter<String> apiKeysAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item);
-        apiKeysAdapter.add("TestAppKey/secret");
+        apiKeysAdapter.add("abc123/secret");
         apiKeysAdapter.add("NoSdkKey/NoSdkSecret");
         apiKeysAdapter.add("ApsalarKey/ApsalarSecret");
         apiKeysAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -74,7 +74,7 @@ public class HomeActivity extends Activity implements OnItemSelectedListener {
         locProviderAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         locationProviderSpinner.setAdapter(locProviderAdapter);
 
-        setupApiInstance("TestAppKey", "secret");
+        setupApiInstance("abc123", "secret");
         updatePushControls();
         
         WebView myWebView = (WebView)this.findViewById(R.id.webView1);

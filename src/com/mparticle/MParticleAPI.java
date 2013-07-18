@@ -152,10 +152,16 @@ public class MParticleAPI {
                 if (!sTimeoutHandlerThread.isAlive()) {
                     sTimeoutHandlerThread.start();
                 }
+                
+                Boolean firstRun = sPreferences.getBoolean(PrefKeys.FIRSTRUN + apiKey, true);
 
+                if(firstRun) {
+                	sPreferences.edit().putBoolean(PrefKeys.FIRSTRUN + apiKey, false).commit();
+                }
+                
                 Context appContext = context.getApplicationContext();
                 MessageManager messageManager = new MessageManager(appContext, apiKey, secret, sDefaultSettings);
-                messageManager.start(appContext);
+                messageManager.start(appContext, firstRun);
 
                 apiInstance = new MParticleAPI(appContext, apiKey, messageManager);
                 if (context instanceof Activity) {

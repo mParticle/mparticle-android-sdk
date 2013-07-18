@@ -100,7 +100,7 @@ import com.mparticle.MParticleDatabase.UploadTable;
     public static final String HEADER_SIGNATURE = "x-mp-signature";
 
     public static final String SERVICE_SCHEME = "http";
-    public static final String SERVICE_HOST = "api.dev.mparticle.com";
+    public static final String SERVICE_HOST = "10.0.0.11";
     public static final String SERVICE_VERSION = "v1";
 
     public static final String SQL_UPLOADABLE_MESSAGES = String.format("%s=? and (%s='NO-SESSION' or %s>=?)",

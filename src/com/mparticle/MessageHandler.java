@@ -182,7 +182,15 @@ import com.mparticle.MParticleDatabase.SessionTable;
         contentValues.put(MessageTable.CREATED_AT, message.getLong(MessageKey.TIMESTAMP));
         contentValues.put(MessageTable.SESSION_ID, getMessageSessionId(message));
         contentValues.put(MessageTable.MESSAGE, message.toString());
-        contentValues.put(MessageTable.STATUS, Status.READY);
+        
+        if(message.getString(MessageKey.TYPE) == MessageType.FIRST_RUN) {
+        	// Force the first run message to be parsed immediately
+        	contentValues.put(MessageTable.STATUS, Status.BATCH_READY);
+        }
+        else {
+        	contentValues.put(MessageTable.STATUS, Status.READY);
+        }
+        
         db.insert(MessageTable.TABLE_NAME, null, contentValues);
     }
 

@@ -101,7 +101,7 @@ import com.mparticle.MParticleAPI.EventType;
 
     }
 
-    public void start(Context appContext) {
+    public void start(Context appContext, Boolean firstRun) {
         if (null == sNetworkStatusBroadcastReceiver) {
             sNetworkStatusBroadcastReceiver = new NetworkStatusBroadcastReceiver();
             // NOTE: if permissions are not correct all messages will be tagged as 'offline'
@@ -111,6 +111,16 @@ import com.mparticle.MParticleAPI.EventType;
                 appContext.registerReceiver(sNetworkStatusBroadcastReceiver, filter);
             }
         }
+        
+        if(firstRun) {
+        	try {
+				JSONObject firstRunMessage = createFirstRunMessage();
+				mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, firstRunMessage));
+			} catch (JSONException e) {
+				Log.w(TAG, "Failed to create First Run Message");
+			}
+        }
+        
         mMessageHandler.sendEmptyMessage(MessageHandler.END_ORPHAN_SESSIONS);
         mUploadHandler.sendEmptyMessageDelayed(UploadHandler.UPLOAD_MESSAGES, Constants.INITIAL_UPLOAD_DELAY);
         mUploadHandler.sendEmptyMessageDelayed(UploadHandler.CLEANUP, Constants.INITIAL_UPLOAD_DELAY);
@@ -124,7 +134,10 @@ import com.mparticle.MParticleAPI.EventType;
         if (MessageType.SESSION_START == messageType) {
             message.put(MessageKey.ID, sessionId);
         } else {
-            message.put(MessageKey.SESSION_ID, sessionId);
+            if(null != sessionId) {
+            	message.put(MessageKey.SESSION_ID, sessionId);	
+            }
+        	
             message.put(MessageKey.ID, UUID.randomUUID().toString());
             if (sessionStart > 0) {
                 message.put(MessageKey.SESSION_START_TIMESTAMP, sessionStart);
@@ -146,6 +159,11 @@ import com.mparticle.MParticleAPI.EventType;
                 message.put(MessageKey.LOCATION, locJSON);
             }
         }
+        return message;
+    }
+    
+    /* package-private */static JSONObject createFirstRunMessage() throws JSONException {
+        JSONObject message = createMessage(MessageType.FIRST_RUN, null, 0, System.currentTimeMillis(), null, null, true);
         return message;
     }
 
