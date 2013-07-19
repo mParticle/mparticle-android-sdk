@@ -131,6 +131,7 @@ import com.mparticle.MParticleAPI.EventType;
         JSONObject message = new JSONObject();
         message.put(MessageKey.TYPE, messageType);
         message.put(MessageKey.TIMESTAMP, time);
+        message.put(MessageKey.DEBUG, sDebugMode);
         if (MessageType.SESSION_START == messageType) {
             message.put(MessageKey.ID, sessionId);
         } else {

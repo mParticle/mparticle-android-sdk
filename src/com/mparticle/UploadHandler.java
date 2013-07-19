@@ -239,6 +239,7 @@ import com.mparticle.MParticleDatabase.UploadTable;
         uploadMessage.put(MessageKey.MPARTICLE_VERSION, Constants.MPARTICLE_VERSION);
         uploadMessage.put(MessageKey.APP_INFO, mAppInfo);
         uploadMessage.put(MessageKey.DEVICE_INFO, mDeviceInfo);
+        uploadMessage.put(MessageKey.DEBUG, mDebugMode);
 
         String userAttrs = mPreferences.getString(PrefKeys.USER_ATTRS + mApiKey, null);
         if (null != userAttrs) {
