@@ -144,7 +144,7 @@ import com.mparticle.MParticleDatabase.UploadTable;
                 fetchConfig();
                 prepareUploads();
                 processUploads();
-                // processCommands();
+                processCommands();
             }
             // trigger another upload check unless configured for manual uploads
             if (mUploadInterval > 0 && msg.arg1 == 0) {
