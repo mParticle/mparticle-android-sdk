@@ -343,6 +343,13 @@ public class MParticleAPI {
     public void upload() {
         mMessageManager.doUpload();
     }
+    
+    /**
+     * Manually set the install referrer 
+     */
+    public void setInstallReferrer(String referrer) {
+        sPreferences.edit().putString(PrefKeys.INSTALL_REFERRER, referrer).commit();
+    }
 
     /**
      * Log an event
@@ -682,6 +689,10 @@ public class MParticleAPI {
         mMessageManager.setConnectionProxy(host, port);
     }
 
+    public void setServiceHost(String hostName) {
+    	mMessageManager.setServiceHost(hostName);
+    }
+    
     /**
      * Enable mParticle exception handling to automatically log events on uncaught exceptions
      */

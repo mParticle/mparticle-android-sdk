@@ -12,6 +12,8 @@ package com.mparticle;
     public static final long INITIAL_UPLOAD_DELAY = 30 * 1000; // 30 seconds
     // interval (millis) between uploads if not specified
     public static final long DEFAULT_UPLOAD_INTERVAL = 60 * 60 * 1000; // 60 minutes
+    // internal (millis) between uploads when in debug mode
+    public static final int DEBUG_UPLOAD_INTERVAL = 3 * 1000; // 3 seconds
     // name of the preferences file
     public static final String PREFS_FILE = "mParticlePrefs";
 
@@ -146,6 +148,7 @@ package com.mparticle;
         public static final String ENABLE_PUSH_NOTIFICATIONS = "enable_push_notifications";
         public static final String PUSH_NOTIFICATION_SENDER_ID = "push_notification_sender_id";
         // MessageManager
+        public static final String DEBUG_UPLOAD_INTERVAL = "debug_upload_interval";
         public static final String UPLOAD_INTERVAL = "upload_interval";
         public static final String ENABLE_SSL = "enable_secure_transport";
         public static final String PROXY_HOST = "proxy_host";

@@ -130,8 +130,8 @@ public class HomeActivity extends Activity implements OnItemSelectedListener {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
         case R.id.menuProxy:
-            String proxyIp = "192.168.1.100";
-            mParticleAPI.setConnectionProxy(proxyIp, 8080);
+            String proxyIp = "brf-devwebsdk.dev.corp.mparticle.com";
+            mParticleAPI.setConnectionProxy(proxyIp, 80);
             Toast.makeText(this, "Now proxying requests to " + proxyIp + " port 8080", Toast.LENGTH_LONG).show();
             break;
         case R.id.menuDeviceInfo:
@@ -221,6 +221,16 @@ public class HomeActivity extends Activity implements OnItemSelectedListener {
             startActivity(new Intent(this, CommandsListActivity.class));
             break;
         }
+    }
+    
+    public void pressSetApiEndpoint(View view) {
+    	TextView endpoint = (TextView) findViewById(R.id.editApiEndpoint);
+    	mParticleAPI.setServiceHost(endpoint.getText().toString());
+    }
+    
+    public void pressSetInstallReferrer(View view) {
+    	TextView referrer = (TextView) findViewById(R.id.editInstallReferrer);
+    	mParticleAPI.setInstallReferrer(referrer.getText().toString());
     }
 
     public void pressSessionButton(View view) {

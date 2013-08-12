@@ -72,5 +72,6 @@
     <string name="button_browser_status">Check Status</string>
     <string name="button_browser_track_install">Track Install</string>
     <string name="button_browser_track_install_http">Track Install (http)</string>
+    <string name="label_api_endpoint">API Host:</string>
 
 </resources>

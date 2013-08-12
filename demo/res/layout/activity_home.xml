@@ -9,6 +9,39 @@
         android:layout_height="wrap_content"
         android:orientation="vertical" >
 
+        <LinearLayout
+            android:id="@+id/layoutApiEndPoint"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="#e8e8e8" >
+
+            <TextView
+                android:id="@+id/lblApiEndpoint"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/label_api_endpoint"
+                android:textSize="22sp" />
+
+            <EditText
+                android:id="@+id/editApiEndpoint"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:ems="10"
+                android:inputType="text"
+                android:text="brf-devwebsdk.dev.corp.mparticle.com" >
+
+                <requestFocus />
+
+            </EditText>
+            <Button
+                android:id="@+id/buttonSetApiEndpoint"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:onClick="pressSetApiEndpoint"
+                android:text="@string/button_set" />
+        </LinearLayout>
+        
         <RelativeLayout
             android:id="@+id/layoutApiPicker"
             android:layout_width="match_parent"
@@ -502,7 +535,30 @@
         </RelativeLayout>
 
         <LinearLayout
+            android:id="@+id/layoutReferrer" 
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <EditText
+                android:id="@+id/editInstallReferrer"
+                android:layout_width="316dp"
+                android:layout_height="fill_parent"
+                android:layout_weight="1"
+                android:ems="10"
+                android:inputType="text" />
+
+                <Button
+                android:id="@+id/buttonSetInstallReferrer"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:onClick="pressSetInstallReferrer"
+                android:text="Set" />
+        </LinearLayout>
+        
+        <LinearLayout
             android:id="@+id/layoutWebBrowser"
+            android:background="#e8e8e8"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical" >

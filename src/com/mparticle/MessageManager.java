@@ -38,6 +38,7 @@ import com.mparticle.MParticleAPI.EventType;
     private static String sActiveNetworkName = "offline";
     private static Location sLocation;
     private static boolean sDebugMode;
+    private static boolean sFirstRun;
     private static BroadcastReceiver sNetworkStatusBroadcastReceiver;
 
     private final MessageHandler mMessageHandler;
@@ -67,7 +68,24 @@ import com.mparticle.MParticleAPI.EventType;
         mMessageHandler = new MessageHandler(appContext, sMessageHandlerThread.getLooper(), apiKey);
         mUploadHandler = new UploadHandler(appContext, sUploadHandlerThread.getLooper(), apiKey, secret);
 
-        if (config.containsKey(ConfigKeys.UPLOAD_INTERVAL)) {
+        int uploadInterval = 0;
+        
+        if(config.containsKey(ConfigKeys.DEBUG_MODE)) {
+        	boolean debugMode = Boolean.parseBoolean(config.getProperty(ConfigKeys.DEBUG_MODE));
+        	
+        	if(debugMode) {
+        		if(config.containsKey(ConfigKeys.DEBUG_UPLOAD_INTERVAL)) {
+        			uploadInterval = 1000 * Integer.parseInt(config.getProperty(ConfigKeys.DEBUG_UPLOAD_INTERVAL));
+        		}
+        		else {
+        			uploadInterval = (int)Constants.DEFAULT_UPLOAD_INTERVAL;
+        		}
+        		
+        		this.setUploadInterval(uploadInterval);
+        	}
+        }
+        
+        if (uploadInterval == 0 && config.containsKey(ConfigKeys.UPLOAD_INTERVAL)) {
             try {
                 this.setUploadInterval(1000 * Integer.parseInt(config.getProperty(ConfigKeys.UPLOAD_INTERVAL)));
             } catch (Throwable t) {
@@ -112,18 +130,13 @@ import com.mparticle.MParticleAPI.EventType;
             }
         }
         
-        if(firstRun) {
-        	try {
-				JSONObject firstRunMessage = createFirstRunMessage();
-				mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, firstRunMessage));
-			} catch (JSONException e) {
-				Log.w(TAG, "Failed to create First Run Message");
-			}
+        sFirstRun = firstRun;
+       
+        if(!sFirstRun) {
+        	mMessageHandler.sendEmptyMessage(MessageHandler.END_ORPHAN_SESSIONS);
+        	mUploadHandler.sendEmptyMessageDelayed(UploadHandler.UPLOAD_MESSAGES, Constants.INITIAL_UPLOAD_DELAY);
+        	mUploadHandler.sendEmptyMessageDelayed(UploadHandler.CLEANUP, Constants.INITIAL_UPLOAD_DELAY);
         }
-        
-        mMessageHandler.sendEmptyMessage(MessageHandler.END_ORPHAN_SESSIONS);
-        mUploadHandler.sendEmptyMessageDelayed(UploadHandler.UPLOAD_MESSAGES, Constants.INITIAL_UPLOAD_DELAY);
-        mUploadHandler.sendEmptyMessageDelayed(UploadHandler.CLEANUP, Constants.INITIAL_UPLOAD_DELAY);
     }
 
     /* package-private */static JSONObject createMessage(String messageType, String sessionId, long sessionStart,
@@ -131,7 +144,6 @@ import com.mparticle.MParticleAPI.EventType;
         JSONObject message = new JSONObject();
         message.put(MessageKey.TYPE, messageType);
         message.put(MessageKey.TIMESTAMP, time);
-        message.put(MessageKey.DEBUG, sDebugMode);
         if (MessageType.SESSION_START == messageType) {
             message.put(MessageKey.ID, sessionId);
         } else {
@@ -163,8 +175,8 @@ import com.mparticle.MParticleAPI.EventType;
         return message;
     }
     
-    /* package-private */static JSONObject createFirstRunMessage() throws JSONException {
-        JSONObject message = createMessage(MessageType.FIRST_RUN, null, 0, System.currentTimeMillis(), null, null, true);
+    /* package-private */static JSONObject createFirstRunMessage(long time) throws JSONException {
+        JSONObject message = createMessage(MessageType.FIRST_RUN, null, 0, time, null, null, true);
         return message;
     }
 
@@ -177,6 +189,17 @@ import com.mparticle.MParticleAPI.EventType;
 
     public void startSession(String sessionId, long time, String launchUri) {
         try {
+        	if(sFirstRun) {
+            	try {
+    				JSONObject firstRunMessage = createFirstRunMessage(time);
+    				mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, firstRunMessage));
+    				sFirstRun = false;
+    				mUploadHandler.sendMessage(mUploadHandler.obtainMessage(UploadHandler.UPLOAD_MESSAGES));
+    			} catch (JSONException e) { 
+    				Log.w(TAG, "Failed to create First Run Message");
+    			}
+            }
+        	
             JSONObject message = createMessage(MessageType.SESSION_START, sessionId, time, time, null, null, true);
             message.put(MessageKey.LAUNCH_REFERRER, launchUri);
             mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
@@ -292,6 +315,10 @@ import com.mparticle.MParticleAPI.EventType;
     public void setConnectionProxy(String host, int port) {
         mUploadHandler.setConnectionProxy(host, port);
     }
+    
+    public void setServiceHost(String hostName) {
+    	mUploadHandler.setServiceHost(hostName);
+    }
 
     public void setSecureTransport(boolean sslEnabled) {
         mUploadHandler.setConnectionScheme(sslEnabled ? "https" : "http");
@@ -330,6 +357,11 @@ import com.mparticle.MParticleAPI.EventType;
 
     public void setDebugMode(boolean debugMode) {
         sDebugMode = debugMode;
+        
+        if(debugMode) {
+        	setUploadInterval(Constants.DEBUG_UPLOAD_INTERVAL);
+        }
+        
         mUploadHandler.setDebugMode(debugMode);
     }
 

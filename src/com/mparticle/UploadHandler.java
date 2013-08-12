@@ -93,6 +93,7 @@ import com.mparticle.MParticleDatabase.UploadTable;
     private int mUploadMode = Status.BATCH_READY;
     private boolean mCompressionEnabled = true;
     private boolean mAccessNetworkStateAvailable = true;
+    private String mUserServiceHost;
 
     public static final int UPLOAD_MESSAGES = 1;
     public static final int CLEANUP = 2;
@@ -100,8 +101,10 @@ import com.mparticle.MParticleDatabase.UploadTable;
     public static final String HEADER_SIGNATURE = "x-mp-signature";
 
     public static final String SERVICE_SCHEME = "http";
-    public static final String SERVICE_HOST = "10.0.0.11";
+    public static final String SERVICE_HOST = "api.dev.corp.mparticle.com";
     public static final String SERVICE_VERSION = "v1";
+    
+    public static final String DEBUG_SERVICE_HOST = "api.debug.corp.mparticle.com"; 
 
     public static final String SQL_UPLOADABLE_MESSAGES = String.format("%s=? and (%s='NO-SESSION' or %s>=?)",
             MessageTable.API_KEY, MessageTable.SESSION_ID, MessageTable.STATUS);
@@ -141,7 +144,7 @@ import com.mparticle.MParticleDatabase.UploadTable;
                 fetchConfig();
                 prepareUploads();
                 processUploads();
-                processCommands();
+                // processCommands();
             }
             // trigger another upload check unless configured for manual uploads
             if (mUploadInterval > 0 && msg.arg1 == 0) {
@@ -157,7 +160,8 @@ import com.mparticle.MParticleDatabase.UploadTable;
     }
 
     private void fetchConfig() {
-        if (!isNetworkAvailable()) {
+        if (!isNetworkAvailable() || mDebugMode) {
+        	// Don't get config when in debug mode, as mode is always stream
             return;
         }
         try {
@@ -202,7 +206,7 @@ import com.mparticle.MParticleDatabase.UploadTable;
             String[] selectionArgs = new String[] { mApiKey, Integer.toString(mUploadMode) };
             String[] selectionColumns = new String[] { "_id", MessageTable.MESSAGE, MessageTable.CREATED_AT };
             Cursor readyMessagesCursor = db.query(MessageTable.TABLE_NAME, selectionColumns, SQL_UPLOADABLE_MESSAGES,
-                    selectionArgs, null, null, MessageTable.CREATED_AT + " , _id");
+                    selectionArgs, null, null, MessageTable.CREATED_AT + " , _id asc");
             if (readyMessagesCursor.getCount() > 0) {
                 if (mDebugMode) {
                     Log.i(TAG, "Processing " + readyMessagesCursor.getCount() + " events for upload");
@@ -210,9 +214,14 @@ import com.mparticle.MParticleDatabase.UploadTable;
                 JSONArray messagesArray = new JSONArray();
                 int lastMessageId = 0;
                 while (readyMessagesCursor.moveToNext()) {
-                    lastMessageId = readyMessagesCursor.getInt(0);
                     JSONObject msgObject = new JSONObject(readyMessagesCursor.getString(1));
                     messagesArray.put(msgObject);
+                    lastMessageId = readyMessagesCursor.getInt(0);
+                    
+                    // First run message should be in a batch by itself
+                    if(msgObject.getString(MessageKey.TYPE).equals(Constants.MessageType.FIRST_RUN)) {
+                    	break;
+                    }
                 }
                 // create upload message
                 JSONObject uploadMessage = createUploadMessage(messagesArray);
@@ -237,6 +246,9 @@ import com.mparticle.MParticleDatabase.UploadTable;
         uploadMessage.put(MessageKey.TIMESTAMP, System.currentTimeMillis());
         uploadMessage.put(MessageKey.APPLICATION_KEY, mApiKey);
         uploadMessage.put(MessageKey.MPARTICLE_VERSION, Constants.MPARTICLE_VERSION);
+        
+        mAppInfo.put(MessageKey.INSTALL_REFERRER, mPreferences.getString(PrefKeys.INSTALL_REFERRER, null));
+        
         uploadMessage.put(MessageKey.APP_INFO, mAppInfo);
         uploadMessage.put(MessageKey.DEVICE_INFO, mDeviceInfo);
         uploadMessage.put(MessageKey.DEBUG, mDebugMode);
@@ -461,7 +473,15 @@ import com.mparticle.MParticleDatabase.UploadTable;
     }
 
     private URI makeServiceUri(String method) throws URISyntaxException {
-        return new URI(mServiceScheme, SERVICE_HOST, "/" + SERVICE_VERSION + "/" + mApiKey + "/" + method, null);
+        if(mUserServiceHost == null) {
+        	if(mDebugMode) {
+        		mUserServiceHost = DEBUG_SERVICE_HOST;
+        	}
+        	else {
+        		mUserServiceHost = SERVICE_HOST;
+        	}
+        }
+    	return new URI(mServiceScheme, mUserServiceHost, "/" + SERVICE_VERSION + "/" + mApiKey + "/" + method, null);
     }
 
     private void dbInsertUpload(SQLiteDatabase db, JSONObject message) throws JSONException {
@@ -534,6 +554,10 @@ import com.mparticle.MParticleDatabase.UploadTable;
         mProxyHost = new HttpHost(host, port);
         mProxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(host, port));
     }
+    
+    public void setServiceHost(String hostName) {
+    	mUserServiceHost = hostName;
+    }
 
     public void setConnectionScheme(String scheme) {
         mServiceScheme = scheme;
@@ -568,6 +592,10 @@ import com.mparticle.MParticleDatabase.UploadTable;
 
     public void setDebugMode(boolean debugMode) {
         mDebugMode = debugMode;
+        
+        if(mDebugMode) {
+        	mUploadMode = Constants.Status.READY;
+        }
     }
 
     public void setCompressionEnabled(boolean compressionEnabled) {
