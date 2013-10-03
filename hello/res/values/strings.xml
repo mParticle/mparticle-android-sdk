@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+	<string name="app_name">mParticle Hello</string>
+	<string name="action_settings">Settings</string>
+	<string name="time_to_load" formatted="false">Time to load: %.2f</string>
+	<string name="restart_without_sdk">Restart without SDK</string>
+	<string name="restart_with_sdk">Restart with SDK</string>
+	<string name="btn_start">Start</string>
+	<string name="btn_stop">Stop</string>
+	<string name="btn_next">Next</string>
+	<string name="btn_send10">10\nEvents</string>
+	<string name="btn_send100">100\nEvents</string>
+	<string name="btn_send1000">1000\nEvents</string>
+					
+</resources>
