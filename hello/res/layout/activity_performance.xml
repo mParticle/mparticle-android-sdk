@@ -1,23 +1,136 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
 	android:layout_width="match_parent"
 	android:layout_height="match_parent"
 	android:orientation="vertical" >
-	
-	<Button 
-		android:id="@+id/btn_start_stop"
-		android:layout_width="wrap_content"
+
+	<RelativeLayout
+		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
-		android:layout_alignParentTop="true"
-		android:layout_alignParentLeft="true"
-		android:text="@string/btn_stop" />
-	
-	<Button 
-		android:id="@+id/btn_next"
-		android:layout_width="wrap_content"
+		android:background="#000080" >
+
+		<Button
+			android:id="@+id/btn_start_stop"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_alignParentLeft="true"
+			android:layout_alignParentTop="true"
+			android:text="@string/btn_stop" />
+
+		<Button
+			android:id="@+id/btn_next"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_alignParentRight="true"
+			android:layout_alignParentTop="true"
+			android:text="@string/btn_next" />
+	</RelativeLayout>
+
+	<RelativeLayout
+		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
-		android:layout_alignParentTop="true"
-		android:layout_alignParentRight="true"
-		android:text="@string/btn_next" />
+		android:gravity="center_horizontal"
+		android:orientation="horizontal" >
+		
+		<LinearLayout
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_centerHorizontal="true"
+			android:orientation="horizontal" >
+		
+			<Button
+				android:id="@+id/btn_send10"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:text="@string/btn_send10" />
+		
+			<Button
+				android:id="@+id/btn_send100"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:text="@string/btn_send100" />
+					
+			<Button
+				android:id="@+id/btn_send1000"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:text="@string/btn_send1000" />
+		</LinearLayout>
+	</RelativeLayout>
 	
-</RelativeLayout>
+	<LinearLayout
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:background="#000040"
+		android:gravity="center"
+		android:orientation="vertical" >
+
+		<ListView
+			android:id="@+id/track_list"
+			android:layout_width="fill_parent"
+			android:layout_height="0dp"
+			android:layout_weight="1"
+			android:divider="#b5b5b5"
+			android:dividerHeight="1dp"
+			android:listSelector="@drawable/list_selector" />
+
+		<LinearLayout
+			android:layout_width="fill_parent"
+			android:layout_height="wrap_content"
+			android:layout_margin="10dp"
+			android:layout_gravity="bottom"
+			android:gravity="center_vertical"
+			android:orientation="horizontal"
+			android:weightSum="6" >
+
+			<Button
+				android:id="@+id/rewindbutton"
+				android:layout_width="0dp"
+				android:layout_height="wrap_content"
+				android:layout_margin="5dp"
+				android:layout_weight="1"
+				android:background="@drawable/btn_rew" />
+
+			<Button
+				android:id="@+id/playbutton"
+				android:layout_width="0dp"
+				android:layout_height="wrap_content"
+				android:layout_margin="5dp"
+				android:layout_weight="1"
+				android:background="@drawable/btn_play" />
+
+			<Button
+				android:id="@+id/pausebutton"
+				android:layout_width="0dp"
+				android:layout_height="wrap_content"
+				android:layout_margin="5dp"
+				android:layout_weight="1"
+				android:background="@drawable/btn_pause" />
+
+			<Button
+				android:id="@+id/skipbutton"
+				android:layout_width="0dp"
+				android:layout_height="wrap_content"
+				android:layout_margin="5dp"
+				android:layout_weight="1"
+				android:background="@drawable/btn_ff" />
+
+			<Button
+				android:id="@+id/stopbutton"
+				android:layout_width="0dp"
+				android:layout_height="wrap_content"
+				android:layout_margin="5dp"
+				android:layout_weight="1"
+				android:background="@drawable/btn_stop" />
+
+			<Button
+				android:id="@+id/ejectbutton"
+				android:layout_width="0dp"
+				android:layout_height="wrap_content"
+				android:layout_margin="5dp"
+				android:layout_weight="1"
+				android:background="@drawable/btn_eject" />
+		</LinearLayout>
+	</LinearLayout>
+
+</LinearLayout>

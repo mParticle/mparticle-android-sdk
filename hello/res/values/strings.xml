@@ -12,5 +12,5 @@
 	<string name="btn_send10">10\nEvents</string>
 	<string name="btn_send100">100\nEvents</string>
 	<string name="btn_send1000">1000\nEvents</string>
-					
+	<string name="empty_media">Media not available yet.</string>	
 </resources>

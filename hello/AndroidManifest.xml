@@ -8,6 +8,10 @@
 		android:minSdkVersion="8"
 		android:targetSdkVersion="18" />
 
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
 	<application
 		android:allowBackup="true"
 		android:icon="@drawable/ic_launcher"
@@ -25,6 +29,34 @@
 		<activity android:name="com.mparticle.hello.AnimationActivity" />
 		<activity android:name="com.mparticle.hello.PerformanceActivity" />
 		<activity android:name="com.mparticle.hello.WebServiceActivity" />
+
+        <service
+            android:name="com.mparticle.hello.musicplayer.MusicService"
+            android:exported="false" >
+            <intent-filter>
+                <action android:name="com.mparticle.hello.musicplayer.action.TOGGLE_PLAYBACK" />
+                <action android:name="com.mparticle.hello.musicplayer.action.PLAY" />
+                <action android:name="com.mparticle.hello.musicplayer.action.PAUSE" />
+                <action android:name="com.mparticle.hello.musicplayer.action.SKIP" />
+                <action android:name="com.mparticle.hello.musicplayer.action.REWIND" />
+                <action android:name="com.mparticle.hello.musicplayer.action.STOP" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="com.mparticle.hello.musicplayer.action.URL" />
+                <data android:scheme="http" />
+            </intent-filter>
+        </service>
+
+        <receiver android:name="com.mparticle.hello.musicplayer.MusicIntentReceiver" >
+            <intent-filter>
+                <action android:name="android.media.AUDIO_BECOMING_NOISY" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.MEDIA_BUTTON" />
+            </intent-filter>
+        </receiver>
+
+				
 	</application>
 
 </manifest>
