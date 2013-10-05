@@ -11,8 +11,8 @@ public class BaseActivity extends Activity {
     
     protected static Boolean smMParticleAPIEnabled = null;
     
-    static final String PARTICLE_APP_KEY = "ec7567d384f20949ace17e3a819c5e1d";
-    static final String PARTICLE_APP_SECRET = "JBN--4eC80P74B4WrHRidEGkfcohLC27aEVOIitXbEgJlJpx4kwn5PzSF3dtMxUH";
+    static final String PARTICLE_APP_KEY = "1615d52f0d2ba44fb1125051c61ea87d";
+    static final String PARTICLE_APP_SECRET = "Ay8AtMxEjUQB07xSwA270rWMX_CLGSP6l0zFJikZ71ccRZXmZp1PHeDvzgAGJOnF";
     static final String PARTICLE_BASE_URL = "sdk.dev.aws.mparticle.com";
     
     @Override
