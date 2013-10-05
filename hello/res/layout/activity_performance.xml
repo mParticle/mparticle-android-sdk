@@ -61,7 +61,6 @@
 	<LinearLayout
 		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
-		android:background="#000040"
 		android:gravity="center"
 		android:orientation="vertical" >
 
@@ -74,6 +73,12 @@
 			android:dividerHeight="1dp"
 			android:listSelector="@drawable/list_selector" />
 
+		<TextView android:id="@+id/empty_media"
+			android:layout_width="match_parent" 
+			android:layout_height="wrap_content" 
+			android:gravity="center"
+			android:text="@string/empty_media" />
+		
 		<LinearLayout
 			android:layout_width="fill_parent"
 			android:layout_height="wrap_content"

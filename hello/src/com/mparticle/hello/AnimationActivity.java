@@ -7,7 +7,6 @@ import java.nio.IntBuffer;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.opengl.GLSurfaceView;
@@ -18,7 +17,9 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.FrameLayout;
 
-public class AnimationActivity extends Activity {
+import com.mparticle.MParticleAPI.EventType;
+
+public class AnimationActivity extends BaseActivity {
 
 	Button mStartStop;
 	Button mSend10;
@@ -36,11 +37,16 @@ public class AnimationActivity extends Activity {
 		mStartStop.setOnClickListener( new OnClickListener() {
 			@Override
 			public void onClick(View vw) {
+				if ((mParticleAPI != null) && (smMParticleAPIEnabled != null) && smMParticleAPIEnabled) 
+					mParticleAPI.logEvent("SDK Start/Stop Pressed", EventType.ACTION);
 				mRunning = !mRunning;
+				initializeMParticleAPI(); // make sure the api is initialized
 				if (mRunning) {
 					mStartStop.setText(R.string.btn_stop);
+					smMParticleAPIEnabled = Boolean.valueOf(true);
 				} else {
 					mStartStop.setText(R.string.btn_start);
+					smMParticleAPIEnabled = Boolean.valueOf(false);
 				}
 			}
 		});
@@ -48,13 +54,17 @@ public class AnimationActivity extends Activity {
 		mSend10.setOnClickListener( new OnClickListener() {
 			@Override
 			public void onClick(View vw) {
+				if ((mParticleAPI != null) && (smMParticleAPIEnabled != null) && smMParticleAPIEnabled) 
+					mParticleAPI.logEvent("Send10 Pressed", EventType.ACTION);
 				sendLog(10);
 			}
 		});
 		mSend100 = (Button)findViewById(R.id.btn_send100);
-		mSend10.setOnClickListener( new OnClickListener() {
+		mSend100.setOnClickListener( new OnClickListener() {
 			@Override
 			public void onClick(View vw) {
+				if ((mParticleAPI != null) && (smMParticleAPIEnabled != null) && smMParticleAPIEnabled) 
+					mParticleAPI.logEvent("Send100 Pressed", EventType.ACTION);
 				sendLog(100);
 			}
 		});
@@ -62,6 +72,8 @@ public class AnimationActivity extends Activity {
 		mSend1000.setOnClickListener( new OnClickListener() {
 			@Override
 			public void onClick(View vw) {
+				if ((mParticleAPI != null) && (smMParticleAPIEnabled != null) && smMParticleAPIEnabled) 
+					mParticleAPI.logEvent("Send1000 Pressed", EventType.ACTION);
 				sendLog(1000);
 			}
 		});
@@ -69,6 +81,8 @@ public class AnimationActivity extends Activity {
 		mNext.setOnClickListener( new OnClickListener() {
 			@Override
 			public void onClick(View vw) {
+				if ((mParticleAPI != null) && (smMParticleAPIEnabled != null) && smMParticleAPIEnabled) 
+					mParticleAPI.logEvent("Next Button Pressed", EventType.NAVIGATION);
 				Intent intent = new Intent(AnimationActivity.this, PerformanceActivity.class);
 				startActivity(intent);
 			}
@@ -78,6 +92,9 @@ public class AnimationActivity extends Activity {
 
 		// set opengl surface
 		initSurface();
+		
+		if ((mParticleAPI != null) && (smMParticleAPIEnabled != null) && smMParticleAPIEnabled) 
+        	mParticleAPI.logScreenView("AnimationActivity");
 	}
 
 	private void sendLog(int n) {

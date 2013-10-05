@@ -22,15 +22,19 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.mparticle.MParticleAPI.EventType;
 import com.mparticle.hello.musicplayer.MusicService;
 import com.mparticle.hello.musicplayer.models.Playable;
 import com.mparticle.hello.musicplayer.models.PlayableList;
 import com.mparticle.hello.musicplayer.utils.ImageLoader;
 import com.mparticle.hello.musicplayer.utils.Utils;
 
-public class PerformanceActivity extends Activity implements OnClickListener, OnKeyListener { 
+public class PerformanceActivity extends BaseActivity implements OnClickListener, OnKeyListener { 
 
 	Button mStartStop;
+	Button mSend10;
+	Button mSend100;
+	Button mSend1000;
 	Button mNext;
 
 	boolean mRunning;
@@ -92,12 +96,44 @@ public class PerformanceActivity extends Activity implements OnClickListener, On
 		mStartStop.setOnClickListener( new OnClickListener() {
 			@Override
 			public void onClick(View vw) {
+				if ((mParticleAPI != null) && (smMParticleAPIEnabled != null) && smMParticleAPIEnabled) 
+					mParticleAPI.logEvent("SDK Start/Stop Pressed", EventType.ACTION);
 				mRunning = !mRunning;
+				initializeMParticleAPI(); // make sure the api is initialized
 				if (mRunning) {
 					mStartStop.setText(R.string.btn_stop);
+					smMParticleAPIEnabled = Boolean.valueOf(true);
 				} else {
 					mStartStop.setText(R.string.btn_start);
+					smMParticleAPIEnabled = Boolean.valueOf(false);
 				}
+			}
+		});
+		mSend10 = (Button)findViewById(R.id.btn_send10);
+		mSend10.setOnClickListener( new OnClickListener() {
+			@Override
+			public void onClick(View vw) {
+				if ((mParticleAPI != null) && (smMParticleAPIEnabled != null) && smMParticleAPIEnabled) 
+					mParticleAPI.logEvent("Send10 Pressed", EventType.ACTION);
+				sendLog(10);
+			}
+		});
+		mSend100 = (Button)findViewById(R.id.btn_send100);
+		mSend100.setOnClickListener( new OnClickListener() {
+			@Override
+			public void onClick(View vw) {
+				if ((mParticleAPI != null) && (smMParticleAPIEnabled != null) && smMParticleAPIEnabled) 
+					mParticleAPI.logEvent("Send100 Pressed", EventType.ACTION);
+				sendLog(100);
+			}
+		});
+		mSend1000 = (Button)findViewById(R.id.btn_send1000);
+		mSend1000.setOnClickListener( new OnClickListener() {
+			@Override
+			public void onClick(View vw) {
+				if ((mParticleAPI != null) && (smMParticleAPIEnabled != null) && smMParticleAPIEnabled) 
+					mParticleAPI.logEvent("Send1000 Pressed", EventType.ACTION);
+				sendLog(1000);
 			}
 		});
 		mNext = (Button)findViewById(R.id.btn_next);
@@ -112,8 +148,15 @@ public class PerformanceActivity extends Activity implements OnClickListener, On
 		mStartStop.setText(R.string.btn_stop);
 		
 		startService(new Intent(MusicService.ACTION_STOP));
+		
+		if ((mParticleAPI != null) && (smMParticleAPIEnabled != null) && smMParticleAPIEnabled) 
+        	mParticleAPI.logScreenView("PerformanceActivity");
 	}
 
+
+	private void sendLog(int n) {
+
+	}
 
 
 	public void onClick(View target) {
@@ -199,7 +242,7 @@ public class PerformanceActivity extends Activity implements OnClickListener, On
 									// update the listview
 									mTrackListView.setAdapter(new TrackListAdapter(PerformanceActivity.this, mPlayList));
 									mTrackListView.requestLayout();
-//									findViewById(R.id.empty_list).setVisibility(View.GONE);
+									findViewById(R.id.empty_media).setVisibility(View.GONE);
 								}
 							};
 							runOnUiThread(r);

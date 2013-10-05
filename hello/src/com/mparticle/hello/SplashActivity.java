@@ -1,27 +1,38 @@
 package com.mparticle.hello;
 
-import android.app.Activity;
+import com.mparticle.MParticleAPI.EventType;
+
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.Menu;
+import android.view.View;
+import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.TextView;
 
-public class SplashActivity extends Activity {
+public class SplashActivity extends BaseActivity {
 
 	TextView mTimeToLoad;
 	Button mRebootButton;
 	float mCountDown;
 	
+	static final float smSplashScreenTime = 5.0f;
+	
 	Handler handler = new Handler() {
 		@Override
 		public void handleMessage(android.os.Message msg) {
+			if (isFinishing()) return;
+			
 			if (msg.what == 0) {
 				if (mCountDown <= 0.0f) {
 					// advance to next screen
 					Intent intent = new Intent(SplashActivity.this, AnimationActivity.class);
 					startActivity(intent);
+					if ((mParticleAPI != null) && (smMParticleAPIEnabled != null) && smMParticleAPIEnabled) 
+						mParticleAPI.logEvent("Splash Timeout", EventType.NAVIGATION);
 				} else {
 					String ttlFormat = getString(R.string.time_to_load);
 					String text = String.format(ttlFormat, mCountDown);
@@ -38,9 +49,37 @@ public class SplashActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_splash);
 		mTimeToLoad = (TextView)findViewById(R.id.txt_time_to_load);
-		mCountDown = 5.0f; // 5 seconds
+		mCountDown = smSplashScreenTime; // 5 seconds
 		handler.sendEmptyMessage(0);		
 		mRebootButton = (Button)findViewById(R.id.btn_restart);
+        if (smMParticleAPIEnabled) {
+        	mRebootButton.setText(R.string.restart_without_sdk);
+        } else {
+        	mRebootButton.setText(R.string.restart_with_sdk);
+        }
+        mRebootButton.setOnClickListener( new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				if ((mParticleAPI != null) && (smMParticleAPIEnabled != null) && smMParticleAPIEnabled) 
+					mParticleAPI.logEvent("Reboot Pressed", EventType.NAVIGATION);
+		        
+		        SharedPreferences p = getApplicationContext().getSharedPreferences(getApplicationContext().getPackageName(), MODE_PRIVATE );
+		        Editor e = p.edit();
+		        e.putBoolean( getString(R.string.particleAPIEnabledKey), new Boolean( !smMParticleAPIEnabled )).commit();
+		        // reboot
+		        Intent i = getBaseContext().getPackageManager()
+		                .getLaunchIntentForPackage( getBaseContext().getPackageName() );
+			   i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+			   startActivity(i);
+			   finish();
+			   
+			   smMParticleAPIEnabled = null;
+			}
+        });
+        
+		if ((mParticleAPI != null) && (smMParticleAPIEnabled != null) && smMParticleAPIEnabled) 
+        	mParticleAPI.logScreenView("SplashActivity");
 	}
 
 	@Override
