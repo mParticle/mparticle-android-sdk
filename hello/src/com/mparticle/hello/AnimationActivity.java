@@ -24,7 +24,7 @@ public class AnimationActivity extends BaseActivity {
 	Button mStartStop;
 	Button mSend10;
 	Button mSend100;
-	Button mSend1000;
+	Button mSend500;
 	Button mNext;
 
 	boolean mRunning;
@@ -68,13 +68,13 @@ public class AnimationActivity extends BaseActivity {
 				sendLog(100);
 			}
 		});
-		mSend1000 = (Button)findViewById(R.id.btn_send1000);
-		mSend1000.setOnClickListener( new OnClickListener() {
+		mSend500 = (Button)findViewById(R.id.btn_send500);
+		mSend500.setOnClickListener( new OnClickListener() {
 			@Override
 			public void onClick(View vw) {
 				if ((mParticleAPI != null) && (smMParticleAPIEnabled != null) && smMParticleAPIEnabled) 
-					mParticleAPI.logEvent("Send1000 Pressed", EventType.ACTION);
-				sendLog(1000);
+					mParticleAPI.logEvent("Send500 Pressed", EventType.ACTION);
+				sendLog(500);
 			}
 		});
 		mNext = (Button)findViewById(R.id.btn_next);
@@ -98,7 +98,11 @@ public class AnimationActivity extends BaseActivity {
 	}
 
 	private void sendLog(int n) {
-
+		if ((mParticleAPI != null) && (smMParticleAPIEnabled != null) && smMParticleAPIEnabled) {
+			for (int i=0; i<n; i++) {
+				mParticleAPI.logEvent("AutoLog"+(i+1)+"Of"+n, EventType.ACTION);
+			}
+		}
 	}
 
 	private void initSurface() {
@@ -137,9 +141,11 @@ public class AnimationActivity extends BaseActivity {
 class TouchSurfaceView extends GLSurfaceView {
 
 	static final int NUM_ANIMATING_CUBES = 100;
+	AnimationActivity mContext;
 	
 	public TouchSurfaceView(Context context) {
 		super(context);
+		mContext = (AnimationActivity)context;
 		mRenderer = new CubeRenderer(false);
 		setRenderer(mRenderer);
 //		setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
@@ -162,6 +168,9 @@ class TouchSurfaceView extends GLSurfaceView {
 			mRenderer.mCube.mAngleX += dx * TOUCH_SCALE_FACTOR;
 			mRenderer.mCube.mAngleY += dy * TOUCH_SCALE_FACTOR;
 			requestRender();
+			if ((mContext.mParticleAPI != null) && (mContext.smMParticleAPIEnabled != null) && mContext.smMParticleAPIEnabled) {
+				mContext.mParticleAPI.logEvent("Moving("+x+","+y+")", EventType.ACTION);
+			}
 		}
 		mPreviousX = x;
 		mPreviousY = y;

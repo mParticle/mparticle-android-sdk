@@ -51,10 +51,10 @@
 				android:text="@string/btn_send100" />
 					
 			<Button
-				android:id="@+id/btn_send1000"
+				android:id="@+id/btn_send500"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
-				android:text="@string/btn_send1000" />
+				android:text="@string/btn_send500" />
 		</LinearLayout>
 	</RelativeLayout>
 	
