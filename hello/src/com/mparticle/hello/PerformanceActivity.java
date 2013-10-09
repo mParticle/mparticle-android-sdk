@@ -39,12 +39,6 @@ public class PerformanceActivity extends BaseActivity implements OnClickListener
 
 	boolean mRunning;
 
-	/**
-	 * The URL we suggest as default when adding by URL. This is just so that the user doesn't
-	 * have to find an URL to test this sample.
-	 */
-	final String SUGGESTED_URL = "http://www.vorbis.com/music/Epoq-Lepidoptera.ogg";
-
 	Button mPlayButton;
 	Button mPauseButton;
 	Button mSkipButton;
@@ -214,14 +208,14 @@ public class PerformanceActivity extends BaseActivity implements OnClickListener
 	 */
 	void showUrlDialog() {
 		AlertDialog.Builder alertBuilder = new AlertDialog.Builder(this);
-		alertBuilder.setTitle("Manual Input");
-		alertBuilder.setMessage("Enter a URL (must be http://)");
+		alertBuilder.setTitle(getString(R.string.manual_entry));
+		alertBuilder.setMessage(getString(R.string.enter_url));
 		final EditText input = new EditText(this);
 		alertBuilder.setView(input);
 
-		input.setText(SUGGESTED_URL);
+		input.setText(getString(R.string.default_music_url));
 
-		alertBuilder.setPositiveButton("Play!", new DialogInterface.OnClickListener() {
+		alertBuilder.setPositiveButton(getString(R.string.choose_play), new DialogInterface.OnClickListener() {
 			public void onClick(DialogInterface dlg, int whichButton) {
 				if ((mParticleAPI != null) && (smMParticleAPIEnabled != null) && smMParticleAPIEnabled) {
 					mParticleAPI.logEvent("Play from URL Dialog Pressed", EventType.ACTION);
@@ -234,7 +228,7 @@ public class PerformanceActivity extends BaseActivity implements OnClickListener
 				startService(i);
 			}
 		});
-		alertBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+		alertBuilder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
 			public void onClick(DialogInterface dlg, int whichButton) {
 				if ((mParticleAPI != null) && (smMParticleAPIEnabled != null) && smMParticleAPIEnabled) {
 					mParticleAPI.logEvent("Cancel from URL Dialog Pressed", EventType.ACTION);

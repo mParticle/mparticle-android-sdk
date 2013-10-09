@@ -12,8 +12,16 @@
 	<string name="btn_send10">10\nEvents</string>
 	<string name="btn_send100">100\nEvents</string>
 	<string name="btn_send500">500\nEvents</string>
+	<string name="btn_geturl">New URL</string>
 	<string name="empty_media">Media not available yet.</string>	
-	
+	<string name="enter_url">Enter a URL (must be http://)</string>
+	<string name="manual_entry">Manual Entry</string>
+	<string name="choose_play">Play!</string>
+	<string name="choose_go">Crawl Url!</string>
+	<string name="cancel">Cancel</string>
+	<string name="default_music_url">http://www.vorbis.com/music/Epoq-Lepidoptera.ogg</string>
+	<string name="default_crawl_url">http://www.irs.gov</string>
+				
 	<string name="particleAPIEnabledKey">particleAPIEnabledKey</string>
 	
 </resources>
