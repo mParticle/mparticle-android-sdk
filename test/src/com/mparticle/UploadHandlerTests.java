@@ -73,7 +73,7 @@ public class UploadHandlerTests extends AndroidTestCase {
     // only process messages from ended sessions
     public void testPrepareUploadsBatch() throws InterruptedException, JSONException {
 
-    	sMParticleAPI.identify("tbreffni@mparticle.com", IdentityType.MICROSOFT);
+    	sMParticleAPI.setUserIdentity("tbreffni@mparticle.com", IdentityType.MICROSOFT);
     	
         sMessageManager1.startSession(mSessionId, 1000, null);
         sMessageManager1.logEvent(mSessionId, 1000, 2000, "event1", EventType.ACTION, null);

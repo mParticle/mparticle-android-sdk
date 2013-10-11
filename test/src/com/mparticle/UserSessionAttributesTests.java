@@ -32,7 +32,7 @@ public class UserSessionAttributesTests extends AndroidTestCase {
     }
     
     public void testSetUserIdentity() throws JSONException {
-    	mMParticleAPI.identify("tbreffni@mparticle.com", IdentityType.MICROSOFT);
+    	mMParticleAPI.setUserIdentity("tbreffni@mparticle.com", IdentityType.MICROSOFT);
     	
     	assertEquals("tbreffni@mparticle.com", ((JSONObject)mMParticleAPI.mUserIdentities.get(0)).get(MessageKey.IDENTITY_VALUE));
     	assertEquals(IdentityType.MICROSOFT.getValue(), ((JSONObject)mMParticleAPI.mUserIdentities.get(0)).get(MessageKey.IDENTITY_NAME));

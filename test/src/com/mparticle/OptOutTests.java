@@ -45,8 +45,8 @@ public class OptOutTests extends AndroidTestCase {
         mMParticleAPI.logEvent("event1", EventType.ACTION);
         mMParticleAPI.logEvent("event2", EventType.ACTION, eventData);
         mMParticleAPI.newSession();
-        mMParticleAPI.logScreenView("view1");
-        mMParticleAPI.logScreenView("view2", eventData);
+//        mMParticleAPI.logScreenView("view1");
+//        mMParticleAPI.logScreenView("view2", eventData);
         mMParticleAPI.logErrorEvent("error1");
         mMParticleAPI.logErrorEvent(new Exception("exception1"));
         mMParticleAPI.stopActivity();

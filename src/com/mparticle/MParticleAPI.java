@@ -685,11 +685,11 @@ public class MParticleAPI {
      * @param port
      *            the proxy port number
      */
-    public void setConnectionProxy(String host, int port) {
+    private void setConnectionProxy(String host, int port) {
         mMessageManager.setConnectionProxy(host, port);
     }
 
-    public void setServiceHost(String hostName) {
+    private void setServiceHost(String hostName) {
     	mMessageManager.setServiceHost(hostName);
     }
     
