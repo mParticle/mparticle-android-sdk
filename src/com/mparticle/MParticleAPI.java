@@ -725,7 +725,7 @@ public class MParticleAPI {
      * @param senderId
      *            the SENDER_ID for the application
      */
-    public void enablePushNotifications(String senderId) {
+    private void enablePushNotifications(String senderId) {
         checkDefaultApiInstance();
         if (null == getPushRegistrationId()) {
             Intent registrationIntent = new Intent("com.google.android.c2dm.intent.REGISTER");
@@ -738,7 +738,7 @@ public class MParticleAPI {
     /**
      * Unregister the device from GCM notifications
      */
-    public void clearPushNotifications() {
+    private void clearPushNotifications() {
         checkDefaultApiInstance();
         if (null != getPushRegistrationId()) {
             Intent unregIntent = new Intent("com.google.android.c2dm.intent.UNREGISTER");
@@ -790,7 +790,7 @@ public class MParticleAPI {
      *
      * @return the push registration id
      */
-    public String getPushRegistrationId() {
+    private String getPushRegistrationId() {
         return sPreferences.getString(PrefKeys.PUSH_REGISTRATION_ID, null);
     }
 
