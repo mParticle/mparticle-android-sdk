@@ -324,7 +324,7 @@ import com.mparticle.MParticleAPI.EventType;
         mUploadHandler.setConnectionScheme(sslEnabled ? "https" : "http");
     }
 
-    public void setUploadInterval(int uploadInterval) {
+    public void setUploadInterval(long uploadInterval) {
         mUploadHandler.setUploadInterval(uploadInterval);
     }
 
