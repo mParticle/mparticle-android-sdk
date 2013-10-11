@@ -93,8 +93,8 @@ public class AnimationActivity extends BaseActivity {
 		// set opengl surface
 		initSurface();
 		
-		if ((mParticleAPI != null) && (smMParticleAPIEnabled != null) && smMParticleAPIEnabled) 
-        	mParticleAPI.logScreenView("AnimationActivity");
+//		if ((mParticleAPI != null) && (smMParticleAPIEnabled != null) && smMParticleAPIEnabled) 
+//        	mParticleAPI.logScreenView("AnimationActivity");
 	}
 
 	private void sendLog(int n) {

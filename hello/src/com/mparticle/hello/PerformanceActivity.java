@@ -147,8 +147,8 @@ public class PerformanceActivity extends BaseActivity implements OnClickListener
 		
 		startService(new Intent(MusicService.ACTION_STOP));
 		
-		if ((mParticleAPI != null) && (smMParticleAPIEnabled != null) && smMParticleAPIEnabled) 
-        	mParticleAPI.logScreenView("PerformanceActivity");
+//		if ((mParticleAPI != null) && (smMParticleAPIEnabled != null) && smMParticleAPIEnabled) 
+//        	mParticleAPI.logScreenView("PerformanceActivity");
 	}
 
 

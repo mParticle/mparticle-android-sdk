@@ -50,7 +50,7 @@ public class BaseActivity extends Activity {
 	        if (smMParticleAPIEnabled) {
 	        	// first time
 	        	mParticleAPI = MParticleAPI.getInstance(this, PARTICLE_APP_KEY, PARTICLE_APP_SECRET);
-	        	mParticleAPI.setServiceHost(PARTICLE_BASE_URL);
+//	        	mParticleAPI.setServiceHost(PARTICLE_BASE_URL);
 	        	mParticleAPI.setDebug(true);
 	        }
 	    } else

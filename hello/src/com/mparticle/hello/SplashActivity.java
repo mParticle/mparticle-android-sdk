@@ -78,8 +78,8 @@ public class SplashActivity extends BaseActivity {
 			}
         });
         
-		if ((mParticleAPI != null) && (smMParticleAPIEnabled != null) && smMParticleAPIEnabled) 
-        	mParticleAPI.logScreenView("SplashActivity");
+//		if ((mParticleAPI != null) && (smMParticleAPIEnabled != null) && smMParticleAPIEnabled) 
+//        	mParticleAPI.logScreenView("SplashActivity");
 	}
 
 	@Override

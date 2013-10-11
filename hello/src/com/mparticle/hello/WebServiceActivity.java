@@ -86,8 +86,8 @@ public class WebServiceActivity extends BaseActivity {
 		mRunning = true;
 		mStartStop.setText(R.string.btn_stop);
 		
-		if ((mParticleAPI != null) && (smMParticleAPIEnabled != null) && smMParticleAPIEnabled) 
-        	mParticleAPI.logScreenView("WebServiceActivity");
+//		if ((mParticleAPI != null) && (smMParticleAPIEnabled != null) && smMParticleAPIEnabled) 
+//        	mParticleAPI.logScreenView("WebServiceActivity");
 		
 		mWebView = (WebView)findViewById(R.id.webview);
 		mWebView.setWebViewClient( mWebViewClient = new WebViewClient() {
