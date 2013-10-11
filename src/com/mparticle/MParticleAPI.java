@@ -568,7 +568,7 @@ public class MParticleAPI {
         }
     }
     
-    public void identify(String id, IdentityType identityType) {
+    public void setUserIdentity(String id, IdentityType identityType) {
     	if(mOptedOut){
     		return;
     	}
