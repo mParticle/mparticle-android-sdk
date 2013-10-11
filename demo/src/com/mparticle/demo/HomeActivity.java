@@ -111,13 +111,13 @@ public class HomeActivity extends Activity implements OnItemSelectedListener {
     }
 
     private void updatePushControls() {
-        String pushId = mParticleAPI.getPushRegistrationId();
-        TextView pushIdView = (TextView) findViewById(R.id.editPushRegistrationId);
-        pushIdView.setText(pushId);
-        ((Button) findViewById(R.id.buttonPushAutoRegister)).setEnabled(null==pushId);
-        ((Button) findViewById(R.id.buttonPushAutoUnregister)).setEnabled(null!=pushId);
-        ((Button) findViewById(R.id.buttonPushManualRegister)).setEnabled(null==pushId);
-        ((Button) findViewById(R.id.buttonPushManualUnregister)).setEnabled(null!=pushId);
+//        String pushId = mParticleAPI.getPushRegistrationId();
+//        TextView pushIdView = (TextView) findViewById(R.id.editPushRegistrationId);
+//        pushIdView.setText(pushId);
+//        ((Button) findViewById(R.id.buttonPushAutoRegister)).setEnabled(null==pushId);
+//        ((Button) findViewById(R.id.buttonPushAutoUnregister)).setEnabled(null!=pushId);
+//        ((Button) findViewById(R.id.buttonPushManualRegister)).setEnabled(null==pushId);
+//        ((Button) findViewById(R.id.buttonPushManualUnregister)).setEnabled(null!=pushId);
     }
 
     @Override
@@ -129,11 +129,11 @@ public class HomeActivity extends Activity implements OnItemSelectedListener {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-        case R.id.menuProxy:
-            String proxyIp = "brf-devwebsdk.dev.corp.mparticle.com";
-            mParticleAPI.setConnectionProxy(proxyIp, 80);
-            Toast.makeText(this, "Now proxying requests to " + proxyIp + " port 8080", Toast.LENGTH_LONG).show();
-            break;
+//        case R.id.menuProxy:
+//            String proxyIp = "brf-devwebsdk.dev.corp.mparticle.com";
+//            mParticleAPI.setConnectionProxy(proxyIp, 80);
+//            Toast.makeText(this, "Now proxying requests to " + proxyIp + " port 8080", Toast.LENGTH_LONG).show();
+//            break;
         case R.id.menuDeviceInfo:
             try {
                 JSONObject info = DemoDeviceAttributes.collectDeviceInfo(this.getApplicationContext());
@@ -178,16 +178,16 @@ public class HomeActivity extends Activity implements OnItemSelectedListener {
             mParticleAPI.logEvent("ButtonCPressed", EventType.OTHER, eventData);
             break;
         }
-        case R.id.viewA:
-            mParticleAPI.logScreenView("View A");
-            break;
-        case R.id.viewB: {
-            HashMap<String, String> eventData= new HashMap<String, String>();
-            eventData.put("key1", "value1");
-            eventData.put("key2", "value2");
-            mParticleAPI.logScreenView("View B", eventData);
-            break;
-        }
+//        case R.id.viewA:
+//            mParticleAPI.logScreenView("View A");
+//            break;
+//        case R.id.viewB: {
+//            HashMap<String, String> eventData= new HashMap<String, String>();
+//            eventData.put("key1", "value1");
+//            eventData.put("key2", "value2");
+//            mParticleAPI.logScreenView("View B", eventData);
+//            break;
+//        }
         case R.id.eventEndUpload: {
             HashMap<String, String> eventData= new HashMap<String, String>();
             eventData.put("key1", "value1");
@@ -223,10 +223,10 @@ public class HomeActivity extends Activity implements OnItemSelectedListener {
         }
     }
     
-    public void pressSetApiEndpoint(View view) {
-    	TextView endpoint = (TextView) findViewById(R.id.editApiEndpoint);
-    	mParticleAPI.setServiceHost(endpoint.getText().toString());
-    }
+//    public void pressSetApiEndpoint(View view) {
+//    	TextView endpoint = (TextView) findViewById(R.id.editApiEndpoint);
+//    	mParticleAPI.setServiceHost(endpoint.getText().toString());
+//    }
     
     public void pressSetInstallReferrer(View view) {
     	TextView referrer = (TextView) findViewById(R.id.editInstallReferrer);
@@ -278,30 +278,30 @@ public class HomeActivity extends Activity implements OnItemSelectedListener {
         }
     }
 
-    public void pressNotifyButton(View view) {
-        switch (view.getId()) {
-        case R.id.buttonPushAutoRegister:
-            mParticleAPI.enablePushNotifications(SENDER_ID);
-            new PushRegChangeDetectorTask().execute();
-            break;
-        case R.id.buttonPushAutoUnregister:
-            mParticleAPI.clearPushNotifications();
-            new PushRegChangeDetectorTask().execute();
-            break;
-        case R.id.buttonPushManualRegister:
-            TextView pushIdView = (TextView) findViewById(R.id.editPushRegistrationId);
-            mParticleAPI.setPushRegistrationId(pushIdView.getText().toString());
-            updatePushControls();
-            break;
-        case R.id.buttonPushManualUnregister:
-            mParticleAPI.clearPushRegistrationId();
-            updatePushControls();
-            break;
-        case R.id.buttonPushRefresh:
-            updatePushControls();
-            break;
-        }
-    }
+//    public void pressNotifyButton(View view) {
+//        switch (view.getId()) {
+//        case R.id.buttonPushAutoRegister:
+//            mParticleAPI.enablePushNotifications(SENDER_ID);
+//            new PushRegChangeDetectorTask().execute();
+//            break;
+//        case R.id.buttonPushAutoUnregister:
+//            mParticleAPI.clearPushNotifications();
+//            new PushRegChangeDetectorTask().execute();
+//            break;
+//        case R.id.buttonPushManualRegister:
+//            TextView pushIdView = (TextView) findViewById(R.id.editPushRegistrationId);
+//            mParticleAPI.setPushRegistrationId(pushIdView.getText().toString());
+//            updatePushControls();
+//            break;
+//        case R.id.buttonPushManualUnregister:
+//            mParticleAPI.clearPushRegistrationId();
+//            updatePushControls();
+//            break;
+//        case R.id.buttonPushRefresh:
+//            updatePushControls();
+//            break;
+//        }
+//    }
 
     public void pressBrowserButton(View view) {
         String url = "http://www.gynn.org/mp/";
@@ -334,24 +334,24 @@ public class HomeActivity extends Activity implements OnItemSelectedListener {
     private class PushRegChangeDetectorTask extends AsyncTask<Void, Void, Boolean> {
         @Override
         protected Boolean doInBackground(Void... params) {
-            try {
-                String initialPushId = mParticleAPI.getPushRegistrationId();
-                for(int i=0; i<5; i++) {
-                    Thread.sleep(1000);
-                    String currentPushId = mParticleAPI.getPushRegistrationId();
-                    if (currentPushId!=initialPushId) {
-                        return true;
-                    }
-                }
-            } catch (InterruptedException e) {
-                Log.w(TAG, "Push reg checker died");
-            }
+//            try {
+//                String initialPushId = mParticleAPI.getPushRegistrationId();
+//                for(int i=0; i<5; i++) {
+//                    Thread.sleep(1000);
+//                    String currentPushId = mParticleAPI.getPushRegistrationId();
+//                    if (currentPushId!=initialPushId) {
+//                        return true;
+//                    }
+//                }
+//            } catch (InterruptedException e) {
+//                Log.w(TAG, "Push reg checker died");
+//            }
             return false;
         }
         protected void onPostExecute(Boolean regUpdated) {
-            if (regUpdated) {
-                updatePushControls();
-            }
+//            if (regUpdated) {
+//                updatePushControls();
+//            }
         }
     }
 

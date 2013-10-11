@@ -7,11 +7,13 @@
         android:title="@string/menu_device_info"
         android:orderInCategory="110"
         android:showAsAction="ifRoom|withText" />
+<!-- 
     <item android:id="@+id/menuProxy"
         android:title="@string/menu_proxy"
         android:orderInCategory="150"
         android:showAsAction="ifRoom|withText" />
-    <item android:id="@+id/menuClose"
+ -->
+     <item android:id="@+id/menuClose"
         android:title="@string/menu_close"
         android:orderInCategory="200"
         android:showAsAction="ifRoom|withText" />
