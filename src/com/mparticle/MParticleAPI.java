@@ -660,9 +660,9 @@ public class MParticleAPI {
      * Set the upload interval period to control how frequently uploads occur.
      *
      * @param uploadInterval
-     *            the number of seconds between uploads
+     *            the number of milliseconds between uploads
      */
-    public void setUploadInterval(int uploadInterval) {
+    public void setUploadInterval(long uploadInterval) {
         mMessageManager.setUploadInterval(uploadInterval);
     }
 

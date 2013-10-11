@@ -563,7 +563,7 @@ import com.mparticle.MParticleDatabase.UploadTable;
         mServiceScheme = scheme;
     }
 
-    public void setUploadInterval(int uploadInterval) {
+    public void setUploadInterval(long uploadInterval) {
         mUploadInterval = uploadInterval;
     }
 
