@@ -271,9 +271,11 @@ public class MusicService extends Service implements OnCompletionListener, OnPre
         }
         int nextIndex = -1;
         if (extras != null) {
-        	String next = extras.getString("play_index", "-1");
+        	String next = extras.getString("play_index");
         	if (next != null) {
         		nextIndex = Integer.parseInt(next);
+        	} else {
+        		nextIndex = -1;
         	}
         }
         if (nextIndex >= 0) {
