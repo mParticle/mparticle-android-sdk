@@ -914,9 +914,10 @@ public class MParticleAPI {
     }
 
     public enum EventType {
-        NAVIGATION, PAGEVIEW, SEARCH, PURCHASE, ACTION, OTHER;
+        Unknown, Navigation, Location, Search, Transaction, UserContent, UserPreference, Social, Other;
         public String toString() {
-            return name().toLowerCase(Locale.US);
+//            return name().toLowerCase(Locale.US);
+            return name();
         }
     }
     

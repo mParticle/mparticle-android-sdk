@@ -91,9 +91,9 @@ public class PerformanceActivity extends BaseActivity implements OnClickListener
 			@Override
 			public void onClick(View vw) {
 				if ((mParticleAPI != null) && (smMParticleAPIEnabled != null) && smMParticleAPIEnabled) 
-					mParticleAPI.logEvent("SDK Start/Stop Pressed", EventType.ACTION);
+					mParticleAPI.logEvent("SDK Start/Stop Pressed", EventType.UserContent);
 				if ((mParticleAPI != null) && (smMParticleAPIEnabled != null) && smMParticleAPIEnabled) 
-					mParticleAPI.logEvent("Play/Paused Pressed, is currently "+(mRunning?"":"not ")+"running", EventType.ACTION);
+					mParticleAPI.logEvent("Play/Paused Pressed, is currently "+(mRunning?"":"not ")+"running", EventType.UserContent);
 				mRunning = !mRunning;
 				initializeMParticleAPI(); // make sure the api is initialized
 				if (mRunning) {
@@ -110,7 +110,7 @@ public class PerformanceActivity extends BaseActivity implements OnClickListener
 			@Override
 			public void onClick(View vw) {
 				if ((mParticleAPI != null) && (smMParticleAPIEnabled != null) && smMParticleAPIEnabled) 
-					mParticleAPI.logEvent("Send10 Pressed", EventType.ACTION);
+					mParticleAPI.logEvent("Send10 Pressed", EventType.UserContent);
 				sendLog(10);
 			}
 		});
@@ -119,7 +119,7 @@ public class PerformanceActivity extends BaseActivity implements OnClickListener
 			@Override
 			public void onClick(View vw) {
 				if ((mParticleAPI != null) && (smMParticleAPIEnabled != null) && smMParticleAPIEnabled) 
-					mParticleAPI.logEvent("Send100 Pressed", EventType.ACTION);
+					mParticleAPI.logEvent("Send100 Pressed", EventType.UserContent);
 				sendLog(100);
 			}
 		});
@@ -128,7 +128,7 @@ public class PerformanceActivity extends BaseActivity implements OnClickListener
 			@Override
 			public void onClick(View vw) {
 				if ((mParticleAPI != null) && (smMParticleAPIEnabled != null) && smMParticleAPIEnabled) 
-					mParticleAPI.logEvent("Send500 Pressed", EventType.ACTION);
+					mParticleAPI.logEvent("Send500 Pressed", EventType.UserContent);
 				sendLog(500);
 			}
 		});
@@ -137,7 +137,7 @@ public class PerformanceActivity extends BaseActivity implements OnClickListener
 			@Override
 			public void onClick(View vw) {
 				if ((mParticleAPI != null) && (smMParticleAPIEnabled != null) && smMParticleAPIEnabled) 
-					mParticleAPI.logEvent("Next Pressed", EventType.ACTION);
+					mParticleAPI.logEvent("Next Pressed", EventType.UserContent);
 				Intent intent = new Intent(PerformanceActivity.this, WebServiceActivity.class);
 				startActivity(intent);
 			}
@@ -155,7 +155,7 @@ public class PerformanceActivity extends BaseActivity implements OnClickListener
 	private void sendLog(int n) {
 		if ((mParticleAPI != null) && (smMParticleAPIEnabled != null) && smMParticleAPIEnabled) {
 			for (int i=0; i<n; i++) {
-				mParticleAPI.logEvent("AutoLog"+(i+1)+"Of"+n, EventType.ACTION);
+				mParticleAPI.logEvent("AutoLog"+(i+1)+"Of"+n, EventType.UserContent);
 			}
 		}
 	}
@@ -165,37 +165,37 @@ public class PerformanceActivity extends BaseActivity implements OnClickListener
 		// Send the correct intent to the MusicService, according to the button that was clicked
 		if (target == mPlayButton) {
 			if ((mParticleAPI != null) && (smMParticleAPIEnabled != null) && smMParticleAPIEnabled) {
-				mParticleAPI.logEvent("Play Pressed", EventType.ACTION);
+				mParticleAPI.logEvent("Play Pressed", EventType.UserContent);
 				startService(new Intent(MusicService.ACTION_PLAY));
 			}	
 		}
 		else if (target == mPauseButton) {
 			if ((mParticleAPI != null) && (smMParticleAPIEnabled != null) && smMParticleAPIEnabled) {
-				mParticleAPI.logEvent("Play Pressed", EventType.ACTION);
+				mParticleAPI.logEvent("Play Pressed", EventType.UserContent);
 			}
 			startService(new Intent(MusicService.ACTION_PAUSE));
 		}	
 		else if (target == mSkipButton) {
 			if ((mParticleAPI != null) && (smMParticleAPIEnabled != null) && smMParticleAPIEnabled) {
-				mParticleAPI.logEvent("Skip Pressed", EventType.ACTION);
+				mParticleAPI.logEvent("Skip Pressed", EventType.UserContent);
 			}
 			startService(new Intent(MusicService.ACTION_SKIP));
 		}	
 		else if (target == mRewindButton) {
 			if ((mParticleAPI != null) && (smMParticleAPIEnabled != null) && smMParticleAPIEnabled) {
-				mParticleAPI.logEvent("Rewind Pressed", EventType.ACTION);
+				mParticleAPI.logEvent("Rewind Pressed", EventType.UserContent);
 			}
 			startService(new Intent(MusicService.ACTION_REWIND));
 		}	
 		else if (target == mStopButton) {
 			if ((mParticleAPI != null) && (smMParticleAPIEnabled != null) && smMParticleAPIEnabled) {
-				mParticleAPI.logEvent("Stop Pressed", EventType.ACTION);
+				mParticleAPI.logEvent("Stop Pressed", EventType.UserContent);
 			}
 			startService(new Intent(MusicService.ACTION_STOP));
 		}	
 		else if (target == mEjectButton) {
 			if ((mParticleAPI != null) && (smMParticleAPIEnabled != null) && smMParticleAPIEnabled) {
-				mParticleAPI.logEvent("Eject Pressed", EventType.ACTION);
+				mParticleAPI.logEvent("Eject Pressed", EventType.UserContent);
 			}	
 			showUrlDialog();
 		}
@@ -218,7 +218,7 @@ public class PerformanceActivity extends BaseActivity implements OnClickListener
 		alertBuilder.setPositiveButton(getString(R.string.choose_play), new DialogInterface.OnClickListener() {
 			public void onClick(DialogInterface dlg, int whichButton) {
 				if ((mParticleAPI != null) && (smMParticleAPIEnabled != null) && smMParticleAPIEnabled) {
-					mParticleAPI.logEvent("Play from URL Dialog Pressed", EventType.ACTION);
+					mParticleAPI.logEvent("Play from URL Dialog Pressed", EventType.UserContent);
 				}
 				// Send an intent with the URL of the song to play. This is expected by
 				// MusicService.
@@ -231,7 +231,7 @@ public class PerformanceActivity extends BaseActivity implements OnClickListener
 		alertBuilder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
 			public void onClick(DialogInterface dlg, int whichButton) {
 				if ((mParticleAPI != null) && (smMParticleAPIEnabled != null) && smMParticleAPIEnabled) {
-					mParticleAPI.logEvent("Cancel from URL Dialog Pressed", EventType.ACTION);
+					mParticleAPI.logEvent("Cancel from URL Dialog Pressed", EventType.UserContent);
 				}
 			}
 		});
@@ -276,7 +276,7 @@ public class PerformanceActivity extends BaseActivity implements OnClickListener
 									mTrackListView.requestLayout();
 									findViewById(R.id.empty_media).setVisibility(View.GONE);
 									if ((mParticleAPI != null) && (smMParticleAPIEnabled != null) && smMParticleAPIEnabled) {
-										mParticleAPI.logEvent("ListView updated", EventType.ACTION);
+										mParticleAPI.logEvent("ListView updated", EventType.UserContent);
 									}
 								}
 							};
@@ -343,7 +343,7 @@ public class PerformanceActivity extends BaseActivity implements OnClickListener
 					imageLoader.DisplayImage(song.getImageUrl(), thumb_image);
 				}
 				if ((mParticleAPI != null) && (smMParticleAPIEnabled != null) && smMParticleAPIEnabled) {
-					mParticleAPI.logEvent("ListItem: "+song.getTitle()+" by "+song.getArtist()+" updated", EventType.ACTION);
+					mParticleAPI.logEvent("ListItem: "+song.getTitle()+" by "+song.getArtist()+" updated", EventType.UserContent);
 				}
 			}
 			return vi;

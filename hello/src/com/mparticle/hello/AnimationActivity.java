@@ -38,7 +38,7 @@ public class AnimationActivity extends BaseActivity {
 			@Override
 			public void onClick(View vw) {
 				if ((mParticleAPI != null) && (smMParticleAPIEnabled != null) && smMParticleAPIEnabled) 
-					mParticleAPI.logEvent("SDK Start/Stop Pressed", EventType.ACTION);
+					mParticleAPI.logEvent("SDK Start/Stop Pressed", EventType.UserContent);
 				mRunning = !mRunning;
 				initializeMParticleAPI(); // make sure the api is initialized
 				if (mRunning) {
@@ -55,7 +55,7 @@ public class AnimationActivity extends BaseActivity {
 			@Override
 			public void onClick(View vw) {
 				if ((mParticleAPI != null) && (smMParticleAPIEnabled != null) && smMParticleAPIEnabled) 
-					mParticleAPI.logEvent("Send10 Pressed", EventType.ACTION);
+					mParticleAPI.logEvent("Send10 Pressed", EventType.UserContent);
 				sendLog(10);
 			}
 		});
@@ -64,7 +64,7 @@ public class AnimationActivity extends BaseActivity {
 			@Override
 			public void onClick(View vw) {
 				if ((mParticleAPI != null) && (smMParticleAPIEnabled != null) && smMParticleAPIEnabled) 
-					mParticleAPI.logEvent("Send100 Pressed", EventType.ACTION);
+					mParticleAPI.logEvent("Send100 Pressed", EventType.UserContent);
 				sendLog(100);
 			}
 		});
@@ -73,7 +73,7 @@ public class AnimationActivity extends BaseActivity {
 			@Override
 			public void onClick(View vw) {
 				if ((mParticleAPI != null) && (smMParticleAPIEnabled != null) && smMParticleAPIEnabled) 
-					mParticleAPI.logEvent("Send500 Pressed", EventType.ACTION);
+					mParticleAPI.logEvent("Send500 Pressed", EventType.UserContent);
 				sendLog(500);
 			}
 		});
@@ -82,7 +82,7 @@ public class AnimationActivity extends BaseActivity {
 			@Override
 			public void onClick(View vw) {
 				if ((mParticleAPI != null) && (smMParticleAPIEnabled != null) && smMParticleAPIEnabled) 
-					mParticleAPI.logEvent("Next Button Pressed", EventType.NAVIGATION);
+					mParticleAPI.logEvent("Next Button Pressed", EventType.Navigation);
 				Intent intent = new Intent(AnimationActivity.this, PerformanceActivity.class);
 				startActivity(intent);
 			}
@@ -100,7 +100,7 @@ public class AnimationActivity extends BaseActivity {
 	private void sendLog(int n) {
 		if ((mParticleAPI != null) && (smMParticleAPIEnabled != null) && smMParticleAPIEnabled) {
 			for (int i=0; i<n; i++) {
-				mParticleAPI.logEvent("AutoLog"+(i+1)+"Of"+n, EventType.ACTION);
+				mParticleAPI.logEvent("AutoLog"+(i+1)+"Of"+n, EventType.UserContent);
 			}
 		}
 	}
@@ -169,7 +169,7 @@ class TouchSurfaceView extends GLSurfaceView {
 			mRenderer.mCube.mAngleY += dy * TOUCH_SCALE_FACTOR;
 			requestRender();
 			if ((mContext.mParticleAPI != null) && (mContext.smMParticleAPIEnabled != null) && mContext.smMParticleAPIEnabled) {
-				mContext.mParticleAPI.logEvent("Moving("+x+","+y+")", EventType.ACTION);
+				mContext.mParticleAPI.logEvent("Moving("+x+","+y+")", EventType.UserContent);
 			}
 		}
 		mPreviousX = x;

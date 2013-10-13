@@ -164,10 +164,10 @@ public class HomeActivity extends Activity implements OnItemSelectedListener {
     public void pressEventButton(View view) throws JSONException {
         switch (view.getId()) {
         case R.id.buttonA:
-            mParticleAPI.logEvent("ButtonAPressed", EventType.ACTION);
+            mParticleAPI.logEvent("ButtonAPressed", EventType.UserContent);
             break;
         case R.id.buttonB:
-            mParticleAPI.logEvent("ButtonBPressed", EventType.NAVIGATION);
+            mParticleAPI.logEvent("ButtonBPressed", EventType.Navigation);
             mParticleAPI.setSessionAttribute("testSessionAttr1", "testValue1");
             mParticleAPI.setSessionAttribute(Attributes.GENDER, "male");
             break;
@@ -175,7 +175,7 @@ public class HomeActivity extends Activity implements OnItemSelectedListener {
             boolean on = ((ToggleButton) view).isChecked();
             HashMap<String, String> eventData= new HashMap<String, String>();
             eventData.put("button_state", on ? "on":"off");
-            mParticleAPI.logEvent("ButtonCPressed", EventType.OTHER, eventData);
+            mParticleAPI.logEvent("ButtonCPressed", EventType.Other, eventData);
             break;
         }
 //        case R.id.viewA:
@@ -192,7 +192,7 @@ public class HomeActivity extends Activity implements OnItemSelectedListener {
             HashMap<String, String> eventData= new HashMap<String, String>();
             eventData.put("key1", "value1");
             eventData.put("key2", "value2");
-            mParticleAPI.logEvent("TestEvent", EventType.ACTION, eventData);
+            mParticleAPI.logEvent("TestEvent", EventType.UserContent, eventData);
             mParticleAPI.endSession();
             mParticleAPI.upload();
             break;

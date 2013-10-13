@@ -63,17 +63,21 @@ public class MParticleJSInterface {
 	private EventType convertEventType(int eventType) {
 		switch(eventType) {
 		case 1:
-			return EventType.NAVIGATION;
+			return EventType.Navigation;
 		case 2:
-			return EventType.PAGEVIEW;
+			return EventType.Location;
 		case 3:
-			return EventType.SEARCH;
+			return EventType.Search;
 		case 4:
-			return EventType.PURCHASE;
+			return EventType.Transaction;
 		case 5:
-			return EventType.ACTION;
+			return EventType.UserContent;
+		case 6:
+			return EventType.UserPreference;
+		case 7:
+			return EventType.Social;
 		default:
-			return EventType.OTHER;
+			return EventType.Other;
 		}
 	}
 }

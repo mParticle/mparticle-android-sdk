@@ -32,7 +32,7 @@ public class SplashActivity extends BaseActivity {
 					Intent intent = new Intent(SplashActivity.this, AnimationActivity.class);
 					startActivity(intent);
 					if ((mParticleAPI != null) && (smMParticleAPIEnabled != null) && smMParticleAPIEnabled) 
-						mParticleAPI.logEvent("Splash Timeout", EventType.NAVIGATION);
+						mParticleAPI.logEvent("Splash Timeout", EventType.Navigation);
 				} else {
 					String ttlFormat = getString(R.string.time_to_load);
 					String text = String.format(ttlFormat, mCountDown);
@@ -62,7 +62,7 @@ public class SplashActivity extends BaseActivity {
 			@Override
 			public void onClick(View v) {
 				if ((mParticleAPI != null) && (smMParticleAPIEnabled != null) && smMParticleAPIEnabled) 
-					mParticleAPI.logEvent("Reboot Pressed", EventType.NAVIGATION);
+					mParticleAPI.logEvent("Reboot Pressed", EventType.Navigation);
 		        
 		        SharedPreferences p = getApplicationContext().getSharedPreferences(getApplicationContext().getPackageName(), MODE_PRIVATE );
 		        Editor e = p.edit();

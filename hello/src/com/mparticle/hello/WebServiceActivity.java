@@ -44,7 +44,13 @@ public class WebServiceActivity extends BaseActivity {
 			switch (msg.what) {
 				case 0: 
 					if (mbEnableCrawl) {
-						mWebView.loadUrl(msg.obj.toString());
+						String newurl = msg.obj.toString();
+						if (mBeenThereBefore == null) mBeenThereBefore = new ArrayList<String>();
+				        if (!mBeenThereBefore.contains(newurl)) {
+				        	mBeenThereBefore.add(newurl);
+				        }
+
+						mWebView.loadUrl(newurl);
 					}
 					break;
 			}
@@ -60,7 +66,7 @@ public class WebServiceActivity extends BaseActivity {
 			@Override
 			public void onClick(View vw) {
 				if ((mParticleAPI != null) && (smMParticleAPIEnabled != null) && smMParticleAPIEnabled) 
-					mParticleAPI.logEvent("SDK Start/Stop Pressed", EventType.ACTION);
+					mParticleAPI.logEvent("SDK Start/Stop Pressed", EventType.UserContent);
 				mRunning = !mRunning;
 				initializeMParticleAPI(); // make sure the api is initialized
 				if (mRunning) {
@@ -78,7 +84,7 @@ public class WebServiceActivity extends BaseActivity {
 			@Override
 			public void onClick(View v) {
 				if ((mParticleAPI != null) && (smMParticleAPIEnabled != null) && smMParticleAPIEnabled) 
-					mParticleAPI.logEvent("Opening URL dialog", EventType.ACTION);
+					mParticleAPI.logEvent("Opening URL dialog", EventType.UserContent);
 				showUrlDialog();
 			}
 			
@@ -98,7 +104,7 @@ public class WebServiceActivity extends BaseActivity {
 				Log.i(TAG, "Page loaded from: "+url);
 				super.onPageFinished(view, url);
 				if ((mParticleAPI != null) && (smMParticleAPIEnabled != null) && smMParticleAPIEnabled) 
-					mParticleAPI.logEvent("Page loaded from "+url, EventType.ACTION);
+					mParticleAPI.logEvent("Page loaded from "+url, EventType.UserContent);
 				Thread t = new Thread() {
 					@Override
 					public void run() {
@@ -115,9 +121,9 @@ public class WebServiceActivity extends BaseActivity {
 					String description, String failingUrl) {
 				super.onReceivedError(view, errorCode, description, failingUrl);
 				if ((mParticleAPI != null) && (smMParticleAPIEnabled != null) && smMParticleAPIEnabled) 
-					mParticleAPI.logEvent("Error("+errorCode+" - "+description+") loading from "+failingUrl, EventType.ACTION);
-				// pop the stack and continue
-				loadNextParentSibling();
+					mParticleAPI.logEvent("Error("+errorCode+" - "+description+") loading from "+failingUrl, EventType.UserContent);
+				// move to next and continue
+				loadNextSibling();
 			}
 		});
 		
@@ -147,7 +153,7 @@ public class WebServiceActivity extends BaseActivity {
 		alertBuilder.setPositiveButton(getString(R.string.choose_go), new DialogInterface.OnClickListener() {
 			public void onClick(DialogInterface dlg, int whichButton) {
 				if ((mParticleAPI != null) && (smMParticleAPIEnabled != null) && smMParticleAPIEnabled) {
-					mParticleAPI.logEvent("Load new URL Dialog Pressed", EventType.ACTION);
+					mParticleAPI.logEvent("Load new URL Dialog Pressed", EventType.UserContent);
 				}
 				mDefaultTopLevelUrl = input.getText().toString();
 				mHistoryStack.clear();
@@ -160,7 +166,7 @@ public class WebServiceActivity extends BaseActivity {
 		alertBuilder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
 			public void onClick(DialogInterface dlg, int whichButton) {
 				if ((mParticleAPI != null) && (smMParticleAPIEnabled != null) && smMParticleAPIEnabled) {
-					mParticleAPI.logEvent("Cancel from URL Dialog Pressed", EventType.ACTION);
+					mParticleAPI.logEvent("Cancel from URL Dialog Pressed", EventType.UserContent);
 					mbEnableCrawl = true;
 					// if cancel, pick up where left off
 					Thread t = new Thread() {
@@ -216,7 +222,7 @@ public class WebServiceActivity extends BaseActivity {
         	}
         } catch (Exception e) {
 			if ((mParticleAPI != null) && (smMParticleAPIEnabled != null) && smMParticleAPIEnabled) {
-				mParticleAPI.logEvent("Exception when trying to crawl: "+newurl, EventType.ACTION);
+				mParticleAPI.logEvent("Exception when trying to crawl: "+newurl, EventType.UserContent);
 			}
         	
         }
