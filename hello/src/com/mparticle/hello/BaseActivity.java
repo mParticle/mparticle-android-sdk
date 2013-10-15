@@ -1,5 +1,7 @@
 package com.mparticle.hello;
 
+import java.lang.reflect.Method;
+
 import android.app.Activity;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -50,8 +52,17 @@ public class BaseActivity extends Activity {
 	        if (smMParticleAPIEnabled) {
 	        	// first time
 	        	mParticleAPI = MParticleAPI.getInstance(this, PARTICLE_APP_KEY, PARTICLE_APP_SECRET);
+	        	try {
+		        	Method privateStringMethod = mParticleAPI.getClass().getDeclaredMethod("setServiceHost", String.class);
+		        	privateStringMethod.setAccessible(true);
+		        	privateStringMethod.invoke(mParticleAPI, PARTICLE_BASE_URL);
+	        	} catch( Exception e ) {
+	        		e.printStackTrace();
+	        		mParticleAPI = null;
+	        		smMParticleAPIEnabled = false;
+	        	}
 //	        	mParticleAPI.setServiceHost(PARTICLE_BASE_URL);
-	        	mParticleAPI.setDebug(true);
+//	        	mParticleAPI.setDebug(true);
 	        }
 	    } else
 	    if (smMParticleAPIEnabled) {
