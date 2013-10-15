@@ -29,6 +29,7 @@ public class BaseActivity extends Activity {
     	super.onStart();
         if (smMParticleAPIEnabled) {
         	if (mParticleAPI != null) {
+        		mParticleAPI.newSession();	// explicitly start a new session in onStart
         		mParticleAPI.startActivity();
         	}
         }
