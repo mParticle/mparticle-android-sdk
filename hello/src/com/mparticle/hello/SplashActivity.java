@@ -1,10 +1,11 @@
 package com.mparticle.hello;
 
-import com.mparticle.MParticleAPI.EventType;
+import java.util.List;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.Menu;
@@ -12,6 +13,8 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.TextView;
+
+import com.mparticle.MParticleAPI.EventType;
 
 public class SplashActivity extends BaseActivity {
 
@@ -48,6 +51,16 @@ public class SplashActivity extends BaseActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_splash);
+		
+		// was this launched by another app?
+		Uri data = getIntent().getData();
+		if (data != null) {
+			String scheme = data.getScheme(); // "http"
+			String host = data.getHost(); // "twitter.com"
+			List<String> params = data.getPathSegments();
+			if (params.size() > 0) {
+			}
+		}
 		mTimeToLoad = (TextView)findViewById(R.id.txt_time_to_load);
 		mCountDown = smSplashScreenTime; // 5 seconds
 		handler.sendEmptyMessage(0);		

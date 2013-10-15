@@ -52,21 +52,22 @@ public class BaseActivity extends Activity {
 	        if (smMParticleAPIEnabled) {
 	        	// first time
 	        	mParticleAPI = MParticleAPI.getInstance(this, PARTICLE_APP_KEY, PARTICLE_APP_SECRET);
-	        	try {
-		        	Method privateStringMethod = mParticleAPI.getClass().getDeclaredMethod("setServiceHost", String.class);
-		        	privateStringMethod.setAccessible(true);
-		        	privateStringMethod.invoke(mParticleAPI, PARTICLE_BASE_URL);
-	        	} catch( Exception e ) {
-	        		e.printStackTrace();
-	        		mParticleAPI = null;
-	        		smMParticleAPIEnabled = false;
-	        	}
-//	        	mParticleAPI.setServiceHost(PARTICLE_BASE_URL);
-//	        	mParticleAPI.setDebug(true);
 	        }
 	    } else
 	    if (smMParticleAPIEnabled) {
 	    	mParticleAPI = MParticleAPI.getInstance(this, PARTICLE_APP_KEY, PARTICLE_APP_SECRET);
+	    }
+	    if (mParticleAPI != null) {
+        	try {
+	        	Method privateStringMethod = mParticleAPI.getClass().getDeclaredMethod("setServiceHost", String.class);
+	        	privateStringMethod.setAccessible(true);
+	        	privateStringMethod.invoke(mParticleAPI, PARTICLE_BASE_URL);
+//	        	mParticleAPI.setDebug(true);
+        	} catch( Exception e ) {
+        		e.printStackTrace();
+        		mParticleAPI = null;
+        		smMParticleAPIEnabled = false;
+        	}
 	    }
     }
 

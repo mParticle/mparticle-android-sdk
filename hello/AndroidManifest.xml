@@ -23,14 +23,24 @@
 			android:label="@string/app_name" >
 			<intent-filter>
 				<action android:name="android.intent.action.MAIN" />
-
 				<category android:name="android.intent.category.LAUNCHER" />
+			</intent-filter>
+			<intent-filter>
+				<data android:scheme="mparticle" />
+				<action android:name="com.mparticle.hello.SplashActivity" />
+				<category android:name="android.intent.category.BROWSABLE" />
 			</intent-filter>
 		</activity>
 		<activity android:name="com.mparticle.hello.AnimationActivity" />
 		<activity android:name="com.mparticle.hello.PerformanceActivity" />
 		<activity android:name="com.mparticle.hello.WebServiceActivity" />
 
+		<receiver android:name="com.mparticle.hello.ReferrerReceiver" android:exported="true">
+  			<intent-filter>
+    			<action android:name="com.android.vending.INSTALL_REFERRER" />
+  			</intent-filter>
+		</receiver>
+		
         <service
             android:name="com.mparticle.hello.musicplayer.MusicService"
             android:exported="false" >
