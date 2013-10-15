@@ -49,18 +49,20 @@ public class SplashActivity extends BaseActivity {
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_splash);
-		
-		// was this launched by another app?
-		Uri data = getIntent().getData();
+		// was this launched by another app?  test before calling baseactivity which needs this data for instantiating mParticleSDK
+		Intent intent = getIntent();
+		Uri data = intent.getData();
 		if (data != null) {
-			String scheme = data.getScheme(); // "http"
-			String host = data.getHost(); // "twitter.com"
+			String scheme = data.getScheme(); // mparticlehello:
+			String host = data.getHost(); // hello.mparticle.com
 			List<String> params = data.getPathSegments();
 			if (params.size() > 0) {
 			}
 		}
+		
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.activity_splash);
+		
 		mTimeToLoad = (TextView)findViewById(R.id.txt_time_to_load);
 		mCountDown = smSplashScreenTime; // 5 seconds
 		handler.sendEmptyMessage(0);		
