@@ -47,23 +47,40 @@ public class BaseActivity extends Activity {
     }
     
     protected void initializeMParticleAPI() {
+    	boolean hasPropFile = false;
 	    if (smMParticleAPIEnabled == null) {
 	        SharedPreferences p = getApplicationContext().getSharedPreferences(getApplicationContext().getPackageName(), MODE_PRIVATE );
 	        smMParticleAPIEnabled = new Boolean(p.getBoolean(getString(R.string.particleAPIEnabledKey), true));
 	        if (smMParticleAPIEnabled) {
-	        	// first time
-	        	mParticleAPI = MParticleAPI.getInstance(this, PARTICLE_APP_KEY, PARTICLE_APP_SECRET);
+	        	// is there a config file?
+	        	try {
+	        		getResources().getAssets().open("mparticle.properties").close();
+		        	// first time
+		        	mParticleAPI = MParticleAPI.getInstance(this);
+		        	hasPropFile = true;
+	        	} catch(Exception e) {
+	        		// if failed, then use explicit getinstance
+		        	// first time
+		        	mParticleAPI = MParticleAPI.getInstance(this, PARTICLE_APP_KEY, PARTICLE_APP_SECRET);
+	        	}
 	        }
 	    } else
 	    if (smMParticleAPIEnabled) {
-	    	mParticleAPI = MParticleAPI.getInstance(this, PARTICLE_APP_KEY, PARTICLE_APP_SECRET);
+        	try {
+        		getResources().getAssets().open("mparticle.properties").close();
+	        	mParticleAPI = MParticleAPI.getInstance(this);
+	        	hasPropFile = true;
+        	} catch(Exception e) {
+        		// if failed, then use explicit getinstance
+	        	mParticleAPI = MParticleAPI.getInstance(this, PARTICLE_APP_KEY, PARTICLE_APP_SECRET);
+        	}
 	    }
 	    if (mParticleAPI != null) {
         	try {
+        		// force the debug endpoint
 	        	Method privateStringMethod = mParticleAPI.getClass().getDeclaredMethod("setServiceHost", String.class);
 	        	privateStringMethod.setAccessible(true);
 	        	privateStringMethod.invoke(mParticleAPI, PARTICLE_BASE_URL);
-//	        	mParticleAPI.setDebug(true);
         	} catch( Exception e ) {
         		e.printStackTrace();
         		mParticleAPI = null;
