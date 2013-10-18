@@ -43,7 +43,7 @@ public class WebServiceActivity extends BaseActivity {
 		public void handleMessage(Message msg) {
 			switch (msg.what) {
 				case 0: 
-					if (mbEnableCrawl) {
+					if (mbEnableCrawl && (msg.obj != null)) {
 						String newurl = msg.obj.toString();
 						if (mBeenThereBefore == null) mBeenThereBefore = new ArrayList<String>();
 				        if (!mBeenThereBefore.contains(newurl)) {
@@ -156,7 +156,7 @@ public class WebServiceActivity extends BaseActivity {
 					mParticleAPI.logEvent("Load new URL Dialog Pressed", EventType.UserContent);
 				}
 				mDefaultTopLevelUrl = input.getText().toString();
-				mHistoryStack.clear();
+				mHistoryStack = null;
 				mBeenThereBefore = null;
 				mbEnableCrawl = true;
 				Message msg = handler.obtainMessage(0, mDefaultTopLevelUrl);
