@@ -602,7 +602,7 @@ public class MParticleAPI {
     			newUserIdentities.put(testid);
     		}
     		// now add this one...only if the id is not null
-    		if (id != null) {
+    		if ((id != null) && (id.length()>0)) {
     			newUserIdentities.put(identity);
     		}
     		// now make the new array the saved one

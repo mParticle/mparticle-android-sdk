@@ -69,7 +69,7 @@ import android.text.TextUtils;
     public PersistentCookieStore(Context context) {
         cookiePrefs = context.getSharedPreferences(COOKIE_PREFS, 0);
         cookies = new ConcurrentHashMap<String, Cookie>();
-
+        
         // Load any previously stored cookies into the store
         String storedCookieNames = cookiePrefs.getString(COOKIE_NAME_STORE, null);
         if (storedCookieNames != null) {
@@ -84,7 +84,7 @@ import android.text.TextUtils;
                 }
             }
 
-            // Clear out expired cookies
+            // Clear out expired cookies, including session cookie
             clearExpired(new Date());
         }
     }
@@ -129,7 +129,9 @@ import android.text.TextUtils;
         for (ConcurrentHashMap.Entry<String, Cookie> entry : cookies.entrySet()) {
             String name = entry.getKey();
             Cookie cookie = entry.getValue();
-            if (cookie.isExpired(date)) {
+            // check for no date (sessio cookie) or expired
+            if ((cookie.getExpiryDate() == null) ||
+            	cookie.isExpired(date)) {
                 // Clear cookies from local store
                 cookies.remove(name);
 

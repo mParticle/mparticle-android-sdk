@@ -47,13 +47,11 @@ public class UserSessionAttributesTests extends AndroidTestCase {
     	assertEquals(3, mMParticleAPI.mUserIdentities.length());
     	mMParticleAPI.setUserIdentity(null, IdentityType.FACEBOOK);
     	assertEquals(2, mMParticleAPI.mUserIdentities.length());
+    	mMParticleAPI.setUserIdentity("", IdentityType.GOOGLE);
+    	assertEquals(1, mMParticleAPI.mUserIdentities.length());
     	
     	int type = (Integer) ((JSONObject)mMParticleAPI.mUserIdentities.get(0)).get(MessageKey.IDENTITY_NAME);
-    	if (type == IdentityType.MICROSOFT.getValue()) {
-        	assertEquals("tbreffni@mparticle.com", ((JSONObject)mMParticleAPI.mUserIdentities.get(0)).get(MessageKey.IDENTITY_VALUE));
-    	} else {
-        	assertEquals("me@myEmail.com", ((JSONObject)mMParticleAPI.mUserIdentities.get(0)).get(MessageKey.IDENTITY_VALUE));
-    	}
+    	assertEquals("tbreffni@mparticle.com", ((JSONObject)mMParticleAPI.mUserIdentities.get(0)).get(MessageKey.IDENTITY_VALUE));
    }
 
     public void testTooManyAttributes() throws JSONException {
