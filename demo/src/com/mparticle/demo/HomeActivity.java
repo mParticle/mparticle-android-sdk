@@ -1,5 +1,6 @@
 package com.mparticle.demo;
 
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Random;
 
@@ -49,6 +50,7 @@ public class HomeActivity extends Activity implements OnItemSelectedListener {
     public static String SENDER_ID = "31005546127";
     private static final String PREFS_EXCEPTION = "exceptions_mode";
     private static final String PREFS_DEBUG = "debug_mode";
+    static final String PARTICLE_DEV_URL = "sdk.dev.aws.mparticle.com";
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -60,6 +62,7 @@ public class HomeActivity extends Activity implements OnItemSelectedListener {
         Spinner spinnerApiKey = (Spinner) findViewById(R.id.spinnerApiKey);
         spinnerApiKey.setOnItemSelectedListener(this);
         ArrayAdapter<String> apiKeysAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item);
+        apiKeysAdapter.add("fc20940310387c4483b56ec164a61c0a/AiRSKtouEfhDLnMwjtfRLprG_5Wz73XmjEYhyHgmAUnPQSC3EmkL8u95BZj2gOR2");
         apiKeysAdapter.add("abc123/secret");
         apiKeysAdapter.add("NoSdkKey/NoSdkSecret");
         apiKeysAdapter.add("ApsalarKey/ApsalarSecret");
@@ -74,7 +77,9 @@ public class HomeActivity extends Activity implements OnItemSelectedListener {
         locProviderAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         locationProviderSpinner.setAdapter(locProviderAdapter);
 
-        setupApiInstance("abc123", "secret");
+//      setupApiInstance("abc123", "secret");
+        String[] keyParts = apiKeysAdapter.getItem(0).split("/");
+        setupApiInstance(keyParts[0], keyParts[1]);
         updatePushControls();
         
         WebView myWebView = (WebView)this.findViewById(R.id.webView1);
@@ -95,7 +100,14 @@ public class HomeActivity extends Activity implements OnItemSelectedListener {
 
     private void setupApiInstance(String apiKey, String secret) {
         mParticleAPI = MParticleAPI.getInstance(this, apiKey, secret);
-
+        try {
+			// force the debug endpoint
+	    	Method privateStringMethod = mParticleAPI.getClass().getDeclaredMethod("setServiceHost", String.class);
+	    	privateStringMethod.setAccessible(true);
+	    	privateStringMethod.invoke(mParticleAPI, PARTICLE_DEV_URL);
+        } catch(Exception e) {
+        	e.printStackTrace();
+        }
         boolean exceptionsMode = mPreferences.getBoolean(PREFS_EXCEPTION, true);
         CheckBox exceptionsModeCheckBox = (CheckBox) findViewById(R.id.checkBoxExceptionsMode);
         exceptionsModeCheckBox.setChecked(exceptionsMode);
