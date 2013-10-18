@@ -1,0 +1,781 @@
+<html>
+    <script type="text/javascript">
+        window.onerror = function(message, url, lineNumber) {
+            console.log("Error: "+message+" in "+url+" at line "+lineNumber);
+        }
+        </script>
+    
+    <script type="text/javascript">
+        /*
+         mParticle Javascript API
+         (c) Copyright 2013 mParticle Inc. All Rights Reserved.
+         
+         Browser Features Required:
+         
+         - XMLHttpRequest
+         - CORS (uses XDomainRequest for MSIE < 10)
+         - JSON support in cookies (might be issues in Opera)
+         */
+        
+        // Start of mParticle code
+        
+        (function (window) {
+         var debugUrl = "api.debug.mparticle.com/v1/JS/",
+         serviceUrl = "api.dev.mparticle.com/v1/JS/",
+         serviceScheme = window.location.protocol + '//',
+         sdkVersion = '1.0',
+         isEnabled = true,
+         pluses = /\+/g,
+         sessionAttributes = {},
+         userAttributes = {},
+         userIdentities = [],
+         sessionId,
+         userId,
+         devToken,
+         serverSettings = {},
+         lastEventSent,
+         currentPosition,
+         isTracking = false,
+         watchPositionId;
+         
+         function getCookie() {
+         var cookies = window.document.cookie.split('; '),
+         key = Config.CookieName,
+         i,
+         l,
+         parts,
+         name,
+         cookie,
+         obj,
+         result = key ? undefined : {};
+         
+         logDebug(InformationMessages.CookieSearch);
+         
+         for (i = 0, l = cookies.length; i < l; i++) {
+         parts = cookies[i].split('=');
+         name = decoded(parts.shift());
+         cookie = decoded(parts.join('='));
+         
+         if (key && key === name) {
+         result = converted(cookie);
+         break;
+         }
+         
+         if (!key) {
+         result[name] = converted(cookie);
+         }
+         }
+         
+         if (result) {
+         logDebug(InformationMessages.CookieFound);
+         
+         try {
+         obj = JSON.parse(result);
+         
+         userId = obj.UserId;
+         sessionId = obj.SessionId;
+         isEnabled = obj.IsEnabled;
+         sessionAttributes = obj.SessionAttributes;
+         userAttributes = obj.UserAttributes;
+         userIdentities = obj.UserIdentities;
+         serverSettings = obj.ServerSettings;
+         devToken = obj.DeveloperToken;
+         
+         if (obj.LastEventSent) {
+         lastEventSent = new Date(obj.LastEventSent);
+         }
+         }
+         catch (e) {
+         logDebug(ErrorMessages.CookieParseError);
+         }
+         }
+         }
+         
+         function setCookie() {
+         var date = new Date(),
+         key = Config.CookieName,
+         value = {
+         SessionId: sessionId,
+         IsEnabled: isEnabled,
+         SessionAttributes: sessionAttributes,
+         UserAttributes: userAttributes,
+         UserIdentities: userIdentities,
+         ServerSettings: serverSettings,
+         DeveloperToken: devToken,
+         LastEventSent: lastEventSent ? lastEventSent.getTime() : null
+         },
+         expires = '',
+         domain = Config.CookieDomain ? ';domain=' + Config.CookieDomain : '';
+         
+         if (value) {
+         expires = new Date(date.getTime() +
+                            (Config.CookieExpiration * 24 * 60 * 60 * 1000)).toGMTString();
+         }
+         
+         logDebug(InformationMessages.CookieSet);
+         
+         window.document.cookie =
+         encodeURIComponent(key) + '=' + encodeURIComponent(JSON.stringify(value)) +
+         ';expires=' + expires +
+         ';path=/' +
+         domain;
+         }
+         
+         function isWebViewEmbedded() {
+         if ((window.external && typeof (window.external.Notify) == 'unknown')
+             || window.mParticleAndroid
+             || window.mParticle.isIOS) {
+         return true;
+         }
+         
+         return false;
+         }
+         
+         function send(event) {
+         var xhr,
+         xhrCallback = function () {
+         var settings;
+         
+         if (xhr.readyState == 4) {
+         logDebug('Received ' + xhr.statusText + ' from server');
+         
+         parseResponse(xhr.responseText);
+         }
+         };
+         
+         logDebug(InformationMessages.SendBegin);
+         
+         if (!event) {
+         logDebug(ErrorMessages.EventEmpty);
+         return;
+         }
+         
+         if (window.external && typeof (window.external.Notify) == 'unknown') {
+         // Inside a Windows Phone WebBrowser control
+         logDebug(InformationMessages.SendWindowsPhone);
+         window.external.Notify(JSON.stringify(event));
+         }
+         else if (window.mParticleAndroid) {
+         // Inside an android phone
+         logDebug(InformationMessages.SendAndroid);
+         window.mParticleAndroid.logEvent(JSON.stringify(event));
+         }
+         else if (window.mParticle.isIOS) {
+         // Inside an iPhone
+         var iframe = document.createElement("IFRAME");
+         iframe.setAttribute("src", 'mp-sdk://' + JSON.stringify(event));
+         document.documentElement.appendChild(iframe);
+         iframe.parentNode.removeChild(iframe);
+         iframe = null;
+         }
+         else {
+         logDebug(InformationMessages.SendHttp);
+         // Send to http endpoint
+         
+         try {
+         xhr = new window.XMLHttpRequest();
+         } catch (e) {
+         logDebug('Error creating XMLHttpRequest object.');
+         }
+         
+         if (xhr && "withCredentials" in xhr) {
+         xhr.onreadystatechange = xhrCallback;
+         }
+         else if (typeof XDomainRequest != 'undefined') {
+         logDebug('Creating XDomainRequest object');
+         
+         try {
+         xhr = new XDomainRequest();
+         xhr.onload = xhrCallback;
+         }
+         catch (e) {
+         logDebug('Error creating XDomainRequest object');
+         }
+         }
+         
+         if (xhr) {
+         try {
+         xhr.open('post',
+                  serviceScheme +
+                  (mParticle.isDebug ? debugUrl : serviceUrl) +
+                  devToken +
+                  '/' +
+                  'Events');
+         
+         xhr.send(JSON.stringify(event));
+         }
+         catch (e) {
+         logDebug('Error sending event to mParticle servers.');
+         }
+         }
+         }
+         }
+         
+         function parseResponse(responseText) {
+         var now = new Date(),
+         settings,
+         prop,
+         fullProp;
+         
+         if (!responseText) {
+         return;
+         }
+         
+         try {
+         logDebug('Parsing response from server');
+         
+         settings = JSON.parse(responseText);
+         
+         if (settings && settings.Store) {
+         logDebug('Parsed store from response, updating local settings');
+         
+         for (prop in settings.Store) {
+         if (!settings.Store.hasOwnProperty(prop)) {
+         continue;
+         }
+         
+         fullProp = settings.Store[prop];
+         
+         if (!fullProp.Value || new Date(fullProp.Expires) < now) {
+         // This setting should be deleted from the local store if it exists
+         
+         if (serverSettings.hasOwnProperty(prop)) {
+         delete serverSettings[prop];
+         }
+         }
+         else {
+         // This is a valid setting
+         
+         serverSettings[prop] = fullProp;
+         }
+         }
+         }
+         }
+         catch (e) {
+         logDebug("Error parsing JSON response from server: " + e.name);
+         }
+         }
+         
+         function startTracking() {
+         if (!isTracking) {
+         if ("geolocation" in navigator) {
+         watchPositionId = navigator.geolocation.watchPosition(function (position) {
+                                                               currentPosition = {
+                                                               lat: position.coords.latitude,
+                                                               lng: position.coords.longitude
+                                                               };
+                                                               });
+         
+         isTracking = true;
+         }
+         }
+         }
+         
+         function stopTracking() {
+         if (isTracking) {
+         navigator.geolocation.clearWatch(watchPositionId);
+         isTracking = false;
+         }
+         }
+         
+         function createEventObject(messageType, name, data, eventType) {
+         if (sessionId) {
+         lastEventSent = new Date();
+         
+         if (isWebViewEmbedded()) {
+         return {
+         EventName: name ? name : messageType,
+         EventCategory: eventType,
+         UserAttributes: userAttributes,
+         SessionAttributes: sessionAttributes,
+         UserIdentities: userIdentities,
+         Store: serverSettings,
+         EventAttributes: data,
+         SDKVersion: sdkVersion,
+         SessionId: sessionId,
+         EventDataType: messageType,
+         Debug: mParticle.isDebug,
+         Timestamp: lastEventSent.getTime(),
+         Location: currentPosition
+         };
+         }
+         else {
+         return {
+         n: name ? name : messageType,	// Event Name
+         et: eventType,					// Event type
+         ua: userAttributes,				// User Attributes
+         sa: sessionAttributes,			// Session Attributes
+         ui: userIdentities,				// User Identities
+         str: serverSettings,			// Server Settings
+         attrs: data,					// Event Attributes
+         sdk: sdkVersion,				// SDK Version
+         sid: sessionId,					// Session Id
+         dt: messageType,				// Event Message Type
+         dbg: mParticle.isDebug,			// Debug Mode
+         ct: lastEventSent.getTime(),	// Timestamp,
+         lc: currentPosition				// Location
+         };
+         }
+         }
+         
+         return null;
+         }
+         
+         function logEvent(type, name, data, category) {
+         logDebug(InformationMessages.StartingLogEvent + ': ' + type + ', ' + name);
+         
+         if (canLog()) {
+         if (!sessionId) {
+         mParticle.startNewSession();
+         }
+         
+         send(createEventObject(type, name, data, category));
+         setCookie();
+         }
+         else {
+         logDebug(InformationMessages.AbandonLogEvent);
+         }
+         }
+         
+         function decoded(s) {
+         return decodeURIComponent(s.replace(pluses, ' '));
+         }
+         
+         function converted(s) {
+         if (s.indexOf('"') === 0) {
+         s = s.slice(1, -1).replace(/\\"/g, '"').replace(/\\\\/g, '\\');
+                                    }
+                                    
+                                    return s;
+                                    }
+                                    
+                                    function generateUniqueId() {
+                                    // See http://stackoverflow.com/a/2117523/637 for details
+                                    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+                                                                                          var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+                                                                                          return v.toString(16);
+                                                                                          });
+                                    }
+                                    
+                                    function logDebug(msg) {
+                                    if (mParticle.isDebug) {
+                                    if (window.external && typeof (window.external.Notify) == "unknown") {
+                                    var logEvent = {
+                                    EventName: msg,
+                                    MessageType: MessageType.Log
+                                    };
+                                    
+                                    window.external.Notify(JSON.stringify(logEvent));
+                                    }
+                                    else if (window.console && window.console.log) {
+                                    window.console.log(msg);
+                                    }
+                                    }
+                                    }
+                                    
+                                    function mergeConfig(config) {
+                                    logDebug(InformationMessages.LoadingConfig);
+                                    
+                                    for (var prop in Config) {
+                                    if (Config.hasOwnProperty(prop) && config.hasOwnProperty(prop)) {
+                                    Config[prop] = config[prop];
+                                    }
+                                    }
+                                    }
+                                    
+                                    function canLog() {
+                                    if (isEnabled && devToken) {
+                                    return true;
+                                    }
+                                    
+                                    return false;
+                                    }
+                                    
+                                    function isObject(value) {
+                                    return Object.prototype.toString.call(value) == "[object Object]";
+                                    }
+                                    
+                                    function addEventHandler(domEvent, selector, eventName, data, eventType) {
+                                    var elements = [],
+                                    handler = function (e) {
+                                    var timeoutHandler = function () {
+                                    if (element.href) {
+                                    window.location.href = element.href;
+                                    }
+                                    else if (element.submit) {
+                                    element.submit();
+                                    }
+                                    };
+                                    
+                                    logDebug('DOM event triggered, handling event');
+                                    
+                                    logEvent(MessageType.PageEvent,
+                                             eventName,
+                                             data,
+                                             eventType ? eventType : EventType.Action);
+                                    
+                                    // TODO: Handle middle-clicks and special keys (ctrl, alt, etc)
+                                    if ((element.href && element.target != '_blank') || element.submit) {
+                                    // Give xmlhttprequest enough time to execute before navigating a link or submitting form
+                                    
+                                    e.returnValue = false;
+                                    setTimeout(timeoutHandler, Config.Timeout);
+                                    }
+                                    },
+                                    element,
+                                    i;
+                                    
+                                    if (!selector) {
+                                    logDebug('Can\'t bind event, selector is required');
+                                    return;
+                                    }
+                                    
+                                    // Handle a css selector string or a dom element
+                                    if (typeof selector === 'string') {
+                                    elements = document.querySelectorAll(selector);
+                                    }
+                                    else if (selector.nodeType) {
+                                    elements = [selector];
+                                    }
+                                    
+                                    if (elements.length > 0) {
+                                    logDebug('Found ' +
+                                             elements.length +
+                                             ' element' +
+                                             (elements.length > 1 ? 's' : '') +
+                                             ', attaching event handlers');
+                                    
+                                    for (i = 0; i < elements.length; i++) {
+                                    element = elements[i];
+                                    
+                                    if (element.addEventListener) {
+                                    element.addEventListener(domEvent, handler, false);
+                                    }
+                                    else if (element.attachEvent) {
+                                    element.attachEvent('on' + domEvent, handler);
+                                    }
+                                    else {
+                                    element['on' + domEvent] = handler;
+                                    }
+                                    }
+                                    }
+                                    else {
+                                    logDebug('No elements found');
+                                    }
+                                    }
+                                    
+                                    var MessageType = {
+                                    SessionStart: 1,
+                                    SessionEnd: 2,
+                                    PageView: 3,
+                                    PageEvent: 4,
+                                    CrashReport: 5,
+                                    OptOut: 6,
+                                    Log: 7
+                                    };
+                                    
+                                    var EventType = {
+                                    Navigation: 1,
+                                    Pageview: 2,
+                                    Search: 3,
+                                    Purchase: 4,
+                                    Action: 5,
+                                    Other: 6
+                                    };
+                                    
+                                    var IdentityType = {
+                                    Other: 0,
+                                    CustomerId: 1,
+                                    Facebook: 2,
+                                    Twitter: 3,
+                                    Google: 4,
+                                    Microsoft: 5,
+                                    Yahoo: 6
+                                    };
+                                    
+                                    var Config = {
+                                    CookieName: 'mprtcl-api',		// Name of the cookie stored on the user's machine
+                                    CookieDomain: null,				// If null, defaults to current location.host
+                                    Debug: false,					// If true, will print debug messages to browser console
+                                    CookieExpiration: 365,			// Cookie expiration time in days
+                                    Verbose: false,					// Whether the server will return verbose responses
+                                    IncludeReferrer: true,			// Include user's referrer
+                                    IncludeGoogleAdwords: true,		// Include utm_source and utm_properties
+                                    Timeout: 300,					// Timeout in milliseconds for logging functions
+                                    SessionTimeout: 30				// Session timeout in minutes
+                                    };
+                                    
+                                    var ErrorMessages = {
+                                    NoToken: 'A token must be specified.',
+                                    EventNameInvalidType: 'Event name must be a valid string value.',
+                                    EventDataInvalidType: 'Event data must be a valid object hash.',
+                                    LoggingDisabled: 'Event logging is currently disabled.',
+                                    CookieParseError: 'Could not parse cookie',
+                                    EventEmpty: 'Event object is null or undefined, cancelling send'
+                                    };
+                                    
+                                    var InformationMessages = {
+                                    CookieSearch: 'Searching for cookie',
+                                    CookieFound: 'Cookie found, parsing values',
+                                    CookieSet: 'Setting cookie',
+                                    SendBegin: 'Starting to send event',
+                                    SendWindowsPhone: 'Sending event to Windows Phone container',
+                                    SendIOS: 'Sending event to iOS container',
+                                    SendAndroid: 'Sending event to Android container',
+                                    SendHttp: 'Sending event to mParticle HTTP service',
+                                    StartingNewSession: 'Starting new Session',
+                                    StartingLogEvent: 'Starting to log event',
+                                    StartingEndSession: 'Starting to end session',
+                                    StartingInitialization: 'Starting to initialize',
+                                    LoadingConfig: 'Loading configuration options',
+                                    AbandonLogEvent: 'Cannot log event, logging disabled or developer token not set',
+                                    AbandonStartSession: 'Cannot start session, logging disabled or developer token not set',
+                                    AbandonEndSession: 'Cannot end session, logging disabled or developer token not set',
+                                    NoSessionToEnd: 'Cannot end session, no active session found'
+                                    };
+                                    
+                                    var mParticle = {
+                                    isIOS: false,
+                                    isDebug: false,
+                                    IdentityType: IdentityType,
+                                    EventType: MessageType,
+                                    init: function (token, config) {
+                                    logDebug(InformationMessages.StartingInitialization);
+                                    
+                                    if (config) {
+                                    mergeConfig(config);
+                                    }
+                                    
+                                    if (!token) {
+                                    logDebug(ErrorMessages.NoToken);
+                                    }
+                                    else if (devToken !== token) {
+                                    mParticle.endSession();
+                                    devToken = token;
+                                    }
+                                    },
+                                    stopTrackingLocation: function () {
+                                    stopTracking();
+                                    },
+                                    startTrackingLocation: function () {
+                                    startTracking();
+                                    },
+                                    setPosition: function (lat, lng) {
+                                    if (typeof lat === 'number' && typeof lng === 'number') {
+                                    currentPosition = {
+                                    lat: lat,
+                                    lng: lng
+                                    };
+                                    }
+                                    else {
+                                    logDebug('Position latitude and/or longitude are invalid');
+                                    }
+                                    },
+                                    setUserId: function (id) {
+                                    userId = id;
+                                    setCookie();
+                                    },
+                                    identify: function (id, type) {
+                                    if (canLog()) {
+                                    userIdentities.push(
+                                                        {
+                                                        Identity: id,
+                                                        Type: type
+                                                        });
+                                    
+                                    setCookie();
+                                    }
+                                    },
+                                    startNewSession: function () {
+                                    // Ends the current session if one is in progress
+                                    
+                                    logDebug(InformationMessages.StartingNewSession);
+                                    
+                                    if (canLog()) {
+                                    mParticle.endSession();
+                                    sessionId = generateUniqueId();
+                                    
+                                    if (!lastEventSent) {
+                                    lastEventSent = new Date();
+                                    }
+                                    
+                                    logEvent(MessageType.SessionStart);
+                                    }
+                                    else {
+                                    logDebug(InformationMessages.AbandonStartSession);
+                                    }
+                                    },
+                                    endSession: function () {
+                                    logDebug(InformationMessages.StartingEndSession);
+                                    
+                                    // Ends the current session.
+                                    if (canLog()) {
+                                    if (!sessionId) {
+                                    logDebug(InformationMessages.NoSessionToEnd);
+                                    return;
+                                    }
+                                    
+                                    logEvent(MessageType.SessionEnd);
+                                    
+                                    sessionId = null;
+                                    sessionAttributes = {};
+                                    
+                                    }
+                                    else {
+                                    logDebug(InformationMessages.AbandonEndSession);
+                                    }
+                                    },
+                                    logEvent: function (eventName, data, eventType) {
+                                    // Example: mParticle.logEvent('Purchase', { price: 9.99 });
+                                    
+                                    if (typeof (eventName) != 'string') {
+                                    logDebug(ErrorMessages.EventNameInvalidType);
+                                    return;
+                                    }
+                                    
+                                    if (data && !isObject(data)) {
+                                    logDebug(ErrorMessages.EventDataInvalidType);
+                                    return;
+                                    }
+                                    
+                                    if (!canLog()) {
+                                    logDebug(ErrorMessages.LoggingDisabled);
+                                    return;
+                                    }
+                                    
+                                    if (!lastEventSent) {
+                                    lastEventSent = new Date();
+                                    }
+                                    else if (new Date() > new Date(lastEventSent.getTime() + Config.SessionTimeout * 60000)) {
+                                    // Session has timed out, start a new one
+                                    mParticle.startNewSession();
+                                    }
+                                    
+                                    if (!eventType) {
+                                    eventType = EventType.Action;
+                                    }
+                                    
+                                    logEvent(MessageType.PageEvent, eventName, data, eventType);
+                                    },
+                                    logError: function (error) {
+                                    if (!error) {
+                                    return;
+                                    }
+                                    
+                                    logEvent(MessageType.CrashReport,
+                                             error.name ? error.name : '',
+                                             {
+                                             m: error.message ? error.message : error,
+                                             s: 'Error',
+                                             t: error.stack
+                                             },
+                                             EventType.Other);
+                                    },
+                                    logLink: function (selector, name, data, category) {
+                                    addEventHandler('click', selector, name, data, category);
+                                    },
+                                    logForm: function (selector, name, data, category) {
+                                    addEventHandler('submit', selector, name, data, category);
+                                    },
+                                    logPageView: function (name, data) {
+                                    // Example: mParticle.logPageView('index.html');
+                                    if (canLog()) {
+                                    logEvent(MessageType.PageView, name, data, EventType.Pageview);
+                                    }
+                                    },
+                                    setUserAttributes: function (key, value) {
+                                    // Logs to cookie
+                                    // And logs to in-memory object
+                                    // Example: mParticle.setUserAttribute('email', 'tbreffni@mparticle.com');
+                                    if (canLog()) {
+                                    userAttributes[key] = value;
+                                    setCookie();
+                                    }
+                                    },
+                                    setSessionAttributes: function (key, value) {
+                                    // Logs to cookie
+                                    // And logs to in-memory object
+                                    // Example: mParticle.setSessionAttribute('location', '33431');
+                                    if (canLog()) {
+                                    sessionAttributes[key] = value;
+                                    setCookie();
+                                    }
+                                    },
+                                    disable: function () {
+                                    if (isEnabled) {
+                                    logEvent(MessageType.OptOut,
+                                             'OptOut',
+                                             null,
+                                             EventType.Other);
+                                    
+                                    isEnabled = false;
+                                    setCookie();
+                                    }
+                                    }
+                                    };
+                                    
+                                    getCookie();
+                                    
+                                    // Check for existence of android JS interface
+                                    if (window.mParticle && window.mParticle.isAndroid) {
+                                    mParticle.isAndroid = window.mParticle.isAndroid;
+                                    }
+                                    
+                                    window.mParticle = mParticle;
+                                    })(window);
+         
+         
+         // Example
+         
+         mParticle.init('MY_TOKEN');
+         // mParticle.logEvent('Purchase', { price: 9.99 });
+         // mParticle.endSession();
+         // mParticle.startSession();         // Example usage:
+         
+         </script>
+    
+    <script type="text/javascript">
+        function buttonLog1()
+        {
+            // var event = '{"EventName":"TestEvent","EventCategory":4,"UserAttributes":{},"SessionAttributes":{},"Store":{},"EventAttributes":{"price":"9.99"},"SDKVersion":"1.0","EventDataType":4}';
+            // mParticle.logEvent(event); //mParticle is Javascript API.
+            
+            mParticle.logEvent('TestEvent1'); //mParticle is Javascript API.
+        }
+        
+        function buttonLog2()
+        {
+            mParticle.logEvent('TestEvent2', { 'EventDataKey1' : 'EventDataValue1' });
+        }
+        
+        function buttonSetUserAttr()
+        {
+            mParticle.setUserAttributes('UserAttrKey1', 'UserAttryValue1');
+        }
+
+        function buttonClearUserAttr()
+        {
+            mParticle.setUserAttributes('UserAttrKey1', '');
+        }
+
+        </script>
+    
+    <body>
+        <h4>Cookie Tests</h4>
+        action=write cookie=cookie1 value=cookieValue1 expiration=1385877600 domain=www.mparticle.com<br>
+        <a href="http://sdk.dev.aws.mparticle.com/TestCookieHelper.aspx?action=write&cookie=cookie1&value=cookieValue1&expiration=1420092000000">cookie1=cookieValue1</a><br>
+        <a href="http://sdk.dev.aws.mparticle.com/TestCookieHelper.aspx?action=expire&cookie=cookie1">cookie1 expire</a><br>
+        <a href="http://sdk.dev.aws.mparticle.com/TestCookieHelper.aspx?action=read&cookie=cookie1">cookie1 read</a><br>
+        <br>
+        action=write cookie=cookie2 value=cookieValue2<br>
+        <a href="http://sdk.dev.aws.mparticle.com/TestCookieHelper.aspx?action=write&cookie=cookie2&value=cookieValue2">cookie2=cookieValue2</a><br>
+        <a href="http://sdk.dev.aws.mparticle.com/TestCookieHelper.aspx?action=expire&cookie=cookie2">cookie2 expire</a><br>
+        <a href="http://sdk.dev.aws.mparticle.com/TestCookieHelper.aspx?action=read&cookie=cookie2">cookie2 read</a><br>
+        
+        <h4>Press button to log event via JS Integration</h4>
+        <button type="button" name="buttonLogEvent1" onclick="buttonLog1()">Log Event 1</button>
+        <button type="button" name="buttonLogEvent2" onclick="buttonLog2()">Log Event 2 (data)</button>
+        <button type="button" name="buttonLogEvent3" onclick="buttonSetUserAttr()">Set User Attr</button>
+        <button type="button" name="buttonLogEvent4" onclick="buttonClearUserAttr()">Clear User Attr</button>
+    </body>
+</hmtl>

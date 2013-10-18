@@ -57,8 +57,8 @@ public class TestCookieActivity extends Activity {
 					sendMessageDelayed(newmsg, 5000L);
 					break;
 				case 2:
-					// inject javascript to log msg
-					mWebView.loadUrl( "javascript: function() { window.location.location = " + kMParticleWebViewSdkUrl + "{ \"EventName\":\"JSEvent\", \"EventDataType\":\"5\", \"EventAttributes\": [{ \"attrib\":\"attribValue\" }] } }; " );
+					// load a page to test the javascript
+					mWebView.loadUrl("file:///android_asset/Test.html");
 					break;		
 			}
 		}
@@ -83,7 +83,8 @@ public class TestCookieActivity extends Activity {
 			}
 		}
 		mJSInterface = new MParticleJSInterface(this, mParticleAPI);
-		
+		mWebView.addJavascriptInterface(mJSInterface, "mParticleAndroid"); 
+			
 		mWebView.setWebViewClient( mWebViewClient = new WebViewClient() {
 			
 			@Override
@@ -101,18 +102,6 @@ public class TestCookieActivity extends Activity {
 				if (mParticleAPI != null) 
 					mParticleAPI.logEvent("Error("+errorCode+" - "+description+") loading from "+failingUrl, EventType.UserContent);
 			}
-
-	    	@Override
-	    	public WebResourceResponse shouldInterceptRequest(WebView view, String url) {
-			    if(url.startsWith(kMParticleWebViewSdkUrl)) {
-					if (mParticleAPI != null) {
-						mJSInterface.logEvent(url.substring(kMParticleWebViewSdkUrl.length()));
-					}
-			    	view.stopLoading();
-			    	return null;
-			    }
-	    		return super.shouldInterceptRequest(view, url);
-	    	}
 
 		});
 		
