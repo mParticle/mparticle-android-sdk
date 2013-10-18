@@ -52,6 +52,7 @@ import org.json.JSONObject;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -101,7 +102,8 @@ import com.mparticle.MParticleDatabase.UploadTable;
     public static final String HEADER_SIGNATURE = "x-mp-signature";
 
     public static final String SERVICE_SCHEME = "http";
-    public static final String SERVICE_HOST = "api.dev.corp.mparticle.com";
+    public static final String SERVICE_HOST = "nativesdk.mparticle.com";
+    public static final String SECURE_SERVICE_HOST = "nativesdks.mparticle.com";
     public static final String SERVICE_VERSION = "v1";
     
     public static final String DEBUG_SERVICE_HOST = "api.debug.corp.mparticle.com"; 
@@ -164,6 +166,9 @@ import com.mparticle.MParticleDatabase.UploadTable;
         	// Don't get config when in debug mode, as mode is always stream
             return;
         }
+        // get the previous mode from preferences
+        mUploadMode = mPreferences.getInt( PrefKeys.UPLOAD_MODE, Status.BATCH_READY);
+
         try {
             HttpClient httpClient = setupHttpClient();
             HttpGet httpGet = new HttpGet(makeServiceUri("config"));
@@ -196,6 +201,9 @@ import com.mparticle.MParticleDatabase.UploadTable;
         } catch (URISyntaxException e) {
             Log.e(TAG, "Error constructing config service URI", e);
         }
+        Editor edit = mPreferences.edit();
+    	edit.putInt(PrefKeys.UPLOAD_MODE, mUploadMode);
+    	edit.commit();
     }
 
     /* package-private */void prepareUploads() {
@@ -478,7 +486,11 @@ import com.mparticle.MParticleDatabase.UploadTable;
         		mUserServiceHost = DEBUG_SERVICE_HOST;
         	}
         	else {
-        		mUserServiceHost = SERVICE_HOST;
+        		if (mServiceScheme.equals("http")) {
+        			mUserServiceHost = SERVICE_HOST;
+        		} else {
+        			mUserServiceHost = SECURE_SERVICE_HOST;
+        		}
         	}
         }
     	return new URI(mServiceScheme, mUserServiceHost, "/" + SERVICE_VERSION + "/" + mApiKey + "/" + method, null);

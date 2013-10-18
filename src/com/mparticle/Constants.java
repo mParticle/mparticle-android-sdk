@@ -130,6 +130,7 @@ package com.mparticle;
         public static final String USER_ATTRS = "mp::user_attrs::";
         public static final String USER_IDENTITIES = "mp::user_ids::";
         public static final String FIRSTRUN = "mp::firstrun::";
+        public static final String UPLOAD_MODE = "mp::batch";
     }
 
     public interface Status {

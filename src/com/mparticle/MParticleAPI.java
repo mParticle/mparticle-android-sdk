@@ -166,6 +166,9 @@ public class MParticleAPI {
                 apiInstance = new MParticleAPI(appContext, apiKey, messageManager);
                 if (context instanceof Activity) {
                     apiInstance.mLaunchUri = ((Activity) context).getIntent().getDataString();
+                    if (apiInstance.mLaunchUri != null) {
+                    	Log.d(TAG, "launchuri: "+apiInstance.mLaunchUri);
+                    }
                 }
 
                 if (sDefaultSettings.containsKey(ConfigKeys.DEBUG_MODE)) {
@@ -349,6 +352,7 @@ public class MParticleAPI {
      */
     public void setInstallReferrer(String referrer) {
         sPreferences.edit().putString(PrefKeys.INSTALL_REFERRER, referrer).commit();
+        debugLog("Set installReferrer: "+referrer);
     }
 
     /**
