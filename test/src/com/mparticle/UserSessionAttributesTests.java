@@ -1,14 +1,14 @@
 package com.mparticle;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.test.AndroidTestCase;
 
 import com.mparticle.Constants.MessageKey;
-import com.mparticle.MParticleAPI;
 import com.mparticle.MParticleAPI.IdentityType;
 
 public class UserSessionAttributesTests extends AndroidTestCase {
@@ -32,11 +32,29 @@ public class UserSessionAttributesTests extends AndroidTestCase {
     }
     
     public void testSetUserIdentity() throws JSONException {
+    	// first remove all identities!
+    	mMParticleAPI.mUserIdentities = new JSONArray();
+    	
     	mMParticleAPI.setUserIdentity("tbreffni@mparticle.com", IdentityType.MICROSOFT);
     	
     	assertEquals("tbreffni@mparticle.com", ((JSONObject)mMParticleAPI.mUserIdentities.get(0)).get(MessageKey.IDENTITY_VALUE));
     	assertEquals(IdentityType.MICROSOFT.getValue(), ((JSONObject)mMParticleAPI.mUserIdentities.get(0)).get(MessageKey.IDENTITY_NAME));
-    }
+    	
+    	mMParticleAPI.setUserIdentity("me@myEmail.com", IdentityType.GOOGLE);
+    	mMParticleAPI.setUserIdentity("myFacebook", IdentityType.FACEBOOK);
+    	mMParticleAPI.setUserIdentity("555-555-5555", IdentityType.FACEBOOK);
+    	
+    	assertEquals(3, mMParticleAPI.mUserIdentities.length());
+    	mMParticleAPI.setUserIdentity(null, IdentityType.FACEBOOK);
+    	assertEquals(2, mMParticleAPI.mUserIdentities.length());
+    	
+    	int type = (Integer) ((JSONObject)mMParticleAPI.mUserIdentities.get(0)).get(MessageKey.IDENTITY_NAME);
+    	if (type == IdentityType.MICROSOFT.getValue()) {
+        	assertEquals("tbreffni@mparticle.com", ((JSONObject)mMParticleAPI.mUserIdentities.get(0)).get(MessageKey.IDENTITY_VALUE));
+    	} else {
+        	assertEquals("me@myEmail.com", ((JSONObject)mMParticleAPI.mUserIdentities.get(0)).get(MessageKey.IDENTITY_VALUE));
+    	}
+   }
 
     public void testTooManyAttributes() throws JSONException {
         for (int i = 0; i < Constants.LIMIT_ATTR_COUNT + 1; i++) {

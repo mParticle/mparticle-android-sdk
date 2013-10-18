@@ -589,7 +589,24 @@ public class MParticleAPI {
     		identity.put(MessageKey.IDENTITY_NAME, identityType.value);
     		identity.put(MessageKey.IDENTITY_VALUE, id);
     		
-    		mUserIdentities.put(identity);
+    		// verify there is not another IDENTITY_VALUE...if so, remove it first...to do this, copy the
+    		//   existing array to a new one
+    		JSONArray newUserIdentities = new JSONArray();
+ 
+    		for (int i=0; i<mUserIdentities.length(); i++) {
+    			JSONObject testid = mUserIdentities.getJSONObject(i);
+    			if (testid.get(MessageKey.IDENTITY_NAME).equals(identityType.value)) {
+    				// remove this one by not copying it
+    				continue;
+    			}
+    			newUserIdentities.put(testid);
+    		}
+    		// now add this one...only if the id is not null
+    		if (id != null) {
+    			newUserIdentities.put(identity);
+    		}
+    		// now make the new array the saved one
+    		mUserIdentities = newUserIdentities;
     	}
     	catch(JSONException e) {
     		Log.w(TAG, "Error setting identity: " + id);
