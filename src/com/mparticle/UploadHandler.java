@@ -101,7 +101,7 @@ import com.mparticle.MParticleDatabase.UploadTable;
 
     public static final String HEADER_SIGNATURE = "x-mp-signature";
 
-    public static final String SERVICE_SCHEME = "http";
+    public static final String SERVICE_SCHEME = "https";
     public static final String SERVICE_HOST = "nativesdk.mparticle.com";
     public static final String SECURE_SERVICE_HOST = "nativesdks.mparticle.com";
     public static final String SERVICE_VERSION = "v1";

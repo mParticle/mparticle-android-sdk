@@ -104,6 +104,7 @@ package com.mparticle;
         public static final String ERROR_CLASS = "c";
         public static final String ERROR_MESSAGE = "m";
         public static final String ERROR_STACK_TRACE = "st";
+        public static final String ERROR_UNCAUGHT = "eh";
         // uploading
         public static final String MESSAGES = "msgs";
         public static final String URL = "u";

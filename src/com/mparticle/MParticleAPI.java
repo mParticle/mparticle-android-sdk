@@ -458,7 +458,7 @@ public class MParticleAPI {
             return;
         }
         ensureActiveSession();
-        mMessageManager.logErrorEvent(mSessionID, mSessionStartTime, mLastEventTime, message, null);
+        mMessageManager.logErrorEvent(mSessionID, mSessionStartTime, mLastEventTime, message, null, true);
         debugLog("Logged error with message: " + message);
     }
 
@@ -477,7 +477,7 @@ public class MParticleAPI {
             return;
         }
         ensureActiveSession();
-        mMessageManager.logErrorEvent(mSessionID, mSessionStartTime, mLastEventTime, null, exception);
+        mMessageManager.logErrorEvent(mSessionID, mSessionStartTime, mLastEventTime, null, exception, true);
         debugLog("Logged exception: " + exception.getMessage());
     }
 
@@ -693,10 +693,10 @@ public class MParticleAPI {
      * @param sslEnabled
      *            true to turn on SSL transport, false to use non-SSL transport
      */
-    public void setSecureTransport(boolean sslEnabled) {
-        mMessageManager.setSecureTransport(sslEnabled);
-        debugLog("Set secure transport: " + sslEnabled);
-    }
+//    public void setSecureTransport(boolean sslEnabled) {
+//        mMessageManager.setSecureTransport(sslEnabled);
+//        debugLog("Set secure transport: " + sslEnabled);
+//    }
 
     /**
      * Configure the data upload to use a proxy server
@@ -785,7 +785,7 @@ public class MParticleAPI {
      * @param registrationId
      *            the device registration id
      */
-    public void setPushRegistrationId(String registrationId) {
+    /* package-private */ void setPushRegistrationId(String registrationId) {
         debugLog("Set push registration token: " + registrationId);
         sPreferences.edit().putString(PrefKeys.PUSH_REGISTRATION_ID, registrationId).commit();
         mMessageManager.setPushRegistrationId(registrationId, true);
@@ -794,7 +794,7 @@ public class MParticleAPI {
     /**
      * Manually un-register the device token for receiving push notifications from mParticle
      */
-    public void clearPushRegistrationId() {
+    /* package-private */ void clearPushRegistrationId() {
         debugLog("Cleared push registration token");
         String registrationId = getPushRegistrationId();
         if (null != registrationId) {
@@ -949,7 +949,8 @@ public class MParticleAPI {
     	TWITTER(3),
     	GOOGLE(4),
     	MICROSOFT(5),
-    	YAHOO(6);
+    	YAHOO(6),
+    	EMAIL(7);
     	
     	private final int value;
     	

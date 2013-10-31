@@ -258,6 +258,10 @@ import com.mparticle.MParticleAPI.EventType;
     }
 
     public void logErrorEvent(String sessionId, long sessionStartTime, long time, String errorMessage, Throwable t) {
+    	logErrorEvent(sessionId, sessionStartTime, time, errorMessage, t, true);
+    }
+    
+    public void logErrorEvent(String sessionId, long sessionStartTime, long time, String errorMessage, Throwable t, boolean caught) {
         try {
             JSONObject message = createMessage(MessageType.ERROR, sessionId, sessionStartTime, time, null, null, false);
             if (null != t) {
@@ -267,6 +271,7 @@ import com.mparticle.MParticleAPI.EventType;
                 StringWriter stringWriter = new StringWriter();
                 t.printStackTrace(new PrintWriter(stringWriter));
                 message.put(MessageKey.ERROR_STACK_TRACE, stringWriter.toString());
+                message.put(MessageKey.ERROR_UNCAUGHT, String.valueOf(caught));
             } else {
                 message.put(MessageKey.ERROR_SEVERITY, "error");
                 message.put(MessageKey.ERROR_MESSAGE, errorMessage);
