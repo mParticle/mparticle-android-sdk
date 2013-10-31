@@ -693,10 +693,10 @@ public class MParticleAPI {
      * @param sslEnabled
      *            true to turn on SSL transport, false to use non-SSL transport
      */
-//    public void setSecureTransport(boolean sslEnabled) {
-//        mMessageManager.setSecureTransport(sslEnabled);
-//        debugLog("Set secure transport: " + sslEnabled);
-//    }
+    private void setSecureTransport(boolean sslEnabled) {
+        mMessageManager.setSecureTransport(sslEnabled);
+        debugLog("Set secure transport: " + sslEnabled);
+    }
 
     /**
      * Configure the data upload to use a proxy server
@@ -711,7 +711,7 @@ public class MParticleAPI {
     }
 
     private void setServiceHost(String hostName) {
-    	mMessageManager.setServiceHost(hostName);
+   		mMessageManager.setServiceHost(hostName);
     }
     
     /**

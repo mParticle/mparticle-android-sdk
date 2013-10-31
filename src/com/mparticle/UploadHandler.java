@@ -102,7 +102,7 @@ import com.mparticle.MParticleDatabase.UploadTable;
     public static final String HEADER_SIGNATURE = "x-mp-signature";
 
     public static final String SERVICE_SCHEME = "https";
-    public static final String SERVICE_HOST = "nativesdk.mparticle.com";
+//    public static final String SERVICE_HOST = "nativesdk.mparticle.com";
     public static final String SECURE_SERVICE_HOST = "nativesdks.mparticle.com";
     public static final String SERVICE_VERSION = "v1";
     
@@ -486,11 +486,7 @@ import com.mparticle.MParticleDatabase.UploadTable;
         		mUserServiceHost = DEBUG_SERVICE_HOST;
         	}
         	else {
-        		if (mServiceScheme.equals("http")) {
-        			mUserServiceHost = SERVICE_HOST;
-        		} else {
-        			mUserServiceHost = SECURE_SERVICE_HOST;
-        		}
+       			mUserServiceHost = SECURE_SERVICE_HOST;
         	}
         }
     	return new URI(mServiceScheme, mUserServiceHost, "/" + SERVICE_VERSION + "/" + mApiKey + "/" + method, null);
