@@ -204,6 +204,24 @@ public class MParticleAPI {
 
         return apiInstance;
     }
+    /**
+     * Initialize or return an instance of the mParticle SDK
+     *
+     * @param context
+     *            the Activity that is creating the instance
+     * @param apiKey
+     *            the API key for your account
+     * @param secret
+     *            the API secret for your account
+     * @param sandbox
+     *            the Stream mode is forced
+     * @return An instance of the mParticle SDK configured with your API key
+     **/
+    public static MParticleAPI getInstance(Context context, String apiKey, String secret, boolean sandboxMode) {
+    	MParticleAPI instance = MParticleAPI.getInstance(context, apiKey, secret);
+    	instance.mMessageManager.setSandboxMode(sandboxMode);
+    	return instance;
+   }
 
     /**
      * Initialize or return an instance of the mParticle SDK using api_key and api_secret from the

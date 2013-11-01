@@ -17,7 +17,7 @@ package com.mparticle;
     // name of the preferences file
     public static final String PREFS_FILE = "mParticlePrefs";
 
-    public static final int LIMIT_ATTR_COUNT = 10;
+    public static final int LIMIT_ATTR_COUNT = 100;
     public static final int LIMIT_ATTR_NAME = 255;
     public static final int LIMIT_ATTR_VALUE = 255;
     public static final int LIMIT_NAME = 255;

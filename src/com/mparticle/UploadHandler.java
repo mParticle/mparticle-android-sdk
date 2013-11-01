@@ -83,6 +83,7 @@ import com.mparticle.MParticleDatabase.UploadTable;
     private final String mSecret;
     private long mUploadInterval = Constants.DEFAULT_UPLOAD_INTERVAL;
     private boolean mDebugMode = false;
+    private boolean mSandboxMode = false;
 
     private HttpContext mHttpContext;
     private HttpHost mProxyHost;
@@ -106,7 +107,7 @@ import com.mparticle.MParticleDatabase.UploadTable;
     public static final String SECURE_SERVICE_HOST = "nativesdks.mparticle.com";
     public static final String SERVICE_VERSION = "v1";
     
-    public static final String DEBUG_SERVICE_HOST = "api.debug.corp.mparticle.com"; 
+//    public static final String DEBUG_SERVICE_HOST = "api.debug.corp.mparticle.com"; 
 
     public static final String SQL_UPLOADABLE_MESSAGES = String.format("%s=? and (%s='NO-SESSION' or %s>=?)",
             MessageTable.API_KEY, MessageTable.SESSION_ID, MessageTable.STATUS);
@@ -162,8 +163,8 @@ import com.mparticle.MParticleDatabase.UploadTable;
     }
 
     private void fetchConfig() {
-        if (!isNetworkAvailable() || mDebugMode) {
-        	// Don't get config when in debug mode, as mode is always stream
+        if (!isNetworkAvailable() || mSandboxMode) {
+        	// Don't get config when in sandbox mode, as mode is always stream
             return;
         }
         // get the previous mode from preferences
@@ -259,7 +260,7 @@ import com.mparticle.MParticleDatabase.UploadTable;
         
         uploadMessage.put(MessageKey.APP_INFO, mAppInfo);
         uploadMessage.put(MessageKey.DEVICE_INFO, mDeviceInfo);
-        uploadMessage.put(MessageKey.DEBUG, mDebugMode);
+        uploadMessage.put(MessageKey.DEBUG, mSandboxMode);
 
         String userAttrs = mPreferences.getString(PrefKeys.USER_ATTRS + mApiKey, null);
         if (null != userAttrs) {
@@ -482,12 +483,12 @@ import com.mparticle.MParticleDatabase.UploadTable;
 
     private URI makeServiceUri(String method) throws URISyntaxException {
         if(mUserServiceHost == null) {
-        	if(mDebugMode) {
-        		mUserServiceHost = DEBUG_SERVICE_HOST;
-        	}
-        	else {
+//        	if(mDebugMode) {
+//        		mUserServiceHost = DEBUG_SERVICE_HOST;
+//        	}
+//        	else {
        			mUserServiceHost = SECURE_SERVICE_HOST;
-        	}
+//        	}
         }
     	return new URI(mServiceScheme, mUserServiceHost, "/" + SERVICE_VERSION + "/" + mApiKey + "/" + method, null);
     }
@@ -601,9 +602,6 @@ import com.mparticle.MParticleDatabase.UploadTable;
     public void setDebugMode(boolean debugMode) {
         mDebugMode = debugMode;
         
-        if(mDebugMode) {
-        	mUploadMode = Constants.Status.READY;
-        }
     }
 
     public void setCompressionEnabled(boolean compressionEnabled) {
@@ -614,4 +612,12 @@ import com.mparticle.MParticleDatabase.UploadTable;
         mUploadMode = uploadMode;
     }
 
+    public void setSandboxMode(boolean sandboxMode) {
+        mSandboxMode = sandboxMode;
+        if(mSandboxMode) {
+        	mUploadMode = Constants.Status.READY;
+        } else {
+        	mUploadMode = Constants.Status.BATCH_READY;
+        }
+    }
 }

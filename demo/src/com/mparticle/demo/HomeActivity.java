@@ -50,7 +50,7 @@ public class HomeActivity extends Activity implements OnItemSelectedListener {
     public static String SENDER_ID = "31005546127";
     private static final String PREFS_EXCEPTION = "exceptions_mode";
     private static final String PREFS_DEBUG = "debug_mode";
-    static final String PARTICLE_DEV_URL = "sdk.dev.aws.mparticle.com";
+    static final String PARTICLE_DEV_URL = "api-qa.mparticle.com"; //"sdk.dev.aws.mparticle.com";
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -105,9 +105,9 @@ public class HomeActivity extends Activity implements OnItemSelectedListener {
 	    	Method privateStringMethod = mParticleAPI.getClass().getDeclaredMethod("setServiceHost", String.class);
 	    	privateStringMethod.setAccessible(true);
 	    	privateStringMethod.invoke(mParticleAPI, PARTICLE_DEV_URL);
-	    	Method privateBooleanMethod = mParticleAPI.getClass().getDeclaredMethod("setSecureTransport", boolean.class);
-	    	privateBooleanMethod.setAccessible(true);
-	    	privateBooleanMethod.invoke(mParticleAPI, false);
+//	    	Method privateBooleanMethod = mParticleAPI.getClass().getDeclaredMethod("setSecureTransport", boolean.class);
+//	    	privateBooleanMethod.setAccessible(true);
+//	    	privateBooleanMethod.invoke(mParticleAPI, false);
         } catch(Exception e) {
         	e.printStackTrace();
         }

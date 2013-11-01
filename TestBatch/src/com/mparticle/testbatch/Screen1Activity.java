@@ -19,7 +19,7 @@ public class Screen1Activity extends Activity {
     
     static final String PARTICLE_APP_KEY = "1615d52f0d2ba44fb1125051c61ea87d";
     static final String PARTICLE_APP_SECRET = "Ay8AtMxEjUQB07xSwA270rWMX_CLGSP6l0zFJikZ71ccRZXmZp1PHeDvzgAGJOnF";
-    static final String PARTICLE_BASE_URL = "sdk.dev.aws.mparticle.com";
+    static final String PARTICLE_BASE_URL = "api-qa.mparticle.com"; //"sdk.dev.aws.mparticle.com";
     
     static final int EVENT_COUNT = 100;
     private int mCurrent = EVENT_COUNT;
@@ -97,9 +97,9 @@ public class Screen1Activity extends Activity {
 	        	Method privateStringMethod = mParticleAPI.getClass().getDeclaredMethod("setServiceHost", String.class);
 	        	privateStringMethod.setAccessible(true);
 	        	privateStringMethod.invoke(mParticleAPI, PARTICLE_BASE_URL);
-		    	Method privateBooleanMethod = mParticleAPI.getClass().getDeclaredMethod("setSecureTransport", boolean.class);
-		    	privateBooleanMethod.setAccessible(true);
-		    	privateBooleanMethod.invoke(mParticleAPI, false);
+//		    	Method privateBooleanMethod = mParticleAPI.getClass().getDeclaredMethod("setSecureTransport", boolean.class);
+//		    	privateBooleanMethod.setAccessible(true);
+//		    	privateBooleanMethod.invoke(mParticleAPI, false);
         	} catch( Exception e ) {
         		e.printStackTrace();
         		mParticleAPI = null;

@@ -362,12 +362,15 @@ import com.mparticle.MParticleAPI.EventType;
 
     public void setDebugMode(boolean debugMode) {
         sDebugMode = debugMode;
-        
-        if(debugMode) {
-        	setUploadInterval(Constants.DEBUG_UPLOAD_INTERVAL);
-        }
-        
+                
         mUploadHandler.setDebugMode(debugMode);
     }
 
+    public void setSandboxMode(boolean sandboxMode) {
+        if(sandboxMode) {
+        	setUploadInterval(Constants.DEBUG_UPLOAD_INTERVAL);
+        }
+    	// pass this on
+    	mUploadHandler.setSandboxMode(sandboxMode);
+    }
 }
