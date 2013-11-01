@@ -161,6 +161,9 @@ public class TestCookieActivity extends Activity {
 	        	Method privateStringMethod = mParticleAPI.getClass().getDeclaredMethod("setServiceHost", String.class);
 	        	privateStringMethod.setAccessible(true);
 	        	privateStringMethod.invoke(mParticleAPI, PARTICLE_BASE_URL);
+		    	Method privateBooleanMethod = mParticleAPI.getClass().getDeclaredMethod("setSecureTransport", boolean.class);
+		    	privateBooleanMethod.setAccessible(true);
+		    	privateBooleanMethod.invoke(mParticleAPI, false);
 	    	} catch( Exception e ) {
 	    		e.printStackTrace();
 	    		mParticleAPI = null;

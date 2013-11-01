@@ -105,6 +105,9 @@ public class HomeActivity extends Activity implements OnItemSelectedListener {
 	    	Method privateStringMethod = mParticleAPI.getClass().getDeclaredMethod("setServiceHost", String.class);
 	    	privateStringMethod.setAccessible(true);
 	    	privateStringMethod.invoke(mParticleAPI, PARTICLE_DEV_URL);
+	    	Method privateBooleanMethod = mParticleAPI.getClass().getDeclaredMethod("setSecureTransport", boolean.class);
+	    	privateBooleanMethod.setAccessible(true);
+	    	privateBooleanMethod.invoke(mParticleAPI, false);
         } catch(Exception e) {
         	e.printStackTrace();
         }
