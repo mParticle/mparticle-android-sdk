@@ -306,7 +306,9 @@ import com.mparticle.MParticleDatabase.UploadTable;
                         GZIPOutputStream gzipOutputStream = new GZIPOutputStream(byteArrayOutputStream);
                         gzipOutputStream.write(messageBytes);
                         gzipOutputStream.finish();
-                        gzipOutputStream.flush();
+                        
+                        //https://code.google.com/p/android/issues/detail?id=62589
+                       // gzipOutputStream.flush();
                         postEntity = new ByteArrayEntity(byteArrayOutputStream.toByteArray());
                         httpPost.setHeader("Content-Encoding", "gzip");
                     } catch (IOException ioException) {
