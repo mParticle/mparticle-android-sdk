@@ -125,7 +125,7 @@ public class EventLoggingTests extends AndroidTestCase {
     public void testLogErrorMessage() {
         mMParticleAPI.logErrorEvent("errorMessage1");
         verify(mMockMessageManager, times(1)).logErrorEvent(anyString(), anyLong(), anyLong(), eq("errorMessage1"),
-                any(Throwable.class));
+                any(Throwable.class), anyBoolean());
     }
 
     public void testLogNullErrorMessage() {
@@ -137,7 +137,7 @@ public class EventLoggingTests extends AndroidTestCase {
     public void testLogException() {
         mMParticleAPI.logErrorEvent(new Exception("testException"));
         verify(mMockMessageManager, times(1)).logErrorEvent(anyString(), anyLong(), anyLong(), eq((String) null),
-                any(Throwable.class));
+                any(Throwable.class), anyBoolean());
     }
 
     public void testLogNullException() {
