@@ -803,7 +803,7 @@ public class MParticleAPI {
      * @param registrationId
      *            the device registration id
      */
-    /* package-private */ void setPushRegistrationId(String registrationId) {
+    public void setPushRegistrationId(String registrationId) {
         debugLog("Set push registration token: " + registrationId);
         sPreferences.edit().putString(PrefKeys.PUSH_REGISTRATION_ID, registrationId).commit();
         mMessageManager.setPushRegistrationId(registrationId, true);
@@ -812,7 +812,7 @@ public class MParticleAPI {
     /**
      * Manually un-register the device token for receiving push notifications from mParticle
      */
-    /* package-private */ void clearPushRegistrationId() {
+    public void clearPushRegistrationId() {
         debugLog("Cleared push registration token");
         String registrationId = getPushRegistrationId();
         if (null != registrationId) {
@@ -829,7 +829,7 @@ public class MParticleAPI {
      *
      * @return the push registration id
      */
-    private String getPushRegistrationId() {
+    public String getPushRegistrationId() {
         return sPreferences.getString(PrefKeys.PUSH_REGISTRATION_ID, null);
     }
 

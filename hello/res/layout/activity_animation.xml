@@ -16,6 +16,26 @@
 		android:layout_alignParentLeft="true"
 		android:text="@string/btn_stop" />
 	
+	<LinearLayout
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:layout_centerHorizontal="true"
+		android:layout_alignParentTop="true" >
+		
+		<Button 
+			android:id="@+id/btn_set_push"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="@string/btn_set_push" />
+		
+		<Button 
+			android:id="@+id/btn_reset_push"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="@string/btn_reset_push" />
+		
+	</LinearLayout>
+	
 	<Button 
 		android:id="@+id/btn_next"
 		android:layout_width="wrap_content"

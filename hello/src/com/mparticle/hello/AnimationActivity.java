@@ -26,6 +26,8 @@ public class AnimationActivity extends BaseActivity {
 	Button mSend100;
 	Button mSend500;
 	Button mNext;
+	Button mSetPush;
+	Button mResetPush;
 
 	boolean mRunning;
 
@@ -48,6 +50,22 @@ public class AnimationActivity extends BaseActivity {
 					mStartStop.setText(R.string.btn_start);
 					smMParticleAPIEnabled = Boolean.valueOf(false);
 				}
+			}
+		});
+		mSetPush = (Button)findViewById(R.id.btn_set_push);
+		mSetPush.setOnClickListener( new OnClickListener() {
+			@Override
+			public void onClick(View vw) {
+				if ((mParticleAPI != null) && (smMParticleAPIEnabled != null) && smMParticleAPIEnabled) 
+					mParticleAPI.setPushRegistrationId("mParticle_hello_push_registration_id");
+			}
+		});
+		mResetPush = (Button)findViewById(R.id.btn_reset_push);
+		mResetPush.setOnClickListener( new OnClickListener() {
+			@Override
+			public void onClick(View vw) {
+				if ((mParticleAPI != null) && (smMParticleAPIEnabled != null) && smMParticleAPIEnabled) 
+					mParticleAPI.clearPushRegistrationId();
 			}
 		});
 		mSend10 = (Button)findViewById(R.id.btn_send10);

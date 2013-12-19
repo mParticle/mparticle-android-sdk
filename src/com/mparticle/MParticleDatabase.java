@@ -189,7 +189,9 @@ import android.database.sqlite.SQLiteOpenHelper;
 
     private void copyDB(SQLiteDatabase db, String tablename, Cursor c, String[] columns10, String[] columns) {
 		if ((c != null) && (c.getCount() > 0)) {
+			db.beginTransaction();
 	        db.execSQL("DROP TABLE IF EXISTS " + tablename);
+	        db.endTransaction();
 	        db.execSQL(CREATE_SESSIONS_DDL);
 	        c.moveToFirst();
 	        // add the rows from the cursor into the (now) new table
@@ -215,9 +217,26 @@ import android.database.sqlite.SQLiteOpenHelper;
 	        				break;
 	        		}
 	        	}
+	        	// assume all new fields were added to the end of the list
 	        	for (int j=columns10.length; j<columns.length; j++) {
 	        		// create null entries for rest of missing fields
-	        		cv.putNull(columns[j]);
+	        		switch (c.getType(c.getColumnIndex(columns[j]))) {
+	        			case Cursor.FIELD_TYPE_NULL:
+	    	        		cv.putNull(columns[j]);
+	        				break;
+	        			case Cursor.FIELD_TYPE_BLOB:
+	    	        		cv.putNull(columns[j]);
+	        				break;
+	        			case Cursor.FIELD_TYPE_FLOAT:
+	        				cv.put(columns[j], 0.0f);
+	        				break;
+	        			case Cursor.FIELD_TYPE_INTEGER:
+	        				cv.put(columns[j], 0);
+	        				break;
+	        			case Cursor.FIELD_TYPE_STRING:
+	        				cv.put(columns[j], "");
+	        				break;
+	        		}
 	        	}
     	        db.insert( tablename, null, cv);
 	        }
