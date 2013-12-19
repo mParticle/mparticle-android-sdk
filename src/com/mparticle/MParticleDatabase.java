@@ -127,8 +127,8 @@ import android.database.sqlite.SQLiteOpenHelper;
                     UploadTable.API_KEY + " STRING NOT NULL, " +
                     UploadTable.MESSAGE + " TEXT, " +
                     UploadTable.CREATED_AT + " INTEGER NOT NULL, " +
-                    UploadTable.CF_UUID + " STRING NOT NULL, " +
-                    UploadTable.SESSION_ID + " STRING NOT NULL" +
+                    UploadTable.CF_UUID + " TEXT, " +
+                    UploadTable.SESSION_ID + " TEXT" +
                     ");";
     
     public interface CommandTable10 {
@@ -170,7 +170,7 @@ import android.database.sqlite.SQLiteOpenHelper;
                     CommandTable.POST_DATA + " TEXT, " +
                     CommandTable.HEADERS + " TEXT, " +
                     CommandTable.CREATED_AT + " INTEGER, " +
-                    CommandTable.SESSION_ID + " STRING NOT NULL, " +
+                    CommandTable.SESSION_ID + " TEXT, " +
             		CommandTable.API_KEY + " STRING NOT NULL, " +
                     CommandTable.CF_UUID + " TEXT" +
                     ");";
@@ -187,12 +187,12 @@ import android.database.sqlite.SQLiteOpenHelper;
         db.execSQL(CREATE_COMMANDS_DDL);
     }
 
-    private void copyDB(SQLiteDatabase db, String tablename, Cursor c, String[] columns10, String[] columns) {
+    private void copyDB(SQLiteDatabase db, String tablename, String exec, Cursor c, String[] columns10, String[] columns) {
 		if ((c != null) && (c.getCount() > 0)) {
 			db.beginTransaction();
 	        db.execSQL("DROP TABLE IF EXISTS " + tablename);
 	        db.endTransaction();
-	        db.execSQL(CREATE_SESSIONS_DDL);
+	        db.execSQL(exec);
 	        c.moveToFirst();
 	        // add the rows from the cursor into the (now) new table
 	        for (int i=0; i<c.getCount(); i++) {
@@ -268,7 +268,7 @@ import android.database.sqlite.SQLiteOpenHelper;
         			SessionTable.ATTRIBUTES,
         			SessionTable.CF_UUID };
 
-    		copyDB(db, SessionTable.TABLE_NAME, c, columnsSessionTable10, columnsSessionTable);
+    		copyDB(db, SessionTable.TABLE_NAME, CREATE_SESSIONS_DDL, c, columnsSessionTable10, columnsSessionTable);
     		c.close();
     		
     		c = db.rawQuery("SELECT * FROM " + MessageTable.TABLE_NAME, null);
@@ -289,7 +289,7 @@ import android.database.sqlite.SQLiteOpenHelper;
     				MessageTable.SESSION_ID,
     				MessageTable.CF_UUID };
 
-    		copyDB(db, MessageTable.TABLE_NAME, c, columnsMessageTable10, columnsMessageTable);
+    		copyDB(db, MessageTable.TABLE_NAME, CREATE_MESSAGES_DDL, c, columnsMessageTable10, columnsMessageTable);
     		c.close();
     		
     		c = db.rawQuery("SELECT * FROM " + UploadTable.TABLE_NAME, null);
@@ -305,7 +305,7 @@ import android.database.sqlite.SQLiteOpenHelper;
     				UploadTable.CF_UUID,
     				UploadTable.SESSION_ID };
 
-    		copyDB(db, UploadTable.TABLE_NAME, c, columnsUploadTable10, columnsUploadTable);
+    		copyDB(db, UploadTable.TABLE_NAME, CREATE_UPLOADS_DDL, c, columnsUploadTable10, columnsUploadTable);
     		c.close();
     		
     		c = db.rawQuery("SELECT * FROM " + CommandTable.TABLE_NAME, null);
@@ -326,7 +326,7 @@ import android.database.sqlite.SQLiteOpenHelper;
                     CommandTable.CF_UUID,
                     CommandTable.SESSION_ID };
 
-    		copyDB(db, CommandTable.TABLE_NAME, c, columnsCommandTable10, columnsCommandTable);
+    		copyDB(db, CommandTable.TABLE_NAME, CREATE_COMMANDS_DDL, c, columnsCommandTable10, columnsCommandTable);
     		c.close();
     		
     	} else {
