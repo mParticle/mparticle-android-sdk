@@ -135,8 +135,10 @@ package com.mparticle;
     }
 
     public interface Status {
-        static final int READY = 1;
+    	static final int UNKNOWN = -1;
+        static final int READY = 1; // stream
         static final int BATCH_READY = 2;
+        static final int UPLOADED = 3;
     }
 
     // keys used in the (optional) mparticle.properties config file

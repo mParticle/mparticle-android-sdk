@@ -28,7 +28,7 @@ public class AnimationActivity extends BaseActivity {
 	Button mNext;
 	Button mSetPush;
 	Button mResetPush;
-
+	
 	boolean mRunning;
 
 	@Override
@@ -57,7 +57,7 @@ public class AnimationActivity extends BaseActivity {
 			@Override
 			public void onClick(View vw) {
 				if ((mParticleAPI != null) && (smMParticleAPIEnabled != null) && smMParticleAPIEnabled) 
-					mParticleAPI.setPushRegistrationId("mParticle_hello_push_registration_id");
+					mParticleAPI.enablePushNotifications("354240567348");
 			}
 		});
 		mResetPush = (Button)findViewById(R.id.btn_reset_push);
@@ -65,7 +65,7 @@ public class AnimationActivity extends BaseActivity {
 			@Override
 			public void onClick(View vw) {
 				if ((mParticleAPI != null) && (smMParticleAPIEnabled != null) && smMParticleAPIEnabled) 
-					mParticleAPI.clearPushRegistrationId();
+					mParticleAPI.clearPushNotifications();
 			}
 		});
 		mSend10 = (Button)findViewById(R.id.btn_send10);
@@ -151,6 +151,7 @@ public class AnimationActivity extends BaseActivity {
 
 	private GLSurfaceView mGLSurfaceView;
 }
+
 
 /**
  * Implement a simple rotation control.

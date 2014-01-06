@@ -109,8 +109,8 @@ import com.mparticle.MParticleDatabase.UploadTable;
     
 //    public static final String DEBUG_SERVICE_HOST = "api.debug.corp.mparticle.com"; 
 
-    public static final String SQL_UPLOADABLE_MESSAGES = String.format("%s=? and (%s='NO-SESSION' or %s>=?)",
-            MessageTable.API_KEY, MessageTable.SESSION_ID, MessageTable.STATUS);
+    public static final String SQL_UPLOADABLE_MESSAGES = String.format("%s=? and (%s='NO-SESSION' or (%s>=? and %s!=%d))",
+            MessageTable.API_KEY, MessageTable.SESSION_ID, MessageTable.STATUS, MessageTable.STATUS, Status.UPLOADED);
 
     public UploadHandler(Context appContext, Looper looper, String apiKey, String secret) {
         super(looper);
@@ -236,8 +236,9 @@ import com.mparticle.MParticleDatabase.UploadTable;
                 JSONObject uploadMessage = createUploadMessage(messagesArray);
                 // store in uploads table
                 dbInsertUpload(db, uploadMessage);
-                // delete processed messages
-                dbDeleteProcessedMessages(db, lastMessageId);
+//	                // delete processed messages
+//	                dbDeleteProcessedMessages(db, lastMessageId);
+               	dbMarkAsUploadedMessage(db, lastMessageId);
             }
         } catch (SQLiteException e) {
             Log.e(TAG, "Error preparing batch upload in mParticle DB", e);
@@ -259,6 +260,13 @@ import com.mparticle.MParticleDatabase.UploadTable;
         mAppInfo.put(MessageKey.INSTALL_REFERRER, mPreferences.getString(PrefKeys.INSTALL_REFERRER, null));
         
         uploadMessage.put(MessageKey.APP_INFO, mAppInfo);
+        // if there is notification key then include it
+        String regkey = mPreferences.getString(PrefKeys.PUSH_REGISTRATION_ID, null);
+        if ((regkey != null) && (regkey.length() > 0)) {
+        	mDeviceInfo.put(MessageKey.PUSH_TOKEN, regkey);
+        } else {
+        	mDeviceInfo.remove(MessageKey.PUSH_TOKEN);
+        }
         uploadMessage.put(MessageKey.DEVICE_INFO, mDeviceInfo);
         uploadMessage.put(MessageKey.DEBUG, mSandboxMode);
 
@@ -509,6 +517,14 @@ import com.mparticle.MParticleDatabase.UploadTable;
         db.delete(MessageTable.TABLE_NAME, whereClause, whereArgs);
     }
 
+    private void dbMarkAsUploadedMessage(SQLiteDatabase db, int lastMessageId) {
+        String[] whereArgs = new String[] { mApiKey, Integer.toString(mUploadMode), Long.toString(lastMessageId) };
+        String whereClause = SQL_UPLOADABLE_MESSAGES + " and _id<=?";
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(MessageTable.STATUS, Status.UPLOADED);
+    	db.update(MessageTable.TABLE_NAME, contentValues, whereClause, whereArgs);
+    }
+    
     private void dbDeleteUpload(SQLiteDatabase db, int id) {
         String[] whereArgs = { Long.toString(id) };
         db.delete(UploadTable.TABLE_NAME, "_id=?", whereArgs);

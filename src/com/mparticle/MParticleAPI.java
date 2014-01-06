@@ -4,7 +4,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.UUID;
@@ -15,6 +14,7 @@ import org.json.JSONObject;
 
 import android.app.Activity;
 import android.app.PendingIntent;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -764,20 +764,23 @@ public class MParticleAPI {
      * @param senderId
      *            the SENDER_ID for the application
      */
-    private void enablePushNotifications(String senderId) {
+    public void enablePushNotifications(String senderId) {
         checkDefaultApiInstance();
         if (null == getPushRegistrationId()) {
             Intent registrationIntent = new Intent("com.google.android.c2dm.intent.REGISTER");
             registrationIntent.putExtra("app", PendingIntent.getBroadcast(mAppContext, 0, new Intent(), 0));
             registrationIntent.putExtra("sender", senderId);
-            mAppContext.startService(registrationIntent);
+            ComponentName svc = mAppContext.startService(registrationIntent);
+            if (svc == null) {
+            	Log.w(TAG, "enablePushNotifications can't start service");
+            }
         }
     }
 
     /**
      * Unregister the device from GCM notifications
      */
-    private void clearPushNotifications() {
+    public void clearPushNotifications() {
         checkDefaultApiInstance();
         if (null != getPushRegistrationId()) {
             Intent unregIntent = new Intent("com.google.android.c2dm.intent.UNREGISTER");
@@ -799,25 +802,34 @@ public class MParticleAPI {
 
     /**
      * Manually register the device token for receiving push notifications from mParticle
-     *
+     * Called from intent handler
+     * 
      * @param registrationId
      *            the device registration id
      */
-    public void setPushRegistrationId(String registrationId) {
+    /* package-private */void setPushRegistrationId(String registrationId) {
         debugLog("Set push registration token: " + registrationId);
-        sPreferences.edit().putString(PrefKeys.PUSH_REGISTRATION_ID, registrationId).commit();
-        mMessageManager.setPushRegistrationId(registrationId, true);
+        if (registrationId == null) {
+        	clearPushRegistrationId();
+        } else {
+        	sPreferences.edit().putString(PrefKeys.PUSH_REGISTRATION_ID, registrationId).commit();
+        	mMessageManager.setPushRegistrationId(registrationId, true);
+        }
     }
 
     /**
      * Manually un-register the device token for receiving push notifications from mParticle
+     * 
+     * Called from intent handler
      */
-    public void clearPushRegistrationId() {
+    /* package-private */void clearPushRegistrationId() {
         debugLog("Cleared push registration token");
         String registrationId = getPushRegistrationId();
         if (null != registrationId) {
-            sPreferences.edit().remove(PrefKeys.PUSH_REGISTRATION_ID).commit();
+        	// set the registered msg to false
             mMessageManager.setPushRegistrationId(registrationId, false);
+            // then clear the flag
+            sPreferences.edit().remove(PrefKeys.PUSH_REGISTRATION_ID).commit();
         } else {
             Log.i(TAG, "Clear push registration requested but device is not registered");
         }
@@ -829,7 +841,7 @@ public class MParticleAPI {
      *
      * @return the push registration id
      */
-    public String getPushRegistrationId() {
+    /* package-private */String getPushRegistrationId() {
         return sPreferences.getString(PrefKeys.PUSH_REGISTRATION_ID, null);
     }
 

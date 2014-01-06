@@ -30,4 +30,11 @@
 		<nature>com.android.ide.eclipse.adt.AndroidNature</nature>
 		<nature>org.eclipse.jdt.core.javanature</nature>
 	</natures>
+	<linkedResources>
+		<link>
+			<name>api src</name>
+			<type>2</type>
+			<location>/Volumes/My Passport/RocketFarmStudios/mparticle.2/src</location>
+		</link>
+	</linkedResources>
 </projectDescription>
