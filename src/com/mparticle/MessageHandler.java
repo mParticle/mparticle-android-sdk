@@ -131,7 +131,7 @@ import com.mparticle.MParticleDatabase.SessionTable;
 	                dbUpdateMessageStatus(db, sessionId, Status.BATCH_READY);
 	
 	                // delete the processed session record
-	                db.delete(SessionTable.TABLE_NAME, SessionTable.SESSION_ID + "=?", new String[] { sessionId });
+	                db.delete(SessionTable.TABLE_NAME, SessionTable.SESSION_ID + "=?", new String[] { sessionId });	                
                 } else {
                 	Log.e(TAG, "Error creating session, no entry for sessionId in mParticle DB");
                 }

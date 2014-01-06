@@ -107,6 +107,7 @@ package com.mparticle;
         public static final String ERROR_UNCAUGHT = "eh";
         // uploading
         public static final String MESSAGES = "msgs";
+        public static final String HISTORY = "sh";
         public static final String URL = "u";
         public static final String METHOD = "m";
         public static final String POST = "d";
