@@ -1,3 +1,5 @@
+import java.text.SimpleDateFormat
+
 buildscript {
     repositories {
         mavenCentral()
@@ -21,7 +23,12 @@ android {
         targetSdkVersion 19
     }
 
+    debug {
+        buildConfig "public static final boolean ECHO = true;"
+    }
+
     release {
+        buildConfig "public static final boolean ECHO = false;"
         runProguard true
         proguardFile 'proguard.txt'
     }

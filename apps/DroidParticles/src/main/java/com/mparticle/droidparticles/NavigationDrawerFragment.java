@@ -1,5 +1,7 @@
 package com.mparticle.droidparticles;
 
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.support.v7.app.ActionBarActivity;;
 import android.app.Activity;
 import android.support.v7.app.ActionBar;
@@ -20,7 +22,8 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
-import android.widget.Toast;
+import android.widget.TextView;
+
 
 /**
  * Fragment used for managing interactions for and presentation of a navigation drawer.
@@ -85,8 +88,9 @@ public class NavigationDrawerFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
-        mDrawerListView = (ListView) inflater.inflate(
+        View v = inflater.inflate(
                 R.layout.fragment_navigation_drawer, container, false);
+        mDrawerListView = (ListView)v.findViewById(R.id.listView);
         mDrawerListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -103,7 +107,23 @@ public class NavigationDrawerFragment extends Fragment {
                         getString(R.string.title_section3),
                 }));
         mDrawerListView.setItemChecked(mCurrentSelectedPosition, true);
-        return mDrawerListView;
+
+        String name = "unknown";
+        String code = name;
+        try{
+            PackageManager manager = mDrawerListView.getContext().getPackageManager();
+            PackageInfo info = manager.getPackageInfo(mDrawerListView.getContext().getPackageName(), 0);
+            name = info.versionName;
+            code = Integer.toString(info.versionCode);
+        }catch(PackageManager.NameNotFoundException nnfe){
+
+        }
+        ((TextView)v.findViewById(R.id.versionCode)).setText("Version code: " + code);
+        ((TextView)v.findViewById(R.id.versionName)).setText("Version name: " + name);
+        ((TextView)v.findViewById(R.id.gitSha)).setText("SHA-1: " + BuildConfig.GIT_SHA);
+        ((TextView)v.findViewById(R.id.appBuildDate)).setText("Build Time: " + BuildConfig.BUILD_TIME);
+
+        return v;
     }
 
     public boolean isDrawerOpen() {
@@ -231,7 +251,6 @@ public class NavigationDrawerFragment extends Fragment {
         // If the drawer is open, show the global app actions in the action bar. See also
         // showGlobalContextActionBar, which controls the top-left area of the action bar.
         if (mDrawerLayout != null && isDrawerOpen()) {
-            inflater.inflate(R.menu.global, menu);
             showGlobalContextActionBar();
         }
         super.onCreateOptionsMenu(menu, inflater);
@@ -241,12 +260,6 @@ public class NavigationDrawerFragment extends Fragment {
     public boolean onOptionsItemSelected(MenuItem item) {
         if (mDrawerToggle.onOptionsItemSelected(item)) {
             return true;
-        }
-
-        switch (item.getItemId()) {
-            case R.id.action_example:
-                Toast.makeText(getActivity(), "Example action.", Toast.LENGTH_SHORT).show();
-                return true;
         }
 
         return super.onOptionsItemSelected(item);

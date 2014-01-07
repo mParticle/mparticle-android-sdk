@@ -328,6 +328,11 @@ import com.mparticle.MParticleDatabase.UploadTable;
         } else {
         	uploadMessage.put(MessageKey.MESSAGES, messagesArray);
         }
+
+        if (BuildConfig.ECHO){
+            uploadMessage.put("echo", "true");
+        }
+
         return uploadMessage;
     }
 
