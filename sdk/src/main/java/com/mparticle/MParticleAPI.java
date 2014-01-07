@@ -425,7 +425,7 @@ public class MParticleAPI {
      * @param screenName
      *            the name of the View to be tracked
      */
-    private void logScreenView(String screenName) {
+    public void logScreenView(String screenName) {
         logScreenView(screenName, null);
     }
 
@@ -437,7 +437,7 @@ public class MParticleAPI {
      * @param eventData
      *            a Map of data attributes
      */
-    private void logScreenView(String screenName, Map<String, String> eventData) {
+    public void logScreenView(String screenName, Map<String, String> eventData) {
         if (mOptedOut) {
             return;
         }
