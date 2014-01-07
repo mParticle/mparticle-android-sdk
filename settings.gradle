@@ -1,1 +1,2 @@
-include ':DroidParticles', ':mParticleSDK'
+include 'sdk:mParticleSDK'
+include 'apps:DroidParticles'
