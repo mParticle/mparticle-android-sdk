@@ -18,6 +18,8 @@ import android.support.v4.widget.DrawerLayout;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
+import com.mparticle.MParticleAPI;
+
 public class ParticleActivity extends ActionBarActivity
         implements NavigationDrawerFragment.NavigationDrawerCallbacks {
 
@@ -30,6 +32,7 @@ public class ParticleActivity extends ActionBarActivity
      * Used to store the last screen title. For use in {@link #restoreActionBar()}.
      */
     private CharSequence mTitle;
+    private MParticleAPI mParticleAPI;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,6 +47,9 @@ public class ParticleActivity extends ActionBarActivity
         mNavigationDrawerFragment.setUp(
                 R.id.navigation_drawer,
                 (DrawerLayout) findViewById(R.id.drawer_layout));
+
+        mParticleAPI = MParticleAPI.getInstance(this);
+        mParticleAPI.logEvent("App Open", MParticleAPI.EventType.Navigation);
     }
 
     @Override
