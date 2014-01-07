@@ -3,10 +3,10 @@ package com.mparticle;
 import java.util.ArrayList;
 import java.util.Properties;
 
-import com.mparticle.Constants.ConfigKeys;
-
 import android.content.Context;
 import android.test.AndroidTestCase;
+
+import com.mparticle.Constants.ConfigKeys;
 
 public class APISetupTests extends AndroidTestCase {
 

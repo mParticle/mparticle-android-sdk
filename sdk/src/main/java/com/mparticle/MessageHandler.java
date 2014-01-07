@@ -110,28 +110,31 @@ import com.mparticle.MParticleDatabase.SessionTable;
                         SessionTable.SESSION_LENGTH, SessionTable.ATTRIBUTES };
                 Cursor selectCursor = db.query(SessionTable.TABLE_NAME, sessionColumns, SessionTable.SESSION_ID + "=?",
                         selectionArgs, null, null, null);
-                selectCursor.moveToFirst();
-                long start = selectCursor.getLong(0);
-                long end = selectCursor.getLong(1);
-                long length = selectCursor.getLong(2);
-                String attributes = selectCursor.getString(3);
-                JSONObject sessionAttributes = null;
-                if (null != attributes) {
-                    sessionAttributes = new JSONObject(attributes);
+                if (selectCursor.moveToFirst()) {
+	                long start = selectCursor.getLong(0);
+	                long end = selectCursor.getLong(1);
+	                long length = selectCursor.getLong(2);
+	                String attributes = selectCursor.getString(3);
+	                JSONObject sessionAttributes = null;
+	                if (null != attributes) {
+	                    sessionAttributes = new JSONObject(attributes);
+	                }
+	
+	                // create a session-end message
+	                JSONObject endMessage = MessageManager.createMessageSessionEnd(sessionId, start, end, length,
+	                        sessionAttributes);
+	
+	                // insert the record into messages with duration
+	                dbInsertMessage(db, endMessage);
+	
+	                // mark session messages ready for BATCH mode upload
+	                dbUpdateMessageStatus(db, sessionId, Status.BATCH_READY);
+	
+	                // delete the processed session record
+	                db.delete(SessionTable.TABLE_NAME, SessionTable.SESSION_ID + "=?", new String[] { sessionId });	                
+                } else {
+                	Log.e(TAG, "Error creating session, no entry for sessionId in mParticle DB");
                 }
-
-                // create a session-end message
-                JSONObject endMessage = MessageManager.createMessageSessionEnd(sessionId, start, end, length,
-                        sessionAttributes);
-
-                // insert the record into messages with duration
-                dbInsertMessage(db, endMessage);
-
-                // mark session messages ready for BATCH mode upload
-                dbUpdateMessageStatus(db, sessionId, Status.BATCH_READY);
-
-                // delete the processed session record
-                db.delete(SessionTable.TABLE_NAME, SessionTable.SESSION_ID + "=?", new String[] { sessionId });
 
             } catch (SQLiteException e) {
                 Log.e(TAG, "Error creating session end message in mParticle DB", e);
