@@ -20,6 +20,12 @@ android {
         minSdkVersion 8
         targetSdkVersion 19
     }
+
+    release {
+        runProguard true
+        proguardFile 'proguard.txt'
+    }
+
 }
 
 android.libraryVariants.all { variant ->
