@@ -2,6 +2,7 @@ package com.mparticle.droidparticles;
 
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.graphics.Typeface;
 import android.support.v7.app.ActionBarActivity;;
 import android.app.Activity;
 import android.support.v7.app.ActionBar;
@@ -13,6 +14,7 @@ import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.text.style.StyleSpan;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -107,19 +109,7 @@ public class NavigationDrawerFragment extends Fragment {
                         getString(R.string.title_section3),
                 }));
         mDrawerListView.setItemChecked(mCurrentSelectedPosition, true);
-
-        String name = "unknown";
-        String code = name;
-        try{
-            PackageManager manager = mDrawerListView.getContext().getPackageManager();
-            PackageInfo info = manager.getPackageInfo(mDrawerListView.getContext().getPackageName(), 0);
-            name = info.versionName;
-            code = Integer.toString(info.versionCode);
-        }catch(PackageManager.NameNotFoundException nnfe){
-
-        }
-        ((TextView)v.findViewById(R.id.versionCode)).setText("Version code: " + code);
-        ((TextView)v.findViewById(R.id.versionName)).setText("Version name: " + name);
+        ((TextView)v.findViewById(R.id.versionCode)).setText("Version code: " + BuildConfig.VERSION_CODE);
         ((TextView)v.findViewById(R.id.gitSha)).setText("SHA-1: " + BuildConfig.GIT_SHA);
         ((TextView)v.findViewById(R.id.appBuildDate)).setText("Build Time: " + BuildConfig.BUILD_TIME);
 
