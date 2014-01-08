@@ -247,7 +247,7 @@ import com.mparticle.MParticleAPI.EventType;
 
     public void logScreenView(String sessionId, long sessionStartTime, long time, String screenName,
             JSONObject attributes) {
-        logEvent(sessionId, sessionStartTime, time, screenName, EventType.Unknown, attributes);
+        logEvent(sessionId, sessionStartTime, time, screenName, EventType.Navigation, attributes);
     }
 
     public void optOut(String sessionId, long sessionStartTime, long time, boolean optOutStatus) {
