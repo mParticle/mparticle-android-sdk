@@ -452,7 +452,7 @@ public class MParticleAPI {
         ensureActiveSession();
         if (checkEventLimit()) {
             JSONObject eventDataJSON = enforceAttributeConstraints(eventData);
-            mMessageManager.logScreenView(mSessionID, mSessionStartTime, mLastEventTime, screenName, eventDataJSON);
+            mMessageManager.logScreen(mSessionID, mSessionStartTime, mLastEventTime, screenName, eventDataJSON);
             if (null == eventDataJSON) {
                 debugLog("Logged screen: " + screenName);
             } else {

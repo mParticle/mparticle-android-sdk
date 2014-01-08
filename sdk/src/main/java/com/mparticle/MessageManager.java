@@ -245,9 +245,17 @@ import com.mparticle.MParticleAPI.EventType;
         }
     }
 
-    public void logScreenView(String sessionId, long sessionStartTime, long time, String screenName,
-            JSONObject attributes) {
-        logEvent(sessionId, sessionStartTime, time, screenName, EventType.Navigation, attributes);
+    public void logScreen(String sessionId, long sessionStartTime, long time, String screenName, JSONObject attributes) {
+        try {
+            JSONObject message = createMessage(MessageType.SCREEN_VIEW, sessionId, sessionStartTime, time, screenName,
+                    attributes, true);
+            // NOTE: event timing is not supported (yet) but the server expects this data
+            message.put(MessageKey.EVENT_START_TIME, time);
+            message.put(MessageKey.EVENT_DURATION, 0);
+            mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
+        } catch (JSONException e) {
+            Log.w(TAG, "Failed to create mParticle log event message");
+        }
     }
 
     public void optOut(String sessionId, long sessionStartTime, long time, boolean optOutStatus) {

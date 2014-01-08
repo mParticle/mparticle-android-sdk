@@ -29,6 +29,7 @@ package com.mparticle;
         public static final String SESSION_START = "ss";
         public static final String SESSION_END = "se";
         public static final String EVENT = "e";
+        public static final String SCREEN_VIEW = "v";
         public static final String OPT_OUT = "o";
         public static final String ERROR = "x";
         public static final String PUSH_REGISTRATION = "pr";
