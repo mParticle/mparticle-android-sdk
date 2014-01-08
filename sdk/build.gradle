@@ -5,7 +5,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:0.6.+'
+        classpath 'com.android.tools.build:gradle:0.7.+'
     }
 }
 apply plugin: 'android-library'
@@ -24,12 +24,13 @@ android {
     }
 
     debug {
-        buildConfig "public static final boolean ECHO = true;"
+        buildConfigField "boolean", "ECHO", "true"
+        runProguard false
     }
 
     release {
-        buildConfig "public static final boolean ECHO = false;"
-        runProguard true
+        buildConfigField "boolean", "ECHO", "false"
+        runProguard false
         proguardFile 'proguard.txt'
     }
 

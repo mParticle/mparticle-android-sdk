@@ -5,7 +5,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:0.6.+'
+        classpath 'com.android.tools.build:gradle:0.7.+'
     }
 }
 apply plugin: 'android'
@@ -31,10 +31,8 @@ android {
     defaultConfig {
         minSdkVersion 8
         targetSdkVersion 19
-        buildConfig """\
-          public static final String GIT_SHA = "$gitHash";
-          public static final String BUILD_TIME = "${buildTime()}";
-        """
+        buildConfigField "String", "GIT_SHA", "\"$gitHash\""
+        buildConfigField "String", "BUILD_TIME", "\"${buildTime()}\""
     }
 }
 
