@@ -112,6 +112,7 @@ package com.mparticle;
         public static final String STATE_INFO_DATA_CONNECTION = "dct";
         public static final String STATE_INFO_ORIENTATION = "so";
         public static final String STATE_INFO_MEMORY_LOW = "sml";
+        public static final String STATE_INFO_MEMORY_THRESHOLD = "smt";
 
         // network keys
         public static final String NETWORK_COUNTRY = "nc";
@@ -157,6 +158,7 @@ package com.mparticle;
 
     public interface MiscStorageKeys {
         public static final String TOTAL_MEMORY = "mp::totalmem";
+        public static final String MEMORY_THRESHOLD = "mp::memthreshold";
     }
 
     public interface Status {

@@ -218,6 +218,7 @@ import java.util.UUID;
         infoJson.put(MessageKey.STATE_INFO_ORIENTATION, orientation);
         infoJson.put(MessageKey.STATE_INFO_BAR_ORIENTATION, orientation);
         infoJson.put(MessageKey.STATE_INFO_MEMORY_LOW, MPUtility.isSystemMemoryLow(mContext));
+        infoJson.put(MessageKey.STATE_INFO_MEMORY_THRESHOLD, getSystemMemoryThreshold());
         return infoJson;
     }
 
@@ -226,10 +227,21 @@ import java.util.UUID;
         if (total < 0){
             total = MPUtility.getTotalMemory(mContext);
             SharedPreferences.Editor edit = mPreferences.edit();
-            edit.putLong(Constants.MISC_FILE, total);
+            edit.putLong(Constants.MiscStorageKeys.TOTAL_MEMORY, total);
             edit.commit();
         }
         return total;
+    }
+
+    public static long getSystemMemoryThreshold() {
+        long threshold = mPreferences.getLong(Constants.MiscStorageKeys.MEMORY_THRESHOLD, -1);
+        if (threshold < 0){
+            threshold = MPUtility.getSystemMemoryThreshold(mContext);
+            SharedPreferences.Editor edit = mPreferences.edit();
+            edit.putLong(Constants.MiscStorageKeys.MEMORY_THRESHOLD,, threshold);
+            edit.commit();
+        }
+        return threshold;
     }
 
     /* package-private */static JSONObject createFirstRunMessage(long time) throws JSONException {
