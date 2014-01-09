@@ -127,9 +127,6 @@ import com.mparticle.MParticleDatabase.SessionTable;
 	                // insert the record into messages with duration
 	                dbInsertMessage(db, endMessage);
 	
-	                // mark session messages ready for BATCH mode upload
-	                dbUpdateMessageStatus(db, sessionId, Status.BATCH_READY);
-	
 	                // delete the processed session record
 	                db.delete(SessionTable.TABLE_NAME, SessionTable.SESSION_ID + "=?", new String[] { sessionId });	                
                 } else {
