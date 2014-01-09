@@ -16,6 +16,8 @@ package com.mparticle;
     public static final int DEBUG_UPLOAD_INTERVAL = 3 * 1000; // 3 seconds
     // name of the preferences file
     public static final String PREFS_FILE = "mParticlePrefs";
+    // misc persistence
+    public static final String MISC_FILE = "mParticleMisc";
 
     public static final int LIMIT_ATTR_COUNT = 100;
     public static final int LIMIT_ATTR_NAME = 255;
@@ -150,6 +152,10 @@ package com.mparticle;
         public static final String USER_IDENTITIES = "mp::user_ids::";
         public static final String FIRSTRUN = "mp::firstrun::";
         public static final String UPLOAD_MODE = "mp::batch";
+    }
+
+    public interface MiscStorageKeys {
+        public static final String TOTAL_MEMORY = "mp::totalmem";
     }
 
     public interface Status {

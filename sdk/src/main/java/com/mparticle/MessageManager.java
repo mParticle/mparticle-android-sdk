@@ -1,5 +1,8 @@
 package com.mparticle;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Locale;
@@ -9,15 +12,18 @@ import java.util.UUID;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.app.ActivityManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.BatteryManager;
+import android.os.Build;
 import android.os.HandlerThread;
 import android.os.Process;
 import android.util.Log;
@@ -56,6 +62,7 @@ import com.mparticle.MParticleAPI.EventType;
 
     private static Context mContext = null;
     private static long sStartTime = System.currentTimeMillis();
+    private static SharedPreferences mPreferences = null;
 
     // This constructor is needed to enable mocking with Mockito and Dexmaker only
     /* package-private */MessageManager() {
@@ -71,7 +78,7 @@ import com.mparticle.MParticleAPI.EventType;
     public MessageManager(Context appContext, String apiKey, String secret, Properties config) {
         mMessageHandler = new MessageHandler(appContext, sMessageHandlerThread.getLooper(), apiKey);
         mUploadHandler = new UploadHandler(appContext, sUploadHandlerThread.getLooper(), apiKey, secret);
-
+        mPreferences = appContext.getSharedPreferences(Constants.MISC_FILE, Context.MODE_PRIVATE);
         int uploadInterval = 0;
         
         if(config.containsKey(ConfigKeys.DEBUG_MODE)) {
@@ -205,7 +212,7 @@ import com.mparticle.MParticleAPI.EventType;
         JSONObject infoJson = new JSONObject();
         infoJson.put(MessageKey.STATE_INFO_CPU, MPUtility.getCpuUsage());
         infoJson.put(MessageKey.STATE_INFO_AVAILABLE_MEMORY, MPUtility.getAvailableMemory());
-        infoJson.put(MessageKey.STATE_INFO_TOTAL_MEMORY, MPUtility.getTotalMemory());
+        infoJson.put(MessageKey.STATE_INFO_TOTAL_MEMORY, getTotalMemory());
         infoJson.put(MessageKey.STATE_INFO_BATTERY_LVL, sBatteryLevel);
         infoJson.put(MessageKey.STATE_INFO_TIME_SINCE_START, System.currentTimeMillis() - sStartTime);
         infoJson.put(MessageKey.STATE_INFO_AVAILABLE_DISK, MPUtility.getAvailableDisk());
@@ -216,6 +223,17 @@ import com.mparticle.MParticleAPI.EventType;
         infoJson.put(MessageKey.STATE_INFO_ORIENTATION, orientation);
         infoJson.put(MessageKey.STATE_INFO_BAR_ORIENTATION, orientation);
         return infoJson;
+    }
+
+    public static long getTotalMemory() {
+        long total = mPreferences.getLong(Constants.MiscStorageKeys.TOTAL_MEMORY, -1);
+        if (total < 0){
+            total = MPUtility.getTotalMemory(mContext);
+            SharedPreferences.Editor edit = mPreferences.edit();
+            edit.putLong(Constants.MISC_FILE, total);
+            edit.commit();
+        }
+        return total;
     }
 
     /* package-private */static JSONObject createFirstRunMessage(long time) throws JSONException {
