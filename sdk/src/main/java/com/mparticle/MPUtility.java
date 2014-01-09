@@ -1,6 +1,8 @@
 package com.mparticle;
 
+import android.Manifest;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.location.LocationManager;
 import android.view.Display;
@@ -20,10 +22,14 @@ class MPUtility {
         return 0;
     }
 
-    public static boolean getGpsEnabled(Context context) {
-        final LocationManager manager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
-        return manager.isProviderEnabled(LocationManager.GPS_PROVIDER); 
-
+    public static String getGpsEnabled(Context context) {
+        if (PackageManager.PERMISSION_GRANTED == context
+                .checkCallingOrSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION)){
+            final LocationManager manager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
+            return Boolean.toString(manager.isProviderEnabled(LocationManager.GPS_PROVIDER));
+        }else{
+            return "unknown";
+        }
     }
 
     public static long getAvailableDisk() {
