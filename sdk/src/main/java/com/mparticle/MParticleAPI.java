@@ -68,7 +68,7 @@ public class MParticleAPI {
     private String mLaunchUri;
 
     /* package-private */MParticleAPI(Context appContext, String apiKey, MessageManager messageManager) {
-        mAppContext = appContext;
+        mAppContext = appContext.getApplicationContext();
         mApiKey = apiKey;
         mMessageManager = messageManager;
         mTimeoutHandler = new SessionTimeoutHandler(this, sTimeoutHandlerThread.getLooper());

@@ -58,7 +58,7 @@ package com.mparticle;
         public static final String EVENT_DURATION = "el";
         // location
         public static final String LOCATION = "lc";
-        public static final String DATA_CONNECTION = "dct";
+
         public static final String LATITUDE = "lat";
         public static final String LONGITUDE = "lng";
         public static final String ACCURACY = "acc";
@@ -95,6 +95,21 @@ package com.mparticle;
         public static final String DEVICE_COUNTRY = "dc";
         public static final String DEVICE_LOCALE_COUNTRY = "dlc";
         public static final String DEVICE_LOCALE_LANGUAGE = "dll";
+        public static final String DEVICE_ROOTED = "jb";
+        // state info
+        public static final String STATE_INFO_KEY = "cs";
+        public static final String STATE_INFO_CPU = "cpu";
+        public static final String STATE_INFO_AVAILABLE_MEMORY = "sma";
+        public static final String STATE_INFO_TOTAL_MEMORY = "tsm";
+        public static final String STATE_INFO_BATTERY_LVL = "bl";
+        public static final String STATE_INFO_TIME_SINCE_START = "tss";
+        public static final String STATE_INFO_AVAILABLE_DISK = "fds";
+        public static final String STATE_INFO_APP_MEMORY = "amt";
+        public static final String STATE_INFO_GPS = "gps";
+        public static final String STATE_INFO_BAR_ORIENTATION = "sbo";
+        public static final String STATE_INFO_DATA_CONNECTION = "dct";
+        public static final String STATE_INFO_ORIENTATION = "so";
+
         // network keys
         public static final String NETWORK_COUNTRY = "nc";
         public static final String NETWORK_CARRIER = "nca";
@@ -121,6 +136,7 @@ package com.mparticle;
         // push-notifications
         public static final String PUSH_TOKEN = "to";
         public static final String PUSH_REGISTER_FLAG = "r";
+
     }
 
     public interface PrefKeys {

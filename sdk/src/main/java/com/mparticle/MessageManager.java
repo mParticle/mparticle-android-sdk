@@ -17,6 +17,7 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.BatteryManager;
 import android.os.HandlerThread;
 import android.os.Process;
 import android.util.Log;
@@ -39,7 +40,8 @@ import com.mparticle.MParticleAPI.EventType;
     private static Location sLocation;
     private static boolean sDebugMode;
     private static boolean sFirstRun;
-    private static BroadcastReceiver sNetworkStatusBroadcastReceiver;
+    private static BroadcastReceiver sStatusBroadcastReceiver;
+    private static float sBatteryLevel;
 
     private final MessageHandler mMessageHandler;
     private final UploadHandler mUploadHandler;
@@ -51,6 +53,9 @@ import com.mparticle.MParticleAPI.EventType;
         sMessageHandlerThread.start();
         sUploadHandlerThread.start();
     }
+
+    private static Context mContext = null;
+    private static long sStartTime = System.currentTimeMillis();
 
     // This constructor is needed to enable mocking with Mockito and Dexmaker only
     /* package-private */MessageManager() {
@@ -64,7 +69,6 @@ import com.mparticle.MParticleAPI.EventType;
     }
 
     public MessageManager(Context appContext, String apiKey, String secret, Properties config) {
-
         mMessageHandler = new MessageHandler(appContext, sMessageHandlerThread.getLooper(), apiKey);
         mUploadHandler = new UploadHandler(appContext, sUploadHandlerThread.getLooper(), apiKey, secret);
 
@@ -119,17 +123,23 @@ import com.mparticle.MParticleAPI.EventType;
 
     }
 
+    public static void setBatteryLevel(float batteryLevel) {
+        MessageManager.sBatteryLevel = batteryLevel;
+    }
+
     public void start(Context appContext, Boolean firstRun) {
-        if (null == sNetworkStatusBroadcastReceiver) {
-            sNetworkStatusBroadcastReceiver = new NetworkStatusBroadcastReceiver();
+        mContext = appContext.getApplicationContext();
+        if (null == sStatusBroadcastReceiver) {
+            sStatusBroadcastReceiver = new StatusBroadcastReceiver();
             // NOTE: if permissions are not correct all messages will be tagged as 'offline'
-            if (PackageManager.PERMISSION_GRANTED == appContext
+            IntentFilter filter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
+            if (PackageManager.PERMISSION_GRANTED == mContext
                     .checkCallingOrSelfPermission(android.Manifest.permission.ACCESS_NETWORK_STATE)) {
-                IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
-                appContext.registerReceiver(sNetworkStatusBroadcastReceiver, filter);
+                filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
             }
+            mContext.registerReceiver(sStatusBroadcastReceiver, filter);
         }
-        
+
         sFirstRun = firstRun;
        
         if(!sFirstRun) {
@@ -140,7 +150,7 @@ import com.mparticle.MParticleAPI.EventType;
     }
 
     /* package-private */static JSONObject createMessage(String messageType, String sessionId, long sessionStart,
-            long time, String name, JSONObject attributes, boolean includeConnLoc) throws JSONException {
+            long time, String name, JSONObject attributes) throws JSONException {
         JSONObject message = new JSONObject();
         message.put(MessageKey.TYPE, messageType);
         message.put(MessageKey.TIMESTAMP, time);
@@ -162,8 +172,7 @@ import com.mparticle.MParticleAPI.EventType;
         if (null != attributes) {
             message.put(MessageKey.ATTRIBUTES, attributes);
         }
-        if (includeConnLoc) {
-            message.put(MessageKey.DATA_CONNECTION, sActiveNetworkName);
+        if (!(MessageType.ERROR.equals(messageType) && !(MessageType.OPT_OUT.equals(messageType)))) {
             if (null != sLocation) {
                 JSONObject locJSON = new JSONObject();
                 locJSON.put(MessageKey.LATITUDE, sLocation.getLatitude());
@@ -172,17 +181,36 @@ import com.mparticle.MParticleAPI.EventType;
                 message.put(MessageKey.LOCATION, locJSON);
             }
         }
+
+        message.put(MessageKey.STATE_INFO_KEY, getStateInfo());
         return message;
     }
-    
+
+    private static JSONObject getStateInfo() throws JSONException {
+        JSONObject infoJson = new JSONObject();
+        infoJson.put(MessageKey.STATE_INFO_CPU, MPUtility.getCpuUsage());
+        infoJson.put(MessageKey.STATE_INFO_AVAILABLE_MEMORY, MPUtility.getAvailableMemory());
+        infoJson.put(MessageKey.STATE_INFO_TOTAL_MEMORY, MPUtility.getTotalMemory());
+        infoJson.put(MessageKey.STATE_INFO_BATTERY_LVL, sBatteryLevel);
+        infoJson.put(MessageKey.STATE_INFO_TIME_SINCE_START, System.currentTimeMillis() - sStartTime);
+        infoJson.put(MessageKey.STATE_INFO_AVAILABLE_DISK, MPUtility.getAvailableDisk());
+        infoJson.put(MessageKey.STATE_INFO_APP_MEMORY, MPUtility.getAppMemoryUsage());
+        infoJson.put(MessageKey.STATE_INFO_GPS, MPUtility.getGpsEnabled(mContext));
+        infoJson.put(MessageKey.STATE_INFO_DATA_CONNECTION, sActiveNetworkName);
+        int orientation = MPUtility.getOrientation(mContext);
+        infoJson.put(MessageKey.STATE_INFO_ORIENTATION, orientation);
+        infoJson.put(MessageKey.STATE_INFO_BAR_ORIENTATION, orientation);
+        return infoJson;
+    }
+
     /* package-private */static JSONObject createFirstRunMessage(long time) throws JSONException {
-        JSONObject message = createMessage(MessageType.FIRST_RUN, null, 0, time, null, null, true);
+        JSONObject message = createMessage(MessageType.FIRST_RUN, null, 0, time, null, null);
         return message;
     }
 
     /* package-private */static JSONObject createMessageSessionEnd(String sessionId, long start, long end, long length,
             JSONObject attributes) throws JSONException {
-        JSONObject message = createMessage(MessageType.SESSION_END, sessionId, start, end, null, attributes, true);
+        JSONObject message = createMessage(MessageType.SESSION_END, sessionId, start, end, null, attributes);
         message.put(MessageKey.SESSION_LENGTH, length);
         return message;
     }
@@ -204,7 +232,7 @@ import com.mparticle.MParticleAPI.EventType;
     			}
             }
         	
-            JSONObject message = createMessage(MessageType.SESSION_START, sessionId, time, time, null, null, true);
+            JSONObject message = createMessage(MessageType.SESSION_START, sessionId, time, time, null, null);
             message.put(MessageKey.LAUNCH_REFERRER, launchUri);
             mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
         } catch (JSONException e) {
@@ -234,7 +262,7 @@ import com.mparticle.MParticleAPI.EventType;
     public void logEvent(String sessionId, long sessionStartTime, long time, String eventName, EventType eventType, JSONObject attributes) {
         try {
             JSONObject message = createMessage(MessageType.EVENT, sessionId, sessionStartTime, time, eventName,
-                    attributes, true);
+                    attributes);
             message.put(MessageKey.EVENT_TYPE, eventType);
             // NOTE: event timing is not supported (yet) but the server expects this data
             message.put(MessageKey.EVENT_START_TIME, time);
@@ -248,7 +276,7 @@ import com.mparticle.MParticleAPI.EventType;
     public void logScreen(String sessionId, long sessionStartTime, long time, String screenName, JSONObject attributes) {
         try {
             JSONObject message = createMessage(MessageType.SCREEN_VIEW, sessionId, sessionStartTime, time, screenName,
-                    attributes, true);
+                    attributes);
             // NOTE: event timing is not supported (yet) but the server expects this data
             message.put(MessageKey.EVENT_START_TIME, time);
             message.put(MessageKey.EVENT_DURATION, 0);
@@ -260,8 +288,7 @@ import com.mparticle.MParticleAPI.EventType;
 
     public void optOut(String sessionId, long sessionStartTime, long time, boolean optOutStatus) {
         try {
-            JSONObject message = createMessage(MessageType.OPT_OUT, sessionId, sessionStartTime, time, null, null,
-                    false);
+            JSONObject message = createMessage(MessageType.OPT_OUT, sessionId, sessionStartTime, time, null, null);
             message.put(MessageKey.OPT_OUT_STATUS, optOutStatus);
             mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
         } catch (JSONException e) {
@@ -275,7 +302,7 @@ import com.mparticle.MParticleAPI.EventType;
     
     public void logErrorEvent(String sessionId, long sessionStartTime, long time, String errorMessage, Throwable t, boolean caught) {
         try {
-            JSONObject message = createMessage(MessageType.ERROR, sessionId, sessionStartTime, time, null, null, false);
+            JSONObject message = createMessage(MessageType.ERROR, sessionId, sessionStartTime, time, null, null);
             if (null != t) {
                 message.put(MessageKey.ERROR_SEVERITY, "fatal");
                 message.put(MessageKey.ERROR_CLASS, t.getClass().getCanonicalName());
@@ -297,7 +324,7 @@ import com.mparticle.MParticleAPI.EventType;
     public void setPushRegistrationId(String token, boolean registeringFlag) {
         try {
             JSONObject message = createMessage(MessageType.PUSH_REGISTRATION, null, 0, System.currentTimeMillis(),
-                    null, null, false);
+                    null, null);
             message.put(MessageKey.PUSH_TOKEN, token);
             message.put(MessageKey.PUSH_REGISTER_FLAG, registeringFlag);
             mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
@@ -345,7 +372,7 @@ import com.mparticle.MParticleAPI.EventType;
         mUploadHandler.setUploadInterval(uploadInterval);
     }
 
-    private static class NetworkStatusBroadcastReceiver extends BroadcastReceiver {
+    private static class StatusBroadcastReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context appContext, Intent intent) {
             if (ConnectivityManager.CONNECTIVITY_ACTION.equals(intent.getAction())) {
@@ -353,6 +380,12 @@ import com.mparticle.MParticleAPI.EventType;
                         .getSystemService(Context.CONNECTIVITY_SERVICE);
                 NetworkInfo activeNetwork = connectivyManager.getActiveNetworkInfo();
                 MessageManager.setDataConnection(activeNetwork);
+            }else if (Intent.ACTION_BATTERY_CHANGED.equals(intent.getAction())){
+                int level = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
+                int scale = intent.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
+
+                float batteryPct = level / (float)scale;
+                MessageManager.setBatteryLevel(batteryPct);
             }
         }
     }

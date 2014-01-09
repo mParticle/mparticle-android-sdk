@@ -1,5 +1,6 @@
 package com.mparticle;
 
+import java.io.File;
 import java.util.Locale;
 import java.util.TimeZone;
 
@@ -84,6 +85,7 @@ import com.mparticle.Constants.PrefKeys;
             attributes.put(MessageKey.PLATFORM, "Android");
             attributes.put(MessageKey.OS_VERSION, android.os.Build.VERSION.SDK_INT);
             attributes.put(MessageKey.MODEL, android.os.Build.MODEL);
+            attributes.put(MessageKey.DEVICE_ROOTED, isPhoneRooted());
 
             // screen height/width
             WindowManager windowManager = (WindowManager) appContext.getSystemService(Context.WINDOW_SERVICE);
@@ -121,7 +123,6 @@ import com.mparticle.Constants.PrefKeys;
                     attributes.put(MessageKey.MOBILE_COUNTRY_CODE, networkOperator.substring(3));
                 }
             }
-
             // timezone
             attributes.put(MessageKey.TIMEZONE, TimeZone.getDefault().getRawOffset() / (1000 * 60 * 60));
         } catch (JSONException e) {
@@ -131,4 +132,25 @@ import com.mparticle.Constants.PrefKeys;
         return attributes;
     }
 
+    private static boolean isPhoneRooted() {
+
+        // get from build info
+        String buildTags = android.os.Build.TAGS;
+        if (buildTags != null && buildTags.contains("test-keys")) {
+            return true;
+        }
+
+        boolean bool = false;
+        String[] arrayOfString1 = { "/sbin/", "/system/bin/", "/system/xbin/", "/data/local/xbin/", "/data/local/bin/", "/system/sd/xbin/", "/system/bin/failsafe/", "/data/local/" };
+        for (String str : arrayOfString1)
+        {
+            File localFile = new File(new StringBuilder().append(str).append("su").toString());
+            if (localFile.exists())
+            {
+                bool = true;
+                break;
+            }
+        }
+        return bool;
+    }
 }
