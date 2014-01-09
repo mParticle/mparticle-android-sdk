@@ -32,6 +32,13 @@ class MPUtility {
         return mi.availMem;
     }
 
+    public static boolean isSystemMemoryLow(Context context) {
+        ActivityManager.MemoryInfo mi = new ActivityManager.MemoryInfo();
+        ActivityManager activityManager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+        activityManager.getMemoryInfo(mi);
+        return mi.lowMemory;
+    }
+
     public static String getGpsEnabled(Context context) {
         if (PackageManager.PERMISSION_GRANTED == context
                 .checkCallingOrSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION)){

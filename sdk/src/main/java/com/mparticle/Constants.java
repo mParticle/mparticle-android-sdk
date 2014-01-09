@@ -111,6 +111,7 @@ package com.mparticle;
         public static final String STATE_INFO_BAR_ORIENTATION = "sbo";
         public static final String STATE_INFO_DATA_CONNECTION = "dct";
         public static final String STATE_INFO_ORIENTATION = "so";
+        public static final String STATE_INFO_MEMORY_LOW = "sml";
 
         // network keys
         public static final String NETWORK_COUNTRY = "nc";

@@ -217,6 +217,7 @@ import java.util.UUID;
         int orientation = MPUtility.getOrientation(mContext);
         infoJson.put(MessageKey.STATE_INFO_ORIENTATION, orientation);
         infoJson.put(MessageKey.STATE_INFO_BAR_ORIENTATION, orientation);
+        infoJson.put(MessageKey.STATE_INFO_MEMORY_LOW, MPUtility.isSystemMemoryLow(mContext));
         return infoJson;
     }
 
