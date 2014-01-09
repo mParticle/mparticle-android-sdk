@@ -47,7 +47,7 @@ public class SplashActivity extends BaseActivity {
 		}
 	};
 	
-	@Override
+  	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		// was this launched by another app?  test before calling baseactivity which needs this data for instantiating mParticleSDK
 		Intent intent = getIntent();

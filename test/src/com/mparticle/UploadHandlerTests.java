@@ -97,15 +97,17 @@ public class UploadHandlerTests extends AndroidTestCase {
         assertEquals(1, sessionsCursor.getCount());
         sessionsCursor.moveToFirst();
         assertEquals(mSessionId + "-2", sessionsCursor.getString(0));
-
+        sessionsCursor.close();
+        
         columns = new String[] { MessageTable.SESSION_ID, MessageTable.STATUS };
         Cursor messagesCursor = db.query(MessageTable.TABLE_NAME, columns, null, null, null, null, null);
-        assertEquals(2, messagesCursor.getCount());
+        assertEquals(5, messagesCursor.getCount());
         while (messagesCursor.moveToNext()) {
             assertEquals(mSessionId + "-2", messagesCursor.getString(0));
             assertEquals(Status.READY, messagesCursor.getInt(1));
         }
-
+        messagesCursor.close();
+        
         columns = new String[] { UploadTable.MESSAGE };
         Cursor uploadsCursor = db.query(UploadTable.TABLE_NAME, columns, null, null, null, null, null);
         assertEquals(1, uploadsCursor.getCount());
@@ -140,11 +142,13 @@ public class UploadHandlerTests extends AndroidTestCase {
         assertEquals(1, sessionsCursor.getCount());
         sessionsCursor.moveToFirst();
         assertEquals(mSessionId + "-2", sessionsCursor.getString(0));
-
+        sessionsCursor.close();
+        
         columns = new String[] { MessageTable.SESSION_ID, MessageTable.STATUS };
         Cursor messagesCursor = db.query(MessageTable.TABLE_NAME, columns, null, null, null, null, null);
-        assertEquals(0, messagesCursor.getCount());
-
+        assertEquals(5, messagesCursor.getCount());
+        messagesCursor.close();
+        
         columns = new String[] { UploadTable.MESSAGE };
         Cursor uploadsCursor = db.query(UploadTable.TABLE_NAME, columns, null, null, null, null, null);
         assertEquals(1, uploadsCursor.getCount());
@@ -178,15 +182,17 @@ public class UploadHandlerTests extends AndroidTestCase {
         assertEquals(1, sessionsCursor.getCount());
         sessionsCursor.moveToFirst();
         assertEquals(mSessionId, sessionsCursor.getString(0));
-
+        sessionsCursor.close();
+        
         columns = new String[] { MessageTable.SESSION_ID, MessageTable.STATUS };
         Cursor messagesCursor = db.query(MessageTable.TABLE_NAME, columns, null, null, null, null, null);
-        assertEquals(3, messagesCursor.getCount());
+        assertEquals(4, messagesCursor.getCount());
         while (messagesCursor.moveToNext()) {
             assertEquals(mSessionId, messagesCursor.getString(0));
             assertEquals(Status.READY, messagesCursor.getInt(1));
         }
-
+        messagesCursor.close();
+        
         columns = new String[] { UploadTable.MESSAGE };
         Cursor uploadsCursor = db.query(UploadTable.TABLE_NAME, columns, null, null, null, null, null);
         assertEquals(1, uploadsCursor.getCount());
@@ -233,15 +239,17 @@ public class UploadHandlerTests extends AndroidTestCase {
         String[] columns = new String[] { SessionTable.SESSION_ID };
         Cursor sessionsCursor = db.query(SessionTable.TABLE_NAME, columns, null, null, null, null, null);
         assertEquals(2, sessionsCursor.getCount());
-
+        sessionsCursor.close();
+        
         columns = new String[] { MessageTable.SESSION_ID, MessageTable.STATUS };
         Cursor messagesCursor = db.query(MessageTable.TABLE_NAME, columns, null, null, null, null, null);
-        assertEquals(2, messagesCursor.getCount());
+        assertEquals(10, messagesCursor.getCount());
         while (messagesCursor.moveToNext()) {
             assertEquals(mSessionId + "-B", messagesCursor.getString(0));
             assertEquals(Status.READY, messagesCursor.getInt(1));
         }
-
+        messagesCursor.close();
+        
         columns = new String[] { UploadTable.MESSAGE };
         String whereClause = UploadTable.API_KEY + "=?";
         Cursor uploadsCursor = db.query(UploadTable.TABLE_NAME, columns, whereClause, new String[] { "test-api-1" },

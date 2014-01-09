@@ -41,18 +41,29 @@ public class GCMIntentService extends IntentService {
             }
         }
         sWakeLock.acquire();
-        intent.setClassName(context, GCMIntentService.class.getName());
+        intent.setClass(context, GCMIntentService.class);
+        Log.i("GCMIntentService", "Running intent");
         context.startService(intent);
     }
 
     @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        Log.i("GCMIntentService", "onStartCommand");
+    	return super.onStartCommand(intent,  flags,  startId);
+    }
+    
+    @Override
     public final void onHandleIntent(Intent intent) {
         try {
             String action = intent.getAction();
+            Log.i("GCMIntentService", "Handling action: "+action);
             if (action.equals("com.google.android.c2dm.intent.REGISTRATION")) {
                 handleRegistration(intent);
             } else if (action.equals("com.google.android.c2dm.intent.RECEIVE")) {
                 handleMessage(intent);
+            } else if (action.equals("com.google.android.c2dm.intent.UNREGISTER")) {
+            	intent.putExtra("unregistered", "true");
+            	handleRegistration(intent);
             }
         } finally {
             synchronized (LOCK) {

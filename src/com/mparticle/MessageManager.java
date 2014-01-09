@@ -194,7 +194,11 @@ import com.mparticle.MParticleAPI.EventType;
     				JSONObject firstRunMessage = createFirstRunMessage(time);
     				mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, firstRunMessage));
     				sFirstRun = false;
-    				mUploadHandler.sendMessage(mUploadHandler.obtainMessage(UploadHandler.UPLOAD_MESSAGES));
+    				if (mUploadHandler != null) {
+    					mUploadHandler.sendMessage(mUploadHandler.obtainMessage(UploadHandler.UPLOAD_MESSAGES));
+    				} else {
+        				Log.w(TAG, "Failed to send First Run Message, no upload handler");
+    				}
     			} catch (JSONException e) { 
     				Log.w(TAG, "Failed to create First Run Message");
     			}
