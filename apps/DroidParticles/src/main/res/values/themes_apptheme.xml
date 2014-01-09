@@ -18,7 +18,6 @@
     <item name="android:imageButtonStyle">@style/ImageButtonAppTheme</item>
 
     <item name="android:spinnerStyle">@style/SpinnerAppTheme</item>
-
     <item name="android:spinnerDropDownItemStyle">@style/SpinnerDropDownItemAppTheme</item>
 
     <item name="android:progressBarStyleHorizontal">@style/ProgressBarAppTheme</item>
