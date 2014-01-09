@@ -1,18 +1,5 @@
 package com.mparticle;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.util.Locale;
-import java.util.Properties;
-import java.util.UUID;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import android.app.ActivityManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -23,7 +10,6 @@ import android.location.Location;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.BatteryManager;
-import android.os.Build;
 import android.os.HandlerThread;
 import android.os.Process;
 import android.util.Log;
@@ -32,6 +18,15 @@ import com.mparticle.Constants.ConfigKeys;
 import com.mparticle.Constants.MessageKey;
 import com.mparticle.Constants.MessageType;
 import com.mparticle.MParticleAPI.EventType;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.util.Locale;
+import java.util.Properties;
+import java.util.UUID;
 
 /* package-private */class MessageManager {
 
@@ -211,7 +206,7 @@ import com.mparticle.MParticleAPI.EventType;
     private static JSONObject getStateInfo() throws JSONException {
         JSONObject infoJson = new JSONObject();
         infoJson.put(MessageKey.STATE_INFO_CPU, MPUtility.getCpuUsage());
-        infoJson.put(MessageKey.STATE_INFO_AVAILABLE_MEMORY, MPUtility.getAvailableMemory());
+        infoJson.put(MessageKey.STATE_INFO_AVAILABLE_MEMORY, MPUtility.getAvailableMemory(mContext));
         infoJson.put(MessageKey.STATE_INFO_TOTAL_MEMORY, getTotalMemory());
         infoJson.put(MessageKey.STATE_INFO_BATTERY_LVL, sBatteryLevel);
         infoJson.put(MessageKey.STATE_INFO_TIME_SINCE_START, System.currentTimeMillis() - sStartTime);

@@ -25,8 +25,11 @@ class MPUtility {
         return 0;
     }
 
-    public static long getAvailableMemory() {
-        return 0;
+    public static long getAvailableMemory(Context context) {
+        ActivityManager.MemoryInfo mi = new ActivityManager.MemoryInfo();
+        ActivityManager activityManager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+        activityManager.getMemoryInfo(mi);
+        return mi.availMem;
     }
 
     public static String getGpsEnabled(Context context) {
