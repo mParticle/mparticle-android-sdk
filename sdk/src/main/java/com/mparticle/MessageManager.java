@@ -41,7 +41,7 @@ import com.mparticle.MParticleAPI.EventType;
     private static boolean sDebugMode;
     private static boolean sFirstRun;
     private static BroadcastReceiver sStatusBroadcastReceiver;
-    private static float sBatteryLevel;
+    private static double sBatteryLevel;
 
     private final MessageHandler mMessageHandler;
     private final UploadHandler mUploadHandler;
@@ -123,18 +123,33 @@ import com.mparticle.MParticleAPI.EventType;
 
     }
 
-    public static void setBatteryLevel(float batteryLevel) {
-        MessageManager.sBatteryLevel = batteryLevel;
+    public static void setBatteryLevel(double batteryLevel) {
+        sBatteryLevel = batteryLevel;
     }
 
     public void start(Context appContext, Boolean firstRun) {
         mContext = appContext.getApplicationContext();
         if (null == sStatusBroadcastReceiver) {
+
+            //get the previous Intent otherwise the first few messages will have 0 for battery level
+            Intent batteryIntent = mContext.getApplicationContext().registerReceiver(null,
+                    new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
+            int level = batteryIntent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
+            int scale = batteryIntent.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
+            double batteryPct = level / (double)scale;
+            MessageManager.setBatteryLevel(batteryPct);
+
             sStatusBroadcastReceiver = new StatusBroadcastReceiver();
             // NOTE: if permissions are not correct all messages will be tagged as 'offline'
             IntentFilter filter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
             if (PackageManager.PERMISSION_GRANTED == mContext
                     .checkCallingOrSelfPermission(android.Manifest.permission.ACCESS_NETWORK_STATE)) {
+
+                //same as with battery, get current connection so we don't have to wait for the next change
+                ConnectivityManager connectivyManager = (ConnectivityManager) appContext
+                        .getSystemService(Context.CONNECTIVITY_SERVICE);
+                NetworkInfo activeNetwork = connectivyManager.getActiveNetworkInfo();
+                MessageManager.setDataConnection(activeNetwork);
                 filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
             }
             mContext.registerReceiver(sStatusBroadcastReceiver, filter);
@@ -384,7 +399,7 @@ import com.mparticle.MParticleAPI.EventType;
                 int level = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
                 int scale = intent.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
 
-                float batteryPct = level / (float)scale;
+                double batteryPct = level / (double)scale;
                 MessageManager.setBatteryLevel(batteryPct);
             }
         }
