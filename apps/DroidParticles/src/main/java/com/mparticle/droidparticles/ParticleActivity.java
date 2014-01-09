@@ -70,7 +70,6 @@ public class ParticleActivity extends ActionBarActivity
                 break;
         }
         MParticleAPI.getInstance(this).logScreenView(mTitle.toString());
-        MParticleAPI.getInstance(this).logEvent(mTitle.toString(), MParticleAPI.EventType.Navigation);
     }
 
     public void restoreActionBar() {
