@@ -50,6 +50,7 @@ import com.mparticle.MParticleDatabase.SessionTable;
         case STORE_MESSAGE:
             try {
                 JSONObject message = (JSONObject) msg.obj;
+                message.put(MessageKey.STATE_INFO_KEY, MessageManager.getStateInfo());
                 String messageType = message.getString(MessageKey.TYPE);
                 SQLiteDatabase db = mDB.getWritableDatabase();
                 // handle the special case of session-start by creating the

@@ -199,11 +199,10 @@ import java.util.UUID;
             }
         }
 
-        message.put(MessageKey.STATE_INFO_KEY, getStateInfo());
         return message;
     }
 
-    private static JSONObject getStateInfo() throws JSONException {
+    public static JSONObject getStateInfo() throws JSONException {
         JSONObject infoJson = new JSONObject();
         infoJson.put(MessageKey.STATE_INFO_CPU, MPUtility.getCpuUsage());
         infoJson.put(MessageKey.STATE_INFO_AVAILABLE_MEMORY, MPUtility.getAvailableMemory(mContext));
