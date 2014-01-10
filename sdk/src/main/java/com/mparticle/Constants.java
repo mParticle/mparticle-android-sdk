@@ -39,6 +39,7 @@ package com.mparticle;
         public static final String RESPONSE_HEADER = "rh";
         public static final String HTTP_COMMAND = "hc";
         public static final String FIRST_RUN = "fr";
+        public static final String APP_STATE_TRANSITION = "ast";
     }
 
     public interface MessageKey {
@@ -144,6 +145,9 @@ package com.mparticle;
         public static final String PUSH_TOKEN = "to";
         public static final String PUSH_REGISTER_FLAG = "r";
 
+        //state transition
+        public static final String STATE_TRANSITION_TYPE = "t";
+
     }
 
     public interface PrefKeys {
@@ -194,6 +198,13 @@ package com.mparticle;
     public interface GCMNotificationKeys {
         public static final String TITLE = "mp::notification::title";
         public static final String TEXT = "mp::notification::text";
+    }
+
+    public interface StateTransitionType {
+        public static final String STATE_TRANS_INIT = "app_init";
+        public static final String STATE_TRANS_EXIT = "app_exit";
+        public static final String STATE_TRANS_BG = "app_back";
+        public static final String STATE_TRANS_FORE = "app_fore";
     }
 
 }
