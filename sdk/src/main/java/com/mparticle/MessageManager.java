@@ -36,7 +36,7 @@ import java.util.UUID;
             Process.THREAD_PRIORITY_BACKGROUND);
     private static final HandlerThread sUploadHandlerThread = new HandlerThread("mParticleUploadHandler",
             Process.THREAD_PRIORITY_BACKGROUND);
-
+    static final Runtime rt = Runtime.getRuntime();
     private static String sActiveNetworkName = "offline";
     private static Location sLocation;
     private static boolean sDebugMode;
@@ -210,7 +210,10 @@ import java.util.UUID;
         infoJson.put(MessageKey.STATE_INFO_BATTERY_LVL, sBatteryLevel);
         infoJson.put(MessageKey.STATE_INFO_TIME_SINCE_START, System.currentTimeMillis() - sStartTime);
         infoJson.put(MessageKey.STATE_INFO_AVAILABLE_DISK, MPUtility.getAvailableInternalDisk());
-        infoJson.put(MessageKey.STATE_INFO_APP_MEMORY, MPUtility.getAppMemoryUsage());
+        infoJson.put(MessageKey.STATE_INFO_AVAILABLE_EXT_DISK, MPUtility.getAvailableExternalDisk());
+        infoJson.put(MessageKey.STATE_INFO_APP_MEMORY_USAGE, rt.totalMemory());
+        infoJson.put(MessageKey.STATE_INFO_APP_MEMORY_AVAIL, rt.freeMemory());
+        infoJson.put(MessageKey.STATE_INFO_APP_MEMORY_MAX, rt.maxMemory());
         infoJson.put(MessageKey.STATE_INFO_GPS, MPUtility.getGpsEnabled(mContext));
         infoJson.put(MessageKey.STATE_INFO_DATA_CONNECTION, sActiveNetworkName);
         int orientation = MPUtility.getOrientation(mContext);

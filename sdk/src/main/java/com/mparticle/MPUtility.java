@@ -111,7 +111,7 @@ class MPUtility {
 
     public static long getAvailableExternalDisk() {
         long availableSpace = -1L;
-        File path = Environment.getDataDirectory();
+        File path = Environment.getExternalStorageDirectory();
         StatFs stat = new StatFs(path.getPath());
         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.JELLY_BEAN_MR1){
             availableSpace = stat.getAvailableBlocksLong() * stat.getBlockSizeLong();
@@ -119,10 +119,6 @@ class MPUtility {
             availableSpace = (long) stat.getAvailableBlocks() * (long) stat.getBlockSize();
         }
         return availableSpace;
-    }
-
-    public static long getAppMemoryUsage() {
-        return 0;
     }
 
     public static int getOrientation(Context context)
