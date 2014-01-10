@@ -198,11 +198,19 @@ public class MParticleAPI {
                 }
 
                 sInstanceMap.put(apiKey, apiInstance);
+
+                apiInstance.logStateTransition(Constants.StateTransitionType.STATE_TRANS_INIT);
             }
         }
 
         return apiInstance;
     }
+
+    void logStateTransition(String transitionType) {
+        ensureActiveSession();
+        mMessageManager.logStateTransition(transitionType, mSessionID, mSessionStartTime);
+    }
+
     /**
      * Initialize or return an instance of the mParticle SDK
      *

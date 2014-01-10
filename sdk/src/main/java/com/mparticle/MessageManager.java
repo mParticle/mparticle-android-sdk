@@ -410,6 +410,17 @@ import java.util.UUID;
         mUploadHandler.setUploadInterval(uploadInterval);
     }
 
+    public void logStateTransition(String stateTransInit, String sessionId, long sessionStartTime) {
+        try {
+            JSONObject message = createMessage(MessageType.APP_STATE_TRANSITION, sessionId, sessionStartTime, System.currentTimeMillis(),
+                    null, null);
+            message.put(MessageKey.STATE_TRANSITION_TYPE, stateTransInit);
+            mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
+        } catch (JSONException e) {
+            Log.w(TAG, "Failed to create mParticle state transition message");
+        }
+    }
+
     private static class StatusBroadcastReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context appContext, Intent intent) {

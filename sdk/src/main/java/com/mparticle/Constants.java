@@ -14,7 +14,7 @@ package com.mparticle;
     public static final long DEFAULT_UPLOAD_INTERVAL = 10 * 60 * 1000; // 10 minutes
     // internal (millis) between uploads when in debug mode
     public static final int DEBUG_UPLOAD_INTERVAL = 3 * 1000; // 3 seconds
-    // name of the preferences file
+    // preferences persistence
     public static final String PREFS_FILE = "mParticlePrefs";
     // misc persistence
     public static final String MISC_FILE = "mParticleMisc";
