@@ -246,7 +246,8 @@ public class MParticleAPI {
         long initialStartTime = mSessionStartTime;
         ensureActiveSession();
         if (initialStartTime == mSessionStartTime) {
-            debugLog("Resumed session");
+            if (mDebugMode)
+                debugLog("Resumed session");
         }
     }
 
@@ -266,7 +267,8 @@ public class MParticleAPI {
         mLastEventTime = stopTime;
         stopActiveSession(mLastEventTime);
         mMessageManager.stopSession(mSessionID, stopTime, mSessionLength);
-        debugLog("Stopped session");
+        if (mDebugMode)
+            debugLog("Stopped session");
     }
 
     /**
@@ -297,7 +299,9 @@ public class MParticleAPI {
      * @param sessionEndTime
      */
     private void endSession(long sessionEndTime) {
-        debugLog("Ended session");
+        if (mDebugMode)
+            debugLog("Ended session");
+
         if (0 == sessionEndTime) {
             sessionEndTime = System.currentTimeMillis();
         }
@@ -335,7 +339,9 @@ public class MParticleAPI {
     /* package-private */void checkSessionTimeout() {
         long now = System.currentTimeMillis();
         if (0 != mSessionStartTime && (mSessionTimeout > 0) && (mSessionTimeout < now - mLastEventTime)) {
-            debugLog("Session timed out");
+            if (mDebugMode)
+                debugLog("Session timed out");
+
             endSession(mLastEventTime);
         }
     }
@@ -352,7 +358,8 @@ public class MParticleAPI {
         mSessionAttributes = new JSONObject();
         mMessageManager.startSession(mSessionID, mSessionStartTime, mLaunchUri);
         mTimeoutHandler.sendEmptyMessageDelayed(0, mSessionTimeout);
-        debugLog("Started new session");
+        if (mDebugMode)
+            debugLog("Started new session");
         // clear the launch URI so it isn't sent on future sessions
         mLaunchUri = null;
     }
@@ -369,7 +376,8 @@ public class MParticleAPI {
      */
     public void setInstallReferrer(String referrer) {
         sPreferences.edit().putString(PrefKeys.INSTALL_REFERRER, referrer).commit();
-        debugLog("Set installReferrer: "+referrer);
+        if (mDebugMode)
+            debugLog("Set installReferrer: "+referrer);
     }
 
     /**
@@ -410,11 +418,12 @@ public class MParticleAPI {
         if (checkEventLimit()) {
             JSONObject eventDataJSON = enforceAttributeConstraints(eventData);
             mMessageManager.logEvent(mSessionID, mSessionStartTime, mLastEventTime, eventName, eventType, eventDataJSON);
-            if (null == eventDataJSON) {
-                debugLog("Logged event: " + eventName);
-            } else {
-                debugLog("Logged event: " + eventName + " with data " + eventDataJSON);
-            }
+            if (mDebugMode)
+                if (null == eventDataJSON) {
+                    debugLog("Logged event: " + eventName);
+                } else {
+                    debugLog("Logged event: " + eventName + " with data " + eventDataJSON);
+                }
         }
     }
 
@@ -422,7 +431,7 @@ public class MParticleAPI {
      * Log a screen view event
      *
      * @param screenName
-     *            the name of the View to be tracked
+     *            the name of the screen to be tracked
      */
     public void logScreenView(String screenName) {
         logScreenView(screenName, null);
@@ -432,7 +441,7 @@ public class MParticleAPI {
      * Log a screen view event with data attributes
      *
      * @param screenName
-     *            the name of the View to be tracked
+     *            the name of the screen to be tracked
      * @param eventData
      *            a Map of data attributes
      */
@@ -452,21 +461,70 @@ public class MParticleAPI {
         if (checkEventLimit()) {
             JSONObject eventDataJSON = enforceAttributeConstraints(eventData);
             mMessageManager.logScreen(mSessionID, mSessionStartTime, mLastEventTime, screenName, eventDataJSON);
-            if (null == eventDataJSON) {
-                debugLog("Logged screen: " + screenName);
-            } else {
-                debugLog("Logged screen: " + screenName + " with data " + eventDataJSON);
-            }
+            if (mDebugMode)
+                if (null == eventDataJSON) {
+                    debugLog("Logged screen: " + screenName);
+                } else {
+                    debugLog("Logged screen: " + screenName + " with data " + eventDataJSON);
+                }
         }
     }
 
     /**
-     * Log an error event with a message
+     * Log an error event with just a Message
      *
      * @param message
      *            the name of the error event to be tracked
      */
     public void logErrorEvent(String message) {
+        logErrorEvent(message, null, null);
+    }
+
+    /**
+     * Log an error event with just an Exception
+     *
+     * @param exception
+     *            an Exception
+     */
+    public void logErrorEvent(Exception exception) {
+        logErrorEvent(null, exception, null);
+    }
+
+    /**
+     * Log an error event with an Exception and any additional data
+     *
+     * @param exception
+     *            an Exception
+     * @param eventData
+     *            a Map of data attributes
+     */
+    public void logErrorEvent(Exception exception, Map<String, String> eventData) {
+        logErrorEvent(null, exception, eventData);
+    }
+
+    /**
+     * Log an error event with an Exception and any additional data
+     *
+     * @param message
+     *            the name of the error to be tracked
+     * @param eventData
+     *            a Map of data attributes
+     */
+    public void logErrorEvent(String message, Map<String, String> eventData) {
+        logErrorEvent(message, null, eventData);
+    }
+
+    /**
+     * Log an error event with a Message, Exception, and any additional data
+     *
+     * @param message
+     *            the name of the error event to be tracked
+     * @param exception
+     *            an Exception
+     * @param eventData
+     *            a Map of data attributes
+     */
+    public void logErrorEvent(String message, Exception exception, Map<String, String> eventData) {
         if (mOptedOut) {
             return;
         }
@@ -475,27 +533,15 @@ public class MParticleAPI {
             return;
         }
         ensureActiveSession();
-        mMessageManager.logErrorEvent(mSessionID, mSessionStartTime, mLastEventTime, message, null, true);
-        debugLog("Logged error with message: " + message);
-    }
-
-    /**
-     * Log an error event with an exception
-     *
-     * @param exception
-     *            an Exception
-     */
-    public void logErrorEvent(Exception exception) {
-        if (mOptedOut) {
-            return;
+        if (checkEventLimit()) {
+            JSONObject eventDataJSON = enforceAttributeConstraints(eventData);
+            mMessageManager.logErrorEvent(mSessionID, mSessionStartTime, mLastEventTime, message, exception, eventDataJSON);
+            if (mDebugMode)
+                debugLog(
+                        "Logged error with message: " + message == null ? "<none>" : message +
+                        " with data: " + eventDataJSON == null ? "<none>" : eventDataJSON.toString() +
+                        " with exception: " + exception == null ? "<none>" : exception.getMessage());
         }
-        if (null == exception) {
-            Log.w(TAG, "exception is required for logErrorEvent");
-            return;
-        }
-        ensureActiveSession();
-        mMessageManager.logErrorEvent(mSessionID, mSessionStartTime, mLastEventTime, null, exception, true);
-        debugLog("Logged exception: " + exception.getMessage());
     }
 
     /**
@@ -565,7 +611,8 @@ public class MParticleAPI {
             return;
         }
         ensureActiveSession();
-        debugLog("Set session attribute: " + key + "=" + value);
+        if (mDebugMode)
+            debugLog("Set session attribute: " + key + "=" + value);
         if (setCheckedAttribute(mSessionAttributes, key, value)) {
             mMessageManager.setSessionAttributes(mSessionID, mSessionAttributes);
         }
@@ -583,7 +630,8 @@ public class MParticleAPI {
         if (mOptedOut) {
             return;
         }
-        debugLog("Set user attribute: " + key + "=" + value);
+        if (mDebugMode)
+            debugLog("Set user attribute: " + key + "=" + value);
         if (setCheckedAttribute(mUserAttributes, key, value)) {
             sPreferences.edit().putString(PrefKeys.USER_ATTRS + mApiKey, mUserAttributes.toString()).commit();
         }
@@ -593,8 +641,9 @@ public class MParticleAPI {
     	if(mOptedOut){
     		return;
     	}
-    	
-    	debugLog("Setting user identity: " + id);
+
+        if (mDebugMode)
+    	    debugLog("Setting user identity: " + id);
     	
     	if (null != id && id.length() > Constants.LIMIT_ATTR_VALUE) {
             Log.w(TAG, "Id value length exceeds limit. Discarding id: " + id);
@@ -659,7 +708,8 @@ public class MParticleAPI {
         sPreferences.edit().putBoolean(PrefKeys.OPTOUT + mApiKey, optOutStatus).commit();
         mOptedOut = optOutStatus;
 
-        debugLog("Set opt-out: " + mOptedOut);
+        if (mDebugMode)
+            debugLog("Set opt-out: " + mOptedOut);
     }
 
     /**
@@ -712,7 +762,8 @@ public class MParticleAPI {
      */
     private void setSecureTransport(boolean sslEnabled) {
         mMessageManager.setSecureTransport(sslEnabled);
-        debugLog("Set secure transport: " + sslEnabled);
+        if (mDebugMode)
+            debugLog("Set secure transport: " + sslEnabled);
     }
 
     /**
@@ -807,7 +858,9 @@ public class MParticleAPI {
      *            the device registration id
      */
     /* package-private */void setPushRegistrationId(String registrationId) {
-        debugLog("Set push registration token: " + registrationId);
+        if (mDebugMode)
+            debugLog("Set push registration token: " + registrationId);
+
         if (registrationId == null) {
         	clearPushRegistrationId();
         } else {
@@ -822,7 +875,9 @@ public class MParticleAPI {
      * Called from intent handler
      */
     /* package-private */void clearPushRegistrationId() {
-        debugLog("Cleared push registration token");
+        if (mDebugMode)
+            debugLog("Cleared push registration token");
+
         String registrationId = getPushRegistrationId();
         if (null != registrationId) {
         	// set the registered msg to false
@@ -908,13 +963,11 @@ public class MParticleAPI {
     }
 
     private void debugLog(String message) {
-        if (mDebugMode) {
             if (null != mSessionID) {
                 Log.d(TAG, mApiKey + ": " + mSessionID + ": " + message);
             } else {
                 Log.d(TAG, mApiKey + ": " + message);
             }
-        }
     }
 
     private static final class SessionTimeoutHandler extends Handler {
