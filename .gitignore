@@ -17,8 +17,21 @@ doc/
 local.properties
 
 # Eclipse project files
-# .classpath
-# .project
+ .classpath
+ .project
+ .settings/
 
 # Keystore
 *keystore
+
+# OS X files
+.DS_Store
+
+# Intellij
+.idea/
+*.iml
+*.iws
+
+# Gradle
+build
+.gradle

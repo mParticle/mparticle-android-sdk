@@ -1,0 +1,43 @@
+import java.text.SimpleDateFormat
+
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:0.7.+'
+    }
+}
+apply plugin: 'android'
+
+repositories {
+    mavenCentral()
+}
+
+def buildTime() {
+    def df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'")
+    df.setTimeZone(TimeZone.getTimeZone("UTC"))
+    return df.format(new Date())
+}
+
+
+
+android {
+    compileSdkVersion 19
+    buildToolsVersion "19.0.1"
+
+    def gitHash = "git rev-parse --short HEAD".execute().text.trim()
+
+    defaultConfig {
+        minSdkVersion 8
+        targetSdkVersion 19
+        buildConfigField "String", "GIT_SHA", "\"$gitHash\""
+        buildConfigField "String", "BUILD_TIME", "\"${buildTime()}\""
+    }
+}
+
+dependencies {
+	compile 'com.android.support:support-v4:19.0.0'
+	compile 'com.android.support:appcompat-v7:19.0.0'
+    compile project(':sdk')
+}

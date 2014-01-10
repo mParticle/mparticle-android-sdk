@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:background="#5e5e5e"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:padding="5dp"
+    android:layout_height="match_parent">
+    <View
+        android:layout_width="1dp"
+        android:layout_height="20dp"/>
+
+        <EditText
+            android:layout_width="200dp"
+            android:layout_height="wrap_content"
+            android:hint="Event/Screen Name"
+            android:textColor="@android:color/white"
+            android:id="@+id/edittext"
+            android:singleLine="true"/>
+
+    <Spinner
+        android:layout_width="200dp"
+        android:id="@+id/spinner"
+        android:gravity="bottom"
+        android:layout_height="40dp"/>
+    <View
+        android:layout_width="1dp"
+        android:layout_height="5dp"/>
+
+    <CheckBox
+        android:layout_width="wrap_content"
+        android:text="Screen View"
+        android:id="@+id/checkbox"
+        android:textColor="@android:color/white"
+        android:layout_height="wrap_content" />
+    <View
+        android:layout_width="1dp"
+        android:layout_height="0dp"
+        android:layout_weight="1"/>
+    <Button
+        android:layout_width="280dp"
+        android:text="Trigger"
+        android:id="@+id/button"
+        android:layout_gravity="center_horizontal"
+        android:textColor="@android:color/white"
+        android:layout_height="50dp" />
+
+</LinearLayout>
