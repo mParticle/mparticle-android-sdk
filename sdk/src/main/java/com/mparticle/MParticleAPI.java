@@ -38,7 +38,6 @@ import com.mparticle.Constants.PrefKeys;
  * This class provides access to the mParticle API.
  */
 public class MParticleAPI {
-
     private static final String TAG = Constants.LOG_TAG;
     private static final Map<String, MParticleAPI> sInstanceMap = new HashMap<String, MParticleAPI>();
     private static final HandlerThread sTimeoutHandlerThread = new HandlerThread("mParticleSessionTimeoutHandler",

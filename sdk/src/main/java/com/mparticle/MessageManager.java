@@ -210,7 +210,7 @@ import java.util.UUID;
         infoJson.put(MessageKey.STATE_INFO_TOTAL_MEMORY, getTotalMemory());
         infoJson.put(MessageKey.STATE_INFO_BATTERY_LVL, sBatteryLevel);
         infoJson.put(MessageKey.STATE_INFO_TIME_SINCE_START, System.currentTimeMillis() - sStartTime);
-        infoJson.put(MessageKey.STATE_INFO_AVAILABLE_DISK, MPUtility.getAvailableDisk());
+        infoJson.put(MessageKey.STATE_INFO_AVAILABLE_DISK, MPUtility.getAvailableInternalDisk());
         infoJson.put(MessageKey.STATE_INFO_APP_MEMORY, MPUtility.getAppMemoryUsage());
         infoJson.put(MessageKey.STATE_INFO_GPS, MPUtility.getGpsEnabled(mContext));
         infoJson.put(MessageKey.STATE_INFO_DATA_CONNECTION, sActiveNetworkName);
@@ -238,7 +238,7 @@ import java.util.UUID;
         if (threshold < 0){
             threshold = MPUtility.getSystemMemoryThreshold(mContext);
             SharedPreferences.Editor edit = mPreferences.edit();
-            edit.putLong(Constants.MiscStorageKeys.MEMORY_THRESHOLD,, threshold);
+            edit.putLong(Constants.MiscStorageKeys.MEMORY_THRESHOLD, threshold);
             edit.commit();
         }
         return threshold;
