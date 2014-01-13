@@ -1,4 +1,4 @@
-package com.mparticle.droidparticles;
+package com.mparticle.particlebox;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -53,8 +53,10 @@ public class ParticleActivity extends ActionBarActivity
                 fragment = EventTestFragment.newInstance(position + 1);
                 break;
         }
-        transaction.replace(R.id.container, fragment)
+        if (fragmentManager.findFragmentByTag(mTitle.toString()) == null){
+            transaction.replace(R.id.container, fragment, mTitle.toString())
                 .commit();
+        }
     }
 
     public void onSectionAttached(int number) {

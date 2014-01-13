@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">Droid Particles</string>
+    <string name="app_name">Particle Box</string>
     <string name="title_section1">Events</string>
     <string name="title_section2">Section 2</string>
     <string name="title_section3">Section 3</string>

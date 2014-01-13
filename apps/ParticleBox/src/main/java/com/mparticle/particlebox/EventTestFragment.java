@@ -1,8 +1,11 @@
-package com.mparticle.droidparticles;
+package com.mparticle.particlebox;
 
 import android.app.Activity;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,7 +14,6 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Spinner;
-import android.widget.SpinnerAdapter;
 import android.widget.TextView;
 
 import com.mparticle.MParticleAPI;
@@ -19,7 +21,7 @@ import com.mparticle.MParticleAPI;
 /**
  * Created by sdozor on 1/7/14.
  */
-public class EventTestFragment extends Fragment implements View.OnClickListener {
+public class EventTestFragment extends Fragment implements View.OnClickListener, TextWatcher {
 
     /**
      * The fragment argument representing the section number for this
@@ -29,6 +31,7 @@ public class EventTestFragment extends Fragment implements View.OnClickListener 
     private Spinner spinner;
     private EditText editText;
     private CheckBox checkBox;
+    private Button button;
 
     /**
      * Returns a new instance of this fragment for the given section
@@ -47,18 +50,25 @@ public class EventTestFragment extends Fragment implements View.OnClickListener 
     }
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setRetainInstance(true);
+    public void onSaveInstanceState(Bundle outState) {
+        outState.putCharSequence("eventlabel", editText.getText());
+        super.onSaveInstanceState(outState);
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_events, container, false);
+
         spinner = (Spinner)v.findViewById(R.id.spinner);
+
+        button = (Button)v.findViewById(R.id.button);
         v.findViewById(R.id.button).setOnClickListener(this);
         editText = (EditText)v.findViewById(R.id.edittext);
+        editText.addTextChangedListener(this);
+        if (savedInstanceState != null){
+            editText.setText(savedInstanceState.getCharSequence("eventlabel"));
+        }
         checkBox = (CheckBox)v.findViewById(R.id.checkbox);
         spinner.setAdapter(new ArrayAdapter<MParticleAPI.EventType>(
                 v.getContext(),
@@ -81,5 +91,21 @@ public class EventTestFragment extends Fragment implements View.OnClickListener 
         }else{
             MParticleAPI.getInstance(v.getContext()).logEvent(editText.getText().toString(), (MParticleAPI.EventType)spinner.getSelectedItem());
         }
+    }
+
+
+    @Override
+    public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+    }
+
+    @Override
+    public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+    }
+
+    @Override
+    public void afterTextChanged(Editable s) {
+        button.setEnabled(editText.getText().length() > 0);
     }
 }

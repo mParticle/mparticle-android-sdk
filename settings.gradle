@@ -1,2 +1,1 @@
-include 'sdk:mParticleSDK'
-include 'apps:DroidParticles'
+include 'sdk:mParticleSDK', 'apps:ParticleBox'

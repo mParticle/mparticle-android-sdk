@@ -85,7 +85,10 @@ import com.mparticle.Constants.PrefKeys;
             attributes.put(MessageKey.PLATFORM, "Android");
             attributes.put(MessageKey.OS_VERSION, android.os.Build.VERSION.SDK_INT);
             attributes.put(MessageKey.MODEL, android.os.Build.MODEL);
-            attributes.put(MessageKey.DEVICE_ROOTED, isPhoneRooted());
+
+            JSONObject rootedObject = new JSONObject();
+            rootedObject.put(MessageKey.DEVICE_ROOTED_CYDIA, isPhoneRooted());
+            attributes.put(MessageKey.DEVICE_ROOTED, rootedObject);
 
             // screen height/width
             WindowManager windowManager = (WindowManager) appContext.getSystemService(Context.WINDOW_SERVICE);

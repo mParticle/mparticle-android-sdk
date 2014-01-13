@@ -98,6 +98,7 @@ package com.mparticle;
         public static final String DEVICE_LOCALE_COUNTRY = "dlc";
         public static final String DEVICE_LOCALE_LANGUAGE = "dll";
         public static final String DEVICE_ROOTED = "jb";
+        public static final String DEVICE_ROOTED_CYDIA = "cydia";
         // state info
         public static final String STATE_INFO_KEY = "cs";
         public static final String STATE_INFO_CPU = "cpu";
@@ -143,7 +144,6 @@ package com.mparticle;
         // push-notifications
         public static final String PUSH_TOKEN = "to";
         public static final String PUSH_REGISTER_FLAG = "r";
-
     }
 
     public interface PrefKeys {

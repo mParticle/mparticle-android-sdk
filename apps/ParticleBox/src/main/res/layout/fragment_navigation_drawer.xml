@@ -1,0 +1,58 @@
+<LinearLayout android:background="#7835AB" android:orientation="vertical" xmlns:android="http://schemas.android.com/apk/res/android" android:layout_height="match_parent" android:layout_width="match_parent">
+    <ListView
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:id="@+id/listView"
+        android:layout_weight="1"
+        android:choiceMode="singleChoice"
+        android:divider="@android:color/transparent"
+        android:dividerHeight="0dp"
+        tools:context="com.mparticle.particlebox.NavigationDrawerFragment" />
+    <LinearLayout
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="5dp"
+        android:layout_width="match_parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:orientation="vertical"
+            android:paddingBottom="5dp"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:layout_height="wrap_content"
+                android:text="Production "
+                android:textSize="10dp"
+                android:textColor="@android:color/white"
+                android:layout_width="wrap_content" />
+
+            <CheckBox
+                android:layout_width="wrap_content"
+                android:enabled="false"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
+
+
+        <TextView
+            android:layout_height="wrap_content"
+            android:id="@+id/versionCode"
+            android:textSize="10dp"
+            android:textColor="@android:color/white"
+            android:layout_width="wrap_content" />
+        <TextView
+            android:layout_height="wrap_content"
+            android:id="@+id/gitSha"
+            android:textSize="10dp"
+            android:textColor="@android:color/white"
+            android:layout_width="wrap_content" />
+        <TextView
+            android:layout_height="wrap_content"
+            android:textColor="@android:color/white"
+            android:textSize="10dp"
+            android:layout_width="wrap_content" android:id="@+id/appBuildDate" />
+
+        </LinearLayout>
+
+</LinearLayout>
