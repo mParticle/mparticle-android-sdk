@@ -538,9 +538,9 @@ public class MParticleAPI {
             mMessageManager.logErrorEvent(mSessionID, mSessionStartTime, mLastEventTime, message, exception, eventDataJSON);
             if (mDebugMode)
                 debugLog(
-                        "Logged error with message: " + message == null ? "<none>" : message +
-                        " with data: " + eventDataJSON == null ? "<none>" : eventDataJSON.toString() +
-                        " with exception: " + exception == null ? "<none>" : exception.getMessage());
+                        "Logged error with message: " + (message == null ? "<none>" : message) +
+                        " with data: " + (eventDataJSON == null ? "<none>" : eventDataJSON.toString()) +
+                        " with exception: " + (exception == null ? "<none>" : exception.getMessage()));
         }
     }
 
