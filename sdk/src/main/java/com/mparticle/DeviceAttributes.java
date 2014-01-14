@@ -70,6 +70,7 @@ import com.mparticle.Constants.PrefKeys;
             attributes.put(MessageKey.MPARTICLE_INSTALL_TIME, preferences.getLong(PrefKeys.INSTALL_TIME, 0));
             attributes.put(MessageKey.INSTALL_REFERRER, preferences.getString(PrefKeys.INSTALL_REFERRER, null));
             attributes.put(MessageKey.BUILD_ID, MPUtility.getBuildUUID(appContext));
+            attributes.put(MessageKey.APP_DEBUG_SIGNING, MPUtility.isDebug(packageManager, packageName));
         } catch (JSONException e) {
             // ignore JSON exceptions
         }
@@ -143,7 +144,7 @@ import com.mparticle.Constants.PrefKeys;
                 }
 
             }
-
+            attributes.put(MessageKey.DEVICE_IS_TABLET, appContext.getResources().getBoolean(com.mparticle.R.bool.mp_isTablet));
             attributes.put(MessageKey.DEVICE_ANID, MPUtility.getAndroidID(appContext));
             attributes.put(MessageKey.DEVICE_OPEN_UDID, MPUtility.getOpenUDID(appContext));
 

@@ -5,6 +5,7 @@ import android.app.ActivityManager;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.content.pm.Signature;
 import android.content.res.Configuration;
 import android.location.LocationManager;
 import android.os.Build;
@@ -16,6 +17,7 @@ import android.view.Display;
 import android.view.WindowManager;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileReader;
@@ -23,7 +25,10 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.math.BigInteger;
 import java.security.SecureRandom;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
 import java.util.Iterator;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.TimeZone;
@@ -284,6 +289,19 @@ class MPUtility {
         }
         return str;
     }
-
+    public static boolean isDebug(PackageManager paramPackageManager, String paramString)
+    {
+        try
+        {
+            Signature localSignature = paramPackageManager.getPackageInfo(paramString, 64).signatures[0];
+            CertificateFactory localCertificateFactory = CertificateFactory.getInstance("X.509");
+            X509Certificate localX509Certificate = (X509Certificate)localCertificateFactory.generateCertificate(new ByteArrayInputStream(localSignature.toByteArray()));
+            return localX509Certificate.getIssuerDN().getName().toLowerCase(Locale.US).startsWith("cn=android debug");
+        }
+        catch (Exception localException)
+        {
+        }
+        return false;
+    }
 
 }

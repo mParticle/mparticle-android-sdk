@@ -81,6 +81,7 @@ package com.mparticle;
         public static final String MPARTICLE_INSTALL_TIME = "ict";
         public static final String INSTALL_REFERRER = "ir";
         public static final String APP_VERSION_CODE = "abn";
+        public static final String APP_DEBUG_SIGNING = "dbg";
         // device info
         public static final String BUILD_ID = "bid";
         public static final String BRAND = "b";
@@ -106,6 +107,7 @@ package com.mparticle;
         public static final String DEVICE_TIMEZONE_NAME = "tzn";
         public static final String DEVICE_OPEN_UDID = "ouid";
         public static final String DEVICE_PUSH_TOKEN = "to";
+        public static final String DEVICE_IS_TABLET = "it";
         // state info
         public static final String STATE_INFO_KEY = "cs";
         public static final String STATE_INFO_CPU = "cpu";
