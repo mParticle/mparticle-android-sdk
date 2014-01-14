@@ -91,8 +91,8 @@ import com.mparticle.Constants.PrefKeys;
                     Settings.Secure.ANDROID_ID));
 
             // device/OS attributes
-            attributes.put(MessageKey.BUILD_ID, android.os.Build.ID);
-            attributes.put(MessageKey.BRAND, android.os.Build.BRAND);
+            attributes.put(MessageKey.BUILD_ID, MPUtility.getBuildUUID(appContext));
+            attributes.put(MessageKey.BRAND, MPUtility.getGeneratedUdid());
             attributes.put(MessageKey.PRODUCT, android.os.Build.PRODUCT);
             attributes.put(MessageKey.DEVICE, android.os.Build.DEVICE);
             attributes.put(MessageKey.MANUFACTURER, android.os.Build.MANUFACTURER);
