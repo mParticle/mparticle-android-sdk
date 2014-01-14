@@ -3,27 +3,36 @@ package com.mparticle;
 import android.Manifest;
 import android.app.ActivityManager;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.location.LocationManager;
 import android.os.Build;
 import android.os.Environment;
 import android.os.StatFs;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.Display;
 import android.view.WindowManager;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.math.BigInteger;
+import java.security.SecureRandom;
+import java.util.Properties;
+import java.util.TimeZone;
 
 /**
  * Created by sdozor on 1/9/14.
  */ 
 
 class MPUtility {
+
+    private static String sOpenUDID;
 
     public static String getCpuUsage() {
         String str1 = "unknown";
@@ -121,6 +130,17 @@ class MPUtility {
         return availableSpace;
     }
 
+    public static synchronized String getAndroidID(Context paramContext)
+    {
+        String str = Settings.Secure.getString(paramContext.getContentResolver(), "android_id");
+        return (str == null) || (str.equals("9774d56d682e549c")) || (str.equals("0000000000000000")) || (str.length() < 15) ? null : str;
+    }
+
+    public static String getTimeZone()
+    {
+        return TimeZone.getDefault().getDisplayName(false, 0);
+    }
+
     public static int getOrientation(Context context)
     {
         WindowManager windowManager = (WindowManager) context
@@ -174,5 +194,29 @@ class MPUtility {
         catch (IOException e){
             return -1;
         }
+    }
+
+    public static synchronized String getOpenUDID(Context context){
+        if (sOpenUDID == null){
+            SharedPreferences sharedPrefs = context.getSharedPreferences(
+                    Constants.MISC_FILE, Context.MODE_PRIVATE);
+            sOpenUDID = sharedPrefs.getString(Constants.PrefKeys.OPEN_UDID, null);
+            if (sOpenUDID == null){
+                sOpenUDID = getAndroidID(context);
+                if (sOpenUDID == null)
+                    sOpenUDID = getGeneratedUdid();
+
+                SharedPreferences.Editor editor = sharedPrefs.edit();
+                editor.putString(Constants.PrefKeys.OPEN_UDID, sOpenUDID);
+                editor.commit();
+            }
+        }
+        return sOpenUDID;
+    }
+
+    static String getGeneratedUdid()
+    {
+        SecureRandom localSecureRandom = new SecureRandom();
+        return new BigInteger(64, localSecureRandom).toString(16);
     }
 }
