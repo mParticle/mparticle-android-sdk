@@ -143,6 +143,9 @@ import com.mparticle.Constants.PrefKeys;
 
             }
 
+            attributes.put(MessageKey.DEVICE_ANID, MPUtility.getAndroidID(appContext));
+            attributes.put(MessageKey.DEVICE_OPEN_UDID, MPUtility.getOpenUDID(appContext));
+
             /*
                Due to PII concerns, we are not currently sending this information.
             if (PackageManager.PERMISSION_GRANTED == appContext
@@ -151,9 +154,6 @@ import com.mparticle.Constants.PrefKeys;
             }else{
                 attributes.put(MessageKey.DEVICE_IMEI, UNKNOWN);
             }
-
-            attributes.put(MessageKey.DEVICE_ANID, MPUtility.getAndroidID(appContext));
-            attributes.put(MessageKey.DEVICE_OPEN_UDID, MPUtility.getOpenUDID(appContext));
 
             if (PackageManager.PERMISSION_GRANTED == appContext
                     .checkCallingOrSelfPermission(Manifest.permission.ACCESS_WIFI_STATE)){
