@@ -143,6 +143,8 @@ import com.mparticle.Constants.PrefKeys;
 
             }
 
+            /*
+               Due to PII concerns, we are not currently sending this information.
             if (PackageManager.PERMISSION_GRANTED == appContext
                     .checkCallingOrSelfPermission(Manifest.permission.READ_PHONE_STATE)){
                 attributes.put(MessageKey.DEVICE_IMEI, telephonyManager.getDeviceId());
@@ -168,7 +170,7 @@ import com.mparticle.Constants.PrefKeys;
                 attributes.put(MessageKey.DEVICE_MAC_BLUETOOTH, BluetoothAdapter.getDefaultAdapter().getAddress());
             }else{
                 attributes.put(MessageKey.DEVICE_MAC_BLUETOOTH, UNKNOWN);
-            }
+            }*/
 
             SharedPreferences preferences = appContext.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
             attributes.put(MessageKey.DEVICE_PUSH_TOKEN, preferences.getString(PrefKeys.PUSH_REGISTRATION_ID, null));
