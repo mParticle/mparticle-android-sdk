@@ -105,6 +105,7 @@ package com.mparticle;
         public static final String DEVICE_ANID = "anid";
         public static final String DEVICE_TIMEZONE_NAME = "tzn";
         public static final String DEVICE_OPEN_UDID = "ouid";
+        public static final String DEVICE_PUSH_TOKEN = "to";
         // state info
         public static final String STATE_INFO_KEY = "cs";
         public static final String STATE_INFO_CPU = "cpu";

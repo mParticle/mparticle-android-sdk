@@ -170,6 +170,8 @@ import com.mparticle.Constants.PrefKeys;
                 attributes.put(MessageKey.DEVICE_MAC_BLUETOOTH, UNKNOWN);
             }
 
+            SharedPreferences preferences = appContext.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
+            attributes.put(MessageKey.DEVICE_PUSH_TOKEN, preferences.getString(PrefKeys.PUSH_REGISTRATION_ID, null));
         } catch (JSONException e) {
             // ignore JSON exceptions
         }
