@@ -22,6 +22,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Event title (required)"
+            android:text="Particle Box Event"
             android:id="@+id/edittext"
             android:singleLine="true"/>
 
@@ -63,6 +64,7 @@
         android:layout_height="wrap_content"
         android:hint="Screen name (required)"
         android:id="@+id/edittext2"
+        android:text="Particle Box Screen"
         android:singleLine="true"/>
 
     <View
@@ -96,6 +98,7 @@
         <EditText
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:text="Particle Box Error"
             android:hint="Error Message (required)"
             android:id="@+id/edittext3"
             android:singleLine="true"/>
