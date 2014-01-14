@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.mparticle.particlebox"
-    android:versionCode="1"
-    android:versionName="0.10" >
+    android:versionCode="2"
+    android:versionName="0.11" >
 
     <uses-sdk
         android:minSdkVersion="8"
