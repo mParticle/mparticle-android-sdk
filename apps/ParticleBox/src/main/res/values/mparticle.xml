@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<resources>
+
+    <string name="mp_key">bb6ef33d0189a24b8f8f7a78104e2626</string>
+
+    <string name="mp_secret">cFlt7oaYxdpdNKoyQdrlP6f6OSp5z5pYX7ElbY3HSjuIY2DHL1MDIgOmRcdBo6qy</string>
+
+    <bool name="mp_reportUncaughtExceptions">true</bool>
+
+    <integer name="mp_sessionTimeout">30</integer>
+
+    <integer name="mp_debugUploadInterval">30</integer>
+
+    <integer name="mp_productionUploadInterval">30</integer>
+
+    <bool name="mp_useSecureTransport">false</bool>
+
+    <bool name="mp_enableDebug">true</bool>
+
+</resources>

@@ -103,8 +103,8 @@ public class NavigationDrawerFragment extends Fragment {
                         getString(R.string.title_section1),
                 }));
         mDrawerListView.setItemChecked(mCurrentSelectedPosition, true);
-        ((TextView)v.findViewById(R.id.versionCode)).setText("Version code: " + BuildConfig.VERSION_CODE);
-        ((TextView)v.findViewById(R.id.gitSha)).setText("SHA-1: " + BuildConfig.GIT_SHA);
+        ((TextView)v.findViewById(R.id.versionCode)).setText("App Version code: " + BuildConfig.VERSION_CODE);
+        ((TextView)v.findViewById(R.id.gitSha)).setText("Git SHA-1: " + BuildConfig.GIT_SHA);
         ((TextView)v.findViewById(R.id.appBuildDate)).setText("Build Time: " + BuildConfig.BUILD_TIME);
 
         return v;

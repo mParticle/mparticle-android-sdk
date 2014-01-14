@@ -71,7 +71,6 @@ public class ParticleActivity extends ActionBarActivity
                 mTitle = getString(R.string.title_section3);
                 break;
         }
-        MParticleAPI.getInstance(this).logScreenView(mTitle.toString());
     }
 
     public void restoreActionBar() {
