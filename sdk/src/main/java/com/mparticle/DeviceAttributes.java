@@ -7,11 +7,15 @@ import java.util.TimeZone;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.Manifest;
+import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiManager;
 import android.provider.Settings;
 import android.telephony.TelephonyManager;
 import android.util.DisplayMetrics;
@@ -113,7 +117,8 @@ import com.mparticle.Constants.PrefKeys;
             attributes.put(MessageKey.DEVICE_COUNTRY, locale.getDisplayCountry());
             attributes.put(MessageKey.DEVICE_LOCALE_COUNTRY, locale.getCountry());
             attributes.put(MessageKey.DEVICE_LOCALE_LANGUAGE, locale.getLanguage());
-
+            attributes.put(MessageKey.DEVICE_TIMEZONE_NAME, MPUtility.getTimeZone());
+            attributes.put(MessageKey.TIMEZONE, TimeZone.getDefault().getRawOffset() / (1000 * 60 * 60));
             // network
             TelephonyManager telephonyManager = (TelephonyManager) appContext
                     .getSystemService(Context.TELEPHONY_SERVICE);
@@ -135,9 +140,38 @@ import com.mparticle.Constants.PrefKeys;
                     attributes.put(MessageKey.MOBILE_NETWORK_CODE, networkOperator.substring(0, 3));
                     attributes.put(MessageKey.MOBILE_COUNTRY_CODE, networkOperator.substring(3));
                 }
+
             }
-            // timezone
-            attributes.put(MessageKey.TIMEZONE, TimeZone.getDefault().getRawOffset() / (1000 * 60 * 60));
+
+            if (PackageManager.PERMISSION_GRANTED == appContext
+                    .checkCallingOrSelfPermission(Manifest.permission.READ_PHONE_STATE)){
+                attributes.put(MessageKey.DEVICE_IMEI, telephonyManager.getDeviceId());
+            }else{
+                attributes.put(MessageKey.DEVICE_IMEI, UNKNOWN);
+            }
+
+            attributes.put(MessageKey.DEVICE_ANID, MPUtility.getAndroidID(appContext));
+            attributes.put(MessageKey.DEVICE_OPEN_UDID, MPUtility.getOpenUDID(appContext));
+
+            if (PackageManager.PERMISSION_GRANTED == appContext
+                    .checkCallingOrSelfPermission(Manifest.permission.ACCESS_WIFI_STATE)){
+                WifiManager wifiMan = (WifiManager) appContext.getSystemService(
+                        Context.WIFI_SERVICE);
+                WifiInfo wifiInf = wifiMan.getConnectionInfo();
+                attributes.put(MessageKey.DEVICE_MAC_WIFI, wifiInf.getMacAddress());
+            }else{
+                attributes.put(MessageKey.DEVICE_MAC_WIFI, UNKNOWN);
+            }
+
+            if (PackageManager.PERMISSION_GRANTED == appContext
+                    .checkCallingOrSelfPermission(Manifest.permission.BLUETOOTH)){
+                attributes.put(MessageKey.DEVICE_MAC_BLUETOOTH, BluetoothAdapter.getDefaultAdapter().getAddress());
+            }else{
+                attributes.put(MessageKey.DEVICE_MAC_BLUETOOTH, UNKNOWN);
+            }
+
+            SharedPreferences preferences = appContext.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
+            attributes.put(MessageKey.DEVICE_PUSH_TOKEN, preferences.getString(PrefKeys.PUSH_REGISTRATION_ID, null));
         } catch (JSONException e) {
             // ignore JSON exceptions
         }

@@ -60,7 +60,6 @@ package com.mparticle;
         public static final String EVENT_DURATION = "el";
         // location
         public static final String LOCATION = "lc";
-
         public static final String LATITUDE = "lat";
         public static final String LONGITUDE = "lng";
         public static final String ACCURACY = "acc";
@@ -100,6 +99,13 @@ package com.mparticle;
         public static final String DEVICE_LOCALE_LANGUAGE = "dll";
         public static final String DEVICE_ROOTED = "jb";
         public static final String DEVICE_ROOTED_CYDIA = "cydia";
+        public static final String DEVICE_MAC_WIFI = "wmac";
+        public static final String DEVICE_MAC_BLUETOOTH = "bmac";
+        public static final String DEVICE_IMEI = "imei";
+        public static final String DEVICE_ANID = "anid";
+        public static final String DEVICE_TIMEZONE_NAME = "tzn";
+        public static final String DEVICE_OPEN_UDID = "ouid";
+        public static final String DEVICE_PUSH_TOKEN = "to";
         // state info
         public static final String STATE_INFO_KEY = "cs";
         public static final String STATE_INFO_CPU = "cpu";
@@ -118,7 +124,6 @@ package com.mparticle;
         public static final String STATE_INFO_ORIENTATION = "so";
         public static final String STATE_INFO_MEMORY_LOW = "sml";
         public static final String STATE_INFO_MEMORY_THRESHOLD = "smt";
-
         // network keys
         public static final String NETWORK_COUNTRY = "nc";
         public static final String NETWORK_CARRIER = "nca";
@@ -152,6 +157,7 @@ package com.mparticle;
         public static final String INSTALL_TIME = "mp::ict";
         public static final String PUSH_REGISTRATION_ID = "mp::push_reg_id";
         public static final String INSTALL_REFERRER = "mp::install_referrer";
+        public static final String OPEN_UDID = "mp::openudid";
         // app-key specific (append appKey to the key)
         public static final String OPTOUT = "mp::optout::";
         public static final String USER_ATTRS = "mp::user_attrs::";
