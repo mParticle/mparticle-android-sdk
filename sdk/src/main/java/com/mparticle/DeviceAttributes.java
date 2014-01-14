@@ -69,6 +69,7 @@ import com.mparticle.Constants.PrefKeys;
             SharedPreferences preferences = appContext.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
             attributes.put(MessageKey.MPARTICLE_INSTALL_TIME, preferences.getLong(PrefKeys.INSTALL_TIME, 0));
             attributes.put(MessageKey.INSTALL_REFERRER, preferences.getString(PrefKeys.INSTALL_REFERRER, null));
+            attributes.put(MessageKey.BUILD_ID, MPUtility.getBuildUUID(appContext));
         } catch (JSONException e) {
             // ignore JSON exceptions
         }
@@ -91,7 +92,7 @@ import com.mparticle.Constants.PrefKeys;
                     Settings.Secure.ANDROID_ID));
 
             // device/OS attributes
-            attributes.put(MessageKey.BUILD_ID, MPUtility.getBuildUUID(appContext));
+            attributes.put(MessageKey.BUILD_ID, android.os.Build.ID);
             attributes.put(MessageKey.BRAND, MPUtility.getGeneratedUdid());
             attributes.put(MessageKey.PRODUCT, android.os.Build.PRODUCT);
             attributes.put(MessageKey.DEVICE, android.os.Build.DEVICE);
