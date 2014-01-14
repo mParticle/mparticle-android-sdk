@@ -1,27 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
-
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android" android:layout_height="match_parent" android:layout_width="match_parent">
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:background="#ffffff"
     android:orientation="vertical" android:layout_width="match_parent"
     android:padding="5dp"
-    android:layout_height="match_parent">
+    android:layout_height="wrap_content">
 
 <LinearLayout
     android:layout_width="match_parent" android:orientation="vertical" android:background="@drawable/gray_border" android:padding="5dp"
     android:layout_height="wrap_content">
+    <TextView
+        android:text="Events"
+        android:textStyle="bold"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
     <View
         android:layout_width="1dp"
         android:layout_height="20dp"/>
 
         <EditText
-            android:layout_width="200dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Event title (required)"
             android:id="@+id/edittext"
             android:singleLine="true"/>
 
     <Spinner
-        android:layout_width="200dp"
+        android:layout_width="match_parent"
         android:id="@+id/spinner"
         android:gravity="bottom"
         android:layout_height="40dp"/>
@@ -29,21 +34,118 @@
         android:layout_width="1dp"
         android:layout_height="5dp"/>
 
-    <CheckBox
-        android:layout_width="wrap_content"
-        android:text="Screen View"
-        android:id="@+id/checkbox"
-        android:textColor="#5e5e5e"
-        android:layout_height="wrap_content" />
-
     <Button
         android:layout_width="280dp"
-        android:text="Trigger"
+        android:text="@string/triggerText"
         android:id="@+id/button"
         android:enabled="false"
         android:layout_gravity="center_horizontal"
         android:textColor="@android:color/white"
         android:layout_height="50dp" />
 </LinearLayout>
+    <View
+        android:layout_width="1dp"
+        android:layout_height="5dp"/>
+    <LinearLayout
+    android:layout_width="match_parent" android:orientation="vertical" android:background="@drawable/gray_border" android:padding="5dp"
+    android:layout_height="wrap_content">
+        <TextView
+            android:text="Screen Views"
+            android:layout_width="wrap_content"
+            android:textStyle="bold"
+            android:layout_height="wrap_content" />
+    <View
+        android:layout_width="1dp"
+        android:layout_height="20dp"/>
+
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Screen name (required)"
+        android:id="@+id/edittext2"
+        android:singleLine="true"/>
+
+    <View
+        android:layout_width="1dp"
+        android:layout_height="5dp"/>
+
+    <Button
+        android:layout_width="280dp"
+        android:text="@string/triggerText"
+        android:id="@+id/button2"
+        android:enabled="false"
+        android:layout_gravity="center_horizontal"
+        android:textColor="@android:color/white"
+        android:layout_height="50dp" />
+</LinearLayout>
+    <View
+        android:layout_width="1dp"
+        android:layout_height="5dp"/>
+    <LinearLayout
+        android:layout_width="match_parent" android:orientation="vertical" android:background="@drawable/gray_border" android:padding="5dp"
+        android:layout_height="wrap_content">
+        <TextView
+            android:text="Handled Errors"
+            android:layout_width="wrap_content"
+            android:textStyle="bold"
+            android:layout_height="wrap_content" />
+        <View
+            android:layout_width="1dp"
+            android:layout_height="20dp"/>
+
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Error Message (required)"
+            android:id="@+id/edittext3"
+            android:singleLine="true"/>
+
+        <View
+            android:layout_width="1dp"
+            android:layout_height="5dp"/>
+
+        <Button
+            android:layout_width="280dp"
+            android:text="@string/triggerText"
+            android:id="@+id/button3"
+            android:enabled="false"
+            android:layout_gravity="center_horizontal"
+            android:textColor="@android:color/white"
+            android:layout_height="50dp" />
+    </LinearLayout>
+    <View
+        android:layout_width="1dp"
+        android:layout_height="5dp"/>
+    <LinearLayout
+        android:layout_width="match_parent" android:orientation="vertical" android:background="@drawable/gray_border" android:padding="5dp"
+        android:layout_height="wrap_content">
+        <TextView
+            android:text="Unhandled Errors"
+            android:layout_width="wrap_content"
+            android:textStyle="bold"
+            android:layout_height="wrap_content" />
+        <View
+            android:layout_width="1dp"
+            android:layout_height="20dp"/>
+
+        <Spinner
+            android:layout_width="match_parent"
+            android:id="@+id/spinner2"
+            android:gravity="bottom"
+            android:layout_height="40dp"/>
+
+        <View
+            android:layout_width="1dp"
+            android:layout_height="5dp"/>
+
+        <Button
+            android:layout_width="280dp"
+            android:text="Crash in 2 seconds"
+            android:id="@+id/button4"
+            android:layout_gravity="center_horizontal"
+            android:textColor="@android:color/white"
+            android:layout_height="50dp" />
+    </LinearLayout>
 
 </LinearLayout>
+</ScrollView>
