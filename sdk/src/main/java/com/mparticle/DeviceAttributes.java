@@ -22,6 +22,9 @@ import com.mparticle.Constants.PrefKeys;
 
 /* package-private */class DeviceAttributes {
 
+    //re-use this whenever an attribute can't be determined
+    private static final String UNKNOWN = "unknown";
+
     /**
      * Generates a collection of application attributes
      *
@@ -36,6 +39,13 @@ import com.mparticle.Constants.PrefKeys;
             PackageManager packageManager = appContext.getPackageManager();
             String packageName = appContext.getPackageName();
             attributes.put(MessageKey.APP_PACKAGE_NAME, packageName);
+            try{
+                PackageInfo pInfo = appContext.getPackageManager().getPackageInfo(packageName, 0);
+                attributes.put(MessageKey.APP_VERSION_CODE, Integer.toString(pInfo.versionCode));
+            }catch (PackageManager.NameNotFoundException nnfe){
+                attributes.put(MessageKey.APP_VERSION_CODE, UNKNOWN);
+            }
+
             String installerPackageName = packageManager.getInstallerPackageName(packageName);
             if (null != installerPackageName) {
                 attributes.put(MessageKey.APP_INSTALLER_NAME, installerPackageName);

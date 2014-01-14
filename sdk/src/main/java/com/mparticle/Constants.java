@@ -81,6 +81,7 @@ package com.mparticle;
         public static final String APP_INSTALLER_NAME = "ain";
         public static final String MPARTICLE_INSTALL_TIME = "ict";
         public static final String INSTALL_REFERRER = "ir";
+        public static final String APP_VERSION_CODE = "abn";
         // device info
         public static final String BUILD_ID = "bid";
         public static final String BRAND = "b";
