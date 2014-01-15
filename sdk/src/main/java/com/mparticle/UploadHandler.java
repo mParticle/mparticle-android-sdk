@@ -314,6 +314,7 @@ import com.mparticle.MParticleDatabase.UploadTable;
 
     private JSONObject createUploadMessage(JSONArray messagesArray, boolean history) throws JSONException {
         JSONObject uploadMessage = new JSONObject();
+
         uploadMessage.put(MessageKey.TYPE, MessageType.REQUEST_HEADER);
         uploadMessage.put(MessageKey.ID, UUID.randomUUID().toString());
         uploadMessage.put(MessageKey.TIMESTAMP, System.currentTimeMillis());
@@ -321,7 +322,6 @@ import com.mparticle.MParticleDatabase.UploadTable;
         uploadMessage.put(MessageKey.MPARTICLE_VERSION, Constants.MPARTICLE_VERSION);
         
         mAppInfo.put(MessageKey.INSTALL_REFERRER, mPreferences.getString(PrefKeys.INSTALL_REFERRER, null));
-        
         uploadMessage.put(MessageKey.APP_INFO, mAppInfo);
         // if there is notification key then include it
         String regkey = mPreferences.getString(PrefKeys.PUSH_REGISTRATION_ID, null);
@@ -330,6 +330,7 @@ import com.mparticle.MParticleDatabase.UploadTable;
         } else {
         	mDeviceInfo.remove(MessageKey.PUSH_TOKEN);
         }
+
         uploadMessage.put(MessageKey.DEVICE_INFO, mDeviceInfo);
         uploadMessage.put(MessageKey.DEBUG, mSandboxMode);
 
@@ -413,7 +414,12 @@ import com.mparticle.MParticleDatabase.UploadTable;
                 try {
                     if (mDebugMode) {
                         Log.d(TAG, "Uploading data to mParticle server:");
-                        Log.d(TAG, message);
+                        try{
+                            JSONObject messageJson = new JSONObject(message);
+                            Log.d(TAG, messageJson.toString(4));
+                        }catch(JSONException jse){
+
+                        }
                     }
                     HttpResponse httpResponse = httpClient.execute(httpPost, mHttpContext);
                     if (null != httpResponse.getStatusLine()) {
