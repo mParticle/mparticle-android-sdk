@@ -43,6 +43,7 @@ public class MParticleAPI {
             Process.THREAD_PRIORITY_BACKGROUND);
     private static SharedPreferences sPreferences;
     /* package-private */static Properties sDefaultSettings;
+    private final AppStateManager mAppStateManager;
 
     private MessageManager mMessageManager;
     private Handler mTimeoutHandler;
@@ -57,8 +58,6 @@ public class MParticleAPI {
     /* package-private */long mSessionStartTime = 0;
     /* package-private */long mLastEventTime = 0;
     private int mSessionTimeout = 30 * 60 * 1000;
-    private long mSessionActiveStart = 0;
-    private int mSessionLength = 0;
     private int mEventCount = 0;
     /* package-private */JSONArray mUserIdentities = new JSONArray();
     /* package-private */JSONObject mUserAttributes = new JSONObject();
@@ -70,7 +69,7 @@ public class MParticleAPI {
         mApiKey = apiKey;
         mMessageManager = messageManager;
         mTimeoutHandler = new SessionTimeoutHandler(this, sTimeoutHandlerThread.getLooper());
-
+        mAppStateManager = new AppStateManager(mAppContext);
         mOptedOut = sPreferences.getBoolean(PrefKeys.OPTOUT + mApiKey, false);
         String userAttrs = sPreferences.getString(PrefKeys.USER_ATTRS + mApiKey, null);
         if (null != userAttrs) {
@@ -196,12 +195,11 @@ public class MParticleAPI {
                 }
             }
         }
-
         return instance;
     }
 
     void logStateTransition(String transitionType) {
-        ensureActiveSession();
+        instance.ensureActiveSession();
         mMessageManager.logStateTransition(transitionType, mSessionID, mSessionStartTime);
     }
 
@@ -267,8 +265,7 @@ public class MParticleAPI {
         }
         long stopTime = System.currentTimeMillis();
         mLastEventTime = stopTime;
-        stopActiveSession(mLastEventTime);
-        mMessageManager.stopSession(mSessionID, stopTime, mSessionLength);
+        mMessageManager.stopSession(mSessionID, stopTime, mSessionStartTime - stopTime);
         if (mDebugMode)
             debugLog("Stopped session");
     }
@@ -304,58 +301,47 @@ public class MParticleAPI {
         if (mDebugMode)
             debugLog("Ended session");
 
-        if (0 == sessionEndTime) {
-            sessionEndTime = System.currentTimeMillis();
-        }
-        stopActiveSession(sessionEndTime);
-        mMessageManager.stopSession(mSessionID, sessionEndTime, mSessionLength);
-        mMessageManager.endSession(mSessionID, sessionEndTime, mSessionLength);
+        mMessageManager.stopSession(mSessionID, sessionEndTime, sessionEndTime - mSessionStartTime);
+        mMessageManager.endSession(mSessionID, sessionEndTime, sessionEndTime - mSessionStartTime);
         // reset agent to unstarted state
         mSessionStartTime = 0;
+        mSessionID = "";
     }
 
     /**
      * Ensures a session is active.
      */
     private void ensureActiveSession() {
-        checkSessionTimeout();
+    //    checkSessionTimeout();
         mLastEventTime = System.currentTimeMillis();
         if (0 == mSessionStartTime) {
             beginSession();
-        }
-        if (0 == mSessionActiveStart) {
-            mSessionActiveStart = mLastEventTime;
-        }
-    }
-
-    private void stopActiveSession(long stopTime) {
-        if (0 != mSessionActiveStart) {
-            mSessionLength += stopTime - mSessionActiveStart;
-            mSessionActiveStart = 0;
         }
     }
 
     /**
      * Check current session timeout and end the session if needed. Will not start a new session.
      */
-    /* package-private */void checkSessionTimeout() {
+    /* package-private */boolean checkSessionTimeout() {
         long now = System.currentTimeMillis();
-        if (0 != mSessionStartTime && (mSessionTimeout > 0) && (mSessionTimeout < now - mLastEventTime)) {
+        if (0 != mSessionStartTime &&
+                mAppStateManager.isBackgrounded() &&
+                (mSessionTimeout < now - mLastEventTime)) {
             if (mDebugMode)
                 debugLog("Session timed out");
 
             endSession(mLastEventTime);
+            return true;
         }
+        return false;
     }
 
     /**
      * Creates a new session and generates the start-session message.
      */
     private void beginSession() {
-        mSessionStartTime = System.currentTimeMillis();
-        mLastEventTime = mSessionStartTime;
+        mLastEventTime = mSessionStartTime = System.currentTimeMillis();
         mSessionID = UUID.randomUUID().toString();
-        mSessionLength = 0;
         mEventCount = 0;
         mSessionAttributes = new JSONObject();
         mMessageManager.startSession(mSessionID, mSessionStartTime, mLaunchUri);
@@ -550,6 +536,7 @@ public class MParticleAPI {
     void logUnhandledError(Throwable t){
         ensureActiveSession();
         mMessageManager.logErrorEvent(mSessionID, mSessionStartTime, mLastEventTime, t != null ? t.getMessage() : null, t, null, false);
+        endSession(System.currentTimeMillis());
     }
     /**
      * Enables location tracking given a provider and update frequency criteria. The provider must
@@ -988,11 +975,8 @@ public class MParticleAPI {
         @Override
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
-            mParticleAPI.checkSessionTimeout();
-            if (0 != mParticleAPI.mSessionStartTime && mParticleAPI.mSessionTimeout > 0) {
-                long nextCheck = mParticleAPI.mLastEventTime - System.currentTimeMillis()
-                        + mParticleAPI.mSessionTimeout;
-                sendEmptyMessageDelayed(0, 1000 + nextCheck);
+            if (!mParticleAPI.checkSessionTimeout()){
+                sendEmptyMessageDelayed(0, mParticleAPI.mSessionTimeout);
             }
         }
     }

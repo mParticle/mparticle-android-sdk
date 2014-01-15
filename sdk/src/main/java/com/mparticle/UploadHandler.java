@@ -182,7 +182,7 @@ import com.mparticle.MParticleDatabase.UploadTable;
 //            processCommands();
             } else {
             	// the previous upload is not done, try again in 30 seconds
-                this.sendEmptyMessageDelayed(UPLOAD_HISTORY, 30000);
+                this.sendEmptyMessageDelayed(UPLOAD_HISTORY, 30*1000);
             }
             break;
         case CLEANUP:
@@ -244,26 +244,41 @@ import com.mparticle.MParticleDatabase.UploadTable;
             MessageTable.SESSION_ID,
             MessageTable.STATUS,
             MessageTable.STATUS,
-            Status.UPLOADED,
             Status.UPLOADED);
 
     public static final String SQL_HISTORY_MESSAGES = String.format(
-            "%s=? and ((%s='NO-SESSION') or ((%s>=?) and (%s=%d)))",
+            "%s=? and ((%s='NO-SESSION') or ((%s>=?) and (%s=%d) and (%s != ?)))",
             MessageTable.API_KEY,
             MessageTable.SESSION_ID,
             MessageTable.STATUS,
             MessageTable.STATUS,
             Status.UPLOADED,
-            Status.UPLOADED);
+            MessageTable.SESSION_ID);
+
+    public static final String SQL_FINISHED_HISTORY_MESSAGES = String.format(
+            "%s=? and ((%s='NO-SESSION') or ((%s>=?) and (%s=%d) and (%s=?)))",
+            MessageTable.API_KEY,
+            MessageTable.SESSION_ID,
+            MessageTable.STATUS,
+            MessageTable.STATUS,
+            Status.UPLOADED,
+            MessageTable.SESSION_ID);
     
     /* package-private */void prepareUploads(boolean history) {
         try {
             // select messages ready to upload
             SQLiteDatabase db = mDB.getWritableDatabase();
 
-            String selection = history ? SQL_HISTORY_MESSAGES : SQL_UPLOADABLE_MESSAGES;
-            String[] selectionArgs = new String[] { mApiKey, Integer.toString(Status.READY) };
-            String[] selectionColumns = new String[] { "_id", MessageTable.MESSAGE, MessageTable.CREATED_AT, MessageTable.STATUS };
+            String selection;
+            String[] selectionArgs;
+            if (history){
+                selection = SQL_HISTORY_MESSAGES;
+                selectionArgs = new String[] { mApiKey, Integer.toString(Status.READY), MParticleAPI.getInstance(null).mSessionID };
+            }else{
+                selection = SQL_UPLOADABLE_MESSAGES;
+                selectionArgs = new String[] { mApiKey, Integer.toString(Status.READY) };
+            }
+            String[] selectionColumns = new String[] { "_id", MessageTable.MESSAGE, MessageTable.CREATED_AT, MessageTable.STATUS, MessageTable.SESSION_ID};
 
             Cursor readyMessagesCursor = db.query(
                     MessageTable.TABLE_NAME,
@@ -272,35 +287,55 @@ import com.mparticle.MParticleDatabase.UploadTable;
                     selectionArgs,
                     null,
                     null,
-                    MessageTable.CREATED_AT + " , _id asc");
+                    MessageTable.CREATED_AT + ", " + MessageTable.SESSION_ID + " , _id asc");
 
             if (readyMessagesCursor.getCount() > 0) {
                 if (mDebugMode) {
                     Log.i(TAG, "Preparing " + readyMessagesCursor.getCount() + " events for upload");
                 }
-                JSONArray messagesArray = new JSONArray();
-                int lastMessageId = 0;
-                while (readyMessagesCursor.moveToNext()) {
-                    JSONObject msgObject = new JSONObject(readyMessagesCursor.getString(1));
-                    messagesArray.put(msgObject);
-                    lastMessageId = readyMessagesCursor.getInt(0);
-                    
-                    if (!history) {
-	                    // First run message should be in a batch by itself
-	                    if(msgObject.getString(MessageKey.TYPE).equals(Constants.MessageType.FIRST_RUN)) {
-	                    	break;
-	                    }
+                if (history){
+                    String currentSessionId;
+                    int sessionIndex = readyMessagesCursor.getColumnIndex(MessageTable.SESSION_ID);
+                    JSONArray messagesArray = new JSONArray();
+                    while (readyMessagesCursor.moveToNext()) {
+                        currentSessionId = readyMessagesCursor.getString(sessionIndex);
+
+                        JSONObject msgObject = new JSONObject(readyMessagesCursor.getString(1));
+                        messagesArray.put(msgObject);
+
+                        if (readyMessagesCursor.isLast()){
+                            JSONObject uploadMessage = createUploadMessage(messagesArray, history);
+                            // store in uploads table
+                            dbInsertUpload(db, uploadMessage);
+                            dbDeleteProcessedMessages(db, currentSessionId);
+                        }else{
+                            if (readyMessagesCursor.moveToNext() && !readyMessagesCursor.getString(sessionIndex).equals(currentSessionId)){
+                                JSONObject uploadMessage = createUploadMessage(messagesArray, history);
+                                // store in uploads table
+                                dbInsertUpload(db, uploadMessage);
+                                dbDeleteProcessedMessages(db, currentSessionId);
+                                messagesArray = new JSONArray();
+                            }
+                            readyMessagesCursor.moveToPrevious();
+                        }
                     }
-                }
-                // create upload message
-                JSONObject uploadMessage = createUploadMessage(messagesArray, history);
-                // store in uploads table
-                dbInsertUpload(db, uploadMessage);
-                if (history) {
-	                // delete processed messages
-	                dbDeleteProcessedMessages(db, lastMessageId);
-                } else {
-                	dbMarkAsUploadedMessage(db, lastMessageId);
+                }else{
+                    JSONArray messagesArray = new JSONArray();
+                    int lastMessageId = 0;
+                    while (readyMessagesCursor.moveToNext()) {
+                        JSONObject msgObject = new JSONObject(readyMessagesCursor.getString(1));
+                        messagesArray.put(msgObject);
+                        lastMessageId = readyMessagesCursor.getInt(0);
+                        // First run message should be in a batch by itself
+                        if(msgObject.getString(MessageKey.TYPE).equals(Constants.MessageType.FIRST_RUN)) {
+                            break;
+                        }
+                    }
+                    JSONObject uploadMessage = createUploadMessage(messagesArray, history);
+                    // store in uploads table
+                    dbInsertUpload(db, uploadMessage);
+                    dbMarkAsUploadedMessage(db, lastMessageId);
+
                 }
             }
         } catch (SQLiteException e) {
@@ -417,6 +452,19 @@ import com.mparticle.MParticleDatabase.UploadTable;
                         try{
                             JSONObject messageJson = new JSONObject(message);
                             Log.d(TAG, messageJson.toString(4));
+                           /* if (messageJson.has(MessageKey.MESSAGES)){
+                                JSONArray messages = messageJson.getJSONArray(MessageKey.MESSAGES);
+                                Log.d(TAG, "SENDING MESSAGES");
+                                for (int i = 0; i < messages.length(); i++){
+                                    Log.d(TAG, "Message type: " + ((JSONObject)messages.get(i)).getString(MessageKey.TYPE));
+                                }
+                            }else if (messageJson.has(MessageKey.HISTORY)){
+                                JSONArray messages = messageJson.getJSONArray(MessageKey.HISTORY);
+                                Log.d(TAG, "SENDING HISTORY");
+                                for (int i = 0; i < messages.length(); i++){
+                                    Log.d(TAG, "Message type: " + ((JSONObject)messages.get(i)).getString(MessageKey.TYPE));
+                                }
+                            }*/
                         }catch(JSONException jse){
 
                         }
@@ -598,10 +646,10 @@ import com.mparticle.MParticleDatabase.UploadTable;
         db.insert(UploadTable.TABLE_NAME, null, contentValues);
     }
 
-    private void dbDeleteProcessedMessages(SQLiteDatabase db, int lastMessageId) {
-        String[] whereArgs = new String[] { mApiKey, Integer.toString(Status.UPLOADED), Integer.toString(lastMessageId) };
-        String whereClause = SQL_HISTORY_MESSAGES + " and (_id<=?)";
-        int rowsdeleted = db.delete(MessageTable.TABLE_NAME, whereClause, whereArgs);
+    private void dbDeleteProcessedMessages(SQLiteDatabase db, String sessionId) {
+        String[] whereArgs = new String[] { mApiKey, Integer.toString(Status.UPLOADED), sessionId };
+        int rowsdeleted = db.delete(MessageTable.TABLE_NAME, SQL_FINISHED_HISTORY_MESSAGES, whereArgs);
+        Log.d("mParticle DB", "Deleted " + rowsdeleted);
     }
 
     private void dbMarkAsUploadedMessage(SQLiteDatabase db, int lastMessageId) {
@@ -619,7 +667,8 @@ import com.mparticle.MParticleDatabase.UploadTable;
     
     private void dbDeleteUpload(SQLiteDatabase db, int id) {
         String[] whereArgs = { Long.toString(id) };
-        db.delete(UploadTable.TABLE_NAME, "_id=?", whereArgs);
+        int rowsdeleted = db.delete(UploadTable.TABLE_NAME, "_id=?", whereArgs);
+        Log.d("mParticle DB", "Deleted " + rowsdeleted);
     }
 
     private void dbDeleteCommand(SQLiteDatabase db, int id) {
