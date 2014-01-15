@@ -18,7 +18,7 @@ import android.util.Log;
     @Override
     public void uncaughtException(Thread thread, Throwable ex) {
         try {
-            mMessageManager.logErrorEvent(null, 0, System.currentTimeMillis(), ex != null ? ex.getMessage() : null, ex, null, false);
+            MParticleAPI.getInstance(null).logUnhandledError(ex);
             if (null != mOriginalUncaughtExceptionHandler) {
                 mOriginalUncaughtExceptionHandler.uncaughtException(thread, ex);
             } else {
