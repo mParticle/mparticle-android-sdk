@@ -1,17 +1,5 @@
 package com.mparticle;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.lang.Thread.UncaughtExceptionHandler;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
-import java.util.UUID;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import android.app.Activity;
 import android.app.PendingIntent;
 import android.content.ComponentName;
@@ -34,12 +22,23 @@ import com.mparticle.Constants.ConfigKeys;
 import com.mparticle.Constants.MessageKey;
 import com.mparticle.Constants.PrefKeys;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.lang.Thread.UncaughtExceptionHandler;
+import java.util.Map;
+import java.util.Properties;
+import java.util.UUID;
+
 /**
  * This class provides access to the mParticle API.
  */
 public class MParticleAPI {
+    private static volatile MParticleAPI instance;
     private static final String TAG = Constants.LOG_TAG;
-    private static final Map<String, MParticleAPI> sInstanceMap = new HashMap<String, MParticleAPI>();
     private static final HandlerThread sTimeoutHandlerThread = new HandlerThread("mParticleSessionTimeoutHandler",
             Process.THREAD_PRIORITY_BACKGROUND);
     private static SharedPreferences sPreferences;
@@ -108,100 +107,96 @@ public class MParticleAPI {
      * @return An instance of the mParticle SDK configured with your API key
      */
     public static MParticleAPI getInstance(Context context, String apiKey, String secret) {
+        if (instance == null){
+            synchronized (MParticleAPI.class){
+                if (instance == null){
+                    if (null == context) {
+                        throw new IllegalArgumentException("context is required");
+                    }
 
-        if (null == context) {
-            throw new IllegalArgumentException("context is required");
-        }
+                    if (PackageManager.PERMISSION_DENIED == context
+                            .checkCallingOrSelfPermission(android.Manifest.permission.INTERNET)) {
+                        throw new IllegalArgumentException("mParticle requires android.permission.INTERNET permission");
+                    }
 
-        if (PackageManager.PERMISSION_DENIED == context
-                .checkCallingOrSelfPermission(android.Manifest.permission.INTERNET)) {
-            throw new IllegalArgumentException("mParticle requires android.permission.INTERNET permission");
-        }
+                    // initialize static objects
+                    if (null == sDefaultSettings) {
+                        Properties defaultSettings = new Properties();
+                        try {
+                            defaultSettings.load(context.getResources().getAssets().open("mparticle.properties"));
+                        } catch (FileNotFoundException e) {
+                            Log.d(TAG, "No mparticle.properties file found in the assets directory. Using defaults.");
+                        } catch (IOException e) {
+                            Log.w(TAG, "Failed to parse mparticle.properties file from assets directory");
+                        } finally {
+                            sDefaultSettings = defaultSettings;
+                        }
+                    }
+                    if (null == sPreferences) {
+                        sPreferences = context.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
+                    }
 
-        // initialize static objects
-        if (null == sDefaultSettings) {
-            Properties defaultSettings = new Properties();
-            try {
-                defaultSettings.load(context.getResources().getAssets().open("mparticle.properties"));
-            } catch (FileNotFoundException e) {
-                Log.d(TAG, "No mparticle.properties file found in the assets directory. Using defaults.");
-            } catch (IOException e) {
-                Log.w(TAG, "Failed to parse mparticle.properties file from assets directory");
-            } finally {
-                sDefaultSettings = defaultSettings;
-            }
-        }
-        if (null == sPreferences) {
-            sPreferences = context.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
-        }
+                    if (null == apiKey || null == secret) {
+                        apiKey = sDefaultSettings.getProperty(ConfigKeys.API_KEY);
+                        secret = sDefaultSettings.getProperty(ConfigKeys.API_SECRET);
+                        if (null == apiKey || null == secret) {
+                            throw new IllegalArgumentException("apiKey and secret are required");
+                        }
+                    }
 
-        if (null == apiKey || null == secret) {
-            apiKey = sDefaultSettings.getProperty(ConfigKeys.API_KEY);
-            secret = sDefaultSettings.getProperty(ConfigKeys.API_SECRET);
-            if (null == apiKey || null == secret) {
-                throw new IllegalArgumentException("apiKey and secret are required");
-            }
-        }
+                    if (!sTimeoutHandlerThread.isAlive()) {
+                        sTimeoutHandlerThread.start();
+                    }
 
-        MParticleAPI apiInstance;
-        synchronized (sInstanceMap) {
-            if (sInstanceMap.containsKey(apiKey)) {
-                apiInstance = sInstanceMap.get(apiKey);
-            } else {
-                if (!sTimeoutHandlerThread.isAlive()) {
-                    sTimeoutHandlerThread.start();
-                }
-                
-                Boolean firstRun = sPreferences.getBoolean(PrefKeys.FIRSTRUN + apiKey, true);
+                    Boolean firstRun = sPreferences.getBoolean(PrefKeys.FIRSTRUN + apiKey, true);
 
-                if(firstRun) {
-                	sPreferences.edit().putBoolean(PrefKeys.FIRSTRUN + apiKey, false).commit();
-                }
-                
-                Context appContext = context.getApplicationContext();
-                MessageManager messageManager = new MessageManager(appContext, apiKey, secret, sDefaultSettings);
-                messageManager.start(appContext, firstRun);
+                    if(firstRun) {
+                        sPreferences.edit().putBoolean(PrefKeys.FIRSTRUN + apiKey, false).commit();
+                    }
 
-                apiInstance = new MParticleAPI(appContext, apiKey, messageManager);
-                if (context instanceof Activity) {
-                    apiInstance.mLaunchUri = ((Activity) context).getIntent().getDataString();
-                    if (apiInstance.mLaunchUri != null) {
-                    	Log.d(TAG, "launchuri: "+apiInstance.mLaunchUri);
+                    Context appContext = context.getApplicationContext();
+                    MessageManager messageManager = new MessageManager(appContext, apiKey, secret, sDefaultSettings);
+                    messageManager.start(appContext, firstRun);
+
+                    instance = new MParticleAPI(appContext, apiKey, messageManager);
+                    if (context instanceof Activity) {
+                        instance.mLaunchUri = ((Activity) context).getIntent().getDataString();
+                        if (instance.mLaunchUri != null) {
+                            Log.d(TAG, "launchuri: "+instance.mLaunchUri);
+                        }
+                    }
+
+                    if (sDefaultSettings.containsKey(ConfigKeys.DEBUG_MODE)) {
+                        try {
+                            instance.setDebug(Boolean.parseBoolean(sDefaultSettings.getProperty(ConfigKeys.DEBUG_MODE)));
+                        } catch (Throwable t) {
+                            Log.w(TAG, "Failed to configure mParticle with '" + ConfigKeys.DEBUG_MODE + "' setting");
+                        }
+                    }
+                    if (sDefaultSettings.containsKey(ConfigKeys.SESSION_TIMEOUT)) {
+                        try {
+                            instance.setSessionTimeout(1000 * Integer.parseInt(sDefaultSettings.getProperty(
+                                    ConfigKeys.SESSION_TIMEOUT, "60")));
+                        } catch (Throwable t) {
+                            Log.w(TAG, "Failed to configure mParticle with '" + ConfigKeys.SESSION_TIMEOUT + "' setting");
+                        }
+                    }
+                    if (sDefaultSettings.containsKey(ConfigKeys.ENABLE_CRASH_REPORTING)) {
+                        if (Boolean.parseBoolean(sDefaultSettings.getProperty(ConfigKeys.ENABLE_CRASH_REPORTING))) {
+                            instance.enableUncaughtExceptionLogging();
+                        }
+                    }
+                    if (sDefaultSettings.containsKey(ConfigKeys.ENABLE_PUSH_NOTIFICATIONS)) {
+                        if (Boolean.parseBoolean(sDefaultSettings.getProperty(ConfigKeys.ENABLE_PUSH_NOTIFICATIONS))) {
+                            String senderId = sDefaultSettings.getProperty(ConfigKeys.PUSH_NOTIFICATION_SENDER_ID);
+                            instance.enablePushNotifications(senderId);
+                        }
                     }
                 }
-
-                if (sDefaultSettings.containsKey(ConfigKeys.DEBUG_MODE)) {
-                    try {
-                        apiInstance.setDebug(Boolean.parseBoolean(sDefaultSettings.getProperty(ConfigKeys.DEBUG_MODE)));
-                    } catch (Throwable t) {
-                        Log.w(TAG, "Failed to configure mParticle with '" + ConfigKeys.DEBUG_MODE + "' setting");
-                    }
-                }
-                if (sDefaultSettings.containsKey(ConfigKeys.SESSION_TIMEOUT)) {
-                    try {
-                        apiInstance.setSessionTimeout(1000 * Integer.parseInt(sDefaultSettings.getProperty(
-                                ConfigKeys.SESSION_TIMEOUT, "60")));
-                    } catch (Throwable t) {
-                        Log.w(TAG, "Failed to configure mParticle with '" + ConfigKeys.SESSION_TIMEOUT + "' setting");
-                    }
-                }
-                if (sDefaultSettings.containsKey(ConfigKeys.ENABLE_CRASH_REPORTING)) {
-                    if (Boolean.parseBoolean(sDefaultSettings.getProperty(ConfigKeys.ENABLE_CRASH_REPORTING))) {
-                        apiInstance.enableUncaughtExceptionLogging();
-                    }
-                }
-                if (sDefaultSettings.containsKey(ConfigKeys.ENABLE_PUSH_NOTIFICATIONS)) {
-                    if (Boolean.parseBoolean(sDefaultSettings.getProperty(ConfigKeys.ENABLE_PUSH_NOTIFICATIONS))) {
-                        String senderId = sDefaultSettings.getProperty(ConfigKeys.PUSH_NOTIFICATION_SENDER_ID);
-                        apiInstance.enablePushNotifications(senderId);
-                    }
-                }
-
-                sInstanceMap.put(apiKey, apiInstance);
             }
         }
 
-        return apiInstance;
+        return instance;
     }
     /**
      * Initialize or return an instance of the mParticle SDK
@@ -212,7 +207,7 @@ public class MParticleAPI {
      *            the API key for your account
      * @param secret
      *            the API secret for your account
-     * @param sandbox
+     * @param sandboxMode
      *            the Stream mode is forced
      * @return An instance of the mParticle SDK configured with your API key
      **/
@@ -544,6 +539,11 @@ public class MParticleAPI {
         }
     }
 
+
+    void logUnhandledError(Throwable t){
+        ensureActiveSession();
+        mMessageManager.logErrorEvent(mSessionID, mSessionStartTime, mLastEventTime, t != null ? t.getMessage() : null, t, null, false);
+    }
     /**
      * Enables location tracking given a provider and update frequency criteria. The provider must
      * be available and the correct permissions must have been requested during installation.
