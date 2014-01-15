@@ -125,10 +125,6 @@ import java.util.UUID;
 
     }
 
-    public static void setBatteryLevel(double batteryLevel) {
-        sBatteryLevel = batteryLevel;
-    }
-
     public void start(Context appContext, Boolean firstRun) {
         mContext = appContext.getApplicationContext();
         if (null == sStatusBroadcastReceiver) {
@@ -138,8 +134,7 @@ import java.util.UUID;
                     new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
             int level = batteryIntent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
             int scale = batteryIntent.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
-            double batteryPct = level / (double)scale;
-            MessageManager.setBatteryLevel(batteryPct);
+            sBatteryLevel = level / (double)scale;
 
             sStatusBroadcastReceiver = new StatusBroadcastReceiver();
             // NOTE: if permissions are not correct all messages will be tagged as 'offline'
@@ -415,6 +410,17 @@ import java.util.UUID;
         mUploadHandler.setUploadInterval(uploadInterval);
     }
 
+    public void logStateTransition(String stateTransInit, String sessionId, long sessionStartTime) {
+        try {
+            JSONObject message = createMessage(MessageType.APP_STATE_TRANSITION, sessionId, sessionStartTime, System.currentTimeMillis(),
+                    null, null);
+            message.put(MessageKey.STATE_TRANSITION_TYPE, stateTransInit);
+            mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
+        } catch (JSONException e) {
+            Log.w(TAG, "Failed to create mParticle state transition message");
+        }
+    }
+
     private static class StatusBroadcastReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context appContext, Intent intent) {
@@ -426,9 +432,8 @@ import java.util.UUID;
             }else if (Intent.ACTION_BATTERY_CHANGED.equals(intent.getAction())){
                 int level = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
                 int scale = intent.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
+                sBatteryLevel = level / (double)scale;
 
-                double batteryPct = level / (double)scale;
-                MessageManager.setBatteryLevel(batteryPct);
             }
         }
     }
@@ -450,7 +455,6 @@ import java.util.UUID;
 
     public void setDebugMode(boolean debugMode) {
         sDebugMode = debugMode;
-                
         mUploadHandler.setDebugMode(debugMode);
     }
 
