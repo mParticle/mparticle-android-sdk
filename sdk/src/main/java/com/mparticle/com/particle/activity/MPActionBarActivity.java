@@ -1,14 +1,14 @@
 package com.mparticle.com.particle.activity;
 
-import android.app.Activity;
 import android.os.Build;
+import android.support.v7.app.ActionBarActivity;
 
 import com.mparticle.MParticle;
 
 /**
  * Created by sdozor on 1/16/14.
  */
-public class MPActivity extends Activity{
+public class MPActionBarActivity extends ActionBarActivity {
     @Override
     protected void onStart() {
         super.onStart();
