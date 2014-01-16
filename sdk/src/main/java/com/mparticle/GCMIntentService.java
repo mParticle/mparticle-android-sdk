@@ -21,16 +21,16 @@ public class GCMIntentService extends IntentService {
     private static PowerManager.WakeLock sWakeLock;
     private static final Object LOCK = GCMIntentService.class;
 
-    private MParticleAPI mMParticleAPI;
+    private MParticle mMParticle;
 
     public GCMIntentService() {
         super("com.mparticle.GCMIntentService");
     }
 
     // for unit tests
-    /* package-private */GCMIntentService(MParticleAPI mParticleAPI) {
+    /* package-private */GCMIntentService(MParticle mParticle) {
         this();
-        mMParticleAPI = mParticleAPI;
+        mMParticle = mParticle;
     }
 
     static void runIntentInService(Context context, Intent intent) {
@@ -77,8 +77,8 @@ public class GCMIntentService extends IntentService {
     private void handleRegistration(Intent intent) {
 
         try {
-            if (null == mMParticleAPI) {
-                mMParticleAPI = MParticleAPI.getInstance(this);
+            if (null == mMParticle) {
+                mMParticle = MParticle.getInstance(this);
             }
         } catch (Throwable t) {
             // failure to instantiate mParticle likely means that the
@@ -93,10 +93,10 @@ public class GCMIntentService extends IntentService {
 
         if (registrationId != null) {
             // registration succeeded
-            mMParticleAPI.setPushRegistrationId(registrationId);
+            mMParticle.setPushRegistrationId(registrationId);
         } else if (unregistered != null) {
             // unregistration succeeded
-            mMParticleAPI.clearPushRegistrationId();
+            mMParticle.clearPushRegistrationId();
         } else if (error != null) {
             // Unrecoverable error, log it
             Log.i(TAG, "GCM registration error: " + error);

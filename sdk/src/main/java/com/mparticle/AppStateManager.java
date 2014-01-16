@@ -9,6 +9,8 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 
+import com.mparticle.com.particle.activity.MPActivity;
+
 /**
  * Created by sdozor on 1/15/14.
  */
@@ -22,7 +24,7 @@ public class AppStateManager {
         @Override
         public void run() {
             if (isBackgrounded()){
-                MParticleAPI.getInstance(null).logStateTransition(Constants.StateTransitionType.STATE_TRANS_BG);
+                MParticle.getInstance(mContext).logStateTransition(Constants.StateTransitionType.STATE_TRANS_BG);
                 Log.d(Constants.LOG_TAG, "APP BACKGROUNDED");
             }
         }
@@ -50,12 +52,7 @@ public class AppStateManager {
 
             @Override
             public void onActivityStarted(Activity activity) {
-                if (isBackgrounded() && mLastStoppedTime > 0){
-                    MParticleAPI.getInstance(null).logStateTransition(Constants.StateTransitionType.STATE_TRANS_FORE);
-                    Log.d(Constants.LOG_TAG, "APP FOREGROUNDED");
-                }
-                mActivities++;
-                Log.d(Constants.LOG_TAG, "Activity Count: " + mActivities);
+                AppStateManager.this.onActivityStarted(activity);
             }
 
             @Override
@@ -70,12 +67,7 @@ public class AppStateManager {
 
             @Override
             public void onActivityStopped(Activity activity) {
-                mActivities--;
-                mLastStoppedTime = System.currentTimeMillis();
-                if (mActivities < 1){
-                    delayedBackgroundCheckHandler.postDelayed(backgroundChecker, ACTIVITY_DELAY);
-                }
-                Log.d(Constants.LOG_TAG, "Activity Count: " + mActivities);
+                AppStateManager.this.onActivityStopped(activity);
             }
 
             @Override
@@ -94,4 +86,39 @@ public class AppStateManager {
         return mActivities < 1 &&
                 (System.currentTimeMillis() - mLastStoppedTime) > ACTIVITY_DELAY;
     }
+
+    public void onActivityStarted(Activity activity){
+        if (isBackgrounded() && mLastStoppedTime > 0){
+            MParticle.getInstance(mContext).logStateTransition(Constants.StateTransitionType.STATE_TRANS_FORE);
+            Log.d(Constants.LOG_TAG, "APP FOREGROUNDED");
+        }
+        mActivities++;
+        Log.d(Constants.LOG_TAG, "Activity Count: " + mActivities);
+        if (MParticle.getInstance(mContext).isAutoTrackingEnabled()){
+            MParticle.getInstance(mContext).logScreen(getActivityName(activity));
+        }
+    }
+
+    public void onActivityStopped(Activity activity){
+        mActivities--;
+        mLastStoppedTime = System.currentTimeMillis();
+        if (mActivities < 1){
+            delayedBackgroundCheckHandler.postDelayed(backgroundChecker, ACTIVITY_DELAY);
+        }
+        Log.d(Constants.LOG_TAG, "Activity Count: " + mActivities);
+
+    }
+
+    private String getActivityName(Activity activity) {
+        return activity.getClass().getCanonicalName();
+        /*if (this.mActivityNameMap.containsKey(canonicalName)) {
+            return (String)this.mActivityNameMap.get(canonicalName);
+        }
+        String name = this.mParameterFetcher.getString(canonicalName);
+        if (name == null) {
+            name = canonicalName;
+        }
+        this.mActivityNameMap.put(canonicalName, name);
+        return name;*/
+   }
 }

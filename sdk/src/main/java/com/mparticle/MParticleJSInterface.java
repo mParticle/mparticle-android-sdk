@@ -7,7 +7,7 @@ import java.util.Map;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.mparticle.MParticleAPI.EventType;
+import com.mparticle.MParticle.EventType;
 
 import android.content.Context;
 import android.util.Log;
@@ -16,9 +16,9 @@ import android.webkit.JavascriptInterface;
 public class MParticleJSInterface {
 	private static final String TAG = Constants.LOG_TAG;
 	private Context mContext;
-	private MParticleAPI mApiInstance;
+	private MParticle mApiInstance;
 	
-	public MParticleJSInterface(Context c, MParticleAPI apiInstance) {
+	public MParticleJSInterface(Context c, MParticle apiInstance) {
 		mContext = c;
 		mApiInstance = apiInstance;
 	}

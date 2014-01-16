@@ -48,4 +48,5 @@ android.libraryVariants.all { variant ->
 }
 
 dependencies {
+    compile 'com.android.support:support-v4:19.0.0'
 }

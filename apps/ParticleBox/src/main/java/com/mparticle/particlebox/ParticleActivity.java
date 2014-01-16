@@ -9,7 +9,7 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 
-import com.mparticle.MParticleAPI;
+import com.mparticle.MParticle;
 
 public class ParticleActivity extends ActionBarActivity
         implements NavigationDrawerFragment.NavigationDrawerCallbacks {
@@ -38,7 +38,7 @@ public class ParticleActivity extends ActionBarActivity
                 R.id.navigation_drawer,
                 (DrawerLayout) findViewById(R.id.drawer_layout));
 
-        MParticleAPI.getInstance(this).setDebug(true);
+        MParticle.getInstance(this).setDebug(true);
     }
 
     @Override

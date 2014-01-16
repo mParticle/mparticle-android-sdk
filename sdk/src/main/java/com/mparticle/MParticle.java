@@ -36,8 +36,8 @@ import java.util.UUID;
 /**
  * This class provides access to the mParticle API.
  */
-public class MParticleAPI {
-    private static volatile MParticleAPI instance;
+public class MParticle {
+    private static volatile MParticle instance;
     private static final String TAG = Constants.LOG_TAG;
     private static final HandlerThread sTimeoutHandlerThread = new HandlerThread("mParticleSessionTimeoutHandler",
             Process.THREAD_PRIORITY_BACKGROUND);
@@ -63,9 +63,10 @@ public class MParticleAPI {
     /* package-private */JSONObject mUserAttributes = new JSONObject();
     /* package-private */JSONObject mSessionAttributes;
     private String mLaunchUri;
+    private boolean mAutoTrackingEnabled;
 
-    /* package-private */MParticleAPI(Context appContext, String apiKey, MessageManager messageManager) {
-        mAppContext = appContext.getApplicationContext();
+    /* package-private */MParticle(Context context, String apiKey, MessageManager messageManager) {
+        mAppContext = context.getApplicationContext();
         mApiKey = apiKey;
         mMessageManager = messageManager;
         mTimeoutHandler = new SessionTimeoutHandler(this, sTimeoutHandlerThread.getLooper());
@@ -105,9 +106,9 @@ public class MParticleAPI {
      *            the API secret for your account
      * @return An instance of the mParticle SDK configured with your API key
      */
-    public static MParticleAPI getInstance(Context context, String apiKey, String secret) {
+    public static MParticle getInstance(Context context, String apiKey, String secret) {
         if (instance == null){
-            synchronized (MParticleAPI.class){
+            synchronized (MParticle.class){
                 if (instance == null){
                     if (null == context) {
                         throw new IllegalArgumentException("context is required");
@@ -157,7 +158,7 @@ public class MParticleAPI {
                     MessageManager messageManager = new MessageManager(appContext, apiKey, secret, sDefaultSettings);
                     messageManager.start(appContext, firstRun);
 
-                    instance = new MParticleAPI(appContext, apiKey, messageManager);
+                    instance = new MParticle(appContext, apiKey, messageManager);
                     if (context instanceof Activity) {
                         instance.mLaunchUri = ((Activity) context).getIntent().getDataString();
                         if (instance.mLaunchUri != null) {
@@ -207,7 +208,7 @@ public class MParticleAPI {
      * Initialize or return an instance of the mParticle SDK
      *
      * @param context
-     *            the Activity that is creating the instance
+     *            the Context that is creating the instance
      * @param apiKey
      *            the API key for your account
      * @param secret
@@ -216,11 +217,12 @@ public class MParticleAPI {
      *            the Stream mode is forced
      * @return An instance of the mParticle SDK configured with your API key
      **/
-    public static MParticleAPI getInstance(Context context, String apiKey, String secret, boolean sandboxMode) {
-    	MParticleAPI instance = MParticleAPI.getInstance(context, apiKey, secret);
+    public static MParticle getInstance(Context context, String apiKey, String secret, boolean sandboxMode) {
+    	MParticle instance = MParticle.getInstance(context, apiKey, secret);
     	instance.mMessageManager.setSandboxMode(sandboxMode);
     	return instance;
    }
+
 
     /**
      * Initialize or return an instance of the mParticle SDK using api_key and api_secret from the
@@ -230,7 +232,7 @@ public class MParticleAPI {
      *            the Activity that is creating the instance
      * @return An instance of the mParticle SDK configured with your API key
      */
-    public static MParticleAPI getInstance(Context context) {
+    public static MParticle getInstance(Context context) {
         return getInstance(context, null, null);
     }
 
@@ -239,7 +241,7 @@ public class MParticleAPI {
      *
      * This method should be called from an Activity's onStart() method.
      */
-    public void startActivity() {
+    public void activityStarted(Activity activity) {
         if (mOptedOut) {
             return;
         }
@@ -249,6 +251,7 @@ public class MParticleAPI {
             if (mDebugMode)
                 debugLog("Resumed session");
         }
+        mAppStateManager.onActivityStarted(activity);
     }
 
     /**
@@ -259,15 +262,11 @@ public class MParticleAPI {
      *
      * To explicitly end a session use the endSession() method.
      */
-    public void stopActivity() {
+    public void activityStopped(Activity activity) {
         if (mSessionStartTime == 0 || mOptedOut) {
             return;
         }
-        long stopTime = System.currentTimeMillis();
-        mLastEventTime = stopTime;
-        mMessageManager.stopSession(mSessionID, stopTime, mSessionStartTime - stopTime);
-        if (mDebugMode)
-            debugLog("Stopped session");
+        mAppStateManager.onActivityStopped(activity);
     }
 
     /**
@@ -421,8 +420,8 @@ public class MParticleAPI {
      * @param screenName
      *            the name of the screen to be tracked
      */
-    public void logScreenView(String screenName) {
-        logScreenView(screenName, null);
+    public void logScreen(String screenName) {
+        logScreen(screenName, null);
     }
 
     /**
@@ -433,7 +432,7 @@ public class MParticleAPI {
      * @param eventData
      *            a Map of data attributes
      */
-    public void logScreenView(String screenName, Map<String, String> eventData) {
+    public void logScreen(String screenName, Map<String, String> eventData) {
         if (mOptedOut) {
             return;
         }
@@ -464,8 +463,8 @@ public class MParticleAPI {
      * @param message
      *            the name of the error event to be tracked
      */
-    public void logErrorEvent(String message) {
-        logErrorEvent(message, null, null);
+    public void logError(String message) {
+        logError(message, null, null);
     }
 
     /**
@@ -474,8 +473,8 @@ public class MParticleAPI {
      * @param exception
      *            an Exception
      */
-    public void logErrorEvent(Exception exception) {
-        logErrorEvent(null, exception, null);
+    public void logError(Exception exception) {
+        logError(null, exception, null);
     }
 
     /**
@@ -486,8 +485,8 @@ public class MParticleAPI {
      * @param eventData
      *            a Map of data attributes
      */
-    public void logErrorEvent(Exception exception, Map<String, String> eventData) {
-        logErrorEvent(null, exception, eventData);
+    public void logError(Exception exception, Map<String, String> eventData) {
+        logError(null, exception, eventData);
     }
 
     /**
@@ -498,8 +497,8 @@ public class MParticleAPI {
      * @param eventData
      *            a Map of data attributes
      */
-    public void logErrorEvent(String message, Map<String, String> eventData) {
-        logErrorEvent(message, null, eventData);
+    public void logError(String message, Map<String, String> eventData) {
+        logError(message, null, eventData);
     }
 
     /**
@@ -512,7 +511,7 @@ public class MParticleAPI {
      * @param eventData
      *            a Map of data attributes
      */
-    public void logErrorEvent(String message, Exception exception, Map<String, String> eventData) {
+    public void logError(String message, Exception exception, Map<String, String> eventData) {
         if (mOptedOut) {
             return;
         }
@@ -964,33 +963,37 @@ public class MParticleAPI {
             }
     }
 
-    private static final class SessionTimeoutHandler extends Handler {
-        private final MParticleAPI mParticleAPI;
+    public boolean isAutoTrackingEnabled() {
+        return mAutoTrackingEnabled;
+    }
 
-        public SessionTimeoutHandler(MParticleAPI mParticleAPI, Looper looper) {
+    private static final class SessionTimeoutHandler extends Handler {
+        private final MParticle mParticle;
+
+        public SessionTimeoutHandler(MParticle mParticle, Looper looper) {
             super(looper);
-            this.mParticleAPI = mParticleAPI;
+            this.mParticle = mParticle;
         }
 
         @Override
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
-            if (!mParticleAPI.checkSessionTimeout()){
-                sendEmptyMessageDelayed(0, mParticleAPI.mSessionTimeout);
+            if (!mParticle.checkSessionTimeout()){
+                sendEmptyMessageDelayed(0, mParticle.mSessionTimeout);
             }
         }
     }
 
     private static final class MParticleLocationListener implements LocationListener {
-        private final MParticleAPI mParticleAPI;
+        private final MParticle mParticle;
 
-        public MParticleLocationListener(MParticleAPI mParticleAPI) {
-            this.mParticleAPI = mParticleAPI;
+        public MParticleLocationListener(MParticle mParticle) {
+            this.mParticle = mParticle;
         }
 
         @Override
         public void onLocationChanged(Location location) {
-            mParticleAPI.setLocation(location);
+            mParticle.setLocation(location);
         }
 
         @Override

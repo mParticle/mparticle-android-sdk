@@ -6,19 +6,16 @@ import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Spinner;
-import android.widget.TextView;
 import android.widget.Toast;
 
-import com.mparticle.MParticleAPI;
+import com.mparticle.MParticle;
 
 /**
  * Created by sdozor on 1/7/14.
@@ -71,10 +68,10 @@ public class EventTestFragment extends Fragment implements View.OnClickListener 
         spinner = (Spinner)v.findViewById(R.id.spinner);
         exceptionSpinner = (Spinner)v.findViewById(R.id.spinner2);
 
-        spinner.setAdapter(new ArrayAdapter<MParticleAPI.EventType>(
+        spinner.setAdapter(new ArrayAdapter<MParticle.EventType>(
                 v.getContext(),
                 android.R.layout.simple_list_item_1,
-                MParticleAPI.EventType.values()));
+                MParticle.EventType.values()));
         spinner.setSelection(8);
 
         exceptionSpinner.setAdapter(new ArrayAdapter<String>(
@@ -160,13 +157,13 @@ public class EventTestFragment extends Fragment implements View.OnClickListener 
         String toastText = "Message logged.";
         switch (v.getId()){
             case R.id.button:
-                MParticleAPI.getInstance(v.getContext()).logEvent(viewEditText.getText().toString(), (MParticleAPI.EventType)spinner.getSelectedItem());
+                MParticle.getInstance(v.getContext()).logEvent(viewEditText.getText().toString(), (MParticle.EventType)spinner.getSelectedItem());
                 break;
             case R.id.button2:
-                MParticleAPI.getInstance(v.getContext()).logScreenView(screenEditText.getText().toString());
+                MParticle.getInstance(v.getContext()).logScreen(screenEditText.getText().toString());
                 break;
             case R.id.button3:
-                MParticleAPI.getInstance(v.getContext()).logErrorEvent(errorEditText.getText().toString());
+                MParticle.getInstance(v.getContext()).logError(errorEditText.getText().toString());
                 break;
             case R.id.button4:
                 toastText = "Crashing...";

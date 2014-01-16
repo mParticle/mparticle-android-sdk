@@ -273,7 +273,7 @@ import com.mparticle.MParticleDatabase.UploadTable;
             String[] selectionArgs;
             if (history){
                 selection = SQL_HISTORY_MESSAGES;
-                selectionArgs = new String[] { mApiKey, Integer.toString(Status.READY), MParticleAPI.getInstance(null).mSessionID };
+                selectionArgs = new String[] { mApiKey, Integer.toString(Status.READY), MParticle.getInstance(null).mSessionID };
             }else{
                 selection = SQL_UPLOADABLE_MESSAGES;
                 selectionArgs = new String[] { mApiKey, Integer.toString(Status.READY) };
