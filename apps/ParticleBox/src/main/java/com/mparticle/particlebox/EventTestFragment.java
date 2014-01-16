@@ -75,6 +75,7 @@ public class EventTestFragment extends Fragment implements View.OnClickListener 
                 v.getContext(),
                 android.R.layout.simple_list_item_1,
                 MParticleAPI.EventType.values()));
+        spinner.setSelection(8);
 
         exceptionSpinner.setAdapter(new ArrayAdapter<String>(
                 v.getContext(),
