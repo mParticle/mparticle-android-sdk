@@ -11,6 +11,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.Scanner;
@@ -149,7 +150,6 @@ import com.mparticle.MParticleDatabase.UploadTable;
             boolean needsHistory = false;
             // execute all the upload steps
             if (mUploadInterval > 0 || msg.arg1 == 1) {
-                fetchConfig();
                 prepareUploads(false);
                 needsHistory = processUploads(false);
                 processCommands();
@@ -176,7 +176,6 @@ import com.mparticle.MParticleDatabase.UploadTable;
             	
             	this.removeMessages(UPLOAD_HISTORY);
 	            // execute all the upload steps
-	            fetchConfig();
 	            prepareUploads(true);
 	            processUploads(true);
 //            processCommands();
@@ -195,7 +194,6 @@ import com.mparticle.MParticleDatabase.UploadTable;
 
     private void fetchConfig() {
         if (!isNetworkAvailable()) {
-        	// Don't get config when in sandbox mode, as mode is always stream
             return;
         }
         // get the previous mode from preferences
@@ -290,6 +288,7 @@ import com.mparticle.MParticleDatabase.UploadTable;
                     MessageTable.CREATED_AT + ", " + MessageTable.SESSION_ID + " , _id asc");
 
             if (readyMessagesCursor.getCount() > 0) {
+                fetchConfig();
                 if (mDebugMode) {
                     Log.i(TAG, "Preparing " + readyMessagesCursor.getCount() + " events for upload");
                 }
@@ -297,23 +296,31 @@ import com.mparticle.MParticleDatabase.UploadTable;
                     String currentSessionId;
                     int sessionIndex = readyMessagesCursor.getColumnIndex(MessageTable.SESSION_ID);
                     JSONArray messagesArray = new JSONArray();
+                    boolean sessionEndFound = false;
                     while (readyMessagesCursor.moveToNext()) {
                         currentSessionId = readyMessagesCursor.getString(sessionIndex);
-
                         JSONObject msgObject = new JSONObject(readyMessagesCursor.getString(1));
+
+                        if (msgObject.getString(MessageKey.TYPE).equals(MessageType.SESSION_END)){
+                            sessionEndFound = true;
+                        }
                         messagesArray.put(msgObject);
 
                         if (readyMessagesCursor.isLast()){
                             JSONObject uploadMessage = createUploadMessage(messagesArray, history);
                             // store in uploads table
-                            dbInsertUpload(db, uploadMessage);
-                            dbDeleteProcessedMessages(db, currentSessionId);
-                        }else{
+                            if (sessionEndFound){
+                                dbInsertUpload(db, uploadMessage);
+                                dbDeleteProcessedMessages(db, currentSessionId);
+                            }
+                        }else {
                             if (readyMessagesCursor.moveToNext() && !readyMessagesCursor.getString(sessionIndex).equals(currentSessionId)){
                                 JSONObject uploadMessage = createUploadMessage(messagesArray, history);
                                 // store in uploads table
-                                dbInsertUpload(db, uploadMessage);
-                                dbDeleteProcessedMessages(db, currentSessionId);
+                                if (uploadMessage != null){
+                                    dbInsertUpload(db, uploadMessage);
+                                    dbDeleteProcessedMessages(db, currentSessionId);
+                                }
                                 messagesArray = new JSONArray();
                             }
                             readyMessagesCursor.moveToPrevious();
@@ -385,123 +392,127 @@ import com.mparticle.MParticleDatabase.UploadTable;
         	uploadMessage.put(MessageKey.MESSAGES, messagesArray);
         }
 
-        if (BuildConfig.ECHO){
-            uploadMessage.put("echo", "true");
-        }
-
         return uploadMessage;
     }
 
     private boolean processUploads(boolean history) {
-    	boolean sessionIsOver = false;
+        boolean processingSessionEnd = false;
         if (!isNetworkAvailable()) {
-            return sessionIsOver;
+            return false;
         }
-        try {
-            HttpClient httpClient = setupHttpClient();
 
+        try {
             // read batches ready to upload
             SQLiteDatabase db = mDB.getWritableDatabase();
             String[] selectionArgs = new String[] { mApiKey };
             String[] selectionColumns = new String[] { "_id", UploadTable.MESSAGE };
             Cursor readyUploadsCursor = db.query(UploadTable.TABLE_NAME, selectionColumns,
                     UploadTable.API_KEY + "=?", selectionArgs, null, null, UploadTable.CREATED_AT);
-            while (readyUploadsCursor.moveToNext()) {
-                int id = readyUploadsCursor.getInt(0);
-                String message = readyUploadsCursor.getString(1);
-                if (!history) {
-                	// if message is the MessageType.SESSION_END, then remember so the session history can be triggered
-                	if (message.contains("\""+MessageKey.TYPE+"\":\""+MessageType.SESSION_END+"\"")) {
-                		sessionIsOver = true;
-                	}
-                }
-                // POST message to mParticle service
-                HttpPost httpPost = new HttpPost(makeServiceUri("events"));
-                httpPost.setHeader("Content-type", "application/json");
 
-                ByteArrayEntity postEntity = null;
-                byte[] messageBytes = message.getBytes();
-                if (mCompressionEnabled) {
-                    httpPost.setHeader("Accept-Encoding", "gzip");
-                    try {
-                        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream(messageBytes.length);
-                        GZIPOutputStream gzipOutputStream = new GZIPOutputStream(byteArrayOutputStream);
-                        gzipOutputStream.write(messageBytes);
-                        gzipOutputStream.finish();
-                        
-                        //https://code.google.com/p/android/issues/detail?id=62589
-                       // gzipOutputStream.flush();
-                        postEntity = new ByteArrayEntity(byteArrayOutputStream.toByteArray());
-                        httpPost.setHeader("Content-Encoding", "gzip");
-                    } catch (IOException ioException) {
-                        Log.w(TAG, "Failed to compress request. Sending uncompressed");
-                    }
-                }
-                if (null == postEntity) {
-                    postEntity = new ByteArrayEntity(messageBytes);
-                }
-                httpPost.setEntity(postEntity);
+            if (readyUploadsCursor.getCount() > 0){
 
-                addMessageSignature(httpPost, message);
+                HttpClient httpClient = setupHttpClient();
 
-                String response = null;
-                int responseCode = -1;
-                try {
-                    if (mDebugMode) {
-                        Log.d(TAG, "Uploading data to mParticle server:");
-                        try{
-                            JSONObject messageJson = new JSONObject(message);
-                            Log.d(TAG, messageJson.toString(4));
-                           /* if (messageJson.has(MessageKey.MESSAGES)){
-                                JSONArray messages = messageJson.getJSONArray(MessageKey.MESSAGES);
-                                Log.d(TAG, "SENDING MESSAGES");
-                                for (int i = 0; i < messages.length(); i++){
-                                    Log.d(TAG, "Message type: " + ((JSONObject)messages.get(i)).getString(MessageKey.TYPE));
-                                }
-                            }else if (messageJson.has(MessageKey.HISTORY)){
-                                JSONArray messages = messageJson.getJSONArray(MessageKey.HISTORY);
-                                Log.d(TAG, "SENDING HISTORY");
-                                for (int i = 0; i < messages.length(); i++){
-                                    Log.d(TAG, "Message type: " + ((JSONObject)messages.get(i)).getString(MessageKey.TYPE));
-                                }
-                            }*/
-                        }catch(JSONException jse){
-
+                while (readyUploadsCursor.moveToNext()) {
+                    int id = readyUploadsCursor.getInt(0);
+                    String message = readyUploadsCursor.getString(1);
+                    if (!history) {
+                        // if message is the MessageType.SESSION_END, then remember so the session history can be triggered
+                        if (message.contains("\""+MessageKey.TYPE+"\":\""+MessageType.SESSION_END+"\"")) {
+                            processingSessionEnd = true;
                         }
                     }
-                    HttpResponse httpResponse = httpClient.execute(httpPost, mHttpContext);
-                    if (null != httpResponse.getStatusLine()) {
-                        responseCode = httpResponse.getStatusLine().getStatusCode();
-                        response = extractResponseBody(httpResponse);
+                    // POST message to mParticle service
+                    HttpPost httpPost = new HttpPost(makeServiceUri("events"));
+                    httpPost.setHeader("Content-type", "application/json");
+
+                    ByteArrayEntity postEntity = null;
+                    byte[] messageBytes = message.getBytes();
+                    if (mCompressionEnabled) {
+                        httpPost.setHeader("Accept-Encoding", "gzip");
+                        try {
+                            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream(messageBytes.length);
+                            GZIPOutputStream gzipOutputStream = new GZIPOutputStream(byteArrayOutputStream);
+                            gzipOutputStream.write(messageBytes);
+                            gzipOutputStream.finish();
+
+                            //https://code.google.com/p/android/issues/detail?id=62589
+                           // gzipOutputStream.flush();
+                            postEntity = new ByteArrayEntity(byteArrayOutputStream.toByteArray());
+                            httpPost.setHeader("Content-Encoding", "gzip");
+                        } catch (IOException ioException) {
+                            Log.w(TAG, "Failed to compress request. Sending uncompressed");
+                        }
                     }
-                } catch (IOException e) {
-                    // IOExceptions (such as timeouts) will be retried
-                    Log.w(TAG, "Upload failed with IO exception: " + e.getClass().getName());
-                } finally {
-                    if (202 == responseCode || (responseCode >= 400 && responseCode < 500)) {
-                        dbDeleteUpload(db, id);
-                    } else {
+                    if (null == postEntity) {
+                        postEntity = new ByteArrayEntity(messageBytes);
+                    }
+                    httpPost.setEntity(postEntity);
+
+                    addMessageSignature(httpPost, message);
+
+                    String response = null;
+                    int responseCode = -1;
+                    try {
                         if (mDebugMode) {
-                            Log.d(TAG, "Upload failed and will be retried.");
-                        }
-                    }
-                }
+                            Log.d(TAG, "Uploading data to mParticle server:");
+                            try{
+                                JSONObject messageJson = new JSONObject(message);
+                                Log.d(TAG, messageJson.toString(4));
+                                /*if (messageJson.has(MessageKey.MESSAGES)){
+                                    JSONArray messages = messageJson.getJSONArray(MessageKey.MESSAGES);
+                                    Log.d(TAG, "SENDING MESSAGES");
+                                    for (int i = 0; i < messages.length(); i++){
+                                        Log.d(TAG, "Message type: " + ((JSONObject)messages.get(i)).getString(MessageKey.TYPE));
+                                    }
+                                }else if (messageJson.has(MessageKey.HISTORY)){
+                                    JSONArray messages = messageJson.getJSONArray(MessageKey.HISTORY);
+                                    Log.d(TAG, "SENDING HISTORY");
+                                    for (int i = 0; i < messages.length(); i++){
 
-                if (responseCode != 202) {
-                    // if *any* upload fails, stop trying and wait for the next cycle
-                    break;
-                } else {
-                    try {
-                        JSONObject responseJSON = new JSONObject(response);
-                        if (responseJSON.has(MessageKey.MESSAGES)) {
-                            JSONArray responseCommands = responseJSON.getJSONArray(MessageKey.MESSAGES);
-                            for (int i = 0; i < responseCommands.length(); i++) {
-                                JSONObject commandObject = responseCommands.getJSONObject(i);
-                                dbInsertCommand(db, commandObject);
+                                        Log.d(TAG, "Message type: " + ((JSONObject)messages.get(i)).getString(MessageKey.TYPE) + " SID: " + ((JSONObject)messages.get(i)).optString(MessageKey.SESSION_ID));
+                                       // Log.d(TAG, ((JSONObject)messages.get(i)).toString(4));
+                                    }
+                                }*/
+                            }catch(JSONException jse){
+
                             }
                         }
-                    } catch (JSONException e) {
-                        // ignore problems parsing response commands
+                        HttpResponse httpResponse = httpClient.execute(httpPost, mHttpContext);
+                        if (null != httpResponse.getStatusLine()) {
+                            responseCode = httpResponse.getStatusLine().getStatusCode();
+                            response = extractResponseBody(httpResponse);
+                        }
+                    } catch (IOException e) {
+                        // IOExceptions (such as timeouts) will be retried
+                        Log.w(TAG, "Upload failed with IO exception: " + e.getClass().getName());
+                    } finally {
+                        if (202 == responseCode || (responseCode >= 400 && responseCode < 500)) {
+                            dbDeleteUpload(db, id);
+                        } else {
+                            if (mDebugMode) {
+                                Log.d(TAG, "Upload failed and will be retried.");
+                            }
+                        }
+                    }
+
+                    if (responseCode != 202) {
+                        // if *any* upload fails, stop trying and wait for the next cycle
+                        processingSessionEnd = false;
+                        break;
+                    } else {
+                        try {
+                            JSONObject responseJSON = new JSONObject(response);
+                            if (responseJSON.has(MessageKey.MESSAGES)) {
+                                JSONArray responseCommands = responseJSON.getJSONArray(MessageKey.MESSAGES);
+                                for (int i = 0; i < responseCommands.length(); i++) {
+                                    JSONObject commandObject = responseCommands.getJSONObject(i);
+                                    dbInsertCommand(db, commandObject);
+                                }
+                            }
+                        } catch (JSONException e) {
+                            // ignore problems parsing response commands
+                        }
                     }
                 }
             }
@@ -512,7 +523,7 @@ import com.mparticle.MParticleDatabase.UploadTable;
         } finally {
             mDB.close();
         }
-        return sessionIsOver;
+        return processingSessionEnd;
     }
 
     // helper method to convert response body to a string whether or not it is

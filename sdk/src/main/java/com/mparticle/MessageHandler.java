@@ -223,7 +223,7 @@ import com.mparticle.MParticleDatabase.SessionTable;
     // session-start messages use the id field
     private String getMessageSessionId(JSONObject message) throws JSONException {
         String sessionId;
-        if (MessageType.SESSION_START == message.getString(MessageKey.TYPE)) {
+        if (MessageType.SESSION_START.equals(message.getString(MessageKey.TYPE))) {
             sessionId = message.getString(MessageKey.ID);
         } else {
             sessionId = message.optString(MessageKey.SESSION_ID, "NO-SESSION");

@@ -248,7 +248,6 @@ import java.util.UUID;
 
     /* package-private */static JSONObject createMessageSessionEnd(String sessionId, long start, long end, long length,
             JSONObject attributes) throws JSONException {
-        Log.d(TAG, "Creating SESSION END message.");
         JSONObject message = createMessage(MessageType.SESSION_END, sessionId, start, end, null, attributes);
         message.put(MessageKey.SESSION_LENGTH, length);
         return message;
