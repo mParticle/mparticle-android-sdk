@@ -42,6 +42,18 @@ package com.mparticle;
         public static final String APP_STATE_TRANSITION = "ast";
     }
 
+    public interface ApiConfig {
+        public static final String KEY_SESSION_UPLOAD_MODE = "su";
+        public static final String KEY_UNHANDLED_EXCEPTIONS = "cue";
+        public static final String KEY_PUSH_MESSAGES = "pmk";
+        public static final String KEY_NETWORK_PERFORMANCE = "cnp";
+        public static final String VALUE_APP_DEFINED = "appdefined";
+        public static final String VALUE_CUE_CATCH = "forcecatch";
+        public static final String VALUE_CUE_IGNORE = "forceignore";
+        public static final String VALUE_CNP_CAPTURE = "forcetrue";
+        public static final String VALUE_CNP_NO_CAPTURE = "forcefalse";
+    }
+
     public interface MessageKey {
         // common
         public static final String TYPE = "dt";
