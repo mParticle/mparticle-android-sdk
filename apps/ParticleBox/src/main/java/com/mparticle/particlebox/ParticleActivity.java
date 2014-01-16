@@ -10,8 +10,9 @@ import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 
 import com.mparticle.MParticle;
+import com.mparticle.com.particle.activity.MPActionBarActivity;
 
-public class ParticleActivity extends ActionBarActivity
+public class ParticleActivity extends MPActionBarActivity
         implements NavigationDrawerFragment.NavigationDrawerCallbacks {
 
     /**
