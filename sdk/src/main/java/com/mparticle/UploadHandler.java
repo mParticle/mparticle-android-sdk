@@ -194,7 +194,7 @@ import com.mparticle.MParticleDatabase.UploadTable;
     }
 
     private void fetchConfig() {
-        if (!isNetworkAvailable() || mSandboxMode) {
+        if (!isNetworkAvailable()) {
         	// Don't get config when in sandbox mode, as mode is always stream
             return;
         }
