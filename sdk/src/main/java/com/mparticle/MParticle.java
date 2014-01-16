@@ -535,6 +535,8 @@ public class MParticle {
     void logUnhandledError(Throwable t){
         ensureActiveSession();
         mMessageManager.logErrorEvent(mSessionID, mSessionStartTime, mLastEventTime, t != null ? t.getMessage() : null, t, null, false);
+        //we know that the app is about to crash and therefore exit
+        logStateTransition(Constants.StateTransitionType.STATE_TRANS_EXIT);
         endSession(System.currentTimeMillis());
     }
     /**
