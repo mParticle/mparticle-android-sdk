@@ -50,17 +50,17 @@ public class AppStateManager {
 
             @Override
             public void onActivityStarted(Activity activity) {
-
-            }
-
-            @Override
-            public void onActivityResumed(Activity activity) {
                 if (isBackgrounded() && mLastStoppedTime > 0){
                     MParticleAPI.getInstance(null).logStateTransition(Constants.StateTransitionType.STATE_TRANS_FORE);
                     Log.d(Constants.LOG_TAG, "APP FOREGROUNDED");
                 }
                 mActivities++;
                 Log.d(Constants.LOG_TAG, "Activity Count: " + mActivities);
+            }
+
+            @Override
+            public void onActivityResumed(Activity activity) {
+
             }
 
             @Override
