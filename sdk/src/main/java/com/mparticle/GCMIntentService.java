@@ -1,7 +1,5 @@
 package com.mparticle;
 
-import com.mparticle.Constants.GCMNotificationKeys;
-
 import android.app.IntentService;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -13,6 +11,8 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Bundle;
 import android.os.PowerManager;
 import android.util.Log;
+
+import com.mparticle.Constants.GCMNotificationKeys;
 
 public class GCMIntentService extends IntentService {
 
@@ -49,21 +49,21 @@ public class GCMIntentService extends IntentService {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.i("GCMIntentService", "onStartCommand");
-    	return super.onStartCommand(intent,  flags,  startId);
+        return super.onStartCommand(intent, flags, startId);
     }
-    
+
     @Override
     public final void onHandleIntent(Intent intent) {
         try {
             String action = intent.getAction();
-            Log.i("GCMIntentService", "Handling action: "+action);
+            Log.i("GCMIntentService", "Handling action: " + action);
             if (action.equals("com.google.android.c2dm.intent.REGISTRATION")) {
                 handleRegistration(intent);
             } else if (action.equals("com.google.android.c2dm.intent.RECEIVE")) {
                 handleMessage(intent);
             } else if (action.equals("com.google.android.c2dm.intent.UNREGISTER")) {
-            	intent.putExtra("unregistered", "true");
-            	handleRegistration(intent);
+                intent.putExtra("unregistered", "true");
+                handleRegistration(intent);
             }
         } finally {
             synchronized (LOCK) {

@@ -73,7 +73,7 @@ package com.mparticle;
         public static final String USER_IDENTITIES = "ui";
         // user identity
         public static final String IDENTITY_NAME = "n";
-        public static final String IDENTITY_VALUE= "i";
+        public static final String IDENTITY_VALUE = "i";
         // application info
         public static final String APP_NAME = "an";
         public static final String APP_VERSION = "av";
@@ -177,7 +177,7 @@ package com.mparticle;
     }
 
     public interface Status {
-    	static final int UNKNOWN = -1;
+        static final int UNKNOWN = -1;
         static final int READY = 1; // stream
         static final int BATCH_READY = 2;
         static final int UPLOADED = 3;

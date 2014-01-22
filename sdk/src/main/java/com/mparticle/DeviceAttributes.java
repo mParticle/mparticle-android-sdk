@@ -1,21 +1,10 @@
 package com.mparticle;
 
-import java.io.File;
-import java.util.Locale;
-import java.util.TimeZone;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import android.Manifest;
-import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.net.wifi.WifiInfo;
-import android.net.wifi.WifiManager;
 import android.provider.Settings;
 import android.telephony.TelephonyManager;
 import android.util.DisplayMetrics;
@@ -23,6 +12,13 @@ import android.view.WindowManager;
 
 import com.mparticle.Constants.MessageKey;
 import com.mparticle.Constants.PrefKeys;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.File;
+import java.util.Locale;
+import java.util.TimeZone;
 
 /* package-private */class DeviceAttributes {
 
@@ -32,8 +28,7 @@ import com.mparticle.Constants.PrefKeys;
     /**
      * Generates a collection of application attributes
      *
-     * @param appContext
-     *            the application context
+     * @param appContext the application context
      * @return a JSONObject of application-specific attributes
      */
     public static JSONObject collectAppInfo(Context appContext) {
@@ -43,10 +38,10 @@ import com.mparticle.Constants.PrefKeys;
             PackageManager packageManager = appContext.getPackageManager();
             String packageName = appContext.getPackageName();
             attributes.put(MessageKey.APP_PACKAGE_NAME, packageName);
-            try{
+            try {
                 PackageInfo pInfo = appContext.getPackageManager().getPackageInfo(packageName, 0);
                 attributes.put(MessageKey.APP_VERSION_CODE, Integer.toString(pInfo.versionCode));
-            }catch (PackageManager.NameNotFoundException nnfe){
+            } catch (PackageManager.NameNotFoundException nnfe) {
                 attributes.put(MessageKey.APP_VERSION_CODE, UNKNOWN);
             }
 
@@ -80,8 +75,7 @@ import com.mparticle.Constants.PrefKeys;
     /**
      * Generates a collection of device attributes
      *
-     * @param appContext
-     *            the application context
+     * @param appContext the application context
      * @return a JSONObject of device-specific attributes
      */
     public static JSONObject collectDeviceInfo(Context appContext) {
@@ -192,12 +186,10 @@ import com.mparticle.Constants.PrefKeys;
         }
 
         boolean bool = false;
-        String[] arrayOfString1 = { "/sbin/", "/system/bin/", "/system/xbin/", "/data/local/xbin/", "/data/local/bin/", "/system/sd/xbin/", "/system/bin/failsafe/", "/data/local/" };
-        for (String str : arrayOfString1)
-        {
+        String[] arrayOfString1 = {"/sbin/", "/system/bin/", "/system/xbin/", "/data/local/xbin/", "/data/local/bin/", "/system/sd/xbin/", "/system/bin/failsafe/", "/data/local/"};
+        for (String str : arrayOfString1) {
             File localFile = new File(new StringBuilder().append(str).append("su").toString());
-            if (localFile.exists())
-            {
+            if (localFile.exists()) {
                 bool = true;
                 break;
             }

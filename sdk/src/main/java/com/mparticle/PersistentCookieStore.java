@@ -25,6 +25,14 @@
 
 package com.mparticle;
 
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.text.TextUtils;
+
+import org.apache.http.client.CookieStore;
+import org.apache.http.cookie.Cookie;
+import org.apache.http.impl.cookie.BasicClientCookie;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -37,20 +45,12 @@ import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.apache.http.client.CookieStore;
-import org.apache.http.cookie.Cookie;
-import org.apache.http.impl.cookie.BasicClientCookie;
-
-import android.content.Context;
-import android.content.SharedPreferences;
-import android.text.TextUtils;
-
 /**
  * A persistent cookie store which implements the Apache HttpClient
  * {@link CookieStore} interface. Cookies are stored and will persist on the
  * user's device between application sessions since they are serialized and
  * stored in {@link SharedPreferences}.
- * <p>
+ * <p/>
  * Instances of this class are designed to be used with
  * {@link AsyncHttpClient#setCookieStore}, but can also be used with a regular
  * old Apache HttpClient/HttpContext if you prefer.
@@ -69,7 +69,7 @@ import android.text.TextUtils;
     public PersistentCookieStore(Context context) {
         cookiePrefs = context.getSharedPreferences(COOKIE_PREFS, 0);
         cookies = new ConcurrentHashMap<String, Cookie>();
-        
+
         // Load any previously stored cookies into the store
         String storedCookieNames = cookiePrefs.getString(COOKIE_NAME_STORE, null);
         if (storedCookieNames != null) {
@@ -131,7 +131,7 @@ import android.text.TextUtils;
             Cookie cookie = entry.getValue();
             // check for no date (sessio cookie) or expired
             if ((cookie.getExpiryDate() == null) ||
-            	cookie.isExpired(date)) {
+                    cookie.isExpired(date)) {
                 // Clear cookies from local store
                 cookies.remove(name);
 

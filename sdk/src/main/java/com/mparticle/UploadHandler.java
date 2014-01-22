@@ -108,9 +108,9 @@ import javax.crypto.spec.SecretKeySpec;
     private ConfigManager mConfigManager;
 
     public static final String SQL_DELETABLE_MESSAGES = String.format(
-        "%s=? and (%s='NO-SESSION')",
-        MessageTable.API_KEY,
-        MessageTable.SESSION_ID);
+            "%s=? and (%s='NO-SESSION')",
+            MessageTable.API_KEY,
+            MessageTable.SESSION_ID);
 
 
     public UploadHandler(Context context, Looper looper, ConfigManager configManager) {
@@ -142,53 +142,53 @@ import javax.crypto.spec.SecretKeySpec;
     public void handleMessage(Message msg) {
         super.handleMessage(msg);
         switch (msg.what) {
-        case UPLOAD_MESSAGES:
-            if (mConfigManager.isDebug()) {
-                Log.d(TAG, "Performing " + (msg.arg1 == 0 ? "periodic" : "manual") + " upload for " + mApiKey);
-            }
-            boolean needsHistory = false;
-            // execute all the upload steps
-            long uploadInterval = mConfigManager.getUploadInterval();
-            if (uploadInterval> 0 || msg.arg1 == 1) {
-                prepareUploads(false);
-                needsHistory = processUploads(false);
-                processCommands();
-                if (needsHistory) {
-                	this.sendEmptyMessage(UPLOAD_HISTORY);
+            case UPLOAD_MESSAGES:
+                if (mConfigManager.isDebug()) {
+                    Log.d(TAG, "Performing " + (msg.arg1 == 0 ? "periodic" : "manual") + " upload for " + mApiKey);
                 }
-            }
-            // trigger another upload check unless configured for manual uploads
-            if (uploadInterval > 0 && msg.arg1 == 0) {
-                this.sendEmptyMessageDelayed(UPLOAD_MESSAGES, uploadInterval);
-            }
-            break;
-        case UPLOAD_HISTORY:
-            if (mConfigManager.isDebug()) {
-                Log.d(TAG, "Performing history upload for " + mApiKey);
-            }
-            // if the uploads table is empty (no old uploads) 
-            //  and the messages table has messages that are not from the current session, 
-            //  or there is no current session
-            //   then create a history upload and send it
-            SQLiteDatabase db = mDB.getWritableDatabase();
-            Cursor isempty = db.rawQuery("select * from "+UploadTable.TABLE_NAME, null);
-            if ((isempty == null) || (isempty.getCount() == 0)) {
-            	
-            	this.removeMessages(UPLOAD_HISTORY);
-	            // execute all the upload steps
-	            prepareUploads(true);
-	            processUploads(true);
+                boolean needsHistory = false;
+                // execute all the upload steps
+                long uploadInterval = mConfigManager.getUploadInterval();
+                if (uploadInterval > 0 || msg.arg1 == 1) {
+                    prepareUploads(false);
+                    needsHistory = processUploads(false);
+                    processCommands();
+                    if (needsHistory) {
+                        this.sendEmptyMessage(UPLOAD_HISTORY);
+                    }
+                }
+                // trigger another upload check unless configured for manual uploads
+                if (uploadInterval > 0 && msg.arg1 == 0) {
+                    this.sendEmptyMessageDelayed(UPLOAD_MESSAGES, uploadInterval);
+                }
+                break;
+            case UPLOAD_HISTORY:
+                if (mConfigManager.isDebug()) {
+                    Log.d(TAG, "Performing history upload for " + mApiKey);
+                }
+                // if the uploads table is empty (no old uploads)
+                //  and the messages table has messages that are not from the current session,
+                //  or there is no current session
+                //   then create a history upload and send it
+                SQLiteDatabase db = mDB.getWritableDatabase();
+                Cursor isempty = db.rawQuery("select * from " + UploadTable.TABLE_NAME, null);
+                if ((isempty == null) || (isempty.getCount() == 0)) {
+
+                    this.removeMessages(UPLOAD_HISTORY);
+                    // execute all the upload steps
+                    prepareUploads(true);
+                    processUploads(true);
 //            processCommands();
-            } else {
-            	// the previous upload is not done, try again in 30 seconds
-                this.sendEmptyMessageDelayed(UPLOAD_HISTORY, 30*1000);
-            }
-            break;
-        case CLEANUP:
-            // delete stale commands, uploads, messages, and sessions
-            cleanupDatabase(Constants.DB_CLEANUP_EXPIRATION);
-            this.sendEmptyMessageDelayed(CLEANUP, Constants.DB_CLEANUP_INTERVAL);
-            break;
+                } else {
+                    // the previous upload is not done, try again in 30 seconds
+                    this.sendEmptyMessageDelayed(UPLOAD_HISTORY, 30 * 1000);
+                }
+                break;
+            case CLEANUP:
+                // delete stale commands, uploads, messages, and sessions
+                cleanupDatabase(Constants.DB_CLEANUP_EXPIRATION);
+                this.sendEmptyMessageDelayed(CLEANUP, Constants.DB_CLEANUP_INTERVAL);
+                break;
         }
     }
 
@@ -253,7 +253,7 @@ import javax.crypto.spec.SecretKeySpec;
             MessageTable.STATUS,
             Status.UPLOADED,
             MessageTable.SESSION_ID);
-    
+
     /* package-private */void prepareUploads(boolean history) {
         try {
             // select messages ready to upload
@@ -261,14 +261,14 @@ import javax.crypto.spec.SecretKeySpec;
 
             String selection;
             String[] selectionArgs;
-            if (history){
+            if (history) {
                 selection = SQL_HISTORY_MESSAGES;
-                selectionArgs = new String[] { mApiKey, Integer.toString(Status.READY), MParticle.getInstance(null).mSessionID };
-            }else{
+                selectionArgs = new String[]{mApiKey, Integer.toString(Status.READY), MParticle.getInstance(null).mSessionID};
+            } else {
                 selection = SQL_UPLOADABLE_MESSAGES;
-                selectionArgs = new String[] { mApiKey, Integer.toString(Status.READY) };
+                selectionArgs = new String[]{mApiKey, Integer.toString(Status.READY)};
             }
-            String[] selectionColumns = new String[] { "_id", MessageTable.MESSAGE, MessageTable.CREATED_AT, MessageTable.STATUS, MessageTable.SESSION_ID};
+            String[] selectionColumns = new String[]{"_id", MessageTable.MESSAGE, MessageTable.CREATED_AT, MessageTable.STATUS, MessageTable.SESSION_ID};
 
             Cursor readyMessagesCursor = db.query(
                     MessageTable.TABLE_NAME,
@@ -284,7 +284,7 @@ import javax.crypto.spec.SecretKeySpec;
                 if (mConfigManager.isDebug()) {
                     Log.i(TAG, "Preparing " + readyMessagesCursor.getCount() + " events for upload");
                 }
-                if (history){
+                if (history) {
                     String currentSessionId;
                     int sessionIndex = readyMessagesCursor.getColumnIndex(MessageTable.SESSION_ID);
                     JSONArray messagesArray = new JSONArray();
@@ -293,23 +293,23 @@ import javax.crypto.spec.SecretKeySpec;
                         currentSessionId = readyMessagesCursor.getString(sessionIndex);
                         JSONObject msgObject = new JSONObject(readyMessagesCursor.getString(1));
 
-                        if (msgObject.getString(MessageKey.TYPE).equals(MessageType.SESSION_END)){
+                        if (msgObject.getString(MessageKey.TYPE).equals(MessageType.SESSION_END)) {
                             sessionEndFound = true;
                         }
                         messagesArray.put(msgObject);
 
-                        if (readyMessagesCursor.isLast()){
+                        if (readyMessagesCursor.isLast()) {
                             JSONObject uploadMessage = createUploadMessage(messagesArray, history);
                             // store in uploads table
-                            if (sessionEndFound){
+                            if (sessionEndFound) {
                                 dbInsertUpload(db, uploadMessage);
                                 dbDeleteProcessedMessages(db, currentSessionId);
                             }
-                        }else {
-                            if (readyMessagesCursor.moveToNext() && !readyMessagesCursor.getString(sessionIndex).equals(currentSessionId)){
+                        } else {
+                            if (readyMessagesCursor.moveToNext() && !readyMessagesCursor.getString(sessionIndex).equals(currentSessionId)) {
                                 JSONObject uploadMessage = createUploadMessage(messagesArray, history);
                                 // store in uploads table
-                                if (uploadMessage != null){
+                                if (uploadMessage != null) {
                                     dbInsertUpload(db, uploadMessage);
                                     dbDeleteProcessedMessages(db, currentSessionId);
                                 }
@@ -318,7 +318,7 @@ import javax.crypto.spec.SecretKeySpec;
                             readyMessagesCursor.moveToPrevious();
                         }
                     }
-                }else{
+                } else {
                     JSONArray messagesArray = new JSONArray();
                     int lastMessageId = 0;
                     while (readyMessagesCursor.moveToNext()) {
@@ -326,7 +326,7 @@ import javax.crypto.spec.SecretKeySpec;
                         messagesArray.put(msgObject);
                         lastMessageId = readyMessagesCursor.getInt(0);
                         // First run message should be in a batch by itself
-                        if(msgObject.getString(MessageKey.TYPE).equals(Constants.MessageType.FIRST_RUN)) {
+                        if (msgObject.getString(MessageKey.TYPE).equals(Constants.MessageType.FIRST_RUN)) {
                             break;
                         }
                     }
@@ -354,15 +354,15 @@ import javax.crypto.spec.SecretKeySpec;
         uploadMessage.put(MessageKey.TIMESTAMP, System.currentTimeMillis());
         uploadMessage.put(MessageKey.APPLICATION_KEY, mApiKey);
         uploadMessage.put(MessageKey.MPARTICLE_VERSION, Constants.MPARTICLE_VERSION);
-        
+
         mAppInfo.put(MessageKey.INSTALL_REFERRER, mPreferences.getString(PrefKeys.INSTALL_REFERRER, null));
         uploadMessage.put(MessageKey.APP_INFO, mAppInfo);
         // if there is notification key then include it
         String regkey = mPreferences.getString(PrefKeys.PUSH_REGISTRATION_ID, null);
         if ((regkey != null) && (regkey.length() > 0)) {
-        	mDeviceInfo.put(MessageKey.PUSH_TOKEN, regkey);
+            mDeviceInfo.put(MessageKey.PUSH_TOKEN, regkey);
         } else {
-        	mDeviceInfo.remove(MessageKey.PUSH_TOKEN);
+            mDeviceInfo.remove(MessageKey.PUSH_TOKEN);
         }
 
         uploadMessage.put(MessageKey.DEVICE_INFO, mDeviceInfo);
@@ -372,16 +372,16 @@ import javax.crypto.spec.SecretKeySpec;
         if (null != userAttrs) {
             uploadMessage.put(MessageKey.USER_ATTRIBUTES, new JSONObject(userAttrs));
         }
-        
+
         String userIds = mPreferences.getString(PrefKeys.USER_IDENTITIES + mApiKey, null);
         if (null != userIds) {
             uploadMessage.put(MessageKey.USER_IDENTITIES, new JSONArray(userIds));
         }
 
         if (history) {
-        	uploadMessage.put(MessageKey.HISTORY, messagesArray);
+            uploadMessage.put(MessageKey.HISTORY, messagesArray);
         } else {
-        	uploadMessage.put(MessageKey.MESSAGES, messagesArray);
+            uploadMessage.put(MessageKey.MESSAGES, messagesArray);
         }
 
         return uploadMessage;
@@ -396,12 +396,12 @@ import javax.crypto.spec.SecretKeySpec;
         try {
             // read batches ready to upload
             SQLiteDatabase db = mDB.getWritableDatabase();
-            String[] selectionArgs = new String[] { mApiKey };
-            String[] selectionColumns = new String[] { "_id", UploadTable.MESSAGE };
+            String[] selectionArgs = new String[]{mApiKey};
+            String[] selectionColumns = new String[]{"_id", UploadTable.MESSAGE};
             Cursor readyUploadsCursor = db.query(UploadTable.TABLE_NAME, selectionColumns,
                     UploadTable.API_KEY + "=?", selectionArgs, null, null, UploadTable.CREATED_AT);
 
-            if (readyUploadsCursor.getCount() > 0){
+            if (readyUploadsCursor.getCount() > 0) {
 
                 HttpClient httpClient = setupHttpClient();
 
@@ -410,7 +410,7 @@ import javax.crypto.spec.SecretKeySpec;
                     String message = readyUploadsCursor.getString(1);
                     if (!history) {
                         // if message is the MessageType.SESSION_END, then remember so the session history can be triggered
-                        if (message.contains("\""+MessageKey.TYPE+"\":\""+MessageType.SESSION_END+"\"")) {
+                        if (message.contains("\"" + MessageKey.TYPE + "\":\"" + MessageType.SESSION_END + "\"")) {
                             processingSessionEnd = true;
                         }
                     }
@@ -429,7 +429,7 @@ import javax.crypto.spec.SecretKeySpec;
                             gzipOutputStream.finish();
 
                             //https://code.google.com/p/android/issues/detail?id=62589
-                           // gzipOutputStream.flush();
+                            // gzipOutputStream.flush();
                             postEntity = new ByteArrayEntity(byteArrayOutputStream.toByteArray());
                             httpPost.setHeader("Content-Encoding", "gzip");
                         } catch (IOException ioException) {
@@ -448,25 +448,25 @@ import javax.crypto.spec.SecretKeySpec;
                     try {
                         if (mConfigManager.isDebug()) {
                             Log.d(TAG, "Uploading data to mParticle server:");
-                            try{
+                            try {
                                 JSONObject messageJson = new JSONObject(message);
                                 Log.d(TAG, messageJson.toString(4));
-                                if (messageJson.has(MessageKey.MESSAGES)){
+                                if (messageJson.has(MessageKey.MESSAGES)) {
                                     JSONArray messages = messageJson.getJSONArray(MessageKey.MESSAGES);
                                     Log.d(TAG, "SENDING MESSAGES");
-                                    for (int i = 0; i < messages.length(); i++){
-                                        Log.d(TAG, "Message type: " + ((JSONObject)messages.get(i)).getString(MessageKey.TYPE));
+                                    for (int i = 0; i < messages.length(); i++) {
+                                        Log.d(TAG, "Message type: " + ((JSONObject) messages.get(i)).getString(MessageKey.TYPE));
                                     }
-                                }else if (messageJson.has(MessageKey.HISTORY)){
+                                } else if (messageJson.has(MessageKey.HISTORY)) {
                                     JSONArray messages = messageJson.getJSONArray(MessageKey.HISTORY);
                                     Log.d(TAG, "SENDING HISTORY");
-                                    for (int i = 0; i < messages.length(); i++){
+                                    for (int i = 0; i < messages.length(); i++) {
 
-                                        Log.d(TAG, "Message type: " + ((JSONObject)messages.get(i)).getString(MessageKey.TYPE) + " SID: " + ((JSONObject)messages.get(i)).optString(MessageKey.SESSION_ID));
-                                       // Log.d(TAG, ((JSONObject)messages.get(i)).toString(4));
+                                        Log.d(TAG, "Message type: " + ((JSONObject) messages.get(i)).getString(MessageKey.TYPE) + " SID: " + ((JSONObject) messages.get(i)).optString(MessageKey.SESSION_ID));
+                                        // Log.d(TAG, ((JSONObject)messages.get(i)).toString(4));
                                     }
                                 }
-                            }catch(JSONException jse){
+                            } catch (JSONException jse) {
 
                             }
                         }
@@ -561,8 +561,8 @@ import javax.crypto.spec.SecretKeySpec;
         try {
             // read batches ready to upload
             SQLiteDatabase db = mDB.getWritableDatabase();
-            String[] selectionColumns = new String[] { "_id", CommandTable.URL, CommandTable.METHOD,
-                    CommandTable.POST_DATA, CommandTable.HEADERS };
+            String[] selectionColumns = new String[]{"_id", CommandTable.URL, CommandTable.METHOD,
+                    CommandTable.POST_DATA, CommandTable.HEADERS};
             Cursor commandsCursor = db.query(CommandTable.TABLE_NAME, selectionColumns,
                     null, null, null, null, "_id");
             while (commandsCursor.moveToNext()) {
@@ -586,7 +586,7 @@ import javax.crypto.spec.SecretKeySpec;
                     }
                     try {
                         JSONObject headersJSON = new JSONObject(headers);
-                        for (Iterator<?> iter = headersJSON.keys(); iter.hasNext();) {
+                        for (Iterator<?> iter = headersJSON.keys(); iter.hasNext(); ) {
                             String headerName = (String) iter.next();
                             String headerValue = headersJSON.getString(headerName);
                             urlConnection.setRequestProperty(headerName, headerValue);
@@ -620,7 +620,7 @@ import javax.crypto.spec.SecretKeySpec;
 
     private void cleanupDatabase(int expirationPeriod) {
         SQLiteDatabase db = mDB.getWritableDatabase();
-        String[] whereArgs = { Long.toString(System.currentTimeMillis() - expirationPeriod) };
+        String[] whereArgs = {Long.toString(System.currentTimeMillis() - expirationPeriod)};
         db.delete(CommandTable.TABLE_NAME, CommandTable.CREATED_AT + "<?", whereArgs);
         db.delete(UploadTable.TABLE_NAME, UploadTable.CREATED_AT + "<?", whereArgs);
         db.delete(MessageTable.TABLE_NAME, MessageTable.CREATED_AT + "<?", whereArgs);
@@ -628,7 +628,7 @@ import javax.crypto.spec.SecretKeySpec;
     }
 
     private URI makeServiceUri(String method) throws URISyntaxException {
-    	return new URI(mConfigManager.getHttpScheme(), DEBUG_SERVICE_HOST, "/" + SERVICE_VERSION + "/" + mApiKey + "/" + method, null);
+        return new URI(mConfigManager.getHttpScheme(), DEBUG_SERVICE_HOST, "/" + SERVICE_VERSION + "/" + mApiKey + "/" + method, null);
     }
 
     private void dbInsertUpload(SQLiteDatabase db, JSONObject message) throws JSONException {
@@ -640,32 +640,32 @@ import javax.crypto.spec.SecretKeySpec;
     }
 
     private void dbDeleteProcessedMessages(SQLiteDatabase db, String sessionId) {
-        String[] whereArgs = new String[] { mApiKey, Integer.toString(Status.UPLOADED), sessionId };
+        String[] whereArgs = new String[]{mApiKey, Integer.toString(Status.UPLOADED), sessionId};
         int rowsdeleted = db.delete(MessageTable.TABLE_NAME, SQL_FINISHED_HISTORY_MESSAGES, whereArgs);
         Log.d("mParticle DB", "Deleted " + rowsdeleted);
     }
 
     private void dbMarkAsUploadedMessage(SQLiteDatabase db, int lastMessageId) {
-    	//non-session messages can be deleted, they're not part of session history
-        String[] whereArgs = new String[] { mApiKey, Long.toString(lastMessageId) };
+        //non-session messages can be deleted, they're not part of session history
+        String[] whereArgs = new String[]{mApiKey, Long.toString(lastMessageId)};
         String whereClause = SQL_DELETABLE_MESSAGES + " and (_id<=?)";
         int rowsdeleted = db.delete(MessageTable.TABLE_NAME, whereClause, whereArgs);
-        
-        whereArgs = new String[] { mApiKey, Integer.toString(Status.READY), Long.toString(lastMessageId) };
+
+        whereArgs = new String[]{mApiKey, Integer.toString(Status.READY), Long.toString(lastMessageId)};
         whereClause = SQL_UPLOADABLE_MESSAGES + " and (_id<=?)";
         ContentValues contentValues = new ContentValues();
         contentValues.put(MessageTable.STATUS, Status.UPLOADED);
-    	int rowsupdated = db.update(MessageTable.TABLE_NAME, contentValues, whereClause, whereArgs);
+        int rowsupdated = db.update(MessageTable.TABLE_NAME, contentValues, whereClause, whereArgs);
     }
-    
+
     private void dbDeleteUpload(SQLiteDatabase db, int id) {
-        String[] whereArgs = { Long.toString(id) };
+        String[] whereArgs = {Long.toString(id)};
         int rowsdeleted = db.delete(UploadTable.TABLE_NAME, "_id=?", whereArgs);
         Log.d("mParticle DB", "Deleted " + rowsdeleted);
     }
 
     private void dbDeleteCommand(SQLiteDatabase db, int id) {
-        String[] whereArgs = { Long.toString(id) };
+        String[] whereArgs = {Long.toString(id)};
         db.delete(CommandTable.TABLE_NAME, "_id=?", whereArgs);
     }
 

@@ -46,20 +46,20 @@ class ConfigManager {
             String sessionUploadMode = responseJSON.getString(KEY_SESSION_UPLOAD_MODE);
             int uploadMode = ("batch".equalsIgnoreCase(sessionUploadMode)) ? Constants.Status.BATCH_READY : Constants.Status.READY;
             editor.putInt(KEY_SESSION_UPLOAD_MODE, uploadMode);
-        }else{
+        } else {
             editor.remove(KEY_SESSION_UPLOAD_MODE);
         }
 
         if (responseJSON.has(KEY_UNHANDLED_EXCEPTIONS)) {
             String logUnhandledExceptions = responseJSON.getString(KEY_UNHANDLED_EXCEPTIONS);
             editor.putString(KEY_UNHANDLED_EXCEPTIONS, logUnhandledExceptions);
-        }else{
+        } else {
             editor.remove(KEY_UNHANDLED_EXCEPTIONS);
         }
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD){
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD) {
             editor.apply();
-        }else{
+        } else {
             editor.commit();
         }
 
@@ -67,9 +67,9 @@ class ConfigManager {
     }
 
     private void applyConfig() {
-        if (getLogUnhandledExceptions()){
+        if (getLogUnhandledExceptions()) {
             MParticle.getInstance(mContext).enableUncaughtExceptionLogging();
-        }else{
+        } else {
             MParticle.getInstance(mContext).disableUncaughtExceptionLogging();
         }
     }
@@ -83,11 +83,11 @@ class ConfigManager {
         }*/
     }
 
-    public boolean getLogUnhandledExceptions(){
+    public boolean getLogUnhandledExceptions() {
         String handleExceptions = mPreferences.getString(KEY_UNHANDLED_EXCEPTIONS, VALUE_APP_DEFINED);
-        if (handleExceptions.equals(VALUE_APP_DEFINED)){
+        if (handleExceptions.equals(VALUE_APP_DEFINED)) {
             return localPrefs.unhandledExceptions;
-        }else{
+        } else {
             return handleExceptions.equals(VALUE_CUE_CATCH);
         }
     }
@@ -109,9 +109,9 @@ class ConfigManager {
     }
 
     public long getUploadInterval() {
-        if (localPrefs.debug){
+        if (localPrefs.debug) {
             return 1000 * localPrefs.debugUploadInterval;
-        }else{
+        } else {
             return 1000 * localPrefs.uploadInterval;
         }
     }
@@ -144,7 +144,7 @@ class ConfigManager {
         localPrefs.useSecureTransport = useSsl;
     }
 
-    public long getSessionTimeout(){
+    public long getSessionTimeout() {
         return 1000 * localPrefs.sessionTimeout;
     }
 

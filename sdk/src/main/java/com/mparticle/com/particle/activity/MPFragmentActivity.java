@@ -12,7 +12,7 @@ public class MPFragmentActivity extends FragmentActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.ICE_CREAM_SANDWICH){
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
             MParticle.getInstance(this).activityStarted(this);
         }
     }
@@ -20,7 +20,7 @@ public class MPFragmentActivity extends FragmentActivity {
     @Override
     protected void onStop() {
         super.onStop();
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.ICE_CREAM_SANDWICH){
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
             MParticle.getInstance(this).activityStopped(this);
         }
     }

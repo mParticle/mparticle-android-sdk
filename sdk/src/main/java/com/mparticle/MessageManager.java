@@ -14,7 +14,6 @@ import android.os.HandlerThread;
 import android.os.Process;
 import android.util.Log;
 
-import com.mparticle.Constants.ConfigKeys;
 import com.mparticle.Constants.MessageKey;
 import com.mparticle.Constants.MessageType;
 import com.mparticle.MParticle.EventType;
@@ -25,7 +24,6 @@ import org.json.JSONObject;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Locale;
-import java.util.Properties;
 import java.util.UUID;
 
 /* package-private */class MessageManager {
@@ -76,7 +74,7 @@ import java.util.UUID;
                     new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
             int level = batteryIntent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
             int scale = batteryIntent.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
-            sBatteryLevel = level / (double)scale;
+            sBatteryLevel = level / (double) scale;
 
             sStatusBroadcastReceiver = new StatusBroadcastReceiver();
             // NOTE: if permissions are not correct all messages will be tagged as 'offline'
@@ -95,26 +93,27 @@ import java.util.UUID;
         }
 
         sFirstRun = firstRun;
-       
-        if(!sFirstRun) {
-        	mMessageHandler.sendEmptyMessage(MessageHandler.END_ORPHAN_SESSIONS);
-        	mUploadHandler.sendEmptyMessageDelayed(UploadHandler.UPLOAD_MESSAGES, Constants.INITIAL_UPLOAD_DELAY);
-        	mUploadHandler.sendEmptyMessageDelayed(UploadHandler.CLEANUP, Constants.INITIAL_UPLOAD_DELAY);
+
+        if (!sFirstRun) {
+            mMessageHandler.sendEmptyMessage(MessageHandler.END_ORPHAN_SESSIONS);
+            mUploadHandler.sendEmptyMessageDelayed(UploadHandler.UPLOAD_MESSAGES, Constants.INITIAL_UPLOAD_DELAY);
+            mUploadHandler.sendEmptyMessageDelayed(UploadHandler.CLEANUP, Constants.INITIAL_UPLOAD_DELAY);
         }
     }
 
-    /* package-private */static JSONObject createMessage(String messageType, String sessionId, long sessionStart,
-            long time, String name, JSONObject attributes) throws JSONException {
+    /* package-private */
+    static JSONObject createMessage(String messageType, String sessionId, long sessionStart,
+                                    long time, String name, JSONObject attributes) throws JSONException {
         JSONObject message = new JSONObject();
         message.put(MessageKey.TYPE, messageType);
         message.put(MessageKey.TIMESTAMP, time);
         if (MessageType.SESSION_START == messageType) {
             message.put(MessageKey.ID, sessionId);
         } else {
-            if(null != sessionId) {
-            	message.put(MessageKey.SESSION_ID, sessionId);	
+            if (null != sessionId) {
+                message.put(MessageKey.SESSION_ID, sessionId);
             }
-        	
+
             message.put(MessageKey.ID, UUID.randomUUID().toString());
             if (sessionStart > 0) {
                 message.put(MessageKey.SESSION_START_TIMESTAMP, sessionStart);
@@ -163,7 +162,7 @@ import java.util.UUID;
 
     public static long getTotalMemory() {
         long total = mPreferences.getLong(Constants.MiscStorageKeys.TOTAL_MEMORY, -1);
-        if (total < 0){
+        if (total < 0) {
             total = MPUtility.getTotalMemory(mContext);
             SharedPreferences.Editor edit = mPreferences.edit();
             edit.putLong(Constants.MiscStorageKeys.TOTAL_MEMORY, total);
@@ -174,7 +173,7 @@ import java.util.UUID;
 
     public static long getSystemMemoryThreshold() {
         long threshold = mPreferences.getLong(Constants.MiscStorageKeys.MEMORY_THRESHOLD, -1);
-        if (threshold < 0){
+        if (threshold < 0) {
             threshold = MPUtility.getSystemMemoryThreshold(mContext);
             SharedPreferences.Editor edit = mPreferences.edit();
             edit.putLong(Constants.MiscStorageKeys.MEMORY_THRESHOLD, threshold);
@@ -183,13 +182,15 @@ import java.util.UUID;
         return threshold;
     }
 
-    /* package-private */static JSONObject createFirstRunMessage(long time) throws JSONException {
+    /* package-private */
+    static JSONObject createFirstRunMessage(long time) throws JSONException {
         JSONObject message = createMessage(MessageType.FIRST_RUN, null, 0, time, null, null);
         return message;
     }
 
-    /* package-private */static JSONObject createMessageSessionEnd(String sessionId, long start, long end, long length,
-            JSONObject attributes) throws JSONException {
+    /* package-private */
+    static JSONObject createMessageSessionEnd(String sessionId, long start, long end, long length,
+                                              JSONObject attributes) throws JSONException {
         JSONObject message = createMessage(MessageType.SESSION_END, sessionId, start, end, null, attributes);
         message.put(MessageKey.SESSION_LENGTH, length);
         return message;
@@ -197,21 +198,21 @@ import java.util.UUID;
 
     public void startSession(String sessionId, long time, String launchUri) {
         try {
-        	if(sFirstRun) {
-            	try {
-    				JSONObject firstRunMessage = createFirstRunMessage(time);
-    				mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, firstRunMessage));
-    				sFirstRun = false;
-    				if (mUploadHandler != null) {
-    					mUploadHandler.sendMessage(mUploadHandler.obtainMessage(UploadHandler.UPLOAD_MESSAGES));
-    				} else {
-        				Log.w(TAG, "Failed to send First Run Message, no upload handler");
-    				}
-    			} catch (JSONException e) { 
-    				Log.w(TAG, "Failed to create First Run Message");
-    			}
+            if (sFirstRun) {
+                try {
+                    JSONObject firstRunMessage = createFirstRunMessage(time);
+                    mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, firstRunMessage));
+                    sFirstRun = false;
+                    if (mUploadHandler != null) {
+                        mUploadHandler.sendMessage(mUploadHandler.obtainMessage(UploadHandler.UPLOAD_MESSAGES));
+                    } else {
+                        Log.w(TAG, "Failed to send First Run Message, no upload handler");
+                    }
+                } catch (JSONException e) {
+                    Log.w(TAG, "Failed to create First Run Message");
+                }
             }
-        	
+
             JSONObject message = createMessage(MessageType.SESSION_START, sessionId, time, time, null, null);
             message.put(MessageKey.LAUNCH_REFERRER, launchUri);
             mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
@@ -277,9 +278,9 @@ import java.util.UUID;
     }
 
     public void logErrorEvent(String sessionId, long sessionStartTime, long time, String errorMessage, Throwable t, JSONObject attributes) {
-    	logErrorEvent(sessionId, sessionStartTime, time, errorMessage, t, attributes, true);
+        logErrorEvent(sessionId, sessionStartTime, time, errorMessage, t, attributes, true);
     }
-    
+
     public void logErrorEvent(String sessionId, long sessionStartTime, long time, String errorMessage, Throwable t, JSONObject attributes, boolean caught) {
         try {
             JSONObject message = createMessage(MessageType.ERROR, sessionId, sessionStartTime, time, null, attributes);
@@ -355,10 +356,10 @@ import java.util.UUID;
                         .getSystemService(Context.CONNECTIVITY_SERVICE);
                 NetworkInfo activeNetwork = connectivyManager.getActiveNetworkInfo();
                 MessageManager.this.setDataConnection(activeNetwork);
-            }else if (Intent.ACTION_BATTERY_CHANGED.equals(intent.getAction())){
+            } else if (Intent.ACTION_BATTERY_CHANGED.equals(intent.getAction())) {
                 int level = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
                 int scale = intent.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
-                sBatteryLevel = level / (double)scale;
+                sBatteryLevel = level / (double) scale;
 
             }
         }
@@ -385,7 +386,7 @@ import java.util.UUID;
 
     public void setSandboxMode(boolean sandboxMode) {
         /*if(sandboxMode) {
-        	setUploadInterval(Constants.DEBUG_UPLOAD_INTERVAL);
+            setUploadInterval(Constants.DEBUG_UPLOAD_INTERVAL);
         }
     	// pass this on
     	.setSandboxMode(sandboxMode);*/

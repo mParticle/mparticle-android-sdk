@@ -18,7 +18,6 @@ import android.os.Message;
 import android.os.Process;
 import android.util.Log;
 
-import com.mparticle.Constants.ConfigKeys;
 import com.mparticle.Constants.MessageKey;
 import com.mparticle.Constants.PrefKeys;
 
@@ -26,11 +25,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.util.Map;
-import java.util.Properties;
 import java.util.UUID;
 
 /**
@@ -54,14 +50,14 @@ public class MParticle {
     private boolean mOptedOut = false;
     private boolean mDebugMode = false;
 
-    /* package-private */String mSessionID;
-    /* package-private */long mSessionStartTime = 0;
-    /* package-private */long mLastEventTime = 0;
+    /* package-private */ String mSessionID;
+    /* package-private */ long mSessionStartTime = 0;
+    /* package-private */ long mLastEventTime = 0;
     //private int mSessionTimeout = 30 * 60 * 1000;
     private int mEventCount = 0;
-    /* package-private */JSONArray mUserIdentities = new JSONArray();
-    /* package-private */JSONObject mUserAttributes = new JSONObject();
-    /* package-private */JSONObject mSessionAttributes;
+    /* package-private */ JSONArray mUserIdentities = new JSONArray();
+    /* package-private */ JSONObject mUserAttributes = new JSONObject();
+    /* package-private */ JSONObject mSessionAttributes;
     private String mLaunchUri;
     private boolean mAutoTrackingEnabled;
 
@@ -95,7 +91,7 @@ public class MParticle {
             sPreferences.edit().putLong(PrefKeys.INSTALL_TIME, System.currentTimeMillis()).commit();
         }
 
-        if (mConfigManager.getLogUnhandledExceptions()){
+        if (mConfigManager.getLogUnhandledExceptions()) {
             enableUncaughtExceptionLogging();
         }
         logStateTransition(Constants.StateTransitionType.STATE_TRANS_INIT);
@@ -104,18 +100,15 @@ public class MParticle {
     /**
      * Initialize or return an instance of the mParticle SDK
      *
-     * @param context
-     *            the Activity that is creating the instance
-     * @param apiKey
-     *            the API key for your account
-     * @param secret
-     *            the API secret for your account
+     * @param context the Activity that is creating the instance
+     * @param apiKey  the API key for your account
+     * @param secret  the API secret for your account
      * @return An instance of the mParticle SDK configured with your API key
      */
     public static MParticle getInstance(Context context, String apiKey, String secret) {
-        if (instance == null){
-            synchronized (MParticle.class){
-                if (instance == null){
+        if (instance == null) {
+            synchronized (MParticle.class) {
+                if (instance == null) {
                     if (null == context) {
                         throw new IllegalArgumentException("Context is required");
                     }
@@ -137,7 +130,7 @@ public class MParticle {
                     Context appContext = context.getApplicationContext();
 
                     Boolean firstRun = sPreferences.getBoolean(PrefKeys.FIRSTRUN + appConfigManager.getApiKey(), true);
-                    if(firstRun) {
+                    if (firstRun) {
                         sPreferences.edit().putBoolean(PrefKeys.FIRSTRUN + appConfigManager.getApiKey(), false).commit();
                     }
 
@@ -148,7 +141,7 @@ public class MParticle {
                     if (context instanceof Activity) {
                         instance.mLaunchUri = ((Activity) context).getIntent().getDataString();
                         if (instance.mLaunchUri != null) {
-                            Log.d(TAG, "launchuri: "+instance.mLaunchUri);
+                            Log.d(TAG, "launchuri: " + instance.mLaunchUri);
                         }
                     }
 
@@ -174,8 +167,7 @@ public class MParticle {
      * Initialize or return an instance of the mParticle SDK using api_key and api_secret from the
      * mparticle.xml file.
      *
-     * @param context
-     *            the Activity that is creating the instance
+     * @param context the Activity that is creating the instance
      * @return An instance of the mParticle SDK configured with your API key
      */
     public static MParticle getInstance(Context context) {
@@ -184,7 +176,7 @@ public class MParticle {
 
     /**
      * Starts tracking a user session. If a session is already active, it will be resumed.
-     *
+     * <p/>
      * This method should be called from an Activity's onStart() method.
      */
     public void activityStarted(Activity activity) {
@@ -203,9 +195,9 @@ public class MParticle {
     /**
      * Stop tracking a user session. If the session is restarted before the session timeout it will
      * be resumed.
-     *
+     * <p/>
      * This method should be called from an Activity's onStop() method.
-     *
+     * <p/>
      * To explicitly end a session use the endSession() method.
      */
     public void activityStopped(Activity activity) {
@@ -257,7 +249,7 @@ public class MParticle {
      * Ensures a session is active.
      */
     private void ensureActiveSession() {
-    //    checkSessionTimeout();
+        //    checkSessionTimeout();
         mLastEventTime = System.currentTimeMillis();
         if (0 == mSessionStartTime) {
             beginSession();
@@ -310,16 +302,14 @@ public class MParticle {
     public void setInstallReferrer(String referrer) {
         sPreferences.edit().putString(PrefKeys.INSTALL_REFERRER, referrer).commit();
         if (mDebugMode)
-            debugLog("Set installReferrer: "+referrer);
+            debugLog("Set installReferrer: " + referrer);
     }
 
     /**
      * Log an event
      *
-     * @param eventName
-     *            the name of the event to be tracked
-     * @param eventType
-     *            the type of the event to be tracked
+     * @param eventName the name of the event to be tracked
+     * @param eventType the type of the event to be tracked
      */
     public void logEvent(String eventName, EventType eventType) {
         logEvent(eventName, eventType, null);
@@ -328,12 +318,9 @@ public class MParticle {
     /**
      * Log an event with data attributes
      *
-     * @param eventName
-     *            the name of the event to be tracked
-     * @param eventType
-     *            the type of the event to be tracked
-     * @param eventData
-     *            a Map of data attributes
+     * @param eventName the name of the event to be tracked
+     * @param eventType the type of the event to be tracked
+     * @param eventData a Map of data attributes
      */
     public void logEvent(String eventName, EventType eventType, Map<String, String> eventData) {
         if (mOptedOut) {
@@ -360,25 +347,25 @@ public class MParticle {
         }
     }
 
-    public void logTransaction(MPTransaction transaction){
-        if (mOptedOut){
+    public void logTransaction(MPTransaction transaction) {
+        if (mOptedOut) {
             return;
         }
-        if (transaction == null){
+        if (transaction == null) {
             throw new IllegalArgumentException("transaction is required for logTransaction");
         }
 
-        if (transaction.getData() == null){
+        if (transaction.getData() == null) {
             throw new IllegalArgumentException("Transaction data was null, please check that the transaction was built properly.");
         }
 
         ensureActiveSession();
-        if (checkEventLimit()){
+        if (checkEventLimit()) {
             mMessageManager.logEvent(mSessionID, mSessionStartTime, mLastEventTime, "Ecommerce", EventType.Transaction, transaction.getData());
-            if (mDebugMode){
-                try{
+            if (mDebugMode) {
+                try {
                     debugLog("Logged transaction with data: " + transaction.getData().toString(4));
-                }catch(JSONException jse){
+                } catch (JSONException jse) {
 
                 }
             }
@@ -389,8 +376,7 @@ public class MParticle {
     /**
      * Log a screen view event
      *
-     * @param screenName
-     *            the name of the screen to be tracked
+     * @param screenName the name of the screen to be tracked
      */
     public void logScreen(String screenName) {
         logScreen(screenName, null);
@@ -399,10 +385,8 @@ public class MParticle {
     /**
      * Log a screen view event with data attributes
      *
-     * @param screenName
-     *            the name of the screen to be tracked
-     * @param eventData
-     *            a Map of data attributes
+     * @param screenName the name of the screen to be tracked
+     * @param eventData  a Map of data attributes
      */
     public void logScreen(String screenName, Map<String, String> eventData) {
         if (mOptedOut) {
@@ -432,8 +416,7 @@ public class MParticle {
     /**
      * Log an error event with just a Message
      *
-     * @param message
-     *            the name of the error event to be tracked
+     * @param message the name of the error event to be tracked
      */
     public void logError(String message) {
         logError(message, null, null);
@@ -442,8 +425,7 @@ public class MParticle {
     /**
      * Log an error event with just an Exception
      *
-     * @param exception
-     *            an Exception
+     * @param exception an Exception
      */
     public void logError(Exception exception) {
         logError(null, exception, null);
@@ -452,10 +434,8 @@ public class MParticle {
     /**
      * Log an error event with an Exception and any additional data
      *
-     * @param exception
-     *            an Exception
-     * @param eventData
-     *            a Map of data attributes
+     * @param exception an Exception
+     * @param eventData a Map of data attributes
      */
     public void logError(Exception exception, Map<String, String> eventData) {
         logError(null, exception, eventData);
@@ -464,10 +444,8 @@ public class MParticle {
     /**
      * Log an error event with an Exception and any additional data
      *
-     * @param message
-     *            the name of the error to be tracked
-     * @param eventData
-     *            a Map of data attributes
+     * @param message   the name of the error to be tracked
+     * @param eventData a Map of data attributes
      */
     public void logError(String message, Map<String, String> eventData) {
         logError(message, null, eventData);
@@ -476,12 +454,9 @@ public class MParticle {
     /**
      * Log an error event with a Message, Exception, and any additional data
      *
-     * @param message
-     *            the name of the error event to be tracked
-     * @param exception
-     *            an Exception
-     * @param eventData
-     *            a Map of data attributes
+     * @param message   the name of the error event to be tracked
+     * @param exception an Exception
+     * @param eventData a Map of data attributes
      */
     public void logError(String message, Exception exception, Map<String, String> eventData) {
         if (mOptedOut) {
@@ -498,29 +473,27 @@ public class MParticle {
             if (mDebugMode)
                 debugLog(
                         "Logged error with message: " + (message == null ? "<none>" : message) +
-                        " with data: " + (eventDataJSON == null ? "<none>" : eventDataJSON.toString()) +
-                        " with exception: " + (exception == null ? "<none>" : exception.getMessage()));
+                                " with data: " + (eventDataJSON == null ? "<none>" : eventDataJSON.toString()) +
+                                " with exception: " + (exception == null ? "<none>" : exception.getMessage()));
         }
     }
 
 
-    void logUnhandledError(Throwable t){
+    void logUnhandledError(Throwable t) {
         ensureActiveSession();
         mMessageManager.logErrorEvent(mSessionID, mSessionStartTime, mLastEventTime, t != null ? t.getMessage() : null, t, null, false);
         //we know that the app is about to crash and therefore exit
         logStateTransition(Constants.StateTransitionType.STATE_TRANS_EXIT);
         endSession(System.currentTimeMillis());
     }
+
     /**
      * Enables location tracking given a provider and update frequency criteria. The provider must
      * be available and the correct permissions must have been requested during installation.
      *
-     * @param provider
-     *            the provider key
-     * @param minTime
-     *            the minimum time (in milliseconds) to trigger an update
-     * @param minDistance
-     *            the minimum distance (in meters) to trigger an update
+     * @param provider    the provider key
+     * @param minTime     the minimum time (in milliseconds) to trigger an update
+     * @param minDistance the minimum distance (in meters) to trigger an update
      */
     public void enableLocationTracking(String provider, long minTime, long minDistance) {
         if (mOptedOut) {
@@ -568,10 +541,8 @@ public class MParticle {
     /**
      * Set a single session attribute. The attribute will combined with any existing attributes.
      *
-     * @param key
-     *            the attribute key
-     * @param value
-     *            the attribute value
+     * @param key   the attribute key
+     * @param value the attribute value
      */
     public void setSessionAttribute(String key, String value) {
         if (mOptedOut) {
@@ -588,19 +559,17 @@ public class MParticle {
     /**
      * Set a single user attribute. The attribute will combined with any existing attributes.
      *
-     * @param key
-     *            the attribute key
-     * @param value
-     *            the attribute value
+     * @param key   the attribute key
+     * @param value the attribute value
      */
     public void setUserAttribute(String key, String value) {
         if (mOptedOut) {
             return;
         }
         if (mDebugMode)
-            if (value != null){
+            if (value != null) {
                 debugLog("Set user attribute: " + key + " with value " + value);
-            }else{
+            } else {
                 debugLog("Set user attribute: " + key);
             }
         if (setCheckedAttribute(mUserAttributes, key, value)) {
@@ -611,56 +580,54 @@ public class MParticle {
     /**
      * Set a single user tag. The attribute will combined with any existing attributes.
      *
-     * @param key
-     *            the attribute key
+     * @param key the attribute key
      */
     public void setUserAttribute(String key) {
         setUserAttribute(key, null);
     }
 
     public void setUserIdentity(String id, IdentityType identityType) {
-    	if(mOptedOut){
-    		return;
-    	}
+        if (mOptedOut) {
+            return;
+        }
 
         if (mDebugMode)
-    	    debugLog("Setting user identity: " + id);
+            debugLog("Setting user identity: " + id);
 
-    	if (null != id && id.length() > Constants.LIMIT_ATTR_VALUE) {
+        if (null != id && id.length() > Constants.LIMIT_ATTR_VALUE) {
             Log.w(TAG, "Id value length exceeds limit. Discarding id: " + id);
             return;
         }
 
-    	try {
-    		JSONObject identity = new JSONObject();
-    		identity.put(MessageKey.IDENTITY_NAME, identityType.value);
-    		identity.put(MessageKey.IDENTITY_VALUE, id);
+        try {
+            JSONObject identity = new JSONObject();
+            identity.put(MessageKey.IDENTITY_NAME, identityType.value);
+            identity.put(MessageKey.IDENTITY_VALUE, id);
 
-    		// verify there is not another IDENTITY_VALUE...if so, remove it first...to do this, copy the
-    		//   existing array to a new one
-    		JSONArray newUserIdentities = new JSONArray();
+            // verify there is not another IDENTITY_VALUE...if so, remove it first...to do this, copy the
+            //   existing array to a new one
+            JSONArray newUserIdentities = new JSONArray();
 
-    		for (int i=0; i<mUserIdentities.length(); i++) {
-    			JSONObject testid = mUserIdentities.getJSONObject(i);
-    			if (testid.get(MessageKey.IDENTITY_NAME).equals(identityType.value)) {
-    				// remove this one by not copying it
-    				continue;
-    			}
-    			newUserIdentities.put(testid);
-    		}
-    		// now add this one...only if the id is not null
-    		if ((id != null) && (id.length()>0)) {
-    			newUserIdentities.put(identity);
-    		}
-    		// now make the new array the saved one
-    		mUserIdentities = newUserIdentities;
-    	}
-    	catch(JSONException e) {
-    		Log.w(TAG, "Error setting identity: " + id);
+            for (int i = 0; i < mUserIdentities.length(); i++) {
+                JSONObject testid = mUserIdentities.getJSONObject(i);
+                if (testid.get(MessageKey.IDENTITY_NAME).equals(identityType.value)) {
+                    // remove this one by not copying it
+                    continue;
+                }
+                newUserIdentities.put(testid);
+            }
+            // now add this one...only if the id is not null
+            if ((id != null) && (id.length() > 0)) {
+                newUserIdentities.put(identity);
+            }
+            // now make the new array the saved one
+            mUserIdentities = newUserIdentities;
+        } catch (JSONException e) {
+            Log.w(TAG, "Error setting identity: " + id);
             return;
-    	}
+        }
 
-    	sPreferences.edit().putString(PrefKeys.USER_IDENTITIES + mApiKey, mUserIdentities.toString()).commit();
+        sPreferences.edit().putString(PrefKeys.USER_IDENTITIES + mApiKey, mUserIdentities.toString()).commit();
     }
 
     /* package-private */void clearUserAttributes() {
@@ -671,8 +638,7 @@ public class MParticle {
     /**
      * Control the opt-in/opt-out status for the application.
      *
-     * @param optOutStatus
-     *            set to <code>true</code> to opt out of event tracking
+     * @param optOutStatus set to <code>true</code> to opt out of event tracking
      */
     public void setOptOut(boolean optOutStatus) {
         if (optOutStatus == mOptedOut) {
@@ -715,7 +681,7 @@ public class MParticle {
 
     /**
      * Set the user session timeout interval.
-     *
+     * <p/>
      * A session is ended when no events (logged events or start/stop events) has occurred within
      * the session timeout interval.
      *
@@ -728,8 +694,7 @@ public class MParticle {
     /**
      * Set the upload interval period to control how frequently uploads occur.
      *
-     * @param uploadInterval
-     *            the number of seconds between uploads
+     * @param uploadInterval the number of seconds between uploads
      */
     public void setUploadInterval(int uploadInterval) {
         mConfigManager.setUploadInterval(uploadInterval);
@@ -738,8 +703,7 @@ public class MParticle {
     /**
      * Set the upload interval period to control how frequently uploads occur when in debug mode.
      *
-     * @param uploadInterval
-     *            the number of seconds between uploads
+     * @param uploadInterval the number of seconds between uploads
      */
     public void setDebugUploadInterval(int uploadInterval) {
         mConfigManager.setDebugUploadInterval(uploadInterval);
@@ -749,8 +713,7 @@ public class MParticle {
     /**
      * Enable SSL transport when uploading data
      *
-     * @param sslEnabled
-     *            true to turn on SSL transport, false to use non-SSL transport
+     * @param sslEnabled true to turn on SSL transport, false to use non-SSL transport
      */
     public void setSecureTransport(boolean sslEnabled) {
         mConfigManager.setUseSsl(sslEnabled);
@@ -787,8 +750,7 @@ public class MParticle {
     /**
      * Register the application for GCM notifications
      *
-     * @param senderId
-     *            the SENDER_ID for the application
+     * @param senderId the SENDER_ID for the application
      */
     public void enablePushNotifications(String senderId) {
         if (null == getPushRegistrationId()) {
@@ -797,7 +759,7 @@ public class MParticle {
             registrationIntent.putExtra("sender", senderId);
             ComponentName svc = mAppContext.startService(registrationIntent);
             if (svc == null) {
-            	Log.w(TAG, "enablePushNotifications can't start service");
+                Log.w(TAG, "enablePushNotifications can't start service");
             }
         }
     }
@@ -817,24 +779,23 @@ public class MParticle {
      * Manually register the device token for receiving push notifications from mParticle
      * Called from intent handler
      *
-     * @param registrationId
-     *            the device registration id
+     * @param registrationId the device registration id
      */
     /* package-private */void setPushRegistrationId(String registrationId) {
         if (mDebugMode)
             debugLog("Set push registration token: " + registrationId);
 
         if (registrationId == null) {
-        	clearPushRegistrationId();
+            clearPushRegistrationId();
         } else {
-        	sPreferences.edit().putString(PrefKeys.PUSH_REGISTRATION_ID, registrationId).commit();
-        	mMessageManager.setPushRegistrationId(registrationId, true);
+            sPreferences.edit().putString(PrefKeys.PUSH_REGISTRATION_ID, registrationId).commit();
+            mMessageManager.setPushRegistrationId(registrationId, true);
         }
     }
 
     /**
      * Manually un-register the device token for receiving push notifications from mParticle
-     *
+     * <p/>
      * Called from intent handler
      */
     /* package-private */void clearPushRegistrationId() {
@@ -843,7 +804,7 @@ public class MParticle {
 
         String registrationId = getPushRegistrationId();
         if (null != registrationId) {
-        	// set the registered msg to false
+            // set the registered msg to false
             mMessageManager.setPushRegistrationId(registrationId, false);
             // then clear the flag
             sPreferences.edit().remove(PrefKeys.PUSH_REGISTRATION_ID).commit();
@@ -883,8 +844,7 @@ public class MParticle {
      * of the attributes is return with data that exceeds the limits removed. NOTE: Non-string
      * attributes are not converted to strings, currently.
      *
-     * @param attributes
-     *            the user-provided JSONObject
+     * @param attributes the user-provided JSONObject
      * @return a cleansed copy of the JSONObject
      */
     /* package-private */JSONObject enforceAttributeConstraints(Map<String, String> attributes) {
@@ -900,7 +860,8 @@ public class MParticle {
         return checkedAttributes;
     }
 
-    /* package-private */static boolean setCheckedAttribute(JSONObject attributes, String key, Object value) {
+    /* package-private */
+    static boolean setCheckedAttribute(JSONObject attributes, String key, Object value) {
         if (null == attributes || null == key) {
             return false;
         }
@@ -917,7 +878,7 @@ public class MParticle {
                 Log.w(TAG, "Attribute name length exceeds limit. Discarding attribute: " + key);
                 return false;
             }
-            if (value == null){
+            if (value == null) {
                 value = JSONObject.NULL;
             }
             attributes.put(key, value);
@@ -955,7 +916,7 @@ public class MParticle {
         @Override
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
-            if (!mParticle.checkSessionTimeout()){
+            if (!mParticle.checkSessionTimeout()) {
                 sendEmptyMessageDelayed(0, mParticle.getSessionTimeout());
             }
         }
@@ -989,6 +950,7 @@ public class MParticle {
 
     public enum EventType {
         Unknown, Navigation, Location, Search, Transaction, UserContent, UserPreference, Social, Other;
+
         public String toString() {
 //            return name().toLowerCase(Locale.US);
             return name();
@@ -996,23 +958,23 @@ public class MParticle {
     }
 
     public enum IdentityType {
-    	OTHER(0),
-    	CUSTOMERID(1),
-    	FACEBOOK(2),
-    	TWITTER(3),
-    	GOOGLE(4),
-    	MICROSOFT(5),
-    	YAHOO(6),
-    	EMAIL(7);
+        OTHER(0),
+        CUSTOMERID(1),
+        FACEBOOK(2),
+        TWITTER(3),
+        GOOGLE(4),
+        MICROSOFT(5),
+        YAHOO(6),
+        EMAIL(7);
 
-    	private final int value;
+        private final int value;
 
-    	private IdentityType(int value) {
-    		this.value = value;
-    	}
+        private IdentityType(int value) {
+            this.value = value;
+        }
 
-    	public int getValue() {
-    		return value;
-    	}
+        public int getValue() {
+            return value;
+        }
     }
 }

@@ -9,8 +9,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 
-import com.mparticle.com.particle.activity.MPActivity;
-
 /**
  * Created by sdozor on 1/15/14.
  */
@@ -23,7 +21,7 @@ public class AppStateManager {
     Runnable backgroundChecker = new Runnable() {
         @Override
         public void run() {
-            if (isBackgrounded()){
+            if (isBackgrounded()) {
                 MParticle.getInstance(mContext).logStateTransition(Constants.StateTransitionType.STATE_TRANS_BG);
                 Log.d(Constants.LOG_TAG, "APP BACKGROUNDED");
             }
@@ -37,14 +35,14 @@ public class AppStateManager {
     public AppStateManager(Context context) {
         mContext = context.getApplicationContext();
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH){
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
             setupLifecycleCallbacks();
         }
     }
 
     @TargetApi(14)
     private void setupLifecycleCallbacks() {
-        ((Application)mContext).registerActivityLifecycleCallbacks(new Application.ActivityLifecycleCallbacks() {
+        ((Application) mContext).registerActivityLifecycleCallbacks(new Application.ActivityLifecycleCallbacks() {
             @Override
             public void onActivityCreated(Activity activity, Bundle savedInstanceState) {
 
@@ -87,22 +85,22 @@ public class AppStateManager {
                 (System.currentTimeMillis() - mLastStoppedTime) > ACTIVITY_DELAY;
     }
 
-    public void onActivityStarted(Activity activity){
-        if (isBackgrounded() && mLastStoppedTime > 0){
+    public void onActivityStarted(Activity activity) {
+        if (isBackgrounded() && mLastStoppedTime > 0) {
             MParticle.getInstance(mContext).logStateTransition(Constants.StateTransitionType.STATE_TRANS_FORE);
             Log.d(Constants.LOG_TAG, "APP FOREGROUNDED");
         }
         mActivities++;
         Log.d(Constants.LOG_TAG, "Activity Count: " + mActivities);
-        if (MParticle.getInstance(mContext).isAutoTrackingEnabled()){
+        if (MParticle.getInstance(mContext).isAutoTrackingEnabled()) {
             MParticle.getInstance(mContext).logScreen(getActivityName(activity));
         }
     }
 
-    public void onActivityStopped(Activity activity){
+    public void onActivityStopped(Activity activity) {
         mActivities--;
         mLastStoppedTime = System.currentTimeMillis();
-        if (mActivities < 1){
+        if (mActivities < 1) {
             delayedBackgroundCheckHandler.postDelayed(backgroundChecker, ACTIVITY_DELAY);
         }
         Log.d(Constants.LOG_TAG, "Activity Count: " + mActivities);
@@ -120,5 +118,5 @@ public class AppStateManager {
         }
         this.mActivityNameMap.put(canonicalName, name);
         return name;*/
-   }
+    }
 }

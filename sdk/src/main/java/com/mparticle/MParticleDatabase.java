@@ -42,7 +42,7 @@ import android.database.sqlite.SQLiteOpenHelper;
         public final static String MESSAGE_TYPE = "message_type";
         public final static String CF_UUID = "cfuuid";
     }
-    
+
     private static final String CREATE_MESSAGES_DDL =
             "CREATE TABLE " + MessageTable.TABLE_NAME + " (" +
                     "_id INTEGER PRIMARY KEY AUTOINCREMENT, " +
@@ -95,7 +95,7 @@ import android.database.sqlite.SQLiteOpenHelper;
                     CommandTable.HEADERS + " TEXT, " +
                     CommandTable.CREATED_AT + " INTEGER, " +
                     CommandTable.SESSION_ID + " TEXT, " +
-            		CommandTable.API_KEY + " STRING NOT NULL, " +
+                    CommandTable.API_KEY + " STRING NOT NULL, " +
                     CommandTable.CF_UUID + " TEXT" +
                     ");";
 
@@ -110,7 +110,7 @@ import android.database.sqlite.SQLiteOpenHelper;
         db.execSQL(CREATE_UPLOADS_DDL);
         db.execSQL(CREATE_COMMANDS_DDL);
     }
-    
+
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         // just blow away the old tables

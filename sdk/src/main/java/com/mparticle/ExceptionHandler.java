@@ -1,8 +1,8 @@
 package com.mparticle;
 
-import java.lang.Thread.UncaughtExceptionHandler;
-
 import android.util.Log;
+
+import java.lang.Thread.UncaughtExceptionHandler;
 
 /* package-private */class ExceptionHandler implements UncaughtExceptionHandler {
 

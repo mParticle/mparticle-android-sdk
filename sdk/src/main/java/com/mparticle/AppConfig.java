@@ -1,7 +1,6 @@
 package com.mparticle;
 
 import android.content.Context;
-import android.content.pm.PackageManager;
 import android.util.Log;
 
 /**
@@ -12,7 +11,7 @@ public class AppConfig {
     public static final String PREFKEY_API_SECRET = "mp_secret";
     public static final String PREFKEY_EXCEPTIONS = "mp_reportUncaughtExceptions";
     public static final String PREFKEY_SESSION_TIMEOUT = "mp_sessionTimeout";
-    public static final String PREFKEY_DBG_UPLOAD_INTERVAL= "mp_debugUploadInterval";
+    public static final String PREFKEY_DBG_UPLOAD_INTERVAL = "mp_debugUploadInterval";
     public static final String PREFKEY_PROD_UPLOAD_INTERVAL = "mp_productionUploadInterval";
     public static final String PREFKEY_USE_SSL = "mp_useSecureTransport";
     public static final String PREFKEY_DBG_ENABLED = "mp_enableDebug";
@@ -35,26 +34,26 @@ public class AppConfig {
         this(context, null, null);
     }
 
-    public AppConfig(Context context, String key, String secret){
+    public AppConfig(Context context, String key, String secret) {
         mContext = context;
-        if ((key == null) || secret == null){
+        if ((key == null) || secret == null) {
             Log.d(Constants.LOG_TAG, context.getString(R.string.error_noservercredentials));
             parseLocalCredentials();
-        }else{
+        } else {
             mKey = key;
             mSecret = secret;
         }
         parseLocalSettings();
     }
 
-    private void parseLocalCredentials(){
+    private void parseLocalCredentials() {
         mKey = getString(PREFKEY_API_KEY);
-        if (mKey == null){
+        if (mKey == null) {
             Log.d(Constants.LOG_TAG, String.format(mContext.getString(R.string.error_missingrequiredkey), PREFKEY_API_KEY));
             throw new IllegalArgumentException(mContext.getString(R.string.missing_apikey));
         }
         mSecret = getString(PREFKEY_API_SECRET);
-        if (mSecret == null){
+        if (mSecret == null) {
             Log.d(Constants.LOG_TAG, String.format(mContext.getString(R.string.error_missingrequiredkey), PREFKEY_API_KEY));
             throw new IllegalArgumentException(mContext.getString(R.string.missing_apisecret));
         }
@@ -73,8 +72,8 @@ public class AppConfig {
         return this.mContext.getResources().getIdentifier(key, type, this.mContext.getPackageName());
     }
 
-    private void debugLog(String message){
-        if (debug){
+    private void debugLog(String message) {
+        if (debug) {
             Log.d(Constants.LOG_TAG, message);
         }
     }
@@ -97,9 +96,9 @@ public class AppConfig {
         return this.mContext.getResources().getBoolean(id);
     }
 
-    public int getInteger(String key, int defaultValue){
+    public int getInteger(String key, int defaultValue) {
         int id = getResourceId(key, "integer");
-        if (id == 0){
+        if (id == 0) {
             debugLog(String.format(mContext.getString(R.string.error_missingkey), key));
             return defaultValue;
         }

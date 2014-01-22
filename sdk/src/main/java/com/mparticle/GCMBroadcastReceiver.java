@@ -13,7 +13,7 @@ public class GCMBroadcastReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-    	Log.i("GCMBroadcastReceiver", "Received message with action: "+intent.getAction());
+        Log.i("GCMBroadcastReceiver", "Received message with action: " + intent.getAction());
         GCMIntentService.runIntentInService(context, intent);
         setResult(Activity.RESULT_OK, null, null);
     }
