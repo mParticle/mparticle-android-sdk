@@ -202,7 +202,7 @@ package com.mparticle;
         public static final String ENABLE_COMPRESSION = "enable_compression";
     }
 
-    // these keys are expected by the GCMIntentService for push notifications
+    // these keys are expected by the GcmIntentService for push notifications
     public interface GCMNotificationKeys {
         public static final String TITLE = "mp::notification::title";
         public static final String TEXT = "mp::notification::text";

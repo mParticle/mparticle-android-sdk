@@ -14,21 +14,21 @@ import android.util.Log;
 
 import com.mparticle.Constants.GCMNotificationKeys;
 
-public class GCMIntentService extends IntentService {
+public class GcmIntentService extends IntentService {
 
     private static final String TAG = Constants.LOG_TAG;
 
     private static PowerManager.WakeLock sWakeLock;
-    private static final Object LOCK = GCMIntentService.class;
+    private static final Object LOCK = GcmIntentService.class;
 
     private MParticle mMParticle;
 
-    public GCMIntentService() {
-        super("com.mparticle.GCMIntentService");
+    public GcmIntentService() {
+        super("com.mparticle.GcmIntentService");
     }
 
     // for unit tests
-    /* package-private */GCMIntentService(MParticle mParticle) {
+    /* package-private */GcmIntentService(MParticle mParticle) {
         this();
         mMParticle = mParticle;
     }
@@ -41,14 +41,14 @@ public class GCMIntentService extends IntentService {
             }
         }
         sWakeLock.acquire();
-        intent.setClass(context, GCMIntentService.class);
-        Log.i("GCMIntentService", "Running intent");
+        intent.setClass(context, GcmIntentService.class);
+        Log.i("GcmIntentService", "Running intent");
         context.startService(intent);
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.i("GCMIntentService", "onStartCommand");
+        Log.i("GcmIntentService", "onStartCommand");
         return super.onStartCommand(intent, flags, startId);
     }
 
@@ -56,7 +56,7 @@ public class GCMIntentService extends IntentService {
     public final void onHandleIntent(Intent intent) {
         try {
             String action = intent.getAction();
-            Log.i("GCMIntentService", "Handling action: " + action);
+            Log.i("GcmIntentService", "Handling action: " + action);
             if (action.equals("com.google.android.c2dm.intent.REGISTRATION")) {
                 handleRegistration(intent);
             } else if (action.equals("com.google.android.c2dm.intent.RECEIVE")) {

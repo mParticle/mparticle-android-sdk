@@ -6,15 +6,15 @@ import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 
-public class GCMBroadcastReceiver extends BroadcastReceiver {
+public class GcmBroadcastReceiver extends BroadcastReceiver {
 
-    public GCMBroadcastReceiver() {
+    public GcmBroadcastReceiver() {
     }
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        Log.i("GCMBroadcastReceiver", "Received message with action: " + intent.getAction());
-        GCMIntentService.runIntentInService(context, intent);
+        Log.i("GcmBroadcastReceiver", "Received message with action: " + intent.getAction());
+        GcmIntentService.runIntentInService(context, intent);
         setResult(Activity.RESULT_OK, null, null);
     }
 
