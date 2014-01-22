@@ -56,6 +56,10 @@ public class ParticleActivity extends MPActionBarActivity
                 mTitle = getString(R.string.title_section2);
                 fragment = AttributeTestFragment.newInstance(position + 1);
                 break;
+            case 2:
+                mTitle = getString(R.string.title_section3);
+                fragment = TransactionTestFragment.newInstance(position + 1);
+                break;
         }
         if (fragmentManager.findFragmentByTag(mTitle.toString()) == null){
             transaction.replace(R.id.container, fragment, mTitle.toString())

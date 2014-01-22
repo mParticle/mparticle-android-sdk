@@ -360,6 +360,32 @@ public class MParticle {
         }
     }
 
+    public void logTransaction(MPTransaction transaction){
+        if (mOptedOut){
+            return;
+        }
+        if (transaction == null){
+            throw new IllegalArgumentException("transaction is required for logTransaction");
+        }
+
+        if (transaction.getData() == null){
+            throw new IllegalArgumentException("Transaction data was null, please check that the transaction was built properly.");
+        }
+
+        ensureActiveSession();
+        if (checkEventLimit()){
+            mMessageManager.logEvent(mSessionID, mSessionStartTime, mLastEventTime, "Ecommerce", EventType.Transaction, transaction.getData());
+            if (mDebugMode){
+                try{
+                    debugLog("Logged transaction with data: " + transaction.getData().toString(4));
+                }catch(JSONException jse){
+
+                }
+            }
+        }
+
+    }
+
     /**
      * Log a screen view event
      *
@@ -874,7 +900,7 @@ public class MParticle {
         return checkedAttributes;
     }
 
-    /* package-private */boolean setCheckedAttribute(JSONObject attributes, String key, Object value) {
+    /* package-private */static boolean setCheckedAttribute(JSONObject attributes, String key, Object value) {
         if (null == attributes || null == key) {
             return false;
         }
