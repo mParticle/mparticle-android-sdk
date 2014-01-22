@@ -12,9 +12,12 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
-    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
-    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
-    <uses-permission android:name="android.permission.BLUETOOTH" />
+    <!-- BEGIN PUSH REQUIREMENTS -->
+    <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
+    <permission android:name="com.mparticle.particlebox.gcm.permission.C2D_MESSAGE"
+        android:protectionLevel="signature" />
+    <uses-permission android:name="com.mparticle.particlebox.gcm.permission.C2D_MESSAGE" />
+    <!-- END PUSH REQUIREMENTS -->
 
     <application
         android:allowBackup="true"
@@ -31,6 +34,19 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- BEGIN PUSH REQUIREMENTS -->
+        <receiver
+            android:name="com.mparticle.GcmBroadcastReceiver"
+            android:permission="com.google.android.c2dm.permission.SEND" >
+            <intent-filter>
+                <action android:name="com.google.android.c2dm.intent.RECEIVE" />
+                <category android:name="com.mparticle.particlebox" />
+            </intent-filter>
+        </receiver>
+        <service android:name="com.mparticle.GcmIntentService" />
+        <!-- END PUSH REQUIREMENTS -->
+
     </application>
 
 </manifest>
