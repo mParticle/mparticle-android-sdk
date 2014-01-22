@@ -51,10 +51,12 @@ public class AppConfig {
         mKey = getString(PREFKEY_API_KEY);
         if (mKey == null){
             Log.d(Constants.LOG_TAG, String.format(mContext.getString(R.string.error_missingrequiredkey), PREFKEY_API_KEY));
+            throw new IllegalArgumentException(mContext.getString(R.string.missing_apikey));
         }
         mSecret = getString(PREFKEY_API_SECRET);
-        if (mKey == null){
+        if (mSecret == null){
             Log.d(Constants.LOG_TAG, String.format(mContext.getString(R.string.error_missingrequiredkey), PREFKEY_API_KEY));
+            throw new IllegalArgumentException(mContext.getString(R.string.missing_apisecret));
         }
     }
 

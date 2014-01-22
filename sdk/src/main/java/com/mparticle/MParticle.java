@@ -65,10 +65,10 @@ public class MParticle {
     private String mLaunchUri;
     private boolean mAutoTrackingEnabled;
 
-    /* package-private */MParticle(Context context, String apiKey, MessageManager messageManager, ConfigManager configManager) {
+    /* package-private */MParticle(Context context, MessageManager messageManager, ConfigManager configManager) {
         mConfigManager = configManager;
         mAppContext = context.getApplicationContext();
-        mApiKey = apiKey;
+        mApiKey = mConfigManager.getApiKey();
         mMessageManager = messageManager;
         mTimeoutHandler = new SessionTimeoutHandler(this, sTimeoutHandlerThread.getLooper());
         mAppStateManager = new AppStateManager(mAppContext);
@@ -94,6 +94,11 @@ public class MParticle {
         if (!sPreferences.contains(PrefKeys.INSTALL_TIME)) {
             sPreferences.edit().putLong(PrefKeys.INSTALL_TIME, System.currentTimeMillis()).commit();
         }
+
+        if (mConfigManager.getLogUnhandledExceptions()){
+            enableUncaughtExceptionLogging();
+        }
+        logStateTransition(Constants.StateTransitionType.STATE_TRANS_INIT);
     }
 
     /**
@@ -112,7 +117,7 @@ public class MParticle {
             synchronized (MParticle.class){
                 if (instance == null){
                     if (null == context) {
-                        throw new IllegalArgumentException("context is required");
+                        throw new IllegalArgumentException("Context is required");
                     }
 
                     if (PackageManager.PERMISSION_DENIED == context
@@ -128,18 +133,18 @@ public class MParticle {
                         sPreferences = context.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
                     }
 
-                    Boolean firstRun = sPreferences.getBoolean(PrefKeys.FIRSTRUN + apiKey, true);
-
-                    if(firstRun) {
-                        sPreferences.edit().putBoolean(PrefKeys.FIRSTRUN + apiKey, false).commit();
-                    }
-
                     ConfigManager appConfigManager = new ConfigManager(context, apiKey, secret);
                     Context appContext = context.getApplicationContext();
+
+                    Boolean firstRun = sPreferences.getBoolean(PrefKeys.FIRSTRUN + appConfigManager.getApiKey(), true);
+                    if(firstRun) {
+                        sPreferences.edit().putBoolean(PrefKeys.FIRSTRUN + appConfigManager.getApiKey(), false).commit();
+                    }
+
                     MessageManager messageManager = new MessageManager(appContext, appConfigManager);
                     messageManager.start(appContext, firstRun);
 
-                    instance = new MParticle(appContext, apiKey, messageManager, appConfigManager);
+                    instance = new MParticle(appContext, messageManager, appConfigManager);
                     if (context instanceof Activity) {
                         instance.mLaunchUri = ((Activity) context).getIntent().getDataString();
                         if (instance.mLaunchUri != null) {
@@ -153,10 +158,7 @@ public class MParticle {
                             instance.enablePushNotifications(senderId);
                         }
                     }*/
-                    if (appConfigManager.getLogUnhandledExceptions()){
-                        instance.enableUncaughtExceptionLogging();
-                    }
-                    instance.logStateTransition(Constants.StateTransitionType.STATE_TRANS_INIT);
+
                 }
             }
         }
@@ -164,33 +166,13 @@ public class MParticle {
     }
 
     void logStateTransition(String transitionType) {
-        instance.ensureActiveSession();
+        ensureActiveSession();
         mMessageManager.logStateTransition(transitionType, mSessionID, mSessionStartTime);
     }
 
     /**
-     * Initialize or return an instance of the mParticle SDK
-     *
-     * @param context
-     *            the Context that is creating the instance
-     * @param apiKey
-     *            the API key for your account
-     * @param secret
-     *            the API secret for your account
-     * @param sandboxMode
-     *            the Stream mode is forced
-     * @return An instance of the mParticle SDK configured with your API key
-     **/
-    public static MParticle getInstance(Context context, String apiKey, String secret, boolean sandboxMode) {
-    	MParticle instance = MParticle.getInstance(context, apiKey, secret);
-    	instance.mMessageManager.setSandboxMode(sandboxMode);
-    	return instance;
-   }
-
-
-    /**
      * Initialize or return an instance of the mParticle SDK using api_key and api_secret from the
-     * mparticle.properties file.
+     * mparticle.xml file.
      *
      * @param context
      *            the Activity that is creating the instance
