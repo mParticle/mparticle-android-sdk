@@ -48,9 +48,13 @@ public class ParticleActivity extends MPActionBarActivity
         FragmentTransaction transaction = fragmentManager.beginTransaction();
         Fragment fragment = null;
         switch (position) {
-            default:
+            case 0:
                 mTitle = getString(R.string.title_section1);
                 fragment = EventTestFragment.newInstance(position + 1);
+                break;
+            case 1:
+                mTitle = getString(R.string.title_section2);
+                fragment = AttributeTestFragment.newInstance(position + 1);
                 break;
         }
         if (fragmentManager.findFragmentByTag(mTitle.toString()) == null){

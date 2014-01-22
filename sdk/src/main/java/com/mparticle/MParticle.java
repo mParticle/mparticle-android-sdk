@@ -81,7 +81,7 @@ public class MParticle {
                 // carry on without user attributes
             }
         }
-        
+
         String userIds = sPreferences.getString(PrefKeys.USER_IDENTITIES + mApiKey, null);
         if (null != userIds) {
             try {
@@ -90,7 +90,7 @@ public class MParticle {
                 // carry on without user identities
             }
         }
-        
+
         if (!sPreferences.contains(PrefKeys.INSTALL_TIME)) {
             sPreferences.edit().putLong(PrefKeys.INSTALL_TIME, System.currentTimeMillis()).commit();
         }
@@ -303,9 +303,9 @@ public class MParticle {
     public void upload() {
         mMessageManager.doUpload();
     }
-    
+
     /**
-     * Manually set the install referrer 
+     * Manually set the install referrer
      */
     public void setInstallReferrer(String referrer) {
         sPreferences.edit().putString(PrefKeys.INSTALL_REFERRER, referrer).commit();
@@ -572,12 +572,26 @@ public class MParticle {
             return;
         }
         if (mDebugMode)
-            debugLog("Set user attribute: " + key + "=" + value);
+            if (value != null){
+                debugLog("Set user attribute: " + key + " with value " + value);
+            }else{
+                debugLog("Set user attribute: " + key);
+            }
         if (setCheckedAttribute(mUserAttributes, key, value)) {
             sPreferences.edit().putString(PrefKeys.USER_ATTRS + mApiKey, mUserAttributes.toString()).commit();
         }
     }
-    
+
+    /**
+     * Set a single user tag. The attribute will combined with any existing attributes.
+     *
+     * @param key
+     *            the attribute key
+     */
+    public void setUserAttribute(String key) {
+        setUserAttribute(key, null);
+    }
+
     public void setUserIdentity(String id, IdentityType identityType) {
     	if(mOptedOut){
     		return;
@@ -585,21 +599,21 @@ public class MParticle {
 
         if (mDebugMode)
     	    debugLog("Setting user identity: " + id);
-    	
+
     	if (null != id && id.length() > Constants.LIMIT_ATTR_VALUE) {
             Log.w(TAG, "Id value length exceeds limit. Discarding id: " + id);
             return;
         }
-    	
+
     	try {
     		JSONObject identity = new JSONObject();
     		identity.put(MessageKey.IDENTITY_NAME, identityType.value);
     		identity.put(MessageKey.IDENTITY_VALUE, id);
-    		
+
     		// verify there is not another IDENTITY_VALUE...if so, remove it first...to do this, copy the
     		//   existing array to a new one
     		JSONArray newUserIdentities = new JSONArray();
- 
+
     		for (int i=0; i<mUserIdentities.length(); i++) {
     			JSONObject testid = mUserIdentities.getJSONObject(i);
     			if (testid.get(MessageKey.IDENTITY_NAME).equals(identityType.value)) {
@@ -619,7 +633,7 @@ public class MParticle {
     		Log.w(TAG, "Error setting identity: " + id);
             return;
     	}
-    	
+
     	sPreferences.edit().putString(PrefKeys.USER_IDENTITIES + mApiKey, mUserIdentities.toString()).commit();
     }
 
@@ -717,7 +731,7 @@ public class MParticle {
         if (mDebugMode)
             debugLog("Set secure transport: " + sslEnabled);
     }
-    
+
     /**
      * Enable mParticle exception handling to automatically log events on uncaught exceptions
      */
@@ -776,7 +790,7 @@ public class MParticle {
     /**
      * Manually register the device token for receiving push notifications from mParticle
      * Called from intent handler
-     * 
+     *
      * @param registrationId
      *            the device registration id
      */
@@ -794,7 +808,7 @@ public class MParticle {
 
     /**
      * Manually un-register the device token for receiving push notifications from mParticle
-     * 
+     *
      * Called from intent handler
      */
     /* package-private */void clearPushRegistrationId() {
@@ -860,7 +874,7 @@ public class MParticle {
         return checkedAttributes;
     }
 
-    /* package-private */boolean setCheckedAttribute(JSONObject attributes, String key, String value) {
+    /* package-private */boolean setCheckedAttribute(JSONObject attributes, String key, Object value) {
         if (null == attributes || null == key) {
             return false;
         }
@@ -877,6 +891,9 @@ public class MParticle {
                 Log.w(TAG, "Attribute name length exceeds limit. Discarding attribute: " + key);
                 return false;
             }
+            if (value == null){
+                value = JSONObject.NULL;
+            }
             attributes.put(key, value);
         } catch (JSONException e) {
             Log.w(TAG, "JSON error processing attributes. Discarding attribute: " + key);
@@ -886,11 +903,11 @@ public class MParticle {
     }
 
     private void debugLog(String message) {
-            if (null != mSessionID) {
-                Log.d(TAG, mApiKey + ": " + mSessionID + ": " + message);
-            } else {
-                Log.d(TAG, mApiKey + ": " + message);
-            }
+        if (null != mSessionID) {
+            Log.d(TAG, mApiKey + ": " + mSessionID + ": " + message);
+        } else {
+            Log.d(TAG, mApiKey + ": " + message);
+        }
     }
 
     public boolean isAutoTrackingEnabled() {
@@ -951,7 +968,7 @@ public class MParticle {
             return name();
         }
     }
-    
+
     public enum IdentityType {
     	OTHER(0),
     	CUSTOMERID(1),
@@ -961,13 +978,13 @@ public class MParticle {
     	MICROSOFT(5),
     	YAHOO(6),
     	EMAIL(7);
-    	
+
     	private final int value;
-    	
+
     	private IdentityType(int value) {
     		this.value = value;
     	}
-    	
+
     	public int getValue() {
     		return value;
     	}
