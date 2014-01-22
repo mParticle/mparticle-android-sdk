@@ -31,6 +31,7 @@ public class EventTestFragment extends Fragment implements View.OnClickListener 
     private EditText viewEditText, screenEditText, errorEditText, unhandleErrorEditText;
     private Button eventButton, screenButton, handledErrorsButton, unhandledErrorsButton;
     private Handler exceptionHandler = new Handler();
+
     /**
      * Returns a new instance of this fragment for the given section
      * number.
@@ -65,8 +66,8 @@ public class EventTestFragment extends Fragment implements View.OnClickListener 
                              Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_events, container, false);
 
-        spinner = (Spinner)v.findViewById(R.id.spinner);
-        exceptionSpinner = (Spinner)v.findViewById(R.id.spinner2);
+        spinner = (Spinner) v.findViewById(R.id.spinner);
+        exceptionSpinner = (Spinner) v.findViewById(R.id.spinner2);
 
         spinner.setAdapter(new ArrayAdapter<MParticle.EventType>(
                 v.getContext(),
@@ -79,15 +80,15 @@ public class EventTestFragment extends Fragment implements View.OnClickListener 
                 android.R.layout.simple_list_item_1,
                 v.getResources().getStringArray(R.array.exceptions)));
 
-        eventButton = (Button)v.findViewById(R.id.button);
-        screenButton = (Button)v.findViewById(R.id.button2);
+        eventButton = (Button) v.findViewById(R.id.button);
+        screenButton = (Button) v.findViewById(R.id.button2);
         eventButton.setOnClickListener(this);
         screenButton.setOnClickListener(this);
-        handledErrorsButton = (Button)v.findViewById(R.id.button3);
-        unhandledErrorsButton = (Button)v.findViewById(R.id.button4);
+        handledErrorsButton = (Button) v.findViewById(R.id.button3);
+        unhandledErrorsButton = (Button) v.findViewById(R.id.button4);
         handledErrorsButton.setOnClickListener(this);
         unhandledErrorsButton.setOnClickListener(this);
-        viewEditText = (EditText)v.findViewById(R.id.edittext);
+        viewEditText = (EditText) v.findViewById(R.id.edittext);
         viewEditText.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -104,7 +105,7 @@ public class EventTestFragment extends Fragment implements View.OnClickListener 
                 eventButton.setEnabled(viewEditText.getText().length() > 0);
             }
         });
-        screenEditText = (EditText)v.findViewById(R.id.edittext2);
+        screenEditText = (EditText) v.findViewById(R.id.edittext2);
         screenEditText.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -121,7 +122,7 @@ public class EventTestFragment extends Fragment implements View.OnClickListener 
                 screenButton.setEnabled(screenEditText.getText().length() > 0);
             }
         });
-        errorEditText = (EditText)v.findViewById(R.id.edittext3);
+        errorEditText = (EditText) v.findViewById(R.id.edittext3);
         errorEditText.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -138,7 +139,7 @@ public class EventTestFragment extends Fragment implements View.OnClickListener 
                 handledErrorsButton.setEnabled(errorEditText.getText().length() > 0);
             }
         });
-        if (savedInstanceState != null){
+        if (savedInstanceState != null) {
             viewEditText.setText(savedInstanceState.getCharSequence("eventlabel"));
         }
 
@@ -155,9 +156,9 @@ public class EventTestFragment extends Fragment implements View.OnClickListener 
     @Override
     public void onClick(View v) {
         String toastText = "Message logged.";
-        switch (v.getId()){
+        switch (v.getId()) {
             case R.id.button:
-                MParticle.getInstance(v.getContext()).logEvent(viewEditText.getText().toString(), (MParticle.EventType)spinner.getSelectedItem());
+                MParticle.getInstance(v.getContext()).logEvent(viewEditText.getText().toString(), (MParticle.EventType) spinner.getSelectedItem());
                 break;
             case R.id.button2:
                 MParticle.getInstance(v.getContext()).logScreen(screenEditText.getText().toString());
@@ -167,7 +168,7 @@ public class EventTestFragment extends Fragment implements View.OnClickListener 
                 break;
             case R.id.button4:
                 toastText = "Crashing...";
-                switch (exceptionSpinner.getSelectedItemPosition()){
+                switch (exceptionSpinner.getSelectedItemPosition()) {
                     case 0:
                         v.postDelayed(npeRunnable, 2000);
                         break;
@@ -179,7 +180,7 @@ public class EventTestFragment extends Fragment implements View.OnClickListener 
         Toast.makeText(v.getContext(), toastText, 300).show();
     }
 
-    private Runnable npeRunnable = new Runnable(){
+    private Runnable npeRunnable = new Runnable() {
 
         @Override
         public void run() {
@@ -188,7 +189,7 @@ public class EventTestFragment extends Fragment implements View.OnClickListener 
         }
     };
 
-    private Runnable ioobeRunnable = new Runnable(){
+    private Runnable ioobeRunnable = new Runnable() {
 
         @Override
         public void run() {

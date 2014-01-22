@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">Particle Box</string>
+    <string name="app_name">Particlebox</string>
     <string name="title_section1">Events</string>
     <string name="title_section2">User Attributes</string>
     <string name="title_section3">Transactions</string>

@@ -38,11 +38,11 @@ public class AttributeTestFragment extends Fragment implements View.OnClickListe
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_attributes, container, false);
-        button1 = (Button)v.findViewById(R.id.button);
-        button2 = (Button)v.findViewById(R.id.button2);
-        editText1 = (EditText)v.findViewById(R.id.edittext);
-        editText2 = (EditText)v.findViewById(R.id.edittext2);
-        editText3 = (EditText)v.findViewById(R.id.edittext3);
+        button1 = (Button) v.findViewById(R.id.button);
+        button2 = (Button) v.findViewById(R.id.button2);
+        editText1 = (EditText) v.findViewById(R.id.edittext);
+        editText2 = (EditText) v.findViewById(R.id.edittext2);
+        editText3 = (EditText) v.findViewById(R.id.edittext3);
         editText1.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -89,14 +89,14 @@ public class AttributeTestFragment extends Fragment implements View.OnClickListe
 
     @Override
     public void onClick(View v) {
-        switch (v.getId()){
+        switch (v.getId()) {
             case R.id.button:
                 MParticle.getInstance(getActivity()).setUserAttribute(editText1.getText().toString(), editText2.getText().toString());
-                Toast.makeText(v.getContext(),"User attribute set.",Toast.LENGTH_SHORT).show();
+                Toast.makeText(v.getContext(), "User attribute set.", Toast.LENGTH_SHORT).show();
                 break;
             case R.id.button2:
                 MParticle.getInstance(getActivity()).setUserAttribute(editText3.getText().toString());
-                Toast.makeText(v.getContext(),"User tag set.",Toast.LENGTH_SHORT).show();
+                Toast.makeText(v.getContext(), "User tag set.", Toast.LENGTH_SHORT).show();
                 break;
         }
     }

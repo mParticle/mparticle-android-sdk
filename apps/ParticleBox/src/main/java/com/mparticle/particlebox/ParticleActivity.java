@@ -61,9 +61,9 @@ public class ParticleActivity extends MPActionBarActivity
                 fragment = TransactionTestFragment.newInstance(position + 1);
                 break;
         }
-        if (fragmentManager.findFragmentByTag(mTitle.toString()) == null){
+        if (fragmentManager.findFragmentByTag(mTitle.toString()) == null) {
             transaction.replace(R.id.container, fragment, mTitle.toString())
-                .commit();
+                    .commit();
         }
     }
 

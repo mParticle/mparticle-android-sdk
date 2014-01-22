@@ -14,7 +14,7 @@ import com.mparticle.MParticle;
 /**
  * Created by sdozor on 1/22/14.
  */
-public class TransactionTestFragment extends Fragment implements View.OnClickListener{
+public class TransactionTestFragment extends Fragment implements View.OnClickListener {
     EditText productName, productSku, quantity, unitPrice, shippingAmount, taxAmount, revenueAmount, productCategory, currencyCode, transactionId, transactionAffiliation;
 
     public TransactionTestFragment() {
@@ -35,17 +35,17 @@ public class TransactionTestFragment extends Fragment implements View.OnClickLis
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_transactions, container, false);
         v.findViewById(R.id.button).setOnClickListener(this);
-        productName = (EditText)v.findViewById(R.id.productName);
-        productSku = (EditText)v.findViewById(R.id.productSku);
-        quantity = (EditText)v.findViewById(R.id.quantity);
-        unitPrice = (EditText)v.findViewById(R.id.unitPrice);
-        shippingAmount = (EditText)v.findViewById(R.id.shipping);
-        taxAmount = (EditText)v.findViewById(R.id.tax);
-        revenueAmount = (EditText)v.findViewById(R.id.revenue);
-        productCategory = (EditText)v.findViewById(R.id.category);
-        currencyCode = (EditText)v.findViewById(R.id.currencyCode);
-        transactionId = (EditText)v.findViewById(R.id.transactionId);
-        transactionAffiliation = (EditText)v.findViewById(R.id.transAffiliation);
+        productName = (EditText) v.findViewById(R.id.productName);
+        productSku = (EditText) v.findViewById(R.id.productSku);
+        quantity = (EditText) v.findViewById(R.id.quantity);
+        unitPrice = (EditText) v.findViewById(R.id.unitPrice);
+        shippingAmount = (EditText) v.findViewById(R.id.shipping);
+        taxAmount = (EditText) v.findViewById(R.id.tax);
+        revenueAmount = (EditText) v.findViewById(R.id.revenue);
+        productCategory = (EditText) v.findViewById(R.id.category);
+        currencyCode = (EditText) v.findViewById(R.id.currencyCode);
+        transactionId = (EditText) v.findViewById(R.id.transactionId);
+        transactionAffiliation = (EditText) v.findViewById(R.id.transAffiliation);
         return v;
     }
 

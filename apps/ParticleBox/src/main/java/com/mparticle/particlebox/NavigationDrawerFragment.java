@@ -1,17 +1,17 @@
 package com.mparticle.particlebox;
 
-import android.content.pm.PackageManager;
-import android.support.v7.app.ActionBarActivity;;
 import android.app.Activity;
-import android.support.v7.app.ActionBar;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.ActionBarDrawerToggle;
-import android.support.v4.view.GravityCompat;
-import android.support.v4.widget.DrawerLayout;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.v4.app.ActionBarDrawerToggle;
+import android.support.v4.app.Fragment;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.ActionBarActivity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -22,6 +22,8 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
+
+;
 
 
 /**
@@ -86,10 +88,10 @@ public class NavigationDrawerFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
-            Bundle savedInstanceState) {
+                             Bundle savedInstanceState) {
         View v = inflater.inflate(
                 R.layout.fragment_navigation_drawer, container, false);
-        mDrawerListView = (ListView)v.findViewById(R.id.listView);
+        mDrawerListView = (ListView) v.findViewById(R.id.listView);
         mDrawerListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -108,17 +110,17 @@ public class NavigationDrawerFragment extends Fragment {
         mDrawerListView.setItemChecked(mCurrentSelectedPosition, true);
 
         String versionName = "Unknown";
-        try{
+        try {
             versionName = v.getContext().getPackageManager()
-                .getPackageInfo(v.getContext().getPackageName(), 0).versionName;
-        }catch(PackageManager.NameNotFoundException nnfe){
+                    .getPackageInfo(v.getContext().getPackageName(), 0).versionName;
+        } catch (PackageManager.NameNotFoundException nnfe) {
 
         }
 
-        ((TextView)v.findViewById(R.id.versionName)).setText("App Version: " + versionName);
-        ((TextView)v.findViewById(R.id.versionCode)).setText("App Version code: " + BuildConfig.VERSION_CODE);
-        ((TextView)v.findViewById(R.id.gitSha)).setText("Git SHA-1: " + BuildConfig.GIT_SHA);
-        ((TextView)v.findViewById(R.id.appBuildDate)).setText("Build Time: " + BuildConfig.BUILD_TIME);
+        ((TextView) v.findViewById(R.id.versionName)).setText("App Version: " + versionName);
+        ((TextView) v.findViewById(R.id.versionCode)).setText("App Version code: " + BuildConfig.VERSION_CODE);
+        ((TextView) v.findViewById(R.id.gitSha)).setText("Git SHA-1: " + BuildConfig.GIT_SHA);
+        ((TextView) v.findViewById(R.id.appBuildDate)).setText("Build Time: " + BuildConfig.BUILD_TIME);
 
         return v;
     }
