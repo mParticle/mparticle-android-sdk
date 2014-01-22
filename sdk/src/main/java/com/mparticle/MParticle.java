@@ -42,7 +42,7 @@ public class MParticle {
     private static final HandlerThread sTimeoutHandlerThread = new HandlerThread("mParticleSessionTimeoutHandler",
             Process.THREAD_PRIORITY_BACKGROUND);
     private static SharedPreferences sPreferences;
-    /* package-private */static Properties sDefaultSettings;
+    private final ConfigManager mConfigManager;
     private final AppStateManager mAppStateManager;
 
     private MessageManager mMessageManager;
@@ -57,7 +57,7 @@ public class MParticle {
     /* package-private */String mSessionID;
     /* package-private */long mSessionStartTime = 0;
     /* package-private */long mLastEventTime = 0;
-    private int mSessionTimeout = 30 * 60 * 1000;
+    //private int mSessionTimeout = 30 * 60 * 1000;
     private int mEventCount = 0;
     /* package-private */JSONArray mUserIdentities = new JSONArray();
     /* package-private */JSONObject mUserAttributes = new JSONObject();
@@ -65,7 +65,8 @@ public class MParticle {
     private String mLaunchUri;
     private boolean mAutoTrackingEnabled;
 
-    /* package-private */MParticle(Context context, String apiKey, MessageManager messageManager) {
+    /* package-private */MParticle(Context context, String apiKey, MessageManager messageManager, ConfigManager configManager) {
+        mConfigManager = configManager;
         mAppContext = context.getApplicationContext();
         mApiKey = apiKey;
         mMessageManager = messageManager;
@@ -119,33 +120,12 @@ public class MParticle {
                         throw new IllegalArgumentException("mParticle requires android.permission.INTERNET permission");
                     }
 
-                    // initialize static objects
-                    if (null == sDefaultSettings) {
-                        Properties defaultSettings = new Properties();
-                        try {
-                            defaultSettings.load(context.getResources().getAssets().open("mparticle.properties"));
-                        } catch (FileNotFoundException e) {
-                            Log.d(TAG, "No mparticle.properties file found in the assets directory. Using defaults.");
-                        } catch (IOException e) {
-                            Log.w(TAG, "Failed to parse mparticle.properties file from assets directory");
-                        } finally {
-                            sDefaultSettings = defaultSettings;
-                        }
-                    }
-                    if (null == sPreferences) {
-                        sPreferences = context.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
-                    }
-
-                    if (null == apiKey || null == secret) {
-                        apiKey = sDefaultSettings.getProperty(ConfigKeys.API_KEY);
-                        secret = sDefaultSettings.getProperty(ConfigKeys.API_SECRET);
-                        if (null == apiKey || null == secret) {
-                            throw new IllegalArgumentException("apiKey and secret are required");
-                        }
-                    }
-
                     if (!sTimeoutHandlerThread.isAlive()) {
                         sTimeoutHandlerThread.start();
+                    }
+
+                    if (null == sPreferences) {
+                        sPreferences = context.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
                     }
 
                     Boolean firstRun = sPreferences.getBoolean(PrefKeys.FIRSTRUN + apiKey, true);
@@ -154,11 +134,12 @@ public class MParticle {
                         sPreferences.edit().putBoolean(PrefKeys.FIRSTRUN + apiKey, false).commit();
                     }
 
+                    ConfigManager appConfigManager = new ConfigManager(context, apiKey, secret);
                     Context appContext = context.getApplicationContext();
-                    MessageManager messageManager = new MessageManager(appContext, apiKey, secret, sDefaultSettings);
+                    MessageManager messageManager = new MessageManager(appContext, appConfigManager);
                     messageManager.start(appContext, firstRun);
 
-                    instance = new MParticle(appContext, apiKey, messageManager);
+                    instance = new MParticle(appContext, apiKey, messageManager, appConfigManager);
                     if (context instanceof Activity) {
                         instance.mLaunchUri = ((Activity) context).getIntent().getDataString();
                         if (instance.mLaunchUri != null) {
@@ -166,31 +147,14 @@ public class MParticle {
                         }
                     }
 
-                    if (sDefaultSettings.containsKey(ConfigKeys.DEBUG_MODE)) {
-                        try {
-                            instance.setDebug(Boolean.parseBoolean(sDefaultSettings.getProperty(ConfigKeys.DEBUG_MODE)));
-                        } catch (Throwable t) {
-                            Log.w(TAG, "Failed to configure mParticle with '" + ConfigKeys.DEBUG_MODE + "' setting");
-                        }
-                    }
-                    if (sDefaultSettings.containsKey(ConfigKeys.SESSION_TIMEOUT)) {
-                        try {
-                            instance.setSessionTimeout(1000 * Integer.parseInt(sDefaultSettings.getProperty(
-                                    ConfigKeys.SESSION_TIMEOUT, "60")));
-                        } catch (Throwable t) {
-                            Log.w(TAG, "Failed to configure mParticle with '" + ConfigKeys.SESSION_TIMEOUT + "' setting");
-                        }
-                    }
-                    if (sDefaultSettings.containsKey(ConfigKeys.ENABLE_CRASH_REPORTING)) {
-                        if (Boolean.parseBoolean(sDefaultSettings.getProperty(ConfigKeys.ENABLE_CRASH_REPORTING))) {
-                            instance.enableUncaughtExceptionLogging();
-                        }
-                    }
-                    if (sDefaultSettings.containsKey(ConfigKeys.ENABLE_PUSH_NOTIFICATIONS)) {
+                   /* if (appConfigManager.isPushEnabled()) {
                         if (Boolean.parseBoolean(sDefaultSettings.getProperty(ConfigKeys.ENABLE_PUSH_NOTIFICATIONS))) {
                             String senderId = sDefaultSettings.getProperty(ConfigKeys.PUSH_NOTIFICATION_SENDER_ID);
                             instance.enablePushNotifications(senderId);
                         }
+                    }*/
+                    if (appConfigManager.getLogUnhandledExceptions()){
+                        instance.enableUncaughtExceptionLogging();
                     }
                     instance.logStateTransition(Constants.StateTransitionType.STATE_TRANS_INIT);
                 }
@@ -325,7 +289,7 @@ public class MParticle {
         long now = System.currentTimeMillis();
         if (0 != mSessionStartTime &&
                 mAppStateManager.isBackgrounded() &&
-                (mSessionTimeout < now - mLastEventTime)) {
+                (mConfigManager.getSessionTimeout() < now - mLastEventTime)) {
             if (mDebugMode)
                 debugLog("Session timed out");
 
@@ -344,7 +308,7 @@ public class MParticle {
         mEventCount = 0;
         mSessionAttributes = new JSONObject();
         mMessageManager.startSession(mSessionID, mSessionStartTime, mLaunchUri);
-        mTimeoutHandler.sendEmptyMessageDelayed(0, mSessionTimeout);
+        mTimeoutHandler.sendEmptyMessageDelayed(0, mConfigManager.getSessionTimeout());
         if (mDebugMode)
             debugLog("Started new session");
         // clear the launch URI so it isn't sent on future sessions
@@ -590,7 +554,7 @@ public class MParticle {
      * @param location
      */
     public void setLocation(Location location) {
-        MessageManager.setLocation(location);
+        mMessageManager.setLocation(location);
     }
 
     /**
@@ -736,18 +700,29 @@ public class MParticle {
      * @param sessionTimeout
      */
     public void setSessionTimeout(int sessionTimeout) {
-        mSessionTimeout = sessionTimeout;
+        mConfigManager.setSessionTimeout(sessionTimeout);
     }
 
     /**
      * Set the upload interval period to control how frequently uploads occur.
      *
      * @param uploadInterval
-     *            the number of milliseconds between uploads
+     *            the number of seconds between uploads
      */
-    public void setUploadInterval(long uploadInterval) {
-        mMessageManager.setUploadInterval(uploadInterval);
+    public void setUploadInterval(int uploadInterval) {
+        mConfigManager.setUploadInterval(uploadInterval);
     }
+
+    /**
+     * Set the upload interval period to control how frequently uploads occur when in debug mode.
+     *
+     * @param uploadInterval
+     *            the number of seconds between uploads
+     */
+    public void setDebugUploadInterval(int uploadInterval) {
+        mConfigManager.setDebugUploadInterval(uploadInterval);
+    }
+
 
     /**
      * Enable SSL transport when uploading data
@@ -755,26 +730,10 @@ public class MParticle {
      * @param sslEnabled
      *            true to turn on SSL transport, false to use non-SSL transport
      */
-    private void setSecureTransport(boolean sslEnabled) {
-        mMessageManager.setSecureTransport(sslEnabled);
+    public void setSecureTransport(boolean sslEnabled) {
+        mConfigManager.setUseSsl(sslEnabled);
         if (mDebugMode)
             debugLog("Set secure transport: " + sslEnabled);
-    }
-
-    /**
-     * Configure the data upload to use a proxy server
-     *
-     * @param host
-     *            the proxy host name or IP address
-     * @param port
-     *            the proxy port number
-     */
-    private void setConnectionProxy(String host, int port) {
-        mMessageManager.setConnectionProxy(host, port);
-    }
-
-    private void setServiceHost(String hostName) {
-   		mMessageManager.setServiceHost(hostName);
     }
     
     /**
@@ -810,7 +769,6 @@ public class MParticle {
      *            the SENDER_ID for the application
      */
     public void enablePushNotifications(String senderId) {
-        checkDefaultApiInstance();
         if (null == getPushRegistrationId()) {
             Intent registrationIntent = new Intent("com.google.android.c2dm.intent.REGISTER");
             registrationIntent.putExtra("app", PendingIntent.getBroadcast(mAppContext, 0, new Intent(), 0));
@@ -826,22 +784,10 @@ public class MParticle {
      * Unregister the device from GCM notifications
      */
     public void clearPushNotifications() {
-        checkDefaultApiInstance();
         if (null != getPushRegistrationId()) {
             Intent unregIntent = new Intent("com.google.android.c2dm.intent.UNREGISTER");
             unregIntent.putExtra("app", PendingIntent.getBroadcast(mAppContext, 0, new Intent(), 0));
             mAppContext.startService(unregIntent);
-        }
-    }
-
-    // This method will log warnings but
-    private void checkDefaultApiInstance() {
-        String defaultApiKey = sDefaultSettings.getProperty(ConfigKeys.API_KEY);
-        String defaultSecret = sDefaultSettings.getProperty(ConfigKeys.API_SECRET);
-        if (null == defaultApiKey || null == defaultSecret) {
-            Log.w(TAG, "mParticle default API key/secret are not set in the mparticle.properties file");
-        } else if (!mApiKey.equals(defaultApiKey)) {
-            Log.w(TAG, "mParticle instance API key does not match the default from the mparticle.properties file");
         }
     }
 
@@ -969,6 +915,10 @@ public class MParticle {
         return mAutoTrackingEnabled;
     }
 
+    public long getSessionTimeout() {
+        return mConfigManager.getSessionTimeout();
+    }
+
     private static final class SessionTimeoutHandler extends Handler {
         private final MParticle mParticle;
 
@@ -981,7 +931,7 @@ public class MParticle {
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
             if (!mParticle.checkSessionTimeout()){
-                sendEmptyMessageDelayed(0, mParticle.mSessionTimeout);
+                sendEmptyMessageDelayed(0, mParticle.getSessionTimeout());
             }
         }
     }

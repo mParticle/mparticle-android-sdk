@@ -1,26 +1,27 @@
 package com.mparticle;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.InetSocketAddress;
-import java.net.Proxy;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.Scanner;
-import java.util.UUID;
-import java.util.zip.GZIPInputStream;
-import java.util.zip.GZIPOutputStream;
+import android.content.ContentValues;
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteException;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
+import android.util.Log;
 
-import javax.crypto.Mac;
-import javax.crypto.spec.SecretKeySpec;
+import com.mparticle.Constants.MessageKey;
+import com.mparticle.Constants.MessageType;
+import com.mparticle.Constants.PrefKeys;
+import com.mparticle.Constants.Status;
+import com.mparticle.MParticleDatabase.CommandTable;
+import com.mparticle.MParticleDatabase.MessageTable;
+import com.mparticle.MParticleDatabase.SessionTable;
+import com.mparticle.MParticleDatabase.UploadTable;
 
 import org.apache.http.Header;
 import org.apache.http.HttpHost;
@@ -50,29 +51,26 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.content.ContentValues;
-import android.content.Context;
-import android.content.SharedPreferences;
-import android.content.SharedPreferences.Editor;
-import android.content.pm.PackageManager;
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteException;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
-import android.os.Handler;
-import android.os.Looper;
-import android.os.Message;
-import android.util.Log;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.InetSocketAddress;
+import java.net.Proxy;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.Scanner;
+import java.util.UUID;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
-import com.mparticle.Constants.MessageKey;
-import com.mparticle.Constants.MessageType;
-import com.mparticle.Constants.PrefKeys;
-import com.mparticle.Constants.Status;
-import com.mparticle.MParticleDatabase.CommandTable;
-import com.mparticle.MParticleDatabase.MessageTable;
-import com.mparticle.MParticleDatabase.SessionTable;
-import com.mparticle.MParticleDatabase.UploadTable;
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
 
 /* package-private */final class UploadHandler extends Handler {
 
@@ -80,23 +78,19 @@ import com.mparticle.MParticleDatabase.UploadTable;
 
     private final MParticleDatabase mDB;
     private final SharedPreferences mPreferences;
+
+    private final Context mContext;
     private final String mApiKey;
     private final String mSecret;
-    private long mUploadInterval = Constants.DEFAULT_UPLOAD_INTERVAL;
-    private boolean mDebugMode = false;
-    private boolean mSandboxMode = false;
 
     private HttpContext mHttpContext;
     private HttpHost mProxyHost;
-    private String mServiceScheme = null;
     private JSONObject mAppInfo;
     private JSONObject mDeviceInfo;
     private Proxy mProxy;
     private final ConnectivityManager mConnectivyManager;
-    private int mUploadMode = Status.BATCH_READY;
-    private boolean mCompressionEnabled = true;
+
     private boolean mAccessNetworkStateAvailable = true;
-    private String mUserServiceHost;
 
     public static final int UPLOAD_MESSAGES = 1;
     public static final int CLEANUP = 2;
@@ -111,28 +105,33 @@ import com.mparticle.MParticleDatabase.UploadTable;
 
     public static final String SERVICE_VERSION = "v1";
 
+    private ConfigManager mConfigManager;
+
     public static final String SQL_DELETABLE_MESSAGES = String.format(
         "%s=? and (%s='NO-SESSION')",
         MessageTable.API_KEY,
         MessageTable.SESSION_ID);
 
 
-    public UploadHandler(Context appContext, Looper looper, String apiKey, String secret) {
+    public UploadHandler(Context context, Looper looper, ConfigManager configManager) {
         super(looper);
-        mApiKey = apiKey;
-        mSecret = secret;
+        mConfigManager = configManager;
 
-        mDB = new MParticleDatabase(appContext);
-        mPreferences = appContext.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
+        mContext = context.getApplicationContext();
+        mApiKey = mConfigManager.getApiKey();
+        mSecret = mConfigManager.getApiSecret();
+
+        mDB = new MParticleDatabase(mContext);
+        mPreferences = mContext.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
         mHttpContext = new BasicHttpContext();
-        mHttpContext.setAttribute(ClientContext.COOKIE_STORE, new PersistentCookieStore(appContext));
+        mHttpContext.setAttribute(ClientContext.COOKIE_STORE, new PersistentCookieStore(mContext));
 
-        mConnectivyManager = (ConnectivityManager) appContext.getSystemService(Context.CONNECTIVITY_SERVICE);
+        mConnectivyManager = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
 
-        mAppInfo = DeviceAttributes.collectAppInfo(appContext);
-        mDeviceInfo = DeviceAttributes.collectDeviceInfo(appContext);
+        mAppInfo = DeviceAttributes.collectAppInfo(mContext);
+        mDeviceInfo = DeviceAttributes.collectDeviceInfo(mContext);
 
-        if (PackageManager.PERMISSION_GRANTED != appContext
+        if (PackageManager.PERMISSION_GRANTED != mContext
                 .checkCallingOrSelfPermission(android.Manifest.permission.ACCESS_NETWORK_STATE)) {
             Log.w(TAG, "Application manifest should require ACCESS_NETWORK_STATE permission");
             mAccessNetworkStateAvailable = false;
@@ -144,12 +143,13 @@ import com.mparticle.MParticleDatabase.UploadTable;
         super.handleMessage(msg);
         switch (msg.what) {
         case UPLOAD_MESSAGES:
-            if (mDebugMode) {
+            if (mConfigManager.isDebug()) {
                 Log.d(TAG, "Performing " + (msg.arg1 == 0 ? "periodic" : "manual") + " upload for " + mApiKey);
             }
             boolean needsHistory = false;
             // execute all the upload steps
-            if (mUploadInterval > 0 || msg.arg1 == 1) {
+            long uploadInterval = mConfigManager.getUploadInterval();
+            if (uploadInterval> 0 || msg.arg1 == 1) {
                 prepareUploads(false);
                 needsHistory = processUploads(false);
                 processCommands();
@@ -158,12 +158,12 @@ import com.mparticle.MParticleDatabase.UploadTable;
                 }
             }
             // trigger another upload check unless configured for manual uploads
-            if (mUploadInterval > 0 && msg.arg1 == 0) {
-                this.sendEmptyMessageDelayed(UPLOAD_MESSAGES, mUploadInterval);
+            if (uploadInterval > 0 && msg.arg1 == 0) {
+                this.sendEmptyMessageDelayed(UPLOAD_MESSAGES, uploadInterval);
             }
             break;
         case UPLOAD_HISTORY:
-            if (mDebugMode) {
+            if (mConfigManager.isDebug()) {
                 Log.d(TAG, "Performing history upload for " + mApiKey);
             }
             // if the uploads table is empty (no old uploads) 
@@ -196,13 +196,10 @@ import com.mparticle.MParticleDatabase.UploadTable;
         if (!isNetworkAvailable()) {
             return;
         }
-        // get the previous mode from preferences
-        mUploadMode = mPreferences.getInt( PrefKeys.UPLOAD_MODE, Status.BATCH_READY);
-
         try {
             HttpClient httpClient = setupHttpClient();
             HttpGet httpGet = new HttpGet(makeServiceUri("config"));
-            if (mCompressionEnabled) {
+            if (mConfigManager.isCompressionEnabled()) {
                 httpGet.setHeader("Accept-Encoding", "gzip");
             }
             addMessageSignature(httpGet, null);
@@ -215,10 +212,8 @@ import com.mparticle.MParticleDatabase.UploadTable;
             if (responseCode >= 200 && responseCode < 300) {
                 String response = extractResponseBody(httpResponse);
                 JSONObject responseJSON = new JSONObject(response);
-                if (responseJSON.has(MessageKey.SESSION_UPLOAD)) {
-                    String sessionUploadMode = responseJSON.getString(MessageKey.SESSION_UPLOAD);
-                    mUploadMode = ("batch".equalsIgnoreCase(sessionUploadMode)) ? Status.BATCH_READY : Status.READY;
-                }
+                mConfigManager.updateConfig(responseJSON);
+
             }
         } catch (java.net.SocketTimeoutException e) {
             // this is caught separately from IOException to prevent this common
@@ -231,9 +226,6 @@ import com.mparticle.MParticleDatabase.UploadTable;
         } catch (URISyntaxException e) {
             Log.e(TAG, "Error constructing config service URI", e);
         }
-        Editor edit = mPreferences.edit();
-    	edit.putInt(PrefKeys.UPLOAD_MODE, mUploadMode);
-    	edit.commit();
     }
 
     public static final String SQL_UPLOADABLE_MESSAGES = String.format(
@@ -289,7 +281,7 @@ import com.mparticle.MParticleDatabase.UploadTable;
 
             if (readyMessagesCursor.getCount() > 0) {
                 fetchConfig();
-                if (mDebugMode) {
+                if (mConfigManager.isDebug()) {
                     Log.i(TAG, "Preparing " + readyMessagesCursor.getCount() + " events for upload");
                 }
                 if (history){
@@ -374,7 +366,7 @@ import com.mparticle.MParticleDatabase.UploadTable;
         }
 
         uploadMessage.put(MessageKey.DEVICE_INFO, mDeviceInfo);
-        uploadMessage.put(MessageKey.DEBUG, mSandboxMode);
+        uploadMessage.put(MessageKey.DEBUG, mConfigManager.getSandboxMode());
 
         String userAttrs = mPreferences.getString(PrefKeys.USER_ATTRS + mApiKey, null);
         if (null != userAttrs) {
@@ -428,7 +420,7 @@ import com.mparticle.MParticleDatabase.UploadTable;
 
                     ByteArrayEntity postEntity = null;
                     byte[] messageBytes = message.getBytes();
-                    if (mCompressionEnabled) {
+                    if (mConfigManager.isCompressionEnabled()) {
                         httpPost.setHeader("Accept-Encoding", "gzip");
                         try {
                             ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream(messageBytes.length);
@@ -454,12 +446,12 @@ import com.mparticle.MParticleDatabase.UploadTable;
                     String response = null;
                     int responseCode = -1;
                     try {
-                        if (mDebugMode) {
+                        if (mConfigManager.isDebug()) {
                             Log.d(TAG, "Uploading data to mParticle server:");
                             try{
                                 JSONObject messageJson = new JSONObject(message);
-                                Log.d(TAG, messageJson.toString(4));
-                                /*if (messageJson.has(MessageKey.MESSAGES)){
+                               // Log.d(TAG, messageJson.toString(4));
+                                if (messageJson.has(MessageKey.MESSAGES)){
                                     JSONArray messages = messageJson.getJSONArray(MessageKey.MESSAGES);
                                     Log.d(TAG, "SENDING MESSAGES");
                                     for (int i = 0; i < messages.length(); i++){
@@ -473,7 +465,7 @@ import com.mparticle.MParticleDatabase.UploadTable;
                                         Log.d(TAG, "Message type: " + ((JSONObject)messages.get(i)).getString(MessageKey.TYPE) + " SID: " + ((JSONObject)messages.get(i)).optString(MessageKey.SESSION_ID));
                                        // Log.d(TAG, ((JSONObject)messages.get(i)).toString(4));
                                     }
-                                }*/
+                                }
                             }catch(JSONException jse){
 
                             }
@@ -490,7 +482,7 @@ import com.mparticle.MParticleDatabase.UploadTable;
                         if (202 == responseCode || (responseCode >= 400 && responseCode < 500)) {
                             dbDeleteUpload(db, id);
                         } else {
-                            if (mDebugMode) {
+                            if (mConfigManager.isDebug()) {
                                 Log.d(TAG, "Upload failed and will be retried.");
                             }
                         }
@@ -582,7 +574,7 @@ import com.mparticle.MParticleDatabase.UploadTable;
 
                 int responseCode = -1;
                 try {
-                    if (mDebugMode) {
+                    if (mConfigManager.isDebug()) {
                         Log.d(TAG, "Sending data to: " + commandUrl);
                     }
                     URL url = new URL(commandUrl);
@@ -614,7 +606,7 @@ import com.mparticle.MParticleDatabase.UploadTable;
                 } finally {
                     if (responseCode > -1) {
                         dbDeleteCommand(db, id);
-                    } else if (mDebugMode) {
+                    } else if (mConfigManager.isDebug()) {
                         Log.w(TAG, "Partner processing failed and will be retried.");
                     }
                 }
@@ -636,17 +628,7 @@ import com.mparticle.MParticleDatabase.UploadTable;
     }
 
     private URI makeServiceUri(String method) throws URISyntaxException {
-        if(mUserServiceHost == null || mServiceScheme == null) {
-        	if(mDebugMode) {
-        		mUserServiceHost = DEBUG_SERVICE_HOST;
-                mServiceScheme = DEBUG_SERVICE_SCHEME;
-        	}
-        	else {
-       			mUserServiceHost = SECURE_SERVICE_HOST;
-                mServiceScheme = SECURE_SERVICE_SCHEME;
-        	}
-        }
-    	return new URI(mServiceScheme, mUserServiceHost, "/" + SERVICE_VERSION + "/" + mApiKey + "/" + method, null);
+    	return new URI(mConfigManager.getHttpScheme(), DEBUG_SERVICE_HOST, "/" + SERVICE_VERSION + "/" + mApiKey + "/" + method, null);
     }
 
     private void dbInsertUpload(SQLiteDatabase db, JSONObject message) throws JSONException {
@@ -733,18 +715,6 @@ import com.mparticle.MParticleDatabase.UploadTable;
         mProxyHost = new HttpHost(host, port);
         mProxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(host, port));
     }
-    
-    public void setServiceHost(String hostName) {
-    	mUserServiceHost = hostName;
-    }
-
-    public void setConnectionScheme(String scheme) {
-        mServiceScheme = scheme;
-    }
-
-    public void setUploadInterval(long uploadInterval) {
-        mUploadInterval = uploadInterval;
-    }
 
     // From Stack Overflow:
     // http://stackoverflow.com/questions/7124735/hmac-sha256-algorithm-for-signature-calculation
@@ -769,25 +739,4 @@ import com.mparticle.MParticleDatabase.UploadTable;
         return new String(chars);
     }
 
-    public void setDebugMode(boolean debugMode) {
-        mDebugMode = debugMode;
-        
-    }
-
-    public void setCompressionEnabled(boolean compressionEnabled) {
-        mCompressionEnabled = compressionEnabled;
-    }
-
-    /* package-private */public void setUploadMode(int uploadMode) {
-        mUploadMode = uploadMode;
-    }
-
-    public void setSandboxMode(boolean sandboxMode) {
-        mSandboxMode = sandboxMode;
-        if(mSandboxMode) {
-        	mUploadMode = Constants.Status.READY;
-        } else {
-        	mUploadMode = Constants.Status.BATCH_READY;
-        }
-    }
 }

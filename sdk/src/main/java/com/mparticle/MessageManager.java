@@ -39,7 +39,7 @@ import java.util.UUID;
     static final Runtime rt = Runtime.getRuntime();
     private static String sActiveNetworkName = "offline";
     private static Location sLocation;
-    private static boolean sDebugMode;
+
     private static boolean sFirstRun;
     private static BroadcastReceiver sStatusBroadcastReceiver;
     private static double sBatteryLevel;
@@ -58,71 +58,13 @@ import java.util.UUID;
     private static Context mContext = null;
     private static long sStartTime = System.currentTimeMillis();
     private static SharedPreferences mPreferences = null;
+    private ConfigManager mConfigManager = null;
 
-    // This constructor is needed to enable mocking with Mockito and Dexmaker only
-    /* package-private */MessageManager() {
-        throw new UnsupportedOperationException();
-    }
-
-    // Package-private constructor for unit tests only
-    /* package-private */MessageManager(MessageHandler messageHandler, UploadHandler uploadHandler) {
-        mMessageHandler = messageHandler;
-        mUploadHandler = uploadHandler;
-    }
-
-    public MessageManager(Context appContext, String apiKey, String secret, Properties config) {
-        mMessageHandler = new MessageHandler(appContext, sMessageHandlerThread.getLooper(), apiKey);
-        mUploadHandler = new UploadHandler(appContext, sUploadHandlerThread.getLooper(), apiKey, secret);
+    public MessageManager(Context appContext, ConfigManager configManager) {
+        mConfigManager = configManager;
+        mMessageHandler = new MessageHandler(appContext, sMessageHandlerThread.getLooper(), configManager.getApiKey());
+        mUploadHandler = new UploadHandler(appContext, sUploadHandlerThread.getLooper(), configManager);
         mPreferences = appContext.getSharedPreferences(Constants.MISC_FILE, Context.MODE_PRIVATE);
-        int uploadInterval = 0;
-        
-        if(config.containsKey(ConfigKeys.DEBUG_MODE)) {
-        	boolean debugMode = Boolean.parseBoolean(config.getProperty(ConfigKeys.DEBUG_MODE));
-        	
-        	if(debugMode) {
-        		if(config.containsKey(ConfigKeys.DEBUG_UPLOAD_INTERVAL)) {
-        			uploadInterval = 1000 * Integer.parseInt(config.getProperty(ConfigKeys.DEBUG_UPLOAD_INTERVAL));
-        		}
-        		else {
-        			uploadInterval = (int)Constants.DEFAULT_UPLOAD_INTERVAL;
-        		}
-        		
-        		this.setUploadInterval(uploadInterval);
-        	}
-        }
-        
-        if (uploadInterval == 0 && config.containsKey(ConfigKeys.UPLOAD_INTERVAL)) {
-            try {
-                this.setUploadInterval(1000 * Integer.parseInt(config.getProperty(ConfigKeys.UPLOAD_INTERVAL)));
-            } catch (Throwable t) {
-                Log.w(TAG, "Failed to configure mParticle with '" + ConfigKeys.UPLOAD_INTERVAL + "' setting");
-            }
-        }
-        if (config.containsKey(ConfigKeys.ENABLE_SSL)) {
-            try {
-                this.setSecureTransport(Boolean.parseBoolean(config.getProperty(ConfigKeys.ENABLE_SSL)));
-            } catch (Throwable t) {
-                Log.w(TAG, "Failed to configure mParticle with '" + ConfigKeys.ENABLE_SSL + "' setting");
-            }
-        }
-        if (config.containsKey(ConfigKeys.PROXY_HOST) && config.containsKey(ConfigKeys.PROXY_PORT)) {
-            try {
-                this.setConnectionProxy(config.getProperty(ConfigKeys.PROXY_HOST),
-                        Integer.parseInt(config.getProperty(ConfigKeys.PROXY_PORT)));
-            } catch (Throwable t) {
-                Log.w(TAG, "Failed to configure mParticle with '" + ConfigKeys.PROXY_HOST +
-                        "' and '" + ConfigKeys.PROXY_PORT + "' settings");
-            }
-        }
-        if (config.containsKey(ConfigKeys.ENABLE_COMPRESSION)) {
-            try {
-                mUploadHandler.setCompressionEnabled(Boolean.parseBoolean(config
-                        .getProperty(ConfigKeys.ENABLE_COMPRESSION)));
-            } catch (Throwable t) {
-                Log.w(TAG, "Failed to configure mParticle with '" + ConfigKeys.ENABLE_COMPRESSION + "' setting");
-            }
-        }
-
     }
 
     public void start(Context appContext, Boolean firstRun) {
@@ -146,7 +88,7 @@ import java.util.UUID;
                 ConnectivityManager connectivyManager = (ConnectivityManager) appContext
                         .getSystemService(Context.CONNECTIVITY_SERVICE);
                 NetworkInfo activeNetwork = connectivyManager.getActiveNetworkInfo();
-                MessageManager.setDataConnection(activeNetwork);
+                setDataConnection(activeNetwork);
                 filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
             }
             mContext.registerReceiver(sStatusBroadcastReceiver, filter);
@@ -387,27 +329,11 @@ import java.util.UUID;
         mUploadHandler.sendMessage(mUploadHandler.obtainMessage(UploadHandler.UPLOAD_MESSAGES, 1, 0));
     }
 
-    public static void setLocation(Location location) {
+    public void setLocation(Location location) {
         sLocation = location;
-        if (sDebugMode) {
+        if (mConfigManager.isDebug()) {
             Log.d(TAG, "Received location update: " + location);
         }
-    }
-
-    public void setConnectionProxy(String host, int port) {
-        mUploadHandler.setConnectionProxy(host, port);
-    }
-    
-    public void setServiceHost(String hostName) {
-    	mUploadHandler.setServiceHost(hostName);
-    }
-
-    public void setSecureTransport(boolean sslEnabled) {
-        mUploadHandler.setConnectionScheme(sslEnabled ? "https" : "http");
-    }
-
-    public void setUploadInterval(long uploadInterval) {
-        mUploadHandler.setUploadInterval(uploadInterval);
     }
 
     public void logStateTransition(String stateTransInit, String sessionId, long sessionStartTime) {
@@ -421,14 +347,14 @@ import java.util.UUID;
         }
     }
 
-    private static class StatusBroadcastReceiver extends BroadcastReceiver {
+    private class StatusBroadcastReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context appContext, Intent intent) {
             if (ConnectivityManager.CONNECTIVITY_ACTION.equals(intent.getAction())) {
                 ConnectivityManager connectivyManager = (ConnectivityManager) appContext
                         .getSystemService(Context.CONNECTIVITY_SERVICE);
                 NetworkInfo activeNetwork = connectivyManager.getActiveNetworkInfo();
-                MessageManager.setDataConnection(activeNetwork);
+                MessageManager.this.setDataConnection(activeNetwork);
             }else if (Intent.ACTION_BATTERY_CHANGED.equals(intent.getAction())){
                 int level = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
                 int scale = intent.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
@@ -438,7 +364,7 @@ import java.util.UUID;
         }
     }
 
-    public static void setDataConnection(NetworkInfo activeNetwork) {
+    public void setDataConnection(NetworkInfo activeNetwork) {
         if (null != activeNetwork) {
             String activeNetworkName = activeNetwork.getTypeName();
             if (0 != activeNetwork.getSubtype()) {
@@ -448,21 +374,24 @@ import java.util.UUID;
         } else {
             sActiveNetworkName = "offline";
         }
-        if (sDebugMode) {
+        if (mConfigManager.isDebug()) {
             Log.d(TAG, "Active network has changed: " + sActiveNetworkName);
         }
     }
 
     public void setDebugMode(boolean debugMode) {
-        sDebugMode = debugMode;
-        mUploadHandler.setDebugMode(debugMode);
+        mConfigManager.setDebug(debugMode);
     }
 
     public void setSandboxMode(boolean sandboxMode) {
-        if(sandboxMode) {
+        /*if(sandboxMode) {
         	setUploadInterval(Constants.DEBUG_UPLOAD_INTERVAL);
         }
     	// pass this on
-    	mUploadHandler.setSandboxMode(sandboxMode);
+    	.setSandboxMode(sandboxMode);*/
+    }
+
+    public void setConnectionProxy(String host, int port) {
+        mUploadHandler.setConnectionProxy(host, port);
     }
 }

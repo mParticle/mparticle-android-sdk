@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="error_noservercredentials">mParticle instance created without server credentials, using XML configuration.</string>
+    <string name="error_numberformat">Configuration: NumberFormatException while parsing %s</string>
+    <string name="error_noserverkey" />
+    <string name="error_missingrequiredkey" >Configuration issue: Missing required key: %s</string>
+    <string name="error_missingkey" >Configuration: missing key: %s</string>
+</resources>
