@@ -13,6 +13,11 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
     <!-- BEGIN PUSH REQUIREMENTS -->
+
+    <!-- Keeps the processor from sleeping when a message is received. -->
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+
+
     <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
     <permission android:name="com.mparticle.particlebox.gcm.permission.C2D_MESSAGE"
         android:protectionLevel="signature" />
@@ -41,6 +46,9 @@
             android:permission="com.google.android.c2dm.permission.SEND" >
             <intent-filter>
                 <action android:name="com.google.android.c2dm.intent.RECEIVE" />
+                <action android:name="com.google.android.c2dm.intent.REGISTRATION" />
+
+                <!-- MODIFICATION REQUIRED - Use your package name as the category -->
                 <category android:name="com.mparticle.particlebox" />
             </intent-filter>
         </receiver>

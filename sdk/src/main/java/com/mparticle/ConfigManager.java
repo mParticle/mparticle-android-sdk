@@ -153,6 +153,20 @@ class ConfigManager {
     }
 
     public boolean isPushEnabled() {
-        return localPrefs.isPushEnabled;
+        return localPrefs.isPushEnabled ||
+                (mPreferences.getBoolean(Constants.PrefKeys.PUSH_ENABLED, false) && getPushSenderId() != null);
+    }
+
+    public String getPushSenderId() {
+        if (localPrefs.pushSenderId != null && localPrefs.pushSenderId.length() > 0)
+            return localPrefs.pushSenderId;
+        else return mPreferences.getString(Constants.PrefKeys.PUSH_SENDER_ID, null);
+    }
+
+    public void setPushSenderId(String senderId){
+        mPreferences.edit()
+                .putString(Constants.PrefKeys.PUSH_SENDER_ID, senderId)
+                .putBoolean(Constants.PrefKeys.PUSH_ENABLED, true)
+                .commit();
     }
 }

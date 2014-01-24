@@ -14,8 +14,12 @@
 
     <integer name="mp_productionUploadInterval">60</integer>
 
-    <bool name="mp_secureTransport">false</bool>
+    <bool name="mp_useSecureTransport">false</bool>
 
     <bool name="mp_debug">true</bool>
+
+    <bool name="mp_enablePush">true</bool>
+
+    <string name="mp_pushSenderId">832202301611</string>
 
 </resources>

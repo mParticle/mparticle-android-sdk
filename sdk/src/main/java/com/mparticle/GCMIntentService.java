@@ -27,12 +27,6 @@ public class GcmIntentService extends IntentService {
         super("com.mparticle.GcmIntentService");
     }
 
-    // for unit tests
-    /* package-private */GcmIntentService(MParticle mParticle) {
-        this();
-        mMParticle = mParticle;
-    }
-
     static void runIntentInService(Context context, Intent intent) {
         synchronized (LOCK) {
             if (sWakeLock == null) {
@@ -96,7 +90,7 @@ public class GcmIntentService extends IntentService {
             mMParticle.setPushRegistrationId(registrationId);
         } else if (unregistered != null) {
             // unregistration succeeded
-            mMParticle.clearPushRegistrationId();
+            mMParticle.clearPushNotificationId();
         } else if (error != null) {
             // Unrecoverable error, log it
             Log.i(TAG, "GCM registration error: " + error);

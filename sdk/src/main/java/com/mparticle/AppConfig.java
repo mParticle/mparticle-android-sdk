@@ -16,6 +16,7 @@ public class AppConfig {
     public static final String PREFKEY_USE_SSL = "mp_useSecureTransport";
     public static final String PREFKEY_DBG_ENABLED = "mp_enableDebug";
     public static final String PREFKEY_PUSH_ENABLED = "mp_enablePush";
+    public static final String PREFKEY_PUSH_SENDER_ID = "mp_pushSenderId";
     private final Context mContext;
 
     public String mKey = null;
@@ -29,6 +30,7 @@ public class AppConfig {
     public int debugUploadInterval = 10;
     public int uploadInterval = 60;
     public boolean isPushEnabled;
+    public String pushSenderId;
 
     public AppConfig(Context context) {
         this(context, null, null);
@@ -66,6 +68,13 @@ public class AppConfig {
         sessionTimeout = getInteger(PREFKEY_SESSION_TIMEOUT, 120);
         debugUploadInterval = getInteger(PREFKEY_DBG_UPLOAD_INTERVAL, 10);
         uploadInterval = getInteger(PREFKEY_PROD_UPLOAD_INTERVAL, 60);
+        isPushEnabled = getBoolean(PREFKEY_PUSH_ENABLED, false);
+        if (isPushEnabled){
+            pushSenderId = getString(PREFKEY_PUSH_SENDER_ID);
+            if (pushSenderId == null){
+                Log.w(Constants.LOG_TAG, mContext.getString(R.string.error_nosenderid));
+            }
+        }
     }
 
     private int getResourceId(String key, String type) {

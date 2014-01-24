@@ -354,13 +354,16 @@ import javax.crypto.spec.SecretKeySpec;
         uploadMessage.put(MessageKey.TIMESTAMP, System.currentTimeMillis());
         uploadMessage.put(MessageKey.APPLICATION_KEY, mApiKey);
         uploadMessage.put(MessageKey.MPARTICLE_VERSION, Constants.MPARTICLE_VERSION);
+        if (BuildConfig.ECHO){
+            uploadMessage.put("echo", true);
+        }
 
         mAppInfo.put(MessageKey.INSTALL_REFERRER, mPreferences.getString(PrefKeys.INSTALL_REFERRER, null));
         uploadMessage.put(MessageKey.APP_INFO, mAppInfo);
         // if there is notification key then include it
-        String regkey = mPreferences.getString(PrefKeys.PUSH_REGISTRATION_ID, null);
-        if ((regkey != null) && (regkey.length() > 0)) {
-            mDeviceInfo.put(MessageKey.PUSH_TOKEN, regkey);
+        String regId = PushRegistrationHelper.getRegistrationId(mContext);
+        if ((regId != null) && (regId.length() > 0)) {
+            mDeviceInfo.put(MessageKey.PUSH_TOKEN, regId);
         } else {
             mDeviceInfo.remove(MessageKey.PUSH_TOKEN);
         }

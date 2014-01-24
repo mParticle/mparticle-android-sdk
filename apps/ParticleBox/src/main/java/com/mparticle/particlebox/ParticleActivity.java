@@ -1,17 +1,19 @@
 package com.mparticle.particlebox;
 
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
+import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 
 import com.mparticle.MParticle;
-import com.mparticle.com.particle.activity.MPActionBarActivity;
 
-public class ParticleActivity extends MPActionBarActivity
+
+public class ParticleActivity extends ActionBarActivity
         implements NavigationDrawerFragment.NavigationDrawerCallbacks {
 
     /**
@@ -39,6 +41,19 @@ public class ParticleActivity extends MPActionBarActivity
                 (DrawerLayout) findViewById(R.id.drawer_layout));
 
         MParticle.getInstance(this).setDebug(true);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        MParticle.getInstance(this).activityStarted(this);
+
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        MParticle.getInstance(this).activityStopped(this);
     }
 
     @Override

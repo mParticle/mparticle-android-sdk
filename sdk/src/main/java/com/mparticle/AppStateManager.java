@@ -50,7 +50,7 @@ public class AppStateManager {
 
             @Override
             public void onActivityStarted(Activity activity) {
-                AppStateManager.this.onActivityStarted(activity);
+                AppStateManager.this.recordActivityStarted(activity);
             }
 
             @Override
@@ -65,7 +65,7 @@ public class AppStateManager {
 
             @Override
             public void onActivityStopped(Activity activity) {
-                AppStateManager.this.onActivityStopped(activity);
+                AppStateManager.this.recordActivityStopped(activity);
             }
 
             @Override
@@ -86,6 +86,18 @@ public class AppStateManager {
     }
 
     public void onActivityStarted(Activity activity) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+            recordActivityStarted(activity);
+        }
+    }
+
+    public void onActivityStopped(Activity activity) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+            recordActivityStopped(activity);
+        }
+    }
+
+    void recordActivityStarted(Activity activity){
         if (isBackgrounded() && mLastStoppedTime > 0) {
             MParticle.getInstance(mContext).logStateTransition(Constants.StateTransitionType.STATE_TRANS_FORE);
             Log.d(Constants.LOG_TAG, "APP FOREGROUNDED");
@@ -97,7 +109,7 @@ public class AppStateManager {
         }
     }
 
-    public void onActivityStopped(Activity activity) {
+    void recordActivityStopped(Activity activity) {
         mActivities--;
         mLastStoppedTime = System.currentTimeMillis();
         if (mActivities < 1) {

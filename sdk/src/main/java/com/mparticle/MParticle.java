@@ -1,10 +1,7 @@
 package com.mparticle;
 
 import android.app.Activity;
-import android.app.PendingIntent;
-import android.content.ComponentName;
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
@@ -33,14 +30,19 @@ import java.util.UUID;
  * This class provides access to the mParticle API.
  */
 public class MParticle {
-    private static volatile MParticle instance;
     private static final String TAG = Constants.LOG_TAG;
     private static final HandlerThread sTimeoutHandlerThread = new HandlerThread("mParticleSessionTimeoutHandler",
             Process.THREAD_PRIORITY_BACKGROUND);
+    private static volatile MParticle instance;
     private static SharedPreferences sPreferences;
     private final ConfigManager mConfigManager;
     private final AppStateManager mAppStateManager;
-
+    /* package-private */ String mSessionID;
+    /* package-private */ long mSessionStartTime = 0;
+    /* package-private */ long mLastEventTime = 0;
+    /* package-private */ JSONArray mUserIdentities = new JSONArray();
+    /* package-private */ JSONObject mUserAttributes = new JSONObject();
+    /* package-private */ JSONObject mSessionAttributes;
     private MessageManager mMessageManager;
     private Handler mTimeoutHandler;
     private MParticleLocationListener mLocationListener;
@@ -49,17 +51,11 @@ public class MParticle {
     private String mApiKey;
     private boolean mOptedOut = false;
     private boolean mDebugMode = false;
-
-    /* package-private */ String mSessionID;
-    /* package-private */ long mSessionStartTime = 0;
-    /* package-private */ long mLastEventTime = 0;
     //private int mSessionTimeout = 30 * 60 * 1000;
     private int mEventCount = 0;
-    /* package-private */ JSONArray mUserIdentities = new JSONArray();
-    /* package-private */ JSONObject mUserAttributes = new JSONObject();
-    /* package-private */ JSONObject mSessionAttributes;
     private String mLaunchUri;
     private boolean mAutoTrackingEnabled;
+
 
     /* package-private */MParticle(Context context, MessageManager messageManager, ConfigManager configManager) {
         mConfigManager = configManager;
@@ -70,6 +66,7 @@ public class MParticle {
         mAppStateManager = new AppStateManager(mAppContext);
         mOptedOut = sPreferences.getBoolean(PrefKeys.OPTOUT + mApiKey, false);
         String userAttrs = sPreferences.getString(PrefKeys.USER_ATTRS + mApiKey, null);
+
         if (null != userAttrs) {
             try {
                 mUserAttributes = new JSONObject(userAttrs);
@@ -145,22 +142,14 @@ public class MParticle {
                         }
                     }
 
-                   /* if (appConfigManager.isPushEnabled()) {
-                        if (Boolean.parseBoolean(sDefaultSettings.getProperty(ConfigKeys.ENABLE_PUSH_NOTIFICATIONS))) {
-                            String senderId = sDefaultSettings.getProperty(ConfigKeys.PUSH_NOTIFICATION_SENDER_ID);
-                            instance.enablePushNotifications(senderId);
-                        }
-                    }*/
+                   if (appConfigManager.isPushEnabled()) {
+                        instance.enablePushNotifications(appConfigManager.getPushSenderId());
+                    }
 
                 }
             }
         }
         return instance;
-    }
-
-    void logStateTransition(String transitionType) {
-        ensureActiveSession();
-        mMessageManager.logStateTransition(transitionType, mSessionID, mSessionStartTime);
     }
 
     /**
@@ -174,6 +163,40 @@ public class MParticle {
         return getInstance(context, null, null);
     }
 
+    /* package-private */
+    static boolean setCheckedAttribute(JSONObject attributes, String key, Object value) {
+        if (null == attributes || null == key) {
+            return false;
+        }
+        try {
+            if (Constants.LIMIT_ATTR_COUNT == attributes.length() && !attributes.has(key)) {
+                Log.w(TAG, "Attribute count exceeds limit. Discarding attribute: " + key);
+                return false;
+            }
+            if (null != value && value.toString().length() > Constants.LIMIT_ATTR_VALUE) {
+                Log.w(TAG, "Attribute value length exceeds limit. Discarding attribute: " + key);
+                return false;
+            }
+            if (key.length() > Constants.LIMIT_ATTR_NAME) {
+                Log.w(TAG, "Attribute name length exceeds limit. Discarding attribute: " + key);
+                return false;
+            }
+            if (value == null) {
+                value = JSONObject.NULL;
+            }
+            attributes.put(key, value);
+        } catch (JSONException e) {
+            Log.w(TAG, "JSON error processing attributes. Discarding attribute: " + key);
+            return false;
+        }
+        return true;
+    }
+
+    void logStateTransition(String transitionType) {
+        ensureActiveSession();
+        mMessageManager.logStateTransition(transitionType, mSessionID, mSessionStartTime);
+    }
+
     /**
      * Starts tracking a user session. If a session is already active, it will be resumed.
      * <p/>
@@ -183,12 +206,7 @@ public class MParticle {
         if (mOptedOut) {
             return;
         }
-        long initialStartTime = mSessionStartTime;
         ensureActiveSession();
-        if (initialStartTime == mSessionStartTime) {
-            if (mDebugMode)
-                debugLog("Resumed session");
-        }
         mAppStateManager.onActivityStarted(activity);
     }
 
@@ -478,7 +496,6 @@ public class MParticle {
         }
     }
 
-
     void logUnhandledError(Throwable t) {
         ensureActiveSession();
         mMessageManager.logErrorEvent(mSessionID, mSessionStartTime, mLastEventTime, t != null ? t.getMessage() : null, t, null, false);
@@ -636,6 +653,15 @@ public class MParticle {
     }
 
     /**
+     * Get the current opt-out status for the application.
+     *
+     * @return the opt-out status
+     */
+    public boolean getOptOut() {
+        return mOptedOut;
+    }
+
+    /**
      * Control the opt-in/opt-out status for the application.
      *
      * @param optOutStatus set to <code>true</code> to opt out of event tracking
@@ -660,15 +686,6 @@ public class MParticle {
     }
 
     /**
-     * Get the current opt-out status for the application.
-     *
-     * @return the opt-out status
-     */
-    public boolean getOptOut() {
-        return mOptedOut;
-    }
-
-    /**
      * Turn on or off debug mode for mParticle. In debug mode, the mParticle SDK will output
      * informational messages to LogCat.
      *
@@ -677,18 +694,6 @@ public class MParticle {
     public void setDebug(boolean debugMode) {
         mDebugMode = debugMode;
         mMessageManager.setDebugMode(debugMode);
-    }
-
-    /**
-     * Set the user session timeout interval.
-     * <p/>
-     * A session is ended when no events (logged events or start/stop events) has occurred within
-     * the session timeout interval.
-     *
-     * @param sessionTimeout
-     */
-    public void setSessionTimeout(int sessionTimeout) {
-        mConfigManager.setSessionTimeout(sessionTimeout);
     }
 
     /**
@@ -750,77 +755,31 @@ public class MParticle {
     /**
      * Register the application for GCM notifications
      *
+     *
      * @param senderId the SENDER_ID for the application
      */
     public void enablePushNotifications(String senderId) {
-        if (null == getPushRegistrationId()) {
-            Intent registrationIntent = new Intent("com.google.android.c2dm.intent.REGISTER");
-            registrationIntent.putExtra("app", PendingIntent.getBroadcast(mAppContext, 0, new Intent(), 0));
-            registrationIntent.putExtra("sender", senderId);
-            ComponentName svc = mAppContext.startService(registrationIntent);
-            if (svc == null) {
-                Log.w(TAG, "enablePushNotifications can't start service");
-            }
-        }
+        mConfigManager.setPushSenderId(senderId);
+        PushRegistrationHelper.enablePushNotifications(mAppContext, senderId);
+    }
+
+    /**
+     * Register the application for GCM notifications
+     *
+     */
+    public void disablePushNotifications() {
+        PushRegistrationHelper.disablePushNotifications(mAppContext);
     }
 
     /**
      * Unregister the device from GCM notifications
      */
-    public void clearPushNotifications() {
-        if (null != getPushRegistrationId()) {
-            Intent unregIntent = new Intent("com.google.android.c2dm.intent.UNREGISTER");
-            unregIntent.putExtra("app", PendingIntent.getBroadcast(mAppContext, 0, new Intent(), 0));
-            mAppContext.startService(unregIntent);
-        }
+    void clearPushNotificationId() {
+        PushRegistrationHelper.clearPushRegistrationId(mAppContext, registrationListener);
     }
 
-    /**
-     * Manually register the device token for receiving push notifications from mParticle
-     * Called from intent handler
-     *
-     * @param registrationId the device registration id
-     */
-    /* package-private */void setPushRegistrationId(String registrationId) {
-        if (mDebugMode)
-            debugLog("Set push registration token: " + registrationId);
-
-        if (registrationId == null) {
-            clearPushRegistrationId();
-        } else {
-            sPreferences.edit().putString(PrefKeys.PUSH_REGISTRATION_ID, registrationId).commit();
-            mMessageManager.setPushRegistrationId(registrationId, true);
-        }
-    }
-
-    /**
-     * Manually un-register the device token for receiving push notifications from mParticle
-     * <p/>
-     * Called from intent handler
-     */
-    /* package-private */void clearPushRegistrationId() {
-        if (mDebugMode)
-            debugLog("Cleared push registration token");
-
-        String registrationId = getPushRegistrationId();
-        if (null != registrationId) {
-            // set the registered msg to false
-            mMessageManager.setPushRegistrationId(registrationId, false);
-            // then clear the flag
-            sPreferences.edit().remove(PrefKeys.PUSH_REGISTRATION_ID).commit();
-        } else {
-            Log.i(TAG, "Clear push registration requested but device is not registered");
-        }
-    }
-
-    /**
-     * Retrieve the push registration id if it has been setup for this device using either
-     * setPushRegistrationId or registerForPushNotifications
-     *
-     * @return the push registration id
-     */
-    /* package-private */String getPushRegistrationId() {
-        return sPreferences.getString(PrefKeys.PUSH_REGISTRATION_ID, null);
+    void setPushRegistrationId(String registrationId) {
+        PushRegistrationHelper.storeRegistrationId(mAppContext, registrationId, registrationListener);
     }
 
     /**
@@ -860,35 +819,6 @@ public class MParticle {
         return checkedAttributes;
     }
 
-    /* package-private */
-    static boolean setCheckedAttribute(JSONObject attributes, String key, Object value) {
-        if (null == attributes || null == key) {
-            return false;
-        }
-        try {
-            if (Constants.LIMIT_ATTR_COUNT == attributes.length() && !attributes.has(key)) {
-                Log.w(TAG, "Attribute count exceeds limit. Discarding attribute: " + key);
-                return false;
-            }
-            if (null != value && value.toString().length() > Constants.LIMIT_ATTR_VALUE) {
-                Log.w(TAG, "Attribute value length exceeds limit. Discarding attribute: " + key);
-                return false;
-            }
-            if (key.length() > Constants.LIMIT_ATTR_NAME) {
-                Log.w(TAG, "Attribute name length exceeds limit. Discarding attribute: " + key);
-                return false;
-            }
-            if (value == null) {
-                value = JSONObject.NULL;
-            }
-            attributes.put(key, value);
-        } catch (JSONException e) {
-            Log.w(TAG, "JSON error processing attributes. Discarding attribute: " + key);
-            return false;
-        }
-        return true;
-    }
-
     private void debugLog(String message) {
         if (null != mSessionID) {
             Log.d(TAG, mApiKey + ": " + mSessionID + ": " + message);
@@ -903,6 +833,49 @@ public class MParticle {
 
     public long getSessionTimeout() {
         return mConfigManager.getSessionTimeout();
+    }
+
+    /**
+     * Set the user session timeout interval.
+     * <p/>
+     * A session is ended when no events (logged events or start/stop events) has occurred within
+     * the session timeout interval.
+     *
+     * @param sessionTimeout
+     */
+    public void setSessionTimeout(int sessionTimeout) {
+        mConfigManager.setSessionTimeout(sessionTimeout);
+    }
+
+
+
+    public enum EventType {
+        Unknown, Navigation, Location, Search, Transaction, UserContent, UserPreference, Social, Other;
+
+        public String toString() {
+            return name();
+        }
+    }
+
+    public enum IdentityType {
+        OTHER(0),
+        CUSTOMERID(1),
+        FACEBOOK(2),
+        TWITTER(3),
+        GOOGLE(4),
+        MICROSOFT(5),
+        YAHOO(6),
+        EMAIL(7);
+
+        private final int value;
+
+        private IdentityType(int value) {
+            this.value = value;
+        }
+
+        public int getValue() {
+            return value;
+        }
     }
 
     private static final class SessionTimeoutHandler extends Handler {
@@ -948,33 +921,17 @@ public class MParticle {
 
     }
 
-    public enum EventType {
-        Unknown, Navigation, Location, Search, Transaction, UserContent, UserPreference, Social, Other;
+    private PushRegistrationListener registrationListener = new PushRegistrationListener() {
 
-        public String toString() {
-//            return name().toLowerCase(Locale.US);
-            return name();
-        }
-    }
-
-    public enum IdentityType {
-        OTHER(0),
-        CUSTOMERID(1),
-        FACEBOOK(2),
-        TWITTER(3),
-        GOOGLE(4),
-        MICROSOFT(5),
-        YAHOO(6),
-        EMAIL(7);
-
-        private final int value;
-
-        private IdentityType(int value) {
-            this.value = value;
+        @Override
+        public void onRegistered(String regId) {
+            mMessageManager.setPushRegistrationId(mSessionID, mSessionStartTime, System.currentTimeMillis(), regId, true);
         }
 
-        public int getValue() {
-            return value;
+        @Override
+        public void onCleared(String regId) {
+            mMessageManager.setPushRegistrationId(mSessionID, mSessionStartTime, System.currentTimeMillis(), null, true);
         }
-    }
+    };
+
 }

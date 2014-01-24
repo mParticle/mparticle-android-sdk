@@ -302,15 +302,15 @@ import java.util.UUID;
         }
     }
 
-    public void setPushRegistrationId(String token, boolean registeringFlag) {
+    public void setPushRegistrationId(String sessionId, long sessionStartTime, long time, String token, boolean registeringFlag) {
         try {
-            JSONObject message = createMessage(MessageType.PUSH_REGISTRATION, null, 0, System.currentTimeMillis(),
+            JSONObject message = createMessage(MessageType.PUSH_REGISTRATION, sessionId, sessionStartTime, time,
                     null, null);
             message.put(MessageKey.PUSH_TOKEN, token);
             message.put(MessageKey.PUSH_REGISTER_FLAG, registeringFlag);
             mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
         } catch (JSONException e) {
-            Log.w(TAG, "Failed to create mParticle error message");
+            Log.w(TAG, "Failed to create mParticle push registration message");
         }
     }
 

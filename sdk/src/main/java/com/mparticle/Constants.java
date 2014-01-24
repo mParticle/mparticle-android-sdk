@@ -169,6 +169,9 @@ package com.mparticle;
         public static final String USER_IDENTITIES = "mp::user_ids::";
         public static final String FIRSTRUN = "mp::firstrun::";
         public static final String UPLOAD_MODE = "mp::batch";
+        public static final String PROPERTY_APP_VERSION = "mp::appversion";
+        public static final String PUSH_ENABLED = "mp::push_enabled";
+        public static final String PUSH_SENDER_ID = "mp::push_sender_id";
     }
 
     public interface MiscStorageKeys {
@@ -192,7 +195,7 @@ package com.mparticle;
         public static final String SESSION_TIMEOUT = "session_timeout";
         public static final String ENABLE_CRASH_REPORTING = "enable_crash_reporting";
         public static final String ENABLE_PUSH_NOTIFICATIONS = "enable_push_notifications";
-        public static final String PUSH_NOTIFICATION_SENDER_ID = "push_notification_sender_id";
+
         // MessageManager
         public static final String DEBUG_UPLOAD_INTERVAL = "debug_upload_interval";
         public static final String UPLOAD_INTERVAL = "upload_interval";
