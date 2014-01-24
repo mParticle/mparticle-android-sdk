@@ -183,8 +183,8 @@ import java.util.UUID;
     }
 
     /* package-private */
-    static JSONObject createFirstRunMessage(long time) throws JSONException {
-        JSONObject message = createMessage(MessageType.FIRST_RUN, null, 0, time, null, null);
+    static JSONObject createFirstRunMessage(long time, String sessionId, long startTime) throws JSONException {
+        JSONObject message = createMessage(MessageType.FIRST_RUN, sessionId, startTime, time, null, null);
         return message;
     }
 
@@ -198,9 +198,13 @@ import java.util.UUID;
 
     public void startSession(String sessionId, long time, String launchUri) {
         try {
+            JSONObject message = createMessage(MessageType.SESSION_START, sessionId, time, time, null, null);
+            message.put(MessageKey.LAUNCH_REFERRER, launchUri);
+            mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
+
             if (sFirstRun) {
                 try {
-                    JSONObject firstRunMessage = createFirstRunMessage(time);
+                    JSONObject firstRunMessage = createFirstRunMessage(time, sessionId, time);
                     mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, firstRunMessage));
                     sFirstRun = false;
                     if (mUploadHandler != null) {
@@ -213,9 +217,7 @@ import java.util.UUID;
                 }
             }
 
-            JSONObject message = createMessage(MessageType.SESSION_START, sessionId, time, time, null, null);
-            message.put(MessageKey.LAUNCH_REFERRER, launchUri);
-            mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
+
         } catch (JSONException e) {
             Log.w(TAG, "Failed to create mParticle start session message");
         }

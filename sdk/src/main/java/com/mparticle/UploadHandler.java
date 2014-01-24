@@ -325,10 +325,6 @@ import javax.crypto.spec.SecretKeySpec;
                         JSONObject msgObject = new JSONObject(readyMessagesCursor.getString(1));
                         messagesArray.put(msgObject);
                         lastMessageId = readyMessagesCursor.getInt(0);
-                        // First run message should be in a batch by itself
-                        if (msgObject.getString(MessageKey.TYPE).equals(Constants.MessageType.FIRST_RUN)) {
-                            break;
-                        }
                     }
                     JSONObject uploadMessage = createUploadMessage(messagesArray, history);
                     // store in uploads table

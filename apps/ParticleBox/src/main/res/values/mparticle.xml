@@ -16,7 +16,7 @@
 
     <bool name="mp_useSecureTransport">false</bool>
 
-    <bool name="mp_debug">true</bool>
+    <bool name="mp_enableDebug">true</bool>
 
     <bool name="mp_enablePush">true</bool>
 
