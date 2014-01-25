@@ -627,7 +627,7 @@ import javax.crypto.spec.SecretKeySpec;
     }
 
     private URI makeServiceUri(String method) throws URISyntaxException {
-        return new URI(mConfigManager.getHttpScheme(), DEBUG_SERVICE_HOST, "/" + SERVICE_VERSION + "/" + mApiKey + "/" + method, null);
+        return new URI("https", DEBUG_SERVICE_HOST, "/" + SERVICE_VERSION + "/" + mApiKey + "/" + method, null);
     }
 
     private void dbInsertUpload(SQLiteDatabase db, JSONObject message) throws JSONException {

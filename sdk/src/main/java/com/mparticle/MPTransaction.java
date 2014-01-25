@@ -103,12 +103,12 @@ public class MPTransaction {
             return this;
         }
 
-        public Builder tax(double val) {
+        public Builder taxAmount(double val) {
             taxAmount = val;
             return this;
         }
 
-        public Builder shipping(double val) {
+        public Builder shippingAmount(double val) {
             shippingAmount = val;
             return this;
         }
@@ -118,7 +118,7 @@ public class MPTransaction {
             return this;
         }
 
-        public Builder transactionAffiliation(String val) {
+        public Builder affiliation(String val) {
             affiliation = val;
             return this;
         }

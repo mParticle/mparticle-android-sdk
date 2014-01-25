@@ -691,7 +691,7 @@ public class MParticle {
      *
      * @param debugMode
      */
-    public void setDebug(boolean debugMode) {
+    public void setDebugMode(boolean debugMode) {
         mDebugMode = debugMode;
         mMessageManager.setDebugMode(debugMode);
     }
@@ -712,18 +712,6 @@ public class MParticle {
      */
     public void setDebugUploadInterval(int uploadInterval) {
         mConfigManager.setDebugUploadInterval(uploadInterval);
-    }
-
-
-    /**
-     * Enable SSL transport when uploading data
-     *
-     * @param sslEnabled true to turn on SSL transport, false to use non-SSL transport
-     */
-    public void setSecureTransport(boolean sslEnabled) {
-        mConfigManager.setUseSsl(sslEnabled);
-        if (mDebugMode)
-            debugLog("Set secure transport: " + sslEnabled);
     }
 
     /**

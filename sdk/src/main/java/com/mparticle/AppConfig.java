@@ -13,7 +13,6 @@ public class AppConfig {
     public static final String PREFKEY_SESSION_TIMEOUT = "mp_sessionTimeout";
     public static final String PREFKEY_DBG_UPLOAD_INTERVAL = "mp_debugUploadInterval";
     public static final String PREFKEY_PROD_UPLOAD_INTERVAL = "mp_productionUploadInterval";
-    public static final String PREFKEY_USE_SSL = "mp_useSecureTransport";
     public static final String PREFKEY_DBG_ENABLED = "mp_enableDebug";
     public static final String PREFKEY_PUSH_ENABLED = "mp_enablePush";
     public static final String PREFKEY_PUSH_SENDER_ID = "mp_pushSenderId";
@@ -24,7 +23,6 @@ public class AppConfig {
 
     public boolean unhandledExceptions;
     public boolean reportUncaughtExceptions = false;
-    public boolean useSecureTransport = true;
     public boolean debug = false;
     public int sessionTimeout = 120;
     public int debugUploadInterval = 10;
@@ -64,7 +62,6 @@ public class AppConfig {
     private void parseLocalSettings() {
         debug = getBoolean(PREFKEY_DBG_ENABLED, false);
         reportUncaughtExceptions = getBoolean(PREFKEY_EXCEPTIONS, false);
-        useSecureTransport = getBoolean(PREFKEY_USE_SSL, true);
         sessionTimeout = getInteger(PREFKEY_SESSION_TIMEOUT, 120);
         debugUploadInterval = getInteger(PREFKEY_DBG_UPLOAD_INTERVAL, 10);
         uploadInterval = getInteger(PREFKEY_PROD_UPLOAD_INTERVAL, 60);

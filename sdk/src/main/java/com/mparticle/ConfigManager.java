@@ -124,10 +124,6 @@ class ConfigManager {
         return true;
     }
 
-    public String getHttpScheme() {
-        return localPrefs.useSecureTransport ? "https" : "http";
-    }
-
     public void setDebug(boolean enabled) {
         localPrefs.debug = enabled;
     }
@@ -138,10 +134,6 @@ class ConfigManager {
 
     public void setDebugUploadInterval(int uploadInterval) {
         localPrefs.debugUploadInterval = uploadInterval;
-    }
-
-    public void setUseSsl(boolean useSsl) {
-        localPrefs.useSecureTransport = useSsl;
     }
 
     public long getSessionTimeout() {

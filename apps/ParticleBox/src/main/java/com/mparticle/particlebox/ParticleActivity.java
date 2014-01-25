@@ -40,7 +40,7 @@ public class ParticleActivity extends ActionBarActivity
                 R.id.navigation_drawer,
                 (DrawerLayout) findViewById(R.id.drawer_layout));
 
-        MParticle.getInstance(this).setDebug(true);
+        MParticle.getInstance(this).setDebugMode(true);
     }
 
     @Override

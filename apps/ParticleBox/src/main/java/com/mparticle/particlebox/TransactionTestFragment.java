@@ -61,13 +61,13 @@ public class TransactionTestFragment extends Fragment implements View.OnClickLis
         MPTransaction transaction = new MPTransaction.Builder(productName.getText().toString(), productSku.getText().toString())
                 .quantity(Integer.parseInt(quantity.getText().toString()))
                 .unitPrice(Double.parseDouble(unitPrice.getText().toString()))
-                .shipping(Double.parseDouble(shippingAmount.getText().toString()))
-                .tax(Double.parseDouble(taxAmount.getText().toString()))
+                .shippingAmount(Double.parseDouble(shippingAmount.getText().toString()))
+                .taxAmount(Double.parseDouble(taxAmount.getText().toString()))
                 .totalRevenue(Double.parseDouble(revenueAmount.getText().toString()))
                 .productCategory(productCategory.getText().toString())
                 .currencyCode(currencyCode.getText().toString())
                 .transactionId(transactionId.getText().toString())
-                .transactionAffiliation(transactionAffiliation.getText().toString())
+                .affiliation(transactionAffiliation.getText().toString())
                 .build();
         MParticle.getInstance(v.getContext()).logTransaction(transaction);
 
