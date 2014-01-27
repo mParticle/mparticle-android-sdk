@@ -153,6 +153,9 @@ public class GcmIntentService extends IntentService {
                 for (String key : keys){
                     String message = extras.getString(key);
                     if (message != null && message.length() > 0){
+                        //redact message contents for privacy concerns
+                        extras.remove(key);
+                        extras.putString(key, "");
                         showPushWithMessage(title, message, extras);
                         break;
                     }
