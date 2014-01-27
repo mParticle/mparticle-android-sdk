@@ -13,9 +13,10 @@ public class AppConfig {
     public static final String PREFKEY_SESSION_TIMEOUT = "mp_sessionTimeout";
     public static final String PREFKEY_DBG_UPLOAD_INTERVAL = "mp_debugUploadInterval";
     public static final String PREFKEY_PROD_UPLOAD_INTERVAL = "mp_productionUploadInterval";
-    public static final String PREFKEY_DBG_ENABLED = "mp_enableDebug";
+    public static final String PREFKEY_DBG_ENABLED = "mp_enableDebugMode";
     public static final String PREFKEY_PUSH_ENABLED = "mp_enablePush";
     public static final String PREFKEY_PUSH_SENDER_ID = "mp_pushSenderId";
+    public static final String PREFKEY_SANDBOX_MODE = "mp_enableSandboxMode";
     private final Context mContext;
 
     public String mKey = null;
@@ -29,12 +30,14 @@ public class AppConfig {
     public int uploadInterval = 60;
     public boolean isPushEnabled;
     public String pushSenderId;
+    public boolean sandboxMode;
 
     public AppConfig(Context context) {
-        this(context, null, null);
+        this(context, null, null, false);
     }
 
-    public AppConfig(Context context, String key, String secret) {
+    public AppConfig(Context context, String key, String secret, boolean sandboxMode) {
+        this.sandboxMode = sandboxMode;
         mContext = context;
         if ((key == null) || secret == null) {
             Log.d(Constants.LOG_TAG, context.getString(R.string.error_noservercredentials));
@@ -72,6 +75,7 @@ public class AppConfig {
                 Log.w(Constants.LOG_TAG, mContext.getString(R.string.error_nosenderid));
             }
         }
+        sandboxMode = getBoolean(PREFKEY_SANDBOX_MODE, sandboxMode);
     }
 
     private int getResourceId(String key, String type) {

@@ -454,7 +454,7 @@ import javax.crypto.spec.SecretKeySpec;
                             Log.d(TAG, "Uploading data to mParticle server:");
                             try {
                                 JSONObject messageJson = new JSONObject(message);
-                                Log.d(TAG, messageJson.toString(4));
+                             //   Log.d(TAG, messageJson.toString(4));
                                 if (messageJson.has(MessageKey.MESSAGES)) {
                                     JSONArray messages = messageJson.getJSONArray(MessageKey.MESSAGES);
                                     Log.d(TAG, "SENDING MESSAGES");

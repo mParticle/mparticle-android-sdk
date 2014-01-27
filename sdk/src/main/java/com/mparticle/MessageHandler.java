@@ -31,6 +31,7 @@ import org.json.JSONObject;
     public static final int UPDATE_SESSION_END = 2;
     public static final int CREATE_SESSION_END_MESSAGE = 3;
     public static final int END_ORPHAN_SESSIONS = 4;
+    private final Context context;
 
     // boolean flag used in unit tests to wait until processing is finished.
     // this is not used in the normal execution.
@@ -38,6 +39,7 @@ import org.json.JSONObject;
 
     public MessageHandler(Context appContext, Looper looper, String apiKey) {
         super(looper);
+        context = appContext;
         mDB = new MParticleDatabase(appContext);
         mApiKey = apiKey;
     }
@@ -63,6 +65,11 @@ import org.json.JSONObject;
                     if (MessageType.SESSION_START != messageType) {
                         dbUpdateSessionEndTime(db, getMessageSessionId(message), message.getLong(MessageKey.TIMESTAMP), 0);
                     }
+
+                    if (MParticle.getInstance(context).mConfigManager.getUploadMode() == Constants.Status.READY){
+                        MParticle.getInstance(context).upload();
+                    }
+
                 } catch (SQLiteException e) {
                     Log.e(TAG, "Error saving event to mParticle DB", e);
                 } catch (JSONException e) {

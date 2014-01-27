@@ -415,14 +415,6 @@ import java.util.UUID;
         mConfigManager.setDebug(debugMode);
     }
 
-    public void setSandboxMode(boolean sandboxMode) {
-        /*if(sandboxMode) {
-            setUploadInterval(Constants.DEBUG_UPLOAD_INTERVAL);
-        }
-    	// pass this on
-    	.setSandboxMode(sandboxMode);*/
-    }
-
     public void setConnectionProxy(String host, int port) {
         mUploadHandler.setConnectionProxy(host, port);
     }

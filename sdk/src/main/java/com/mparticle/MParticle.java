@@ -107,6 +107,19 @@ public class MParticle {
      * @return An instance of the mParticle SDK configured with your API key
      */
     public static MParticle getInstance(Context context, String apiKey, String secret) {
+        return getInstance(context, apiKey, secret, false);
+    }
+
+    /**
+     * Initialize or return an instance of the mParticle SDK
+     *
+     * @param context the Activity that is creating the instance
+     * @param apiKey  the API key for your account
+     * @param secret  the API secret for your account
+     * @param sandboxMode set the SDK in sandbox mode, xml configuration will override this value
+     * @return An instance of the mParticle SDK configured with your API key
+     */
+    public static MParticle getInstance(Context context, String apiKey, String secret, boolean sandboxMode) {
         if (instance == null) {
             synchronized (MParticle.class) {
                 if (instance == null) {
@@ -127,7 +140,7 @@ public class MParticle {
                         sPreferences = context.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
                     }
 
-                    ConfigManager appConfigManager = new ConfigManager(context, apiKey, secret);
+                    ConfigManager appConfigManager = new ConfigManager(context, apiKey, secret, sandboxMode);
                     Context appContext = context.getApplicationContext();
 
                     Boolean firstRun = sPreferences.getBoolean(PrefKeys.FIRSTRUN + appConfigManager.getApiKey(), true);
@@ -164,7 +177,7 @@ public class MParticle {
      * @return An instance of the mParticle SDK configured with your API key
      */
     public static MParticle getInstance(Context context) {
-        return getInstance(context, null, null);
+        return getInstance(context, null, null, false);
     }
 
     /* package-private */
@@ -525,7 +538,7 @@ public class MParticle {
     void logUnhandledError(Throwable t) {
         if (mOptedOut)
             return;
-        
+
         ensureActiveSession();
         mMessageManager.logErrorEvent(mSessionID, mSessionStartTime, mLastEventTime, t != null ? t.getMessage() : null, t, null, false);
         //we know that the app is about to crash and therefore exit

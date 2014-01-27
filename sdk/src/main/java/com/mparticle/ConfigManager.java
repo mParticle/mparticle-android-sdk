@@ -30,7 +30,6 @@ class ConfigManager {
 
     private final SharedPreferences mPreferences;
     private static final String PREFERENCES_FILE = "mp_preferences";
-    private boolean mSandboxMode;
     private AppConfig localPrefs;
     public static final String DEBUG_SERVICE_HOST = "api-qa.mparticle.com";
     private String[] pushKeys;
@@ -39,10 +38,10 @@ class ConfigManager {
 
     private boolean loaded = false;
 
-    public ConfigManager(Context context, String key, String secret) {
+    public ConfigManager(Context context, String key, String secret, boolean sandboxMode) {
         mContext = context.getApplicationContext();
         mPreferences = mContext.getSharedPreferences(PREFERENCES_FILE, Context.MODE_PRIVATE);
-        localPrefs = new AppConfig(mContext, key, secret);
+        localPrefs = new AppConfig(mContext, key, secret, sandboxMode);
     }
 
     public synchronized void updateConfig(JSONObject responseJSON) throws JSONException {
@@ -92,15 +91,6 @@ class ConfigManager {
         }
     }
 
-    public void setSandboxMode(boolean sandboxMode) {
-        mSandboxMode = sandboxMode;
-       /* if(mSandboxMode) {
-            mUploadMode = Constants.Status.READY;
-        } else {
-            mUploadMode = Constants.Status.BATCH_READY;
-        }*/
-    }
-
     public boolean getLogUnhandledExceptions() {
         if (logUnhandledExceptions.equals(VALUE_APP_DEFINED)) {
             return localPrefs.unhandledExceptions;
@@ -110,11 +100,15 @@ class ConfigManager {
     }
 
     public boolean getSandboxMode() {
-        return mSandboxMode;
+        return localPrefs.sandboxMode;
     }
 
     public int getUploadMode() {
-        return uploadMode;
+        if (getSandboxMode()){
+            return Constants.Status.READY;
+        }else{
+            return uploadMode;
+        }
     }
 
     public String getApiKey() {
