@@ -35,7 +35,7 @@ public class MParticle {
             Process.THREAD_PRIORITY_BACKGROUND);
     private static volatile MParticle instance;
     private static SharedPreferences sPreferences;
-    private final ConfigManager mConfigManager;
+    final ConfigManager mConfigManager;
     private final AppStateManager mAppStateManager;
     /* package-private */ String mSessionID;
     /* package-private */ long mSessionStartTime = 0;

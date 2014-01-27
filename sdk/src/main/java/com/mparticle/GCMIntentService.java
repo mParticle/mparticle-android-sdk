@@ -99,10 +99,39 @@ public class GcmIntentService extends IntentService {
     }
 
     private void handleMessage(Intent intent) {
-        Bundle extras = intent.getExtras();
-        String title = extras.getString(GCMNotificationKeys.TITLE);
-        String text = extras.getString(GCMNotificationKeys.TEXT);
+        try {
+            if (null == mMParticle) {
+                mMParticle = MParticle.getInstance(this);
+            }
+        } catch (Throwable t) {
+            // failure to instantiate mParticle likely means that the
+            // mparticle.properties file is not correct
+            // and a warning message will already have been logged
+            return;
+        }
 
+        String title = "Unknown";
+        try{
+            int stringId = getApplicationInfo().labelRes;
+            title = getResources().getString(stringId);
+        }catch(Exception e){
+
+        }
+
+        String[] keys = mMParticle.mConfigManager.getPushKeys();
+        if (keys != null){
+            Bundle extras = intent.getExtras();
+            for (String key : keys){
+                String message = extras.getString(key);
+                if (message != null && message.length() > 0){
+                    showPushWithMessage(title, message);
+                    break;
+                }
+            }
+        }
+    }
+
+    private void showPushWithMessage(String title, String message) {
         PackageManager packageManager = getPackageManager();
         String packageName = getPackageName();
 
@@ -120,9 +149,9 @@ public class GcmIntentService extends IntentService {
         PendingIntent notifyIntent = PendingIntent.getActivity(this, 0, launchIntent,
                 PendingIntent.FLAG_UPDATE_CURRENT);
 
-        Notification notification = new Notification(applicationIcon, text, System.currentTimeMillis());
+        Notification notification = new Notification(applicationIcon, message, System.currentTimeMillis());
         notification.flags |= Notification.FLAG_AUTO_CANCEL;
-        notification.setLatestEventInfo(this, title, text, notifyIntent);
+        notification.setLatestEventInfo(this, title, message, notifyIntent);
 
         NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager.notify(1, notification);

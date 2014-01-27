@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Build;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -11,6 +12,7 @@ import org.json.JSONObject;
  * Created by sdozor on 1/16/14.
  */
 class ConfigManager {
+    private static final String CONFIG_JSON = "json";
     private static volatile ConfigManager instance;
 
     public static final String KEY_SESSION_UPLOAD_MODE = "su";
@@ -31,30 +33,46 @@ class ConfigManager {
     private boolean mSandboxMode;
     private AppConfig localPrefs;
     public static final String DEBUG_SERVICE_HOST = "api-qa.mparticle.com";
+    private String[] pushKeys;
+    private int uploadMode = Constants.Status.BATCH_READY;
+    private String logUnhandledExceptions = VALUE_APP_DEFINED;
 
     public ConfigManager(Context context, String key, String secret) {
         mContext = context.getApplicationContext();
         mPreferences = mContext.getSharedPreferences(PREFERENCES_FILE, Context.MODE_PRIVATE);
         localPrefs = new AppConfig(mContext, key, secret);
+        try{
+            String cachedConfig = mPreferences.getString(CONFIG_JSON, "");
+            if (cachedConfig != null && cachedConfig.length() > 0){
+                updateConfig(new JSONObject(cachedConfig));
+            }
+        }catch(JSONException ex){
+
+        }
     }
 
-    public void updateConfig(JSONObject responseJSON) throws JSONException {
-
+    public synchronized void updateConfig(JSONObject responseJSON) throws JSONException {
         SharedPreferences.Editor editor = mPreferences.edit();
+        editor.putString(CONFIG_JSON, responseJSON.toString());
 
         if (responseJSON.has(KEY_SESSION_UPLOAD_MODE)) {
             String sessionUploadMode = responseJSON.getString(KEY_SESSION_UPLOAD_MODE);
-            int uploadMode = ("batch".equalsIgnoreCase(sessionUploadMode)) ? Constants.Status.BATCH_READY : Constants.Status.READY;
-            editor.putInt(KEY_SESSION_UPLOAD_MODE, uploadMode);
-        } else {
-            editor.remove(KEY_SESSION_UPLOAD_MODE);
+            uploadMode = ("batch".equalsIgnoreCase(sessionUploadMode)) ? Constants.Status.BATCH_READY : Constants.Status.READY;
         }
 
         if (responseJSON.has(KEY_UNHANDLED_EXCEPTIONS)) {
-            String logUnhandledExceptions = responseJSON.getString(KEY_UNHANDLED_EXCEPTIONS);
-            editor.putString(KEY_UNHANDLED_EXCEPTIONS, logUnhandledExceptions);
-        } else {
-            editor.remove(KEY_UNHANDLED_EXCEPTIONS);
+            logUnhandledExceptions = responseJSON.getString(KEY_UNHANDLED_EXCEPTIONS);
+        }
+
+        if (responseJSON.has(KEY_PUSH_MESSAGES)) {
+            JSONArray pushKeyArray = responseJSON.getJSONArray(KEY_PUSH_MESSAGES);
+            editor.putString(KEY_PUSH_MESSAGES, pushKeyArray.toString());
+            if (pushKeyArray != null){
+                pushKeys = new String[pushKeyArray.length()];
+            }
+            for (int i = 0; i < pushKeyArray.length(); i++){
+                pushKeys[i] = pushKeyArray.getString(i);
+            }
         }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD) {
@@ -64,6 +82,10 @@ class ConfigManager {
         }
 
         applyConfig();
+    }
+
+    public String[] getPushKeys(){
+        return pushKeys;
     }
 
     private void applyConfig() {
@@ -84,11 +106,10 @@ class ConfigManager {
     }
 
     public boolean getLogUnhandledExceptions() {
-        String handleExceptions = mPreferences.getString(KEY_UNHANDLED_EXCEPTIONS, VALUE_APP_DEFINED);
-        if (handleExceptions.equals(VALUE_APP_DEFINED)) {
+        if (logUnhandledExceptions.equals(VALUE_APP_DEFINED)) {
             return localPrefs.unhandledExceptions;
         } else {
-            return handleExceptions.equals(VALUE_CUE_CATCH);
+            return logUnhandledExceptions.equals(VALUE_CUE_CATCH);
         }
     }
 
@@ -97,7 +118,7 @@ class ConfigManager {
     }
 
     public int getUploadMode() {
-        return mPreferences.getInt(KEY_SESSION_UPLOAD_MODE, Constants.Status.BATCH_READY);
+        return uploadMode;
     }
 
     public String getApiKey() {
