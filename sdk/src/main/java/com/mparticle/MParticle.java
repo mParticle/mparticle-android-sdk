@@ -448,7 +448,32 @@ public class MParticle {
      * @param message the name of the error event to be tracked
      */
     public void logError(String message) {
-        logError(message, null, null);
+        logError(message, null);
+    }
+
+    /**
+     * Log an error event with a Message, Exception, and any additional data
+     *
+     * @param message   the name of the error event to be tracked
+     * @param eventData a Map of data attributes
+     */
+    public void logError(String message, Map<String, String> eventData) {
+        if (mOptedOut) {
+            return;
+        }
+        if (null == message) {
+            Log.w(TAG, "message is required for logErrorEvent");
+            return;
+        }
+        ensureActiveSession();
+        if (checkEventLimit()) {
+            JSONObject eventDataJSON = enforceAttributeConstraints(eventData);
+            mMessageManager.logErrorEvent(mSessionID, mSessionStartTime, mLastEventTime, message, null, eventDataJSON);
+            if (mDebugMode)
+                debugLog(
+                        "Logged error with message: " + (message == null ? "<none>" : message) +
+                                " with data: " + (eventDataJSON == null ? "<none>" : eventDataJSON.toString()));
+        }
     }
 
     /**
@@ -456,8 +481,8 @@ public class MParticle {
      *
      * @param exception an Exception
      */
-    public void logError(Exception exception) {
-        logError(null, exception, null);
+    public void logException(Exception exception) {
+        logException(exception, null, null);
     }
 
     /**
@@ -466,28 +491,18 @@ public class MParticle {
      * @param exception an Exception
      * @param eventData a Map of data attributes
      */
-    public void logError(Exception exception, Map<String, String> eventData) {
-        logError(null, exception, eventData);
-    }
-
-    /**
-     * Log an error event with an Exception and any additional data
-     *
-     * @param message   the name of the error to be tracked
-     * @param eventData a Map of data attributes
-     */
-    public void logError(String message, Map<String, String> eventData) {
-        logError(message, null, eventData);
+    public void logException(Exception exception, Map<String, String> eventData) {
+        logException(exception, eventData, null);
     }
 
     /**
      * Log an error event with a Message, Exception, and any additional data
      *
-     * @param message   the name of the error event to be tracked
      * @param exception an Exception
      * @param eventData a Map of data attributes
+     * @param message   the name of the error event to be tracked
      */
-    public void logError(String message, Exception exception, Map<String, String> eventData) {
+    public void logException(Exception exception, Map<String, String> eventData, String message) {
         if (mOptedOut) {
             return;
         }
@@ -501,7 +516,7 @@ public class MParticle {
             mMessageManager.logErrorEvent(mSessionID, mSessionStartTime, mLastEventTime, message, exception, eventDataJSON);
             if (mDebugMode)
                 debugLog(
-                        "Logged error with message: " + (message == null ? "<none>" : message) +
+                        "Logged exception with message: " + (message == null ? "<none>" : message) +
                                 " with data: " + (eventDataJSON == null ? "<none>" : eventDataJSON.toString()) +
                                 " with exception: " + (exception == null ? "<none>" : exception.getMessage()));
         }
