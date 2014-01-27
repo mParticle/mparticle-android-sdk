@@ -865,14 +865,14 @@ public class MParticle {
     }
 
     public enum IdentityType {
-        OTHER(0),
-        CUSTOMERID(1),
-        FACEBOOK(2),
-        TWITTER(3),
-        GOOGLE(4),
-        MICROSOFT(5),
-        YAHOO(6),
-        EMAIL(7);
+        Other(0),
+        CustomId(1),
+        Facebook(2),
+        Twitter(3),
+        Google(4),
+        Microsoft(5),
+        Yahoo(6),
+        Email(7);
 
         private final int value;
 
