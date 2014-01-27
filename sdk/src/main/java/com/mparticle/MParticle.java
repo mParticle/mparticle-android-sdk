@@ -523,6 +523,9 @@ public class MParticle {
     }
 
     void logUnhandledError(Throwable t) {
+        if (mOptedOut)
+            return;
+        
         ensureActiveSession();
         mMessageManager.logErrorEvent(mSessionID, mSessionStartTime, mLastEventTime, t != null ? t.getMessage() : null, t, null, false);
         //we know that the app is about to crash and therefore exit
