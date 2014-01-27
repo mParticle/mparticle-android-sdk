@@ -847,6 +847,9 @@ public class MParticle {
     }
 
     void logNotification(Intent intent) {
+        if (mOptedOut){
+            return;
+        }
         lastNotificationBundle = intent.getExtras().getBundle(MessageKey.PAYLOAD);
         ensureActiveSession();
         mMessageManager.logNotification(mSessionID, mSessionStartTime, lastNotificationBundle, intent.getExtras().getString(MessageKey.APP_STATE));
