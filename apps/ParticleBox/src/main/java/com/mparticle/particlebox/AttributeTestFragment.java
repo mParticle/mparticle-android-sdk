@@ -95,7 +95,7 @@ public class AttributeTestFragment extends Fragment implements View.OnClickListe
                 Toast.makeText(v.getContext(), "User attribute set.", Toast.LENGTH_SHORT).show();
                 break;
             case R.id.button2:
-                MParticle.getInstance(getActivity()).setUserAttribute(editText3.getText().toString());
+                MParticle.getInstance(getActivity()).setUserTag(editText3.getText().toString());
                 Toast.makeText(v.getContext(), "User tag set.", Toast.LENGTH_SHORT).show();
                 break;
         }

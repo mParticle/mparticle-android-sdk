@@ -358,13 +358,36 @@ public class MParticle {
     }
 
     /**
+     * Log an event
+     *
+     * @param eventName the name of the event to be tracked
+     * @param eventType the type of the event to be tracked
+     * @param eventLength the duration of the event in milliseconds
+     */
+    public void logEvent(String eventName, EventType eventType, long eventLength) {
+        logEvent(eventName, eventType, null, eventLength);
+    }
+
+
+    /**
      * Log an event with data attributes
      *
      * @param eventName the name of the event to be tracked
      * @param eventType the type of the event to be tracked
-     * @param eventData a Map of data attributes
+     * @param eventInfo a Map of data attributes
      */
-    public void logEvent(String eventName, EventType eventType, Map<String, String> eventData) {
+    public void logEvent(String eventName, EventType eventType, Map<String, String> eventInfo) {
+        logEvent(eventName, eventType, eventInfo, 0);
+    }
+    /**
+     * Log an event with data attributes
+     *
+     * @param eventName the name of the event to be tracked
+     * @param eventType the type of the event to be tracked
+     * @param eventInfo a Map of data attributes
+     * @param eventLength the duration of the event in milliseconds
+     */
+    public void logEvent(String eventName, EventType eventType, Map<String, String> eventInfo, long eventLength) {
         if (mOptedOut) {
             return;
         }
@@ -378,8 +401,8 @@ public class MParticle {
         }
         ensureActiveSession();
         if (checkEventLimit()) {
-            JSONObject eventDataJSON = enforceAttributeConstraints(eventData);
-            mMessageManager.logEvent(mSessionID, mSessionStartTime, mLastEventTime, eventName, eventType, eventDataJSON);
+            JSONObject eventDataJSON = enforceAttributeConstraints(eventInfo);
+            mMessageManager.logEvent(mSessionID, mSessionStartTime, mLastEventTime, eventName, eventType, eventDataJSON, eventLength);
             if (mDebugMode)
                 if (null == eventDataJSON) {
                     debugLog("Logged event: " + eventName);
@@ -403,7 +426,7 @@ public class MParticle {
 
         ensureActiveSession();
         if (checkEventLimit()) {
-            mMessageManager.logEvent(mSessionID, mSessionStartTime, mLastEventTime, "Ecommerce", EventType.Transaction, transaction.getData());
+            mMessageManager.logEvent(mSessionID, mSessionStartTime, mLastEventTime, "Ecommerce", EventType.Transaction, transaction.getData(), 0);
             if (mDebugMode) {
                 try {
                     debugLog("Logged transaction with data: " + transaction.getData().toString(4));
@@ -637,12 +660,12 @@ public class MParticle {
     }
 
     /**
-     * Set a single user tag. The attribute will combined with any existing attributes.
+     * Set a single user tag, it will be combined with any existing tags.
      *
-     * @param key the attribute key
+     * @param tag a tag assigned to a user
      */
-    public void setUserAttribute(String key) {
-        setUserAttribute(key, null);
+    public void setUserTag(String tag) {
+        setUserAttribute(tag, null);
     }
 
     public void setUserIdentity(String id, IdentityType identityType) {
