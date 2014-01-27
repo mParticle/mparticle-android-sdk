@@ -95,6 +95,7 @@ import javax.crypto.spec.SecretKeySpec;
     public static final int UPLOAD_MESSAGES = 1;
     public static final int CLEANUP = 2;
     public static final int UPLOAD_HISTORY = 3;
+    public static final int UPDATE_CONFIG = 4;
 
     public static final String HEADER_SIGNATURE = "x-mp-signature";
 
@@ -142,6 +143,9 @@ import javax.crypto.spec.SecretKeySpec;
     public void handleMessage(Message msg) {
         super.handleMessage(msg);
         switch (msg.what) {
+            case UPDATE_CONFIG:
+                fetchConfig();
+                break;
             case UPLOAD_MESSAGES:
                 if (mConfigManager.isDebug()) {
                     Log.d(TAG, "Performing " + (msg.arg1 == 0 ? "periodic" : "manual") + " upload for " + mApiKey);
@@ -193,10 +197,11 @@ import javax.crypto.spec.SecretKeySpec;
     }
 
     private void fetchConfig() {
-        if (!isNetworkAvailable()) {
-            return;
-        }
         try {
+            if (!isNetworkAvailable()) {
+                mConfigManager.restoreFromCache();
+                return;
+            }
             HttpClient httpClient = setupHttpClient();
             HttpGet httpGet = new HttpGet(makeServiceUri("config"));
             if (mConfigManager.isCompressionEnabled()) {

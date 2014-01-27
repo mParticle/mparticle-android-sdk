@@ -197,6 +197,10 @@ public class MParticle {
     }
 
     void logStateTransition(String transitionType) {
+        if (mOptedOut){
+            return;
+        }
+
         ensureActiveSession();
         mMessageManager.logStateTransition(transitionType, mSessionID, mSessionStartTime, lastNotificationBundle);
         if (Constants.StateTransitionType.STATE_TRANS_BG.equals(transitionType)){

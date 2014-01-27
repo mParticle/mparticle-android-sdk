@@ -12,7 +12,7 @@ import org.json.JSONObject;
  * Created by sdozor on 1/16/14.
  */
 class ConfigManager {
-    private static final String CONFIG_JSON = "json";
+    public static final String CONFIG_JSON = "json";
     private static volatile ConfigManager instance;
 
     public static final String KEY_SESSION_UPLOAD_MODE = "su";
@@ -37,18 +37,12 @@ class ConfigManager {
     private int uploadMode = Constants.Status.BATCH_READY;
     private String logUnhandledExceptions = VALUE_APP_DEFINED;
 
+    private boolean loaded = false;
+
     public ConfigManager(Context context, String key, String secret) {
         mContext = context.getApplicationContext();
         mPreferences = mContext.getSharedPreferences(PREFERENCES_FILE, Context.MODE_PRIVATE);
         localPrefs = new AppConfig(mContext, key, secret);
-        try{
-            String cachedConfig = mPreferences.getString(CONFIG_JSON, "");
-            if (cachedConfig != null && cachedConfig.length() > 0){
-                updateConfig(new JSONObject(cachedConfig));
-            }
-        }catch(JSONException ex){
-
-        }
     }
 
     public synchronized void updateConfig(JSONObject responseJSON) throws JSONException {
@@ -80,8 +74,10 @@ class ConfigManager {
         } else {
             editor.commit();
         }
-
         applyConfig();
+        if (responseJSON != null){
+            loaded = true;
+        }
     }
 
     public String[] getPushKeys(){
@@ -181,5 +177,15 @@ class ConfigManager {
                 .putString(Constants.PrefKeys.PUSH_SENDER_ID, senderId)
                 .putBoolean(Constants.PrefKeys.PUSH_ENABLED, true)
                 .commit();
+    }
+
+    public void restoreFromCache() {
+        try{
+            if (!loaded){
+                updateConfig(new JSONObject(mPreferences.getString(ConfigManager.CONFIG_JSON, "")));
+            }
+        }catch(Exception e){
+
+        }
     }
 }

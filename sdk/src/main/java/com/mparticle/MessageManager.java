@@ -100,6 +100,7 @@ import java.util.UUID;
             mUploadHandler.sendEmptyMessageDelayed(UploadHandler.UPLOAD_MESSAGES, Constants.INITIAL_UPLOAD_DELAY);
             mUploadHandler.sendEmptyMessageDelayed(UploadHandler.CLEANUP, Constants.INITIAL_UPLOAD_DELAY);
         }
+        mUploadHandler.sendEmptyMessage(UploadHandler.UPDATE_CONFIG);
     }
 
     /* package-private */
