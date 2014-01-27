@@ -40,6 +40,7 @@ package com.mparticle;
         public static final String HTTP_COMMAND = "hc";
         public static final String FIRST_RUN = "fr";
         public static final String APP_STATE_TRANSITION = "ast";
+        public static final String PUSH_RECEIVED = "pm";
     }
 
     public interface MessageKey {
@@ -153,8 +154,10 @@ package com.mparticle;
         // push-notifications
         public static final String PUSH_TOKEN = "to";
         public static final String PUSH_REGISTER_FLAG = "r";
+        public static final String APP_STATE = "as";
         //state transition
         public static final String STATE_TRANSITION_TYPE = "t";
+        public static final String PAYLOAD = "pay";
     }
 
     public interface PrefKeys {

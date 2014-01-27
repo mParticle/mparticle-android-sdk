@@ -2,6 +2,7 @@ package com.mparticle;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
@@ -36,7 +37,7 @@ public class MParticle {
     private static volatile MParticle instance;
     private static SharedPreferences sPreferences;
     final ConfigManager mConfigManager;
-    private final AppStateManager mAppStateManager;
+    AppStateManager mAppStateManager;
     /* package-private */ String mSessionID;
     /* package-private */ long mSessionStartTime = 0;
     /* package-private */ long mLastEventTime = 0;
@@ -55,9 +56,12 @@ public class MParticle {
     private int mEventCount = 0;
     private String mLaunchUri;
     private boolean mAutoTrackingEnabled;
+    static Bundle lastNotificationBundle;
+    static boolean appRunning;
 
 
     /* package-private */MParticle(Context context, MessageManager messageManager, ConfigManager configManager) {
+        appRunning = true;
         mConfigManager = configManager;
         mAppContext = context.getApplicationContext();
         mApiKey = mConfigManager.getApiKey();
@@ -194,7 +198,10 @@ public class MParticle {
 
     void logStateTransition(String transitionType) {
         ensureActiveSession();
-        mMessageManager.logStateTransition(transitionType, mSessionID, mSessionStartTime);
+        mMessageManager.logStateTransition(transitionType, mSessionID, mSessionStartTime, lastNotificationBundle);
+        if (Constants.StateTransitionType.STATE_TRANS_BG.equals(transitionType)){
+            lastNotificationBundle = null;
+        }
     }
 
     /**
@@ -835,6 +842,11 @@ public class MParticle {
         mConfigManager.setSessionTimeout(sessionTimeout);
     }
 
+    void logNotification(Intent intent) {
+        lastNotificationBundle = intent.getExtras().getBundle(MessageKey.PAYLOAD);
+        ensureActiveSession();
+        mMessageManager.logNotification(mSessionID, mSessionStartTime, lastNotificationBundle, intent.getExtras().getString(MessageKey.APP_STATE));
+    }
 
 
     public enum EventType {

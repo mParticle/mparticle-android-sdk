@@ -10,6 +10,7 @@ import android.location.Location;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.BatteryManager;
+import android.os.Bundle;
 import android.os.HandlerThread;
 import android.os.Process;
 import android.util.Log;
@@ -339,15 +340,42 @@ import java.util.UUID;
         }
     }
 
-    public void logStateTransition(String stateTransInit, String sessionId, long sessionStartTime) {
+    public void logStateTransition(String stateTransInit, String sessionId, long sessionStartTime, Bundle lastNotificationBundle) {
         try {
             JSONObject message = createMessage(MessageType.APP_STATE_TRANSITION, sessionId, sessionStartTime, System.currentTimeMillis(),
                     null, null);
             message.put(MessageKey.STATE_TRANSITION_TYPE, stateTransInit);
+            if (lastNotificationBundle != null){
+                message.put(MessageKey.PAYLOAD, lastNotificationBundle.get(MessageKey.PAYLOAD));
+            }
             mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
         } catch (JSONException e) {
             Log.w(TAG, "Failed to create mParticle state transition message");
         }
+    }
+
+    public void logNotification(String sessionId, long sessionStartTime, Bundle bundle, String state) {
+        JSONObject attributes = new JSONObject();
+        for (String key : bundle.keySet()){
+            try{
+                attributes.put(key, bundle.get(key));
+            }catch(JSONException ex){
+
+            }
+        }
+        try{
+            JSONObject message = createMessage(MessageType.PUSH_RECEIVED, sessionId, sessionStartTime, System.currentTimeMillis(), "gcm", null);
+            message.put(MessageKey.PAYLOAD, attributes);
+            String regId = PushRegistrationHelper.getRegistrationId(mContext);
+            if ((regId != null) && (regId.length() > 0)) {
+                message.put(MessageKey.PUSH_TOKEN, regId);
+            }
+            message.put(MessageKey.APP_STATE, state);
+            mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
+        }catch (JSONException e) {
+
+        }
+
     }
 
     private class StatusBroadcastReceiver extends BroadcastReceiver {
