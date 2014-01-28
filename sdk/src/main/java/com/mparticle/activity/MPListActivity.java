@@ -1,6 +1,6 @@
-package com.mparticle.com.particle.activity;
+package com.mparticle.activity;
 
-import android.app.Activity;
+import android.app.ListActivity;
 import android.os.Build;
 
 import com.mparticle.MParticle;
@@ -8,7 +8,7 @@ import com.mparticle.MParticle;
 /**
  * Created by sdozor on 1/16/14.
  */
-public class MPActivity extends Activity {
+public class MPListActivity extends ListActivity {
     @Override
     protected void onStart() {
         super.onStart();
