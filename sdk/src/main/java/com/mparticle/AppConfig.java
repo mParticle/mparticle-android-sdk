@@ -17,6 +17,9 @@ public class AppConfig {
     public static final String PREFKEY_PUSH_ENABLED = "mp_enablePush";
     public static final String PREFKEY_PUSH_SENDER_ID = "mp_pushSenderId";
     public static final String PREFKEY_SANDBOX_MODE = "mp_enableSandboxMode";
+    public static final String PREFKEY_APP_LICENSE_KEY = "mp_appLicenseKey";
+    public static final String PREFKEY_LICENSING_ENABLED = "mp_enableLicenseCheck";
+
     private final Context mContext;
 
     public String mKey = null;
@@ -31,6 +34,8 @@ public class AppConfig {
     public boolean isPushEnabled;
     public String pushSenderId;
     public boolean sandboxMode;
+    public String licenseKey;
+    public boolean isLicensingEnabled;
 
     public AppConfig(Context context) {
         this(context, null, null, false);
@@ -76,6 +81,14 @@ public class AppConfig {
             }
         }
         sandboxMode = getBoolean(PREFKEY_SANDBOX_MODE, sandboxMode);
+        isLicensingEnabled = getBoolean(PREFKEY_LICENSING_ENABLED, false);
+        if (isLicensingEnabled){
+            licenseKey = getString(PREFKEY_APP_LICENSE_KEY);
+            if (licenseKey == null){
+                Log.d(Constants.LOG_TAG, String.format(mContext.getString(R.string.error_licensingmissingkey), PREFKEY_API_KEY));
+            }
+        }
+
     }
 
     private int getResourceId(String key, String type) {

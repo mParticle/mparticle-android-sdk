@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.os.Message;
 import android.provider.Settings;
 import android.telephony.TelephonyManager;
 import android.util.DisplayMetrics;
@@ -66,6 +67,7 @@ import java.util.TimeZone;
             attributes.put(MessageKey.INSTALL_REFERRER, preferences.getString(PrefKeys.INSTALL_REFERRER, null));
             attributes.put(MessageKey.BUILD_ID, MPUtility.getBuildUUID(appContext));
             attributes.put(MessageKey.APP_DEBUG_SIGNING, MPUtility.isDebug(packageManager, packageName));
+            attributes.put(MessageKey.APP_PIRATED, preferences.getBoolean(PrefKeys.PIRATED, false));
         } catch (JSONException e) {
             // ignore JSON exceptions
         }

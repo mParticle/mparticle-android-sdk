@@ -14,10 +14,16 @@ import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
 import android.os.Process;
+import android.provider.Settings;
 import android.util.Log;
 
 import com.mparticle.Constants.MessageKey;
 import com.mparticle.Constants.PrefKeys;
+import com.mparticle.google.licensing.AESObfuscator;
+import com.mparticle.google.licensing.LicenseChecker;
+import com.mparticle.google.licensing.LicenseCheckerCallback;
+import com.mparticle.google.licensing.Policy;
+import com.mparticle.google.licensing.ServerManagedPolicy;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -58,6 +64,7 @@ public class MParticle {
     private boolean mAutoTrackingEnabled;
     static Bundle lastNotificationBundle;
     static boolean appRunning;
+    private LicenseCheckerCallback clientLicensingCallback;
 
 
     /* package-private */MParticle(Context context, MessageManager messageManager, ConfigManager configManager) {
@@ -161,7 +168,11 @@ public class MParticle {
 
                    if (appConfigManager.isPushEnabled()) {
                         instance.enablePushNotifications(appConfigManager.getPushSenderId());
-                    }
+                   }
+                   if (appConfigManager.isLicensingEnabled()){
+                        instance.performLicenseCheck();
+                   }
+
 
                 }
             }
@@ -872,6 +883,57 @@ public class MParticle {
         return checkedAttributes;
     }
 
+    private static final byte[] SALT = new byte[] {
+            -46, 65, 30, -128, -103, -57, 74, 10, 51, 88, -95, -45, -43, -117, -36, 99, -11, 32, -64,
+            89
+    };
+
+    void performLicenseCheck(){
+        String deviceId = Settings.Secure.getString(mAppContext.getContentResolver(), Settings.Secure.ANDROID_ID);
+
+        MPLicenseCheckerCallback licenseCheckerCallback = new MPLicenseCheckerCallback();
+
+        LicenseChecker checker = new LicenseChecker(
+                mAppContext, new ServerManagedPolicy(mAppContext,
+                new AESObfuscator(SALT, mAppContext.getPackageName(), deviceId)),
+                mConfigManager.getLicenseKey());
+        checker.checkAccess(licenseCheckerCallback);
+    }
+
+
+    /**
+     * This method makes sure the constraints on event attributes are enforced. A JSONObject version
+     * of the attributes is return with data that exceeds the limits removed. NOTE: Non-string
+     * attributes are not converted to strings, currently.
+     *
+     * @param encodedPublicKey Base64-encoded RSA public key of your application
+     * @param licensingCallback Optional {@link com.mparticle.google.licensing.LicenseCheckerCallback} callback for licensing checking
+     * @param policy Optional {@link com.mparticle.google.licensing.Policy}, will default to {@link com.mparticle.google.licensing.ServerManagedPolicy}
+     */
+    public void performLicenseCheck(String encodedPublicKey, LicenseCheckerCallback licensingCallback, Policy policy){
+        if (encodedPublicKey == null || encodedPublicKey.length() == 0){
+            throw new IllegalArgumentException("LicenseKey null or invalid.");
+        }
+
+        if (licensingCallback == null){
+            Log.w(TAG, "No licensing callback specified, using MParticle default.");
+        }
+
+        clientLicensingCallback = licensingCallback;
+
+        if (policy == null){
+            Log.w(TAG, "No policy specified, using default ServerManagedPolicy");
+            String deviceId = Settings.Secure.getString(mAppContext.getContentResolver(), Settings.Secure.ANDROID_ID);
+            policy = new ServerManagedPolicy(mAppContext,
+                    new AESObfuscator(SALT, mAppContext.getPackageName(), deviceId));
+        }
+
+        MPLicenseCheckerCallback licenseCheckerCallback = new MPLicenseCheckerCallback();
+        LicenseChecker checker = new LicenseChecker(
+                mAppContext, policy, encodedPublicKey);
+        checker.checkAccess(licenseCheckerCallback);
+    }
+
     private void debugLog(String message) {
         if (null != mSessionID) {
             Log.d(TAG, mApiKey + ": " + mSessionID + ": " + message);
@@ -994,5 +1056,34 @@ public class MParticle {
             mMessageManager.setPushRegistrationId(mSessionID, mSessionStartTime, System.currentTimeMillis(), null, true);
         }
     };
+
+    private class MPLicenseCheckerCallback implements LicenseCheckerCallback {
+        public void allow(int policyReason) {
+            if (policyReason == Policy.LICENSED){
+                sPreferences.edit().putBoolean(PrefKeys.PIRATED, false).commit();
+            }
+            if (clientLicensingCallback != null){
+                clientLicensingCallback.allow(policyReason);
+            }
+        }
+
+        public void dontAllow(int policyReason) {
+            if (policyReason == ServerManagedPolicy.NOT_LICENSED){
+                sPreferences.edit().putBoolean(PrefKeys.PIRATED, true).commit();
+            }
+            if (clientLicensingCallback != null){
+                clientLicensingCallback.dontAllow(policyReason);
+            }
+        }
+
+        public void applicationError(int errorCode) {
+            if (errorCode == LicenseCheckerCallback.ERROR_MISSING_PERMISSION){
+                Log.w(TAG, "Licensing enabled but app is missing com.android.vending.CHECK_LICENSE permission.");
+            }
+            if (clientLicensingCallback != null){
+                clientLicensingCallback.applicationError(errorCode);
+            }
+        }
+    }
 
 }

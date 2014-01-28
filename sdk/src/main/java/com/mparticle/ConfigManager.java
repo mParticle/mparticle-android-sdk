@@ -182,4 +182,12 @@ class ConfigManager {
 
         }
     }
+
+    public String getLicenseKey() {
+        return localPrefs.licenseKey;
+    }
+
+    public boolean isLicensingEnabled() {
+        return localPrefs.licenseKey != null && localPrefs.isLicensingEnabled;
+    }
 }

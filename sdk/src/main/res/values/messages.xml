@@ -9,4 +9,5 @@
     <string name="missing_apikey">Configuration issue: Missing API key.</string>
     <string name="missing_apisecret">Configuration issue: Missing API secret</string>
     <string name="error_nosenderid">Configuration issue: Push is enabled but no sender id is specified.</string>
+    <string name="error_licensingmissingkey">Configuration issue: Licensing enabled but no license key specified.</string>
 </resources>

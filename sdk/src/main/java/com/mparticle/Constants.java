@@ -84,6 +84,7 @@ package com.mparticle;
         public static final String INSTALL_REFERRER = "ir";
         public static final String APP_VERSION_CODE = "abn";
         public static final String APP_DEBUG_SIGNING = "dbg";
+        public static final String APP_PIRATED = "pir";
         // device info
         public static final String BUILD_ID = "bid";
         public static final String BRAND = "b";
@@ -175,6 +176,7 @@ package com.mparticle;
         public static final String PROPERTY_APP_VERSION = "mp::appversion";
         public static final String PUSH_ENABLED = "mp::push_enabled";
         public static final String PUSH_SENDER_ID = "mp::push_sender_id";
+        public static final String PIRATED = "mp::pirated";
     }
 
     public interface MiscStorageKeys {
