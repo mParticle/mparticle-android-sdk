@@ -37,6 +37,8 @@ class ConfigManager {
     private String logUnhandledExceptions = VALUE_APP_DEFINED;
 
     private boolean loaded = false;
+    boolean pushVibrationEnabled = true;
+    boolean pushSoundEnabled = true;
 
     public ConfigManager(Context context, String key, String secret, boolean sandboxMode) {
         mContext = context.getApplicationContext();
@@ -189,5 +191,13 @@ class ConfigManager {
 
     public boolean isLicensingEnabled() {
         return localPrefs.licenseKey != null && localPrefs.isLicensingEnabled;
+    }
+
+    public void setPushSoundEnabled(boolean pushSoundEnabled) {
+        this.pushSoundEnabled = pushSoundEnabled;
+    }
+
+    public void setPushVibrationEnabled(boolean pushVibrationEnabled) {
+        this.pushVibrationEnabled = pushVibrationEnabled;
     }
 }

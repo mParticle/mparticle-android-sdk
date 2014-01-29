@@ -179,19 +179,26 @@ public class GcmIntentService extends IntentService {
         if (0 == applicationIcon) {
             applicationIcon = android.R.drawable.ic_dialog_alert;
         }
-
-
-        Intent launchIntent = new Intent(getApplicationContext(), GcmIntentService.class);
-        launchIntent.setAction(MPARTICLE_NOTIFICATION_OPENED);
-        launchIntent.putExtras(extras);
-
-        PendingIntent notifyIntent = PendingIntent.getService(getApplicationContext(), 0, new Intent(getApplicationContext(), GcmIntentService.class), PendingIntent.FLAG_UPDATE_CURRENT);
-        Notification notification = new Notification(applicationIcon, message, System.currentTimeMillis());
-        notification.flags |= Notification.FLAG_AUTO_CANCEL;
-        notification.setLatestEventInfo(this, title, message, notifyIntent);
-
         NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        notificationManager.notify(1, notification);
+        MParticle mMParticle = MParticle.getInstance(this);
+        if (mMParticle.customNotification != null){
+            notificationManager.notify(1, mMParticle.customNotification.setContentText(message).build());
+        }else{
+            Intent launchIntent = new Intent(getApplicationContext(), GcmIntentService.class);
+            launchIntent.setAction(MPARTICLE_NOTIFICATION_OPENED);
+            launchIntent.putExtras(extras);
+            PendingIntent notifyIntent = PendingIntent.getService(getApplicationContext(), 0, new Intent(getApplicationContext(), GcmIntentService.class), PendingIntent.FLAG_UPDATE_CURRENT);
+            Notification notification = new Notification(applicationIcon, message, System.currentTimeMillis());
+            if (mMParticle.mConfigManager.pushSoundEnabled){
+                notification.flags |= Notification.DEFAULT_SOUND;
+            }
+            if (mMParticle.mConfigManager.pushVibrationEnabled){
+                notification.flags |= Notification.DEFAULT_VIBRATE;
+            }
+            notification.flags |= Notification.FLAG_AUTO_CANCEL;
+            notification.setLatestEventInfo(this, title, message, notifyIntent);
+            notificationManager.notify(1, notification);
+        }
     }
 
 }

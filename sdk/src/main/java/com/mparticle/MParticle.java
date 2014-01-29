@@ -15,6 +15,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.Process;
 import android.provider.Settings;
+import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
 import com.mparticle.Constants.MessageKey;
@@ -65,6 +66,7 @@ public class MParticle {
     static Bundle lastNotificationBundle;
     static boolean appRunning;
     private LicenseCheckerCallback clientLicensingCallback;
+    /* package-private */ NotificationCompat.Builder customNotification;
 
 
     /* package-private */MParticle(Context context, MessageManager messageManager, ConfigManager configManager) {
@@ -819,7 +821,6 @@ public class MParticle {
     /**
      * Register the application for GCM notifications
      *
-     *
      * @param senderId the SENDER_ID for the application
      */
     public void enablePushNotifications(String senderId) {
@@ -828,7 +829,7 @@ public class MParticle {
     }
 
     /**
-     * Register the application for GCM notifications
+     * Unregister the application for GCM notifications
      *
      */
     public void disablePushNotifications() {
@@ -836,8 +837,36 @@ public class MParticle {
     }
 
     /**
-     * Unregister the device from GCM notifications
+     * Enable the default notification sound for push notifications
+     *
+     * @param enabled
      */
+    public void setNotificationSoundEnabled(boolean enabled){
+        mConfigManager.setPushSoundEnabled(enabled);
+    }
+
+    /**
+     * Enable the default notification vibration for push notifications
+     *
+     * @param enabled
+     */
+    public void setNotificationVibrationEnabled(boolean enabled){
+        mConfigManager.setPushVibrationEnabled(enabled);
+    }
+
+    /**
+     * Set a custom notification style to use for push notification. This will override
+     * the values set by the {@link #setNotificationSoundEnabled(boolean) setPushSoundEnabled}
+     * and the {@link #setNotificationVibrationEnabled(boolean) setNotificationVibrationEnabled}
+     * methods.
+     *
+     * @see <a href="http://developer.android.com/reference/android/support/v4/app/NotificationCompat.Builder.html">NotificationCompat.Builder</a>
+     * @param notification
+     */
+    public void setCustomPushNotification(NotificationCompat.Builder notification){
+        customNotification = notification;
+    }
+
     void clearPushNotificationId() {
         PushRegistrationHelper.clearPushRegistrationId(mAppContext, registrationListener);
     }
