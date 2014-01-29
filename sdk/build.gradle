@@ -29,7 +29,7 @@ android {
     }
 
     release {
-        buildConfigField "boolean", "ECHO", "false"
+        buildConfigField "boolean", "ECHO", "true"
         runProguard false
         proguardFile 'proguard.txt'
     }

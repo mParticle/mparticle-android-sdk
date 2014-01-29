@@ -16,6 +16,10 @@ import android.util.Log;
 import android.view.Display;
 import android.view.WindowManager;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -26,7 +30,10 @@ import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
@@ -282,6 +289,56 @@ class MPUtility {
         } catch (Exception localException) {
         }
         return false;
+    }
+
+    public static boolean jsonObjsAreEqual(JSONObject js1, JSONObject js2) throws JSONException {
+        if (js1 == null || js2 == null) {
+            return (js1 == js2);
+        }
+
+        List<String> l1 =  new ArrayList<String>();
+        JSONArray a1 = js1.names();
+        for (int i = 0; i < a1.length(); i++){
+            l1.add(a1.getString(i));
+        }
+
+        Collections.sort(l1);
+        List<String> l2 =  new ArrayList<String>();
+        JSONArray a2 = js2.names();
+        for (int i = 0; i < a2.length(); i++){
+            l2.add(a2.getString(i));
+        }
+        Collections.sort(l2);
+        if (!l1.equals(l2)) {
+            Log.d(Constants.LOG_TAG, "Difference detected: ECHO " + l1.toString() + " is different than: " + l2.toString());
+            return false;
+        }
+        for (String key : l1) {
+            Object val1 = js1.get(key);
+            Object val2 = js2.get(key);
+            if (val1 instanceof JSONObject) {
+                if (!(val2 instanceof JSONObject)) {
+                    Log.d(Constants.LOG_TAG, "Difference detected while inspecting key: " + key);
+                    return false;
+                }
+                if (!jsonObjsAreEqual((JSONObject)val1, (JSONObject)val2)) {
+                    Log.d(Constants.LOG_TAG, "Difference detected while inspecting key: " + key);
+                    return false;
+                }
+            }
+
+            if (val1 == null) {
+                if (val2 != null) {
+                    Log.d(Constants.LOG_TAG, "Difference detected while inspecting key: " + key);
+                    return false;
+
+                }
+            }  else if (!val1.equals(val2)) {
+                Log.d(Constants.LOG_TAG, "Difference detected while inspecting key: " + key);
+                return false;
+            }
+        }
+        return true;
     }
 
 }

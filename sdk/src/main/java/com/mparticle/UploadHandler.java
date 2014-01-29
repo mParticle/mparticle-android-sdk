@@ -499,6 +499,17 @@ import javax.crypto.spec.SecretKeySpec;
                     } else {
                         try {
                             JSONObject responseJSON = new JSONObject(response);
+                            if (responseJSON.has("echo")){
+                                try{
+                                    boolean equal = MPUtility.jsonObjsAreEqual(responseJSON.getJSONObject("echo"),new JSONObject(message) );
+                                    if (!equal){
+                                        Log.e(TAG, "Echo response did not match request!");
+                                        Log.d(TAG, responseJSON.getJSONObject("echo").toString(4));
+                                    }
+                                }catch (Exception e){
+                                    Log.d(TAG, "Exception while comparing Echo response: " + e.getMessage());
+                                }
+                            }
                             if (responseJSON.has(MessageKey.MESSAGES)) {
                                 JSONArray responseCommands = responseJSON.getJSONArray(MessageKey.MESSAGES);
                                 for (int i = 0; i < responseCommands.length(); i++) {
