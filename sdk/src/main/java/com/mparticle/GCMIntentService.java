@@ -13,9 +13,6 @@ import android.os.Bundle;
 import android.os.PowerManager;
 import android.util.Log;
 
-import com.google.android.gms.appstate.AppState;
-import com.mparticle.Constants.GCMNotificationKeys;
-
 public class GcmIntentService extends IntentService {
 
     private static final String TAG = Constants.LOG_TAG;

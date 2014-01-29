@@ -66,7 +66,6 @@ package com.mparticle;
         public static final String LONGITUDE = "lng";
         public static final String ACCURACY = "acc";
         // batch details
-        public static final String APPLICATION_KEY = "a";
         public static final String MPARTICLE_VERSION = "sdk";
         public static final String APP_INFO = "ai";
         public static final String DEVICE_INFO = "di";

@@ -353,7 +353,6 @@ import javax.crypto.spec.SecretKeySpec;
         uploadMessage.put(MessageKey.TYPE, MessageType.REQUEST_HEADER);
         uploadMessage.put(MessageKey.ID, UUID.randomUUID().toString());
         uploadMessage.put(MessageKey.TIMESTAMP, System.currentTimeMillis());
-        uploadMessage.put(MessageKey.APPLICATION_KEY, mApiKey);
         uploadMessage.put(MessageKey.MPARTICLE_VERSION, Constants.MPARTICLE_VERSION);
         if (BuildConfig.ECHO){
             uploadMessage.put("echo", true);
@@ -375,17 +374,23 @@ import javax.crypto.spec.SecretKeySpec;
         String userAttrs = mPreferences.getString(PrefKeys.USER_ATTRS + mApiKey, null);
         if (null != userAttrs) {
             uploadMessage.put(MessageKey.USER_ATTRIBUTES, new JSONObject(userAttrs));
+        }else{
+            uploadMessage.put(MessageKey.USER_ATTRIBUTES, new JSONObject());
         }
 
         String userIds = mPreferences.getString(PrefKeys.USER_IDENTITIES + mApiKey, null);
         if (null != userIds) {
             uploadMessage.put(MessageKey.USER_IDENTITIES, new JSONArray(userIds));
+        }else{
+            uploadMessage.put(MessageKey.USER_IDENTITIES, new JSONArray());
         }
 
         if (history) {
             uploadMessage.put(MessageKey.HISTORY, messagesArray);
+            uploadMessage.put(MessageKey.MESSAGES, new JSONArray());
         } else {
             uploadMessage.put(MessageKey.MESSAGES, messagesArray);
+            uploadMessage.put(MessageKey.HISTORY, new JSONArray());
         }
 
         return uploadMessage;
@@ -501,10 +506,12 @@ import javax.crypto.spec.SecretKeySpec;
                             JSONObject responseJSON = new JSONObject(response);
                             if (responseJSON.has("echo")){
                                 try{
-                                    boolean equal = MPUtility.jsonObjsAreEqual(responseJSON.getJSONObject("echo"),new JSONObject(message) );
+                                    JSONObject messageObj = new JSONObject(message);
+                                    boolean equal = MPUtility.jsonObjsAreEqual(responseJSON.getJSONObject("echo"), messageObj);
                                     if (!equal){
                                         Log.e(TAG, "Echo response did not match request!");
-                                        Log.d(TAG, responseJSON.getJSONObject("echo").toString(4));
+                                        Log.d(TAG, "Request: " + messageObj.toString(4));
+                                        Log.d(TAG, "Echo response: " + responseJSON.getJSONObject("echo").toString(4));
                                     }
                                 }catch (Exception e){
                                     Log.d(TAG, "Exception while comparing Echo response: " + e.getMessage());

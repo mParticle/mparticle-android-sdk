@@ -48,5 +48,5 @@ android.libraryVariants.all { variant ->
 }
 
 dependencies {
-    compile 'com.google.android.gms:play-services:3.2.65'
+    compile 'com.android.support:support-v4:19.0.0'
 }

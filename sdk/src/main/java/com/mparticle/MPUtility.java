@@ -329,12 +329,16 @@ class MPUtility {
 
             if (val1 == null) {
                 if (val2 != null) {
-                    Log.d(Constants.LOG_TAG, "Difference detected while inspecting key: " + key);
+                    Log.d(Constants.LOG_TAG, "Difference detected while inspecting key, value: " + key + ", " + val2);
                     return false;
 
                 }
             }  else if (!val1.equals(val2)) {
-                Log.d(Constants.LOG_TAG, "Difference detected while inspecting key: " + key);
+                if (val2 == null){
+                    Log.d(Constants.LOG_TAG, "Difference detected while inspecting value: " + val1);
+                }else{
+                    Log.d(Constants.LOG_TAG, "Difference detected while inspecting value: " + val1 + ", does not match :" + val2);
+                }
                 return false;
             }
         }
