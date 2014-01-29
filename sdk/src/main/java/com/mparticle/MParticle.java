@@ -451,6 +451,32 @@ public class MParticle {
 
     }
 
+
+    void logScreen(String screenName, Map<String, String> eventData, boolean started) {
+        if (mOptedOut) {
+            return;
+        }
+        if (null == screenName) {
+            Log.w(TAG, "screenName is required for logScreenView");
+            return;
+        }
+        if (screenName.length() > Constants.LIMIT_NAME) {
+            Log.w(TAG, "The screen name was too long. Discarding event.");
+            return;
+        }
+        ensureActiveSession();
+        if (checkEventLimit()) {
+            JSONObject eventDataJSON = enforceAttributeConstraints(eventData);
+            mMessageManager.logScreen(mSessionID, mSessionStartTime, mLastEventTime, screenName, eventDataJSON, started);
+            if (mDebugMode)
+                if (null == eventDataJSON) {
+                    debugLog("Logged screen: " + screenName);
+                } else {
+                    debugLog("Logged screen: " + screenName + " with data " + eventDataJSON);
+                }
+        }
+    }
+
     /**
      * Log a screen view event
      *
@@ -467,28 +493,7 @@ public class MParticle {
      * @param eventData  a Map of data attributes
      */
     public void logScreen(String screenName, Map<String, String> eventData) {
-        if (mOptedOut) {
-            return;
-        }
-        if (null == screenName) {
-            Log.w(TAG, "screenName is required for logScreenView");
-            return;
-        }
-        if (screenName.length() > Constants.LIMIT_NAME) {
-            Log.w(TAG, "The screen name was too long. Discarding event.");
-            return;
-        }
-        ensureActiveSession();
-        if (checkEventLimit()) {
-            JSONObject eventDataJSON = enforceAttributeConstraints(eventData);
-            mMessageManager.logScreen(mSessionID, mSessionStartTime, mLastEventTime, screenName, eventDataJSON);
-            if (mDebugMode)
-                if (null == eventDataJSON) {
-                    debugLog("Logged screen: " + screenName);
-                } else {
-                    debugLog("Logged screen: " + screenName + " with data " + eventDataJSON);
-                }
-        }
+       logScreen(screenName, eventData, true);
     }
 
     /**

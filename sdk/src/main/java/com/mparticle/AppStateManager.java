@@ -109,7 +109,7 @@ public class AppStateManager {
         mActivities++;
         Log.d(Constants.LOG_TAG, "Activity Count: " + mActivities);
         if (MParticle.getInstance(mContext).isAutoTrackingEnabled()) {
-            MParticle.getInstance(mContext).logScreen(getActivityName(activity));
+            MParticle.getInstance(mContext).logScreen(getActivityName(activity), null, true);
         }
     }
 
@@ -120,6 +120,9 @@ public class AppStateManager {
             delayedBackgroundCheckHandler.postDelayed(backgroundChecker, ACTIVITY_DELAY);
         }
         Log.d(Constants.LOG_TAG, "Activity Count: " + mActivities);
+        if (MParticle.getInstance(mContext).isAutoTrackingEnabled()) {
+            MParticle.getInstance(mContext).logScreen(getActivityName(activity), null, false);
+        }
 
     }
 

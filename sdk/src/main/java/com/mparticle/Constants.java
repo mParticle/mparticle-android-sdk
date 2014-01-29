@@ -158,6 +158,8 @@ package com.mparticle;
         //state transition
         public static final String STATE_TRANSITION_TYPE = "t";
         public static final String PAYLOAD = "pay";
+        //screen view
+        public static final String SCREEN_STARTED = "t";
     }
 
     public interface PrefKeys {

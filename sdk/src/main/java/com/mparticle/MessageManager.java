@@ -259,13 +259,14 @@ import java.util.UUID;
         }
     }
 
-    public void logScreen(String sessionId, long sessionStartTime, long time, String screenName, JSONObject attributes) {
+    public void logScreen(String sessionId, long sessionStartTime, long time, String screenName, JSONObject attributes, boolean started) {
         try {
             JSONObject message = createMessage(MessageType.SCREEN_VIEW, sessionId, sessionStartTime, time, screenName,
                     attributes);
             // NOTE: event timing is not supported (yet) but the server expects this data
             message.put(MessageKey.EVENT_START_TIME, time);
             message.put(MessageKey.EVENT_DURATION, 0);
+            message.put(MessageKey.SCREEN_STARTED, started ? "activity_started" : "activity_stopped");
             mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
         } catch (JSONException e) {
             Log.w(TAG, "Failed to create mParticle log event message");
