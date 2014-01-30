@@ -413,10 +413,6 @@ import java.util.UUID;
         }
     }
 
-    public void setDebugMode(boolean debugMode) {
-        mConfigManager.setDebug(debugMode);
-    }
-
     public void setConnectionProxy(String host, int port) {
         mUploadHandler.setConnectionProxy(host, port);
     }

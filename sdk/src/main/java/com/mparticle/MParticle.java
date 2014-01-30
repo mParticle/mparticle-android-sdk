@@ -35,9 +35,11 @@ import java.util.Map;
 import java.util.UUID;
 
 /**
- * Class to provide thread-safe access to the mParticle API. You can retrieve an instance of this class by calling {@link #getInstance(android.content.Context)}, which requires
- * configuration via {@link <a href="http://developer.android.com/guide/topics/resources/providing-resources.html">Android Resources</a>}. It's recommended to keep
- * these resources in a single xml file located within your res/values folder. The full list of configuration options is as follows:
+ * Class to provide thread-safe access to the mParticle API. In order to use this class, you must first call {@link #start(android.content.Context)}, which requires
+ * configuration via {@link <a href="http://developer.android.com/guide/topics/resources/providing-resources.html">Android Resources</a>}. You can then retrieve a reference
+ * to an instance of this class via {@link #getInstance()}
+ *
+ * It's recommended to keep configuration parameters in a single xml file located within your res/values folder. The full list of configuration options is as follows:
  * <p/>
  * <h4>Required parameters</h4>
  * <ul>
@@ -134,12 +136,28 @@ public class MParticle {
         logStateTransition(Constants.StateTransitionType.STATE_TRANS_INIT);
     }
 
+    /**
+     * Start the mParticle SDK and begin tracking a user session. This method must be called prior to {@link #getInstance()}.
+     * This method requires that your API key and secret are contained in your XML configuration.
+     *
+     * @param context Required reference to a Context object
+     */
+
     public static void start(Context context){
         if (context == null) {
             throw new IllegalArgumentException("mParticle failed to start: context is required.");
         }
         MParticle.getInstance(context, null, null, false);
     }
+
+    /**
+     * Start the mParticle SDK and begin tracking a user session.
+     *
+     * @param context Required reference to a Context object
+     * @param apiKey The API key to use for authentication with mParticle
+     * @param secret The API secret to use for authentication with mParticle
+     * @param sandboxMode
+     */
 
     public static void start(Context context, String apiKey, String secret, boolean sandboxMode){
         if (context == null) {
@@ -216,8 +234,8 @@ public class MParticle {
     }
 
     /**
-     * Initialize or return an instance of the mParticle SDK using api_key and api_secret from the
-     * mparticle.xml file.
+     * Retrieve an instance of the MParticle class. {@link #start(android.content.Context)} or {@link #start(android.content.Context, String, String, boolean)} must
+     * be called prior to this or a {@link java.lang.IllegalStateException} will be thrown.
      *
      * @return An instance of the mParticle SDK configured with your API key
      */
@@ -297,10 +315,10 @@ public class MParticle {
     /**
      * Begin tracking a new session. Ends the current session.
      */
-    public void newSession() {
+    public void beginSession() {
         if (mConfigManager.getSendOoEvents()) {
             endSession();
-            beginSession();
+            newSession();
         }
     }
 
@@ -337,7 +355,7 @@ public class MParticle {
         //    checkSessionTimeout();
         mLastEventTime = System.currentTimeMillis();
         if (0 == mSessionStartTime) {
-            beginSession();
+            newSession();
         }
     }
 
@@ -361,7 +379,8 @@ public class MParticle {
     /**
      * Creates a new session and generates the start-session message.
      */
-    private void beginSession() {
+    private void newSession() {
+        endSession();
         mLastEventTime = mSessionStartTime = System.currentTimeMillis();
         mSessionID = UUID.randomUUID().toString();
         mEventCount = 0;
@@ -790,8 +809,11 @@ public class MParticle {
      * @param debugMode
      */
     public void setDebugMode(boolean debugMode) {
-        mDebugMode = debugMode;
-        mMessageManager.setDebugMode(debugMode);
+        mConfigManager.setDebug(debugMode);
+    }
+
+    public boolean getDebugMode() {
+        return mConfigManager.isDebug();
     }
 
     /**
@@ -875,8 +897,8 @@ public class MParticle {
 
     /**
      * Set a custom notification style to use for push notification. This will override
-     * the values set by the {@link #setNotificationSoundEnabled(boolean) setPushSoundEnabled}
-     * and the {@link #setNotificationVibrationEnabled(boolean) setNotificationVibrationEnabled}
+     * the values set by the {@link #setNotificationSoundEnabled(boolean)}
+     * and the {@link #setNotificationVibrationEnabled(boolean)}
      * methods.
      *
      * @param notification
@@ -949,10 +971,10 @@ public class MParticle {
      * attributes are not converted to strings, currently.
      *
      * @param encodedPublicKey  Base64-encoded RSA public key of your application
-     * @param licensingCallback Optional {@link com.mparticle.com.google.licensing.LicenseCheckerCallback} callback for licensing checking
-     * @param policy            Optional {@link com.mparticle.com.google.licensing.Policy}, will default to {@link com.mparticle.com.google.licensing.ServerManagedPolicy}
+     * @param policy            <b>Optional</b> {@link com.mparticle.com.google.licensing.Policy}, will default to {@link com.mparticle.com.google.licensing.ServerManagedPolicy}
+     * @param licensingCallback <b>Optional</b> {@link com.mparticle.com.google.licensing.LicenseCheckerCallback} callback for licensing checking
      */
-    public void performLicenseCheck(String encodedPublicKey, LicenseCheckerCallback licensingCallback, Policy policy) {
+    public void performLicenseCheck(String encodedPublicKey, Policy policy, LicenseCheckerCallback licensingCallback) {
         if (encodedPublicKey == null || encodedPublicKey.length() == 0) {
             throw new IllegalArgumentException("LicenseKey null or invalid.");
         }
