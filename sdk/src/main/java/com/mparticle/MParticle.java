@@ -156,7 +156,7 @@ public class MParticle {
      * @param context Required reference to a Context object
      * @param apiKey The API key to use for authentication with mParticle
      * @param secret The API secret to use for authentication with mParticle
-     * @param sandboxMode
+     * @param sandboxMode Enable/disable sandbox mode
      */
 
     public static void start(Context context, String apiKey, String secret, boolean sandboxMode){
@@ -286,9 +286,12 @@ public class MParticle {
     }
 
     /**
-     * Starts tracking a user session. If a session is already active, it will be resumed.
-     * <p/>
-     * This method should be called from an Activity's onStart() method.
+     * Track that an Activity has started. Should only be called within the onStart method of your Activities,
+     * and is only necessary for pre-API level 14 devices. Not necessary to use if your Activity extends an mParticle
+     * Activity implementation.
+     *
+     * @see com.mparticle.activity.MPActivity
+     * @see com.mparticle.activity.MPListActivity
      */
     public void activityStarted(Activity activity) {
         if (mConfigManager.getSendOoEvents()) {
@@ -298,12 +301,13 @@ public class MParticle {
     }
 
     /**
-     * Stop tracking a user session. If the session is restarted before the session timeout it will
-     * be resumed.
-     * <p/>
-     * This method should be called from an Activity's onStop() method.
-     * <p/>
-     * To explicitly end a session use the endSession() method.
+     * Track that an Activity has stopped. Should only be called within the onStop method of your Activities,
+     * and is only necessary for pre-API level 14 devices. Not necessary to use if your Activity extends an mParticle
+     * Activity implementation.
+     *
+     * @see com.mparticle.activity.MPActivity
+     * @see com.mparticle.activity.MPListActivity
+     *
      */
     public void activityStopped(Activity activity) {
         if (mConfigManager.getSendOoEvents()) {
@@ -313,7 +317,7 @@ public class MParticle {
     }
 
     /**
-     * Begin tracking a new session. Ends the current session.
+     * Explicitly begin tracking a new session. Usually not necessary unless {@link #endSession()} is also used.
      */
     public void beginSession() {
         if (mConfigManager.getSendOoEvents()) {
@@ -323,7 +327,7 @@ public class MParticle {
     }
 
     /**
-     * Explicitly terminates the user session.
+     * Explicitly terminate the current user session.
      */
     public void endSession() {
         if (mConfigManager.getSendOoEvents()) {
@@ -332,11 +336,6 @@ public class MParticle {
         }
     }
 
-    /**
-     * Explicitly end the session at the given time and generate the end-session message
-     *
-     * @param sessionEndTime
-     */
     private void endSession(long sessionEndTime) {
         if (mDebugMode)
             debugLog("Ended session");
@@ -393,14 +392,15 @@ public class MParticle {
     }
 
     /**
-     * Upload queued messages to the mParticle server.
+     * Force upload all queued messages to the mParticle server.
      */
     public void upload() {
         mMessageManager.doUpload();
     }
 
     /**
-     * Manually set the install referrer
+     * Manually set the install referrer. This will replace any install referrer that was
+     * automatically retrieved upon installation from Google Play.
      */
     public void setInstallReferrer(String referrer) {
         sPreferences.edit().putString(PrefKeys.INSTALL_REFERRER, referrer).commit();
@@ -409,9 +409,9 @@ public class MParticle {
     }
 
     /**
-     * Log an event
+     * Logs an event
      *
-     * @param eventName the name of the event to be tracked
+     * @param eventName the name of the event to be tracked (required not null)
      * @param eventType the type of the event to be tracked
      */
     public void logEvent(String eventName, EventType eventType) {
@@ -419,9 +419,9 @@ public class MParticle {
     }
 
     /**
-     * Log an event
+     * Logs an event
      *
-     * @param eventName   the name of the event to be tracked
+     * @param eventName   the name of the event to be tracked  (required not null)
      * @param eventType   the type of the event to be tracked
      * @param eventLength the duration of the event in milliseconds
      */
@@ -432,7 +432,7 @@ public class MParticle {
     /**
      * Log an event with data attributes
      *
-     * @param eventName the name of the event to be tracked
+     * @param eventName the name of the event to be tracked  (required not null)
      * @param eventType the type of the event to be tracked
      * @param eventInfo a Map of data attributes
      */
@@ -443,9 +443,9 @@ public class MParticle {
     /**
      * Log an event with data attributes
      *
-     * @param eventName   the name of the event to be tracked
+     * @param eventName   the name of the event to be tracked  (required not null)
      * @param eventType   the type of the event to be tracked
-     * @param eventInfo   a Map of data attributes
+     * @param eventInfo   a Map of data attributes to associate with the event
      * @param eventLength the duration of the event in milliseconds
      */
     public void logEvent(String eventName, EventType eventType, Map<String, String> eventInfo, long eventLength) {
@@ -472,6 +472,13 @@ public class MParticle {
         }
     }
 
+    /**
+     * Logs an e-commerce transaction event
+     *
+     * @see com.mparticle.MPTransaction.Builder
+     *
+     * @param transaction (required not null)
+     */
     public void logTransaction(MPTransaction transaction) {
         if (mConfigManager.getSendOoEvents()) {
             if (transaction == null) {
@@ -521,7 +528,7 @@ public class MParticle {
     }
 
     /**
-     * Log a screen view event
+     * Logs a screen view event
      *
      * @param screenName the name of the screen to be tracked
      */
@@ -530,17 +537,17 @@ public class MParticle {
     }
 
     /**
-     * Log a screen view event with data attributes
+     * Logs a screen view event
      *
      * @param screenName the name of the screen to be tracked
-     * @param eventData  a Map of data attributes
+     * @param eventData  a Map of data attributes to associate with this screen view
      */
     public void logScreen(String screenName, Map<String, String> eventData) {
         logScreen(screenName, eventData, true);
     }
 
     /**
-     * Log an error event with just a Message
+     * Logs an error event
      *
      * @param message the name of the error event to be tracked
      */
@@ -549,10 +556,10 @@ public class MParticle {
     }
 
     /**
-     * Log an error event with a Message, Exception, and any additional data
+     * Logs an error event
      *
      * @param message   the name of the error event to be tracked
-     * @param eventData a Map of data attributes
+     * @param eventData a Map of data attributes to associate with this error
      */
     public void logError(String message, Map<String, String> eventData) {
         if (mConfigManager.getSendOoEvents()) {
@@ -573,7 +580,7 @@ public class MParticle {
     }
 
     /**
-     * Log an error event with just an Exception
+     * Logs an Exception
      *
      * @param exception an Exception
      */
@@ -582,7 +589,7 @@ public class MParticle {
     }
 
     /**
-     * Log an error event with an Exception and any additional data
+     * Logs an Exception
      *
      * @param exception an Exception
      * @param eventData a Map of data attributes
@@ -592,7 +599,7 @@ public class MParticle {
     }
 
     /**
-     * Log an error event with a Message, Exception, and any additional data
+     * Logs an Exception
      *
      * @param exception an Exception
      * @param eventData a Map of data attributes
@@ -629,7 +636,7 @@ public class MParticle {
 
     /**
      * Enables location tracking given a provider and update frequency criteria. The provider must
-     * be available and the correct permissions must have been requested during installation.
+     * be available and the correct permissions must have been requested within your application's manifest XML file.
      *
      * @param provider    the provider key
      * @param minTime     the minimum time (in milliseconds) to trigger an update
@@ -678,7 +685,7 @@ public class MParticle {
     }
 
     /**
-     * Set a single session attribute. The attribute will combined with any existing attributes.
+     * Set a single <i>session</i> attribute. The attribute will combined with any existing session attributes.
      *
      * @param key   the attribute key
      * @param value the attribute value
@@ -695,7 +702,7 @@ public class MParticle {
     }
 
     /**
-     * Set a single user attribute. The attribute will combined with any existing attributes.
+     * Set a single <i>user</i> attribute. The attribute will combined with any existing user attributes.
      *
      * @param key   the attribute key
      * @param value the attribute value
@@ -722,6 +729,14 @@ public class MParticle {
     public void setUserTag(String tag) {
         setUserAttribute(tag, null);
     }
+
+    /**
+     * Set the current user's identity
+     *
+     *
+     * @param id
+     * @param identityType
+     */
 
     public void setUserIdentity(String id, IdentityType identityType) {
         if (mConfigManager.getSendOoEvents()) {
@@ -811,6 +826,12 @@ public class MParticle {
         mConfigManager.setDebug(debugMode);
     }
 
+
+    /**
+     * Get the current debug mode status
+     *
+     * @return If debug mode is enabled or disabled
+     */
     public boolean getDebugMode() {
         return mConfigManager.isDebug();
     }
@@ -965,9 +986,10 @@ public class MParticle {
     }
 
     /**
-     * This method makes sure the constraints on event attributes are enforced. A JSONObject version
-     * of the attributes is return with data that exceeds the limits removed. NOTE: Non-string
-     * attributes are not converted to strings, currently.
+     * Performs a license check to ensure that the application
+     * was downloaded and/or purchased from Google Play and not "pirated" or "side-loaded".
+     *
+     * Optionally use the licensingCallback to allow or disallow access to features of your application.
      *
      * @param encodedPublicKey  Base64-encoded RSA public key of your application
      * @param policy            <b>Optional</b> {@link com.mparticle.com.google.licensing.Policy}, will default to {@link com.mparticle.com.google.licensing.ServerManagedPolicy}
@@ -1005,21 +1027,31 @@ public class MParticle {
         }
     }
 
+    /**
+     * Retrieves the current setting of automatic screen tracking.
+     *
+     * @return The current setting of automatic screen tracking.
+     */
+
     public boolean isAutoTrackingEnabled() {
         return mConfigManager.isAutoTrackingEnabled();
     }
 
-    public long getSessionTimeout() {
+    /**
+     * Retrieves the current session timeout setting in seconds
+     *
+     * @return The current session timeout setting in seconds
+     */
+    public int getSessionTimeout() {
         return mConfigManager.getSessionTimeout();
     }
 
     /**
      * Set the user session timeout interval.
      * <p/>
-     * A session is ended when no events (logged events or start/stop events) has occurred within
-     * the session timeout interval.
+     * A session has ended once the application has been in the background for more than this timeout
      *
-     * @param sessionTimeout
+     * @param sessionTimeout Session timeout in seconds
      */
     public void setSessionTimeout(int sessionTimeout) {
         mConfigManager.setSessionTimeout(sessionTimeout);
@@ -1034,6 +1066,13 @@ public class MParticle {
         }
     }
 
+    /**
+     * Event type to use when logging events.
+     *
+     * @see #logEvent(String, com.mparticle.MParticle.EventType)
+     *
+     */
+
     public enum EventType {
         Unknown, Navigation, Location, Search, Transaction, UserContent, UserPreference, Social, Other;
 
@@ -1041,6 +1080,13 @@ public class MParticle {
             return name();
         }
     }
+
+    /**
+     * Identity type to use when setting the user identity
+     *
+     * @see #setUserIdentity(String, com.mparticle.MParticle.IdentityType)
+     *
+     */
 
     public enum IdentityType {
         Other(0),
@@ -1075,7 +1121,7 @@ public class MParticle {
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
             if (!mParticle.checkSessionTimeout()) {
-                sendEmptyMessageDelayed(0, mParticle.getSessionTimeout());
+                sendEmptyMessageDelayed(0, mParticle.getSessionTimeout() * 1000);
             }
         }
     }

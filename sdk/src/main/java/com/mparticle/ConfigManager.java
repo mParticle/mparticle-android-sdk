@@ -155,8 +155,8 @@ class ConfigManager {
         localPrefs.debugUploadInterval = uploadInterval;
     }
 
-    public long getSessionTimeout() {
-        return 1000 * localPrefs.sessionTimeout;
+    public int getSessionTimeout() {
+        return localPrefs.sessionTimeout;
     }
 
     public void setSessionTimeout(int sessionTimeout) {
