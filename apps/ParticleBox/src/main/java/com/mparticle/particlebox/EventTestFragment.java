@@ -158,13 +158,13 @@ public class EventTestFragment extends Fragment implements View.OnClickListener 
         String toastText = "Message logged.";
         switch (v.getId()) {
             case R.id.button:
-                MParticle.getInstance(v.getContext()).logEvent(viewEditText.getText().toString(), (MParticle.EventType) spinner.getSelectedItem());
+                MParticle.getInstance().logEvent(viewEditText.getText().toString(), (MParticle.EventType) spinner.getSelectedItem());
                 break;
             case R.id.button2:
-                MParticle.getInstance(v.getContext()).logScreen(screenEditText.getText().toString());
+                MParticle.getInstance().logScreen(screenEditText.getText().toString());
                 break;
             case R.id.button3:
-                MParticle.getInstance(v.getContext()).logError(errorEditText.getText().toString());
+                MParticle.getInstance().logError(errorEditText.getText().toString());
                 break;
             case R.id.button4:
                 toastText = "Crashing...";

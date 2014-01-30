@@ -93,9 +93,9 @@ class ConfigManager {
 
     private void applyConfig() {
         if (getLogUnhandledExceptions()) {
-            MParticle.getInstance(mContext).enableUncaughtExceptionLogging();
+            MParticle.getInstance().enableUncaughtExceptionLogging();
         } else {
-            MParticle.getInstance(mContext).disableUncaughtExceptionLogging();
+            MParticle.getInstance().disableUncaughtExceptionLogging();
         }
     }
 

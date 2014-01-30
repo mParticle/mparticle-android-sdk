@@ -81,7 +81,7 @@
         </activity>
 
         <receiver
-            android:name="com.mparticle.GcmBroadcastReceiver"
+            android:name="com.mparticle.MPReceiver"
             android:permission="com.google.android.c2dm.permission.SEND" >
             <intent-filter>
                 <action android:name="com.google.android.c2dm.intent.REGISTRATION" />
@@ -91,7 +91,7 @@
             </intent-filter>
         </receiver>
 
-        <service android:name="com.mparticle.GcmIntentService" />
+        <service android:name="com.mparticle.MPService" />
 
         <receiver
             android:name="com.mparticle.InstallReferrerTracker"

@@ -66,8 +66,8 @@ import org.json.JSONObject;
                         dbUpdateSessionEndTime(db, getMessageSessionId(message), message.getLong(MessageKey.TIMESTAMP), 0);
                     }
 
-                    if (MParticle.getInstance(context).mConfigManager.getUploadMode() == Constants.Status.READY){
-                        MParticle.getInstance(context).upload();
+                    if (MParticle.getInstance().mConfigManager.getUploadMode() == Constants.Status.READY){
+                        MParticle.getInstance().upload();
                     }
 
                 } catch (SQLiteException e) {

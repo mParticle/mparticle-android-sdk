@@ -39,21 +39,20 @@ public class ParticleActivity extends ActionBarActivity
         mNavigationDrawerFragment.setUp(
                 R.id.navigation_drawer,
                 (DrawerLayout) findViewById(R.id.drawer_layout));
-
-        MParticle.getInstance(this).setDebugMode(true);
+        MParticle.start(this);
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-        MParticle.getInstance(this).activityStarted(this);
+        MParticle.getInstance().activityStarted(this);
 
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        MParticle.getInstance(this).activityStopped(this);
+        MParticle.getInstance().activityStopped(this);
     }
 
     @Override

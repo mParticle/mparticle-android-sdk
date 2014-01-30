@@ -13,16 +13,16 @@ import android.os.Bundle;
 import android.os.PowerManager;
 import android.util.Log;
 
-public class GcmIntentService extends IntentService {
+public class MPService extends IntentService {
 
     private static final String TAG = Constants.LOG_TAG;
     private static final String MPARTICLE_NOTIFICATION_OPENED = "com.mparticle.notification_opened";
 
     private static PowerManager.WakeLock sWakeLock;
-    private static final Object LOCK = GcmIntentService.class;
+    private static final Object LOCK = MPService.class;
 
-    public GcmIntentService() {
-        super("com.mparticle.GcmIntentService");
+    public MPService() {
+        super("com.mparticle.MPService");
     }
 
     static void runIntentInService(Context context, Intent intent) {
@@ -33,14 +33,14 @@ public class GcmIntentService extends IntentService {
             }
         }
         sWakeLock.acquire();
-        intent.setClass(context, GcmIntentService.class);
-        Log.i("GcmIntentService", "Running intent");
+        intent.setClass(context, MPService.class);
+        Log.i("MPService", "Running intent");
         context.startService(intent);
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.i("GcmIntentService", "onStartCommand");
+        Log.i("MPService", "onStartCommand");
         return super.onStartCommand(intent, flags, startId);
     }
 
@@ -48,7 +48,7 @@ public class GcmIntentService extends IntentService {
     public final void onHandleIntent(Intent intent) {
         try {
             String action = intent.getAction();
-            Log.i("GcmIntentService", "Handling action: " + action);
+            Log.i("MPService", "Handling action: " + action);
             if (action.equals("com.google.android.c2dm.intent.REGISTRATION")) {
                 handleRegistration(intent);
             } else if (action.equals("com.google.android.c2dm.intent.RECEIVE")) {
@@ -71,7 +71,7 @@ public class GcmIntentService extends IntentService {
     private void handleNotificationClick(Intent intent) {
         try {
             MParticle.lastNotificationBundle = intent.getExtras().getBundle(Constants.MessageKey.PAYLOAD);
-            MParticle mMParticle = MParticle.getInstance(this);
+            MParticle mMParticle = MParticle.getInstance();
             mMParticle.logNotification(intent);
         } catch (Throwable t) {
             // failure to instantiate mParticle likely means that the
@@ -91,7 +91,7 @@ public class GcmIntentService extends IntentService {
 
     private void handleRegistration(Intent intent) {
         try {
-            MParticle mMParticle = MParticle.getInstance(this);
+            MParticle mMParticle = MParticle.getInstance();
             String registrationId = intent.getStringExtra("registration_id");
             String unregistered = intent.getStringExtra("unregistered");
             String error = intent.getStringExtra("error");
@@ -124,7 +124,7 @@ public class GcmIntentService extends IntentService {
                 newExtras.putString(Constants.MessageKey.APP_STATE, AppStateManager.APP_STATE_NOTRUNNING);
             }
 
-            MParticle mMParticle = MParticle.getInstance(this);
+            MParticle mMParticle = MParticle.getInstance();
 
             if (!newExtras.containsKey(Constants.MessageKey.APP_STATE)){
                 if (mMParticle.mAppStateManager.isBackgrounded()){
@@ -180,14 +180,14 @@ public class GcmIntentService extends IntentService {
             applicationIcon = android.R.drawable.ic_dialog_alert;
         }
         NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        MParticle mMParticle = MParticle.getInstance(this);
+        MParticle mMParticle = MParticle.getInstance();
         if (mMParticle.customNotification != null){
             notificationManager.notify(1, mMParticle.customNotification.setContentText(message).build());
         }else{
-            Intent launchIntent = new Intent(getApplicationContext(), GcmIntentService.class);
+            Intent launchIntent = new Intent(getApplicationContext(), MPService.class);
             launchIntent.setAction(MPARTICLE_NOTIFICATION_OPENED);
             launchIntent.putExtras(extras);
-            PendingIntent notifyIntent = PendingIntent.getService(getApplicationContext(), 0, new Intent(getApplicationContext(), GcmIntentService.class), PendingIntent.FLAG_UPDATE_CURRENT);
+            PendingIntent notifyIntent = PendingIntent.getService(getApplicationContext(), 0, new Intent(getApplicationContext(), MPService.class), PendingIntent.FLAG_UPDATE_CURRENT);
             Notification notification = new Notification(applicationIcon, message, System.currentTimeMillis());
             if (mMParticle.mConfigManager.pushSoundEnabled){
                 notification.flags |= Notification.DEFAULT_SOUND;

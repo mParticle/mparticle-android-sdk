@@ -268,7 +268,7 @@ import javax.crypto.spec.SecretKeySpec;
             String[] selectionArgs;
             if (history) {
                 selection = SQL_HISTORY_MESSAGES;
-                selectionArgs = new String[]{mApiKey, Integer.toString(Status.READY), MParticle.getInstance(null).mSessionID};
+                selectionArgs = new String[]{mApiKey, Integer.toString(Status.READY), MParticle.getInstance().mSessionID};
             } else {
                 selection = SQL_UPLOADABLE_MESSAGES;
                 selectionArgs = new String[]{mApiKey, Integer.toString(Status.READY)};

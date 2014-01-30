@@ -26,7 +26,7 @@ class AppStateManager {
         @Override
         public void run() {
             if (isBackgrounded()) {
-                MParticle.getInstance(mContext).logStateTransition(Constants.StateTransitionType.STATE_TRANS_BG);
+                MParticle.getInstance().logStateTransition(Constants.StateTransitionType.STATE_TRANS_BG);
                 Log.d(Constants.LOG_TAG, "APP BACKGROUNDED");
             }
         }
@@ -103,13 +103,13 @@ class AppStateManager {
 
     void recordActivityStarted(Activity activity){
         if (isBackgrounded() && mLastStoppedTime > 0) {
-            MParticle.getInstance(mContext).logStateTransition(Constants.StateTransitionType.STATE_TRANS_FORE);
+            MParticle.getInstance().logStateTransition(Constants.StateTransitionType.STATE_TRANS_FORE);
             Log.d(Constants.LOG_TAG, "APP FOREGROUNDED");
         }
         mActivities++;
         Log.d(Constants.LOG_TAG, "Activity Count: " + mActivities);
-        if (MParticle.getInstance(mContext).isAutoTrackingEnabled()) {
-            MParticle.getInstance(mContext).logScreen(getActivityName(activity), null, true);
+        if (MParticle.getInstance().isAutoTrackingEnabled()) {
+            MParticle.getInstance().logScreen(getActivityName(activity), null, true);
         }
     }
 
@@ -120,8 +120,8 @@ class AppStateManager {
             delayedBackgroundCheckHandler.postDelayed(backgroundChecker, ACTIVITY_DELAY);
         }
         Log.d(Constants.LOG_TAG, "Activity Count: " + mActivities);
-        if (MParticle.getInstance(mContext).isAutoTrackingEnabled()) {
-            MParticle.getInstance(mContext).logScreen(getActivityName(activity), null, false);
+        if (MParticle.getInstance().isAutoTrackingEnabled()) {
+            MParticle.getInstance().logScreen(getActivityName(activity), null, false);
         }
 
     }

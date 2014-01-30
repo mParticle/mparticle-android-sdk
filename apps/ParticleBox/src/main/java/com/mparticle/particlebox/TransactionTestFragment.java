@@ -69,7 +69,7 @@ public class TransactionTestFragment extends Fragment implements View.OnClickLis
                 .transactionId(transactionId.getText().toString())
                 .affiliation(transactionAffiliation.getText().toString())
                 .build();
-        MParticle.getInstance(v.getContext()).logTransaction(transaction);
+        MParticle.getInstance().logTransaction(transaction);
 
         Toast.makeText(v.getContext(), "Transaction logged.", Toast.LENGTH_SHORT).show();
 

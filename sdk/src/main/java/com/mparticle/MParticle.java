@@ -134,20 +134,30 @@ public class MParticle {
         logStateTransition(Constants.StateTransitionType.STATE_TRANS_INIT);
     }
 
-    /**
-     * Initialize or return an instance of the mParticle SDK
-     *
-     * @param context the Activity that is creating the instance
-     * @param apiKey  the API key for your account
-     * @param secret  the API secret for your account
-     * @return An instance of the mParticle SDK configured with your API key
-     */
-    public static MParticle getInstance(Context context, String apiKey, String secret) {
-        return getInstance(context, apiKey, secret, false);
+    public static void start(Context context){
+        if (context == null) {
+            throw new IllegalArgumentException("mParticle failed to start: context is required.");
+        }
+        MParticle.getInstance(context, null, null, false);
+    }
+
+    public static void start(Context context, String apiKey, String secret, boolean sandboxMode){
+        if (context == null) {
+            throw new IllegalArgumentException("mParticle failed to start: context is required.");
+        }
+        if (apiKey == null) {
+            throw new IllegalArgumentException("mParticle failed to start: apiKey is required.");
+        }
+        if (secret == null) {
+            throw new IllegalArgumentException("mParticle failed to start: secret is required.");
+        }
+        MParticle.getInstance(context, apiKey, secret, sandboxMode);
     }
 
     /**
-     * Initialize or return an instance of the mParticle SDK
+     * Initialize or return a thread-safe instance of the mParticle SDK, specifying the API credentials to use. If this
+     * or any other {@link #getInstance()} has already been called in the application's lifecycle, the
+     * API credentials will be ignored and the current instance will be returned.
      *
      * @param context     the Activity that is creating the instance
      * @param apiKey      the API key for your account
@@ -155,14 +165,10 @@ public class MParticle {
      * @param sandboxMode set the SDK in sandbox mode, xml configuration will override this value
      * @return An instance of the mParticle SDK configured with your API key
      */
-    public static MParticle getInstance(Context context, String apiKey, String secret, boolean sandboxMode) {
+    private static MParticle getInstance(Context context, String apiKey, String secret, boolean sandboxMode) {
         if (instance == null) {
             synchronized (MParticle.class) {
                 if (instance == null) {
-                    if (null == context) {
-                        throw new IllegalArgumentException("Context is required");
-                    }
-
                     if (PackageManager.PERMISSION_DENIED == context
                             .checkCallingOrSelfPermission(android.Manifest.permission.INTERNET)) {
                         throw new IllegalArgumentException("mParticle requires android.permission.INTERNET permission");
@@ -213,11 +219,13 @@ public class MParticle {
      * Initialize or return an instance of the mParticle SDK using api_key and api_secret from the
      * mparticle.xml file.
      *
-     * @param context the Activity that is creating the instance
      * @return An instance of the mParticle SDK configured with your API key
      */
-    public static MParticle getInstance(Context context) {
-        return getInstance(context, null, null, false);
+    public static MParticle getInstance() {
+        if (instance == null){
+            throw new IllegalStateException("Failed to get MParticle instance, getInstance() called prior to start().");
+        }
+        return getInstance(null, null, null, false);
     }
 
     /* package-private */

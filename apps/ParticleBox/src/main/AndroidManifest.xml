@@ -42,7 +42,7 @@
 
         <!-- BEGIN PUSH REQUIREMENTS -->
         <receiver
-            android:name="com.mparticle.GcmBroadcastReceiver"
+            android:name="com.mparticle.MPReceiver"
             android:permission="com.google.android.c2dm.permission.SEND" >
             <intent-filter>
                 <action android:name="com.google.android.c2dm.intent.RECEIVE" />
@@ -52,7 +52,7 @@
                 <category android:name="com.mparticle.particlebox" />
             </intent-filter>
         </receiver>
-        <service android:name="com.mparticle.GcmIntentService" />
+        <service android:name="com.mparticle.MPService" />
         <!-- END PUSH REQUIREMENTS -->
 
     </application>

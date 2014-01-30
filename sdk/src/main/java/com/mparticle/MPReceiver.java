@@ -1,16 +1,14 @@
 package com.mparticle;
 
+import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.util.Log;
 
-import com.mparticle.Constants.PrefKeys;
+public class MPReceiver extends BroadcastReceiver {
 
-public class InstallReferrerTracker extends BroadcastReceiver {
-
-    public InstallReferrerTracker() {
+    public MPReceiver() {
     }
 
     @Override
@@ -18,8 +16,11 @@ public class InstallReferrerTracker extends BroadcastReceiver {
         if ("com.android.vending.INSTALL_REFERRER".equals(intent.getAction())) {
             String referrer = intent.getStringExtra("referrer");
             SharedPreferences preferences = context.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
-            preferences.edit().putString(PrefKeys.INSTALL_REFERRER, referrer).commit();
+            preferences.edit().putString(Constants.PrefKeys.INSTALL_REFERRER, referrer).commit();
+        }else{
+            MParticle.start(context);
+            MPService.runIntentInService(context, intent);
         }
+        setResult(Activity.RESULT_OK, null, null);
     }
-
 }

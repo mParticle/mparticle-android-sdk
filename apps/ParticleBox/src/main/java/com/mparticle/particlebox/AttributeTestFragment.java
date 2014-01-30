@@ -91,11 +91,11 @@ public class AttributeTestFragment extends Fragment implements View.OnClickListe
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.button:
-                MParticle.getInstance(getActivity()).setUserAttribute(editText1.getText().toString(), editText2.getText().toString());
+                MParticle.getInstance().setUserAttribute(editText1.getText().toString(), editText2.getText().toString());
                 Toast.makeText(v.getContext(), "User attribute set.", Toast.LENGTH_SHORT).show();
                 break;
             case R.id.button2:
-                MParticle.getInstance(getActivity()).setUserTag(editText3.getText().toString());
+                MParticle.getInstance().setUserTag(editText3.getText().toString());
                 Toast.makeText(v.getContext(), "User tag set.", Toast.LENGTH_SHORT).show();
                 break;
         }
