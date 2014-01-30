@@ -19,27 +19,34 @@ class AppConfig {
     public static final String PREFKEY_SANDBOX_MODE = "mp_enableSandboxMode";
     public static final String PREFKEY_APP_LICENSE_KEY = "mp_appLicenseKey";
     public static final String PREFKEY_LICENSING_ENABLED = "mp_enableLicenseCheck";
+    private static final String PREFKEY_AUTOTRACKING = "mp_enableAutoTracking";
+
+    public static final int DEFAULT_SESSION_TIMEOUT = 60;
+    public static final int DEFAULT_UPLOAD_INTERVAL = 600;
+    public static final int DEFAULT_DEBUG_UPLOAD_INTERVAL = 10;
+    public static final boolean DEFAULT_ENABLE_PUSH = false;
+    public static final boolean DEFAULT_REPORT_UNCAUGHT_EXCEPTIONS = false;
+    public static final boolean DEFAULT_SANDBOX_MODE = false;
+    public static final boolean DEFAULT_ENABLE_DEBUG_MODE = false;
+    public static final boolean DEFAULT_ENABLE_LICENSING = false;
+    public static final boolean DEFAULT_ENABLE_AUTO_TRACKING = false;
 
     private final Context mContext;
 
     public String mKey = null;
     public String mSecret = null;
 
-    public boolean unhandledExceptions;
-    public boolean reportUncaughtExceptions = false;
-    public boolean debug = false;
-    public int sessionTimeout = 120;
-    public int debugUploadInterval = 10;
-    public int uploadInterval = 60;
+    public boolean reportUncaughtExceptions;
+    public boolean debug;
+    public int sessionTimeout;
+    public int debugUploadInterval;
+    public int uploadInterval;
     public boolean isPushEnabled;
     public String pushSenderId;
     public boolean sandboxMode;
     public String licenseKey;
     public boolean isLicensingEnabled;
-
-    public AppConfig(Context context) {
-        this(context, null, null, false);
-    }
+    public boolean autoTrackingEnabled;
 
     public AppConfig(Context context, String key, String secret, boolean sandboxMode) {
         this.sandboxMode = sandboxMode;
@@ -68,26 +75,27 @@ class AppConfig {
     }
 
     private void parseLocalSettings() {
-        debug = getBoolean(PREFKEY_DBG_ENABLED, false);
-        reportUncaughtExceptions = getBoolean(PREFKEY_EXCEPTIONS, false);
-        sessionTimeout = getInteger(PREFKEY_SESSION_TIMEOUT, 120);
-        debugUploadInterval = getInteger(PREFKEY_DBG_UPLOAD_INTERVAL, 10);
-        uploadInterval = getInteger(PREFKEY_PROD_UPLOAD_INTERVAL, 60);
-        isPushEnabled = getBoolean(PREFKEY_PUSH_ENABLED, false);
+        debug = getBoolean(PREFKEY_DBG_ENABLED, DEFAULT_ENABLE_DEBUG_MODE);
+        reportUncaughtExceptions = getBoolean(PREFKEY_EXCEPTIONS, DEFAULT_REPORT_UNCAUGHT_EXCEPTIONS);
+        sessionTimeout = getInteger(PREFKEY_SESSION_TIMEOUT, DEFAULT_SESSION_TIMEOUT);
+        debugUploadInterval = getInteger(PREFKEY_DBG_UPLOAD_INTERVAL, DEFAULT_DEBUG_UPLOAD_INTERVAL);
+        uploadInterval = getInteger(PREFKEY_PROD_UPLOAD_INTERVAL, DEFAULT_UPLOAD_INTERVAL);
+        isPushEnabled = getBoolean(PREFKEY_PUSH_ENABLED, DEFAULT_ENABLE_PUSH);
         if (isPushEnabled){
             pushSenderId = getString(PREFKEY_PUSH_SENDER_ID);
             if (pushSenderId == null){
                 Log.w(Constants.LOG_TAG, mContext.getString(R.string.error_nosenderid));
             }
         }
-        sandboxMode = getBoolean(PREFKEY_SANDBOX_MODE, sandboxMode);
-        isLicensingEnabled = getBoolean(PREFKEY_LICENSING_ENABLED, false);
+        sandboxMode = getBoolean(PREFKEY_SANDBOX_MODE, DEFAULT_SANDBOX_MODE);
+        isLicensingEnabled = getBoolean(PREFKEY_LICENSING_ENABLED, DEFAULT_ENABLE_LICENSING);
         if (isLicensingEnabled){
             licenseKey = getString(PREFKEY_APP_LICENSE_KEY);
             if (licenseKey == null){
                 Log.d(Constants.LOG_TAG, String.format(mContext.getString(R.string.error_licensingmissingkey), PREFKEY_API_KEY));
             }
         }
+        autoTrackingEnabled = getBoolean(PREFKEY_AUTOTRACKING, DEFAULT_ENABLE_AUTO_TRACKING);
 
     }
 

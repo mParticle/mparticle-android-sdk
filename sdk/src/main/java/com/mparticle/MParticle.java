@@ -38,36 +38,42 @@ import java.util.UUID;
  * Class to provide thread-safe access to the mParticle API. You can retrieve an instance of this class by calling {@link #getInstance(android.content.Context)}, which requires
  * configuration via {@link <a href="http://developer.android.com/guide/topics/resources/providing-resources.html">Android Resources</a>}. It's recommended to keep
  * these resources in a single xml file located within your res/values folder. The full list of configuration options is as follows:
- *
+ * <p/>
  * <h4>Required parameters</h4>
- *  <ul>
- *  <li>mp_key - {@link <a href="http://developer.android.com/guide/topics/resources/string-resource.html#String">String</a>} - This is the key used to authenticate with the mParticle SDK server API</li>
- *  <li>mp_secret - {@link <a href="http://developer.android.com/guide/topics/resources/string-resource.html#String">String</a>} - This is the secret used to authenticate with the mParticle SDK server API</li>
- *  </ul>
+ * <ul>
+ * <li>mp_key - {@link <a href="http://developer.android.com/guide/topics/resources/string-resource.html#String">String</a>} - This is the key used to authenticate with the mParticle SDK server API</li>
+ * <li>mp_secret - {@link <a href="http://developer.android.com/guide/topics/resources/string-resource.html#String">String</a>} - This is the secret used to authenticate with the mParticle SDK server API</li>
+ * </ul>
  * <h4>Required for push notifications</h4>
  * <ul>
- * <li> mp_enablePush - {@link <a href="http://developer.android.com/guide/topics/resources/more-resources.html#Bool">Bool</a>} - Enable push registration, notifications, and analytics</li>
+ * <li> mp_enablePush - {@link <a href="http://developer.android.com/guide/topics/resources/more-resources.html#Bool">Bool</a>} - Enable push registration, notifications, and analytics. <i>Default: false</i></li>
  * <li> mp_pushSenderId - {@link <a href="http://developer.android.com/guide/topics/resources/string-resource.html#String">String</a>} - {@link <a href="http://developer.android.com/google/gcm/gcm.html#senderid">GCM Sender ID</a>}</li>
  * </ul>
  * <h4>Required for licensing</h4>
- *  <ul>
- *   <li> mp_enableLicenseCheck - {@link <a href="http://developer.android.com/guide/topics/resources/more-resources.html#Bool">Bool</a>} - By enabling license check, MParticle will automatically validate that the app was downloaded and/or bought via Google Play, or if it was "pirated" or "side-loaded".</li>
- *   <li> mp_appLicenseKey - {@link <a href="http://developer.android.com/guide/topics/resources/string-resource.html#String">String</a>} - The {@link <a href="http://developer.android.com/google/play/licensing/adding-licensing.html#account-key">public key</a>} used by your app to verify the user's license with Google Play.</li>
+ * <ul>
+ * <li> mp_enableLicenseCheck - {@link <a href="http://developer.android.com/guide/topics/resources/more-resources.html#Bool">Bool</a>} - By enabling license check, MParticle will automatically validate that the app was downloaded and/or bought via Google Play, or if it was "pirated" or "side-loaded". <i>Default: false</i></li>
+ * <li> mp_appLicenseKey - {@link <a href="http://developer.android.com/guide/topics/resources/string-resource.html#String">String</a>} - The {@link <a href="http://developer.android.com/google/play/licensing/adding-licensing.html#account-key">public key</a>} used by your app to verify the user's license with Google Play.</li>
  * </ul>
  * <h4>Optional</h4>
  * <ul>
- *    <li>mp_productionUploadInterval - {@link <a href="http://developer.android.com/guide/topics/resources/more-resources.html#Integer">Integer</a>} - The length of time in seconds to send batches of messages to mParticle. Setting this too low could have an adverse effect on the device battery. The default is 600.</li>
- *    <li>mp_reportUncaughtExceptions - {@link <a href="http://developer.android.com/guide/topics/resources/more-resources.html#Bool">Bool</a>} - By enabled this, the MParticle SDK will automatically log and report any uncaught exceptions, including stack traces.</li>
- *    <li>mp_sessionTimeout - {@link <a href="http://developer.android.com/guide/topics/resources/more-resources.html#Integer">Integer</a>} - The length of time (in seconds) that a user session will remain valid while application has been paused and put into the background.</li>
- *    <li>mp_enableDebugMode - {@link <a href="http://developer.android.com/guide/topics/resources/more-resources.html#Bool">Bool</a>} - Enabling this will provide additional logcat messages to debug your implementation and usage of mParticle</li>
- *    <li>mp_debugUploadInterval - {@link <a href="http://developer.android.com/guide/topics/resources/more-resources.html#Integer">Integer</a>} - The upload interval (see above) while in debug mode.</li>
- *    <li>mp_enableSandboxMode - {@link <a href="http://developer.android.com/guide/topics/resources/more-resources.html#Bool">Bool</a>} - Enabling this will mark events as sandbox messages for debugging and isolation in the mParticle web application.</li>
+ * <li>mp_productionUploadInterval - {@link <a href="http://developer.android.com/guide/topics/resources/more-resources.html#Integer">Integer</a>} - The length of time in seconds to send batches of messages to mParticle. Setting this too low could have an adverse effect on the device battery. <i>Default: 600</i></li>
+ * <li>mp_reportUncaughtExceptions - {@link <a href="http://developer.android.com/guide/topics/resources/more-resources.html#Bool">Bool</a>} - By enabling this, the MParticle SDK will automatically log and report any uncaught exceptions, including stack traces. <i>Default: false</i></li>
+ * <li>mp_sessionTimeout - {@link <a href="http://developer.android.com/guide/topics/resources/more-resources.html#Integer">Integer</a>} - The length of time (in seconds) that a user session will remain valid while application has been paused and put into the background. <i>Default: 60</i></li>
+ * <li>mp_enableDebugMode - {@link <a href="http://developer.android.com/guide/topics/resources/more-resources.html#Bool">Bool</a>} - Enabling this will provide additional logcat messages to debug your implementation and usage of mParticle <i>Default: false</i></li>
+ * <li>mp_debugUploadInterval - {@link <a href="http://developer.android.com/guide/topics/resources/more-resources.html#Integer">Integer</a>} - The upload interval (see above) while in debug mode. <i>Default: 10</i></li>
+ * <li>mp_enableSandboxMode - {@link <a href="http://developer.android.com/guide/topics/resources/more-resources.html#Bool">Bool</a>} - Enabling this will mark events as sandbox messages for debugging and isolation in the mParticle web application. <i>Default: false</i></li>
  * </ul>
  */
 public class MParticle {
     private static final String TAG = Constants.LOG_TAG;
     private static final HandlerThread sTimeoutHandlerThread = new HandlerThread("mParticleSessionTimeoutHandler",
             Process.THREAD_PRIORITY_BACKGROUND);
+    private static final byte[] SALT = new byte[]{
+            -46, 65, 30, -128, -103, -57, 74, 10, 51, 88, -95, -45, -43, -117, -36, 99, -11, 32, -64,
+            89
+    };
+    static Bundle lastNotificationBundle;
+    static boolean appRunning;
     private static volatile MParticle instance;
     private static SharedPreferences sPreferences;
     final ConfigManager mConfigManager;
@@ -78,6 +84,7 @@ public class MParticle {
     /* package-private */ JSONArray mUserIdentities = new JSONArray();
     /* package-private */ JSONObject mUserAttributes = new JSONObject();
     /* package-private */ JSONObject mSessionAttributes;
+    /* package-private */ NotificationCompat.Builder customNotification;
     private MessageManager mMessageManager;
     private Handler mTimeoutHandler;
     private MParticleLocationListener mLocationListener;
@@ -88,12 +95,7 @@ public class MParticle {
     //private int mSessionTimeout = 30 * 60 * 1000;
     private int mEventCount = 0;
     private String mLaunchUri;
-    private boolean mAutoTrackingEnabled;
-    static Bundle lastNotificationBundle;
-    static boolean appRunning;
     private LicenseCheckerCallback clientLicensingCallback;
-    /* package-private */ NotificationCompat.Builder customNotification;
-
 
     /* package-private */MParticle(Context context, MessageManager messageManager, ConfigManager configManager) {
         appRunning = true;
@@ -147,9 +149,9 @@ public class MParticle {
     /**
      * Initialize or return an instance of the mParticle SDK
      *
-     * @param context the Activity that is creating the instance
-     * @param apiKey  the API key for your account
-     * @param secret  the API secret for your account
+     * @param context     the Activity that is creating the instance
+     * @param apiKey      the API key for your account
+     * @param secret      the API secret for your account
      * @param sandboxMode set the SDK in sandbox mode, xml configuration will override this value
      * @return An instance of the mParticle SDK configured with your API key
      */
@@ -193,12 +195,12 @@ public class MParticle {
                         }
                     }
 
-                   if (appConfigManager.isPushEnabled()) {
+                    if (appConfigManager.isPushEnabled()) {
                         instance.enablePushNotifications(appConfigManager.getPushSenderId());
-                   }
-                   if (appConfigManager.isLicensingEnabled()){
+                    }
+                    if (appConfigManager.isLicensingEnabled()) {
                         instance.performLicenseCheck();
-                   }
+                    }
 
 
                 }
@@ -248,10 +250,10 @@ public class MParticle {
     }
 
     void logStateTransition(String transitionType) {
-        if (mConfigManager.getSendOoEvents()){
+        if (mConfigManager.getSendOoEvents()) {
             ensureActiveSession();
             mMessageManager.logStateTransition(transitionType, mSessionID, mSessionStartTime, lastNotificationBundle);
-            if (Constants.StateTransitionType.STATE_TRANS_BG.equals(transitionType)){
+            if (Constants.StateTransitionType.STATE_TRANS_BG.equals(transitionType)) {
                 lastNotificationBundle = null;
             }
         }
@@ -263,7 +265,7 @@ public class MParticle {
      * This method should be called from an Activity's onStart() method.
      */
     public void activityStarted(Activity activity) {
-        if (mConfigManager.getSendOoEvents()){
+        if (mConfigManager.getSendOoEvents()) {
             ensureActiveSession();
             mAppStateManager.onActivityStarted(activity);
         }
@@ -278,7 +280,7 @@ public class MParticle {
      * To explicitly end a session use the endSession() method.
      */
     public void activityStopped(Activity activity) {
-        if (mConfigManager.getSendOoEvents()){
+        if (mConfigManager.getSendOoEvents()) {
             ensureActiveSession();
             mAppStateManager.onActivityStopped(activity);
         }
@@ -288,7 +290,7 @@ public class MParticle {
      * Begin tracking a new session. Ends the current session.
      */
     public void newSession() {
-        if (mConfigManager.getSendOoEvents()){
+        if (mConfigManager.getSendOoEvents()) {
             endSession();
             beginSession();
         }
@@ -298,7 +300,7 @@ public class MParticle {
      * Explicitly terminates the user session.
      */
     public void endSession() {
-        if (mConfigManager.getSendOoEvents()){
+        if (mConfigManager.getSendOoEvents()) {
             long sessionEndTime = System.currentTimeMillis();
             endSession(sessionEndTime);
         }
@@ -393,14 +395,13 @@ public class MParticle {
     /**
      * Log an event
      *
-     * @param eventName the name of the event to be tracked
-     * @param eventType the type of the event to be tracked
+     * @param eventName   the name of the event to be tracked
+     * @param eventType   the type of the event to be tracked
      * @param eventLength the duration of the event in milliseconds
      */
     public void logEvent(String eventName, EventType eventType, long eventLength) {
         logEvent(eventName, eventType, null, eventLength);
     }
-
 
     /**
      * Log an event with data attributes
@@ -412,16 +413,17 @@ public class MParticle {
     public void logEvent(String eventName, EventType eventType, Map<String, String> eventInfo) {
         logEvent(eventName, eventType, eventInfo, 0);
     }
+
     /**
      * Log an event with data attributes
      *
-     * @param eventName the name of the event to be tracked
-     * @param eventType the type of the event to be tracked
-     * @param eventInfo a Map of data attributes
+     * @param eventName   the name of the event to be tracked
+     * @param eventType   the type of the event to be tracked
+     * @param eventInfo   a Map of data attributes
      * @param eventLength the duration of the event in milliseconds
      */
     public void logEvent(String eventName, EventType eventType, Map<String, String> eventInfo, long eventLength) {
-        if (mConfigManager.getSendOoEvents()){
+        if (mConfigManager.getSendOoEvents()) {
             if (null == eventName) {
                 Log.w(TAG, "eventName is required for logEvent");
                 return;
@@ -445,7 +447,7 @@ public class MParticle {
     }
 
     public void logTransaction(MPTransaction transaction) {
-        if (mConfigManager.getSendOoEvents()){
+        if (mConfigManager.getSendOoEvents()) {
             if (transaction == null) {
                 throw new IllegalArgumentException("transaction is required for logTransaction");
             }
@@ -468,9 +470,8 @@ public class MParticle {
         }
     }
 
-
     void logScreen(String screenName, Map<String, String> eventData, boolean started) {
-        if (mConfigManager.getSendOoEvents()){
+        if (mConfigManager.getSendOoEvents()) {
             if (null == screenName) {
                 Log.w(TAG, "screenName is required for logScreenView");
                 return;
@@ -509,7 +510,7 @@ public class MParticle {
      * @param eventData  a Map of data attributes
      */
     public void logScreen(String screenName, Map<String, String> eventData) {
-       logScreen(screenName, eventData, true);
+        logScreen(screenName, eventData, true);
     }
 
     /**
@@ -528,7 +529,7 @@ public class MParticle {
      * @param eventData a Map of data attributes
      */
     public void logError(String message, Map<String, String> eventData) {
-        if (mConfigManager.getSendOoEvents()){
+        if (mConfigManager.getSendOoEvents()) {
             if (null == message) {
                 Log.w(TAG, "message is required for logErrorEvent");
                 return;
@@ -572,7 +573,7 @@ public class MParticle {
      * @param message   the name of the error event to be tracked
      */
     public void logException(Exception exception, Map<String, String> eventData, String message) {
-        if (mConfigManager.getSendOoEvents()){
+        if (mConfigManager.getSendOoEvents()) {
             if (null == message) {
                 Log.w(TAG, "message is required for logErrorEvent");
                 return;
@@ -591,7 +592,7 @@ public class MParticle {
     }
 
     void logUnhandledError(Throwable t) {
-        if (mConfigManager.getSendOoEvents()){
+        if (mConfigManager.getSendOoEvents()) {
             ensureActiveSession();
             mMessageManager.logErrorEvent(mSessionID, mSessionStartTime, mLastEventTime, t != null ? t.getMessage() : null, t, null, false);
             //we know that the app is about to crash and therefore exit
@@ -609,7 +610,7 @@ public class MParticle {
      * @param minDistance the minimum distance (in meters) to trigger an update
      */
     public void enableLocationTracking(String provider, long minTime, long minDistance) {
-        if (mConfigManager.getSendOoEvents()){
+        if (mConfigManager.getSendOoEvents()) {
             try {
                 LocationManager locationManager = (LocationManager) mAppContext.getSystemService(Context.LOCATION_SERVICE);
                 if (!locationManager.isProviderEnabled(provider)) {
@@ -657,7 +658,7 @@ public class MParticle {
      * @param value the attribute value
      */
     public void setSessionAttribute(String key, String value) {
-        if (mConfigManager.getSendOoEvents()){
+        if (mConfigManager.getSendOoEvents()) {
             ensureActiveSession();
             if (mDebugMode)
                 debugLog("Set session attribute: " + key + "=" + value);
@@ -674,7 +675,7 @@ public class MParticle {
      * @param value the attribute value
      */
     public void setUserAttribute(String key, String value) {
-        if (mConfigManager.getSendOoEvents()){
+        if (mConfigManager.getSendOoEvents()) {
             if (mDebugMode)
                 if (value != null) {
                     debugLog("Set user attribute: " + key + " with value " + value);
@@ -697,7 +698,7 @@ public class MParticle {
     }
 
     public void setUserIdentity(String id, IdentityType identityType) {
-        if (mConfigManager.getSendOoEvents()){
+        if (mConfigManager.getSendOoEvents()) {
             if (mDebugMode)
                 debugLog("Setting user identity: " + id);
 
@@ -758,7 +759,7 @@ public class MParticle {
      * @param optOutStatus set to <code>true</code> to opt out of event tracking
      */
     public void setOptOut(boolean optOutStatus) {
-        if (optOutStatus != mConfigManager.getOptedOut()){
+        if (optOutStatus != mConfigManager.getOptedOut()) {
             if (!optOutStatus) {
                 ensureActiveSession();
             }
@@ -841,7 +842,6 @@ public class MParticle {
 
     /**
      * Unregister the application for GCM notifications
-     *
      */
     public void disablePushNotifications() {
         PushRegistrationHelper.disablePushNotifications(mAppContext);
@@ -852,7 +852,7 @@ public class MParticle {
      *
      * @param enabled
      */
-    public void setNotificationSoundEnabled(boolean enabled){
+    public void setNotificationSoundEnabled(boolean enabled) {
         mConfigManager.setPushSoundEnabled(enabled);
     }
 
@@ -861,7 +861,7 @@ public class MParticle {
      *
      * @param enabled
      */
-    public void setNotificationVibrationEnabled(boolean enabled){
+    public void setNotificationVibrationEnabled(boolean enabled) {
         mConfigManager.setPushVibrationEnabled(enabled);
     }
 
@@ -871,10 +871,10 @@ public class MParticle {
      * and the {@link #setNotificationVibrationEnabled(boolean) setNotificationVibrationEnabled}
      * methods.
      *
-     * @see <a href="http://developer.android.com/reference/android/support/v4/app/NotificationCompat.Builder.html">NotificationCompat.Builder</a>
      * @param notification
+     * @see <a href="http://developer.android.com/reference/android/support/v4/app/NotificationCompat.Builder.html">NotificationCompat.Builder</a>
      */
-    public void setCustomPushNotification(NotificationCompat.Builder notification){
+    public void setCustomPushNotification(NotificationCompat.Builder notification) {
         customNotification = notification;
     }
 
@@ -923,12 +923,7 @@ public class MParticle {
         return checkedAttributes;
     }
 
-    private static final byte[] SALT = new byte[] {
-            -46, 65, 30, -128, -103, -57, 74, 10, 51, 88, -95, -45, -43, -117, -36, 99, -11, 32, -64,
-            89
-    };
-
-    void performLicenseCheck(){
+    void performLicenseCheck() {
         String deviceId = Settings.Secure.getString(mAppContext.getContentResolver(), Settings.Secure.ANDROID_ID);
 
         MPLicenseCheckerCallback licenseCheckerCallback = new MPLicenseCheckerCallback();
@@ -940,28 +935,27 @@ public class MParticle {
         checker.checkAccess(licenseCheckerCallback);
     }
 
-
     /**
      * This method makes sure the constraints on event attributes are enforced. A JSONObject version
      * of the attributes is return with data that exceeds the limits removed. NOTE: Non-string
      * attributes are not converted to strings, currently.
      *
-     * @param encodedPublicKey Base64-encoded RSA public key of your application
+     * @param encodedPublicKey  Base64-encoded RSA public key of your application
      * @param licensingCallback Optional {@link com.mparticle.com.google.licensing.LicenseCheckerCallback} callback for licensing checking
-     * @param policy Optional {@link com.mparticle.com.google.licensing.Policy}, will default to {@link com.mparticle.com.google.licensing.ServerManagedPolicy}
+     * @param policy            Optional {@link com.mparticle.com.google.licensing.Policy}, will default to {@link com.mparticle.com.google.licensing.ServerManagedPolicy}
      */
-    public void performLicenseCheck(String encodedPublicKey, LicenseCheckerCallback licensingCallback, Policy policy){
-        if (encodedPublicKey == null || encodedPublicKey.length() == 0){
+    public void performLicenseCheck(String encodedPublicKey, LicenseCheckerCallback licensingCallback, Policy policy) {
+        if (encodedPublicKey == null || encodedPublicKey.length() == 0) {
             throw new IllegalArgumentException("LicenseKey null or invalid.");
         }
 
-        if (licensingCallback == null){
+        if (licensingCallback == null) {
             Log.w(TAG, "No licensing callback specified, using MParticle default.");
         }
 
         clientLicensingCallback = licensingCallback;
 
-        if (policy == null){
+        if (policy == null) {
             Log.w(TAG, "No policy specified, using default ServerManagedPolicy");
             String deviceId = Settings.Secure.getString(mAppContext.getContentResolver(), Settings.Secure.ANDROID_ID);
             policy = new ServerManagedPolicy(mAppContext,
@@ -983,7 +977,7 @@ public class MParticle {
     }
 
     public boolean isAutoTrackingEnabled() {
-        return mAutoTrackingEnabled;
+        return mConfigManager.isAutoTrackingEnabled();
     }
 
     public long getSessionTimeout() {
@@ -1004,7 +998,7 @@ public class MParticle {
     }
 
     void logNotification(Intent intent) {
-        if (mConfigManager.getSendOoEvents()){
+        if (mConfigManager.getSendOoEvents()) {
             lastNotificationBundle = intent.getExtras().getBundle(MessageKey.PAYLOAD);
             ensureActiveSession();
             mMessageManager.logNotification(mSessionID, mSessionStartTime, lastNotificationBundle, intent.getExtras().getString(MessageKey.APP_STATE));
@@ -1083,6 +1077,35 @@ public class MParticle {
 
     }
 
+    private class MPLicenseCheckerCallback implements LicenseCheckerCallback {
+        public void allow(int policyReason) {
+            if (policyReason == Policy.LICENSED) {
+                sPreferences.edit().putBoolean(PrefKeys.PIRATED, false).commit();
+            }
+            if (clientLicensingCallback != null) {
+                clientLicensingCallback.allow(policyReason);
+            }
+        }
+
+        public void dontAllow(int policyReason) {
+            if (policyReason == ServerManagedPolicy.NOT_LICENSED) {
+                sPreferences.edit().putBoolean(PrefKeys.PIRATED, true).commit();
+            }
+            if (clientLicensingCallback != null) {
+                clientLicensingCallback.dontAllow(policyReason);
+            }
+        }
+
+        public void applicationError(int errorCode) {
+            if (errorCode == LicenseCheckerCallback.ERROR_MISSING_PERMISSION) {
+                Log.w(TAG, "Licensing enabled but app is missing com.android.vending.CHECK_LICENSE permission.");
+            }
+            if (clientLicensingCallback != null) {
+                clientLicensingCallback.applicationError(errorCode);
+            }
+        }
+    }
+
     private PushRegistrationListener registrationListener = new PushRegistrationListener() {
 
         @Override
@@ -1095,34 +1118,5 @@ public class MParticle {
             mMessageManager.setPushRegistrationId(mSessionID, mSessionStartTime, System.currentTimeMillis(), null, true);
         }
     };
-
-    private class MPLicenseCheckerCallback implements LicenseCheckerCallback {
-        public void allow(int policyReason) {
-            if (policyReason == Policy.LICENSED){
-                sPreferences.edit().putBoolean(PrefKeys.PIRATED, false).commit();
-            }
-            if (clientLicensingCallback != null){
-                clientLicensingCallback.allow(policyReason);
-            }
-        }
-
-        public void dontAllow(int policyReason) {
-            if (policyReason == ServerManagedPolicy.NOT_LICENSED){
-                sPreferences.edit().putBoolean(PrefKeys.PIRATED, true).commit();
-            }
-            if (clientLicensingCallback != null){
-                clientLicensingCallback.dontAllow(policyReason);
-            }
-        }
-
-        public void applicationError(int errorCode) {
-            if (errorCode == LicenseCheckerCallback.ERROR_MISSING_PERMISSION){
-                Log.w(TAG, "Licensing enabled but app is missing com.android.vending.CHECK_LICENSE permission.");
-            }
-            if (clientLicensingCallback != null){
-                clientLicensingCallback.applicationError(errorCode);
-            }
-        }
-    }
 
 }

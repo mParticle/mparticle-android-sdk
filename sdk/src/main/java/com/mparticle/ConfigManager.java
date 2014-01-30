@@ -101,7 +101,7 @@ class ConfigManager {
 
     public boolean getLogUnhandledExceptions() {
         if (logUnhandledExceptions.equals(VALUE_APP_DEFINED)) {
-            return localPrefs.unhandledExceptions;
+            return localPrefs.reportUncaughtExceptions;
         } else {
             return logUnhandledExceptions.equals(VALUE_CUE_CATCH);
         }
@@ -223,5 +223,9 @@ class ConfigManager {
 
     public boolean getOptedOut(){
         return mPreferences.getBoolean(Constants.PrefKeys.OPTOUT, false);
+    }
+
+    public boolean isAutoTrackingEnabled() {
+        return localPrefs.autoTrackingEnabled;
     }
 }
