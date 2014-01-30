@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package com.mparticle.google.licensing;
+package com.mparticle.com.google.licensing;
 
 
-import com.mparticle.google.licensing.util.Base64;
-import com.mparticle.google.licensing.util.Base64DecoderException;
+import com.mparticle.com.google.licensing.util.Base64;
+import com.mparticle.com.google.licensing.util.Base64DecoderException;
 
 import java.io.UnsupportedEncodingException;
 import java.security.GeneralSecurityException;

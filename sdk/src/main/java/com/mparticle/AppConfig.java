@@ -6,7 +6,7 @@ import android.util.Log;
 /**
  * Created by sdozor on 1/21/14.
  */
-public class AppConfig {
+class AppConfig {
     public static final String PREFKEY_API_KEY = "mp_key";
     public static final String PREFKEY_API_SECRET = "mp_secret";
     public static final String PREFKEY_EXCEPTIONS = "mp_reportUncaughtExceptions";

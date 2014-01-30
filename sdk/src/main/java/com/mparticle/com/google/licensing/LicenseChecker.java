@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.mparticle.google.licensing;
+package com.mparticle.com.google.licensing;
 
 
 import android.content.ComponentName;
@@ -29,8 +29,8 @@ import android.os.RemoteException;
 import android.provider.Settings.Secure;
 import android.util.Log;
 
-import com.mparticle.google.licensing.util.Base64;
-import com.mparticle.google.licensing.util.Base64DecoderException;
+import com.mparticle.com.google.licensing.util.Base64;
+import com.mparticle.com.google.licensing.util.Base64DecoderException;
 
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;

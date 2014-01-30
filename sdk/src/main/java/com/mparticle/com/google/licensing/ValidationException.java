@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.mparticle.google.licensing;
+package com.mparticle.com.google.licensing;
 
 /**
  * Indicates that an error occurred while validating the integrity of data managed by an

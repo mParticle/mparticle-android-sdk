@@ -2,13 +2,9 @@
  * This file is auto-generated.  DO NOT MODIFY.
  * Original file: aidl/ILicenseResultListener.aidl
  */
-package  com.mparticle.google.licensing;
-import java.lang.String;
-import android.os.RemoteException;
+package com.mparticle.com.google.licensing;
 import android.os.IBinder;
-import android.os.IInterface;
-import android.os.Binder;
-import android.os.Parcel;
+
 public interface ILicenseResultListener extends android.os.IInterface
 {
 /** Local-side IPC implementation stub class. */
@@ -30,10 +26,10 @@ if ((obj==null)) {
 return null;
 }
 android.os.IInterface iin = (android.os.IInterface)obj.queryLocalInterface(DESCRIPTOR);
-if (((iin!=null)&&(iin instanceof com.mparticle.google.licensing.ILicenseResultListener))) {
+if (((iin!=null)&&(iin instanceof ILicenseResultListener))) {
 return ((ILicenseResultListener)iin);
 }
-return new com.mparticle.google.licensing.ILicenseResultListener.Stub.Proxy(obj);
+return new ILicenseResultListener.Stub.Proxy(obj);
 }
 public android.os.IBinder asBinder()
 {
@@ -63,7 +59,7 @@ return true;
 }
 return super.onTransact(code, data, reply, flags);
 }
-private static class Proxy implements com.mparticle.google.licensing.ILicenseResultListener
+private static class Proxy implements ILicenseResultListener
 {
 private android.os.IBinder mRemote;
 Proxy(android.os.IBinder remote)

@@ -20,11 +20,11 @@ import android.util.Log;
 
 import com.mparticle.Constants.MessageKey;
 import com.mparticle.Constants.PrefKeys;
-import com.mparticle.google.licensing.AESObfuscator;
-import com.mparticle.google.licensing.LicenseChecker;
-import com.mparticle.google.licensing.LicenseCheckerCallback;
-import com.mparticle.google.licensing.Policy;
-import com.mparticle.google.licensing.ServerManagedPolicy;
+import com.mparticle.com.google.licensing.AESObfuscator;
+import com.mparticle.com.google.licensing.LicenseChecker;
+import com.mparticle.com.google.licensing.LicenseCheckerCallback;
+import com.mparticle.com.google.licensing.Policy;
+import com.mparticle.com.google.licensing.ServerManagedPolicy;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -35,7 +35,34 @@ import java.util.Map;
 import java.util.UUID;
 
 /**
- * This class provides access to the mParticle API.
+ * Class to provide thread-safe access to the mParticle API. You can retrieve an instance of this class by calling {@link #getInstance(android.content.Context)}, which requires
+ * configuration via {@link <a href="http://developer.android.com/guide/topics/resources/providing-resources.html">Android Resources</a>}. It's recommended to keep
+ * these resources in a single xml file located within your res/values folder. The full list of configuration options is as follows:
+ *
+ * <h4>Required parameters</h4>
+ *  <ul>
+ *  <li>mp_key - {@link <a href="http://developer.android.com/guide/topics/resources/string-resource.html#String">String</a>} - This is the key used to authenticate with the mParticle SDK server API</li>
+ *  <li>mp_secret - {@link <a href="http://developer.android.com/guide/topics/resources/string-resource.html#String">String</a>} - This is the secret used to authenticate with the mParticle SDK server API</li>
+ *  </ul>
+ * <h4>Required for push notifications</h4>
+ * <ul>
+ * <li> mp_enablePush - {@link <a href="http://developer.android.com/guide/topics/resources/more-resources.html#Bool">Bool</a>} - Enable push registration, notifications, and analytics</li>
+ * <li> mp_pushSenderId - {@link <a href="http://developer.android.com/guide/topics/resources/string-resource.html#String">String</a>} - {@link <a href="http://developer.android.com/google/gcm/gcm.html#senderid">GCM Sender ID</a>}</li>
+ * </ul>
+ * <h4>Required for licensing</h4>
+ *  <ul>
+ *   <li> mp_enableLicenseCheck - {@link <a href="http://developer.android.com/guide/topics/resources/more-resources.html#Bool">Bool</a>} - By enabling license check, MParticle will automatically validate that the app was downloaded and/or bought via Google Play, or if it was "pirated" or "side-loaded".</li>
+ *   <li> mp_appLicenseKey - {@link <a href="http://developer.android.com/guide/topics/resources/string-resource.html#String">String</a>} - The {@link <a href="http://developer.android.com/google/play/licensing/adding-licensing.html#account-key">public key</a>} used by your app to verify the user's license with Google Play.</li>
+ * </ul>
+ * <h4>Optional</h4>
+ * <ul>
+ *    <li>mp_productionUploadInterval - {@link <a href="http://developer.android.com/guide/topics/resources/more-resources.html#Integer">Integer</a>} - The length of time in seconds to send batches of messages to mParticle. Setting this too low could have an adverse effect on the device battery. The default is 600.</li>
+ *    <li>mp_reportUncaughtExceptions - {@link <a href="http://developer.android.com/guide/topics/resources/more-resources.html#Bool">Bool</a>} - By enabled this, the MParticle SDK will automatically log and report any uncaught exceptions, including stack traces.</li>
+ *    <li>mp_sessionTimeout - {@link <a href="http://developer.android.com/guide/topics/resources/more-resources.html#Integer">Integer</a>} - The length of time (in seconds) that a user session will remain valid while application has been paused and put into the background.</li>
+ *    <li>mp_enableDebugMode - {@link <a href="http://developer.android.com/guide/topics/resources/more-resources.html#Bool">Bool</a>} - Enabling this will provide additional logcat messages to debug your implementation and usage of mParticle</li>
+ *    <li>mp_debugUploadInterval - {@link <a href="http://developer.android.com/guide/topics/resources/more-resources.html#Integer">Integer</a>} - The upload interval (see above) while in debug mode.</li>
+ *    <li>mp_enableSandboxMode - {@link <a href="http://developer.android.com/guide/topics/resources/more-resources.html#Bool">Bool</a>} - Enabling this will mark events as sandbox messages for debugging and isolation in the mParticle web application.</li>
+ * </ul>
  */
 public class MParticle {
     private static final String TAG = Constants.LOG_TAG;
@@ -920,8 +947,8 @@ public class MParticle {
      * attributes are not converted to strings, currently.
      *
      * @param encodedPublicKey Base64-encoded RSA public key of your application
-     * @param licensingCallback Optional {@link com.mparticle.google.licensing.LicenseCheckerCallback} callback for licensing checking
-     * @param policy Optional {@link com.mparticle.google.licensing.Policy}, will default to {@link com.mparticle.google.licensing.ServerManagedPolicy}
+     * @param licensingCallback Optional {@link com.mparticle.com.google.licensing.LicenseCheckerCallback} callback for licensing checking
+     * @param policy Optional {@link com.mparticle.com.google.licensing.Policy}, will default to {@link com.mparticle.com.google.licensing.ServerManagedPolicy}
      */
     public void performLicenseCheck(String encodedPublicKey, LicenseCheckerCallback licensingCallback, Policy policy){
         if (encodedPublicKey == null || encodedPublicKey.length() == 0){

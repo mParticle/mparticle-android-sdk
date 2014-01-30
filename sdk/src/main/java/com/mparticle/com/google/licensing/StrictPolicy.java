@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.mparticle.google.licensing;
+package com.mparticle.com.google.licensing;
 
 /**
  * Non-caching policy. All requests will be sent to the licensing service,
@@ -35,7 +35,7 @@ public class StrictPolicy implements Policy {
 
     public StrictPolicy() {
         // Set default policy. This will force the application to check the policy on launch.
-        mLastResponse = Policy.RETRY;
+        mLastResponse = RETRY;
     }
 
     /**
@@ -57,7 +57,7 @@ public class StrictPolicy implements Policy {
      * was received the last time the server was contacted.
      */
     public boolean allowAccess() {
-        return (mLastResponse == Policy.LICENSED);
+        return (mLastResponse == LICENSED);
     }
 
 }

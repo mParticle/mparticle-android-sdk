@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.mparticle.google.licensing;
+package com.mparticle.com.google.licensing;
 
 /**
  * Policy used by {@link LicenseChecker} to determine whether a user should have

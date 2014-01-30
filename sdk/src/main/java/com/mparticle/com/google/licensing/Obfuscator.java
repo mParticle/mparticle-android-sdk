@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.mparticle.google.licensing;
+package com.mparticle.com.google.licensing;
 
 /**
  * Interface used as part of a {@link Policy} to allow application authors to obfuscate

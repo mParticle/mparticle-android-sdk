@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.mparticle.google.licensing;
+package com.mparticle.com.google.licensing;
 
 /**
  * A DeviceLimiter that doesn't limit the number of devices that can use a

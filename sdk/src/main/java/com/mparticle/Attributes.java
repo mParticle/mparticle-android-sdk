@@ -1,6 +1,6 @@
 package com.mparticle;
 
-public class Attributes {
+class Attributes {
 
     // user accounts
     public static final String APP_ID = "mp::app_uid";

@@ -12,7 +12,7 @@ import android.util.Log;
 /**
  * Created by sdozor on 1/15/14.
  */
-public class AppStateManager {
+class AppStateManager {
 
     public static final String APP_STATE_FOREGROUND = "foreground";
     public static final String APP_STATE_BACKGROUND = "background";

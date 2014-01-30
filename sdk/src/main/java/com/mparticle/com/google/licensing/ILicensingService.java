@@ -2,17 +2,13 @@
  * This file is auto-generated.  DO NOT MODIFY.
  * Original file: aidl/ILicensingService.aidl
  */
-package com.mparticle.google.licensing;
-import java.lang.String;
-import android.os.RemoteException;
+package com.mparticle.com.google.licensing;
 import android.os.IBinder;
-import android.os.IInterface;
-import android.os.Binder;
-import android.os.Parcel;
+
 public interface ILicensingService extends android.os.IInterface
 {
 /** Local-side IPC implementation stub class. */
-public static abstract class Stub extends android.os.Binder implements com.mparticle.google.licensing.ILicensingService
+public static abstract class Stub extends android.os.Binder implements ILicensingService
 {
 private static final java.lang.String DESCRIPTOR = "com.android.vending.licensing.ILicensingService";
 /** Construct the stub at attach it to the interface. */
@@ -24,16 +20,16 @@ this.attachInterface(this, DESCRIPTOR);
  * Cast an IBinder object into an ILicensingService interface,
  * generating a proxy if needed.
  */
-public static com.mparticle.google.licensing.ILicensingService asInterface(android.os.IBinder obj)
+public static ILicensingService asInterface(android.os.IBinder obj)
 {
 if ((obj==null)) {
 return null;
 }
 android.os.IInterface iin = (android.os.IInterface)obj.queryLocalInterface(DESCRIPTOR);
-if (((iin!=null)&&(iin instanceof com.mparticle.google.licensing.ILicensingService))) {
-return ((com.mparticle.google.licensing.ILicensingService)iin);
+if (((iin!=null)&&(iin instanceof ILicensingService))) {
+return ((ILicensingService)iin);
 }
-return new com.mparticle.google.licensing.ILicensingService.Stub.Proxy(obj);
+return new ILicensingService.Stub.Proxy(obj);
 }
 public android.os.IBinder asBinder()
 {
@@ -55,15 +51,15 @@ long _arg0;
 _arg0 = data.readLong();
 java.lang.String _arg1;
 _arg1 = data.readString();
-    com.mparticle.google.licensing.ILicenseResultListener _arg2;
-_arg2 = com.mparticle.google.licensing.ILicenseResultListener.Stub.asInterface(data.readStrongBinder());
+    ILicenseResultListener _arg2;
+_arg2 = ILicenseResultListener.Stub.asInterface(data.readStrongBinder());
 this.checkLicense(_arg0, _arg1, _arg2);
 return true;
 }
 }
 return super.onTransact(code, data, reply, flags);
 }
-private static class Proxy implements com.mparticle.google.licensing.ILicensingService
+private static class Proxy implements ILicensingService
 {
 private android.os.IBinder mRemote;
 Proxy(android.os.IBinder remote)
@@ -78,7 +74,7 @@ public java.lang.String getInterfaceDescriptor()
 {
 return DESCRIPTOR;
 }
-public void checkLicense(long nonce, java.lang.String packageName, com.mparticle.google.licensing.ILicenseResultListener listener) throws android.os.RemoteException
+public void checkLicense(long nonce, java.lang.String packageName, ILicenseResultListener listener) throws android.os.RemoteException
 {
 android.os.Parcel _data = android.os.Parcel.obtain();
 try {
@@ -95,5 +91,5 @@ _data.recycle();
 }
 static final int TRANSACTION_checkLicense = (IBinder.FIRST_CALL_TRANSACTION + 0);
 }
-public void checkLicense(long nonce, java.lang.String packageName, com.mparticle.google.licensing.ILicenseResultListener listener) throws android.os.RemoteException;
+public void checkLicense(long nonce, java.lang.String packageName, ILicenseResultListener listener) throws android.os.RemoteException;
 }

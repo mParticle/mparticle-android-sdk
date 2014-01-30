@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package com.mparticle.google.licensing;
+package com.mparticle.com.google.licensing;
 
 import android.text.TextUtils;
 import android.util.Log;
 
-import com.mparticle.google.licensing.util.Base64;
-import com.mparticle.google.licensing.util.Base64DecoderException;
+import com.mparticle.com.google.licensing.util.Base64;
+import com.mparticle.com.google.licensing.util.Base64DecoderException;
 
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
