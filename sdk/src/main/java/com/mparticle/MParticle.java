@@ -57,7 +57,6 @@ public class MParticle {
     private ExceptionHandler mExHandler;
     private Context mAppContext;
     private String mApiKey;
-    private boolean mOptedOut = false;
     private boolean mDebugMode = false;
     //private int mSessionTimeout = 30 * 60 * 1000;
     private int mEventCount = 0;
@@ -77,7 +76,6 @@ public class MParticle {
         mMessageManager = messageManager;
         mTimeoutHandler = new SessionTimeoutHandler(this, sTimeoutHandlerThread.getLooper());
         mAppStateManager = new AppStateManager(mAppContext);
-        mOptedOut = sPreferences.getBoolean(PrefKeys.OPTOUT + mApiKey, false);
         String userAttrs = sPreferences.getString(PrefKeys.USER_ATTRS + mApiKey, null);
 
         if (null != userAttrs) {
@@ -223,14 +221,12 @@ public class MParticle {
     }
 
     void logStateTransition(String transitionType) {
-        if (mOptedOut){
-            return;
-        }
-
-        ensureActiveSession();
-        mMessageManager.logStateTransition(transitionType, mSessionID, mSessionStartTime, lastNotificationBundle);
-        if (Constants.StateTransitionType.STATE_TRANS_BG.equals(transitionType)){
-            lastNotificationBundle = null;
+        if (mConfigManager.getSendOoEvents()){
+            ensureActiveSession();
+            mMessageManager.logStateTransition(transitionType, mSessionID, mSessionStartTime, lastNotificationBundle);
+            if (Constants.StateTransitionType.STATE_TRANS_BG.equals(transitionType)){
+                lastNotificationBundle = null;
+            }
         }
     }
 
@@ -240,11 +236,10 @@ public class MParticle {
      * This method should be called from an Activity's onStart() method.
      */
     public void activityStarted(Activity activity) {
-        if (mOptedOut) {
-            return;
+        if (mConfigManager.getSendOoEvents()){
+            ensureActiveSession();
+            mAppStateManager.onActivityStarted(activity);
         }
-        ensureActiveSession();
-        mAppStateManager.onActivityStarted(activity);
     }
 
     /**
@@ -256,32 +251,30 @@ public class MParticle {
      * To explicitly end a session use the endSession() method.
      */
     public void activityStopped(Activity activity) {
-        if (mSessionStartTime == 0 || mOptedOut) {
-            return;
+        if (mConfigManager.getSendOoEvents()){
+            ensureActiveSession();
+            mAppStateManager.onActivityStopped(activity);
         }
-        mAppStateManager.onActivityStopped(activity);
     }
 
     /**
      * Begin tracking a new session. Ends the current session.
      */
     public void newSession() {
-        if (mOptedOut) {
-            return;
+        if (mConfigManager.getSendOoEvents()){
+            endSession();
+            beginSession();
         }
-        endSession();
-        beginSession();
     }
 
     /**
      * Explicitly terminates the user session.
      */
     public void endSession() {
-        if (mSessionStartTime == 0 || mOptedOut) {
-            return;
+        if (mConfigManager.getSendOoEvents()){
+            long sessionEndTime = System.currentTimeMillis();
+            endSession(sessionEndTime);
         }
-        long sessionEndTime = System.currentTimeMillis();
-        endSession(sessionEndTime);
     }
 
     /**
@@ -401,79 +394,75 @@ public class MParticle {
      * @param eventLength the duration of the event in milliseconds
      */
     public void logEvent(String eventName, EventType eventType, Map<String, String> eventInfo, long eventLength) {
-        if (mOptedOut) {
-            return;
-        }
-        if (null == eventName) {
-            Log.w(TAG, "eventName is required for logEvent");
-            return;
-        }
-        if (eventName.length() > Constants.LIMIT_NAME) {
-            Log.w(TAG, "The event name was too long. Discarding event.");
-            return;
-        }
-        ensureActiveSession();
-        if (checkEventLimit()) {
-            JSONObject eventDataJSON = enforceAttributeConstraints(eventInfo);
-            mMessageManager.logEvent(mSessionID, mSessionStartTime, mLastEventTime, eventName, eventType, eventDataJSON, eventLength);
-            if (mDebugMode)
-                if (null == eventDataJSON) {
-                    debugLog("Logged event: " + eventName);
-                } else {
-                    debugLog("Logged event: " + eventName + " with data " + eventDataJSON);
-                }
+        if (mConfigManager.getSendOoEvents()){
+            if (null == eventName) {
+                Log.w(TAG, "eventName is required for logEvent");
+                return;
+            }
+            if (eventName.length() > Constants.LIMIT_NAME) {
+                Log.w(TAG, "The event name was too long. Discarding event.");
+                return;
+            }
+            ensureActiveSession();
+            if (checkEventLimit()) {
+                JSONObject eventDataJSON = enforceAttributeConstraints(eventInfo);
+                mMessageManager.logEvent(mSessionID, mSessionStartTime, mLastEventTime, eventName, eventType, eventDataJSON, eventLength);
+                if (mDebugMode)
+                    if (null == eventDataJSON) {
+                        debugLog("Logged event: " + eventName);
+                    } else {
+                        debugLog("Logged event: " + eventName + " with data " + eventDataJSON);
+                    }
+            }
         }
     }
 
     public void logTransaction(MPTransaction transaction) {
-        if (mOptedOut) {
-            return;
-        }
-        if (transaction == null) {
-            throw new IllegalArgumentException("transaction is required for logTransaction");
-        }
+        if (mConfigManager.getSendOoEvents()){
+            if (transaction == null) {
+                throw new IllegalArgumentException("transaction is required for logTransaction");
+            }
 
-        if (transaction.getData() == null) {
-            throw new IllegalArgumentException("Transaction data was null, please check that the transaction was built properly.");
-        }
+            if (transaction.getData() == null) {
+                throw new IllegalArgumentException("Transaction data was null, please check that the transaction was built properly.");
+            }
 
-        ensureActiveSession();
-        if (checkEventLimit()) {
-            mMessageManager.logEvent(mSessionID, mSessionStartTime, mLastEventTime, "Ecommerce", EventType.Transaction, transaction.getData(), 0);
-            if (mDebugMode) {
-                try {
-                    debugLog("Logged transaction with data: " + transaction.getData().toString(4));
-                } catch (JSONException jse) {
+            ensureActiveSession();
+            if (checkEventLimit()) {
+                mMessageManager.logEvent(mSessionID, mSessionStartTime, mLastEventTime, "Ecommerce", EventType.Transaction, transaction.getData(), 0);
+                if (mDebugMode) {
+                    try {
+                        debugLog("Logged transaction with data: " + transaction.getData().toString(4));
+                    } catch (JSONException jse) {
 
+                    }
                 }
             }
         }
-
     }
 
 
     void logScreen(String screenName, Map<String, String> eventData, boolean started) {
-        if (mOptedOut) {
-            return;
-        }
-        if (null == screenName) {
-            Log.w(TAG, "screenName is required for logScreenView");
-            return;
-        }
-        if (screenName.length() > Constants.LIMIT_NAME) {
-            Log.w(TAG, "The screen name was too long. Discarding event.");
-            return;
-        }
-        ensureActiveSession();
-        if (checkEventLimit()) {
-            JSONObject eventDataJSON = enforceAttributeConstraints(eventData);
-            mMessageManager.logScreen(mSessionID, mSessionStartTime, mLastEventTime, screenName, eventDataJSON, started);
-            if (mDebugMode)
-                if (null == eventDataJSON) {
-                    debugLog("Logged screen: " + screenName);
-                } else {
-                    debugLog("Logged screen: " + screenName + " with data " + eventDataJSON);
-                }
+        if (mConfigManager.getSendOoEvents()){
+            if (null == screenName) {
+                Log.w(TAG, "screenName is required for logScreenView");
+                return;
+            }
+            if (screenName.length() > Constants.LIMIT_NAME) {
+                Log.w(TAG, "The screen name was too long. Discarding event.");
+                return;
+            }
+            ensureActiveSession();
+            if (checkEventLimit()) {
+                JSONObject eventDataJSON = enforceAttributeConstraints(eventData);
+                mMessageManager.logScreen(mSessionID, mSessionStartTime, mLastEventTime, screenName, eventDataJSON, started);
+                if (mDebugMode)
+                    if (null == eventDataJSON) {
+                        debugLog("Logged screen: " + screenName);
+                    } else {
+                        debugLog("Logged screen: " + screenName + " with data " + eventDataJSON);
+                    }
+            }
         }
     }
 
@@ -512,21 +501,20 @@ public class MParticle {
      * @param eventData a Map of data attributes
      */
     public void logError(String message, Map<String, String> eventData) {
-        if (mOptedOut) {
-            return;
-        }
-        if (null == message) {
-            Log.w(TAG, "message is required for logErrorEvent");
-            return;
-        }
-        ensureActiveSession();
-        if (checkEventLimit()) {
-            JSONObject eventDataJSON = enforceAttributeConstraints(eventData);
-            mMessageManager.logErrorEvent(mSessionID, mSessionStartTime, mLastEventTime, message, null, eventDataJSON);
-            if (mDebugMode)
-                debugLog(
-                        "Logged error with message: " + (message == null ? "<none>" : message) +
-                                " with data: " + (eventDataJSON == null ? "<none>" : eventDataJSON.toString()));
+        if (mConfigManager.getSendOoEvents()){
+            if (null == message) {
+                Log.w(TAG, "message is required for logErrorEvent");
+                return;
+            }
+            ensureActiveSession();
+            if (checkEventLimit()) {
+                JSONObject eventDataJSON = enforceAttributeConstraints(eventData);
+                mMessageManager.logErrorEvent(mSessionID, mSessionStartTime, mLastEventTime, message, null, eventDataJSON);
+                if (mDebugMode)
+                    debugLog(
+                            "Logged error with message: " + (message == null ? "<none>" : message) +
+                                    " with data: " + (eventDataJSON == null ? "<none>" : eventDataJSON.toString()));
+            }
         }
     }
 
@@ -557,34 +545,32 @@ public class MParticle {
      * @param message   the name of the error event to be tracked
      */
     public void logException(Exception exception, Map<String, String> eventData, String message) {
-        if (mOptedOut) {
-            return;
-        }
-        if (null == message) {
-            Log.w(TAG, "message is required for logErrorEvent");
-            return;
-        }
-        ensureActiveSession();
-        if (checkEventLimit()) {
-            JSONObject eventDataJSON = enforceAttributeConstraints(eventData);
-            mMessageManager.logErrorEvent(mSessionID, mSessionStartTime, mLastEventTime, message, exception, eventDataJSON);
-            if (mDebugMode)
-                debugLog(
-                        "Logged exception with message: " + (message == null ? "<none>" : message) +
-                                " with data: " + (eventDataJSON == null ? "<none>" : eventDataJSON.toString()) +
-                                " with exception: " + (exception == null ? "<none>" : exception.getMessage()));
+        if (mConfigManager.getSendOoEvents()){
+            if (null == message) {
+                Log.w(TAG, "message is required for logErrorEvent");
+                return;
+            }
+            ensureActiveSession();
+            if (checkEventLimit()) {
+                JSONObject eventDataJSON = enforceAttributeConstraints(eventData);
+                mMessageManager.logErrorEvent(mSessionID, mSessionStartTime, mLastEventTime, message, exception, eventDataJSON);
+                if (mDebugMode)
+                    debugLog(
+                            "Logged exception with message: " + (message == null ? "<none>" : message) +
+                                    " with data: " + (eventDataJSON == null ? "<none>" : eventDataJSON.toString()) +
+                                    " with exception: " + (exception == null ? "<none>" : exception.getMessage()));
+            }
         }
     }
 
     void logUnhandledError(Throwable t) {
-        if (mOptedOut)
-            return;
-
-        ensureActiveSession();
-        mMessageManager.logErrorEvent(mSessionID, mSessionStartTime, mLastEventTime, t != null ? t.getMessage() : null, t, null, false);
-        //we know that the app is about to crash and therefore exit
-        logStateTransition(Constants.StateTransitionType.STATE_TRANS_EXIT);
-        endSession(System.currentTimeMillis());
+        if (mConfigManager.getSendOoEvents()){
+            ensureActiveSession();
+            mMessageManager.logErrorEvent(mSessionID, mSessionStartTime, mLastEventTime, t != null ? t.getMessage() : null, t, null, false);
+            //we know that the app is about to crash and therefore exit
+            logStateTransition(Constants.StateTransitionType.STATE_TRANS_EXIT);
+            endSession(System.currentTimeMillis());
+        }
     }
 
     /**
@@ -596,25 +582,24 @@ public class MParticle {
      * @param minDistance the minimum distance (in meters) to trigger an update
      */
     public void enableLocationTracking(String provider, long minTime, long minDistance) {
-        if (mOptedOut) {
-            return;
-        }
-        try {
-            LocationManager locationManager = (LocationManager) mAppContext.getSystemService(Context.LOCATION_SERVICE);
-            if (!locationManager.isProviderEnabled(provider)) {
-                Log.w(TAG, "That requested location provider is not available");
-                return;
-            }
+        if (mConfigManager.getSendOoEvents()){
+            try {
+                LocationManager locationManager = (LocationManager) mAppContext.getSystemService(Context.LOCATION_SERVICE);
+                if (!locationManager.isProviderEnabled(provider)) {
+                    Log.w(TAG, "That requested location provider is not available");
+                    return;
+                }
 
-            if (null == mLocationListener) {
-                mLocationListener = new MParticleLocationListener(this);
-            } else {
-                // clear the location listener, so it can be added again
-                locationManager.removeUpdates(mLocationListener);
+                if (null == mLocationListener) {
+                    mLocationListener = new MParticleLocationListener(this);
+                } else {
+                    // clear the location listener, so it can be added again
+                    locationManager.removeUpdates(mLocationListener);
+                }
+                locationManager.requestLocationUpdates(provider, minTime, minDistance, mLocationListener);
+            } catch (SecurityException e) {
+                Log.w(TAG, "The app must require the appropriate permissions to track location using this provider");
             }
-            locationManager.requestLocationUpdates(provider, minTime, minDistance, mLocationListener);
-        } catch (SecurityException e) {
-            Log.w(TAG, "The app must require the appropriate permissions to track location using this provider");
         }
     }
 
@@ -645,14 +630,13 @@ public class MParticle {
      * @param value the attribute value
      */
     public void setSessionAttribute(String key, String value) {
-        if (mOptedOut) {
-            return;
-        }
-        ensureActiveSession();
-        if (mDebugMode)
-            debugLog("Set session attribute: " + key + "=" + value);
-        if (setCheckedAttribute(mSessionAttributes, key, value)) {
-            mMessageManager.setSessionAttributes(mSessionID, mSessionAttributes);
+        if (mConfigManager.getSendOoEvents()){
+            ensureActiveSession();
+            if (mDebugMode)
+                debugLog("Set session attribute: " + key + "=" + value);
+            if (setCheckedAttribute(mSessionAttributes, key, value)) {
+                mMessageManager.setSessionAttributes(mSessionID, mSessionAttributes);
+            }
         }
     }
 
@@ -663,17 +647,16 @@ public class MParticle {
      * @param value the attribute value
      */
     public void setUserAttribute(String key, String value) {
-        if (mOptedOut) {
-            return;
-        }
-        if (mDebugMode)
-            if (value != null) {
-                debugLog("Set user attribute: " + key + " with value " + value);
-            } else {
-                debugLog("Set user attribute: " + key);
+        if (mConfigManager.getSendOoEvents()){
+            if (mDebugMode)
+                if (value != null) {
+                    debugLog("Set user attribute: " + key + " with value " + value);
+                } else {
+                    debugLog("Set user attribute: " + key);
+                }
+            if (setCheckedAttribute(mUserAttributes, key, value)) {
+                sPreferences.edit().putString(PrefKeys.USER_ATTRS + mApiKey, mUserAttributes.toString()).commit();
             }
-        if (setCheckedAttribute(mUserAttributes, key, value)) {
-            sPreferences.edit().putString(PrefKeys.USER_ATTRS + mApiKey, mUserAttributes.toString()).commit();
         }
     }
 
@@ -687,47 +670,45 @@ public class MParticle {
     }
 
     public void setUserIdentity(String id, IdentityType identityType) {
-        if (mOptedOut) {
-            return;
-        }
+        if (mConfigManager.getSendOoEvents()){
+            if (mDebugMode)
+                debugLog("Setting user identity: " + id);
 
-        if (mDebugMode)
-            debugLog("Setting user identity: " + id);
+            if (null != id && id.length() > Constants.LIMIT_ATTR_VALUE) {
+                Log.w(TAG, "Id value length exceeds limit. Discarding id: " + id);
+                return;
+            }
 
-        if (null != id && id.length() > Constants.LIMIT_ATTR_VALUE) {
-            Log.w(TAG, "Id value length exceeds limit. Discarding id: " + id);
-            return;
-        }
+            try {
+                JSONObject identity = new JSONObject();
+                identity.put(MessageKey.IDENTITY_NAME, identityType.value);
+                identity.put(MessageKey.IDENTITY_VALUE, id);
 
-        try {
-            JSONObject identity = new JSONObject();
-            identity.put(MessageKey.IDENTITY_NAME, identityType.value);
-            identity.put(MessageKey.IDENTITY_VALUE, id);
+                // verify there is not another IDENTITY_VALUE...if so, remove it first...to do this, copy the
+                //   existing array to a new one
+                JSONArray newUserIdentities = new JSONArray();
 
-            // verify there is not another IDENTITY_VALUE...if so, remove it first...to do this, copy the
-            //   existing array to a new one
-            JSONArray newUserIdentities = new JSONArray();
-
-            for (int i = 0; i < mUserIdentities.length(); i++) {
-                JSONObject testid = mUserIdentities.getJSONObject(i);
-                if (testid.get(MessageKey.IDENTITY_NAME).equals(identityType.value)) {
-                    // remove this one by not copying it
-                    continue;
+                for (int i = 0; i < mUserIdentities.length(); i++) {
+                    JSONObject testid = mUserIdentities.getJSONObject(i);
+                    if (testid.get(MessageKey.IDENTITY_NAME).equals(identityType.value)) {
+                        // remove this one by not copying it
+                        continue;
+                    }
+                    newUserIdentities.put(testid);
                 }
-                newUserIdentities.put(testid);
+                // now add this one...only if the id is not null
+                if ((id != null) && (id.length() > 0)) {
+                    newUserIdentities.put(identity);
+                }
+                // now make the new array the saved one
+                mUserIdentities = newUserIdentities;
+            } catch (JSONException e) {
+                Log.w(TAG, "Error setting identity: " + id);
+                return;
             }
-            // now add this one...only if the id is not null
-            if ((id != null) && (id.length() > 0)) {
-                newUserIdentities.put(identity);
-            }
-            // now make the new array the saved one
-            mUserIdentities = newUserIdentities;
-        } catch (JSONException e) {
-            Log.w(TAG, "Error setting identity: " + id);
-            return;
-        }
 
-        sPreferences.edit().putString(PrefKeys.USER_IDENTITIES + mApiKey, mUserIdentities.toString()).commit();
+            sPreferences.edit().putString(PrefKeys.USER_IDENTITIES + mApiKey, mUserIdentities.toString()).commit();
+        }
     }
 
     /* package-private */void clearUserAttributes() {
@@ -741,7 +722,7 @@ public class MParticle {
      * @return the opt-out status
      */
     public boolean getOptOut() {
-        return mOptedOut;
+        return mConfigManager.getOptedOut();
     }
 
     /**
@@ -750,22 +731,20 @@ public class MParticle {
      * @param optOutStatus set to <code>true</code> to opt out of event tracking
      */
     public void setOptOut(boolean optOutStatus) {
-        if (optOutStatus == mOptedOut) {
-            return;
-        }
-        if (!optOutStatus) {
-            ensureActiveSession();
-        }
-        mMessageManager.optOut(mSessionID, mSessionStartTime, System.currentTimeMillis(), optOutStatus);
-        if (optOutStatus && mSessionStartTime > 0) {
-            endSession();
-        }
+        if (optOutStatus != mConfigManager.getOptedOut()){
+            if (!optOutStatus) {
+                ensureActiveSession();
+            }
+            mMessageManager.optOut(mSessionID, mSessionStartTime, System.currentTimeMillis(), optOutStatus);
+            if (optOutStatus && mSessionStartTime > 0) {
+                endSession();
+            }
 
-        sPreferences.edit().putBoolean(PrefKeys.OPTOUT + mApiKey, optOutStatus).commit();
-        mOptedOut = optOutStatus;
+            mConfigManager.setOptOut(optOutStatus);
 
-        if (mDebugMode)
-            debugLog("Set opt-out: " + mOptedOut);
+            if (mDebugMode)
+                debugLog("Set opt-out: " + optOutStatus);
+        }
     }
 
     /**
@@ -994,17 +973,16 @@ public class MParticle {
      */
     public void setSessionTimeout(int sessionTimeout) {
         mConfigManager.setSessionTimeout(sessionTimeout);
+
     }
 
     void logNotification(Intent intent) {
-        if (mOptedOut){
-            return;
+        if (mConfigManager.getSendOoEvents()){
+            lastNotificationBundle = intent.getExtras().getBundle(MessageKey.PAYLOAD);
+            ensureActiveSession();
+            mMessageManager.logNotification(mSessionID, mSessionStartTime, lastNotificationBundle, intent.getExtras().getString(MessageKey.APP_STATE));
         }
-        lastNotificationBundle = intent.getExtras().getBundle(MessageKey.PAYLOAD);
-        ensureActiveSession();
-        mMessageManager.logNotification(mSessionID, mSessionStartTime, lastNotificationBundle, intent.getExtras().getString(MessageKey.APP_STATE));
     }
-
 
     public enum EventType {
         Unknown, Navigation, Location, Search, Transaction, UserContent, UserPreference, Social, Other;

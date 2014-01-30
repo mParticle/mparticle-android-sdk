@@ -13,6 +13,7 @@ import org.json.JSONObject;
  */
 class ConfigManager {
     public static final String CONFIG_JSON = "json";
+    private static final String KEY_OPT_OUT = "oo";
     private static volatile ConfigManager instance;
 
     public static final String KEY_SESSION_UPLOAD_MODE = "su";
@@ -39,6 +40,7 @@ class ConfigManager {
     private boolean loaded = false;
     boolean pushVibrationEnabled = true;
     boolean pushSoundEnabled = true;
+    private boolean sendOoEvents;
 
     public ConfigManager(Context context, String key, String secret, boolean sandboxMode) {
         mContext = context.getApplicationContext();
@@ -68,6 +70,10 @@ class ConfigManager {
             for (int i = 0; i < pushKeyArray.length(); i++){
                 pushKeys[i] = pushKeyArray.getString(i);
             }
+        }
+
+        if (responseJSON.has(KEY_OPT_OUT)){
+            sendOoEvents = responseJSON.getBoolean(KEY_OPT_OUT);
         }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD) {
@@ -199,5 +205,23 @@ class ConfigManager {
 
     public void setPushVibrationEnabled(boolean pushVibrationEnabled) {
         this.pushVibrationEnabled = pushVibrationEnabled;
+    }
+
+    public boolean getSendOoEvents(){
+        boolean optedOut = this.getOptedOut();
+        if (!optedOut){
+            return true;
+        }else{
+            return sendOoEvents;
+        }
+
+    }
+
+    public void setOptOut(boolean optOut){
+        mPreferences.edit().putBoolean(Constants.PrefKeys.OPTOUT, optOut).commit();
+    }
+
+    public boolean getOptedOut(){
+        return mPreferences.getBoolean(Constants.PrefKeys.OPTOUT, false);
     }
 }

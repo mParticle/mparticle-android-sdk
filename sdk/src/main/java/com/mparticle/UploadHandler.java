@@ -357,6 +357,7 @@ import javax.crypto.spec.SecretKeySpec;
         if (BuildConfig.ECHO){
             uploadMessage.put("echo", true);
         }
+        uploadMessage.put(MessageKey.OPT_OUT_HEADER, mConfigManager.getOptedOut());
 
         mAppInfo.put(MessageKey.INSTALL_REFERRER, mPreferences.getString(PrefKeys.INSTALL_REFERRER, null));
         uploadMessage.put(MessageKey.APP_INFO, mAppInfo);
