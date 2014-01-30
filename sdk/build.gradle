@@ -45,6 +45,7 @@ android.libraryVariants.all { variant ->
         classpath = files(android.plugin.runtimeJarList, variant.javaCompile.classpath)
         options.setWindowTitle("mParticle Android API")
         options.setDocTitle("mParticle Android SDK Documentation")
+        options.setStylesheetFile(new File("sdk/src/main/css", "mp-javadoc-stylesheet.css"))
     }
 }
 

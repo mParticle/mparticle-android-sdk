@@ -380,7 +380,6 @@ public class MParticle {
      * Creates a new session and generates the start-session message.
      */
     private void newSession() {
-        endSession();
         mLastEventTime = mSessionStartTime = System.currentTimeMillis();
         mSessionID = UUID.randomUUID().toString();
         mEventCount = 0;
