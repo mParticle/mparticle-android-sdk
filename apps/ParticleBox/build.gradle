@@ -12,6 +12,7 @@ apply plugin: 'android'
 
 repositories {
     mavenCentral()
+    mavenLocal()
 }
 
 def buildTime() {
@@ -19,8 +20,6 @@ def buildTime() {
     df.setTimeZone(TimeZone.getTimeZone("UTC"))
     return df.format(new Date())
 }
-
-
 
 android {
     compileSdkVersion 19
@@ -39,5 +38,5 @@ android {
 dependencies {
 	compile 'com.android.support:support-v4:19.0.0'
 	compile 'com.android.support:appcompat-v7:19.0.0'
-    compile project(':sdk')
+    compile ':sdk'
 }

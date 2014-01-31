@@ -1,4 +1,5 @@
-import java.text.SimpleDateFormat
+apply plugin: 'android-library'
+apply plugin: 'maven'
 
 buildscript {
     repositories {
@@ -9,7 +10,6 @@ buildscript {
 
     }
 }
-apply plugin: 'android-library'
 
 repositories {
     mavenCentral()
@@ -22,6 +22,7 @@ android {
     defaultConfig {
         minSdkVersion 8
         targetSdkVersion 19
+        version 1.0
     }
 
     debug {
@@ -31,7 +32,7 @@ android {
 
     release {
         buildConfigField "boolean", "ECHO", "true"
-        runProguard false
+        runProguard true
         proguardFile 'proguard.txt'
     }
 
@@ -39,6 +40,7 @@ android {
 
 android.libraryVariants.all { variant ->
     def name = variant.name
+
     task "javadoc$name"(type: Javadoc) {
         description = "Generates javadoc for build $name"
         destinationDir = new File('docs', variant.baseName)
@@ -51,6 +53,28 @@ android.libraryVariants.all { variant ->
         options.addStringOption('templatedir', 'docs/customization')
         options.docletpath = pathList
         options.doclet = "com.google.doclava.Doclava"
+    }
+}
+
+android.libraryVariants.all { variant ->
+    def name = variant.buildType.name
+    if (name.equals(com.android.builder.BuilderConstants.DEBUG)) {
+        return; // Skip debug builds.
+    }
+    def task = project.tasks.create "jar${name.capitalize()}", Jar
+    task.dependsOn variant.javaCompile
+    task.from variant.javaCompile.destinationDir
+    artifacts.add('archives', task);
+}
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            repository(url: "file://localhost/Users/sdozor/maven/repo/")
+            pom.version = version
+            pom.artifactId = 'android-sdk'
+            pom.groupId = 'com.mparticle'
+        }
     }
 }
 
