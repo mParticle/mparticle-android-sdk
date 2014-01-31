@@ -14,7 +14,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 /**
- * Javascript interface to be used for WebView analytics.
+ * Javascript interface to be used for {@code Webview} analytics.
  *
  */
 public class MParticleJSInterface {

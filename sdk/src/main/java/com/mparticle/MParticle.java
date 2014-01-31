@@ -230,7 +230,7 @@ public class MParticle {
 
     /**
      * Retrieve an instance of the MParticle class. {@link #start(android.content.Context)} or {@link #start(android.content.Context, String, String, boolean)} must
-     * be called prior to this or a {@link java.lang.IllegalStateException} will be thrown.
+     * be called prior to this or a {@code java.lang.IllegalStateException} will be thrown.
      *
      * @return An instance of the mParticle SDK configured with your API key
      */
@@ -1077,7 +1077,7 @@ public class MParticle {
     }
 
     /**
-     * Identity type to use when setting the user identity
+     * Identity type to use when setting the user identity.
      *
      * @see #setUserIdentity(String, com.mparticle.MParticle.IdentityType)
      *

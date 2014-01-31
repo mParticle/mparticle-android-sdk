@@ -1,12 +1,12 @@
 package com.mparticle.activity;
 
-import android.app.Activity;
 import android.os.Build;
+import android.support.v4.app.FragmentActivity;
 
 import com.mparticle.MParticle;
 
 /**
- * <p>{@code Activity} implementation to be sub-classed that automatically handles screen tracking as
+ * <p>Compatiblity {@code FragmentActivity} implementation to be sub-classed that automatically handles screen tracking as
  * well as application background and foreground tracking.</p>
  *
  * <p></p>This class need only be used on pre-ICS (API level 14) devices. For pre-ICS, every {@code Activity} in your
@@ -17,10 +17,10 @@ import com.mparticle.MParticle;
  * <p>For ICS and later, screen tracking and application state tracking are handled automatically.</p>
  *
  * @see com.mparticle.activity.MPListActivity
- * @see com.mparticle.activity.MPFragmentActivity
+ * @see com.mparticle.activity.MPActivity
  *
  */
-public class MPActivity extends Activity {
+public class MPFragmentActivity extends FragmentActivity {
     @Override
     protected void onStart() {
         super.onStart();

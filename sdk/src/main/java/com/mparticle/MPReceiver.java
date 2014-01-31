@@ -7,7 +7,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 
 /**
- * BroadcastReceiver that handles the following Intent actions:
+ * Core {@code BroadcastReceiver} used to support push notification and installer referrers. Handles the following Intent actions:
  *
  * <ul>
  *     <li>{@code com.android.vending.INSTALL_REFERRER}</li>
@@ -16,7 +16,8 @@ import android.content.SharedPreferences;
  *     <li>{@code com.google.android.c2dm.intent.UNREGISTER}</li>
  * </ul>
  *
- * This BroadcastReceiver should be specified within the {@code <application>} block of AndroidManifest.xml file:
+ * This {@code BroadcastReceiver} must be specified within the {@code <application>} block of your application's {@code AndroidManifest.xml} file:
+ *
  *
  * <pre>
  * {@code

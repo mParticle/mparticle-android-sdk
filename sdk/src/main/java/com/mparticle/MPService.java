@@ -13,6 +13,16 @@ import android.os.Bundle;
 import android.os.PowerManager;
 import android.util.Log;
 
+/**
+ * {@code IntentService } used internally by the SDK to process incoming broadcast messages in the background. Required for push notification functionality.
+ *
+ * This {@code IntentService} must be specified within the {@code <application>} block of your application's {@code AndroidManifest.xml} file:
+ *
+ * <pre>
+ * {@code
+ * <service android:name="com.mparticle.MPService" />}
+ *</pre>
+ */
 public class MPService extends IntentService {
 
     private static final String TAG = Constants.LOG_TAG;
