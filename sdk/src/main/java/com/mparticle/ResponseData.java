@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.mparticle.com.google.licensing;
+package com.mparticle;
 
 import java.util.regex.Pattern;
 
@@ -23,7 +23,7 @@ import android.text.TextUtils;
 /**
  * ResponseData from licensing server.
  */
-public class ResponseData {
+class ResponseData {
 
     public int responseCode;
     public int nonce;

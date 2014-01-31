@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.mparticle.com.google.licensing;
+package com.mparticle;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
@@ -43,7 +43,7 @@ import android.util.Log;
  * Developers who need more fine grained control over their application's
  * licensing policy should implement a custom Policy.
  */
-public class ServerManagedPolicy implements Policy {
+class ServerManagedPolicy implements Policy {
 
     private static final String TAG = "ServerManagedPolicy";
     private static final String PREFS_FILE = "com.android.vending.licensing.ServerManagedPolicy";

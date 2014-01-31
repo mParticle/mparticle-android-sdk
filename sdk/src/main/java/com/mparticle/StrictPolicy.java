@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.mparticle.com.google.licensing;
+package com.mparticle;
 
 /**
  * Non-caching policy. All requests will be sent to the licensing service,
@@ -29,7 +29,7 @@ package com.mparticle.com.google.licensing;
  * Access to the application is only allowed if a LICESNED response is.
  * received. All other responses (including RETRY) will deny access.
  */
-public class StrictPolicy implements Policy {
+class StrictPolicy implements Policy {
 
     private int mLastResponse;
 

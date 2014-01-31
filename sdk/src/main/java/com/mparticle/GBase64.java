@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package com.mparticle.com.google.licensing.util;
+package com.mparticle;
 
 // This code was converted from code at http://iharder.sourceforge.net/base64/
 // Lots of extraneous features were removed.
@@ -32,13 +32,13 @@ package com.mparticle.com.google.licensing.util;
  */
 
 /**
- * Base64 converter class. This code is not a full-blown MIME encoder;
+ * GBase64 converter class. This code is not a full-blown MIME encoder;
  * it simply converts binary data to base64 data and back.
  *
  * <p>Note {@link CharBase64} is a GWT-compatible implementation of this
  * class.
  */
-public class Base64 {
+class GBase64 {
   /** Specify encoding (value is {@code true}). */
   public final static boolean ENCODE = true;
 
@@ -52,7 +52,7 @@ public class Base64 {
   private final static byte NEW_LINE = (byte) '\n';
 
   /**
-   * The 64 valid Base64 values.
+   * The 64 valid GBase64 values.
    */
   private final static byte[] ALPHABET =
       {(byte) 'A', (byte) 'B', (byte) 'C', (byte) 'D', (byte) 'E', (byte) 'F',
@@ -70,7 +70,7 @@ public class Base64 {
           (byte) '9', (byte) '+', (byte) '/'};
 
   /**
-   * The 64 valid web safe Base64 values.
+   * The 64 valid web safe GBase64 values.
    */
   private final static byte[] WEBSAFE_ALPHABET =
       {(byte) 'A', (byte) 'B', (byte) 'C', (byte) 'D', (byte) 'E', (byte) 'F',
@@ -88,7 +88,7 @@ public class Base64 {
           (byte) '9', (byte) '-', (byte) '_'};
 
   /**
-   * Translates a Base64 value to either its 6-bit reconstruction value
+   * Translates a GBase64 value to either its 6-bit reconstruction value
    * or a negative number indicating some other meaning.
    **/
   private final static byte[] DECODABET = {-9, -9, -9, -9, -9, -9, -9, -9, -9, // Decimal  0 -  8
@@ -166,14 +166,14 @@ public class Base64 {
   private final static byte EQUALS_SIGN_ENC = -1;
 
   /** Defeats instantiation. */
-  private Base64() {
+  private GBase64() {
   }
 
   /* ********  E N C O D I N G   M E T H O D S  ******** */
 
   /**
    * Encodes up to three bytes of the array <var>source</var>
-   * and writes the resulting four Base64 bytes to <var>destination</var>.
+   * and writes the resulting four GBase64 bytes to <var>destination</var>.
    * The source and destination arrays can be manipulated
    * anywhere along their length by specifying
    * <var>srcOffset</var> and <var>destOffset</var>.
@@ -236,7 +236,7 @@ public class Base64 {
   } // end encode3to4
 
   /**
-   * Encodes a byte array into Base64 notation.
+   * Encodes a byte array into GBase64 notation.
    * Equivalent to calling
    * {@code encodeBytes(source, 0, source.length)}
    *
@@ -248,7 +248,7 @@ public class Base64 {
   }
 
   /**
-   * Encodes a byte array into web safe Base64 notation.
+   * Encodes a byte array into web safe GBase64 notation.
    *
    * @param source The data to convert
    * @param doPadding is {@code true} to pad result with '=' chars
@@ -259,7 +259,7 @@ public class Base64 {
   }
 
   /**
-   * Encodes a byte array into Base64 notation.
+   * Encodes a byte array into GBase64 notation.
    *
    * @param source The data to convert
    * @param off Offset in array where conversion should begin
@@ -287,7 +287,7 @@ public class Base64 {
   }
 
   /**
-   * Encodes a byte array into Base64 notation.
+   * Encodes a byte array into GBase64 notation.
    *
    * @param source The data to convert
    * @param off Offset in array where conversion should begin
@@ -361,14 +361,14 @@ public class Base64 {
    * the <var>source</var> array or <var>destOffset</var> + 3 for
    * the <var>destination</var> array.
    * This method returns the actual number of bytes that
-   * were converted from the Base64 encoding.
+   * were converted from the GBase64 encoding.
    *
    *
    * @param source the array to convert
    * @param srcOffset the index where conversion begins
    * @param destination the array to hold the conversion
    * @param destOffset the index where output will be put
-   * @param decodabet the decodabet for decoding Base64 content
+   * @param decodabet the decodabet for decoding GBase64 content
    * @return the number of decoded bytes converted
    * @since 1.3
    */
@@ -409,7 +409,7 @@ public class Base64 {
 
 
   /**
-   * Decodes data from Base64 notation.
+   * Decodes data from GBase64 notation.
    *
    * @param s the string to decode (decoded in default encoding)
    * @return the decoded data
@@ -421,7 +421,7 @@ public class Base64 {
   }
 
   /**
-   * Decodes data from web safe Base64 notation.
+   * Decodes data from web safe GBase64 notation.
    * Web safe encoding uses '-' instead of '+', '_' instead of '/'
    *
    * @param s the string to decode (decoded in default encoding)
@@ -433,10 +433,10 @@ public class Base64 {
   }
 
   /**
-   * Decodes Base64 content in byte array format and returns
+   * Decodes GBase64 content in byte array format and returns
    * the decoded byte array.
    *
-   * @param source The Base64 encoded data
+   * @param source The GBase64 encoded data
    * @return decoded data
    * @since 1.3
    * @throws Base64DecoderException
@@ -446,7 +446,7 @@ public class Base64 {
   }
 
   /**
-   * Decodes web safe Base64 content in byte array format and returns
+   * Decodes web safe GBase64 content in byte array format and returns
    * the decoded data.
    * Web safe encoding uses '-' instead of '+', '_' instead of '/'
    *
@@ -459,10 +459,10 @@ public class Base64 {
   }
 
   /**
-   * Decodes Base64 content in byte array format and returns
+   * Decodes GBase64 content in byte array format and returns
    * the decoded byte array.
    *
-   * @param source The Base64 encoded data
+   * @param source The GBase64 encoded data
    * @param off    The offset of where to begin decoding
    * @param len    The length of characters to decode
    * @return decoded data
@@ -475,11 +475,11 @@ public class Base64 {
   }
 
   /**
-   * Decodes web safe Base64 content in byte array format and returns
+   * Decodes web safe GBase64 content in byte array format and returns
    * the decoded byte array.
    * Web safe encoding uses '-' instead of '+', '_' instead of '/'
    *
-   * @param source The Base64 encoded data
+   * @param source The GBase64 encoded data
    * @param off    The offset of where to begin decoding
    * @param len    The length of characters to decode
    * @return decoded data
@@ -490,13 +490,13 @@ public class Base64 {
   }
 
   /**
-   * Decodes Base64 content using the supplied decodabet and returns
+   * Decodes GBase64 content using the supplied decodabet and returns
    * the decoded byte array.
    *
-   * @param source    The Base64 encoded data
+   * @param source    The GBase64 encoded data
    * @param off       The offset of where to begin decoding
    * @param len       The length of characters to decode
-   * @param decodabet the decodabet for decoding Base64 content
+   * @param decodabet the decodabet for decoding GBase64 content
    * @return decoded data
    */
   public static byte[] decode(byte[] source, int off, int len, byte[] decodabet)
@@ -543,7 +543,7 @@ public class Base64 {
           }
         }
       } else {
-        throw new Base64DecoderException("Bad Base64 input character at " + i
+        throw new Base64DecoderException("Bad GBase64 input character at " + i
             + ": " + source[i + off] + "(decimal)");
       }
     }

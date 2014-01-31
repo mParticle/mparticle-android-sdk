@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.mparticle.com.google.licensing;
+package com.mparticle;
 
 /**
  * Allows the developer to limit the number of devices using a single license.
@@ -35,7 +35,7 @@ package com.mparticle.com.google.licensing;
  * changing phones. This will catch egregious violations of multiple people
  * sharing one license.
  */
-public interface DeviceLimiter {
+interface DeviceLimiter {
 
     /**
      * Checks if this device is allowed to use the given user's license.

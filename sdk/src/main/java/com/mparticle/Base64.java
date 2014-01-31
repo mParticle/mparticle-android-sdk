@@ -14,7 +14,7 @@ import java.util.Arrays;
  * on small arrays (10 - 1000 bytes) and 2-3 times as fast on larger arrays (10000 - 1000000 bytes)
  * compared to <code>sun.misc.Encoder()/Decoder()</code>.<br><br>
  * <p/>
- * On byte arrays the encoder is about 20% faster than Jakarta Commons Base64 Codec for encode and
+ * On byte arrays the encoder is about 20% faster than Jakarta Commons GBase64 Codec for encode and
  * about 50% faster for decoding large arrays. This implementation is about twice as fast on very small
  * arrays (&lt 30 bytes). If source/destination is a <code>String</code> this
  * version is about three times as fast due to the fact that the Commons Codec result has to be recoded

@@ -14,11 +14,8 @@
  * limitations under the License.
  */
 
-package com.mparticle.com.google.licensing;
+package com.mparticle;
 
-
-import com.mparticle.com.google.licensing.util.Base64;
-import com.mparticle.com.google.licensing.util.Base64DecoderException;
 
 import java.io.UnsupportedEncodingException;
 import java.security.GeneralSecurityException;
@@ -36,7 +33,7 @@ import javax.crypto.spec.SecretKeySpec;
 /**
  * An Obfuscator that uses AES to encrypt data.
  */
-public class AESObfuscator implements Obfuscator {
+class AESObfuscator implements Obfuscator {
     private static final String UTF8 = "UTF-8";
     private static final String KEYGEN_ALGORITHM = "PBEWITHSHAAND256BITAES-CBC-BC";
     private static final String CIPHER_ALGORITHM = "AES/CBC/PKCS5Padding";
@@ -76,7 +73,7 @@ public class AESObfuscator implements Obfuscator {
         }
         try {
             // Header is appended as an integrity check
-            return Base64.encode(mEncryptor.doFinal((header + key + original).getBytes(UTF8)));
+            return GBase64.encode(mEncryptor.doFinal((header + key + original).getBytes(UTF8)));
         } catch (UnsupportedEncodingException e) {
             throw new RuntimeException("Invalid environment", e);
         } catch (GeneralSecurityException e) {
@@ -89,7 +86,7 @@ public class AESObfuscator implements Obfuscator {
             return null;
         }
         try {
-            String result = new String(mDecryptor.doFinal(Base64.decode(obfuscated)), UTF8);
+            String result = new String(mDecryptor.doFinal(GBase64.decode(obfuscated)), UTF8);
             // Check for presence of header. This serves as a final integrity check, for cases
             // where the block size is correct during decryption.
             int headerIndex = result.indexOf(header+key);

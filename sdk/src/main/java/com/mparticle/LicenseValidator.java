@@ -14,13 +14,10 @@
  * limitations under the License.
  */
 
-package com.mparticle.com.google.licensing;
+package com.mparticle;
 
 import android.text.TextUtils;
 import android.util.Log;
-
-import com.mparticle.com.google.licensing.util.Base64;
-import com.mparticle.com.google.licensing.util.Base64DecoderException;
 
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -98,7 +95,7 @@ class LicenseValidator {
                 sig.initVerify(publicKey);
                 sig.update(signedData.getBytes());
 
-                if (!sig.verify(Base64.decode(signature))) {
+                if (!sig.verify(GBase64.decode(signature))) {
                     Log.e(TAG, "Signature verification failed.");
                     handleInvalidResponse();
                     return;
@@ -112,7 +109,7 @@ class LicenseValidator {
             } catch (SignatureException e) {
                 throw new RuntimeException(e);
             } catch (Base64DecoderException e) {
-                Log.e(TAG, "Could not Base64-decode signature.");
+                Log.e(TAG, "Could not GBase64-decode signature.");
                 handleInvalidResponse();
                 return;
             }

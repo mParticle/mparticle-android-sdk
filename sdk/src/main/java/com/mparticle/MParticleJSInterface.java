@@ -13,6 +13,10 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+/**
+ * Javascript interface to be used for WebView analytics.
+ *
+ */
 public class MParticleJSInterface {
     private static final String TAG = Constants.LOG_TAG;
     private Context mContext;

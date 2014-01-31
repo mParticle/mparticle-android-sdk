@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.mparticle.com.google.licensing;
+package com.mparticle;
 
 import android.content.SharedPreferences;
 import android.util.Log;
@@ -22,7 +22,7 @@ import android.util.Log;
 /**
  * An wrapper for SharedPreferences that transparently performs data obfuscation.
  */
-public class PreferenceObfuscator {
+class PreferenceObfuscator {
 
     private static final String TAG = "PreferenceObfuscator";
 

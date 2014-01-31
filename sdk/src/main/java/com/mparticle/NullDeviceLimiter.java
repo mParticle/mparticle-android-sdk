@@ -14,20 +14,19 @@
  * limitations under the License.
  */
 
-package com.mparticle.com.google.licensing;
+package com.mparticle;
 
 /**
- * Indicates that an error occurred while validating the integrity of data managed by an
- * {@link Obfuscator}.}
+ * A DeviceLimiter that doesn't limit the number of devices that can use a
+ * given user's license.
+ * <p>
+ * Unless you have reason to believe that your application is being pirated
+ * by multiple users using the same license (signing in to Market as the same
+ * user), we recommend you use this implementation.
  */
-public class ValidationException extends Exception {
-    public ValidationException() {
-      super();
-    }
+class NullDeviceLimiter implements DeviceLimiter {
 
-    public ValidationException(String s) {
-      super(s);
+    public int isDeviceAllowed(String userId) {
+        return Policy.LICENSED;
     }
-
-    private static final long serialVersionUID = 1L;
 }

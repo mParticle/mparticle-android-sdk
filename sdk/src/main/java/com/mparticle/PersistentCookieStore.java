@@ -188,7 +188,7 @@ import java.util.concurrent.ConcurrentHashMap;
     }
 
     // Using some super basic byte array <-> hex conversions so we don't have
-    // to rely on any large Base64 libraries. Can be overridden if you like!
+    // to rely on any large GBase64 libraries. Can be overridden if you like!
     protected String byteArrayToHexString(byte[] b) {
         StringBuffer sb = new StringBuffer(b.length * 2);
         for (byte element : b) {

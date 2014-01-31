@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package com.mparticle.com.google.licensing;
+package com.mparticle;
 
 /**
  * Policy used by {@link LicenseChecker} to determine whether a user should have
  * access to the application.
  */
-public interface Policy {
+interface Policy {
 
     /**
      * Change these values to make it more difficult for tools to automatically

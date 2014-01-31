@@ -20,11 +20,6 @@ import android.util.Log;
 
 import com.mparticle.Constants.MessageKey;
 import com.mparticle.Constants.PrefKeys;
-import com.mparticle.com.google.licensing.AESObfuscator;
-import com.mparticle.com.google.licensing.LicenseChecker;
-import com.mparticle.com.google.licensing.LicenseCheckerCallback;
-import com.mparticle.com.google.licensing.Policy;
-import com.mparticle.com.google.licensing.ServerManagedPolicy;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -35,7 +30,7 @@ import java.util.Map;
 import java.util.UUID;
 
 /**
- * Class to provide thread-safe access to the mParticle API. In order to use this class, you must first call {@link #start(android.content.Context)}, which requires
+ * The primary access point to the mParticle SDK. In order to use this class, you must first call {@link #start(android.content.Context)}, which requires
  * configuration via {@link <a href="http://developer.android.com/guide/topics/resources/providing-resources.html">Android Resources</a>}. You can then retrieve a reference
  * to an instance of this class via {@link #getInstance()}
  *
@@ -991,11 +986,11 @@ public class MParticle {
      *
      * Optionally use the licensingCallback to allow or disallow access to features of your application.
      *
-     * @param encodedPublicKey  Base64-encoded RSA public key of your application
-     * @param policy            <b>Optional</b> {@link com.mparticle.com.google.licensing.Policy}, will default to {@link com.mparticle.com.google.licensing.ServerManagedPolicy}
-     * @param licensingCallback <b>Optional</b> {@link com.mparticle.com.google.licensing.LicenseCheckerCallback} callback for licensing checking
+     * @param encodedPublicKey  GBase64-encoded RSA public key of your application
+     * @param policy            <b>Optional</b> {@link Policy}, will default to {@link ServerManagedPolicy}
+     * @param licensingCallback <b>Optional</b> {@link LicenseCheckerCallback} callback for licensing checking
      */
-    public void performLicenseCheck(String encodedPublicKey, Policy policy, LicenseCheckerCallback licensingCallback) {
+    private void performLicenseCheck(String encodedPublicKey, Policy policy, LicenseCheckerCallback licensingCallback) {
         if (encodedPublicKey == null || encodedPublicKey.length() == 0) {
             throw new IllegalArgumentException("LicenseKey null or invalid.");
         }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.mparticle.com.google.licensing;
+package com.mparticle;
 
 /**
  * Callback for the license checker library.
@@ -32,7 +32,7 @@ package com.mparticle.com.google.licensing;
  * while in most cases Policy.NOT_LICENSED will call dontAllow and
  * Policy.LICENSED will Allow.
  */
-public interface LicenseCheckerCallback {
+interface LicenseCheckerCallback {
 
     /**
      * Allow use. App should proceed as normal.

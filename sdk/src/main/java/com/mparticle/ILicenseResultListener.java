@@ -2,10 +2,10 @@
  * This file is auto-generated.  DO NOT MODIFY.
  * Original file: aidl/ILicenseResultListener.aidl
  */
-package com.mparticle.com.google.licensing;
+package com.mparticle;
 import android.os.IBinder;
 
-public interface ILicenseResultListener extends android.os.IInterface
+interface ILicenseResultListener extends android.os.IInterface
 {
 /** Local-side IPC implementation stub class. */
 public static abstract class Stub extends android.os.Binder implements ILicenseResultListener

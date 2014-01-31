@@ -47,8 +47,9 @@
             <intent-filter>
                 <action android:name="com.google.android.c2dm.intent.RECEIVE" />
                 <action android:name="com.google.android.c2dm.intent.REGISTRATION" />
-
-                <!-- MODIFICATION REQUIRED - Use your package name as the category -->
+                <action android:name="com.google.android.c2dm.intent.UNREGISTER"/>
+                <action android:name="com.android.vending.INSTALL_REFERRER"/>
+                <!-- Use your package name as the category -->
                 <category android:name="com.mparticle.particlebox" />
             </intent-filter>
         </receiver>

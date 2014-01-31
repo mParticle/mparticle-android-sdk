@@ -12,14 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package com.mparticle.com.google.licensing.util;
+package com.mparticle;
 
 /**
- * Exception thrown when encountering an invalid Base64 input character.
+ * Exception thrown when encountering an invalid GBase64 input character.
  *
  * @author nelson
  */
-public class Base64DecoderException extends Exception {
+class Base64DecoderException extends Exception {
   public Base64DecoderException() {
     super();
   }

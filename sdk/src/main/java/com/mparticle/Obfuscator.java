@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.mparticle.com.google.licensing;
+package com.mparticle;
 
 /**
  * Interface used as part of a {@link Policy} to allow application authors to obfuscate
@@ -25,7 +25,7 @@ package com.mparticle.com.google.licensing;
  * should use device-specific information as a key in the obfuscation algorithm to prevent
  * obfuscated preferences from being shared among devices.
  */
-public interface Obfuscator {
+interface Obfuscator {
 
     /**
      * Obfuscate a string that is being stored into shared preferences.

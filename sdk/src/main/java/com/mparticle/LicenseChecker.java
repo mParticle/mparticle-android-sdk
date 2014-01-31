@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.mparticle.com.google.licensing;
+package com.mparticle;
 
 
 import android.content.ComponentName;
@@ -28,9 +28,6 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.provider.Settings.Secure;
 import android.util.Log;
-
-import com.mparticle.com.google.licensing.util.Base64;
-import com.mparticle.com.google.licensing.util.Base64DecoderException;
 
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
@@ -52,10 +49,10 @@ import java.util.Set;
  * example, the Policy can define a threshold for allowable number of server or
  * client failures before the library reports the user as not having access.
  * <p>
- * Must also provide the Base64-encoded RSA public key associated with your
+ * Must also provide the GBase64-encoded RSA public key associated with your
  * developer account. The public key is obtainable from the publisher site.
  */
-public class LicenseChecker implements ServiceConnection {
+class LicenseChecker implements ServiceConnection {
     private static final String TAG = "LicenseChecker";
 
     private static final String KEY_FACTORY_ALGORITHM = "RSA";
@@ -84,7 +81,7 @@ public class LicenseChecker implements ServiceConnection {
     /**
      * @param context a Context
      * @param policy implementation of Policy
-     * @param encodedPublicKey Base64-encoded RSA public key
+     * @param encodedPublicKey GBase64-encoded RSA public key
      * @throws IllegalArgumentException if encodedPublicKey is invalid
      */
     public LicenseChecker(Context context, Policy policy, String encodedPublicKey) {
@@ -100,14 +97,14 @@ public class LicenseChecker implements ServiceConnection {
 
     /**
      * Generates a PublicKey instance from a string containing the
-     * Base64-encoded public key.
+     * GBase64-encoded public key.
      * 
-     * @param encodedPublicKey Base64-encoded public key
+     * @param encodedPublicKey GBase64-encoded public key
      * @throws IllegalArgumentException if encodedPublicKey is invalid
      */
     private static PublicKey generatePublicKey(String encodedPublicKey) {
         try {
-            byte[] decodedKey = Base64.decode(encodedPublicKey);
+            byte[] decodedKey = GBase64.decode(encodedPublicKey);
             KeyFactory keyFactory = KeyFactory.getInstance(KEY_FACTORY_ALGORITHM);
 
             return keyFactory.generatePublic(new X509EncodedKeySpec(decodedKey));
@@ -115,7 +112,7 @@ public class LicenseChecker implements ServiceConnection {
             // This won't happen in an Android-compatible environment.
             throw new RuntimeException(e);
         } catch (Base64DecoderException e) {
-            Log.e(TAG, "Could not decode from Base64.");
+            Log.e(TAG, "Could not decode from GBase64.");
             throw new IllegalArgumentException(e);
         } catch (InvalidKeySpecException e) {
             Log.e(TAG, "Invalid key specification.");
@@ -151,7 +148,7 @@ public class LicenseChecker implements ServiceConnection {
                             .bindService(
                                     new Intent(
                                             new String(
-                                                    Base64.decode("Y29tLmFuZHJvaWQudmVuZGluZy5saWNlbnNpbmcuSUxpY2Vuc2luZ1NlcnZpY2U="))),
+                                                    GBase64.decode("Y29tLmFuZHJvaWQudmVuZGluZy5saWNlbnNpbmcuSUxpY2Vuc2luZ1NlcnZpY2U="))),
                                     this, // ServiceConnection.
                                     Context.BIND_AUTO_CREATE);
 
