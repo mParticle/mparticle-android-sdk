@@ -1,0 +1,15 @@
+#header {
+  border-bottom: 3px solid #7835AB;
+}
+
+#search_filtered .jd-selected {
+  background-color: #7835AB;
+}
+
+#jd-header {
+  background-color: #E2E2E2;
+}
+
+#headerLeft h1 {
+    margin: 0;
+}

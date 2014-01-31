@@ -41,14 +41,14 @@ android.libraryVariants.all { variant ->
     def name = variant.name
     task "javadoc$name"(type: Javadoc) {
         description = "Generates javadoc for build $name"
-        destinationDir = new File('documentation', variant.baseName)
+        destinationDir = new File('docs', variant.baseName)
         source = 'src/main/java'
         classpath = files(android.plugin.runtimeJarList, variant.javaCompile.classpath)
         title = null
         List<File> pathList = new ArrayList<File>();
-        pathList.add(new File("documentation/doclava-1.0.6.jar"))
+        pathList.add(new File("docs/doclava-1.0.6.jar"))
         options.addStringOption('title', 'Android SDK')
-        options.addStringOption('templatedir', 'documentation')
+        options.addStringOption('templatedir', 'docs/customization')
         options.docletpath = pathList
         options.doclet = "com.google.doclava.Doclava"
     }
