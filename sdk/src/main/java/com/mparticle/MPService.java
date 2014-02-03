@@ -71,7 +71,7 @@ public class MPService extends IntentService {
             }
         } finally {
             synchronized (LOCK) {
-                if (sWakeLock != null) {
+                if (sWakeLock != null && sWakeLock.isHeld()) {
                     sWakeLock.release();
                 }
             }
@@ -81,13 +81,11 @@ public class MPService extends IntentService {
     private void handleNotificationClick(Intent intent) {
         try {
             MParticle.lastNotificationBundle = intent.getExtras().getBundle(Constants.MessageKey.PAYLOAD);
+            MParticle.start(getApplicationContext());
             MParticle mMParticle = MParticle.getInstance();
             mMParticle.logNotification(intent);
         } catch (Throwable t) {
-            // failure to instantiate mParticle likely means that the
-            // mparticle.properties file is not correct
-            // and a warning message will already have been logged
-            return;
+
         }
 
         PackageManager packageManager = getPackageManager();
@@ -161,9 +159,9 @@ public class MPService extends IntentService {
                     String message = extras.getString(key);
                     if (message != null && message.length() > 0){
                         //redact message contents for privacy concerns
-                        extras.remove(key);
-                        extras.putString(key, "");
-                        showPushWithMessage(title, message, extras);
+                        newExtras.getBundle(Constants.MessageKey.PAYLOAD).remove(key);
+                        newExtras.getBundle(Constants.MessageKey.PAYLOAD).putString(key, "");
+                        showPushWithMessage(title, message, newExtras);
                         break;
                     }
                 }
@@ -197,7 +195,7 @@ public class MPService extends IntentService {
             Intent launchIntent = new Intent(getApplicationContext(), MPService.class);
             launchIntent.setAction(MPARTICLE_NOTIFICATION_OPENED);
             launchIntent.putExtras(extras);
-            PendingIntent notifyIntent = PendingIntent.getService(getApplicationContext(), 0, new Intent(getApplicationContext(), MPService.class), PendingIntent.FLAG_UPDATE_CURRENT);
+            PendingIntent notifyIntent = PendingIntent.getService(getApplicationContext(), 0, launchIntent, PendingIntent.FLAG_UPDATE_CURRENT);
             Notification notification = new Notification(applicationIcon, message, System.currentTimeMillis());
             if (mMParticle.mConfigManager.isPushSoundEnabled()){
                 notification.flags |= Notification.DEFAULT_SOUND;
