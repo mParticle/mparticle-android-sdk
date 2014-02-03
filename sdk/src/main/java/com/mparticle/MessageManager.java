@@ -349,7 +349,15 @@ import java.util.UUID;
                     null, null);
             message.put(MessageKey.STATE_TRANSITION_TYPE, stateTransInit);
             if (lastNotificationBundle != null){
-                message.put(MessageKey.PAYLOAD, lastNotificationBundle.get(MessageKey.PAYLOAD));
+                JSONObject attributes = new JSONObject();
+                for (String key : lastNotificationBundle.keySet()){
+                    try{
+                        attributes.put(key, lastNotificationBundle.get(key));
+                    }catch(JSONException ex){
+
+                    }
+                }
+               message.put(MessageKey.PAYLOAD, attributes.toString());
             }
             mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
         } catch (JSONException e) {
@@ -368,7 +376,7 @@ import java.util.UUID;
         }
         try{
             JSONObject message = createMessage(MessageType.PUSH_RECEIVED, sessionId, sessionStartTime, System.currentTimeMillis(), "gcm", null);
-            message.put(MessageKey.PAYLOAD, attributes);
+            message.put(MessageKey.PAYLOAD, attributes.toString());
             String regId = PushRegistrationHelper.getRegistrationId(mContext);
             if ((regId != null) && (regId.length() > 0)) {
                 message.put(MessageKey.PUSH_TOKEN, regId);
