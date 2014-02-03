@@ -60,7 +60,7 @@ class AppConfig {
         this.sandboxMode = sandboxMode;
         mContext = context;
         if ((key == null) || secret == null) {
-            Log.d(Constants.LOG_TAG, context.getString(R.string.error_noservercredentials));
+            Log.d(Constants.LOG_TAG, "mParticle instance created without server credentials, using XML configuration");
             parseLocalCredentials();
         } else {
             mKey = key;
@@ -72,13 +72,13 @@ class AppConfig {
     private void parseLocalCredentials() {
         mKey = getString(PREFKEY_API_KEY);
         if (mKey == null) {
-            Log.d(Constants.LOG_TAG, String.format(mContext.getString(R.string.error_missingrequiredkey), PREFKEY_API_KEY));
-            throw new IllegalArgumentException(mContext.getString(R.string.missing_apikey));
+            Log.d(Constants.LOG_TAG, String.format("Configuration issue: Missing required key: %s", PREFKEY_API_KEY));
+            throw new IllegalArgumentException("Configuration issue: Missing API key.");
         }
         mSecret = getString(PREFKEY_API_SECRET);
         if (mSecret == null) {
-            Log.d(Constants.LOG_TAG, String.format(mContext.getString(R.string.error_missingrequiredkey), PREFKEY_API_KEY));
-            throw new IllegalArgumentException(mContext.getString(R.string.missing_apisecret));
+            Log.d(Constants.LOG_TAG, String.format("Configuration issue: Missing required key: %s", PREFKEY_API_KEY));
+            throw new IllegalArgumentException("Configuration issue: Missing API secret.");
         }
     }
 
@@ -92,7 +92,7 @@ class AppConfig {
         if (isPushEnabled){
             pushSenderId = getString(PREFKEY_PUSH_SENDER_ID);
             if (pushSenderId == null){
-                Log.w(Constants.LOG_TAG, mContext.getString(R.string.error_nosenderid));
+                Log.w(Constants.LOG_TAG, "Configuration issue: Push is enabled but no sender id is specified.");
             }
         }
         sandboxMode = getBoolean(PREFKEY_SANDBOX_MODE, DEFAULT_SANDBOX_MODE);
@@ -100,7 +100,7 @@ class AppConfig {
         if (isLicensingEnabled){
             licenseKey = getString(PREFKEY_APP_LICENSE_KEY);
             if (licenseKey == null){
-                Log.d(Constants.LOG_TAG, String.format(mContext.getString(R.string.error_licensingmissingkey), PREFKEY_API_KEY));
+                Log.d(Constants.LOG_TAG, "Configuration issue: Licensing enabled but no license key specified.");
             }
         }
         autoTrackingEnabled = getBoolean(PREFKEY_AUTOTRACKING, DEFAULT_ENABLE_AUTO_TRACKING);
@@ -121,7 +121,7 @@ class AppConfig {
     public String getString(String key) {
         int id = getResourceId(key, "string");
         if (id == 0) {
-            debugLog(String.format(mContext.getString(R.string.error_missingkey), key));
+            debugLog(String.format("Configuration issue: Missing required key: %s", key));
             return null;
         }
         return this.mContext.getString(id);
@@ -130,7 +130,7 @@ class AppConfig {
     public boolean getBoolean(String key, boolean defaultValue) {
         int id = getResourceId(key, "bool");
         if (id == 0) {
-            debugLog(String.format(mContext.getString(R.string.error_missingkey), key));
+            debugLog(String.format("Configuration issue: Missing required key: %s", key));
             return defaultValue;
         }
         return this.mContext.getResources().getBoolean(id);
@@ -139,7 +139,7 @@ class AppConfig {
     public int getInteger(String key, int defaultValue) {
         int id = getResourceId(key, "integer");
         if (id == 0) {
-            debugLog(String.format(mContext.getString(R.string.error_missingkey), key));
+            debugLog(String.format("Configuration issue: Missing required key: %s", key));
             return defaultValue;
         }
         return mContext.getResources().getInteger(id);

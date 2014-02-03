@@ -140,7 +140,7 @@ import java.util.TimeZone;
                 }
 
             }
-            attributes.put(MessageKey.DEVICE_IS_TABLET, appContext.getResources().getBoolean(com.mparticle.R.bool.mp_isTablet));
+            attributes.put(MessageKey.DEVICE_IS_TABLET, MPUtility.isTablet(appContext));
             attributes.put(MessageKey.DEVICE_ANID, MPUtility.getAndroidID(appContext));
             attributes.put(MessageKey.DEVICE_OPEN_UDID, MPUtility.getOpenUDID(appContext));
 

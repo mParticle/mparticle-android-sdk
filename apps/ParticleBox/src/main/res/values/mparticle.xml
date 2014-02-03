@@ -10,7 +10,7 @@
 
     <integer name="mp_sessionTimeout">30</integer>
 
-    <integer name="mp_debugUploadInterval">30</integer>
+    <integer name="mp_debugUploadInterval">10</integer>
 
     <integer name="mp_productionUploadInterval">600</integer>
 
