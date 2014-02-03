@@ -111,6 +111,8 @@ package com.mparticle;
         public static final String DEVICE_OPEN_UDID = "ouid";
         public static final String DEVICE_PUSH_TOKEN = "to";
         public static final String DEVICE_IS_TABLET = "it";
+        public static final String PUSH_SOUND_ENABLED = "se";
+        public static final String PUSH_VIBRATION_ENABLED = "ve";
         // state info
         public static final String STATE_INFO_KEY = "cs";
         public static final String STATE_INFO_CPU = "cpu";
@@ -161,6 +163,7 @@ package com.mparticle;
         public static final String PAYLOAD = "pay";
         //screen view
         public static final String SCREEN_STARTED = "t";
+
     }
 
     public interface PrefKeys {

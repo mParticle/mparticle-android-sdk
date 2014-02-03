@@ -10,17 +10,17 @@
 
     <integer name="mp_sessionTimeout">30</integer>
 
-    <integer name="mp_debugUploadInterval">3</integer>
+    <integer name="mp_debugUploadInterval">30</integer>
 
-    <integer name="mp_productionUploadInterval">60</integer>
+    <integer name="mp_productionUploadInterval">600</integer>
 
     <bool name="mp_enableDebugMode">true</bool>
 
     <bool name="mp_enablePush">true</bool>
 
-    <string name="mp_pushSenderId">832202301611</string>
+    <string name="mp_pushSenderId">399057526769</string>
 
-    <bool name="mp_enableSandboxMode">true</bool>
+    <bool name="mp_enableSandboxMode">false</bool>
 
     <bool name="mp_enableLicenseCheck">true</bool>
 

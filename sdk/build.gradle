@@ -32,7 +32,7 @@ android {
 
     release {
         buildConfigField "boolean", "ECHO", "true"
-        runProguard true
+        runProguard false
         proguardFile 'proguard.txt'
     }
 

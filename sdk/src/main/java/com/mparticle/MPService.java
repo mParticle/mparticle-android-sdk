@@ -199,10 +199,10 @@ public class MPService extends IntentService {
             launchIntent.putExtras(extras);
             PendingIntent notifyIntent = PendingIntent.getService(getApplicationContext(), 0, new Intent(getApplicationContext(), MPService.class), PendingIntent.FLAG_UPDATE_CURRENT);
             Notification notification = new Notification(applicationIcon, message, System.currentTimeMillis());
-            if (mMParticle.mConfigManager.pushSoundEnabled){
+            if (mMParticle.mConfigManager.isPushSoundEnabled()){
                 notification.flags |= Notification.DEFAULT_SOUND;
             }
-            if (mMParticle.mConfigManager.pushVibrationEnabled){
+            if (mMParticle.mConfigManager.isPushVibrationEnabled()){
                 notification.flags |= Notification.DEFAULT_VIBRATE;
             }
             notification.flags |= Notification.FLAG_AUTO_CANCEL;

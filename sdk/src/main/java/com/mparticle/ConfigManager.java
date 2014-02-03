@@ -38,8 +38,7 @@ class ConfigManager {
     private String logUnhandledExceptions = VALUE_APP_DEFINED;
 
     private boolean loaded = false;
-    boolean pushVibrationEnabled = true;
-    boolean pushSoundEnabled = true;
+
     private boolean sendOoEvents;
 
     public ConfigManager(Context context, String key, String secret, boolean sandboxMode) {
@@ -156,7 +155,7 @@ class ConfigManager {
     }
 
     public int getSessionTimeout() {
-        return localPrefs.sessionTimeout;
+        return localPrefs.sessionTimeout * 1000;
     }
 
     public void setSessionTimeout(int sessionTimeout) {
@@ -200,11 +199,11 @@ class ConfigManager {
     }
 
     public void setPushSoundEnabled(boolean pushSoundEnabled) {
-        this.pushSoundEnabled = pushSoundEnabled;
+        localPrefs.isPushSoundEnabled = pushSoundEnabled;
     }
 
     public void setPushVibrationEnabled(boolean pushVibrationEnabled) {
-        this.pushVibrationEnabled = pushVibrationEnabled;
+        localPrefs.isPushVibrationEnabled = pushVibrationEnabled;
     }
 
     public boolean getSendOoEvents(){
@@ -227,5 +226,12 @@ class ConfigManager {
 
     public boolean isAutoTrackingEnabled() {
         return localPrefs.autoTrackingEnabled;
+    }
+
+    public boolean isPushSoundEnabled() {
+        return localPrefs.isPushSoundEnabled;
+    }
+    public boolean isPushVibrationEnabled() {
+        return localPrefs.isPushVibrationEnabled;
     }
 }

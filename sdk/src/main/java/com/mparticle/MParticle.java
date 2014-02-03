@@ -100,8 +100,9 @@ public class MParticle {
         mAppContext = context.getApplicationContext();
         mApiKey = mConfigManager.getApiKey();
         mMessageManager = messageManager;
-        mTimeoutHandler = new SessionTimeoutHandler(this, sTimeoutHandlerThread.getLooper());
         mAppStateManager = new AppStateManager(mAppContext);
+        mTimeoutHandler = new SessionTimeoutHandler(this, sTimeoutHandlerThread.getLooper());
+
         String userAttrs = sPreferences.getString(PrefKeys.USER_ATTRS + mApiKey, null);
 
         if (null != userAttrs) {
@@ -1038,7 +1039,7 @@ public class MParticle {
      * @return The current session timeout setting in seconds
      */
     public int getSessionTimeout() {
-        return mConfigManager.getSessionTimeout();
+        return mConfigManager.getSessionTimeout() / 1000;
     }
 
     /**
@@ -1116,7 +1117,7 @@ public class MParticle {
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
             if (!mParticle.checkSessionTimeout()) {
-                sendEmptyMessageDelayed(0, mParticle.getSessionTimeout() * 1000);
+                sendEmptyMessageDelayed(0, mParticle.getSessionTimeout()*1000);
             }
         }
     }

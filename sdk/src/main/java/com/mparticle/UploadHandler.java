@@ -369,6 +369,10 @@ import javax.crypto.spec.SecretKeySpec;
             mDeviceInfo.remove(MessageKey.PUSH_TOKEN);
         }
 
+        mDeviceInfo.put(MessageKey.PUSH_SOUND_ENABLED, mConfigManager.isPushSoundEnabled());
+        mDeviceInfo.put(MessageKey.PUSH_VIBRATION_ENABLED, mConfigManager.isPushVibrationEnabled());
+
+
         uploadMessage.put(MessageKey.DEVICE_INFO, mDeviceInfo);
         uploadMessage.put(MessageKey.DEBUG, mConfigManager.getSandboxMode());
 
@@ -376,22 +380,22 @@ import javax.crypto.spec.SecretKeySpec;
         if (null != userAttrs) {
             uploadMessage.put(MessageKey.USER_ATTRIBUTES, new JSONObject(userAttrs));
         }else{
-            uploadMessage.put(MessageKey.USER_ATTRIBUTES, new JSONObject());
+            //uploadMessage.put(MessageKey.USER_ATTRIBUTES, new JSONObject());
         }
 
         String userIds = mPreferences.getString(PrefKeys.USER_IDENTITIES + mApiKey, null);
         if (null != userIds) {
             uploadMessage.put(MessageKey.USER_IDENTITIES, new JSONArray(userIds));
         }else{
-            uploadMessage.put(MessageKey.USER_IDENTITIES, new JSONArray());
+            //uploadMessage.put(MessageKey.USER_IDENTITIES, new JSONArray());
         }
 
         if (history) {
             uploadMessage.put(MessageKey.HISTORY, messagesArray);
-            uploadMessage.put(MessageKey.MESSAGES, new JSONArray());
+          //  uploadMessage.put(MessageKey.MESSAGES, new JSONArray());
         } else {
             uploadMessage.put(MessageKey.MESSAGES, messagesArray);
-            uploadMessage.put(MessageKey.HISTORY, new JSONArray());
+           // uploadMessage.put(MessageKey.HISTORY, new JSONArray());
         }
 
         return uploadMessage;

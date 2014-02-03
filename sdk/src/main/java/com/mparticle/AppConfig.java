@@ -20,6 +20,8 @@ class AppConfig {
     public static final String PREFKEY_APP_LICENSE_KEY = "mp_appLicenseKey";
     public static final String PREFKEY_LICENSING_ENABLED = "mp_enableLicenseCheck";
     private static final String PREFKEY_AUTOTRACKING = "mp_enableAutoTracking";
+    private static final String PREFKEY_PUSH_SOUND_ENABLED = "mp_enablePushSounds";
+    private static final String PREFKEY_PUSH_VIBRATION_ENABLED = "mp_enablePushVibration";
 
     public static final int DEFAULT_SESSION_TIMEOUT = 60;
     public static final int DEFAULT_UPLOAD_INTERVAL = 600;
@@ -30,6 +32,9 @@ class AppConfig {
     public static final boolean DEFAULT_ENABLE_DEBUG_MODE = false;
     public static final boolean DEFAULT_ENABLE_LICENSING = false;
     public static final boolean DEFAULT_ENABLE_AUTO_TRACKING = false;
+    public static final boolean DEFAULT_ENABLE_PUSH_SOUND = false;
+    public static final boolean DEFAULT_ENABLE_PUSH_VIBRATION = false;
+
 
     private final Context mContext;
 
@@ -47,6 +52,9 @@ class AppConfig {
     public String licenseKey;
     public boolean isLicensingEnabled;
     public boolean autoTrackingEnabled;
+    public boolean isPushSoundEnabled;
+    public boolean isPushVibrationEnabled;
+
 
     public AppConfig(Context context, String key, String secret, boolean sandboxMode) {
         this.sandboxMode = sandboxMode;
@@ -96,7 +104,8 @@ class AppConfig {
             }
         }
         autoTrackingEnabled = getBoolean(PREFKEY_AUTOTRACKING, DEFAULT_ENABLE_AUTO_TRACKING);
-
+        isPushSoundEnabled = getBoolean(PREFKEY_PUSH_SOUND_ENABLED, DEFAULT_ENABLE_PUSH_SOUND);
+        isPushVibrationEnabled = getBoolean(PREFKEY_PUSH_VIBRATION_ENABLED, DEFAULT_ENABLE_PUSH_VIBRATION);
     }
 
     private int getResourceId(String key, String type) {
@@ -135,4 +144,6 @@ class AppConfig {
         }
         return mContext.getResources().getInteger(id);
     }
+
+
 }
