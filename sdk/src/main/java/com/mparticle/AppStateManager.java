@@ -85,8 +85,7 @@ class AppStateManager {
     }
 
     boolean isBackgrounded() {
-        return mActivities < 1 &&
-                (System.currentTimeMillis() - mLastStoppedTime) > ACTIVITY_DELAY;
+        return mActivities < 1;
     }
 
     public void onActivityStarted(Activity activity) {
