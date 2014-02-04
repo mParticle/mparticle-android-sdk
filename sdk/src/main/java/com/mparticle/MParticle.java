@@ -26,6 +26,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.lang.Thread.UncaughtExceptionHandler;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
@@ -449,6 +450,19 @@ public class MParticle {
      * @param eventLength the duration of the event in milliseconds
      */
     public void logEvent(String eventName, EventType eventType, Map<String, String> eventInfo, long eventLength) {
+        logEvent(eventName, eventType, eventInfo, eventLength, null);
+    }
+
+    /**
+     * Log an event with data attributes
+     *
+     * @param eventName   the name of the event to be tracked  (required not null)
+     * @param eventType   the type of the event to be tracked
+     * @param eventInfo   a Map of data attributes to associate with the event
+     * @param eventLength the duration of the event in milliseconds
+     * @param category    the category with which to associate this event
+     */
+    public void logEvent(String eventName, EventType eventType, Map<String, String> eventInfo, long eventLength, String category) {
         if (mConfigManager.getSendOoEvents()) {
             if (null == eventName) {
                 Log.w(TAG, "eventName is required for logEvent");
@@ -460,6 +474,12 @@ public class MParticle {
             }
             ensureActiveSession();
             if (checkEventLimit()) {
+                if (category != null){
+                    if (eventInfo == null){
+                        eventInfo = new HashMap<String, String>();
+                    }
+                    eventInfo.put(Constants.MessageKey.EVENT_CATEGORY, category);
+                }
                 JSONObject eventDataJSON = enforceAttributeConstraints(eventInfo);
                 mMessageManager.logEvent(mSessionID, mSessionStartTime, mLastEventTime, eventName, eventType, eventDataJSON, eventLength);
                 if (mDebugMode)

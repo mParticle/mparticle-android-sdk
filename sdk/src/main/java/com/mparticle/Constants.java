@@ -164,6 +164,7 @@ package com.mparticle;
         //screen view
         public static final String SCREEN_STARTED = "t";
 
+        public static final String EVENT_CATEGORY = "$Category";
     }
 
     public interface PrefKeys {
