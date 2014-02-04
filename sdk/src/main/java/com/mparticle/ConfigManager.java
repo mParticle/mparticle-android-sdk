@@ -199,11 +199,15 @@ class ConfigManager {
     }
 
     public void setPushSoundEnabled(boolean pushSoundEnabled) {
-        localPrefs.isPushSoundEnabled = pushSoundEnabled;
+        mPreferences.edit()
+                .putBoolean(Constants.PrefKeys.PUSH_ENABLE_SOUND, pushSoundEnabled)
+                .commit();
     }
 
     public void setPushVibrationEnabled(boolean pushVibrationEnabled) {
-        localPrefs.isPushVibrationEnabled = pushVibrationEnabled;
+        mPreferences.edit()
+                .putBoolean(Constants.PrefKeys.PUSH_ENABLE_VIBRATION, pushVibrationEnabled)
+                .commit();
     }
 
     public boolean getSendOoEvents(){
@@ -229,9 +233,9 @@ class ConfigManager {
     }
 
     public boolean isPushSoundEnabled() {
-        return localPrefs.isPushSoundEnabled;
+        return mPreferences.getBoolean(Constants.PrefKeys.PUSH_ENABLE_SOUND, AppConfig.DEFAULT_ENABLE_PUSH_SOUND);
     }
     public boolean isPushVibrationEnabled() {
-        return localPrefs.isPushVibrationEnabled;
+        return mPreferences.getBoolean(Constants.PrefKeys.PUSH_ENABLE_VIBRATION, AppConfig.DEFAULT_ENABLE_PUSH_VIBRATION);
     }
 }

@@ -53,6 +53,10 @@ import java.util.UUID;
  * </ul>
  * <h4>Optional</h4>
  * <ul>
+ * <li>mp_enableAutoScreenTracking - {@link <a href="http://developer.android.com/guide/topics/resources/more-resources.html#Integer">Integer</a>} - Enable automatic screen view events. Note that *prior to ICS/API level 14*, this functionality requires instrumentation via an mParticle Activity implementation or manually. </li>
+ * @see com.mparticle.activity.MPActivity
+ * </ul>
+ * <ul>
  * <li>mp_productionUploadInterval - {@link <a href="http://developer.android.com/guide/topics/resources/more-resources.html#Integer">Integer</a>} - The length of time in seconds to send batches of messages to mParticle. Setting this too low could have an adverse effect on the device battery. <i>Default: 600</i></li>
  * <li>mp_reportUncaughtExceptions - {@link <a href="http://developer.android.com/guide/topics/resources/more-resources.html#Bool">Bool</a>} - By enabling this, the MParticle SDK will automatically log and report any uncaught exceptions, including stack traces. <i>Default: false</i></li>
  * <li>mp_sessionTimeout - {@link <a href="http://developer.android.com/guide/topics/resources/more-resources.html#Integer">Integer</a>} - The length of time (in seconds) that a user session will remain valid while application has been paused and put into the background. <i>Default: 60</i></li>
@@ -502,7 +506,7 @@ public class MParticle {
     void logScreen(String screenName, Map<String, String> eventData, boolean started) {
         if (mConfigManager.getSendOoEvents()) {
             if (null == screenName) {
-                Log.w(TAG, "screenName is required for logScreenView");
+                Log.w(TAG, "screenName is required for logScreen");
                 return;
             }
             if (screenName.length() > Constants.LIMIT_NAME) {
@@ -894,7 +898,8 @@ public class MParticle {
     }
 
     /**
-     * Enable the default notification sound for push notifications
+     * Enable the default notification sound for push notifications. This is a user preference that will be persisted across
+     * application sessions.
      *
      * @param enabled
      */
@@ -903,7 +908,8 @@ public class MParticle {
     }
 
     /**
-     * Enable the default notification vibration for push notifications
+     * Enable the default notification vibration for push notifications. This is a user preference that will be persisted across
+     * application sessions.
      *
      * @param enabled
      */
