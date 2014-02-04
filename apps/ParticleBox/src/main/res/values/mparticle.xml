@@ -18,7 +18,7 @@
 
     <bool name="mp_enablePush">true</bool>
 
-    <string name="mp_pushSenderId">399057526769</string>
+    <string name="mp_pushSenderId">214353432629</string>
 
     <bool name="mp_enableSandboxMode">false</bool>
 

@@ -92,6 +92,7 @@ public class MPService extends IntentService {
         String packageName = getPackageName();
         Intent launchIntent = packageManager.getLaunchIntentForPackage(packageName);
         launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        launchIntent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
         startActivity(launchIntent);
 
 
@@ -189,13 +190,14 @@ public class MPService extends IntentService {
         }
         NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         MParticle mMParticle = MParticle.getInstance();
+        Intent launchIntent = new Intent(getApplicationContext(), MPService.class);
+        launchIntent.setAction(MPARTICLE_NOTIFICATION_OPENED);
+        launchIntent.putExtras(extras);
+        PendingIntent notifyIntent = PendingIntent.getService(getApplicationContext(), 0, launchIntent, PendingIntent.FLAG_UPDATE_CURRENT);
         if (mMParticle.customNotification != null){
-            notificationManager.notify(1, mMParticle.customNotification.setContentText(message).build());
+            mMParticle.customNotification.setContentIntent(notifyIntent);
+            notificationManager.notify(extras.hashCode(), mMParticle.customNotification.setContentText(message).build());
         }else{
-            Intent launchIntent = new Intent(getApplicationContext(), MPService.class);
-            launchIntent.setAction(MPARTICLE_NOTIFICATION_OPENED);
-            launchIntent.putExtras(extras);
-            PendingIntent notifyIntent = PendingIntent.getService(getApplicationContext(), 0, launchIntent, PendingIntent.FLAG_UPDATE_CURRENT);
             Notification notification = new Notification(applicationIcon, message, System.currentTimeMillis());
             if (mMParticle.mConfigManager.isPushSoundEnabled()){
                 notification.flags |= Notification.DEFAULT_SOUND;
@@ -205,7 +207,7 @@ public class MPService extends IntentService {
             }
             notification.flags |= Notification.FLAG_AUTO_CANCEL;
             notification.setLatestEventInfo(this, title, message, notifyIntent);
-            notificationManager.notify(1, notification);
+            notificationManager.notify(extras.hashCode(), notification);
         }
     }
 
