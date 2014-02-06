@@ -21,11 +21,15 @@ import android.util.Log;
 import com.mparticle.Constants.MessageKey;
 import com.mparticle.Constants.PrefKeys;
 
+import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.lang.Thread.UncaughtExceptionHandler;
+import java.net.Socket;
+import java.net.SocketImpl;
+import java.net.SocketImplFactory;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -135,7 +139,33 @@ public class MParticle {
             enableUncaughtExceptionLogging();
         }
         logStateTransition(Constants.StateTransitionType.STATE_TRANS_INIT);
+
     }
+
+    private void initNetworkMonitoring() {
+
+        try{
+            SocketImpl socket = (SocketImpl)MPUtility.getAccessibleObject(MPUtility.getAccessibleField(Socket.class, SocketImpl.class), new Socket());
+            SocketImplFactory factory = new MPSocketImplFactory(socket.getClass());
+            Socket.setSocketImplFactory(factory);
+        }catch (Exception e){
+            Log.d(Constants.LOG_TAG, e.getMessage());
+
+        }
+        try{
+            SSLSocketFactory localObject2 = org.apache.http.conn.ssl.SSLSocketFactory.getSocketFactory();
+            Object localObject1 = (javax.net.ssl.SSLSocketFactory) MPUtility.getAccessibleField(org.apache.http.conn.ssl.SSLSocketFactory.class, javax.net.ssl.SSLSocketFactory.class).get(localObject2);
+            Object factory = new MPSSLSocketFactory((javax.net.ssl.SSLSocketFactory)localObject1);
+            localObject2 = org.apache.http.conn.ssl.SSLSocketFactory.getSocketFactory();
+            MPUtility.getAccessibleField(org.apache.http.conn.ssl.SSLSocketFactory.class, javax.net.ssl.SSLSocketFactory.class).set(localObject2, factory);
+
+        }catch (Exception e){
+            Log.d(Constants.LOG_TAG, e.getMessage());
+        }
+    }
+
+
+
 
     /**
      * Start the mParticle SDK and begin tracking a user session. This method must be called prior to {@link #getInstance()}.
@@ -227,7 +257,7 @@ public class MParticle {
                         instance.performLicenseCheck();
                     }
 
-
+                    instance.initNetworkMonitoring();
                 }
             }
         }

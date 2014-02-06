@@ -26,6 +26,9 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.lang.reflect.AccessibleObject;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
 import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.security.cert.CertificateFactory;
@@ -349,6 +352,66 @@ class MPUtility {
         return (context.getResources().getConfiguration().screenLayout
                 & Configuration.SCREENLAYOUT_SIZE_MASK)
                 >= Configuration.SCREENLAYOUT_SIZE_LARGE;
+    }
+
+    public static Object getAccessibleObject(Field paramField, Object paramObject)
+    {
+        Object localObject = null;
+        if (paramField == null)
+            return null;
+        if (paramField != null)
+        {
+            paramField.setAccessible(true);
+            try
+            {
+                localObject = paramField.get(paramObject);
+            }
+            catch (Exception e){
+
+            }
+        }
+        return localObject;
+    }
+
+    public static Field getAccessibleField(Class paramClass1, Class paramClass2)
+    {
+        Field[] paramfields = paramClass1.getDeclaredFields();
+        Field localField = null;
+        for (int i = 0; i < paramfields.length; i++)
+            if (paramClass2.isAssignableFrom(paramfields[i].getType()))
+            {
+                // if (localField != null)
+                //throw new MPException(cd.l);
+                localField = paramfields[i];
+            }
+
+        localField.setAccessible(true);
+        return localField;
+    }
+
+    public static void a(AccessibleObject[] paramArrayOfAccessibleObject)
+    {
+        for (int i = 0; i < paramArrayOfAccessibleObject.length; i++)
+        {
+            AccessibleObject localAccessibleObject;
+            if ((localAccessibleObject = paramArrayOfAccessibleObject[i]) != null)
+                localAccessibleObject.setAccessible(true);
+        }
+    }
+
+    public static Constructor getConstructor(String paramString, String[] paramArrayOfString) throws ClassNotFoundException
+    {
+        Constructor<?>[] constructors = Class.forName(paramString).getDeclaredConstructors();
+        for (int i = 0; i < constructors.length; i++)
+        {
+            String[] arrayOfString = paramArrayOfString;
+            Class[] arrayOfClass = constructors[i].getParameterTypes();
+            for (int j = 0; j < arrayOfClass.length; j++){
+                if ((!arrayOfClass[j].getName().equals(arrayOfString[j]) ? 0 : arrayOfClass.length != arrayOfString.length ? 0 : 1) != 0)
+                    return constructors[i];
+            }
+        }
+        return null;
     }
 
 }
