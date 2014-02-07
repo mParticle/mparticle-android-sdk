@@ -98,7 +98,7 @@ public abstract class ParticleActivity extends ActionBarActivity
         ActionBar actionBar = getSupportActionBar();
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
         actionBar.setDisplayShowTitleEnabled(true);
-        actionBar.setTitle(mTitle);
+       // actionBar.setTitle(mTitle);
     }
 
 

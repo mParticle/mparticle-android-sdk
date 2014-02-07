@@ -16,6 +16,9 @@ import android.widget.Toast;
 
 import com.mparticle.MParticle;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * Created by sdozor on 1/7/14.
  */
@@ -26,9 +29,10 @@ public class MainEventTestFragment extends Fragment implements View.OnClickListe
      * fragment.
      */
     private static final String ARG_SECTION_NUMBER = "section_number";
-    protected Spinner spinner, exceptionSpinner;
-    protected EditText viewEditText, screenEditText, errorEditText, unhandleErrorEditText;
-    protected Button eventButton, screenButton, handledErrorsButton, unhandledErrorsButton;
+    protected Spinner spinner, exceptionSpinner, timingCategory;
+    protected EditText viewEditText, screenEditText, errorEditText, unhandleErrorEditText, eventValue, eventLabel, timingTitle, timingLabel, timingLength;
+    protected Button eventButton, screenButton, handledErrorsButton, unhandledErrorsButton, timingButton;
+
 
     /**
      * Returns a new instance of this fragment for the given section
@@ -65,8 +69,18 @@ public class MainEventTestFragment extends Fragment implements View.OnClickListe
         View v = inflater.inflate(R.layout.fragment_events, container, false);
 
         spinner = (Spinner) v.findViewById(R.id.spinner);
+        timingCategory = (Spinner) v.findViewById(R.id.timingCategory);
         exceptionSpinner = (Spinner) v.findViewById(R.id.spinner2);
+        eventLabel = (EditText) v.findViewById(R.id.eventLabel);
+        eventValue = (EditText) v.findViewById(R.id.eventValue);
 
+        timingCategory.setAdapter(new ArrayAdapter<MParticle.EventType>(
+                v.getContext(),
+                android.R.layout.simple_list_item_1,
+                MParticle.EventType.values()));
+        timingTitle = (EditText)v.findViewById(R.id.timingTitle);
+        timingLabel = (EditText)v.findViewById(R.id.timingLabel);
+        timingLength = (EditText)v.findViewById(R.id.timingLength);
         spinner.setAdapter(new ArrayAdapter<MParticle.EventType>(
                 v.getContext(),
                 android.R.layout.simple_list_item_1,
@@ -80,6 +94,8 @@ public class MainEventTestFragment extends Fragment implements View.OnClickListe
 
         eventButton = (Button) v.findViewById(R.id.button);
         screenButton = (Button) v.findViewById(R.id.button2);
+        timingButton = (Button) v.findViewById(R.id.button5);
+        timingButton.setOnClickListener(this);
         eventButton.setOnClickListener(this);
         screenButton.setOnClickListener(this);
         handledErrorsButton = (Button) v.findViewById(R.id.button3);
@@ -156,7 +172,11 @@ public class MainEventTestFragment extends Fragment implements View.OnClickListe
         String toastText = "Message logged.";
         switch (v.getId()) {
             case R.id.button:
-                MParticle.getInstance().logEvent(viewEditText.getText().toString(), (MParticle.EventType) spinner.getSelectedItem());
+                Map eventInfo = new HashMap<String, String>();
+                eventInfo.put("Label", eventLabel.getText().toString());
+                eventInfo.put("Value", eventLabel.getText().toString());
+                MParticle.getInstance().logEvent(viewEditText.getText().toString(),
+                        (MParticle.EventType) spinner.getSelectedItem(), eventInfo);
                 break;
             case R.id.button2:
                 MParticle.getInstance().logScreen(screenEditText.getText().toString());
@@ -174,6 +194,14 @@ public class MainEventTestFragment extends Fragment implements View.OnClickListe
                         v.postDelayed(ioobeRunnable, 2000);
                 }
                 break;
+            case R.id.button5:
+                Map timingEventInfo = new HashMap<String, String>();
+                timingEventInfo.put("Label", timingLabel.getText().toString());
+                MParticle.getInstance().logEvent(timingTitle.getText().toString(),
+                        (MParticle.EventType) spinner.getSelectedItem(),
+                        timingEventInfo,
+                        Long.parseLong(timingLength.getText().toString()));
+
         }
         Toast.makeText(v.getContext(), toastText, 300).show();
     }
