@@ -32,6 +32,18 @@ android {
         targetSdkVersion 19
         buildConfigField "String", "GIT_SHA", "\"$gitHash\""
         buildConfigField "String", "BUILD_TIME", "\"${buildTime()}\""
+        versionCode 1
+    }
+
+    productFlavors {
+        googleanalytics {
+            packageName 'com.mparticle.particlebox.googleanalytics'
+        }
+        mparticle {
+
+        }
+
+
     }
 }
 
@@ -39,4 +51,5 @@ dependencies {
 	compile 'com.android.support:support-v4:19.0.0'
 	compile 'com.android.support:appcompat-v7:19.0.0'
     compile project(':sdk')
+    googleanalyticsCompile files("libs/libGoogleAnalyticsServices.jar")
 }

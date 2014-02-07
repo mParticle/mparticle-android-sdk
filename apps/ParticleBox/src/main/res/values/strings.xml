@@ -2,6 +2,7 @@
 <resources>
 
     <string name="app_name">Particlebox</string>
+    <string name="packageName">com.mparticle.particlebox</string>
     <string name="title_section1">Events</string>
     <string name="title_section2">User Attributes</string>
     <string name="title_section3">Transactions</string>
