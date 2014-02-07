@@ -42,7 +42,9 @@ android {
         mparticle {
 
         }
-
+        mixpanel {
+            packageName 'com.mparticle.particlebox.mixpanel'
+        }
 
     }
 }
@@ -52,4 +54,5 @@ dependencies {
 	compile 'com.android.support:appcompat-v7:19.0.0'
     compile project(':sdk')
     googleanalyticsCompile files("libs/libGoogleAnalyticsServices.jar")
+    mixpanelCompile 'com.mixpanel.android:mixpanel-android:4.0.0-RC2@aar'
 }
