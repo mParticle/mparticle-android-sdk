@@ -39,7 +39,7 @@ public class MainEventTestFragment extends Fragment implements View.OnClickListe
      * number.
      */
     public static MainEventTestFragment newInstance(int sectionNumber) {
-        MainEventTestFragment fragment = new MainEventTestFragment();
+        MainEventTestFragment fragment = new EventTestFragment();
         Bundle args = new Bundle();
         args.putInt(ARG_SECTION_NUMBER, sectionNumber);
         fragment.setArguments(args);

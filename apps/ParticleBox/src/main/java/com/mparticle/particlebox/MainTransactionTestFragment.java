@@ -24,7 +24,7 @@ public class MainTransactionTestFragment extends Fragment implements View.OnClic
     private static final String ARG_SECTION_NUMBER = "section_number";
 
     public static MainTransactionTestFragment newInstance(int sectionNumber) {
-        MainTransactionTestFragment fragment = new MainTransactionTestFragment();
+        MainTransactionTestFragment fragment = new TransactionTestFragment();
         Bundle args = new Bundle();
         args.putInt(ARG_SECTION_NUMBER, sectionNumber);
         fragment.setArguments(args);

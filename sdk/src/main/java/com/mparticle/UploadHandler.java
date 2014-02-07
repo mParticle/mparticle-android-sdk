@@ -703,6 +703,7 @@ import javax.crypto.spec.SecretKeySpec;
         contentValues.put(CommandTable.POST_DATA, command.optString(MessageKey.POST));
         contentValues.put(CommandTable.HEADERS, command.optString(MessageKey.HEADERS));
         contentValues.put(CommandTable.CREATED_AT, System.currentTimeMillis());
+        contentValues.put(CommandTable.API_KEY, mApiKey);
         db.insert(CommandTable.TABLE_NAME, null, contentValues);
     }
 
