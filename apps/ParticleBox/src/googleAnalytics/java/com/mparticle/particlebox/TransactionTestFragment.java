@@ -28,5 +28,16 @@ public class TransactionTestFragment extends MainTransactionTestFragment impleme
                         Double.parseDouble(shippingAmount.getText().toString()),
                         currencyCode.getText().toString()).
                         build());
+
+        tracker.send(MapBuilder
+                .createItem(transactionId.getText().toString(),               // (String) Transaction ID
+                        productName.getText().toString(),      // (String) Product name
+                        productSku.getText().toString(),                  // (String) Product SKU
+                        productCategory.getText().toString(),        // (String) Product category
+                        Double.parseDouble(unitPrice.getText().toString()),                    // (Double) Product price
+                        Long.parseLong(quantity.getText().toString()),                       // (Long) Product quantity
+                        currencyCode.getText().toString())                    // (String) Currency code
+                .build()
+        );
     }
 }

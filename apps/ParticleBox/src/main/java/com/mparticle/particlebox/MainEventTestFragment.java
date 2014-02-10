@@ -174,7 +174,7 @@ public class MainEventTestFragment extends Fragment implements View.OnClickListe
             case R.id.button:
                 Map eventInfo = new HashMap<String, String>();
                 eventInfo.put("Label", eventLabel.getText().toString());
-                eventInfo.put("Value", eventLabel.getText().toString());
+                eventInfo.put("Value", eventValue.getText().toString());
                 MParticle.getInstance().logEvent(viewEditText.getText().toString(),
                         (MParticle.EventType) spinner.getSelectedItem(), eventInfo);
                 break;
