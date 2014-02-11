@@ -6,7 +6,6 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.Build;
-import android.os.Message;
 import android.provider.Settings;
 import android.telephony.TelephonyManager;
 import android.util.DisplayMetrics;
@@ -188,7 +187,7 @@ import java.util.TimeZone;
         boolean bool = false;
         String[] arrayOfString1 = {"/sbin/", "/system/bin/", "/system/xbin/", "/data/local/xbin/", "/data/local/bin/", "/system/sd/xbin/", "/system/bin/failsafe/", "/data/local/"};
         for (String str : arrayOfString1) {
-            File localFile = new File(new StringBuilder().append(str).append("su").toString());
+            File localFile = new File(str + "su");
             if (localFile.exists()) {
                 bool = true;
                 break;

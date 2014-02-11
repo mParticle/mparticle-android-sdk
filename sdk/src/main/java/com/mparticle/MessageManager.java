@@ -19,7 +19,6 @@ import com.mparticle.Constants.MessageKey;
 import com.mparticle.Constants.MessageType;
 import com.mparticle.MParticle.EventType;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 

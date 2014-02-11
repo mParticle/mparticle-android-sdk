@@ -1,6 +1,7 @@
 package com.mparticle;
 
 import android.Manifest;
+import android.annotation.TargetApi;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -176,6 +177,7 @@ class MPUtility {
         }
     }
 
+    @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
     public static long getTotalMemoryJB(Context context) {
         ActivityManager.MemoryInfo mi = new ActivityManager.MemoryInfo();
         ActivityManager activityManager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);

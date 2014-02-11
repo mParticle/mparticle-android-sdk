@@ -1,5 +1,6 @@
 package com.mparticle;
 
+import android.annotation.SuppressLint;
 import android.app.IntentService;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -23,6 +24,7 @@ import android.util.Log;
  * <service android:name="com.mparticle.MPService" />}
  *</pre>
  */
+@SuppressLint("Registered")
 public class MPService extends IntentService {
 
     private static final String TAG = Constants.LOG_TAG;

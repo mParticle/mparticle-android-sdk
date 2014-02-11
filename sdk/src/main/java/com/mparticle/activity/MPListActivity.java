@@ -1,5 +1,6 @@
 package com.mparticle.activity;
 
+import android.annotation.SuppressLint;
 import android.app.ListActivity;
 import android.os.Build;
 
@@ -20,6 +21,7 @@ import com.mparticle.MParticle;
  * @see com.mparticle.activity.MPFragmentActivity
  *
  */
+@SuppressLint("Registered")
 public class MPListActivity extends ListActivity {
     @Override
     protected void onStart() {
