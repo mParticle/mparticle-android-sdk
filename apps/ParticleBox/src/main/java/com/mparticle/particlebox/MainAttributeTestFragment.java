@@ -26,7 +26,7 @@ public class MainAttributeTestFragment extends Fragment implements View.OnClickL
     private static final String ARG_SECTION_NUMBER = "section_number";
 
     public static MainAttributeTestFragment newInstance(int sectionNumber) {
-        MainAttributeTestFragment fragment = new MainAttributeTestFragment();
+        MainAttributeTestFragment fragment = new AttributeTestFragment();
         Bundle args = new Bundle();
         args.putInt(ARG_SECTION_NUMBER, sectionNumber);
         fragment.setArguments(args);
