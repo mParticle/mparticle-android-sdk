@@ -64,7 +64,7 @@ public class EventTestFragment extends MainEventTestFragment implements View.OnC
             case R.id.button3:
                 tracker.send(MapBuilder.createException(errorEditText.getText().toString(), false).build());
                 break;
-            case R.id.button4:
+            case R.id.button5:
                 tracker.send(MapBuilder.createTiming(
                         timingCategory.getSelectedItem().toString(),
                         Long.parseLong(timingLength.getText().toString()),

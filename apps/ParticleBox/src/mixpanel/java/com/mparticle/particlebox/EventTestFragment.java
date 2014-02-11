@@ -74,7 +74,7 @@ public class EventTestFragment extends MainEventTestFragment implements View.OnC
             case R.id.button3:
                 Toast.makeText(v.getContext(), "Not implemented for Mixpanel...", Toast.LENGTH_SHORT).show();
                 break;
-            case R.id.button4:
+            case R.id.button5:
                 Toast.makeText(v.getContext(), "Not implemented for Mixpanel...", Toast.LENGTH_SHORT).show();
                 break;
         }

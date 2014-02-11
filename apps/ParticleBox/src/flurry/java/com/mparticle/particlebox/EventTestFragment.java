@@ -33,7 +33,7 @@ public class EventTestFragment extends MainEventTestFragment implements View.OnC
             case R.id.button3:
                 FlurryAgent.onError(Integer.toString(errorEditText.hashCode()), errorEditText.getText().toString(), new Exception("fake exception"));
                 break;
-            case R.id.button4:
+            case R.id.button5:
                 Map<String, String> articleParams2 = new HashMap<String, String>();
                 articleParams2.put("Category", timingCategory.getSelectedItem().toString()); // Capture author info
                 articleParams2.put("Label", timingLabel.getText().toString()); // Capture user status=
