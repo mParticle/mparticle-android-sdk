@@ -42,6 +42,8 @@ public class EventTestFragment extends MainEventTestFragment implements View.OnC
         super.onAttach(activity);
         mixpanel =
                 MixpanelAPI.getInstance(activity, "b66214bab597da0085dfc3bcc1e44929");
+
+        mixpanel.getPeople().initPushHandling("217134478361");
     }
 
     @Override

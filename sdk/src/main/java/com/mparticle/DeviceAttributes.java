@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Message;
 import android.provider.Settings;
 import android.telephony.TelephonyManager;
@@ -90,7 +91,7 @@ import java.util.TimeZone;
 
             // device/OS attributes
             attributes.put(MessageKey.BUILD_ID, android.os.Build.ID);
-            attributes.put(MessageKey.BRAND, MPUtility.getGeneratedUdid());
+            attributes.put(MessageKey.BRAND, Build.BRAND);
             attributes.put(MessageKey.PRODUCT, android.os.Build.PRODUCT);
             attributes.put(MessageKey.DEVICE, android.os.Build.DEVICE);
             attributes.put(MessageKey.MANUFACTURER, android.os.Build.MANUFACTURER);

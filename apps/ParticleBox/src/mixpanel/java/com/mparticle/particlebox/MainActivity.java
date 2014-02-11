@@ -17,8 +17,9 @@ public class MainActivity extends ParticleActivity {
         super.onCreate(savedInstanceState);
         mixpanel =  MixpanelAPI.getInstance(this, "b66214bab597da0085dfc3bcc1e44929");
 
-        mixpanel.getPeople().identify(Settings.Secure.getString(getContentResolver(),
+      /*  mixpanel.getPeople().identify(Settings.Secure.getString(getContentResolver(),
                 Settings.Secure.ANDROID_ID));
+*/
 
         mixpanel.getPeople().initPushHandling("217134478361");
     }

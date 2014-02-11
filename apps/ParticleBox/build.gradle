@@ -45,6 +45,9 @@ android {
         mixpanel {
             packageName 'com.mparticle.particlebox.mixpanel'
         }
+        flurry {
+            packageName 'com.mparticle.particlebox.flurry'
+        }
 
     }
 }
@@ -54,5 +57,6 @@ dependencies {
 	compile 'com.android.support:appcompat-v7:19.0.0'
     compile project(':sdk')
     googleanalyticsCompile files("libs/libGoogleAnalyticsServices.jar")
-    mixpanelCompile 'com.mixpanel.android:mixpanel-android:4.0.0-RC2@aar'
+    mixpanelCompile 'com.mixpanel.android:mixpanel-android:4.0.0-RC3@aar'
+    flurryCompile files ("libs/FlurryAnalytics_3.3.3.jar")
 }
