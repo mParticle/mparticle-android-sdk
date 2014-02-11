@@ -94,6 +94,7 @@ package com.mparticle;
         public static final String MANUFACTURER = "dma";
         public static final String PLATFORM = "dp";
         public static final String OS_VERSION = "dosv";
+        public static final String OS_VERSION_INT = "dosvi";
         public static final String MODEL = "dmdl";
         public static final String SCREEN_HEIGHT = "dsh";
         public static final String SCREEN_WIDTH = "dsw";
@@ -113,6 +114,11 @@ package com.mparticle;
         public static final String DEVICE_IS_TABLET = "it";
         public static final String PUSH_SOUND_ENABLED = "se";
         public static final String PUSH_VIBRATION_ENABLED = "ve";
+        public static final String DEVICE_SUPPORTS_TELEPHONY = "dst";
+        public static final String DEVICE_SUPPORTS_NFC = "dsnfc";
+        public static final String DEVICE_BLUETOOTH_ENABLED = "dbe";
+        public static final String DEVICE_BLUETOOTH_VERSION = "dbv";
+
         // state info
         public static final String STATE_INFO_KEY = "cs";
         public static final String STATE_INFO_CPU = "cpu";

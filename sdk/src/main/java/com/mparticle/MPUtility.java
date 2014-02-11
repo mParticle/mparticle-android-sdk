@@ -3,6 +3,7 @@ package com.mparticle;
 import android.Manifest;
 import android.annotation.TargetApi;
 import android.app.ActivityManager;
+import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -27,6 +28,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.lang.reflect.InvocationTargetException;
 import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.security.cert.CertificateFactory;
@@ -353,4 +355,51 @@ class MPUtility {
                 >= Configuration.SCREENLAYOUT_SIZE_LARGE;
     }
 
+    public static boolean hasNfc(Context context){
+        return context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_NFC);
+    }
+
+    static final String NO_BLUETOOTH = "none";
+    public static String getBluetoothVersion(Context context){
+        String bluetoothVersion = NO_BLUETOOTH;
+        if ((Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) && (context.getPackageManager().hasSystemFeature("android.hardware.bluetooth_le")))
+        {
+            bluetoothVersion = "ble";
+        } else if (context.getPackageManager().hasSystemFeature("android.hardware.bluetooth")) {
+            bluetoothVersion = "classic";
+        }
+        return bluetoothVersion;
+    }
+
+    public static boolean isPhoneRooted() {
+
+        // get from build info
+        String buildTags = android.os.Build.TAGS;
+        if (buildTags != null && buildTags.contains("test-keys")) {
+            return true;
+        }
+
+        boolean bool = false;
+        String[] arrayOfString1 = {"/sbin/", "/system/bin/", "/system/xbin/", "/data/local/xbin/", "/data/local/bin/", "/system/sd/xbin/", "/system/bin/failsafe/", "/data/local/"};
+        for (String str : arrayOfString1) {
+            File localFile = new File(str + "su");
+            if (localFile.exists()) {
+                bool = true;
+                break;
+            }
+        }
+        return bool;
+    }
+
+    public static boolean hasTelephony(Context context){
+        return context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_TELEPHONY);
+    }
+
+    public static boolean isBluetoothEnabled(){
+        BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        if (mBluetoothAdapter == null) {
+            return mBluetoothAdapter.isEnabled();
+        }
+        return false;
+    }
 }
