@@ -2,13 +2,12 @@ package com.mparticle.particlebox;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.mparticle.MParticle;
@@ -18,9 +17,8 @@ import com.mparticle.MParticle;
  */
 public class MainAttributeTestFragment extends Fragment implements View.OnClickListener {
 
-    protected Button button1, button2;
-    protected EditText editText1, editText2, editText3;
-
+    protected EditText editText1, editText2, editText3, editText4;
+    protected Spinner identitySpinner;
     public MainAttributeTestFragment() {
         super();
     }
@@ -38,46 +36,21 @@ public class MainAttributeTestFragment extends Fragment implements View.OnClickL
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_attributes, container, false);
-        button1 = (Button) v.findViewById(R.id.button);
-        button2 = (Button) v.findViewById(R.id.button2);
+        v.findViewById(R.id.button).setOnClickListener(this);
+        v.findViewById(R.id.button2).setOnClickListener(this);
+        v.findViewById(R.id.button3).setOnClickListener(this);
         editText1 = (EditText) v.findViewById(R.id.edittext);
         editText2 = (EditText) v.findViewById(R.id.edittext2);
         editText3 = (EditText) v.findViewById(R.id.edittext3);
-        editText1.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+        editText4 = (EditText) v.findViewById(R.id.edittext4);
 
-            }
+        identitySpinner = (Spinner) v.findViewById(R.id.spinner);
 
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
+        identitySpinner.setAdapter(new ArrayAdapter<MParticle.IdentityType>(
+                v.getContext(),
+                android.R.layout.simple_list_item_1,
+                MParticle.IdentityType.values()));
 
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-                button1.setEnabled(editText1.getText().length() > 0);
-            }
-        });
-        editText3.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-                button2.setEnabled(editText3.getText().length() > 0);
-            }
-        });
-
-        button1.setOnClickListener(this);
-        button2.setOnClickListener(this);
         return v;
     }
 
@@ -97,6 +70,10 @@ public class MainAttributeTestFragment extends Fragment implements View.OnClickL
             case R.id.button2:
                 MParticle.getInstance().setUserTag(editText3.getText().toString());
                 Toast.makeText(v.getContext(), "User tag set.", Toast.LENGTH_SHORT).show();
+                break;
+            case R.id.button3:
+                MParticle.getInstance().setUserIdentity(editText4.getText().toString(), (MParticle.IdentityType)identitySpinner.getSelectedItem());
+                Toast.makeText(v.getContext(), "User identity set.", Toast.LENGTH_SHORT).show();
                 break;
         }
     }
