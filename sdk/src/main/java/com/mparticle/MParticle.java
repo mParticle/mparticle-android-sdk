@@ -15,7 +15,6 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.Process;
 import android.provider.Settings;
-import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
 import com.mparticle.Constants.MessageKey;
@@ -86,7 +85,6 @@ public class MParticle {
     /* package-private */ JSONArray mUserIdentities = new JSONArray();
     /* package-private */ JSONObject mUserAttributes = new JSONObject();
     /* package-private */ JSONObject mSessionAttributes;
-    /* package-private */ NotificationCompat.Builder customNotification;
     private MessageManager mMessageManager;
     private Handler mTimeoutHandler;
     private MParticleLocationListener mLocationListener;
@@ -935,19 +933,6 @@ public class MParticle {
      */
     public void setNotificationVibrationEnabled(boolean enabled) {
         mConfigManager.setPushVibrationEnabled(enabled);
-    }
-
-    /**
-     * Set a custom notification style to use for push notification. This will override
-     * the values set by the {@link #setNotificationSoundEnabled(boolean)}
-     * and the {@link #setNotificationVibrationEnabled(boolean)}
-     * methods.
-     *
-     * @param notification
-     * @see <a href="http://developer.android.com/reference/android/support/v4/app/NotificationCompat.Builder.html">NotificationCompat.Builder</a>
-     */
-    public void setCustomPushNotification(NotificationCompat.Builder notification) {
-        customNotification = notification;
     }
 
     void clearPushNotificationId() {

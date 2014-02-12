@@ -16,22 +16,21 @@ import android.util.Log;
 
 /**
  * {@code IntentService } used internally by the SDK to process incoming broadcast messages in the background. Required for push notification functionality.
- *
+ * <p/>
  * This {@code IntentService} must be specified within the {@code <application>} block of your application's {@code AndroidManifest.xml} file:
- *
+ * <p/>
  * <pre>
  * {@code
  * <service android:name="com.mparticle.MPService" />}
- *</pre>
+ * </pre>
  */
 @SuppressLint("Registered")
 public class MPService extends IntentService {
 
     private static final String TAG = Constants.LOG_TAG;
     private static final String MPARTICLE_NOTIFICATION_OPENED = "com.mparticle.notification_opened";
-
-    private static PowerManager.WakeLock sWakeLock;
     private static final Object LOCK = MPService.class;
+    private static PowerManager.WakeLock sWakeLock;
 
     public MPService() {
         super("com.mparticle.MPService");
@@ -68,7 +67,7 @@ public class MPService extends IntentService {
             } else if (action.equals("com.google.android.c2dm.intent.UNREGISTER")) {
                 intent.putExtra("unregistered", "true");
                 handleRegistration(intent);
-            }else if (action.equals(MPARTICLE_NOTIFICATION_OPENED)){
+            } else if (action.equals(MPARTICLE_NOTIFICATION_OPENED)) {
                 handleNotificationClick(intent);
             }
         } finally {
@@ -131,36 +130,36 @@ public class MPService extends IntentService {
             Bundle extras = intent.getExtras();
             Bundle newExtras = new Bundle();
             newExtras.putBundle(Constants.MessageKey.PAYLOAD, extras);
-            if (!MParticle.appRunning){
+            if (!MParticle.appRunning) {
                 newExtras.putString(Constants.MessageKey.APP_STATE, AppStateManager.APP_STATE_NOTRUNNING);
             }
 
             MParticle mMParticle = MParticle.getInstance();
 
-            if (!newExtras.containsKey(Constants.MessageKey.APP_STATE)){
-                if (mMParticle.mAppStateManager.isBackgrounded()){
+            if (!newExtras.containsKey(Constants.MessageKey.APP_STATE)) {
+                if (mMParticle.mAppStateManager.isBackgrounded()) {
                     newExtras.putString(Constants.MessageKey.APP_STATE, AppStateManager.APP_STATE_BACKGROUND);
-                }else{
+                } else {
                     newExtras.putString(Constants.MessageKey.APP_STATE, AppStateManager.APP_STATE_FOREGROUND);
                 }
             }
 
             String title = "Unknown";
-            try{
+            try {
                 int stringId = getApplicationInfo().labelRes;
                 title = getResources().getString(stringId);
-            }catch(Resources.NotFoundException ex){
+            } catch (Resources.NotFoundException ex) {
 
             }
 
             //TODO: support collapse key to auto-update notifications that are still visible.
 
             String[] keys = mMParticle.mConfigManager.getPushKeys();
-            if (keys != null){
+            if (keys != null) {
 
-                for (String key : keys){
+                for (String key : keys) {
                     String message = extras.getString(key);
-                    if (message != null && message.length() > 0){
+                    if (message != null && message.length() > 0) {
                         //redact message contents for privacy concerns
                         newExtras.getBundle(Constants.MessageKey.PAYLOAD).remove(key);
                         newExtras.getBundle(Constants.MessageKey.PAYLOAD).putString(key, "");
@@ -196,21 +195,18 @@ public class MPService extends IntentService {
         launchIntent.setAction(MPARTICLE_NOTIFICATION_OPENED);
         launchIntent.putExtras(extras);
         PendingIntent notifyIntent = PendingIntent.getService(getApplicationContext(), 0, launchIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-        if (mMParticle.customNotification != null){
-            mMParticle.customNotification.setContentIntent(notifyIntent);
-            notificationManager.notify(extras.hashCode(), mMParticle.customNotification.setContentText(message).build());
-        }else{
-            Notification notification = new Notification(applicationIcon, message, System.currentTimeMillis());
-            if (mMParticle.mConfigManager.isPushSoundEnabled()){
-                notification.flags |= Notification.DEFAULT_SOUND;
-            }
-            if (mMParticle.mConfigManager.isPushVibrationEnabled()){
-                notification.flags |= Notification.DEFAULT_VIBRATE;
-            }
-            notification.flags |= Notification.FLAG_AUTO_CANCEL;
-            notification.setLatestEventInfo(this, title, message, notifyIntent);
-            notificationManager.notify(extras.hashCode(), notification);
+
+        Notification notification = new Notification(applicationIcon, message, System.currentTimeMillis());
+        if (mMParticle.mConfigManager.isPushSoundEnabled()) {
+            notification.flags |= Notification.DEFAULT_SOUND;
         }
+        if (mMParticle.mConfigManager.isPushVibrationEnabled()) {
+            notification.flags |= Notification.DEFAULT_VIBRATE;
+        }
+        notification.flags |= Notification.FLAG_AUTO_CANCEL;
+        notification.setLatestEventInfo(this, title, message, notifyIntent);
+        notificationManager.notify(extras.hashCode(), notification);
+
     }
 
 }
