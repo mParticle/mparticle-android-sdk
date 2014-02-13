@@ -182,7 +182,9 @@ public class MainEventTestFragment extends Fragment implements View.OnClickListe
                 MParticle.getInstance().logScreen(screenEditText.getText().toString());
                 break;
             case R.id.button3:
-                MParticle.getInstance().logError(errorEditText.getText().toString());
+                Map<String, String> attributes = new HashMap<String, String>();
+                attributes.put("Attribute", "Some Attribute");
+                MParticle.getInstance().logException(new NullPointerException(), attributes, errorEditText.getText().toString());
                 break;
             case R.id.button4:
                 toastText = "Crashing...";
