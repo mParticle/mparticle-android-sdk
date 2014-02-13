@@ -186,6 +186,7 @@ package com.mparticle;
         public static final String FIRSTRUN = "mp::firstrun::";
         public static final String UPLOAD_MODE = "mp::batch";
         public static final String PROPERTY_APP_VERSION = "mp::appversion";
+        public static final String PROPERTY_OS_VERSION = "mp::osversion";
         public static final String PUSH_ENABLED = "mp::push_enabled";
         public static final String PUSH_SENDER_ID = "mp::push_sender_id";
         public static final String PIRATED = "mp::pirated";

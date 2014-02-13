@@ -14,6 +14,8 @@ import android.content.SharedPreferences;
  *     <li>{@code com.google.android.c2dm.intent.REGISTRATION}</li>
  *     <li>{@code com.google.android.c2dm.intent.RECEIVE}</li>
  *     <li>{@code com.google.android.c2dm.intent.UNREGISTER}</li>
+ *     <li>{@code android.intent.action.PACKAGE_REPLACED}</li>
+ *     <li>{@code android.intent.action.BOOT_COMPLETED}</li>
  * </ul>
  *
  * This {@code BroadcastReceiver} must be specified within the {@code <application>} block of your application's {@code AndroidManifest.xml} file:
@@ -29,7 +31,18 @@ import android.content.SharedPreferences;
  *          <action android:name="com.google.android.c2dm.intent.RECEIVE" />
  *          <action android:name="com.google.android.c2dm.intent.UNREGISTER"/>
  *          <!-- Use your application's package name as the category -->
- *          <category android:name="com.your.package.name" />
+ *          <category android:name="<YOUR_PACKAGE_NAME_HERE>" />
+ *      </intent-filter>
+ *      <!-- The GCM registration ID could change on an app upgrade, this filter will allow mParticle to re-register for push notifications if necessary. -->
+ *      <intent-filter>
+ *          <action android:name="android.intent.action.PACKAGE_REPLACED" />
+ *          <!-- Use your application's package name as the path -->
+ *          <data android:path="<YOUR_PACKAGE_NAME_HERE>"
+ *              android:scheme="package" />
+ *      </intent-filter>
+ *      <!-- The GCM registration ID could change if the device's Android version changes, this filter will allow mParticle to re-register for push notifications if necessary. -->
+ *      <intent-filter>
+ *          <action android:name="android.intent.action.BOOT_COMPLETED" />
  *      </intent-filter>
  * </receiver> }</pre>
  *

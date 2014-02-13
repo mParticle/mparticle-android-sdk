@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.os.Build;
 import android.util.Log;
 
 /**
@@ -47,8 +48,9 @@ class PushRegistrationHelper {
         // app version.
         int registeredVersion = preferences.getInt(Constants.PrefKeys.PROPERTY_APP_VERSION, Integer.MIN_VALUE);
         int currentVersion = getAppVersion(context);
-        if (registeredVersion != currentVersion) {
-            Log.i(Constants.LOG_TAG, "App version changed.");
+        int osVersion = preferences.getInt(Constants.PrefKeys.PROPERTY_OS_VERSION, Integer.MIN_VALUE);
+        if (registeredVersion != currentVersion || osVersion != Build.VERSION.SDK_INT) {
+            Log.i(Constants.LOG_TAG, "App or OS version changed.");
             return null;
         }
         return registrationId;
@@ -81,6 +83,7 @@ class PushRegistrationHelper {
         SharedPreferences.Editor editor = preferences.edit();
         editor.putString(Constants.PrefKeys.PUSH_REGISTRATION_ID, regId);
         editor.putInt(Constants.PrefKeys.PROPERTY_APP_VERSION, appVersion);
+        editor.putInt(Constants.PrefKeys.PROPERTY_OS_VERSION, Build.VERSION.SDK_INT);
         editor.commit();
         listener.onRegistered(regId);
     }

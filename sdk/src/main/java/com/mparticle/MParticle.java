@@ -1062,14 +1062,13 @@ public class MParticle {
      */
     public void setSessionTimeout(int sessionTimeout) {
         mConfigManager.setSessionTimeout(sessionTimeout);
-
     }
 
-    void logNotification(Intent intent) {
+    /* package private */ void logNotification(Bundle notificationBundle, String appState) {
+        lastNotificationBundle = notificationBundle;
         if (mConfigManager.getSendOoEvents()) {
-            lastNotificationBundle = intent.getExtras().getBundle(MessageKey.PAYLOAD);
             ensureActiveSession();
-            mMessageManager.logNotification(mSessionID, mSessionStartTime, lastNotificationBundle, intent.getExtras().getString(MessageKey.APP_STATE));
+            mMessageManager.logNotification(mSessionID, mSessionStartTime, lastNotificationBundle, appState);
         }
     }
 
@@ -1200,5 +1199,13 @@ public class MParticle {
             mMessageManager.setPushRegistrationId(mSessionID, mSessionStartTime, System.currentTimeMillis(), null, true);
         }
     };
+
+    public interface Push {
+        public static final String BROADCAST_NOTIFICATION_RECEIVED = "com.mparticle.push.notification_received";
+        public static final String BROADCAST_NOTIFICATION_TAPPED = "com.mparticle.push.notification_tapped";
+
+        public static final String PUSH_ALERT_EXTRA = "com.mparticle.push.alert";
+
+    }
 
 }

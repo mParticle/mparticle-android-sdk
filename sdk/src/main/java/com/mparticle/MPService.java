@@ -28,9 +28,13 @@ import android.util.Log;
 public class MPService extends IntentService {
 
     private static final String TAG = Constants.LOG_TAG;
-    private static final String MPARTICLE_NOTIFICATION_OPENED = "com.mparticle.notification_opened";
+    private static final String MPARTICLE_NOTIFICATION_OPENED = "com.mparticle.push.notification_opened";
     private static final Object LOCK = MPService.class;
     private static PowerManager.WakeLock sWakeLock;
+    private static final String APP_STATE = "com.mparticle.push.appstate";
+    private static final String PUSH_ORIGINAL_PAYLOAD = "com.mparticle.push.originalpayload";
+    private static final String PUSH_REDACTED_PAYLOAD = "com.mparticle.push.redactedpayload";
+    private static final String BROADCAST_PERMISSION = ".mparticle.permission.NOTIFICATIONS";
 
     public MPService() {
         super("com.mparticle.MPService");
@@ -69,6 +73,8 @@ public class MPService extends IntentService {
                 handleRegistration(intent);
             } else if (action.equals(MPARTICLE_NOTIFICATION_OPENED)) {
                 handleNotificationClick(intent);
+            } else {
+                handeReRegistration();
             }
         } finally {
             synchronized (LOCK) {
@@ -79,24 +85,34 @@ public class MPService extends IntentService {
         }
     }
 
+    private void handeReRegistration() {
+        MParticle.start(getApplicationContext());
+        MParticle.getInstance();
+    }
+
     private void handleNotificationClick(Intent intent) {
+
+        broadcastNotificationClicked(intent.getBundleExtra(PUSH_ORIGINAL_PAYLOAD));
+
         try {
-            MParticle.lastNotificationBundle = intent.getExtras().getBundle(Constants.MessageKey.PAYLOAD);
             MParticle.start(getApplicationContext());
             MParticle mMParticle = MParticle.getInstance();
-            mMParticle.logNotification(intent);
+            Bundle extras = intent.getExtras();
+            String appState = extras.getString(APP_STATE);
+            mMParticle.logNotification(intent.getExtras().getBundle(PUSH_REDACTED_PAYLOAD),
+                                        appState);
         } catch (Throwable t) {
 
         }
 
-        PackageManager packageManager = getPackageManager();
         String packageName = getPackageName();
+        sendBroadcast(intent, packageName + BROADCAST_PERMISSION);
+
+        PackageManager packageManager = getPackageManager();
         Intent launchIntent = packageManager.getLaunchIntentForPackage(packageName);
         launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         launchIntent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
         startActivity(launchIntent);
-
-
     }
 
     private void handleRegistration(Intent intent) {
@@ -129,18 +145,19 @@ public class MPService extends IntentService {
         try {
             Bundle extras = intent.getExtras();
             Bundle newExtras = new Bundle();
-            newExtras.putBundle(Constants.MessageKey.PAYLOAD, extras);
+            newExtras.putBundle(PUSH_ORIGINAL_PAYLOAD, extras);
+            newExtras.putBundle(PUSH_REDACTED_PAYLOAD, extras);
+
             if (!MParticle.appRunning) {
-                newExtras.putString(Constants.MessageKey.APP_STATE, AppStateManager.APP_STATE_NOTRUNNING);
+                extras.putString(APP_STATE, AppStateManager.APP_STATE_NOTRUNNING);
             }
 
             MParticle mMParticle = MParticle.getInstance();
-
-            if (!newExtras.containsKey(Constants.MessageKey.APP_STATE)) {
+            if (!extras.containsKey(Constants.MessageKey.APP_STATE)) {
                 if (mMParticle.mAppStateManager.isBackgrounded()) {
-                    newExtras.putString(Constants.MessageKey.APP_STATE, AppStateManager.APP_STATE_BACKGROUND);
+                    extras.putString(APP_STATE, AppStateManager.APP_STATE_BACKGROUND);
                 } else {
-                    newExtras.putString(Constants.MessageKey.APP_STATE, AppStateManager.APP_STATE_FOREGROUND);
+                    extras.putString(APP_STATE, AppStateManager.APP_STATE_FOREGROUND);
                 }
             }
 
@@ -152,22 +169,15 @@ public class MPService extends IntentService {
 
             }
 
-            //TODO: support collapse key to auto-update notifications that are still visible.
+            String[] possibleKeys = mMParticle.mConfigManager.getPushKeys();
+            String key = findMessageKey(possibleKeys, extras);
+            String message = extras.getString(key);
+            newExtras.getBundle(PUSH_REDACTED_PAYLOAD).putString(key, "");
+            newExtras.getBundle(PUSH_ORIGINAL_PAYLOAD).putString(MParticle.Push.PUSH_ALERT_EXTRA, message);
 
-            String[] keys = mMParticle.mConfigManager.getPushKeys();
-            if (keys != null) {
+            showPushWithMessage(title, message, newExtras);
 
-                for (String key : keys) {
-                    String message = extras.getString(key);
-                    if (message != null && message.length() > 0) {
-                        //redact message contents for privacy concerns
-                        newExtras.getBundle(Constants.MessageKey.PAYLOAD).remove(key);
-                        newExtras.getBundle(Constants.MessageKey.PAYLOAD).putString(key, "");
-                        showPushWithMessage(title, message, newExtras);
-                        break;
-                    }
-                }
-            }
+            broadcastNotificationReceived(newExtras.getBundle("originalPayload"));
         } catch (Throwable t) {
             // failure to instantiate mParticle likely means that the
             // mparticle.properties file is not correct
@@ -176,7 +186,34 @@ public class MPService extends IntentService {
         }
     }
 
-    private void showPushWithMessage(String title, String message, Bundle extras) {
+    private void broadcastNotificationReceived(Bundle originalPayload) {
+        Intent intent = new Intent(MParticle.Push.BROADCAST_NOTIFICATION_RECEIVED);
+        intent.putExtras(originalPayload);
+        String packageName = getPackageName();
+        sendBroadcast(intent, packageName + BROADCAST_PERMISSION);
+    }
+
+    private void broadcastNotificationClicked(Bundle originalPayload) {
+        Intent intent = new Intent(MParticle.Push.BROADCAST_NOTIFICATION_RECEIVED);
+        intent.putExtras(originalPayload);
+        String packageName = getPackageName();
+        sendBroadcast(intent, packageName + BROADCAST_PERMISSION);
+    }
+
+    private String findMessageKey(String[] possibleKeys, Bundle extras){
+        if (possibleKeys != null) {
+            for (String key : possibleKeys) {
+                String message = extras.getString(key);
+                if (message != null && message.length() > 0) {
+                    return key;
+                }
+            }
+        }
+        Log.w(Constants.LOG_TAG, "Failed to extract push alert message using configuration.");
+        return null;
+    }
+
+    private void showPushWithMessage(String title, String message, Bundle newExtras) {
         PackageManager packageManager = getPackageManager();
         String packageName = getPackageName();
 
@@ -193,7 +230,7 @@ public class MPService extends IntentService {
         MParticle mMParticle = MParticle.getInstance();
         Intent launchIntent = new Intent(getApplicationContext(), MPService.class);
         launchIntent.setAction(MPARTICLE_NOTIFICATION_OPENED);
-        launchIntent.putExtras(extras);
+        launchIntent.putExtras(newExtras);
         PendingIntent notifyIntent = PendingIntent.getService(getApplicationContext(), 0, launchIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         Notification notification = new Notification(applicationIcon, message, System.currentTimeMillis());
@@ -205,8 +242,7 @@ public class MPService extends IntentService {
         }
         notification.flags |= Notification.FLAG_AUTO_CANCEL;
         notification.setLatestEventInfo(this, title, message, notifyIntent);
-        notificationManager.notify(extras.hashCode(), notification);
-
+        notificationManager.notify(message.hashCode(), notification);
     }
 
 }
