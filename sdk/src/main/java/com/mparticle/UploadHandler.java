@@ -509,7 +509,7 @@ import javax.crypto.spec.SecretKeySpec;
                     } else {
                         try {
                             JSONObject responseJSON = new JSONObject(response);
-                            if (responseJSON.has("echo")){
+                           /* if (responseJSON.has("echo")){
                                 try{
                                     JSONObject messageObj = new JSONObject(message);
                                     boolean equal = MPUtility.jsonObjsAreEqual(responseJSON.getJSONObject("echo"), messageObj);
@@ -521,7 +521,7 @@ import javax.crypto.spec.SecretKeySpec;
                                 }catch (Exception e){
                                     Log.d(TAG, "Exception while comparing Echo response: " + e.getMessage());
                                 }
-                            }
+                            }*/
                             if (responseJSON.has(MessageKey.MESSAGES)) {
                                 JSONArray responseCommands = responseJSON.getJSONArray(MessageKey.MESSAGES);
                                 for (int i = 0; i < responseCommands.length(); i++) {

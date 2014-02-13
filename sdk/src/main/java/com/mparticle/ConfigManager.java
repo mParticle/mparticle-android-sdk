@@ -238,4 +238,24 @@ class ConfigManager {
     public boolean isPushVibrationEnabled() {
         return mPreferences.getBoolean(Constants.PrefKeys.PUSH_ENABLE_VIBRATION, AppConfig.DEFAULT_ENABLE_PUSH_VIBRATION);
     }
+
+    public void setPushNotificationIcon(int pushNotificationIcon) {
+        mPreferences.edit()
+                .putInt(Constants.PrefKeys.PUSH_ICON, pushNotificationIcon)
+                .commit();
+    }
+
+    public void setPushNotificationTitle(int pushNotificationTitle) {
+        mPreferences.edit()
+                .putInt(Constants.PrefKeys.PUSH_TITLE, pushNotificationTitle)
+                .commit();
+    }
+
+    public int getPushTitle() {
+        return mPreferences.getInt(Constants.PrefKeys.PUSH_TITLE, 0);
+    }
+
+    public int getPushIcon() {
+        return mPreferences.getInt(Constants.PrefKeys.PUSH_ICON, 0);
+    }
 }

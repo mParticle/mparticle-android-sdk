@@ -192,6 +192,8 @@ package com.mparticle;
         public static final String PIRATED = "mp::pirated";
         public static final String PUSH_ENABLE_SOUND = "mp::push::sound";
         public static final String PUSH_ENABLE_VIBRATION = "mp::push::vibration";
+        public static final String PUSH_ICON = "mp::push::icon";
+        public static final String PUSH_TITLE = "mp::push::title";
     }
 
     public interface MiscStorageKeys {

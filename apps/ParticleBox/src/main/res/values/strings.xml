@@ -13,6 +13,7 @@
     <string name="triggerText">Log</string>
     <string name="exceptions">NullPointerException</string>
     <string name="setText">Set</string>
+
     <string-array name="exceptions">
         <item>NullPointerException</item>
         <item>IndexOutOfBoundsException</item>

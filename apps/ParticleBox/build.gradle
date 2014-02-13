@@ -48,7 +48,9 @@ android {
         flurry {
             packageName 'com.mparticle.particlebox.flurry'
         }
-
+        urbanairship {
+            packageName 'com.mparticle.particlebox.urbanairship'
+        }
     }
 }
 
@@ -59,4 +61,5 @@ dependencies {
     googleanalyticsCompile files("libs/libGoogleAnalyticsServices.jar")
     mixpanelCompile 'com.mixpanel.android:mixpanel-android:4.0.0-RC3@aar'
     flurryCompile files ("libs/FlurryAnalytics_3.3.3.jar")
+    urbanairshipCompile files ("libs/urbanairship-lib-3.2.3.jar")
 }

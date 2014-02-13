@@ -1201,11 +1201,34 @@ public class MParticle {
     };
 
     public interface Push {
-        public static final String BROADCAST_NOTIFICATION_RECEIVED = "com.mparticle.push.notification_received";
-        public static final String BROADCAST_NOTIFICATION_TAPPED = "com.mparticle.push.notification_tapped";
-
+        public static final String BROADCAST_NOTIFICATION_RECEIVED = "com.mparticle.push.NOTIFICATION_RECEIVED";
+        public static final String BROADCAST_NOTIFICATION_TAPPED = "com.mparticle.push.NOTIFICATION_TAPPED";
         public static final String PUSH_ALERT_EXTRA = "com.mparticle.push.alert";
 
     }
+
+    /**
+     * Set the resource ID of the icon to be shown in the notification bar when a notification is received.
+     *
+     * By default, the app launcher icon will be shown.
+     *
+     * @param resId the resource id of a drawable
+     */
+    public void setPushNotificationIcon(int resId){
+        mConfigManager.setPushNotificationIcon(resId);
+    }
+
+    /**
+     * Set the resource ID of the title to be shown in the notification bar when a notification is received
+     *
+     * By default, the title of the application will be shown.
+     *
+     * @param resId the resource id of a string
+     */
+    public void setPushNotificationTitle(int resId){
+        mConfigManager.setPushNotificationTitle(resId);
+    }
+
+
 
 }

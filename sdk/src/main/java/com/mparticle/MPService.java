@@ -10,6 +10,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.PowerManager;
 import android.util.Log;
@@ -49,7 +50,6 @@ public class MPService extends IntentService {
         }
         sWakeLock.acquire();
         intent.setClass(context, MPService.class);
-        Log.i("MPService", "Running intent");
         context.startService(intent);
     }
 
@@ -104,12 +104,8 @@ public class MPService extends IntentService {
         } catch (Throwable t) {
 
         }
-
-        String packageName = getPackageName();
-        sendBroadcast(intent, packageName + BROADCAST_PERMISSION);
-
         PackageManager packageManager = getPackageManager();
-        Intent launchIntent = packageManager.getLaunchIntentForPackage(packageName);
+        Intent launchIntent = packageManager.getLaunchIntentForPackage(getPackageName());
         launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         launchIntent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
         startActivity(launchIntent);
@@ -143,21 +139,21 @@ public class MPService extends IntentService {
     private void handleMessage(Intent intent) {
 
         try {
-            Bundle extras = intent.getExtras();
+
             Bundle newExtras = new Bundle();
-            newExtras.putBundle(PUSH_ORIGINAL_PAYLOAD, extras);
-            newExtras.putBundle(PUSH_REDACTED_PAYLOAD, extras);
+            newExtras.putBundle(PUSH_ORIGINAL_PAYLOAD, intent.getExtras());
+            newExtras.putBundle(PUSH_REDACTED_PAYLOAD, intent.getExtras());
 
             if (!MParticle.appRunning) {
-                extras.putString(APP_STATE, AppStateManager.APP_STATE_NOTRUNNING);
+                newExtras.putString(APP_STATE, AppStateManager.APP_STATE_NOTRUNNING);
             }
 
             MParticle mMParticle = MParticle.getInstance();
-            if (!extras.containsKey(Constants.MessageKey.APP_STATE)) {
+            if (!newExtras.containsKey(Constants.MessageKey.APP_STATE)) {
                 if (mMParticle.mAppStateManager.isBackgrounded()) {
-                    extras.putString(APP_STATE, AppStateManager.APP_STATE_BACKGROUND);
+                    newExtras.putString(APP_STATE, AppStateManager.APP_STATE_BACKGROUND);
                 } else {
-                    extras.putString(APP_STATE, AppStateManager.APP_STATE_FOREGROUND);
+                    newExtras.putString(APP_STATE, AppStateManager.APP_STATE_FOREGROUND);
                 }
             }
 
@@ -170,14 +166,22 @@ public class MPService extends IntentService {
             }
 
             String[] possibleKeys = mMParticle.mConfigManager.getPushKeys();
-            String key = findMessageKey(possibleKeys, extras);
-            String message = extras.getString(key);
+            String key = findMessageKey(possibleKeys, newExtras.getBundle(PUSH_ORIGINAL_PAYLOAD));
+            String message = newExtras.getBundle(PUSH_ORIGINAL_PAYLOAD).getString(key);
             newExtras.getBundle(PUSH_REDACTED_PAYLOAD).putString(key, "");
             newExtras.getBundle(PUSH_ORIGINAL_PAYLOAD).putString(MParticle.Push.PUSH_ALERT_EXTRA, message);
+            int titleResId = MParticle.getInstance().mConfigManager.getPushTitle();
+            if (titleResId > 0){
+                try{
+                    title = getString(titleResId);
+                }catch(Resources.NotFoundException e){
+
+                }
+            }
 
             showPushWithMessage(title, message, newExtras);
 
-            broadcastNotificationReceived(newExtras.getBundle("originalPayload"));
+            broadcastNotificationReceived(newExtras.getBundle(PUSH_ORIGINAL_PAYLOAD));
         } catch (Throwable t) {
             // failure to instantiate mParticle likely means that the
             // mparticle.properties file is not correct
@@ -217,14 +221,23 @@ public class MPService extends IntentService {
         PackageManager packageManager = getPackageManager();
         String packageName = getPackageName();
 
-        int applicationIcon = 0;
-        try {
-            applicationIcon = packageManager.getApplicationInfo(packageName, 0).icon;
-        } catch (NameNotFoundException e) {
-            // use the ic_dialog_alert icon if the app's can not be found
+        MParticle.start(getApplicationContext());
+        int iconResId = MParticle.getInstance().mConfigManager.getPushIcon();
+        try{
+            Drawable draw = getResources().getDrawable(iconResId);
+        }catch (Resources.NotFoundException nfe){
+            iconResId = 0;
         }
-        if (0 == applicationIcon) {
-            applicationIcon = android.R.drawable.ic_dialog_alert;
+
+        if (iconResId == 0){
+            try {
+                iconResId = packageManager.getApplicationInfo(packageName, 0).icon;
+            } catch (NameNotFoundException e) {
+                // use the ic_dialog_alert icon if the app's can not be found
+            }
+            if (0 == iconResId) {
+                iconResId = android.R.drawable.ic_dialog_alert;
+            }
         }
         NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         MParticle mMParticle = MParticle.getInstance();
@@ -233,7 +246,7 @@ public class MPService extends IntentService {
         launchIntent.putExtras(newExtras);
         PendingIntent notifyIntent = PendingIntent.getService(getApplicationContext(), 0, launchIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
-        Notification notification = new Notification(applicationIcon, message, System.currentTimeMillis());
+        Notification notification = new Notification(iconResId, message, System.currentTimeMillis());
         if (mMParticle.mConfigManager.isPushSoundEnabled()) {
             notification.flags |= Notification.DEFAULT_SOUND;
         }
