@@ -18,7 +18,6 @@ import com.mparticle.MParticle;
  * <p>For ICS and later, screen tracking and application state tracking are handled automatically.</p>
  *
  * @see com.mparticle.activity.MPActivity
- * @see com.mparticle.activity.MPFragmentActivity
  *
  */
 @SuppressLint("Registered")

@@ -38,6 +38,7 @@ package com.mparticle;
  * <p>Note {@link CharBase64} is a GWT-compatible implementation of this
  * class.
  */
+@SuppressWarnings("ALL")
 class GBase64 {
   /** Specify encoding (value is {@code true}). */
   public final static boolean ENCODE = true;
