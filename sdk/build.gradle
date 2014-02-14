@@ -35,6 +35,9 @@ android {
         runProguard false
         proguardFile 'proguard.txt'
     }
+    lintOptions {
+        abortOnError false
+    }
 
 }
 
