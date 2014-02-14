@@ -31,8 +31,8 @@ android {
     }
 
     release {
-        buildConfigField "boolean", "ECHO", "true"
-        runProguard false
+        buildConfigField "boolean", "ECHO", "false"
+        runProguard true
         proguardFile 'proguard.txt'
     }
     lintOptions {
