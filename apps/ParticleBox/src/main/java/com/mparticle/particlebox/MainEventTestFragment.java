@@ -200,6 +200,7 @@ public class MainEventTestFragment extends Fragment implements View.OnClickListe
                     attributes.put("Attribute", "Some Attribute");
                     MParticle.getInstance().logException(e, attributes, errorEditText.getText().toString());
                 }
+                break;
             case R.id.button4:
                 toastText = "Crashing...";
                 switch (exceptionSpinner.getSelectedItemPosition()) {
@@ -222,7 +223,7 @@ public class MainEventTestFragment extends Fragment implements View.OnClickListe
         Toast.makeText(v.getContext(), toastText, 300).show();
     }
 
-    private Runnable npeRunnable = new Runnable() {
+    protected Runnable npeRunnable = new Runnable() {
 
         @Override
         public void run() {
@@ -231,7 +232,7 @@ public class MainEventTestFragment extends Fragment implements View.OnClickListe
         }
     };
 
-    private Runnable ioobeRunnable = new Runnable() {
+    protected Runnable ioobeRunnable = new Runnable() {
 
         @Override
         public void run() {

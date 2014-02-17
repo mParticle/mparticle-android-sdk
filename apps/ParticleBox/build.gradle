@@ -13,6 +13,9 @@ apply plugin: 'android'
 repositories {
     mavenCentral()
     mavenLocal()
+    maven {
+        url "http://www.bugsense.com/gradle/"
+    }
 }
 
 def buildTime() {
@@ -51,6 +54,9 @@ android {
         urbanairship {
             packageName 'com.mparticle.particlebox.urbanairship'
         }
+        bugsense {
+            packageName 'com.mparticle.particlebox.bugsense'
+        }
     }
 }
 
@@ -62,4 +68,5 @@ dependencies {
     mixpanelCompile 'com.mixpanel.android:mixpanel-android:4.0.0-RC3@aar'
     flurryCompile files ("libs/FlurryAnalytics_3.3.3.jar")
     urbanairshipCompile files ("libs/urbanairship-lib-3.2.3.jar")
+    bugsenseCompile 'com.bugsense.trace:bugsense:3.5'
 }
