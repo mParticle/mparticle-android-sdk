@@ -29,7 +29,7 @@ public class MainEventTestFragment extends Fragment implements View.OnClickListe
      * fragment.
      */
     private static final String ARG_SECTION_NUMBER = "section_number";
-    protected Spinner spinner, exceptionSpinner, timingCategory;
+    protected Spinner spinner, exceptionSpinner, timingCategory, handledExceptionSpinner;
     protected EditText viewEditText, screenEditText, errorEditText, unhandleErrorEditText, eventValue, eventLabel, timingTitle, timingLabel, timingLength;
     protected Button eventButton, screenButton, handledErrorsButton, unhandledErrorsButton, timingButton;
 
@@ -71,6 +71,7 @@ public class MainEventTestFragment extends Fragment implements View.OnClickListe
         spinner = (Spinner) v.findViewById(R.id.spinner);
         timingCategory = (Spinner) v.findViewById(R.id.timingCategory);
         exceptionSpinner = (Spinner) v.findViewById(R.id.spinner2);
+        handledExceptionSpinner = (Spinner) v.findViewById(R.id.handledExceptionSpinner);
         eventLabel = (EditText) v.findViewById(R.id.eventLabel);
         eventValue = (EditText) v.findViewById(R.id.eventValue);
 
@@ -88,6 +89,10 @@ public class MainEventTestFragment extends Fragment implements View.OnClickListe
         spinner.setSelection(8);
 
         exceptionSpinner.setAdapter(new ArrayAdapter<String>(
+                v.getContext(),
+                android.R.layout.simple_list_item_1,
+                v.getResources().getStringArray(R.array.exceptions)));
+        handledExceptionSpinner.setAdapter(new ArrayAdapter<String>(
                 v.getContext(),
                 android.R.layout.simple_list_item_1,
                 v.getResources().getStringArray(R.array.exceptions)));
@@ -182,10 +187,19 @@ public class MainEventTestFragment extends Fragment implements View.OnClickListe
                 MParticle.getInstance().logScreen(screenEditText.getText().toString());
                 break;
             case R.id.button3:
-                Map<String, String> attributes = new HashMap<String, String>();
-                attributes.put("Attribute", "Some Attribute");
-                MParticle.getInstance().logException(new NullPointerException(), attributes, errorEditText.getText().toString());
-                break;
+                try{
+                    switch (handledExceptionSpinner.getSelectedItemPosition()) {
+                        case 0:
+                            npeRunnable.run();
+                            break;
+                        case 1:
+                            ioobeRunnable.run();
+                        }
+                }catch(Exception e){
+                    Map<String, String> attributes = new HashMap<String, String>();
+                    attributes.put("Attribute", "Some Attribute");
+                    MParticle.getInstance().logException(e, attributes, errorEditText.getText().toString());
+                }
             case R.id.button4:
                 toastText = "Crashing...";
                 switch (exceptionSpinner.getSelectedItemPosition()) {

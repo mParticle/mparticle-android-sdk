@@ -145,6 +145,14 @@
             <View
                 android:layout_width="1dp"
                 android:layout_height="5dp" />
+            <Spinner
+                android:layout_width="match_parent"
+                android:id="@+id/handledExceptionSpinner"
+                android:gravity="bottom"
+                android:layout_height="40dp" />
+            <View
+                android:layout_width="1dp"
+                android:layout_height="5dp" />
 
             <Button
                 android:layout_width="280dp"
