@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -122,20 +123,40 @@ public class NavigationDrawerFragment extends Fragment {
         CompoundButton.OnCheckedChangeListener checkedChangedListener = new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                MParticle.getInstance().setOptOut(isChecked);
+                if (buttonView.getId() == R.id.optoutCheckbox || buttonView.getId() == R.id.optoutSwitch){
+                    MParticle.getInstance().setOptOut(isChecked);
+                }else{
+                    if (isChecked){
+                        MParticle.getInstance().enableLocationTracking(LocationManager.NETWORK_PROVIDER, 60*1000, 100);
+                    }else{
+                        MParticle.getInstance().disableLocationTracking();
+                    }
+                }
+
             }
         };
 
         if (v.findViewById(R.id.optoutSwitch) != null){
             optoutSwitch = (Switch)v.findViewById(R.id.optoutSwitch);
-
-            optoutSwitch.setOnCheckedChangeListener(checkedChangedListener);
             optoutSwitch.setChecked(MParticle.getInstance().getOptOut());
+            optoutSwitch.setOnCheckedChangeListener(checkedChangedListener);
+
         }else{
             optoutCheckbox = (CheckBox)v.findViewById(R.id.optoutCheckbox);
-            optoutCheckbox.setOnCheckedChangeListener(checkedChangedListener);
             optoutCheckbox.setChecked(MParticle.getInstance().getOptOut());
+            optoutCheckbox.setOnCheckedChangeListener(checkedChangedListener);
         }
+
+        if (v.findViewById(R.id.locationTrackingSwitch) != null){
+            Switch locationTracking = (Switch)v.findViewById(R.id.locationTrackingSwitch);
+            locationTracking.setChecked(MParticle.getInstance().getOptOut());
+            locationTracking.setOnCheckedChangeListener(checkedChangedListener);
+
+        }else{
+            CheckBox locationTracking = (CheckBox)v.findViewById(R.id.locationTrackingCheckbox);
+            locationTracking.setOnCheckedChangeListener(checkedChangedListener);
+        }
+
 
         ((TextView) v.findViewById(R.id.versionName)).setText("App Version: " + versionName);
         ((TextView) v.findViewById(R.id.versionCode)).setText("App Version code: " + BuildConfig.VERSION_CODE);
