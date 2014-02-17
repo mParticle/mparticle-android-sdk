@@ -4,6 +4,7 @@ import android.os.Handler;
 import android.view.View;
 
 import com.flurry.android.FlurryAgent;
+import com.mparticle.MParticle;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -31,7 +32,18 @@ public class EventTestFragment extends MainEventTestFragment implements View.OnC
                 FlurryAgent.logEvent(screenEditText.getText().toString());
                 break;
             case R.id.button3:
-                FlurryAgent.onError(Integer.toString(errorEditText.hashCode()), errorEditText.getText().toString(), new Exception("fake exception"));
+                try{
+                    switch (handledExceptionSpinner.getSelectedItemPosition()) {
+                        case 0:
+                            npeRunnable.run();
+                            break;
+                        case 1:
+                            ioobeRunnable.run();
+                    }
+                }catch(Exception e){
+                    FlurryAgent.onError(Integer.toString(errorEditText.hashCode()), errorEditText.getText().toString(), e);
+                }
+
                 break;
             case R.id.button5:
                 Map<String, String> articleParams2 = new HashMap<String, String>();
