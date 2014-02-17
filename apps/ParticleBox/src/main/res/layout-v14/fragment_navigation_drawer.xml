@@ -23,14 +23,16 @@
 
             <TextView
                 android:layout_height="wrap_content"
-                android:text="Production "
+                android:text="Opt-out "
                 android:textSize="10dp"
+
                 android:textColor="@android:color/white"
                 android:layout_width="wrap_content" />
 
             <Switch
                 android:layout_width="wrap_content"
-                android:enabled="false"
+                android:enabled="true"
+                android:id="@+id/optoutSwitch"
                 android:layout_height="wrap_content" />
         </LinearLayout>
 

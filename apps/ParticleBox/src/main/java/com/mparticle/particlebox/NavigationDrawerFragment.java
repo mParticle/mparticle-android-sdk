@@ -1,9 +1,11 @@
 package com.mparticle.particlebox;
 
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.ActionBarDrawerToggle;
@@ -20,10 +22,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.ListView;
+import android.widget.Switch;
 import android.widget.TextView;
 
-;
+;import com.mparticle.MParticle;
 
 
 /**
@@ -59,6 +64,8 @@ public class NavigationDrawerFragment extends Fragment {
     private View mFragmentContainerView;
 
     private int mCurrentSelectedPosition = 0;
+    private Switch optoutSwitch;
+    private CheckBox optoutCheckbox;
 
     public NavigationDrawerFragment() {
     }
@@ -80,6 +87,7 @@ public class NavigationDrawerFragment extends Fragment {
         // Indicate that this fragment would like to influence the set of actions in the action bar.
         setHasOptionsMenu(true);
     }
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -110,6 +118,23 @@ public class NavigationDrawerFragment extends Fragment {
                     .getPackageInfo(v.getContext().getPackageName(), 0).versionName;
         } catch (PackageManager.NameNotFoundException nnfe) {
 
+        }
+        CompoundButton.OnCheckedChangeListener checkedChangedListener = new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                MParticle.getInstance().setOptOut(isChecked);
+            }
+        };
+
+        if (v.findViewById(R.id.optoutSwitch) != null){
+            optoutSwitch = (Switch)v.findViewById(R.id.optoutSwitch);
+
+            optoutSwitch.setOnCheckedChangeListener(checkedChangedListener);
+            optoutSwitch.setChecked(MParticle.getInstance().getOptOut());
+        }else{
+            optoutCheckbox = (CheckBox)v.findViewById(R.id.optoutCheckbox);
+            optoutCheckbox.setOnCheckedChangeListener(checkedChangedListener);
+            optoutCheckbox.setChecked(MParticle.getInstance().getOptOut());
         }
 
         ((TextView) v.findViewById(R.id.versionName)).setText("App Version: " + versionName);
