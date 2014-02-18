@@ -228,11 +228,15 @@ import java.util.UUID;
     }
 
     private void incrementSessionCounter() {
-        mPreferences.edit().putInt(Constants.PrefKeys.SESSION_COUNTER, (mPreferences.getInt(Constants.PrefKeys.SESSION_COUNTER, 0) + 1));
+        mPreferences.edit().putInt(Constants.PrefKeys.SESSION_COUNTER, (mPreferences.getInt(Constants.PrefKeys.SESSION_COUNTER, 0) + 1)).commit();
     }
 
     private int getCurrentSessionCounter(){
         return mPreferences.getInt(Constants.PrefKeys.SESSION_COUNTER, 0);
+    }
+
+    private void clearSessionCounter(){
+        mPreferences.edit().putInt(Constants.PrefKeys.SESSION_COUNTER, 0).commit();
     }
 
     public void stopSession(String sessionId, long stopTime, long sessionLength) {
@@ -324,13 +328,13 @@ import java.util.UUID;
                 message.put(MessageKey.ERROR_UNCAUGHT, String.valueOf(caught));
 
                 message.put(MessageKey.ERROR_SESSION_COUNT, getCurrentSessionCounter());
+
             } else {
                 message.put(MessageKey.ERROR_SEVERITY, "error");
                 message.put(MessageKey.ERROR_MESSAGE, errorMessage);
             }
-
-
             mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
+            clearSessionCounter();
         } catch (JSONException e) {
             Log.w(TAG, "Failed to create mParticle error message");
         }
