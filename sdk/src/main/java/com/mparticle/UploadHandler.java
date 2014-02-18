@@ -669,7 +669,6 @@ import javax.crypto.spec.SecretKeySpec;
     private void dbDeleteProcessedMessages(SQLiteDatabase db, String sessionId) {
         String[] whereArgs = new String[]{mApiKey, Integer.toString(Status.UPLOADED), sessionId};
         int rowsdeleted = db.delete(MessageTable.TABLE_NAME, SQL_FINISHED_HISTORY_MESSAGES, whereArgs);
-        Log.d("mParticle DB", "Deleted " + rowsdeleted);
     }
 
     private void dbMarkAsUploadedMessage(SQLiteDatabase db, int lastMessageId) {
@@ -688,7 +687,6 @@ import javax.crypto.spec.SecretKeySpec;
     private void dbDeleteUpload(SQLiteDatabase db, int id) {
         String[] whereArgs = {Long.toString(id)};
         int rowsdeleted = db.delete(UploadTable.TABLE_NAME, "_id=?", whereArgs);
-        Log.d("mParticle DB", "Deleted " + rowsdeleted);
     }
 
     private void dbDeleteCommand(SQLiteDatabase db, int id) {

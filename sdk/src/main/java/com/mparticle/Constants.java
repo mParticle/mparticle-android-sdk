@@ -198,7 +198,8 @@ package com.mparticle;
         public static final String PUSH_ENABLE_VIBRATION = "mp::push::vibration";
         public static final String PUSH_ICON = "mp::push::icon";
         public static final String PUSH_TITLE = "mp::push::title";
-        public static final String SESSION_COUNTER = "mp::session::breadcrumbcount";
+        public static final String SESSION_COUNTER = "mp::breadcrumbs::sessioncount";
+        public static final String BREADCRUMB_LIMIT = "mp::breadcrumbs::limit";
     }
 
     public interface MiscStorageKeys {

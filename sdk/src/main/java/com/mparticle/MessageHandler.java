@@ -215,9 +215,10 @@ import org.json.JSONObject;
                 breadcrumbs.put(breadcrumbObject);
             }
             message.put(MessageType.BREADCRUMB, breadcrumbs);
-            db.delete(BreadcrumbTable.TABLE_NAME, null, null);
         }
     }
+
+    private static final String[] idColumns = {"_id"};
 
     private void dbInsertBreadcrumb(SQLiteDatabase db, JSONObject message) throws JSONException {
         ContentValues contentValues = new ContentValues();
@@ -226,7 +227,16 @@ import org.json.JSONObject;
         contentValues.put(MParticleDatabase.BreadcrumbTable.SESSION_ID, getMessageSessionId(message));
         contentValues.put(MParticleDatabase.BreadcrumbTable.MESSAGE, message.toString());
 
-        db.insert(MParticleDatabase.BreadcrumbTable.TABLE_NAME, null, contentValues);
+
+        db.insert(BreadcrumbTable.TABLE_NAME, null, contentValues);
+        Cursor cursor = db.query(BreadcrumbTable.TABLE_NAME, idColumns, null, null, null, null, " _id desc limit 1");
+        if (cursor.moveToFirst()){
+            int maxId = cursor.getInt(0);
+            if (maxId > MParticle.getInstance().mConfigManager.getBreadcrumbLimit()){
+                String[] limit = {Integer.toString(maxId - MParticle.getInstance().mConfigManager.getBreadcrumbLimit())};
+                db.delete(BreadcrumbTable.TABLE_NAME, " _id < ?", limit);
+            }
+        }
     }
 
     private void dbInsertSession(SQLiteDatabase db, JSONObject message) throws JSONException {

@@ -228,15 +228,15 @@ import java.util.UUID;
     }
 
     private void incrementSessionCounter() {
-        mPreferences.edit().putInt(Constants.PrefKeys.SESSION_COUNTER, (mPreferences.getInt(Constants.PrefKeys.SESSION_COUNTER, 0) + 1)).commit();
+        int nextCount = getCurrentSessionCounter() + 1;
+        if (nextCount >= (Integer.MAX_VALUE / 100)){
+            nextCount = 0;
+        }
+        mPreferences.edit().putInt(Constants.PrefKeys.SESSION_COUNTER, nextCount).commit();
     }
 
     private int getCurrentSessionCounter(){
         return mPreferences.getInt(Constants.PrefKeys.SESSION_COUNTER, 0);
-    }
-
-    private void clearSessionCounter(){
-        mPreferences.edit().putInt(Constants.PrefKeys.SESSION_COUNTER, 0).commit();
     }
 
     public void stopSession(String sessionId, long stopTime, long sessionLength) {
@@ -319,7 +319,7 @@ import java.util.UUID;
         try {
             JSONObject message = createMessage(MessageType.ERROR, sessionId, sessionStartTime, time, null, attributes);
             if (null != t) {
-                message.put(MessageKey.ERROR_SEVERITY, "fatal");
+                message.put(MessageKey.ERROR_SEVERITY, caught ? "error" : "fatal");
                 message.put(MessageKey.ERROR_CLASS, t.getClass().getCanonicalName());
                 message.put(MessageKey.ERROR_MESSAGE, t.getMessage());
                 StringWriter stringWriter = new StringWriter();
@@ -334,7 +334,6 @@ import java.util.UUID;
                 message.put(MessageKey.ERROR_MESSAGE, errorMessage);
             }
             mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
-            clearSessionCounter();
         } catch (JSONException e) {
             Log.w(TAG, "Failed to create mParticle error message");
         }

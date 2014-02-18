@@ -139,7 +139,7 @@
                 android:layout_height="wrap_content"
                 android:hint="Breadcrumb name (required)"
                 android:id="@+id/breadcrumbEdittext"
-                android:text="Particlebox Breadcrumb"
+                android:text="Particlebox Breadcrumb 1"
                 android:singleLine="true" />
 
             <View

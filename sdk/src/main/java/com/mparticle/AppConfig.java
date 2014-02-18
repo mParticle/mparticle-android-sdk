@@ -32,6 +32,7 @@ class AppConfig {
     public static final boolean DEFAULT_ENABLE_AUTO_TRACKING = false;
     public static final boolean DEFAULT_ENABLE_PUSH_SOUND = false;
     public static final boolean DEFAULT_ENABLE_PUSH_VIBRATION = false;
+    public static final int DEFAULT_BREADCRUMB_LIMIT = 50;
 
 
     private final Context mContext;

@@ -224,7 +224,16 @@ public class MainEventTestFragment extends Fragment implements View.OnClickListe
                         Long.parseLong(timingLength.getText().toString()));
                 break;
             case R.id.breadcrumbButton:
-                MParticle.getInstance().leaveBreadcrumb(breadcrumb.getText().toString());
+                String text = breadcrumb.getText().toString();
+                MParticle.getInstance().leaveBreadcrumb(text);
+                try{
+                    int index = text.lastIndexOf(" ");
+                    int breadcrumbNumber = Integer.parseInt(text.substring(index, text.length()).trim()) + 1;
+                    text = text.substring(0, index) + " " + breadcrumbNumber;
+                    breadcrumb.setText(text);
+                }catch (Exception e){
+
+                }
                 toastText = "Breadcrumb left and logged.";
                 break;
 

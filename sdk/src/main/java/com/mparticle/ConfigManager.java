@@ -221,7 +221,8 @@ class ConfigManager {
     }
 
     public void setOptOut(boolean optOut){
-        mPreferences.edit().putBoolean(Constants.PrefKeys.OPTOUT, optOut).commit();
+        mPreferences
+                .edit().putBoolean(Constants.PrefKeys.OPTOUT, optOut).commit();
     }
 
     public boolean getOptedOut(){
@@ -260,6 +261,12 @@ class ConfigManager {
     }
 
     public int getBreadcrumbLimit() {
-        return 50;
+        return mPreferences.getInt(Constants.PrefKeys.BREADCRUMB_LIMIT, AppConfig.DEFAULT_BREADCRUMB_LIMIT);
+    }
+
+    public void setBreadcrumbLimit(int newLimit){
+        mPreferences.edit()
+                .putInt(Constants.PrefKeys.BREADCRUMB_LIMIT, newLimit)
+                .commit();
     }
 }
