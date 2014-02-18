@@ -30,8 +30,8 @@ public class MainEventTestFragment extends Fragment implements View.OnClickListe
      */
     private static final String ARG_SECTION_NUMBER = "section_number";
     protected Spinner spinner, exceptionSpinner, timingCategory, handledExceptionSpinner;
-    protected EditText viewEditText, screenEditText, errorEditText, unhandleErrorEditText, eventValue, eventLabel, timingTitle, timingLabel, timingLength;
-    protected Button eventButton, screenButton, handledErrorsButton, unhandledErrorsButton, timingButton;
+    protected EditText viewEditText, screenEditText, errorEditText, unhandleErrorEditText, eventValue, eventLabel, timingTitle, timingLabel, timingLength, breadcrumb;
+    protected Button eventButton, screenButton, handledErrorsButton, unhandledErrorsButton, timingButton, breadcrumbButton;
 
 
     /**
@@ -82,6 +82,7 @@ public class MainEventTestFragment extends Fragment implements View.OnClickListe
         timingTitle = (EditText)v.findViewById(R.id.timingTitle);
         timingLabel = (EditText)v.findViewById(R.id.timingLabel);
         timingLength = (EditText)v.findViewById(R.id.timingLength);
+        breadcrumb = (EditText)v.findViewById(R.id.breadcrumbEdittext);
         spinner.setAdapter(new ArrayAdapter<MParticle.EventType>(
                 v.getContext(),
                 android.R.layout.simple_list_item_1,
@@ -98,6 +99,9 @@ public class MainEventTestFragment extends Fragment implements View.OnClickListe
                 v.getResources().getStringArray(R.array.exceptions)));
 
         eventButton = (Button) v.findViewById(R.id.button);
+
+        breadcrumbButton = (Button) v.findViewById(R.id.breadcrumbButton);
+        breadcrumbButton.setOnClickListener(this);
         screenButton = (Button) v.findViewById(R.id.button2);
         timingButton = (Button) v.findViewById(R.id.button5);
         timingButton.setOnClickListener(this);
@@ -218,6 +222,11 @@ public class MainEventTestFragment extends Fragment implements View.OnClickListe
                         (MParticle.EventType) spinner.getSelectedItem(),
                         timingEventInfo,
                         Long.parseLong(timingLength.getText().toString()));
+                break;
+            case R.id.breadcrumbButton:
+                MParticle.getInstance().leaveBreadcrumb(breadcrumb.getText().toString());
+                toastText = "Breadcrumb left and logged.";
+                break;
 
         }
         Toast.makeText(v.getContext(), toastText, 300).show();

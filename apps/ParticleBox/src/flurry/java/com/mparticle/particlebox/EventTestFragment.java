@@ -2,6 +2,7 @@ package com.mparticle.particlebox;
 
 import android.os.Handler;
 import android.view.View;
+import android.widget.Toast;
 
 import com.flurry.android.FlurryAgent;
 import com.mparticle.MParticle;
@@ -58,6 +59,9 @@ public class EventTestFragment extends MainEventTestFragment implements View.OnC
                         FlurryAgent.endTimedEvent(named);
                     }
                 }, Long.parseLong(timingLength.getText().toString()));
+                break;
+            case R.id.breadcrumbButton:
+                Toast.makeText(v.getContext(), "Not implemented for Flurry...", Toast.LENGTH_SHORT).show();
                 break;
         }
     }

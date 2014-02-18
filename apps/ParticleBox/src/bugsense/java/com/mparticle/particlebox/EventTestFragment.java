@@ -41,6 +41,9 @@ public class EventTestFragment extends MainEventTestFragment implements View.OnC
                     BugSenseHandler.sendExceptionMap(attributes,e);
                 }
                 break;
+            case R.id.breadcrumbButton:
+                BugSenseHandler.leaveBreadcrumb(breadcrumb.getText().toString());
+                break;
         }
     }
 }
