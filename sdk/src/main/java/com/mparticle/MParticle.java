@@ -565,6 +565,30 @@ public class MParticle {
     }
 
     /**
+     * Leave a breadcrumb to be included with error and exception logging, as well as
+     * with regular session events.
+     *
+     * @param breadcrumb
+     */
+    public void leaveBreadcrumb(String breadcrumb){
+        if (mConfigManager.getSendOoEvents()) {
+            if (null == breadcrumb) {
+                Log.w(TAG, "breadcrumb is required for leaveBreadcrumb");
+                return;
+            }
+            if (breadcrumb.length() > Constants.LIMIT_NAME) {
+                Log.w(TAG, "The breadcrumb name was too long. Discarding event.");
+                return;
+            }
+            ensureActiveSession();
+            mMessageManager.logBreadcrumb(mSessionID, mSessionStartTime, mLastEventTime, breadcrumb);
+            if (mDebugMode)
+                debugLog("Logged breadcrumb: " + breadcrumb);
+
+        }
+    }
+
+    /**
      * Logs an error event
      *
      * @param message the name of the error event to be tracked

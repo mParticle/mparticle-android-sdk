@@ -219,10 +219,20 @@ import java.util.UUID;
                 }
             }
 
+            incrementSessionCounter();
+
 
         } catch (JSONException e) {
             Log.w(TAG, "Failed to create mParticle start session message");
         }
+    }
+
+    private void incrementSessionCounter() {
+        mPreferences.edit().putInt(Constants.PrefKeys.SESSION_COUNTER, (mPreferences.getInt(Constants.PrefKeys.SESSION_COUNTER, 0) + 1));
+    }
+
+    private int getCurrentSessionCounter(){
+        return mPreferences.getInt(Constants.PrefKeys.SESSION_COUNTER, 0);
     }
 
     public void stopSession(String sessionId, long stopTime, long sessionLength) {
@@ -272,6 +282,21 @@ import java.util.UUID;
         }
     }
 
+    public void logBreadcrumb(String sessionId, long sessionStartTime, long time, String breadcrumb) {
+        try {
+            JSONObject message = createMessage(MessageType.BREADCRUMB, sessionId, sessionStartTime, time, null,
+                    null);
+            // NOTE: event timing is not supported (yet) but the server expects this data
+            message.put(MessageKey.EVENT_START_TIME, time);
+            message.put(MessageKey.BREADCRUMB_SESSION_COUNTER, getCurrentSessionCounter());
+            message.put(MessageKey.BREADCRUMB_LABEL, breadcrumb);
+            mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
+            mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_BREADCRUMB, message));
+        } catch (JSONException e) {
+            Log.w(TAG, "Failed to create mParticle breadcrumb message");
+        }
+    }
+
     public void optOut(String sessionId, long sessionStartTime, long time, boolean optOutStatus) {
         try {
             JSONObject message = createMessage(MessageType.OPT_OUT, sessionId, sessionStartTime, time, null, null);
@@ -297,10 +322,14 @@ import java.util.UUID;
                 t.printStackTrace(new PrintWriter(stringWriter));
                 message.put(MessageKey.ERROR_STACK_TRACE, stringWriter.toString());
                 message.put(MessageKey.ERROR_UNCAUGHT, String.valueOf(caught));
+
+                message.put(MessageKey.ERROR_SESSION_COUNT, getCurrentSessionCounter());
             } else {
                 message.put(MessageKey.ERROR_SEVERITY, "error");
                 message.put(MessageKey.ERROR_MESSAGE, errorMessage);
             }
+
+
             mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
         } catch (JSONException e) {
             Log.w(TAG, "Failed to create mParticle error message");

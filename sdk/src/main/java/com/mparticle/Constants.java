@@ -41,6 +41,7 @@ package com.mparticle;
         public static final String FIRST_RUN = "fr";
         public static final String APP_STATE_TRANSITION = "ast";
         public static final String PUSH_RECEIVED = "pm";
+        public static final String BREADCRUMB = "bc";
     }
 
     public interface MessageKey {
@@ -148,6 +149,7 @@ package com.mparticle;
         public static final String ERROR_MESSAGE = "m";
         public static final String ERROR_STACK_TRACE = "st";
         public static final String ERROR_UNCAUGHT = "eh";
+        public static final String ERROR_SESSION_COUNT = "sn";
         // uploading
         public static final String MESSAGES = "msgs";
         public static final String HISTORY = "sh";
@@ -171,6 +173,8 @@ package com.mparticle;
         public static final String SCREEN_STARTED = "t";
 
         public static final String EVENT_CATEGORY = "$Category";
+        public static final String BREADCRUMB_SESSION_COUNTER = "sn";
+        public static final String BREADCRUMB_LABEL = "l";
     }
 
     public interface PrefKeys {
@@ -194,6 +198,7 @@ package com.mparticle;
         public static final String PUSH_ENABLE_VIBRATION = "mp::push::vibration";
         public static final String PUSH_ICON = "mp::push::icon";
         public static final String PUSH_TITLE = "mp::push::title";
+        public static final String SESSION_COUNTER = "mp::session::breadcrumbcount";
     }
 
     public interface MiscStorageKeys {

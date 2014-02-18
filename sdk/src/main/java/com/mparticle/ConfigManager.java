@@ -258,4 +258,8 @@ class ConfigManager {
     public int getPushIcon() {
         return mPreferences.getInt(Constants.PrefKeys.PUSH_ICON, 0);
     }
+
+    public int getBreadcrumbLimit() {
+        return 50;
+    }
 }
