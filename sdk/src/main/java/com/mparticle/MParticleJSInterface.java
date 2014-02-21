@@ -22,6 +22,22 @@ public class MParticleJSInterface {
     private Context mContext;
     private MParticle mApiInstance;
 
+    //the following keys are sent from the JS library as a part of each event
+    private static String JS_KEY_EVENT_NAME = "EventName";
+    private static String JS_KEY_EVENT_CATEGORY = "EventCategory";
+    private static String JS_KEY_USER_ATTRIBUTES = "UserAttributes";
+    private static String JS_KEY_SESSION_ATTRIBUTES = "SessionAttributes";
+    private static String JS_KEY_USER_IDENTITIES = "UserIdentities";
+    private static String JS_KEY_STORE = "Store";
+    private static String JS_KEY_EVENT_ATTRIBUTES = "EventAttributes";
+    private static String JS_KEY_SDK_VERSION = "SDKVersion";
+    private static String JS_KEY_SESSION_ID = "SessionId";
+    private static String JS_KEY_EVENT_DATATYPE = "EventDataType";
+    private static String JS_KEY_DEBUG = "Debug";
+    private static String JS_KEY_TIMESTAMP = "Timestamp";
+    private static String JS_KEY_LOCATION = "Location";
+    private static String JS_KEY_OPTOUT = "OptOut";
+
     public MParticleJSInterface(Context c, MParticle apiInstance) {
         mContext = c;
         mApiInstance = apiInstance;
@@ -29,16 +45,16 @@ public class MParticleJSInterface {
 
     @JavascriptInterface
     public void logEvent(String data) {
-        Log.d(TAG, "Received event from webview, processing...");
+        Log.d(TAG, "Received event from WebView, processing...");
 
         try {
             JSONObject event = new JSONObject(data);
 
-            mApiInstance.logEvent(event.getString("EventName"),
-                    convertEventType(event.getInt("EventDataType")),
-                    getEventAttributes(event.getJSONObject("EventAttributes")));
+            mApiInstance.logEvent(event.getString(JS_KEY_EVENT_NAME),
+                    convertEventType(event.getInt(JS_KEY_EVENT_CATEGORY)),
+                    getEventAttributes(event.getJSONObject(JS_KEY_EVENT_ATTRIBUTES)));
         } catch (JSONException e) {
-            Log.w(TAG, "Error deserializing JSON event from webview");
+            Log.w(TAG, "Error deserializing JSON event from WebView: " + e.getMessage());
         }
     }
 
@@ -62,6 +78,7 @@ public class MParticleJSInterface {
 
         return null;
     }
+
 
     private EventType convertEventType(int eventType) {
         switch (eventType) {
