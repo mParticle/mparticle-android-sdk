@@ -57,6 +57,9 @@ android {
         bugsense {
             packageName 'com.mparticle.particlebox.bugsense'
         }
+        kahuna {
+            packageName 'com.mparticle.particlebox.kahuna'
+        }
     }
 }
 
@@ -69,4 +72,5 @@ dependencies {
     flurryCompile files ("libs/FlurryAnalytics_3.3.3.jar")
     urbanairshipCompile files ("libs/urbanairship-lib-3.2.3.jar")
     bugsenseCompile 'com.bugsense.trace:bugsense:3.5'
+    kahunaCompile files ("libs/Kahuna.jar")
 }
