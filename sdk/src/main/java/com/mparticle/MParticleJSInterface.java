@@ -38,7 +38,7 @@ public class MParticleJSInterface {
     private static final int JS_MSG_TYPE_OO = 6;
 
     public MParticleJSInterface(Context c, MParticle apiInstance) {
-        mContext = c;
+        mContext = c.getApplicationContext();
         mApiInstance = apiInstance;
     }
 
@@ -49,7 +49,7 @@ public class MParticleJSInterface {
 
             String name = event.getString(JS_KEY_EVENT_NAME);
             EventType eventType = convertEventType(event.getInt(JS_KEY_EVENT_CATEGORY));
-            Map<String, String> eventAttributes = convertToMap(event.getJSONObject(JS_KEY_EVENT_ATTRIBUTES));
+            Map<String, String> eventAttributes = convertToMap(event.optJSONObject(JS_KEY_EVENT_ATTRIBUTES));
 
             int messageType = event.getInt(JS_KEY_EVENT_DATATYPE);
             switch (messageType){
@@ -132,12 +132,10 @@ public class MParticleJSInterface {
     public void setUserIdentity(String json){
         try {
             JSONObject attribute = new JSONObject(json);
-            Iterator<?> keys = attribute.keys();
 
-            while( keys.hasNext() ){
-                String key = (String)keys.next();
-                mApiInstance.setUserIdentity(key, convertIdentityType(attribute.getInt(key)));
-            }
+
+                mApiInstance.setUserIdentity(attribute.getString("Identity"), convertIdentityType(attribute.getInt("Type")));
+
 
         } catch (JSONException e) {
             Log.w(TAG, "Error deserializing JSON data from WebView: " + e.getMessage());
@@ -193,17 +191,19 @@ public class MParticleJSInterface {
 
     private MParticle.IdentityType convertIdentityType(int identityType) {
         switch (identityType) {
-            case 2:
+            case 0:
+                return MParticle.IdentityType.Other;
+            case 1:
                 return MParticle.IdentityType.CustomId;
-            case 3:
+            case 2:
                 return MParticle.IdentityType.Facebook;
-            case 4:
+            case 3:
                 return MParticle.IdentityType.Twitter;
-            case 5:
+            case 4:
                 return  MParticle.IdentityType.Google;
-            case 6:
+            case 5:
                 return  MParticle.IdentityType.Microsoft;
-            case 7:
+            case 6:
                 return  MParticle.IdentityType.Yahoo;
             default:
                 return  MParticle.IdentityType.Email;

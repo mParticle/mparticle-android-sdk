@@ -438,7 +438,7 @@ com.mparticle.MParticle -> com.mparticle.MParticle:
     java.lang.String mSessionID -> d
     long mSessionStartTime -> e
     long mLastEventTime -> k
-    org.json.JSONObject mUserIdentities -> l
+    org.json.JSONArray mUserIdentities -> l
     org.json.JSONObject mUserAttributes -> m
     org.json.JSONObject mSessionAttributes -> n
     com.mparticle.MessageManager mMessageManager -> o
@@ -488,39 +488,40 @@ com.mparticle.MParticle -> com.mparticle.MParticle:
     727:728:void setLocation(android.location.Location) -> setLocation
     737:745:void setSessionAttribute(java.lang.String,java.lang.String) -> setSessionAttribute
     754:765:void setUserAttribute(java.lang.String,java.lang.String) -> setUserAttribute
-    768:782:void setUserAttributes(java.util.Map) -> a
-    785:799:void setUserIdentities(java.util.Map) -> b
-    807:808:void setUserTag(java.lang.String) -> setUserTag
-    817:842:void setUserIdentity(java.lang.String,com.mparticle.MParticle$IdentityType) -> setUserIdentity
-    885:885:boolean getOptOut() -> getOptOut
-    894:905:void setOptOut(boolean) -> setOptOut
-    917:918:void setDebugMode(boolean) -> setDebugMode
-    927:927:boolean getDebugMode() -> getDebugMode
-    936:937:void setUploadInterval(int) -> setUploadInterval
-    945:946:void setDebugUploadInterval(int) -> setDebugUploadInterval
-    952:959:void enableUncaughtExceptionLogging() -> enableUncaughtExceptionLogging
-    965:972:void disableUncaughtExceptionLogging() -> disableUncaughtExceptionLogging
-    980:982:void enablePushNotifications(java.lang.String) -> enablePushNotifications
-    988:989:void disablePushNotifications() -> disablePushNotifications
-    998:999:void setNotificationSoundEnabled(boolean) -> setNotificationSoundEnabled
-    1008:1009:void setNotificationVibrationEnabled(boolean) -> setNotificationVibrationEnabled
-    1012:1013:void clearPushNotificationId() -> b
-    1016:1017:void setPushRegistrationId(java.lang.String) -> b
-    1026:1031:boolean checkEventLimit() -> f
-    1044:1053:org.json.JSONObject enforceAttributeConstraints(java.util.Map) -> c
-    1117:1117:boolean isAutoTrackingEnabled() -> isAutoTrackingEnabled
-    1126:1126:int getSessionTimeout() -> getSessionTimeout
-    1137:1138:void setSessionTimeout(int) -> setSessionTimeout
-    1141:1146:void logNotification(android.os.Bundle,java.lang.String) -> a
-    1291:1292:void setPushNotificationIcon(int) -> setPushNotificationIcon
-    1302:1303:void setPushNotificationTitle(int) -> setPushNotificationTitle
+    773:784:void removeUserAttribute(java.lang.String) -> removeUserAttribute
+    792:793:void setUserTag(java.lang.String) -> setUserTag
+    801:802:void removeUserTag(java.lang.String) -> removeUserTag
+    813:847:void setUserIdentity(java.lang.String,com.mparticle.MParticle$IdentityType) -> setUserIdentity
+    857:884:void removeUserIdentity(java.lang.String) -> removeUserIdentity
+    897:897:boolean getOptOut() -> getOptOut
+    906:917:void setOptOut(boolean) -> setOptOut
+    929:930:void setDebugMode(boolean) -> setDebugMode
+    939:939:boolean getDebugMode() -> getDebugMode
+    948:949:void setUploadInterval(int) -> setUploadInterval
+    957:958:void setDebugUploadInterval(int) -> setDebugUploadInterval
+    964:971:void enableUncaughtExceptionLogging() -> enableUncaughtExceptionLogging
+    977:984:void disableUncaughtExceptionLogging() -> disableUncaughtExceptionLogging
+    992:994:void enablePushNotifications(java.lang.String) -> enablePushNotifications
+    1000:1001:void disablePushNotifications() -> disablePushNotifications
+    1010:1011:void setNotificationSoundEnabled(boolean) -> setNotificationSoundEnabled
+    1020:1021:void setNotificationVibrationEnabled(boolean) -> setNotificationVibrationEnabled
+    1024:1025:void clearPushNotificationId() -> b
+    1028:1029:void setPushRegistrationId(java.lang.String) -> b
+    1038:1043:boolean checkEventLimit() -> f
+    1056:1065:org.json.JSONObject enforceAttributeConstraints(java.util.Map) -> a
+    1129:1129:boolean isAutoTrackingEnabled() -> isAutoTrackingEnabled
+    1138:1138:int getSessionTimeout() -> getSessionTimeout
+    1149:1150:void setSessionTimeout(int) -> setSessionTimeout
+    1153:1158:void logNotification(android.os.Bundle,java.lang.String) -> a
+    1304:1305:void setPushNotificationIcon(int) -> setPushNotificationIcon
+    1315:1316:void setPushNotificationTitle(int) -> setPushNotificationTitle
     69:69:android.content.SharedPreferences access$200() -> c
     69:69:com.mparticle.LicenseCheckerCallback access$300(com.mparticle.MParticle) -> a
     69:69:com.mparticle.MessageManager access$400(com.mparticle.MParticle) -> b
 com.mparticle.MParticle$1 -> com.mparticle.MParticle$1:
     com.mparticle.MParticle this$0 -> a
-    1267:1268:void onRegistered(java.lang.String) -> a
-    1272:1273:void onCleared$552c4e01() -> a
+    1280:1281:void onRegistered(java.lang.String) -> a
+    1285:1286:void onCleared$552c4e01() -> a
 com.mparticle.MParticle$EventType -> com.mparticle.MParticle$EventType:
     com.mparticle.MParticle$EventType Unknown -> Unknown
     com.mparticle.MParticle$EventType Navigation -> Navigation
@@ -532,9 +533,9 @@ com.mparticle.MParticle$EventType -> com.mparticle.MParticle$EventType:
     com.mparticle.MParticle$EventType Social -> Social
     com.mparticle.MParticle$EventType Other -> Other
     com.mparticle.MParticle$EventType[] $VALUES -> a
-    1155:1155:com.mparticle.MParticle$EventType[] values() -> values
-    1155:1155:com.mparticle.MParticle$EventType valueOf(java.lang.String) -> valueOf
-    1159:1159:java.lang.String toString() -> toString
+    1168:1168:com.mparticle.MParticle$EventType[] values() -> values
+    1168:1168:com.mparticle.MParticle$EventType valueOf(java.lang.String) -> valueOf
+    1172:1172:java.lang.String toString() -> toString
 com.mparticle.MParticle$IdentityType -> com.mparticle.MParticle$IdentityType:
     com.mparticle.MParticle$IdentityType Other -> Other
     com.mparticle.MParticle$IdentityType CustomId -> CustomId
@@ -546,28 +547,28 @@ com.mparticle.MParticle$IdentityType -> com.mparticle.MParticle$IdentityType:
     com.mparticle.MParticle$IdentityType Email -> Email
     int value -> a
     com.mparticle.MParticle$IdentityType[] $VALUES -> b
-    1170:1170:com.mparticle.MParticle$IdentityType[] values() -> values
-    1170:1170:com.mparticle.MParticle$IdentityType valueOf(java.lang.String) -> valueOf
-    1187:1187:int getValue() -> getValue
-    1170:1170:int access$000(com.mparticle.MParticle$IdentityType) -> a
+    1183:1183:com.mparticle.MParticle$IdentityType[] values() -> values
+    1183:1183:com.mparticle.MParticle$IdentityType valueOf(java.lang.String) -> valueOf
+    1200:1200:int getValue() -> getValue
+    1183:1183:int access$000(com.mparticle.MParticle$IdentityType) -> a
 com.mparticle.MParticle$MPLicenseCheckerCallback -> com.mparticle.MParticle$a:
     com.mparticle.MParticle this$0 -> a
-    1236:1242:void allow(int) -> a
-    1245:1251:void dontAllow(int) -> b
-    1254:1260:void applicationError(int) -> c
+    1249:1255:void allow(int) -> a
+    1258:1264:void dontAllow(int) -> b
+    1267:1273:void applicationError(int) -> c
 com.mparticle.MParticle$MParticleLocationListener -> com.mparticle.MParticle$b:
     com.mparticle.MParticle mParticle -> a
-    1217:1218:void onLocationChanged(android.location.Location) -> onLocationChanged
-    1222:1222:void onProviderDisabled(java.lang.String) -> onProviderDisabled
-    1226:1226:void onProviderEnabled(java.lang.String) -> onProviderEnabled
-    1230:1230:void onStatusChanged(java.lang.String,int,android.os.Bundle) -> onStatusChanged
+    1230:1231:void onLocationChanged(android.location.Location) -> onLocationChanged
+    1235:1235:void onProviderDisabled(java.lang.String) -> onProviderDisabled
+    1239:1239:void onProviderEnabled(java.lang.String) -> onProviderEnabled
+    1243:1243:void onStatusChanged(java.lang.String,int,android.os.Bundle) -> onStatusChanged
 com.mparticle.MParticle$Push -> com.mparticle.MParticle$Push:
     java.lang.String BROADCAST_NOTIFICATION_RECEIVED -> BROADCAST_NOTIFICATION_RECEIVED
     java.lang.String BROADCAST_NOTIFICATION_TAPPED -> BROADCAST_NOTIFICATION_TAPPED
     java.lang.String PUSH_ALERT_EXTRA -> PUSH_ALERT_EXTRA
 com.mparticle.MParticle$SessionTimeoutHandler -> com.mparticle.MParticle$c:
     com.mparticle.MParticle mParticle -> a
-    1201:1205:void handleMessage(android.os.Message) -> handleMessage
+    1214:1218:void handleMessage(android.os.Message) -> handleMessage
 com.mparticle.MParticleDatabase -> com.mparticle.MParticleDatabase:
     129:134:void onCreate(android.database.sqlite.SQLiteDatabase) -> onCreate
     139:147:void onUpgrade(android.database.sqlite.SQLiteDatabase,int,int) -> onUpgrade
@@ -615,8 +616,15 @@ com.mparticle.MParticleDatabase$UploadTable -> com.mparticle.MParticleDatabase$U
     java.lang.String SESSION_ID -> SESSION_ID
 com.mparticle.MParticleJSInterface -> com.mparticle.MParticleJSInterface:
     com.mparticle.MParticle mApiInstance -> a
-    58:101:void logEvent(java.lang.String) -> logEvent
-    104:121:java.util.Map convertToMap(org.json.JSONObject) -> a
+    48:82:void logEvent(java.lang.String) -> logEvent
+    86:87:void setUserTag(java.lang.String) -> setUserTag
+    91:92:void removeUserTag(java.lang.String) -> removeUserTag
+    97:108:void setUserAttribute(java.lang.String) -> setUserAttribute
+    112:113:void removeUserAttribute(java.lang.String) -> removeUserAttribute
+    118:129:void setSessionAttribute(java.lang.String) -> setSessionAttribute
+    134:145:void setUserIdentity(java.lang.String) -> setUserIdentity
+    149:150:void removeUserIdentity(java.lang.String) -> removeUserIdentity
+    153:170:java.util.Map convertToMap(org.json.JSONObject) -> a
 com.mparticle.MessageHandler -> com.mparticle.m:
     com.mparticle.MParticleDatabase mDB -> a
     java.lang.String mApiKey -> b
@@ -741,19 +749,19 @@ com.mparticle.UploadHandler -> com.mparticle.t:
     145:198:void handleMessage(android.os.Message) -> handleMessage
     202:235:void fetchConfig() -> a
     266:348:void prepareUploads(boolean) -> a
-    352:408:org.json.JSONObject createUploadMessage(org.json.JSONArray,boolean) -> a
-    412:552:boolean processUploads(boolean) -> b
-    558:566:java.lang.String extractResponseBody(org.apache.http.HttpResponse) -> a
-    571:589:void addMessageSignature(org.apache.http.client.methods.HttpUriRequest,java.lang.String) -> a
-    592:652:void processCommands() -> b
-    665:665:java.net.URI makeServiceUri(java.lang.String) -> a
-    669:674:void dbInsertUpload(android.database.sqlite.SQLiteDatabase,org.json.JSONObject) -> a
-    677:679:void dbDeleteProcessedMessages(android.database.sqlite.SQLiteDatabase,java.lang.String) -> a
-    695:697:void dbDeleteUpload(android.database.sqlite.SQLiteDatabase,int) -> a
-    700:702:void dbDeleteCommand(android.database.sqlite.SQLiteDatabase,int) -> b
-    716:724:boolean isNetworkAvailable() -> c
-    728:743:org.apache.http.client.HttpClient setupHttpClient() -> d
-    767:772:java.lang.String asHex(byte[]) -> a
+    352:402:org.json.JSONObject createUploadMessage(org.json.JSONArray,boolean) -> a
+    406:546:boolean processUploads(boolean) -> b
+    552:560:java.lang.String extractResponseBody(org.apache.http.HttpResponse) -> a
+    565:583:void addMessageSignature(org.apache.http.client.methods.HttpUriRequest,java.lang.String) -> a
+    586:646:void processCommands() -> b
+    659:659:java.net.URI makeServiceUri(java.lang.String) -> a
+    663:668:void dbInsertUpload(android.database.sqlite.SQLiteDatabase,org.json.JSONObject) -> a
+    671:673:void dbDeleteProcessedMessages(android.database.sqlite.SQLiteDatabase,java.lang.String) -> a
+    689:691:void dbDeleteUpload(android.database.sqlite.SQLiteDatabase,int) -> a
+    694:696:void dbDeleteCommand(android.database.sqlite.SQLiteDatabase,int) -> b
+    710:718:boolean isNetworkAvailable() -> c
+    722:737:org.apache.http.client.HttpClient setupHttpClient() -> d
+    761:766:java.lang.String asHex(byte[]) -> a
 com.mparticle.ValidationException -> com.mparticle.u:
     long serialVersionUID -> serialVersionUID
 com.mparticle.activity.MPActivity -> com.mparticle.activity.MPActivity:
