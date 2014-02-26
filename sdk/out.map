@@ -616,15 +616,15 @@ com.mparticle.MParticleDatabase$UploadTable -> com.mparticle.MParticleDatabase$U
     java.lang.String SESSION_ID -> SESSION_ID
 com.mparticle.MParticleJSInterface -> com.mparticle.MParticleJSInterface:
     com.mparticle.MParticle mApiInstance -> a
-    48:82:void logEvent(java.lang.String) -> logEvent
-    86:87:void setUserTag(java.lang.String) -> setUserTag
-    91:92:void removeUserTag(java.lang.String) -> removeUserTag
-    97:108:void setUserAttribute(java.lang.String) -> setUserAttribute
-    112:113:void removeUserAttribute(java.lang.String) -> removeUserAttribute
-    118:129:void setSessionAttribute(java.lang.String) -> setSessionAttribute
-    134:145:void setUserIdentity(java.lang.String) -> setUserIdentity
-    149:150:void removeUserIdentity(java.lang.String) -> removeUserIdentity
-    153:170:java.util.Map convertToMap(org.json.JSONObject) -> a
+    50:84:void logEvent(java.lang.String) -> logEvent
+    89:94:void setUserTag(java.lang.String) -> setUserTag
+    99:104:void removeUserTag(java.lang.String) -> removeUserTag
+    109:114:void setUserAttribute(java.lang.String) -> setUserAttribute
+    119:124:void removeUserAttribute(java.lang.String) -> removeUserAttribute
+    129:134:void setSessionAttribute(java.lang.String) -> setSessionAttribute
+    139:144:void setUserIdentity(java.lang.String) -> setUserIdentity
+    149:154:void removeUserIdentity(java.lang.String) -> removeUserIdentity
+    157:174:java.util.Map convertToMap(org.json.JSONObject) -> a
 com.mparticle.MessageHandler -> com.mparticle.m:
     com.mparticle.MParticleDatabase mDB -> a
     java.lang.String mApiKey -> b
@@ -746,22 +746,22 @@ com.mparticle.UploadHandler -> com.mparticle.t:
     java.lang.String SQL_HISTORY_MESSAGES -> n
     java.lang.String SQL_FINISHED_HISTORY_MESSAGES -> o
     char[] HEX_CHARS -> p
-    145:198:void handleMessage(android.os.Message) -> handleMessage
-    202:235:void fetchConfig() -> a
-    266:348:void prepareUploads(boolean) -> a
-    352:402:org.json.JSONObject createUploadMessage(org.json.JSONArray,boolean) -> a
-    406:546:boolean processUploads(boolean) -> b
-    552:560:java.lang.String extractResponseBody(org.apache.http.HttpResponse) -> a
-    565:583:void addMessageSignature(org.apache.http.client.methods.HttpUriRequest,java.lang.String) -> a
-    586:646:void processCommands() -> b
-    659:659:java.net.URI makeServiceUri(java.lang.String) -> a
-    663:668:void dbInsertUpload(android.database.sqlite.SQLiteDatabase,org.json.JSONObject) -> a
-    671:673:void dbDeleteProcessedMessages(android.database.sqlite.SQLiteDatabase,java.lang.String) -> a
-    689:691:void dbDeleteUpload(android.database.sqlite.SQLiteDatabase,int) -> a
-    694:696:void dbDeleteCommand(android.database.sqlite.SQLiteDatabase,int) -> b
-    710:718:boolean isNetworkAvailable() -> c
-    722:737:org.apache.http.client.HttpClient setupHttpClient() -> d
-    761:766:java.lang.String asHex(byte[]) -> a
+    144:197:void handleMessage(android.os.Message) -> handleMessage
+    201:234:void fetchConfig() -> a
+    265:347:void prepareUploads(boolean) -> a
+    351:401:org.json.JSONObject createUploadMessage(org.json.JSONArray,boolean) -> a
+    405:545:boolean processUploads(boolean) -> b
+    551:559:java.lang.String extractResponseBody(org.apache.http.HttpResponse) -> a
+    564:582:void addMessageSignature(org.apache.http.client.methods.HttpUriRequest,java.lang.String) -> a
+    585:645:void processCommands() -> b
+    658:658:java.net.URI makeServiceUri(java.lang.String) -> a
+    662:667:void dbInsertUpload(android.database.sqlite.SQLiteDatabase,org.json.JSONObject) -> a
+    670:672:void dbDeleteProcessedMessages(android.database.sqlite.SQLiteDatabase,java.lang.String) -> a
+    688:690:void dbDeleteUpload(android.database.sqlite.SQLiteDatabase,int) -> a
+    693:695:void dbDeleteCommand(android.database.sqlite.SQLiteDatabase,int) -> b
+    709:717:boolean isNetworkAvailable() -> c
+    721:736:org.apache.http.client.HttpClient setupHttpClient() -> d
+    760:765:java.lang.String asHex(byte[]) -> a
 com.mparticle.ValidationException -> com.mparticle.u:
     long serialVersionUID -> serialVersionUID
 com.mparticle.activity.MPActivity -> com.mparticle.activity.MPActivity:
