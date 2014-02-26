@@ -6,6 +6,7 @@
     <string name="title_section1">Events</string>
     <string name="title_section2">User Attributes</string>
     <string name="title_section3">Transactions</string>
+    <string name="title_section4">Mobile Web</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
     <string name="action_example">Example action</string>
