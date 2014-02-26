@@ -37,6 +37,8 @@ public class MParticleJSInterface {
     private static final int JS_MSG_TYPE_CR = 5;
     private static final int JS_MSG_TYPE_OO = 6;
 
+    private static final String errorMsg = "Error processing JSON data from Webview: %s";
+
     public MParticleJSInterface(Context c, MParticle apiInstance) {
         mContext = c.getApplicationContext();
         mApiInstance = apiInstance;
@@ -76,55 +78,58 @@ public class MParticleJSInterface {
 
             }
 
-        } catch (JSONException e) {
-            Log.w(TAG, "Error deserializing JSON data from WebView: " + e.getMessage());
+        } catch (JSONException jse) {
+            Log.w(TAG, String.format(errorMsg, jse.getMessage()));
         }
     }
 
     @JavascriptInterface
-    public void setUserTag(String tagName){
-        mApiInstance.setUserTag(tagName);
+    public void setUserTag(String json){
+        try{
+            JSONObject attribute = new JSONObject(json);
+            mApiInstance.setUserTag(attribute.getString("key"));
+        }catch (JSONException jse){
+            Log.w(TAG, String.format(errorMsg, jse.getMessage()));
+        }
     }
 
     @JavascriptInterface
-    public void removeUserTag(String tagName){
-        mApiInstance.removeUserTag(tagName);
+    public void removeUserTag(String json){
+        try{
+            JSONObject attribute = new JSONObject(json);
+            mApiInstance.removeUserTag(attribute.getString("key"));
+        }catch (JSONException jse){
+            Log.w(TAG, String.format(errorMsg, jse.getMessage()));
+        }
     }
 
     @JavascriptInterface
     public void setUserAttribute(String json){
         try {
             JSONObject attribute = new JSONObject(json);
-            Iterator<?> keys = attribute.keys();
-
-            while( keys.hasNext() ){
-                String key = (String)keys.next();
-                mApiInstance.setUserAttribute(key, attribute.getString(key));
-            }
-
-        } catch (JSONException e) {
-            Log.w(TAG, "Error deserializing JSON data from WebView: " + e.getMessage());
+            mApiInstance.setUserAttribute(attribute.getString("key"), attribute.getString("value"));
+        } catch (JSONException jse) {
+            Log.w(TAG, String.format(errorMsg, jse.getMessage()));
         }
     }
 
     @JavascriptInterface
-    public void removeUserAttribute(String attributeName){
-        mApiInstance.removeUserAttribute(attributeName);
+    public void removeUserAttribute(String json){
+        try{
+            JSONObject attribute = new JSONObject(json);
+            mApiInstance.removeUserAttribute(attribute.getString("key"));
+        }catch (JSONException jse){
+            Log.w(TAG, String.format(errorMsg, jse.getMessage()));
+        }
     }
 
     @JavascriptInterface
     public void setSessionAttribute(String json){
         try {
             JSONObject attribute = new JSONObject(json);
-            Iterator<?> keys = attribute.keys();
-
-            while( keys.hasNext() ){
-                String key = (String)keys.next();
-                mApiInstance.setSessionAttribute(key, attribute.getString(key));
-            }
-
-        } catch (JSONException e) {
-            Log.w(TAG, "Error deserializing JSON data from WebView: " + e.getMessage());
+            mApiInstance.setSessionAttribute(attribute.getString("key"), attribute.getString("value"));
+        } catch (JSONException jse) {
+            Log.w(TAG, String.format(errorMsg, jse.getMessage()));
         }
     }
 
@@ -132,19 +137,20 @@ public class MParticleJSInterface {
     public void setUserIdentity(String json){
         try {
             JSONObject attribute = new JSONObject(json);
-
-
-                mApiInstance.setUserIdentity(attribute.getString("Identity"), convertIdentityType(attribute.getInt("Type")));
-
-
-        } catch (JSONException e) {
-            Log.w(TAG, "Error deserializing JSON data from WebView: " + e.getMessage());
+            mApiInstance.setUserIdentity(attribute.getString("Identity"), convertIdentityType(attribute.getInt("Type")));
+        } catch (JSONException jse) {
+            Log.w(TAG, String.format(errorMsg, jse.getMessage()));
         }
     }
 
     @JavascriptInterface
-    public void removeUserIdentity(String id){
-        mApiInstance.removeUserIdentity(id);
+    public void removeUserIdentity(String json){
+        try{
+            JSONObject attribute = new JSONObject(json);
+            mApiInstance.removeUserIdentity(attribute.getString("key"));
+        }catch (JSONException jse){
+            Log.w(TAG, String.format(errorMsg, jse.getMessage()));
+        }
     }
 
     private Map<String, String> convertToMap(JSONObject attributes) {
