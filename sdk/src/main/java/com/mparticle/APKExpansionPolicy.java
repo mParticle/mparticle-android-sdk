@@ -46,6 +46,7 @@ import java.util.Vector;
  * Developers who need more fine grained control over their application's
  * licensing policy should implement a custom Policy.
  */
+@SuppressWarnings("ALL")
 class APKExpansionPolicy implements Policy {
 
     private static final String TAG = "APKExpansionPolicy";

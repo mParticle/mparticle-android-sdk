@@ -41,6 +41,7 @@ package com.mparticle;
         public static final String FIRST_RUN = "fr";
         public static final String APP_STATE_TRANSITION = "ast";
         public static final String PUSH_RECEIVED = "pm";
+        public static final String BREADCRUMB = "bc";
     }
 
     public interface MessageKey {
@@ -94,6 +95,7 @@ package com.mparticle;
         public static final String MANUFACTURER = "dma";
         public static final String PLATFORM = "dp";
         public static final String OS_VERSION = "dosv";
+        public static final String OS_VERSION_INT = "dosvi";
         public static final String MODEL = "dmdl";
         public static final String SCREEN_HEIGHT = "dsh";
         public static final String SCREEN_WIDTH = "dsw";
@@ -113,6 +115,11 @@ package com.mparticle;
         public static final String DEVICE_IS_TABLET = "it";
         public static final String PUSH_SOUND_ENABLED = "se";
         public static final String PUSH_VIBRATION_ENABLED = "ve";
+        public static final String DEVICE_SUPPORTS_TELEPHONY = "dst";
+        public static final String DEVICE_SUPPORTS_NFC = "dsnfc";
+        public static final String DEVICE_BLUETOOTH_ENABLED = "dbe";
+        public static final String DEVICE_BLUETOOTH_VERSION = "dbv";
+
         // state info
         public static final String STATE_INFO_KEY = "cs";
         public static final String STATE_INFO_CPU = "cpu";
@@ -142,6 +149,7 @@ package com.mparticle;
         public static final String ERROR_MESSAGE = "m";
         public static final String ERROR_STACK_TRACE = "st";
         public static final String ERROR_UNCAUGHT = "eh";
+        public static final String ERROR_SESSION_COUNT = "sn";
         // uploading
         public static final String MESSAGES = "msgs";
         public static final String HISTORY = "sh";
@@ -165,6 +173,8 @@ package com.mparticle;
         public static final String SCREEN_STARTED = "t";
 
         public static final String EVENT_CATEGORY = "$Category";
+        public static final String BREADCRUMB_SESSION_COUNTER = "sn";
+        public static final String BREADCRUMB_LABEL = "l";
     }
 
     public interface PrefKeys {
@@ -180,11 +190,16 @@ package com.mparticle;
         public static final String FIRSTRUN = "mp::firstrun::";
         public static final String UPLOAD_MODE = "mp::batch";
         public static final String PROPERTY_APP_VERSION = "mp::appversion";
+        public static final String PROPERTY_OS_VERSION = "mp::osversion";
         public static final String PUSH_ENABLED = "mp::push_enabled";
         public static final String PUSH_SENDER_ID = "mp::push_sender_id";
         public static final String PIRATED = "mp::pirated";
         public static final String PUSH_ENABLE_SOUND = "mp::push::sound";
         public static final String PUSH_ENABLE_VIBRATION = "mp::push::vibration";
+        public static final String PUSH_ICON = "mp::push::icon";
+        public static final String PUSH_TITLE = "mp::push::title";
+        public static final String SESSION_COUNTER = "mp::breadcrumbs::sessioncount";
+        public static final String BREADCRUMB_LIMIT = "mp::breadcrumbs::limit";
     }
 
     public interface MiscStorageKeys {

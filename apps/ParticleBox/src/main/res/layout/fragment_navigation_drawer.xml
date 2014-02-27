@@ -23,14 +23,38 @@
 
             <TextView
                 android:layout_height="wrap_content"
-                android:text="Production "
+                android:text="Location tracking"
                 android:textSize="10dp"
                 android:textColor="@android:color/white"
                 android:layout_width="wrap_content" />
 
             <CheckBox
                 android:layout_width="wrap_content"
-                android:enabled="false"
+                android:enabled="true"
+                android:id="@+id/locationTrackingCheckbox"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
+        <View
+            android:layout_width="1dp"
+            android:layout_height="5dp"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:orientation="vertical"
+            android:paddingBottom="5dp"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:layout_height="wrap_content"
+                android:text="Opt-out "
+                android:textSize="10dp"
+                android:textColor="@android:color/white"
+                android:layout_width="wrap_content" />
+
+            <CheckBox
+                android:layout_width="wrap_content"
+                android:enabled="true"
+                android:id="@+id/optoutCheckbox"
                 android:layout_height="wrap_content" />
         </LinearLayout>
 

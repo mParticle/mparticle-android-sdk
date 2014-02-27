@@ -13,6 +13,9 @@ apply plugin: 'android'
 repositories {
     mavenCentral()
     mavenLocal()
+    maven {
+        url "http://www.bugsense.com/gradle/"
+    }
 }
 
 def buildTime() {
@@ -32,6 +35,31 @@ android {
         targetSdkVersion 19
         buildConfigField "String", "GIT_SHA", "\"$gitHash\""
         buildConfigField "String", "BUILD_TIME", "\"${buildTime()}\""
+        versionCode 1
+    }
+
+    productFlavors {
+        googleanalytics {
+            packageName 'com.mparticle.particlebox.googleanalytics'
+        }
+        mparticle {
+
+        }
+        mixpanel {
+            packageName 'com.mparticle.particlebox.mixpanel'
+        }
+        flurry {
+            packageName 'com.mparticle.particlebox.flurry'
+        }
+        urbanairship {
+            packageName 'com.mparticle.particlebox.urbanairship'
+        }
+        bugsense {
+            packageName 'com.mparticle.particlebox.bugsense'
+        }
+        kahuna {
+            packageName 'com.mparticle.particlebox.kahuna'
+        }
     }
 }
 
@@ -39,4 +67,10 @@ dependencies {
 	compile 'com.android.support:support-v4:19.0.0'
 	compile 'com.android.support:appcompat-v7:19.0.0'
     compile project(':sdk')
+    googleanalyticsCompile files("libs/libGoogleAnalyticsServices.jar")
+    mixpanelCompile 'com.mixpanel.android:mixpanel-android:4.0.0-RC3@aar'
+    flurryCompile files ("libs/FlurryAnalytics_3.3.3.jar")
+    urbanairshipCompile files ("libs/urbanairship-lib-3.2.3.jar")
+    bugsenseCompile 'com.bugsense.trace:bugsense:3.5'
+    kahunaCompile files ("libs/Kahuna.jar")
 }

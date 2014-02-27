@@ -20,6 +20,26 @@ import android.database.sqlite.SQLiteOpenHelper;
         public final static String CF_UUID = "cfuuid";
     }
 
+    public interface BreadcrumbTable {
+        public final static String TABLE_NAME = "breadcrumbs";
+        public final static String SESSION_ID = "session_id";
+        public final static String API_KEY = "api_key";
+        public final static String MESSAGE = "message";
+        public final static String CREATED_AT = "breadcrumb_time";
+        public final static String CF_UUID = "cfuuid";
+    }
+
+    private static final String CREATE_BREADCRUMBS_DDL =
+            "CREATE TABLE " + BreadcrumbTable.TABLE_NAME + " (" +
+                    "_id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                    BreadcrumbTable.SESSION_ID + " STRING NOT NULL, " +
+                    BreadcrumbTable.API_KEY + " STRING NOT NULL, " +
+                    BreadcrumbTable.MESSAGE + " TEXT, " +
+                    BreadcrumbTable.CREATED_AT + " INTEGER NOT NULL, " +
+                    BreadcrumbTable.CF_UUID + " TEXT" +
+                    ");";
+
+
     private static final String CREATE_SESSIONS_DDL =
             "CREATE TABLE " + SessionTable.TABLE_NAME + " (" +
                     "_id INTEGER PRIMARY KEY AUTOINCREMENT, " +
@@ -31,6 +51,7 @@ import android.database.sqlite.SQLiteOpenHelper;
                     SessionTable.ATTRIBUTES + " TEXT, " +
                     SessionTable.CF_UUID + " TEXT" +
                     ");";
+
 
     public interface MessageTable {
         public final static String TABLE_NAME = "messages";
@@ -109,6 +130,7 @@ import android.database.sqlite.SQLiteOpenHelper;
         db.execSQL(CREATE_MESSAGES_DDL);
         db.execSQL(CREATE_UPLOADS_DDL);
         db.execSQL(CREATE_COMMANDS_DDL);
+        db.execSQL(CREATE_BREADCRUMBS_DDL);
     }
 
     @Override

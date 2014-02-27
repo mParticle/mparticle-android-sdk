@@ -1,5 +1,6 @@
 package com.mparticle.activity;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.os.Build;
 
@@ -17,9 +18,9 @@ import com.mparticle.MParticle;
  * <p>For ICS and later, screen tracking and application state tracking are handled automatically.</p>
  *
  * @see com.mparticle.activity.MPListActivity
- * @see com.mparticle.activity.MPFragmentActivity
  *
  */
+@SuppressLint("Registered")
 public class MPActivity extends Activity {
     @Override
     protected void onStart() {

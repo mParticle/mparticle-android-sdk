@@ -15,7 +15,9 @@ import com.mparticle.Constants.MessageType;
 import com.mparticle.Constants.Status;
 import com.mparticle.MParticleDatabase.MessageTable;
 import com.mparticle.MParticleDatabase.SessionTable;
+import com.mparticle.MParticleDatabase.BreadcrumbTable;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -31,6 +33,7 @@ import org.json.JSONObject;
     public static final int UPDATE_SESSION_END = 2;
     public static final int CREATE_SESSION_END_MESSAGE = 3;
     public static final int END_ORPHAN_SESSIONS = 4;
+    public static final int STORE_BREADCRUMB = 5;
     private final Context context;
 
     // boolean flag used in unit tests to wait until processing is finished.
@@ -59,6 +62,9 @@ import org.json.JSONObject;
                     // session record first
                     if (MessageType.SESSION_START == messageType) {
                         dbInsertSession(db, message);
+                    }
+                    if (MessageType.ERROR == messageType){
+                        appendBreadcrumbs(db, message);
                     }
                     dbInsertMessage(db, message);
 
@@ -170,8 +176,67 @@ import org.json.JSONObject;
                     mDB.close();
                 }
                 break;
+            case STORE_BREADCRUMB:
+                try {
+                    JSONObject message = (JSONObject) msg.obj;
+                    SQLiteDatabase db = mDB.getWritableDatabase();
+                    dbInsertBreadcrumb(db, message);
+
+                } catch (SQLiteException e) {
+                    Log.e(TAG, "Error saving breadcrumb to mParticle DB", e);
+                } catch (JSONException e) {
+                    Log.e(TAG, "Error with JSON object", e);
+                } finally {
+                    mDB.close();
+                }
         }
         mIsProcessingMessage = false;
+    }
+
+    private static final String[] breadcrumbColumns = {
+            BreadcrumbTable.CREATED_AT,
+            BreadcrumbTable.MESSAGE
+    };
+
+    private void appendBreadcrumbs(SQLiteDatabase db, JSONObject message) throws JSONException {
+        Cursor breadcrumbCursor = db.query(BreadcrumbTable.TABLE_NAME,
+                breadcrumbColumns,
+                null,
+                null,
+                null,
+                null,
+                BreadcrumbTable.CREATED_AT + " desc limit " + MParticle.getInstance().mConfigManager.getBreadcrumbLimit());
+
+        if (breadcrumbCursor.getCount() > 0){
+            JSONArray breadcrumbs = new JSONArray();
+            int breadcrumbIndex = breadcrumbCursor.getColumnIndex(BreadcrumbTable.MESSAGE);
+            while (breadcrumbCursor.moveToNext()){
+                JSONObject breadcrumbObject = new JSONObject(breadcrumbCursor.getString(breadcrumbIndex));
+                breadcrumbs.put(breadcrumbObject);
+            }
+            message.put(MessageType.BREADCRUMB, breadcrumbs);
+        }
+    }
+
+    private static final String[] idColumns = {"_id"};
+
+    private void dbInsertBreadcrumb(SQLiteDatabase db, JSONObject message) throws JSONException {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(MParticleDatabase.BreadcrumbTable.API_KEY, mApiKey);
+        contentValues.put(MParticleDatabase.BreadcrumbTable.CREATED_AT, message.getLong(MessageKey.TIMESTAMP));
+        contentValues.put(MParticleDatabase.BreadcrumbTable.SESSION_ID, getMessageSessionId(message));
+        contentValues.put(MParticleDatabase.BreadcrumbTable.MESSAGE, message.toString());
+
+
+        db.insert(BreadcrumbTable.TABLE_NAME, null, contentValues);
+        Cursor cursor = db.query(BreadcrumbTable.TABLE_NAME, idColumns, null, null, null, null, " _id desc limit 1");
+        if (cursor.moveToFirst()){
+            int maxId = cursor.getInt(0);
+            if (maxId > MParticle.getInstance().mConfigManager.getBreadcrumbLimit()){
+                String[] limit = {Integer.toString(maxId - MParticle.getInstance().mConfigManager.getBreadcrumbLimit())};
+                db.delete(BreadcrumbTable.TABLE_NAME, " _id < ?", limit);
+            }
+        }
     }
 
     private void dbInsertSession(SQLiteDatabase db, JSONObject message) throws JSONException {

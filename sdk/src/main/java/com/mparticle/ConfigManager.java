@@ -221,7 +221,8 @@ class ConfigManager {
     }
 
     public void setOptOut(boolean optOut){
-        mPreferences.edit().putBoolean(Constants.PrefKeys.OPTOUT, optOut).commit();
+        mPreferences
+                .edit().putBoolean(Constants.PrefKeys.OPTOUT, optOut).commit();
     }
 
     public boolean getOptedOut(){
@@ -237,5 +238,35 @@ class ConfigManager {
     }
     public boolean isPushVibrationEnabled() {
         return mPreferences.getBoolean(Constants.PrefKeys.PUSH_ENABLE_VIBRATION, AppConfig.DEFAULT_ENABLE_PUSH_VIBRATION);
+    }
+
+    public void setPushNotificationIcon(int pushNotificationIcon) {
+        mPreferences.edit()
+                .putInt(Constants.PrefKeys.PUSH_ICON, pushNotificationIcon)
+                .commit();
+    }
+
+    public void setPushNotificationTitle(int pushNotificationTitle) {
+        mPreferences.edit()
+                .putInt(Constants.PrefKeys.PUSH_TITLE, pushNotificationTitle)
+                .commit();
+    }
+
+    public int getPushTitle() {
+        return mPreferences.getInt(Constants.PrefKeys.PUSH_TITLE, 0);
+    }
+
+    public int getPushIcon() {
+        return mPreferences.getInt(Constants.PrefKeys.PUSH_ICON, 0);
+    }
+
+    public int getBreadcrumbLimit() {
+        return mPreferences.getInt(Constants.PrefKeys.BREADCRUMB_LIMIT, AppConfig.DEFAULT_BREADCRUMB_LIMIT);
+    }
+
+    public void setBreadcrumbLimit(int newLimit){
+        mPreferences.edit()
+                .putInt(Constants.PrefKeys.BREADCRUMB_LIMIT, newLimit)
+                .commit();
     }
 }

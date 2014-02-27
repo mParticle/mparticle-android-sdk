@@ -5,7 +5,7 @@ import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.os.Message;
+import android.os.Build;
 import android.provider.Settings;
 import android.telephony.TelephonyManager;
 import android.util.DisplayMetrics;
@@ -90,16 +90,21 @@ import java.util.TimeZone;
 
             // device/OS attributes
             attributes.put(MessageKey.BUILD_ID, android.os.Build.ID);
-            attributes.put(MessageKey.BRAND, MPUtility.getGeneratedUdid());
+            attributes.put(MessageKey.BRAND, Build.BRAND);
             attributes.put(MessageKey.PRODUCT, android.os.Build.PRODUCT);
             attributes.put(MessageKey.DEVICE, android.os.Build.DEVICE);
             attributes.put(MessageKey.MANUFACTURER, android.os.Build.MANUFACTURER);
             attributes.put(MessageKey.PLATFORM, "Android");
-            attributes.put(MessageKey.OS_VERSION, android.os.Build.VERSION.SDK_INT);
+            attributes.put(MessageKey.OS_VERSION, Build.VERSION.SDK);
+            attributes.put(MessageKey.OS_VERSION_INT, Build.VERSION.SDK_INT);
+            attributes.put(MessageKey.DEVICE_BLUETOOTH_ENABLED, MPUtility.isBluetoothEnabled());
+            attributes.put(MessageKey.DEVICE_BLUETOOTH_VERSION, MPUtility.getBluetoothVersion(appContext));
+            attributes.put(MessageKey.DEVICE_SUPPORTS_NFC, MPUtility.hasNfc(appContext));
+            attributes.put(MessageKey.DEVICE_SUPPORTS_TELEPHONY, MPUtility.hasTelephony(appContext));
             attributes.put(MessageKey.MODEL, android.os.Build.MODEL);
 
             JSONObject rootedObject = new JSONObject();
-            rootedObject.put(MessageKey.DEVICE_ROOTED_CYDIA, isPhoneRooted());
+            rootedObject.put(MessageKey.DEVICE_ROOTED_CYDIA, MPUtility.isPhoneRooted());
             attributes.put(MessageKey.DEVICE_ROOTED, rootedObject);
 
             // screen height/width
@@ -176,23 +181,5 @@ import java.util.TimeZone;
         return attributes;
     }
 
-    private static boolean isPhoneRooted() {
 
-        // get from build info
-        String buildTags = android.os.Build.TAGS;
-        if (buildTags != null && buildTags.contains("test-keys")) {
-            return true;
-        }
-
-        boolean bool = false;
-        String[] arrayOfString1 = {"/sbin/", "/system/bin/", "/system/xbin/", "/data/local/xbin/", "/data/local/bin/", "/system/sd/xbin/", "/system/bin/failsafe/", "/data/local/"};
-        for (String str : arrayOfString1) {
-            File localFile = new File(new StringBuilder().append(str).append("su").toString());
-            if (localFile.exists()) {
-                bool = true;
-                break;
-            }
-        }
-        return bool;
-    }
 }

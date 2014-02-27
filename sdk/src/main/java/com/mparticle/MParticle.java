@@ -8,6 +8,7 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -15,7 +16,6 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.Process;
 import android.provider.Settings;
-import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
 import com.mparticle.Constants.MessageKey;
@@ -92,7 +92,6 @@ public class MParticle {
     /* package-private */ JSONArray mUserIdentities = new JSONArray();
     /* package-private */ JSONObject mUserAttributes = new JSONObject();
     /* package-private */ JSONObject mSessionAttributes;
-    /* package-private */ NotificationCompat.Builder customNotification;
     private MessageManager mMessageManager;
     private Handler mTimeoutHandler;
     private MParticleLocationListener mLocationListener;
@@ -599,6 +598,30 @@ public class MParticle {
     }
 
     /**
+     * Leave a breadcrumb to be included with error and exception logging, as well as
+     * with regular session events.
+     *
+     * @param breadcrumb
+     */
+    public void leaveBreadcrumb(String breadcrumb){
+        if (mConfigManager.getSendOoEvents()) {
+            if (null == breadcrumb) {
+                Log.w(TAG, "breadcrumb is required for leaveBreadcrumb");
+                return;
+            }
+            if (breadcrumb.length() > Constants.LIMIT_NAME) {
+                Log.w(TAG, "The breadcrumb name was too long. Discarding event.");
+                return;
+            }
+            ensureActiveSession();
+            mMessageManager.logBreadcrumb(mSessionID, mSessionStartTime, mLastEventTime, breadcrumb);
+            if (mDebugMode)
+                debugLog("Logged breadcrumb: " + breadcrumb);
+
+        }
+    }
+
+    /**
      * Logs an error event
      *
      * @param message the name of the error event to be tracked
@@ -774,12 +797,40 @@ public class MParticle {
     }
 
     /**
+     * Remove a <i>user</i> attribute
+     *
+     * @param key the key of the attribute
+     */
+    public void removeUserAttribute(String key) {
+        if (mConfigManager.getSendOoEvents()) {
+            if (mDebugMode)
+                if (key != null) {
+                    debugLog("Removing user attribute: " + key);
+                }
+            if (mUserAttributes.has(key)){
+                mUserAttributes.remove(key);
+                sPreferences.edit().putString(PrefKeys.USER_ATTRS + mApiKey, mUserAttributes.toString()).commit();
+            }
+
+        }
+    }
+
+    /**
      * Set a single user tag, it will be combined with any existing tags.
      *
      * @param tag a tag assigned to a user
      */
     public void setUserTag(String tag) {
         setUserAttribute(tag, null);
+    }
+
+    /**
+     * Remove a user tag.
+     *
+     * @param tag a tag that was previously added
+     */
+    public void removeUserTag(String tag) {
+        removeUserAttribute(tag);
     }
 
     /**
@@ -791,7 +842,7 @@ public class MParticle {
      */
 
     public void setUserIdentity(String id, IdentityType identityType) {
-        if (mConfigManager.getSendOoEvents()) {
+        if (mConfigManager.getSendOoEvents() && id != null && id.length() > 0) {
             if (mDebugMode)
                 debugLog("Setting user identity: " + id);
 
@@ -801,34 +852,66 @@ public class MParticle {
             }
 
             try {
-                JSONObject identity = new JSONObject();
-                identity.put(MessageKey.IDENTITY_NAME, identityType.value);
-                identity.put(MessageKey.IDENTITY_VALUE, id);
-
-                // verify there is not another IDENTITY_VALUE...if so, remove it first...to do this, copy the
-                //   existing array to a new one
-                JSONArray newUserIdentities = new JSONArray();
-
+                int index = -1;
                 for (int i = 0; i < mUserIdentities.length(); i++) {
-                    JSONObject testid = mUserIdentities.getJSONObject(i);
-                    if (testid.get(MessageKey.IDENTITY_NAME).equals(identityType.value)) {
-                        // remove this one by not copying it
-                        continue;
+                    if (mUserIdentities.getJSONObject(i).get(MessageKey.IDENTITY_NAME).equals(identityType.value)) {
+                        index = i;
+                        break;
                     }
-                    newUserIdentities.put(testid);
                 }
-                // now add this one...only if the id is not null
-                if ((id != null) && (id.length() > 0)) {
-                    newUserIdentities.put(identity);
+
+                JSONObject newObject = new JSONObject();
+                newObject.put(MessageKey.IDENTITY_NAME, identityType.value);
+                newObject.put(MessageKey.IDENTITY_VALUE, id);
+                if (index >= 0){
+                    mUserIdentities.put(index, newObject);
+                }else{
+                    mUserIdentities.put(newObject);
                 }
-                // now make the new array the saved one
-                mUserIdentities = newUserIdentities;
+
             } catch (JSONException e) {
                 Log.w(TAG, "Error setting identity: " + id);
                 return;
             }
 
             sPreferences.edit().putString(PrefKeys.USER_IDENTITIES + mApiKey, mUserIdentities.toString()).commit();
+        }
+    }
+
+    /**
+     * Remove an identity matching this id
+     *
+     * Note: this will only remove the *first* matching id
+     *
+     * @param id the id to remove
+     */
+    public void removeUserIdentity(String id){
+        if (id != null && id.length() > 0 && mUserIdentities != null){
+            try{
+                int indexToRemove = -1;
+                for (int i = 0; i < mUserIdentities.length(); i++){
+                    if (mUserIdentities.getJSONObject(i).getString(MessageKey.IDENTITY_VALUE).equals(id)){
+                        indexToRemove = i;
+                        break;
+                    }
+                }
+                if (indexToRemove >= 0){
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT){
+                        mUserIdentities.remove(indexToRemove);
+                    }else{
+                        JSONArray newIdentities = new JSONArray();
+                        for (int i=0; i < mUserIdentities.length(); i++){
+                            if (i != indexToRemove){
+                                newIdentities.put(mUserIdentities.get(i));
+                            }
+                        }
+                    }
+                    sPreferences.edit().putString(PrefKeys.USER_IDENTITIES + mApiKey, mUserIdentities.toString()).commit();
+
+                }
+            }catch (JSONException jse){
+                Log.w(TAG, "Error removing identity: " + id);
+            }
         }
     }
 
@@ -969,19 +1052,6 @@ public class MParticle {
         mConfigManager.setPushVibrationEnabled(enabled);
     }
 
-    /**
-     * Set a custom notification style to use for push notification. This will override
-     * the values set by the {@link #setNotificationSoundEnabled(boolean)}
-     * and the {@link #setNotificationVibrationEnabled(boolean)}
-     * methods.
-     *
-     * @param notification
-     * @see <a href="http://developer.android.com/reference/android/support/v4/app/NotificationCompat.Builder.html">NotificationCompat.Builder</a>
-     */
-    public void setCustomPushNotification(NotificationCompat.Builder notification) {
-        customNotification = notification;
-    }
-
     void clearPushNotificationId() {
         PushRegistrationHelper.clearPushRegistrationId(mAppContext, registrationListener);
     }
@@ -1109,16 +1179,16 @@ public class MParticle {
      */
     public void setSessionTimeout(int sessionTimeout) {
         mConfigManager.setSessionTimeout(sessionTimeout);
-
     }
 
-    void logNotification(Intent intent) {
+    /* package private */ void logNotification(Bundle notificationBundle, String appState) {
+        lastNotificationBundle = notificationBundle;
         if (mConfigManager.getSendOoEvents()) {
-            lastNotificationBundle = intent.getExtras().getBundle(MessageKey.PAYLOAD);
             ensureActiveSession();
-            mMessageManager.logNotification(mSessionID, mSessionStartTime, lastNotificationBundle, intent.getExtras().getString(MessageKey.APP_STATE));
+            mMessageManager.logNotification(mSessionID, mSessionStartTime, lastNotificationBundle, appState);
         }
     }
+
 
     /**
      * Event type to use when logging events.
@@ -1247,5 +1317,36 @@ public class MParticle {
             mMessageManager.setPushRegistrationId(mSessionID, mSessionStartTime, System.currentTimeMillis(), null, true);
         }
     };
+
+    public interface Push {
+        public static final String BROADCAST_NOTIFICATION_RECEIVED = "com.mparticle.push.NOTIFICATION_RECEIVED";
+        public static final String BROADCAST_NOTIFICATION_TAPPED = "com.mparticle.push.NOTIFICATION_TAPPED";
+        public static final String PUSH_ALERT_EXTRA = "com.mparticle.push.alert";
+
+    }
+
+    /**
+     * Set the resource ID of the icon to be shown in the notification bar when a notification is received.
+     *
+     * By default, the app launcher icon will be shown.
+     *
+     * @param resId the resource id of a drawable
+     */
+    public void setPushNotificationIcon(int resId){
+        mConfigManager.setPushNotificationIcon(resId);
+    }
+
+    /**
+     * Set the resource ID of the title to be shown in the notification bar when a notification is received
+     *
+     * By default, the title of the application will be shown.
+     *
+     * @param resId the resource id of a string
+     */
+    public void setPushNotificationTitle(int resId){
+        mConfigManager.setPushNotificationTitle(resId);
+    }
+
+
 
 }

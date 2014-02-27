@@ -55,7 +55,9 @@ import java.util.concurrent.ConcurrentHashMap;
  * {@link AsyncHttpClient#setCookieStore}, but can also be used with a regular
  * old Apache HttpClient/HttpContext if you prefer.
  */
-/* package-private */ class PersistentCookieStore implements CookieStore {
+/* package-private */
+@SuppressWarnings("ALL")
+class PersistentCookieStore implements CookieStore {
     private static final String COOKIE_PREFS = "CookiePrefsFile";
     private static final String COOKIE_NAME_STORE = "names";
     private static final String COOKIE_NAME_PREFIX = "cookie_";

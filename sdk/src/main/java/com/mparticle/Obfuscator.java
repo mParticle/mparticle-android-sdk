@@ -25,6 +25,7 @@ package com.mparticle;
  * should use device-specific information as a key in the obfuscation algorithm to prevent
  * obfuscated preferences from being shared among devices.
  */
+@SuppressWarnings("ALL")
 interface Obfuscator {
 
     /**

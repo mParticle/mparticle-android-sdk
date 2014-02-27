@@ -22,7 +22,7 @@ android {
     defaultConfig {
         minSdkVersion 8
         targetSdkVersion 19
-        version 1.0
+        version sdkversion
     }
 
     debug {
@@ -31,9 +31,12 @@ android {
     }
 
     release {
-        buildConfigField "boolean", "ECHO", "true"
-        runProguard false
+        buildConfigField "boolean", "ECHO", "false"
+        runProguard true
         proguardFile 'proguard.txt'
+    }
+    lintOptions {
+        abortOnError false
     }
 
 }
@@ -79,5 +82,5 @@ uploadArchives {
 }
 
 dependencies {
-    compile 'com.android.support:support-v4:19.0.0'
+   // compile 'com.android.support:support-v4:19.0.1'
 }

@@ -20,7 +20,7 @@
 
     <string name="mp_pushSenderId">214353432629</string>
 
-    <bool name="mp_enableSandboxMode">false</bool>
+    <bool name="mp_enableSandboxMode">true</bool>
 
     <bool name="mp_enableLicenseCheck">true</bool>
 

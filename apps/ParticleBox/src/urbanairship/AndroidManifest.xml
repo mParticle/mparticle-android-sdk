@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <permission
+        android:name="com.mparticle.particlebox.urbanairship.permission.C2D_MESSAGE"
+        android:protectionLevel="signature" />
+
+    <permission
+        android:name="com.mparticle.particlebox.urbanairship.mparticle.permission.NOTIFICATIONS"
+        android:protectionLevel="signature" />
+    
+    <uses-permission android:name="com.mparticle.particlebox.urbanairship.mparticle.permission.NOTIFICATIONS"/>
+
+    <uses-permission android:name="com.mparticle.particlebox.urbanairship.permission.C2D_MESSAGE" />
+    <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
+    <uses-permission android:name="android.permission.GET_ACCOUNTS" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <application>
+        <receiver android:name="com.mparticle.particlebox.PushReceiver">
+            <intent-filter>
+                <action android:name="com.mparticle.push.NOTIFICATION_TAPPED"/>
+                <action android:name="com.mparticle.push.NOTIFICATION_RECEIVED"/>
+                <action android:name="com.urbanairship.push.NOTIFICATION_OPENED"/>
+            </intent-filter>
+        </receiver>
+        <!-- REQUIRED for Urban Airship GCM -->
+        <receiver android:name="com.urbanairship.CoreReceiver" />
+        <receiver
+            android:name="com.urbanairship.push.GCMPushReceiver"
+            android:permission="com.google.android.c2dm.permission.SEND">
+            <intent-filter>
+                <action android:name="com.google.android.c2dm.intent.RECEIVE" />
+                <action android:name="com.google.android.c2dm.intent.REGISTRATION" />
+
+                <!-- MODIFICATION REQUIRED - Use your package name as the category -->
+                <category android:name="com.mparticle.particlebox.urbanairship" />
+            </intent-filter>
+            <!-- REQUIRED for detecting when the application is upgraded so it can request a new GCM ID -->
+            <intent-filter>
+                <action android:name="android.intent.action.PACKAGE_REPLACED"
+                    android:path="com.mparticle.particlebox.urbanairship"
+                     />
+                <data android:scheme="package" />
+            </intent-filter>
+        </receiver>
+
+        <service
+            android:name="com.urbanairship.push.PushService"
+            android:label="Push Notification Service" />
+
+        <provider
+            android:name="com.urbanairship.UrbanAirshipProvider"
+            android:authorities="com.mparticle.particlebox.urbanairship.urbanairship.provider"
+            android:exported="false"
+            android:multiprocess="true" />
+
+        <receiver
+            android:name="com.mparticle.MPReceiver"
+            android:permission="com.google.android.c2dm.permission.SEND">
+            <intent-filter>
+                <action android:name="com.google.android.c2dm.intent.RECEIVE" />
+                <action android:name="com.google.android.c2dm.intent.REGISTRATION" />
+                <action android:name="com.google.android.c2dm.intent.UNREGISTER" />
+                <action android:name="com.android.vending.INSTALL_REFERRER" />
+                <!-- Use your package name as the category -->
+                <category android:name="com.mparticle.particlebox.urbanairship" />
+            </intent-filter>
+
+            <!-- The GCM registration ID could change if the device's Android version changes, this filter will allow mParticle to re-register for push notifications if necessary. -->
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
+        <service android:name="com.mparticle.MPService" />
+
+    </application>
+</manifest>

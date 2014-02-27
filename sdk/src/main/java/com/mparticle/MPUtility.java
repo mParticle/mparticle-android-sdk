@@ -1,7 +1,9 @@
 package com.mparticle;
 
 import android.Manifest;
+import android.annotation.TargetApi;
 import android.app.ActivityManager;
+import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -49,6 +51,7 @@ import java.util.jar.JarFile;
 
 class MPUtility {
 
+    static final String NO_BLUETOOTH = "none";
     private static String sOpenUDID;
     private static String sBuildUUID;
 
@@ -179,6 +182,7 @@ class MPUtility {
         }
     }
 
+    @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
     public static long getTotalMemoryJB(Context context) {
         ActivityManager.MemoryInfo mi = new ActivityManager.MemoryInfo();
         ActivityManager activityManager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
@@ -299,16 +303,16 @@ class MPUtility {
             return (js1 == js2);
         }
 
-        List<String> l1 =  new ArrayList<String>();
+        List<String> l1 = new ArrayList<String>();
         JSONArray a1 = js1.names();
-        for (int i = 0; i < a1.length(); i++){
+        for (int i = 0; i < a1.length(); i++) {
             l1.add(a1.getString(i));
         }
 
         Collections.sort(l1);
-        List<String> l2 =  new ArrayList<String>();
+        List<String> l2 = new ArrayList<String>();
         JSONArray a2 = js2.names();
-        for (int i = 0; i < a2.length(); i++){
+        for (int i = 0; i < a2.length(); i++) {
             l2.add(a2.getString(i));
         }
         Collections.sort(l2);
@@ -324,7 +328,7 @@ class MPUtility {
                     Log.d(Constants.LOG_TAG, "Difference detected while inspecting key: " + key);
                     return false;
                 }
-                if (!jsonObjsAreEqual((JSONObject)val1, (JSONObject)val2)) {
+                if (!jsonObjsAreEqual((JSONObject) val1, (JSONObject) val2)) {
                     Log.d(Constants.LOG_TAG, "Difference detected while inspecting key: " + key);
                     return false;
                 }
@@ -336,10 +340,10 @@ class MPUtility {
                     return false;
 
                 }
-            }  else if (!val1.equals(val2)) {
-                if (val2 == null){
+            } else if (!val1.equals(val2)) {
+                if (val2 == null) {
                     Log.d(Constants.LOG_TAG, "Difference detected while inspecting value: " + val1);
-                }else{
+                } else {
                     Log.d(Constants.LOG_TAG, "Difference detected while inspecting value: " + val1 + ", does not match :" + val2);
                 }
                 return false;
@@ -354,32 +358,26 @@ class MPUtility {
                 >= Configuration.SCREENLAYOUT_SIZE_LARGE;
     }
 
-    public static Object getAccessibleObject(Field paramField, Object paramObject)
-    {
+    public static Object getAccessibleObject(Field paramField, Object paramObject) {
         Object localObject = null;
         if (paramField == null)
             return null;
-        if (paramField != null)
-        {
+        if (paramField != null) {
             paramField.setAccessible(true);
-            try
-            {
+            try {
                 localObject = paramField.get(paramObject);
-            }
-            catch (Exception e){
+            } catch (Exception e) {
 
             }
         }
         return localObject;
     }
 
-    public static Field getAccessibleField(Class paramClass1, Class paramClass2)
-    {
+    public static Field getAccessibleField(Class paramClass1, Class paramClass2) {
         Field[] paramfields = paramClass1.getDeclaredFields();
         Field localField = null;
         for (int i = 0; i < paramfields.length; i++)
-            if (paramClass2.isAssignableFrom(paramfields[i].getType()))
-            {
+            if (paramClass2.isAssignableFrom(paramfields[i].getType())) {
                 // if (localField != null)
                 //throw new MPException(cd.l);
                 localField = paramfields[i];
@@ -389,29 +387,71 @@ class MPUtility {
         return localField;
     }
 
-    public static void a(AccessibleObject[] paramArrayOfAccessibleObject)
-    {
-        for (int i = 0; i < paramArrayOfAccessibleObject.length; i++)
-        {
+    public static void a(AccessibleObject[] paramArrayOfAccessibleObject) {
+        for (int i = 0; i < paramArrayOfAccessibleObject.length; i++) {
             AccessibleObject localAccessibleObject;
             if ((localAccessibleObject = paramArrayOfAccessibleObject[i]) != null)
                 localAccessibleObject.setAccessible(true);
         }
     }
 
-    public static Constructor getConstructor(String paramString, String[] paramArrayOfString) throws ClassNotFoundException
-    {
+    public static Constructor getConstructor(String paramString, String[] paramArrayOfString) throws ClassNotFoundException {
         Constructor<?>[] constructors = Class.forName(paramString).getDeclaredConstructors();
-        for (int i = 0; i < constructors.length; i++)
-        {
+        for (int i = 0; i < constructors.length; i++) {
             String[] arrayOfString = paramArrayOfString;
             Class[] arrayOfClass = constructors[i].getParameterTypes();
-            for (int j = 0; j < arrayOfClass.length; j++){
+            for (int j = 0; j < arrayOfClass.length; j++) {
                 if ((!arrayOfClass[j].getName().equals(arrayOfString[j]) ? 0 : arrayOfClass.length != arrayOfString.length ? 0 : 1) != 0)
                     return constructors[i];
             }
         }
         return null;
+    }
+
+    public static boolean hasNfc(Context context) {
+        return context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_NFC);
+    }
+
+    public static String getBluetoothVersion(Context context) {
+        String bluetoothVersion = NO_BLUETOOTH;
+        if ((Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) && (context.getPackageManager().hasSystemFeature("android.hardware.bluetooth_le"))) {
+            bluetoothVersion = "ble";
+        } else if (context.getPackageManager().hasSystemFeature("android.hardware.bluetooth")) {
+            bluetoothVersion = "classic";
+        }
+        return bluetoothVersion;
+    }
+
+    public static boolean isPhoneRooted() {
+
+        // get from build info
+        String buildTags = android.os.Build.TAGS;
+        if (buildTags != null && buildTags.contains("test-keys")) {
+            return true;
+        }
+
+        boolean bool = false;
+        String[] arrayOfString1 = {"/sbin/", "/system/bin/", "/system/xbin/", "/data/local/xbin/", "/data/local/bin/", "/system/sd/xbin/", "/system/bin/failsafe/", "/data/local/"};
+        for (String str : arrayOfString1) {
+            File localFile = new File(str + "su");
+            if (localFile.exists()) {
+                bool = true;
+                break;
+            }
+        }
+        return bool;
+    }
+
+    public static boolean hasTelephony(Context context) {
+        return context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_TELEPHONY);
+    }
+
+    public static boolean isBluetoothEnabled() {
+        BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        if (mBluetoothAdapter == null) {
+            return mBluetoothAdapter.isEnabled();
+        }
+        return false;
     }
 
 }

@@ -1,5 +1,6 @@
 package com.mparticle;
 
+import android.annotation.SuppressLint;
 import android.app.IntentService;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -9,27 +10,32 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.PowerManager;
 import android.util.Log;
 
 /**
  * {@code IntentService } used internally by the SDK to process incoming broadcast messages in the background. Required for push notification functionality.
- *
+ * <p/>
  * This {@code IntentService} must be specified within the {@code <application>} block of your application's {@code AndroidManifest.xml} file:
- *
+ * <p/>
  * <pre>
  * {@code
  * <service android:name="com.mparticle.MPService" />}
- *</pre>
+ * </pre>
  */
+@SuppressLint("Registered")
 public class MPService extends IntentService {
 
     private static final String TAG = Constants.LOG_TAG;
-    private static final String MPARTICLE_NOTIFICATION_OPENED = "com.mparticle.notification_opened";
-
-    private static PowerManager.WakeLock sWakeLock;
+    private static final String MPARTICLE_NOTIFICATION_OPENED = "com.mparticle.push.notification_opened";
     private static final Object LOCK = MPService.class;
+    private static PowerManager.WakeLock sWakeLock;
+    private static final String APP_STATE = "com.mparticle.push.appstate";
+    private static final String PUSH_ORIGINAL_PAYLOAD = "com.mparticle.push.originalpayload";
+    private static final String PUSH_REDACTED_PAYLOAD = "com.mparticle.push.redactedpayload";
+    private static final String BROADCAST_PERMISSION = ".mparticle.permission.NOTIFICATIONS";
 
     public MPService() {
         super("com.mparticle.MPService");
@@ -44,7 +50,6 @@ public class MPService extends IntentService {
         }
         sWakeLock.acquire();
         intent.setClass(context, MPService.class);
-        Log.i("MPService", "Running intent");
         context.startService(intent);
     }
 
@@ -66,8 +71,10 @@ public class MPService extends IntentService {
             } else if (action.equals("com.google.android.c2dm.intent.UNREGISTER")) {
                 intent.putExtra("unregistered", "true");
                 handleRegistration(intent);
-            }else if (action.equals(MPARTICLE_NOTIFICATION_OPENED)){
+            } else if (action.equals(MPARTICLE_NOTIFICATION_OPENED)) {
                 handleNotificationClick(intent);
+            } else {
+                handeReRegistration();
             }
         } finally {
             synchronized (LOCK) {
@@ -78,24 +85,30 @@ public class MPService extends IntentService {
         }
     }
 
+    private void handeReRegistration() {
+        MParticle.start(getApplicationContext());
+        MParticle.getInstance();
+    }
+
     private void handleNotificationClick(Intent intent) {
+
+        broadcastNotificationClicked(intent.getBundleExtra(PUSH_ORIGINAL_PAYLOAD));
+
         try {
-            MParticle.lastNotificationBundle = intent.getExtras().getBundle(Constants.MessageKey.PAYLOAD);
             MParticle.start(getApplicationContext());
             MParticle mMParticle = MParticle.getInstance();
-            mMParticle.logNotification(intent);
+            Bundle extras = intent.getExtras();
+            String appState = extras.getString(APP_STATE);
+            mMParticle.logNotification(intent.getExtras().getBundle(PUSH_REDACTED_PAYLOAD),
+                                        appState);
         } catch (Throwable t) {
 
         }
-
         PackageManager packageManager = getPackageManager();
-        String packageName = getPackageName();
-        Intent launchIntent = packageManager.getLaunchIntentForPackage(packageName);
+        Intent launchIntent = packageManager.getLaunchIntentForPackage(getPackageName());
         launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         launchIntent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
         startActivity(launchIntent);
-
-
     }
 
     private void handleRegistration(Intent intent) {
@@ -126,47 +139,49 @@ public class MPService extends IntentService {
     private void handleMessage(Intent intent) {
 
         try {
-            Bundle extras = intent.getExtras();
+
             Bundle newExtras = new Bundle();
-            newExtras.putBundle(Constants.MessageKey.PAYLOAD, extras);
-            if (!MParticle.appRunning){
-                newExtras.putString(Constants.MessageKey.APP_STATE, AppStateManager.APP_STATE_NOTRUNNING);
+            newExtras.putBundle(PUSH_ORIGINAL_PAYLOAD, intent.getExtras());
+            newExtras.putBundle(PUSH_REDACTED_PAYLOAD, intent.getExtras());
+
+            if (!MParticle.appRunning) {
+                newExtras.putString(APP_STATE, AppStateManager.APP_STATE_NOTRUNNING);
             }
 
             MParticle mMParticle = MParticle.getInstance();
-
-            if (!newExtras.containsKey(Constants.MessageKey.APP_STATE)){
-                if (mMParticle.mAppStateManager.isBackgrounded()){
-                    newExtras.putString(Constants.MessageKey.APP_STATE, AppStateManager.APP_STATE_BACKGROUND);
-                }else{
-                    newExtras.putString(Constants.MessageKey.APP_STATE, AppStateManager.APP_STATE_FOREGROUND);
+            if (!newExtras.containsKey(Constants.MessageKey.APP_STATE)) {
+                if (mMParticle.mAppStateManager.isBackgrounded()) {
+                    newExtras.putString(APP_STATE, AppStateManager.APP_STATE_BACKGROUND);
+                } else {
+                    newExtras.putString(APP_STATE, AppStateManager.APP_STATE_FOREGROUND);
                 }
             }
 
             String title = "Unknown";
-            try{
+            try {
                 int stringId = getApplicationInfo().labelRes;
                 title = getResources().getString(stringId);
-            }catch(Resources.NotFoundException ex){
+            } catch (Resources.NotFoundException ex) {
 
             }
 
-            //TODO: support collapse key to auto-update notifications that are still visible.
+            String[] possibleKeys = mMParticle.mConfigManager.getPushKeys();
+            String key = findMessageKey(possibleKeys, newExtras.getBundle(PUSH_ORIGINAL_PAYLOAD));
+            String message = newExtras.getBundle(PUSH_ORIGINAL_PAYLOAD).getString(key);
+            newExtras.getBundle(PUSH_REDACTED_PAYLOAD).putString(key, "");
+            newExtras.getBundle(PUSH_ORIGINAL_PAYLOAD).putString(MParticle.Push.PUSH_ALERT_EXTRA, message);
+            int titleResId = MParticle.getInstance().mConfigManager.getPushTitle();
+            if (titleResId > 0){
+                try{
+                    title = getString(titleResId);
+                }catch(Resources.NotFoundException e){
 
-            String[] keys = mMParticle.mConfigManager.getPushKeys();
-            if (keys != null){
-
-                for (String key : keys){
-                    String message = extras.getString(key);
-                    if (message != null && message.length() > 0){
-                        //redact message contents for privacy concerns
-                        newExtras.getBundle(Constants.MessageKey.PAYLOAD).remove(key);
-                        newExtras.getBundle(Constants.MessageKey.PAYLOAD).putString(key, "");
-                        showPushWithMessage(title, message, newExtras);
-                        break;
-                    }
                 }
             }
+
+            showPushWithMessage(title, message, newExtras);
+
+            broadcastNotificationReceived(newExtras.getBundle(PUSH_ORIGINAL_PAYLOAD));
         } catch (Throwable t) {
             // failure to instantiate mParticle likely means that the
             // mparticle.properties file is not correct
@@ -175,40 +190,72 @@ public class MPService extends IntentService {
         }
     }
 
-    private void showPushWithMessage(String title, String message, Bundle extras) {
+    private void broadcastNotificationReceived(Bundle originalPayload) {
+        Intent intent = new Intent(MParticle.Push.BROADCAST_NOTIFICATION_RECEIVED);
+        intent.putExtras(originalPayload);
+        String packageName = getPackageName();
+        sendBroadcast(intent, packageName + BROADCAST_PERMISSION);
+    }
+
+    private void broadcastNotificationClicked(Bundle originalPayload) {
+        Intent intent = new Intent(MParticle.Push.BROADCAST_NOTIFICATION_RECEIVED);
+        intent.putExtras(originalPayload);
+        String packageName = getPackageName();
+        sendBroadcast(intent, packageName + BROADCAST_PERMISSION);
+    }
+
+    private String findMessageKey(String[] possibleKeys, Bundle extras){
+        if (possibleKeys != null) {
+            for (String key : possibleKeys) {
+                String message = extras.getString(key);
+                if (message != null && message.length() > 0) {
+                    return key;
+                }
+            }
+        }
+        Log.w(Constants.LOG_TAG, "Failed to extract push alert message using configuration.");
+        return null;
+    }
+
+    private void showPushWithMessage(String title, String message, Bundle newExtras) {
         PackageManager packageManager = getPackageManager();
         String packageName = getPackageName();
 
-        int applicationIcon = 0;
-        try {
-            applicationIcon = packageManager.getApplicationInfo(packageName, 0).icon;
-        } catch (NameNotFoundException e) {
-            // use the ic_dialog_alert icon if the app's can not be found
+        MParticle.start(getApplicationContext());
+        int iconResId = MParticle.getInstance().mConfigManager.getPushIcon();
+        try{
+            Drawable draw = getResources().getDrawable(iconResId);
+        }catch (Resources.NotFoundException nfe){
+            iconResId = 0;
         }
-        if (0 == applicationIcon) {
-            applicationIcon = android.R.drawable.ic_dialog_alert;
+
+        if (iconResId == 0){
+            try {
+                iconResId = packageManager.getApplicationInfo(packageName, 0).icon;
+            } catch (NameNotFoundException e) {
+                // use the ic_dialog_alert icon if the app's can not be found
+            }
+            if (0 == iconResId) {
+                iconResId = android.R.drawable.ic_dialog_alert;
+            }
         }
         NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         MParticle mMParticle = MParticle.getInstance();
         Intent launchIntent = new Intent(getApplicationContext(), MPService.class);
         launchIntent.setAction(MPARTICLE_NOTIFICATION_OPENED);
-        launchIntent.putExtras(extras);
+        launchIntent.putExtras(newExtras);
         PendingIntent notifyIntent = PendingIntent.getService(getApplicationContext(), 0, launchIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-        if (mMParticle.customNotification != null){
-            mMParticle.customNotification.setContentIntent(notifyIntent);
-            notificationManager.notify(extras.hashCode(), mMParticle.customNotification.setContentText(message).build());
-        }else{
-            Notification notification = new Notification(applicationIcon, message, System.currentTimeMillis());
-            if (mMParticle.mConfigManager.isPushSoundEnabled()){
-                notification.flags |= Notification.DEFAULT_SOUND;
-            }
-            if (mMParticle.mConfigManager.isPushVibrationEnabled()){
-                notification.flags |= Notification.DEFAULT_VIBRATE;
-            }
-            notification.flags |= Notification.FLAG_AUTO_CANCEL;
-            notification.setLatestEventInfo(this, title, message, notifyIntent);
-            notificationManager.notify(extras.hashCode(), notification);
+
+        Notification notification = new Notification(iconResId, message, System.currentTimeMillis());
+        if (mMParticle.mConfigManager.isPushSoundEnabled()) {
+            notification.flags |= Notification.DEFAULT_SOUND;
         }
+        if (mMParticle.mConfigManager.isPushVibrationEnabled()) {
+            notification.flags |= Notification.DEFAULT_VIBRATE;
+        }
+        notification.flags |= Notification.FLAG_AUTO_CANCEL;
+        notification.setLatestEventInfo(this, title, message, notifyIntent);
+        notificationManager.notify(message.hashCode(), notification);
     }
 
 }

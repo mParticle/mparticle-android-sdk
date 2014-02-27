@@ -101,8 +101,8 @@ import javax.crypto.spec.SecretKeySpec;
 
     public static final String SECURE_SERVICE_SCHEME = "https";
     public static final String SECURE_SERVICE_HOST = "nativesdk.mparticle.com";
-    public static final String DEBUG_SERVICE_SCHEME = "http";
     public static final String DEBUG_SERVICE_HOST = "api-qa.mparticle.com";
+   //public static final String DEBUG_SERVICE_HOST = "win-dozor";
 
     public static final String SERVICE_VERSION = "v1";
 
@@ -509,7 +509,7 @@ import javax.crypto.spec.SecretKeySpec;
                     } else {
                         try {
                             JSONObject responseJSON = new JSONObject(response);
-                            if (responseJSON.has("echo")){
+                           /* if (responseJSON.has("echo")){
                                 try{
                                     JSONObject messageObj = new JSONObject(message);
                                     boolean equal = MPUtility.jsonObjsAreEqual(responseJSON.getJSONObject("echo"), messageObj);
@@ -521,7 +521,7 @@ import javax.crypto.spec.SecretKeySpec;
                                 }catch (Exception e){
                                     Log.d(TAG, "Exception while comparing Echo response: " + e.getMessage());
                                 }
-                            }
+                            }*/
                             if (responseJSON.has(MessageKey.MESSAGES)) {
                                 JSONArray responseCommands = responseJSON.getJSONArray(MessageKey.MESSAGES);
                                 for (int i = 0; i < responseCommands.length(); i++) {
@@ -655,7 +655,7 @@ import javax.crypto.spec.SecretKeySpec;
     }
 
     private URI makeServiceUri(String method) throws URISyntaxException {
-        return new URI("https", DEBUG_SERVICE_HOST, "/" + SERVICE_VERSION + "/" + mApiKey + "/" + method, null);
+        return new URI(SECURE_SERVICE_SCHEME, DEBUG_SERVICE_HOST, "/" + SERVICE_VERSION + "/" + mApiKey + "/" + method, null);
     }
 
     private void dbInsertUpload(SQLiteDatabase db, JSONObject message) throws JSONException {
@@ -669,7 +669,6 @@ import javax.crypto.spec.SecretKeySpec;
     private void dbDeleteProcessedMessages(SQLiteDatabase db, String sessionId) {
         String[] whereArgs = new String[]{mApiKey, Integer.toString(Status.UPLOADED), sessionId};
         int rowsdeleted = db.delete(MessageTable.TABLE_NAME, SQL_FINISHED_HISTORY_MESSAGES, whereArgs);
-        Log.d("mParticle DB", "Deleted " + rowsdeleted);
     }
 
     private void dbMarkAsUploadedMessage(SQLiteDatabase db, int lastMessageId) {
@@ -688,7 +687,6 @@ import javax.crypto.spec.SecretKeySpec;
     private void dbDeleteUpload(SQLiteDatabase db, int id) {
         String[] whereArgs = {Long.toString(id)};
         int rowsdeleted = db.delete(UploadTable.TABLE_NAME, "_id=?", whereArgs);
-        Log.d("mParticle DB", "Deleted " + rowsdeleted);
     }
 
     private void dbDeleteCommand(SQLiteDatabase db, int id) {
@@ -703,6 +701,7 @@ import javax.crypto.spec.SecretKeySpec;
         contentValues.put(CommandTable.POST_DATA, command.optString(MessageKey.POST));
         contentValues.put(CommandTable.HEADERS, command.optString(MessageKey.HEADERS));
         contentValues.put(CommandTable.CREATED_AT, System.currentTimeMillis());
+        contentValues.put(CommandTable.API_KEY, mApiKey);
         db.insert(CommandTable.TABLE_NAME, null, contentValues);
     }
 
