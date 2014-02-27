@@ -1,4 +1,7 @@
-package com.mparticle;
+package com.mparticle.networking;
+
+import com.mparticle.networking.ISocket;
+import com.mparticle.networking.MeasuredRequest;
 
 import java.io.IOException;
 import java.io.OutputStream;

@@ -20,6 +20,8 @@ import android.util.Log;
 
 import com.mparticle.Constants.MessageKey;
 import com.mparticle.Constants.PrefKeys;
+import com.mparticle.networking.MPSSLSocketFactory;
+import com.mparticle.networking.MPSocketImplFactory;
 
 import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.json.JSONArray;

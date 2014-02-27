@@ -1,4 +1,4 @@
-package com.mparticle;
+package com.mparticle.networking;
 
 import android.location.Location;
 

@@ -1,4 +1,6 @@
-package com.mparticle;
+package com.mparticle.networking;
+
+import com.mparticle.MPException;
 
 import java.net.SocketImpl;
 import java.net.SocketImplFactory;

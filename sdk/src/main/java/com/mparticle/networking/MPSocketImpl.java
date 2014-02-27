@@ -1,6 +1,4 @@
-package com.mparticle;
-
-import android.util.Log;
+package com.mparticle.networking;
 
 import java.io.FileDescriptor;
 import java.io.IOException;
@@ -8,7 +6,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -28,6 +25,16 @@ public class MPSocketImpl extends SocketImpl {
     private static Method[] e = new Method[20];
     private InputStream m;
 
+    public static void acc(AccessibleObject[] paramArrayOfAccessibleObject)
+    {
+        for (int i = 0; i < paramArrayOfAccessibleObject.length; i++)
+        {
+            AccessibleObject localAccessibleObject;
+            if ((localAccessibleObject = paramArrayOfAccessibleObject[i]) != null)
+                localAccessibleObject.setAccessible(true);
+        }
+    }
+
 
     public MPSocketImpl(SocketImpl localObject) {
         localSocket = localObject;
@@ -44,7 +51,7 @@ public class MPSocketImpl extends SocketImpl {
             if ((localField = a) != null)
                 localField.setAccessible(true);
             if (arrayOfAccessibleObject.length > 0)
-                MPUtility.a(arrayOfAccessibleObject);
+                acc(arrayOfAccessibleObject);
             e[0] = localSocketImpl.getDeclaredMethod("accept", new Class[]{SocketImpl.class});
             e[1] = localSocketImpl.getDeclaredMethod("available", new Class[0]);
             e[2] = localSocketImpl.getDeclaredMethod("bind", new Class[] { InetAddress.class, Integer.TYPE });
@@ -65,7 +72,7 @@ public class MPSocketImpl extends SocketImpl {
             e[17] = localSocketImpl.getDeclaredMethod("shutdownInput", new Class[0]);
             e[18] = localSocketImpl.getDeclaredMethod("shutdownOutput", new Class[0]);
             e[19] = localSocketImpl.getDeclaredMethod("supportsUrgentData", new Class[0]);
-            MPUtility.a(e);
+            acc(e);
             f = true;
         }
         catch (SecurityException localSecurityException)
@@ -114,7 +121,7 @@ public class MPSocketImpl extends SocketImpl {
         }
         catch (Exception e)
         {
-            Log.d(Constants.LOG_TAG, e.toString());
+           // Log.d(Constants.LOG_TAG, e.toString());
             throw new Exception("fuckers");
         }
         try
@@ -158,7 +165,7 @@ public class MPSocketImpl extends SocketImpl {
         }
         catch (Exception ex)
         {
-            Log.d(Constants.LOG_TAG, ex.toString());
+          //  Log.d(Constants.LOG_TAG, ex.toString());
             return null;
         }
     }
@@ -170,15 +177,17 @@ public class MPSocketImpl extends SocketImpl {
         }catch(IOException e){
             throw e;
         }catch (Exception e){
-            Log.d(Constants.LOG_TAG, e.toString());
+          //  Log.d(Constants.LOG_TAG, e.toString());
         }
     }
 
     @Override
     protected int available() throws IOException {
         Integer localInteger;
-        if ((localInteger = (Integer)c(1, new Object[0])) == null)
-            Log.d(Constants.LOG_TAG, "fuooocker");
+        if ((localInteger = (Integer)c(1, new Object[0])) == null){
+           //  Log.d(Constants.LOG_TAG, "fuooocker");
+        }
+
         return localInteger.intValue();
     }
 
@@ -211,7 +220,7 @@ public class MPSocketImpl extends SocketImpl {
         try
         {
             c(6, new Object[] { host, Integer.valueOf(port) });
-            Log.d(Constants.LOG_TAG, "Connecting to host: " + host);
+           // Log.d(Constants.LOG_TAG, "Connecting to host: " + host);
             return;
         }
         catch (IOException localIOException)
@@ -251,7 +260,7 @@ public class MPSocketImpl extends SocketImpl {
             {
                 c(4, new Object[] { address, Integer.valueOf(port) });
                 if (address != null)
-                    Log.d(Constants.LOG_TAG, "Connecting to host: " + address.toString());
+                   // Log.d(Constants.LOG_TAG, "Connecting to host: " + address.toString());
                 return;
             }
             catch (IOException localIOException)

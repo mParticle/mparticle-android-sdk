@@ -1,4 +1,4 @@
-package com.mparticle;
+package com.mparticle.networking;
 
 import java.io.IOException;
 import java.net.InetAddress;
