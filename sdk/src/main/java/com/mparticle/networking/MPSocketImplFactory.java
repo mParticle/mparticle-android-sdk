@@ -8,68 +8,54 @@ import java.net.SocketImplFactory;
 /**
  * Created by sdozor on 2/4/14.
  */
-public final class MPSocketImplFactory
-        implements SocketImplFactory
-{
+public final class MPSocketImplFactory implements SocketImplFactory {
     private Class a;
-    private SocketImplFactory b;
+    private SocketImplFactory localFactory;
 
-
-    public MPSocketImplFactory(Class paramClass)
-    {
+    public MPSocketImplFactory(Class paramClass) {
 
         this.a = paramClass;
-        try{
-        if ((paramClass = this.a) == null)
-            throw new MPException();
+        try {
+            if (paramClass == null)
+                throw new MPException();
 
             paramClass.newInstance();
-        }catch (Exception e){
+        } catch (Exception e) {
 
         }
 
     }
 
-    public MPSocketImplFactory(SocketImplFactory paramSocketImplFactory)
-    {
+    public MPSocketImplFactory(SocketImplFactory factory) {
 
-        this.b = paramSocketImplFactory;
-        if ((paramSocketImplFactory = this.b) == null)
-            try
-            {
-                if (paramSocketImplFactory.createSocketImpl() == null)
-                {
+        this.localFactory = factory;
+        if ((factory = this.localFactory) == null)
+            try {
+                if (factory.createSocketImpl() == null) {
                     throw new MPException();
                 }
                 return;
-            }
-            catch (Throwable ex)
-            {
+            } catch (Throwable ex) {
 
             }
 
     }
 
-    public final SocketImpl createSocketImpl()
-    {
-        SocketImpl localObject = null;
-        if (this.b != null)
-            localObject = this.b.createSocketImpl();
-        else
-            try
-            {
-                localObject = (SocketImpl)this.a.newInstance();
-            }
-            catch (IllegalAccessException localIllegalAccessException)
-            {
+    public final SocketImpl createSocketImpl() {
+        SocketImpl socketImpl = null;
+        if (this.localFactory != null)
+            socketImpl = this.localFactory.createSocketImpl();
+        else {
+            try {
+                socketImpl = (SocketImpl) this.a.newInstance();
+            } catch (IllegalAccessException localIllegalAccessException) {
                 localIllegalAccessException.printStackTrace();
-            }
-            catch (InstantiationException localInstantiationException)
-            {
+            } catch (InstantiationException localInstantiationException) {
                 localInstantiationException.printStackTrace();
             }
-        if (localObject != null)
-           localObject = new MPSocketImpl(localObject);
-        return localObject;
+        }
+        if (socketImpl != null)
+            socketImpl = new MPSocketImpl(socketImpl);
+        return socketImpl;
     }
 }

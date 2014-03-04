@@ -1,9 +1,14 @@
 package com.mparticle.networking;
 
+import android.util.Log;
+
+import com.mparticle.MParticle;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetAddress;
+import java.net.Socket;
 import java.net.SocketAddress;
 import java.net.SocketException;
 import java.nio.channels.SocketChannel;
@@ -18,13 +23,15 @@ public final class MPSSLSocket extends SSLSocket implements ISocket {
     private final Queue requestQueue = new LinkedList();
     private SSLSocket localSocket;
     private OutputStream outputStream;
-    private InputStream inputStream;
+    private MPInputStream inputStream;
+    private MeasuredRequest request;
 
-    public MPSSLSocket(SSLSocket localSocket) {
+    public MPSSLSocket(String host, SSLSocket localSocket) {
         if (localSocket == null)
             throw new NullPointerException("SSLSocket was null");
 
         this.localSocket = localSocket;
+        request = new MeasuredRequest(host);
 
     }
 
@@ -101,7 +108,6 @@ public final class MPSSLSocket extends SSLSocket implements ISocket {
     }
 
     public final void bind(SocketAddress localAddr) throws IOException {
-        // Log.d(Constants.LOG_TAG, "Bind " + localAddr.toString());
         this.localSocket.bind(localAddr);
     }
 
@@ -110,12 +116,10 @@ public final class MPSSLSocket extends SSLSocket implements ISocket {
     }
 
     public final void connect(SocketAddress remoteAddr, int timeout) throws IOException {
-        // Log.d(Constants.LOG_TAG, "Connect " + remoteAddr.toString());
         this.localSocket.connect(remoteAddr, timeout);
     }
 
     public final void connect(SocketAddress remoteAddr) throws IOException {
-        // Log.d(Constants.LOG_TAG, "Connect " + remoteAddr.toString());
         this.localSocket.connect(remoteAddr);
     }
 
@@ -128,12 +132,12 @@ public final class MPSSLSocket extends SSLSocket implements ISocket {
     }
 
     public final InputStream getInputStream() throws IOException {
-        InputStream inputStream = this.localSocket.getInputStream();
-        if (inputStream != null){
-            if (this.inputStream != null){
+        InputStream inputStreams = this.localSocket.getInputStream();
+        if (inputStreams != null){
+            if (this.inputStream != null && inputStream.isSameStream(inputStreams)){
                 return this.inputStream;
             }else{
-                this.inputStream = new MPInputStream(this, inputStream);
+                this.inputStream = new MPInputStream(inputStreams, request);
             }
         }
         return this.inputStream;
@@ -168,12 +172,13 @@ public final class MPSSLSocket extends SSLSocket implements ISocket {
     }
 
     public final OutputStream getOutputStream() throws IOException {
+        this.request.startTiming();
         OutputStream outputStream = this.localSocket.getOutputStream();
         if (outputStream != null){
             if (this.outputStream != null){
                 return this.outputStream;
             }else{
-                this.outputStream = new MPOutputStream(this, outputStream);
+                this.outputStream = new MPOutputStream(outputStream, request);
             }
         }
         return this.outputStream;
@@ -291,12 +296,9 @@ public final class MPSSLSocket extends SSLSocket implements ISocket {
         return this.localSocket.hashCode();
     }
 
-    public final MeasuredRequest a() {
-        return a(false);
-    }
-
-    private MeasuredRequest a(boolean paramBoolean) {
-        return new MeasuredRequest();
+    @Override
+    public MeasuredRequest a() {
+        return null;
     }
 
     public final void a(MeasuredRequest paramb) {

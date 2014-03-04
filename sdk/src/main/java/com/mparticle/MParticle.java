@@ -22,6 +22,7 @@ import com.mparticle.Constants.MessageKey;
 import com.mparticle.Constants.PrefKeys;
 import com.mparticle.networking.MPSSLSocketFactory;
 import com.mparticle.networking.MPSocketImplFactory;
+import com.mparticle.networking.MPUrlStreamHandlerFactory;
 
 import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.json.JSONArray;
@@ -32,6 +33,7 @@ import java.lang.Thread.UncaughtExceptionHandler;
 import java.net.Socket;
 import java.net.SocketImpl;
 import java.net.SocketImplFactory;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -74,6 +76,7 @@ import java.util.UUID;
  */
 public class MParticle {
     private static final String TAG = Constants.LOG_TAG;
+    public static final String NETWORK_TAG = "mParticle Network Monitor";
     private static final HandlerThread sTimeoutHandlerThread = new HandlerThread("mParticleSessionTimeoutHandler",
             Process.THREAD_PRIORITY_BACKGROUND);
     private static final byte[] SALT = new byte[]{
@@ -162,6 +165,12 @@ public class MParticle {
 
         }catch (Exception e){
             Log.d(Constants.LOG_TAG, e.getMessage());
+        }
+
+        try{
+            URL.setURLStreamHandlerFactory(new MPUrlStreamHandlerFactory());
+        }catch (Exception e){
+
         }
     }
 
