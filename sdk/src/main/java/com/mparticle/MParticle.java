@@ -2,7 +2,6 @@ package com.mparticle;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
@@ -20,9 +19,6 @@ import android.util.Log;
 
 import com.mparticle.Constants.MessageKey;
 import com.mparticle.Constants.PrefKeys;
-import com.mparticle.networking.MPSSLSocketFactory;
-import com.mparticle.networking.MPSocketImplFactory;
-import com.mparticle.networking.MPUrlStreamHandlerFactory;
 
 import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.json.JSONArray;
@@ -37,6 +33,8 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+
+import javax.net.ssl.HttpsURLConnection;
 
 /**
  * The primary access point to the mParticle SDK. In order to use this class, you must first call {@link #start(android.content.Context)}, which requires
@@ -76,7 +74,6 @@ import java.util.UUID;
  */
 public class MParticle {
     private static final String TAG = Constants.LOG_TAG;
-    public static final String NETWORK_TAG = "mParticle Network Monitor";
     private static final HandlerThread sTimeoutHandlerThread = new HandlerThread("mParticleSessionTimeoutHandler",
             Process.THREAD_PRIORITY_BACKGROUND);
     private static final byte[] SALT = new byte[]{
@@ -95,6 +92,8 @@ public class MParticle {
     /* package-private */ JSONArray mUserIdentities = new JSONArray();
     /* package-private */ JSONObject mUserAttributes = new JSONObject();
     /* package-private */ JSONObject mSessionAttributes;
+    /* package-private */ volatile boolean networkMonitoring = true;
+    /* package-private */  RequestManager requestManager;
     private MessageManager mMessageManager;
     private Handler mTimeoutHandler;
     private MParticleLocationListener mLocationListener;
@@ -106,6 +105,7 @@ public class MParticle {
     private int mEventCount = 0;
     private String mLaunchUri;
     private LicenseCheckerCallback clientLicensingCallback;
+
 
     /* package-private */MParticle(Context context, MessageManager messageManager, ConfigManager configManager) {
         appRunning = true;
@@ -148,34 +148,42 @@ public class MParticle {
 
     private void initNetworkMonitoring() {
 
+        requestManager = new RequestManager();
+
         try{
             SocketImpl socket = (SocketImpl)MPUtility.getAccessibleObject(MPUtility.getAccessibleField(Socket.class, SocketImpl.class), new Socket());
             SocketImplFactory factory = new MPSocketImplFactory(socket.getClass());
             Socket.setSocketImplFactory(factory);
         }catch (Exception e){
-            Log.d(Constants.LOG_TAG, e.getMessage());
-
+            if (getDebugMode()){
+                Log.d(Constants.LOG_TAG, "Error initiating network performance monitoring: " + e.getMessage());
+            }
         }
         try{
-            SSLSocketFactory localObject2 = org.apache.http.conn.ssl.SSLSocketFactory.getSocketFactory();
-            Object localObject1 = (javax.net.ssl.SSLSocketFactory) MPUtility.getAccessibleField(org.apache.http.conn.ssl.SSLSocketFactory.class, javax.net.ssl.SSLSocketFactory.class).get(localObject2);
-            Object factory = new MPSSLSocketFactory((javax.net.ssl.SSLSocketFactory)localObject1);
-            localObject2 = org.apache.http.conn.ssl.SSLSocketFactory.getSocketFactory();
-            MPUtility.getAccessibleField(org.apache.http.conn.ssl.SSLSocketFactory.class, javax.net.ssl.SSLSocketFactory.class).set(localObject2, factory);
-
+            SSLSocketFactory currentSocketFactory = org.apache.http.conn.ssl.SSLSocketFactory.getSocketFactory();
+            javax.net.ssl.SSLSocketFactory innerFactory = (javax.net.ssl.SSLSocketFactory) MPUtility.getAccessibleField(org.apache.http.conn.ssl.SSLSocketFactory.class, javax.net.ssl.SSLSocketFactory.class).get(currentSocketFactory);
+            MPSSLSocketFactory wrapperFactory = new MPSSLSocketFactory(innerFactory);
+            MPUtility.getAccessibleField(org.apache.http.conn.ssl.SSLSocketFactory.class, javax.net.ssl.SSLSocketFactory.class).set(currentSocketFactory, wrapperFactory);
         }catch (Exception e){
-            Log.d(Constants.LOG_TAG, e.getMessage());
+            if (getDebugMode()){
+                Log.d(Constants.LOG_TAG, "Error initiating network performance monitoring: " + e.getMessage());
+            }
         }
 
         try{
             URL.setURLStreamHandlerFactory(new MPUrlStreamHandlerFactory());
+            HttpsURLConnection.setDefaultSSLSocketFactory(new MPSSLSocketFactory(HttpsURLConnection.getDefaultSSLSocketFactory()));
         }catch (Exception e){
-
+            if (getDebugMode()){
+                Log.d(Constants.LOG_TAG, "Error initiating network performance monitoring: " + e.getMessage());
+            }
         }
     }
 
 
-
+    boolean shouldProcessUrl(String url){
+        return !url.contains("mparticle");
+    }
 
     /**
      * Start the mParticle SDK and begin tracking a user session. This method must be called prior to {@link #getInstance()}.
@@ -661,6 +669,23 @@ public class MParticle {
                                     " with data: " + (eventDataJSON == null ? "<none>" : eventDataJSON.toString()));
             }
         }
+    }
+
+    public void logNetworkPerformance(String url, long startTime, String method, long length, long bytesSent, long bytesReceived){
+        if (mConfigManager.getSendOoEvents()) {
+            ensureActiveSession();
+            if (checkEventLimit()) {
+                mMessageManager.logNetworkPerformanceEvent(mSessionID, mSessionStartTime, startTime, method, url, length, bytesSent, bytesReceived);
+            }
+        }
+    }
+
+    public void beginMeasuringNetworkPerformance(){
+        initNetworkMonitoring();
+    }
+
+    public void endMeasuringNetworkPerformance(){
+
     }
 
     /**
@@ -1331,7 +1356,6 @@ public class MParticle {
         public static final String BROADCAST_NOTIFICATION_RECEIVED = "com.mparticle.push.NOTIFICATION_RECEIVED";
         public static final String BROADCAST_NOTIFICATION_TAPPED = "com.mparticle.push.NOTIFICATION_TAPPED";
         public static final String PUSH_ALERT_EXTRA = "com.mparticle.push.alert";
-
     }
 
     /**
@@ -1355,7 +1379,4 @@ public class MParticle {
     public void setPushNotificationTitle(int resId){
         mConfigManager.setPushNotificationTitle(resId);
     }
-
-
-
 }

@@ -776,11 +776,11 @@ com.mparticle.activity.MPListActivity -> com.mparticle.activity.MPListActivity:
     27:31:void onStart() -> onStart
     35:39:void onStop() -> onStop
 com.mparticle.networking.ISocket -> com.mparticle.networking.ISocket:
-    com.mparticle.networking.MeasuredRequest a() -> a
-    void a(com.mparticle.networking.MeasuredRequest) -> a
-    com.mparticle.networking.MeasuredRequest b() -> b
-com.mparticle.networking.MPInputStream -> com.mparticle.networking.MPInputStream:
-    com.mparticle.networking.MeasuredRequest b -> a
+    com.mparticle.MeasuredRequest a() -> a
+    void a(com.mparticle.MeasuredRequest) -> a
+    com.mparticle.MeasuredRequest b() -> b
+com.mparticle.MPInputStream -> com.mparticle.MPInputStream:
+    com.mparticle.MeasuredRequest b -> a
     java.io.InputStream c -> b
     28:28:int available() -> available
     44:46:void close() -> close
@@ -802,9 +802,9 @@ com.mparticle.networking.MPInputStream -> com.mparticle.networking.MPInputStream
     241:241:void a(java.lang.String) -> a
     245:245:boolean isSameStream(java.io.InputStream) -> isSameStream
     252:252:void d() -> d
-com.mparticle.networking.MPOutputStream -> com.mparticle.networking.MPOutputStream:
+com.mparticle.MPOutputStream -> com.mparticle.MPOutputStream:
     java.io.OutputStream localOutputStream -> a
-    com.mparticle.networking.MeasuredRequest measuredRequest -> b
+    com.mparticle.MeasuredRequest measuredRequest -> b
     19:20:void flush() -> flush
     23:24:void close() -> close
     27:28:void write(int) -> write
@@ -818,7 +818,7 @@ com.mparticle.networking.MPOutputStream -> com.mparticle.networking.MPOutputStre
     76:80:java.lang.String c() -> c
     85:87:void a(java.lang.String) -> a
     90:90:boolean isSameStream(java.io.OutputStream) -> isSameStream
-com.mparticle.networking.MPSSLSocket -> com.mparticle.networking.MPSSLSocket:
+com.mparticle.MPSSLSocket -> com.mparticle.MPSSLSocket:
     java.util.Queue requestQueue -> a
     javax.net.ssl.SSLSocket localSocket -> b
     java.io.OutputStream outputStream -> c
@@ -884,10 +884,10 @@ com.mparticle.networking.MPSSLSocket -> com.mparticle.networking.MPSSLSocket:
     283:283:java.lang.String toString() -> toString
     287:287:boolean equals(java.lang.Object) -> equals
     291:291:int hashCode() -> hashCode
-    295:295:com.mparticle.networking.MeasuredRequest a() -> a
-    303:308:void a(com.mparticle.networking.MeasuredRequest) -> a
-    311:313:com.mparticle.networking.MeasuredRequest b() -> b
-com.mparticle.networking.MPSSLSocketFactory -> com.mparticle.networking.MPSSLSocketFactory:
+    295:295:com.mparticle.MeasuredRequest a() -> a
+    303:308:void a(com.mparticle.MeasuredRequest) -> a
+    311:313:com.mparticle.MeasuredRequest b() -> b
+com.mparticle.MPSSLSocketFactory -> com.mparticle.MPSSLSocketFactory:
     javax.net.ssl.SSLSocketFactory localSocketFactory -> a
     18:18:javax.net.ssl.SSLSocketFactory a() -> a
     22:22:java.lang.String[] getDefaultCipherSuites() -> getDefaultCipherSuites
@@ -899,15 +899,15 @@ com.mparticle.networking.MPSSLSocketFactory -> com.mparticle.networking.MPSSLSoc
     55:55:java.net.Socket createSocket(java.net.InetAddress,int) -> createSocket
     59:59:java.net.Socket createSocket(java.net.InetAddress,int,java.net.InetAddress,int) -> createSocket
     63:63:java.net.Socket createSocket() -> createSocket
-com.mparticle.networking.MPSocketImpl -> com.mparticle.networking.MPSocketImpl:
+com.mparticle.MPSocketImpl -> com.mparticle.MPSocketImpl:
     java.lang.reflect.Field addressField -> a
     java.lang.reflect.Field fileDescriptorField -> b
     java.lang.reflect.Field localPortField -> c
     java.lang.reflect.Field portField -> d
     java.lang.reflect.Method[] methods -> e
     java.net.SocketImpl localSocket -> f
-    com.mparticle.networking.MPInputStream localInputStream -> g
-    com.mparticle.networking.MPOutputStream localOutputStream -> h
+    com.mparticle.MPInputStream localInputStream -> g
+    com.mparticle.MPOutputStream localOutputStream -> h
     76:81:void setAccessible(java.lang.reflect.AccessibleObject[]) -> setAccessible
     85:103:java.lang.Object invokeMethod(int,java.lang.Object[]) -> a
     108:115:void updateFields() -> a
@@ -925,11 +925,11 @@ com.mparticle.networking.MPSocketImpl -> com.mparticle.networking.MPSocketImpl:
     194:195:void sendUrgentData(int) -> sendUrgentData
     199:199:java.lang.Object getOption(int) -> getOption
     204:205:void setOption(int,java.lang.Object) -> setOption
-com.mparticle.networking.MPSocketImplFactory -> com.mparticle.networking.MPSocketImplFactory:
+com.mparticle.MPSocketImplFactory -> com.mparticle.MPSocketImplFactory:
     java.lang.Class a -> a
     java.net.SocketImplFactory localFactory -> b
     45:59:java.net.SocketImpl createSocketImpl() -> createSocketImpl
-com.mparticle.networking.MeasuredRequest -> com.mparticle.networking.MeasuredRequest:
+com.mparticle.MeasuredRequest -> com.mparticle.MeasuredRequest:
     long a -> a
     long k -> c
     boolean l -> g
@@ -962,5 +962,5 @@ com.mparticle.networking.MeasuredRequest -> com.mparticle.networking.MeasuredReq
     220:220:void a(int) -> a
     228:236:void a(java.io.OutputStream) -> a
     241:241:void e() -> e
-com.mparticle.networking.MeasuredRequest$a -> com.mparticle.networking.MeasuredRequest$a:
+com.mparticle.MeasuredRequest$a -> com.mparticle.MeasuredRequest$a:
     255:255:java.lang.String toString() -> toString

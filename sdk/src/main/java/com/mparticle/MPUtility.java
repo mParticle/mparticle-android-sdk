@@ -87,7 +87,6 @@ public class MPUtility {
                     localProcess.destroy();
             } catch (IOException localIOException4) {
                 Log.w(Constants.LOG_TAG, "Error computing CPU usage");
-                localIOException4.printStackTrace();
             }
         }
         return str1;
@@ -385,14 +384,6 @@ public class MPUtility {
 
         localField.setAccessible(true);
         return localField;
-    }
-
-    public static void a(AccessibleObject[] paramArrayOfAccessibleObject) {
-        for (int i = 0; i < paramArrayOfAccessibleObject.length; i++) {
-            AccessibleObject localAccessibleObject;
-            if ((localAccessibleObject = paramArrayOfAccessibleObject[i]) != null)
-                localAccessibleObject.setAccessible(true);
-        }
     }
 
     public static Constructor getConstructor(String paramString, String[] paramArrayOfString) throws ClassNotFoundException {

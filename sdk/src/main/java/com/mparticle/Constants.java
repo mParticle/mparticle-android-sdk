@@ -42,6 +42,7 @@ package com.mparticle;
         public static final String APP_STATE_TRANSITION = "ast";
         public static final String PUSH_RECEIVED = "pm";
         public static final String BREADCRUMB = "bc";
+        public static final String NETWORK_PERFORMNACE = "npe";
     }
 
     public interface MessageKey {
@@ -175,6 +176,13 @@ package com.mparticle;
         public static final String EVENT_CATEGORY = "$Category";
         public static final String BREADCRUMB_SESSION_COUNTER = "sn";
         public static final String BREADCRUMB_LABEL = "l";
+
+        //network performance monitoring
+        public static final String NPE_METHOD = "v";
+        public static final String NPE_URL = "url";
+        public static final String NPE_LENGTH = "te";
+        public static final String NPE_SENT = "bo";
+        public static final String NPE_REC = "bi";
     }
 
     public interface PrefKeys {

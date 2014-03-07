@@ -1,4 +1,4 @@
-package com.mparticle.networking;
+package com.mparticle;
 
 import java.net.URLStreamHandler;
 import java.net.URLStreamHandlerFactory;

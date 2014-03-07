@@ -339,6 +339,21 @@ import java.util.UUID;
         }
     }
 
+    public void logNetworkPerformanceEvent(String sessionId, long sessionStartTime, long time, String method, String url, long length, long bytesSent, long bytesReceived) {
+        try {
+            JSONObject message = createMessage(MessageType.NETWORK_PERFORMNACE, sessionId, sessionStartTime, time, null, null);
+            message.put(MessageKey.NPE_METHOD, method);
+            message.put(MessageKey.NPE_URL, url);
+            message.put(MessageKey.NPE_LENGTH, length);
+            message.put(MessageKey.NPE_SENT, bytesSent);
+            message.put(MessageKey.NPE_REC, bytesReceived);
+            mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
+        } catch (JSONException e) {
+            Log.w(TAG, "Failed to create mParticle error message");
+        }
+    }
+
+
     public void setPushRegistrationId(String sessionId, long sessionStartTime, long time, String token, boolean registeringFlag) {
         try {
             JSONObject message = createMessage(MessageType.PUSH_REGISTRATION, sessionId, sessionStartTime, time,
