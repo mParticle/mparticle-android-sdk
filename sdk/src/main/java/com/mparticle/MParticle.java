@@ -688,6 +688,18 @@ public class MParticle {
 
     }
 
+    public void excludeUrlFromNetworkPerformanceMeasurement(String url){
+
+    }
+
+    public void addNetworkPerformanceQueryOnlyFilter(String filter){
+
+    }
+
+    public void resetNetworkPerformanceExclusionsAndFilters(){
+
+    }
+
     /**
      * Logs an Exception
      *
