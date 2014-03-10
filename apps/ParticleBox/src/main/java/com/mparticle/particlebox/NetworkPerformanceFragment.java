@@ -8,6 +8,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.Toast;
+
+import com.mparticle.MParticle;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -20,13 +23,11 @@ import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 
 import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
@@ -37,7 +38,7 @@ import java.util.List;
  */
 public class NetworkPerformanceFragment extends Fragment implements View.OnClickListener {
     private static final String ARG_SECTION_NUMBER = "section_number";
-    private EditText url1;
+    private EditText url1, filter;
     private CheckBox postCheckBox;
 
     public NetworkPerformanceFragment() {
@@ -60,9 +61,14 @@ public class NetworkPerformanceFragment extends Fragment implements View.OnClick
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_networkperformance, container, false);
         url1 = (EditText) v.findViewById(R.id.url1);
+        filter = (EditText) v.findViewById(R.id.filter);
         postCheckBox = (CheckBox) v.findViewById(R.id.postCheckBox);
         v.findViewById(R.id.button1).setOnClickListener(this);
         v.findViewById(R.id.button2).setOnClickListener(this);
+        v.findViewById(R.id.reset).setOnClickListener(this);
+        v.findViewById(R.id.allowQuery).setOnClickListener(this);
+        v.findViewById(R.id.exluceUrl).setOnClickListener(this);
+
         return v;
     }
 
@@ -146,8 +152,30 @@ public class NetworkPerformanceFragment extends Fragment implements View.OnClick
                         }
                         return null;
                     }
-                }).execute(url1.getText().toString(), Boolean.toString(postCheckBox.isChecked()));
 
+                    @Override
+                    protected void onPostExecute(Void aVoid) {
+                        super.onPostExecute(aVoid);
+                        Toast.makeText(getActivity(), "HTTP request completed.",Toast.LENGTH_SHORT).show();
+                    }
+                }).execute(url1.getText().toString(), Boolean.toString(postCheckBox.isChecked()));
+                break;
+            case R.id.exluceUrl:
+                if (filter.getText() != null) {
+                    MParticle.getInstance().excludeUrlFromNetworkPerformanceMeasurement(filter.getText().toString());
+                    Toast.makeText(getActivity(), "Exclude url: " + filter.getText().toString(), Toast.LENGTH_SHORT).show();
+                }
+                break;
+            case R.id.allowQuery:
+                if (filter.getText() != null) {
+                    MParticle.getInstance().addNetworkPerformanceQueryOnlyFilter(filter.getText().toString());
+                    Toast.makeText(getActivity(), "Allowed query: " + filter.getText().toString(), Toast.LENGTH_SHORT).show();
+                }
+                break;
+            case R.id.reset:
+                MParticle.getInstance().resetNetworkPerformanceExclusionsAndFilters();
+                Toast.makeText(getActivity(), "Exlusions and filters reset.", Toast.LENGTH_SHORT).show();
+                break;
         }
     }
 }
