@@ -708,11 +708,20 @@ public class MParticle {
 
     }
 
+    /**
+     * Begin measuring network performance. This method only needs to be called one time during the runtime of an application.
+     *
+     */
     public void beginMeasuringNetworkPerformance() {
         mConfigManager.setNetworkingEnabled(true);
         initNetworkMonitoring();
     }
 
+
+    /**
+     * Stop measuring network performance.
+     *
+     */
     public void endMeasuringNetworkPerformance() {
         measuredRequestManager.setEnabled(false);
         mConfigManager.setNetworkingEnabled(false);
@@ -728,14 +737,38 @@ public class MParticle {
         }
     }
 
+    /**
+     * Exclude the given URL substring from network measurement tracking. This method may be called repeatedly to add
+     * multiple excluded URLs.
+     *
+     * @see #resetNetworkPerformanceExclusionsAndFilters()
+     *
+     * @param url
+     */
     public void excludeUrlFromNetworkPerformanceMeasurement(String url) {
         measuredRequestManager.addExcludedUrl(url);
     }
 
+    /**
+     * Specify a filter for query strings that should be logged. Call this method repeatedly to specify
+     * multiple query string filters. By default, query strings will be removed from all measured URLs.
+     *
+     * @see #resetNetworkPerformanceExclusionsAndFilters()
+     *
+     * @param filter
+     */
     public void addNetworkPerformanceQueryOnlyFilter(String filter) {
         measuredRequestManager.addQueryStringFilter(filter);
     }
 
+    /**
+     * Remove all previously excluded URLs and allowed query filters. After this, all URLs will be
+     * measured, and all query strings will be redacted when logging measurements.
+     *
+     * @see #excludeUrlFromNetworkPerformanceMeasurement(String)
+     * @see #addNetworkPerformanceQueryOnlyFilter(String)
+     *
+     */
     public void resetNetworkPerformanceExclusionsAndFilters() {
         measuredRequestManager.resetFilters();
     }
