@@ -3,19 +3,21 @@ import java.text.SimpleDateFormat
 buildscript {
     repositories {
         mavenCentral()
+        maven { url 'http://download.crashlytics.com/maven' }
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:0.8.+'
+        classpath 'com.android.tools.build:gradle:0.9.+'
+        classpath 'com.crashlytics.tools.gradle:crashlytics-gradle:1.+'
     }
 }
 apply plugin: 'android'
+apply plugin: 'crashlytics'
 
 repositories {
     mavenCentral()
     mavenLocal()
-    maven {
-        url "http://www.bugsense.com/gradle/"
-    }
+    maven { url 'http://www.bugsense.com/gradle/' }
+    maven { url 'http://download.crashlytics.com/maven' }
 }
 
 def buildTime() {
@@ -60,6 +62,9 @@ android {
         kahuna {
             packageName 'com.mparticle.particlebox.kahuna'
         }
+        crashlytics {
+            packageName 'com.mparticle.particlebox.crashlytics'
+        }
     }
 }
 
@@ -73,4 +78,5 @@ dependencies {
     urbanairshipCompile files ("libs/urbanairship-lib-3.2.3.jar")
     bugsenseCompile 'com.bugsense.trace:bugsense:3.5'
     kahunaCompile files ("libs/Kahuna.jar")
+    crashlyticsCompile 'com.crashlytics.android:crashlytics:1.+'
 }

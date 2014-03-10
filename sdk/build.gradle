@@ -6,7 +6,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:0.8.+'
+        classpath 'com.android.tools.build:gradle:0.9.+'
 
     }
 }
@@ -25,16 +25,19 @@ android {
         version sdkversion
     }
 
-    debug {
-        buildConfigField "boolean", "ECHO", "true"
-        runProguard false
+    buildTypes {
+        debug {
+            buildConfigField "boolean", "ECHO", "true"
+            runProguard false
+        }
+
+        release {
+            buildConfigField "boolean", "ECHO", "false"
+            runProguard false
+            proguardFile 'proguard.txt'
+        }
     }
 
-    release {
-        buildConfigField "boolean", "ECHO", "false"
-        runProguard false
-        proguardFile 'proguard.txt'
-    }
     lintOptions {
         abortOnError false
     }
