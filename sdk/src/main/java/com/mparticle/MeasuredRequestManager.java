@@ -7,6 +7,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
 
@@ -20,6 +21,7 @@ final class MeasuredRequestManager {
     private CopyOnWriteArrayList<String> excludedUrlFilters = new CopyOnWriteArrayList<String>();
     private CopyOnWriteArrayList<String> queryStringFilters = new CopyOnWriteArrayList<String>();
     private static final String MPARTICLEHOST = ".mparticle.com";
+    private ScheduledFuture<?> runner;
 
     public void addRequest(MeasuredRequest request){
         MeasuredRequest current = requests.get(request.getKey());
@@ -29,7 +31,7 @@ final class MeasuredRequestManager {
     }
 
     public MeasuredRequestManager() {
-        scheduler.scheduleAtFixedRate(processPending, 10, 30, SECONDS);
+
     }
 
     final Runnable processPending = new Runnable() {
@@ -109,5 +111,14 @@ final class MeasuredRequestManager {
         return true;
     }
 
+    public void setEnabled(boolean enabled){
+        if (enabled){
+            runner = scheduler.scheduleAtFixedRate(processPending, 10, 30, SECONDS);
+        }else{
+            if (runner != null){
+                runner.cancel(true);
+            }
+        }
+    }
 }
 
