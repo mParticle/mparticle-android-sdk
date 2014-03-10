@@ -12,6 +12,5 @@ public class EventTestFragment extends MainEventTestFragment implements View.OnC
     public void onClick(View v) {
         super.onClick(v);
         Toast.makeText(v.getContext(), "Not implemented for Crashlytics...", Toast.LENGTH_SHORT).show();
-
     }
 }

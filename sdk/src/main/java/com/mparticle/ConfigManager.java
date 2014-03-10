@@ -269,4 +269,12 @@ class ConfigManager {
                 .putInt(Constants.PrefKeys.BREADCRUMB_LIMIT, newLimit)
                 .commit();
     }
+
+    public boolean isNetworkPerformanceEnabled() {
+        return localPrefs.networkingEnabled;
+    }
+
+    public void setNetworkingEnabled(boolean networkingEnabled) {
+        this.localPrefs.networkingEnabled = networkingEnabled;
+    }
 }

@@ -21,7 +21,7 @@ public final class MPSocketImplFactory implements SocketImplFactory {
     public final SocketImpl createSocketImpl() {
         try {
             SocketImpl socketImpl = (SocketImpl) this.socketClass.newInstance();
-            if (MParticle.getInstance().networkMonitoring){
+            if (MParticle.getInstance().mConfigManager.isNetworkPerformanceEnabled()){
                 return new MPSocketImpl(socketImpl);
             }else{
                 return socketImpl;

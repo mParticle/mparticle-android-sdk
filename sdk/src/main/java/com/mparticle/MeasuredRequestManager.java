@@ -19,6 +19,7 @@ final class MeasuredRequestManager {
     ConcurrentHashMap<String, MeasuredRequest> requests = new ConcurrentHashMap<String, MeasuredRequest>();
     private CopyOnWriteArrayList<String> excludedUrlFilters = new CopyOnWriteArrayList<String>();
     private CopyOnWriteArrayList<String> queryStringFilters = new CopyOnWriteArrayList<String>();
+    private static final String MPARTICLEHOST = ".mparticle.com";
 
     public void addRequest(MeasuredRequest request){
         MeasuredRequest current = requests.get(request.getKey());
@@ -81,14 +82,7 @@ final class MeasuredRequestManager {
             return false;
         }
 
-        private boolean isUriAllowed(String uri){
-            for (String filter : excludedUrlFilters){
-                if (uri.contains(filter)){
-                    return false;
-                }
-            }
-            return true;
-        }
+
     };
 
     public void addExcludedUrl(String url) {
@@ -103,5 +97,17 @@ final class MeasuredRequestManager {
         excludedUrlFilters.clear();
         queryStringFilters.clear();
     }
+    public boolean isUriAllowed(String uri){
+        if (uri.contains(MPARTICLEHOST)){
+            return false;
+        }
+        for (String filter : excludedUrlFilters){
+            if (uri.contains(filter)){
+                return false;
+            }
+        }
+        return true;
+    }
+
 }
 

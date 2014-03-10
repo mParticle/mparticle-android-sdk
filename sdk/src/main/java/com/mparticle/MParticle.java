@@ -70,6 +70,7 @@ import javax.net.ssl.HttpsURLConnection;
  * <li>mp_enableDebugMode - {@link <a href="http://developer.android.com/guide/topics/resources/more-resources.html#Bool">Bool</a>} - Enabling this will provide additional logcat messages to debug your implementation and usage of mParticle <i>Default: false</i></li>
  * <li>mp_debugUploadInterval - {@link <a href="http://developer.android.com/guide/topics/resources/more-resources.html#Integer">Integer</a>} - The upload interval (see above) while in debug mode. <i>Default: 10</i></li>
  * <li>mp_enableSandboxMode - {@link <a href="http://developer.android.com/guide/topics/resources/more-resources.html#Bool">Bool</a>} - Enabling this will mark events as sandbox messages for debugging and isolation in the mParticle web application. <i>Default: false</i></li>
+ * <li>mp_enableNetworkPerformanceMeasurement - {@link <a href="http://developer.android.com/guide/topics/resources/more-resources.html#Bool">Bool</a>} - Enabling this will allow the mParticle SDK to measure network requests made with Apache's HttpClient as well as UrlConnection. <i>Default: false</i></li>
  * </ul>
  */
 public class MParticle {
@@ -92,8 +93,7 @@ public class MParticle {
     /* package-private */ JSONArray mUserIdentities = new JSONArray();
     /* package-private */ JSONObject mUserAttributes = new JSONObject();
     /* package-private */ JSONObject mSessionAttributes;
-    /* package-private */ volatile boolean networkMonitoring = true;
-    /* package-private */  RequestManager requestManager;
+    /* package-private */  MeasuredRequestManager measuredRequestManager;
     private MessageManager mMessageManager;
     private Handler mTimeoutHandler;
     private MParticleLocationListener mLocationListener;
@@ -146,43 +146,11 @@ public class MParticle {
 
     }
 
-    private void initNetworkMonitoring() {
-
-        requestManager = new RequestManager();
-
-        try{
-            SocketImpl socket = (SocketImpl)MPUtility.getAccessibleObject(MPUtility.getAccessibleField(Socket.class, SocketImpl.class), new Socket());
-            SocketImplFactory factory = new MPSocketImplFactory(socket.getClass());
-            Socket.setSocketImplFactory(factory);
-        }catch (Exception e){
-            if (getDebugMode()){
-                Log.d(Constants.LOG_TAG, "Error initiating network performance monitoring: " + e.getMessage());
-            }
-        }
-        try{
-            SSLSocketFactory currentSocketFactory = org.apache.http.conn.ssl.SSLSocketFactory.getSocketFactory();
-            javax.net.ssl.SSLSocketFactory innerFactory = (javax.net.ssl.SSLSocketFactory) MPUtility.getAccessibleField(org.apache.http.conn.ssl.SSLSocketFactory.class, javax.net.ssl.SSLSocketFactory.class).get(currentSocketFactory);
-            MPSSLSocketFactory wrapperFactory = new MPSSLSocketFactory(innerFactory);
-            MPUtility.getAccessibleField(org.apache.http.conn.ssl.SSLSocketFactory.class, javax.net.ssl.SSLSocketFactory.class).set(currentSocketFactory, wrapperFactory);
-        }catch (Exception e){
-            if (getDebugMode()){
-                Log.d(Constants.LOG_TAG, "Error initiating network performance monitoring: " + e.getMessage());
-            }
-        }
-
-        try{
-            URL.setURLStreamHandlerFactory(new MPUrlStreamHandlerFactory());
-            HttpsURLConnection.setDefaultSSLSocketFactory(new MPSSLSocketFactory(HttpsURLConnection.getDefaultSSLSocketFactory()));
-        }catch (Exception e){
-            if (getDebugMode()){
-                Log.d(Constants.LOG_TAG, "Error initiating network performance monitoring: " + e.getMessage());
-            }
-        }
-    }
 
 
     boolean shouldProcessUrl(String url){
-        return !url.contains("mparticle");
+        return mConfigManager.isNetworkPerformanceEnabled() &&
+                measuredRequestManager.isUriAllowed(url);
     }
 
     /**
@@ -274,8 +242,11 @@ public class MParticle {
                     if (appConfigManager.isLicensingEnabled()) {
                         instance.performLicenseCheck();
                     }
+                    if (appConfigManager.isNetworkPerformanceEnabled()) {
+                        instance.beginMeasuringNetworkPerformance();
+                    }
 
-                    instance.initNetworkMonitoring();
+
                 }
             }
         }
@@ -680,24 +651,78 @@ public class MParticle {
         }
     }
 
+    private void initNetworkMonitoring() {
+
+        if (measuredRequestManager == null) {
+            measuredRequestManager = new MeasuredRequestManager();
+        }
+
+        try{
+            SocketImpl socket = (SocketImpl)MPUtility.getAccessibleObject(MPUtility.getAccessibleField(Socket.class, SocketImpl.class), new Socket());
+            SocketImplFactory factory = new MPSocketImplFactory(socket.getClass());
+            Socket.setSocketImplFactory(factory);
+        }catch (Exception e){
+            if (getDebugMode()){
+                Log.d(Constants.LOG_TAG, "Error initiating network performance monitoring: " + e.getMessage());
+            }
+        }
+        try{
+            SSLSocketFactory currentSocketFactory = org.apache.http.conn.ssl.SSLSocketFactory.getSocketFactory();
+            javax.net.ssl.SSLSocketFactory innerFactory = (javax.net.ssl.SSLSocketFactory) MPUtility.getAccessibleField(org.apache.http.conn.ssl.SSLSocketFactory.class, javax.net.ssl.SSLSocketFactory.class).get(currentSocketFactory);
+            MPSSLSocketFactory wrapperFactory = new MPSSLSocketFactory(innerFactory);
+            MPUtility.getAccessibleField(org.apache.http.conn.ssl.SSLSocketFactory.class, javax.net.ssl.SSLSocketFactory.class).set(currentSocketFactory, wrapperFactory);
+        }catch (Exception e){
+            if (getDebugMode()){
+                Log.d(Constants.LOG_TAG, "Error initiating network performance monitoring: " + e.getMessage());
+            }
+        }
+
+        try{
+            URL.setURLStreamHandlerFactory(new MPUrlStreamHandlerFactory());
+            HttpsURLConnection.setDefaultSSLSocketFactory(new MPSSLSocketFactory(HttpsURLConnection.getDefaultSSLSocketFactory()));
+        }catch (Exception e){
+            if (getDebugMode()){
+                Log.d(Constants.LOG_TAG, "Error initiating network performance monitoring: " + e.getMessage());
+            }
+        }
+    }
+
+
     public void beginMeasuringNetworkPerformance(){
+        mConfigManager.setNetworkingEnabled(true);
         initNetworkMonitoring();
     }
 
     public void endMeasuringNetworkPerformance(){
-
+        mConfigManager.setNetworkingEnabled(false);
+        try {
+            javax.net.ssl.SSLSocketFactory current = HttpsURLConnection.getDefaultSSLSocketFactory();
+            if (current instanceof MPSSLSocketFactory) {
+                HttpsURLConnection.setDefaultSSLSocketFactory(((MPSSLSocketFactory) current).delegateFactory);
+            }
+        }catch (Exception e){
+            if (getDebugMode()){
+                Log.d(Constants.LOG_TAG, "Error stopping network performance monitoring: " + e.getMessage());
+            }
+        }
     }
 
     public void excludeUrlFromNetworkPerformanceMeasurement(String url){
-
+        if (measuredRequestManager != null){
+            measuredRequestManager.addExcludedUrl(url);
+        }
     }
 
     public void addNetworkPerformanceQueryOnlyFilter(String filter){
-
+        if (measuredRequestManager != null){
+            measuredRequestManager.addQueryStringFilter(filter);
+        }
     }
 
     public void resetNetworkPerformanceExclusionsAndFilters(){
-
+        if (measuredRequestManager != null){
+            measuredRequestManager.resetFilters();
+        }
     }
 
     /**

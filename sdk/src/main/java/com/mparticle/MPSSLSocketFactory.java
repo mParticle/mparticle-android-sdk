@@ -11,7 +11,7 @@ import javax.net.ssl.SSLSocketFactory;
  * Created by sdozor on 3/4/14.
  */
 final class MPSSLSocketFactory extends SSLSocketFactory {
-    private SSLSocketFactory delegateFactory;
+    SSLSocketFactory delegateFactory;
 
     public MPSSLSocketFactory(SSLSocketFactory socketFactory) {
         this.delegateFactory = socketFactory;
@@ -26,7 +26,7 @@ final class MPSSLSocketFactory extends SSLSocketFactory {
     }
 
     private Socket createSocket(String host, Socket socket) throws IOException{
-        if (socket != null && socket instanceof SSLSocket && MParticle.getInstance().networkMonitoring && MParticle.getInstance().shouldProcessUrl(host)){
+        if (socket != null && socket instanceof SSLSocket && MParticle.getInstance().shouldProcessUrl(host)){
             return new MPSSLSocket(host, (SSLSocket) socket);
         }
         return socket;
