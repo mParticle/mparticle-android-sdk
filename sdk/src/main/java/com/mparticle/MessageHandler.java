@@ -13,9 +13,9 @@ import android.util.Log;
 import com.mparticle.Constants.MessageKey;
 import com.mparticle.Constants.MessageType;
 import com.mparticle.Constants.Status;
+import com.mparticle.MParticleDatabase.BreadcrumbTable;
 import com.mparticle.MParticleDatabase.MessageTable;
 import com.mparticle.MParticleDatabase.SessionTable;
-import com.mparticle.MParticleDatabase.BreadcrumbTable;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -75,6 +75,7 @@ import org.json.JSONObject;
                     if (MParticle.getInstance().mConfigManager.getUploadMode() == Constants.Status.READY){
                         MParticle.getInstance().upload();
                     }
+
 
                 } catch (SQLiteException e) {
                     Log.e(TAG, "Error saving event to mParticle DB", e);
@@ -146,6 +147,7 @@ import org.json.JSONObject;
                     } else {
                         Log.e(TAG, "Error creating session, no entry for sessionId in mParticle DB");
                     }
+                    selectCursor.close();
 
                 } catch (SQLiteException e) {
                     Log.e(TAG, "Error creating session end message in mParticle DB", e);
@@ -170,6 +172,7 @@ import org.json.JSONObject;
                         String sessionId = selectCursor.getString(0);
                         sendMessage(obtainMessage(MessageHandler.CREATE_SESSION_END_MESSAGE, sessionId));
                     }
+                    selectCursor.close();
                 } catch (SQLiteException e) {
                     Log.e(TAG, "Error processing initialization in mParticle DB", e);
                 } finally {
@@ -181,7 +184,6 @@ import org.json.JSONObject;
                     JSONObject message = (JSONObject) msg.obj;
                     SQLiteDatabase db = mDB.getWritableDatabase();
                     dbInsertBreadcrumb(db, message);
-
                 } catch (SQLiteException e) {
                     Log.e(TAG, "Error saving breadcrumb to mParticle DB", e);
                 } catch (JSONException e) {

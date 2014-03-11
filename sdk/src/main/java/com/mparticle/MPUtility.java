@@ -394,7 +394,7 @@ class MPUtility {
 
     public static boolean isBluetoothEnabled(){
         BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-        if (mBluetoothAdapter == null) {
+        if (mBluetoothAdapter != null) {
             return mBluetoothAdapter.isEnabled();
         }
         return false;

@@ -338,6 +338,7 @@ import javax.crypto.spec.SecretKeySpec;
 
                 }
             }
+            readyMessagesCursor.close();
         } catch (SQLiteException e) {
             Log.e(TAG, "Error preparing batch upload in mParticle DB", e);
         } catch (JSONException e) {
@@ -535,6 +536,7 @@ import javax.crypto.spec.SecretKeySpec;
                     }
                 }
             }
+            readyUploadsCursor.close();
         } catch (SQLiteException e) {
             Log.e(TAG, "Error processing batch uploads in mParticle DB", e);
         } catch (URISyntaxException e) {
@@ -638,6 +640,7 @@ import javax.crypto.spec.SecretKeySpec;
                     }
                 }
             }
+            commandsCursor.close();
         } catch (SQLiteException e) {
             Log.e(TAG, "Error processing partner uploads in mParticle DB", e);
         } finally {
