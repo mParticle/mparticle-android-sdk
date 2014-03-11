@@ -101,7 +101,7 @@ import javax.crypto.spec.SecretKeySpec;
 
     public static final String SECURE_SERVICE_SCHEME = "https";
     public static final String SECURE_SERVICE_HOST = "nativesdks.mparticle.com";
-    public static final String DEBUG_SERVICE_HOST = "api-qa.mparticle.com";
+   // public static final String DEBUG_SERVICE_HOST = "api-qa.mparticle.com";
    //public static final String DEBUG_SERVICE_HOST = "win-dozor";
 
     public static final String SERVICE_VERSION = "v1";
@@ -655,7 +655,7 @@ import javax.crypto.spec.SecretKeySpec;
     }
 
     private URI makeServiceUri(String method) throws URISyntaxException {
-        return new URI(SECURE_SERVICE_SCHEME, DEBUG_SERVICE_HOST, "/" + SERVICE_VERSION + "/" + mApiKey + "/" + method, null);
+        return new URI(SECURE_SERVICE_SCHEME, SECURE_SERVICE_HOST, "/" + SERVICE_VERSION + "/" + mApiKey + "/" + method, null);
     }
 
     private void dbInsertUpload(SQLiteDatabase db, JSONObject message) throws JSONException {
