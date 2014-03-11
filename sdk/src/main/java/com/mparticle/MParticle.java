@@ -2,7 +2,6 @@ package com.mparticle;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
@@ -989,8 +988,12 @@ public class MParticle {
      * @param senderId the SENDER_ID for the application
      */
     public void enablePushNotifications(String senderId) {
-        mConfigManager.setPushSenderId(senderId);
-        PushRegistrationHelper.enablePushNotifications(mAppContext, senderId);
+        if (MPUtility.checkPermission(mAppContext, "com.google.android.c2dm.permission.RECEIVE")){
+            mConfigManager.setPushSenderId(senderId);
+            PushRegistrationHelper.enablePushNotifications(mAppContext, senderId);
+        }else{
+            Log.e(Constants.LOG_TAG, "Attempted to enable push notifications without required permission: " + "\"com.google.android.c2dm.permission.RECEIVE\"");
+        }
     }
 
     /**
@@ -1265,7 +1268,7 @@ public class MParticle {
 
         public void applicationError(int errorCode) {
             if (errorCode == LicenseCheckerCallback.ERROR_MISSING_PERMISSION) {
-                Log.w(TAG, "Licensing enabled but app is missing com.android.vending.CHECK_LICENSE permission.");
+                Log.e(TAG, "License checking enabled but app is missing permission: \"com.android.vending.CHECK_LICENSE\"");
             }
             if (clientLicensingCallback != null) {
                 clientLicensingCallback.applicationError(errorCode);

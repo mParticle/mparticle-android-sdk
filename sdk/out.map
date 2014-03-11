@@ -28,14 +28,14 @@ com.mparticle.AppConfig -> com.mparticle.b:
     135:140:int getInteger(java.lang.String,int) -> a
     36:74:org.json.JSONObject collectAppInfo(android.content.Context) -> a
     84:181:org.json.JSONObject collectDeviceInfo(android.content.Context) -> b
-    56:90:java.lang.String getCpuUsage() -> a
-    149:150:java.lang.String getAndroidID(android.content.Context) -> c
-    191:207:long getTotalMemoryPreJB() -> b
-    212:226:java.lang.String getOpenUDID(android.content.Context) -> d
-    235:273:java.lang.String getBuildUUID(android.content.Context) -> e
-    277:284:java.lang.String convertBytesToUUID(byte[],boolean) -> a
-    289:295:boolean isDebug(android.content.pm.PackageManager,java.lang.String) -> a
-    377:391:boolean isPhoneRooted() -> c
+    55:87:java.lang.String getCpuUsage() -> a
+    146:147:java.lang.String getAndroidID(android.content.Context) -> c
+    188:204:long getTotalMemoryPreJB() -> b
+    209:223:java.lang.String getOpenUDID(android.content.Context) -> d
+    232:270:java.lang.String getBuildUUID(android.content.Context) -> e
+    274:281:java.lang.String convertBytesToUUID(byte[],boolean) -> a
+    286:292:boolean isDebug(android.content.pm.PackageManager,java.lang.String) -> a
+    374:388:boolean isPhoneRooted() -> c
     22:27:int getAppVersion(android.content.Context) -> g
     40:58:java.lang.String getRegistrationId(android.content.Context) -> f
     67:73:void enablePushNotifications(android.content.Context,java.lang.String) -> a
@@ -51,7 +51,7 @@ com.mparticle.AppStateManager -> com.mparticle.c:
     96:99:void onActivityStarted(android.app.Activity) -> a
     102:105:void onActivityStopped(android.app.Activity) -> b
     108:121:void recordActivityStarted(android.app.Activity) -> c
-    124:134:void recordActivityStopped(android.app.Activity) -> d
+    124:136:void recordActivityStopped(android.app.Activity) -> d
 com.mparticle.AppStateManager$1 -> com.mparticle.c$1:
     com.mparticle.AppStateManager this$0 -> a
     30:36:void run() -> run

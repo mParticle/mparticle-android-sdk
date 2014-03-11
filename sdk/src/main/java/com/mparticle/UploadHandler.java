@@ -134,7 +134,7 @@ import javax.crypto.spec.SecretKeySpec;
 
         if (PackageManager.PERMISSION_GRANTED != mContext
                 .checkCallingOrSelfPermission(android.Manifest.permission.ACCESS_NETWORK_STATE)) {
-            Log.w(TAG, "Application manifest should require ACCESS_NETWORK_STATE permission");
+            Log.w(TAG, "Application manifest missing ACCESS_NETWORK_STATE permission");
             mAccessNetworkStateAvailable = false;
         }
     }

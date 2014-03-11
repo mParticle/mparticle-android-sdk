@@ -399,4 +399,9 @@ class MPUtility {
         }
         return false;
     }
+
+    public static boolean checkPermission(Context context, String permission){
+        int res = context.checkCallingOrSelfPermission(permission);
+        return (res == PackageManager.PERMISSION_GRANTED);
+    }
 }
