@@ -54,9 +54,6 @@ import java.util.UUID;
  * <h4>Optional</h4>
  * <ul>
  * <li>mp_enableAutoScreenTracking - {@link <a href="http://developer.android.com/guide/topics/resources/more-resources.html#Integer">Integer</a>} - Enable automatic screen view events. Note that *prior to ICS/API level 14*, this functionality requires instrumentation via an mParticle Activity implementation or manually. </li>
- * @see com.mparticle.activity.MPActivity
- * </ul>
- * <ul>
  * <li>mp_productionUploadInterval - {@link <a href="http://developer.android.com/guide/topics/resources/more-resources.html#Integer">Integer</a>} - The length of time in seconds to send batches of messages to mParticle. Setting this too low could have an adverse effect on the device battery. <i>Default: 600</i></li>
  * <li>mp_reportUncaughtExceptions - {@link <a href="http://developer.android.com/guide/topics/resources/more-resources.html#Bool">Bool</a>} - By enabling this, the MParticle SDK will automatically log and report any uncaught exceptions, including stack traces. <i>Default: false</i></li>
  * <li>mp_sessionTimeout - {@link <a href="http://developer.android.com/guide/topics/resources/more-resources.html#Integer">Integer</a>} - The length of time (in seconds) that a user session will remain valid while application has been paused and put into the background. <i>Default: 60</i></li>
@@ -1290,10 +1287,18 @@ public class MParticle {
     };
 
     public interface Push {
+        /**
+         * Subscribe a receiver to this broadcast to detect when a push notification is received.
+         */
         public static final String BROADCAST_NOTIFICATION_RECEIVED = "com.mparticle.push.NOTIFICATION_RECEIVED";
+        /**
+         * Subscribe a receiver to this broadcast to detect when a push notification is tapped.
+         */
         public static final String BROADCAST_NOTIFICATION_TAPPED = "com.mparticle.push.NOTIFICATION_TAPPED";
+        /**
+         * Use this key name to extract the push alert message from received bundle, regardless of the originating service provider.
+         */
         public static final String PUSH_ALERT_EXTRA = "com.mparticle.push.alert";
-
     }
 
     /**
