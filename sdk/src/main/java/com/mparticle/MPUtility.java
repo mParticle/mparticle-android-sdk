@@ -28,7 +28,6 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.lang.reflect.InvocationTargetException;
 import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.security.cert.CertificateFactory;
@@ -75,7 +74,6 @@ class MPUtility {
                 }
         } catch (IOException localIOException2) {
             Log.w(Constants.LOG_TAG, "Error computing CPU usage");
-            localIOException2.printStackTrace();
         } finally {
             try {
                 if (localBufferedReader != null)
@@ -84,7 +82,6 @@ class MPUtility {
                     localProcess.destroy();
             } catch (IOException localIOException4) {
                 Log.w(Constants.LOG_TAG, "Error computing CPU usage");
-                localIOException4.printStackTrace();
             }
         }
         return str1;
