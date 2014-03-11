@@ -9,6 +9,8 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 /**
  * Created by sdozor on 1/15/14.
  */
@@ -18,7 +20,7 @@ class AppStateManager {
     public static final String APP_STATE_BACKGROUND = "background";
     public static final String APP_STATE_NOTRUNNING = "not_running";
     Context mContext;
-    int mActivities = 0;
+    AtomicInteger mActivities = new AtomicInteger(0);
     long mLastStoppedTime;
     Handler delayedBackgroundCheckHandler = new Handler();
 
@@ -85,7 +87,7 @@ class AppStateManager {
     }
 
     boolean isBackgrounded() {
-        return mActivities < 1;
+        return mActivities.get() < 1 && (System.currentTimeMillis() - mLastStoppedTime >= ACTIVITY_DELAY);
     }
 
     public void onActivityStarted(Activity activity) {
@@ -105,7 +107,7 @@ class AppStateManager {
             MParticle.getInstance().logStateTransition(Constants.StateTransitionType.STATE_TRANS_FORE);
             Log.d(Constants.LOG_TAG, "APP FOREGROUNDED");
         }
-        mActivities++;
+        mActivities.getAndIncrement();
         Log.d(Constants.LOG_TAG, "Activity Count: " + mActivities);
         if (MParticle.getInstance().isAutoTrackingEnabled()) {
             MParticle.getInstance().logScreen(getActivityName(activity), null, true);
@@ -113,9 +115,9 @@ class AppStateManager {
     }
 
     void recordActivityStopped(Activity activity) {
-        mActivities--;
         mLastStoppedTime = System.currentTimeMillis();
-        if (mActivities < 1) {
+
+        if (mActivities.decrementAndGet() < 1) {
             delayedBackgroundCheckHandler.postDelayed(backgroundChecker, ACTIVITY_DELAY);
         }
         Log.d(Constants.LOG_TAG, "Activity Count: " + mActivities);

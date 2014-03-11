@@ -43,27 +43,27 @@ com.mparticle.AppConfig -> com.mparticle.b:
     108:112:void clearPushRegistrationId(android.content.Context,com.mparticle.PushRegistrationListener) -> a
 com.mparticle.AppStateManager -> com.mparticle.c:
     android.content.Context mContext -> a
-    int mActivities -> b
+    java.util.concurrent.atomic.AtomicInteger mActivities -> b
     long mLastStoppedTime -> c
     android.os.Handler delayedBackgroundCheckHandler -> d
     java.lang.Runnable backgroundChecker -> e
-    88:88:boolean isBackgrounded() -> a
-    92:95:void onActivityStarted(android.app.Activity) -> a
-    98:101:void onActivityStopped(android.app.Activity) -> b
-    104:113:void recordActivityStarted(android.app.Activity) -> c
-    116:126:void recordActivityStopped(android.app.Activity) -> d
+    90:90:boolean isBackgrounded() -> a
+    94:97:void onActivityStarted(android.app.Activity) -> a
+    100:103:void onActivityStopped(android.app.Activity) -> b
+    106:115:void recordActivityStarted(android.app.Activity) -> c
+    118:128:void recordActivityStopped(android.app.Activity) -> d
 com.mparticle.AppStateManager$1 -> com.mparticle.c$1:
     com.mparticle.AppStateManager this$0 -> a
-    28:32:void run() -> run
+    30:34:void run() -> run
 com.mparticle.AppStateManager$2 -> com.mparticle.c$2:
     com.mparticle.AppStateManager this$0 -> a
-    53:53:void onActivityCreated(android.app.Activity,android.os.Bundle) -> onActivityCreated
-    57:58:void onActivityStarted(android.app.Activity) -> onActivityStarted
-    63:63:void onActivityResumed(android.app.Activity) -> onActivityResumed
-    68:68:void onActivityPaused(android.app.Activity) -> onActivityPaused
-    72:73:void onActivityStopped(android.app.Activity) -> onActivityStopped
-    78:78:void onActivitySaveInstanceState(android.app.Activity,android.os.Bundle) -> onActivitySaveInstanceState
-    83:83:void onActivityDestroyed(android.app.Activity) -> onActivityDestroyed
+    55:55:void onActivityCreated(android.app.Activity,android.os.Bundle) -> onActivityCreated
+    59:60:void onActivityStarted(android.app.Activity) -> onActivityStarted
+    65:65:void onActivityResumed(android.app.Activity) -> onActivityResumed
+    70:70:void onActivityPaused(android.app.Activity) -> onActivityPaused
+    74:75:void onActivityStopped(android.app.Activity) -> onActivityStopped
+    80:80:void onActivitySaveInstanceState(android.app.Activity,android.os.Bundle) -> onActivitySaveInstanceState
+    85:85:void onActivityDestroyed(android.app.Activity) -> onActivityDestroyed
 com.mparticle.Base64 -> com.mparticle.d:
     char[] CA -> a
     int[] IA -> b
