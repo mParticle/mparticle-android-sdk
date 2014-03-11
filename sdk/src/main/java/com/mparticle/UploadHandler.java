@@ -100,7 +100,7 @@ import javax.crypto.spec.SecretKeySpec;
     public static final String HEADER_SIGNATURE = "x-mp-signature";
 
     public static final String SECURE_SERVICE_SCHEME = "https";
-    public static final String SECURE_SERVICE_HOST = "nativesdk.mparticle.com";
+    public static final String SECURE_SERVICE_HOST = "nativesdks.mparticle.com";
     public static final String DEBUG_SERVICE_HOST = "api-qa.mparticle.com";
    //public static final String DEBUG_SERVICE_HOST = "win-dozor";
 

@@ -37,10 +37,10 @@ com.mparticle.AppConfig -> com.mparticle.b:
     289:295:boolean isDebug(android.content.pm.PackageManager,java.lang.String) -> a
     377:391:boolean isPhoneRooted() -> c
     22:27:int getAppVersion(android.content.Context) -> g
-    40:56:java.lang.String getRegistrationId(android.content.Context) -> f
-    65:71:void enablePushNotifications(android.content.Context,java.lang.String) -> a
-    81:89:void storeRegistrationId(android.content.Context,java.lang.String,com.mparticle.PushRegistrationListener) -> a
-    108:112:void clearPushRegistrationId(android.content.Context,com.mparticle.PushRegistrationListener) -> a
+    40:58:java.lang.String getRegistrationId(android.content.Context) -> f
+    67:73:void enablePushNotifications(android.content.Context,java.lang.String) -> a
+    83:91:void storeRegistrationId(android.content.Context,java.lang.String,com.mparticle.PushRegistrationListener) -> a
+    110:114:void clearPushRegistrationId(android.content.Context,com.mparticle.PushRegistrationListener) -> a
 com.mparticle.AppStateManager -> com.mparticle.c:
     android.content.Context mContext -> a
     java.util.concurrent.atomic.AtomicInteger mActivities -> b
