@@ -119,7 +119,7 @@ public class MPUtility {
             final LocationManager manager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
             return Boolean.toString(manager.isProviderEnabled(LocationManager.GPS_PROVIDER));
         } else {
-            return "unknown";
+            return null;
         }
     }
 

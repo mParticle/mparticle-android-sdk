@@ -4,7 +4,7 @@ package com.mparticle;
 
     public final static String LOG_TAG = "mParticleAPI";
 
-    public static final String MPARTICLE_VERSION = "1.0.0";
+    public static final String MPARTICLE_VERSION = "1.0.1";
 
     // maximum number of events per session
     public static final int EVENT_LIMIT = 1000;
