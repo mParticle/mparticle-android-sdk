@@ -652,29 +652,29 @@ com.mparticle.MessageManager -> com.mparticle.n:
     com.mparticle.ConfigManager mConfigManager -> n
     70:104:void start(android.content.Context,java.lang.Boolean) -> a
     109:140:org.json.JSONObject createMessage(java.lang.String,java.lang.String,long,long,java.lang.String,org.json.JSONObject) -> a
-    144:162:org.json.JSONObject getStateInfo() -> a
-    196:198:org.json.JSONObject createMessageSessionEnd(java.lang.String,long,long,long,org.json.JSONObject) -> a
-    203:228:void startSession(java.lang.String,long,java.lang.String) -> a
-    239:239:int getCurrentSessionCounter() -> c
-    244:253:void stopSession(java.lang.String,long,long) -> a
-    256:259:void endSession(java.lang.String,long,long) -> b
-    263:273:void logEvent(java.lang.String,long,long,java.lang.String,com.mparticle.MParticle$EventType,org.json.JSONObject,long) -> a
-    277:287:void logScreen(java.lang.String,long,long,java.lang.String,org.json.JSONObject,boolean) -> a
-    291:302:void logBreadcrumb(java.lang.String,long,long,java.lang.String) -> a
-    306:312:void optOut(java.lang.String,long,long,boolean) -> a
-    315:316:void logErrorEvent(java.lang.String,long,long,java.lang.String,java.lang.Throwable,org.json.JSONObject) -> a
-    320:340:void logErrorEvent(java.lang.String,long,long,java.lang.String,java.lang.Throwable,org.json.JSONObject,boolean) -> a
-    344:352:void setPushRegistrationId(java.lang.String,long,long,java.lang.String,boolean) -> a
-    356:364:void setSessionAttributes(java.lang.String,org.json.JSONObject) -> a
-    367:368:void doUpload() -> b
-    371:375:void setLocation(android.location.Location) -> a
-    379:397:void logStateTransition(java.lang.String,java.lang.String,long,android.os.Bundle) -> a
-    400:421:void logNotification(java.lang.String,long,android.os.Bundle,java.lang.String) -> a
-    441:453:void setDataConnection(android.net.NetworkInfo) -> a
+    144:165:org.json.JSONObject getStateInfo() -> a
+    199:201:org.json.JSONObject createMessageSessionEnd(java.lang.String,long,long,long,org.json.JSONObject) -> a
+    206:231:void startSession(java.lang.String,long,java.lang.String) -> a
+    242:242:int getCurrentSessionCounter() -> c
+    247:256:void stopSession(java.lang.String,long,long) -> a
+    259:262:void endSession(java.lang.String,long,long) -> b
+    266:276:void logEvent(java.lang.String,long,long,java.lang.String,com.mparticle.MParticle$EventType,org.json.JSONObject,long) -> a
+    280:290:void logScreen(java.lang.String,long,long,java.lang.String,org.json.JSONObject,boolean) -> a
+    294:305:void logBreadcrumb(java.lang.String,long,long,java.lang.String) -> a
+    309:315:void optOut(java.lang.String,long,long,boolean) -> a
+    318:319:void logErrorEvent(java.lang.String,long,long,java.lang.String,java.lang.Throwable,org.json.JSONObject) -> a
+    323:343:void logErrorEvent(java.lang.String,long,long,java.lang.String,java.lang.Throwable,org.json.JSONObject,boolean) -> a
+    347:355:void setPushRegistrationId(java.lang.String,long,long,java.lang.String,boolean) -> a
+    359:367:void setSessionAttributes(java.lang.String,org.json.JSONObject) -> a
+    370:371:void doUpload() -> b
+    374:378:void setLocation(android.location.Location) -> a
+    382:400:void logStateTransition(java.lang.String,java.lang.String,long,android.os.Bundle) -> a
+    403:424:void logNotification(java.lang.String,long,android.os.Bundle,java.lang.String) -> a
+    444:456:void setDataConnection(android.net.NetworkInfo) -> a
     30:30:double access$102(double) -> a
 com.mparticle.MessageManager$StatusBroadcastReceiver -> com.mparticle.n$a:
     com.mparticle.MessageManager this$0 -> a
-    426:437:void onReceive(android.content.Context,android.content.Intent) -> onReceive
+    429:440:void onReceive(android.content.Context,android.content.Intent) -> onReceive
 com.mparticle.Obfuscator -> com.mparticle.o:
     java.lang.String obfuscate(java.lang.String,java.lang.String) -> a
     java.lang.String unobfuscate(java.lang.String,java.lang.String) -> b

@@ -152,7 +152,10 @@ import java.util.UUID;
         infoJson.put(MessageKey.STATE_INFO_APP_MEMORY_USAGE, rt.totalMemory());
         infoJson.put(MessageKey.STATE_INFO_APP_MEMORY_AVAIL, rt.freeMemory());
         infoJson.put(MessageKey.STATE_INFO_APP_MEMORY_MAX, rt.maxMemory());
-        infoJson.put(MessageKey.STATE_INFO_GPS, MPUtility.getGpsEnabled(mContext));
+        String gps = MPUtility.getGpsEnabled(mContext);
+        if (gps != null){
+            infoJson.put(MessageKey.STATE_INFO_GPS,Boolean.parseBoolean(gps));
+        }
         infoJson.put(MessageKey.STATE_INFO_DATA_CONNECTION, sActiveNetworkName);
         int orientation = MPUtility.getOrientation(mContext);
         infoJson.put(MessageKey.STATE_INFO_ORIENTATION, orientation);

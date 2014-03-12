@@ -101,7 +101,7 @@ import javax.crypto.spec.SecretKeySpec;
 
     public static final String SECURE_SERVICE_SCHEME = "https";
     public static final String SECURE_SERVICE_HOST = "nativesdks.mparticle.com";
-   // public static final String DEBUG_SERVICE_HOST = "api-qa.mparticle.com";
+   // public static final String SECURE_SERVICE_HOST = "api-qa.mparticle.com";
    //public static final String DEBUG_SERVICE_HOST = "win-dozor";
 
     public static final String SERVICE_VERSION = "v1";
@@ -356,7 +356,7 @@ import javax.crypto.spec.SecretKeySpec;
         uploadMessage.put(MessageKey.TIMESTAMP, System.currentTimeMillis());
         uploadMessage.put(MessageKey.MPARTICLE_VERSION, Constants.MPARTICLE_VERSION);
         if (BuildConfig.ECHO){
-            uploadMessage.put("echo", true);
+            //uploadMessage.put("echo", true);
         }
         uploadMessage.put(MessageKey.OPT_OUT_HEADER, mConfigManager.getOptedOut());
 
