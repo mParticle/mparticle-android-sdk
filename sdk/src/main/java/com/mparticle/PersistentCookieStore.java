@@ -1,260 +1,174 @@
-/*
- * NOTICE: This class is taken from the Android Async HTTP project. Apache Licensed.
- * https://github.com/loopj/android-async-http
- * The code has been modified to make SerializableCookie an inner class and change
- * the class visibility. Also toUpperCase now uses the US locale to prevent variations.
- */
-
-/*
- Android Asynchronous Http Client
- Copyright (c) 2011 James Smith <james@loopj.com>
- http://loopj.com
-
- Licensed under the Apache License, Version 2.0 (the "License");
- you may not use this file except in compliance with the License.
- You may obtain a copy of the License at
-
- http://www.apache.org/licenses/LICENSE-2.0
-
- Unless required by applicable law or agreed to in writing, software
- distributed under the License is distributed on an "AS IS" BASIS,
- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- See the License for the specific language governing permissions and
- limitations under the License.
- */
-
-package com.mparticle;
-
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.text.TextUtils;
 
-import org.apache.http.client.CookieStore;
-import org.apache.http.cookie.Cookie;
-import org.apache.http.impl.cookie.BasicClientCookie;
-
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
+import java.net.CookieStore;
+import java.net.HttpCookie;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.Date;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.Map;
+import java.util.Set;
 
-/**
- * A persistent cookie store which implements the Apache HttpClient
- * {@link CookieStore} interface. Cookies are stored and will persist on the
- * user's device between application sessions since they are serialized and
- * stored in {@link SharedPreferences}.
- * <p/>
- * Instances of this class are designed to be used with
- * {@link AsyncHttpClient#setCookieStore}, but can also be used with a regular
- * old Apache HttpClient/HttpContext if you prefer.
+/*
+ * This is a custom cookie storage for the application. This
+ * will store all the cookies to the shared preferences so that it persists
+ * across application restarts.
  */
-/* package-private */
-@SuppressWarnings("ALL")
 class PersistentCookieStore implements CookieStore {
-    private static final String COOKIE_PREFS = "CookiePrefsFile";
-    private static final String COOKIE_NAME_STORE = "names";
-    private static final String COOKIE_NAME_PREFIX = "cookie_";
 
-    private final ConcurrentHashMap<String, Cookie> cookies;
-    private final SharedPreferences cookiePrefs;
-
-    /**
-     * Construct a persistent cookie store.
+    /*
+     * The memory storage of the cookies
      */
-    public PersistentCookieStore(Context context) {
-        cookiePrefs = context.getSharedPreferences(COOKIE_PREFS, 0);
-        cookies = new ConcurrentHashMap<String, Cookie>();
+    private Map<URI, List<HttpCookie>> mapCookies = new HashMap<URI, List<HttpCookie>>();
+    /*
+     * The instance of the shared preferences
+     */
+    private final SharedPreferences spePreferences;
 
-        // Load any previously stored cookies into the store
-        String storedCookieNames = cookiePrefs.getString(COOKIE_NAME_STORE, null);
-        if (storedCookieNames != null) {
-            String[] cookieNames = TextUtils.split(storedCookieNames, ",");
-            for (String name : cookieNames) {
-                String encodedCookie = cookiePrefs.getString(COOKIE_NAME_PREFIX + name, null);
-                if (encodedCookie != null) {
-                    Cookie decodedCookie = decodeCookie(encodedCookie);
-                    if (decodedCookie != null) {
-                        cookies.put(name, decodedCookie);
+    /*
+     * @see java.net.CookieStore#add(java.net.URI, java.net.HttpCookie)
+     */
+    public void add(URI uri, HttpCookie cookie) {
+
+        System.out.println("add");
+        System.out.println(cookie.toString());
+
+        List<HttpCookie> cookies = mapCookies.get(uri);
+        if (cookies == null) {
+            cookies = new ArrayList<HttpCookie>();
+            mapCookies.put(uri, cookies);
+        }
+        cookies.add(cookie);
+
+        SharedPreferences.Editor ediWriter = spePreferences.edit();
+        HashSet<String> setCookies = new HashSet<String>();
+        setCookies.add(cookie.toString());
+        ediWriter.putStringSet(uri.toString(), spePreferences.getStringSet(uri.toString(), setCookies));
+        ediWriter.commit();
+
+    }
+
+    /*
+     * Constructor
+     *
+     * @param  ctxContext the context of the Activity
+     */
+    @SuppressWarnings("unchecked")
+    public PersistentCookieStore(Context ctxContext) {
+
+        spePreferences = ctxContext.getSharedPreferences("CookiePrefsFile", 0);
+        Map<String, ?> prefsMap = spePreferences.getAll();
+
+        for(Map.Entry<String, ?> entry : prefsMap.entrySet()) {
+
+            for (String strCookie : (HashSet<String>) entry.getValue()) {
+
+                if (!mapCookies.containsKey(entry.getKey())) {
+
+                    List<HttpCookie> lstCookies = new ArrayList<HttpCookie>();
+                    lstCookies.addAll(HttpCookie.parse(strCookie));
+
+                    try {
+
+                        mapCookies.put(new URI(entry.getKey()), lstCookies);
+
+                    } catch (URISyntaxException e) {
+
+                        e.printStackTrace();
+
                     }
+
+                } else {
+
+                    List<HttpCookie> lstCookies = mapCookies.get(entry.getKey());
+                    lstCookies.addAll(HttpCookie.parse(strCookie));
+
+                    try {
+
+                        mapCookies.put(new URI(entry.getKey()), lstCookies);
+
+                    } catch (URISyntaxException e) {
+
+                        e.printStackTrace();
+
+                    }
+
                 }
+
+                System.out.println(entry.getKey() + ": " + strCookie);
+
             }
 
-            // Clear out expired cookies, including session cookie
-            clearExpired(new Date());
-        }
-    }
-
-    @Override
-    public void addCookie(Cookie cookie) {
-        String name = cookie.getName();
-
-        // Save cookie into local store, or remove if expired
-        if (!cookie.isExpired(new Date())) {
-            cookies.put(name, cookie);
-        } else {
-            cookies.remove(name);
         }
 
-        // Save cookie into persistent store
-        SharedPreferences.Editor prefsWriter = cookiePrefs.edit();
-        prefsWriter.putString(COOKIE_NAME_STORE, TextUtils.join(",", cookies.keySet()));
-        prefsWriter.putString(COOKIE_NAME_PREFIX + name, encodeCookie(new SerializableCookie(cookie)));
-        prefsWriter.commit();
     }
 
-    @Override
-    public void clear() {
-        // Clear cookies from local store
-        cookies.clear();
-
-        // Clear cookies from persistent store
-        SharedPreferences.Editor prefsWriter = cookiePrefs.edit();
-        for (String name : cookies.keySet()) {
-            prefsWriter.remove(COOKIE_NAME_PREFIX + name);
-        }
-        prefsWriter.remove(COOKIE_NAME_STORE);
-        prefsWriter.commit();
-    }
-
-    @Override
-    public boolean clearExpired(Date date) {
-        boolean clearedAny = false;
-        SharedPreferences.Editor prefsWriter = cookiePrefs.edit();
-
-        for (ConcurrentHashMap.Entry<String, Cookie> entry : cookies.entrySet()) {
-            String name = entry.getKey();
-            Cookie cookie = entry.getValue();
-            // check for no date (sessio cookie) or expired
-            if ((cookie.getExpiryDate() == null) ||
-                    cookie.isExpired(date)) {
-                // Clear cookies from local store
-                cookies.remove(name);
-
-                // Clear cookies from persistent store
-                prefsWriter.remove(COOKIE_NAME_PREFIX + name);
-
-                // We've cleared at least one
-                clearedAny = true;
-            }
-        }
-
-        // Update names in persistent store
-        if (clearedAny) {
-            prefsWriter.putString(COOKIE_NAME_STORE, TextUtils.join(",", cookies.keySet()));
-        }
-        prefsWriter.commit();
-
-        return clearedAny;
-    }
-
-    @Override
-    public List<Cookie> getCookies() {
-        return new ArrayList<Cookie>(cookies.values());
-    }
-
-    //
-    // Cookie serialization/deserialization
-    //
-
-    protected String encodeCookie(SerializableCookie cookie) {
-        ByteArrayOutputStream os = new ByteArrayOutputStream();
-        try {
-            ObjectOutputStream outputStream = new ObjectOutputStream(os);
-            outputStream.writeObject(cookie);
-        } catch (Exception e) {
-            return null;
-        }
-
-        return byteArrayToHexString(os.toByteArray());
-    }
-
-    protected Cookie decodeCookie(String cookieStr) {
-        byte[] bytes = hexStringToByteArray(cookieStr);
-        ByteArrayInputStream is = new ByteArrayInputStream(bytes);
-        Cookie cookie = null;
-        try {
-            ObjectInputStream ois = new ObjectInputStream(is);
-            cookie = ((SerializableCookie) ois.readObject()).getCookie();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return cookie;
-    }
-
-    // Using some super basic byte array <-> hex conversions so we don't have
-    // to rely on any large GBase64 libraries. Can be overridden if you like!
-    protected String byteArrayToHexString(byte[] b) {
-        StringBuffer sb = new StringBuffer(b.length * 2);
-        for (byte element : b) {
-            int v = element & 0xff;
-            if (v < 16) {
-                sb.append('0');
-            }
-            sb.append(Integer.toHexString(v));
-        }
-        return sb.toString().toUpperCase(Locale.US);
-    }
-
-    protected byte[] hexStringToByteArray(String s) {
-        int len = s.length();
-        byte[] data = new byte[len / 2];
-        for (int i = 0; i < len; i += 2) {
-            data[i / 2] = (byte) ((Character.digit(s.charAt(i), 16) << 4) + Character.digit(s.charAt(i + 1), 16));
-        }
-        return data;
-    }
-
-    /**
-     * A wrapper class around {@link Cookie} and/or {@link BasicClientCookie}
-     * designed for use in {@link PersistentCookieStore}.
+    /*
+     * @see java.net.CookieStore#get(java.net.URI)
      */
-    public class SerializableCookie implements Serializable {
-        private static final long serialVersionUID = 6374381828722046732L;
+    public List<HttpCookie> get(URI uri) {
 
-        private transient final Cookie cookie;
-        private transient BasicClientCookie clientCookie;
+        List<HttpCookie> lstCookies = mapCookies.get(uri);
 
-        public SerializableCookie(Cookie cookie) {
-            this.cookie = cookie;
-        }
+        if (lstCookies == null)
+            mapCookies.put(uri, new ArrayList<HttpCookie>());
 
-        public Cookie getCookie() {
-            Cookie bestCookie = cookie;
-            if (clientCookie != null) {
-                bestCookie = clientCookie;
-            }
-            return bestCookie;
-        }
+        return mapCookies.get(uri);
 
-        private void writeObject(ObjectOutputStream out) throws IOException {
-            out.writeObject(cookie.getName());
-            out.writeObject(cookie.getValue());
-            out.writeObject(cookie.getComment());
-            out.writeObject(cookie.getDomain());
-            out.writeObject(cookie.getExpiryDate());
-            out.writeObject(cookie.getPath());
-            out.writeInt(cookie.getVersion());
-            out.writeBoolean(cookie.isSecure());
-        }
-
-        private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
-            String name = (String) in.readObject();
-            String value = (String) in.readObject();
-            clientCookie = new BasicClientCookie(name, value);
-            clientCookie.setComment((String) in.readObject());
-            clientCookie.setDomain((String) in.readObject());
-            clientCookie.setExpiryDate((Date) in.readObject());
-            clientCookie.setPath((String) in.readObject());
-            clientCookie.setVersion(in.readInt());
-            clientCookie.setSecure(in.readBoolean());
-        }
     }
+
+    /*
+     * @see java.net.CookieStore#removeAll()
+     */
+    public boolean removeAll() {
+
+        mapCookies.clear();
+        return true;
+
+    }
+
+    /*
+     * @see java.net.CookieStore#getCookies()
+     */
+    public List<HttpCookie> getCookies() {
+
+        Collection<List<HttpCookie>> values = mapCookies.values();
+
+        List<HttpCookie> result = new ArrayList<HttpCookie>();
+        for (List<HttpCookie> value : values) {
+            result.addAll(value);
+        }
+
+        return result;
+
+    }
+
+    /*
+     * @see java.net.CookieStore#getURIs()
+     */
+    public List<URI> getURIs() {
+
+        Set<URI> keys = mapCookies.keySet();
+        return new ArrayList<URI>(keys);
+
+    }
+
+    /*
+     * @see java.net.CookieStore#remove(java.net.URI, java.net.HttpCookie)
+     */
+    public boolean remove(URI uri, HttpCookie cookie) {
+
+        List<HttpCookie> lstCookies = mapCookies.get(uri);
+
+        if (lstCookies == null)
+            return false;
+
+        return lstCookies.remove(cookie);
+
+    }
+
 }

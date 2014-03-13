@@ -1060,7 +1060,6 @@ com.mparticle.PersistentCookieStore -> com.mparticle.PersistentCookieStore:
     128:154:boolean clearExpired(java.util.Date) -> clearExpired
     159:159:java.util.List getCookies() -> getCookies
     167:175:java.lang.String encodeCookie(com.mparticle.PersistentCookieStore$SerializableCookie) -> a
-    179:189:org.apache.http.cookie.Cookie decodeCookie(java.lang.String) -> a
     195:203:java.lang.String byteArrayToHexString(byte[]) -> a
 com.mparticle.PersistentCookieStore$SerializableCookie -> com.mparticle.PersistentCookieStore$SerializableCookie:
     long serialVersionUID -> serialVersionUID
@@ -1109,33 +1108,29 @@ com.mparticle.UploadHandler -> com.mparticle.E:
     android.content.Context mContext -> c
     java.lang.String mApiKey -> d
     java.lang.String mSecret -> e
-    org.apache.http.protocol.HttpContext mHttpContext -> f
-    org.json.JSONObject mAppInfo -> g
-    org.json.JSONObject mDeviceInfo -> h
-    android.net.ConnectivityManager mConnectivyManager -> i
-    boolean mAccessNetworkStateAvailable -> j
-    com.mparticle.ConfigManager mConfigManager -> k
-    java.lang.String SQL_DELETABLE_MESSAGES -> l
-    java.lang.String SQL_UPLOADABLE_MESSAGES -> m
-    java.lang.String SQL_HISTORY_MESSAGES -> n
-    java.lang.String SQL_FINISHED_HISTORY_MESSAGES -> o
-    char[] HEX_CHARS -> p
-    144:197:void handleMessage(android.os.Message) -> handleMessage
-    201:234:void fetchConfig() -> a
-    265:348:void prepareUploads(boolean) -> a
-    352:402:org.json.JSONObject createUploadMessage(org.json.JSONArray,boolean) -> a
-    406:547:boolean processUploads(boolean) -> b
-    553:561:java.lang.String extractResponseBody(org.apache.http.HttpResponse) -> a
-    566:584:void addMessageSignature(org.apache.http.client.methods.HttpUriRequest,java.lang.String) -> a
-    587:648:void processCommands() -> b
-    661:661:java.net.URI makeServiceUri(java.lang.String) -> a
-    665:670:void dbInsertUpload(android.database.sqlite.SQLiteDatabase,org.json.JSONObject) -> a
-    673:675:void dbDeleteProcessedMessages(android.database.sqlite.SQLiteDatabase,java.lang.String) -> a
-    691:693:void dbDeleteUpload(android.database.sqlite.SQLiteDatabase,int) -> a
-    696:698:void dbDeleteCommand(android.database.sqlite.SQLiteDatabase,int) -> b
-    712:720:boolean isNetworkAvailable() -> c
-    724:739:org.apache.http.client.HttpClient setupHttpClient() -> d
-    763:768:java.lang.String asHex(byte[]) -> a
+    org.json.JSONObject mAppInfo -> f
+    org.json.JSONObject mDeviceInfo -> g
+    android.net.ConnectivityManager mConnectivyManager -> h
+    boolean mAccessNetworkStateAvailable -> i
+    com.mparticle.ConfigManager mConfigManager -> j
+    java.lang.String SQL_DELETABLE_MESSAGES -> k
+    java.lang.String SQL_UPLOADABLE_MESSAGES -> l
+    java.lang.String SQL_HISTORY_MESSAGES -> m
+    java.lang.String SQL_FINISHED_HISTORY_MESSAGES -> n
+    char[] HEX_CHARS -> o
+    138:191:void handleMessage(android.os.Message) -> handleMessage
+    195:230:void fetchConfig() -> a
+    261:344:void prepareUploads(boolean) -> a
+    348:398:org.json.JSONObject createUploadMessage(org.json.JSONArray,boolean) -> a
+    402:501:boolean processUploads(boolean) -> b
+    505:527:void logUpload(java.lang.String) -> a
+    545:563:void addMessageSignature(java.net.HttpURLConnection,java.lang.String) -> a
+    566:627:void processCommands() -> b
+    640:645:void dbInsertUpload(android.database.sqlite.SQLiteDatabase,org.json.JSONObject) -> a
+    648:650:void dbDeleteProcessedMessages(android.database.sqlite.SQLiteDatabase,java.lang.String) -> a
+    671:673:void dbDeleteCommand(android.database.sqlite.SQLiteDatabase,int) -> a
+    687:695:boolean isNetworkAvailable() -> c
+    738:743:java.lang.String asHex(byte[]) -> a
 com.mparticle.ValidationException -> com.mparticle.F:
     long serialVersionUID -> serialVersionUID
 com.mparticle.activity.MPActivity -> com.mparticle.activity.MPActivity:
