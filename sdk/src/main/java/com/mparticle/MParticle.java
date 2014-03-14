@@ -26,6 +26,7 @@ import org.json.JSONObject;
 
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.UUID;
 
@@ -243,7 +244,12 @@ public class MParticle {
     }
 
     /* package-private */
-    static boolean setCheckedAttribute(JSONObject attributes, String key, Object value) {
+    static boolean setCheckedAttribute(JSONObject attributes, String key, Object value){
+        return setCheckedAttribute(attributes, key, value, false);
+    }
+
+    /* package-private */
+    static boolean setCheckedAttribute(JSONObject attributes, String key, Object value, boolean caseInsensitive) {
         if (null == attributes || null == key) {
             return false;
         }
@@ -263,12 +269,26 @@ public class MParticle {
             if (value == null) {
                 value = JSONObject.NULL;
             }
+            if (caseInsensitive){
+                key = findCaseInsensitiveKey(attributes, key);
+            }
             attributes.put(key, value);
         } catch (JSONException e) {
             Log.w(TAG, "JSON error processing attributes. Discarding attribute: " + key);
             return false;
         }
         return true;
+    }
+
+    static String findCaseInsensitiveKey(JSONObject jsonObject, String key){
+        Iterator<String> keys = jsonObject.keys();
+        while(keys.hasNext()){
+            String currentKey = keys.next();
+            if (currentKey.equalsIgnoreCase(key)){
+                return currentKey;
+            }
+        }
+        return key;
     }
 
     void logStateTransition(String transitionType) {
@@ -844,28 +864,28 @@ public class MParticle {
 
     /**
      * Remove an identity matching this id
-     *
+     * <p/>
      * Note: this will only remove the *first* matching id
      *
      * @param id the id to remove
      */
-    public void removeUserIdentity(String id){
-        if (id != null && id.length() > 0 && mUserIdentities != null){
-            try{
+    public void removeUserIdentity(String id) {
+        if (id != null && id.length() > 0 && mUserIdentities != null) {
+            try {
                 int indexToRemove = -1;
-                for (int i = 0; i < mUserIdentities.length(); i++){
-                    if (mUserIdentities.getJSONObject(i).getString(MessageKey.IDENTITY_VALUE).equals(id)){
+                for (int i = 0; i < mUserIdentities.length(); i++) {
+                    if (mUserIdentities.getJSONObject(i).getString(MessageKey.IDENTITY_VALUE).equals(id)) {
                         indexToRemove = i;
                         break;
                     }
                 }
-                if (indexToRemove >= 0){
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT){
+                if (indexToRemove >= 0) {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
                         mUserIdentities.remove(indexToRemove);
-                    }else{
+                    } else {
                         JSONArray newIdentities = new JSONArray();
-                        for (int i=0; i < mUserIdentities.length(); i++){
-                            if (i != indexToRemove){
+                        for (int i = 0; i < mUserIdentities.length(); i++) {
+                            if (i != indexToRemove) {
                                 newIdentities.put(mUserIdentities.get(i));
                             }
                         }
@@ -873,7 +893,7 @@ public class MParticle {
                     sPreferences.edit().putString(PrefKeys.USER_IDENTITIES + mApiKey, mUserIdentities.toString()).commit();
 
                 }
-            }catch (JSONException jse){
+            } catch (JSONException jse) {
                 Log.w(TAG, "Error removing identity: " + id);
             }
         }
