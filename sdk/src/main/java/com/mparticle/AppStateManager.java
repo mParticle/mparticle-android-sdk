@@ -19,6 +19,7 @@ class AppStateManager {
     public static final String APP_STATE_FOREGROUND = "foreground";
     public static final String APP_STATE_BACKGROUND = "background";
     public static final String APP_STATE_NOTRUNNING = "not_running";
+    private final EmbeddedKitManager embeddedKitManager;
     Context mContext;
     AtomicInteger mActivities = new AtomicInteger(0);
     long mLastStoppedTime;
@@ -40,9 +41,10 @@ class AppStateManager {
     //starts again, so don't declared that we're backgrounded immediately.
     private static final long ACTIVITY_DELAY = 1000;
 
-    public AppStateManager(Context context) {
+    public AppStateManager(Context context, EmbeddedKitManager embeddedKitManager) {
         mContext = context.getApplicationContext();
         mLastStoppedTime = System.currentTimeMillis();
+        this.embeddedKitManager = embeddedKitManager;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
             setupLifecycleCallbacks();
         }
@@ -88,6 +90,12 @@ class AppStateManager {
         });
     }
 
+    public void onActivityResumed(Activity activity){
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+            recordActivityResumed(activity);
+        }
+    }
+
     boolean isBackgrounded() {
         return mActivities.get() < 1 && (System.currentTimeMillis() - mLastStoppedTime >= ACTIVITY_DELAY);
     }
@@ -102,6 +110,10 @@ class AppStateManager {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
             recordActivityStopped(activity);
         }
+    }
+
+    void recordActivityResumed(Activity activity){
+        embeddedKitManager.onResume(activity);
     }
 
     void recordActivityStarted(Activity activity){

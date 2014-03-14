@@ -110,21 +110,23 @@ public class MParticle {
     private Context mAppContext;
     private String mApiKey;
     private boolean mDebugMode = false;
+    private EmbeddedKitManager embeddedKitManager;
     //private int mSessionTimeout = 30 * 60 * 1000;
     private int mEventCount = 0;
     private String mLaunchUri;
     private LicenseCheckerCallback clientLicensingCallback;
 
 
-    /* package-private */MParticle(Context context, MessageManager messageManager, ConfigManager configManager) {
+    /* package-private */MParticle(Context context, MessageManager messageManager, ConfigManager configManager, EmbeddedKitManager embeddedKitManager) {
         appRunning = true;
         mConfigManager = configManager;
         mAppContext = context.getApplicationContext();
         mApiKey = mConfigManager.getApiKey();
         mMessageManager = messageManager;
-        mAppStateManager = new AppStateManager(mAppContext);
+        mAppStateManager = new AppStateManager(mAppContext, embeddedKitManager);
         measuredRequestManager = new MeasuredRequestManager();
         mTimeoutHandler = new SessionTimeoutHandler(this, sTimeoutHandlerThread.getLooper());
+        this.embeddedKitManager = embeddedKitManager;
 
         String userAttrs = sPreferences.getString(PrefKeys.USER_ATTRS + mApiKey, null);
 
@@ -220,7 +222,8 @@ public class MParticle {
                         sPreferences = context.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
                     }
 
-                    ConfigManager appConfigManager = new ConfigManager(context, apiKey, secret, sandboxMode);
+                    EmbeddedKitManager embeddedKitManager1 = new EmbeddedKitManager(context);
+                    ConfigManager appConfigManager = new ConfigManager(context, apiKey, secret, sandboxMode, embeddedKitManager1);
                     Context appContext = context.getApplicationContext();
 
                     Boolean firstRun = sPreferences.getBoolean(PrefKeys.FIRSTRUN + appConfigManager.getApiKey(), true);
@@ -231,7 +234,7 @@ public class MParticle {
                     MessageManager messageManager = new MessageManager(appContext, appConfigManager);
                     messageManager.start(appContext, firstRun);
 
-                    instance = new MParticle(appContext, messageManager, appConfigManager);
+                    instance = new MParticle(appContext, messageManager, appConfigManager, embeddedKitManager1);
                     if (context instanceof Activity) {
                         instance.mLaunchUri = ((Activity) context).getIntent().getDataString();
                         if (instance.mLaunchUri != null) {

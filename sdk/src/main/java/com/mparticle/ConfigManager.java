@@ -20,6 +20,7 @@ class ConfigManager {
     public static final String KEY_UNHANDLED_EXCEPTIONS = "cue";
     public static final String KEY_PUSH_MESSAGES = "pmk";
     public static final String KEY_NETWORK_PERFORMANCE = "cnp";
+    public static final String KEY_EMBEDDED_KITS = "eks";
 
     public static final String VALUE_APP_DEFINED = "appdefined";
     public static final String VALUE_CUE_CATCH = "forcecatch";
@@ -31,6 +32,7 @@ class ConfigManager {
 
     private final SharedPreferences mPreferences;
     private static final String PREFERENCES_FILE = "mp_preferences";
+    private final EmbeddedKitManager embeddedKitManager;
     private AppConfig localPrefs;
     public static final String DEBUG_SERVICE_HOST = "api-qa.mparticle.com";
     private String[] pushKeys;
@@ -41,13 +43,17 @@ class ConfigManager {
 
     private boolean sendOoEvents;
 
-    public ConfigManager(Context context, String key, String secret, boolean sandboxMode) {
+    public ConfigManager(Context context, String key, String secret, boolean sandboxMode, EmbeddedKitManager embeddedKitManager) {
         mContext = context.getApplicationContext();
         mPreferences = mContext.getSharedPreferences(PREFERENCES_FILE, Context.MODE_PRIVATE);
         localPrefs = new AppConfig(mContext, key, secret, sandboxMode);
+        this.embeddedKitManager = embeddedKitManager;
     }
 
     public synchronized void updateConfig(JSONObject responseJSON) throws JSONException {
+        if (loaded && mPreferences.getString(CONFIG_JSON,"").equals(responseJSON)){
+            return;
+        }
         SharedPreferences.Editor editor = mPreferences.edit();
         editor.putString(CONFIG_JSON, responseJSON.toString());
 
@@ -81,6 +87,11 @@ class ConfigManager {
             editor.commit();
         }
         applyConfig();
+
+        if (responseJSON.has(KEY_EMBEDDED_KITS)) {
+            embeddedKitManager.updateWithConfig(responseJSON.getJSONArray(KEY_EMBEDDED_KITS));
+        }
+
         if (responseJSON != null){
             loaded = true;
         }

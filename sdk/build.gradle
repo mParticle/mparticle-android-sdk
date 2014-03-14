@@ -33,7 +33,7 @@ android {
 
         release {
             buildConfigField "boolean", "ECHO", "false"
-            runProguard true
+            runProguard false
             proguardFile 'proguard.txt'
         }
 
@@ -86,5 +86,5 @@ uploadArchives {
 }
 
 dependencies {
-   // compile 'com.android.support:support-v4:19.0.1'
+    compile fileTree(dir: 'embeddedkits', include: ['*.jar'])
 }

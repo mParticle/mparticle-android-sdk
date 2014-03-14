@@ -1120,22 +1120,22 @@ com.mparticle.UploadHandler -> com.mparticle.E:
     java.lang.String SQL_HISTORY_MESSAGES -> n
     java.lang.String SQL_FINISHED_HISTORY_MESSAGES -> o
     char[] HEX_CHARS -> p
-    144:197:void handleMessage(android.os.Message) -> handleMessage
-    201:234:void fetchConfig() -> a
-    265:348:void prepareUploads(boolean) -> a
-    352:402:org.json.JSONObject createUploadMessage(org.json.JSONArray,boolean) -> a
-    406:547:boolean processUploads(boolean) -> b
-    553:561:java.lang.String extractResponseBody(org.apache.http.HttpResponse) -> a
-    566:584:void addMessageSignature(org.apache.http.client.methods.HttpUriRequest,java.lang.String) -> a
-    587:648:void processCommands() -> b
-    661:661:java.net.URI makeServiceUri(java.lang.String) -> a
-    665:670:void dbInsertUpload(android.database.sqlite.SQLiteDatabase,org.json.JSONObject) -> a
-    673:675:void dbDeleteProcessedMessages(android.database.sqlite.SQLiteDatabase,java.lang.String) -> a
-    691:693:void dbDeleteUpload(android.database.sqlite.SQLiteDatabase,int) -> a
-    696:698:void dbDeleteCommand(android.database.sqlite.SQLiteDatabase,int) -> b
-    712:720:boolean isNetworkAvailable() -> c
-    724:739:org.apache.http.client.HttpClient setupHttpClient() -> d
-    763:768:java.lang.String asHex(byte[]) -> a
+    145:198:void handleMessage(android.os.Message) -> handleMessage
+    202:235:void fetchConfig() -> a
+    266:349:void prepareUploads(boolean) -> a
+    353:403:org.json.JSONObject createUploadMessage(org.json.JSONArray,boolean) -> a
+    407:548:boolean processUploads(boolean) -> b
+    554:562:java.lang.String extractResponseBody(org.apache.http.HttpResponse) -> a
+    567:585:void addMessageSignature(org.apache.http.client.methods.HttpUriRequest,java.lang.String) -> a
+    588:649:void processCommands() -> b
+    662:662:java.net.URI makeServiceUri(java.lang.String,java.lang.String) -> a
+    666:671:void dbInsertUpload(android.database.sqlite.SQLiteDatabase,org.json.JSONObject) -> a
+    674:676:void dbDeleteProcessedMessages(android.database.sqlite.SQLiteDatabase,java.lang.String) -> a
+    692:694:void dbDeleteUpload(android.database.sqlite.SQLiteDatabase,int) -> a
+    697:699:void dbDeleteCommand(android.database.sqlite.SQLiteDatabase,int) -> b
+    713:721:boolean isNetworkAvailable() -> c
+    725:740:org.apache.http.client.HttpClient setupHttpClient() -> d
+    764:769:java.lang.String asHex(byte[]) -> a
 com.mparticle.ValidationException -> com.mparticle.F:
     long serialVersionUID -> serialVersionUID
 com.mparticle.activity.MPActivity -> com.mparticle.activity.MPActivity:

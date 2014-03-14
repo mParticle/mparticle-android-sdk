@@ -100,11 +100,12 @@ import javax.crypto.spec.SecretKeySpec;
     public static final String HEADER_SIGNATURE = "x-mp-signature";
 
     public static final String SECURE_SERVICE_SCHEME = "https";
-    public static final String SECURE_SERVICE_HOST = "nativesdks.mparticle.com";
-   // public static final String SECURE_SERVICE_HOST = "api-qa.mparticle.com";
+   // public static final String SECURE_SERVICE_HOST = "nativesdks.mparticle.com";
+    public static final String SECURE_SERVICE_HOST = "api-qa.mparticle.com";
    //public static final String DEBUG_SERVICE_HOST = "win-dozor";
 
-    public static final String SERVICE_VERSION = "v1";
+    public static final String SERVICE_VERSION_1 = "v1";
+    public static final String SERVICE_VERSION_2 = "v2";
 
     private ConfigManager mConfigManager;
 
@@ -203,7 +204,7 @@ import javax.crypto.spec.SecretKeySpec;
                 return;
             }
             HttpClient httpClient = setupHttpClient();
-            HttpGet httpGet = new HttpGet(makeServiceUri("config"));
+            HttpGet httpGet = new HttpGet(makeServiceUri("config", SERVICE_VERSION_2));
             if (mConfigManager.isCompressionEnabled()) {
                 httpGet.setHeader("Accept-Encoding", "gzip");
             }
@@ -430,7 +431,7 @@ import javax.crypto.spec.SecretKeySpec;
                         }
                     }
                     // POST message to mParticle service
-                    HttpPost httpPost = new HttpPost(makeServiceUri("events"));
+                    HttpPost httpPost = new HttpPost(makeServiceUri("events",SERVICE_VERSION_1));
                     httpPost.setHeader("Content-type", "application/json");
 
                     ByteArrayEntity postEntity = null;
@@ -657,8 +658,8 @@ import javax.crypto.spec.SecretKeySpec;
         db.delete(SessionTable.TABLE_NAME, SessionTable.END_TIME + "<?", whereArgs);
     }
 
-    private URI makeServiceUri(String method) throws URISyntaxException {
-        return new URI(SECURE_SERVICE_SCHEME, SECURE_SERVICE_HOST, "/" + SERVICE_VERSION + "/" + mApiKey + "/" + method, null);
+    private URI makeServiceUri(String method, String version) throws URISyntaxException {
+        return new URI(SECURE_SERVICE_SCHEME, SECURE_SERVICE_HOST, "/" + version + "/" + mApiKey + "/" + method, null);
     }
 
     private void dbInsertUpload(SQLiteDatabase db, JSONObject message) throws JSONException {

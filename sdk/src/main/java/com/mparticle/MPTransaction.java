@@ -13,6 +13,17 @@ import org.json.JSONObject;
  *
  */
 public class MPTransaction {
+    static final String NAME = "ProductName";
+    static final String SKU = "ProductSKU";
+    static final String AFFILIATION = "TransactionAffiliation";
+    static final String UNITPRICE = "ProductUnitPrice";
+    static final String QUANTITY = "ProductQuantity";
+    static final String REVENUE = "RevenueAmount";
+    static final String TAX = "TaxAmount";
+    static final String SHIPPING = "ShippingAmount";
+    static final String CATEGORY = "ProductCategory";
+    static final String CURRENCY = "CurrencyCode";
+    static final String TRANSACTION_ID = "TransactionID";
     private JSONObject transactionInfo;
 
     private MPTransaction(Builder builder) {
@@ -26,35 +37,35 @@ public class MPTransaction {
         try {
             transactionInfo = new JSONObject();
             transactionInfo.put("$MethodName", "LogEcommerceTransaction");
-            MParticle.setCheckedAttribute(transactionInfo, "ProductName", builder.productName);
-            MParticle.setCheckedAttribute(transactionInfo, "ProductSKU", builder.productSku);
+            MParticle.setCheckedAttribute(transactionInfo, NAME, builder.productName);
+            MParticle.setCheckedAttribute(transactionInfo, SKU, builder.productSku);
 
             if (builder.affiliation != null && builder.affiliation.length() > 0)
-                MParticle.setCheckedAttribute(transactionInfo, "TransactionAffiliation", builder.affiliation);
+                MParticle.setCheckedAttribute(transactionInfo, AFFILIATION, builder.affiliation);
 
             if (builder.productUnitPrice != null)
-                MParticle.setCheckedAttribute(transactionInfo, "ProductUnitPrice", Double.toString(builder.productUnitPrice));
+                MParticle.setCheckedAttribute(transactionInfo, UNITPRICE, Double.toString(builder.productUnitPrice));
 
             if (builder.quantity != null)
-                MParticle.setCheckedAttribute(transactionInfo, "ProductQuantity", Double.toString(builder.quantity));
+                MParticle.setCheckedAttribute(transactionInfo, QUANTITY, Double.toString(builder.quantity));
 
             if (builder.revenueAmount != null)
-                MParticle.setCheckedAttribute(transactionInfo, "RevenueAmount", Double.toString(builder.revenueAmount));
+                MParticle.setCheckedAttribute(transactionInfo, REVENUE, Double.toString(builder.revenueAmount));
 
             if (builder.taxAmount != null)
-                MParticle.setCheckedAttribute(transactionInfo, "TaxAmount", Double.toString(builder.taxAmount));
+                MParticle.setCheckedAttribute(transactionInfo, TAX, Double.toString(builder.taxAmount));
 
             if (builder.shippingAmount != null)
-                MParticle.setCheckedAttribute(transactionInfo, "ShippingAmount", Double.toString(builder.shippingAmount));
+                MParticle.setCheckedAttribute(transactionInfo, SHIPPING, Double.toString(builder.shippingAmount));
 
             if (builder.productCategory != null)
-                MParticle.setCheckedAttribute(transactionInfo, "ProductCategory", builder.productCategory);
+                MParticle.setCheckedAttribute(transactionInfo, CATEGORY, builder.productCategory);
 
             if (builder.currencyCode != null)
-                MParticle.setCheckedAttribute(transactionInfo, "CurrencyCode", builder.currencyCode);
+                MParticle.setCheckedAttribute(transactionInfo, CURRENCY, builder.currencyCode);
 
             if (builder.transactionId != null && builder.transactionId.length() > 0)
-                MParticle.setCheckedAttribute(transactionInfo, "TransactionID", builder.transactionId);
+                MParticle.setCheckedAttribute(transactionInfo, TRANSACTION_ID, builder.transactionId);
 
 
         } catch (JSONException jse) {
