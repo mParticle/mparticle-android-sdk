@@ -31,6 +31,7 @@ import java.net.SocketImpl;
 import java.net.SocketImplFactory;
 import java.net.URL;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.UUID;
 
@@ -270,7 +271,12 @@ public class MParticle {
     }
 
     /* package-private */
-    static boolean setCheckedAttribute(JSONObject attributes, String key, Object value) {
+    static boolean setCheckedAttribute(JSONObject attributes, String key, Object value){
+        return setCheckedAttribute(attributes, key, value, false);
+    }
+
+    /* package-private */
+    static boolean setCheckedAttribute(JSONObject attributes, String key, Object value, boolean caseInsensitive) {
         if (null == attributes || null == key) {
             return false;
         }
@@ -290,12 +296,26 @@ public class MParticle {
             if (value == null) {
                 value = JSONObject.NULL;
             }
+            if (caseInsensitive){
+                key = findCaseInsensitiveKey(attributes, key);
+            }
             attributes.put(key, value);
         } catch (JSONException e) {
             Log.w(TAG, "JSON error processing attributes. Discarding attribute: " + key);
             return false;
         }
         return true;
+    }
+
+    static String findCaseInsensitiveKey(JSONObject jsonObject, String key){
+        Iterator<String> keys = jsonObject.keys();
+        while(keys.hasNext()){
+            String currentKey = keys.next();
+            if (currentKey.equalsIgnoreCase(key)){
+                return currentKey;
+            }
+        }
+        return key;
     }
 
     boolean shouldProcessUrl(String url) {
@@ -886,9 +906,10 @@ public class MParticle {
     public void setSessionAttribute(String key, String value) {
         if (mConfigManager.getSendOoEvents()) {
             ensureActiveSession();
-            if (mDebugMode)
+            if (mDebugMode) {
                 debugLog("Set session attribute: " + key + "=" + value);
-            if (setCheckedAttribute(mSessionAttributes, key, value)) {
+            }
+            if (setCheckedAttribute(mSessionAttributes, key, value, true)) {
                 mMessageManager.setSessionAttributes(mSessionID, mSessionAttributes);
             }
         }
@@ -908,7 +929,7 @@ public class MParticle {
                 } else {
                     debugLog("Set user attribute: " + key);
                 }
-            if (setCheckedAttribute(mUserAttributes, key, value)) {
+            if (setCheckedAttribute(mUserAttributes, key, value, true)) {
                 sPreferences.edit().putString(PrefKeys.USER_ATTRS + mApiKey, mUserAttributes.toString()).commit();
             }
         }
@@ -921,11 +942,10 @@ public class MParticle {
      */
     public void removeUserAttribute(String key) {
         if (mConfigManager.getSendOoEvents()) {
-            if (mDebugMode)
-                if (key != null) {
-                    debugLog("Removing user attribute: " + key);
-                }
-            if (mUserAttributes.has(key)) {
+            if (mDebugMode && key != null) {
+                debugLog("Removing user attribute: " + key);
+            }
+            if (mUserAttributes.has(key) || mUserAttributes.has(findCaseInsensitiveKey(mUserAttributes, key)) ) {
                 mUserAttributes.remove(key);
                 sPreferences.edit().putString(PrefKeys.USER_ATTRS + mApiKey, mUserAttributes.toString()).commit();
             }
