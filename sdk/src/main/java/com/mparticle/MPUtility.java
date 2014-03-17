@@ -28,7 +28,6 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.math.BigInteger;
@@ -448,5 +447,15 @@ public class MPUtility {
     public static boolean checkPermission(Context context, String permission){
         int res = context.checkCallingOrSelfPermission(permission);
         return (res == PackageManager.PERMISSION_GRANTED);
+    }
+
+    public static boolean isGooglePlayServicesAvailable(){
+        try{
+            Class.forName("com.google.android.gms.ads.identifier.AdvertisingIdClient");
+            return true;
+        }catch (ClassNotFoundException cnfe){
+
+        }
+        return false;
     }
 }

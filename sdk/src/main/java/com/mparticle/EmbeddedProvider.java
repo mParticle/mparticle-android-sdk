@@ -22,10 +22,10 @@ public abstract class EmbeddedProvider implements IEmbeddedKit {
     private final static String KEY_EVENT_ATTRIBUTES = "ea";
     private final static int MAT = 32;
 
-    protected HashMap<String, String> properties;
-    protected HashMap<Long, Boolean> types;
-    protected HashMap<Long, Boolean> names;
-    protected HashMap<Long, Boolean> attributes;
+    protected HashMap<String, String> properties = new HashMap<String, String>(0);
+    protected HashMap<Integer, Boolean> types = new HashMap<Integer, Boolean>(0);
+    protected HashMap<Integer, Boolean> names = new HashMap<Integer, Boolean>(0);
+    protected HashMap<Integer, Boolean> attributes = new HashMap<Integer, Boolean>(0);
     protected Context context;
 
     public EmbeddedProvider(Context context) throws ClassNotFoundException{
@@ -55,12 +55,12 @@ public abstract class EmbeddedProvider implements IEmbeddedKit {
         return this;
     }
 
-    private HashMap<Long, Boolean> convertToHashMap(JSONObject json){
-        HashMap<Long, Boolean> map = new HashMap<Long, Boolean>();
+    private HashMap<Integer, Boolean> convertToHashMap(JSONObject json){
+        HashMap<Integer, Boolean> map = new HashMap<Integer, Boolean>();
         for (Iterator<String> iterator = json.keys(); iterator.hasNext();) {
             try {
                 String key = iterator.next();
-                map.put(Long.parseLong(key), json.getBoolean(key));
+                map.put(Integer.parseInt(key), json.getBoolean(key));
             }catch (JSONException jse){
                 if (MParticle.getInstance().getDebugMode()){
                     Log.w(Constants.LOG_TAG, "Issue while parsing embedded kit configuration: " + jse.getMessage());
@@ -74,14 +74,56 @@ public abstract class EmbeddedProvider implements IEmbeddedKit {
         int id = json.getInt(KEY_ID);
         switch (id){
             case MAT:
-                return new EmbeddedMAT(context).parseConfig(json).init();
+                return new EmbeddedMAT(context);
             default:
                 return null;
         }
 
     }
 
-    protected abstract EmbeddedProvider init();
+    private static int hash(String input) {
+        int hash = 0;
+
+        if (input == null || input.length() == 0)
+            return hash;
+
+        char[] chars = input.toLowerCase().toCharArray();
+
+        for (char c : chars) {
+            hash = ((hash << 5) - hash) + c;
+        }
+
+        return hash;
+    }
+
+    protected boolean shouldSend(MParticle.EventType type, String name){
+        int typeHash = hash(type.toString());
+        if (types.containsKey(typeHash) && !types.get(typeHash)){
+            return false;
+        }
+        int typeNameHash = hash(type.toString() + name);
+        if (names.containsKey(typeNameHash) && !names.get(typeNameHash)){
+            return false;
+        }
+
+        return true;
+    }
+
+    protected JSONObject filterAttributes(MParticle.EventType type, String name, JSONObject eventAttributes){
+        Iterator attIterator = eventAttributes.keys();
+        String nameType = type + name;
+        while (attIterator.hasNext()){
+            String attributeKey = (String)attIterator.next();
+            int hash = hash(nameType + attributeKey);
+            if (attributes.containsKey(hash) && !attributes.get(hash)){
+                attIterator.remove();
+            }
+        }
+        return eventAttributes;
+    }
+
+    protected abstract EmbeddedProvider update();
     public abstract String getName();
+
 
 }

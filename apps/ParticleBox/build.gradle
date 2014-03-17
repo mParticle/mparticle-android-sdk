@@ -33,7 +33,7 @@ android {
     def gitHash = "git rev-parse --short HEAD".execute().text.trim()
 
     defaultConfig {
-        minSdkVersion 8
+        minSdkVersion 9
         targetSdkVersion 19
         buildConfigField "String", "GIT_SHA", "\"$gitHash\""
         buildConfigField "String", "BUILD_TIME", "\"${buildTime()}\""

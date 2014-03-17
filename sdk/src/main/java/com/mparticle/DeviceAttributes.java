@@ -17,7 +17,6 @@ import com.mparticle.Constants.PrefKeys;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.File;
 import java.util.Locale;
 import java.util.TimeZone;
 
@@ -180,6 +179,8 @@ import java.util.TimeZone;
 
         return attributes;
     }
+
+
 
 
 }

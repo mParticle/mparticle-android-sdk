@@ -14,7 +14,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * Created by sdozor on 1/15/14.
  */
-class AppStateManager {
+class AppStateManager implements MPActivityCallbacks{
 
     public static final String APP_STATE_FOREGROUND = "foreground";
     public static final String APP_STATE_BACKGROUND = "background";
@@ -55,17 +55,17 @@ class AppStateManager {
         ((Application) mContext).registerActivityLifecycleCallbacks(new Application.ActivityLifecycleCallbacks() {
             @Override
             public void onActivityCreated(Activity activity, Bundle savedInstanceState) {
-
+                AppStateManager.this.onActivityCreated(activity);
             }
 
             @Override
             public void onActivityStarted(Activity activity) {
-                AppStateManager.this.recordActivityStarted(activity);
+                AppStateManager.this.onActivityStarted(activity);
             }
 
             @Override
             public void onActivityResumed(Activity activity) {
-
+                AppStateManager.this.onActivityResumed(activity);
             }
 
             @Override
@@ -75,7 +75,7 @@ class AppStateManager {
 
             @Override
             public void onActivityStopped(Activity activity) {
-                AppStateManager.this.recordActivityStopped(activity);
+                AppStateManager.this.onActivityStopped(activity);
             }
 
             @Override
@@ -90,33 +90,12 @@ class AppStateManager {
         });
     }
 
-    public void onActivityResumed(Activity activity){
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
-            recordActivityResumed(activity);
-        }
-    }
-
     boolean isBackgrounded() {
         return mActivities.get() < 1 && (System.currentTimeMillis() - mLastStoppedTime >= ACTIVITY_DELAY);
     }
 
+    @Override
     public void onActivityStarted(Activity activity) {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
-            recordActivityStarted(activity);
-        }
-    }
-
-    public void onActivityStopped(Activity activity) {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
-            recordActivityStopped(activity);
-        }
-    }
-
-    void recordActivityResumed(Activity activity){
-        embeddedKitManager.onResume(activity);
-    }
-
-    void recordActivityStarted(Activity activity){
         if (isBackgrounded() && mLastStoppedTime > 0) {
             MParticle.getInstance().logStateTransition(Constants.StateTransitionType.STATE_TRANS_FORE);
             if (MParticle.getInstance().getDebugMode()) {
@@ -124,39 +103,41 @@ class AppStateManager {
             }
         }
         mActivities.getAndIncrement();
-        if (MParticle.getInstance().getDebugMode()) {
-            Log.d(Constants.LOG_TAG, "Activity Count: " + mActivities);
-        }
         if (MParticle.getInstance().isAutoTrackingEnabled()) {
             MParticle.getInstance().logScreen(getActivityName(activity), null, true);
         }
+        embeddedKitManager.onActivityStarted(activity);
     }
 
-    void recordActivityStopped(Activity activity) {
+    @Override
+    public void onActivityStopped(Activity activity) {
         mLastStoppedTime = System.currentTimeMillis();
 
         if (mActivities.decrementAndGet() < 1) {
             delayedBackgroundCheckHandler.postDelayed(backgroundChecker, ACTIVITY_DELAY);
         }
-        if (MParticle.getInstance().getDebugMode()) {
-            Log.d(Constants.LOG_TAG, "Activity Count: " + mActivities);
-        }
         if (MParticle.getInstance().isAutoTrackingEnabled()) {
             MParticle.getInstance().logScreen(getActivityName(activity), null, false);
         }
+        embeddedKitManager.onActivityStopped(activity);
+    }
 
+    @Override
+    public void onActivityCreated(Activity activity){
+        embeddedKitManager.onActivityCreated(activity);
+    }
+
+    @Override
+    public void onActivityResumed(Activity activity){
+        embeddedKitManager.onActivityResumed(activity);
+    }
+
+    @Override
+    public void onActivityPaused(Activity activity) {
+        embeddedKitManager.onActivityPaused(activity);
     }
 
     private String getActivityName(Activity activity) {
         return activity.getClass().getCanonicalName();
-        /*if (this.mActivityNameMap.containsKey(canonicalName)) {
-            return (String)this.mActivityNameMap.get(canonicalName);
-        }
-        String name = this.mParameterFetcher.getString(canonicalName);
-        if (name == null) {
-            name = canonicalName;
-        }
-        this.mActivityNameMap.put(canonicalName, name);
-        return name;*/
     }
 }

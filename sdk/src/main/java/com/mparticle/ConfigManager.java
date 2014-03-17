@@ -89,7 +89,7 @@ class ConfigManager {
         applyConfig();
 
         if (responseJSON.has(KEY_EMBEDDED_KITS)) {
-            embeddedKitManager.updateWithConfig(responseJSON.getJSONArray(KEY_EMBEDDED_KITS));
+            embeddedKitManager.updateKits(responseJSON.getJSONArray(KEY_EMBEDDED_KITS));
         }
 
         if (responseJSON != null){

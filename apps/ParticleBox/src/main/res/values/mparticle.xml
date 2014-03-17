@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="utf-8" ?>
 
 <resources>
-    <string name="mp_key">2076f64e6acf0044a7ac09120851b25d</string>
-    <string name="mp_secret">7BGSoICxOrATrbAGonXm2ca2ajgPUvo_L1gFQ4g-mF1esCRjad1iY0aGiTh54VMc</string>
-   <!-- <string name="mp_key">bb6ef33d0189a24b8f8f7a78104e2626</string>
 
-    <string name="mp_secret">cFlt7oaYxdpdNKoyQdrlP6f6OSp5z5pYX7ElbY3HSjuIY2DHL1MDIgOmRcdBo6qy</string>-->
+    <string name="mp_key">bb6ef33d0189a24b8f8f7a78104e2626</string>
+
+    <string name="mp_secret">cFlt7oaYxdpdNKoyQdrlP6f6OSp5z5pYX7ElbY3HSjuIY2DHL1MDIgOmRcdBo6qy</string>
 
     <bool name="mp_reportUncaughtExceptions">true</bool>
 

@@ -497,6 +497,7 @@ public class MParticle {
                 Log.w(TAG, "eventName is required for logEvent");
                 return;
             }
+
             if (eventName.length() > Constants.LIMIT_NAME) {
                 Log.w(TAG, "The event name was too long. Discarding event.");
                 return;
@@ -510,13 +511,16 @@ public class MParticle {
                     eventInfo.put(Constants.MessageKey.EVENT_CATEGORY, category);
                 }
                 JSONObject eventDataJSON = enforceAttributeConstraints(eventInfo);
+
                 mMessageManager.logEvent(mSessionID, mSessionStartTime, mLastEventTime, eventName, eventType, eventDataJSON, eventLength);
-                if (mDebugMode)
+                if (mDebugMode) {
                     if (null == eventDataJSON) {
                         debugLog("Logged event: " + eventName);
                     } else {
                         debugLog("Logged event: " + eventName + " with data " + eventDataJSON);
                     }
+                }
+                embeddedKitManager.logEvent(eventType, eventName, eventDataJSON);
             }
         }
     }
@@ -549,6 +553,7 @@ public class MParticle {
 
                     }
                 }
+                embeddedKitManager.logTransaction(transaction);
             }
         }
     }
@@ -567,12 +572,14 @@ public class MParticle {
             if (checkEventLimit()) {
                 JSONObject eventDataJSON = enforceAttributeConstraints(eventData);
                 mMessageManager.logScreen(mSessionID, mSessionStartTime, mLastEventTime, screenName, eventDataJSON, started);
-                if (mDebugMode)
+                if (mDebugMode) {
                     if (null == eventDataJSON) {
                         debugLog("Logged screen: " + screenName);
                     } else {
                         debugLog("Logged screen: " + screenName + " with data " + eventDataJSON);
                     }
+                }
+                embeddedKitManager.logScreen(screenName, eventDataJSON);
             }
         }
     }
