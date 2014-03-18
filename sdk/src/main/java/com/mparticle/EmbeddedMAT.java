@@ -15,14 +15,13 @@ import java.util.UUID;
 
 /**
  * Created by sdozor on 3/13/14.
- *
+ * <p/>
  * Embedded implementation of the MAT SDK, tested against MAT v. 3.1.
- *
+ * <p/>
  * Detailed behavior defined here:
  * https://mparticle.atlassian.net/wiki/pages/viewpage.action?spaceKey=DMP&title=MobileAppTracking
  */
-public class EmbeddedMAT extends EmbeddedProvider implements MPActivityCallbacks{
-
+public class EmbeddedMAT extends EmbeddedProvider implements MPActivityCallbacks {
     //Server config constants defined for this provider
     //keys to provide access to the MAT account.
     private static final String ADVERTISER_ID = "advertiserId";
@@ -37,8 +36,6 @@ public class EmbeddedMAT extends EmbeddedProvider implements MPActivityCallbacks
     //if true, we forward available user data (e.g., name, email, age, etc.) to MAT
     private static final String INCLUDE_USER_DATA = "includeUserData";
 
-
-
     //If true, we'll turn on MAT's "viewing server response" feature. Useful for debugging
     private static final String VIEW_SERVER_RESPONSE = "viewServerResponse";
     private String conversionId;
@@ -48,8 +45,8 @@ public class EmbeddedMAT extends EmbeddedProvider implements MPActivityCallbacks
         super(context);
         try {
             Class.forName("com.mobileapptracker.MobileAppTracker");
-        }catch (ClassNotFoundException cnfe){
-            if (MParticle.getInstance().getDebugMode()){
+        } catch (ClassNotFoundException cnfe) {
+            if (MParticle.getInstance().getDebugMode()) {
                 Log.w(Constants.LOG_TAG, "Failed in initiate MAT - library not found. Have you added it to your application's classpath?");
             }
             throw cnfe;
@@ -65,11 +62,11 @@ public class EmbeddedMAT extends EmbeddedProvider implements MPActivityCallbacks
                 if (eventAttributes.length() > 0) {
                     JSONObject lowercaseAttributes = new JSONObject();
                     Iterator<String> keys = eventAttributes.keys();
-                    while (keys.hasNext()){
+                    while (keys.hasNext()) {
                         String key = keys.next();
                         try {
                             lowercaseAttributes.put(key.toLowerCase(), eventAttributes.optString(key));
-                        }catch (JSONException jse){
+                        } catch (JSONException jse) {
 
                         }
                     }
@@ -82,7 +79,7 @@ public class EmbeddedMAT extends EmbeddedProvider implements MPActivityCallbacks
                     );
                     instance.measureAction(name, item);
                 }
-            }else{
+            } else {
                 instance.measureAction(name);
             }
         }
@@ -95,18 +92,18 @@ public class EmbeddedMAT extends EmbeddedProvider implements MPActivityCallbacks
         com.mobileapptracker.MATEventItem item = new com.mobileapptracker.MATEventItem(
                 transData.optString(MPTransaction.NAME),
                 transData.optInt(MPTransaction.QUANTITY, 1),
-                transData.optDouble(MPTransaction.UNITPRICE,0),
-                transData.optDouble(MPTransaction.REVENUE,0),
+                transData.optDouble(MPTransaction.UNITPRICE, 0),
+                transData.optDouble(MPTransaction.REVENUE, 0),
                 transData.optString(MPTransaction.TAX),
                 transData.optString(MPTransaction.SHIPPING),
                 transData.optString(MPTransaction.SKU),
                 transData.optString(MPTransaction.AFFILIATION),
                 transData.optString(MPTransaction.CATEGORY)
-                );
+        );
         instance.measureAction("purchase",
                 item,
                 transData.optDouble(MPTransaction.REVENUE, 0),
-                transData.optString(MPTransaction.CURRENCY,"USD"),
+                transData.optString(MPTransaction.CURRENCY, "USD"),
                 transData.optString(MPTransaction.TRANSACTION_ID, UUID.randomUUID().toString())
         );
     }
@@ -118,7 +115,7 @@ public class EmbeddedMAT extends EmbeddedProvider implements MPActivityCallbacks
 
     @Override
     public void setLocation(Location location) {
-        if (location != null){
+        if (location != null) {
             com.mobileapptracker.MobileAppTracker.getInstance().setLatitude(location.getLatitude());
             com.mobileapptracker.MobileAppTracker.getInstance().setLongitude(location.getLongitude());
             com.mobileapptracker.MobileAppTracker.getInstance().setAltitude(location.getAltitude());
@@ -128,32 +125,32 @@ public class EmbeddedMAT extends EmbeddedProvider implements MPActivityCallbacks
     @Override
     public void setUserAttributes(JSONObject mUserAttributes) {
         if (mUserAttributes != null &&
-                (!properties.containsKey(INCLUDE_USER_DATA) || Boolean.parseBoolean(properties.get(INCLUDE_USER_DATA)))){
-            com.mobileapptracker.MobileAppTracker instance  = com.mobileapptracker.MobileAppTracker.getInstance();
+                (!properties.containsKey(INCLUDE_USER_DATA) || Boolean.parseBoolean(properties.get(INCLUDE_USER_DATA)))) {
+            com.mobileapptracker.MobileAppTracker instance = com.mobileapptracker.MobileAppTracker.getInstance();
             Iterator<String> keys = mUserAttributes.keys();
             String firstName = "";
             String lastName = "";
-            while (keys.hasNext()){
+            while (keys.hasNext()) {
                 String key = keys.next();
                 try {
                     if (MParticle.UserAttributes.AGE.equalsIgnoreCase(key)) {
                         instance.setAge(Integer.parseInt(mUserAttributes.getString(key)));
-                    }else if (MParticle.UserAttributes.GENDER.equalsIgnoreCase(key)) {
+                    } else if (MParticle.UserAttributes.GENDER.equalsIgnoreCase(key)) {
                         instance.setGender(Integer.parseInt(mUserAttributes.getString(key)));
-                    }else if (MParticle.UserAttributes.FIRSTNAME.equalsIgnoreCase(key)) {
+                    } else if (MParticle.UserAttributes.FIRSTNAME.equalsIgnoreCase(key)) {
                         firstName = mUserAttributes.optString(key);
-                    }else if (MParticle.UserAttributes.LASTNAME.equalsIgnoreCase(key)) {
+                    } else if (MParticle.UserAttributes.LASTNAME.equalsIgnoreCase(key)) {
                         lastName = mUserAttributes.optString(key);
                     }
-                }catch (JSONException jse){
+                } catch (JSONException jse) {
 
-                }catch (NumberFormatException nfe){
-                    if (MParticle.getInstance().getDebugMode()){
+                } catch (NumberFormatException nfe) {
+                    if (MParticle.getInstance().getDebugMode()) {
                         Log.e(Constants.LOG_TAG, getName() + " requires user attribute: " + key + " to be parsable as an integer");
                     }
                 }
             }
-            if (firstName.length() > 0 || lastName.length() > 0){
+            if (firstName.length() > 0 || lastName.length() > 0) {
                 String fullName = firstName + " " + lastName;
                 instance.setUserName(fullName);
             }
@@ -168,12 +165,12 @@ public class EmbeddedMAT extends EmbeddedProvider implements MPActivityCallbacks
     @Override
     public void setUserIdentity(String id, MParticle.IdentityType identityType) {
         com.mobileapptracker.MobileAppTracker instance = com.mobileapptracker.MobileAppTracker.getInstance();
-        if (identityType == MParticle.IdentityType.CustomerId){
+        if (identityType == MParticle.IdentityType.CustomerId) {
             if (!properties.containsKey(USE_CUSTOMER_ID) ||
                     Boolean.parseBoolean(properties.get(USE_CUSTOMER_ID))) {
                 instance.setUserId(id);
             }
-        }else if (Boolean.parseBoolean(properties.get(INCLUDE_ALL_IDS))) {
+        } else if (Boolean.parseBoolean(properties.get(INCLUDE_ALL_IDS))) {
             switch (identityType) {
                 case Facebook:
                     instance.setFacebookUserId(id);
@@ -206,7 +203,7 @@ public class EmbeddedMAT extends EmbeddedProvider implements MPActivityCallbacks
                     .putBoolean(Constants.PrefKeys.MAT_EXISTING_USER, true)
                     .commit();
         }
-        if (Boolean.parseBoolean(properties.get(VIEW_SERVER_RESPONSE))){
+        if (Boolean.parseBoolean(properties.get(VIEW_SERVER_RESPONSE))) {
             com.mobileapptracker.MobileAppTracker.getInstance().setMATResponse(new com.mobileapptracker.MATResponse() {
                 @Override
                 public void enqueuedActionWithRefId(String id) {
