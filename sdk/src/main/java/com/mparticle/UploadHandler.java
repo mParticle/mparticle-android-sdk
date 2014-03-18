@@ -465,7 +465,7 @@ import javax.crypto.spec.SecretKeySpec;
                             Log.d(TAG, "Uploading data to mParticle server:");
                             try {
                                 JSONObject messageJson = new JSONObject(message);
-                             //   Log.bytesOut(TAG, messageJson.toString(4));
+                             //   Log.d(TAG, messageJson.toString(4));
                                 if (messageJson.has(MessageKey.MESSAGES)) {
                                     JSONArray messages = messageJson.getJSONArray(MessageKey.MESSAGES);
                                     Log.d(TAG, "SENDING MESSAGES");
@@ -478,7 +478,7 @@ import javax.crypto.spec.SecretKeySpec;
                                     for (int i = 0; i < messages.length(); i++) {
 
                                         Log.d(TAG, "Message type: " + ((JSONObject) messages.get(i)).getString(MessageKey.TYPE) + " SID: " + ((JSONObject) messages.get(i)).optString(MessageKey.SESSION_ID));
-                                        // Log.bytesOut(TAG, ((JSONObject)messages.get(i)).toString(4));
+                                        // Log.d(TAG, ((JSONObject)messages.get(i)).toString(4));
                                     }
                                 }
                             } catch (JSONException jse) {
@@ -516,11 +516,11 @@ import javax.crypto.spec.SecretKeySpec;
                                     boolean equal = MPUtility.jsonObjsAreEqual(responseJSON.getJSONObject("echo"), messageObj);
                                     if (!equal){
                                         Log.e(TAG, "Echo response did not match request!");
-                                        Log.bytesOut(TAG, "Request: " + messageObj.toString(4));
-                                        Log.bytesOut(TAG, "Echo response: " + responseJSON.getJSONObject("echo").toString(4));
+                                        Log.d(TAG, "Request: " + messageObj.toString(4));
+                                        Log.d(TAG, "Echo response: " + responseJSON.getJSONObject("echo").toString(4));
                                     }
                                 }catch (Exception e){
-                                    Log.bytesOut(TAG, "Exception while comparing Echo response: " + e.getMessage());
+                                    Log.d(TAG, "Exception while comparing Echo response: " + e.getMessage());
                                 }
                             }*/
                             if (responseJSON.has(MessageKey.MESSAGES)) {
