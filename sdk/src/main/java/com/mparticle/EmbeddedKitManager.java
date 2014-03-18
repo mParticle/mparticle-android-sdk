@@ -29,10 +29,12 @@ class EmbeddedKitManager implements IEmbeddedKit, MPActivityCallbacks{
                 JSONObject current = kitConfigs.getJSONObject(i);
                 if (!providers.containsKey(current.getInt(EmbeddedProvider.KEY_ID))) {
                     providers.put(current.getInt(EmbeddedProvider.KEY_ID), EmbeddedProvider.createInstance(current, context));
+                }
+                providers.get(current.getInt(EmbeddedProvider.KEY_ID)).parseConfig(current).update();
+                if (!providers.get(current.getInt(EmbeddedProvider.KEY_ID)).optedOut()) {
                     providers.get(current.getInt(EmbeddedProvider.KEY_ID)).setUserAttributes(MParticle.getInstance().mUserAttributes);
                     syncUserIdentities(providers.get(current.getInt(EmbeddedProvider.KEY_ID)));
                 }
-                providers.get(current.getInt(EmbeddedProvider.KEY_ID)).parseConfig(current).update();
             }catch (JSONException jse){
                 if (MParticle.getInstance().getDebugMode()){
                     Log.w(Constants.LOG_TAG, "Exception while parsing embedded kit configuration: " + jse.getMessage());
@@ -68,7 +70,9 @@ class EmbeddedKitManager implements IEmbeddedKit, MPActivityCallbacks{
     public void logEvent(MParticle.EventType type, String name, JSONObject eventAttributes) {
         for (EmbeddedProvider provider : providers.values()){
             try {
-                provider.logEvent(type, name, eventAttributes);
+                if (!provider.optedOut()) {
+                    provider.logEvent(type, name, eventAttributes);
+                }
             } catch (Exception e) {
                 if (MParticle.getInstance().getDebugMode()){
                     Log.w(Constants.LOG_TAG, "Failed to call logEvent for embedded provider: " + provider.getName() + ": " + e.getMessage());
@@ -81,7 +85,9 @@ class EmbeddedKitManager implements IEmbeddedKit, MPActivityCallbacks{
     public void logTransaction(MPTransaction transaction) {
         for (EmbeddedProvider provider : providers.values()){
             try {
-                provider.logTransaction(transaction);
+                if (!provider.optedOut()) {
+                    provider.logTransaction(transaction);
+                }
             } catch (Exception e) {
                 if (MParticle.getInstance().getDebugMode()){
                     Log.w(Constants.LOG_TAG, "Failed to call logTransaction for embedded provider: " + provider.getName() + ": " + e.getMessage());
@@ -94,7 +100,9 @@ class EmbeddedKitManager implements IEmbeddedKit, MPActivityCallbacks{
     public void logScreen(String screenName, JSONObject eventAttributes) {
         for (EmbeddedProvider provider : providers.values()){
             try {
-                provider.logScreen(screenName, eventAttributes);
+                if (!provider.optedOut()) {
+                    provider.logScreen(screenName, eventAttributes);
+                }
             } catch (Exception e) {
                 if (MParticle.getInstance().getDebugMode()){
                     Log.w(Constants.LOG_TAG, "Failed to call logScreen for embedded provider: " + provider.getName() + ": " + e.getMessage());
@@ -107,7 +115,9 @@ class EmbeddedKitManager implements IEmbeddedKit, MPActivityCallbacks{
     public void setLocation(Location location) {
         for (EmbeddedProvider provider : providers.values()){
             try {
-                provider.setLocation(location);
+                if (!provider.optedOut()) {
+                    provider.setLocation(location);
+                }
             } catch (Exception e) {
                 if (MParticle.getInstance().getDebugMode()){
                     Log.w(Constants.LOG_TAG, "Failed to call setLocation for embedded provider: " + provider.getName() + ": " + e.getMessage());
@@ -120,7 +130,9 @@ class EmbeddedKitManager implements IEmbeddedKit, MPActivityCallbacks{
     public void setUserAttributes(JSONObject mUserAttributes) {
         for (EmbeddedProvider provider : providers.values()){
             try {
-                provider.setUserAttributes(mUserAttributes);
+                if (!provider.optedOut()) {
+                    provider.setUserAttributes(mUserAttributes);
+                }
             } catch (Exception e) {
                 if (MParticle.getInstance().getDebugMode()){
                     Log.w(Constants.LOG_TAG, "Failed to call setUserAttributes for embedded provider: " + provider.getName() + ": " + e.getMessage());
@@ -133,7 +145,9 @@ class EmbeddedKitManager implements IEmbeddedKit, MPActivityCallbacks{
     public void removeUserAttribute(String key) {
         for (EmbeddedProvider provider : providers.values()){
             try {
-                provider.removeUserAttribute(key);
+                if (!provider.optedOut()) {
+                    provider.removeUserAttribute(key);
+                }
             } catch (Exception e) {
                 if (MParticle.getInstance().getDebugMode()){
                     Log.w(Constants.LOG_TAG, "Failed to call removeUserAttribute for embedded provider: " + provider.getName() + ": " + e.getMessage());
@@ -146,7 +160,9 @@ class EmbeddedKitManager implements IEmbeddedKit, MPActivityCallbacks{
     public void setUserIdentity(String id, MParticle.IdentityType identityType) {
         for (EmbeddedProvider provider : providers.values()){
             try {
-                provider.setUserIdentity(id, identityType);
+                if (!provider.optedOut()) {
+                    provider.setUserIdentity(id, identityType);
+                }
             } catch (Exception e) {
                 if (MParticle.getInstance().getDebugMode()){
                     Log.w(Constants.LOG_TAG, "Failed to call setUserIdentity for embedded provider: " + provider.getName() + ": " + e.getMessage());
@@ -160,7 +176,9 @@ class EmbeddedKitManager implements IEmbeddedKit, MPActivityCallbacks{
         for (EmbeddedProvider provider : providers.values()){
             if (provider instanceof MPActivityCallbacks) {
                 try {
-                    ((MPActivityCallbacks)provider).onActivityCreated(activity);
+                    if (!provider.optedOut()) {
+                        ((MPActivityCallbacks) provider).onActivityCreated(activity);
+                    }
                 } catch (Exception e) {
                     if (MParticle.getInstance().getDebugMode()) {
                         Log.w(Constants.LOG_TAG, "Failed to call onCreate for embedded provider: " + provider.getName() + ": " + e.getMessage());
@@ -175,7 +193,9 @@ class EmbeddedKitManager implements IEmbeddedKit, MPActivityCallbacks{
         for (EmbeddedProvider provider : providers.values()){
             if (provider instanceof MPActivityCallbacks) {
                 try {
-                    ((MPActivityCallbacks)provider).onActivityResumed(activity);
+                    if (!provider.optedOut()) {
+                        ((MPActivityCallbacks) provider).onActivityResumed(activity);
+                    }
                 } catch (Exception e) {
                     if (MParticle.getInstance().getDebugMode()) {
                         Log.w(Constants.LOG_TAG, "Failed to call onResume for embedded provider: " + provider.getName() + ": " + e.getMessage());

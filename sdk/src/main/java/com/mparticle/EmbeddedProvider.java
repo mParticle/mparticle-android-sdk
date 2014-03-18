@@ -22,6 +22,9 @@ public abstract class EmbeddedProvider implements IEmbeddedKit {
     private final static String KEY_EVENT_ATTRIBUTES = "ea";
     private final static int MAT = 32;
 
+    //If set to true, our sdk honor user's optout wish. If false, we still collect data on opt-ed out users, but only for reporting
+    private static final String HONOR_OPT_OUT = "honorOptOut";
+
     protected HashMap<String, String> properties = new HashMap<String, String>(0);
     protected HashMap<Integer, Boolean> types = new HashMap<Integer, Boolean>(0);
     protected HashMap<Integer, Boolean> names = new HashMap<Integer, Boolean>(0);
@@ -68,6 +71,11 @@ public abstract class EmbeddedProvider implements IEmbeddedKit {
             }
         }
         return map;
+    }
+
+    public boolean optedOut(){
+        return Boolean.parseBoolean(properties.containsKey(HONOR_OPT_OUT) ? properties.get(HONOR_OPT_OUT) : "true")
+                && !MParticle.getInstance().mConfigManager.getSendOoEvents();
     }
 
     static final EmbeddedProvider createInstance(JSONObject json, Context context) throws JSONException, ClassNotFoundException{

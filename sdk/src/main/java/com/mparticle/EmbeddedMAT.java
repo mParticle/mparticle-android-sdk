@@ -37,8 +37,7 @@ public class EmbeddedMAT extends EmbeddedProvider implements MPActivityCallbacks
     //if true, we forward available user data (e.g., name, email, age, etc.) to MAT
     private static final String INCLUDE_USER_DATA = "includeUserData";
 
-    //If set to true, our sdk honor user's optout wish. If false, we still collect data on opt-ed out users, but only for reporting
-    private static final String HONOR_OPT_OUT = "honorOptOut";
+
 
     //If true, we'll turn on MAT's "viewing server response" feature. Useful for debugging
     private static final String VIEW_SERVER_RESPONSE = "viewServerResponse";

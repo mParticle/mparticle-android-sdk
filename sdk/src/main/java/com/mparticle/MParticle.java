@@ -40,7 +40,7 @@ import javax.net.ssl.HttpsURLConnection;
  * The primary access point to the mParticle SDK. In order to use this class, you must first call {@link #start(android.content.Context)}, which requires
  * configuration via {@link <a href="http://developer.android.com/guide/topics/resources/providing-resources.html">Android Resources</a>}. You can then retrieve a reference
  * to an instance of this class via {@link #getInstance()}
- *
+ * <p/>
  * It's recommended to keep configuration parameters in a single xml file located within your res/values folder. The full list of configuration options is as follows:
  * <p/>
  * <h4>Required parameters</h4>
@@ -492,26 +492,25 @@ public class MParticle {
      * @param category    the category with which to associate this event
      */
     public void logEvent(String eventName, EventType eventType, Map<String, String> eventInfo, long eventLength, String category) {
-        if (mConfigManager.getSendOoEvents()) {
-            if (null == eventName) {
-                Log.w(TAG, "eventName is required for logEvent");
-                return;
-            }
+        if (null == eventName) {
+            Log.w(TAG, "eventName is required for logEvent");
+            return;
+        }
 
-            if (eventName.length() > Constants.LIMIT_NAME) {
-                Log.w(TAG, "The event name was too long. Discarding event.");
-                return;
-            }
-            ensureActiveSession();
-            if (checkEventLimit()) {
-                if (category != null) {
-                    if (eventInfo == null) {
-                        eventInfo = new HashMap<String, String>();
-                    }
-                    eventInfo.put(Constants.MessageKey.EVENT_CATEGORY, category);
+        if (eventName.length() > Constants.LIMIT_NAME) {
+            Log.w(TAG, "The event name was too long. Discarding event.");
+            return;
+        }
+        ensureActiveSession();
+        if (checkEventLimit()) {
+            if (category != null) {
+                if (eventInfo == null) {
+                    eventInfo = new HashMap<String, String>();
                 }
-                JSONObject eventDataJSON = enforceAttributeConstraints(eventInfo);
-
+                eventInfo.put(Constants.MessageKey.EVENT_CATEGORY, category);
+            }
+            JSONObject eventDataJSON = enforceAttributeConstraints(eventInfo);
+            if (mConfigManager.getSendOoEvents()) {
                 mMessageManager.logEvent(mSessionID, mSessionStartTime, mLastEventTime, eventName, eventType, eventDataJSON, eventLength);
                 if (mDebugMode) {
                     if (null == eventDataJSON) {
@@ -520,31 +519,31 @@ public class MParticle {
                         debugLog("Logged event: " + eventName + " with data " + eventDataJSON);
                     }
                 }
-                embeddedKitManager.logEvent(eventType, eventName, eventDataJSON);
+
             }
+            embeddedKitManager.logEvent(eventType, eventName, eventDataJSON);
         }
     }
 
     /**
      * Logs an e-commerce transaction event
      *
-     * @see com.mparticle.MPTransaction.Builder
-     *
      * @param transaction (required not null)
+     * @see com.mparticle.MPTransaction.Builder
      * @see com.mparticle.MPTransaction.Builder
      */
     public void logTransaction(MPTransaction transaction) {
-        if (mConfigManager.getSendOoEvents()) {
-            if (transaction == null) {
-                throw new IllegalArgumentException("transaction is required for logTransaction");
-            }
+        if (transaction == null) {
+            throw new IllegalArgumentException("transaction is required for logTransaction");
+        }
 
-            if (transaction.getData() == null) {
-                throw new IllegalArgumentException("Transaction data was null, please check that the transaction was built properly.");
-            }
+        if (transaction.getData() == null) {
+            throw new IllegalArgumentException("Transaction data was null, please check that the transaction was built properly.");
+        }
 
-            ensureActiveSession();
-            if (checkEventLimit()) {
+        ensureActiveSession();
+        if (checkEventLimit()) {
+            if (mConfigManager.getSendOoEvents()) {
                 mMessageManager.logEvent(mSessionID, mSessionStartTime, mLastEventTime, "Ecommerce", EventType.Transaction, transaction.getData(), 0);
                 if (mDebugMode) {
                     try {
@@ -553,24 +552,25 @@ public class MParticle {
 
                     }
                 }
-                embeddedKitManager.logTransaction(transaction);
+
             }
+            embeddedKitManager.logTransaction(transaction);
         }
     }
 
     void logScreen(String screenName, Map<String, String> eventData, boolean started) {
-        if (mConfigManager.getSendOoEvents()) {
-            if (null == screenName) {
-                Log.w(TAG, "screenName is required for logScreen");
-                return;
-            }
-            if (screenName.length() > Constants.LIMIT_NAME) {
-                Log.w(TAG, "The screen name was too long. Discarding event.");
-                return;
-            }
-            ensureActiveSession();
-            if (checkEventLimit()) {
-                JSONObject eventDataJSON = enforceAttributeConstraints(eventData);
+        if (null == screenName) {
+            Log.w(TAG, "screenName is required for logScreen");
+            return;
+        }
+        if (screenName.length() > Constants.LIMIT_NAME) {
+            Log.w(TAG, "The screen name was too long. Discarding event.");
+            return;
+        }
+        ensureActiveSession();
+        if (checkEventLimit()) {
+            JSONObject eventDataJSON = enforceAttributeConstraints(eventData);
+            if (mConfigManager.getSendOoEvents()) {
                 mMessageManager.logScreen(mSessionID, mSessionStartTime, mLastEventTime, screenName, eventDataJSON, started);
                 if (mDebugMode) {
                     if (null == eventDataJSON) {
@@ -579,8 +579,8 @@ public class MParticle {
                         debugLog("Logged screen: " + screenName + " with data " + eventDataJSON);
                     }
                 }
-                embeddedKitManager.logScreen(screenName, eventDataJSON);
             }
+            embeddedKitManager.logScreen(screenName, eventDataJSON);
         }
     }
 
@@ -718,7 +718,6 @@ public class MParticle {
 
     /**
      * Begin measuring network performance. This method only needs to be called one time during the runtime of an application.
-     *
      */
     public void beginMeasuringNetworkPerformance() {
         mConfigManager.setNetworkingEnabled(true);
@@ -728,7 +727,6 @@ public class MParticle {
 
     /**
      * Stop measuring network performance.
-     *
      */
     public void endMeasuringNetworkPerformance() {
         measuredRequestManager.setEnabled(false);
@@ -749,9 +747,8 @@ public class MParticle {
      * Exclude the given URL substring from network measurement tracking. This method may be called repeatedly to add
      * multiple excluded URLs.
      *
-     * @see #resetNetworkPerformanceExclusionsAndFilters()
-     *
      * @param url
+     * @see #resetNetworkPerformanceExclusionsAndFilters()
      */
     public void excludeUrlFromNetworkPerformanceMeasurement(String url) {
         measuredRequestManager.addExcludedUrl(url);
@@ -761,9 +758,8 @@ public class MParticle {
      * Specify a filter for query strings that should be logged. Call this method repeatedly to specify
      * multiple query string filters. By default, query strings will be removed from all measured URLs.
      *
-     * @see #resetNetworkPerformanceExclusionsAndFilters()
-     *
      * @param filter
+     * @see #resetNetworkPerformanceExclusionsAndFilters()
      */
     public void addNetworkPerformanceQueryOnlyFilter(String filter) {
         measuredRequestManager.addQueryStringFilter(filter);
@@ -775,7 +771,6 @@ public class MParticle {
      *
      * @see #excludeUrlFromNetworkPerformanceMeasurement(String)
      * @see #addNetworkPerformanceQueryOnlyFilter(String)
-     *
      */
     public void resetNetworkPerformanceExclusionsAndFilters() {
         measuredRequestManager.resetFilters();
@@ -912,18 +907,17 @@ public class MParticle {
      * @param value the attribute value
      */
     public void setUserAttribute(String key, String value) {
-        if (mConfigManager.getSendOoEvents()) {
-            if (mDebugMode)
-                if (value != null) {
-                    debugLog("Set user attribute: " + key + " with value " + value);
-                } else {
-                    debugLog("Set user attribute: " + key);
-                }
-            if (setCheckedAttribute(mUserAttributes, key, value)) {
-                sPreferences.edit().putString(PrefKeys.USER_ATTRS + mApiKey, mUserAttributes.toString()).commit();
-                embeddedKitManager.setUserAttributes(mUserAttributes);
+        if (mDebugMode)
+            if (value != null) {
+                debugLog("Set user attribute: " + key + " with value " + value);
+            } else {
+                debugLog("Set user attribute: " + key);
             }
+        if (setCheckedAttribute(mUserAttributes, key, value)) {
+            sPreferences.edit().putString(PrefKeys.USER_ATTRS + mApiKey, mUserAttributes.toString()).commit();
+            embeddedKitManager.setUserAttributes(mUserAttributes);
         }
+
     }
 
     /**
@@ -932,17 +926,14 @@ public class MParticle {
      * @param key the key of the attribute
      */
     public void removeUserAttribute(String key) {
-        if (mConfigManager.getSendOoEvents()) {
-            if (mDebugMode)
-                if (key != null) {
-                    debugLog("Removing user attribute: " + key);
-                }
-            if (mUserAttributes.has(key)) {
-                mUserAttributes.remove(key);
-                sPreferences.edit().putString(PrefKeys.USER_ATTRS + mApiKey, mUserAttributes.toString()).commit();
-                embeddedKitManager.removeUserAttribute(key);
+        if (mDebugMode)
+            if (key != null) {
+                debugLog("Removing user attribute: " + key);
             }
-
+        if (mUserAttributes.has(key)) {
+            mUserAttributes.remove(key);
+            sPreferences.edit().putString(PrefKeys.USER_ATTRS + mApiKey, mUserAttributes.toString()).commit();
+            embeddedKitManager.removeUserAttribute(key);
         }
     }
 
@@ -972,7 +963,7 @@ public class MParticle {
      */
 
     public void setUserIdentity(String id, IdentityType identityType) {
-        if (mConfigManager.getSendOoEvents() && id != null && id.length() > 0) {
+        if (id != null && id.length() > 0) {
             if (mDebugMode)
                 debugLog("Setting user identity: " + id);
 
@@ -1152,10 +1143,10 @@ public class MParticle {
      * @param senderId the SENDER_ID for the application
      */
     public void enablePushNotifications(String senderId) {
-        if (MPUtility.checkPermission(mAppContext, "com.google.android.c2dm.permission.RECEIVE")){
+        if (MPUtility.checkPermission(mAppContext, "com.google.android.c2dm.permission.RECEIVE")) {
             mConfigManager.setPushSenderId(senderId);
             PushRegistrationHelper.enablePushNotifications(mAppContext, senderId);
-        }else{
+        } else {
             Log.e(Constants.LOG_TAG, "Attempted to enable push notifications without required permission: " + "\"com.google.android.c2dm.permission.RECEIVE\"");
         }
     }
@@ -1383,12 +1374,8 @@ public class MParticle {
             this.value = value;
         }
 
-        public int getValue() {
-            return value;
-        }
-
-        public static IdentityType parseInt(int val){
-            switch (val){
+        public static IdentityType parseInt(int val) {
+            switch (val) {
                 case 1:
                     return CustomerId;
                 case 2:
@@ -1407,6 +1394,10 @@ public class MParticle {
                     return Other;
 
             }
+        }
+
+        public int getValue() {
+            return value;
         }
 
     }
