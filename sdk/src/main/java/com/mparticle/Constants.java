@@ -208,6 +208,8 @@ package com.mparticle;
         public static final String PUSH_TITLE = "mp::push::title";
         public static final String SESSION_COUNTER = "mp::breadcrumbs::sessioncount";
         public static final String BREADCRUMB_LIMIT = "mp::breadcrumbs::limit";
+        //MAT embedded
+        public static final String MAT_EXISTING_USER = "mp::embedded::mat::existinguser";
     }
 
     public interface MiscStorageKeys {

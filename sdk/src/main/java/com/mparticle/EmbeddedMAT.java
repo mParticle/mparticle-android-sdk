@@ -126,6 +126,13 @@ public class EmbeddedMAT extends EmbeddedProvider implements MPActivityCallbacks
                     advertiserId,
                     conversionId
             );
+            boolean existingUser = context.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE)
+                    .getBoolean(Constants.PrefKeys.MAT_EXISTING_USER, false);
+            com.mobileapptracker.MobileAppTracker.getInstance().setExistingUser(existingUser);
+            context.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE)
+                    .edit()
+                    .putBoolean(Constants.PrefKeys.MAT_EXISTING_USER, true)
+                    .commit();
         }
         if (Boolean.parseBoolean(properties.get(VIEW_SERVER_RESPONSE))){
             com.mobileapptracker.MobileAppTracker.getInstance().setMATResponse(new com.mobileapptracker.MATResponse() {
