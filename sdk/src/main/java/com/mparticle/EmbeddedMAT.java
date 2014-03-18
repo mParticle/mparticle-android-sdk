@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.location.Location;
 import android.util.Log;
 
 import org.json.JSONException;
@@ -114,6 +115,78 @@ public class EmbeddedMAT extends EmbeddedProvider implements MPActivityCallbacks
     @Override
     public void logScreen(String screenName, JSONObject eventAttributes) throws Exception {
         logEvent(MParticle.EventType.Navigation, screenName, eventAttributes);
+    }
+
+    @Override
+    public void setLocation(Location location) {
+        if (location != null){
+            com.mobileapptracker.MobileAppTracker.getInstance().setLatitude(location.getLatitude());
+            com.mobileapptracker.MobileAppTracker.getInstance().setLongitude(location.getLongitude());
+            com.mobileapptracker.MobileAppTracker.getInstance().setAltitude(location.getAltitude());
+        }
+    }
+
+    @Override
+    public void setUserAttributes(JSONObject mUserAttributes) {
+        if (mUserAttributes != null &&
+                (!properties.containsKey(INCLUDE_USER_DATA) || Boolean.parseBoolean(properties.get(INCLUDE_USER_DATA)))){
+            com.mobileapptracker.MobileAppTracker instance  = com.mobileapptracker.MobileAppTracker.getInstance();
+            Iterator<String> keys = mUserAttributes.keys();
+            String firstName = "";
+            String lastName = "";
+            while (keys.hasNext()){
+                String key = keys.next();
+                try {
+                    if (MParticle.UserAttributes.AGE.equalsIgnoreCase(key)) {
+                        instance.setAge(Integer.parseInt(mUserAttributes.getString(key)));
+                    }else if (MParticle.UserAttributes.GENDER.equalsIgnoreCase(key)) {
+                        instance.setGender(Integer.parseInt(mUserAttributes.getString(key)));
+                    }else if (MParticle.UserAttributes.FIRSTNAME.equalsIgnoreCase(key)) {
+                        firstName = mUserAttributes.optString(key);
+                    }else if (MParticle.UserAttributes.LASTNAME.equalsIgnoreCase(key)) {
+                        lastName = mUserAttributes.optString(key);
+                    }
+                }catch (JSONException jse){
+
+                }catch (NumberFormatException nfe){
+                    if (MParticle.getInstance().getDebugMode()){
+                        Log.e(Constants.LOG_TAG, getName() + " requires user attribute: " + key + " to be parsable as an integer");
+                    }
+                }
+            }
+            if (firstName.length() > 0 || lastName.length() > 0){
+                String fullName = firstName + " " + lastName;
+                instance.setUserName(fullName);
+            }
+        }
+    }
+
+    @Override
+    public void removeUserAttribute(String key) {
+        //MAT doesn't really support this...all of their attributes are primitives/non-nulls.
+    }
+
+    @Override
+    public void setUserIdentity(String id, MParticle.IdentityType identityType) {
+        com.mobileapptracker.MobileAppTracker instance = com.mobileapptracker.MobileAppTracker.getInstance();
+        if (identityType == MParticle.IdentityType.CustomerId){
+            if (!properties.containsKey(USE_CUSTOMER_ID) ||
+                    Boolean.parseBoolean(properties.get(USE_CUSTOMER_ID))) {
+                instance.setUserId(id);
+            }
+        }else if (Boolean.parseBoolean(properties.get(INCLUDE_ALL_IDS))) {
+            switch (identityType) {
+                case Facebook:
+                    instance.setFacebookUserId(id);
+                    break;
+                case Google:
+                    instance.setGoogleUserId(id);
+                    break;
+                case Twitter:
+                    instance.setTwitterUserId(id);
+                    break;
+            }
+        }
     }
 
     @Override

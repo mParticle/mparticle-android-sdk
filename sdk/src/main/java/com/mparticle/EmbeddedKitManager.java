@@ -2,6 +2,7 @@ package com.mparticle;
 
 import android.app.Activity;
 import android.content.Context;
+import android.location.Location;
 import android.util.Log;
 
 import org.json.JSONArray;
@@ -28,6 +29,8 @@ class EmbeddedKitManager implements IEmbeddedKit, MPActivityCallbacks{
                 JSONObject current = kitConfigs.getJSONObject(i);
                 if (!providers.containsKey(current.getInt(EmbeddedProvider.KEY_ID))) {
                     providers.put(current.getInt(EmbeddedProvider.KEY_ID), EmbeddedProvider.createInstance(current, context));
+                    providers.get(current.getInt(EmbeddedProvider.KEY_ID)).setUserAttributes(MParticle.getInstance().mUserAttributes);
+                    syncUserIdentities(providers.get(current.getInt(EmbeddedProvider.KEY_ID)));
                 }
                 providers.get(current.getInt(EmbeddedProvider.KEY_ID)).parseConfig(current).update();
             }catch (JSONException jse){
@@ -43,6 +46,23 @@ class EmbeddedKitManager implements IEmbeddedKit, MPActivityCallbacks{
             }
         }
     }
+
+    private void syncUserIdentities(EmbeddedProvider provider) {
+        JSONArray identities = MParticle.getInstance().mUserIdentities;
+        if (identities != null) {
+            for (int i = 0; i < identities.length(); i++) {
+                try {
+                    JSONObject identity = identities.getJSONObject(i);
+                    MParticle.IdentityType type = MParticle.IdentityType.parseInt(identity.getInt(Constants.MessageKey.IDENTITY_NAME));
+                    String id = identity.getString(Constants.MessageKey.IDENTITY_VALUE);
+                    provider.setUserIdentity(id, type);
+                }catch (JSONException jse){
+                    //swallow
+                }
+            }
+        }
+    }
+
 
     @Override
     public void logEvent(MParticle.EventType type, String name, JSONObject eventAttributes) {
@@ -78,6 +98,58 @@ class EmbeddedKitManager implements IEmbeddedKit, MPActivityCallbacks{
             } catch (Exception e) {
                 if (MParticle.getInstance().getDebugMode()){
                     Log.w(Constants.LOG_TAG, "Failed to call logScreen for embedded provider: " + provider.getName() + ": " + e.getMessage());
+                }
+            }
+        }
+    }
+
+    @Override
+    public void setLocation(Location location) {
+        for (EmbeddedProvider provider : providers.values()){
+            try {
+                provider.setLocation(location);
+            } catch (Exception e) {
+                if (MParticle.getInstance().getDebugMode()){
+                    Log.w(Constants.LOG_TAG, "Failed to call setLocation for embedded provider: " + provider.getName() + ": " + e.getMessage());
+                }
+            }
+        }
+    }
+
+    @Override
+    public void setUserAttributes(JSONObject mUserAttributes) {
+        for (EmbeddedProvider provider : providers.values()){
+            try {
+                provider.setUserAttributes(mUserAttributes);
+            } catch (Exception e) {
+                if (MParticle.getInstance().getDebugMode()){
+                    Log.w(Constants.LOG_TAG, "Failed to call setUserAttributes for embedded provider: " + provider.getName() + ": " + e.getMessage());
+                }
+            }
+        }
+    }
+
+    @Override
+    public void removeUserAttribute(String key) {
+        for (EmbeddedProvider provider : providers.values()){
+            try {
+                provider.removeUserAttribute(key);
+            } catch (Exception e) {
+                if (MParticle.getInstance().getDebugMode()){
+                    Log.w(Constants.LOG_TAG, "Failed to call removeUserAttribute for embedded provider: " + provider.getName() + ": " + e.getMessage());
+                }
+            }
+        }
+    }
+
+    @Override
+    public void setUserIdentity(String id, MParticle.IdentityType identityType) {
+        for (EmbeddedProvider provider : providers.values()){
+            try {
+                provider.setUserIdentity(id, identityType);
+            } catch (Exception e) {
+                if (MParticle.getInstance().getDebugMode()){
+                    Log.w(Constants.LOG_TAG, "Failed to call setUserIdentity for embedded provider: " + provider.getName() + ": " + e.getMessage());
                 }
             }
         }

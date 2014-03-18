@@ -885,6 +885,7 @@ public class MParticle {
      */
     public void setLocation(Location location) {
         mMessageManager.setLocation(location);
+        embeddedKitManager.setLocation(location);
     }
 
     /**
@@ -920,6 +921,7 @@ public class MParticle {
                 }
             if (setCheckedAttribute(mUserAttributes, key, value)) {
                 sPreferences.edit().putString(PrefKeys.USER_ATTRS + mApiKey, mUserAttributes.toString()).commit();
+                embeddedKitManager.setUserAttributes(mUserAttributes);
             }
         }
     }
@@ -938,6 +940,7 @@ public class MParticle {
             if (mUserAttributes.has(key)) {
                 mUserAttributes.remove(key);
                 sPreferences.edit().putString(PrefKeys.USER_ATTRS + mApiKey, mUserAttributes.toString()).commit();
+                embeddedKitManager.removeUserAttribute(key);
             }
 
         }
@@ -977,6 +980,8 @@ public class MParticle {
                 Log.w(TAG, "Id value length exceeds limit. Discarding id: " + id);
                 return;
             }
+
+            embeddedKitManager.setUserIdentity(id, identityType);
 
             try {
                 int index = -1;
@@ -1364,7 +1369,7 @@ public class MParticle {
 
     public enum IdentityType {
         Other(0),
-        CustomId(1),
+        CustomerId(1),
         Facebook(2),
         Twitter(3),
         Google(4),
@@ -1381,12 +1386,58 @@ public class MParticle {
         public int getValue() {
             return value;
         }
+
+        public static IdentityType parseInt(int val){
+            switch (val){
+                case 1:
+                    return CustomerId;
+                case 2:
+                    return Facebook;
+                case 3:
+                    return Twitter;
+                case 4:
+                    return Google;
+                case 5:
+                    return Microsoft;
+                case 6:
+                    return Yahoo;
+                case 7:
+                    return Email;
+                default:
+                    return Other;
+
+            }
+        }
+
     }
 
     public interface Push {
         public static final String BROADCAST_NOTIFICATION_RECEIVED = "com.mparticle.push.NOTIFICATION_RECEIVED";
         public static final String BROADCAST_NOTIFICATION_TAPPED = "com.mparticle.push.NOTIFICATION_TAPPED";
         public static final String PUSH_ALERT_EXTRA = "com.mparticle.push.alert";
+    }
+
+    public interface UserAttributes {
+        //A special attribute string to specify the mobile number of the consumer's device
+        public static final String MOBILE_NUMBER = "$Mobile";
+        //A special attribute string to specify the consumer's gender.
+        public static final String GENDER = "$Gender";
+        //A special attribute string to specify the consumer's age.
+        public static final String AGE = "$Age";
+        //A special attribute string to specify the consumer's country.
+        public static final String COUNTRY = "$Country";
+        //A special attribute string to specify the consumer's zip code.
+        public static final String ZIPCODE = "$Zip";
+        //A special attribute string to specify the consumer's city.
+        public static final String CITY = "$City";
+        //A special attribute string to specify the consumer's state or region.
+        public static final String STATE = "$State";
+        //A special attribute string to specify the consumer's street address and apartment number.
+        public static final String ADDRESS = "$Address";
+        //A special attribute string to specify the consumer's first name.
+        public static final String FIRSTNAME = "$FirstName";
+        //A special attribute string to specify the consumer's last name.
+        public static final String LASTNAME = "$LastName";
     }
 
     private static final class SessionTimeoutHandler extends Handler {
