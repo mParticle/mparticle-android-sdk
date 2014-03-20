@@ -5,7 +5,7 @@ com.mparticle.AESObfuscator -> com.mparticle.a:
     71:80:java.lang.String obfuscate(java.lang.String,java.lang.String) -> a
     85:105:java.lang.String unobfuscate(java.lang.String,java.lang.String) -> b
 com.mparticle.AppConfig -> com.mparticle.b:
-    android.content.Context mContext -> o
+    android.content.Context mContext -> n
     java.lang.String mKey -> a
     java.lang.String mSecret -> b
     boolean reportUncaughtExceptions -> c
@@ -19,17 +19,27 @@ com.mparticle.AppConfig -> com.mparticle.b:
     java.lang.String licenseKey -> k
     boolean isLicensingEnabled -> l
     boolean autoTrackingEnabled -> m
-    boolean networkingEnabled -> n
-    111:111:int getResourceId(java.lang.String,java.lang.String) -> a
-    115:118:void debugLog(java.lang.String) -> a
-    121:126:java.lang.String getString(java.lang.String) -> b
-    130:135:boolean getBoolean(java.lang.String,boolean) -> a
-    139:144:int getInteger(java.lang.String,int) -> a
-    36:74:org.json.JSONObject collectAppInfo(android.content.Context) -> a
-    84:181:org.json.JSONObject collectDeviceInfo(android.content.Context) -> b
-    22:27:int getAppVersion(android.content.Context) -> d
-    40:58:java.lang.String getRegistrationId(android.content.Context) -> c
-    67:73:void enablePushNotifications(android.content.Context,java.lang.String) -> a
+    java.lang.String sOpenUDID -> o
+    java.lang.String sBuildUUID -> p
+    107:107:int getResourceId(java.lang.String,java.lang.String) -> a
+    111:114:void debugLog(java.lang.String) -> a
+    117:122:java.lang.String getString(java.lang.String) -> b
+    126:131:boolean getBoolean(java.lang.String,boolean) -> a
+    135:140:int getInteger(java.lang.String,int) -> a
+    35:73:org.json.JSONObject collectAppInfo(android.content.Context) -> a
+    83:180:org.json.JSONObject collectDeviceInfo(android.content.Context) -> b
+    56:88:java.lang.String getCpuUsage() -> a
+    147:148:java.lang.String getAndroidID(android.content.Context) -> c
+    189:205:long getTotalMemoryPreJB() -> b
+    210:224:java.lang.String getOpenUDID(android.content.Context) -> d
+    233:271:java.lang.String getBuildUUID(android.content.Context) -> e
+    275:282:java.lang.String convertBytesToUUID(byte[],boolean) -> a
+    287:293:boolean isDebug(android.content.pm.PackageManager,java.lang.String) -> a
+    374:388:boolean isPhoneRooted() -> c
+    404:405:boolean checkPermission(android.content.Context,java.lang.String) -> a
+    22:27:int getAppVersion(android.content.Context) -> g
+    40:58:java.lang.String getRegistrationId(android.content.Context) -> f
+    67:73:void enablePushNotifications(android.content.Context,java.lang.String) -> b
     83:91:void storeRegistrationId(android.content.Context,java.lang.String,com.mparticle.PushRegistrationListener) -> a
     110:114:void clearPushRegistrationId(android.content.Context,com.mparticle.PushRegistrationListener) -> a
 com.mparticle.AppStateManager -> com.mparticle.c:
@@ -103,8 +113,6 @@ com.mparticle.ConfigManager -> com.mparticle.f:
     256:256:int getPushTitle() -> t
     260:260:int getPushIcon() -> u
     264:264:int getBreadcrumbLimit() -> v
-    274:274:boolean isNetworkPerformanceEnabled() -> w
-    278:279:void setNetworkingEnabled(boolean) -> e
 com.mparticle.Constants$ConfigKeys -> com.mparticle.Constants$ConfigKeys:
     java.lang.String API_KEY -> API_KEY
     java.lang.String API_SECRET -> API_SECRET
@@ -233,11 +241,6 @@ com.mparticle.Constants$MessageKey -> com.mparticle.Constants$MessageKey:
     java.lang.String EVENT_CATEGORY -> EVENT_CATEGORY
     java.lang.String BREADCRUMB_SESSION_COUNTER -> BREADCRUMB_SESSION_COUNTER
     java.lang.String BREADCRUMB_LABEL -> BREADCRUMB_LABEL
-    java.lang.String NPE_METHOD -> NPE_METHOD
-    java.lang.String NPE_URL -> NPE_URL
-    java.lang.String NPE_LENGTH -> NPE_LENGTH
-    java.lang.String NPE_SENT -> NPE_SENT
-    java.lang.String NPE_REC -> NPE_REC
 com.mparticle.Constants$MessageType -> com.mparticle.Constants$MessageType:
     java.lang.String SESSION_START -> SESSION_START
     java.lang.String SESSION_END -> SESSION_END
@@ -253,7 +256,6 @@ com.mparticle.Constants$MessageType -> com.mparticle.Constants$MessageType:
     java.lang.String APP_STATE_TRANSITION -> APP_STATE_TRANSITION
     java.lang.String PUSH_RECEIVED -> PUSH_RECEIVED
     java.lang.String BREADCRUMB -> BREADCRUMB
-    java.lang.String NETWORK_PERFORMNACE -> NETWORK_PERFORMNACE
 com.mparticle.Constants$MiscStorageKeys -> com.mparticle.Constants$MiscStorageKeys:
     java.lang.String TOTAL_MEMORY -> TOTAL_MEMORY
     java.lang.String MEMORY_THRESHOLD -> MEMORY_THRESHOLD
@@ -378,249 +380,8 @@ com.mparticle.LicenseValidator -> com.mparticle.l:
     203:212:void handleResponse(int,com.mparticle.ResponseData) -> a
     215:216:void handleApplicationError(int) -> a
     219:220:void handleInvalidResponse() -> d
-com.mparticle.MPAbstractStreamHandler -> com.mparticle.m:
-    java.lang.String[] proxyOverloadSignature -> a
-    java.lang.String[] urlOverloadSignature -> b
-    java.lang.reflect.Constructor proxyOverload -> c
-    java.lang.reflect.Constructor urlOverload -> d
-    35:35:java.net.URLConnection openConnection(java.net.URL) -> openConnection
-    39:41:java.net.URLConnection openConnection(java.net.URL,java.net.Proxy) -> openConnection
-    46:52:java.net.URLConnection openNewConnection(java.net.URL,java.net.Proxy) -> a
-    int getDefaultPort() -> getDefaultPort
-com.mparticle.MPException -> com.mparticle.MPException:
-    long serialVersionUID -> serialVersionUID
-com.mparticle.MPHttpUrlConnection -> com.mparticle.n:
-    com.mparticle.MeasuredRequest request -> a
-    java.net.HttpURLConnection delegateConnection -> b
-    com.mparticle.MPInputStream inputStream -> c
-    com.mparticle.MPOutputStream outputStream -> d
-    35:36:void disconnect() -> disconnect
-    40:40:java.io.InputStream getErrorStream() -> getErrorStream
-    45:45:java.security.Permission getPermission() -> getPermission
-    50:50:java.lang.String getRequestMethod() -> getRequestMethod
-    55:56:void setRequestMethod(java.lang.String) -> setRequestMethod
-    60:63:int getResponseCode() -> getResponseCode
-    68:71:java.lang.String getResponseMessage() -> getResponseMessage
-    76:76:boolean usingProxy() -> usingProxy
-    81:84:java.lang.String getContentEncoding() -> getContentEncoding
-    89:89:boolean getInstanceFollowRedirects() -> getInstanceFollowRedirects
-    94:95:void setInstanceFollowRedirects(boolean) -> setInstanceFollowRedirects
-    99:99:long getHeaderFieldDate(java.lang.String,long) -> getHeaderFieldDate
-    104:105:void setFixedLengthStreamingMode(int) -> setFixedLengthStreamingMode
-    109:110:void setChunkedStreamingMode(int) -> setChunkedStreamingMode
-    114:117:void connect() -> connect
-    121:121:boolean getAllowUserInteraction() -> getAllowUserInteraction
-    126:127:void setAllowUserInteraction(boolean) -> setAllowUserInteraction
-    131:133:java.lang.Object getContent() -> getContent
-    138:140:java.lang.Object getContent(java.lang.Class[]) -> getContent
-    145:145:int getContentLength() -> getContentLength
-    150:152:java.lang.String getContentType() -> getContentType
-    157:157:long getDate() -> getDate
-    162:162:boolean getDefaultUseCaches() -> getDefaultUseCaches
-    167:168:void setDefaultUseCaches(boolean) -> setDefaultUseCaches
-    172:172:boolean getDoInput() -> getDoInput
-    177:178:void setDoInput(boolean) -> setDoInput
-    182:182:boolean getDoOutput() -> getDoOutput
-    187:188:void setDoOutput(boolean) -> setDoOutput
-    192:192:long getExpiration() -> getExpiration
-    197:199:java.lang.String getHeaderField(int) -> getHeaderField
-    204:206:java.util.Map getHeaderFields() -> getHeaderFields
-    211:211:java.util.Map getRequestProperties() -> getRequestProperties
-    216:217:void addRequestProperty(java.lang.String,java.lang.String) -> addRequestProperty
-    221:223:java.lang.String getHeaderField(java.lang.String) -> getHeaderField
-    228:230:int getHeaderFieldInt(java.lang.String,int) -> getHeaderFieldInt
-    235:237:java.lang.String getHeaderFieldKey(int) -> getHeaderFieldKey
-    242:242:long getIfModifiedSince() -> getIfModifiedSince
-    247:248:void setIfModifiedSince(long) -> setIfModifiedSince
-    252:252:java.lang.String getRequestProperty(java.lang.String) -> getRequestProperty
-    257:257:java.net.URL getURL() -> getURL
-    262:262:boolean getUseCaches() -> getUseCaches
-    267:268:void setUseCaches(boolean) -> setUseCaches
-    272:273:void setRequestProperty(java.lang.String,java.lang.String) -> setRequestProperty
-    277:277:int getConnectTimeout() -> getConnectTimeout
-    282:283:void setConnectTimeout(int) -> setConnectTimeout
-    287:287:int getReadTimeout() -> getReadTimeout
-    292:293:void setReadTimeout(int) -> setReadTimeout
-    297:297:java.lang.String toString() -> toString
-    302:302:boolean equals(java.lang.Object) -> equals
-    307:307:int hashCode() -> hashCode
-    312:312:long getLastModified() -> getLastModified
-    317:326:java.io.OutputStream getOutputStream() -> getOutputStream
-    332:344:java.io.InputStream getInputStream() -> getInputStream
-com.mparticle.MPHttpsUrlConnection -> com.mparticle.o:
-    com.mparticle.MeasuredRequest request -> a
-    javax.net.ssl.HttpsURLConnection delegateConnection -> b
-    com.mparticle.MPInputStream inputStream -> c
-    com.mparticle.MPOutputStream outputStream -> d
-    42:42:java.lang.String getCipherSuite() -> getCipherSuite
-    47:47:java.security.cert.Certificate[] getLocalCertificates() -> getLocalCertificates
-    52:52:java.security.cert.Certificate[] getServerCertificates() -> getServerCertificates
-    57:57:java.security.Principal getPeerPrincipal() -> getPeerPrincipal
-    62:62:java.security.Principal getLocalPrincipal() -> getLocalPrincipal
-    67:68:void setHostnameVerifier(javax.net.ssl.HostnameVerifier) -> setHostnameVerifier
-    72:72:javax.net.ssl.HostnameVerifier getHostnameVerifier() -> getHostnameVerifier
-    77:78:void setSSLSocketFactory(javax.net.ssl.SSLSocketFactory) -> setSSLSocketFactory
-    82:82:javax.net.ssl.SSLSocketFactory getSSLSocketFactory() -> getSSLSocketFactory
-    87:88:void disconnect() -> disconnect
-    92:95:java.io.InputStream getErrorStream() -> getErrorStream
-    100:100:java.security.Permission getPermission() -> getPermission
-    105:105:java.lang.String getRequestMethod() -> getRequestMethod
-    110:113:int getResponseCode() -> getResponseCode
-    118:121:java.lang.String getResponseMessage() -> getResponseMessage
-    126:127:void setRequestMethod(java.lang.String) -> setRequestMethod
-    131:131:boolean usingProxy() -> usingProxy
-    136:139:java.lang.String getContentEncoding() -> getContentEncoding
-    144:144:boolean getInstanceFollowRedirects() -> getInstanceFollowRedirects
-    149:150:void setInstanceFollowRedirects(boolean) -> setInstanceFollowRedirects
-    154:154:long getHeaderFieldDate(java.lang.String,long) -> getHeaderFieldDate
-    159:160:void setFixedLengthStreamingMode(long) -> setFixedLengthStreamingMode
-    164:165:void setFixedLengthStreamingMode(int) -> setFixedLengthStreamingMode
-    169:170:void setChunkedStreamingMode(int) -> setChunkedStreamingMode
-    174:177:void connect() -> connect
-    181:181:boolean getAllowUserInteraction() -> getAllowUserInteraction
-    186:188:java.lang.Object getContent() -> getContent
-    193:195:java.lang.Object getContent(java.lang.Class[]) -> getContent
-    200:200:int getContentLength() -> getContentLength
-    205:207:java.lang.String getContentType() -> getContentType
-    212:212:long getDate() -> getDate
-    217:217:boolean getDefaultUseCaches() -> getDefaultUseCaches
-    222:222:boolean getDoInput() -> getDoInput
-    227:227:boolean getDoOutput() -> getDoOutput
-    232:232:long getExpiration() -> getExpiration
-    237:240:java.lang.String getHeaderField(int) -> getHeaderField
-    245:248:java.util.Map getHeaderFields() -> getHeaderFields
-    253:253:java.util.Map getRequestProperties() -> getRequestProperties
-    258:259:void addRequestProperty(java.lang.String,java.lang.String) -> addRequestProperty
-    263:266:java.lang.String getHeaderField(java.lang.String) -> getHeaderField
-    271:273:int getHeaderFieldInt(java.lang.String,int) -> getHeaderFieldInt
-    278:280:java.lang.String getHeaderFieldKey(int) -> getHeaderFieldKey
-    285:285:long getIfModifiedSince() -> getIfModifiedSince
-    290:290:java.lang.String getRequestProperty(java.lang.String) -> getRequestProperty
-    295:295:java.net.URL getURL() -> getURL
-    300:300:boolean getUseCaches() -> getUseCaches
-    305:306:void setAllowUserInteraction(boolean) -> setAllowUserInteraction
-    310:311:void setDefaultUseCaches(boolean) -> setDefaultUseCaches
-    315:316:void setDoInput(boolean) -> setDoInput
-    320:321:void setDoOutput(boolean) -> setDoOutput
-    325:326:void setIfModifiedSince(long) -> setIfModifiedSince
-    330:331:void setRequestProperty(java.lang.String,java.lang.String) -> setRequestProperty
-    335:336:void setUseCaches(boolean) -> setUseCaches
-    340:341:void setConnectTimeout(int) -> setConnectTimeout
-    345:345:int getConnectTimeout() -> getConnectTimeout
-    350:351:void setReadTimeout(int) -> setReadTimeout
-    355:355:int getReadTimeout() -> getReadTimeout
-    360:360:java.lang.String toString() -> toString
-    365:365:boolean equals(java.lang.Object) -> equals
-    370:370:int hashCode() -> hashCode
-    374:374:long getLastModified() -> getLastModified
-    378:387:java.io.OutputStream getOutputStream() -> getOutputStream
-    391:401:java.io.InputStream getInputStream() -> getInputStream
-com.mparticle.MPInputStream -> com.mparticle.p:
-    com.mparticle.MeasuredRequest measuredRequest -> a
-    java.io.InputStream localInputStream -> b
-    27:27:int available() -> available
-    31:32:void close() -> close
-    35:36:void mark(int) -> mark
-    39:39:boolean markSupported() -> markSupported
-    43:43:int read() -> read
-    47:47:int read(byte[]) -> read
-    51:59:int read(byte[],int,int) -> read
-    63:64:void reset() -> reset
-    67:67:long skip(long) -> skip
-    71:71:boolean isSameStream(java.io.InputStream) -> a
-com.mparticle.MPOutputStream -> com.mparticle.q:
-    java.io.OutputStream localOutputStream -> a
-    com.mparticle.MeasuredRequest measuredRequest -> b
-    25:26:void flush() -> flush
-    30:31:void close() -> close
-    35:37:void write(int) -> write
-    41:42:void write(byte[]) -> write
-    46:55:void write(byte[],int,int) -> write
-    58:58:boolean isSameStream(java.io.OutputStream) -> a
 com.mparticle.MPReceiver -> com.mparticle.MPReceiver:
     59:68:void onReceive(android.content.Context,android.content.Intent) -> onReceive
-com.mparticle.MPSSLSocket -> com.mparticle.MPSSLSocket:
-    javax.net.ssl.SSLSocket localSocket -> a
-    java.io.OutputStream outputStream -> b
-    com.mparticle.MPInputStream inputStream -> c
-    com.mparticle.MeasuredRequest request -> d
-    39:40:void addHandshakeCompletedListener(javax.net.ssl.HandshakeCompletedListener) -> addHandshakeCompletedListener
-    44:44:boolean getEnableSessionCreation() -> getEnableSessionCreation
-    49:50:void setEnableSessionCreation(boolean) -> setEnableSessionCreation
-    54:54:java.lang.String[] getEnabledCipherSuites() -> getEnabledCipherSuites
-    59:60:void setEnabledCipherSuites(java.lang.String[]) -> setEnabledCipherSuites
-    64:64:java.lang.String[] getEnabledProtocols() -> getEnabledProtocols
-    69:70:void setEnabledProtocols(java.lang.String[]) -> setEnabledProtocols
-    74:74:boolean getNeedClientAuth() -> getNeedClientAuth
-    79:80:void setNeedClientAuth(boolean) -> setNeedClientAuth
-    84:84:javax.net.ssl.SSLSession getSession() -> getSession
-    89:89:java.lang.String[] getSupportedCipherSuites() -> getSupportedCipherSuites
-    94:94:java.lang.String[] getSupportedProtocols() -> getSupportedProtocols
-    99:99:boolean getUseClientMode() -> getUseClientMode
-    104:105:void setUseClientMode(boolean) -> setUseClientMode
-    109:109:boolean getWantClientAuth() -> getWantClientAuth
-    114:115:void setWantClientAuth(boolean) -> setWantClientAuth
-    119:120:void removeHandshakeCompletedListener(javax.net.ssl.HandshakeCompletedListener) -> removeHandshakeCompletedListener
-    124:125:void startHandshake() -> startHandshake
-    129:130:void bind(java.net.SocketAddress) -> bind
-    134:135:void close() -> close
-    139:140:void connect(java.net.SocketAddress,int) -> connect
-    144:145:void connect(java.net.SocketAddress) -> connect
-    149:149:java.nio.channels.SocketChannel getChannel() -> getChannel
-    154:154:java.net.InetAddress getInetAddress() -> getInetAddress
-    159:167:java.io.InputStream getInputStream() -> getInputStream
-    172:172:boolean getKeepAlive() -> getKeepAlive
-    177:178:void setKeepAlive(boolean) -> setKeepAlive
-    182:182:java.net.InetAddress getLocalAddress() -> getLocalAddress
-    187:187:int getLocalPort() -> getLocalPort
-    192:192:java.net.SocketAddress getLocalSocketAddress() -> getLocalSocketAddress
-    197:197:boolean getOOBInline() -> getOOBInline
-    202:203:void setOOBInline(boolean) -> setOOBInline
-    207:216:java.io.OutputStream getOutputStream() -> getOutputStream
-    221:221:int getPort() -> getPort
-    226:226:int getReceiveBufferSize() -> getReceiveBufferSize
-    231:232:void setReceiveBufferSize(int) -> setReceiveBufferSize
-    236:236:java.net.SocketAddress getRemoteSocketAddress() -> getRemoteSocketAddress
-    241:241:boolean getReuseAddress() -> getReuseAddress
-    246:247:void setReuseAddress(boolean) -> setReuseAddress
-    251:251:int getSendBufferSize() -> getSendBufferSize
-    256:257:void setSendBufferSize(int) -> setSendBufferSize
-    261:261:int getSoLinger() -> getSoLinger
-    266:266:int getSoTimeout() -> getSoTimeout
-    271:272:void setSoTimeout(int) -> setSoTimeout
-    276:276:boolean getTcpNoDelay() -> getTcpNoDelay
-    281:282:void setTcpNoDelay(boolean) -> setTcpNoDelay
-    286:286:int getTrafficClass() -> getTrafficClass
-    291:292:void setTrafficClass(int) -> setTrafficClass
-    296:296:boolean isBound() -> isBound
-    301:301:boolean isClosed() -> isClosed
-    306:306:boolean isConnected() -> isConnected
-    311:311:boolean isInputShutdown() -> isInputShutdown
-    316:316:boolean isOutputShutdown() -> isOutputShutdown
-    321:322:void sendUrgentData(int) -> sendUrgentData
-    326:327:void setPerformancePreferences(int,int,int) -> setPerformancePreferences
-    331:332:void setSoLinger(boolean,int) -> setSoLinger
-    336:337:void shutdownInput() -> shutdownInput
-    341:342:void shutdownOutput() -> shutdownOutput
-    346:346:java.lang.String toString() -> toString
-    351:351:boolean equals(java.lang.Object) -> equals
-    356:356:int hashCode() -> hashCode
-com.mparticle.MPSSLSocketFactory -> com.mparticle.r:
-    javax.net.ssl.SSLSocketFactory delegateFactory -> a
-    21:21:java.lang.String[] getDefaultCipherSuites() -> getDefaultCipherSuites
-    25:25:java.lang.String[] getSupportedCipherSuites() -> getSupportedCipherSuites
-    29:32:java.net.Socket createSocket(java.lang.String,java.net.Socket) -> a
-    37:37:java.net.Socket createSocket(java.net.Socket,java.lang.String,int,boolean) -> createSocket
-    42:42:java.net.Socket createSocket(java.lang.String,int) -> createSocket
-    47:47:java.net.Socket createSocket(java.lang.String,int,java.net.InetAddress,int) -> createSocket
-    52:52:java.net.Socket createSocket(java.net.InetAddress,int) -> createSocket
-    57:57:java.net.Socket createSocket(java.net.InetAddress,int,java.net.InetAddress,int) -> createSocket
-    62:62:java.net.Socket createSocket() -> createSocket
-com.mparticle.MPSSLStreamHandler -> com.mparticle.s:
-    java.lang.String[] classes -> a
-    24:28:java.net.URLConnection openConnection(java.net.URL) -> openConnection
-    34:38:java.net.URLConnection openConnection(java.net.URL,java.net.Proxy) -> openConnection
-    44:44:int getDefaultPort() -> getDefaultPort
 com.mparticle.MPService -> com.mparticle.MPService:
     java.lang.Object LOCK -> a
     android.os.PowerManager$WakeLock sWakeLock -> b
@@ -630,41 +391,6 @@ com.mparticle.MPService -> com.mparticle.MPService:
     116:137:void handleRegistration(android.content.Intent) -> a
     208:217:java.lang.String findMessageKey(java.lang.String[],android.os.Bundle) -> a
     221:259:void showPushWithMessage(java.lang.String,java.lang.String,android.os.Bundle) -> a
-com.mparticle.MPSocketImpl -> com.mparticle.t:
-    java.lang.reflect.Field addressField -> a
-    java.lang.reflect.Field fileDescriptorField -> b
-    java.lang.reflect.Field localPortField -> c
-    java.lang.reflect.Field portField -> d
-    java.lang.reflect.Method[] methods -> e
-    com.mparticle.MeasuredRequest request -> f
-    java.net.SocketImpl delegateSocket -> g
-    com.mparticle.MPInputStream delegateInputStream -> h
-    com.mparticle.MPOutputStream delegateOutputStream -> i
-    67:72:void setAccessible(java.lang.reflect.AccessibleObject[]) -> a
-    76:96:java.lang.Object invokeMethod(int,java.lang.Object[]) -> a
-    101:108:void updateFields() -> a
-    112:113:void accept(java.net.SocketImpl) -> accept
-    117:118:int available() -> available
-    123:124:void bind(java.net.InetAddress,int) -> bind
-    128:129:void close() -> close
-    133:134:void connect(java.lang.String,int) -> connect
-    138:139:void connect(java.net.InetAddress,int) -> connect
-    143:144:void create(boolean) -> create
-    148:156:java.io.InputStream getInputStream() -> getInputStream
-    161:169:java.io.OutputStream getOutputStream() -> getOutputStream
-    174:175:void listen(int) -> listen
-    179:180:void connect(java.net.SocketAddress,int) -> connect
-    184:185:void sendUrgentData(int) -> sendUrgentData
-    189:189:java.lang.Object getOption(int) -> getOption
-    194:195:void setOption(int,java.lang.Object) -> setOption
-com.mparticle.MPSocketImplFactory -> com.mparticle.MPSocketImplFactory:
-    java.lang.Class socketClass -> a
-    23:34:java.net.SocketImpl createSocketImpl() -> createSocketImpl
-com.mparticle.MPStreamHandler -> com.mparticle.u:
-    java.lang.String[] classes -> a
-    23:27:java.net.URLConnection openConnection(java.net.URL) -> openConnection
-    32:36:java.net.URLConnection openConnection(java.net.URL,java.net.Proxy) -> openConnection
-    42:42:int getDefaultPort() -> getDefaultPort
 com.mparticle.MPTransaction -> com.mparticle.MPTransaction:
     org.json.JSONObject transactionInfo -> a
     67:67:org.json.JSONObject getData() -> a
@@ -701,145 +427,103 @@ com.mparticle.MPTransaction$Builder -> com.mparticle.MPTransaction$Builder:
     75:75:java.lang.String access$800(com.mparticle.MPTransaction$Builder) -> i
     75:75:java.lang.String access$900(com.mparticle.MPTransaction$Builder) -> j
     75:75:java.lang.String access$1000(com.mparticle.MPTransaction$Builder) -> k
-com.mparticle.MPUrlStreamHandlerFactory -> com.mparticle.MPUrlStreamHandlerFactory:
-    13:18:java.net.URLStreamHandler createURLStreamHandler(java.lang.String) -> createURLStreamHandler
-com.mparticle.MPUtility -> com.mparticle.MPUtility:
-    java.lang.String sOpenUDID -> a
-    java.lang.String sBuildUUID -> b
-    59:92:java.lang.String getCpuUsage() -> getCpuUsage
-    96:99:long getAvailableMemory(android.content.Context) -> getAvailableMemory
-    103:106:boolean isSystemMemoryLow(android.content.Context) -> isSystemMemoryLow
-    110:113:long getSystemMemoryThreshold(android.content.Context) -> getSystemMemoryThreshold
-    117:122:java.lang.String getGpsEnabled(android.content.Context) -> getGpsEnabled
-    127:135:long getAvailableInternalDisk() -> getAvailableInternalDisk
-    139:147:long getAvailableExternalDisk() -> getAvailableExternalDisk
-    151:152:java.lang.String getAndroidID(android.content.Context) -> getAndroidID
-    156:156:java.lang.String getTimeZone() -> getTimeZone
-    160:173:int getOrientation(android.content.Context) -> getOrientation
-    177:180:long getTotalMemory(android.content.Context) -> getTotalMemory
-    186:189:long getTotalMemoryJB(android.content.Context) -> getTotalMemoryJB
-    193:209:long getTotalMemoryPreJB() -> getTotalMemoryPreJB
-    214:228:java.lang.String getOpenUDID(android.content.Context) -> getOpenUDID
-    237:275:java.lang.String getBuildUUID(android.content.Context) -> a
-    279:286:java.lang.String convertBytesToUUID(byte[],boolean) -> a
-    291:297:boolean isDebug(android.content.pm.PackageManager,java.lang.String) -> isDebug
-    301:351:boolean jsonObjsAreEqual(org.json.JSONObject,org.json.JSONObject) -> jsonObjsAreEqual
-    355:355:boolean isTablet(android.content.Context) -> isTablet
-    361:372:java.lang.Object getAccessibleObject(java.lang.reflect.Field,java.lang.Object) -> getAccessibleObject
-    376:386:java.lang.reflect.Field getAccessibleField(java.lang.Class,java.lang.Class) -> getAccessibleField
-    390:399:java.lang.reflect.Constructor getConstructor(java.lang.String,java.lang.String[]) -> getConstructor
-    403:403:boolean hasNfc(android.content.Context) -> hasNfc
-    407:413:java.lang.String getBluetoothVersion(android.content.Context) -> getBluetoothVersion
-    419:433:boolean isPhoneRooted() -> isPhoneRooted
-    437:437:boolean hasTelephony(android.content.Context) -> hasTelephony
-    441:445:boolean isBluetoothEnabled() -> isBluetoothEnabled
-    449:450:boolean checkPermission(android.content.Context,java.lang.String) -> checkPermission
 com.mparticle.MParticle -> com.mparticle.MParticle:
-    android.os.HandlerThread sTimeoutHandlerThread -> g
-    byte[] SALT -> h
-    android.os.Bundle lastNotificationBundle -> i
+    android.os.HandlerThread sTimeoutHandlerThread -> f
+    byte[] SALT -> g
+    android.os.Bundle lastNotificationBundle -> h
     boolean appRunning -> a
-    com.mparticle.MParticle instance -> j
-    android.content.SharedPreferences sPreferences -> k
+    com.mparticle.MParticle instance -> i
+    android.content.SharedPreferences sPreferences -> j
     com.mparticle.ConfigManager mConfigManager -> b
     com.mparticle.AppStateManager mAppStateManager -> c
     java.lang.String mSessionID -> d
     long mSessionStartTime -> e
-    com.mparticle.PushRegistrationListener registrationListener -> l
-    long mLastEventTime -> m
-    org.json.JSONArray mUserIdentities -> n
-    org.json.JSONObject mUserAttributes -> o
-    org.json.JSONObject mSessionAttributes -> p
-    com.mparticle.MeasuredRequestManager measuredRequestManager -> f
-    com.mparticle.MessageManager mMessageManager -> q
-    android.os.Handler mTimeoutHandler -> r
-    com.mparticle.MParticle$MParticleLocationListener mLocationListener -> s
-    com.mparticle.ExceptionHandler mExHandler -> t
-    android.content.Context mAppContext -> u
-    java.lang.String mApiKey -> v
-    boolean mDebugMode -> w
-    int mEventCount -> x
-    java.lang.String mLaunchUri -> y
-    168:172:void start(android.content.Context) -> start
-    184:194:void start(android.content.Context,java.lang.String,java.lang.String,boolean) -> start
-    208:257:com.mparticle.MParticle getInstance(android.content.Context,java.lang.String,java.lang.String,boolean) -> a
-    267:270:com.mparticle.MParticle getInstance() -> getInstance
-    275:275:boolean setCheckedAttribute(org.json.JSONObject,java.lang.String,java.lang.Object) -> a
-    280:307:boolean setCheckedAttribute(org.json.JSONObject,java.lang.String,java.lang.Object,boolean) -> a
-    311:318:java.lang.String findCaseInsensitiveKey(org.json.JSONObject,java.lang.String) -> a
-    322:322:boolean shouldProcessUrl(java.lang.String) -> a
-    327:334:void logStateTransition(java.lang.String) -> b
-    345:349:void activityStarted(android.app.Activity) -> activityStarted
-    360:364:void activityStopped(android.app.Activity) -> activityStopped
-    370:374:void beginSession() -> beginSession
-    380:384:void endSession() -> endSession
-    387:395:void endSession(long) -> a
-    402:406:void ensureActiveSession() -> d
-    412:422:boolean checkSessionTimeout() -> a
-    429:439:void newSession() -> e
-    445:446:void upload() -> upload
-    453:454:void setInstallReferrer(java.lang.String) -> setInstallReferrer
-    465:466:void logEvent(java.lang.String,com.mparticle.MParticle$EventType) -> logEvent
-    476:477:void logEvent(java.lang.String,com.mparticle.MParticle$EventType,long) -> logEvent
-    487:488:void logEvent(java.lang.String,com.mparticle.MParticle$EventType,java.util.Map) -> logEvent
-    499:500:void logEvent(java.lang.String,com.mparticle.MParticle$EventType,java.util.Map,long) -> logEvent
-    512:531:void logEvent(java.lang.String,com.mparticle.MParticle$EventType,java.util.Map,long,java.lang.String) -> logEvent
-    550:562:void logTransaction(com.mparticle.MPTransaction) -> logTransaction
-    574:587:void logScreen(java.lang.String,java.util.Map,boolean) -> a
-    603:604:void logScreen(java.lang.String) -> logScreen
-    613:614:void logScreen(java.lang.String,java.util.Map) -> logScreen
-    623:634:void leaveBreadcrumb(java.lang.String) -> leaveBreadcrumb
-    646:647:void logError(java.lang.String) -> logError
-    656:665:void logError(java.lang.String,java.util.Map) -> logError
-    675:681:void logNetworkPerformance(java.lang.String,long,java.lang.String,long,long,long) -> logNetworkPerformance
-    734:736:void beginMeasuringNetworkPerformance() -> beginMeasuringNetworkPerformance
-    744:756:void endMeasuringNetworkPerformance() -> endMeasuringNetworkPerformance
-    767:768:void excludeUrlFromNetworkPerformanceMeasurement(java.lang.String) -> excludeUrlFromNetworkPerformanceMeasurement
-    779:780:void addNetworkPerformanceQueryOnlyFilter(java.lang.String) -> addNetworkPerformanceQueryOnlyFilter
-    791:792:void resetNetworkPerformanceExclusionsAndFilters() -> resetNetworkPerformanceExclusionsAndFilters
-    800:801:void logException(java.lang.Exception) -> logException
-    810:811:void logException(java.lang.Exception,java.util.Map) -> logException
-    821:830:void logException(java.lang.Exception,java.util.Map,java.lang.String) -> logException
-    841:848:void logUnhandledError(java.lang.Throwable) -> a
-    859:878:void enableLocationTracking(java.lang.String,long,long) -> enableLocationTracking
-    884:889:void disableLocationTracking() -> disableLocationTracking
-    897:898:void setLocation(android.location.Location) -> setLocation
-    907:916:void setSessionAttribute(java.lang.String,java.lang.String) -> setSessionAttribute
-    925:936:void setUserAttribute(java.lang.String,java.lang.String) -> setUserAttribute
-    944:954:void removeUserAttribute(java.lang.String) -> removeUserAttribute
-    962:963:void setUserTag(java.lang.String) -> setUserTag
-    971:972:void removeUserTag(java.lang.String) -> removeUserTag
-    982:1016:void setUserIdentity(java.lang.String,com.mparticle.MParticle$IdentityType) -> setUserIdentity
-    1026:1053:void removeUserIdentity(java.lang.String) -> removeUserIdentity
-    1066:1066:boolean getOptOut() -> getOptOut
-    1075:1086:void setOptOut(boolean) -> setOptOut
-    1097:1097:boolean getDebugMode() -> getDebugMode
-    1107:1108:void setDebugMode(boolean) -> setDebugMode
-    1116:1117:void setUploadInterval(int) -> setUploadInterval
-    1125:1126:void setDebugUploadInterval(int) -> setDebugUploadInterval
-    1132:1139:void enableUncaughtExceptionLogging() -> enableUncaughtExceptionLogging
-    1145:1152:void disableUncaughtExceptionLogging() -> disableUncaughtExceptionLogging
-    1160:1166:void enablePushNotifications(java.lang.String) -> enablePushNotifications
-    1172:1173:void disablePushNotifications() -> disablePushNotifications
-    1182:1183:void setNotificationSoundEnabled(boolean) -> setNotificationSoundEnabled
-    1192:1193:void setNotificationVibrationEnabled(boolean) -> setNotificationVibrationEnabled
-    1196:1197:void clearPushNotificationId() -> b
-    1200:1201:void setPushRegistrationId(java.lang.String) -> c
-    1210:1215:boolean checkEventLimit() -> f
-    1228:1237:org.json.JSONObject enforceAttributeConstraints(java.util.Map) -> a
-    1302:1302:boolean isAutoTrackingEnabled() -> isAutoTrackingEnabled
-    1311:1311:int getSessionTimeout() -> getSessionTimeout
-    1322:1323:void setSessionTimeout(int) -> setSessionTimeout
-    1326:1331:void logNotification(android.os.Bundle,java.lang.String) -> a
-    1341:1342:void setPushNotificationIcon(int) -> setPushNotificationIcon
-    1352:1353:void setPushNotificationTitle(int) -> setPushNotificationTitle
-    74:74:com.mparticle.MessageManager access$000(com.mparticle.MParticle) -> a
-    74:74:android.content.SharedPreferences access$300() -> c
-    74:74:com.mparticle.LicenseCheckerCallback access$400(com.mparticle.MParticle) -> b
+    long mLastEventTime -> k
+    org.json.JSONArray mUserIdentities -> l
+    org.json.JSONObject mUserAttributes -> m
+    org.json.JSONObject mSessionAttributes -> n
+    com.mparticle.MessageManager mMessageManager -> o
+    android.os.Handler mTimeoutHandler -> p
+    com.mparticle.MParticle$MParticleLocationListener mLocationListener -> q
+    com.mparticle.ExceptionHandler mExHandler -> r
+    android.content.Context mAppContext -> s
+    java.lang.String mApiKey -> t
+    boolean mDebugMode -> u
+    int mEventCount -> v
+    java.lang.String mLaunchUri -> w
+    com.mparticle.PushRegistrationListener registrationListener -> x
+    144:148:void start(android.content.Context) -> start
+    160:170:void start(android.content.Context,java.lang.String,java.lang.String,boolean) -> start
+    184:230:com.mparticle.MParticle getInstance(android.content.Context,java.lang.String,java.lang.String,boolean) -> a
+    240:243:com.mparticle.MParticle getInstance() -> getInstance
+    248:248:boolean setCheckedAttribute(org.json.JSONObject,java.lang.String,java.lang.Object) -> a
+    253:280:boolean setCheckedAttribute(org.json.JSONObject,java.lang.String,java.lang.Object,boolean) -> a
+    295:302:void logStateTransition(java.lang.String) -> a
+    313:317:void activityStarted(android.app.Activity) -> activityStarted
+    329:333:void activityStopped(android.app.Activity) -> activityStopped
+    339:343:void beginSession() -> beginSession
+    349:353:void endSession() -> endSession
+    356:364:void endSession(long) -> a
+    371:375:void ensureActiveSession() -> d
+    381:391:boolean checkSessionTimeout() -> a
+    398:408:void newSession() -> e
+    414:415:void upload() -> upload
+    422:423:void setInstallReferrer(java.lang.String) -> setInstallReferrer
+    434:435:void logEvent(java.lang.String,com.mparticle.MParticle$EventType) -> logEvent
+    445:446:void logEvent(java.lang.String,com.mparticle.MParticle$EventType,long) -> logEvent
+    456:457:void logEvent(java.lang.String,com.mparticle.MParticle$EventType,java.util.Map) -> logEvent
+    468:469:void logEvent(java.lang.String,com.mparticle.MParticle$EventType,java.util.Map,long) -> logEvent
+    481:500:void logEvent(java.lang.String,com.mparticle.MParticle$EventType,java.util.Map,long,java.lang.String) -> logEvent
+    518:530:void logTransaction(com.mparticle.MPTransaction) -> logTransaction
+    542:555:void logScreen(java.lang.String,java.util.Map,boolean) -> a
+    571:572:void logScreen(java.lang.String) -> logScreen
+    581:582:void logScreen(java.lang.String,java.util.Map) -> logScreen
+    591:602:void leaveBreadcrumb(java.lang.String) -> leaveBreadcrumb
+    614:615:void logError(java.lang.String) -> logError
+    624:633:void logError(java.lang.String,java.util.Map) -> logError
+    647:648:void logException(java.lang.Exception) -> logException
+    657:658:void logException(java.lang.Exception,java.util.Map) -> logException
+    668:677:void logException(java.lang.Exception,java.util.Map,java.lang.String) -> logException
+    687:694:void logUnhandledError(java.lang.Throwable) -> a
+    705:724:void enableLocationTracking(java.lang.String,long,long) -> enableLocationTracking
+    730:735:void disableLocationTracking() -> disableLocationTracking
+    743:744:void setLocation(android.location.Location) -> setLocation
+    753:761:void setSessionAttribute(java.lang.String,java.lang.String) -> setSessionAttribute
+    770:781:void setUserAttribute(java.lang.String,java.lang.String) -> setUserAttribute
+    789:800:void removeUserAttribute(java.lang.String) -> removeUserAttribute
+    808:809:void setUserTag(java.lang.String) -> setUserTag
+    817:818:void removeUserTag(java.lang.String) -> removeUserTag
+    829:863:void setUserIdentity(java.lang.String,com.mparticle.MParticle$IdentityType) -> setUserIdentity
+    873:900:void removeUserIdentity(java.lang.String) -> removeUserIdentity
+    913:913:boolean getOptOut() -> getOptOut
+    922:933:void setOptOut(boolean) -> setOptOut
+    945:946:void setDebugMode(boolean) -> setDebugMode
+    955:955:boolean getDebugMode() -> getDebugMode
+    964:965:void setUploadInterval(int) -> setUploadInterval
+    973:974:void setDebugUploadInterval(int) -> setDebugUploadInterval
+    980:987:void enableUncaughtExceptionLogging() -> enableUncaughtExceptionLogging
+    993:1000:void disableUncaughtExceptionLogging() -> disableUncaughtExceptionLogging
+    1008:1014:void enablePushNotifications(java.lang.String) -> enablePushNotifications
+    1020:1021:void disablePushNotifications() -> disablePushNotifications
+    1030:1031:void setNotificationSoundEnabled(boolean) -> setNotificationSoundEnabled
+    1040:1041:void setNotificationVibrationEnabled(boolean) -> setNotificationVibrationEnabled
+    1044:1045:void clearPushNotificationId() -> b
+    1048:1049:void setPushRegistrationId(java.lang.String) -> b
+    1058:1063:boolean checkEventLimit() -> f
+    1076:1085:org.json.JSONObject enforceAttributeConstraints(java.util.Map) -> a
+    1149:1149:boolean isAutoTrackingEnabled() -> isAutoTrackingEnabled
+    1158:1158:int getSessionTimeout() -> getSessionTimeout
+    1169:1170:void setSessionTimeout(int) -> setSessionTimeout
+    1173:1178:void logNotification(android.os.Bundle,java.lang.String) -> a
+    1332:1333:void setPushNotificationIcon(int) -> setPushNotificationIcon
+    1343:1344:void setPushNotificationTitle(int) -> setPushNotificationTitle
+    66:66:android.content.SharedPreferences access$200() -> c
+    66:66:com.mparticle.LicenseCheckerCallback access$300(com.mparticle.MParticle) -> a
+    66:66:com.mparticle.MessageManager access$400(com.mparticle.MParticle) -> b
 com.mparticle.MParticle$1 -> com.mparticle.MParticle$1:
     com.mparticle.MParticle this$0 -> a
-    94:95:void onRegistered(java.lang.String) -> a
-    99:100:void onCleared$552c4e01() -> a
+    1300:1301:void onRegistered(java.lang.String) -> a
+    1305:1306:void onCleared$552c4e01() -> a
 com.mparticle.MParticle$EventType -> com.mparticle.MParticle$EventType:
     com.mparticle.MParticle$EventType Unknown -> Unknown
     com.mparticle.MParticle$EventType Navigation -> Navigation
@@ -851,9 +535,9 @@ com.mparticle.MParticle$EventType -> com.mparticle.MParticle$EventType:
     com.mparticle.MParticle$EventType Social -> Social
     com.mparticle.MParticle$EventType Other -> Other
     com.mparticle.MParticle$EventType[] $VALUES -> a
-    1361:1361:com.mparticle.MParticle$EventType[] values() -> values
-    1361:1361:com.mparticle.MParticle$EventType valueOf(java.lang.String) -> valueOf
-    1365:1365:java.lang.String toString() -> toString
+    1188:1188:com.mparticle.MParticle$EventType[] values() -> values
+    1188:1188:com.mparticle.MParticle$EventType valueOf(java.lang.String) -> valueOf
+    1192:1192:java.lang.String toString() -> toString
 com.mparticle.MParticle$IdentityType -> com.mparticle.MParticle$IdentityType:
     com.mparticle.MParticle$IdentityType Other -> Other
     com.mparticle.MParticle$IdentityType CustomId -> CustomId
@@ -865,28 +549,28 @@ com.mparticle.MParticle$IdentityType -> com.mparticle.MParticle$IdentityType:
     com.mparticle.MParticle$IdentityType Email -> Email
     int value -> a
     com.mparticle.MParticle$IdentityType[] $VALUES -> b
-    1375:1375:com.mparticle.MParticle$IdentityType[] values() -> values
-    1375:1375:com.mparticle.MParticle$IdentityType valueOf(java.lang.String) -> valueOf
-    1392:1392:int getValue() -> getValue
-    1375:1375:int access$100(com.mparticle.MParticle$IdentityType) -> a
+    1203:1203:com.mparticle.MParticle$IdentityType[] values() -> values
+    1203:1203:com.mparticle.MParticle$IdentityType valueOf(java.lang.String) -> valueOf
+    1220:1220:int getValue() -> getValue
+    1203:1203:int access$000(com.mparticle.MParticle$IdentityType) -> a
 com.mparticle.MParticle$MPLicenseCheckerCallback -> com.mparticle.MParticle$a:
     com.mparticle.MParticle this$0 -> a
-    1447:1453:void allow(int) -> a
-    1456:1462:void dontAllow(int) -> b
-    1465:1471:void applicationError(int) -> c
+    1269:1275:void allow(int) -> a
+    1278:1284:void dontAllow(int) -> b
+    1287:1293:void applicationError(int) -> c
 com.mparticle.MParticle$MParticleLocationListener -> com.mparticle.MParticle$b:
     com.mparticle.MParticle mParticle -> a
-    1428:1429:void onLocationChanged(android.location.Location) -> onLocationChanged
-    1433:1433:void onProviderDisabled(java.lang.String) -> onProviderDisabled
-    1437:1437:void onProviderEnabled(java.lang.String) -> onProviderEnabled
-    1441:1441:void onStatusChanged(java.lang.String,int,android.os.Bundle) -> onStatusChanged
+    1250:1251:void onLocationChanged(android.location.Location) -> onLocationChanged
+    1255:1255:void onProviderDisabled(java.lang.String) -> onProviderDisabled
+    1259:1259:void onProviderEnabled(java.lang.String) -> onProviderEnabled
+    1263:1263:void onStatusChanged(java.lang.String,int,android.os.Bundle) -> onStatusChanged
 com.mparticle.MParticle$Push -> com.mparticle.MParticle$Push:
     java.lang.String BROADCAST_NOTIFICATION_RECEIVED -> BROADCAST_NOTIFICATION_RECEIVED
     java.lang.String BROADCAST_NOTIFICATION_TAPPED -> BROADCAST_NOTIFICATION_TAPPED
     java.lang.String PUSH_ALERT_EXTRA -> PUSH_ALERT_EXTRA
 com.mparticle.MParticle$SessionTimeoutHandler -> com.mparticle.MParticle$c:
     com.mparticle.MParticle mParticle -> a
-    1412:1416:void handleMessage(android.os.Message) -> handleMessage
+    1234:1238:void handleMessage(android.os.Message) -> handleMessage
 com.mparticle.MParticleDatabase -> com.mparticle.MParticleDatabase:
     129:134:void onCreate(android.database.sqlite.SQLiteDatabase) -> onCreate
     139:147:void onUpgrade(android.database.sqlite.SQLiteDatabase,int,int) -> onUpgrade
@@ -943,64 +627,7 @@ com.mparticle.MParticleJSInterface -> com.mparticle.MParticleJSInterface:
     139:144:void setUserIdentity(java.lang.String) -> setUserIdentity
     149:154:void removeUserIdentity(java.lang.String) -> removeUserIdentity
     157:174:java.util.Map convertToMap(org.json.JSONObject) -> a
-com.mparticle.MeasuredRequest -> com.mparticle.v:
-    boolean endOfStream -> a
-    long headerStartTime -> b
-    long streamEndTime -> c
-    long streamStartTime -> d
-    long headerEndTime -> e
-    long responseContentLength -> f
-    long requestContentLength -> g
-    long streamBytesWritten -> h
-    long streamBytesRead -> i
-    int responseCode -> j
-    java.lang.String requestMethod -> k
-    java.lang.String host -> l
-    java.net.URL url -> m
-    org.apache.http.util.ByteArrayBuffer outputByteBuffer -> n
-    org.apache.http.util.ByteArrayBuffer inputByteBuffer -> o
-    boolean chunked -> p
-    boolean parseHeaders -> q
-    boolean added -> r
-    boolean secure -> s
-    49:49:boolean foundHeaderTiming() -> a
-    53:56:void startTiming() -> b
-    60:71:java.lang.String getUri() -> c
-    76:80:long getTotalTime() -> d
-    84:84:java.lang.String getKey() -> e
-    88:108:void parseUrlResponse(java.net.HttpURLConnection) -> a
-    126:131:void log() -> l
-    137:148:int findEndOfHeaders(byte[]) -> a
-    152:209:void parseInputStreamBytes(byte[],int,int) -> a
-    212:212:boolean readyForLogging() -> f
-    220:235:void reset() -> g
-    238:292:void parseOutputStreamBytes(byte[],int,int) -> b
-    295:295:boolean isRequestParsed() -> m
-    299:299:long getStartTime() -> h
-    304:323:java.lang.String toString() -> toString
-    327:328:void setParseHeaders(boolean) -> a
-    331:332:void setSecure(boolean) -> b
-    335:335:java.lang.String getMethod() -> i
-    339:339:long getBytesSent() -> j
-    343:343:long getBytesReceived() -> k
-com.mparticle.MeasuredRequestManager -> com.mparticle.w:
-    java.util.concurrent.ScheduledExecutorService scheduler -> b
-    java.util.concurrent.ConcurrentHashMap requests -> a
-    java.util.concurrent.CopyOnWriteArrayList excludedUrlFilters -> c
-    java.util.concurrent.CopyOnWriteArrayList queryStringFilters -> d
-    java.util.concurrent.ScheduledFuture runner -> e
-    java.lang.Runnable processPending -> f
-    91:92:void addExcludedUrl(java.lang.String) -> a
-    95:96:void addQueryStringFilter(java.lang.String) -> b
-    99:101:void resetFilters() -> a
-    103:111:boolean isUriAllowed(java.lang.String) -> c
-    115:122:void setEnabled(boolean) -> a
-    17:17:java.util.concurrent.CopyOnWriteArrayList access$000(com.mparticle.MeasuredRequestManager) -> a
-com.mparticle.MeasuredRequestManager$1 -> com.mparticle.w$1:
-    com.mparticle.MeasuredRequestManager this$0 -> a
-    40:66:void run() -> run
-    79:84:boolean isUriQueryAllowed(java.lang.String) -> a
-com.mparticle.MessageHandler -> com.mparticle.x:
+com.mparticle.MessageHandler -> com.mparticle.m:
     com.mparticle.MParticleDatabase mDB -> a
     java.lang.String mApiKey -> b
     java.lang.String[] breadcrumbColumns -> c
@@ -1010,7 +637,7 @@ com.mparticle.MessageHandler -> com.mparticle.x:
     255:269:void dbInsertMessage(android.database.sqlite.SQLiteDatabase,org.json.JSONObject) -> b
     286:293:void dbUpdateSessionEndTime(android.database.sqlite.SQLiteDatabase,java.lang.String,long,long) -> a
     299:304:java.lang.String getMessageSessionId(org.json.JSONObject) -> a
-com.mparticle.MessageManager -> com.mparticle.y:
+com.mparticle.MessageManager -> com.mparticle.n:
     android.os.HandlerThread sMessageHandlerThread -> a
     android.os.HandlerThread sUploadHandlerThread -> b
     java.lang.Runtime rt -> c
@@ -1039,19 +666,18 @@ com.mparticle.MessageManager -> com.mparticle.y:
     309:315:void optOut(java.lang.String,long,long,boolean) -> a
     318:319:void logErrorEvent(java.lang.String,long,long,java.lang.String,java.lang.Throwable,org.json.JSONObject) -> a
     323:343:void logErrorEvent(java.lang.String,long,long,java.lang.String,java.lang.Throwable,org.json.JSONObject,boolean) -> a
-    347:357:void logNetworkPerformanceEvent(java.lang.String,long,long,java.lang.String,java.lang.String,long,long,long) -> a
-    362:370:void setPushRegistrationId(java.lang.String,long,long,java.lang.String,boolean) -> a
-    374:382:void setSessionAttributes(java.lang.String,org.json.JSONObject) -> a
-    385:386:void doUpload() -> b
-    389:393:void setLocation(android.location.Location) -> a
-    397:415:void logStateTransition(java.lang.String,java.lang.String,long,android.os.Bundle) -> a
-    418:439:void logNotification(java.lang.String,long,android.os.Bundle,java.lang.String) -> a
-    459:471:void setDataConnection(android.net.NetworkInfo) -> a
+    347:355:void setPushRegistrationId(java.lang.String,long,long,java.lang.String,boolean) -> a
+    359:367:void setSessionAttributes(java.lang.String,org.json.JSONObject) -> a
+    370:371:void doUpload() -> b
+    374:378:void setLocation(android.location.Location) -> a
+    382:400:void logStateTransition(java.lang.String,java.lang.String,long,android.os.Bundle) -> a
+    403:424:void logNotification(java.lang.String,long,android.os.Bundle,java.lang.String) -> a
+    444:456:void setDataConnection(android.net.NetworkInfo) -> a
     30:30:double access$102(double) -> a
-com.mparticle.MessageManager$StatusBroadcastReceiver -> com.mparticle.y$a:
+com.mparticle.MessageManager$StatusBroadcastReceiver -> com.mparticle.n$a:
     com.mparticle.MessageManager this$0 -> a
-    444:455:void onReceive(android.content.Context,android.content.Intent) -> onReceive
-com.mparticle.Obfuscator -> com.mparticle.z:
+    429:440:void onReceive(android.content.Context,android.content.Intent) -> onReceive
+com.mparticle.Obfuscator -> com.mparticle.o:
     java.lang.String obfuscate(java.lang.String,java.lang.String) -> a
     java.lang.String unobfuscate(java.lang.String,java.lang.String) -> b
 com.mparticle.PersistentCookieStore -> com.mparticle.PersistentCookieStore:
@@ -1071,7 +697,7 @@ com.mparticle.PersistentCookieStore$SerializableCookie -> com.mparticle.Persiste
     230:234:org.apache.http.cookie.Cookie getCookie() -> getCookie
     238:246:void writeObject(java.io.ObjectOutputStream) -> writeObject
     249:258:void readObject(java.io.ObjectInputStream) -> readObject
-com.mparticle.Policy -> com.mparticle.A:
+com.mparticle.Policy -> com.mparticle.p:
     long mValidityTimestamp -> a
     long mRetryUntil -> b
     long mMaxRetries -> c
@@ -1086,17 +712,17 @@ com.mparticle.Policy -> com.mparticle.A:
     193:203:void setRetryUntil(java.lang.String) -> b
     219:229:void setMaxRetries(java.lang.String) -> c
     263:273:java.util.Map decodeExtras(java.lang.String) -> d
-com.mparticle.PreferenceObfuscator -> com.mparticle.B:
+com.mparticle.PreferenceObfuscator -> com.mparticle.q:
     android.content.SharedPreferences mPreferences -> a
     com.mparticle.Obfuscator mObfuscator -> b
     android.content.SharedPreferences$Editor mEditor -> c
     46:51:void putString(java.lang.String,java.lang.String) -> a
     55:68:java.lang.String getString(java.lang.String,java.lang.String) -> b
     72:76:void commit() -> a
-com.mparticle.PushRegistrationListener -> com.mparticle.C:
+com.mparticle.PushRegistrationListener -> com.mparticle.r:
     void onRegistered(java.lang.String) -> a
     void onCleared$552c4e01() -> a
-com.mparticle.ResponseData -> com.mparticle.D:
+com.mparticle.ResponseData -> com.mparticle.s:
     int responseCode -> a
     int nonce -> b
     java.lang.String packageName -> c
@@ -1105,7 +731,7 @@ com.mparticle.ResponseData -> com.mparticle.D:
     long timestamp -> f
     java.lang.String extra -> g
     76:76:java.lang.String toString() -> toString
-com.mparticle.UploadHandler -> com.mparticle.E:
+com.mparticle.UploadHandler -> com.mparticle.t:
     com.mparticle.MParticleDatabase mDB -> a
     android.content.SharedPreferences mPreferences -> b
     android.content.Context mContext -> c
@@ -1138,7 +764,7 @@ com.mparticle.UploadHandler -> com.mparticle.E:
     712:720:boolean isNetworkAvailable() -> c
     724:739:org.apache.http.client.HttpClient setupHttpClient() -> d
     763:768:java.lang.String asHex(byte[]) -> a
-com.mparticle.ValidationException -> com.mparticle.F:
+com.mparticle.ValidationException -> com.mparticle.u:
     long serialVersionUID -> serialVersionUID
 com.mparticle.activity.MPActivity -> com.mparticle.activity.MPActivity:
     27:31:void onStart() -> onStart

@@ -48,6 +48,7 @@ import java.util.jar.JarFile;
 
 class MPUtility {
 
+    static final String NO_BLUETOOTH = "none";
     private static String sOpenUDID;
     private static String sBuildUUID;
 
@@ -297,16 +298,16 @@ class MPUtility {
             return (js1 == js2);
         }
 
-        List<String> l1 =  new ArrayList<String>();
+        List<String> l1 = new ArrayList<String>();
         JSONArray a1 = js1.names();
-        for (int i = 0; i < a1.length(); i++){
+        for (int i = 0; i < a1.length(); i++) {
             l1.add(a1.getString(i));
         }
 
         Collections.sort(l1);
-        List<String> l2 =  new ArrayList<String>();
+        List<String> l2 = new ArrayList<String>();
         JSONArray a2 = js2.names();
-        for (int i = 0; i < a2.length(); i++){
+        for (int i = 0; i < a2.length(); i++) {
             l2.add(a2.getString(i));
         }
         Collections.sort(l2);
@@ -322,7 +323,7 @@ class MPUtility {
                     Log.d(Constants.LOG_TAG, "Difference detected while inspecting key: " + key);
                     return false;
                 }
-                if (!jsonObjsAreEqual((JSONObject)val1, (JSONObject)val2)) {
+                if (!jsonObjsAreEqual((JSONObject) val1, (JSONObject) val2)) {
                     Log.d(Constants.LOG_TAG, "Difference detected while inspecting key: " + key);
                     return false;
                 }
@@ -334,10 +335,10 @@ class MPUtility {
                     return false;
 
                 }
-            }  else if (!val1.equals(val2)) {
-                if (val2 == null){
+            } else if (!val1.equals(val2)) {
+                if (val2 == null) {
                     Log.d(Constants.LOG_TAG, "Difference detected while inspecting value: " + val1);
-                }else{
+                } else {
                     Log.d(Constants.LOG_TAG, "Difference detected while inspecting value: " + val1 + ", does not match :" + val2);
                 }
                 return false;
@@ -356,8 +357,7 @@ class MPUtility {
         return context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_NFC);
     }
 
-    static final String NO_BLUETOOTH = "none";
-    public static String getBluetoothVersion(Context context){
+    public static String getBluetoothVersion(Context context) {
         String bluetoothVersion = NO_BLUETOOTH;
         if ((Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) && (context.getPackageManager().hasSystemFeature("android.hardware.bluetooth_le")))
         {
@@ -388,13 +388,13 @@ class MPUtility {
         return bool;
     }
 
-    public static boolean hasTelephony(Context context){
+    public static boolean hasTelephony(Context context) {
         return context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_TELEPHONY);
     }
 
-    public static boolean isBluetoothEnabled(){
+    public static boolean isBluetoothEnabled(Context context) {
         BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-        if (mBluetoothAdapter != null) {
+        if (mBluetoothAdapter != null && checkPermission(context, Manifest.permission.BLUETOOTH)) {
             return mBluetoothAdapter.isEnabled();
         }
         return false;

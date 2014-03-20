@@ -17,7 +17,6 @@ import com.mparticle.Constants.PrefKeys;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.File;
 import java.util.Locale;
 import java.util.TimeZone;
 
@@ -97,7 +96,7 @@ import java.util.TimeZone;
             attributes.put(MessageKey.PLATFORM, "Android");
             attributes.put(MessageKey.OS_VERSION, Build.VERSION.SDK);
             attributes.put(MessageKey.OS_VERSION_INT, Build.VERSION.SDK_INT);
-            attributes.put(MessageKey.DEVICE_BLUETOOTH_ENABLED, MPUtility.isBluetoothEnabled());
+            attributes.put(MessageKey.DEVICE_BLUETOOTH_ENABLED, MPUtility.isBluetoothEnabled(appContext));
             attributes.put(MessageKey.DEVICE_BLUETOOTH_VERSION, MPUtility.getBluetoothVersion(appContext));
             attributes.put(MessageKey.DEVICE_SUPPORTS_NFC, MPUtility.hasNfc(appContext));
             attributes.put(MessageKey.DEVICE_SUPPORTS_TELEPHONY, MPUtility.hasTelephony(appContext));
