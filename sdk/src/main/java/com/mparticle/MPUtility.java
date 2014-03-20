@@ -28,7 +28,6 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.math.BigInteger;
@@ -437,9 +436,9 @@ public class MPUtility {
         return context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_TELEPHONY);
     }
 
-    public static boolean isBluetoothEnabled() {
+    public static boolean isBluetoothEnabled(Context context) {
         BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-        if (mBluetoothAdapter != null) {
+        if (mBluetoothAdapter != null && checkPermission(context, Manifest.permission.BLUETOOTH)) {
             return mBluetoothAdapter.isEnabled();
         }
         return false;
