@@ -25,8 +25,8 @@ com.mparticle.AppConfig -> com.mparticle.b:
     121:126:java.lang.String getString(java.lang.String) -> b
     130:135:boolean getBoolean(java.lang.String,boolean) -> a
     139:144:int getInteger(java.lang.String,int) -> a
-    36:74:org.json.JSONObject collectAppInfo(android.content.Context) -> a
-    84:181:org.json.JSONObject collectDeviceInfo(android.content.Context) -> b
+    35:73:org.json.JSONObject collectAppInfo(android.content.Context) -> a
+    83:180:org.json.JSONObject collectDeviceInfo(android.content.Context) -> b
     22:27:int getAppVersion(android.content.Context) -> d
     40:58:java.lang.String getRegistrationId(android.content.Context) -> c
     67:73:void enablePushNotifications(android.content.Context,java.lang.String) -> a
@@ -706,34 +706,34 @@ com.mparticle.MPUrlStreamHandlerFactory -> com.mparticle.MPUrlStreamHandlerFacto
 com.mparticle.MPUtility -> com.mparticle.MPUtility:
     java.lang.String sOpenUDID -> a
     java.lang.String sBuildUUID -> b
-    59:92:java.lang.String getCpuUsage() -> getCpuUsage
-    96:99:long getAvailableMemory(android.content.Context) -> getAvailableMemory
-    103:106:boolean isSystemMemoryLow(android.content.Context) -> isSystemMemoryLow
-    110:113:long getSystemMemoryThreshold(android.content.Context) -> getSystemMemoryThreshold
-    117:122:java.lang.String getGpsEnabled(android.content.Context) -> getGpsEnabled
-    127:135:long getAvailableInternalDisk() -> getAvailableInternalDisk
-    139:147:long getAvailableExternalDisk() -> getAvailableExternalDisk
-    151:152:java.lang.String getAndroidID(android.content.Context) -> getAndroidID
-    156:156:java.lang.String getTimeZone() -> getTimeZone
-    160:173:int getOrientation(android.content.Context) -> getOrientation
-    177:180:long getTotalMemory(android.content.Context) -> getTotalMemory
-    186:189:long getTotalMemoryJB(android.content.Context) -> getTotalMemoryJB
-    193:209:long getTotalMemoryPreJB() -> getTotalMemoryPreJB
-    214:228:java.lang.String getOpenUDID(android.content.Context) -> getOpenUDID
-    237:275:java.lang.String getBuildUUID(android.content.Context) -> a
-    279:286:java.lang.String convertBytesToUUID(byte[],boolean) -> a
-    291:297:boolean isDebug(android.content.pm.PackageManager,java.lang.String) -> isDebug
-    301:351:boolean jsonObjsAreEqual(org.json.JSONObject,org.json.JSONObject) -> jsonObjsAreEqual
-    355:355:boolean isTablet(android.content.Context) -> isTablet
-    361:372:java.lang.Object getAccessibleObject(java.lang.reflect.Field,java.lang.Object) -> getAccessibleObject
-    376:386:java.lang.reflect.Field getAccessibleField(java.lang.Class,java.lang.Class) -> getAccessibleField
-    390:399:java.lang.reflect.Constructor getConstructor(java.lang.String,java.lang.String[]) -> getConstructor
-    403:403:boolean hasNfc(android.content.Context) -> hasNfc
-    407:413:java.lang.String getBluetoothVersion(android.content.Context) -> getBluetoothVersion
-    419:433:boolean isPhoneRooted() -> isPhoneRooted
-    437:437:boolean hasTelephony(android.content.Context) -> hasTelephony
-    441:445:boolean isBluetoothEnabled() -> isBluetoothEnabled
-    449:450:boolean checkPermission(android.content.Context,java.lang.String) -> checkPermission
+    58:91:java.lang.String getCpuUsage() -> getCpuUsage
+    95:98:long getAvailableMemory(android.content.Context) -> getAvailableMemory
+    102:105:boolean isSystemMemoryLow(android.content.Context) -> isSystemMemoryLow
+    109:112:long getSystemMemoryThreshold(android.content.Context) -> getSystemMemoryThreshold
+    116:121:java.lang.String getGpsEnabled(android.content.Context) -> getGpsEnabled
+    126:134:long getAvailableInternalDisk() -> getAvailableInternalDisk
+    138:146:long getAvailableExternalDisk() -> getAvailableExternalDisk
+    150:151:java.lang.String getAndroidID(android.content.Context) -> getAndroidID
+    155:155:java.lang.String getTimeZone() -> getTimeZone
+    159:172:int getOrientation(android.content.Context) -> getOrientation
+    176:179:long getTotalMemory(android.content.Context) -> getTotalMemory
+    185:188:long getTotalMemoryJB(android.content.Context) -> getTotalMemoryJB
+    192:208:long getTotalMemoryPreJB() -> getTotalMemoryPreJB
+    213:227:java.lang.String getOpenUDID(android.content.Context) -> getOpenUDID
+    236:274:java.lang.String getBuildUUID(android.content.Context) -> a
+    278:285:java.lang.String convertBytesToUUID(byte[],boolean) -> a
+    290:296:boolean isDebug(android.content.pm.PackageManager,java.lang.String) -> isDebug
+    300:350:boolean jsonObjsAreEqual(org.json.JSONObject,org.json.JSONObject) -> jsonObjsAreEqual
+    354:354:boolean isTablet(android.content.Context) -> isTablet
+    360:371:java.lang.Object getAccessibleObject(java.lang.reflect.Field,java.lang.Object) -> getAccessibleObject
+    375:385:java.lang.reflect.Field getAccessibleField(java.lang.Class,java.lang.Class) -> getAccessibleField
+    389:398:java.lang.reflect.Constructor getConstructor(java.lang.String,java.lang.String[]) -> getConstructor
+    402:402:boolean hasNfc(android.content.Context) -> hasNfc
+    406:412:java.lang.String getBluetoothVersion(android.content.Context) -> getBluetoothVersion
+    418:432:boolean isPhoneRooted() -> isPhoneRooted
+    436:436:boolean hasTelephony(android.content.Context) -> hasTelephony
+    440:444:boolean isBluetoothEnabled(android.content.Context) -> isBluetoothEnabled
+    448:449:boolean checkPermission(android.content.Context,java.lang.String) -> checkPermission
 com.mparticle.MParticle -> com.mparticle.MParticle:
     android.os.HandlerThread sTimeoutHandlerThread -> g
     byte[] SALT -> h
