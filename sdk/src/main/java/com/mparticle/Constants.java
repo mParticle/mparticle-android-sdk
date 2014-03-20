@@ -27,7 +27,7 @@ package com.mparticle;
     public static final int DB_CLEANUP_EXPIRATION = 3 * 24 * 60 * 60 * 1000; // 3 days old
     public static final long DB_CLEANUP_INTERVAL = 1 * 24 * 60 * 60 * 1000; // 1 day
 
-    public interface MessageType {
+    interface MessageType {
         public static final String SESSION_START = "ss";
         public static final String SESSION_END = "se";
         public static final String EVENT = "e";
@@ -45,7 +45,7 @@ package com.mparticle;
         public static final String NETWORK_PERFORMNACE = "npe";
     }
 
-    public interface MessageKey {
+    interface MessageKey {
         // common
         public static final String TYPE = "dt";
         public static final String ID = "id";
@@ -185,7 +185,7 @@ package com.mparticle;
         public static final String NPE_REC = "bi";
     }
 
-    public interface PrefKeys {
+    interface PrefKeys {
         // common
         public static final String INSTALL_TIME = "mp::ict";
         public static final String PUSH_REGISTRATION_ID = "mp::push_reg_id";
@@ -210,12 +210,12 @@ package com.mparticle;
         public static final String BREADCRUMB_LIMIT = "mp::breadcrumbs::limit";
     }
 
-    public interface MiscStorageKeys {
+    interface MiscStorageKeys {
         public static final String TOTAL_MEMORY = "mp::totalmem";
         public static final String MEMORY_THRESHOLD = "mp::memthreshold";
     }
 
-    public interface Status {
+    interface Status {
         static final int UNKNOWN = -1;
         static final int READY = 1; // stream
         static final int BATCH_READY = 2;
@@ -223,7 +223,7 @@ package com.mparticle;
     }
 
     // keys used in the (optional) mparticle.properties config file
-    public interface ConfigKeys {
+    interface ConfigKeys {
         // mParticleAPI
         public static final String API_KEY = "api_key";
         public static final String API_SECRET = "api_secret";
@@ -242,12 +242,12 @@ package com.mparticle;
     }
 
     // these keys are expected by the MPService for push notifications
-    public interface GCMNotificationKeys {
+    interface GCMNotificationKeys {
         public static final String TITLE = "mp::notification::title";
         public static final String TEXT = "mp::notification::text";
     }
 
-    public interface StateTransitionType {
+    interface StateTransitionType {
         public static final String STATE_TRANS_INIT = "app_init";
         public static final String STATE_TRANS_EXIT = "app_exit";
         public static final String STATE_TRANS_BG = "app_back";

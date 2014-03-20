@@ -105,189 +105,6 @@ com.mparticle.ConfigManager -> com.mparticle.f:
     264:264:int getBreadcrumbLimit() -> v
     274:274:boolean isNetworkPerformanceEnabled() -> w
     278:279:void setNetworkingEnabled(boolean) -> e
-com.mparticle.Constants$ConfigKeys -> com.mparticle.Constants$ConfigKeys:
-    java.lang.String API_KEY -> API_KEY
-    java.lang.String API_SECRET -> API_SECRET
-    java.lang.String DEBUG_MODE -> DEBUG_MODE
-    java.lang.String SESSION_TIMEOUT -> SESSION_TIMEOUT
-    java.lang.String ENABLE_CRASH_REPORTING -> ENABLE_CRASH_REPORTING
-    java.lang.String ENABLE_PUSH_NOTIFICATIONS -> ENABLE_PUSH_NOTIFICATIONS
-    java.lang.String DEBUG_UPLOAD_INTERVAL -> DEBUG_UPLOAD_INTERVAL
-    java.lang.String UPLOAD_INTERVAL -> UPLOAD_INTERVAL
-    java.lang.String ENABLE_SSL -> ENABLE_SSL
-    java.lang.String PROXY_HOST -> PROXY_HOST
-    java.lang.String PROXY_PORT -> PROXY_PORT
-    java.lang.String ENABLE_COMPRESSION -> ENABLE_COMPRESSION
-com.mparticle.Constants$GCMNotificationKeys -> com.mparticle.Constants$GCMNotificationKeys:
-    java.lang.String TITLE -> TITLE
-    java.lang.String TEXT -> TEXT
-com.mparticle.Constants$MessageKey -> com.mparticle.Constants$MessageKey:
-    java.lang.String TYPE -> TYPE
-    java.lang.String ID -> ID
-    java.lang.String TIMESTAMP -> TIMESTAMP
-    java.lang.String SESSION_START_TIMESTAMP -> SESSION_START_TIMESTAMP
-    java.lang.String SESSION_ID -> SESSION_ID
-    java.lang.String SESSION_LENGTH -> SESSION_LENGTH
-    java.lang.String ATTRIBUTES -> ATTRIBUTES
-    java.lang.String EVENT_TYPE -> EVENT_TYPE
-    java.lang.String NAME -> NAME
-    java.lang.String DEBUG -> DEBUG
-    java.lang.String OPT_OUT_HEADER -> OPT_OUT_HEADER
-    java.lang.String LAUNCH_REFERRER -> LAUNCH_REFERRER
-    java.lang.String EVENT_START_TIME -> EVENT_START_TIME
-    java.lang.String EVENT_DURATION -> EVENT_DURATION
-    java.lang.String LOCATION -> LOCATION
-    java.lang.String LATITUDE -> LATITUDE
-    java.lang.String LONGITUDE -> LONGITUDE
-    java.lang.String ACCURACY -> ACCURACY
-    java.lang.String MPARTICLE_VERSION -> MPARTICLE_VERSION
-    java.lang.String APP_INFO -> APP_INFO
-    java.lang.String DEVICE_INFO -> DEVICE_INFO
-    java.lang.String USER_ATTRIBUTES -> USER_ATTRIBUTES
-    java.lang.String USER_IDENTITIES -> USER_IDENTITIES
-    java.lang.String IDENTITY_NAME -> IDENTITY_NAME
-    java.lang.String IDENTITY_VALUE -> IDENTITY_VALUE
-    java.lang.String APP_NAME -> APP_NAME
-    java.lang.String APP_VERSION -> APP_VERSION
-    java.lang.String APP_PACKAGE_NAME -> APP_PACKAGE_NAME
-    java.lang.String APP_INSTALLER_NAME -> APP_INSTALLER_NAME
-    java.lang.String MPARTICLE_INSTALL_TIME -> MPARTICLE_INSTALL_TIME
-    java.lang.String INSTALL_REFERRER -> INSTALL_REFERRER
-    java.lang.String APP_VERSION_CODE -> APP_VERSION_CODE
-    java.lang.String APP_DEBUG_SIGNING -> APP_DEBUG_SIGNING
-    java.lang.String APP_PIRATED -> APP_PIRATED
-    java.lang.String BUILD_ID -> BUILD_ID
-    java.lang.String BRAND -> BRAND
-    java.lang.String PRODUCT -> PRODUCT
-    java.lang.String DEVICE -> DEVICE
-    java.lang.String DEVICE_ID -> DEVICE_ID
-    java.lang.String MANUFACTURER -> MANUFACTURER
-    java.lang.String PLATFORM -> PLATFORM
-    java.lang.String OS_VERSION -> OS_VERSION
-    java.lang.String OS_VERSION_INT -> OS_VERSION_INT
-    java.lang.String MODEL -> MODEL
-    java.lang.String SCREEN_HEIGHT -> SCREEN_HEIGHT
-    java.lang.String SCREEN_WIDTH -> SCREEN_WIDTH
-    java.lang.String SCREEN_DPI -> SCREEN_DPI
-    java.lang.String DEVICE_COUNTRY -> DEVICE_COUNTRY
-    java.lang.String DEVICE_LOCALE_COUNTRY -> DEVICE_LOCALE_COUNTRY
-    java.lang.String DEVICE_LOCALE_LANGUAGE -> DEVICE_LOCALE_LANGUAGE
-    java.lang.String DEVICE_ROOTED -> DEVICE_ROOTED
-    java.lang.String DEVICE_ROOTED_CYDIA -> DEVICE_ROOTED_CYDIA
-    java.lang.String DEVICE_MAC_WIFI -> DEVICE_MAC_WIFI
-    java.lang.String DEVICE_MAC_BLUETOOTH -> DEVICE_MAC_BLUETOOTH
-    java.lang.String DEVICE_IMEI -> DEVICE_IMEI
-    java.lang.String DEVICE_ANID -> DEVICE_ANID
-    java.lang.String DEVICE_TIMEZONE_NAME -> DEVICE_TIMEZONE_NAME
-    java.lang.String DEVICE_OPEN_UDID -> DEVICE_OPEN_UDID
-    java.lang.String DEVICE_PUSH_TOKEN -> DEVICE_PUSH_TOKEN
-    java.lang.String DEVICE_IS_TABLET -> DEVICE_IS_TABLET
-    java.lang.String PUSH_SOUND_ENABLED -> PUSH_SOUND_ENABLED
-    java.lang.String PUSH_VIBRATION_ENABLED -> PUSH_VIBRATION_ENABLED
-    java.lang.String DEVICE_SUPPORTS_TELEPHONY -> DEVICE_SUPPORTS_TELEPHONY
-    java.lang.String DEVICE_SUPPORTS_NFC -> DEVICE_SUPPORTS_NFC
-    java.lang.String DEVICE_BLUETOOTH_ENABLED -> DEVICE_BLUETOOTH_ENABLED
-    java.lang.String DEVICE_BLUETOOTH_VERSION -> DEVICE_BLUETOOTH_VERSION
-    java.lang.String STATE_INFO_KEY -> STATE_INFO_KEY
-    java.lang.String STATE_INFO_CPU -> STATE_INFO_CPU
-    java.lang.String STATE_INFO_AVAILABLE_MEMORY -> STATE_INFO_AVAILABLE_MEMORY
-    java.lang.String STATE_INFO_TOTAL_MEMORY -> STATE_INFO_TOTAL_MEMORY
-    java.lang.String STATE_INFO_BATTERY_LVL -> STATE_INFO_BATTERY_LVL
-    java.lang.String STATE_INFO_TIME_SINCE_START -> STATE_INFO_TIME_SINCE_START
-    java.lang.String STATE_INFO_AVAILABLE_DISK -> STATE_INFO_AVAILABLE_DISK
-    java.lang.String STATE_INFO_AVAILABLE_EXT_DISK -> STATE_INFO_AVAILABLE_EXT_DISK
-    java.lang.String STATE_INFO_APP_MEMORY_AVAIL -> STATE_INFO_APP_MEMORY_AVAIL
-    java.lang.String STATE_INFO_APP_MEMORY_MAX -> STATE_INFO_APP_MEMORY_MAX
-    java.lang.String STATE_INFO_APP_MEMORY_USAGE -> STATE_INFO_APP_MEMORY_USAGE
-    java.lang.String STATE_INFO_GPS -> STATE_INFO_GPS
-    java.lang.String STATE_INFO_BAR_ORIENTATION -> STATE_INFO_BAR_ORIENTATION
-    java.lang.String STATE_INFO_DATA_CONNECTION -> STATE_INFO_DATA_CONNECTION
-    java.lang.String STATE_INFO_ORIENTATION -> STATE_INFO_ORIENTATION
-    java.lang.String STATE_INFO_MEMORY_LOW -> STATE_INFO_MEMORY_LOW
-    java.lang.String STATE_INFO_MEMORY_THRESHOLD -> STATE_INFO_MEMORY_THRESHOLD
-    java.lang.String NETWORK_COUNTRY -> NETWORK_COUNTRY
-    java.lang.String NETWORK_CARRIER -> NETWORK_CARRIER
-    java.lang.String MOBILE_NETWORK_CODE -> MOBILE_NETWORK_CODE
-    java.lang.String MOBILE_COUNTRY_CODE -> MOBILE_COUNTRY_CODE
-    java.lang.String ERROR_SEVERITY -> ERROR_SEVERITY
-    java.lang.String ERROR_CLASS -> ERROR_CLASS
-    java.lang.String ERROR_MESSAGE -> ERROR_MESSAGE
-    java.lang.String ERROR_STACK_TRACE -> ERROR_STACK_TRACE
-    java.lang.String ERROR_UNCAUGHT -> ERROR_UNCAUGHT
-    java.lang.String ERROR_SESSION_COUNT -> ERROR_SESSION_COUNT
-    java.lang.String MESSAGES -> MESSAGES
-    java.lang.String HISTORY -> HISTORY
-    java.lang.String URL -> URL
-    java.lang.String METHOD -> METHOD
-    java.lang.String POST -> POST
-    java.lang.String HEADERS -> HEADERS
-    java.lang.String SESSION_UPLOAD -> SESSION_UPLOAD
-    java.lang.String TIMEZONE -> TIMEZONE
-    java.lang.String OPT_OUT_STATUS -> OPT_OUT_STATUS
-    java.lang.String PUSH_TOKEN -> PUSH_TOKEN
-    java.lang.String PUSH_REGISTER_FLAG -> PUSH_REGISTER_FLAG
-    java.lang.String APP_STATE -> APP_STATE
-    java.lang.String STATE_TRANSITION_TYPE -> STATE_TRANSITION_TYPE
-    java.lang.String PAYLOAD -> PAYLOAD
-    java.lang.String SCREEN_STARTED -> SCREEN_STARTED
-    java.lang.String EVENT_CATEGORY -> EVENT_CATEGORY
-    java.lang.String BREADCRUMB_SESSION_COUNTER -> BREADCRUMB_SESSION_COUNTER
-    java.lang.String BREADCRUMB_LABEL -> BREADCRUMB_LABEL
-    java.lang.String NPE_METHOD -> NPE_METHOD
-    java.lang.String NPE_URL -> NPE_URL
-    java.lang.String NPE_LENGTH -> NPE_LENGTH
-    java.lang.String NPE_SENT -> NPE_SENT
-    java.lang.String NPE_REC -> NPE_REC
-com.mparticle.Constants$MessageType -> com.mparticle.Constants$MessageType:
-    java.lang.String SESSION_START -> SESSION_START
-    java.lang.String SESSION_END -> SESSION_END
-    java.lang.String EVENT -> EVENT
-    java.lang.String SCREEN_VIEW -> SCREEN_VIEW
-    java.lang.String OPT_OUT -> OPT_OUT
-    java.lang.String ERROR -> ERROR
-    java.lang.String PUSH_REGISTRATION -> PUSH_REGISTRATION
-    java.lang.String REQUEST_HEADER -> REQUEST_HEADER
-    java.lang.String RESPONSE_HEADER -> RESPONSE_HEADER
-    java.lang.String HTTP_COMMAND -> HTTP_COMMAND
-    java.lang.String FIRST_RUN -> FIRST_RUN
-    java.lang.String APP_STATE_TRANSITION -> APP_STATE_TRANSITION
-    java.lang.String PUSH_RECEIVED -> PUSH_RECEIVED
-    java.lang.String BREADCRUMB -> BREADCRUMB
-    java.lang.String NETWORK_PERFORMNACE -> NETWORK_PERFORMNACE
-com.mparticle.Constants$MiscStorageKeys -> com.mparticle.Constants$MiscStorageKeys:
-    java.lang.String TOTAL_MEMORY -> TOTAL_MEMORY
-    java.lang.String MEMORY_THRESHOLD -> MEMORY_THRESHOLD
-com.mparticle.Constants$PrefKeys -> com.mparticle.Constants$PrefKeys:
-    java.lang.String INSTALL_TIME -> INSTALL_TIME
-    java.lang.String PUSH_REGISTRATION_ID -> PUSH_REGISTRATION_ID
-    java.lang.String INSTALL_REFERRER -> INSTALL_REFERRER
-    java.lang.String OPEN_UDID -> OPEN_UDID
-    java.lang.String OPTOUT -> OPTOUT
-    java.lang.String USER_ATTRS -> USER_ATTRS
-    java.lang.String USER_IDENTITIES -> USER_IDENTITIES
-    java.lang.String FIRSTRUN -> FIRSTRUN
-    java.lang.String UPLOAD_MODE -> UPLOAD_MODE
-    java.lang.String PROPERTY_APP_VERSION -> PROPERTY_APP_VERSION
-    java.lang.String PROPERTY_OS_VERSION -> PROPERTY_OS_VERSION
-    java.lang.String PUSH_ENABLED -> PUSH_ENABLED
-    java.lang.String PUSH_SENDER_ID -> PUSH_SENDER_ID
-    java.lang.String PIRATED -> PIRATED
-    java.lang.String PUSH_ENABLE_SOUND -> PUSH_ENABLE_SOUND
-    java.lang.String PUSH_ENABLE_VIBRATION -> PUSH_ENABLE_VIBRATION
-    java.lang.String PUSH_ICON -> PUSH_ICON
-    java.lang.String PUSH_TITLE -> PUSH_TITLE
-    java.lang.String SESSION_COUNTER -> SESSION_COUNTER
-    java.lang.String BREADCRUMB_LIMIT -> BREADCRUMB_LIMIT
-com.mparticle.Constants$StateTransitionType -> com.mparticle.Constants$StateTransitionType:
-    java.lang.String STATE_TRANS_INIT -> STATE_TRANS_INIT
-    java.lang.String STATE_TRANS_EXIT -> STATE_TRANS_EXIT
-    java.lang.String STATE_TRANS_BG -> STATE_TRANS_BG
-    java.lang.String STATE_TRANS_FORE -> STATE_TRANS_FORE
-com.mparticle.Constants$Status -> com.mparticle.Constants$Status:
-    int UNKNOWN -> UNKNOWN
-    int READY -> READY
-    int BATCH_READY -> BATCH_READY
-    int UPLOADED -> UPLOADED
 com.mparticle.DeviceLimiter -> com.mparticle.g:
 com.mparticle.ExceptionHandler -> com.mparticle.h:
     java.lang.Thread$UncaughtExceptionHandler mOriginalUncaughtExceptionHandler -> a
@@ -640,23 +457,23 @@ com.mparticle.MPSocketImpl -> com.mparticle.t:
     java.net.SocketImpl delegateSocket -> g
     com.mparticle.MPInputStream delegateInputStream -> h
     com.mparticle.MPOutputStream delegateOutputStream -> i
-    67:72:void setAccessible(java.lang.reflect.AccessibleObject[]) -> a
-    76:96:java.lang.Object invokeMethod(int,java.lang.Object[]) -> a
-    101:108:void updateFields() -> a
-    112:113:void accept(java.net.SocketImpl) -> accept
-    117:118:int available() -> available
-    123:124:void bind(java.net.InetAddress,int) -> bind
-    128:129:void close() -> close
-    133:134:void connect(java.lang.String,int) -> connect
-    138:139:void connect(java.net.InetAddress,int) -> connect
-    143:144:void create(boolean) -> create
-    148:156:java.io.InputStream getInputStream() -> getInputStream
-    161:169:java.io.OutputStream getOutputStream() -> getOutputStream
-    174:175:void listen(int) -> listen
-    179:180:void connect(java.net.SocketAddress,int) -> connect
-    184:185:void sendUrgentData(int) -> sendUrgentData
-    189:189:java.lang.Object getOption(int) -> getOption
-    194:195:void setOption(int,java.lang.Object) -> setOption
+    74:79:void setAccessible(java.lang.reflect.AccessibleObject[]) -> a
+    83:103:java.lang.Object invokeMethod(int,java.lang.Object[]) -> a
+    108:115:void updateFields() -> a
+    119:120:void accept(java.net.SocketImpl) -> accept
+    124:125:int available() -> available
+    130:131:void bind(java.net.InetAddress,int) -> bind
+    135:136:void close() -> close
+    140:141:void connect(java.lang.String,int) -> connect
+    145:146:void connect(java.net.InetAddress,int) -> connect
+    150:151:void create(boolean) -> create
+    155:163:java.io.InputStream getInputStream() -> getInputStream
+    168:176:java.io.OutputStream getOutputStream() -> getOutputStream
+    181:182:void listen(int) -> listen
+    186:187:void connect(java.net.SocketAddress,int) -> connect
+    191:192:void sendUrgentData(int) -> sendUrgentData
+    196:196:java.lang.Object getOption(int) -> getOption
+    201:202:void setOption(int,java.lang.Object) -> setOption
 com.mparticle.MPSocketImplFactory -> com.mparticle.MPSocketImplFactory:
     java.lang.Class socketClass -> a
     23:34:java.net.SocketImpl createSocketImpl() -> createSocketImpl
@@ -809,30 +626,30 @@ com.mparticle.MParticle -> com.mparticle.MParticle:
     944:954:void removeUserAttribute(java.lang.String) -> removeUserAttribute
     962:963:void setUserTag(java.lang.String) -> setUserTag
     971:972:void removeUserTag(java.lang.String) -> removeUserTag
-    982:1016:void setUserIdentity(java.lang.String,com.mparticle.MParticle$IdentityType) -> setUserIdentity
-    1026:1053:void removeUserIdentity(java.lang.String) -> removeUserIdentity
-    1066:1066:boolean getOptOut() -> getOptOut
-    1075:1086:void setOptOut(boolean) -> setOptOut
-    1097:1097:boolean getDebugMode() -> getDebugMode
-    1107:1108:void setDebugMode(boolean) -> setDebugMode
-    1116:1117:void setUploadInterval(int) -> setUploadInterval
-    1125:1126:void setDebugUploadInterval(int) -> setDebugUploadInterval
-    1132:1139:void enableUncaughtExceptionLogging() -> enableUncaughtExceptionLogging
-    1145:1152:void disableUncaughtExceptionLogging() -> disableUncaughtExceptionLogging
-    1160:1166:void enablePushNotifications(java.lang.String) -> enablePushNotifications
-    1172:1173:void disablePushNotifications() -> disablePushNotifications
-    1182:1183:void setNotificationSoundEnabled(boolean) -> setNotificationSoundEnabled
-    1192:1193:void setNotificationVibrationEnabled(boolean) -> setNotificationVibrationEnabled
-    1196:1197:void clearPushNotificationId() -> b
-    1200:1201:void setPushRegistrationId(java.lang.String) -> c
-    1210:1215:boolean checkEventLimit() -> f
-    1228:1237:org.json.JSONObject enforceAttributeConstraints(java.util.Map) -> a
-    1302:1302:boolean isAutoTrackingEnabled() -> isAutoTrackingEnabled
-    1311:1311:int getSessionTimeout() -> getSessionTimeout
-    1322:1323:void setSessionTimeout(int) -> setSessionTimeout
-    1326:1331:void logNotification(android.os.Bundle,java.lang.String) -> a
-    1341:1342:void setPushNotificationIcon(int) -> setPushNotificationIcon
-    1352:1353:void setPushNotificationTitle(int) -> setPushNotificationTitle
+    983:1017:void setUserIdentity(java.lang.String,com.mparticle.MParticle$IdentityType) -> setUserIdentity
+    1027:1054:void removeUserIdentity(java.lang.String) -> removeUserIdentity
+    1067:1067:boolean getOptOut() -> getOptOut
+    1076:1087:void setOptOut(boolean) -> setOptOut
+    1099:1100:void setDebugMode(boolean) -> setDebugMode
+    1109:1109:boolean getDebugMode() -> getDebugMode
+    1118:1119:void setUploadInterval(int) -> setUploadInterval
+    1127:1128:void setDebugUploadInterval(int) -> setDebugUploadInterval
+    1134:1141:void enableUncaughtExceptionLogging() -> enableUncaughtExceptionLogging
+    1147:1154:void disableUncaughtExceptionLogging() -> disableUncaughtExceptionLogging
+    1162:1168:void enablePushNotifications(java.lang.String) -> enablePushNotifications
+    1174:1175:void disablePushNotifications() -> disablePushNotifications
+    1184:1185:void setNotificationSoundEnabled(boolean) -> setNotificationSoundEnabled
+    1194:1195:void setNotificationVibrationEnabled(boolean) -> setNotificationVibrationEnabled
+    1198:1199:void clearPushNotificationId() -> b
+    1202:1203:void setPushRegistrationId(java.lang.String) -> c
+    1212:1217:boolean checkEventLimit() -> f
+    1230:1239:org.json.JSONObject enforceAttributeConstraints(java.util.Map) -> a
+    1304:1304:boolean isAutoTrackingEnabled() -> isAutoTrackingEnabled
+    1313:1313:int getSessionTimeout() -> getSessionTimeout
+    1324:1325:void setSessionTimeout(int) -> setSessionTimeout
+    1328:1333:void logNotification(android.os.Bundle,java.lang.String) -> a
+    1343:1344:void setPushNotificationIcon(int) -> setPushNotificationIcon
+    1354:1355:void setPushNotificationTitle(int) -> setPushNotificationTitle
     74:74:com.mparticle.MessageManager access$000(com.mparticle.MParticle) -> a
     74:74:android.content.SharedPreferences access$300() -> c
     74:74:com.mparticle.LicenseCheckerCallback access$400(com.mparticle.MParticle) -> b
@@ -851,9 +668,9 @@ com.mparticle.MParticle$EventType -> com.mparticle.MParticle$EventType:
     com.mparticle.MParticle$EventType Social -> Social
     com.mparticle.MParticle$EventType Other -> Other
     com.mparticle.MParticle$EventType[] $VALUES -> a
-    1361:1361:com.mparticle.MParticle$EventType[] values() -> values
-    1361:1361:com.mparticle.MParticle$EventType valueOf(java.lang.String) -> valueOf
-    1365:1365:java.lang.String toString() -> toString
+    1363:1363:com.mparticle.MParticle$EventType[] values() -> values
+    1363:1363:com.mparticle.MParticle$EventType valueOf(java.lang.String) -> valueOf
+    1367:1367:java.lang.String toString() -> toString
 com.mparticle.MParticle$IdentityType -> com.mparticle.MParticle$IdentityType:
     com.mparticle.MParticle$IdentityType Other -> Other
     com.mparticle.MParticle$IdentityType CustomId -> CustomId
@@ -865,28 +682,28 @@ com.mparticle.MParticle$IdentityType -> com.mparticle.MParticle$IdentityType:
     com.mparticle.MParticle$IdentityType Email -> Email
     int value -> a
     com.mparticle.MParticle$IdentityType[] $VALUES -> b
-    1375:1375:com.mparticle.MParticle$IdentityType[] values() -> values
-    1375:1375:com.mparticle.MParticle$IdentityType valueOf(java.lang.String) -> valueOf
-    1392:1392:int getValue() -> getValue
-    1375:1375:int access$100(com.mparticle.MParticle$IdentityType) -> a
+    1377:1377:com.mparticle.MParticle$IdentityType[] values() -> values
+    1377:1377:com.mparticle.MParticle$IdentityType valueOf(java.lang.String) -> valueOf
+    1394:1394:int getValue() -> getValue
+    1377:1377:int access$100(com.mparticle.MParticle$IdentityType) -> a
 com.mparticle.MParticle$MPLicenseCheckerCallback -> com.mparticle.MParticle$a:
     com.mparticle.MParticle this$0 -> a
-    1447:1453:void allow(int) -> a
-    1456:1462:void dontAllow(int) -> b
-    1465:1471:void applicationError(int) -> c
+    1449:1455:void allow(int) -> a
+    1458:1464:void dontAllow(int) -> b
+    1467:1473:void applicationError(int) -> c
 com.mparticle.MParticle$MParticleLocationListener -> com.mparticle.MParticle$b:
     com.mparticle.MParticle mParticle -> a
-    1428:1429:void onLocationChanged(android.location.Location) -> onLocationChanged
-    1433:1433:void onProviderDisabled(java.lang.String) -> onProviderDisabled
-    1437:1437:void onProviderEnabled(java.lang.String) -> onProviderEnabled
-    1441:1441:void onStatusChanged(java.lang.String,int,android.os.Bundle) -> onStatusChanged
+    1430:1431:void onLocationChanged(android.location.Location) -> onLocationChanged
+    1435:1435:void onProviderDisabled(java.lang.String) -> onProviderDisabled
+    1439:1439:void onProviderEnabled(java.lang.String) -> onProviderEnabled
+    1443:1443:void onStatusChanged(java.lang.String,int,android.os.Bundle) -> onStatusChanged
 com.mparticle.MParticle$Push -> com.mparticle.MParticle$Push:
     java.lang.String BROADCAST_NOTIFICATION_RECEIVED -> BROADCAST_NOTIFICATION_RECEIVED
     java.lang.String BROADCAST_NOTIFICATION_TAPPED -> BROADCAST_NOTIFICATION_TAPPED
     java.lang.String PUSH_ALERT_EXTRA -> PUSH_ALERT_EXTRA
 com.mparticle.MParticle$SessionTimeoutHandler -> com.mparticle.MParticle$c:
     com.mparticle.MParticle mParticle -> a
-    1412:1416:void handleMessage(android.os.Message) -> handleMessage
+    1414:1418:void handleMessage(android.os.Message) -> handleMessage
 com.mparticle.MParticleDatabase -> com.mparticle.MParticleDatabase:
     129:134:void onCreate(android.database.sqlite.SQLiteDatabase) -> onCreate
     139:147:void onUpgrade(android.database.sqlite.SQLiteDatabase,int,int) -> onUpgrade

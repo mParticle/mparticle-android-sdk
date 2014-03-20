@@ -974,6 +974,7 @@ public class MParticle {
     /**
      * Set the current user's identity
      *
+     *
      * @param id
      * @param identityType
      */
@@ -1089,15 +1090,6 @@ public class MParticle {
     }
 
     /**
-     * Get the current debug mode status
-     *
-     * @return If debug mode is enabled or disabled
-     */
-    public boolean getDebugMode() {
-        return mConfigManager.isDebug();
-    }
-
-    /**
      * Turn on or off debug mode for mParticle. In debug mode, the mParticle SDK will output
      * informational messages to LogCat.
      *
@@ -1105,6 +1097,16 @@ public class MParticle {
      */
     public void setDebugMode(boolean debugMode) {
         mConfigManager.setDebug(debugMode);
+    }
+
+
+    /**
+     * Get the current debug mode status
+     *
+     * @return If debug mode is enabled or disabled
+     */
+    public boolean getDebugMode() {
+        return mConfigManager.isDebug();
     }
 
     /**
