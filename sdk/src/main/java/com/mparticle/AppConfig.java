@@ -120,7 +120,7 @@ class AppConfig {
     public String getString(String key) {
         int id = getResourceId(key, "string");
         if (id == 0) {
-            debugLog(String.format("Configuration issue: Missing required key: %s", key));
+            debugLog(String.format("Configuration issue: Missing key: %s", key));
             return null;
         }
         return this.mContext.getString(id);
@@ -129,7 +129,7 @@ class AppConfig {
     public boolean getBoolean(String key, boolean defaultValue) {
         int id = getResourceId(key, "bool");
         if (id == 0) {
-            debugLog(String.format("Configuration issue: Missing required key: %s", key));
+            debugLog(String.format("Configuration issue: Missing key: %s", key));
             return defaultValue;
         }
         return this.mContext.getResources().getBoolean(id);
@@ -138,7 +138,7 @@ class AppConfig {
     public int getInteger(String key, int defaultValue) {
         int id = getResourceId(key, "integer");
         if (id == 0) {
-            debugLog(String.format("Configuration issue: Missing required key: %s", key));
+            debugLog(String.format("Configuration issue: Missing key: %s", key));
             return defaultValue;
         }
         return mContext.getResources().getInteger(id);
