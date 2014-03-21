@@ -83,7 +83,7 @@ uploadArchives {
         mavenDeployer {
             configuration = configurations.deployerJars
             repository(url: "s3://www.mparticle.com/maven") {
-                authentication(userName: "", password: "")
+                authentication(userName: System.console().readLine("\n\$ AWS access key: "), password: System.console().readLine("\n\$ AWS password: "))
             }
             pom.version = version
             pom.artifactId = 'android-sdk'
