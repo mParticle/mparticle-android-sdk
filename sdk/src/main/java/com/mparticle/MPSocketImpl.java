@@ -89,12 +89,14 @@ final class MPSocketImpl extends SocketImpl {
 
         try {
             return methods[paramInt].invoke(delegateSocket, paramArrayOfObject);
-        } catch (IllegalAccessException e) {
+        } catch (Exception e) {
             //e.printStackTrace();
-        } catch (InvocationTargetException e) {
+
             //important: this methods are *supposed* to throw sometimes
-            if (e.getTargetException() instanceof IOException){
-                throw (IOException)e.getTargetException();
+            if (e instanceof  InvocationTargetException && ((InvocationTargetException) e).getTargetException() instanceof IOException){
+                throw (IOException)((InvocationTargetException) e).getTargetException();
+            }else if (e instanceof IOException){
+                throw (IOException)e;
             }
         }finally {
             updateFields();

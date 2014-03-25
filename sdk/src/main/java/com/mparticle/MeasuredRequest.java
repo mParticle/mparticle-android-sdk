@@ -85,6 +85,7 @@ final class MeasuredRequest {
     }
 
     public void parseUrlResponse(HttpURLConnection connection) {
+        streamEndTime = System.currentTimeMillis();
         if (!foundHeaderTiming() && responseContentLength == 0) {
             try {
                 requestMethod = connection.getRequestMethod();
@@ -99,7 +100,7 @@ final class MeasuredRequest {
                 headerStartTime = Long.parseLong(connection.getHeaderField("X-Android-Sent-Millis"));
                 headerEndTime = Long.parseLong(connection.getHeaderField("X-Android-Received-Millis"));
             } catch (Exception e) {
-
+                
             } finally {
                 log();
             }
@@ -343,4 +344,7 @@ final class MeasuredRequest {
         return Math.max(streamBytesRead, requestContentLength);
     }
 
+    public void setUri(URL uri) {
+        this.url = uri;
+    }
 }
