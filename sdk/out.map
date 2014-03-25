@@ -211,59 +211,59 @@ com.mparticle.MPHttpUrlConnection -> com.mparticle.n:
     java.net.HttpURLConnection delegateConnection -> b
     com.mparticle.MPInputStream inputStream -> c
     com.mparticle.MPOutputStream outputStream -> d
-    35:36:void disconnect() -> disconnect
-    40:40:java.io.InputStream getErrorStream() -> getErrorStream
-    45:45:java.security.Permission getPermission() -> getPermission
-    50:50:java.lang.String getRequestMethod() -> getRequestMethod
-    55:56:void setRequestMethod(java.lang.String) -> setRequestMethod
-    60:63:int getResponseCode() -> getResponseCode
-    68:71:java.lang.String getResponseMessage() -> getResponseMessage
-    76:76:boolean usingProxy() -> usingProxy
-    81:84:java.lang.String getContentEncoding() -> getContentEncoding
-    89:89:boolean getInstanceFollowRedirects() -> getInstanceFollowRedirects
-    94:95:void setInstanceFollowRedirects(boolean) -> setInstanceFollowRedirects
-    99:99:long getHeaderFieldDate(java.lang.String,long) -> getHeaderFieldDate
-    104:105:void setFixedLengthStreamingMode(int) -> setFixedLengthStreamingMode
-    109:110:void setChunkedStreamingMode(int) -> setChunkedStreamingMode
-    114:117:void connect() -> connect
-    121:121:boolean getAllowUserInteraction() -> getAllowUserInteraction
-    126:127:void setAllowUserInteraction(boolean) -> setAllowUserInteraction
-    131:133:java.lang.Object getContent() -> getContent
-    138:140:java.lang.Object getContent(java.lang.Class[]) -> getContent
-    145:145:int getContentLength() -> getContentLength
-    150:152:java.lang.String getContentType() -> getContentType
-    157:157:long getDate() -> getDate
-    162:162:boolean getDefaultUseCaches() -> getDefaultUseCaches
-    167:168:void setDefaultUseCaches(boolean) -> setDefaultUseCaches
-    172:172:boolean getDoInput() -> getDoInput
-    177:178:void setDoInput(boolean) -> setDoInput
-    182:182:boolean getDoOutput() -> getDoOutput
-    187:188:void setDoOutput(boolean) -> setDoOutput
-    192:192:long getExpiration() -> getExpiration
-    197:199:java.lang.String getHeaderField(int) -> getHeaderField
-    204:206:java.util.Map getHeaderFields() -> getHeaderFields
-    211:211:java.util.Map getRequestProperties() -> getRequestProperties
-    216:217:void addRequestProperty(java.lang.String,java.lang.String) -> addRequestProperty
-    221:223:java.lang.String getHeaderField(java.lang.String) -> getHeaderField
-    228:230:int getHeaderFieldInt(java.lang.String,int) -> getHeaderFieldInt
-    235:237:java.lang.String getHeaderFieldKey(int) -> getHeaderFieldKey
-    242:242:long getIfModifiedSince() -> getIfModifiedSince
-    247:248:void setIfModifiedSince(long) -> setIfModifiedSince
-    252:252:java.lang.String getRequestProperty(java.lang.String) -> getRequestProperty
-    257:257:java.net.URL getURL() -> getURL
-    262:262:boolean getUseCaches() -> getUseCaches
-    267:268:void setUseCaches(boolean) -> setUseCaches
-    272:273:void setRequestProperty(java.lang.String,java.lang.String) -> setRequestProperty
-    277:277:int getConnectTimeout() -> getConnectTimeout
-    282:283:void setConnectTimeout(int) -> setConnectTimeout
-    287:287:int getReadTimeout() -> getReadTimeout
-    292:293:void setReadTimeout(int) -> setReadTimeout
-    297:297:java.lang.String toString() -> toString
-    302:302:boolean equals(java.lang.Object) -> equals
-    307:307:int hashCode() -> hashCode
-    312:312:long getLastModified() -> getLastModified
-    317:326:java.io.OutputStream getOutputStream() -> getOutputStream
-    332:344:java.io.InputStream getInputStream() -> getInputStream
+    36:37:void disconnect() -> disconnect
+    41:41:java.io.InputStream getErrorStream() -> getErrorStream
+    46:46:java.security.Permission getPermission() -> getPermission
+    51:51:java.lang.String getRequestMethod() -> getRequestMethod
+    56:57:void setRequestMethod(java.lang.String) -> setRequestMethod
+    61:64:int getResponseCode() -> getResponseCode
+    69:72:java.lang.String getResponseMessage() -> getResponseMessage
+    77:77:boolean usingProxy() -> usingProxy
+    82:85:java.lang.String getContentEncoding() -> getContentEncoding
+    90:90:boolean getInstanceFollowRedirects() -> getInstanceFollowRedirects
+    95:96:void setInstanceFollowRedirects(boolean) -> setInstanceFollowRedirects
+    100:100:long getHeaderFieldDate(java.lang.String,long) -> getHeaderFieldDate
+    105:106:void setFixedLengthStreamingMode(int) -> setFixedLengthStreamingMode
+    110:111:void setChunkedStreamingMode(int) -> setChunkedStreamingMode
+    115:118:void connect() -> connect
+    122:122:boolean getAllowUserInteraction() -> getAllowUserInteraction
+    127:128:void setAllowUserInteraction(boolean) -> setAllowUserInteraction
+    132:134:java.lang.Object getContent() -> getContent
+    139:141:java.lang.Object getContent(java.lang.Class[]) -> getContent
+    146:146:int getContentLength() -> getContentLength
+    151:153:java.lang.String getContentType() -> getContentType
+    158:158:long getDate() -> getDate
+    163:163:boolean getDefaultUseCaches() -> getDefaultUseCaches
+    168:169:void setDefaultUseCaches(boolean) -> setDefaultUseCaches
+    173:173:boolean getDoInput() -> getDoInput
+    178:179:void setDoInput(boolean) -> setDoInput
+    183:183:boolean getDoOutput() -> getDoOutput
+    188:189:void setDoOutput(boolean) -> setDoOutput
+    193:193:long getExpiration() -> getExpiration
+    198:200:java.lang.String getHeaderField(int) -> getHeaderField
+    205:207:java.util.Map getHeaderFields() -> getHeaderFields
+    212:212:java.util.Map getRequestProperties() -> getRequestProperties
+    217:218:void addRequestProperty(java.lang.String,java.lang.String) -> addRequestProperty
+    222:224:java.lang.String getHeaderField(java.lang.String) -> getHeaderField
+    229:231:int getHeaderFieldInt(java.lang.String,int) -> getHeaderFieldInt
+    236:238:java.lang.String getHeaderFieldKey(int) -> getHeaderFieldKey
+    243:243:long getIfModifiedSince() -> getIfModifiedSince
+    248:249:void setIfModifiedSince(long) -> setIfModifiedSince
+    253:253:java.lang.String getRequestProperty(java.lang.String) -> getRequestProperty
+    258:258:java.net.URL getURL() -> getURL
+    263:263:boolean getUseCaches() -> getUseCaches
+    268:269:void setUseCaches(boolean) -> setUseCaches
+    273:274:void setRequestProperty(java.lang.String,java.lang.String) -> setRequestProperty
+    278:278:int getConnectTimeout() -> getConnectTimeout
+    283:284:void setConnectTimeout(int) -> setConnectTimeout
+    288:288:int getReadTimeout() -> getReadTimeout
+    293:294:void setReadTimeout(int) -> setReadTimeout
+    298:298:java.lang.String toString() -> toString
+    303:303:boolean equals(java.lang.Object) -> equals
+    308:308:int hashCode() -> hashCode
+    313:313:long getLastModified() -> getLastModified
+    318:327:java.io.OutputStream getOutputStream() -> getOutputStream
+    333:345:java.io.InputStream getInputStream() -> getInputStream
 com.mparticle.MPHttpsUrlConnection -> com.mparticle.o:
     com.mparticle.MeasuredRequest request -> a
     javax.net.ssl.HttpsURLConnection delegateConnection -> b
@@ -458,22 +458,22 @@ com.mparticle.MPSocketImpl -> com.mparticle.t:
     com.mparticle.MPInputStream delegateInputStream -> h
     com.mparticle.MPOutputStream delegateOutputStream -> i
     74:79:void setAccessible(java.lang.reflect.AccessibleObject[]) -> a
-    83:103:java.lang.Object invokeMethod(int,java.lang.Object[]) -> a
-    108:115:void updateFields() -> a
-    119:120:void accept(java.net.SocketImpl) -> accept
-    124:125:int available() -> available
-    130:131:void bind(java.net.InetAddress,int) -> bind
-    135:136:void close() -> close
-    140:141:void connect(java.lang.String,int) -> connect
-    145:146:void connect(java.net.InetAddress,int) -> connect
-    150:151:void create(boolean) -> create
-    155:163:java.io.InputStream getInputStream() -> getInputStream
-    168:176:java.io.OutputStream getOutputStream() -> getOutputStream
-    181:182:void listen(int) -> listen
-    186:187:void connect(java.net.SocketAddress,int) -> connect
-    191:192:void sendUrgentData(int) -> sendUrgentData
-    196:196:java.lang.Object getOption(int) -> getOption
-    201:202:void setOption(int,java.lang.Object) -> setOption
+    83:105:java.lang.Object invokeMethod(int,java.lang.Object[]) -> a
+    110:117:void updateFields() -> a
+    121:122:void accept(java.net.SocketImpl) -> accept
+    126:127:int available() -> available
+    132:133:void bind(java.net.InetAddress,int) -> bind
+    137:138:void close() -> close
+    142:143:void connect(java.lang.String,int) -> connect
+    147:148:void connect(java.net.InetAddress,int) -> connect
+    152:153:void create(boolean) -> create
+    157:165:java.io.InputStream getInputStream() -> getInputStream
+    170:178:java.io.OutputStream getOutputStream() -> getOutputStream
+    183:184:void listen(int) -> listen
+    188:189:void connect(java.net.SocketAddress,int) -> connect
+    193:194:void sendUrgentData(int) -> sendUrgentData
+    198:198:java.lang.Object getOption(int) -> getOption
+    203:204:void setOption(int,java.lang.Object) -> setOption
 com.mparticle.MPSocketImplFactory -> com.mparticle.MPSocketImplFactory:
     java.lang.Class socketClass -> a
     23:34:java.net.SocketImpl createSocketImpl() -> createSocketImpl
@@ -785,21 +785,22 @@ com.mparticle.MeasuredRequest -> com.mparticle.v:
     60:71:java.lang.String getUri() -> c
     76:80:long getTotalTime() -> d
     84:84:java.lang.String getKey() -> e
-    88:108:void parseUrlResponse(java.net.HttpURLConnection) -> a
-    126:131:void log() -> l
-    137:148:int findEndOfHeaders(byte[]) -> a
-    152:209:void parseInputStreamBytes(byte[],int,int) -> a
-    212:212:boolean readyForLogging() -> f
-    220:235:void reset() -> g
-    238:292:void parseOutputStreamBytes(byte[],int,int) -> b
-    295:295:boolean isRequestParsed() -> m
-    299:299:long getStartTime() -> h
-    304:323:java.lang.String toString() -> toString
-    327:328:void setParseHeaders(boolean) -> a
-    331:332:void setSecure(boolean) -> b
-    335:335:java.lang.String getMethod() -> i
-    339:339:long getBytesSent() -> j
-    343:343:long getBytesReceived() -> k
+    88:109:void parseUrlResponse(java.net.HttpURLConnection) -> a
+    127:132:void log() -> l
+    138:149:int findEndOfHeaders(byte[]) -> a
+    153:210:void parseInputStreamBytes(byte[],int,int) -> a
+    213:213:boolean readyForLogging() -> f
+    221:236:void reset() -> g
+    239:293:void parseOutputStreamBytes(byte[],int,int) -> b
+    296:296:boolean isRequestParsed() -> m
+    300:300:long getStartTime() -> h
+    305:324:java.lang.String toString() -> toString
+    328:329:void setParseHeaders(boolean) -> a
+    332:333:void setSecure(boolean) -> b
+    336:336:java.lang.String getMethod() -> i
+    340:340:long getBytesSent() -> j
+    344:344:long getBytesReceived() -> k
+    348:349:void setUri(java.net.URL) -> a
 com.mparticle.MeasuredRequestManager -> com.mparticle.w:
     java.util.concurrent.ScheduledExecutorService scheduler -> b
     java.util.concurrent.ConcurrentHashMap requests -> a

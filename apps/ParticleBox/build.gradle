@@ -42,6 +42,7 @@ android {
 
     productFlavors {
         googleanalytics {
+            minSdkVersion 9
             packageName 'com.mparticle.particlebox.googleanalytics'
         }
         mparticle {
@@ -72,7 +73,7 @@ dependencies {
 	compile 'com.android.support:support-v4:19.0.0'
 	compile 'com.android.support:appcompat-v7:19.0.0'
     compile project(':sdk')
-    googleanalyticsCompile files("libs/libGoogleAnalyticsServices.jar")
+    googleanalyticsCompile 'com.google.android.gms:play-services:4.3.23'
     mixpanelCompile 'com.mixpanel.android:mixpanel-android:4.0.0-RC3@aar'
     flurryCompile files ("libs/FlurryAnalytics_3.3.3.jar")
     urbanairshipCompile files ("libs/urbanairship-lib-3.2.3.jar")

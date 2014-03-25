@@ -100,7 +100,7 @@ final class MeasuredRequest {
                 headerStartTime = Long.parseLong(connection.getHeaderField("X-Android-Sent-Millis"));
                 headerEndTime = Long.parseLong(connection.getHeaderField("X-Android-Received-Millis"));
             } catch (Exception e) {
-                
+
             } finally {
                 log();
             }

@@ -1,10 +1,11 @@
 package com.mparticle.particlebox;
 
 import android.view.View;
-import android.widget.EditText;
 
-import com.google.analytics.tracking.android.EasyTracker;
-import com.google.analytics.tracking.android.MapBuilder;
+import com.google.android.gms.analytics.GoogleAnalytics;
+import com.google.android.gms.analytics.HitBuilders;
+import com.google.android.gms.analytics.Tracker;
+
 
 /**
  * Created by sdozor on 1/22/14.
@@ -19,25 +20,14 @@ public class TransactionTestFragment extends MainTransactionTestFragment impleme
     public void onClick(View v) {
         super.onClick(v);
 
-        EasyTracker tracker = EasyTracker.getInstance(v.getContext());
-        tracker.send(MapBuilder
-                .createTransaction(transactionId.getText().toString(),
-                        transactionAffiliation.getText().toString(),
-                        Double.parseDouble(revenueAmount.getText().toString()),
-                        Double.parseDouble(taxAmount.getText().toString()),
-                        Double.parseDouble(shippingAmount.getText().toString()),
-                        currencyCode.getText().toString()).
+        Tracker tracker = GoogleAnalytics.getInstance(v.getContext()).getInstance(v.getContext()).newTracker("UA-46924309-4");
+        tracker.send(new HitBuilders.TransactionBuilder().setTransactionId(transactionId.getText().toString())
+                .setAffiliation(transactionAffiliation.getText().toString())
+                        .setRevenue(Double.parseDouble(revenueAmount.getText().toString()))
+                        .setTax(Double.parseDouble(taxAmount.getText().toString()))
+                        .setShipping(Double.parseDouble(shippingAmount.getText().toString()))
+                        .setCurrencyCode(currencyCode.getText().toString()).
                         build());
 
-        tracker.send(MapBuilder
-                .createItem(transactionId.getText().toString(),               // (String) Transaction ID
-                        productName.getText().toString(),      // (String) Product name
-                        productSku.getText().toString(),                  // (String) Product SKU
-                        productCategory.getText().toString(),        // (String) Product category
-                        Double.parseDouble(unitPrice.getText().toString()),                    // (Double) Product price
-                        Long.parseLong(quantity.getText().toString()),                       // (Long) Product quantity
-                        currencyCode.getText().toString())                    // (String) Currency code
-                .build()
-        );
     }
 }
