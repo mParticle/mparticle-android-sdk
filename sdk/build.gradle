@@ -15,6 +15,10 @@ repositories {
     mavenCentral()
 }
 
+configurations {
+    deployerJars
+}
+
 android {
     compileSdkVersion 19
     buildToolsVersion "19.0.1"
@@ -22,7 +26,7 @@ android {
     defaultConfig {
         minSdkVersion 8
         targetSdkVersion 19
-        version sdkversion
+        versionName sdkversion
     }
 
     buildTypes {
@@ -77,14 +81,16 @@ android.libraryVariants.all { variant ->
 uploadArchives {
     repositories {
         mavenDeployer {
-            repository(url: "file://localhost/Users/sdozor/maven/repo/")
-            pom.version = version
+            configuration = configurations.deployerJars
+            repository(url: "s3://www.mparticle.com/maven")
+            pom.version = sdkversion
             pom.artifactId = 'android-sdk'
             pom.groupId = 'com.mparticle'
+            pom.packaging = 'aar'
         }
     }
 }
 
 dependencies {
-   // compile 'com.android.support:support-v4:19.0.1'
+    deployerJars "org.kuali.maven.wagons:maven-s3-wagon:1.2.1"
 }
