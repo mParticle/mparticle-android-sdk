@@ -3,12 +3,9 @@ package com.mparticle;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -23,50 +20,13 @@ import com.mparticle.MParticleDatabase.MessageTable;
 import com.mparticle.MParticleDatabase.SessionTable;
 import com.mparticle.MParticleDatabase.UploadTable;
 
-import org.apache.http.Header;
-import org.apache.http.HttpHost;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpVersion;
-import org.apache.http.client.HttpClient;
-import org.apache.http.conn.params.ConnRouteParams;
-import org.apache.http.conn.scheme.PlainSocketFactory;
-import org.apache.http.conn.scheme.Scheme;
-import org.apache.http.conn.scheme.SchemeRegistry;
-import org.apache.http.conn.ssl.SSLSocketFactory;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.impl.cookie.DateUtils;
-import org.apache.http.params.BasicHttpParams;
-import org.apache.http.params.HttpConnectionParams;
-import org.apache.http.params.HttpParams;
-import org.apache.http.params.HttpProtocolParams;
-import org.apache.http.protocol.HTTP;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.CookieHandler;
-import java.net.CookieManager;
-import java.net.HttpURLConnection;
-import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
-import java.net.Proxy;
-import java.net.URL;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.Scanner;
 import java.util.UUID;
-import java.util.zip.GZIPInputStream;
-import java.util.zip.GZIPOutputStream;
-
-import javax.crypto.Mac;
-import javax.crypto.spec.SecretKeySpec;
 
 /* package-private */final class UploadHandler extends Handler {
 
@@ -78,28 +38,16 @@ import javax.crypto.spec.SecretKeySpec;
     private final Context mContext;
     private final String mApiKey;
     private final String mSecret;
+    private MParticleApiClient mApiClient;
 
-    private HttpHost mProxyHost;
     private JSONObject mAppInfo;
     private JSONObject mDeviceInfo;
-    private Proxy mProxy;
-    private final ConnectivityManager mConnectivyManager;
-
-    private boolean mAccessNetworkStateAvailable = true;
 
     public static final int UPLOAD_MESSAGES = 1;
     public static final int CLEANUP = 2;
     public static final int UPLOAD_HISTORY = 3;
     public static final int UPDATE_CONFIG = 4;
 
-    public static final String HEADER_SIGNATURE = "x-mp-signature";
-
-    public static final String SECURE_SERVICE_SCHEME = "http";
-    //public static final String SECURE_SERVICE_HOST = "nativesdks.mparticle.com";
-   // public static final String SECURE_SERVICE_HOST = "api-qa.mparticle.com";
-   public static final String SECURE_SERVICE_HOST = "10.0.16.21";
-
-    public static final String SERVICE_VERSION = "v1";
 
     private ConfigManager mConfigManager;
 
@@ -120,19 +68,15 @@ import javax.crypto.spec.SecretKeySpec;
         mDB = new MParticleDatabase(mContext);
         mPreferences = mContext.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
 
-        mConnectivyManager = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
-
         mAppInfo = DeviceAttributes.collectAppInfo(mContext);
         mDeviceInfo = DeviceAttributes.collectDeviceInfo(mContext);
+        try {
+            mApiClient = new MParticleApiClient(context, configManager, mApiKey, mSecret);
+        }catch (MalformedURLException e){
 
-        if (PackageManager.PERMISSION_GRANTED != mContext
-                .checkCallingOrSelfPermission(android.Manifest.permission.ACCESS_NETWORK_STATE)) {
-            Log.w(TAG, "Application manifest missing ACCESS_NETWORK_STATE permission");
-            mAccessNetworkStateAvailable = false;
         }
-//        CookieManager cookieManager = new CookieManager(new PersistentCookieStore(context), CookiePolicy.ACCEPT_ALL);
 
-        CookieHandler.setDefault(new CookieManager());
+
     }
 
     @Override
@@ -140,7 +84,11 @@ import javax.crypto.spec.SecretKeySpec;
         super.handleMessage(msg);
         switch (msg.what) {
             case UPDATE_CONFIG:
-                fetchConfig();
+                try {
+                    mApiClient.fetchConfig();
+                }catch (IOException ioe){
+
+                }
                 break;
             case UPLOAD_MESSAGES:
                 if (mConfigManager.isDebug()) {
@@ -189,45 +137,6 @@ import javax.crypto.spec.SecretKeySpec;
                 cleanupDatabase(Constants.DB_CLEANUP_EXPIRATION);
                 this.sendEmptyMessageDelayed(CLEANUP, Constants.DB_CLEANUP_INTERVAL);
                 break;
-        }
-    }
-
-    private void fetchConfig() {
-        try {
-            if (!isNetworkAvailable()) {
-                mConfigManager.restoreFromCache();
-                return;
-            }
-            HttpURLConnection connection = (HttpURLConnection)new URL(SECURE_SERVICE_SCHEME,SECURE_SERVICE_HOST,SERVICE_VERSION + "/" + mApiKey+"/config").openConnection();
-            if (mConfigManager.isCompressionEnabled()) {
-                connection.setRequestProperty("Accept-Encoding", "gzip");
-            }
-            addMessageSignature(connection, null);
-
-
-            int responseCode = connection.getResponseCode();
-
-            if (responseCode >= 200 && responseCode < 300) {
-                StringBuilder responseBuilder = new StringBuilder();
-                BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-                String line;
-                while ((line = in.readLine()) != null) {
-                    responseBuilder.append(line + '\n');
-                }
-                JSONObject responseJSON = new JSONObject(responseBuilder.toString());
-                mConfigManager.updateConfig(responseJSON);
-
-            }
-        } catch (MalformedURLException e) {
-            Log.e(TAG, "Error constructing config service URL", e);
-        } catch (java.net.SocketTimeoutException e) {
-            // this is caught separately from IOException to prevent this common
-            // exception from logging a stack trace
-            Log.w(TAG, "Config request timed out");
-        } catch (IOException e) {
-            Log.w(TAG, "Config request failed with IO exception:", e);
-        } catch (JSONException e) {
-            Log.w(TAG, "Config request failed to process response message JSON");
         }
     }
 
@@ -283,7 +192,7 @@ import javax.crypto.spec.SecretKeySpec;
                     MessageTable.CREATED_AT + ", " + MessageTable.SESSION_ID + " , _id asc");
 
             if (readyMessagesCursor.getCount() > 0) {
-                fetchConfig();
+                mApiClient.fetchConfig();
                 if (mConfigManager.isDebug()) {
                     Log.i(TAG, "Preparing " + readyMessagesCursor.getCount() + " events for upload");
                 }
@@ -338,6 +247,8 @@ import javax.crypto.spec.SecretKeySpec;
             }
             readyMessagesCursor.close();
         } catch (SQLiteException e) {
+            Log.e(TAG, "Error preparing batch upload in mParticle DB", e);
+        } catch (IOException e) {
             Log.e(TAG, "Error preparing batch upload in mParticle DB", e);
         } catch (JSONException e) {
             Log.e(TAG, "Error with upload JSON object", e);
@@ -402,10 +313,6 @@ import javax.crypto.spec.SecretKeySpec;
 
     private boolean processUploads(boolean history) {
         boolean processingSessionEnd = false;
-        if (!isNetworkAvailable()) {
-            return false;
-        }
-
         try {
             // read batches ready to upload
             SQLiteDatabase db = mDB.getWritableDatabase();
@@ -424,50 +331,12 @@ import javax.crypto.spec.SecretKeySpec;
                     }
                 }
 
-                byte[] messageBytes = message.getBytes();
-                // POST message to mParticle service
-                HttpURLConnection connection = (HttpURLConnection)new URL(SECURE_SERVICE_SCHEME, SECURE_SERVICE_HOST, SERVICE_VERSION + "/" + mApiKey + "/events").openConnection();
-                connection.setDoOutput(true);
-             //   connection.setFixedLengthStreamingMode(messageBytes.length);
-                connection.setRequestProperty("Content-type", "application/json");
-                //connection.setChunkedStreamingMode(0);
-                connection.setRequestProperty("Content-Encoding","gzip");
-                connection.setRequestProperty("User-Agent",null);
-                if (!mConfigManager.isCompressionEnabled()) {
-                    connection.setRequestProperty("Accept-Encoding", "identity");
-                }
+                MParticleApiClient.ApiResponse response = mApiClient.sendMessageBatch(message);
 
-                addMessageSignature(connection, message);
-
-                int responseCode;
-
-                if (mConfigManager.isDebug()) {
-                    logUpload(message);
-                }
-
-
-                GZIPOutputStream zos = new GZIPOutputStream(new BufferedOutputStream(connection.getOutputStream()));
-                try {
-                    zos.write(messageBytes);
-                } finally {
-                    zos.close();
-                }
-
-                responseCode = connection.getResponseCode();
-
-
-
-
-                if (202 == responseCode || (responseCode >= 400 && responseCode < 500)) {
+                if (response.shouldDelete()) {
                     dbDeleteUpload(db, id);
                     try {
-                        StringBuilder responseBuilder = new StringBuilder();
-                        BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-                        String line;
-                        while ((line = in.readLine()) != null) {
-                            responseBuilder.append(line + '\n');
-                        }
-                        JSONObject responseJSON = new JSONObject(responseBuilder.toString());
+
                    /* if (responseJSON.has("echo")){
                         try{
                             JSONObject messageObj = new JSONObject(message);
@@ -481,8 +350,8 @@ import javax.crypto.spec.SecretKeySpec;
                             Log.bytesOut(TAG, "Exception while comparing Echo response: " + e.getMessage());
                         }
                     }*/
-                        if (responseJSON.has(MessageKey.MESSAGES)) {
-                            JSONArray responseCommands = responseJSON.getJSONArray(MessageKey.MESSAGES);
+                        if (response.getJsonResponse().has(MessageKey.MESSAGES)) {
+                            JSONArray responseCommands = response.getJsonResponse().getJSONArray(MessageKey.MESSAGES);
                             for (int i = 0; i < responseCommands.length(); i++) {
                                 JSONObject commandObject = responseCommands.getJSONObject(i);
                                 dbInsertCommand(db, commandObject);
@@ -501,84 +370,18 @@ import javax.crypto.spec.SecretKeySpec;
             readyUploadsCursor.close();
         } catch (SQLiteException e) {
             Log.e(TAG, "Error processing batch uploads in mParticle DB", e);
-        } catch (MalformedURLException e) {
-            Log.e(TAG, "Error constructing upload service URL", e);
-        } catch (IOException e) {
-            // IOExceptions (such as timeouts) will be retried
-            Log.w(TAG, "Upload failed with IO exception: " + e.getClass().getName());
+        } catch (IOException ioe){
+            Log.e(TAG, "Error processing batch uploads in mParticle DB", ioe);
         } finally {
             mDB.close();
         }
         return processingSessionEnd;
     }
 
-    private void logUpload(String message) {
-        Log.d(TAG, "Uploading data to mParticle server:");
-        try {
-            JSONObject messageJson = new JSONObject(message);
-            //   Log.bytesOut(TAG, messageJson.toString(4));
-            if (messageJson.has(MessageKey.MESSAGES)) {
-                JSONArray messages = messageJson.getJSONArray(MessageKey.MESSAGES);
-                Log.d(TAG, "SENDING MESSAGES");
-                for (int i = 0; i < messages.length(); i++) {
-                    Log.d(TAG, "Message type: " + ((JSONObject) messages.get(i)).getString(MessageKey.TYPE));
-                }
-            } else if (messageJson.has(MessageKey.HISTORY)) {
-                JSONArray messages = messageJson.getJSONArray(MessageKey.HISTORY);
-                Log.d(TAG, "SENDING HISTORY");
-                for (int i = 0; i < messages.length(); i++) {
 
-                    Log.d(TAG, "Message type: " + ((JSONObject) messages.get(i)).getString(MessageKey.TYPE) + " SID: " + ((JSONObject) messages.get(i)).optString(MessageKey.SESSION_ID));
-                    // Log.bytesOut(TAG, ((JSONObject)messages.get(i)).toString(4));
-                }
-            }
-        } catch (JSONException jse) {
-
-        }
-    }
-
-    // helper method to convert response body to a string whether or not it is
-    // compressed
-    private String extractResponseBody(HttpResponse httpResponse) throws IllegalStateException, IOException {
-        InputStream inputStream = httpResponse.getEntity().getContent();
-        Header contentEncoding = httpResponse.getFirstHeader("Content-Encoding");
-        if (contentEncoding != null && contentEncoding.getValue().equalsIgnoreCase("gzip")) {
-            inputStream = new GZIPInputStream(inputStream);
-        }
-        // From Stack Overflow:
-        // http://stackoverflow.com/questions/309424/read-convert-an-inputstream-to-a-string
-        Scanner s = new Scanner(inputStream).useDelimiter("\\A");
-        return s.hasNext() ? s.next() : "";
-    }
-
-    private void addMessageSignature(HttpURLConnection request, String message) {
-        try {
-            String method = request.getRequestMethod();
-            String dateHeader = DateUtils.formatDate(new Date());
-            if (dateHeader.length() > DateUtils.PATTERN_RFC1123.length()) {
-                // handle a problem on some devices where TZ offset is appended
-                dateHeader = dateHeader.substring(0, DateUtils.PATTERN_RFC1123.length());
-            }
-            String path = request.getURL().getPath();
-            String signatureMessage = method + "\n" + dateHeader + "\n" + path;
-            if ("POST".equalsIgnoreCase(method) && null != message) {
-                signatureMessage += message;
-            }
-            request.setRequestProperty("Date", dateHeader);
-            request.setRequestProperty(HEADER_SIGNATURE, hmacSha256Encode(mSecret, signatureMessage));
-        } catch (InvalidKeyException e) {
-            Log.e(TAG, "Error signing message", e);
-        } catch (NoSuchAlgorithmException e) {
-            Log.e(TAG, "Error signing message", e);
-        }
-    }
 
     private void processCommands() {
-        if (!isNetworkAvailable()) {
-            return;
-        }
         try {
-            // read batches ready to upload
             SQLiteDatabase db = mDB.getWritableDatabase();
             String[] selectionColumns = new String[]{"_id", CommandTable.URL, CommandTable.METHOD,
                     CommandTable.POST_DATA, CommandTable.HEADERS};
@@ -591,48 +394,22 @@ import javax.crypto.spec.SecretKeySpec;
                 String postData = commandsCursor.getString(3);
                 String headers = commandsCursor.getString(4);
 
-                int responseCode = -1;
+                MParticleApiClient.ApiResponse response = null;
                 try {
-                    if (mConfigManager.isDebug()) {
-                        Log.d(TAG, "Sending data to: " + commandUrl);
-                    }
-                    URL url = new URL(commandUrl);
-                    HttpURLConnection urlConnection;
-                    if (mProxy == null) {
-                        urlConnection = (HttpURLConnection) url.openConnection();
-                    } else {
-                        urlConnection = (HttpURLConnection) url.openConnection(mProxy);
-                    }
-                    try {
-                        JSONObject headersJSON = new JSONObject(headers);
-                        for (Iterator<?> iter = headersJSON.keys(); iter.hasNext(); ) {
-                            String headerName = (String) iter.next();
-                            String headerValue = headersJSON.getString(headerName);
-                            urlConnection.setRequestProperty(headerName, headerValue);
-                        }
-                        if ("POST".equalsIgnoreCase(method)) {
-                            urlConnection.setDoOutput(true);
-                            byte[] postDataBytes = Base64.decode(postData.getBytes());
-                            urlConnection.setFixedLengthStreamingMode(postDataBytes.length);
-                            urlConnection.getOutputStream().write(postDataBytes);
-                        }
-                        responseCode = urlConnection.getResponseCode();
-                    } finally {
-                        urlConnection.disconnect();
-                    }
+                    response = mApiClient.sendCommand(commandUrl, method, postData, headers);
                 } catch (Throwable t) {
                     // fail silently. a message will be logged if debug mode is enabled
                 } finally {
-                    if (responseCode > -1) {
+                    if (response != null && response.getResponseCode() > -1) {
                         dbDeleteCommand(db, id);
                     } else if (mConfigManager.isDebug()) {
-                        Log.w(TAG, "Partner processing failed and will be retried.");
+                        Log.w(TAG, "Provider command processing failed and will be retried.");
                     }
                 }
             }
             commandsCursor.close();
         } catch (SQLiteException e) {
-            Log.e(TAG, "Error processing partner uploads in mParticle DB", e);
+            Log.e(TAG, "Error processing provider command uploads in mParticle DB", e);
         } finally {
             mDB.close();
         }
@@ -694,64 +471,8 @@ import javax.crypto.spec.SecretKeySpec;
         db.insert(CommandTable.TABLE_NAME, null, contentValues);
     }
 
-    private boolean isNetworkAvailable() {
-        if (!mAccessNetworkStateAvailable) {
-            return true;
-        }
-
-        NetworkInfo networkInfo = mConnectivyManager.getActiveNetworkInfo();
-        if (networkInfo != null) {
-            return networkInfo.isConnectedOrConnecting();
-        }
-        return false;
-    }
-
-    private HttpURLConnection setupHttpClient() {
-        HttpParams params = new BasicHttpParams();
-        HttpProtocolParams.setVersion(params, HttpVersion.HTTP_1_1);
-        HttpProtocolParams.setContentCharset(params, HTTP.DEFAULT_CONTENT_CHARSET);
-
-        HttpConnectionParams.setConnectionTimeout(params, 10 * 1000);
-        HttpConnectionParams.setSoTimeout(params, 10 * 1000);
-
-        SchemeRegistry registry = new SchemeRegistry();
-        registry.register(new Scheme("http", PlainSocketFactory.getSocketFactory(), 80));
-        registry.register(new Scheme("https", SSLSocketFactory.getSocketFactory(), 443));
-
-        if (null != mProxyHost) {
-            ConnRouteParams.setDefaultProxy(params, mProxyHost);
-        }
-        HttpClient client = new DefaultHttpClient(params);
-        return null;
-    }
-
     public void setConnectionProxy(String host, int port) {
-        // HttpClient and UrlConnection use separate proxies
-        mProxyHost = new HttpHost(host, port);
-        mProxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(host, port));
-    }
-
-    // From Stack Overflow:
-    // http://stackoverflow.com/questions/7124735/hmac-sha256-algorithm-for-signature-calculation
-    private static String hmacSha256Encode(String key, String data) throws NoSuchAlgorithmException,
-            InvalidKeyException {
-        Mac sha256_HMAC = Mac.getInstance("HmacSHA256");
-        SecretKeySpec secret_key = new SecretKeySpec(key.getBytes(), "HmacSHA256");
-        sha256_HMAC.init(secret_key);
-        return asHex(sha256_HMAC.doFinal(data.getBytes()));
-    }
-
-    // From Stack Overflow:
-    // http://stackoverflow.com/questions/923863/converting-a-string-to-hexadecimal-in-java
-    private static final char[] HEX_CHARS = "0123456789abcdef".toCharArray();
-
-    private static String asHex(byte[] buf) {
-        char[] chars = new char[2 * buf.length];
-        for (int i = 0; i < buf.length; ++i) {
-            chars[2 * i] = HEX_CHARS[(buf[i] & 0xF0) >>> 4];
-            chars[2 * i + 1] = HEX_CHARS[buf[i] & 0x0F];
-        }
-        return new String(chars);
+        mApiClient.setConnectionProxy(host, port);
     }
 
 }
