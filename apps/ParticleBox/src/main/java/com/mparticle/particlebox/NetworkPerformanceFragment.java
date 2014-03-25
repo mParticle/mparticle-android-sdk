@@ -1,5 +1,7 @@
 package com.mparticle.particlebox;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -8,6 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.mparticle.MParticle;
@@ -38,8 +41,10 @@ import java.util.List;
  */
 public class NetworkPerformanceFragment extends Fragment implements View.OnClickListener {
     private static final String ARG_SECTION_NUMBER = "section_number";
-    private EditText url1, filter;
+    private EditText url1, filter, imageUrl;
     private CheckBox postCheckBox;
+    private ImageView image;
+
 
     public NetworkPerformanceFragment() {
         super();
@@ -63,14 +68,20 @@ public class NetworkPerformanceFragment extends Fragment implements View.OnClick
         url1 = (EditText) v.findViewById(R.id.url1);
         filter = (EditText) v.findViewById(R.id.filter);
         postCheckBox = (CheckBox) v.findViewById(R.id.postCheckBox);
+        imageUrl = (EditText)v.findViewById(R.id.imageUrl);
+        image = (ImageView)v.findViewById(R.id.image);
+
         v.findViewById(R.id.button1).setOnClickListener(this);
         v.findViewById(R.id.button2).setOnClickListener(this);
         v.findViewById(R.id.reset).setOnClickListener(this);
         v.findViewById(R.id.allowQuery).setOnClickListener(this);
         v.findViewById(R.id.exluceUrl).setOnClickListener(this);
+        v.findViewById(R.id.loadImage).setOnClickListener(this);
 
         return v;
     }
+
+
 
     @Override
     public void onClick(View v) {
@@ -176,6 +187,47 @@ public class NetworkPerformanceFragment extends Fragment implements View.OnClick
                 MParticle.getInstance().resetNetworkPerformanceExclusionsAndFilters();
                 Toast.makeText(getActivity(), "Exlusions and filters reset.", Toast.LENGTH_SHORT).show();
                 break;
+            case R.id.loadImage:
+                v.setEnabled(false);
+                new DownloadImageTask(image)
+                        .execute(imageUrl.getText().toString());
+                break;
+            }
+
         }
-    }
+        class DownloadImageTask extends AsyncTask<String, Void, Bitmap> {
+            ImageView bmImage;
+
+            public DownloadImageTask(ImageView bmImage) {
+                this.bmImage = bmImage;
+            }
+
+            @Override
+            protected void onPreExecute() {
+                super.onPreExecute();
+                Toast.makeText(getActivity(), "Loading image...", Toast.LENGTH_SHORT).show();
+            }
+
+            protected Bitmap doInBackground(String... urls) {
+                String urldisplay = urls[0];
+                Bitmap mIcon11 = null;
+                try {
+                    InputStream in = new java.net.URL(urldisplay).openStream();
+                    mIcon11 = BitmapFactory.decodeStream(in);
+                } catch (Exception e) {
+                   // e.printStackTrace();
+                }
+                return mIcon11;
+            }
+
+            protected void onPostExecute(Bitmap result) {
+                bmImage.setImageBitmap(result);
+                try {
+                    getView().findViewById(R.id.loadImage).setEnabled(true);
+                }catch (NullPointerException npe){
+
+                }
+            }
+        }
+
 }
