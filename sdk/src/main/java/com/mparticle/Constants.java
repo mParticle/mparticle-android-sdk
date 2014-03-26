@@ -85,7 +85,11 @@ package com.mparticle;
         public static final String INSTALL_REFERRER = "ir";
         public static final String APP_VERSION_CODE = "abn";
         public static final String APP_DEBUG_SIGNING = "dbg";
-        public static final String APP_PIRATED = "pir";
+        public static final String INSTALL_DATE = "ind";
+        public static final String UPGRADE_DATE = "ud";
+        public static final String LAUNCH_COUNT = "lc";
+        public static final String LAUNCH_COUNT_SINCE_UPGRADE = "lcu";
+        public static final String LAST_USE_DATE = "lud";
         // device info
         public static final String BUILD_ID = "bid";
         public static final String BRAND = "b";
