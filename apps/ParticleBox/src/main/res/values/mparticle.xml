@@ -2,9 +2,9 @@
 
 <resources>
 
-    <string name="mp_key">bb6ef33d0189a24b8f8f7a78104e2626</string>
+    <string name="mp_key">5f2480e75ecd2741ab15ac44cddcc578</string>
 
-    <string name="mp_secret">cFlt7oaYxdpdNKoyQdrlP6f6OSp5z5pYX7ElbY3HSjuIY2DHL1MDIgOmRcdBo6qy</string>
+    <string name="mp_secret">-kP7BP6QXw6C44vAExiKscIyYDkOz0z_tU92GKS1qNEr2iVojX7ADoDe6VC8dRGD</string>
 
     <bool name="mp_reportUncaughtExceptions">true</bool>
 

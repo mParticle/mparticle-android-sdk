@@ -30,32 +30,49 @@ import java.util.UUID;
 
 /* package-private */final class UploadHandler extends Handler {
 
-    private static final String TAG = Constants.LOG_TAG;
-
-    private final MParticleDatabase mDB;
-    private final SharedPreferences mPreferences;
-
-    private final Context mContext;
-    private final String mApiKey;
-    private final String mSecret;
-    private MParticleApiClient mApiClient;
-
-    private JSONObject mAppInfo;
-    private JSONObject mDeviceInfo;
-
     public static final int UPLOAD_MESSAGES = 1;
     public static final int CLEANUP = 2;
     public static final int UPLOAD_HISTORY = 3;
     public static final int UPDATE_CONFIG = 4;
-
-
+    private static final String TAG = Constants.LOG_TAG;
+    private final MParticleDatabase mDB;
+    private final SharedPreferences mPreferences;
+    private final Context mContext;
+    private final String mApiKey;
+    private final String mSecret;
+    private MParticleApiClient mApiClient;
+    private JSONObject mAppInfo;
+    private JSONObject mDeviceInfo;
     private ConfigManager mConfigManager;
 
     public static final String SQL_DELETABLE_MESSAGES = String.format(
             "%s=? and (%s='NO-SESSION')",
             MessageTable.API_KEY,
             MessageTable.SESSION_ID);
-
+    public static final String SQL_UPLOADABLE_MESSAGES = String.format(
+            "%s=? and ((%s='NO-SESSION') or ((%s>=?) and (%s!=%d)))",
+            MessageTable.API_KEY,
+            MessageTable.SESSION_ID,
+            MessageTable.STATUS,
+            MessageTable.STATUS,
+            Status.UPLOADED);
+    public static final String SQL_HISTORY_MESSAGES = String.format(
+            "%s=? and ((%s='NO-SESSION') or ((%s>=?) and (%s=%d) and (%s != ?)))",
+            MessageTable.API_KEY,
+            MessageTable.SESSION_ID,
+            MessageTable.STATUS,
+            MessageTable.STATUS,
+            Status.UPLOADED,
+            MessageTable.SESSION_ID);
+    public static final String SQL_FINISHED_HISTORY_MESSAGES = String.format(
+            "%s=? and ((%s='NO-SESSION') or ((%s>=?) and (%s=%d) and (%s=?)))",
+            MessageTable.API_KEY,
+            MessageTable.SESSION_ID,
+            MessageTable.STATUS,
+            MessageTable.STATUS,
+            Status.UPLOADED,
+            MessageTable.SESSION_ID);
+    private volatile boolean isNetworkConnected = true;
 
     public UploadHandler(Context context, Looper looper, ConfigManager configManager) {
         super(looper);
@@ -72,11 +89,13 @@ import java.util.UUID;
         mDeviceInfo = DeviceAttributes.collectDeviceInfo(mContext);
         try {
             mApiClient = new MParticleApiClient(context, configManager, mApiKey, mSecret);
-        }catch (MalformedURLException e){
+        } catch (MalformedURLException e) {
 
         }
+    }
 
-
+    public void setConnected(boolean connected){
+        isNetworkConnected = connected;
     }
 
     @Override
@@ -86,23 +105,23 @@ import java.util.UUID;
             case UPDATE_CONFIG:
                 try {
                     mApiClient.fetchConfig();
-                }catch (IOException ioe){
+                } catch (IOException ioe) {
 
                 }
                 break;
             case UPLOAD_MESSAGES:
-                if (mConfigManager.isDebug()) {
-                    Log.d(TAG, "Performing " + (msg.arg1 == 0 ? "periodic" : "manual") + " upload for " + mApiKey);
-                }
-                boolean needsHistory = false;
+
+                boolean needsHistory;
                 // execute all the upload steps
                 long uploadInterval = mConfigManager.getUploadInterval();
                 if (uploadInterval > 0 || msg.arg1 == 1) {
                     prepareUploads(false);
-                    needsHistory = processUploads(false);
-                    processCommands();
-                    if (needsHistory) {
-                        this.sendEmptyMessage(UPLOAD_HISTORY);
+                    if (isNetworkConnected) {
+                        needsHistory = processUploads(false);
+                        processCommands();
+                        if (needsHistory) {
+                            this.sendEmptyMessage(UPLOAD_HISTORY);
+                        }
                     }
                 }
                 // trigger another upload check unless configured for manual uploads
@@ -117,7 +136,7 @@ import java.util.UUID;
                 // if the uploads table is empty (no old uploads)
                 //  and the messages table has messages that are not from the current session,
                 //  or there is no current session
-                //   then create a history upload and send it
+                //  then create a history upload and send it
                 SQLiteDatabase db = mDB.getWritableDatabase();
                 Cursor isempty = db.rawQuery("select * from " + UploadTable.TABLE_NAME, null);
                 if ((isempty == null) || (isempty.getCount() == 0)) {
@@ -125,8 +144,9 @@ import java.util.UUID;
                     this.removeMessages(UPLOAD_HISTORY);
                     // execute all the upload steps
                     prepareUploads(true);
-                    processUploads(true);
-//            processCommands();
+                    if (isNetworkConnected) {
+                        processUploads(true);
+                    }
                 } else {
                     // the previous upload is not done, try again in 30 seconds
                     this.sendEmptyMessageDelayed(UPLOAD_HISTORY, 30 * 1000);
@@ -140,31 +160,6 @@ import java.util.UUID;
         }
     }
 
-    public static final String SQL_UPLOADABLE_MESSAGES = String.format(
-            "%s=? and ((%s='NO-SESSION') or ((%s>=?) and (%s!=%d)))",
-            MessageTable.API_KEY,
-            MessageTable.SESSION_ID,
-            MessageTable.STATUS,
-            MessageTable.STATUS,
-            Status.UPLOADED);
-
-    public static final String SQL_HISTORY_MESSAGES = String.format(
-            "%s=? and ((%s='NO-SESSION') or ((%s>=?) and (%s=%d) and (%s != ?)))",
-            MessageTable.API_KEY,
-            MessageTable.SESSION_ID,
-            MessageTable.STATUS,
-            MessageTable.STATUS,
-            Status.UPLOADED,
-            MessageTable.SESSION_ID);
-
-    public static final String SQL_FINISHED_HISTORY_MESSAGES = String.format(
-            "%s=? and ((%s='NO-SESSION') or ((%s>=?) and (%s=%d) and (%s=?)))",
-            MessageTable.API_KEY,
-            MessageTable.SESSION_ID,
-            MessageTable.STATUS,
-            MessageTable.STATUS,
-            Status.UPLOADED,
-            MessageTable.SESSION_ID);
 
     /* package-private */void prepareUploads(boolean history) {
         try {
@@ -257,60 +252,6 @@ import java.util.UUID;
         }
     }
 
-    private JSONObject createUploadMessage(JSONArray messagesArray, boolean history) throws JSONException {
-        JSONObject uploadMessage = new JSONObject();
-
-        uploadMessage.put(MessageKey.TYPE, MessageType.REQUEST_HEADER);
-        uploadMessage.put(MessageKey.ID, UUID.randomUUID().toString());
-        uploadMessage.put(MessageKey.TIMESTAMP, System.currentTimeMillis());
-        uploadMessage.put(MessageKey.MPARTICLE_VERSION, Constants.MPARTICLE_VERSION);
-        if (BuildConfig.ECHO){
-            //uploadMessage.put("echo", true);
-        }
-        uploadMessage.put(MessageKey.OPT_OUT_HEADER, mConfigManager.getOptedOut());
-
-        mAppInfo.put(MessageKey.INSTALL_REFERRER, mPreferences.getString(PrefKeys.INSTALL_REFERRER, null));
-        uploadMessage.put(MessageKey.APP_INFO, mAppInfo);
-        // if there is notification key then include it
-        String regId = PushRegistrationHelper.getRegistrationId(mContext);
-        if ((regId != null) && (regId.length() > 0)) {
-            mDeviceInfo.put(MessageKey.PUSH_TOKEN, regId);
-        } else {
-            mDeviceInfo.remove(MessageKey.PUSH_TOKEN);
-        }
-
-        mDeviceInfo.put(MessageKey.PUSH_SOUND_ENABLED, mConfigManager.isPushSoundEnabled());
-        mDeviceInfo.put(MessageKey.PUSH_VIBRATION_ENABLED, mConfigManager.isPushVibrationEnabled());
-
-
-        uploadMessage.put(MessageKey.DEVICE_INFO, mDeviceInfo);
-        uploadMessage.put(MessageKey.DEBUG, mConfigManager.getSandboxMode());
-
-        String userAttrs = mPreferences.getString(PrefKeys.USER_ATTRS + mApiKey, null);
-        if (null != userAttrs) {
-            uploadMessage.put(MessageKey.USER_ATTRIBUTES, new JSONObject(userAttrs));
-        }else{
-            //uploadMessage.put(MessageKey.USER_ATTRIBUTES, new JSONObject());
-        }
-
-        String userIds = mPreferences.getString(PrefKeys.USER_IDENTITIES + mApiKey, null);
-        if (null != userIds) {
-            uploadMessage.put(MessageKey.USER_IDENTITIES, new JSONArray(userIds));
-        }else{
-            //uploadMessage.put(MessageKey.USER_IDENTITIES, new JSONArray());
-        }
-
-        if (history) {
-            uploadMessage.put(MessageKey.HISTORY, messagesArray);
-          //  uploadMessage.put(MessageKey.MESSAGES, new JSONArray());
-        } else {
-            uploadMessage.put(MessageKey.MESSAGES, messagesArray);
-           // uploadMessage.put(MessageKey.HISTORY, new JSONArray());
-        }
-
-        return uploadMessage;
-    }
-
     private boolean processUploads(boolean history) {
         boolean processingSessionEnd = false;
         try {
@@ -336,21 +277,8 @@ import java.util.UUID;
                 if (response.shouldDelete()) {
                     dbDeleteUpload(db, id);
                     try {
-
-                   /* if (responseJSON.has("echo")){
-                        try{
-                            JSONObject messageObj = new JSONObject(message);
-                            boolean equal = MPUtility.jsonObjsAreEqual(responseJSON.getJSONObject("echo"), messageObj);
-                            if (!equal){
-                                Log.e(TAG, "Echo response did not match request!");
-                                Log.bytesOut(TAG, "Request: " + messageObj.toString(4));
-                                Log.bytesOut(TAG, "Echo response: " + responseJSON.getJSONObject("echo").toString(4));
-                            }
-                        }catch (Exception e){
-                            Log.bytesOut(TAG, "Exception while comparing Echo response: " + e.getMessage());
-                        }
-                    }*/
-                        if (response.getJsonResponse().has(MessageKey.MESSAGES)) {
+                        if (response.getJsonResponse() != null &&
+                                response.getJsonResponse().has(MessageKey.MESSAGES)) {
                             JSONArray responseCommands = response.getJsonResponse().getJSONArray(MessageKey.MESSAGES);
                             for (int i = 0; i < responseCommands.length(); i++) {
                                 JSONObject commandObject = responseCommands.getJSONObject(i);
@@ -370,14 +298,13 @@ import java.util.UUID;
             readyUploadsCursor.close();
         } catch (SQLiteException e) {
             Log.e(TAG, "Error processing batch uploads in mParticle DB", e);
-        } catch (IOException ioe){
+        } catch (IOException ioe) {
             Log.e(TAG, "Error processing batch uploads in mParticle DB", ioe);
         } finally {
             mDB.close();
         }
         return processingSessionEnd;
     }
-
 
 
     private void processCommands() {
@@ -413,6 +340,50 @@ import java.util.UUID;
         } finally {
             mDB.close();
         }
+    }
+
+    private JSONObject createUploadMessage(JSONArray messagesArray, boolean history) throws JSONException {
+        JSONObject uploadMessage = new JSONObject();
+
+        uploadMessage.put(MessageKey.TYPE, MessageType.REQUEST_HEADER);
+        uploadMessage.put(MessageKey.ID, UUID.randomUUID().toString());
+        uploadMessage.put(MessageKey.TIMESTAMP, System.currentTimeMillis());
+        uploadMessage.put(MessageKey.MPARTICLE_VERSION, Constants.MPARTICLE_VERSION);
+        if (BuildConfig.ECHO) {
+            //uploadMessage.put("echo", true);
+        }
+        uploadMessage.put(MessageKey.OPT_OUT_HEADER, mConfigManager.getOptedOut());
+
+        mAppInfo.put(MessageKey.INSTALL_REFERRER, mPreferences.getString(PrefKeys.INSTALL_REFERRER, null));
+        uploadMessage.put(MessageKey.APP_INFO, mAppInfo);
+        // if there is notification key then include it
+        String regId = PushRegistrationHelper.getRegistrationId(mContext);
+        if ((regId != null) && (regId.length() > 0)) {
+            mDeviceInfo.put(MessageKey.PUSH_TOKEN, regId);
+        } else {
+            mDeviceInfo.remove(MessageKey.PUSH_TOKEN);
+        }
+
+        mDeviceInfo.put(MessageKey.PUSH_SOUND_ENABLED, mConfigManager.isPushSoundEnabled());
+        mDeviceInfo.put(MessageKey.PUSH_VIBRATION_ENABLED, mConfigManager.isPushVibrationEnabled());
+
+
+        uploadMessage.put(MessageKey.DEVICE_INFO, mDeviceInfo);
+        uploadMessage.put(MessageKey.DEBUG, mConfigManager.getSandboxMode());
+
+        String userAttrs = mPreferences.getString(PrefKeys.USER_ATTRS + mApiKey, null);
+        if (null != userAttrs) {
+            uploadMessage.put(MessageKey.USER_ATTRIBUTES, new JSONObject(userAttrs));
+        }
+
+        String userIds = mPreferences.getString(PrefKeys.USER_IDENTITIES + mApiKey, null);
+        if (null != userIds) {
+            uploadMessage.put(MessageKey.USER_IDENTITIES, new JSONArray(userIds));
+        }
+
+        uploadMessage.put(history ? MessageKey.HISTORY : MessageKey.MESSAGES, messagesArray);
+
+        return uploadMessage;
     }
 
     private void cleanupDatabase(int expirationPeriod) {
@@ -470,9 +441,4 @@ import java.util.UUID;
         contentValues.put(CommandTable.API_KEY, mApiKey);
         db.insert(CommandTable.TABLE_NAME, null, contentValues);
     }
-
-    public void setConnectionProxy(String host, int port) {
-        mApiClient.setConnectionProxy(host, port);
-    }
-
 }
