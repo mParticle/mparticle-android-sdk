@@ -27,6 +27,8 @@ class ConfigManager {
     public static final String VALUE_CNP_CAPTURE = "forcetrue";
     public static final String VALUE_CNP_NO_CAPTURE = "forcefalse";
 
+
+
     private final Context mContext;
 
     private final SharedPreferences mPreferences;
@@ -40,6 +42,7 @@ class ConfigManager {
     private boolean loaded = false;
 
     private boolean sendOoEvents;
+    private JSONArray providerPersistence;
 
     public ConfigManager(Context context, String key, String secret, boolean sandboxMode) {
         mContext = context.getApplicationContext();
@@ -74,6 +77,8 @@ class ConfigManager {
         if (responseJSON.has(KEY_OPT_OUT)){
             sendOoEvents = responseJSON.getBoolean(KEY_OPT_OUT);
         }
+
+        setProviderPersistence(new ProviderPersistence(responseJSON, mContext));
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD) {
             editor.apply();
@@ -268,5 +273,13 @@ class ConfigManager {
         mPreferences.edit()
                 .putInt(Constants.PrefKeys.BREADCRUMB_LIMIT, newLimit)
                 .commit();
+    }
+
+    private synchronized void setProviderPersistence(JSONArray persistence){
+        providerPersistence = persistence;
+    }
+
+    public synchronized JSONArray getProviderPersistence() {
+        return providerPersistence;
     }
 }

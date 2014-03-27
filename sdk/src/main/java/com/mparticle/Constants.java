@@ -179,6 +179,7 @@ package com.mparticle;
         public static final String EVENT_CATEGORY = "$Category";
         public static final String BREADCRUMB_SESSION_COUNTER = "sn";
         public static final String BREADCRUMB_LABEL = "l";
+        public static final String PROVIDER_PERSISTENCE = "cms";
     }
 
     interface PrefKeys {

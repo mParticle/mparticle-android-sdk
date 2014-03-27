@@ -361,7 +361,9 @@ import javax.crypto.spec.SecretKeySpec;
         uploadMessage.put(MessageKey.OPT_OUT_HEADER, mConfigManager.getOptedOut());
 
         mAppInfo.put(MessageKey.INSTALL_REFERRER, mPreferences.getString(PrefKeys.INSTALL_REFERRER, null));
+        mAppInfo.put(MessageKey.PROVIDER_PERSISTENCE, mConfigManager.getProviderPersistence());
         uploadMessage.put(MessageKey.APP_INFO, mAppInfo);
+
         // if there is notification key then include it
         String regId = PushRegistrationHelper.getRegistrationId(mContext);
         if ((regId != null) && (regId.length() > 0)) {
@@ -372,7 +374,6 @@ import javax.crypto.spec.SecretKeySpec;
 
         mDeviceInfo.put(MessageKey.PUSH_SOUND_ENABLED, mConfigManager.isPushSoundEnabled());
         mDeviceInfo.put(MessageKey.PUSH_VIBRATION_ENABLED, mConfigManager.isPushVibrationEnabled());
-
 
         uploadMessage.put(MessageKey.DEVICE_INFO, mDeviceInfo);
         uploadMessage.put(MessageKey.DEBUG, mConfigManager.getSandboxMode());
