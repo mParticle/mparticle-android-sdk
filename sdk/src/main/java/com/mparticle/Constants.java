@@ -85,7 +85,7 @@ package com.mparticle;
         public static final String INSTALL_REFERRER = "ir";
         public static final String APP_VERSION_CODE = "abn";
         public static final String APP_DEBUG_SIGNING = "dbg";
-        public static final String INSTALL_DATE = "ind";
+        public static final String APP_PIRATED = "pir";
         public static final String UPGRADE_DATE = "ud";
         public static final String LAUNCH_COUNT = "lc";
         public static final String LAUNCH_COUNT_SINCE_UPGRADE = "lcu";
@@ -204,6 +204,12 @@ package com.mparticle;
         public static final String PUSH_TITLE = "mp::push::title";
         public static final String SESSION_COUNTER = "mp::breadcrumbs::sessioncount";
         public static final String BREADCRUMB_LIMIT = "mp::breadcrumbs::limit";
+        public static final String INSTALL_DATE = "mp::installdate";
+        public static final String TOTAL_SINCE_UPGRADE = "mp::launch_since_upgrade";
+        public static final String UPGRADE_DATE = "mp::upgrade_date";
+        public static final String COUNTER_VERSION = "mp::version::counter";
+        public static final String LAST_USE = "mp::lastusedate";
+        public static final String TOTAL_RUNS = "mp::totalruns";
     }
 
     interface MiscStorageKeys {

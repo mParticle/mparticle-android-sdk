@@ -123,10 +123,6 @@ public class MParticle {
             }
         }
 
-        if (!sPreferences.contains(PrefKeys.INSTALL_TIME)) {
-            sPreferences.edit().putLong(PrefKeys.INSTALL_TIME, System.currentTimeMillis()).commit();
-        }
-
         if (mConfigManager.getLogUnhandledExceptions()) {
             enableUncaughtExceptionLogging();
         }
@@ -209,6 +205,7 @@ public class MParticle {
                     messageManager.start(appContext, firstRun);
 
                     instance = new MParticle(appContext, messageManager, appConfigManager);
+
                     if (context instanceof Activity) {
                         instance.mLaunchUri = ((Activity) context).getIntent().getDataString();
                         if (instance.mLaunchUri != null) {
