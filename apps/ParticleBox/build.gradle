@@ -4,17 +4,16 @@ buildscript {
     repositories {
         mavenCentral()
         maven { url 'http://download.crashlytics.com/maven' }
-        maven { url 'https://www.testfairy.com/maven' }
+        //maven { url 'https://www.testfairy.com/maven' }
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:0.9.+'
         classpath 'com.crashlytics.tools.gradle:crashlytics-gradle:1.+'
-        classpath 'com.testfairy.plugins.gradle:testfairy:1.+'
     }
 }
 apply plugin: 'android'
 apply plugin: 'crashlytics'
-apply plugin: 'testfairy'
+//apply plugin: 'testfairy'
 
 repositories {
     mavenCentral()
@@ -70,10 +69,10 @@ android {
         }
     }
 
-    testfairyConfig {
+  /*  testfairyConfig {
         apiKey '19a16a25a041eb7668efa061e695240d0167fa06'
     }
-
+   */
 }
 
 dependencies {
