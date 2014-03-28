@@ -180,6 +180,7 @@ package com.mparticle;
         public static final String BREADCRUMB_SESSION_COUNTER = "sn";
         public static final String BREADCRUMB_LABEL = "l";
         public static final String PROVIDER_PERSISTENCE = "cms";
+        public static final String RELEASE_VERSION = "vr";
     }
 
     interface PrefKeys {
