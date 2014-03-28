@@ -86,7 +86,6 @@ import java.util.TimeZone;
             // device ID
             attributes.put(MessageKey.DEVICE_ID, Settings.Secure.getString(appContext.getContentResolver(),
                     Settings.Secure.ANDROID_ID));
-
             // device/OS attributes
             attributes.put(MessageKey.BUILD_ID, android.os.Build.ID);
             attributes.put(MessageKey.BRAND, Build.BRAND);

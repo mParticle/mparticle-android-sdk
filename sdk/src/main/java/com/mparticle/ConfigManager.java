@@ -283,6 +283,10 @@ class ConfigManager {
     }
 
     public void setMpid(long mpid) {
-        mPreferences.edit().putFloat(Constants.PrefKeys.Mpid, mpid).commit();
+        mPreferences.edit().putLong(Constants.PrefKeys.Mpid, mpid).commit();
+    }
+
+    public long getMpid() {
+        return mPreferences.getLong(Constants.PrefKeys.Mpid, 0);
     }
 }

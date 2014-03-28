@@ -48,13 +48,15 @@ public class MParticleApiClient {
     private final URL configUrl;
     private final URL batchUploadUrl;
     private final String userAgent;
+    private final String apiKey;
 
     public MParticleApiClient(ConfigManager configManager, String key, String secret) throws MalformedURLException {
         this.configManager = configManager;
         this.apiSecret = secret;
-
+        this.apiKey = key;
         this.configUrl = new URL(SECURE_SERVICE_SCHEME, SECURE_SERVICE_HOST, SERVICE_VERSION + "/" + key + "/config");
         this.batchUploadUrl = new URL(SECURE_SERVICE_SCHEME, SECURE_SERVICE_HOST, SERVICE_VERSION + "/" + key + "/events");
+
         this.userAgent = "mParticle Android SDK/" + Constants.MPARTICLE_VERSION;
     }
 
@@ -69,6 +71,31 @@ public class MParticleApiClient {
             ApiResponse response = new ApiResponse(connection);
 
             if (response.statusCode >= HttpStatus.SC_OK && response.statusCode < HttpStatus.SC_MULTIPLE_CHOICES) {
+                configManager.updateConfig(response.getJsonResponse());
+            }
+        } catch (MalformedURLException e) {
+            Log.e(Constants.LOG_TAG, "Error constructing config service URL", e);
+        } catch (JSONException e) {
+            Log.w(Constants.LOG_TAG, "Config request failed to process response message JSON");
+        }
+    }
+
+    private URL getAudienceUrl() throws MalformedURLException {
+        return new URL(SECURE_SERVICE_SCHEME, SECURE_SERVICE_HOST, SERVICE_VERSION + "/" + apiKey + "/audience?mpid=" + configManager.getMpid());
+    }
+
+    void fetchAudiences() throws IOException {
+        try {
+
+            HttpURLConnection connection = (HttpURLConnection) getAudienceUrl().openConnection();
+            connection.setRequestProperty("Accept-Encoding", "gzip");
+            connection.setRequestProperty(HTTP.USER_AGENT, userAgent);
+
+            addMessageSignature(connection, null);
+
+            ApiResponse response = new ApiResponse(connection);
+
+            if (false || response.statusCode >= HttpStatus.SC_OK && response.statusCode < HttpStatus.SC_MULTIPLE_CHOICES) {
                 configManager.updateConfig(response.getJsonResponse());
             }
         } catch (MalformedURLException e) {
