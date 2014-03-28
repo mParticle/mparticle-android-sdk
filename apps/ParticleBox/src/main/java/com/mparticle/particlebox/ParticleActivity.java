@@ -78,6 +78,10 @@ public abstract class ParticleActivity extends ActionBarActivity
                 mTitle = getString(R.string.title_section4);
                 fragment = WebAppFragment.newInstance(position + 1);
                 break;
+            case 4:
+                mTitle = getString(R.string.title_section5);
+                fragment = NetworkPerformanceFragment.newInstance(position + 1);
+                break;
         }
         if (fragmentManager.findFragmentByTag(mTitle.toString()) == null) {
             transaction.replace(R.id.container, fragment, mTitle.toString())
@@ -97,6 +101,9 @@ public abstract class ParticleActivity extends ActionBarActivity
                 mTitle = getString(R.string.title_section3);
                 break;
             case 4:
+                mTitle = getString(R.string.title_section4);
+                break;
+            case 5:
                 mTitle = getString(R.string.title_section4);
                 break;
         }

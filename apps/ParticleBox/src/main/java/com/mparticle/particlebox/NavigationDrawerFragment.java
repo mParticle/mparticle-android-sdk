@@ -1,12 +1,10 @@
 package com.mparticle.particlebox;
 
-import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.location.LocationManager;
-import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.ActionBarDrawerToggle;
@@ -29,7 +27,9 @@ import android.widget.ListView;
 import android.widget.Switch;
 import android.widget.TextView;
 
-;import com.mparticle.MParticle;
+import com.mparticle.MParticle;
+
+;
 
 
 /**
@@ -110,7 +110,8 @@ public class NavigationDrawerFragment extends Fragment {
                         getString(R.string.title_section1),
                         getString(R.string.title_section2),
                         getString(R.string.title_section3),
-                        getString(R.string.title_section4)
+                        getString(R.string.title_section4),
+                        getString(R.string.title_section5)
                 }));
         mDrawerListView.setItemChecked(mCurrentSelectedPosition, true);
 
@@ -126,12 +127,20 @@ public class NavigationDrawerFragment extends Fragment {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if (buttonView.getId() == R.id.optoutCheckbox || buttonView.getId() == R.id.optoutSwitch){
                     MParticle.getInstance().setOptOut(isChecked);
-                }else{
+                }else if (buttonView.getId() == R.id.networkMeasurementCheckbox ||
+                        buttonView.getId() == R.id.networkMeasurementSwitch) {
                     if (isChecked){
-                        MParticle.getInstance().enableLocationTracking(LocationManager.NETWORK_PROVIDER, 60*1000, 100);
+                        MParticle.getInstance().beginMeasuringNetworkPerformance();
                     }else{
-                        MParticle.getInstance().disableLocationTracking();
+                        MParticle.getInstance().endMeasuringNetworkPerformance();
                     }
+                }else {
+                        if (isChecked){
+                            MParticle.getInstance().enableLocationTracking(LocationManager.NETWORK_PROVIDER, 60*1000, 100);
+                        }else{
+                            MParticle.getInstance().disableLocationTracking();
+                        }
+
                 }
 
             }
@@ -158,6 +167,14 @@ public class NavigationDrawerFragment extends Fragment {
             locationTracking.setOnCheckedChangeListener(checkedChangedListener);
         }
 
+        if (v.findViewById(R.id.networkMeasurementSwitch) != null){
+            Switch locationTracking = (Switch)v.findViewById(R.id.networkMeasurementSwitch);
+            locationTracking.setOnCheckedChangeListener(checkedChangedListener);
+
+        }else{
+            CheckBox locationTracking = (CheckBox)v.findViewById(R.id.networkMeasurementCheckbox);
+            locationTracking.setOnCheckedChangeListener(checkedChangedListener);
+        }
 
         ((TextView) v.findViewById(R.id.versionName)).setText("App Version: " + versionName);
         ((TextView) v.findViewById(R.id.versionCode)).setText("App Version code: " + BuildConfig.VERSION_CODE);

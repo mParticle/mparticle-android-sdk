@@ -28,6 +28,8 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
 import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.security.cert.CertificateFactory;
@@ -46,7 +48,7 @@ import java.util.jar.JarFile;
  * Created by sdozor on 1/9/14.
  */
 
-class MPUtility {
+public class MPUtility {
 
     static final String NO_BLUETOOTH = "none";
     private static String sOpenUDID;
@@ -75,6 +77,7 @@ class MPUtility {
                 }
         } catch (IOException localIOException2) {
             Log.w(Constants.LOG_TAG, "Error computing CPU usage");
+            localIOException2.printStackTrace();
         } finally {
             try {
                 if (localBufferedReader != null)
@@ -353,14 +356,55 @@ class MPUtility {
                 >= Configuration.SCREENLAYOUT_SIZE_LARGE;
     }
 
-    public static boolean hasNfc(Context context){
+    public static Object getAccessibleObject(Field paramField, Object paramObject) {
+        Object localObject = null;
+        if (paramField == null)
+            return null;
+        if (paramField != null) {
+            paramField.setAccessible(true);
+            try {
+                localObject = paramField.get(paramObject);
+            } catch (Exception e) {
+
+            }
+        }
+        return localObject;
+    }
+
+    public static Field getAccessibleField(Class paramClass1, Class paramClass2) {
+        Field[] paramfields = paramClass1.getDeclaredFields();
+        Field localField = null;
+        for (int i = 0; i < paramfields.length; i++)
+            if (paramClass2.isAssignableFrom(paramfields[i].getType())) {
+                // if (localField != null)
+                //throw new MPException(cd.l);
+                localField = paramfields[i];
+            }
+
+        localField.setAccessible(true);
+        return localField;
+    }
+
+    public static Constructor getConstructor(String paramString, String[] paramArrayOfString) throws ClassNotFoundException {
+        Constructor<?>[] constructors = Class.forName(paramString).getDeclaredConstructors();
+        for (int i = 0; i < constructors.length; i++) {
+            String[] arrayOfString = paramArrayOfString;
+            Class[] arrayOfClass = constructors[i].getParameterTypes();
+            for (int j = 0; j < arrayOfClass.length; j++) {
+                if ((!arrayOfClass[j].getName().equals(arrayOfString[j]) ? 0 : arrayOfClass.length != arrayOfString.length ? 0 : 1) != 0)
+                    return constructors[i];
+            }
+        }
+        return null;
+    }
+
+    public static boolean hasNfc(Context context) {
         return context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_NFC);
     }
 
     public static String getBluetoothVersion(Context context) {
         String bluetoothVersion = NO_BLUETOOTH;
-        if ((Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) && (context.getPackageManager().hasSystemFeature("android.hardware.bluetooth_le")))
-        {
+        if ((Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) && (context.getPackageManager().hasSystemFeature("android.hardware.bluetooth_le"))) {
             bluetoothVersion = "ble";
         } else if (context.getPackageManager().hasSystemFeature("android.hardware.bluetooth")) {
             bluetoothVersion = "classic";

@@ -20,6 +20,7 @@ class AppConfig {
     public static final String PREFKEY_APP_LICENSE_KEY = "mp_appLicenseKey";
     public static final String PREFKEY_LICENSING_ENABLED = "mp_enableLicenseCheck";
     private static final String PREFKEY_AUTOTRACKING = "mp_enableAutoTracking";
+    private static final String PREFKEY_NETWORK_MEASUREMENT = "mp_enableNetworkPerformanceMeasurement";
 
     public static final int DEFAULT_SESSION_TIMEOUT = 60;
     public static final int DEFAULT_UPLOAD_INTERVAL = 600;
@@ -33,6 +34,7 @@ class AppConfig {
     public static final boolean DEFAULT_ENABLE_PUSH_SOUND = false;
     public static final boolean DEFAULT_ENABLE_PUSH_VIBRATION = false;
     public static final int DEFAULT_BREADCRUMB_LIMIT = 50;
+    public static final boolean DEFAULT_NETWORK_MEASUREMENT = false;
 
 
     private final Context mContext;
@@ -51,6 +53,7 @@ class AppConfig {
     public String licenseKey;
     public boolean isLicensingEnabled;
     public boolean autoTrackingEnabled;
+    public volatile boolean networkingEnabled;
 
 
     public AppConfig(Context context, String key, String secret, boolean sandboxMode) {
@@ -101,6 +104,7 @@ class AppConfig {
             }
         }
         autoTrackingEnabled = getBoolean(PREFKEY_AUTOTRACKING, DEFAULT_ENABLE_AUTO_TRACKING);
+        networkingEnabled = getBoolean(PREFKEY_NETWORK_MEASUREMENT, DEFAULT_NETWORK_MEASUREMENT);
     }
 
     private int getResourceId(String key, String type) {

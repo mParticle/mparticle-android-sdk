@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
 import android.location.Location;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -68,7 +67,7 @@ import java.util.UUID;
 
     public void start(Context appContext, Boolean firstRun) {
         mContext = appContext.getApplicationContext();
-        if (null == sStatusBroadcastReceiver) {
+        if (sStatusBroadcastReceiver == null) {
 
             //get the previous Intent otherwise the first few messages will have 0 for battery level
             Intent batteryIntent = mContext.getApplicationContext().registerReceiver(null,
@@ -80,9 +79,7 @@ import java.util.UUID;
             sStatusBroadcastReceiver = new StatusBroadcastReceiver();
             // NOTE: if permissions are not correct all messages will be tagged as 'offline'
             IntentFilter filter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
-            if (PackageManager.PERMISSION_GRANTED == mContext
-                    .checkCallingOrSelfPermission(android.Manifest.permission.ACCESS_NETWORK_STATE)) {
-
+            if (MPUtility.checkPermission(mContext, android.Manifest.permission.ACCESS_NETWORK_STATE)) {
                 //same as with battery, get current connection so we don't have to wait for the next change
                 ConnectivityManager connectivyManager = (ConnectivityManager) appContext
                         .getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -112,7 +109,7 @@ import java.util.UUID;
         if (MessageType.SESSION_START == messageType) {
             message.put(MessageKey.ID, sessionId);
         } else {
-            if (null != sessionId) {
+            if (sessionId != null) {
                 message.put(MessageKey.SESSION_ID, sessionId);
             }
 
@@ -121,14 +118,14 @@ import java.util.UUID;
                 message.put(MessageKey.SESSION_START_TIMESTAMP, sessionStart);
             }
         }
-        if (null != name) {
+        if (name != null) {
             message.put(MessageKey.NAME, name);
         }
-        if (null != attributes) {
+        if (attributes != null) {
             message.put(MessageKey.ATTRIBUTES, attributes);
         }
         if (!(MessageType.ERROR.equals(messageType) && !(MessageType.OPT_OUT.equals(messageType)))) {
-            if (null != sLocation) {
+            if (sLocation != null) {
                 JSONObject locJSON = new JSONObject();
                 locJSON.put(MessageKey.LATITUDE, sLocation.getLatitude());
                 locJSON.put(MessageKey.LONGITUDE, sLocation.getLongitude());
@@ -321,7 +318,7 @@ import java.util.UUID;
     public void logErrorEvent(String sessionId, long sessionStartTime, long time, String errorMessage, Throwable t, JSONObject attributes, boolean caught) {
         try {
             JSONObject message = createMessage(MessageType.ERROR, sessionId, sessionStartTime, time, null, attributes);
-            if (null != t) {
+            if (t != null) {
                 message.put(MessageKey.ERROR_SEVERITY, caught ? "error" : "fatal");
                 message.put(MessageKey.ERROR_CLASS, t.getClass().getCanonicalName());
                 message.put(MessageKey.ERROR_MESSAGE, t.getMessage());
@@ -341,6 +338,21 @@ import java.util.UUID;
             Log.w(TAG, "Failed to create mParticle error message");
         }
     }
+
+    public void logNetworkPerformanceEvent(String sessionId, long sessionStartTime, long time, String method, String url, long length, long bytesSent, long bytesReceived) {
+        try {
+            JSONObject message = createMessage(MessageType.NETWORK_PERFORMNACE, sessionId, sessionStartTime, time, null, null);
+            message.put(MessageKey.NPE_METHOD, method);
+            message.put(MessageKey.NPE_URL, url);
+            message.put(MessageKey.NPE_LENGTH, length);
+            message.put(MessageKey.NPE_SENT, bytesSent);
+            message.put(MessageKey.NPE_REC, bytesReceived);
+            mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
+        } catch (JSONException e) {
+            Log.w(TAG, "Failed to create mParticle error message");
+        }
+    }
+
 
     public void setPushRegistrationId(String sessionId, long sessionStartTime, long time, String token, boolean registeringFlag) {
         try {
@@ -441,7 +453,7 @@ import java.util.UUID;
     }
 
     public void setDataConnection(NetworkInfo activeNetwork) {
-        if (null != activeNetwork) {
+        if (activeNetwork != null) {
             String activeNetworkName = activeNetwork.getTypeName();
             if (0 != activeNetwork.getSubtype()) {
                 activeNetworkName += "/" + activeNetwork.getSubtypeName();
@@ -450,12 +462,11 @@ import java.util.UUID;
         } else {
             sActiveNetworkName = "offline";
         }
+
+        mUploadHandler.setConnected(activeNetwork != null && activeNetwork.isConnectedOrConnecting());
+
         if (mConfigManager.isDebug()) {
             Log.d(TAG, "Active network has changed: " + sActiveNetworkName);
         }
-    }
-
-    public void setConnectionProxy(String host, int port) {
-        mUploadHandler.setConnectionProxy(host, port);
     }
 }

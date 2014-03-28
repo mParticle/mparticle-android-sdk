@@ -3,19 +3,23 @@ import java.text.SimpleDateFormat
 buildscript {
     repositories {
         mavenCentral()
+        maven { url 'http://download.crashlytics.com/maven' }
+        //maven { url 'https://www.testfairy.com/maven' }
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:0.9.+'
+        classpath 'com.android.tools.build:gradle:0.9.0'
+        classpath 'com.crashlytics.tools.gradle:crashlytics-gradle:1.+'
     }
 }
 apply plugin: 'android'
+apply plugin: 'crashlytics'
+//apply plugin: 'testfairy'
 
 repositories {
     mavenCentral()
     mavenLocal()
-    maven {
-        url "http://www.bugsense.com/gradle/"
-    }
+    maven { url 'http://www.bugsense.com/gradle/' }
+    maven { url 'http://download.crashlytics.com/maven' }
 }
 
 def buildTime() {
@@ -26,7 +30,7 @@ def buildTime() {
 
 android {
     compileSdkVersion 19
-    buildToolsVersion "19.0.1"
+    buildToolsVersion "19.0.3"
 
     def gitHash = "git rev-parse --short HEAD".execute().text.trim()
 
@@ -40,6 +44,7 @@ android {
 
     productFlavors {
         googleanalytics {
+            minSdkVersion 9
             packageName 'com.mparticle.particlebox.googleanalytics'
         }
         mparticle {
@@ -60,17 +65,26 @@ android {
         kahuna {
             packageName 'com.mparticle.particlebox.kahuna'
         }
+        crashlytics {
+            packageName 'com.mparticle.particlebox.crashlytics'
+        }
     }
+
+  /*  testfairyConfig {
+        apiKey '19a16a25a041eb7668efa061e695240d0167fa06'
+    }
+   */
 }
 
 dependencies {
 	compile 'com.android.support:support-v4:19.0.0'
 	compile 'com.android.support:appcompat-v7:19.0.0'
     compile project(':sdk')
-    googleanalyticsCompile files("libs/libGoogleAnalyticsServices.jar")
+    googleanalyticsCompile 'com.google.android.gms:play-services:4.3.23'
     mixpanelCompile 'com.mixpanel.android:mixpanel-android:4.0.0-RC3@aar'
     flurryCompile files ("libs/FlurryAnalytics_3.3.3.jar")
     urbanairshipCompile files ("libs/urbanairship-lib-3.2.3.jar")
     bugsenseCompile 'com.bugsense.trace:bugsense:3.5'
     kahunaCompile files ("libs/Kahuna.jar")
+    crashlyticsCompile 'com.crashlytics.android:crashlytics:1.+'
 }

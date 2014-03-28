@@ -27,8 +27,6 @@ class ConfigManager {
     public static final String VALUE_CNP_CAPTURE = "forcetrue";
     public static final String VALUE_CNP_NO_CAPTURE = "forcefalse";
 
-
-
     private final Context mContext;
 
     private final SharedPreferences mPreferences;
@@ -141,10 +139,6 @@ class ConfigManager {
 
     public boolean isDebug() {
         return localPrefs.debug;
-    }
-
-    public boolean isCompressionEnabled() {
-        return true;
     }
 
     public void setDebug(boolean enabled) {
@@ -281,5 +275,25 @@ class ConfigManager {
 
     public synchronized JSONArray getProviderPersistence() {
         return providerPersistence;
+    }
+
+    public boolean isNetworkPerformanceEnabled() {
+        return localPrefs.networkingEnabled;
+    }
+
+    public void setNetworkingEnabled(boolean networkingEnabled) {
+        this.localPrefs.networkingEnabled = networkingEnabled;
+    }
+
+    public void setCookies(JSONObject cookies) {
+        mPreferences.edit().putString(Constants.PrefKeys.Cookies, cookies.toString()).commit();
+    }
+
+    public JSONObject getCookies() throws JSONException {
+        return new JSONObject(mPreferences.getString(Constants.PrefKeys.Cookies, ""));
+    }
+
+    public void setMpid(long mpid) {
+        mPreferences.edit().putFloat(Constants.PrefKeys.Mpid, mpid).commit();
     }
 }

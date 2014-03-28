@@ -42,6 +42,7 @@ package com.mparticle;
         public static final String APP_STATE_TRANSITION = "ast";
         public static final String PUSH_RECEIVED = "pm";
         public static final String BREADCRUMB = "bc";
+        public static final String NETWORK_PERFORMNACE = "npe";
     }
 
     interface MessageKey {
@@ -181,6 +182,13 @@ package com.mparticle;
         public static final String BREADCRUMB_LABEL = "l";
         public static final String PROVIDER_PERSISTENCE = "cms";
         public static final String RELEASE_VERSION = "vr";
+
+        //network performance monitoring
+        public static final String NPE_METHOD = "v";
+        public static final String NPE_URL = "url";
+        public static final String NPE_LENGTH = "te";
+        public static final String NPE_SENT = "bo";
+        public static final String NPE_REC = "bi";
     }
 
     interface PrefKeys {
@@ -212,6 +220,8 @@ package com.mparticle;
         public static final String COUNTER_VERSION = "mp::version::counter";
         public static final String LAST_USE = "mp::lastusedate";
         public static final String TOTAL_RUNS = "mp::totalruns";
+        public static final String Cookies = "mp::cookies";
+        public static final String Mpid = "mp::mpid";
     }
 
     interface MiscStorageKeys {
