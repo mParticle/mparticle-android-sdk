@@ -289,4 +289,8 @@ class ConfigManager {
     public long getMpid() {
         return mPreferences.getLong(Constants.PrefKeys.Mpid, 0);
     }
+
+    public int getAudienceTimeout() {
+        return localPrefs.audienceTimeout;
+    }
 }

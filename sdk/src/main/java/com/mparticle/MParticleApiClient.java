@@ -20,6 +20,11 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.zip.GZIPOutputStream;
 
 import javax.crypto.Mac;
@@ -84,25 +89,31 @@ public class MParticleApiClient {
         return new URL(SECURE_SERVICE_SCHEME, SECURE_SERVICE_HOST, SERVICE_VERSION + "/" + apiKey + "/audience?mpid=" + configManager.getMpid());
     }
 
-    void fetchAudiences() throws IOException {
-        try {
+    JSONObject fetchAudiences(int timeout) throws IOException {
+        FutureTask<JSONObject> audienceTask = new FutureTask<JSONObject>(new Callable<JSONObject>() {
+            @Override
+            public JSONObject call() throws Exception {
+                HttpURLConnection connection = (HttpURLConnection) getAudienceUrl().openConnection();
+                connection.setRequestProperty("Accept-Encoding", "gzip");
+                connection.setRequestProperty(HTTP.USER_AGENT, userAgent);
 
-            HttpURLConnection connection = (HttpURLConnection) getAudienceUrl().openConnection();
-            connection.setRequestProperty("Accept-Encoding", "gzip");
-            connection.setRequestProperty(HTTP.USER_AGENT, userAgent);
+                addMessageSignature(connection, null);
 
-            addMessageSignature(connection, null);
-
-            ApiResponse response = new ApiResponse(connection);
-
-            if (false || response.statusCode >= HttpStatus.SC_OK && response.statusCode < HttpStatus.SC_MULTIPLE_CHOICES) {
-                configManager.updateConfig(response.getJsonResponse());
+                return new ApiResponse(connection).getJsonResponse();
             }
-        } catch (MalformedURLException e) {
-            Log.e(Constants.LOG_TAG, "Error constructing config service URL", e);
-        } catch (JSONException e) {
-            Log.w(Constants.LOG_TAG, "Config request failed to process response message JSON");
+        });
+        try {
+            return audienceTask.get(timeout, TimeUnit.MILLISECONDS);
+        }catch (InterruptedException ie){
+
+        }catch (TimeoutException toe){
+            if (configManager.isDebug()){
+                Log.d(Constants.LOG_TAG, "User audience API call timeout, returning cached audience records.");
+            }
+        }catch (ExecutionException ee) {
+
         }
+        return null;
     }
 
     ApiResponse sendMessageBatch(String message) throws IOException {
