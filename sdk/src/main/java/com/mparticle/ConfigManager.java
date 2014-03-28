@@ -138,10 +138,6 @@ class ConfigManager {
         return localPrefs.debug;
     }
 
-    public boolean isCompressionEnabled() {
-        return true;
-    }
-
     public void setDebug(boolean enabled) {
         localPrefs.debug = enabled;
     }

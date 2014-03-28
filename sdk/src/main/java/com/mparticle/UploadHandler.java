@@ -88,9 +88,9 @@ import java.util.UUID;
         mAppInfo = DeviceAttributes.collectAppInfo(mContext);
         mDeviceInfo = DeviceAttributes.collectDeviceInfo(mContext);
         try {
-            mApiClient = new MParticleApiClient(context, configManager, mApiKey, mSecret);
+            mApiClient = new MParticleApiClient(configManager, mApiKey, mSecret);
         } catch (MalformedURLException e) {
-
+            //this should never happen - the URLs are created by constants.
         }
     }
 
@@ -285,6 +285,7 @@ import java.util.UUID;
                                 dbInsertCommand(db, commandObject);
                             }
                         }
+
                     } catch (JSONException e) {
                         // ignore problems parsing response commands
                     }

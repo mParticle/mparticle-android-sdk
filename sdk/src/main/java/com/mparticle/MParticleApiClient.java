@@ -1,9 +1,10 @@
 package com.mparticle;
 
-import android.content.Context;
 import android.util.Log;
 
+import org.apache.http.HttpStatus;
 import org.apache.http.impl.cookie.DateUtils;
+import org.apache.http.protocol.HTTP;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -28,45 +29,43 @@ import javax.crypto.spec.SecretKeySpec;
  * Created by sdozor on 3/25/14.
  */
 public class MParticleApiClient {
-    public static final String HEADER_SIGNATURE = "x-mp-signature";
 
-    public static final String SECURE_SERVICE_SCHEME = "http";
+    public static final String HEADER_SIGNATURE = "x-mp-signature";
+    public static final String SECURE_SERVICE_SCHEME = "https";
     //public static final String SECURE_SERVICE_HOST = "nativesdks.mparticle.com";
-    //public static final String SECURE_SERVICE_HOST = "api-qa.mparticle.com";
+    public static final String SECURE_SERVICE_HOST = "api-qa.mparticle.com";
     public static final String SERVICE_VERSION = "v1";
     // From Stack Overflow:
     // http://stackoverflow.com/questions/923863/converting-a-string-to-hexadecimal-in-java
     private static final char[] HEX_CHARS = "0123456789abcdef".toCharArray();
-    private final Context context;
     private final ConfigManager configManager;
-    private final String apiKey;
     private final String apiSecret;
 
-     public static final String SECURE_SERVICE_HOST = "10.0.16.21/sdk";
+    // public static final String SECURE_SERVICE_HOST = "10.0.16.21";
     private final URL configUrl;
     private final URL batchUploadUrl;
+    private final String userAgent;
 
-    public MParticleApiClient(Context context, ConfigManager configManager, String key, String secret) throws MalformedURLException {
-        this.context = context;
+    public MParticleApiClient(ConfigManager configManager, String key, String secret) throws MalformedURLException {
         this.configManager = configManager;
-        this.apiKey = key;
         this.apiSecret = secret;
 
-        this.configUrl = new URL(SECURE_SERVICE_SCHEME, SECURE_SERVICE_HOST, SERVICE_VERSION + "/" + apiKey + "/config");
-        this.batchUploadUrl = new URL(SECURE_SERVICE_SCHEME, SECURE_SERVICE_HOST, SERVICE_VERSION + "/" + apiKey + "/events");
+        this.configUrl = new URL(SECURE_SERVICE_SCHEME, SECURE_SERVICE_HOST, SERVICE_VERSION + "/" + key + "/config");
+        this.batchUploadUrl = new URL(SECURE_SERVICE_SCHEME, SECURE_SERVICE_HOST, SERVICE_VERSION + "/" + key + "/events");
+        this.userAgent = "mParticle Android SDK/" + Constants.MPARTICLE_VERSION;
     }
 
     void fetchConfig() throws IOException {
         try {
             HttpURLConnection connection = (HttpURLConnection) configUrl.openConnection();
-            if (configManager.isCompressionEnabled()) {
-                connection.setRequestProperty("Accept-Encoding", "gzip");
-            }
+            connection.setRequestProperty("Accept-Encoding", "gzip");
+            connection.setRequestProperty(HTTP.USER_AGENT, userAgent);
+
             addMessageSignature(connection, null);
 
             ApiResponse response = new ApiResponse(connection);
 
-            if (response.statusCode >= 200 && response.statusCode < 300) {
+            if (response.statusCode >= HttpStatus.SC_OK && response.statusCode < HttpStatus.SC_MULTIPLE_CHOICES) {
                 configManager.updateConfig(response.getJsonResponse());
             }
         } catch (MalformedURLException e) {
@@ -81,12 +80,10 @@ public class MParticleApiClient {
         // POST message to mParticle service
         HttpURLConnection connection = (HttpURLConnection) batchUploadUrl.openConnection();
         connection.setDoOutput(true);
-        connection.setRequestProperty("Content-type", "application/json");
-        connection.setRequestProperty("Content-Encoding", "gzip");
-        connection.setRequestProperty("User-Agent", null);
-        if (!configManager.isCompressionEnabled()) {
-            connection.setRequestProperty("Accept-Encoding", "identity");
-        }
+        connection.setRequestMethod("POST");
+        connection.setRequestProperty(HTTP.CONTENT_TYPE, "application/json");
+        connection.setRequestProperty(HTTP.CONTENT_ENCODING, "gzip");
+        connection.setRequestProperty(HTTP.USER_AGENT, userAgent);
 
         addMessageSignature(connection, message);
 
@@ -161,12 +158,17 @@ public class MParticleApiClient {
                 dateHeader = dateHeader.substring(0, DateUtils.PATTERN_RFC1123.length());
             }
             String path = request.getURL().getPath();
-            String signatureMessage = method + "\n" + dateHeader + "\n" + path;
-            if ("POST".equalsIgnoreCase(method) && null != message) {
-                signatureMessage += message;
+            StringBuilder hashString = new StringBuilder()
+                                            .append(method)
+                                            .append("\n")
+                                            .append(dateHeader)
+                                            .append("\n")
+                                            .append(path);
+            if (message != null) {
+                hashString.append(message);
             }
-            request.setRequestProperty("Date", dateHeader);
-            request.setRequestProperty(HEADER_SIGNATURE, hmacSha256Encode(apiSecret, signatureMessage));
+            request.setRequestProperty(HTTP.DATE_HEADER, dateHeader);
+            request.setRequestProperty(HEADER_SIGNATURE, hmacSha256Encode(apiSecret, hashString.toString()));
         } catch (InvalidKeyException e) {
             Log.e(Constants.LOG_TAG, "Error signing message", e);
         } catch (NoSuchAlgorithmException e) {
@@ -201,10 +203,14 @@ public class MParticleApiClient {
         public ApiResponse(HttpURLConnection connection) throws IOException {
             this.connection = connection;
             statusCode = connection.getResponseCode();
+            if (statusCode == HttpStatus.SC_BAD_REQUEST && configManager.isDebug()){
+                Log.e(Constants.LOG_TAG, "Bad API request - is the correct API key and secret configured?");
+            }
         }
 
         boolean shouldDelete() {
-            return 202 == statusCode || (statusCode >= 400 && statusCode < 500);
+            return HttpStatus.SC_ACCEPTED == statusCode ||
+                    (statusCode >= HttpStatus.SC_BAD_REQUEST && statusCode < HttpStatus.SC_INTERNAL_SERVER_ERROR);
         }
 
         JSONObject getJsonResponse() {
@@ -216,6 +222,7 @@ public class MParticleApiClient {
                     while ((line = in.readLine()) != null) {
                         responseBuilder.append(line + '\n');
                     }
+                    in.close();
                     jsonResponse = new JSONObject(responseBuilder.toString());
                 } catch (IOException ex) {
 
