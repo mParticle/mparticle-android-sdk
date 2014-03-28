@@ -384,6 +384,8 @@ import java.util.UUID;
 
         uploadMessage.put(history ? MessageKey.HISTORY : MessageKey.MESSAGES, messagesArray);
 
+        MParticleApiClient.addCookies(uploadMessage, mConfigManager);
+
         return uploadMessage;
     }
 

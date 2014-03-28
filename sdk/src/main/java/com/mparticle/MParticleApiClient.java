@@ -32,9 +32,12 @@ public class MParticleApiClient {
 
     public static final String HEADER_SIGNATURE = "x-mp-signature";
     public static final String SECURE_SERVICE_SCHEME = "https";
-    //public static final String SECURE_SERVICE_HOST = "nativesdks.mparticle.com";
-    public static final String SECURE_SERVICE_HOST = "api-qa.mparticle.com";
+    public static final String SECURE_SERVICE_HOST = "nativesdks.mparticle.com";
+    //public static final String SECURE_SERVICE_HOST = "api-qa.mparticle.com";
     public static final String SERVICE_VERSION = "v1";
+    public static final String COOKIES = "ck";
+    public static final String CONSUMER_INFO = "ci";
+    public static final String MPID = "mpid";
     // From Stack Overflow:
     // http://stackoverflow.com/questions/923863/converting-a-string-to-hexadecimal-in-java
     private static final char[] HEX_CHARS = "0123456789abcdef".toCharArray();
@@ -195,6 +198,16 @@ public class MParticleApiClient {
         return new String(chars);
     }
 
+    public static void addCookies(JSONObject uploadMessage, ConfigManager manager) {
+        try {
+            if (uploadMessage != null) {
+                uploadMessage.put(COOKIES, manager.getCookies());
+            }
+        }catch (JSONException jse){
+
+        }
+    }
+
     class ApiResponse {
         private int statusCode;
         private JSONObject jsonResponse;
@@ -224,6 +237,16 @@ public class MParticleApiClient {
                     }
                     in.close();
                     jsonResponse = new JSONObject(responseBuilder.toString());
+                    if (jsonResponse.has(CONSUMER_INFO)) {
+                        JSONObject consumerInfo = jsonResponse.getJSONObject(CONSUMER_INFO);
+                        if (consumerInfo.has(MPID)) {
+                            configManager.setMpid(consumerInfo.getLong(MPID));
+                        }
+                        if (consumerInfo.has(COOKIES)){
+                            configManager.setCookies(consumerInfo.getJSONObject(COOKIES));
+                        }
+                    }
+
                 } catch (IOException ex) {
 
                 } catch (JSONException jse) {
