@@ -21,7 +21,7 @@ configurations {
 
 android {
     compileSdkVersion 19
-    buildToolsVersion "19.0.1"
+    buildToolsVersion "19.0.3"
 
     defaultConfig {
         minSdkVersion 8
@@ -37,7 +37,7 @@ android {
 
         release {
             buildConfigField "boolean", "ECHO", "false"
-            runProguard true
+            runProguard false
             proguardFile 'proguard.txt'
         }
 

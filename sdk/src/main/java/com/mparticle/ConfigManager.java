@@ -138,10 +138,6 @@ class ConfigManager {
         return localPrefs.debug;
     }
 
-    public boolean isCompressionEnabled() {
-        return true;
-    }
-
     public void setDebug(boolean enabled) {
         localPrefs.debug = enabled;
     }
@@ -276,5 +272,17 @@ class ConfigManager {
 
     public void setNetworkingEnabled(boolean networkingEnabled) {
         this.localPrefs.networkingEnabled = networkingEnabled;
+    }
+
+    public void setCookies(JSONObject cookies) {
+        mPreferences.edit().putString(Constants.PrefKeys.Cookies, cookies.toString()).commit();
+    }
+
+    public JSONObject getCookies() throws JSONException {
+        return new JSONObject(mPreferences.getString(Constants.PrefKeys.Cookies, ""));
+    }
+
+    public void setMpid(long mpid) {
+        mPreferences.edit().putFloat(Constants.PrefKeys.Mpid, mpid).commit();
     }
 }
