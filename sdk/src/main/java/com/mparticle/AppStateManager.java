@@ -4,6 +4,7 @@ import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.Application;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -19,6 +20,7 @@ class AppStateManager {
     public static final String APP_STATE_FOREGROUND = "foreground";
     public static final String APP_STATE_BACKGROUND = "background";
     public static final String APP_STATE_NOTRUNNING = "not_running";
+    private final SharedPreferences preferences;
     Context mContext;
     AtomicInteger mActivities = new AtomicInteger(0);
     long mLastStoppedTime;
@@ -46,6 +48,7 @@ class AppStateManager {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
             setupLifecycleCallbacks();
         }
+        preferences = context.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
     }
 
     @TargetApi(14)
@@ -105,6 +108,7 @@ class AppStateManager {
     }
 
     void recordActivityStarted(Activity activity){
+        preferences.edit().putBoolean(Constants.PrefKeys.CRASHED_IN_FOREGROUND, true).commit();
         if (isBackgrounded() && mLastStoppedTime > 0) {
             MParticle.getInstance().logStateTransition(Constants.StateTransitionType.STATE_TRANS_FORE);
             if (MParticle.getInstance().getDebugMode()) {
@@ -121,6 +125,7 @@ class AppStateManager {
     }
 
     void recordActivityStopped(Activity activity) {
+        preferences.edit().putBoolean(Constants.PrefKeys.CRASHED_IN_FOREGROUND, false).commit();
         mLastStoppedTime = System.currentTimeMillis();
 
         if (mActivities.decrementAndGet() < 1) {

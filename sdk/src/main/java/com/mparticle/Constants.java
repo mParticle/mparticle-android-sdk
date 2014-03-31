@@ -143,6 +143,8 @@ package com.mparticle;
         public static final String STATE_INFO_ORIENTATION = "so";
         public static final String STATE_INFO_MEMORY_LOW = "sml";
         public static final String STATE_INFO_MEMORY_THRESHOLD = "smt";
+        //app init message special keys
+        public static final String APP_INIT_CRASHED = "sc";
         // network keys
         public static final String NETWORK_COUNTRY = "nc";
         public static final String NETWORK_CARRIER = "nca";
@@ -222,6 +224,7 @@ package com.mparticle;
         public static final String TOTAL_RUNS = "mp::totalruns";
         public static final String Cookies = "mp::cookies";
         public static final String Mpid = "mp::mpid";
+        public static final String CRASHED_IN_FOREGROUND = "mp::crashed_in_foreground";
     }
 
     interface MiscStorageKeys {

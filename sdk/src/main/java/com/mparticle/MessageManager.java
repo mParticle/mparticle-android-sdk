@@ -394,6 +394,9 @@ import java.util.UUID;
             JSONObject message = createMessage(MessageType.APP_STATE_TRANSITION, sessionId, sessionStartTime, System.currentTimeMillis(),
                     null, null);
             message.put(MessageKey.STATE_TRANSITION_TYPE, stateTransInit);
+            if (stateTransInit.equals(Constants.StateTransitionType.STATE_TRANS_INIT)){
+                message.put(MessageKey.APP_INIT_CRASHED, !mPreferences.getBoolean(Constants.PrefKeys.CRASHED_IN_FOREGROUND, false));
+            }
             if (lastNotificationBundle != null){
                 JSONObject attributes = new JSONObject();
                 for (String key : lastNotificationBundle.keySet()){
