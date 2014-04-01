@@ -36,7 +36,8 @@ public class MParticleApiClient {
     //public static final String SECURE_SERVICE_HOST = "aws-sdk-branch1.mparticle.com";
     //public static final String SECURE_SERVICE_HOST = "api-qa.mparticle.com";
     //public static final String SECURE_SERVICE_HOST = "10.0.16.21";
-    public static final String SERVICE_VERSION = "v1";
+    public static final String SERVICE_VERSION_1 = "v1";
+    public static final String SERVICE_VERSION_2 = "v2";
     public static final String COOKIES = "ck";
     public static final String CONSUMER_INFO = "ci";
     public static final String MPID = "mpid";
@@ -53,8 +54,8 @@ public class MParticleApiClient {
         this.configManager = configManager;
         this.apiSecret = secret;
 
-        this.configUrl = new URL(SECURE_SERVICE_SCHEME, SECURE_SERVICE_HOST, SERVICE_VERSION + "/" + key + "/config");
-        this.batchUploadUrl = new URL(SECURE_SERVICE_SCHEME, SECURE_SERVICE_HOST, SERVICE_VERSION + "/" + key + "/events");
+        this.configUrl = new URL(SECURE_SERVICE_SCHEME, SECURE_SERVICE_HOST, SERVICE_VERSION_2 + "/" + key + "/config");
+        this.batchUploadUrl = new URL(SECURE_SERVICE_SCHEME, SECURE_SERVICE_HOST, SERVICE_VERSION_1 + "/" + key + "/events");
         this.userAgent = "mParticle Android SDK/" + Constants.MPARTICLE_VERSION;
     }
 
@@ -111,23 +112,24 @@ public class MParticleApiClient {
         URL url = new URL(commandUrl);
         HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
 
-        try {
+        if (headers != null && headers.length() > 0) {
             JSONObject headersJSON = new JSONObject(headers);
             for (Iterator<?> iter = headersJSON.keys(); iter.hasNext(); ) {
                 String headerName = (String) iter.next();
                 String headerValue = headersJSON.getString(headerName);
                 urlConnection.setRequestProperty(headerName, headerValue);
             }
-            if ("POST".equalsIgnoreCase(method)) {
-                urlConnection.setDoOutput(true);
+        }
+        if ("POST".equalsIgnoreCase(method)) {
+            urlConnection.setDoOutput(true);
+            if (postData != null && postData.length() > 0) {
                 byte[] postDataBytes = Base64.decode(postData.getBytes());
                 urlConnection.setFixedLengthStreamingMode(postDataBytes.length);
                 urlConnection.getOutputStream().write(postDataBytes);
             }
-            return new ApiResponse(urlConnection);
-        } finally {
-            urlConnection.disconnect();
         }
+        return new ApiResponse(urlConnection);
+
     }
 
     private void logUpload(String message) {

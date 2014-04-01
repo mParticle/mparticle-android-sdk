@@ -10,7 +10,7 @@ import org.json.JSONObject;
 /**
  * Created by sdozor on 3/27/14.
  */
-public class ProviderPersistence extends JSONArray{
+public class ProviderPersistence extends JSONObject{
 
     private static final String KEY_PERSISTENCE = "cms";
     private static final String KEY_PERSISTENCE_ID = "id";
@@ -34,13 +34,11 @@ public class ProviderPersistence extends JSONArray{
         super();
         JSONArray configPersistence = config.getJSONArray(KEY_PERSISTENCE);
         for (int i = 0; i < configPersistence.length(); i++){
-            JSONObject module = new JSONObject();
-            module.put(KEY_PERSISTENCE_ID, configPersistence.getJSONObject(i).getInt(KEY_PERSISTENCE_ID));
-            module.put("cs", new JSONArray());
 
+            JSONObject values = new JSONObject();
             if (configPersistence.getJSONObject(i).has(KEY_PERSISTENCE_ANDROID)){
                 JSONArray files = configPersistence.getJSONObject(i).getJSONArray(KEY_PERSISTENCE_ANDROID);
-                JSONObject values = new JSONObject();
+
                 for (int fileIndex = 0; fileIndex < files.length(); fileIndex++){
                     JSONObject fileObject = files.getJSONObject(fileIndex);
                     SharedPreferences preferences = context.getSharedPreferences(fileObject.getString(KEY_PERSISTENCE_FILE), fileObject.getInt(KEY_PERSISTENCE_MODE));
@@ -76,9 +74,8 @@ public class ProviderPersistence extends JSONArray{
 
                     }
                 }
-                ((JSONArray)module.get("cs")).put(values);
             }
-            put(module);
+            put(Integer.toString(configPersistence.getJSONObject(i).getInt(KEY_PERSISTENCE_ID)), values);
 
         }
 

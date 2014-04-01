@@ -386,6 +386,8 @@ import java.util.UUID;
 
         MParticleApiClient.addCookies(uploadMessage, mConfigManager);
 
+        uploadMessage.put(MessageKey.PROVIDER_PERSISTENCE, mConfigManager.getProviderPersistence());
+
         return uploadMessage;
     }
 

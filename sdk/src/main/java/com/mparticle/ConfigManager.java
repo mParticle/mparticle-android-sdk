@@ -40,7 +40,7 @@ class ConfigManager {
     private boolean loaded = false;
 
     private boolean sendOoEvents;
-    private JSONArray providerPersistence;
+    private JSONObject providerPersistence;
 
     public ConfigManager(Context context, String key, String secret, boolean sandboxMode) {
         mContext = context.getApplicationContext();
@@ -269,11 +269,11 @@ class ConfigManager {
                 .commit();
     }
 
-    private synchronized void setProviderPersistence(JSONArray persistence){
+    private synchronized void setProviderPersistence(JSONObject persistence){
         providerPersistence = persistence;
     }
 
-    public synchronized JSONArray getProviderPersistence() {
+    public synchronized JSONObject getProviderPersistence() {
         return providerPersistence;
     }
 
