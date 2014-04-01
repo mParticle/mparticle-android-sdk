@@ -538,30 +538,27 @@ public class MParticle {
     /**
      * Logs an e-commerce transaction event
      *
-     * @see com.mparticle.MPTransaction.Builder
+     * @see MPProduct.Builder
      *
-     * @param transaction (required not null)
-     * @see com.mparticle.MPTransaction.Builder
+     * @param product (required not null)
+     * @see MPProduct.Builder
      */
-    public void logTransaction(MPTransaction transaction) {
+    public void logTransaction(MPProduct product) {
         if (mConfigManager.getSendOoEvents()) {
-            if (transaction == null) {
+            if (product == null) {
                 throw new IllegalArgumentException("transaction is required for logTransaction");
             }
 
-            if (transaction.getData() == null) {
+            if (product.isEmpty()) {
                 throw new IllegalArgumentException("Transaction data was null, please check that the transaction was built properly.");
             }
 
             ensureActiveSession();
             if (checkEventLimit()) {
-                mMessageManager.logEvent(mSessionID, mSessionStartTime, mLastEventTime, "Ecommerce", EventType.Transaction, transaction.getData(), 0);
+                JSONObject transactionJson = enforceAttributeConstraints(product);
+                mMessageManager.logEvent(mSessionID, mSessionStartTime, mLastEventTime, "Ecommerce", EventType.Transaction, transactionJson, 0);
                 if (mDebugMode) {
-                    try {
-                        debugLog("Logged transaction with data: " + transaction.getData().toString(4));
-                    } catch (JSONException jse) {
-
-                    }
+                    debugLog("Logged transaction with data: " + product.toString());
                 }
             }
         }

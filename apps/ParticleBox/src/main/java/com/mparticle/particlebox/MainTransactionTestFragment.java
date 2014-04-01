@@ -8,7 +8,7 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.mparticle.MPTransaction;
+import com.mparticle.MPProduct;
 import com.mparticle.MParticle;
 
 /**
@@ -58,7 +58,7 @@ public class MainTransactionTestFragment extends Fragment implements View.OnClic
     @Override
     public void onClick(View v) {
 
-        MPTransaction transaction = new MPTransaction.Builder(productName.getText().toString(), productSku.getText().toString())
+        MPProduct transaction = new MPProduct.Builder(productName.getText().toString(), productSku.getText().toString())
                 .quantity(Integer.parseInt(quantity.getText().toString()))
                 .unitPrice(Double.parseDouble(unitPrice.getText().toString()))
                 .shippingAmount(Double.parseDouble(shippingAmount.getText().toString()))
