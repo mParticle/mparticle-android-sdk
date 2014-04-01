@@ -95,7 +95,7 @@ import java.util.TimeZone;
                 countSinceUpgrade += 1;
                 editor.putInt(PrefKeys.TOTAL_SINCE_UPGRADE, countSinceUpgrade);
 
-                attributes.put(MessageKey.LAUNCH_COUNT_SINCE_UPGRADE, upgradeDate);
+                attributes.put(MessageKey.LAUNCH_COUNT_SINCE_UPGRADE, countSinceUpgrade);
                 attributes.put(MessageKey.UPGRADE_DATE, upgradeDate);
             } catch (PackageManager.NameNotFoundException e) {
                 // ignore missing data

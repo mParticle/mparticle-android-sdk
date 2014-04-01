@@ -33,7 +33,9 @@ public class MParticleApiClient {
     public static final String HEADER_SIGNATURE = "x-mp-signature";
     public static final String SECURE_SERVICE_SCHEME = "https";
     public static final String SECURE_SERVICE_HOST = "nativesdks.mparticle.com";
+    //public static final String SECURE_SERVICE_HOST = "aws-sdk-branch1.mparticle.com";
     //public static final String SECURE_SERVICE_HOST = "api-qa.mparticle.com";
+    //public static final String SECURE_SERVICE_HOST = "10.0.16.21";
     public static final String SERVICE_VERSION = "v1";
     public static final String COOKIES = "ck";
     public static final String CONSUMER_INFO = "ci";
@@ -43,8 +45,6 @@ public class MParticleApiClient {
     private static final char[] HEX_CHARS = "0123456789abcdef".toCharArray();
     private final ConfigManager configManager;
     private final String apiSecret;
-
-    // public static final String SECURE_SERVICE_HOST = "10.0.16.21";
     private final URL configUrl;
     private final URL batchUploadUrl;
     private final String userAgent;
