@@ -397,12 +397,13 @@ import java.util.UUID;
                     null, null);
             message.put(MessageKey.STATE_TRANSITION_TYPE, stateTransInit);
             if (stateTransInit.equals(Constants.StateTransitionType.STATE_TRANS_INIT)){
-                message.put(MessageKey.APP_INIT_CRASHED, !mPreferences.getBoolean(Constants.PrefKeys.CRASHED_IN_FOREGROUND, false));
+
                 Boolean firstRun = mPreferences.getBoolean(Constants.PrefKeys.FIRSTINIT, true);
                 SharedPreferences.Editor editor = mPreferences.edit();
                 if (firstRun) {
                     editor.putBoolean(Constants.PrefKeys.FIRSTINIT, false);
                 }
+                message.put(MessageKey.APP_INIT_CRASHED, !firstRun && !mPreferences.getBoolean(Constants.PrefKeys.CRASHED_IN_FOREGROUND, false));
 
                 int versionCode = 0;
                 try {
