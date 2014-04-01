@@ -145,6 +145,8 @@ package com.mparticle;
         public static final String STATE_INFO_MEMORY_THRESHOLD = "smt";
         //app init message special keys
         public static final String APP_INIT_CRASHED = "sc";
+        public static final String APP_INIT_FIRST_RUN = "ifr";
+        public static final String APP_INIT_UPGRADE = "iu";
         // network keys
         public static final String NETWORK_COUNTRY = "nc";
         public static final String NETWORK_CARRIER = "nca";
@@ -204,6 +206,8 @@ package com.mparticle;
         public static final String USER_ATTRS = "mp::user_attrs::";
         public static final String USER_IDENTITIES = "mp::user_ids::";
         public static final String FIRSTRUN = "mp::firstrun::";
+        public static final String FIRSTINIT = "mp::firstinit";
+        public static final String INITUPGRADE = "mp::initupgrade";
         public static final String UPLOAD_MODE = "mp::batch";
         public static final String PROPERTY_APP_VERSION = "mp::appversion";
         public static final String PROPERTY_OS_VERSION = "mp::osversion";

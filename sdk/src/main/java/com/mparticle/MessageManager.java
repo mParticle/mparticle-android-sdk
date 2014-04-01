@@ -5,6 +5,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.location.Location;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -396,6 +398,25 @@ import java.util.UUID;
             message.put(MessageKey.STATE_TRANSITION_TYPE, stateTransInit);
             if (stateTransInit.equals(Constants.StateTransitionType.STATE_TRANS_INIT)){
                 message.put(MessageKey.APP_INIT_CRASHED, !mPreferences.getBoolean(Constants.PrefKeys.CRASHED_IN_FOREGROUND, false));
+                Boolean firstRun = mPreferences.getBoolean(Constants.PrefKeys.FIRSTINIT, true);
+                SharedPreferences.Editor editor = mPreferences.edit();
+                if (firstRun) {
+                    editor.putBoolean(Constants.PrefKeys.FIRSTINIT, false);
+                }
+
+                int versionCode = 0;
+                try {
+                    PackageInfo pInfo = mContext.getPackageManager().getPackageInfo(mContext.getPackageName(), 0);
+                    versionCode = pInfo.versionCode;
+                } catch (PackageManager.NameNotFoundException nnfe) {
+
+                }
+                boolean upgrade = !firstRun && (versionCode != mPreferences.getInt(Constants.PrefKeys.INITUPGRADE, 0));
+                editor.putInt(Constants.PrefKeys.INITUPGRADE, versionCode);
+                editor.commit();
+
+                message.put(MessageKey.APP_INIT_FIRST_RUN, firstRun);
+                message.put(MessageKey.APP_INIT_UPGRADE, upgrade);
             }
             if (lastNotificationBundle != null){
                 JSONObject attributes = new JSONObject();
