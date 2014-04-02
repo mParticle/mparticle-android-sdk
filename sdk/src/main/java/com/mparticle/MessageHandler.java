@@ -106,6 +106,7 @@ import org.json.JSONObject;
                     String sessionId = sessionTiming.getString(MessageKey.SESSION_ID);
                     long time = sessionTiming.getLong(MessageKey.TIMESTAMP);
                     long sessionLength = sessionTiming.getLong(MessageKey.SESSION_LENGTH);
+
                     SQLiteDatabase db = mDB.getWritableDatabase();
                     dbUpdateSessionEndTime(db, sessionId, time, sessionLength);
                 } catch (SQLiteException e) {

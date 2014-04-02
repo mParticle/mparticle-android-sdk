@@ -110,10 +110,16 @@ class AppStateManager {
     void recordActivityStarted(Activity activity){
         preferences.edit().putBoolean(Constants.PrefKeys.CRASHED_IN_FOREGROUND, true).commit();
         if (isBackgrounded() && mLastStoppedTime > 0) {
+            long totalTimeInBackground = preferences.getLong(Constants.PrefKeys.TIME_IN_BG, 0);
+            totalTimeInBackground += (System.currentTimeMillis() - mLastStoppedTime);
+            preferences.edit().putLong(Constants.PrefKeys.TIME_IN_BG, totalTimeInBackground).commit();
+
             MParticle.getInstance().logStateTransition(Constants.StateTransitionType.STATE_TRANS_FORE);
             if (MParticle.getInstance().getDebugMode()) {
                 Log.d(Constants.LOG_TAG, "APP FOREGROUNDED");
             }
+
+
         }
         mActivities.getAndIncrement();
         if (MParticle.getInstance().getDebugMode()) {

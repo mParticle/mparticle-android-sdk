@@ -58,6 +58,7 @@ package com.mparticle;
         public static final String NAME = "n";
         public static final String DEBUG = "dbg";
         public static final String OPT_OUT_HEADER = "oo";
+        public static final String PREVIOUS_SESSION_LENGTH = "psl";
         // referrer
         public static final String LAUNCH_REFERRER = "lr";
         // event timing
@@ -232,6 +233,8 @@ package com.mparticle;
         public static final String Mpid = "mp::mpid";
         public static final String CRASHED_IN_FOREGROUND = "mp::crashed_in_foreground";
         public static final String LTV = "mp::ltv";
+        public static final String TIME_IN_BG = "mp::time_in_bg";
+        public static final String PREVIOUS_SESSION_FOREGROUND = "mp::time_in_fg";
     }
 
     interface MiscStorageKeys {

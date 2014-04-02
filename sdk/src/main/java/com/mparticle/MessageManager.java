@@ -208,6 +208,12 @@ import java.util.UUID;
         try {
             JSONObject message = createMessage(MessageType.SESSION_START, sessionId, time, time, null, null);
             message.put(MessageKey.LAUNCH_REFERRER, launchUri);
+            long timeInFg = mPreferences.getLong(Constants.PrefKeys.PREVIOUS_SESSION_FOREGROUND, 0);
+            if (timeInFg > 0) {
+                message.put(MessageKey.PREVIOUS_SESSION_LENGTH, timeInFg);
+                mPreferences.edit().remove(Constants.PrefKeys.PREVIOUS_SESSION_FOREGROUND).commit();
+            }
+
             mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
 
             if (sFirstRun) {
@@ -253,6 +259,13 @@ import java.util.UUID;
             sessionTiming.put(MessageKey.SESSION_LENGTH, sessionLength);
             mMessageHandler
                     .sendMessage(mMessageHandler.obtainMessage(MessageHandler.UPDATE_SESSION_END, sessionTiming));
+            long timeInBackground = mPreferences.getLong(Constants.PrefKeys.TIME_IN_BG, 0);
+            long foregroundLength = sessionLength - timeInBackground;
+            SharedPreferences.Editor editor = mPreferences.edit();
+
+            editor.putLong(Constants.PrefKeys.PREVIOUS_SESSION_FOREGROUND, foregroundLength > 0 ? foregroundLength : sessionLength);
+            editor.remove(Constants.PrefKeys.TIME_IN_BG);
+            editor.commit();
         } catch (JSONException e) {
             Log.w(TAG, "Failed to send update session end message");
         }
