@@ -584,7 +584,7 @@ public class MParticle {
         String newValue = currentValue.add(valueIncreased).toPlainString();
         sPreferences.edit().putString(PrefKeys.LTV, newValue).commit();
         Map<String, String> attributes = new HashMap<String, String>();
-        attributes.put("$Amount", newValue);
+        attributes.put("$Amount", valueIncreased.toPlainString());
         attributes.put("$TotalAmount", newValue);
         attributes.put("$MethodName", "logLTVIncrease");
         logEvent("Increase LTV", EventType.Transaction, attributes);
