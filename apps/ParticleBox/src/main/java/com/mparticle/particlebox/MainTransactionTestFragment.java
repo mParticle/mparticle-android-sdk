@@ -11,6 +11,8 @@ import android.widget.Toast;
 import com.mparticle.MPProduct;
 import com.mparticle.MParticle;
 
+import java.math.BigDecimal;
+
 /**
  * Created by sdozor on 1/22/14.
  */
@@ -60,7 +62,7 @@ public class MainTransactionTestFragment extends Fragment implements View.OnClic
     @Override
     public void onClick(View v) {
         if (v.getId() == R.id.ltvButton){
-            MParticle.getInstance().logLtvIncrease(Double.parseDouble(ltvEditText.getText().toString()));
+            MParticle.getInstance().logLtvIncrease(new BigDecimal(ltvEditText.getText().toString()));
             Toast.makeText(v.getContext(), "LTV increase logged.", Toast.LENGTH_SHORT).show();
         }else{
             MPProduct transaction = new MPProduct.Builder(productName.getText().toString(), productSku.getText().toString())

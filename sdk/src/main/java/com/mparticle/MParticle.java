@@ -26,6 +26,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.lang.Thread.UncaughtExceptionHandler;
+import java.math.BigDecimal;
 import java.net.Socket;
 import java.net.SocketImpl;
 import java.net.SocketImplFactory;
@@ -572,12 +573,18 @@ public class MParticle {
         }
     }
 
-    public void logLtvIncrease(double valueIncreased){
-        double currentValue = Double.parseDouble(sPreferences.getString(PrefKeys.LTV, "0"));
-        String newValue = Double.toString(currentValue + valueIncreased);
+    /**
+     * Logs an increase in the lifetime value of a user. This will signify and increase
+     * in the revenue assigned to this user for service providers that support revenue tracking.
+     *
+     * @param valueIncreased    The currency value by which to increase the current user's LTV
+     */
+    public void logLtvIncrease(BigDecimal valueIncreased){
+        BigDecimal currentValue = new BigDecimal(sPreferences.getString(PrefKeys.LTV, "0"));
+        String newValue = currentValue.add(valueIncreased).toPlainString();
         sPreferences.edit().putString(PrefKeys.LTV, newValue).commit();
         Map<String, String> attributes = new HashMap<String, String>();
-        attributes.put("$Amount", Double.toString(valueIncreased));
+        attributes.put("$Amount", newValue);
         attributes.put("$TotalAmount", newValue);
         attributes.put("$MethodName", "logLTVIncrease");
         logEvent("Increase LTV", EventType.Transaction, attributes);
