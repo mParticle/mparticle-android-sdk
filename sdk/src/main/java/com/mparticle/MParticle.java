@@ -572,6 +572,17 @@ public class MParticle {
         }
     }
 
+    public void logLtvIncrease(double valueIncreased){
+        double currentValue = Double.parseDouble(sPreferences.getString(PrefKeys.LTV, "0"));
+        String newValue = Double.toString(currentValue + valueIncreased);
+        sPreferences.edit().putString(PrefKeys.LTV, newValue).commit();
+        Map<String, String> attributes = new HashMap<String, String>();
+        attributes.put("$Amount", Double.toString(valueIncreased));
+        attributes.put("$TotalAmount", newValue);
+        attributes.put("$MethodName", "logLTVIncrease");
+        logEvent("Increase LTV", EventType.Transaction, attributes);
+    }
+
     /**
      * Logs an e-commerce transaction event
      *

@@ -229,6 +229,7 @@ package com.mparticle;
         public static final String Cookies = "mp::cookies";
         public static final String Mpid = "mp::mpid";
         public static final String CRASHED_IN_FOREGROUND = "mp::crashed_in_foreground";
+        public static final String LTV = "mp::ltv";
     }
 
     interface MiscStorageKeys {
