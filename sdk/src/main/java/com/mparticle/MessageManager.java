@@ -23,9 +23,11 @@ import com.mparticle.MParticle.EventType;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Locale;
+import java.util.Map;
 import java.util.UUID;
 
 /* package-private */class MessageManager {
@@ -59,6 +61,7 @@ import java.util.UUID;
     private static long sStartTime = System.currentTimeMillis();
     private static SharedPreferences mPreferences = null;
     private ConfigManager mConfigManager = null;
+    private MParticle.InstallType mInstallType;
 
     public MessageManager(Context appContext, ConfigManager configManager) {
         mConfigManager = configManager;
@@ -67,7 +70,7 @@ import java.util.UUID;
         mPreferences = appContext.getSharedPreferences(Constants.MISC_FILE, Context.MODE_PRIVATE);
     }
 
-    public void start(Context appContext, Boolean firstRun) {
+    public void start(Context appContext, Boolean firstRun, MParticle.InstallType installType) {
         mContext = appContext.getApplicationContext();
         if (sStatusBroadcastReceiver == null) {
 
@@ -93,6 +96,7 @@ import java.util.UUID;
         }
 
         sFirstRun = firstRun;
+        mInstallType = installType;
 
         if (!sFirstRun) {
             mMessageHandler.sendEmptyMessage(MessageHandler.END_ORPHAN_SESSIONS);
@@ -398,12 +402,12 @@ import java.util.UUID;
             message.put(MessageKey.STATE_TRANSITION_TYPE, stateTransInit);
             if (stateTransInit.equals(Constants.StateTransitionType.STATE_TRANS_INIT)){
 
-                Boolean firstRun = mPreferences.getBoolean(Constants.PrefKeys.FIRSTINIT, true);
+
                 SharedPreferences.Editor editor = mPreferences.edit();
-                if (firstRun) {
-                    editor.putBoolean(Constants.PrefKeys.FIRSTINIT, false);
+
+                if (!sFirstRun) {
+                    message.put(MessageKey.APP_INIT_CRASHED, !mPreferences.getBoolean(Constants.PrefKeys.CRASHED_IN_FOREGROUND, false));
                 }
-                message.put(MessageKey.APP_INIT_CRASHED, !firstRun && !mPreferences.getBoolean(Constants.PrefKeys.CRASHED_IN_FOREGROUND, false));
 
                 int versionCode = 0;
                 try {
@@ -412,12 +416,21 @@ import java.util.UUID;
                 } catch (PackageManager.NameNotFoundException nnfe) {
 
                 }
-                boolean upgrade = !firstRun && (versionCode != mPreferences.getInt(Constants.PrefKeys.INITUPGRADE, 0));
+                boolean upgrade = (versionCode != mPreferences.getInt(Constants.PrefKeys.INITUPGRADE, 0));
                 editor.putInt(Constants.PrefKeys.INITUPGRADE, versionCode);
                 editor.commit();
 
-                message.put(MessageKey.APP_INIT_FIRST_RUN, firstRun);
-                message.put(MessageKey.APP_INIT_UPGRADE, upgrade);
+                boolean installDetected = (mInstallType == MParticle.InstallType.AutoDetect && autoDetectInstall());
+
+                boolean globalFirstRun = sFirstRun &&
+                                (mInstallType == MParticle.InstallType.KnownInstall ||
+                                        installDetected);
+                boolean globalUpgrade = upgrade &&
+                                (mInstallType == MParticle.InstallType.KnownUpgrade ||
+                                        !installDetected);
+
+                message.put(MessageKey.APP_INIT_FIRST_RUN, globalFirstRun);
+                message.put(MessageKey.APP_INIT_UPGRADE, globalUpgrade);
             }
             if (lastNotificationBundle != null){
                 JSONObject attributes = new JSONObject();
@@ -434,6 +447,32 @@ import java.util.UUID;
         } catch (JSONException e) {
             Log.w(TAG, "Failed to create mParticle state transition message");
         }
+    }
+
+    private boolean autoDetectInstall() {
+        //heuristic 1: look for install referrer
+        if (mPreferences.contains(Constants.PrefKeys.INSTALL_REFERRER)){
+            return true;
+        }
+        //heuristic 2: look for other persisted preferences
+        File prefsdir = new File(mContext.getApplicationInfo().dataDir, "shared_prefs");
+        if(prefsdir.exists() && prefsdir.isDirectory()) {
+            String[] list = prefsdir.list();
+            for (String item : list) {
+                if (item.contains(".xml") && !item.contains(Constants.PREFS_FILE)) {
+                    //remove .xml from the file name
+                    String preffile = item.substring(0, item.length() - 4);
+
+                    SharedPreferences sp2 = mContext.getSharedPreferences(preffile, Context.MODE_PRIVATE);
+                    Map map = sp2.getAll();
+
+                    if (!map.isEmpty()) {
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
     }
 
     public void logNotification(String sessionId, long sessionStartTime, Bundle bundle, String state) {
