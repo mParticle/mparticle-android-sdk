@@ -354,6 +354,8 @@ import java.util.UUID;
             //uploadMessage.put("echo", true);
         }
         uploadMessage.put(MessageKey.OPT_OUT_HEADER, mConfigManager.getOptedOut());
+        uploadMessage.put(MessageKey.CONFIG_UPLOAD_INTERVAL, mConfigManager.getUploadInterval()/1000);
+        uploadMessage.put(MessageKey.CONFIG_SESSION_TIMEOUT, mConfigManager.getSessionTimeout()/1000);
 
         mAppInfo.put(MessageKey.INSTALL_REFERRER, mPreferences.getString(PrefKeys.INSTALL_REFERRER, null));
         uploadMessage.put(MessageKey.APP_INFO, mAppInfo);

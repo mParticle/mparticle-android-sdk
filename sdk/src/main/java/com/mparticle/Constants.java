@@ -193,6 +193,8 @@ package com.mparticle;
         public static final String NPE_LENGTH = "te";
         public static final String NPE_SENT = "bo";
         public static final String NPE_REC = "bi";
+        public static final String CONFIG_SESSION_TIMEOUT = "stl";
+        public static final String CONFIG_UPLOAD_INTERVAL = "uitl";
     }
 
     interface PrefKeys {
