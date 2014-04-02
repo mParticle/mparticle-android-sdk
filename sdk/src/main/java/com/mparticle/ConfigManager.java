@@ -129,7 +129,7 @@ class ConfigManager {
         return localPrefs.mSecret;
     }
 
-    public long getUploadInterval() {
+    public int getUploadInterval() {
         if (localPrefs.debug) {
             return 1000 * localPrefs.debugUploadInterval;
         } else {

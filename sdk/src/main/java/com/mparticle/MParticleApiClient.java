@@ -31,6 +31,8 @@ import javax.crypto.spec.SecretKeySpec;
 public class MParticleApiClient {
 
     public static final String HEADER_SIGNATURE = "x-mp-signature";
+    public static final String HEADER_SESSION_LENGTH = "x-mp-sl";
+    public static final String HEADER_UPLOAD_INTERVAL = "x-mp-uil";
     public static final String SECURE_SERVICE_SCHEME = "https";
     public static final String SECURE_SERVICE_HOST = "nativesdks.mparticle.com";
     //public static final String SECURE_SERVICE_HOST = "aws-sdk-branch1.mparticle.com";
@@ -64,7 +66,8 @@ public class MParticleApiClient {
             HttpURLConnection connection = (HttpURLConnection) configUrl.openConnection();
             connection.setRequestProperty("Accept-Encoding", "gzip");
             connection.setRequestProperty(HTTP.USER_AGENT, userAgent);
-
+            connection.setRequestProperty(HEADER_SESSION_LENGTH, Integer.toString(configManager.getSessionTimeout() / 1000));
+            connection.setRequestProperty(HEADER_UPLOAD_INTERVAL, Integer.toString(configManager.getUploadInterval() / 1000));
             addMessageSignature(connection, null);
 
             ApiResponse response = new ApiResponse(connection);
@@ -88,6 +91,8 @@ public class MParticleApiClient {
         connection.setRequestProperty(HTTP.CONTENT_TYPE, "application/json");
         connection.setRequestProperty(HTTP.CONTENT_ENCODING, "gzip");
         connection.setRequestProperty(HTTP.USER_AGENT, userAgent);
+        connection.setRequestProperty(HEADER_SESSION_LENGTH, Integer.toString(configManager.getSessionTimeout() / 1000));
+        connection.setRequestProperty(HEADER_UPLOAD_INTERVAL, Integer.toString(configManager.getUploadInterval() / 1000));
 
         addMessageSignature(connection, message);
 
