@@ -578,8 +578,10 @@ public class MParticle {
      * in the revenue assigned to this user for service providers that support revenue tracking.
      *
      * @param valueIncreased    The currency value by which to increase the current user's LTV
+     * @param eventName         An event name to be associated with this increase in LTV (optional)
+     * @param contextInfo       An MPProduct or any set of data to associate with this increase in LTV (optional)
      */
-    public void logLtvIncrease(BigDecimal valueIncreased){
+    public void logLtvIncrease(BigDecimal valueIncreased, String eventName, Map<String, String> contextInfo){
         BigDecimal currentValue = new BigDecimal(sPreferences.getString(PrefKeys.LTV, "0"));
         String newValue = currentValue.add(valueIncreased).toPlainString();
         sPreferences.edit().putString(PrefKeys.LTV, newValue).commit();
