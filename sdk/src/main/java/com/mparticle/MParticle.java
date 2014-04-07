@@ -585,12 +585,11 @@ public class MParticle {
         if (valueIncreased == null){
             throw new IllegalArgumentException("ValueIncreased must not be null.");
         }
-        if (contextInfo != null){
+        if (contextInfo == null){
             contextInfo = new HashMap<String, String>();
         }
         contextInfo.put("$Amount", valueIncreased.toPlainString());
         contextInfo.put(Constants.MethodName.METHOD_NAME, Constants.MethodName.LOG_LTV);
-        sPreferences.edit().putString(PrefKeys.LTV_RECENT, valueIncreased.toPlainString()).commit();
         logEvent(eventName == null ? "Increase LTV" : eventName, EventType.Transaction, contextInfo);
     }
 

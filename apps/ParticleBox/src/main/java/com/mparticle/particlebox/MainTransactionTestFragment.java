@@ -62,7 +62,7 @@ public class MainTransactionTestFragment extends Fragment implements View.OnClic
     @Override
     public void onClick(View v) {
         if (v.getId() == R.id.ltvButton){
-            MParticle.getInstance().logLtvIncrease(new BigDecimal(ltvEditText.getText().toString()));
+            MParticle.getInstance().logLtvIncrease(new BigDecimal(ltvEditText.getText().toString()), null, null);
             Toast.makeText(v.getContext(), "LTV increase logged.", Toast.LENGTH_SHORT).show();
         }else{
             MPProduct transaction = new MPProduct.Builder(productName.getText().toString(), productSku.getText().toString())

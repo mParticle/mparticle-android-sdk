@@ -255,7 +255,7 @@ public class MParticleApiClient {
                     }
                     if (jsonResponse.has(LTV)){
                         BigDecimal serverLtv = new BigDecimal(jsonResponse.getString(LTV));
-                        BigDecimal mostRecentClientLtc = new BigDecimal(sharedPreferences.getString(Constants.PrefKeys.LTV_RECENT, "0"));
+                        BigDecimal mostRecentClientLtc = new BigDecimal(sharedPreferences.getString(Constants.PrefKeys.LTV, "0"));
                         BigDecimal sum = serverLtv.add(mostRecentClientLtc);
                         sharedPreferences.edit().putString(Constants.PrefKeys.LTV, sum.toPlainString()).commit();
                     }
