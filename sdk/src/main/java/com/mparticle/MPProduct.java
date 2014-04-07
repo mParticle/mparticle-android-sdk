@@ -10,7 +10,9 @@ import java.util.HashMap;
  *
  */
 public class MPProduct extends HashMap<String, String> {
-
+    private MPProduct(){
+        //prevent instantiation
+    }
 
     private MPProduct(Builder builder) {
         if (builder.productName == null) {

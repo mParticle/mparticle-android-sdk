@@ -373,27 +373,27 @@ com.mparticle.MPProduct$Builder -> com.mparticle.MPProduct$Builder:
     java.lang.String currencyCode -> i
     java.lang.String affiliation -> j
     java.lang.String transactionId -> k
-    96:97:com.mparticle.MPProduct$Builder unitPrice(double) -> unitPrice
-    107:108:com.mparticle.MPProduct$Builder quantity(int) -> quantity
-    118:119:com.mparticle.MPProduct$Builder productCategory(java.lang.String) -> productCategory
-    129:130:com.mparticle.MPProduct$Builder totalRevenue(double) -> totalRevenue
-    140:141:com.mparticle.MPProduct$Builder taxAmount(double) -> taxAmount
-    151:152:com.mparticle.MPProduct$Builder shippingAmount(double) -> shippingAmount
-    162:163:com.mparticle.MPProduct$Builder currencyCode(java.lang.String) -> currencyCode
-    173:174:com.mparticle.MPProduct$Builder affiliation(java.lang.String) -> affiliation
-    184:185:com.mparticle.MPProduct$Builder transactionId(java.lang.String) -> transactionId
-    195:195:com.mparticle.MPProduct build() -> build
-    61:61:java.lang.String access$000(com.mparticle.MPProduct$Builder) -> a
-    61:61:java.lang.String access$100(com.mparticle.MPProduct$Builder) -> b
-    61:61:java.lang.String access$200(com.mparticle.MPProduct$Builder) -> c
-    61:61:java.lang.Double access$300(com.mparticle.MPProduct$Builder) -> d
-    61:61:java.lang.Integer access$400(com.mparticle.MPProduct$Builder) -> e
-    61:61:java.lang.Double access$500(com.mparticle.MPProduct$Builder) -> f
-    61:61:java.lang.Double access$600(com.mparticle.MPProduct$Builder) -> g
-    61:61:java.lang.Double access$700(com.mparticle.MPProduct$Builder) -> h
-    61:61:java.lang.String access$800(com.mparticle.MPProduct$Builder) -> i
-    61:61:java.lang.String access$900(com.mparticle.MPProduct$Builder) -> j
-    61:61:java.lang.String access$1000(com.mparticle.MPProduct$Builder) -> k
+    98:99:com.mparticle.MPProduct$Builder unitPrice(double) -> unitPrice
+    109:110:com.mparticle.MPProduct$Builder quantity(int) -> quantity
+    120:121:com.mparticle.MPProduct$Builder productCategory(java.lang.String) -> productCategory
+    131:132:com.mparticle.MPProduct$Builder totalRevenue(double) -> totalRevenue
+    142:143:com.mparticle.MPProduct$Builder taxAmount(double) -> taxAmount
+    153:154:com.mparticle.MPProduct$Builder shippingAmount(double) -> shippingAmount
+    164:165:com.mparticle.MPProduct$Builder currencyCode(java.lang.String) -> currencyCode
+    175:176:com.mparticle.MPProduct$Builder affiliation(java.lang.String) -> affiliation
+    186:187:com.mparticle.MPProduct$Builder transactionId(java.lang.String) -> transactionId
+    197:197:com.mparticle.MPProduct build() -> build
+    63:63:java.lang.String access$000(com.mparticle.MPProduct$Builder) -> a
+    63:63:java.lang.String access$100(com.mparticle.MPProduct$Builder) -> b
+    63:63:java.lang.String access$200(com.mparticle.MPProduct$Builder) -> c
+    63:63:java.lang.Double access$300(com.mparticle.MPProduct$Builder) -> d
+    63:63:java.lang.Integer access$400(com.mparticle.MPProduct$Builder) -> e
+    63:63:java.lang.Double access$500(com.mparticle.MPProduct$Builder) -> f
+    63:63:java.lang.Double access$600(com.mparticle.MPProduct$Builder) -> g
+    63:63:java.lang.Double access$700(com.mparticle.MPProduct$Builder) -> h
+    63:63:java.lang.String access$800(com.mparticle.MPProduct$Builder) -> i
+    63:63:java.lang.String access$900(com.mparticle.MPProduct$Builder) -> j
+    63:63:java.lang.String access$1000(com.mparticle.MPProduct$Builder) -> k
 com.mparticle.MPReceiver -> com.mparticle.MPReceiver:
     59:68:void onReceive(android.content.Context,android.content.Intent) -> onReceive
 com.mparticle.MPSSLSocket -> com.mparticle.MPSSLSocket:
