@@ -1,5 +1,6 @@
 package com.mparticle;
 
+import android.content.SharedPreferences;
 import android.util.Log;
 
 import org.apache.http.HttpStatus;
@@ -13,6 +14,7 @@ import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.math.BigDecimal;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -33,7 +35,7 @@ public class MParticleApiClient {
     public static final String HEADER_SIGNATURE = "x-mp-signature";
     public static final String SECURE_SERVICE_SCHEME = "https";
     public static final String SECURE_SERVICE_HOST = "nativesdks.mparticle.com";
-    //public static final String SECURE_SERVICE_HOST = "aws-sdk-branch1.mparticle.com";
+    //public static final String SECURE_SERVICE_HOST = "54.236.165.123";
     //public static final String SECURE_SERVICE_HOST = "api-qa.mparticle.com";
     //public static final String SECURE_SERVICE_HOST = "10.0.16.21";
     public static final String SERVICE_VERSION_1 = "v1";
@@ -49,10 +51,12 @@ public class MParticleApiClient {
     private final URL configUrl;
     private final URL batchUploadUrl;
     private final String userAgent;
+    private final SharedPreferences sharedPreferences;
 
-    public MParticleApiClient(ConfigManager configManager, String key, String secret) throws MalformedURLException {
+    public MParticleApiClient(ConfigManager configManager, String key, String secret, SharedPreferences sharedPreferences) throws MalformedURLException {
         this.configManager = configManager;
         this.apiSecret = secret;
+        this.sharedPreferences = sharedPreferences;
 
         this.configUrl = new URL(SECURE_SERVICE_SCHEME, SECURE_SERVICE_HOST, SERVICE_VERSION_2 + "/" + key + "/config");
         this.batchUploadUrl = new URL(SECURE_SERVICE_SCHEME, SECURE_SERVICE_HOST, SERVICE_VERSION_1 + "/" + key + "/events");
@@ -211,6 +215,7 @@ public class MParticleApiClient {
     }
 
     class ApiResponse {
+        private static final String LTV = "iltv";
         private int statusCode;
         private JSONObject jsonResponse;
         private HttpURLConnection connection;
@@ -247,6 +252,12 @@ public class MParticleApiClient {
                         if (consumerInfo.has(COOKIES)){
                             configManager.setCookies(consumerInfo.getJSONObject(COOKIES));
                         }
+                    }
+                    if (jsonResponse.has(LTV)){
+                        BigDecimal serverLtv = new BigDecimal(jsonResponse.getString(LTV));
+                        BigDecimal mostRecentClientLtc = new BigDecimal(sharedPreferences.getString(Constants.PrefKeys.LTV_RECENT, "0"));
+                        BigDecimal sum = serverLtv.add(mostRecentClientLtc);
+                        sharedPreferences.edit().putString(Constants.PrefKeys.LTV, sum.toPlainString()).commit();
                     }
 
                 } catch (IOException ex) {

@@ -574,19 +574,23 @@ public class MParticle {
     }
 
     /**
-     * Logs an increase in the lifetime value of a user. This will signify and increase
+     * Logs an increase in the lifetime value of a user. This will signify an increase
      * in the revenue assigned to this user for service providers that support revenue tracking.
      *
-     * @param valueIncreased    The currency value by which to increase the current user's LTV
+     * @param valueIncreased    The currency value by which to increase the current user's LTV (required)
      * @param eventName         An event name to be associated with this increase in LTV (optional)
      * @param contextInfo       An MPProduct or any set of data to associate with this increase in LTV (optional)
      */
     public void logLtvIncrease(BigDecimal valueIncreased, String eventName, Map<String, String> contextInfo){
+        if (valueIncreased == null){
+            throw new IllegalArgumentException("ValueIncreased must not be null.");
+        }
         if (contextInfo != null){
             contextInfo = new HashMap<String, String>();
         }
         contextInfo.put("$Amount", valueIncreased.toPlainString());
         contextInfo.put(Constants.MethodName.METHOD_NAME, Constants.MethodName.LOG_LTV);
+        sPreferences.edit().putString(PrefKeys.LTV_RECENT, valueIncreased.toPlainString()).commit();
         logEvent(eventName == null ? "Increase LTV" : eventName, EventType.Transaction, contextInfo);
     }
 

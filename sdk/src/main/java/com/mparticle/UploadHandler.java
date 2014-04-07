@@ -25,6 +25,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.net.MalformedURLException;
 import java.util.UUID;
 
@@ -88,7 +89,7 @@ import java.util.UUID;
         mAppInfo = DeviceAttributes.collectAppInfo(mContext);
         mDeviceInfo = DeviceAttributes.collectDeviceInfo(mContext);
         try {
-            mApiClient = new MParticleApiClient(configManager, mApiKey, mSecret);
+            mApiClient = new MParticleApiClient(configManager, mApiKey, mSecret, mPreferences);
         } catch (MalformedURLException e) {
             //this should never happen - the URLs are created by constants.
         }
@@ -110,7 +111,6 @@ import java.util.UUID;
                 }
                 break;
             case UPLOAD_MESSAGES:
-
                 boolean needsHistory;
                 // execute all the upload steps
                 long uploadInterval = mConfigManager.getUploadInterval();
@@ -370,9 +370,10 @@ import java.util.UUID;
         mDeviceInfo.put(MessageKey.PUSH_SOUND_ENABLED, mConfigManager.isPushSoundEnabled());
         mDeviceInfo.put(MessageKey.PUSH_VIBRATION_ENABLED, mConfigManager.isPushVibrationEnabled());
 
-
         uploadMessage.put(MessageKey.DEVICE_INFO, mDeviceInfo);
         uploadMessage.put(MessageKey.DEBUG, mConfigManager.getSandboxMode());
+
+        uploadMessage.put(MessageKey.LTV, new BigDecimal(mPreferences.getString(PrefKeys.LTV, "0")));
 
         String userAttrs = mPreferences.getString(PrefKeys.USER_ATTRS + mApiKey, null);
         if (null != userAttrs) {

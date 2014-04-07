@@ -65,6 +65,7 @@ package com.mparticle;
         public static final String DEBUG = "dbg";
         public static final String OPT_OUT_HEADER = "oo";
         public static final String PREVIOUS_SESSION_LENGTH = "psl";
+        public static final String LTV = "ltv";
         // referrer
         public static final String LAUNCH_REFERRER = "lr";
         // event timing
@@ -241,6 +242,7 @@ package com.mparticle;
         public static final String LTV = "mp::ltv";
         public static final String TIME_IN_BG = "mp::time_in_bg";
         public static final String PREVIOUS_SESSION_FOREGROUND = "mp::time_in_fg";
+        public static final String LTV_RECENT = "mp::ltv::recent";
     }
 
     interface MiscStorageKeys {
