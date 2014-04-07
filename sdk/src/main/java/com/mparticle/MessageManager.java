@@ -67,7 +67,7 @@ import java.util.UUID;
         mConfigManager = configManager;
         mMessageHandler = new MessageHandler(appContext, sMessageHandlerThread.getLooper(), configManager.getApiKey());
         mUploadHandler = new UploadHandler(appContext, sUploadHandlerThread.getLooper(), configManager);
-        mPreferences = appContext.getSharedPreferences(Constants.MISC_FILE, Context.MODE_PRIVATE);
+        mPreferences = appContext.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
     }
 
     public void start(Context appContext, Boolean firstRun, MParticle.InstallType installType) {

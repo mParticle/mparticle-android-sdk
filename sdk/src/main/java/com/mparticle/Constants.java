@@ -16,8 +16,6 @@ package com.mparticle;
     public static final int DEBUG_UPLOAD_INTERVAL = 3 * 1000; // 3 seconds
     // preferences persistence
     public static final String PREFS_FILE = "mParticlePrefs";
-    // misc persistence
-    public static final String MISC_FILE = "mParticleMisc";
 
     public static final int LIMIT_ATTR_COUNT = 100;
     public static final int LIMIT_ATTR_NAME = 255;
