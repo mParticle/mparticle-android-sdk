@@ -20,7 +20,7 @@ public class MPProduct extends HashMap<String, String> {
             throw new IllegalStateException("productSku is required for a transaction");
         }
 
-        put("$MethodName", "LogEcommerceTransaction");
+        put(Constants.MethodName.METHOD_NAME, Constants.MethodName.LOG_ECOMMERCE);
         put("ProductName", builder.productName);
         put("ProductSKU", builder.productSku);
 

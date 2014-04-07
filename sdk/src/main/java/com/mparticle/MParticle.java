@@ -586,7 +586,7 @@ public class MParticle {
         Map<String, String> attributes = new HashMap<String, String>();
         attributes.put("$Amount", valueIncreased.toPlainString());
         attributes.put("$TotalAmount", newValue);
-        attributes.put("$MethodName", "logLTVIncrease");
+        attributes.put(Constants.MethodName.METHOD_NAME, Constants.MethodName.LOG_LTV);
         logEvent("Increase LTV", EventType.Transaction, attributes);
     }
 

@@ -27,6 +27,12 @@ package com.mparticle;
     public static final int DB_CLEANUP_EXPIRATION = 3 * 24 * 60 * 60 * 1000; // 3 days old
     public static final long DB_CLEANUP_INTERVAL = 1 * 24 * 60 * 60 * 1000; // 1 day
 
+    interface MethodName {
+        public static final String METHOD_NAME = "$MethodName";
+        public static final String LOG_LTV = "LogLTVIncrease";
+        public static final String LOG_ECOMMERCE = "LogEcommerceTransaction";
+    }
+
     interface MessageType {
         public static final String SESSION_START = "ss";
         public static final String SESSION_END = "se";
