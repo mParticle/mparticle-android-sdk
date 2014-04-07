@@ -212,7 +212,7 @@ public class MPUtility {
     public static synchronized String getOpenUDID(Context context) {
         if (sOpenUDID == null) {
             SharedPreferences sharedPrefs = context.getSharedPreferences(
-                    Constants.MISC_FILE, Context.MODE_PRIVATE);
+                    Constants.PREFS_FILE, Context.MODE_PRIVATE);
             sOpenUDID = sharedPrefs.getString(Constants.PrefKeys.OPEN_UDID, null);
             if (sOpenUDID == null) {
                 sOpenUDID = getAndroidID(context);

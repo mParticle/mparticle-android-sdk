@@ -2,9 +2,9 @@
 
 <resources>
 
-    <string name="mp_key">bb6ef33d0189a24b8f8f7a78104e2626</string>
+    <string name="mp_key">a046f89c3c3d8649927a3e551b2db28c</string>
 
-    <string name="mp_secret">cFlt7oaYxdpdNKoyQdrlP6f6OSp5z5pYX7ElbY3HSjuIY2DHL1MDIgOmRcdBo6qy</string>
+    <string name="mp_secret">gFTC2qf9U0Lzq-baewHGi_MW8tmwAGhoX8dQWHsNWJ_XymHEkjOF3ysUmRa6A3RZ</string>
 
     <bool name="mp_reportUncaughtExceptions">true</bool>
 
@@ -26,4 +26,5 @@
 
     <string name="mp_appLicenseKey">MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEArAWUDEjbayyaawREfEH/JbSHvVfawbvamk5IVswQyWqwnRvHQnSBLy4J0zOfrdvNvSZTSwf96iDSn6TSb3OC0xdfhwPgt3DJ4eGFnQWmpzTpFhQ8IMr2MPxNdyL+l93bzMtOAGvpzKZOeFq3/Plr8opzk+pYs6vK2TdZ0PIBHQccL9bd26wiwyJoqx4KdtFNXULqu2T8upnvhPNZvIpgYjMcb55oRbBu8zfGeIlnofVmpzZs3FTdqhMCKSwqpivD95Ds9LhKgt5oNoNPDRZH2k9xYkHw2KSxo1NZFWasHjhzMYMJPodio8MMatmUf9e7v7iMoLJ1cx67sXvqK/W0gQIDAQAB</string>
     <bool name="mp_enableAutoTracking">true</bool>
+    <bool name="mp_enableNetworkPerformanceMeasurement">true</bool>
 </resources>

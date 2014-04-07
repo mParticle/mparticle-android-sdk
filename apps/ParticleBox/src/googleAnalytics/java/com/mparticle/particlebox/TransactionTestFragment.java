@@ -19,15 +19,16 @@ public class TransactionTestFragment extends MainTransactionTestFragment impleme
     @Override
     public void onClick(View v) {
         super.onClick(v);
-
-        Tracker tracker = GoogleAnalytics.getInstance(v.getContext()).getInstance(v.getContext()).newTracker("UA-46924309-4");
-        tracker.send(new HitBuilders.TransactionBuilder().setTransactionId(transactionId.getText().toString())
-                .setAffiliation(transactionAffiliation.getText().toString())
-                        .setRevenue(Double.parseDouble(revenueAmount.getText().toString()))
-                        .setTax(Double.parseDouble(taxAmount.getText().toString()))
-                        .setShipping(Double.parseDouble(shippingAmount.getText().toString()))
-                        .setCurrencyCode(currencyCode.getText().toString()).
-                        build());
+        if (v.getId() == R.id.button) {
+            Tracker tracker = GoogleAnalytics.getInstance(v.getContext()).getInstance(v.getContext()).newTracker("UA-46924309-4");
+            tracker.send(new HitBuilders.TransactionBuilder().setTransactionId(transactionId.getText().toString())
+                    .setAffiliation(transactionAffiliation.getText().toString())
+                    .setRevenue(Double.parseDouble(revenueAmount.getText().toString()))
+                    .setTax(Double.parseDouble(taxAmount.getText().toString()))
+                    .setShipping(Double.parseDouble(shippingAmount.getText().toString()))
+                    .setCurrencyCode(currencyCode.getText().toString()).
+                            build());
+        }
 
     }
 }

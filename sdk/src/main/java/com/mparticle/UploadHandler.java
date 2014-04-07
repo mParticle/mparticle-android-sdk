@@ -25,6 +25,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.net.MalformedURLException;
 import java.util.UUID;
 
@@ -88,7 +89,7 @@ import java.util.UUID;
         mAppInfo = DeviceAttributes.collectAppInfo(mContext);
         mDeviceInfo = DeviceAttributes.collectDeviceInfo(mContext);
         try {
-            mApiClient = new MParticleApiClient(configManager, mApiKey, mSecret);
+            mApiClient = new MParticleApiClient(configManager, mApiKey, mSecret, mPreferences);
         } catch (MalformedURLException e) {
             //this should never happen - the URLs are created by constants.
         }
@@ -110,7 +111,6 @@ import java.util.UUID;
                 }
                 break;
             case UPLOAD_MESSAGES:
-
                 boolean needsHistory;
                 // execute all the upload steps
                 long uploadInterval = mConfigManager.getUploadInterval();
@@ -242,11 +242,17 @@ import java.util.UUID;
             }
             readyMessagesCursor.close();
         } catch (SQLiteException e) {
-            Log.e(TAG, "Error preparing batch upload in mParticle DB", e);
+            if (MParticle.getInstance().getDebugMode()) {
+                Log.d(TAG, "Error preparing batch upload in mParticle DB: " + e.getMessage());
+            }
         } catch (IOException e) {
-            Log.e(TAG, "Error preparing batch upload in mParticle DB", e);
+            if (MParticle.getInstance().getDebugMode()) {
+                Log.d(TAG, "Error preparing batch upload in mParticle DB: " + e.getMessage());
+            }
         } catch (JSONException e) {
-            Log.e(TAG, "Error with upload JSON object", e);
+            if (MParticle.getInstance().getDebugMode()) {
+                Log.d(TAG, "Error preparing batch upload in mParticle DB: " + e.getMessage());
+            }
         } finally {
             mDB.close();
         }
@@ -298,9 +304,9 @@ import java.util.UUID;
 
             readyUploadsCursor.close();
         } catch (SQLiteException e) {
-            Log.e(TAG, "Error processing batch uploads in mParticle DB", e);
+            Log.d(TAG, "Error processing batch uploads in mParticle DB", e);
         } catch (IOException ioe) {
-            Log.e(TAG, "Error processing batch uploads in mParticle DB", ioe);
+            Log.d(TAG, "Error processing batch uploads in mParticle DB", ioe);
         } finally {
             mDB.close();
         }
@@ -354,6 +360,8 @@ import java.util.UUID;
             //uploadMessage.put("echo", true);
         }
         uploadMessage.put(MessageKey.OPT_OUT_HEADER, mConfigManager.getOptedOut());
+        uploadMessage.put(MessageKey.CONFIG_UPLOAD_INTERVAL, mConfigManager.getUploadInterval()/1000);
+        uploadMessage.put(MessageKey.CONFIG_SESSION_TIMEOUT, mConfigManager.getSessionTimeout()/1000);
 
         mAppInfo.put(MessageKey.INSTALL_REFERRER, mPreferences.getString(PrefKeys.INSTALL_REFERRER, null));
         uploadMessage.put(MessageKey.APP_INFO, mAppInfo);
@@ -368,9 +376,10 @@ import java.util.UUID;
         mDeviceInfo.put(MessageKey.PUSH_SOUND_ENABLED, mConfigManager.isPushSoundEnabled());
         mDeviceInfo.put(MessageKey.PUSH_VIBRATION_ENABLED, mConfigManager.isPushVibrationEnabled());
 
-
         uploadMessage.put(MessageKey.DEVICE_INFO, mDeviceInfo);
         uploadMessage.put(MessageKey.DEBUG, mConfigManager.getSandboxMode());
+
+        uploadMessage.put(MessageKey.LTV, new BigDecimal(mPreferences.getString(PrefKeys.LTV, "0")));
 
         String userAttrs = mPreferences.getString(PrefKeys.USER_ATTRS + mApiKey, null);
         if (null != userAttrs) {
@@ -385,6 +394,8 @@ import java.util.UUID;
         uploadMessage.put(history ? MessageKey.HISTORY : MessageKey.MESSAGES, messagesArray);
 
         MParticleApiClient.addCookies(uploadMessage, mConfigManager);
+
+        uploadMessage.put(MessageKey.PROVIDER_PERSISTENCE, mConfigManager.getProviderPersistence());
 
         return uploadMessage;
     }

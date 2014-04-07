@@ -40,6 +40,7 @@ class ConfigManager {
     private boolean loaded = false;
 
     private boolean sendOoEvents;
+    private JSONObject providerPersistence;
 
     public ConfigManager(Context context, String key, String secret, boolean sandboxMode) {
         mContext = context.getApplicationContext();
@@ -73,6 +74,10 @@ class ConfigManager {
 
         if (responseJSON.has(KEY_OPT_OUT)){
             sendOoEvents = responseJSON.getBoolean(KEY_OPT_OUT);
+        }
+
+        if (responseJSON.has(ProviderPersistence.KEY_PERSISTENCE)) {
+            setProviderPersistence(new ProviderPersistence(responseJSON, mContext));
         }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD) {
@@ -264,6 +269,14 @@ class ConfigManager {
         mPreferences.edit()
                 .putInt(Constants.PrefKeys.BREADCRUMB_LIMIT, newLimit)
                 .commit();
+    }
+
+    private synchronized void setProviderPersistence(JSONObject persistence){
+        providerPersistence = persistence;
+    }
+
+    public synchronized JSONObject getProviderPersistence() {
+        return providerPersistence;
     }
 
     public boolean isNetworkPerformanceEnabled() {

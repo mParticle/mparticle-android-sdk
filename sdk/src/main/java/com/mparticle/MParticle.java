@@ -26,6 +26,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.lang.Thread.UncaughtExceptionHandler;
+import java.math.BigDecimal;
 import java.net.Socket;
 import java.net.SocketImpl;
 import java.net.SocketImplFactory;
@@ -41,7 +42,7 @@ import javax.net.ssl.HttpsURLConnection;
  * The primary access point to the mParticle SDK. In order to use this class, you must first call {@link #start(android.content.Context)}, which requires
  * configuration via {@link <a href="http://developer.android.com/guide/topics/resources/providing-resources.html">Android Resources</a>}. You can then retrieve a reference
  * to an instance of this class via {@link #getInstance()}
- *
+ * <p/>
  * It's recommended to keep configuration parameters in a single xml file located within your res/values folder. The full list of configuration options is as follows:
  * <p/>
  * <h4>Required parameters</h4>
@@ -146,10 +147,6 @@ public class MParticle {
             }
         }
 
-        if (!sPreferences.contains(PrefKeys.INSTALL_TIME)) {
-            sPreferences.edit().putLong(PrefKeys.INSTALL_TIME, System.currentTimeMillis()).commit();
-        }
-
         if (mConfigManager.getLogUnhandledExceptions()) {
             enableUncaughtExceptionLogging();
         }
@@ -165,10 +162,7 @@ public class MParticle {
      */
 
     public static void start(Context context) {
-        if (context == null) {
-            throw new IllegalArgumentException("mParticle failed to start: context is required.");
-        }
-        MParticle.getInstance(context, null, null, false);
+        start(context, InstallType.AutoDetect);
     }
 
     /**
@@ -181,6 +175,47 @@ public class MParticle {
      */
 
     public static void start(Context context, String apiKey, String secret, boolean sandboxMode) {
+        start(context, apiKey, secret, sandboxMode, InstallType.AutoDetect);
+    }
+
+    /**
+     * Start the mParticle SDK and begin tracking a user session. This method must be called prior to {@link #getInstance()}.
+     * This method requires that your API key and secret are contained in your XML configuration.
+     *
+     * The InstallType parameter is used to determine if this is a new install or an upgrade. In
+     * the case where the mParticle SDK is being added to an existing app with existing users, this
+     * parameter prevents mParticle from categorizing all users as new users.
+     *
+     * @param context     Required reference to a Context object
+     * @param installType Specify whether this is a new install or an upgrade, or let mParticle detect
+     *
+     * @see com.mparticle.MParticle.InstallType
+     */
+
+    public static void start(Context context, InstallType installType) {
+        if (context == null) {
+            throw new IllegalArgumentException("mParticle failed to start: context is required.");
+        }
+        MParticle.getInstance(context, null, null, false, installType);
+    }
+
+    /**
+     * Start the mParticle SDK and begin tracking a user session.
+     *
+     * The InstallType parameter is used to determine if this is a new install or an upgrade. In
+     * the case where the mParticle SDK is being added to an existing app with existing users, this
+     * parameter prevents mParticle from categorizing all users as new users.
+     *
+     * @param context     Required reference to a Context object
+     * @param apiKey      The API key to use for authentication with mParticle
+     * @param secret      The API secret to use for authentication with mParticle
+     * @param sandboxMode Enable/disable sandbox mode
+     * @param installType Specify whether this is a new install or an upgrade, or let mParticle detect
+     *
+     * @see com.mparticle.MParticle.InstallType
+     */
+
+    public static void start(Context context, String apiKey, String secret, boolean sandboxMode, InstallType installType) {
         if (context == null) {
             throw new IllegalArgumentException("mParticle failed to start: context is required.");
         }
@@ -190,7 +225,10 @@ public class MParticle {
         if (secret == null) {
             throw new IllegalArgumentException("mParticle failed to start: secret is required.");
         }
-        MParticle.getInstance(context, apiKey, secret, sandboxMode);
+        if (installType == null) {
+            throw new IllegalArgumentException("mParticle failed to start: installType is required.");
+        }
+        MParticle.getInstance(context, apiKey, secret, sandboxMode, installType);
     }
 
     /**
@@ -203,8 +241,9 @@ public class MParticle {
      * @param secret      the API secret for your account
      * @param sandboxMode set the SDK in sandbox mode, xml configuration will override this value
      * @return An instance of the mParticle SDK configured with your API key
+     *
      */
-    private static MParticle getInstance(Context context, String apiKey, String secret, boolean sandboxMode) {
+    private static MParticle getInstance(Context context, String apiKey, String secret, boolean sandboxMode, InstallType installType) {
         if (instance == null) {
             synchronized (MParticle.class) {
                 if (instance == null) {
@@ -230,9 +269,10 @@ public class MParticle {
                     }
 
                     MessageManager messageManager = new MessageManager(appContext, appConfigManager);
-                    messageManager.start(appContext, firstRun);
+                    messageManager.start(appContext, firstRun, installType);
 
                     instance = new MParticle(appContext, messageManager, appConfigManager);
+
                     if (context instanceof Activity) {
                         instance.mLaunchUri = ((Activity) context).getIntent().getDataString();
                         if (instance.mLaunchUri != null) {
@@ -267,11 +307,11 @@ public class MParticle {
         if (instance == null) {
             throw new IllegalStateException("Failed to get MParticle instance, getInstance() called prior to start().");
         }
-        return getInstance(null, null, null, false);
+        return getInstance(null, null, null, false, null);
     }
 
     /* package-private */
-    static boolean setCheckedAttribute(JSONObject attributes, String key, Object value){
+    static boolean setCheckedAttribute(JSONObject attributes, String key, Object value) {
         return setCheckedAttribute(attributes, key, value, false);
     }
 
@@ -296,7 +336,7 @@ public class MParticle {
             if (value == null) {
                 value = JSONObject.NULL;
             }
-            if (caseInsensitive){
+            if (caseInsensitive) {
                 key = findCaseInsensitiveKey(attributes, key);
             }
             attributes.put(key, value);
@@ -307,11 +347,11 @@ public class MParticle {
         return true;
     }
 
-    static String findCaseInsensitiveKey(JSONObject jsonObject, String key){
+    static String findCaseInsensitiveKey(JSONObject jsonObject, String key) {
         Iterator<String> keys = jsonObject.keys();
-        while(keys.hasNext()){
+        while (keys.hasNext()) {
             String currentKey = keys.next();
-            if (currentKey.equalsIgnoreCase(key)){
+            if (currentKey.equalsIgnoreCase(key)) {
                 return currentKey;
             }
         }
@@ -387,7 +427,7 @@ public class MParticle {
         if (mDebugMode)
             debugLog("Ended session");
 
-        mMessageManager.stopSession(mSessionID, sessionEndTime, sessionEndTime - mSessionStartTime);
+       // mMessageManager.stopSession(mSessionID, sessionEndTime, sessionEndTime - mSessionStartTime);
         mMessageManager.endSession(mSessionID, sessionEndTime, sessionEndTime - mSessionStartTime);
         // reset agent to unstarted state
         mSessionStartTime = 0;
@@ -539,32 +579,48 @@ public class MParticle {
     }
 
     /**
+     * Logs an increase in the lifetime value of a user. This will signify an increase
+     * in the revenue assigned to this user for service providers that support revenue tracking.
+     *
+     * @param valueIncreased    The currency value by which to increase the current user's LTV (required)
+     * @param eventName         An event name to be associated with this increase in LTV (optional)
+     * @param contextInfo       An MPProduct or any set of data to associate with this increase in LTV (optional)
+     */
+    public void logLtvIncrease(BigDecimal valueIncreased, String eventName, Map<String, String> contextInfo){
+        if (valueIncreased == null){
+            throw new IllegalArgumentException("ValueIncreased must not be null.");
+        }
+        if (contextInfo == null){
+            contextInfo = new HashMap<String, String>();
+        }
+        contextInfo.put("$Amount", valueIncreased.toPlainString());
+        contextInfo.put(Constants.MethodName.METHOD_NAME, Constants.MethodName.LOG_LTV);
+        logEvent(eventName == null ? "Increase LTV" : eventName, EventType.Transaction, contextInfo);
+    }
+
+    /**
      * Logs an e-commerce transaction event
      *
-     * @see com.mparticle.MPTransaction.Builder
-     *
-     * @param transaction (required not null)
-     * @see com.mparticle.MPTransaction.Builder
+     * @param product (required not null)
+     * @see MPProduct.Builder
+     * @see MPProduct.Builder
      */
-    public void logTransaction(MPTransaction transaction) {
+    public void logTransaction(MPProduct product) {
         if (mConfigManager.getSendOoEvents()) {
-            if (transaction == null) {
+            if (product == null) {
                 throw new IllegalArgumentException("transaction is required for logTransaction");
             }
 
-            if (transaction.getData() == null) {
+            if (product.isEmpty()) {
                 throw new IllegalArgumentException("Transaction data was null, please check that the transaction was built properly.");
             }
 
             ensureActiveSession();
             if (checkEventLimit()) {
-                mMessageManager.logEvent(mSessionID, mSessionStartTime, mLastEventTime, "Ecommerce", EventType.Transaction, transaction.getData(), 0);
+                JSONObject transactionJson = enforceAttributeConstraints(product);
+                mMessageManager.logEvent(mSessionID, mSessionStartTime, mLastEventTime, "Ecommerce", EventType.Transaction, transactionJson, 0);
                 if (mDebugMode) {
-                    try {
-                        debugLog("Logged transaction with data: " + transaction.getData().toString(4));
-                    } catch (JSONException jse) {
-
-                    }
+                    debugLog("Logged transaction with data: " + product.toString());
                 }
             }
         }
@@ -728,7 +784,6 @@ public class MParticle {
 
     /**
      * Begin measuring network performance. This method only needs to be called one time during the runtime of an application.
-     *
      */
     public void beginMeasuringNetworkPerformance() {
         mConfigManager.setNetworkingEnabled(true);
@@ -738,7 +793,6 @@ public class MParticle {
 
     /**
      * Stop measuring network performance.
-     *
      */
     public void endMeasuringNetworkPerformance() {
         measuredRequestManager.setEnabled(false);
@@ -759,9 +813,8 @@ public class MParticle {
      * Exclude the given URL substring from network measurement tracking. This method may be called repeatedly to add
      * multiple excluded URLs.
      *
-     * @see #resetNetworkPerformanceExclusionsAndFilters()
-     *
      * @param url
+     * @see #resetNetworkPerformanceExclusionsAndFilters()
      */
     public void excludeUrlFromNetworkPerformanceMeasurement(String url) {
         measuredRequestManager.addExcludedUrl(url);
@@ -771,9 +824,8 @@ public class MParticle {
      * Specify a filter for query strings that should be logged. Call this method repeatedly to specify
      * multiple query string filters. By default, query strings will be removed from all measured URLs.
      *
-     * @see #resetNetworkPerformanceExclusionsAndFilters()
-     *
      * @param filter
+     * @see #resetNetworkPerformanceExclusionsAndFilters()
      */
     public void addNetworkPerformanceQueryOnlyFilter(String filter) {
         measuredRequestManager.addQueryStringFilter(filter);
@@ -785,7 +837,6 @@ public class MParticle {
      *
      * @see #excludeUrlFromNetworkPerformanceMeasurement(String)
      * @see #addNetworkPerformanceQueryOnlyFilter(String)
-     *
      */
     public void resetNetworkPerformanceExclusionsAndFilters() {
         measuredRequestManager.resetFilters();
@@ -945,7 +996,7 @@ public class MParticle {
             if (mDebugMode && key != null) {
                 debugLog("Removing user attribute: " + key);
             }
-            if (mUserAttributes.has(key) || mUserAttributes.has(findCaseInsensitiveKey(mUserAttributes, key)) ) {
+            if (mUserAttributes.has(key) || mUserAttributes.has(findCaseInsensitiveKey(mUserAttributes, key))) {
                 mUserAttributes.remove(key);
                 sPreferences.edit().putString(PrefKeys.USER_ATTRS + mApiKey, mUserAttributes.toString()).commit();
             }
@@ -973,7 +1024,6 @@ public class MParticle {
 
     /**
      * Set the current user's identity
-     *
      *
      * @param id
      * @param identityType
@@ -1159,10 +1209,10 @@ public class MParticle {
      * @param senderId the SENDER_ID for the application
      */
     public void enablePushNotifications(String senderId) {
-        if (MPUtility.checkPermission(mAppContext, "com.google.android.c2dm.permission.RECEIVE")){
+        if (MPUtility.checkPermission(mAppContext, "com.google.android.c2dm.permission.RECEIVE")) {
             mConfigManager.setPushSenderId(senderId);
             PushRegistrationHelper.enablePushNotifications(mAppContext, senderId);
-        }else{
+        } else {
             Log.e(Constants.LOG_TAG, "Attempted to enable push notifications without required permission: " + "\"com.google.android.c2dm.permission.RECEIVE\"");
         }
     }
@@ -1362,6 +1412,31 @@ public class MParticle {
 
     public enum EventType {
         Unknown, Navigation, Location, Search, Transaction, UserContent, UserPreference, Social, Other;
+
+        public String toString() {
+            return name();
+        }
+    }
+
+    /**
+     * To be used when initializing MParticle
+     *
+     * @see #start(android.content.Context, com.mparticle.MParticle.InstallType)
+     */
+
+    public enum InstallType {
+        /**
+         * This is the default value. Using this value will rely on the mParticle SDK to differentiate a new install vs. an upgrade
+         */
+        AutoDetect,
+        /**
+         * In the case where your app has never seen this user before.
+         */
+        KnownInstall,
+        /**
+         * In the case where you app has seen this user before
+         */
+        KnownUpgrade;
 
         public String toString() {
             return name();

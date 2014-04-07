@@ -1,5 +1,6 @@
 package com.mparticle;
 
+import android.content.SharedPreferences;
 import android.util.Log;
 
 import org.apache.http.HttpStatus;
@@ -13,6 +14,7 @@ import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.math.BigDecimal;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -38,8 +40,11 @@ public class MParticleApiClient {
     public static final String HEADER_SIGNATURE = "x-mp-signature";
     public static final String SECURE_SERVICE_SCHEME = "https";
     public static final String SECURE_SERVICE_HOST = "nativesdks.mparticle.com";
+    //public static final String SECURE_SERVICE_HOST = "54.236.165.123";
     //public static final String SECURE_SERVICE_HOST = "api-qa.mparticle.com";
-    public static final String SERVICE_VERSION = "v1";
+    //public static final String SECURE_SERVICE_HOST = "10.0.16.21";
+    public static final String SERVICE_VERSION_1 = "/v1";
+    public static final String SERVICE_VERSION_2 = "/v2";
     public static final String COOKIES = "ck";
     public static final String CONSUMER_INFO = "ci";
     public static final String MPID = "mpid";
@@ -53,15 +58,16 @@ public class MParticleApiClient {
     private final URL configUrl;
     private final URL batchUploadUrl;
     private final String userAgent;
+    private final SharedPreferences sharedPreferences;
     private final String apiKey;
 
-    public MParticleApiClient(ConfigManager configManager, String key, String secret) throws MalformedURLException {
+    public MParticleApiClient(ConfigManager configManager, String key, String secret, SharedPreferences sharedPreferences) throws MalformedURLException {
         this.configManager = configManager;
         this.apiSecret = secret;
+        this.sharedPreferences = sharedPreferences;
         this.apiKey = key;
-        this.configUrl = new URL(SECURE_SERVICE_SCHEME, SECURE_SERVICE_HOST, SERVICE_VERSION + "/" + key + "/config");
-        this.batchUploadUrl = new URL(SECURE_SERVICE_SCHEME, SECURE_SERVICE_HOST, SERVICE_VERSION + "/" + key + "/events");
-
+        this.configUrl = new URL(SECURE_SERVICE_SCHEME, SECURE_SERVICE_HOST, SERVICE_VERSION_2 + "/" + key + "/config");
+        this.batchUploadUrl = new URL(SECURE_SERVICE_SCHEME, SECURE_SERVICE_HOST, SERVICE_VERSION_1 + "/" + key + "/events");
         this.userAgent = "mParticle Android SDK/" + Constants.MPARTICLE_VERSION;
     }
 
@@ -86,7 +92,7 @@ public class MParticleApiClient {
     }
 
     private URL getAudienceUrl() throws MalformedURLException {
-        return new URL(SECURE_SERVICE_SCHEME, SECURE_SERVICE_HOST, SERVICE_VERSION + "/" + apiKey + "/audience?mpid=" + configManager.getMpid());
+        return new URL(SECURE_SERVICE_SCHEME, SECURE_SERVICE_HOST, SERVICE_VERSION_2 + "/" + apiKey + "/audience?mpid=" + configManager.getMpid());
     }
 
     JSONObject fetchAudiences(int timeout) throws IOException {
@@ -149,23 +155,24 @@ public class MParticleApiClient {
         URL url = new URL(commandUrl);
         HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
 
-        try {
+        if (headers != null && headers.length() > 0) {
             JSONObject headersJSON = new JSONObject(headers);
             for (Iterator<?> iter = headersJSON.keys(); iter.hasNext(); ) {
                 String headerName = (String) iter.next();
                 String headerValue = headersJSON.getString(headerName);
                 urlConnection.setRequestProperty(headerName, headerValue);
             }
-            if ("POST".equalsIgnoreCase(method)) {
-                urlConnection.setDoOutput(true);
+        }
+        if ("POST".equalsIgnoreCase(method)) {
+            urlConnection.setDoOutput(true);
+            if (postData != null && postData.length() > 0) {
                 byte[] postDataBytes = Base64.decode(postData.getBytes());
                 urlConnection.setFixedLengthStreamingMode(postDataBytes.length);
                 urlConnection.getOutputStream().write(postDataBytes);
             }
-            return new ApiResponse(urlConnection);
-        } finally {
-            urlConnection.disconnect();
         }
+        return new ApiResponse(urlConnection);
+
     }
 
     private void logUpload(String message) {
@@ -247,6 +254,7 @@ public class MParticleApiClient {
     }
 
     class ApiResponse {
+        private static final String LTV = "iltv";
         private int statusCode;
         private JSONObject jsonResponse;
         private HttpURLConnection connection;
@@ -283,6 +291,12 @@ public class MParticleApiClient {
                         if (consumerInfo.has(COOKIES)){
                             configManager.setCookies(consumerInfo.getJSONObject(COOKIES));
                         }
+                    }
+                    if (jsonResponse.has(LTV)){
+                        BigDecimal serverLtv = new BigDecimal(jsonResponse.getString(LTV));
+                        BigDecimal mostRecentClientLtc = new BigDecimal(sharedPreferences.getString(Constants.PrefKeys.LTV, "0"));
+                        BigDecimal sum = serverLtv.add(mostRecentClientLtc);
+                        sharedPreferences.edit().putString(Constants.PrefKeys.LTV, sum.toPlainString()).commit();
                     }
 
                 } catch (IOException ex) {
