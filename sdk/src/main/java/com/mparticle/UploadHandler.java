@@ -242,11 +242,17 @@ import java.util.UUID;
             }
             readyMessagesCursor.close();
         } catch (SQLiteException e) {
-            Log.e(TAG, "Error preparing batch upload in mParticle DB", e);
+            if (MParticle.getInstance().getDebugMode()) {
+                Log.d(TAG, "Error preparing batch upload in mParticle DB: " + e.getMessage());
+            }
         } catch (IOException e) {
-            Log.e(TAG, "Error preparing batch upload in mParticle DB", e);
+            if (MParticle.getInstance().getDebugMode()) {
+                Log.d(TAG, "Error preparing batch upload in mParticle DB: " + e.getMessage());
+            }
         } catch (JSONException e) {
-            Log.e(TAG, "Error with upload JSON object", e);
+            if (MParticle.getInstance().getDebugMode()) {
+                Log.d(TAG, "Error preparing batch upload in mParticle DB: " + e.getMessage());
+            }
         } finally {
             mDB.close();
         }
@@ -298,9 +304,9 @@ import java.util.UUID;
 
             readyUploadsCursor.close();
         } catch (SQLiteException e) {
-            Log.e(TAG, "Error processing batch uploads in mParticle DB", e);
+            Log.d(TAG, "Error processing batch uploads in mParticle DB", e);
         } catch (IOException ioe) {
-            Log.e(TAG, "Error processing batch uploads in mParticle DB", ioe);
+            Log.d(TAG, "Error processing batch uploads in mParticle DB", ioe);
         } finally {
             mDB.close();
         }
