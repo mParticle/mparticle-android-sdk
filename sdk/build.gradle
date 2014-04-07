@@ -81,12 +81,19 @@ android.libraryVariants.all { variant ->
 uploadArchives {
     repositories {
         mavenDeployer {
-            configuration = configurations.deployerJars
-            repository(url: "s3://www.mparticle.com/maven")
-            pom.version = sdkversion
-            pom.artifactId = 'android-sdk'
-            pom.groupId = 'com.mparticle'
-            pom.packaging = 'aar'
+            if (mavenrepo == "s3") {
+                configuration = configurations.deployerJars
+                repository(url: "s3://www.mparticle.com/maven")
+                pom.version = sdkversion
+                pom.artifactId = 'android-sdk'
+                pom.groupId = 'com.mparticle'
+                pom.packaging = 'aar'
+            }else{
+                repository(url: "file://localhost/Users/sdozor/maven/repo/")
+                pom.version = sdkversion
+                pom.artifactId = 'android-sdk'
+                pom.groupId = 'com.mparticle'
+            }
         }
     }
 }
