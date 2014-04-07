@@ -30,23 +30,24 @@ public class TransactionTestFragment extends MainTransactionTestFragment impleme
     @Override
     public void onClick(View v) {
         super.onClick(v);
+        if (v.getId() == R.id.button) {
+            try {
+                JSONObject properties = new JSONObject();
+                properties.put("productName", productName.getText().toString());
+                properties.put("productSku", productSku.getText().toString());
+                properties.put("quantity", quantity.getText().toString());
+                properties.put("unitPrice", unitPrice.getText().toString());
+                properties.put("shippingAmount", shippingAmount.getText().toString());
+                properties.put("taxAmount", taxAmount.getText().toString());
+                properties.put("revenueAmount", revenueAmount.getText().toString());
+                properties.put("productCategory", productCategory.getText().toString());
+                properties.put("currencyCode", currencyCode.getText().toString());
+                properties.put("transactionId", transactionId.getText().toString());
+                properties.put("transactionAffiliation", transactionAffiliation.getText().toString());
+                mixpanel.getPeople().trackCharge(Double.parseDouble(revenueAmount.getText().toString()), properties);
+            } catch (Exception e) {
 
-        try {
-            JSONObject properties = new JSONObject();
-            properties.put("productName", productName.getText().toString());
-            properties.put("productSku", productSku.getText().toString());
-            properties.put("quantity", quantity.getText().toString());
-            properties.put("unitPrice", unitPrice.getText().toString());
-            properties.put("shippingAmount", shippingAmount.getText().toString());
-            properties.put("taxAmount", taxAmount.getText().toString());
-            properties.put("revenueAmount", revenueAmount.getText().toString());
-            properties.put("productCategory", productCategory.getText().toString());
-            properties.put("currencyCode", currencyCode.getText().toString());
-            properties.put("transactionId", transactionId.getText().toString());
-            properties.put("transactionAffiliation", transactionAffiliation.getText().toString());
-            mixpanel.getPeople().trackCharge(Double.parseDouble(revenueAmount.getText().toString()), properties);
-        } catch (Exception e) {
-
+            }
         }
     }
 }

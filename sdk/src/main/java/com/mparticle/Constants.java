@@ -16,8 +16,6 @@ package com.mparticle;
     public static final int DEBUG_UPLOAD_INTERVAL = 3 * 1000; // 3 seconds
     // preferences persistence
     public static final String PREFS_FILE = "mParticlePrefs";
-    // misc persistence
-    public static final String MISC_FILE = "mParticleMisc";
 
     public static final int LIMIT_ATTR_COUNT = 100;
     public static final int LIMIT_ATTR_NAME = 255;
@@ -26,6 +24,12 @@ package com.mparticle;
 
     public static final int DB_CLEANUP_EXPIRATION = 3 * 24 * 60 * 60 * 1000; // 3 days old
     public static final long DB_CLEANUP_INTERVAL = 1 * 24 * 60 * 60 * 1000; // 1 day
+
+    interface MethodName {
+        public static final String METHOD_NAME = "$MethodName";
+        public static final String LOG_LTV = "LogLTVIncrease";
+        public static final String LOG_ECOMMERCE = "LogEcommerceTransaction";
+    }
 
     interface MessageType {
         public static final String SESSION_START = "ss";
@@ -42,6 +46,7 @@ package com.mparticle;
         public static final String APP_STATE_TRANSITION = "ast";
         public static final String PUSH_RECEIVED = "pm";
         public static final String BREADCRUMB = "bc";
+        public static final String NETWORK_PERFORMNACE = "npe";
     }
 
     interface MessageKey {
@@ -57,6 +62,8 @@ package com.mparticle;
         public static final String NAME = "n";
         public static final String DEBUG = "dbg";
         public static final String OPT_OUT_HEADER = "oo";
+        public static final String PREVIOUS_SESSION_LENGTH = "psl";
+        public static final String LTV = "ltv";
         // referrer
         public static final String LAUNCH_REFERRER = "lr";
         // event timing
@@ -86,6 +93,10 @@ package com.mparticle;
         public static final String APP_VERSION_CODE = "abn";
         public static final String APP_DEBUG_SIGNING = "dbg";
         public static final String APP_PIRATED = "pir";
+        public static final String UPGRADE_DATE = "ud";
+        public static final String LAUNCH_COUNT = "lc";
+        public static final String LAUNCH_COUNT_SINCE_UPGRADE = "lcu";
+        public static final String LAST_USE_DATE = "lud";
         // device info
         public static final String BUILD_ID = "bid";
         public static final String BRAND = "b";
@@ -138,6 +149,10 @@ package com.mparticle;
         public static final String STATE_INFO_ORIENTATION = "so";
         public static final String STATE_INFO_MEMORY_LOW = "sml";
         public static final String STATE_INFO_MEMORY_THRESHOLD = "smt";
+        //app init message special keys
+        public static final String APP_INIT_CRASHED = "sc";
+        public static final String APP_INIT_FIRST_RUN = "ifr";
+        public static final String APP_INIT_UPGRADE = "iu";
         // network keys
         public static final String NETWORK_COUNTRY = "nc";
         public static final String NETWORK_CARRIER = "nca";
@@ -175,6 +190,17 @@ package com.mparticle;
         public static final String EVENT_CATEGORY = "$Category";
         public static final String BREADCRUMB_SESSION_COUNTER = "sn";
         public static final String BREADCRUMB_LABEL = "l";
+        public static final String PROVIDER_PERSISTENCE = "cms";
+        public static final String RELEASE_VERSION = "vr";
+
+        //network performance monitoring
+        public static final String NPE_METHOD = "v";
+        public static final String NPE_URL = "url";
+        public static final String NPE_LENGTH = "te";
+        public static final String NPE_SENT = "bo";
+        public static final String NPE_REC = "bi";
+        public static final String CONFIG_SESSION_TIMEOUT = "stl";
+        public static final String CONFIG_UPLOAD_INTERVAL = "uitl";
     }
 
     interface PrefKeys {
@@ -188,6 +214,8 @@ package com.mparticle;
         public static final String USER_ATTRS = "mp::user_attrs::";
         public static final String USER_IDENTITIES = "mp::user_ids::";
         public static final String FIRSTRUN = "mp::firstrun::";
+        public static final String FIRSTINIT = "mp::firstinit";
+        public static final String INITUPGRADE = "mp::initupgrade";
         public static final String UPLOAD_MODE = "mp::batch";
         public static final String PROPERTY_APP_VERSION = "mp::appversion";
         public static final String PROPERTY_OS_VERSION = "mp::osversion";
@@ -200,6 +228,18 @@ package com.mparticle;
         public static final String PUSH_TITLE = "mp::push::title";
         public static final String SESSION_COUNTER = "mp::breadcrumbs::sessioncount";
         public static final String BREADCRUMB_LIMIT = "mp::breadcrumbs::limit";
+        public static final String INSTALL_DATE = "mp::installdate";
+        public static final String TOTAL_SINCE_UPGRADE = "mp::launch_since_upgrade";
+        public static final String UPGRADE_DATE = "mp::upgrade_date";
+        public static final String COUNTER_VERSION = "mp::version::counter";
+        public static final String LAST_USE = "mp::lastusedate";
+        public static final String TOTAL_RUNS = "mp::totalruns";
+        public static final String Cookies = "mp::cookies";
+        public static final String Mpid = "mp::mpid";
+        public static final String CRASHED_IN_FOREGROUND = "mp::crashed_in_foreground";
+        public static final String LTV = "mp::ltv";
+        public static final String TIME_IN_BG = "mp::time_in_bg";
+        public static final String PREVIOUS_SESSION_FOREGROUND = "mp::time_in_fg";
     }
 
     interface MiscStorageKeys {
