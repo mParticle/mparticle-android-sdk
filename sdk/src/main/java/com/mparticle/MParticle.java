@@ -188,6 +188,8 @@ public class MParticle {
      *
      * @param context     Required reference to a Context object
      * @param installType Specify whether this is a new install or an upgrade, or let mParticle detect
+     *
+     * @see com.mparticle.MParticle.InstallType
      */
 
     public static void start(Context context, InstallType installType) {
@@ -209,6 +211,8 @@ public class MParticle {
      * @param secret      The API secret to use for authentication with mParticle
      * @param sandboxMode Enable/disable sandbox mode
      * @param installType Specify whether this is a new install or an upgrade, or let mParticle detect
+     *
+     * @see com.mparticle.MParticle.InstallType
      */
 
     public static void start(Context context, String apiKey, String secret, boolean sandboxMode, InstallType installType) {
@@ -237,6 +241,7 @@ public class MParticle {
      * @param secret      the API secret for your account
      * @param sandboxMode set the SDK in sandbox mode, xml configuration will override this value
      * @return An instance of the mParticle SDK configured with your API key
+     *
      */
     private static MParticle getInstance(Context context, String apiKey, String secret, boolean sandboxMode, InstallType installType) {
         if (instance == null) {
@@ -1414,13 +1419,24 @@ public class MParticle {
     }
 
     /**
-     * Event type to use when logging events.
+     * To be used when initializing MParticle
      *
-     * @see #logEvent(String, com.mparticle.MParticle.EventType)
+     * @see #start(android.content.Context, com.mparticle.MParticle.InstallType)
      */
 
     public enum InstallType {
-        AutoDetect, KnownInstall, KnownUpgrade;
+        /**
+         * This is the default value. Using this value will rely on the mParticle SDK to differentiate a new install vs. an upgrade
+         */
+        AutoDetect,
+        /**
+         * In the case where your app has never seen this user before.
+         */
+        KnownInstall,
+        /**
+         * In the case where you app has seen this user before
+         */
+        KnownUpgrade;
 
         public String toString() {
             return name();
