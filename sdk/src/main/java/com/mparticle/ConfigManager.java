@@ -76,7 +76,9 @@ class ConfigManager {
             sendOoEvents = responseJSON.getBoolean(KEY_OPT_OUT);
         }
 
-        setProviderPersistence(new ProviderPersistence(responseJSON, mContext));
+        if (responseJSON.has(ProviderPersistence.KEY_PERSISTENCE)) {
+            setProviderPersistence(new ProviderPersistence(responseJSON, mContext));
+        }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD) {
             editor.apply();

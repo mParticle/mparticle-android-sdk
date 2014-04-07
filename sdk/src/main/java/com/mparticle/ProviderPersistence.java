@@ -12,7 +12,7 @@ import org.json.JSONObject;
  */
 public class ProviderPersistence extends JSONObject{
 
-    private static final String KEY_PERSISTENCE = "cms";
+    static final String KEY_PERSISTENCE = "cms";
     private static final String KEY_PERSISTENCE_ID = "id";
     private static final String KEY_PERSISTENCE_ANDROID = "pr";
     private static final String KEY_PERSISTENCE_FILE = "f";
