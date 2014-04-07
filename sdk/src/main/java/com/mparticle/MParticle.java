@@ -582,14 +582,12 @@ public class MParticle {
      * @param contextInfo       An MPProduct or any set of data to associate with this increase in LTV (optional)
      */
     public void logLtvIncrease(BigDecimal valueIncreased, String eventName, Map<String, String> contextInfo){
-        BigDecimal currentValue = new BigDecimal(sPreferences.getString(PrefKeys.LTV, "0"));
-        String newValue = currentValue.add(valueIncreased).toPlainString();
-        sPreferences.edit().putString(PrefKeys.LTV, newValue).commit();
-        Map<String, String> attributes = new HashMap<String, String>();
-        attributes.put("$Amount", valueIncreased.toPlainString());
-        attributes.put("$TotalAmount", newValue);
-        attributes.put(Constants.MethodName.METHOD_NAME, Constants.MethodName.LOG_LTV);
-        logEvent("Increase LTV", EventType.Transaction, attributes);
+        if (contextInfo != null){
+            contextInfo = new HashMap<String, String>();
+        }
+        contextInfo.put("$Amount", valueIncreased.toPlainString());
+        contextInfo.put(Constants.MethodName.METHOD_NAME, Constants.MethodName.LOG_LTV);
+        logEvent(eventName == null ? "Increase LTV" : eventName, EventType.Transaction, contextInfo);
     }
 
     /**
