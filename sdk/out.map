@@ -20,13 +20,13 @@ com.mparticle.AppConfig -> com.mparticle.b:
     boolean isLicensingEnabled -> l
     boolean autoTrackingEnabled -> m
     boolean networkingEnabled -> n
-    111:111:int getResourceId(java.lang.String,java.lang.String) -> a
-    115:118:void debugLog(java.lang.String) -> a
-    121:126:java.lang.String getString(java.lang.String) -> b
-    130:135:boolean getBoolean(java.lang.String,boolean) -> a
-    139:144:int getInteger(java.lang.String,int) -> a
+    112:112:int getResourceId(java.lang.String,java.lang.String) -> a
+    116:119:void debugLog(java.lang.String) -> a
+    122:127:java.lang.String getString(java.lang.String) -> b
+    131:136:boolean getBoolean(java.lang.String,boolean) -> a
+    140:145:int getInteger(java.lang.String,int) -> a
     35:110:org.json.JSONObject collectAppInfo(android.content.Context) -> a
-    120:218:org.json.JSONObject collectDeviceInfo(android.content.Context) -> b
+    120:217:org.json.JSONObject collectDeviceInfo(android.content.Context) -> b
     22:27:int getAppVersion(android.content.Context) -> d
     40:58:java.lang.String getRegistrationId(android.content.Context) -> c
     67:73:void enablePushNotifications(android.content.Context,java.lang.String) -> a
@@ -734,26 +734,39 @@ com.mparticle.MParticleApiClient -> com.mparticle.MParticleApiClient:
     java.net.URL batchUploadUrl -> e
     java.lang.String userAgent -> f
     android.content.SharedPreferences sharedPreferences -> g
-    68:84:void fetchConfig() -> a
-    87:109:com.mparticle.MParticleApiClient$ApiResponse sendMessageBatch(java.lang.String) -> a
-    113:135:com.mparticle.MParticleApiClient$ApiResponse sendCommand(java.lang.String,java.lang.String,java.lang.String,java.lang.String) -> a
-    163:186:void addMessageSignature(java.net.HttpURLConnection,java.lang.String) -> a
-    199:204:java.lang.String asHex(byte[]) -> a
-    209:215:void addCookies(org.json.JSONObject,com.mparticle.ConfigManager) -> addCookies
-    33:33:com.mparticle.ConfigManager access$100(com.mparticle.MParticleApiClient) -> a
-    33:33:android.content.SharedPreferences access$200(com.mparticle.MParticleApiClient) -> b
+    76:92:void fetchConfig() -> a
+    126:148:com.mparticle.MParticleApiClient$ApiResponse sendMessageBatch(java.lang.String) -> a
+    152:174:com.mparticle.MParticleApiClient$ApiResponse sendCommand(java.lang.String,java.lang.String,java.lang.String,java.lang.String) -> a
+    202:225:void addMessageSignature(java.net.HttpURLConnection,java.lang.String) -> a
+    238:243:java.lang.String asHex(byte[]) -> a
+    248:254:void addCookies(org.json.JSONObject,com.mparticle.ConfigManager) -> addCookies
+    38:38:com.mparticle.ConfigManager access$400(com.mparticle.MParticleApiClient) -> a
+    38:38:android.content.SharedPreferences access$500(com.mparticle.MParticleApiClient) -> b
 com.mparticle.MParticleApiClient$ApiResponse -> com.mparticle.MParticleApiClient$a:
     int statusCode -> a
     org.json.JSONObject jsonResponse -> b
     java.net.HttpURLConnection connection -> c
     com.mparticle.MParticleApiClient this$0 -> d
-    232:232:boolean shouldDelete() -> a
-    237:269:org.json.JSONObject getJsonResponse() -> b
-    273:273:int getResponseCode() -> c
-    217:217:int access$000(com.mparticle.MParticleApiClient$ApiResponse) -> a
+    271:271:boolean shouldDelete() -> a
+    276:308:org.json.JSONObject getJsonResponse() -> b
+    312:312:int getResponseCode() -> c
+    256:256:int access$000(com.mparticle.MParticleApiClient$ApiResponse) -> a
 com.mparticle.MParticleDatabase -> com.mparticle.MParticleDatabase:
-    129:134:void onCreate(android.database.sqlite.SQLiteDatabase) -> onCreate
-    139:147:void onUpgrade(android.database.sqlite.SQLiteDatabase,int,int) -> onUpgrade
+    163:170:void onCreate(android.database.sqlite.SQLiteDatabase) -> onCreate
+    174:182:void onUpgrade(android.database.sqlite.SQLiteDatabase,int,int) -> onUpgrade
+com.mparticle.MParticleDatabase$AudienceMembershipTable -> com.mparticle.MParticleDatabase$AudienceMembershipTable:
+    java.lang.String TABLE_NAME -> TABLE_NAME
+    java.lang.String ID -> ID
+    java.lang.String AUDIENCE_ID -> AUDIENCE_ID
+    java.lang.String TIMESTAMP -> TIMESTAMP
+    java.lang.String MEMBERSHIP_ACTION -> MEMBERSHIP_ACTION
+    java.lang.String CF_UUID -> CF_UUID
+com.mparticle.MParticleDatabase$AudienceTable -> com.mparticle.MParticleDatabase$AudienceTable:
+    java.lang.String TABLE_NAME -> TABLE_NAME
+    java.lang.String AUDIENCE_ID -> AUDIENCE_ID
+    java.lang.String NAME -> NAME
+    java.lang.String ENDPOINTS -> ENDPOINTS
+    java.lang.String CF_UUID -> CF_UUID
 com.mparticle.MParticleDatabase$BreadcrumbTable -> com.mparticle.MParticleDatabase$BreadcrumbTable:
     java.lang.String TABLE_NAME -> TABLE_NAME
     java.lang.String SESSION_ID -> SESSION_ID
@@ -984,3 +997,4 @@ com.mparticle.activity.MPActivity -> com.mparticle.activity.MPActivity:
 com.mparticle.activity.MPListActivity -> com.mparticle.activity.MPListActivity:
     27:31:void onStart() -> onStart
     35:39:void onStop() -> onStop
+com.mparticle.com.mparticle.audience.Audience -> com.mparticle.com.mparticle.audience.Audience:

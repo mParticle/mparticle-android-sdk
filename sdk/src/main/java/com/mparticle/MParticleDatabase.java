@@ -6,8 +6,42 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 /* package-private */class MParticleDatabase extends SQLiteOpenHelper {
 
-    private static final int DB_VERSION = 1;
+    private static final int DB_VERSION = 2;
     private static final String DB_NAME = "mparticle.db";
+
+    public interface AudienceTable {
+        public final static String TABLE_NAME = "audiences";
+        public final static String AUDIENCE_ID = "_id";
+        public final static String NAME = "name";
+        public final static String ENDPOINTS = "endpoint_ids";
+        public final static String CF_UUID = "cfuuid";
+    }
+
+    private static final String CREATE_AUDIENCES_DDL =
+            "CREATE TABLE IF NOT EXISTS " + AudienceTable.TABLE_NAME + " (" +
+                    "_id INTEGER PRIMARY KEY, " +
+                    AudienceTable.NAME + " TEXT NOT NULL, " +
+                    AudienceTable.ENDPOINTS + " TEXT, " +
+                    AudienceTable.CF_UUID + " TEXT NOT NULL" +
+                    ");";
+
+    public interface AudienceMembershipTable {
+        public final static String TABLE_NAME = "audience_memberships";
+        public final static String ID = "_id";
+        public final static String AUDIENCE_ID = "audience_id";
+        public final static String TIMESTAMP = "name";
+        public final static String MEMBERSHIP_ACTION = "endpoint_ids";
+        public final static String CF_UUID = "cfuuid";
+    }
+
+    private static final String CREATE_AUDIENCE_MEMBERSHIP_DDL =
+            "CREATE TABLE IF NOT EXISTS " + AudienceMembershipTable.TABLE_NAME + " (" +
+                    "_id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                    AudienceMembershipTable.AUDIENCE_ID + " INTEGER NOT NULL, " +
+                    AudienceMembershipTable.TIMESTAMP + " REAL NOT NULL, " +
+                    AudienceMembershipTable.MEMBERSHIP_ACTION + " INTEGER NOT NULL, " +
+                    " FOREIGN KEY ("+AudienceMembershipTable.AUDIENCE_ID+") REFERENCES "+AudienceTable.TABLE_NAME+" ("+ AudienceTable.AUDIENCE_ID+"));";
+
 
     public interface SessionTable {
         public final static String TABLE_NAME = "sessions";
@@ -30,7 +64,7 @@ import android.database.sqlite.SQLiteOpenHelper;
     }
 
     private static final String CREATE_BREADCRUMBS_DDL =
-            "CREATE TABLE " + BreadcrumbTable.TABLE_NAME + " (" +
+            "CREATE TABLE IF NOT EXISTS " + BreadcrumbTable.TABLE_NAME + " (" +
                     "_id INTEGER PRIMARY KEY AUTOINCREMENT, " +
                     BreadcrumbTable.SESSION_ID + " STRING NOT NULL, " +
                     BreadcrumbTable.API_KEY + " STRING NOT NULL, " +
@@ -41,7 +75,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 
     private static final String CREATE_SESSIONS_DDL =
-            "CREATE TABLE " + SessionTable.TABLE_NAME + " (" +
+            "CREATE TABLE IF NOT EXISTS " + SessionTable.TABLE_NAME + " (" +
                     "_id INTEGER PRIMARY KEY AUTOINCREMENT, " +
                     SessionTable.SESSION_ID + " STRING NOT NULL, " +
                     SessionTable.API_KEY + " STRING NOT NULL, " +
@@ -65,7 +99,7 @@ import android.database.sqlite.SQLiteOpenHelper;
     }
 
     private static final String CREATE_MESSAGES_DDL =
-            "CREATE TABLE " + MessageTable.TABLE_NAME + " (" +
+            "CREATE TABLE IF NOT EXISTS " + MessageTable.TABLE_NAME + " (" +
                     "_id INTEGER PRIMARY KEY AUTOINCREMENT, " +
                     MessageTable.SESSION_ID + " STRING NOT NULL, " +
                     MessageTable.API_KEY + " STRING NOT NULL, " +
@@ -86,7 +120,7 @@ import android.database.sqlite.SQLiteOpenHelper;
     }
 
     private static final String CREATE_UPLOADS_DDL =
-            "CREATE TABLE " + UploadTable.TABLE_NAME + " (" +
+            "CREATE TABLE IF NOT EXISTS " + UploadTable.TABLE_NAME + " (" +
                     "_id INTEGER PRIMARY KEY AUTOINCREMENT, " +
                     UploadTable.API_KEY + " STRING NOT NULL, " +
                     UploadTable.MESSAGE + " TEXT, " +
@@ -108,7 +142,7 @@ import android.database.sqlite.SQLiteOpenHelper;
     }
 
     private static final String CREATE_COMMANDS_DDL =
-            "CREATE TABLE " + CommandTable.TABLE_NAME + " (" +
+            "CREATE TABLE IF NOT EXISTS " + CommandTable.TABLE_NAME + " (" +
                     "_id INTEGER PRIMARY KEY AUTOINCREMENT, " +
                     CommandTable.URL + " STRING NOT NULL, " +
                     CommandTable.METHOD + " STRING NOT NULL, " +
@@ -131,19 +165,20 @@ import android.database.sqlite.SQLiteOpenHelper;
         db.execSQL(CREATE_UPLOADS_DDL);
         db.execSQL(CREATE_COMMANDS_DDL);
         db.execSQL(CREATE_BREADCRUMBS_DDL);
+        db.execSQL(CREATE_AUDIENCES_DDL);
+        db.execSQL(CREATE_AUDIENCE_MEMBERSHIP_DDL);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        // just blow away the old tables
-        db.execSQL("DROP TABLE IF EXISTS " + SessionTable.TABLE_NAME);
         db.execSQL(CREATE_SESSIONS_DDL);
-        db.execSQL("DROP TABLE IF EXISTS " + MessageTable.TABLE_NAME);
         db.execSQL(CREATE_MESSAGES_DDL);
-        db.execSQL("DROP TABLE IF EXISTS " + UploadTable.TABLE_NAME);
         db.execSQL(CREATE_UPLOADS_DDL);
-        db.execSQL("DROP TABLE IF EXISTS " + CommandTable.TABLE_NAME);
         db.execSQL(CREATE_COMMANDS_DDL);
+        db.execSQL(CREATE_BREADCRUMBS_DDL);
+        db.execSQL(CREATE_AUDIENCES_DDL);
+        db.execSQL(CREATE_AUDIENCE_MEMBERSHIP_DDL);
+
     }
 
 }
