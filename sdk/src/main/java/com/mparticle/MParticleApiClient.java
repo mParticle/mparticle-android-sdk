@@ -24,6 +24,8 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -38,10 +40,10 @@ import javax.crypto.spec.SecretKeySpec;
 public class MParticleApiClient {
 
     public static final String HEADER_SIGNATURE = "x-mp-signature";
-    public static final String SECURE_SERVICE_SCHEME = "https";
-    public static final String SECURE_SERVICE_HOST = "nativesdks.mparticle.com";
-    //public static final String SECURE_SERVICE_HOST = "54.236.165.123";
-    //public static final String SECURE_SERVICE_HOST = "api-qa.mparticle.com";
+    public static final String SECURE_SERVICE_SCHEME = "http";
+    //public static final String SECURE_SERVICE_HOST = "nativesdks.mparticle.com";
+    //public static final String SECURE_SERVICE_HOST = "54.236.151.50";
+    public static final String SECURE_SERVICE_HOST = "api-qa.mparticle.com";
     //public static final String SECURE_SERVICE_HOST = "10.0.16.21";
     public static final String SERVICE_VERSION_1 = "/v1";
     public static final String SERVICE_VERSION_2 = "/v2";
@@ -92,10 +94,12 @@ public class MParticleApiClient {
     }
 
     private URL getAudienceUrl() throws MalformedURLException {
-        return new URL(SECURE_SERVICE_SCHEME, SECURE_SERVICE_HOST, SERVICE_VERSION_2 + "/" + apiKey + "/audience?mpid=" + configManager.getMpid());
+        return new URL(SECURE_SERVICE_SCHEME, SECURE_SERVICE_HOST, SERVICE_VERSION_1 + "/" + apiKey + "/audience?mpID=" + configManager.getMpid());
     }
 
-    JSONObject fetchAudiences(int timeout) throws IOException {
+    Executor executor = Executors.newSingleThreadExecutor();
+
+    JSONObject fetchAudiences(long timeout)  {
         FutureTask<JSONObject> audienceTask = new FutureTask<JSONObject>(new Callable<JSONObject>() {
             @Override
             public JSONObject call() throws Exception {
@@ -109,6 +113,7 @@ public class MParticleApiClient {
             }
         });
         try {
+            executor.execute(audienceTask);
             return audienceTask.get(timeout, TimeUnit.MILLISECONDS);
         }catch (InterruptedException ie){
 
@@ -205,7 +210,7 @@ public class MParticleApiClient {
                 // handle a problem on some devices where TZ offset is appended
                 dateHeader = dateHeader.substring(0, DateUtils.PATTERN_RFC1123.length());
             }
-            String path = request.getURL().getPath();
+            String path = request.getURL().getFile();
             StringBuilder hashString = new StringBuilder()
                                             .append(method)
                                             .append("\n")

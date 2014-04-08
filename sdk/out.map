@@ -56,6 +56,8 @@ com.mparticle.AppStateManager$2 -> com.mparticle.c$2:
     79:80:void onActivityStopped(android.app.Activity) -> onActivityStopped
     85:85:void onActivitySaveInstanceState(android.app.Activity,android.os.Bundle) -> onActivitySaveInstanceState
     90:90:void onActivityDestroyed(android.app.Activity) -> onActivityDestroyed
+com.mparticle.AudienceListener -> com.mparticle.AudienceListener:
+    void onAudiencesRetrieved(com.mparticle.com.mparticle.audience.Audiences) -> onAudiencesRetrieved
 com.mparticle.Base64 -> com.mparticle.d:
     char[] CA -> a
     int[] IA -> b
@@ -110,6 +112,7 @@ com.mparticle.ConfigManager -> com.mparticle.f:
     291:292:void setCookies(org.json.JSONObject) -> b
     295:295:org.json.JSONObject getCookies() -> x
     299:300:void setMpid(long) -> a
+    303:303:long getMpid() -> y
 com.mparticle.DeviceLimiter -> com.mparticle.g:
 com.mparticle.ExceptionHandler -> com.mparticle.h:
     java.lang.Thread$UncaughtExceptionHandler mOriginalUncaughtExceptionHandler -> a
@@ -656,6 +659,7 @@ com.mparticle.MParticle -> com.mparticle.MParticle:
     1378:1383:void logNotification(android.os.Bundle,java.lang.String) -> a
     1393:1394:void setPushNotificationIcon(int) -> setPushNotificationIcon
     1404:1405:void setPushNotificationTitle(int) -> setPushNotificationTitle
+    1408:1411:void getUserAudiences(long,java.lang.String,com.mparticle.AudienceListener) -> getUserAudiences
     75:75:com.mparticle.MessageManager access$000(com.mparticle.MParticle) -> a
     75:75:android.content.SharedPreferences access$300() -> c
     75:75:com.mparticle.LicenseCheckerCallback access$400(com.mparticle.MParticle) -> b
@@ -674,9 +678,9 @@ com.mparticle.MParticle$EventType -> com.mparticle.MParticle$EventType:
     com.mparticle.MParticle$EventType Social -> Social
     com.mparticle.MParticle$EventType Other -> Other
     com.mparticle.MParticle$EventType[] $VALUES -> a
-    1413:1413:com.mparticle.MParticle$EventType[] values() -> values
-    1413:1413:com.mparticle.MParticle$EventType valueOf(java.lang.String) -> valueOf
-    1417:1417:java.lang.String toString() -> toString
+    1419:1419:com.mparticle.MParticle$EventType[] values() -> values
+    1419:1419:com.mparticle.MParticle$EventType valueOf(java.lang.String) -> valueOf
+    1423:1423:java.lang.String toString() -> toString
 com.mparticle.MParticle$IdentityType -> com.mparticle.MParticle$IdentityType:
     com.mparticle.MParticle$IdentityType Other -> Other
     com.mparticle.MParticle$IdentityType CustomId -> CustomId
@@ -688,36 +692,36 @@ com.mparticle.MParticle$IdentityType -> com.mparticle.MParticle$IdentityType:
     com.mparticle.MParticle$IdentityType Email -> Email
     int value -> a
     com.mparticle.MParticle$IdentityType[] $VALUES -> b
-    1452:1452:com.mparticle.MParticle$IdentityType[] values() -> values
-    1452:1452:com.mparticle.MParticle$IdentityType valueOf(java.lang.String) -> valueOf
-    1469:1469:int getValue() -> getValue
-    1452:1452:int access$100(com.mparticle.MParticle$IdentityType) -> a
+    1458:1458:com.mparticle.MParticle$IdentityType[] values() -> values
+    1458:1458:com.mparticle.MParticle$IdentityType valueOf(java.lang.String) -> valueOf
+    1475:1475:int getValue() -> getValue
+    1458:1458:int access$100(com.mparticle.MParticle$IdentityType) -> a
 com.mparticle.MParticle$InstallType -> com.mparticle.MParticle$InstallType:
     com.mparticle.MParticle$InstallType AutoDetect -> AutoDetect
     com.mparticle.MParticle$InstallType KnownInstall -> KnownInstall
     com.mparticle.MParticle$InstallType KnownUpgrade -> KnownUpgrade
     com.mparticle.MParticle$InstallType[] $VALUES -> a
-    1427:1427:com.mparticle.MParticle$InstallType[] values() -> values
-    1427:1427:com.mparticle.MParticle$InstallType valueOf(java.lang.String) -> valueOf
-    1442:1442:java.lang.String toString() -> toString
+    1433:1433:com.mparticle.MParticle$InstallType[] values() -> values
+    1433:1433:com.mparticle.MParticle$InstallType valueOf(java.lang.String) -> valueOf
+    1448:1448:java.lang.String toString() -> toString
 com.mparticle.MParticle$MPLicenseCheckerCallback -> com.mparticle.MParticle$a:
     com.mparticle.MParticle this$0 -> a
-    1524:1530:void allow(int) -> a
-    1533:1539:void dontAllow(int) -> b
-    1542:1548:void applicationError(int) -> c
+    1530:1536:void allow(int) -> a
+    1539:1545:void dontAllow(int) -> b
+    1548:1554:void applicationError(int) -> c
 com.mparticle.MParticle$MParticleLocationListener -> com.mparticle.MParticle$b:
     com.mparticle.MParticle mParticle -> a
-    1505:1506:void onLocationChanged(android.location.Location) -> onLocationChanged
-    1510:1510:void onProviderDisabled(java.lang.String) -> onProviderDisabled
-    1514:1514:void onProviderEnabled(java.lang.String) -> onProviderEnabled
-    1518:1518:void onStatusChanged(java.lang.String,int,android.os.Bundle) -> onStatusChanged
+    1511:1512:void onLocationChanged(android.location.Location) -> onLocationChanged
+    1516:1516:void onProviderDisabled(java.lang.String) -> onProviderDisabled
+    1520:1520:void onProviderEnabled(java.lang.String) -> onProviderEnabled
+    1524:1524:void onStatusChanged(java.lang.String,int,android.os.Bundle) -> onStatusChanged
 com.mparticle.MParticle$Push -> com.mparticle.MParticle$Push:
     java.lang.String BROADCAST_NOTIFICATION_RECEIVED -> BROADCAST_NOTIFICATION_RECEIVED
     java.lang.String BROADCAST_NOTIFICATION_TAPPED -> BROADCAST_NOTIFICATION_TAPPED
     java.lang.String PUSH_ALERT_EXTRA -> PUSH_ALERT_EXTRA
 com.mparticle.MParticle$SessionTimeoutHandler -> com.mparticle.MParticle$c:
     com.mparticle.MParticle mParticle -> a
-    1489:1493:void handleMessage(android.os.Message) -> handleMessage
+    1495:1499:void handleMessage(android.os.Message) -> handleMessage
 com.mparticle.MParticleApiClient -> com.mparticle.MParticleApiClient:
     java.lang.String HEADER_SIGNATURE -> HEADER_SIGNATURE
     java.lang.String SECURE_SERVICE_SCHEME -> SECURE_SERVICE_SCHEME
@@ -734,14 +738,22 @@ com.mparticle.MParticleApiClient -> com.mparticle.MParticleApiClient:
     java.net.URL batchUploadUrl -> e
     java.lang.String userAgent -> f
     android.content.SharedPreferences sharedPreferences -> g
+    java.lang.String apiKey -> h
     76:92:void fetchConfig() -> a
+    99:122:org.json.JSONObject fetchAudiences(long) -> a
     126:148:com.mparticle.MParticleApiClient$ApiResponse sendMessageBatch(java.lang.String) -> a
     152:174:com.mparticle.MParticleApiClient$ApiResponse sendCommand(java.lang.String,java.lang.String,java.lang.String,java.lang.String) -> a
     202:225:void addMessageSignature(java.net.HttpURLConnection,java.lang.String) -> a
     238:243:java.lang.String asHex(byte[]) -> a
     248:254:void addCookies(org.json.JSONObject,com.mparticle.ConfigManager) -> addCookies
-    38:38:com.mparticle.ConfigManager access$400(com.mparticle.MParticleApiClient) -> a
-    38:38:android.content.SharedPreferences access$500(com.mparticle.MParticleApiClient) -> b
+    38:38:java.net.URL access$100(com.mparticle.MParticleApiClient) -> a
+    38:38:java.lang.String access$200(com.mparticle.MParticleApiClient) -> b
+    38:38:void access$300(com.mparticle.MParticleApiClient,java.net.HttpURLConnection,java.lang.String) -> a
+    38:38:com.mparticle.ConfigManager access$400(com.mparticle.MParticleApiClient) -> c
+    38:38:android.content.SharedPreferences access$500(com.mparticle.MParticleApiClient) -> d
+com.mparticle.MParticleApiClient$1 -> com.mparticle.MParticleApiClient$1:
+    com.mparticle.MParticleApiClient this$0 -> a
+    99:99:java.lang.Object call() -> call
 com.mparticle.MParticleApiClient$ApiResponse -> com.mparticle.MParticleApiClient$a:
     int statusCode -> a
     org.json.JSONObject jsonResponse -> b
@@ -889,16 +901,16 @@ com.mparticle.MessageHandler -> com.mparticle.x:
     287:294:void dbUpdateSessionEndTime(android.database.sqlite.SQLiteDatabase,java.lang.String,long,long) -> a
     300:305:java.lang.String getMessageSessionId(org.json.JSONObject) -> a
 com.mparticle.MessageManager -> com.mparticle.y:
-    android.os.HandlerThread sMessageHandlerThread -> a
-    android.os.HandlerThread sUploadHandlerThread -> b
-    java.lang.Runtime rt -> c
-    java.lang.String sActiveNetworkName -> d
-    android.location.Location sLocation -> e
-    boolean sFirstRun -> f
-    android.content.BroadcastReceiver sStatusBroadcastReceiver -> g
-    double sBatteryLevel -> h
-    com.mparticle.MessageHandler mMessageHandler -> i
-    com.mparticle.UploadHandler mUploadHandler -> j
+    android.os.HandlerThread sMessageHandlerThread -> b
+    android.os.HandlerThread sUploadHandlerThread -> c
+    java.lang.Runtime rt -> d
+    java.lang.String sActiveNetworkName -> e
+    android.location.Location sLocation -> f
+    boolean sFirstRun -> g
+    android.content.BroadcastReceiver sStatusBroadcastReceiver -> h
+    double sBatteryLevel -> i
+    com.mparticle.MessageHandler mMessageHandler -> j
+    com.mparticle.UploadHandler mUploadHandler -> a
     android.content.Context mContext -> k
     long sStartTime -> l
     android.content.SharedPreferences mPreferences -> m
@@ -982,13 +994,22 @@ com.mparticle.UploadHandler -> com.mparticle.E:
     java.lang.String SQL_HISTORY_MESSAGES -> l
     java.lang.String SQL_FINISHED_HISTORY_MESSAGES -> m
     boolean isNetworkConnected -> n
-    99:100:void setConnected(boolean) -> a
-    104:161:void handleMessage(android.os.Message) -> handleMessage
-    167:258:void prepareUploads(boolean) -> b
-    262:313:boolean processUploads(boolean) -> c
-    353:400:org.json.JSONObject createUploadMessage(org.json.JSONArray,boolean) -> a
-    413:418:void dbInsertUpload(android.database.sqlite.SQLiteDatabase,org.json.JSONObject) -> a
-    421:423:void dbDeleteProcessedMessages(android.database.sqlite.SQLiteDatabase,java.lang.String) -> a
+    101:102:void setConnected(boolean) -> a
+    106:163:void handleMessage(android.os.Message) -> handleMessage
+    169:260:void prepareUploads(boolean) -> b
+    264:315:boolean processUploads(boolean) -> c
+    355:402:org.json.JSONObject createUploadMessage(org.json.JSONArray,boolean) -> a
+    415:420:void dbInsertUpload(android.database.sqlite.SQLiteDatabase,org.json.JSONObject) -> a
+    423:425:void dbDeleteProcessedMessages(android.database.sqlite.SQLiteDatabase,java.lang.String) -> a
+    462:464:void fetchAudiences(long,java.lang.String,com.mparticle.AudienceListener) -> a
+    34:34:void access$000(com.mparticle.UploadHandler,org.json.JSONObject) -> a
+    34:34:com.mparticle.com.mparticle.audience.Audiences access$100(com.mparticle.UploadHandler,java.lang.String) -> a
+com.mparticle.UploadHandler$AudienceTask -> com.mparticle.E$a:
+    java.lang.String endpointId -> a
+    com.mparticle.AudienceListener listener -> b
+    com.mparticle.UploadHandler this$0 -> c
+    474:474:void onPostExecute(java.lang.Object) -> onPostExecute
+    474:474:java.lang.Object doInBackground(java.lang.Object[]) -> doInBackground
 com.mparticle.ValidationException -> com.mparticle.F:
     long serialVersionUID -> serialVersionUID
 com.mparticle.activity.MPActivity -> com.mparticle.activity.MPActivity:
@@ -997,4 +1018,10 @@ com.mparticle.activity.MPActivity -> com.mparticle.activity.MPActivity:
 com.mparticle.activity.MPListActivity -> com.mparticle.activity.MPListActivity:
     27:31:void onStart() -> onStart
     35:39:void onStop() -> onStop
-com.mparticle.com.mparticle.audience.Audience -> com.mparticle.com.mparticle.audience.Audience:
+com.mparticle.com.mparticle.audience.Audiences -> com.mparticle.com.mparticle.audience.Audiences:
+    java.util.ArrayList audienceIds -> a
+    java.lang.StringBuilder list -> b
+    18:18:java.util.ArrayList getAudienceIds() -> getAudienceIds
+    25:25:long getExpiration() -> getExpiration
+    32:32:boolean isExpired() -> isExpired
+    40:51:java.lang.String toString() -> toString

@@ -6,6 +6,7 @@ import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
+import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -19,6 +20,7 @@ import com.mparticle.MParticleDatabase.CommandTable;
 import com.mparticle.MParticleDatabase.MessageTable;
 import com.mparticle.MParticleDatabase.SessionTable;
 import com.mparticle.MParticleDatabase.UploadTable;
+import com.mparticle.com.mparticle.audience.Audiences;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -454,5 +456,43 @@ import java.util.UUID;
         contentValues.put(CommandTable.CREATED_AT, System.currentTimeMillis());
         contentValues.put(CommandTable.API_KEY, mApiKey);
         db.insert(CommandTable.TABLE_NAME, null, contentValues);
+    }
+
+    public void fetchAudiences(long timeout, String endpointId, AudienceListener listener) {
+        JSONObject audiences = mApiClient.fetchAudiences(timeout);
+        new AudienceTask(endpointId, listener).execute(audiences);
+    }
+
+    private Audiences queryAudiences(String endpointId) {
+        return new Audiences();
+    }
+
+    private void insertAudiences(JSONObject audiences) {
+
+    }
+
+    class AudienceTask extends AsyncTask<JSONObject, Void, Audiences> {
+
+        String endpointId;
+        AudienceListener listener;
+        AudienceTask(String endpointId, AudienceListener listener){
+            this.endpointId = endpointId;
+            this.listener = listener;
+        }
+        @Override
+        protected Audiences doInBackground(JSONObject... params) {
+            if (params != null && params[0] != null){
+                insertAudiences(params[0]);
+            }
+            return queryAudiences(endpointId);
+        }
+
+        @Override
+        protected void onPostExecute(Audiences audiences) {
+            super.onPostExecute(audiences);
+            if (listener != null){
+                listener.onAudiencesRetrieved(audiences);
+            }
+        }
     }
 }

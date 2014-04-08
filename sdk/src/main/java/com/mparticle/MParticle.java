@@ -1404,6 +1404,12 @@ public class MParticle {
         mConfigManager.setPushNotificationTitle(resId);
     }
 
+    public void getUserAudiences(long timeout, String endpointId, AudienceListener listener){
+        if (mMessageManager != null && mMessageManager.mUploadHandler != null){
+            mMessageManager.mUploadHandler.fetchAudiences(timeout, endpointId, listener);
+        }
+    }
+
     /**
      * Event type to use when logging events.
      *
