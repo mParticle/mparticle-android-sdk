@@ -38,7 +38,7 @@ final class MeasuredRequestManager {
         @Override
         public void run() {
             boolean debugLog = MParticle.getInstance().getDebugMode();
-            if (debugLog){
+            if (debugLog && requests.size() > 0){
                 Log.d(Constants.LOG_TAG, "Processing " + requests.size() + " measured network requests.");
             }
             for (Map.Entry<String, MeasuredRequest> entry : requests.entrySet()){
