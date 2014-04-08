@@ -6,10 +6,15 @@ import java.util.ArrayList;
  This class is returned as response from a user audiences call. It contains audience ids, expiration, and a flag indicating whether it is expired.
  */
 public class Audiences {
-    private ArrayList<Integer> audienceIds = new ArrayList<Integer>();
+    private ArrayList<Integer> audienceIds;
     private long expiration;
     private boolean expired;
     StringBuilder list;
+
+    public Audiences(ArrayList<Integer> ids) {
+        super();
+        audienceIds = ids;
+    }
 
     /**
      The list of user audience ids

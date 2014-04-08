@@ -14,24 +14,21 @@ import android.database.sqlite.SQLiteOpenHelper;
         public final static String AUDIENCE_ID = "_id";
         public final static String NAME = "name";
         public final static String ENDPOINTS = "endpoint_ids";
-        public final static String CF_UUID = "cfuuid";
     }
 
     private static final String CREATE_AUDIENCES_DDL =
             "CREATE TABLE IF NOT EXISTS " + AudienceTable.TABLE_NAME + " (" +
                     "_id INTEGER PRIMARY KEY, " +
                     AudienceTable.NAME + " TEXT NOT NULL, " +
-                    AudienceTable.ENDPOINTS + " TEXT, " +
-                    AudienceTable.CF_UUID + " TEXT NOT NULL" +
+                    AudienceTable.ENDPOINTS + " TEXT " +
                     ");";
 
     public interface AudienceMembershipTable {
         public final static String TABLE_NAME = "audience_memberships";
         public final static String ID = "_id";
         public final static String AUDIENCE_ID = "audience_id";
-        public final static String TIMESTAMP = "name";
-        public final static String MEMBERSHIP_ACTION = "endpoint_ids";
-        public final static String CF_UUID = "cfuuid";
+        public final static String TIMESTAMP = "expiration";
+        public final static String MEMBERSHIP_ACTION = "action";
     }
 
     private static final String CREATE_AUDIENCE_MEMBERSHIP_DDL =

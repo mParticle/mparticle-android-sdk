@@ -33,6 +33,20 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
 
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingLeft="10dp"
+                android:id="@+id/timeoutText"/>
+
+            <SeekBar
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:max="5000"
+                android:progress="1000"
+                android:id="@+id/seekBar"
+                android:layout_gravity="center_horizontal" />
+
             <View
                 android:layout_width="1dp"
                 android:layout_height="5dp" />

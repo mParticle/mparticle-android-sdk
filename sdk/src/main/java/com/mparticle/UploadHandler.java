@@ -29,7 +29,15 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.net.MalformedURLException;
+import java.util.ArrayList;
 import java.util.UUID;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /* package-private */final class UploadHandler extends Handler {
 
@@ -458,41 +466,100 @@ import java.util.UUID;
         db.insert(CommandTable.TABLE_NAME, null, contentValues);
     }
 
-    public void fetchAudiences(long timeout, String endpointId, AudienceListener listener) {
-        JSONObject audiences = mApiClient.fetchAudiences(timeout);
-        new AudienceTask(endpointId, listener).execute(audiences);
+    public void fetchAudiences(long timeout, final String endpointId, final AudienceListener listener) {
+        new AudienceTask(timeout, endpointId, listener).execute();
     }
 
     private Audiences queryAudiences(String endpointId) {
-        return new Audiences();
+        SQLiteDatabase db = mDB.getReadableDatabase();
+        Cursor audienceCursor = db.query(MParticleDatabase.AudienceTable.TABLE_NAME, null, null, null, null, null, null);
+        ArrayList<Integer> ids = new ArrayList<Integer>();
+        while (audienceCursor.moveToNext()){
+            ids.add(audienceCursor.getInt(audienceCursor.getColumnIndex(MParticleDatabase.AudienceTable.AUDIENCE_ID)));
+        }
+        Audiences audiences = new Audiences(ids);
+        db.close();
+        return audiences;
     }
 
-    private void insertAudiences(JSONObject audiences) {
+    private void insertAudiences(JSONObject audiences) throws JSONException {
+        SQLiteDatabase db = mDB.getWritableDatabase();
+        JSONArray audienceList = audiences.getJSONArray("m");
+        db.beginTransaction();
+        boolean success = false;
+        try {
+            db.delete(MParticleDatabase.AudienceMembershipTable.TABLE_NAME, null, null);
+            db.delete(MParticleDatabase.AudienceTable.TABLE_NAME, null, null);
+            for (int i = 0; i < audienceList.length(); i++) {
+                ContentValues audienceRow = new ContentValues();
+                JSONObject audience = audienceList.getJSONObject(i);
+                int id = audience.getInt("id");
+                String name = audience.getString("n");
+                String endPointIds = audience.getJSONArray("s").toString();
+                audienceRow.put(MParticleDatabase.AudienceTable.AUDIENCE_ID, id);
+                audienceRow.put(MParticleDatabase.AudienceTable.NAME, name);
+                audienceRow.put(MParticleDatabase.AudienceTable.ENDPOINTS, endPointIds);
+                db.insert(MParticleDatabase.AudienceTable.TABLE_NAME, null, audienceRow);
+                JSONArray memberships = audience.getJSONArray("c");
+                for (int j = 0; j < memberships.length(); j++) {
+                    ContentValues membershipRow = new ContentValues();
+                    membershipRow.put(MParticleDatabase.AudienceMembershipTable.AUDIENCE_ID, id);
+                    membershipRow.put(MParticleDatabase.AudienceMembershipTable.MEMBERSHIP_ACTION, memberships.getJSONObject(j).getString("a"));
+                    membershipRow.put(MParticleDatabase.AudienceMembershipTable.TIMESTAMP, memberships.getJSONObject(j).optLong("ct", 0));
+                }
+            }
+            success = true;
+        }catch (Exception e){
+            Log.d(Constants.LOG_TAG, "Failed to insert audiences: " + e.getMessage());
+        }finally {
+            if (success){
+                db.setTransactionSuccessful();
+            }
+            db.endTransaction();
+        }
 
     }
 
-    class AudienceTask extends AsyncTask<JSONObject, Void, Audiences> {
-
+    class AudienceTask extends AsyncTask<Void, Void, Audiences> {
+        ExecutorService executor = Executors.newSingleThreadExecutor();
         String endpointId;
         AudienceListener listener;
-        AudienceTask(String endpointId, AudienceListener listener){
+        long timeout;
+        AudienceTask(long timeout, String endpointId, AudienceListener listener){
+            this.timeout = timeout;
             this.endpointId = endpointId;
             this.listener = listener;
         }
         @Override
-        protected Audiences doInBackground(JSONObject... params) {
-            if (params != null && params[0] != null){
-                insertAudiences(params[0]);
+        protected Audiences doInBackground(Void... params) {
+            FutureTask<Boolean> futureTask1 = new FutureTask<Boolean>(new Callable<Boolean>() {
+                @Override
+                public Boolean call() throws Exception {
+                    JSONObject audiences = mApiClient.fetchAudiences();
+                    if (audiences != null){
+                        insertAudiences(audiences);
+                    }
+                    return audiences != null;
+                }
+            });
+
+            executor.execute(futureTask1);
+            try {
+                boolean success = futureTask1.get(timeout, TimeUnit.MILLISECONDS);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+            } catch (TimeoutException e) {
+                e.printStackTrace();
             }
+            executor.shutdown();
             return queryAudiences(endpointId);
         }
 
         @Override
         protected void onPostExecute(Audiences audiences) {
-            super.onPostExecute(audiences);
-            if (listener != null){
-                listener.onAudiencesRetrieved(audiences);
-            }
+            listener.onAudiencesRetrieved(audiences);
         }
     }
 }

@@ -22,13 +22,6 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Date;
 import java.util.Iterator;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
-import java.util.concurrent.FutureTask;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import java.util.zip.GZIPOutputStream;
 
 import javax.crypto.Mac;
@@ -97,34 +90,21 @@ public class MParticleApiClient {
         return new URL(SECURE_SERVICE_SCHEME, SECURE_SERVICE_HOST, SERVICE_VERSION_1 + "/" + apiKey + "/audience?mpID=" + configManager.getMpid());
     }
 
-    Executor executor = Executors.newSingleThreadExecutor();
+    JSONObject fetchAudiences()  {
 
-    JSONObject fetchAudiences(long timeout)  {
-        FutureTask<JSONObject> audienceTask = new FutureTask<JSONObject>(new Callable<JSONObject>() {
-            @Override
-            public JSONObject call() throws Exception {
-                HttpURLConnection connection = (HttpURLConnection) getAudienceUrl().openConnection();
-                connection.setRequestProperty("Accept-Encoding", "gzip");
-                connection.setRequestProperty(HTTP.USER_AGENT, userAgent);
-
-                addMessageSignature(connection, null);
-
-                return new ApiResponse(connection).getJsonResponse();
-            }
-        });
+        JSONObject response = null;
         try {
-            executor.execute(audienceTask);
-            return audienceTask.get(timeout, TimeUnit.MILLISECONDS);
-        }catch (InterruptedException ie){
+            Log.d(Constants.LOG_TAG, "Starting Audience Network request");
+            HttpURLConnection connection = (HttpURLConnection) getAudienceUrl().openConnection();
+            connection.setRequestProperty("Accept-Encoding", "gzip");
+            connection.setRequestProperty(HTTP.USER_AGENT, userAgent);
 
-        }catch (TimeoutException toe){
-            if (configManager.isDebug()){
-                Log.d(Constants.LOG_TAG, "User audience API call timeout, returning cached audience records.");
-            }
-        }catch (ExecutionException ee) {
-
+            addMessageSignature(connection, null);
+            response =  new ApiResponse(connection).getJsonResponse();
+        }catch (Exception e){
+            Log.d(Constants.LOG_TAG, "Audience call failed with exception: " + e.getMessage());
         }
-        return null;
+        return response;
     }
 
     ApiResponse sendMessageBatch(String message) throws IOException {
