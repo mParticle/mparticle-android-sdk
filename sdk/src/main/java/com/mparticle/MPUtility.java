@@ -82,8 +82,17 @@ public class MPUtility {
             try {
                 if (localBufferedReader != null)
                     localBufferedReader.close();
-                if (localProcess != null)
-                    localProcess.destroy();
+                if (localProcess != null){
+                    try {
+                        if (localProcess != null) {
+                            // use exitValue() to determine if process is still running.
+                            localProcess.exitValue();
+                        }
+                    } catch (IllegalThreadStateException e) {
+                        // process is still running, kill it.
+                        localProcess.destroy();
+                    }
+                }
             } catch (IOException localIOException4) {
                 Log.w(Constants.LOG_TAG, "Error computing CPU usage");
             }

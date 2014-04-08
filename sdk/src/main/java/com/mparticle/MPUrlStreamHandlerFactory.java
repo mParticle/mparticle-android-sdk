@@ -6,7 +6,7 @@ import java.net.URLStreamHandlerFactory;
 /**
  * Created by sdozor on 3/3/14.
  */
-public class MPUrlStreamHandlerFactory implements URLStreamHandlerFactory {
+class MPUrlStreamHandlerFactory implements URLStreamHandlerFactory {
 
     @Override
     public final URLStreamHandler createURLStreamHandler(String protocol) {

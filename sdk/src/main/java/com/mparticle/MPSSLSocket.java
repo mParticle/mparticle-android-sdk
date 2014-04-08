@@ -17,7 +17,7 @@ import javax.net.ssl.SSLSocket;
 /**
  * Created by sdozor on 3/4/14.
  */
-public final class MPSSLSocket extends SSLSocket {
+final class MPSSLSocket extends SSLSocket {
     private final Queue requestQueue = new LinkedList();
     private SSLSocket localSocket;
     private OutputStream outputStream;

@@ -20,6 +20,7 @@ repositories {
     mavenLocal()
     maven { url 'http://www.bugsense.com/gradle/' }
     maven { url 'http://download.crashlytics.com/maven' }
+    maven { url 'http://www.mparticle.com/maven/' }
 }
 
 def buildTime() {
@@ -79,7 +80,16 @@ android {
 dependencies {
 	compile 'com.android.support:support-v4:19.0.0'
 	compile 'com.android.support:appcompat-v7:19.0.0'
-    compile project(':sdk')
+    flurryCompile project(':sdk')
+    googleanalyticsCompile project(':sdk')
+    mixpanelCompile project(':sdk')
+    urbanairshipCompile project(':sdk')
+    flurryCompile project(':sdk')
+    kahunaCompile project(':sdk')
+    crashlyticsCompile project(':sdk')
+    //mparticleCompile 'com.mparticle:android-sdk:1.1.+'
+    mparticleCompile project(':sdk')
+    //mparticleCompile files ("libs/classes.jar")
     googleanalyticsCompile 'com.google.android.gms:play-services:4.3.23'
     mixpanelCompile 'com.mixpanel.android:mixpanel-android:4.0.0-RC3@aar'
     flurryCompile files ("libs/FlurryAnalytics_3.3.3.jar")
