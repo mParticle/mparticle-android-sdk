@@ -472,11 +472,19 @@ import java.util.concurrent.TimeoutException;
 
     private Audiences queryAudiences(String endpointId) {
         SQLiteDatabase db = mDB.getReadableDatabase();
-        Cursor audienceCursor = db.query(MParticleDatabase.AudienceTable.TABLE_NAME, null, null, null, null, null, null);
+        String selection = null;
+        String[] args = null;
+        if (endpointId != null && endpointId.length() > 0){
+            selection = MParticleDatabase.AudienceTable.ENDPOINTS + " like ?";
+            args = new String[1];
+            args[0] = "%\"" + endpointId + "\"%";
+        }
+        Cursor audienceCursor = db.query(MParticleDatabase.AudienceTable.TABLE_NAME, null, selection, args, null, null, null);
         ArrayList<Integer> ids = new ArrayList<Integer>();
         while (audienceCursor.moveToNext()){
             ids.add(audienceCursor.getInt(audienceCursor.getColumnIndex(MParticleDatabase.AudienceTable.AUDIENCE_ID)));
         }
+        
         Audiences audiences = new Audiences(ids);
         db.close();
         return audiences;
@@ -545,7 +553,7 @@ import java.util.concurrent.TimeoutException;
 
             executor.execute(futureTask1);
             try {
-                boolean success = futureTask1.get(timeout, TimeUnit.MILLISECONDS);
+                futureTask1.get(timeout, TimeUnit.MILLISECONDS);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             } catch (ExecutionException e) {

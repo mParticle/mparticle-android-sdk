@@ -33,6 +33,13 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
 
+            <EditText
+                android:layout_width="200dp"
+                android:hint="Endpoint"
+                android:id="@+id/endpoint"
+                android:layout_marginLeft="10dp"
+                android:layout_height="match_parent" />
+
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

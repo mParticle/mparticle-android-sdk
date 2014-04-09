@@ -2,9 +2,11 @@ package com.mparticle.particlebox;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.text.Editable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -20,6 +22,7 @@ public class AudienceFragment extends Fragment implements AudienceListener, View
     private static final String ARG_SECTION_NUMBER = "section_number";
     TextView audienceTextView, timeoutTextView;
     SeekBar seekbar;
+    EditText endpointText;
     long time;
 
     @Override
@@ -28,6 +31,7 @@ public class AudienceFragment extends Fragment implements AudienceListener, View
         audienceTextView = (TextView)v.findViewById(R.id.audiences);
         timeoutTextView = (TextView)v.findViewById(R.id.timeoutText);
         seekbar = (SeekBar)v.findViewById(R.id.seekBar);
+        endpointText = (EditText)v.findViewById(R.id.endpoint);
         seekbar.setOnSeekBarChangeListener(this);
         timeoutTextView.setText("Timeout: " + Integer.toString(seekbar.getProgress()) + " milliseconds");
         v.findViewById(R.id.button).setOnClickListener(this);
@@ -55,7 +59,8 @@ public class AudienceFragment extends Fragment implements AudienceListener, View
     @Override
     public void onClick(View v) {
         time = System.currentTimeMillis();
-        MParticle.getInstance().getUserAudiences(seekbar.getProgress(), null, this);
+        Editable text = endpointText.getText();
+        MParticle.getInstance().getUserAudiences(seekbar.getProgress(), text != null ? text.toString() : null, this);
     }
 
     @Override
