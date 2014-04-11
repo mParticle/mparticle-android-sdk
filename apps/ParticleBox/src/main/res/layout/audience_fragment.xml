@@ -27,11 +27,15 @@
                 android:layout_width="1dp"
                 android:layout_height="20dp" />
 
-            <TextView
+            <ListView
                 android:text=""
                 android:id="@+id/audiences"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
+                android:layout_height="200dp" />
+
+            <View
+                android:layout_width="1dp"
+                android:layout_height="25dp" />
 
             <EditText
                 android:layout_width="200dp"

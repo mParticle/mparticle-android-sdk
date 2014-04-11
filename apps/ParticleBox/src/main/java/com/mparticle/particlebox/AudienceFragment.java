@@ -6,21 +6,25 @@ import android.text.Editable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.ListView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.mparticle.AudienceListener;
 import com.mparticle.MParticle;
-import com.mparticle.com.mparticle.audience.Audiences;
+import com.mparticle.com.mparticle.audience.Audience;
+import com.mparticle.com.mparticle.audience.AudienceMembership;
 
 /**
  * Created by sdozor on 2/25/14.
  */
 public class AudienceFragment extends Fragment implements AudienceListener, View.OnClickListener, SeekBar.OnSeekBarChangeListener {
     private static final String ARG_SECTION_NUMBER = "section_number";
-    TextView audienceTextView, timeoutTextView;
+    TextView  timeoutTextView;
+    ListView audienceList;
     SeekBar seekbar;
     EditText endpointText;
     long time;
@@ -28,7 +32,7 @@ public class AudienceFragment extends Fragment implements AudienceListener, View
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.audience_fragment, container, false);
-        audienceTextView = (TextView)v.findViewById(R.id.audiences);
+        audienceList = (ListView)v.findViewById(R.id.audiences);
         timeoutTextView = (TextView)v.findViewById(R.id.timeoutText);
         seekbar = (SeekBar)v.findViewById(R.id.seekBar);
         endpointText = (EditText)v.findViewById(R.id.endpoint);
@@ -51,9 +55,14 @@ public class AudienceFragment extends Fragment implements AudienceListener, View
     }
 
     @Override
-    public void onAudiencesRetrieved(Audiences audiences) {
-        Toast.makeText(getActivity(), "Audience returned in: " + (System.currentTimeMillis() - time) + " milliseconds.", Toast.LENGTH_SHORT ).show();
-        audienceTextView.setText(audiences.toString());
+    public void onAudiencesRetrieved(AudienceMembership audienceMembership) {
+        Toast.makeText(getActivity(), "Audiences returned in: " + (System.currentTimeMillis() - time) + " milliseconds.", Toast.LENGTH_SHORT ).show();
+        StringBuilder builder = new StringBuilder();
+        for (Audience audience : audienceMembership.getAudiences()){
+            builder.append(audience.toString());
+            builder.append("\n");
+        }
+        audienceList.setAdapter(new ArrayAdapter<Audience>(getActivity(), android.R.layout.simple_list_item_1, audienceMembership.getAudiences()));
     }
 
     @Override

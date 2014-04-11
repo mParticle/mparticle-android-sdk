@@ -286,4 +286,15 @@ package com.mparticle;
         public static final String STATE_TRANS_FORE = "app_fore";
     }
 
+    interface Audience {
+        public static final String ACTION_ADD = "add";
+        public static final String API_AUDIENCE_LIST = "m";
+        public static final String API_AUDIENCE_ID = "id";
+        public static final String API_AUDIENCE_NAME = "n";
+        public static final String API_AUDIENCE_ENDPOINTS = "s";
+        public static final String API_AUDIENCE_MEMBERSHIPS = "c";
+        public static final String API_AUDIENCE_ACTION = "a";
+        public static final String API_AUDIENCE_MEMBERSHIP_TIMESTAMP = "ct";
+    }
+
 }
