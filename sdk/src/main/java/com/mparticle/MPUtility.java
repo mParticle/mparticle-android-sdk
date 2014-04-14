@@ -212,7 +212,7 @@ public class MPUtility {
     public static synchronized String getOpenUDID(Context context) {
         if (sOpenUDID == null) {
             SharedPreferences sharedPrefs = context.getSharedPreferences(
-                    Constants.MISC_FILE, Context.MODE_PRIVATE);
+                    Constants.PREFS_FILE, Context.MODE_PRIVATE);
             sOpenUDID = sharedPrefs.getString(Constants.PrefKeys.OPEN_UDID, null);
             if (sOpenUDID == null) {
                 sOpenUDID = getAndroidID(context);
@@ -436,9 +436,9 @@ public class MPUtility {
         return context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_TELEPHONY);
     }
 
-    public static boolean isBluetoothEnabled() {
+    public static boolean isBluetoothEnabled(Context context) {
         BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-        if (mBluetoothAdapter != null) {
+        if (mBluetoothAdapter != null && checkPermission(context, Manifest.permission.BLUETOOTH)) {
             return mBluetoothAdapter.isEnabled();
         }
         return false;

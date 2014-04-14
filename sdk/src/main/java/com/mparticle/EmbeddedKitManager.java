@@ -82,11 +82,11 @@ class EmbeddedKitManager implements IEmbeddedKit, MPActivityCallbacks{
     }
 
     @Override
-    public void logTransaction(MPTransaction transaction) {
+    public void logTransaction(MPProduct product) {
         for (EmbeddedProvider provider : providers.values()){
             try {
                 if (!provider.optedOut()) {
-                    provider.logTransaction(transaction);
+                    provider.logTransaction(product);
                 }
             } catch (Exception e) {
                 if (MParticle.getInstance().getDebugMode()){

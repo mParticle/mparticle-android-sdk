@@ -5,7 +5,7 @@
     android:versionName="0.20">
 
     <uses-sdk
-        android:minSdkVersion="9"
+        android:minSdkVersion="8"
         android:targetSdkVersion="19" />
 
     <uses-permission android:name="android.permission.INTERNET" />
@@ -17,6 +17,9 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="com.android.vending.CHECK_LICENSE" />
 
+
+
+
     <application
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
@@ -24,6 +27,8 @@
         android:theme="@style/AppTheme">
         <meta-data android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
+
+        <meta-data android:name="com.crashlytics.ApiKey" android:value="f429d77fa500ec35daba0301d600914067554649"/>
 
         <activity
             android:name="com.mparticle.particlebox.MainActivity"
@@ -36,7 +41,7 @@
         </activity>
 
 
-        <meta-data android:name="com.crashlytics.ApiKey" android:value="f429d77fa500ec35daba0301d600914067554649"/>
-    </application>
+
+   </application>
 
 </manifest>

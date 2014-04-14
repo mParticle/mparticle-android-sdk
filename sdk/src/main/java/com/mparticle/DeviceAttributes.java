@@ -33,8 +33,10 @@ import java.util.TimeZone;
      */
     public static JSONObject collectAppInfo(Context appContext) {
         JSONObject attributes = new JSONObject();
-
+        SharedPreferences preferences = appContext.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = preferences.edit();
         try {
+            long now = System.currentTimeMillis();
             PackageManager packageManager = appContext.getPackageManager();
             String packageName = appContext.getPackageName();
             attributes.put(MessageKey.APP_PACKAGE_NAME, packageName);
@@ -61,14 +63,49 @@ import java.util.TimeZone;
             } catch (PackageManager.NameNotFoundException e) {
                 // ignore missing data
             }
-            SharedPreferences preferences = appContext.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
-            attributes.put(MessageKey.MPARTICLE_INSTALL_TIME, preferences.getLong(PrefKeys.INSTALL_TIME, 0));
+
             attributes.put(MessageKey.INSTALL_REFERRER, preferences.getString(PrefKeys.INSTALL_REFERRER, null));
             attributes.put(MessageKey.BUILD_ID, MPUtility.getBuildUUID(appContext));
             attributes.put(MessageKey.APP_DEBUG_SIGNING, MPUtility.isDebug(packageManager, packageName));
             attributes.put(MessageKey.APP_PIRATED, preferences.getBoolean(PrefKeys.PIRATED, false));
+
+            attributes.put(MessageKey.MPARTICLE_INSTALL_TIME, preferences.getLong(PrefKeys.INSTALL_TIME, now));
+            if (!preferences.contains(PrefKeys.INSTALL_TIME)) {
+                editor.putLong(PrefKeys.INSTALL_TIME, now);
+            }
+
+            int totalRuns = preferences.getInt(PrefKeys.TOTAL_RUNS, 0) + 1;
+            editor.putInt(PrefKeys.TOTAL_RUNS, totalRuns);
+            attributes.put(MessageKey.LAUNCH_COUNT, totalRuns);
+
+            long useDate = preferences.getLong(PrefKeys.LAST_USE, 0);
+            attributes.put(MessageKey.LAST_USE_DATE, useDate);
+            editor.putLong(PrefKeys.LAST_USE, now);
+            try {
+                PackageInfo pInfo = packageManager.getPackageInfo(packageName, 0);
+                int persistedVersion = preferences.getInt(PrefKeys.COUNTER_VERSION, -1);
+                int countSinceUpgrade = preferences.getInt(PrefKeys.TOTAL_SINCE_UPGRADE, 0);
+                long upgradeDate = preferences.getLong(PrefKeys.UPGRADE_DATE, now);
+                if (persistedVersion < 0 || persistedVersion != pInfo.versionCode){
+                    countSinceUpgrade = 0;
+                    upgradeDate = now;
+                    editor.putInt(PrefKeys.COUNTER_VERSION, pInfo.versionCode);
+                    editor.putLong(PrefKeys.UPGRADE_DATE, upgradeDate);
+                }
+                countSinceUpgrade += 1;
+                editor.putInt(PrefKeys.TOTAL_SINCE_UPGRADE, countSinceUpgrade);
+
+                attributes.put(MessageKey.LAUNCH_COUNT_SINCE_UPGRADE, countSinceUpgrade);
+                attributes.put(MessageKey.UPGRADE_DATE, upgradeDate);
+            } catch (PackageManager.NameNotFoundException e) {
+                // ignore missing data
+            }
+
+
         } catch (JSONException e) {
             // ignore JSON exceptions
+        } finally {
+            editor.commit();
         }
         return attributes;
     }
@@ -96,11 +133,12 @@ import java.util.TimeZone;
             attributes.put(MessageKey.PLATFORM, "Android");
             attributes.put(MessageKey.OS_VERSION, Build.VERSION.SDK);
             attributes.put(MessageKey.OS_VERSION_INT, Build.VERSION.SDK_INT);
-            attributes.put(MessageKey.DEVICE_BLUETOOTH_ENABLED, MPUtility.isBluetoothEnabled());
+            attributes.put(MessageKey.DEVICE_BLUETOOTH_ENABLED, MPUtility.isBluetoothEnabled(appContext));
             attributes.put(MessageKey.DEVICE_BLUETOOTH_VERSION, MPUtility.getBluetoothVersion(appContext));
             attributes.put(MessageKey.DEVICE_SUPPORTS_NFC, MPUtility.hasNfc(appContext));
             attributes.put(MessageKey.DEVICE_SUPPORTS_TELEPHONY, MPUtility.hasTelephony(appContext));
             attributes.put(MessageKey.MODEL, android.os.Build.MODEL);
+            attributes.put(MessageKey.RELEASE_VERSION, Build.VERSION.RELEASE);
 
             JSONObject rootedObject = new JSONObject();
             rootedObject.put(MessageKey.DEVICE_ROOTED_CYDIA, MPUtility.isPhoneRooted());

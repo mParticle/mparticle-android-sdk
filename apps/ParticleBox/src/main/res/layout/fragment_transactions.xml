@@ -131,6 +131,49 @@
                 android:layout_height="50dp" />
         </LinearLayout>
 
+        <View
+            android:layout_width="1dp"
+            android:layout_height="5dp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:orientation="vertical"
+            android:background="@drawable/gray_border"
+            android:padding="5dp"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:text="LTV Increase"
+                android:textStyle="bold"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <View
+                android:layout_width="1dp"
+                android:layout_height="20dp" />
+
+            <EditText
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Increase LTV by..."
+                android:text="15.00"
+                android:inputType="numberDecimal"
+                android:id="@+id/ltv"
+                android:singleLine="true" />
+
+            <View
+                android:layout_width="1dp"
+                android:layout_height="5dp" />
+
+            <Button
+                android:layout_width="280dp"
+                android:text="@string/triggerText"
+                android:id="@+id/ltvButton"
+                android:layout_gravity="center_horizontal"
+                android:textColor="@android:color/white"
+                android:layout_height="50dp" />
+        </LinearLayout>
+
 
     </LinearLayout>
 </ScrollView>

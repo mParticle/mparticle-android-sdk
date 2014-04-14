@@ -42,6 +42,7 @@ class ConfigManager {
     private boolean loaded = false;
 
     private boolean sendOoEvents;
+    private JSONObject providerPersistence;
 
     public ConfigManager(Context context, String key, String secret, boolean sandboxMode, EmbeddedKitManager embeddedKitManager) {
         mContext = context.getApplicationContext();
@@ -79,6 +80,10 @@ class ConfigManager {
 
         if (responseJSON.has(KEY_OPT_OUT)){
             sendOoEvents = responseJSON.getBoolean(KEY_OPT_OUT);
+        }
+
+        if (responseJSON.has(ProviderPersistence.KEY_PERSISTENCE)) {
+            setProviderPersistence(new ProviderPersistence(responseJSON, mContext));
         }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD) {
@@ -147,10 +152,6 @@ class ConfigManager {
 
     public boolean isDebug() {
         return localPrefs.debug;
-    }
-
-    public boolean isCompressionEnabled() {
-        return true;
     }
 
     public void setDebug(boolean enabled) {
@@ -281,11 +282,31 @@ class ConfigManager {
                 .commit();
     }
 
+    private synchronized void setProviderPersistence(JSONObject persistence){
+        providerPersistence = persistence;
+    }
+
+    public synchronized JSONObject getProviderPersistence() {
+        return providerPersistence;
+    }
+
     public boolean isNetworkPerformanceEnabled() {
         return localPrefs.networkingEnabled;
     }
 
     public void setNetworkingEnabled(boolean networkingEnabled) {
         this.localPrefs.networkingEnabled = networkingEnabled;
+    }
+
+    public void setCookies(JSONObject cookies) {
+        mPreferences.edit().putString(Constants.PrefKeys.Cookies, cookies.toString()).commit();
+    }
+
+    public JSONObject getCookies() throws JSONException {
+        return new JSONObject(mPreferences.getString(Constants.PrefKeys.Cookies, ""));
+    }
+
+    public void setMpid(long mpid) {
+        mPreferences.edit().putFloat(Constants.PrefKeys.Mpid, mpid).commit();
     }
 }

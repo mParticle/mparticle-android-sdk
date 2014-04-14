@@ -86,25 +86,24 @@ public class EmbeddedMAT extends EmbeddedProvider implements MPActivityCallbacks
     }
 
     @Override
-    public void logTransaction(MPTransaction transaction) {
-        JSONObject transData = transaction.getData();
+    public void logTransaction(MPProduct transaction) {
         com.mobileapptracker.MobileAppTracker instance = com.mobileapptracker.MobileAppTracker.getInstance();
         com.mobileapptracker.MATEventItem item = new com.mobileapptracker.MATEventItem(
-                transData.optString(MPTransaction.NAME),
-                transData.optInt(MPTransaction.QUANTITY, 1),
-                transData.optDouble(MPTransaction.UNITPRICE, 0),
-                transData.optDouble(MPTransaction.REVENUE, 0),
-                transData.optString(MPTransaction.TAX),
-                transData.optString(MPTransaction.SHIPPING),
-                transData.optString(MPTransaction.SKU),
-                transData.optString(MPTransaction.AFFILIATION),
-                transData.optString(MPTransaction.CATEGORY)
+                transaction.get(MPProduct.NAME,""),
+                Integer.parseInt(transaction.get(MPProduct.QUANTITY, "1")),
+                Double.parseDouble(transaction.get(MPProduct.UNITPRICE, "0")),
+                Double.parseDouble(transaction.get(MPProduct.REVENUE, "0")),
+                transaction.get(MPProduct.TAX, "0"),
+                transaction.get(MPProduct.SHIPPING, "0"),
+                transaction.get(MPProduct.SKU, ""),
+                transaction.get(MPProduct.AFFILIATION, ""),
+                transaction.get(MPProduct.CATEGORY, "")
         );
         instance.measureAction("purchase",
                 item,
-                transData.optDouble(MPTransaction.REVENUE, 0),
-                transData.optString(MPTransaction.CURRENCY, "USD"),
-                transData.optString(MPTransaction.TRANSACTION_ID, UUID.randomUUID().toString())
+                Double.parseDouble(transaction.get(MPProduct.REVENUE, "0")),
+                transaction.get(MPProduct.CURRENCY, "USD"),
+                transaction.get(MPProduct.TRANSACTION_ID, UUID.randomUUID().toString())
         );
     }
 

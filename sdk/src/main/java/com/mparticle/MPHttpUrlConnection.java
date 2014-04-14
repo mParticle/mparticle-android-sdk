@@ -26,6 +26,7 @@ final class MPHttpUrlConnection extends HttpURLConnection {
     public MPHttpUrlConnection(HttpURLConnection connection) {
         super(connection.getURL());
         request = new MeasuredRequest();
+        request.setUri(connection.getURL());
         request.setParseHeaders(false);
         delegateConnection = connection;
     }

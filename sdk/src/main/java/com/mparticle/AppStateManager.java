@@ -4,6 +4,7 @@ import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.Application;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -19,6 +20,7 @@ class AppStateManager implements MPActivityCallbacks{
     public static final String APP_STATE_FOREGROUND = "foreground";
     public static final String APP_STATE_BACKGROUND = "background";
     public static final String APP_STATE_NOTRUNNING = "not_running";
+    private final SharedPreferences preferences;
     private final EmbeddedKitManager embeddedKitManager;
     Context mContext;
     AtomicInteger mActivities = new AtomicInteger(0);
@@ -48,6 +50,7 @@ class AppStateManager implements MPActivityCallbacks{
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
             setupLifecycleCallbacks();
         }
+        preferences = context.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
     }
 
     @TargetApi(14)
@@ -96,7 +99,17 @@ class AppStateManager implements MPActivityCallbacks{
 
     @Override
     public void onActivityStarted(Activity activity) {
+        preferences.edit().putBoolean(Constants.PrefKeys.CRASHED_IN_FOREGROUND, true).commit();
         if (isBackgrounded() && mLastStoppedTime > 0) {
+            long totalTimeInBackground = preferences.getLong(Constants.PrefKeys.TIME_IN_BG, -1);
+            if (totalTimeInBackground > -1){
+                totalTimeInBackground += (System.currentTimeMillis() - mLastStoppedTime);
+            }else{
+                totalTimeInBackground = 0;
+            }
+
+            preferences.edit().putLong(Constants.PrefKeys.TIME_IN_BG, totalTimeInBackground).commit();
+
             MParticle.getInstance().logStateTransition(Constants.StateTransitionType.STATE_TRANS_FORE);
             if (MParticle.getInstance().getDebugMode()) {
                 Log.d(Constants.LOG_TAG, "APP FOREGROUNDED");
@@ -111,6 +124,7 @@ class AppStateManager implements MPActivityCallbacks{
 
     @Override
     public void onActivityStopped(Activity activity) {
+        preferences.edit().putBoolean(Constants.PrefKeys.CRASHED_IN_FOREGROUND, false).commit();
         mLastStoppedTime = System.currentTimeMillis();
 
         if (mActivities.decrementAndGet() < 1) {

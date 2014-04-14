@@ -1,18 +1,16 @@
 package com.mparticle;
 
-import android.util.Log;
-
-import org.json.JSONException;
-import org.json.JSONObject;
+import java.util.HashMap;
 
 /**
  *
  * Class used to log an e-commerce transaction.
  *
- *  @see com.mparticle.MParticle#logTransaction(MPTransaction)
+ *  @see com.mparticle.MParticle#logTransaction(MPProduct)
  *
  */
-public class MPTransaction {
+    
+public class MPProduct extends HashMap<String, String> {
     static final String NAME = "ProductName";
     static final String SKU = "ProductSKU";
     static final String AFFILIATION = "TransactionAffiliation";
@@ -24,9 +22,13 @@ public class MPTransaction {
     static final String CATEGORY = "ProductCategory";
     static final String CURRENCY = "CurrencyCode";
     static final String TRANSACTION_ID = "TransactionID";
-    private JSONObject transactionInfo;
 
-    private MPTransaction(Builder builder) {
+
+    private MPProduct(){
+        //prevent instantiation
+    }
+
+    private MPProduct(Builder builder) {
         if (builder.productName == null) {
             throw new IllegalStateException("productName is required for a transaction");
         }
@@ -34,54 +36,47 @@ public class MPTransaction {
             throw new IllegalStateException("productSku is required for a transaction");
         }
 
-        try {
-            transactionInfo = new JSONObject();
-            transactionInfo.put("$MethodName", "LogEcommerceTransaction");
-            MParticle.setCheckedAttribute(transactionInfo, NAME, builder.productName);
-            MParticle.setCheckedAttribute(transactionInfo, SKU, builder.productSku);
+        put(Constants.MethodName.METHOD_NAME, Constants.MethodName.LOG_ECOMMERCE);
+        put(NAME, builder.productName);
+        put(SKU, builder.productSku);
 
-            if (builder.affiliation != null && builder.affiliation.length() > 0)
-                MParticle.setCheckedAttribute(transactionInfo, AFFILIATION, builder.affiliation);
+        if (builder.affiliation != null && builder.affiliation.length() > 0)
+            put(AFFILIATION, builder.affiliation);
 
-            if (builder.productUnitPrice != null)
-                MParticle.setCheckedAttribute(transactionInfo, UNITPRICE, Double.toString(builder.productUnitPrice));
+        if (builder.productUnitPrice != null)
+            put(UNITPRICE, Double.toString(builder.productUnitPrice));
 
-            if (builder.quantity != null)
-                MParticle.setCheckedAttribute(transactionInfo, QUANTITY, Double.toString(builder.quantity));
+        if (builder.quantity != null)
+            put(QUANTITY, Double.toString(builder.quantity));
 
-            if (builder.revenueAmount != null)
-                MParticle.setCheckedAttribute(transactionInfo, REVENUE, Double.toString(builder.revenueAmount));
+        if (builder.revenueAmount != null)
+            put(REVENUE, Double.toString(builder.revenueAmount));
 
-            if (builder.taxAmount != null)
-                MParticle.setCheckedAttribute(transactionInfo, TAX, Double.toString(builder.taxAmount));
+        if (builder.taxAmount != null)
+            put(TAX, Double.toString(builder.taxAmount));
 
-            if (builder.shippingAmount != null)
-                MParticle.setCheckedAttribute(transactionInfo, SHIPPING, Double.toString(builder.shippingAmount));
+        if (builder.shippingAmount != null)
+            put(SHIPPING, Double.toString(builder.shippingAmount));
 
-            if (builder.productCategory != null)
-                MParticle.setCheckedAttribute(transactionInfo, CATEGORY, builder.productCategory);
+        if (builder.productCategory != null)
+            put(CATEGORY, builder.productCategory);
 
-            if (builder.currencyCode != null)
-                MParticle.setCheckedAttribute(transactionInfo, CURRENCY, builder.currencyCode);
+        if (builder.currencyCode != null)
+            put(CURRENCY, builder.currencyCode);
 
-            if (builder.transactionId != null && builder.transactionId.length() > 0)
-                MParticle.setCheckedAttribute(transactionInfo, TRANSACTION_ID, builder.transactionId);
-
-
-        } catch (JSONException jse) {
-            Log.w(Constants.LOG_TAG, "Failed to create transaction: " + jse.getMessage());
-        }
+        if (builder.transactionId != null && builder.transactionId.length() > 0)
+            put(TRANSACTION_ID, builder.transactionId);
 
     }
 
-    JSONObject getData() {
-        return transactionInfo;
+    public String get(Object key, String defaultValue) {
+        return containsKey(key) ? super.get(key) : defaultValue;
     }
 
     /**
      * Class used to build an {@code MPTransaction} object.
      *
-     * @see com.mparticle.MParticle#logTransaction(MPTransaction)
+     * @see com.mparticle.MParticle#logTransaction(MPProduct)
      */
     public static class Builder {
         //required parameters
@@ -211,13 +206,13 @@ public class MPTransaction {
         }
 
         /**
-         * The final step in creating an {@code MPTransaction} object, to be passed into {@link com.mparticle.MParticle#logTransaction(MPTransaction)}.
+         * The final step in creating an {@code MPTransaction} object, to be passed into {@link com.mparticle.MParticle#logTransaction(MPProduct)}.
          * This method will perform validation on the fields and will throw an {@code IllegalStateException} if {@code productName} or {@code productCode} are null.
          *
          * @return The {@code MPTransaction}
          */
-        public MPTransaction build() {
-            return new MPTransaction(this);
+        public MPProduct build() {
+            return new MPProduct(this);
         }
     }
 }

@@ -31,36 +31,43 @@ final class MPSocketImpl extends SocketImpl {
         delegateSocket = socketImpl;
         request = new MeasuredRequest();
 
-        Class localSocketImpl = SocketImpl.class;
-        addressField = localSocketImpl.getDeclaredField("address");
-        fileDescriptorField = localSocketImpl.getDeclaredField("fd");
-        localPortField = localSocketImpl.getDeclaredField("localport");
-        portField = localSocketImpl.getDeclaredField("port");
-        AccessibleObject[] objects = {addressField, fileDescriptorField, localPortField, portField};
+        updateFields();
+    }
 
-        setAccessible(objects);
+    static {
+        try{
 
-        methods[0] = localSocketImpl.getDeclaredMethod("accept", new Class[]{SocketImpl.class});
-        methods[1] = localSocketImpl.getDeclaredMethod("available", new Class[0]);
-        methods[2] = localSocketImpl.getDeclaredMethod("bind", new Class[]{InetAddress.class, Integer.TYPE});
-        methods[3] = localSocketImpl.getDeclaredMethod("close", new Class[0]);
-        methods[4] = localSocketImpl.getDeclaredMethod("connect", new Class[]{InetAddress.class, Integer.TYPE});
-        methods[5] = localSocketImpl.getDeclaredMethod("connect", new Class[]{SocketAddress.class, Integer.TYPE});
-        methods[6] = localSocketImpl.getDeclaredMethod("connect", new Class[]{String.class, Integer.TYPE});
-        methods[7] = localSocketImpl.getDeclaredMethod("create", new Class[]{Boolean.TYPE});
-        methods[8] = localSocketImpl.getDeclaredMethod("getFileDescriptor", new Class[0]);
-        methods[9] = localSocketImpl.getDeclaredMethod("getInetAddress", new Class[0]);
-        methods[10] = localSocketImpl.getDeclaredMethod("getInputStream", new Class[0]);
-        methods[11] = localSocketImpl.getDeclaredMethod("getLocalPort", new Class[0]);
-        methods[12] = localSocketImpl.getDeclaredMethod("getOutputStream", new Class[0]);
-        methods[13] = localSocketImpl.getDeclaredMethod("getPort", new Class[0]);
-        methods[14] = localSocketImpl.getDeclaredMethod("listen", new Class[]{Integer.TYPE});
-        methods[15] = localSocketImpl.getDeclaredMethod("sendUrgentData", new Class[]{Integer.TYPE});
-        methods[16] = localSocketImpl.getDeclaredMethod("setPerformancePreferences", new Class[]{Integer.TYPE, Integer.TYPE, Integer.TYPE});
-        methods[17] = localSocketImpl.getDeclaredMethod("shutdownInput", new Class[0]);
-        methods[18] = localSocketImpl.getDeclaredMethod("shutdownOutput", new Class[0]);
-        methods[19] = localSocketImpl.getDeclaredMethod("supportsUrgentData", new Class[0]);
-        setAccessible(methods);
+            Class localSocketImpl = SocketImpl.class;
+            addressField = localSocketImpl.getDeclaredField("address");
+            fileDescriptorField = localSocketImpl.getDeclaredField("fd");
+            localPortField = localSocketImpl.getDeclaredField("localport");
+            portField = localSocketImpl.getDeclaredField("port");
+            AccessibleObject[] objects = {addressField, fileDescriptorField, localPortField, portField};
+            setAccessible(objects);
+            methods[0] = localSocketImpl.getDeclaredMethod("accept", new Class[]{SocketImpl.class});
+            methods[1] = localSocketImpl.getDeclaredMethod("available", new Class[0]);
+            methods[2] = localSocketImpl.getDeclaredMethod("bind", new Class[]{InetAddress.class, Integer.TYPE});
+            methods[3] = localSocketImpl.getDeclaredMethod("close", new Class[0]);
+            methods[4] = localSocketImpl.getDeclaredMethod("connect", new Class[]{InetAddress.class, Integer.TYPE});
+            methods[5] = localSocketImpl.getDeclaredMethod("connect", new Class[]{SocketAddress.class, Integer.TYPE});
+            methods[6] = localSocketImpl.getDeclaredMethod("connect", new Class[]{String.class, Integer.TYPE});
+            methods[7] = localSocketImpl.getDeclaredMethod("create", new Class[]{Boolean.TYPE});
+            methods[8] = localSocketImpl.getDeclaredMethod("getFileDescriptor", new Class[0]);
+            methods[9] = localSocketImpl.getDeclaredMethod("getInetAddress", new Class[0]);
+            methods[10] = localSocketImpl.getDeclaredMethod("getInputStream", new Class[0]);
+            methods[11] = localSocketImpl.getDeclaredMethod("getLocalPort", new Class[0]);
+            methods[12] = localSocketImpl.getDeclaredMethod("getOutputStream", new Class[0]);
+            methods[13] = localSocketImpl.getDeclaredMethod("getPort", new Class[0]);
+            methods[14] = localSocketImpl.getDeclaredMethod("listen", new Class[]{Integer.TYPE});
+            methods[15] = localSocketImpl.getDeclaredMethod("sendUrgentData", new Class[]{Integer.TYPE});
+            methods[16] = localSocketImpl.getDeclaredMethod("setPerformancePreferences", new Class[]{Integer.TYPE, Integer.TYPE, Integer.TYPE});
+            methods[17] = localSocketImpl.getDeclaredMethod("shutdownInput", new Class[0]);
+            methods[18] = localSocketImpl.getDeclaredMethod("shutdownOutput", new Class[0]);
+            methods[19] = localSocketImpl.getDeclaredMethod("supportsUrgentData", new Class[0]);
+            setAccessible(methods);
+        }catch (Exception e){
+
+        }
     }
 
     public static void setAccessible(AccessibleObject[] objects) {
@@ -82,12 +89,14 @@ final class MPSocketImpl extends SocketImpl {
 
         try {
             return methods[paramInt].invoke(delegateSocket, paramArrayOfObject);
-        } catch (IllegalAccessException e) {
+        } catch (Exception e) {
             //e.printStackTrace();
-        } catch (InvocationTargetException e) {
+
             //important: this methods are *supposed* to throw sometimes
-            if (e.getTargetException() instanceof IOException){
-                throw (IOException)e.getTargetException();
+            if (e instanceof  InvocationTargetException && ((InvocationTargetException) e).getTargetException() instanceof IOException){
+                throw (IOException)((InvocationTargetException) e).getTargetException();
+            }else if (e instanceof IOException){
+                throw (IOException)e;
             }
         }finally {
             updateFields();
