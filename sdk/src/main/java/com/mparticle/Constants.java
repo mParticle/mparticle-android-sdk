@@ -83,6 +83,9 @@ package com.mparticle;
         // user identity
         public static final String IDENTITY_NAME = "n";
         public static final String IDENTITY_VALUE = "i";
+        public static final String IDENTITY_DATE_FIRST_SEEN = "dfs";
+        public static final String IDENTITY_FIRST_SEEN = "f";
+
         // application info
         public static final String APP_NAME = "an";
         public static final String APP_VERSION = "av";
