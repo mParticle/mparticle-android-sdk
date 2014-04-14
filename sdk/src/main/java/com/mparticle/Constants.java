@@ -130,6 +130,7 @@ package com.mparticle;
         public static final String DEVICE_SUPPORTS_NFC = "dsnfc";
         public static final String DEVICE_BLUETOOTH_ENABLED = "dbe";
         public static final String DEVICE_BLUETOOTH_VERSION = "dbv";
+        public static final String GOOGLE_ADV_ID = "gaid";
 
         // state info
         public static final String STATE_INFO_KEY = "cs";

@@ -842,7 +842,7 @@ com.mparticle.AppConfig -> com.mparticle.b:
     130:135:boolean getBoolean(java.lang.String,boolean) -> a
     139:144:int getInteger(java.lang.String,int) -> a
     35:110:org.json.JSONObject collectAppInfo(android.content.Context) -> a
-    120:218:org.json.JSONObject collectDeviceInfo(android.content.Context) -> b
+    120:230:org.json.JSONObject collectDeviceInfo(android.content.Context) -> b
     22:27:int getAppVersion(android.content.Context) -> d
     40:58:java.lang.String getRegistrationId(android.content.Context) -> c
     67:73:void enablePushNotifications(android.content.Context,java.lang.String) -> a
