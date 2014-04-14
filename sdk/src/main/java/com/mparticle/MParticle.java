@@ -1051,9 +1051,13 @@ public class MParticle {
                 JSONObject newObject = new JSONObject();
                 newObject.put(MessageKey.IDENTITY_NAME, identityType.value);
                 newObject.put(MessageKey.IDENTITY_VALUE, id);
+                newObject.put(MessageKey.IDENTITY_FIRST_SEEN, index == -1);
+
                 if (index >= 0) {
+                    newObject.put(MessageKey.IDENTITY_DATE_FIRST_SEEN, mUserIdentities.getJSONObject(index).optLong(MessageKey.IDENTITY_DATE_FIRST_SEEN, System.currentTimeMillis()));
                     mUserIdentities.put(index, newObject);
                 } else {
+                    newObject.put(MessageKey.IDENTITY_DATE_FIRST_SEEN, System.currentTimeMillis());
                     mUserIdentities.put(newObject);
                 }
 
@@ -1457,7 +1461,8 @@ public class MParticle {
         Google(4),
         Microsoft(5),
         Yahoo(6),
-        Email(7);
+        Email(7),
+        Alias(8);
 
         private final int value;
 
