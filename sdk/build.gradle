@@ -95,6 +95,5 @@ uploadArchives {
 dependencies {
     deployerJars "org.kuali.maven.wagons:maven-s3-wagon:1.2.1"
     compile fileTree(dir: 'embeddedkits', include: ['*.jar'])
-
     compile 'com.google.android.gms:play-services:4+'
 }

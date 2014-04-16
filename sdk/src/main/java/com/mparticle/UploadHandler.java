@@ -42,8 +42,7 @@ import java.util.UUID;
     private final String mApiKey;
     private final String mSecret;
     private MParticleApiClient mApiClient;
-    private JSONObject mAppInfo;
-    private JSONObject mDeviceInfo;
+
     private ConfigManager mConfigManager;
 
     public static final String SQL_DELETABLE_MESSAGES = String.format(
@@ -74,6 +73,8 @@ import java.util.UUID;
             Status.UPLOADED,
             MessageTable.SESSION_ID);
     private volatile boolean isNetworkConnected = true;
+    private JSONObject deviceInfo;
+    private JSONObject appInfo;
 
     public UploadHandler(Context context, Looper looper, ConfigManager configManager) {
         super(looper);
@@ -86,13 +87,25 @@ import java.util.UUID;
         mDB = new MParticleDatabase(mContext);
         mPreferences = mContext.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
 
-        mAppInfo = DeviceAttributes.collectAppInfo(mContext);
-        mDeviceInfo = DeviceAttributes.collectDeviceInfo(mContext);
         try {
             mApiClient = new MParticleApiClient(configManager, mApiKey, mSecret, mPreferences);
         } catch (MalformedURLException e) {
             //this should never happen - the URLs are created by constants.
         }
+    }
+
+    private JSONObject getDeviceInfo(){
+        if (deviceInfo == null){
+            deviceInfo = DeviceAttributes.collectDeviceInfo(mContext);
+        }
+        return deviceInfo;
+    }
+
+    private JSONObject getAppInfo(){
+        if (appInfo == null){
+            appInfo = DeviceAttributes.collectAppInfo(mContext);
+        }
+        return appInfo;
     }
 
     public void setConnected(boolean connected){
@@ -151,6 +164,9 @@ import java.util.UUID;
                     // the previous upload is not done, try again in 30 seconds
                     this.sendEmptyMessageDelayed(UPLOAD_HISTORY, 30 * 1000);
                 }
+                if (isempty != null && !isempty.isClosed()){
+                    isempty.close();
+                }
                 break;
             case CLEANUP:
                 // delete stale commands, uploads, messages, and sessions
@@ -162,6 +178,7 @@ import java.util.UUID;
 
 
     /* package-private */void prepareUploads(boolean history) {
+        Cursor readyMessagesCursor = null;
         try {
             // select messages ready to upload
             SQLiteDatabase db = mDB.getWritableDatabase();
@@ -177,7 +194,7 @@ import java.util.UUID;
             }
             String[] selectionColumns = new String[]{"_id", MessageTable.MESSAGE, MessageTable.CREATED_AT, MessageTable.STATUS, MessageTable.SESSION_ID};
 
-            Cursor readyMessagesCursor = db.query(
+            readyMessagesCursor = db.query(
                     MessageTable.TABLE_NAME,
                     selectionColumns,
                     selection,
@@ -240,7 +257,6 @@ import java.util.UUID;
 
                 }
             }
-            readyMessagesCursor.close();
         } catch (SQLiteException e) {
             if (MParticle.getInstance().getDebugMode()) {
                 Log.d(TAG, "Error preparing batch upload in mParticle DB: " + e.getMessage());
@@ -254,18 +270,22 @@ import java.util.UUID;
                 Log.d(TAG, "Error preparing batch upload in mParticle DB: " + e.getMessage());
             }
         } finally {
+            if (readyMessagesCursor != null && !readyMessagesCursor.isClosed()){
+                readyMessagesCursor.close();
+            }
             mDB.close();
         }
     }
 
     private boolean processUploads(boolean history) {
         boolean processingSessionEnd = false;
+        Cursor readyUploadsCursor = null;
         try {
             // read batches ready to upload
             SQLiteDatabase db = mDB.getWritableDatabase();
             String[] selectionArgs = new String[]{mApiKey};
             String[] selectionColumns = new String[]{"_id", UploadTable.MESSAGE};
-            Cursor readyUploadsCursor = db.query(UploadTable.TABLE_NAME, selectionColumns,
+            readyUploadsCursor = db.query(UploadTable.TABLE_NAME, selectionColumns,
                     UploadTable.API_KEY + "=?", selectionArgs, null, null, UploadTable.CREATED_AT);
 
             while (readyUploadsCursor.moveToNext()) {
@@ -301,13 +321,14 @@ import java.util.UUID;
                     }
                 }
             }
-
-            readyUploadsCursor.close();
         } catch (SQLiteException e) {
             Log.d(TAG, "Error processing batch uploads in mParticle DB", e);
         } catch (IOException ioe) {
             Log.d(TAG, "Error processing batch uploads in mParticle DB", ioe);
         } finally {
+            if (readyUploadsCursor != null && !readyUploadsCursor.isClosed()){
+                readyUploadsCursor.close();
+            }
             mDB.close();
         }
         return processingSessionEnd;
@@ -363,20 +384,20 @@ import java.util.UUID;
         uploadMessage.put(MessageKey.CONFIG_UPLOAD_INTERVAL, mConfigManager.getUploadInterval()/1000);
         uploadMessage.put(MessageKey.CONFIG_SESSION_TIMEOUT, mConfigManager.getSessionTimeout()/1000);
 
-        mAppInfo.put(MessageKey.INSTALL_REFERRER, mPreferences.getString(PrefKeys.INSTALL_REFERRER, null));
-        uploadMessage.put(MessageKey.APP_INFO, mAppInfo);
+
+        uploadMessage.put(MessageKey.APP_INFO, getAppInfo());
         // if there is notification key then include it
         String regId = PushRegistrationHelper.getRegistrationId(mContext);
         if ((regId != null) && (regId.length() > 0)) {
-            mDeviceInfo.put(MessageKey.PUSH_TOKEN, regId);
+            getDeviceInfo().put(MessageKey.PUSH_TOKEN, regId);
         } else {
-            mDeviceInfo.remove(MessageKey.PUSH_TOKEN);
+            getDeviceInfo().remove(MessageKey.PUSH_TOKEN);
         }
 
-        mDeviceInfo.put(MessageKey.PUSH_SOUND_ENABLED, mConfigManager.isPushSoundEnabled());
-        mDeviceInfo.put(MessageKey.PUSH_VIBRATION_ENABLED, mConfigManager.isPushVibrationEnabled());
+        getDeviceInfo().put(MessageKey.PUSH_SOUND_ENABLED, mConfigManager.isPushSoundEnabled());
+        getDeviceInfo().put(MessageKey.PUSH_VIBRATION_ENABLED, mConfigManager.isPushVibrationEnabled());
 
-        uploadMessage.put(MessageKey.DEVICE_INFO, mDeviceInfo);
+        uploadMessage.put(MessageKey.DEVICE_INFO, getDeviceInfo());
         uploadMessage.put(MessageKey.DEBUG, mConfigManager.getSandboxMode());
 
         uploadMessage.put(MessageKey.LTV, new BigDecimal(mPreferences.getString(PrefKeys.LTV, "0")));

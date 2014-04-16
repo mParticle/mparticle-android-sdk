@@ -450,6 +450,9 @@ public class MPUtility {
     }
 
     public static boolean isGooglePlayServicesAvailable(){
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.FROYO){
+            return false;
+        }
         try{
             Class.forName("com.google.android.gms.ads.identifier.AdvertisingIdClient");
             return true;
