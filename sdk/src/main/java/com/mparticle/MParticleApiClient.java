@@ -1,6 +1,7 @@
 package com.mparticle;
 
 import android.content.SharedPreferences;
+import android.util.Base64;
 import android.util.Log;
 
 import org.apache.http.HttpStatus;
@@ -127,7 +128,7 @@ public class MParticleApiClient {
         if ("POST".equalsIgnoreCase(method)) {
             urlConnection.setDoOutput(true);
             if (postData != null && postData.length() > 0) {
-                byte[] postDataBytes = Base64.decode(postData.getBytes());
+                byte[] postDataBytes = Base64.decode(postData.getBytes(), Base64.DEFAULT);
                 urlConnection.setFixedLengthStreamingMode(postDataBytes.length);
                 urlConnection.getOutputStream().write(postDataBytes);
             }

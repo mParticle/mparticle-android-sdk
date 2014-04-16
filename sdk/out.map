@@ -56,13 +56,9 @@ com.mparticle.AppStateManager$2 -> com.mparticle.c$2:
     79:80:void onActivityStopped(android.app.Activity) -> onActivityStopped
     85:85:void onActivitySaveInstanceState(android.app.Activity,android.os.Bundle) -> onActivitySaveInstanceState
     90:90:void onActivityDestroyed(android.app.Activity) -> onActivityDestroyed
-com.mparticle.Base64 -> com.mparticle.d:
-    char[] CA -> a
-    int[] IA -> b
-    337:379:byte[] decode(byte[]) -> a
-com.mparticle.Base64DecoderException -> com.mparticle.e:
+com.mparticle.Base64DecoderException -> com.mparticle.d:
     long serialVersionUID -> serialVersionUID
-com.mparticle.ConfigManager -> com.mparticle.f:
+com.mparticle.ConfigManager -> com.mparticle.e:
     android.content.Context mContext -> a
     android.content.SharedPreferences mPreferences -> b
     com.mparticle.AppConfig localPrefs -> c
@@ -110,12 +106,12 @@ com.mparticle.ConfigManager -> com.mparticle.f:
     291:292:void setCookies(org.json.JSONObject) -> b
     295:295:org.json.JSONObject getCookies() -> x
     299:300:void setMpid(long) -> a
-com.mparticle.DeviceLimiter -> com.mparticle.g:
-com.mparticle.ExceptionHandler -> com.mparticle.h:
+com.mparticle.DeviceLimiter -> com.mparticle.f:
+com.mparticle.ExceptionHandler -> com.mparticle.g:
     java.lang.Thread$UncaughtExceptionHandler mOriginalUncaughtExceptionHandler -> a
     21:31:void uncaughtException(java.lang.Thread,java.lang.Throwable) -> uncaughtException
     34:34:java.lang.Thread$UncaughtExceptionHandler getOriginalExceptionHandler() -> a
-com.mparticle.GBase64 -> com.mparticle.i:
+com.mparticle.GBase64 -> com.mparticle.h:
     byte[] ALPHABET -> a
     byte[] DECODABET -> b
     boolean $assertionsDisabled -> c
@@ -142,7 +138,7 @@ com.mparticle.ILicensingService$Stub$Proxy -> com.mparticle.ILicensingService$St
     android.os.IBinder mRemote -> a
     71:71:android.os.IBinder asBinder() -> asBinder
     79:89:void checkLicense(long,java.lang.String,com.mparticle.ILicenseResultListener) -> a
-com.mparticle.LicenseChecker -> com.mparticle.j:
+com.mparticle.LicenseChecker -> com.mparticle.i:
     java.security.SecureRandom RANDOM -> a
     com.mparticle.ILicensingService mService -> b
     java.security.PublicKey mPublicKey -> c
@@ -166,27 +162,27 @@ com.mparticle.LicenseChecker -> com.mparticle.j:
     55:55:java.util.Set access$300(com.mparticle.LicenseChecker) -> a
     55:55:java.security.PublicKey access$500(com.mparticle.LicenseChecker) -> b
     55:55:android.os.Handler access$600(com.mparticle.LicenseChecker) -> c
-com.mparticle.LicenseChecker$ResultListener -> com.mparticle.j$a:
+com.mparticle.LicenseChecker$ResultListener -> com.mparticle.i$a:
     com.mparticle.LicenseValidator mValidator -> b
     java.lang.Runnable mOnTimeout -> c
     com.mparticle.LicenseChecker this$0 -> a
     220:261:void verifyLicense(int,java.lang.String,java.lang.String) -> a
     196:196:com.mparticle.LicenseValidator access$000(com.mparticle.LicenseChecker$ResultListener) -> a
     196:196:void access$400(com.mparticle.LicenseChecker$ResultListener) -> b
-com.mparticle.LicenseChecker$ResultListener$1 -> com.mparticle.j$a$1:
+com.mparticle.LicenseChecker$ResultListener$1 -> com.mparticle.i$a$1:
     com.mparticle.LicenseChecker$ResultListener this$1 -> a
     204:207:void run() -> run
-com.mparticle.LicenseChecker$ResultListener$2 -> com.mparticle.j$a$2:
+com.mparticle.LicenseChecker$ResultListener$2 -> com.mparticle.i$a$2:
     int val$responseCode -> a
     java.lang.String val$signedData -> b
     java.lang.String val$signature -> c
     com.mparticle.LicenseChecker$ResultListener this$1 -> d
     222:259:void run() -> run
-com.mparticle.LicenseCheckerCallback -> com.mparticle.k:
+com.mparticle.LicenseCheckerCallback -> com.mparticle.j:
     void allow(int) -> a
     void dontAllow(int) -> b
     void applicationError(int) -> c
-com.mparticle.LicenseValidator -> com.mparticle.l:
+com.mparticle.LicenseValidator -> com.mparticle.k:
     com.mparticle.Policy mPolicy -> a
     com.mparticle.LicenseCheckerCallback mCallback -> b
     int mNonce -> c
@@ -200,7 +196,7 @@ com.mparticle.LicenseValidator -> com.mparticle.l:
     203:212:void handleResponse(int,com.mparticle.ResponseData) -> a
     215:216:void handleApplicationError(int) -> a
     219:220:void handleInvalidResponse() -> d
-com.mparticle.MPAbstractStreamHandler -> com.mparticle.m:
+com.mparticle.MPAbstractStreamHandler -> com.mparticle.l:
     java.lang.String[] proxyOverloadSignature -> a
     java.lang.String[] urlOverloadSignature -> b
     java.lang.reflect.Constructor proxyOverload -> c
@@ -212,7 +208,7 @@ com.mparticle.MPAbstractStreamHandler -> com.mparticle.m:
 com.mparticle.MPCookie -> com.mparticle.MPCookie:
 com.mparticle.MPException -> com.mparticle.MPException:
     long serialVersionUID -> serialVersionUID
-com.mparticle.MPHttpUrlConnection -> com.mparticle.n:
+com.mparticle.MPHttpUrlConnection -> com.mparticle.m:
     com.mparticle.MeasuredRequest request -> a
     java.net.HttpURLConnection delegateConnection -> b
     com.mparticle.MPInputStream inputStream -> c
@@ -270,7 +266,7 @@ com.mparticle.MPHttpUrlConnection -> com.mparticle.n:
     313:313:long getLastModified() -> getLastModified
     318:327:java.io.OutputStream getOutputStream() -> getOutputStream
     333:345:java.io.InputStream getInputStream() -> getInputStream
-com.mparticle.MPHttpsUrlConnection -> com.mparticle.o:
+com.mparticle.MPHttpsUrlConnection -> com.mparticle.n:
     com.mparticle.MeasuredRequest request -> a
     javax.net.ssl.HttpsURLConnection delegateConnection -> b
     com.mparticle.MPInputStream inputStream -> c
@@ -338,7 +334,7 @@ com.mparticle.MPHttpsUrlConnection -> com.mparticle.o:
     374:374:long getLastModified() -> getLastModified
     378:387:java.io.OutputStream getOutputStream() -> getOutputStream
     391:401:java.io.InputStream getInputStream() -> getInputStream
-com.mparticle.MPInputStream -> com.mparticle.p:
+com.mparticle.MPInputStream -> com.mparticle.o:
     com.mparticle.MeasuredRequest measuredRequest -> a
     java.io.InputStream localInputStream -> b
     27:27:int available() -> available
@@ -351,7 +347,7 @@ com.mparticle.MPInputStream -> com.mparticle.p:
     63:64:void reset() -> reset
     67:67:long skip(long) -> skip
     71:71:boolean isSameStream(java.io.InputStream) -> a
-com.mparticle.MPOutputStream -> com.mparticle.q:
+com.mparticle.MPOutputStream -> com.mparticle.p:
     java.io.OutputStream localOutputStream -> a
     com.mparticle.MeasuredRequest measuredRequest -> b
     25:26:void flush() -> flush
@@ -462,7 +458,7 @@ com.mparticle.MPSSLSocket -> com.mparticle.MPSSLSocket:
     346:346:java.lang.String toString() -> toString
     351:351:boolean equals(java.lang.Object) -> equals
     356:356:int hashCode() -> hashCode
-com.mparticle.MPSSLSocketFactory -> com.mparticle.r:
+com.mparticle.MPSSLSocketFactory -> com.mparticle.q:
     javax.net.ssl.SSLSocketFactory delegateFactory -> a
     21:21:java.lang.String[] getDefaultCipherSuites() -> getDefaultCipherSuites
     25:25:java.lang.String[] getSupportedCipherSuites() -> getSupportedCipherSuites
@@ -473,7 +469,7 @@ com.mparticle.MPSSLSocketFactory -> com.mparticle.r:
     52:52:java.net.Socket createSocket(java.net.InetAddress,int) -> createSocket
     57:57:java.net.Socket createSocket(java.net.InetAddress,int,java.net.InetAddress,int) -> createSocket
     62:62:java.net.Socket createSocket() -> createSocket
-com.mparticle.MPSSLStreamHandler -> com.mparticle.s:
+com.mparticle.MPSSLStreamHandler -> com.mparticle.r:
     java.lang.String[] classes -> a
     24:28:java.net.URLConnection openConnection(java.net.URL) -> openConnection
     34:38:java.net.URLConnection openConnection(java.net.URL,java.net.Proxy) -> openConnection
@@ -487,7 +483,7 @@ com.mparticle.MPService -> com.mparticle.MPService:
     116:137:void handleRegistration(android.content.Intent) -> a
     208:217:java.lang.String findMessageKey(java.lang.String[],android.os.Bundle) -> a
     221:259:void showPushWithMessage(java.lang.String,java.lang.String,android.os.Bundle) -> a
-com.mparticle.MPSocketImpl -> com.mparticle.t:
+com.mparticle.MPSocketImpl -> com.mparticle.s:
     java.lang.reflect.Field addressField -> a
     java.lang.reflect.Field fileDescriptorField -> b
     java.lang.reflect.Field localPortField -> c
@@ -517,7 +513,7 @@ com.mparticle.MPSocketImpl -> com.mparticle.t:
 com.mparticle.MPSocketImplFactory -> com.mparticle.MPSocketImplFactory:
     java.lang.Class socketClass -> a
     23:34:java.net.SocketImpl createSocketImpl() -> createSocketImpl
-com.mparticle.MPStreamHandler -> com.mparticle.u:
+com.mparticle.MPStreamHandler -> com.mparticle.t:
     java.lang.String[] classes -> a
     23:27:java.net.URLConnection openConnection(java.net.URL) -> openConnection
     32:36:java.net.URLConnection openConnection(java.net.URL,java.net.Proxy) -> openConnection
@@ -735,23 +731,23 @@ com.mparticle.MParticleApiClient -> com.mparticle.MParticleApiClient:
     java.net.URL batchUploadUrl -> e
     java.lang.String userAgent -> f
     android.content.SharedPreferences sharedPreferences -> g
-    68:84:void fetchConfig() -> a
-    87:109:com.mparticle.MParticleApiClient$ApiResponse sendMessageBatch(java.lang.String) -> a
-    113:135:com.mparticle.MParticleApiClient$ApiResponse sendCommand(java.lang.String,java.lang.String,java.lang.String,java.lang.String) -> a
-    163:186:void addMessageSignature(java.net.HttpURLConnection,java.lang.String) -> a
-    199:204:java.lang.String asHex(byte[]) -> a
-    209:215:void addCookies(org.json.JSONObject,com.mparticle.ConfigManager) -> addCookies
-    33:33:com.mparticle.ConfigManager access$100(com.mparticle.MParticleApiClient) -> a
-    33:33:android.content.SharedPreferences access$200(com.mparticle.MParticleApiClient) -> b
+    69:85:void fetchConfig() -> a
+    88:110:com.mparticle.MParticleApiClient$ApiResponse sendMessageBatch(java.lang.String) -> a
+    114:136:com.mparticle.MParticleApiClient$ApiResponse sendCommand(java.lang.String,java.lang.String,java.lang.String,java.lang.String) -> a
+    164:187:void addMessageSignature(java.net.HttpURLConnection,java.lang.String) -> a
+    200:205:java.lang.String asHex(byte[]) -> a
+    210:216:void addCookies(org.json.JSONObject,com.mparticle.ConfigManager) -> addCookies
+    34:34:com.mparticle.ConfigManager access$100(com.mparticle.MParticleApiClient) -> a
+    34:34:android.content.SharedPreferences access$200(com.mparticle.MParticleApiClient) -> b
 com.mparticle.MParticleApiClient$ApiResponse -> com.mparticle.MParticleApiClient$a:
     int statusCode -> a
     org.json.JSONObject jsonResponse -> b
     java.net.HttpURLConnection connection -> c
     com.mparticle.MParticleApiClient this$0 -> d
-    232:232:boolean shouldDelete() -> a
-    237:269:org.json.JSONObject getJsonResponse() -> b
-    273:273:int getResponseCode() -> c
-    217:217:int access$000(com.mparticle.MParticleApiClient$ApiResponse) -> a
+    233:233:boolean shouldDelete() -> a
+    238:270:org.json.JSONObject getJsonResponse() -> b
+    274:274:int getResponseCode() -> c
+    218:218:int access$000(com.mparticle.MParticleApiClient$ApiResponse) -> a
 com.mparticle.MParticleDatabase -> com.mparticle.MParticleDatabase:
     129:134:void onCreate(android.database.sqlite.SQLiteDatabase) -> onCreate
     139:147:void onUpgrade(android.database.sqlite.SQLiteDatabase,int,int) -> onUpgrade
@@ -808,7 +804,7 @@ com.mparticle.MParticleJSInterface -> com.mparticle.MParticleJSInterface:
     139:144:void setUserIdentity(java.lang.String) -> setUserIdentity
     149:154:void removeUserIdentity(java.lang.String) -> removeUserIdentity
     157:174:java.util.Map convertToMap(org.json.JSONObject) -> a
-com.mparticle.MeasuredRequest -> com.mparticle.v:
+com.mparticle.MeasuredRequest -> com.mparticle.u:
     boolean endOfStream -> a
     long headerStartTime -> b
     long streamEndTime -> c
@@ -849,7 +845,7 @@ com.mparticle.MeasuredRequest -> com.mparticle.v:
     340:340:long getBytesSent() -> j
     344:344:long getBytesReceived() -> k
     348:349:void setUri(java.net.URL) -> a
-com.mparticle.MeasuredRequestManager -> com.mparticle.w:
+com.mparticle.MeasuredRequestManager -> com.mparticle.v:
     java.util.concurrent.ScheduledExecutorService scheduler -> b
     java.util.concurrent.ConcurrentHashMap requests -> a
     java.util.concurrent.CopyOnWriteArrayList excludedUrlFilters -> c
@@ -862,11 +858,11 @@ com.mparticle.MeasuredRequestManager -> com.mparticle.w:
     103:111:boolean isUriAllowed(java.lang.String) -> c
     115:122:void setEnabled(boolean) -> a
     17:17:java.util.concurrent.CopyOnWriteArrayList access$000(com.mparticle.MeasuredRequestManager) -> a
-com.mparticle.MeasuredRequestManager$1 -> com.mparticle.w$1:
+com.mparticle.MeasuredRequestManager$1 -> com.mparticle.v$1:
     com.mparticle.MeasuredRequestManager this$0 -> a
     40:66:void run() -> run
     79:84:boolean isUriQueryAllowed(java.lang.String) -> a
-com.mparticle.MessageHandler -> com.mparticle.x:
+com.mparticle.MessageHandler -> com.mparticle.w:
     com.mparticle.MParticleDatabase mDB -> a
     java.lang.String mApiKey -> b
     java.lang.String[] breadcrumbColumns -> c
@@ -876,7 +872,7 @@ com.mparticle.MessageHandler -> com.mparticle.x:
     256:270:void dbInsertMessage(android.database.sqlite.SQLiteDatabase,org.json.JSONObject) -> b
     287:294:void dbUpdateSessionEndTime(android.database.sqlite.SQLiteDatabase,java.lang.String,long,long) -> a
     300:305:java.lang.String getMessageSessionId(org.json.JSONObject) -> a
-com.mparticle.MessageManager -> com.mparticle.y:
+com.mparticle.MessageManager -> com.mparticle.x:
     android.os.HandlerThread sMessageHandlerThread -> a
     android.os.HandlerThread sUploadHandlerThread -> b
     java.lang.Runtime rt -> c
@@ -914,13 +910,13 @@ com.mparticle.MessageManager -> com.mparticle.y:
     492:513:void logNotification(java.lang.String,long,android.os.Bundle,java.lang.String) -> a
     533:548:void setDataConnection(android.net.NetworkInfo) -> a
     33:33:double access$102(double) -> a
-com.mparticle.MessageManager$StatusBroadcastReceiver -> com.mparticle.y$a:
+com.mparticle.MessageManager$StatusBroadcastReceiver -> com.mparticle.x$a:
     com.mparticle.MessageManager this$0 -> a
     518:529:void onReceive(android.content.Context,android.content.Intent) -> onReceive
-com.mparticle.Obfuscator -> com.mparticle.z:
+com.mparticle.Obfuscator -> com.mparticle.y:
     java.lang.String obfuscate(java.lang.String,java.lang.String) -> a
     java.lang.String unobfuscate(java.lang.String,java.lang.String) -> b
-com.mparticle.Policy -> com.mparticle.A:
+com.mparticle.Policy -> com.mparticle.z:
     long mValidityTimestamp -> a
     long mRetryUntil -> b
     long mMaxRetries -> c
@@ -935,7 +931,7 @@ com.mparticle.Policy -> com.mparticle.A:
     193:203:void setRetryUntil(java.lang.String) -> b
     219:229:void setMaxRetries(java.lang.String) -> c
     263:273:java.util.Map decodeExtras(java.lang.String) -> d
-com.mparticle.PreferenceObfuscator -> com.mparticle.B:
+com.mparticle.PreferenceObfuscator -> com.mparticle.A:
     android.content.SharedPreferences mPreferences -> a
     com.mparticle.Obfuscator mObfuscator -> b
     android.content.SharedPreferences$Editor mEditor -> c
@@ -943,10 +939,10 @@ com.mparticle.PreferenceObfuscator -> com.mparticle.B:
     55:68:java.lang.String getString(java.lang.String,java.lang.String) -> b
     72:76:void commit() -> a
 com.mparticle.ProviderPersistence -> com.mparticle.ProviderPersistence:
-com.mparticle.PushRegistrationListener -> com.mparticle.C:
+com.mparticle.PushRegistrationListener -> com.mparticle.B:
     void onRegistered(java.lang.String) -> a
     void onCleared$552c4e01() -> a
-com.mparticle.ResponseData -> com.mparticle.D:
+com.mparticle.ResponseData -> com.mparticle.C:
     int responseCode -> a
     int nonce -> b
     java.lang.String packageName -> c
@@ -955,7 +951,7 @@ com.mparticle.ResponseData -> com.mparticle.D:
     long timestamp -> f
     java.lang.String extra -> g
     76:76:java.lang.String toString() -> toString
-com.mparticle.UploadHandler -> com.mparticle.E:
+com.mparticle.UploadHandler -> com.mparticle.D:
     com.mparticle.MParticleDatabase mDB -> a
     android.content.SharedPreferences mPreferences -> b
     android.content.Context mContext -> c
@@ -977,7 +973,7 @@ com.mparticle.UploadHandler -> com.mparticle.E:
     353:411:org.json.JSONObject createUploadMessage(org.json.JSONArray,boolean) -> a
     424:429:void dbInsertUpload(android.database.sqlite.SQLiteDatabase,org.json.JSONObject) -> a
     432:434:void dbDeleteProcessedMessages(android.database.sqlite.SQLiteDatabase,java.lang.String) -> a
-com.mparticle.ValidationException -> com.mparticle.F:
+com.mparticle.ValidationException -> com.mparticle.E:
     long serialVersionUID -> serialVersionUID
 com.mparticle.activity.MPActivity -> com.mparticle.activity.MPActivity:
     27:31:void onStart() -> onStart
