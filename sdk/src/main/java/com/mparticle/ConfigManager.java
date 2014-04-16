@@ -291,7 +291,8 @@ class ConfigManager {
     }
 
     public boolean isNetworkPerformanceEnabled() {
-        return localPrefs.networkingEnabled;
+        return Build.VERSION.SDK_INT > Build.VERSION_CODES.FROYO &&
+                localPrefs.networkingEnabled;
     }
 
     public void setNetworkingEnabled(boolean networkingEnabled) {
