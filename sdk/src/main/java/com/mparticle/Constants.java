@@ -83,6 +83,9 @@ package com.mparticle;
         // user identity
         public static final String IDENTITY_NAME = "n";
         public static final String IDENTITY_VALUE = "i";
+        public static final String IDENTITY_DATE_FIRST_SEEN = "dfs";
+        public static final String IDENTITY_FIRST_SEEN = "f";
+
         // application info
         public static final String APP_NAME = "an";
         public static final String APP_VERSION = "av";
@@ -130,6 +133,7 @@ package com.mparticle;
         public static final String DEVICE_SUPPORTS_NFC = "dsnfc";
         public static final String DEVICE_BLUETOOTH_ENABLED = "dbe";
         public static final String DEVICE_BLUETOOTH_VERSION = "dbv";
+        public static final String GOOGLE_ADV_ID = "gaid";
 
         // state info
         public static final String STATE_INFO_KEY = "cs";
@@ -228,6 +232,8 @@ package com.mparticle;
         public static final String PUSH_TITLE = "mp::push::title";
         public static final String SESSION_COUNTER = "mp::breadcrumbs::sessioncount";
         public static final String BREADCRUMB_LIMIT = "mp::breadcrumbs::limit";
+        //MAT embedded
+        public static final String MAT_EXISTING_USER = "mp::embedded::mat::existinguser";
         public static final String INSTALL_DATE = "mp::installdate";
         public static final String TOTAL_SINCE_UPGRADE = "mp::launch_since_upgrade";
         public static final String UPGRADE_DATE = "mp::upgrade_date";

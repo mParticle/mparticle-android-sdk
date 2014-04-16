@@ -112,21 +112,23 @@ public class MParticle {
     private Context mAppContext;
     private String mApiKey;
     private boolean mDebugMode = false;
+    private EmbeddedKitManager embeddedKitManager;
     //private int mSessionTimeout = 30 * 60 * 1000;
     private int mEventCount = 0;
     private String mLaunchUri;
     private LicenseCheckerCallback clientLicensingCallback;
 
 
-    /* package-private */MParticle(Context context, MessageManager messageManager, ConfigManager configManager) {
+    /* package-private */MParticle(Context context, MessageManager messageManager, ConfigManager configManager, EmbeddedKitManager embeddedKitManager) {
         appRunning = true;
         mConfigManager = configManager;
         mAppContext = context.getApplicationContext();
         mApiKey = mConfigManager.getApiKey();
         mMessageManager = messageManager;
-        mAppStateManager = new AppStateManager(mAppContext);
+        mAppStateManager = new AppStateManager(mAppContext, embeddedKitManager);
         measuredRequestManager = new MeasuredRequestManager();
         mTimeoutHandler = new SessionTimeoutHandler(this, sTimeoutHandlerThread.getLooper());
+        this.embeddedKitManager = embeddedKitManager;
 
         String userAttrs = sPreferences.getString(PrefKeys.USER_ATTRS + mApiKey, null);
 
@@ -144,6 +146,25 @@ public class MParticle {
                 mUserIdentities = new JSONArray(userIds);
             } catch (JSONException e) {
                 // carry on without user identities
+            }
+            try {
+                boolean changeMade = false;
+                for (int i = 0; i < mUserIdentities.length(); i++) {
+                    JSONObject identity = mUserIdentities.getJSONObject(i);
+                    if (!identity.has(MessageKey.IDENTITY_DATE_FIRST_SEEN)){
+                        identity.put(MessageKey.IDENTITY_DATE_FIRST_SEEN, 0);
+                        changeMade = true;
+                    }
+                    if (!identity.has(MessageKey.IDENTITY_FIRST_SEEN)){
+                        identity.put(MessageKey.IDENTITY_FIRST_SEEN, true);
+                        changeMade = true;
+                    }
+                }
+                if (changeMade) {
+                    sPreferences.edit().putString(PrefKeys.USER_IDENTITIES + mApiKey, mUserIdentities.toString()).commit();
+                }
+            }catch (JSONException jse){
+                //swallow this
             }
         }
 
@@ -260,7 +281,8 @@ public class MParticle {
                         sPreferences = context.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
                     }
 
-                    ConfigManager appConfigManager = new ConfigManager(context, apiKey, secret, sandboxMode);
+                    EmbeddedKitManager embeddedKitManager1 = new EmbeddedKitManager(context);
+                    ConfigManager appConfigManager = new ConfigManager(context, apiKey, secret, sandboxMode, embeddedKitManager1);
                     Context appContext = context.getApplicationContext();
 
                     Boolean firstRun = sPreferences.getBoolean(PrefKeys.FIRSTRUN + appConfigManager.getApiKey(), true);
@@ -271,8 +293,8 @@ public class MParticle {
                     MessageManager messageManager = new MessageManager(appContext, appConfigManager);
                     messageManager.start(appContext, firstRun, installType);
 
-                    instance = new MParticle(appContext, messageManager, appConfigManager);
-
+                    instance = new MParticle(appContext, messageManager, appConfigManager, embeddedKitManager1);
+            
                     if (context instanceof Activity) {
                         instance.mLaunchUri = ((Activity) context).getIntent().getDataString();
                         if (instance.mLaunchUri != null) {
@@ -289,8 +311,6 @@ public class MParticle {
                     if (appConfigManager.isNetworkPerformanceEnabled()) {
                         instance.beginMeasuringNetworkPerformance();
                     }
-
-
                 }
             }
         }
@@ -549,32 +569,36 @@ public class MParticle {
      * @param category    the category with which to associate this event
      */
     public void logEvent(String eventName, EventType eventType, Map<String, String> eventInfo, long eventLength, String category) {
-        if (mConfigManager.getSendOoEvents()) {
-            if (null == eventName) {
-                Log.w(TAG, "eventName is required for logEvent");
-                return;
-            }
-            if (eventName.length() > Constants.LIMIT_NAME) {
-                Log.w(TAG, "The event name was too long. Discarding event.");
-                return;
-            }
-            ensureActiveSession();
-            if (checkEventLimit()) {
-                if (category != null) {
-                    if (eventInfo == null) {
-                        eventInfo = new HashMap<String, String>();
-                    }
-                    eventInfo.put(Constants.MessageKey.EVENT_CATEGORY, category);
+        if (null == eventName) {
+            Log.w(TAG, "eventName is required for logEvent");
+            return;
+        }
+
+        if (eventName.length() > Constants.LIMIT_NAME) {
+            Log.w(TAG, "The event name was too long. Discarding event.");
+            return;
+        }
+        ensureActiveSession();
+        if (checkEventLimit()) {
+            if (category != null) {
+                if (eventInfo == null) {
+                    eventInfo = new HashMap<String, String>();
                 }
-                JSONObject eventDataJSON = enforceAttributeConstraints(eventInfo);
+                eventInfo.put(Constants.MessageKey.EVENT_CATEGORY, category);
+            }
+            JSONObject eventDataJSON = enforceAttributeConstraints(eventInfo);
+            if (mConfigManager.getSendOoEvents()) {
                 mMessageManager.logEvent(mSessionID, mSessionStartTime, mLastEventTime, eventName, eventType, eventDataJSON, eventLength);
-                if (mDebugMode)
+                if (mDebugMode) {
                     if (null == eventDataJSON) {
                         debugLog("Logged event: " + eventName);
                     } else {
                         debugLog("Logged event: " + eventName + " with data " + eventDataJSON);
                     }
+                }
+
             }
+            embeddedKitManager.logEvent(eventType, eventName, eventDataJSON);
         }
     }
 
@@ -606,7 +630,6 @@ public class MParticle {
      * @see MPProduct.Builder
      */
     public void logTransaction(MPProduct product) {
-        if (mConfigManager.getSendOoEvents()) {
             if (product == null) {
                 throw new IllegalArgumentException("transaction is required for logTransaction");
             }
@@ -622,31 +645,35 @@ public class MParticle {
                 if (mDebugMode) {
                     debugLog("Logged transaction with data: " + product.toString());
                 }
+
             }
-        }
+            embeddedKitManager.logTransaction(product);
+        
     }
 
     void logScreen(String screenName, Map<String, String> eventData, boolean started) {
-        if (mConfigManager.getSendOoEvents()) {
-            if (null == screenName) {
-                Log.w(TAG, "screenName is required for logScreen");
-                return;
-            }
-            if (screenName.length() > Constants.LIMIT_NAME) {
-                Log.w(TAG, "The screen name was too long. Discarding event.");
-                return;
-            }
-            ensureActiveSession();
-            if (checkEventLimit()) {
-                JSONObject eventDataJSON = enforceAttributeConstraints(eventData);
+        if (null == screenName) {
+            Log.w(TAG, "screenName is required for logScreen");
+            return;
+        }
+        if (screenName.length() > Constants.LIMIT_NAME) {
+            Log.w(TAG, "The screen name was too long. Discarding event.");
+            return;
+        }
+        ensureActiveSession();
+        if (checkEventLimit()) {
+            JSONObject eventDataJSON = enforceAttributeConstraints(eventData);
+            if (mConfigManager.getSendOoEvents()) {
                 mMessageManager.logScreen(mSessionID, mSessionStartTime, mLastEventTime, screenName, eventDataJSON, started);
-                if (mDebugMode)
+                if (mDebugMode) {
                     if (null == eventDataJSON) {
                         debugLog("Logged screen: " + screenName);
                     } else {
                         debugLog("Logged screen: " + screenName + " with data " + eventDataJSON);
                     }
+                }
             }
+            embeddedKitManager.logScreen(screenName, eventDataJSON);
         }
     }
 
@@ -784,6 +811,7 @@ public class MParticle {
 
     /**
      * Begin measuring network performance. This method only needs to be called one time during the runtime of an application.
+     *
      */
     public void beginMeasuringNetworkPerformance() {
         mConfigManager.setNetworkingEnabled(true);
@@ -793,6 +821,7 @@ public class MParticle {
 
     /**
      * Stop measuring network performance.
+     *
      */
     public void endMeasuringNetworkPerformance() {
         measuredRequestManager.setEnabled(false);
@@ -837,6 +866,7 @@ public class MParticle {
      *
      * @see #excludeUrlFromNetworkPerformanceMeasurement(String)
      * @see #addNetworkPerformanceQueryOnlyFilter(String)
+     *
      */
     public void resetNetworkPerformanceExclusionsAndFilters() {
         measuredRequestManager.resetFilters();
@@ -946,6 +976,7 @@ public class MParticle {
      */
     public void setLocation(Location location) {
         mMessageManager.setLocation(location);
+        embeddedKitManager.setLocation(location);
     }
 
     /**
@@ -973,17 +1004,18 @@ public class MParticle {
      * @param value the attribute value
      */
     public void setUserAttribute(String key, String value) {
-        if (mConfigManager.getSendOoEvents()) {
-            if (mDebugMode)
-                if (value != null) {
-                    debugLog("Set user attribute: " + key + " with value " + value);
-                } else {
-                    debugLog("Set user attribute: " + key);
-                }
-            if (setCheckedAttribute(mUserAttributes, key, value, true)) {
-                sPreferences.edit().putString(PrefKeys.USER_ATTRS + mApiKey, mUserAttributes.toString()).commit();
+        if (mDebugMode)
+            if (value != null) {
+                debugLog("Set user attribute: " + key + " with value " + value);
+            } else {
+                debugLog("Set user attribute: " + key);
             }
+
+        if (setCheckedAttribute(mUserAttributes, key, value)) {
+            sPreferences.edit().putString(PrefKeys.USER_ATTRS + mApiKey, mUserAttributes.toString()).commit();
+            embeddedKitManager.setUserAttributes(mUserAttributes);
         }
+
     }
 
     /**
@@ -992,15 +1024,13 @@ public class MParticle {
      * @param key the key of the attribute
      */
     public void removeUserAttribute(String key) {
-        if (mConfigManager.getSendOoEvents()) {
-            if (mDebugMode && key != null) {
-                debugLog("Removing user attribute: " + key);
-            }
-            if (mUserAttributes.has(key) || mUserAttributes.has(findCaseInsensitiveKey(mUserAttributes, key))) {
-                mUserAttributes.remove(key);
-                sPreferences.edit().putString(PrefKeys.USER_ATTRS + mApiKey, mUserAttributes.toString()).commit();
-            }
-
+        if (mDebugMode && key != null) {
+            debugLog("Removing user attribute: " + key);
+        }
+        if (mUserAttributes.has(key) || mUserAttributes.has(findCaseInsensitiveKey(mUserAttributes, key))) {
+            mUserAttributes.remove(key);
+            sPreferences.edit().putString(PrefKeys.USER_ATTRS + mApiKey, mUserAttributes.toString()).commit();
+            embeddedKitManager.removeUserAttribute(key);
         }
     }
 
@@ -1022,6 +1052,8 @@ public class MParticle {
         removeUserAttribute(tag);
     }
 
+
+
     /**
      * Set the current user's identity
      *
@@ -1030,7 +1062,7 @@ public class MParticle {
      */
 
     public void setUserIdentity(String id, IdentityType identityType) {
-        if (mConfigManager.getSendOoEvents() && id != null && id.length() > 0) {
+        if (id != null && id.length() > 0) {
             if (mDebugMode)
                 debugLog("Setting user identity: " + id);
 
@@ -1038,6 +1070,8 @@ public class MParticle {
                 Log.w(TAG, "Id value length exceeds limit. Discarding id: " + id);
                 return;
             }
+
+            embeddedKitManager.setUserIdentity(id, identityType);
 
             try {
                 int index = -1;
@@ -1051,9 +1085,13 @@ public class MParticle {
                 JSONObject newObject = new JSONObject();
                 newObject.put(MessageKey.IDENTITY_NAME, identityType.value);
                 newObject.put(MessageKey.IDENTITY_VALUE, id);
+                newObject.put(MessageKey.IDENTITY_FIRST_SEEN, true);
+
                 if (index >= 0) {
+                    newObject.put(MessageKey.IDENTITY_DATE_FIRST_SEEN, mUserIdentities.getJSONObject(index).optLong(MessageKey.IDENTITY_DATE_FIRST_SEEN, System.currentTimeMillis()));
                     mUserIdentities.put(index, newObject);
                 } else {
+                    newObject.put(MessageKey.IDENTITY_DATE_FIRST_SEEN, System.currentTimeMillis());
                     mUserIdentities.put(newObject);
                 }
 
@@ -1451,13 +1489,14 @@ public class MParticle {
 
     public enum IdentityType {
         Other(0),
-        CustomId(1),
+        CustomerId(1),
         Facebook(2),
         Twitter(3),
         Google(4),
         Microsoft(5),
         Yahoo(6),
-        Email(7);
+        Email(7),
+        Alias(8);
 
         private final int value;
 
@@ -1465,15 +1504,61 @@ public class MParticle {
             this.value = value;
         }
 
+        public static IdentityType parseInt(int val) {
+            switch (val) {
+                case 1:
+                    return CustomerId;
+                case 2:
+                    return Facebook;
+                case 3:
+                    return Twitter;
+                case 4:
+                    return Google;
+                case 5:
+                    return Microsoft;
+                case 6:
+                    return Yahoo;
+                case 7:
+                    return Email;
+                default:
+                    return Other;
+
+            }
+        }
+
         public int getValue() {
             return value;
         }
+
     }
 
     public interface Push {
         public static final String BROADCAST_NOTIFICATION_RECEIVED = "com.mparticle.push.NOTIFICATION_RECEIVED";
         public static final String BROADCAST_NOTIFICATION_TAPPED = "com.mparticle.push.NOTIFICATION_TAPPED";
         public static final String PUSH_ALERT_EXTRA = "com.mparticle.push.alert";
+    }
+
+    public interface UserAttributes {
+        //A special attribute string to specify the mobile number of the consumer's device
+        public static final String MOBILE_NUMBER = "$Mobile";
+        //A special attribute string to specify the consumer's gender.
+        public static final String GENDER = "$Gender";
+        //A special attribute string to specify the consumer's age.
+        public static final String AGE = "$Age";
+        //A special attribute string to specify the consumer's country.
+        public static final String COUNTRY = "$Country";
+        //A special attribute string to specify the consumer's zip code.
+        public static final String ZIPCODE = "$Zip";
+        //A special attribute string to specify the consumer's city.
+        public static final String CITY = "$City";
+        //A special attribute string to specify the consumer's state or region.
+        public static final String STATE = "$State";
+        //A special attribute string to specify the consumer's street address and apartment number.
+        public static final String ADDRESS = "$Address";
+        //A special attribute string to specify the consumer's first name.
+        public static final String FIRSTNAME = "$FirstName";
+        //A special attribute string to specify the consumer's last name.
+        public static final String LASTNAME = "$LastName";
     }
 
     private static final class SessionTimeoutHandler extends Handler {

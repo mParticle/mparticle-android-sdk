@@ -15,12 +15,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * Created by sdozor on 1/15/14.
  */
-class AppStateManager {
+class AppStateManager implements MPActivityCallbacks{
 
     public static final String APP_STATE_FOREGROUND = "foreground";
     public static final String APP_STATE_BACKGROUND = "background";
     public static final String APP_STATE_NOTRUNNING = "not_running";
     private final SharedPreferences preferences;
+    private final EmbeddedKitManager embeddedKitManager;
     Context mContext;
     AtomicInteger mActivities = new AtomicInteger(0);
     long mLastStoppedTime;
@@ -42,9 +43,10 @@ class AppStateManager {
     //starts again, so don't declared that we're backgrounded immediately.
     private static final long ACTIVITY_DELAY = 1000;
 
-    public AppStateManager(Context context) {
+    public AppStateManager(Context context, EmbeddedKitManager embeddedKitManager) {
         mContext = context.getApplicationContext();
         mLastStoppedTime = System.currentTimeMillis();
+        this.embeddedKitManager = embeddedKitManager;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
             setupLifecycleCallbacks();
         }
@@ -56,17 +58,17 @@ class AppStateManager {
         ((Application) mContext).registerActivityLifecycleCallbacks(new Application.ActivityLifecycleCallbacks() {
             @Override
             public void onActivityCreated(Activity activity, Bundle savedInstanceState) {
-
+                AppStateManager.this.onActivityCreated(activity);
             }
 
             @Override
             public void onActivityStarted(Activity activity) {
-                AppStateManager.this.recordActivityStarted(activity);
+                AppStateManager.this.onActivityStarted(activity);
             }
 
             @Override
             public void onActivityResumed(Activity activity) {
-
+                AppStateManager.this.onActivityResumed(activity);
             }
 
             @Override
@@ -76,7 +78,7 @@ class AppStateManager {
 
             @Override
             public void onActivityStopped(Activity activity) {
-                AppStateManager.this.recordActivityStopped(activity);
+                AppStateManager.this.onActivityStopped(activity);
             }
 
             @Override
@@ -95,19 +97,8 @@ class AppStateManager {
         return mActivities.get() < 1 && (System.currentTimeMillis() - mLastStoppedTime >= ACTIVITY_DELAY);
     }
 
+    @Override
     public void onActivityStarted(Activity activity) {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
-            recordActivityStarted(activity);
-        }
-    }
-
-    public void onActivityStopped(Activity activity) {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
-            recordActivityStopped(activity);
-        }
-    }
-
-    void recordActivityStarted(Activity activity){
         preferences.edit().putBoolean(Constants.PrefKeys.CRASHED_IN_FOREGROUND, true).commit();
         if (isBackgrounded() && mLastStoppedTime > 0) {
             long totalTimeInBackground = preferences.getLong(Constants.PrefKeys.TIME_IN_BG, -1);
@@ -123,44 +114,44 @@ class AppStateManager {
             if (MParticle.getInstance().getDebugMode()) {
                 Log.d(Constants.LOG_TAG, "APP FOREGROUNDED");
             }
-
-
         }
         mActivities.getAndIncrement();
-        if (MParticle.getInstance().getDebugMode()) {
-            Log.d(Constants.LOG_TAG, "Activity Count: " + mActivities);
-        }
         if (MParticle.getInstance().isAutoTrackingEnabled()) {
             MParticle.getInstance().logScreen(getActivityName(activity), null, true);
         }
+        embeddedKitManager.onActivityStarted(activity);
     }
 
-    void recordActivityStopped(Activity activity) {
+    @Override
+    public void onActivityStopped(Activity activity) {
         preferences.edit().putBoolean(Constants.PrefKeys.CRASHED_IN_FOREGROUND, false).commit();
         mLastStoppedTime = System.currentTimeMillis();
 
         if (mActivities.decrementAndGet() < 1) {
             delayedBackgroundCheckHandler.postDelayed(backgroundChecker, ACTIVITY_DELAY);
         }
-        if (MParticle.getInstance().getDebugMode()) {
-            Log.d(Constants.LOG_TAG, "Activity Count: " + mActivities);
-        }
         if (MParticle.getInstance().isAutoTrackingEnabled()) {
             MParticle.getInstance().logScreen(getActivityName(activity), null, false);
         }
+        embeddedKitManager.onActivityStopped(activity);
+    }
 
+    @Override
+    public void onActivityCreated(Activity activity){
+        embeddedKitManager.onActivityCreated(activity);
+    }
+
+    @Override
+    public void onActivityResumed(Activity activity){
+        embeddedKitManager.onActivityResumed(activity);
+    }
+
+    @Override
+    public void onActivityPaused(Activity activity) {
+        embeddedKitManager.onActivityPaused(activity);
     }
 
     private String getActivityName(Activity activity) {
         return activity.getClass().getCanonicalName();
-        /*if (this.mActivityNameMap.containsKey(canonicalName)) {
-            return (String)this.mActivityNameMap.get(canonicalName);
-        }
-        String name = this.mParameterFetcher.getString(canonicalName);
-        if (name == null) {
-            name = canonicalName;
-        }
-        this.mActivityNameMap.put(canonicalName, name);
-        return name;*/
     }
 }

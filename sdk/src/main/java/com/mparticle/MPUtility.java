@@ -48,7 +48,7 @@ import java.util.jar.JarFile;
  * Created by sdozor on 1/9/14.
  */
 
-public class MPUtility {
+class MPUtility {
 
     static final String NO_BLUETOOTH = "none";
     private static String sOpenUDID;
@@ -456,5 +456,18 @@ public class MPUtility {
     public static boolean checkPermission(Context context, String permission){
         int res = context.checkCallingOrSelfPermission(permission);
         return (res == PackageManager.PERMISSION_GRANTED);
+    }
+
+    public static boolean isGooglePlayServicesAvailable(){
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.FROYO){
+            return false;
+        }
+        try{
+            Class.forName("com.google.android.gms.ads.identifier.AdvertisingIdClient");
+            return true;
+        }catch (ClassNotFoundException cnfe){
+
+        }
+        return false;
     }
 }

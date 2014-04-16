@@ -24,7 +24,7 @@ android {
     buildToolsVersion "19.0.3"
 
     defaultConfig {
-        minSdkVersion 8
+        minSdkVersion 9
         targetSdkVersion 19
         versionName sdkversion
     }
@@ -89,4 +89,6 @@ uploadArchives {
 
 dependencies {
     deployerJars "org.kuali.maven.wagons:maven-s3-wagon:1.2.1"
+    compile fileTree(dir: 'embeddedkits', include: ['*.jar'])
+    compile 'com.google.android.gms:play-services:4+'
 }
