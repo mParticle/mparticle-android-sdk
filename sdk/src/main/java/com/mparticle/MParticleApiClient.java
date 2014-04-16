@@ -41,7 +41,7 @@ import javax.net.ssl.TrustManagerFactory;
 /**
  * Created by sdozor on 3/25/14.
  */
-public class MParticleApiClient {
+class MParticleApiClient {
 
     public static final String HEADER_SIGNATURE = "x-mp-signature";
     public static final String SECURE_SERVICE_SCHEME = "https";

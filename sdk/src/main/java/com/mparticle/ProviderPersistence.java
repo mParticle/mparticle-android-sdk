@@ -10,7 +10,7 @@ import org.json.JSONObject;
 /**
  * Created by sdozor on 3/27/14.
  */
-public class ProviderPersistence extends JSONObject{
+class ProviderPersistence extends JSONObject{
 
     static final String KEY_PERSISTENCE = "cms";
     private static final String KEY_PERSISTENCE_ID = "id";
@@ -31,7 +31,7 @@ public class ProviderPersistence extends JSONObject{
     private static final int PERSISTENCE_TYPE_LONG = 5;
 
 
-    public ProviderPersistence(JSONObject config, Context context) throws JSONException{
+    ProviderPersistence(JSONObject config, Context context) throws JSONException{
         super();
         JSONArray configPersistence = config.getJSONArray(KEY_PERSISTENCE);
         for (int i = 0; i < configPersistence.length(); i++){

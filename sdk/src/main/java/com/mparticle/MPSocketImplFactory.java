@@ -8,10 +8,10 @@ import java.net.SocketImplFactory;
 /**
  * Created by sdozor on 2/4/14.
  */
-public final class MPSocketImplFactory implements SocketImplFactory {
+final class MPSocketImplFactory implements SocketImplFactory {
     private Class socketClass;
 
-    public MPSocketImplFactory(Class paramClass) throws IllegalAccessException, InstantiationException {
+    MPSocketImplFactory(Class paramClass) throws IllegalAccessException, InstantiationException {
         socketClass = paramClass;
         //test creating a new instance so in the case that it fails,
         //we don't completely break the users' network connection
