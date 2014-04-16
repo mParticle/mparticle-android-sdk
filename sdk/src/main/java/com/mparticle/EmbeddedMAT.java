@@ -21,7 +21,7 @@ import java.util.UUID;
  * Detailed behavior defined here:
  * https://mparticle.atlassian.net/wiki/pages/viewpage.action?spaceKey=DMP&title=MobileAppTracking
  */
-public class EmbeddedMAT extends EmbeddedProvider implements MPActivityCallbacks {
+class EmbeddedMAT extends EmbeddedProvider implements MPActivityCallbacks {
     //Server config constants defined for this provider
     //keys to provide access to the MAT account.
     private static final String ADVERTISER_ID = "advertiserId";
@@ -41,7 +41,7 @@ public class EmbeddedMAT extends EmbeddedProvider implements MPActivityCallbacks
     private String conversionId;
     private String advertiserId;
 
-    public EmbeddedMAT(Context context) throws ClassNotFoundException {
+    EmbeddedMAT(Context context) throws ClassNotFoundException {
         super(context);
         try {
             Class.forName("com.mobileapptracker.MobileAppTracker");

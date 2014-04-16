@@ -12,7 +12,7 @@ import java.util.Iterator;
 /**
  * Created by sdozor on 3/13/14.
  */
-public abstract class EmbeddedProvider implements IEmbeddedKit {
+abstract class EmbeddedProvider implements IEmbeddedKit {
 
     final static String KEY_ID = "id";
     private final static String KEY_PROPERTIES = "as";

@@ -9,7 +9,7 @@ import android.database.sqlite.SQLiteOpenHelper;
     private static final int DB_VERSION = 1;
     private static final String DB_NAME = "mparticle.db";
 
-    public interface SessionTable {
+    interface SessionTable {
         public final static String TABLE_NAME = "sessions";
         public final static String SESSION_ID = "session_id";
         public final static String API_KEY = "api_key";
@@ -20,7 +20,7 @@ import android.database.sqlite.SQLiteOpenHelper;
         public final static String CF_UUID = "cfuuid";
     }
 
-    public interface BreadcrumbTable {
+    interface BreadcrumbTable {
         public final static String TABLE_NAME = "breadcrumbs";
         public final static String SESSION_ID = "session_id";
         public final static String API_KEY = "api_key";
@@ -53,7 +53,7 @@ import android.database.sqlite.SQLiteOpenHelper;
                     ");";
 
 
-    public interface MessageTable {
+    interface MessageTable {
         public final static String TABLE_NAME = "messages";
         public final static String SESSION_ID = "session_id";
         public final static String API_KEY = "api_key";
@@ -76,7 +76,7 @@ import android.database.sqlite.SQLiteOpenHelper;
                     MessageTable.CF_UUID + " TEXT" +
                     ");";
 
-    public interface UploadTable {
+    interface UploadTable {
         public final static String TABLE_NAME = "uploads";
         public final static String API_KEY = "api_key";
         public final static String MESSAGE = "message";
@@ -95,7 +95,7 @@ import android.database.sqlite.SQLiteOpenHelper;
                     UploadTable.SESSION_ID + " TEXT" +
                     ");";
 
-    public interface CommandTable {
+    interface CommandTable {
         public final static String TABLE_NAME = "commands";
         public final static String URL = "url";
         public final static String METHOD = "method";
@@ -120,7 +120,7 @@ import android.database.sqlite.SQLiteOpenHelper;
                     CommandTable.CF_UUID + " TEXT" +
                     ");";
 
-    public MParticleDatabase(Context context) {
+    MParticleDatabase(Context context) {
         super(context, DB_NAME, null, DB_VERSION);
     }
 

@@ -48,7 +48,7 @@ import java.util.jar.JarFile;
  * Created by sdozor on 1/9/14.
  */
 
-public class MPUtility {
+class MPUtility {
 
     static final String NO_BLUETOOTH = "none";
     private static String sOpenUDID;

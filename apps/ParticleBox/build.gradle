@@ -20,6 +20,7 @@ repositories {
     mavenLocal()
     maven { url 'http://www.bugsense.com/gradle/' }
     maven { url 'http://download.crashlytics.com/maven' }
+    maven { url 'file://localhost/Users/sdozor/maven/repo/' }
 }
 
 def buildTime() {
@@ -35,7 +36,7 @@ android {
     def gitHash = "git rev-parse --short HEAD".execute().text.trim()
 
     defaultConfig {
-        minSdkVersion 8
+        minSdkVersion 9
         targetSdkVersion 19
         buildConfigField "String", "GIT_SHA", "\"$gitHash\""
         buildConfigField "String", "BUILD_TIME", "\"${buildTime()}\""
@@ -86,8 +87,8 @@ dependencies {
     flurryCompile project(':sdk')
     kahunaCompile project(':sdk')
     crashlyticsCompile project(':sdk')
-    //mparticleCompile 'com.mparticle:android-sdk:1.1.+'
-    mparticleCompile project(':sdk')
+    mparticleCompile 'com.mparticle:android-sdk:1.2.+'
+    //mparticleCompile project(':sdk')
     //mparticleCompile files ("libs/classes.jar")
     googleanalyticsCompile 'com.google.android.gms:play-services:4+'
     mixpanelCompile 'com.mixpanel.android:mixpanel-android:4.0.0-RC3@aar'
