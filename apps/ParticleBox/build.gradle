@@ -35,7 +35,7 @@ android {
     def gitHash = "git rev-parse --short HEAD".execute().text.trim()
 
     defaultConfig {
-        minSdkVersion 8
+        minSdkVersion 9
         targetSdkVersion 19
         buildConfigField "String", "GIT_SHA", "\"$gitHash\""
         buildConfigField "String", "BUILD_TIME", "\"${buildTime()}\""
@@ -76,11 +76,12 @@ android {
    */
 }
 
+
 dependencies {
 	compile 'com.android.support:support-v4:19.0.0'
 	compile 'com.android.support:appcompat-v7:19.0.0'
     compile project(':sdk')
-    googleanalyticsCompile 'com.google.android.gms:play-services:4.3.23'
+    googleanalyticsCompile 'com.google.android.gms:play-services:4+'
     mixpanelCompile 'com.mixpanel.android:mixpanel-android:4.0.0-RC3@aar'
     flurryCompile files ("libs/FlurryAnalytics_3.3.3.jar")
     urbanairshipCompile files ("libs/urbanairship-lib-3.2.3.jar")

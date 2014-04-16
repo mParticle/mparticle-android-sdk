@@ -6,7 +6,6 @@ import android.webkit.JavascriptInterface;
 
 import com.mparticle.MParticle.EventType;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -200,7 +199,7 @@ public class MParticleJSInterface {
             case 0:
                 return MParticle.IdentityType.Other;
             case 1:
-                return MParticle.IdentityType.CustomId;
+                return MParticle.IdentityType.CustomerId;
             case 2:
                 return MParticle.IdentityType.Facebook;
             case 3:

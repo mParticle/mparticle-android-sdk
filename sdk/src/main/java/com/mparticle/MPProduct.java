@@ -9,7 +9,21 @@ import java.util.HashMap;
  *  @see com.mparticle.MParticle#logTransaction(MPProduct)
  *
  */
+    
 public class MPProduct extends HashMap<String, String> {
+    static final String NAME = "ProductName";
+    static final String SKU = "ProductSKU";
+    static final String AFFILIATION = "TransactionAffiliation";
+    static final String UNITPRICE = "ProductUnitPrice";
+    static final String QUANTITY = "ProductQuantity";
+    static final String REVENUE = "RevenueAmount";
+    static final String TAX = "TaxAmount";
+    static final String SHIPPING = "ShippingAmount";
+    static final String CATEGORY = "ProductCategory";
+    static final String CURRENCY = "CurrencyCode";
+    static final String TRANSACTION_ID = "TransactionID";
+
+
     private MPProduct(){
         //prevent instantiation
     }
@@ -23,36 +37,40 @@ public class MPProduct extends HashMap<String, String> {
         }
 
         put(Constants.MethodName.METHOD_NAME, Constants.MethodName.LOG_ECOMMERCE);
-        put("ProductName", builder.productName);
-        put("ProductSKU", builder.productSku);
+        put(NAME, builder.productName);
+        put(SKU, builder.productSku);
 
         if (builder.affiliation != null && builder.affiliation.length() > 0)
-            put("TransactionAffiliation", builder.affiliation);
+            put(AFFILIATION, builder.affiliation);
 
         if (builder.productUnitPrice != null)
-            put("ProductUnitPrice", Double.toString(builder.productUnitPrice));
+            put(UNITPRICE, Double.toString(builder.productUnitPrice));
 
         if (builder.quantity != null)
-            put("ProductQuantity", Double.toString(builder.quantity));
+            put(QUANTITY, Double.toString(builder.quantity));
 
         if (builder.revenueAmount != null)
-            put("RevenueAmount", Double.toString(builder.revenueAmount));
+            put(REVENUE, Double.toString(builder.revenueAmount));
 
         if (builder.taxAmount != null)
-            put("TaxAmount", Double.toString(builder.taxAmount));
+            put(TAX, Double.toString(builder.taxAmount));
 
         if (builder.shippingAmount != null)
-            put("ShippingAmount", Double.toString(builder.shippingAmount));
+            put(SHIPPING, Double.toString(builder.shippingAmount));
 
         if (builder.productCategory != null)
-            put("ProductCategory", builder.productCategory);
+            put(CATEGORY, builder.productCategory);
 
         if (builder.currencyCode != null)
-            put("CurrencyCode", builder.currencyCode);
+            put(CURRENCY, builder.currencyCode);
 
         if (builder.transactionId != null && builder.transactionId.length() > 0)
-            put("TransactionID", builder.transactionId);
+            put(TRANSACTION_ID, builder.transactionId);
 
+    }
+
+    public String get(Object key, String defaultValue) {
+        return containsKey(key) ? super.get(key) : defaultValue;
     }
 
     /**

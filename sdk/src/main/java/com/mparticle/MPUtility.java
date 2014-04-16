@@ -448,4 +448,14 @@ public class MPUtility {
         int res = context.checkCallingOrSelfPermission(permission);
         return (res == PackageManager.PERMISSION_GRANTED);
     }
+
+    public static boolean isGooglePlayServicesAvailable(){
+        try{
+            Class.forName("com.google.android.gms.ads.identifier.AdvertisingIdClient");
+            return true;
+        }catch (ClassNotFoundException cnfe){
+
+        }
+        return false;
+    }
 }
