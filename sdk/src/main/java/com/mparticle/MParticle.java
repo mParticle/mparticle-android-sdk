@@ -145,6 +145,25 @@ public class MParticle {
             } catch (JSONException e) {
                 // carry on without user identities
             }
+            try {
+                boolean changeMade = false;
+                for (int i = 0; i < mUserIdentities.length(); i++) {
+                    JSONObject identity = mUserIdentities.getJSONObject(i);
+                    if (!identity.has(MessageKey.IDENTITY_DATE_FIRST_SEEN)){
+                        identity.put(MessageKey.IDENTITY_DATE_FIRST_SEEN, 0);
+                        changeMade = true;
+                    }
+                    if (!identity.has(MessageKey.IDENTITY_FIRST_SEEN)){
+                        identity.put(MessageKey.IDENTITY_FIRST_SEEN, true);
+                        changeMade = true;
+                    }
+                }
+                if (changeMade) {
+                    sPreferences.edit().putString(PrefKeys.USER_IDENTITIES + mApiKey, mUserIdentities.toString()).commit();
+                }
+            }catch (JSONException jse){
+                //swallow this
+            }
         }
 
         if (mConfigManager.getLogUnhandledExceptions()) {
@@ -289,8 +308,6 @@ public class MParticle {
                     if (appConfigManager.isNetworkPerformanceEnabled()) {
                         instance.beginMeasuringNetworkPerformance();
                     }
-
-
                 }
             }
         }
@@ -1022,6 +1039,8 @@ public class MParticle {
         removeUserAttribute(tag);
     }
 
+
+
     /**
      * Set the current user's identity
      *
@@ -1051,7 +1070,7 @@ public class MParticle {
                 JSONObject newObject = new JSONObject();
                 newObject.put(MessageKey.IDENTITY_NAME, identityType.value);
                 newObject.put(MessageKey.IDENTITY_VALUE, id);
-                newObject.put(MessageKey.IDENTITY_FIRST_SEEN, index == -1);
+                newObject.put(MessageKey.IDENTITY_FIRST_SEEN, true);
 
                 if (index >= 0) {
                     newObject.put(MessageKey.IDENTITY_DATE_FIRST_SEEN, mUserIdentities.getJSONObject(index).optLong(MessageKey.IDENTITY_DATE_FIRST_SEEN, System.currentTimeMillis()));

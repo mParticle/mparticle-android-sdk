@@ -388,7 +388,18 @@ import java.util.UUID;
 
         String userIds = mPreferences.getString(PrefKeys.USER_IDENTITIES + mApiKey, null);
         if (null != userIds) {
-            uploadMessage.put(MessageKey.USER_IDENTITIES, new JSONArray(userIds));
+            JSONArray identities = new JSONArray(userIds);
+            uploadMessage.put(MessageKey.USER_IDENTITIES, identities);
+            boolean changeMade = false;
+            for (int i = 0; i < identities.length(); i++) {
+                if (identities.getJSONObject(i).getBoolean(MessageKey.IDENTITY_FIRST_SEEN)){
+                    identities.getJSONObject(i).put(MessageKey.IDENTITY_FIRST_SEEN, false);
+                    changeMade = true;
+                }
+            }
+            if (changeMade) {
+                mPreferences.edit().putString(PrefKeys.USER_IDENTITIES + mApiKey, identities.toString()).commit();
+            }
         }
 
         uploadMessage.put(history ? MessageKey.HISTORY : MessageKey.MESSAGES, messagesArray);
