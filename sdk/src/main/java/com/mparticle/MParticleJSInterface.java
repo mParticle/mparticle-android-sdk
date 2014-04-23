@@ -21,6 +21,7 @@ public class MParticleJSInterface {
     private static final String TAG = Constants.LOG_TAG;
     private Context mContext;
     private MParticle mApiInstance;
+    public static final String INTERFACE_NAME = "mParticleAndroid";
 
     //the following keys are sent from the JS library as a part of each event
     private static final String JS_KEY_EVENT_NAME = "EventName";
