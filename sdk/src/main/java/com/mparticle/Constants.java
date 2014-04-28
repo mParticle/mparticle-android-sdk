@@ -246,6 +246,7 @@ package com.mparticle;
         public static final String LTV = "mp::ltv";
         public static final String TIME_IN_BG = "mp::time_in_bg";
         public static final String PREVIOUS_SESSION_FOREGROUND = "mp::time_in_fg";
+        public static final String NEXT_REQUEST_TIME = "mp::next_valid_request_time";
     }
 
     interface MiscStorageKeys {
