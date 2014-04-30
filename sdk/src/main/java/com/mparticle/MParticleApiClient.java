@@ -64,6 +64,7 @@ class MParticleApiClient {
     private final String userAgent;
     private final SharedPreferences sharedPreferences;
     private SSLSocketFactory socketFactory;
+    private static final long THROTTLE = 1000*60*60*2;
 
     public MParticleApiClient(ConfigManager configManager, String key, String secret, SharedPreferences sharedPreferences) throws MalformedURLException {
         this.configManager = configManager;
@@ -75,8 +76,9 @@ class MParticleApiClient {
         this.userAgent = "mParticle Android SDK/" + Constants.MPARTICLE_VERSION;
     }
 
-    void fetchConfig() throws IOException {
+    void fetchConfig() throws IOException, MPThrottleException {
         try {
+            checkThrottleTime();
             HttpURLConnection connection = (HttpURLConnection) configUrl.openConnection();
             connection.setRequestProperty("Accept-Encoding", "gzip");
             connection.setRequestProperty(HTTP.USER_AGENT, userAgent);
@@ -95,7 +97,14 @@ class MParticleApiClient {
         }
     }
 
-    ApiResponse sendMessageBatch(String message) throws IOException {
+    private void checkThrottleTime() throws MPThrottleException {
+        if (System.currentTimeMillis() < sharedPreferences.getLong(Constants.PrefKeys.NEXT_REQUEST_TIME, 0)){
+            throw new MPThrottleException();
+        }
+    }
+
+    ApiResponse sendMessageBatch(String message) throws IOException, MPThrottleException {
+        checkThrottleTime();
         byte[] messageBytes = message.getBytes();
         // POST message to mParticle service
         HttpURLConnection connection = (HttpURLConnection) batchUploadUrl.openConnection();
@@ -340,6 +349,9 @@ class MParticleApiClient {
             if (statusCode == HttpStatus.SC_BAD_REQUEST && configManager.isDebug()) {
                 Log.e(Constants.LOG_TAG, "Bad API request - is the correct API key and secret configured?");
             }
+            if (statusCode == HttpStatus.SC_SERVICE_UNAVAILABLE){
+                setNextValidTime();
+            }
         }
 
         boolean shouldDelete() {
@@ -388,4 +400,14 @@ class MParticleApiClient {
         }
     }
 
+    private void setNextValidTime() {
+        long nextTime = System.currentTimeMillis() + THROTTLE;
+        sharedPreferences.edit().putLong(Constants.PrefKeys.NEXT_REQUEST_TIME, nextTime).commit();
+    }
+
+    class MPThrottleException extends Exception {
+        public MPThrottleException() {
+            super("mP servers are busy, API connections have been throttled.");
+        }
+    }
 }

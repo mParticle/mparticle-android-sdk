@@ -23,7 +23,6 @@ import javax.net.ssl.SSLSocketFactory;
  * many methods that a developer can initiate a request.
  */
 final class MPHttpsUrlConnection extends HttpsURLConnection {
-    private final MeasuredRequest request;
     private HttpsURLConnection delegateConnection = null;
 
     private MPInputStream inputStream;
@@ -31,10 +30,7 @@ final class MPHttpsUrlConnection extends HttpsURLConnection {
 
     public MPHttpsUrlConnection(HttpsURLConnection paramHttpsURLConnection) {
         super(paramHttpsURLConnection.getURL());
-        request = new MeasuredRequest();
-        request.setParseHeaders(false);
-        request.setSecure(true);
-        delegateConnection = paramHttpsURLConnection;
+         delegateConnection = paramHttpsURLConnection;
     }
 
     @Override
@@ -89,9 +85,9 @@ final class MPHttpsUrlConnection extends HttpsURLConnection {
 
     @Override
     public InputStream getErrorStream() {
-        request.startTiming();
+       // getRequest().startTiming();
         InputStream stream = delegateConnection.getErrorStream();
-        request.parseUrlResponse(delegateConnection);
+        getRequest().parseUrlResponse(delegateConnection);
         return stream;
     }
 
@@ -107,17 +103,17 @@ final class MPHttpsUrlConnection extends HttpsURLConnection {
 
     @Override
     public int getResponseCode() throws IOException {
-        request.startTiming();
+       // getRequest().startTiming();
         int code = delegateConnection.getResponseCode();
-        request.parseUrlResponse(delegateConnection);
+        getRequest().parseUrlResponse(delegateConnection);
         return code;
     }
 
     @Override
     public String getResponseMessage() throws IOException {
-        request.startTiming();
+        //getRequest().startTiming();
         String message = delegateConnection.getResponseMessage();
-        request.parseUrlResponse(delegateConnection);
+        getRequest().parseUrlResponse(delegateConnection);
         return message;
     }
 
@@ -133,9 +129,9 @@ final class MPHttpsUrlConnection extends HttpsURLConnection {
 
     @Override
     public String getContentEncoding() {
-        request.startTiming();
+      //  getRequest().startTiming();
         String encoding = delegateConnection.getContentEncoding();
-        request.parseUrlResponse(delegateConnection);
+        getRequest().parseUrlResponse(delegateConnection);
         return encoding;
     }
 
@@ -171,9 +167,9 @@ final class MPHttpsUrlConnection extends HttpsURLConnection {
 
     @Override
     public void connect() throws IOException {
-        request.startTiming();
+      //  getRequest().startTiming();
         delegateConnection.connect();
-        request.parseUrlResponse(delegateConnection);
+        getRequest().parseUrlResponse(delegateConnection);
     }
 
     @Override
@@ -184,14 +180,14 @@ final class MPHttpsUrlConnection extends HttpsURLConnection {
     @Override
     public Object getContent() throws IOException {
         Object content = delegateConnection.getContent();
-        request.parseUrlResponse(delegateConnection);
+        getRequest().parseUrlResponse(delegateConnection);
         return content;
     }
 
     @Override
     public Object getContent(Class[] types) throws IOException {
         Object object = delegateConnection.getContent(types);
-        request.parseUrlResponse(delegateConnection);
+        getRequest().parseUrlResponse(delegateConnection);
         return object;
     }
 
@@ -203,7 +199,7 @@ final class MPHttpsUrlConnection extends HttpsURLConnection {
     @Override
     public String getContentType() {
         String type = delegateConnection.getContentType();
-        request.parseUrlResponse(delegateConnection);
+        getRequest().parseUrlResponse(delegateConnection);
         return type;
     }
 
@@ -234,17 +230,17 @@ final class MPHttpsUrlConnection extends HttpsURLConnection {
 
     @Override
     public String getHeaderField(int pos) {
-        request.startTiming();
+       // getRequest().startTiming();
         String field = delegateConnection.getHeaderField(pos);
-        request.parseUrlResponse(delegateConnection);
+        getRequest().parseUrlResponse(delegateConnection);
         return field;
     }
 
     @Override
     public Map<String, List<String>> getHeaderFields() {
-        request.startTiming();
+      //  getRequest().startTiming();
         Map<String, List<String>> headerFields = delegateConnection.getHeaderFields();
-        request.parseUrlResponse(delegateConnection);
+        getRequest().parseUrlResponse(delegateConnection);
         return headerFields;
     }
 
@@ -260,23 +256,23 @@ final class MPHttpsUrlConnection extends HttpsURLConnection {
 
     @Override
     public String getHeaderField(String key) {
-        request.startTiming();
+       // getRequest().startTiming();
         String headerField = delegateConnection.getHeaderField(key);
-        request.parseUrlResponse(delegateConnection);
+        getRequest().parseUrlResponse(delegateConnection);
         return headerField;
     }
 
     @Override
     public int getHeaderFieldInt(String field, int defaultValue) {
         int headerFieldInt = delegateConnection.getHeaderFieldInt(field, defaultValue);
-        request.parseUrlResponse(delegateConnection);
+        getRequest().parseUrlResponse(delegateConnection);
         return headerFieldInt;
     }
 
     @Override
     public String getHeaderFieldKey(int posn) {
         String headerFieldKey = delegateConnection.getHeaderFieldKey(posn);
-        request.parseUrlResponse(delegateConnection);
+        getRequest().parseUrlResponse(delegateConnection);
         return headerFieldKey;
     }
 
@@ -381,21 +377,31 @@ final class MPHttpsUrlConnection extends HttpsURLConnection {
             if (this.outputStream != null) {
                 return this.outputStream;
             } else {
-                this.outputStream = new MPOutputStream(stream, request);
+                this.outputStream = new MPOutputStream(stream,inputStream);
             }
         }
         return this.outputStream;
     }
 
+    private MeasuredRequest getRequest(){
+        if (outputStream != null){
+            outputStream.measuredRequest.setParseHeaders(false);
+            outputStream.measuredRequest.setSecure(true);
+            return outputStream.measuredRequest;
+        }else{
+            return null;
+        }
+    }
+
     public final InputStream getInputStream() throws IOException {
-        request.startTiming();
+     //   getRequest().startTiming();
         InputStream inputStreams = this.delegateConnection.getInputStream();
-        request.parseUrlResponse(delegateConnection);
+        getRequest().parseUrlResponse(delegateConnection);
         if (inputStreams != null) {
             if (this.inputStream != null && inputStream.isSameStream(inputStreams)) {
                 return this.inputStream;
             } else {
-                this.inputStream = new MPInputStream(inputStreams, request);
+                this.inputStream = new MPInputStream(inputStreams);
             }
         }
         return this.inputStream;

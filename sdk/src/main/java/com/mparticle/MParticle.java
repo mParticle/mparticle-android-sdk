@@ -168,10 +168,8 @@ public class MParticle {
             }
         }
 
-        if (mConfigManager.getLogUnhandledExceptions()) {
-            enableUncaughtExceptionLogging();
-        }
-        logStateTransition(Constants.StateTransitionType.STATE_TRANS_INIT);
+
+
 
     }
 
@@ -291,9 +289,14 @@ public class MParticle {
                     }
 
                     MessageManager messageManager = new MessageManager(appContext, appConfigManager);
-                    messageManager.start(appContext, firstRun, installType);
+
 
                     instance = new MParticle(appContext, messageManager, appConfigManager, embeddedKitManager1);
+                    messageManager.start(appContext, firstRun, installType);
+                    instance.logStateTransition(Constants.StateTransitionType.STATE_TRANS_INIT);
+                    if (appConfigManager.getLogUnhandledExceptions()) {
+                        instance.enableUncaughtExceptionLogging();
+                    }
             
                     if (context instanceof Activity) {
                         instance.mLaunchUri = ((Activity) context).getIntent().getDataString();
@@ -755,10 +758,14 @@ public class MParticle {
     }
 
     public void logNetworkPerformance(String url, long startTime, String method, long length, long bytesSent, long bytesReceived) {
+        logNetworkPerformance(url, startTime, method, length, bytesSent, bytesReceived, null);
+    }
+
+    void logNetworkPerformance(String url, long startTime, String method, long length, long bytesSent, long bytesReceived, String requestString) {
         if (mConfigManager.getSendOoEvents()) {
             ensureActiveSession();
             if (checkEventLimit()) {
-                mMessageManager.logNetworkPerformanceEvent(mSessionID, mSessionStartTime, startTime, method, url, length, bytesSent, bytesReceived);
+                mMessageManager.logNetworkPerformanceEvent(mSessionID, mSessionStartTime, startTime, method, url, length, bytesSent, bytesReceived, requestString);
             }
         }
     }

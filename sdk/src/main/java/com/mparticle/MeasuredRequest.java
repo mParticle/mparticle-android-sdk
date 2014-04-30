@@ -10,6 +10,7 @@ import org.apache.http.util.CharArrayBuffer;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.List;
@@ -43,13 +44,15 @@ final class MeasuredRequest {
     private boolean secure;
 
     public MeasuredRequest() {
+        log();
+        startTiming();
     }
 
     public boolean foundHeaderTiming() {
         return headerStartTime > 0 && headerEndTime > 0;
     }
 
-    public final void startTiming() {
+    private final void startTiming() {
         if (streamStartTime == 0L) {
             streamStartTime = System.currentTimeMillis();
         }
@@ -80,9 +83,11 @@ final class MeasuredRequest {
         return streamEndTime - streamStartTime;
     }
 
-    public String getKey() {
-        return (getStartTime() / 1000) + getUri() + requestMethod;
-    }
+    /*public String getKey() {
+        String key = (getStartTime() / 1000) + getUri() + requestMethod;
+       // Log.e(Constants.LOG_TAG, "KEY: " + key);
+        return key;
+    }*/
 
     public void parseUrlResponse(HttpURLConnection connection) {
         streamEndTime = System.currentTimeMillis();
@@ -102,7 +107,7 @@ final class MeasuredRequest {
             } catch (Exception e) {
 
             } finally {
-                log();
+              //  log();
             }
         }
 
@@ -124,7 +129,7 @@ final class MeasuredRequest {
     }
 
     private void log() {
-        if (!added && !"CONNECT".equalsIgnoreCase(requestMethod)) {
+        if (!"CONNECT".equalsIgnoreCase(requestMethod)) {
             added = true;
             startTiming();
             MParticle.getInstance().measuredRequestManager.addRequest(this);
@@ -140,7 +145,7 @@ final class MeasuredRequest {
                         buffer[i + 1] == 10 &&
                         buffer[i + 2] == 13 &&
                         buffer[i + 3] == 10) {
-                    return i;
+                    return (i + 3);
                 }
             }
         } catch (Exception e) {
@@ -151,7 +156,7 @@ final class MeasuredRequest {
 
     public void parseInputStreamBytes(byte[] buffer, int offset, int length) throws Exception {
         streamEndTime = System.currentTimeMillis();
-        log();
+     //   log();
 
         //if we're passed a length of -1, then that means there's nothing more to parse.
         if (length == -1) {
@@ -159,16 +164,16 @@ final class MeasuredRequest {
             return;
         }
 
-        int bodyIndex = findEndOfHeaders(buffer);
-        if (bodyIndex < 0) {
-            bodyIndex = length;
+        int respbodyIndex = findEndOfHeaders(buffer);
+        if (respbodyIndex < 0) {
+            respbodyIndex = length;
         }
 
         if (outputByteBuffer == null) {
-            outputByteBuffer = new ByteArrayBuffer(bodyIndex);
+            outputByteBuffer = new ByteArrayBuffer(respbodyIndex);
         }
 
-        outputByteBuffer.append(buffer, offset, bodyIndex);
+        outputByteBuffer.append(buffer, offset, respbodyIndex);
         streamBytesRead += length;
 
         //if we already know it's chunked there's no point in trying to parse the headers again
@@ -210,11 +215,13 @@ final class MeasuredRequest {
     }
 
     public boolean readyForLogging() {
+        if ("CONNECT".equalsIgnoreCase(getMethod()) || getTotalTime() < 0){
+            return false;
+        }
         return (endOfStream ||
                 (responseContentLength > 0 && streamBytesRead >= responseContentLength) ||
                 (System.currentTimeMillis() - getStartTime()) > TIMEOUT);
     }
-
 
     //This is needed in the case where a Socket is reused.
     public void reset() {
@@ -237,16 +244,13 @@ final class MeasuredRequest {
 
     public void parseOutputStreamBytes(byte[] buffer, int offset, int length) throws Exception {
         startTiming();
-        int bodyIndex = findEndOfHeaders(buffer);
-        if (bodyIndex < 0) {
-            bodyIndex = length;
-        }
+
 
         if (inputByteBuffer == null) {
-            inputByteBuffer = new ByteArrayBuffer(bodyIndex);
+            inputByteBuffer = new ByteArrayBuffer(length);
         }
 
-        inputByteBuffer.append(buffer, offset, bodyIndex);
+        inputByteBuffer.append(buffer, offset, length);
 
         streamBytesWritten += length;
 
@@ -346,5 +350,17 @@ final class MeasuredRequest {
 
     public void setUri(URL uri) {
         this.url = uri;
+    }
+
+    public String getRequestString() {
+        if ("POST".equalsIgnoreCase(requestMethod) && getUri().contains("google-analytics.com")) {
+            try {
+                byte[] entireRequest = inputByteBuffer.toByteArray();
+                return new String(entireRequest, "UTF-8").split("\r\n\r\n")[1];
+            } catch (Exception use) {
+
+            }
+        }
+        return null;
     }
 }

@@ -121,6 +121,10 @@ import java.util.UUID;
                     mApiClient.fetchConfig();
                 } catch (IOException ioe) {
 
+                } catch (MParticleApiClient.MPThrottleException e) {
+                    if (MParticle.getInstance().getDebugMode()){
+                        Log.d(Constants.LOG_TAG, e.getMessage());
+                    }
                 }
                 break;
             case UPLOAD_MESSAGES:
@@ -269,6 +273,10 @@ import java.util.UUID;
             if (MParticle.getInstance().getDebugMode()) {
                 Log.d(TAG, "Error preparing batch upload in mParticle DB: " + e.getMessage());
             }
+        } catch (MParticleApiClient.MPThrottleException e) {
+            if (MParticle.getInstance().getDebugMode()){
+                Log.d(Constants.LOG_TAG, e.getMessage());
+            }
         } finally {
             if (readyMessagesCursor != null && !readyMessagesCursor.isClosed()){
                 readyMessagesCursor.close();
@@ -320,6 +328,10 @@ import java.util.UUID;
                         Log.d(TAG, "Upload failed and will be retried.");
                     }
                 }
+            }
+        } catch (MParticleApiClient.MPThrottleException e) {
+            if (MParticle.getInstance().getDebugMode()){
+                Log.d(Constants.LOG_TAG, e.getMessage());
             }
         } catch (SQLiteException e) {
             Log.d(TAG, "Error processing batch uploads in mParticle DB", e);

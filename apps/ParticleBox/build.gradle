@@ -87,10 +87,10 @@ dependencies {
     flurryCompile project(':sdk')
     kahunaCompile project(':sdk')
     crashlyticsCompile project(':sdk')
-    mparticleCompile 'com.mparticle:android-sdk:1.2.+'
+    mparticleCompile 'com.mparticle:android-sdk:1.3.+'
     //mparticleCompile project(':sdk')
     //mparticleCompile files ("libs/classes.jar")
-    googleanalyticsCompile 'com.google.android.gms:play-services:4+'
+    googleanalyticsCompile files ("libs/libGoogleAnalyticsServices.jar")
     mixpanelCompile 'com.mixpanel.android:mixpanel-android:4.0.0-RC3@aar'
     flurryCompile files ("libs/FlurryAnalytics_3.3.3.jar")
     urbanairshipCompile files ("libs/urbanairship-lib-3.2.3.jar")
