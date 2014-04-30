@@ -44,9 +44,10 @@ final class MeasuredRequestManager {
                 Iterator<MeasuredRequest> iter = requests.iterator();
                 while(iter.hasNext()) {
                     MeasuredRequest request = iter.next();
+                    String uri = request.getUri();
+                    boolean allowed = isUriAllowed(uri);
                     if (request.readyForLogging()) {
-                        String uri = request.getUri();
-                        if (isUriAllowed(uri)) {
+                        if (allowed) {
                         /* disabling this for the server-side extractors...for now
                          if (!isUriQueryAllowed(uri)){
                             uri = redactQuery(uri);
@@ -64,7 +65,7 @@ final class MeasuredRequestManager {
                         }
                         request.reset();
                         iter.remove();
-                    }else if ((System.currentTimeMillis() - request.getStartTime()) > (60*1000)){
+                    }else if (!allowed || (System.currentTimeMillis() - request.getStartTime()) > (60*1000)){
                         iter.remove();
                     }
                 }
@@ -106,6 +107,9 @@ final class MeasuredRequestManager {
         queryStringFilters.clear();
     }
     public boolean isUriAllowed(String uri){
+        if (uri == null){
+            return true;
+        }
         if (uri.contains(MPARTICLEHOST)){
             return false;
         }
