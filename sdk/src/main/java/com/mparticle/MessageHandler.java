@@ -1,7 +1,6 @@
 package com.mparticle;
 
 import android.content.ContentValues;
-import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
@@ -25,7 +24,7 @@ import org.json.JSONObject;
 
     private static final String TAG = Constants.LOG_TAG;
 
-    private final MParticleDatabase mDB;
+    private final SQLiteDatabase db;
     private final String mApiKey;
 
     public static final int STORE_MESSAGE = 0;
@@ -34,16 +33,14 @@ import org.json.JSONObject;
     public static final int CREATE_SESSION_END_MESSAGE = 3;
     public static final int END_ORPHAN_SESSIONS = 4;
     public static final int STORE_BREADCRUMB = 5;
-    private final Context context;
 
     // boolean flag used in unit tests to wait until processing is finished.
     // this is not used in the normal execution.
     /* package-private */ boolean mIsProcessingMessage = false;
 
-    public MessageHandler(Context appContext, Looper looper, String apiKey) {
+    public MessageHandler(Looper looper, String apiKey, SQLiteDatabase database) {
         super(looper);
-        context = appContext;
-        mDB = new MParticleDatabase(appContext);
+        db = database;
         mApiKey = apiKey;
     }
 
@@ -57,19 +54,18 @@ import org.json.JSONObject;
                     JSONObject message = (JSONObject) msg.obj;
                     message.put(MessageKey.STATE_INFO_KEY, MessageManager.getStateInfo());
                     String messageType = message.getString(MessageKey.TYPE);
-                    SQLiteDatabase db = mDB.getWritableDatabase();
                     // handle the special case of session-start by creating the
                     // session record first
                     if (MessageType.SESSION_START == messageType) {
-                        dbInsertSession(db, message);
+                        dbInsertSession(message);
                     }
                     if (MessageType.ERROR == messageType){
-                        appendBreadcrumbs(db, message);
+                        appendBreadcrumbs(message);
                     }
-                    dbInsertMessage(db, message);
+                    dbInsertMessage(message);
 
                     if (MessageType.SESSION_START != messageType) {
-                        dbUpdateSessionEndTime(db, getMessageSessionId(message), message.getLong(MessageKey.TIMESTAMP), 0);
+                        dbUpdateSessionEndTime(getMessageSessionId(message), message.getLong(MessageKey.TIMESTAMP), 0);
                     }
 
                     if (MParticle.getInstance().mConfigManager.getUploadMode() == Constants.Status.READY){
@@ -82,7 +78,7 @@ import org.json.JSONObject;
                 } catch (JSONException e) {
                     Log.e(TAG, "Error with JSON object", e);
                 } finally {
-                    mDB.close();
+
                 }
                 break;
             case UPDATE_SESSION_ATTRIBUTES:
@@ -90,14 +86,13 @@ import org.json.JSONObject;
                     JSONObject sessionAttributes = (JSONObject) msg.obj;
                     String sessionId = sessionAttributes.getString(MessageKey.SESSION_ID);
                     String attributes = sessionAttributes.getString(MessageKey.ATTRIBUTES);
-                    SQLiteDatabase db = mDB.getWritableDatabase();
-                    dbUpdateSessionAttributes(db, sessionId, attributes);
+                    dbUpdateSessionAttributes(sessionId, attributes);
                 } catch (SQLiteException e) {
                     Log.e(TAG, "Error updating session attributes in mParticle DB", e);
                 } catch (JSONException e) {
                     Log.e(TAG, "Error with JSON object", e);
                 } finally {
-                    mDB.close();
+
                 }
                 break;
             case UPDATE_SESSION_END:
@@ -107,20 +102,19 @@ import org.json.JSONObject;
                     long time = sessionTiming.getLong(MessageKey.TIMESTAMP);
                     long sessionLength = sessionTiming.getLong(MessageKey.SESSION_LENGTH);
 
-                    SQLiteDatabase db = mDB.getWritableDatabase();
-                    dbUpdateSessionEndTime(db, sessionId, time, sessionLength);
+
+                    dbUpdateSessionEndTime(sessionId, time, sessionLength);
                 } catch (SQLiteException e) {
                     Log.e(TAG, "Error updating session end time in mParticle DB", e);
                 } catch (JSONException e) {
                     Log.e(TAG, "Error with JSON object", e);
                 } finally {
-                    mDB.close();
+
                 }
                 break;
             case CREATE_SESSION_END_MESSAGE:
                 try {
                     String sessionId = (String) msg.obj;
-                    SQLiteDatabase db = mDB.getWritableDatabase();
                     String[] selectionArgs = new String[]{sessionId};
                     String[] sessionColumns = new String[]{SessionTable.START_TIME, SessionTable.END_TIME,
                             SessionTable.SESSION_LENGTH, SessionTable.ATTRIBUTES};
@@ -141,7 +135,7 @@ import org.json.JSONObject;
                                 sessionAttributes);
 
                         // insert the record into messages with duration
-                        dbInsertMessage(db, endMessage);
+                        dbInsertMessage(endMessage);
 
                         // delete the processed session record
                         db.delete(SessionTable.TABLE_NAME, SessionTable.SESSION_ID + "=?", new String[]{sessionId});
@@ -155,13 +149,12 @@ import org.json.JSONObject;
                 } catch (JSONException e) {
                     Log.e(TAG, "Error with JSON object", e);
                 } finally {
-                    mDB.close();
+
                 }
                 break;
             case END_ORPHAN_SESSIONS:
                 try {
                     // find left-over sessions that exist during startup and end them
-                    SQLiteDatabase db = mDB.getReadableDatabase();
                     String[] selectionArgs = new String[]{mApiKey};
                     String[] sessionColumns = new String[]{SessionTable.SESSION_ID};
                     Cursor selectCursor = db.query(SessionTable.TABLE_NAME, sessionColumns,
@@ -177,20 +170,19 @@ import org.json.JSONObject;
                 } catch (SQLiteException e) {
                     Log.e(TAG, "Error processing initialization in mParticle DB", e);
                 } finally {
-                    mDB.close();
+
                 }
                 break;
             case STORE_BREADCRUMB:
                 try {
                     JSONObject message = (JSONObject) msg.obj;
-                    SQLiteDatabase db = mDB.getWritableDatabase();
-                    dbInsertBreadcrumb(db, message);
+                    dbInsertBreadcrumb(message);
                 } catch (SQLiteException e) {
                     Log.e(TAG, "Error saving breadcrumb to mParticle DB", e);
                 } catch (JSONException e) {
                     Log.e(TAG, "Error with JSON object", e);
                 } finally {
-                    mDB.close();
+
                 }
         }
         mIsProcessingMessage = false;
@@ -201,7 +193,7 @@ import org.json.JSONObject;
             BreadcrumbTable.MESSAGE
     };
 
-    private void appendBreadcrumbs(SQLiteDatabase db, JSONObject message) throws JSONException {
+    private void appendBreadcrumbs(JSONObject message) throws JSONException {
         Cursor breadcrumbCursor = db.query(BreadcrumbTable.TABLE_NAME,
                 breadcrumbColumns,
                 null,
@@ -223,7 +215,7 @@ import org.json.JSONObject;
 
     private static final String[] idColumns = {"_id"};
 
-    private void dbInsertBreadcrumb(SQLiteDatabase db, JSONObject message) throws JSONException {
+    private void dbInsertBreadcrumb(JSONObject message) throws JSONException {
         ContentValues contentValues = new ContentValues();
         contentValues.put(MParticleDatabase.BreadcrumbTable.API_KEY, mApiKey);
         contentValues.put(MParticleDatabase.BreadcrumbTable.CREATED_AT, message.getLong(MessageKey.TIMESTAMP));
@@ -242,7 +234,7 @@ import org.json.JSONObject;
         }
     }
 
-    private void dbInsertSession(SQLiteDatabase db, JSONObject message) throws JSONException {
+    private void dbInsertSession(JSONObject message) throws JSONException {
         ContentValues contentValues = new ContentValues();
         contentValues.put(SessionTable.API_KEY, mApiKey);
         contentValues.put(SessionTable.SESSION_ID, message.getString(MessageKey.ID));
@@ -252,7 +244,7 @@ import org.json.JSONObject;
         db.insert(SessionTable.TABLE_NAME, null, contentValues);
     }
 
-    private void dbInsertMessage(SQLiteDatabase db, JSONObject message) throws JSONException {
+    private void dbInsertMessage(JSONObject message) throws JSONException {
         ContentValues contentValues = new ContentValues();
         contentValues.put(MessageTable.API_KEY, mApiKey);
         contentValues.put(MessageTable.CREATED_AT, message.getLong(MessageKey.TIMESTAMP));
@@ -269,21 +261,21 @@ import org.json.JSONObject;
         db.insert(MessageTable.TABLE_NAME, null, contentValues);
     }
 
-    private void dbUpdateMessageStatus(SQLiteDatabase db, String sessionId, long status) {
+    private void dbUpdateMessageStatus(String sessionId, long status) {
         ContentValues contentValues = new ContentValues();
         contentValues.put(MessageTable.STATUS, status);
         String[] whereArgs = {sessionId};
         db.update(MessageTable.TABLE_NAME, contentValues, MessageTable.SESSION_ID + "=?", whereArgs);
     }
 
-    private void dbUpdateSessionAttributes(SQLiteDatabase db, String sessionId, String attributes) {
+    private void dbUpdateSessionAttributes(String sessionId, String attributes) {
         ContentValues sessionValues = new ContentValues();
         sessionValues.put(SessionTable.ATTRIBUTES, attributes);
         String[] whereArgs = {sessionId};
         db.update(SessionTable.TABLE_NAME, sessionValues, SessionTable.SESSION_ID + "=?", whereArgs);
     }
 
-    private void dbUpdateSessionEndTime(SQLiteDatabase db, String sessionId, long endTime, long sessionLength) {
+    private void dbUpdateSessionEndTime(String sessionId, long endTime, long sessionLength) {
         ContentValues sessionValues = new ContentValues();
         sessionValues.put(SessionTable.END_TIME, endTime);
         if (sessionLength > 0) {

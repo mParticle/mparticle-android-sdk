@@ -36,7 +36,7 @@ import java.util.UUID;
     public static final int UPLOAD_HISTORY = 3;
     public static final int UPDATE_CONFIG = 4;
     private static final String TAG = Constants.LOG_TAG;
-    private final MParticleDatabase mDB;
+    private final SQLiteDatabase db;
     private final SharedPreferences mPreferences;
     private final Context mContext;
     private final String mApiKey;
@@ -76,7 +76,7 @@ import java.util.UUID;
     private JSONObject deviceInfo;
     private JSONObject appInfo;
 
-    public UploadHandler(Context context, Looper looper, ConfigManager configManager) {
+    public UploadHandler(Context context, Looper looper, ConfigManager configManager, SQLiteDatabase database) {
         super(looper);
         mConfigManager = configManager;
 
@@ -84,7 +84,7 @@ import java.util.UUID;
         mApiKey = mConfigManager.getApiKey();
         mSecret = mConfigManager.getApiSecret();
 
-        mDB = new MParticleDatabase(mContext);
+        db = database;
         mPreferences = mContext.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
 
         try {
@@ -154,7 +154,7 @@ import java.util.UUID;
                 //  and the messages table has messages that are not from the current session,
                 //  or there is no current session
                 //  then create a history upload and send it
-                SQLiteDatabase db = mDB.getWritableDatabase();
+
                 Cursor isempty = db.rawQuery("select * from " + UploadTable.TABLE_NAME, null);
                 if ((isempty == null) || (isempty.getCount() == 0)) {
 
@@ -185,7 +185,7 @@ import java.util.UUID;
         Cursor readyMessagesCursor = null;
         try {
             // select messages ready to upload
-            SQLiteDatabase db = mDB.getWritableDatabase();
+
 
             String selection;
             String[] selectionArgs;
@@ -230,16 +230,16 @@ import java.util.UUID;
                             JSONObject uploadMessage = createUploadMessage(messagesArray, history);
                             // store in uploads table
                             if (sessionEndFound) {
-                                dbInsertUpload(db, uploadMessage);
-                                dbDeleteProcessedMessages(db, currentSessionId);
+                                dbInsertUpload(uploadMessage);
+                                dbDeleteProcessedMessages(currentSessionId);
                             }
                         } else {
                             if (readyMessagesCursor.moveToNext() && !readyMessagesCursor.getString(sessionIndex).equals(currentSessionId)) {
                                 JSONObject uploadMessage = createUploadMessage(messagesArray, history);
                                 // store in uploads table
                                 if (uploadMessage != null) {
-                                    dbInsertUpload(db, uploadMessage);
-                                    dbDeleteProcessedMessages(db, currentSessionId);
+                                    dbInsertUpload(uploadMessage);
+                                    dbDeleteProcessedMessages(currentSessionId);
                                 }
                                 messagesArray = new JSONArray();
                             }
@@ -256,8 +256,8 @@ import java.util.UUID;
                     }
                     JSONObject uploadMessage = createUploadMessage(messagesArray, history);
                     // store in uploads table
-                    dbInsertUpload(db, uploadMessage);
-                    dbMarkAsUploadedMessage(db, lastMessageId);
+                    dbInsertUpload(uploadMessage);
+                    dbMarkAsUploadedMessage(lastMessageId);
 
                 }
             }
@@ -281,7 +281,6 @@ import java.util.UUID;
             if (readyMessagesCursor != null && !readyMessagesCursor.isClosed()){
                 readyMessagesCursor.close();
             }
-            mDB.close();
         }
     }
 
@@ -290,7 +289,6 @@ import java.util.UUID;
         Cursor readyUploadsCursor = null;
         try {
             // read batches ready to upload
-            SQLiteDatabase db = mDB.getWritableDatabase();
             String[] selectionArgs = new String[]{mApiKey};
             String[] selectionColumns = new String[]{"_id", UploadTable.MESSAGE};
             readyUploadsCursor = db.query(UploadTable.TABLE_NAME, selectionColumns,
@@ -309,14 +307,14 @@ import java.util.UUID;
                 MParticleApiClient.ApiResponse response = mApiClient.sendMessageBatch(message);
 
                 if (response.shouldDelete()) {
-                    dbDeleteUpload(db, id);
+                    dbDeleteUpload(id);
                     try {
                         if (response.getJsonResponse() != null &&
                                 response.getJsonResponse().has(MessageKey.MESSAGES)) {
                             JSONArray responseCommands = response.getJsonResponse().getJSONArray(MessageKey.MESSAGES);
                             for (int i = 0; i < responseCommands.length(); i++) {
                                 JSONObject commandObject = responseCommands.getJSONObject(i);
-                                dbInsertCommand(db, commandObject);
+                                dbInsertCommand(commandObject);
                             }
                         }
 
@@ -341,7 +339,7 @@ import java.util.UUID;
             if (readyUploadsCursor != null && !readyUploadsCursor.isClosed()){
                 readyUploadsCursor.close();
             }
-            mDB.close();
+
         }
         return processingSessionEnd;
     }
@@ -349,7 +347,7 @@ import java.util.UUID;
 
     private void processCommands() {
         try {
-            SQLiteDatabase db = mDB.getWritableDatabase();
+
             String[] selectionColumns = new String[]{"_id", CommandTable.URL, CommandTable.METHOD,
                     CommandTable.POST_DATA, CommandTable.HEADERS};
             Cursor commandsCursor = db.query(CommandTable.TABLE_NAME, selectionColumns,
@@ -368,7 +366,7 @@ import java.util.UUID;
                     // fail silently. a message will be logged if debug mode is enabled
                 } finally {
                     if (response != null && response.getResponseCode() > -1) {
-                        dbDeleteCommand(db, id);
+                        dbDeleteCommand(id);
                     } else if (mConfigManager.isDebug()) {
                         Log.w(TAG, "Provider command processing failed and will be retried.");
                     }
@@ -378,7 +376,7 @@ import java.util.UUID;
         } catch (SQLiteException e) {
             Log.e(TAG, "Error processing provider command uploads in mParticle DB", e);
         } finally {
-            mDB.close();
+
         }
     }
 
@@ -445,7 +443,6 @@ import java.util.UUID;
     }
 
     private void cleanupDatabase(int expirationPeriod) {
-        SQLiteDatabase db = mDB.getWritableDatabase();
         String[] whereArgs = {Long.toString(System.currentTimeMillis() - expirationPeriod)};
         db.delete(CommandTable.TABLE_NAME, CommandTable.CREATED_AT + "<?", whereArgs);
         db.delete(UploadTable.TABLE_NAME, UploadTable.CREATED_AT + "<?", whereArgs);
@@ -453,7 +450,7 @@ import java.util.UUID;
         db.delete(SessionTable.TABLE_NAME, SessionTable.END_TIME + "<?", whereArgs);
     }
 
-    private void dbInsertUpload(SQLiteDatabase db, JSONObject message) throws JSONException {
+    private void dbInsertUpload(JSONObject message) throws JSONException {
         ContentValues contentValues = new ContentValues();
         contentValues.put(UploadTable.API_KEY, mApiKey);
         contentValues.put(UploadTable.CREATED_AT, message.getLong(MessageKey.TIMESTAMP));
@@ -461,12 +458,12 @@ import java.util.UUID;
         db.insert(UploadTable.TABLE_NAME, null, contentValues);
     }
 
-    private void dbDeleteProcessedMessages(SQLiteDatabase db, String sessionId) {
+    private void dbDeleteProcessedMessages(String sessionId) {
         String[] whereArgs = new String[]{mApiKey, Integer.toString(Status.UPLOADED), sessionId};
         int rowsdeleted = db.delete(MessageTable.TABLE_NAME, SQL_FINISHED_HISTORY_MESSAGES, whereArgs);
     }
 
-    private void dbMarkAsUploadedMessage(SQLiteDatabase db, int lastMessageId) {
+    private void dbMarkAsUploadedMessage(int lastMessageId) {
         //non-session messages can be deleted, they're not part of session history
         String[] whereArgs = new String[]{mApiKey, Long.toString(lastMessageId)};
         String whereClause = SQL_DELETABLE_MESSAGES + " and (_id<=?)";
@@ -479,17 +476,17 @@ import java.util.UUID;
         int rowsupdated = db.update(MessageTable.TABLE_NAME, contentValues, whereClause, whereArgs);
     }
 
-    private void dbDeleteUpload(SQLiteDatabase db, int id) {
+    private void dbDeleteUpload(int id) {
         String[] whereArgs = {Long.toString(id)};
         int rowsdeleted = db.delete(UploadTable.TABLE_NAME, "_id=?", whereArgs);
     }
 
-    private void dbDeleteCommand(SQLiteDatabase db, int id) {
+    private void dbDeleteCommand(int id) {
         String[] whereArgs = {Long.toString(id)};
         db.delete(CommandTable.TABLE_NAME, "_id=?", whereArgs);
     }
 
-    private void dbInsertCommand(SQLiteDatabase db, JSONObject command) throws JSONException {
+    private void dbInsertCommand(JSONObject command) throws JSONException {
         ContentValues contentValues = new ContentValues();
         contentValues.put(CommandTable.URL, command.getString(MessageKey.URL));
         contentValues.put(CommandTable.METHOD, command.getString(MessageKey.METHOD));
