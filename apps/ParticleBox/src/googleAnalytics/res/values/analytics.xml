@@ -7,6 +7,8 @@
     <!--Enable automatic activity tracking-->
     <bool name="ga_autoActivityTracking">true</bool>
     <integer name="ga_dispatchPeriod">10</integer>
+    <integer name="ga_sessionTimeout">30</integer>
     <!--Enable automatic exception tracking-->
     <bool name="ga_reportUncaughtExceptions">true</bool>
+    <string name="ga_logLevel">error</string>
 </resources>

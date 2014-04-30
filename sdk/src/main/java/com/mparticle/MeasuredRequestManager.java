@@ -2,8 +2,8 @@ package com.mparticle;
 
 import android.util.Log;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -17,16 +17,15 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 final class MeasuredRequestManager {
     private final ScheduledExecutorService scheduler =
             Executors.newScheduledThreadPool(1);
-    ConcurrentHashMap<String, MeasuredRequest> requests = new ConcurrentHashMap<String, MeasuredRequest>();
+    HashSet<MeasuredRequest> requests = new HashSet<MeasuredRequest>();
     private CopyOnWriteArrayList<String> excludedUrlFilters = new CopyOnWriteArrayList<String>();
     private CopyOnWriteArrayList<String> queryStringFilters = new CopyOnWriteArrayList<String>();
     private static final String MPARTICLEHOST = ".mparticle.com";
     private ScheduledFuture<?> runner;
 
     public void addRequest(MeasuredRequest request){
-        MeasuredRequest current = requests.get(request.getKey());
-        if (current == null || request.foundHeaderTiming()){
-            requests.put(request.getKey(), request);
+        synchronized (requests) {
+            requests.add(request);
         }
     }
 
@@ -37,30 +36,37 @@ final class MeasuredRequestManager {
     final Runnable processPending = new Runnable() {
         @Override
         public void run() {
-            boolean debugLog = MParticle.getInstance().getDebugMode();
-            if (debugLog && requests.size() > 0){
-                Log.d(Constants.LOG_TAG, "Processing " + requests.size() + " measured network requests.");
-            }
-            for (Map.Entry<String, MeasuredRequest> entry : requests.entrySet()){
-                if (entry.getValue().readyForLogging()){
-                    MeasuredRequest request = entry.getValue();
-                    String uri = request.getUri();
-                    if (isUriAllowed(uri)) {
-                        if (!isUriQueryAllowed(uri)){
+            synchronized (requests) {
+                boolean debugLog = MParticle.getInstance().getDebugMode();
+                if (debugLog && requests.size() > 0) {
+                    Log.d(Constants.LOG_TAG, "Processing " + requests.size() + " measured network requests.");
+                }
+                Iterator<MeasuredRequest> iter = requests.iterator();
+                while(iter.hasNext()) {
+                    MeasuredRequest request = iter.next();
+                    if (request.readyForLogging()) {
+                        String uri = request.getUri();
+                        if (isUriAllowed(uri)) {
+                        /* disabling this for the server-side extractors...for now
+                         if (!isUriQueryAllowed(uri)){
                             uri = redactQuery(uri);
+                        }*/
+                            MParticle.getInstance().logNetworkPerformance(uri,
+                                    request.getStartTime(),
+                                    request.getMethod(),
+                                    request.getTotalTime(),
+                                    request.getBytesSent(),
+                                    request.getBytesReceived(),
+                                    request.getRequestString());
+                            if (debugLog) {
+                                Log.d(Constants.LOG_TAG, "Logging network request: " + request.toString());
+                            }
                         }
-                        MParticle.getInstance().logNetworkPerformance(uri,
-                                request.getStartTime(),
-                                request.getMethod(),
-                                request.getTotalTime(),
-                                request.getBytesSent(),
-                                request.getBytesReceived());
-                        if (debugLog) {
-                            Log.d(Constants.LOG_TAG, "Logging network request: " + request.toString());
-                        }
+                        request.reset();
+                        iter.remove();
+                    }else if ((System.currentTimeMillis() - request.getStartTime()) > (60*1000)){
+                        iter.remove();
                     }
-                    request.reset();
-                    requests.remove(entry.getKey());
                 }
             }
         }
@@ -113,7 +119,7 @@ final class MeasuredRequestManager {
 
     public void setEnabled(boolean enabled){
         if (enabled){
-            runner = scheduler.scheduleAtFixedRate(processPending, 10, 30, SECONDS);
+            runner = scheduler.scheduleAtFixedRate(processPending, 10, 15, SECONDS);
         }else{
             if (runner != null){
                 runner.cancel(true);

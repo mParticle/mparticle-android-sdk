@@ -358,7 +358,7 @@ import java.util.UUID;
         }
     }
 
-    public void logNetworkPerformanceEvent(String sessionId, long sessionStartTime, long time, String method, String url, long length, long bytesSent, long bytesReceived) {
+    public void logNetworkPerformanceEvent(String sessionId, long sessionStartTime, long time, String method, String url, long length, long bytesSent, long bytesReceived, String requestString) {
         try {
             JSONObject message = createMessage(MessageType.NETWORK_PERFORMNACE, sessionId, sessionStartTime, time, null, null);
             message.put(MessageKey.NPE_METHOD, method);
@@ -366,6 +366,9 @@ import java.util.UUID;
             message.put(MessageKey.NPE_LENGTH, length);
             message.put(MessageKey.NPE_SENT, bytesSent);
             message.put(MessageKey.NPE_REC, bytesReceived);
+            if (requestString != null){
+                message.put(MessageKey.NPE_POST_DATA, requestString);
+            }
             mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
         } catch (JSONException e) {
             Log.w(TAG, "Failed to create mParticle error message");

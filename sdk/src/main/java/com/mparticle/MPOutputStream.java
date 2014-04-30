@@ -12,12 +12,14 @@ import java.io.OutputStream;
  */
 final class MPOutputStream extends OutputStream {
 
+    private final MPInputStream inputStream;
     private OutputStream localOutputStream;
-    private MeasuredRequest measuredRequest;
+    public MeasuredRequest measuredRequest;
+    private boolean writing = false;
 
-    public MPOutputStream(OutputStream outputStream, MeasuredRequest request) {
+    public MPOutputStream(OutputStream outputStream, MPInputStream inputStream) {
         localOutputStream = outputStream;
-        measuredRequest = request;
+        this.inputStream  = inputStream;
     }
 
     @Override
@@ -32,7 +34,14 @@ final class MPOutputStream extends OutputStream {
 
     @Override
     public final void write(int oneByte) throws IOException {
-        measuredRequest.startTiming();
+        if (measuredRequest == null || !writing || inputStream == null || inputStream.getRead()) {
+            measuredRequest = new MeasuredRequest();
+        }
+        if (inputStream != null){
+            inputStream.resetRead();
+        }
+        writing = true;
+
         localOutputStream.write(oneByte);
     }
 
@@ -43,7 +52,14 @@ final class MPOutputStream extends OutputStream {
 
     @Override
     public final void write(byte[] buffer, int offset, int byteCount) throws IOException {
-        measuredRequest.startTiming();
+        if (measuredRequest == null || !writing || inputStream == null || inputStream.getRead()) {
+            measuredRequest = new MeasuredRequest();
+        }
+        if (inputStream != null){
+            inputStream.resetRead();
+            inputStream.setMeasuredRequest(measuredRequest);
+        }
+        writing = true;
         localOutputStream.write(buffer, offset, byteCount);
         try{
             measuredRequest.parseOutputStreamBytes(buffer, offset, byteCount);
@@ -57,4 +73,5 @@ final class MPOutputStream extends OutputStream {
     public final boolean isSameStream(OutputStream paramOutputStream) {
         return this.localOutputStream == paramOutputStream;
     }
+
 }
