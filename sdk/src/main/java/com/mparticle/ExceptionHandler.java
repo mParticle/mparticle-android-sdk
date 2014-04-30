@@ -18,13 +18,14 @@ import java.lang.Thread.UncaughtExceptionHandler;
     @Override
     public void uncaughtException(Thread thread, Throwable ex) {
         try {
-            MParticle.getInstance().logUnhandledError(ex);
+                MParticle.getInstance().logUnhandledError(ex);
+
             if (null != mOriginalUncaughtExceptionHandler) {
                 mOriginalUncaughtExceptionHandler.uncaughtException(thread, ex);
             } else {
                 Thread.getDefaultUncaughtExceptionHandler().uncaughtException(thread, ex);
             }
-        } catch (Throwable t) {
+        } catch (Exception t) {
             Log.e(TAG, "Failed to log error event for uncaught exception", t);
             // we tried. don't make things worse.
         }

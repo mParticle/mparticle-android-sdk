@@ -14,13 +14,13 @@ import java.io.InputStream;
 final class MPInputStream extends InputStream {
     private MeasuredRequest measuredRequest;
     private InputStream localInputStream;
+    private boolean read;
 
-    public MPInputStream(InputStream paramInputStream, MeasuredRequest request) {
+    public MPInputStream(InputStream paramInputStream) {
         if (paramInputStream == null)
             throw new NullPointerException("InputStream was null");
 
         localInputStream = paramInputStream;
-        measuredRequest = request;
     }
 
     public final int available() throws IOException {
@@ -48,9 +48,12 @@ final class MPInputStream extends InputStream {
     }
 
     public final int read(byte[] buffer, int offset, int length) throws IOException {
+        read = true;
         length =  localInputStream.read(buffer, offset, length);
         try{
-            measuredRequest.parseInputStreamBytes(buffer, offset, length);
+            if (measuredRequest != null) {
+                measuredRequest.parseInputStreamBytes(buffer, offset, length);
+            }
         }catch (Exception e){
             if (MParticle.getInstance().getDebugMode()){
                 Log.w(Constants.LOG_TAG, "Exception thrown while parsing networking InputStream: " + e.getMessage());
@@ -69,5 +72,17 @@ final class MPInputStream extends InputStream {
 
     public final boolean isSameStream(InputStream inputStream) {
         return localInputStream == inputStream;
+    }
+
+    public boolean getRead(){
+        return read;
+    }
+
+    public void resetRead(){
+        read = false;
+    }
+
+    public void setMeasuredRequest(MeasuredRequest request){
+        measuredRequest = request;
     }
 }

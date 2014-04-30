@@ -22,15 +22,12 @@ final class MPSSLSocket extends SSLSocket {
     private SSLSocket localSocket;
     private OutputStream outputStream;
     private MPInputStream inputStream;
-    private MeasuredRequest request;
 
     public MPSSLSocket(String host, SSLSocket localSocket) {
         if (localSocket == null)
             throw new NullPointerException("SSLSocket was null");
 
         this.localSocket = localSocket;
-        request = new MeasuredRequest();
-        request.setSecure(true);
 
     }
 
@@ -161,7 +158,7 @@ final class MPSSLSocket extends SSLSocket {
             if (this.inputStream != null && inputStream.isSameStream(inputStreams)){
                 return this.inputStream;
             }else{
-                this.inputStream = new MPInputStream(inputStreams, request);
+                this.inputStream = new MPInputStream(inputStreams);
             }
         }
         return this.inputStream;
@@ -204,13 +201,12 @@ final class MPSSLSocket extends SSLSocket {
 
     @Override
     public final OutputStream getOutputStream() throws IOException {
-        this.request.startTiming();
         OutputStream outputStream =this.localSocket.getOutputStream();
         if (outputStream != null){
             if (this.outputStream != null){
                 return this.outputStream;
             }else{
-                this.outputStream = new MPOutputStream(outputStream, request);
+                this.outputStream = new MPOutputStream(outputStream, inputStream);
             }
         }
         return this.outputStream;

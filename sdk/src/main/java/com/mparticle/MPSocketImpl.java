@@ -22,14 +22,12 @@ final class MPSocketImpl extends SocketImpl {
     private static Field localPortField;
     private static Field portField;
     private static Method[] methods = new Method[20];
-    private final MeasuredRequest request;
     private SocketImpl delegateSocket;
     private MPInputStream delegateInputStream;
     private MPOutputStream delegateOutputStream;
 
     public MPSocketImpl(SocketImpl socketImpl) throws Exception{
         delegateSocket = socketImpl;
-        request = new MeasuredRequest();
 
         updateFields();
     }
@@ -157,7 +155,7 @@ final class MPSocketImpl extends SocketImpl {
         InputStream inputStream = (InputStream) invokeMethod(10, new Object[0]);
         if (inputStream != null) {
             if (delegateInputStream == null || !delegateInputStream.isSameStream(inputStream)) {
-                delegateInputStream = new MPInputStream(inputStream, request);
+                delegateInputStream = new MPInputStream(inputStream);
             }
         } else {
             return inputStream;
@@ -170,7 +168,7 @@ final class MPSocketImpl extends SocketImpl {
         OutputStream outputStream =(OutputStream) invokeMethod(12, new Object[0]);
         if (outputStream != null) {
             if (delegateOutputStream == null || !delegateOutputStream.isSameStream(outputStream)) {
-                delegateOutputStream = new MPOutputStream(outputStream,request);
+                delegateOutputStream = new MPOutputStream(outputStream, delegateInputStream);
             }
         } else {
             return outputStream;

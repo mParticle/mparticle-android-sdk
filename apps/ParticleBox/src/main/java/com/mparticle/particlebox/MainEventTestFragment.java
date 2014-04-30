@@ -181,11 +181,11 @@ public class MainEventTestFragment extends Fragment implements View.OnClickListe
         String toastText = "Message logged.";
         switch (v.getId()) {
             case R.id.button:
-                Map eventInfo = new HashMap<String, String>();
+             /*   Map eventInfo = new HashMap<String, String>();
                 eventInfo.put("Label", eventLabel.getText().toString());
                 eventInfo.put("Value", eventValue.getText().toString());
                 MParticle.getInstance().logEvent(viewEditText.getText().toString(),
-                        (MParticle.EventType) spinner.getSelectedItem(), eventInfo);
+                        (MParticle.EventType) spinner.getSelectedItem(), eventInfo);*/
                 break;
             case R.id.button2:
                 MParticle.getInstance().logScreen(screenEditText.getText().toString());
