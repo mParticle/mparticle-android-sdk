@@ -7,6 +7,7 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.database.sqlite.SQLiteDatabase;
 import android.location.Location;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -65,8 +66,9 @@ import java.util.UUID;
 
     public MessageManager(Context appContext, ConfigManager configManager) {
         mConfigManager = configManager;
-        mMessageHandler = new MessageHandler(appContext, sMessageHandlerThread.getLooper(), configManager.getApiKey());
-        mUploadHandler = new UploadHandler(appContext, sUploadHandlerThread.getLooper(), configManager);
+        SQLiteDatabase database = new MParticleDatabase(appContext).getWritableDatabase();
+        mMessageHandler = new MessageHandler(sMessageHandlerThread.getLooper(), configManager.getApiKey(), database);
+        mUploadHandler = new UploadHandler(appContext, sUploadHandlerThread.getLooper(), configManager, database);
         mPreferences = appContext.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
     }
 
