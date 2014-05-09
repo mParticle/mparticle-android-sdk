@@ -174,8 +174,8 @@ import java.util.UUID;
                 break;
             case CLEANUP:
                 // delete stale commands, uploads, messages, and sessions
-                cleanupDatabase(Constants.DB_CLEANUP_EXPIRATION);
-                this.sendEmptyMessageDelayed(CLEANUP, Constants.DB_CLEANUP_INTERVAL);
+                //cleanupDatabase(Constants.DB_CLEANUP_EXPIRATION);
+                //this.sendEmptyMessageDelayed(CLEANUP, Constants.DB_CLEANUP_INTERVAL);
                 break;
         }
     }
