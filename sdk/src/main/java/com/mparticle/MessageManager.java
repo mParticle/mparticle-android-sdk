@@ -103,7 +103,7 @@ import java.util.UUID;
         if (!sFirstRun) {
             mMessageHandler.sendEmptyMessage(MessageHandler.END_ORPHAN_SESSIONS);
             mUploadHandler.sendEmptyMessageDelayed(UploadHandler.UPLOAD_MESSAGES, Constants.INITIAL_UPLOAD_DELAY);
-            mUploadHandler.sendEmptyMessageDelayed(UploadHandler.CLEANUP, Constants.INITIAL_UPLOAD_DELAY);
+           // mUploadHandler.sendEmptyMessageDelayed(UploadHandler.CLEANUP, Constants.INITIAL_UPLOAD_DELAY);
         }
         mUploadHandler.sendEmptyMessage(UploadHandler.UPDATE_CONFIG);
     }
