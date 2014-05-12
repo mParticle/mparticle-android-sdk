@@ -23,14 +23,15 @@ import javax.net.ssl.SSLSocketFactory;
  * many methods that a developer can initiate a request.
  */
 final class MPHttpsUrlConnection extends HttpsURLConnection {
+    private MeasuredRequest measuredRequest;
     private HttpsURLConnection delegateConnection = null;
 
     private MPInputStream inputStream;
     private MPOutputStream outputStream;
 
-    public MPHttpsUrlConnection(HttpsURLConnection paramHttpsURLConnection) {
-        super(paramHttpsURLConnection.getURL());
-         delegateConnection = paramHttpsURLConnection;
+    public MPHttpsUrlConnection(HttpsURLConnection connection) {
+        super(connection.getURL());
+        delegateConnection = connection;
     }
 
     @Override
@@ -378,19 +379,20 @@ final class MPHttpsUrlConnection extends HttpsURLConnection {
                 return this.outputStream;
             } else {
                 this.outputStream = new MPOutputStream(stream,inputStream);
+                this.outputStream.measuredRequest = getRequest();
             }
         }
         return this.outputStream;
     }
 
     private MeasuredRequest getRequest(){
-        if (outputStream != null){
-            outputStream.measuredRequest.setParseHeaders(false);
-            outputStream.measuredRequest.setSecure(true);
-            return outputStream.measuredRequest;
-        }else{
-            return null;
+        if (measuredRequest == null){
+            measuredRequest = new MeasuredRequest();
+            measuredRequest.setParseHeaders(false);
+            measuredRequest.setSecure(true);
+            return measuredRequest;
         }
+        return measuredRequest;
     }
 
     public final InputStream getInputStream() throws IOException {
@@ -402,6 +404,7 @@ final class MPHttpsUrlConnection extends HttpsURLConnection {
                 return this.inputStream;
             } else {
                 this.inputStream = new MPInputStream(inputStreams);
+                this.inputStream.setMeasuredRequest(getRequest());
             }
         }
         return this.inputStream;
