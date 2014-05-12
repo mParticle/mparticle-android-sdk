@@ -821,8 +821,10 @@ public class MParticle {
      *
      */
     public void beginMeasuringNetworkPerformance() {
-        mConfigManager.setNetworkingEnabled(true);
-        initNetworkMonitoring();
+        if (!mConfigManager.isNetworkPerformanceEnabled()) {
+            mConfigManager.setNetworkingEnabled(true);
+            initNetworkMonitoring();
+        }
     }
 
 
@@ -831,16 +833,18 @@ public class MParticle {
      *
      */
     public void endMeasuringNetworkPerformance() {
-        measuredRequestManager.setEnabled(false);
-        mConfigManager.setNetworkingEnabled(false);
-        try {
-            javax.net.ssl.SSLSocketFactory current = HttpsURLConnection.getDefaultSSLSocketFactory();
-            if (current instanceof MPSSLSocketFactory) {
-                HttpsURLConnection.setDefaultSSLSocketFactory(((MPSSLSocketFactory) current).delegateFactory);
-            }
-        } catch (Exception e) {
-            if (getDebugMode()) {
-                Log.d(Constants.LOG_TAG, "Error stopping network performance monitoring: " + e.getMessage());
+        if (mConfigManager.isNetworkPerformanceEnabled()) {
+            measuredRequestManager.setEnabled(false);
+            mConfigManager.setNetworkingEnabled(false);
+            try {
+                javax.net.ssl.SSLSocketFactory current = HttpsURLConnection.getDefaultSSLSocketFactory();
+                if (current instanceof MPSSLSocketFactory) {
+                    HttpsURLConnection.setDefaultSSLSocketFactory(((MPSSLSocketFactory) current).delegateFactory);
+                }
+            } catch (Exception e) {
+                if (getDebugMode()) {
+                    Log.d(Constants.LOG_TAG, "Error stopping network performance monitoring: " + e.getMessage());
+                }
             }
         }
     }
