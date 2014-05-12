@@ -234,7 +234,7 @@ public class MParticle {
      * @see com.mparticle.MParticle.InstallType
      */
 
-    public static void start(Context context, String apiKey, String secret, boolean sandboxMode, InstallType installType) {
+    public static void start(final Context context, final String apiKey, final String secret, final boolean sandboxMode, final InstallType installType) {
         if (context == null) {
             throw new IllegalArgumentException("mParticle failed to start: context is required.");
         }
@@ -907,10 +907,6 @@ public class MParticle {
      */
     public void logException(Exception exception, Map<String, String> eventData, String message) {
         if (mConfigManager.getSendOoEvents()) {
-            if (null == message) {
-                Log.w(TAG, "message is required for logErrorEvent");
-                return;
-            }
             ensureActiveSession();
             if (checkEventLimit()) {
                 JSONObject eventDataJSON = enforceAttributeConstraints(eventData);
@@ -1186,7 +1182,8 @@ public class MParticle {
 
     /**
      * Turn on or off debug mode for mParticle. In debug mode, the mParticle SDK will output
-     * informational messages to LogCat.
+     * informational messages to LogCat. This should never be enabled
+     * in a production application.
      *
      * @param debugMode
      */
@@ -1203,6 +1200,27 @@ public class MParticle {
     public boolean getDebugMode() {
         return mConfigManager.isDebug();
     }
+
+    /**
+     * Turn on or off sandbox mode for mParticle. In sandbox mode, events will be fired immediately
+     * and will be highlighted as sandbox events in the mParticle web console. This should never be enabled
+     * in a production application.
+     *
+     * @param sandboxMode
+     */
+    public void setSandboxMode(boolean sandboxMode) {
+        mConfigManager.setSandboxMode(sandboxMode);
+    }
+
+    /**
+     * Get the current sandbox mode status
+     *
+     * @return If sandbox mode is enabled or disabled
+     */
+    public boolean getSandboxMode() {
+        return mConfigManager.getSandboxMode();
+    }
+
 
     /**
      * Set the upload interval period to control how frequently uploads occur.
