@@ -14,7 +14,8 @@ final class MPSSLStreamHandler extends MPAbstractStreamHandler {
     //these are the typical classes that Android uses for UrlConnections
     private static final String[] classes = {"libcore.net.http.HttpsURLConnectionImpl",
             "org.apache.harmony.luni.internal.net.www.protocol.https.HttpsURLConnectionImpl",
-            "org.apache.harmony.luni.internal.net.www.protocol.https.HttpsURLConnection"};
+            "org.apache.harmony.luni.internal.net.www.protocol.https.HttpsURLConnection",
+            "com.android.okhttp.internal.http.HttpURLConnectionImpl"};
 
     public MPSSLStreamHandler() {
         super(classes);

@@ -158,18 +158,17 @@ class MParticleApiClient {
     }
 
     private void logUpload(String message) {
-        Log.d(Constants.LOG_TAG, "Uploading data to mParticle server:");
         try {
             JSONObject messageJson = new JSONObject(message);
             if (messageJson.has(Constants.MessageKey.MESSAGES)) {
                 JSONArray messages = messageJson.getJSONArray(Constants.MessageKey.MESSAGES);
-                Log.d(Constants.LOG_TAG, "SENDING MESSAGES");
+                Log.d(Constants.LOG_TAG, "Uploading message batch...");
                 for (int i = 0; i < messages.length(); i++) {
                     Log.d(Constants.LOG_TAG, "Message type: " + ((JSONObject) messages.get(i)).getString(Constants.MessageKey.TYPE));
                 }
             } else if (messageJson.has(Constants.MessageKey.HISTORY)) {
                 JSONArray messages = messageJson.getJSONArray(Constants.MessageKey.HISTORY);
-                Log.d(Constants.LOG_TAG, "SENDING HISTORY");
+                Log.d(Constants.LOG_TAG, "Uploading session history batch...");
                 for (int i = 0; i < messages.length(); i++) {
                     Log.d(Constants.LOG_TAG, "Message type: " + ((JSONObject) messages.get(i)).getString(Constants.MessageKey.TYPE) + " SID: " + ((JSONObject) messages.get(i)).optString(Constants.MessageKey.SESSION_ID));
                 }

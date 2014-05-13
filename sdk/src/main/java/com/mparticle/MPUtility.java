@@ -394,13 +394,12 @@ class MPUtility {
         return localField;
     }
 
-    public static Constructor getConstructor(String paramString, String[] paramArrayOfString) throws ClassNotFoundException {
-        Constructor<?>[] constructors = Class.forName(paramString).getDeclaredConstructors();
+    public static Constructor getConstructor(String classStr, String[] params) throws ClassNotFoundException {
+        Constructor<?>[] constructors = Class.forName(classStr).getDeclaredConstructors();
         for (int i = 0; i < constructors.length; i++) {
-            String[] arrayOfString = paramArrayOfString;
-            Class[] arrayOfClass = constructors[i].getParameterTypes();
-            for (int j = 0; j < arrayOfClass.length; j++) {
-                if ((!arrayOfClass[j].getName().equals(arrayOfString[j]) ? 0 : arrayOfClass.length != arrayOfString.length ? 0 : 1) != 0)
+            Class[] classes = constructors[i].getParameterTypes();
+            for (int j = 0; j < classes.length; j++) {
+                if ((!classes[j].getName().equals(params[j]) ? 0 : classes.length != params.length ? 0 : 1) != 0)
                     return constructors[i];
             }
         }

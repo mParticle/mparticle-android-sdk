@@ -16,6 +16,7 @@ final class MPOutputStream extends OutputStream {
     private OutputStream localOutputStream;
     public MeasuredRequest measuredRequest;
     private boolean writing = false;
+    private boolean secure;
 
     public MPOutputStream(OutputStream outputStream, MPInputStream inputStream) {
         localOutputStream = outputStream;
@@ -36,6 +37,10 @@ final class MPOutputStream extends OutputStream {
     public final void write(int oneByte) throws IOException {
         if (measuredRequest == null || !writing || inputStream == null || inputStream.getRead()) {
             measuredRequest = new MeasuredRequest();
+
+        }
+        if (secure){
+            measuredRequest.setSecure(secure);
         }
         if (inputStream != null){
             inputStream.resetRead();
@@ -54,6 +59,10 @@ final class MPOutputStream extends OutputStream {
     public final void write(byte[] buffer, int offset, int byteCount) throws IOException {
         if (measuredRequest == null || !writing || inputStream == null || inputStream.getRead()) {
             measuredRequest = new MeasuredRequest();
+
+        }
+        if (secure){
+            measuredRequest.setSecure(secure);
         }
         if (inputStream != null){
             inputStream.resetRead();
@@ -63,6 +72,8 @@ final class MPOutputStream extends OutputStream {
         localOutputStream.write(buffer, offset, byteCount);
         try{
             measuredRequest.parseOutputStreamBytes(buffer, offset, byteCount);
+
+
         }catch (Exception e){
             if (MParticle.getInstance().getDebugMode()){
                 Log.w(Constants.LOG_TAG, "Exception thrown while parsing networking OutputStream: " + e.getMessage());
@@ -74,4 +85,7 @@ final class MPOutputStream extends OutputStream {
         return this.localOutputStream == paramOutputStream;
     }
 
+    public void setSecure(boolean secure) {
+        this.secure = secure;
+    }
 }
