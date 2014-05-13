@@ -43,6 +43,7 @@ class ConfigManager {
 
     private boolean sendOoEvents;
     private JSONObject providerPersistence;
+    private String networkPerformance = "";
 
     public ConfigManager(Context context, String key, String secret, boolean sandboxMode, EmbeddedKitManager embeddedKitManager) {
         mContext = context.getApplicationContext();
@@ -78,6 +79,8 @@ class ConfigManager {
             }
         }
 
+        networkPerformance = responseJSON.optString(KEY_NETWORK_PERFORMANCE, VALUE_APP_DEFINED);
+
         if (responseJSON.has(KEY_OPT_OUT)){
             sendOoEvents = responseJSON.getBoolean(KEY_OPT_OUT);
         }
@@ -111,6 +114,13 @@ class ConfigManager {
             MParticle.getInstance().enableUncaughtExceptionLogging();
         } else {
             MParticle.getInstance().disableUncaughtExceptionLogging();
+        }
+        if (!VALUE_APP_DEFINED.equals(networkPerformance)){
+            if (VALUE_CNP_CAPTURE.equals(networkPerformance)){
+                MParticle.getInstance().beginMeasuringNetworkPerformance();
+            }else if (VALUE_CNP_NO_CAPTURE.equals(networkPerformance)){
+                MParticle.getInstance().endMeasuringNetworkPerformance();
+            }
         }
     }
 

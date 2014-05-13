@@ -18,6 +18,7 @@ import java.util.Map;
  */
 final class MPHttpUrlConnection extends HttpURLConnection {
     private HttpURLConnection delegateConnection = null;
+    private MeasuredRequest measuredRequest;
 
     private MPInputStream inputStream;
     private MPOutputStream outputStream;
@@ -318,6 +319,7 @@ final class MPHttpUrlConnection extends HttpURLConnection {
                 return this.outputStream;
             } else {
                 this.outputStream = new MPOutputStream(stream, inputStream);
+                this.outputStream.measuredRequest = getRequest();
             }
         }
         return this.outputStream;
@@ -333,6 +335,7 @@ final class MPHttpUrlConnection extends HttpURLConnection {
                     return this.inputStream;
                 } else {
                     this.inputStream = new MPInputStream(inputStreams);
+                    this.inputStream.setMeasuredRequest(getRequest());
                 }
             }
             return this.inputStream;
@@ -343,11 +346,10 @@ final class MPHttpUrlConnection extends HttpURLConnection {
     }
 
     private MeasuredRequest getRequest(){
-        if (outputStream != null){
-            outputStream.measuredRequest.setUri(getURL());
-            outputStream.measuredRequest.setParseHeaders(false);
-            return outputStream.measuredRequest;
+        if (measuredRequest == null){
+            measuredRequest = new MeasuredRequest();
+            measuredRequest.setUri(getURL());
         }
-        return null;
+        return measuredRequest;
     }
 }
