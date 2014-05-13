@@ -13,7 +13,8 @@ final class MPStreamHandler extends MPAbstractStreamHandler {
     //these are the typical classes that Android uses for UrlConnections
     private static final String[] classes = {"libcore.net.http.HttpURLConnectionImpl",
             "org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnectionImpl",
-            "org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection"};
+            "org.apache.harmony.luni.internal.net.www.protocol.http.HttpURLConnection",
+            "com.android.okhttp.internal.http.HttpURLConnectionImpl"};
 
     public MPStreamHandler() {
         super(classes);
