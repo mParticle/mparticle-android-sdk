@@ -22,6 +22,7 @@ final class MeasuredRequestManager {
     private CopyOnWriteArrayList<String> queryStringFilters = new CopyOnWriteArrayList<String>();
     private static final String MPARTICLEHOST = ".mparticle.com";
     private ScheduledFuture<?> runner;
+    private boolean enabled;
 
     public void addRequest(MeasuredRequest request){
         synchronized (requests) {
@@ -126,13 +127,18 @@ final class MeasuredRequestManager {
     }
 
     public void setEnabled(boolean enabled){
-        if (enabled){
+        this.enabled = enabled;
+        if (this.enabled){
             runner = scheduler.scheduleAtFixedRate(processPending, 10, 15, SECONDS);
         }else{
             if (runner != null){
                 runner.cancel(true);
             }
         }
+    }
+
+    public boolean getEnabled() {
+        return enabled;
     }
 }
 

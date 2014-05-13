@@ -22,12 +22,19 @@ abstract class MPAbstractStreamHandler extends URLStreamHandler {
         for (String c : classes) {
             try {
                 urlOverload = MPUtility.getConstructor(c, urlOverloadSignature);
-                proxyOverload = MPUtility.getConstructor(c, proxyOverloadSignature);
                 urlOverload.setAccessible(true);
-                proxyOverload.setAccessible(true);
-            } catch (ClassNotFoundException ex) {
+            } catch (Exception ex) {
 
             }
+            try {
+                proxyOverload = MPUtility.getConstructor(c, proxyOverloadSignature);
+                proxyOverload.setAccessible(true);
+            } catch (Exception ex) {
+
+            }
+        }
+        if (urlOverload == null){
+            throw new IllegalStateException();
         }
     }
 
@@ -36,20 +43,22 @@ abstract class MPAbstractStreamHandler extends URLStreamHandler {
     }
 
     protected URLConnection openConnection(URL url, Proxy proxy) throws IOException {
-        if ((url == null) || (proxy == null))
+        if ((url == null) || (proxy == null)) {
             throw new IllegalArgumentException("url or proxy was null!");
+        }
         return openNewConnection(url, proxy);
     }
 
-    private URLConnection openNewConnection(URL paramURL, Proxy paramProxy) throws IOException {
+    private URLConnection openNewConnection(URL url, Proxy proxy) throws IOException {
         try {
-            if (paramProxy == null)
-                return (URLConnection) urlOverload.newInstance(new Object[]{paramURL, Integer.valueOf(getDefaultPort())});
-            else
-                return (URLConnection) proxyOverload.newInstance(new Object[]{paramURL, Integer.valueOf(getDefaultPort()), paramProxy});
+            if (proxy == null || proxyOverload == null) {
+                return (URLConnection) urlOverload.newInstance(new Object[]{url, Integer.valueOf(getDefaultPort())});
+            }else {
+                return (URLConnection) proxyOverload.newInstance(new Object[]{url, Integer.valueOf(getDefaultPort()), proxy});
+            }
         } catch (Exception ex) {
             //if all else fails, this should always work.
-            return new URL(paramURL.toExternalForm()).openConnection();
+            return new URL(url.toExternalForm()).openConnection();
         }
     }
 

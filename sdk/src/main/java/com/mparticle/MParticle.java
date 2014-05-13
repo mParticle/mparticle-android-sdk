@@ -801,7 +801,21 @@ public class MParticle {
         }
 
         try {
-            URL.setURLStreamHandlerFactory(new MPUrlStreamHandlerFactory());
+            MPUrlStreamHandlerFactory factory = new MPUrlStreamHandlerFactory();
+            factory.createURLStreamHandler("https");
+            factory.createURLStreamHandler("http");
+            URL.setURLStreamHandlerFactory(factory);
+        } catch (Error e) {
+            if (getDebugMode()) {
+                Log.d(Constants.LOG_TAG, "Error initiating network performance monitoring: " + e.getMessage());
+            }
+        } catch (Exception e) {
+            if (getDebugMode()) {
+                Log.d(Constants.LOG_TAG, "Exception initiating network performance monitoring: " + e.getMessage());
+            }
+        }
+
+        try {
             HttpsURLConnection.setDefaultSSLSocketFactory(new MPSSLSocketFactory(HttpsURLConnection.getDefaultSSLSocketFactory()));
         } catch (Error e) {
             if (getDebugMode()) {
@@ -821,7 +835,7 @@ public class MParticle {
      *
      */
     public void beginMeasuringNetworkPerformance() {
-        if (!mConfigManager.isNetworkPerformanceEnabled()) {
+        if (!measuredRequestManager.getEnabled()) {
             mConfigManager.setNetworkingEnabled(true);
             initNetworkMonitoring();
         }
@@ -833,7 +847,7 @@ public class MParticle {
      *
      */
     public void endMeasuringNetworkPerformance() {
-        if (mConfigManager.isNetworkPerformanceEnabled()) {
+        if (measuredRequestManager.getEnabled()) {
             measuredRequestManager.setEnabled(false);
             mConfigManager.setNetworkingEnabled(false);
             try {
