@@ -159,6 +159,7 @@ final class MPSSLSocket extends SSLSocket {
                 return this.inputStream;
             }else{
                 this.inputStream = new MPInputStream(inputStreams);
+                ((MPInputStream)this.inputStream).setSecure(true);
             }
         }
         return this.inputStream;
@@ -207,6 +208,7 @@ final class MPSSLSocket extends SSLSocket {
                 return this.outputStream;
             }else{
                 this.outputStream = new MPOutputStream(outputStream, inputStream);
+                ((MPOutputStream)this.outputStream).setSecure(true);
             }
         }
         return this.outputStream;

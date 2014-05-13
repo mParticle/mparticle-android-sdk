@@ -44,28 +44,32 @@ final class MeasuredRequestManager {
                 Iterator<MeasuredRequest> iter = requests.iterator();
                 while(iter.hasNext()) {
                     MeasuredRequest request = iter.next();
-                    String uri = request.getUri();
-                    boolean allowed = isUriAllowed(uri);
-                    if (request.readyForLogging()) {
-                        if (allowed) {
+                    try {
+                        String uri = request.getUri();
+                        boolean allowed = isUriAllowed(uri);
+                        if (request.readyForLogging()) {
+                            if (allowed) {
                         /* disabling this for the server-side extractors...for now
                          if (!isUriQueryAllowed(uri)){
                             uri = redactQuery(uri);
                         }*/
-                            MParticle.getInstance().logNetworkPerformance(uri,
-                                    request.getStartTime(),
-                                    request.getMethod(),
-                                    request.getTotalTime(),
-                                    request.getBytesSent(),
-                                    request.getBytesReceived(),
-                                    request.getRequestString());
-                            if (debugLog) {
-                                Log.d(Constants.LOG_TAG, "Logging network request: " + request.toString());
+                                MParticle.getInstance().logNetworkPerformance(uri,
+                                        request.getStartTime(),
+                                        request.getMethod(),
+                                        request.getTotalTime(),
+                                        request.getBytesSent(),
+                                        request.getBytesReceived(),
+                                        request.getRequestString());
+                                if (debugLog) {
+                                    Log.d(Constants.LOG_TAG, "Logging network request: " + request.toString());
+                                }
                             }
+                            request.reset();
+                            iter.remove();
+                        } else if (!allowed || (System.currentTimeMillis() - request.getStartTime()) > (60 * 1000)) {
+                            iter.remove();
                         }
-                        request.reset();
-                        iter.remove();
-                    }else if (!allowed || (System.currentTimeMillis() - request.getStartTime()) > (60*1000)){
+                    }catch (Exception e){
                         iter.remove();
                     }
                 }

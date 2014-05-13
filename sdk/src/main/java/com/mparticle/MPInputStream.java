@@ -15,6 +15,7 @@ final class MPInputStream extends InputStream {
     private MeasuredRequest measuredRequest;
     private InputStream localInputStream;
     private boolean read;
+    private boolean secure;
 
     public MPInputStream(InputStream paramInputStream) {
         if (paramInputStream == null)
@@ -84,5 +85,12 @@ final class MPInputStream extends InputStream {
 
     public void setMeasuredRequest(MeasuredRequest request){
         measuredRequest = request;
+        if (measuredRequest != null && secure){
+            measuredRequest.setSecure(secure);
+        }
+    }
+
+    public void setSecure(boolean secure) {
+        this.secure = secure;
     }
 }
