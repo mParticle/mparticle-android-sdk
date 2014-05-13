@@ -33,7 +33,7 @@ class AppStateManager implements MPActivityCallbacks{
             if (isBackgrounded()) {
                 MParticle.getInstance().logStateTransition(Constants.StateTransitionType.STATE_TRANS_BG);
                 if (MParticle.getInstance().getDebugMode()) {
-                    Log.d(Constants.LOG_TAG, "APP BACKGROUNDED");
+                    Log.d(Constants.LOG_TAG, "App backgrounded.");
                 }
             }
         }
@@ -112,7 +112,7 @@ class AppStateManager implements MPActivityCallbacks{
 
             MParticle.getInstance().logStateTransition(Constants.StateTransitionType.STATE_TRANS_FORE);
             if (MParticle.getInstance().getDebugMode()) {
-                Log.d(Constants.LOG_TAG, "APP FOREGROUNDED");
+                Log.d(Constants.LOG_TAG, "App foregrounded.");
             }
         }
         mActivities.getAndIncrement();
