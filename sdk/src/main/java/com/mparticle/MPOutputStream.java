@@ -72,6 +72,8 @@ final class MPOutputStream extends OutputStream {
         localOutputStream.write(buffer, offset, byteCount);
         try{
             measuredRequest.parseOutputStreamBytes(buffer, offset, byteCount);
+
+
         }catch (Exception e){
             if (MParticle.getInstance().getDebugMode()){
                 Log.w(Constants.LOG_TAG, "Exception thrown while parsing networking OutputStream: " + e.getMessage());

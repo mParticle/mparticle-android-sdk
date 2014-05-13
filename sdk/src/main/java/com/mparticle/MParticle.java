@@ -802,8 +802,17 @@ public class MParticle {
 
         try {
             MPUrlStreamHandlerFactory factory = new MPUrlStreamHandlerFactory();
-            factory.createURLStreamHandler("https");
-            factory.createURLStreamHandler("http");
+
+            try {
+                factory.createURLStreamHandler("https");
+                factory.createURLStreamHandler("http");
+            }catch (IllegalArgumentException iae){
+                throw iae;
+            }catch (Exception e){
+
+            }
+
+
             URL.setURLStreamHandlerFactory(factory);
         } catch (Error e) {
             if (getDebugMode()) {

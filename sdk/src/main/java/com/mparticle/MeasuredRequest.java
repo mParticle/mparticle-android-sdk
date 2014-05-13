@@ -10,7 +10,6 @@ import org.apache.http.util.CharArrayBuffer;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.List;
@@ -215,7 +214,7 @@ final class MeasuredRequest {
     }
 
     public boolean readyForLogging() {
-        if ("CONNECT".equalsIgnoreCase(getMethod()) || getTotalTime() < 0){
+        if ("CONNECT".equalsIgnoreCase(getMethod()) || getTotalTime() < 0 || (System.currentTimeMillis() - getStartTime() < 2000) && responseCode > 0){
             return false;
         }
         return (endOfStream ||

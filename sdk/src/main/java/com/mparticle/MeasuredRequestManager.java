@@ -2,6 +2,7 @@ package com.mparticle;
 
 import android.util.Log;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -43,31 +44,41 @@ final class MeasuredRequestManager {
                     Log.d(Constants.LOG_TAG, "Processing " + requests.size() + " measured network requests.");
                 }
                 Iterator<MeasuredRequest> iter = requests.iterator();
+                ArrayList<String> loggedUris = new ArrayList<String>();
+                ArrayList<Integer> loggedBodys = new ArrayList<Integer>();
                 while(iter.hasNext()) {
                     MeasuredRequest request = iter.next();
                     try {
                         String uri = request.getUri();
+                        String requestString = request.getRequestString();
                         boolean allowed = isUriAllowed(uri);
-                        if (request.readyForLogging()) {
+                        if (request.readyForLogging() && !loggedUris.contains(uri)) {
                             if (allowed) {
                         /* disabling this for the server-side extractors...for now
                          if (!isUriQueryAllowed(uri)){
                             uri = redactQuery(uri);
                         }*/
+
                                 MParticle.getInstance().logNetworkPerformance(uri,
                                         request.getStartTime(),
                                         request.getMethod(),
                                         request.getTotalTime(),
                                         request.getBytesSent(),
                                         request.getBytesReceived(),
-                                        request.getRequestString());
+                                        requestString);
+                                if ("POST".equalsIgnoreCase(request.getMethod())){
+                                    loggedBodys.add(requestString.hashCode());
+                                }else{
+                                    loggedUris.add(uri);
+                                }
+
                                 if (debugLog) {
                                     Log.d(Constants.LOG_TAG, "Logging network request: " + request.toString());
                                 }
                             }
                             request.reset();
                             iter.remove();
-                        } else if (!allowed || (System.currentTimeMillis() - request.getStartTime()) > (60 * 1000)) {
+                        } else if (!allowed || (System.currentTimeMillis() - request.getStartTime()) > (60 * 1000) || loggedUris.contains(uri) || loggedBodys.contains(requestString.hashCode())) {
                             iter.remove();
                         }
                     }catch (Exception e){
