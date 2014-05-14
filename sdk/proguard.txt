@@ -19,7 +19,6 @@
 #   public *;
 #}
 
-#-libraryjars  <java.home>/lib/rt.jar
 -printmapping out.map
 
 -keepparameternames
@@ -76,3 +75,9 @@
 }
 
 -dontwarn com.google.android.gms.**
+-keep class com.unity3d.** { *; }
+-dontwarn com.unity3d.**
+
+-keep class org.fmod.** { *; }
+-dontwarn org.fmod.**
+

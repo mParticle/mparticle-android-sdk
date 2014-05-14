@@ -167,6 +167,9 @@ class ConfigManager {
     public void setDebug(boolean enabled) {
         localPrefs.debug = enabled;
     }
+    public void setSandboxMode(boolean enabled) {
+        localPrefs.sandboxMode = enabled;
+    }
 
     public void setUploadInterval(int uploadInterval) {
         localPrefs.uploadInterval = uploadInterval;

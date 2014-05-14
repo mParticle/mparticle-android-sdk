@@ -81,7 +81,7 @@ public class MParticle {
             89
     };
     static Bundle lastNotificationBundle;
-    static boolean appRunning;
+    static Boolean appRunning;
     private static volatile MParticle instance;
     private static SharedPreferences sPreferences;
     final ConfigManager mConfigManager;
@@ -111,7 +111,7 @@ public class MParticle {
     private ExceptionHandler mExHandler;
     private Context mAppContext;
     private String mApiKey;
-    private boolean mDebugMode = false;
+    private Boolean mDebugMode = false;
     private EmbeddedKitManager embeddedKitManager;
     //private int mSessionTimeout = 30 * 60 * 1000;
     private int mEventCount = 0;
@@ -148,7 +148,7 @@ public class MParticle {
                 // carry on without user identities
             }
             try {
-                boolean changeMade = false;
+                Boolean changeMade = false;
                 for (int i = 0; i < mUserIdentities.length(); i++) {
                     JSONObject identity = mUserIdentities.getJSONObject(i);
                     if (!identity.has(MessageKey.IDENTITY_DATE_FIRST_SEEN)){
@@ -193,7 +193,7 @@ public class MParticle {
      * @param sandboxMode Enable/disable sandbox mode
      */
 
-    public static void start(Context context, String apiKey, String secret, boolean sandboxMode) {
+    public static void start(Context context, String apiKey, String secret, Boolean sandboxMode) {
         start(context, apiKey, secret, sandboxMode, InstallType.AutoDetect);
     }
 
@@ -234,7 +234,7 @@ public class MParticle {
      * @see com.mparticle.MParticle.InstallType
      */
 
-    public static void start(Context context, String apiKey, String secret, boolean sandboxMode, InstallType installType) {
+    public static void start(final Context context, final String apiKey, final String secret, final Boolean sandboxMode, final InstallType installType) {
         if (context == null) {
             throw new IllegalArgumentException("mParticle failed to start: context is required.");
         }
@@ -262,7 +262,7 @@ public class MParticle {
      * @return An instance of the mParticle SDK configured with your API key
      *
      */
-    private static MParticle getInstance(Context context, String apiKey, String secret, boolean sandboxMode, InstallType installType) {
+    private static MParticle getInstance(Context context, String apiKey, String secret, Boolean sandboxMode, InstallType installType) {
         if (instance == null) {
             synchronized (MParticle.class) {
                 if (instance == null) {
@@ -321,7 +321,7 @@ public class MParticle {
     }
 
     /**
-     * Retrieve an instance of the MParticle class. {@link #start(android.content.Context)} or {@link #start(android.content.Context, String, String, boolean)} must
+     * Retrieve an instance of the MParticle class. {@link #start(android.content.Context)} or {@link #start(android.content.Context, String, String, Boolean)} must
      * be called prior to this or a {@code java.lang.IllegalStateException} will be thrown.
      *
      * @return An instance of the mParticle SDK configured with your API key
@@ -334,12 +334,12 @@ public class MParticle {
     }
 
     /* package-private */
-    static boolean setCheckedAttribute(JSONObject attributes, String key, Object value) {
+    static Boolean setCheckedAttribute(JSONObject attributes, String key, Object value) {
         return setCheckedAttribute(attributes, key, value, false);
     }
 
     /* package-private */
-    static boolean setCheckedAttribute(JSONObject attributes, String key, Object value, boolean caseInsensitive) {
+    static Boolean setCheckedAttribute(JSONObject attributes, String key, Object value, Boolean caseInsensitive) {
         if (null == attributes || null == key) {
             return false;
         }
@@ -381,7 +381,7 @@ public class MParticle {
         return key;
     }
 
-    boolean shouldProcessUrl(String url) {
+    Boolean shouldProcessUrl(String url) {
         return mConfigManager.isNetworkPerformanceEnabled() &&
                 measuredRequestManager.isUriAllowed(url);
     }
@@ -405,9 +405,11 @@ public class MParticle {
      * @see com.mparticle.activity.MPListActivity
      */
     public void activityStarted(Activity activity) {
-        if (mConfigManager.getSendOoEvents()) {
-            ensureActiveSession();
-            mAppStateManager.onActivityStarted(activity);
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+            if (mConfigManager.getSendOoEvents()) {
+                ensureActiveSession();
+                mAppStateManager.onActivityStarted(activity);
+            }
         }
     }
 
@@ -420,9 +422,11 @@ public class MParticle {
      * @see com.mparticle.activity.MPListActivity
      */
     public void activityStopped(Activity activity) {
-        if (mConfigManager.getSendOoEvents()) {
-            ensureActiveSession();
-            mAppStateManager.onActivityStopped(activity);
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+            if (mConfigManager.getSendOoEvents()) {
+                ensureActiveSession();
+                mAppStateManager.onActivityStopped(activity);
+            }
         }
     }
 
@@ -471,7 +475,7 @@ public class MParticle {
     /**
      * Check current session timeout and end the session if needed. Will not start a new session.
      */
-    /* package-private */boolean checkSessionTimeout() {
+    /* package-private */Boolean checkSessionTimeout() {
         long now = System.currentTimeMillis();
         if (0 != mSessionStartTime &&
                 mAppStateManager.isBackgrounded() &&
@@ -654,7 +658,7 @@ public class MParticle {
         
     }
 
-    void logScreen(String screenName, Map<String, String> eventData, boolean started) {
+    void logScreen(String screenName, Map<String, String> eventData, Boolean started) {
         if (null == screenName) {
             Log.w(TAG, "screenName is required for logScreen");
             return;
@@ -934,10 +938,6 @@ public class MParticle {
      */
     public void logException(Exception exception, Map<String, String> eventData, String message) {
         if (mConfigManager.getSendOoEvents()) {
-            if (null == message) {
-                Log.w(TAG, "message is required for logErrorEvent");
-                return;
-            }
             ensureActiveSession();
             if (checkEventLimit()) {
                 JSONObject eventDataJSON = enforceAttributeConstraints(eventData);
@@ -1185,7 +1185,7 @@ public class MParticle {
      *
      * @return the opt-out status
      */
-    public boolean getOptOut() {
+    public Boolean getOptOut() {
         return mConfigManager.getOptedOut();
     }
 
@@ -1194,7 +1194,7 @@ public class MParticle {
      *
      * @param optOutStatus set to <code>true</code> to opt out of event tracking
      */
-    public void setOptOut(boolean optOutStatus) {
+    public void setOptOut(Boolean optOutStatus) {
         if (optOutStatus != mConfigManager.getOptedOut()) {
             if (!optOutStatus) {
                 ensureActiveSession();
@@ -1213,11 +1213,12 @@ public class MParticle {
 
     /**
      * Turn on or off debug mode for mParticle. In debug mode, the mParticle SDK will output
-     * informational messages to LogCat.
+     * informational messages to LogCat. This should never be enabled
+     * in a production application.
      *
      * @param debugMode
      */
-    public void setDebugMode(boolean debugMode) {
+    public void setDebugMode(Boolean debugMode) {
         mConfigManager.setDebug(debugMode);
     }
 
@@ -1227,9 +1228,30 @@ public class MParticle {
      *
      * @return If debug mode is enabled or disabled
      */
-    public boolean getDebugMode() {
+    public Boolean getDebugMode() {
         return mConfigManager.isDebug();
     }
+
+    /**
+     * Turn on or off sandbox mode for mParticle. In sandbox mode, events will be fired immediately
+     * and will be highlighted as sandbox events in the mParticle web console. This should never be enabled
+     * in a production application.
+     *
+     * @param sandboxMode
+     */
+    public void setSandboxMode(Boolean sandboxMode) {
+        mConfigManager.setSandboxMode(sandboxMode);
+    }
+
+    /**
+     * Get the current sandbox mode status
+     *
+     * @return If sandbox mode is enabled or disabled
+     */
+    public Boolean getSandboxMode() {
+        return mConfigManager.getSandboxMode();
+    }
+
 
     /**
      * Set the upload interval period to control how frequently uploads occur.
@@ -1302,7 +1324,7 @@ public class MParticle {
      *
      * @param enabled
      */
-    public void setNotificationSoundEnabled(boolean enabled) {
+    public void setNotificationSoundEnabled(Boolean enabled) {
         mConfigManager.setPushSoundEnabled(enabled);
     }
 
@@ -1312,7 +1334,7 @@ public class MParticle {
      *
      * @param enabled
      */
-    public void setNotificationVibrationEnabled(boolean enabled) {
+    public void setNotificationVibrationEnabled(Boolean enabled) {
         mConfigManager.setPushVibrationEnabled(enabled);
     }
 
@@ -1330,7 +1352,7 @@ public class MParticle {
      *
      * @return true if event count is below limit
      */
-    private boolean checkEventLimit() {
+    private Boolean checkEventLimit() {
         if (mEventCount < Constants.EVENT_LIMIT) {
             mEventCount++;
             return true;
@@ -1422,7 +1444,7 @@ public class MParticle {
      * @return The current setting of automatic screen tracking.
      */
 
-    public boolean isAutoTrackingEnabled() {
+    public Boolean isAutoTrackingEnabled() {
         return mConfigManager.isAutoTrackingEnabled();
     }
 
