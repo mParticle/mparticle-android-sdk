@@ -6,7 +6,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:0.9.+'
+        classpath 'com.android.tools.build:gradle:0.10.+'
 
     }
 }
@@ -48,7 +48,7 @@ android {
     }
 
 }
-
+/*
 android.libraryVariants.all { variant ->
     def name = variant.name
 
@@ -65,7 +65,7 @@ android.libraryVariants.all { variant ->
         options.docletpath = pathList
         options.doclet = "com.google.doclava.Doclava"
     }
-}
+}*/
 
 uploadArchives {
     repositories {
@@ -92,5 +92,5 @@ dependencies {
     deployerJars "org.kuali.maven.wagons:maven-s3-wagon:1.2.1"
     compile fileTree(dir: 'embeddedkits', include: ['*.jar'])
     compile 'com.google.android.gms:play-services:4+'
-    compile files ("libs/unity.jar")
+    compile project(':unityskeleton')
 }
