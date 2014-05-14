@@ -7,7 +7,7 @@ buildscript {
         //maven { url 'https://www.testfairy.com/maven' }
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:0.9.0'
+        classpath 'com.android.tools.build:gradle:0.10.+'
         classpath 'com.crashlytics.tools.gradle:crashlytics-gradle:1.+'
     }
 }
@@ -87,8 +87,8 @@ dependencies {
     flurryCompile project(':sdk')
     kahunaCompile project(':sdk')
     crashlyticsCompile project(':sdk')
-    mparticleCompile 'com.mparticle:android-sdk:1.3.2'
-    //mparticleCompile project(':sdk')
+    //mparticleCompile 'com.mparticle:android-sdk:1.3.2'
+    mparticleCompile project(':sdk')
     //mparticleCompile files ("libs/classes.jar")
     googleanalyticsCompile files ("libs/libGoogleAnalyticsServices.jar")
     mixpanelCompile 'com.mixpanel.android:mixpanel-android:4.0.0-RC3@aar'
