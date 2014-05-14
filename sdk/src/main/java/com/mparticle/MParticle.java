@@ -405,9 +405,11 @@ public class MParticle {
      * @see com.mparticle.activity.MPListActivity
      */
     public void activityStarted(Activity activity) {
-        if (mConfigManager.getSendOoEvents()) {
-            ensureActiveSession();
-            mAppStateManager.onActivityStarted(activity);
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+            if (mConfigManager.getSendOoEvents()) {
+                ensureActiveSession();
+                mAppStateManager.onActivityStarted(activity);
+            }
         }
     }
 
@@ -420,9 +422,11 @@ public class MParticle {
      * @see com.mparticle.activity.MPListActivity
      */
     public void activityStopped(Activity activity) {
-        if (mConfigManager.getSendOoEvents()) {
-            ensureActiveSession();
-            mAppStateManager.onActivityStopped(activity);
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+            if (mConfigManager.getSendOoEvents()) {
+                ensureActiveSession();
+                mAppStateManager.onActivityStopped(activity);
+            }
         }
     }
 
