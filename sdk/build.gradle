@@ -76,12 +76,13 @@ uploadArchives {
                 pom.version = sdkversion
                 pom.artifactId = 'android-sdk'
                 pom.groupId = 'com.mparticle'
-                pom.packaging = 'aar'
+                pom.packaging = 'jar'
             }else{
                 repository(url: "file://localhost/Users/sdozor/maven/repo/")
                 pom.version = sdkversion
                 pom.artifactId = 'android-sdk'
                 pom.groupId = 'com.mparticle'
+                pom.packaging = 'jar'
             }
         }
     }
