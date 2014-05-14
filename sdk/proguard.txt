@@ -19,7 +19,6 @@
 #   public *;
 #}
 
--libraryjars  unity.jar
 -printmapping out.map
 
 -keepparameternames
