@@ -22,6 +22,7 @@ class AppStateManager implements MPActivityCallbacks{
     public static final String APP_STATE_NOTRUNNING = "not_running";
     private final SharedPreferences preferences;
     private final EmbeddedKitManager embeddedKitManager;
+    private Class unityActivity = null;
     Context mContext;
     AtomicInteger mActivities = new AtomicInteger(0);
     long mLastStoppedTime;
@@ -31,13 +32,17 @@ class AppStateManager implements MPActivityCallbacks{
         @Override
         public void run() {
             if (isBackgrounded()) {
-                MParticle.getInstance().logStateTransition(Constants.StateTransitionType.STATE_TRANS_BG);
-                if (MParticle.getInstance().getDebugMode()) {
-                    Log.d(Constants.LOG_TAG, "App backgrounded.");
-                }
+               logBackgrounded();
             }
         }
     };
+
+    private void logBackgrounded(){
+        MParticle.getInstance().logStateTransition(Constants.StateTransitionType.STATE_TRANS_BG);
+        if (MParticle.getInstance().getDebugMode()) {
+            Log.d(Constants.LOG_TAG, "App backgrounded.");
+        }
+    }
 
     //it can take some time between when an activity stops and when a new one (or the same one)
     //starts again, so don't declared that we're backgrounded immediately.
@@ -51,6 +56,11 @@ class AppStateManager implements MPActivityCallbacks{
             setupLifecycleCallbacks();
         }
         preferences = context.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
+        try {
+            unityActivity = Class.forName("com.unity3d.player.UnityPlayerNativeActivity");
+        }catch (ClassNotFoundException cne){
+
+        }
     }
 
     @TargetApi(14)
@@ -128,7 +138,11 @@ class AppStateManager implements MPActivityCallbacks{
         mLastStoppedTime = System.currentTimeMillis();
 
         if (mActivities.decrementAndGet() < 1) {
-            delayedBackgroundCheckHandler.postDelayed(backgroundChecker, ACTIVITY_DELAY);
+            if (unityActivity != null && unityActivity.isInstance(activity)){
+                logBackgrounded();
+            }else {
+                delayedBackgroundCheckHandler.postDelayed(backgroundChecker, ACTIVITY_DELAY);
+            }
         }
         if (MParticle.getInstance().isAutoTrackingEnabled()) {
             MParticle.getInstance().logScreen(getActivityName(activity), null, false);

@@ -203,6 +203,7 @@ import java.util.UUID;
                                               JSONObject attributes) throws JSONException {
         JSONObject message = createMessage(MessageType.SESSION_END, sessionId, start, end, null, attributes);
         message.put(MessageKey.SESSION_LENGTH, length);
+        message.put(MessageKey.STATE_INFO_KEY, MessageManager.getStateInfo());
         return message;
     }
 
@@ -340,14 +341,18 @@ import java.util.UUID;
         try {
             JSONObject message = createMessage(MessageType.ERROR, sessionId, sessionStartTime, time, null, attributes);
             if (t != null) {
-                message.put(MessageKey.ERROR_SEVERITY, caught ? "error" : "fatal");
-                message.put(MessageKey.ERROR_CLASS, t.getClass().getCanonicalName());
                 message.put(MessageKey.ERROR_MESSAGE, t.getMessage());
-                StringWriter stringWriter = new StringWriter();
-                t.printStackTrace(new PrintWriter(stringWriter));
-                message.put(MessageKey.ERROR_STACK_TRACE, stringWriter.toString());
+                message.put(MessageKey.ERROR_SEVERITY, caught ? "error" : "fatal");
+                if (t instanceof MPUnityException){
+                    message.put(MessageKey.ERROR_CLASS, t.getMessage());
+                    message.put(MessageKey.ERROR_STACK_TRACE, ((MPUnityException)t).getManualStackTrace());
+                }else {
+                    message.put(MessageKey.ERROR_CLASS, t.getClass().getCanonicalName());
+                    StringWriter stringWriter = new StringWriter();
+                    t.printStackTrace(new PrintWriter(stringWriter));
+                    message.put(MessageKey.ERROR_STACK_TRACE, stringWriter.toString());
+                }
                 message.put(MessageKey.ERROR_UNCAUGHT, String.valueOf(caught));
-
                 message.put(MessageKey.ERROR_SESSION_COUNT, getCurrentSessionCounter());
 
             } else {
