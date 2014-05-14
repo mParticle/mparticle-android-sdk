@@ -1,1 +1,2 @@
-include 'sdk', 'apps:ParticleBox'
+include ':unityskeleton'
+include 'sdk'
