@@ -1157,7 +1157,7 @@ public class MParticle {
                 }
                 if (indexToRemove >= 0) {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-                        mUserIdentities.remove(indexToRemove);
+                        KitKatHelper.remove(mUserIdentities, indexToRemove);
                     } else {
                         JSONArray newIdentities = new JSONArray();
                         for (int i = 0; i < mUserIdentities.length(); i++) {
