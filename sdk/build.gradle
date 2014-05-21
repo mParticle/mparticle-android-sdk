@@ -32,11 +32,20 @@ android {
     buildTypes {
         debug {
             buildConfigField "boolean", "ECHO", "true"
+            buildConfigField "boolean", "UNITY", "false"
             runProguard false
+        }
+
+        unity {
+            buildConfigField "boolean", "ECHO", "false"
+            buildConfigField "boolean", "UNITY", "true"
+            runProguard true
+            proguardFile 'proguard.txt'
         }
 
         release {
             buildConfigField "boolean", "ECHO", "false"
+            buildConfigField "boolean", "UNITY", "false"
             runProguard true
             proguardFile 'proguard.txt'
         }
@@ -48,7 +57,7 @@ android {
     }
 
 }
-/*
+
 android.libraryVariants.all { variant ->
     def name = variant.name
 
@@ -56,7 +65,7 @@ android.libraryVariants.all { variant ->
         description = "Generates javadoc for build $name"
         destinationDir = new File('docs', variant.baseName)
         source = 'src/main/java'
-        classpath = files(android.plugin.runtimeJarList, variant.javaCompile.classpath)
+        classpath = files(android.getBootClasspath(), variant.javaCompile.classpath)
         title = null
         List<File> pathList = new ArrayList<File>();
         pathList.add(new File("docs/doclava-1.0.6.jar"))
@@ -65,7 +74,7 @@ android.libraryVariants.all { variant ->
         options.docletpath = pathList
         options.doclet = "com.google.doclava.Doclava"
     }
-}*/
+}
 
 uploadArchives {
     repositories {
@@ -92,5 +101,5 @@ dependencies {
     deployerJars "org.kuali.maven.wagons:maven-s3-wagon:1.2.1"
     compile fileTree(dir: 'embeddedkits', include: ['*.jar'])
     compile 'com.google.android.gms:play-services:4+'
-    compile project(':unityskeleton')
+    unityCompile project(':unityskeleton')
 }
