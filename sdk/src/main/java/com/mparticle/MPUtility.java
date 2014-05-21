@@ -61,12 +61,13 @@ class MPUtility {
         BufferedReader localBufferedReader = null;
         String str3 = null;
         try {
-            localProcess = Runtime.getRuntime().exec("top -d 1 -n 1");
+            String[] command =   {"top","-d","1","-n","1"};
+            localProcess = new ProcessBuilder().command(command).redirectErrorStream(true).start();
             localBufferedReader = new BufferedReader(new InputStreamReader(localProcess.getInputStream()));
             while ((str3 = localBufferedReader.readLine()) != null)
                 if (str3.contains(str2)) {
                     String[] arrayOfString = str3.split(" ");
-                    if (arrayOfString != null)
+                    if (arrayOfString != null) {
                         for (int i = 0; i < arrayOfString.length; i++) {
                             if ((arrayOfString[i] != null) && (arrayOfString[i].contains("%"))) {
                                 str1 = arrayOfString[i];
@@ -74,20 +75,20 @@ class MPUtility {
                                 return str1;
                             }
                         }
+                    }
                 }
         } catch (IOException localIOException2) {
             Log.w(Constants.LOG_TAG, "Error computing CPU usage");
-            localIOException2.printStackTrace();
         } finally {
             try {
-                if (localBufferedReader != null)
+                if (localBufferedReader != null) {
                     localBufferedReader.close();
+                }
                 if (localProcess != null){
                     try {
-                        if (localProcess != null) {
-                            // use exitValue() to determine if process is still running.
-                            localProcess.exitValue();
-                        }
+                        // use exitValue() to determine if process is still running.
+                        localProcess.exitValue();
+
                     } catch (IllegalThreadStateException e) {
                         // process is still running, kill it.
                         localProcess.destroy();
