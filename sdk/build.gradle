@@ -22,11 +22,16 @@ configurations {
 android {
     compileSdkVersion 19
     buildToolsVersion "19.0.3"
+    useOldManifestMerger false
 
     defaultConfig {
-        minSdkVersion 9
+        minSdkVersion 8
         targetSdkVersion 19
         versionName sdkversion
+        testPackageName "com.mparticle.test"
+        testInstrumentationRunner "android.test.InstrumentationTestRunner"
+        testHandleProfiling true
+        testFunctionalTest true
     }
 
     buildTypes {
