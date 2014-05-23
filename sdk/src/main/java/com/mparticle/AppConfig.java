@@ -59,8 +59,7 @@ class AppConfig {
     public AppConfig(Context context, String key, String secret, boolean sandboxMode) {
         this.sandboxMode = sandboxMode;
         mContext = context;
-        if ((key == null) || secret == null) {
-            Log.d(Constants.LOG_TAG, "mParticle instance created without server credentials, using XML configuration");
+        if (key == null || secret == null) {
             parseLocalCredentials();
         } else {
             mKey = key;
@@ -77,7 +76,7 @@ class AppConfig {
         }
         mSecret = getString(PREFKEY_API_SECRET);
         if (mSecret == null) {
-            Log.d(Constants.LOG_TAG, String.format("Configuration issue: Missing required key: %s", PREFKEY_API_KEY));
+            Log.d(Constants.LOG_TAG, String.format("Configuration issue: Missing required key: %s", PREFKEY_API_SECRET));
             throw new IllegalArgumentException("Configuration issue: Missing API secret.");
         }
     }
