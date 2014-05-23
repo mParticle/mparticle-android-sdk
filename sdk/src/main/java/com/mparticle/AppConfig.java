@@ -95,7 +95,7 @@ class AppConfig {
                 Log.w(Constants.LOG_TAG, "Configuration issue: Push is enabled but no sender id is specified.");
             }
         }
-        sandboxMode = getBoolean(PREFKEY_SANDBOX_MODE, DEFAULT_SANDBOX_MODE);
+        sandboxMode = getBoolean(PREFKEY_SANDBOX_MODE, sandboxMode);
         isLicensingEnabled = getBoolean(PREFKEY_LICENSING_ENABLED, DEFAULT_ENABLE_LICENSING);
         if (isLicensingEnabled){
             licenseKey = getString(PREFKEY_APP_LICENSE_KEY);
