@@ -95,6 +95,7 @@ dependencies {
     flurryCompile files ("libs/FlurryAnalytics_3.3.3.jar")
     urbanairshipCompile files ("libs/urbanairship-lib-3.2.3.jar")
     bugsenseCompile 'com.bugsense.trace:bugsense:3.5'
+    bugsenseCompile 'com.google.android.gms:play-services:4+'
     kahunaCompile files ("libs/Kahuna.jar")
     crashlyticsCompile 'com.crashlytics.android:crashlytics:1.+'
 }
