@@ -21,12 +21,17 @@ configurations {
 
 android {
     compileSdkVersion 19
-    buildToolsVersion "19.0.3"
+    buildToolsVersion "19.1"
+    useOldManifestMerger false
 
     defaultConfig {
-        minSdkVersion 9
+        minSdkVersion 8
         targetSdkVersion 19
         versionName sdkversion
+        testPackageName "com.mparticle.test"
+        testInstrumentationRunner "android.test.InstrumentationTestRunner"
+        testHandleProfiling true
+        testFunctionalTest true
     }
 
     buildTypes {
@@ -101,5 +106,5 @@ dependencies {
     deployerJars "org.kuali.maven.wagons:maven-s3-wagon:1.2.1"
     compile fileTree(dir: 'embeddedkits', include: ['*.jar'])
     compile 'com.google.android.gms:play-services:4+'
-    unityCompile project(':unityskeleton')
+    unityCompile project('unityskeleton')
 }

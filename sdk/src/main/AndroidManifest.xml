@@ -1,8 +1,12 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="com.mparticle">
     <application/>
-    <uses-sdk
-        android:targetSdkVersion="19"/>
+    <uses-sdk tools:replace="minSdkVersion"
+        android:minSdkVersion="8"
+        android:targetSdkVersion="19">
+
+    </uses-sdk>
 
     <uses-permission android:name="android.permission.INTERNET" />
 
