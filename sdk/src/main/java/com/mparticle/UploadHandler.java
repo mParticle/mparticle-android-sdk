@@ -407,6 +407,11 @@ import java.util.UUID;
         getDeviceInfo().put(MessageKey.PUSH_SOUND_ENABLED, mConfigManager.isPushSoundEnabled());
         getDeviceInfo().put(MessageKey.PUSH_VIBRATION_ENABLED, mConfigManager.isPushVibrationEnabled());
 
+        String payload = mConfigManager.getAdtruth().lastPayload;
+        if (payload != null) {
+            getDeviceInfo().put(MessageKey.ADTRUTH_ID, mConfigManager.getAdtruth().lastPayload);
+        }
+
         uploadMessage.put(MessageKey.DEVICE_INFO, getDeviceInfo());
         uploadMessage.put(MessageKey.DEBUG, mConfigManager.getSandboxMode());
 

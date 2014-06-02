@@ -329,6 +329,18 @@ class MParticleApiClient {
         return socketFactory;
     }
 
+    public static String getAbsoluteUrl(String relativeUrl) {
+        if (relativeUrl == null || relativeUrl.startsWith("http")){
+            return relativeUrl;
+        }else{
+            return new StringBuilder(SECURE_SERVICE_SCHEME)
+                    .append("://")
+                    .append(SECURE_SERVICE_HOST)
+                    .append("/")
+                    .append(relativeUrl).toString();
+        }
+    }
+
     class ApiResponse {
         private static final String LTV = "iltv";
         private int statusCode;
