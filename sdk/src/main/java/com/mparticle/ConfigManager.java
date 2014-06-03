@@ -355,6 +355,7 @@ class ConfigManager {
         private String url;
         long lastSuccessful;
         String lastPayload;
+        private WebView wv;
 
         AdtruthConfig(){
             lastPayload = mPreferences.getString(Constants.PrefKeys.ADTRUTH_PAYLOAD, null);
@@ -375,7 +376,7 @@ class ConfigManager {
         }
         void process(){
             if (isValid()){
-                WebView wv = new WebView(mContext);
+                wv = new WebView(mContext);
                 wv.getSettings().setJavaScriptEnabled(true);
                 wv.addJavascriptInterface(this, "mParticleAndroid");
                 wv.loadUrl(url);
@@ -392,6 +393,10 @@ class ConfigManager {
                         .putString(Constants.PrefKeys.ADTRUTH_PAYLOAD, lastPayload)
                         .putLong(Constants.PrefKeys.ADTRUTH_LAST_TIMESTAMP, lastSuccessful)
                         .commit();
+            }
+            if (wv != null){
+                wv.destroy();
+                wv = null;
             }
         }
     }
