@@ -201,6 +201,7 @@ import java.util.UUID;
     /* package-private */
     static JSONObject createMessageSessionEnd(String sessionId, long start, long end, long length,
                                               JSONObject attributes) throws JSONException {
+        resetEventCounter();
         JSONObject message = createMessage(MessageType.SESSION_END, sessionId, start, end, null, attributes);
         message.put(MessageKey.SESSION_LENGTH, length);
         message.put(MessageKey.STATE_INFO_KEY, MessageManager.getStateInfo());
@@ -288,10 +289,19 @@ import java.util.UUID;
             // NOTE: event timing is not supported (yet) but the server expects this data
             message.put(MessageKey.EVENT_START_TIME, time);
             message.put(MessageKey.EVENT_DURATION, eventLength);
+
+            int count = mPreferences.getInt(Constants.PrefKeys.EVENT_COUNTER, 0);
+            message.put(MessageKey.EVENT_COUNTER, count);
+            mPreferences.edit().putInt(Constants.PrefKeys.EVENT_COUNTER, ++count).commit();
+
             mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
         } catch (JSONException e) {
             Log.w(TAG, "Failed to create mParticle log event message");
         }
+    }
+
+    private static void resetEventCounter(){
+        mPreferences.edit().putInt(Constants.PrefKeys.EVENT_COUNTER, 0).commit();
     }
 
     public void logScreen(String sessionId, long sessionStartTime, long time, String screenName, JSONObject attributes, boolean started) {

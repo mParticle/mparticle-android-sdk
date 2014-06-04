@@ -207,6 +207,9 @@ package com.mparticle;
         public static final String NPE_POST_DATA = "d";
         public static final String CONFIG_SESSION_TIMEOUT = "stl";
         public static final String CONFIG_UPLOAD_INTERVAL = "uitl";
+
+        //events
+        public static final String EVENT_COUNTER = "en";
     }
 
     interface PrefKeys {
@@ -251,6 +254,7 @@ package com.mparticle;
         public static final String NEXT_REQUEST_TIME = "mp::next_valid_request_time";
         public static final String ADTRUTH_PAYLOAD = "mp::adtruth::payload";
         public static final String ADTRUTH_LAST_TIMESTAMP = "mp::adtruth::timestamp";
+        public static final String EVENT_COUNTER = "mp::events::counter";
     }
 
     interface MiscStorageKeys {
