@@ -201,8 +201,11 @@ import java.util.UUID;
     /* package-private */
     static JSONObject createMessageSessionEnd(String sessionId, long start, long end, long length,
                                               JSONObject attributes) throws JSONException {
+
+        int eventCounter = mPreferences.getInt(Constants.PrefKeys.EVENT_COUNTER, 0);
         resetEventCounter();
         JSONObject message = createMessage(MessageType.SESSION_END, sessionId, start, end, null, attributes);
+        message.put(MessageKey.EVENT_COUNTER, eventCounter);
         message.put(MessageKey.SESSION_LENGTH, length);
         message.put(MessageKey.STATE_INFO_KEY, MessageManager.getStateInfo());
         return message;
