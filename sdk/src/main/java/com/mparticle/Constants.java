@@ -269,25 +269,6 @@ package com.mparticle;
         static final int UPLOADED = 3;
     }
 
-    // keys used in the (optional) mparticle.properties config file
-    interface ConfigKeys {
-        // mParticleAPI
-        public static final String API_KEY = "api_key";
-        public static final String API_SECRET = "api_secret";
-        public static final String DEBUG_MODE = "debug_mode";
-        public static final String SESSION_TIMEOUT = "session_timeout";
-        public static final String ENABLE_CRASH_REPORTING = "enable_crash_reporting";
-        public static final String ENABLE_PUSH_NOTIFICATIONS = "enable_push_notifications";
-
-        // MessageManager
-        public static final String DEBUG_UPLOAD_INTERVAL = "debug_upload_interval";
-        public static final String UPLOAD_INTERVAL = "upload_interval";
-        public static final String ENABLE_SSL = "enable_secure_transport";
-        public static final String PROXY_HOST = "proxy_host";
-        public static final String PROXY_PORT = "proxy_port";
-        public static final String ENABLE_COMPRESSION = "enable_compression";
-    }
-
     // these keys are expected by the MPService for push notifications
     interface GCMNotificationKeys {
         public static final String TITLE = "mp::notification::title";
