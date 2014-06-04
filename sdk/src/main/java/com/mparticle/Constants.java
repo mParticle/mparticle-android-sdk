@@ -191,13 +191,10 @@ package com.mparticle;
         public static final String PAYLOAD = "pay";
         //screen view
         public static final String SCREEN_STARTED = "t";
-
-        public static final String EVENT_CATEGORY = "$Category";
         public static final String BREADCRUMB_SESSION_COUNTER = "sn";
         public static final String BREADCRUMB_LABEL = "l";
         public static final String PROVIDER_PERSISTENCE = "cms";
         public static final String RELEASE_VERSION = "vr";
-
         //network performance monitoring
         public static final String NPE_METHOD = "v";
         public static final String NPE_URL = "url";
@@ -207,9 +204,11 @@ package com.mparticle;
         public static final String NPE_POST_DATA = "d";
         public static final String CONFIG_SESSION_TIMEOUT = "stl";
         public static final String CONFIG_UPLOAD_INTERVAL = "uitl";
-
         //events
         public static final String EVENT_COUNTER = "en";
+        public static final String EVENT_CATEGORY = "$Category";
+        //session start
+        public static final String PREVIOUS_SESSION_ID = "pid";
     }
 
     interface PrefKeys {
@@ -255,6 +254,7 @@ package com.mparticle;
         public static final String ADTRUTH_PAYLOAD = "mp::adtruth::payload";
         public static final String ADTRUTH_LAST_TIMESTAMP = "mp::adtruth::timestamp";
         public static final String EVENT_COUNTER = "mp::events::counter";
+        public static final String PREVIOUS_SESSION_ID = "mp::session::previous_id";
     }
 
     interface MiscStorageKeys {

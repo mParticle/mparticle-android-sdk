@@ -212,10 +212,18 @@ import java.util.UUID;
         try {
             JSONObject message = createMessage(MessageType.SESSION_START, sessionId, time, time, null, null);
             message.put(MessageKey.LAUNCH_REFERRER, launchUri);
+
+            SharedPreferences.Editor editor = mPreferences.edit();
             long timeInFg = mPreferences.getLong(Constants.PrefKeys.PREVIOUS_SESSION_FOREGROUND, 0);
             if (timeInFg > 0) {
                 message.put(MessageKey.PREVIOUS_SESSION_LENGTH, timeInFg);
-                mPreferences.edit().remove(Constants.PrefKeys.PREVIOUS_SESSION_FOREGROUND).commit();
+                editor.remove(Constants.PrefKeys.PREVIOUS_SESSION_FOREGROUND);
+            }
+            String prevSessionId = mPreferences.getString(Constants.PrefKeys.PREVIOUS_SESSION_ID, "");
+            editor.putString(Constants.PrefKeys.PREVIOUS_SESSION_ID, sessionId);
+            editor.commit();
+            if (prevSessionId != null && prevSessionId.length() > 0) {
+                message.put(MessageKey.PREVIOUS_SESSION_ID, prevSessionId);
             }
 
             mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
