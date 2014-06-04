@@ -3,6 +3,8 @@ package com.mparticle;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Build;
+import android.webkit.JavascriptInterface;
+import android.webkit.WebView;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -21,6 +23,9 @@ class ConfigManager {
     public static final String KEY_PUSH_MESSAGES = "pmk";
     public static final String KEY_NETWORK_PERFORMANCE = "cnp";
     public static final String KEY_EMBEDDED_KITS = "eks";
+    private static final String KEY_ADTRUTH = "atc";
+    private static final String KEY_ADTRUTH_URL = "cp";
+    private static final String KEY_ADTRUTH_INTERVAL = "ci";
 
     public static final String VALUE_APP_DEFINED = "appdefined";
     public static final String VALUE_CUE_CATCH = "forcecatch";
@@ -44,6 +49,8 @@ class ConfigManager {
     private boolean sendOoEvents;
     private JSONObject providerPersistence;
     private String networkPerformance = "";
+
+    private AdtruthConfig adtruth;
 
     public ConfigManager(Context context, String key, String secret, boolean sandboxMode, EmbeddedKitManager embeddedKitManager) {
         mContext = context.getApplicationContext();
@@ -89,6 +96,14 @@ class ConfigManager {
             setProviderPersistence(new ProviderPersistence(responseJSON, mContext));
         }
 
+        if (responseJSON.has(KEY_ADTRUTH)){
+            JSONObject adtruthObject = responseJSON.getJSONObject(KEY_ADTRUTH);
+            if (adtruthObject != null) {
+                getAdtruth().setUrl(adtruthObject.optString(KEY_ADTRUTH_URL));
+                getAdtruth().setInterval(adtruthObject.optInt(KEY_ADTRUTH_INTERVAL, 0));
+            }
+        }
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD) {
             editor.apply();
         } else {
@@ -103,6 +118,13 @@ class ConfigManager {
         if (responseJSON != null){
             loaded = true;
         }
+    }
+
+    public AdtruthConfig getAdtruth(){
+        if (adtruth == null){
+            adtruth = new AdtruthConfig();
+        }
+        return adtruth;
     }
 
     public String[] getPushKeys(){
@@ -322,5 +344,60 @@ class ConfigManager {
 
     public void setMpid(long mpid) {
         mPreferences.edit().putFloat(Constants.PrefKeys.Mpid, mpid).commit();
+    }
+
+    public void handleBackgrounded() {
+        getAdtruth().process();
+    }
+
+    class AdtruthConfig {
+        private long interval;
+        private String url;
+        long lastSuccessful;
+        String lastPayload;
+        private WebView wv;
+
+        AdtruthConfig(){
+            lastPayload = mPreferences.getString(Constants.PrefKeys.ADTRUTH_PAYLOAD, null);
+            lastSuccessful = mPreferences.getLong(Constants.PrefKeys.ADTRUTH_LAST_TIMESTAMP, 0);
+        }
+        private boolean isValid() {
+            return (interval > 0 &&
+                    url != null &&
+                    url.length() > 1 &&
+                    ((lastSuccessful + interval) < System.currentTimeMillis()));
+
+        }
+        void setInterval(int intervalSeconds){
+            interval = (intervalSeconds * 1000);
+        }
+        void setUrl(String configUrl){
+            url = MParticleApiClient.getAbsoluteUrl(configUrl);
+        }
+        void process(){
+            if (isValid()){
+                wv = new WebView(mContext);
+                wv.getSettings().setJavaScriptEnabled(true);
+                wv.addJavascriptInterface(this, "mParticleAndroid");
+                wv.loadUrl(url);
+            }
+        }
+
+        @JavascriptInterface
+        public void adtruth(String payload){
+            if (payload != null && payload.length() > 0){
+                lastPayload = payload;
+                lastSuccessful = System.currentTimeMillis();
+                mPreferences
+                        .edit()
+                        .putString(Constants.PrefKeys.ADTRUTH_PAYLOAD, lastPayload)
+                        .putLong(Constants.PrefKeys.ADTRUTH_LAST_TIMESTAMP, lastSuccessful)
+                        .commit();
+            }
+            if (wv != null){
+                wv.destroy();
+                wv = null;
+            }
+        }
     }
 }

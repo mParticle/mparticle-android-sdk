@@ -1119,13 +1119,14 @@ public class MParticle {
                 JSONObject newObject = new JSONObject();
                 newObject.put(MessageKey.IDENTITY_NAME, identityType.value);
                 newObject.put(MessageKey.IDENTITY_VALUE, id);
-                newObject.put(MessageKey.IDENTITY_FIRST_SEEN, true);
 
                 if (index >= 0) {
                     newObject.put(MessageKey.IDENTITY_DATE_FIRST_SEEN, mUserIdentities.getJSONObject(index).optLong(MessageKey.IDENTITY_DATE_FIRST_SEEN, System.currentTimeMillis()));
+                    newObject.put(MessageKey.IDENTITY_FIRST_SEEN, false);
                     mUserIdentities.put(index, newObject);
                 } else {
                     newObject.put(MessageKey.IDENTITY_DATE_FIRST_SEEN, System.currentTimeMillis());
+                    newObject.put(MessageKey.IDENTITY_FIRST_SEEN, true);
                     mUserIdentities.put(newObject);
                 }
 

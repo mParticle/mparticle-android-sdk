@@ -407,6 +407,11 @@ import java.util.UUID;
         getDeviceInfo().put(MessageKey.PUSH_SOUND_ENABLED, mConfigManager.isPushSoundEnabled());
         getDeviceInfo().put(MessageKey.PUSH_VIBRATION_ENABLED, mConfigManager.isPushVibrationEnabled());
 
+        String payload = mConfigManager.getAdtruth().lastPayload;
+        if (payload != null) {
+            getDeviceInfo().put(MessageKey.ADTRUTH_ID, mConfigManager.getAdtruth().lastPayload);
+        }
+
         uploadMessage.put(MessageKey.DEVICE_INFO, getDeviceInfo());
         uploadMessage.put(MessageKey.DEBUG, mConfigManager.getSandboxMode());
 
@@ -420,7 +425,6 @@ import java.util.UUID;
         String userIds = mPreferences.getString(PrefKeys.USER_IDENTITIES + mApiKey, null);
         if (null != userIds) {
             JSONArray identities = new JSONArray(userIds);
-            uploadMessage.put(MessageKey.USER_IDENTITIES, identities);
             boolean changeMade = false;
             for (int i = 0; i < identities.length(); i++) {
                 if (identities.getJSONObject(i).getBoolean(MessageKey.IDENTITY_FIRST_SEEN)){
@@ -429,7 +433,10 @@ import java.util.UUID;
                 }
             }
             if (changeMade) {
+                uploadMessage.put(MessageKey.USER_IDENTITIES, new JSONArray(userIds));
                 mPreferences.edit().putString(PrefKeys.USER_IDENTITIES + mApiKey, identities.toString()).commit();
+            }else{
+                uploadMessage.put(MessageKey.USER_IDENTITIES, identities);
             }
         }
 

@@ -201,7 +201,11 @@ import java.util.UUID;
     /* package-private */
     static JSONObject createMessageSessionEnd(String sessionId, long start, long end, long length,
                                               JSONObject attributes) throws JSONException {
+
+        int eventCounter = mPreferences.getInt(Constants.PrefKeys.EVENT_COUNTER, 0);
+        resetEventCounter();
         JSONObject message = createMessage(MessageType.SESSION_END, sessionId, start, end, null, attributes);
+        message.put(MessageKey.EVENT_COUNTER, eventCounter);
         message.put(MessageKey.SESSION_LENGTH, length);
         message.put(MessageKey.STATE_INFO_KEY, MessageManager.getStateInfo());
         return message;
@@ -211,10 +215,18 @@ import java.util.UUID;
         try {
             JSONObject message = createMessage(MessageType.SESSION_START, sessionId, time, time, null, null);
             message.put(MessageKey.LAUNCH_REFERRER, launchUri);
+
+            SharedPreferences.Editor editor = mPreferences.edit();
             long timeInFg = mPreferences.getLong(Constants.PrefKeys.PREVIOUS_SESSION_FOREGROUND, 0);
             if (timeInFg > 0) {
                 message.put(MessageKey.PREVIOUS_SESSION_LENGTH, timeInFg);
-                mPreferences.edit().remove(Constants.PrefKeys.PREVIOUS_SESSION_FOREGROUND).commit();
+                editor.remove(Constants.PrefKeys.PREVIOUS_SESSION_FOREGROUND);
+            }
+            String prevSessionId = mPreferences.getString(Constants.PrefKeys.PREVIOUS_SESSION_ID, "");
+            editor.putString(Constants.PrefKeys.PREVIOUS_SESSION_ID, sessionId);
+            editor.commit();
+            if (prevSessionId != null && prevSessionId.length() > 0) {
+                message.put(MessageKey.PREVIOUS_SESSION_ID, prevSessionId);
             }
 
             mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
@@ -288,10 +300,19 @@ import java.util.UUID;
             // NOTE: event timing is not supported (yet) but the server expects this data
             message.put(MessageKey.EVENT_START_TIME, time);
             message.put(MessageKey.EVENT_DURATION, eventLength);
+
+            int count = mPreferences.getInt(Constants.PrefKeys.EVENT_COUNTER, 0);
+            message.put(MessageKey.EVENT_COUNTER, count);
+            mPreferences.edit().putInt(Constants.PrefKeys.EVENT_COUNTER, ++count).commit();
+
             mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
         } catch (JSONException e) {
             Log.w(TAG, "Failed to create mParticle log event message");
         }
+    }
+
+    private static void resetEventCounter(){
+        mPreferences.edit().putInt(Constants.PrefKeys.EVENT_COUNTER, 0).commit();
     }
 
     public void logScreen(String sessionId, long sessionStartTime, long time, String screenName, JSONObject attributes, boolean started) {

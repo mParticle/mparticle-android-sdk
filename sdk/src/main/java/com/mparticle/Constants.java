@@ -134,6 +134,7 @@ package com.mparticle;
         public static final String DEVICE_BLUETOOTH_ENABLED = "dbe";
         public static final String DEVICE_BLUETOOTH_VERSION = "dbv";
         public static final String GOOGLE_ADV_ID = "gaid";
+        public static final String ADTRUTH_ID = "atp";
 
         // state info
         public static final String STATE_INFO_KEY = "cs";
@@ -190,13 +191,10 @@ package com.mparticle;
         public static final String PAYLOAD = "pay";
         //screen view
         public static final String SCREEN_STARTED = "t";
-
-        public static final String EVENT_CATEGORY = "$Category";
         public static final String BREADCRUMB_SESSION_COUNTER = "sn";
         public static final String BREADCRUMB_LABEL = "l";
         public static final String PROVIDER_PERSISTENCE = "cms";
         public static final String RELEASE_VERSION = "vr";
-
         //network performance monitoring
         public static final String NPE_METHOD = "v";
         public static final String NPE_URL = "url";
@@ -206,6 +204,11 @@ package com.mparticle;
         public static final String NPE_POST_DATA = "d";
         public static final String CONFIG_SESSION_TIMEOUT = "stl";
         public static final String CONFIG_UPLOAD_INTERVAL = "uitl";
+        //events
+        public static final String EVENT_COUNTER = "en";
+        public static final String EVENT_CATEGORY = "$Category";
+        //session start
+        public static final String PREVIOUS_SESSION_ID = "pid";
     }
 
     interface PrefKeys {
@@ -248,6 +251,10 @@ package com.mparticle;
         public static final String TIME_IN_BG = "mp::time_in_bg";
         public static final String PREVIOUS_SESSION_FOREGROUND = "mp::time_in_fg";
         public static final String NEXT_REQUEST_TIME = "mp::next_valid_request_time";
+        public static final String ADTRUTH_PAYLOAD = "mp::adtruth::payload";
+        public static final String ADTRUTH_LAST_TIMESTAMP = "mp::adtruth::timestamp";
+        public static final String EVENT_COUNTER = "mp::events::counter";
+        public static final String PREVIOUS_SESSION_ID = "mp::session::previous_id";
     }
 
     interface MiscStorageKeys {
@@ -260,25 +267,6 @@ package com.mparticle;
         static final int READY = 1; // stream
         static final int BATCH_READY = 2;
         static final int UPLOADED = 3;
-    }
-
-    // keys used in the (optional) mparticle.properties config file
-    interface ConfigKeys {
-        // mParticleAPI
-        public static final String API_KEY = "api_key";
-        public static final String API_SECRET = "api_secret";
-        public static final String DEBUG_MODE = "debug_mode";
-        public static final String SESSION_TIMEOUT = "session_timeout";
-        public static final String ENABLE_CRASH_REPORTING = "enable_crash_reporting";
-        public static final String ENABLE_PUSH_NOTIFICATIONS = "enable_push_notifications";
-
-        // MessageManager
-        public static final String DEBUG_UPLOAD_INTERVAL = "debug_upload_interval";
-        public static final String UPLOAD_INTERVAL = "upload_interval";
-        public static final String ENABLE_SSL = "enable_secure_transport";
-        public static final String PROXY_HOST = "proxy_host";
-        public static final String PROXY_PORT = "proxy_port";
-        public static final String ENABLE_COMPRESSION = "enable_compression";
     }
 
     // these keys are expected by the MPService for push notifications

@@ -39,6 +39,7 @@ class AppStateManager implements MPActivityCallbacks{
 
     private void logBackgrounded(){
         MParticle.getInstance().logStateTransition(Constants.StateTransitionType.STATE_TRANS_BG);
+        MParticle.getInstance().mConfigManager.handleBackgrounded();
         if (MParticle.getInstance().getDebugMode()) {
             Log.d(Constants.LOG_TAG, "App backgrounded.");
         }
