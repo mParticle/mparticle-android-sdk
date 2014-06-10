@@ -60,9 +60,15 @@ class ConfigManager {
     }
 
     public synchronized void updateConfig(JSONObject responseJSON) throws JSONException {
-        if (loaded && mPreferences.getString(CONFIG_JSON,"").equals(responseJSON)){
+        //Work-around caching mechanism:
+        //Clear out values that change on every config request,
+        //so that the cache isn't prematurely busted.
+        responseJSON.remove("id");
+        responseJSON.remove("ct");
+        if (loaded && mPreferences.getString(CONFIG_JSON,"").equals(responseJSON.toString())){
             return;
         }
+
         SharedPreferences.Editor editor = mPreferences.edit();
         editor.putString(CONFIG_JSON, responseJSON.toString());
 
@@ -114,10 +120,8 @@ class ConfigManager {
         if (responseJSON.has(KEY_EMBEDDED_KITS)) {
             embeddedKitManager.updateKits(responseJSON.getJSONArray(KEY_EMBEDDED_KITS));
         }
-
-        if (responseJSON != null){
-            loaded = true;
-        }
+        
+        loaded = true;
     }
 
     public AdtruthConfig getAdtruth(){
@@ -378,7 +382,7 @@ class ConfigManager {
             if (isValid()){
                 wv = new WebView(mContext);
                 wv.getSettings().setJavaScriptEnabled(true);
-                wv.addJavascriptInterface(this, "mParticleAndroid");
+                wv.addJavascriptInterface(this, "mParticleSDK");
                 wv.loadUrl(url);
             }
         }
