@@ -51,7 +51,7 @@ android {
         release {
             buildConfigField "boolean", "ECHO", "false"
             buildConfigField "boolean", "UNITY", "false"
-            runProguard false
+            runProguard true 
             proguardFile 'proguard.txt'
         }
 
