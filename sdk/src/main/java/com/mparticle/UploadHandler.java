@@ -46,27 +46,23 @@ import java.util.UUID;
     private ConfigManager mConfigManager;
 
     public static final String SQL_DELETABLE_MESSAGES = String.format(
-            "%s=? and (%s='NO-SESSION')",
-            MessageTable.API_KEY,
+            "(%s='NO-SESSION')",
             MessageTable.SESSION_ID);
     public static final String SQL_UPLOADABLE_MESSAGES = String.format(
-            "%s=? and ((%s='NO-SESSION') or ((%s>=?) and (%s!=%d)))",
-            MessageTable.API_KEY,
+            "((%s='NO-SESSION') or ((%s>=?) and (%s!=%d)))",
             MessageTable.SESSION_ID,
             MessageTable.STATUS,
             MessageTable.STATUS,
             Status.UPLOADED);
     public static final String SQL_HISTORY_MESSAGES = String.format(
-            "%s=? and ((%s='NO-SESSION') or ((%s>=?) and (%s=%d) and (%s != ?)))",
-            MessageTable.API_KEY,
+            "((%s='NO-SESSION') or ((%s>=?) and (%s=%d) and (%s != ?)))",
             MessageTable.SESSION_ID,
             MessageTable.STATUS,
             MessageTable.STATUS,
             Status.UPLOADED,
             MessageTable.SESSION_ID);
     public static final String SQL_FINISHED_HISTORY_MESSAGES = String.format(
-            "%s=? and ((%s='NO-SESSION') or ((%s>=?) and (%s=%d) and (%s=?)))",
-            MessageTable.API_KEY,
+            "((%s='NO-SESSION') or ((%s>=?) and (%s=%d) and (%s=?)))",
             MessageTable.SESSION_ID,
             MessageTable.STATUS,
             MessageTable.STATUS,
@@ -191,10 +187,10 @@ import java.util.UUID;
             String[] selectionArgs;
             if (history) {
                 selection = SQL_HISTORY_MESSAGES;
-                selectionArgs = new String[]{mApiKey, Integer.toString(Status.READY), MParticle.getInstance().mSessionID};
+                selectionArgs = new String[]{Integer.toString(Status.READY), MParticle.getInstance().mSessionID};
             } else {
                 selection = SQL_UPLOADABLE_MESSAGES;
-                selectionArgs = new String[]{mApiKey, Integer.toString(Status.READY)};
+                selectionArgs = new String[]{Integer.toString(Status.READY)};
             }
             String[] selectionColumns = new String[]{"_id", MessageTable.MESSAGE, MessageTable.CREATED_AT, MessageTable.STATUS, MessageTable.SESSION_ID};
 
@@ -289,10 +285,10 @@ import java.util.UUID;
         Cursor readyUploadsCursor = null;
         try {
             // read batches ready to upload
-            String[] selectionArgs = new String[]{mApiKey};
+
             String[] selectionColumns = new String[]{"_id", UploadTable.MESSAGE};
             readyUploadsCursor = db.query(UploadTable.TABLE_NAME, selectionColumns,
-                    UploadTable.API_KEY + "=?", selectionArgs, null, null, UploadTable.CREATED_AT);
+                    null, null, null, null, UploadTable.CREATED_AT);
 
             while (readyUploadsCursor.moveToNext()) {
                 int id = readyUploadsCursor.getInt(0);
@@ -472,11 +468,11 @@ import java.util.UUID;
 
     private void dbMarkAsUploadedMessage(int lastMessageId) {
         //non-session messages can be deleted, they're not part of session history
-        String[] whereArgs = new String[]{mApiKey, Long.toString(lastMessageId)};
+        String[] whereArgs = new String[]{Long.toString(lastMessageId)};
         String whereClause = SQL_DELETABLE_MESSAGES + " and (_id<=?)";
         int rowsdeleted = db.delete(MessageTable.TABLE_NAME, whereClause, whereArgs);
 
-        whereArgs = new String[]{mApiKey, Integer.toString(Status.READY), Long.toString(lastMessageId)};
+        whereArgs = new String[]{Integer.toString(Status.READY), Long.toString(lastMessageId)};
         whereClause = SQL_UPLOADABLE_MESSAGES + " and (_id<=?)";
         ContentValues contentValues = new ContentValues();
         contentValues.put(MessageTable.STATUS, Status.UPLOADED);
