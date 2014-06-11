@@ -48,7 +48,7 @@ import java.util.UUID;
     private static double sBatteryLevel;
 
     private final MessageHandler mMessageHandler;
-    private final UploadHandler mUploadHandler;
+    final UploadHandler mUploadHandler;
 
     static {
         // ideally these threads would not be started in a static initializer
@@ -236,18 +236,12 @@ import java.util.UUID;
                     JSONObject firstRunMessage = createFirstRunMessage(time, sessionId, time);
                     mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, firstRunMessage));
                     sFirstRun = false;
-                    if (mUploadHandler != null) {
-                        mUploadHandler.sendMessage(mUploadHandler.obtainMessage(UploadHandler.UPLOAD_MESSAGES));
-                    } else {
-                        Log.w(TAG, "Failed to send First Run Message, no upload handler");
-                    }
                 } catch (JSONException e) {
                     Log.w(TAG, "Failed to create First Run Message");
                 }
             }
 
             incrementSessionCounter();
-
 
         } catch (JSONException e) {
             Log.w(TAG, "Failed to create mParticle start session message");
