@@ -3,7 +3,7 @@ package com.mparticle;
 import com.mparticle.audience.AudienceMembership;
 
 /**
- * Created by sdozor on 4/7/14.
+ * Use this callback interface to retrieve the current user's audience membership.
  */
 public interface AudienceListener {
     public void onAudiencesRetrieved(AudienceMembership audienceMembership);

@@ -29,6 +29,9 @@ public class AudienceMembership {
         return getCommaSeparatedIds();
     }
 
+    /**
+     Returns a String with a comma separated list of user audience ids.
+     */
     public String getCommaSeparatedIds() {
         if (list == null) {
             list = new StringBuilder();

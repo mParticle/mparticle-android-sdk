@@ -6,7 +6,7 @@ import org.json.JSONException;
 import java.util.Arrays;
 
 /**
- * Created by sdozor on 4/9/14.
+ * This class represents a single Audience of which one or more users may be a member.
  */
 public class Audience {
     int id;
@@ -28,14 +28,29 @@ public class Audience {
 
     }
 
+    /**
+     * Retrieve the unique audience ID.
+     *
+     * @return an integer ID
+     */
     public int getId(){
         return id;
     }
 
+    /**
+     * Retrieve the display name for this Audience, configured via the mParticle web console.
+     *
+     * @return
+     */
     public String getName(){
         return name;
     }
 
+    /**
+     * Retrieve the endpoint IDs to which this Audience is configured to forward
+     *
+     * @return an array of IDs
+     */
     public String[] getEndpoints(){
         if (endpoints != null) {
             return endpoints;
@@ -44,6 +59,11 @@ public class Audience {
         }
     }
 
+    /**
+     * Retrieve a readable summary of this Audience
+     *
+     * @return Audience summary
+     */
     @Override
     public String toString() {
         return "Audience ID:  " + id + ", " +
