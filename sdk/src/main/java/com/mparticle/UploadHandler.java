@@ -462,7 +462,7 @@ import java.util.UUID;
     }
 
     private void dbDeleteProcessedMessages(String sessionId) {
-        String[] whereArgs = new String[]{mApiKey, Integer.toString(Status.UPLOADED), sessionId};
+        String[] whereArgs = new String[]{Integer.toString(Status.UPLOADED), sessionId};
         int rowsdeleted = db.delete(MessageTable.TABLE_NAME, SQL_FINISHED_HISTORY_MESSAGES, whereArgs);
     }
 
