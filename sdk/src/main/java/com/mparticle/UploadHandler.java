@@ -20,8 +20,8 @@ import com.mparticle.MParticleDatabase.CommandTable;
 import com.mparticle.MParticleDatabase.MessageTable;
 import com.mparticle.MParticleDatabase.SessionTable;
 import com.mparticle.MParticleDatabase.UploadTable;
-import com.mparticle.com.mparticle.audience.Audience;
-import com.mparticle.com.mparticle.audience.AudienceMembership;
+import com.mparticle.audience.Audience;
+import com.mparticle.audience.AudienceMembership;
 
 import org.json.JSONArray;
 import org.json.JSONException;

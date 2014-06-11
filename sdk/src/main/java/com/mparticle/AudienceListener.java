@@ -1,6 +1,6 @@
 package com.mparticle;
 
-import com.mparticle.com.mparticle.audience.AudienceMembership;
+import com.mparticle.audience.AudienceMembership;
 
 /**
  * Created by sdozor on 4/7/14.

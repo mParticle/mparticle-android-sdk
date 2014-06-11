@@ -1,4 +1,4 @@
-package com.mparticle.com.mparticle.audience;
+package com.mparticle.audience;
 
 import org.json.JSONArray;
 import org.json.JSONException;
