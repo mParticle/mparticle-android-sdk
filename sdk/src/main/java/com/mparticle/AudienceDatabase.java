@@ -42,7 +42,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 
 
-    public AudienceDatabase(Context context) {
+    AudienceDatabase(Context context) {
         super(context, DB_NAME, null, DB_VERSION);
     }
 
