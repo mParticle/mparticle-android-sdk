@@ -7,7 +7,6 @@ import java.util.ArrayList;
  */
 public class AudienceMembership {
     private ArrayList<Audience> audiences;
-    private boolean expired;
     StringBuilder list;
 
     public AudienceMembership(ArrayList<Audience> ids) {
@@ -27,6 +26,10 @@ public class AudienceMembership {
      */
     @Override
     public String toString(){
+        return getCommaSeparatedIds();
+    }
+
+    public String getCommaSeparatedIds() {
         if (list == null) {
             list = new StringBuilder();
 
@@ -39,10 +42,6 @@ public class AudienceMembership {
             }
         }
         return list.toString();
-    }
-
-    public String getCommaSeparatedIds() {
-        return toString();
     }
 
 }
