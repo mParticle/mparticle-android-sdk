@@ -9,7 +9,7 @@ import android.database.sqlite.SQLiteOpenHelper;
     private static final int DB_VERSION = 1;
     private static final String DB_NAME = "mparticle_audience.db";
 
-    public interface AudienceTable {
+    interface AudienceTable {
         public final static String TABLE_NAME = "audiences";
         public final static String AUDIENCE_ID = "_id";
         public final static String NAME = "name";
@@ -23,7 +23,7 @@ import android.database.sqlite.SQLiteOpenHelper;
                     AudienceTable.ENDPOINTS + " TEXT " +
                     ");";
 
-    public interface AudienceMembershipTable {
+    interface AudienceMembershipTable {
         public final static String TABLE_NAME = "audience_memberships";
         public final static String ID = "_id";
         public final static String AUDIENCE_ID = "audience_id";
@@ -56,7 +56,6 @@ import android.database.sqlite.SQLiteOpenHelper;
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         db.execSQL(CREATE_AUDIENCES_DDL);
         db.execSQL(CREATE_AUDIENCE_MEMBERSHIP_DDL);
-
     }
 
 }
