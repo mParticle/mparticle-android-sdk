@@ -112,9 +112,18 @@ class MParticleApiClient {
             connection.setRequestProperty(HTTP.USER_AGENT, userAgent);
 
             addMessageSignature(connection, null);
-            response =  new ApiResponse(connection).getJsonResponse();
+            ApiResponse apiResponse = new ApiResponse(connection);
+            if (apiResponse.getResponseCode() == HttpURLConnection.HTTP_FORBIDDEN){
+                if (configManager.isDebug()) {
+                    Log.d(Constants.LOG_TAG, "Audience call forbidden: is Audience enabled for the current mParticle org?");
+                }
+            }
+            response =  apiResponse.getJsonResponse();
+
         }catch (Exception e){
-            Log.d(Constants.LOG_TAG, "Audience call failed with exception: " + e.getMessage());
+            if (configManager.isDebug()) {
+                Log.d(Constants.LOG_TAG, "Audience call failed: " + e.getMessage());
+            }
         }
         return response;
     }
