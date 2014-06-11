@@ -54,6 +54,7 @@ class AppConfig {
     public boolean isLicensingEnabled;
     public boolean autoTrackingEnabled;
     public volatile boolean networkingEnabled;
+    public int audienceTimeout = 100;
 
 
     public AppConfig(Context context, String key, String secret, boolean sandboxMode) {

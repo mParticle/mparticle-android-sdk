@@ -48,7 +48,7 @@ import java.util.UUID;
     private static double sBatteryLevel;
 
     private final MessageHandler mMessageHandler;
-    private final UploadHandler mUploadHandler;
+    final UploadHandler mUploadHandler;
 
     static {
         // ideally these threads would not be started in a static initializer

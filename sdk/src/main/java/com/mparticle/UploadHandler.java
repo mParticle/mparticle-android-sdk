@@ -6,6 +6,7 @@ import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
+import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -19,6 +20,8 @@ import com.mparticle.MParticleDatabase.CommandTable;
 import com.mparticle.MParticleDatabase.MessageTable;
 import com.mparticle.MParticleDatabase.SessionTable;
 import com.mparticle.MParticleDatabase.UploadTable;
+import com.mparticle.com.mparticle.audience.Audience;
+import com.mparticle.com.mparticle.audience.AudienceMembership;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -27,7 +30,16 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.net.MalformedURLException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.UUID;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /* package-private */final class UploadHandler extends Handler {
 
@@ -41,6 +53,7 @@ import java.util.UUID;
     private final Context mContext;
     private final String mApiKey;
     private final String mSecret;
+    private final AudienceDatabase audienceDB;
     private MParticleApiClient mApiClient;
 
     private ConfigManager mConfigManager;
@@ -81,6 +94,7 @@ import java.util.UUID;
         mSecret = mConfigManager.getApiSecret();
 
         db = database;
+        audienceDB = new AudienceDatabase(mContext);
         mPreferences = mContext.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
 
         try {
@@ -498,5 +512,166 @@ import java.util.UUID;
         contentValues.put(CommandTable.CREATED_AT, System.currentTimeMillis());
         contentValues.put(CommandTable.API_KEY, mApiKey);
         db.insert(CommandTable.TABLE_NAME, null, contentValues);
+    }
+
+    public void fetchAudiences(long timeout, final String endpointId, final AudienceListener listener) {
+        new AudienceTask(timeout, endpointId, listener).execute();
+    }
+
+    private AudienceMembership queryAudiences(String endpointId) {
+        SQLiteDatabase db = audienceDB.getReadableDatabase();
+
+        String selection = null;
+        String[] args = null;
+        if (endpointId != null && endpointId.length() > 0){
+            selection = AudienceDatabase.AudienceTable.ENDPOINTS + " like ?";
+            args = new String[1];
+            args[0] = "%\"" + endpointId + "\"%";
+        }
+
+        Cursor audienceCursor = db.query(AudienceDatabase.AudienceTable.TABLE_NAME,
+                                        null,
+                                        selection,
+                                        args,
+                                        null,
+                                        null,
+                                        AUDIENCE_QUERY);
+        HashMap<Integer, Audience> audiences = new HashMap<Integer, Audience>();
+
+
+        while (audienceCursor.moveToNext()){
+            int id = audienceCursor.getInt(audienceCursor.getColumnIndex(AudienceDatabase.AudienceTable.AUDIENCE_ID));
+
+            Audience audience = new Audience(id,
+                                            audienceCursor.getString(audienceCursor.getColumnIndex(AudienceDatabase.AudienceTable.NAME)),
+                                            audienceCursor.getString(audienceCursor.getColumnIndex(AudienceDatabase.AudienceTable.ENDPOINTS)));
+            audiences.put(id, audience);
+        }
+        audienceCursor.close();
+
+
+        long currentTime = System.currentTimeMillis();
+        Cursor membershipCursor = db.query(false,
+                                    AudienceDatabase.AudienceMembershipTable.TABLE_NAME,
+                                    MEMBERSHIP_QUERY_COLUMNS,
+                                    String.format(MEMBERSHIP_QUERY_SELECTION,
+                                                    audiences.keySet().toString().replace("[", "(").replace("]", ")"),
+                                                    currentTime),
+                                    null,
+                                    null,
+                                    null,
+                                    MEMBERSHIP_QUERY_ORDER,
+                                    null);
+
+
+        ArrayList<Audience> finalAudiences = new ArrayList<Audience>();
+        int currentId = -1;
+        while (membershipCursor.moveToNext()){
+            int id = membershipCursor.getInt(1);
+            if (id != currentId) {
+                currentId = id;
+                String action = membershipCursor.getString(2);
+                if (action.equals(Constants.Audience.ACTION_ADD)){
+                    finalAudiences.add(audiences.get(currentId));
+                }
+            }
+        }
+        membershipCursor.close();
+
+        db.close();
+        return new AudienceMembership(finalAudiences);
+    }
+
+    private final static String AUDIENCE_QUERY = AudienceDatabase.AudienceTable.AUDIENCE_ID + " desc";
+    private final static String MEMBERSHIP_QUERY_ORDER = AudienceDatabase.AudienceMembershipTable.AUDIENCE_ID + " desc, " + AudienceDatabase.AudienceMembershipTable.TIMESTAMP + " desc";
+    private final static String[] MEMBERSHIP_QUERY_COLUMNS = new String[]
+                                                                {
+                                                                    AudienceDatabase.AudienceMembershipTable.ID,
+                                                                    AudienceDatabase.AudienceMembershipTable.AUDIENCE_ID,
+                                                                    AudienceDatabase.AudienceMembershipTable.MEMBERSHIP_ACTION
+                                                                };
+    private final static String MEMBERSHIP_QUERY_SELECTION = "audience_id in %s and " + AudienceDatabase.AudienceMembershipTable.TIMESTAMP + " < %d";
+
+    private void insertAudiences(JSONObject audiences) throws JSONException {
+        SQLiteDatabase db = audienceDB.getWritableDatabase();
+        JSONArray audienceList = audiences.getJSONArray(Constants.Audience.API_AUDIENCE_LIST);
+        db.beginTransaction();
+        boolean success = false;
+        try {
+            db.delete(AudienceDatabase.AudienceMembershipTable.TABLE_NAME, null, null);
+            db.delete(AudienceDatabase.AudienceTable.TABLE_NAME, null, null);
+            for (int i = 0; i < audienceList.length(); i++) {
+                ContentValues audienceRow = new ContentValues();
+                JSONObject audience = audienceList.getJSONObject(i);
+                int id = audience.getInt(Constants.Audience.API_AUDIENCE_ID);
+                String name = audience.getString(Constants.Audience.API_AUDIENCE_NAME);
+                String endPointIds = audience.getJSONArray(Constants.Audience.API_AUDIENCE_ENDPOINTS).toString();
+                audienceRow.put(AudienceDatabase.AudienceTable.AUDIENCE_ID, id);
+                audienceRow.put(AudienceDatabase.AudienceTable.NAME, name);
+                audienceRow.put(AudienceDatabase.AudienceTable.ENDPOINTS, endPointIds);
+                db.insert(AudienceDatabase.AudienceTable.TABLE_NAME, null, audienceRow);
+                JSONArray memberships = audience.getJSONArray(Constants.Audience.API_AUDIENCE_MEMBERSHIPS);
+                for (int j = 0; j < memberships.length(); j++) {
+                    ContentValues membershipRow = new ContentValues();
+                    membershipRow.put(AudienceDatabase.AudienceMembershipTable.AUDIENCE_ID, id);
+                    membershipRow.put(AudienceDatabase.AudienceMembershipTable.MEMBERSHIP_ACTION, memberships.getJSONObject(j).getString(Constants.Audience.API_AUDIENCE_ACTION));
+                    membershipRow.put(AudienceDatabase.AudienceMembershipTable.TIMESTAMP, memberships.getJSONObject(j).optLong(Constants.Audience.API_AUDIENCE_MEMBERSHIP_TIMESTAMP, 0));
+                    db.insert(AudienceDatabase.AudienceMembershipTable.TABLE_NAME, null, membershipRow);
+                }
+            }
+            success = true;
+        }catch (Exception e){
+            Log.d(Constants.LOG_TAG, "Failed to insert audiences: " + e.getMessage());
+        }finally {
+            if (success){
+                db.setTransactionSuccessful();
+            }
+            db.endTransaction();
+            db.close();
+        }
+
+    }
+
+    class AudienceTask extends AsyncTask<Void, Void, AudienceMembership> {
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        String endpointId;
+        AudienceListener listener;
+        long timeout;
+        AudienceTask(long timeout, String endpointId, AudienceListener listener){
+            this.timeout = timeout;
+            this.endpointId = endpointId;
+            this.listener = listener;
+        }
+        @Override
+        protected AudienceMembership doInBackground(Void... params) {
+            FutureTask<Boolean> futureTask1 = new FutureTask<Boolean>(new Callable<Boolean>() {
+                @Override
+                public Boolean call() throws Exception {
+                    JSONObject audiences = mApiClient.fetchAudiences();
+                    if (audiences != null){
+                        insertAudiences(audiences);
+                    }
+                    return audiences != null;
+                }
+            });
+
+            executor.execute(futureTask1);
+            try {
+                futureTask1.get(timeout, TimeUnit.MILLISECONDS);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+            } catch (TimeoutException e) {
+                e.printStackTrace();
+            }
+            executor.shutdown();
+            return queryAudiences(endpointId);
+        }
+
+        @Override
+        protected void onPostExecute(AudienceMembership audienceMembership) {
+            listener.onAudiencesRetrieved(audienceMembership);
+        }
     }
 }

@@ -63,6 +63,7 @@ class MParticleApiClient {
     private final URL batchUploadUrl;
     private final String userAgent;
     private final SharedPreferences sharedPreferences;
+    private final String apiKey;
     private SSLSocketFactory socketFactory;
     private static final long THROTTLE = 1000*60*60*2;
 
@@ -70,7 +71,7 @@ class MParticleApiClient {
         this.configManager = configManager;
         this.apiSecret = secret;
         this.sharedPreferences = sharedPreferences;
-
+        this.apiKey = key;
         this.configUrl = new URL(SECURE_SERVICE_SCHEME, SECURE_SERVICE_HOST, SERVICE_VERSION_2 + "/" + key + "/config");
         this.batchUploadUrl = new URL(SECURE_SERVICE_SCHEME, SECURE_SERVICE_HOST, SERVICE_VERSION_1 + "/" + key + "/events");
         this.userAgent = "mParticle Android SDK/" + Constants.MPARTICLE_VERSION;
@@ -95,6 +96,27 @@ class MParticleApiClient {
         } catch (JSONException e) {
             Log.w(Constants.LOG_TAG, "Config request failed to process response message JSON");
         }
+    }
+
+    private URL getAudienceUrl() throws MalformedURLException {
+        return new URL(SECURE_SERVICE_SCHEME, SECURE_SERVICE_HOST, SERVICE_VERSION_1 + "/" + apiKey + "/audience?mpID=" + configManager.getMpid());
+    }
+
+    JSONObject fetchAudiences()  {
+
+        JSONObject response = null;
+        try {
+            Log.d(Constants.LOG_TAG, "Starting Audience Network request");
+            HttpURLConnection connection = (HttpURLConnection) getAudienceUrl().openConnection();
+            connection.setRequestProperty("Accept-Encoding", "gzip");
+            connection.setRequestProperty(HTTP.USER_AGENT, userAgent);
+
+            addMessageSignature(connection, null);
+            response =  new ApiResponse(connection).getJsonResponse();
+        }catch (Exception e){
+            Log.d(Constants.LOG_TAG, "Audience call failed with exception: " + e.getMessage());
+        }
+        return response;
     }
 
     private void checkThrottleTime() throws MPThrottleException {
@@ -186,7 +208,7 @@ class MParticleApiClient {
                 // handle a problem on some devices where TZ offset is appended
                 dateHeader = dateHeader.substring(0, DateUtils.PATTERN_RFC1123.length());
             }
-            String path = request.getURL().getPath();
+            String path = request.getURL().getFile();
             StringBuilder hashString = new StringBuilder()
                                             .append(method)
                                             .append("\n")
