@@ -51,7 +51,7 @@ android {
         release {
             buildConfigField "boolean", "ECHO", "false"
             buildConfigField "boolean", "UNITY", "false"
-            runProguard true 
+            runProguard true
             proguardFile 'proguard.txt'
         }
 
@@ -92,7 +92,7 @@ uploadArchives {
                 pom.groupId = 'com.mparticle'
                 pom.packaging = 'jar'
             }else{
-                repository(url: "file://localhost/Users/sdozor/maven/repo/")
+                repository url: 'file://' + new File(System.getProperty('user.home'), '.m2/repository').absolutePath
                 pom.version = sdkversion
                 pom.artifactId = 'android-sdk'
                 pom.groupId = 'com.mparticle'

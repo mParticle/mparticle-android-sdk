@@ -45,9 +45,9 @@ class MParticleApiClient {
 
     public static final String HEADER_SIGNATURE = "x-mp-signature";
     public static final String SECURE_SERVICE_SCHEME = "https";
-    public static final String SECURE_SERVICE_HOST = "nativesdks.mparticle.com";
+    //public static final String SECURE_SERVICE_HOST = "nativesdks.mparticle.com";
     //public static final String SECURE_SERVICE_HOST = "54.236.165.123";
-    //public static final String SECURE_SERVICE_HOST = "api-qa.mparticle.com";
+    public static final String SECURE_SERVICE_HOST = "api-qa.mparticle.com";
     //public static final String SECURE_SERVICE_HOST = "10.0.16.21";
     public static final String SERVICE_VERSION_1 = "/v1";
     public static final String SERVICE_VERSION_2 = "/v2";
