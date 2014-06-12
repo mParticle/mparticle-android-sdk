@@ -176,8 +176,8 @@ import java.util.TimeZone;
                 // android combines MNC+MCC into network operator
                 String networkOperator = telephonyManager.getNetworkOperator();
                 if (6 == networkOperator.length()) {
-                    attributes.put(MessageKey.MOBILE_NETWORK_CODE, networkOperator.substring(0, 3));
-                    attributes.put(MessageKey.MOBILE_COUNTRY_CODE, networkOperator.substring(3));
+                    attributes.put(MessageKey.MOBILE_COUNTRY_CODE, networkOperator.substring(0, 3));
+                    attributes.put(MessageKey.MOBILE_NETWORK_CODE, networkOperator.substring(3));
                 }
 
             }
