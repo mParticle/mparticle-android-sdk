@@ -19,6 +19,7 @@ import android.util.Log;
 
 import com.mparticle.Constants.MessageKey;
 import com.mparticle.Constants.PrefKeys;
+import com.mparticle.audience.AudienceListener;
 
 import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.json.JSONArray;

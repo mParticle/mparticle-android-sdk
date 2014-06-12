@@ -1,6 +1,4 @@
-package com.mparticle;
-
-import com.mparticle.audience.AudienceMembership;
+package com.mparticle.audience;
 
 /**
  * Use this callback interface to retrieve the current user's audience membership.

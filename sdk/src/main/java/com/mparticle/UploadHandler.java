@@ -21,6 +21,7 @@ import com.mparticle.MParticleDatabase.MessageTable;
 import com.mparticle.MParticleDatabase.SessionTable;
 import com.mparticle.MParticleDatabase.UploadTable;
 import com.mparticle.audience.Audience;
+import com.mparticle.audience.AudienceListener;
 import com.mparticle.audience.AudienceMembership;
 
 import org.json.JSONArray;
