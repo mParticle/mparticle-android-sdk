@@ -35,15 +35,26 @@ android {
     }
 
     buildTypes {
+
+        Properties properties = new Properties()
+        properties.load(project.rootProject.file('local.properties').newDataInputStream())
+        String url = properties.getProperty('mp.url')
+        if (url == null){
+            url = "\"nativesdks.mparticle.com\""
+        }
+
+
         debug {
             buildConfigField "boolean", "ECHO", "true"
             buildConfigField "boolean", "UNITY", "false"
+            buildConfigField "String", "MP_URL", url
             runProguard false
         }
 
         unity {
             buildConfigField "boolean", "ECHO", "false"
             buildConfigField "boolean", "UNITY", "true"
+            buildConfigField "String", "MP_URL", url
             runProguard true
             proguardFile 'proguard.txt'
         }
@@ -51,6 +62,7 @@ android {
         release {
             buildConfigField "boolean", "ECHO", "false"
             buildConfigField "boolean", "UNITY", "false"
+            buildConfigField "String", "MP_URL", url
             runProguard true
             proguardFile 'proguard.txt'
         }
