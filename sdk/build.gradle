@@ -36,13 +36,14 @@ android {
 
     buildTypes {
 
-        Properties properties = new Properties()
-        properties.load(project.rootProject.file('local.properties').newDataInputStream())
-        String url = properties.getProperty('mp.url')
-        if (url == null){
-            url = "\"nativesdks.mparticle.com\""
-        }
+        String url = "\"nativesdks.mparticle.com\"";
+        try {
+            Properties properties = new Properties()
+            properties.load(project.rootProject.file('local.properties').newDataInputStream())
+            url = properties.getProperty('mp.url')
+        }catch (Exception e){
 
+        }
 
         debug {
             buildConfigField "boolean", "ECHO", "true"
