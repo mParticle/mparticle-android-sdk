@@ -191,11 +191,10 @@ public class MParticle {
      * @param context     Required reference to a Context object
      * @param apiKey      The API key to use for authentication with mParticle
      * @param secret      The API secret to use for authentication with mParticle
-     * @param sandboxMode Enable/disable sandbox mode
      */
 
-    public static void start(Context context, String apiKey, String secret, Boolean sandboxMode) {
-        start(context, apiKey, secret, sandboxMode, InstallType.AutoDetect);
+    public static void start(Context context, String apiKey, String secret) {
+        start(context, apiKey, secret, false, InstallType.AutoDetect);
     }
 
     /**
@@ -630,33 +629,72 @@ public class MParticle {
         logEvent(eventName == null ? "Increase LTV" : eventName, EventType.Transaction, contextInfo);
     }
 
+
+    /**
+     * Log an E-Commerce related event associated to a product
+     *
+     * @see com.mparticle.MPProduct
+     * @see com.mparticle.MPProduct.EVENT
+     *
+     * @param event
+     * @param product
+     */
+    public void logProductEvent(final MPProduct.EVENT event, MPProduct product) {
+        if (product == null) {
+            throw new IllegalArgumentException("MPProduct is required.");
+        }
+        if (product.isEmpty()) {
+            throw new IllegalArgumentException("MPProduct data was null, please check that the MPProduct was built properly.");
+        }
+        if (event == null){
+            throw new IllegalArgumentException("MPProduct.EVENT is required.");
+        }
+        boolean purchaseEvent = false;
+        switch (event) {
+            case VIEW:
+                product.put(Constants.MethodName.METHOD_NAME, Constants.MethodName.LOG_ECOMMERCE_VIEW);
+                break;
+            case REMOVE_FROM_CART:
+                product.put(Constants.MethodName.METHOD_NAME, Constants.MethodName.LOG_ECOMMERCE_REMOVE_FROM_CART);
+                break;
+            case ADD_TO_CART:
+                product.put(Constants.MethodName.METHOD_NAME, Constants.MethodName.LOG_ECOMMERCE_ADD_TO_CART);
+                break;
+            case ADD_TO_WISHLIST:
+                product.put(Constants.MethodName.METHOD_NAME, Constants.MethodName.LOG_ECOMMERCE_ADD_TO_WISHLIST);
+                break;
+            case REMOVE_FROM_WISHLIST:
+                product.put(Constants.MethodName.METHOD_NAME, Constants.MethodName.LOG_ECOMMERCE_REMOVE_FROM_WISHLIST);
+                break;
+            case PURCHASE:
+                purchaseEvent = true;
+                product.put(Constants.MethodName.METHOD_NAME, Constants.MethodName.LOG_ECOMMERCE);
+                break;
+        }
+
+        ensureActiveSession();
+        if (checkEventLimit()) {
+            JSONObject transactionJson = enforceAttributeConstraints(product);
+            mMessageManager.logEvent(mSessionID, mSessionStartTime, mLastEventTime, event.toString(), EventType.Transaction, transactionJson, 0);
+            if (mDebugMode) {
+                debugLog("Logged product event with data: " + product.toString());
+            }
+
+        }
+        if (purchaseEvent) {
+            embeddedKitManager.logTransaction(product);
+        }
+
+    }
+
     /**
      * Logs an e-commerce transaction event
      *
      * @param product (required not null)
-     * @see MPProduct.Builder
-     * @see MPProduct.Builder
+     * @see com.mparticle.MPProduct
      */
     public void logTransaction(MPProduct product) {
-            if (product == null) {
-                throw new IllegalArgumentException("transaction is required for logTransaction");
-            }
-
-            if (product.isEmpty()) {
-                throw new IllegalArgumentException("Transaction data was null, please check that the transaction was built properly.");
-            }
-
-            ensureActiveSession();
-            if (checkEventLimit()) {
-                JSONObject transactionJson = enforceAttributeConstraints(product);
-                mMessageManager.logEvent(mSessionID, mSessionStartTime, mLastEventTime, "Ecommerce", EventType.Transaction, transactionJson, 0);
-                if (mDebugMode) {
-                    debugLog("Logged transaction with data: " + product.toString());
-                }
-
-            }
-            embeddedKitManager.logTransaction(product);
-        
+        logProductEvent(MPProduct.EVENT.PURCHASE, product);
     }
 
     void logScreen(String screenName, Map<String, String> eventData, Boolean started) {

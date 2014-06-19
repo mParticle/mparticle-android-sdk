@@ -29,6 +29,13 @@ package com.mparticle;
         public static final String METHOD_NAME = "$MethodName";
         public static final String LOG_LTV = "LogLTVIncrease";
         public static final String LOG_ECOMMERCE = "LogEcommerceTransaction";
+
+        public static final String LOG_ECOMMERCE_VIEW = "$ProductView";
+        public static final String LOG_ECOMMERCE_ADD_TO_CART = "$AddedToCart";
+        public static final String LOG_ECOMMERCE_REMOVE_FROM_CART = "$RemovedFromCart";
+        public static final String LOG_ECOMMERCE_ADD_TO_WISHLIST = "$AddedToWishlist";
+        public static final String LOG_ECOMMERCE_REMOVE_FROM_WISHLIST = "$RemovedFromWishlist";
+
     }
 
     interface MessageType {
