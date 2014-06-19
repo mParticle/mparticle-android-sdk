@@ -321,7 +321,7 @@ public class MParticle {
     }
 
     /**
-     * Retrieve an instance of the MParticle class. {@link #start(android.content.Context)} or {@link #start(android.content.Context, String, String, Boolean)} must
+     * Retrieve an instance of the MParticle class. {@link #start(android.content.Context)} or {@link #start(android.content.Context, String, String)} must
      * be called prior to this or a {@code java.lang.IllegalStateException} will be thrown.
      *
      * @return An instance of the mParticle SDK configured with your API key
@@ -441,7 +441,7 @@ public class MParticle {
     }
 
     /**
-     * Explicitly terminate the current user session.
+     * Explicitly terminate the current user's session.
      */
     public void endSession() {
         if (mConfigManager.getSendOoEvents()) {
@@ -461,9 +461,6 @@ public class MParticle {
         mSessionID = "";
     }
 
-    /**
-     * Ensures a session is active.
-     */
     private void ensureActiveSession() {
         //    checkSessionTimeout();
         mLastEventTime = System.currentTimeMillis();
