@@ -6,7 +6,7 @@ import java.util.HashMap;
  *
  * Use this class to represent a product that a user could purchase or otherwise interact with.
  *
- *  @see com.mparticle.MParticle#logProductEvent(com.mparticle.MPProduct.EVENT, MPProduct)
+ *  @see com.mparticle.MParticle#logProductEvent(com.mparticle.MPProduct.Event, MPProduct)
  *  @see com.mparticle.MParticle#logTransaction(MPProduct)
  *
  */
@@ -16,9 +16,9 @@ public class MPProduct extends HashMap<String, String> {
     /**
      *  Use this enumeration to conveniently log common product interactions.
      *
-     *  @see com.mparticle.MParticle#logProductEvent(com.mparticle.MPProduct.EVENT, MPProduct)
+     *  @see com.mparticle.MParticle#logProductEvent(com.mparticle.MPProduct.Event, MPProduct)
      */
-    public static enum EVENT {
+    public static enum Event {
         VIEW("Product Viewed"),
         ADD_TO_WISHLIST("Added to Wishlist"),
         REMOVE_FROM_WISHLIST("Removed from Wishlist"),
@@ -27,7 +27,7 @@ public class MPProduct extends HashMap<String, String> {
         PURCHASE("Product Purchased");
 
         private final String description;
-        EVENT(String description){
+        Event(String description){
             this.description = description;
         }
 

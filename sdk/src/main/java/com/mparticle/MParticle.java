@@ -631,12 +631,12 @@ public class MParticle {
      * Log an E-Commerce related event associated to a product
      *
      * @see com.mparticle.MPProduct
-     * @see com.mparticle.MPProduct.EVENT
+     * @see com.mparticle.MPProduct.Event
      *
      * @param event
      * @param product
      */
-    public void logProductEvent(final MPProduct.EVENT event, MPProduct product) {
+    public void logProductEvent(final MPProduct.Event event, MPProduct product) {
         if (product == null) {
             throw new IllegalArgumentException("MPProduct is required.");
         }
@@ -691,7 +691,7 @@ public class MParticle {
      * @see com.mparticle.MPProduct
      */
     public void logTransaction(MPProduct product) {
-        logProductEvent(MPProduct.EVENT.PURCHASE, product);
+        logProductEvent(MPProduct.Event.PURCHASE, product);
     }
 
     void logScreen(String screenName, Map<String, String> eventData, Boolean started) {

@@ -49,7 +49,9 @@ android {
         try {
             Properties properties = new Properties()
             properties.load(project.rootProject.file('local.properties').newDataInputStream())
-            url = properties.getProperty('mp.url')
+            if (properties.stringPropertyNames().contains('mp.url')) {
+                url = properties.getProperty('mp.url')
+            }
         }catch (Exception e){
 
         }
