@@ -44,15 +44,15 @@ import javax.net.ssl.TrustManagerFactory;
  */
 class MParticleApiClient {
 
-    public static final String HEADER_SIGNATURE = "x-mp-signature";
-    public static final String SECURE_SERVICE_SCHEME = "https";
-    public static final String SECURE_SERVICE_HOST = BuildConfig.MP_URL;
+    private static final String HEADER_SIGNATURE = "x-mp-signature";
+    private static final String SECURE_SERVICE_SCHEME = "https";
+    private static final String SECURE_SERVICE_HOST = BuildConfig.MP_URL;
 
-    public static final String SERVICE_VERSION_1 = "/v1";
-    public static final String SERVICE_VERSION_2 = "/v2";
-    public static final String COOKIES = "ck";
-    public static final String CONSUMER_INFO = "ci";
-    public static final String MPID = "mpid";
+    private static final String SERVICE_VERSION_1 = "/v1";
+    private static final String SERVICE_VERSION_2 = "/v2";
+    private static final String COOKIES = "ck";
+    private static final String CONSUMER_INFO = "ci";
+    private static final String MPID = "mpid";
     // From Stack Overflow:
     // http://stackoverflow.com/questions/923863/converting-a-string-to-hexadecimal-in-java
     private static final char[] HEX_CHARS = "0123456789abcdef".toCharArray();

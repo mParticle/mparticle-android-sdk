@@ -14,7 +14,7 @@ import java.util.HashMap;
 public class MPProduct extends HashMap<String, String> {
 
     /**
-     *  Use this enumeration to conveniently log common product interactions
+     *  Use this enumeration to conveniently log common product interactions.
      *
      *  @see com.mparticle.MParticle#logProductEvent(com.mparticle.MPProduct.EVENT, MPProduct)
      */

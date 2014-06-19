@@ -19,6 +19,12 @@ configurations {
     deployerJars
 }
 
+def getDate() {
+    def date = new Date()
+    def formattedDate = date.format('yyyyMMdd')
+    return Integer.parseInt(formattedDate)
+}
+
 android {
     compileSdkVersion 19
     buildToolsVersion "19.1"
@@ -28,11 +34,14 @@ android {
         minSdkVersion 9
         targetSdkVersion 19
         versionName sdkversion
+        versionCode getDate()
         testPackageName "com.mparticle.test"
         testInstrumentationRunner "android.test.InstrumentationTestRunner"
         testHandleProfiling true
         testFunctionalTest true
     }
+
+
 
     buildTypes {
 
@@ -82,15 +91,19 @@ android.libraryVariants.all { variant ->
     task "javadoc$name"(type: Javadoc) {
         description = "Generates javadoc for build $name"
         destinationDir = new File('docs', variant.baseName)
-        source = 'src/main/java'
+        source = files(variant.javaCompile.source)
         classpath = files(android.getBootClasspath(), variant.javaCompile.classpath)
         title = null
+        ext.androidJar =
+                "${android.sdkDirectory}/platforms/${android.compileSdkVersion}/android.jar"
         List<File> pathList = new ArrayList<File>();
         pathList.add(new File("docs/doclava-1.0.6.jar"))
         options.addStringOption('title', 'Android SDK')
         options.addStringOption('templatedir', 'docs/customization')
         options.docletpath = pathList
         options.doclet = "com.google.doclava.Doclava"
+
+        exclude '**/R.java'
     }
 }
 
