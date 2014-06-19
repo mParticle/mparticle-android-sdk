@@ -4,13 +4,39 @@ import java.util.HashMap;
 
 /**
  *
- * Class used to log an e-commerce transaction.
+ * Use this class to represent a product that a user could purchase or otherwise interact with.
  *
+ *  @see com.mparticle.MParticle#logProductEvent(com.mparticle.MPProduct.EVENT, MPProduct)
  *  @see com.mparticle.MParticle#logTransaction(MPProduct)
  *
  */
     
 public class MPProduct extends HashMap<String, String> {
+
+    /**
+     *  Use this enumeration to conveniently log common product interactions
+     *
+     *  @see com.mparticle.MParticle#logProductEvent(com.mparticle.MPProduct.EVENT, MPProduct)
+     */
+    public static enum EVENT {
+        VIEW("Product Viewed"),
+        ADD_TO_WISHLIST("Added to Wishlist"),
+        REMOVE_FROM_WISHLIST("Removed from Wishlist"),
+        ADD_TO_CART("Added to Cart"),
+        REMOVE_FROM_CART("Removed from Cart"),
+        PURCHASE("Product Purchased");
+
+        private final String description;
+        EVENT(String description){
+            this.description = description;
+        }
+
+        @Override
+        public String toString() {
+            return description;
+        }
+    }
+
     static final String NAME = "ProductName";
     static final String SKU = "ProductSKU";
     static final String AFFILIATION = "TransactionAffiliation";
@@ -36,7 +62,7 @@ public class MPProduct extends HashMap<String, String> {
             throw new IllegalStateException("productSku is required for a transaction");
         }
 
-        put(Constants.MethodName.METHOD_NAME, Constants.MethodName.LOG_ECOMMERCE);
+
         put(NAME, builder.productName);
         put(SKU, builder.productSku);
 
