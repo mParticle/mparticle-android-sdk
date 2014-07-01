@@ -19,7 +19,7 @@ import android.util.Log;
 
 import com.mparticle.Constants.MessageKey;
 import com.mparticle.Constants.PrefKeys;
-import com.mparticle.audience.AudienceListener;
+import com.mparticle.segmentation.SegmentListener;
 
 import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.json.JSONArray;
@@ -1535,9 +1535,9 @@ public class MParticle {
         mConfigManager.setPushNotificationTitle(resId);
     }
 
-    public void getUserAudiences(long timeout, String endpointId, AudienceListener listener){
+    public void getUserSegments(long timeout, String endpointId, SegmentListener listener){
         if (mMessageManager != null && mMessageManager.mUploadHandler != null){
-            mMessageManager.mUploadHandler.fetchAudiences(timeout, endpointId, listener);
+            mMessageManager.mUploadHandler.fetchSegments(timeout, endpointId, listener);
         }
     }
 

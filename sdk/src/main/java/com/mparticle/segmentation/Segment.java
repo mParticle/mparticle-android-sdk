@@ -1,4 +1,4 @@
-package com.mparticle.audience;
+package com.mparticle.segmentation;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -6,14 +6,14 @@ import org.json.JSONException;
 import java.util.Arrays;
 
 /**
- * This class represents a single Audience of which one or more users may be a member.
+ * This class represents a single Segment of which one or more users may be a member.
  */
-public class Audience {
+public class Segment {
     int id;
     String name;
     String[] endpoints;
 
-    public Audience(int id, String name, String endpointBlob) {
+    public Segment(int id, String name, String endpointBlob) {
         this.id = id;
         this.name = name;
         try {
@@ -29,7 +29,7 @@ public class Audience {
     }
 
     /**
-     * Retrieve the unique audience ID.
+     * Retrieve the unique segment ID.
      *
      * @return an integer ID
      */
@@ -38,7 +38,7 @@ public class Audience {
     }
 
     /**
-     * Retrieve the display name for this Audience, configured via the mParticle web console.
+     * Retrieve the display name for this Segment, configured via the mParticle web console.
      *
      * @return
      */
@@ -47,7 +47,7 @@ public class Audience {
     }
 
     /**
-     * Retrieve the endpoint IDs to which this Audience is configured to forward
+     * Retrieve the endpoint IDs to which this Segment is configured to forward
      *
      * @return an array of IDs
      */
@@ -60,13 +60,13 @@ public class Audience {
     }
 
     /**
-     * Retrieve a readable summary of this Audience
+     * Retrieve a readable summary of this Segment
      *
-     * @return Audience summary
+     * @return Segment summary
      */
     @Override
     public String toString() {
-        return "Audience ID:  " + id + ", " +
+        return "Segment ID:  " + id + ", " +
                "Name: " + name + ", " +
                "Endpoints: " + ((endpoints != null && endpoints.length > 0) ? Arrays.toString(endpoints) : "None specified");
     }

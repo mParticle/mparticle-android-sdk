@@ -20,9 +20,9 @@ import com.mparticle.MParticleDatabase.CommandTable;
 import com.mparticle.MParticleDatabase.MessageTable;
 import com.mparticle.MParticleDatabase.SessionTable;
 import com.mparticle.MParticleDatabase.UploadTable;
-import com.mparticle.audience.Audience;
-import com.mparticle.audience.AudienceListener;
-import com.mparticle.audience.AudienceMembership;
+import com.mparticle.segmentation.Segment;
+import com.mparticle.segmentation.SegmentListener;
+import com.mparticle.segmentation.SegmentMembership;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -515,11 +515,11 @@ import java.util.concurrent.TimeoutException;
         db.insert(CommandTable.TABLE_NAME, null, contentValues);
     }
 
-    public void fetchAudiences(long timeout, final String endpointId, final AudienceListener listener) {
+    public void fetchSegments(long timeout, final String endpointId, final SegmentListener listener) {
         new AudienceTask(timeout, endpointId, listener).execute();
     }
 
-    private AudienceMembership queryAudiences(String endpointId) {
+    private SegmentMembership queryAudiences(String endpointId) {
         SQLiteDatabase db = audienceDB.getReadableDatabase();
 
         String selection = null;
@@ -537,16 +537,16 @@ import java.util.concurrent.TimeoutException;
                                         null,
                                         null,
                                         AUDIENCE_QUERY);
-        HashMap<Integer, Audience> audiences = new HashMap<Integer, Audience>();
+        HashMap<Integer, Segment> audiences = new HashMap<Integer, Segment>();
 
 
         while (audienceCursor.moveToNext()){
             int id = audienceCursor.getInt(audienceCursor.getColumnIndex(AudienceDatabase.AudienceTable.AUDIENCE_ID));
 
-            Audience audience = new Audience(id,
+            Segment segment = new Segment(id,
                                             audienceCursor.getString(audienceCursor.getColumnIndex(AudienceDatabase.AudienceTable.NAME)),
                                             audienceCursor.getString(audienceCursor.getColumnIndex(AudienceDatabase.AudienceTable.ENDPOINTS)));
-            audiences.put(id, audience);
+            audiences.put(id, segment);
         }
         audienceCursor.close();
 
@@ -565,7 +565,7 @@ import java.util.concurrent.TimeoutException;
                                     null);
 
 
-        ArrayList<Audience> finalAudiences = new ArrayList<Audience>();
+        ArrayList<Segment> finalSegments = new ArrayList<Segment>();
         int currentId = -1;
         while (membershipCursor.moveToNext()){
             int id = membershipCursor.getInt(1);
@@ -573,14 +573,14 @@ import java.util.concurrent.TimeoutException;
                 currentId = id;
                 String action = membershipCursor.getString(2);
                 if (action.equals(Constants.Audience.ACTION_ADD)){
-                    finalAudiences.add(audiences.get(currentId));
+                    finalSegments.add(audiences.get(currentId));
                 }
             }
         }
         membershipCursor.close();
 
         db.close();
-        return new AudienceMembership(finalAudiences);
+        return new SegmentMembership(finalSegments);
     }
 
     private final static String AUDIENCE_QUERY = AudienceDatabase.AudienceTable.AUDIENCE_ID + " desc";
@@ -633,18 +633,18 @@ import java.util.concurrent.TimeoutException;
 
     }
 
-    class AudienceTask extends AsyncTask<Void, Void, AudienceMembership> {
+    class AudienceTask extends AsyncTask<Void, Void, SegmentMembership> {
         ExecutorService executor = Executors.newSingleThreadExecutor();
         String endpointId;
-        AudienceListener listener;
+        SegmentListener listener;
         long timeout;
-        AudienceTask(long timeout, String endpointId, AudienceListener listener){
+        AudienceTask(long timeout, String endpointId, SegmentListener listener){
             this.timeout = timeout;
             this.endpointId = endpointId;
             this.listener = listener;
         }
         @Override
-        protected AudienceMembership doInBackground(Void... params) {
+        protected SegmentMembership doInBackground(Void... params) {
             FutureTask<Boolean> futureTask1 = new FutureTask<Boolean>(new Callable<Boolean>() {
                 @Override
                 public Boolean call() throws Exception {
@@ -671,8 +671,8 @@ import java.util.concurrent.TimeoutException;
         }
 
         @Override
-        protected void onPostExecute(AudienceMembership audienceMembership) {
-            listener.onAudiencesRetrieved(audienceMembership);
+        protected void onPostExecute(SegmentMembership segmentMembership) {
+            listener.onSegmentsRetrieved(segmentMembership);
         }
     }
 }
