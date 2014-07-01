@@ -54,7 +54,7 @@ import java.util.concurrent.TimeoutException;
     private final Context mContext;
     private final String mApiKey;
     private final String mSecret;
-    private final AudienceDatabase audienceDB;
+    private final SegmentDatabase audienceDB;
     private MParticleApiClient mApiClient;
 
     private ConfigManager mConfigManager;
@@ -95,7 +95,7 @@ import java.util.concurrent.TimeoutException;
         mSecret = mConfigManager.getApiSecret();
 
         db = database;
-        audienceDB = new AudienceDatabase(mContext);
+        audienceDB = new SegmentDatabase(mContext);
         mPreferences = mContext.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
 
         try {
@@ -516,7 +516,7 @@ import java.util.concurrent.TimeoutException;
     }
 
     public void fetchSegments(long timeout, final String endpointId, final SegmentListener listener) {
-        new AudienceTask(timeout, endpointId, listener).execute();
+        new SegmentTask(timeout, endpointId, listener).execute();
     }
 
     private SegmentMembership queryAudiences(String endpointId) {
@@ -525,12 +525,12 @@ import java.util.concurrent.TimeoutException;
         String selection = null;
         String[] args = null;
         if (endpointId != null && endpointId.length() > 0){
-            selection = AudienceDatabase.AudienceTable.ENDPOINTS + " like ?";
+            selection = SegmentDatabase.SegmentTable.ENDPOINTS + " like ?";
             args = new String[1];
             args[0] = "%\"" + endpointId + "\"%";
         }
 
-        Cursor audienceCursor = db.query(AudienceDatabase.AudienceTable.TABLE_NAME,
+        Cursor audienceCursor = db.query(SegmentDatabase.SegmentTable.TABLE_NAME,
                                         null,
                                         selection,
                                         args,
@@ -541,11 +541,11 @@ import java.util.concurrent.TimeoutException;
 
 
         while (audienceCursor.moveToNext()){
-            int id = audienceCursor.getInt(audienceCursor.getColumnIndex(AudienceDatabase.AudienceTable.AUDIENCE_ID));
+            int id = audienceCursor.getInt(audienceCursor.getColumnIndex(SegmentDatabase.SegmentTable.SEGMENT_ID));
 
             Segment segment = new Segment(id,
-                                            audienceCursor.getString(audienceCursor.getColumnIndex(AudienceDatabase.AudienceTable.NAME)),
-                                            audienceCursor.getString(audienceCursor.getColumnIndex(AudienceDatabase.AudienceTable.ENDPOINTS)));
+                                            audienceCursor.getString(audienceCursor.getColumnIndex(SegmentDatabase.SegmentTable.NAME)),
+                                            audienceCursor.getString(audienceCursor.getColumnIndex(SegmentDatabase.SegmentTable.ENDPOINTS)));
             audiences.put(id, segment);
         }
         audienceCursor.close();
@@ -553,7 +553,7 @@ import java.util.concurrent.TimeoutException;
 
         long currentTime = System.currentTimeMillis();
         Cursor membershipCursor = db.query(false,
-                                    AudienceDatabase.AudienceMembershipTable.TABLE_NAME,
+                                    SegmentDatabase.SegmentMembershipTable.TABLE_NAME,
                                     MEMBERSHIP_QUERY_COLUMNS,
                                     String.format(MEMBERSHIP_QUERY_SELECTION,
                                                     audiences.keySet().toString().replace("[", "(").replace("]", ")"),
@@ -583,15 +583,15 @@ import java.util.concurrent.TimeoutException;
         return new SegmentMembership(finalSegments);
     }
 
-    private final static String AUDIENCE_QUERY = AudienceDatabase.AudienceTable.AUDIENCE_ID + " desc";
-    private final static String MEMBERSHIP_QUERY_ORDER = AudienceDatabase.AudienceMembershipTable.AUDIENCE_ID + " desc, " + AudienceDatabase.AudienceMembershipTable.TIMESTAMP + " desc";
+    private final static String AUDIENCE_QUERY = SegmentDatabase.SegmentTable.SEGMENT_ID + " desc";
+    private final static String MEMBERSHIP_QUERY_ORDER = SegmentDatabase.SegmentMembershipTable.SEGMENT_ID + " desc, " + SegmentDatabase.SegmentMembershipTable.TIMESTAMP + " desc";
     private final static String[] MEMBERSHIP_QUERY_COLUMNS = new String[]
                                                                 {
-                                                                    AudienceDatabase.AudienceMembershipTable.ID,
-                                                                    AudienceDatabase.AudienceMembershipTable.AUDIENCE_ID,
-                                                                    AudienceDatabase.AudienceMembershipTable.MEMBERSHIP_ACTION
+                                                                    SegmentDatabase.SegmentMembershipTable.ID,
+                                                                    SegmentDatabase.SegmentMembershipTable.SEGMENT_ID,
+                                                                    SegmentDatabase.SegmentMembershipTable.MEMBERSHIP_ACTION
                                                                 };
-    private final static String MEMBERSHIP_QUERY_SELECTION = "audience_id in %s and " + AudienceDatabase.AudienceMembershipTable.TIMESTAMP + " < %d";
+    private final static String MEMBERSHIP_QUERY_SELECTION = "audience_id in %s and " + SegmentDatabase.SegmentMembershipTable.TIMESTAMP + " < %d";
 
     private void insertAudiences(JSONObject audiences) throws JSONException {
         SQLiteDatabase db = audienceDB.getWritableDatabase();
@@ -599,25 +599,25 @@ import java.util.concurrent.TimeoutException;
         db.beginTransaction();
         boolean success = false;
         try {
-            db.delete(AudienceDatabase.AudienceMembershipTable.TABLE_NAME, null, null);
-            db.delete(AudienceDatabase.AudienceTable.TABLE_NAME, null, null);
+            db.delete(SegmentDatabase.SegmentMembershipTable.TABLE_NAME, null, null);
+            db.delete(SegmentDatabase.SegmentTable.TABLE_NAME, null, null);
             for (int i = 0; i < audienceList.length(); i++) {
                 ContentValues audienceRow = new ContentValues();
                 JSONObject audience = audienceList.getJSONObject(i);
                 int id = audience.getInt(Constants.Audience.API_AUDIENCE_ID);
                 String name = audience.getString(Constants.Audience.API_AUDIENCE_NAME);
                 String endPointIds = audience.getJSONArray(Constants.Audience.API_AUDIENCE_ENDPOINTS).toString();
-                audienceRow.put(AudienceDatabase.AudienceTable.AUDIENCE_ID, id);
-                audienceRow.put(AudienceDatabase.AudienceTable.NAME, name);
-                audienceRow.put(AudienceDatabase.AudienceTable.ENDPOINTS, endPointIds);
-                db.insert(AudienceDatabase.AudienceTable.TABLE_NAME, null, audienceRow);
+                audienceRow.put(SegmentDatabase.SegmentTable.SEGMENT_ID, id);
+                audienceRow.put(SegmentDatabase.SegmentTable.NAME, name);
+                audienceRow.put(SegmentDatabase.SegmentTable.ENDPOINTS, endPointIds);
+                db.insert(SegmentDatabase.SegmentTable.TABLE_NAME, null, audienceRow);
                 JSONArray memberships = audience.getJSONArray(Constants.Audience.API_AUDIENCE_MEMBERSHIPS);
                 for (int j = 0; j < memberships.length(); j++) {
                     ContentValues membershipRow = new ContentValues();
-                    membershipRow.put(AudienceDatabase.AudienceMembershipTable.AUDIENCE_ID, id);
-                    membershipRow.put(AudienceDatabase.AudienceMembershipTable.MEMBERSHIP_ACTION, memberships.getJSONObject(j).getString(Constants.Audience.API_AUDIENCE_ACTION));
-                    membershipRow.put(AudienceDatabase.AudienceMembershipTable.TIMESTAMP, memberships.getJSONObject(j).optLong(Constants.Audience.API_AUDIENCE_MEMBERSHIP_TIMESTAMP, 0));
-                    db.insert(AudienceDatabase.AudienceMembershipTable.TABLE_NAME, null, membershipRow);
+                    membershipRow.put(SegmentDatabase.SegmentMembershipTable.SEGMENT_ID, id);
+                    membershipRow.put(SegmentDatabase.SegmentMembershipTable.MEMBERSHIP_ACTION, memberships.getJSONObject(j).getString(Constants.Audience.API_AUDIENCE_ACTION));
+                    membershipRow.put(SegmentDatabase.SegmentMembershipTable.TIMESTAMP, memberships.getJSONObject(j).optLong(Constants.Audience.API_AUDIENCE_MEMBERSHIP_TIMESTAMP, 0));
+                    db.insert(SegmentDatabase.SegmentMembershipTable.TABLE_NAME, null, membershipRow);
                 }
             }
             success = true;
@@ -633,12 +633,12 @@ import java.util.concurrent.TimeoutException;
 
     }
 
-    class AudienceTask extends AsyncTask<Void, Void, SegmentMembership> {
+    class SegmentTask extends AsyncTask<Void, Void, SegmentMembership> {
         ExecutorService executor = Executors.newSingleThreadExecutor();
         String endpointId;
         SegmentListener listener;
         long timeout;
-        AudienceTask(long timeout, String endpointId, SegmentListener listener){
+        SegmentTask(long timeout, String endpointId, SegmentListener listener){
             this.timeout = timeout;
             this.endpointId = endpointId;
             this.listener = listener;
