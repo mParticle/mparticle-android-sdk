@@ -526,7 +526,18 @@ public class MParticle {
      * @param eventType the type of the event to be tracked
      */
     public void logEvent(String eventName, EventType eventType) {
-        logEvent(eventName, eventType, null);
+        logEvent(eventName, eventType, null, 0, null);
+    }
+
+    /**
+     * Logs an event
+     *
+     * @param eventName the name of the event to be tracked (required not null)
+     * @param eventType the type of the event to be tracked
+     * @param category  the Google Analytics category with which to associate this event
+     */
+    public void logEvent(String eventName, EventType eventType, String category) {
+        logEvent(eventName, eventType, null, 0, category);
     }
 
     /**
@@ -554,6 +565,18 @@ public class MParticle {
     /**
      * Log an event with data attributes
      *
+     * @param eventName the name of the event to be tracked  (required not null)
+     * @param eventType the type of the event to be tracked
+     * @param eventInfo a Map of data attributes
+     * @param category  the Google Analytics category with which to associate this event
+     */
+    public void logEvent(String eventName, EventType eventType, Map<String, String> eventInfo, String category) {
+        logEvent(eventName, eventType, eventInfo, 0, category);
+    }
+
+    /**
+     * Log an event with data attributes
+     *
      * @param eventName   the name of the event to be tracked  (required not null)
      * @param eventType   the type of the event to be tracked
      * @param eventInfo   a Map of data attributes to associate with the event
@@ -570,7 +593,7 @@ public class MParticle {
      * @param eventType   the type of the event to be tracked
      * @param eventInfo   a Map of data attributes to associate with the event
      * @param eventLength the duration of the event in milliseconds
-     * @param category    the category with which to associate this event
+     * @param category    the Google Analytics category with which to associate this event
      */
     public void logEvent(String eventName, EventType eventType, Map<String, String> eventInfo, long eventLength, String category) {
         if (null == eventName) {
