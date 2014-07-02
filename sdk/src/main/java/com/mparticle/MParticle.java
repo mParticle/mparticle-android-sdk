@@ -16,10 +16,11 @@ import android.os.Message;
 import android.os.Process;
 import android.provider.Settings;
 import android.util.Log;
+import android.webkit.WebView;
 
 import com.mparticle.Constants.MessageKey;
 import com.mparticle.Constants.PrefKeys;
-import com.mparticle.audience.AudienceListener;
+import com.mparticle.segmentation.SegmentListener;
 
 import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.json.JSONArray;
@@ -526,7 +527,18 @@ public class MParticle {
      * @param eventType the type of the event to be tracked
      */
     public void logEvent(String eventName, EventType eventType) {
-        logEvent(eventName, eventType, null);
+        logEvent(eventName, eventType, null, 0, null);
+    }
+
+    /**
+     * Logs an event
+     *
+     * @param eventName the name of the event to be tracked (required not null)
+     * @param eventType the type of the event to be tracked
+     * @param category  the Google Analytics category with which to associate this event
+     */
+    public void logEvent(String eventName, EventType eventType, String category) {
+        logEvent(eventName, eventType, null, 0, category);
     }
 
     /**
@@ -554,6 +566,18 @@ public class MParticle {
     /**
      * Log an event with data attributes
      *
+     * @param eventName the name of the event to be tracked  (required not null)
+     * @param eventType the type of the event to be tracked
+     * @param eventInfo a Map of data attributes
+     * @param category  the Google Analytics category with which to associate this event
+     */
+    public void logEvent(String eventName, EventType eventType, Map<String, String> eventInfo, String category) {
+        logEvent(eventName, eventType, eventInfo, 0, category);
+    }
+
+    /**
+     * Log an event with data attributes
+     *
      * @param eventName   the name of the event to be tracked  (required not null)
      * @param eventType   the type of the event to be tracked
      * @param eventInfo   a Map of data attributes to associate with the event
@@ -570,7 +594,7 @@ public class MParticle {
      * @param eventType   the type of the event to be tracked
      * @param eventInfo   a Map of data attributes to associate with the event
      * @param eventLength the duration of the event in milliseconds
-     * @param category    the category with which to associate this event
+     * @param category    the Google Analytics category with which to associate this event
      */
     public void logEvent(String eventName, EventType eventType, Map<String, String> eventInfo, long eventLength, String category) {
         if (null == eventName) {
@@ -1535,9 +1559,23 @@ public class MParticle {
         mConfigManager.setPushNotificationTitle(resId);
     }
 
-    public void getUserAudiences(long timeout, String endpointId, AudienceListener listener){
+    public void getUserSegments(long timeout, String endpointId, SegmentListener listener){
         if (mMessageManager != null && mMessageManager.mUploadHandler != null){
-            mMessageManager.mUploadHandler.fetchAudiences(timeout, endpointId, listener);
+            mMessageManager.mUploadHandler.fetchSegments(timeout, endpointId, listener);
+        }
+    }
+
+    /**
+     * Instrument a WebView so that the mParticle Javascript SDK may be used within the given website or web app
+     *
+     * @param webView
+     */
+    public void registerWebView(WebView webView){
+        if (webView != null){
+            webView.addJavascriptInterface(
+                    new MParticleJSInterface(),
+                    MParticleJSInterface.INTERFACE_NAME
+            );
         }
     }
 

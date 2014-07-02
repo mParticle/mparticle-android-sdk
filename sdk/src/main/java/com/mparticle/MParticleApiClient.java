@@ -105,7 +105,7 @@ class MParticleApiClient {
 
         JSONObject response = null;
         try {
-            Log.d(Constants.LOG_TAG, "Starting Audience Network request");
+            Log.d(Constants.LOG_TAG, "Starting Segment Network request");
             HttpURLConnection connection = (HttpURLConnection) getAudienceUrl().openConnection();
             connection.setRequestProperty("Accept-Encoding", "gzip");
             connection.setRequestProperty(HTTP.USER_AGENT, userAgent);
@@ -114,14 +114,14 @@ class MParticleApiClient {
             ApiResponse apiResponse = new ApiResponse(connection);
             if (apiResponse.getResponseCode() == HttpURLConnection.HTTP_FORBIDDEN){
                 if (configManager.isDebug()) {
-                    Log.d(Constants.LOG_TAG, "Audience call forbidden: is Audience enabled for the current mParticle org?");
+                    Log.d(Constants.LOG_TAG, "Segment call forbidden: is Segment enabled for the current mParticle org?");
                 }
             }
             response =  apiResponse.getJsonResponse();
 
         }catch (Exception e){
             if (configManager.isDebug()) {
-                Log.d(Constants.LOG_TAG, "Audience call failed: " + e.getMessage());
+                Log.d(Constants.LOG_TAG, "Segment call failed: " + e.getMessage());
             }
         }
         return response;
