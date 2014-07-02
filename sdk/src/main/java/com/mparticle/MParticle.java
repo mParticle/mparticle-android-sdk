@@ -16,6 +16,7 @@ import android.os.Message;
 import android.os.Process;
 import android.provider.Settings;
 import android.util.Log;
+import android.webkit.WebView;
 
 import com.mparticle.Constants.MessageKey;
 import com.mparticle.Constants.PrefKeys;
@@ -1561,6 +1562,20 @@ public class MParticle {
     public void getUserSegments(long timeout, String endpointId, SegmentListener listener){
         if (mMessageManager != null && mMessageManager.mUploadHandler != null){
             mMessageManager.mUploadHandler.fetchSegments(timeout, endpointId, listener);
+        }
+    }
+
+    /**
+     * Instrument a WebView so that the mParticle Javascript SDK may be used within the given website or web app
+     *
+     * @param webView
+     */
+    public void registerWebView(WebView webView){
+        if (webView != null){
+            webView.addJavascriptInterface(
+                    new MParticleJSInterface(),
+                    MParticleJSInterface.INTERFACE_NAME
+            );
         }
     }
 

@@ -1,6 +1,5 @@
 package com.mparticle;
 
-import android.content.Context;
 import android.util.Log;
 import android.webkit.JavascriptInterface;
 
@@ -17,11 +16,9 @@ import java.util.Map;
  * Javascript interface to be used for {@code Webview} analytics.
  *
  */
-public class MParticleJSInterface {
+class MParticleJSInterface {
     private static final String TAG = Constants.LOG_TAG;
-    private Context mContext;
-    private MParticle mApiInstance;
-    public static final String INTERFACE_NAME = "mParticleAndroid";
+    static final String INTERFACE_NAME = "mParticleAndroid";
 
     //the following keys are sent from the JS library as a part of each event
     private static final String JS_KEY_EVENT_NAME = "EventName";
@@ -39,9 +36,8 @@ public class MParticleJSInterface {
 
     private static final String errorMsg = "Error processing JSON data from Webview: %s";
 
-    public MParticleJSInterface(Context c, MParticle apiInstance) {
-        mContext = c.getApplicationContext();
-        mApiInstance = apiInstance;
+    MParticleJSInterface() {
+
     }
 
     @JavascriptInterface
@@ -56,20 +52,20 @@ public class MParticleJSInterface {
             int messageType = event.getInt(JS_KEY_EVENT_DATATYPE);
             switch (messageType){
                 case JS_MSG_TYPE_PE:
-                    mApiInstance.logEvent(name,
+                    MParticle.getInstance().logEvent(name,
                             eventType,
                             eventAttributes);
                     break;
                 case JS_MSG_TYPE_PV:
-                    mApiInstance.logScreen(name,
+                    MParticle.getInstance().logScreen(name,
                             eventAttributes,
                             true);
                     break;
                 case JS_MSG_TYPE_OO:
-                    mApiInstance.setOptOut(event.optBoolean(JS_KEY_OPTOUT));
+                    MParticle.getInstance().setOptOut(event.optBoolean(JS_KEY_OPTOUT));
                     break;
                 case JS_MSG_TYPE_CR:
-                    mApiInstance.logError(name, eventAttributes);
+                    MParticle.getInstance().logError(name, eventAttributes);
                     break;
                 case JS_MSG_TYPE_SE:
                 case JS_MSG_TYPE_SS:
@@ -87,7 +83,7 @@ public class MParticleJSInterface {
     public void setUserTag(String json){
         try{
             JSONObject attribute = new JSONObject(json);
-            mApiInstance.setUserTag(attribute.getString("key"));
+            MParticle.getInstance().setUserTag(attribute.getString("key"));
         }catch (JSONException jse){
             Log.w(TAG, String.format(errorMsg, jse.getMessage()));
         }
@@ -97,7 +93,7 @@ public class MParticleJSInterface {
     public void removeUserTag(String json){
         try{
             JSONObject attribute = new JSONObject(json);
-            mApiInstance.removeUserTag(attribute.getString("key"));
+            MParticle.getInstance().removeUserTag(attribute.getString("key"));
         }catch (JSONException jse){
             Log.w(TAG, String.format(errorMsg, jse.getMessage()));
         }
@@ -107,7 +103,7 @@ public class MParticleJSInterface {
     public void setUserAttribute(String json){
         try {
             JSONObject attribute = new JSONObject(json);
-            mApiInstance.setUserAttribute(attribute.getString("key"), attribute.getString("value"));
+            MParticle.getInstance().setUserAttribute(attribute.getString("key"), attribute.getString("value"));
         } catch (JSONException jse) {
             Log.w(TAG, String.format(errorMsg, jse.getMessage()));
         }
@@ -117,7 +113,7 @@ public class MParticleJSInterface {
     public void removeUserAttribute(String json){
         try{
             JSONObject attribute = new JSONObject(json);
-            mApiInstance.removeUserAttribute(attribute.getString("key"));
+            MParticle.getInstance().removeUserAttribute(attribute.getString("key"));
         }catch (JSONException jse){
             Log.w(TAG, String.format(errorMsg, jse.getMessage()));
         }
@@ -127,7 +123,7 @@ public class MParticleJSInterface {
     public void setSessionAttribute(String json){
         try {
             JSONObject attribute = new JSONObject(json);
-            mApiInstance.setSessionAttribute(attribute.getString("key"), attribute.getString("value"));
+            MParticle.getInstance().setSessionAttribute(attribute.getString("key"), attribute.getString("value"));
         } catch (JSONException jse) {
             Log.w(TAG, String.format(errorMsg, jse.getMessage()));
         }
@@ -137,7 +133,7 @@ public class MParticleJSInterface {
     public void setUserIdentity(String json){
         try {
             JSONObject attribute = new JSONObject(json);
-            mApiInstance.setUserIdentity(attribute.getString("Identity"), convertIdentityType(attribute.getInt("Type")));
+            MParticle.getInstance().setUserIdentity(attribute.getString("Identity"), convertIdentityType(attribute.getInt("Type")));
         } catch (JSONException jse) {
             Log.w(TAG, String.format(errorMsg, jse.getMessage()));
         }
@@ -147,7 +143,7 @@ public class MParticleJSInterface {
     public void removeUserIdentity(String json){
         try{
             JSONObject attribute = new JSONObject(json);
-            mApiInstance.removeUserIdentity(attribute.getString("key"));
+            MParticle.getInstance().removeUserIdentity(attribute.getString("key"));
         }catch (JSONException jse){
             Log.w(TAG, String.format(errorMsg, jse.getMessage()));
         }
