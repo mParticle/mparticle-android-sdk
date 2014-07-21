@@ -433,10 +433,12 @@ import java.util.concurrent.TimeoutException;
             uploadMessage.put(MessageKey.USER_ATTRIBUTES, new JSONObject(userAttrs));
         }
 
-        String deletedAttr = mPreferences.getString(PrefKeys.DELETED_USER_ATTRS + mApiKey, null);
-        if (null != deletedAttr) {
-            uploadMessage.put(MessageKey.DELETED_USER_ATTRIBUTES, new JSONArray(userAttrs));
-            mPreferences.edit().remove(PrefKeys.DELETED_USER_ATTRS + mApiKey).commit();
+        if (history) {
+            String deletedAttr = mPreferences.getString(PrefKeys.DELETED_USER_ATTRS + mApiKey, null);
+            if (null != deletedAttr) {
+                uploadMessage.put(MessageKey.DELETED_USER_ATTRIBUTES, new JSONArray(userAttrs));
+                mPreferences.edit().remove(PrefKeys.DELETED_USER_ATTRS + mApiKey).commit();
+            }
         }
 
         String userIds = mPreferences.getString(PrefKeys.USER_IDENTITIES + mApiKey, null);
