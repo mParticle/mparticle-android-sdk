@@ -1124,8 +1124,22 @@ public class MParticle {
         if (mUserAttributes.has(key) || mUserAttributes.has(findCaseInsensitiveKey(mUserAttributes, key))) {
             mUserAttributes.remove(key);
             sPreferences.edit().putString(PrefKeys.USER_ATTRS + mApiKey, mUserAttributes.toString()).commit();
+            attributeRemoved(key);
             embeddedKitManager.removeUserAttribute(key);
         }
+    }
+
+    private void attributeRemoved(String key){
+        String serializedJsonArray = sPreferences.getString(PrefKeys.USER_ATTRS + mApiKey, null);
+        JSONArray deletedAtributes;
+        try{
+            deletedAtributes = new JSONArray(serializedJsonArray);
+        }catch (Exception jse) {
+            deletedAtributes = new JSONArray();
+        }
+        deletedAtributes.put(key);
+
+        sPreferences.edit().putString(PrefKeys.USER_ATTRS + mApiKey, deletedAtributes.toString()).commit();
     }
 
     /**
@@ -1234,11 +1248,6 @@ public class MParticle {
                 Log.w(TAG, "Error removing identity: " + id);
             }
         }
-    }
-
-    /* package-private */void clearUserAttributes() {
-        mUserAttributes = new JSONObject();
-        sPreferences.edit().putString(PrefKeys.USER_ATTRS + mApiKey, mUserAttributes.toString()).commit();
     }
 
     /**

@@ -87,6 +87,7 @@ package com.mparticle;
         public static final String DEVICE_INFO = "di";
         public static final String USER_ATTRIBUTES = "ua";
         public static final String USER_IDENTITIES = "ui";
+        public static final String DELETED_USER_ATTRIBUTES = "uad";
         // user identity
         public static final String IDENTITY_NAME = "n";
         public static final String IDENTITY_VALUE = "i";
@@ -227,6 +228,7 @@ package com.mparticle;
         // app-key specific (append appKey to the key)
         public static final String OPTOUT = "mp::optout::";
         public static final String USER_ATTRS = "mp::user_attrs::";
+        public static final String DELETED_USER_ATTRS = "mp::deleted_user_attrs::";
         public static final String USER_IDENTITIES = "mp::user_ids::";
         public static final String FIRSTRUN = "mp::firstrun::";
         public static final String FIRSTINIT = "mp::firstinit";
