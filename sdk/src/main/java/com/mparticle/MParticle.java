@@ -75,50 +75,38 @@ import javax.net.ssl.HttpsURLConnection;
  * </ul>
  */
 public class MParticle {
-    private static final String TAG = Constants.LOG_TAG;
-    private static final HandlerThread sTimeoutHandlerThread = new HandlerThread("mParticleSessionTimeoutHandler",
-            Process.THREAD_PRIORITY_BACKGROUND);
-    private static final byte[] SALT = new byte[]{
-            -46, 65, 30, -128, -103, -57, 74, 10, 51, 88, -95, -45, -43, -117, -36, 99, -11, 32, -64,
-            89
-    };
-    static Bundle lastNotificationBundle;
-    static Boolean appRunning;
-    private static volatile MParticle instance;
-    private static SharedPreferences sPreferences;
-    final ConfigManager mConfigManager;
-    AppStateManager mAppStateManager;
-    /* package-private */ String mSessionID;
-    /* package-private */ long mSessionStartTime = 0;
-    private PushRegistrationListener registrationListener = new PushRegistrationListener() {
 
-        @Override
-        public void onRegistered(String regId) {
-            mMessageManager.setPushRegistrationId(mSessionID, mSessionStartTime, System.currentTimeMillis(), regId, true);
-        }
-
-        @Override
-        public void onCleared(String regId) {
-            mMessageManager.setPushRegistrationId(mSessionID, mSessionStartTime, System.currentTimeMillis(), null, true);
-        }
-    };
-    /* package-private */ long mLastEventTime = 0;
+    /* package-private */ static Bundle lastNotificationBundle;
+    /* package-private */ static Boolean appRunning;
+    /* package-private */ final ConfigManager mConfigManager;
+    /* package-private */ final AppStateManager mAppStateManager;
+    /* package-private */ final MeasuredRequestManager measuredRequestManager;
     /* package-private */ JSONArray mUserIdentities = new JSONArray();
     /* package-private */ JSONObject mUserAttributes = new JSONObject();
     /* package-private */ JSONObject mSessionAttributes;
-    /* package-private */ MeasuredRequestManager measuredRequestManager;
-    private MessageManager mMessageManager;
-    private Handler mTimeoutHandler;
+
+    /* package-private */ String mSessionID;
+    /* package-private */ long mSessionStartTime = 0;
+    /* package-private */ long mLastEventTime = 0;
+    private final MessageManager mMessageManager;
+    private static volatile MParticle instance;
+    private static SharedPreferences sPreferences;
+    private final Handler mTimeoutHandler;
     private MParticleLocationListener mLocationListener;
     private ExceptionHandler mExHandler;
     private Context mAppContext;
     private String mApiKey;
     private Boolean mDebugMode = false;
-    private EmbeddedKitManager embeddedKitManager;
-    //private int mSessionTimeout = 30 * 60 * 1000;
+    private final EmbeddedKitManager embeddedKitManager;
     private int mEventCount = 0;
     private String mLaunchUri;
     private LicenseCheckerCallback clientLicensingCallback;
+    private static final HandlerThread sTimeoutHandlerThread = new HandlerThread("mParticleSessionTimeoutHandler",
+            Process.THREAD_PRIORITY_BACKGROUND);
+    private static final byte[] LICENSE_CHECK_SALT = new byte[]{
+            -46, 65, 30, -128, -103, -57, 74, 10, 51, 88, -95, -45, -43, -117, -36, 99, -11, 32, -64,
+            89
+    };
 
 
     /* package-private */MParticle(Context context, MessageManager messageManager, ConfigManager configManager, EmbeddedKitManager embeddedKitManager) {
@@ -302,7 +290,7 @@ public class MParticle {
                     if (context instanceof Activity) {
                         instance.mLaunchUri = ((Activity) context).getIntent().getDataString();
                         if (instance.mLaunchUri != null) {
-                            Log.d(TAG, "launchuri: " + instance.mLaunchUri);
+                            Log.d(Constants.LOG_TAG, "launchuri: " + instance.mLaunchUri);
                         }
                     }
 
@@ -346,15 +334,15 @@ public class MParticle {
         }
         try {
             if (Constants.LIMIT_ATTR_COUNT == attributes.length() && !attributes.has(key)) {
-                Log.w(TAG, "Attribute count exceeds limit. Discarding attribute: " + key);
+                Log.w(Constants.LOG_TAG, "Attribute count exceeds limit. Discarding attribute: " + key);
                 return false;
             }
             if (null != value && value.toString().length() > Constants.LIMIT_ATTR_VALUE) {
-                Log.w(TAG, "Attribute value length exceeds limit. Discarding attribute: " + key);
+                Log.w(Constants.LOG_TAG, "Attribute value length exceeds limit. Discarding attribute: " + key);
                 return false;
             }
             if (key.length() > Constants.LIMIT_ATTR_NAME) {
-                Log.w(TAG, "Attribute name length exceeds limit. Discarding attribute: " + key);
+                Log.w(Constants.LOG_TAG, "Attribute name length exceeds limit. Discarding attribute: " + key);
                 return false;
             }
             if (value == null) {
@@ -365,7 +353,7 @@ public class MParticle {
             }
             attributes.put(key, value);
         } catch (JSONException e) {
-            Log.w(TAG, "JSON error processing attributes. Discarding attribute: " + key);
+            Log.w(Constants.LOG_TAG, "JSON error processing attributes. Discarding attribute: " + key);
             return false;
         }
         return true;
@@ -598,12 +586,12 @@ public class MParticle {
      */
     public void logEvent(String eventName, EventType eventType, Map<String, String> eventInfo, long eventLength, String category) {
         if (null == eventName) {
-            Log.w(TAG, "eventName is required for logEvent");
+            Log.w(Constants.LOG_TAG, "eventName is required for logEvent");
             return;
         }
 
         if (eventName.length() > Constants.LIMIT_NAME) {
-            Log.w(TAG, "The event name was too long. Discarding event.");
+            Log.w(Constants.LOG_TAG, "The event name was too long. Discarding event.");
             return;
         }
         ensureActiveSession();
@@ -720,11 +708,11 @@ public class MParticle {
 
     void logScreen(String screenName, Map<String, String> eventData, Boolean started) {
         if (null == screenName) {
-            Log.w(TAG, "screenName is required for logScreen");
+            Log.w(Constants.LOG_TAG, "screenName is required for logScreen");
             return;
         }
         if (screenName.length() > Constants.LIMIT_NAME) {
-            Log.w(TAG, "The screen name was too long. Discarding event.");
+            Log.w(Constants.LOG_TAG, "The screen name was too long. Discarding event.");
             return;
         }
         ensureActiveSession();
@@ -772,11 +760,11 @@ public class MParticle {
     public void leaveBreadcrumb(String breadcrumb) {
         if (mConfigManager.getSendOoEvents()) {
             if (null == breadcrumb) {
-                Log.w(TAG, "breadcrumb is required for leaveBreadcrumb");
+                Log.w(Constants.LOG_TAG, "breadcrumb is required for leaveBreadcrumb");
                 return;
             }
             if (breadcrumb.length() > Constants.LIMIT_NAME) {
-                Log.w(TAG, "The breadcrumb name was too long. Discarding event.");
+                Log.w(Constants.LOG_TAG, "The breadcrumb name was too long. Discarding event.");
                 return;
             }
             ensureActiveSession();
@@ -805,7 +793,7 @@ public class MParticle {
     public void logError(String message, Map<String, String> eventData) {
         if (mConfigManager.getSendOoEvents()) {
             if (null == message) {
-                Log.w(TAG, "message is required for logErrorEvent");
+                Log.w(Constants.LOG_TAG, "message is required for logErrorEvent");
                 return;
             }
             ensureActiveSession();
@@ -1035,7 +1023,7 @@ public class MParticle {
             try {
                 LocationManager locationManager = (LocationManager) mAppContext.getSystemService(Context.LOCATION_SERVICE);
                 if (!locationManager.isProviderEnabled(provider)) {
-                    Log.w(TAG, "That requested location provider is not available");
+                    Log.w(Constants.LOG_TAG, "That requested location provider is not available");
                     return;
                 }
 
@@ -1047,7 +1035,7 @@ public class MParticle {
                 }
                 locationManager.requestLocationUpdates(provider, minTime, minDistance, mLocationListener);
             } catch (SecurityException e) {
-                Log.w(TAG, "The app must require the appropriate permissions to track location using this provider");
+                Log.w(Constants.LOG_TAG, "The app must require the appropriate permissions to track location using this provider");
             }
         }
     }
@@ -1175,7 +1163,7 @@ public class MParticle {
                 debugLog("Setting user identity: " + id);
 
             if (null != id && id.length() > Constants.LIMIT_ATTR_VALUE) {
-                Log.w(TAG, "Id value length exceeds limit. Discarding id: " + id);
+                Log.w(Constants.LOG_TAG, "Id value length exceeds limit. Discarding id: " + id);
                 return;
             }
 
@@ -1205,7 +1193,7 @@ public class MParticle {
                 }
 
             } catch (JSONException e) {
-                Log.w(TAG, "Error setting identity: " + id);
+                Log.w(Constants.LOG_TAG, "Error setting identity: " + id);
                 return;
             }
 
@@ -1245,7 +1233,7 @@ public class MParticle {
 
                 }
             } catch (JSONException jse) {
-                Log.w(TAG, "Error removing identity: " + id);
+                Log.w(Constants.LOG_TAG, "Error removing identity: " + id);
             }
         }
     }
@@ -1409,11 +1397,13 @@ public class MParticle {
     }
 
     void clearPushNotificationId() {
-        PushRegistrationHelper.clearPushRegistrationId(mAppContext, registrationListener);
+        PushRegistrationHelper.clearPushRegistrationId(mAppContext);
+        mMessageManager.setPushRegistrationId(mSessionID, mSessionStartTime, System.currentTimeMillis(), null, true);
     }
 
     void setPushRegistrationId(String registrationId) {
-        PushRegistrationHelper.storeRegistrationId(mAppContext, registrationId, registrationListener);
+        PushRegistrationHelper.storeRegistrationId(mAppContext, registrationId);
+        mMessageManager.setPushRegistrationId(mSessionID, mSessionStartTime, System.currentTimeMillis(), registrationId, true);
     }
 
     /**
@@ -1427,7 +1417,7 @@ public class MParticle {
             mEventCount++;
             return true;
         } else {
-            Log.w(TAG, "The event limit has been exceeded for this session.");
+            Log.w(Constants.LOG_TAG, "The event limit has been exceeded for this session.");
             return false;
         }
     }
@@ -1460,7 +1450,7 @@ public class MParticle {
 
         LicenseChecker checker = new LicenseChecker(
                 mAppContext, new ServerManagedPolicy(mAppContext,
-                new AESObfuscator(SALT, mAppContext.getPackageName(), deviceId)),
+                new AESObfuscator(LICENSE_CHECK_SALT, mAppContext.getPackageName(), deviceId)),
                 mConfigManager.getLicenseKey()
         );
         checker.checkAccess(licenseCheckerCallback);
@@ -1482,16 +1472,16 @@ public class MParticle {
         }
 
         if (licensingCallback == null) {
-            Log.w(TAG, "No licensing callback specified, using MParticle default.");
+            Log.w(Constants.LOG_TAG, "No licensing callback specified, using MParticle default.");
         }
 
         clientLicensingCallback = licensingCallback;
 
         if (policy == null) {
-            Log.w(TAG, "No policy specified, using default ServerManagedPolicy");
+            Log.w(Constants.LOG_TAG, "No policy specified, using default ServerManagedPolicy");
             String deviceId = Settings.Secure.getString(mAppContext.getContentResolver(), Settings.Secure.ANDROID_ID);
             policy = new ServerManagedPolicy(mAppContext,
-                    new AESObfuscator(SALT, mAppContext.getPackageName(), deviceId));
+                    new AESObfuscator(LICENSE_CHECK_SALT, mAppContext.getPackageName(), deviceId));
         }
 
         MPLicenseCheckerCallback licenseCheckerCallback = new MPLicenseCheckerCallback();
@@ -1502,9 +1492,9 @@ public class MParticle {
 
     private void debugLog(String message) {
         if (null != mSessionID) {
-            Log.d(TAG, mApiKey + ": " + mSessionID + ": " + message);
+            Log.d(Constants.LOG_TAG, mApiKey + ": " + mSessionID + ": " + message);
         } else {
-            Log.d(TAG, mApiKey + ": " + message);
+            Log.d(Constants.LOG_TAG, mApiKey + ": " + message);
         }
     }
 
@@ -1771,11 +1761,12 @@ public class MParticle {
 
         public void applicationError(int errorCode) {
             if (errorCode == LicenseCheckerCallback.ERROR_MISSING_PERMISSION) {
-                Log.e(TAG, "License checking enabled but app is missing permission: \"com.android.vending.CHECK_LICENSE\"");
+                Log.e(Constants.LOG_TAG, "License checking enabled but app is missing permission: \"com.android.vending.CHECK_LICENSE\"");
             }
             if (clientLicensingCallback != null) {
                 clientLicensingCallback.applicationError(errorCode);
             }
         }
     }
+
 }
