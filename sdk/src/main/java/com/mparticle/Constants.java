@@ -10,10 +10,7 @@ package com.mparticle;
     public static final int EVENT_LIMIT = 1000;
     // delay (millis) before processing uploads to allow app to get started
     public static final long INITIAL_UPLOAD_DELAY = 5 * 1000; // 30 seconds
-    // interval (millis) between uploads if not specified
-    public static final long DEFAULT_UPLOAD_INTERVAL = 10 * 60 * 1000; // 10 minutes
-    // internal (millis) between uploads when in debug mode
-    public static final int DEBUG_UPLOAD_INTERVAL = 3 * 1000; // 3 seconds
+
     // preferences persistence
     public static final String PREFS_FILE = "mParticlePrefs";
 
@@ -21,9 +18,6 @@ package com.mparticle;
     public static final int LIMIT_ATTR_NAME = 255;
     public static final int LIMIT_ATTR_VALUE = 255;
     public static final int LIMIT_NAME = 255;
-
-    public static final int DB_CLEANUP_EXPIRATION = 3 * 24 * 60 * 60 * 1000; // 3 days old
-    public static final long DB_CLEANUP_INTERVAL = 1 * 24 * 60 * 60 * 1000; // 1 day
 
     interface MethodName {
         public static final String METHOD_NAME = "$MethodName";
@@ -54,6 +48,7 @@ package com.mparticle;
         public static final String PUSH_RECEIVED = "pm";
         public static final String BREADCRUMB = "bc";
         public static final String NETWORK_PERFORMNACE = "npe";
+        public static final String PROFILE = "pro";
     }
 
     interface MessageKey {
@@ -278,12 +273,6 @@ package com.mparticle;
         static final int UPLOADED = 3;
     }
 
-    // these keys are expected by the MPService for push notifications
-    interface GCMNotificationKeys {
-        public static final String TITLE = "mp::notification::title";
-        public static final String TEXT = "mp::notification::text";
-    }
-
     interface StateTransitionType {
         public static final String STATE_TRANS_INIT = "app_init";
         public static final String STATE_TRANS_EXIT = "app_exit";
@@ -300,6 +289,11 @@ package com.mparticle;
         public static final String API_AUDIENCE_MEMBERSHIPS = "c";
         public static final String API_AUDIENCE_ACTION = "a";
         public static final String API_AUDIENCE_MEMBERSHIP_TIMESTAMP = "ct";
+    }
+
+    interface ProfileActions {
+        public static final String LOGOUT = "logout";
+        public static final String KEY = "t";
     }
 
 }

@@ -537,6 +537,19 @@ import java.util.UUID;
 
     }
 
+    public void logProfileAction(String action, String mSessionID, long mSessionStartTime) {
+        try {
+            JSONObject message = createMessage(MessageType.PROFILE, mSessionID, mSessionStartTime, System.currentTimeMillis(), null,
+                    null);
+
+            message.put(Constants.ProfileActions.KEY, action);
+
+            mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
+        } catch (JSONException e) {
+            Log.w(TAG, "Failed to create mParticle log event message");
+        }
+    }
+
     private class StatusBroadcastReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context appContext, Intent intent) {

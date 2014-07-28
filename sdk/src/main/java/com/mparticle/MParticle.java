@@ -1080,6 +1080,24 @@ public class MParticle {
     }
 
     /**
+     * Signal to the mParticle platform that the current user has logged out. As of 1.6.x of
+     * the SDK, this function is only used as a signaling mechanism to server providers
+     * that support an explicit logout. As of 1.6.x, after calling this method, all user attributes
+     * and identities will stay the same.
+     *
+     */
+    public void logout(){
+        if (mConfigManager.getSendOoEvents()) {
+            ensureActiveSession();
+            if (mDebugMode) {
+                debugLog("Logging out.");
+            }
+
+            mMessageManager.logProfileAction(Constants.ProfileActions.LOGOUT, mSessionID, mSessionStartTime);
+        }
+    }
+
+    /**
      * Set a single <i>user</i> attribute. The attribute will combined with any existing user attributes.
      *
      * @param key   the attribute key
