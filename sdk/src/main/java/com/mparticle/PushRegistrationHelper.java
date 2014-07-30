@@ -77,9 +77,8 @@ class PushRegistrationHelper {
      * {@code SharedPreferences}.
      *
      * @param regId   registration ID
-     * @param listener
      */
-    public static void storeRegistrationId(Context context, String regId, PushRegistrationListener listener) {
+    public static void storeRegistrationId(Context context, String regId) {
         int appVersion = getAppVersion(context);
         SharedPreferences preferences = context.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = preferences.edit();
@@ -87,7 +86,6 @@ class PushRegistrationHelper {
         editor.putInt(Constants.PrefKeys.PROPERTY_APP_VERSION, appVersion);
         editor.putInt(Constants.PrefKeys.PROPERTY_OS_VERSION, Build.VERSION.SDK_INT);
         editor.commit();
-        listener.onRegistered(regId);
     }
 
     /**
@@ -106,10 +104,8 @@ class PushRegistrationHelper {
      * Manually un-register the device token for receiving push notifications from mParticle
      * <p/>
      */
-    public static void clearPushRegistrationId(Context context, PushRegistrationListener listener) {
+    public static void clearPushRegistrationId(Context context) {
         SharedPreferences preferences = context.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
-        String regId = getRegistrationId(context);
         preferences.edit().remove(Constants.PrefKeys.PUSH_REGISTRATION_ID).commit();
-        listener.onCleared(regId);
     }
 }
