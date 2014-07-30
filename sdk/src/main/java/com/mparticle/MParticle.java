@@ -1345,11 +1345,34 @@ public class MParticle {
     }
 
     /**
+     * Force the SDK into either Production or Development mode. See {@link com.mparticle.MParticle.Environment}
+     * for implications of each mode. The SDK automatically determines which mode it should be in depending
+     * on the signing and the DEBUGGABLE flag of your application's AndroidManifest.xml, so this method should
+     * typically not be used.
      *
+     * This method can however be useful while you're testing a release-signed version of your application, and you have *not* set the
+     * debuggable flag in your AndroidManifest.xml. In this case, you can force the SDK into development mode to prevent sending
+     * your test usage/data as production data. It's crucial, however, that prior to submission to Google Play that you ensure
+     * you are no longer forcing development mode.
      *
      * @param environment
      */
     public void forceEnvironment(Environment environment){
+        if (environment != null) {
+            if (environment.equals(Environment.Development)) {
+                if (mConfigManager.isDebugEnvironment()){
+                    Log.w(Constants.LOG_TAG, "Forcing environment to DEVELOPMENT, but your app is already debuggable and hence in DEVELOPMENT mode - did you mean to call forceEnvironment(Environment.Production) instead?");
+                } else{
+                    Log.w(Constants.LOG_TAG, "Forcing environment to DEVELOPMENT on a production app! Be careful, be sure not to do this in an application that you submit to Google Play.");
+                }
+            }else{
+                if (mConfigManager.isDebugEnvironment()) {
+                    Log.w(Constants.LOG_TAG, "Forcing environment to PRODUCTION on a debuggable app. Be careful, you are now in PRODUCTION and any test event data will be mixed with live event data!");
+                } else {
+                    Log.w(Constants.LOG_TAG, "Forcing environment to PRODUCTION, but your app is already in PRODUCTION mode - did you mean to call forceEnvironment(Environment.Development) instead?");
+                }
+            }
+        }
         mConfigManager.setForceEnvironment(environment);
     }
 
@@ -1711,8 +1734,24 @@ public class MParticle {
 
     }
 
+    /**
+     * The Environment in which the SDK and hosting app are running. The SDK automatically detects the Environment based on the
+     * DEBUGGABLE flag of your application. The DEBUGGABLE flag of your application will be TRUE when signing with a debug
+     * certificate during development, or if you have explicitly set your application to debug within your AndroidManifest.xml.
+     *
+     * @see {@link #forceEnvironment(com.mparticle.MParticle.Environment)} to override this behavior.
+     *
+     */
     public enum Environment {
+        /**
+         * Development mode. In this mode, all data from the SDK will be treated as development data, and will be silo'd from your
+         * production data. Alos, the SDK will more aggressively upload data to the mParticle platform, to aide in a faster implementation.
+         */
         Development(1),
+        /**
+         * Production mode. In this mode, all data from the SDK will be treated as production data, and will be forwarded to all configured
+         * integrations for your application. The SDK will honor the configured upload interval.
+         */
         Production(2);
         private final int value;
         int getValue() { return value; }
