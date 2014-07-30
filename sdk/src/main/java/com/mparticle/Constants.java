@@ -62,7 +62,6 @@ package com.mparticle;
         public static final String ATTRIBUTES = "attrs";
         public static final String EVENT_TYPE = "et";
         public static final String NAME = "n";
-        public static final String DEBUG = "dbg";
         public static final String OPT_OUT_HEADER = "oo";
         public static final String PREVIOUS_SESSION_LENGTH = "psl";
         public static final String LTV = "ltv";

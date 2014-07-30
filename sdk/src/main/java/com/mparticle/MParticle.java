@@ -204,7 +204,7 @@ public class MParticle {
         if (context == null) {
             throw new IllegalArgumentException("mParticle failed to start: context is required.");
         }
-        MParticle.getInstance(context, null, null, false, installType);
+        MParticle.getInstance(context, null, null, installType);
     }
 
     /**
@@ -219,6 +219,8 @@ public class MParticle {
      * @param secret      The API secret to use for authentication with mParticle
      * @param sandboxMode Enable/disable sandbox mode
      * @param installType Specify whether this is a new install or an upgrade, or let mParticle detect
+     *
+     * @deprecated Sandbox mode is deprecated, this method will be removed in a future version of the SDK.
      *
      * @see com.mparticle.MParticle.InstallType
      */
@@ -236,7 +238,7 @@ public class MParticle {
         if (installType == null) {
             throw new IllegalArgumentException("mParticle failed to start: installType is required.");
         }
-        MParticle.getInstance(context, apiKey, secret, sandboxMode, installType);
+        MParticle.getInstance(context, apiKey, secret, installType);
     }
 
     /**
@@ -247,11 +249,10 @@ public class MParticle {
      * @param context     the Activity that is creating the instance
      * @param apiKey      the API key for your account
      * @param secret      the API secret for your account
-     * @param sandboxMode set the SDK in sandbox mode, xml configuration will override this value
      * @return An instance of the mParticle SDK configured with your API key
      *
      */
-    private static MParticle getInstance(Context context, String apiKey, String secret, Boolean sandboxMode, InstallType installType) {
+    private static MParticle getInstance(Context context, String apiKey, String secret, InstallType installType) {
         if (instance == null) {
             synchronized (MParticle.class) {
                 if (instance == null) {
@@ -269,7 +270,7 @@ public class MParticle {
                     }
 
                     EmbeddedKitManager embeddedKitManager1 = new EmbeddedKitManager(context);
-                    ConfigManager appConfigManager = new ConfigManager(context, apiKey, secret, sandboxMode, embeddedKitManager1);
+                    ConfigManager appConfigManager = new ConfigManager(context, apiKey, secret, embeddedKitManager1);
                     Context appContext = context.getApplicationContext();
 
                     Boolean firstRun = sPreferences.getBoolean(PrefKeys.FIRSTRUN + appConfigManager.getApiKey(), true);
@@ -319,7 +320,7 @@ public class MParticle {
         if (instance == null) {
             throw new IllegalStateException("Failed to get MParticle instance, getInstance() called prior to start().");
         }
-        return getInstance(null, null, null, false, null);
+        return getInstance(null, null, null, null);
     }
 
     /* package-private */
@@ -1292,20 +1293,28 @@ public class MParticle {
      * informational messages to LogCat. This should never be enabled
      * in a production application.
      *
+     * @deprecated Use {@link com.mparticle.MParticle.Environment} and {@link #forceEnvironment}. This method will
+     * be removed in a future SDK version.
+     *
      * @param debugMode
+     *
      */
     public void setDebugMode(Boolean debugMode) {
-        mConfigManager.setDebug(debugMode);
+        Log.w(Constants.LOG_TAG, "Deprecated method setDebugMode called - this API call is a no-op.");
     }
 
 
     /**
      * Get the current debug mode status
      *
+     * @deprecated Use {@link com.mparticle.MParticle.Environment} and {@link #forceEnvironment}. This method will
+     * be removed in a future SDK version.
+     *
      * @return If debug mode is enabled or disabled
      */
     public Boolean getDebugMode() {
-        return mConfigManager.isDebug();
+        Log.w(Constants.LOG_TAG, "Deprecated method getDebugMode called - this API call always returns false!");
+        return false;
     }
 
     /**
@@ -1313,21 +1322,36 @@ public class MParticle {
      * and will be highlighted as sandbox events in the mParticle web console. This should never be enabled
      * in a production application.
      *
+     * @deprecated Use {@link com.mparticle.MParticle.Environment} and {@link #forceEnvironment}. This method will
+     * be removed in a future SDK version.
+     *
      * @param sandboxMode
      */
     public void setSandboxMode(Boolean sandboxMode) {
-        mConfigManager.setSandboxMode(sandboxMode);
+        Log.w(Constants.LOG_TAG, "Deprecated method setSandboxMode called - this API call is a no-op.");
     }
 
     /**
      * Get the current sandbox mode status
      *
      * @return If sandbox mode is enabled or disabled
+     *
+     * @deprecated Use {@link com.mparticle.MParticle.Environment} and {@link #forceEnvironment}. This method will
+     * be removed in a future SDK version.
      */
     public Boolean getSandboxMode() {
-        return mConfigManager.getSandboxMode();
+        Log.w(Constants.LOG_TAG, "Deprecated method getSandboxMode called - this API call always returns FALSE");
+        return false;
     }
 
+    /**
+     *
+     *
+     * @param environment
+     */
+    public void forceEnvironment(Environment environment){
+        mConfigManager.setForceEnvironment(environment);
+    }
 
     /**
      * Set the upload interval period to control how frequently uploads occur.
@@ -1341,10 +1365,11 @@ public class MParticle {
     /**
      * Set the upload interval period to control how frequently uploads occur when in debug mode.
      *
-     * @param uploadInterval the number of seconds between uploads
+     * @deprecated Use {@link com.mparticle.MParticle.Environment} and {@link #forceEnvironment}. This method will
+     * be removed in a future SDK version.
      */
     public void setDebugUploadInterval(int uploadInterval) {
-        mConfigManager.setDebugUploadInterval(uploadInterval);
+        Log.w(Constants.LOG_TAG, "Deprecated method setDebugUploadInterval called - this API call is a no-op.");
     }
 
     /**
@@ -1684,6 +1709,16 @@ public class MParticle {
             return value;
         }
 
+    }
+
+    public enum Environment {
+        Development(1),
+        Production(2);
+        private final int value;
+
+        private Environment(int value){
+            this.value = value;
+        }
     }
 
     public interface Push {

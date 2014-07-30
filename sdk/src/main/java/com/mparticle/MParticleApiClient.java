@@ -19,6 +19,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
@@ -53,8 +54,7 @@ class MParticleApiClient {
     private static final String COOKIES = "ck";
     private static final String CONSUMER_INFO = "ci";
     private static final String MPID = "mpid";
-    // From Stack Overflow:
-    // http://stackoverflow.com/questions/923863/converting-a-string-to-hexadecimal-in-java
+
     private static final char[] HEX_CHARS = "0123456789abcdef".toCharArray();
     private final ConfigManager configManager;
     private final String apiSecret;
@@ -113,16 +113,12 @@ class MParticleApiClient {
             addMessageSignature(connection, null);
             ApiResponse apiResponse = new ApiResponse(connection);
             if (apiResponse.getResponseCode() == HttpURLConnection.HTTP_FORBIDDEN){
-                if (configManager.isDebug()) {
-                    Log.d(Constants.LOG_TAG, "Segment call forbidden: is Segment enabled for the current mParticle org?");
-                }
+                configManager.debugLog("Segment call forbidden: is Segment enabled for the current mParticle org?");
             }
             response =  apiResponse.getJsonResponse();
 
         }catch (Exception e){
-            if (configManager.isDebug()) {
-                Log.d(Constants.LOG_TAG, "Segment call failed: " + e.getMessage());
-            }
+            configManager.debugLog("Segment call failed: " + e.getMessage());
         }
         return response;
     }
@@ -146,7 +142,7 @@ class MParticleApiClient {
 
         addMessageSignature(connection, message);
 
-        if (configManager.isDebug()) {
+        if (configManager.isDevelopmentMode()) {
             logUpload(message);
         }
 
@@ -161,9 +157,8 @@ class MParticleApiClient {
     }
 
     ApiResponse sendCommand(String commandUrl, String method, String postData, String headers) throws IOException, JSONException {
-        if (configManager.isDebug()) {
-            Log.d(Constants.LOG_TAG, "Sending data to: " + commandUrl);
-        }
+        configManager.debugLog("Sending data to: " + commandUrl);
+
         URL url = new URL(commandUrl);
         HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
 
@@ -229,20 +224,20 @@ class MParticleApiClient {
             request.setRequestProperty(HTTP.DATE_HEADER, dateHeader);
             request.setRequestProperty(HEADER_SIGNATURE, hmacSha256Encode(apiSecret, hashString.toString()));
         } catch (InvalidKeyException e) {
-            Log.e(Constants.LOG_TAG, "Error signing message", e);
+            Log.e(Constants.LOG_TAG, "Error signing message.", e);
         } catch (NoSuchAlgorithmException e) {
-            Log.e(Constants.LOG_TAG, "Error signing message", e);
+            Log.e(Constants.LOG_TAG, "Error signing message.", e);
+        } catch (UnsupportedEncodingException e){
+            Log.e(Constants.LOG_TAG, "Error signing message.", e);
         }
     }
 
-    // From Stack Overflow:
-    // http://stackoverflow.com/questions/7124735/hmac-sha256-algorithm-for-signature-calculation
     private static String hmacSha256Encode(String key, String data) throws NoSuchAlgorithmException,
-            InvalidKeyException {
+            InvalidKeyException, UnsupportedEncodingException {
         Mac sha256_HMAC = Mac.getInstance("HmacSHA256");
-        SecretKeySpec secret_key = new SecretKeySpec(key.getBytes(), "HmacSHA256");
+        SecretKeySpec secret_key = new SecretKeySpec(key.getBytes("utf-8"), "HmacSHA256");
         sha256_HMAC.init(secret_key);
-        return asHex(sha256_HMAC.doFinal(data.getBytes()));
+        return asHex(sha256_HMAC.doFinal(data.getBytes("utf-8")));
     }
 
     private static String asHex(byte[] buf) {
@@ -387,8 +382,8 @@ class MParticleApiClient {
                 }
             }
             statusCode = connection.getResponseCode();
-            if (statusCode == HttpStatus.SC_BAD_REQUEST && configManager.isDebug()) {
-                Log.e(Constants.LOG_TAG, "Bad API request - is the correct API key and secret configured?");
+            if (statusCode == HttpStatus.SC_BAD_REQUEST) {
+                configManager.debugLog("Bad API request - is the correct API key and secret configured?");
             }
             if (statusCode == HttpStatus.SC_SERVICE_UNAVAILABLE){
                 setNextValidTime();

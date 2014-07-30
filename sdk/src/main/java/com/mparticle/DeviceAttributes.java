@@ -66,7 +66,7 @@ import java.util.TimeZone;
 
             attributes.put(MessageKey.INSTALL_REFERRER, preferences.getString(PrefKeys.INSTALL_REFERRER, null));
             attributes.put(MessageKey.BUILD_ID, MPUtility.getBuildUUID(appContext));
-            attributes.put(MessageKey.APP_DEBUG_SIGNING, MPUtility.isDebug(packageManager, packageName));
+            attributes.put(MessageKey.APP_DEBUG_SIGNING, ( 0 != ( appContext.getApplicationInfo().flags &= ApplicationInfo.FLAG_DEBUGGABLE ) ));
             attributes.put(MessageKey.APP_PIRATED, preferences.getBoolean(PrefKeys.PIRATED, false));
 
             attributes.put(MessageKey.MPARTICLE_INSTALL_TIME, preferences.getLong(PrefKeys.INSTALL_TIME, now));
@@ -196,32 +196,6 @@ import java.util.TimeZone;
                 }
 
             }
-
-            /*
-               Due to PII concerns, we are not currently sending this information.
-            if (PackageManager.PERMISSION_GRANTED == appContext
-                    .checkCallingOrSelfPermission(Manifest.permission.READ_PHONE_STATE)){
-                attributes.put(MessageKey.DEVICE_IMEI, telephonyManager.getDeviceId());
-            }else{
-                attributes.put(MessageKey.DEVICE_IMEI, UNKNOWN);
-            }
-
-            if (PackageManager.PERMISSION_GRANTED == appContext
-                    .checkCallingOrSelfPermission(Manifest.permission.ACCESS_WIFI_STATE)){
-                WifiManager wifiMan = (WifiManager) appContext.getSystemService(
-                        Context.WIFI_SERVICE);
-                WifiInfo wifiInf = wifiMan.getConnectionInfo();
-                attributes.put(MessageKey.DEVICE_MAC_WIFI, wifiInf.getMacAddress());
-            }else{
-                attributes.put(MessageKey.DEVICE_MAC_WIFI, UNKNOWN);
-            }
-
-            if (PackageManager.PERMISSION_GRANTED == appContext
-                    .checkCallingOrSelfPermission(Manifest.permission.BLUETOOTH)){
-                attributes.put(MessageKey.DEVICE_MAC_BLUETOOTH, BluetoothAdapter.getDefaultAdapter().getAddress());
-            }else{
-                attributes.put(MessageKey.DEVICE_MAC_BLUETOOTH, UNKNOWN);
-            }*/
         } catch (JSONException e) {
             // ignore JSON exceptions
         }

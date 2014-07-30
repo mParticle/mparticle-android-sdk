@@ -53,7 +53,6 @@ import java.util.concurrent.TimeoutException;
     private final SharedPreferences mPreferences;
     private final Context mContext;
     private final String mApiKey;
-    private final String mSecret;
     private final SegmentDatabase audienceDB;
     private MParticleApiClient mApiClient;
 
@@ -92,14 +91,13 @@ import java.util.concurrent.TimeoutException;
 
         mContext = context.getApplicationContext();
         mApiKey = mConfigManager.getApiKey();
-        mSecret = mConfigManager.getApiSecret();
 
         db = database;
         audienceDB = new SegmentDatabase(mContext);
         mPreferences = mContext.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
 
         try {
-            mApiClient = new MParticleApiClient(configManager, mApiKey, mSecret, mPreferences);
+            mApiClient = new MParticleApiClient(configManager, mApiKey, mConfigManager.getApiSecret(), mPreferences);
         } catch (MalformedURLException e) {
             //this should never happen - the URLs are created by constants.
         }
@@ -158,9 +156,8 @@ import java.util.concurrent.TimeoutException;
                 }
                 break;
             case UPLOAD_HISTORY:
-                if (mConfigManager.isDebug()) {
-                    Log.d(TAG, "Performing history upload for " + mApiKey);
-                }
+                mConfigManager.debugLog("Performing history upload.");
+
                 // if the uploads table is empty (no old uploads)
                 //  and the messages table has messages that are not from the current session,
                 //  or there is no current session
@@ -220,9 +217,8 @@ import java.util.concurrent.TimeoutException;
 
             if (readyMessagesCursor.getCount() > 0) {
                 mApiClient.fetchConfig();
-                if (mConfigManager.isDebug()) {
-                    Log.i(TAG, "Preparing " + readyMessagesCursor.getCount() + " events for upload");
-                }
+                mConfigManager.debugLog("Preparing " + readyMessagesCursor.getCount() + " events for upload");
+
                 if (history) {
                     String currentSessionId;
                     int sessionIndex = readyMessagesCursor.getColumnIndex(MessageTable.SESSION_ID);
@@ -333,9 +329,7 @@ import java.util.concurrent.TimeoutException;
                         // ignore problems parsing response commands
                     }
                 } else {
-                    if (mConfigManager.isDebug()) {
-                        Log.d(TAG, "Upload failed and will be retried.");
-                    }
+                    mConfigManager.debugLog("Upload failed and will be retried.");
                 }
             }
         } catch (MParticleApiClient.MPThrottleException e) {
@@ -378,8 +372,8 @@ import java.util.concurrent.TimeoutException;
                 } finally {
                     if (response != null && response.getResponseCode() > -1) {
                         dbDeleteCommand(id);
-                    } else if (mConfigManager.isDebug()) {
-                        Log.w(TAG, "Provider command processing failed and will be retried.");
+                    } else {
+                        mConfigManager.debugLog("Provider command processing failed and will be retried.");
                     }
                 }
             }
@@ -424,7 +418,6 @@ import java.util.concurrent.TimeoutException;
         }
 
         uploadMessage.put(MessageKey.DEVICE_INFO, getDeviceInfo());
-        uploadMessage.put(MessageKey.DEBUG, mConfigManager.getSandboxMode());
 
         uploadMessage.put(MessageKey.LTV, new BigDecimal(mPreferences.getString(PrefKeys.LTV, "0")));
 
