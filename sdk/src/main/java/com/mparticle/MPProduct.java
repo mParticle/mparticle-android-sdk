@@ -100,7 +100,7 @@ public class MPProduct extends HashMap<String, String> {
     }
 
     /**
-     * Class used to build an {@code MPTransaction} object.
+     * Class used to build an {@link com.mparticle.MPProduct} object.
      *
      * @see com.mparticle.MParticle#logTransaction(MPProduct)
      */
@@ -122,7 +122,7 @@ public class MPProduct extends HashMap<String, String> {
         /**
          * Starting point of the builder with two required parameters. The rest of the fields
          * of this class are optional. Once the desired fields have been set, use {@link #build()} to
-         * create the {@code MPTransaction} object.
+         * create the {@link com.mparticle.MPProduct} object.
          *
          * @param productName The name of the product that was purchased
          * @param productSku The Sku or internal label for the product that was purchased
@@ -232,10 +232,10 @@ public class MPProduct extends HashMap<String, String> {
         }
 
         /**
-         * The final step in creating an {@code MPTransaction} object, to be passed into {@link com.mparticle.MParticle#logTransaction(MPProduct)}.
+         * The final step in creating an {@link com.mparticle.MPProduct} object, to be passed into {@link com.mparticle.MParticle#logTransaction(MPProduct)}.
          * This method will perform validation on the fields and will throw an {@code IllegalStateException} if {@code productName} or {@code productCode} are null.
          *
-         * @return The {@code MPTransaction}
+         * @return The {@link com.mparticle.MPProduct}
          */
         public MPProduct build() {
             return new MPProduct(this);
