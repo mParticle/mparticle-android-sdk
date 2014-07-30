@@ -2,7 +2,7 @@ package com.mparticle;
 
 /* package-private */class Constants {
 
-    public final static String LOG_TAG = "mParticleAPI";
+    public final static String LOG_TAG = "mParticle SDK";
 
     public static final String MPARTICLE_VERSION = BuildConfig.VERSION_NAME;
 
