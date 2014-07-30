@@ -113,6 +113,7 @@ import java.util.concurrent.TimeoutException;
     private JSONObject getAppInfo(){
         if (appInfo == null){
             appInfo = DeviceAttributes.collectAppInfo(mContext);
+            appInfo.put(MessageKey.ENVIRONMENT, mConfigManager.isDevelopmentMode() ? 1 : 2);
         }
         return appInfo;
     }
@@ -418,6 +419,7 @@ import java.util.concurrent.TimeoutException;
         }
 
         uploadMessage.put(MessageKey.DEVICE_INFO, getDeviceInfo());
+        uploadMessage.put(MessageKey.SANDBOX, mConfigManager.isDevelopmentMode());
 
         uploadMessage.put(MessageKey.LTV, new BigDecimal(mPreferences.getString(PrefKeys.LTV, "0")));
 
