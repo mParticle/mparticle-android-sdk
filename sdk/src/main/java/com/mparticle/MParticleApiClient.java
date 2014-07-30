@@ -46,6 +46,7 @@ import javax.net.ssl.TrustManagerFactory;
 class MParticleApiClient {
 
     private static final String HEADER_SIGNATURE = "x-mp-signature";
+    private static final String HEADER_ENVIRONMENT = "x-mp-env";
     private static final String SECURE_SERVICE_SCHEME = "https";
     private static final String SECURE_SERVICE_HOST = BuildConfig.MP_URL;
 
@@ -81,6 +82,7 @@ class MParticleApiClient {
             checkThrottleTime();
             HttpURLConnection connection = (HttpURLConnection) configUrl.openConnection();
             connection.setRequestProperty("Accept-Encoding", "gzip");
+            connection.setRequestProperty(HEADER_ENVIRONMENT, configManager.isDevelopmentMode() ? "1" : "2");
             connection.setRequestProperty(HTTP.USER_AGENT, userAgent);
 
             addMessageSignature(connection, null);
