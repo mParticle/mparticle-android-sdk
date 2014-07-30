@@ -165,7 +165,7 @@ class ConfigManager {
     }
 
     public long getUploadInterval() {
-        if (isDevelopmentMode()) {
+        if (getEnvironment().equals(MParticle.Environment.Development)) {
             return DEVMODE_UPLOAD_INTERVAL_MILLISECONDS;
         } else {
             return 1000 * mLocalPrefs.uploadInterval;
@@ -179,9 +179,12 @@ class ConfigManager {
         return mIsDebugEnvironment;
     }
 
-    public boolean isDevelopmentMode() {
-        return MParticle.Environment.Development.equals(mLocalPrefs.forcedEnvironment) ||
-                    (isDebugEnvironment() && !MParticle.Environment.Production.equals(mLocalPrefs.forcedEnvironment));
+    public MParticle.Environment getEnvironment() {
+        if (mLocalPrefs.forcedEnvironment != null){
+            return mLocalPrefs.forcedEnvironment;
+        }else{
+            return isDebugEnvironment() ? MParticle.Environment.Development : MParticle.Environment.Production;
+        }
     }
 
     public void setUploadInterval(int uploadInterval) {
@@ -225,7 +228,7 @@ class ConfigManager {
     }
 
     void debugLog(String... message) {
-        if (isDevelopmentMode()) {
+        if (getEnvironment().equals(MParticle.Environment.Development)) {
             Log.d(Constants.LOG_TAG, message[0]);
         }
     }
@@ -352,7 +355,7 @@ class ConfigManager {
     }
 
     public void setForceEnvironment(MParticle.Environment environment) {
-
+        mLocalPrefs.forcedEnvironment = environment;
     }
 
     class AdtruthConfig {

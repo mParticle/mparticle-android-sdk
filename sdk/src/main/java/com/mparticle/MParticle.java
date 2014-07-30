@@ -1715,7 +1715,7 @@ public class MParticle {
         Development(1),
         Production(2);
         private final int value;
-
+        int getValue() { return value; }
         private Environment(int value){
             this.value = value;
         }

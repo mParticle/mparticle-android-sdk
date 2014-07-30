@@ -82,7 +82,7 @@ class MParticleApiClient {
             checkThrottleTime();
             HttpURLConnection connection = (HttpURLConnection) configUrl.openConnection();
             connection.setRequestProperty("Accept-Encoding", "gzip");
-            connection.setRequestProperty(HEADER_ENVIRONMENT, configManager.isDevelopmentMode() ? "1" : "2");
+            connection.setRequestProperty(HEADER_ENVIRONMENT, Integer.toString(configManager.getEnvironment().getValue()));
             connection.setRequestProperty(HTTP.USER_AGENT, userAgent);
 
             addMessageSignature(connection, null);
@@ -144,7 +144,7 @@ class MParticleApiClient {
 
         addMessageSignature(connection, message);
 
-        if (configManager.isDevelopmentMode()) {
+        if (configManager.getEnvironment().equals(MParticle.Environment.Development)) {
             logUpload(message);
         }
 
