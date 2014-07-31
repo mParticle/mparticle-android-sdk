@@ -109,6 +109,11 @@ class EmbeddedMAT extends EmbeddedProvider implements MPActivityCallbacks {
 
     @Override
     public void logScreen(String screenName, JSONObject eventAttributes) throws Exception {
+        if (screenName == null){
+            screenName = "Viewed";
+        }else{
+            screenName = "Viewed " + screenName;
+        }
         logEvent(MParticle.EventType.Navigation, screenName, eventAttributes);
     }
 
