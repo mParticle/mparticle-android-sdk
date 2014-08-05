@@ -28,6 +28,9 @@ public class EmbeddedKochava extends EmbeddedProvider implements MPActivityCallb
     private static final String RETRIEVE_ATT_DATA = "retrieveAttributionData";
     private static final String ENABLE_LOGGING = "enableLogging";
     private static final String CURRENCY = "currency";
+    private static final String SPACIAL_X = "SpacialX";
+    private static final String SPACIAL_Y = "SpacialY";
+    private static final String SPACIAL_Z = "SpacialZ";
     private String appId;
     private String currency;
     private Feature feature;
@@ -71,26 +74,43 @@ public class EmbeddedKochava extends EmbeddedProvider implements MPActivityCallb
         return "Kochava";
     }
 
-
-
     @Override
     public void logEvent(MParticle.EventType type, String name, JSONObject eventAttributes) throws Exception {
-
+        if (feature != null){
+            if (eventAttributes != null &&
+                    (eventAttributes.has(SPACIAL_X) || eventAttributes.has(SPACIAL_Y) || eventAttributes.has(SPACIAL_Z))) {
+                feature.eventSpatial(name,
+                        eventAttributes.optDouble(SPACIAL_X, 0),
+                        eventAttributes.optDouble(SPACIAL_Y, 0),
+                        eventAttributes.optDouble(SPACIAL_Z, 0),
+                        null);
+            }else{
+                feature.event(name, null);
+            }
+        }
     }
 
     @Override
     public void logTransaction(MPProduct transaction) throws Exception {
-
+        if (feature != null) {
+            String kochavaName = "eCommerce";
+            feature.event(kochavaName, Double.toString(transaction.getTotalRevenue()));
+        }
     }
 
     @Override
     public void logScreen(String screenName, JSONObject eventAttributes) throws Exception {
-
+        String kochavaName = "Viewed " + (screenName == null ? "" : screenName);
+        logEvent(null, kochavaName, eventAttributes);
     }
 
     @Override
     public void setLocation(Location location) {
-
+        if (feature != null && location != null){
+            feature.setLatlong(
+                    Double.toString(location.getLatitude()),
+                    Double.toString(location.getLongitude()));
+        }
     }
 
     @Override

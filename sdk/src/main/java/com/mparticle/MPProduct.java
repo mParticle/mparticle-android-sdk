@@ -95,6 +95,42 @@ public class MPProduct extends HashMap<String, String> {
 
     }
 
+    public double getUnitPrice(){
+        return Double.parseDouble(get(UNITPRICE, "0"));
+    }
+
+    public int getQuantity(){
+        return Integer.parseInt(get(QUANTITY, "0"));
+    }
+
+    public String getProductCategory(){
+        return get(CATEGORY, null);
+    }
+
+    public double getTotalRevenue(){
+        return Double.parseDouble(get(REVENUE, "0"));
+    }
+
+    public double getTaxAmount(){
+        return Double.parseDouble(get(TAX, "0"));
+    }
+
+    public double getShippingAmount(){
+        return Double.parseDouble(get(SHIPPING, "0"));
+    }
+
+    public String getCurrencyCode(){
+        return get(CURRENCY, null);
+    }
+
+    public String getAffiliation(){
+        return get(AFFILIATION, null);
+    }
+
+    public String getTransactionId(){
+        return get(TRANSACTION_ID, null);
+    }
+
     public String get(Object key, String defaultValue) {
         return containsKey(key) ? super.get(key) : defaultValue;
     }
