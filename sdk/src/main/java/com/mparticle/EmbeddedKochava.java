@@ -55,7 +55,7 @@ public class EmbeddedKochava extends EmbeddedProvider implements MPActivityCallb
             if (currency != null) {
                 feature = new Feature(context, appId, currency);
             }else{
-                
+                feature = new Feature(context, appId, "USD");
             }
         }
         feature.setAppLimitTracking(Boolean.parseBoolean(properties.get(LIMIT_ADD_TRACKING)));
@@ -66,7 +66,9 @@ public class EmbeddedKochava extends EmbeddedProvider implements MPActivityCallb
     }
 
     private boolean needsRestart() {
-        return true;
+        return feature == null ||
+                appId != properties.get(APP_ID) ||
+                currency != properties.get(CURRENCY) ;
     }
 
     @Override
