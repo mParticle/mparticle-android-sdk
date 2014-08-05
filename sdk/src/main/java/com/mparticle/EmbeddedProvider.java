@@ -2,6 +2,8 @@ package com.mparticle;
 
 import android.content.Context;
 import android.util.Log;
+import android.util.SparseArray;
+import android.util.SparseBooleanArray;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -21,14 +23,15 @@ abstract class EmbeddedProvider implements IEmbeddedKit {
     private final static String KEY_EVENT_NAMES = "ec";
     private final static String KEY_EVENT_ATTRIBUTES = "ea";
     private final static int MAT = 32;
+    private final static int KOCHAVA = 37;
 
     //If set to true, our sdk honor user's optout wish. If false, we still collect data on opt-ed out users, but only for reporting
     private static final String HONOR_OPT_OUT = "honorOptOut";
 
     protected HashMap<String, String> properties = new HashMap<String, String>(0);
-    protected HashMap<Integer, Boolean> types = new HashMap<Integer, Boolean>(0);
-    protected HashMap<Integer, Boolean> names = new HashMap<Integer, Boolean>(0);
-    protected HashMap<Integer, Boolean> attributes = new HashMap<Integer, Boolean>(0);
+    protected SparseBooleanArray types = new SparseBooleanArray(0);
+    protected SparseBooleanArray names = new SparseBooleanArray(0);
+    protected SparseBooleanArray attributes = new SparseBooleanArray(0);
     protected Context context;
 
     public EmbeddedProvider(Context context) throws ClassNotFoundException{
@@ -46,20 +49,20 @@ abstract class EmbeddedProvider implements IEmbeddedKit {
         }
         if (json.has(KEY_FILTERS)){
             if (json.has(KEY_EVENT_TYPES)){
-                types = convertToHashMap(json.getJSONObject(KEY_EVENT_TYPES));
+                types = convertToSparseArray(json.getJSONObject(KEY_EVENT_TYPES));
             }
             if (json.has(KEY_EVENT_NAMES)){
-                names = convertToHashMap(json.getJSONObject(KEY_EVENT_NAMES));
+                names = convertToSparseArray(json.getJSONObject(KEY_EVENT_NAMES));
             }
             if (json.has(KEY_EVENT_ATTRIBUTES)){
-                attributes = convertToHashMap(json.getJSONObject(KEY_EVENT_ATTRIBUTES));
+                attributes = convertToSparseArray(json.getJSONObject(KEY_EVENT_ATTRIBUTES));
             }
         }
         return this;
     }
 
-    private HashMap<Integer, Boolean> convertToHashMap(JSONObject json){
-        HashMap<Integer, Boolean> map = new HashMap<Integer, Boolean>();
+    private SparseBooleanArray convertToSparseArray(JSONObject json){
+        SparseBooleanArray map = new SparseBooleanArray();
         for (Iterator<String> iterator = json.keys(); iterator.hasNext();) {
             try {
                 String key = iterator.next();
@@ -83,6 +86,8 @@ abstract class EmbeddedProvider implements IEmbeddedKit {
         switch (id){
             case MAT:
                 return new EmbeddedMAT(context);
+            case KOCHAVA:
+                return new EmbeddedKochava(context);
             default:
                 return null;
         }
@@ -106,15 +111,8 @@ abstract class EmbeddedProvider implements IEmbeddedKit {
 
     protected boolean shouldSend(MParticle.EventType type, String name){
         int typeHash = hash(type.toString());
-        if (types.containsKey(typeHash) && !types.get(typeHash)){
-            return false;
-        }
         int typeNameHash = hash(type.toString() + name);
-        if (names.containsKey(typeNameHash) && !names.get(typeNameHash)){
-            return false;
-        }
-
-        return true;
+        return types.get(typeHash, true) && names.get(typeNameHash, true);
     }
 
     protected JSONObject filterAttributes(MParticle.EventType type, String name, JSONObject eventAttributes){
@@ -123,7 +121,7 @@ abstract class EmbeddedProvider implements IEmbeddedKit {
         while (attIterator.hasNext()){
             String attributeKey = (String)attIterator.next();
             int hash = hash(nameType + attributeKey);
-            if (attributes.containsKey(hash) && !attributes.get(hash)){
+            if (!attributes.get(hash, true)){
                 attIterator.remove();
             }
         }
