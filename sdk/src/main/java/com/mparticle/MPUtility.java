@@ -132,6 +132,7 @@ class MPUtility {
         }
     }
 
+    @TargetApi(18)
     public static long getAvailableInternalDisk() {
         long availableSpace = -1L;
         File path = Environment.getDataDirectory();
@@ -144,6 +145,7 @@ class MPUtility {
         return availableSpace;
     }
 
+    @TargetApi(18)
     public static long getAvailableExternalDisk() {
         long availableSpace = -1L;
         File path = Environment.getExternalStorageDirectory();

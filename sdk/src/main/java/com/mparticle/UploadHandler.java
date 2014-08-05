@@ -11,6 +11,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.util.Log;
+import android.util.SparseArray;
 
 import com.mparticle.Constants.MessageKey;
 import com.mparticle.Constants.MessageType;
@@ -529,9 +530,9 @@ import java.util.concurrent.TimeoutException;
                                         null,
                                         null,
                                         AUDIENCE_QUERY);
-        HashMap<Integer, Segment> audiences = new HashMap<Integer, Segment>();
+        SparseArray<Segment> audiences = new SparseArray<Segment>();
 
-
+        StringBuilder keys = new StringBuilder("(");
         while (audienceCursor.moveToNext()){
             int id = audienceCursor.getInt(audienceCursor.getColumnIndex(SegmentDatabase.SegmentTable.SEGMENT_ID));
 
@@ -539,16 +540,19 @@ import java.util.concurrent.TimeoutException;
                                             audienceCursor.getString(audienceCursor.getColumnIndex(SegmentDatabase.SegmentTable.NAME)),
                                             audienceCursor.getString(audienceCursor.getColumnIndex(SegmentDatabase.SegmentTable.ENDPOINTS)));
             audiences.put(id, segment);
+            keys.append(id);
+            keys.append(", ");
         }
         audienceCursor.close();
-
+        keys.delete(keys.length()-2, keys.length());
+        keys.append(")");
 
         long currentTime = System.currentTimeMillis();
         Cursor membershipCursor = db.query(false,
                                     SegmentDatabase.SegmentMembershipTable.TABLE_NAME,
                                     MEMBERSHIP_QUERY_COLUMNS,
                                     String.format(MEMBERSHIP_QUERY_SELECTION,
-                                                    audiences.keySet().toString().replace("[", "(").replace("]", ")"),
+                                                    keys.toString(),
                                                     currentTime),
                                     null,
                                     null,

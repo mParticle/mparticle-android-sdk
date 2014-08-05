@@ -227,9 +227,13 @@ class ConfigManager {
         }
     }
 
-    void debugLog(String... message) {
-        if (getEnvironment().equals(MParticle.Environment.Development)) {
-            Log.d(Constants.LOG_TAG, message[0]);
+    void debugLog(String... messages) {
+        if (messages != null && getEnvironment().equals(MParticle.Environment.Development)) {
+            StringBuilder logMessage = new StringBuilder();
+            for (String m : messages){
+                logMessage.append(m);
+            }
+            Log.d(Constants.LOG_TAG, logMessage.toString());
         }
     }
 
