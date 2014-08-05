@@ -75,9 +75,7 @@ final class MPOutputStream extends OutputStream {
 
 
         }catch (Exception e){
-            if (MParticle.getInstance().getDebugMode()){
-                Log.w(Constants.LOG_TAG, "Exception thrown while parsing networking OutputStream: " + e.getMessage());
-            }
+            MParticle.getInstance().mConfigManager.debugLog("Exception thrown while parsing networking OutputStream: ", e.getMessage());
         }
     }
 

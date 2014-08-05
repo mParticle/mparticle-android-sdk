@@ -40,9 +40,7 @@ public class EmbeddedKochava extends EmbeddedProvider implements MPActivityCallb
         try {
             Class.forName("com.kochava.android.Feature");
         } catch (ClassNotFoundException cnfe) {
-            if (MParticle.getInstance().getDebugMode()) {
-                Log.w(Constants.LOG_TAG, "Failed in initiate Kochava - library not found. Have you added it to your application's classpath?");
-            }
+            MParticle.getInstance().mConfigManager.debugLog("Failed in initiate Kochava - library not found. Have you added it to your application's classpath?");
             throw cnfe;
         }
     }

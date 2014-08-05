@@ -18,7 +18,7 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 final class MeasuredRequestManager {
     private final ScheduledExecutorService scheduler =
             Executors.newScheduledThreadPool(1);
-    HashSet<MeasuredRequest> requests = new HashSet<MeasuredRequest>();
+    final HashSet<MeasuredRequest> requests = new HashSet<MeasuredRequest>();
     private CopyOnWriteArrayList<String> excludedUrlFilters = new CopyOnWriteArrayList<String>();
     private CopyOnWriteArrayList<String> queryStringFilters = new CopyOnWriteArrayList<String>();
     private static final String MPARTICLEHOST = ".mparticle.com";
@@ -39,9 +39,9 @@ final class MeasuredRequestManager {
         @Override
         public void run() {
             synchronized (requests) {
-                boolean debugLog = MParticle.getInstance().getDebugMode();
-                if (debugLog && requests.size() > 0) {
-                    Log.d(Constants.LOG_TAG, "Processing " + requests.size() + " measured network requests.");
+
+                if (requests.size() > 0) {
+                    MParticle.getInstance().mConfigManager.debugLog("Processing ", Integer.toString(requests.size()), " measured network requests.");
                 }
                 Iterator<MeasuredRequest> iter = requests.iterator();
                 ArrayList<String> loggedUris = new ArrayList<String>();
@@ -72,9 +72,8 @@ final class MeasuredRequestManager {
                                     loggedUris.add(uri);
                                 }
 
-                                if (debugLog) {
-                                    Log.d(Constants.LOG_TAG, "Logging network request: " + request.toString());
-                                }
+                                MParticle.getInstance().mConfigManager.debugLog("Logging network request: " + request.toString());
+
                             }
                             request.reset();
                             iter.remove();

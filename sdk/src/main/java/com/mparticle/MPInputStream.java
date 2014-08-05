@@ -56,9 +56,7 @@ final class MPInputStream extends InputStream {
                 measuredRequest.parseInputStreamBytes(buffer, offset, length);
             }
         }catch (Exception e){
-            if (MParticle.getInstance().getDebugMode()){
-                Log.w(Constants.LOG_TAG, "Exception thrown while parsing networking InputStream: " + e.getMessage());
-            }
+            MParticle.getInstance().mConfigManager.debugLog("Exception thrown while parsing networking InputStream: ", e.getMessage());
         }
         return length;
     }

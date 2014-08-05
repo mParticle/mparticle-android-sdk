@@ -136,9 +136,7 @@ import java.util.concurrent.TimeoutException;
                 } catch (IOException ioe) {
 
                 } catch (MParticleApiClient.MPThrottleException e) {
-                    if (MParticle.getInstance().getDebugMode()){
-                        Log.d(Constants.LOG_TAG, e.getMessage());
-                    }
+                    mConfigManager.debugLog(e.getMessage());
                 }
                 break;
             case UPLOAD_MESSAGES:
@@ -274,21 +272,13 @@ import java.util.concurrent.TimeoutException;
                 }
             }
         } catch (SQLiteException e) {
-            if (MParticle.getInstance().getDebugMode()) {
-                Log.d(TAG, "Error preparing batch upload in mParticle DB: " + e.getMessage());
-            }
+            mConfigManager.debugLog("Error preparing batch upload in mParticle DB: " + e.getMessage());
         } catch (IOException e) {
-            if (MParticle.getInstance().getDebugMode()) {
-                Log.d(TAG, "Error preparing batch upload in mParticle DB: " + e.getMessage());
-            }
+            mConfigManager.debugLog("Error preparing batch upload in mParticle DB: " + e.getMessage());
         } catch (JSONException e) {
-            if (MParticle.getInstance().getDebugMode()) {
-                Log.d(TAG, "Error preparing batch upload in mParticle DB: " + e.getMessage());
-            }
+            mConfigManager.debugLog("Error preparing batch upload in mParticle DB: " + e.getMessage());
         } catch (MParticleApiClient.MPThrottleException e) {
-            if (MParticle.getInstance().getDebugMode()){
-                Log.d(Constants.LOG_TAG, e.getMessage());
-            }
+            mConfigManager.debugLog(e.getMessage());
         } finally {
             if (readyMessagesCursor != null && !readyMessagesCursor.isClosed()){
                 readyMessagesCursor.close();
@@ -338,9 +328,7 @@ import java.util.concurrent.TimeoutException;
                 }
             }
         } catch (MParticleApiClient.MPThrottleException e) {
-            if (MParticle.getInstance().getDebugMode()){
-                Log.d(Constants.LOG_TAG, e.getMessage());
-            }
+            mConfigManager.debugLog(e.getMessage());
         } catch (SQLiteException e) {
             Log.d(TAG, "Error processing batch uploads in mParticle DB", e);
         } catch (IOException ioe) {
@@ -397,9 +385,6 @@ import java.util.concurrent.TimeoutException;
         uploadMessage.put(MessageKey.ID, UUID.randomUUID().toString());
         uploadMessage.put(MessageKey.TIMESTAMP, System.currentTimeMillis());
         uploadMessage.put(MessageKey.MPARTICLE_VERSION, Constants.MPARTICLE_VERSION);
-        if (BuildConfig.ECHO) {
-            //uploadMessage.put("echo", true);
-        }
         uploadMessage.put(MessageKey.OPT_OUT_HEADER, mConfigManager.getOptedOut());
         uploadMessage.put(MessageKey.CONFIG_UPLOAD_INTERVAL, mConfigManager.getUploadInterval()/1000);
         uploadMessage.put(MessageKey.CONFIG_SESSION_TIMEOUT, mConfigManager.getSessionTimeout()/1000);

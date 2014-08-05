@@ -96,7 +96,6 @@ public class MParticle {
     private ExceptionHandler mExHandler;
     private Context mAppContext;
     private String mApiKey;
-    private Boolean mDebugMode = false;
     private final EmbeddedKitManager embeddedKitManager;
     private int mEventCount = 0;
     private String mLaunchUri;
@@ -441,8 +440,7 @@ public class MParticle {
     }
 
     private void endSession(long sessionEndTime) {
-        if (mDebugMode)
-            debugLog("Ended session");
+        mConfigManager.debugLog("Ended session");
 
        // mMessageManager.stopSession(mSessionID, sessionEndTime, sessionEndTime - mSessionStartTime);
         mMessageManager.endSession(mSessionID, sessionEndTime, sessionEndTime - mSessionStartTime);
@@ -467,8 +465,7 @@ public class MParticle {
         if (0 != mSessionStartTime &&
                 mAppStateManager.isBackgrounded() &&
                 (mConfigManager.getSessionTimeout() < now - mLastEventTime)) {
-            if (mDebugMode)
-                debugLog("Session timed out");
+            mConfigManager.debugLog("Session timed out");
 
             endSession(mLastEventTime);
             return true;
@@ -486,8 +483,7 @@ public class MParticle {
         mSessionAttributes = new JSONObject();
         mMessageManager.startSession(mSessionID, mSessionStartTime, mLaunchUri);
         mTimeoutHandler.sendEmptyMessageDelayed(0, mConfigManager.getSessionTimeout());
-        if (mDebugMode)
-            debugLog("Started new session");
+        mConfigManager.debugLog("Started new session");
         // clear the launch URI so it isn't sent on future sessions
         mLaunchUri = null;
     }
@@ -505,8 +501,7 @@ public class MParticle {
      */
     public void setInstallReferrer(String referrer) {
         sPreferences.edit().putString(PrefKeys.INSTALL_REFERRER, referrer).commit();
-        if (mDebugMode)
-            debugLog("Set installReferrer: " + referrer);
+        mConfigManager.debugLog("Set installReferrer: ", referrer);
     }
 
     /**
@@ -606,13 +601,13 @@ public class MParticle {
             JSONObject eventDataJSON = enforceAttributeConstraints(eventInfo);
             if (mConfigManager.getSendOoEvents()) {
                 mMessageManager.logEvent(mSessionID, mSessionStartTime, mLastEventTime, eventName, eventType, eventDataJSON, eventLength);
-                if (mDebugMode) {
+
                     if (null == eventDataJSON) {
-                        debugLog("Logged event: " + eventName);
+                        mConfigManager.debugLog("Logged event: ", eventName);
                     } else {
-                        debugLog("Logged event: " + eventName + " with data " + eventDataJSON);
+                        mConfigManager.debugLog("Logged event: ", eventName, " with data ", eventDataJSON.toString());
                     }
-                }
+
 
             }
             embeddedKitManager.logEvent(eventType, eventName, eventDataJSON);
@@ -686,9 +681,8 @@ public class MParticle {
         if (checkEventLimit()) {
             JSONObject transactionJson = enforceAttributeConstraints(product);
             mMessageManager.logEvent(mSessionID, mSessionStartTime, mLastEventTime, event.toString(), EventType.Transaction, transactionJson, 0);
-            if (mDebugMode) {
-                debugLog("Logged product event with data: " + product.toString());
-            }
+            mConfigManager.debugLog("Logged product event with data: ", product.toString());
+
 
         }
         if (purchaseEvent) {
@@ -721,13 +715,13 @@ public class MParticle {
             JSONObject eventDataJSON = enforceAttributeConstraints(eventData);
             if (mConfigManager.getSendOoEvents()) {
                 mMessageManager.logScreen(mSessionID, mSessionStartTime, mLastEventTime, screenName, eventDataJSON, started);
-                if (mDebugMode) {
+
                     if (null == eventDataJSON) {
-                        debugLog("Logged screen: " + screenName);
+                        mConfigManager.debugLog("Logged screen: ", screenName);
                     } else {
-                        debugLog("Logged screen: " + screenName + " with data " + eventDataJSON);
+                        mConfigManager.debugLog("Logged screen: ", screenName, " with data ", eventDataJSON.toString());
                     }
-                }
+
             }
             embeddedKitManager.logScreen(screenName, eventDataJSON);
         }
@@ -770,8 +764,7 @@ public class MParticle {
             }
             ensureActiveSession();
             mMessageManager.logBreadcrumb(mSessionID, mSessionStartTime, mLastEventTime, breadcrumb);
-            if (mDebugMode)
-                debugLog("Logged breadcrumb: " + breadcrumb);
+            mConfigManager.debugLog("Logged breadcrumb: " + breadcrumb);
 
         }
     }
@@ -801,8 +794,7 @@ public class MParticle {
             if (checkEventLimit()) {
                 JSONObject eventDataJSON = enforceAttributeConstraints(eventData);
                 mMessageManager.logErrorEvent(mSessionID, mSessionStartTime, mLastEventTime, message, null, eventDataJSON);
-                if (mDebugMode)
-                    debugLog(
+                mConfigManager.debugLog(
                             "Logged error with message: " + (message == null ? "<none>" : message) +
                                     " with data: " + (eventDataJSON == null ? "<none>" : eventDataJSON.toString())
                     );
@@ -830,13 +822,10 @@ public class MParticle {
             SocketImplFactory factory = new MPSocketImplFactory(socket.getClass());
             Socket.setSocketImplFactory(factory);
         } catch (Error e) {
-            if (getDebugMode()) {
-                Log.d(Constants.LOG_TAG, "Error initiating network performance monitoring: " + e.getMessage());
-            }
+            mConfigManager.debugLog("Error initiating network performance monitoring: " + e.getMessage());
+
         } catch (Exception e) {
-            if (getDebugMode()) {
-                Log.d(Constants.LOG_TAG, "Exception initiating network performance monitoring: " + e.getMessage());
-            }
+            mConfigManager.debugLog("Exception initiating network performance monitoring: " + e.getMessage());
         }
         try {
             SSLSocketFactory currentSocketFactory = org.apache.http.conn.ssl.SSLSocketFactory.getSocketFactory();
@@ -844,13 +833,11 @@ public class MParticle {
             MPSSLSocketFactory wrapperFactory = new MPSSLSocketFactory(innerFactory);
             MPUtility.getAccessibleField(org.apache.http.conn.ssl.SSLSocketFactory.class, javax.net.ssl.SSLSocketFactory.class).set(currentSocketFactory, wrapperFactory);
         } catch (Error e) {
-            if (getDebugMode()) {
-                Log.d(Constants.LOG_TAG, "Error initiating network performance monitoring: " + e.getMessage());
-            }
+            mConfigManager.debugLog("Error initiating network performance monitoring: " + e.getMessage());
+
         } catch (Exception e) {
-            if (getDebugMode()) {
-                Log.d(Constants.LOG_TAG, "Exception initiating network performance monitoring: " + e.getMessage());
-            }
+            mConfigManager.debugLog("Exception initiating network performance monitoring: " + e.getMessage());
+
         }
 
         try {
@@ -868,25 +855,20 @@ public class MParticle {
 
             URL.setURLStreamHandlerFactory(factory);
         } catch (Error e) {
-            if (getDebugMode()) {
-                Log.d(Constants.LOG_TAG, "Error initiating network performance monitoring: " + e.getMessage());
-            }
+            mConfigManager.debugLog("Error initiating network performance monitoring: " + e.getMessage());
+
         } catch (Exception e) {
-            if (getDebugMode()) {
-                Log.d(Constants.LOG_TAG, "Exception initiating network performance monitoring: " + e.getMessage());
-            }
+            mConfigManager.debugLog("Exception initiating network performance monitoring: " + e.getMessage());
+
         }
 
         try {
             HttpsURLConnection.setDefaultSSLSocketFactory(new MPSSLSocketFactory(HttpsURLConnection.getDefaultSSLSocketFactory()));
         } catch (Error e) {
-            if (getDebugMode()) {
-                Log.d(Constants.LOG_TAG, "Error initiating network performance monitoring: " + e.getMessage());
-            }
+            mConfigManager.debugLog("Error initiating network performance monitoring: ", e.getMessage());
+
         } catch (Exception e) {
-            if (getDebugMode()) {
-                Log.d(Constants.LOG_TAG, "Exception initiating network performance monitoring: " + e.getMessage());
-            }
+            mConfigManager.debugLog("Exception initiating network performance monitoring: " + e.getMessage());
         }
         measuredRequestManager.setEnabled(true);
 
@@ -918,9 +900,7 @@ public class MParticle {
                     HttpsURLConnection.setDefaultSSLSocketFactory(((MPSSLSocketFactory) current).delegateFactory);
                 }
             } catch (Exception e) {
-                if (getDebugMode()) {
-                    Log.d(Constants.LOG_TAG, "Error stopping network performance monitoring: " + e.getMessage());
-                }
+                mConfigManager.debugLog("Error stopping network performance monitoring: ", e.getMessage());
             }
         }
     }
@@ -991,8 +971,7 @@ public class MParticle {
             if (checkEventLimit()) {
                 JSONObject eventDataJSON = enforceAttributeConstraints(eventData);
                 mMessageManager.logErrorEvent(mSessionID, mSessionStartTime, mLastEventTime, message, exception, eventDataJSON);
-                if (mDebugMode)
-                    debugLog(
+                mConfigManager.debugLog(
                             "Logged exception with message: " + (message == null ? "<none>" : message) +
                                     " with data: " + (eventDataJSON == null ? "<none>" : eventDataJSON.toString()) +
                                     " with exception: " + (exception == null ? "<none>" : exception.getMessage())
@@ -1071,9 +1050,8 @@ public class MParticle {
     public void setSessionAttribute(String key, String value) {
         if (mConfigManager.getSendOoEvents()) {
             ensureActiveSession();
-            if (mDebugMode) {
-                debugLog("Set session attribute: " + key + "=" + value);
-            }
+            mConfigManager.debugLog("Set session attribute: " + key + "=" + value);
+
             if (setCheckedAttribute(mSessionAttributes, key, value, true)) {
                 mMessageManager.setSessionAttributes(mSessionID, mSessionAttributes);
             }
@@ -1090,9 +1068,8 @@ public class MParticle {
     public void logout(){
         if (mConfigManager.getSendOoEvents()) {
             ensureActiveSession();
-            if (mDebugMode) {
-                debugLog("Logging out.");
-            }
+            mConfigManager.debugLog("Logging out.");
+
 
             mMessageManager.logProfileAction(Constants.ProfileActions.LOGOUT, mSessionID, mSessionStartTime);
         }
@@ -1105,11 +1082,11 @@ public class MParticle {
      * @param value the attribute value
      */
     public void setUserAttribute(String key, String value) {
-        if (mDebugMode)
+
             if (value != null) {
-                debugLog("Set user attribute: " + key + " with value " + value);
+                mConfigManager.debugLog("Set user attribute: " + key + " with value " + value);
             } else {
-                debugLog("Set user attribute: " + key);
+                mConfigManager.debugLog("Set user attribute: " + key);
             }
 
         if (setCheckedAttribute(mUserAttributes, key, value)) {
@@ -1125,8 +1102,8 @@ public class MParticle {
      * @param key the key of the attribute
      */
     public void removeUserAttribute(String key) {
-        if (mDebugMode && key != null) {
-            debugLog("Removing user attribute: " + key);
+        if (key != null) {
+            mConfigManager.debugLog("Removing user attribute: " + key);
         }
         if (mUserAttributes.has(key) || mUserAttributes.has(findCaseInsensitiveKey(mUserAttributes, key))) {
             mUserAttributes.remove(key);
@@ -1178,8 +1155,7 @@ public class MParticle {
 
     public void setUserIdentity(String id, IdentityType identityType) {
         if (id != null && id.length() > 0) {
-            if (mDebugMode)
-                debugLog("Setting user identity: " + id);
+            mConfigManager.debugLog("Setting user identity: " + id);
 
             if (null != id && id.length() > Constants.LIMIT_ATTR_VALUE) {
                 Log.w(Constants.LOG_TAG, "Id value length exceeds limit. Discarding id: " + id);
@@ -1283,8 +1259,7 @@ public class MParticle {
 
             mConfigManager.setOptOut(optOutStatus);
 
-            if (mDebugMode)
-                debugLog("Set opt-out: " + optOutStatus);
+            mConfigManager.debugLog("Set opt-out: " + optOutStatus);
         }
     }
 
@@ -1312,7 +1287,7 @@ public class MParticle {
      *
      * @return If debug mode is enabled or disabled
      */
-    public Boolean getDebugMode() {
+    public Boolean getDebugsMode() {
         Log.w(Constants.LOG_TAG, "Deprecated method getDebugMode called - this API call always returns false!");
         return false;
     }
@@ -1554,14 +1529,6 @@ public class MParticle {
         LicenseChecker checker = new LicenseChecker(
                 mAppContext, policy, encodedPublicKey);
         checker.checkAccess(licenseCheckerCallback);
-    }
-
-    private void debugLog(String message) {
-        if (null != mSessionID) {
-            Log.d(Constants.LOG_TAG, mApiKey + ": " + mSessionID + ": " + message);
-        } else {
-            Log.d(Constants.LOG_TAG, mApiKey + ": " + message);
-        }
     }
 
     /**

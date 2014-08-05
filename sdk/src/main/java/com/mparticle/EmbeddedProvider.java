@@ -68,9 +68,7 @@ abstract class EmbeddedProvider implements IEmbeddedKit {
                 String key = iterator.next();
                 map.put(Integer.parseInt(key), json.getBoolean(key));
             }catch (JSONException jse){
-                if (MParticle.getInstance().getDebugMode()){
-                    Log.w(Constants.LOG_TAG, "Issue while parsing embedded kit configuration: " + jse.getMessage());
-                }
+                MParticle.getInstance().mConfigManager.debugLog("Issue while parsing embedded kit configuration: " + jse.getMessage());
             }
         }
         return map;
