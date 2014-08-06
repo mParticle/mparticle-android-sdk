@@ -1274,7 +1274,7 @@ public class MParticle {
                 } else{
                     Log.w(Constants.LOG_TAG, "Forcing environment to DEVELOPMENT on a production app! Be careful, be sure not to do this in an application that you submit to Google Play.");
                 }
-            }else{
+            }else if (environment.equals(Environment.Production)) {
                 if (mConfigManager.isDebugEnvironment()) {
                     Log.w(Constants.LOG_TAG, "Forcing environment to PRODUCTION on a debuggable app. Be careful, you are now in PRODUCTION and any test event data will be mixed with live event data!");
                 } else {
