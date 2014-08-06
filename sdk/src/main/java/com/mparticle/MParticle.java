@@ -68,9 +68,6 @@ import javax.net.ssl.HttpsURLConnection;
  * <li>mp_productionUploadInterval - {@link <a href="http://developer.android.com/guide/topics/resources/more-resources.html#Integer">Integer</a>} - The length of time in seconds to send batches of messages to mParticle. Setting this too low could have an adverse effect on the device battery. <i>Default: 600</i></li>
  * <li>mp_reportUncaughtExceptions - {@link <a href="http://developer.android.com/guide/topics/resources/more-resources.html#Bool">Bool</a>} - By enabling this, the MParticle SDK will automatically log and report any uncaught exceptions, including stack traces. <i>Default: false</i></li>
  * <li>mp_sessionTimeout - {@link <a href="http://developer.android.com/guide/topics/resources/more-resources.html#Integer">Integer</a>} - The length of time (in seconds) that a user session will remain valid while application has been paused and put into the background. <i>Default: 60</i></li>
- * <li>mp_enableDebugMode - {@link <a href="http://developer.android.com/guide/topics/resources/more-resources.html#Bool">Bool</a>} - Enabling this will provide additional logcat messages to debug your implementation and usage of mParticle <i>Default: false</i></li>
- * <li>mp_debugUploadInterval - {@link <a href="http://developer.android.com/guide/topics/resources/more-resources.html#Integer">Integer</a>} - The upload interval (see above) while in debug mode. <i>Default: 10</i></li>
- * <li>mp_enableSandboxMode - {@link <a href="http://developer.android.com/guide/topics/resources/more-resources.html#Bool">Bool</a>} - Enabling this will mark events as sandbox messages for debugging and isolation in the mParticle web application. <i>Default: false</i></li>
  * <li>mp_enableNetworkPerformanceMeasurement - {@link <a href="http://developer.android.com/guide/topics/resources/more-resources.html#Bool">Bool</a>} - Enabling this will allow the mParticle SDK to measure network requests made with Apache's HttpClient as well as UrlConnection. <i>Default: false</i></li>
  * </ul>
  */
@@ -156,10 +153,6 @@ public class MParticle {
                 //swallow this
             }
         }
-
-
-
-
     }
 
     /**
@@ -182,7 +175,38 @@ public class MParticle {
      */
 
     public static void start(Context context, String apiKey, String secret) {
-        start(context, apiKey, secret, false, InstallType.AutoDetect);
+        start(context, apiKey, secret, InstallType.AutoDetect);
+    }
+
+    /**
+     * Start the mParticle SDK and begin tracking a user session.
+     *
+     * The InstallType parameter is used to determine if this is a new install or an upgrade. In
+     * the case where the mParticle SDK is being added to an existing app with existing users, this
+     * parameter prevents mParticle from categorizing all users as new users.
+     *
+     * @param context     Required reference to a Context object
+     * @param apiKey      The API key to use for authentication with mParticle
+     * @param secret      The API secret to use for authentication with mParticle
+     * @param installType Specify whether this is a new install or an upgrade, or let mParticle detect
+     *
+     * @see com.mparticle.MParticle.InstallType
+     */
+
+    public static void start(final Context context, final String apiKey, final String secret, final InstallType installType) {
+        if (context == null) {
+            throw new IllegalArgumentException("mParticle failed to start: context is required.");
+        }
+        if (apiKey == null) {
+            throw new IllegalArgumentException("mParticle failed to start: apiKey is required.");
+        }
+        if (secret == null) {
+            throw new IllegalArgumentException("mParticle failed to start: secret is required.");
+        }
+        if (installType == null) {
+            throw new IllegalArgumentException("mParticle failed to start: installType is required.");
+        }
+        MParticle.getInstance(context, apiKey, secret, installType);
     }
 
     /**
@@ -204,40 +228,6 @@ public class MParticle {
             throw new IllegalArgumentException("mParticle failed to start: context is required.");
         }
         MParticle.getInstance(context, null, null, installType);
-    }
-
-    /**
-     * Start the mParticle SDK and begin tracking a user session.
-     *
-     * The InstallType parameter is used to determine if this is a new install or an upgrade. In
-     * the case where the mParticle SDK is being added to an existing app with existing users, this
-     * parameter prevents mParticle from categorizing all users as new users.
-     *
-     * @param context     Required reference to a Context object
-     * @param apiKey      The API key to use for authentication with mParticle
-     * @param secret      The API secret to use for authentication with mParticle
-     * @param sandboxMode Enable/disable sandbox mode
-     * @param installType Specify whether this is a new install or an upgrade, or let mParticle detect
-     *
-     * @deprecated Sandbox mode is deprecated, this method will be removed in a future version of the SDK.
-     *
-     * @see com.mparticle.MParticle.InstallType
-     */
-
-    public static void start(final Context context, final String apiKey, final String secret, final Boolean sandboxMode, final InstallType installType) {
-        if (context == null) {
-            throw new IllegalArgumentException("mParticle failed to start: context is required.");
-        }
-        if (apiKey == null) {
-            throw new IllegalArgumentException("mParticle failed to start: apiKey is required.");
-        }
-        if (secret == null) {
-            throw new IllegalArgumentException("mParticle failed to start: secret is required.");
-        }
-        if (installType == null) {
-            throw new IllegalArgumentException("mParticle failed to start: installType is required.");
-        }
-        MParticle.getInstance(context, apiKey, secret, installType);
     }
 
     /**
@@ -1264,62 +1254,6 @@ public class MParticle {
     }
 
     /**
-     * Turn on or off debug mode for mParticle. In debug mode, the mParticle SDK will output
-     * informational messages to LogCat. This should never be enabled
-     * in a production application.
-     *
-     * @deprecated Use {@link com.mparticle.MParticle.Environment} and {@link #forceEnvironment}. This method will
-     * be removed in a future SDK version.
-     *
-     * @param debugMode
-     *
-     */
-    public void setDebugMode(Boolean debugMode) {
-        Log.w(Constants.LOG_TAG, "Deprecated method setDebugMode called - this API call is a no-op.");
-    }
-
-
-    /**
-     * Get the current debug mode status
-     *
-     * @deprecated Use {@link com.mparticle.MParticle.Environment} and {@link #forceEnvironment}. This method will
-     * be removed in a future SDK version.
-     *
-     * @return If debug mode is enabled or disabled
-     */
-    public Boolean getDebugsMode() {
-        Log.w(Constants.LOG_TAG, "Deprecated method getDebugMode called - this API call always returns false!");
-        return false;
-    }
-
-    /**
-     * Turn on or off sandbox mode for mParticle. In sandbox mode, events will be fired immediately
-     * and will be highlighted as sandbox events in the mParticle web console. This should never be enabled
-     * in a production application.
-     *
-     * @deprecated Use {@link com.mparticle.MParticle.Environment} and {@link #forceEnvironment}. This method will
-     * be removed in a future SDK version.
-     *
-     * @param sandboxMode
-     */
-    public void setSandboxMode(Boolean sandboxMode) {
-        Log.w(Constants.LOG_TAG, "Deprecated method setSandboxMode called - this API call is a no-op.");
-    }
-
-    /**
-     * Get the current sandbox mode status
-     *
-     * @return If sandbox mode is enabled or disabled
-     *
-     * @deprecated Use {@link com.mparticle.MParticle.Environment} and {@link #forceEnvironment}. This method will
-     * be removed in a future SDK version.
-     */
-    public Boolean getSandboxMode() {
-        Log.w(Constants.LOG_TAG, "Deprecated method getSandboxMode called - this API call always returns FALSE");
-        return false;
-    }
-
-    /**
      * Force the SDK into either Production or Development mode. See {@link com.mparticle.MParticle.Environment}
      * for implications of each mode. The SDK automatically determines which mode it should be in depending
      * on the signing and the DEBUGGABLE flag of your application's AndroidManifest.xml, so this method should
@@ -1332,7 +1266,7 @@ public class MParticle {
      *
      * @param environment
      */
-    public void forceEnvironment(Environment environment){
+    public void setEnvironment(Environment environment){
         if (environment != null) {
             if (environment.equals(Environment.Development)) {
                 if (mConfigManager.isDebugEnvironment()){
@@ -1358,16 +1292,6 @@ public class MParticle {
      */
     public void setUploadInterval(int uploadInterval) {
         mConfigManager.setUploadInterval(uploadInterval);
-    }
-
-    /**
-     * Set the upload interval period to control how frequently uploads occur when in debug mode.
-     *
-     * @deprecated Use {@link com.mparticle.MParticle.Environment} and {@link #forceEnvironment}. This method will
-     * be removed in a future SDK version.
-     */
-    public void setDebugUploadInterval(int uploadInterval) {
-        Log.w(Constants.LOG_TAG, "Deprecated method setDebugUploadInterval called - this API call is a no-op.");
     }
 
     /**
