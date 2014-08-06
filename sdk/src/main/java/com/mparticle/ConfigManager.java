@@ -391,7 +391,12 @@ class ConfigManager {
                 wv = new WebView(mContext);
                 wv.getSettings().setJavaScriptEnabled(true);
                 wv.addJavascriptInterface(this, "mParticleSDK");
-                wv.loadUrl(url);
+                wv.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        wv.loadUrl(url);
+                    }
+                });
             }
         }
 
