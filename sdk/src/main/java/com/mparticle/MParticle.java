@@ -1626,14 +1626,20 @@ public class MParticle {
     }
 
     /**
-     * The Environment in which the SDK and hosting app are running. The SDK automatically detects the Environment based on the
-     * DEBUGGABLE flag of your application. The DEBUGGABLE flag of your application will be TRUE when signing with a debug
-     * certificate during development, or if you have explicitly set your application to debug within your AndroidManifest.xml.
+     * The Environment in which the SDK and hosting app are running. The method should not usually be necessary - the SDK
+     * automatically detects the Environment based on the DEBUGGABLE flag of your application. The DEBUGGABLE flag of your
+     * application will be TRUE when signing with a debug certificate during development, or if you have explicitly set your
+     * application to debug within your AndroidManifest.xml.
      *
-     * @see {@link #forceEnvironment(com.mparticle.MParticle.Environment)} to override this behavior.
+     * @see {@link #setEnvironment(com.mparticle.MParticle.Environment)} to override this behavior.
      *
      */
     public enum Environment {
+        /**
+         * AutoDetect mode (DEFAULT). In this mode, the SDK will automatically configure itself based on the signing configuration
+         * and the DEBUGGABLE flag of your application.
+         */
+        AutoDetect(0),
         /**
          * Development mode. In this mode, all data from the SDK will be treated as development data, and will be silo'd from your
          * production data. Alos, the SDK will more aggressively upload data to the mParticle platform, to aide in a faster implementation.

@@ -47,7 +47,7 @@ class AppConfig {
     public boolean autoTrackingEnabled;
     public volatile boolean networkingEnabled;
     public int audienceTimeout = 100;
-    public MParticle.Environment forcedEnvironment = null;
+    public MParticle.Environment forcedEnvironment = MParticle.Environment.AutoDetect;
 
 
     public AppConfig(Context context, String key, String secret) {

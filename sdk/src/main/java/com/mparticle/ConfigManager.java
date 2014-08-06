@@ -180,7 +180,7 @@ class ConfigManager {
     }
 
     public MParticle.Environment getEnvironment() {
-        if (mLocalPrefs.forcedEnvironment != null){
+        if (mLocalPrefs.forcedEnvironment != MParticle.Environment.AutoDetect){
             return mLocalPrefs.forcedEnvironment;
         }else{
             return isDebugEnvironment() ? MParticle.Environment.Development : MParticle.Environment.Production;
