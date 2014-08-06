@@ -114,11 +114,11 @@ import java.util.concurrent.TimeoutException;
     private JSONObject getAppInfo(){
         if (appInfo == null){
             appInfo = DeviceAttributes.collectAppInfo(mContext);
-            try {
-                appInfo.put(MessageKey.ENVIRONMENT, mConfigManager.getEnvironment().getValue());
-            }catch (JSONException e){
+        }
+        try {
+            appInfo.put(MessageKey.ENVIRONMENT, mConfigManager.getEnvironment().getValue());
+        }catch (JSONException e){
 
-            }
         }
         return appInfo;
     }
