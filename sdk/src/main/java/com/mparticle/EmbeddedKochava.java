@@ -15,7 +15,7 @@ import java.util.Map;
 /**
  * Created by sdozor on 7/24/14.
  */
-public class EmbeddedKochava extends EmbeddedProvider implements MPActivityCallbacks {
+class EmbeddedKochava extends EmbeddedProvider implements MPActivityCallbacks {
     private static final String APP_ID = "appId";
 
     //If set to true, we will pass customer id from user identities (if it exists) to KOCHAVA as user_id
