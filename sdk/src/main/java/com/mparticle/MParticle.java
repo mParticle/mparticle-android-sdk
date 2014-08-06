@@ -1286,6 +1286,15 @@ public class MParticle {
     }
 
     /**
+     * Get the current Environment that the SDK has interpreted. Will never return AutoDetect.
+     *
+     * @return
+     */
+    public Environment getEnvironment(){
+        return mConfigManager.getEnvironment();
+    }
+
+    /**
      * Set the upload interval period to control how frequently uploads occur.
      *
      * @param uploadInterval the number of seconds between uploads
