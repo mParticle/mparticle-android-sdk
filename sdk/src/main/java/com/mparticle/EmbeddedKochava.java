@@ -38,7 +38,7 @@ public class EmbeddedKochava extends EmbeddedProvider implements MPActivityCallb
     EmbeddedKochava(Context context) throws ClassNotFoundException {
         super(context);
         try {
-            Class.forName("com.kochava.android.Feature");
+            Class.forName("com.kochava.android.tracker.Feature");
         } catch (ClassNotFoundException cnfe) {
             MParticle.getInstance().mConfigManager.debugLog("Failed in initiate Kochava - library not found. Have you added it to your application's classpath?");
             throw cnfe;
