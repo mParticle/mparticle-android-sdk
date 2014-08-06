@@ -11,6 +11,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.util.Log;
+import android.util.SparseArray;
 
 import com.mparticle.Constants.MessageKey;
 import com.mparticle.Constants.MessageType;
@@ -53,7 +54,6 @@ import java.util.concurrent.TimeoutException;
     private final SharedPreferences mPreferences;
     private final Context mContext;
     private final String mApiKey;
-    private final String mSecret;
     private final SegmentDatabase audienceDB;
     private MParticleApiClient mApiClient;
 
@@ -92,14 +92,13 @@ import java.util.concurrent.TimeoutException;
 
         mContext = context.getApplicationContext();
         mApiKey = mConfigManager.getApiKey();
-        mSecret = mConfigManager.getApiSecret();
 
         db = database;
         audienceDB = new SegmentDatabase(mContext);
         mPreferences = mContext.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
 
         try {
-            mApiClient = new MParticleApiClient(configManager, mApiKey, mSecret, mPreferences);
+            mApiClient = new MParticleApiClient(configManager, mApiKey, mConfigManager.getApiSecret(), mPreferences);
         } catch (MalformedURLException e) {
             //this should never happen - the URLs are created by constants.
         }
@@ -115,6 +114,11 @@ import java.util.concurrent.TimeoutException;
     private JSONObject getAppInfo(){
         if (appInfo == null){
             appInfo = DeviceAttributes.collectAppInfo(mContext);
+        }
+        try {
+            appInfo.put(MessageKey.ENVIRONMENT, mConfigManager.getEnvironment().getValue());
+        }catch (JSONException e){
+
         }
         return appInfo;
     }
@@ -133,9 +137,7 @@ import java.util.concurrent.TimeoutException;
                 } catch (IOException ioe) {
 
                 } catch (MParticleApiClient.MPThrottleException e) {
-                    if (MParticle.getInstance().getDebugMode()){
-                        Log.d(Constants.LOG_TAG, e.getMessage());
-                    }
+                    mConfigManager.debugLog(e.getMessage());
                 }
                 break;
             case UPLOAD_MESSAGES:
@@ -158,9 +160,8 @@ import java.util.concurrent.TimeoutException;
                 }
                 break;
             case UPLOAD_HISTORY:
-                if (mConfigManager.isDebug()) {
-                    Log.d(TAG, "Performing history upload for " + mApiKey);
-                }
+                mConfigManager.debugLog("Performing history upload.");
+
                 // if the uploads table is empty (no old uploads)
                 //  and the messages table has messages that are not from the current session,
                 //  or there is no current session
@@ -220,9 +221,8 @@ import java.util.concurrent.TimeoutException;
 
             if (readyMessagesCursor.getCount() > 0) {
                 mApiClient.fetchConfig();
-                if (mConfigManager.isDebug()) {
-                    Log.i(TAG, "Preparing " + readyMessagesCursor.getCount() + " events for upload");
-                }
+                mConfigManager.debugLog("Preparing " + readyMessagesCursor.getCount() + " events for upload");
+
                 if (history) {
                     String currentSessionId;
                     int sessionIndex = readyMessagesCursor.getColumnIndex(MessageTable.SESSION_ID);
@@ -273,21 +273,13 @@ import java.util.concurrent.TimeoutException;
                 }
             }
         } catch (SQLiteException e) {
-            if (MParticle.getInstance().getDebugMode()) {
-                Log.d(TAG, "Error preparing batch upload in mParticle DB: " + e.getMessage());
-            }
+            mConfigManager.debugLog("Error preparing batch upload in mParticle DB: " + e.getMessage());
         } catch (IOException e) {
-            if (MParticle.getInstance().getDebugMode()) {
-                Log.d(TAG, "Error preparing batch upload in mParticle DB: " + e.getMessage());
-            }
+            mConfigManager.debugLog("Error preparing batch upload in mParticle DB: " + e.getMessage());
         } catch (JSONException e) {
-            if (MParticle.getInstance().getDebugMode()) {
-                Log.d(TAG, "Error preparing batch upload in mParticle DB: " + e.getMessage());
-            }
+            mConfigManager.debugLog("Error preparing batch upload in mParticle DB: " + e.getMessage());
         } catch (MParticleApiClient.MPThrottleException e) {
-            if (MParticle.getInstance().getDebugMode()){
-                Log.d(Constants.LOG_TAG, e.getMessage());
-            }
+            mConfigManager.debugLog(e.getMessage());
         } finally {
             if (readyMessagesCursor != null && !readyMessagesCursor.isClosed()){
                 readyMessagesCursor.close();
@@ -333,15 +325,11 @@ import java.util.concurrent.TimeoutException;
                         // ignore problems parsing response commands
                     }
                 } else {
-                    if (mConfigManager.isDebug()) {
-                        Log.d(TAG, "Upload failed and will be retried.");
-                    }
+                    mConfigManager.debugLog("Upload failed and will be retried.");
                 }
             }
         } catch (MParticleApiClient.MPThrottleException e) {
-            if (MParticle.getInstance().getDebugMode()){
-                Log.d(Constants.LOG_TAG, e.getMessage());
-            }
+            mConfigManager.debugLog(e.getMessage());
         } catch (SQLiteException e) {
             Log.d(TAG, "Error processing batch uploads in mParticle DB", e);
         } catch (IOException ioe) {
@@ -378,8 +366,8 @@ import java.util.concurrent.TimeoutException;
                 } finally {
                     if (response != null && response.getResponseCode() > -1) {
                         dbDeleteCommand(id);
-                    } else if (mConfigManager.isDebug()) {
-                        Log.w(TAG, "Provider command processing failed and will be retried.");
+                    } else {
+                        mConfigManager.debugLog("Provider command processing failed and will be retried.");
                     }
                 }
             }
@@ -398,9 +386,6 @@ import java.util.concurrent.TimeoutException;
         uploadMessage.put(MessageKey.ID, UUID.randomUUID().toString());
         uploadMessage.put(MessageKey.TIMESTAMP, System.currentTimeMillis());
         uploadMessage.put(MessageKey.MPARTICLE_VERSION, Constants.MPARTICLE_VERSION);
-        if (BuildConfig.ECHO) {
-            //uploadMessage.put("echo", true);
-        }
         uploadMessage.put(MessageKey.OPT_OUT_HEADER, mConfigManager.getOptedOut());
         uploadMessage.put(MessageKey.CONFIG_UPLOAD_INTERVAL, mConfigManager.getUploadInterval()/1000);
         uploadMessage.put(MessageKey.CONFIG_SESSION_TIMEOUT, mConfigManager.getSessionTimeout()/1000);
@@ -424,7 +409,7 @@ import java.util.concurrent.TimeoutException;
         }
 
         uploadMessage.put(MessageKey.DEVICE_INFO, getDeviceInfo());
-        uploadMessage.put(MessageKey.DEBUG, mConfigManager.getSandboxMode());
+        uploadMessage.put(MessageKey.SANDBOX, mConfigManager.getEnvironment().equals(MParticle.Environment.Development));
 
         uploadMessage.put(MessageKey.LTV, new BigDecimal(mPreferences.getString(PrefKeys.LTV, "0")));
 
@@ -545,9 +530,9 @@ import java.util.concurrent.TimeoutException;
                                         null,
                                         null,
                                         AUDIENCE_QUERY);
-        HashMap<Integer, Segment> audiences = new HashMap<Integer, Segment>();
+        SparseArray<Segment> audiences = new SparseArray<Segment>();
 
-
+        StringBuilder keys = new StringBuilder("(");
         while (audienceCursor.moveToNext()){
             int id = audienceCursor.getInt(audienceCursor.getColumnIndex(SegmentDatabase.SegmentTable.SEGMENT_ID));
 
@@ -555,16 +540,19 @@ import java.util.concurrent.TimeoutException;
                                             audienceCursor.getString(audienceCursor.getColumnIndex(SegmentDatabase.SegmentTable.NAME)),
                                             audienceCursor.getString(audienceCursor.getColumnIndex(SegmentDatabase.SegmentTable.ENDPOINTS)));
             audiences.put(id, segment);
+            keys.append(id);
+            keys.append(", ");
         }
         audienceCursor.close();
-
+        keys.delete(keys.length()-2, keys.length());
+        keys.append(")");
 
         long currentTime = System.currentTimeMillis();
         Cursor membershipCursor = db.query(false,
                                     SegmentDatabase.SegmentMembershipTable.TABLE_NAME,
                                     MEMBERSHIP_QUERY_COLUMNS,
                                     String.format(MEMBERSHIP_QUERY_SELECTION,
-                                                    audiences.keySet().toString().replace("[", "(").replace("]", ")"),
+                                                    keys.toString(),
                                                     currentTime),
                                     null,
                                     null,

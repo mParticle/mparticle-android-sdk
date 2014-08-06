@@ -68,9 +68,6 @@ import javax.net.ssl.HttpsURLConnection;
  * <li>mp_productionUploadInterval - {@link <a href="http://developer.android.com/guide/topics/resources/more-resources.html#Integer">Integer</a>} - The length of time in seconds to send batches of messages to mParticle. Setting this too low could have an adverse effect on the device battery. <i>Default: 600</i></li>
  * <li>mp_reportUncaughtExceptions - {@link <a href="http://developer.android.com/guide/topics/resources/more-resources.html#Bool">Bool</a>} - By enabling this, the MParticle SDK will automatically log and report any uncaught exceptions, including stack traces. <i>Default: false</i></li>
  * <li>mp_sessionTimeout - {@link <a href="http://developer.android.com/guide/topics/resources/more-resources.html#Integer">Integer</a>} - The length of time (in seconds) that a user session will remain valid while application has been paused and put into the background. <i>Default: 60</i></li>
- * <li>mp_enableDebugMode - {@link <a href="http://developer.android.com/guide/topics/resources/more-resources.html#Bool">Bool</a>} - Enabling this will provide additional logcat messages to debug your implementation and usage of mParticle <i>Default: false</i></li>
- * <li>mp_debugUploadInterval - {@link <a href="http://developer.android.com/guide/topics/resources/more-resources.html#Integer">Integer</a>} - The upload interval (see above) while in debug mode. <i>Default: 10</i></li>
- * <li>mp_enableSandboxMode - {@link <a href="http://developer.android.com/guide/topics/resources/more-resources.html#Bool">Bool</a>} - Enabling this will mark events as sandbox messages for debugging and isolation in the mParticle web application. <i>Default: false</i></li>
  * <li>mp_enableNetworkPerformanceMeasurement - {@link <a href="http://developer.android.com/guide/topics/resources/more-resources.html#Bool">Bool</a>} - Enabling this will allow the mParticle SDK to measure network requests made with Apache's HttpClient as well as UrlConnection. <i>Default: false</i></li>
  * </ul>
  */
@@ -96,7 +93,6 @@ public class MParticle {
     private ExceptionHandler mExHandler;
     private Context mAppContext;
     private String mApiKey;
-    private Boolean mDebugMode = false;
     private final EmbeddedKitManager embeddedKitManager;
     private int mEventCount = 0;
     private String mLaunchUri;
@@ -157,10 +153,6 @@ public class MParticle {
                 //swallow this
             }
         }
-
-
-
-
     }
 
     /**
@@ -183,7 +175,38 @@ public class MParticle {
      */
 
     public static void start(Context context, String apiKey, String secret) {
-        start(context, apiKey, secret, false, InstallType.AutoDetect);
+        start(context, apiKey, secret, InstallType.AutoDetect);
+    }
+
+    /**
+     * Start the mParticle SDK and begin tracking a user session.
+     *
+     * The InstallType parameter is used to determine if this is a new install or an upgrade. In
+     * the case where the mParticle SDK is being added to an existing app with existing users, this
+     * parameter prevents mParticle from categorizing all users as new users.
+     *
+     * @param context     Required reference to a Context object
+     * @param apiKey      The API key to use for authentication with mParticle
+     * @param secret      The API secret to use for authentication with mParticle
+     * @param installType Specify whether this is a new install or an upgrade, or let mParticle detect
+     *
+     * @see com.mparticle.MParticle.InstallType
+     */
+
+    public static void start(final Context context, final String apiKey, final String secret, final InstallType installType) {
+        if (context == null) {
+            throw new IllegalArgumentException("mParticle failed to start: context is required.");
+        }
+        if (apiKey == null) {
+            throw new IllegalArgumentException("mParticle failed to start: apiKey is required.");
+        }
+        if (secret == null) {
+            throw new IllegalArgumentException("mParticle failed to start: secret is required.");
+        }
+        if (installType == null) {
+            throw new IllegalArgumentException("mParticle failed to start: installType is required.");
+        }
+        MParticle.getInstance(context, apiKey, secret, installType);
     }
 
     /**
@@ -204,39 +227,7 @@ public class MParticle {
         if (context == null) {
             throw new IllegalArgumentException("mParticle failed to start: context is required.");
         }
-        MParticle.getInstance(context, null, null, false, installType);
-    }
-
-    /**
-     * Start the mParticle SDK and begin tracking a user session.
-     *
-     * The InstallType parameter is used to determine if this is a new install or an upgrade. In
-     * the case where the mParticle SDK is being added to an existing app with existing users, this
-     * parameter prevents mParticle from categorizing all users as new users.
-     *
-     * @param context     Required reference to a Context object
-     * @param apiKey      The API key to use for authentication with mParticle
-     * @param secret      The API secret to use for authentication with mParticle
-     * @param sandboxMode Enable/disable sandbox mode
-     * @param installType Specify whether this is a new install or an upgrade, or let mParticle detect
-     *
-     * @see com.mparticle.MParticle.InstallType
-     */
-
-    public static void start(final Context context, final String apiKey, final String secret, final Boolean sandboxMode, final InstallType installType) {
-        if (context == null) {
-            throw new IllegalArgumentException("mParticle failed to start: context is required.");
-        }
-        if (apiKey == null) {
-            throw new IllegalArgumentException("mParticle failed to start: apiKey is required.");
-        }
-        if (secret == null) {
-            throw new IllegalArgumentException("mParticle failed to start: secret is required.");
-        }
-        if (installType == null) {
-            throw new IllegalArgumentException("mParticle failed to start: installType is required.");
-        }
-        MParticle.getInstance(context, apiKey, secret, sandboxMode, installType);
+        MParticle.getInstance(context, null, null, installType);
     }
 
     /**
@@ -247,11 +238,10 @@ public class MParticle {
      * @param context     the Activity that is creating the instance
      * @param apiKey      the API key for your account
      * @param secret      the API secret for your account
-     * @param sandboxMode set the SDK in sandbox mode, xml configuration will override this value
      * @return An instance of the mParticle SDK configured with your API key
      *
      */
-    private static MParticle getInstance(Context context, String apiKey, String secret, Boolean sandboxMode, InstallType installType) {
+    private static MParticle getInstance(Context context, String apiKey, String secret, InstallType installType) {
         if (instance == null) {
             synchronized (MParticle.class) {
                 if (instance == null) {
@@ -269,7 +259,7 @@ public class MParticle {
                     }
 
                     EmbeddedKitManager embeddedKitManager1 = new EmbeddedKitManager(context);
-                    ConfigManager appConfigManager = new ConfigManager(context, apiKey, secret, sandboxMode, embeddedKitManager1);
+                    ConfigManager appConfigManager = new ConfigManager(context, apiKey, secret, embeddedKitManager1);
                     Context appContext = context.getApplicationContext();
 
                     Boolean firstRun = sPreferences.getBoolean(PrefKeys.FIRSTRUN + appConfigManager.getApiKey(), true);
@@ -319,7 +309,7 @@ public class MParticle {
         if (instance == null) {
             throw new IllegalStateException("Failed to get MParticle instance, getInstance() called prior to start().");
         }
-        return getInstance(null, null, null, false, null);
+        return getInstance(null, null, null, null);
     }
 
     /* package-private */
@@ -440,8 +430,7 @@ public class MParticle {
     }
 
     private void endSession(long sessionEndTime) {
-        if (mDebugMode)
-            debugLog("Ended session");
+        mConfigManager.debugLog("Ended session");
 
        // mMessageManager.stopSession(mSessionID, sessionEndTime, sessionEndTime - mSessionStartTime);
         mMessageManager.endSession(mSessionID, sessionEndTime, sessionEndTime - mSessionStartTime);
@@ -466,8 +455,7 @@ public class MParticle {
         if (0 != mSessionStartTime &&
                 mAppStateManager.isBackgrounded() &&
                 (mConfigManager.getSessionTimeout() < now - mLastEventTime)) {
-            if (mDebugMode)
-                debugLog("Session timed out");
+            mConfigManager.debugLog("Session timed out");
 
             endSession(mLastEventTime);
             return true;
@@ -485,8 +473,7 @@ public class MParticle {
         mSessionAttributes = new JSONObject();
         mMessageManager.startSession(mSessionID, mSessionStartTime, mLaunchUri);
         mTimeoutHandler.sendEmptyMessageDelayed(0, mConfigManager.getSessionTimeout());
-        if (mDebugMode)
-            debugLog("Started new session");
+        mConfigManager.debugLog("Started new session");
         // clear the launch URI so it isn't sent on future sessions
         mLaunchUri = null;
     }
@@ -504,8 +491,7 @@ public class MParticle {
      */
     public void setInstallReferrer(String referrer) {
         sPreferences.edit().putString(PrefKeys.INSTALL_REFERRER, referrer).commit();
-        if (mDebugMode)
-            debugLog("Set installReferrer: " + referrer);
+        mConfigManager.debugLog("Set installReferrer: ", referrer);
     }
 
     /**
@@ -605,13 +591,13 @@ public class MParticle {
             JSONObject eventDataJSON = enforceAttributeConstraints(eventInfo);
             if (mConfigManager.getSendOoEvents()) {
                 mMessageManager.logEvent(mSessionID, mSessionStartTime, mLastEventTime, eventName, eventType, eventDataJSON, eventLength);
-                if (mDebugMode) {
+
                     if (null == eventDataJSON) {
-                        debugLog("Logged event: " + eventName);
+                        mConfigManager.debugLog("Logged event: ", eventName);
                     } else {
-                        debugLog("Logged event: " + eventName + " with data " + eventDataJSON);
+                        mConfigManager.debugLog("Logged event: ", eventName, " with data ", eventDataJSON.toString());
                     }
-                }
+
 
             }
             embeddedKitManager.logEvent(eventType, eventName, eventDataJSON);
@@ -685,9 +671,8 @@ public class MParticle {
         if (checkEventLimit()) {
             JSONObject transactionJson = enforceAttributeConstraints(product);
             mMessageManager.logEvent(mSessionID, mSessionStartTime, mLastEventTime, event.toString(), EventType.Transaction, transactionJson, 0);
-            if (mDebugMode) {
-                debugLog("Logged product event with data: " + product.toString());
-            }
+            mConfigManager.debugLog("Logged product event with data: ", product.toString());
+
 
         }
         if (purchaseEvent) {
@@ -720,13 +705,13 @@ public class MParticle {
             JSONObject eventDataJSON = enforceAttributeConstraints(eventData);
             if (mConfigManager.getSendOoEvents()) {
                 mMessageManager.logScreen(mSessionID, mSessionStartTime, mLastEventTime, screenName, eventDataJSON, started);
-                if (mDebugMode) {
+
                     if (null == eventDataJSON) {
-                        debugLog("Logged screen: " + screenName);
+                        mConfigManager.debugLog("Logged screen: ", screenName);
                     } else {
-                        debugLog("Logged screen: " + screenName + " with data " + eventDataJSON);
+                        mConfigManager.debugLog("Logged screen: ", screenName, " with data ", eventDataJSON.toString());
                     }
-                }
+
             }
             embeddedKitManager.logScreen(screenName, eventDataJSON);
         }
@@ -769,8 +754,7 @@ public class MParticle {
             }
             ensureActiveSession();
             mMessageManager.logBreadcrumb(mSessionID, mSessionStartTime, mLastEventTime, breadcrumb);
-            if (mDebugMode)
-                debugLog("Logged breadcrumb: " + breadcrumb);
+            mConfigManager.debugLog("Logged breadcrumb: " + breadcrumb);
 
         }
     }
@@ -800,8 +784,7 @@ public class MParticle {
             if (checkEventLimit()) {
                 JSONObject eventDataJSON = enforceAttributeConstraints(eventData);
                 mMessageManager.logErrorEvent(mSessionID, mSessionStartTime, mLastEventTime, message, null, eventDataJSON);
-                if (mDebugMode)
-                    debugLog(
+                mConfigManager.debugLog(
                             "Logged error with message: " + (message == null ? "<none>" : message) +
                                     " with data: " + (eventDataJSON == null ? "<none>" : eventDataJSON.toString())
                     );
@@ -829,13 +812,10 @@ public class MParticle {
             SocketImplFactory factory = new MPSocketImplFactory(socket.getClass());
             Socket.setSocketImplFactory(factory);
         } catch (Error e) {
-            if (getDebugMode()) {
-                Log.d(Constants.LOG_TAG, "Error initiating network performance monitoring: " + e.getMessage());
-            }
+            mConfigManager.debugLog("Error initiating network performance monitoring: " + e.getMessage());
+
         } catch (Exception e) {
-            if (getDebugMode()) {
-                Log.d(Constants.LOG_TAG, "Exception initiating network performance monitoring: " + e.getMessage());
-            }
+            mConfigManager.debugLog("Exception initiating network performance monitoring: " + e.getMessage());
         }
         try {
             SSLSocketFactory currentSocketFactory = org.apache.http.conn.ssl.SSLSocketFactory.getSocketFactory();
@@ -843,13 +823,11 @@ public class MParticle {
             MPSSLSocketFactory wrapperFactory = new MPSSLSocketFactory(innerFactory);
             MPUtility.getAccessibleField(org.apache.http.conn.ssl.SSLSocketFactory.class, javax.net.ssl.SSLSocketFactory.class).set(currentSocketFactory, wrapperFactory);
         } catch (Error e) {
-            if (getDebugMode()) {
-                Log.d(Constants.LOG_TAG, "Error initiating network performance monitoring: " + e.getMessage());
-            }
+            mConfigManager.debugLog("Error initiating network performance monitoring: " + e.getMessage());
+
         } catch (Exception e) {
-            if (getDebugMode()) {
-                Log.d(Constants.LOG_TAG, "Exception initiating network performance monitoring: " + e.getMessage());
-            }
+            mConfigManager.debugLog("Exception initiating network performance monitoring: " + e.getMessage());
+
         }
 
         try {
@@ -867,25 +845,20 @@ public class MParticle {
 
             URL.setURLStreamHandlerFactory(factory);
         } catch (Error e) {
-            if (getDebugMode()) {
-                Log.d(Constants.LOG_TAG, "Error initiating network performance monitoring: " + e.getMessage());
-            }
+            mConfigManager.debugLog("Error initiating network performance monitoring: " + e.getMessage());
+
         } catch (Exception e) {
-            if (getDebugMode()) {
-                Log.d(Constants.LOG_TAG, "Exception initiating network performance monitoring: " + e.getMessage());
-            }
+            mConfigManager.debugLog("Exception initiating network performance monitoring: " + e.getMessage());
+
         }
 
         try {
             HttpsURLConnection.setDefaultSSLSocketFactory(new MPSSLSocketFactory(HttpsURLConnection.getDefaultSSLSocketFactory()));
         } catch (Error e) {
-            if (getDebugMode()) {
-                Log.d(Constants.LOG_TAG, "Error initiating network performance monitoring: " + e.getMessage());
-            }
+            mConfigManager.debugLog("Error initiating network performance monitoring: ", e.getMessage());
+
         } catch (Exception e) {
-            if (getDebugMode()) {
-                Log.d(Constants.LOG_TAG, "Exception initiating network performance monitoring: " + e.getMessage());
-            }
+            mConfigManager.debugLog("Exception initiating network performance monitoring: " + e.getMessage());
         }
         measuredRequestManager.setEnabled(true);
 
@@ -917,9 +890,7 @@ public class MParticle {
                     HttpsURLConnection.setDefaultSSLSocketFactory(((MPSSLSocketFactory) current).delegateFactory);
                 }
             } catch (Exception e) {
-                if (getDebugMode()) {
-                    Log.d(Constants.LOG_TAG, "Error stopping network performance monitoring: " + e.getMessage());
-                }
+                mConfigManager.debugLog("Error stopping network performance monitoring: ", e.getMessage());
             }
         }
     }
@@ -990,8 +961,7 @@ public class MParticle {
             if (checkEventLimit()) {
                 JSONObject eventDataJSON = enforceAttributeConstraints(eventData);
                 mMessageManager.logErrorEvent(mSessionID, mSessionStartTime, mLastEventTime, message, exception, eventDataJSON);
-                if (mDebugMode)
-                    debugLog(
+                mConfigManager.debugLog(
                             "Logged exception with message: " + (message == null ? "<none>" : message) +
                                     " with data: " + (eventDataJSON == null ? "<none>" : eventDataJSON.toString()) +
                                     " with exception: " + (exception == null ? "<none>" : exception.getMessage())
@@ -1070,9 +1040,8 @@ public class MParticle {
     public void setSessionAttribute(String key, String value) {
         if (mConfigManager.getSendOoEvents()) {
             ensureActiveSession();
-            if (mDebugMode) {
-                debugLog("Set session attribute: " + key + "=" + value);
-            }
+            mConfigManager.debugLog("Set session attribute: " + key + "=" + value);
+
             if (setCheckedAttribute(mSessionAttributes, key, value, true)) {
                 mMessageManager.setSessionAttributes(mSessionID, mSessionAttributes);
             }
@@ -1089,9 +1058,8 @@ public class MParticle {
     public void logout(){
         if (mConfigManager.getSendOoEvents()) {
             ensureActiveSession();
-            if (mDebugMode) {
-                debugLog("Logging out.");
-            }
+            mConfigManager.debugLog("Logging out.");
+
 
             mMessageManager.logProfileAction(Constants.ProfileActions.LOGOUT, mSessionID, mSessionStartTime);
         }
@@ -1104,11 +1072,11 @@ public class MParticle {
      * @param value the attribute value
      */
     public void setUserAttribute(String key, String value) {
-        if (mDebugMode)
+
             if (value != null) {
-                debugLog("Set user attribute: " + key + " with value " + value);
+                mConfigManager.debugLog("Set user attribute: " + key + " with value " + value);
             } else {
-                debugLog("Set user attribute: " + key);
+                mConfigManager.debugLog("Set user attribute: " + key);
             }
 
         if (setCheckedAttribute(mUserAttributes, key, value)) {
@@ -1124,8 +1092,8 @@ public class MParticle {
      * @param key the key of the attribute
      */
     public void removeUserAttribute(String key) {
-        if (mDebugMode && key != null) {
-            debugLog("Removing user attribute: " + key);
+        if (key != null) {
+            mConfigManager.debugLog("Removing user attribute: " + key);
         }
         if (mUserAttributes.has(key) || mUserAttributes.has(findCaseInsensitiveKey(mUserAttributes, key))) {
             mUserAttributes.remove(key);
@@ -1177,8 +1145,7 @@ public class MParticle {
 
     public void setUserIdentity(String id, IdentityType identityType) {
         if (id != null && id.length() > 0) {
-            if (mDebugMode)
-                debugLog("Setting user identity: " + id);
+            mConfigManager.debugLog("Setting user identity: " + id);
 
             if (null != id && id.length() > Constants.LIMIT_ATTR_VALUE) {
                 Log.w(Constants.LOG_TAG, "Id value length exceeds limit. Discarding id: " + id);
@@ -1282,52 +1249,50 @@ public class MParticle {
 
             mConfigManager.setOptOut(optOutStatus);
 
-            if (mDebugMode)
-                debugLog("Set opt-out: " + optOutStatus);
+            mConfigManager.debugLog("Set opt-out: " + optOutStatus);
         }
     }
 
     /**
-     * Turn on or off debug mode for mParticle. In debug mode, the mParticle SDK will output
-     * informational messages to LogCat. This should never be enabled
-     * in a production application.
+     * Force the SDK into either Production or Development mode. See {@link com.mparticle.MParticle.Environment}
+     * for implications of each mode. The SDK automatically determines which mode it should be in depending
+     * on the signing and the DEBUGGABLE flag of your application's AndroidManifest.xml, so this method should
+     * typically not be used.
      *
-     * @param debugMode
+     * This method can however be useful while you're testing a release-signed version of your application, and you have *not* set the
+     * debuggable flag in your AndroidManifest.xml. In this case, you can force the SDK into development mode to prevent sending
+     * your test usage/data as production data. It's crucial, however, that prior to submission to Google Play that you ensure
+     * you are no longer forcing development mode.
+     *
+     * @param environment
      */
-    public void setDebugMode(Boolean debugMode) {
-        mConfigManager.setDebug(debugMode);
+    public void setEnvironment(Environment environment){
+        if (environment != null) {
+            if (environment.equals(Environment.Development)) {
+                if (mConfigManager.isDebugEnvironment()){
+                    Log.w(Constants.LOG_TAG, "Forcing environment to DEVELOPMENT, but your app is already debuggable and hence in DEVELOPMENT mode - did you mean to call forceEnvironment(Environment.Production) instead?");
+                } else{
+                    Log.w(Constants.LOG_TAG, "Forcing environment to DEVELOPMENT on a production app! Be careful, be sure not to do this in an application that you submit to Google Play.");
+                }
+            }else if (environment.equals(Environment.Production)) {
+                if (mConfigManager.isDebugEnvironment()) {
+                    Log.w(Constants.LOG_TAG, "Forcing environment to PRODUCTION on a debuggable app. Be careful, you are now in PRODUCTION and any test event data will be mixed with live event data!");
+                } else {
+                    Log.w(Constants.LOG_TAG, "Forcing environment to PRODUCTION, but your app is already in PRODUCTION mode - did you mean to call forceEnvironment(Environment.Development) instead?");
+                }
+            }
+        }
+        mConfigManager.setForceEnvironment(environment);
     }
-
 
     /**
-     * Get the current debug mode status
+     * Get the current Environment that the SDK has interpreted. Will never return AutoDetect.
      *
-     * @return If debug mode is enabled or disabled
+     * @return
      */
-    public Boolean getDebugMode() {
-        return mConfigManager.isDebug();
+    public Environment getEnvironment(){
+        return mConfigManager.getEnvironment();
     }
-
-    /**
-     * Turn on or off sandbox mode for mParticle. In sandbox mode, events will be fired immediately
-     * and will be highlighted as sandbox events in the mParticle web console. This should never be enabled
-     * in a production application.
-     *
-     * @param sandboxMode
-     */
-    public void setSandboxMode(Boolean sandboxMode) {
-        mConfigManager.setSandboxMode(sandboxMode);
-    }
-
-    /**
-     * Get the current sandbox mode status
-     *
-     * @return If sandbox mode is enabled or disabled
-     */
-    public Boolean getSandboxMode() {
-        return mConfigManager.getSandboxMode();
-    }
-
 
     /**
      * Set the upload interval period to control how frequently uploads occur.
@@ -1336,15 +1301,6 @@ public class MParticle {
      */
     public void setUploadInterval(int uploadInterval) {
         mConfigManager.setUploadInterval(uploadInterval);
-    }
-
-    /**
-     * Set the upload interval period to control how frequently uploads occur when in debug mode.
-     *
-     * @param uploadInterval the number of seconds between uploads
-     */
-    public void setDebugUploadInterval(int uploadInterval) {
-        mConfigManager.setDebugUploadInterval(uploadInterval);
     }
 
     /**
@@ -1506,14 +1462,6 @@ public class MParticle {
         LicenseChecker checker = new LicenseChecker(
                 mAppContext, policy, encodedPublicKey);
         checker.checkAccess(licenseCheckerCallback);
-    }
-
-    private void debugLog(String message) {
-        if (null != mSessionID) {
-            Log.d(Constants.LOG_TAG, mApiKey + ": " + mSessionID + ": " + message);
-        } else {
-            Log.d(Constants.LOG_TAG, mApiKey + ": " + message);
-        }
     }
 
     /**
@@ -1684,6 +1632,38 @@ public class MParticle {
             return value;
         }
 
+    }
+
+    /**
+     * The Environment in which the SDK and hosting app are running. The method should not usually be necessary - the SDK
+     * automatically detects the Environment based on the DEBUGGABLE flag of your application. The DEBUGGABLE flag of your
+     * application will be TRUE when signing with a debug certificate during development, or if you have explicitly set your
+     * application to debug within your AndroidManifest.xml.
+     *
+     * @see {@link #setEnvironment(com.mparticle.MParticle.Environment)} to override this behavior.
+     *
+     */
+    public enum Environment {
+        /**
+         * AutoDetect mode (DEFAULT). In this mode, the SDK will automatically configure itself based on the signing configuration
+         * and the DEBUGGABLE flag of your application.
+         */
+        AutoDetect(0),
+        /**
+         * Development mode. In this mode, all data from the SDK will be treated as development data, and will be silo'd from your
+         * production data. Alos, the SDK will more aggressively upload data to the mParticle platform, to aide in a faster implementation.
+         */
+        Development(1),
+        /**
+         * Production mode. In this mode, all data from the SDK will be treated as production data, and will be forwarded to all configured
+         * integrations for your application. The SDK will honor the configured upload interval.
+         */
+        Production(2);
+        private final int value;
+        int getValue() { return value; }
+        private Environment(int value){
+            this.value = value;
+        }
     }
 
     public interface Push {

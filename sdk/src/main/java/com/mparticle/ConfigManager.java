@@ -2,7 +2,9 @@ package com.mparticle;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.pm.ApplicationInfo;
 import android.os.Build;
+import android.util.Log;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebView;
 
@@ -16,9 +18,6 @@ import org.json.JSONObject;
 class ConfigManager {
     public static final String CONFIG_JSON = "json";
     private static final String KEY_OPT_OUT = "oo";
-    private static volatile ConfigManager instance;
-
-    public static final String KEY_SESSION_UPLOAD_MODE = "su";
     public static final String KEY_UNHANDLED_EXCEPTIONS = "cue";
     public static final String KEY_PUSH_MESSAGES = "pmk";
     public static final String KEY_NETWORK_PERFORMANCE = "cnp";
@@ -26,37 +25,41 @@ class ConfigManager {
     private static final String KEY_ADTRUTH = "atc";
     private static final String KEY_ADTRUTH_URL = "cp";
     private static final String KEY_ADTRUTH_INTERVAL = "ci";
-
     public static final String VALUE_APP_DEFINED = "appdefined";
     public static final String VALUE_CUE_CATCH = "forcecatch";
     public static final String VALUE_CUE_IGNORE = "forceignore";
     public static final String VALUE_CNP_CAPTURE = "forcetrue";
     public static final String VALUE_CNP_NO_CAPTURE = "forcefalse";
-
-    private final Context mContext;
-
-    private final SharedPreferences mPreferences;
     private static final String PREFERENCES_FILE = "mp_preferences";
-    private final EmbeddedKitManager embeddedKitManager;
-    private AppConfig localPrefs;
-    public static final String DEBUG_SERVICE_HOST = "api-qa.mparticle.com";
-    private String[] pushKeys;
-    private int uploadMode = Constants.Status.BATCH_READY;
-    private String logUnhandledExceptions = VALUE_APP_DEFINED;
+    private static final int DEVMODE_UPLOAD_INTERVAL_MILLISECONDS = 5 * 1000;
 
-    private boolean loaded = false;
+    private Context mContext;
 
-    private boolean sendOoEvents;
-    private JSONObject providerPersistence;
-    private String networkPerformance = "";
+    private SharedPreferences mPreferences;
+
+    private EmbeddedKitManager mEmbeddedKitManager;
+    private AppConfig mLocalPrefs;
+    private String[] mPushKeys;
+    private String mLogUnhandledExceptions = VALUE_APP_DEFINED;
+
+    private boolean mLoaded = false;
+
+    private boolean mSendOoEvents;
+    private JSONObject mProviderPersistence;
+    private String mNetworkPerformance = "";
+    private Boolean mIsDebugEnvironment = null;
 
     private AdtruthConfig adtruth;
 
-    public ConfigManager(Context context, String key, String secret, boolean sandboxMode, EmbeddedKitManager embeddedKitManager) {
+    private ConfigManager(){
+
+    }
+
+    public ConfigManager(Context context, String key, String secret, EmbeddedKitManager embeddedKitManager) {
         mContext = context.getApplicationContext();
         mPreferences = mContext.getSharedPreferences(PREFERENCES_FILE, Context.MODE_PRIVATE);
-        localPrefs = new AppConfig(mContext, key, secret, sandboxMode);
-        this.embeddedKitManager = embeddedKitManager;
+        mLocalPrefs = new AppConfig(mContext, key, secret);
+        mEmbeddedKitManager = embeddedKitManager;
     }
 
     public synchronized void updateConfig(JSONObject responseJSON) throws JSONException {
@@ -65,37 +68,32 @@ class ConfigManager {
         //so that the cache isn't prematurely busted.
         responseJSON.remove("id");
         responseJSON.remove("ct");
-        if (loaded && mPreferences.getString(CONFIG_JSON,"").equals(responseJSON.toString())){
+        if (mLoaded && mPreferences.getString(CONFIG_JSON,"").equals(responseJSON.toString())){
             return;
         }
 
         SharedPreferences.Editor editor = mPreferences.edit();
         editor.putString(CONFIG_JSON, responseJSON.toString());
 
-        if (responseJSON.has(KEY_SESSION_UPLOAD_MODE)) {
-            String sessionUploadMode = responseJSON.getString(KEY_SESSION_UPLOAD_MODE);
-            uploadMode = ("batch".equalsIgnoreCase(sessionUploadMode)) ? Constants.Status.BATCH_READY : Constants.Status.READY;
-        }
-
         if (responseJSON.has(KEY_UNHANDLED_EXCEPTIONS)) {
-            logUnhandledExceptions = responseJSON.getString(KEY_UNHANDLED_EXCEPTIONS);
+            mLogUnhandledExceptions = responseJSON.getString(KEY_UNHANDLED_EXCEPTIONS);
         }
 
         if (responseJSON.has(KEY_PUSH_MESSAGES)) {
             JSONArray pushKeyArray = responseJSON.getJSONArray(KEY_PUSH_MESSAGES);
             editor.putString(KEY_PUSH_MESSAGES, pushKeyArray.toString());
             if (pushKeyArray != null){
-                pushKeys = new String[pushKeyArray.length()];
+                mPushKeys = new String[pushKeyArray.length()];
             }
             for (int i = 0; i < pushKeyArray.length(); i++){
-                pushKeys[i] = pushKeyArray.getString(i);
+                mPushKeys[i] = pushKeyArray.getString(i);
             }
         }
 
-        networkPerformance = responseJSON.optString(KEY_NETWORK_PERFORMANCE, VALUE_APP_DEFINED);
+        mNetworkPerformance = responseJSON.optString(KEY_NETWORK_PERFORMANCE, VALUE_APP_DEFINED);
 
         if (responseJSON.has(KEY_OPT_OUT)){
-            sendOoEvents = responseJSON.getBoolean(KEY_OPT_OUT);
+            mSendOoEvents = responseJSON.getBoolean(KEY_OPT_OUT);
         }
 
         if (responseJSON.has(ProviderPersistence.KEY_PERSISTENCE)) {
@@ -118,10 +116,10 @@ class ConfigManager {
         applyConfig();
 
         if (responseJSON.has(KEY_EMBEDDED_KITS)) {
-            embeddedKitManager.updateKits(responseJSON.getJSONArray(KEY_EMBEDDED_KITS));
+            mEmbeddedKitManager.updateKits(responseJSON.getJSONArray(KEY_EMBEDDED_KITS));
         }
         
-        loaded = true;
+        mLoaded = true;
     }
 
     public AdtruthConfig getAdtruth(){
@@ -132,7 +130,7 @@ class ConfigManager {
     }
 
     public String[] getPushKeys(){
-        return pushKeys;
+        return mPushKeys;
     }
 
     private void applyConfig() {
@@ -141,86 +139,74 @@ class ConfigManager {
         } else {
             MParticle.getInstance().disableUncaughtExceptionLogging();
         }
-        if (!VALUE_APP_DEFINED.equals(networkPerformance)){
-            if (VALUE_CNP_CAPTURE.equals(networkPerformance)){
+        if (!VALUE_APP_DEFINED.equals(mNetworkPerformance)){
+            if (VALUE_CNP_CAPTURE.equals(mNetworkPerformance)){
                 MParticle.getInstance().beginMeasuringNetworkPerformance();
-            }else if (VALUE_CNP_NO_CAPTURE.equals(networkPerformance)){
+            }else if (VALUE_CNP_NO_CAPTURE.equals(mNetworkPerformance)){
                 MParticle.getInstance().endMeasuringNetworkPerformance();
             }
         }
     }
 
     public boolean getLogUnhandledExceptions() {
-        if (logUnhandledExceptions.equals(VALUE_APP_DEFINED)) {
-            return localPrefs.reportUncaughtExceptions;
+        if (mLogUnhandledExceptions.equals(VALUE_APP_DEFINED)) {
+            return mLocalPrefs.reportUncaughtExceptions;
         } else {
-            return logUnhandledExceptions.equals(VALUE_CUE_CATCH);
-        }
-    }
-
-    public boolean getSandboxMode() {
-        return localPrefs.sandboxMode;
-    }
-
-    public int getUploadMode() {
-        if (getSandboxMode()){
-            return Constants.Status.READY;
-        }else{
-            return uploadMode;
+            return mLogUnhandledExceptions.equals(VALUE_CUE_CATCH);
         }
     }
 
     public String getApiKey() {
-        return localPrefs.mKey;
+        return mLocalPrefs.mKey;
     }
 
     public String getApiSecret() {
-        return localPrefs.mSecret;
+        return mLocalPrefs.mSecret;
     }
 
     public long getUploadInterval() {
-        if (localPrefs.debug) {
-            return 1000 * localPrefs.debugUploadInterval;
+        if (getEnvironment().equals(MParticle.Environment.Development)) {
+            return DEVMODE_UPLOAD_INTERVAL_MILLISECONDS;
         } else {
-            return 1000 * localPrefs.uploadInterval;
+            return 1000 * mLocalPrefs.uploadInterval;
         }
     }
 
-    public boolean isDebug() {
-        return localPrefs.debug;
+    public boolean isDebugEnvironment(){
+        if (mIsDebugEnvironment == null){
+            mIsDebugEnvironment = ( 0 != ( mContext.getApplicationInfo().flags &= ApplicationInfo.FLAG_DEBUGGABLE ) );
+        }
+        return mIsDebugEnvironment;
     }
 
-    public void setDebug(boolean enabled) {
-        localPrefs.debug = enabled;
-    }
-    public void setSandboxMode(boolean enabled) {
-        localPrefs.sandboxMode = enabled;
+    public MParticle.Environment getEnvironment() {
+        if (mLocalPrefs.forcedEnvironment != MParticle.Environment.AutoDetect){
+            return mLocalPrefs.forcedEnvironment;
+        }else{
+            return isDebugEnvironment() ? MParticle.Environment.Development : MParticle.Environment.Production;
+        }
     }
 
     public void setUploadInterval(int uploadInterval) {
-        localPrefs.uploadInterval = uploadInterval;
-    }
-
-    public void setDebugUploadInterval(int uploadInterval) {
-        localPrefs.debugUploadInterval = uploadInterval;
+        mLocalPrefs.uploadInterval = uploadInterval;
     }
 
     public int getSessionTimeout() {
-        return localPrefs.sessionTimeout * 1000;
+        return mLocalPrefs.sessionTimeout * 1000;
     }
 
     public void setSessionTimeout(int sessionTimeout) {
-        localPrefs.sessionTimeout = sessionTimeout;
+        mLocalPrefs.sessionTimeout = sessionTimeout;
     }
 
     public boolean isPushEnabled() {
-        return localPrefs.isPushEnabled ||
+        return mLocalPrefs.isPushEnabled ||
                 (mPreferences.getBoolean(Constants.PrefKeys.PUSH_ENABLED, false) && getPushSenderId() != null);
     }
 
     public String getPushSenderId() {
-        if (localPrefs.pushSenderId != null && localPrefs.pushSenderId.length() > 0)
-            return localPrefs.pushSenderId;
+        if (mLocalPrefs.pushSenderId != null && mLocalPrefs.pushSenderId.length() > 0)
+            return mLocalPrefs.pushSenderId;
         else return mPreferences.getString(Constants.PrefKeys.PUSH_SENDER_ID, null);
     }
 
@@ -233,7 +219,7 @@ class ConfigManager {
 
     public void restoreFromCache() {
         try{
-            if (!loaded){
+            if (!mLoaded){
                 updateConfig(new JSONObject(mPreferences.getString(ConfigManager.CONFIG_JSON, "")));
             }
         }catch(Exception e){
@@ -241,12 +227,22 @@ class ConfigManager {
         }
     }
 
+    void debugLog(String... messages) {
+        if (messages != null && getEnvironment().equals(MParticle.Environment.Development)) {
+            StringBuilder logMessage = new StringBuilder();
+            for (String m : messages){
+                logMessage.append(m);
+            }
+            Log.d(Constants.LOG_TAG, logMessage.toString());
+        }
+    }
+
     public String getLicenseKey() {
-        return localPrefs.licenseKey;
+        return mLocalPrefs.licenseKey;
     }
 
     public boolean isLicensingEnabled() {
-        return localPrefs.licenseKey != null && localPrefs.isLicensingEnabled;
+        return mLocalPrefs.licenseKey != null && mLocalPrefs.isLicensingEnabled;
     }
 
     public void setPushSoundEnabled(boolean pushSoundEnabled) {
@@ -266,7 +262,7 @@ class ConfigManager {
         if (!optedOut){
             return true;
         }else{
-            return sendOoEvents;
+            return mSendOoEvents;
         }
 
     }
@@ -281,7 +277,7 @@ class ConfigManager {
     }
 
     public boolean isAutoTrackingEnabled() {
-        return localPrefs.autoTrackingEnabled;
+        return mLocalPrefs.autoTrackingEnabled;
     }
 
     public boolean isPushSoundEnabled() {
@@ -322,20 +318,20 @@ class ConfigManager {
     }
 
     private synchronized void setProviderPersistence(JSONObject persistence){
-        providerPersistence = persistence;
+        mProviderPersistence = persistence;
     }
 
     public synchronized JSONObject getProviderPersistence() {
-        return providerPersistence;
+        return mProviderPersistence;
     }
 
     public boolean isNetworkPerformanceEnabled() {
         return Build.VERSION.SDK_INT > Build.VERSION_CODES.FROYO &&
-                localPrefs.networkingEnabled;
+                mLocalPrefs.networkingEnabled;
     }
 
     public void setNetworkingEnabled(boolean networkingEnabled) {
-        this.localPrefs.networkingEnabled = networkingEnabled;
+        mLocalPrefs.networkingEnabled = networkingEnabled;
     }
 
     public void setCookies(JSONObject cookies) {
@@ -355,11 +351,15 @@ class ConfigManager {
     }
 
     public int getAudienceTimeout() {
-        return localPrefs.audienceTimeout;
+        return mLocalPrefs.audienceTimeout;
     }
 
     public void handleBackgrounded() {
         getAdtruth().process();
+    }
+
+    public void setForceEnvironment(MParticle.Environment environment) {
+        mLocalPrefs.forcedEnvironment = environment;
     }
 
     class AdtruthConfig {
@@ -391,7 +391,12 @@ class ConfigManager {
                 wv = new WebView(mContext);
                 wv.getSettings().setJavaScriptEnabled(true);
                 wv.addJavascriptInterface(this, "mParticleSDK");
-                wv.loadUrl(url);
+                wv.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        wv.loadUrl(url);
+                    }
+                });
             }
         }
 

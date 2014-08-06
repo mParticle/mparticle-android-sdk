@@ -40,9 +40,7 @@ class PushRegistrationHelper {
         SharedPreferences preferences = context.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
         String registrationId = preferences.getString(Constants.PrefKeys.PUSH_REGISTRATION_ID, "");
         if (registrationId == null || registrationId.length() == 0) {
-            if (MParticle.getInstance().getDebugMode()) {
-                Log.d(Constants.LOG_TAG, "GCM Registration ID not found.");
-            }
+            MParticle.getInstance().mConfigManager.debugLog("GCM Registration ID not found.");
             return null;
         }
         // Check if app was updated; if so, it must clear the registration ID

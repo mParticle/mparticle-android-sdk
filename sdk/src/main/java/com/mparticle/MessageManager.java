@@ -428,9 +428,7 @@ import java.util.UUID;
 
     public void setLocation(Location location) {
         sLocation = location;
-        if (mConfigManager.isDebug()) {
-            Log.d(TAG, "Received location update: " + location);
-        }
+        mConfigManager.debugLog("Received location update: " + location);
     }
 
     public void logStateTransition(String stateTransInit, String sessionId, long sessionStartTime, Bundle lastNotificationBundle) {
@@ -579,9 +577,6 @@ import java.util.UUID;
         }
 
         mUploadHandler.setConnected(activeNetwork != null && activeNetwork.isConnectedOrConnecting());
-
-        if (mConfigManager.isDebug()) {
-            Log.d(TAG, "Active network has changed: " + sActiveNetworkName);
-        }
+        mConfigManager.debugLog("Active network has changed: " + sActiveNetworkName);
     }
 }

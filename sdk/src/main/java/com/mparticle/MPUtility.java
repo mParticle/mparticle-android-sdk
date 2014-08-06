@@ -132,6 +132,7 @@ class MPUtility {
         }
     }
 
+    @TargetApi(18)
     public static long getAvailableInternalDisk() {
         long availableSpace = -1L;
         File path = Environment.getDataDirectory();
@@ -144,6 +145,7 @@ class MPUtility {
         return availableSpace;
     }
 
+    @TargetApi(18)
     public static long getAvailableExternalDisk() {
         long availableSpace = -1L;
         File path = Environment.getExternalStorageDirectory();
@@ -293,17 +295,6 @@ class MPUtility {
             }
         }
         return str;
-    }
-
-    public static boolean isDebug(PackageManager paramPackageManager, String paramString) {
-        try {
-            Signature localSignature = paramPackageManager.getPackageInfo(paramString, 64).signatures[0];
-            CertificateFactory localCertificateFactory = CertificateFactory.getInstance("X.509");
-            X509Certificate localX509Certificate = (X509Certificate) localCertificateFactory.generateCertificate(new ByteArrayInputStream(localSignature.toByteArray()));
-            return localX509Certificate.getIssuerDN().getName().toLowerCase(Locale.US).startsWith("cn=android debug");
-        } catch (Exception localException) {
-        }
-        return false;
     }
 
     public static boolean jsonObjsAreEqual(JSONObject js1, JSONObject js2) throws JSONException {

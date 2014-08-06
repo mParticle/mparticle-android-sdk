@@ -27,9 +27,7 @@ final class MPSocketImplFactory implements SocketImplFactory {
                 return socketImpl;
             }
         } catch (Exception ex) {
-            if (MParticle.getInstance().getDebugMode()){
-                Log.w(Constants.LOG_TAG, "Failed to create new Socket");
-            }
+            MParticle.getInstance().mConfigManager.debugLog("Failed to create new Socket");
         }
         return null;
     }

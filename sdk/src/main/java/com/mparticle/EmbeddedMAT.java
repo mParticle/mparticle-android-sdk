@@ -46,9 +46,7 @@ class EmbeddedMAT extends EmbeddedProvider implements MPActivityCallbacks {
         try {
             Class.forName("com.mobileapptracker.MobileAppTracker");
         } catch (ClassNotFoundException cnfe) {
-            if (MParticle.getInstance().getDebugMode()) {
-                Log.w(Constants.LOG_TAG, "Failed in initiate MAT - library not found. Have you added it to your application's classpath?");
-            }
+            MParticle.getInstance().mConfigManager.debugLog("Failed in initiate MAT - library not found. Have you added it to your application's classpath?");
             throw cnfe;
         }
     }
@@ -109,6 +107,11 @@ class EmbeddedMAT extends EmbeddedProvider implements MPActivityCallbacks {
 
     @Override
     public void logScreen(String screenName, JSONObject eventAttributes) throws Exception {
+        if (screenName == null){
+            screenName = "Viewed";
+        }else{
+            screenName = "Viewed " + screenName;
+        }
         logEvent(MParticle.EventType.Navigation, screenName, eventAttributes);
     }
 
@@ -144,9 +147,7 @@ class EmbeddedMAT extends EmbeddedProvider implements MPActivityCallbacks {
                 } catch (JSONException jse) {
 
                 } catch (NumberFormatException nfe) {
-                    if (MParticle.getInstance().getDebugMode()) {
-                        Log.e(Constants.LOG_TAG, getName() + " requires user attribute: " + key + " to be parsable as an integer");
-                    }
+                    MParticle.getInstance().mConfigManager.debugLog(getName() + " requires user attribute: " + key + " to be parsable as an integer");
                 }
             }
             if (firstName.length() > 0 || lastName.length() > 0) {
@@ -221,7 +222,7 @@ class EmbeddedMAT extends EmbeddedProvider implements MPActivityCallbacks {
             });
         }
 
-        com.mobileapptracker.MobileAppTracker.getInstance().setDebugMode(MParticle.getInstance().getDebugMode());
+        com.mobileapptracker.MobileAppTracker.getInstance().setDebugMode(MParticle.getInstance().mConfigManager.isDebugEnvironment());
         SharedPreferences preferences = context.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
         String referrer = preferences.getString(Constants.PrefKeys.INSTALL_REFERRER, "");
         if (referrer.length() > 0) {

@@ -2,7 +2,7 @@ package com.mparticle;
 
 /* package-private */class Constants {
 
-    public final static String LOG_TAG = "mParticleAPI";
+    public final static String LOG_TAG = "mParticle SDK";
 
     public static final String MPARTICLE_VERSION = BuildConfig.VERSION_NAME;
 
@@ -62,7 +62,6 @@ package com.mparticle;
         public static final String ATTRIBUTES = "attrs";
         public static final String EVENT_TYPE = "et";
         public static final String NAME = "n";
-        public static final String DEBUG = "dbg";
         public static final String OPT_OUT_HEADER = "oo";
         public static final String PREVIOUS_SESSION_LENGTH = "psl";
         public static final String LTV = "ltv";
@@ -212,6 +211,9 @@ package com.mparticle;
         public static final String EVENT_CATEGORY = "$Category";
         //session start
         public static final String PREVIOUS_SESSION_ID = "pid";
+        //sandbox mode is deprecated as of > 1.6.3
+        public static final String SANDBOX = "dbg";
+        public static final String ENVIRONMENT = "env";
     }
 
     interface PrefKeys {
