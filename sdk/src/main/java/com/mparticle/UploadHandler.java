@@ -137,7 +137,7 @@ import java.util.concurrent.TimeoutException;
                 } catch (IOException ioe) {
 
                 } catch (MParticleApiClient.MPThrottleException e) {
-                    mConfigManager.debugLog(e.getMessage());
+                    ConfigManager.log(MParticle.LogLevel.DEBUG, e.getMessage());
                 }
                 break;
             case UPLOAD_MESSAGES:
@@ -160,7 +160,7 @@ import java.util.concurrent.TimeoutException;
                 }
                 break;
             case UPLOAD_HISTORY:
-                mConfigManager.debugLog("Performing history upload.");
+                ConfigManager.log(MParticle.LogLevel.DEBUG, "Performing history upload.");
 
                 // if the uploads table is empty (no old uploads)
                 //  and the messages table has messages that are not from the current session,
@@ -221,7 +221,7 @@ import java.util.concurrent.TimeoutException;
 
             if (readyMessagesCursor.getCount() > 0) {
                 mApiClient.fetchConfig();
-                mConfigManager.debugLog("Preparing " + readyMessagesCursor.getCount() + " events for upload");
+                ConfigManager.log(MParticle.LogLevel.DEBUG, "Preparing " + readyMessagesCursor.getCount() + " events for upload");
 
                 if (history) {
                     String currentSessionId;
@@ -273,13 +273,13 @@ import java.util.concurrent.TimeoutException;
                 }
             }
         } catch (SQLiteException e) {
-            mConfigManager.debugLog("Error preparing batch upload in mParticle DB: " + e.getMessage());
+            ConfigManager.log(MParticle.LogLevel.ERROR, "Error preparing batch upload in mParticle DB: " + e.getMessage());
         } catch (IOException e) {
-            mConfigManager.debugLog("Error preparing batch upload in mParticle DB: " + e.getMessage());
+            ConfigManager.log(MParticle.LogLevel.WARNING, "Error preparing batch upload in mParticle DB: " + e.getMessage());
         } catch (JSONException e) {
-            mConfigManager.debugLog("Error preparing batch upload in mParticle DB: " + e.getMessage());
+            ConfigManager.log(MParticle.LogLevel.ERROR, "Error preparing batch upload in mParticle DB: " + e.getMessage());
         } catch (MParticleApiClient.MPThrottleException e) {
-            mConfigManager.debugLog(e.getMessage());
+            ConfigManager.log(MParticle.LogLevel.DEBUG, e.getMessage());
         } finally {
             if (readyMessagesCursor != null && !readyMessagesCursor.isClosed()){
                 readyMessagesCursor.close();
@@ -325,15 +325,15 @@ import java.util.concurrent.TimeoutException;
                         // ignore problems parsing response commands
                     }
                 } else {
-                    mConfigManager.debugLog("Upload failed and will be retried.");
+                    ConfigManager.log(MParticle.LogLevel.WARNING, "Upload failed and will be retried.");
                 }
             }
         } catch (MParticleApiClient.MPThrottleException e) {
-            mConfigManager.debugLog(e.getMessage());
+            ConfigManager.log(MParticle.LogLevel.DEBUG, e.getMessage());
         } catch (SQLiteException e) {
-            Log.d(TAG, "Error processing batch uploads in mParticle DB", e);
+            ConfigManager.log(MParticle.LogLevel.ERROR, e, "Error processing batch uploads in mParticle DB");
         } catch (IOException ioe) {
-            Log.d(TAG, "Error processing batch uploads in mParticle DB", ioe);
+            ConfigManager.log(MParticle.LogLevel.ERROR, ioe, "Error processing batch uploads in mParticle DB");
         } finally {
             if (readyUploadsCursor != null && !readyUploadsCursor.isClosed()){
                 readyUploadsCursor.close();
@@ -367,13 +367,13 @@ import java.util.concurrent.TimeoutException;
                     if (response != null && response.getResponseCode() > -1) {
                         dbDeleteCommand(id);
                     } else {
-                        mConfigManager.debugLog("Provider command processing failed and will be retried.");
+                        ConfigManager.log(MParticle.LogLevel.DEBUG, "Provider command processing failed and will be retried.");
                     }
                 }
             }
             commandsCursor.close();
         } catch (SQLiteException e) {
-            Log.e(TAG, "Error processing provider command uploads in mParticle DB", e);
+            ConfigManager.log(MParticle.LogLevel.WARNING, e, "Error processing provider command uploads in mParticle DB");
         } finally {
 
         }
@@ -618,7 +618,7 @@ import java.util.concurrent.TimeoutException;
             }
             success = true;
         }catch (Exception e){
-            Log.d(Constants.LOG_TAG, "Failed to insert audiences: " + e.getMessage());
+            ConfigManager.log(MParticle.LogLevel.DEBUG, "Failed to insert audiences: " + e.getMessage());
         }finally {
             if (success){
                 db.setTransactionSuccessful();

@@ -73,18 +73,20 @@ import javax.net.ssl.HttpsURLConnection;
  */
 public class MParticle {
 
-    /* package-private */ static Bundle lastNotificationBundle;
-    /* package-private */ static Boolean appRunning;
-    /* package-private */ final ConfigManager mConfigManager;
-    /* package-private */ final AppStateManager mAppStateManager;
-    /* package-private */ final MeasuredRequestManager measuredRequestManager;
-    /* package-private */ JSONArray mUserIdentities = new JSONArray();
-    /* package-private */ JSONObject mUserAttributes = new JSONObject();
-    /* package-private */ JSONObject mSessionAttributes;
+    static Boolean appRunning;
+    final ConfigManager mConfigManager;
+    final AppStateManager mAppStateManager;
+    final MeasuredRequestManager measuredRequestManager;
+    JSONArray mUserIdentities = new JSONArray();
+    String mSessionID;
 
-    /* package-private */ String mSessionID;
-    /* package-private */ long mSessionStartTime = 0;
-    /* package-private */ long mLastEventTime = 0;
+    private static Bundle lastNotificationBundle;
+
+    JSONObject mUserAttributes = new JSONObject();
+    private JSONObject mSessionAttributes;
+
+    private long mSessionStartTime = 0;
+    private long mLastEventTime = 0;
     private final MessageManager mMessageManager;
     private static volatile MParticle instance;
     private static SharedPreferences sPreferences;
@@ -93,19 +95,14 @@ public class MParticle {
     private ExceptionHandler mExHandler;
     private Context mAppContext;
     private String mApiKey;
-    private final EmbeddedKitManager embeddedKitManager;
+    private final EmbeddedKitManager mEmbeddedKitManager;
     private int mEventCount = 0;
     private String mLaunchUri;
     private LicenseCheckerCallback clientLicensingCallback;
     private static final HandlerThread sTimeoutHandlerThread = new HandlerThread("mParticleSessionTimeoutHandler",
             Process.THREAD_PRIORITY_BACKGROUND);
-    private static final byte[] LICENSE_CHECK_SALT = new byte[]{
-            -46, 65, 30, -128, -103, -57, 74, 10, 51, 88, -95, -45, -43, -117, -36, 99, -11, 32, -64,
-            89
-    };
 
-
-    /* package-private */MParticle(Context context, MessageManager messageManager, ConfigManager configManager, EmbeddedKitManager embeddedKitManager) {
+    MParticle(Context context, MessageManager messageManager, ConfigManager configManager, EmbeddedKitManager embeddedKitManager) {
         appRunning = true;
         mConfigManager = configManager;
         mAppContext = context.getApplicationContext();
@@ -114,7 +111,7 @@ public class MParticle {
         mAppStateManager = new AppStateManager(mAppContext, embeddedKitManager);
         measuredRequestManager = new MeasuredRequestManager();
         mTimeoutHandler = new SessionTimeoutHandler(this, sTimeoutHandlerThread.getLooper());
-        this.embeddedKitManager = embeddedKitManager;
+        mEmbeddedKitManager = embeddedKitManager;
 
         String userAttrs = sPreferences.getString(PrefKeys.USER_ATTRS + mApiKey, null);
 
@@ -137,11 +134,11 @@ public class MParticle {
                 Boolean changeMade = false;
                 for (int i = 0; i < mUserIdentities.length(); i++) {
                     JSONObject identity = mUserIdentities.getJSONObject(i);
-                    if (!identity.has(MessageKey.IDENTITY_DATE_FIRST_SEEN)){
+                    if (!identity.has(MessageKey.IDENTITY_DATE_FIRST_SEEN)) {
                         identity.put(MessageKey.IDENTITY_DATE_FIRST_SEEN, 0);
                         changeMade = true;
                     }
-                    if (!identity.has(MessageKey.IDENTITY_FIRST_SEEN)){
+                    if (!identity.has(MessageKey.IDENTITY_FIRST_SEEN)) {
                         identity.put(MessageKey.IDENTITY_FIRST_SEEN, true);
                         changeMade = true;
                     }
@@ -149,7 +146,7 @@ public class MParticle {
                 if (changeMade) {
                     sPreferences.edit().putString(PrefKeys.USER_IDENTITIES + mApiKey, mUserIdentities.toString()).commit();
                 }
-            }catch (JSONException jse){
+            } catch (JSONException jse) {
                 //swallow this
             }
         }
@@ -169,9 +166,9 @@ public class MParticle {
     /**
      * Start the mParticle SDK and begin tracking a user session.
      *
-     * @param context     Required reference to a Context object
-     * @param apiKey      The API key to use for authentication with mParticle
-     * @param secret      The API secret to use for authentication with mParticle
+     * @param context Required reference to a Context object
+     * @param apiKey  The API key to use for authentication with mParticle
+     * @param secret  The API secret to use for authentication with mParticle
      */
 
     public static void start(Context context, String apiKey, String secret) {
@@ -180,7 +177,7 @@ public class MParticle {
 
     /**
      * Start the mParticle SDK and begin tracking a user session.
-     *
+     * <p/>
      * The InstallType parameter is used to determine if this is a new install or an upgrade. In
      * the case where the mParticle SDK is being added to an existing app with existing users, this
      * parameter prevents mParticle from categorizing all users as new users.
@@ -189,7 +186,6 @@ public class MParticle {
      * @param apiKey      The API key to use for authentication with mParticle
      * @param secret      The API secret to use for authentication with mParticle
      * @param installType Specify whether this is a new install or an upgrade, or let mParticle detect
-     *
      * @see com.mparticle.MParticle.InstallType
      */
 
@@ -212,14 +208,13 @@ public class MParticle {
     /**
      * Start the mParticle SDK and begin tracking a user session. This method must be called prior to {@link #getInstance()}.
      * This method requires that your API key and secret are contained in your XML configuration.
-     *
+     * <p/>
      * The InstallType parameter is used to determine if this is a new install or an upgrade. In
      * the case where the mParticle SDK is being added to an existing app with existing users, this
      * parameter prevents mParticle from categorizing all users as new users.
      *
      * @param context     Required reference to a Context object
      * @param installType Specify whether this is a new install or an upgrade, or let mParticle detect
-     *
      * @see com.mparticle.MParticle.InstallType
      */
 
@@ -235,11 +230,10 @@ public class MParticle {
      * or any other {@link #getInstance()} has already been called in the application's lifecycle, the
      * API credentials will be ignored and the current instance will be returned.
      *
-     * @param context     the Activity that is creating the instance
-     * @param apiKey      the API key for your account
-     * @param secret      the API secret for your account
+     * @param context the Activity that is creating the instance
+     * @param apiKey  the API key for your account
+     * @param secret  the API secret for your account
      * @return An instance of the mParticle SDK configured with your API key
-     *
      */
     private static MParticle getInstance(Context context, String apiKey, String secret, InstallType installType) {
         if (instance == null) {
@@ -276,11 +270,11 @@ public class MParticle {
                     if (appConfigManager.getLogUnhandledExceptions()) {
                         instance.enableUncaughtExceptionLogging();
                     }
-            
+
                     if (context instanceof Activity) {
                         instance.mLaunchUri = ((Activity) context).getIntent().getDataString();
                         if (instance.mLaunchUri != null) {
-                            Log.d(Constants.LOG_TAG, "launchuri: " + instance.mLaunchUri);
+                            ConfigManager.log(LogLevel.DEBUG, "launchuri: ", instance.mLaunchUri);
                         }
                     }
 
@@ -312,27 +306,27 @@ public class MParticle {
         return getInstance(null, null, null, null);
     }
 
-    /* package-private */
+
     static Boolean setCheckedAttribute(JSONObject attributes, String key, Object value) {
         return setCheckedAttribute(attributes, key, value, false);
     }
 
-    /* package-private */
+
     static Boolean setCheckedAttribute(JSONObject attributes, String key, Object value, Boolean caseInsensitive) {
         if (null == attributes || null == key) {
             return false;
         }
         try {
             if (Constants.LIMIT_ATTR_COUNT == attributes.length() && !attributes.has(key)) {
-                Log.w(Constants.LOG_TAG, "Attribute count exceeds limit. Discarding attribute: " + key);
+                ConfigManager.log(LogLevel.ERROR, "Attribute count exceeds limit. Discarding attribute: " + key);
                 return false;
             }
             if (null != value && value.toString().length() > Constants.LIMIT_ATTR_VALUE) {
-                Log.w(Constants.LOG_TAG, "Attribute value length exceeds limit. Discarding attribute: " + key);
+                ConfigManager.log(LogLevel.ERROR, "Attribute value length exceeds limit. Discarding attribute: " + key);
                 return false;
             }
             if (key.length() > Constants.LIMIT_ATTR_NAME) {
-                Log.w(Constants.LOG_TAG, "Attribute name length exceeds limit. Discarding attribute: " + key);
+                ConfigManager.log(LogLevel.ERROR, "Attribute name length exceeds limit. Discarding attribute: " + key);
                 return false;
             }
             if (value == null) {
@@ -343,7 +337,7 @@ public class MParticle {
             }
             attributes.put(key, value);
         } catch (JSONException e) {
-            Log.w(Constants.LOG_TAG, "JSON error processing attributes. Discarding attribute: " + key);
+            ConfigManager.log(LogLevel.ERROR, "JSON error processing attributes. Discarding attribute: " + key);
             return false;
         }
         return true;
@@ -362,7 +356,7 @@ public class MParticle {
 
     Boolean shouldProcessUrl(String url) {
         return mConfigManager.isNetworkPerformanceEnabled() &&
-                measuredRequestManager.isUriAllowed(url);
+                measuredRequestManager.isUriAllowed(url) && !mEmbeddedKitManager.isEmbeddedKitUri(url);
     }
 
     void logStateTransition(String transitionType) {
@@ -430,9 +424,9 @@ public class MParticle {
     }
 
     private void endSession(long sessionEndTime) {
-        mConfigManager.debugLog("Ended session");
+        ConfigManager.log(LogLevel.DEBUG, "Ended session");
 
-       // mMessageManager.stopSession(mSessionID, sessionEndTime, sessionEndTime - mSessionStartTime);
+        // mMessageManager.stopSession(mSessionID, sessionEndTime, sessionEndTime - mSessionStartTime);
         mMessageManager.endSession(mSessionID, sessionEndTime, sessionEndTime - mSessionStartTime);
         // reset agent to unstarted state
         mSessionStartTime = 0;
@@ -450,12 +444,12 @@ public class MParticle {
     /**
      * Check current session timeout and end the session if needed. Will not start a new session.
      */
-    /* package-private */Boolean checkSessionTimeout() {
+    Boolean checkSessionTimeout() {
         long now = System.currentTimeMillis();
         if (0 != mSessionStartTime &&
                 mAppStateManager.isBackgrounded() &&
                 (mConfigManager.getSessionTimeout() < now - mLastEventTime)) {
-            mConfigManager.debugLog("Session timed out");
+            ConfigManager.log(LogLevel.DEBUG, "Session timed out");
 
             endSession(mLastEventTime);
             return true;
@@ -473,7 +467,7 @@ public class MParticle {
         mSessionAttributes = new JSONObject();
         mMessageManager.startSession(mSessionID, mSessionStartTime, mLaunchUri);
         mTimeoutHandler.sendEmptyMessageDelayed(0, mConfigManager.getSessionTimeout());
-        mConfigManager.debugLog("Started new session");
+        ConfigManager.log(LogLevel.DEBUG, "Started new session");
         // clear the launch URI so it isn't sent on future sessions
         mLaunchUri = null;
     }
@@ -491,7 +485,7 @@ public class MParticle {
      */
     public void setInstallReferrer(String referrer) {
         sPreferences.edit().putString(PrefKeys.INSTALL_REFERRER, referrer).commit();
-        mConfigManager.debugLog("Set installReferrer: ", referrer);
+        ConfigManager.log(LogLevel.DEBUG, "Set installReferrer: ", referrer);
     }
 
     /**
@@ -572,12 +566,12 @@ public class MParticle {
      */
     public void logEvent(String eventName, EventType eventType, Map<String, String> eventInfo, long eventLength, String category) {
         if (null == eventName) {
-            Log.w(Constants.LOG_TAG, "eventName is required for logEvent");
+            ConfigManager.log(LogLevel.ERROR, "eventName is required for logEvent");
             return;
         }
 
         if (eventName.length() > Constants.LIMIT_NAME) {
-            Log.w(Constants.LOG_TAG, "The event name was too long. Discarding event.");
+            ConfigManager.log(LogLevel.ERROR, "The event name was too long. Discarding event.");
             return;
         }
         ensureActiveSession();
@@ -592,15 +586,15 @@ public class MParticle {
             if (mConfigManager.getSendOoEvents()) {
                 mMessageManager.logEvent(mSessionID, mSessionStartTime, mLastEventTime, eventName, eventType, eventDataJSON, eventLength);
 
-                    if (null == eventDataJSON) {
-                        mConfigManager.debugLog("Logged event: ", eventName);
-                    } else {
-                        mConfigManager.debugLog("Logged event: ", eventName, " with data ", eventDataJSON.toString());
-                    }
+                if (null == eventDataJSON) {
+                    ConfigManager.log(LogLevel.DEBUG, "Logged event: ", eventName);
+                } else {
+                    ConfigManager.log(LogLevel.DEBUG, "Logged event: ", eventName, " with data ", eventDataJSON.toString());
+                }
 
 
             }
-            embeddedKitManager.logEvent(eventType, eventName, eventDataJSON);
+            mEmbeddedKitManager.logEvent(eventType, eventName, eventDataJSON);
         }
     }
 
@@ -608,15 +602,15 @@ public class MParticle {
      * Logs an increase in the lifetime value of a user. This will signify an increase
      * in the revenue assigned to this user for service providers that support revenue tracking.
      *
-     * @param valueIncreased    The currency value by which to increase the current user's LTV (required)
-     * @param eventName         An event name to be associated with this increase in LTV (optional)
-     * @param contextInfo       An MPProduct or any set of data to associate with this increase in LTV (optional)
+     * @param valueIncreased The currency value by which to increase the current user's LTV (required)
+     * @param eventName      An event name to be associated with this increase in LTV (optional)
+     * @param contextInfo    An MPProduct or any set of data to associate with this increase in LTV (optional)
      */
-    public void logLtvIncrease(BigDecimal valueIncreased, String eventName, Map<String, String> contextInfo){
-        if (valueIncreased == null){
+    public void logLtvIncrease(BigDecimal valueIncreased, String eventName, Map<String, String> contextInfo) {
+        if (valueIncreased == null) {
             throw new IllegalArgumentException("ValueIncreased must not be null.");
         }
-        if (contextInfo == null){
+        if (contextInfo == null) {
             contextInfo = new HashMap<String, String>();
         }
         contextInfo.put("$Amount", valueIncreased.toPlainString());
@@ -628,11 +622,10 @@ public class MParticle {
     /**
      * Log an E-Commerce related event associated to a product
      *
-     * @see com.mparticle.MPProduct
-     * @see com.mparticle.MPProduct.Event
-     *
      * @param event
      * @param product
+     * @see com.mparticle.MPProduct
+     * @see com.mparticle.MPProduct.Event
      */
     public void logProductEvent(final MPProduct.Event event, MPProduct product) {
         if (product == null) {
@@ -641,7 +634,7 @@ public class MParticle {
         if (product.isEmpty()) {
             throw new IllegalArgumentException("MPProduct data was null, please check that the MPProduct was built properly.");
         }
-        if (event == null){
+        if (event == null) {
             throw new IllegalArgumentException("MPProduct.EVENT is required.");
         }
         boolean purchaseEvent = false;
@@ -671,12 +664,12 @@ public class MParticle {
         if (checkEventLimit()) {
             JSONObject transactionJson = enforceAttributeConstraints(product);
             mMessageManager.logEvent(mSessionID, mSessionStartTime, mLastEventTime, event.toString(), EventType.Transaction, transactionJson, 0);
-            mConfigManager.debugLog("Logged product event with data: ", product.toString());
+            ConfigManager.log(LogLevel.DEBUG, "Logged product event with data: ", product.toString());
 
 
         }
         if (purchaseEvent) {
-            embeddedKitManager.logTransaction(product);
+            mEmbeddedKitManager.logTransaction(product);
         }
 
     }
@@ -693,11 +686,11 @@ public class MParticle {
 
     void logScreen(String screenName, Map<String, String> eventData, Boolean started) {
         if (null == screenName) {
-            Log.w(Constants.LOG_TAG, "screenName is required for logScreen");
+            ConfigManager.log(LogLevel.ERROR, "screenName is required for logScreen");
             return;
         }
         if (screenName.length() > Constants.LIMIT_NAME) {
-            Log.w(Constants.LOG_TAG, "The screen name was too long. Discarding event.");
+            ConfigManager.log(LogLevel.ERROR, "The screen name was too long. Discarding event.");
             return;
         }
         ensureActiveSession();
@@ -706,14 +699,14 @@ public class MParticle {
             if (mConfigManager.getSendOoEvents()) {
                 mMessageManager.logScreen(mSessionID, mSessionStartTime, mLastEventTime, screenName, eventDataJSON, started);
 
-                    if (null == eventDataJSON) {
-                        mConfigManager.debugLog("Logged screen: ", screenName);
-                    } else {
-                        mConfigManager.debugLog("Logged screen: ", screenName, " with data ", eventDataJSON.toString());
-                    }
+                if (null == eventDataJSON) {
+                    ConfigManager.log(LogLevel.DEBUG, "Logged screen: ", screenName);
+                } else {
+                    ConfigManager.log(LogLevel.DEBUG, "Logged screen: ", screenName, " with data ", eventDataJSON.toString());
+                }
 
             }
-            embeddedKitManager.logScreen(screenName, eventDataJSON);
+            mEmbeddedKitManager.logScreen(screenName, eventDataJSON);
         }
     }
 
@@ -745,16 +738,16 @@ public class MParticle {
     public void leaveBreadcrumb(String breadcrumb) {
         if (mConfigManager.getSendOoEvents()) {
             if (null == breadcrumb) {
-                Log.w(Constants.LOG_TAG, "breadcrumb is required for leaveBreadcrumb");
+                ConfigManager.log(LogLevel.ERROR, "breadcrumb is required for leaveBreadcrumb");
                 return;
             }
             if (breadcrumb.length() > Constants.LIMIT_NAME) {
-                Log.w(Constants.LOG_TAG, "The breadcrumb name was too long. Discarding event.");
+                ConfigManager.log(LogLevel.ERROR, "The breadcrumb name was too long. Discarding event.");
                 return;
             }
             ensureActiveSession();
             mMessageManager.logBreadcrumb(mSessionID, mSessionStartTime, mLastEventTime, breadcrumb);
-            mConfigManager.debugLog("Logged breadcrumb: " + breadcrumb);
+            ConfigManager.log(LogLevel.DEBUG, "Logged breadcrumb: " + breadcrumb);
 
         }
     }
@@ -777,17 +770,17 @@ public class MParticle {
     public void logError(String message, Map<String, String> eventData) {
         if (mConfigManager.getSendOoEvents()) {
             if (null == message) {
-                Log.w(Constants.LOG_TAG, "message is required for logErrorEvent");
+                ConfigManager.log(LogLevel.ERROR, "message is required for logErrorEvent");
                 return;
             }
             ensureActiveSession();
             if (checkEventLimit()) {
                 JSONObject eventDataJSON = enforceAttributeConstraints(eventData);
                 mMessageManager.logErrorEvent(mSessionID, mSessionStartTime, mLastEventTime, message, null, eventDataJSON);
-                mConfigManager.debugLog(
-                            "Logged error with message: " + (message == null ? "<none>" : message) +
-                                    " with data: " + (eventDataJSON == null ? "<none>" : eventDataJSON.toString())
-                    );
+                ConfigManager.log(LogLevel.DEBUG,
+                        "Logged error with message: " + (message == null ? "<none>" : message) +
+                                " with data: " + (eventDataJSON == null ? "<none>" : eventDataJSON.toString())
+                );
             }
         }
     }
@@ -812,10 +805,10 @@ public class MParticle {
             SocketImplFactory factory = new MPSocketImplFactory(socket.getClass());
             Socket.setSocketImplFactory(factory);
         } catch (Error e) {
-            mConfigManager.debugLog("Error initiating network performance monitoring: " + e.getMessage());
+            ConfigManager.log(LogLevel.WARNING, "Error initiating network performance monitoring: " + e.getMessage());
 
         } catch (Exception e) {
-            mConfigManager.debugLog("Exception initiating network performance monitoring: " + e.getMessage());
+            ConfigManager.log(LogLevel.WARNING, "Exception initiating network performance monitoring: " + e.getMessage());
         }
         try {
             SSLSocketFactory currentSocketFactory = org.apache.http.conn.ssl.SSLSocketFactory.getSocketFactory();
@@ -823,10 +816,10 @@ public class MParticle {
             MPSSLSocketFactory wrapperFactory = new MPSSLSocketFactory(innerFactory);
             MPUtility.getAccessibleField(org.apache.http.conn.ssl.SSLSocketFactory.class, javax.net.ssl.SSLSocketFactory.class).set(currentSocketFactory, wrapperFactory);
         } catch (Error e) {
-            mConfigManager.debugLog("Error initiating network performance monitoring: " + e.getMessage());
+            ConfigManager.log(LogLevel.WARNING, "Error initiating network performance monitoring: " + e.getMessage());
 
         } catch (Exception e) {
-            mConfigManager.debugLog("Exception initiating network performance monitoring: " + e.getMessage());
+            ConfigManager.log(LogLevel.WARNING, "Exception initiating network performance monitoring: " + e.getMessage());
 
         }
 
@@ -836,29 +829,27 @@ public class MParticle {
             try {
                 factory.createURLStreamHandler("https");
                 factory.createURLStreamHandler("http");
-            }catch (IllegalArgumentException iae){
+            } catch (IllegalArgumentException iae) {
                 throw iae;
-            }catch (Exception e){
+            } catch (Exception e) {
 
             }
 
 
             URL.setURLStreamHandlerFactory(factory);
         } catch (Error e) {
-            mConfigManager.debugLog("Error initiating network performance monitoring: " + e.getMessage());
-
+            ConfigManager.log(LogLevel.WARNING, "Error initiating network performance monitoring: " + e.getMessage());
         } catch (Exception e) {
-            mConfigManager.debugLog("Exception initiating network performance monitoring: " + e.getMessage());
-
+            ConfigManager.log(LogLevel.WARNING, "Exception initiating network performance monitoring: " + e.getMessage());
         }
 
         try {
             HttpsURLConnection.setDefaultSSLSocketFactory(new MPSSLSocketFactory(HttpsURLConnection.getDefaultSSLSocketFactory()));
         } catch (Error e) {
-            mConfigManager.debugLog("Error initiating network performance monitoring: ", e.getMessage());
+            ConfigManager.log(LogLevel.WARNING, "Error initiating network performance monitoring: ", e.getMessage());
 
         } catch (Exception e) {
-            mConfigManager.debugLog("Exception initiating network performance monitoring: " + e.getMessage());
+            ConfigManager.log(LogLevel.WARNING, "Exception initiating network performance monitoring: " + e.getMessage());
         }
         measuredRequestManager.setEnabled(true);
 
@@ -866,7 +857,6 @@ public class MParticle {
 
     /**
      * Begin measuring network performance. This method only needs to be called one time during the runtime of an application.
-     *
      */
     public void beginMeasuringNetworkPerformance() {
         if (!measuredRequestManager.getEnabled()) {
@@ -878,7 +868,6 @@ public class MParticle {
 
     /**
      * Stop measuring network performance.
-     *
      */
     public void endMeasuringNetworkPerformance() {
         if (measuredRequestManager.getEnabled()) {
@@ -890,7 +879,7 @@ public class MParticle {
                     HttpsURLConnection.setDefaultSSLSocketFactory(((MPSSLSocketFactory) current).delegateFactory);
                 }
             } catch (Exception e) {
-                mConfigManager.debugLog("Error stopping network performance monitoring: ", e.getMessage());
+                ConfigManager.log(LogLevel.WARNING, "Error stopping network performance monitoring: ", e.getMessage());
             }
         }
     }
@@ -923,7 +912,6 @@ public class MParticle {
      *
      * @see #excludeUrlFromNetworkPerformanceMeasurement(String)
      * @see #addNetworkPerformanceQueryOnlyFilter(String)
-     *
      */
     public void resetNetworkPerformanceExclusionsAndFilters() {
         measuredRequestManager.resetFilters();
@@ -961,11 +949,11 @@ public class MParticle {
             if (checkEventLimit()) {
                 JSONObject eventDataJSON = enforceAttributeConstraints(eventData);
                 mMessageManager.logErrorEvent(mSessionID, mSessionStartTime, mLastEventTime, message, exception, eventDataJSON);
-                mConfigManager.debugLog(
-                            "Logged exception with message: " + (message == null ? "<none>" : message) +
-                                    " with data: " + (eventDataJSON == null ? "<none>" : eventDataJSON.toString()) +
-                                    " with exception: " + (exception == null ? "<none>" : exception.getMessage())
-                    );
+                ConfigManager.log(LogLevel.DEBUG,
+                        "Logged exception with message: " + (message == null ? "<none>" : message) +
+                                " with data: " + (eventDataJSON == null ? "<none>" : eventDataJSON.toString()) +
+                                " with exception: " + (exception == null ? "<none>" : exception.getMessage())
+                );
             }
         }
     }
@@ -993,7 +981,7 @@ public class MParticle {
             try {
                 LocationManager locationManager = (LocationManager) mAppContext.getSystemService(Context.LOCATION_SERVICE);
                 if (!locationManager.isProviderEnabled(provider)) {
-                    Log.w(Constants.LOG_TAG, "That requested location provider is not available");
+                    ConfigManager.log(LogLevel.ERROR, "That requested location provider is not available");
                     return;
                 }
 
@@ -1005,7 +993,7 @@ public class MParticle {
                 }
                 locationManager.requestLocationUpdates(provider, minTime, minDistance, mLocationListener);
             } catch (SecurityException e) {
-                Log.w(Constants.LOG_TAG, "The app must require the appropriate permissions to track location using this provider");
+                ConfigManager.log(LogLevel.ERROR, "The app must require the appropriate permissions to track location using this provider");
             }
         }
     }
@@ -1028,7 +1016,7 @@ public class MParticle {
      */
     public void setLocation(Location location) {
         mMessageManager.setLocation(location);
-        embeddedKitManager.setLocation(location);
+        mEmbeddedKitManager.setLocation(location);
     }
 
     /**
@@ -1040,7 +1028,7 @@ public class MParticle {
     public void setSessionAttribute(String key, String value) {
         if (mConfigManager.getSendOoEvents()) {
             ensureActiveSession();
-            mConfigManager.debugLog("Set session attribute: " + key + "=" + value);
+            ConfigManager.log(LogLevel.DEBUG, "Set session attribute: " + key + "=" + value);
 
             if (setCheckedAttribute(mSessionAttributes, key, value, true)) {
                 mMessageManager.setSessionAttributes(mSessionID, mSessionAttributes);
@@ -1053,12 +1041,11 @@ public class MParticle {
      * the SDK, this function is only used as a signaling mechanism to server providers
      * that support an explicit logout. As of 1.6.x, after calling this method, all user attributes
      * and identities will stay the same.
-     *
      */
-    public void logout(){
+    public void logout() {
         if (mConfigManager.getSendOoEvents()) {
             ensureActiveSession();
-            mConfigManager.debugLog("Logging out.");
+            ConfigManager.log(LogLevel.DEBUG, "Logging out.");
 
 
             mMessageManager.logProfileAction(Constants.ProfileActions.LOGOUT, mSessionID, mSessionStartTime);
@@ -1073,15 +1060,15 @@ public class MParticle {
      */
     public void setUserAttribute(String key, String value) {
 
-            if (value != null) {
-                mConfigManager.debugLog("Set user attribute: " + key + " with value " + value);
-            } else {
-                mConfigManager.debugLog("Set user attribute: " + key);
-            }
+        if (value != null) {
+            ConfigManager.log(LogLevel.DEBUG, "Set user attribute: " + key + " with value " + value);
+        } else {
+            ConfigManager.log(LogLevel.DEBUG, "Set user attribute: " + key);
+        }
 
         if (setCheckedAttribute(mUserAttributes, key, value)) {
             sPreferences.edit().putString(PrefKeys.USER_ATTRS + mApiKey, mUserAttributes.toString()).commit();
-            embeddedKitManager.setUserAttributes(mUserAttributes);
+            mEmbeddedKitManager.setUserAttributes(mUserAttributes);
         }
 
     }
@@ -1093,22 +1080,22 @@ public class MParticle {
      */
     public void removeUserAttribute(String key) {
         if (key != null) {
-            mConfigManager.debugLog("Removing user attribute: " + key);
+            ConfigManager.log(LogLevel.DEBUG, "Removing user attribute: " + key);
         }
         if (mUserAttributes.has(key) || mUserAttributes.has(findCaseInsensitiveKey(mUserAttributes, key))) {
             mUserAttributes.remove(key);
             sPreferences.edit().putString(PrefKeys.USER_ATTRS + mApiKey, mUserAttributes.toString()).commit();
             attributeRemoved(key);
-            embeddedKitManager.removeUserAttribute(key);
+            mEmbeddedKitManager.removeUserAttribute(key);
         }
     }
 
-    private void attributeRemoved(String key){
+    private void attributeRemoved(String key) {
         String serializedJsonArray = sPreferences.getString(PrefKeys.USER_ATTRS + mApiKey, null);
         JSONArray deletedAtributes;
-        try{
+        try {
             deletedAtributes = new JSONArray(serializedJsonArray);
-        }catch (Exception jse) {
+        } catch (Exception jse) {
             deletedAtributes = new JSONArray();
         }
         deletedAtributes.put(key);
@@ -1135,7 +1122,6 @@ public class MParticle {
     }
 
 
-
     /**
      * Set the current user's identity
      *
@@ -1145,14 +1131,14 @@ public class MParticle {
 
     public void setUserIdentity(String id, IdentityType identityType) {
         if (id != null && id.length() > 0) {
-            mConfigManager.debugLog("Setting user identity: " + id);
+            ConfigManager.log(LogLevel.DEBUG, "Setting user identity: " + id);
 
             if (null != id && id.length() > Constants.LIMIT_ATTR_VALUE) {
-                Log.w(Constants.LOG_TAG, "Id value length exceeds limit. Discarding id: " + id);
+                ConfigManager.log(LogLevel.WARNING, "Id value length exceeds limit. Discarding id: " + id);
                 return;
             }
 
-            embeddedKitManager.setUserIdentity(id, identityType);
+            mEmbeddedKitManager.setUserIdentity(id, identityType);
 
             try {
                 int index = -1;
@@ -1178,7 +1164,7 @@ public class MParticle {
                 }
 
             } catch (JSONException e) {
-                Log.w(Constants.LOG_TAG, "Error setting identity: " + id);
+                ConfigManager.log(LogLevel.ERROR, "Error setting identity: " + id);
                 return;
             }
 
@@ -1218,7 +1204,7 @@ public class MParticle {
 
                 }
             } catch (JSONException jse) {
-                Log.w(Constants.LOG_TAG, "Error removing identity: " + id);
+                ConfigManager.log(MParticle.LogLevel.WARNING, "Error removing identity: " + id);
             }
         }
     }
@@ -1249,7 +1235,7 @@ public class MParticle {
 
             mConfigManager.setOptOut(optOutStatus);
 
-            mConfigManager.debugLog("Set opt-out: " + optOutStatus);
+            ConfigManager.log(LogLevel.DEBUG, "Set opt-out: " + optOutStatus);
         }
     }
 
@@ -1258,7 +1244,7 @@ public class MParticle {
      * for implications of each mode. The SDK automatically determines which mode it should be in depending
      * on the signing and the DEBUGGABLE flag of your application's AndroidManifest.xml, so this method should
      * typically not be used.
-     *
+     * <p/>
      * This method can however be useful while you're testing a release-signed version of your application, and you have *not* set the
      * debuggable flag in your AndroidManifest.xml. In this case, you can force the SDK into development mode to prevent sending
      * your test usage/data as production data. It's crucial, however, that prior to submission to Google Play that you ensure
@@ -1266,15 +1252,15 @@ public class MParticle {
      *
      * @param environment
      */
-    public void setEnvironment(Environment environment){
+    public void setEnvironment(Environment environment) {
         if (environment != null) {
             if (environment.equals(Environment.Development)) {
-                if (mConfigManager.isDebugEnvironment()){
+                if (mConfigManager.isDebugEnvironment()) {
                     Log.w(Constants.LOG_TAG, "Forcing environment to DEVELOPMENT, but your app is already debuggable and hence in DEVELOPMENT mode - did you mean to call forceEnvironment(Environment.Production) instead?");
-                } else{
+                } else {
                     Log.w(Constants.LOG_TAG, "Forcing environment to DEVELOPMENT on a production app! Be careful, be sure not to do this in an application that you submit to Google Play.");
                 }
-            }else if (environment.equals(Environment.Production)) {
+            } else if (environment.equals(Environment.Production)) {
                 if (mConfigManager.isDebugEnvironment()) {
                     Log.w(Constants.LOG_TAG, "Forcing environment to PRODUCTION on a debuggable app. Be careful, you are now in PRODUCTION and any test event data will be mixed with live event data!");
                 } else {
@@ -1290,7 +1276,7 @@ public class MParticle {
      *
      * @return
      */
-    public Environment getEnvironment(){
+    public Environment getEnvironment() {
         return mConfigManager.getEnvironment();
     }
 
@@ -1339,7 +1325,7 @@ public class MParticle {
             mConfigManager.setPushSenderId(senderId);
             PushRegistrationHelper.enablePushNotifications(mAppContext, senderId);
         } else {
-            Log.e(Constants.LOG_TAG, "Attempted to enable push notifications without required permission: " + "\"com.google.android.c2dm.permission.RECEIVE\"");
+            ConfigManager.log(LogLevel.ERROR, "Attempted to enable push notifications without required permission: ", "\"com.google.android.c2dm.permission.RECEIVE\"");
         }
     }
 
@@ -1391,7 +1377,7 @@ public class MParticle {
             mEventCount++;
             return true;
         } else {
-            Log.w(Constants.LOG_TAG, "The event limit has been exceeded for this session.");
+            ConfigManager.log(MParticle.LogLevel.WARNING, "The event limit has been exceeded for this session.");
             return false;
         }
     }
@@ -1404,7 +1390,7 @@ public class MParticle {
      * @param attributes the user-provided JSONObject
      * @return a cleansed copy of the JSONObject
      */
-    /* package-private */JSONObject enforceAttributeConstraints(Map<String, String> attributes) {
+    JSONObject enforceAttributeConstraints(Map<String, String> attributes) {
         if (null == attributes) {
             return null;
         }
@@ -1424,7 +1410,7 @@ public class MParticle {
 
         LicenseChecker checker = new LicenseChecker(
                 mAppContext, new ServerManagedPolicy(mAppContext,
-                new AESObfuscator(LICENSE_CHECK_SALT, mAppContext.getPackageName(), deviceId)),
+                new AESObfuscator(Constants.LICENSE_CHECK_SALT, mAppContext.getPackageName(), deviceId)),
                 mConfigManager.getLicenseKey()
         );
         checker.checkAccess(licenseCheckerCallback);
@@ -1446,16 +1432,16 @@ public class MParticle {
         }
 
         if (licensingCallback == null) {
-            Log.w(Constants.LOG_TAG, "No licensing callback specified, using MParticle default.");
+            ConfigManager.log(MParticle.LogLevel.WARNING, "No licensing callback specified, using MParticle default.");
         }
 
         clientLicensingCallback = licensingCallback;
 
         if (policy == null) {
-            Log.w(Constants.LOG_TAG, "No policy specified, using default ServerManagedPolicy");
+            ConfigManager.log(MParticle.LogLevel.WARNING, "No policy specified, using default ServerManagedPolicy");
             String deviceId = Settings.Secure.getString(mAppContext.getContentResolver(), Settings.Secure.ANDROID_ID);
             policy = new ServerManagedPolicy(mAppContext,
-                    new AESObfuscator(LICENSE_CHECK_SALT, mAppContext.getPackageName(), deviceId));
+                    new AESObfuscator(Constants.LICENSE_CHECK_SALT, mAppContext.getPackageName(), deviceId));
         }
 
         MPLicenseCheckerCallback licenseCheckerCallback = new MPLicenseCheckerCallback();
@@ -1524,8 +1510,8 @@ public class MParticle {
         mConfigManager.setPushNotificationTitle(resId);
     }
 
-    public void getUserSegments(long timeout, String endpointId, SegmentListener listener){
-        if (mMessageManager != null && mMessageManager.mUploadHandler != null){
+    public void getUserSegments(long timeout, String endpointId, SegmentListener listener) {
+        if (mMessageManager != null && mMessageManager.mUploadHandler != null) {
             mMessageManager.mUploadHandler.fetchSegments(timeout, endpointId, listener);
         }
     }
@@ -1535,8 +1521,8 @@ public class MParticle {
      *
      * @param webView
      */
-    public void registerWebView(WebView webView){
-        if (webView != null){
+    public void registerWebView(WebView webView) {
+        if (webView != null) {
             webView.addJavascriptInterface(
                     new MParticleJSInterface(),
                     MParticleJSInterface.INTERFACE_NAME
@@ -1545,11 +1531,25 @@ public class MParticle {
     }
 
     /**
+     * The log level is used to moderate the amount of messages that are printed
+     * by the SDK to the console. Note that while the SDK is in the Production,
+     * <i>no log messages will be printed</i>.
+     *
+     * @see com.mparticle.MParticle.LogLevel
+     *
+     * @param level
+     */
+    public void setLogLevel(LogLevel level) {
+        if (level != null) {
+            mConfigManager.setLogLevel(level);
+        }
+    }
+
+    /**
      * Event type to use when logging events.
      *
      * @see #logEvent(String, com.mparticle.MParticle.EventType)
      */
-
     public enum EventType {
         Unknown, Navigation, Location, Search, Transaction, UserContent, UserPreference, Social, Other;
 
@@ -1563,7 +1563,6 @@ public class MParticle {
      *
      * @see #start(android.content.Context, com.mparticle.MParticle.InstallType)
      */
-
     public enum InstallType {
         /**
          * This is the default value. Using this value will rely on the mParticle SDK to differentiate a new install vs. an upgrade
@@ -1641,7 +1640,6 @@ public class MParticle {
      * application to debug within your AndroidManifest.xml.
      *
      * @see {@link #setEnvironment(com.mparticle.MParticle.Environment)} to override this behavior.
-     *
      */
     public enum Environment {
         /**
@@ -1660,38 +1658,119 @@ public class MParticle {
          */
         Production(2);
         private final int value;
-        int getValue() { return value; }
-        private Environment(int value){
+
+        int getValue() {
+            return value;
+        }
+
+        private Environment(int value) {
             this.value = value;
         }
     }
 
+    /**
+     * Enumeration used to moderate the amount of messages that are printed
+     * by the SDK to the console. Note that while the SDK is in the Production,
+     * <i>no log messages will be printed</i>.
+     * <p/>
+     * The default is WARNING, which means only ERROR and WARNING level messages will appear in the console, viewable by logcat or another utility.
+     *
+     * @see #setLogLevel(com.mparticle.MParticle.LogLevel)
+     */
+    public enum LogLevel {
+        /**
+         * Disable logging completely.
+         */
+        NONE,
+        /**
+         * Used for critical issues with the SDK or it's configuration.
+         */
+        ERROR,
+        /**
+         * (default) Used to warn developers of potentially unintended consequences of their use of the SDK.
+         */
+        WARNING,
+        /**
+         * Used to communicate the internal state and processes of the SDK.
+         */
+        DEBUG;
+    }
+
+    /**
+     * Constants used to interact with the mParticle GCM receiver.
+     */
     public interface Push {
+        /**
+         * Listen for this broadcast (as an Intent action) to detect when the device received a push.
+         * <p/>
+         * In the received Intent, you will have access to the entire payload of the push notification.
+         */
         public static final String BROADCAST_NOTIFICATION_RECEIVED = "com.mparticle.push.NOTIFICATION_RECEIVED";
+        /**
+         * Listen for this broadcast (as an Intent action) to detect when a user taps a push message in the
+         * notification bar of their device. You may then navigate or otherwise adjust the user experience based on
+         * the payload of the push.
+         * <p/>
+         * In the received Intent, you will have access to the entire payload of the push notification.
+         */
         public static final String BROADCAST_NOTIFICATION_TAPPED = "com.mparticle.push.NOTIFICATION_TAPPED";
+        /**
+         * If leveraging either <code>BROADCAST_NOTIFICATION_RECEIVED</code> or <code>BROADCAST_NOTIFICATION_TAPPED</code>, you
+         * have access to the entire payload of a push notification. Depending on the service that has sent the push, for example
+         * Urban Airship or Mixpanel, the primary alert text will have a different key associated with it. The mParticle SDK
+         * take care of this for you, and will add the primary alert of the push an an extra to the received intent with this key.
+         * This allows you to switch push notification providers without having to adjust the code of your application.
+         */
         public static final String PUSH_ALERT_EXTRA = "com.mparticle.push.alert";
     }
 
+    /**
+     * This interface defines a series of constants that can be used to specify certain characteristics of a user. There are many 3rd party services
+     * that support, for example, specifying a gender of a user. The mParticle platform will look for these constants within the user attributes that
+     * you have set for a given user, and forward any attributes to the services that support them.
+     *
+     * @see #setUserAttribute(String, String)
+     */
     public interface UserAttributes {
-        //A special attribute string to specify the mobile number of the consumer's device
+        /**
+         * A special attribute string to specify the mobile number of the consumer's device
+         */
         public static final String MOBILE_NUMBER = "$Mobile";
-        //A special attribute string to specify the consumer's gender.
+        /**
+         * A special attribute string to specify the user's gender.
+         */
         public static final String GENDER = "$Gender";
-        //A special attribute string to specify the consumer's age.
+        /**
+         * A special attribute string to specify the user's age.
+         */
         public static final String AGE = "$Age";
-        //A special attribute string to specify the consumer's country.
+        /**
+         * A special attribute string to specify the user's country.
+         */
         public static final String COUNTRY = "$Country";
-        //A special attribute string to specify the consumer's zip code.
+        /**
+         * A special attribute string to specify the user's zip code.
+         */
         public static final String ZIPCODE = "$Zip";
-        //A special attribute string to specify the consumer's city.
+        /**
+         * A special attribute string to specify the user's city.
+         */
         public static final String CITY = "$City";
-        //A special attribute string to specify the consumer's state or region.
+        /**
+         * A special attribute string to specify the user's state or region.
+         */
         public static final String STATE = "$State";
-        //A special attribute string to specify the consumer's street address and apartment number.
+        /**
+         * A special attribute string to specify the user's street address and apartment number.
+         */
         public static final String ADDRESS = "$Address";
-        //A special attribute string to specify the consumer's first name.
+        /**
+         * A special attribute string to specify the user's first name.
+         */
         public static final String FIRSTNAME = "$FirstName";
-        //A special attribute string to specify the consumer's last name.
+        /**
+         * A special attribute string to specify the user's last name.
+         */
         public static final String LASTNAME = "$LastName";
     }
 
@@ -1759,7 +1838,7 @@ public class MParticle {
 
         public void applicationError(int errorCode) {
             if (errorCode == LicenseCheckerCallback.ERROR_MISSING_PERMISSION) {
-                Log.e(Constants.LOG_TAG, "License checking enabled but app is missing permission: \"com.android.vending.CHECK_LICENSE\"");
+                ConfigManager.log(LogLevel.ERROR, "License checking enabled but app is missing permission: \"com.android.vending.CHECK_LICENSE\"");
             }
             if (clientLicensingCallback != null) {
                 clientLicensingCallback.applicationError(errorCode);

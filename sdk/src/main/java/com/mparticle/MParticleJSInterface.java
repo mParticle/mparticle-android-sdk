@@ -1,6 +1,6 @@
 package com.mparticle;
 
-import android.util.Log;
+
 import android.webkit.JavascriptInterface;
 
 import com.mparticle.MParticle.EventType;
@@ -75,7 +75,7 @@ class MParticleJSInterface {
             }
 
         } catch (JSONException jse) {
-            Log.w(TAG, String.format(errorMsg, jse.getMessage()));
+            ConfigManager.log(MParticle.LogLevel.WARNING, String.format(errorMsg, jse.getMessage()));
         }
     }
 
@@ -85,7 +85,7 @@ class MParticleJSInterface {
             JSONObject attribute = new JSONObject(json);
             MParticle.getInstance().setUserTag(attribute.getString("key"));
         }catch (JSONException jse){
-            Log.w(TAG, String.format(errorMsg, jse.getMessage()));
+            ConfigManager.log(MParticle.LogLevel.WARNING, String.format(errorMsg, jse.getMessage()));
         }
     }
 
@@ -95,7 +95,7 @@ class MParticleJSInterface {
             JSONObject attribute = new JSONObject(json);
             MParticle.getInstance().removeUserTag(attribute.getString("key"));
         }catch (JSONException jse){
-            Log.w(TAG, String.format(errorMsg, jse.getMessage()));
+            ConfigManager.log(MParticle.LogLevel.WARNING, String.format(errorMsg, jse.getMessage()));
         }
     }
 
@@ -105,7 +105,7 @@ class MParticleJSInterface {
             JSONObject attribute = new JSONObject(json);
             MParticle.getInstance().setUserAttribute(attribute.getString("key"), attribute.getString("value"));
         } catch (JSONException jse) {
-            Log.w(TAG, String.format(errorMsg, jse.getMessage()));
+            ConfigManager.log(MParticle.LogLevel.WARNING, String.format(errorMsg, jse.getMessage()));
         }
     }
 
@@ -115,7 +115,7 @@ class MParticleJSInterface {
             JSONObject attribute = new JSONObject(json);
             MParticle.getInstance().removeUserAttribute(attribute.getString("key"));
         }catch (JSONException jse){
-            Log.w(TAG, String.format(errorMsg, jse.getMessage()));
+            ConfigManager.log(MParticle.LogLevel.WARNING, String.format(errorMsg, jse.getMessage()));
         }
     }
 
@@ -125,7 +125,7 @@ class MParticleJSInterface {
             JSONObject attribute = new JSONObject(json);
             MParticle.getInstance().setSessionAttribute(attribute.getString("key"), attribute.getString("value"));
         } catch (JSONException jse) {
-            Log.w(TAG, String.format(errorMsg, jse.getMessage()));
+            ConfigManager.log(MParticle.LogLevel.WARNING, String.format(errorMsg, jse.getMessage()));
         }
     }
 
@@ -135,7 +135,7 @@ class MParticleJSInterface {
             JSONObject attribute = new JSONObject(json);
             MParticle.getInstance().setUserIdentity(attribute.getString("Identity"), convertIdentityType(attribute.getInt("Type")));
         } catch (JSONException jse) {
-            Log.w(TAG, String.format(errorMsg, jse.getMessage()));
+            ConfigManager.log(MParticle.LogLevel.WARNING, String.format(errorMsg, jse.getMessage()));
         }
     }
 
@@ -145,7 +145,7 @@ class MParticleJSInterface {
             JSONObject attribute = new JSONObject(json);
             MParticle.getInstance().removeUserIdentity(attribute.getString("key"));
         }catch (JSONException jse){
-            Log.w(TAG, String.format(errorMsg, jse.getMessage()));
+            ConfigManager.log(MParticle.LogLevel.WARNING, String.format(errorMsg, jse.getMessage()));
         }
     }
 
@@ -160,7 +160,7 @@ class MParticleJSInterface {
                 try {
                     parsedAttributes.put(key, attributes.getString(key));
                 } catch (JSONException e) {
-                    Log.w(TAG, "Could not parse event attribute value");
+                    ConfigManager.log(MParticle.LogLevel.WARNING, "Could not parse event attribute value");
                 }
             }
 

@@ -18,6 +18,10 @@ package com.mparticle;
     public static final int LIMIT_ATTR_NAME = 255;
     public static final int LIMIT_ATTR_VALUE = 255;
     public static final int LIMIT_NAME = 255;
+    public static final byte[] LICENSE_CHECK_SALT = new byte[]{
+            -46, 65, 30, -128, -103, -57, 74, 10, 51, 88, -95, -45, -43, -117, -36, 99, -11, 32, -64,
+            89
+    };
 
     interface MethodName {
         public static final String METHOD_NAME = "$MethodName";
@@ -261,6 +265,8 @@ package com.mparticle;
         public static final String ADTRUTH_LAST_TIMESTAMP = "mp::adtruth::timestamp";
         public static final String EVENT_COUNTER = "mp::events::counter";
         public static final String PREVIOUS_SESSION_ID = "mp::session::previous_id";
+        public static final String API_KEY = "mp::config::apikey";
+        public static final String API_SECRET = "mp::config::apisecret";
     }
 
     interface MiscStorageKeys {

@@ -78,7 +78,7 @@ class MPUtility {
                     }
                 }
         } catch (IOException localIOException2) {
-            Log.w(Constants.LOG_TAG, "Error computing CPU usage");
+            ConfigManager.log(MParticle.LogLevel.WARNING, "Error computing CPU usage");
         } finally {
             try {
                 if (localBufferedReader != null) {
@@ -95,7 +95,7 @@ class MPUtility {
                     }
                 }
             } catch (IOException localIOException4) {
-                Log.w(Constants.LOG_TAG, "Error computing CPU usage");
+                ConfigManager.log(MParticle.LogLevel.WARNING, "Error computing CPU usage");
             }
         }
         return str1;
@@ -210,9 +210,6 @@ class MPUtility {
             BufferedReader localBufferedReader = new BufferedReader(localFileReader, 8192);
             str2 = localBufferedReader.readLine();//meminfo
             arrayOfString = str2.split("\\s+");
-            for (String num : arrayOfString) {
-                Log.i(str2, num + "\t");
-            }
             initial_memory = Integer.valueOf(arrayOfString[1]).intValue() * 1024;
             localBufferedReader.close();
             return initial_memory;

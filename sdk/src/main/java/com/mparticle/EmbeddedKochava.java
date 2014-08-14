@@ -31,6 +31,7 @@ public class EmbeddedKochava extends EmbeddedProvider implements MPActivityCallb
     private static final String SPACIAL_X = "SpacialX";
     private static final String SPACIAL_Y = "SpacialY";
     private static final String SPACIAL_Z = "SpacialZ";
+    private static final String HOST = "kochava.com";
     private String appId;
     private String currency;
     private Feature feature;
@@ -40,7 +41,7 @@ public class EmbeddedKochava extends EmbeddedProvider implements MPActivityCallb
         try {
             Class.forName("com.kochava.android.tracker.Feature");
         } catch (ClassNotFoundException cnfe) {
-            MParticle.getInstance().mConfigManager.debugLog("Failed in initiate Kochava - library not found. Have you added it to your application's classpath?");
+            ConfigManager.log(MParticle.LogLevel.ERROR, "Failed in initiate Kochava - library not found. Have you added it to your application's classpath?");
             throw cnfe;
         }
     }
@@ -72,6 +73,11 @@ public class EmbeddedKochava extends EmbeddedProvider implements MPActivityCallb
     @Override
     public String getName() {
         return "Kochava";
+    }
+
+    @Override
+    public boolean isOriginator(String uri) {
+        return uri != null && uri.toLowerCase().contains(HOST);
     }
 
     @Override

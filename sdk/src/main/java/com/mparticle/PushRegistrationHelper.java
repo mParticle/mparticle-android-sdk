@@ -40,7 +40,7 @@ class PushRegistrationHelper {
         SharedPreferences preferences = context.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
         String registrationId = preferences.getString(Constants.PrefKeys.PUSH_REGISTRATION_ID, "");
         if (registrationId == null || registrationId.length() == 0) {
-            MParticle.getInstance().mConfigManager.debugLog("GCM Registration ID not found.");
+            ConfigManager.log(MParticle.LogLevel.DEBUG, "GCM Registration ID not found.");
             return null;
         }
         // Check if app was updated; if so, it must clear the registration ID
@@ -50,7 +50,7 @@ class PushRegistrationHelper {
         int currentVersion = getAppVersion(context);
         int osVersion = preferences.getInt(Constants.PrefKeys.PROPERTY_OS_VERSION, Integer.MIN_VALUE);
         if (registeredVersion != currentVersion || osVersion != Build.VERSION.SDK_INT) {
-            Log.i(Constants.LOG_TAG, "App or OS version changed.");
+            ConfigManager.log(MParticle.LogLevel.DEBUG, "App or OS version changed.");
             return null;
         }
         return registrationId;

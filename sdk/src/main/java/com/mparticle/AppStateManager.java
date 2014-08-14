@@ -40,7 +40,7 @@ class AppStateManager implements MPActivityCallbacks{
     private void logBackgrounded(){
         MParticle.getInstance().logStateTransition(Constants.StateTransitionType.STATE_TRANS_BG);
         MParticle.getInstance().mConfigManager.handleBackgrounded();
-        MParticle.getInstance().mConfigManager.debugLog("App backgrounded.");
+        ConfigManager.log(MParticle.LogLevel.DEBUG, "App backgrounded.");
     }
 
     //it can take some time between when an activity stops and when a new one (or the same one)
@@ -120,7 +120,7 @@ class AppStateManager implements MPActivityCallbacks{
             preferences.edit().putLong(Constants.PrefKeys.TIME_IN_BG, totalTimeInBackground).commit();
 
             MParticle.getInstance().logStateTransition(Constants.StateTransitionType.STATE_TRANS_FORE);
-            MParticle.getInstance().mConfigManager.debugLog("App foregrounded.");
+            ConfigManager.log(MParticle.LogLevel.DEBUG, "App foregrounded.");
 
         }
         mActivities.getAndIncrement();

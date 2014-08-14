@@ -12,6 +12,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.mparticle.MParticle.LogLevel;
+
 /**
  * Created by sdozor on 1/16/14.
  */
@@ -38,7 +40,7 @@ class ConfigManager {
     private SharedPreferences mPreferences;
 
     private EmbeddedKitManager mEmbeddedKitManager;
-    private AppConfig mLocalPrefs;
+    private static AppConfig sLocalPrefs;
     private String[] mPushKeys;
     private String mLogUnhandledExceptions = VALUE_APP_DEFINED;
 
@@ -47,7 +49,7 @@ class ConfigManager {
     private boolean mSendOoEvents;
     private JSONObject mProviderPersistence;
     private String mNetworkPerformance = "";
-    private Boolean mIsDebugEnvironment = null;
+    private static boolean sIsDebugEnvironment = false;
 
     private AdtruthConfig adtruth;
 
@@ -57,8 +59,13 @@ class ConfigManager {
 
     public ConfigManager(Context context, String key, String secret, EmbeddedKitManager embeddedKitManager) {
         mContext = context.getApplicationContext();
+        sIsDebugEnvironment = ( 0 != ( mContext.getApplicationInfo().flags &= ApplicationInfo.FLAG_DEBUGGABLE ) );
         mPreferences = mContext.getSharedPreferences(PREFERENCES_FILE, Context.MODE_PRIVATE);
-        mLocalPrefs = new AppConfig(mContext, key, secret);
+        sLocalPrefs = new AppConfig(mContext, key, secret);
+        if (sIsDebugEnvironment){
+            sLocalPrefs.logLevel = LogLevel.DEBUG;
+        }
+        sLocalPrefs.init(mPreferences);
         mEmbeddedKitManager = embeddedKitManager;
     }
 
@@ -150,63 +157,60 @@ class ConfigManager {
 
     public boolean getLogUnhandledExceptions() {
         if (mLogUnhandledExceptions.equals(VALUE_APP_DEFINED)) {
-            return mLocalPrefs.reportUncaughtExceptions;
+            return sLocalPrefs.reportUncaughtExceptions;
         } else {
             return mLogUnhandledExceptions.equals(VALUE_CUE_CATCH);
         }
     }
 
     public String getApiKey() {
-        return mLocalPrefs.mKey;
+        return sLocalPrefs.mKey;
     }
 
     public String getApiSecret() {
-        return mLocalPrefs.mSecret;
+        return sLocalPrefs.mSecret;
     }
 
     public long getUploadInterval() {
         if (getEnvironment().equals(MParticle.Environment.Development)) {
             return DEVMODE_UPLOAD_INTERVAL_MILLISECONDS;
         } else {
-            return 1000 * mLocalPrefs.uploadInterval;
+            return 1000 * sLocalPrefs.uploadInterval;
         }
     }
 
-    public boolean isDebugEnvironment(){
-        if (mIsDebugEnvironment == null){
-            mIsDebugEnvironment = ( 0 != ( mContext.getApplicationInfo().flags &= ApplicationInfo.FLAG_DEBUGGABLE ) );
-        }
-        return mIsDebugEnvironment;
+    public static boolean isDebugEnvironment(){
+        return sIsDebugEnvironment;
     }
 
-    public MParticle.Environment getEnvironment() {
-        if (mLocalPrefs.forcedEnvironment != MParticle.Environment.AutoDetect){
-            return mLocalPrefs.forcedEnvironment;
+    public static MParticle.Environment getEnvironment() {
+        if (sLocalPrefs.forcedEnvironment != MParticle.Environment.AutoDetect){
+            return sLocalPrefs.forcedEnvironment;
         }else{
             return isDebugEnvironment() ? MParticle.Environment.Development : MParticle.Environment.Production;
         }
     }
 
     public void setUploadInterval(int uploadInterval) {
-        mLocalPrefs.uploadInterval = uploadInterval;
+        sLocalPrefs.uploadInterval = uploadInterval;
     }
 
     public int getSessionTimeout() {
-        return mLocalPrefs.sessionTimeout * 1000;
+        return sLocalPrefs.sessionTimeout * 1000;
     }
 
     public void setSessionTimeout(int sessionTimeout) {
-        mLocalPrefs.sessionTimeout = sessionTimeout;
+        sLocalPrefs.sessionTimeout = sessionTimeout;
     }
 
     public boolean isPushEnabled() {
-        return mLocalPrefs.isPushEnabled ||
+        return sLocalPrefs.isPushEnabled ||
                 (mPreferences.getBoolean(Constants.PrefKeys.PUSH_ENABLED, false) && getPushSenderId() != null);
     }
 
     public String getPushSenderId() {
-        if (mLocalPrefs.pushSenderId != null && mLocalPrefs.pushSenderId.length() > 0)
-            return mLocalPrefs.pushSenderId;
+        if (sLocalPrefs.pushSenderId != null && sLocalPrefs.pushSenderId.length() > 0)
+            return sLocalPrefs.pushSenderId;
         else return mPreferences.getString(Constants.PrefKeys.PUSH_SENDER_ID, null);
     }
 
@@ -227,22 +231,50 @@ class ConfigManager {
         }
     }
 
-    void debugLog(String... messages) {
-        if (messages != null && getEnvironment().equals(MParticle.Environment.Development)) {
+    static void log(LogLevel priority, String... messages) {
+        log(priority, null, messages);
+    }
+
+    static void log(LogLevel priority, Throwable error, String... messages){
+        if (messages != null && sLocalPrefs.logLevel.ordinal() >= priority.ordinal() &&
+                getEnvironment().equals(MParticle.Environment.Development)) {
             StringBuilder logMessage = new StringBuilder();
             for (String m : messages){
                 logMessage.append(m);
             }
-            Log.d(Constants.LOG_TAG, logMessage.toString());
+            switch (priority){
+                case ERROR:
+                    if (error != null){
+                        Log.e(Constants.LOG_TAG, logMessage.toString(), error);
+                    }else{
+                        Log.e(Constants.LOG_TAG, logMessage.toString());
+                    }
+                    break;
+                case WARNING:
+                    if (error != null){
+                        Log.w(Constants.LOG_TAG, logMessage.toString(), error);
+                    }else{
+                        Log.w(Constants.LOG_TAG, logMessage.toString());
+                    }
+
+                    break;
+                case DEBUG:
+                    if (error != null){
+                        Log.v(Constants.LOG_TAG, logMessage.toString(), error);
+                    }else{
+                        Log.v(Constants.LOG_TAG, logMessage.toString());
+                    }
+                    break;
+            }
         }
     }
 
     public String getLicenseKey() {
-        return mLocalPrefs.licenseKey;
+        return sLocalPrefs.licenseKey;
     }
 
     public boolean isLicensingEnabled() {
-        return mLocalPrefs.licenseKey != null && mLocalPrefs.isLicensingEnabled;
+        return sLocalPrefs.licenseKey != null && sLocalPrefs.isLicensingEnabled;
     }
 
     public void setPushSoundEnabled(boolean pushSoundEnabled) {
@@ -277,7 +309,7 @@ class ConfigManager {
     }
 
     public boolean isAutoTrackingEnabled() {
-        return mLocalPrefs.autoTrackingEnabled;
+        return sLocalPrefs.autoTrackingEnabled;
     }
 
     public boolean isPushSoundEnabled() {
@@ -327,11 +359,11 @@ class ConfigManager {
 
     public boolean isNetworkPerformanceEnabled() {
         return Build.VERSION.SDK_INT > Build.VERSION_CODES.FROYO &&
-                mLocalPrefs.networkingEnabled;
+                sLocalPrefs.networkingEnabled;
     }
 
     public void setNetworkingEnabled(boolean networkingEnabled) {
-        mLocalPrefs.networkingEnabled = networkingEnabled;
+        sLocalPrefs.networkingEnabled = networkingEnabled;
     }
 
     public void setCookies(JSONObject cookies) {
@@ -351,7 +383,7 @@ class ConfigManager {
     }
 
     public int getAudienceTimeout() {
-        return mLocalPrefs.audienceTimeout;
+        return sLocalPrefs.audienceTimeout;
     }
 
     public void handleBackgrounded() {
@@ -359,7 +391,11 @@ class ConfigManager {
     }
 
     public void setForceEnvironment(MParticle.Environment environment) {
-        mLocalPrefs.forcedEnvironment = environment;
+        sLocalPrefs.forcedEnvironment = environment;
+    }
+
+    public void setLogLevel(LogLevel level) {
+        sLocalPrefs.logLevel = level;
     }
 
     class AdtruthConfig {

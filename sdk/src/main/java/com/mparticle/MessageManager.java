@@ -237,14 +237,14 @@ import java.util.UUID;
                     mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, firstRunMessage));
                     sFirstRun = false;
                 } catch (JSONException e) {
-                    Log.w(TAG, "Failed to create First Run Message");
+                    ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to create First Run Message");
                 }
             }
 
             incrementSessionCounter();
 
         } catch (JSONException e) {
-            Log.w(TAG, "Failed to create mParticle start session message");
+            ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to create mParticle start session message");
         }
     }
 
@@ -276,7 +276,7 @@ import java.util.UUID;
             editor.remove(Constants.PrefKeys.TIME_IN_BG);
             editor.commit();
         } catch (JSONException e) {
-            Log.w(TAG, "Failed to send update session end message");
+            ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to send update session end message");
         }
     }
 
@@ -301,7 +301,7 @@ import java.util.UUID;
 
             mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
         } catch (JSONException e) {
-            Log.w(TAG, "Failed to create mParticle log event message");
+            ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to create mParticle log event message");
         }
     }
 
@@ -319,7 +319,7 @@ import java.util.UUID;
             message.put(MessageKey.SCREEN_STARTED, started ? "activity_started" : "activity_stopped");
             mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
         } catch (JSONException e) {
-            Log.w(TAG, "Failed to create mParticle log event message");
+            ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to create mParticle log event message");
         }
     }
 
@@ -334,7 +334,7 @@ import java.util.UUID;
             mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
             mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_BREADCRUMB, message));
         } catch (JSONException e) {
-            Log.w(TAG, "Failed to create mParticle breadcrumb message");
+            ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to create mParticle breadcrumb message");
         }
     }
 
@@ -344,7 +344,7 @@ import java.util.UUID;
             message.put(MessageKey.OPT_OUT_STATUS, optOutStatus);
             mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
         } catch (JSONException e) {
-            Log.w(TAG, "Failed to create mParticle opt out message");
+            ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to create mParticle opt out message");
         }
     }
 
@@ -376,7 +376,7 @@ import java.util.UUID;
             }
             mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
         } catch (JSONException e) {
-            Log.w(TAG, "Failed to create mParticle error message");
+            ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to create mParticle error message");
         }
     }
 
@@ -393,7 +393,7 @@ import java.util.UUID;
             }
             mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
         } catch (JSONException e) {
-            Log.w(TAG, "Failed to create mParticle error message");
+            ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to create mParticle error message");
         }
     }
 
@@ -406,7 +406,7 @@ import java.util.UUID;
             message.put(MessageKey.PUSH_REGISTER_FLAG, registeringFlag);
             mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
         } catch (JSONException e) {
-            Log.w(TAG, "Failed to create mParticle push registration message");
+            ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to create mParticle push registration message");
         }
     }
 
@@ -418,7 +418,7 @@ import java.util.UUID;
             mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.UPDATE_SESSION_ATTRIBUTES,
                     sessionAttributes));
         } catch (JSONException e) {
-            Log.w(TAG, "Failed to send update session attributes message");
+            ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to send update session attributes message");
         }
     }
 
@@ -428,7 +428,7 @@ import java.util.UUID;
 
     public void setLocation(Location location) {
         sLocation = location;
-        mConfigManager.debugLog("Received location update: " + location);
+        ConfigManager.log(MParticle.LogLevel.DEBUG, "Received location update: " + location);
     }
 
     public void logStateTransition(String stateTransInit, String sessionId, long sessionStartTime, Bundle lastNotificationBundle) {
@@ -481,7 +481,7 @@ import java.util.UUID;
             }
             mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
         } catch (JSONException e) {
-            Log.w(TAG, "Failed to create mParticle state transition message");
+            ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to create mParticle state transition message");
         }
     }
 
@@ -544,7 +544,7 @@ import java.util.UUID;
 
             mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
         } catch (JSONException e) {
-            Log.w(TAG, "Failed to create mParticle log event message");
+            ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to create mParticle log event message");
         }
     }
 
@@ -577,6 +577,6 @@ import java.util.UUID;
         }
 
         mUploadHandler.setConnected(activeNetwork != null && activeNetwork.isConnectedOrConnecting());
-        mConfigManager.debugLog("Active network has changed: " + sActiveNetworkName);
+        ConfigManager.log(MParticle.LogLevel.DEBUG, "Active network has changed: " + sActiveNetworkName);
     }
 }

@@ -68,7 +68,7 @@ abstract class EmbeddedProvider implements IEmbeddedKit {
                 String key = iterator.next();
                 map.put(Integer.parseInt(key), json.getBoolean(key));
             }catch (JSONException jse){
-                MParticle.getInstance().mConfigManager.debugLog("Issue while parsing embedded kit configuration: " + jse.getMessage());
+                ConfigManager.log(MParticle.LogLevel.ERROR, "Issue while parsing embedded kit configuration: " + jse.getMessage());
             }
         }
         return map;
@@ -129,5 +129,7 @@ abstract class EmbeddedProvider implements IEmbeddedKit {
     protected abstract EmbeddedProvider update();
     public abstract String getName();
 
+
+    public abstract boolean isOriginator(String uri);
 
 }

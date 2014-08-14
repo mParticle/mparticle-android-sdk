@@ -93,9 +93,9 @@ class MParticleApiClient {
                 configManager.updateConfig(response.getJsonResponse());
             }
         } catch (MalformedURLException e) {
-            Log.e(Constants.LOG_TAG, "Error constructing config service URL", e);
+            ConfigManager.log(MParticle.LogLevel.ERROR, e, "Error constructing config service URL");
         } catch (JSONException e) {
-            Log.w(Constants.LOG_TAG, "Config request failed to process response message JSON");
+            ConfigManager.log(MParticle.LogLevel.ERROR, "Config request failed to process response message JSON");
         }
     }
 
@@ -107,7 +107,7 @@ class MParticleApiClient {
 
         JSONObject response = null;
         try {
-            Log.d(Constants.LOG_TAG, "Starting Segment Network request");
+            ConfigManager.log(MParticle.LogLevel.DEBUG, "Starting Segment Network request");
             HttpURLConnection connection = (HttpURLConnection) getAudienceUrl().openConnection();
             connection.setRequestProperty("Accept-Encoding", "gzip");
             connection.setRequestProperty(HTTP.USER_AGENT, userAgent);
@@ -115,12 +115,12 @@ class MParticleApiClient {
             addMessageSignature(connection, null);
             ApiResponse apiResponse = new ApiResponse(connection);
             if (apiResponse.getResponseCode() == HttpURLConnection.HTTP_FORBIDDEN){
-                configManager.debugLog("Segment call forbidden: is Segment enabled for the current mParticle org?");
+                ConfigManager.log(MParticle.LogLevel.ERROR, "Segment call forbidden: is Segment enabled for the current mParticle org?");
             }
             response =  apiResponse.getJsonResponse();
 
         }catch (Exception e){
-            configManager.debugLog("Segment call failed: " + e.getMessage());
+            ConfigManager.log(MParticle.LogLevel.ERROR, "Segment call failed: " + e.getMessage());
         }
         return response;
     }
@@ -159,7 +159,7 @@ class MParticleApiClient {
     }
 
     ApiResponse sendCommand(String commandUrl, String method, String postData, String headers) throws IOException, JSONException {
-        configManager.debugLog("Sending data to: " + commandUrl);
+        ConfigManager.log(MParticle.LogLevel.DEBUG, "Sending data to: " + commandUrl);
 
         URL url = new URL(commandUrl);
         HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
@@ -189,15 +189,15 @@ class MParticleApiClient {
             JSONObject messageJson = new JSONObject(message);
             if (messageJson.has(Constants.MessageKey.MESSAGES)) {
                 JSONArray messages = messageJson.getJSONArray(Constants.MessageKey.MESSAGES);
-                Log.d(Constants.LOG_TAG, "Uploading message batch...");
+                ConfigManager.log(MParticle.LogLevel.DEBUG, "Uploading message batch...");
                 for (int i = 0; i < messages.length(); i++) {
-                    Log.d(Constants.LOG_TAG, "Message type: " + ((JSONObject) messages.get(i)).getString(Constants.MessageKey.TYPE));
+                    ConfigManager.log(MParticle.LogLevel.DEBUG, "Message type: " + ((JSONObject) messages.get(i)).getString(Constants.MessageKey.TYPE));
                 }
             } else if (messageJson.has(Constants.MessageKey.HISTORY)) {
                 JSONArray messages = messageJson.getJSONArray(Constants.MessageKey.HISTORY);
-                Log.d(Constants.LOG_TAG, "Uploading session history batch...");
+                ConfigManager.log(MParticle.LogLevel.DEBUG, "Uploading session history batch...");
                 for (int i = 0; i < messages.length(); i++) {
-                    Log.d(Constants.LOG_TAG, "Message type: " + ((JSONObject) messages.get(i)).getString(Constants.MessageKey.TYPE) + " SID: " + ((JSONObject) messages.get(i)).optString(Constants.MessageKey.SESSION_ID));
+                    ConfigManager.log(MParticle.LogLevel.DEBUG, "Message type: " + ((JSONObject) messages.get(i)).getString(Constants.MessageKey.TYPE) + " SID: " + ((JSONObject) messages.get(i)).optString(Constants.MessageKey.SESSION_ID));
                 }
             }
         } catch (JSONException jse) {
@@ -226,11 +226,11 @@ class MParticleApiClient {
             request.setRequestProperty(HTTP.DATE_HEADER, dateHeader);
             request.setRequestProperty(HEADER_SIGNATURE, hmacSha256Encode(apiSecret, hashString.toString()));
         } catch (InvalidKeyException e) {
-            Log.e(Constants.LOG_TAG, "Error signing message.", e);
+            ConfigManager.log(MParticle.LogLevel.ERROR, e, "Error signing message.");
         } catch (NoSuchAlgorithmException e) {
-            Log.e(Constants.LOG_TAG, "Error signing message.", e);
+            ConfigManager.log(MParticle.LogLevel.ERROR, e, "Error signing message.");
         } catch (UnsupportedEncodingException e){
-            Log.e(Constants.LOG_TAG, "Error signing message.", e);
+            ConfigManager.log(MParticle.LogLevel.ERROR, e, "Error signing message.");
         }
     }
 
@@ -385,7 +385,7 @@ class MParticleApiClient {
             }
             statusCode = connection.getResponseCode();
             if (statusCode == HttpStatus.SC_BAD_REQUEST) {
-                configManager.debugLog("Bad API request - is the correct API key and secret configured?");
+                ConfigManager.log(MParticle.LogLevel.ERROR, "Bad API request - is the correct API key and secret configured?");
             }
             if (statusCode == HttpStatus.SC_SERVICE_UNAVAILABLE){
                 setNextValidTime();
