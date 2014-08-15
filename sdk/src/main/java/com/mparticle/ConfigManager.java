@@ -33,6 +33,7 @@ class ConfigManager {
     public static final String VALUE_CNP_CAPTURE = "forcetrue";
     public static final String VALUE_CNP_NO_CAPTURE = "forcefalse";
     private static final String PREFERENCES_FILE = "mp_preferences";
+    private static final String KEY_RAMP = "rp";
     private static final int DEVMODE_UPLOAD_INTERVAL_MILLISECONDS = 5 * 1000;
 
     private Context mContext;
@@ -44,12 +45,11 @@ class ConfigManager {
     private String[] mPushKeys;
     private String mLogUnhandledExceptions = VALUE_APP_DEFINED;
 
-    private boolean mLoaded = false;
-
     private boolean mSendOoEvents;
     private JSONObject mProviderPersistence;
     private String mNetworkPerformance = "";
     private static boolean sIsDebugEnvironment = false;
+    private int mRampValue = -1;
 
     private AdtruthConfig adtruth;
 
@@ -70,14 +70,6 @@ class ConfigManager {
     }
 
     public synchronized void updateConfig(JSONObject responseJSON) throws JSONException {
-        //Work-around caching mechanism:
-        //Clear out values that change on every config request,
-        //so that the cache isn't prematurely busted.
-        responseJSON.remove("id");
-        responseJSON.remove("ct");
-        if (mLoaded && mPreferences.getString(CONFIG_JSON,"").equals(responseJSON.toString())){
-            return;
-        }
 
         SharedPreferences.Editor editor = mPreferences.edit();
         editor.putString(CONFIG_JSON, responseJSON.toString());
@@ -98,6 +90,8 @@ class ConfigManager {
         }
 
         mNetworkPerformance = responseJSON.optString(KEY_NETWORK_PERFORMANCE, VALUE_APP_DEFINED);
+
+        mRampValue = responseJSON.optInt(KEY_RAMP, -1);
 
         if (responseJSON.has(KEY_OPT_OUT)){
             mSendOoEvents = responseJSON.getBoolean(KEY_OPT_OUT);
@@ -125,8 +119,6 @@ class ConfigManager {
         if (responseJSON.has(KEY_EMBEDDED_KITS)) {
             mEmbeddedKitManager.updateKits(responseJSON.getJSONArray(KEY_EMBEDDED_KITS));
         }
-        
-        mLoaded = true;
     }
 
     public AdtruthConfig getAdtruth(){
@@ -219,16 +211,6 @@ class ConfigManager {
                 .putString(Constants.PrefKeys.PUSH_SENDER_ID, senderId)
                 .putBoolean(Constants.PrefKeys.PUSH_ENABLED, true)
                 .commit();
-    }
-
-    public void restoreFromCache() {
-        try{
-            if (!mLoaded){
-                updateConfig(new JSONObject(mPreferences.getString(ConfigManager.CONFIG_JSON, "")));
-            }
-        }catch(Exception e){
-
-        }
     }
 
     static void log(LogLevel priority, String... messages) {
@@ -396,6 +378,10 @@ class ConfigManager {
 
     public void setLogLevel(LogLevel level) {
         sLocalPrefs.logLevel = level;
+    }
+
+    public int getCurrentRampValue() {
+        return mRampValue;
     }
 
     class AdtruthConfig {

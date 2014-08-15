@@ -7,7 +7,6 @@ import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.content.pm.Signature;
 import android.content.res.Configuration;
 import android.location.LocationManager;
 import android.os.Build;
@@ -23,7 +22,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
@@ -32,13 +30,10 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.math.BigInteger;
 import java.security.SecureRandom;
-import java.security.cert.CertificateFactory;
-import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
 import java.util.TreeMap;
@@ -61,7 +56,7 @@ class MPUtility {
         BufferedReader localBufferedReader = null;
         String str3 = null;
         try {
-            String[] command =   {"top","-d","1","-n","1"};
+            String[] command = {"top", "-d", "1", "-n", "1"};
             localProcess = new ProcessBuilder().command(command).redirectErrorStream(true).start();
             localBufferedReader = new BufferedReader(new InputStreamReader(localProcess.getInputStream()));
             while ((str3 = localBufferedReader.readLine()) != null)
@@ -84,7 +79,7 @@ class MPUtility {
                 if (localBufferedReader != null) {
                     localBufferedReader.close();
                 }
-                if (localProcess != null){
+                if (localProcess != null) {
                     try {
                         // use exitValue() to determine if process is still running.
                         localProcess.exitValue();
@@ -441,21 +436,36 @@ class MPUtility {
         return false;
     }
 
-    public static boolean checkPermission(Context context, String permission){
+    public static boolean checkPermission(Context context, String permission) {
         int res = context.checkCallingOrSelfPermission(permission);
         return (res == PackageManager.PERMISSION_GRANTED);
     }
 
-    public static boolean isGooglePlayServicesAvailable(){
-        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.FROYO){
+    public static boolean isGooglePlayServicesAvailable() {
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.FROYO) {
             return false;
         }
-        try{
+        try {
             Class.forName("com.google.android.gms.ads.identifier.AdvertisingIdClient");
             return true;
-        }catch (ClassNotFoundException cnfe){
+        } catch (ClassNotFoundException cnfe) {
 
         }
         return false;
+    }
+
+    public static BigInteger hashDeviceIdForRamping(byte[] data) {
+        final BigInteger INIT64 = new BigInteger("cbf29ce484222325", 16);
+        final BigInteger PRIME64 = new BigInteger("100000001b3", 16);
+        final BigInteger MOD64 = new BigInteger("2").pow(64);
+
+        BigInteger hash = INIT64;
+
+        for (byte b : data) {
+            hash = hash.xor(BigInteger.valueOf((int) b & 0xff));
+            hash = hash.multiply(PRIME64).mod(MOD64);
+        }
+
+        return hash;
     }
 }

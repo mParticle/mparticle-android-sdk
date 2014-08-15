@@ -98,7 +98,7 @@ import java.util.concurrent.TimeoutException;
         mPreferences = mContext.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
 
         try {
-            mApiClient = new MParticleApiClient(configManager, mApiKey, mConfigManager.getApiSecret(), mPreferences);
+            mApiClient = new MParticleApiClient(configManager, mPreferences, context);
         } catch (MalformedURLException e) {
             //this should never happen - the URLs are created by constants.
         }
@@ -307,12 +307,18 @@ import java.util.concurrent.TimeoutException;
                     }
                 }
 
-                MParticleApiClient.ApiResponse response = mApiClient.sendMessageBatch(message);
+                MParticleApiClient.ApiResponse response = null;
+                try {
+                    response = mApiClient.sendMessageBatch(message);
+                } catch (MParticleApiClient.MPRampException e) {
+                    ConfigManager.log(MParticle.LogLevel.DEBUG, e.toString());
+                }
 
-                if (response.shouldDelete()) {
+                if (response == null || response.shouldDelete()) {
                     dbDeleteUpload(id);
                     try {
-                        if (response.getJsonResponse() != null &&
+                        if (response != null &&
+                                response.getJsonResponse() != null &&
                                 response.getJsonResponse().has(MessageKey.MESSAGES)) {
                             JSONArray responseCommands = response.getJsonResponse().getJSONArray(MessageKey.MESSAGES);
                             for (int i = 0; i < responseCommands.length(); i++) {
