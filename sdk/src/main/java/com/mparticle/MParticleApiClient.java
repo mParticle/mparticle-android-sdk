@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Build;
 import android.provider.Settings;
+import android.text.TextUtils;
 import android.util.Base64;
 
 
@@ -50,7 +51,9 @@ class MParticleApiClient {
     private static final String HEADER_SIGNATURE = "x-mp-signature";
     private static final String HEADER_ENVIRONMENT = "x-mp-env";
     private static final String SECURE_SERVICE_SCHEME = "https";
-    private static final String SECURE_SERVICE_HOST = BuildConfig.MP_URL;
+
+    private static final String API_HOST = TextUtils.isEmpty(BuildConfig.MP_URL) ? "nativesdks.mparticle.com" : BuildConfig.MP_URL;
+    private static final String CONFIG_HOST = TextUtils.isEmpty(BuildConfig.MP_CONFIG_URL) ? "config.mparticle.com" : BuildConfig.MP_CONFIG_URL;
 
     private static final String SERVICE_VERSION_1 = "/v1";
     private static final String SERVICE_VERSION_2 = "/v2";
@@ -75,8 +78,8 @@ class MParticleApiClient {
         mApiSecret = configManager.getApiSecret();
         mPreferences = sharedPreferences;
         mApiKey = configManager.getApiKey();
-        mConfigUrl = new URL(SECURE_SERVICE_SCHEME, SECURE_SERVICE_HOST, SERVICE_VERSION_2 + "/" + mApiKey + "/config");
-        mEventUrl = new URL(SECURE_SERVICE_SCHEME, SECURE_SERVICE_HOST, SERVICE_VERSION_1 + "/" + mApiKey + "/events");
+        mConfigUrl = new URL(SECURE_SERVICE_SCHEME, API_HOST, SERVICE_VERSION_2 + "/" + mApiKey + "/config");
+        mEventUrl = new URL(SECURE_SERVICE_SCHEME, CONFIG_HOST, SERVICE_VERSION_1 + "/" + mApiKey + "/events");
         mUserAgent = "mParticle Android SDK/" + Constants.MPARTICLE_VERSION;
         mDeviceRampNumber = MPUtility.hashDeviceIdForRamping(
                         Settings.Secure.getString(context.getContentResolver(),
@@ -109,7 +112,7 @@ class MParticleApiClient {
     }
 
     private URL getAudienceUrl() throws MalformedURLException {
-        return new URL(SECURE_SERVICE_SCHEME, SECURE_SERVICE_HOST, SERVICE_VERSION_1 + "/" + mApiKey + "/audience?mpID=" + mConfigManager.getMpid());
+        return new URL(SECURE_SERVICE_SCHEME, API_HOST, SERVICE_VERSION_1 + "/" + mApiKey + "/audience?mpID=" + mConfigManager.getMpid());
     }
 
     JSONObject fetchAudiences()  {
@@ -256,7 +259,7 @@ class MParticleApiClient {
         return new String(chars);
     }
 
-    private static void addCookies(JSONObject uploadMessage, ConfigManager manager) {
+    static void addCookies(JSONObject uploadMessage, ConfigManager manager) {
         try {
             if (uploadMessage != null) {
                 uploadMessage.put(COOKIES, manager.getCookies());
@@ -367,7 +370,7 @@ class MParticleApiClient {
         }else{
             return new StringBuilder(SECURE_SERVICE_SCHEME)
                     .append("://")
-                    .append(SECURE_SERVICE_HOST)
+                    .append(API_HOST)
                     .append("/")
                     .append(relativeUrl).toString();
         }
