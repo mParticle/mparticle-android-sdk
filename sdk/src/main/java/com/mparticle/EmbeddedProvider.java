@@ -3,10 +3,12 @@ package com.mparticle;
 import android.content.Context;
 import android.util.SparseBooleanArray;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 
 /**
@@ -17,6 +19,7 @@ abstract class EmbeddedProvider implements IEmbeddedKit {
     final static String KEY_ID = "id";
     private final static String KEY_PROPERTIES = "as";
     private final static String KEY_FILTERS = "hs";
+    private final static String KEY_INCLUSION_FILTERS = "eventList";
     private final static String KEY_EVENT_TYPES = "et";
     private final static String KEY_EVENT_NAMES = "ec";
     private final static String KEY_EVENT_ATTRIBUTES = "ea";
@@ -28,6 +31,8 @@ abstract class EmbeddedProvider implements IEmbeddedKit {
     protected SparseBooleanArray types = new SparseBooleanArray(0);
     protected SparseBooleanArray names = new SparseBooleanArray(0);
     protected SparseBooleanArray attributes = new SparseBooleanArray(0);
+    protected HashSet<String> includedEvents;
+
     protected Context context;
 
     public EmbeddedProvider(Context context) throws ClassNotFoundException{
@@ -42,6 +47,17 @@ abstract class EmbeddedProvider implements IEmbeddedKit {
                 String key = iterator.next();
                 properties.put(key, propJson.getString(key));
             }
+            if (propJson.has(KEY_INCLUSION_FILTERS)){
+                try {
+                    JSONArray inclusions = propJson.getJSONArray(KEY_INCLUSION_FILTERS);
+                    includedEvents = new HashSet<String>(inclusions.length());
+                    for (int i = 0; i < inclusions.length(); i++){
+                        includedEvents.add(inclusions.getString(i).toLowerCase());
+                    }
+                }catch (JSONException jse){
+
+                }
+            }
         }
         if (json.has(KEY_FILTERS)){
             if (json.has(KEY_EVENT_TYPES)){
@@ -54,6 +70,7 @@ abstract class EmbeddedProvider implements IEmbeddedKit {
                 attributes = convertToSparseArray(json.getJSONObject(KEY_EVENT_ATTRIBUTES));
             }
         }
+
         return this;
     }
 

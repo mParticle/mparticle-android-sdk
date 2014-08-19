@@ -613,7 +613,7 @@ public class MParticle {
         if (contextInfo == null) {
             contextInfo = new HashMap<String, String>();
         }
-        contextInfo.put("$Amount", valueIncreased.toPlainString());
+        contextInfo.put(Constants.MessageKey.RESERVED_KEY_LTV, valueIncreased.toPlainString());
         contextInfo.put(Constants.MethodName.METHOD_NAME, Constants.MethodName.LOG_LTV);
         logEvent(eventName == null ? "Increase LTV" : eventName, EventType.Transaction, contextInfo);
     }
@@ -665,8 +665,6 @@ public class MParticle {
             JSONObject transactionJson = enforceAttributeConstraints(product);
             mMessageManager.logEvent(mSessionID, mSessionStartTime, mLastEventTime, event.toString(), EventType.Transaction, transactionJson, 0);
             ConfigManager.log(LogLevel.DEBUG, "Logged product event with data: ", product.toString());
-
-
         }
         if (purchaseEvent) {
             mEmbeddedKitManager.logTransaction(product);
@@ -1050,6 +1048,7 @@ public class MParticle {
 
             mMessageManager.logProfileAction(Constants.ProfileActions.LOGOUT, mSessionID, mSessionStartTime);
         }
+        mEmbeddedKitManager.logout();
     }
 
     /**
@@ -1206,6 +1205,7 @@ public class MParticle {
             } catch (JSONException jse) {
                 ConfigManager.log(MParticle.LogLevel.WARNING, "Error removing identity: " + id);
             }
+            mEmbeddedKitManager.removeUserIdentity(id);
         }
     }
 

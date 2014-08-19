@@ -145,6 +145,16 @@ public class EmbeddedKochava extends EmbeddedProvider implements MPActivityCallb
     }
 
     @Override
+    public void logout() {
+        //no matching feature in Kochava
+    }
+
+    @Override
+    public void removeUserIdentity(String id) {
+
+    }
+
+    @Override
     public void onActivityCreated(Activity activity, int activityCount) {
 
     }

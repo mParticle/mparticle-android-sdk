@@ -15,4 +15,6 @@ interface IEmbeddedKit {
     void setUserAttributes(JSONObject mUserAttributes);
     void removeUserAttribute(String key);
     void setUserIdentity(String id, MParticle.IdentityType identityType);
+    void logout();
+    void removeUserIdentity(String id);
 }

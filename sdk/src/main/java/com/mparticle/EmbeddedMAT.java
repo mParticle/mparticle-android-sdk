@@ -7,6 +7,8 @@ import android.content.SharedPreferences;
 import android.location.Location;
 import android.util.Log;
 
+import com.mobileapptracker.MobileAppTracker;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -184,6 +186,16 @@ class EmbeddedMAT extends EmbeddedProvider implements MPActivityCallbacks {
                     break;
             }
         }
+    }
+
+    @Override
+    public void logout() {
+        //no matching MAT feature
+    }
+
+    @Override
+    public void removeUserIdentity(String id) {
+
     }
 
     @Override

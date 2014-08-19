@@ -131,6 +131,10 @@ public class MPProduct extends HashMap<String, String> {
         return get(TRANSACTION_ID, null);
     }
 
+    public String getProductName(){
+        return get(NAME, null);
+    }
+
     public String get(Object key, String defaultValue) {
         return containsKey(key) ? super.get(key) : defaultValue;
     }

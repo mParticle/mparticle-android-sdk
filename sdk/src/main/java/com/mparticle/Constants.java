@@ -218,6 +218,7 @@ package com.mparticle;
         //sandbox mode is deprecated as of > 1.6.3
         public static final String SANDBOX = "dbg";
         public static final String ENVIRONMENT = "env";
+        String RESERVED_KEY_LTV = "$Amount";
     }
 
     interface PrefKeys {

@@ -153,6 +153,32 @@ class EmbeddedKitManager implements IEmbeddedKit, MPActivityCallbacks{
     }
 
     @Override
+    public void logout() {
+        for (EmbeddedProvider provider : providers.values()){
+            try {
+                if (!provider.optedOut()) {
+                    provider.logout();
+                }
+            } catch (Exception e) {
+                ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to call logout for embedded provider: " + provider.getName() + ": " + e.getMessage());
+            }
+        }
+    }
+
+    @Override
+    public void removeUserIdentity(String id) {
+        for (EmbeddedProvider provider : providers.values()){
+            try {
+                if (!provider.optedOut()) {
+                    provider.removeUserIdentity(id);
+                }
+            } catch (Exception e) {
+                ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to call removeUserIdentity for embedded provider: " + provider.getName() + ": " + e.getMessage());
+            }
+        }
+    }
+
+    @Override
     public void onActivityCreated(Activity activity, int activityCount) {
         for (EmbeddedProvider provider : providers.values()){
             if (provider instanceof MPActivityCallbacks) {
