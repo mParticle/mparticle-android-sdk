@@ -203,6 +203,7 @@ class EmbeddedMAT extends EmbeddedProvider implements MPActivityCallbacks {
                     .edit()
                     .putBoolean(Constants.PrefKeys.MAT_EXISTING_USER, true)
                     .commit();
+            com.mobileapptracker.MobileAppTracker.getInstance().measureSession();
         }
         if (Boolean.parseBoolean(properties.get(VIEW_SERVER_RESPONSE))) {
             com.mobileapptracker.MobileAppTracker.getInstance().setMATResponse(new com.mobileapptracker.MATResponse() {
@@ -248,7 +249,7 @@ class EmbeddedMAT extends EmbeddedProvider implements MPActivityCallbacks {
     }
 
     @Override
-    public void onActivityCreated(Activity activity) {
+    public void onActivityCreated(Activity activity, int activityCount) {
         if (Intent.ACTION_MAIN.equals(activity.getIntent().getAction())) {
             com.mobileapptracker.MobileAppTracker.getInstance().setReferralSources(activity);
             if (MPUtility.isGooglePlayServicesAvailable()) {
@@ -270,24 +271,24 @@ class EmbeddedMAT extends EmbeddedProvider implements MPActivityCallbacks {
     }
 
     @Override
-    public void onActivityResumed(Activity activity) {
+    public void onActivityResumed(Activity activity, int currentCount) {
         if (Intent.ACTION_MAIN.equals(activity.getIntent().getAction())) {
             com.mobileapptracker.MobileAppTracker.getInstance().measureSession();
         }
     }
 
     @Override
-    public void onActivityPaused(Activity activity) {
+    public void onActivityPaused(Activity activity, int activityCount) {
 
     }
 
     @Override
-    public void onActivityStopped(Activity activity) {
+    public void onActivityStopped(Activity activity, int currentCount) {
 
     }
 
     @Override
-    public void onActivityStarted(Activity activity) {
+    public void onActivityStarted(Activity activity, int currentCount) {
 
     }
 }

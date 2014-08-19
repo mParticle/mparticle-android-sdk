@@ -3,7 +3,6 @@ package com.mparticle;
 import android.app.Activity;
 import android.content.Context;
 import android.location.Location;
-import android.util.Log;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -27,13 +26,14 @@ class EmbeddedKitManager implements IEmbeddedKit, MPActivityCallbacks{
         for (int i = 0; i < kitConfigs.length(); i++){
             try {
                 JSONObject current = kitConfigs.getJSONObject(i);
-                if (!providers.containsKey(current.getInt(EmbeddedProvider.KEY_ID))) {
-                    providers.put(current.getInt(EmbeddedProvider.KEY_ID), EmbeddedProvider.createInstance(current, context));
+                int currentId = current.getInt(EmbeddedProvider.KEY_ID);
+                if (!providers.containsKey(currentId)) {
+                    providers.put(currentId, new EmbeddedKitFactory().createInstance(currentId, context));
                 }
-                providers.get(current.getInt(EmbeddedProvider.KEY_ID)).parseConfig(current).update();
-                if (!providers.get(current.getInt(EmbeddedProvider.KEY_ID)).optedOut()) {
-                    providers.get(current.getInt(EmbeddedProvider.KEY_ID)).setUserAttributes(MParticle.getInstance().mUserAttributes);
-                    syncUserIdentities(providers.get(current.getInt(EmbeddedProvider.KEY_ID)));
+                providers.get(currentId).parseConfig(current).update();
+                if (!providers.get(currentId).optedOut()) {
+                    providers.get(currentId).setUserAttributes(MParticle.getInstance().mUserAttributes);
+                    syncUserIdentities(providers.get(currentId));
                 }
             }catch (JSONException jse){
                 ConfigManager.log(MParticle.LogLevel.ERROR, "Exception while parsing embedded kit configuration: " + jse.getMessage());
@@ -60,7 +60,6 @@ class EmbeddedKitManager implements IEmbeddedKit, MPActivityCallbacks{
             }
         }
     }
-
 
     @Override
     public void logEvent(MParticle.EventType type, String name, JSONObject eventAttributes) {
@@ -154,12 +153,12 @@ class EmbeddedKitManager implements IEmbeddedKit, MPActivityCallbacks{
     }
 
     @Override
-    public void onActivityCreated(Activity activity) {
+    public void onActivityCreated(Activity activity, int activityCount) {
         for (EmbeddedProvider provider : providers.values()){
             if (provider instanceof MPActivityCallbacks) {
                 try {
                     if (!provider.optedOut()) {
-                        ((MPActivityCallbacks) provider).onActivityCreated(activity);
+                        ((MPActivityCallbacks) provider).onActivityCreated(activity, activityCount);
                     }
                 } catch (Exception e) {
                     ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to call onCreate for embedded provider: " + provider.getName() + ": " + e.getMessage());
@@ -169,12 +168,12 @@ class EmbeddedKitManager implements IEmbeddedKit, MPActivityCallbacks{
     }
 
     @Override
-    public void onActivityResumed(Activity activity) {
+    public void onActivityResumed(Activity activity, int currentCount) {
         for (EmbeddedProvider provider : providers.values()){
             if (provider instanceof MPActivityCallbacks) {
                 try {
                     if (!provider.optedOut()) {
-                        ((MPActivityCallbacks) provider).onActivityResumed(activity);
+                        ((MPActivityCallbacks) provider).onActivityResumed(activity, currentCount);
                     }
                 } catch (Exception e) {
                     ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to call onResume for embedded provider: " + provider.getName() + ": " + e.getMessage());
@@ -184,17 +183,17 @@ class EmbeddedKitManager implements IEmbeddedKit, MPActivityCallbacks{
     }
 
     @Override
-    public void onActivityPaused(Activity activity) {
+    public void onActivityPaused(Activity activity, int activityCount) {
 
     }
 
     @Override
-    public void onActivityStopped(Activity activity) {
+    public void onActivityStopped(Activity activity, int currentCount) {
 
     }
 
     @Override
-    public void onActivityStarted(Activity activity) {
+    public void onActivityStarted(Activity activity, int currentCount) {
 
     }
 
@@ -205,5 +204,20 @@ class EmbeddedKitManager implements IEmbeddedKit, MPActivityCallbacks{
             }
         }
         return false;
+    }
+
+    public static class BaseEmbeddedKitFactory {
+        private final static int MAT = 32;
+        private final static int KOCHAVA = 37;
+        protected EmbeddedProvider createInstance(int id, Context context) throws JSONException, ClassNotFoundException{
+            switch (id){
+                case MAT:
+                    return new EmbeddedMAT(context);
+                case KOCHAVA:
+                    return new EmbeddedKochava(context);
+                default:
+                    return null;
+            }
+        }
     }
 }

@@ -1,8 +1,6 @@
 package com.mparticle;
 
 import android.content.Context;
-import android.util.Log;
-import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 
 import org.json.JSONException;
@@ -22,8 +20,6 @@ abstract class EmbeddedProvider implements IEmbeddedKit {
     private final static String KEY_EVENT_TYPES = "et";
     private final static String KEY_EVENT_NAMES = "ec";
     private final static String KEY_EVENT_ATTRIBUTES = "ea";
-    private final static int MAT = 32;
-    private final static int KOCHAVA = 37;
 
     //If set to true, our sdk honor user's optout wish. If false, we still collect data on opt-ed out users, but only for reporting
     private static final String HONOR_OPT_OUT = "honorOptOut";
@@ -79,19 +75,6 @@ abstract class EmbeddedProvider implements IEmbeddedKit {
                 && !MParticle.getInstance().mConfigManager.getSendOoEvents();
     }
 
-    static final EmbeddedProvider createInstance(JSONObject json, Context context) throws JSONException, ClassNotFoundException{
-        int id = json.getInt(KEY_ID);
-        switch (id){
-            case MAT:
-                return new EmbeddedMAT(context);
-            case KOCHAVA:
-                return new EmbeddedKochava(context);
-            default:
-                return null;
-        }
-
-    }
-
     private static int hash(String input) {
         int hash = 0;
 
@@ -126,10 +109,10 @@ abstract class EmbeddedProvider implements IEmbeddedKit {
         return eventAttributes;
     }
 
-    protected abstract EmbeddedProvider update();
     public abstract String getName();
 
 
     public abstract boolean isOriginator(String uri);
 
+    protected abstract EmbeddedProvider update();
 }

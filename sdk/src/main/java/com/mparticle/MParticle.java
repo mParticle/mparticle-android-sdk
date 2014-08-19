@@ -381,7 +381,7 @@ public class MParticle {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
             if (mConfigManager.getSendOoEvents()) {
                 ensureActiveSession();
-                mAppStateManager.onActivityStarted(activity);
+                mAppStateManager.onActivityStarted(activity, 0);
             }
         }
     }
@@ -398,7 +398,7 @@ public class MParticle {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
             if (mConfigManager.getSendOoEvents()) {
                 ensureActiveSession();
-                mAppStateManager.onActivityStopped(activity);
+                mAppStateManager.onActivityStopped(activity, 0);
             }
         }
     }

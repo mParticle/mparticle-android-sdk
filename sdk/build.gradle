@@ -29,6 +29,22 @@ android {
     compileSdkVersion 19
     buildToolsVersion "19.1"
     useOldManifestMerger false
+    publishNonDefault true
+
+    String url = "\"\"";
+    String configurationUrl = "\"\"";
+    try {
+        Properties properties = new Properties()
+        properties.load(project.rootProject.file('local.properties').newDataInputStream())
+        if (properties.stringPropertyNames().contains('mp.url')) {
+            url = properties.getProperty('mp.url')
+        }
+        if (properties.stringPropertyNames().contains('mp.configurl')) {
+            configurationUrl = properties.getProperty('mp.configurl')
+        }
+    }catch (Exception e){
+
+    }
 
     defaultConfig {
         minSdkVersion 9
@@ -39,53 +55,36 @@ android {
         testInstrumentationRunner "android.test.InstrumentationTestRunner"
         testHandleProfiling true
         testFunctionalTest true
+
+        buildConfigField "String", "MP_URL", url
+        buildConfigField "String", "MP_CONFIG_URL", configurationUrl
+
     }
 
-
-
-    buildTypes {
-
-        String url = "\"\"";
-        String configurationUrl = "\"\"";
-        try {
-            Properties properties = new Properties()
-            properties.load(project.rootProject.file('local.properties').newDataInputStream())
-            if (properties.stringPropertyNames().contains('mp.url')) {
-                url = properties.getProperty('mp.url')
-            }
-            if (properties.stringPropertyNames().contains('mp.configurl')) {
-                configurationUrl = properties.getProperty('mp.configurl')
-            }
-        }catch (Exception e){
+    productFlavors {
+        mainline {
 
         }
 
+        kahuna {
+
+        }
+    }
+
+    buildTypes {
+
         debug {
-            buildConfigField "boolean", "ECHO", "true"
-            buildConfigField "boolean", "UNITY", "false"
-            buildConfigField "String", "MP_URL", url
-            buildConfigField "String", "MP_CONFIG_URL", configurationUrl
             runProguard false
         }
 
         unity {
-            buildConfigField "boolean", "ECHO", "false"
-            buildConfigField "boolean", "UNITY", "true"
-            buildConfigField "String", "MP_URL", url
-            buildConfigField "String", "MP_CONFIG_URL", configurationUrl
-            runProguard true
-            proguardFile 'proguard.txt'
+
         }
 
         release {
-            buildConfigField "boolean", "ECHO", "false"
-            buildConfigField "boolean", "UNITY", "false"
-            buildConfigField "String", "MP_URL", url
-            buildConfigField "String", "MP_CONFIG_URL", configurationUrl
             runProguard true
             proguardFile 'proguard.txt'
         }
-
     }
 
     lintOptions {
@@ -139,7 +138,9 @@ uploadArchives {
 
 dependencies {
     deployerJars "org.kuali.maven.wagons:maven-s3-wagon:1.2.1"
-    compile fileTree(dir: 'embeddedkits', include: ['*.jar'])
+    kahunaCompile files('embeddedkits/Kahuna473.jar')
+    compile files('embeddedkits/KochavaSDK.jar')
+    compile files('embeddedkits/MobileAppTracker-3.1.jar')
     compile 'com.google.android.gms:play-services:5+'
     unityCompile project('unityskeleton')
 }

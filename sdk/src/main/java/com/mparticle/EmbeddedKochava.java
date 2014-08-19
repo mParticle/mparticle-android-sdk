@@ -3,7 +3,6 @@ package com.mparticle;
 import android.app.Activity;
 import android.content.Context;
 import android.location.Location;
-import android.util.Log;
 
 import com.kochava.android.tracker.Feature;
 
@@ -146,27 +145,27 @@ public class EmbeddedKochava extends EmbeddedProvider implements MPActivityCallb
     }
 
     @Override
-    public void onActivityCreated(Activity activity) {
+    public void onActivityCreated(Activity activity, int activityCount) {
 
     }
 
     @Override
-    public void onActivityResumed(Activity activity) {
+    public void onActivityResumed(Activity activity, int activityCount) {
 
     }
 
     @Override
-    public void onActivityPaused(Activity activity) {
+    public void onActivityPaused(Activity activity, int activityCount) {
 
     }
 
     @Override
-    public void onActivityStopped(Activity activity) {
+    public void onActivityStopped(Activity activity, int activityCount) {
 
     }
 
     @Override
-    public void onActivityStarted(Activity activity) {
+    public void onActivityStarted(Activity activity, int activityCount) {
 
     }
 }
