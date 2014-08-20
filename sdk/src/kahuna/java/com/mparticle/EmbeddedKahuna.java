@@ -2,10 +2,13 @@ package com.mparticle;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.location.Location;
 import android.text.TextUtils;
 
 import com.kahuna.sdk.KahunaAnalytics;
+import com.kahuna.sdk.KahunaPushReceiver;
 import com.kahuna.sdk.KahunaUserAttributesKeys;
 import com.kahuna.sdk.KahunaUserCredentialKeys;
 
@@ -35,7 +38,14 @@ class EmbeddedKahuna extends EmbeddedProvider implements MPActivityCallbacks {
     @Override
     protected EmbeddedProvider update() {
         if (!initialized) {
-            KahunaAnalytics.onAppCreate(context, properties.get(KEY_SECRET_KEY), MParticle.getInstance().mConfigManager.getPushSenderId());
+            KahunaPushReceiver receiver = new KahunaPushReceiver();
+            IntentFilter filter = new IntentFilter();
+            filter.addAction("com.google.android.c2dm.intent.REGISTRATION");
+            filter.addCategory(context.getPackageName());
+            context.registerReceiver(receiver, filter, "com.google.android.c2dm.permission.SEND", null);
+            KahunaAnalytics.setDebugMode(MParticle.getInstance().mConfigManager.isDebugEnvironment());
+            KahunaAnalytics.onAppCreate(context, "030fd320c2f240f48d7edaacb7654fac", MParticle.getInstance().mConfigManager.getPushSenderId());
+            KahunaAnalytics.start();
             initialized = true;
         }
         sendTransactionData = properties.containsKey(KEY_TRANSACTION_DATA) && Boolean.parseBoolean(properties.get(KEY_TRANSACTION_DATA));
@@ -54,26 +64,33 @@ class EmbeddedKahuna extends EmbeddedProvider implements MPActivityCallbacks {
 
     @Override
     public void logEvent(MParticle.EventType type, String name, JSONObject eventAttributes) throws Exception {
-        if (TextUtils.isEmpty(name)) {
+        if (!TextUtils.isEmpty(name)) {
             if (sendTransactionData && eventAttributes != null && eventAttributes.has(Constants.MessageKey.RESERVED_KEY_LTV)){
                 Double amount = Double.parseDouble(eventAttributes.getString(Constants.MessageKey.RESERVED_KEY_LTV)) * 100;
                 KahunaAnalytics.trackEvent("purchase", 1, amount.intValue());
+                if (eventAttributes != null && eventAttributes.length() > 0){
+                    this.setUserAttributes(eventAttributes);
+                }
             }else if (shouldSend(type, name)) {
                 KahunaAnalytics.trackEvent(name);
+                if (eventAttributes != null && eventAttributes.length() > 0){
+                    this.setUserAttributes(eventAttributes);
+                }
             }
+
         }
     }
 
     @Override
     protected boolean shouldSend(MParticle.EventType type, String name) {
-        return name != null && includedEvents != null && includedEvents.contains(name.toLowerCase());
+        return name != null && includedEvents != null && (includedEvents.contains(name.toLowerCase()) || includedEvents.toString().contains(name.toLowerCase()));
     }
 
     @Override
     public void logTransaction(MPProduct transaction) throws Exception {
         if (sendTransactionData && transaction != null){
-            double revenue = transaction.getTotalRevenue() * 100;
-            KahunaAnalytics.trackEvent("purchase", transaction.getQuantity(), (int)revenue);
+            Double revenue = transaction.getTotalRevenue() * 100;
+            KahunaAnalytics.trackEvent("purchase", (int) transaction.getQuantity(), revenue.intValue());
         }
     }
 
@@ -155,6 +172,11 @@ class EmbeddedKahuna extends EmbeddedProvider implements MPActivityCallbacks {
                 }
             }
         }
+    }
+
+    @Override
+    public void handleIntent(Intent intent) {
+      //  new KahunaPushReceiver().onReceive(context, intent);
     }
 
     @Override
