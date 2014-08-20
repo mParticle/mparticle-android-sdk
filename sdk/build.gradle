@@ -78,7 +78,8 @@ android {
         }
 
         unity {
-
+            runProguard true
+            proguardFile 'proguard.txt'
         }
 
         release {
