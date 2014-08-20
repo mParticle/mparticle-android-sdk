@@ -50,6 +50,7 @@ class MParticleApiClient {
 
     private static final String HEADER_SIGNATURE = "x-mp-signature";
     private static final String HEADER_ENVIRONMENT = "x-mp-env";
+    private static final String HEADER_VARIANT = "x-mp-variant";
     private static final String SECURE_SERVICE_SCHEME = "https";
 
     private static final String API_HOST = TextUtils.isEmpty(BuildConfig.MP_URL) ? "nativesdks.mparticle.com" : BuildConfig.MP_URL;
@@ -70,6 +71,7 @@ class MParticleApiClient {
     private final SharedPreferences mPreferences;
     private final String mApiKey;
     private final int mDeviceRampNumber;
+    private static String variant;
     private SSLSocketFactory socketFactory;
     private static final long THROTTLE = 1000*60*60*2;
 
@@ -86,7 +88,7 @@ class MParticleApiClient {
                         Settings.Secure.ANDROID_ID).getBytes())
                     .mod(BigInteger.valueOf(100))
                     .intValue();
-
+        variant = BuildConfig.FLAVOR.equals("kahuna") ? BuildConfig.FLAVOR : "main";
     }
 
     void fetchConfig() throws IOException, MPThrottleException {
@@ -95,6 +97,7 @@ class MParticleApiClient {
             HttpURLConnection connection = (HttpURLConnection) mConfigUrl.openConnection();
             connection.setRequestProperty("Accept-Encoding", "gzip");
             connection.setRequestProperty(HEADER_ENVIRONMENT, Integer.toString(mConfigManager.getEnvironment().getValue()));
+            connection.setRequestProperty(HEADER_VARIANT, variant);
             connection.setRequestProperty(HTTP.USER_AGENT, mUserAgent);
 
             addMessageSignature(connection, null);
@@ -123,6 +126,7 @@ class MParticleApiClient {
             HttpURLConnection connection = (HttpURLConnection) getAudienceUrl().openConnection();
             connection.setRequestProperty("Accept-Encoding", "gzip");
             connection.setRequestProperty(HTTP.USER_AGENT, mUserAgent);
+            connection.setRequestProperty(HEADER_VARIANT, variant);
 
             addMessageSignature(connection, null);
             ApiResponse apiResponse = new ApiResponse(connection);
@@ -149,6 +153,7 @@ class MParticleApiClient {
         connection.setRequestProperty(HTTP.CONTENT_TYPE, "application/json");
         connection.setRequestProperty(HTTP.CONTENT_ENCODING, "gzip");
         connection.setRequestProperty(HTTP.USER_AGENT, mUserAgent);
+        connection.setRequestProperty(HEADER_VARIANT, variant);
 
         addMessageSignature(connection, message);
 
