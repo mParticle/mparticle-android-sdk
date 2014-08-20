@@ -149,7 +149,7 @@ class MParticleJSInterface {
         }
     }
 
-    private Map<String, String> convertToMap(JSONObject attributes) {
+    private static Map<String, String> convertToMap(JSONObject attributes) {
         if (null != attributes) {
             Iterator keys = attributes.keys();
 
