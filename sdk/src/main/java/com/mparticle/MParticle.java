@@ -77,6 +77,7 @@ public class MParticle {
     final ConfigManager mConfigManager;
     final AppStateManager mAppStateManager;
     final MeasuredRequestManager measuredRequestManager;
+    final EmbeddedKitManager mEmbeddedKitManager;
     JSONArray mUserIdentities = new JSONArray();
     String mSessionID;
 
@@ -95,7 +96,6 @@ public class MParticle {
     private ExceptionHandler mExHandler;
     private Context mAppContext;
     private String mApiKey;
-    private final EmbeddedKitManager mEmbeddedKitManager;
     private int mEventCount = 0;
     private String mLaunchUri;
     private LicenseCheckerCallback clientLicensingCallback;
@@ -202,7 +202,7 @@ public class MParticle {
         if (installType == null) {
             throw new IllegalArgumentException("mParticle failed to start: installType is required.");
         }
-        MParticle.getInstance(context, apiKey, secret, installType);
+        MParticle.getInstance(context.getApplicationContext(), apiKey, secret, installType);
     }
 
     /**
@@ -222,7 +222,7 @@ public class MParticle {
         if (context == null) {
             throw new IllegalArgumentException("mParticle failed to start: context is required.");
         }
-        MParticle.getInstance(context, null, null, installType);
+        MParticle.getInstance(context.getApplicationContext(), null, null, installType);
     }
 
     /**
