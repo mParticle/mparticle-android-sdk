@@ -55,7 +55,8 @@ abstract class EmbeddedProvider implements IEmbeddedKit {
                         includedEvents.add(inclusions.getString(i).toLowerCase());
                     }
                 }catch (JSONException jse){
-
+                    includedEvents = new HashSet<String>(1);
+                    includedEvents.add(propJson.getString(KEY_INCLUSION_FILTERS).toLowerCase());
                 }
             }
         }
