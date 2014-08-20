@@ -91,7 +91,7 @@ class EmbeddedMAT extends EmbeddedProvider implements MPActivityCallbacks {
         com.mobileapptracker.MobileAppTracker instance = com.mobileapptracker.MobileAppTracker.getInstance();
         com.mobileapptracker.MATEventItem item = new com.mobileapptracker.MATEventItem(
                 transaction.get(MPProduct.NAME,""),
-                Integer.parseInt(transaction.get(MPProduct.QUANTITY, "1")),
+                (int)transaction.getQuantity(),
                 Double.parseDouble(transaction.get(MPProduct.UNITPRICE, "0")),
                 Double.parseDouble(transaction.get(MPProduct.REVENUE, "0")),
                 transaction.get(MPProduct.TAX, "0"),
@@ -195,6 +195,11 @@ class EmbeddedMAT extends EmbeddedProvider implements MPActivityCallbacks {
 
     @Override
     public void removeUserIdentity(String id) {
+
+    }
+
+    @Override
+    public void handleIntent(Intent intent) {
 
     }
 

@@ -2,6 +2,7 @@ package com.mparticle;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.location.Location;
 
 import com.kochava.android.tracker.Feature;
@@ -151,6 +152,11 @@ public class EmbeddedKochava extends EmbeddedProvider implements MPActivityCallb
 
     @Override
     public void removeUserIdentity(String id) {
+
+    }
+
+    @Override
+    public void handleIntent(Intent intent) {
 
     }
 

@@ -1,5 +1,6 @@
 package com.mparticle;
 
+import android.content.Intent;
 import android.location.Location;
 
 import org.json.JSONObject;
@@ -17,4 +18,5 @@ interface IEmbeddedKit {
     void setUserIdentity(String id, MParticle.IdentityType identityType);
     void logout();
     void removeUserIdentity(String id);
+    void handleIntent(Intent intent);
 }
