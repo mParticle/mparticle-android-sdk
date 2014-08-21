@@ -140,6 +140,7 @@ package com.mparticle;
         public static final String DEVICE_BLUETOOTH_ENABLED = "dbe";
         public static final String DEVICE_BLUETOOTH_VERSION = "dbv";
         public static final String GOOGLE_ADV_ID = "gaid";
+        public static final String LIMIT_AD_TRACKING = "lat";
         public static final String ADTRUTH_ID = "atp";
 
         // state info
@@ -219,6 +220,8 @@ package com.mparticle;
         public static final String SANDBOX = "dbg";
         public static final String ENVIRONMENT = "env";
         String RESERVED_KEY_LTV = "$Amount";
+
+
     }
 
     interface PrefKeys {
