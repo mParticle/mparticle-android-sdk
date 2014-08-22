@@ -62,12 +62,29 @@ public class MPService extends IntentService {
     @Override
     public final void onHandleIntent(Intent intent) {
         try {
+            if (intent.getBooleanExtra("mparticle_ignore", false)){
+                  return;
+            }
+            MParticle.start(getApplicationContext());
+            MParticle.getInstance().mEmbeddedKitManager.handleIntent(intent);
+
+
             String action = intent.getAction();
             Log.i("MPService", "Handling action: " + action);
             if (action.equals("com.google.android.c2dm.intent.REGISTRATION")) {
                 handleRegistration(intent);
+                if (EmbeddedKahuna.sReceiver == null) {
+                    EmbeddedKahuna.registerForPush(this);
+                    intent.putExtra("mparticle_ignore", true);
+                    sendBroadcast(intent);
+                }
             } else if (action.equals("com.google.android.c2dm.intent.RECEIVE")) {
                 handleMessage(intent);
+                if (EmbeddedKahuna.sReceiver == null) {
+                    EmbeddedKahuna.registerForPush(this);
+                    intent.putExtra("mparticle_ignore", true);
+                    sendBroadcast(intent);
+                }
             } else if (action.equals("com.google.android.c2dm.intent.UNREGISTER")) {
                 intent.putExtra("unregistered", "true");
                 handleRegistration(intent);
@@ -169,7 +186,7 @@ public class MPService extends IntentService {
             String key = findMessageKey(possibleKeys, newExtras.getBundle(PUSH_ORIGINAL_PAYLOAD));
             String message = newExtras.getBundle(PUSH_ORIGINAL_PAYLOAD).getString(key);
             newExtras.getBundle(PUSH_REDACTED_PAYLOAD).putString(key, "");
-            newExtras.getBundle(PUSH_ORIGINAL_PAYLOAD).putString(MParticle.Push.PUSH_ALERT_EXTRA, message);
+            newExtras.getBundle(PUSH_ORIGINAL_PAYLOAD).putString(MParticlePushUtility.PUSH_ALERT_EXTRA, message);
             int titleResId = MParticle.getInstance().mConfigManager.getPushTitle();
             if (titleResId > 0){
                 try{
@@ -191,14 +208,14 @@ public class MPService extends IntentService {
     }
 
     private void broadcastNotificationReceived(Bundle originalPayload) {
-        Intent intent = new Intent(MParticle.Push.BROADCAST_NOTIFICATION_RECEIVED);
+        Intent intent = new Intent(MParticlePushUtility.BROADCAST_NOTIFICATION_RECEIVED);
         intent.putExtras(originalPayload);
         String packageName = getPackageName();
         sendBroadcast(intent, packageName + BROADCAST_PERMISSION);
     }
 
     private void broadcastNotificationClicked(Bundle originalPayload) {
-        Intent intent = new Intent(MParticle.Push.BROADCAST_NOTIFICATION_RECEIVED);
+        Intent intent = new Intent(MParticlePushUtility.BROADCAST_NOTIFICATION_TAPPED);
         intent.putExtras(originalPayload);
         String packageName = getPackageName();
         sendBroadcast(intent, packageName + BROADCAST_PERMISSION);

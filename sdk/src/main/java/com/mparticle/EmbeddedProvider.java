@@ -19,7 +19,8 @@ abstract class EmbeddedProvider implements IEmbeddedKit {
     final static String KEY_ID = "id";
     private final static String KEY_PROPERTIES = "as";
     private final static String KEY_FILTERS = "hs";
-    private final static String KEY_INCLUSION_FILTERS = "eventList";
+    private final static String KEY_EVENT_LIST = "eventList";
+    private final static String KEY_ATTRIBUTE_LIST = "attributeList";
     private final static String KEY_EVENT_TYPES = "et";
     private final static String KEY_EVENT_NAMES = "ec";
     private final static String KEY_EVENT_ATTRIBUTES = "ea";
@@ -31,7 +32,7 @@ abstract class EmbeddedProvider implements IEmbeddedKit {
     protected SparseBooleanArray types = new SparseBooleanArray(0);
     protected SparseBooleanArray names = new SparseBooleanArray(0);
     protected SparseBooleanArray attributes = new SparseBooleanArray(0);
-    protected HashSet<String> includedEvents;
+    protected HashSet<String> includedEvents, includedAttributes;
 
     protected Context context;
 
@@ -47,16 +48,26 @@ abstract class EmbeddedProvider implements IEmbeddedKit {
                 String key = iterator.next();
                 properties.put(key, propJson.getString(key));
             }
-            if (propJson.has(KEY_INCLUSION_FILTERS)){
+            if (propJson.has(KEY_EVENT_LIST)){
                 try {
-                    JSONArray inclusions = propJson.getJSONArray(KEY_INCLUSION_FILTERS);
+                    JSONArray inclusions = new JSONArray(propJson.getString(KEY_EVENT_LIST));
                     includedEvents = new HashSet<String>(inclusions.length());
                     for (int i = 0; i < inclusions.length(); i++){
                         includedEvents.add(inclusions.getString(i).toLowerCase());
                     }
                 }catch (JSONException jse){
-                    includedEvents = new HashSet<String>(1);
-                    includedEvents.add(propJson.getString(KEY_INCLUSION_FILTERS).toLowerCase());
+
+                }
+            }
+            if (propJson.has(KEY_ATTRIBUTE_LIST)){
+                try {
+                    JSONArray inclusions = new JSONArray(propJson.getString(KEY_ATTRIBUTE_LIST));
+                    includedAttributes = new HashSet<String>(inclusions.length());
+                    for (int i = 0; i < inclusions.length(); i++){
+                        includedAttributes.add(inclusions.getString(i).toLowerCase());
+                    }
+                }catch (JSONException jse){
+
                 }
             }
         }

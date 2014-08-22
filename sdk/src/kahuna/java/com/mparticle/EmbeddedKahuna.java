@@ -9,10 +9,10 @@ import android.text.TextUtils;
 
 import com.kahuna.sdk.KahunaAnalytics;
 import com.kahuna.sdk.KahunaPushReceiver;
+import com.kahuna.sdk.KahunaPushService;
 import com.kahuna.sdk.KahunaUserAttributesKeys;
 import com.kahuna.sdk.KahunaUserCredentialKeys;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.HashMap;
@@ -26,6 +26,7 @@ import java.util.Map;
  */
 class EmbeddedKahuna extends EmbeddedProvider implements MPActivityCallbacks {
 
+    static KahunaPushReceiver sReceiver;
     boolean initialized = false;
     private static final String KEY_TRANSACTION_DATA = "sendTransactionData";
     private static final String KEY_SECRET_KEY = "secretKey";
@@ -38,18 +39,32 @@ class EmbeddedKahuna extends EmbeddedProvider implements MPActivityCallbacks {
     @Override
     protected EmbeddedProvider update() {
         if (!initialized) {
-            KahunaPushReceiver receiver = new KahunaPushReceiver();
-            IntentFilter filter = new IntentFilter();
-            filter.addAction("com.google.android.c2dm.intent.REGISTRATION");
-            filter.addCategory(context.getPackageName());
-            context.registerReceiver(receiver, filter, "com.google.android.c2dm.permission.SEND", null);
             KahunaAnalytics.setDebugMode(MParticle.getInstance().mConfigManager.isDebugEnvironment());
-            KahunaAnalytics.onAppCreate(context, "030fd320c2f240f48d7edaacb7654fac", MParticle.getInstance().mConfigManager.getPushSenderId());
+            if (MParticle.getInstance().mConfigManager.isPushEnabled()) {
+               // registerForPush(context);
+                KahunaAnalytics.onAppCreate(context, "030fd320c2f240f48d7edaacb7654fac", MParticle.getInstance().mConfigManager.getPushSenderId());
+                KahunaAnalytics.disableKahunaGenerateNotifications();
+            }else{
+                KahunaAnalytics.onAppCreate(context, "030fd320c2f240f48d7edaacb7654fac", null);
+            }
             KahunaAnalytics.start();
+
             initialized = true;
+            if (!MPUtility.isServiceAvailable(context, KahunaPushService.class)){
+                ConfigManager.log(MParticle.LogLevel.ERROR, "The Kahuna SDK is enabled for this application, but you have not added <service android:name=\"com.kahuna.sdk.KahunaPushService\" /> to the <application> section in your application's AndroidManifest.xml");
+            }
         }
         sendTransactionData = properties.containsKey(KEY_TRANSACTION_DATA) && Boolean.parseBoolean(properties.get(KEY_TRANSACTION_DATA));
         return this;
+    }
+
+    public static void registerForPush(Context context){
+        sReceiver = new KahunaPushReceiver();
+        IntentFilter filter = new IntentFilter();
+        filter.addAction("com.google.android.c2dm.intent.REGISTRATION");
+        filter.addAction("com.google.android.c2dm.intent.RECEIVE");
+        filter.addCategory(context.getPackageName());
+        context.registerReceiver(sReceiver, filter, "com.google.android.c2dm.permission.SEND", null);
     }
 
     @Override
@@ -68,17 +83,35 @@ class EmbeddedKahuna extends EmbeddedProvider implements MPActivityCallbacks {
             if (sendTransactionData && eventAttributes != null && eventAttributes.has(Constants.MessageKey.RESERVED_KEY_LTV)){
                 Double amount = Double.parseDouble(eventAttributes.getString(Constants.MessageKey.RESERVED_KEY_LTV)) * 100;
                 KahunaAnalytics.trackEvent("purchase", 1, amount.intValue());
-                if (eventAttributes != null && eventAttributes.length() > 0){
+                if (eventAttributes != null
+                        && (eventAttributes = filterAttributes(type, name, eventAttributes)).length() > 0 ) {
                     this.setUserAttributes(eventAttributes);
                 }
             }else if (shouldSend(type, name)) {
                 KahunaAnalytics.trackEvent(name);
-                if (eventAttributes != null && eventAttributes.length() > 0){
+                if (eventAttributes != null
+                        && (eventAttributes = filterAttributes(type, name, eventAttributes)).length() > 0 ) {
                     this.setUserAttributes(eventAttributes);
                 }
             }
 
         }
+    }
+
+    @Override
+    protected JSONObject filterAttributes(MParticle.EventType type, String name, JSONObject eventAttributes) {
+        //JSONObject attributes = super.filterAttributes(type, name, eventAttributes);
+        if (includedAttributes != null){
+            Iterator attIterator = eventAttributes.keys();
+            while (attIterator.hasNext()){
+                String attributeKey = (String)attIterator.next();
+                if (!includedAttributes.contains(attributeKey)){
+                    attIterator.remove();
+                }
+            }
+            return eventAttributes;
+        }
+        return eventAttributes;
     }
 
     @Override
@@ -118,7 +151,9 @@ class EmbeddedKahuna extends EmbeddedProvider implements MPActivityCallbacks {
                 kahunaAttributes.put(convertMpKeyToKahuna(key), value);
             }
         }
-        KahunaAnalytics.setUserAttributes(kahunaAttributes);
+        if (kahunaAttributes != null) {
+            KahunaAnalytics.setUserAttributes(kahunaAttributes);
+        }
     }
 
     private static final String convertMpKeyToKahuna(String key) {

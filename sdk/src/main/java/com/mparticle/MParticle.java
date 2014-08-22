@@ -1,6 +1,7 @@
 package com.mparticle;
 
 import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -1321,11 +1322,13 @@ public class MParticle {
      * @param senderId the SENDER_ID for the application
      */
     public void enablePushNotifications(String senderId) {
-        if (MPUtility.checkPermission(mAppContext, "com.google.android.c2dm.permission.RECEIVE")) {
+        if (!MPUtility.isServiceAvailable(mAppContext, MPService.class)){
+            ConfigManager.log(LogLevel.ERROR, "Push is enabled but you have not added <service android:name=\"com.mparticle.MPService\" /> to the <application> section of your AndroidManifest.xml");
+        }else if (!MPUtility.checkPermission(mAppContext, "com.google.android.c2dm.permission.RECEIVE")){
+            ConfigManager.log(LogLevel.ERROR, "Attempted to enable push notifications without required permission: ", "\"com.google.android.c2dm.permission.RECEIVE\"");
+        }else {
             mConfigManager.setPushSenderId(senderId);
             PushRegistrationHelper.enablePushNotifications(mAppContext, senderId);
-        } else {
-            ConfigManager.log(LogLevel.ERROR, "Attempted to enable push notifications without required permission: ", "\"com.google.android.c2dm.permission.RECEIVE\"");
         }
     }
 
@@ -1694,34 +1697,6 @@ public class MParticle {
          * Used to communicate the internal state and processes of the SDK.
          */
         DEBUG;
-    }
-
-    /**
-     * Constants used to interact with the mParticle GCM receiver.
-     */
-    public interface Push {
-        /**
-         * Listen for this broadcast (as an Intent action) to detect when the device received a push.
-         * <p/>
-         * In the received Intent, you will have access to the entire payload of the push notification.
-         */
-        public static final String BROADCAST_NOTIFICATION_RECEIVED = "com.mparticle.push.NOTIFICATION_RECEIVED";
-        /**
-         * Listen for this broadcast (as an Intent action) to detect when a user taps a push message in the
-         * notification bar of their device. You may then navigate or otherwise adjust the user experience based on
-         * the payload of the push.
-         * <p/>
-         * In the received Intent, you will have access to the entire payload of the push notification.
-         */
-        public static final String BROADCAST_NOTIFICATION_TAPPED = "com.mparticle.push.NOTIFICATION_TAPPED";
-        /**
-         * If leveraging either <code>BROADCAST_NOTIFICATION_RECEIVED</code> or <code>BROADCAST_NOTIFICATION_TAPPED</code>, you
-         * have access to the entire payload of a push notification. Depending on the service that has sent the push, for example
-         * Urban Airship or Mixpanel, the primary alert text will have a different key associated with it. The mParticle SDK
-         * take care of this for you, and will add the primary alert of the push an an extra to the received intent with this key.
-         * This allows you to switch push notification providers without having to adjust the code of your application.
-         */
-        public static final String PUSH_ALERT_EXTRA = "com.mparticle.push.alert";
     }
 
     /**

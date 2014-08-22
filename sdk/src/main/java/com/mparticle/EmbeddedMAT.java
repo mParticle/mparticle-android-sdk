@@ -59,7 +59,8 @@ class EmbeddedMAT extends EmbeddedProvider implements MPActivityCallbacks {
         if (shouldSend(type, name)) {
             com.mobileapptracker.MobileAppTracker instance = com.mobileapptracker.MobileAppTracker.getInstance();
             if (eventAttributes != null) {
-                eventAttributes = filterAttributes(type, name, eventAttributes);
+                eventAttributes =
+                        filterAttributes(type, name, eventAttributes);
                 if (eventAttributes.length() > 0) {
                     JSONObject lowercaseAttributes = new JSONObject();
                     Iterator<String> keys = eventAttributes.keys();

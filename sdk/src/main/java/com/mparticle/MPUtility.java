@@ -5,6 +5,7 @@ import android.annotation.TargetApi;
 import android.app.ActivityManager;
 import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
@@ -16,6 +17,8 @@ import android.provider.Settings;
 import android.util.Log;
 import android.view.Display;
 import android.view.WindowManager;
+
+import com.kahuna.sdk.KahunaPushService;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -467,5 +470,17 @@ class MPUtility {
         }
 
         return hash;
+    }
+
+    public static boolean isServiceAvailable(Context context, Class<?> service) {
+        final PackageManager packageManager = context.getPackageManager();
+        final Intent intent = new Intent(context, service);
+        List resolveInfo =
+                packageManager.queryIntentServices(intent,
+                        PackageManager.MATCH_DEFAULT_ONLY);
+        if (resolveInfo.size() > 0) {
+            return true;
+        }
+        return false;
     }
 }
