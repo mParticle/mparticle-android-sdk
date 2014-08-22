@@ -433,10 +433,13 @@ class ConfigManager {
                         .putLong(Constants.PrefKeys.ADTRUTH_LAST_TIMESTAMP, lastSuccessful)
                         .commit();
             }
-            if (wv != null){
-                wv.destroy();
-                wv = null;
-            }
+            wv.post(new Runnable() {
+                @Override
+                public void run() {
+                    wv.destroy();
+                    wv = null;
+                }
+            });
         }
     }
 }
