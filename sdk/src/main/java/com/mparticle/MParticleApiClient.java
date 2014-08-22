@@ -476,8 +476,8 @@ class MParticleApiClient {
 
     private void checkRampValue() throws MPRampException {
         int currentRamp = mConfigManager.getCurrentRampValue();
-        if (currentRamp >= 0 && currentRamp < 100 &&
-                mDeviceRampNumber <= mConfigManager.getCurrentRampValue()){
+        if (currentRamp > 0 && currentRamp < 100 &&
+                mDeviceRampNumber > mConfigManager.getCurrentRampValue()){
             throw new MPRampException();
         }
     }
