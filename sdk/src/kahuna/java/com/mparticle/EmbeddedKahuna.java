@@ -42,10 +42,10 @@ class EmbeddedKahuna extends EmbeddedProvider implements MPActivityCallbacks {
             KahunaAnalytics.setDebugMode(MParticle.getInstance().mConfigManager.isDebugEnvironment());
             if (MParticle.getInstance().mConfigManager.isPushEnabled()) {
                // registerForPush(context);
-                KahunaAnalytics.onAppCreate(context, "030fd320c2f240f48d7edaacb7654fac", MParticle.getInstance().mConfigManager.getPushSenderId());
+                KahunaAnalytics.onAppCreate(context, properties.get(KEY_SECRET_KEY), MParticle.getInstance().mConfigManager.getPushSenderId());
                 KahunaAnalytics.disableKahunaGenerateNotifications();
             }else{
-                KahunaAnalytics.onAppCreate(context, "030fd320c2f240f48d7edaacb7654fac", null);
+                KahunaAnalytics.onAppCreate(context, properties.get(KEY_SECRET_KEY), null);
             }
             KahunaAnalytics.start();
 
