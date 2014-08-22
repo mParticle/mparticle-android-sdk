@@ -58,7 +58,7 @@ class EmbeddedKahuna extends EmbeddedProvider implements MPActivityCallbacks {
         return this;
     }
 
-    public static void registerForPush(Context context){
+    public void registerForPush(){
         sReceiver = new KahunaPushReceiver();
         IntentFilter filter = new IntentFilter();
         filter.addAction("com.google.android.c2dm.intent.REGISTRATION");
@@ -211,7 +211,21 @@ class EmbeddedKahuna extends EmbeddedProvider implements MPActivityCallbacks {
 
     @Override
     public void handleIntent(Intent intent) {
-      //  new KahunaPushReceiver().onReceive(context, intent);
+        String action = intent.getAction();
+
+        if (action.equals("com.google.android.c2dm.intent.REGISTRATION")) {
+            if (EmbeddedKahuna.sReceiver == null) {
+                registerForPush();
+                intent.putExtra(MPReceiver.MPARTICLE_IGNORE, true);
+                context.sendBroadcast(intent);
+            }
+        } else if (action.equals("com.google.android.c2dm.intent.RECEIVE")) {
+            if (EmbeddedKahuna.sReceiver == null) {
+                registerForPush();
+                intent.putExtra(MPReceiver.MPARTICLE_IGNORE, true);
+                context.sendBroadcast(intent);
+            }
+        }
     }
 
     @Override

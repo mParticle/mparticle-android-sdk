@@ -18,8 +18,6 @@ import android.util.Log;
 import android.view.Display;
 import android.view.WindowManager;
 
-import com.kahuna.sdk.KahunaPushService;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;

@@ -31,6 +31,7 @@ public class MPService extends IntentService {
     private static final String TAG = Constants.LOG_TAG;
     private static final String MPARTICLE_NOTIFICATION_OPENED = "com.mparticle.push.notification_opened";
     private static final Object LOCK = MPService.class;
+
     private static PowerManager.WakeLock sWakeLock;
     private static final String APP_STATE = "com.mparticle.push.appstate";
     private static final String PUSH_ORIGINAL_PAYLOAD = "com.mparticle.push.originalpayload";
@@ -62,29 +63,16 @@ public class MPService extends IntentService {
     @Override
     public final void onHandleIntent(Intent intent) {
         try {
-            if (intent.getBooleanExtra("mparticle_ignore", false)){
-                  return;
-            }
+
             MParticle.start(getApplicationContext());
             MParticle.getInstance().mEmbeddedKitManager.handleIntent(intent);
-
 
             String action = intent.getAction();
             Log.i("MPService", "Handling action: " + action);
             if (action.equals("com.google.android.c2dm.intent.REGISTRATION")) {
                 handleRegistration(intent);
-                if (EmbeddedKahuna.sReceiver == null) {
-                    EmbeddedKahuna.registerForPush(this);
-                    intent.putExtra("mparticle_ignore", true);
-                    sendBroadcast(intent);
-                }
             } else if (action.equals("com.google.android.c2dm.intent.RECEIVE")) {
                 handleMessage(intent);
-                if (EmbeddedKahuna.sReceiver == null) {
-                    EmbeddedKahuna.registerForPush(this);
-                    intent.putExtra("mparticle_ignore", true);
-                    sendBroadcast(intent);
-                }
             } else if (action.equals("com.google.android.c2dm.intent.UNREGISTER")) {
                 intent.putExtra("unregistered", "true");
                 handleRegistration(intent);
