@@ -135,7 +135,7 @@ import java.util.concurrent.TimeoutException;
                 try {
                     mApiClient.fetchConfig();
                 } catch (IOException ioe) {
-
+                    ConfigManager.log(MParticle.LogLevel.DEBUG, "Failed to update configuration: ", ioe.toString());
                 } catch (MParticleApiClient.MPThrottleException e) {
                     ConfigManager.log(MParticle.LogLevel.DEBUG, e.getMessage());
                 }
