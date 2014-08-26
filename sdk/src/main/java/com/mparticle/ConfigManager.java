@@ -27,6 +27,8 @@ class ConfigManager {
     private static final String KEY_ADTRUTH = "atc";
     private static final String KEY_ADTRUTH_URL = "cp";
     private static final String KEY_ADTRUTH_INTERVAL = "ci";
+    private static final String KEY_UPLOAD_INTERVAL = "uitl";
+    private static final String KEY_SESSION_TIMEOUT = "stl";
     public static final String VALUE_APP_DEFINED = "appdefined";
     public static final String VALUE_CUE_CATCH = "forcecatch";
     public static final String VALUE_CUE_IGNORE = "forceignore";
@@ -48,8 +50,12 @@ class ConfigManager {
     private boolean mSendOoEvents;
     private JSONObject mProviderPersistence;
     private String mNetworkPerformance = "";
+
     private static boolean sIsDebugEnvironment = false;
     private int mRampValue = -1;
+
+    private int mSessionTimeoutInterval = -1;
+    private int mUploadInterval = -1;
 
     private AdtruthConfig adtruth;
 
@@ -100,6 +106,9 @@ class ConfigManager {
         if (responseJSON.has(ProviderPersistence.KEY_PERSISTENCE)) {
             setProviderPersistence(new ProviderPersistence(responseJSON, mContext));
         }
+
+        mSessionTimeoutInterval = responseJSON.optInt(KEY_SESSION_TIMEOUT, -1);
+        mUploadInterval = responseJSON.optInt(KEY_UPLOAD_INTERVAL, -1);
 
         if (responseJSON.has(KEY_ADTRUTH)){
             JSONObject adtruthObject = responseJSON.getJSONObject(KEY_ADTRUTH);
@@ -167,7 +176,11 @@ class ConfigManager {
         if (getEnvironment().equals(MParticle.Environment.Development)) {
             return DEVMODE_UPLOAD_INTERVAL_MILLISECONDS;
         } else {
-            return 1000 * sLocalPrefs.uploadInterval;
+            if (mUploadInterval > 0){
+                return 1000 * mUploadInterval;
+            }else {
+                return (1000 * sLocalPrefs.uploadInterval);
+            }
         }
     }
 
@@ -188,7 +201,11 @@ class ConfigManager {
     }
 
     public int getSessionTimeout() {
-        return sLocalPrefs.sessionTimeout * 1000;
+        if (mSessionTimeoutInterval > 0){
+            return mSessionTimeoutInterval * 1000;
+        }else{
+            return sLocalPrefs.sessionTimeout * 1000;
+        }
     }
 
     public void setSessionTimeout(int sessionTimeout) {
