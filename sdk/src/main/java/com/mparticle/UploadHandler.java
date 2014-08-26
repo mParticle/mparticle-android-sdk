@@ -409,11 +409,6 @@ import java.util.concurrent.TimeoutException;
         getDeviceInfo().put(MessageKey.PUSH_SOUND_ENABLED, mConfigManager.isPushSoundEnabled());
         getDeviceInfo().put(MessageKey.PUSH_VIBRATION_ENABLED, mConfigManager.isPushVibrationEnabled());
 
-        String payload = mConfigManager.getAdtruth().lastPayload;
-        if (payload != null) {
-            getDeviceInfo().put(MessageKey.ADTRUTH_ID, mConfigManager.getAdtruth().lastPayload);
-        }
-
         uploadMessage.put(MessageKey.DEVICE_INFO, getDeviceInfo());
         uploadMessage.put(MessageKey.SANDBOX, mConfigManager.getEnvironment().equals(MParticle.Environment.Development));
 

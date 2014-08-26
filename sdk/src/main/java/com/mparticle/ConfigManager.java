@@ -24,9 +24,6 @@ class ConfigManager {
     public static final String KEY_PUSH_MESSAGES = "pmk";
     public static final String KEY_NETWORK_PERFORMANCE = "cnp";
     public static final String KEY_EMBEDDED_KITS = "eks";
-    private static final String KEY_ADTRUTH = "atc";
-    private static final String KEY_ADTRUTH_URL = "cp";
-    private static final String KEY_ADTRUTH_INTERVAL = "ci";
     private static final String KEY_UPLOAD_INTERVAL = "uitl";
     private static final String KEY_SESSION_TIMEOUT = "stl";
     public static final String VALUE_APP_DEFINED = "appdefined";
@@ -56,8 +53,6 @@ class ConfigManager {
 
     private int mSessionTimeoutInterval = -1;
     private int mUploadInterval = -1;
-
-    private AdtruthConfig adtruth;
 
     private ConfigManager(){
 
@@ -110,14 +105,6 @@ class ConfigManager {
         mSessionTimeoutInterval = responseJSON.optInt(KEY_SESSION_TIMEOUT, -1);
         mUploadInterval = responseJSON.optInt(KEY_UPLOAD_INTERVAL, -1);
 
-        if (responseJSON.has(KEY_ADTRUTH)){
-            JSONObject adtruthObject = responseJSON.getJSONObject(KEY_ADTRUTH);
-            if (adtruthObject != null) {
-                getAdtruth().setUrl(adtruthObject.optString(KEY_ADTRUTH_URL));
-                getAdtruth().setInterval(adtruthObject.optInt(KEY_ADTRUTH_INTERVAL, 0));
-            }
-        }
-
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD) {
             editor.apply();
         } else {
@@ -128,13 +115,6 @@ class ConfigManager {
         if (responseJSON.has(KEY_EMBEDDED_KITS)) {
             mEmbeddedKitManager.updateKits(responseJSON.getJSONArray(KEY_EMBEDDED_KITS));
         }
-    }
-
-    public AdtruthConfig getAdtruth(){
-        if (adtruth == null){
-            adtruth = new AdtruthConfig();
-        }
-        return adtruth;
     }
 
     public String[] getPushKeys(){
@@ -385,10 +365,6 @@ class ConfigManager {
         return sLocalPrefs.audienceTimeout;
     }
 
-    public void handleBackgrounded() {
-        getAdtruth().process();
-    }
-
     public void setForceEnvironment(MParticle.Environment environment) {
         sLocalPrefs.forcedEnvironment = environment;
     }
@@ -399,64 +375,5 @@ class ConfigManager {
 
     public int getCurrentRampValue() {
         return mRampValue;
-    }
-
-    class AdtruthConfig {
-        private long interval;
-        private String url;
-        long lastSuccessful;
-        String lastPayload;
-        private WebView wv;
-
-        AdtruthConfig(){
-            lastPayload = mPreferences.getString(Constants.PrefKeys.ADTRUTH_PAYLOAD, null);
-            lastSuccessful = mPreferences.getLong(Constants.PrefKeys.ADTRUTH_LAST_TIMESTAMP, 0);
-        }
-        private boolean isValid() {
-            return (interval > 0 &&
-                    url != null &&
-                    url.length() > 1 &&
-                    ((lastSuccessful + interval) < System.currentTimeMillis()));
-
-        }
-        void setInterval(int intervalSeconds){
-            interval = (intervalSeconds * 1000);
-        }
-        void setUrl(String configUrl){
-            url = MParticleApiClient.getAbsoluteUrl(configUrl);
-        }
-        void process(){
-            if (isValid()){
-                wv = new WebView(mContext);
-                wv.getSettings().setJavaScriptEnabled(true);
-                wv.addJavascriptInterface(this, "mParticleSDK");
-                wv.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        wv.loadUrl(url);
-                    }
-                });
-            }
-        }
-
-        @JavascriptInterface
-        public void adtruth(String payload){
-            if (payload != null && payload.length() > 0){
-                lastPayload = payload;
-                lastSuccessful = System.currentTimeMillis();
-                mPreferences
-                        .edit()
-                        .putString(Constants.PrefKeys.ADTRUTH_PAYLOAD, lastPayload)
-                        .putLong(Constants.PrefKeys.ADTRUTH_LAST_TIMESTAMP, lastSuccessful)
-                        .commit();
-            }
-            wv.post(new Runnable() {
-                @Override
-                public void run() {
-                    wv.destroy();
-                    wv = null;
-                }
-            });
-        }
     }
 }
