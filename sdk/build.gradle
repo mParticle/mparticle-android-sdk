@@ -142,6 +142,6 @@ dependencies {
     kahunaCompile files('embeddedkits/Kahuna473.jar')
     compile files('embeddedkits/KochavaSDK.jar')
     compile files('embeddedkits/MobileAppTracker-3.1.jar')
-    compile 'com.google.android.gms:play-services:5+'
+    compile 'com.google.android.gms:play-services:4.+'
     unityCompile project('unityskeleton')
 }

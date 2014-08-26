@@ -81,3 +81,5 @@
 -keep class org.fmod.** { *; }
 -dontwarn org.fmod.**
 
+-keep class com.kochava.** { *; }
+
