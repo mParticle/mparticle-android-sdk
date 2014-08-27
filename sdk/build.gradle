@@ -47,7 +47,7 @@ android {
             releaseType = properties.getProperty('mp.releasetype')
             if (releaseType.contains("kahuna")){
                 defaultPublishConfig "kahunaRelease"
-                artifactId = "android-kahuna-sdk"
+                artifactId = "android-sdk-kahuna"
             }
         }
     }catch (Exception e){
