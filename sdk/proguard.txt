@@ -83,3 +83,5 @@
 
 -keep class com.kochava.** { *; }
 
+-classobfuscationdictionary names.txt
+
