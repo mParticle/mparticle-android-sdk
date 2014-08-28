@@ -106,7 +106,7 @@ class MParticleApiClient {
 
             if (response.statusCode >= HttpStatus.SC_OK && response.statusCode < HttpStatus.SC_MULTIPLE_CHOICES) {
                 mConfigManager.updateConfig(response.getJsonResponse());
-            }else{
+            }else if (response.statusCode >= HttpStatus.SC_BAD_REQUEST) {
                 throw new MPConfigException();
             }
         } catch (MalformedURLException e) {
