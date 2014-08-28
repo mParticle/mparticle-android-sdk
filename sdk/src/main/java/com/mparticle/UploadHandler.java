@@ -138,6 +138,8 @@ import java.util.concurrent.TimeoutException;
                     ConfigManager.log(MParticle.LogLevel.DEBUG, "Failed to update configuration: ", ioe.toString());
                 } catch (MParticleApiClient.MPThrottleException e) {
                     ConfigManager.log(MParticle.LogLevel.DEBUG, e.getMessage());
+                } catch (MParticleApiClient.MPConfigException e) {
+                    ConfigManager.log(MParticle.LogLevel.DEBUG, "Failed to update configuration: ", e.toString());
                 }
                 break;
             case UPLOAD_MESSAGES:
@@ -279,6 +281,8 @@ import java.util.concurrent.TimeoutException;
         } catch (JSONException e) {
             ConfigManager.log(MParticle.LogLevel.ERROR, "Error preparing batch upload in mParticle DB: " + e.getMessage());
         } catch (MParticleApiClient.MPThrottleException e) {
+            ConfigManager.log(MParticle.LogLevel.DEBUG, e.getMessage());
+        }  catch (MParticleApiClient.MPConfigException e) {
             ConfigManager.log(MParticle.LogLevel.DEBUG, e.getMessage());
         } finally {
             if (readyMessagesCursor != null && !readyMessagesCursor.isClosed()){

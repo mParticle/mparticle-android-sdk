@@ -91,7 +91,7 @@ class MParticleApiClient {
         variant = BuildConfig.FLAVOR.equals("kahuna") ? BuildConfig.FLAVOR : "main";
     }
 
-    void fetchConfig() throws IOException, MPThrottleException {
+    void fetchConfig() throws IOException, MPThrottleException, MPConfigException {
         try {
             checkThrottleTime();
             HttpURLConnection connection = (HttpURLConnection) mConfigUrl.openConnection();
@@ -106,6 +106,8 @@ class MParticleApiClient {
 
             if (response.statusCode >= HttpStatus.SC_OK && response.statusCode < HttpStatus.SC_MULTIPLE_CHOICES) {
                 mConfigManager.updateConfig(response.getJsonResponse());
+            }else{
+                throw new MPConfigException();
             }
         } catch (MalformedURLException e) {
             ConfigManager.log(MParticle.LogLevel.ERROR, e, "Error constructing config service URL");
@@ -459,6 +461,12 @@ class MParticleApiClient {
     final class MPThrottleException extends Exception {
         public MPThrottleException() {
             super("mP servers are busy, API connections have been throttled.");
+        }
+    }
+
+    final class MPConfigException extends Exception {
+        public MPConfigException() {
+            super("mP configuration request failed, deferring next batch.");
         }
     }
 
