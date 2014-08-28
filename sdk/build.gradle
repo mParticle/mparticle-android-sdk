@@ -28,7 +28,7 @@ String releaseType = "mainlineRelease"
 String artifactId = "android-sdk"
 android {
     compileSdkVersion 19
-    buildToolsVersion "19.1"
+    buildToolsVersion "20"
     useOldManifestMerger false
     defaultPublishConfig "mainlineRelease"
 
