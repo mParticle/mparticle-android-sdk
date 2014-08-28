@@ -99,8 +99,8 @@ public class MPProduct extends HashMap<String, String> {
         return Double.parseDouble(get(UNITPRICE, "0"));
     }
 
-    public int getQuantity(){
-        return Integer.parseInt(get(QUANTITY, "0"));
+    public double getQuantity(){
+        return Double.parseDouble(get(QUANTITY, "0"));
     }
 
     public String getProductCategory(){
@@ -129,6 +129,10 @@ public class MPProduct extends HashMap<String, String> {
 
     public String getTransactionId(){
         return get(TRANSACTION_ID, null);
+    }
+
+    public String getProductName(){
+        return get(NAME, null);
     }
 
     public String get(Object key, String defaultValue) {

@@ -72,9 +72,9 @@ import org.json.JSONObject;
                         MParticle.getInstance().upload();
                     }
                 } catch (SQLiteException e) {
-                    Log.e(TAG, "Error saving event to mParticle DB", e);
+                    ConfigManager.log(MParticle.LogLevel.ERROR, e, "Error saving event to mParticle DB");
                 } catch (JSONException e) {
-                    Log.e(TAG, "Error with JSON object", e);
+                    ConfigManager.log(MParticle.LogLevel.ERROR, e, "Error with JSON object");
                 } finally {
 
                 }
@@ -86,9 +86,9 @@ import org.json.JSONObject;
                     String attributes = sessionAttributes.getString(MessageKey.ATTRIBUTES);
                     dbUpdateSessionAttributes(sessionId, attributes);
                 } catch (SQLiteException e) {
-                    Log.e(TAG, "Error updating session attributes in mParticle DB", e);
+                    ConfigManager.log(MParticle.LogLevel.ERROR, e, "Error updating session attributes in mParticle DB");
                 } catch (JSONException e) {
-                    Log.e(TAG, "Error with JSON object", e);
+                    ConfigManager.log(MParticle.LogLevel.ERROR, e, "Error with JSON object");
                 } finally {
 
                 }
@@ -103,9 +103,9 @@ import org.json.JSONObject;
 
                     dbUpdateSessionEndTime(sessionId, time, sessionLength);
                 } catch (SQLiteException e) {
-                    Log.e(TAG, "Error updating session end time in mParticle DB", e);
+                    ConfigManager.log(MParticle.LogLevel.ERROR, e, "Error updating session end time in mParticle DB");
                 } catch (JSONException e) {
-                    Log.e(TAG, "Error with JSON object", e);
+                    ConfigManager.log(MParticle.LogLevel.ERROR, e, "Error with JSON object");
                 } finally {
 
                 }
@@ -138,14 +138,14 @@ import org.json.JSONObject;
                         // delete the processed session record
                         db.delete(SessionTable.TABLE_NAME, SessionTable.SESSION_ID + "=?", new String[]{sessionId});
                     } else {
-                        Log.e(TAG, "Error creating session, no entry for sessionId in mParticle DB");
+                        ConfigManager.log(MParticle.LogLevel.ERROR, "Error creating session, no entry for sessionId in mParticle DB");
                     }
                     selectCursor.close();
 
                 } catch (SQLiteException e) {
-                    Log.e(TAG, "Error creating session end message in mParticle DB", e);
+                    ConfigManager.log(MParticle.LogLevel.ERROR, e, "Error creating session end message in mParticle DB");
                 } catch (JSONException e) {
-                    Log.e(TAG, "Error with JSON object", e);
+                    ConfigManager.log(MParticle.LogLevel.ERROR, e, "Error with JSON object");
                 } finally {
 
                 }
@@ -166,7 +166,7 @@ import org.json.JSONObject;
                     }
                     selectCursor.close();
                 } catch (SQLiteException e) {
-                    Log.e(TAG, "Error processing initialization in mParticle DB", e);
+                    ConfigManager.log(MParticle.LogLevel.ERROR, e, "Error processing initialization in mParticle DB");
                 } finally {
 
                 }
@@ -176,9 +176,9 @@ import org.json.JSONObject;
                     JSONObject message = (JSONObject) msg.obj;
                     dbInsertBreadcrumb(message);
                 } catch (SQLiteException e) {
-                    Log.e(TAG, "Error saving breadcrumb to mParticle DB", e);
+                    ConfigManager.log(MParticle.LogLevel.ERROR, e, "Error saving breadcrumb to mParticle DB");
                 } catch (JSONException e) {
-                    Log.e(TAG, "Error with JSON object", e);
+                    ConfigManager.log(MParticle.LogLevel.ERROR, e, "Error with JSON object");
                 } finally {
 
                 }

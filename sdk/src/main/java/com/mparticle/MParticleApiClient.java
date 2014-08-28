@@ -1,9 +1,11 @@
 package com.mparticle;
 
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Build;
+import android.provider.Settings;
+import android.text.TextUtils;
 import android.util.Base64;
-import android.util.Log;
 
 
 import org.apache.http.HttpStatus;
@@ -21,6 +23,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -47,8 +50,11 @@ class MParticleApiClient {
 
     private static final String HEADER_SIGNATURE = "x-mp-signature";
     private static final String HEADER_ENVIRONMENT = "x-mp-env";
-    private static final String SECURE_SERVICE_SCHEME = "https";
-    private static final String SECURE_SERVICE_HOST = BuildConfig.MP_URL;
+    private static final String HEADER_VARIANT = "x-mp-variant";
+    private static final String SECURE_SERVICE_SCHEME = TextUtils.isEmpty(BuildConfig.MP_URL) ? "https" : "http";
+
+    private static final String API_HOST = TextUtils.isEmpty(BuildConfig.MP_URL) ? "nativesdks.mparticle.com" : BuildConfig.MP_URL;
+    private static final String CONFIG_HOST = TextUtils.isEmpty(BuildConfig.MP_CONFIG_URL) ? "config.mparticle.com" : BuildConfig.MP_CONFIG_URL;
 
     private static final String SERVICE_VERSION_1 = "/v1";
     private static final String SERVICE_VERSION_2 = "/v2";
@@ -57,94 +63,101 @@ class MParticleApiClient {
     private static final String MPID = "mpid";
 
     private static final char[] HEX_CHARS = "0123456789abcdef".toCharArray();
-    private final ConfigManager configManager;
-    private final String apiSecret;
-    private final URL configUrl;
-    private final URL batchUploadUrl;
-    private final String userAgent;
-    private final SharedPreferences sharedPreferences;
-    private final String apiKey;
+    private final ConfigManager mConfigManager;
+    private final String mApiSecret;
+    private final URL mConfigUrl;
+    private final URL mEventUrl;
+    private final String mUserAgent;
+    private final SharedPreferences mPreferences;
+    private final String mApiKey;
+    private final int mDeviceRampNumber;
+    private static String variant;
     private SSLSocketFactory socketFactory;
     private static final long THROTTLE = 1000*60*60*2;
 
-    public MParticleApiClient(ConfigManager configManager, String key, String secret, SharedPreferences sharedPreferences) throws MalformedURLException {
-        this.configManager = configManager;
-        this.apiSecret = secret;
-        this.sharedPreferences = sharedPreferences;
-        this.apiKey = key;
-        this.configUrl = new URL(SECURE_SERVICE_SCHEME, SECURE_SERVICE_HOST, SERVICE_VERSION_2 + "/" + key + "/config");
-        this.batchUploadUrl = new URL(SECURE_SERVICE_SCHEME, SECURE_SERVICE_HOST, SERVICE_VERSION_1 + "/" + key + "/events");
-        this.userAgent = "mParticle Android SDK/" + Constants.MPARTICLE_VERSION;
+    public MParticleApiClient(ConfigManager configManager, SharedPreferences sharedPreferences, Context context) throws MalformedURLException {
+        mConfigManager = configManager;
+        mApiSecret = configManager.getApiSecret();
+        mPreferences = sharedPreferences;
+        mApiKey = configManager.getApiKey();
+        mConfigUrl = new URL(SECURE_SERVICE_SCHEME, CONFIG_HOST, SERVICE_VERSION_2 + "/" + mApiKey + "/config");
+        mEventUrl = new URL(SECURE_SERVICE_SCHEME, API_HOST, SERVICE_VERSION_1 + "/" + mApiKey + "/events");
+        mUserAgent = "mParticle Android SDK/" + Constants.MPARTICLE_VERSION;
+        mDeviceRampNumber = MPUtility.hashDeviceIdForRamping(
+                        Settings.Secure.getString(context.getContentResolver(),
+                        Settings.Secure.ANDROID_ID).getBytes())
+                    .mod(BigInteger.valueOf(100))
+                    .intValue();
+        variant = BuildConfig.FLAVOR.equals("kahuna") ? BuildConfig.FLAVOR : "main";
     }
 
     void fetchConfig() throws IOException, MPThrottleException {
         try {
             checkThrottleTime();
-            HttpURLConnection connection = (HttpURLConnection) configUrl.openConnection();
+            HttpURLConnection connection = (HttpURLConnection) mConfigUrl.openConnection();
             connection.setRequestProperty("Accept-Encoding", "gzip");
-            connection.setRequestProperty(HEADER_ENVIRONMENT, Integer.toString(configManager.getEnvironment().getValue()));
-            connection.setRequestProperty(HTTP.USER_AGENT, userAgent);
+            connection.setRequestProperty(HEADER_ENVIRONMENT, Integer.toString(mConfigManager.getEnvironment().getValue()));
+            connection.setRequestProperty(HEADER_VARIANT, variant);
+            connection.setRequestProperty(HTTP.USER_AGENT, mUserAgent);
 
             addMessageSignature(connection, null);
 
             ApiResponse response = new ApiResponse(connection);
 
             if (response.statusCode >= HttpStatus.SC_OK && response.statusCode < HttpStatus.SC_MULTIPLE_CHOICES) {
-                configManager.updateConfig(response.getJsonResponse());
+                mConfigManager.updateConfig(response.getJsonResponse());
             }
         } catch (MalformedURLException e) {
-            Log.e(Constants.LOG_TAG, "Error constructing config service URL", e);
+            ConfigManager.log(MParticle.LogLevel.ERROR, e, "Error constructing config service URL");
         } catch (JSONException e) {
-            Log.w(Constants.LOG_TAG, "Config request failed to process response message JSON");
+            ConfigManager.log(MParticle.LogLevel.ERROR, "Config request failed to process response message JSON");
         }
     }
 
     private URL getAudienceUrl() throws MalformedURLException {
-        return new URL(SECURE_SERVICE_SCHEME, SECURE_SERVICE_HOST, SERVICE_VERSION_1 + "/" + apiKey + "/audience?mpID=" + configManager.getMpid());
+        return new URL(SECURE_SERVICE_SCHEME, API_HOST, SERVICE_VERSION_1 + "/" + mApiKey + "/audience?mpID=" + mConfigManager.getMpid());
     }
 
     JSONObject fetchAudiences()  {
 
         JSONObject response = null;
         try {
-            Log.d(Constants.LOG_TAG, "Starting Segment Network request");
+            ConfigManager.log(MParticle.LogLevel.DEBUG, "Starting Segment Network request");
             HttpURLConnection connection = (HttpURLConnection) getAudienceUrl().openConnection();
             connection.setRequestProperty("Accept-Encoding", "gzip");
-            connection.setRequestProperty(HTTP.USER_AGENT, userAgent);
+            connection.setRequestProperty(HTTP.USER_AGENT, mUserAgent);
+            connection.setRequestProperty(HEADER_VARIANT, variant);
 
             addMessageSignature(connection, null);
             ApiResponse apiResponse = new ApiResponse(connection);
             if (apiResponse.getResponseCode() == HttpURLConnection.HTTP_FORBIDDEN){
-                configManager.debugLog("Segment call forbidden: is Segment enabled for the current mParticle org?");
+                ConfigManager.log(MParticle.LogLevel.ERROR, "Segment call forbidden: is Segment enabled for the current mParticle org?");
             }
             response =  apiResponse.getJsonResponse();
 
         }catch (Exception e){
-            configManager.debugLog("Segment call failed: " + e.getMessage());
+            ConfigManager.log(MParticle.LogLevel.ERROR, "Segment call failed: " + e.getMessage());
         }
         return response;
     }
 
-    private void checkThrottleTime() throws MPThrottleException {
-        if (System.currentTimeMillis() < sharedPreferences.getLong(Constants.PrefKeys.NEXT_REQUEST_TIME, 0)){
-            throw new MPThrottleException();
-        }
-    }
-
-    ApiResponse sendMessageBatch(String message) throws IOException, MPThrottleException {
+    ApiResponse sendMessageBatch(String message) throws IOException, MPThrottleException, MPRampException {
         checkThrottleTime();
+        checkRampValue();
+
         byte[] messageBytes = message.getBytes();
         // POST message to mParticle service
-        HttpURLConnection connection = (HttpURLConnection) batchUploadUrl.openConnection();
+        HttpURLConnection connection = (HttpURLConnection) mEventUrl.openConnection();
         connection.setDoOutput(true);
         connection.setRequestMethod("POST");
         connection.setRequestProperty(HTTP.CONTENT_TYPE, "application/json");
         connection.setRequestProperty(HTTP.CONTENT_ENCODING, "gzip");
-        connection.setRequestProperty(HTTP.USER_AGENT, userAgent);
+        connection.setRequestProperty(HTTP.USER_AGENT, mUserAgent);
+        connection.setRequestProperty(HEADER_VARIANT, variant);
 
         addMessageSignature(connection, message);
 
-        if (configManager.getEnvironment().equals(MParticle.Environment.Development)) {
+        if (mConfigManager.getEnvironment().equals(MParticle.Environment.Development)) {
             logUpload(message);
         }
 
@@ -159,7 +172,7 @@ class MParticleApiClient {
     }
 
     ApiResponse sendCommand(String commandUrl, String method, String postData, String headers) throws IOException, JSONException {
-        configManager.debugLog("Sending data to: " + commandUrl);
+        ConfigManager.log(MParticle.LogLevel.DEBUG, "Sending data to: " + commandUrl);
 
         URL url = new URL(commandUrl);
         HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
@@ -189,15 +202,15 @@ class MParticleApiClient {
             JSONObject messageJson = new JSONObject(message);
             if (messageJson.has(Constants.MessageKey.MESSAGES)) {
                 JSONArray messages = messageJson.getJSONArray(Constants.MessageKey.MESSAGES);
-                Log.d(Constants.LOG_TAG, "Uploading message batch...");
+                ConfigManager.log(MParticle.LogLevel.DEBUG, "Uploading message batch...");
                 for (int i = 0; i < messages.length(); i++) {
-                    Log.d(Constants.LOG_TAG, "Message type: " + ((JSONObject) messages.get(i)).getString(Constants.MessageKey.TYPE));
+                    ConfigManager.log(MParticle.LogLevel.DEBUG, "Message type: " + ((JSONObject) messages.get(i)).getString(Constants.MessageKey.TYPE));
                 }
             } else if (messageJson.has(Constants.MessageKey.HISTORY)) {
                 JSONArray messages = messageJson.getJSONArray(Constants.MessageKey.HISTORY);
-                Log.d(Constants.LOG_TAG, "Uploading session history batch...");
+                ConfigManager.log(MParticle.LogLevel.DEBUG, "Uploading session history batch...");
                 for (int i = 0; i < messages.length(); i++) {
-                    Log.d(Constants.LOG_TAG, "Message type: " + ((JSONObject) messages.get(i)).getString(Constants.MessageKey.TYPE) + " SID: " + ((JSONObject) messages.get(i)).optString(Constants.MessageKey.SESSION_ID));
+                    ConfigManager.log(MParticle.LogLevel.DEBUG, "Message type: " + ((JSONObject) messages.get(i)).getString(Constants.MessageKey.TYPE) + " SID: " + ((JSONObject) messages.get(i)).optString(Constants.MessageKey.SESSION_ID));
                 }
             }
         } catch (JSONException jse) {
@@ -224,13 +237,13 @@ class MParticleApiClient {
                 hashString.append(message);
             }
             request.setRequestProperty(HTTP.DATE_HEADER, dateHeader);
-            request.setRequestProperty(HEADER_SIGNATURE, hmacSha256Encode(apiSecret, hashString.toString()));
+            request.setRequestProperty(HEADER_SIGNATURE, hmacSha256Encode(mApiSecret, hashString.toString()));
         } catch (InvalidKeyException e) {
-            Log.e(Constants.LOG_TAG, "Error signing message.", e);
+            ConfigManager.log(MParticle.LogLevel.ERROR, e, "Error signing message.");
         } catch (NoSuchAlgorithmException e) {
-            Log.e(Constants.LOG_TAG, "Error signing message.", e);
+            ConfigManager.log(MParticle.LogLevel.ERROR, e, "Error signing message.");
         } catch (UnsupportedEncodingException e){
-            Log.e(Constants.LOG_TAG, "Error signing message.", e);
+            ConfigManager.log(MParticle.LogLevel.ERROR, e, "Error signing message.");
         }
     }
 
@@ -251,7 +264,7 @@ class MParticleApiClient {
         return new String(chars);
     }
 
-    public static void addCookies(JSONObject uploadMessage, ConfigManager manager) {
+    static void addCookies(JSONObject uploadMessage, ConfigManager manager) {
         try {
             if (uploadMessage != null) {
                 uploadMessage.put(COOKIES, manager.getCookies());
@@ -314,7 +327,7 @@ class MParticleApiClient {
             "4uJEvlz36hz1\n" +
             "-----END CERTIFICATE-----\n";
 
-    public SSLSocketFactory getSocketFactory() throws Exception{
+    private SSLSocketFactory getSocketFactory() throws Exception{
         if (socketFactory == null){
             // Load CAs from an InputStream
             // (could be from a resource or ByteArrayInputStream or ...)
@@ -362,7 +375,7 @@ class MParticleApiClient {
         }else{
             return new StringBuilder(SECURE_SERVICE_SCHEME)
                     .append("://")
-                    .append(SECURE_SERVICE_HOST)
+                    .append(API_HOST)
                     .append("/")
                     .append(relativeUrl).toString();
         }
@@ -385,7 +398,7 @@ class MParticleApiClient {
             }
             statusCode = connection.getResponseCode();
             if (statusCode == HttpStatus.SC_BAD_REQUEST) {
-                configManager.debugLog("Bad API request - is the correct API key and secret configured?");
+                ConfigManager.log(MParticle.LogLevel.ERROR, "Bad API request - is the correct API key and secret configured?");
             }
             if (statusCode == HttpStatus.SC_SERVICE_UNAVAILABLE){
                 setNextValidTime();
@@ -411,17 +424,17 @@ class MParticleApiClient {
                     if (jsonResponse.has(CONSUMER_INFO)) {
                         JSONObject consumerInfo = jsonResponse.getJSONObject(CONSUMER_INFO);
                         if (consumerInfo.has(MPID)) {
-                            configManager.setMpid(consumerInfo.getLong(MPID));
+                            mConfigManager.setMpid(consumerInfo.getLong(MPID));
                         }
                         if (consumerInfo.has(COOKIES)){
-                            configManager.setCookies(consumerInfo.getJSONObject(COOKIES));
+                            mConfigManager.setCookies(consumerInfo.getJSONObject(COOKIES));
                         }
                     }
                     if (jsonResponse.has(LTV)){
                         BigDecimal serverLtv = new BigDecimal(jsonResponse.getString(LTV));
-                        BigDecimal mostRecentClientLtc = new BigDecimal(sharedPreferences.getString(Constants.PrefKeys.LTV, "0"));
+                        BigDecimal mostRecentClientLtc = new BigDecimal(mPreferences.getString(Constants.PrefKeys.LTV, "0"));
                         BigDecimal sum = serverLtv.add(mostRecentClientLtc);
-                        sharedPreferences.edit().putString(Constants.PrefKeys.LTV, sum.toPlainString()).commit();
+                        mPreferences.edit().putString(Constants.PrefKeys.LTV, sum.toPlainString()).commit();
                     }
 
                 } catch (IOException ex) {
@@ -440,12 +453,32 @@ class MParticleApiClient {
 
     private void setNextValidTime() {
         long nextTime = System.currentTimeMillis() + THROTTLE;
-        sharedPreferences.edit().putLong(Constants.PrefKeys.NEXT_REQUEST_TIME, nextTime).commit();
+        mPreferences.edit().putLong(Constants.PrefKeys.NEXT_REQUEST_TIME, nextTime).commit();
     }
 
-    class MPThrottleException extends Exception {
+    final class MPThrottleException extends Exception {
         public MPThrottleException() {
             super("mP servers are busy, API connections have been throttled.");
+        }
+    }
+
+    final class MPRampException extends Exception {
+        public MPRampException() {
+            super("This device is being sampled.");
+        }
+    }
+
+    private void checkThrottleTime() throws MPThrottleException {
+        if (System.currentTimeMillis() < mPreferences.getLong(Constants.PrefKeys.NEXT_REQUEST_TIME, 0)){
+            throw new MPThrottleException();
+        }
+    }
+
+    private void checkRampValue() throws MPRampException {
+        int currentRamp = mConfigManager.getCurrentRampValue();
+        if (currentRamp > 0 && currentRamp < 100 &&
+                mDeviceRampNumber > mConfigManager.getCurrentRampValue()){
+            throw new MPRampException();
         }
     }
 }

@@ -2,8 +2,8 @@ package com.mparticle;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.location.Location;
-import android.util.Log;
 
 import com.kochava.android.tracker.Feature;
 
@@ -31,8 +31,7 @@ class EmbeddedKochava extends EmbeddedProvider implements MPActivityCallbacks {
     private static final String SPACIAL_X = "SpacialX";
     private static final String SPACIAL_Y = "SpacialY";
     private static final String SPACIAL_Z = "SpacialZ";
-    private String appId;
-    private String currency;
+    private static final String HOST = "kochava.com";
     private Feature feature;
 
     EmbeddedKochava(Context context) throws ClassNotFoundException {
@@ -40,38 +39,30 @@ class EmbeddedKochava extends EmbeddedProvider implements MPActivityCallbacks {
         try {
             Class.forName("com.kochava.android.tracker.Feature");
         } catch (ClassNotFoundException cnfe) {
-            MParticle.getInstance().mConfigManager.debugLog("Failed in initiate Kochava - library not found. Have you added it to your application's classpath?");
+            ConfigManager.log(MParticle.LogLevel.ERROR, "Failed in initiate Kochava - library not found. Have you added it to your application's classpath?");
             throw cnfe;
         }
     }
 
     @Override
     protected EmbeddedProvider update() {
-        if (needsRestart()){
-            appId = properties.get(APP_ID);
-            currency = properties.get(CURRENCY);
-            if (currency != null) {
-                feature = new Feature(context, appId, currency);
-            }else{
-                feature = new Feature(context, appId, "USD");
-            }
+        if (feature != null){
+            feature.setAppLimitTracking(Boolean.parseBoolean(properties.get(LIMIT_ADD_TRACKING)));
+            Feature.setErrorDebug(Boolean.parseBoolean(properties.get(ENABLE_LOGGING)));
+            Feature.setRequestAttributionData(Boolean.parseBoolean(properties.get(RETRIEVE_ATT_DATA)));
         }
-        feature.setAppLimitTracking(Boolean.parseBoolean(properties.get(LIMIT_ADD_TRACKING)));
-        Feature.setErrorDebug(Boolean.parseBoolean(properties.get(ENABLE_LOGGING)));
-        Feature.setRequestAttributionData(Boolean.parseBoolean(properties.get(RETRIEVE_ATT_DATA)));
 
         return this;
-    }
-
-    private boolean needsRestart() {
-        return feature == null ||
-                appId != properties.get(APP_ID) ||
-                currency != properties.get(CURRENCY) ;
     }
 
     @Override
     public String getName() {
         return "Kochava";
+    }
+
+    @Override
+    public boolean isOriginator(String uri) {
+        return uri != null && uri.toLowerCase().contains(HOST);
     }
 
     @Override
@@ -125,42 +116,76 @@ class EmbeddedKochava extends EmbeddedProvider implements MPActivityCallbacks {
 
     @Override
     public void setUserIdentity(String id, MParticle.IdentityType identityType) {
-        if (identityType == MParticle.IdentityType.CustomerId) {
-            if (!properties.containsKey(USE_CUSTOMER_ID) ||
-                    Boolean.parseBoolean(properties.get(USE_CUSTOMER_ID))) {
+        if (feature != null) {
+            if (identityType == MParticle.IdentityType.CustomerId) {
+                if (!properties.containsKey(USE_CUSTOMER_ID) ||
+                        Boolean.parseBoolean(properties.get(USE_CUSTOMER_ID))) {
+                    Map<String, String> map = new HashMap<String, String>(1);
+                    map.put(identityType.name(), id);
+                    feature.linkIdentity(map);
+                }
+            } else if (Boolean.parseBoolean(properties.get(INCLUDE_ALL_IDS))) {
                 Map<String, String> map = new HashMap<String, String>(1);
                 map.put(identityType.name(), id);
                 feature.linkIdentity(map);
             }
-        } else if (Boolean.parseBoolean(properties.get(INCLUDE_ALL_IDS))) {
-            Map<String, String> map = new HashMap<String, String>(1);
-            map.put(identityType.name(), id);
-            feature.linkIdentity(map);
         }
     }
 
     @Override
-    public void onActivityCreated(Activity activity) {
+    public void logout() {
+        //no matching feature in Kochava
+    }
+
+    @Override
+    public void removeUserIdentity(String id) {
 
     }
 
     @Override
-    public void onActivityResumed(Activity activity) {
+    public void handleIntent(Intent intent) {
+
+    }
+
+    private void createKochava(Activity activity){
+        if (feature == null){
+            HashMap<String, Object> datamap = new HashMap<String, Object>();
+            datamap.put(Feature.INPUTITEMS.KOCHAVA_APP_ID , properties.get(APP_ID));
+            datamap.put(Feature.INPUTITEMS.CURRENCY , Feature.CURRENCIES.EUR);
+            if (properties.containsKey(CURRENCY)) {
+                datamap.put(Feature.INPUTITEMS.CURRENCY , properties.get(CURRENCY));
+            }else{
+                datamap.put(Feature.INPUTITEMS.CURRENCY , Feature.CURRENCIES.USD);
+            }
+            datamap.put(Feature.INPUTITEMS.APP_LIMIT_TRACKING , properties.get(LIMIT_ADD_TRACKING));
+            datamap.put(Feature.INPUTITEMS.DEBUG_ON , Boolean.parseBoolean(properties.get(ENABLE_LOGGING)));
+            datamap.put(Feature.INPUTITEMS.REQUEST_ATTRIBUTION , Boolean.parseBoolean(properties.get(RETRIEVE_ATT_DATA)));
+            feature = new Feature(activity, datamap);
+        }
+    }
+
+    @Override
+    public void onActivityCreated(Activity activity, int activityCount) {
+        createKochava(activity);
+    }
+
+    @Override
+    public void onActivityResumed(Activity activity, int activityCount) {
+        createKochava(activity);
+    }
+
+    @Override
+    public void onActivityPaused(Activity activity, int activityCount) {
 
     }
 
     @Override
-    public void onActivityPaused(Activity activity) {
-
+    public void onActivityStopped(Activity activity, int activityCount) {
+        feature = null;
     }
 
     @Override
-    public void onActivityStopped(Activity activity) {
-
-    }
-
-    @Override
-    public void onActivityStarted(Activity activity) {
-
+    public void onActivityStarted(Activity activity, int activityCount) {
+        createKochava(activity);
     }
 }

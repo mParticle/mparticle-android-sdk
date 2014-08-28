@@ -7,6 +7,8 @@ import android.content.SharedPreferences;
 import android.location.Location;
 import android.util.Log;
 
+import com.mobileapptracker.MobileAppTracker;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -40,13 +42,14 @@ class EmbeddedMAT extends EmbeddedProvider implements MPActivityCallbacks {
     private static final String VIEW_SERVER_RESPONSE = "viewServerResponse";
     private String conversionId;
     private String advertiserId;
+    private static final String HOST = "engine.mobileapptracking.com";
 
     EmbeddedMAT(Context context) throws ClassNotFoundException {
         super(context);
         try {
             Class.forName("com.mobileapptracker.MobileAppTracker");
         } catch (ClassNotFoundException cnfe) {
-            MParticle.getInstance().mConfigManager.debugLog("Failed in initiate MAT - library not found. Have you added it to your application's classpath?");
+            ConfigManager.log(MParticle.LogLevel.ERROR, "Failed in initiate MAT - library not found. Have you added it to your application's classpath?");
             throw cnfe;
         }
     }
@@ -56,7 +59,8 @@ class EmbeddedMAT extends EmbeddedProvider implements MPActivityCallbacks {
         if (shouldSend(type, name)) {
             com.mobileapptracker.MobileAppTracker instance = com.mobileapptracker.MobileAppTracker.getInstance();
             if (eventAttributes != null) {
-                eventAttributes = filterAttributes(type, name, eventAttributes);
+                eventAttributes =
+                        filterAttributes(type, name, eventAttributes);
                 if (eventAttributes.length() > 0) {
                     JSONObject lowercaseAttributes = new JSONObject();
                     Iterator<String> keys = eventAttributes.keys();
@@ -88,7 +92,7 @@ class EmbeddedMAT extends EmbeddedProvider implements MPActivityCallbacks {
         com.mobileapptracker.MobileAppTracker instance = com.mobileapptracker.MobileAppTracker.getInstance();
         com.mobileapptracker.MATEventItem item = new com.mobileapptracker.MATEventItem(
                 transaction.get(MPProduct.NAME,""),
-                Integer.parseInt(transaction.get(MPProduct.QUANTITY, "1")),
+                (int)transaction.getQuantity(),
                 Double.parseDouble(transaction.get(MPProduct.UNITPRICE, "0")),
                 Double.parseDouble(transaction.get(MPProduct.REVENUE, "0")),
                 transaction.get(MPProduct.TAX, "0"),
@@ -147,7 +151,7 @@ class EmbeddedMAT extends EmbeddedProvider implements MPActivityCallbacks {
                 } catch (JSONException jse) {
 
                 } catch (NumberFormatException nfe) {
-                    MParticle.getInstance().mConfigManager.debugLog(getName() + " requires user attribute: " + key + " to be parsable as an integer");
+                    ConfigManager.log(MParticle.LogLevel.WARNING, getName() + " requires user attribute: " + key + " to be parsable as an integer");
                 }
             }
             if (firstName.length() > 0 || lastName.length() > 0) {
@@ -186,6 +190,21 @@ class EmbeddedMAT extends EmbeddedProvider implements MPActivityCallbacks {
     }
 
     @Override
+    public void logout() {
+        //no matching MAT feature
+    }
+
+    @Override
+    public void removeUserIdentity(String id) {
+
+    }
+
+    @Override
+    public void handleIntent(Intent intent) {
+
+    }
+
+    @Override
     protected EmbeddedProvider update() {
         if (needsRestart()) {
             advertiserId = properties.get(ADVERTISER_ID);
@@ -202,6 +221,7 @@ class EmbeddedMAT extends EmbeddedProvider implements MPActivityCallbacks {
                     .edit()
                     .putBoolean(Constants.PrefKeys.MAT_EXISTING_USER, true)
                     .commit();
+            com.mobileapptracker.MobileAppTracker.getInstance().measureSession();
         }
         if (Boolean.parseBoolean(properties.get(VIEW_SERVER_RESPONSE))) {
             com.mobileapptracker.MobileAppTracker.getInstance().setMATResponse(new com.mobileapptracker.MATResponse() {
@@ -237,12 +257,17 @@ class EmbeddedMAT extends EmbeddedProvider implements MPActivityCallbacks {
         return "Mobile App Tracking";
     }
 
+    @Override
+    public boolean isOriginator(String uri) {
+        return uri != null && uri.toLowerCase().contains(HOST);
+    }
+
     private boolean needsRestart() {
         return !properties.get(ADVERTISER_ID).equals(advertiserId) || !properties.get(CONVERSION_ID).equals(conversionId);
     }
 
     @Override
-    public void onActivityCreated(Activity activity) {
+    public void onActivityCreated(Activity activity, int activityCount) {
         if (Intent.ACTION_MAIN.equals(activity.getIntent().getAction())) {
             com.mobileapptracker.MobileAppTracker.getInstance().setReferralSources(activity);
             if (MPUtility.isGooglePlayServicesAvailable()) {
@@ -255,7 +280,7 @@ class EmbeddedMAT extends EmbeddedProvider implements MPActivityCallbacks {
                         } catch (Exception e) {
                             // Unrecoverable error connecting to Google Play services (e.g.,
                             // the old version of the service doesn't support getting AdvertisingId).
-                            Log.w(Constants.LOG_TAG, "Failed to retrieve Google Advertising id: " + e.getMessage());
+                            ConfigManager.log(MParticle.LogLevel.DEBUG, getName(),  " failed to retrieve Google Advertising id: ", e.getMessage());
                         }
                     }
                 }).start();
@@ -264,24 +289,24 @@ class EmbeddedMAT extends EmbeddedProvider implements MPActivityCallbacks {
     }
 
     @Override
-    public void onActivityResumed(Activity activity) {
+    public void onActivityResumed(Activity activity, int currentCount) {
         if (Intent.ACTION_MAIN.equals(activity.getIntent().getAction())) {
             com.mobileapptracker.MobileAppTracker.getInstance().measureSession();
         }
     }
 
     @Override
-    public void onActivityPaused(Activity activity) {
+    public void onActivityPaused(Activity activity, int activityCount) {
 
     }
 
     @Override
-    public void onActivityStopped(Activity activity) {
+    public void onActivityStopped(Activity activity, int currentCount) {
 
     }
 
     @Override
-    public void onActivityStarted(Activity activity) {
+    public void onActivityStarted(Activity activity, int currentCount) {
 
     }
 }

@@ -31,6 +31,7 @@ public class MPService extends IntentService {
     private static final String TAG = Constants.LOG_TAG;
     private static final String MPARTICLE_NOTIFICATION_OPENED = "com.mparticle.push.notification_opened";
     private static final Object LOCK = MPService.class;
+
     private static PowerManager.WakeLock sWakeLock;
     private static final String APP_STATE = "com.mparticle.push.appstate";
     private static final String PUSH_ORIGINAL_PAYLOAD = "com.mparticle.push.originalpayload";
@@ -62,6 +63,10 @@ public class MPService extends IntentService {
     @Override
     public final void onHandleIntent(Intent intent) {
         try {
+
+            MParticle.start(getApplicationContext());
+            MParticle.getInstance().mEmbeddedKitManager.handleIntent(intent);
+
             String action = intent.getAction();
             Log.i("MPService", "Handling action: " + action);
             if (action.equals("com.google.android.c2dm.intent.REGISTRATION")) {
@@ -169,7 +174,7 @@ public class MPService extends IntentService {
             String key = findMessageKey(possibleKeys, newExtras.getBundle(PUSH_ORIGINAL_PAYLOAD));
             String message = newExtras.getBundle(PUSH_ORIGINAL_PAYLOAD).getString(key);
             newExtras.getBundle(PUSH_REDACTED_PAYLOAD).putString(key, "");
-            newExtras.getBundle(PUSH_ORIGINAL_PAYLOAD).putString(MParticle.Push.PUSH_ALERT_EXTRA, message);
+            newExtras.getBundle(PUSH_ORIGINAL_PAYLOAD).putString(MParticlePushUtility.PUSH_ALERT_EXTRA, message);
             int titleResId = MParticle.getInstance().mConfigManager.getPushTitle();
             if (titleResId > 0){
                 try{
@@ -191,14 +196,14 @@ public class MPService extends IntentService {
     }
 
     private void broadcastNotificationReceived(Bundle originalPayload) {
-        Intent intent = new Intent(MParticle.Push.BROADCAST_NOTIFICATION_RECEIVED);
+        Intent intent = new Intent(MParticlePushUtility.BROADCAST_NOTIFICATION_RECEIVED);
         intent.putExtras(originalPayload);
         String packageName = getPackageName();
         sendBroadcast(intent, packageName + BROADCAST_PERMISSION);
     }
 
     private void broadcastNotificationClicked(Bundle originalPayload) {
-        Intent intent = new Intent(MParticle.Push.BROADCAST_NOTIFICATION_RECEIVED);
+        Intent intent = new Intent(MParticlePushUtility.BROADCAST_NOTIFICATION_TAPPED);
         intent.putExtras(originalPayload);
         String packageName = getPackageName();
         sendBroadcast(intent, packageName + BROADCAST_PERMISSION);

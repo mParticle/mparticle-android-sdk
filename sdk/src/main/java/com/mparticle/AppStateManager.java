@@ -39,8 +39,7 @@ class AppStateManager implements MPActivityCallbacks{
 
     private void logBackgrounded(){
         MParticle.getInstance().logStateTransition(Constants.StateTransitionType.STATE_TRANS_BG);
-        MParticle.getInstance().mConfigManager.handleBackgrounded();
-        MParticle.getInstance().mConfigManager.debugLog("App backgrounded.");
+        ConfigManager.log(MParticle.LogLevel.DEBUG, "App backgrounded.");
     }
 
     //it can take some time between when an activity stops and when a new one (or the same one)
@@ -67,17 +66,17 @@ class AppStateManager implements MPActivityCallbacks{
         ((Application) mContext).registerActivityLifecycleCallbacks(new Application.ActivityLifecycleCallbacks() {
             @Override
             public void onActivityCreated(Activity activity, Bundle savedInstanceState) {
-                AppStateManager.this.onActivityCreated(activity);
+                AppStateManager.this.onActivityCreated(activity, 0);
             }
 
             @Override
             public void onActivityStarted(Activity activity) {
-                AppStateManager.this.onActivityStarted(activity);
+                AppStateManager.this.onActivityStarted(activity, 0);
             }
 
             @Override
             public void onActivityResumed(Activity activity) {
-                AppStateManager.this.onActivityResumed(activity);
+                AppStateManager.this.onActivityResumed(activity, 0);
             }
 
             @Override
@@ -87,7 +86,7 @@ class AppStateManager implements MPActivityCallbacks{
 
             @Override
             public void onActivityStopped(Activity activity) {
-                AppStateManager.this.onActivityStopped(activity);
+                AppStateManager.this.onActivityStopped(activity, 0);
             }
 
             @Override
@@ -107,7 +106,7 @@ class AppStateManager implements MPActivityCallbacks{
     }
 
     @Override
-    public void onActivityStarted(Activity activity) {
+    public void onActivityStarted(Activity activity, int currentCount) {
         preferences.edit().putBoolean(Constants.PrefKeys.CRASHED_IN_FOREGROUND, true).commit();
         if (isBackgrounded() && mLastStoppedTime > 0) {
             long totalTimeInBackground = preferences.getLong(Constants.PrefKeys.TIME_IN_BG, -1);
@@ -120,18 +119,18 @@ class AppStateManager implements MPActivityCallbacks{
             preferences.edit().putLong(Constants.PrefKeys.TIME_IN_BG, totalTimeInBackground).commit();
 
             MParticle.getInstance().logStateTransition(Constants.StateTransitionType.STATE_TRANS_FORE);
-            MParticle.getInstance().mConfigManager.debugLog("App foregrounded.");
+            ConfigManager.log(MParticle.LogLevel.DEBUG, "App foregrounded.");
 
         }
         mActivities.getAndIncrement();
         if (MParticle.getInstance().isAutoTrackingEnabled()) {
             MParticle.getInstance().logScreen(getActivityName(activity), null, true);
         }
-        embeddedKitManager.onActivityStarted(activity);
+        embeddedKitManager.onActivityStarted(activity, mActivities.get());
     }
 
     @Override
-    public void onActivityStopped(Activity activity) {
+    public void onActivityStopped(Activity activity, int currentCount) {
         preferences.edit().putBoolean(Constants.PrefKeys.CRASHED_IN_FOREGROUND, false).commit();
         mLastStoppedTime = System.currentTimeMillis();
 
@@ -145,22 +144,22 @@ class AppStateManager implements MPActivityCallbacks{
         if (MParticle.getInstance().isAutoTrackingEnabled()) {
             MParticle.getInstance().logScreen(getActivityName(activity), null, false);
         }
-        embeddedKitManager.onActivityStopped(activity);
+        embeddedKitManager.onActivityStopped(activity, mActivities.get());
     }
 
     @Override
-    public void onActivityCreated(Activity activity){
-        embeddedKitManager.onActivityCreated(activity);
+    public void onActivityCreated(Activity activity, int activityCount){
+        embeddedKitManager.onActivityCreated(activity, mActivities.get());
     }
 
     @Override
-    public void onActivityResumed(Activity activity){
-        embeddedKitManager.onActivityResumed(activity);
+    public void onActivityResumed(Activity activity, int currentCount){
+        embeddedKitManager.onActivityResumed(activity, mActivities.get());
     }
 
     @Override
-    public void onActivityPaused(Activity activity) {
-        embeddedKitManager.onActivityPaused(activity);
+    public void onActivityPaused(Activity activity, int activityCount) {
+        embeddedKitManager.onActivityPaused(activity, mActivities.get());
     }
 
     private String getActivityName(Activity activity) {

@@ -24,11 +24,35 @@ def getDate() {
     def formattedDate = date.format('yyyyMMdd')
     return Integer.parseInt(formattedDate)
 }
-
+String releaseType = "mainlineRelease"
+String artifactId = "android-sdk"
 android {
     compileSdkVersion 19
-    buildToolsVersion "19.1"
+    buildToolsVersion "20"
     useOldManifestMerger false
+    defaultPublishConfig "mainlineRelease"
+
+    String url = "\"\"";
+    String configurationUrl = "\"\"";
+    try {
+        Properties properties = new Properties()
+        properties.load(project.rootProject.file('local.properties').newDataInputStream())
+        if (properties.stringPropertyNames().contains('mp.url')) {
+            url = properties.getProperty('mp.url')
+        }
+        if (properties.stringPropertyNames().contains('mp.configurl')) {
+            configurationUrl = properties.getProperty('mp.configurl')
+        }
+        if (properties.stringPropertyNames().contains('mp.releasetype')) {
+            releaseType = properties.getProperty('mp.releasetype')
+            if (releaseType.contains("kahuna")){
+                defaultPublishConfig "kahunaRelease"
+                artifactId = "android-sdk-kahuna"
+            }
+        }
+    }catch (Exception e){
+
+    }
 
     defaultConfig {
         minSdkVersion 9
@@ -39,46 +63,37 @@ android {
         testInstrumentationRunner "android.test.InstrumentationTestRunner"
         testHandleProfiling true
         testFunctionalTest true
+
+        buildConfigField "String", "MP_URL", url
+        buildConfigField "String", "MP_CONFIG_URL", configurationUrl
+
     }
 
-
-
-    buildTypes {
-
-        String url = "\"nativesdks.mparticle.com\"";
-        try {
-            Properties properties = new Properties()
-            properties.load(project.rootProject.file('local.properties').newDataInputStream())
-            if (properties.stringPropertyNames().contains('mp.url')) {
-                url = properties.getProperty('mp.url')
-            }
-        }catch (Exception e){
+    productFlavors {
+        mainline {
 
         }
 
+        kahuna {
+
+        }
+    }
+
+    buildTypes {
+
         debug {
-            buildConfigField "boolean", "ECHO", "true"
-            buildConfigField "boolean", "UNITY", "false"
-            buildConfigField "String", "MP_URL", url
             runProguard false
         }
 
         unity {
-            buildConfigField "boolean", "ECHO", "false"
-            buildConfigField "boolean", "UNITY", "true"
-            buildConfigField "String", "MP_URL", url
             runProguard true
             proguardFile 'proguard.txt'
         }
 
         release {
-            buildConfigField "boolean", "ECHO", "false"
-            buildConfigField "boolean", "UNITY", "false"
-            buildConfigField "String", "MP_URL", url
             runProguard true
             proguardFile 'proguard.txt'
         }
-
     }
 
     lintOptions {
@@ -116,13 +131,13 @@ uploadArchives {
                 configuration = configurations.deployerJars
                 repository(url: "s3://www.mparticle.com/maven")
                 pom.version = sdkversion
-                pom.artifactId = 'android-sdk'
+                pom.artifactId = artifactId
                 pom.groupId = 'com.mparticle'
                 pom.packaging = 'jar'
             }else{
                 repository url: 'file://' + new File(System.getProperty('user.home'), '.m2/repository').absolutePath
                 pom.version = sdkversion
-                pom.artifactId = 'android-sdk'
+                pom.artifactId = artifactId
                 pom.groupId = 'com.mparticle'
                 pom.packaging = 'jar'
             }
@@ -132,7 +147,9 @@ uploadArchives {
 
 dependencies {
     deployerJars "org.kuali.maven.wagons:maven-s3-wagon:1.2.1"
-    compile fileTree(dir: 'embeddedkits', include: ['*.jar'])
+    kahunaCompile files('embeddedkits/Kahuna473.jar')
+    compile files('embeddedkits/KochavaSDK.jar')
+    compile files('embeddedkits/MobileAppTracker-3.1.jar')
     compile 'com.google.android.gms:play-services:4.+'
     unityCompile project('unityskeleton')
 }

@@ -191,6 +191,7 @@ import java.util.TimeZone;
                     if (!adInfo.isLimitAdTrackingEnabled()) {
                         attributes.put(MessageKey.GOOGLE_ADV_ID, adInfo.getId());
                     }
+                    attributes.put(MessageKey.LIMIT_AD_TRACKING, adInfo.isLimitAdTrackingEnabled());
                 }catch (Exception e){
 
                 }

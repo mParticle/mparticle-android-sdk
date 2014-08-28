@@ -18,7 +18,7 @@ import java.lang.Thread.UncaughtExceptionHandler;
     @Override
     public void uncaughtException(Thread thread, Throwable ex) {
         try {
-                MParticle.getInstance().logUnhandledError(ex);
+            MParticle.getInstance().logUnhandledError(ex);
 
             if (null != mOriginalUncaughtExceptionHandler) {
                 mOriginalUncaughtExceptionHandler.uncaughtException(thread, ex);

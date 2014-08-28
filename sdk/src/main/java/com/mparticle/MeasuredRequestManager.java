@@ -41,7 +41,7 @@ final class MeasuredRequestManager {
             synchronized (requests) {
 
                 if (requests.size() > 0) {
-                    MParticle.getInstance().mConfigManager.debugLog("Processing ", Integer.toString(requests.size()), " measured network requests.");
+                    ConfigManager.log(MParticle.LogLevel.DEBUG, "Processing ", Integer.toString(requests.size()), " measured network requests.");
                 }
                 Iterator<MeasuredRequest> iter = requests.iterator();
                 ArrayList<String> loggedUris = new ArrayList<String>();
@@ -72,7 +72,7 @@ final class MeasuredRequestManager {
                                     loggedUris.add(uri);
                                 }
 
-                                MParticle.getInstance().mConfigManager.debugLog("Logging network request: " + request.toString());
+                                ConfigManager.log(MParticle.LogLevel.DEBUG, "Logging network request: " + request.toString());
 
                             }
                             request.reset();
