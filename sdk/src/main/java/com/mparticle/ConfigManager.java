@@ -33,7 +33,7 @@ class ConfigManager {
     public static final String VALUE_CNP_NO_CAPTURE = "forcefalse";
     private static final String PREFERENCES_FILE = "mp_preferences";
     private static final String KEY_RAMP = "rp";
-    private static final int DEVMODE_UPLOAD_INTERVAL_MILLISECONDS = 5 * 1000;
+    private static final int DEVMODE_UPLOAD_INTERVAL_MILLISECONDS = 10 * 1000;
 
     private Context mContext;
 
