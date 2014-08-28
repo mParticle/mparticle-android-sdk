@@ -51,7 +51,7 @@ class MParticleApiClient {
     private static final String HEADER_SIGNATURE = "x-mp-signature";
     private static final String HEADER_ENVIRONMENT = "x-mp-env";
     private static final String HEADER_VARIANT = "x-mp-variant";
-    private static final String SECURE_SERVICE_SCHEME = "https";
+    private static final String SECURE_SERVICE_SCHEME = TextUtils.isEmpty(BuildConfig.MP_URL) ? "https" : "http";
 
     private static final String API_HOST = TextUtils.isEmpty(BuildConfig.MP_URL) ? "nativesdks.mparticle.com" : BuildConfig.MP_URL;
     private static final String CONFIG_HOST = TextUtils.isEmpty(BuildConfig.MP_CONFIG_URL) ? "config.mparticle.com" : BuildConfig.MP_CONFIG_URL;
@@ -80,8 +80,8 @@ class MParticleApiClient {
         mApiSecret = configManager.getApiSecret();
         mPreferences = sharedPreferences;
         mApiKey = configManager.getApiKey();
-        mConfigUrl = new URL(SECURE_SERVICE_SCHEME, API_HOST, SERVICE_VERSION_2 + "/" + mApiKey + "/config");
-        mEventUrl = new URL(SECURE_SERVICE_SCHEME, CONFIG_HOST, SERVICE_VERSION_1 + "/" + mApiKey + "/events");
+        mConfigUrl = new URL(SECURE_SERVICE_SCHEME, CONFIG_HOST, SERVICE_VERSION_2 + "/" + mApiKey + "/config");
+        mEventUrl = new URL(SECURE_SERVICE_SCHEME, API_HOST, SERVICE_VERSION_1 + "/" + mApiKey + "/events");
         mUserAgent = "mParticle Android SDK/" + Constants.MPARTICLE_VERSION;
         mDeviceRampNumber = MPUtility.hashDeviceIdForRamping(
                         Settings.Secure.getString(context.getContentResolver(),
