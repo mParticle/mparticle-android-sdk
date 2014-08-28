@@ -67,10 +67,6 @@ import org.json.JSONObject;
                     if (MessageType.SESSION_START != messageType) {
                         dbUpdateSessionEndTime(getMessageSessionId(message), message.getLong(MessageKey.TIMESTAMP), 0);
                     }
-
-                    if (messageType.equals(MessageType.FIRST_RUN)){
-                        MParticle.getInstance().upload();
-                    }
                 } catch (SQLiteException e) {
                     ConfigManager.log(MParticle.LogLevel.ERROR, e, "Error saving event to mParticle DB");
                 } catch (JSONException e) {
