@@ -23,6 +23,10 @@ import android.os.Bundle;
  * }</pre>
  */
 public final class MParticlePushUtility {
+    private MParticlePushUtility() {
+        super();
+    }
+
     /**
      * Listen for this broadcast (as an Intent action) to detect when the device received a push.
      *
