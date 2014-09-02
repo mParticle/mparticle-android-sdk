@@ -59,7 +59,7 @@ android {
         targetSdkVersion 19
         versionName sdkversion
         versionCode getDate()
-        testPackageName "com.mparticle.test"
+        testApplicationId "com.mparticle.test"
         testInstrumentationRunner "android.test.InstrumentationTestRunner"
         testHandleProfiling true
         testFunctionalTest true
