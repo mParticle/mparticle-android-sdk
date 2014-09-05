@@ -442,12 +442,22 @@ class MPUtility {
         return (res == PackageManager.PERMISSION_GRANTED);
     }
 
-    public static boolean isGooglePlayServicesAvailable() {
+    public static boolean isGmsAdIdAvailable() {
         if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.FROYO) {
             return false;
         }
         try {
             Class.forName("com.google.android.gms.ads.identifier.AdvertisingIdClient");
+            return true;
+        } catch (ClassNotFoundException cnfe) {
+
+        }
+        return false;
+    }
+
+    public static boolean isGcmServicesAvailable() {
+        try {
+            Class.forName("com.google.android.gms.gcm.GoogleCloudMessaging");
             return true;
         } catch (ClassNotFoundException cnfe) {
 

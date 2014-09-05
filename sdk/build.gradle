@@ -151,5 +151,7 @@ dependencies {
     compile files('embeddedkits/KochavaSDK.jar')
     compile files('embeddedkits/MobileAppTracker-3.1.jar')
     provided 'com.google.android.gms:play-services:4.+'
+    provided 'com.android.support:support-v4:19.+'
+
     unityCompile project('unityskeleton')
 }

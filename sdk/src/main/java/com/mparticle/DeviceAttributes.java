@@ -185,7 +185,7 @@ import java.util.TimeZone;
             attributes.put(MessageKey.DEVICE_ANID, MPUtility.getAndroidID(appContext));
             attributes.put(MessageKey.DEVICE_OPEN_UDID, MPUtility.getOpenUDID(appContext));
 
-            if (MPUtility.isGooglePlayServicesAvailable()) {
+            if (MPUtility.isGmsAdIdAvailable()) {
                 try {
                     com.google.android.gms.ads.identifier.AdvertisingIdClient.Info adInfo = com.google.android.gms.ads.identifier.AdvertisingIdClient.getAdvertisingIdInfo(appContext);
                     if (!adInfo.isLimitAdTrackingEnabled()) {

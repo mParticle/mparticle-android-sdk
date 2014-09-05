@@ -1,8 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     package="com.mparticle">
     <application/>
-    <uses-sdk tools:replace="minSdkVersion"
+    <uses-sdk
         android:minSdkVersion="8"
         android:targetSdkVersion="19">
 

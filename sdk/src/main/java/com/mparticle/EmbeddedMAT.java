@@ -270,7 +270,7 @@ class EmbeddedMAT extends EmbeddedProvider implements MPActivityCallbacks {
     public void onActivityCreated(Activity activity, int activityCount) {
         if (Intent.ACTION_MAIN.equals(activity.getIntent().getAction())) {
             com.mobileapptracker.MobileAppTracker.getInstance().setReferralSources(activity);
-            if (MPUtility.isGooglePlayServicesAvailable()) {
+            if (MPUtility.isGmsAdIdAvailable()) {
                 new Thread(new Runnable() {
                     @Override
                     public void run() {

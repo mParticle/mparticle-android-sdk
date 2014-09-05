@@ -18,6 +18,7 @@ import android.provider.Settings;
 import android.util.Log;
 import android.webkit.WebView;
 
+import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.mparticle.Constants.MessageKey;
 import com.mparticle.Constants.PrefKeys;
 import com.mparticle.segmentation.SegmentListener;
@@ -1321,7 +1322,9 @@ public class MParticle {
      * @param senderId the SENDER_ID for the application
      */
     public void enablePushNotifications(String senderId) {
-        if (!MPUtility.isServiceAvailable(mAppContext, MPService.class)){
+        if (!MPUtility.isGcmServicesAvailable()) {
+            ConfigManager.log(LogLevel.ERROR, "GoogleCloudMessaging library not found - you must add Google Play Services 3.1 or later to your application.");
+        }else if (!MPUtility.isServiceAvailable(mAppContext, MPService.class)){
             ConfigManager.log(LogLevel.ERROR, "Push is enabled but you have not added <service android:name=\"com.mparticle.MPService\" /> to the <application> section of your AndroidManifest.xml");
         }else if (!MPUtility.checkPermission(mAppContext, "com.google.android.c2dm.permission.RECEIVE")){
             ConfigManager.log(LogLevel.ERROR, "Attempted to enable push notifications without required permission: ", "\"com.google.android.c2dm.permission.RECEIVE\"");

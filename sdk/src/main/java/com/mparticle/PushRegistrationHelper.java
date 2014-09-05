@@ -6,8 +6,12 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.os.AsyncTask;
 import android.os.Build;
-import android.util.Log;
+
+import com.google.android.gms.gcm.GoogleCloudMessaging;
+
+import java.io.IOException;
 
 /**
  * Created by sdozor on 1/23/14.
@@ -61,12 +65,20 @@ class PushRegistrationHelper {
      *
      * @param senderId the SENDER_ID for the application
      */
-    public static void enablePushNotifications(Context context, String senderId) {
+    public static void enablePushNotifications(final Context context, final String senderId) {
         if (getRegistrationId(context) == null) {
-            Intent registrationIntent = new Intent("com.google.android.c2dm.intent.REGISTER");
-            registrationIntent.putExtra("app", PendingIntent.getBroadcast(context, 0, new Intent(), 0));
-            registrationIntent.putExtra("sender", senderId);
-            context.startService(registrationIntent);
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        GoogleCloudMessaging gcm = GoogleCloudMessaging.getInstance(context);
+                        String regid = gcm.register(senderId);
+                        PushRegistrationHelper.storeRegistrationId(context, regid);
+                    } catch (IOException ex) {
+                        ConfigManager.log(MParticle.LogLevel.ERROR, "Error registering for GCM", ex.getMessage());
+                    }
+                }
+            }).start();
         }
     }
 
@@ -89,13 +101,18 @@ class PushRegistrationHelper {
     /**
      * Unregister the device from GCM notifications
      */
-    public static void disablePushNotifications(Context context) {
-        SharedPreferences preferences = context.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = preferences.edit();
-        editor.putBoolean(Constants.PrefKeys.PUSH_ENABLED, false).commit();
-        Intent unregIntent = new Intent("com.google.android.c2dm.intent.UNREGISTER");
-        unregIntent.putExtra("app", PendingIntent.getBroadcast(context, 0, new Intent(), 0));
-        context.startService(unregIntent);
+    public static void disablePushNotifications(final Context context) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    GoogleCloudMessaging.getInstance(context).unregister();
+                    PushRegistrationHelper.clearPushRegistrationId(context);
+                } catch (IOException ex) {
+                    ConfigManager.log(MParticle.LogLevel.ERROR, "Error unregistering for GCM", ex.getMessage());
+                }
+            }
+        }).start();
     }
 
     /**
@@ -104,6 +121,9 @@ class PushRegistrationHelper {
      */
     public static void clearPushRegistrationId(Context context) {
         SharedPreferences preferences = context.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
-        preferences.edit().remove(Constants.PrefKeys.PUSH_REGISTRATION_ID).commit();
+        preferences.edit()
+                .remove(Constants.PrefKeys.PUSH_REGISTRATION_ID)
+                .putBoolean(Constants.PrefKeys.PUSH_ENABLED, false)
+                .commit();
     }
 }
