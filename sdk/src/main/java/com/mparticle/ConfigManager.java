@@ -99,7 +99,7 @@ class ConfigManager {
         }
 
         if (responseJSON.has(ProviderPersistence.KEY_PERSISTENCE)) {
-            setProviderPersistence(new ProviderPersistence(responseJSON, mContext));
+            setProviderPersistence(new ProviderPersistence(responseJSON, mContext, mPreferences));
         }
 
         mSessionTimeoutInterval = responseJSON.optInt(KEY_SESSION_TIMEOUT, -1);

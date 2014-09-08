@@ -2,10 +2,16 @@ package com.mparticle;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.text.TextUtils;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.security.SecureRandom;
+import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Created by sdozor on 3/27/14.
@@ -31,7 +37,7 @@ class ProviderPersistence extends JSONObject{
     private static final int PERSISTENCE_TYPE_LONG = 5;
 
 
-    ProviderPersistence(JSONObject config, Context context) throws JSONException{
+    ProviderPersistence(JSONObject config, Context context, SharedPreferences mpPreferences) throws JSONException{
         super();
         JSONArray configPersistence = config.getJSONArray(KEY_PERSISTENCE);
         for (int i = 0; i < configPersistence.length(); i++){
@@ -55,7 +61,7 @@ class ProviderPersistence extends JSONObject{
                         Object defaultValue;
                         switch (type) {
                             case PERSISTENCE_TYPE_STRING:
-                                defaultValue = fileObjects.getJSONObject(keyIndex).getString(KEY_PERSISTENCE_DEFAULT);
+                                defaultValue = applyMacro(fileObjects.getJSONObject(keyIndex).getString(KEY_PERSISTENCE_DEFAULT), mpPreferences);
                                 if (contains) {
                                     values.put(mpKey, preferences.getString(key, (String) defaultValue));
                                 } else {
@@ -119,5 +125,77 @@ class ProviderPersistence extends JSONObject{
 
         }
 
+    }
+
+
+
+    private static final String MACRO_GUID_NO_DASHES = "%gn%";
+    private static final String MACRO_OMNITURE_AID = "%oaid%";
+    private static final String MACRO_GUID = "%g%";
+    private static final String MACRO_TIMESTAMP = "%ts%";
+    private static final String MACRO_GUID_LEAST_SIG = "%glsb%";
+
+
+    private String applyMacro(String defaultString, SharedPreferences preferences) {
+        if (!TextUtils.isEmpty(defaultString) && defaultString.startsWith("%")){
+            if (defaultString.toUpperCase().equals(MACRO_GUID_NO_DASHES)){
+                String value = preferences.getString(Constants.PrefKeys.MACRO_GN, null);
+                if (value == null){
+                    value = UUID.randomUUID().toString().replace("-", "");
+                    preferences.edit().putString(Constants.PrefKeys.MACRO_GN, value).commit();
+                }
+                return value;
+            }else if (defaultString.equals(MACRO_OMNITURE_AID)){
+                String value = preferences.getString(Constants.PrefKeys.MACRO_OAID, null);
+                if (value == null){
+                    value = generateAID();
+                    preferences.edit().putString(Constants.PrefKeys.MACRO_OAID, value).commit();
+                }
+                return value;
+            }else if (defaultString.equals(MACRO_GUID)){
+                String value = preferences.getString(Constants.PrefKeys.MACRO_G, null);
+                if (value == null){
+                    value = UUID.randomUUID().toString();
+                    preferences.edit().putString(Constants.PrefKeys.MACRO_G, value).commit();
+                }
+                return value;
+            }else if (defaultString.equals(MACRO_TIMESTAMP)){
+                String value = preferences.getString(Constants.PrefKeys.MACRO_TS, null);
+                if (value == null){
+                    value = Long.toString(System.currentTimeMillis());
+                    preferences.edit().putString(Constants.PrefKeys.MACRO_TS, value).commit();
+                }
+                return value;
+            }else if (defaultString.equals(MACRO_GUID_LEAST_SIG)){
+                String value = preferences.getString(Constants.PrefKeys.MACRO_GLSB, null);
+                if (value == null){
+                    value = Long.toString(UUID.randomUUID().getLeastSignificantBits());
+                    preferences.edit().putString(Constants.PrefKeys.MACRO_GLSB, value).commit();
+                }
+                return value;
+            }
+        }
+        return defaultString;
+    }
+
+    private static String generateAID() {
+        String uuid = UUID.randomUUID().toString().replace("-", "");
+        uuid = uuid.toUpperCase();
+
+        Pattern firstPattern = Pattern.compile("^[89A-F]");
+        Pattern secondPattern = Pattern.compile("^[4-9A-F]");
+        Matcher firstMatcher = firstPattern.matcher(uuid.substring(0, 16));
+        Matcher secondMatcher = secondPattern.matcher(uuid.substring(16, 32));
+
+        SecureRandom r = new SecureRandom();
+        String vi_hi = firstMatcher.replaceAll(String.valueOf(r.nextInt(7)));
+        String vi_lo = secondMatcher.replaceAll(String.valueOf(r.nextInt(3)));
+
+        StringBuilder aidBuilder = new StringBuilder(33);
+        aidBuilder.append(vi_hi);
+        aidBuilder.append("-");
+        aidBuilder.append(vi_lo);
+
+        return aidBuilder.toString();
     }
 }

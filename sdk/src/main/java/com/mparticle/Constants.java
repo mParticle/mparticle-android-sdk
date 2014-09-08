@@ -272,6 +272,11 @@ package com.mparticle;
         public static final String PREVIOUS_SESSION_ID = "mp::session::previous_id";
         public static final String API_KEY = "mp::config::apikey";
         public static final String API_SECRET = "mp::config::apisecret";
+        public static final String MACRO_GN = "mp:macros::gn";
+        public static final String MACRO_OAID = "mp:macros::oaid";
+        public static final String MACRO_G = "mp:macros::g";
+        public static final String MACRO_TS = "mp:macros::ts";
+        public static final String MACRO_GLSB = "mp:macros::glsb";
     }
 
     interface MiscStorageKeys {
