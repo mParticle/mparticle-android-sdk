@@ -111,13 +111,13 @@ import org.json.JSONObject;
                     String sessionId = (String) msg.obj;
                     String[] selectionArgs = new String[]{sessionId};
                     String[] sessionColumns = new String[]{SessionTable.START_TIME, SessionTable.END_TIME,
-                            SessionTable.SESSION_LENGTH, SessionTable.ATTRIBUTES};
+                            SessionTable.SESSION_FOREGROUND_LENGTH, SessionTable.ATTRIBUTES};
                     Cursor selectCursor = db.query(SessionTable.TABLE_NAME, sessionColumns, SessionTable.SESSION_ID + "=?",
                             selectionArgs, null, null, null);
                     if (selectCursor.moveToFirst()) {
                         long start = selectCursor.getLong(0);
                         long end = selectCursor.getLong(1);
-                        long length = selectCursor.getLong(2);
+                        long foregroundLength = selectCursor.getLong(2);
                         String attributes = selectCursor.getString(3);
                         JSONObject sessionAttributes = null;
                         if (null != attributes) {
@@ -125,7 +125,7 @@ import org.json.JSONObject;
                         }
 
                         // create a session-end message
-                        JSONObject endMessage = MessageManager.createMessageSessionEnd(sessionId, start, end, length,
+                        JSONObject endMessage = MessageManager.createMessageSessionEnd(sessionId, start, end, foregroundLength,
                                 sessionAttributes);
 
                         // insert the record into messages with duration
@@ -234,7 +234,7 @@ import org.json.JSONObject;
         contentValues.put(SessionTable.SESSION_ID, message.getString(MessageKey.ID));
         contentValues.put(SessionTable.START_TIME, message.getLong(MessageKey.TIMESTAMP));
         contentValues.put(SessionTable.END_TIME, message.getLong(MessageKey.TIMESTAMP));
-        contentValues.put(SessionTable.SESSION_LENGTH, 0);
+        contentValues.put(SessionTable.SESSION_FOREGROUND_LENGTH, 0);
         db.insert(SessionTable.TABLE_NAME, null, contentValues);
     }
 
@@ -273,7 +273,7 @@ import org.json.JSONObject;
         ContentValues sessionValues = new ContentValues();
         sessionValues.put(SessionTable.END_TIME, endTime);
         if (sessionLength > 0) {
-            sessionValues.put(SessionTable.SESSION_LENGTH, sessionLength);
+            sessionValues.put(SessionTable.SESSION_FOREGROUND_LENGTH, sessionLength);
         }
         String[] whereArgs = {sessionId};
         db.update(SessionTable.TABLE_NAME, sessionValues, SessionTable.SESSION_ID + "=?", whereArgs);

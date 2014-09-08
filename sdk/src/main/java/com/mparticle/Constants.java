@@ -63,6 +63,7 @@ package com.mparticle;
         public static final String SESSION_START_TIMESTAMP = "sct";
         public static final String SESSION_ID = "sid";
         public static final String SESSION_LENGTH = "sl";
+        public static final String SESSION_LENGTH_TOTAL = "slx";
         public static final String ATTRIBUTES = "attrs";
         public static final String EVENT_TYPE = "et";
         public static final String NAME = "n";
