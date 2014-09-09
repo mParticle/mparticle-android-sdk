@@ -54,10 +54,10 @@ class MParticleApiClient {
     private static final String SECURE_SERVICE_SCHEME = TextUtils.isEmpty(BuildConfig.MP_URL) ? "https" : "http";
 
     private static final String API_HOST = TextUtils.isEmpty(BuildConfig.MP_URL) ? "nativesdks.mparticle.com" : BuildConfig.MP_URL;
-    private static final String CONFIG_HOST = TextUtils.isEmpty(BuildConfig.MP_CONFIG_URL) ? "config.mparticle.com" : BuildConfig.MP_CONFIG_URL;
+    private static final String CONFIG_HOST = TextUtils.isEmpty(BuildConfig.MP_CONFIG_URL) ? "config2.mparticle.com" : BuildConfig.MP_CONFIG_URL;
 
     private static final String SERVICE_VERSION_1 = "/v1";
-    private static final String SERVICE_VERSION_2 = "/v2";
+    private static final String SERVICE_VERSION_3 = "/v3";
     private static final String COOKIES = "ck";
     private static final String CONSUMER_INFO = "ci";
     private static final String MPID = "mpid";
@@ -82,7 +82,7 @@ class MParticleApiClient {
         mApiSecret = configManager.getApiSecret();
         mPreferences = sharedPreferences;
         mApiKey = configManager.getApiKey();
-        mConfigUrl = new URL(SECURE_SERVICE_SCHEME, CONFIG_HOST, SERVICE_VERSION_2 + "/" + mApiKey + "/config");
+        mConfigUrl = new URL(SECURE_SERVICE_SCHEME, CONFIG_HOST, SERVICE_VERSION_3 + "/" + mApiKey + "/config");
         mEventUrl = new URL(SECURE_SERVICE_SCHEME, API_HOST, SERVICE_VERSION_1 + "/" + mApiKey + "/events");
         mUserAgent = "mParticle Android SDK/" + Constants.MPARTICLE_VERSION;
         mDeviceRampNumber = MPUtility.hashDeviceIdForRamping(
