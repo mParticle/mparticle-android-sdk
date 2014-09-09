@@ -73,6 +73,8 @@ class MParticleApiClient {
     private final int mDeviceRampNumber;
     private static String variant;
     private SSLSocketFactory socketFactory;
+    private String etag = null;
+    private String modified = null;
     private static final long THROTTLE = 1000*60*60*2;
 
     public MParticleApiClient(ConfigManager configManager, SharedPreferences sharedPreferences, Context context) throws MalformedURLException {
@@ -99,6 +101,12 @@ class MParticleApiClient {
             connection.setRequestProperty(HEADER_ENVIRONMENT, Integer.toString(mConfigManager.getEnvironment().getValue()));
             connection.setRequestProperty(HEADER_VARIANT, variant);
             connection.setRequestProperty(HTTP.USER_AGENT, mUserAgent);
+            if (etag != null){
+                connection.setRequestProperty("If-None-Match", etag);
+            }
+            if (modified != null){
+                connection.setRequestProperty("If-Modified-Since", modified);
+            }
 
             addMessageSignature(connection, null);
 
@@ -106,6 +114,8 @@ class MParticleApiClient {
 
             if (response.statusCode >= HttpStatus.SC_OK && response.statusCode < HttpStatus.SC_MULTIPLE_CHOICES) {
                 mConfigManager.updateConfig(response.getJsonResponse());
+                etag = connection.getHeaderField("ETag");
+                modified = connection.getHeaderField("Last-Modified");
             }else if (response.statusCode >= HttpStatus.SC_BAD_REQUEST) {
                 throw new MPConfigException();
             }
