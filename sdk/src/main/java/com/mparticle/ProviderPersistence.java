@@ -37,7 +37,7 @@ class ProviderPersistence extends JSONObject{
     private static final int PERSISTENCE_TYPE_LONG = 5;
 
 
-    ProviderPersistence(JSONObject config, Context context, SharedPreferences mpPreferences) throws JSONException{
+    ProviderPersistence(JSONObject config, Context context) throws JSONException{
         super();
         JSONArray configPersistence = config.getJSONArray(KEY_PERSISTENCE);
         for (int i = 0; i < configPersistence.length(); i++){
@@ -56,67 +56,37 @@ class ProviderPersistence extends JSONObject{
                         final String key = fileObjects.getJSONObject(keyIndex).getString(KEY_PERSISTENCE_KEY);
                         final String mpKey = fileObjects.getJSONObject(keyIndex).getString(KEY_PERSISTENCE_MPVAR);
                         final String mpPersistenceKey = MPPREFIX + mpKey;
-                        boolean contains = preferences.contains(key);
-                        boolean containsMpKey = preferences.contains(mpPersistenceKey);
-                        Object defaultValue;
-                        switch (type) {
-                            case PERSISTENCE_TYPE_STRING:
-                                defaultValue = applyMacro(fileObjects.getJSONObject(keyIndex).getString(KEY_PERSISTENCE_DEFAULT), mpPreferences);
-                                if (contains) {
-                                    values.put(mpKey, preferences.getString(key, (String) defaultValue));
-                                } else {
-                                    if (!containsMpKey){
-                                        editor.putString(mpPersistenceKey , (String) defaultValue);
-                                    }
-                                    values.put(mpKey, preferences.getString(mpPersistenceKey, (String) defaultValue));
+                        if (preferences.contains(mpPersistenceKey)){
+                            values.put(mpKey, preferences.getString(mpPersistenceKey, null));
+                        }else{
+                            String resolvedValue = null;
+                            if (preferences.contains(key)) {
+                                switch (type) {
+                                    case PERSISTENCE_TYPE_STRING:
+                                        resolvedValue = preferences.getString(key, resolvedValue);
+                                        break;
+                                    case PERSISTENCE_TYPE_INT:
+                                        resolvedValue = Integer.toString(preferences.getInt(key, 0));
+                                        break;
+                                    case PERSISTENCE_TYPE_BOOLEAN:
+                                        resolvedValue = Boolean.toString(preferences.getBoolean(key, false));
+                                        break;
+                                    case PERSISTENCE_TYPE_FLOAT:
+                                        resolvedValue = Float.toString(preferences.getFloat(key, 0));
+                                        break;
+                                    case PERSISTENCE_TYPE_LONG:
+                                        resolvedValue = Long.toString(preferences.getLong(key, 0));
+                                        break;
                                 }
-                                break;
-                            case PERSISTENCE_TYPE_INT:
-                                defaultValue = fileObjects.getJSONObject(keyIndex).getInt(KEY_PERSISTENCE_DEFAULT);
-                                if (contains) {
-                                    values.put(mpKey, preferences.getInt(key, (Integer) defaultValue));
-                                } else {
-                                    if (!containsMpKey){
-                                        editor.putInt(mpPersistenceKey, (Integer) defaultValue);
-                                    }
-                                    values.put(mpKey, preferences.getInt(mpPersistenceKey, (Integer) defaultValue));
-                                }
-                                break;
-                            case PERSISTENCE_TYPE_BOOLEAN:
-                                defaultValue = fileObjects.getJSONObject(keyIndex).getBoolean(KEY_PERSISTENCE_DEFAULT);
-                                if (contains) {
-                                    values.put(mpKey, preferences.getBoolean(key, (Boolean) defaultValue));
-                                } else {
-                                    if (!containsMpKey){
-                                        editor.putBoolean(mpPersistenceKey, (Boolean) defaultValue);
-                                    }
-                                    values.put(mpKey, preferences.getBoolean(mpPersistenceKey, (Boolean) defaultValue));
-                                }
-                                break;
-                            case PERSISTENCE_TYPE_FLOAT:
-                                defaultValue = fileObjects.getJSONObject(keyIndex).getDouble(KEY_PERSISTENCE_DEFAULT);
-                                if (contains) {
-                                    values.put(mpKey, preferences.getFloat(key, (Float) defaultValue));
-                                } else {
-                                    if (!containsMpKey){
-                                        editor.putFloat(mpPersistenceKey, (Float) defaultValue);
-                                    }
-                                    values.put(mpKey, preferences.getFloat(mpPersistenceKey, (Float) defaultValue));
-                                }
-                                break;
-                            case PERSISTENCE_TYPE_LONG:
-                                defaultValue = fileObjects.getJSONObject(keyIndex).getLong(KEY_PERSISTENCE_DEFAULT);
-                                if (contains) {
-                                    values.put(mpKey, preferences.getLong(key, (Long) defaultValue));
-                                } else {
-                                    if (!containsMpKey){
-                                        editor.putLong(mpPersistenceKey, (Long) defaultValue);
-                                    }
-                                    values.put(mpKey, preferences.getLong(mpPersistenceKey, (Long) defaultValue));
-                                }
-                                break;
+                            }else{
+                                resolvedValue = applyMacro(fileObjects.getJSONObject(keyIndex).getString(KEY_PERSISTENCE_DEFAULT));
+                            }
+
+                            editor.putString(mpPersistenceKey, resolvedValue);
+                            editor.commit();
+                            values.put(mpKey, resolvedValue);
                         }
-                        editor.commit();
+
                     }
 
                 }
@@ -135,50 +105,24 @@ class ProviderPersistence extends JSONObject{
     private static final String MACRO_TIMESTAMP = "%ts%";
     private static final String MACRO_GUID_LEAST_SIG = "%glsb%";
 
-
-    private String applyMacro(String defaultString, SharedPreferences preferences) {
+    private static final String applyMacro(String defaultString) {
         if (!TextUtils.isEmpty(defaultString) && defaultString.startsWith("%")){
             if (defaultString.toUpperCase().equals(MACRO_GUID_NO_DASHES)){
-                String value = preferences.getString(Constants.PrefKeys.MACRO_GN, null);
-                if (value == null){
-                    value = UUID.randomUUID().toString().replace("-", "");
-                    preferences.edit().putString(Constants.PrefKeys.MACRO_GN, value).commit();
-                }
-                return value;
+                return UUID.randomUUID().toString().replace("-", "");
             }else if (defaultString.equals(MACRO_OMNITURE_AID)){
-                String value = preferences.getString(Constants.PrefKeys.MACRO_OAID, null);
-                if (value == null){
-                    value = generateAID();
-                    preferences.edit().putString(Constants.PrefKeys.MACRO_OAID, value).commit();
-                }
-                return value;
+                return generateAID();
             }else if (defaultString.equals(MACRO_GUID)){
-                String value = preferences.getString(Constants.PrefKeys.MACRO_G, null);
-                if (value == null){
-                    value = UUID.randomUUID().toString();
-                    preferences.edit().putString(Constants.PrefKeys.MACRO_G, value).commit();
-                }
-                return value;
+                return UUID.randomUUID().toString();
             }else if (defaultString.equals(MACRO_TIMESTAMP)){
-                String value = preferences.getString(Constants.PrefKeys.MACRO_TS, null);
-                if (value == null){
-                    value = Long.toString(System.currentTimeMillis());
-                    preferences.edit().putString(Constants.PrefKeys.MACRO_TS, value).commit();
-                }
-                return value;
+                return Long.toString(System.currentTimeMillis());
             }else if (defaultString.equals(MACRO_GUID_LEAST_SIG)){
-                String value = preferences.getString(Constants.PrefKeys.MACRO_GLSB, null);
-                if (value == null){
-                    value = Long.toString(UUID.randomUUID().getLeastSignificantBits());
-                    preferences.edit().putString(Constants.PrefKeys.MACRO_GLSB, value).commit();
-                }
-                return value;
+                return Long.toString(UUID.randomUUID().getLeastSignificantBits());
             }
         }
         return defaultString;
     }
 
-    private static String generateAID() {
+    private static final String generateAID() {
         String uuid = UUID.randomUUID().toString().replace("-", "");
         uuid = uuid.toUpperCase();
 
