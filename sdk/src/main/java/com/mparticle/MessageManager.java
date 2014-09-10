@@ -200,14 +200,15 @@ import java.util.UUID;
     }
 
     /* package-private */
-    static JSONObject createMessageSessionEnd(String sessionId, long start, long end, long length,
+    static JSONObject createMessageSessionEnd(String sessionId, long start, long end, long foregroundLength,
                                               JSONObject attributes) throws JSONException {
 
         int eventCounter = mPreferences.getInt(Constants.PrefKeys.EVENT_COUNTER, 0);
         resetEventCounter();
         JSONObject message = createMessage(MessageType.SESSION_END, sessionId, start, end, null, attributes);
         message.put(MessageKey.EVENT_COUNTER, eventCounter);
-        message.put(MessageKey.SESSION_LENGTH, length);
+        message.put(MessageKey.SESSION_LENGTH, foregroundLength);
+        message.put(MessageKey.SESSION_LENGTH_TOTAL, (end - start));
         message.put(MessageKey.STATE_INFO_KEY, MessageManager.getStateInfo());
         return message;
     }
@@ -263,19 +264,23 @@ import java.util.UUID;
 
     public void stopSession(String sessionId, long stopTime, long sessionLength) {
         try {
-            JSONObject sessionTiming = new JSONObject();
-            sessionTiming.put(MessageKey.SESSION_ID, sessionId);
-            sessionTiming.put(MessageKey.TIMESTAMP, stopTime);
-            sessionTiming.put(MessageKey.SESSION_LENGTH, sessionLength);
-            mMessageHandler
-                    .sendMessage(mMessageHandler.obtainMessage(MessageHandler.UPDATE_SESSION_END, sessionTiming));
+
+
             long timeInBackground = mPreferences.getLong(Constants.PrefKeys.TIME_IN_BG, 0);
             long foregroundLength = sessionLength - timeInBackground;
             SharedPreferences.Editor editor = mPreferences.edit();
-
             editor.putLong(Constants.PrefKeys.PREVIOUS_SESSION_FOREGROUND, foregroundLength > 0 ? foregroundLength : sessionLength);
             editor.remove(Constants.PrefKeys.TIME_IN_BG);
             editor.commit();
+
+            JSONObject sessionTiming = new JSONObject();
+            sessionTiming.put(MessageKey.SESSION_ID, sessionId);
+            sessionTiming.put(MessageKey.TIMESTAMP, stopTime);
+            sessionTiming.put(MessageKey.SESSION_LENGTH, foregroundLength);
+
+            mMessageHandler
+                    .sendMessage(mMessageHandler.obtainMessage(MessageHandler.UPDATE_SESSION_END, sessionTiming));
+
         } catch (JSONException e) {
             ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to send update session end message");
         }

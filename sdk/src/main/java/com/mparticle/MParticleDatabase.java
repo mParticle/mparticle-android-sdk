@@ -15,7 +15,7 @@ import android.database.sqlite.SQLiteOpenHelper;
         public final static String API_KEY = "api_key";
         public final static String START_TIME = "start_time";
         public final static String END_TIME = "end_time";
-        public final static String SESSION_LENGTH = "session_length";
+        public final static String SESSION_FOREGROUND_LENGTH = "session_length";
         public final static String ATTRIBUTES = "attributes";
         public final static String CF_UUID = "cfuuid";
     }
@@ -47,7 +47,7 @@ import android.database.sqlite.SQLiteOpenHelper;
                     SessionTable.API_KEY + " STRING NOT NULL, " +
                     SessionTable.START_TIME + " INTEGER NOT NULL," +
                     SessionTable.END_TIME + " INTEGER NOT NULL," +
-                    SessionTable.SESSION_LENGTH + " INTEGER NOT NULL," +
+                    SessionTable.SESSION_FOREGROUND_LENGTH + " INTEGER NOT NULL," +
                     SessionTable.ATTRIBUTES + " TEXT, " +
                     SessionTable.CF_UUID + " TEXT" +
                     ");";

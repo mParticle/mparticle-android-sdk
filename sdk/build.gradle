@@ -59,7 +59,7 @@ android {
         targetSdkVersion 19
         versionName sdkversion
         versionCode getDate()
-        testPackageName "com.mparticle.test"
+        testApplicationId "com.mparticle.test"
         testInstrumentationRunner "android.test.InstrumentationTestRunner"
         testHandleProfiling true
         testFunctionalTest true
@@ -129,7 +129,7 @@ uploadArchives {
         mavenDeployer {
             if (mavenrepo == "s3") {
                 configuration = configurations.deployerJars
-                repository(url: "s3://www.mparticle.com/maven")
+                repository(url: "s3://maven.mparticle.com")
                 pom.version = sdkversion
                 pom.artifactId = artifactId
                 pom.groupId = 'com.mparticle'
