@@ -91,7 +91,7 @@ android {
         }
 
         release {
-            runProguard true
+            runProguard false
             proguardFile 'proguard.txt'
         }
     }
