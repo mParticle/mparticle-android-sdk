@@ -11,11 +11,15 @@ import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.support.v4.app.NotificationCompat;
+import android.text.TextUtils;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.w3c.dom.Text;
 
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -24,7 +28,7 @@ import java.util.List;
 /**
  * Created by sdozor on 9/11/14.
  */
-public class MPCloudMessage {
+public class MPCloudMessage implements Parcelable {
     private final static String ROOT_KEY = "mp_data";
     private final static String SMALL_ICON = "si";
     private final static String TITLE = "t";
@@ -49,6 +53,137 @@ public class MPCloudMessage {
     private final static String ACTION_3 = "a3";
     private final static String ACTION_ICON = "ai";
     private final static String ACTION_TITLE = "at";
+
+    private String mSmallIcon;
+    private String mTitle;
+    private String mPrimaryText;
+    private String mSecondayText;
+    private String mLargeIconUri;
+    private int mLightColor = -1;
+    private int mLightOffMillis = -1;
+    private int mLightOnMillis = -1;
+    private int mNumber = -1;
+    private boolean mAlertOnce;
+    private int mPriority = NotificationCompat.PRIORITY_DEFAULT;
+    private String mSoundUri;
+    private String mBigImageUri;
+    private String mTitleExpanded;
+    private String mBigText;
+    private String[] mInboxText;
+    private long[] mVibrationPattern;
+    private MPCloudAction[] mActions;
+
+    public MPCloudMessage(){}
+
+    public MPCloudMessage(Parcel pc){
+        mSmallIcon = pc.readString();
+        mTitle = pc.readString();
+        mPrimaryText = pc.readString();
+        mSecondayText = pc.readString();
+        mLargeIconUri = pc.readString();
+        mLightColor = pc.readInt();
+        mLightOffMillis = pc.readInt();
+        mLightOnMillis = pc.readInt();
+        mNumber = pc.readInt();
+        mAlertOnce = (pc.readInt() == 1);
+        mPriority = pc.readInt();
+        mSoundUri = pc.readString();
+        mBigImageUri = pc.readString();
+        mTitleExpanded = pc.readString();
+        mBigText = pc.readString();
+        pc.readStringArray(mInboxText);
+        pc.readLongArray(mVibrationPattern);
+        mActions = (MPCloudAction[]) pc.readParcelableArray(MPCloudAction.class.getClassLoader());
+    }
+
+    MPCloudMessage(Context context, JSONObject mpData)  {
+        mSmallIcon = mpData.optString(SMALL_ICON, null);
+
+        mTitle = mpData.optString(TITLE, null);
+        mPrimaryText = mpData.optString(PRIMARY_MESSAGE, null);
+
+        mSecondayText = mpData.optString(SECONDARY_MESSAGE, null);
+        mLargeIconUri = mpData.optString(LARGE_ICON, null);
+
+        if (mpData.has(LIGHTS_ROOT)) {
+            try {
+                JSONObject lightData = mpData.getJSONObject(LIGHTS_ROOT);
+                mLightColor = lightData.optInt(LIGHTS_COLOR, mLightColor);
+                mLightOffMillis = lightData.optInt(LIGHTS_OFF_MILLIS, mLightOffMillis);
+                mLightOnMillis = lightData.optInt(LIGHTS_ON_MILLIS, mLightOnMillis);
+            }catch (JSONException jse){
+
+            }
+        }
+        mNumber = mpData.optInt(NUMBER, mNumber);
+        mAlertOnce = mpData.optBoolean(ALERT_ONCE, true);
+        mPriority = mpData.optInt(PRIORITY, mPriority);
+        mSoundUri =  mpData.optString(SOUND, null);
+        mBigImageUri = mpData.optString(BIG_IMAGE, null);
+        mBigText = mpData.optString(BIG_TEXT, null);
+        if (mpData.has(INBOX_STYLE_ROOT)) {
+            try {
+                JSONArray lines = mpData.getJSONArray(INBOX_STYLE_ROOT);
+                if (lines != null && lines.length() > 0) {
+                    mInboxText = new String[lines.length()];
+                    for (int i = 0; i < lines.length(); i++) {
+                        mInboxText[i] = lines.getString(i);
+                    }
+                }
+            } catch (JSONException jse) {
+
+            }
+        }
+        if (mpData.has(VIBRATION_PATTERN)) {
+            try {
+                JSONArray pattern = mpData.getJSONArray(VIBRATION_PATTERN);
+                mVibrationPattern = new long[pattern.length()];
+                for (int i = 0; i < pattern.length(); i++) {
+                    mVibrationPattern[i] = pattern.getLong(i);
+                }
+            }catch (JSONException jse){
+
+            }
+        }
+        mActions = new MPCloudAction[3];
+        try{
+            if (mpData.has(ACTION_1)) {
+                mActions[0] = new MPCloudAction(mpData.getJSONObject(ACTION_1));
+            }
+            if (mpData.has(ACTION_2)) {
+                mActions[1] = new MPCloudAction(mpData.getJSONObject(ACTION_2));
+            }
+            if (mpData.has(ACTION_3)) {
+                mActions[2] = new MPCloudAction(mpData.getJSONObject(ACTION_3));
+            }
+        }catch (JSONException jse){
+
+        }
+
+    }
+
+    public static final Parcelable.Creator<MPCloudMessage> CREATOR = new Parcelable.Creator<MPCloudMessage>() {
+
+        @Override
+        public MPCloudMessage createFromParcel(Parcel source) {
+            return new MPCloudMessage(source);
+        }
+
+        @Override
+        public MPCloudMessage[] newArray(int size) {
+            return new MPCloudMessage[size];
+        }
+    };
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+
+    }
 
     static String getFallbackTitle(Context context){
         String fallbackTitle = null;
@@ -95,41 +230,40 @@ public class MPCloudMessage {
         return extras != null && extras.containsKey(ROOT_KEY);
     }
 
-    static Notification buildNotification(Context context, Bundle extras) throws JSONException {
-        JSONObject mpData = new JSONObject(extras.getString(ROOT_KEY));
+    Notification buildNotification(Context context) throws JSONException {
+
         NotificationCompat.Builder notification = new NotificationCompat.Builder(context);
         int smallIconResId = 0;
-        if (mpData.has(SMALL_ICON) &&
-                (smallIconResId = context.getResources().getIdentifier(mpData.getString(SMALL_ICON), "drawable", context.getPackageName())) > 0) {
+        if (!TextUtils.isEmpty(mSmallIcon) && (smallIconResId = context.getResources().getIdentifier(mSmallIcon, "drawable", context.getPackageName())) > 0) {
             notification.setSmallIcon(smallIconResId);
         } else {
             notification.setSmallIcon(MPCloudMessage.getFallbackIcon(context));
         }
         String fallbackTitle = MPCloudMessage.getFallbackTitle(context);
-        notification.setContentTitle(mpData.optString(TITLE, fallbackTitle));
-        notification.setContentText(mpData.optString(PRIMARY_MESSAGE, fallbackTitle));
+        notification.setContentTitle(mTitle == null ? fallbackTitle : mTitle);
+        notification.setContentText(mPrimaryText == null ? fallbackTitle : mPrimaryText);
 
-        if (mpData.has(SECONDARY_MESSAGE)) {
-            notification.setSubText(mpData.getString(SECONDARY_MESSAGE));
+        if (!TextUtils.isEmpty(mSecondayText))
+            notification.setSubText(mSecondayText);
+
+        /*
+          waiting for v21 of support library to be released.
+        if (mpData.containsKey("g")){
+           notification.setGroup(mpData.getString("g));
         }
-            /*
-              waiting for v21 of support library to be released.
-            if (mpData.containsKey("g")){
-               notification.setGroup(mpData.getString("g));
-            }
-            */
-        if (mpData.has(LARGE_ICON)) {
-            String largeIcon = mpData.getString(LARGE_ICON);
-            if (largeIcon.contains("http")) {
+        */
+
+        if (!TextUtils.isEmpty(mLargeIconUri)) {
+            if (mLargeIconUri.contains("http")) {
                 try {
-                    InputStream in = new java.net.URL(largeIcon).openStream();
+                    InputStream in = new java.net.URL(mLargeIconUri).openStream();
                     notification.setLargeIcon(BitmapFactory.decodeStream(in));
                 } catch (Exception e) {
 
 
                 }
             } else {
-                int drawableResourceId = context.getResources().getIdentifier(largeIcon, "drawable", context.getPackageName());
+                int drawableResourceId = context.getResources().getIdentifier(mLargeIconUri, "drawable", context.getPackageName());
                 if (drawableResourceId > 0) {
                     Bitmap icon = BitmapFactory.decodeResource(context.getResources(),
                             drawableResourceId);
@@ -137,23 +271,17 @@ public class MPCloudMessage {
                 }
             }
         }
-        if (mpData.has(LIGHTS_ROOT)) {
-            JSONObject lightData = mpData.getJSONObject(LIGHTS_ROOT);
-            int argbColor = lightData.getInt(LIGHTS_COLOR);
-            int off = lightData.getInt(LIGHTS_OFF_MILLIS);
-            int on = lightData.getInt(LIGHTS_ON_MILLIS);
-            notification.setLights(argbColor, on, off);
+        if (mLightColor > 0) {
+            notification.setLights(mLightColor, mLightOnMillis, mLightOffMillis);
         }
-        if (mpData.has(NUMBER)) {
-            notification.setNumber(mpData.getInt(NUMBER));
+        if (mNumber > 0) {
+            notification.setNumber(mNumber);
         }
-        if (mpData.has(ALERT_ONCE)) {
-            notification.setOnlyAlertOnce(mpData.getBoolean(ALERT_ONCE));
-        }
-        if (mpData.has(PRIORITY)) {
-            notification.setPriority(mpData.getInt(PRIORITY));
-        }
-        if (mpData.has(SOUND)) {
+
+        notification.setOnlyAlertOnce(mAlertOnce);
+        notification.setPriority(mPriority);
+
+      /*  if (mpData.has(SOUND)) {
             try {
                 notification.setSound(Uri.parse("android.resource://" + context.getPackageName() + "/raw/" + mpData.getString(SOUND)));
             } catch (Exception e) {
@@ -214,7 +342,7 @@ public class MPCloudMessage {
             addAction(context, notification, mpData.getJSONObject(ACTION_3));
         }
 
-        notification.setContentIntent(MPCloudMessage.getDefaultOpenIntent(context, extras));
+        notification.setContentIntent(MPCloudMessage.getDefaultOpenIntent(context, extras));*/
         notification.setAutoCancel(true);
         // broadcastNotificationReceived(newExtras.getBundle(PUSH_ORIGINAL_PAYLOAD));
         return notification.build();
@@ -227,12 +355,17 @@ public class MPCloudMessage {
         return PendingIntent.getService(context, 0, launchIntent, PendingIntent.FLAG_UPDATE_CURRENT);
     }
 
-        private static void addAction(Context context, NotificationCompat.Builder notification, JSONObject actionData) {
-            try {
-                int drawableResourceId = context.getResources().getIdentifier(actionData.getString(ACTION_ICON), "drawable", context.getPackageName());
-                notification.addAction(drawableResourceId, actionData.getString(ACTION_TITLE), null);
-            }catch (JSONException e){}
-        }
-
-
+    private static void addAction(Context context, NotificationCompat.Builder notification, JSONObject actionData) {
+        try {
+            int drawableResourceId = context.getResources().getIdentifier(actionData.getString(ACTION_ICON), "drawable", context.getPackageName());
+            notification.addAction(drawableResourceId, actionData.getString(ACTION_TITLE), null);
+        }catch (JSONException e){}
     }
+
+
+    private class MPCloudAction {
+        public MPCloudAction(JSONObject jsonObject) {
+
+        }
+    }
+}

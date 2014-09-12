@@ -50,8 +50,8 @@ public class MPService extends IntentService {
 
     private static PowerManager.WakeLock sWakeLock;
     private static final String APP_STATE = "com.mparticle.push.appstate";
-    private static final String PUSH_ORIGINAL_PAYLOAD = "com.mparticle.push.originalpayload";
-    private static final String PUSH_REDACTED_PAYLOAD = "com.mparticle.push.redactedpayload";
+    //private static final String PUSH_ORIGINAL_PAYLOAD = "com.mparticle.push.originalpayload";
+    //private static final String PUSH_REDACTED_PAYLOAD = "com.mparticle.push.redactedpayload";
     private static final String BROADCAST_PERMISSION = ".mparticle.permission.NOTIFICATIONS";
 
     public MPService() {
@@ -93,7 +93,7 @@ public class MPService extends IntentService {
                 (new AsyncTask<Intent, Void, Notification>() {
                     @Override
                     protected Notification doInBackground(Intent... params) {
-                        return handleMessage(params[0]);
+                        return handleGcmMessage(params[0]);
                     }
 
                     @Override
@@ -174,56 +174,45 @@ public class MPService extends IntentService {
                 Log.i(TAG, "GCM registration error: " + error);
             }
         } catch (Throwable t) {
-            // failure to instantiate mParticle likely means that the
-            // mparticle.properties file is not correct
-            // and a warning message will already have been logged
-            return;
+
         }
     }
 
-    private Notification handleMessage(Intent intent) {
-
-
+    private Notification handleGcmMessage(Intent intent) {
         try {
-
             Bundle newExtras = new Bundle();
             newExtras.putBundle(PUSH_ORIGINAL_PAYLOAD, intent.getExtras());
             newExtras.putBundle(PUSH_REDACTED_PAYLOAD, intent.getExtras());
 
             if (!MParticle.appRunning) {
                 newExtras.putString(APP_STATE, AppStateManager.APP_STATE_NOTRUNNING);
-            }
-
-            MParticle mMParticle = MParticle.getInstance();
-            if (!newExtras.containsKey(Constants.MessageKey.APP_STATE)) {
-                if (mMParticle.mAppStateManager.isBackgrounded()) {
-                    newExtras.putString(APP_STATE, AppStateManager.APP_STATE_BACKGROUND);
-                } else {
-                    newExtras.putString(APP_STATE, AppStateManager.APP_STATE_FOREGROUND);
+            }else {
+                if (!newExtras.containsKey(Constants.MessageKey.APP_STATE)) {
+                    if (MParticle.getInstance().mAppStateManager.isBackgrounded()) {
+                        newExtras.putString(APP_STATE, AppStateManager.APP_STATE_BACKGROUND);
+                    } else {
+                        newExtras.putString(APP_STATE, AppStateManager.APP_STATE_FOREGROUND);
+                    }
                 }
             }
 
-
+            Notification notification;
             if (MPCloudMessage.isValidMPMessage(intent.getExtras())){
-                return MPCloudMessage.buildNotification(getApplicationContext(), intent.getExtras());
+                notification = MPCloudMessage.buildNotification(getApplicationContext(), intent.getExtras());
             }else{
-                String[] possibleKeys = mMParticle.mConfigManager.getPushKeys();
-                String key = findMessageKey(possibleKeys, newExtras.getBundle(PUSH_ORIGINAL_PAYLOAD));
-                String message = newExtras.getBundle(PUSH_ORIGINAL_PAYLOAD).getString(key);
-                newExtras.getBundle(PUSH_REDACTED_PAYLOAD).putString(key, "");
+                String message = findProviderMessage(intent.getExtras());
+                newExtras.getBundle(PUSH_REDACTED_PAYLOAD).putString(message, "");
                 newExtras.getBundle(PUSH_ORIGINAL_PAYLOAD).putString(MParticlePushUtility.PUSH_ALERT_EXTRA, message);
                 broadcastNotificationReceived(newExtras.getBundle(PUSH_ORIGINAL_PAYLOAD));
-                return showBasicPush(MPCloudMessage.getFallbackIcon(getApplicationContext()),
+                notification = showBasicPush(MPCloudMessage.getFallbackIcon(getApplicationContext()),
                         MPCloudMessage.getFallbackTitle(getApplicationContext()),
                         message,
                         newExtras);
             }
-
-
+            broadcastNotificationReceived(newExtras.getBundle(PUSH_ORIGINAL_PAYLOAD));
+            return notification;
         } catch (Throwable t) {
-            // failure to instantiate mParticle likely means that the
-            // mparticle.properties file is not correct
-            // and a warning message will already have been logged
+
             return null;
         }
     }
@@ -243,22 +232,23 @@ public class MPService extends IntentService {
         sendBroadcast(intent, packageName + BROADCAST_PERMISSION);
     }
 
-    private String findMessageKey(String[] possibleKeys, Bundle extras){
+    private String findProviderMessage(Bundle extras){
+        String[] possibleKeys = MParticle.getInstance().mConfigManager.getPushKeys();
         if (possibleKeys != null) {
             for (String key : possibleKeys) {
                 String message = extras.getString(key);
                 if (message != null && message.length() > 0) {
-                    return key;
+                    extras.remove(key);
+                    return message;
                 }
             }
         }
-        Log.w(Constants.LOG_TAG, "Failed to extract push alert message using configuration.");
-        return null;
+        Log.w(Constants.LOG_TAG, "Failed to extract 3rd party push message.");
+        return "";
     }
 
     private Notification showBasicPush(int iconId, String title, String message, Bundle newExtras) {
         MParticle.start(getApplicationContext());
-        NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         MParticle mMParticle = MParticle.getInstance();
         Intent launchIntent = new Intent(getApplicationContext(), MPService.class);
         launchIntent.setAction(MPARTICLE_NOTIFICATION_OPENED);
