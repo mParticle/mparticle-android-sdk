@@ -18,7 +18,6 @@ import android.provider.Settings;
 import android.util.Log;
 import android.webkit.WebView;
 
-import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.mparticle.Constants.MessageKey;
 import com.mparticle.Constants.PrefKeys;
 import com.mparticle.segmentation.SegmentListener;
@@ -82,8 +81,6 @@ public class MParticle {
     JSONArray mUserIdentities = new JSONArray();
     String mSessionID;
 
-    private static Bundle lastNotificationBundle;
-
     JSONObject mUserAttributes = new JSONObject();
     private JSONObject mSessionAttributes;
 
@@ -102,6 +99,7 @@ public class MParticle {
     private LicenseCheckerCallback clientLicensingCallback;
     private static final HandlerThread sTimeoutHandlerThread = new HandlerThread("mParticleSessionTimeoutHandler",
             Process.THREAD_PRIORITY_BACKGROUND);
+    private AbstractCloudMessage lastPushMessage;
 
     MParticle(Context context, MessageManager messageManager, ConfigManager configManager, EmbeddedKitManager embeddedKitManager) {
         appRunning = true;
@@ -363,9 +361,9 @@ public class MParticle {
     void logStateTransition(String transitionType) {
         if (mConfigManager.getSendOoEvents()) {
             ensureActiveSession();
-            mMessageManager.logStateTransition(transitionType, mSessionID, mSessionStartTime, lastNotificationBundle);
+            mMessageManager.logStateTransition(transitionType, mSessionID, mSessionStartTime, lastPushMessage == null ? null : lastPushMessage.getExtras());
             if (Constants.StateTransitionType.STATE_TRANS_BG.equals(transitionType)) {
-                lastNotificationBundle = null;
+                lastPushMessage = null;
             }
         }
     }
@@ -1485,11 +1483,11 @@ public class MParticle {
         mConfigManager.setSessionTimeout(sessionTimeout);
     }
 
-    /* package private */ void logNotification(Bundle notificationBundle, String appState) {
-        lastNotificationBundle = notificationBundle;
+    /* package private */ void logNotification(AbstractCloudMessage message) {
+        lastPushMessage = message;
         if (mConfigManager.getSendOoEvents()) {
             ensureActiveSession();
-            mMessageManager.logNotification(mSessionID, mSessionStartTime, lastNotificationBundle, appState);
+            mMessageManager.logNotification(mSessionID, mSessionStartTime, message.getExtras(), message.getAppState());
         }
     }
 

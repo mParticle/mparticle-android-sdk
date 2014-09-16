@@ -4,6 +4,9 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
+import android.content.res.Resources;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 
 /**
@@ -23,6 +26,8 @@ import android.os.Bundle;
  * }</pre>
  */
 public final class MParticlePushUtility {
+    public static final String CLOUD_MESSAGE_EXTRA = "mp-push-message";
+
     private MParticlePushUtility() {
         super();
     }
@@ -113,5 +118,46 @@ public final class MParticlePushUtility {
                 onNotificationTapped(intent.getExtras().getString(PUSH_ALERT_EXTRA), intent.getExtras());
             }
         }
+    }
+
+    static String getFallbackTitle(Context context){
+        String fallbackTitle = null;
+        int titleResId = MParticle.getInstance().mConfigManager.getPushTitle();
+        if (titleResId > 0){
+            try{
+                fallbackTitle = context.getString(titleResId);
+            }catch(Resources.NotFoundException e){
+
+            }
+        }else{
+            try {
+                int stringId = context.getApplicationInfo().labelRes;
+                fallbackTitle = context.getResources().getString(stringId);
+            } catch (Resources.NotFoundException ex) {
+
+            }
+        }
+        return fallbackTitle;
+    }
+
+    static int getFallbackIcon(Context context){
+        int smallIcon = MParticle.getInstance().mConfigManager.getPushIcon();
+        try{
+            Drawable draw = context.getResources().getDrawable(smallIcon);
+        }catch (Resources.NotFoundException nfe){
+            smallIcon = 0;
+        }
+
+        if (smallIcon == 0){
+            try {
+                smallIcon = context.getPackageManager().getApplicationInfo(context.getPackageName(), 0).icon;
+            } catch (PackageManager.NameNotFoundException e) {
+                // use the ic_dialog_alert icon if the app's can not be found
+            }
+            if (0 == smallIcon) {
+                smallIcon = android.R.drawable.ic_dialog_alert;
+            }
+        }
+        return smallIcon;
     }
 }

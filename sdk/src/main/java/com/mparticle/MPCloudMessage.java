@@ -1,15 +1,9 @@
 package com.mparticle;
 
 import android.app.Notification;
-import android.app.PendingIntent;
 import android.content.Context;
-import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.drawable.Drawable;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -19,16 +13,13 @@ import android.text.TextUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.w3c.dom.Text;
 
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by sdozor on 9/11/14.
  */
-public class MPCloudMessage implements Parcelable {
+public class MPCloudMessage extends AbstractCloudMessage {
     private final static String ROOT_KEY = "mp_data";
     private final static String SMALL_ICON = "si";
     private final static String TITLE = "t";
@@ -54,9 +45,9 @@ public class MPCloudMessage implements Parcelable {
     private final static String ACTION_ICON = "ai";
     private final static String ACTION_TITLE = "at";
 
+
     private String mSmallIcon;
-    private String mTitle;
-    private String mPrimaryText;
+
     private String mSecondayText;
     private String mLargeIconUri;
     private int mLightColor = -1;
@@ -94,16 +85,26 @@ public class MPCloudMessage implements Parcelable {
         pc.readStringArray(mInboxText);
         pc.readLongArray(mVibrationPattern);
         mActions = (MPCloudAction[]) pc.readParcelableArray(MPCloudAction.class.getClassLoader());
+        mExtras = pc.readBundle();
     }
 
-    MPCloudMessage(Context context, JSONObject mpData)  {
+    MPCloudMessage(Bundle extras) throws JSONException{
+        JSONObject mpData = new JSONObject(extras.getString(ROOT_KEY));
+        mExtras = extras;
+
         mSmallIcon = mpData.optString(SMALL_ICON, null);
 
         mTitle = mpData.optString(TITLE, null);
         mPrimaryText = mpData.optString(PRIMARY_MESSAGE, null);
-
         mSecondayText = mpData.optString(SECONDARY_MESSAGE, null);
         mLargeIconUri = mpData.optString(LARGE_ICON, null);
+        mTitleExpanded = mpData.optString(TITLE_EXPANDED, null);
+        mNumber = mpData.optInt(NUMBER, mNumber);
+        mAlertOnce = mpData.optBoolean(ALERT_ONCE, true);
+        mPriority = mpData.optInt(PRIORITY, mPriority);
+        mSoundUri =  mpData.optString(SOUND, null);
+        mBigImageUri = mpData.optString(BIG_IMAGE, null);
+        mBigText = mpData.optString(BIG_TEXT, null);
 
         if (mpData.has(LIGHTS_ROOT)) {
             try {
@@ -115,12 +116,7 @@ public class MPCloudMessage implements Parcelable {
 
             }
         }
-        mNumber = mpData.optInt(NUMBER, mNumber);
-        mAlertOnce = mpData.optBoolean(ALERT_ONCE, true);
-        mPriority = mpData.optInt(PRIORITY, mPriority);
-        mSoundUri =  mpData.optString(SOUND, null);
-        mBigImageUri = mpData.optString(BIG_IMAGE, null);
-        mBigText = mpData.optString(BIG_TEXT, null);
+
         if (mpData.has(INBOX_STYLE_ROOT)) {
             try {
                 JSONArray lines = mpData.getJSONArray(INBOX_STYLE_ROOT);
@@ -145,15 +141,22 @@ public class MPCloudMessage implements Parcelable {
 
             }
         }
-        mActions = new MPCloudAction[3];
+
         try{
             if (mpData.has(ACTION_1)) {
+                mActions = new MPCloudAction[3];
                 mActions[0] = new MPCloudAction(mpData.getJSONObject(ACTION_1));
             }
             if (mpData.has(ACTION_2)) {
+                if (mActions == null){
+                    mActions = new MPCloudAction[3];
+                }
                 mActions[1] = new MPCloudAction(mpData.getJSONObject(ACTION_2));
             }
             if (mpData.has(ACTION_3)) {
+                if (mActions == null){
+                    mActions = new MPCloudAction[3];
+                }
                 mActions[2] = new MPCloudAction(mpData.getJSONObject(ACTION_3));
             }
         }catch (JSONException jse){
@@ -185,61 +188,16 @@ public class MPCloudMessage implements Parcelable {
 
     }
 
-    static String getFallbackTitle(Context context){
-        String fallbackTitle = null;
-        int titleResId = MParticle.getInstance().mConfigManager.getPushTitle();
-        if (titleResId > 0){
-            try{
-                fallbackTitle = context.getString(titleResId);
-            }catch(Resources.NotFoundException e){
-
-            }
-        }else{
-            try {
-                int stringId = context.getApplicationInfo().labelRes;
-                fallbackTitle = context.getResources().getString(stringId);
-            } catch (Resources.NotFoundException ex) {
-
-            }
-        }
-        return fallbackTitle;
-    }
-
-    static int getFallbackIcon(Context context){
-        int smallIcon = MParticle.getInstance().mConfigManager.getPushIcon();
-        try{
-            Drawable draw = context.getResources().getDrawable(smallIcon);
-        }catch (Resources.NotFoundException nfe){
-            smallIcon = 0;
-        }
-
-        if (smallIcon == 0){
-            try {
-                smallIcon = context.getPackageManager().getApplicationInfo(context.getPackageName(), 0).icon;
-            } catch (PackageManager.NameNotFoundException e) {
-                // use the ic_dialog_alert icon if the app's can not be found
-            }
-            if (0 == smallIcon) {
-                smallIcon = android.R.drawable.ic_dialog_alert;
-            }
-        }
-        return smallIcon;
-    }
-
-    static boolean isValidMPMessage(Bundle extras){
-        return extras != null && extras.containsKey(ROOT_KEY);
-    }
-
-    Notification buildNotification(Context context) throws JSONException {
+    public Notification buildNotification(Context context) {
 
         NotificationCompat.Builder notification = new NotificationCompat.Builder(context);
         int smallIconResId = 0;
         if (!TextUtils.isEmpty(mSmallIcon) && (smallIconResId = context.getResources().getIdentifier(mSmallIcon, "drawable", context.getPackageName())) > 0) {
             notification.setSmallIcon(smallIconResId);
         } else {
-            notification.setSmallIcon(MPCloudMessage.getFallbackIcon(context));
+            notification.setSmallIcon(MParticlePushUtility.getFallbackIcon(context));
         }
-        String fallbackTitle = MPCloudMessage.getFallbackTitle(context);
+        String fallbackTitle = MParticlePushUtility.getFallbackTitle(context);
         notification.setContentTitle(mTitle == null ? fallbackTitle : mTitle);
         notification.setContentText(mPrimaryText == null ? fallbackTitle : mPrimaryText);
 
@@ -348,12 +306,7 @@ public class MPCloudMessage implements Parcelable {
         return notification.build();
     }
 
-    private static PendingIntent getDefaultOpenIntent(Context context, Bundle extras){
-        Intent launchIntent = new Intent(context, MPService.class);
-        launchIntent.setAction(MPService.MPARTICLE_NOTIFICATION_OPENED);
-        launchIntent.putExtras(extras);
-        return PendingIntent.getService(context, 0, launchIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-    }
+
 
     private static void addAction(Context context, NotificationCompat.Builder notification, JSONObject actionData) {
         try {

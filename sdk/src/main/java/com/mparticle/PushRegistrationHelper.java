@@ -71,9 +71,8 @@ class PushRegistrationHelper {
                 @Override
                 public void run() {
                     try {
-                        GoogleCloudMessaging gcm = GoogleCloudMessaging.getInstance(context);
-                        String regid = gcm.register(senderId);
-                        PushRegistrationHelper.storeRegistrationId(context, regid);
+                        String registrationId = GoogleCloudMessaging.getInstance(context).register(senderId);
+                        PushRegistrationHelper.storeRegistrationId(context, registrationId);
                     } catch (IOException ex) {
                         ConfigManager.log(MParticle.LogLevel.ERROR, "Error registering for GCM", ex.getMessage());
                     }
