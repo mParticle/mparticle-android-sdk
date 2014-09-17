@@ -147,7 +147,7 @@ uploadArchives {
 
 dependencies {
     deployerJars "org.kuali.maven.wagons:maven-s3-wagon:1.2.1"
-    kahunaCompile files('embeddedkits/Kahuna473.jar')
+    kahunaCompile files('embeddedkits/Kahuna489.jar')
     compile files('embeddedkits/KochavaSDK.jar')
     compile files('embeddedkits/MobileAppTracker-3.1.jar')
     provided 'com.google.android.gms:play-services:4.+'
