@@ -307,16 +307,20 @@ public class MParticle {
     }
 
 
-    static Boolean setCheckedAttribute(JSONObject attributes, String key, Object value) {
-        return setCheckedAttribute(attributes, key, value, false);
+    static Boolean setCheckedAttribute(JSONObject attributes, String key, Object value, boolean increment) {
+        return setCheckedAttribute(attributes, key, value, false, increment);
     }
 
 
-    static Boolean setCheckedAttribute(JSONObject attributes, String key, Object value, Boolean caseInsensitive) {
+    static Boolean setCheckedAttribute(JSONObject attributes, String key, Object value, Boolean caseInsensitive, boolean increment) {
         if (null == attributes || null == key) {
             return false;
         }
         try {
+            if (caseInsensitive) {
+                key = findCaseInsensitiveKey(attributes, key);
+            }
+
             if (Constants.LIMIT_ATTR_COUNT == attributes.length() && !attributes.has(key)) {
                 ConfigManager.log(LogLevel.ERROR, "Attribute count exceeds limit. Discarding attribute: " + key);
                 return false;
@@ -332,12 +336,20 @@ public class MParticle {
             if (value == null) {
                 value = JSONObject.NULL;
             }
-            if (caseInsensitive) {
-                key = findCaseInsensitiveKey(attributes, key);
+            if (increment){
+                String oldValue = attributes.optString(key, "0");
+                int oldInt = Integer.parseInt(oldValue);
+                value = Integer.toString((Integer)value + oldInt);
             }
             attributes.put(key, value);
         } catch (JSONException e) {
             ConfigManager.log(LogLevel.ERROR, "JSON error processing attributes. Discarding attribute: " + key);
+            return false;
+        } catch (NumberFormatException nfe){
+            ConfigManager.log(LogLevel.ERROR, "Attempted to increment a key that could not be parsed as an integer: " + key);
+            return false;
+        } catch (Exception e){
+            ConfigManager.log(LogLevel.ERROR, "Failed to add attribute: " + e.getMessage());
             return false;
         }
         return true;
@@ -1021,14 +1033,43 @@ public class MParticle {
      * Set a single <i>session</i> attribute. The attribute will combined with any existing session attributes.
      *
      * @param key   the attribute key
-     * @param value the attribute value
+     * @param value the attribute value. This value will be converted to its String representation as dictated by its <code>toString()</code> method.
      */
-    public void setSessionAttribute(String key, String value) {
+    public void setSessionAttribute(String key, Object value) {
+        if (key == null){
+            ConfigManager.log(LogLevel.WARNING, "setSessionAttribute called with null key. Ignoring...");
+            return;
+        }
+        if (value != null){
+            value = value.toString();
+        }
         if (mConfigManager.getSendOoEvents()) {
             ensureActiveSession();
             ConfigManager.log(LogLevel.DEBUG, "Set session attribute: " + key + "=" + value);
 
-            if (setCheckedAttribute(mSessionAttributes, key, value, true)) {
+            if (setCheckedAttribute(mSessionAttributes, key, value, true, false)) {
+                mMessageManager.setSessionAttributes(mSessionID, mSessionAttributes);
+            }
+        }
+    }
+
+    /**
+     * Increment a single <i>session</i> attribute. If the attribute does not exist, it will be added as a new attribute.
+     *
+     * @param key   the attribute key
+     * @param value the attribute value
+     */
+    public void incrementSessionAttribute(String key, int value) {
+        if (key == null){
+            ConfigManager.log(LogLevel.WARNING, "incrementSessionAttribute called with null key. Ignoring...");
+            return;
+        }
+        if (mConfigManager.getSendOoEvents()) {
+            ensureActiveSession();
+            ConfigManager.log(LogLevel.DEBUG, "Incrementing session attribute: " + key + "=" + value);
+
+
+            if (setCheckedAttribute(mSessionAttributes, key, value, true, true)) {
                 mMessageManager.setSessionAttributes(mSessionID, mSessionAttributes);
             }
         }
@@ -1055,17 +1096,41 @@ public class MParticle {
      * Set a single <i>user</i> attribute. The attribute will combined with any existing user attributes.
      *
      * @param key   the attribute key
-     * @param value the attribute value
+     * @param value the attribute value. This value will be converted to its String representation as dictated by its <code>toString()</code> method.
      */
-    public void setUserAttribute(String key, String value) {
-
+    public void setUserAttribute(String key, Object value) {
+        if (key == null){
+            ConfigManager.log(LogLevel.WARNING, "setUserAttribute called with null key. Ignoring...");
+            return;
+        }
         if (value != null) {
+            value = value.toString();
             ConfigManager.log(LogLevel.DEBUG, "Set user attribute: " + key + " with value " + value);
         } else {
             ConfigManager.log(LogLevel.DEBUG, "Set user attribute: " + key);
         }
 
-        if (setCheckedAttribute(mUserAttributes, key, value)) {
+        if (setCheckedAttribute(mUserAttributes, key, value, false)) {
+            sPreferences.edit().putString(PrefKeys.USER_ATTRS + mApiKey, mUserAttributes.toString()).commit();
+            mEmbeddedKitManager.setUserAttributes(mUserAttributes);
+        }
+
+    }
+
+    /**
+     * Increment a single <i>user</i> attribute. If the attribute does not already exist, a new one will be created.
+     *
+     * @param key   the attribute key
+     * @param value the attribute value
+     */
+    public void incrementUserAttribute(String key, int value) {
+        if (key == null){
+            ConfigManager.log(LogLevel.WARNING, "incrementUserAttribute called with null key. Ignoring...");
+            return;
+        }
+        ConfigManager.log(LogLevel.DEBUG, "Incrementing user attribute: " + key + " with value " + value);
+
+        if (setCheckedAttribute(mUserAttributes, key, value, true)) {
             sPreferences.edit().putString(PrefKeys.USER_ATTRS + mApiKey, mUserAttributes.toString()).commit();
             mEmbeddedKitManager.setUserAttributes(mUserAttributes);
         }
@@ -1400,7 +1465,7 @@ public class MParticle {
         for (Map.Entry<String, String> entry : attributes.entrySet()) {
             String key = entry.getKey();
             String value = entry.getValue();
-            setCheckedAttribute(checkedAttributes, key, value);
+            setCheckedAttribute(checkedAttributes, key, value, false);
         }
         return checkedAttributes;
     }
