@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.os.Build;
+import android.text.TextUtils;
 import android.util.Log;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebView;
@@ -371,7 +372,14 @@ class ConfigManager {
 
     public JSONObject getCookies() throws JSONException {
         if (mCurrentCookies == null){
-            mCurrentCookies = new JSONObject(mPreferences.getString(Constants.PrefKeys.Cookies, ""));
+            String currentCookies = mPreferences.getString(Constants.PrefKeys.Cookies, null);
+            if (TextUtils.isEmpty(currentCookies)){
+                mCurrentCookies = new JSONObject();
+                mPreferences.edit().putString(Constants.PrefKeys.Cookies, mCurrentCookies.toString()).commit();
+                return mCurrentCookies;
+            }else {
+                mCurrentCookies = new JSONObject(currentCookies);
+            }
             Calendar nowCalendar = Calendar.getInstance();
             nowCalendar.set(Calendar.YEAR, 1990);
             Date oldDate = nowCalendar.getTime();
