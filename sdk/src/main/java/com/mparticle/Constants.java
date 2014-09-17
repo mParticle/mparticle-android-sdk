@@ -196,6 +196,7 @@ package com.mparticle;
         public static final String APP_STATE = "as";
         //state transition
         public static final String STATE_TRANSITION_TYPE = "t";
+        public static final String CURRENT_ACTIVITY = "cn";
         public static final String PAYLOAD = "pay";
         //screen view
         public static final String SCREEN_STARTED = "t";

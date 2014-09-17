@@ -8,7 +8,6 @@ import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.util.Log;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -36,9 +35,12 @@ class AppStateManager implements MPActivityCallbacks{
             }
         }
     };
+    private String mCurrentActivity;
+    private boolean mInitialized;
 
     private void logBackgrounded(){
-        MParticle.getInstance().logStateTransition(Constants.StateTransitionType.STATE_TRANS_BG);
+        MParticle.getInstance().logStateTransition(Constants.StateTransitionType.STATE_TRANS_BG, mCurrentActivity);
+        mCurrentActivity = null;
         ConfigManager.log(MParticle.LogLevel.DEBUG, "App backgrounded.");
     }
 
@@ -107,6 +109,11 @@ class AppStateManager implements MPActivityCallbacks{
 
     @Override
     public void onActivityStarted(Activity activity, int currentCount) {
+        mCurrentActivity = getActivityName(activity);
+        if (!mInitialized){
+            mInitialized = true;
+            MParticle.getInstance().logStateTransition(Constants.StateTransitionType.STATE_TRANS_INIT, mCurrentActivity);
+        }
         preferences.edit().putBoolean(Constants.PrefKeys.CRASHED_IN_FOREGROUND, true).commit();
         if (isBackgrounded() && mLastStoppedTime > 0) {
             long totalTimeInBackground = preferences.getLong(Constants.PrefKeys.TIME_IN_BG, -1);
@@ -118,13 +125,14 @@ class AppStateManager implements MPActivityCallbacks{
 
             preferences.edit().putLong(Constants.PrefKeys.TIME_IN_BG, totalTimeInBackground).commit();
 
-            MParticle.getInstance().logStateTransition(Constants.StateTransitionType.STATE_TRANS_FORE);
+            MParticle.getInstance().logStateTransition(Constants.StateTransitionType.STATE_TRANS_FORE, mCurrentActivity);
             ConfigManager.log(MParticle.LogLevel.DEBUG, "App foregrounded.");
 
         }
         mActivities.getAndIncrement();
+
         if (MParticle.getInstance().isAutoTrackingEnabled()) {
-            MParticle.getInstance().logScreen(getActivityName(activity), null, true);
+            MParticle.getInstance().logScreen(mCurrentActivity, null, true);
         }
         embeddedKitManager.onActivityStarted(activity, mActivities.get());
     }
@@ -164,5 +172,9 @@ class AppStateManager implements MPActivityCallbacks{
 
     private String getActivityName(Activity activity) {
         return activity.getClass().getCanonicalName();
+    }
+
+    public String getCurrentActivity() {
+        return mCurrentActivity;
     }
 }

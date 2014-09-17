@@ -266,7 +266,7 @@ public class MParticle {
 
                     instance = new MParticle(appContext, messageManager, appConfigManager, embeddedKitManager1);
                     messageManager.start(appContext, firstRun, installType);
-                    instance.logStateTransition(Constants.StateTransitionType.STATE_TRANS_INIT);
+
                     if (appConfigManager.getLogUnhandledExceptions()) {
                         instance.enableUncaughtExceptionLogging();
                     }
@@ -359,10 +359,10 @@ public class MParticle {
                 measuredRequestManager.isUriAllowed(url) && !mEmbeddedKitManager.isEmbeddedKitUri(url);
     }
 
-    void logStateTransition(String transitionType) {
+    void logStateTransition(String transitionType, String currentActivity) {
         if (mConfigManager.getSendOoEvents()) {
             ensureActiveSession();
-            mMessageManager.logStateTransition(transitionType, mSessionID, mSessionStartTime, lastNotificationBundle);
+            mMessageManager.logStateTransition(transitionType, mSessionID, mSessionStartTime, lastNotificationBundle, currentActivity);
             if (Constants.StateTransitionType.STATE_TRANS_BG.equals(transitionType)) {
                 lastNotificationBundle = null;
             }
@@ -584,7 +584,7 @@ public class MParticle {
             }
             JSONObject eventDataJSON = enforceAttributeConstraints(eventInfo);
             if (mConfigManager.getSendOoEvents()) {
-                mMessageManager.logEvent(mSessionID, mSessionStartTime, mLastEventTime, eventName, eventType, eventDataJSON, eventLength);
+                mMessageManager.logEvent(mSessionID, mSessionStartTime, mLastEventTime, eventName, eventType, eventDataJSON, eventLength, mAppStateManager.getCurrentActivity());
 
                 if (null == eventDataJSON) {
                     ConfigManager.log(LogLevel.DEBUG, "Logged event: ", eventName);
@@ -663,7 +663,7 @@ public class MParticle {
         ensureActiveSession();
         if (checkEventLimit()) {
             JSONObject transactionJson = enforceAttributeConstraints(product);
-            mMessageManager.logEvent(mSessionID, mSessionStartTime, mLastEventTime, event.toString(), EventType.Transaction, transactionJson, 0);
+            mMessageManager.logEvent(mSessionID, mSessionStartTime, mLastEventTime, event.toString(), EventType.Transaction, transactionJson, 0, mAppStateManager.getCurrentActivity());
             ConfigManager.log(LogLevel.DEBUG, "Logged product event with data: ", product.toString());
         }
         if (purchaseEvent) {
@@ -961,7 +961,7 @@ public class MParticle {
             ensureActiveSession();
             mMessageManager.logErrorEvent(mSessionID, mSessionStartTime, mLastEventTime, t != null ? t.getMessage() : null, t, null, false);
             //we know that the app is about to crash and therefore exit
-            logStateTransition(Constants.StateTransitionType.STATE_TRANS_EXIT);
+            logStateTransition(Constants.StateTransitionType.STATE_TRANS_EXIT, mAppStateManager.getCurrentActivity());
             endSession(System.currentTimeMillis());
         }
     }
