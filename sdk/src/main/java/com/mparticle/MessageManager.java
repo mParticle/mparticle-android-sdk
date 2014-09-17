@@ -292,7 +292,7 @@ import java.util.UUID;
                 .sendMessage(mMessageHandler.obtainMessage(MessageHandler.CREATE_SESSION_END_MESSAGE, sessionId));
     }
 
-    public void logEvent(String sessionId, long sessionStartTime, long time, String eventName, EventType eventType, JSONObject attributes, long eventLength) {
+    public void logEvent(String sessionId, long sessionStartTime, long time, String eventName, EventType eventType, JSONObject attributes, long eventLength, String currentActivity) {
         try {
             JSONObject message = createMessage(MessageType.EVENT, sessionId, sessionStartTime, time, eventName,
                     attributes);
@@ -300,7 +300,9 @@ import java.util.UUID;
             // NOTE: event timing is not supported (yet) but the server expects this data
             message.put(MessageKey.EVENT_START_TIME, time);
             message.put(MessageKey.EVENT_DURATION, eventLength);
-
+            if (currentActivity != null){
+                message.put(MessageKey.CURRENT_ACTIVITY, currentActivity);
+            }
             int count = mPreferences.getInt(Constants.PrefKeys.EVENT_COUNTER, 0);
             message.put(MessageKey.EVENT_COUNTER, count);
             mPreferences.edit().putInt(Constants.PrefKeys.EVENT_COUNTER, ++count).commit();
@@ -437,11 +439,14 @@ import java.util.UUID;
         ConfigManager.log(MParticle.LogLevel.DEBUG, "Received location update: " + location);
     }
 
-    public void logStateTransition(String stateTransInit, String sessionId, long sessionStartTime, Bundle lastNotificationBundle) {
+    public void logStateTransition(String stateTransInit, String sessionId, long sessionStartTime, Bundle lastNotificationBundle, String currentActivity) {
         try {
             JSONObject message = createMessage(MessageType.APP_STATE_TRANSITION, sessionId, sessionStartTime, System.currentTimeMillis(),
                     null, null);
             message.put(MessageKey.STATE_TRANSITION_TYPE, stateTransInit);
+            if (currentActivity != null){
+                message.put(MessageKey.CURRENT_ACTIVITY, currentActivity);
+            }
             if (stateTransInit.equals(Constants.StateTransitionType.STATE_TRANS_INIT)){
 
 
