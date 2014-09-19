@@ -82,6 +82,8 @@
 -dontwarn org.fmod.**
 
 -keep class com.kochava.** { *; }
+-keep class com.mobileapptracker.** { *; }
+-keep class com.kahuna.** { *; }
 
 -classobfuscationdictionary names.txt
 
