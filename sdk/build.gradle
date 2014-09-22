@@ -1,5 +1,6 @@
-apply plugin: 'android-library'
+apply plugin: 'com.android.library'
 apply plugin: 'maven'
+
 
 buildscript {
     repositories {
@@ -119,7 +120,6 @@ android.libraryVariants.all { variant ->
         options.addStringOption('templatedir', 'docs/customization')
         options.docletpath = pathList
         options.doclet = "com.google.doclava.Doclava"
-
         exclude '**/R.java'
     }
 }
