@@ -1,6 +1,7 @@
 package com.mparticle;
 
 import android.app.Activity;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -97,7 +98,6 @@ public class MParticle {
     private Context mAppContext;
     private String mApiKey;
     private int mEventCount = 0;
-    private String mLaunchUri;
     private LicenseCheckerCallback clientLicensingCallback;
     private static final HandlerThread sTimeoutHandlerThread = new HandlerThread("mParticleSessionTimeoutHandler",
             Process.THREAD_PRIORITY_BACKGROUND);
@@ -271,13 +271,6 @@ public class MParticle {
                         instance.enableUncaughtExceptionLogging();
                     }
 
-                    if (context instanceof Activity) {
-                        instance.mLaunchUri = ((Activity) context).getIntent().getDataString();
-                        if (instance.mLaunchUri != null) {
-                            ConfigManager.log(LogLevel.DEBUG, "launchuri: ", instance.mLaunchUri);
-                        }
-                    }
-
                     if (appConfigManager.isPushEnabled()) {
                         instance.enablePushNotifications(appConfigManager.getPushSenderId());
                     }
@@ -366,20 +359,38 @@ public class MParticle {
         return key;
     }
 
+
     Boolean shouldProcessUrl(String url) {
         return mConfigManager.isNetworkPerformanceEnabled() &&
                 measuredRequestManager.isUriAllowed(url) && !mEmbeddedKitManager.isEmbeddedKitUri(url);
     }
 
     void logStateTransition(String transitionType, String currentActivity) {
+       logStateTransition(transitionType, currentActivity, 0, 0, null, null, null, 0);
+    }
+
+    void logStateTransition(String transitionType, String currentActivity, long previousForegroundTime, long suspendedTime, String dataString, String launchParameters, String launchPackage, int interruptions) {
         if (mConfigManager.getSendOoEvents()) {
             ensureActiveSession();
-            mMessageManager.logStateTransition(transitionType, mSessionID, mSessionStartTime, lastNotificationBundle, currentActivity);
+
+            mMessageManager.logStateTransition(transitionType,
+                    mSessionID,
+                    mSessionStartTime,
+                    lastNotificationBundle,
+                    currentActivity,
+                    dataString,
+                    launchParameters,
+                    launchPackage,
+                    previousForegroundTime,
+                    suspendedTime,
+                    interruptions
+                    );
             if (Constants.StateTransitionType.STATE_TRANS_BG.equals(transitionType)) {
                 lastNotificationBundle = null;
             }
         }
     }
+
 
     /**
      * Track that an Activity has started. Should only be called within the onStart method of your Activities,
@@ -445,6 +456,11 @@ public class MParticle {
         mSessionID = "";
     }
 
+
+    boolean isSessionActive() {
+        return mSessionStartTime > 0;
+    }
+
     private void ensureActiveSession() {
         //    checkSessionTimeout();
         mLastEventTime = System.currentTimeMillis();
@@ -477,11 +493,9 @@ public class MParticle {
         mSessionID = UUID.randomUUID().toString();
         mEventCount = 0;
         mSessionAttributes = new JSONObject();
-        mMessageManager.startSession(mSessionID, mSessionStartTime, mLaunchUri);
+        mMessageManager.startSession(mSessionID, mSessionStartTime);
         mTimeoutHandler.sendEmptyMessageDelayed(0, mConfigManager.getSessionTimeout());
         ConfigManager.log(LogLevel.DEBUG, "Started new session");
-        // clear the launch URI so it isn't sent on future sessions
-        mLaunchUri = null;
     }
 
     /**
@@ -1612,6 +1626,7 @@ public class MParticle {
         }
     }
 
+
     /**
      * Event type to use when logging events.
      *
@@ -1772,7 +1787,7 @@ public class MParticle {
      * that support, for example, specifying a gender of a user. The mParticle platform will look for these constants within the user attributes that
      * you have set for a given user, and forward any attributes to the services that support them.
      *
-     * @see #setUserAttribute(String, String)
+     * @see #setUserAttribute(String, Object)
      */
     public interface UserAttributes {
         /**
