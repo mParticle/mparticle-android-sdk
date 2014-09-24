@@ -219,7 +219,7 @@ import java.util.UUID;
             SharedPreferences.Editor editor = mPreferences.edit();
             long timeInFg = mPreferences.getLong(Constants.PrefKeys.PREVIOUS_SESSION_FOREGROUND, 0);
             if (timeInFg > 0) {
-                message.put(MessageKey.PREVIOUS_SESSION_LENGTH, timeInFg);
+                message.put(MessageKey.PREVIOUS_SESSION_LENGTH, timeInFg / 1000);
                 editor.remove(Constants.PrefKeys.PREVIOUS_SESSION_FOREGROUND);
             }
             String prevSessionId = mPreferences.getString(Constants.PrefKeys.PREVIOUS_SESSION_ID, "");
@@ -262,8 +262,6 @@ import java.util.UUID;
 
     public void stopSession(String sessionId, long stopTime, long sessionLength) {
         try {
-
-
             long timeInBackground = mPreferences.getLong(Constants.PrefKeys.TIME_IN_BG, 0);
             long foregroundLength = sessionLength - timeInBackground;
             SharedPreferences.Editor editor = mPreferences.edit();
