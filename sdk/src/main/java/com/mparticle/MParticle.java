@@ -458,7 +458,7 @@ public class MParticle {
 
 
     boolean isSessionActive() {
-        return mSessionStartTime == 0;
+        return mSessionStartTime > 0;
     }
 
     private void ensureActiveSession() {

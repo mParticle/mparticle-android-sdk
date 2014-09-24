@@ -77,7 +77,7 @@ class AppStateManager implements MPActivityCallbacks{
                     previousSessionParameters,
                     previousSessionPackage,
                     0);
-
+            mLastForegroundTime = System.currentTimeMillis();
         }else if (isBackgrounded() && mLastStoppedTime > 0) {
             long totalTimeInBackground = mPreferences.getLong(Constants.PrefKeys.TIME_IN_BG, -1);
             if (totalTimeInBackground > -1){
@@ -87,7 +87,7 @@ class AppStateManager implements MPActivityCallbacks{
             }
 
             mPreferences.edit().putLong(Constants.PrefKeys.TIME_IN_BG, totalTimeInBackground).commit();
-            MParticle.getInstance().logStateTransition(Constants.StateTransitionType.STATE_TRANS_INIT,
+            MParticle.getInstance().logStateTransition(Constants.StateTransitionType.STATE_TRANS_FORE,
                     mCurrentActivity,
                     mLastStoppedTime - mLastForegroundTime,
                     System.currentTimeMillis() - mLastStoppedTime,
