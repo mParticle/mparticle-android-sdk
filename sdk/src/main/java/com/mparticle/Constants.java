@@ -71,7 +71,7 @@ package com.mparticle;
         public static final String PREVIOUS_SESSION_LENGTH = "psl";
         public static final String LTV = "ltv";
         // referrer
-        public static final String LAUNCH_REFERRER = "lr";
+
         // event timing
         public static final String EVENT_START_TIME = "est";
         public static final String EVENT_DURATION = "el";
@@ -198,6 +198,13 @@ package com.mparticle;
         public static final String STATE_TRANSITION_TYPE = "t";
         public static final String CURRENT_ACTIVITY = "cn";
         public static final String PAYLOAD = "pay";
+        public static final String ST_LAUNCH_REFERRER = "lr";
+        public static final String ST_LAUNCH_PARAMS = "lpr";
+        public static final String ST_LAUNCH_SOURCE_PACKAGE = "srp";
+        public static final String ST_LAUNCH_PRV_FORE_TIME = "pft";
+        public static final String ST_LAUNCH_TIME_SUSPENDED = "tls";
+        public static final String ST_INTERRUPTIONS = "nsi";
+
         //screen view
         public static final String SCREEN_STARTED = "t";
         public static final String BREADCRUMB_SESSION_COUNTER = "sn";
@@ -315,4 +322,7 @@ package com.mparticle;
         public static final String KEY = "t";
     }
 
+    interface External {
+        public static final String APPLINK_KEY = "al_applink_data";
+    }
 }

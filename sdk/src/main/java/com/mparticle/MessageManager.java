@@ -202,7 +202,6 @@ import java.util.UUID;
     /* package-private */
     static JSONObject createMessageSessionEnd(String sessionId, long start, long end, long foregroundLength,
                                               JSONObject attributes) throws JSONException {
-
         int eventCounter = mPreferences.getInt(Constants.PrefKeys.EVENT_COUNTER, 0);
         resetEventCounter();
         JSONObject message = createMessage(MessageType.SESSION_END, sessionId, start, end, null, attributes);
@@ -213,10 +212,9 @@ import java.util.UUID;
         return message;
     }
 
-    public void startSession(String sessionId, long time, String launchUri) {
+    public void startSession(String sessionId, long time) {
         try {
             JSONObject message = createMessage(MessageType.SESSION_START, sessionId, time, time, null, null);
-            message.put(MessageKey.LAUNCH_REFERRER, launchUri);
 
             SharedPreferences.Editor editor = mPreferences.edit();
             long timeInFg = mPreferences.getLong(Constants.PrefKeys.PREVIOUS_SESSION_FOREGROUND, 0);
@@ -439,7 +437,8 @@ import java.util.UUID;
         ConfigManager.log(MParticle.LogLevel.DEBUG, "Received location update: " + location);
     }
 
-    public void logStateTransition(String stateTransInit, String sessionId, long sessionStartTime, Bundle lastNotificationBundle, String currentActivity) {
+    public void logStateTransition(String stateTransInit, String sessionId, long sessionStartTime, Bundle lastNotificationBundle, String currentActivity,
+                                   String launchUri, String launchExtras, String launchSourcePackage, long previousForegroundTime, long suspendedTime, int interruptions) {
         try {
             JSONObject message = createMessage(MessageType.APP_STATE_TRANSITION, sessionId, sessionStartTime, System.currentTimeMillis(),
                     null, null);
@@ -447,6 +446,24 @@ import java.util.UUID;
             if (currentActivity != null){
                 message.put(MessageKey.CURRENT_ACTIVITY, currentActivity);
             }
+
+            if (stateTransInit.equals(Constants.StateTransitionType.STATE_TRANS_INIT)||
+                    stateTransInit.equals(Constants.StateTransitionType.STATE_TRANS_FORE)){
+                message.put(MessageKey.ST_LAUNCH_REFERRER, launchUri);
+                message.put(MessageKey.ST_LAUNCH_PARAMS, launchExtras);
+                message.put(MessageKey.ST_LAUNCH_SOURCE_PACKAGE, launchSourcePackage);
+                if (previousForegroundTime > 0) {
+                    message.put(MessageKey.ST_LAUNCH_PRV_FORE_TIME, previousForegroundTime);
+                }
+                if (suspendedTime > 0) {
+                    message.put(MessageKey.ST_LAUNCH_TIME_SUSPENDED, suspendedTime);
+                }
+                if (interruptions >= 0){
+                    message.put(MessageKey.ST_INTERRUPTIONS, interruptions);
+                }
+
+            }
+
             if (stateTransInit.equals(Constants.StateTransitionType.STATE_TRANS_INIT)){
 
 
