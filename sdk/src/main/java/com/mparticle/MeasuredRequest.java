@@ -14,6 +14,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by sdozor on 3/4/14.
@@ -53,7 +54,7 @@ final class MeasuredRequest {
 
     private final void startTiming() {
         if (streamStartTime == 0L) {
-            streamStartTime = System.currentTimeMillis();
+            streamStartTime = TimeUnit.MILLISECONDS.convert(System.nanoTime(), TimeUnit.NANOSECONDS);
         }
     }
 
@@ -89,7 +90,7 @@ final class MeasuredRequest {
     }*/
 
     public void parseUrlResponse(HttpURLConnection connection) {
-        streamEndTime = System.currentTimeMillis();
+        streamEndTime = TimeUnit.MILLISECONDS.convert(System.nanoTime(), TimeUnit.NANOSECONDS);
         if (!foundHeaderTiming() && responseContentLength == 0) {
             try {
                 requestMethod = connection.getRequestMethod();
@@ -154,7 +155,7 @@ final class MeasuredRequest {
     }
 
     public void parseInputStreamBytes(byte[] buffer, int offset, int length) throws Exception {
-        streamEndTime = System.currentTimeMillis();
+        streamEndTime = TimeUnit.MILLISECONDS.convert(System.nanoTime(), TimeUnit.NANOSECONDS);
      //   log();
 
         //if we're passed a length of -1, then that means there's nothing more to parse.
@@ -214,12 +215,12 @@ final class MeasuredRequest {
     }
 
     public boolean readyForLogging() {
-        if ("CONNECT".equalsIgnoreCase(getMethod()) || getTotalTime() < 0 || (System.currentTimeMillis() - getStartTime() < 2000) && responseCode > 0){
+        if ("CONNECT".equalsIgnoreCase(getMethod()) || getTotalTime() < 0 || (TimeUnit.MILLISECONDS.convert(System.nanoTime(), TimeUnit.NANOSECONDS) - getStartTime() < 2000) && responseCode > 0){
             return false;
         }
         return (endOfStream ||
                 (responseContentLength > 0 && streamBytesRead >= responseContentLength) ||
-                (System.currentTimeMillis() - getStartTime()) > TIMEOUT);
+                (TimeUnit.MILLISECONDS.convert(System.nanoTime(), TimeUnit.NANOSECONDS) - getStartTime()) > TIMEOUT);
     }
 
     //This is needed in the case where a Socket is reused.
