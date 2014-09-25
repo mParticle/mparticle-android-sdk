@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- This is a sample AndroidManifest.xml file with nearly every SDK feature enabled. -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="YOURPACKAGENAME"
+    android:versionCode="1"
+    android:versionName="1">
+    <uses-sdk
+        android:minSdkVersion="8"
+        android:targetSdkVersion="19" />
+    <!-- Required for the mParticle SDK -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <!-- Required for the mParticle SDK to modulate it's behavior based on radio state, and to report more detailed radio analytics -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <!-- For detailed user-location tracking, required to access approximate location derived from cell towers and/or WiFi. -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <!-- For detailed user-location tracking, required to access precise location derived from GPS, cell towers, and WiFi. -->
+    <!-- Only use the FINE permission if an exact location is required -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <!-- Required to verify that an application was purchases/downloaded legally from Google Play -->
+    <uses-permission android:name="com.android.vending.CHECK_LICENSE" />
+    <!-- BEGIN REQUIRED PERMISSIONS FOR PUSH -->
+    <!-- Required for push notification registration -->
+    <permission
+        android:name="YOURPACKAGENAME.permission.C2D_MESSAGE"
+        android:protectionLevel="signature" />
+    <uses-permission android:name="YOURPACKAGENAME.permission.C2D_MESSAGE" />
+    <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
+    <!-- A device must re-register for push notifications when it's operating system version changes (in the case of an upgrade). -->
+    <!-- On device boot, the mParticle SDK will check if an upgrade has occurred -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <!-- Prevent the application from sleeping while a GCM notification is being processed -->
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <!-- END REQUIRED PERMISSIONS FOR PUSH -->
+    <!-- BEGIN OPTIONAL PERMISSIONS FOR PUSH -->
+    <!-- Required to receive secure broadcasts when a GCM notification is received/tapped -->
+    <permission
+        android:name="YOURPACKAGENAME.mparticle.permission.NOTIFICATIONS"
+        android:protectionLevel="signature" />
+    <uses-permission android:name="YOURPACKAGENAME.mparticle.permission.NOTIFICATIONS" />
+    <!-- END OPTIONAL PERMISSIONS FOR PUSH -->
+    <application>
+        <activity android:name=".MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <!-- REQUIRED FOR PUSH -->
+        <receiver
+            android:name="com.mparticle.MPReceiver" android:exported="true"
+            android:permission="com.google.android.c2dm.permission.SEND">
+            <intent-filter>
+                <action android:name="com.google.android.c2dm.intent.RECEIVE" />
+                <action android:name="com.google.android.c2dm.intent.REGISTRATION" />
+                <action android:name="com.google.android.c2dm.intent.UNREGISTER" />
+                <!-- Use your package name as the category -->
+                <category android:name="YOURPACKAGENAME" />
+            </intent-filter>
+            <!-- BOOT_COMPLETED is used to detect if the operating system has been updated, which requires re-registration for GCM -->
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+            <!-- PACKAGE_REPLACED is used to detect if the application version has changed, which requires re-registration for GCM -->
+            <intent-filter>
+                <action android:name="android.intent.action.PACKAGE_REPLACED" />
+                <data
+                    android:scheme="package"
+                    android:path="YOURPACKAGENAME" />
+            </intent-filter>
+            <!-- REQUIRED FOR AUTOMATIC INSTALL REFERRER TRACKING -->
+            <intent-filter>
+                <action android:name="com.android.vending.INSTALL_REFERRER" />
+            </intent-filter>
+        </receiver>
+        <!-- REQUIRED FOR PUSH. This is the service that does the heavy lifting in parsing, showing, and tracking GCM notifications. -->
+        <service android:name="com.mparticle.MPService" />
+ 
+        <!-- Change the name to the fully qualified package and class name of the new BroadcastReceiver -->
+        <receiver android:name="com.some.package.MyReceiver">
+            <intent-filter>
+                <action android:name="com.mparticle.push.NOTIFICATION_TAPPED"/>
+                <action android:name="com.mparticle.push.NOTIFICATION_RECEIVED"/>
+            </intent-filter>
+        </receiver>
+    </application>
+</manifest>
