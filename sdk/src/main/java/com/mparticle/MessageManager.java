@@ -59,7 +59,7 @@ import java.util.UUID;
     }
 
     private static Context mContext = null;
-    private static long sStartTime = System.currentTimeMillis();
+    private static long sStartTime = MPUtility.millitime();
     private static SharedPreferences mPreferences = null;
     private ConfigManager mConfigManager = null;
     private MParticle.InstallType mInstallType;
@@ -152,7 +152,7 @@ import java.util.UUID;
         infoJson.put(MessageKey.STATE_INFO_AVAILABLE_MEMORY, MPUtility.getAvailableMemory(mContext));
         infoJson.put(MessageKey.STATE_INFO_TOTAL_MEMORY, getTotalMemory());
         infoJson.put(MessageKey.STATE_INFO_BATTERY_LVL, sBatteryLevel);
-        infoJson.put(MessageKey.STATE_INFO_TIME_SINCE_START, System.currentTimeMillis() - sStartTime);
+        infoJson.put(MessageKey.STATE_INFO_TIME_SINCE_START, MPUtility.millitime() - sStartTime);
         infoJson.put(MessageKey.STATE_INFO_AVAILABLE_DISK, MPUtility.getAvailableInternalDisk());
         infoJson.put(MessageKey.STATE_INFO_AVAILABLE_EXT_DISK, MPUtility.getAvailableExternalDisk());
         infoJson.put(MessageKey.STATE_INFO_APP_MEMORY_USAGE, rt.totalMemory());
