@@ -25,8 +25,9 @@ final class MeasuredRequest {
     private static final long TIMEOUT = 120;
     boolean endOfStream = false;
     private long headerStartTime = 0L;
-    private long streamEndTime = 0L;
-    private long streamStartTime = 0L;
+    private long streamSystemNanoEndTime = 0L;
+    private long streamSystemNanoStartTime = 0L;
+    private long streamSystemMilliStartTime = 0L;
     private long headerEndTime = 0L;
     private long responseContentLength = 0L;
     private long requestContentLength = 0L;
@@ -53,8 +54,9 @@ final class MeasuredRequest {
     }
 
     private final void startTiming() {
-        if (streamStartTime == 0L) {
-            streamStartTime = TimeUnit.MILLISECONDS.convert(System.nanoTime(), TimeUnit.NANOSECONDS);
+        if (streamSystemNanoStartTime == 0L) {
+            streamSystemNanoStartTime = MPUtility.millitime();
+            streamSystemMilliStartTime = System.currentTimeMillis();
         }
     }
 
@@ -80,7 +82,7 @@ final class MeasuredRequest {
         if (headerTime > 0) {
             return headerTime;
         }
-        return streamEndTime - streamStartTime;
+        return streamSystemNanoEndTime - streamSystemNanoStartTime;
     }
 
     /*public String getKey() {
@@ -90,7 +92,7 @@ final class MeasuredRequest {
     }*/
 
     public void parseUrlResponse(HttpURLConnection connection) {
-        streamEndTime = TimeUnit.MILLISECONDS.convert(System.nanoTime(), TimeUnit.NANOSECONDS);
+        streamSystemNanoEndTime = MPUtility.millitime();
         if (!foundHeaderTiming() && responseContentLength == 0) {
             try {
                 requestMethod = connection.getRequestMethod();
@@ -155,9 +157,7 @@ final class MeasuredRequest {
     }
 
     public void parseInputStreamBytes(byte[] buffer, int offset, int length) throws Exception {
-        streamEndTime = TimeUnit.MILLISECONDS.convert(System.nanoTime(), TimeUnit.NANOSECONDS);
-     //   log();
-
+        streamSystemNanoEndTime = MPUtility.millitime();
         //if we're passed a length of -1, then that means there's nothing more to parse.
         if (length == -1) {
             endOfStream = true;
@@ -215,18 +215,19 @@ final class MeasuredRequest {
     }
 
     public boolean readyForLogging() {
-        if ("CONNECT".equalsIgnoreCase(getMethod()) || getTotalTime() < 0 || (TimeUnit.MILLISECONDS.convert(System.nanoTime(), TimeUnit.NANOSECONDS) - getStartTime() < 2000) && responseCode > 0){
+        if ("CONNECT".equalsIgnoreCase(getMethod()) || getTotalTime() < 0 || (MPUtility.millitime() - getStartTime() < 2000) && responseCode > 0){
             return false;
         }
         return (endOfStream ||
                 (responseContentLength > 0 && streamBytesRead >= responseContentLength) ||
-                (TimeUnit.MILLISECONDS.convert(System.nanoTime(), TimeUnit.NANOSECONDS) - getStartTime()) > TIMEOUT);
+                (MPUtility.millitime() - getStartTime()) > TIMEOUT);
     }
 
     //This is needed in the case where a Socket is reused.
     public void reset() {
-        streamEndTime = 0L;
-        streamStartTime = 0L;
+        streamSystemMilliStartTime = 0L;
+        streamSystemNanoEndTime = 0L;
+        streamSystemNanoStartTime = 0L;
         headerStartTime = 0L;
         headerEndTime = 0L;
         responseContentLength = 0L;
@@ -301,7 +302,7 @@ final class MeasuredRequest {
     }
 
     public long getStartTime() {
-        return headerStartTime > 0 ? headerStartTime : streamStartTime;
+        return headerStartTime > 0 ? headerStartTime : streamSystemMilliStartTime;
     }
 
     @Override
