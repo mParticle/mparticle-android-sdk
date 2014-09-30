@@ -229,8 +229,7 @@ package com.mparticle;
         public static final String SANDBOX = "dbg";
         public static final String ENVIRONMENT = "env";
         String RESERVED_KEY_LTV = "$Amount";
-
-
+        public static final String FIRST_SEEN_INSTALL = "fi";
     }
 
     interface PrefKeys {
@@ -285,6 +284,7 @@ package com.mparticle;
         public static final String MACRO_G = "mp:macros::g";
         public static final String MACRO_TS = "mp:macros::ts";
         public static final String MACRO_GLSB = "mp:macros::glsb";
+        public static final String FIRST_RUN_INSTALL = "mp::firstrun::install";
     }
 
     interface MiscStorageKeys {
