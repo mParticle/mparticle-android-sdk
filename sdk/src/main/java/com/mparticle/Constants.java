@@ -225,6 +225,7 @@ package com.mparticle;
         public static final String EVENT_CATEGORY = "$Category";
         //session start
         public static final String PREVIOUS_SESSION_ID = "pid";
+        public static final String PREVIOUS_SESSION_START = "pss";
         //sandbox mode is deprecated as of > 1.6.3
         public static final String SANDBOX = "dbg";
         public static final String ENVIRONMENT = "env";
@@ -277,6 +278,7 @@ package com.mparticle;
         public static final String ADTRUTH_LAST_TIMESTAMP = "mp::adtruth::timestamp";
         public static final String EVENT_COUNTER = "mp::events::counter";
         public static final String PREVIOUS_SESSION_ID = "mp::session::previous_id";
+        public static final String PREVIOUS_SESSION_START = "mp::session::previous_start";
         public static final String API_KEY = "mp::config::apikey";
         public static final String API_SECRET = "mp::config::apisecret";
         public static final String MACRO_GN = "mp:macros::gn";

@@ -229,10 +229,18 @@ import java.util.UUID;
             }
             String prevSessionId = mPreferences.getString(Constants.PrefKeys.PREVIOUS_SESSION_ID, "");
             editor.putString(Constants.PrefKeys.PREVIOUS_SESSION_ID, sessionId);
-            editor.commit();
             if (prevSessionId != null && prevSessionId.length() > 0) {
                 message.put(MessageKey.PREVIOUS_SESSION_ID, prevSessionId);
             }
+
+            long prevSessionStart = mPreferences.getLong(Constants.PrefKeys.PREVIOUS_SESSION_START, -1);
+            editor.putLong(Constants.PrefKeys.PREVIOUS_SESSION_START, time);
+
+            if (prevSessionStart > 0) {
+                message.put(MessageKey.PREVIOUS_SESSION_START, prevSessionStart);
+            }
+
+            editor.commit();
 
             mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
 
@@ -468,8 +476,6 @@ import java.util.UUID;
             }
 
             if (stateTransInit.equals(Constants.StateTransitionType.STATE_TRANS_INIT)){
-
-
                 SharedPreferences.Editor editor = mPreferences.edit();
 
                 if (!sFirstRun) {
