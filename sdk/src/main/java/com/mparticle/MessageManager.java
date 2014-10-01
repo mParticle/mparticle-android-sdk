@@ -103,6 +103,11 @@ import java.util.UUID;
         if (!sFirstRun) {
             mMessageHandler.sendEmptyMessage(MessageHandler.END_ORPHAN_SESSIONS);
            // mUploadHandler.sendEmptyMessageDelayed(UploadHandler.CLEANUP, Constants.INITIAL_UPLOAD_DELAY);
+        }else{
+            boolean installDetected = !MParticle.InstallType.KnownUpgrade.equals(mInstallType) &&
+                    (MParticle.InstallType.KnownInstall.equals(mInstallType) ||
+                            (mInstallType == MParticle.InstallType.AutoDetect && autoDetectInstall()));
+            mPreferences.edit().putBoolean(Constants.PrefKeys.FIRST_RUN_INSTALL, installDetected).commit();
         }
 
         mUploadHandler.sendEmptyMessage(UploadHandler.UPDATE_CONFIG);
@@ -224,10 +229,18 @@ import java.util.UUID;
             }
             String prevSessionId = mPreferences.getString(Constants.PrefKeys.PREVIOUS_SESSION_ID, "");
             editor.putString(Constants.PrefKeys.PREVIOUS_SESSION_ID, sessionId);
-            editor.commit();
             if (prevSessionId != null && prevSessionId.length() > 0) {
                 message.put(MessageKey.PREVIOUS_SESSION_ID, prevSessionId);
             }
+
+            long prevSessionStart = mPreferences.getLong(Constants.PrefKeys.PREVIOUS_SESSION_START, -1);
+            editor.putLong(Constants.PrefKeys.PREVIOUS_SESSION_START, time);
+
+            if (prevSessionStart > 0) {
+                message.put(MessageKey.PREVIOUS_SESSION_START, prevSessionStart);
+            }
+
+            editor.commit();
 
             mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
 
@@ -463,8 +476,6 @@ import java.util.UUID;
             }
 
             if (stateTransInit.equals(Constants.StateTransitionType.STATE_TRANS_INIT)){
-
-
                 SharedPreferences.Editor editor = mPreferences.edit();
 
                 if (!sFirstRun) {
@@ -479,19 +490,15 @@ import java.util.UUID;
 
                 }
                 boolean upgrade = (versionCode != mPreferences.getInt(Constants.PrefKeys.INITUPGRADE, 0));
-                editor.putInt(Constants.PrefKeys.INITUPGRADE, versionCode);
-                editor.commit();
+                editor.putInt(Constants.PrefKeys.INITUPGRADE, versionCode).commit();
 
                 boolean installDetected = (mInstallType == MParticle.InstallType.AutoDetect && autoDetectInstall());
 
-                boolean globalFirstRun = sFirstRun &&
-                                (mInstallType == MParticle.InstallType.KnownInstall ||
-                                        installDetected);
-                boolean globalUpgrade = upgrade &&
+                boolean globalUpgrade = upgrade ||
                                 (mInstallType == MParticle.InstallType.KnownUpgrade ||
                                         !installDetected);
 
-                message.put(MessageKey.APP_INIT_FIRST_RUN, globalFirstRun);
+                message.put(MessageKey.APP_INIT_FIRST_RUN, sFirstRun);
                 message.put(MessageKey.APP_INIT_UPGRADE, globalUpgrade);
             }
             if (lastNotificationBundle != null){
