@@ -33,8 +33,6 @@ import java.util.UUID;
 
 /* package-private */class MessageManager {
 
-    private static final String TAG = Constants.LOG_TAG;
-
     private static final HandlerThread sMessageHandlerThread = new HandlerThread("mParticleMessageHandler",
             Process.THREAD_PRIORITY_BACKGROUND);
     private static final HandlerThread sUploadHandlerThread = new HandlerThread("mParticleUploadHandler",
@@ -199,9 +197,12 @@ import java.util.UUID;
     }
 
     /* package-private */
-    static JSONObject createFirstRunMessage(long time, String sessionId, long startTime) throws JSONException {
-        JSONObject message = createMessage(MessageType.FIRST_RUN, sessionId, startTime, time, null, null);
-        return message;
+    static MPMessage createFirstRunMessage(long time, String sessionId, long startTime) throws JSONException {
+        return new MPMessage.Builder(MessageType.FIRST_RUN, sessionId)
+                .sessionStartTime(startTime)
+                .timestamp(time)
+                .location(sLocation)
+                .build();
     }
 
     /* package-private */
