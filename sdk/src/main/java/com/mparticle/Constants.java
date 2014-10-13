@@ -71,7 +71,7 @@ package com.mparticle;
         public static final String PREVIOUS_SESSION_LENGTH = "psl";
         public static final String LTV = "ltv";
         // referrer
-        public static final String LAUNCH_REFERRER = "lr";
+
         // event timing
         public static final String EVENT_START_TIME = "est";
         public static final String EVENT_DURATION = "el";
@@ -196,7 +196,15 @@ package com.mparticle;
         public static final String APP_STATE = "as";
         //state transition
         public static final String STATE_TRANSITION_TYPE = "t";
+        public static final String CURRENT_ACTIVITY = "cn";
         public static final String PAYLOAD = "pay";
+        public static final String ST_LAUNCH_REFERRER = "lr";
+        public static final String ST_LAUNCH_PARAMS = "lpr";
+        public static final String ST_LAUNCH_SOURCE_PACKAGE = "srp";
+        public static final String ST_LAUNCH_PRV_FORE_TIME = "pft";
+        public static final String ST_LAUNCH_TIME_SUSPENDED = "tls";
+        public static final String ST_INTERRUPTIONS = "nsi";
+
         //screen view
         public static final String SCREEN_STARTED = "t";
         public static final String BREADCRUMB_SESSION_COUNTER = "sn";
@@ -217,12 +225,12 @@ package com.mparticle;
         public static final String EVENT_CATEGORY = "$Category";
         //session start
         public static final String PREVIOUS_SESSION_ID = "pid";
+        public static final String PREVIOUS_SESSION_START = "pss";
         //sandbox mode is deprecated as of > 1.6.3
         public static final String SANDBOX = "dbg";
         public static final String ENVIRONMENT = "env";
         String RESERVED_KEY_LTV = "$Amount";
-
-
+        public static final String FIRST_SEEN_INSTALL = "fi";
     }
 
     interface PrefKeys {
@@ -270,6 +278,7 @@ package com.mparticle;
         public static final String ADTRUTH_LAST_TIMESTAMP = "mp::adtruth::timestamp";
         public static final String EVENT_COUNTER = "mp::events::counter";
         public static final String PREVIOUS_SESSION_ID = "mp::session::previous_id";
+        public static final String PREVIOUS_SESSION_START = "mp::session::previous_start";
         public static final String API_KEY = "mp::config::apikey";
         public static final String API_SECRET = "mp::config::apisecret";
         public static final String MACRO_GN = "mp:macros::gn";
@@ -277,6 +286,7 @@ package com.mparticle;
         public static final String MACRO_G = "mp:macros::g";
         public static final String MACRO_TS = "mp:macros::ts";
         public static final String MACRO_GLSB = "mp:macros::glsb";
+        public static final String FIRST_RUN_INSTALL = "mp::firstrun::install";
     }
 
     interface MiscStorageKeys {
@@ -314,4 +324,7 @@ package com.mparticle;
         public static final String KEY = "t";
     }
 
+    interface External {
+        public static final String APPLINK_KEY = "al_applink_data";
+    }
 }

@@ -1,12 +1,13 @@
-apply plugin: 'android-library'
+apply plugin: 'com.android.library'
 apply plugin: 'maven'
+
 
 buildscript {
     repositories {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:0.12.+'
+        classpath 'com.android.tools.build:gradle:0.13.+'
 
     }
 }
@@ -119,7 +120,6 @@ android.libraryVariants.all { variant ->
         options.addStringOption('templatedir', 'docs/customization')
         options.docletpath = pathList
         options.doclet = "com.google.doclava.Doclava"
-
         exclude '**/R.java'
     }
 }
@@ -147,7 +147,7 @@ uploadArchives {
 
 dependencies {
     deployerJars "org.kuali.maven.wagons:maven-s3-wagon:1.2.1"
-    kahunaCompile files('embeddedkits/Kahuna473.jar')
+    kahunaCompile files('embeddedkits/Kahuna489.jar')
     compile files('embeddedkits/KochavaSDK.jar')
     compile files('embeddedkits/MobileAppTracker-3.1.jar')
     provided 'com.google.android.gms:play-services:4.+'

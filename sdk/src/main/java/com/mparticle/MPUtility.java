@@ -11,6 +11,7 @@ import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.location.LocationManager;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.Environment;
 import android.os.StatFs;
 import android.provider.Settings;
@@ -490,5 +491,33 @@ class MPUtility {
             return true;
         }
         return false;
+    }
+
+    static JSONObject wrapExtras(Bundle extras) {
+        if (extras != null && !extras.isEmpty()) {
+            JSONObject parameters = new JSONObject();
+            for (String key : extras.keySet()) {
+                Object value;
+                if ((value = extras.getBundle(key)) != null) {
+                    try {
+                        parameters.put(key, wrapExtras((Bundle) value));
+                    } catch (JSONException e) {
+
+                    }
+                } else if ((value = extras.get(key)) != null) {
+                    String stringVal = value.toString();
+                    if ((stringVal.length() < 500)) {
+                        try {
+                            parameters.put(key, stringVal);
+                        } catch (JSONException e) {
+
+                        }
+                    }
+                }
+            }
+            return parameters;
+        }else{
+            return null;
+        }
     }
 }

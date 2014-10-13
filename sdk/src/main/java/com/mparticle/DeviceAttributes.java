@@ -101,6 +101,8 @@ import java.util.TimeZone;
                 // ignore missing data
             }
 
+            boolean install = preferences.getBoolean(PrefKeys.FIRST_RUN_INSTALL, true);
+            attributes.put(MessageKey.FIRST_SEEN_INSTALL, install);
 
         } catch (JSONException e) {
             // ignore JSON exceptions

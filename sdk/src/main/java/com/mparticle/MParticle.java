@@ -1,6 +1,7 @@
 package com.mparticle;
 
 import android.app.Activity;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -95,7 +96,6 @@ public class MParticle {
     private Context mAppContext;
     private String mApiKey;
     private int mEventCount = 0;
-    private String mLaunchUri;
     private LicenseCheckerCallback clientLicensingCallback;
     private static final HandlerThread sTimeoutHandlerThread = new HandlerThread("mParticleSessionTimeoutHandler",
             Process.THREAD_PRIORITY_BACKGROUND);
@@ -265,16 +265,9 @@ public class MParticle {
 
                     instance = new MParticle(appContext, messageManager, appConfigManager, embeddedKitManager1);
                     messageManager.start(appContext, firstRun, installType);
-                    instance.logStateTransition(Constants.StateTransitionType.STATE_TRANS_INIT);
+
                     if (appConfigManager.getLogUnhandledExceptions()) {
                         instance.enableUncaughtExceptionLogging();
-                    }
-
-                    if (context instanceof Activity) {
-                        instance.mLaunchUri = ((Activity) context).getIntent().getDataString();
-                        if (instance.mLaunchUri != null) {
-                            ConfigManager.log(LogLevel.DEBUG, "launchuri: ", instance.mLaunchUri);
-                        }
                     }
 
                     if (appConfigManager.isPushEnabled()) {
@@ -306,16 +299,20 @@ public class MParticle {
     }
 
 
-    static Boolean setCheckedAttribute(JSONObject attributes, String key, Object value) {
-        return setCheckedAttribute(attributes, key, value, false);
+    static Boolean setCheckedAttribute(JSONObject attributes, String key, Object value, boolean increment) {
+        return setCheckedAttribute(attributes, key, value, false, increment);
     }
 
 
-    static Boolean setCheckedAttribute(JSONObject attributes, String key, Object value, Boolean caseInsensitive) {
+    static Boolean setCheckedAttribute(JSONObject attributes, String key, Object value, Boolean caseInsensitive, boolean increment) {
         if (null == attributes || null == key) {
             return false;
         }
         try {
+            if (caseInsensitive) {
+                key = findCaseInsensitiveKey(attributes, key);
+            }
+
             if (Constants.LIMIT_ATTR_COUNT == attributes.length() && !attributes.has(key)) {
                 ConfigManager.log(LogLevel.ERROR, "Attribute count exceeds limit. Discarding attribute: " + key);
                 return false;
@@ -331,12 +328,20 @@ public class MParticle {
             if (value == null) {
                 value = JSONObject.NULL;
             }
-            if (caseInsensitive) {
-                key = findCaseInsensitiveKey(attributes, key);
+            if (increment){
+                String oldValue = attributes.optString(key, "0");
+                int oldInt = Integer.parseInt(oldValue);
+                value = Integer.toString((Integer)value + oldInt);
             }
             attributes.put(key, value);
         } catch (JSONException e) {
             ConfigManager.log(LogLevel.ERROR, "JSON error processing attributes. Discarding attribute: " + key);
+            return false;
+        } catch (NumberFormatException nfe){
+            ConfigManager.log(LogLevel.ERROR, "Attempted to increment a key that could not be parsed as an integer: " + key);
+            return false;
+        } catch (Exception e){
+            ConfigManager.log(LogLevel.ERROR, "Failed to add attribute: " + e.getMessage());
             return false;
         }
         return true;
@@ -353,20 +358,37 @@ public class MParticle {
         return key;
     }
 
+
     Boolean shouldProcessUrl(String url) {
         return mConfigManager.isNetworkPerformanceEnabled() &&
                 measuredRequestManager.isUriAllowed(url) && !mEmbeddedKitManager.isEmbeddedKitUri(url);
     }
 
-    void logStateTransition(String transitionType) {
+    void logStateTransition(String transitionType, String currentActivity) {
+       logStateTransition(transitionType, currentActivity, 0, 0, null, null, null, 0);
+    }
+
+    void logStateTransition(String transitionType, String currentActivity, long previousForegroundTime, long suspendedTime, String dataString, String launchParameters, String launchPackage, int interruptions) {
         if (mConfigManager.getSendOoEvents()) {
             ensureActiveSession();
-            mMessageManager.logStateTransition(transitionType, mSessionID, mSessionStartTime, lastPushMessage == null ? null : lastPushMessage.getExtras());
+            mMessageManager.logStateTransition(transitionType,
+                    mSessionID,
+                    mSessionStartTime,
+                    lastPushMessage == null ? null : lastPushMessage.getExtras(),
+                    currentActivity,
+                    dataString,
+                    launchParameters,
+                    launchPackage,
+                    previousForegroundTime,
+                    suspendedTime,
+                    interruptions
+                    );
             if (Constants.StateTransitionType.STATE_TRANS_BG.equals(transitionType)) {
                 lastPushMessage = null;
             }
         }
     }
+
 
     /**
      * Track that an Activity has started. Should only be called within the onStart method of your Activities,
@@ -432,6 +454,11 @@ public class MParticle {
         mSessionID = "";
     }
 
+
+    boolean isSessionActive() {
+        return mSessionStartTime > 0;
+    }
+
     private void ensureActiveSession() {
         //    checkSessionTimeout();
         mLastEventTime = System.currentTimeMillis();
@@ -464,11 +491,9 @@ public class MParticle {
         mSessionID = UUID.randomUUID().toString();
         mEventCount = 0;
         mSessionAttributes = new JSONObject();
-        mMessageManager.startSession(mSessionID, mSessionStartTime, mLaunchUri);
+        mMessageManager.startSession(mSessionID, mSessionStartTime);
         mTimeoutHandler.sendEmptyMessageDelayed(0, mConfigManager.getSessionTimeout());
         ConfigManager.log(LogLevel.DEBUG, "Started new session");
-        // clear the launch URI so it isn't sent on future sessions
-        mLaunchUri = null;
     }
 
     /**
@@ -583,7 +608,7 @@ public class MParticle {
             }
             JSONObject eventDataJSON = enforceAttributeConstraints(eventInfo);
             if (mConfigManager.getSendOoEvents()) {
-                mMessageManager.logEvent(mSessionID, mSessionStartTime, mLastEventTime, eventName, eventType, eventDataJSON, eventLength);
+                mMessageManager.logEvent(mSessionID, mSessionStartTime, mLastEventTime, eventName, eventType, eventDataJSON, eventLength, mAppStateManager.getCurrentActivity());
 
                 if (null == eventDataJSON) {
                     ConfigManager.log(LogLevel.DEBUG, "Logged event: ", eventName);
@@ -662,7 +687,7 @@ public class MParticle {
         ensureActiveSession();
         if (checkEventLimit()) {
             JSONObject transactionJson = enforceAttributeConstraints(product);
-            mMessageManager.logEvent(mSessionID, mSessionStartTime, mLastEventTime, event.toString(), EventType.Transaction, transactionJson, 0);
+            mMessageManager.logEvent(mSessionID, mSessionStartTime, mLastEventTime, event.toString(), EventType.Transaction, transactionJson, 0, mAppStateManager.getCurrentActivity());
             ConfigManager.log(LogLevel.DEBUG, "Logged product event with data: ", product.toString());
         }
         if (purchaseEvent) {
@@ -960,7 +985,7 @@ public class MParticle {
             ensureActiveSession();
             mMessageManager.logErrorEvent(mSessionID, mSessionStartTime, mLastEventTime, t != null ? t.getMessage() : null, t, null, false);
             //we know that the app is about to crash and therefore exit
-            logStateTransition(Constants.StateTransitionType.STATE_TRANS_EXIT);
+            logStateTransition(Constants.StateTransitionType.STATE_TRANS_EXIT, mAppStateManager.getCurrentActivity());
             endSession(System.currentTimeMillis());
         }
     }
@@ -1020,14 +1045,43 @@ public class MParticle {
      * Set a single <i>session</i> attribute. The attribute will combined with any existing session attributes.
      *
      * @param key   the attribute key
-     * @param value the attribute value
+     * @param value the attribute value. This value will be converted to its String representation as dictated by its <code>toString()</code> method.
      */
-    public void setSessionAttribute(String key, String value) {
+    public void setSessionAttribute(String key, Object value) {
+        if (key == null){
+            ConfigManager.log(LogLevel.WARNING, "setSessionAttribute called with null key. Ignoring...");
+            return;
+        }
+        if (value != null){
+            value = value.toString();
+        }
         if (mConfigManager.getSendOoEvents()) {
             ensureActiveSession();
             ConfigManager.log(LogLevel.DEBUG, "Set session attribute: " + key + "=" + value);
 
-            if (setCheckedAttribute(mSessionAttributes, key, value, true)) {
+            if (setCheckedAttribute(mSessionAttributes, key, value, true, false)) {
+                mMessageManager.setSessionAttributes(mSessionID, mSessionAttributes);
+            }
+        }
+    }
+
+    /**
+     * Increment a single <i>session</i> attribute. If the attribute does not exist, it will be added as a new attribute.
+     *
+     * @param key   the attribute key
+     * @param value the attribute value
+     */
+    public void incrementSessionAttribute(String key, int value) {
+        if (key == null){
+            ConfigManager.log(LogLevel.WARNING, "incrementSessionAttribute called with null key. Ignoring...");
+            return;
+        }
+        if (mConfigManager.getSendOoEvents()) {
+            ensureActiveSession();
+            ConfigManager.log(LogLevel.DEBUG, "Incrementing session attribute: " + key + "=" + value);
+
+
+            if (setCheckedAttribute(mSessionAttributes, key, value, true, true)) {
                 mMessageManager.setSessionAttributes(mSessionID, mSessionAttributes);
             }
         }
@@ -1054,17 +1108,41 @@ public class MParticle {
      * Set a single <i>user</i> attribute. The attribute will combined with any existing user attributes.
      *
      * @param key   the attribute key
-     * @param value the attribute value
+     * @param value the attribute value. This value will be converted to its String representation as dictated by its <code>toString()</code> method.
      */
-    public void setUserAttribute(String key, String value) {
-
+    public void setUserAttribute(String key, Object value) {
+        if (key == null){
+            ConfigManager.log(LogLevel.WARNING, "setUserAttribute called with null key. Ignoring...");
+            return;
+        }
         if (value != null) {
+            value = value.toString();
             ConfigManager.log(LogLevel.DEBUG, "Set user attribute: " + key + " with value " + value);
         } else {
             ConfigManager.log(LogLevel.DEBUG, "Set user attribute: " + key);
         }
 
-        if (setCheckedAttribute(mUserAttributes, key, value)) {
+        if (setCheckedAttribute(mUserAttributes, key, value, false)) {
+            sPreferences.edit().putString(PrefKeys.USER_ATTRS + mApiKey, mUserAttributes.toString()).commit();
+            mEmbeddedKitManager.setUserAttributes(mUserAttributes);
+        }
+
+    }
+
+    /**
+     * Increment a single <i>user</i> attribute. If the attribute does not already exist, a new one will be created.
+     *
+     * @param key   the attribute key
+     * @param value the attribute value
+     */
+    public void incrementUserAttribute(String key, int value) {
+        if (key == null){
+            ConfigManager.log(LogLevel.WARNING, "incrementUserAttribute called with null key. Ignoring...");
+            return;
+        }
+        ConfigManager.log(LogLevel.DEBUG, "Incrementing user attribute: " + key + " with value " + value);
+
+        if (setCheckedAttribute(mUserAttributes, key, value, true)) {
             sPreferences.edit().putString(PrefKeys.USER_ATTRS + mApiKey, mUserAttributes.toString()).commit();
             mEmbeddedKitManager.setUserAttributes(mUserAttributes);
         }
@@ -1401,7 +1479,7 @@ public class MParticle {
         for (Map.Entry<String, String> entry : attributes.entrySet()) {
             String key = entry.getKey();
             String value = entry.getValue();
-            setCheckedAttribute(checkedAttributes, key, value);
+            setCheckedAttribute(checkedAttributes, key, value, false);
         }
         return checkedAttributes;
     }
@@ -1547,6 +1625,7 @@ public class MParticle {
             mConfigManager.setLogLevel(level);
         }
     }
+
 
     /**
      * Event type to use when logging events.
@@ -1708,7 +1787,7 @@ public class MParticle {
      * that support, for example, specifying a gender of a user. The mParticle platform will look for these constants within the user attributes that
      * you have set for a given user, and forward any attributes to the services that support them.
      *
-     * @see #setUserAttribute(String, String)
+     * @see #setUserAttribute(String, Object)
      */
     public interface UserAttributes {
         /**

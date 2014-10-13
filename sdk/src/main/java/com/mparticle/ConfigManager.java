@@ -4,15 +4,24 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.os.Build;
+import android.text.TextUtils;
 import android.util.Log;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebView;
 
+import org.apache.http.impl.cookie.DateParseException;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.mparticle.MParticle.LogLevel;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Iterator;
 
 /**
  * Created by sdozor on 1/16/14.
@@ -34,7 +43,7 @@ class ConfigManager {
     private static final String PREFERENCES_FILE = "mp_preferences";
     private static final String KEY_RAMP = "rp";
     private static final int DEVMODE_UPLOAD_INTERVAL_MILLISECONDS = 10 * 1000;
-
+    private JSONObject mCurrentCookies;
     private Context mContext;
 
     private SharedPreferences mPreferences;
@@ -345,12 +354,62 @@ class ConfigManager {
         sLocalPrefs.networkingEnabled = networkingEnabled;
     }
 
-    public void setCookies(JSONObject cookies) {
-        mPreferences.edit().putString(Constants.PrefKeys.Cookies, cookies.toString()).commit();
+    public void setCookies(JSONObject serverCookies) {
+        try {
+            JSONObject localCookies = getCookies();
+            Iterator<?> keys = serverCookies.keys();
+
+            while (keys.hasNext()) {
+                String key = (String) keys.next();
+                localCookies.put(key, serverCookies.getJSONObject(key));
+            }
+            mCurrentCookies = localCookies;
+            mPreferences.edit().putString(Constants.PrefKeys.Cookies, mCurrentCookies.toString()).commit();
+        }catch (JSONException jse){
+
+        }
     }
 
     public JSONObject getCookies() throws JSONException {
-        return new JSONObject(mPreferences.getString(Constants.PrefKeys.Cookies, ""));
+        if (mCurrentCookies == null){
+            String currentCookies = mPreferences.getString(Constants.PrefKeys.Cookies, null);
+            if (TextUtils.isEmpty(currentCookies)){
+                mCurrentCookies = new JSONObject();
+                mPreferences.edit().putString(Constants.PrefKeys.Cookies, mCurrentCookies.toString()).commit();
+                return mCurrentCookies;
+            }else {
+                mCurrentCookies = new JSONObject(currentCookies);
+            }
+            Calendar nowCalendar = Calendar.getInstance();
+            nowCalendar.set(Calendar.YEAR, 1990);
+            Date oldDate = nowCalendar.getTime();
+            SimpleDateFormat parser = new SimpleDateFormat("yyyy");
+            Iterator<?> keys = mCurrentCookies.keys();
+            ArrayList<String> keysToRemove = new ArrayList<String>();
+            while (keys.hasNext()) {
+                String key = (String) keys.next();
+                if( mCurrentCookies.get(key) instanceof JSONObject ){
+                    String expiration = ((JSONObject) mCurrentCookies.get(key)).getString("e");
+                    try {
+                        Date date = parser.parse(expiration);
+                        if (date.before(oldDate)){
+                            keysToRemove.add(key);
+                        }
+                    }catch (ParseException dpe){
+
+                    }
+                }
+            }
+            for (String key : keysToRemove){
+                mCurrentCookies.remove(key);
+            }
+            if (keysToRemove.size() > 0) {
+                mPreferences.edit().putString(Constants.PrefKeys.Cookies, mCurrentCookies.toString()).commit();
+            }
+            return mCurrentCookies;
+        }else{
+            return mCurrentCookies;
+        }
     }
 
     public void setMpid(long mpid) {

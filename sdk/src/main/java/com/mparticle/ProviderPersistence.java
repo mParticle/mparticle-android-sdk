@@ -107,7 +107,8 @@ class ProviderPersistence extends JSONObject{
 
     private static final String applyMacro(String defaultString) {
         if (!TextUtils.isEmpty(defaultString) && defaultString.startsWith("%")){
-            if (defaultString.toUpperCase().equals(MACRO_GUID_NO_DASHES)){
+            defaultString = defaultString.toLowerCase();
+            if (defaultString.equalsIgnoreCase(MACRO_GUID_NO_DASHES)){
                 return UUID.randomUUID().toString().replace("-", "");
             }else if (defaultString.equals(MACRO_OMNITURE_AID)){
                 return generateAID();
