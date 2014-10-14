@@ -128,11 +128,14 @@ import org.json.JSONObject;
                         }
 
                         // create a session-end message
-                        JSONObject endMessage = MessageManager.createMessageSessionEnd(sessionId, start, end, foregroundLength,
-                                sessionAttributes);
-
-                        // insert the record into messages with duration
-                        dbInsertMessage(endMessage);
+                        try {
+                            MPMessage endMessage = mMessageManagerCallbacks.createMessageSessionEnd(sessionId, start, end, foregroundLength,
+                                    sessionAttributes);
+                            // insert the record into messages with duration
+                            dbInsertMessage(endMessage);
+                        }catch (JSONException jse){
+                            ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to create mParticle session end message");
+                        }
 
                         // delete the processed session record
                         db.delete(SessionTable.TABLE_NAME, SessionTable.SESSION_ID + "=?", new String[]{sessionId});
@@ -238,7 +241,7 @@ import org.json.JSONObject;
         db.insert(SessionTable.TABLE_NAME, null, contentValues);
     }
 
-    private void dbInsertMessage(JSONObject message) throws JSONException {
+    private void dbInsertMessage(MPMessage message) throws JSONException {
         ContentValues contentValues = new ContentValues();
         contentValues.put(MessageTable.CREATED_AT, message.getLong(MessageKey.TIMESTAMP));
         contentValues.put(MessageTable.SESSION_ID, getMessageSessionId(message));

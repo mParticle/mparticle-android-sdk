@@ -71,9 +71,10 @@ public class MPMessage extends JSONObject{
         private JSONObject mAttributes;
         private Location mLocation;
 
-        public Builder(String messageType, String sessionId){
+        public Builder(String messageType, String sessionId, Location location){
             mMessageType = messageType;
             mSessionId = sessionId;
+            mLocation = location;
         }
 
         public Builder sessionStartTime(long sessionStartTime){
@@ -93,10 +94,6 @@ public class MPMessage extends JSONObject{
             return this;
         }
 
-        public Builder location(Location location){
-            mLocation = location;
-            return this;
-        }
         public MPMessage build() throws JSONException {
             return new MPMessage(this);
         }
