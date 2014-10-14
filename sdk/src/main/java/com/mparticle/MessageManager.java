@@ -619,6 +619,11 @@ import java.util.Map;
         return message;
     }
 
+    @Override
+    public String getApiKey() {
+        return mConfigManager.getApiKey();
+    }
+
     private class StatusBroadcastReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context appContext, Intent intent) {

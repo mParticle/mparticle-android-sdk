@@ -155,10 +155,11 @@ import org.json.JSONObject;
             case END_ORPHAN_SESSIONS:
                 try {
                     // find left-over sessions that exist during startup and end them
+                    String[] selectionArgs = new String[]{mMessageManagerCallbacks.getApiKey()};
                     String[] sessionColumns = new String[]{SessionTable.SESSION_ID};
                     Cursor selectCursor = db.query(SessionTable.TABLE_NAME, sessionColumns,
                             SessionTable.API_KEY + "=?",
-                            null, null, null, null);
+                            selectionArgs, null, null, null);
                     // NOTE: there should be at most one orphan per api key - but
                     // process any that are found
                     while (selectCursor.moveToNext()) {
@@ -216,6 +217,7 @@ import org.json.JSONObject;
 
     private void dbInsertBreadcrumb(JSONObject message) throws JSONException {
         ContentValues contentValues = new ContentValues();
+        contentValues.put(MParticleDatabase.BreadcrumbTable.API_KEY, mMessageManagerCallbacks.getApiKey());
         contentValues.put(MParticleDatabase.BreadcrumbTable.CREATED_AT, message.getLong(MessageKey.TIMESTAMP));
         contentValues.put(MParticleDatabase.BreadcrumbTable.SESSION_ID, getMessageSessionId(message));
         contentValues.put(MParticleDatabase.BreadcrumbTable.MESSAGE, message.toString());
@@ -234,6 +236,7 @@ import org.json.JSONObject;
 
     private void dbInsertSession(JSONObject message) throws JSONException {
         ContentValues contentValues = new ContentValues();
+        contentValues.put(SessionTable.API_KEY, mMessageManagerCallbacks.getApiKey());
         contentValues.put(SessionTable.SESSION_ID, message.getString(MessageKey.ID));
         contentValues.put(SessionTable.START_TIME, message.getLong(MessageKey.TIMESTAMP));
         contentValues.put(SessionTable.END_TIME, message.getLong(MessageKey.TIMESTAMP));
@@ -243,6 +246,7 @@ import org.json.JSONObject;
 
     private void dbInsertMessage(MPMessage message) throws JSONException {
         ContentValues contentValues = new ContentValues();
+        contentValues.put(MessageTable.API_KEY, mMessageManagerCallbacks.getApiKey());
         contentValues.put(MessageTable.CREATED_AT, message.getLong(MessageKey.TIMESTAMP));
         contentValues.put(MessageTable.SESSION_ID, getMessageSessionId(message));
         contentValues.put(MessageTable.MESSAGE, message.toString());
