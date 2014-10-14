@@ -46,6 +46,22 @@ public class MPMessage extends JSONObject{
         }
     }
 
+    public String getMessageType() {
+        return optString(Constants.MessageKey.TYPE);
+    }
+
+    public int getTypeNameHash() {
+        return MPUtility.mpHash(getType() + getName());
+    }
+
+    public String getType() {
+        return optString(Constants.MessageKey.TYPE);
+    }
+
+    public String getName() {
+        return optString(Constants.MessageKey.NAME);
+    }
+
     public static class Builder {
         private final String mMessageType;
         private final String mSessionId;

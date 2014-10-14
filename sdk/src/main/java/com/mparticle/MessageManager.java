@@ -21,17 +21,19 @@ import com.mparticle.Constants.MessageKey;
 import com.mparticle.Constants.MessageType;
 import com.mparticle.MParticle.EventType;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 
-/* package-private */class MessageManager {
+/* package-private */class MessageManager implements MessageManagerCallbacks {
 
     private static final HandlerThread sMessageHandlerThread = new HandlerThread("mParticleMessageHandler",
             Process.THREAD_PRIORITY_BACKGROUND);
@@ -65,7 +67,7 @@ import java.util.UUID;
     public MessageManager(Context appContext, ConfigManager configManager) {
         mConfigManager = configManager;
         SQLiteDatabase database = new MParticleDatabase(appContext).getWritableDatabase();
-        mMessageHandler = new MessageHandler(sMessageHandlerThread.getLooper(), configManager.getApiKey(), database);
+        mMessageHandler = new MessageHandler(sMessageHandlerThread.getLooper(), database, this);
         mUploadHandler = new UploadHandler(appContext, sUploadHandlerThread.getLooper(), configManager, database);
         mPreferences = appContext.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
     }
@@ -605,6 +607,42 @@ import java.util.UUID;
             mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
         } catch (JSONException e) {
             ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to create mParticle log event message");
+        }
+    }
+
+    @Override
+    public void checkForTrigger(MPMessage message) {
+        JSONArray eventTypes = mConfigManager.getTriggerTypes();
+        JSONArray triggerHashes = mConfigManager.getTriggerMessages();
+        boolean shouldTrigger = false;
+
+        if (eventTypes != null){
+            for (int i = 0; i < eventTypes.length(); i++){
+                try {
+                    if (eventTypes.getString(i).equalsIgnoreCase(message.getMessageType())) {
+                        shouldTrigger = true;
+                        break;
+                    }
+                }catch (JSONException jse){
+
+                }
+            }
+        }
+        if (!shouldTrigger && triggerHashes != null){
+            for (int i = 0; i < triggerHashes.length(); i++){
+                try {
+                    if (triggerHashes.getInt(i) == message.getTypeNameHash()) {
+                        shouldTrigger = true;
+                        break;
+                    }
+                }catch (JSONException jse){
+
+                }
+            }
+        }
+        if (shouldTrigger) {
+            mUploadHandler.removeMessages(UploadHandler.UPLOAD_TRIGGER_MESSAGES);
+            mUploadHandler.sendMessageDelayed(mUploadHandler.obtainMessage(UploadHandler.UPLOAD_TRIGGER_MESSAGES, 1, 0), Constants.TRIGGER_MESSAGE_DELAY);
         }
     }
 

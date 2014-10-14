@@ -25,7 +25,6 @@ import org.json.JSONObject;
     private static final String TAG = Constants.LOG_TAG;
 
     private final SQLiteDatabase db;
-    private final String mApiKey;
 
     public static final int STORE_MESSAGE = 0;
     public static final int UPDATE_SESSION_ATTRIBUTES = 1;
@@ -33,15 +32,16 @@ import org.json.JSONObject;
     public static final int CREATE_SESSION_END_MESSAGE = 3;
     public static final int END_ORPHAN_SESSIONS = 4;
     public static final int STORE_BREADCRUMB = 5;
+    private final MessageManagerCallbacks mMessageManagerCallbacks;
 
     // boolean flag used in unit tests to wait until processing is finished.
     // this is not used in the normal execution.
     /* package-private */ boolean mIsProcessingMessage = false;
 
-    public MessageHandler(Looper looper, String apiKey, SQLiteDatabase database) {
+    public MessageHandler(Looper looper, SQLiteDatabase database, MessageManagerCallbacks messageManager) {
         super(looper);
         db = database;
-        mApiKey = apiKey;
+        mMessageManagerCallbacks = messageManager;
     }
 
     @Override
@@ -51,7 +51,7 @@ import org.json.JSONObject;
         switch (msg.what) {
             case STORE_MESSAGE:
                 try {
-                    JSONObject message = (JSONObject) msg.obj;
+                    MPMessage message = (MPMessage) msg.obj;
                     message.put(MessageKey.STATE_INFO_KEY, MessageManager.getStateInfo());
                     String messageType = message.getString(MessageKey.TYPE);
                     // handle the special case of session-start by creating the
@@ -67,6 +67,9 @@ import org.json.JSONObject;
                     if (MessageType.SESSION_START != messageType) {
                         dbUpdateSessionEndTime(getMessageSessionId(message), message.getLong(MessageKey.TIMESTAMP), 0);
                     }
+
+                    mMessageManagerCallbacks.checkForTrigger(message);
+
                 } catch (SQLiteException e) {
                     ConfigManager.log(MParticle.LogLevel.ERROR, e, "Error saving event to mParticle DB");
                 } catch (JSONException e) {
@@ -149,11 +152,10 @@ import org.json.JSONObject;
             case END_ORPHAN_SESSIONS:
                 try {
                     // find left-over sessions that exist during startup and end them
-                    String[] selectionArgs = new String[]{mApiKey};
                     String[] sessionColumns = new String[]{SessionTable.SESSION_ID};
                     Cursor selectCursor = db.query(SessionTable.TABLE_NAME, sessionColumns,
                             SessionTable.API_KEY + "=?",
-                            selectionArgs, null, null, null);
+                            null, null, null, null);
                     // NOTE: there should be at most one orphan per api key - but
                     // process any that are found
                     while (selectCursor.moveToNext()) {
@@ -211,7 +213,6 @@ import org.json.JSONObject;
 
     private void dbInsertBreadcrumb(JSONObject message) throws JSONException {
         ContentValues contentValues = new ContentValues();
-        contentValues.put(MParticleDatabase.BreadcrumbTable.API_KEY, mApiKey);
         contentValues.put(MParticleDatabase.BreadcrumbTable.CREATED_AT, message.getLong(MessageKey.TIMESTAMP));
         contentValues.put(MParticleDatabase.BreadcrumbTable.SESSION_ID, getMessageSessionId(message));
         contentValues.put(MParticleDatabase.BreadcrumbTable.MESSAGE, message.toString());
@@ -230,7 +231,6 @@ import org.json.JSONObject;
 
     private void dbInsertSession(JSONObject message) throws JSONException {
         ContentValues contentValues = new ContentValues();
-        contentValues.put(SessionTable.API_KEY, mApiKey);
         contentValues.put(SessionTable.SESSION_ID, message.getString(MessageKey.ID));
         contentValues.put(SessionTable.START_TIME, message.getLong(MessageKey.TIMESTAMP));
         contentValues.put(SessionTable.END_TIME, message.getLong(MessageKey.TIMESTAMP));
@@ -240,7 +240,6 @@ import org.json.JSONObject;
 
     private void dbInsertMessage(JSONObject message) throws JSONException {
         ContentValues contentValues = new ContentValues();
-        contentValues.put(MessageTable.API_KEY, mApiKey);
         contentValues.put(MessageTable.CREATED_AT, message.getLong(MessageKey.TIMESTAMP));
         contentValues.put(MessageTable.SESSION_ID, getMessageSessionId(message));
         contentValues.put(MessageTable.MESSAGE, message.toString());

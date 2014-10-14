@@ -49,6 +49,7 @@ import java.util.concurrent.TimeoutException;
     public static final int CLEANUP = 2;
     public static final int UPLOAD_HISTORY = 3;
     public static final int UPDATE_CONFIG = 4;
+    public static final int UPLOAD_TRIGGER_MESSAGES = 5;
     private static final String TAG = Constants.LOG_TAG;
     private final SQLiteDatabase db;
     private final SharedPreferences mPreferences;
@@ -143,6 +144,7 @@ import java.util.concurrent.TimeoutException;
                 }
                 break;
             case UPLOAD_MESSAGES:
+            case UPLOAD_TRIGGER_MESSAGES:
                 boolean needsHistory;
                 // execute all the upload steps
                 long uploadInterval = mConfigManager.getUploadInterval();

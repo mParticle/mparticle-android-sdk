@@ -23,6 +23,10 @@ package com.mparticle;
             89
     };
 
+    //wait 5 seconds to trigger an immediate upload in the case where multiple trigger-messages are logged
+    //in quick succession.
+    public static final long TRIGGER_MESSAGE_DELAY = 5000;
+
     interface MethodName {
         public static final String METHOD_NAME = "$MethodName";
         public static final String LOG_LTV = "LogLTVIncrease";
