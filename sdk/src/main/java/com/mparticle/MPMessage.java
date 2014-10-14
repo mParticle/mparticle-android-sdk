@@ -10,7 +10,7 @@ import java.util.UUID;
 /**
  * Created by sdozor on 10/9/14.
  */
-public class MPMessage extends JSONObject{
+class MPMessage extends JSONObject{
 
     private MPMessage(){}
     private MPMessage(Builder builder) throws JSONException{
