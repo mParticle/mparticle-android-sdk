@@ -27,6 +27,7 @@ import android.os.Bundle;
  */
 public final class MParticlePushUtility {
     public static final String CLOUD_MESSAGE_EXTRA = "mp-push-message";
+    public static final String CLOUD_ACTION_EXTRA = "mp-push-action";
 
     private MParticlePushUtility() {
         super();

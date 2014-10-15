@@ -10,6 +10,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.os.PowerManager;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import org.json.JSONException;
@@ -29,13 +30,10 @@ public class MPService extends IntentService {
 
     private static final String TAG = Constants.LOG_TAG;
     static final String MPARTICLE_NOTIFICATION_OPENED = "com.mparticle.push.notification_opened";
+    private static final String INTERNAL_NOTIFICATION_TAP = "com.mparticle.push.notification_tapped";
     private static final Object LOCK = MPService.class;
 
     private static PowerManager.WakeLock sWakeLock;
-    private static final String APP_STATE = "com.mparticle.push.appstate";
-    //private static final String PUSH_ORIGINAL_PAYLOAD = "com.mparticle.push.originalpayload";
-    //private static final String PUSH_REDACTED_PAYLOAD = "com.mparticle.push.redactedpayload";
-    private static final String BROADCAST_PERMISSION = ".mparticle.permission.NOTIFICATIONS";
 
     public MPService() {
         super("com.mparticle.MPService");
@@ -54,29 +52,30 @@ public class MPService extends IntentService {
     }
 
     @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.i("MPService", "onStartCommand");
-        return super.onStartCommand(intent, flags, startId);
-    }
-
-    @Override
     public final void onHandleIntent(final Intent intent) {
         boolean release = true;
         try {
-
-            MParticle.start(getApplicationContext());
-            MParticle.getInstance().mEmbeddedKitManager.handleIntent(intent);
-
             String action = intent.getAction();
             Log.i("MPService", "Handling action: " + action);
             if (action.equals("com.google.android.c2dm.intent.REGISTRATION")) {
+                MParticle.start(getApplicationContext());
+                MParticle.getInstance().mEmbeddedKitManager.handleIntent(intent);
                 handleRegistration(intent);
             } else if (action.equals("com.google.android.c2dm.intent.RECEIVE")) {
+                generateCloudMessage(intent);
+            } else if (action.equals("com.google.android.c2dm.intent.UNREGISTER")) {
+                intent.putExtra("unregistered", "true");
+                handleRegistration(intent);
+            } else if (action.equals(INTERNAL_NOTIFICATION_TAP)) {
+                handleNotificationTapInternal(intent);
+            } else if (action.equals(MParticlePushUtility.BROADCAST_NOTIFICATION_TAPPED)) {
+                handleNotificationTap(intent);
+            } else if (action.equals(MParticlePushUtility.BROADCAST_NOTIFICATION_RECEIVED)){
                 release = false;
-                (new AsyncTask<Intent, Void, Notification>() {
+                (new AsyncTask<AbstractCloudMessage, Void, Notification>() {
                     @Override
-                    protected Notification doInBackground(Intent... params) {
-                        return generateGcmNotification(params[0]);
+                    protected Notification doInBackground(AbstractCloudMessage... params) {
+                        return params[0].buildNotification(MPService.this);
                     }
 
                     @Override
@@ -86,7 +85,6 @@ public class MPService extends IntentService {
                             NotificationManager mNotifyMgr =
                                     (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
                             mNotifyMgr.notify(notification.hashCode(), notification);
-
                         }
                         synchronized (LOCK) {
                             if (sWakeLock != null && sWakeLock.isHeld()) {
@@ -94,13 +92,7 @@ public class MPService extends IntentService {
                             }
                         }
                     }
-                }).execute(intent);
-
-            } else if (action.equals("com.google.android.c2dm.intent.UNREGISTER")) {
-                intent.putExtra("unregistered", "true");
-                handleRegistration(intent);
-            } else if (action.equals(MPARTICLE_NOTIFICATION_OPENED)) {
-                handleNotificationTap(intent);
+                }).execute((AbstractCloudMessage)intent.getParcelableExtra(MParticlePushUtility.CLOUD_MESSAGE_EXTRA));
             } else {
                 handeReRegistration();
             }
@@ -113,26 +105,22 @@ public class MPService extends IntentService {
         }
     }
 
+    private void handleNotificationTapInternal(Intent intent) {
+        intent.setAction(MParticlePushUtility.BROADCAST_NOTIFICATION_TAPPED);
+        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+    }
+
     private void handeReRegistration() {
         MParticle.start(getApplicationContext());
         MParticle.getInstance();
     }
 
     private void handleNotificationTap(Intent intent) {
-       AbstractCloudMessage message = intent.getParcelableExtra(MParticlePushUtility.CLOUD_MESSAGE_EXTRA);
-       broadcastNotificationTapped((AbstractCloudMessage) intent.getParcelableExtra(MParticlePushUtility.CLOUD_MESSAGE_EXTRA));
-
-        try {
-            MParticle.start(getApplicationContext());
-            MParticle.getInstance().logNotification(message);
-        } catch (Throwable t) {
-
+        AbstractCloudMessage.CloudAction action = intent.getParcelableExtra(MParticlePushUtility.CLOUD_ACTION_EXTRA);
+        Intent actionIntent = action.getIntent();
+        if (actionIntent != null) {
+            startActivity(actionIntent);
         }
-        PackageManager packageManager = getPackageManager();
-        Intent launchIntent = packageManager.getLaunchIntentForPackage(getPackageName());
-        launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        launchIntent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-        startActivity(launchIntent);
     }
 
     private void handleRegistration(Intent intent) {
@@ -157,7 +145,7 @@ public class MPService extends IntentService {
         }
     }
 
-    private Notification generateGcmNotification(Intent intent) {
+    private void generateCloudMessage(Intent intent) {
         String appState = AppStateManager.APP_STATE_NOTRUNNING;
         if (MParticle.appRunning) {
             if (MParticle.getInstance().mAppStateManager.isBackgrounded()) {
@@ -167,34 +155,14 @@ public class MPService extends IntentService {
             }
         }
 
-        AbstractCloudMessage cloudMessage;
-        try {
-            cloudMessage = new MPCloudMessage(intent.getExtras());
-        }catch (JSONException jse){
-            cloudMessage = new ProviderCloudMessage(intent.getExtras());
-        }
+        AbstractCloudMessage cloudMessage = AbstractCloudMessage.createMessage(intent);
         cloudMessage.setAppState(appState);
         broadcastNotificationReceived(cloudMessage);
-        return cloudMessage.buildNotification(getApplicationContext());
-
     }
 
     private void broadcastNotificationReceived(AbstractCloudMessage message) {
         Intent intent = new Intent(MParticlePushUtility.BROADCAST_NOTIFICATION_RECEIVED);
         intent.putExtra(MParticlePushUtility.CLOUD_MESSAGE_EXTRA, message);
-        String packageName = getPackageName();
-        sendBroadcast(intent, packageName + BROADCAST_PERMISSION);
+        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
     }
-
-    private void broadcastNotificationTapped(AbstractCloudMessage message) {
-        Intent intent = new Intent(MParticlePushUtility.BROADCAST_NOTIFICATION_TAPPED);
-        intent.putExtra(MParticlePushUtility.CLOUD_MESSAGE_EXTRA, message);
-        String packageName = getPackageName();
-        sendBroadcast(intent, packageName + BROADCAST_PERMISSION);
-    }
-
-
-
-
-
 }
