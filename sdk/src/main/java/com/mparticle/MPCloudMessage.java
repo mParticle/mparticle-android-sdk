@@ -20,30 +20,55 @@ import java.io.InputStream;
  * Created by sdozor on 9/11/14.
  */
 public class MPCloudMessage extends AbstractCloudMessage {
-    private final static String ROOT_KEY = "mp_data";
-    private final static String SMALL_ICON = "si";
-    private final static String TITLE = "t";
-    private final static String PRIMARY_MESSAGE = "m";
-    private final static String SECONDARY_MESSAGE = "sm";
-    private final static String LARGE_ICON = "li";
-    private final static String LIGHTS_ROOT = "l";
-    private final static String LIGHTS_COLOR = "c";
-    private final static String LIGHTS_OFF_MILLIS = "off";
-    private final static String LIGHTS_ON_MILLIS = "on";
-    private final static String NUMBER = "n";
-    private final static String ALERT_ONCE = "ao";
-    private final static String PRIORITY = "p";
-    private final static String SOUND = "s";
-    private final static String BIG_IMAGE = "bi";
-    private final static String TITLE_EXPANDED = "xt";
-    private final static String INBOX_STYLE_ROOT = "ib";
-    private final static String BIG_TEXT = "bt";
-    private final static String VIBRATION_PATTERN = "v";
-    private final static String ACTION_1 = "a1";
-    private final static String ACTION_2 = "a2";
-    private final static String ACTION_3 = "a3";
+    private final static String COMMAND = "m_cmd";
+    private final static String CAMPAIGN_ID = "m_cid";
+    private final static String CONTENT_ID = "m_cntid";
+    private final static String SMALL_ICON = "m_si";
+    private final static String SHOW_INAPP_MESSAGE = "m_sia";
+    private final static String DEFAULT_ACTIVITY = "m_dact";
+    private final static String TITLE = "m_t";
+    private final static String PRIMARY_MESSAGE = "m_m";
+    private final static String SECONDARY_MESSAGE = "m_sm";
+    private final static String LARGE_ICON = "m_li";
+    private final static String LIGHTS_COLOR = "m_l_c";
+    private final static String LIGHTS_OFF_MILLIS = "m_l_off";
+    private final static String LIGHTS_ON_MILLIS = "m__on";
+    private final static String NUMBER = "m_n";
+    private final static String ALERT_ONCE = "m_ao";
+    private final static String PRIORITY = "m_p";
+    private final static String SOUND = "m_s";
+    private final static String BIG_IMAGE = "m_bi";
+    private final static String TITLE_EXPANDED = "m_xt";
+
+    private final static String INBOX_TEXT_1 = "m_ib_1";
+    private final static String INBOX_TEXT_2 = "m_ib_2";
+    private final static String INBOX_TEXT_3 = "m_ib_3";
+    private final static String INBOX_TEXT_4 = "m_ib_4";
+    private final static String INBOX_TEXT_5 = "m_ib_5";
+
+    private final static String BIG_TEXT = "m_bt";
+    private final static String VIBRATION_PATTERN = "m_v";
+
+    private final static String ACTION_1_ID = "m_a1_aid";
+    private final static String ACTION_1_ICON = "m_a1_ai";
+    private final static String ACTION_1_TITLE = "m_a1_at";
+    private final static String ACTION_1_ACTIVITY = "m_a1_act";
+
+    private final static String ACTION_2_ID = "m_a2_aid";
+    private final static String ACTION_2_ICON = "m_a2_ai";
+    private final static String ACTION_2_TITLE = "m_a2_at";
+    private final static String ACTION_2_ACTIVITY = "m_a2_act";
+
+    private final static String ACTION_3_ID = "m_a3_aid";
+    private final static String ACTION_3_ICON = "m_a3_ai";
+    private final static String ACTION_3_TITLE = "m_a3_at";
+    private final static String ACTION_3_ACTIVITY = "m_a3_act";
+
     private final static String ACTION_ICON = "ai";
     private final static String ACTION_TITLE = "at";
+    private final static String GROUP = "m_g";
+    private final static String INAPP_MESSAGE_THEME = "m_iamt";
+
 
 
     private String mSmallIcon;
@@ -89,79 +114,7 @@ public class MPCloudMessage extends AbstractCloudMessage {
     }
 
     MPCloudMessage(Bundle extras) throws JSONException{
-        JSONObject mpData = new JSONObject(extras.getString(ROOT_KEY));
-        mExtras = extras;
 
-        mSmallIcon = mpData.optString(SMALL_ICON, null);
-
-        mTitle = mpData.optString(TITLE, null);
-        mPrimaryText = mpData.optString(PRIMARY_MESSAGE, null);
-        mSecondayText = mpData.optString(SECONDARY_MESSAGE, null);
-        mLargeIconUri = mpData.optString(LARGE_ICON, null);
-        mTitleExpanded = mpData.optString(TITLE_EXPANDED, null);
-        mNumber = mpData.optInt(NUMBER, mNumber);
-        mAlertOnce = mpData.optBoolean(ALERT_ONCE, true);
-        mPriority = mpData.optInt(PRIORITY, mPriority);
-        mSoundUri =  mpData.optString(SOUND, null);
-        mBigImageUri = mpData.optString(BIG_IMAGE, null);
-        mBigText = mpData.optString(BIG_TEXT, null);
-
-        if (mpData.has(LIGHTS_ROOT)) {
-            try {
-                JSONObject lightData = mpData.getJSONObject(LIGHTS_ROOT);
-                mLightColor = lightData.optInt(LIGHTS_COLOR, mLightColor);
-                mLightOffMillis = lightData.optInt(LIGHTS_OFF_MILLIS, mLightOffMillis);
-                mLightOnMillis = lightData.optInt(LIGHTS_ON_MILLIS, mLightOnMillis);
-            }catch (JSONException jse){
-
-            }
-        }
-
-        if (mpData.has(INBOX_STYLE_ROOT)) {
-            try {
-                JSONArray lines = mpData.getJSONArray(INBOX_STYLE_ROOT);
-                if (lines != null && lines.length() > 0) {
-                    mInboxText = new String[lines.length()];
-                    for (int i = 0; i < lines.length(); i++) {
-                        mInboxText[i] = lines.getString(i);
-                    }
-                }
-            } catch (JSONException jse) {
-
-            }
-        }
-        if (mpData.has(VIBRATION_PATTERN)) {
-            try {
-                JSONArray pattern = mpData.getJSONArray(VIBRATION_PATTERN);
-                mVibrationPattern = new long[pattern.length()];
-                for (int i = 0; i < pattern.length(); i++) {
-                    mVibrationPattern[i] = pattern.getLong(i);
-                }
-            }catch (JSONException jse){
-
-            }
-        }
-
-        try{
-            if (mpData.has(ACTION_1)) {
-                mActions = new CloudAction[3];
-                mActions[0] = new CloudAction(mpData.getJSONObject(ACTION_1));
-            }
-            if (mpData.has(ACTION_2)) {
-                if (mActions == null){
-                    mActions = new CloudAction[3];
-                }
-                mActions[1] = new CloudAction(mpData.getJSONObject(ACTION_2));
-            }
-            if (mpData.has(ACTION_3)) {
-                if (mActions == null){
-                    mActions = new CloudAction[3];
-                }
-                mActions[2] = new CloudAction(mpData.getJSONObject(ACTION_3));
-            }
-        }catch (JSONException jse){
-
-        }
 
     }
 
