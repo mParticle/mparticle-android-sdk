@@ -15,12 +15,12 @@ import android.os.BatteryManager;
 import android.os.Bundle;
 import android.os.HandlerThread;
 import android.os.Process;
-import android.util.Log;
 
 import com.mparticle.Constants.MessageKey;
 import com.mparticle.Constants.MessageType;
 import com.mparticle.MParticle.EventType;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -29,9 +29,8 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Locale;
 import java.util.Map;
-import java.util.UUID;
 
-/* package-private */class MessageManager {
+/* package-private */class MessageManager implements MessageManagerCallbacks {
 
     private static final HandlerThread sMessageHandlerThread = new HandlerThread("mParticleMessageHandler",
             Process.THREAD_PRIORITY_BACKGROUND);
@@ -39,7 +38,7 @@ import java.util.UUID;
             Process.THREAD_PRIORITY_BACKGROUND);
     static final Runtime rt = Runtime.getRuntime();
     private static String sActiveNetworkName = "offline";
-    private static Location sLocation;
+    private Location mLocation;
 
     private static boolean sFirstRun;
     private static BroadcastReceiver sStatusBroadcastReceiver;
@@ -65,7 +64,7 @@ import java.util.UUID;
     public MessageManager(Context appContext, ConfigManager configManager) {
         mConfigManager = configManager;
         SQLiteDatabase database = new MParticleDatabase(appContext).getWritableDatabase();
-        mMessageHandler = new MessageHandler(sMessageHandlerThread.getLooper(), configManager.getApiKey(), database);
+        mMessageHandler = new MessageHandler(sMessageHandlerThread.getLooper(), database, this);
         mUploadHandler = new UploadHandler(appContext, sUploadHandlerThread.getLooper(), configManager, database);
         mPreferences = appContext.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
     }
@@ -110,43 +109,6 @@ import java.util.UUID;
 
         mUploadHandler.sendEmptyMessage(UploadHandler.UPDATE_CONFIG);
         mUploadHandler.sendEmptyMessageDelayed(UploadHandler.UPLOAD_MESSAGES, Constants.INITIAL_UPLOAD_DELAY);
-    }
-
-    /* package-private */
-    static JSONObject createMessage(String messageType, String sessionId, long sessionStart,
-                                    long time, String name, JSONObject attributes) throws JSONException {
-        JSONObject message = new JSONObject();
-        message.put(MessageKey.TYPE, messageType);
-        message.put(MessageKey.TIMESTAMP, time);
-        if (MessageType.SESSION_START == messageType) {
-            message.put(MessageKey.ID, sessionId);
-        } else {
-            if (sessionId != null) {
-                message.put(MessageKey.SESSION_ID, sessionId);
-            }
-
-            message.put(MessageKey.ID, UUID.randomUUID().toString());
-            if (sessionStart > 0) {
-                message.put(MessageKey.SESSION_START_TIMESTAMP, sessionStart);
-            }
-        }
-        if (name != null) {
-            message.put(MessageKey.NAME, name);
-        }
-        if (attributes != null) {
-            message.put(MessageKey.ATTRIBUTES, attributes);
-        }
-        if (!(MessageType.ERROR.equals(messageType) && !(MessageType.OPT_OUT.equals(messageType)))) {
-            if (sLocation != null) {
-                JSONObject locJSON = new JSONObject();
-                locJSON.put(MessageKey.LATITUDE, sLocation.getLatitude());
-                locJSON.put(MessageKey.LONGITUDE, sLocation.getLongitude());
-                locJSON.put(MessageKey.ACCURACY, sLocation.getAccuracy());
-                message.put(MessageKey.LOCATION, locJSON);
-            }
-        }
-
-        return message;
     }
 
     public static JSONObject getStateInfo() throws JSONException {
@@ -196,35 +158,21 @@ import java.util.UUID;
         return threshold;
     }
 
-    /* package-private */
-    static MPMessage createFirstRunMessage(long time, String sessionId, long startTime) throws JSONException {
-        return new MPMessage.Builder(MessageType.FIRST_RUN, sessionId)
+    MPMessage createFirstRunMessage(long time, String sessionId, long startTime) throws JSONException {
+        return new MPMessage.Builder(MessageType.FIRST_RUN, sessionId, mLocation)
                 .sessionStartTime(startTime)
                 .timestamp(time)
-                .location(sLocation)
                 .build();
     }
 
-    /* package-private */
-    static MPMessage createMessageSessionEnd(String sessionId, long start, long end, long foregroundLength,
-                                              JSONObject attributes) throws JSONException {
-        int eventCounter = mPreferences.getInt(Constants.PrefKeys.EVENT_COUNTER, 0);
-        resetEventCounter();
-        MPMessage message = new MPMessage.Builder(MessageType.SESSION_END, sessionId)
-                                .sessionStartTime(start)
-                                .timestamp(end)
-                                .attributes(attributes)
-                                .build();
-        message.put(MessageKey.EVENT_COUNTER, eventCounter);
-        message.put(MessageKey.SESSION_LENGTH, foregroundLength);
-        message.put(MessageKey.SESSION_LENGTH_TOTAL, (end - start));
-        message.put(MessageKey.STATE_INFO_KEY, MessageManager.getStateInfo());
-        return message;
-    }
+
 
     public void startSession(String sessionId, long time) {
         try {
-            JSONObject message = createMessage(MessageType.SESSION_START, sessionId, time, time, null, null);
+            MPMessage message = new MPMessage.Builder(MessageType.APP_STATE_TRANSITION, sessionId, mLocation)
+                    .sessionStartTime(time)
+                    .timestamp(System.currentTimeMillis())
+                    .build();
 
             SharedPreferences.Editor editor = mPreferences.edit();
             long timeInFg = mPreferences.getLong(Constants.PrefKeys.PREVIOUS_SESSION_FOREGROUND, 0);
@@ -308,7 +256,7 @@ import java.util.UUID;
 
     public void logEvent(String sessionId, long sessionStartTime, long time, String eventName, EventType eventType, JSONObject attributes, long eventLength, String currentActivity) {
         try {
-            MPMessage message = new MPMessage.Builder(MessageType.EVENT, sessionId)
+            MPMessage message = new MPMessage.Builder(MessageType.EVENT, sessionId, mLocation)
                     .sessionStartTime(sessionStartTime)
                     .timestamp(time)
                     .attributes(attributes)
@@ -337,8 +285,12 @@ import java.util.UUID;
 
     public void logScreen(String sessionId, long sessionStartTime, long time, String screenName, JSONObject attributes, boolean started) {
         try {
-            JSONObject message = createMessage(MessageType.SCREEN_VIEW, sessionId, sessionStartTime, time, screenName,
-                    attributes);
+            MPMessage message = new MPMessage.Builder(MessageType.SCREEN_VIEW, sessionId, mLocation)
+                    .sessionStartTime(sessionStartTime)
+                    .timestamp(time)
+                    .name(screenName)
+                    .attributes(attributes)
+                    .build();
             // NOTE: event timing is not supported (yet) but the server expects this data
             message.put(MessageKey.EVENT_START_TIME, time);
             message.put(MessageKey.EVENT_DURATION, 0);
@@ -351,7 +303,7 @@ import java.util.UUID;
 
     public void logBreadcrumb(String sessionId, long sessionStartTime, long time, String breadcrumb) {
         try {
-            MPMessage message = new MPMessage.Builder(MessageType.BREADCRUMB, sessionId)
+            MPMessage message = new MPMessage.Builder(MessageType.BREADCRUMB, sessionId, mLocation)
                                         .sessionStartTime(sessionStartTime)
                                         .timestamp(time)
                                         .build();
@@ -368,7 +320,7 @@ import java.util.UUID;
 
     public void optOut(String sessionId, long sessionStartTime, long time, boolean optOutStatus) {
         try {
-            MPMessage message = new MPMessage.Builder(MessageType.OPT_OUT, sessionId)
+            MPMessage message = new MPMessage.Builder(MessageType.OPT_OUT, sessionId, mLocation)
                     .sessionStartTime(sessionStartTime)
                     .timestamp(time)
                     .build();
@@ -385,7 +337,7 @@ import java.util.UUID;
 
     public void logErrorEvent(String sessionId, long sessionStartTime, long time, String errorMessage, Throwable t, JSONObject attributes, boolean caught) {
         try {
-            MPMessage message = new MPMessage.Builder(MessageType.ERROR, sessionId)
+            MPMessage message = new MPMessage.Builder(MessageType.ERROR, sessionId, mLocation)
                     .sessionStartTime(sessionStartTime)
                     .timestamp(time)
                     .attributes(attributes)
@@ -417,7 +369,7 @@ import java.util.UUID;
 
     public void logNetworkPerformanceEvent(String sessionId, long sessionStartTime, long time, String method, String url, long length, long bytesSent, long bytesReceived, String requestString) {
         try {
-            MPMessage message = new MPMessage.Builder(MessageType.NETWORK_PERFORMNACE, sessionId)
+            MPMessage message = new MPMessage.Builder(MessageType.NETWORK_PERFORMNACE, sessionId, mLocation)
                     .sessionStartTime(sessionStartTime)
                     .timestamp(time)
                     .build();
@@ -438,7 +390,7 @@ import java.util.UUID;
 
     public void setPushRegistrationId(String sessionId, long sessionStartTime, long time, String token, boolean registeringFlag) {
         try {
-            MPMessage message = new MPMessage.Builder(MessageType.PUSH_REGISTRATION, sessionId)
+            MPMessage message = new MPMessage.Builder(MessageType.PUSH_REGISTRATION, sessionId, mLocation)
                     .sessionStartTime(sessionStartTime)
                     .timestamp(time)
                     .build();
@@ -467,14 +419,14 @@ import java.util.UUID;
     }
 
     public void setLocation(Location location) {
-        sLocation = location;
+        mLocation = location;
         ConfigManager.log(MParticle.LogLevel.DEBUG, "Received location update: " + location);
     }
 
     public void logStateTransition(String stateTransInit, String sessionId, long sessionStartTime, Bundle lastNotificationBundle, String currentActivity,
                                    String launchUri, String launchExtras, String launchSourcePackage, long previousForegroundTime, long suspendedTime, int interruptions) {
         try {
-            MPMessage message = new MPMessage.Builder(MessageType.APP_STATE_TRANSITION, sessionId)
+            MPMessage message = new MPMessage.Builder(MessageType.APP_STATE_TRANSITION, sessionId, mLocation)
                     .sessionStartTime(sessionStartTime)
                     .timestamp(System.currentTimeMillis())
                     .build();
@@ -580,7 +532,11 @@ import java.util.UUID;
             }
         }
         try{
-            JSONObject message = createMessage(MessageType.PUSH_RECEIVED, sessionId, sessionStartTime, System.currentTimeMillis(), "gcm", null);
+            MPMessage message = new MPMessage.Builder(MessageType.PUSH_RECEIVED, sessionId, mLocation)
+                    .sessionStartTime(sessionStartTime)
+                    .timestamp(System.currentTimeMillis())
+                    .name("gcm")
+                    .build();
 
             message.put(MessageKey.PAYLOAD, attributes.toString());
             String regId = PushRegistrationHelper.getRegistrationId(mContext);
@@ -595,10 +551,13 @@ import java.util.UUID;
 
     }
 
-    public void logProfileAction(String action, String mSessionID, long mSessionStartTime) {
+    public void logProfileAction(String action, String sessionId, long sessionStartTime) {
         try {
-            JSONObject message = createMessage(MessageType.PROFILE, mSessionID, mSessionStartTime, System.currentTimeMillis(), null,
-                    null);
+
+            MPMessage message = new MPMessage.Builder(MessageType.PROFILE, sessionId, mLocation)
+                    .sessionStartTime(sessionStartTime)
+                    .timestamp(System.currentTimeMillis())
+                    .build();
 
             message.put(Constants.ProfileActions.KEY, action);
 
@@ -606,6 +565,63 @@ import java.util.UUID;
         } catch (JSONException e) {
             ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to create mParticle log event message");
         }
+    }
+
+    @Override
+    public void checkForTrigger(MPMessage message) {
+        JSONArray eventTypes = mConfigManager.getTriggerTypes();
+        JSONArray triggerHashes = mConfigManager.getTriggerMessages();
+        boolean shouldTrigger = false;
+
+        if (eventTypes != null){
+            for (int i = 0; i < eventTypes.length(); i++){
+                try {
+                    if (eventTypes.getString(i).equalsIgnoreCase(message.getMessageType())) {
+                        shouldTrigger = true;
+                        break;
+                    }
+                }catch (JSONException jse){
+
+                }
+            }
+        }
+        if (!shouldTrigger && triggerHashes != null){
+            for (int i = 0; i < triggerHashes.length(); i++){
+                try {
+                    if (triggerHashes.getInt(i) == message.getTypeNameHash()) {
+                        shouldTrigger = true;
+                        break;
+                    }
+                }catch (JSONException jse){
+
+                }
+            }
+        }
+        if (shouldTrigger) {
+            mUploadHandler.removeMessages(UploadHandler.UPLOAD_TRIGGER_MESSAGES);
+            mUploadHandler.sendMessageDelayed(mUploadHandler.obtainMessage(UploadHandler.UPLOAD_TRIGGER_MESSAGES, 1, 0), Constants.TRIGGER_MESSAGE_DELAY);
+        }
+    }
+
+    @Override
+    public MPMessage createMessageSessionEnd(String sessionId, long start, long end, long foregroundLength, JSONObject sessionAttributes) throws JSONException{
+        int eventCounter = mPreferences.getInt(Constants.PrefKeys.EVENT_COUNTER, 0);
+        resetEventCounter();
+        MPMessage message = new MPMessage.Builder(MessageType.SESSION_END, sessionId, mLocation)
+                .sessionStartTime(start)
+                .timestamp(end)
+                .attributes(sessionAttributes)
+                .build();
+        message.put(MessageKey.EVENT_COUNTER, eventCounter);
+        message.put(MessageKey.SESSION_LENGTH, foregroundLength);
+        message.put(MessageKey.SESSION_LENGTH_TOTAL, (end - start));
+        message.put(MessageKey.STATE_INFO_KEY, MessageManager.getStateInfo());
+        return message;
+    }
+
+    @Override
+    public String getApiKey() {
+        return mConfigManager.getApiKey();
     }
 
     private class StatusBroadcastReceiver extends BroadcastReceiver {

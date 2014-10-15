@@ -10,7 +10,7 @@ import java.util.UUID;
 /**
  * Created by sdozor on 10/9/14.
  */
-public class MPMessage extends JSONObject{
+class MPMessage extends JSONObject{
 
     private MPMessage(){}
     private MPMessage(Builder builder) throws JSONException{
@@ -46,6 +46,30 @@ public class MPMessage extends JSONObject{
         }
     }
 
+    public String getSessionId() {
+        if (Constants.MessageType.SESSION_START.equals(getMessageType())) {
+            return optString(Constants.MessageKey.ID, Constants.NO_SESSION_ID);
+        } else {
+            return optString(Constants.MessageKey.SESSION_ID, Constants.NO_SESSION_ID);
+        }
+    }
+
+    public String getMessageType() {
+        return optString(Constants.MessageKey.TYPE);
+    }
+
+    public int getTypeNameHash() {
+        return MPUtility.mpHash(getType() + getName());
+    }
+
+    public String getType() {
+        return optString(Constants.MessageKey.TYPE);
+    }
+
+    public String getName() {
+        return optString(Constants.MessageKey.NAME);
+    }
+
     public static class Builder {
         private final String mMessageType;
         private final String mSessionId;
@@ -55,9 +79,10 @@ public class MPMessage extends JSONObject{
         private JSONObject mAttributes;
         private Location mLocation;
 
-        public Builder(String messageType, String sessionId){
+        public Builder(String messageType, String sessionId, Location location){
             mMessageType = messageType;
             mSessionId = sessionId;
+            mLocation = location;
         }
 
         public Builder sessionStartTime(long sessionStartTime){
@@ -77,10 +102,6 @@ public class MPMessage extends JSONObject{
             return this;
         }
 
-        public Builder location(Location location){
-            mLocation = location;
-            return this;
-        }
         public MPMessage build() throws JSONException {
             return new MPMessage(this);
         }

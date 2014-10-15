@@ -426,6 +426,21 @@ class MPUtility {
         return bool;
     }
 
+    public static int mpHash(String input) {
+        int hash = 0;
+
+        if (input == null || input.length() == 0)
+            return hash;
+
+        char[] chars = input.toLowerCase().toCharArray();
+
+        for (char c : chars) {
+            hash = ((hash << 5) - hash) + c;
+        }
+
+        return hash;
+    }
+
     public static boolean hasTelephony(Context context) {
         return context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_TELEPHONY);
     }

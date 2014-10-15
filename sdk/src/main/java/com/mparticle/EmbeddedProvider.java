@@ -104,24 +104,11 @@ abstract class EmbeddedProvider implements IEmbeddedKit {
                 && !MParticle.getInstance().mConfigManager.getSendOoEvents();
     }
 
-    private static int hash(String input) {
-        int hash = 0;
 
-        if (input == null || input.length() == 0)
-            return hash;
-
-        char[] chars = input.toLowerCase().toCharArray();
-
-        for (char c : chars) {
-            hash = ((hash << 5) - hash) + c;
-        }
-
-        return hash;
-    }
 
     protected boolean shouldSend(MParticle.EventType type, String name){
-        int typeHash = hash(type.toString());
-        int typeNameHash = hash(type.toString() + name);
+        int typeHash = MPUtility.mpHash(type.toString());
+        int typeNameHash = MPUtility.mpHash(type.toString() + name);
         return types.get(typeHash, true) && names.get(typeNameHash, true);
     }
 
@@ -130,7 +117,7 @@ abstract class EmbeddedProvider implements IEmbeddedKit {
         String nameType = type + name;
         while (attIterator.hasNext()){
             String attributeKey = (String)attIterator.next();
-            int hash = hash(nameType + attributeKey);
+            int hash = MPUtility.mpHash(nameType + attributeKey);
             if (!attributes.get(hash, true)){
                 attIterator.remove();
             }

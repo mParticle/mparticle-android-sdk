@@ -28,6 +28,9 @@ import java.util.Iterator;
  */
 class ConfigManager {
     public static final String CONFIG_JSON = "json";
+    private static final String KEY_TRIGGER_ITEMS = "tri";
+    private static final String KEY_TRIGGER_ITEM_TYPES = "dts";
+    private static final String KEY_TRIGGER_ITEM_HASHES = "evts";
     private static final String KEY_OPT_OUT = "oo";
     public static final String KEY_UNHANDLED_EXCEPTIONS = "cue";
     public static final String KEY_PUSH_MESSAGES = "pmk";
@@ -56,6 +59,9 @@ class ConfigManager {
     private boolean mSendOoEvents;
     private JSONObject mProviderPersistence;
     private String mNetworkPerformance = "";
+
+    private JSONArray mTriggerMessageTypes;
+    private JSONArray mTriggerMessageHashes;
 
     private static boolean sIsDebugEnvironment = false;
     private int mRampValue = -1;
@@ -114,6 +120,21 @@ class ConfigManager {
         mSessionTimeoutInterval = responseJSON.optInt(KEY_SESSION_TIMEOUT, -1);
         mUploadInterval = responseJSON.optInt(KEY_UPLOAD_INTERVAL, -1);
 
+        mTriggerMessageTypes = mTriggerMessageHashes = null;
+        if (responseJSON.has(KEY_TRIGGER_ITEMS)){
+            try {
+                JSONObject items = responseJSON.getJSONObject(KEY_TRIGGER_ITEMS);
+                if (items.has(KEY_TRIGGER_ITEM_TYPES)) {
+                    mTriggerMessageTypes = items.getJSONArray(KEY_TRIGGER_ITEM_TYPES);
+                }
+                if (items.has(KEY_TRIGGER_ITEM_HASHES)) {
+                    mTriggerMessageHashes = items.getJSONArray(KEY_TRIGGER_ITEM_HASHES);
+                }
+            }catch (JSONException jse){
+
+            }
+        }
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD) {
             editor.apply();
         } else {
@@ -128,6 +149,14 @@ class ConfigManager {
 
     public String[] getPushKeys(){
         return mPushKeys;
+    }
+
+    public JSONArray getTriggerTypes(){
+        return mTriggerMessageTypes;
+    }
+
+    public JSONArray getTriggerMessages(){
+        return mTriggerMessageHashes;
     }
 
     private void applyConfig() {
