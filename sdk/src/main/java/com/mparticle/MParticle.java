@@ -270,7 +270,6 @@ public class MParticle {
                     if (appConfigManager.getLogUnhandledExceptions()) {
                         instance.enableUncaughtExceptionLogging();
                     }
-
                     if (appConfigManager.isPushEnabled()) {
                         instance.enablePushNotifications(appConfigManager.getPushSenderId());
                     }

@@ -197,12 +197,10 @@ import java.util.concurrent.TimeoutException;
     }
 
 
-    /* package-private */void prepareUploads(boolean history) {
+    void prepareUploads(boolean history) {
         Cursor readyMessagesCursor = null;
         try {
             // select messages ready to upload
-
-
             String selection;
             String[] selectionArgs;
             if (history) {

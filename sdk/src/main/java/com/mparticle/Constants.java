@@ -26,6 +26,8 @@ package com.mparticle;
     //wait 5 seconds to trigger an immediate upload in the case where multiple trigger-messages are logged
     //in quick succession.
     public static final long TRIGGER_MESSAGE_DELAY = 5000;
+    //special session id for messages logged without a session
+    static final String NO_SESSION_ID = "NO-SESSION";
 
     interface MethodName {
         public static final String METHOD_NAME = "$MethodName";

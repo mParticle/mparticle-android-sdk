@@ -135,12 +135,11 @@ import android.database.sqlite.SQLiteOpenHelper;
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        //so far upgrades have only been additive, so just make sure we've got all the tables.
         db.execSQL(CREATE_SESSIONS_DDL);
         db.execSQL(CREATE_MESSAGES_DDL);
         db.execSQL(CREATE_UPLOADS_DDL);
         db.execSQL(CREATE_COMMANDS_DDL);
         db.execSQL(CREATE_BREADCRUMBS_DDL);
-
     }
-
 }

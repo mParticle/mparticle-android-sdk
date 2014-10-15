@@ -65,7 +65,7 @@ import org.json.JSONObject;
                     dbInsertMessage(message);
 
                     if (MessageType.SESSION_START != messageType) {
-                        dbUpdateSessionEndTime(getMessageSessionId(message), message.getLong(MessageKey.TIMESTAMP), 0);
+                        dbUpdateSessionEndTime(message.getSessionId(), message.getLong(MessageKey.TIMESTAMP), 0);
                     }
 
                     mMessageManagerCallbacks.checkForTrigger(message);
@@ -175,7 +175,7 @@ import org.json.JSONObject;
                 break;
             case STORE_BREADCRUMB:
                 try {
-                    JSONObject message = (JSONObject) msg.obj;
+                    MPMessage message = (MPMessage) msg.obj;
                     dbInsertBreadcrumb(message);
                 } catch (SQLiteException e) {
                     ConfigManager.log(MParticle.LogLevel.ERROR, e, "Error saving breadcrumb to mParticle DB");
@@ -215,11 +215,11 @@ import org.json.JSONObject;
 
     private static final String[] idColumns = {"_id"};
 
-    private void dbInsertBreadcrumb(JSONObject message) throws JSONException {
+    private void dbInsertBreadcrumb(MPMessage message) throws JSONException {
         ContentValues contentValues = new ContentValues();
         contentValues.put(MParticleDatabase.BreadcrumbTable.API_KEY, mMessageManagerCallbacks.getApiKey());
         contentValues.put(MParticleDatabase.BreadcrumbTable.CREATED_AT, message.getLong(MessageKey.TIMESTAMP));
-        contentValues.put(MParticleDatabase.BreadcrumbTable.SESSION_ID, getMessageSessionId(message));
+        contentValues.put(MParticleDatabase.BreadcrumbTable.SESSION_ID, message.getSessionId());
         contentValues.put(MParticleDatabase.BreadcrumbTable.MESSAGE, message.toString());
 
 
@@ -248,7 +248,7 @@ import org.json.JSONObject;
         ContentValues contentValues = new ContentValues();
         contentValues.put(MessageTable.API_KEY, mMessageManagerCallbacks.getApiKey());
         contentValues.put(MessageTable.CREATED_AT, message.getLong(MessageKey.TIMESTAMP));
-        contentValues.put(MessageTable.SESSION_ID, getMessageSessionId(message));
+        contentValues.put(MessageTable.SESSION_ID, message.getSessionId());
         contentValues.put(MessageTable.MESSAGE, message.toString());
 
         if (message.getString(MessageKey.TYPE) == MessageType.FIRST_RUN) {
@@ -283,17 +283,5 @@ import org.json.JSONObject;
         }
         String[] whereArgs = {sessionId};
         db.update(SessionTable.TABLE_NAME, sessionValues, SessionTable.SESSION_ID + "=?", whereArgs);
-    }
-
-    // helper method for getting a session id out of a message since
-    // session-start messages use the id field
-    private String getMessageSessionId(JSONObject message) throws JSONException {
-        String sessionId;
-        if (MessageType.SESSION_START.equals(message.getString(MessageKey.TYPE))) {
-            sessionId = message.getString(MessageKey.ID);
-        } else {
-            sessionId = message.optString(MessageKey.SESSION_ID, "NO-SESSION");
-        }
-        return sessionId;
     }
 }
