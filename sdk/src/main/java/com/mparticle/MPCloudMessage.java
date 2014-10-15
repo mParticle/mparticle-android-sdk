@@ -62,7 +62,7 @@ public class MPCloudMessage extends AbstractCloudMessage {
     private String mBigText;
     private String[] mInboxText;
     private long[] mVibrationPattern;
-    private MPCloudAction[] mActions;
+    private CloudAction[] mActions;
 
     public MPCloudMessage(){}
 
@@ -84,7 +84,7 @@ public class MPCloudMessage extends AbstractCloudMessage {
         mBigText = pc.readString();
         pc.readStringArray(mInboxText);
         pc.readLongArray(mVibrationPattern);
-        mActions = (MPCloudAction[]) pc.readParcelableArray(MPCloudAction.class.getClassLoader());
+        mActions = (CloudAction[]) pc.readParcelableArray(CloudAction.class.getClassLoader());
         mExtras = pc.readBundle();
     }
 
@@ -144,20 +144,20 @@ public class MPCloudMessage extends AbstractCloudMessage {
 
         try{
             if (mpData.has(ACTION_1)) {
-                mActions = new MPCloudAction[3];
-                mActions[0] = new MPCloudAction(mpData.getJSONObject(ACTION_1));
+                mActions = new CloudAction[3];
+                mActions[0] = new CloudAction(mpData.getJSONObject(ACTION_1));
             }
             if (mpData.has(ACTION_2)) {
                 if (mActions == null){
-                    mActions = new MPCloudAction[3];
+                    mActions = new CloudAction[3];
                 }
-                mActions[1] = new MPCloudAction(mpData.getJSONObject(ACTION_2));
+                mActions[1] = new CloudAction(mpData.getJSONObject(ACTION_2));
             }
             if (mpData.has(ACTION_3)) {
                 if (mActions == null){
-                    mActions = new MPCloudAction[3];
+                    mActions = new CloudAction[3];
                 }
-                mActions[2] = new MPCloudAction(mpData.getJSONObject(ACTION_3));
+                mActions[2] = new CloudAction(mpData.getJSONObject(ACTION_3));
             }
         }catch (JSONException jse){
 
@@ -316,9 +316,4 @@ public class MPCloudMessage extends AbstractCloudMessage {
     }
 
 
-    private class MPCloudAction {
-        public MPCloudAction(JSONObject jsonObject) {
-
-        }
-    }
 }
