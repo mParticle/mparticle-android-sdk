@@ -45,19 +45,24 @@ public class CloudAction implements Parcelable {
         dest.writeString(mActionActivity);
     }
 
-    public PendingIntent getIntent(Context context, Bundle extras) {
+    public PendingIntent getIntent(Context context, AbstractCloudMessage message, CloudAction action) {
+        PendingIntent activityIntent = null;
         if (mActionActivity != null){
             try {
-                Intent intent = new Intent();
+                Intent intent = new Intent(MPService.INTERNAL_NOTIFICATION_TAP);
                 intent.setClass(context, Class.forName(mActionActivity));
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                intent.putExtras(extras);
-                return PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+                intent.putExtra(MParticlePushUtility.CLOUD_MESSAGE_EXTRA, message);
+                intent.putExtra(MParticlePushUtility.CLOUD_ACTION_EXTRA, action);
+
+                activityIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
             }catch (Exception e){
 
             }
         }
-        return null;
+        if (activityIntent == null){
+            activityIntent = message.getDefaultOpenIntent(context, message);
+        }
+        return activityIntent;
     }
 
     public static final Parcelable.Creator<CloudAction> CREATOR = new Parcelable.Creator<CloudAction>() {

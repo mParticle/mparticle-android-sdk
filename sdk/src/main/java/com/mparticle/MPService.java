@@ -31,7 +31,7 @@ public class MPService extends IntentService {
 
     private static final String TAG = Constants.LOG_TAG;
     static final String MPARTICLE_NOTIFICATION_OPENED = "com.mparticle.push.notification_opened";
-    private static final String INTERNAL_NOTIFICATION_TAP = "com.mparticle.push.notification_tapped";
+    static final String INTERNAL_NOTIFICATION_TAP = "com.mparticle.push.notification_tapped";
     private static final Object LOCK = MPService.class;
 
     private static PowerManager.WakeLock sWakeLock;
@@ -106,19 +106,10 @@ public class MPService extends IntentService {
         }
     }
 
-    private void handleNotificationTapInternal(Intent intent) {
-        intent.setAction(MParticlePushUtility.BROADCAST_NOTIFICATION_TAPPED);
-        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
-    }
-
-    private void handeReRegistration() {
-        MParticle.start(getApplicationContext());
-        MParticle.getInstance();
-    }
-
     private void handleNotificationTap(Intent intent) {
         CloudAction action = intent.getParcelableExtra(MParticlePushUtility.CLOUD_ACTION_EXTRA);
-        PendingIntent actionIntent = action.getIntent(getApplicationContext(), null);
+        AbstractCloudMessage message = intent.getParcelableExtra(MParticlePushUtility.CLOUD_MESSAGE_EXTRA);
+        PendingIntent actionIntent = action.getIntent(getApplicationContext(), message, action);
         if (actionIntent != null) {
             try {
                 actionIntent.send();
@@ -126,6 +117,18 @@ public class MPService extends IntentService {
 
             }
         }
+    }
+
+    private void handeReRegistration() {
+        MParticle.start(getApplicationContext());
+        MParticle.getInstance();
+    }
+
+    private void handleNotificationTapInternal(Intent intent) {
+        Intent broadcast = new Intent(MParticlePushUtility.BROADCAST_NOTIFICATION_TAPPED);
+        broadcast.putExtras(intent.getExtras());
+        LocalBroadcastManager.getInstance(this).sendBroadcast(broadcast);
+
     }
 
     private void handleRegistration(Intent intent) {

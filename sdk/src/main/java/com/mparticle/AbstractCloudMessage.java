@@ -37,7 +37,7 @@ public abstract class AbstractCloudMessage implements Parcelable {
         return appState;
     }
 
-    protected static PendingIntent getDefaultOpenIntent(Context context, AbstractCloudMessage message){
+    protected PendingIntent getDefaultOpenIntent(Context context, AbstractCloudMessage message){
         Intent launchIntent = new Intent(context, MPService.class);
         launchIntent.setAction(MPService.MPARTICLE_NOTIFICATION_OPENED);
         launchIntent.putExtra(MParticlePushUtility.CLOUD_MESSAGE_EXTRA, message);

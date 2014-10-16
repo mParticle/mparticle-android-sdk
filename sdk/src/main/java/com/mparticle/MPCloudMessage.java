@@ -1,7 +1,10 @@
 package com.mparticle;
 
 import android.app.Notification;
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
@@ -353,14 +356,36 @@ public class MPCloudMessage extends AbstractCloudMessage {
         }
 
         if (mActions != null) {
+            try {
+
+            }catch (Exception e){
+
+            }
             for (CloudAction action : mActions) {
-                notification.addAction(action.getIconId(context), action.getTitle(), action.getIntent(context, mExtras));
+                notification.addAction(action.getIconId(context), action.getTitle(), getLoopbackIntent(context, this, action));
             }
         }
 
-        notification.setContentIntent(MPCloudMessage.getDefaultOpenIntent(context, this));
+        notification.setContentIntent(getDefaultOpenIntent(context, this));
         notification.setAutoCancel(true);
         return notification.build();
+    }
+
+    @Override
+    protected PendingIntent getDefaultOpenIntent(Context context, AbstractCloudMessage message) {
+        PackageManager pm = context.getPackageManager();
+        Intent intent=pm.getLaunchIntentForPackage(context.getPackageName());
+        intent.putExtra(MParticlePushUtility.CLOUD_MESSAGE_EXTRA, message);
+        return PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+    }
+
+    private static PendingIntent getLoopbackIntent(Context context, AbstractCloudMessage message, CloudAction action){
+        Intent intent = new Intent(MPService.INTERNAL_NOTIFICATION_TAP);
+        intent.setClass(context, MPService.class);
+        intent.putExtra(MParticlePushUtility.CLOUD_MESSAGE_EXTRA, message);
+        intent.putExtra(MParticlePushUtility.CLOUD_ACTION_EXTRA, action);
+
+        return PendingIntent.getService(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
     }
 
     public static boolean isValid(Bundle extras) {
