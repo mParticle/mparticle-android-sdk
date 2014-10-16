@@ -169,7 +169,7 @@ import java.util.Map;
 
     public void startSession(String sessionId, long time) {
         try {
-            MPMessage message = new MPMessage.Builder(MessageType.APP_STATE_TRANSITION, sessionId, mLocation)
+            MPMessage message = new MPMessage.Builder(MessageType.SESSION_START, sessionId, mLocation)
                     .sessionStartTime(time)
                     .timestamp(System.currentTimeMillis())
                     .build();

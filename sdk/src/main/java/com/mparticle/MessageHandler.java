@@ -140,7 +140,7 @@ import org.json.JSONObject;
                         // delete the processed session record
                         db.delete(SessionTable.TABLE_NAME, SessionTable.SESSION_ID + "=?", new String[]{sessionId});
                     } else {
-                        ConfigManager.log(MParticle.LogLevel.ERROR, "Error creating session, no entry for sessionId in mParticle DB");
+                        ConfigManager.log(MParticle.LogLevel.ERROR, "Error creating session end, no entry for sessionId in mParticle DB");
                     }
                     selectCursor.close();
 
@@ -234,10 +234,10 @@ import org.json.JSONObject;
         }
     }
 
-    private void dbInsertSession(JSONObject message) throws JSONException {
+    private void dbInsertSession(MPMessage message) throws JSONException {
         ContentValues contentValues = new ContentValues();
         contentValues.put(SessionTable.API_KEY, mMessageManagerCallbacks.getApiKey());
-        contentValues.put(SessionTable.SESSION_ID, message.getString(MessageKey.ID));
+        contentValues.put(SessionTable.SESSION_ID, message.getSessionId());
         contentValues.put(SessionTable.START_TIME, message.getLong(MessageKey.TIMESTAMP));
         contentValues.put(SessionTable.END_TIME, message.getLong(MessageKey.TIMESTAMP));
         contentValues.put(SessionTable.SESSION_FOREGROUND_LENGTH, 0);
