@@ -4,6 +4,7 @@ import android.app.Notification;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -15,6 +16,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.InputStream;
+import java.lang.reflect.Array;
+import java.util.ArrayList;
 
 /**
  * Created by sdozor on 9/11/14.
@@ -64,56 +67,42 @@ public class MPCloudMessage extends AbstractCloudMessage {
     private final static String ACTION_3_TITLE = "m_a3_at";
     private final static String ACTION_3_ACTIVITY = "m_a3_act";
 
-    private final static String ACTION_ICON = "ai";
-    private final static String ACTION_TITLE = "at";
     private final static String GROUP = "m_g";
     private final static String INAPP_MESSAGE_THEME = "m_iamt";
 
-
-
-    private String mSmallIcon;
-
-    private String mSecondayText;
-    private String mLargeIconUri;
-    private int mLightColor = -1;
-    private int mLightOffMillis = -1;
-    private int mLightOnMillis = -1;
-    private int mNumber = -1;
-    private boolean mAlertOnce;
-    private int mPriority = NotificationCompat.PRIORITY_DEFAULT;
-    private String mSoundUri;
-    private String mBigImageUri;
-    private String mTitleExpanded;
-    private String mBigText;
-    private String[] mInboxText;
-    private long[] mVibrationPattern;
     private CloudAction[] mActions;
 
-    public MPCloudMessage(){}
-
     public MPCloudMessage(Parcel pc){
-        mSmallIcon = pc.readString();
-        mTitle = pc.readString();
-        mPrimaryText = pc.readString();
-        mSecondayText = pc.readString();
-        mLargeIconUri = pc.readString();
-        mLightColor = pc.readInt();
-        mLightOffMillis = pc.readInt();
-        mLightOnMillis = pc.readInt();
-        mNumber = pc.readInt();
-        mAlertOnce = (pc.readInt() == 1);
-        mPriority = pc.readInt();
-        mSoundUri = pc.readString();
-        mBigImageUri = pc.readString();
-        mTitleExpanded = pc.readString();
-        mBigText = pc.readString();
-        pc.readStringArray(mInboxText);
-        pc.readLongArray(mVibrationPattern);
+        super(pc);
+        pc.readTypedArray(mActions, CloudAction.CREATOR);
         mActions = (CloudAction[]) pc.readParcelableArray(CloudAction.class.getClassLoader());
-        mExtras = pc.readBundle();
     }
 
-    MPCloudMessage(Bundle extras) throws JSONException{
+    public MPCloudMessage(Bundle extras) {
+        super(extras);
+
+        mActions = new CloudAction[3];
+        if (mExtras.containsKey(ACTION_1_ID)){
+            mActions[0] = new CloudAction(
+                    mExtras.getString(ACTION_1_ID),
+                    mExtras.getString(ACTION_1_ICON),
+                    mExtras.getString(ACTION_1_TITLE),
+                    mExtras.getString(ACTION_1_ACTIVITY));
+        }
+        if (mExtras.containsKey(ACTION_2_ID)){
+            mActions[1] = new CloudAction(
+                    mExtras.getString(ACTION_2_ID),
+                    mExtras.getString(ACTION_2_ICON),
+                    mExtras.getString(ACTION_2_TITLE),
+                    mExtras.getString(ACTION_2_ACTIVITY));
+        }
+        if (mExtras.containsKey(ACTION_3_ID)){
+            mActions[2] = new CloudAction(
+                    mExtras.getString(ACTION_3_ID),
+                    mExtras.getString(ACTION_3_ICON),
+                    mExtras.getString(ACTION_3_TITLE),
+                    mExtras.getString(ACTION_3_ACTIVITY));
+        }
 
 
     }
@@ -132,30 +121,191 @@ public class MPCloudMessage extends AbstractCloudMessage {
     };
 
     @Override
-    public int describeContents() {
-        return 0;
+    public void writeToParcel(Parcel dest, int flags) {
+        super.writeToParcel(dest, flags);
+        dest.writeTypedArray(mActions, 0);
     }
 
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
+    public int getSmallIconResourceId(Context context){
+        String resourceName = mExtras.getString(SMALL_ICON);
+        if (!TextUtils.isEmpty(resourceName)) {
+            int id = context.getResources().getIdentifier(resourceName, "drawable", context.getPackageName());
+            if (id > 0){
+                return id;
+            }
+        }
+        return MParticlePushUtility.getFallbackIcon(context);
+    }
 
+    public String getContentTitle(Context context){
+        String title = mExtras.getString(TITLE);
+        if (TextUtils.isEmpty(title)){
+            return MParticlePushUtility.getFallbackTitle(context);
+        }else{
+            return title;
+        }
+    }
+
+    public String getPrimaryText(Context context){
+        String text = mExtras.getString(PRIMARY_MESSAGE);
+        if (TextUtils.isEmpty(text)){
+            return MParticlePushUtility.getFallbackTitle(context);
+        }else{
+            return text;
+        }
+    }
+
+    public String getSubText(){
+        return mExtras.getString(SECONDARY_MESSAGE);
+    }
+
+    public Bitmap getLargeIcon(Context context){
+        String largeIconUri = mExtras.getString(LARGE_ICON);
+        if (!TextUtils.isEmpty(largeIconUri)) {
+            if (largeIconUri.contains("http")) {
+                try {
+                    InputStream in = new java.net.URL(largeIconUri).openStream();
+                    return BitmapFactory.decodeStream(in);
+                } catch (Exception e) {
+
+
+                }
+            } else {
+                int drawableResourceId = context.getResources().getIdentifier(largeIconUri, "drawable", context.getPackageName());
+                if (drawableResourceId > 0) {
+                    return BitmapFactory.decodeResource(context.getResources(),
+                            drawableResourceId);
+                }
+            }
+        }
+        return null;
+    }
+
+    public int getLightColorArgb(){
+        return mExtras.getInt(LIGHTS_COLOR);
+    }
+
+    public int getLightOffMillis(){
+        return mExtras.getInt(LIGHTS_OFF_MILLIS);
+    }
+
+    public int getLightOnMillis(){
+        return mExtras.getInt(LIGHTS_ON_MILLIS);
+    }
+
+    public int getNumber(){
+        return mExtras.getInt(NUMBER);
+    }
+
+    public boolean getAlertOnlyOnce(){
+        if (mExtras.containsKey(ALERT_ONCE)){
+            return mExtras.getBoolean(ALERT_ONCE);
+        }
+        return true;
+    }
+
+    public Integer getPriority(){
+        if (mExtras.containsKey(PRIORITY)){
+            return mExtras.getInt(PRIORITY);
+        }else{
+            return null;
+        }
+    }
+
+    public Uri getSound(Context context){
+        String sound = mExtras.getString(SOUND);
+        if (!TextUtils.isEmpty(sound)) {
+            return Uri.parse("android.resource://" + context.getPackageName() + "/raw/" + mExtras.getString(SOUND));
+        }else{
+            return null;
+        }
+    }
+
+    public Bitmap getBigPicture(Context context){
+        String image = mExtras.getString(BIG_IMAGE);
+        if (!TextUtils.isEmpty(image)){
+            try {
+                InputStream in = new java.net.URL(image).openStream();
+                return BitmapFactory.decodeStream(in);
+            }catch (Exception e){
+
+            }
+        }
+        return null;
+    }
+
+    public String getExpandedTitle(){
+        return mExtras.getString(TITLE_EXPANDED);
+    }
+
+    public String getBigText(){
+        return mExtras.getString(BIG_TEXT);
+    }
+
+    public ArrayList<String> getInboxLines(){
+        ArrayList<String> lines = new ArrayList<String>();
+        String line_1 = mExtras.getString(INBOX_TEXT_1);
+        if (!TextUtils.isEmpty(line_1)){
+            lines.add(line_1);
+        }
+        String line_2 = mExtras.getString(INBOX_TEXT_2);
+        if (!TextUtils.isEmpty(line_2)){
+            lines.add(line_2);
+        }
+        String line_3 = mExtras.getString(INBOX_TEXT_3);
+        if (!TextUtils.isEmpty(line_3)){
+            lines.add(line_3);
+        }
+        String line_4 = mExtras.getString(INBOX_TEXT_4);
+        if (!TextUtils.isEmpty(line_4)){
+            lines.add(line_4);
+        }
+        String line_5 = mExtras.getString(INBOX_TEXT_5);
+        if (!TextUtils.isEmpty(line_5)){
+            lines.add(line_5);
+        }
+        return lines;
+    }
+
+    public long[] getVibrationPattern(){
+        String patternString = mExtras.getString(VIBRATION_PATTERN);
+        if (!TextUtils.isEmpty(patternString)){
+            try {
+                String[] patterns = patternString.split(",");
+                long[] primPatterns = new long[patterns.length];
+                int i = 0;
+                for (String pattern : patterns) {
+                    primPatterns[i] = Long.parseLong(pattern);
+                    i++;
+                }
+                return primPatterns;
+            }catch (Exception e){
+
+            }
+        }
+        return null;
     }
 
     public Notification buildNotification(Context context) {
-
         NotificationCompat.Builder notification = new NotificationCompat.Builder(context);
-        int smallIconResId = 0;
-        if (!TextUtils.isEmpty(mSmallIcon) && (smallIconResId = context.getResources().getIdentifier(mSmallIcon, "drawable", context.getPackageName())) > 0) {
-            notification.setSmallIcon(smallIconResId);
-        } else {
-            notification.setSmallIcon(MParticlePushUtility.getFallbackIcon(context));
+        notification.setSmallIcon(getSmallIconResourceId(context));
+        notification.setContentTitle(getContentTitle(context));
+        notification.setContentText(getPrimaryText(context));
+        notification.setSubText(getSubText());
+        notification.setLargeIcon(getLargeIcon(context));
+        int lightColor = getLightColorArgb();
+        if (lightColor > 0) {
+            notification.setLights(lightColor, getLightOnMillis(), getLightOffMillis());
         }
-        String fallbackTitle = MParticlePushUtility.getFallbackTitle(context);
-        notification.setContentTitle(mTitle == null ? fallbackTitle : mTitle);
-        notification.setContentText(mPrimaryText == null ? fallbackTitle : mPrimaryText);
-
-        if (!TextUtils.isEmpty(mSecondayText))
-            notification.setSubText(mSecondayText);
+        int number = getNumber();
+        if (number > 0) {
+            notification.setNumber(number);
+        }
+        notification.setOnlyAlertOnce(getAlertOnlyOnce());
+        Integer priority = getPriority();
+        if (priority != null) {
+            notification.setPriority(priority);
+        }
 
         /*
           waiting for v21 of support library to be released.
@@ -164,109 +314,56 @@ public class MPCloudMessage extends AbstractCloudMessage {
         }
         */
 
-        if (!TextUtils.isEmpty(mLargeIconUri)) {
-            if (mLargeIconUri.contains("http")) {
-                try {
-                    InputStream in = new java.net.URL(mLargeIconUri).openStream();
-                    notification.setLargeIcon(BitmapFactory.decodeStream(in));
-                } catch (Exception e) {
-
-
-                }
-            } else {
-                int drawableResourceId = context.getResources().getIdentifier(mLargeIconUri, "drawable", context.getPackageName());
-                if (drawableResourceId > 0) {
-                    Bitmap icon = BitmapFactory.decodeResource(context.getResources(),
-                            drawableResourceId);
-                    notification.setLargeIcon(icon);
-                }
-            }
+        Uri sound = getSound(context);
+        if (sound != null){
+            notification.setSound(sound);
         }
-        if (mLightColor > 0) {
-            notification.setLights(mLightColor, mLightOnMillis, mLightOffMillis);
-        }
-        if (mNumber > 0) {
-            notification.setNumber(mNumber);
-        }
+        Bitmap bigImage = getBigPicture(context);
+        ArrayList<String> inboxLines = getInboxLines();
+        String bigContentTitle = getExpandedTitle();
+        if (bigImage != null) {
+            NotificationCompat.BigPictureStyle style = new NotificationCompat.BigPictureStyle();
+            style.bigPicture(bigImage);
 
-        notification.setOnlyAlertOnce(mAlertOnce);
-        notification.setPriority(mPriority);
-
-      /*  if (mpData.has(SOUND)) {
-            try {
-                notification.setSound(Uri.parse("android.resource://" + context.getPackageName() + "/raw/" + mpData.getString(SOUND)));
-            } catch (Exception e) {
-
-            }
-        }
-        if (mpData.has(BIG_IMAGE)) {
-            try {
-                InputStream in = new java.net.URL(mpData.getString(BIG_IMAGE)).openStream();
-                NotificationCompat.BigPictureStyle style = new NotificationCompat.BigPictureStyle();
-                style.bigPicture(BitmapFactory.decodeStream(in));
-                if (mpData.has(TITLE_EXPANDED)) {
-                    style.setBigContentTitle(mpData.getString(TITLE_EXPANDED));
-                }
-                notification.setStyle(style);
-            } catch (Exception e) {
-
-
-            }
-        } else if (mpData.has(BIG_TEXT)) {
-            NotificationCompat.BigTextStyle style = new NotificationCompat.BigTextStyle().bigText(mpData.getString(BIG_TEXT));
-            if (mpData.has(TITLE_EXPANDED)) {
-                style.setBigContentTitle(mpData.getString(TITLE_EXPANDED));
+            if (!TextUtils.isEmpty(bigContentTitle)) {
+                style.setBigContentTitle(bigContentTitle);
             }
             notification.setStyle(style);
-        } else if (mpData.has(INBOX_STYLE_ROOT)) {
+        } else if (!TextUtils.isEmpty(getBigText())) {
+            NotificationCompat.BigTextStyle style = new NotificationCompat.BigTextStyle().bigText(getBigText());
+
+            if (!TextUtils.isEmpty(bigContentTitle)) {
+                style.setBigContentTitle(bigContentTitle);
+            }
+            notification.setStyle(style);
+        } else if (inboxLines != null && inboxLines.size() > 0) {
             NotificationCompat.InboxStyle style = new NotificationCompat.InboxStyle();
-            JSONArray lines = mpData.getJSONArray(INBOX_STYLE_ROOT);
-            for (int i = 0; i < lines.length(); i++) {
-                style.addLine(lines.getString(i));
+            for (String line : inboxLines){
+                style.addLine(line);
             }
-            if (mpData.has(TITLE_EXPANDED)) {
-                style.setBigContentTitle(mpData.getString(TITLE_EXPANDED));
+
+            if (!TextUtils.isEmpty(bigContentTitle)) {
+                style.setBigContentTitle(bigContentTitle);
             }
             notification.setStyle(style);
         }
-        if (mpData.has(VIBRATION_PATTERN)) {
-            JSONArray pattern = mpData.getJSONArray(VIBRATION_PATTERN);
-            List<Long> list = new ArrayList<Long>();
-            for (int i = 0; i < pattern.length(); i++) {
-                list.add(pattern.getLong(i));
+        long[] pattern = getVibrationPattern();
+        if (pattern != null && pattern.length > 0) {
+            notification.setVibrate(pattern);
+        }
+
+        if (mActions != null) {
+            for (CloudAction action : mActions) {
+                notification.addAction(action.getIconId(context), action.getTitle(), action.getIntent(context, mExtras));
             }
-            Long[] vArray = new Long[list.size()];
-            vArray = list.toArray(vArray);
-            long[] primitives = new long[vArray.length];
-            for (int i = 0; i < vArray.length; i++)
-                primitives[i] = vArray[i];
-
-            notification.setVibrate(primitives);
-        }
-        if (mpData.has(ACTION_1)) {
-            addAction(context, notification, mpData.getJSONObject(ACTION_1));
-        }
-        if (mpData.has(ACTION_2)) {
-            addAction(context, notification, mpData.getJSONObject(ACTION_2));
-        }
-        if (mpData.has(ACTION_3)) {
-            addAction(context, notification, mpData.getJSONObject(ACTION_3));
         }
 
-        notification.setContentIntent(MPCloudMessage.getDefaultOpenIntent(context, extras));*/
+        notification.setContentIntent(MPCloudMessage.getDefaultOpenIntent(context, this));
         notification.setAutoCancel(true);
-        // broadcastNotificationReceived(newExtras.getBundle(PUSH_ORIGINAL_PAYLOAD));
         return notification.build();
     }
 
-
-
-    private static void addAction(Context context, NotificationCompat.Builder notification, JSONObject actionData) {
-        try {
-            int drawableResourceId = context.getResources().getIdentifier(actionData.getString(ACTION_ICON), "drawable", context.getPackageName());
-            notification.addAction(drawableResourceId, actionData.getString(ACTION_TITLE), null);
-        }catch (JSONException e){}
+    public static boolean isValid(Bundle extras) {
+        return extras.containsKey(CAMPAIGN_ID);
     }
-
-
 }

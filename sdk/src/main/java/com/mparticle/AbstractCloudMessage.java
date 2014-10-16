@@ -16,9 +16,17 @@ import org.json.JSONObject;
  */
 public abstract class AbstractCloudMessage implements Parcelable {
     private String appState;
-    protected String mTitle;
-    protected String mPrimaryText;
     protected Bundle mExtras;
+
+    public AbstractCloudMessage(Parcel pc) {
+        mExtras = pc.readBundle();
+        appState = pc.readString();
+    }
+
+    public AbstractCloudMessage(Bundle extras){
+        mExtras = extras;
+    }
+
     public abstract Notification buildNotification(Context context);
 
     public void setAppState(String appState) {
@@ -41,30 +49,21 @@ public abstract class AbstractCloudMessage implements Parcelable {
     }
 
     public static AbstractCloudMessage createMessage(Intent intent) {
-        try {
+        if (MPCloudMessage.isValid(intent.getExtras())){
             return new MPCloudMessage(intent.getExtras());
-        }catch (JSONException jse){
+        }else{
             return new ProviderCloudMessage(intent.getExtras());
         }
     }
 
-    public class CloudAction implements Parcelable{
-        public CloudAction(JSONObject jsonObject) {
+    @Override
+    public int describeContents() {
+        return 0;
+    }
 
-        }
-
-        @Override
-        public int describeContents() {
-            return 0;
-        }
-
-        @Override
-        public void writeToParcel(Parcel dest, int flags) {
-
-        }
-
-        public Intent getIntent() {
-            return null;
-        }
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeBundle(mExtras);
+        dest.writeString(appState);
     }
 }

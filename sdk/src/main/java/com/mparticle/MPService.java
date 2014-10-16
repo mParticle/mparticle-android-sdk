@@ -5,6 +5,7 @@ import android.app.IntentService;
 
 import android.app.Notification;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -116,10 +117,14 @@ public class MPService extends IntentService {
     }
 
     private void handleNotificationTap(Intent intent) {
-        AbstractCloudMessage.CloudAction action = intent.getParcelableExtra(MParticlePushUtility.CLOUD_ACTION_EXTRA);
-        Intent actionIntent = action.getIntent();
+        CloudAction action = intent.getParcelableExtra(MParticlePushUtility.CLOUD_ACTION_EXTRA);
+        PendingIntent actionIntent = action.getIntent(getApplicationContext(), null);
         if (actionIntent != null) {
-            startActivity(actionIntent);
+            try {
+                actionIntent.send();
+            } catch (PendingIntent.CanceledException e) {
+
+            }
         }
     }
 

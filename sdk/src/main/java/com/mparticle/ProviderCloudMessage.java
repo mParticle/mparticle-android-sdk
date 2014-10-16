@@ -11,8 +11,10 @@ import android.util.Log;
  * Created by sdozor on 9/15/14.
  */
 public class ProviderCloudMessage extends AbstractCloudMessage {
+    private final String mPrimaryText;
+
     public ProviderCloudMessage(Bundle extras) {
-        mExtras = extras;
+        super(extras);
         mPrimaryText = findProviderMessage(extras);
     }
 
@@ -23,7 +25,8 @@ public class ProviderCloudMessage extends AbstractCloudMessage {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-
+        super.writeToParcel(dest, flags);
+        dest.writeString(mPrimaryText);
     }
 
     @Override

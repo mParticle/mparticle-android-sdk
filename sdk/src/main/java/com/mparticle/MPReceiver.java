@@ -65,7 +65,7 @@ public class MPReceiver extends BroadcastReceiver {
                 preferences.edit().putString(Constants.PrefKeys.INSTALL_REFERRER, referrer).commit();
             } else if (MParticlePushUtility.BROADCAST_NOTIFICATION_TAPPED.equalsIgnoreCase(intent.getAction())){
                 AbstractCloudMessage message = intent.getParcelableExtra(MParticlePushUtility.CLOUD_MESSAGE_EXTRA);
-                AbstractCloudMessage.CloudAction action = intent.getParcelableExtra(MParticlePushUtility.CLOUD_ACTION_EXTRA);
+                CloudAction action = intent.getParcelableExtra(MParticlePushUtility.CLOUD_ACTION_EXTRA);
                 if (!onNotificationTapped(message, action)){
                     MPService.runIntentInService(context, intent);
                 }
@@ -100,7 +100,7 @@ public class MPReceiver extends BroadcastReceiver {
      * @param action The action that the user acted on.
      * @return True if you would like to consume this tap/action, False if the mParticle SDK should attempt to handle it.
      */
-    protected boolean onNotificationTapped(AbstractCloudMessage message, AbstractCloudMessage.CloudAction action){
+    protected boolean onNotificationTapped(AbstractCloudMessage message, CloudAction action){
         return false;
     }
 
