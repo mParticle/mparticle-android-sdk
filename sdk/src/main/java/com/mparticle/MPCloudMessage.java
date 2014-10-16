@@ -74,8 +74,8 @@ public class MPCloudMessage extends AbstractCloudMessage {
 
     public MPCloudMessage(Parcel pc){
         super(pc);
+        mActions = new CloudAction[3];
         pc.readTypedArray(mActions, CloudAction.CREATOR);
-        mActions = (CloudAction[]) pc.readParcelableArray(CloudAction.class.getClassLoader());
     }
 
     public MPCloudMessage(Bundle extras) {
