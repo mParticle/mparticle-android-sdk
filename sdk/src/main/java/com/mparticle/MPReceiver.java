@@ -5,7 +5,9 @@ import android.app.Notification;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.support.v4.content.LocalBroadcastManager;
 
 /**
  * Core {@code BroadcastReceiver} used to support push notification and installer referrers. Handles the following Intent actions:
@@ -75,6 +77,9 @@ public class MPReceiver extends BroadcastReceiver {
                     MPService.runIntentInService(context, intent);
                 }
             } else {
+                IntentFilter filter = new IntentFilter(MParticlePushUtility.BROADCAST_NOTIFICATION_RECEIVED);
+                filter.addAction(MParticlePushUtility.BROADCAST_NOTIFICATION_TAPPED);
+                LocalBroadcastManager.getInstance(context).registerReceiver(this, filter);
                 MPService.runIntentInService(context, intent);
             }
         }
