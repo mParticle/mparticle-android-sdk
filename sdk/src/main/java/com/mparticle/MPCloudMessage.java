@@ -357,7 +357,9 @@ public class MPCloudMessage extends AbstractCloudMessage {
 
         if (mActions != null) {
             for (CloudAction action : mActions) {
-                notification.addAction(action.getIconId(context), action.getTitle(), getLoopbackIntent(context, this, action));
+                if (action != null) {
+                    notification.addAction(action.getIconId(context), action.getTitle(), getLoopbackIntent(context, this, action));
+                }
             }
         }
 
