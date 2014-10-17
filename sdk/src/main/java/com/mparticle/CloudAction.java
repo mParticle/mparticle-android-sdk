@@ -79,8 +79,8 @@ public class CloudAction implements Parcelable {
     };
 
     public int getIconId(Context context) {
-        if (!TextUtils.isEmpty(mActionId)) {
-            int id = context.getResources().getIdentifier(mActionId, "drawable", context.getPackageName());
+        if (!TextUtils.isEmpty(mActionIcon)) {
+            int id = context.getResources().getIdentifier(mActionIcon, "drawable", context.getPackageName());
             if (id > 0){
                 return id;
             }
