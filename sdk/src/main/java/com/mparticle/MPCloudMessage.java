@@ -158,6 +158,14 @@ public class MPCloudMessage extends AbstractCloudMessage {
         }
     }
 
+    public boolean getShowInApp() {
+        return Boolean.parseBoolean(mExtras.getString(SHOW_INAPP_MESSAGE));
+    }
+
+    public String getInAppTheme() {
+        return mExtras.getString(INAPP_MESSAGE_THEME);
+    }
+
     public String getSubText(){
         return mExtras.getString(SECONDARY_MESSAGE);
     }
@@ -388,4 +396,10 @@ public class MPCloudMessage extends AbstractCloudMessage {
     public static boolean isValid(Bundle extras) {
         return extras.containsKey(CAMPAIGN_ID);
     }
+
+    public CloudAction[] getActions() {
+        return mActions;
+    }
+
+
 }

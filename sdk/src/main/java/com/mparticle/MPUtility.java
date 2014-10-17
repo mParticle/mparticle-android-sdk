@@ -471,6 +471,17 @@ class MPUtility {
         return false;
     }
 
+    public static boolean isSupportLibAvailable(){
+
+        try {
+            Class.forName("android.support.v4.app.FragmentActivity");
+            return true;
+        } catch (ClassNotFoundException cnfe) {
+
+        }
+        return false;
+    }
+
     public static boolean isGcmServicesAvailable() {
         try {
             Class.forName("com.google.android.gms.gcm.GoogleCloudMessaging");

@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.*;
+import android.support.v4.app.FragmentActivity;
 
 import com.google.android.gms.appstate.AppState;
 
@@ -26,6 +27,7 @@ class AppStateManager implements MPActivityCallbacks{
     public static final String APP_STATE_NOTRUNNING = "not_running";
     private final SharedPreferences mPreferences;
     private final EmbeddedKitManager mEmbeddedKitManager;
+    private final boolean mSupportLib;
     private Class unityActivity = null;
     private String mCurrentActivity;
     private boolean mInitialized;
@@ -47,6 +49,8 @@ class AppStateManager implements MPActivityCallbacks{
         mLastStoppedTime = System.currentTimeMillis();
         mEmbeddedKitManager = embeddedKitManager;
 
+        mSupportLib = MPUtility.isSupportLibAvailable();
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
             setupLifecycleCallbacks();
         }
@@ -59,6 +63,13 @@ class AppStateManager implements MPActivityCallbacks{
     }
     @Override
     public void onActivityStarted(Activity activity, int currentCount) {
+        Intent intent = activity.getIntent();
+        if (mSupportLib && activity instanceof FragmentActivity && intent != null){
+            Parcelable message = intent.getParcelableExtra(MParticlePushUtility.CLOUD_MESSAGE_EXTRA);
+            if (message != null && ((MPCloudMessage)message).getShowInApp()) {
+                CloudDialog.newInstance((MPCloudMessage) message).show(((FragmentActivity) activity).getSupportFragmentManager(),"mpfragment");
+            }
+        }
         mPreferences.edit().putBoolean(Constants.PrefKeys.CRASHED_IN_FOREGROUND, true).commit();
         mCurrentActivity = AppStateManager.getActivityName(activity);
 
