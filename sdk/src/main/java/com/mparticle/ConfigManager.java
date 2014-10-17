@@ -348,12 +348,14 @@ class ConfigManager {
                 .commit();
     }
 
-    public int getPushTitle() {
-        return mPreferences.getInt(Constants.PrefKeys.PUSH_TITLE, 0);
+    public static int getPushTitle(Context context) {
+        return context.getSharedPreferences(PREFERENCES_FILE, Context.MODE_PRIVATE)
+                .getInt(Constants.PrefKeys.PUSH_TITLE, 0);
     }
 
-    public int getPushIcon() {
-        return mPreferences.getInt(Constants.PrefKeys.PUSH_ICON, 0);
+    public static int getPushIcon(Context context) {
+        return context.getSharedPreferences(PREFERENCES_FILE, Context.MODE_PRIVATE)
+                .getInt(Constants.PrefKeys.PUSH_ICON, 0);
     }
 
     public int getBreadcrumbLimit() {

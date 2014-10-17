@@ -123,7 +123,7 @@ public final class MParticlePushUtility {
 
     static String getFallbackTitle(Context context){
         String fallbackTitle = null;
-        int titleResId = MParticle.getInstance().mConfigManager.getPushTitle();
+        int titleResId = ConfigManager.getPushTitle(context);
         if (titleResId > 0){
             try{
                 fallbackTitle = context.getString(titleResId);
@@ -142,7 +142,7 @@ public final class MParticlePushUtility {
     }
 
     static int getFallbackIcon(Context context){
-        int smallIcon = MParticle.getInstance().mConfigManager.getPushIcon();
+        int smallIcon = ConfigManager.getPushIcon(context);
         try{
             Drawable draw = context.getResources().getDrawable(smallIcon);
         }catch (Resources.NotFoundException nfe){
