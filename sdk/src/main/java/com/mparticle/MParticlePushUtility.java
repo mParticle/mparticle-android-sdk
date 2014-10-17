@@ -38,7 +38,7 @@ public final class MParticlePushUtility {
      *
      * In the received Intent, you will have access to the entire payload of the push notification.
      */
-    public static final String BROADCAST_NOTIFICATION_RECEIVED = "com.mparticle.push.NOTIFICATION_RECEIVED";
+    public static final String BROADCAST_NOTIFICATION_RECEIVED = "com.mparticle.push.RECEIVE";
     /**
      * Listen for this broadcast (as an Intent action) to detect when a user taps a push message in the
      * notification bar of their device. You may then navigate or otherwise adjust the user experience based on
@@ -46,7 +46,7 @@ public final class MParticlePushUtility {
      *
      * In the received Intent, you will have access to the entire payload of the push notification.
      */
-    public static final String BROADCAST_NOTIFICATION_TAPPED = "com.mparticle.push.NOTIFICATION_TAPPED";
+    public static final String BROADCAST_NOTIFICATION_TAPPED = "com.mparticle.push.TAP";
     /**
      * If leveraging either <code>BROADCAST_NOTIFICATION_RECEIVED</code> or <code>BROADCAST_NOTIFICATION_TAPPED</code>, you
      * have access to the entire payload of a push notification. Depending on the service that has sent the push, for example

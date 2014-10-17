@@ -91,4 +91,8 @@ public class CloudAction implements Parcelable {
     public CharSequence getTitle() {
         return mActionTitle;
     }
+
+    public String getActionId() {
+        return mActionId;
+    }
 }

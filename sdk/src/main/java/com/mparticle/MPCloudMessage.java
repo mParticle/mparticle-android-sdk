@@ -375,12 +375,12 @@ public class MPCloudMessage extends AbstractCloudMessage {
     }
 
     private static PendingIntent getLoopbackIntent(Context context, AbstractCloudMessage message, CloudAction action){
-        Intent intent = new Intent(MPService.INTERNAL_NOTIFICATION_TAP);
+        Intent intent = new Intent(MPService.INTERNAL_NOTIFICATION_TAP + action.getActionId());
         intent.setClass(context, MPService.class);
         intent.putExtra(MParticlePushUtility.CLOUD_MESSAGE_EXTRA, message);
         intent.putExtra(MParticlePushUtility.CLOUD_ACTION_EXTRA, action);
 
-        return PendingIntent.getService(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        return PendingIntent.getService(context, action.getActionId().hashCode(), intent, PendingIntent.FLAG_UPDATE_CURRENT);
     }
 
     public static boolean isValid(Bundle extras) {

@@ -77,14 +77,13 @@ public class MPReceiver extends BroadcastReceiver {
                     MPService.runIntentInService(context, intent);
                 }
             } else {
-                IntentFilter filter = new IntentFilter(MParticlePushUtility.BROADCAST_NOTIFICATION_RECEIVED);
-                filter.addAction(MParticlePushUtility.BROADCAST_NOTIFICATION_TAPPED);
-                LocalBroadcastManager.getInstance(context).registerReceiver(this, filter);
                 MPService.runIntentInService(context, intent);
             }
         }
         setResult(Activity.RESULT_OK, null, null);
     }
+
+
 
     /**
      * Override this method to listen for when a notification has been received.

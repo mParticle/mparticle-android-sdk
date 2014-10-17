@@ -67,7 +67,7 @@ public class MPService extends IntentService {
             } else if (action.equals("com.google.android.c2dm.intent.UNREGISTER")) {
                 intent.putExtra("unregistered", "true");
                 handleRegistration(intent);
-            } else if (action.equals(INTERNAL_NOTIFICATION_TAP)) {
+            } else if (action.startsWith(INTERNAL_NOTIFICATION_TAP)) {
                 handleNotificationTapInternal(intent);
             } else if (action.equals(MParticlePushUtility.BROADCAST_NOTIFICATION_TAPPED)) {
                 handleNotificationTap(intent);
@@ -127,8 +127,7 @@ public class MPService extends IntentService {
     private void handleNotificationTapInternal(Intent intent) {
         Intent broadcast = new Intent(MParticlePushUtility.BROADCAST_NOTIFICATION_TAPPED);
         broadcast.putExtras(intent.getExtras());
-        LocalBroadcastManager.getInstance(this).sendBroadcast(broadcast);
-
+        sendOrderedBroadcast(broadcast, null);
     }
 
     private void handleRegistration(Intent intent) {
@@ -171,6 +170,6 @@ public class MPService extends IntentService {
     private void broadcastNotificationReceived(AbstractCloudMessage message) {
         Intent intent = new Intent(MParticlePushUtility.BROADCAST_NOTIFICATION_RECEIVED);
         intent.putExtra(MParticlePushUtility.CLOUD_MESSAGE_EXTRA, message);
-        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+        sendOrderedBroadcast(intent, null);
     }
 }
