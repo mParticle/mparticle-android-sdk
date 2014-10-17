@@ -74,7 +74,7 @@ import javax.net.ssl.HttpsURLConnection;
  */
 public class MParticle {
 
-    static Boolean appRunning;
+    static boolean appRunning;
     final ConfigManager mConfigManager;
     final AppStateManager mAppStateManager;
     final MeasuredRequestManager measuredRequestManager;
