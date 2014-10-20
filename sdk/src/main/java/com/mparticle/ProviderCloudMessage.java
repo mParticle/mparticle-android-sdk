@@ -32,6 +32,11 @@ public class ProviderCloudMessage extends AbstractCloudMessage {
     }
 
     @Override
+    public int getId() {
+        return mPrimaryText.hashCode();
+    }
+
+    @Override
     public Notification buildNotification(Context context) {
         Notification notification = new NotificationCompat.Builder(context)
                 .setContentIntent(getDefaultOpenIntent(context, this))

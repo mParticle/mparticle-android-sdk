@@ -127,6 +127,11 @@ public class MPCloudMessage extends AbstractCloudMessage {
         dest.writeTypedArray(mActions, 0);
     }
 
+    @Override
+    public int getId() {
+        return getContentId().hashCode();
+    }
+
     public int getSmallIconResourceId(Context context){
         String resourceName = mExtras.getString(SMALL_ICON);
         if (!TextUtils.isEmpty(resourceName)) {

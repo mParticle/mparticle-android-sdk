@@ -67,4 +67,6 @@ public abstract class AbstractCloudMessage implements Parcelable {
         dest.writeBundle(mExtras);
         dest.writeString(appState);
     }
+
+    public abstract int getId();
 }

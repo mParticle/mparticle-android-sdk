@@ -72,6 +72,7 @@ public class MPService extends IntentService {
                 handleNotificationTap(intent);
             } else if (action.equals(MParticlePushUtility.BROADCAST_NOTIFICATION_RECEIVED)){
                 release = false;
+                final AbstractCloudMessage message = intent.getParcelableExtra(MParticlePushUtility.CLOUD_MESSAGE_EXTRA);
                 (new AsyncTask<AbstractCloudMessage, Void, Notification>() {
                     @Override
                     protected Notification doInBackground(AbstractCloudMessage... params) {
@@ -84,7 +85,7 @@ public class MPService extends IntentService {
                         if (notification != null) {
                             NotificationManager mNotifyMgr =
                                     (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-                            mNotifyMgr.notify(notification.hashCode(), notification);
+                            mNotifyMgr.notify(message.getId(), notification);
                         }
                         synchronized (LOCK) {
                             if (sWakeLock != null && sWakeLock.isHeld()) {
@@ -124,6 +125,11 @@ public class MPService extends IntentService {
     }
 
     private void handleNotificationTapInternal(Intent intent) {
+        final AbstractCloudMessage message = intent.getParcelableExtra(MParticlePushUtility.CLOUD_MESSAGE_EXTRA);
+        NotificationManager mNotifyMgr =
+                (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        mNotifyMgr.cancel(message.getId());
+
         Intent broadcast = new Intent(MParticlePushUtility.BROADCAST_NOTIFICATION_TAPPED);
         broadcast.putExtras(intent.getExtras());
         sendOrderedBroadcast(broadcast, null);
