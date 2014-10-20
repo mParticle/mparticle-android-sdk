@@ -7,8 +7,10 @@ import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
+import android.view.ContextThemeWrapper;
 
 import com.mparticle.MParticlePushUtility;
 
@@ -16,6 +18,9 @@ import com.mparticle.MParticlePushUtility;
  * Created by sdozor on 10/17/14.
  */
 public class CloudDialog extends DialogFragment {
+
+    private static final String DARK_THEME = "mp.dark";
+    private static final String LIGHT_THEME = "mp.light";
 
     public static String TAG = "mp_dialog";
 
@@ -38,9 +43,37 @@ public class CloudDialog extends DialogFragment {
             // use the ic_dialog_alert icon if the app's can not be found
         }
 
-        AlertDialog.Builder dialog = new AlertDialog.Builder(getActivity())
-                .setIcon(iconId)
-                .setTitle(message.getContentTitle(getActivity()));
+        String theme = message.getInAppTheme();
+        int themeId = 0;
+        if (theme != null && !theme.equals(DARK_THEME) && !theme.equals(LIGHT_THEME)){
+            try {
+                themeId = getResources().getIdentifier(theme, "style", getActivity().getPackageName());
+            }catch (Exception e){
+
+            }
+        }else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+            if (DARK_THEME.equals(theme)) {
+                themeId = AlertDialog.THEME_HOLO_DARK;
+            } else {
+                themeId = AlertDialog.THEME_HOLO_LIGHT;
+            }
+        }
+
+        AlertDialog.Builder dialog;
+
+        if (themeId > 0) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+                dialog = new AlertDialog.Builder(getActivity(), themeId);
+            } else {
+                ContextThemeWrapper ctw = new ContextThemeWrapper( getActivity(), themeId );
+                dialog = new AlertDialog.Builder(ctw);
+            }
+        }else{
+            dialog = new AlertDialog.Builder(getActivity());
+        }
+
+        dialog.setIcon(iconId);
+        dialog.setTitle(message.getContentTitle(getActivity()));
 
         String primary = message.getPrimaryText(getActivity());
         String bigText = message.getBigText();
