@@ -1,16 +1,24 @@
-package com.mparticle;
+package com.mparticle.push;
 
 
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
+import android.content.pm.PackageManager;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
+
+import com.mparticle.MParticlePushUtility;
 
 /**
  * Created by sdozor on 10/17/14.
  */
 public class CloudDialog extends DialogFragment {
+
+    public static String TAG = "mp_dialog";
+
     public static CloudDialog newInstance(MPCloudMessage message) {
         CloudDialog frag = new CloudDialog();
         Bundle args = new Bundle();
@@ -23,8 +31,15 @@ public class CloudDialog extends DialogFragment {
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         MPCloudMessage message = getArguments().getParcelable(MParticlePushUtility.CLOUD_MESSAGE_EXTRA);
 
+        int iconId = android.R.drawable.ic_dialog_alert;
+        try {
+            iconId = getActivity().getPackageManager().getApplicationInfo(getActivity().getPackageName(), 0).icon;
+        } catch (PackageManager.NameNotFoundException e) {
+            // use the ic_dialog_alert icon if the app's can not be found
+        }
+
         AlertDialog.Builder dialog = new AlertDialog.Builder(getActivity())
-                .setIcon(message.getSmallIconResourceId(getActivity()))
+                .setIcon(iconId)
                 .setTitle(message.getContentTitle(getActivity()));
 
         String primary = message.getPrimaryText(getActivity());

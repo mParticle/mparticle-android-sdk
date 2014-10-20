@@ -400,4 +400,7 @@ public class MPCloudMessage extends AbstractCloudMessage {
     }
 
 
+    public String getContentId() {
+        return mExtras.getString(CONTENT_ID);
+    }
 }

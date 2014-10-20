@@ -121,7 +121,7 @@ public final class MParticlePushUtility {
         }
     }
 
-    static String getFallbackTitle(Context context){
+    public static String getFallbackTitle(Context context){
         String fallbackTitle = null;
         int titleResId = ConfigManager.getPushTitle(context);
         if (titleResId > 0){
@@ -141,7 +141,7 @@ public final class MParticlePushUtility {
         return fallbackTitle;
     }
 
-    static int getFallbackIcon(Context context){
+    public static int getFallbackIcon(Context context){
         int smallIcon = ConfigManager.getPushIcon(context);
         try{
             Drawable draw = context.getResources().getDrawable(smallIcon);

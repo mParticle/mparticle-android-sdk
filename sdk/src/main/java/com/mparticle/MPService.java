@@ -8,13 +8,12 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.os.PowerManager;
-import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
-import org.json.JSONException;
+import com.mparticle.push.AbstractCloudMessage;
+import com.mparticle.push.CloudAction;
 
 /**
  * {@code IntentService } used internally by the SDK to process incoming broadcast messages in the background. Required for push notification functionality.
@@ -30,8 +29,8 @@ import org.json.JSONException;
 public class MPService extends IntentService {
 
     private static final String TAG = Constants.LOG_TAG;
-    static final String MPARTICLE_NOTIFICATION_OPENED = "com.mparticle.push.notification_opened";
-    static final String INTERNAL_NOTIFICATION_TAP = "com.mparticle.push.notification_tapped";
+    public static final String MPARTICLE_NOTIFICATION_OPENED = "com.mparticle.push.notification_opened";
+    public static final String INTERNAL_NOTIFICATION_TAP = "com.mparticle.push.notification_tapped";
     private static final Object LOCK = MPService.class;
 
     private static PowerManager.WakeLock sWakeLock;

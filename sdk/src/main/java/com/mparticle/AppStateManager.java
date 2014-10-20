@@ -10,9 +10,9 @@ import android.content.SharedPreferences;
 import android.os.*;
 import android.support.v4.app.FragmentActivity;
 
-import com.google.android.gms.appstate.AppState;
+import com.mparticle.push.CloudDialog;
+import com.mparticle.push.MPCloudMessage;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.concurrent.atomic.AtomicInteger;
@@ -63,13 +63,7 @@ class AppStateManager implements MPActivityCallbacks{
     }
     @Override
     public void onActivityStarted(Activity activity, int currentCount) {
-        Intent intent = activity.getIntent();
-        if (mSupportLib && activity instanceof FragmentActivity && intent != null){
-            Parcelable message = intent.getParcelableExtra(MParticlePushUtility.CLOUD_MESSAGE_EXTRA);
-            if (message != null && ((MPCloudMessage)message).getShowInApp()) {
-                CloudDialog.newInstance((MPCloudMessage) message).show(((FragmentActivity) activity).getSupportFragmentManager(),"mpfragment");
-            }
-        }
+
         mPreferences.edit().putBoolean(Constants.PrefKeys.CRASHED_IN_FOREGROUND, true).commit();
         mCurrentActivity = AppStateManager.getActivityName(activity);
 
@@ -175,6 +169,23 @@ class AppStateManager implements MPActivityCallbacks{
     @Override
     public void onActivityResumed(Activity activity, int currentCount){
         mEmbeddedKitManager.onActivityResumed(activity, mActivities.get());
+        showCloudDialog(activity);
+    }
+
+    private void showCloudDialog(Activity activity){
+        Intent intent = activity.getIntent();
+        if (mSupportLib && intent != null && activity instanceof FragmentActivity){
+            Parcelable message = intent.getParcelableExtra(MParticlePushUtility.CLOUD_MESSAGE_EXTRA);
+            if (message != null) {
+                String contentId = ((MPCloudMessage) message).getContentId();
+                String shownId = intent.getStringExtra("mp_content_shown");
+                if (((MPCloudMessage) message).getShowInApp() && !contentId.equals(shownId)) {
+                    activity.getIntent().putExtra("mp_content_shown", ((MPCloudMessage) message).getContentId());
+                    CloudDialog.newInstance((MPCloudMessage) message)
+                            .show(((FragmentActivity) activity).getSupportFragmentManager(), CloudDialog.TAG);
+                }
+            }
+        }
     }
 
     @Override
