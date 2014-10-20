@@ -1,4 +1,4 @@
-package com.mparticle;
+package com.mparticle.push;
 
 import android.app.Notification;
 import android.app.PendingIntent;
@@ -8,8 +8,9 @@ import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.mparticle.MPService;
+import com.mparticle.MParticlePushUtility;
+import com.mparticle.ProviderCloudMessage;
 
 /**
  * Created by sdozor on 9/15/14.

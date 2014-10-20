@@ -1,4 +1,4 @@
-package com.mparticle;
+package com.mparticle.push;
 
 import android.app.Notification;
 import android.app.PendingIntent;
@@ -14,12 +14,10 @@ import android.os.Parcelable;
 import android.support.v4.app.NotificationCompat;
 import android.text.TextUtils;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.mparticle.MPService;
+import com.mparticle.MParticlePushUtility;
 
 import java.io.InputStream;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 /**
@@ -286,7 +284,7 @@ public class MPCloudMessage extends AbstractCloudMessage {
                 long[] primPatterns = new long[patterns.length];
                 int i = 0;
                 for (String pattern : patterns) {
-                    primPatterns[i] = Long.parseLong(pattern);
+                    primPatterns[i] = Long.parseLong(pattern.trim());
                     i++;
                 }
                 return primPatterns;

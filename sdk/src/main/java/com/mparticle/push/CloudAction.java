@@ -1,12 +1,14 @@
-package com.mparticle;
+package com.mparticle.push;
 
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
+
+import com.mparticle.MPService;
+import com.mparticle.MParticlePushUtility;
 
 /**
  * Created by sdozor on 10/16/14.
