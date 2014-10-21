@@ -80,7 +80,7 @@ public class MParticle {
     final MeasuredRequestManager measuredRequestManager;
     final EmbeddedKitManager mEmbeddedKitManager;
     JSONArray mUserIdentities = new JSONArray();
-    String mSessionID;
+    String mSessionID = new String();
 
     JSONObject mUserAttributes = new JSONObject();
     private JSONObject mSessionAttributes;
