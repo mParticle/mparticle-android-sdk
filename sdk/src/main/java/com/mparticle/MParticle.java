@@ -20,7 +20,7 @@ import android.webkit.WebView;
 
 import com.mparticle.Constants.MessageKey;
 import com.mparticle.Constants.PrefKeys;
-import com.mparticle.push.AbstractCloudMessage;
+import com.mparticle.messaging.AbstractCloudMessage;
 import com.mparticle.segmentation.SegmentListener;
 
 import org.apache.http.conn.ssl.SSLSocketFactory;

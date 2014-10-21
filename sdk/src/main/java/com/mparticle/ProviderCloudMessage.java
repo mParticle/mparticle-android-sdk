@@ -7,7 +7,7 @@ import android.os.Parcel;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
-import com.mparticle.push.AbstractCloudMessage;
+import com.mparticle.messaging.AbstractCloudMessage;
 
 /**
  * Created by sdozor on 9/15/14.

@@ -1,4 +1,4 @@
-package com.mparticle.push;
+package com.mparticle.messaging;
 
 
 import android.app.AlertDialog;

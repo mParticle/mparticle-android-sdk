@@ -12,8 +12,8 @@ import android.os.AsyncTask;
 import android.os.PowerManager;
 import android.util.Log;
 
-import com.mparticle.push.AbstractCloudMessage;
-import com.mparticle.push.CloudAction;
+import com.mparticle.messaging.AbstractCloudMessage;
+import com.mparticle.messaging.CloudAction;
 
 /**
  * {@code IntentService } used internally by the SDK to process incoming broadcast messages in the background. Required for push notification functionality.

@@ -10,8 +10,8 @@ import android.content.SharedPreferences;
 import android.os.*;
 import android.support.v4.app.FragmentActivity;
 
-import com.mparticle.push.CloudDialog;
-import com.mparticle.push.MPCloudMessage;
+import com.mparticle.messaging.CloudDialog;
+import com.mparticle.messaging.MPCloudMessage;
 
 import org.json.JSONObject;
 
