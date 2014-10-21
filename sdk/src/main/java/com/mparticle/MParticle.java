@@ -1626,6 +1626,7 @@ public class MParticle {
     }
 
     void refreshConfiguration() {
+        ConfigManager.log(LogLevel.DEBUG, "Refreshing configuration...");
         mMessageManager.refreshConfiguration();
     }
 
