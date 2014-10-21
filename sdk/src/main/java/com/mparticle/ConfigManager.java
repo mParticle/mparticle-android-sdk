@@ -29,6 +29,7 @@ import java.util.Iterator;
 class ConfigManager {
     public static final String CONFIG_JSON = "json";
     private static final String KEY_TRIGGER_ITEMS = "tri";
+    private static final String KEY_MESSAGE_MATCHES = "mm";
     private static final String KEY_TRIGGER_ITEM_TYPES = "dts";
     private static final String KEY_TRIGGER_ITEM_HASHES = "evts";
     private static final String KEY_OPT_OUT = "oo";
@@ -60,14 +61,12 @@ class ConfigManager {
     private JSONObject mProviderPersistence;
     private String mNetworkPerformance = "";
 
-    private JSONArray mTriggerMessageTypes;
-    private JSONArray mTriggerMessageHashes;
-
     private static boolean sIsDebugEnvironment = false;
     private int mRampValue = -1;
 
     private int mSessionTimeoutInterval = -1;
     private int mUploadInterval = -1;
+    private JSONArray mTriggerMessageMatches, mTriggerMessageHashes;
 
     private ConfigManager(){
 
@@ -116,19 +115,20 @@ class ConfigManager {
         mSessionTimeoutInterval = responseJSON.optInt(KEY_SESSION_TIMEOUT, -1);
         mUploadInterval = responseJSON.optInt(KEY_UPLOAD_INTERVAL, -1);
 
-        mTriggerMessageTypes = mTriggerMessageHashes = null;
+        mTriggerMessageMatches = null;
         if (responseJSON.has(KEY_TRIGGER_ITEMS)){
             try {
                 JSONObject items = responseJSON.getJSONObject(KEY_TRIGGER_ITEMS);
-                if (items.has(KEY_TRIGGER_ITEM_TYPES)) {
-                    mTriggerMessageTypes = items.getJSONArray(KEY_TRIGGER_ITEM_TYPES);
+                if (items.has(KEY_MESSAGE_MATCHES)){
+                    mTriggerMessageMatches = items.getJSONArray(KEY_MESSAGE_MATCHES);
                 }
-                if (items.has(KEY_TRIGGER_ITEM_HASHES)) {
+                if (items.has(KEY_TRIGGER_ITEM_HASHES)){
                     mTriggerMessageHashes = items.getJSONArray(KEY_TRIGGER_ITEM_HASHES);
                 }
             }catch (JSONException jse){
 
             }
+
         }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD) {
@@ -143,12 +143,8 @@ class ConfigManager {
         }
     }
 
-    public JSONArray getTriggerTypes(){
-        return mTriggerMessageTypes;
-    }
-
-    public JSONArray getTriggerMessages(){
-        return mTriggerMessageHashes;
+    public JSONArray getTriggerMessageMatches(){
+        return mTriggerMessageMatches;
     }
 
     private void applyConfig() {
@@ -473,5 +469,9 @@ class ConfigManager {
 
     public int getCurrentRampValue() {
         return mRampValue;
+    }
+
+    public JSONArray getTriggerMessageHashes() {
+        return mTriggerMessageHashes;
     }
 }
