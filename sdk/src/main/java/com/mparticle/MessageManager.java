@@ -27,6 +27,7 @@ import org.json.JSONObject;
 import java.io.File;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
 
@@ -569,20 +570,28 @@ import java.util.Map;
 
     @Override
     public void checkForTrigger(MPMessage message) {
-        JSONArray eventTypes = mConfigManager.getTriggerTypes();
-        JSONArray triggerHashes = mConfigManager.getTriggerMessages();
+        JSONArray messageMatches = mConfigManager.getTriggerMessageMatches();
+        JSONArray triggerHashes = mConfigManager.getTriggerMessageHashes();
         boolean shouldTrigger = false;
 
-        if (eventTypes != null){
-            for (int i = 0; i < eventTypes.length(); i++){
+        if (messageMatches != null){
+            int i = 0;
+            while (!shouldTrigger && i < messageMatches.length()){
                 try {
-                    if (eventTypes.getString(i).equalsIgnoreCase(message.getMessageType())) {
-                        shouldTrigger = true;
-                        break;
+                    JSONObject messageMatch = messageMatches.getJSONObject(i);
+                    Iterator<?> keys = messageMatch.keys();
+                    while( keys.hasNext() ){
+                        String key = (String)keys.next();
+                        shouldTrigger = message.has(key) &&
+                                message.get(key).toString().equals(messageMatch.get(key).toString());
+                        if (!shouldTrigger){
+                            break;
+                        }
                     }
-                }catch (JSONException jse){
+                } catch (Exception e) {
 
                 }
+                i++;
             }
         }
         if (!shouldTrigger && triggerHashes != null){
