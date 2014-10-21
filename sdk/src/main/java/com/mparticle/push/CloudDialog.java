@@ -5,8 +5,6 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
-import android.graphics.BitmapFactory;
-import android.graphics.drawable.BitmapDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
@@ -15,14 +13,23 @@ import android.view.ContextThemeWrapper;
 import com.mparticle.MParticlePushUtility;
 
 /**
- * Created by sdozor on 10/17/14.
+ * A basic DialogFragment designed to show an in-app push message to the user. The mParticle
+ * SDK will automatically show this for push messages that are configured for it.
+ *
+ * This dialog is themeable via the mParticle push generation console. By default it will use the
+ * default AlertDialog style as configured in the given Activity context.
+ *
  */
-public class CloudDialog extends DialogFragment {
+public class CloudDialog extends DialogFragment implements DialogInterface.OnClickListener{
 
     private static final String DARK_THEME = "mp.dark";
     private static final String LIGHT_THEME = "mp.light";
 
+    /**
+     * The mParticle SDK will use this tag when adding this DialogFragment in a FragmentTransaction
+     */
     public static String TAG = "mp_dialog";
+    private DialogInterface.OnClickListener mListener;
 
     public static CloudDialog newInstance(MPCloudMessage message) {
         CloudDialog frag = new CloudDialog();
@@ -83,17 +90,26 @@ public class CloudDialog extends DialogFragment {
             dialog.setMessage(primary);
         }
 
-        
-        dialog.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                if (getActivity() instanceof DialogInterface.OnClickListener){
-                    ((DialogInterface.OnClickListener)getActivity()).onClick(dialog, which);
-                }
-                dialog.dismiss();
-            }
-        });
+        dialog.setPositiveButton("OK", this);
 
         return dialog.create();
+    }
+
+    /**
+     * Use this to set your own listener for when the CloudDialog is dismissed.
+     *
+     * @param listener
+     */
+    public void setOnClickListener(DialogInterface.OnClickListener listener){
+        mListener = listener;
+    }
+
+    @Override
+    public final void onClick(DialogInterface dialog, int which) {
+        if (mListener != null){
+            mListener.onClick(dialog, which);
+        }
+
+        dialog.dismiss();
     }
 }
