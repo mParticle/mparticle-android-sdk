@@ -31,7 +31,7 @@ public class CloudDialog extends DialogFragment implements DialogInterface.OnCli
     public static String TAG = "mp_dialog";
     private DialogInterface.OnClickListener mListener;
 
-    public static CloudDialog newInstance(MPCloudMessage message) {
+    public static CloudDialog newInstance(MPCloudNotificationMessage message) {
         CloudDialog frag = new CloudDialog();
         Bundle args = new Bundle();
         args.putParcelable(MParticlePushUtility.CLOUD_MESSAGE_EXTRA, message);
@@ -45,7 +45,7 @@ public class CloudDialog extends DialogFragment implements DialogInterface.OnCli
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
-        MPCloudMessage message = getArguments().getParcelable(MParticlePushUtility.CLOUD_MESSAGE_EXTRA);
+        MPCloudNotificationMessage message = getArguments().getParcelable(MParticlePushUtility.CLOUD_MESSAGE_EXTRA);
 
         int iconId = android.R.drawable.ic_dialog_alert;
         try {

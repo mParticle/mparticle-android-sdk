@@ -11,7 +11,7 @@ import android.os.*;
 import android.support.v4.app.FragmentActivity;
 
 import com.mparticle.messaging.CloudDialog;
-import com.mparticle.messaging.MPCloudMessage;
+import com.mparticle.messaging.MPCloudNotificationMessage;
 
 import org.json.JSONObject;
 
@@ -177,11 +177,11 @@ class AppStateManager implements MPActivityCallbacks{
         if (mSupportLib && intent != null && activity instanceof FragmentActivity){
             Parcelable message = intent.getParcelableExtra(MParticlePushUtility.CLOUD_MESSAGE_EXTRA);
             if (message != null) {
-                String contentId = ((MPCloudMessage) message).getContentId();
+                String contentId = ((MPCloudNotificationMessage) message).getContentId();
                 String shownId = intent.getStringExtra("mp_content_shown");
-                if (((MPCloudMessage) message).getShowInApp() && !contentId.equals(shownId)) {
-                    activity.getIntent().putExtra("mp_content_shown", ((MPCloudMessage) message).getContentId());
-                    CloudDialog.newInstance((MPCloudMessage) message)
+                if (((MPCloudNotificationMessage) message).getShowInApp() && !contentId.equals(shownId)) {
+                    activity.getIntent().putExtra("mp_content_shown", ((MPCloudNotificationMessage) message).getContentId());
+                    CloudDialog.newInstance((MPCloudNotificationMessage) message)
                             .show(((FragmentActivity) activity).getSupportFragmentManager(), CloudDialog.TAG);
                 }
             }

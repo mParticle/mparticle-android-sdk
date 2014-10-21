@@ -1625,6 +1625,10 @@ public class MParticle {
         }
     }
 
+    void refreshConfiguration() {
+        mMessageManager.refreshConfiguration();
+    }
+
 
     /**
      * Event type to use when logging events.

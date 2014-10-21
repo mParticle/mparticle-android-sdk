@@ -4,11 +4,11 @@ import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.mparticle.MPService;
 import com.mparticle.MParticlePushUtility;
 
 import org.json.JSONArray;
@@ -43,11 +43,11 @@ public abstract class AbstractCloudMessage implements Parcelable {
         return appState;
     }
 
-    protected PendingIntent getDefaultOpenIntent(Context context, AbstractCloudMessage message){
-        Intent launchIntent = new Intent(context, MPService.class);
-        launchIntent.setAction(MPService.MPARTICLE_NOTIFICATION_OPENED);
-        launchIntent.putExtra(MParticlePushUtility.CLOUD_MESSAGE_EXTRA, message);
-        return PendingIntent.getService(context, 0, launchIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+    protected PendingIntent getDefaultOpenIntent(Context context, AbstractCloudMessage message) {
+        PackageManager pm = context.getPackageManager();
+        Intent intent = pm.getLaunchIntentForPackage(context.getPackageName());
+        intent.putExtra(MParticlePushUtility.CLOUD_MESSAGE_EXTRA, message);
+        return PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
     }
 
     public Bundle getExtras() {
@@ -55,8 +55,8 @@ public abstract class AbstractCloudMessage implements Parcelable {
     }
 
     public static AbstractCloudMessage createMessage(Intent intent, JSONArray keys) {
-        if (MPCloudMessage.isValid(intent.getExtras())){
-            return new MPCloudMessage(intent.getExtras());
+        if (MPCloudNotificationMessage.isValid(intent.getExtras())){
+            return new MPCloudNotificationMessage(intent.getExtras());
         }else{
             return new ProviderCloudMessage(intent.getExtras(), keys);
         }

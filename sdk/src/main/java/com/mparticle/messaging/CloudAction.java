@@ -11,7 +11,7 @@ import com.mparticle.MPService;
 import com.mparticle.MParticlePushUtility;
 
 /**
- * Represents an tappable action to be associated with an {@link com.mparticle.messaging.MPCloudMessage}
+ * Represents an tappable action to be associated with an {@link MPCloudNotificationMessage}
  */
 public class CloudAction implements Parcelable {
 

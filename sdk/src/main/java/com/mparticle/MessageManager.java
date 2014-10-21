@@ -108,7 +108,7 @@ import java.util.Map;
             mPreferences.edit().putBoolean(Constants.PrefKeys.FIRST_RUN_INSTALL, installDetected).commit();
         }
 
-        mUploadHandler.sendEmptyMessage(UploadHandler.UPDATE_CONFIG);
+        refreshConfiguration();
         mUploadHandler.sendEmptyMessageDelayed(UploadHandler.UPLOAD_MESSAGES, Constants.INITIAL_UPLOAD_DELAY);
     }
 
@@ -631,6 +631,10 @@ import java.util.Map;
     @Override
     public String getApiKey() {
         return mConfigManager.getApiKey();
+    }
+
+    public void refreshConfiguration() {
+        mUploadHandler.sendEmptyMessage(UploadHandler.UPDATE_CONFIG);
     }
 
     private class StatusBroadcastReceiver extends BroadcastReceiver {

@@ -4,7 +4,6 @@ import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
@@ -24,8 +23,8 @@ import java.util.ArrayList;
  * The class representation of a GCM/push sent by mParticle. Allows for very granular customization
  * based on a series of key/value pairs in the GCM data payload.
  */
-public class MPCloudMessage extends AbstractCloudMessage {
-    private final static String COMMAND = "m_cmd";
+public class MPCloudNotificationMessage extends AbstractCloudMessage {
+    public final static String COMMAND = "m_cmd";
     private final static String CAMPAIGN_ID = "m_cid";
     private final static String CONTENT_ID = "m_cntid";
     private final static String SMALL_ICON = "m_si";
@@ -74,13 +73,13 @@ public class MPCloudMessage extends AbstractCloudMessage {
 
     private CloudAction[] mActions;
 
-    public MPCloudMessage(Parcel pc){
+    public MPCloudNotificationMessage(Parcel pc){
         super(pc);
         mActions = new CloudAction[3];
         pc.readTypedArray(mActions, CloudAction.CREATOR);
     }
 
-    public MPCloudMessage(Bundle extras) {
+    public MPCloudNotificationMessage(Bundle extras) {
         super(extras);
 
         mActions = new CloudAction[3];
@@ -109,16 +108,16 @@ public class MPCloudMessage extends AbstractCloudMessage {
 
     }
 
-    public static final Parcelable.Creator<MPCloudMessage> CREATOR = new Parcelable.Creator<MPCloudMessage>() {
+    public static final Parcelable.Creator<MPCloudNotificationMessage> CREATOR = new Parcelable.Creator<MPCloudNotificationMessage>() {
 
         @Override
-        public MPCloudMessage createFromParcel(Parcel source) {
-            return new MPCloudMessage(source);
+        public MPCloudNotificationMessage createFromParcel(Parcel source) {
+            return new MPCloudNotificationMessage(source);
         }
 
         @Override
-        public MPCloudMessage[] newArray(int size) {
-            return new MPCloudMessage[size];
+        public MPCloudNotificationMessage[] newArray(int size) {
+            return new MPCloudNotificationMessage[size];
         }
     };
 
@@ -378,14 +377,6 @@ public class MPCloudMessage extends AbstractCloudMessage {
         notification.setContentIntent(getDefaultOpenIntent(context, this));
         notification.setAutoCancel(true);
         return notification.build();
-    }
-
-    @Override
-    protected PendingIntent getDefaultOpenIntent(Context context, AbstractCloudMessage message) {
-        PackageManager pm = context.getPackageManager();
-        Intent intent=pm.getLaunchIntentForPackage(context.getPackageName());
-        intent.putExtra(MParticlePushUtility.CLOUD_MESSAGE_EXTRA, message);
-        return PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
     }
 
     private static PendingIntent getLoopbackIntent(Context context, AbstractCloudMessage message, CloudAction action){

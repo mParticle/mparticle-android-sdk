@@ -62,7 +62,7 @@ public class MPService extends IntentService {
                 MParticle.getInstance().mEmbeddedKitManager.handleIntent(intent);
                 handleRegistration(intent);
             } else if (action.equals("com.google.android.c2dm.intent.RECEIVE")) {
-                generateCloudMessage(intent);
+                processCloudMessage(intent);
             } else if (action.equals("com.google.android.c2dm.intent.UNREGISTER")) {
                 intent.putExtra("unregistered", "true");
                 handleRegistration(intent);
@@ -157,19 +157,21 @@ public class MPService extends IntentService {
         }
     }
 
-    private void generateCloudMessage(Intent intent) {
-        String appState = AppStateManager.APP_STATE_NOTRUNNING;
-        if (MParticle.appRunning) {
-            if (MParticle.getInstance().mAppStateManager.isBackgrounded()) {
-                appState = AppStateManager.APP_STATE_BACKGROUND;
-            } else {
-                appState = AppStateManager.APP_STATE_FOREGROUND;
+    private void processCloudMessage(Intent intent) {
+        if (!MPCloudBackgroundMessage.processSilentPush(this, intent.getExtras())){
+            String appState = AppStateManager.APP_STATE_NOTRUNNING;
+            if (MParticle.appRunning) {
+                if (MParticle.getInstance().mAppStateManager.isBackgrounded()) {
+                    appState = AppStateManager.APP_STATE_BACKGROUND;
+                } else {
+                    appState = AppStateManager.APP_STATE_FOREGROUND;
+                }
             }
-        }
 
-        AbstractCloudMessage cloudMessage = AbstractCloudMessage.createMessage(intent, ConfigManager.getPushKeys(this));
-        cloudMessage.setAppState(appState);
-        broadcastNotificationReceived(cloudMessage);
+            AbstractCloudMessage cloudMessage = AbstractCloudMessage.createMessage(intent, ConfigManager.getPushKeys(this));
+            cloudMessage.setAppState(appState);
+            broadcastNotificationReceived(cloudMessage);
+        }
     }
 
     private void broadcastNotificationReceived(AbstractCloudMessage message) {
