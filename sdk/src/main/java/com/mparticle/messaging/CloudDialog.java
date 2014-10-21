@@ -39,6 +39,10 @@ public class CloudDialog extends DialogFragment implements DialogInterface.OnCli
         return frag;
     }
 
+    public CloudDialog() {
+        super();
+    }
+
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         MPCloudMessage message = getArguments().getParcelable(MParticlePushUtility.CLOUD_MESSAGE_EXTRA);

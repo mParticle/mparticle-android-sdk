@@ -1,13 +1,15 @@
-package com.mparticle;
+package com.mparticle.messaging;
 
 import android.app.Notification;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.support.v4.app.NotificationCompat;
-import android.util.Log;
 
-import com.mparticle.messaging.AbstractCloudMessage;
+import com.mparticle.MParticlePushUtility;
+
+import org.json.JSONArray;
+import org.json.JSONException;
 
 /**
  * Created by sdozor on 9/15/14.
@@ -15,9 +17,9 @@ import com.mparticle.messaging.AbstractCloudMessage;
 public class ProviderCloudMessage extends AbstractCloudMessage {
     private final String mPrimaryText;
 
-    public ProviderCloudMessage(Bundle extras) {
+    public ProviderCloudMessage(Bundle extras, JSONArray pushKeys) {
         super(extras);
-        mPrimaryText = findProviderMessage(extras);
+        mPrimaryText = findProviderMessage(extras, pushKeys);
     }
 
     @Override
@@ -45,31 +47,24 @@ public class ProviderCloudMessage extends AbstractCloudMessage {
                 .setContentTitle(MParticlePushUtility.getFallbackTitle(context))
                 .setContentText(mPrimaryText).build();
 
-        MParticle.start(context);
-        MParticle mMParticle = MParticle.getInstance();
-
-        if (mMParticle.mConfigManager.isPushSoundEnabled()) {
-            notification.defaults |= Notification.DEFAULT_SOUND;
-        }
-        if (mMParticle.mConfigManager.isPushVibrationEnabled()) {
-            notification.defaults |= Notification.DEFAULT_VIBRATE;
-        }
         notification.flags |= Notification.FLAG_AUTO_CANCEL;
         return notification;
     }
 
-    private String findProviderMessage(Bundle extras){
-        String[] possibleKeys = MParticle.getInstance().mConfigManager.getPushKeys();
+    private String findProviderMessage(Bundle extras, JSONArray possibleKeys){
         if (possibleKeys != null) {
-            for (String key : possibleKeys) {
-                String message = extras.getString(key);
-                if (message != null && message.length() > 0) {
-                    extras.remove(key);
-                    return message;
+            for (int i = 0; i < possibleKeys.length(); i++){
+                try {
+                    String message = extras.getString(possibleKeys.getString(i));
+                    if (message != null && message.length() > 0) {
+                        extras.remove(possibleKeys.getString(i));
+                        return message;
+                    }
+                }catch (JSONException jse){
+
                 }
             }
         }
-        Log.w(Constants.LOG_TAG, "Failed to extract 3rd party push message.");
         return "";
     }
 }

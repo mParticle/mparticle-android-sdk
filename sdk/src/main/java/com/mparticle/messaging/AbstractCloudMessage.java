@@ -10,7 +10,8 @@ import android.os.Parcelable;
 
 import com.mparticle.MPService;
 import com.mparticle.MParticlePushUtility;
-import com.mparticle.ProviderCloudMessage;
+
+import org.json.JSONArray;
 
 /**
  * Created by sdozor on 9/15/14.
@@ -49,11 +50,11 @@ public abstract class AbstractCloudMessage implements Parcelable {
         return mExtras;
     }
 
-    public static AbstractCloudMessage createMessage(Intent intent) {
+    public static AbstractCloudMessage createMessage(Intent intent, JSONArray keys) {
         if (MPCloudMessage.isValid(intent.getExtras())){
             return new MPCloudMessage(intent.getExtras());
         }else{
-            return new ProviderCloudMessage(intent.getExtras());
+            return new ProviderCloudMessage(intent.getExtras(), keys);
         }
     }
 

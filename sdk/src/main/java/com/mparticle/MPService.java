@@ -167,7 +167,7 @@ public class MPService extends IntentService {
             }
         }
 
-        AbstractCloudMessage cloudMessage = AbstractCloudMessage.createMessage(intent);
+        AbstractCloudMessage cloudMessage = AbstractCloudMessage.createMessage(intent, ConfigManager.getPushKeys(this));
         cloudMessage.setAppState(appState);
         broadcastNotificationReceived(cloudMessage);
     }

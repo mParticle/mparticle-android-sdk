@@ -53,7 +53,7 @@ class ConfigManager {
 
     private EmbeddedKitManager mEmbeddedKitManager;
     private static AppConfig sLocalPrefs;
-    private String[] mPushKeys;
+    private static JSONArray sPushKeys;
     private String mLogUnhandledExceptions = VALUE_APP_DEFINED;
 
     private boolean mSendOoEvents;
@@ -85,6 +85,8 @@ class ConfigManager {
         mEmbeddedKitManager = embeddedKitManager;
     }
 
+
+
     public synchronized void updateConfig(JSONObject responseJSON) throws JSONException {
 
         SharedPreferences.Editor editor = mPreferences.edit();
@@ -95,14 +97,8 @@ class ConfigManager {
         }
 
         if (responseJSON.has(KEY_PUSH_MESSAGES)) {
-            JSONArray pushKeyArray = responseJSON.getJSONArray(KEY_PUSH_MESSAGES);
-            editor.putString(KEY_PUSH_MESSAGES, pushKeyArray.toString());
-            if (pushKeyArray != null){
-                mPushKeys = new String[pushKeyArray.length()];
-            }
-            for (int i = 0; i < pushKeyArray.length(); i++){
-                mPushKeys[i] = pushKeyArray.getString(i);
-            }
+            sPushKeys = responseJSON.getJSONArray(KEY_PUSH_MESSAGES);
+            editor.putString(KEY_PUSH_MESSAGES, sPushKeys.toString());
         }
 
         mNetworkPerformance = responseJSON.optString(KEY_NETWORK_PERFORMANCE, VALUE_APP_DEFINED);
@@ -145,10 +141,6 @@ class ConfigManager {
         if (responseJSON.has(KEY_EMBEDDED_KITS)) {
             mEmbeddedKitManager.updateKits(responseJSON.getJSONArray(KEY_EMBEDDED_KITS));
         }
-    }
-
-    public String[] getPushKeys(){
-        return mPushKeys;
     }
 
     public JSONArray getTriggerTypes(){
@@ -296,14 +288,14 @@ class ConfigManager {
 
     public void setPushSoundEnabled(boolean pushSoundEnabled) {
         mPreferences.edit()
-                .putBoolean(Constants.PrefKeys.PUSH_ENABLE_SOUND, pushSoundEnabled)
-                .commit();
+            .putBoolean(Constants.PrefKeys.PUSH_ENABLE_SOUND, pushSoundEnabled)
+            .commit();
     }
 
     public void setPushVibrationEnabled(boolean pushVibrationEnabled) {
         mPreferences.edit()
-                .putBoolean(Constants.PrefKeys.PUSH_ENABLE_VIBRATION, pushVibrationEnabled)
-                .commit();
+            .putBoolean(Constants.PrefKeys.PUSH_ENABLE_VIBRATION, pushVibrationEnabled)
+            .commit();
     }
 
     public boolean getSendOoEvents(){
@@ -348,13 +340,29 @@ class ConfigManager {
                 .commit();
     }
 
+    private static SharedPreferences getPreferences(Context context){
+        return context.getSharedPreferences(PREFERENCES_FILE, Context.MODE_PRIVATE);
+    }
+
+    public static JSONArray getPushKeys(Context context){
+        if (sPushKeys == null){
+            String arrayString = getPreferences(context).getString(KEY_PUSH_MESSAGES, null);
+            try {
+                sPushKeys = new JSONArray(arrayString);
+            } catch (JSONException e) {
+                sPushKeys = new JSONArray();
+            }
+        }
+        return sPushKeys;
+    }
+
     public static int getPushTitle(Context context) {
-        return context.getSharedPreferences(PREFERENCES_FILE, Context.MODE_PRIVATE)
+        return getPreferences(context)
                 .getInt(Constants.PrefKeys.PUSH_TITLE, 0);
     }
 
     public static int getPushIcon(Context context) {
-        return context.getSharedPreferences(PREFERENCES_FILE, Context.MODE_PRIVATE)
+        return getPreferences(context)
                 .getInt(Constants.PrefKeys.PUSH_ICON, 0);
     }
 
