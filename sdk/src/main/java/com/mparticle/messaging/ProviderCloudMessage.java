@@ -4,6 +4,7 @@ import android.app.Notification;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.Parcel;
+import android.os.Parcelable;
 import android.support.v4.app.NotificationCompat;
 
 import com.mparticle.MParticlePushUtility;
@@ -22,6 +23,11 @@ public class ProviderCloudMessage extends AbstractCloudMessage {
         mPrimaryText = findProviderMessage(extras, pushKeys);
     }
 
+    public ProviderCloudMessage(Parcel pc) {
+        super(pc);
+        mPrimaryText = pc.readString();
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -32,6 +38,20 @@ public class ProviderCloudMessage extends AbstractCloudMessage {
         super.writeToParcel(dest, flags);
         dest.writeString(mPrimaryText);
     }
+
+    public static final Parcelable.Creator<ProviderCloudMessage> CREATOR = new Parcelable.Creator<ProviderCloudMessage>() {
+
+        @Override
+        public ProviderCloudMessage createFromParcel(Parcel source) {
+            return new ProviderCloudMessage(source);
+        }
+
+        @Override
+        public ProviderCloudMessage[] newArray(int size) {
+            return new ProviderCloudMessage[size];
+        }
+    };
+
 
     @Override
     public int getId() {
