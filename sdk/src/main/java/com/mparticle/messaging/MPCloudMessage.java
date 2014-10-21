@@ -21,7 +21,8 @@ import java.io.InputStream;
 import java.util.ArrayList;
 
 /**
- * Created by sdozor on 9/11/14.
+ * The class representation of a GCM/push sent by mParticle. Allows for very granular customization
+ * based on a series of key/value pairs in the GCM data payload.
  */
 public class MPCloudMessage extends AbstractCloudMessage {
     private final static String COMMAND = "m_cmd";

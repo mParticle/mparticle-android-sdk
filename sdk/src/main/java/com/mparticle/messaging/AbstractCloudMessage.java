@@ -14,7 +14,11 @@ import com.mparticle.MParticlePushUtility;
 import org.json.JSONArray;
 
 /**
- * Created by sdozor on 9/15/14.
+ * Base class for the class representation of a GCM/push
+ *
+ * This class and it's children implement parcelable so that they can be passed around as extras
+ * of an Intent.
+ *
  */
 public abstract class AbstractCloudMessage implements Parcelable {
     private String appState;

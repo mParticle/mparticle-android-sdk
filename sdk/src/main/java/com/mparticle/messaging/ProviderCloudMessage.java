@@ -12,7 +12,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 
 /**
- * Created by sdozor on 9/15/14.
+ * Representation of a GCM/push sent by a 3rd party such as Urban Airship or Mixpanel.
  */
 public class ProviderCloudMessage extends AbstractCloudMessage {
     private final String mPrimaryText;
