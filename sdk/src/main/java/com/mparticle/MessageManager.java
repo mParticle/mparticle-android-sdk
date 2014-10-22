@@ -19,6 +19,7 @@ import android.os.Process;
 import com.mparticle.Constants.MessageKey;
 import com.mparticle.Constants.MessageType;
 import com.mparticle.MParticle.EventType;
+import com.mparticle.messaging.AbstractCloudMessage;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -523,15 +524,7 @@ import java.util.Map;
         return true;
     }
 
-    public void logNotification(String sessionId, long sessionStartTime, Bundle bundle, String state) {
-        JSONObject attributes = new JSONObject();
-        for (String key : bundle.keySet()){
-            try{
-                attributes.put(key, bundle.get(key));
-            }catch(JSONException ex){
-
-            }
-        }
+    public void logNotification(String sessionId, long sessionStartTime, AbstractCloudMessage cloudMessage, String type, int behavior, String actionId) {
         try{
             MPMessage message = new MPMessage.Builder(MessageType.PUSH_RECEIVED, sessionId, mLocation)
                     .sessionStartTime(sessionStartTime)
@@ -539,12 +532,17 @@ import java.util.Map;
                     .name("gcm")
                     .build();
 
-            message.put(MessageKey.PAYLOAD, attributes.toString());
+            message.put(MessageKey.PAYLOAD, cloudMessage.getJsonPayload().toString());
+            message.put(MessageKey.PUSH_TYPE, type);
+            message.put(MessageKey.PUSH_BEHAVIOR, behavior);
+            if (type.equals(Constants.Push.MESSAGE_TYPE_ACTION) && actionId != null) {
+                message.put(MessageKey.PUSH_ACTION_TAKEN, actionId);
+            }
             String regId = PushRegistrationHelper.getRegistrationId(mContext);
             if ((regId != null) && (regId.length() > 0)) {
                 message.put(MessageKey.PUSH_TOKEN, regId);
             }
-            message.put(MessageKey.APP_STATE, state);
+            message.put(MessageKey.APP_STATE, cloudMessage.getAppState());
             mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
         }catch (JSONException e) {
 

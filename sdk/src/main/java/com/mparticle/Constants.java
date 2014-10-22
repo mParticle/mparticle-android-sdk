@@ -204,6 +204,11 @@ package com.mparticle;
         public static final String STATE_TRANSITION_TYPE = "t";
         public static final String CURRENT_ACTIVITY = "cn";
         public static final String PAYLOAD = "pay";
+        public static final String PUSH_TYPE = "t";
+        public static final String PUSH_BEHAVIOR = "bhv";
+        public static final String PUSH_ACTION_TAKEN = "aid";
+
+
         public static final String ST_LAUNCH_REFERRER = "lr";
         public static final String ST_LAUNCH_PARAMS = "lpr";
         public static final String ST_LAUNCH_SOURCE_PACKAGE = "srp";
@@ -332,5 +337,10 @@ package com.mparticle;
 
     interface External {
         public static final String APPLINK_KEY = "al_applink_data";
+    }
+
+    interface Push {
+        public static final String MESSAGE_TYPE_RECEIVED = "received";
+        public static final String MESSAGE_TYPE_ACTION = "action";
     }
 }

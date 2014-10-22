@@ -29,6 +29,11 @@ public class ProviderCloudMessage extends AbstractCloudMessage {
     }
 
     @Override
+    protected CloudAction getDefaultAction() {
+        return new CloudAction(null, null, mPrimaryText, null);
+    }
+
+    @Override
     public int describeContents() {
         return 0;
     }
@@ -60,8 +65,9 @@ public class ProviderCloudMessage extends AbstractCloudMessage {
 
     @Override
     public Notification buildNotification(Context context) {
+
         Notification notification = new NotificationCompat.Builder(context)
-                .setContentIntent(getDefaultOpenIntent(context, this))
+                .setContentIntent(getLoopbackIntent(context, this, getDefaultAction()))
                 .setSmallIcon(MParticlePushUtility.getFallbackIcon(context))
                 .setTicker(mPrimaryText)
                 .setContentTitle(MParticlePushUtility.getFallbackTitle(context))

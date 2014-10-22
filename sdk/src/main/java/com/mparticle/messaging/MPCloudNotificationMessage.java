@@ -108,6 +108,15 @@ public class MPCloudNotificationMessage extends AbstractCloudMessage {
 
     }
 
+    private String getDefaultActivity(){
+        return mExtras.getString(DEFAULT_ACTIVITY);
+    }
+
+    @Override
+    protected CloudAction getDefaultAction() {
+        return new CloudAction(getContentId(), null, null, getDefaultActivity());
+    }
+
     public static final Parcelable.Creator<MPCloudNotificationMessage> CREATOR = new Parcelable.Creator<MPCloudNotificationMessage>() {
 
         @Override
@@ -395,19 +404,12 @@ public class MPCloudNotificationMessage extends AbstractCloudMessage {
             }
         }
 
-        notification.setContentIntent(getDefaultOpenIntent(context, this));
+        notification.setContentIntent(getLoopbackIntent(context, this, getDefaultAction()));
         notification.setAutoCancel(true);
         return notification.build();
     }
 
-    private static PendingIntent getLoopbackIntent(Context context, AbstractCloudMessage message, CloudAction action){
-        Intent intent = new Intent(MPService.INTERNAL_NOTIFICATION_TAP + action.getActionId());
-        intent.setClass(context, MPService.class);
-        intent.putExtra(MParticlePushUtility.CLOUD_MESSAGE_EXTRA, message);
-        intent.putExtra(MParticlePushUtility.CLOUD_ACTION_EXTRA, action);
 
-        return PendingIntent.getService(context, action.getActionId().hashCode(), intent, PendingIntent.FLAG_UPDATE_CURRENT);
-    }
 
     public static boolean isValid(Bundle extras) {
         return extras.containsKey(CAMPAIGN_ID);

@@ -5,13 +5,19 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.mparticle.MPService;
 import com.mparticle.MParticlePushUtility;
 
 import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.Set;
 
 /**
  * Base class for the class representation of a GCM/push
@@ -21,8 +27,14 @@ import org.json.JSONArray;
  *
  */
 public abstract class AbstractCloudMessage implements Parcelable {
+
     private String appState;
     protected Bundle mExtras;
+
+    public static final int FLAG_RECEIVED = 0x00000001;
+    public static final int FLAG_DIRECT_OPEN = 0x00000010;
+    public static final int FLAG_READ = 0x00001000;
+    public static final int FLAG_INFLUENCE_OPEN = 0x00010000;
 
     public AbstractCloudMessage(Parcel pc) {
         mExtras = pc.readBundle();
@@ -32,6 +44,8 @@ public abstract class AbstractCloudMessage implements Parcelable {
     public AbstractCloudMessage(Bundle extras){
         mExtras = extras;
     }
+
+    protected abstract CloudAction getDefaultAction();
 
     public abstract Notification buildNotification(Context context);
 
@@ -43,11 +57,11 @@ public abstract class AbstractCloudMessage implements Parcelable {
         return appState;
     }
 
-    protected PendingIntent getDefaultOpenIntent(Context context, AbstractCloudMessage message) {
+    protected Intent getDefaultOpenIntent(Context context, AbstractCloudMessage message) {
         PackageManager pm = context.getPackageManager();
         Intent intent = pm.getLaunchIntentForPackage(context.getPackageName());
         intent.putExtra(MParticlePushUtility.CLOUD_MESSAGE_EXTRA, message);
-        return PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        return intent;
     }
 
     public Bundle getExtras() {
@@ -74,4 +88,29 @@ public abstract class AbstractCloudMessage implements Parcelable {
     }
 
     public abstract int getId();
+
+    public JSONObject getJsonPayload(){
+        JSONObject json = new JSONObject();
+        Set<String> keys = mExtras.keySet();
+        for (String key : keys) {
+            try {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                    json.put(key, JSONObject.wrap(mExtras.get(key)));
+                }else{
+                    json.put(key, mExtras.get(key));
+                }
+            } catch(JSONException e) {
+            }
+        }
+        return json;
+    }
+
+    protected static PendingIntent getLoopbackIntent(Context context, AbstractCloudMessage message, CloudAction action){
+        Intent intent = new Intent(MPService.INTERNAL_NOTIFICATION_TAP + action.getActionId());
+        intent.setClass(context, MPService.class);
+        intent.putExtra(MParticlePushUtility.CLOUD_MESSAGE_EXTRA, message);
+        intent.putExtra(MParticlePushUtility.CLOUD_ACTION_EXTRA, action);
+
+        return PendingIntent.getService(context, action.getActionId().hashCode(), intent, PendingIntent.FLAG_UPDATE_CURRENT);
+    }
 }

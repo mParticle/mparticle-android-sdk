@@ -62,7 +62,7 @@ public class MPService extends IntentService {
                 MParticle.getInstance().mEmbeddedKitManager.handleIntent(intent);
                 handleRegistration(intent);
             } else if (action.equals("com.google.android.c2dm.intent.RECEIVE")) {
-                processCloudMessage(intent);
+                generateCloudMessage(intent);
             } else if (action.equals("com.google.android.c2dm.intent.UNREGISTER")) {
                 intent.putExtra("unregistered", "true");
                 handleRegistration(intent);
@@ -71,31 +71,8 @@ public class MPService extends IntentService {
             } else if (action.equals(MParticlePushUtility.BROADCAST_NOTIFICATION_TAPPED)) {
                 handleNotificationTap(intent);
             } else if (action.equals(MParticlePushUtility.BROADCAST_NOTIFICATION_RECEIVED)){
+                showNotification(intent);
                 release = false;
-                final AbstractCloudMessage message = intent.getParcelableExtra(MParticlePushUtility.CLOUD_MESSAGE_EXTRA);
-                (new AsyncTask<AbstractCloudMessage, Void, Notification>() {
-                    @Override
-                    protected Notification doInBackground(AbstractCloudMessage... params) {
-                        return params[0].buildNotification(MPService.this);
-                    }
-
-                    @Override
-                    protected void onPostExecute(Notification notification) {
-                        super.onPostExecute(notification);
-                        if (notification != null) {
-                            NotificationManager mNotifyMgr =
-                                    (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-                            mNotifyMgr.notify(message.getId(), notification);
-                        }
-                        synchronized (LOCK) {
-                            if (sWakeLock != null && sWakeLock.isHeld()) {
-                                sWakeLock.release();
-                            }
-                        }
-                    }
-                }).execute((AbstractCloudMessage)intent.getParcelableExtra(MParticlePushUtility.CLOUD_MESSAGE_EXTRA));
-            } else {
-                handeReRegistration();
             }
         } finally {
             synchronized (LOCK) {
@@ -104,6 +81,31 @@ public class MPService extends IntentService {
                 }
             }
         }
+    }
+
+    private void showNotification(Intent intent) {
+        final AbstractCloudMessage message = intent.getParcelableExtra(MParticlePushUtility.CLOUD_MESSAGE_EXTRA);
+        (new AsyncTask<AbstractCloudMessage, Void, Notification>() {
+            @Override
+            protected Notification doInBackground(AbstractCloudMessage... params) {
+                return params[0].buildNotification(MPService.this);
+            }
+
+            @Override
+            protected void onPostExecute(Notification notification) {
+                super.onPostExecute(notification);
+                if (notification != null) {
+                    NotificationManager mNotifyMgr =
+                            (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+                    mNotifyMgr.notify(message.getId(), notification);
+                }
+                synchronized (LOCK) {
+                    if (sWakeLock != null && sWakeLock.isHeld()) {
+                        sWakeLock.release();
+                    }
+                }
+            }
+        }).execute(message);
     }
 
     private void handleNotificationTap(Intent intent) {
@@ -119,17 +121,16 @@ public class MPService extends IntentService {
         }
     }
 
-    private void handeReRegistration() {
-        MParticle.start(getApplicationContext());
-        MParticle.getInstance();
-    }
-
     private void handleNotificationTapInternal(Intent intent) {
         final AbstractCloudMessage message = intent.getParcelableExtra(MParticlePushUtility.CLOUD_MESSAGE_EXTRA);
+        final CloudAction action = intent.getParcelableExtra(MParticlePushUtility.CLOUD_ACTION_EXTRA);
         NotificationManager mNotifyMgr =
                 (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         mNotifyMgr.cancel(message.getId());
-
+        MParticle.getInstance().logNotification(message,
+                action.getActionId() == null ? Constants.Push.MESSAGE_TYPE_RECEIVED : Constants.Push.MESSAGE_TYPE_ACTION,
+                AbstractCloudMessage.FLAG_RECEIVED | AbstractCloudMessage.FLAG_READ | AbstractCloudMessage.FLAG_DIRECT_OPEN,
+                action.getActionId());
         Intent broadcast = new Intent(MParticlePushUtility.BROADCAST_NOTIFICATION_TAPPED);
         broadcast.putExtras(intent.getExtras());
         sendOrderedBroadcast(broadcast, null);
@@ -157,7 +158,7 @@ public class MPService extends IntentService {
         }
     }
 
-    private void processCloudMessage(Intent intent) {
+    private void generateCloudMessage(Intent intent) {
         if (!MPCloudBackgroundMessage.processSilentPush(this, intent.getExtras())){
             String appState = AppStateManager.APP_STATE_NOTRUNNING;
             if (MParticle.appRunning) {
@@ -170,6 +171,8 @@ public class MPService extends IntentService {
 
             AbstractCloudMessage cloudMessage = AbstractCloudMessage.createMessage(intent, ConfigManager.getPushKeys(this));
             cloudMessage.setAppState(appState);
+            MParticle.start(this);
+            MParticle.getInstance().logNotification(cloudMessage, Constants.Push.MESSAGE_TYPE_RECEIVED, AbstractCloudMessage.FLAG_RECEIVED, null);
             broadcastNotificationReceived(cloudMessage);
         }
     }
