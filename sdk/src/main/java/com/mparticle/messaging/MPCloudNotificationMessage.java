@@ -132,6 +132,7 @@ public class MPCloudNotificationMessage extends AbstractCloudMessage {
         return getContentId().hashCode();
     }
 
+
     public int getSmallIconResourceId(Context context){
         String resourceName = mExtras.getString(SMALL_ICON);
         if (!TextUtils.isEmpty(resourceName)) {
@@ -196,31 +197,51 @@ public class MPCloudNotificationMessage extends AbstractCloudMessage {
     }
 
     public int getLightColorArgb(){
-        return mExtras.getInt(LIGHTS_COLOR);
+        try {
+        return Integer.parseInt(mExtras.getString(LIGHTS_COLOR));
+        }catch (NumberFormatException nfe){
+            return 0;
+        }
     }
 
     public int getLightOffMillis(){
-        return mExtras.getInt(LIGHTS_OFF_MILLIS);
+        try {
+        return Integer.parseInt(mExtras.getString(LIGHTS_OFF_MILLIS));
+        }catch (NumberFormatException nfe){
+            return 0;
+        }
     }
 
     public int getLightOnMillis(){
-        return mExtras.getInt(LIGHTS_ON_MILLIS);
+        try {
+        return Integer.parseInt(mExtras.getString(LIGHTS_ON_MILLIS));
+        }catch (NumberFormatException nfe){
+            return 0;
+        }
     }
 
     public int getNumber(){
-        return mExtras.getInt(NUMBER);
+        try {
+            return Integer.parseInt(mExtras.getString(NUMBER));
+        }catch (NumberFormatException nfe){
+            return 0;
+        }
     }
 
     public boolean getAlertOnlyOnce(){
         if (mExtras.containsKey(ALERT_ONCE)){
-            return mExtras.getBoolean(ALERT_ONCE);
+            return Boolean.parseBoolean(mExtras.getString(ALERT_ONCE));
         }
         return true;
     }
 
     public Integer getPriority(){
         if (mExtras.containsKey(PRIORITY)){
-            return mExtras.getInt(PRIORITY);
+            try {
+                return Integer.parseInt(mExtras.getString(PRIORITY));
+            }catch (NumberFormatException nfe){
+                return null;
+            }
         }else{
             return null;
         }
