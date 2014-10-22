@@ -345,7 +345,7 @@ class ConfigManager {
             String arrayString = getPreferences(context).getString(KEY_PUSH_MESSAGES, null);
             try {
                 sPushKeys = new JSONArray(arrayString);
-            } catch (JSONException e) {
+            } catch (Exception e) {
                 sPushKeys = new JSONArray();
             }
         }
