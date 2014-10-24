@@ -425,7 +425,7 @@ import java.util.Map;
         ConfigManager.log(MParticle.LogLevel.DEBUG, "Received location update: " + location);
     }
 
-    public void logStateTransition(String stateTransInit, String sessionId, long sessionStartTime, Bundle lastNotificationBundle, String currentActivity,
+    public void logStateTransition(String stateTransInit, String sessionId, long sessionStartTime, JSONObject lastNotificationJson, String currentActivity,
                                    String launchUri, String launchExtras, String launchSourcePackage, long previousForegroundTime, long suspendedTime, int interruptions) {
         try {
             MPMessage message = new MPMessage.Builder(MessageType.APP_STATE_TRANSITION, sessionId, mLocation)
@@ -481,16 +481,8 @@ import java.util.Map;
                 message.put(MessageKey.APP_INIT_FIRST_RUN, sFirstRun);
                 message.put(MessageKey.APP_INIT_UPGRADE, globalUpgrade);
             }
-            if (lastNotificationBundle != null){
-                JSONObject attributes = new JSONObject();
-                for (String key : lastNotificationBundle.keySet()){
-                    try{
-                        attributes.put(key, lastNotificationBundle.get(key));
-                    }catch(JSONException ex){
-
-                    }
-                }
-               message.put(MessageKey.PAYLOAD, attributes.toString());
+            if (lastNotificationJson != null){
+               message.put(MessageKey.PAYLOAD, lastNotificationJson.toString());
             }
             mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
         } catch (JSONException e) {
@@ -572,18 +564,30 @@ import java.util.Map;
         JSONArray triggerHashes = mConfigManager.getTriggerMessageHashes();
         boolean shouldTrigger = false;
 
-        if (messageMatches != null){
+        if (messageMatches != null && messageMatches.length() > 0){
+            shouldTrigger = true;
             int i = 0;
-            while (!shouldTrigger && i < messageMatches.length()){
+            while (shouldTrigger && i < messageMatches.length()){
                 try {
                     JSONObject messageMatch = messageMatches.getJSONObject(i);
                     Iterator<?> keys = messageMatch.keys();
-                    while( keys.hasNext() ){
+                    while(shouldTrigger && keys.hasNext() ){
                         String key = (String)keys.next();
-                        shouldTrigger = message.has(key) &&
-                                message.get(key).toString().equals(messageMatch.get(key).toString());
-                        if (!shouldTrigger){
-                            break;
+                        shouldTrigger = message.has(key);
+                        if (shouldTrigger){
+                            try {
+                                shouldTrigger = messageMatch.getString(key).equalsIgnoreCase(message.getString(key));
+                            }catch (JSONException stringex){
+                                try {
+                                    shouldTrigger = message.getBoolean(key) == messageMatch.getBoolean(key);
+                                }catch (JSONException boolex){
+                                    try{
+                                        shouldTrigger = message.getDouble(key) == messageMatch.getDouble(key);
+                                    }catch (JSONException doubleex){
+                                        shouldTrigger = false;
+                                    }
+                                }
+                            }
                         }
                     }
                 } catch (Exception e) {
