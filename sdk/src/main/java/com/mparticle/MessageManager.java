@@ -20,6 +20,7 @@ import com.mparticle.Constants.MessageKey;
 import com.mparticle.Constants.MessageType;
 import com.mparticle.MParticle.EventType;
 import com.mparticle.messaging.AbstractCloudMessage;
+import com.mparticle.messaging.MPCloudNotificationMessage;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -516,7 +517,7 @@ import java.util.Map;
         return true;
     }
 
-    public void logNotification(String sessionId, long sessionStartTime, AbstractCloudMessage cloudMessage, String type, int behavior, String actionId) {
+    public void logNotification(String sessionId, long sessionStartTime, AbstractCloudMessage cloudMessage, String type, String actionId) {
         try{
             MPMessage message = new MPMessage.Builder(MessageType.PUSH_RECEIVED, sessionId, mLocation)
                     .sessionStartTime(sessionStartTime)
@@ -526,7 +527,7 @@ import java.util.Map;
 
             message.put(MessageKey.PAYLOAD, cloudMessage.getJsonPayload().toString());
             message.put(MessageKey.PUSH_TYPE, type);
-            message.put(MessageKey.PUSH_BEHAVIOR, behavior);
+            message.put(MessageKey.PUSH_BEHAVIOR, cloudMessage.getBehavior());
             if (type.equals(Constants.Push.MESSAGE_TYPE_ACTION) && actionId != null) {
                 message.put(MessageKey.PUSH_ACTION_TAKEN, actionId);
             }
@@ -536,6 +537,9 @@ import java.util.Map;
             }
             message.put(MessageKey.APP_STATE, cloudMessage.getAppState());
             mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
+            if (cloudMessage instanceof MPCloudNotificationMessage) {
+                mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_GCM_MESSAGE, cloudMessage));
+            }
         }catch (JSONException e) {
 
         }

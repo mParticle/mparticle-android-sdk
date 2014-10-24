@@ -15,6 +15,8 @@ import com.mparticle.Constants.Status;
 import com.mparticle.MParticleDatabase.BreadcrumbTable;
 import com.mparticle.MParticleDatabase.MessageTable;
 import com.mparticle.MParticleDatabase.SessionTable;
+import com.mparticle.messaging.AbstractCloudMessage;
+import com.mparticle.messaging.MPCloudNotificationMessage;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -32,6 +34,7 @@ import org.json.JSONObject;
     public static final int CREATE_SESSION_END_MESSAGE = 3;
     public static final int END_ORPHAN_SESSIONS = 4;
     public static final int STORE_BREADCRUMB = 5;
+    public static final int STORE_GCM_MESSAGE = 6;
     private final MessageManagerCallbacks mMessageManagerCallbacks;
 
     // boolean flag used in unit tests to wait until processing is finished.
@@ -184,6 +187,19 @@ import org.json.JSONObject;
                 } finally {
 
                 }
+                break;
+            case STORE_GCM_MESSAGE:
+
+                try {
+                    MPCloudNotificationMessage message = (MPCloudNotificationMessage) msg.obj;
+                    dbInsertGcmMessage(message);
+                } catch (SQLiteException e) {
+                    ConfigManager.log(MParticle.LogLevel.ERROR, e, "Error saving GCM message to mParticle DB");
+                } catch (JSONException e) {
+                    ConfigManager.log(MParticle.LogLevel.ERROR, e, "Error with JSON object");
+                } finally {
+
+                }
         }
         mIsProcessingMessage = false;
     }
@@ -232,6 +248,16 @@ import org.json.JSONObject;
                 db.delete(BreadcrumbTable.TABLE_NAME, " _id < ?", limit);
             }
         }
+    }
+
+    private void dbInsertGcmMessage(MPCloudNotificationMessage message) throws JSONException {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(MParticleDatabase.GcmMessageTable.CONTENT_ID, message.getContentId());
+        contentValues.put(MParticleDatabase.GcmMessageTable.CAMPAIGN_ID, message.getCampaignId());
+        contentValues.put(MParticleDatabase.GcmMessageTable.EXPIRATION, message.getExpiration());
+        contentValues.put(MParticleDatabase.GcmMessageTable.PAYLOAD, message.getJsonPayload().toString());
+        contentValues.put(MParticleDatabase.GcmMessageTable.BEHAVIOR_FLAGS, message.getBehavior());
+        db.replace(MParticleDatabase.GcmMessageTable.TABLE_NAME, null, contentValues);
     }
 
     private void dbInsertSession(MPMessage message) throws JSONException {

@@ -3,11 +3,31 @@ package com.mparticle;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.provider.BaseColumns;
 
 /* package-private */class MParticleDatabase extends SQLiteOpenHelper {
 
-    private static final int DB_VERSION = 2;
+    private static final int DB_VERSION = 3;
     private static final String DB_NAME = "mparticle.db";
+
+    interface BreadcrumbTable {
+        public final static String TABLE_NAME = "breadcrumbs";
+        public final static String SESSION_ID = "session_id";
+        public final static String API_KEY = "api_key";
+        public final static String MESSAGE = "message";
+        public final static String CREATED_AT = "breadcrumb_time";
+        public final static String CF_UUID = "cfuuid";
+    }
+
+    private static final String CREATE_BREADCRUMBS_DDL =
+            "CREATE TABLE IF NOT EXISTS " + BreadcrumbTable.TABLE_NAME + " (" + BaseColumns._ID +
+                    " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                    BreadcrumbTable.SESSION_ID + " STRING NOT NULL, " +
+                    BreadcrumbTable.API_KEY + " STRING NOT NULL, " +
+                    BreadcrumbTable.MESSAGE + " TEXT, " +
+                    BreadcrumbTable.CREATED_AT + " INTEGER NOT NULL, " +
+                    BreadcrumbTable.CF_UUID + " TEXT" +
+                    ");";
 
     interface SessionTable {
         public final static String TABLE_NAME = "sessions";
@@ -20,29 +40,9 @@ import android.database.sqlite.SQLiteOpenHelper;
         public final static String CF_UUID = "cfuuid";
     }
 
-    interface BreadcrumbTable {
-        public final static String TABLE_NAME = "breadcrumbs";
-        public final static String SESSION_ID = "session_id";
-        public final static String API_KEY = "api_key";
-        public final static String MESSAGE = "message";
-        public final static String CREATED_AT = "breadcrumb_time";
-        public final static String CF_UUID = "cfuuid";
-    }
-
-    private static final String CREATE_BREADCRUMBS_DDL =
-            "CREATE TABLE IF NOT EXISTS " + BreadcrumbTable.TABLE_NAME + " (" +
-                    "_id INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                    BreadcrumbTable.SESSION_ID + " STRING NOT NULL, " +
-                    BreadcrumbTable.API_KEY + " STRING NOT NULL, " +
-                    BreadcrumbTable.MESSAGE + " TEXT, " +
-                    BreadcrumbTable.CREATED_AT + " INTEGER NOT NULL, " +
-                    BreadcrumbTable.CF_UUID + " TEXT" +
-                    ");";
-
-
     private static final String CREATE_SESSIONS_DDL =
-            "CREATE TABLE IF NOT EXISTS " + SessionTable.TABLE_NAME + " (" +
-                    "_id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+            "CREATE TABLE IF NOT EXISTS " + SessionTable.TABLE_NAME + " (" + BaseColumns._ID +
+                    " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                     SessionTable.SESSION_ID + " STRING NOT NULL, " +
                     SessionTable.API_KEY + " STRING NOT NULL, " +
                     SessionTable.START_TIME + " INTEGER NOT NULL," +
@@ -65,8 +65,8 @@ import android.database.sqlite.SQLiteOpenHelper;
     }
 
     private static final String CREATE_MESSAGES_DDL =
-            "CREATE TABLE IF NOT EXISTS " + MessageTable.TABLE_NAME + " (" +
-                    "_id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+            "CREATE TABLE IF NOT EXISTS " + MessageTable.TABLE_NAME + " (" + BaseColumns._ID +
+                    " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                     MessageTable.SESSION_ID + " STRING NOT NULL, " +
                     MessageTable.API_KEY + " STRING NOT NULL, " +
                     MessageTable.MESSAGE + " TEXT, " +
@@ -86,8 +86,8 @@ import android.database.sqlite.SQLiteOpenHelper;
     }
 
     private static final String CREATE_UPLOADS_DDL =
-            "CREATE TABLE IF NOT EXISTS " + UploadTable.TABLE_NAME + " (" +
-                    "_id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+            "CREATE TABLE IF NOT EXISTS " + UploadTable.TABLE_NAME + " (" + BaseColumns._ID +
+                    " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                     UploadTable.API_KEY + " STRING NOT NULL, " +
                     UploadTable.MESSAGE + " TEXT, " +
                     UploadTable.CREATED_AT + " INTEGER NOT NULL, " +
@@ -108,8 +108,8 @@ import android.database.sqlite.SQLiteOpenHelper;
     }
 
     private static final String CREATE_COMMANDS_DDL =
-            "CREATE TABLE IF NOT EXISTS " + CommandTable.TABLE_NAME + " (" +
-                    "_id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+            "CREATE TABLE IF NOT EXISTS " + CommandTable.TABLE_NAME + " (" + BaseColumns._ID +
+                    " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                     CommandTable.URL + " STRING NOT NULL, " +
                     CommandTable.METHOD + " STRING NOT NULL, " +
                     CommandTable.POST_DATA + " TEXT, " +
@@ -118,6 +118,26 @@ import android.database.sqlite.SQLiteOpenHelper;
                     CommandTable.SESSION_ID + " TEXT, " +
                     CommandTable.API_KEY + " STRING NOT NULL, " +
                     CommandTable.CF_UUID + " TEXT" +
+                    ");";
+
+    interface GcmMessageTable {
+        public final static String CONTENT_ID = "content_id";
+        public final static String CAMPAIGN_ID = "campaign_id";
+        public final static String TABLE_NAME = "gcm_messages";
+        public final static String PAYLOAD = "payload";
+        public final static String CREATED_AT = "message_time";
+        public final static String EXPIRATION = "expiration";
+        public final static String BEHAVIOR_FLAGS = "behaviors";
+    }
+
+    private static final String CREATE_GCM_MSG_DDL =
+            "CREATE TABLE IF NOT EXISTS " + GcmMessageTable.TABLE_NAME + " (" + GcmMessageTable.CONTENT_ID +
+                    " TEXT PRIMARY KEY, " +
+                    GcmMessageTable.PAYLOAD + " TEXT NOT NULL, " +
+                    GcmMessageTable.CREATED_AT + " INTEGER NOT NULL, " +
+                    GcmMessageTable.EXPIRATION + " INTEGER NOT NULL, " +
+                    GcmMessageTable.BEHAVIOR_FLAGS + " INTEGER NOT NULL," +
+                    GcmMessageTable.CAMPAIGN_ID + " TEXT NOT NULL" +
                     ");";
 
     MParticleDatabase(Context context) {
@@ -131,6 +151,7 @@ import android.database.sqlite.SQLiteOpenHelper;
         db.execSQL(CREATE_UPLOADS_DDL);
         db.execSQL(CREATE_COMMANDS_DDL);
         db.execSQL(CREATE_BREADCRUMBS_DDL);
+        db.execSQL(CREATE_GCM_MSG_DDL);
     }
 
     @Override
@@ -141,5 +162,6 @@ import android.database.sqlite.SQLiteOpenHelper;
         db.execSQL(CREATE_UPLOADS_DDL);
         db.execSQL(CREATE_COMMANDS_DDL);
         db.execSQL(CREATE_BREADCRUMBS_DDL);
+        db.execSQL(CREATE_GCM_MSG_DDL);
     }
 }

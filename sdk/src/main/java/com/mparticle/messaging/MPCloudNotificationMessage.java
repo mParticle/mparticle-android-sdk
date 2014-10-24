@@ -72,6 +72,7 @@ public class MPCloudNotificationMessage extends AbstractCloudMessage {
     private final static String INAPP_MESSAGE_THEME = "m_iamt";
 
     private CloudAction[] mActions;
+    private final static String EXPIRATION = "m_expy";
 
     public MPCloudNotificationMessage(Parcel pc){
         super(pc);
@@ -422,5 +423,13 @@ public class MPCloudNotificationMessage extends AbstractCloudMessage {
 
     public String getContentId() {
         return mExtras.getString(CONTENT_ID);
+    }
+
+    public String getCampaignId() {
+        return mExtras.getString(CAMPAIGN_ID);
+    }
+
+    public long getExpiration() {
+        return mExtras.getLong(EXPIRATION);
     }
 }
