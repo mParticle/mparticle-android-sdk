@@ -373,7 +373,7 @@ public class MParticle {
             mMessageManager.logStateTransition(transitionType,
                     mSessionID,
                     mSessionStartTime,
-                    lastPushMessage == null ? null : lastPushMessage.getExtras(),
+                    lastPushMessage == null ? null : lastPushMessage.getJsonPayload(),
                     currentActivity,
                     dataString,
                     launchParameters,
@@ -1560,11 +1560,11 @@ public class MParticle {
         mConfigManager.setSessionTimeout(sessionTimeout);
     }
 
-    /* package private */ void logNotification(AbstractCloudMessage message, String type, int behavior, String actionId) {
+    /* package private */ void logNotification(AbstractCloudMessage message, String type, String actionId) {
         lastPushMessage = message;
         if (mConfigManager.getSendOoEvents()) {
             ensureActiveSession();
-            mMessageManager.logNotification(mSessionID, mSessionStartTime, message, type, behavior, actionId);
+            mMessageManager.logNotification(mSessionID, mSessionStartTime, message, type, actionId);
         }
     }
 
