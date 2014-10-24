@@ -28,8 +28,9 @@ import java.util.Set;
  */
 public abstract class AbstractCloudMessage implements Parcelable {
 
-    private String appState;
+    private String mAppState;
     protected Bundle mExtras;
+    private int mBehavior;
 
     public static final int FLAG_RECEIVED = 0x00000001;
     public static final int FLAG_DIRECT_OPEN = 0x00000010;
@@ -38,7 +39,8 @@ public abstract class AbstractCloudMessage implements Parcelable {
 
     public AbstractCloudMessage(Parcel pc) {
         mExtras = pc.readBundle();
-        appState = pc.readString();
+        mAppState = pc.readString();
+        mBehavior = pc.readInt();
     }
 
     public AbstractCloudMessage(Bundle extras){
@@ -50,11 +52,23 @@ public abstract class AbstractCloudMessage implements Parcelable {
     public abstract Notification buildNotification(Context context);
 
     public void setAppState(String appState) {
-        this.appState = appState;
+        this.mAppState = appState;
+    }
+
+    public void setBehavior(int behavior){
+        mBehavior = behavior;
+    }
+
+    public void addBehavior(int behavior){
+        mBehavior |= behavior;
+    }
+
+    public int getBehavior() {
+        return mBehavior;
     }
 
     public String getAppState() {
-        return appState;
+        return mAppState;
     }
 
     protected Intent getDefaultOpenIntent(Context context, AbstractCloudMessage message) {
@@ -84,7 +98,8 @@ public abstract class AbstractCloudMessage implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeBundle(mExtras);
-        dest.writeString(appState);
+        dest.writeString(mAppState);
+        dest.writeInt(mBehavior);
     }
 
     public abstract int getId();

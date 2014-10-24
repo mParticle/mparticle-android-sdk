@@ -122,17 +122,22 @@ public class MPService extends IntentService {
     }
 
     private void handleNotificationTapInternal(Intent intent) {
-        final AbstractCloudMessage message = intent.getParcelableExtra(MParticlePushUtility.CLOUD_MESSAGE_EXTRA);
-        final CloudAction action = intent.getParcelableExtra(MParticlePushUtility.CLOUD_ACTION_EXTRA);
+        AbstractCloudMessage message = intent.getParcelableExtra(MParticlePushUtility.CLOUD_MESSAGE_EXTRA);
+        CloudAction action = intent.getParcelableExtra(MParticlePushUtility.CLOUD_ACTION_EXTRA);
+
         NotificationManager mNotifyMgr =
                 (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         mNotifyMgr.cancel(message.getId());
+
+        message.addBehavior(AbstractCloudMessage.FLAG_READ);
+        message.addBehavior(AbstractCloudMessage.FLAG_DIRECT_OPEN);
         MParticle.getInstance().logNotification(message,
                 action.getActionId() == null ? Constants.Push.MESSAGE_TYPE_RECEIVED : Constants.Push.MESSAGE_TYPE_ACTION,
-                AbstractCloudMessage.FLAG_RECEIVED | AbstractCloudMessage.FLAG_READ | AbstractCloudMessage.FLAG_DIRECT_OPEN,
                 action.getActionId());
+
         Intent broadcast = new Intent(MParticlePushUtility.BROADCAST_NOTIFICATION_TAPPED);
-        broadcast.putExtras(intent.getExtras());
+        broadcast.putExtra(MParticlePushUtility.CLOUD_MESSAGE_EXTRA, message);
+        broadcast.putExtra(MParticlePushUtility.CLOUD_ACTION_EXTRA, action);
         sendOrderedBroadcast(broadcast, null);
     }
 
@@ -171,8 +176,9 @@ public class MPService extends IntentService {
 
             AbstractCloudMessage cloudMessage = AbstractCloudMessage.createMessage(intent, ConfigManager.getPushKeys(this));
             cloudMessage.setAppState(appState);
+            cloudMessage.addBehavior(AbstractCloudMessage.FLAG_RECEIVED);
             MParticle.start(this);
-            MParticle.getInstance().logNotification(cloudMessage, Constants.Push.MESSAGE_TYPE_RECEIVED, AbstractCloudMessage.FLAG_RECEIVED, null);
+            MParticle.getInstance().logNotification(cloudMessage, Constants.Push.MESSAGE_TYPE_RECEIVED, null);
             broadcastNotificationReceived(cloudMessage);
         }
     }
