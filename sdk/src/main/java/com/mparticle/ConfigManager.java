@@ -32,6 +32,7 @@ class ConfigManager {
     private static final String KEY_MESSAGE_MATCHES = "mm";
     private static final String KEY_TRIGGER_ITEM_TYPES = "dts";
     private static final String KEY_TRIGGER_ITEM_HASHES = "evts";
+    private static final String KEY_INFLUENCE_OPEN = "pio";
     private static final String KEY_OPT_OUT = "oo";
     public static final String KEY_UNHANDLED_EXCEPTIONS = "cue";
     public static final String KEY_PUSH_MESSAGES = "pmk";
@@ -66,6 +67,7 @@ class ConfigManager {
 
     private int mSessionTimeoutInterval = -1;
     private int mUploadInterval = -1;
+    private long mInfluenceOpenTimeout = 3600;
     private JSONArray mTriggerMessageMatches, mTriggerMessageHashes;
 
     private ConfigManager(){
@@ -131,6 +133,10 @@ class ConfigManager {
 
         }
 
+        if (responseJSON.has(KEY_INFLUENCE_OPEN)){
+            mInfluenceOpenTimeout = responseJSON.getLong(KEY_INFLUENCE_OPEN);
+        }
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD) {
             editor.apply();
         } else {
@@ -145,6 +151,10 @@ class ConfigManager {
 
     public JSONArray getTriggerMessageMatches(){
         return mTriggerMessageMatches;
+    }
+
+    public long getInfluenceOpenTimeout(){
+        return mInfluenceOpenTimeout;
     }
 
     private void applyConfig() {
