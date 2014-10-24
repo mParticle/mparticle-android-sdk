@@ -15,12 +15,12 @@ import com.mparticle.MParticlePushUtility;
  */
 public class CloudAction implements Parcelable {
 
-    private final String mActionId;
+    private final int mActionId;
     private final String mActionIcon;
     private final String mActionTitle;
     private final String mActionActivity;
 
-    public CloudAction(String actionId, String actionIcon, String actionTitle, String actionActivity) {
+    public CloudAction(int actionId, String actionIcon, String actionTitle, String actionActivity) {
         mActionId = actionId;
         mActionIcon = actionIcon;
         mActionTitle = actionTitle;
@@ -28,7 +28,7 @@ public class CloudAction implements Parcelable {
     }
 
     public CloudAction(Parcel source) {
-        mActionId = source.readString();
+        mActionId = source.readInt();
         mActionIcon = source.readString();
         mActionTitle = source.readString();
         mActionActivity = source.readString();
@@ -41,7 +41,7 @@ public class CloudAction implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(mActionId);
+        dest.writeInt(mActionId);
         dest.writeString(mActionIcon);
         dest.writeString(mActionTitle);
         dest.writeString(mActionActivity);
@@ -57,7 +57,7 @@ public class CloudAction implements Parcelable {
                 intent.putExtra(MParticlePushUtility.CLOUD_ACTION_EXTRA, action);
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
-                activityIntent = PendingIntent.getActivity(context, action.getActionId().hashCode(), intent, PendingIntent.FLAG_UPDATE_CURRENT);
+                activityIntent = PendingIntent.getActivity(context, action.getActionId(), intent, PendingIntent.FLAG_UPDATE_CURRENT);
             }catch (Exception e){
 
             }
@@ -98,7 +98,7 @@ public class CloudAction implements Parcelable {
         return mActionTitle;
     }
 
-    public String getActionId() {
+    public int getActionId() {
         return mActionId;
     }
 }

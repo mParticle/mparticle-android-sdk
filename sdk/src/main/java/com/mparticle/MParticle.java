@@ -1560,7 +1560,7 @@ public class MParticle {
         mConfigManager.setSessionTimeout(sessionTimeout);
     }
 
-    /* package private */ void logNotification(AbstractCloudMessage message, String type, String actionId) {
+    /* package private */ void logNotification(AbstractCloudMessage message, String type, int actionId) {
         lastPushMessage = message;
         if (mConfigManager.getSendOoEvents()) {
             ensureActiveSession();

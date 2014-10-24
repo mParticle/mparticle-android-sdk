@@ -126,6 +126,6 @@ public abstract class AbstractCloudMessage implements Parcelable {
         intent.putExtra(MParticlePushUtility.CLOUD_MESSAGE_EXTRA, message);
         intent.putExtra(MParticlePushUtility.CLOUD_ACTION_EXTRA, action);
 
-        return PendingIntent.getService(context, action.getActionId().hashCode(), intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        return PendingIntent.getService(context, action.getActionId(), intent, PendingIntent.FLAG_UPDATE_CURRENT);
     }
 }

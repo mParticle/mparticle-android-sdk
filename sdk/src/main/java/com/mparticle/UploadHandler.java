@@ -455,7 +455,38 @@ import java.util.concurrent.TimeoutException;
 
         uploadMessage.put(MessageKey.PROVIDER_PERSISTENCE, mConfigManager.getProviderPersistence());
 
+        addGCMHistory(uploadMessage);
+
         return uploadMessage;
+    }
+
+    private void addGCMHistory(JSONObject uploadMessage) {
+        //first remove expired
+        Cursor gcmHistory = null;
+        try {
+            String[] deleteWhereArgs = {Long.toString(System.currentTimeMillis())};
+            db.delete(MParticleDatabase.GcmMessageTable.TABLE_NAME, MParticleDatabase.GcmMessageTable.EXPIRATION + " < ?", deleteWhereArgs);
+            String[] columns = {MParticleDatabase.GcmMessageTable.CONTENT_ID, MParticleDatabase.GcmMessageTable.CAMPAIGN_ID, MParticleDatabase.GcmMessageTable.EXPIRATION};
+            gcmHistory = db.query(MParticleDatabase.GcmMessageTable.TABLE_NAME,
+                    columns,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null);
+            if (gcmHistory.getCount() > 0) {
+                JSONObject historyObject = new JSONObject();
+                while (gcmHistory.moveToNext()) {
+
+                }
+            }
+        }catch (Exception e){
+
+        }finally {
+            if (gcmHistory != null && !gcmHistory.isClosed()){
+                gcmHistory.close();
+            }
+        }
     }
 
     private void cleanupDatabase(int expirationPeriod) {

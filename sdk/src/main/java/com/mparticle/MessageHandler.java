@@ -189,10 +189,9 @@ import org.json.JSONObject;
                 }
                 break;
             case STORE_GCM_MESSAGE:
-
                 try {
                     MPCloudNotificationMessage message = (MPCloudNotificationMessage) msg.obj;
-                    dbInsertGcmMessage(message);
+                    dbUpdateGcmMessage(message);
                 } catch (SQLiteException e) {
                     ConfigManager.log(MParticle.LogLevel.ERROR, e, "Error saving GCM message to mParticle DB");
                 } catch (JSONException e) {
@@ -250,7 +249,7 @@ import org.json.JSONObject;
         }
     }
 
-    private void dbInsertGcmMessage(MPCloudNotificationMessage message) throws JSONException {
+    private void dbUpdateGcmMessage(MPCloudNotificationMessage message) throws JSONException {
         ContentValues contentValues = new ContentValues();
         contentValues.put(MParticleDatabase.GcmMessageTable.CONTENT_ID, message.getContentId());
         contentValues.put(MParticleDatabase.GcmMessageTable.CAMPAIGN_ID, message.getCampaignId());

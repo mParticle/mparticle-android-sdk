@@ -30,7 +30,7 @@ public class ProviderCloudMessage extends AbstractCloudMessage {
 
     @Override
     protected CloudAction getDefaultAction() {
-        return new CloudAction(null, null, mPrimaryText, null);
+        return new CloudAction(0, null, mPrimaryText, null);
     }
 
     @Override

@@ -132,7 +132,7 @@ public class MPService extends IntentService {
         message.addBehavior(AbstractCloudMessage.FLAG_READ);
         message.addBehavior(AbstractCloudMessage.FLAG_DIRECT_OPEN);
         MParticle.getInstance().logNotification(message,
-                action.getActionId() == null ? Constants.Push.MESSAGE_TYPE_RECEIVED : Constants.Push.MESSAGE_TYPE_ACTION,
+                action.getActionId() > 0 ? Constants.Push.MESSAGE_TYPE_RECEIVED : Constants.Push.MESSAGE_TYPE_ACTION,
                 action.getActionId());
 
         Intent broadcast = new Intent(MParticlePushUtility.BROADCAST_NOTIFICATION_TAPPED);
@@ -176,9 +176,9 @@ public class MPService extends IntentService {
 
             AbstractCloudMessage cloudMessage = AbstractCloudMessage.createMessage(intent, ConfigManager.getPushKeys(this));
             cloudMessage.setAppState(appState);
-            cloudMessage.addBehavior(AbstractCloudMessage.FLAG_RECEIVED);
+            cloudMessage.setBehavior(AbstractCloudMessage.FLAG_RECEIVED);
             MParticle.start(this);
-            MParticle.getInstance().logNotification(cloudMessage, Constants.Push.MESSAGE_TYPE_RECEIVED, null);
+            MParticle.getInstance().logNotification(cloudMessage, Constants.Push.MESSAGE_TYPE_RECEIVED, 0);
             broadcastNotificationReceived(cloudMessage);
         }
     }

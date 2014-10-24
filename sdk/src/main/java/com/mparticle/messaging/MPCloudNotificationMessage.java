@@ -86,21 +86,21 @@ public class MPCloudNotificationMessage extends AbstractCloudMessage {
         mActions = new CloudAction[3];
         if (mExtras.containsKey(ACTION_1_ID)){
             mActions[0] = new CloudAction(
-                    mExtras.getString(ACTION_1_ID),
+                    mExtras.getInt(ACTION_1_ID),
                     mExtras.getString(ACTION_1_ICON),
                     mExtras.getString(ACTION_1_TITLE),
                     mExtras.getString(ACTION_1_ACTIVITY));
         }
         if (mExtras.containsKey(ACTION_2_ID)){
             mActions[1] = new CloudAction(
-                    mExtras.getString(ACTION_2_ID),
+                    mExtras.getInt(ACTION_2_ID),
                     mExtras.getString(ACTION_2_ICON),
                     mExtras.getString(ACTION_2_TITLE),
                     mExtras.getString(ACTION_2_ACTIVITY));
         }
         if (mExtras.containsKey(ACTION_3_ID)){
             mActions[2] = new CloudAction(
-                    mExtras.getString(ACTION_3_ID),
+                    mExtras.getInt(ACTION_3_ID),
                     mExtras.getString(ACTION_3_ICON),
                     mExtras.getString(ACTION_3_TITLE),
                     mExtras.getString(ACTION_3_ACTIVITY));
@@ -139,7 +139,7 @@ public class MPCloudNotificationMessage extends AbstractCloudMessage {
 
     @Override
     public int getId() {
-        return getContentId().hashCode();
+        return getContentId();
     }
 
 
@@ -421,12 +421,12 @@ public class MPCloudNotificationMessage extends AbstractCloudMessage {
     }
 
 
-    public String getContentId() {
-        return mExtras.getString(CONTENT_ID);
+    public int getContentId() {
+        return mExtras.getInt(CONTENT_ID);
     }
 
-    public String getCampaignId() {
-        return mExtras.getString(CAMPAIGN_ID);
+    public int getCampaignId() {
+        return mExtras.getInt(CAMPAIGN_ID);
     }
 
     public long getExpiration() {

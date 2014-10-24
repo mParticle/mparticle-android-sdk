@@ -177,9 +177,9 @@ class AppStateManager implements MPActivityCallbacks{
         if (mSupportLib && intent != null && activity instanceof FragmentActivity){
             Parcelable message = intent.getParcelableExtra(MParticlePushUtility.CLOUD_MESSAGE_EXTRA);
             if (message != null) {
-                String contentId = ((MPCloudNotificationMessage) message).getContentId();
-                String shownId = intent.getStringExtra("mp_content_shown");
-                if (((MPCloudNotificationMessage) message).getShowInApp() && !contentId.equals(shownId)) {
+                int contentId = ((MPCloudNotificationMessage) message).getContentId();
+                int shownId = intent.getIntExtra("mp_content_shown", -1);
+                if (((MPCloudNotificationMessage) message).getShowInApp() && contentId != shownId) {
                     activity.getIntent().putExtra("mp_content_shown", ((MPCloudNotificationMessage) message).getContentId());
                     CloudDialog.newInstance((MPCloudNotificationMessage) message)
                             .show(((FragmentActivity) activity).getSupportFragmentManager(), CloudDialog.TAG);

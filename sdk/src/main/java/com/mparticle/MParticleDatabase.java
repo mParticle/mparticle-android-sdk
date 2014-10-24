@@ -132,12 +132,12 @@ import android.provider.BaseColumns;
 
     private static final String CREATE_GCM_MSG_DDL =
             "CREATE TABLE IF NOT EXISTS " + GcmMessageTable.TABLE_NAME + " (" + GcmMessageTable.CONTENT_ID +
-                    " TEXT PRIMARY KEY, " +
+                    " INTEGER PRIMARY KEY, " +
                     GcmMessageTable.PAYLOAD + " TEXT NOT NULL, " +
                     GcmMessageTable.CREATED_AT + " INTEGER NOT NULL, " +
                     GcmMessageTable.EXPIRATION + " INTEGER NOT NULL, " +
                     GcmMessageTable.BEHAVIOR_FLAGS + " INTEGER NOT NULL," +
-                    GcmMessageTable.CAMPAIGN_ID + " TEXT NOT NULL" +
+                    GcmMessageTable.CAMPAIGN_ID + " INTEGER NOT NULL" +
                     ");";
 
     MParticleDatabase(Context context) {

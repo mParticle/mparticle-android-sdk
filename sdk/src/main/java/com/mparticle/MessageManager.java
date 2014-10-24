@@ -517,7 +517,7 @@ import java.util.Map;
         return true;
     }
 
-    public void logNotification(String sessionId, long sessionStartTime, AbstractCloudMessage cloudMessage, String type, String actionId) {
+    public void logNotification(String sessionId, long sessionStartTime, AbstractCloudMessage cloudMessage, String type, int actionId) {
         try{
             MPMessage message = new MPMessage.Builder(MessageType.PUSH_RECEIVED, sessionId, mLocation)
                     .sessionStartTime(sessionStartTime)
@@ -528,7 +528,7 @@ import java.util.Map;
             message.put(MessageKey.PAYLOAD, cloudMessage.getJsonPayload().toString());
             message.put(MessageKey.PUSH_TYPE, type);
             message.put(MessageKey.PUSH_BEHAVIOR, cloudMessage.getBehavior());
-            if (type.equals(Constants.Push.MESSAGE_TYPE_ACTION) && actionId != null) {
+            if (type.equals(Constants.Push.MESSAGE_TYPE_ACTION) && actionId > 0) {
                 message.put(MessageKey.PUSH_ACTION_TAKEN, actionId);
             }
             String regId = PushRegistrationHelper.getRegistrationId(mContext);
