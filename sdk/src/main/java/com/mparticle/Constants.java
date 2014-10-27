@@ -242,6 +242,8 @@ package com.mparticle;
         public static final String ENVIRONMENT = "env";
         String RESERVED_KEY_LTV = "$Amount";
         public static final String FIRST_SEEN_INSTALL = "fi";
+        public static final String PUSH_CONTENT_ID = "cntid";
+        public static final String PUSH_CAMPAIGN_HISTORY = "pch";
     }
 
     interface PrefKeys {

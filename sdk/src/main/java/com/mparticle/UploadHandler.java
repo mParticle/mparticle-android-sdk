@@ -473,12 +473,21 @@ import java.util.concurrent.TimeoutException;
                     null,
                     null,
                     null,
-                    null);
+                    MParticleDatabase.GcmMessageTable.EXPIRATION + " asc");
             if (gcmHistory.getCount() > 0) {
                 JSONObject historyObject = new JSONObject();
                 while (gcmHistory.moveToNext()) {
-
+                    int campaignId = gcmHistory.getInt(gcmHistory.getColumnIndex(MParticleDatabase.GcmMessageTable.CAMPAIGN_ID));
+                    String campaignIdString = Integer.toString(campaignId);
+                    int contentId = gcmHistory.getInt(gcmHistory.getColumnIndex(MParticleDatabase.GcmMessageTable.CONTENT_ID));
+                    JSONObject campaignObject = historyObject.optJSONObject(campaignIdString);
+                    if (campaignObject == null){
+                        campaignObject = new JSONObject();
+                        campaignObject.put(Constants.MessageKey.PUSH_CONTENT_ID, contentId);
+                        historyObject.put(campaignIdString, campaignObject);
+                    }
                 }
+                uploadMessage.put(Constants.MessageKey.PUSH_CAMPAIGN_HISTORY, historyObject);
             }
         }catch (Exception e){
 
