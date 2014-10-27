@@ -173,13 +173,16 @@ public class MPService extends IntentService {
                     appState = AppStateManager.APP_STATE_FOREGROUND;
                 }
             }
-
-            AbstractCloudMessage cloudMessage = AbstractCloudMessage.createMessage(intent, ConfigManager.getPushKeys(this));
-            cloudMessage.setAppState(appState);
-            cloudMessage.setBehavior(AbstractCloudMessage.FLAG_RECEIVED);
-            MParticle.start(this);
-            MParticle.getInstance().logNotification(cloudMessage, Constants.Push.MESSAGE_TYPE_RECEIVED, 0);
-            broadcastNotificationReceived(cloudMessage);
+            try {
+                AbstractCloudMessage cloudMessage = AbstractCloudMessage.createMessage(intent, ConfigManager.getPushKeys(this));
+                cloudMessage.setAppState(appState);
+                cloudMessage.setBehavior(AbstractCloudMessage.FLAG_RECEIVED);
+                MParticle.start(this);
+                MParticle.getInstance().logNotification(cloudMessage, Constants.Push.MESSAGE_TYPE_RECEIVED, 0);
+                broadcastNotificationReceived(cloudMessage);
+            }catch (Exception e){
+                Log.i(TAG, "GCM parsing error: " + e.toString());
+            }
         }
     }
 
