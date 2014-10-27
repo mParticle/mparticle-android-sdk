@@ -473,7 +473,7 @@ import java.util.concurrent.TimeoutException;
                     null,
                     null,
                     null,
-                    MParticleDatabase.GcmMessageTable.EXPIRATION + " asc");
+                    MParticleDatabase.GcmMessageTable.EXPIRATION + " desc"); //this order to necessary so that we only append the latest push messages
             if (gcmHistory.getCount() > 0) {
                 JSONObject historyObject = new JSONObject();
                 while (gcmHistory.moveToNext()) {
@@ -481,6 +481,7 @@ import java.util.concurrent.TimeoutException;
                     String campaignIdString = Integer.toString(campaignId);
                     int contentId = gcmHistory.getInt(gcmHistory.getColumnIndex(MParticleDatabase.GcmMessageTable.CONTENT_ID));
                     JSONObject campaignObject = historyObject.optJSONObject(campaignIdString);
+                    //only append the latest pushes
                     if (campaignObject == null){
                         campaignObject = new JSONObject();
                         campaignObject.put(Constants.MessageKey.PUSH_CONTENT_ID, contentId);
