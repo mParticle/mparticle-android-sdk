@@ -256,6 +256,7 @@ import org.json.JSONObject;
         contentValues.put(MParticleDatabase.GcmMessageTable.EXPIRATION, message.getExpiration());
         contentValues.put(MParticleDatabase.GcmMessageTable.PAYLOAD, message.getJsonPayload().toString());
         contentValues.put(MParticleDatabase.GcmMessageTable.BEHAVIOR_FLAGS, message.getBehavior());
+        contentValues.put(MParticleDatabase.GcmMessageTable.CREATED_AT, System.currentTimeMillis());
         db.replace(MParticleDatabase.GcmMessageTable.TABLE_NAME, null, contentValues);
     }
 
