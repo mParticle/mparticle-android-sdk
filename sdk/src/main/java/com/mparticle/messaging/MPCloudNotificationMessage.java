@@ -17,6 +17,8 @@ import com.mparticle.MPService;
 import com.mparticle.MParticlePushUtility;
 
 import java.io.InputStream;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
 /**
@@ -25,6 +27,11 @@ import java.util.ArrayList;
  */
 public class MPCloudNotificationMessage extends AbstractCloudMessage {
     public final static String COMMAND = "m_cmd";
+    public final static int COMMAND_ALERT_NOW = 1;
+    public final static int COMMAND_ALERT_LOCALTIME = 2;
+    public final static int COMMAND_ALERT_BACKGROUND = 3;
+    public final static int COMMAND_ALERT_CONFIG_REFRESH = 4;
+
     private final static String CAMPAIGN_ID = "m_cid";
     private final static String CONTENT_ID = "m_cntid";
     private final static String SMALL_ICON = "m_si";
@@ -67,6 +74,10 @@ public class MPCloudNotificationMessage extends AbstractCloudMessage {
     private final static String ACTION_3_ICON = "m_a3_ai";
     private final static String ACTION_3_TITLE = "m_a3_at";
     private final static String ACTION_3_ACTIVITY = "m_a3_act";
+
+    private final static String LOCAL_DELIVERY_TIME = "m_ldt";
+
+
 
     private final static String GROUP = "m_g";
     private final static String INAPP_MESSAGE_THEME = "m_iamt";
@@ -140,6 +151,11 @@ public class MPCloudNotificationMessage extends AbstractCloudMessage {
     @Override
     public int getId() {
         return getContentId();
+    }
+
+    @Override
+    public boolean shouldDisplay() {
+        return getCommand() == COMMAND_ALERT_NOW;
     }
 
 
@@ -409,7 +425,9 @@ public class MPCloudNotificationMessage extends AbstractCloudMessage {
         notification.setAutoCancel(true);
         return notification.build();
     }
-
+    public int getCommand() {
+        return Integer.parseInt(mExtras.getString(COMMAND));
+    }
 
 
     public static boolean isValid(Bundle extras) {
@@ -432,4 +450,23 @@ public class MPCloudNotificationMessage extends AbstractCloudMessage {
     public long getExpiration() {
         return Long.parseLong(mExtras.getString(EXPIRATION));
     }
+
+    public boolean isDelayed() {
+        return getCommand() == COMMAND_ALERT_LOCALTIME;
+    }
+
+    public long getDeliveryTime() {
+        String time = mExtras.getString(LOCAL_DELIVERY_TIME);
+        long deliveryTime = System.currentTimeMillis();
+        if (!TextUtils.isEmpty(time)){
+            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+            try {
+                deliveryTime = format.parse(time).getTime();
+            }catch (ParseException pe){
+
+            }
+        }
+        return deliveryTime;
+    }
+
 }

@@ -128,4 +128,10 @@ public abstract class AbstractCloudMessage implements Parcelable {
 
         return PendingIntent.getService(context, action.getActionId(), intent, PendingIntent.FLAG_UPDATE_CURRENT);
     }
+
+    public boolean shouldDisplay(){
+        return true;
+    }
+
+
 }

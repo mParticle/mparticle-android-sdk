@@ -1,6 +1,7 @@
 package com.mparticle;
 
 import android.annotation.SuppressLint;
+import android.app.AlarmManager;
 import android.app.IntentService;
 
 import android.app.Notification;
@@ -9,11 +10,13 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.PowerManager;
 import android.util.Log;
 
 import com.mparticle.messaging.AbstractCloudMessage;
 import com.mparticle.messaging.CloudAction;
+import com.mparticle.messaging.MPCloudNotificationMessage;
 
 /**
  * {@code IntentService } used internally by the SDK to process incoming broadcast messages in the background. Required for push notification functionality.
@@ -32,6 +35,7 @@ public class MPService extends IntentService {
     public static final String MPARTICLE_NOTIFICATION_OPENED = "com.mparticle.push.notification_opened";
     public static final String INTERNAL_NOTIFICATION_TAP = "com.mparticle.push.notification_tapped";
     private static final Object LOCK = MPService.class;
+    private static final String INTERNAL_DELAYED_RECEIVE = "com.mparticle.delayeddelivery";
 
     private static PowerManager.WakeLock sWakeLock;
 
@@ -71,8 +75,12 @@ public class MPService extends IntentService {
             } else if (action.equals(MParticlePushUtility.BROADCAST_NOTIFICATION_TAPPED)) {
                 handleNotificationTap(intent);
             } else if (action.equals(MParticlePushUtility.BROADCAST_NOTIFICATION_RECEIVED)){
-                showNotification(intent);
+                final AbstractCloudMessage message = intent.getParcelableExtra(MParticlePushUtility.CLOUD_MESSAGE_EXTRA);
+                showNotification(message);
                 release = false;
+            } else if (action.equals(INTERNAL_DELAYED_RECEIVE)){
+                final MPCloudNotificationMessage message = intent.getParcelableExtra(MParticlePushUtility.CLOUD_MESSAGE_EXTRA);
+                broadcastNotificationReceived(message);
             }
         } finally {
             synchronized (LOCK) {
@@ -83,8 +91,8 @@ public class MPService extends IntentService {
         }
     }
 
-    private void showNotification(Intent intent) {
-        final AbstractCloudMessage message = intent.getParcelableExtra(MParticlePushUtility.CLOUD_MESSAGE_EXTRA);
+    private void showNotification(final AbstractCloudMessage message) {
+
         final boolean isNetworkingEnabled = ConfigManager.isNetworkPerformanceEnabled();
         if (isNetworkingEnabled){
             ConfigManager.setNetworkingEnabled(false);
@@ -188,10 +196,29 @@ public class MPService extends IntentService {
                 cloudMessage.setBehavior(AbstractCloudMessage.FLAG_RECEIVED);
                 MParticle.start(this);
                 MParticle.getInstance().logNotification(cloudMessage, Constants.Push.MESSAGE_TYPE_RECEIVED, 0, false);
-                broadcastNotificationReceived(cloudMessage);
+                if (cloudMessage instanceof MPCloudNotificationMessage && (((MPCloudNotificationMessage)cloudMessage).isDelayed())) {
+                    scheduleFutureNotification((MPCloudNotificationMessage) cloudMessage);
+                }else {
+                    broadcastNotificationReceived(cloudMessage);
+                }
             }catch (Exception e){
                 Log.i(TAG, "GCM parsing error: " + e.toString());
             }
+        }
+    }
+
+    private void scheduleFutureNotification(MPCloudNotificationMessage message){
+        AlarmManager alarmService = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+
+        Intent intent = new Intent(MPService.INTERNAL_DELAYED_RECEIVE);
+        intent.setClass(this, MPService.class);
+        intent.putExtra(MParticlePushUtility.CLOUD_MESSAGE_EXTRA, message);
+
+        PendingIntent pIntent = PendingIntent.getService(this, message.getId(), intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT){
+            alarmService.setExact(AlarmManager.RTC, message.getDeliveryTime(), pIntent);
+        }else{
+            alarmService.set(AlarmManager.RTC, message.getDeliveryTime(), pIntent);
         }
     }
 

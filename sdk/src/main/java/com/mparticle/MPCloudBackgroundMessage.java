@@ -11,23 +11,20 @@ import com.mparticle.messaging.MPCloudNotificationMessage;
  */
 class MPCloudBackgroundMessage {
 
-    private static final String COMMAND_CONFIG_REFRESH = "CONFIG_REFRESH";
-
     public static boolean processSilentPush(Context context, Bundle extras) {
         if (extras != null &&
                 extras.containsKey(MPCloudNotificationMessage.COMMAND)){
-            String command = extras.getString(MPCloudNotificationMessage.COMMAND);
-            if (!TextUtils.isEmpty(command)){
-                if (COMMAND_CONFIG_REFRESH.equals(command)){
-                    try {
-                        MParticle.start(context);
-                        MParticle.getInstance().refreshConfiguration();
-                    }catch (Exception e){
+            int command = Integer.parseInt(extras.getString(MPCloudNotificationMessage.COMMAND));
+            if (command == MPCloudNotificationMessage.COMMAND_ALERT_CONFIG_REFRESH){
+                try {
+                    MParticle.start(context);
+                    MParticle.getInstance().refreshConfiguration();
+                }catch (Exception e){
 
-                    }
-                    return true;
                 }
+                return true;
             }
+
         }
         return false;
     }
