@@ -80,7 +80,7 @@ public class MParticle {
     final MeasuredRequestManager measuredRequestManager;
     final EmbeddedKitManager mEmbeddedKitManager;
     JSONArray mUserIdentities = new JSONArray();
-    String mSessionID = new String();
+    String mSessionID = Constants.NO_SESSION_ID;
 
     JSONObject mUserAttributes = new JSONObject();
     private JSONObject mSessionAttributes;
@@ -450,7 +450,7 @@ public class MParticle {
         mMessageManager.endSession(mSessionID, sessionEndTime, sessionEndTime - mSessionStartTime);
         // reset agent to unstarted state
         mSessionStartTime = 0;
-        mSessionID = "";
+        mSessionID = Constants.NO_SESSION_ID;
     }
 
 
@@ -1560,10 +1560,12 @@ public class MParticle {
         mConfigManager.setSessionTimeout(sessionTimeout);
     }
 
-    /* package private */ void logNotification(AbstractCloudMessage message, String type, int actionId) {
+    /* package private */ void logNotification(AbstractCloudMessage message, String type, int actionId, boolean startSession) {
         lastPushMessage = message;
         if (mConfigManager.getSendOoEvents()) {
-            ensureActiveSession();
+            if (startSession){
+                ensureActiveSession();
+            }
             mMessageManager.logNotification(mSessionID, mSessionStartTime, message, type, actionId);
         }
     }

@@ -85,6 +85,10 @@ public class MPService extends IntentService {
 
     private void showNotification(Intent intent) {
         final AbstractCloudMessage message = intent.getParcelableExtra(MParticlePushUtility.CLOUD_MESSAGE_EXTRA);
+        final boolean isNetworkingEnabled = ConfigManager.isNetworkPerformanceEnabled();
+        if (isNetworkingEnabled){
+            ConfigManager.setNetworkingEnabled(false);
+        }
         (new AsyncTask<AbstractCloudMessage, Void, Notification>() {
             @Override
             protected Notification doInBackground(AbstractCloudMessage... params) {
@@ -99,6 +103,10 @@ public class MPService extends IntentService {
                             (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
                     mNotifyMgr.notify(message.getId(), notification);
                 }
+
+                if (isNetworkingEnabled){
+                    ConfigManager.setNetworkingEnabled(true);
+                }
                 synchronized (LOCK) {
                     if (sWakeLock != null && sWakeLock.isHeld()) {
                         sWakeLock.release();
@@ -106,6 +114,7 @@ public class MPService extends IntentService {
                 }
             }
         }).execute(message);
+        MParticle.getInstance().endMeasuringNetworkPerformance();
     }
 
     private void handleNotificationTap(Intent intent) {
@@ -133,7 +142,7 @@ public class MPService extends IntentService {
         message.addBehavior(AbstractCloudMessage.FLAG_DIRECT_OPEN);
         MParticle.getInstance().logNotification(message,
                 action.getActionId() > 0 ? Constants.Push.MESSAGE_TYPE_RECEIVED : Constants.Push.MESSAGE_TYPE_ACTION,
-                action.getActionId());
+                action.getActionId(), true);
 
         Intent broadcast = new Intent(MParticlePushUtility.BROADCAST_NOTIFICATION_TAPPED);
         broadcast.putExtra(MParticlePushUtility.CLOUD_MESSAGE_EXTRA, message);
@@ -178,7 +187,7 @@ public class MPService extends IntentService {
                 cloudMessage.setAppState(appState);
                 cloudMessage.setBehavior(AbstractCloudMessage.FLAG_RECEIVED);
                 MParticle.start(this);
-                MParticle.getInstance().logNotification(cloudMessage, Constants.Push.MESSAGE_TYPE_RECEIVED, 0);
+                MParticle.getInstance().logNotification(cloudMessage, Constants.Push.MESSAGE_TYPE_RECEIVED, 0, false);
                 broadcastNotificationReceived(cloudMessage);
             }catch (Exception e){
                 Log.i(TAG, "GCM parsing error: " + e.toString());

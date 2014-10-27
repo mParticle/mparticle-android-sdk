@@ -390,13 +390,15 @@ class ConfigManager {
         return mProviderPersistence;
     }
 
-    public boolean isNetworkPerformanceEnabled() {
-        return Build.VERSION.SDK_INT > Build.VERSION_CODES.FROYO &&
+    public static boolean isNetworkPerformanceEnabled() {
+        return Build.VERSION.SDK_INT > Build.VERSION_CODES.FROYO && sLocalPrefs != null &&
                 sLocalPrefs.networkingEnabled;
     }
 
-    public void setNetworkingEnabled(boolean networkingEnabled) {
-        sLocalPrefs.networkingEnabled = networkingEnabled;
+    public static void setNetworkingEnabled(boolean networkingEnabled) {
+        if (sLocalPrefs != null) {
+            sLocalPrefs.networkingEnabled = networkingEnabled;
+        }
     }
 
     public void setCookies(JSONObject serverCookies) {

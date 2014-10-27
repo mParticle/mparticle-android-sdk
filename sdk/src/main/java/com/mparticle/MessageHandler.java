@@ -274,7 +274,11 @@ import org.json.JSONObject;
         ContentValues contentValues = new ContentValues();
         contentValues.put(MessageTable.API_KEY, mMessageManagerCallbacks.getApiKey());
         contentValues.put(MessageTable.CREATED_AT, message.getLong(MessageKey.TIMESTAMP));
-        contentValues.put(MessageTable.SESSION_ID, message.getSessionId());
+        String sessionID = message.getSessionId();
+        contentValues.put(MessageTable.SESSION_ID, sessionID);
+        if (Constants.NO_SESSION_ID.equals(sessionID)){
+            message.remove(Constants.MessageKey.SESSION_ID);
+        }
         contentValues.put(MessageTable.MESSAGE, message.toString());
 
         if (message.getString(MessageKey.TYPE) == MessageType.FIRST_RUN) {

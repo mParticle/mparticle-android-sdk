@@ -70,7 +70,7 @@ import java.util.concurrent.TimeoutException;
             MessageTable.STATUS,
             Status.UPLOADED);
     public static final String SQL_HISTORY_MESSAGES = String.format(
-            "((%s='NO-SESSION') or ((%s>=?) and (%s=%d) and (%s != ?)))",
+            "((%s!='NO-SESSION') and ((%s>=?) and (%s=%d) and (%s != ?)))",
             MessageTable.SESSION_ID,
             MessageTable.STATUS,
             MessageTable.STATUS,
