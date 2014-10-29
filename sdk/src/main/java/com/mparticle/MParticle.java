@@ -730,7 +730,9 @@ public class MParticle {
                 }
 
             }
-            mEmbeddedKitManager.logScreen(screenName, eventData);
+            if (started) {
+                mEmbeddedKitManager.logScreen(screenName, eventData);
+            }
         }
     }
 
