@@ -620,7 +620,7 @@ public class MParticle {
 
 
             }
-            mEmbeddedKitManager.logEvent(eventType, eventName, eventDataJSON);
+            mEmbeddedKitManager.logEvent(eventType, eventName, eventInfo);
         }
     }
 
@@ -730,7 +730,7 @@ public class MParticle {
                 }
 
             }
-            mEmbeddedKitManager.logScreen(screenName, eventDataJSON);
+            mEmbeddedKitManager.logScreen(screenName, eventData);
         }
     }
 

@@ -13,6 +13,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.Iterator;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -55,19 +56,19 @@ class EmbeddedMAT extends EmbeddedProvider implements MPActivityCallbacks {
     }
 
     @Override
-    public void logEvent(MParticle.EventType type, String name, JSONObject eventAttributes) {
+    public void logEvent(MParticle.EventType type, String name, Map<String, String> eventAttributes) {
         if (shouldSend(type, name)) {
             com.mobileapptracker.MobileAppTracker instance = com.mobileapptracker.MobileAppTracker.getInstance();
             if (eventAttributes != null) {
                 eventAttributes =
                         filterAttributes(type, name, eventAttributes);
-                if (eventAttributes.length() > 0) {
+                if (eventAttributes.size() > 0) {
                     JSONObject lowercaseAttributes = new JSONObject();
-                    Iterator<String> keys = eventAttributes.keys();
+                    Iterator<String> keys = eventAttributes.keySet().iterator();
                     while (keys.hasNext()) {
                         String key = keys.next();
                         try {
-                            lowercaseAttributes.put(key.toLowerCase(), eventAttributes.optString(key));
+                            lowercaseAttributes.put(key.toLowerCase(), eventAttributes.get(key));
                         } catch (JSONException jse) {
 
                         }
@@ -110,7 +111,7 @@ class EmbeddedMAT extends EmbeddedProvider implements MPActivityCallbacks {
     }
 
     @Override
-    public void logScreen(String screenName, JSONObject eventAttributes) throws Exception {
+    public void logScreen(String screenName, Map<String, String> eventAttributes) throws Exception {
         if (screenName == null){
             screenName = "Viewed";
         }else{
@@ -201,6 +202,16 @@ class EmbeddedMAT extends EmbeddedProvider implements MPActivityCallbacks {
 
     @Override
     public void handleIntent(Intent intent) {
+
+    }
+
+    @Override
+    public void startSession() {
+
+    }
+
+    @Override
+    public void endSession() {
 
     }
 
