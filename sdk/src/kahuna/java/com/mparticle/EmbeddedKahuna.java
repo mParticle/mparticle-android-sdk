@@ -18,6 +18,7 @@ import org.json.JSONObject;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * <p/>
@@ -78,19 +79,19 @@ class EmbeddedKahuna extends EmbeddedProvider implements MPActivityCallbacks {
     }
 
     @Override
-    public void logEvent(MParticle.EventType type, String name, JSONObject eventAttributes) throws Exception {
+    public void logEvent(MParticle.EventType type, String name, Map<String, String> eventAttributes) throws Exception {
         if (!TextUtils.isEmpty(name)) {
-            if (sendTransactionData && eventAttributes != null && eventAttributes.has(Constants.MessageKey.RESERVED_KEY_LTV)){
-                Double amount = Double.parseDouble(eventAttributes.getString(Constants.MessageKey.RESERVED_KEY_LTV)) * 100;
+            if (sendTransactionData && eventAttributes != null && eventAttributes.containsKey(Constants.MessageKey.RESERVED_KEY_LTV)){
+                Double amount = Double.parseDouble(eventAttributes.get(Constants.MessageKey.RESERVED_KEY_LTV)) * 100;
                 KahunaAnalytics.trackEvent("purchase", 1, amount.intValue());
                 if (eventAttributes != null
-                        && (eventAttributes = filterAttributes(type, name, eventAttributes)).length() > 0 ) {
+                        && (eventAttributes = filterAttributes(type, name, eventAttributes)).size() > 0 ) {
                     this.setUserAttributes(eventAttributes);
                 }
             }else if (shouldSend(type, name)) {
                 KahunaAnalytics.trackEvent(name);
                 if (eventAttributes != null
-                        && (eventAttributes = filterAttributes(type, name, eventAttributes)).length() > 0 ) {
+                        && (eventAttributes = filterAttributes(type, name, eventAttributes)).size() > 0 ) {
                     this.setUserAttributes(eventAttributes);
                 }
             }
@@ -99,17 +100,17 @@ class EmbeddedKahuna extends EmbeddedProvider implements MPActivityCallbacks {
     }
 
     @Override
-    protected JSONObject filterAttributes(MParticle.EventType type, String name, JSONObject eventAttributes) {
+    protected Map<String, String> filterAttributes(MParticle.EventType type, String name, Map<String, String> eventAttributes) {
         //JSONObject attributes = super.filterAttributes(type, name, eventAttributes);
         if (includedAttributes != null){
-            Iterator attIterator = eventAttributes.keys();
-            while (attIterator.hasNext()){
-                String attributeKey = (String)attIterator.next();
-                if (!includedAttributes.contains(attributeKey)){
-                    attIterator.remove();
+            Map<String, String> newAttributes = new HashMap<String, String>();
+            for (Map.Entry<String, String> entry : eventAttributes.entrySet())
+            {
+                if (includedAttributes.contains(entry.getKey())){
+                    newAttributes.put(entry.getKey(), entry.getValue());
                 }
             }
-            return eventAttributes;
+            return newAttributes;
         }
         return eventAttributes;
     }
@@ -128,7 +129,7 @@ class EmbeddedKahuna extends EmbeddedProvider implements MPActivityCallbacks {
     }
 
     @Override
-    public void logScreen(String screenName, JSONObject eventAttributes) throws Exception {
+    public void logScreen(String screenName, Map<String, String> eventAttributes) throws Exception {
 
     }
 
@@ -153,6 +154,16 @@ class EmbeddedKahuna extends EmbeddedProvider implements MPActivityCallbacks {
         }
         if (kahunaAttributes != null) {
             KahunaAnalytics.setUserAttributes(kahunaAttributes);
+        }
+    }
+
+    private void setUserAttributes(Map<String, String> attributes){
+        if (attributes != null){
+            HashMap<String, String> kahunaAttributes = new HashMap<String, String>(attributes.size());
+            for (Map.Entry<String, String> entry : attributes.entrySet())
+            {
+                kahunaAttributes.put(convertMpKeyToKahuna(entry.getKey()), entry.getValue());
+            }
         }
     }
 
@@ -226,6 +237,16 @@ class EmbeddedKahuna extends EmbeddedProvider implements MPActivityCallbacks {
                 context.sendBroadcast(intent);
             }
         }
+    }
+
+    @Override
+    public void startSession() {
+
+    }
+
+    @Override
+    public void endSession() {
+
     }
 
     @Override

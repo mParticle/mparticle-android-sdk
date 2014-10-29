@@ -66,20 +66,46 @@ class EmbeddedKochava extends EmbeddedProvider implements MPActivityCallbacks {
     }
 
     @Override
-    public void logEvent(MParticle.EventType type, String name, JSONObject eventAttributes) throws Exception {
+    public void logEvent(MParticle.EventType type, String name, Map<String, String> eventAttributes) throws Exception {
         if (feature != null){
             if (eventAttributes != null &&
-                    (eventAttributes.has(SPACIAL_X) || eventAttributes.has(SPACIAL_Y) || eventAttributes.has(SPACIAL_Z))) {
+                    (eventAttributes.containsKey(SPACIAL_X) || eventAttributes.containsKey(SPACIAL_Y) || eventAttributes.containsKey(SPACIAL_Z))) {
+
+                double spacialX = 0;
+                double spacialY = 0;
+                double spacialZ = 0;
+                if (eventAttributes.containsKey(SPACIAL_X)){
+                    try{
+                        spacialX = Double.parseDouble(eventAttributes.get(SPACIAL_X));
+                    }catch (NumberFormatException nfe){
+
+                    }
+                }
+                if (eventAttributes.containsKey(SPACIAL_Y)){
+                    try{
+                        spacialY = Double.parseDouble(eventAttributes.get(SPACIAL_Y));
+                    }catch (NumberFormatException nfe){
+
+                    }
+                }
+                if (eventAttributes.containsKey(SPACIAL_Z)){
+                    try{
+                        spacialZ = Double.parseDouble(eventAttributes.get(SPACIAL_Z));
+                    }catch (NumberFormatException nfe){
+
+                    }
+                }
                 feature.eventSpatial(name,
-                        eventAttributes.optDouble(SPACIAL_X, 0),
-                        eventAttributes.optDouble(SPACIAL_Y, 0),
-                        eventAttributes.optDouble(SPACIAL_Z, 0),
+                        spacialX,
+                        spacialY,
+                        spacialZ,
                         null);
             }else{
                 feature.event(name, null);
             }
         }
     }
+
 
     @Override
     public void logTransaction(MPProduct transaction) throws Exception {
@@ -90,7 +116,7 @@ class EmbeddedKochava extends EmbeddedProvider implements MPActivityCallbacks {
     }
 
     @Override
-    public void logScreen(String screenName, JSONObject eventAttributes) throws Exception {
+    public void logScreen(String screenName, Map<String, String> eventAttributes) throws Exception {
         String kochavaName = "Viewed " + (screenName == null ? "" : screenName);
         logEvent(null, kochavaName, eventAttributes);
     }
@@ -144,6 +170,16 @@ class EmbeddedKochava extends EmbeddedProvider implements MPActivityCallbacks {
 
     @Override
     public void handleIntent(Intent intent) {
+
+    }
+
+    @Override
+    public void startSession() {
+
+    }
+
+    @Override
+    public void endSession() {
 
     }
 
