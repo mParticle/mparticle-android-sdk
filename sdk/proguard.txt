@@ -85,5 +85,8 @@
 -keep class com.mobileapptracker.** { *; }
 -keep class com.kahuna.** { *; }
 
+-keep class com.comscore.** { *; }
+-dontwarn com.comscore.**
+
 -classobfuscationdictionary names.txt
 
