@@ -41,7 +41,7 @@ class EmbeddedComscore extends EmbeddedProvider implements MPActivityCallbacks {
     private String autoUpdateMode;
     private int autoUpdateInterval = 60;
 
-    private static final String HOST = "engine.mobileapptracking.com";
+    private static final String HOST = "scorecardresearch.com";
     private boolean isEnterprise;
 
     EmbeddedComscore(Context context) throws ClassNotFoundException{
