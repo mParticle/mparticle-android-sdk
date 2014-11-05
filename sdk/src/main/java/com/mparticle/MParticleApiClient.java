@@ -32,6 +32,7 @@ import java.security.KeyStore;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateFactory;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.zip.GZIPOutputStream;
@@ -90,8 +91,12 @@ class MParticleApiClient {
                         Settings.Secure.ANDROID_ID).getBytes())
                     .mod(BigInteger.valueOf(100))
                     .intValue();
-        variant = BuildConfig.FLAVOR.equals("kahuna") ? BuildConfig.FLAVOR : "main";
+
+        variant = getSupportedKitString();
     }
+
+
+
 
     void fetchConfig() throws IOException, MPThrottleException, MPConfigException {
         try {
@@ -497,6 +502,20 @@ class MParticleApiClient {
         if (currentRamp > 0 && currentRamp < 100 &&
                 mDeviceRampNumber > mConfigManager.getCurrentRampValue()){
             throw new MPRampException();
+        }
+    }
+
+    private static String getSupportedKitString(){
+        ArrayList<Integer> supportedKitIds = EmbeddedKitFactory.getSupportedKits();
+        if (supportedKitIds.size() > 0) {
+            StringBuilder kitString = new StringBuilder();
+            for (Integer kitint : supportedKitIds) {
+                kitString.append(kitint).append(",");
+            }
+            kitString.deleteCharAt(kitString.length()-1);
+            return kitString.toString();
+        }else{
+            return "";
         }
     }
 }

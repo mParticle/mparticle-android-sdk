@@ -9,6 +9,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -304,9 +305,10 @@ class EmbeddedKitManager implements IEmbeddedKit, MPActivityCallbacks{
     }
 
     public static class BaseEmbeddedKitFactory {
-        private final static int MAT = 32;
-        private final static int KOCHAVA = 37;
-        private final static int COMSCORE = 39;
+        protected final static int MAT = 32;
+        protected final static int KOCHAVA = 37;
+        protected final static int COMSCORE = 39;
+
         protected EmbeddedProvider createInstance(int id, Context context) throws JSONException, ClassNotFoundException{
             switch (id){
                 case MAT:
