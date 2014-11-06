@@ -39,6 +39,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 import java.util.TreeMap;
+import java.util.concurrent.TimeUnit;
 import java.util.jar.JarFile;
 
 /**
@@ -153,6 +154,10 @@ class MPUtility {
             availableSpace = (long) stat.getAvailableBlocks() * (long) stat.getBlockSize();
         }
         return availableSpace;
+    }
+
+    public static long millitime(){
+        return TimeUnit.MILLISECONDS.convert(System.nanoTime(), TimeUnit.NANOSECONDS);
     }
 
     public static synchronized String getAndroidID(Context paramContext) {
