@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.mparticle;
+package com.mparticle.licensing;
 
 
 import java.io.UnsupportedEncodingException;
@@ -33,7 +33,7 @@ import javax.crypto.spec.SecretKeySpec;
 /**
  * An Obfuscator that uses AES to encrypt data.
  */
-class AESObfuscator implements Obfuscator {
+public class AESObfuscator implements Obfuscator {
     private static final String UTF8 = "UTF-8";
     private static final String KEYGEN_ALGORITHM = "PBEWITHSHAAND256BITAES-CBC-BC";
     private static final String CIPHER_ALGORITHM = "AES/CBC/PKCS5Padding";

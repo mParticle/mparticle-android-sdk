@@ -8,6 +8,8 @@ import android.text.TextUtils;
 import android.util.Base64;
 
 
+import com.mparticle.internal.Constants;
+
 import org.apache.http.HttpStatus;
 import org.apache.http.impl.cookie.DateUtils;
 import org.apache.http.protocol.HTTP;

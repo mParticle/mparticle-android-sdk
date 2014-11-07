@@ -7,7 +7,7 @@ import android.content.SharedPreferences;
 import android.location.Location;
 import android.util.Log;
 
-import com.mobileapptracker.MobileAppTracker;
+import com.mparticle.internal.Constants;
 
 import org.json.JSONException;
 import org.json.JSONObject;

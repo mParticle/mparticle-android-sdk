@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.mparticle;
+package com.mparticle.licensing;
 
 /**
  * Allows the developer to limit the number of devices using a single license.

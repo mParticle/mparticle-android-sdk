@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.mparticle;
+package com.mparticle.licensing;
 
 
 import android.content.ComponentName;
@@ -44,7 +44,7 @@ import java.util.Set;
 /**
  * Client library for Android Market license verifications.
  * <p>
- * The LicenseChecker is configured via a {@link Policy} which contains the
+ * The LicenseChecker is configured via a {@link com.mparticle.licensing.Policy} which contains the
  * logic to determine whether a user should have access to the application. For
  * example, the Policy can define a threshold for allowable number of server or
  * client failures before the library reports the user as not having access.
@@ -52,7 +52,7 @@ import java.util.Set;
  * Must also provide the GBase64-encoded RSA public key associated with your
  * developer account. The public key is obtainable from the publisher site.
  */
-class LicenseChecker implements ServiceConnection {
+public class LicenseChecker implements ServiceConnection {
     private static final String TAG = "LicenseChecker";
 
     private static final String KEY_FACTORY_ALGORITHM = "RSA";

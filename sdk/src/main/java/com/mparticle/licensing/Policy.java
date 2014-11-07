@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package com.mparticle;
+package com.mparticle.licensing;
 
 /**
- * Policy used by {@link LicenseChecker} to determine whether a user should have
+ * Policy used by {@link com.mparticle.LicenseChecker} to determine whether a user should have
  * access to the application.
  */
-interface Policy {
+public interface Policy {
 
     /**
      * Change these values to make it more difficult for tools to automatically

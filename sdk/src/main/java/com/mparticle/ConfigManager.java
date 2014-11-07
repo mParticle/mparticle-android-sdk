@@ -6,15 +6,13 @@ import android.content.pm.ApplicationInfo;
 import android.os.Build;
 import android.text.TextUtils;
 import android.util.Log;
-import android.webkit.JavascriptInterface;
-import android.webkit.WebView;
 
-import org.apache.http.impl.cookie.DateParseException;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.mparticle.MParticle.LogLevel;
+import com.mparticle.internal.Constants;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;

@@ -6,6 +6,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 
+import com.mparticle.internal.Constants;
+
 /**
  * Core {@code BroadcastReceiver} used to support push notification and installer referrers. Handles the following Intent actions:
  *

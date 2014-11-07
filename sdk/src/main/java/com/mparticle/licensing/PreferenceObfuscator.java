@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-package com.mparticle;
+package com.mparticle.licensing;
 
 import android.content.SharedPreferences;
 import android.util.Log;
+
 
 /**
  * An wrapper for SharedPreferences that transparently performs data obfuscation.

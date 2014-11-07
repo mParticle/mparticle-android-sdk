@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package com.mparticle;
+package com.mparticle.licensing;
 
 /**
  * Callback for the license checker library.
  * <p>
- * Upon checking with the Market server and conferring with the {@link Policy},
+ * Upon checking with the Market server and conferring with the {@link com.mparticle.licensing.Policy},
  * the library calls the appropriate callback method to communicate the result.
  * <p>
  * <b>The callback does not occur in the original checking thread.</b> Your
@@ -32,7 +32,7 @@ package com.mparticle;
  * while in most cases Policy.NOT_LICENSED will call dontAllow and
  * Policy.LICENSED will Allow.
  */
-interface LicenseCheckerCallback {
+public interface LicenseCheckerCallback {
 
     /**
      * Allow use. App should proceed as normal.

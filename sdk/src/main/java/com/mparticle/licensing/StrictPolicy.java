@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.mparticle;
+package com.mparticle.licensing;
 
 /**
  * Non-caching policy. All requests will be sent to the licensing service,

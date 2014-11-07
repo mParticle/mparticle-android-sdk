@@ -1,6 +1,8 @@
-package com.mparticle;
+package com.mparticle.internal;
 
-/* package-private */class Constants {
+import com.mparticle.BuildConfig;
+
+public class Constants {
 
     public final static String LOG_TAG = "mParticle SDK";
 
@@ -23,7 +25,7 @@ package com.mparticle;
             89
     };
 
-    interface MethodName {
+    public interface MethodName {
         public static final String METHOD_NAME = "$MethodName";
         public static final String LOG_LTV = "LogLTVIncrease";
         public static final String LOG_ECOMMERCE = "LogEcommerceTransaction";
@@ -36,7 +38,7 @@ package com.mparticle;
 
     }
 
-    interface MessageType {
+    public interface MessageType {
         public static final String SESSION_START = "ss";
         public static final String SESSION_END = "se";
         public static final String EVENT = "e";
@@ -55,7 +57,7 @@ package com.mparticle;
         public static final String PROFILE = "pro";
     }
 
-    interface MessageKey {
+    public interface MessageKey {
         // common
         public static final String TYPE = "dt";
         public static final String ID = "id";
@@ -233,7 +235,7 @@ package com.mparticle;
         public static final String FIRST_SEEN_INSTALL = "fi";
     }
 
-    interface PrefKeys {
+    public interface PrefKeys {
         // common
         public static final String INSTALL_TIME = "mp::ict";
         public static final String PUSH_REGISTRATION_ID = "mp::push_reg_id";
@@ -289,26 +291,26 @@ package com.mparticle;
         public static final String FIRST_RUN_INSTALL = "mp::firstrun::install";
     }
 
-    interface MiscStorageKeys {
+    public interface MiscStorageKeys {
         public static final String TOTAL_MEMORY = "mp::totalmem";
         public static final String MEMORY_THRESHOLD = "mp::memthreshold";
     }
 
-    interface Status {
+    public interface Status {
         static final int UNKNOWN = -1;
         static final int READY = 1; // stream
         static final int BATCH_READY = 2;
         static final int UPLOADED = 3;
     }
 
-    interface StateTransitionType {
+    public interface StateTransitionType {
         public static final String STATE_TRANS_INIT = "app_init";
         public static final String STATE_TRANS_EXIT = "app_exit";
         public static final String STATE_TRANS_BG = "app_back";
         public static final String STATE_TRANS_FORE = "app_fore";
     }
 
-    interface Audience {
+    public interface Audience {
         public static final String ACTION_ADD = "add";
         public static final String API_AUDIENCE_LIST = "m";
         public static final String API_AUDIENCE_ID = "id";
@@ -319,12 +321,12 @@ package com.mparticle;
         public static final String API_AUDIENCE_MEMBERSHIP_TIMESTAMP = "ct";
     }
 
-    interface ProfileActions {
+    public interface ProfileActions {
         public static final String LOGOUT = "logout";
         public static final String KEY = "t";
     }
 
-    interface External {
+    public interface External {
         public static final String APPLINK_KEY = "al_applink_data";
     }
 }

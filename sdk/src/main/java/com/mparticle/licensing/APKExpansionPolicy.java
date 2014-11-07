@@ -1,5 +1,5 @@
 
-package com.mparticle;
+package com.mparticle.licensing;
 
 /*
  * Copyright (C) 2012 The Android Open Source Project
@@ -47,7 +47,7 @@ import java.util.Vector;
  * licensing policy should implement a custom Policy.
  */
 @SuppressWarnings("ALL")
-class APKExpansionPolicy implements Policy {
+public class APKExpansionPolicy implements Policy {
 
     private static final String TAG = "APKExpansionPolicy";
     private static final String PREFS_FILE = "com.android.vending.licensing.APKExpansionPolicy";

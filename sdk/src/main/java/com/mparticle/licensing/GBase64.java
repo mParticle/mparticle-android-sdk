@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package com.mparticle;
+package com.mparticle.licensing;
 
 // This code was converted from code at http://iharder.sourceforge.net/base64/
 // Lots of extraneous features were removed.
@@ -39,7 +39,7 @@ package com.mparticle;
  * class.
  */
 @SuppressWarnings("ALL")
-class GBase64 {
+public class GBase64 {
   /** Specify encoding (value is {@code true}). */
   public final static boolean ENCODE = true;
 

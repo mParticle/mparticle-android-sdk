@@ -15,6 +15,8 @@ import android.os.Bundle;
 import android.os.PowerManager;
 import android.util.Log;
 
+import com.mparticle.internal.Constants;
+
 /**
  * {@code IntentService } used internally by the SDK to process incoming broadcast messages in the background. Required for push notification functionality.
  * <p/>

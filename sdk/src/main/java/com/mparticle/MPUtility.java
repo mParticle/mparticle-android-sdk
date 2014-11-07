@@ -19,6 +19,8 @@ import android.util.Log;
 import android.view.Display;
 import android.view.WindowManager;
 
+import com.mparticle.internal.Constants;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;

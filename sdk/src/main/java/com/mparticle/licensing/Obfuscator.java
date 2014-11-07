@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.mparticle;
+package com.mparticle.licensing;
 
 /**
  * Interface used as part of a {@link Policy} to allow application authors to obfuscate
@@ -43,7 +43,7 @@ interface Obfuscator {
      * @param original The data that is to be obfuscated.
      * @param key The key for the data that is to be obfuscated.
      * @return A transformed version of the original data.
-     * @throws ValidationException Optionally thrown if a data integrity check fails.
+     * @throws com.mparticle.ValidationException Optionally thrown if a data integrity check fails.
      */
     String unobfuscate(String obfuscated, String key) throws ValidationException;
 }

@@ -4,6 +4,8 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Log;
 
+import com.mparticle.internal.Constants;
+
 /**
  * Created by sdozor on 1/21/14.
  */

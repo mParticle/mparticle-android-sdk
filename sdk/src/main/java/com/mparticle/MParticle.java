@@ -1,7 +1,6 @@
 package com.mparticle;
 
 import android.app.Activity;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -19,8 +18,14 @@ import android.provider.Settings;
 import android.util.Log;
 import android.webkit.WebView;
 
-import com.mparticle.Constants.MessageKey;
-import com.mparticle.Constants.PrefKeys;
+import com.mparticle.internal.Constants;
+import com.mparticle.internal.Constants.MessageKey;
+import com.mparticle.internal.Constants.PrefKeys;
+import com.mparticle.licensing.AESObfuscator;
+import com.mparticle.licensing.LicenseChecker;
+import com.mparticle.licensing.LicenseCheckerCallback;
+import com.mparticle.licensing.Policy;
+import com.mparticle.licensing.ServerManagedPolicy;
 import com.mparticle.segmentation.SegmentListener;
 
 import org.apache.http.conn.ssl.SSLSocketFactory;
@@ -1504,7 +1509,7 @@ public class MParticle {
      * Optionally use the licensingCallback to allow or disallow access to features of your application.
      *
      * @param encodedPublicKey  GBase64-encoded RSA public key of your application
-     * @param policy            <b>Optional</b> {@link Policy}, will default to {@link ServerManagedPolicy}
+     * @param policy            <b>Optional</b> {@link com.mparticle.licensing.Policy}, will default to {@link ServerManagedPolicy}
      * @param licensingCallback <b>Optional</b> {@link LicenseCheckerCallback} callback for licensing checking
      */
     private void performLicenseCheck(String encodedPublicKey, Policy policy, LicenseCheckerCallback licensingCallback) {

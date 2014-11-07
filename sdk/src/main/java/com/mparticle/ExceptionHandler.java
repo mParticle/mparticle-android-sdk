@@ -2,6 +2,8 @@ package com.mparticle;
 
 import android.util.Log;
 
+import com.mparticle.internal.Constants;
+
 import java.lang.Thread.UncaughtExceptionHandler;
 
 /* package-private */class ExceptionHandler implements UncaughtExceptionHandler {

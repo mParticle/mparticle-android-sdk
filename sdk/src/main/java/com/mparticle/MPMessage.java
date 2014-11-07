@@ -2,6 +2,8 @@ package com.mparticle;
 
 import android.location.Location;
 
+import com.mparticle.internal.Constants;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 

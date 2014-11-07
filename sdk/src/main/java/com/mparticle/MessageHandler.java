@@ -7,11 +7,11 @@ import android.database.sqlite.SQLiteException;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.util.Log;
 
-import com.mparticle.Constants.MessageKey;
-import com.mparticle.Constants.MessageType;
-import com.mparticle.Constants.Status;
+import com.mparticle.internal.Constants;
+import com.mparticle.internal.Constants.MessageKey;
+import com.mparticle.internal.Constants.MessageType;
+import com.mparticle.internal.Constants.Status;
 import com.mparticle.MParticleDatabase.BreadcrumbTable;
 import com.mparticle.MParticleDatabase.MessageTable;
 import com.mparticle.MParticleDatabase.SessionTable;

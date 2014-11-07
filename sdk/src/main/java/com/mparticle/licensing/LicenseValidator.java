@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-package com.mparticle;
+package com.mparticle.licensing;
 
 import android.text.TextUtils;
 import android.util.Log;
+
 
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;

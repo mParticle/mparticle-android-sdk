@@ -11,8 +11,9 @@ import android.telephony.TelephonyManager;
 import android.util.DisplayMetrics;
 import android.view.WindowManager;
 
-import com.mparticle.Constants.MessageKey;
-import com.mparticle.Constants.PrefKeys;
+import com.mparticle.internal.Constants;
+import com.mparticle.internal.Constants.MessageKey;
+import com.mparticle.internal.Constants.PrefKeys;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -205,8 +206,4 @@ import java.util.TimeZone;
 
         return attributes;
     }
-
-
-
-
 }

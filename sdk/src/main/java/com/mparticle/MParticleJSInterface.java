@@ -4,6 +4,7 @@ package com.mparticle;
 import android.webkit.JavascriptInterface;
 
 import com.mparticle.MParticle.EventType;
+import com.mparticle.internal.Constants;
 
 import org.json.JSONException;
 import org.json.JSONObject;

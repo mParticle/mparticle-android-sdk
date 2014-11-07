@@ -5,13 +5,11 @@ import android.app.Activity;
 import android.app.Application;
 import android.content.ComponentName;
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.*;
 
-import com.google.android.gms.appstate.AppState;
+import com.mparticle.internal.Constants;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.concurrent.atomic.AtomicInteger;

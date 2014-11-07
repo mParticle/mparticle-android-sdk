@@ -5,6 +5,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
 
+import com.mparticle.internal.Constants;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;

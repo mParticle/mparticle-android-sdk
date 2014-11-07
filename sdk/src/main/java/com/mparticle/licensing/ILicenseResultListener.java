@@ -2,7 +2,7 @@
  * This file is auto-generated.  DO NOT MODIFY.
  * Original file: aidl/ILicenseResultListener.aidl
  */
-package com.mparticle;
+package com.mparticle.licensing;
 import android.os.IBinder;
 
 interface ILicenseResultListener extends android.os.IInterface

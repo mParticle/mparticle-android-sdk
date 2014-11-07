@@ -15,10 +15,10 @@ import android.os.BatteryManager;
 import android.os.Bundle;
 import android.os.HandlerThread;
 import android.os.Process;
-import android.util.Log;
 
-import com.mparticle.Constants.MessageKey;
-import com.mparticle.Constants.MessageType;
+import com.mparticle.internal.Constants;
+import com.mparticle.internal.Constants.MessageKey;
+import com.mparticle.internal.Constants.MessageType;
 import com.mparticle.MParticle.EventType;
 
 import org.json.JSONException;

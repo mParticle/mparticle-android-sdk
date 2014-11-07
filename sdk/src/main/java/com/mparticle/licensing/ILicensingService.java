@@ -2,7 +2,7 @@
  * This file is auto-generated.  DO NOT MODIFY.
  * Original file: aidl/ILicensingService.aidl
  */
-package com.mparticle;
+package com.mparticle.licensing;
 import android.os.IBinder;
 
 interface ILicensingService extends android.os.IInterface

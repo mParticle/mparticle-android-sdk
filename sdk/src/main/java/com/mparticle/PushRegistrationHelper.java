@@ -7,7 +7,8 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.Build;
-import android.util.Log;
+
+import com.mparticle.internal.Constants;
 
 /**
  * Created by sdozor on 1/23/14.
