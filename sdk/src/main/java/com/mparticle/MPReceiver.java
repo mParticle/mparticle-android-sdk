@@ -1,4 +1,4 @@
-package com.mparticle.internal;
+package com.mparticle;
 
 import android.app.Activity;
 import android.content.BroadcastReceiver;
@@ -6,7 +6,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 
+import com.mparticle.MPService;
 import com.mparticle.MParticle;
+import com.mparticle.internal.Constants;
 
 /**
  * Core {@code BroadcastReceiver} used to support push notification and installer referrers. Handles the following Intent actions:

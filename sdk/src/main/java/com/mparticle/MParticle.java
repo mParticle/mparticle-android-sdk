@@ -27,7 +27,6 @@ import com.mparticle.internal.embedded.EmbeddedKitManager;
 import com.mparticle.internal.ExceptionHandler;
 import com.mparticle.internal.KitKatHelper;
 import com.mparticle.internal.np.MPSSLSocketFactory;
-import com.mparticle.internal.MPService;
 import com.mparticle.internal.np.MPSocketImplFactory;
 import com.mparticle.internal.np.MPUrlStreamHandlerFactory;
 import com.mparticle.internal.MPUtility;

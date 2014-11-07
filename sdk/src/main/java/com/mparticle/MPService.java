@@ -1,4 +1,4 @@
-package com.mparticle.internal;
+package com.mparticle;
 
 import android.annotation.SuppressLint;
 import android.app.IntentService;
@@ -15,7 +15,8 @@ import android.os.Bundle;
 import android.os.PowerManager;
 import android.util.Log;
 
-import com.mparticle.MParticle;
+import com.mparticle.internal.AppStateManager;
+import com.mparticle.internal.Constants;
 
 /**
  * {@code IntentService } used internally by the SDK to process incoming broadcast messages in the background. Required for push notification functionality.
@@ -107,7 +108,7 @@ public class MPService extends IntentService {
             Bundle extras = intent.getExtras();
             String appState = extras.getString(APP_STATE);
             mMParticle.internal().logNotification(intent.getExtras().getBundle(PUSH_REDACTED_PAYLOAD),
-                                        appState);
+                    appState);
         } catch (Throwable t) {
 
         }
