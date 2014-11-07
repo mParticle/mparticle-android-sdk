@@ -1,4 +1,4 @@
-package com.mparticle.internal;
+package com.mparticle;
 
 /**
  * Private API - for use by the mParticle Unity SDK.

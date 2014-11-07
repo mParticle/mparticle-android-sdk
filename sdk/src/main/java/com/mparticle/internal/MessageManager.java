@@ -16,6 +16,7 @@ import android.os.Bundle;
 import android.os.HandlerThread;
 import android.os.Process;
 
+import com.mparticle.MPUnityException;
 import com.mparticle.MParticle;
 import com.mparticle.internal.Constants.MessageKey;
 import com.mparticle.internal.Constants.MessageType;

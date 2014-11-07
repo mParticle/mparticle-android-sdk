@@ -16,7 +16,7 @@ import com.mparticle.MParticle;
 import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.Constants;
 import com.mparticle.internal.MPActivityCallbacks;
-import com.mparticle.internal.MPProduct;
+import com.mparticle.MPProduct;
 import com.mparticle.internal.MPReceiver;
 import com.mparticle.internal.MPUtility;
 

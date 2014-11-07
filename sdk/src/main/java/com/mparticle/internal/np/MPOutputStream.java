@@ -1,6 +1,7 @@
-package com.mparticle.internal;
+package com.mparticle.internal.np;
 
 import com.mparticle.MParticle;
+import com.mparticle.internal.ConfigManager;
 
 import java.io.IOException;
 import java.io.OutputStream;

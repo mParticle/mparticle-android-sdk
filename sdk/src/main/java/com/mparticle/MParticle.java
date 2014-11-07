@@ -26,14 +26,13 @@ import com.mparticle.internal.Constants.PrefKeys;
 import com.mparticle.internal.embedded.EmbeddedKitManager;
 import com.mparticle.internal.ExceptionHandler;
 import com.mparticle.internal.KitKatHelper;
-import com.mparticle.internal.MPProduct;
-import com.mparticle.internal.MPSSLSocketFactory;
+import com.mparticle.internal.np.MPSSLSocketFactory;
 import com.mparticle.internal.MPService;
-import com.mparticle.internal.MPSocketImplFactory;
-import com.mparticle.internal.MPUrlStreamHandlerFactory;
+import com.mparticle.internal.np.MPSocketImplFactory;
+import com.mparticle.internal.np.MPUrlStreamHandlerFactory;
 import com.mparticle.internal.MPUtility;
 import com.mparticle.internal.MParticleJSInterface;
-import com.mparticle.internal.MeasuredRequestManager;
+import com.mparticle.internal.np.MeasuredRequestManager;
 import com.mparticle.internal.MessageManager;
 import com.mparticle.internal.PushRegistrationHelper;
 import com.mparticle.licensing.AESObfuscator;
@@ -643,8 +642,8 @@ public class MParticle {
      *
      * @param event
      * @param product
-     * @see com.mparticle.internal.MPProduct
-     * @see com.mparticle.internal.MPProduct.Event
+     * @see MPProduct
+     * @see MPProduct.Event
      */
     public void logProductEvent(final MPProduct.Event event, MPProduct product) {
         if (product == null) {
@@ -695,7 +694,7 @@ public class MParticle {
      * Logs an e-commerce transaction event
      *
      * @param product (required not null)
-     * @see com.mparticle.internal.MPProduct
+     * @see MPProduct
      */
     public void logTransaction(MPProduct product) {
         logProductEvent(MPProduct.Event.PURCHASE, product);

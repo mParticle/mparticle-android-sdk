@@ -9,7 +9,7 @@ import com.kochava.android.tracker.Feature;
 import com.mparticle.MParticle;
 import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.MPActivityCallbacks;
-import com.mparticle.internal.MPProduct;
+import com.mparticle.MPProduct;
 
 import org.json.JSONObject;
 

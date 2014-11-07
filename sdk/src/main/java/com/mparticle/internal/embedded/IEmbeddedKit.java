@@ -4,7 +4,7 @@ import android.content.Intent;
 import android.location.Location;
 
 import com.mparticle.MParticle;
-import com.mparticle.internal.MPProduct;
+import com.mparticle.MPProduct;
 
 import org.json.JSONObject;
 

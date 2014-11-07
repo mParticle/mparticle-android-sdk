@@ -2,7 +2,7 @@ package com.mparticle.test;
 
 import android.test.AndroidTestCase;
 
-import com.mparticle.internal.MPProduct;
+import com.mparticle.MPProduct;
 
 /**
  * Created by sdozor on 11/6/14.

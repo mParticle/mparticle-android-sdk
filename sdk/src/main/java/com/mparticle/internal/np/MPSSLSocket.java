@@ -1,4 +1,4 @@
-package com.mparticle.internal;
+package com.mparticle.internal.np;
 
 import java.io.IOException;
 import java.io.InputStream;

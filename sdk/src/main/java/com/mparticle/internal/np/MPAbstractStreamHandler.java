@@ -1,6 +1,8 @@
-package com.mparticle.internal;
+package com.mparticle.internal.np;
 
 import android.os.Build;
+
+import com.mparticle.internal.MPUtility;
 
 import java.io.IOException;
 import java.lang.reflect.Constructor;

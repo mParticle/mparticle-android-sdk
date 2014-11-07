@@ -1,4 +1,4 @@
-package com.mparticle.internal;
+package com.mparticle;
 
 import java.util.HashMap;
 
