@@ -441,7 +441,7 @@ public class MParticle {
 
     private void endSession(long sessionEndTime) {
         ConfigManager.log(LogLevel.DEBUG, "Ended session");
-
+        mEmbeddedKitManager.endSession();
         // mMessageManager.stopSession(mSessionID, sessionEndTime, sessionEndTime - mSessionStartTime);
         mMessageManager.endSession(mSessionID, sessionEndTime, sessionEndTime - mSessionStartTime);
         // reset agent to unstarted state
@@ -487,6 +487,7 @@ public class MParticle {
         mMessageManager.startSession(mSessionID, mSessionStartTime);
         mTimeoutHandler.sendEmptyMessageDelayed(0, mConfigManager.getSessionTimeout());
         ConfigManager.log(LogLevel.DEBUG, "Started new session");
+        mEmbeddedKitManager.startSession();
     }
 
     /**
@@ -611,7 +612,7 @@ public class MParticle {
 
 
             }
-            mEmbeddedKitManager.logEvent(eventType, eventName, eventDataJSON);
+            mEmbeddedKitManager.logEvent(eventType, eventName, eventInfo);
         }
     }
 
@@ -698,8 +699,6 @@ public class MParticle {
     public void logTransaction(MPProduct product) {
         logProductEvent(MPProduct.Event.PURCHASE, product);
     }
-
-
 
     /**
      * Logs a screen view event
@@ -1902,7 +1901,9 @@ public class MParticle {
                     }
 
                 }
-                mEmbeddedKitManager.logScreen(screenName, eventDataJSON);
+                if (started) {
+                    mEmbeddedKitManager.logScreen(screenName, eventData);
+                }
             }
         }
 

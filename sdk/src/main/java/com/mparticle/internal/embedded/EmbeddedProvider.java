@@ -13,6 +13,7 @@ import org.json.JSONObject;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
 
 /**
  * Created by sdozor on 3/13/14.
@@ -128,12 +129,13 @@ abstract class EmbeddedProvider implements IEmbeddedKit {
         return types.get(typeHash, true) && names.get(typeNameHash, true);
     }
 
-    protected JSONObject filterAttributes(MParticle.EventType type, String name, JSONObject eventAttributes){
-        Iterator attIterator = eventAttributes.keys();
+    protected Map<String, String> filterAttributes(MParticle.EventType type, String name, Map<String, String> eventAttributes){
         String nameType = type + name;
-        while (attIterator.hasNext()){
-            String attributeKey = (String)attIterator.next();
-            int hash = hash(nameType + attributeKey);
+        Iterator<Map.Entry<String, String>> attIterator = eventAttributes.entrySet().iterator();
+        while (attIterator.hasNext()) {
+            Map.Entry<String, String> entry = attIterator.next();
+            String key = entry.getKey();
+            int hash = hash(nameType + key);
             if (!attributes.get(hash, true)){
                 attIterator.remove();
             }

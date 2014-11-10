@@ -15,6 +15,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -69,7 +70,7 @@ public class EmbeddedKitManager implements IEmbeddedKit, MPActivityCallbacks {
     }
 
     @Override
-    public void logEvent(MParticle.EventType type, String name, JSONObject eventAttributes) {
+    public void logEvent(MParticle.EventType type, String name, Map<String, String> eventAttributes) {
         for (EmbeddedProvider provider : providers.values()){
             try {
                 if (!provider.optedOut()) {
@@ -95,7 +96,7 @@ public class EmbeddedKitManager implements IEmbeddedKit, MPActivityCallbacks {
     }
 
     @Override
-    public void logScreen(String screenName, JSONObject eventAttributes) {
+    public void logScreen(String screenName, Map<String, String> eventAttributes) {
         for (EmbeddedProvider provider : providers.values()){
             try {
                 if (!provider.optedOut()) {
@@ -199,6 +200,32 @@ public class EmbeddedKitManager implements IEmbeddedKit, MPActivityCallbacks {
     }
 
     @Override
+    public void startSession() {
+        for (EmbeddedProvider provider : providers.values()){
+            try {
+                if (!provider.optedOut()) {
+                    provider.startSession();
+                }
+            } catch (Exception e) {
+                ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to call startSession for embedded provider: " + provider.getName() + ": " + e.getMessage());
+            }
+        }
+    }
+
+    @Override
+    public void endSession() {
+        for (EmbeddedProvider provider : providers.values()){
+            try {
+                if (!provider.optedOut()) {
+                    provider.endSession();
+                }
+            } catch (Exception e) {
+                ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to call endSession for embedded provider: " + provider.getName() + ": " + e.getMessage());
+            }
+        }
+    }
+
+    @Override
     public void onActivityCreated(Activity activity, int activityCount) {
         for (EmbeddedProvider provider : providers.values()){
             if (provider instanceof MPActivityCallbacks) {
@@ -285,12 +312,15 @@ public class EmbeddedKitManager implements IEmbeddedKit, MPActivityCallbacks {
     public static class BaseEmbeddedKitFactory {
         private final static int MAT = 32;
         private final static int KOCHAVA = 37;
+        private final static int COMSCORE = 39;
         protected EmbeddedProvider createInstance(int id, Context context) throws JSONException, ClassNotFoundException{
             switch (id){
                 case MAT:
                     return new EmbeddedMAT(context);
                 case KOCHAVA:
                     return new EmbeddedKochava(context);
+                case COMSCORE:
+                    return new EmbeddedComscore(context);
                 default:
                     return null;
             }

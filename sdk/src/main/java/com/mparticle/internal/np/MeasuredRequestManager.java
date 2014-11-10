@@ -52,7 +52,7 @@ public final class MeasuredRequestManager {
                     try {
                         String uri = request.getUri();
                         String requestString = request.getRequestString();
-                        boolean allowed = isUriAllowed(uri);
+                        boolean allowed = MParticle.getInstance().internal().shouldProcessUrl(uri);
                         if (request.readyForLogging() && !loggedUris.contains(uri)) {
                             if (allowed) {
                         /* disabling this for the server-side extractors...for now
