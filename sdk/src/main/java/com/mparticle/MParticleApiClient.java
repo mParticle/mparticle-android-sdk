@@ -7,7 +7,6 @@ import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Base64;
 
-
 import org.apache.http.HttpStatus;
 import org.apache.http.impl.cookie.DateUtils;
 import org.apache.http.protocol.HTTP;
@@ -51,7 +50,7 @@ class MParticleApiClient {
 
     private static final String HEADER_SIGNATURE = "x-mp-signature";
     private static final String HEADER_ENVIRONMENT = "x-mp-env";
-    private static final String HEADER_VARIANT = "x-mp-variant";
+    private static final String HEADER_KITS = "x-mp-kits";
     private static final String SECURE_SERVICE_SCHEME = TextUtils.isEmpty(BuildConfig.MP_URL) ? "https" : "http";
 
     private static final String API_HOST = TextUtils.isEmpty(BuildConfig.MP_URL) ? "nativesdks.mparticle.com" : BuildConfig.MP_URL;
@@ -72,7 +71,7 @@ class MParticleApiClient {
     private final SharedPreferences mPreferences;
     private final String mApiKey;
     private final int mDeviceRampNumber;
-    private static String variant;
+    private static String supportedKits;
     private SSLSocketFactory socketFactory;
     private String etag = null;
     private String modified = null;
@@ -92,7 +91,7 @@ class MParticleApiClient {
                     .mod(BigInteger.valueOf(100))
                     .intValue();
 
-        variant = getSupportedKitString();
+        supportedKits = getSupportedKitString();
     }
 
 
@@ -104,7 +103,7 @@ class MParticleApiClient {
             HttpURLConnection connection = (HttpURLConnection) mConfigUrl.openConnection();
             connection.setRequestProperty("Accept-Encoding", "gzip");
             connection.setRequestProperty(HEADER_ENVIRONMENT, Integer.toString(mConfigManager.getEnvironment().getValue()));
-            connection.setRequestProperty(HEADER_VARIANT, variant);
+            connection.setRequestProperty(HEADER_KITS, supportedKits);
             connection.setRequestProperty(HTTP.USER_AGENT, mUserAgent);
             if (etag != null){
                 connection.setRequestProperty("If-None-Match", etag);
@@ -143,7 +142,6 @@ class MParticleApiClient {
             HttpURLConnection connection = (HttpURLConnection) getAudienceUrl().openConnection();
             connection.setRequestProperty("Accept-Encoding", "gzip");
             connection.setRequestProperty(HTTP.USER_AGENT, mUserAgent);
-            connection.setRequestProperty(HEADER_VARIANT, variant);
 
             addMessageSignature(connection, null);
             ApiResponse apiResponse = new ApiResponse(connection);
@@ -170,7 +168,7 @@ class MParticleApiClient {
         connection.setRequestProperty(HTTP.CONTENT_TYPE, "application/json");
         connection.setRequestProperty(HTTP.CONTENT_ENCODING, "gzip");
         connection.setRequestProperty(HTTP.USER_AGENT, mUserAgent);
-        connection.setRequestProperty(HEADER_VARIANT, variant);
+        connection.setRequestProperty(HEADER_KITS, MParticle.getInstance().mEmbeddedKitManager.getActiveModuleIds());
 
         addMessageSignature(connection, message);
 
@@ -508,13 +506,17 @@ class MParticleApiClient {
     private static String getSupportedKitString(){
         ArrayList<Integer> supportedKitIds = EmbeddedKitFactory.getSupportedKits();
         if (supportedKitIds.size() > 0) {
-            StringBuilder kitString = new StringBuilder();
-            for (Integer kitint : supportedKitIds) {
-                kitString.append(kitint).append(",");
+            StringBuilder buffer = new StringBuilder(supportedKitIds.size() * 3);
+            Iterator<Integer> it = supportedKitIds.iterator();
+            while (it.hasNext()) {
+                Integer next = it.next();
+                buffer.append(next);
+                if (it.hasNext()) {
+                    buffer.append(",");
+                }
             }
-            kitString.deleteCharAt(kitString.length()-1);
-            return kitString.toString();
-        }else{
+            return buffer.toString();
+        }else {
             return "";
         }
     }

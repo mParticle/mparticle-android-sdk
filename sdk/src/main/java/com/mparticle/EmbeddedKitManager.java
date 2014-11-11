@@ -9,8 +9,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -303,6 +304,26 @@ class EmbeddedKitManager implements IEmbeddedKit, MPActivityCallbacks{
         }
         return false;
     }
+
+    public String getActiveModuleIds() {
+        if (providers.isEmpty()){
+            return "";
+        }else {
+            Set keys = providers.keySet();
+            StringBuilder buffer = new StringBuilder(keys.size() * 3);
+
+            Iterator<Integer> it = keys.iterator();
+            while (it.hasNext()) {
+                Integer next = it.next();
+                buffer.append(next);
+                if (it.hasNext()) {
+                    buffer.append(",");
+                }
+            }
+            return buffer.toString();
+        }
+    }
+
 
     public static class BaseEmbeddedKitFactory {
         protected final static int MAT = 32;
