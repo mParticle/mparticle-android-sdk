@@ -15,7 +15,7 @@ public class MParticleSanityTest extends AndroidTestCase {
         try{
             MParticle.start(getContext());
         }catch (Exception e){
-            fail("SDK failed to start(): " + e.getMessage());
+            fail("SDK failed to start(): " + e.toString());
         }
     }
 
