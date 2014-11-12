@@ -9,6 +9,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
@@ -32,7 +33,7 @@ class EmbeddedKitManager implements IEmbeddedKit, MPActivityCallbacks{
                 JSONObject current = kitConfigs.getJSONObject(i);
                 int currentId = current.getInt(EmbeddedProvider.KEY_ID);
                 if (!providers.containsKey(currentId)) {
-                    providers.put(currentId, new EmbeddedKitFactory().createInstance(currentId, context));
+                    providers.put(currentId, new BaseEmbeddedKitFactory().createInstance(currentId, context));
                 }
                 providers.get(currentId).parseConfig(current).update();
                 if (!providers.get(currentId).optedOut()) {
@@ -326,9 +327,10 @@ class EmbeddedKitManager implements IEmbeddedKit, MPActivityCallbacks{
 
 
     public static class BaseEmbeddedKitFactory {
-        protected final static int MAT = 32;
-        protected final static int KOCHAVA = 37;
-        protected final static int COMSCORE = 39;
+        private final static int MAT = 32;
+        private final static int KOCHAVA = 37;
+        private final static int COMSCORE = 39;
+        private final static int KAHUNA = 56;
 
         protected EmbeddedProvider createInstance(int id, Context context) throws JSONException, ClassNotFoundException{
             switch (id){
@@ -338,9 +340,20 @@ class EmbeddedKitManager implements IEmbeddedKit, MPActivityCallbacks{
                     return new EmbeddedKochava(context);
                 case COMSCORE:
                     return new EmbeddedComscore(context);
+                case KAHUNA:
+                    return new EmbeddedKahuna(context);
                 default:
                     return null;
             }
+        }
+
+        public static ArrayList<Integer> getSupportedKits() {
+            ArrayList<Integer> supportedKitIds = new ArrayList<Integer>();
+            supportedKitIds.add(MAT);
+            supportedKitIds.add(KOCHAVA);
+            supportedKitIds.add(COMSCORE);
+            supportedKitIds.add(KAHUNA);
+            return supportedKitIds;
         }
     }
 }
