@@ -504,7 +504,7 @@ class MParticleApiClient {
     }
 
     private static String getSupportedKitString(){
-        ArrayList<Integer> supportedKitIds = EmbeddedKitFactory.getSupportedKits();
+        ArrayList<Integer> supportedKitIds = EmbeddedKitManager.BaseEmbeddedKitFactory.getSupportedKits();
         if (supportedKitIds.size() > 0) {
             StringBuilder buffer = new StringBuilder(supportedKitIds.size() * 3);
             Iterator<Integer> it = supportedKitIds.iterator();
