@@ -121,9 +121,8 @@ class ConfigManager {
         }
         applyConfig();
 
-        if (responseJSON.has(KEY_EMBEDDED_KITS)) {
-            mEmbeddedKitManager.updateKits(responseJSON.getJSONArray(KEY_EMBEDDED_KITS));
-        }
+        mEmbeddedKitManager.updateKits(responseJSON.optJSONArray(KEY_EMBEDDED_KITS));
+
     }
 
     public String[] getPushKeys(){

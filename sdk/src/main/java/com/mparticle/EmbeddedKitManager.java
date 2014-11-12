@@ -29,34 +29,38 @@ class EmbeddedKitManager implements IEmbeddedKit, MPActivityCallbacks{
     }
 
     void updateKits(JSONArray kitConfigs){
-        HashSet<Integer> activeIds = new HashSet<Integer>();
-        for (int i = 0; i < kitConfigs.length(); i++){
-            try {
-                JSONObject current = kitConfigs.getJSONObject(i);
-                int currentId = current.getInt(EmbeddedProvider.KEY_ID);
-                activeIds.add(currentId);
-                if (!providers.containsKey(currentId)) {
-                    providers.put(currentId, new BaseEmbeddedKitFactory().createInstance(currentId, context));
+        if (kitConfigs == null) {
+            providers.clear();
+        }else{
+            HashSet<Integer> activeIds = new HashSet<Integer>();
+            for (int i = 0; i < kitConfigs.length(); i++) {
+                try {
+                    JSONObject current = kitConfigs.getJSONObject(i);
+                    int currentId = current.getInt(EmbeddedProvider.KEY_ID);
+                    activeIds.add(currentId);
+                    if (!providers.containsKey(currentId)) {
+                        providers.put(currentId, new BaseEmbeddedKitFactory().createInstance(currentId, context));
+                    }
+                    providers.get(currentId).parseConfig(current).update();
+                    if (!providers.get(currentId).optedOut()) {
+                        providers.get(currentId).setUserAttributes(MParticle.getInstance().mUserAttributes);
+                        syncUserIdentities(providers.get(currentId));
+                    }
+                } catch (JSONException jse) {
+                    ConfigManager.log(MParticle.LogLevel.ERROR, "Exception while parsing embedded kit configuration: " + jse.getMessage());
+                } catch (ClassNotFoundException cnfe) {
+                    //this should already be logged in the EmbeddedProvider, but I want to bubble up the exception.
+                } catch (Exception e) {
+                    ConfigManager.log(MParticle.LogLevel.ERROR, "Exception while started embedded kit: " + e.getMessage());
                 }
-                providers.get(currentId).parseConfig(current).update();
-                if (!providers.get(currentId).optedOut()) {
-                    providers.get(currentId).setUserAttributes(MParticle.getInstance().mUserAttributes);
-                    syncUserIdentities(providers.get(currentId));
-                }
-            }catch (JSONException jse){
-                ConfigManager.log(MParticle.LogLevel.ERROR, "Exception while parsing embedded kit configuration: " + jse.getMessage());
-            }catch (ClassNotFoundException cnfe){
-                //this should already be logged in the EmbeddedProvider, but I want to bubble up the exception.
-            }catch (Exception e){
-                ConfigManager.log(MParticle.LogLevel.ERROR, "Exception while started embedded kit: " + e.getMessage());
             }
-        }
 
-        Iterator<Integer> ids = providers.keySet().iterator();
-        while (ids.hasNext()){
-            Integer id = ids.next();
-            if (!activeIds.contains(id)){
-                ids.remove();
+            Iterator<Integer> ids = providers.keySet().iterator();
+            while (ids.hasNext()) {
+                Integer id = ids.next();
+                if (!activeIds.contains(id)) {
+                    ids.remove();
+                }
             }
         }
     }
