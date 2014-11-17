@@ -85,39 +85,17 @@ class EmbeddedKahuna extends EmbeddedProvider implements MPActivityCallbacks {
                 Double amount = Double.parseDouble(eventAttributes.get(Constants.MessageKey.RESERVED_KEY_LTV)) * 100;
                 KahunaAnalytics.trackEvent("purchase", 1, amount.intValue());
                 if (eventAttributes != null
-                        && (eventAttributes = filterAttributes(type, name, eventAttributes)).size() > 0 ) {
+                        && (eventAttributes = filterAttributes(mUserAttributeFilters, eventAttributes)).size() > 0 ) {
                     this.setUserAttributes(eventAttributes);
                 }
-            }else if (shouldSend(type, name)) {
+            }else {
                 KahunaAnalytics.trackEvent(name);
                 if (eventAttributes != null
-                        && (eventAttributes = filterAttributes(type, name, eventAttributes)).size() > 0 ) {
+                        && (eventAttributes = filterAttributes(mUserAttributeFilters, eventAttributes)).size() > 0 ) {
                     this.setUserAttributes(eventAttributes);
                 }
             }
-
         }
-    }
-
-    @Override
-    protected Map<String, String> filterAttributes(MParticle.EventType type, String name, Map<String, String> eventAttributes) {
-        //JSONObject attributes = super.filterAttributes(type, name, eventAttributes);
-        if (includedAttributes != null){
-            Map<String, String> newAttributes = new HashMap<String, String>();
-            for (Map.Entry<String, String> entry : eventAttributes.entrySet())
-            {
-                if (includedAttributes.contains(entry.getKey())){
-                    newAttributes.put(entry.getKey(), entry.getValue());
-                }
-            }
-            return newAttributes;
-        }
-        return eventAttributes;
-    }
-
-    @Override
-    protected boolean shouldSend(MParticle.EventType type, String name) {
-        return name != null && includedEvents != null && (includedEvents.contains(name.toLowerCase()) || includedEvents.toString().contains(name.toLowerCase()));
     }
 
     @Override

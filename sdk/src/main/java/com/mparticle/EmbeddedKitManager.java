@@ -85,8 +85,8 @@ class EmbeddedKitManager implements IEmbeddedKit, MPActivityCallbacks{
     public void logEvent(MParticle.EventType type, String name, Map<String, String> eventAttributes) {
         for (EmbeddedProvider provider : providers.values()){
             try {
-                if (!provider.optedOut()) {
-                    provider.logEvent(type, name, eventAttributes);
+                if (!provider.optedOut() && provider.shouldLogEvent(type, name)) {
+                    provider.logEvent(type, name, provider.filterAttributes(provider.mAttributeFilters, eventAttributes));
                 }
             } catch (Exception e) {
                 ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to call logEvent for embedded provider: " + provider.getName() + ": " + e.getMessage());
@@ -111,8 +111,8 @@ class EmbeddedKitManager implements IEmbeddedKit, MPActivityCallbacks{
     public void logScreen(String screenName, Map<String, String> eventAttributes) {
         for (EmbeddedProvider provider : providers.values()){
             try {
-                if (!provider.optedOut()) {
-                    provider.logScreen(screenName, eventAttributes);
+                if (!provider.optedOut() && provider.shouldLogScreen(screenName)) {
+                    provider.logScreen(screenName, provider.filterAttributes(provider.mScreenAttributeFilters, eventAttributes));
                 }
             } catch (Exception e) {
                 ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to call logScreen for embedded provider: " + provider.getName() + ": " + e.getMessage());
@@ -138,7 +138,7 @@ class EmbeddedKitManager implements IEmbeddedKit, MPActivityCallbacks{
         for (EmbeddedProvider provider : providers.values()){
             try {
                 if (!provider.optedOut()) {
-                    provider.setUserAttributes(mUserAttributes);
+                    provider.setUserAttributes(provider.filterAttributes(provider.mUserAttributeFilters, mUserAttributes));
                 }
             } catch (Exception e) {
                 ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to call setUserAttributes for embedded provider: " + provider.getName() + ": " + e.getMessage());
@@ -163,7 +163,7 @@ class EmbeddedKitManager implements IEmbeddedKit, MPActivityCallbacks{
     public void setUserIdentity(String id, MParticle.IdentityType identityType) {
         for (EmbeddedProvider provider : providers.values()){
             try {
-                if (!provider.optedOut()) {
+                if (!provider.optedOut() && provider.shouldSetIdentity(identityType)) {
                     provider.setUserIdentity(id, identityType);
                 }
             } catch (Exception e) {
