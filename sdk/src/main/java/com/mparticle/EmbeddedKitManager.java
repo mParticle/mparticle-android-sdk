@@ -86,7 +86,7 @@ class EmbeddedKitManager implements IEmbeddedKit, MPActivityCallbacks{
         for (EmbeddedProvider provider : providers.values()){
             try {
                 if (!provider.optedOut() && provider.shouldLogEvent(type, name)) {
-                    provider.logEvent(type, name, provider.filterAttributes(provider.mAttributeFilters, eventAttributes));
+                    provider.logEvent(type, name, provider.filterAttributes(type.toString(), name, provider.mAttributeFilters, eventAttributes));
                 }
             } catch (Exception e) {
                 ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to call logEvent for embedded provider: " + provider.getName() + ": " + e.getMessage());
@@ -112,7 +112,7 @@ class EmbeddedKitManager implements IEmbeddedKit, MPActivityCallbacks{
         for (EmbeddedProvider provider : providers.values()){
             try {
                 if (!provider.optedOut() && provider.shouldLogScreen(screenName)) {
-                    provider.logScreen(screenName, provider.filterAttributes(provider.mScreenAttributeFilters, eventAttributes));
+                    provider.logScreen(screenName, provider.filterAttributes("0", screenName, provider.mScreenAttributeFilters, eventAttributes));
                 }
             } catch (Exception e) {
                 ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to call logScreen for embedded provider: " + provider.getName() + ": " + e.getMessage());

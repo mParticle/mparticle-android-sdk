@@ -163,21 +163,21 @@ abstract class EmbeddedProvider implements IEmbeddedKit {
     }
 
     public boolean shouldLogScreen(String screenName) {
-        int nameHash = hash(screenName);
+        int nameHash = hash("0" + screenName);
         if (mScreenNameFilters.size() > 0 && !mScreenNameFilters.get(nameHash, true)){
             return false;
         }
         return true;
     }
 
-    protected Map<String, String> filterAttributes(SparseBooleanArray filter, Map<String, String> eventAttributes){
+    protected Map<String, String> filterAttributes(String eventType, String eventName, SparseBooleanArray filter, Map<String, String> eventAttributes){
         if (eventAttributes != null && filter.size() > 0) {
             Iterator<Map.Entry<String, String>> attIterator = eventAttributes.entrySet().iterator();
             Map<String, String> newAttributes = new HashMap<String, String>();
             while (attIterator.hasNext()) {
                 Map.Entry<String, String> entry = attIterator.next();
                 String key = entry.getKey();
-                int hash = hash(key);
+                int hash = hash(eventType + eventName + key);
                 if (filter.get(hash, true)) {
                     newAttributes.put(key, entry.getValue());
                 }

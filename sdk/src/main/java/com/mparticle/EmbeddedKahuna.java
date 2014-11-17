@@ -42,16 +42,16 @@ class EmbeddedKahuna extends EmbeddedProvider implements MPActivityCallbacks {
         if (!initialized) {
             KahunaAnalytics.setDebugMode(MParticle.getInstance().mConfigManager.isDebugEnvironment());
             if (MParticle.getInstance().mConfigManager.isPushEnabled()) {
-               // registerForPush(context);
+                // registerForPush(context);
                 KahunaAnalytics.onAppCreate(context, properties.get(KEY_SECRET_KEY), MParticle.getInstance().mConfigManager.getPushSenderId());
                 KahunaAnalytics.disableKahunaGenerateNotifications();
-            }else{
+            } else {
                 KahunaAnalytics.onAppCreate(context, properties.get(KEY_SECRET_KEY), null);
             }
             KahunaAnalytics.start();
 
             initialized = true;
-            if (!MPUtility.isServiceAvailable(context, KahunaPushService.class)){
+            if (!MPUtility.isServiceAvailable(context, KahunaPushService.class)) {
                 ConfigManager.log(MParticle.LogLevel.ERROR, "The Kahuna SDK is enabled for this application, but you have not added <service android:name=\"com.kahuna.sdk.KahunaPushService\" /> to the <application> section in your application's AndroidManifest.xml");
             }
         }
@@ -59,7 +59,7 @@ class EmbeddedKahuna extends EmbeddedProvider implements MPActivityCallbacks {
         return this;
     }
 
-    public void registerForPush(){
+    public void registerForPush() {
         sReceiver = new KahunaPushReceiver();
         IntentFilter filter = new IntentFilter();
         filter.addAction("com.google.android.c2dm.intent.REGISTRATION");
@@ -81,17 +81,14 @@ class EmbeddedKahuna extends EmbeddedProvider implements MPActivityCallbacks {
     @Override
     public void logEvent(MParticle.EventType type, String name, Map<String, String> eventAttributes) throws Exception {
         if (!TextUtils.isEmpty(name)) {
-            if (sendTransactionData && eventAttributes != null && eventAttributes.containsKey(Constants.MessageKey.RESERVED_KEY_LTV)){
+            if (sendTransactionData && eventAttributes != null && eventAttributes.containsKey(Constants.MessageKey.RESERVED_KEY_LTV)) {
                 Double amount = Double.parseDouble(eventAttributes.get(Constants.MessageKey.RESERVED_KEY_LTV)) * 100;
                 KahunaAnalytics.trackEvent("purchase", 1, amount.intValue());
-                if (eventAttributes != null
-                        && (eventAttributes = filterAttributes(mUserAttributeFilters, eventAttributes)).size() > 0 ) {
+                if (eventAttributes != null)
                     this.setUserAttributes(eventAttributes);
-                }
-            }else {
+            } else {
                 KahunaAnalytics.trackEvent(name);
-                if (eventAttributes != null
-                        && (eventAttributes = filterAttributes(mUserAttributeFilters, eventAttributes)).size() > 0 ) {
+                if (eventAttributes != null) {
                     this.setUserAttributes(eventAttributes);
                 }
             }
