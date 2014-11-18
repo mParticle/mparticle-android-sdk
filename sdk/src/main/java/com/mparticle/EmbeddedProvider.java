@@ -83,38 +83,39 @@ abstract class EmbeddedProvider implements IEmbeddedKit {
             }
         }
         if (json.has(KEY_FILTERS)){
-            if (json.has(KEY_EVENT_TYPES_FILTER)){
-                mTypeFilters = convertToSparseArray(json.getJSONObject(KEY_EVENT_TYPES_FILTER));
+            JSONObject filterJson = json.getJSONObject(KEY_FILTERS);
+            if (filterJson.has(KEY_EVENT_TYPES_FILTER)){
+                mTypeFilters = convertToSparseArray(filterJson.getJSONObject(KEY_EVENT_TYPES_FILTER));
             }else {
                 mTypeFilters.clear();
             }
-            if (json.has(KEY_EVENT_NAMES_FILTER)){
-                mNameFilters = convertToSparseArray(json.getJSONObject(KEY_EVENT_NAMES_FILTER));
+            if (filterJson.has(KEY_EVENT_NAMES_FILTER)){
+                mNameFilters = convertToSparseArray(filterJson.getJSONObject(KEY_EVENT_NAMES_FILTER));
             }else{
                 mNameFilters.clear();
             }
-            if (json.has(KEY_EVENT_ATTRIBUTES_FILTER)){
-                mAttributeFilters = convertToSparseArray(json.getJSONObject(KEY_EVENT_ATTRIBUTES_FILTER));
+            if (filterJson.has(KEY_EVENT_ATTRIBUTES_FILTER)){
+                mAttributeFilters = convertToSparseArray(filterJson.getJSONObject(KEY_EVENT_ATTRIBUTES_FILTER));
             }else{
                 mAttributeFilters.clear();
             }
-            if (json.has(KEY_SCREEN_NAME_FILTER)){
-                mScreenNameFilters = convertToSparseArray(json.getJSONObject(KEY_SCREEN_NAME_FILTER));
+            if (filterJson.has(KEY_SCREEN_NAME_FILTER)){
+                mScreenNameFilters = convertToSparseArray(filterJson.getJSONObject(KEY_SCREEN_NAME_FILTER));
             }else{
                 mScreenNameFilters.clear();
             }
-            if (json.has(KEY_SCREEN_ATTRIBUTES_FILTER)){
-                mScreenAttributeFilters = convertToSparseArray(json.getJSONObject(KEY_SCREEN_ATTRIBUTES_FILTER));
+            if (filterJson.has(KEY_SCREEN_ATTRIBUTES_FILTER)){
+                mScreenAttributeFilters = convertToSparseArray(filterJson.getJSONObject(KEY_SCREEN_ATTRIBUTES_FILTER));
             }else{
                 mScreenAttributeFilters.clear();
             }
-            if (json.has(KEY_USER_IDENTITY_FILTER)){
-                mUserIdentityFilters = convertToSparseArray(json.getJSONObject(KEY_USER_IDENTITY_FILTER));
+            if (filterJson.has(KEY_USER_IDENTITY_FILTER)){
+                mUserIdentityFilters = convertToSparseArray(filterJson.getJSONObject(KEY_USER_IDENTITY_FILTER));
             }else{
                 mUserIdentityFilters.clear();
             }
-            if (json.has(KEY_USER_ATTRIBUTE_FILTER)){
-                mUserAttributeFilters = convertToSparseArray(json.getJSONObject(KEY_USER_ATTRIBUTE_FILTER));
+            if (filterJson.has(KEY_USER_ATTRIBUTE_FILTER)){
+                mUserAttributeFilters = convertToSparseArray(filterJson.getJSONObject(KEY_USER_ATTRIBUTE_FILTER));
             }else{
                 mUserAttributeFilters.clear();
             }
@@ -128,7 +129,7 @@ abstract class EmbeddedProvider implements IEmbeddedKit {
         for (Iterator<String> iterator = json.keys(); iterator.hasNext();) {
             try {
                 String key = iterator.next();
-                map.put(Integer.parseInt(key), json.getBoolean(key));
+                map.put(Integer.parseInt(key), json.getInt(key) == 1);
             }catch (JSONException jse){
                 ConfigManager.log(MParticle.LogLevel.ERROR, "Issue while parsing embedded kit configuration: " + jse.getMessage());
             }
@@ -157,8 +158,8 @@ abstract class EmbeddedProvider implements IEmbeddedKit {
     }
 
     protected boolean shouldLogEvent(MParticle.EventType type, String name){
-        int typeHash = hash(type.toString());
-        int typeNameHash = hash(type.toString() + name);
+        int typeHash = hash(type.ordinal() + "");
+        int typeNameHash = hash(type.ordinal() + ""+ name);
         return mTypeFilters.get(typeHash, true) && mNameFilters.get(typeNameHash, true);
     }
 
@@ -170,14 +171,19 @@ abstract class EmbeddedProvider implements IEmbeddedKit {
         return true;
     }
 
-    protected Map<String, String> filterEventAttributes(String eventType, String eventName, SparseBooleanArray filter, Map<String, String> eventAttributes){
+    protected Map<String, String> filterEventAttributes(MParticle.EventType eventType, String eventName, SparseBooleanArray filter, Map<String, String> eventAttributes){
         if (eventAttributes != null && eventAttributes.size() > 0 && filter != null && filter.size() > 0) {
+
+            String eventTypeStr = "0";
+            if (eventType != null){
+                eventTypeStr = eventType.ordinal() + "";
+            }
             Iterator<Map.Entry<String, String>> attIterator = eventAttributes.entrySet().iterator();
             Map<String, String> newAttributes = new HashMap<String, String>();
             while (attIterator.hasNext()) {
                 Map.Entry<String, String> entry = attIterator.next();
                 String key = entry.getKey();
-                int hash = hash(eventType + eventName + key);
+                int hash = hash(eventTypeStr + eventName + key);
                 if (filter.get(hash, true)) {
                     newAttributes.put(key, entry.getValue());
                 }
