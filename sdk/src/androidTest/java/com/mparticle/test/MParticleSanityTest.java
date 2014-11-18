@@ -12,14 +12,14 @@ public class MParticleSanityTest extends AndroidTestCase {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-    }
-
-    public void testSdkStart() {
         try{
             MParticle.start(getContext());
         }catch (Exception e){
             fail("SDK failed to start(): " + e.toString());
         }
+    }
+
+    public void testSdkStart() {
         MParticle instance = MParticle.getInstance();
         assertNotNull(instance);
     }
