@@ -170,8 +170,8 @@ abstract class EmbeddedProvider implements IEmbeddedKit {
         return true;
     }
 
-    protected Map<String, String> filterAttributes(String eventType, String eventName, SparseBooleanArray filter, Map<String, String> eventAttributes){
-        if (eventAttributes != null && filter.size() > 0) {
+    protected Map<String, String> filterEventAttributes(String eventType, String eventName, SparseBooleanArray filter, Map<String, String> eventAttributes){
+        if (eventAttributes != null && eventAttributes.size() > 0 && filter != null && filter.size() > 0) {
             Iterator<Map.Entry<String, String>> attIterator = eventAttributes.entrySet().iterator();
             Map<String, String> newAttributes = new HashMap<String, String>();
             while (attIterator.hasNext()) {
@@ -195,7 +195,8 @@ abstract class EmbeddedProvider implements IEmbeddedKit {
     protected abstract EmbeddedProvider update();
 
     public JSONObject filterAttributes(SparseBooleanArray attributeFilters, JSONObject attributes) {
-        if (attributes != null && attributeFilters.size() > 0) {
+        if (attributes != null && attributeFilters != null && attributeFilters.size() > 0
+                && attributes.length() > 0) {
             Iterator<String> attIterator = attributes.keys();
             JSONObject newAttributes = new JSONObject();
             while (attIterator.hasNext()) {
@@ -216,6 +217,6 @@ abstract class EmbeddedProvider implements IEmbeddedKit {
     }
 
     public boolean shouldSetIdentity(MParticle.IdentityType identityType) {
-        return mUserIdentityFilters.size() > 0 && mUserIdentityFilters.get(identityType.getValue(), true);
+        return mUserIdentityFilters == null || mUserIdentityFilters.size() == 0 || mUserIdentityFilters.get(identityType.getValue(), true);
     }
 }
