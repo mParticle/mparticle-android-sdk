@@ -66,7 +66,7 @@ public class MPReceiver extends BroadcastReceiver {
                 MParticle.start(context);
                 MPService.runIntentInService(context, intent);
             }
+            setResult(Activity.RESULT_OK, null, null);
         }
-        setResult(Activity.RESULT_OK, null, null);
     }
 }
