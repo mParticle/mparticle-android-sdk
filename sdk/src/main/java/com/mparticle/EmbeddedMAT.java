@@ -57,34 +57,30 @@ class EmbeddedMAT extends EmbeddedProvider implements MPActivityCallbacks {
 
     @Override
     public void logEvent(MParticle.EventType type, String name, Map<String, String> eventAttributes) {
-        if (shouldSend(type, name)) {
-            com.mobileapptracker.MobileAppTracker instance = com.mobileapptracker.MobileAppTracker.getInstance();
-            if (eventAttributes != null) {
-                eventAttributes =
-                        filterAttributes(type, name, eventAttributes);
-                if (eventAttributes.size() > 0) {
-                    JSONObject lowercaseAttributes = new JSONObject();
-                    Iterator<String> keys = eventAttributes.keySet().iterator();
-                    while (keys.hasNext()) {
-                        String key = keys.next();
-                        try {
-                            lowercaseAttributes.put(key.toLowerCase(), eventAttributes.get(key));
-                        } catch (JSONException jse) {
+        com.mobileapptracker.MobileAppTracker instance = com.mobileapptracker.MobileAppTracker.getInstance();
+        if (eventAttributes != null) {
+            if (eventAttributes.size() > 0) {
+                JSONObject lowercaseAttributes = new JSONObject();
+                Iterator<String> keys = eventAttributes.keySet().iterator();
+                while (keys.hasNext()) {
+                    String key = keys.next();
+                    try {
+                        lowercaseAttributes.put(key.toLowerCase(), eventAttributes.get(key));
+                    } catch (JSONException jse) {
 
-                        }
                     }
-                    com.mobileapptracker.MATEventItem item = new com.mobileapptracker.MATEventItem(name,
-                            lowercaseAttributes.optString("mat_eventattribute1"),
-                            lowercaseAttributes.optString("mat_eventattribute2"),
-                            lowercaseAttributes.optString("checkintime"),
-                            lowercaseAttributes.optString("checkouttime"),
-                            lowercaseAttributes.optString("guestcount")
-                    );
-                    instance.measureAction(name, item);
                 }
-            } else {
-                instance.measureAction(name);
+                com.mobileapptracker.MATEventItem item = new com.mobileapptracker.MATEventItem(name,
+                        lowercaseAttributes.optString("mat_eventattribute1"),
+                        lowercaseAttributes.optString("mat_eventattribute2"),
+                        lowercaseAttributes.optString("checkintime"),
+                        lowercaseAttributes.optString("checkouttime"),
+                        lowercaseAttributes.optString("guestcount")
+                );
+                instance.measureAction(name, item);
             }
+        } else {
+            instance.measureAction(name);
         }
     }
 

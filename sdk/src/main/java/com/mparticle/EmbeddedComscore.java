@@ -51,7 +51,7 @@ class EmbeddedComscore extends EmbeddedProvider implements MPActivityCallbacks {
 
     @Override
     public void logEvent(MParticle.EventType type, String name, Map<String, String> eventAttributes) {
-        if (isEnterprise && shouldSend(type, name)) {
+        if (isEnterprise) {
             HashMap<String, String> comscoreLabels;
             if (eventAttributes == null) {
                 comscoreLabels = new HashMap<String, String>();
