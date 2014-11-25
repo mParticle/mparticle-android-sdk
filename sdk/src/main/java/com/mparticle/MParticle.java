@@ -1322,6 +1322,19 @@ public class MParticle {
     }
 
     /**
+     * Retrieve a URL to be loaded within a {@link android.webkit.WebView} to show the user a survey
+     * or feedback form.
+     *
+     * @param serviceProviderId The ID of the desired survey/feedback service.
+     * @return a fully-formed url, or null if no URL exists for the given ID.
+     *
+     * @see {@link com.mparticle.MParticle.ServiceProviders}
+     */
+    public String getSurveyUrl(int serviceProviderId) {
+        return mEmbeddedKitManager.getSurveyUrl(serviceProviderId, mUserAttributes);
+    }
+
+    /**
      * Force the SDK into either Production or Development mode. See {@link com.mparticle.MParticle.Environment}
      * for implications of each mode. The SDK automatically determines which mode it should be in depending
      * on the signing and the DEBUGGABLE flag of your application's AndroidManifest.xml, so this method should
@@ -1783,6 +1796,10 @@ public class MParticle {
          * Used to communicate the internal state and processes of the SDK.
          */
         DEBUG;
+    }
+
+    public interface ServiceProviders {
+        public static final int FORESEE_ID = 64;
     }
 
     /**
