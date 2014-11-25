@@ -8,6 +8,7 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -1326,11 +1327,11 @@ public class MParticle {
      * or feedback form.
      *
      * @param serviceProviderId The ID of the desired survey/feedback service.
-     * @return a fully-formed url, or null if no URL exists for the given ID.
+     * @return a fully-formed URI, or null if no URL exists for the given ID.
      *
      * @see {@link com.mparticle.MParticle.ServiceProviders}
      */
-    public String getSurveyUrl(int serviceProviderId) {
+    public Uri getSurveyUrl(int serviceProviderId) {
         return mEmbeddedKitManager.getSurveyUrl(serviceProviderId, mUserAttributes);
     }
 

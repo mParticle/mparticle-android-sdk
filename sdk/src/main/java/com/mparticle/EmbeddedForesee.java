@@ -112,7 +112,7 @@ class EmbeddedForesee extends EmbeddedProvider implements ISurveyProvider{
      * example: http://survey.foreseeresults.com/survey/display?cid=8NNxB5BIVJdMBEBUBJ1Fpg==&sid=link&cpp[custid]=1234
      */
     @Override
-    public String getSurveyUrl(JSONObject userAttributes) {
+    public Uri getSurveyUrl(JSONObject userAttributes) {
         String baseUrl = properties.get(ROOT_URL);
         if (baseUrl == null){
             return null;
@@ -167,6 +167,6 @@ class EmbeddedForesee extends EmbeddedProvider implements ISurveyProvider{
 
         builder.appendQueryParameter("cpps", cpps.toString());
 
-        return builder.build().toString();
+        return builder.build();
     }
 }

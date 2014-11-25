@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
+import android.net.Uri;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -340,7 +341,7 @@ class EmbeddedKitManager implements IEmbeddedKit, MPActivityCallbacks{
         }
     }
 
-    public String getSurveyUrl(int serviceId, JSONObject userAttributes) {
+    public Uri getSurveyUrl(int serviceId, JSONObject userAttributes) {
         EmbeddedProvider provider = providers.get(serviceId);
         if (provider instanceof ISurveyProvider) {
             return ((ISurveyProvider)provider).getSurveyUrl(provider.filterAttributes(provider.mUserAttributeFilters, userAttributes));
