@@ -343,7 +343,7 @@ class EmbeddedKitManager implements IEmbeddedKit, MPActivityCallbacks{
     public String getSurveyUrl(int serviceId, JSONObject userAttributes) {
         EmbeddedProvider provider = providers.get(serviceId);
         if (provider instanceof ISurveyProvider) {
-            return ((ISurveyProvider)provider).getSurveyUrl(userAttributes);
+            return ((ISurveyProvider)provider).getSurveyUrl(provider.filterAttributes(provider.mUserAttributeFilters, userAttributes));
         } else{
             return null;
         }
