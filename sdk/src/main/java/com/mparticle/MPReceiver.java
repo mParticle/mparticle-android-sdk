@@ -63,7 +63,6 @@ public class MPReceiver extends BroadcastReceiver {
     }
 
     @Override
-
     public void onReceive(Context context, Intent intent) {
         if (!MPARTICLE_IGNORE.equals(intent.getAction()) && !intent.getBooleanExtra(MPARTICLE_IGNORE, false)) {
             if ("com.android.vending.INSTALL_REFERRER".equals(intent.getAction())) {

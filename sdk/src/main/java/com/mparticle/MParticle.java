@@ -1595,11 +1595,6 @@ public class MParticle {
     }
 
 
-    void refreshConfiguration() {
-        ConfigManager.log(LogLevel.DEBUG, "Refreshing configuration...");
-        mMessageManager.refreshConfiguration();
-    }
-
 
     public MParticleInternal internal() {
         return mInternal;
@@ -2007,5 +2002,11 @@ public class MParticle {
             return mConfigManager.isNetworkPerformanceEnabled() &&
                     measuredRequestManager.isUriAllowed(url) && !mEmbeddedKitManager.isEmbeddedKitUri(url);
         }
+
+        public void refreshConfiguration() {
+            ConfigManager.log(LogLevel.DEBUG, "Refreshing configuration...");
+            mMessageManager.refreshConfiguration();
+        }
+
     }
 }

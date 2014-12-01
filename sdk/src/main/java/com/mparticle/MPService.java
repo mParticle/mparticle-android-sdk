@@ -19,6 +19,7 @@ import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.Constants;
 import com.mparticle.messaging.AbstractCloudMessage;
 import com.mparticle.messaging.CloudAction;
+import com.mparticle.messaging.MPCloudBackgroundMessage;
 import com.mparticle.messaging.MPCloudNotificationMessage;
 
 /**
