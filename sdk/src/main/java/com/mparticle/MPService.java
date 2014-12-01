@@ -14,6 +14,9 @@ import android.os.Build;
 import android.os.PowerManager;
 import android.util.Log;
 
+import com.mparticle.internal.AppStateManager;
+import com.mparticle.internal.ConfigManager;
+import com.mparticle.internal.Constants;
 import com.mparticle.messaging.AbstractCloudMessage;
 import com.mparticle.messaging.CloudAction;
 import com.mparticle.messaging.MPCloudNotificationMessage;
@@ -167,10 +170,10 @@ public class MPService extends IntentService {
 
             if (registrationId != null) {
                 // registration succeeded
-                mMParticle.setPushRegistrationId(registrationId);
+                mMParticle.internal().setPushRegistrationId(registrationId);
             } else if (unregistered != null) {
                 // unregistration succeeded
-                mMParticle.clearPushNotificationId();
+                mMParticle.internal().clearPushNotificationId();
             } else if (error != null) {
                 // Unrecoverable error, log it
                 Log.i(TAG, "GCM registration error: " + error);

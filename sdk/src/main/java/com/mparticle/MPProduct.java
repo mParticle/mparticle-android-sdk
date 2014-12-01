@@ -6,7 +6,7 @@ import java.util.HashMap;
  *
  * Use this class to represent a product that a user could purchase or otherwise interact with.
  *
- *  @see com.mparticle.MParticle#logProductEvent(com.mparticle.MPProduct.Event, MPProduct)
+ *  @see com.mparticle.MParticle#logProductEvent(MPProduct.Event, MPProduct)
  *  @see com.mparticle.MParticle#logTransaction(MPProduct)
  *
  */
@@ -16,7 +16,7 @@ public class MPProduct extends HashMap<String, String> {
     /**
      *  Use this enumeration to conveniently log common product interactions.
      *
-     *  @see com.mparticle.MParticle#logProductEvent(com.mparticle.MPProduct.Event, MPProduct)
+     *  @see com.mparticle.MParticle#logProductEvent(MPProduct.Event, MPProduct)
      */
     public static enum Event {
         VIEW("Product Viewed"),
@@ -37,17 +37,17 @@ public class MPProduct extends HashMap<String, String> {
         }
     }
 
-    static final String NAME = "ProductName";
-    static final String SKU = "ProductSKU";
-    static final String AFFILIATION = "TransactionAffiliation";
-    static final String UNITPRICE = "ProductUnitPrice";
-    static final String QUANTITY = "ProductQuantity";
-    static final String REVENUE = "RevenueAmount";
-    static final String TAX = "TaxAmount";
-    static final String SHIPPING = "ShippingAmount";
-    static final String CATEGORY = "ProductCategory";
-    static final String CURRENCY = "CurrencyCode";
-    static final String TRANSACTION_ID = "TransactionID";
+    public static final String NAME = "ProductName";
+    public static final String SKU = "ProductSKU";
+    public static final String AFFILIATION = "TransactionAffiliation";
+    public static final String UNITPRICE = "ProductUnitPrice";
+    public static final String QUANTITY = "ProductQuantity";
+    public static final String REVENUE = "RevenueAmount";
+    public static final String TAX = "TaxAmount";
+    public static final String SHIPPING = "ShippingAmount";
+    public static final String CATEGORY = "ProductCategory";
+    public static final String CURRENCY = "CurrencyCode";
+    public static final String TRANSACTION_ID = "TransactionID";
 
 
     private MPProduct(){
@@ -140,7 +140,7 @@ public class MPProduct extends HashMap<String, String> {
     }
 
     /**
-     * Class used to build an {@link com.mparticle.MPProduct} object.
+     * Class used to build an {@link MPProduct} object.
      *
      * @see com.mparticle.MParticle#logTransaction(MPProduct)
      */
@@ -162,7 +162,7 @@ public class MPProduct extends HashMap<String, String> {
         /**
          * Starting point of the builder with two required parameters. The rest of the fields
          * of this class are optional. Once the desired fields have been set, use {@link #build()} to
-         * create the {@link com.mparticle.MPProduct} object.
+         * create the {@link MPProduct} object.
          *
          * @param productName The name of the product that was purchased
          * @param productSku The Sku or internal label for the product that was purchased
@@ -272,10 +272,10 @@ public class MPProduct extends HashMap<String, String> {
         }
 
         /**
-         * The final step in creating an {@link com.mparticle.MPProduct} object, to be passed into {@link com.mparticle.MParticle#logTransaction(MPProduct)}.
+         * The final step in creating an {@link MPProduct} object, to be passed into {@link com.mparticle.MParticle#logTransaction(MPProduct)}.
          * This method will perform validation on the fields and will throw an {@code IllegalStateException} if {@code productName} or {@code productCode} are null.
          *
-         * @return The {@link com.mparticle.MPProduct}
+         * @return The {@link MPProduct}
          */
         public MPProduct build() {
             return new MPProduct(this);

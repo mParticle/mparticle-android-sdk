@@ -9,6 +9,8 @@ import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 
+import com.mparticle.internal.ConfigManager;
+
 /**
  * Helper class to listen for different events related to receiving and interacting with push notifications
  * received from the Google Cloud Messaging service.
@@ -64,7 +66,7 @@ public final class MParticlePushUtility {
      *
      * Note: If your app is no longer running on a users devices (because they either restarted their device, or they forceably closed your application), this
      * receiver will no longer be registered. In order to work around this you can either override the Android {@link android.app.Application } class, or you can
-     * declare a {@link com.mparticle.MParticlePushUtility.MParticlePushReceiver in your AndroidManifest.xml}.
+     * declare a {@link MParticlePushUtility.MParticlePushReceiver in your AndroidManifest.xml}.
      *
      * @param context Required: Used to derive the package name and register the receiver.
      * @param receiver Required: Your listener to be called.

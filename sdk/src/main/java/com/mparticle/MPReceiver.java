@@ -6,8 +6,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 
+
 import com.mparticle.messaging.AbstractCloudMessage;
 import com.mparticle.messaging.CloudAction;
+
+import com.mparticle.internal.Constants;
+
 
 /**
  * Core {@code BroadcastReceiver} used to support push notification and installer referrers. Handles the following Intent actions:
@@ -53,14 +57,15 @@ import com.mparticle.messaging.CloudAction;
  */
 public class MPReceiver extends BroadcastReceiver {
 
-    static final String MPARTICLE_IGNORE = "mparticle_ignore";
+    public static final String MPARTICLE_IGNORE = "mparticle_ignore";
 
     public MPReceiver() {
     }
 
     @Override
-    public final void onReceive(Context context, Intent intent) {
-        if (!MPARTICLE_IGNORE.equals(intent.getAction())) {
+
+    public void onReceive(Context context, Intent intent) {
+        if (!MPARTICLE_IGNORE.equals(intent.getAction()) && !intent.getBooleanExtra(MPARTICLE_IGNORE, false)) {
             if ("com.android.vending.INSTALL_REFERRER".equals(intent.getAction())) {
                 String referrer = intent.getStringExtra("referrer");
                 SharedPreferences preferences = context.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
@@ -79,8 +84,8 @@ public class MPReceiver extends BroadcastReceiver {
             } else {
                 MPService.runIntentInService(context, intent);
             }
+            setResult(Activity.RESULT_OK, null, null);
         }
-        setResult(Activity.RESULT_OK, null, null);
     }
 
 

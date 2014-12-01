@@ -7,6 +7,7 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -18,9 +19,31 @@ import android.provider.Settings;
 import android.util.Log;
 import android.webkit.WebView;
 
-import com.mparticle.Constants.MessageKey;
-import com.mparticle.Constants.PrefKeys;
+
+import com.mparticle.internal.MessageManager;
 import com.mparticle.messaging.AbstractCloudMessage;
+
+import com.mparticle.internal.AppStateManager;
+import com.mparticle.internal.ConfigManager;
+import com.mparticle.internal.Constants;
+
+import com.mparticle.internal.embedded.EmbeddedKitManager;
+import com.mparticle.internal.ExceptionHandler;
+import com.mparticle.internal.KitKatHelper;
+import com.mparticle.internal.np.MPSSLSocketFactory;
+import com.mparticle.internal.np.MPSocketImplFactory;
+import com.mparticle.internal.np.MPUrlStreamHandlerFactory;
+import com.mparticle.internal.MPUtility;
+import com.mparticle.internal.MParticleJSInterface;
+import com.mparticle.internal.np.MeasuredRequestManager;
+
+import com.mparticle.internal.PushRegistrationHelper;
+import com.mparticle.licensing.AESObfuscator;
+import com.mparticle.licensing.LicenseChecker;
+import com.mparticle.licensing.LicenseCheckerCallback;
+import com.mparticle.licensing.Policy;
+import com.mparticle.licensing.ServerManagedPolicy;
+
 import com.mparticle.segmentation.SegmentListener;
 
 import org.apache.http.conn.ssl.SSLSocketFactory;
@@ -40,6 +63,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import javax.net.ssl.HttpsURLConnection;
+import com.mparticle.internal.Constants.*;
 
 /**
  * The primary access point to the mParticle SDK. In order to use this class, you must first call {@link #start(android.content.Context)}, which requires
@@ -74,15 +98,21 @@ import javax.net.ssl.HttpsURLConnection;
  */
 public class MParticle {
 
+
     static boolean appRunning;
     final ConfigManager mConfigManager;
     final AppStateManager mAppStateManager;
     final MeasuredRequestManager measuredRequestManager;
     final EmbeddedKitManager mEmbeddedKitManager;
-    JSONArray mUserIdentities = new JSONArray();
-    String mSessionID = Constants.NO_SESSION_ID;
 
-    JSONObject mUserAttributes = new JSONObject();
+
+    private JSONArray mUserIdentities = new JSONArray();
+    private String mSessionID;
+
+    private static Bundle lastNotificationBundle;
+
+
+    private JSONObject mUserAttributes = new JSONObject();
     private JSONObject mSessionAttributes;
 
     private long mSessionStartTime = 0;
@@ -99,7 +129,11 @@ public class MParticle {
     private LicenseCheckerCallback clientLicensingCallback;
     private static final HandlerThread sTimeoutHandlerThread = new HandlerThread("mParticleSessionTimeoutHandler",
             Process.THREAD_PRIORITY_BACKGROUND);
+
     private AbstractCloudMessage lastPushMessage;
+
+    private final MParticleInternal mInternal;
+
 
     MParticle(Context context, MessageManager messageManager, ConfigManager configManager, EmbeddedKitManager embeddedKitManager) {
         appRunning = true;
@@ -111,8 +145,9 @@ public class MParticle {
         measuredRequestManager = new MeasuredRequestManager();
         mTimeoutHandler = new SessionTimeoutHandler(this, sTimeoutHandlerThread.getLooper());
         mEmbeddedKitManager = embeddedKitManager;
+        mInternal = new MParticleInternal();
 
-        String userAttrs = sPreferences.getString(PrefKeys.USER_ATTRS + mApiKey, null);
+        String userAttrs = sPreferences.getString(Constants.PrefKeys.USER_ATTRS + mApiKey, null);
 
         if (null != userAttrs) {
             try {
@@ -122,7 +157,7 @@ public class MParticle {
             }
         }
 
-        String userIds = sPreferences.getString(PrefKeys.USER_IDENTITIES + mApiKey, null);
+        String userIds = sPreferences.getString(Constants.PrefKeys.USER_IDENTITIES + mApiKey, null);
         if (null != userIds) {
             try {
                 mUserIdentities = new JSONArray(userIds);
@@ -357,38 +392,6 @@ public class MParticle {
         return key;
     }
 
-
-    Boolean shouldProcessUrl(String url) {
-        return mConfigManager.isNetworkPerformanceEnabled() &&
-                measuredRequestManager.isUriAllowed(url) && !mEmbeddedKitManager.isEmbeddedKitUri(url);
-    }
-
-    void logStateTransition(String transitionType, String currentActivity) {
-       logStateTransition(transitionType, currentActivity, 0, 0, null, null, null, 0);
-    }
-
-    void logStateTransition(String transitionType, String currentActivity, long previousForegroundTime, long suspendedTime, String dataString, String launchParameters, String launchPackage, int interruptions) {
-        if (mConfigManager.getSendOoEvents()) {
-            ensureActiveSession();
-            mMessageManager.logStateTransition(transitionType,
-                    mSessionID,
-                    mSessionStartTime,
-                    lastPushMessage == null ? null : lastPushMessage.getJsonPayload(),
-                    currentActivity,
-                    dataString,
-                    launchParameters,
-                    launchPackage,
-                    previousForegroundTime,
-                    suspendedTime,
-                    interruptions
-                    );
-            if (Constants.StateTransitionType.STATE_TRANS_BG.equals(transitionType)) {
-                lastPushMessage = null;
-            }
-        }
-    }
-
-
     /**
      * Track that an Activity has started. Should only be called within the onStart method of your Activities,
      * and is only necessary for pre-API level 14 devices. Not necessary to use if your Activity extends an mParticle
@@ -445,17 +448,12 @@ public class MParticle {
 
     private void endSession(long sessionEndTime) {
         ConfigManager.log(LogLevel.DEBUG, "Ended session");
-
+        mEmbeddedKitManager.endSession();
         // mMessageManager.stopSession(mSessionID, sessionEndTime, sessionEndTime - mSessionStartTime);
         mMessageManager.endSession(mSessionID, sessionEndTime, sessionEndTime - mSessionStartTime);
         // reset agent to unstarted state
         mSessionStartTime = 0;
         mSessionID = Constants.NO_SESSION_ID;
-    }
-
-
-    boolean isSessionActive() {
-        return mSessionStartTime > 0;
     }
 
     private void ensureActiveSession() {
@@ -493,6 +491,7 @@ public class MParticle {
         mMessageManager.startSession(mSessionID, mSessionStartTime);
         mTimeoutHandler.sendEmptyMessageDelayed(0, mConfigManager.getSessionTimeout());
         ConfigManager.log(LogLevel.DEBUG, "Started new session");
+        mEmbeddedKitManager.startSession();
     }
 
     /**
@@ -617,7 +616,7 @@ public class MParticle {
 
 
             }
-            mEmbeddedKitManager.logEvent(eventType, eventName, eventDataJSON);
+            mEmbeddedKitManager.logEvent(eventType, eventName, eventInfo);
         }
     }
 
@@ -647,8 +646,8 @@ public class MParticle {
      *
      * @param event
      * @param product
-     * @see com.mparticle.MPProduct
-     * @see com.mparticle.MPProduct.Event
+     * @see MPProduct
+     * @see MPProduct.Event
      */
     public void logProductEvent(final MPProduct.Event event, MPProduct product) {
         if (product == null) {
@@ -699,36 +698,10 @@ public class MParticle {
      * Logs an e-commerce transaction event
      *
      * @param product (required not null)
-     * @see com.mparticle.MPProduct
+     * @see MPProduct
      */
     public void logTransaction(MPProduct product) {
         logProductEvent(MPProduct.Event.PURCHASE, product);
-    }
-
-    void logScreen(String screenName, Map<String, String> eventData, Boolean started) {
-        if (null == screenName) {
-            ConfigManager.log(LogLevel.ERROR, "screenName is required for logScreen");
-            return;
-        }
-        if (screenName.length() > Constants.LIMIT_NAME) {
-            ConfigManager.log(LogLevel.ERROR, "The screen name was too long. Discarding event.");
-            return;
-        }
-        ensureActiveSession();
-        if (checkEventLimit()) {
-            JSONObject eventDataJSON = enforceAttributeConstraints(eventData);
-            if (mConfigManager.getSendOoEvents()) {
-                mMessageManager.logScreen(mSessionID, mSessionStartTime, mLastEventTime, screenName, eventDataJSON, started);
-
-                if (null == eventDataJSON) {
-                    ConfigManager.log(LogLevel.DEBUG, "Logged screen: ", screenName);
-                } else {
-                    ConfigManager.log(LogLevel.DEBUG, "Logged screen: ", screenName, " with data ", eventDataJSON.toString());
-                }
-
-            }
-            mEmbeddedKitManager.logScreen(screenName, eventDataJSON);
-        }
     }
 
     /**
@@ -747,7 +720,7 @@ public class MParticle {
      * @param eventData  a Map of data attributes to associate with this screen view
      */
     public void logScreen(String screenName, Map<String, String> eventData) {
-        logScreen(screenName, eventData, true);
+        mInternal.logScreen(screenName, eventData, true);
     }
 
     /**
@@ -806,11 +779,7 @@ public class MParticle {
         }
     }
 
-    public void logNetworkPerformance(String url, long startTime, String method, long length, long bytesSent, long bytesReceived) {
-        logNetworkPerformance(url, startTime, method, length, bytesSent, bytesReceived, null);
-    }
-
-    void logNetworkPerformance(String url, long startTime, String method, long length, long bytesSent, long bytesReceived, String requestString) {
+    public void logNetworkPerformance(String url, long startTime, String method, long length, long bytesSent, long bytesReceived, String requestString) {
         if (mConfigManager.getSendOoEvents()) {
             ensureActiveSession();
             if (checkEventLimit()) {
@@ -979,15 +948,7 @@ public class MParticle {
         }
     }
 
-    void logUnhandledError(Throwable t) {
-        if (mConfigManager.getSendOoEvents()) {
-            ensureActiveSession();
-            mMessageManager.logErrorEvent(mSessionID, mSessionStartTime, mLastEventTime, t != null ? t.getMessage() : null, t, null, false);
-            //we know that the app is about to crash and therefore exit
-            logStateTransition(Constants.StateTransitionType.STATE_TRANS_EXIT, mAppStateManager.getCurrentActivity());
-            endSession(System.currentTimeMillis());
-        }
-    }
+
 
     /**
      * Enables location tracking given a provider and update frequency criteria. The provider must
@@ -1316,6 +1277,19 @@ public class MParticle {
     }
 
     /**
+     * Retrieve a URL to be loaded within a {@link android.webkit.WebView} to show the user a survey
+     * or feedback form.
+     *
+     * @param serviceProviderId The ID of the desired survey/feedback service.
+     * @return a fully-formed URI, or null if no URL exists for the given ID.
+     *
+     * @see {@link com.mparticle.MParticle.ServiceProviders}
+     */
+    public Uri getSurveyUrl(int serviceProviderId) {
+        return mEmbeddedKitManager.getSurveyUrl(serviceProviderId, mUserAttributes);
+    }
+
+    /**
      * Force the SDK into either Production or Development mode. See {@link com.mparticle.MParticle.Environment}
      * for implications of each mode. The SDK automatically determines which mode it should be in depending
      * on the signing and the DEBUGGABLE flag of your application's AndroidManifest.xml, so this method should
@@ -1436,15 +1410,7 @@ public class MParticle {
         mConfigManager.setPushVibrationEnabled(enabled);
     }
 
-    void clearPushNotificationId() {
-        PushRegistrationHelper.clearPushRegistrationId(mAppContext);
-        mMessageManager.setPushRegistrationId(mSessionID, mSessionStartTime, System.currentTimeMillis(), null, true);
-    }
 
-    void setPushRegistrationId(String registrationId) {
-        PushRegistrationHelper.storeRegistrationId(mAppContext, registrationId);
-        mMessageManager.setPushRegistrationId(mSessionID, mSessionStartTime, System.currentTimeMillis(), registrationId, true);
-    }
 
     /**
      * This method checks the event count is below the limit and increments the event count. A
@@ -1503,7 +1469,7 @@ public class MParticle {
      * Optionally use the licensingCallback to allow or disallow access to features of your application.
      *
      * @param encodedPublicKey  GBase64-encoded RSA public key of your application
-     * @param policy            <b>Optional</b> {@link Policy}, will default to {@link ServerManagedPolicy}
+     * @param policy            <b>Optional</b> {@link com.mparticle.licensing.Policy}, will default to {@link ServerManagedPolicy}
      * @param licensingCallback <b>Optional</b> {@link LicenseCheckerCallback} callback for licensing checking
      */
     private void performLicenseCheck(String encodedPublicKey, Policy policy, LicenseCheckerCallback licensingCallback) {
@@ -1559,6 +1525,7 @@ public class MParticle {
     public void setSessionTimeout(int sessionTimeout) {
         mConfigManager.setSessionTimeout(sessionTimeout);
     }
+
 
     /* package private */ void logNotification(AbstractCloudMessage message, String type, int actionId, boolean startSession) {
         lastPushMessage = message;
@@ -1627,11 +1594,16 @@ public class MParticle {
         }
     }
 
+
     void refreshConfiguration() {
         ConfigManager.log(LogLevel.DEBUG, "Refreshing configuration...");
         mMessageManager.refreshConfiguration();
     }
 
+
+    public MParticleInternal internal() {
+        return mInternal;
+    }
 
     /**
      * Event type to use when logging events.
@@ -1751,7 +1723,7 @@ public class MParticle {
         Production(2);
         private final int value;
 
-        int getValue() {
+        public int getValue() {
             return value;
         }
 
@@ -1786,6 +1758,10 @@ public class MParticle {
          * Used to communicate the internal state and processes of the SDK.
          */
         DEBUG;
+    }
+
+    public interface ServiceProviders {
+        public static final int FORESEE_ID = 64;
     }
 
     /**
@@ -1910,4 +1886,126 @@ public class MParticle {
         }
     }
 
+    public class MParticleInternal {
+
+        private JSONObject mUserAttributes;
+        private JSONArray mUserIdentities;
+        private EmbeddedKitManager mEmbeddedKitManager;
+        private AppStateManager mAppStateManager;
+
+        public MeasuredRequestManager getMeasuredRequestManager() {
+            return measuredRequestManager;
+        }
+
+        public ConfigManager getConfigurationManager() {
+            return mConfigManager;
+        }
+
+        public String getSessionId(){
+            return mSessionID;
+        }
+
+        public boolean getIsAppRunning() {
+            return appRunning;
+        }
+
+        public void logUnhandledError(Throwable t) {
+            if (mConfigManager.getSendOoEvents()) {
+                ensureActiveSession();
+                mMessageManager.logErrorEvent(mSessionID, mSessionStartTime, mLastEventTime, t != null ? t.getMessage() : null, t, null, false);
+                //we know that the app is about to crash and therefore exit
+                mInternal.logStateTransition(Constants.StateTransitionType.STATE_TRANS_EXIT, mAppStateManager.getCurrentActivity());
+                endSession(System.currentTimeMillis());
+            }
+        }
+
+        public void logScreen(String screenName, Map<String, String> eventData, Boolean started) {
+            if (null == screenName) {
+                ConfigManager.log(LogLevel.ERROR, "screenName is required for logScreen");
+                return;
+            }
+            if (screenName.length() > Constants.LIMIT_NAME) {
+                ConfigManager.log(LogLevel.ERROR, "The screen name was too long. Discarding event.");
+                return;
+            }
+            ensureActiveSession();
+            if (checkEventLimit()) {
+                JSONObject eventDataJSON = enforceAttributeConstraints(eventData);
+                if (mConfigManager.getSendOoEvents()) {
+                    mMessageManager.logScreen(mSessionID, mSessionStartTime, mLastEventTime, screenName, eventDataJSON, started);
+
+                    if (null == eventDataJSON) {
+                        ConfigManager.log(LogLevel.DEBUG, "Logged screen: ", screenName);
+                    } else {
+                        ConfigManager.log(LogLevel.DEBUG, "Logged screen: ", screenName, " with data ", eventDataJSON.toString());
+                    }
+
+                }
+                if (started) {
+                    mEmbeddedKitManager.logScreen(screenName, eventData);
+                }
+            }
+        }
+
+        public boolean isSessionActive() {
+            return mSessionStartTime > 0;
+        }
+
+        public void logStateTransition(String transitionType, String currentActivity) {
+            logStateTransition(transitionType, currentActivity, 0, 0, null, null, null, 0);
+        }
+
+        public void logStateTransition(String transitionType, String currentActivity, long previousForegroundTime, long suspendedTime, String dataString, String launchParameters, String launchPackage, int interruptions) {
+            if (mConfigManager.getSendOoEvents()) {
+                ensureActiveSession();
+
+                mMessageManager.logStateTransition(transitionType,
+                        mSessionID,
+                        mSessionStartTime,
+                        lastPushMessage,
+                        currentActivity,
+                        dataString,
+                        launchParameters,
+                        launchPackage,
+                        previousForegroundTime,
+                        suspendedTime,
+                        interruptions
+                );
+                if (Constants.StateTransitionType.STATE_TRANS_BG.equals(transitionType)) {
+                    lastNotificationBundle = null;
+                }
+            }
+        }
+
+        public JSONObject getUserAttributes() {
+            return mUserAttributes;
+        }
+
+        public JSONArray getUserIdentities() {
+            return mUserIdentities;
+        }
+
+        public EmbeddedKitManager getEmbeddedKitManager() {
+            return mEmbeddedKitManager;
+        }
+
+        public void clearPushNotificationId() {
+            PushRegistrationHelper.clearPushRegistrationId(mAppContext);
+            mMessageManager.setPushRegistrationId(mSessionID, mSessionStartTime, System.currentTimeMillis(), null, true);
+        }
+
+        public void setPushRegistrationId(String registrationId) {
+            PushRegistrationHelper.storeRegistrationId(mAppContext, registrationId);
+            mMessageManager.setPushRegistrationId(mSessionID, mSessionStartTime, System.currentTimeMillis(), registrationId, true);
+        }
+
+        public AppStateManager getAppStateManager() {
+            return mAppStateManager;
+        }
+
+        public Boolean shouldProcessUrl(String url) {
+            return mConfigManager.isNetworkPerformanceEnabled() &&
+                    measuredRequestManager.isUriAllowed(url) && !mEmbeddedKitManager.isEmbeddedKitUri(url);
+        }
+    }
 }
