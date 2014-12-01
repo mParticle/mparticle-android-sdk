@@ -61,7 +61,7 @@ public class MPReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        if (!MPARTICLE_IGNORE.equals(intent.getAction())) {
+        if (!MPARTICLE_IGNORE.equals(intent.getAction()) && !intent.getBooleanExtra(MPARTICLE_IGNORE, false)) {
             if ("com.android.vending.INSTALL_REFERRER".equals(intent.getAction())) {
                 String referrer = intent.getStringExtra("referrer");
                 SharedPreferences preferences = context.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
@@ -70,7 +70,7 @@ public class MPReceiver extends BroadcastReceiver {
                 MParticle.start(context);
                 MPService.runIntentInService(context, intent);
             }
+            setResult(Activity.RESULT_OK, null, null);
         }
-        setResult(Activity.RESULT_OK, null, null);
     }
 }

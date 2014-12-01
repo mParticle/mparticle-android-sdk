@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
+import android.net.Uri;
 
 import com.mparticle.MParticle;
 import com.mparticle.internal.ConfigManager;
@@ -15,7 +16,11 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -30,25 +35,40 @@ public class EmbeddedKitManager implements IEmbeddedKit, MPActivityCallbacks {
         this.context = context;
     }
 
+
     public void updateKits(JSONArray kitConfigs){
-        for (int i = 0; i < kitConfigs.length(); i++){
-            try {
-                JSONObject current = kitConfigs.getJSONObject(i);
-                int currentId = current.getInt(EmbeddedProvider.KEY_ID);
-                if (!providers.containsKey(currentId)) {
-                    providers.put(currentId, new EmbeddedKitFactory().createInstance(currentId, context));
+        if (kitConfigs == null) {
+            providers.clear();
+        }else{
+            HashSet<Integer> activeIds = new HashSet<Integer>();
+            for (int i = 0; i < kitConfigs.length(); i++) {
+                try {
+                    JSONObject current = kitConfigs.getJSONObject(i);
+                    int currentId = current.getInt(EmbeddedProvider.KEY_ID);
+                    activeIds.add(currentId);
+                    if (!providers.containsKey(currentId)) {
+                        providers.put(currentId, new BaseEmbeddedKitFactory().createInstance(currentId, context));
+                    }
+                    providers.get(currentId).parseConfig(current).update();
+                    if (!providers.get(currentId).optedOut()) {
+                        providers.get(currentId).setUserAttributes(MParticle.getInstance().internal().getUserAttributes());
+                        syncUserIdentities(providers.get(currentId));
+                    }
+                } catch (JSONException jse) {
+                    ConfigManager.log(MParticle.LogLevel.ERROR, "Exception while parsing embedded kit configuration: " + jse.getMessage());
+                } catch (ClassNotFoundException cnfe) {
+                    //this should already be logged in the EmbeddedProvider, but I want to bubble up the exception.
+                } catch (Exception e) {
+                    ConfigManager.log(MParticle.LogLevel.ERROR, "Exception while started embedded kit: " + e.getMessage());
                 }
-                providers.get(currentId).parseConfig(current).update();
-                if (!providers.get(currentId).optedOut()) {
-                    providers.get(currentId).setUserAttributes(MParticle.getInstance().internal().getUserAttributes());
-                    syncUserIdentities(providers.get(currentId));
+            }
+
+            Iterator<Integer> ids = providers.keySet().iterator();
+            while (ids.hasNext()) {
+                Integer id = ids.next();
+                if (!activeIds.contains(id)) {
+                    ids.remove();
                 }
-            }catch (JSONException jse){
-                ConfigManager.log(MParticle.LogLevel.ERROR, "Exception while parsing embedded kit configuration: " + jse.getMessage());
-            }catch (ClassNotFoundException cnfe){
-                //this should already be logged in the EmbeddedProvider, but I want to bubble up the exception.
-            }catch (Exception e){
-                ConfigManager.log(MParticle.LogLevel.ERROR, "Exception while started embedded kit: " + e.getMessage());
             }
         }
     }
@@ -73,8 +93,8 @@ public class EmbeddedKitManager implements IEmbeddedKit, MPActivityCallbacks {
     public void logEvent(MParticle.EventType type, String name, Map<String, String> eventAttributes) {
         for (EmbeddedProvider provider : providers.values()){
             try {
-                if (!provider.optedOut()) {
-                    provider.logEvent(type, name, eventAttributes);
+                if (!provider.optedOut() && provider.shouldLogEvent(type, name)) {
+                    provider.logEvent(type, name, provider.filterEventAttributes(type, name, provider.mAttributeFilters, eventAttributes));
                 }
             } catch (Exception e) {
                 ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to call logEvent for embedded provider: " + provider.getName() + ": " + e.getMessage());
@@ -99,8 +119,8 @@ public class EmbeddedKitManager implements IEmbeddedKit, MPActivityCallbacks {
     public void logScreen(String screenName, Map<String, String> eventAttributes) {
         for (EmbeddedProvider provider : providers.values()){
             try {
-                if (!provider.optedOut()) {
-                    provider.logScreen(screenName, eventAttributes);
+                if (!provider.optedOut() && provider.shouldLogScreen(screenName)) {
+                    provider.logScreen(screenName, provider.filterEventAttributes(null, screenName, provider.mScreenAttributeFilters, eventAttributes));
                 }
             } catch (Exception e) {
                 ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to call logScreen for embedded provider: " + provider.getName() + ": " + e.getMessage());
@@ -126,7 +146,7 @@ public class EmbeddedKitManager implements IEmbeddedKit, MPActivityCallbacks {
         for (EmbeddedProvider provider : providers.values()){
             try {
                 if (!provider.optedOut()) {
-                    provider.setUserAttributes(mUserAttributes);
+                    provider.setUserAttributes(provider.filterAttributes(provider.mUserAttributeFilters, mUserAttributes));
                 }
             } catch (Exception e) {
                 ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to call setUserAttributes for embedded provider: " + provider.getName() + ": " + e.getMessage());
@@ -151,7 +171,7 @@ public class EmbeddedKitManager implements IEmbeddedKit, MPActivityCallbacks {
     public void setUserIdentity(String id, MParticle.IdentityType identityType) {
         for (EmbeddedProvider provider : providers.values()){
             try {
-                if (!provider.optedOut()) {
+                if (!provider.optedOut() && provider.shouldSetIdentity(identityType)) {
                     provider.setUserIdentity(id, identityType);
                 }
             } catch (Exception e) {
@@ -309,10 +329,41 @@ public class EmbeddedKitManager implements IEmbeddedKit, MPActivityCallbacks {
         return false;
     }
 
+    public String getActiveModuleIds() {
+        if (providers.isEmpty()){
+            return "";
+        }else {
+            Set keys = providers.keySet();
+            StringBuilder buffer = new StringBuilder(keys.size() * 3);
+
+            Iterator<Integer> it = keys.iterator();
+            while (it.hasNext()) {
+                Integer next = it.next();
+                buffer.append(next);
+                if (it.hasNext()) {
+                    buffer.append(",");
+                }
+            }
+            return buffer.toString();
+        }
+    }
+
+    public Uri getSurveyUrl(int serviceId, JSONObject userAttributes) {
+        EmbeddedProvider provider = providers.get(serviceId);
+        if (provider instanceof ISurveyProvider) {
+            return ((ISurveyProvider)provider).getSurveyUrl(provider.filterAttributes(provider.mUserAttributeFilters, userAttributes));
+        } else{
+            return null;
+        }
+    }
+
     public static class BaseEmbeddedKitFactory {
         private final static int MAT = 32;
         private final static int KOCHAVA = 37;
         private final static int COMSCORE = 39;
+        private final static int KAHUNA = 56;
+        private final static int FORESEE = MParticle.ServiceProviders.FORESEE_ID;
+
         protected EmbeddedProvider createInstance(int id, Context context) throws JSONException, ClassNotFoundException{
             switch (id){
                 case MAT:
@@ -321,9 +372,23 @@ public class EmbeddedKitManager implements IEmbeddedKit, MPActivityCallbacks {
                     return new EmbeddedKochava(context);
                 case COMSCORE:
                     return new EmbeddedComscore(context);
+                case KAHUNA:
+                    return new EmbeddedKahuna(context);
+                case FORESEE:
+                    return new EmbeddedForesee(context);
                 default:
                     return null;
             }
+        }
+
+        public static ArrayList<Integer> getSupportedKits() {
+            ArrayList<Integer> supportedKitIds = new ArrayList<Integer>();
+            supportedKitIds.add(MAT);
+            supportedKitIds.add(KOCHAVA);
+            supportedKitIds.add(COMSCORE);
+            supportedKitIds.add(KAHUNA);
+            supportedKitIds.add(FORESEE);
+            return supportedKitIds;
         }
     }
 }

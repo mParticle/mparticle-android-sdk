@@ -7,7 +7,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:0.13.+'
+        classpath 'com.android.tools.build:gradle:1.0.0-rc1'
 
     }
 }
@@ -25,13 +25,10 @@ def getDate() {
     def formattedDate = date.format('yyyyMMdd')
     return Integer.parseInt(formattedDate)
 }
-String releaseType = "mainlineRelease"
-String artifactId = "android-sdk"
+
 android {
     compileSdkVersion 19
     buildToolsVersion "20"
-    useOldManifestMerger false
-    defaultPublishConfig "mainlineRelease"
 
     String url = "\"\"";
     String configurationUrl = "\"\"";
@@ -43,13 +40,6 @@ android {
         }
         if (properties.stringPropertyNames().contains('mp.configurl')) {
             configurationUrl = properties.getProperty('mp.configurl')
-        }
-        if (properties.stringPropertyNames().contains('mp.releasetype')) {
-            releaseType = properties.getProperty('mp.releasetype')
-            if (releaseType.contains("kahuna")){
-                defaultPublishConfig "kahunaRelease"
-                artifactId = "android-sdk-kahuna"
-            }
         }
     }catch (Exception e){
 
@@ -70,29 +60,19 @@ android {
 
     }
 
-    productFlavors {
-        mainline {
-
-        }
-
-        kahuna {
-
-        }
-    }
-
     buildTypes {
 
         debug {
-            runProguard false
+            minifyEnabled false
         }
 
         unity {
-            runProguard true
+            minifyEnabled true
             proguardFile 'proguard.txt'
         }
 
         release {
-            runProguard true
+            minifyEnabled true
             proguardFile 'proguard.txt'
         }
     }
@@ -131,15 +111,13 @@ uploadArchives {
                 configuration = configurations.deployerJars
                 repository(url: "s3://maven.mparticle.com")
                 pom.version = sdkversion
-                pom.artifactId = artifactId
+                pom.artifactId = 'android-sdk'
                 pom.groupId = 'com.mparticle'
-                pom.packaging = 'jar'
             }else{
                 repository url: 'file://' + new File(System.getProperty('user.home'), '.m2/repository').absolutePath
                 pom.version = sdkversion
-                pom.artifactId = artifactId
+                pom.artifactId = 'android-sdk'
                 pom.groupId = 'com.mparticle'
-                pom.packaging = 'jar'
             }
         }
     }
@@ -147,7 +125,7 @@ uploadArchives {
 
 dependencies {
     deployerJars "org.kuali.maven.wagons:maven-s3-wagon:1.2.1"
-    kahunaCompile files('embeddedkits/Kahuna489.jar')
+    compile files('embeddedkits/Kahuna489.jar')
     compile files('embeddedkits/KochavaSDK.jar')
     compile files('embeddedkits/MobileAppTracker-3.1.jar')
     compile files('embeddedkits/comscore2140923.jar')

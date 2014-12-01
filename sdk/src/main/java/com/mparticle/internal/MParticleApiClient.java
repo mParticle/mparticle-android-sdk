@@ -7,9 +7,10 @@ import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Base64;
 
-
 import com.mparticle.BuildConfig;
 import com.mparticle.MParticle;
+import com.mparticle.internal.embedded.EmbeddedKitManager;
+
 
 import org.apache.http.HttpStatus;
 import org.apache.http.impl.cookie.DateUtils;
@@ -35,6 +36,7 @@ import java.security.KeyStore;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateFactory;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.zip.GZIPOutputStream;
@@ -53,7 +55,7 @@ class MParticleApiClient {
 
     private static final String HEADER_SIGNATURE = "x-mp-signature";
     private static final String HEADER_ENVIRONMENT = "x-mp-env";
-    private static final String HEADER_VARIANT = "x-mp-variant";
+    private static final String HEADER_KITS = "x-mp-kits";
     private static final String SECURE_SERVICE_SCHEME = TextUtils.isEmpty(BuildConfig.MP_URL) ? "https" : "http";
 
     private static final String API_HOST = TextUtils.isEmpty(BuildConfig.MP_URL) ? "nativesdks.mparticle.com" : BuildConfig.MP_URL;
@@ -74,7 +76,7 @@ class MParticleApiClient {
     private final SharedPreferences mPreferences;
     private final String mApiKey;
     private final int mDeviceRampNumber;
-    private static String variant;
+    private static String supportedKits;
     private SSLSocketFactory socketFactory;
     private String etag = null;
     private String modified = null;
@@ -93,8 +95,12 @@ class MParticleApiClient {
                         Settings.Secure.ANDROID_ID).getBytes())
                     .mod(BigInteger.valueOf(100))
                     .intValue();
-        variant = BuildConfig.FLAVOR.equals("kahuna") ? BuildConfig.FLAVOR : "main";
+
+        supportedKits = getSupportedKitString();
     }
+
+
+
 
     void fetchConfig() throws IOException, MPThrottleException, MPConfigException {
         try {
@@ -102,7 +108,7 @@ class MParticleApiClient {
             HttpURLConnection connection = (HttpURLConnection) mConfigUrl.openConnection();
             connection.setRequestProperty("Accept-Encoding", "gzip");
             connection.setRequestProperty(HEADER_ENVIRONMENT, Integer.toString(mConfigManager.getEnvironment().getValue()));
-            connection.setRequestProperty(HEADER_VARIANT, variant);
+            connection.setRequestProperty(HEADER_KITS, supportedKits);
             connection.setRequestProperty(HTTP.USER_AGENT, mUserAgent);
             if (etag != null){
                 connection.setRequestProperty("If-None-Match", etag);
@@ -141,7 +147,6 @@ class MParticleApiClient {
             HttpURLConnection connection = (HttpURLConnection) getAudienceUrl().openConnection();
             connection.setRequestProperty("Accept-Encoding", "gzip");
             connection.setRequestProperty(HTTP.USER_AGENT, mUserAgent);
-            connection.setRequestProperty(HEADER_VARIANT, variant);
 
             addMessageSignature(connection, null);
             ApiResponse apiResponse = new ApiResponse(connection);
@@ -168,7 +173,7 @@ class MParticleApiClient {
         connection.setRequestProperty(HTTP.CONTENT_TYPE, "application/json");
         connection.setRequestProperty(HTTP.CONTENT_ENCODING, "gzip");
         connection.setRequestProperty(HTTP.USER_AGENT, mUserAgent);
-        connection.setRequestProperty(HEADER_VARIANT, variant);
+        connection.setRequestProperty(HEADER_KITS, MParticle.getInstance().internal().getEmbeddedKitManager().getActiveModuleIds());
 
         addMessageSignature(connection, message);
 
@@ -500,6 +505,24 @@ class MParticleApiClient {
         if (currentRamp > 0 && currentRamp < 100 &&
                 mDeviceRampNumber > mConfigManager.getCurrentRampValue()){
             throw new MPRampException();
+        }
+    }
+
+    private static String getSupportedKitString(){
+        ArrayList<Integer> supportedKitIds = EmbeddedKitManager.BaseEmbeddedKitFactory.getSupportedKits();
+        if (supportedKitIds.size() > 0) {
+            StringBuilder buffer = new StringBuilder(supportedKitIds.size() * 3);
+            Iterator<Integer> it = supportedKitIds.iterator();
+            while (it.hasNext()) {
+                Integer next = it.next();
+                buffer.append(next);
+                if (it.hasNext()) {
+                    buffer.append(",");
+                }
+            }
+            return buffer.toString();
+        }else {
+            return "";
         }
     }
 }

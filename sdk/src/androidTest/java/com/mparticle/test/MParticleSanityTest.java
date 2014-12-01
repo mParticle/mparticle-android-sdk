@@ -19,7 +19,11 @@ public class MParticleSanityTest extends AndroidTestCase {
         }
     }
 
+<<<<<<< HEAD
     public void testSdkStarted() {
+=======
+    public void testSdkStart() {
+>>>>>>> master
         MParticle instance = MParticle.getInstance();
         assertNotNull(instance);
     }
