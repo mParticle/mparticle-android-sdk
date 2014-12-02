@@ -16,6 +16,8 @@ import android.text.TextUtils;
 import com.mparticle.MPService;
 import com.mparticle.MParticlePushUtility;
 
+import org.json.JSONObject;
+
 import java.io.InputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -151,6 +153,18 @@ public class MPCloudNotificationMessage extends AbstractCloudMessage {
     @Override
     public int getId() {
         return getContentId();
+    }
+
+    @Override
+    public JSONObject getJsonPayload() {
+        JSONObject payload = new JSONObject();
+        try {
+            payload.put(CAMPAIGN_ID, getCampaignId());
+            payload.put(CONTENT_ID, getContentId());
+        }catch (Exception e){
+
+        }
+        return payload;
     }
 
     @Override

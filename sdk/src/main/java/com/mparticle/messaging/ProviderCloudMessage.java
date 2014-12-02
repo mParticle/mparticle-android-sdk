@@ -2,6 +2,7 @@ package com.mparticle.messaging;
 
 import android.app.Notification;
 import android.content.Context;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -11,6 +12,9 @@ import com.mparticle.MParticlePushUtility;
 
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.Set;
 
 /**
  * Representation of a GCM/push sent by a 3rd party such as Urban Airship or Mixpanel.
@@ -20,7 +24,7 @@ public class ProviderCloudMessage extends AbstractCloudMessage {
 
     public ProviderCloudMessage(Bundle extras, JSONArray pushKeys) {
         super(extras);
-        mPrimaryText = findProviderMessage(extras, pushKeys);
+        mPrimaryText = findProviderMessage(pushKeys);
     }
 
     public ProviderCloudMessage(Parcel pc) {
@@ -64,6 +68,23 @@ public class ProviderCloudMessage extends AbstractCloudMessage {
     }
 
     @Override
+    public JSONObject getJsonPayload() {
+        JSONObject json = new JSONObject();
+        Set<String> keys = mExtras.keySet();
+        for (String key : keys) {
+            try {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                    json.put(key, JSONObject.wrap(mExtras.get(key)));
+                }else{
+                    json.put(key, mExtras.get(key));
+                }
+            } catch(JSONException e) {
+            }
+        }
+        return json;
+    }
+
+    @Override
     public Notification buildNotification(Context context) {
 
         Notification notification = new NotificationCompat.Builder(context)
@@ -77,13 +98,13 @@ public class ProviderCloudMessage extends AbstractCloudMessage {
         return notification;
     }
 
-    private String findProviderMessage(Bundle extras, JSONArray possibleKeys){
+    private String findProviderMessage(JSONArray possibleKeys){
         if (possibleKeys != null) {
             for (int i = 0; i < possibleKeys.length(); i++){
                 try {
-                    String message = extras.getString(possibleKeys.getString(i));
+                    String message = mExtras.getString(possibleKeys.getString(i));
                     if (message != null && message.length() > 0) {
-                        extras.remove(possibleKeys.getString(i));
+                        mExtras.remove(possibleKeys.getString(i));
                         return message;
                     }
                 }catch (JSONException jse){

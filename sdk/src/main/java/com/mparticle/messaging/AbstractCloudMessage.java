@@ -113,21 +113,7 @@ public abstract class AbstractCloudMessage implements Parcelable {
 
     public abstract int getId();
 
-    public JSONObject getJsonPayload(){
-        JSONObject json = new JSONObject();
-        Set<String> keys = mExtras.keySet();
-        for (String key : keys) {
-            try {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-                    json.put(key, JSONObject.wrap(mExtras.get(key)));
-                }else{
-                    json.put(key, mExtras.get(key));
-                }
-            } catch(JSONException e) {
-            }
-        }
-        return json;
-    }
+    public abstract JSONObject getJsonPayload();
 
     protected static PendingIntent getLoopbackIntent(Context context, AbstractCloudMessage message, CloudAction action){
         Intent intent = new Intent(MPService.INTERNAL_NOTIFICATION_TAP + action.getActionId());
