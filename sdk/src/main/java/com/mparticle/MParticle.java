@@ -105,12 +105,8 @@ public class MParticle {
     final MeasuredRequestManager measuredRequestManager;
     final EmbeddedKitManager mEmbeddedKitManager;
 
-
     private JSONArray mUserIdentities = new JSONArray();
     private String mSessionID;
-
-    private static Bundle lastNotificationBundle;
-
 
     private JSONObject mUserAttributes = new JSONObject();
     private JSONObject mSessionAttributes;
@@ -427,7 +423,7 @@ public class MParticle {
     }
 
     /**
-     * Explicitly begin tracking a new session. Usually not necessary unless {@link #endSession()} is also used.
+     * Explicitly begin tracking a new session. Usually not necessary unless {@link #endSession()} is also explicitly used.
      */
     public void beginSession() {
         if (mConfigManager.getSendOoEvents()) {
@@ -1595,7 +1591,11 @@ public class MParticle {
     }
 
 
-
+    /**
+     * Private SDK APIs, do not use.
+     *
+     * @return
+     */
     public MParticleInternal internal() {
         return mInternal;
     }
@@ -1883,11 +1883,6 @@ public class MParticle {
 
     public class MParticleInternal {
 
-        private JSONObject mUserAttributes;
-        private JSONArray mUserIdentities;
-        private EmbeddedKitManager mEmbeddedKitManager;
-        private AppStateManager mAppStateManager;
-
         public MeasuredRequestManager getMeasuredRequestManager() {
             return measuredRequestManager;
         }
@@ -1909,7 +1904,7 @@ public class MParticle {
                 ensureActiveSession();
                 mMessageManager.logErrorEvent(mSessionID, mSessionStartTime, mLastEventTime, t != null ? t.getMessage() : null, t, null, false);
                 //we know that the app is about to crash and therefore exit
-                mInternal.logStateTransition(Constants.StateTransitionType.STATE_TRANS_EXIT, mAppStateManager.getCurrentActivity());
+                logStateTransition(Constants.StateTransitionType.STATE_TRANS_EXIT, mAppStateManager.getCurrentActivity());
                 endSession(System.currentTimeMillis());
             }
         }
@@ -1967,7 +1962,7 @@ public class MParticle {
                         interruptions
                 );
                 if (Constants.StateTransitionType.STATE_TRANS_BG.equals(transitionType)) {
-                    lastNotificationBundle = null;
+                    lastPushMessage = null;
                 }
             }
         }
