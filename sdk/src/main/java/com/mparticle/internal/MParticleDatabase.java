@@ -126,6 +126,7 @@ import android.provider.BaseColumns;
         public final static String TABLE_NAME = "gcm_messages";
         public final static String PAYLOAD = "payload";
         public final static String CREATED_AT = "message_time";
+        public final static String DISPLAYED_AT = "displayed_time";
         public final static String EXPIRATION = "expiration";
         public final static String BEHAVIOR_FLAGS = "behaviors";
     }
@@ -137,7 +138,8 @@ import android.provider.BaseColumns;
                     GcmMessageTable.CREATED_AT + " INTEGER NOT NULL, " +
                     GcmMessageTable.EXPIRATION + " INTEGER NOT NULL, " +
                     GcmMessageTable.BEHAVIOR_FLAGS + " INTEGER NOT NULL," +
-                    GcmMessageTable.CAMPAIGN_ID + " INTEGER NOT NULL" +
+                    GcmMessageTable.CAMPAIGN_ID + " INTEGER NOT NULL, " +
+                    GcmMessageTable.DISPLAYED_AT + " INTEGER NOT NULL" +
                     ");";
 
     MParticleDatabase(Context context) {

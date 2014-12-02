@@ -464,8 +464,8 @@ public final class UploadHandler extends Handler {
         Cursor gcmHistory = null;
         try {
             String[] deleteWhereArgs = {Long.toString(System.currentTimeMillis())};
-            db.delete(MParticleDatabase.GcmMessageTable.TABLE_NAME, MParticleDatabase.GcmMessageTable.EXPIRATION + " < ?", deleteWhereArgs);
-            String[] columns = {MParticleDatabase.GcmMessageTable.CONTENT_ID, MParticleDatabase.GcmMessageTable.CAMPAIGN_ID, MParticleDatabase.GcmMessageTable.EXPIRATION};
+            db.delete(MParticleDatabase.GcmMessageTable.TABLE_NAME, MParticleDatabase.GcmMessageTable.EXPIRATION + " < ? and " + MParticleDatabase.GcmMessageTable.DISPLAYED_AT + " > 0", deleteWhereArgs);
+            String[] columns = {MParticleDatabase.GcmMessageTable.CONTENT_ID, MParticleDatabase.GcmMessageTable.CAMPAIGN_ID, MParticleDatabase.GcmMessageTable.EXPIRATION, MParticleDatabase.GcmMessageTable.DISPLAYED_AT};
             gcmHistory = db.query(MParticleDatabase.GcmMessageTable.TABLE_NAME,
                     columns,
                     null,
@@ -479,11 +479,13 @@ public final class UploadHandler extends Handler {
                     int campaignId = gcmHistory.getInt(gcmHistory.getColumnIndex(MParticleDatabase.GcmMessageTable.CAMPAIGN_ID));
                     String campaignIdString = Integer.toString(campaignId);
                     int contentId = gcmHistory.getInt(gcmHistory.getColumnIndex(MParticleDatabase.GcmMessageTable.CONTENT_ID));
+                    long displayedDate = gcmHistory.getLong(gcmHistory.getColumnIndex(MParticleDatabase.GcmMessageTable.DISPLAYED_AT));
                     JSONObject campaignObject = historyObject.optJSONObject(campaignIdString);
                     //only append the latest pushes
                     if (campaignObject == null){
                         campaignObject = new JSONObject();
                         campaignObject.put(Constants.MessageKey.PUSH_CONTENT_ID, contentId);
+                        campaignObject.put(MessageKey.PUSH_CAMPAIGN_HISTORY_TIMESTAMP, displayedDate);
                         historyObject.put(campaignIdString, campaignObject);
                     }
                 }

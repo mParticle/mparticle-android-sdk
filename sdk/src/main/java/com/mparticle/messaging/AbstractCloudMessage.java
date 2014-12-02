@@ -36,11 +36,14 @@ public abstract class AbstractCloudMessage implements Parcelable {
     public static final int FLAG_DIRECT_OPEN = 0x00000010;
     public static final int FLAG_READ = 0x00001000;
     public static final int FLAG_INFLUENCE_OPEN = 0x00010000;
+    public static final int FLAG_DISPLAYED = 0x00100000;
+    private long mActualDeliveryTime = 0;
 
     public AbstractCloudMessage(Parcel pc) {
         mExtras = pc.readBundle();
         mAppState = pc.readString();
         mBehavior = pc.readInt();
+        mActualDeliveryTime = pc.readLong();
     }
 
     public AbstractCloudMessage(Bundle extras){
@@ -49,7 +52,12 @@ public abstract class AbstractCloudMessage implements Parcelable {
 
     protected abstract CloudAction getDefaultAction();
 
-    public abstract Notification buildNotification(Context context);
+    public Notification buildNotification(Context context, long time){
+        setActualDeliveryTime(time);
+        return buildNotification(context);
+    }
+
+    protected abstract Notification buildNotification(Context context);
 
     public void setAppState(String appState) {
         this.mAppState = appState;
@@ -100,6 +108,7 @@ public abstract class AbstractCloudMessage implements Parcelable {
         dest.writeBundle(mExtras);
         dest.writeString(mAppState);
         dest.writeInt(mBehavior);
+        dest.writeLong(mActualDeliveryTime);
     }
 
     public abstract int getId();
@@ -134,4 +143,11 @@ public abstract class AbstractCloudMessage implements Parcelable {
     }
 
 
+    public long getActualDeliveryTime() {
+        return mActualDeliveryTime;
+    }
+
+    public void setActualDeliveryTime(long time){
+        mActualDeliveryTime = time;
+    }
 }

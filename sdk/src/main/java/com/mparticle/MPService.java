@@ -104,7 +104,11 @@ public class MPService extends IntentService {
         (new AsyncTask<AbstractCloudMessage, Void, Notification>() {
             @Override
             protected Notification doInBackground(AbstractCloudMessage... params) {
-                return params[0].buildNotification(MPService.this);
+                params[0].addBehavior(AbstractCloudMessage.FLAG_DISPLAYED);
+                Notification notification =  params[0].buildNotification(MPService.this, System.currentTimeMillis());
+
+                MParticle.getInstance().logNotification(params[0], Constants.Push.MESSAGE_TYPE_RECEIVED, 0, false);
+                return notification;
             }
 
             @Override
@@ -198,9 +202,12 @@ public class MPService extends IntentService {
                 AbstractCloudMessage cloudMessage = AbstractCloudMessage.createMessage(intent, ConfigManager.getPushKeys(this));
                 cloudMessage.setAppState(appState);
                 cloudMessage.setBehavior(AbstractCloudMessage.FLAG_RECEIVED);
-                MParticle.start(this);
-                MParticle.getInstance().logNotification(cloudMessage, Constants.Push.MESSAGE_TYPE_RECEIVED, 0, false);
+
+
                 if (cloudMessage instanceof MPCloudNotificationMessage && (((MPCloudNotificationMessage)cloudMessage).isDelayed())) {
+                    //only log received at this point if it's delayed, since we also log when the notification (delayed or not) is displayed
+                    MParticle.start(this);
+                    MParticle.getInstance().logNotification(cloudMessage, Constants.Push.MESSAGE_TYPE_RECEIVED, 0, false);
                     scheduleFutureNotification((MPCloudNotificationMessage) cloudMessage);
                 }else {
                     broadcastNotificationReceived(cloudMessage);

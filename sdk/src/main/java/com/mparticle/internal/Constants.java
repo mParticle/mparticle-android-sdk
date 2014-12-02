@@ -247,6 +247,7 @@ public class Constants {
         public static final String FIRST_SEEN_INSTALL = "fi";
         public static final String PUSH_CONTENT_ID = "cntid";
         public static final String PUSH_CAMPAIGN_HISTORY = "pch";
+        public static final String PUSH_CAMPAIGN_HISTORY_TIMESTAMP = "ts";
     }
 
     public interface PrefKeys {
