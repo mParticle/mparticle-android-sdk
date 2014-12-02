@@ -229,6 +229,6 @@ public class MPService extends IntentService {
     private void broadcastNotificationReceived(AbstractCloudMessage message) {
         Intent intent = new Intent(MParticlePushUtility.BROADCAST_NOTIFICATION_RECEIVED);
         intent.putExtra(MParticlePushUtility.CLOUD_MESSAGE_EXTRA, message);
-        sendOrderedBroadcast(intent, null);
+        sendBroadcast(intent, getApplicationContext().getPackageName() + ".mparticle.permission.NOTIFICATIONS");
     }
 }
