@@ -253,7 +253,7 @@ import org.json.JSONObject;
         contentValues.put(MParticleDatabase.GcmMessageTable.CONTENT_ID, message.getContentId());
         contentValues.put(MParticleDatabase.GcmMessageTable.CAMPAIGN_ID, message.getCampaignId());
         contentValues.put(MParticleDatabase.GcmMessageTable.EXPIRATION, message.getExpiration());
-        contentValues.put(MParticleDatabase.GcmMessageTable.PAYLOAD, message.getJsonPayload().toString());
+        contentValues.put(MParticleDatabase.GcmMessageTable.PAYLOAD, message.getRedactedJsonPayload().toString());
         contentValues.put(MParticleDatabase.GcmMessageTable.BEHAVIOR_FLAGS, message.getBehavior());
         contentValues.put(MParticleDatabase.GcmMessageTable.CREATED_AT, System.currentTimeMillis());
         contentValues.put(MParticleDatabase.GcmMessageTable.DISPLAYED_AT, message.getActualDeliveryTime());

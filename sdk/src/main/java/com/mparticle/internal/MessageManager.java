@@ -486,7 +486,7 @@ public class MessageManager implements MessageManagerCallbacks {
                 message.put(MessageKey.APP_INIT_UPGRADE, globalUpgrade);
             }
             if (lastPushMessage != null){
-               message.put(MessageKey.PAYLOAD, lastPushMessage.toString());
+               message.put(MessageKey.PAYLOAD, lastPushMessage.getRedactedJsonPayload().toString());
             }
             mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
         } catch (JSONException e) {
@@ -528,7 +528,7 @@ public class MessageManager implements MessageManagerCallbacks {
                     .name("gcm")
                     .build();
 
-            message.put(MessageKey.PAYLOAD, cloudMessage.getJsonPayload().toString());
+            message.put(MessageKey.PAYLOAD, cloudMessage.getRedactedJsonPayload().toString());
             message.put(MessageKey.PUSH_TYPE, type);
             message.put(MessageKey.PUSH_BEHAVIOR, cloudMessage.getBehavior());
             if (type.equals(Constants.Push.MESSAGE_TYPE_ACTION) && actionId > 0) {

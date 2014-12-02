@@ -68,7 +68,7 @@ public class ProviderCloudMessage extends AbstractCloudMessage {
     }
 
     @Override
-    public JSONObject getJsonPayload() {
+    public JSONObject getRedactedJsonPayload() {
         JSONObject json = new JSONObject();
         Set<String> keys = mExtras.keySet();
         for (String key : keys) {

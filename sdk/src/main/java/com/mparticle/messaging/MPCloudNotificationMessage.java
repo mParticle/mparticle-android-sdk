@@ -156,7 +156,7 @@ public class MPCloudNotificationMessage extends AbstractCloudMessage {
     }
 
     @Override
-    public JSONObject getJsonPayload() {
+    public JSONObject getRedactedJsonPayload() {
         JSONObject payload = new JSONObject();
         try {
             payload.put(CAMPAIGN_ID, getCampaignId());
