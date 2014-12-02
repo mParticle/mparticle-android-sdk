@@ -43,7 +43,7 @@ public class MPCloudNotificationMessage extends AbstractCloudMessage {
     private final static String LARGE_ICON = "m_li";
     private final static String LIGHTS_COLOR = "m_l_c";
     private final static String LIGHTS_OFF_MILLIS = "m_l_off";
-    private final static String LIGHTS_ON_MILLIS = "m__on";
+    private final static String LIGHTS_ON_MILLIS = "m_l_on";
     private final static String NUMBER = "m_n";
     private final static String ALERT_ONCE = "m_ao";
     private final static String PRIORITY = "m_p";
