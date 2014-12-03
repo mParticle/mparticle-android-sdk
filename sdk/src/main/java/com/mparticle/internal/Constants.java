@@ -201,6 +201,7 @@ public class Constants {
         public static final String OPT_OUT_STATUS = "s";
         // push-notifications
         public static final String PUSH_TOKEN = "to";
+        public static final String PUSH_TOKEN_TYPE = "tot";
         public static final String PUSH_REGISTER_FLAG = "r";
         public static final String APP_STATE = "as";
         //state transition

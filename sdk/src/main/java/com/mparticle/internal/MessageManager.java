@@ -401,6 +401,7 @@ public class MessageManager implements MessageManagerCallbacks {
                     .timestamp(time)
                     .build();
             message.put(MessageKey.PUSH_TOKEN, token);
+            message.put(MessageKey.PUSH_TOKEN_TYPE, "google");
             message.put(MessageKey.PUSH_REGISTER_FLAG, registeringFlag);
             mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
         } catch (JSONException e) {

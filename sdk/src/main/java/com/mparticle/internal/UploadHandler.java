@@ -405,8 +405,10 @@ public final class UploadHandler extends Handler {
         String regId = PushRegistrationHelper.getRegistrationId(mContext);
         if ((regId != null) && (regId.length() > 0)) {
             getDeviceInfo().put(MessageKey.PUSH_TOKEN, regId);
+            getDeviceInfo().put(MessageKey.PUSH_TOKEN_TYPE, "google");
         } else {
             getDeviceInfo().remove(MessageKey.PUSH_TOKEN);
+            getDeviceInfo().remove(MessageKey.PUSH_TOKEN_TYPE);
         }
 
         getDeviceInfo().put(MessageKey.PUSH_SOUND_ENABLED, mConfigManager.isPushSoundEnabled());
