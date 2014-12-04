@@ -18,7 +18,7 @@
 #-keepclassmembers class fqcn.of.javascript.interface.for.webview {
 #   public *;
 #}
-
+-optimizations !code/allocation/variable
 -printmapping out.map
 
 -keepparameternames
