@@ -34,6 +34,7 @@ import org.json.JSONObject;
     public static final int END_ORPHAN_SESSIONS = 4;
     public static final int STORE_BREADCRUMB = 5;
     public static final int STORE_GCM_MESSAGE = 6;
+    public static final int MARK_INFLUENCE_OPEN_GCM = 7;
     private final MessageManagerCallbacks mMessageManagerCallbacks;
 
     // boolean flag used in unit tests to wait until processing is finished.
@@ -63,6 +64,9 @@ import org.json.JSONObject;
                     }
                     if (MessageType.ERROR == messageType){
                         appendBreadcrumbs(message);
+                    }
+                    if (MessageType.APP_STATE_TRANSITION == messageType){
+                        appendLatestPushNotification(message);
                     }
                     dbInsertMessage(message);
 
@@ -198,9 +202,57 @@ import org.json.JSONObject;
                 } finally {
 
                 }
+                break;
+            case MARK_INFLUENCE_OPEN_GCM:
+               // long openTimestamp = (long) msg.obj;
+                markGcmMessages(0);
+                break;
         }
         mIsProcessingMessage = false;
     }
+
+    private void markGcmMessages(long openTimestamp) {
+        Cursor gcmCursor = null;
+        try{
+            long influenceOpenTimeout = MParticle.getInstance().internal().getConfigurationManager().getInfluenceOpenTimeout();
+            gcmCursor = db.query(MParticleDatabase.GcmMessageTable.TABLE_NAME,
+                    gcmColumns,
+                    MParticleDatabase.GcmMessageTable.DISPLAYED_AT + " > 0 and " + MParticleDatabase.GcmMessageTable.DISPLAYED_AT + " > " + (openTimestamp - influenceOpenTimeout),
+                    null,
+                    null,
+                    null,
+                    MParticleDatabase.GcmMessageTable.DISPLAYED_AT + " desc limit 1");
+        }catch (Exception e){
+
+        }
+    }
+
+    private void appendLatestPushNotification(MPMessage message) {
+        Cursor pushCursor = null;
+        try {
+            pushCursor = db.query(MParticleDatabase.GcmMessageTable.TABLE_NAME,
+                    gcmColumns,
+                    MParticleDatabase.GcmMessageTable.DISPLAYED_AT + " > 0",
+                    null,
+                    null,
+                    null,
+                    MParticleDatabase.GcmMessageTable.DISPLAYED_AT + " desc limit 1");
+            if (pushCursor.moveToFirst()) {
+                String payload = pushCursor.getString(pushCursor.getColumnIndex(MParticleDatabase.GcmMessageTable.PAYLOAD));
+                message.put(MessageKey.PAYLOAD, payload);
+            }
+        }catch (Exception e){
+            ConfigManager.log(MParticle.LogLevel.DEBUG, "Failed to append latest push notification payload: " + e.toString());
+        }finally {
+            if (pushCursor != null && !pushCursor.isClosed()){
+                pushCursor.close();
+            }
+        }
+    }
+
+    private static final String[] gcmColumns = {
+            MParticleDatabase.GcmMessageTable.PAYLOAD
+    };
 
     private static final String[] breadcrumbColumns = {
             BreadcrumbTable.CREATED_AT,

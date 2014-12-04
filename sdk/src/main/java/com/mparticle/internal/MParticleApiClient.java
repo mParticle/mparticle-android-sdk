@@ -99,9 +99,6 @@ class MParticleApiClient {
         supportedKits = getSupportedKitString();
     }
 
-
-
-
     void fetchConfig() throws IOException, MPThrottleException, MPConfigException {
         try {
             checkThrottleTime();

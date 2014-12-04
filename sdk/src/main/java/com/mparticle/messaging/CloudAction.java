@@ -65,6 +65,7 @@ public class CloudAction implements Parcelable {
         if (activityIntent == null){
             Intent intent = message.getDefaultOpenIntent(context, message);
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
             intent.putExtra(MParticlePushUtility.CLOUD_ACTION_EXTRA, action);
             activityIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         }

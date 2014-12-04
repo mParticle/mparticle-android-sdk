@@ -28,20 +28,18 @@ import java.util.Set;
  */
 public abstract class AbstractCloudMessage implements Parcelable {
 
-    private String mAppState;
-    protected Bundle mExtras;
-    private int mBehavior;
-
     public static final int FLAG_RECEIVED = 0x00000001;
     public static final int FLAG_DIRECT_OPEN = 0x00000010;
     public static final int FLAG_READ = 0x00001000;
     public static final int FLAG_INFLUENCE_OPEN = 0x00010000;
     public static final int FLAG_DISPLAYED = 0x00100000;
+
     private long mActualDeliveryTime = 0;
+    protected Bundle mExtras;
+    private int mBehavior = FLAG_RECEIVED;
 
     public AbstractCloudMessage(Parcel pc) {
         mExtras = pc.readBundle();
-        mAppState = pc.readString();
         mBehavior = pc.readInt();
         mActualDeliveryTime = pc.readLong();
     }
@@ -59,24 +57,12 @@ public abstract class AbstractCloudMessage implements Parcelable {
 
     protected abstract Notification buildNotification(Context context);
 
-    public void setAppState(String appState) {
-        this.mAppState = appState;
-    }
-
-    public void setBehavior(int behavior){
-        mBehavior = behavior;
-    }
-
     public void addBehavior(int behavior){
         mBehavior |= behavior;
     }
 
     public int getBehavior() {
         return mBehavior;
-    }
-
-    public String getAppState() {
-        return mAppState;
     }
 
     protected Intent getDefaultOpenIntent(Context context, AbstractCloudMessage message) {
@@ -106,7 +92,6 @@ public abstract class AbstractCloudMessage implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeBundle(mExtras);
-        dest.writeString(mAppState);
         dest.writeInt(mBehavior);
         dest.writeLong(mActualDeliveryTime);
     }

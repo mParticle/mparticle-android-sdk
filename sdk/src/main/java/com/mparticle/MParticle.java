@@ -44,6 +44,7 @@ import com.mparticle.licensing.LicenseCheckerCallback;
 import com.mparticle.licensing.Policy;
 import com.mparticle.licensing.ServerManagedPolicy;
 
+import com.mparticle.messaging.MPCloudNotificationMessage;
 import com.mparticle.segmentation.SegmentListener;
 
 import org.apache.http.conn.ssl.SSLSocketFactory;
@@ -125,8 +126,6 @@ public class MParticle {
     private LicenseCheckerCallback clientLicensingCallback;
     private static final HandlerThread sTimeoutHandlerThread = new HandlerThread("mParticleSessionTimeoutHandler",
             Process.THREAD_PRIORITY_BACKGROUND);
-
-    private AbstractCloudMessage lastPushMessage;
 
     private final MParticleInternal mInternal;
 
@@ -1523,13 +1522,12 @@ public class MParticle {
     }
 
 
-    /* package private */ void logNotification(AbstractCloudMessage message, String type, int actionId, boolean startSession) {
-        lastPushMessage = message;
+    /* package private */ void logNotification(AbstractCloudMessage message, String type, int actionId, boolean startSession, String appState) {
         if (mConfigManager.getSendOoEvents()) {
             if (startSession){
                 ensureActiveSession();
             }
-            mMessageManager.logNotification(mSessionID, mSessionStartTime, message, type, actionId);
+            mMessageManager.logNotification(mSessionID, mSessionStartTime, message, type, actionId, appState);
         }
     }
 
@@ -1598,6 +1596,10 @@ public class MParticle {
      */
     public MParticleInternal internal() {
         return mInternal;
+    }
+
+    public void saveGcmMessage(MPCloudNotificationMessage cloudMessage) {
+        mMessageManager.saveGcmMessage(cloudMessage);
     }
 
     /**
@@ -1895,10 +1897,6 @@ public class MParticle {
             return mSessionID;
         }
 
-        public boolean getIsAppRunning() {
-            return appRunning;
-        }
-
         public void logUnhandledError(Throwable t) {
             if (mConfigManager.getSendOoEvents()) {
                 ensureActiveSession();
@@ -1952,7 +1950,6 @@ public class MParticle {
                 mMessageManager.logStateTransition(transitionType,
                         mSessionID,
                         mSessionStartTime,
-                        lastPushMessage,
                         currentActivity,
                         dataString,
                         launchParameters,
@@ -1961,9 +1958,6 @@ public class MParticle {
                         suspendedTime,
                         interruptions
                 );
-                if (Constants.StateTransitionType.STATE_TRANS_BG.equals(transitionType)) {
-                    lastPushMessage = null;
-                }
             }
         }
 

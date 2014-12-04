@@ -85,7 +85,7 @@ public class PushRegistrationHelper {
     }
 
     /**
-     * Stores the registration ID and app versionCode in the application's
+     * Stores the registration ID and app versionCode in the application's6
      * {@code SharedPreferences}.
      *
      * @param regId   registration ID

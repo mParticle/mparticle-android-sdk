@@ -46,6 +46,15 @@ class MPMessage extends JSONObject{
         }
     }
 
+    public long getTimestamp(){
+        try {
+            return getLong(Constants.MessageKey.TIMESTAMP);
+        }catch (JSONException jse){
+
+        }
+        return 0;
+    }
+
     public String getSessionId() {
         if (Constants.MessageType.SESSION_START.equals(getMessageType())) {
             return optString(Constants.MessageKey.ID, Constants.NO_SESSION_ID);

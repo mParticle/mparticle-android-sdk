@@ -75,11 +75,13 @@ public class MPReceiver extends BroadcastReceiver {
                 if (!onNotificationTapped(message, action)){
                     MPService.runIntentInService(context, intent);
                 }
+                return;
             } else if (MParticlePushUtility.BROADCAST_NOTIFICATION_RECEIVED.equalsIgnoreCase(intent.getAction())){
                 AbstractCloudMessage message = intent.getParcelableExtra(MParticlePushUtility.CLOUD_MESSAGE_EXTRA);
                 if (!onNotificationReceived(message)){
                     MPService.runIntentInService(context, intent);
                 }
+                return;
             } else {
                 MPService.runIntentInService(context, intent);
             }

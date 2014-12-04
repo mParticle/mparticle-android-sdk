@@ -105,7 +105,7 @@ public class MessageManager implements MessageManagerCallbacks {
 
         if (!sFirstRun) {
             mMessageHandler.sendEmptyMessage(MessageHandler.END_ORPHAN_SESSIONS);
-           // mUploadHandler.sendEmptyMessageDelayed(UploadHandler.CLEANUP, Constants.INITIAL_UPLOAD_DELAY);
+            // mUploadHandler.sendEmptyMessageDelayed(UploadHandler.CLEANUP, Constants.INITIAL_UPLOAD_DELAY);
         }else{
             boolean installDetected = !MParticle.InstallType.KnownUpgrade.equals(mInstallType) &&
                     (MParticle.InstallType.KnownInstall.equals(mInstallType) ||
@@ -263,6 +263,7 @@ public class MessageManager implements MessageManagerCallbacks {
     public void logEvent(String sessionId, long sessionStartTime, long time, String eventName, EventType eventType, JSONObject attributes, long eventLength, String currentActivity) {
         try {
             MPMessage message = new MPMessage.Builder(MessageType.EVENT, sessionId, mLocation)
+                    .name(eventName)
                     .sessionStartTime(sessionStartTime)
                     .timestamp(time)
                     .attributes(attributes)
@@ -310,9 +311,9 @@ public class MessageManager implements MessageManagerCallbacks {
     public void logBreadcrumb(String sessionId, long sessionStartTime, long time, String breadcrumb) {
         try {
             MPMessage message = new MPMessage.Builder(MessageType.BREADCRUMB, sessionId, mLocation)
-                                        .sessionStartTime(sessionStartTime)
-                                        .timestamp(time)
-                                        .build();
+                    .sessionStartTime(sessionStartTime)
+                    .timestamp(time)
+                    .build();
             // NOTE: event timing is not supported (yet) but the server expects this data
             message.put(MessageKey.EVENT_START_TIME, time);
             message.put(MessageKey.BREADCRUMB_SESSION_COUNTER, getCurrentSessionCounter());
@@ -403,6 +404,7 @@ public class MessageManager implements MessageManagerCallbacks {
             message.put(MessageKey.PUSH_TOKEN, token);
             message.put(MessageKey.PUSH_TOKEN_TYPE, "google");
             message.put(MessageKey.PUSH_REGISTER_FLAG, registeringFlag);
+
             mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
         } catch (JSONException e) {
             ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to create mParticle push registration message");
@@ -430,7 +432,7 @@ public class MessageManager implements MessageManagerCallbacks {
         ConfigManager.log(MParticle.LogLevel.DEBUG, "Received location update: " + location);
     }
 
-    public void logStateTransition(String stateTransInit, String sessionId, long sessionStartTime, AbstractCloudMessage lastPushMessage, String currentActivity,
+    public void logStateTransition(String stateTransInit, String sessionId, long sessionStartTime, String currentActivity,
                                    String launchUri, String launchExtras, String launchSourcePackage, long previousForegroundTime, long suspendedTime, int interruptions) {
         try {
             MPMessage message = new MPMessage.Builder(MessageType.APP_STATE_TRANSITION, sessionId, mLocation)
@@ -457,7 +459,7 @@ public class MessageManager implements MessageManagerCallbacks {
                 if (interruptions >= 0){
                     message.put(MessageKey.ST_INTERRUPTIONS, interruptions);
                 }
-
+                mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.MARK_INFLUENCE_OPEN_GCM, message.getTimestamp()));
             }
 
             if (stateTransInit.equals(Constants.StateTransitionType.STATE_TRANS_INIT)){
@@ -480,15 +482,13 @@ public class MessageManager implements MessageManagerCallbacks {
                 boolean installDetected = (mInstallType == MParticle.InstallType.AutoDetect && autoDetectInstall());
 
                 boolean globalUpgrade = upgrade ||
-                                (mInstallType == MParticle.InstallType.KnownUpgrade ||
-                                        !installDetected);
+                        (mInstallType == MParticle.InstallType.KnownUpgrade ||
+                                !installDetected);
 
                 message.put(MessageKey.APP_INIT_FIRST_RUN, sFirstRun);
                 message.put(MessageKey.APP_INIT_UPGRADE, globalUpgrade);
             }
-            if (lastPushMessage != null){
-               message.put(MessageKey.PAYLOAD, lastPushMessage.getRedactedJsonPayload().toString());
-            }
+
             mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
         } catch (JSONException e) {
             ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to create mParticle state transition message");
@@ -521,7 +521,7 @@ public class MessageManager implements MessageManagerCallbacks {
         return true;
     }
 
-    public void logNotification(String sessionId, long sessionStartTime, AbstractCloudMessage cloudMessage, String type, int actionId) {
+    public void logNotification(String sessionId, long sessionStartTime, AbstractCloudMessage cloudMessage, String type, int actionId, String appState) {
         try{
             MPMessage message = new MPMessage.Builder(MessageType.PUSH_RECEIVED, sessionId, mLocation)
                     .sessionStartTime(sessionStartTime)
@@ -539,11 +539,9 @@ public class MessageManager implements MessageManagerCallbacks {
             if ((regId != null) && (regId.length() > 0)) {
                 message.put(MessageKey.PUSH_TOKEN, regId);
             }
-            message.put(MessageKey.APP_STATE, cloudMessage.getAppState());
+            message.put(MessageKey.APP_STATE, appState);
             mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
-            if (cloudMessage instanceof MPCloudNotificationMessage) {
-                mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_GCM_MESSAGE, cloudMessage));
-            }
+
         }catch (JSONException e) {
 
         }
@@ -645,6 +643,10 @@ public class MessageManager implements MessageManagerCallbacks {
 
     public void refreshConfiguration() {
         mUploadHandler.sendEmptyMessage(UploadHandler.UPDATE_CONFIG);
+    }
+
+    public void saveGcmMessage(MPCloudNotificationMessage cloudMessage) {
+        mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_GCM_MESSAGE, cloudMessage));
     }
 
     private class StatusBroadcastReceiver extends BroadcastReceiver {

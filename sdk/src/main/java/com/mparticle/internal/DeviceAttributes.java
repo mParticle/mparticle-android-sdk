@@ -141,6 +141,7 @@ import java.util.TimeZone;
             attributes.put(MessageKey.MODEL, android.os.Build.MODEL);
             attributes.put(MessageKey.RELEASE_VERSION, Build.VERSION.RELEASE);
 
+
             JSONObject rootedObject = new JSONObject();
             rootedObject.put(MessageKey.DEVICE_ROOTED_CYDIA, MPUtility.isPhoneRooted());
             attributes.put(MessageKey.DEVICE_ROOTED, rootedObject);

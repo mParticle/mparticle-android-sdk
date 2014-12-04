@@ -107,7 +107,7 @@ public class MPService extends IntentService {
                 params[0].addBehavior(AbstractCloudMessage.FLAG_DISPLAYED);
                 Notification notification =  params[0].buildNotification(MPService.this, System.currentTimeMillis());
 
-                MParticle.getInstance().logNotification(params[0], Constants.Push.MESSAGE_TYPE_RECEIVED, 0, false);
+                MParticle.getInstance().logNotification(params[0], Constants.Push.MESSAGE_TYPE_RECEIVED, 0, false, getAppState());
                 return notification;
             }
 
@@ -146,6 +146,18 @@ public class MPService extends IntentService {
         }
     }
 
+    private String getAppState(){
+        String appState = AppStateManager.APP_STATE_NOTRUNNING;
+        if (MParticle.appRunning) {
+            if (MParticle.getInstance().mAppStateManager.isBackgrounded()) {
+                appState = AppStateManager.APP_STATE_BACKGROUND;
+            } else {
+                appState = AppStateManager.APP_STATE_FOREGROUND;
+            }
+        }
+        return appState;
+    }
+
     private void handleNotificationTapInternal(Intent intent) {
         AbstractCloudMessage message = intent.getParcelableExtra(MParticlePushUtility.CLOUD_MESSAGE_EXTRA);
         CloudAction action = intent.getParcelableExtra(MParticlePushUtility.CLOUD_ACTION_EXTRA);
@@ -154,16 +166,18 @@ public class MPService extends IntentService {
                 (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         mNotifyMgr.cancel(message.getId());
 
+
+
         message.addBehavior(AbstractCloudMessage.FLAG_READ);
         message.addBehavior(AbstractCloudMessage.FLAG_DIRECT_OPEN);
         MParticle.getInstance().logNotification(message,
                 action.getActionId() > 0 ? Constants.Push.MESSAGE_TYPE_RECEIVED : Constants.Push.MESSAGE_TYPE_ACTION,
-                action.getActionId(), true);
+                action.getActionId(), true, getAppState());
 
         Intent broadcast = new Intent(MParticlePushUtility.BROADCAST_NOTIFICATION_TAPPED);
         broadcast.putExtra(MParticlePushUtility.CLOUD_MESSAGE_EXTRA, message);
         broadcast.putExtra(MParticlePushUtility.CLOUD_ACTION_EXTRA, action);
-        sendOrderedBroadcast(broadcast, null);
+        sendBroadcast(broadcast, getApplicationContext().getPackageName() + ".mparticle.permission.NOTIFICATIONS");
     }
 
     private void handleRegistration(Intent intent) {
@@ -190,24 +204,19 @@ public class MPService extends IntentService {
 
     private void generateCloudMessage(Intent intent) {
         if (!MPCloudBackgroundMessage.processSilentPush(this, intent.getExtras())){
-            String appState = AppStateManager.APP_STATE_NOTRUNNING;
-            if (MParticle.appRunning) {
-                if (MParticle.getInstance().mAppStateManager.isBackgrounded()) {
-                    appState = AppStateManager.APP_STATE_BACKGROUND;
-                } else {
-                    appState = AppStateManager.APP_STATE_FOREGROUND;
-                }
-            }
             try {
                 AbstractCloudMessage cloudMessage = AbstractCloudMessage.createMessage(intent, ConfigManager.getPushKeys(this));
-                cloudMessage.setAppState(appState);
-                cloudMessage.setBehavior(AbstractCloudMessage.FLAG_RECEIVED);
+                String appState = getAppState();
 
+                if (cloudMessage instanceof MPCloudNotificationMessage){
+                    MParticle.start(this);
+                    MParticle.getInstance().saveGcmMessage(((MPCloudNotificationMessage)cloudMessage));
+                }
 
                 if (cloudMessage instanceof MPCloudNotificationMessage && (((MPCloudNotificationMessage)cloudMessage).isDelayed())) {
                     //only log received at this point if it's delayed, since we also log when the notification (delayed or not) is displayed
                     MParticle.start(this);
-                    MParticle.getInstance().logNotification(cloudMessage, Constants.Push.MESSAGE_TYPE_RECEIVED, 0, false);
+                    MParticle.getInstance().logNotification(cloudMessage, Constants.Push.MESSAGE_TYPE_RECEIVED, 0, false, appState);
                     scheduleFutureNotification((MPCloudNotificationMessage) cloudMessage);
                 }else {
                     broadcastNotificationReceived(cloudMessage);

@@ -24,6 +24,7 @@ public class ProviderCloudMessage extends AbstractCloudMessage {
 
     public ProviderCloudMessage(Bundle extras, JSONArray pushKeys) {
         super(extras);
+        addBehavior(AbstractCloudMessage.FLAG_DISPLAYED);
         mPrimaryText = findProviderMessage(pushKeys);
     }
 
