@@ -28,11 +28,11 @@ import java.util.Set;
  */
 public abstract class AbstractCloudMessage implements Parcelable {
 
-    public static final int FLAG_RECEIVED = 0x00000001;
-    public static final int FLAG_DIRECT_OPEN = 0x00000010;
-    public static final int FLAG_READ = 0x00001000;
-    public static final int FLAG_INFLUENCE_OPEN = 0x00010000;
-    public static final int FLAG_DISPLAYED = 0x00100000;
+    public static final int FLAG_RECEIVED = 1 << 0;
+    public static final int FLAG_DIRECT_OPEN = 1 << 1;
+    public static final int FLAG_READ = 1 << 2;
+    public static final int FLAG_INFLUENCE_OPEN = 1 << 3;
+    public static final int FLAG_DISPLAYED = 1 << 4;
 
     private long mActualDeliveryTime = 0;
     protected Bundle mExtras;
