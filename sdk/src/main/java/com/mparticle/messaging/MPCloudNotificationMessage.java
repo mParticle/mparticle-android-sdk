@@ -404,18 +404,19 @@ public class MPCloudNotificationMessage extends AbstractCloudMessage {
                 style.setBigContentTitle(bigContentTitle);
             }
             notification.setStyle(style);
-        } else if (!TextUtils.isEmpty(getBigText())) {
-            NotificationCompat.BigTextStyle style = new NotificationCompat.BigTextStyle().bigText(getBigText());
-
-            if (!TextUtils.isEmpty(bigContentTitle)) {
-                style.setBigContentTitle(bigContentTitle);
-            }
-            notification.setStyle(style);
         } else if (inboxLines != null && inboxLines.size() > 0) {
             NotificationCompat.InboxStyle style = new NotificationCompat.InboxStyle();
             for (String line : inboxLines){
                 style.addLine(line);
             }
+
+            if (!TextUtils.isEmpty(bigContentTitle)) {
+                style.setBigContentTitle(bigContentTitle);
+            }
+            notification.setStyle(style);
+        } else {
+            String bigText = getBigText();
+            NotificationCompat.BigTextStyle style = new NotificationCompat.BigTextStyle().bigText(TextUtils.isEmpty(bigText) ? getPrimaryText(context) : bigText);
 
             if (!TextUtils.isEmpty(bigContentTitle)) {
                 style.setBigContentTitle(bigContentTitle);
