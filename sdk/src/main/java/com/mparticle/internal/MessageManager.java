@@ -14,6 +14,7 @@ import android.net.NetworkInfo;
 import android.os.BatteryManager;
 import android.os.Bundle;
 import android.os.HandlerThread;
+import android.os.Message;
 import android.os.Process;
 
 import com.mparticle.MPUnityException;
@@ -521,7 +522,7 @@ public class MessageManager implements MessageManagerCallbacks {
         return true;
     }
 
-    public void logNotification(String sessionId, long sessionStartTime, AbstractCloudMessage cloudMessage, String type, int actionId, String appState) {
+    public void logNotification(String sessionId, long sessionStartTime, String payload, String contentId, String type, String actionId, String appState, int newBehavior) {
         try{
             MPMessage message = new MPMessage.Builder(MessageType.PUSH_RECEIVED, sessionId, mLocation)
                     .sessionStartTime(sessionStartTime)
@@ -529,10 +530,11 @@ public class MessageManager implements MessageManagerCallbacks {
                     .name("gcm")
                     .build();
 
-            message.put(MessageKey.PAYLOAD, cloudMessage.getRedactedJsonPayload().toString());
+            message.put(MessageKey.PAYLOAD, payload);
             message.put(MessageKey.PUSH_TYPE, type);
-            message.put(MessageKey.PUSH_BEHAVIOR, cloudMessage.getBehavior());
-            if (type.equals(Constants.Push.MESSAGE_TYPE_ACTION) && actionId > 0) {
+            message.put(MessageKey.PUSH_BEHAVIOR, newBehavior);
+            message.put(MParticleDatabase.GcmMessageTable.CONTENT_ID, contentId);
+            if (type.equals(Constants.Push.MESSAGE_TYPE_ACTION) && actionId != null && !actionId.equals(contentId)) {
                 message.put(MessageKey.PUSH_ACTION_TAKEN, actionId);
             }
             String regId = PushRegistrationHelper.getRegistrationId(mContext);
@@ -645,8 +647,12 @@ public class MessageManager implements MessageManagerCallbacks {
         mUploadHandler.sendEmptyMessage(UploadHandler.UPDATE_CONFIG);
     }
 
-    public void saveGcmMessage(MPCloudNotificationMessage cloudMessage) {
-        mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_GCM_MESSAGE, cloudMessage));
+    public void saveGcmMessage(MPCloudNotificationMessage cloudMessage, String appState) {
+        Message message = mMessageHandler.obtainMessage(MessageHandler.STORE_GCM_MESSAGE, cloudMessage);
+        Bundle data = new Bundle();
+        data.putString(MParticleDatabase.GcmMessageTable.APPSTATE, appState);
+        message.setData(data);
+        mMessageHandler.sendMessage(message);
     }
 
     private class StatusBroadcastReceiver extends BroadcastReceiver {

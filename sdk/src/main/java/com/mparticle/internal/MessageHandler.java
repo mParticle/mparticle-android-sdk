@@ -4,6 +4,7 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -15,6 +16,7 @@ import com.mparticle.internal.Constants.Status;
 import com.mparticle.internal.MParticleDatabase.BreadcrumbTable;
 import com.mparticle.internal.MParticleDatabase.MessageTable;
 import com.mparticle.internal.MParticleDatabase.SessionTable;
+import com.mparticle.messaging.AbstractCloudMessage;
 import com.mparticle.messaging.MPCloudNotificationMessage;
 
 import org.json.JSONArray;
@@ -67,6 +69,9 @@ import org.json.JSONObject;
                     }
                     if (MessageType.APP_STATE_TRANSITION == messageType){
                         appendLatestPushNotification(message);
+                    }
+                    if (MessageType.PUSH_RECEIVED == messageType){
+                        validateBehaviorFlags(message);
                     }
                     dbInsertMessage(message);
 
@@ -194,7 +199,7 @@ import org.json.JSONObject;
             case STORE_GCM_MESSAGE:
                 try {
                     MPCloudNotificationMessage message = (MPCloudNotificationMessage) msg.obj;
-                    dbUpdateGcmMessage(message);
+                    dbInsertGcmMessage(message, msg.getData().getString(MParticleDatabase.GcmMessageTable.APPSTATE));
                 } catch (SQLiteException e) {
                     ConfigManager.log(MParticle.LogLevel.ERROR, e, "Error saving GCM message to mParticle DB");
                 } catch (JSONException e) {
@@ -204,26 +209,102 @@ import org.json.JSONObject;
                 }
                 break;
             case MARK_INFLUENCE_OPEN_GCM:
-               // long openTimestamp = (long) msg.obj;
-                markGcmMessages(0);
+               long openTimestamp = (Long) msg.obj;
+                logInfluenceOpenGcmMessages(openTimestamp);
                 break;
         }
         mIsProcessingMessage = false;
     }
 
-    private void markGcmMessages(long openTimestamp) {
+    private void validateBehaviorFlags(MPMessage message) {
         Cursor gcmCursor = null;
-        try{
-            long influenceOpenTimeout = MParticle.getInstance().internal().getConfigurationManager().getInfluenceOpenTimeout();
+        int newBehavior = message.optInt(MessageKey.PUSH_BEHAVIOR);
+        try {
+            ConfigManager.log(MParticle.LogLevel.DEBUG, "Validating GCM behaviors...");
+            String[] args = {message.getString(MParticleDatabase.GcmMessageTable.CONTENT_ID)};
             gcmCursor = db.query(MParticleDatabase.GcmMessageTable.TABLE_NAME,
                     gcmColumns,
-                    MParticleDatabase.GcmMessageTable.DISPLAYED_AT + " > 0 and " + MParticleDatabase.GcmMessageTable.DISPLAYED_AT + " > " + (openTimestamp - influenceOpenTimeout),
+                    MParticleDatabase.GcmMessageTable.CONTENT_ID + " =?",
+                    args,
+                    null,
+                    null,
+                    null);
+            int updatedBehaviors = 0;
+            long timestamp = 0;
+            if (gcmCursor.moveToFirst()) {
+                int currentBehaviors = gcmCursor.getInt(gcmCursor.getColumnIndex(MParticleDatabase.GcmMessageTable.BEHAVIOR));
+                gcmCursor.close();
+                if (((newBehavior & AbstractCloudMessage.FLAG_DIRECT_OPEN) == AbstractCloudMessage.FLAG_DIRECT_OPEN) &&
+                        ((currentBehaviors & AbstractCloudMessage.FLAG_INFLUENCE_OPEN) == AbstractCloudMessage.FLAG_INFLUENCE_OPEN)) {
+                    newBehavior &= ~AbstractCloudMessage.FLAG_DIRECT_OPEN;
+                }else if (((newBehavior & AbstractCloudMessage.FLAG_INFLUENCE_OPEN) == AbstractCloudMessage.FLAG_INFLUENCE_OPEN) &&
+                        ((currentBehaviors & AbstractCloudMessage.FLAG_DIRECT_OPEN) == AbstractCloudMessage.FLAG_DIRECT_OPEN)) {
+                    newBehavior &= ~AbstractCloudMessage.FLAG_INFLUENCE_OPEN;
+                }
+
+                updatedBehaviors = currentBehaviors | newBehavior;
+
+                if (((newBehavior & AbstractCloudMessage.FLAG_DISPLAYED) == AbstractCloudMessage.FLAG_DISPLAYED) &&
+                        ((currentBehaviors & AbstractCloudMessage.FLAG_DISPLAYED) != AbstractCloudMessage.FLAG_DISPLAYED)){
+                    timestamp = message.getTimestamp();
+                }
+
+                if (updatedBehaviors != currentBehaviors) {
+                    message.put(MessageKey.PUSH_BEHAVIOR, updatedBehaviors);
+                    ContentValues values = new ContentValues();
+                    values.put(MParticleDatabase.GcmMessageTable.BEHAVIOR, updatedBehaviors);
+                    if (timestamp > 0){
+                        values.put(MParticleDatabase.GcmMessageTable.DISPLAYED_AT, timestamp);
+                    }
+                    int updated = db.update(MParticleDatabase.GcmMessageTable.TABLE_NAME, values, MParticleDatabase.GcmMessageTable.CONTENT_ID + " =?", args);
+                    if (updated > 0) {
+                        ConfigManager.log(MParticle.LogLevel.DEBUG, "Updated GCM with content ID: " + message.getString(MParticleDatabase.GcmMessageTable.CONTENT_ID) + " and behavior: " + Integer.toHexString(updatedBehaviors));
+                    }
+                }
+            }
+        } catch (Exception e) {
+            ConfigManager.log(MParticle.LogLevel.DEBUG, e, "Failed to update GCM message.");
+        }finally {
+            if (gcmCursor != null && !gcmCursor.isClosed()){
+                gcmCursor.close();
+            }
+        }
+
+    }
+
+
+
+    private void logInfluenceOpenGcmMessages(long openTimestamp) {
+        Cursor gcmCursor = null;
+        try{
+            long influenceOpenTimeout = MParticle.getInstance().internal().getConfigurationManager().getInfluenceOpenTimeout() * 1000;
+            gcmCursor = db.query(MParticleDatabase.GcmMessageTable.TABLE_NAME,
+                    gcmColumns,
+                    MParticleDatabase.GcmMessageTable.DISPLAYED_AT +
+                            " > 0 and " +
+                            MParticleDatabase.GcmMessageTable.DISPLAYED_AT +
+                            " > " + (openTimestamp - influenceOpenTimeout) +
+                            " and ((" + MParticleDatabase.GcmMessageTable.BEHAVIOR + " & " + AbstractCloudMessage.FLAG_INFLUENCE_OPEN + "" + ") != " + AbstractCloudMessage.FLAG_INFLUENCE_OPEN + ")",
                     null,
                     null,
                     null,
-                    MParticleDatabase.GcmMessageTable.DISPLAYED_AT + " desc limit 1");
+                    null);
+            while (gcmCursor.moveToNext()){
+                MParticle.getInstance().internal().logNotification(gcmCursor.getString(gcmCursor.getColumnIndex(MParticleDatabase.GcmMessageTable.PAYLOAD)),
+                        gcmCursor.getString(gcmCursor.getColumnIndex(MParticleDatabase.GcmMessageTable.CONTENT_ID)),
+                        Constants.Push.MESSAGE_TYPE_RECEIVED,
+                        "",
+                        true,
+                        gcmCursor.getString(gcmCursor.getColumnIndex(MParticleDatabase.GcmMessageTable.APPSTATE)),
+                        gcmCursor.getInt(gcmCursor.getColumnIndex(MParticleDatabase.GcmMessageTable.BEHAVIOR)) | AbstractCloudMessage.FLAG_INFLUENCE_OPEN
+                        );
+            }
         }catch (Exception e){
 
+        }finally {
+            if (gcmCursor != null && !gcmCursor.isClosed()){
+                gcmCursor.close();
+            }
         }
     }
 
@@ -251,7 +332,8 @@ import org.json.JSONObject;
     }
 
     private static final String[] gcmColumns = {
-            MParticleDatabase.GcmMessageTable.PAYLOAD
+            MParticleDatabase.GcmMessageTable.PAYLOAD,
+            MParticleDatabase.GcmMessageTable.BEHAVIOR
     };
 
     private static final String[] breadcrumbColumns = {
@@ -300,15 +382,17 @@ import org.json.JSONObject;
         }
     }
 
-    private void dbUpdateGcmMessage(MPCloudNotificationMessage message) throws JSONException {
+    private void dbInsertGcmMessage(MPCloudNotificationMessage message, String appState) throws JSONException {
         ContentValues contentValues = new ContentValues();
         contentValues.put(MParticleDatabase.GcmMessageTable.CONTENT_ID, message.getContentId());
         contentValues.put(MParticleDatabase.GcmMessageTable.CAMPAIGN_ID, message.getCampaignId());
         contentValues.put(MParticleDatabase.GcmMessageTable.EXPIRATION, message.getExpiration());
         contentValues.put(MParticleDatabase.GcmMessageTable.PAYLOAD, message.getRedactedJsonPayload().toString());
-        contentValues.put(MParticleDatabase.GcmMessageTable.BEHAVIOR_FLAGS, message.getBehavior());
+        contentValues.put(MParticleDatabase.GcmMessageTable.BEHAVIOR, AbstractCloudMessage.FLAG_RECEIVED);
         contentValues.put(MParticleDatabase.GcmMessageTable.CREATED_AT, System.currentTimeMillis());
         contentValues.put(MParticleDatabase.GcmMessageTable.DISPLAYED_AT, message.getActualDeliveryTime());
+        contentValues.put(MParticleDatabase.GcmMessageTable.APPSTATE, appState);
+
         db.replace(MParticleDatabase.GcmMessageTable.TABLE_NAME, null, contentValues);
     }
 

@@ -79,8 +79,6 @@ public class MPCloudNotificationMessage extends AbstractCloudMessage {
 
     private final static String LOCAL_DELIVERY_TIME = "m_ldt";
 
-
-
     private final static String GROUP = "m_g";
     private final static String INAPP_MESSAGE_THEME = "m_iamt";
 
@@ -99,21 +97,21 @@ public class MPCloudNotificationMessage extends AbstractCloudMessage {
         mActions = new CloudAction[3];
         if (mExtras.containsKey(ACTION_1_ID)){
             mActions[0] = new CloudAction(
-                    Integer.parseInt(mExtras.getString(ACTION_1_ID)),
+                    mExtras.getString(ACTION_1_ID),
                     mExtras.getString(ACTION_1_ICON),
                     mExtras.getString(ACTION_1_TITLE),
                     mExtras.getString(ACTION_1_ACTIVITY));
         }
         if (mExtras.containsKey(ACTION_2_ID)){
             mActions[1] = new CloudAction(
-                    Integer.parseInt(mExtras.getString(ACTION_2_ID)),
+                    mExtras.getString(ACTION_2_ID),
                     mExtras.getString(ACTION_2_ICON),
                     mExtras.getString(ACTION_2_TITLE),
                     mExtras.getString(ACTION_2_ACTIVITY));
         }
         if (mExtras.containsKey(ACTION_3_ID)){
             mActions[2] = new CloudAction(
-                    Integer.parseInt(mExtras.getString(ACTION_3_ID)),
+                    mExtras.getString(ACTION_3_ID),
                     mExtras.getString(ACTION_3_ICON),
                     mExtras.getString(ACTION_3_TITLE),
                     mExtras.getString(ACTION_3_ACTIVITY));
@@ -151,7 +149,7 @@ public class MPCloudNotificationMessage extends AbstractCloudMessage {
     }
 
     @Override
-    public int getId() {
+    public String getId() {
         return getContentId();
     }
 
@@ -454,8 +452,8 @@ public class MPCloudNotificationMessage extends AbstractCloudMessage {
     }
 
 
-    public int getContentId() {
-        return Integer.parseInt(mExtras.getString(CONTENT_ID));
+    public String getContentId() {
+        return mExtras.getString(CONTENT_ID);
     }
 
     public int getCampaignId() {

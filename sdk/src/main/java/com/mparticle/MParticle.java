@@ -99,7 +99,6 @@ import com.mparticle.internal.Constants.*;
  */
 public class MParticle {
 
-
     static boolean appRunning;
     final ConfigManager mConfigManager;
     final AppStateManager mAppStateManager;
@@ -1522,14 +1521,7 @@ public class MParticle {
     }
 
 
-    /* package private */ void logNotification(AbstractCloudMessage message, String type, int actionId, boolean startSession, String appState) {
-        if (mConfigManager.getSendOoEvents()) {
-            if (startSession){
-                ensureActiveSession();
-            }
-            mMessageManager.logNotification(mSessionID, mSessionStartTime, message, type, actionId, appState);
-        }
-    }
+
 
     /**
      * Set the resource ID of the icon to be shown in the notification bar when a notification is received.
@@ -1598,8 +1590,8 @@ public class MParticle {
         return mInternal;
     }
 
-    public void saveGcmMessage(MPCloudNotificationMessage cloudMessage) {
-        mMessageManager.saveGcmMessage(cloudMessage);
+    void saveGcmMessage(MPCloudNotificationMessage cloudMessage, String appState) {
+        mMessageManager.saveGcmMessage(cloudMessage, appState);
     }
 
     /**
@@ -1995,6 +1987,19 @@ public class MParticle {
         public void refreshConfiguration() {
             ConfigManager.log(LogLevel.DEBUG, "Refreshing configuration...");
             mMessageManager.refreshConfiguration();
+        }
+
+        public void logNotification(AbstractCloudMessage message, String type, String actionId, boolean startSession, String appState, int behavior) {
+            logNotification(message.getRedactedJsonPayload().toString(), message.getId(), type, actionId, startSession, appState, behavior);
+        }
+
+        public void logNotification(String payload, String contentId, String type, String actionId, boolean startSession, String appState, int behavior) {
+            if (mConfigManager.getSendOoEvents()) {
+                if (startSession){
+                    ensureActiveSession();
+                }
+                mMessageManager.logNotification(mSessionID, mSessionStartTime, payload, contentId, type, actionId, appState, behavior);
+            }
         }
 
     }

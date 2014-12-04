@@ -41,6 +41,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 import java.util.TreeMap;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.jar.JarFile;
 
@@ -269,7 +270,7 @@ public class MPUtility {
         } catch (Exception localException) {
         }
         if (localTreeMap.size() == 0) {
-            sBuildUUID = "";
+            sBuildUUID = UUID.randomUUID().toString();
         } else {
             byte[] arrayOfByte = new byte[16];
             int i = 0;

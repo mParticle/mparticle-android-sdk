@@ -36,11 +36,9 @@ public abstract class AbstractCloudMessage implements Parcelable {
 
     private long mActualDeliveryTime = 0;
     protected Bundle mExtras;
-    private int mBehavior = FLAG_RECEIVED;
 
     public AbstractCloudMessage(Parcel pc) {
         mExtras = pc.readBundle();
-        mBehavior = pc.readInt();
         mActualDeliveryTime = pc.readLong();
     }
 
@@ -56,14 +54,6 @@ public abstract class AbstractCloudMessage implements Parcelable {
     }
 
     protected abstract Notification buildNotification(Context context);
-
-    public void addBehavior(int behavior){
-        mBehavior |= behavior;
-    }
-
-    public int getBehavior() {
-        return mBehavior;
-    }
 
     protected Intent getDefaultOpenIntent(Context context, AbstractCloudMessage message) {
         PackageManager pm = context.getPackageManager();
@@ -92,11 +82,10 @@ public abstract class AbstractCloudMessage implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeBundle(mExtras);
-        dest.writeInt(mBehavior);
         dest.writeLong(mActualDeliveryTime);
     }
 
-    public abstract int getId();
+    public abstract String getId();
 
     public abstract JSONObject getRedactedJsonPayload();
 
@@ -106,13 +95,12 @@ public abstract class AbstractCloudMessage implements Parcelable {
         intent.putExtra(MParticlePushUtility.CLOUD_MESSAGE_EXTRA, message);
         intent.putExtra(MParticlePushUtility.CLOUD_ACTION_EXTRA, action);
 
-        return PendingIntent.getService(context, action.getActionId(), intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        return PendingIntent.getService(context, action.getActionId().hashCode(), intent, PendingIntent.FLAG_UPDATE_CURRENT);
     }
 
     public boolean shouldDisplay(){
         return true;
     }
-
 
     public long getActualDeliveryTime() {
         return mActualDeliveryTime;

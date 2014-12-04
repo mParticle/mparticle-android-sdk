@@ -24,7 +24,6 @@ public class ProviderCloudMessage extends AbstractCloudMessage {
 
     public ProviderCloudMessage(Bundle extras, JSONArray pushKeys) {
         super(extras);
-        addBehavior(AbstractCloudMessage.FLAG_DISPLAYED);
         mPrimaryText = findProviderMessage(pushKeys);
     }
 
@@ -35,7 +34,7 @@ public class ProviderCloudMessage extends AbstractCloudMessage {
 
     @Override
     protected CloudAction getDefaultAction() {
-        return new CloudAction(0, null, mPrimaryText, null);
+        return new CloudAction(getId(), null, mPrimaryText, null);
     }
 
     @Override
@@ -64,8 +63,8 @@ public class ProviderCloudMessage extends AbstractCloudMessage {
 
 
     @Override
-    public int getId() {
-        return mPrimaryText.hashCode();
+    public String getId() {
+        return Integer.toString(mPrimaryText.hashCode());
     }
 
     @Override

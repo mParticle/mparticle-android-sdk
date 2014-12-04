@@ -128,17 +128,19 @@ import android.provider.BaseColumns;
         public final static String CREATED_AT = "message_time";
         public final static String DISPLAYED_AT = "displayed_time";
         public final static String EXPIRATION = "expiration";
-        public final static String BEHAVIOR_FLAGS = "behaviors";
+        public final static String BEHAVIOR = "behavior";
+        public final static String APPSTATE = "appstate";
     }
 
     private static final String CREATE_GCM_MSG_DDL =
             "CREATE TABLE IF NOT EXISTS " + GcmMessageTable.TABLE_NAME + " (" + GcmMessageTable.CONTENT_ID +
-                    " INTEGER PRIMARY KEY, " +
+                    " TEXT PRIMARY KEY, " +
                     GcmMessageTable.PAYLOAD + " TEXT NOT NULL, " +
+                    GcmMessageTable.APPSTATE + " TEXT NOT NULL, " +
                     GcmMessageTable.CREATED_AT + " INTEGER NOT NULL, " +
                     GcmMessageTable.EXPIRATION + " INTEGER NOT NULL, " +
-                    GcmMessageTable.BEHAVIOR_FLAGS + " INTEGER NOT NULL," +
-                    GcmMessageTable.CAMPAIGN_ID + " INTEGER NOT NULL, " +
+                    GcmMessageTable.BEHAVIOR + " INTEGER NOT NULL," +
+                    GcmMessageTable.CAMPAIGN_ID + " TEXT NOT NULL, " +
                     GcmMessageTable.DISPLAYED_AT + " INTEGER NOT NULL" +
                     ");";
 

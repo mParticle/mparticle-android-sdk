@@ -96,7 +96,6 @@ public class MPService extends IntentService {
     }
 
     private void showNotification(final AbstractCloudMessage message) {
-
         final boolean isNetworkingEnabled = ConfigManager.isNetworkPerformanceEnabled();
         if (isNetworkingEnabled){
             ConfigManager.setNetworkingEnabled(false);
@@ -104,10 +103,9 @@ public class MPService extends IntentService {
         (new AsyncTask<AbstractCloudMessage, Void, Notification>() {
             @Override
             protected Notification doInBackground(AbstractCloudMessage... params) {
-                params[0].addBehavior(AbstractCloudMessage.FLAG_DISPLAYED);
                 Notification notification =  params[0].buildNotification(MPService.this, System.currentTimeMillis());
 
-                MParticle.getInstance().logNotification(params[0], Constants.Push.MESSAGE_TYPE_RECEIVED, 0, false, getAppState());
+                MParticle.getInstance().internal().logNotification(params[0], Constants.Push.MESSAGE_TYPE_RECEIVED, null, false, getAppState(), AbstractCloudMessage.FLAG_RECEIVED | AbstractCloudMessage.FLAG_DISPLAYED);
                 return notification;
             }
 
@@ -117,7 +115,7 @@ public class MPService extends IntentService {
                 if (notification != null) {
                     NotificationManager mNotifyMgr =
                             (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-                    mNotifyMgr.notify(message.getId(), notification);
+                    mNotifyMgr.notify(message.getId().hashCode(), notification);
                 }
 
                 if (isNetworkingEnabled){
@@ -164,15 +162,11 @@ public class MPService extends IntentService {
 
         NotificationManager mNotifyMgr =
                 (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-        mNotifyMgr.cancel(message.getId());
+        mNotifyMgr.cancel(message.getId().hashCode());
 
-
-
-        message.addBehavior(AbstractCloudMessage.FLAG_READ);
-        message.addBehavior(AbstractCloudMessage.FLAG_DIRECT_OPEN);
-        MParticle.getInstance().logNotification(message,
-                action.getActionId() > 0 ? Constants.Push.MESSAGE_TYPE_RECEIVED : Constants.Push.MESSAGE_TYPE_ACTION,
-                action.getActionId(), true, getAppState());
+        MParticle.getInstance().internal().logNotification(message,
+                action.getActionId().equals(message.getId()) ? Constants.Push.MESSAGE_TYPE_RECEIVED : Constants.Push.MESSAGE_TYPE_ACTION,
+                action.getActionId(), true, getAppState(), AbstractCloudMessage.FLAG_RECEIVED | AbstractCloudMessage.FLAG_READ | AbstractCloudMessage.FLAG_DIRECT_OPEN);
 
         Intent broadcast = new Intent(MParticlePushUtility.BROADCAST_NOTIFICATION_TAPPED);
         broadcast.putExtra(MParticlePushUtility.CLOUD_MESSAGE_EXTRA, message);
@@ -210,13 +204,13 @@ public class MPService extends IntentService {
 
                 if (cloudMessage instanceof MPCloudNotificationMessage){
                     MParticle.start(this);
-                    MParticle.getInstance().saveGcmMessage(((MPCloudNotificationMessage)cloudMessage));
+                    MParticle.getInstance().saveGcmMessage(((MPCloudNotificationMessage)cloudMessage), appState);
                 }
 
                 if (cloudMessage instanceof MPCloudNotificationMessage && (((MPCloudNotificationMessage)cloudMessage).isDelayed())) {
                     //only log received at this point if it's delayed, since we also log when the notification (delayed or not) is displayed
                     MParticle.start(this);
-                    MParticle.getInstance().logNotification(cloudMessage, Constants.Push.MESSAGE_TYPE_RECEIVED, 0, false, appState);
+                    MParticle.getInstance().internal().logNotification(cloudMessage, Constants.Push.MESSAGE_TYPE_RECEIVED, null, false, appState, AbstractCloudMessage.FLAG_RECEIVED);
                     scheduleFutureNotification((MPCloudNotificationMessage) cloudMessage);
                 }else {
                     broadcastNotificationReceived(cloudMessage);
@@ -234,7 +228,7 @@ public class MPService extends IntentService {
         intent.setClass(this, MPService.class);
         intent.putExtra(MParticlePushUtility.CLOUD_MESSAGE_EXTRA, message);
 
-        PendingIntent pIntent = PendingIntent.getService(this, message.getId(), intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent pIntent = PendingIntent.getService(this, message.getId().hashCode(), intent, PendingIntent.FLAG_UPDATE_CURRENT);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT){
             alarmService.setExact(AlarmManager.RTC, message.getDeliveryTime(), pIntent);
         }else{
