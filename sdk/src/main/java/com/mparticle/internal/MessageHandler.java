@@ -223,7 +223,7 @@ import org.json.JSONObject;
             ConfigManager.log(MParticle.LogLevel.DEBUG, "Validating GCM behaviors...");
             String[] args = {message.getString(MParticleDatabase.GcmMessageTable.CONTENT_ID)};
             gcmCursor = db.query(MParticleDatabase.GcmMessageTable.TABLE_NAME,
-                    gcmColumns,
+                    null,
                     MParticleDatabase.GcmMessageTable.CONTENT_ID + " =?",
                     args,
                     null,
@@ -272,14 +272,12 @@ import org.json.JSONObject;
 
     }
 
-
-
     private void logInfluenceOpenGcmMessages(long openTimestamp) {
         Cursor gcmCursor = null;
         try{
             long influenceOpenTimeout = MParticle.getInstance().internal().getConfigurationManager().getInfluenceOpenTimeout() * 1000;
             gcmCursor = db.query(MParticleDatabase.GcmMessageTable.TABLE_NAME,
-                    gcmColumns,
+                    null,
                     MParticleDatabase.GcmMessageTable.DISPLAYED_AT +
                             " > 0 and " +
                             MParticleDatabase.GcmMessageTable.DISPLAYED_AT +
@@ -312,7 +310,7 @@ import org.json.JSONObject;
         Cursor pushCursor = null;
         try {
             pushCursor = db.query(MParticleDatabase.GcmMessageTable.TABLE_NAME,
-                    gcmColumns,
+                    null,
                     MParticleDatabase.GcmMessageTable.DISPLAYED_AT + " > 0",
                     null,
                     null,
@@ -330,11 +328,6 @@ import org.json.JSONObject;
             }
         }
     }
-
-    private static final String[] gcmColumns = {
-            MParticleDatabase.GcmMessageTable.PAYLOAD,
-            MParticleDatabase.GcmMessageTable.BEHAVIOR
-    };
 
     private static final String[] breadcrumbColumns = {
             BreadcrumbTable.CREATED_AT,

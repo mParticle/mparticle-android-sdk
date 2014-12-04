@@ -106,7 +106,7 @@ public class MParticle {
     final EmbeddedKitManager mEmbeddedKitManager;
 
     private JSONArray mUserIdentities = new JSONArray();
-    private String mSessionID;
+    private String mSessionID = Constants.NO_SESSION_ID;
 
     private JSONObject mUserAttributes = new JSONObject();
     private JSONObject mSessionAttributes;
