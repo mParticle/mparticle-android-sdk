@@ -147,7 +147,7 @@ public class MPService extends IntentService {
 
     private String getAppState(){
         String appState = AppStateManager.APP_STATE_NOTRUNNING;
-        if (MParticle.appRunning) {
+        if (AppStateManager.appRunning) {
             if (MParticle.getInstance().mAppStateManager.isBackgrounded()) {
                 appState = AppStateManager.APP_STATE_BACKGROUND;
             } else {
@@ -165,6 +165,7 @@ public class MPService extends IntentService {
                 (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         mNotifyMgr.cancel(message.getId().hashCode());
 
+        MParticle.start(getApplicationContext());
         MParticle.getInstance().internal().logNotification(message,
                 action.getActionId().equals(message.getId()) ? Constants.Push.MESSAGE_TYPE_RECEIVED : Constants.Push.MESSAGE_TYPE_ACTION,
                 action.getActionId(), true, getAppState(), AbstractCloudMessage.FLAG_RECEIVED | AbstractCloudMessage.FLAG_READ | AbstractCloudMessage.FLAG_DIRECT_OPEN);

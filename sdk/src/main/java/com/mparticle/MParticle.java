@@ -99,7 +99,6 @@ import com.mparticle.internal.Constants.*;
  */
 public class MParticle {
 
-    static boolean appRunning;
     final ConfigManager mConfigManager;
     final AppStateManager mAppStateManager;
     final MeasuredRequestManager measuredRequestManager;
@@ -130,7 +129,7 @@ public class MParticle {
 
 
     MParticle(Context context, MessageManager messageManager, ConfigManager configManager, EmbeddedKitManager embeddedKitManager) {
-        appRunning = true;
+
         mConfigManager = configManager;
         mAppContext = context.getApplicationContext();
         mApiKey = mConfigManager.getApiKey();

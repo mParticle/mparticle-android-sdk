@@ -48,6 +48,7 @@ public class AppStateManager implements MPActivityCallbacks{
     //starts again, so don't declared that we're backgrounded immediately.
     private static final long ACTIVITY_DELAY = 1000;
     private long mLastForegroundTime;
+    public static boolean appRunning = false;
 
     public AppStateManager(Context context, EmbeddedKitManager embeddedKitManager) {
         mContext = context.getApplicationContext();
@@ -68,7 +69,7 @@ public class AppStateManager implements MPActivityCallbacks{
     }
     @Override
     public void onActivityStarted(Activity activity, int currentCount) {
-
+        appRunning = true;
         mPreferences.edit().putBoolean(Constants.PrefKeys.CRASHED_IN_FOREGROUND, true).commit();
         mCurrentActivity = AppStateManager.getActivityName(activity);
 
