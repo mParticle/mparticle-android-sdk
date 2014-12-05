@@ -6,6 +6,7 @@ import android.os.Build;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Base64;
+import android.util.Log;
 
 import com.mparticle.BuildConfig;
 import com.mparticle.MParticle;
@@ -60,6 +61,8 @@ class MParticleApiClient {
 
     private static final String API_HOST = TextUtils.isEmpty(BuildConfig.MP_URL) ? "nativesdks.mparticle.com" : BuildConfig.MP_URL;
     private static final String CONFIG_HOST = TextUtils.isEmpty(BuildConfig.MP_CONFIG_URL) ? "config2.mparticle.com" : BuildConfig.MP_CONFIG_URL;
+
+    private static boolean DEBUGGING = !TextUtils.isEmpty(BuildConfig.MP_URL) && BuildConfig.MP_URL.equals("api-qa.mparticle.com");
 
     private static final String SERVICE_VERSION_1 = "/v1";
     private static final String SERVICE_VERSION_3 = "/v3";
@@ -161,6 +164,15 @@ class MParticleApiClient {
     ApiResponse sendMessageBatch(String message) throws IOException, MPThrottleException, MPRampException {
         checkThrottleTime();
         checkRampValue();
+
+        if (DEBUGGING){
+            try{
+                JSONObject messageJson = new JSONObject(message);
+                Log.d("mParticle API request", messageJson.toString(4));
+            }catch (Exception e){
+
+            }
+        }
 
         byte[] messageBytes = message.getBytes();
         // POST message to mParticle service
