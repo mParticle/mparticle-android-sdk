@@ -115,6 +115,7 @@ public class MPService extends IntentService {
                 if (notification != null) {
                     NotificationManager mNotifyMgr =
                             (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+                    mNotifyMgr.cancel(message.getId().hashCode());
                     mNotifyMgr.notify(message.getId().hashCode(), notification);
                 }
 
