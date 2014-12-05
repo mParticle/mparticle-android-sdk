@@ -95,21 +95,24 @@ public class MPCloudNotificationMessage extends AbstractCloudMessage {
         super(extras);
 
         mActions = new CloudAction[3];
-        if (mExtras.containsKey(ACTION_1_ID)){
+        if (mExtras.containsKey(ACTION_1_ICON) ||
+                mExtras.containsKey(ACTION_1_TITLE)){
             mActions[0] = new CloudAction(
                     mExtras.getString(ACTION_1_ID),
                     mExtras.getString(ACTION_1_ICON),
                     mExtras.getString(ACTION_1_TITLE),
                     mExtras.getString(ACTION_1_ACTIVITY));
         }
-        if (mExtras.containsKey(ACTION_2_ID)){
+        if (mExtras.containsKey(ACTION_2_ICON) ||
+                mExtras.containsKey(ACTION_2_TITLE)){
             mActions[1] = new CloudAction(
                     mExtras.getString(ACTION_2_ID),
                     mExtras.getString(ACTION_2_ICON),
                     mExtras.getString(ACTION_2_TITLE),
                     mExtras.getString(ACTION_2_ACTIVITY));
         }
-        if (mExtras.containsKey(ACTION_3_ID)){
+        if (mExtras.containsKey(ACTION_3_ICON) ||
+                mExtras.containsKey(ACTION_3_TITLE)){
             mActions[2] = new CloudAction(
                     mExtras.getString(ACTION_3_ID),
                     mExtras.getString(ACTION_3_ICON),
