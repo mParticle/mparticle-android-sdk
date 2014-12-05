@@ -11,6 +11,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Build;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.PowerManager;
 import android.util.Log;
 
@@ -34,6 +36,20 @@ import com.mparticle.messaging.MPCloudNotificationMessage;
  */
 @SuppressLint("Registered")
 public class MPService extends IntentService {
+
+    { // http://stackoverflow.com/questions/4280330/onpostexecute-not-being-called-in-asynctask-handler-runtime-exception
+        Looper looper = Looper.getMainLooper();
+        Handler handler = new Handler(looper);
+        handler.post(new Runnable() {
+            public void run() {
+                try {
+                    Class.forName("android.os.AsyncTask");
+                } catch (ClassNotFoundException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+    }
 
     private static final String TAG = Constants.LOG_TAG;
     public static final String MPARTICLE_NOTIFICATION_OPENED = "com.mparticle.push.notification_opened";
@@ -157,23 +173,7 @@ public class MPService extends IntentService {
         return appState;
     }
 
-    private void handleNotificationTapInternal(Intent intent) {
-        AbstractCloudMessage message = intent.getParcelableExtra(MParticlePushUtility.CLOUD_MESSAGE_EXTRA);
-        CloudAction action = intent.getParcelableExtra(MParticlePushUtility.CLOUD_ACTION_EXTRA);
 
-        NotificationManager mNotifyMgr =
-                (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-        mNotifyMgr.cancel(message.getId().hashCode());
-
-        MParticle.start(getApplicationContext());
-        MParticle.getInstance().internal().logNotification(message,
-                action, true, getAppState(), AbstractCloudMessage.FLAG_RECEIVED | AbstractCloudMessage.FLAG_READ | AbstractCloudMessage.FLAG_DIRECT_OPEN);
-
-        Intent broadcast = new Intent(MParticlePushUtility.BROADCAST_NOTIFICATION_TAPPED);
-        broadcast.putExtra(MParticlePushUtility.CLOUD_MESSAGE_EXTRA, message);
-        broadcast.putExtra(MParticlePushUtility.CLOUD_ACTION_EXTRA, action);
-        sendBroadcast(broadcast, getApplicationContext().getPackageName() + ".mparticle.permission.NOTIFICATIONS");
-    }
 
     private void handleRegistration(Intent intent) {
         try {
@@ -238,8 +238,54 @@ public class MPService extends IntentService {
     }
 
     private void broadcastNotificationReceived(AbstractCloudMessage message) {
-        Intent intent = new Intent(MParticlePushUtility.BROADCAST_NOTIFICATION_RECEIVED);
-        intent.putExtra(MParticlePushUtility.CLOUD_MESSAGE_EXTRA, message);
-        sendBroadcast(intent, getApplicationContext().getPackageName() + ".mparticle.permission.NOTIFICATIONS");
+        if (!onNotificationReceived(message)){
+            Intent intent = new Intent(MParticlePushUtility.BROADCAST_NOTIFICATION_RECEIVED);
+            intent.putExtra(MParticlePushUtility.CLOUD_MESSAGE_EXTRA, message);
+            intent.addCategory(getPackageName());
+            onHandleIntent(intent);
+        }
+    }
+
+    private void handleNotificationTapInternal(Intent intent) {
+        AbstractCloudMessage message = intent.getParcelableExtra(MParticlePushUtility.CLOUD_MESSAGE_EXTRA);
+        CloudAction action = intent.getParcelableExtra(MParticlePushUtility.CLOUD_ACTION_EXTRA);
+
+        NotificationManager mNotifyMgr =
+                (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        mNotifyMgr.cancel(message.getId().hashCode());
+
+        MParticle.start(getApplicationContext());
+        MParticle.getInstance().internal().logNotification(message,
+                action, true, getAppState(), AbstractCloudMessage.FLAG_RECEIVED | AbstractCloudMessage.FLAG_READ | AbstractCloudMessage.FLAG_DIRECT_OPEN);
+
+        if (!onNotificationTapped(message, action)){
+            Intent broadcast = new Intent(MParticlePushUtility.BROADCAST_NOTIFICATION_TAPPED);
+            broadcast.putExtra(MParticlePushUtility.CLOUD_MESSAGE_EXTRA, message);
+            broadcast.putExtra(MParticlePushUtility.CLOUD_ACTION_EXTRA, action);
+            onHandleIntent(broadcast);
+        }
+    }
+
+    /**
+     * Override this method to listen for when a notification has been received.
+     *
+     *
+     * @param message The message that was received. Depending on the push provider, could be either a {@link com.mparticle.messaging.MPCloudNotificationMessage} or a {@link com.mparticle.messaging.ProviderCloudMessage}
+     * @return True if you would like to handle this notification, False if you would like the mParticle to generate and show a {@link android.app.Notification}.
+     */
+    protected boolean onNotificationReceived(AbstractCloudMessage message){
+        return false;
+    }
+
+    /**
+     * Override this method to listen for when a notification has been tapped or acted on.
+     *
+     *
+     * @param message The message that was tapped. Depending on the push provider, could be either a {@link com.mparticle.messaging.MPCloudNotificationMessage} or a {@link com.mparticle.messaging.ProviderCloudMessage}
+     * @param action The action that the user acted on.
+     * @return True if you would like to consume this tap/action, False if the mParticle SDK should attempt to handle it.
+     */
+    protected boolean onNotificationTapped(AbstractCloudMessage message, CloudAction action){
+        return false;
     }
 }
