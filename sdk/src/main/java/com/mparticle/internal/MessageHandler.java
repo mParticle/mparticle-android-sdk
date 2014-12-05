@@ -290,8 +290,7 @@ import org.json.JSONObject;
             while (gcmCursor.moveToNext()){
                 MParticle.getInstance().internal().logNotification(gcmCursor.getString(gcmCursor.getColumnIndex(MParticleDatabase.GcmMessageTable.PAYLOAD)),
                         gcmCursor.getString(gcmCursor.getColumnIndex(MParticleDatabase.GcmMessageTable.CONTENT_ID)),
-                        Constants.Push.MESSAGE_TYPE_RECEIVED,
-                        "",
+                        null,
                         true,
                         gcmCursor.getString(gcmCursor.getColumnIndex(MParticleDatabase.GcmMessageTable.APPSTATE)),
                         gcmCursor.getInt(gcmCursor.getColumnIndex(MParticleDatabase.GcmMessageTable.BEHAVIOR)) | AbstractCloudMessage.FLAG_INFLUENCE_OPEN

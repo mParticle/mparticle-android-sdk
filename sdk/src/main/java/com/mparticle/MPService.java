@@ -105,7 +105,7 @@ public class MPService extends IntentService {
             protected Notification doInBackground(AbstractCloudMessage... params) {
                 Notification notification =  params[0].buildNotification(MPService.this, System.currentTimeMillis());
 
-                MParticle.getInstance().internal().logNotification(params[0], Constants.Push.MESSAGE_TYPE_RECEIVED, null, false, getAppState(), AbstractCloudMessage.FLAG_RECEIVED | AbstractCloudMessage.FLAG_DISPLAYED);
+                MParticle.getInstance().internal().logNotification(params[0], null, false, getAppState(), AbstractCloudMessage.FLAG_RECEIVED | AbstractCloudMessage.FLAG_DISPLAYED);
                 return notification;
             }
 
@@ -167,8 +167,7 @@ public class MPService extends IntentService {
 
         MParticle.start(getApplicationContext());
         MParticle.getInstance().internal().logNotification(message,
-                action.getActionId().equals(message.getId()) ? Constants.Push.MESSAGE_TYPE_RECEIVED : Constants.Push.MESSAGE_TYPE_ACTION,
-                action.getActionId(), true, getAppState(), AbstractCloudMessage.FLAG_RECEIVED | AbstractCloudMessage.FLAG_READ | AbstractCloudMessage.FLAG_DIRECT_OPEN);
+                action, true, getAppState(), AbstractCloudMessage.FLAG_RECEIVED | AbstractCloudMessage.FLAG_READ | AbstractCloudMessage.FLAG_DIRECT_OPEN);
 
         Intent broadcast = new Intent(MParticlePushUtility.BROADCAST_NOTIFICATION_TAPPED);
         broadcast.putExtra(MParticlePushUtility.CLOUD_MESSAGE_EXTRA, message);
@@ -212,7 +211,7 @@ public class MPService extends IntentService {
                 if (cloudMessage instanceof MPCloudNotificationMessage && (((MPCloudNotificationMessage)cloudMessage).isDelayed())) {
                     //only log received at this point if it's delayed, since we also log when the notification (delayed or not) is displayed
                     MParticle.start(this);
-                    MParticle.getInstance().internal().logNotification(cloudMessage, Constants.Push.MESSAGE_TYPE_RECEIVED, null, false, appState, AbstractCloudMessage.FLAG_RECEIVED);
+                    MParticle.getInstance().internal().logNotification(cloudMessage, null, false, appState, AbstractCloudMessage.FLAG_RECEIVED);
                     scheduleFutureNotification((MPCloudNotificationMessage) cloudMessage);
                 }else {
                     broadcastNotificationReceived(cloudMessage);

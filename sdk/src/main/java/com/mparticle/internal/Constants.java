@@ -211,6 +211,7 @@ public class Constants {
         public static final String PUSH_TYPE = "t";
         public static final String PUSH_BEHAVIOR = "bhv";
         public static final String PUSH_ACTION_TAKEN = "aid";
+        public static final String PUSH_ACTION_NAME = "an";
 
 
         public static final String ST_LAUNCH_REFERRER = "lr";

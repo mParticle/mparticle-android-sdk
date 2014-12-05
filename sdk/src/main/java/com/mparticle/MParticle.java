@@ -44,6 +44,7 @@ import com.mparticle.licensing.LicenseCheckerCallback;
 import com.mparticle.licensing.Policy;
 import com.mparticle.licensing.ServerManagedPolicy;
 
+import com.mparticle.messaging.CloudAction;
 import com.mparticle.messaging.MPCloudNotificationMessage;
 import com.mparticle.segmentation.SegmentListener;
 
@@ -1988,16 +1989,16 @@ public class MParticle {
             mMessageManager.refreshConfiguration();
         }
 
-        public void logNotification(AbstractCloudMessage message, String type, String actionId, boolean startSession, String appState, int behavior) {
-            logNotification(message.getRedactedJsonPayload().toString(), message.getId(), type, actionId, startSession, appState, behavior);
+        public void logNotification(AbstractCloudMessage message, CloudAction action, boolean startSession, String appState, int behavior) {
+            logNotification(message.getRedactedJsonPayload().toString(), message.getId(), action, startSession, appState, behavior);
         }
 
-        public void logNotification(String payload, String contentId, String type, String actionId, boolean startSession, String appState, int behavior) {
+        public void logNotification(String payload, String contentId, CloudAction action, boolean startSession, String appState, int behavior) {
             if (mConfigManager.getSendOoEvents()) {
                 if (startSession){
                     ensureActiveSession();
                 }
-                mMessageManager.logNotification(mSessionID, mSessionStartTime, payload, contentId, type, actionId, appState, behavior);
+                mMessageManager.logNotification(mSessionID, mSessionStartTime, payload, contentId, action, appState, behavior);
             }
         }
 

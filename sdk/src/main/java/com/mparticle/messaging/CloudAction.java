@@ -99,6 +99,10 @@ public class CloudAction implements Parcelable {
         }
     };
 
+    public String getIconId(){
+        return mActionIcon;
+    }
+
     public int getIconId(Context context) {
         if (!TextUtils.isEmpty(mActionIcon)) {
             int id = context.getResources().getIdentifier(mActionIcon, "drawable", context.getPackageName());
@@ -109,7 +113,7 @@ public class CloudAction implements Parcelable {
         return 0;
     }
 
-    public CharSequence getTitle() {
+    public String getTitle() {
         return mActionTitle;
     }
 
