@@ -10,6 +10,8 @@ import android.text.TextUtils;
 import com.mparticle.MPService;
 import com.mparticle.MParticlePushUtility;
 
+import java.util.UUID;
+
 /**
  * Represents a tappable action to be associated with an {@link MPCloudNotificationMessage}
  */
@@ -21,10 +23,22 @@ public class CloudAction implements Parcelable {
     private final String mActionActivity;
 
     public CloudAction(String actionId, String actionIcon, String actionTitle, String actionActivity) {
-        mActionId = actionId;
+
         mActionIcon = actionIcon;
         mActionTitle = actionTitle;
         mActionActivity = actionActivity;
+
+        if (actionId == null){
+            if (!TextUtils.isEmpty(mActionTitle)){
+                mActionId = mActionTitle;
+            }else if (!TextUtils.isEmpty(mActionIcon)){
+                mActionId = mActionIcon;
+            }else{
+                mActionId = UUID.randomUUID().toString();
+            }
+        }else{
+            mActionId = actionId;
+        }
     }
 
     public CloudAction(Parcel source) {
