@@ -3,7 +3,6 @@
 
     <application>
         <service android:name="com.kahuna.sdk.KahunaPushService" />
-        <service android:name="com.mparticle.MPService"/>
     </application>
 
     <uses-permission android:name="android.permission.INTERNET" />

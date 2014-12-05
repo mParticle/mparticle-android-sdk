@@ -9,6 +9,7 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ResolveInfo;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Handler;
@@ -23,6 +24,8 @@ import com.mparticle.messaging.AbstractCloudMessage;
 import com.mparticle.messaging.CloudAction;
 import com.mparticle.messaging.MPCloudBackgroundMessage;
 import com.mparticle.messaging.MPCloudNotificationMessage;
+
+import java.util.List;
 
 /**
  * {@code IntentService } used internally by the SDK to process incoming broadcast messages in the background. Required for push notification functionality.
@@ -238,10 +241,14 @@ public class MPService extends IntentService {
     }
 
     private void broadcastNotificationReceived(AbstractCloudMessage message) {
-        if (!onNotificationReceived(message)){
-            Intent intent = new Intent(MParticlePushUtility.BROADCAST_NOTIFICATION_RECEIVED);
-            intent.putExtra(MParticlePushUtility.CLOUD_MESSAGE_EXTRA, message);
-            intent.addCategory(getPackageName());
+        Intent intent = new Intent(MParticlePushUtility.BROADCAST_NOTIFICATION_RECEIVED);
+        intent.putExtra(MParticlePushUtility.CLOUD_MESSAGE_EXTRA, message);
+        intent.addCategory(getPackageName());
+
+        List<ResolveInfo> result = getPackageManager().queryBroadcastReceivers(intent, 0);
+        if (result != null && result.size() > 0){
+            sendBroadcast(intent, "com.mparticle.permission.push");
+        } else {
             onHandleIntent(intent);
         }
     }
@@ -258,34 +265,16 @@ public class MPService extends IntentService {
         MParticle.getInstance().internal().logNotification(message,
                 action, true, getAppState(), AbstractCloudMessage.FLAG_RECEIVED | AbstractCloudMessage.FLAG_READ | AbstractCloudMessage.FLAG_DIRECT_OPEN);
 
-        if (!onNotificationTapped(message, action)){
-            Intent broadcast = new Intent(MParticlePushUtility.BROADCAST_NOTIFICATION_TAPPED);
-            broadcast.putExtra(MParticlePushUtility.CLOUD_MESSAGE_EXTRA, message);
-            broadcast.putExtra(MParticlePushUtility.CLOUD_ACTION_EXTRA, action);
+        Intent broadcast = new Intent(MParticlePushUtility.BROADCAST_NOTIFICATION_TAPPED);
+        broadcast.putExtra(MParticlePushUtility.CLOUD_MESSAGE_EXTRA, message);
+        broadcast.putExtra(MParticlePushUtility.CLOUD_ACTION_EXTRA, action);
+
+        List<ResolveInfo> result = getPackageManager().queryBroadcastReceivers(broadcast, 0);
+        if (result != null && result.size() > 0){
+            sendBroadcast(broadcast, "com.mparticle.permission.push");
+        } else {
             onHandleIntent(broadcast);
         }
     }
 
-    /**
-     * Override this method to listen for when a notification has been received.
-     *
-     *
-     * @param message The message that was received. Depending on the push provider, could be either a {@link com.mparticle.messaging.MPCloudNotificationMessage} or a {@link com.mparticle.messaging.ProviderCloudMessage}
-     * @return True if you would like to handle this notification, False if you would like the mParticle to generate and show a {@link android.app.Notification}.
-     */
-    protected boolean onNotificationReceived(AbstractCloudMessage message){
-        return false;
-    }
-
-    /**
-     * Override this method to listen for when a notification has been tapped or acted on.
-     *
-     *
-     * @param message The message that was tapped. Depending on the push provider, could be either a {@link com.mparticle.messaging.MPCloudNotificationMessage} or a {@link com.mparticle.messaging.ProviderCloudMessage}
-     * @param action The action that the user acted on.
-     * @return True if you would like to consume this tap/action, False if the mParticle SDK should attempt to handle it.
-     */
-    protected boolean onNotificationTapped(AbstractCloudMessage message, CloudAction action){
-        return false;
-    }
 }
