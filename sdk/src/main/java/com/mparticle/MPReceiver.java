@@ -5,6 +5,8 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Handler;
+import android.os.Looper;
 
 
 import com.mparticle.messaging.AbstractCloudMessage;
@@ -57,13 +59,27 @@ import com.mparticle.internal.Constants;
  */
 public class MPReceiver extends BroadcastReceiver {
 
+    { // http://stackoverflow.com/questions/4280330/onpostexecute-not-being-called-in-asynctask-handler-runtime-exception
+        Looper looper = Looper.getMainLooper();
+        Handler handler = new Handler(looper);
+        handler.post(new Runnable() {
+            public void run() {
+                try {
+                    Class.forName("android.os.AsyncTask");
+                } catch (ClassNotFoundException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+    }
+
     public static final String MPARTICLE_IGNORE = "mparticle_ignore";
 
     public MPReceiver() {
     }
 
     @Override
-    public void onReceive(Context context, Intent intent) {
+    public final void onReceive(Context context, Intent intent) {
         if (!MPARTICLE_IGNORE.equals(intent.getAction()) && !intent.getBooleanExtra(MPARTICLE_IGNORE, false)) {
             if ("com.android.vending.INSTALL_REFERRER".equals(intent.getAction())) {
                 String referrer = intent.getStringExtra("referrer");

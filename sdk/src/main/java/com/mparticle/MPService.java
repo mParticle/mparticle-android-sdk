@@ -257,9 +257,9 @@ public class MPService extends IntentService {
         AbstractCloudMessage message = intent.getParcelableExtra(MParticlePushUtility.CLOUD_MESSAGE_EXTRA);
         CloudAction action = intent.getParcelableExtra(MParticlePushUtility.CLOUD_ACTION_EXTRA);
 
-        NotificationManager mNotifyMgr =
+        NotificationManager manager =
                 (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-        mNotifyMgr.cancel(message.getId().hashCode());
+        manager.cancel(message.getId().hashCode());
 
         MParticle.start(getApplicationContext());
         MParticle.getInstance().internal().logNotification(message,
