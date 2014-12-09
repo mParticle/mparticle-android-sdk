@@ -133,7 +133,9 @@ public class ConfigManager {
         }
 
         if (responseJSON.has(KEY_INFLUENCE_OPEN)){
-            mInfluenceOpenTimeout = responseJSON.getLong(KEY_INFLUENCE_OPEN);
+            mInfluenceOpenTimeout = responseJSON.getLong(KEY_INFLUENCE_OPEN) * 60 * 1000;
+        }else{
+            mInfluenceOpenTimeout = 3600;
         }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD) {
@@ -151,7 +153,7 @@ public class ConfigManager {
         return mTriggerMessageMatches;
     }
 
-    public long getInfluenceOpenTimeout(){
+    public long getInfluenceOpenTimeoutMillis(){
         return mInfluenceOpenTimeout;
     }
 

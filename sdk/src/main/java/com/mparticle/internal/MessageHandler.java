@@ -275,7 +275,7 @@ import org.json.JSONObject;
     private void logInfluenceOpenGcmMessages(long openTimestamp) {
         Cursor gcmCursor = null;
         try{
-            long influenceOpenTimeout = MParticle.getInstance().internal().getConfigurationManager().getInfluenceOpenTimeout() * 1000;
+            long influenceOpenTimeout = MParticle.getInstance().internal().getConfigurationManager().getInfluenceOpenTimeoutMillis();
             gcmCursor = db.query(MParticleDatabase.GcmMessageTable.TABLE_NAME,
                     null,
                     MParticleDatabase.GcmMessageTable.DISPLAYED_AT +
