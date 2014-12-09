@@ -1,24 +1,16 @@
 package com.mparticle.internal;
 
-import android.app.PendingIntent;
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.os.AsyncTask;
 import android.os.Build;
 
-
 import com.google.android.gms.gcm.GoogleCloudMessaging;
+import com.mparticle.MParticle;
 
 import java.io.IOException;
 
-import com.mparticle.MParticle;
-
-/**
- * Created by sdozor on 1/23/14.
- */
 public class PushRegistrationHelper {
 
     /**

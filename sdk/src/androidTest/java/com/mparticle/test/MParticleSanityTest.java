@@ -4,9 +4,6 @@ import android.test.AndroidTestCase;
 
 import com.mparticle.MParticle;
 
-/**
- * Created by sdozor on 11/6/14.
- */
 public class MParticleSanityTest extends AndroidTestCase {
 
     @Override
@@ -19,11 +16,7 @@ public class MParticleSanityTest extends AndroidTestCase {
         }
     }
 
-<<<<<<< HEAD
     public void testSdkStarted() {
-=======
-    public void testSdkStart() {
->>>>>>> master
         MParticle instance = MParticle.getInstance();
         assertNotNull(instance);
     }

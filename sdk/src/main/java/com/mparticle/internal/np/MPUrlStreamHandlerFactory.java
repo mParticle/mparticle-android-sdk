@@ -3,9 +3,6 @@ package com.mparticle.internal.np;
 import java.net.URLStreamHandler;
 import java.net.URLStreamHandlerFactory;
 
-/**
- * Created by sdozor on 3/3/14.
- */
 public class MPUrlStreamHandlerFactory implements URLStreamHandlerFactory {
 
     @Override

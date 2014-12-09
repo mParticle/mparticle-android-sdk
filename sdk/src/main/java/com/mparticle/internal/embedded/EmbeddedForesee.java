@@ -17,9 +17,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.UUID;
 
-/**
- * Created by sdozor on 11/25/14.
- */
 class EmbeddedForesee extends EmbeddedProvider implements ISurveyProvider {
 
     public static final String ROOT_URL = "rootUrl";

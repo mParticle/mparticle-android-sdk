@@ -22,9 +22,6 @@ import org.json.JSONObject;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-/**
- * Created by sdozor on 1/15/14.
- */
 public class AppStateManager implements MPActivityCallbacks{
 
     public static final String APP_STATE_FOREGROUND = "foreground";

@@ -7,9 +7,6 @@ import org.json.JSONObject;
 
 import java.util.UUID;
 
-/**
- * Created by sdozor on 10/9/14.
- */
 class MPMessage extends JSONObject{
 
     private MPMessage(){}

@@ -6,9 +6,6 @@ import android.app.Application;
 import android.os.Build;
 import android.os.Bundle;
 
-/**
- * Created by sdozor on 9/23/14.
- */
 @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
 class MPLifecycleCallbackDelegate implements Application.ActivityLifecycleCallbacks {
     private AppStateManager mStateManager;

@@ -9,9 +9,6 @@ import java.net.Socket;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 
-/**
- * Created by sdozor on 3/4/14.
- */
 public final class MPSSLSocketFactory extends SSLSocketFactory {
     public SSLSocketFactory delegateFactory;
 

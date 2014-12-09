@@ -10,9 +10,6 @@ import org.json.JSONObject;
 
 import java.util.Map;
 
-/**
- * Created by sdozor on 3/14/14.
- */
 interface IEmbeddedKit {
     void logEvent(MParticle.EventType type, String name, Map<String, String> eventAttributes) throws Exception;
     void logTransaction(MPProduct transaction) throws Exception;

@@ -4,9 +4,6 @@ import android.test.AndroidTestCase;
 
 import com.mparticle.MPProduct;
 
-/**
- * Created by sdozor on 11/6/14.
- */
 public class MPProductTest extends AndroidTestCase {
 
     public void testBuilder(){

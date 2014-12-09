@@ -7,8 +7,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 /**
- * Created by sdozor on 3/4/14.
- *
  * This is a decorator around the given OutputStream (or OutputStream subclass).
  */
 final class MPOutputStream extends OutputStream {

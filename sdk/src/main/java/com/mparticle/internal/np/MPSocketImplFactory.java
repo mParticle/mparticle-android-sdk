@@ -6,9 +6,6 @@ import com.mparticle.internal.ConfigManager;
 import java.net.SocketImpl;
 import java.net.SocketImplFactory;
 
-/**
- * Created by sdozor on 2/4/14.
- */
 public final class MPSocketImplFactory implements SocketImplFactory {
     private Class socketClass;
 

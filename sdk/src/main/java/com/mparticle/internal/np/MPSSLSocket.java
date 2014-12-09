@@ -14,9 +14,6 @@ import javax.net.ssl.HandshakeCompletedListener;
 import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSocket;
 
-/**
- * Created by sdozor on 3/4/14.
- */
 final class MPSSLSocket extends SSLSocket {
     private final Queue requestQueue = new LinkedList();
     private SSLSocket localSocket;

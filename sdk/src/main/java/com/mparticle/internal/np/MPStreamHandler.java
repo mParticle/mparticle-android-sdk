@@ -8,9 +8,6 @@ import java.net.Proxy;
 import java.net.URL;
 import java.net.URLConnection;
 
-/**
- * Created by sdozor on 3/4/14.
- */
 final class MPStreamHandler extends MPAbstractStreamHandler {
     //these are the typical classes that Android uses for UrlConnections
     private static final String[] classes = {"libcore.net.http.HttpURLConnectionImpl",

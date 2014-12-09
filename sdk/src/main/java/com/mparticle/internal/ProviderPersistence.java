@@ -13,9 +13,6 @@ import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/**
- * Created by sdozor on 3/27/14.
- */
 class ProviderPersistence extends JSONObject{
 
     static final String KEY_PERSISTENCE = "cms";

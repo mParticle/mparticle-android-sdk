@@ -18,9 +18,6 @@ import java.net.URL;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Created by sdozor on 3/4/14.
- */
 final class MeasuredRequest {
     //max time to wait before logging this request
     //TODO: this could be set to the timeout of the given socket/connection

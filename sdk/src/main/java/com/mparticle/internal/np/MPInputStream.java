@@ -8,8 +8,6 @@ import java.io.IOException;
 import java.io.InputStream;
 
 /**
- * Created by sdozor on 3/4/14.
- *
  * This is a decorator around the given InputStream (or InputStream subclass).
  */
 final class MPInputStream extends InputStream {

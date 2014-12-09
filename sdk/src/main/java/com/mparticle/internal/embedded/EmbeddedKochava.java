@@ -16,9 +16,6 @@ import org.json.JSONObject;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Created by sdozor on 7/24/14.
- */
 class EmbeddedKochava extends EmbeddedProvider implements MPActivityCallbacks {
     private static final String APP_ID = "appId";
 

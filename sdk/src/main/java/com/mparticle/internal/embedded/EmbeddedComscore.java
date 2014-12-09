@@ -18,7 +18,6 @@ import java.util.Iterator;
 import java.util.Map;
 
 /**
- * Created by sdozor on 10/28/14.
  * <p/>
  * Embedded implementation of the Comscore SDK, tested against Comscore 2.14.0923.
  * <p/>

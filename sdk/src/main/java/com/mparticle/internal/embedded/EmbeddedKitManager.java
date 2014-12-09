@@ -23,9 +23,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-/**
- * Created by sdozor on 3/13/14.
- */
 public class EmbeddedKitManager implements IEmbeddedKit, MPActivityCallbacks {
     private ConcurrentHashMap<Integer,EmbeddedProvider> providers = new ConcurrentHashMap<Integer, EmbeddedProvider>(0);
 

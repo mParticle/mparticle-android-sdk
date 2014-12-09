@@ -49,9 +49,6 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManagerFactory;
 
-/**
- * Created by sdozor on 3/25/14.
- */
 class MParticleApiClient {
 
     private static final String HEADER_SIGNATURE = "x-mp-signature";

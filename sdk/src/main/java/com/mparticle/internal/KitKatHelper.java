@@ -5,9 +5,6 @@ import android.os.Build;
 
 import org.json.JSONArray;
 
-/**
- * Created by sdozor on 5/21/14.
- */
 @TargetApi(19)
 public class KitKatHelper {
     public static void remove(JSONArray array, int index){

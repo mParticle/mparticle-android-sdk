@@ -22,9 +22,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Iterator;
 
-/**
- * Created by sdozor on 1/16/14.
- */
 public class ConfigManager {
     public static final String CONFIG_JSON = "json";
     private static final String KEY_TRIGGER_ITEMS = "tri";

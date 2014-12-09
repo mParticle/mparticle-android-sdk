@@ -13,9 +13,6 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLStreamHandler;
 
-/**
- * Created by sdozor on 3/4/14.
- */
 abstract class MPAbstractStreamHandler extends URLStreamHandler {
     public static final String[] proxyOverloadSignature = {"java.net.URL", "int", "java.net.Proxy"};
     public static final String[] urlOverloadSignature = {"java.net.URL", "int"};

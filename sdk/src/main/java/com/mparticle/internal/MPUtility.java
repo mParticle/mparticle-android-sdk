@@ -45,10 +45,6 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.jar.JarFile;
 
-/**
- * Created by sdozor on 1/9/14.
- */
-
 public class MPUtility {
 
     static final String NO_BLUETOOTH = "none";

@@ -16,9 +16,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 
-/**
- * Created by sdozor on 3/13/14.
- */
 abstract class EmbeddedProvider implements IEmbeddedKit {
 
     final static String KEY_ID = "id";

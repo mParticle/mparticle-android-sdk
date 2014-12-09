@@ -9,9 +9,6 @@ import java.net.URLConnection;
 
 import javax.net.ssl.HttpsURLConnection;
 
-/**
- * Created by sdozor on 3/4/14.
- */
 final class MPSSLStreamHandler extends MPAbstractStreamHandler {
     //these are the typical classes that Android uses for UrlConnections
     private static final String[] classes = {"libcore.net.http.HttpsURLConnectionImpl",

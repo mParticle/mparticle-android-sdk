@@ -13,9 +13,6 @@ import java.net.SocketAddress;
 import java.net.SocketException;
 import java.net.SocketImpl;
 
-/**
- * Created by sdozor on 2/5/14.
- */
 final class MPSocketImpl extends SocketImpl {
     private static Field addressField;
     private static Field fileDescriptorField;

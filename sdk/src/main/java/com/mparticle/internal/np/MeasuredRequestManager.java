@@ -13,9 +13,6 @@ import java.util.concurrent.ScheduledFuture;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
 
-/**
- * Created by sdozor on 3/4/14.
- */
 public final class MeasuredRequestManager {
     private final ScheduledExecutorService scheduler =
             Executors.newScheduledThreadPool(1);

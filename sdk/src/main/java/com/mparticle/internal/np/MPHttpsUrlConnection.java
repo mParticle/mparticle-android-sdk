@@ -17,8 +17,6 @@ import javax.net.ssl.SSLPeerUnverifiedException;
 import javax.net.ssl.SSLSocketFactory;
 
 /**
- * Created by sdozor on 3/4/14.
- *
  * This a decorator around the given UrlConnection that handle parsing requests/responses in the
  * many methods that a developer can initiate a request.
  */

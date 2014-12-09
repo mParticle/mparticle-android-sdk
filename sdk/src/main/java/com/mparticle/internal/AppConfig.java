@@ -6,9 +6,6 @@ import android.util.Log;
 
 import com.mparticle.MParticle;
 
-/**
- * Created by sdozor on 1/21/14.
- */
 class AppConfig {
     public static final String PREFKEY_API_KEY = "mp_key";
     public static final String PREFKEY_API_SECRET = "mp_secret";
