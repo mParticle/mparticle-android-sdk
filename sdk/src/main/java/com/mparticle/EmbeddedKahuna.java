@@ -33,7 +33,7 @@ class EmbeddedKahuna extends EmbeddedProvider implements MPActivityCallbacks {
     private static final String KEY_SECRET_KEY = "secretKey";
     private boolean sendTransactionData = false;
 
-    public EmbeddedKahuna(Context context) throws ClassNotFoundException {
+    public EmbeddedKahuna(Context context) {
         super(context);
     }
 

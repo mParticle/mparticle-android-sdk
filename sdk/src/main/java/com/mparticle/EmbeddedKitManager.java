@@ -49,8 +49,6 @@ class EmbeddedKitManager implements IEmbeddedKit, MPActivityCallbacks{
                     }
                 } catch (JSONException jse) {
                     ConfigManager.log(MParticle.LogLevel.ERROR, "Exception while parsing embedded kit configuration: " + jse.getMessage());
-                } catch (ClassNotFoundException cnfe) {
-                    //this should already be logged in the EmbeddedProvider, but I want to bubble up the exception.
                 } catch (Exception e) {
                     ConfigManager.log(MParticle.LogLevel.ERROR, "Exception while started embedded kit: " + e.getMessage());
                 }

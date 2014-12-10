@@ -30,68 +30,8 @@ class EmbeddedAdjust extends EmbeddedProvider implements MPActivityCallbacks {
 
     boolean initialized = false;
 
-    EmbeddedAdjust(Context context) throws ClassNotFoundException {
+    EmbeddedAdjust(Context context) {
         super(context);
-    }
-
-    @Override
-    public void logEvent(MParticle.EventType type, String name, Map<String, String> eventAttributes) {
-
-    }
-
-    @Override
-    public void logTransaction(MPProduct transaction) {
-
-    }
-
-    @Override
-    public void logScreen(String screenName, Map<String, String> eventAttributes) throws Exception {
-
-    }
-
-    @Override
-    public void setLocation(Location location) {
-
-    }
-
-    @Override
-    public void setUserAttributes(JSONObject mUserAttributes) {
-
-    }
-
-    @Override
-    public void removeUserAttribute(String key) {
-        //MAT doesn't really support this...all of their attributes are primitives/non-nulls.
-    }
-
-    @Override
-    public void setUserIdentity(String id, MParticle.IdentityType identityType) {
-
-    }
-
-    @Override
-    public void logout() {
-        //no matching MAT feature
-    }
-
-    @Override
-    public void removeUserIdentity(String id) {
-
-    }
-
-    @Override
-    public void handleIntent(Intent intent) {
-
-    }
-
-    @Override
-    public void startSession() {
-
-    }
-
-    @Override
-    public void endSession() {
-
     }
 
     private void initAdjust(){
@@ -149,12 +89,44 @@ class EmbeddedAdjust extends EmbeddedProvider implements MPActivityCallbacks {
     }
 
     @Override
-    public void onActivityStopped(Activity activity, int currentCount) {
-
-    }
+    public void onActivityStopped(Activity activity, int currentCount) {}
 
     @Override
-    public void onActivityStarted(Activity activity, int currentCount) {
+    public void onActivityStarted(Activity activity, int currentCount) {}
 
-    }
+    @Override
+    public void logEvent(MParticle.EventType type, String name, Map<String, String> eventAttributes) {}
+
+    @Override
+    public void logTransaction(MPProduct transaction) {}
+
+    @Override
+    public void logScreen(String screenName, Map<String, String> eventAttributes) throws Exception {}
+
+    @Override
+    public void setLocation(Location location) {}
+
+    @Override
+    public void setUserAttributes(JSONObject mUserAttributes) {}
+
+    @Override
+    public void removeUserAttribute(String key) {}
+
+    @Override
+    public void setUserIdentity(String id, MParticle.IdentityType identityType) {}
+
+    @Override
+    public void logout() {}
+
+    @Override
+    public void removeUserIdentity(String id) {}
+
+    @Override
+    public void handleIntent(Intent intent) {}
+
+    @Override
+    public void startSession() {}
+
+    @Override
+    public void endSession() {}
 }
