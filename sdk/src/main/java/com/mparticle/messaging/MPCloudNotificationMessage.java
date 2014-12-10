@@ -29,6 +29,7 @@ import java.util.ArrayList;
  */
 public class MPCloudNotificationMessage extends AbstractCloudMessage {
     public final static String COMMAND = "m_cmd";
+    public final static int COMMAND_DONOTHING = 0;
     public final static int COMMAND_ALERT_NOW = 1;
     public final static int COMMAND_ALERT_LOCALTIME = 2;
     public final static int COMMAND_ALERT_BACKGROUND = 3;

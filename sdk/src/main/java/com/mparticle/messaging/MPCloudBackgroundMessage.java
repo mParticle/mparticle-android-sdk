@@ -13,15 +13,16 @@ public class MPCloudBackgroundMessage {
         if (extras != null &&
                 extras.containsKey(MPCloudNotificationMessage.COMMAND)){
             int command = Integer.parseInt(extras.getString(MPCloudNotificationMessage.COMMAND));
-            if (command == MPCloudNotificationMessage.COMMAND_ALERT_CONFIG_REFRESH){
-                try {
+            switch (command){
+                case MPCloudNotificationMessage.COMMAND_ALERT_CONFIG_REFRESH:
                     MParticle.start(context);
                     MParticle.getInstance().internal().refreshConfiguration();
-                }catch (Exception e){
-
-                }
-                return true;
+                case MPCloudNotificationMessage.COMMAND_DONOTHING:
+                    return true;
+                default:
+                    return false;
             }
+
 
         }
         return false;
