@@ -1,0 +1,3 @@
+[submodule "adjust_sdk"]
+	path = adjust_sdk
+	url = git@github.com:adjust/android_sdk.git
