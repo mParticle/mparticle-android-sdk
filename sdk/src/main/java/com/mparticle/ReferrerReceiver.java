@@ -8,6 +8,22 @@ import android.content.SharedPreferences;
 /**
  * When Google Play installs an application it will broadcast an <code>Intent</code> with the <code>com.android.vending.INSTALL_REFERRER</code> action.
  * From this <code>Intent</code>, mParticle will extract any available referral data for use in measuring the success of advertising or install campaigns.
+ *
+ *
+ * This {@code BroadcastReceiver} must be specified within the {@code <application>} block of your application's {@code AndroidManifest.xml} file:
+ *
+ *
+ * <pre>
+ * {@code
+ *  <receiver
+ *      android:name="com.mparticle.ReferrerReceiver"
+ *      android:exported="true">
+ *      <intent-filter>
+ *          <action android:name="com.android.vending.INSTALL_REFERRER"/>
+ *      </intent-filter>
+ *
+ * </receiver> }</pre>
+ *
  */
 public class ReferrerReceiver extends BroadcastReceiver {
     @Override
