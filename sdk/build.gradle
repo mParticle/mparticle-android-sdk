@@ -7,7 +7,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:0.13.+'
+        classpath 'com.android.tools.build:gradle:1.0.0'
 
     }
 }
@@ -28,8 +28,7 @@ def getDate() {
 
 android {
     compileSdkVersion 19
-    buildToolsVersion "20"
-    useOldManifestMerger false
+    buildToolsVersion "21.1.1"
 
     String url = "\"\"";
     String configurationUrl = "\"\"";
@@ -64,16 +63,16 @@ android {
     buildTypes {
 
         debug {
-            runProguard false
+            minifyEnabled false
         }
 
         unity {
-            runProguard true
+            minifyEnabled true
             proguardFile 'proguard.txt'
         }
 
         release {
-            runProguard true
+            minifyEnabled true
             proguardFile 'proguard.txt'
         }
     }
