@@ -351,16 +351,14 @@ class EmbeddedKitManager implements IEmbeddedKit, MPActivityCallbacks{
     }
 
     public static class BaseEmbeddedKitFactory {
-        private final static int MAT = 32;
         private final static int KOCHAVA = 37;
         private final static int COMSCORE = 39;
         private final static int KAHUNA = 56;
         private final static int FORESEE = MParticle.ServiceProviders.FORESEE_ID;
+        private final static int ADJUST = 68;
 
         protected EmbeddedProvider createInstance(int id, Context context) throws JSONException, ClassNotFoundException{
             switch (id){
-                case MAT:
-                    return new EmbeddedMAT(context);
                 case KOCHAVA:
                     return new EmbeddedKochava(context);
                 case COMSCORE:
@@ -369,6 +367,8 @@ class EmbeddedKitManager implements IEmbeddedKit, MPActivityCallbacks{
                     return new EmbeddedKahuna(context);
                 case FORESEE:
                     return new EmbeddedForesee(context);
+                case ADJUST:
+                    return new EmbeddedAdjust(context);
                 default:
                     return null;
             }
@@ -376,11 +376,11 @@ class EmbeddedKitManager implements IEmbeddedKit, MPActivityCallbacks{
 
         public static ArrayList<Integer> getSupportedKits() {
             ArrayList<Integer> supportedKitIds = new ArrayList<Integer>();
-            supportedKitIds.add(MAT);
             supportedKitIds.add(KOCHAVA);
             supportedKitIds.add(COMSCORE);
             supportedKitIds.add(KAHUNA);
             supportedKitIds.add(FORESEE);
+            supportedKitIds.add(ADJUST);
             return supportedKitIds;
         }
     }
