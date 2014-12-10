@@ -138,11 +138,13 @@ class EmbeddedAdjust extends EmbeddedProvider implements MPActivityCallbacks {
 
     @Override
     public void onActivityResumed(Activity activity, int currentCount) {
+        initAdjust();
         Adjust.getInstance().onResume();
     }
 
     @Override
     public void onActivityPaused(Activity activity, int activityCount) {
+        initAdjust();
         Adjust.getInstance().onPause();
     }
 
