@@ -186,13 +186,10 @@ public class MPService extends IntentService {
             String error = intent.getStringExtra("error");
 
             if (registrationId != null) {
-                // registration succeeded
                 mMParticle.internal().setPushRegistrationId(registrationId);
             } else if (unregistered != null) {
-                // unregistration succeeded
                 mMParticle.internal().clearPushNotificationId();
             } else if (error != null) {
-                // Unrecoverable error, log it
                 Log.i(TAG, "GCM registration error: " + error);
             }
         } catch (Throwable t) {
@@ -204,23 +201,20 @@ public class MPService extends IntentService {
         if (!MPCloudBackgroundMessage.processSilentPush(this, intent.getExtras())){
             try {
                 AbstractCloudMessage cloudMessage = AbstractCloudMessage.createMessage(intent, ConfigManager.getPushKeys(this));
-                String appState = getAppState();
 
                 if (cloudMessage instanceof MPCloudNotificationMessage){
+                    String appState = getAppState();
                     MParticle.start(this);
                     MParticle.getInstance().saveGcmMessage(((MPCloudNotificationMessage)cloudMessage), appState);
+                    if (((MPCloudNotificationMessage)cloudMessage).isDelayed()){
+                        MParticle.getInstance().internal().logNotification(cloudMessage, null, false, appState, AbstractCloudMessage.FLAG_RECEIVED);
+                        scheduleFutureNotification((MPCloudNotificationMessage) cloudMessage);
+                        return;
+                    }
                 }
-
-                if (cloudMessage instanceof MPCloudNotificationMessage && (((MPCloudNotificationMessage)cloudMessage).isDelayed())) {
-                    //only log received at this point if it's delayed, since we also log when the notification (delayed or not) is displayed
-                    MParticle.start(this);
-                    MParticle.getInstance().internal().logNotification(cloudMessage, null, false, appState, AbstractCloudMessage.FLAG_RECEIVED);
-                    scheduleFutureNotification((MPCloudNotificationMessage) cloudMessage);
-                }else {
-                    broadcastNotificationReceived(cloudMessage);
-                }
+                broadcastNotificationReceived(cloudMessage);
             }catch (Exception e){
-                Log.i(TAG, "GCM parsing error: " + e.toString());
+                Log.w(TAG, "GCM parsing error: " + e.toString());
             }
         }
     }
