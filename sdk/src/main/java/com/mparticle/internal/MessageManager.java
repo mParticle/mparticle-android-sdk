@@ -533,7 +533,7 @@ public class MessageManager implements MessageManagerCallbacks {
                     .build();
 
             message.put(MessageKey.PAYLOAD, payload);
-            message.put(MessageKey.PUSH_TYPE, action == null ? Constants.Push.MESSAGE_TYPE_RECEIVED : Constants.Push.MESSAGE_TYPE_ACTION);
+            message.put(MessageKey.PUSH_TYPE, action == null  || action.getActionId().equals(contentId)? Constants.Push.MESSAGE_TYPE_RECEIVED : Constants.Push.MESSAGE_TYPE_ACTION);
             message.put(MessageKey.PUSH_BEHAVIOR, newBehavior);
             message.put(MParticleDatabase.GcmMessageTable.CONTENT_ID, contentId);
             if (action != null && !action.getActionId().equals(contentId)) {
