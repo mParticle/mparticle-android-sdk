@@ -92,9 +92,11 @@ public class MPCloudNotificationMessage extends AbstractCloudMessage {
         pc.readTypedArray(mActions, CloudAction.CREATOR);
     }
 
-    public MPCloudNotificationMessage(Bundle extras) {
+    public MPCloudNotificationMessage(Bundle extras) throws InvalidGcmMessageException {
         super(extras);
-
+        if (getExpiration() <= System.currentTimeMillis()){
+            throw new InvalidGcmMessageException("GCM message is expired.");
+        }
         mActions = new CloudAction[3];
         if (mExtras.containsKey(ACTION_1_ICON) ||
                 mExtras.containsKey(ACTION_1_TITLE)){

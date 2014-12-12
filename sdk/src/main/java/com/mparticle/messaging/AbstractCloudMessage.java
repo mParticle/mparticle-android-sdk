@@ -66,7 +66,7 @@ public abstract class AbstractCloudMessage implements Parcelable {
         return mExtras;
     }
 
-    public static AbstractCloudMessage createMessage(Intent intent, JSONArray keys) {
+    public static AbstractCloudMessage createMessage(Intent intent, JSONArray keys) throws InvalidGcmMessageException {
         if (MPCloudNotificationMessage.isValid(intent.getExtras())){
             return new MPCloudNotificationMessage(intent.getExtras());
         }else{
@@ -108,5 +108,11 @@ public abstract class AbstractCloudMessage implements Parcelable {
 
     public void setActualDeliveryTime(long time){
         mActualDeliveryTime = time;
+    }
+
+    static class InvalidGcmMessageException extends Exception {
+        public InvalidGcmMessageException(String detailMessage) {
+            super(detailMessage);
+        }
     }
 }
