@@ -56,6 +56,7 @@ import org.json.JSONObject;
         switch (msg.what) {
             case STORE_MESSAGE:
                 try {
+
                     MPMessage message = (MPMessage) msg.obj;
                     message.put(MessageKey.STATE_INFO_KEY, MessageManager.getStateInfo());
                     String messageType = message.getString(MessageKey.TYPE);
@@ -234,18 +235,25 @@ import org.json.JSONObject;
             if (gcmCursor.moveToFirst()) {
                 int currentBehaviors = gcmCursor.getInt(gcmCursor.getColumnIndex(MParticleDatabase.GcmMessageTable.BEHAVIOR));
                 gcmCursor.close();
+
+                //if we're trying to log a direct open, but the push has already been marked influence open, remove direct open from the new behavior
                 if (((newBehavior & AbstractCloudMessage.FLAG_DIRECT_OPEN) == AbstractCloudMessage.FLAG_DIRECT_OPEN) &&
                         ((currentBehaviors & AbstractCloudMessage.FLAG_INFLUENCE_OPEN) == AbstractCloudMessage.FLAG_INFLUENCE_OPEN)) {
                     newBehavior &= ~AbstractCloudMessage.FLAG_DIRECT_OPEN;
-                }else if (((newBehavior & AbstractCloudMessage.FLAG_INFLUENCE_OPEN) == AbstractCloudMessage.FLAG_INFLUENCE_OPEN) &&
+                }//if we're trying to log an influence open, but the push has already been marked direct open, remove influence open from the new behavior
+                else if (((newBehavior & AbstractCloudMessage.FLAG_INFLUENCE_OPEN) == AbstractCloudMessage.FLAG_INFLUENCE_OPEN) &&
                         ((currentBehaviors & AbstractCloudMessage.FLAG_DIRECT_OPEN) == AbstractCloudMessage.FLAG_DIRECT_OPEN)) {
                     newBehavior &= ~AbstractCloudMessage.FLAG_INFLUENCE_OPEN;
                 }
-
+                if ((currentBehaviors & AbstractCloudMessage.FLAG_RECEIVED) == AbstractCloudMessage.FLAG_RECEIVED ){
+                    newBehavior &= ~AbstractCloudMessage.FLAG_RECEIVED;
+                }
+                if ((currentBehaviors & AbstractCloudMessage.FLAG_DISPLAYED) == AbstractCloudMessage.FLAG_DISPLAYED ){
+                    newBehavior &= ~AbstractCloudMessage.FLAG_DISPLAYED;
+                }
                 updatedBehaviors = currentBehaviors | newBehavior;
 
-                if (((newBehavior & AbstractCloudMessage.FLAG_DISPLAYED) == AbstractCloudMessage.FLAG_DISPLAYED) &&
-                        ((currentBehaviors & AbstractCloudMessage.FLAG_DISPLAYED) != AbstractCloudMessage.FLAG_DISPLAYED)){
+                if ((updatedBehaviors & AbstractCloudMessage.FLAG_DISPLAYED) == AbstractCloudMessage.FLAG_DISPLAYED){
                     timestamp = message.getTimestamp();
                 }
 

@@ -124,7 +124,7 @@ public class MPService extends IntentService {
             protected Notification doInBackground(AbstractCloudMessage... params) {
                 Notification notification =  params[0].buildNotification(MPService.this, System.currentTimeMillis());
 
-                MParticle.getInstance().internal().logNotification(params[0], null, false, getAppState(), AbstractCloudMessage.FLAG_RECEIVED | AbstractCloudMessage.FLAG_DISPLAYED);
+                MParticle.getInstance().internal().logNotification(params[0], null, false, getAppState(), AbstractCloudMessage.FLAG_DISPLAYED);
                 return notification;
             }
 
@@ -257,7 +257,7 @@ public class MPService extends IntentService {
 
         MParticle.start(getApplicationContext());
         MParticle.getInstance().internal().logNotification(message,
-                action, true, getAppState(), AbstractCloudMessage.FLAG_RECEIVED | AbstractCloudMessage.FLAG_READ | AbstractCloudMessage.FLAG_DIRECT_OPEN);
+                action, true, getAppState(), AbstractCloudMessage.FLAG_READ | AbstractCloudMessage.FLAG_DIRECT_OPEN);
 
         Intent broadcast = new Intent(MParticlePushUtility.BROADCAST_NOTIFICATION_TAPPED);
         broadcast.putExtra(MParticlePushUtility.CLOUD_MESSAGE_EXTRA, message);
