@@ -67,6 +67,7 @@ import java.util.UUID;
     private static TelephonyManager sTelephonyManager;
 
     public MessageManager(Context appContext, ConfigManager configManager) {
+        mContext = appContext.getApplicationContext();
         mConfigManager = configManager;
         SQLiteDatabase database = new MParticleDatabase(appContext).getWritableDatabase();
         mMessageHandler = new MessageHandler(sMessageHandlerThread.getLooper(), configManager.getApiKey(), database);
@@ -82,7 +83,6 @@ import java.util.UUID;
     }
 
     public void start(Context appContext, Boolean firstRun, MParticle.InstallType installType) {
-        mContext = appContext.getApplicationContext();
         if (sStatusBroadcastReceiver == null) {
 
             //get the previous Intent otherwise the first few messages will have 0 for battery level
