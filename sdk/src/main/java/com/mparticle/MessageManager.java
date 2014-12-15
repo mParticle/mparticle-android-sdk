@@ -15,6 +15,7 @@ import android.os.BatteryManager;
 import android.os.Bundle;
 import android.os.HandlerThread;
 import android.os.Process;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 
 import com.mparticle.Constants.MessageKey;
@@ -63,6 +64,7 @@ import java.util.UUID;
     private static SharedPreferences mPreferences = null;
     private ConfigManager mConfigManager = null;
     private MParticle.InstallType mInstallType;
+    private static TelephonyManager sTelephonyManager;
 
     public MessageManager(Context appContext, ConfigManager configManager) {
         mConfigManager = configManager;
@@ -70,6 +72,13 @@ import java.util.UUID;
         mMessageHandler = new MessageHandler(sMessageHandlerThread.getLooper(), configManager.getApiKey(), database);
         mUploadHandler = new UploadHandler(appContext, sUploadHandlerThread.getLooper(), configManager, database);
         mPreferences = appContext.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
+    }
+
+    private static TelephonyManager getTelephonyManager(){
+        if (sTelephonyManager == null){
+            sTelephonyManager = (TelephonyManager) mContext.getSystemService(Context.TELEPHONY_SERVICE);
+        }
+        return sTelephonyManager;
     }
 
     public void start(Context appContext, Boolean firstRun, MParticle.InstallType installType) {
@@ -173,6 +182,7 @@ import java.util.UUID;
         infoJson.put(MessageKey.STATE_INFO_BAR_ORIENTATION, orientation);
         infoJson.put(MessageKey.STATE_INFO_MEMORY_LOW, MPUtility.isSystemMemoryLow(mContext));
         infoJson.put(MessageKey.STATE_INFO_MEMORY_THRESHOLD, getSystemMemoryThreshold());
+        infoJson.put(MessageKey.STATE_INFO_NETWORK_TYPE, getTelephonyManager().getNetworkType());
         return infoJson;
     }
 
