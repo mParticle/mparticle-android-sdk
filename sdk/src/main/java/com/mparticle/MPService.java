@@ -241,7 +241,7 @@ public class MPService extends IntentService {
 
         List<ResolveInfo> result = getPackageManager().queryBroadcastReceivers(intent, 0);
         if (result != null && result.size() > 0){
-            sendBroadcast(intent, "com.mparticle.permission.push");
+            sendBroadcast(intent, null);
         } else {
             onHandleIntent(intent);
         }
