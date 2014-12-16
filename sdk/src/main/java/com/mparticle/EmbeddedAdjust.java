@@ -3,20 +3,13 @@ package com.mparticle;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.location.Location;
-import android.util.Log;
 
 import com.adjust.sdk.Adjust;
-import com.adjust.sdk.AdjustConfig;
-import com.mobileapptracker.MobileAppTracker;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.Iterator;
 import java.util.Map;
-import java.util.UUID;
 
 /**
  * <p/>
@@ -36,11 +29,11 @@ class EmbeddedAdjust extends EmbeddedProvider implements MPActivityCallbacks {
 
     private void initAdjust(){
         if (!initialized) {
-            AdjustConfig config = AdjustConfig.getInstance(context,
+            Adjust.appDidLaunch(context,
                     properties.get(APP_TOKEN),
-                    MParticle.getInstance().getEnvironment() == MParticle.Environment.Production ? AdjustConfig.PRODUCTION_ENVIRONMENT : AdjustConfig.SANDBOX_ENVIRONMENT);
-
-            Adjust.getInstance().onCreate(config);
+                    MParticle.getInstance().getEnvironment() == MParticle.Environment.Production ? "production" : "sandbox",
+                    "info",
+                    false);
             initialized = true;
         }
     }
@@ -53,8 +46,8 @@ class EmbeddedAdjust extends EmbeddedProvider implements MPActivityCallbacks {
                 MParticle.getInstance().setInstallReferrer(installReferrer);
             }
             boolean optOut = MParticle.getInstance().getOptOut();
-            if (optOut != Adjust.getInstance().isEnabled()){
-                Adjust.getInstance().setEnabled(!optOut);
+            if (optOut != Adjust.isEnabled()){
+                Adjust.setEnabled(!optOut);
             }
         }
 
@@ -79,13 +72,13 @@ class EmbeddedAdjust extends EmbeddedProvider implements MPActivityCallbacks {
     @Override
     public void onActivityResumed(Activity activity, int currentCount) {
         initAdjust();
-        Adjust.getInstance().onResume();
+        Adjust.onResume(activity);
     }
 
     @Override
     public void onActivityPaused(Activity activity, int activityCount) {
         initAdjust();
-        Adjust.getInstance().onPause();
+        Adjust.onPause();
     }
 
     @Override
