@@ -249,7 +249,7 @@ import org.json.JSONObject;
                     newBehavior &= ~AbstractCloudMessage.FLAG_RECEIVED;
                 }
                 if ((currentBehaviors & AbstractCloudMessage.FLAG_DISPLAYED) == AbstractCloudMessage.FLAG_DISPLAYED ){
-                    newBehavior &= ~AbstractCloudMessage.FLAG_DISPLAYED;
+                    currentBehaviors &= ~AbstractCloudMessage.FLAG_DISPLAYED;
                 }
                 updatedBehaviors = currentBehaviors | newBehavior;
 
@@ -301,7 +301,7 @@ import org.json.JSONObject;
                         null,
                         true,
                         gcmCursor.getString(gcmCursor.getColumnIndex(MParticleDatabase.GcmMessageTable.APPSTATE)),
-                        gcmCursor.getInt(gcmCursor.getColumnIndex(MParticleDatabase.GcmMessageTable.BEHAVIOR)) | AbstractCloudMessage.FLAG_INFLUENCE_OPEN
+                         AbstractCloudMessage.FLAG_INFLUENCE_OPEN
                         );
             }
         }catch (Exception e){
