@@ -566,6 +566,7 @@ import java.util.UUID;
         try{
             JSONObject message = createMessage(MessageType.PUSH_RECEIVED, sessionId, sessionStartTime, System.currentTimeMillis(), "gcm", null);
             message.put(MessageKey.PAYLOAD, attributes.toString());
+            message.put("t", "received");
             String regId = PushRegistrationHelper.getRegistrationId(mContext);
             if ((regId != null) && (regId.length() > 0)) {
                 message.put(MessageKey.PUSH_TOKEN, regId);
