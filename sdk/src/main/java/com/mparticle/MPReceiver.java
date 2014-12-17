@@ -7,7 +7,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 
 /**
- * Core {@code BroadcastReceiver} used to support push notification and installer referrers. Handles the following Intent actions:
+ * Core {@code BroadcastReceiver} used to support push notifications. Handles the following Intent actions:
  *
  * <ul>
  *     <li>{@code com.google.android.c2dm.intent.REGISTRATION}</li>

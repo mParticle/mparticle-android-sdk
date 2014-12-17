@@ -6,6 +6,9 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 
 /**
+ * <code>BroadcastReceiver</code> required to capture attribution data via the Google Play install referrer broadcast.
+ *
+ *
  * When Google Play installs an application it will broadcast an <code>Intent</code> with the <code>com.android.vending.INSTALL_REFERRER</code> action.
  * From this <code>Intent</code>, mParticle will extract any available referral data for use in measuring the success of advertising or install campaigns.
  *
