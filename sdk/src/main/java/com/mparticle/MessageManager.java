@@ -15,6 +15,7 @@ import android.os.BatteryManager;
 import android.os.Bundle;
 import android.os.HandlerThread;
 import android.os.Process;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 
 import com.mparticle.Constants.MessageKey;
@@ -63,8 +64,10 @@ import java.util.UUID;
     private static SharedPreferences mPreferences = null;
     private ConfigManager mConfigManager = null;
     private MParticle.InstallType mInstallType;
+    private static TelephonyManager sTelephonyManager;
 
     public MessageManager(Context appContext, ConfigManager configManager) {
+        mContext = appContext.getApplicationContext();
         mConfigManager = configManager;
         SQLiteDatabase database = new MParticleDatabase(appContext).getWritableDatabase();
         mMessageHandler = new MessageHandler(sMessageHandlerThread.getLooper(), configManager.getApiKey(), database);
@@ -72,8 +75,14 @@ import java.util.UUID;
         mPreferences = appContext.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
     }
 
+    private static TelephonyManager getTelephonyManager(){
+        if (sTelephonyManager == null){
+            sTelephonyManager = (TelephonyManager) mContext.getSystemService(Context.TELEPHONY_SERVICE);
+        }
+        return sTelephonyManager;
+    }
+
     public void start(Context appContext, Boolean firstRun, MParticle.InstallType installType) {
-        mContext = appContext.getApplicationContext();
         if (sStatusBroadcastReceiver == null) {
 
             //get the previous Intent otherwise the first few messages will have 0 for battery level
@@ -173,6 +182,7 @@ import java.util.UUID;
         infoJson.put(MessageKey.STATE_INFO_BAR_ORIENTATION, orientation);
         infoJson.put(MessageKey.STATE_INFO_MEMORY_LOW, MPUtility.isSystemMemoryLow(mContext));
         infoJson.put(MessageKey.STATE_INFO_MEMORY_THRESHOLD, getSystemMemoryThreshold());
+        infoJson.put(MessageKey.STATE_INFO_NETWORK_TYPE, getTelephonyManager().getNetworkType());
         return infoJson;
     }
 
@@ -556,6 +566,7 @@ import java.util.UUID;
         try{
             JSONObject message = createMessage(MessageType.PUSH_RECEIVED, sessionId, sessionStartTime, System.currentTimeMillis(), "gcm", null);
             message.put(MessageKey.PAYLOAD, attributes.toString());
+            message.put("t", "received");
             String regId = PushRegistrationHelper.getRegistrationId(mContext);
             if ((regId != null) && (regId.length() > 0)) {
                 message.put(MessageKey.PUSH_TOKEN, regId);

@@ -34,14 +34,8 @@ class EmbeddedKochava extends EmbeddedProvider implements MPActivityCallbacks {
     private static final String HOST = "kochava.com";
     private Feature feature;
 
-    EmbeddedKochava(Context context) throws ClassNotFoundException {
+    EmbeddedKochava(Context context){
         super(context);
-        try {
-            Class.forName("com.kochava.android.tracker.Feature");
-        } catch (ClassNotFoundException cnfe) {
-            ConfigManager.log(MParticle.LogLevel.ERROR, "Failed in initiate Kochava - library not found. Have you added it to your application's classpath?");
-            throw cnfe;
-        }
     }
 
     @Override

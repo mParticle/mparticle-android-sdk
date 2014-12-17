@@ -44,7 +44,7 @@ class EmbeddedComscore extends EmbeddedProvider implements MPActivityCallbacks {
     private static final String HOST = "scorecardresearch.com";
     private boolean isEnterprise;
 
-    EmbeddedComscore(Context context) throws ClassNotFoundException{
+    EmbeddedComscore(Context context) {
         super(context);
         comScore.setAppContext(context);
     }

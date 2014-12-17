@@ -516,6 +516,10 @@ public class MParticle {
         ConfigManager.log(LogLevel.DEBUG, "Set installReferrer: ", referrer);
     }
 
+    public String getInstallReferrer(){
+        return sPreferences.getString(PrefKeys.INSTALL_REFERRER, null);
+    }
+
     /**
      * Logs an event
      *
