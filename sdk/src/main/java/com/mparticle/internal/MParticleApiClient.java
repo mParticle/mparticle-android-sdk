@@ -201,6 +201,7 @@ class MParticleApiClient {
         ConfigManager.log(MParticle.LogLevel.DEBUG, "Sending data to: " + commandUrl);
 
         URL url = new URL(commandUrl);
+        MParticle.getInstance().excludeUrlFromNetworkPerformanceMeasurement(url.getHost().toString());
         HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
 
         if (headers != null && headers.length() > 0) {

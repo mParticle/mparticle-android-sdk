@@ -31,7 +31,6 @@ abstract class EmbeddedProvider implements IEmbeddedKit {
     private final static String KEY_USER_IDENTITY_FILTER = "uid";
     private final static String KEY_USER_ATTRIBUTE_FILTER = "ua";
 
-
     //If set to true, our sdk honor user's optout wish. If false, we still collect data on opt-ed out users, but only for reporting
     private static final String HONOR_OPT_OUT = "honorOptOut";
 
@@ -47,7 +46,7 @@ abstract class EmbeddedProvider implements IEmbeddedKit {
 
     protected Context context;
 
-    public EmbeddedProvider(Context context) throws ClassNotFoundException{
+    public EmbeddedProvider(Context context) {
         this.context = context;
     }
 

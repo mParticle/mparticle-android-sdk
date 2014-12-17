@@ -504,6 +504,10 @@ public class MParticle {
         ConfigManager.log(LogLevel.DEBUG, "Set installReferrer: ", referrer);
     }
 
+    public String getInstallReferrer(){
+        return sPreferences.getString(PrefKeys.INSTALL_REFERRER, null);
+    }
+
     /**
      * Logs an event
      *
@@ -1277,7 +1281,7 @@ public class MParticle {
      * @param serviceProviderId The ID of the desired survey/feedback service.
      * @return a fully-formed URI, or null if no URL exists for the given ID.
      *
-     * @see {@link com.mparticle.MParticle.ServiceProviders}
+     * @see com.mparticle.MParticle.ServiceProviders
      */
     public Uri getSurveyUrl(int serviceProviderId) {
         return mEmbeddedKitManager.getSurveyUrl(serviceProviderId, mUserAttributes);
@@ -1749,6 +1753,11 @@ public class MParticle {
         DEBUG;
     }
 
+    /**
+     * This interface defines constants that can be used to interact with specific 3rd-party services.
+     *
+     * @see #getSurveyUrl(int)
+     */
     public interface ServiceProviders {
         public static final int FORESEE_ID = 64;
     }

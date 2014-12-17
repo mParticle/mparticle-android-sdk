@@ -53,8 +53,6 @@ public class EmbeddedKitManager implements IEmbeddedKit, MPActivityCallbacks {
                     }
                 } catch (JSONException jse) {
                     ConfigManager.log(MParticle.LogLevel.ERROR, "Exception while parsing embedded kit configuration: " + jse.getMessage());
-                } catch (ClassNotFoundException cnfe) {
-                    //this should already be logged in the EmbeddedProvider, but I want to bubble up the exception.
                 } catch (Exception e) {
                     ConfigManager.log(MParticle.LogLevel.ERROR, "Exception while started embedded kit: " + e.getMessage());
                 }
@@ -359,6 +357,7 @@ public class EmbeddedKitManager implements IEmbeddedKit, MPActivityCallbacks {
         private final static int COMSCORE = 39;
         private final static int KAHUNA = 56;
         private final static int FORESEE = MParticle.ServiceProviders.FORESEE_ID;
+        private final static int ADJUST = 68;
 
         protected EmbeddedProvider createInstance(int id, Context context) throws JSONException, ClassNotFoundException{
             switch (id){
@@ -370,6 +369,8 @@ public class EmbeddedKitManager implements IEmbeddedKit, MPActivityCallbacks {
                     return new EmbeddedKahuna(context);
                 case FORESEE:
                     return new EmbeddedForesee(context);
+                case ADJUST:
+                    return new EmbeddedAdjust(context);
                 default:
                     return null;
             }
@@ -381,6 +382,7 @@ public class EmbeddedKitManager implements IEmbeddedKit, MPActivityCallbacks {
             supportedKitIds.add(COMSCORE);
             supportedKitIds.add(KAHUNA);
             supportedKitIds.add(FORESEE);
+            supportedKitIds.add(ADJUST);
             return supportedKitIds;
         }
     }
