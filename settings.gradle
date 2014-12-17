@@ -1,4 +1,2 @@
 include ':sdk:unityskeleton'
 include ':sdk'
-include ':Adjust'
-project(':Adjust').projectDir = new File('adjust_sdk/Adjust')
