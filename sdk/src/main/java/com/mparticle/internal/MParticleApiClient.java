@@ -2,7 +2,6 @@ package com.mparticle.internal;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.os.Build;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Base64;
@@ -116,7 +115,7 @@ class MParticleApiClient {
 
             addMessageSignature(connection, null);
 
-            ApiResponse response = new ApiResponse(connection);
+            ApiResponse response = new ApiResponse(connection, true);
 
             if (response.statusCode >= HttpStatus.SC_OK && response.statusCode < HttpStatus.SC_MULTIPLE_CHOICES) {
                 mConfigManager.updateConfig(response.getJsonResponse());
@@ -146,7 +145,7 @@ class MParticleApiClient {
             connection.setRequestProperty(HTTP.USER_AGENT, mUserAgent);
 
             addMessageSignature(connection, null);
-            ApiResponse apiResponse = new ApiResponse(connection);
+            ApiResponse apiResponse = new ApiResponse(connection, true);
             if (apiResponse.getResponseCode() == HttpURLConnection.HTTP_FORBIDDEN){
                 ConfigManager.log(MParticle.LogLevel.ERROR, "Segment call forbidden: is Segment enabled for the current mParticle org?");
             }
@@ -194,7 +193,7 @@ class MParticleApiClient {
             zos.close();
         }
 
-        return new ApiResponse(connection);
+        return new ApiResponse(connection, true);
     }
 
     ApiResponse sendCommand(String commandUrl, String method, String postData, String headers) throws IOException, JSONException {
@@ -220,7 +219,7 @@ class MParticleApiClient {
                 urlConnection.getOutputStream().write(postDataBytes);
             }
         }
-        return new ApiResponse(urlConnection);
+        return new ApiResponse(urlConnection, false);
 
     }
 
@@ -414,9 +413,9 @@ class MParticleApiClient {
         private JSONObject jsonResponse;
         private HttpURLConnection connection;
 
-        public ApiResponse(HttpURLConnection connection) throws IOException {
+        public ApiResponse(HttpURLConnection connection, boolean checkSsl) throws IOException {
             this.connection = connection;
-            if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.FROYO && connection instanceof HttpsURLConnection) {
+            if (checkSsl && connection instanceof HttpsURLConnection) {
                 try {
                     ((HttpsURLConnection) connection).setSSLSocketFactory(getSocketFactory());
                 }catch (Exception e){
