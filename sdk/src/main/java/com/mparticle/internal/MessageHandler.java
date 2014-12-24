@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.util.Log;
 
 import com.mparticle.MParticle;
 import com.mparticle.internal.Constants.MessageKey;
@@ -71,8 +72,8 @@ import org.json.JSONObject;
                     if (MessageType.APP_STATE_TRANSITION == messageType){
                         appendLatestPushNotification(message);
                     }
-                    if (MessageType.PUSH_RECEIVED == messageType){
-                        validateBehaviorFlags(message);
+                    if (MessageType.PUSH_RECEIVED == messageType && !validateBehaviorFlags(message)){
+                        return;
                     }
                     dbInsertMessage(message);
 
@@ -217,8 +218,9 @@ import org.json.JSONObject;
         mIsProcessingMessage = false;
     }
 
-    private void validateBehaviorFlags(MPMessage message) {
+    private boolean validateBehaviorFlags(MPMessage message) {
         Cursor gcmCursor = null;
+        boolean shouldInsert = true;
         int newBehavior = message.optInt(MessageKey.PUSH_BEHAVIOR);
         try {
             ConfigManager.log(MParticle.LogLevel.DEBUG, "Validating GCM behaviors...");
@@ -230,7 +232,6 @@ import org.json.JSONObject;
                     null,
                     null,
                     null);
-            int updatedBehaviors = 0;
             long timestamp = 0;
             if (gcmCursor.moveToFirst()) {
                 int currentBehaviors = gcmCursor.getInt(gcmCursor.getColumnIndex(MParticleDatabase.GcmMessageTable.BEHAVIOR));
@@ -239,36 +240,38 @@ import org.json.JSONObject;
                 //if we're trying to log a direct open, but the push has already been marked influence open, remove direct open from the new behavior
                 if (((newBehavior & AbstractCloudMessage.FLAG_DIRECT_OPEN) == AbstractCloudMessage.FLAG_DIRECT_OPEN) &&
                         ((currentBehaviors & AbstractCloudMessage.FLAG_INFLUENCE_OPEN) == AbstractCloudMessage.FLAG_INFLUENCE_OPEN)) {
-                    newBehavior &= ~AbstractCloudMessage.FLAG_DIRECT_OPEN;
+                    return false;
                 }//if we're trying to log an influence open, but the push has already been marked direct open, remove influence open from the new behavior
                 else if (((newBehavior & AbstractCloudMessage.FLAG_INFLUENCE_OPEN) == AbstractCloudMessage.FLAG_INFLUENCE_OPEN) &&
                         ((currentBehaviors & AbstractCloudMessage.FLAG_DIRECT_OPEN) == AbstractCloudMessage.FLAG_DIRECT_OPEN)) {
-                    newBehavior &= ~AbstractCloudMessage.FLAG_INFLUENCE_OPEN;
+                    return false;
                 }
                 if ((currentBehaviors & AbstractCloudMessage.FLAG_RECEIVED) == AbstractCloudMessage.FLAG_RECEIVED ){
                     newBehavior &= ~AbstractCloudMessage.FLAG_RECEIVED;
                 }
                 if ((currentBehaviors & AbstractCloudMessage.FLAG_DISPLAYED) == AbstractCloudMessage.FLAG_DISPLAYED ){
-                    currentBehaviors &= ~AbstractCloudMessage.FLAG_DISPLAYED;
+                    newBehavior &= ~AbstractCloudMessage.FLAG_DISPLAYED;
                 }
-                updatedBehaviors = currentBehaviors | newBehavior;
 
-                if ((updatedBehaviors & AbstractCloudMessage.FLAG_DISPLAYED) == AbstractCloudMessage.FLAG_DISPLAYED){
+                if ((newBehavior & AbstractCloudMessage.FLAG_DISPLAYED) == AbstractCloudMessage.FLAG_DISPLAYED){
                     timestamp = message.getTimestamp();
                 }
+                message.put(MessageKey.PUSH_BEHAVIOR, newBehavior);
 
-                if (updatedBehaviors != currentBehaviors) {
-                    message.put(MessageKey.PUSH_BEHAVIOR, updatedBehaviors);
+                if (newBehavior != currentBehaviors) {
                     ContentValues values = new ContentValues();
-                    values.put(MParticleDatabase.GcmMessageTable.BEHAVIOR, updatedBehaviors);
+                    values.put(MParticleDatabase.GcmMessageTable.BEHAVIOR, newBehavior);
                     if (timestamp > 0){
                         values.put(MParticleDatabase.GcmMessageTable.DISPLAYED_AT, timestamp);
                     }
                     int updated = db.update(MParticleDatabase.GcmMessageTable.TABLE_NAME, values, MParticleDatabase.GcmMessageTable.CONTENT_ID + " =?", args);
                     if (updated > 0) {
-                        ConfigManager.log(MParticle.LogLevel.DEBUG, "Updated GCM with content ID: " + message.getString(MParticleDatabase.GcmMessageTable.CONTENT_ID) + " and behavior: " + Integer.toHexString(updatedBehaviors));
+                        ConfigManager.log(MParticle.LogLevel.DEBUG, "Updated GCM with content ID: " + message.getString(MParticleDatabase.GcmMessageTable.CONTENT_ID) + " and behavior(s): " + getBehaviorString(newBehavior));
                     }
+                }else{
+                    shouldInsert = false;
                 }
+
             }
         } catch (Exception e) {
             ConfigManager.log(MParticle.LogLevel.DEBUG, e, "Failed to update GCM message.");
@@ -277,7 +280,21 @@ import org.json.JSONObject;
                 gcmCursor.close();
             }
         }
+        return shouldInsert;
+    }
 
+    private String getBehaviorString(int newBehavior){
+        String behavior = "";
+        if ((newBehavior & AbstractCloudMessage.FLAG_DIRECT_OPEN) == AbstractCloudMessage.FLAG_DIRECT_OPEN){
+            behavior += "direct-open, ";
+        }else if ((newBehavior & AbstractCloudMessage.FLAG_INFLUENCE_OPEN) == AbstractCloudMessage.FLAG_INFLUENCE_OPEN){
+            behavior += "influence-open, ";
+        }else if ((newBehavior & AbstractCloudMessage.FLAG_RECEIVED) == AbstractCloudMessage.FLAG_RECEIVED){
+            behavior += "received, ";
+        }else if ((newBehavior & AbstractCloudMessage.FLAG_DISPLAYED) == AbstractCloudMessage.FLAG_DISPLAYED){
+            behavior += "displayed, ";
+        }
+        return behavior;
     }
 
     private void logInfluenceOpenGcmMessages(long openTimestamp) {
@@ -388,7 +405,7 @@ import org.json.JSONObject;
         contentValues.put(MParticleDatabase.GcmMessageTable.CAMPAIGN_ID, message.getCampaignId());
         contentValues.put(MParticleDatabase.GcmMessageTable.EXPIRATION, message.getExpiration());
         contentValues.put(MParticleDatabase.GcmMessageTable.PAYLOAD, message.getRedactedJsonPayload().toString());
-        contentValues.put(MParticleDatabase.GcmMessageTable.BEHAVIOR, AbstractCloudMessage.FLAG_RECEIVED);
+        contentValues.put(MParticleDatabase.GcmMessageTable.BEHAVIOR, 0);
         contentValues.put(MParticleDatabase.GcmMessageTable.CREATED_AT, System.currentTimeMillis());
         contentValues.put(MParticleDatabase.GcmMessageTable.DISPLAYED_AT, message.getActualDeliveryTime());
         contentValues.put(MParticleDatabase.GcmMessageTable.APPSTATE, appState);
