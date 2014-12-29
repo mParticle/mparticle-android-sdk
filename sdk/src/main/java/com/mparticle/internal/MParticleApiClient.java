@@ -426,7 +426,7 @@ class MParticleApiClient {
             if (statusCode == HttpStatus.SC_BAD_REQUEST) {
                 ConfigManager.log(MParticle.LogLevel.ERROR, "Bad API request - is the correct API key and secret configured?");
             }
-            if (statusCode == HttpStatus.SC_SERVICE_UNAVAILABLE){
+            if (statusCode == HttpStatus.SC_SERVICE_UNAVAILABLE && !DEBUGGING){
                 setNextValidTime();
             }
         }
