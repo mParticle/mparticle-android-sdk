@@ -110,7 +110,7 @@ public abstract class AbstractCloudMessage implements Parcelable {
         mActualDeliveryTime = time;
     }
 
-    static class InvalidGcmMessageException extends Exception {
+    public static class InvalidGcmMessageException extends Exception {
         public InvalidGcmMessageException(String detailMessage) {
             super(detailMessage);
         }
