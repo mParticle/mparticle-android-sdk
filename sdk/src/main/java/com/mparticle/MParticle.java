@@ -628,7 +628,8 @@ public class MParticle {
      */
     public void logLtvIncrease(BigDecimal valueIncreased, String eventName, Map<String, String> contextInfo) {
         if (valueIncreased == null) {
-            throw new IllegalArgumentException("ValueIncreased must not be null.");
+            ConfigManager.log(LogLevel.ERROR, "ValueIncreased must not be null.");
+            return;
         }
         if (contextInfo == null) {
             contextInfo = new HashMap<String, String>();
@@ -649,13 +650,16 @@ public class MParticle {
      */
     public void logProductEvent(final MPProduct.Event event, MPProduct product) {
         if (product == null) {
-            throw new IllegalArgumentException("MPProduct is required.");
+            ConfigManager.log(LogLevel.ERROR, "MPProduct is required for call to logProductEvent()");
+            return;
         }
         if (product.isEmpty()) {
-            throw new IllegalArgumentException("MPProduct data was null, please check that the MPProduct was built properly.");
+            ConfigManager.log(LogLevel.ERROR, "MPProduct data was null, please check that the MPProduct was built properly.");
+            return;
         }
         if (event == null) {
-            throw new IllegalArgumentException("MPProduct.EVENT is required.");
+            ConfigManager.log(LogLevel.ERROR, "MPProduct.EVENT is required.");
+            return;
         }
         boolean purchaseEvent = false;
         switch (event) {
@@ -2011,5 +2015,8 @@ public class MParticle {
             }
         }
 
+        public MessageManager getMessageManager() {
+            return mMessageManager;
+        }
     }
 }
