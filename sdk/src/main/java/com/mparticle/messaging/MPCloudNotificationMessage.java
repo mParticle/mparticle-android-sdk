@@ -178,7 +178,6 @@ public class MPCloudNotificationMessage extends AbstractCloudMessage {
         return getCommand() == COMMAND_ALERT_NOW;
     }
 
-
     public int getSmallIconResourceId(Context context){
         String resourceName = mExtras.getString(SMALL_ICON);
         if (!TextUtils.isEmpty(resourceName)) {
@@ -239,7 +238,8 @@ public class MPCloudNotificationMessage extends AbstractCloudMessage {
                 }
             }
         }
-        return null;
+        return BitmapFactory.decodeResource(context.getResources(),
+                MParticlePushUtility.getFallbackIcon(context));
     }
 
     public int getLightColorArgb(){
