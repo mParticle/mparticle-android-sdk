@@ -128,7 +128,6 @@ public class MParticle {
 
     private final MParticleInternal mInternal;
 
-
     MParticle(Context context, MessageManager messageManager, ConfigManager configManager, EmbeddedKitManager embeddedKitManager) {
 
         mConfigManager = configManager;
@@ -199,7 +198,7 @@ public class MParticle {
      * @param secret  The API secret to use for authentication with mParticle
      */
 
-    public static void start(Context context, String apiKey, String secret) {
+    private static void start(Context context, String apiKey, String secret) {
         start(context, apiKey, secret, InstallType.AutoDetect);
     }
 
@@ -217,7 +216,7 @@ public class MParticle {
      * @see com.mparticle.MParticle.InstallType
      */
 
-    public static void start(final Context context, final String apiKey, final String secret, final InstallType installType) {
+    private static void start(final Context context, final String apiKey, final String secret, final InstallType installType) {
         if (context == null) {
             throw new IllegalArgumentException("mParticle failed to start: context is required.");
         }
