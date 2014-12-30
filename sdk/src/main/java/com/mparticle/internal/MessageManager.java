@@ -178,14 +178,12 @@ public class MessageManager implements MessageManagerCallbacks {
         return threshold;
     }
 
-    MPMessage createFirstRunMessage(long time, String sessionId, long startTime) throws JSONException {
+    public MPMessage createFirstRunMessage(long time, String sessionId) throws JSONException {
         return new MPMessage.Builder(MessageType.FIRST_RUN, sessionId, mLocation)
-                .sessionStartTime(startTime)
                 .timestamp(time)
+                .dataConnection(sActiveNetworkName)
                 .build();
     }
-
-
 
     public void startSession(String sessionId, long time) {
         try {
@@ -219,7 +217,7 @@ public class MessageManager implements MessageManagerCallbacks {
 
             if (sFirstRun) {
                 try {
-                    JSONObject firstRunMessage = createFirstRunMessage(time, sessionId, time);
+                    JSONObject firstRunMessage = createFirstRunMessage(time, sessionId);
                     mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, firstRunMessage));
                     sFirstRun = false;
                 } catch (JSONException e) {

@@ -7,7 +7,7 @@ import org.json.JSONObject;
 
 import java.util.UUID;
 
-class MPMessage extends JSONObject{
+public class MPMessage extends JSONObject{
 
     private MPMessage(){}
     private MPMessage(Builder builder) throws JSONException{
@@ -31,6 +31,10 @@ class MPMessage extends JSONObject{
         if (builder.mAttributes != null) {
             put(Constants.MessageKey.ATTRIBUTES, builder.mAttributes);
         }
+        if (builder.mDataConnection != null) {
+            put(Constants.MessageKey.STATE_INFO_DATA_CONNECTION, builder.mDataConnection);
+        }
+
         if (!(Constants.MessageType.ERROR.equals(builder.mMessageType) &&
                 !(Constants.MessageType.OPT_OUT.equals(builder.mMessageType)))) {
             if (builder.mLocation != null) {
@@ -84,6 +88,7 @@ class MPMessage extends JSONObject{
         private String mName;
         private JSONObject mAttributes;
         private Location mLocation;
+        private String mDataConnection;
 
         public Builder(String messageType, String sessionId, Location location){
             mMessageType = messageType;
@@ -110,6 +115,11 @@ class MPMessage extends JSONObject{
 
         public MPMessage build() throws JSONException {
             return new MPMessage(this);
+        }
+
+        public Builder dataConnection(String dataConnection) {
+            mDataConnection = dataConnection;
+            return this;
         }
     }
 }
