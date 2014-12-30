@@ -64,7 +64,7 @@ public class ConfigManager {
     private int mSessionTimeoutInterval = -1;
     private int mUploadInterval = -1;
     private long mInfluenceOpenTimeout = 3600;
-    private JSONArray mTriggerMessageMatches, mTriggerMessageHashes;
+    private JSONArray mTriggerMessageMatches, mTriggerMessageHashes = null;
 
     private ConfigManager(){
 
@@ -81,8 +81,6 @@ public class ConfigManager {
         sLocalPrefs.init(mPreferences);
         mEmbeddedKitManager = embeddedKitManager;
     }
-
-
 
     public synchronized void updateConfig(JSONObject responseJSON) throws JSONException {
 
@@ -108,12 +106,15 @@ public class ConfigManager {
 
         if (responseJSON.has(ProviderPersistence.KEY_PERSISTENCE)) {
             setProviderPersistence(new ProviderPersistence(responseJSON, mContext));
+        }else{
+            setProviderPersistence(null);
         }
 
         mSessionTimeoutInterval = responseJSON.optInt(KEY_SESSION_TIMEOUT, -1);
         mUploadInterval = responseJSON.optInt(KEY_UPLOAD_INTERVAL, -1);
 
         mTriggerMessageMatches = null;
+        mTriggerMessageHashes = null;
         if (responseJSON.has(KEY_TRIGGER_ITEMS)){
             try {
                 JSONObject items = responseJSON.getJSONObject(KEY_TRIGGER_ITEMS);
@@ -156,15 +157,15 @@ public class ConfigManager {
 
     private void applyConfig() {
         if (getLogUnhandledExceptions()) {
-            MParticle.getInstance().enableUncaughtExceptionLogging();
+            MParticle.getInstance().internal().enableUncaughtExceptionLogging(false);
         } else {
-            MParticle.getInstance().disableUncaughtExceptionLogging();
+            MParticle.getInstance().internal().disableUncaughtExceptionLogging(false);
         }
         if (!VALUE_APP_DEFINED.equals(mNetworkPerformance)){
             if (VALUE_CNP_CAPTURE.equals(mNetworkPerformance)){
-                MParticle.getInstance().beginMeasuringNetworkPerformance();
+                MParticle.getInstance().internal().beginMeasuringNetworkPerformance(false);
             }else if (VALUE_CNP_NO_CAPTURE.equals(mNetworkPerformance)){
-                MParticle.getInstance().endMeasuringNetworkPerformance();
+                MParticle.getInstance().internal().endMeasuringNetworkPerformance(false);
             }
         }
     }
@@ -175,6 +176,10 @@ public class ConfigManager {
         } else {
             return mLogUnhandledExceptions.equals(VALUE_CUE_CATCH);
         }
+    }
+
+    public void setLogUnhandledExceptions(boolean log){
+        sLocalPrefs.reportUncaughtExceptions = log;
     }
 
     public String getApiKey() {

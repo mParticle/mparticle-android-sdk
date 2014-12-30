@@ -826,7 +826,6 @@ public class MParticle {
 
             }
 
-
             URL.setURLStreamHandlerFactory(factory);
         } catch (Error e) {
             ConfigManager.log(LogLevel.WARNING, "Error initiating network performance monitoring: " + e.getMessage());
@@ -850,10 +849,7 @@ public class MParticle {
      * Begin measuring network performance. This method only needs to be called one time during the runtime of an application.
      */
     public void beginMeasuringNetworkPerformance() {
-        if (!measuredRequestManager.getEnabled()) {
-            mConfigManager.setNetworkingEnabled(true);
-            initNetworkMonitoring();
-        }
+        internal().beginMeasuringNetworkPerformance(true);
     }
 
 
@@ -861,18 +857,7 @@ public class MParticle {
      * Stop measuring network performance.
      */
     public void endMeasuringNetworkPerformance() {
-        if (measuredRequestManager.getEnabled()) {
-            measuredRequestManager.setEnabled(false);
-            mConfigManager.setNetworkingEnabled(false);
-            try {
-                javax.net.ssl.SSLSocketFactory current = HttpsURLConnection.getDefaultSSLSocketFactory();
-                if (current instanceof MPSSLSocketFactory) {
-                    HttpsURLConnection.setDefaultSSLSocketFactory(((MPSSLSocketFactory) current).delegateFactory);
-                }
-            } catch (Exception e) {
-                ConfigManager.log(LogLevel.WARNING, "Error stopping network performance monitoring: ", e.getMessage());
-            }
-        }
+        internal().endMeasuringNetworkPerformance(true);
     }
 
     /**
@@ -1344,26 +1329,14 @@ public class MParticle {
      * Enable mParticle exception handling to automatically log events on uncaught exceptions
      */
     public void enableUncaughtExceptionLogging() {
-        if (null == mExHandler) {
-            UncaughtExceptionHandler currentUncaughtExceptionHandler = Thread.getDefaultUncaughtExceptionHandler();
-            if (!(currentUncaughtExceptionHandler instanceof ExceptionHandler)) {
-                mExHandler = new ExceptionHandler(mMessageManager, currentUncaughtExceptionHandler);
-                Thread.setDefaultUncaughtExceptionHandler(mExHandler);
-            }
-        }
+        internal().enableUncaughtExceptionLogging(true);
     }
 
     /**
      * Disables mParticle exception handling and restores the original UncaughtExceptionHandler
      */
     public void disableUncaughtExceptionLogging() {
-        if (null != mExHandler) {
-            UncaughtExceptionHandler currentUncaughtExceptionHandler = Thread.getDefaultUncaughtExceptionHandler();
-            if (currentUncaughtExceptionHandler instanceof ExceptionHandler) {
-                Thread.setDefaultUncaughtExceptionHandler(mExHandler.getOriginalExceptionHandler());
-                mExHandler = null;
-            }
-        }
+        internal().disableUncaughtExceptionLogging(true);
     }
 
     /**
@@ -1899,6 +1872,58 @@ public class MParticle {
 
         public String getSessionId(){
             return mSessionID;
+        }
+
+        public void enableUncaughtExceptionLogging(boolean userTriggered) {
+            if (null == mExHandler) {
+                UncaughtExceptionHandler currentUncaughtExceptionHandler = Thread.getDefaultUncaughtExceptionHandler();
+                if (!(currentUncaughtExceptionHandler instanceof ExceptionHandler)) {
+                    mExHandler = new ExceptionHandler(mMessageManager, currentUncaughtExceptionHandler);
+                    Thread.setDefaultUncaughtExceptionHandler(mExHandler);
+                    if (userTriggered) {
+                        mConfigManager.setLogUnhandledExceptions(true);
+                    }
+                }
+            }
+        }
+
+        public void disableUncaughtExceptionLogging(boolean userTriggered) {
+            if (null != mExHandler) {
+                UncaughtExceptionHandler currentUncaughtExceptionHandler = Thread.getDefaultUncaughtExceptionHandler();
+                if (currentUncaughtExceptionHandler instanceof ExceptionHandler) {
+                    Thread.setDefaultUncaughtExceptionHandler(mExHandler.getOriginalExceptionHandler());
+                    mExHandler = null;
+                    if (userTriggered) {
+                        mConfigManager.setLogUnhandledExceptions(false);
+                    }
+                }
+            }
+        }
+
+        public void beginMeasuringNetworkPerformance(boolean userTriggered) {
+            if (!measuredRequestManager.getEnabled()) {
+                if (userTriggered) {
+                    mConfigManager.setNetworkingEnabled(true);
+                }
+                initNetworkMonitoring();
+            }
+        }
+
+        public void endMeasuringNetworkPerformance(boolean userTriggered) {
+            if (measuredRequestManager.getEnabled()) {
+                measuredRequestManager.setEnabled(false);
+                if (userTriggered) {
+                    mConfigManager.setNetworkingEnabled(false);
+                }
+                try {
+                    javax.net.ssl.SSLSocketFactory current = HttpsURLConnection.getDefaultSSLSocketFactory();
+                    if (current instanceof MPSSLSocketFactory) {
+                        HttpsURLConnection.setDefaultSSLSocketFactory(((MPSSLSocketFactory) current).delegateFactory);
+                    }
+                } catch (Exception e) {
+                    ConfigManager.log(LogLevel.WARNING, "Error stopping network performance monitoring: ", e.getMessage());
+                }
+            }
         }
 
         public void logUnhandledError(Throwable t) {

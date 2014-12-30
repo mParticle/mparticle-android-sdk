@@ -43,7 +43,7 @@ public class MParticleSanityTest extends AndroidTestCase {
 
     public void testSessionTimeout(){
         //configured in mParticle.xml
-        assertEquals(MParticle.getInstance().getSessionTimeout(), 30);
+        assertEquals(MParticle.getInstance().getSessionTimeout(), 60);
         MParticle.getInstance().setSessionTimeout(31);
         assertEquals(MParticle.getInstance().getSessionTimeout(), 31);
     }
