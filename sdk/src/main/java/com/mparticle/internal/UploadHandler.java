@@ -10,6 +10,7 @@ import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.util.Log;
 import android.util.SparseArray;
 
 import com.mparticle.MParticle;
@@ -487,8 +488,9 @@ public final class UploadHandler extends Handler {
                 JSONObject historyObject = new JSONObject();
                 while (gcmHistory.moveToNext()) {
                     int campaignId = gcmHistory.getInt(gcmHistory.getColumnIndex(MParticleDatabase.GcmMessageTable.CAMPAIGN_ID));
+
                     String campaignIdString = Integer.toString(campaignId);
-                    int contentId = gcmHistory.getInt(gcmHistory.getColumnIndex(MParticleDatabase.GcmMessageTable.CONTENT_ID));
+                    String contentId = gcmHistory.getString(gcmHistory.getColumnIndex(MParticleDatabase.GcmMessageTable.CONTENT_ID));
                     long displayedDate = gcmHistory.getLong(gcmHistory.getColumnIndex(MParticleDatabase.GcmMessageTable.DISPLAYED_AT));
                     JSONObject campaignObject = historyObject.optJSONObject(campaignIdString);
                     //only append the latest pushes
@@ -502,7 +504,7 @@ public final class UploadHandler extends Handler {
                 uploadMessage.put(Constants.MessageKey.PUSH_CAMPAIGN_HISTORY, historyObject);
             }
         }catch (Exception e){
-
+            ConfigManager.log(MParticle.LogLevel.WARNING, e, "Error while building GCM campaign history");
         }finally {
             if (gcmHistory != null && !gcmHistory.isClosed()){
                 gcmHistory.close();
