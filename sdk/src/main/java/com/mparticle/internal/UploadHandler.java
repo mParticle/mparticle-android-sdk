@@ -25,12 +25,14 @@ import com.mparticle.segmentation.Segment;
 import com.mparticle.segmentation.SegmentListener;
 import com.mparticle.segmentation.SegmentMembership;
 
+import org.apache.http.HttpStatus;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.UUID;
@@ -55,7 +57,7 @@ public final class UploadHandler extends Handler {
     private final Context mContext;
     private final String mApiKey;
     private final SegmentDatabase audienceDB;
-    private MParticleApiClient mApiClient;
+    private IMPApiClient mApiClient;
 
     private ConfigManager mConfigManager;
 
@@ -310,20 +312,20 @@ public final class UploadHandler extends Handler {
                     }
                 }
 
-                MParticleApiClient.ApiResponse response = null;
+                HttpURLConnection connection = null;
                 try {
-                    response = mApiClient.sendMessageBatch(message);
+                    connection = mApiClient.sendMessageBatch(message);
                 } catch (MParticleApiClient.MPRampException e) {
                     ConfigManager.log(MParticle.LogLevel.DEBUG, e.toString());
                 }
 
-                if (response == null || response.shouldDelete()) {
+                if (connection != null && shouldDelete(connection.getResponseCode())) {
                     dbDeleteUpload(id);
                     try {
-                        if (response != null &&
-                                response.getJsonResponse() != null &&
-                                response.getJsonResponse().has(MessageKey.MESSAGES)) {
-                            JSONArray responseCommands = response.getJsonResponse().getJSONArray(MessageKey.MESSAGES);
+                        JSONObject jsonObject = MParticleApiClient.getJsonResponse(connection);
+                        if (jsonObject != null &&
+                                jsonObject.has(MessageKey.MESSAGES)) {
+                            JSONArray responseCommands = jsonObject.getJSONArray(MessageKey.MESSAGES);
                             for (int i = 0; i < responseCommands.length(); i++) {
                                 JSONObject commandObject = responseCommands.getJSONObject(i);
                                 dbInsertCommand(commandObject);
@@ -352,6 +354,10 @@ public final class UploadHandler extends Handler {
         return processingSessionEnd;
     }
 
+    boolean shouldDelete(int statusCode) {
+        return HttpStatus.SC_ACCEPTED == statusCode ||
+                (statusCode >= HttpStatus.SC_BAD_REQUEST && statusCode < HttpStatus.SC_INTERNAL_SERVER_ERROR);
+    }
 
     private void processCommands() {
         try {
@@ -367,13 +373,15 @@ public final class UploadHandler extends Handler {
                 String postData = commandsCursor.getString(3);
                 String headers = commandsCursor.getString(4);
 
-                MParticleApiClient.ApiResponse response = null;
+                HttpURLConnection connection = null;
+                int responseCode = -1;
                 try {
-                    response = mApiClient.sendCommand(commandUrl, method, postData, headers);
+                    connection = mApiClient.sendCommand(commandUrl, method, postData, headers);
+                    responseCode = connection.getResponseCode();
                 } catch (Throwable t) {
                     // fail silently. a message will be logged if debug mode is enabled
                 } finally {
-                    if (response != null && response.getResponseCode() > -1) {
+                    if (connection != null && responseCode > -1) {
                         dbDeleteCommand(id);
                     } else {
                         ConfigManager.log(MParticle.LogLevel.DEBUG, "Provider command processing failed and will be retried.");
@@ -676,6 +684,10 @@ public final class UploadHandler extends Handler {
             db.close();
         }
 
+    }
+
+    public void setApiClient(IMPApiClient apiClient) {
+        mApiClient = apiClient;
     }
 
     class SegmentTask extends AsyncTask<Void, Void, SegmentMembership> {

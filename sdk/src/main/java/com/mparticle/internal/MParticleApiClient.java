@@ -48,7 +48,7 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManagerFactory;
 
-class MParticleApiClient {
+public class MParticleApiClient implements IMPApiClient {
 
     private static final String HEADER_SIGNATURE = "x-mp-signature";
     private static final String HEADER_ENVIRONMENT = "x-mp-env";
@@ -63,6 +63,7 @@ class MParticleApiClient {
     private static final String SERVICE_VERSION_1 = "/v1";
     private static final String SERVICE_VERSION_3 = "/v3";
     private static final String COOKIES = "ck";
+    private static final String LTV = "iltv";
     private static final String CONSUMER_INFO = "ci";
     private static final String MPID = "mpid";
 
@@ -98,7 +99,7 @@ class MParticleApiClient {
         supportedKits = getSupportedKitString();
     }
 
-    void fetchConfig() throws IOException, MPThrottleException, MPConfigException {
+    public void fetchConfig() throws IOException, MPThrottleException, MPConfigException {
         try {
             checkThrottleTime();
             HttpURLConnection connection = (HttpURLConnection) mConfigUrl.openConnection();
@@ -115,13 +116,15 @@ class MParticleApiClient {
 
             addMessageSignature(connection, null);
 
-            ApiResponse response = new ApiResponse(connection, true);
+            makeUrlRequest(connection, true);
 
-            if (response.statusCode >= HttpStatus.SC_OK && response.statusCode < HttpStatus.SC_MULTIPLE_CHOICES) {
-                mConfigManager.updateConfig(response.getJsonResponse());
+            if (connection.getResponseCode() >= HttpStatus.SC_OK && connection.getResponseCode() < HttpStatus.SC_MULTIPLE_CHOICES) {
+                JSONObject response = getJsonResponse(connection);
+                parseMparticleJson(response);
+                mConfigManager.updateConfig(response);
                 etag = connection.getHeaderField("ETag");
                 modified = connection.getHeaderField("Last-Modified");
-            }else if (response.statusCode >= HttpStatus.SC_BAD_REQUEST) {
+            }else if (connection.getResponseCode() >= HttpStatus.SC_BAD_REQUEST) {
                 throw new MPConfigException();
             }
         } catch (MalformedURLException e) {
@@ -135,7 +138,7 @@ class MParticleApiClient {
         return new URL(SECURE_SERVICE_SCHEME, API_HOST, SERVICE_VERSION_1 + "/" + mApiKey + "/audience?mpID=" + mConfigManager.getMpid());
     }
 
-    JSONObject fetchAudiences()  {
+    public JSONObject fetchAudiences()  {
 
         JSONObject response = null;
         try {
@@ -145,11 +148,12 @@ class MParticleApiClient {
             connection.setRequestProperty(HTTP.USER_AGENT, mUserAgent);
 
             addMessageSignature(connection, null);
-            ApiResponse apiResponse = new ApiResponse(connection, true);
-            if (apiResponse.getResponseCode() == HttpURLConnection.HTTP_FORBIDDEN){
+            makeUrlRequest(connection, true);
+            if (connection.getResponseCode() == HttpURLConnection.HTTP_FORBIDDEN){
                 ConfigManager.log(MParticle.LogLevel.ERROR, "Segment call forbidden: is Segment enabled for the current mParticle org?");
             }
-            response =  apiResponse.getJsonResponse();
+            response =  getJsonResponse(connection);
+            parseMparticleJson(response);
 
         }catch (Exception e){
             ConfigManager.log(MParticle.LogLevel.ERROR, "Segment call failed: " + e.getMessage());
@@ -157,7 +161,7 @@ class MParticleApiClient {
         return response;
     }
 
-    ApiResponse sendMessageBatch(String message) throws IOException, MPThrottleException, MPRampException {
+    public HttpURLConnection sendMessageBatch(String message) throws IOException, MPThrottleException, MPRampException {
         checkThrottleTime();
         checkRampValue();
 
@@ -193,10 +197,10 @@ class MParticleApiClient {
             zos.close();
         }
 
-        return new ApiResponse(connection, true);
+        return makeUrlRequest(connection, true);
     }
 
-    ApiResponse sendCommand(String commandUrl, String method, String postData, String headers) throws IOException, JSONException {
+    public HttpURLConnection sendCommand(String commandUrl, String method, String postData, String headers) throws IOException, JSONException {
         ConfigManager.log(MParticle.LogLevel.DEBUG, "Sending data to: " + commandUrl);
 
         URL url = new URL(commandUrl);
@@ -219,7 +223,7 @@ class MParticleApiClient {
                 urlConnection.getOutputStream().write(postDataBytes);
             }
         }
-        return new ApiResponse(urlConnection, false);
+        return makeUrlRequest(urlConnection, false);
 
     }
 
@@ -407,73 +411,63 @@ class MParticleApiClient {
         }
     }
 
-    class ApiResponse {
-        private static final String LTV = "iltv";
-        private int statusCode;
-        private JSONObject jsonResponse;
-        private HttpURLConnection connection;
+    public HttpURLConnection makeUrlRequest(HttpURLConnection connection, boolean mParticle) throws IOException{
+        if (mParticle && connection instanceof HttpsURLConnection) {
+            try {
+                ((HttpsURLConnection) connection).setSSLSocketFactory(getSocketFactory());
+            }catch (Exception e){
 
-        public ApiResponse(HttpURLConnection connection, boolean checkSsl) throws IOException {
-            this.connection = connection;
-            if (checkSsl && connection instanceof HttpsURLConnection) {
-                try {
-                    ((HttpsURLConnection) connection).setSSLSocketFactory(getSocketFactory());
-                }catch (Exception e){
-
-                }
             }
-            statusCode = connection.getResponseCode();
+        }
+        if (mParticle) {
+            int statusCode = connection.getResponseCode();
             if (statusCode == HttpStatus.SC_BAD_REQUEST) {
                 ConfigManager.log(MParticle.LogLevel.ERROR, "Bad API request - is the correct API key and secret configured?");
             }
-            if (statusCode == HttpStatus.SC_SERVICE_UNAVAILABLE && !DEBUGGING){
+            if (statusCode == HttpStatus.SC_SERVICE_UNAVAILABLE && !DEBUGGING) {
                 setNextValidTime();
             }
         }
+        return connection;
+    }
+    static JSONObject getJsonResponse(HttpURLConnection connection) {
+        try {
+            StringBuilder responseBuilder = new StringBuilder();
+            BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+            String line;
+            while ((line = in.readLine()) != null) {
+                responseBuilder.append(line + '\n');
+            }
+            in.close();
+            return new JSONObject(responseBuilder.toString());
+        } catch (IOException ex) {
 
-        boolean shouldDelete() {
-            return HttpStatus.SC_ACCEPTED == statusCode ||
-                    (statusCode >= HttpStatus.SC_BAD_REQUEST && statusCode < HttpStatus.SC_INTERNAL_SERVER_ERROR);
+        } catch (JSONException jse) {
+
         }
+        return null;
+    }
 
-        JSONObject getJsonResponse() {
-            if (jsonResponse == null) {
-                try {
-                    StringBuilder responseBuilder = new StringBuilder();
-                    BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-                    String line;
-                    while ((line = in.readLine()) != null) {
-                        responseBuilder.append(line + '\n');
-                    }
-                    in.close();
-                    jsonResponse = new JSONObject(responseBuilder.toString());
-                    if (jsonResponse.has(CONSUMER_INFO)) {
-                        JSONObject consumerInfo = jsonResponse.getJSONObject(CONSUMER_INFO);
-                        if (consumerInfo.has(MPID)) {
-                            mConfigManager.setMpid(consumerInfo.getLong(MPID));
-                        }
-                        if (consumerInfo.has(COOKIES)){
-                            mConfigManager.setCookies(consumerInfo.getJSONObject(COOKIES));
-                        }
-                    }
-                    if (jsonResponse.has(LTV)){
-                        BigDecimal serverLtv = new BigDecimal(jsonResponse.getString(LTV));
-                        BigDecimal mostRecentClientLtc = new BigDecimal(mPreferences.getString(Constants.PrefKeys.LTV, "0"));
-                        BigDecimal sum = serverLtv.add(mostRecentClientLtc);
-                        mPreferences.edit().putString(Constants.PrefKeys.LTV, sum.toPlainString()).commit();
-                    }
-
-                } catch (IOException ex) {
-
-                } catch (JSONException jse) {
-
+    public void parseMparticleJson(JSONObject jsonResponse){
+        try {
+            if (jsonResponse.has(CONSUMER_INFO)) {
+                JSONObject consumerInfo = jsonResponse.getJSONObject(CONSUMER_INFO);
+                if (consumerInfo.has(MPID)) {
+                    mConfigManager.setMpid(consumerInfo.getLong(MPID));
+                }
+                if (consumerInfo.has(COOKIES)) {
+                    mConfigManager.setCookies(consumerInfo.getJSONObject(COOKIES));
                 }
             }
-            return jsonResponse;
-        }
+            if (jsonResponse.has(LTV)) {
+                BigDecimal serverLtv = new BigDecimal(jsonResponse.getString(LTV));
+                BigDecimal mostRecentClientLtc = new BigDecimal(mPreferences.getString(Constants.PrefKeys.LTV, "0"));
+                BigDecimal sum = serverLtv.add(mostRecentClientLtc);
+                mPreferences.edit().putString(Constants.PrefKeys.LTV, sum.toPlainString()).commit();
+            }
 
-        public int getResponseCode() {
-            return statusCode;
+        } catch (JSONException jse) {
+
         }
     }
 
@@ -482,19 +476,19 @@ class MParticleApiClient {
         mPreferences.edit().putLong(Constants.PrefKeys.NEXT_REQUEST_TIME, nextTime).commit();
     }
 
-    final class MPThrottleException extends Exception {
+    public final class MPThrottleException extends Exception {
         public MPThrottleException() {
             super("mP servers are busy, API connections have been throttled.");
         }
     }
 
-    final class MPConfigException extends Exception {
+    public final class MPConfigException extends Exception {
         public MPConfigException() {
             super("mP configuration request failed, deferring next batch.");
         }
     }
 
-    final class MPRampException extends Exception {
+    public final class MPRampException extends Exception {
         public MPRampException() {
             super("This device is being sampled.");
         }
