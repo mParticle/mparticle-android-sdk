@@ -163,6 +163,23 @@ public class PushTests extends AndroidTestCase {
         fail("Message should have been expired!");
     }
 
+    public void testCampaignBatchExpiration(){
+        JSONArray messageKeys = getMockMessageKeys();
+
+        Intent pushIntent = new Intent();
+        Bundle extras = getMpExtras(MP_JSON);
+        extras.putString("m_expy", Long.toString(System.currentTimeMillis()));
+        pushIntent.putExtras(extras);
+
+        MPCloudNotificationMessage message = null;
+        try {
+            message = (MPCloudNotificationMessage) AbstractCloudMessage.createMessage(pushIntent, messageKeys);
+        } catch (AbstractCloudMessage.InvalidGcmMessageException e) {
+            assertNotNull(e);
+            return;
+        }
+    }
+
     public void testCommands(){
         Intent pushIntent = new Intent();
         Bundle extras = getMpExtras(MP_JSON);
@@ -241,7 +258,7 @@ public class PushTests extends AndroidTestCase {
         return jsonArray;
     }
 
-    private Bundle getMpExtras(String jsonString){
+    public static Bundle getMpExtras(String jsonString){
         try {
             Bundle extras = new Bundle();
             JSONObject json = new JSONObject(jsonString);
