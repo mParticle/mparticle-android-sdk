@@ -81,7 +81,7 @@ public class MParticle {
     final MeasuredRequestManager measuredRequestManager;
     final EmbeddedKitManager mEmbeddedKitManager;
     JSONArray mUserIdentities = new JSONArray();
-    String mSessionID;
+    String mSessionID = "NO-SESSION";
 
     private static Bundle lastNotificationBundle;
 
@@ -454,7 +454,7 @@ public class MParticle {
         mMessageManager.endSession(mSessionID, sessionEndTime, sessionEndTime - mSessionStartTime);
         // reset agent to unstarted state
         mSessionStartTime = 0;
-        mSessionID = "";
+        mSessionID = "NO-SESSION";
     }
 
 
@@ -465,7 +465,7 @@ public class MParticle {
     private void ensureActiveSession() {
         //    checkSessionTimeout();
         mLastEventTime = System.currentTimeMillis();
-        if (0 == mSessionStartTime) {
+        if (0 == mSessionStartTime || "NO-SESSION".equals(mSessionID) ) {
             newSession();
         }
     }

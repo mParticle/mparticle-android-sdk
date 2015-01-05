@@ -284,6 +284,8 @@ import java.util.concurrent.TimeoutException;
             ConfigManager.log(MParticle.LogLevel.DEBUG, e.getMessage());
         }  catch (MParticleApiClient.MPConfigException e) {
             ConfigManager.log(MParticle.LogLevel.DEBUG, e.getMessage());
+        } catch (Exception e){
+            ConfigManager.log(MParticle.LogLevel.DEBUG, e.getMessage());
         } finally {
             if (readyMessagesCursor != null && !readyMessagesCursor.isClosed()){
                 readyMessagesCursor.close();
@@ -344,7 +346,9 @@ import java.util.concurrent.TimeoutException;
             ConfigManager.log(MParticle.LogLevel.ERROR, e, "Error processing batch uploads in mParticle DB");
         } catch (IOException ioe) {
             ConfigManager.log(MParticle.LogLevel.ERROR, ioe, "Error processing batch uploads in mParticle DB");
-        } finally {
+        } catch (Exception e){
+            ConfigManager.log(MParticle.LogLevel.ERROR, e, "Error processing batch uploads in mParticle DB");
+        }finally {
             if (readyUploadsCursor != null && !readyUploadsCursor.isClosed()){
                 readyUploadsCursor.close();
             }
