@@ -197,7 +197,12 @@ public class MParticleApiClient implements IMPApiClient {
             zos.close();
         }
 
-        return makeUrlRequest(connection, true);
+        makeUrlRequest(connection, true);
+        if (connection.getResponseCode() >= HttpStatus.SC_OK && connection.getResponseCode() < HttpStatus.SC_MULTIPLE_CHOICES) {
+            JSONObject response = getJsonResponse(connection);
+            parseMparticleJson(response);
+        }
+        return connection;
     }
 
     public HttpURLConnection sendCommand(String commandUrl, String method, String postData, String headers) throws IOException, JSONException {
