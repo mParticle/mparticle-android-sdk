@@ -200,7 +200,7 @@ import org.json.JSONObject;
                 break;
             case STORE_GCM_MESSAGE:
                 try {
-                    MPCloudNotificationMessage message = (MPCloudNotificationMessage) msg.obj;
+                    AbstractCloudMessage message = (AbstractCloudMessage) msg.obj;
                     dbInsertGcmMessage(message, msg.getData().getString(MParticleDatabase.GcmMessageTable.APPSTATE));
                 } catch (SQLiteException e) {
                     ConfigManager.log(MParticle.LogLevel.ERROR, e, "Error saving GCM message to mParticle DB");
@@ -302,7 +302,7 @@ import org.json.JSONObject;
         try{
             long influenceOpenTimeout = MParticle.getInstance().internal().getConfigurationManager().getInfluenceOpenTimeoutMillis();
             gcmCursor = db.query(MParticleDatabase.GcmMessageTable.TABLE_NAME,
-                    null,
+                    null,MParticleDatabase.GcmMessageTable.CONTENT_ID + " != '" + MParticleDatabase.GcmMessageTable.PROVIDER_CONTENT_ID + "' and " +
                     MParticleDatabase.GcmMessageTable.DISPLAYED_AT +
                             " > 0 and " +
                             MParticleDatabase.GcmMessageTable.DISPLAYED_AT +
@@ -399,11 +399,17 @@ import org.json.JSONObject;
         }
     }
 
-    private void dbInsertGcmMessage(MPCloudNotificationMessage message, String appState) throws JSONException {
+    private void dbInsertGcmMessage(AbstractCloudMessage message, String appState) throws JSONException {
         ContentValues contentValues = new ContentValues();
-        contentValues.put(MParticleDatabase.GcmMessageTable.CONTENT_ID, message.getContentId());
-        contentValues.put(MParticleDatabase.GcmMessageTable.CAMPAIGN_ID, message.getCampaignId());
-        contentValues.put(MParticleDatabase.GcmMessageTable.EXPIRATION, message.getExpiration());
+        if (message instanceof MPCloudNotificationMessage) {
+            contentValues.put(MParticleDatabase.GcmMessageTable.CONTENT_ID, ((MPCloudNotificationMessage)message).getContentId());
+            contentValues.put(MParticleDatabase.GcmMessageTable.CAMPAIGN_ID, ((MPCloudNotificationMessage)message).getCampaignId());
+            contentValues.put(MParticleDatabase.GcmMessageTable.EXPIRATION, ((MPCloudNotificationMessage)message).getExpiration());
+        }else{
+            contentValues.put(MParticleDatabase.GcmMessageTable.CONTENT_ID, MParticleDatabase.GcmMessageTable.PROVIDER_CONTENT_ID);
+            contentValues.put(MParticleDatabase.GcmMessageTable.CAMPAIGN_ID, 0);
+            contentValues.put(MParticleDatabase.GcmMessageTable.EXPIRATION, System.currentTimeMillis() + (24 * 60 * 60 * 1000));
+        }
         contentValues.put(MParticleDatabase.GcmMessageTable.PAYLOAD, message.getRedactedJsonPayload().toString());
         contentValues.put(MParticleDatabase.GcmMessageTable.BEHAVIOR, 0);
         contentValues.put(MParticleDatabase.GcmMessageTable.CREATED_AT, System.currentTimeMillis());

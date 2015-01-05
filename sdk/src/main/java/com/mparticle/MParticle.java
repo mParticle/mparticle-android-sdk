@@ -46,6 +46,7 @@ import com.mparticle.licensing.ServerManagedPolicy;
 
 import com.mparticle.messaging.CloudAction;
 import com.mparticle.messaging.MPCloudNotificationMessage;
+import com.mparticle.messaging.ProviderCloudMessage;
 import com.mparticle.segmentation.SegmentListener;
 
 import org.apache.http.conn.ssl.SSLSocketFactory;
@@ -1571,6 +1572,10 @@ public class MParticle {
     }
 
     void saveGcmMessage(MPCloudNotificationMessage cloudMessage, String appState) {
+        mMessageManager.saveGcmMessage(cloudMessage, appState);
+    }
+
+    void saveGcmMessage(ProviderCloudMessage cloudMessage, String appState) {
         mMessageManager.saveGcmMessage(cloudMessage, appState);
     }
 

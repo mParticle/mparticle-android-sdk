@@ -487,18 +487,20 @@ public final class UploadHandler extends Handler {
             if (gcmHistory.getCount() > 0) {
                 JSONObject historyObject = new JSONObject();
                 while (gcmHistory.moveToNext()) {
-                    int campaignId = gcmHistory.getInt(gcmHistory.getColumnIndex(MParticleDatabase.GcmMessageTable.CAMPAIGN_ID));
 
-                    String campaignIdString = Integer.toString(campaignId);
                     String contentId = gcmHistory.getString(gcmHistory.getColumnIndex(MParticleDatabase.GcmMessageTable.CONTENT_ID));
-                    long displayedDate = gcmHistory.getLong(gcmHistory.getColumnIndex(MParticleDatabase.GcmMessageTable.DISPLAYED_AT));
-                    JSONObject campaignObject = historyObject.optJSONObject(campaignIdString);
-                    //only append the latest pushes
-                    if (campaignObject == null){
-                        campaignObject = new JSONObject();
-                        campaignObject.put(Constants.MessageKey.PUSH_CONTENT_ID, contentId);
-                        campaignObject.put(MessageKey.PUSH_CAMPAIGN_HISTORY_TIMESTAMP, displayedDate);
-                        historyObject.put(campaignIdString, campaignObject);
+                    if (!MParticleDatabase.GcmMessageTable.PROVIDER_CONTENT_ID.equals(contentId)) {
+                        int campaignId = gcmHistory.getInt(gcmHistory.getColumnIndex(MParticleDatabase.GcmMessageTable.CAMPAIGN_ID));
+                        String campaignIdString = Integer.toString(campaignId);
+                        long displayedDate = gcmHistory.getLong(gcmHistory.getColumnIndex(MParticleDatabase.GcmMessageTable.DISPLAYED_AT));
+                        JSONObject campaignObject = historyObject.optJSONObject(campaignIdString);
+                        //only append the latest pushes
+                        if (campaignObject == null) {
+                            campaignObject = new JSONObject();
+                            campaignObject.put(Constants.MessageKey.PUSH_CONTENT_ID, contentId);
+                            campaignObject.put(MessageKey.PUSH_CAMPAIGN_HISTORY_TIMESTAMP, displayedDate);
+                            historyObject.put(campaignIdString, campaignObject);
+                        }
                     }
                 }
                 uploadMessage.put(Constants.MessageKey.PUSH_CAMPAIGN_HISTORY, historyObject);

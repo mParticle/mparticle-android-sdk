@@ -28,6 +28,7 @@ import com.mparticle.MParticle.EventType;
 import com.mparticle.messaging.AbstractCloudMessage;
 import com.mparticle.messaging.CloudAction;
 import com.mparticle.messaging.MPCloudNotificationMessage;
+import com.mparticle.messaging.ProviderCloudMessage;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -668,6 +669,14 @@ public class MessageManager implements MessageManagerCallbacks {
     }
 
     public void saveGcmMessage(MPCloudNotificationMessage cloudMessage, String appState) {
+        Message message = mMessageHandler.obtainMessage(MessageHandler.STORE_GCM_MESSAGE, cloudMessage);
+        Bundle data = new Bundle();
+        data.putString(MParticleDatabase.GcmMessageTable.APPSTATE, appState);
+        message.setData(data);
+        mMessageHandler.sendMessage(message);
+    }
+
+    public void saveGcmMessage(ProviderCloudMessage cloudMessage, String appState) {
         Message message = mMessageHandler.obtainMessage(MessageHandler.STORE_GCM_MESSAGE, cloudMessage);
         Bundle data = new Bundle();
         data.putString(MParticleDatabase.GcmMessageTable.APPSTATE, appState);

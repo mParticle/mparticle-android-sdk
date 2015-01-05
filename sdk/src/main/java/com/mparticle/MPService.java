@@ -24,7 +24,9 @@ import com.mparticle.messaging.AbstractCloudMessage;
 import com.mparticle.messaging.CloudAction;
 import com.mparticle.messaging.MPCloudBackgroundMessage;
 import com.mparticle.messaging.MPCloudNotificationMessage;
+import com.mparticle.messaging.ProviderCloudMessage;
 
+import java.security.Provider;
 import java.util.List;
 
 /**
@@ -201,9 +203,9 @@ public class MPService extends IntentService {
         if (!MPCloudBackgroundMessage.processSilentPush(this, intent.getExtras())){
             try {
                 AbstractCloudMessage cloudMessage = AbstractCloudMessage.createMessage(intent, ConfigManager.getPushKeys(this));
-
+                String appState = getAppState();
                 if (cloudMessage instanceof MPCloudNotificationMessage){
-                    String appState = getAppState();
+
                     MParticle.start(this);
                     MParticle.getInstance().saveGcmMessage(((MPCloudNotificationMessage)cloudMessage), appState);
                     if (((MPCloudNotificationMessage)cloudMessage).isDelayed()){
@@ -211,6 +213,8 @@ public class MPService extends IntentService {
                         scheduleFutureNotification((MPCloudNotificationMessage) cloudMessage);
                         return;
                     }
+                }else if (cloudMessage instanceof ProviderCloudMessage){
+                    MParticle.getInstance().saveGcmMessage(((ProviderCloudMessage)cloudMessage), appState);
                 }
                 broadcastNotificationReceived(cloudMessage);
             }catch (Exception e){

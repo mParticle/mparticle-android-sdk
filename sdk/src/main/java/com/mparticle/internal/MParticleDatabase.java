@@ -130,6 +130,7 @@ import android.provider.BaseColumns;
         public final static String EXPIRATION = "expiration";
         public final static String BEHAVIOR = "behavior";
         public final static String APPSTATE = "appstate";
+        public final static String PROVIDER_CONTENT_ID = "PROVIDER_ID";
     }
 
     private static final String CREATE_GCM_MSG_DDL =
