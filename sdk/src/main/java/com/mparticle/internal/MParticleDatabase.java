@@ -130,12 +130,12 @@ import android.provider.BaseColumns;
         public final static String EXPIRATION = "expiration";
         public final static String BEHAVIOR = "behavior";
         public final static String APPSTATE = "appstate";
-        public final static String PROVIDER_CONTENT_ID = "PROVIDER_ID";
+        public final static int PROVIDER_CONTENT_ID = -1;
     }
 
     private static final String CREATE_GCM_MSG_DDL =
             "CREATE TABLE IF NOT EXISTS " + GcmMessageTable.TABLE_NAME + " (" + GcmMessageTable.CONTENT_ID +
-                    " TEXT PRIMARY KEY, " +
+                    " INTEGER PRIMARY KEY, " +
                     GcmMessageTable.PAYLOAD + " TEXT NOT NULL, " +
                     GcmMessageTable.APPSTATE + " TEXT NOT NULL, " +
                     GcmMessageTable.CREATED_AT + " INTEGER NOT NULL, " +

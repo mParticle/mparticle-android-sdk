@@ -34,7 +34,7 @@ public class ProviderCloudMessage extends AbstractCloudMessage {
 
     @Override
     protected CloudAction getDefaultAction() {
-        return new CloudAction(getId(), null, mPrimaryText, null);
+        return new CloudAction(Integer.toString(getId()), null, mPrimaryText, null);
     }
 
     @Override
@@ -63,8 +63,8 @@ public class ProviderCloudMessage extends AbstractCloudMessage {
 
 
     @Override
-    public String getId() {
-        return Integer.toString(mPrimaryText.hashCode());
+    public int getId() {
+        return mPrimaryText.hashCode();
     }
 
     @Override

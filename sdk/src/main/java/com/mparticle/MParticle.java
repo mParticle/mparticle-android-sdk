@@ -2031,21 +2031,31 @@ public class MParticle {
             mMessageManager.refreshConfiguration();
         }
 
-        public void logNotification(AbstractCloudMessage message, CloudAction action, boolean startSession, String appState, int behavior) {
-            logNotification(message.getRedactedJsonPayload().toString(), message.getId(), action, startSession, appState, behavior);
+        public void logNotification(MPCloudNotificationMessage cloudMessage, CloudAction action, boolean startSession, String appState, int behavior) {
+            logNotification(cloudMessage.getId(), cloudMessage.getRedactedJsonPayload().toString(), action, startSession, appState, behavior);
         }
 
-        public void logNotification(String payload, String contentId, CloudAction action, boolean startSession, String appState, int behavior) {
+        public void logNotification(ProviderCloudMessage cloudMessage, boolean startSession, String appState) {
             if (mConfigManager.getSendOoEvents()) {
                 if (startSession){
                     ensureActiveSession();
                 }
-                mMessageManager.logNotification(mSessionID, mSessionStartTime, payload, contentId, action, appState, behavior);
+                mMessageManager.logNotification(mSessionID, mSessionStartTime, cloudMessage, appState);
+            }
+        }
+
+        public void logNotification(int contentId, String payload, CloudAction action, boolean startSession, String appState, int behavior) {
+            if (mConfigManager.getSendOoEvents()) {
+                if (startSession){
+                    ensureActiveSession();
+                }
+                mMessageManager.logNotification(mSessionID, mSessionStartTime, contentId, payload, action, appState, behavior);
             }
         }
 
         public MessageManager getMessageManager() {
             return mMessageManager;
         }
+
     }
 }

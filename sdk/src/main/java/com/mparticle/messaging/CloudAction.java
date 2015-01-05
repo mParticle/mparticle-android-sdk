@@ -21,23 +21,25 @@ public class CloudAction implements Parcelable {
     private final String mActionIcon;
     private final String mActionTitle;
     private final String mActionActivity;
+    private final String mActionIdentifier;
 
     public CloudAction(String actionId, String actionIcon, String actionTitle, String actionActivity) {
 
         mActionIcon = actionIcon;
         mActionTitle = actionTitle;
         mActionActivity = actionActivity;
+        mActionId = actionId;
 
-        if (actionId == null){
+        if (TextUtils.isEmpty(mActionId)){
             if (!TextUtils.isEmpty(mActionTitle)){
-                mActionId = mActionTitle;
+                mActionIdentifier = mActionTitle;
             }else if (!TextUtils.isEmpty(mActionIcon)){
-                mActionId = mActionIcon;
+                mActionIdentifier = mActionIcon;
             }else{
-                mActionId = UUID.randomUUID().toString();
+                mActionIdentifier = UUID.randomUUID().toString();
             }
         }else{
-            mActionId = actionId;
+            mActionIdentifier = mActionId;
         }
     }
 
@@ -46,6 +48,7 @@ public class CloudAction implements Parcelable {
         mActionIcon = source.readString();
         mActionTitle = source.readString();
         mActionActivity = source.readString();
+        mActionIdentifier = source.readString();
     }
 
     @Override
@@ -59,6 +62,7 @@ public class CloudAction implements Parcelable {
         dest.writeString(mActionIcon);
         dest.writeString(mActionTitle);
         dest.writeString(mActionActivity);
+        dest.writeString(mActionIdentifier);
     }
 
     public PendingIntent getIntent(Context context, AbstractCloudMessage message, CloudAction action) {
@@ -71,7 +75,7 @@ public class CloudAction implements Parcelable {
                 intent.putExtra(MParticlePushUtility.CLOUD_ACTION_EXTRA, action);
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
-                activityIntent = PendingIntent.getActivity(context, action.getActionId().hashCode(), intent, PendingIntent.FLAG_UPDATE_CURRENT);
+                activityIntent = PendingIntent.getActivity(context, action.getActionIdentifier().hashCode(), intent, PendingIntent.FLAG_UPDATE_CURRENT);
             }catch (Exception e){
 
             }
@@ -119,5 +123,18 @@ public class CloudAction implements Parcelable {
 
     public String getActionId() {
         return mActionId;
+    }
+
+    public String getActionIdentifier() {
+        return mActionIdentifier;
+    }
+
+    public int getActionIdInt() {
+        try {
+            return Integer.parseInt(getActionId());
+        }catch (Exception e){
+
+        }
+        return -1;
     }
 }

@@ -72,7 +72,9 @@ import org.json.JSONObject;
                     if (MessageType.APP_STATE_TRANSITION == messageType){
                         appendLatestPushNotification(message);
                     }
-                    if (MessageType.PUSH_RECEIVED == messageType && !validateBehaviorFlags(message)){
+                    if (MessageType.PUSH_RECEIVED == messageType &&
+                            message.has(MessageKey.PUSH_BEHAVIOR) &&
+                            !validateBehaviorFlags(message)){
                         return;
                     }
                     dbInsertMessage(message);
@@ -224,7 +226,7 @@ import org.json.JSONObject;
         int newBehavior = message.optInt(MessageKey.PUSH_BEHAVIOR);
         try {
             ConfigManager.log(MParticle.LogLevel.DEBUG, "Validating GCM behaviors...");
-            String[] args = {message.getString(MParticleDatabase.GcmMessageTable.CONTENT_ID)};
+            String[] args = {Integer.toString(message.getInt(MParticleDatabase.GcmMessageTable.CONTENT_ID))};
             gcmCursor = db.query(MParticleDatabase.GcmMessageTable.TABLE_NAME,
                     null,
                     MParticleDatabase.GcmMessageTable.CONTENT_ID + " =?",
@@ -266,7 +268,7 @@ import org.json.JSONObject;
                     }
                     int updated = db.update(MParticleDatabase.GcmMessageTable.TABLE_NAME, values, MParticleDatabase.GcmMessageTable.CONTENT_ID + " =?", args);
                     if (updated > 0) {
-                        ConfigManager.log(MParticle.LogLevel.DEBUG, "Updated GCM with content ID: " + message.getString(MParticleDatabase.GcmMessageTable.CONTENT_ID) + " and behavior(s): " + getBehaviorString(newBehavior));
+                        ConfigManager.log(MParticle.LogLevel.DEBUG, "Updated GCM with content ID: " + message.getInt(MParticleDatabase.GcmMessageTable.CONTENT_ID) + " and behavior(s): " + getBehaviorString(newBehavior));
                     }
                 }else{
                     shouldInsert = false;
@@ -302,7 +304,7 @@ import org.json.JSONObject;
         try{
             long influenceOpenTimeout = MParticle.getInstance().internal().getConfigurationManager().getInfluenceOpenTimeoutMillis();
             gcmCursor = db.query(MParticleDatabase.GcmMessageTable.TABLE_NAME,
-                    null,MParticleDatabase.GcmMessageTable.CONTENT_ID + " != '" + MParticleDatabase.GcmMessageTable.PROVIDER_CONTENT_ID + "' and " +
+                    null,MParticleDatabase.GcmMessageTable.CONTENT_ID + " != " + MParticleDatabase.GcmMessageTable.PROVIDER_CONTENT_ID + " and " +
                     MParticleDatabase.GcmMessageTable.DISPLAYED_AT +
                             " > 0 and " +
                             MParticleDatabase.GcmMessageTable.DISPLAYED_AT +
@@ -313,8 +315,8 @@ import org.json.JSONObject;
                     null,
                     null);
             while (gcmCursor.moveToNext()){
-                MParticle.getInstance().internal().logNotification(gcmCursor.getString(gcmCursor.getColumnIndex(MParticleDatabase.GcmMessageTable.PAYLOAD)),
-                        gcmCursor.getString(gcmCursor.getColumnIndex(MParticleDatabase.GcmMessageTable.CONTENT_ID)),
+                MParticle.getInstance().internal().logNotification(gcmCursor.getInt(gcmCursor.getColumnIndex(MParticleDatabase.GcmMessageTable.CONTENT_ID)),
+                        gcmCursor.getString(gcmCursor.getColumnIndex(MParticleDatabase.GcmMessageTable.PAYLOAD)),
                         null,
                         true,
                         gcmCursor.getString(gcmCursor.getColumnIndex(MParticleDatabase.GcmMessageTable.APPSTATE)),

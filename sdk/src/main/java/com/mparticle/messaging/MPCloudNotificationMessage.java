@@ -98,32 +98,34 @@ public class MPCloudNotificationMessage extends AbstractCloudMessage {
             throw new InvalidGcmMessageException("GCM message is expired.");
         }
         mActions = new CloudAction[3];
-        if (mExtras.containsKey(ACTION_1_ICON) ||
-                mExtras.containsKey(ACTION_1_TITLE)){
-            mActions[0] = new CloudAction(
-                    mExtras.getString(ACTION_1_ID),
-                    mExtras.getString(ACTION_1_ICON),
-                    mExtras.getString(ACTION_1_TITLE),
-                    mExtras.getString(ACTION_1_ACTIVITY));
+        try {
+            if (mExtras.containsKey(ACTION_1_ICON) ||
+                    mExtras.containsKey(ACTION_1_TITLE)) {
+                mActions[0] = new CloudAction(
+                        mExtras.getString(ACTION_1_ID),
+                        mExtras.getString(ACTION_1_ICON),
+                        mExtras.getString(ACTION_1_TITLE),
+                        mExtras.getString(ACTION_1_ACTIVITY));
+            }
+            if (mExtras.containsKey(ACTION_2_ICON) ||
+                    mExtras.containsKey(ACTION_2_TITLE)) {
+                mActions[1] = new CloudAction(
+                        mExtras.getString(ACTION_2_ID),
+                        mExtras.getString(ACTION_2_ICON),
+                        mExtras.getString(ACTION_2_TITLE),
+                        mExtras.getString(ACTION_2_ACTIVITY));
+            }
+            if (mExtras.containsKey(ACTION_3_ICON) ||
+                    mExtras.containsKey(ACTION_3_TITLE)) {
+                mActions[2] = new CloudAction(
+                        mExtras.getString(ACTION_3_ID),
+                        mExtras.getString(ACTION_3_ICON),
+                        mExtras.getString(ACTION_3_TITLE),
+                        mExtras.getString(ACTION_3_ACTIVITY));
+            }
+        }catch (Exception e){
+            throw new InvalidGcmMessageException(e.getMessage());
         }
-        if (mExtras.containsKey(ACTION_2_ICON) ||
-                mExtras.containsKey(ACTION_2_TITLE)){
-            mActions[1] = new CloudAction(
-                    mExtras.getString(ACTION_2_ID),
-                    mExtras.getString(ACTION_2_ICON),
-                    mExtras.getString(ACTION_2_TITLE),
-                    mExtras.getString(ACTION_2_ACTIVITY));
-        }
-        if (mExtras.containsKey(ACTION_3_ICON) ||
-                mExtras.containsKey(ACTION_3_TITLE)){
-            mActions[2] = new CloudAction(
-                    mExtras.getString(ACTION_3_ID),
-                    mExtras.getString(ACTION_3_ICON),
-                    mExtras.getString(ACTION_3_TITLE),
-                    mExtras.getString(ACTION_3_ACTIVITY));
-        }
-
-
     }
 
     private String getDefaultActivity(){
@@ -132,7 +134,7 @@ public class MPCloudNotificationMessage extends AbstractCloudMessage {
 
     @Override
     protected CloudAction getDefaultAction() {
-        return new CloudAction(getContentId(), null, null, getDefaultActivity());
+        return new CloudAction(Integer.toString(getContentId()), null, null, getDefaultActivity());
     }
 
     public static final Parcelable.Creator<MPCloudNotificationMessage> CREATOR = new Parcelable.Creator<MPCloudNotificationMessage>() {
@@ -155,7 +157,7 @@ public class MPCloudNotificationMessage extends AbstractCloudMessage {
     }
 
     @Override
-    public String getId() {
+    public int getId() {
         return getContentId();
     }
 
@@ -460,8 +462,8 @@ public class MPCloudNotificationMessage extends AbstractCloudMessage {
     }
 
 
-    public String getContentId() {
-        return mExtras.getString(CONTENT_ID);
+    public int getContentId() {
+        return Integer.parseInt(mExtras.getString(CONTENT_ID));
     }
 
     public int getCampaignId() {

@@ -124,10 +124,14 @@ public class MPService extends IntentService {
         (new AsyncTask<AbstractCloudMessage, Void, Notification>() {
             @Override
             protected Notification doInBackground(AbstractCloudMessage... params) {
-                Notification notification =  params[0].buildNotification(MPService.this, System.currentTimeMillis());
-
-                MParticle.getInstance().internal().logNotification(params[0], null, false, getAppState(), AbstractCloudMessage.FLAG_RECEIVED | AbstractCloudMessage.FLAG_DISPLAYED);
-                return notification;
+                String appState = getAppState();
+                AbstractCloudMessage message = params[0];
+                if (message instanceof ProviderCloudMessage){
+                    MParticle.getInstance().internal().logNotification((ProviderCloudMessage)message, false, appState);
+                }else if (message instanceof MPCloudNotificationMessage){
+                    MParticle.getInstance().internal().logNotification((MPCloudNotificationMessage)message, null, false, appState, AbstractCloudMessage.FLAG_RECEIVED | AbstractCloudMessage.FLAG_DISPLAYED);
+                }
+                return message.buildNotification(MPService.this, System.currentTimeMillis());
             }
 
             @Override
@@ -136,8 +140,8 @@ public class MPService extends IntentService {
                 if (notification != null) {
                     NotificationManager mNotifyMgr =
                             (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-                    mNotifyMgr.cancel(message.getId().hashCode());
-                    mNotifyMgr.notify(message.getId().hashCode(), notification);
+                    mNotifyMgr.cancel(message.getId());
+                    mNotifyMgr.notify(message.getId(), notification);
                 }
 
                 if (isNetworkingEnabled){
@@ -209,7 +213,7 @@ public class MPService extends IntentService {
                     MParticle.start(this);
                     MParticle.getInstance().saveGcmMessage(((MPCloudNotificationMessage)cloudMessage), appState);
                     if (((MPCloudNotificationMessage)cloudMessage).isDelayed()){
-                        MParticle.getInstance().internal().logNotification(cloudMessage, null, false, appState, AbstractCloudMessage.FLAG_RECEIVED);
+                        MParticle.getInstance().internal().logNotification((MPCloudNotificationMessage)cloudMessage, null, false, appState, AbstractCloudMessage.FLAG_RECEIVED);
                         scheduleFutureNotification((MPCloudNotificationMessage) cloudMessage);
                         return;
                     }
@@ -230,7 +234,7 @@ public class MPService extends IntentService {
         intent.setClass(this, MPService.class);
         intent.putExtra(MParticlePushUtility.CLOUD_MESSAGE_EXTRA, message);
 
-        PendingIntent pIntent = PendingIntent.getService(this, message.getId().hashCode(), intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent pIntent = PendingIntent.getService(this, message.getId(), intent, PendingIntent.FLAG_UPDATE_CURRENT);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT){
             alarmService.setExact(AlarmManager.RTC, message.getDeliveryTime(), pIntent);
         }else{
@@ -257,11 +261,13 @@ public class MPService extends IntentService {
 
         NotificationManager manager =
                 (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-        manager.cancel(message.getId().hashCode());
+        manager.cancel(message.getId());
 
         MParticle.start(getApplicationContext());
-        MParticle.getInstance().internal().logNotification(message,
-                action, true, getAppState(), AbstractCloudMessage.FLAG_READ | AbstractCloudMessage.FLAG_DIRECT_OPEN);
+        if (message instanceof MPCloudNotificationMessage) {
+            MParticle.getInstance().internal().logNotification((MPCloudNotificationMessage) message,
+                    action, true, getAppState(), AbstractCloudMessage.FLAG_READ | AbstractCloudMessage.FLAG_DIRECT_OPEN);
+        }
 
         Intent broadcast = new Intent(MParticlePushUtility.BROADCAST_NOTIFICATION_TAPPED);
         broadcast.putExtra(MParticlePushUtility.CLOUD_MESSAGE_EXTRA, message);

@@ -534,7 +534,30 @@ public class MessageManager implements MessageManagerCallbacks {
         return true;
     }
 
-    public void logNotification(String sessionId, long sessionStartTime, String payload, String contentId, CloudAction action, String appState, int newBehavior) {
+    public void logNotification(String sessionId, long sessionStartTime, ProviderCloudMessage cloudMessage, String appState) {
+        try{
+            MPMessage message = new MPMessage.Builder(MessageType.PUSH_RECEIVED, sessionId, mLocation)
+                    .sessionStartTime(sessionStartTime)
+                    .timestamp(System.currentTimeMillis())
+                    .name("gcm")
+                    .build();
+
+            message.put(MessageKey.PAYLOAD, cloudMessage.getRedactedJsonPayload().toString());
+            message.put(MessageKey.PUSH_TYPE, Constants.Push.MESSAGE_TYPE_RECEIVED);
+
+            String regId = PushRegistrationHelper.getRegistrationId(mContext);
+            if ((regId != null) && (regId.length() > 0)) {
+                message.put(MessageKey.PUSH_TOKEN, regId);
+            }
+            message.put(MessageKey.APP_STATE, appState);
+            mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
+
+        }catch (JSONException e) {
+
+        }
+    }
+
+    public void logNotification(String sessionId, long sessionStartTime, int contentId, String payload, CloudAction action, String appState, int newBehavior) {
         try{
             MPMessage message = new MPMessage.Builder(MessageType.PUSH_RECEIVED, sessionId, mLocation)
                     .sessionStartTime(sessionStartTime)
@@ -543,17 +566,17 @@ public class MessageManager implements MessageManagerCallbacks {
                     .build();
 
             message.put(MessageKey.PAYLOAD, payload);
-            message.put(MessageKey.PUSH_TYPE, action == null  || action.getActionId().equals(contentId)? Constants.Push.MESSAGE_TYPE_RECEIVED : Constants.Push.MESSAGE_TYPE_ACTION);
             message.put(MessageKey.PUSH_BEHAVIOR, newBehavior);
             message.put(MParticleDatabase.GcmMessageTable.CONTENT_ID, contentId);
-            if (action != null && !action.getActionId().equals(contentId)) {
+
+            if (action == null || action.getActionIdInt() == contentId){
+                message.put(MessageKey.PUSH_TYPE, Constants.Push.MESSAGE_TYPE_RECEIVED);
+            }else{
+                message.put(MessageKey.PUSH_TYPE, Constants.Push.MESSAGE_TYPE_ACTION);
                 message.put(MessageKey.PUSH_ACTION_TAKEN, action.getActionId());
                 String title = action.getTitle();
                 if (TextUtils.isEmpty(title)){
-                    title = action.getActionId();
-                    if (TextUtils.isEmpty(title)){
-                        title = action.getIconId();
-                    }
+                    title = action.getActionIdentifier();
                 }
                 message.put(MessageKey.PUSH_ACTION_NAME, title);
             }

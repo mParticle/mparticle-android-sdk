@@ -488,8 +488,8 @@ public final class UploadHandler extends Handler {
                 JSONObject historyObject = new JSONObject();
                 while (gcmHistory.moveToNext()) {
 
-                    String contentId = gcmHistory.getString(gcmHistory.getColumnIndex(MParticleDatabase.GcmMessageTable.CONTENT_ID));
-                    if (!MParticleDatabase.GcmMessageTable.PROVIDER_CONTENT_ID.equals(contentId)) {
+                    int contentId = gcmHistory.getInt(gcmHistory.getColumnIndex(MParticleDatabase.GcmMessageTable.CONTENT_ID));
+                    if (contentId != MParticleDatabase.GcmMessageTable.PROVIDER_CONTENT_ID) {
                         int campaignId = gcmHistory.getInt(gcmHistory.getColumnIndex(MParticleDatabase.GcmMessageTable.CAMPAIGN_ID));
                         String campaignIdString = Integer.toString(campaignId);
                         long displayedDate = gcmHistory.getLong(gcmHistory.getColumnIndex(MParticleDatabase.GcmMessageTable.DISPLAYED_AT));
