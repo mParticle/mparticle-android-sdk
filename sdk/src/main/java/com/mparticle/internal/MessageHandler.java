@@ -38,6 +38,7 @@ import org.json.JSONObject;
     public static final int STORE_BREADCRUMB = 5;
     public static final int STORE_GCM_MESSAGE = 6;
     public static final int MARK_INFLUENCE_OPEN_GCM = 7;
+    public static final int CLEAR_PROVIDER_GCM = 8;
     private final MessageManagerCallbacks mMessageManagerCallbacks;
 
     // boolean flag used in unit tests to wait until processing is finished.
@@ -216,8 +217,16 @@ import org.json.JSONObject;
                long openTimestamp = (Long) msg.obj;
                 logInfluenceOpenGcmMessages(openTimestamp);
                 break;
+            case CLEAR_PROVIDER_GCM:
+                clearOldProviderGcm();
+                break;
         }
         mIsProcessingMessage = false;
+    }
+
+    private void clearOldProviderGcm() {
+        String[] deleteWhereArgs = {Integer.toString(MParticleDatabase.GcmMessageTable.PROVIDER_CONTENT_ID)};
+        db.delete(MParticleDatabase.GcmMessageTable.TABLE_NAME, MParticleDatabase.GcmMessageTable.CONTENT_ID + " = ?", deleteWhereArgs);
     }
 
     private boolean validateBehaviorFlags(MPMessage message) {
@@ -407,15 +416,17 @@ import org.json.JSONObject;
             contentValues.put(MParticleDatabase.GcmMessageTable.CONTENT_ID, ((MPCloudNotificationMessage)message).getContentId());
             contentValues.put(MParticleDatabase.GcmMessageTable.CAMPAIGN_ID, ((MPCloudNotificationMessage)message).getCampaignId());
             contentValues.put(MParticleDatabase.GcmMessageTable.EXPIRATION, ((MPCloudNotificationMessage)message).getExpiration());
+            contentValues.put(MParticleDatabase.GcmMessageTable.DISPLAYED_AT, message.getActualDeliveryTime());
         }else{
             contentValues.put(MParticleDatabase.GcmMessageTable.CONTENT_ID, MParticleDatabase.GcmMessageTable.PROVIDER_CONTENT_ID);
             contentValues.put(MParticleDatabase.GcmMessageTable.CAMPAIGN_ID, 0);
             contentValues.put(MParticleDatabase.GcmMessageTable.EXPIRATION, System.currentTimeMillis() + (24 * 60 * 60 * 1000));
+            contentValues.put(MParticleDatabase.GcmMessageTable.DISPLAYED_AT, System.currentTimeMillis());
         }
         contentValues.put(MParticleDatabase.GcmMessageTable.PAYLOAD, message.getRedactedJsonPayload().toString());
         contentValues.put(MParticleDatabase.GcmMessageTable.BEHAVIOR, 0);
         contentValues.put(MParticleDatabase.GcmMessageTable.CREATED_AT, System.currentTimeMillis());
-        contentValues.put(MParticleDatabase.GcmMessageTable.DISPLAYED_AT, message.getActualDeliveryTime());
+
         contentValues.put(MParticleDatabase.GcmMessageTable.APPSTATE, appState);
 
         db.replace(MParticleDatabase.GcmMessageTable.TABLE_NAME, null, contentValues);

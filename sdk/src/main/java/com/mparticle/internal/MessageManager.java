@@ -502,6 +502,10 @@ public class MessageManager implements MessageManagerCallbacks {
                 message.put(MessageKey.APP_INIT_UPGRADE, globalUpgrade);
             }
 
+            if (stateTransInit.equals(Constants.StateTransitionType.STATE_TRANS_BG)){
+                mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.CLEAR_PROVIDER_GCM, message.getTimestamp()));
+            }
+
             mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
         } catch (JSONException e) {
             ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to create mParticle state transition message");
