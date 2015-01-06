@@ -200,7 +200,7 @@ public class MPCloudNotificationMessage extends AbstractCloudMessage {
         }
     }
 
-    public String getPrimaryText(Context context){
+    public String getPrimaryMessage(Context context){
         String text = mExtras.getString(PRIMARY_MESSAGE);
         if (TextUtils.isEmpty(text)){
             return MParticlePushUtility.getFallbackTitle(context);
@@ -373,7 +373,7 @@ public class MPCloudNotificationMessage extends AbstractCloudMessage {
         NotificationCompat.Builder notification = new NotificationCompat.Builder(context);
         notification.setSmallIcon(getSmallIconResourceId(context));
         notification.setContentTitle(getContentTitle(context));
-        String text = getPrimaryText(context);
+        String text = getPrimaryMessage(context);
         notification.setContentText(text);
         notification.setTicker(text);
         notification.setSubText(getSubText());
@@ -426,7 +426,7 @@ public class MPCloudNotificationMessage extends AbstractCloudMessage {
             notification.setStyle(style);
         } else {
             String bigText = getBigText();
-            NotificationCompat.BigTextStyle style = new NotificationCompat.BigTextStyle().bigText(TextUtils.isEmpty(bigText) ? getPrimaryText(context) : bigText);
+            NotificationCompat.BigTextStyle style = new NotificationCompat.BigTextStyle().bigText(TextUtils.isEmpty(bigText) ? getPrimaryMessage(context) : bigText);
 
             if (!TextUtils.isEmpty(bigContentTitle)) {
                 style.setBigContentTitle(bigContentTitle);

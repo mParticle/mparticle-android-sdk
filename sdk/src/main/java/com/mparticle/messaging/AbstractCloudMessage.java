@@ -87,6 +87,8 @@ public abstract class AbstractCloudMessage implements Parcelable {
 
     public abstract int getId();
 
+    public abstract String getPrimaryMessage(Context context);
+
     public abstract JSONObject getRedactedJsonPayload();
 
     protected static PendingIntent getLoopbackIntent(Context context, AbstractCloudMessage message, CloudAction action){

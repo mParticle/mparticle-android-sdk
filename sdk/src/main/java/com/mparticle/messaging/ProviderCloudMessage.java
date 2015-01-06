@@ -67,6 +67,11 @@ public class ProviderCloudMessage extends AbstractCloudMessage {
         return mPrimaryText.hashCode();
     }
 
+    @Override
+    public String getPrimaryMessage(Context context) {
+        return mPrimaryText;
+    }
+
     /**
      * Note that the actual message is stripped from the extras bundle in findProviderMessage()
      *

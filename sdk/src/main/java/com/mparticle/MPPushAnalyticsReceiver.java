@@ -8,18 +8,23 @@ import com.mparticle.messaging.AbstractCloudMessage;
 import com.mparticle.messaging.CloudAction;
 
 public class MPPushAnalyticsReceiver extends BroadcastReceiver {
+    private Context mContext = null;
     @Override
     public final void onReceive(Context context, Intent intent) {
+        mContext = context;
         if (MParticlePushUtility.BROADCAST_NOTIFICATION_TAPPED.equalsIgnoreCase(intent.getAction())){
             AbstractCloudMessage message = intent.getParcelableExtra(MParticlePushUtility.CLOUD_MESSAGE_EXTRA);
             CloudAction action = intent.getParcelableExtra(MParticlePushUtility.CLOUD_ACTION_EXTRA);
             if (!onNotificationTapped(message, action)){
+                intent.putExtra(MParticlePushUtility.CLOUD_MESSAGE_EXTRA, message);
+                intent.putExtra(MParticlePushUtility.CLOUD_ACTION_EXTRA, action);
                 MPService.runIntentInService(context, intent);
             }
             return;
         } else if (MParticlePushUtility.BROADCAST_NOTIFICATION_RECEIVED.equalsIgnoreCase(intent.getAction())){
             AbstractCloudMessage message = intent.getParcelableExtra(MParticlePushUtility.CLOUD_MESSAGE_EXTRA);
             if (!onNotificationReceived(message)){
+                intent.putExtra(MParticlePushUtility.CLOUD_MESSAGE_EXTRA, message);
                 MPService.runIntentInService(context, intent);
             }
             return;
@@ -27,7 +32,9 @@ public class MPPushAnalyticsReceiver extends BroadcastReceiver {
 
     }
 
-
+    protected final Context getContext(){
+        return mContext;
+    }
 
     /**
      * Override this method to listen for when a notification has been received.

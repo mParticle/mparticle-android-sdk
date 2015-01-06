@@ -86,7 +86,7 @@ public class CloudDialog extends DialogFragment implements DialogInterface.OnCli
         dialog.setIcon(iconId);
         dialog.setTitle(message.getContentTitle(getActivity()));
 
-        String primary = message.getPrimaryText(getActivity());
+        String primary = message.getPrimaryMessage(getActivity());
         String bigText = message.getBigText();
         if (bigText != null){
             dialog.setMessage(bigText);
