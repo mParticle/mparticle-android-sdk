@@ -618,9 +618,10 @@ public class MessageManager implements MessageManagerCallbacks {
     public void checkForTrigger(MPMessage message) {
         JSONArray messageMatches = mConfigManager.getTriggerMessageMatches();
         JSONArray triggerHashes = mConfigManager.getTriggerMessageHashes();
-        boolean shouldTrigger = false;
 
-        if (messageMatches != null && messageMatches.length() > 0){
+        boolean shouldTrigger = message.getMessageType().equals(MessageType.PUSH_RECEIVED);
+
+        if (!shouldTrigger && messageMatches != null && messageMatches.length() > 0){
             shouldTrigger = true;
             int i = 0;
             while (shouldTrigger && i < messageMatches.length()){
