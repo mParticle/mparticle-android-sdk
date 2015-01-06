@@ -67,6 +67,11 @@ public class ProviderCloudMessage extends AbstractCloudMessage {
         return mPrimaryText.hashCode();
     }
 
+    /**
+     * Note that the actual message is stripped from the extras bundle in findProviderMessage()
+     *
+     * @return
+     */
     @Override
     public JSONObject getRedactedJsonPayload() {
         JSONObject json = new JSONObject();
@@ -98,6 +103,12 @@ public class ProviderCloudMessage extends AbstractCloudMessage {
         return notification;
     }
 
+    /**
+     * Find the intended message, and also remove it from the extras for privacy.
+     *
+     * @param possibleKeys
+     * @return
+     */
     private String findProviderMessage(JSONArray possibleKeys){
         if (possibleKeys != null) {
             for (int i = 0; i < possibleKeys.length(); i++){
