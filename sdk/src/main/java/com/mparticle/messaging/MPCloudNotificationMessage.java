@@ -373,7 +373,9 @@ public class MPCloudNotificationMessage extends AbstractCloudMessage {
         NotificationCompat.Builder notification = new NotificationCompat.Builder(context);
         notification.setSmallIcon(getSmallIconResourceId(context));
         notification.setContentTitle(getContentTitle(context));
-        notification.setContentText(getPrimaryText(context));
+        String text = getPrimaryText(context);
+        notification.setContentText(text);
+        notification.setTicker(text);
         notification.setSubText(getSubText());
         notification.setLargeIcon(getLargeIcon(context));
         int lightColor = getLightColorArgb();
@@ -445,7 +447,7 @@ public class MPCloudNotificationMessage extends AbstractCloudMessage {
         }
 
         notification.setContentIntent(getLoopbackIntent(context, this, getDefaultAction()));
-        notification.setAutoCancel(true);
+        //notification.setAutoCancel(true);
         return notification.build();
     }
     public int getCommand() {
