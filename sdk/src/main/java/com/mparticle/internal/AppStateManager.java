@@ -17,6 +17,7 @@ import com.mparticle.messaging.MPCloudNotificationMessage;
 
 import com.mparticle.MParticle;
 import com.mparticle.internal.embedded.EmbeddedKitManager;
+import com.mparticle.messaging.MessagingUtils;
 
 import org.json.JSONObject;
 
@@ -178,7 +179,7 @@ public class AppStateManager implements MPActivityCallbacks{
     private void showCloudDialog(Activity activity){
         Intent intent = activity.getIntent();
         if (mSupportLib && intent != null && activity instanceof FragmentActivity){
-            Parcelable message = intent.getParcelableExtra(MParticlePushUtility.CLOUD_MESSAGE_EXTRA);
+            Parcelable message = intent.getParcelableExtra(MessagingUtils.CLOUD_MESSAGE_EXTRA);
             if (message != null) {
                 int contentId = ((MPCloudNotificationMessage) message).getContentId();
                 int shownId = intent.getIntExtra("mp_content_shown", 0);

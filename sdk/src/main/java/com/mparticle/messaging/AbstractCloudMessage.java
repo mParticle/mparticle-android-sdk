@@ -5,6 +5,8 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
+import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcel;
@@ -12,6 +14,7 @@ import android.os.Parcelable;
 
 import com.mparticle.MPService;
 import com.mparticle.MParticlePushUtility;
+import com.mparticle.internal.ConfigManager;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -58,7 +61,7 @@ public abstract class AbstractCloudMessage implements Parcelable {
     protected Intent getDefaultOpenIntent(Context context, AbstractCloudMessage message) {
         PackageManager pm = context.getPackageManager();
         Intent intent = pm.getLaunchIntentForPackage(context.getPackageName());
-        intent.putExtra(MParticlePushUtility.CLOUD_MESSAGE_EXTRA, message);
+        intent.putExtra(MessagingUtils.CLOUD_MESSAGE_EXTRA, message);
         return intent;
     }
 
@@ -94,8 +97,8 @@ public abstract class AbstractCloudMessage implements Parcelable {
     protected static PendingIntent getLoopbackIntent(Context context, AbstractCloudMessage message, CloudAction action){
         Intent intent = new Intent(MPService.INTERNAL_NOTIFICATION_TAP + action.getActionId());
         intent.setClass(context, MPService.class);
-        intent.putExtra(MParticlePushUtility.CLOUD_MESSAGE_EXTRA, message);
-        intent.putExtra(MParticlePushUtility.CLOUD_ACTION_EXTRA, action);
+        intent.putExtra(MessagingUtils.CLOUD_MESSAGE_EXTRA, message);
+        intent.putExtra(MessagingUtils.CLOUD_ACTION_EXTRA, action);
 
         return PendingIntent.getService(context, action.getActionIdentifier().hashCode(), intent, PendingIntent.FLAG_UPDATE_CURRENT);
     }
@@ -112,9 +115,53 @@ public abstract class AbstractCloudMessage implements Parcelable {
         mActualDeliveryTime = time;
     }
 
+    /**
+     * @hide
+     */
     public static class InvalidGcmMessageException extends Exception {
         public InvalidGcmMessageException(String detailMessage) {
             super(detailMessage);
         }
+    }
+
+    protected static String getFallbackTitle(Context context){
+        String fallbackTitle = null;
+        int titleResId = ConfigManager.getPushTitle(context);
+        if (titleResId > 0){
+            try{
+                fallbackTitle = context.getString(titleResId);
+            }catch(Resources.NotFoundException e){
+
+            }
+        }else{
+            try {
+                int stringId = context.getApplicationInfo().labelRes;
+                fallbackTitle = context.getResources().getString(stringId);
+            } catch (Resources.NotFoundException ex) {
+
+            }
+        }
+        return fallbackTitle;
+    }
+
+    protected static int getFallbackIcon(Context context){
+        int smallIcon = ConfigManager.getPushIcon(context);
+        try{
+            Drawable draw = context.getResources().getDrawable(smallIcon);
+        }catch (Resources.NotFoundException nfe){
+            smallIcon = 0;
+        }
+
+        if (smallIcon == 0){
+            try {
+                smallIcon = context.getPackageManager().getApplicationInfo(context.getPackageName(), 0).icon;
+            } catch (PackageManager.NameNotFoundException e) {
+                // use the ic_dialog_alert icon if the app's can not be found
+            }
+            if (0 == smallIcon) {
+                smallIcon = android.R.drawable.ic_dialog_alert;
+            }
+        }
+        return smallIcon;
     }
 }

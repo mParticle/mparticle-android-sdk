@@ -46,6 +46,7 @@ import com.mparticle.licensing.ServerManagedPolicy;
 
 import com.mparticle.messaging.CloudAction;
 import com.mparticle.messaging.MPCloudNotificationMessage;
+import com.mparticle.messaging.MessagingUtils;
 import com.mparticle.messaging.ProviderCloudMessage;
 import com.mparticle.segmentation.SegmentListener;
 
@@ -128,6 +129,7 @@ public class MParticle {
             Process.THREAD_PRIORITY_BACKGROUND);
 
     private final MParticleInternal mInternal;
+    private MessagingUtils mMessaging;
 
     MParticle(Context context, MessageManager messageManager, ConfigManager configManager, EmbeddedKitManager embeddedKitManager) {
 
@@ -299,7 +301,7 @@ public class MParticle {
                         instance.enableUncaughtExceptionLogging();
                     }
                     if (appConfigManager.isPushEnabled()) {
-                        instance.enablePushNotifications(appConfigManager.getPushSenderId());
+                        instance.Messaging().enablePushNotifications(appConfigManager.getPushSenderId());
                     }
                     if (appConfigManager.isLicensingEnabled()) {
                         instance.performLicenseCheck();
@@ -1340,50 +1342,7 @@ public class MParticle {
         internal().disableUncaughtExceptionLogging(true);
     }
 
-    /**
-     * Register the application for GCM notifications
-     *
-     * @param senderId the SENDER_ID for the application
-     */
-    public void enablePushNotifications(String senderId) {
-        if (!MPUtility.isGcmServicesAvailable()) {
-            ConfigManager.log(LogLevel.ERROR, "GoogleCloudMessaging library not found - you must add Google Play Services 3.1 or later to your application.");
-        }else if (!MPUtility.isServiceAvailable(mAppContext, MPService.class)){
-            ConfigManager.log(LogLevel.ERROR, "Push is enabled but you have not added <service android:name=\"com.mparticle.MPService\" /> to the <application> section of your AndroidManifest.xml");
-        }else if (!MPUtility.checkPermission(mAppContext, "com.google.android.c2dm.permission.RECEIVE")){
-            ConfigManager.log(LogLevel.ERROR, "Attempted to enable push notifications without required permission: ", "\"com.google.android.c2dm.permission.RECEIVE\"");
-        }else {
-            mConfigManager.setPushSenderId(senderId);
-            PushRegistrationHelper.enablePushNotifications(mAppContext, senderId);
-        }
-    }
 
-    /**
-     * Unregister the application for GCM notifications
-     */
-    public void disablePushNotifications() {
-        PushRegistrationHelper.disablePushNotifications(mAppContext);
-    }
-
-    /**
-     * Enable the default notification sound for push notifications. This is a user preference that will be persisted across
-     * application sessions.
-     *
-     * @param enabled
-     */
-    public void setNotificationSoundEnabled(Boolean enabled) {
-        mConfigManager.setPushSoundEnabled(enabled);
-    }
-
-    /**
-     * Enable the default notification vibration for push notifications. This is a user preference that will be persisted across
-     * application sessions.
-     *
-     * @param enabled
-     */
-    public void setNotificationVibrationEnabled(Boolean enabled) {
-        mConfigManager.setPushVibrationEnabled(enabled);
-    }
 
 
 
@@ -1503,29 +1462,6 @@ public class MParticle {
 
 
 
-
-    /**
-     * Set the resource ID of the icon to be shown in the notification bar when a notification is received.
-     * <p/>
-     * By default, the app launcher icon will be shown.
-     *
-     * @param resId the resource id of a drawable
-     */
-    public void setPushNotificationIcon(int resId) {
-        mConfigManager.setPushNotificationIcon(resId);
-    }
-
-    /**
-     * Set the resource ID of the title to be shown in the notification bar when a notification is received
-     * <p/>
-     * By default, the title of the application will be shown.
-     *
-     * @param resId the resource id of a string
-     */
-    public void setPushNotificationTitle(int resId) {
-        mConfigManager.setPushNotificationTitle(resId);
-    }
-
     public void getUserSegments(long timeout, String endpointId, SegmentListener listener) {
         if (mMessageManager != null && mMessageManager.mUploadHandler != null) {
             mMessageManager.mUploadHandler.fetchSegments(timeout, endpointId, listener);
@@ -1562,8 +1498,17 @@ public class MParticle {
     }
 
 
+    public MessagingUtils Messaging() {
+        if (mMessaging == null){
+            mMessaging = new MessagingUtils(mAppContext, mConfigManager);
+        }
+        return mMessaging;
+    }
+
     /**
      * Private SDK APIs, do not use.
+     *
+     * @hide
      *
      * @return
      */
@@ -1865,6 +1810,10 @@ public class MParticle {
         }
     }
 
+    /**
+     * @hide
+     *
+     */
     public class MParticleInternal {
 
         public MeasuredRequestManager getMeasuredRequestManager() {

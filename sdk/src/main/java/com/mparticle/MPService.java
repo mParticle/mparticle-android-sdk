@@ -24,6 +24,7 @@ import com.mparticle.messaging.AbstractCloudMessage;
 import com.mparticle.messaging.CloudAction;
 import com.mparticle.messaging.MPCloudBackgroundMessage;
 import com.mparticle.messaging.MPCloudNotificationMessage;
+import com.mparticle.messaging.MessagingUtils;
 import com.mparticle.messaging.ProviderCloudMessage;
 
 import java.security.Provider;
@@ -57,7 +58,6 @@ public class MPService extends IntentService {
     }
 
     private static final String TAG = Constants.LOG_TAG;
-    public static final String MPARTICLE_NOTIFICATION_OPENED = "com.mparticle.push.notification_opened";
     public static final String INTERNAL_NOTIFICATION_TAP = "com.mparticle.push.notification_tapped";
     private static final Object LOCK = MPService.class;
     private static final String INTERNAL_DELAYED_RECEIVE = "com.mparticle.delayeddelivery";
@@ -68,7 +68,11 @@ public class MPService extends IntentService {
         super("com.mparticle.MPService");
     }
 
-    static void runIntentInService(Context context, Intent intent) {
+    /**
+     * @hide
+     *
+     */
+    public static void runIntentInService(Context context, Intent intent) {
         synchronized (LOCK) {
             if (sWakeLock == null) {
                 PowerManager pm = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
@@ -80,6 +84,10 @@ public class MPService extends IntentService {
         context.startService(intent);
     }
 
+    /**
+     * @hide
+     *
+     */
     @Override
     public final void onHandleIntent(final Intent intent) {
         boolean release = true;
@@ -97,14 +105,14 @@ public class MPService extends IntentService {
                 handleRegistration(intent);
             } else if (action.startsWith(INTERNAL_NOTIFICATION_TAP)) {
                 handleNotificationTapInternal(intent);
-            } else if (action.equals(MParticlePushUtility.BROADCAST_NOTIFICATION_TAPPED)) {
+            } else if (action.equals(MessagingUtils.BROADCAST_NOTIFICATION_TAPPED)) {
                 handleNotificationTap(intent);
-            } else if (action.equals(MParticlePushUtility.BROADCAST_NOTIFICATION_RECEIVED)){
-                final AbstractCloudMessage message = intent.getParcelableExtra(MParticlePushUtility.CLOUD_MESSAGE_EXTRA);
+            } else if (action.equals(MessagingUtils.BROADCAST_NOTIFICATION_RECEIVED)){
+                final AbstractCloudMessage message = intent.getParcelableExtra(MessagingUtils.CLOUD_MESSAGE_EXTRA);
                 showNotification(message);
                 release = false;
             } else if (action.equals(INTERNAL_DELAYED_RECEIVE)){
-                final MPCloudNotificationMessage message = intent.getParcelableExtra(MParticlePushUtility.CLOUD_MESSAGE_EXTRA);
+                final MPCloudNotificationMessage message = intent.getParcelableExtra(MessagingUtils.CLOUD_MESSAGE_EXTRA);
                 broadcastNotificationReceived(message);
             }
         } finally {
@@ -158,8 +166,8 @@ public class MPService extends IntentService {
     }
 
     private void handleNotificationTap(Intent intent) {
-        CloudAction action = intent.getParcelableExtra(MParticlePushUtility.CLOUD_ACTION_EXTRA);
-        AbstractCloudMessage message = intent.getParcelableExtra(MParticlePushUtility.CLOUD_MESSAGE_EXTRA);
+        CloudAction action = intent.getParcelableExtra(MessagingUtils.CLOUD_ACTION_EXTRA);
+        AbstractCloudMessage message = intent.getParcelableExtra(MessagingUtils.CLOUD_MESSAGE_EXTRA);
         PendingIntent actionIntent = action.getIntent(getApplicationContext(), message, action);
         if (actionIntent != null) {
             try {
@@ -232,7 +240,7 @@ public class MPService extends IntentService {
 
         Intent intent = new Intent(MPService.INTERNAL_DELAYED_RECEIVE);
         intent.setClass(this, MPService.class);
-        intent.putExtra(MParticlePushUtility.CLOUD_MESSAGE_EXTRA, message);
+        intent.putExtra(MessagingUtils.CLOUD_MESSAGE_EXTRA, message);
 
         PendingIntent pIntent = PendingIntent.getService(this, message.getId(), intent, PendingIntent.FLAG_UPDATE_CURRENT);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT){
@@ -243,8 +251,8 @@ public class MPService extends IntentService {
     }
 
     private void broadcastNotificationReceived(AbstractCloudMessage message) {
-        Intent intent = new Intent(MParticlePushUtility.BROADCAST_NOTIFICATION_RECEIVED);
-        intent.putExtra(MParticlePushUtility.CLOUD_MESSAGE_EXTRA, message);
+        Intent intent = new Intent(MessagingUtils.BROADCAST_NOTIFICATION_RECEIVED);
+        intent.putExtra(MessagingUtils.CLOUD_MESSAGE_EXTRA, message);
         intent.addCategory(getPackageName());
 
         List<ResolveInfo> result = getPackageManager().queryBroadcastReceivers(intent, 0);
@@ -256,8 +264,8 @@ public class MPService extends IntentService {
     }
 
     private void handleNotificationTapInternal(Intent intent) {
-        AbstractCloudMessage message = intent.getParcelableExtra(MParticlePushUtility.CLOUD_MESSAGE_EXTRA);
-        CloudAction action = intent.getParcelableExtra(MParticlePushUtility.CLOUD_ACTION_EXTRA);
+        AbstractCloudMessage message = intent.getParcelableExtra(MessagingUtils.CLOUD_MESSAGE_EXTRA);
+        CloudAction action = intent.getParcelableExtra(MessagingUtils.CLOUD_ACTION_EXTRA);
 
         NotificationManager manager =
                 (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
@@ -269,9 +277,9 @@ public class MPService extends IntentService {
                     action, true, getAppState(), AbstractCloudMessage.FLAG_READ | AbstractCloudMessage.FLAG_DIRECT_OPEN);
         }
 
-        Intent broadcast = new Intent(MParticlePushUtility.BROADCAST_NOTIFICATION_TAPPED);
-        broadcast.putExtra(MParticlePushUtility.CLOUD_MESSAGE_EXTRA, message);
-        broadcast.putExtra(MParticlePushUtility.CLOUD_ACTION_EXTRA, action);
+        Intent broadcast = new Intent(MessagingUtils.BROADCAST_NOTIFICATION_TAPPED);
+        broadcast.putExtra(MessagingUtils.CLOUD_MESSAGE_EXTRA, message);
+        broadcast.putExtra(MessagingUtils.CLOUD_ACTION_EXTRA, action);
 
         List<ResolveInfo> result = getPackageManager().queryBroadcastReceivers(broadcast, 0);
         if (result != null && result.size() > 0){

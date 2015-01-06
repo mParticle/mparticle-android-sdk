@@ -4,6 +4,7 @@ import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
@@ -188,13 +189,13 @@ public class MPCloudNotificationMessage extends AbstractCloudMessage {
                 return id;
             }
         }
-        return MParticlePushUtility.getFallbackIcon(context);
+        return AbstractCloudMessage.getFallbackIcon(context);
     }
 
     public String getContentTitle(Context context){
         String title = mExtras.getString(TITLE);
         if (TextUtils.isEmpty(title)){
-            return MParticlePushUtility.getFallbackTitle(context);
+            return AbstractCloudMessage.getFallbackTitle(context);
         }else{
             return title;
         }
@@ -203,7 +204,7 @@ public class MPCloudNotificationMessage extends AbstractCloudMessage {
     public String getPrimaryMessage(Context context){
         String text = mExtras.getString(PRIMARY_MESSAGE);
         if (TextUtils.isEmpty(text)){
-            return MParticlePushUtility.getFallbackTitle(context);
+            return AbstractCloudMessage.getFallbackTitle(context);
         }else{
             return text;
         }
@@ -240,8 +241,15 @@ public class MPCloudNotificationMessage extends AbstractCloudMessage {
                 }
             }
         }
+        int appIcon = android.R.drawable.ic_dialog_alert;
+        try {
+            appIcon = context.getPackageManager().getApplicationInfo(context.getPackageName(), 0).icon;
+        } catch (PackageManager.NameNotFoundException e) {
+            // use the ic_dialog_alert icon if the app's can not be found
+        }
+
         return BitmapFactory.decodeResource(context.getResources(),
-                MParticlePushUtility.getFallbackIcon(context));
+                appIcon);
     }
 
     public int getLightColorArgb(){

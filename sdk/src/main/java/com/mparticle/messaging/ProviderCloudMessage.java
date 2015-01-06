@@ -99,9 +99,9 @@ public class ProviderCloudMessage extends AbstractCloudMessage {
 
         Notification notification = new NotificationCompat.Builder(context)
                 .setContentIntent(getLoopbackIntent(context, this, getDefaultAction()))
-                .setSmallIcon(MParticlePushUtility.getFallbackIcon(context))
+                .setSmallIcon(AbstractCloudMessage.getFallbackIcon(context))
                 .setTicker(mPrimaryText)
-                .setContentTitle(MParticlePushUtility.getFallbackTitle(context))
+                .setContentTitle(AbstractCloudMessage.getFallbackTitle(context))
                 .setContentText(mPrimaryText).build();
 
         notification.flags |= Notification.FLAG_AUTO_CANCEL;

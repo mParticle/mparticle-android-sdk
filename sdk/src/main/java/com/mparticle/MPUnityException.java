@@ -1,7 +1,7 @@
 package com.mparticle;
 
 /**
- * Private API - for use by the mParticle Unity SDK.
+ * @hide
  */
 public class MPUnityException extends Exception {
     String stackTrace = null;

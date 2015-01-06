@@ -7,6 +7,9 @@ import android.text.TextUtils;
 import com.mparticle.MParticle;
 import com.mparticle.messaging.MPCloudNotificationMessage;
 
+/**
+ * @hide
+ */
 public class MPCloudBackgroundMessage {
 
     public static boolean processSilentPush(Context context, Bundle extras) {
