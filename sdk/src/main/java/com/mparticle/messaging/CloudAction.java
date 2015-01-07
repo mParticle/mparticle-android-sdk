@@ -121,17 +121,13 @@ public class CloudAction implements Parcelable {
         return mActionTitle;
     }
 
-    public String getActionId() {
-        return mActionId;
-    }
-
     public String getActionIdentifier() {
         return mActionIdentifier;
     }
 
     public int getActionIdInt() {
         try {
-            return Integer.parseInt(getActionId());
+            return Integer.parseInt(getActionIdentifier());
         }catch (Exception e){
 
         }

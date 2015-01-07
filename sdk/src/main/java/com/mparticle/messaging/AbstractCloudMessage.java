@@ -95,7 +95,7 @@ public abstract class AbstractCloudMessage implements Parcelable {
     public abstract JSONObject getRedactedJsonPayload();
 
     protected static PendingIntent getLoopbackIntent(Context context, AbstractCloudMessage message, CloudAction action){
-        Intent intent = new Intent(MPService.INTERNAL_NOTIFICATION_TAP + action.getActionId());
+        Intent intent = new Intent(MPService.INTERNAL_NOTIFICATION_TAP + action.getActionIdentifier());
         intent.setClass(context, MPService.class);
         intent.putExtra(MessagingUtils.CLOUD_MESSAGE_EXTRA, message);
         intent.putExtra(MessagingUtils.CLOUD_ACTION_EXTRA, action);

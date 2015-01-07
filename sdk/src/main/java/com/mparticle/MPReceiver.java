@@ -35,7 +35,6 @@ import com.mparticle.messaging.MessagingUtils;
  *  <receiver android:name="com.mparticle.MPReceiver"
  *      android:permission="com.google.android.c2dm.permission.SEND" >
  *      <intent-filter>
- *          <action android:name="com.android.vending.INSTALL_REFERRER"/>
  *          <action android:name="com.google.android.c2dm.intent.REGISTRATION" />
  *          <action android:name="com.google.android.c2dm.intent.RECEIVE" />
  *          <action android:name="com.google.android.c2dm.intent.UNREGISTER"/>

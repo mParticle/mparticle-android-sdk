@@ -108,7 +108,7 @@ public class PushTests extends AndroidTestCase {
         }
         assertNotNull(message.getActions());
         assertTrue(message.getActions().length == 3);
-        assertEquals(actionId, message.getActions()[0].getActionId());
+        assertEquals(actionId, message.getActions()[0].getActionIdentifier());
     }
 
     public void testMpPushMessageIntent(){

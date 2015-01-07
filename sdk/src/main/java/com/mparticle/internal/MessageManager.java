@@ -577,7 +577,7 @@ public class MessageManager implements MessageManagerCallbacks {
                 message.put(MessageKey.PUSH_TYPE, Constants.Push.MESSAGE_TYPE_RECEIVED);
             }else{
                 message.put(MessageKey.PUSH_TYPE, Constants.Push.MESSAGE_TYPE_ACTION);
-                message.put(MessageKey.PUSH_ACTION_TAKEN, action.getActionId());
+                message.put(MessageKey.PUSH_ACTION_TAKEN, action.getActionIdentifier());
                 String title = action.getTitle();
                 if (TextUtils.isEmpty(title)){
                     title = action.getActionIdentifier();
