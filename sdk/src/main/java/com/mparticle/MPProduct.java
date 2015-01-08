@@ -19,7 +19,7 @@ public class MPProduct extends HashMap<String, String> {
      *  @see com.mparticle.MParticle#logProductEvent(MPProduct.Event, MPProduct)
      */
     public static enum Event {
-        VIEW("Product Viewed"),
+        VIEW("Product View"),
         ADD_TO_WISHLIST("Added to Wishlist"),
         REMOVE_FROM_WISHLIST("Removed from Wishlist"),
         ADD_TO_CART("Added to Cart"),
