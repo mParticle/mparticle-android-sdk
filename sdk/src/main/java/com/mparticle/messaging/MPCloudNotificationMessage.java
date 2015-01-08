@@ -1,5 +1,6 @@
 package com.mparticle.messaging;
 
+import android.Manifest;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -16,6 +17,7 @@ import android.text.TextUtils;
 
 import com.mparticle.MPService;
 import com.mparticle.MParticlePushUtility;
+import com.mparticle.internal.MPUtility;
 
 import org.json.JSONObject;
 
@@ -441,9 +443,11 @@ public class MPCloudNotificationMessage extends AbstractCloudMessage {
             }
             notification.setStyle(style);
         }
-        long[] pattern = getVibrationPattern();
-        if (pattern != null && pattern.length > 0) {
-            notification.setVibrate(pattern);
+        if (MPUtility.checkPermission(context, Manifest.permission.VIBRATE)) {
+            long[] pattern = getVibrationPattern();
+            if (pattern != null && pattern.length > 0) {
+                notification.setVibrate(pattern);
+            }
         }
 
         if (mActions != null) {
