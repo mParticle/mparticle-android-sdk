@@ -648,7 +648,7 @@ public final class UploadHandler extends Handler {
                                                                     SegmentDatabase.SegmentMembershipTable.SEGMENT_ID,
                                                                     SegmentDatabase.SegmentMembershipTable.MEMBERSHIP_ACTION
                                                                 };
-    private final static String MEMBERSHIP_QUERY_SELECTION = "audience_id in %s and " + SegmentDatabase.SegmentMembershipTable.TIMESTAMP + " < %d";
+    private final static String MEMBERSHIP_QUERY_SELECTION = SegmentDatabase.SegmentMembershipTable.SEGMENT_ID+ " in %s and " + SegmentDatabase.SegmentMembershipTable.TIMESTAMP + " < %d";
 
     private void insertAudiences(JSONObject audiences) throws JSONException {
         SQLiteDatabase db = audienceDB.getWritableDatabase();
