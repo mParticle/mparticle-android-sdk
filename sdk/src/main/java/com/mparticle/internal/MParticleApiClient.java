@@ -151,7 +151,7 @@ public class MParticleApiClient implements IMPApiClient {
             addMessageSignature(connection, null);
             makeUrlRequest(connection, true);
             if (connection.getResponseCode() == HttpURLConnection.HTTP_FORBIDDEN){
-                ConfigManager.log(MParticle.LogLevel.ERROR, "Segment call forbidden: is Segment enabled for the current mParticle org?");
+                ConfigManager.log(MParticle.LogLevel.ERROR, "Segment call forbidden: is Segmentation enabled for your account?");
             }
             response =  getJsonResponse(connection);
             parseMparticleJson(response);
@@ -195,7 +195,6 @@ public class MParticleApiClient implements IMPApiClient {
             try {
                 ((HttpsURLConnection) connection).setSSLSocketFactory(getSocketFactory());
             }catch (Exception e){
-                Log.e("CONNECTION ERROR:", e.toString());
             }
         }
 
