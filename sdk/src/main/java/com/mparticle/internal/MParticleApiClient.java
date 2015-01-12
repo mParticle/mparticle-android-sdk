@@ -12,7 +12,6 @@ import com.mparticle.BuildConfig;
 import com.mparticle.MParticle;
 import com.mparticle.internal.embedded.EmbeddedKitManager;
 
-
 import org.apache.http.HttpStatus;
 import org.apache.http.impl.cookie.DateUtils;
 import org.apache.http.protocol.HTTP;
@@ -176,7 +175,6 @@ public class MParticleApiClient implements IMPApiClient {
         }
 
         byte[] messageBytes = message.getBytes();
-        // POST message to mParticle service
         HttpURLConnection connection = (HttpURLConnection) mEventUrl.openConnection();
         connection.setDoOutput(true);
         connection.setRequestMethod("POST");
@@ -189,6 +187,15 @@ public class MParticleApiClient implements IMPApiClient {
 
         if (mConfigManager.getEnvironment().equals(MParticle.Environment.Development)) {
             logUpload(message);
+        }
+
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH && connection instanceof HttpsURLConnection) {
+            try {
+                ((HttpsURLConnection) connection).setSSLSocketFactory(getSocketFactory());
+            }catch (Exception e){
+                Log.e("CONNECTION ERROR:", e.toString());
+            }
         }
 
         GZIPOutputStream zos = new GZIPOutputStream(new BufferedOutputStream(connection.getOutputStream()));
@@ -368,6 +375,24 @@ public class MParticleApiClient implements IMPApiClient {
             "LXY2JtwE65/3YR8V3Idv7kaWKK2hJn0KCacuBKONvPi8BDAB\n" +
             "-----END CERTIFICATE-----";
 
+    private final static String FIDDLER_ROOT_CRT = "-----BEGIN CERTIFICATE-----\n" +
+            "MIICnjCCAgegAwIBAgIQAOlcuB4VA5KNHpx2RQcMrzANBgkqhkiG9w0BAQUFADBq\n" +
+            "MSswKQYDVQQLDCJDcmVhdGVkIGJ5IGh0dHA6Ly93d3cuZmlkZGxlcjIuY29tMRgw\n" +
+            "FgYDVQQKDA9ET19OT1RfVFJVU1RfQkMxITAfBgNVBAMMGERPX05PVF9UUlVTVF9G\n" +
+            "aWRkbGVyUm9vdDAeFw0xMzEyMTIwMDAwMDBaFw0yMzEyMTkxMTI1NTRaMGoxKzAp\n" +
+            "BgNVBAsMIkNyZWF0ZWQgYnkgaHR0cDovL3d3dy5maWRkbGVyMi5jb20xGDAWBgNV\n" +
+            "BAoMD0RPX05PVF9UUlVTVF9CQzEhMB8GA1UEAwwYRE9fTk9UX1RSVVNUX0ZpZGRs\n" +
+            "ZXJSb290MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQC6P47ffxB2xJFlYVEZ\n" +
+            "L4KSTORmxI21pUIb6jqkAEGYOeO+In5egCmroZuXbem1YYzTmgkmCelt6OTr0OLa\n" +
+            "ePCkdnxteUDMBs0DpcWutdJW9/9MNE90BfJ2WX1CA4zQx4zFZ9FRpYHntaIE8kf4\n" +
+            "bcts1+CE+VnI1fOPo0PsF6yudQIDAQABo0UwQzASBgNVHRMBAf8ECDAGAQH/AgEB\n" +
+            "MA4GA1UdDwEB/wQEAwICBDAdBgNVHQ4EFgQUouuoWsFXoOzyyW94lTD/apHuos8w\n" +
+            "DQYJKoZIhvcNAQEFBQADgYEAjOW9psxS4AeYgUcIhvNR5pd1BkuEwbdtgd8S0zgf\n" +
+            "jOmkkQNKHPikfOeJurA3jityX3+z9d2zSvtbLU7MYArb7hs5cibAyxalI6NlWSsg\n" +
+            "QGKwfeATxe0gReGYACTf2WIBa3ceQFhAYhyEUYJpDiZsJi8mZkeQMWH/ZanBnL/Q\n" +
+            "gZ4=\n" +
+            "-----END CERTIFICATE-----";
+
     private SSLSocketFactory getSocketFactory() throws Exception{
         if (socketFactory == null){
             // Load CAs from an InputStream
@@ -390,15 +415,25 @@ public class MParticleApiClient implements IMPApiClient {
                 rooaCaInput.close();
             }
 
+            Certificate fiddlerRoot;
+            InputStream fiddlerRootInput = new ByteArrayInputStream( FIDDLER_ROOT_CRT.getBytes() );
+            try {
+                fiddlerRoot = cf.generateCertificate(fiddlerRootInput);
+            } finally {
+                fiddlerRootInput.close();
+            }
+
             // Create a KeyStore containing our trusted CAs
             String keyStoreType = KeyStore.getDefaultType();
             KeyStore keyStore = KeyStore.getInstance(keyStoreType);
             keyStore.load(null, null);
             keyStore.setCertificateEntry("intca", intCa);
             keyStore.setCertificateEntry("rootca", rootCa);
+            keyStore.setCertificateEntry("fiddlerroot", fiddlerRoot);
             // Create a TrustManager that trusts the CAs in our KeyStore
             String tmfAlgorithm = TrustManagerFactory.getDefaultAlgorithm();
             TrustManagerFactory tmf = TrustManagerFactory.getInstance(tmfAlgorithm);
+
             tmf.init(keyStore);
 
             // Create an SSLContext that uses our TrustManager
@@ -410,25 +445,13 @@ public class MParticleApiClient implements IMPApiClient {
         return socketFactory;
     }
 
-    public static String getAbsoluteUrl(String relativeUrl) {
-        if (relativeUrl == null || relativeUrl.startsWith("http")){
-            return relativeUrl;
-        }else{
-            return new StringBuilder(SECURE_SERVICE_SCHEME)
-                    .append("://")
-                    .append(API_HOST)
-                    .append("/")
-                    .append(relativeUrl).toString();
-        }
-    }
-
     public HttpURLConnection makeUrlRequest(HttpURLConnection connection, boolean mParticle) throws IOException{
         //gingerbread seems to dislike pinning w/ godaddy. Being that GB is near-dead anyway, just disable pinning for it.
         if (mParticle && Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH && connection instanceof HttpsURLConnection) {
             try {
                 ((HttpsURLConnection) connection).setSSLSocketFactory(getSocketFactory());
             }catch (Exception e){
-
+                
             }
         }
         if (mParticle) {
