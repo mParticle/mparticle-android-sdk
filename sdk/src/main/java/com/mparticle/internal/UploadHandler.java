@@ -52,7 +52,7 @@ public final class UploadHandler extends Handler {
     public static final int UPLOAD_HISTORY = 3;
     public static final int UPDATE_CONFIG = 4;
     public static final int UPLOAD_TRIGGER_MESSAGES = 5;
-    private static final String TAG = Constants.LOG_TAG;
+
     private final SQLiteDatabase db;
     private final SharedPreferences mPreferences;
     private final Context mContext;
@@ -65,12 +65,14 @@ public final class UploadHandler extends Handler {
     public static final String SQL_DELETABLE_MESSAGES = String.format(
             "(%s='NO-SESSION')",
             MessageTable.SESSION_ID);
+
     public static final String SQL_UPLOADABLE_MESSAGES = String.format(
             "((%s='NO-SESSION') or ((%s>=?) and (%s!=%d)))",
             MessageTable.SESSION_ID,
             MessageTable.STATUS,
             MessageTable.STATUS,
             Status.UPLOADED);
+
     public static final String SQL_HISTORY_MESSAGES = String.format(
             "((%s!='NO-SESSION') and ((%s>=?) and (%s=%d) and (%s != ?)))",
             MessageTable.SESSION_ID,
@@ -78,6 +80,7 @@ public final class UploadHandler extends Handler {
             MessageTable.STATUS,
             Status.UPLOADED,
             MessageTable.SESSION_ID);
+
     public static final String SQL_FINISHED_HISTORY_MESSAGES = String.format(
             "((%s='NO-SESSION') or ((%s>=?) and (%s=%d) and (%s=?)))",
             MessageTable.SESSION_ID,
@@ -85,6 +88,7 @@ public final class UploadHandler extends Handler {
             MessageTable.STATUS,
             Status.UPLOADED,
             MessageTable.SESSION_ID);
+
     private volatile boolean isNetworkConnected = true;
     private JSONObject deviceInfo;
     private JSONObject appInfo;
@@ -101,7 +105,7 @@ public final class UploadHandler extends Handler {
         mPreferences = mContext.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
 
         try {
-            mApiClient = new MParticleApiClient(configManager, mPreferences, context);
+            setApiClient(new MParticleApiClient(configManager, mPreferences, context));
         } catch (MalformedURLException e) {
             //this should never happen - the URLs are created by constants.
         }
@@ -199,6 +203,11 @@ public final class UploadHandler extends Handler {
     }
 
 
+
+    String prepareOrderBy = MessageTable.CREATED_AT + ", " + MessageTable.SESSION_ID + " , _id asc";
+    String[] prepareSelection = new String[]{"_id", MessageTable.MESSAGE, MessageTable.CREATED_AT, MessageTable.STATUS, MessageTable.SESSION_ID};
+    String[] defaultSelectionArgs = new String[]{Integer.toString(Status.READY)};
+
     void prepareUploads(boolean history) {
         Cursor readyMessagesCursor = null;
         try {
@@ -210,18 +219,17 @@ public final class UploadHandler extends Handler {
                 selectionArgs = new String[]{Integer.toString(Status.READY), MParticle.getInstance().internal().getSessionId()};
             } else {
                 selection = SQL_UPLOADABLE_MESSAGES;
-                selectionArgs = new String[]{Integer.toString(Status.READY)};
+                selectionArgs = defaultSelectionArgs;
             }
-            String[] selectionColumns = new String[]{"_id", MessageTable.MESSAGE, MessageTable.CREATED_AT, MessageTable.STATUS, MessageTable.SESSION_ID};
 
             readyMessagesCursor = db.query(
                     MessageTable.TABLE_NAME,
-                    selectionColumns,
+                    prepareSelection,
                     selection,
                     selectionArgs,
                     null,
                     null,
-                    MessageTable.CREATED_AT + ", " + MessageTable.SESSION_ID + " , _id asc");
+                    prepareOrderBy);
 
             if (readyMessagesCursor.getCount() > 0) {
                 mApiClient.fetchConfig();
@@ -293,14 +301,18 @@ public final class UploadHandler extends Handler {
         }
     }
 
+
+    String[] uploadColumns = new String[]{"_id", UploadTable.MESSAGE};
+    String containsClause = "\"" + MessageKey.TYPE + "\":\"" + MessageType.SESSION_END + "\"";
+
     private boolean processUploads(boolean history) {
         boolean processingSessionEnd = false;
         Cursor readyUploadsCursor = null;
         try {
             // read batches ready to upload
 
-            String[] selectionColumns = new String[]{"_id", UploadTable.MESSAGE};
-            readyUploadsCursor = db.query(UploadTable.TABLE_NAME, selectionColumns,
+
+            readyUploadsCursor = db.query(UploadTable.TABLE_NAME, uploadColumns,
                     null, null, null, null, UploadTable.CREATED_AT);
 
             while (readyUploadsCursor.moveToNext()) {
@@ -308,7 +320,7 @@ public final class UploadHandler extends Handler {
                 String message = readyUploadsCursor.getString(1);
                 if (!history) {
                     // if message is the MessageType.SESSION_END, then remember so the session history can be triggered
-                    if (message.contains("\"" + MessageKey.TYPE + "\":\"" + MessageType.SESSION_END + "\"")) {
+                    if (message.contains(containsClause)) {
                         processingSessionEnd = true;
                     }
                 }
@@ -470,15 +482,18 @@ public final class UploadHandler extends Handler {
         return uploadMessage;
     }
 
+
+    String gcmDeleteWhere = MParticleDatabase.GcmMessageTable.EXPIRATION + " < ? and " + MParticleDatabase.GcmMessageTable.DISPLAYED_AT + " > 0";
+    String[] gcmColumns = {MParticleDatabase.GcmMessageTable.CONTENT_ID, MParticleDatabase.GcmMessageTable.CAMPAIGN_ID, MParticleDatabase.GcmMessageTable.EXPIRATION, MParticleDatabase.GcmMessageTable.DISPLAYED_AT};
     private void addGCMHistory(JSONObject uploadMessage) {
         //first remove expired
         Cursor gcmHistory = null;
         try {
             String[] deleteWhereArgs = {Long.toString(System.currentTimeMillis())};
-            db.delete(MParticleDatabase.GcmMessageTable.TABLE_NAME, MParticleDatabase.GcmMessageTable.EXPIRATION + " < ? and " + MParticleDatabase.GcmMessageTable.DISPLAYED_AT + " > 0", deleteWhereArgs);
-            String[] columns = {MParticleDatabase.GcmMessageTable.CONTENT_ID, MParticleDatabase.GcmMessageTable.CAMPAIGN_ID, MParticleDatabase.GcmMessageTable.EXPIRATION, MParticleDatabase.GcmMessageTable.DISPLAYED_AT};
+            db.delete(MParticleDatabase.GcmMessageTable.TABLE_NAME, gcmDeleteWhere, deleteWhereArgs);
+
             gcmHistory = db.query(MParticleDatabase.GcmMessageTable.TABLE_NAME,
-                    columns,
+                    gcmColumns,
                     null,
                     null,
                     null,
