@@ -86,7 +86,7 @@ public class PushTests extends AndroidTestCase {
         } catch (AbstractCloudMessage.InvalidGcmMessageException e) {
             fail(e.getMessage());
         }
-        String text = message.getPrimaryText(getContext());
+        String text = message.getPrimaryMessage(getContext());
         assertFalse(TextUtils.isEmpty(text));
         assertFalse(message.getRedactedJsonPayload().toString().contains(text));
     }
