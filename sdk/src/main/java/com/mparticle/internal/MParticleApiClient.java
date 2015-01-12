@@ -35,6 +35,7 @@ import java.security.InvalidKeyException;
 import java.security.KeyStore;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.Certificate;
+import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.util.ArrayList;
 import java.util.Date;
@@ -393,53 +394,34 @@ public class MParticleApiClient implements IMPApiClient {
             "gZ4=\n" +
             "-----END CERTIFICATE-----";
 
+    private static Certificate generateCertificate(CertificateFactory certificateFactory, String encodedCertificate) throws IOException, CertificateException {
+        Certificate certificate = null;
+        InputStream inputStream = new ByteArrayInputStream( encodedCertificate.getBytes() );
+        try {
+            certificate = certificateFactory.generateCertificate(inputStream);
+        }finally {
+            inputStream.close();
+        }
+        return certificate;
+    }
+
     private SSLSocketFactory getSocketFactory() throws Exception{
         if (socketFactory == null){
-            // Load CAs from an InputStream
-            // (could be from a resource or ByteArrayInputStream or ...)
-            CertificateFactory cf = CertificateFactory.getInstance("X.509");
-            // From https://www.washington.edu/itconnect/security/ca/load-der.crt
-            Certificate intCa;
-            InputStream caInput = new ByteArrayInputStream( GODADDY_INTERMEDIATE_CRT.getBytes() );
-            try {
-                intCa = cf.generateCertificate(caInput);
-            } finally {
-                caInput.close();
-            }
-
-            Certificate rootCa;
-            InputStream rooaCaInput = new ByteArrayInputStream( GODADDY_ROOT_CRT.getBytes() );
-            try {
-                rootCa = cf.generateCertificate(rooaCaInput);
-            } finally {
-                rooaCaInput.close();
-            }
-
-            Certificate fiddlerRoot;
-            InputStream fiddlerRootInput = new ByteArrayInputStream( FIDDLER_ROOT_CRT.getBytes() );
-            try {
-                fiddlerRoot = cf.generateCertificate(fiddlerRootInput);
-            } finally {
-                fiddlerRootInput.close();
-            }
-
-            // Create a KeyStore containing our trusted CAs
             String keyStoreType = KeyStore.getDefaultType();
             KeyStore keyStore = KeyStore.getInstance(keyStoreType);
             keyStore.load(null, null);
-            keyStore.setCertificateEntry("intca", intCa);
-            keyStore.setCertificateEntry("rootca", rootCa);
-            keyStore.setCertificateEntry("fiddlerroot", fiddlerRoot);
-            // Create a TrustManager that trusts the CAs in our KeyStore
+
+            CertificateFactory cf = CertificateFactory.getInstance("X.509");
+            keyStore.setCertificateEntry("intca", generateCertificate(cf, GODADDY_INTERMEDIATE_CRT));
+            keyStore.setCertificateEntry("rootca", generateCertificate(cf, GODADDY_ROOT_CRT));
+            keyStore.setCertificateEntry("fiddlerroot", generateCertificate(cf, FIDDLER_ROOT_CRT));
+
             String tmfAlgorithm = TrustManagerFactory.getDefaultAlgorithm();
             TrustManagerFactory tmf = TrustManagerFactory.getInstance(tmfAlgorithm);
-
             tmf.init(keyStore);
 
-            // Create an SSLContext that uses our TrustManager
             SSLContext context = SSLContext.getInstance("TLS");
             context.init(null, tmf.getTrustManagers(), null);
-
             socketFactory = context.getSocketFactory();
         }
         return socketFactory;
@@ -451,7 +433,7 @@ public class MParticleApiClient implements IMPApiClient {
             try {
                 ((HttpsURLConnection) connection).setSSLSocketFactory(getSocketFactory());
             }catch (Exception e){
-                
+
             }
         }
         if (mParticle) {
