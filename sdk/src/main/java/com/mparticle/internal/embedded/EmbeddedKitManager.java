@@ -353,7 +353,6 @@ public class EmbeddedKitManager implements IEmbeddedKit, MPActivityCallbacks {
     }
 
     public static class BaseEmbeddedKitFactory {
-        private final static int KOCHAVA = 37;
         private final static int COMSCORE = 39;
         private final static int KAHUNA = 56;
         private final static int FORESEE = MParticle.ServiceProviders.FORESEE_ID;
@@ -361,8 +360,6 @@ public class EmbeddedKitManager implements IEmbeddedKit, MPActivityCallbacks {
 
         protected EmbeddedProvider createInstance(int id, Context context) throws JSONException, ClassNotFoundException{
             switch (id){
-                case KOCHAVA:
-                    return new EmbeddedKochava(context);
                 case COMSCORE:
                     return new EmbeddedComscore(context);
                 case KAHUNA:
@@ -378,7 +375,6 @@ public class EmbeddedKitManager implements IEmbeddedKit, MPActivityCallbacks {
 
         public static ArrayList<Integer> getSupportedKits() {
             ArrayList<Integer> supportedKitIds = new ArrayList<Integer>();
-            supportedKitIds.add(KOCHAVA);
             supportedKitIds.add(COMSCORE);
             supportedKitIds.add(KAHUNA);
             supportedKitIds.add(FORESEE);
