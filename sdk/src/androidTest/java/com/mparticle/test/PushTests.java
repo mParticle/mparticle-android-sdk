@@ -217,7 +217,7 @@ public class PushTests extends AndroidTestCase {
         } catch (AbstractCloudMessage.InvalidGcmMessageException e) {
 
         }
-        assertFalse(TextUtils.isEmpty(message.getPrimaryText(getContext())));
+        assertFalse(TextUtils.isEmpty(message.getPrimaryMessage(getContext())));
         assertNotNull(message.getLargeIcon(getContext()));
         assertFalse(TextUtils.isEmpty(message.getContentTitle(getContext())));
     }
