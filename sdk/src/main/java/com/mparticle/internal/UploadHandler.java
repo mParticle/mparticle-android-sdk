@@ -45,6 +45,8 @@ import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import javax.net.ssl.SSLHandshakeException;
+
 public final class UploadHandler extends Handler {
 
     public static final int UPLOAD_MESSAGES = 1;
@@ -141,6 +143,8 @@ public final class UploadHandler extends Handler {
             case UPDATE_CONFIG:
                 try {
                     mApiClient.fetchConfig();
+                } catch (SSLHandshakeException ssle){
+                        ConfigManager.log(MParticle.LogLevel.DEBUG, "SSL handshake failed while update configuration - possible MITM attack detected.");
                 } catch (IOException ioe) {
                     ConfigManager.log(MParticle.LogLevel.DEBUG, "Failed to update configuration: ", ioe.toString());
                 } catch (MParticleApiClient.MPThrottleException e) {
@@ -284,16 +288,14 @@ public final class UploadHandler extends Handler {
 
                 }
             }
-        } catch (SQLiteException e) {
-            ConfigManager.log(MParticle.LogLevel.ERROR, "Error preparing batch upload in mParticle DB: " + e.getMessage());
-        } catch (IOException e) {
-            ConfigManager.log(MParticle.LogLevel.WARNING, "Error preparing batch upload in mParticle DB: " + e.getMessage());
-        } catch (JSONException e) {
-            ConfigManager.log(MParticle.LogLevel.ERROR, "Error preparing batch upload in mParticle DB: " + e.getMessage());
+        } catch (SSLHandshakeException ssle){
+            ConfigManager.log(MParticle.LogLevel.DEBUG, "SSL handshake failed while fetching configuration during upload preparation - possible MITM attack detected.");
         } catch (MParticleApiClient.MPThrottleException e) {
             ConfigManager.log(MParticle.LogLevel.DEBUG, e.getMessage());
         }  catch (MParticleApiClient.MPConfigException e) {
             ConfigManager.log(MParticle.LogLevel.DEBUG, e.getMessage());
+        } catch (Exception e){
+            ConfigManager.log(MParticle.LogLevel.ERROR, "Error preparing batch upload in mParticle DB: " + e.getMessage());
         } finally {
             if (readyMessagesCursor != null && !readyMessagesCursor.isClosed()){
                 readyMessagesCursor.close();
@@ -354,9 +356,9 @@ public final class UploadHandler extends Handler {
             }
         } catch (MParticleApiClient.MPThrottleException e) {
             ConfigManager.log(MParticle.LogLevel.DEBUG, e.getMessage());
-        } catch (SQLiteException e) {
-            ConfigManager.log(MParticle.LogLevel.ERROR, e, "Error processing batch uploads in mParticle DB");
-        } catch (IOException ioe) {
+        } catch (SSLHandshakeException ssle){
+            ConfigManager.log(MParticle.LogLevel.DEBUG, "SSL handshake failed while preparing uploads - possible MITM attack detected.");
+        } catch (Exception ioe) {
             ConfigManager.log(MParticle.LogLevel.ERROR, ioe, "Error processing batch uploads in mParticle DB");
         } finally {
             if (readyUploadsCursor != null && !readyUploadsCursor.isClosed()){
@@ -609,50 +611,56 @@ public final class UploadHandler extends Handler {
         SparseArray<Segment> audiences = new SparseArray<Segment>();
 
         StringBuilder keys = new StringBuilder("(");
-        while (audienceCursor.moveToNext()){
-            int id = audienceCursor.getInt(audienceCursor.getColumnIndex(SegmentDatabase.SegmentTable.SEGMENT_ID));
+        if (audienceCursor.getCount() > 0){
+            while (audienceCursor.moveToNext()){
+                int id = audienceCursor.getInt(audienceCursor.getColumnIndex(SegmentDatabase.SegmentTable.SEGMENT_ID));
 
-            Segment segment = new Segment(id,
-                                            audienceCursor.getString(audienceCursor.getColumnIndex(SegmentDatabase.SegmentTable.NAME)),
-                                            audienceCursor.getString(audienceCursor.getColumnIndex(SegmentDatabase.SegmentTable.ENDPOINTS)));
-            audiences.put(id, segment);
-            keys.append(id);
-            keys.append(", ");
-        }
-        audienceCursor.close();
-        keys.delete(keys.length()-2, keys.length());
-        keys.append(")");
+                Segment segment = new Segment(id,
+                        audienceCursor.getString(audienceCursor.getColumnIndex(SegmentDatabase.SegmentTable.NAME)),
+                        audienceCursor.getString(audienceCursor.getColumnIndex(SegmentDatabase.SegmentTable.ENDPOINTS)));
+                audiences.put(id, segment);
+                keys.append(id);
+                keys.append(", ");
+            }
+            audienceCursor.close();
 
-        long currentTime = System.currentTimeMillis();
-        Cursor membershipCursor = db.query(false,
-                                    SegmentDatabase.SegmentMembershipTable.TABLE_NAME,
-                                    MEMBERSHIP_QUERY_COLUMNS,
-                                    String.format(MEMBERSHIP_QUERY_SELECTION,
-                                                    keys.toString(),
-                                                    currentTime),
-                                    null,
-                                    null,
-                                    null,
-                                    MEMBERSHIP_QUERY_ORDER,
-                                    null);
+            keys.delete(keys.length()-2, keys.length());
+            keys.append(")");
+
+            long currentTime = System.currentTimeMillis();
+            Cursor membershipCursor = db.query(false,
+                    SegmentDatabase.SegmentMembershipTable.TABLE_NAME,
+                    MEMBERSHIP_QUERY_COLUMNS,
+                    String.format(MEMBERSHIP_QUERY_SELECTION,
+                            keys.toString(),
+                            currentTime),
+                    null,
+                    null,
+                    null,
+                    MEMBERSHIP_QUERY_ORDER,
+                    null);
 
 
-        ArrayList<Segment> finalSegments = new ArrayList<Segment>();
-        int currentId = -1;
-        while (membershipCursor.moveToNext()){
-            int id = membershipCursor.getInt(1);
-            if (id != currentId) {
-                currentId = id;
-                String action = membershipCursor.getString(2);
-                if (action.equals(Constants.Audience.ACTION_ADD)){
-                    finalSegments.add(audiences.get(currentId));
+            ArrayList<Segment> finalSegments = new ArrayList<Segment>();
+            int currentId = -1;
+            while (membershipCursor.moveToNext()){
+                int id = membershipCursor.getInt(1);
+                if (id != currentId) {
+                    currentId = id;
+                    String action = membershipCursor.getString(2);
+                    if (action.equals(Constants.Audience.ACTION_ADD)){
+                        finalSegments.add(audiences.get(currentId));
+                    }
                 }
             }
-        }
-        membershipCursor.close();
+            membershipCursor.close();
 
-        db.close();
-        return new SegmentMembership(finalSegments);
+            db.close();
+            return new SegmentMembership(finalSegments);
+        }else{
+            return new SegmentMembership(new ArrayList<Segment>());
+        }
+
     }
 
     private final static String AUDIENCE_QUERY = SegmentDatabase.SegmentTable.SEGMENT_ID + " desc";
