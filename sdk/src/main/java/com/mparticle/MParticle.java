@@ -1,5 +1,6 @@
 package com.mparticle;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -1473,6 +1474,7 @@ public class MParticle {
      *
      * @param webView
      */
+    @SuppressLint("AddJavascriptInterface")
     public void registerWebView(WebView webView) {
         if (webView != null) {
             webView.addJavascriptInterface(
@@ -1676,7 +1678,7 @@ public class MParticle {
         /**
          * Used to communicate the internal state and processes of the SDK.
          */
-        DEBUG;
+        DEBUG
     }
 
     /**
@@ -1832,7 +1834,7 @@ public class MParticle {
             if (null == mExHandler) {
                 UncaughtExceptionHandler currentUncaughtExceptionHandler = Thread.getDefaultUncaughtExceptionHandler();
                 if (!(currentUncaughtExceptionHandler instanceof ExceptionHandler)) {
-                    mExHandler = new ExceptionHandler(mMessageManager, currentUncaughtExceptionHandler);
+                    mExHandler = new ExceptionHandler(currentUncaughtExceptionHandler);
                     Thread.setDefaultUncaughtExceptionHandler(mExHandler);
                     if (userTriggered) {
                         mConfigManager.setLogUnhandledExceptions(true);

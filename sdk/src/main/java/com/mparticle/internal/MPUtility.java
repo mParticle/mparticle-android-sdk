@@ -49,7 +49,6 @@ public class MPUtility {
 
     static final String NO_BLUETOOTH = "none";
     private static String sOpenUDID;
-    private static String sBuildUUID;
 
     public static String getCpuUsage() {
         String str1 = "unknown";
@@ -265,6 +264,7 @@ public class MPUtility {
             }
         } catch (Exception localException) {
         }
+        String sBuildUUID;
         if (localTreeMap.size() == 0) {
             sBuildUUID = UUID.randomUUID().toString();
         } else {

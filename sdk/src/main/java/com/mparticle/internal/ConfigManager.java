@@ -308,11 +308,7 @@ public class ConfigManager {
 
     public boolean getSendOoEvents(){
         boolean optedOut = this.getOptedOut();
-        if (!optedOut){
-            return true;
-        }else{
-            return mSendOoEvents;
-        }
+        return !optedOut || mSendOoEvents;
 
     }
 

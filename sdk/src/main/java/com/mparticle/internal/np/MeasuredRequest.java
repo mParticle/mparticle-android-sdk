@@ -52,7 +52,7 @@ final class MeasuredRequest {
         return headerStartTime > 0 && headerEndTime > 0;
     }
 
-    private final void startTiming() {
+    private void startTiming() {
         if (streamSystemNanoStartTime == 0L) {
             streamSystemNanoStartTime = MPUtility.millitime();
             streamSystemMilliStartTime = System.currentTimeMillis();

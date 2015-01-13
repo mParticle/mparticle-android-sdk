@@ -102,7 +102,7 @@ class ProviderPersistence extends JSONObject{
     private static final String MACRO_TIMESTAMP = "%ts%";
     private static final String MACRO_GUID_LEAST_SIG = "%glsb%";
 
-    private static final String applyMacro(String defaultString) {
+    private static String applyMacro(String defaultString) {
         if (!TextUtils.isEmpty(defaultString) && defaultString.startsWith("%")){
             defaultString = defaultString.toLowerCase();
             if (defaultString.equalsIgnoreCase(MACRO_GUID_NO_DASHES)){
@@ -120,7 +120,7 @@ class ProviderPersistence extends JSONObject{
         return defaultString;
     }
 
-    private static final String generateAID() {
+    private static String generateAID() {
         String uuid = UUID.randomUUID().toString().replace("-", "");
         uuid = uuid.toUpperCase();
 

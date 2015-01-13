@@ -180,7 +180,6 @@ public final class UploadHandler extends Handler {
                 //  and the messages table has messages that are not from the current session,
                 //  or there is no current session
                 //  then create a history upload and send it
-
                 Cursor isempty = db.rawQuery("select * from " + UploadTable.TABLE_NAME, null);
                 if ((isempty == null) || (isempty.getCount() == 0)) {
 

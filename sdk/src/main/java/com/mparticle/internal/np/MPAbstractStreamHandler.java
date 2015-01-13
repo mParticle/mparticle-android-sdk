@@ -16,7 +16,6 @@ import java.net.URLStreamHandler;
 abstract class MPAbstractStreamHandler extends URLStreamHandler {
     public static final String[] proxyOverloadSignature = {"java.net.URL", "int", "java.net.Proxy"};
     public static final String[] urlOverloadSignature = {"java.net.URL", "int"};
-    private Class kitKatClientClass;
     private Object kitKatClient;
     private Method kitKatMethod;
 
@@ -45,7 +44,7 @@ abstract class MPAbstractStreamHandler extends URLStreamHandler {
             }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             try {
-                kitKatClientClass = Class.forName("com.android.okhttp.OkHttpClient");
+                Class kitKatClientClass = Class.forName("com.android.okhttp.OkHttpClient");
                 kitKatClient =  kitKatClientClass.newInstance();
                 Class[] params = new Class[1];
                 params[0] = URL.class;

@@ -39,7 +39,6 @@ class EmbeddedComscore extends EmbeddedProvider implements MPActivityCallbacks {
     private static final String COMSCORE_DEFAULT_LABEL_KEY = "name";
     private String clientId;
     private String publisherSecret;
-    private boolean useHttps;
     private String autoUpdateMode;
     private int autoUpdateInterval = 60;
 
@@ -184,7 +183,7 @@ class EmbeddedComscore extends EmbeddedProvider implements MPActivityCallbacks {
             }
         }
 
-        useHttps = Boolean.parseBoolean(properties.get(USE_HTTPS));
+        boolean useHttps = Boolean.parseBoolean(properties.get(USE_HTTPS));
         comScore.setSecure(useHttps);
         comScore.setDebug(MParticle.getInstance().internal().getConfigurationManager().isDebugEnvironment());
         isEnterprise = "enterprise".equals(properties.get(PRODUCT));

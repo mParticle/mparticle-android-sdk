@@ -148,7 +148,7 @@ class EmbeddedKahuna extends EmbeddedProvider implements MPActivityCallbacks {
         }
     }
 
-    private static final String convertMpKeyToKahuna(String key) {
+    private static String convertMpKeyToKahuna(String key) {
         if (key.equals(MParticle.UserAttributes.FIRSTNAME)) {
             return KahunaUserAttributesKeys.FIRST_NAME_KEY;
         } else if (key.equals(MParticle.UserAttributes.LASTNAME)) {

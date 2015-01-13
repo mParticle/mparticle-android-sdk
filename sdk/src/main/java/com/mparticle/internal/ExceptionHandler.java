@@ -10,10 +10,8 @@ import java.lang.Thread.UncaughtExceptionHandler;
 
     private static final String TAG = Constants.LOG_TAG;
     private final UncaughtExceptionHandler mOriginalUncaughtExceptionHandler;
-    private final MessageManager mMessageManager;
 
-    public ExceptionHandler(MessageManager messageManager, UncaughtExceptionHandler originalUncaughtExceptionHandler) {
-        mMessageManager = messageManager;
+    public ExceptionHandler(UncaughtExceptionHandler originalUncaughtExceptionHandler) {
         mOriginalUncaughtExceptionHandler = originalUncaughtExceptionHandler;
     }
 

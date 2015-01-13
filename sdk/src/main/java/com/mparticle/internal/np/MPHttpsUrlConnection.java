@@ -1,5 +1,8 @@
 package com.mparticle.internal.np;
 
+import android.annotation.TargetApi;
+import android.os.Build;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -149,6 +152,7 @@ final class MPHttpsUrlConnection extends HttpsURLConnection {
         return delegateConnection.getHeaderFieldDate(field, defaultValue);
     }
 
+    @TargetApi(Build.VERSION_CODES.KITKAT)
     @Override
     public void setFixedLengthStreamingMode(long contentLength) {
         delegateConnection.setFixedLengthStreamingMode(contentLength);

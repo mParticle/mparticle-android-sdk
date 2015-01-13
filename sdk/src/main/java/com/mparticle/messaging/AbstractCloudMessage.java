@@ -31,7 +31,7 @@ import java.util.Set;
  */
 public abstract class AbstractCloudMessage implements Parcelable {
 
-    public static final int FLAG_RECEIVED = 1 << 0;
+    public static final int FLAG_RECEIVED = 1;
     public static final int FLAG_DIRECT_OPEN = 1 << 1;
     public static final int FLAG_READ = 1 << 2;
     public static final int FLAG_INFLUENCE_OPEN = 1 << 3;

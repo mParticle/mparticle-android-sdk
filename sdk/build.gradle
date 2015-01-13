@@ -30,6 +30,11 @@ android {
     compileSdkVersion 21
     buildToolsVersion "21.1.2"
 
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_7
+        targetCompatibility JavaVersion.VERSION_1_7
+    }
+
     String url = "\"\"";
     String configurationUrl = "\"\"";
     try {
@@ -47,7 +52,7 @@ android {
 
     defaultConfig {
         minSdkVersion 9
-        targetSdkVersion 19
+        targetSdkVersion 21
         versionName sdkversion
         versionCode getDate()
         testApplicationId "com.mparticle.test"
@@ -129,8 +134,8 @@ dependencies {
     compile files('embeddedkits/Kahuna489.jar')
     compile files('embeddedkits/KochavaSDK.jar')
     compile files('embeddedkits/comscore2140923.jar')
-    provided 'com.google.android.gms:play-services:4.+'
-    provided 'com.android.support:support-v4:19.+'
+    provided 'com.google.android.gms:play-services:6.5.87'
+    provided 'com.android.support:support-v4:21.0.3'
 
     unityCompile project('unityskeleton')
 }
