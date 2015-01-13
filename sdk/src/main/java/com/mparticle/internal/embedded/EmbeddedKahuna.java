@@ -176,6 +176,8 @@ class EmbeddedKahuna extends EmbeddedProvider implements MPActivityCallbacks {
                 kahunaKey = KahunaUserCredentialKeys.EMAIL_KEY;
                 break;
             case Other:
+                kahunaKey = "user_id";
+                break;
             case CustomerId:
                 kahunaKey = KahunaUserCredentialKeys.USERNAME_KEY;
                 break;
