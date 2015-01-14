@@ -26,7 +26,23 @@
 -keepattributes Exceptions,InnerClasses,Signature,Deprecated,
                 SourceFile,LineNumberTable,*Annotation*,EnclosingMethod
 
--keep public class * {
+-keep public class com.mparticle.* {
+    public protected *;
+}
+
+-keep public class com.mparticle.activity.* {
+    public protected *;
+}
+
+-keep public class com.mparticle.licensing.* {
+    public protected *;
+}
+
+-keep public class com.mparticle.messaging.* {
+    public protected *;
+}
+
+-keep public class com.mparticle.segmentation.* {
     public protected *;
 }
 
