@@ -6,10 +6,9 @@ import android.content.Intent;
 import android.location.Location;
 
 import com.kochava.android.tracker.Feature;
-import com.mparticle.MParticle;
-import com.mparticle.internal.ConfigManager;
-import com.mparticle.internal.MPActivityCallbacks;
 import com.mparticle.MPProduct;
+import com.mparticle.MParticle;
+import com.mparticle.internal.MPActivityCallbacks;
 
 import org.json.JSONObject;
 
@@ -19,7 +18,6 @@ import java.util.Map;
 class EmbeddedKochava extends EmbeddedProvider implements MPActivityCallbacks {
     private static final String APP_ID = "appId";
 
-    //If set to true, we will pass customer id from user identities (if it exists) to KOCHAVA as user_id
     private static final String USE_CUSTOMER_ID = "useCustomerId";
 
     private static final String INCLUDE_ALL_IDS = "passAllOtherIdentities";
@@ -92,14 +90,16 @@ class EmbeddedKochava extends EmbeddedProvider implements MPActivityCallbacks {
             if (identityType == MParticle.IdentityType.CustomerId) {
                 if (!properties.containsKey(USE_CUSTOMER_ID) ||
                         Boolean.parseBoolean(properties.get(USE_CUSTOMER_ID))) {
-                    Map<String, String> map = new HashMap<String, String>(1);
+                    Map<String, String> map = new HashMap<>(1);
                     map.put(identityType.name(), id);
                     feature.linkIdentity(map);
                 }
-            } else if (Boolean.parseBoolean(properties.get(INCLUDE_ALL_IDS))) {
-                Map<String, String> map = new HashMap<String, String>(1);
-                map.put(identityType.name(), id);
-                feature.linkIdentity(map);
+            } else {
+                if (Boolean.parseBoolean(properties.get(INCLUDE_ALL_IDS))) {
+                    Map<String, String> map = new HashMap<>(1);
+                    map.put(identityType.name(), id);
+                    feature.linkIdentity(map);
+                }
             }
         }
     }
