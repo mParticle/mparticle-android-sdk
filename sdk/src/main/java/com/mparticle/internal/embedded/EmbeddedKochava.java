@@ -29,9 +29,6 @@ class EmbeddedKochava extends EmbeddedProvider implements MPActivityCallbacks {
     private static final String RETRIEVE_ATT_DATA = "retrieveAttributionData";
     private static final String ENABLE_LOGGING = "enableLogging";
     private static final String CURRENCY = "currency";
-    private static final String SPACIAL_X = "SpacialX";
-    private static final String SPACIAL_Y = "SpacialY";
-    private static final String SPACIAL_Z = "SpacialZ";
     private static final String HOST = "kochava.com";
     private Feature feature;
 
@@ -61,60 +58,14 @@ class EmbeddedKochava extends EmbeddedProvider implements MPActivityCallbacks {
     }
 
     @Override
-    public void logEvent(MParticle.EventType type, String name, Map<String, String> eventAttributes) throws Exception {
-        if (feature != null){
-            if (eventAttributes != null &&
-                    (eventAttributes.containsKey(SPACIAL_X) || eventAttributes.containsKey(SPACIAL_Y) || eventAttributes.containsKey(SPACIAL_Z))) {
-
-                double spacialX = 0;
-                double spacialY = 0;
-                double spacialZ = 0;
-                if (eventAttributes.containsKey(SPACIAL_X)){
-                    try{
-                        spacialX = Double.parseDouble(eventAttributes.get(SPACIAL_X));
-                    }catch (NumberFormatException nfe){
-
-                    }
-                }
-                if (eventAttributes.containsKey(SPACIAL_Y)){
-                    try{
-                        spacialY = Double.parseDouble(eventAttributes.get(SPACIAL_Y));
-                    }catch (NumberFormatException nfe){
-
-                    }
-                }
-                if (eventAttributes.containsKey(SPACIAL_Z)){
-                    try{
-                        spacialZ = Double.parseDouble(eventAttributes.get(SPACIAL_Z));
-                    }catch (NumberFormatException nfe){
-
-                    }
-                }
-                feature.eventSpatial(name,
-                        spacialX,
-                        spacialY,
-                        spacialZ,
-                        null);
-            }else{
-                feature.event(name, null);
-            }
-        }
-    }
+    public void logEvent(MParticle.EventType type, String name, Map<String, String> eventAttributes) throws Exception { }
 
 
     @Override
-    public void logTransaction(MPProduct transaction) throws Exception {
-        if (feature != null) {
-            String kochavaName = "eCommerce";
-            feature.event(kochavaName, Double.toString(transaction.getTotalRevenue()));
-        }
-    }
+    public void logTransaction(MPProduct transaction) throws Exception {}
 
     @Override
-    public void logScreen(String screenName, Map<String, String> eventAttributes) throws Exception {
-        String kochavaName = "Viewed " + (screenName == null ? "" : screenName);
-        logEvent(null, kochavaName, eventAttributes);
-    }
+    public void logScreen(String screenName, Map<String, String> eventAttributes) throws Exception {}
 
     @Override
     public void setLocation(Location location) {
@@ -182,7 +133,6 @@ class EmbeddedKochava extends EmbeddedProvider implements MPActivityCallbacks {
         if (feature == null){
             HashMap<String, Object> datamap = new HashMap<String, Object>();
             datamap.put(Feature.INPUTITEMS.KOCHAVA_APP_ID , properties.get(APP_ID));
-            datamap.put(Feature.INPUTITEMS.CURRENCY , Feature.CURRENCIES.EUR);
             if (properties.containsKey(CURRENCY)) {
                 datamap.put(Feature.INPUTITEMS.CURRENCY , properties.get(CURRENCY));
             }else{
@@ -206,9 +156,7 @@ class EmbeddedKochava extends EmbeddedProvider implements MPActivityCallbacks {
     }
 
     @Override
-    public void onActivityPaused(Activity activity, int activityCount) {
-
-    }
+    public void onActivityPaused(Activity activity, int activityCount) {}
 
     @Override
     public void onActivityStopped(Activity activity, int activityCount) {
