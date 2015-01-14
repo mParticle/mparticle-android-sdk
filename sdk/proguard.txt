@@ -105,5 +105,5 @@
 -keep class com.comscore.** { *; }
 -dontwarn com.comscore.**
 
--classobfuscationdictionary names.txt
+
 
