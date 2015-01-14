@@ -8,7 +8,6 @@ import android.os.Parcelable;
 import android.text.TextUtils;
 
 import com.mparticle.MPService;
-import com.mparticle.MParticlePushUtility;
 
 import java.util.UUID;
 

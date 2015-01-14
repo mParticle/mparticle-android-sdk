@@ -7,20 +7,15 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.mparticle.MPService;
-import com.mparticle.MParticlePushUtility;
 import com.mparticle.internal.ConfigManager;
 
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.util.Set;
 
 /**
  * Base class for the class representation of a GCM/push

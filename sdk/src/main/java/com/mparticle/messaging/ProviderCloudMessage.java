@@ -8,8 +8,6 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.v4.app.NotificationCompat;
 
-import com.mparticle.MParticlePushUtility;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;

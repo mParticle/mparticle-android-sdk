@@ -7,16 +7,15 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.os.*;
+import android.os.Build;
+import android.os.Handler;
+import android.os.Parcelable;
 import android.support.v4.app.FragmentActivity;
-
-
-import com.mparticle.MParticlePushUtility;
-import com.mparticle.messaging.CloudDialog;
-import com.mparticle.messaging.MPCloudNotificationMessage;
 
 import com.mparticle.MParticle;
 import com.mparticle.internal.embedded.EmbeddedKitManager;
+import com.mparticle.messaging.CloudDialog;
+import com.mparticle.messaging.MPCloudNotificationMessage;
 import com.mparticle.messaging.MessagingUtils;
 
 import org.json.JSONObject;

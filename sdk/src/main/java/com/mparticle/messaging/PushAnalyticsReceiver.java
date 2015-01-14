@@ -5,9 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 
 import com.mparticle.MPService;
-import com.mparticle.MParticlePushUtility;
-import com.mparticle.messaging.AbstractCloudMessage;
-import com.mparticle.messaging.CloudAction;
 
 /**
  * <code>BroadcastReceiver</code> to be used to listen for, manipulate, and react to GCM notifications.

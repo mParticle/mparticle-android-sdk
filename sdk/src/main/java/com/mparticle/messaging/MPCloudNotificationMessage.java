@@ -2,9 +2,7 @@ package com.mparticle.messaging;
 
 import android.Manifest;
 import android.app.Notification;
-import android.app.PendingIntent;
 import android.content.Context;
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -15,8 +13,6 @@ import android.os.Parcelable;
 import android.support.v4.app.NotificationCompat;
 import android.text.TextUtils;
 
-import com.mparticle.MPService;
-import com.mparticle.MParticlePushUtility;
 import com.mparticle.internal.MPUtility;
 
 import org.json.JSONObject;
