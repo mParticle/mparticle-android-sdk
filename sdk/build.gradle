@@ -132,6 +132,7 @@ dependencies {
     deployerJars "org.kuali.maven.wagons:maven-s3-wagon:1.2.1"
     compile files('embeddedkits/adjust-android-3.6.1.jar')
     compile files('embeddedkits/Kahuna489.jar')
+    compile files('embeddedkits/KochavaSDK.jar')
     compile files('embeddedkits/comscore2140923.jar')
     provided 'com.google.android.gms:play-services:6.5.87'
     provided 'com.android.support:support-v4:21.0.3'
