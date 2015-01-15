@@ -50,10 +50,8 @@ class AppConfig {
     public MParticle.Environment forcedEnvironment = MParticle.Environment.AutoDetect;
     public MParticle.LogLevel logLevel = MParticle.LogLevel.DEBUG;
 
-    public AppConfig(Context context, String key, String secret) {
+    public AppConfig(Context context) {
         mContext = context;
-        mKey = key;
-        mSecret = secret;
     }
 
     public void init(SharedPreferences preferences) {

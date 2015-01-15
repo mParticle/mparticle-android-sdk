@@ -195,48 +195,6 @@ public class MParticle {
     }
 
     /**
-     * Start the mParticle SDK and begin tracking a user session.
-     *
-     * @param context Required reference to a Context object
-     * @param apiKey  The API key to use for authentication with mParticle
-     * @param secret  The API secret to use for authentication with mParticle
-     */
-
-    private static void start(Context context, String apiKey, String secret) {
-        start(context, apiKey, secret, InstallType.AutoDetect);
-    }
-
-    /**
-     * Start the mParticle SDK and begin tracking a user session.
-     * <p/>
-     * The InstallType parameter is used to determine if this is a new install or an upgrade. In
-     * the case where the mParticle SDK is being added to an existing app with existing users, this
-     * parameter prevents mParticle from categorizing all users as new users.
-     *
-     * @param context     Required reference to a Context object
-     * @param apiKey      The API key to use for authentication with mParticle
-     * @param secret      The API secret to use for authentication with mParticle
-     * @param installType Specify whether this is a new install or an upgrade, or let mParticle detect
-     * @see com.mparticle.MParticle.InstallType
-     */
-
-    private static void start(final Context context, final String apiKey, final String secret, final InstallType installType) {
-        if (context == null) {
-            throw new IllegalArgumentException("mParticle failed to start: context is required.");
-        }
-        if (apiKey == null) {
-            throw new IllegalArgumentException("mParticle failed to start: apiKey is required.");
-        }
-        if (secret == null) {
-            throw new IllegalArgumentException("mParticle failed to start: secret is required.");
-        }
-        if (installType == null) {
-            throw new IllegalArgumentException("mParticle failed to start: installType is required.");
-        }
-        MParticle.getInstance(context.getApplicationContext(), apiKey, secret, installType);
-    }
-
-    /**
      * Start the mParticle SDK and begin tracking a user session. This method must be called prior to {@link #getInstance()}.
      * This method requires that your API key and secret are contained in your XML configuration.
      * <p/>
@@ -253,7 +211,7 @@ public class MParticle {
         if (context == null) {
             throw new IllegalArgumentException("mParticle failed to start: context is required.");
         }
-        MParticle.getInstance(context.getApplicationContext(), null, null, installType);
+        MParticle.getInstance(context.getApplicationContext(), installType);
     }
 
     /**
@@ -262,11 +220,9 @@ public class MParticle {
      * API credentials will be ignored and the current instance will be returned.
      *
      * @param context the Activity that is creating the instance
-     * @param apiKey  the API key for your account
-     * @param secret  the API secret for your account
      * @return An instance of the mParticle SDK configured with your API key
      */
-    private static MParticle getInstance(Context context, String apiKey, String secret, InstallType installType) {
+    private static MParticle getInstance(Context context, InstallType installType) {
         if (instance == null) {
             synchronized (MParticle.class) {
                 if (instance == null) {
@@ -283,8 +239,8 @@ public class MParticle {
                         sPreferences = context.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
                     }
 
-                    EmbeddedKitManager embeddedKitManager1 = new EmbeddedKitManager(context);
-                    ConfigManager appConfigManager = new ConfigManager(context, apiKey, secret, embeddedKitManager1);
+                    EmbeddedKitManager embeddedKitManager = new EmbeddedKitManager(context);
+                    ConfigManager appConfigManager = new ConfigManager(context, embeddedKitManager);
                     Context appContext = context.getApplicationContext();
 
                     Boolean firstRun = sPreferences.getBoolean(PrefKeys.FIRSTRUN + appConfigManager.getApiKey(), true);
@@ -295,7 +251,9 @@ public class MParticle {
                     MessageManager messageManager = new MessageManager(appContext, appConfigManager);
 
 
-                    instance = new MParticle(appContext, messageManager, appConfigManager, embeddedKitManager1);
+                    instance = new MParticle(appContext, messageManager, appConfigManager, embeddedKitManager);
+                    appConfigManager.restore();
+
                     messageManager.start(appContext, firstRun, installType);
 
                     if (appConfigManager.getLogUnhandledExceptions()) {
@@ -308,7 +266,7 @@ public class MParticle {
                         instance.performLicenseCheck();
                     }
                     if (appConfigManager.isNetworkPerformanceEnabled()) {
-                        instance.beginMeasuringNetworkPerformance();
+                        instance.setNetworkTrackingEnabled(true);
                     }
                 }
             }
@@ -317,25 +275,25 @@ public class MParticle {
     }
 
     /**
-     * Retrieve an instance of the MParticle class. {@link #start(android.content.Context)} or {@link #start(android.content.Context, String, String)} must
-     * be called prior to this or a {@code java.lang.IllegalStateException} will be thrown.
+     * Retrieve an instance of the MParticle class. {@link #start(android.content.Context)} must
+     * be called prior to this.
      *
      * @return An instance of the mParticle SDK configured with your API key
      */
     public static MParticle getInstance() {
         if (instance == null) {
-            throw new IllegalStateException("Failed to get MParticle instance, getInstance() called prior to start().");
+            Log.e(Constants.LOG_TAG, "Failed to get MParticle instance, getInstance() called prior to start().");
         }
-        return getInstance(null, null, null, null);
+        return getInstance(null, null);
     }
 
 
-    static Boolean setCheckedAttribute(JSONObject attributes, String key, Object value, boolean increment) {
+    private static Boolean setCheckedAttribute(JSONObject attributes, String key, Object value, boolean increment) {
         return setCheckedAttribute(attributes, key, value, false, increment);
     }
 
 
-    static Boolean setCheckedAttribute(JSONObject attributes, String key, Object value, Boolean caseInsensitive, boolean increment) {
+    private static Boolean setCheckedAttribute(JSONObject attributes, String key, Object value, Boolean caseInsensitive, boolean increment) {
         if (null == attributes || null == key) {
             return false;
         }
@@ -378,7 +336,7 @@ public class MParticle {
         return true;
     }
 
-    static String findCaseInsensitiveKey(JSONObject jsonObject, String key) {
+    private static String findCaseInsensitiveKey(JSONObject jsonObject, String key) {
         Iterator<String> keys = jsonObject.keys();
         while (keys.hasNext()) {
             String currentKey = keys.next();
@@ -464,7 +422,7 @@ public class MParticle {
     /**
      * Check current session timeout and end the session if needed. Will not start a new session.
      */
-    Boolean checkSessionTimeout() {
+    private Boolean checkSessionTimeout() {
         long now = System.currentTimeMillis();
         if (0 != mSessionStartTime &&
                 mAppStateManager.isBackgrounded() &&
@@ -850,18 +808,14 @@ public class MParticle {
     }
 
     /**
-     * Begin measuring network performance. This method only needs to be called one time during the runtime of an application.
+     * Enable or disable measuring network performance.
      */
-    public void beginMeasuringNetworkPerformance() {
-        internal().beginMeasuringNetworkPerformance(true);
-    }
-
-
-    /**
-     * Stop measuring network performance.
-     */
-    public void endMeasuringNetworkPerformance() {
-        internal().endMeasuringNetworkPerformance(true);
+    public void setNetworkTrackingEnabled(boolean enabled) {
+        if (enabled) {
+            internal().beginMeasuringNetworkPerformance(true);
+        }else{
+            internal().endMeasuringNetworkPerformance(true);
+        }
     }
 
     /**
@@ -1343,10 +1297,6 @@ public class MParticle {
         internal().disableUncaughtExceptionLogging(true);
     }
 
-
-
-
-
     /**
      * This method checks the event count is below the limit and increments the event count. A
      * warning is logged if the limit has been reached.
@@ -1371,7 +1321,7 @@ public class MParticle {
      * @param attributes the user-provided JSONObject
      * @return a cleansed copy of the JSONObject
      */
-    JSONObject enforceAttributeConstraints(Map<String, String> attributes) {
+    private JSONObject enforceAttributeConstraints(Map<String, String> attributes) {
         if (null == attributes) {
             return null;
         }
@@ -1384,7 +1334,7 @@ public class MParticle {
         return checkedAttributes;
     }
 
-    void performLicenseCheck() {
+    private void performLicenseCheck() {
         String deviceId = Settings.Secure.getString(mAppContext.getContentResolver(), Settings.Secure.ANDROID_ID);
 
         MPLicenseCheckerCallback licenseCheckerCallback = new MPLicenseCheckerCallback();
@@ -1461,8 +1411,6 @@ public class MParticle {
         mConfigManager.setSessionTimeout(sessionTimeout);
     }
 
-
-
     public void getUserSegments(long timeout, String endpointId, SegmentListener listener) {
         if (mMessageManager != null && mMessageManager.mUploadHandler != null) {
             mMessageManager.mUploadHandler.fetchSegments(timeout, endpointId, listener);
@@ -1499,7 +1447,11 @@ public class MParticle {
         }
     }
 
-
+    /**
+     * Entry point to the Messaging APIs
+     *
+     * @return a helper object that allows for interaction with the Messaging APIs
+     */
     public MessagingUtils Messaging() {
         if (mMessaging == null){
             mMessaging = new MessagingUtils(mAppContext, mConfigManager);
@@ -1966,10 +1918,6 @@ public class MParticle {
         public void setPushRegistrationId(String registrationId) {
             PushRegistrationHelper.storeRegistrationId(mAppContext, registrationId);
             mMessageManager.setPushRegistrationId(mSessionID, mSessionStartTime, System.currentTimeMillis(), registrationId, true);
-        }
-
-        public AppStateManager getAppStateManager() {
-            return mAppStateManager;
         }
 
         public Boolean shouldProcessUrl(String url) {

@@ -70,11 +70,11 @@ public class ConfigManager {
 
     }
 
-    public ConfigManager(Context context, String key, String secret, EmbeddedKitManager embeddedKitManager) {
+    public ConfigManager(Context context, EmbeddedKitManager embeddedKitManager) {
         mContext = context.getApplicationContext();
         sIsDebugEnvironment = ( 0 != ( mContext.getApplicationInfo().flags &= ApplicationInfo.FLAG_DEBUGGABLE ) );
         mPreferences = mContext.getSharedPreferences(PREFERENCES_FILE, Context.MODE_PRIVATE);
-        sLocalPrefs = new AppConfig(mContext, key, secret);
+        sLocalPrefs = new AppConfig(mContext);
         if (sIsDebugEnvironment){
             sLocalPrefs.logLevel = LogLevel.DEBUG;
         }
@@ -82,10 +82,25 @@ public class ConfigManager {
         mEmbeddedKitManager = embeddedKitManager;
     }
 
-    public synchronized void updateConfig(JSONObject responseJSON) throws JSONException {
+    public void restore(){
+        String oldConfig = mPreferences.getString(CONFIG_JSON, null);
+        if (!TextUtils.isEmpty(oldConfig)){
+            try{
+                updateConfig(new JSONObject(oldConfig), false);
+            }catch (JSONException jse){
 
+            }
+        }
+    }
+
+    public synchronized void updateConfig(JSONObject responseJSON) throws JSONException {
+        updateConfig(responseJSON, true);
+    }
+    public synchronized void updateConfig(JSONObject responseJSON, boolean persistJson) throws JSONException {
         SharedPreferences.Editor editor = mPreferences.edit();
-        editor.putString(CONFIG_JSON, responseJSON.toString());
+        if (persistJson) {
+            editor.putString(CONFIG_JSON, responseJSON.toString());
+        }
 
         if (responseJSON.has(KEY_UNHANDLED_EXCEPTIONS)) {
             mLogUnhandledExceptions = responseJSON.getString(KEY_UNHANDLED_EXCEPTIONS);

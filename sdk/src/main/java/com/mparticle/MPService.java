@@ -129,6 +129,7 @@ public class MPService extends IntentService {
         if (isNetworkingEnabled){
             ConfigManager.setNetworkingEnabled(false);
         }
+        MParticle.getInstance().setNetworkTrackingEnabled(false);
         (new AsyncTask<AbstractCloudMessage, Void, Notification>() {
             @Override
             protected Notification doInBackground(AbstractCloudMessage... params) {
@@ -162,7 +163,7 @@ public class MPService extends IntentService {
                 }
             }
         }).execute(message);
-        MParticle.getInstance().endMeasuringNetworkPerformance();
+
     }
 
     private void handleNotificationTap(Intent intent) {
