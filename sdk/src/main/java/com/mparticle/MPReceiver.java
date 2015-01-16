@@ -20,9 +20,7 @@ import com.mparticle.messaging.MessagingUtils;
  * Core {@code BroadcastReceiver} used to support push notifications. Handles the following Intent actions:
  *
  * <ul>
- *     <li>{@code com.google.android.c2dm.intent.REGISTRATION}</li>
  *     <li>{@code com.google.android.c2dm.intent.RECEIVE}</li>
- *     <li>{@code com.google.android.c2dm.intent.UNREGISTER}</li>
  *     <li>{@code android.intent.action.PACKAGE_REPLACED}</li>
  *     <li>{@code android.intent.action.BOOT_COMPLETED}</li>
  * </ul>

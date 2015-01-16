@@ -67,8 +67,8 @@ public class PushRegistrationHelper {
                 public void run() {
                     try {
                         String registrationId = GoogleCloudMessaging.getInstance(context).register(senderId);
-                        PushRegistrationHelper.storeRegistrationId(context, registrationId);
-                    } catch (IOException ex) {
+                        MParticle.getInstance().internal().setPushRegistrationId(registrationId);
+                    } catch (Exception ex) {
                         ConfigManager.log(MParticle.LogLevel.ERROR, "Error registering for GCM", ex.getMessage());
                     }
                 }

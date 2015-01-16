@@ -97,12 +97,8 @@ public class MPService extends IntentService {
             if (action.equals("com.google.android.c2dm.intent.REGISTRATION")) {
                 MParticle.start(getApplicationContext());
                 MParticle.getInstance().mEmbeddedKitManager.handleIntent(intent);
-                handleRegistration(intent);
             } else if (action.equals("com.google.android.c2dm.intent.RECEIVE")) {
                 generateCloudMessage(intent);
-            } else if (action.equals("com.google.android.c2dm.intent.UNREGISTER")) {
-                intent.putExtra("unregistered", "true");
-                handleRegistration(intent);
             } else if (action.startsWith(INTERNAL_NOTIFICATION_TAP)) {
                 handleNotificationTapInternal(intent);
             } else if (action.equals(MessagingUtils.BROADCAST_NOTIFICATION_TAPPED)) {
@@ -189,27 +185,6 @@ public class MPService extends IntentService {
             }
         }
         return appState;
-    }
-
-
-
-    private void handleRegistration(Intent intent) {
-        try {
-            MParticle mMParticle = MParticle.getInstance();
-            String registrationId = intent.getStringExtra("registration_id");
-            String unregistered = intent.getStringExtra("unregistered");
-            String error = intent.getStringExtra("error");
-
-            if (registrationId != null) {
-                mMParticle.internal().setPushRegistrationId(registrationId);
-            } else if (unregistered != null) {
-                mMParticle.internal().clearPushNotificationId();
-            } else if (error != null) {
-                Log.i(TAG, "GCM registration error: " + error);
-            }
-        } catch (Throwable t) {
-
-        }
     }
 
     private void generateCloudMessage(Intent intent) {
