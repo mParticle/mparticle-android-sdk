@@ -61,7 +61,7 @@ public class PushRegistrationHelper {
      * @param senderId the SENDER_ID for the application
      */
     public static void enablePushNotifications(final Context context, final String senderId) {
-        if (getRegistrationId(context) == null) {
+        if (getRegistrationId(context) == null && MPUtility.isSupportLibAvailable() && MPUtility.isGcmServicesAvailable()) {
             new Thread(new Runnable() {
                 @Override
                 public void run() {
