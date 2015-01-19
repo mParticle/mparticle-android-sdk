@@ -66,7 +66,7 @@ public class PushRegistrationHelper {
                 @Override
                 public void run() {
                     try {
-                        String registrationId = GoogleCloudMessaging.getInstance(context).register(senderId);
+                        String registrationId =  GoogleCloudMessaging.getInstance(context).register(senderId);
                         MParticle.getInstance().internal().setPushRegistrationId(registrationId);
                     } catch (Exception ex) {
                         ConfigManager.log(MParticle.LogLevel.ERROR, "Error registering for GCM", ex.getMessage());
@@ -96,17 +96,19 @@ public class PushRegistrationHelper {
      * Unregister the device from GCM notifications
      */
     public static void disablePushNotifications(final Context context) {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    GoogleCloudMessaging.getInstance(context).unregister();
-                    PushRegistrationHelper.clearPushRegistrationId(context);
-                } catch (IOException ex) {
-                    ConfigManager.log(MParticle.LogLevel.ERROR, "Error unregistering for GCM", ex.getMessage());
+        if (MPUtility.isGcmServicesAvailable()) {
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        GoogleCloudMessaging.getInstance(context).unregister();
+                        PushRegistrationHelper.clearPushRegistrationId(context);
+                    } catch (IOException ex) {
+                        ConfigManager.log(MParticle.LogLevel.ERROR, "Error unregistering for GCM", ex.getMessage());
+                    }
                 }
-            }
-        }).start();
+            }).start();
+        }
     }
 
     /**
