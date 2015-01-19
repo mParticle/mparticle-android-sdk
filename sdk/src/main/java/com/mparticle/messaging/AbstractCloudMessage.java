@@ -154,7 +154,7 @@ public abstract class AbstractCloudMessage implements Parcelable {
                 // use the ic_dialog_alert icon if the app's can not be found
             }
             if (0 == smallIcon) {
-                smallIcon = android.R.drawable.ic_dialog_alert;
+                smallIcon = context.getResources().getIdentifier("ic_dialog_alert", "drawable", "android");
             }
         }
         return smallIcon;

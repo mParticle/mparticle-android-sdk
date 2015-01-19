@@ -221,12 +221,13 @@ public class MPCloudNotificationMessage extends AbstractCloudMessage {
     }
 
     public Bitmap getLargeIcon(Context context){
+        Bitmap bitmap = null;
         String largeIconUri = mExtras.getString(LARGE_ICON);
         if (!TextUtils.isEmpty(largeIconUri)) {
-            if (largeIconUri.contains("http")) {
+            if (largeIconUri.contains("http:") || largeIconUri.contains("https:") ) {
                 try {
                     InputStream in = new java.net.URL(largeIconUri).openStream();
-                    return BitmapFactory.decodeStream(in);
+                    bitmap = BitmapFactory.decodeStream(in);
                 } catch (Exception e) {
 
 
@@ -234,20 +235,28 @@ public class MPCloudNotificationMessage extends AbstractCloudMessage {
             } else {
                 int drawableResourceId = context.getResources().getIdentifier(largeIconUri, "drawable", context.getPackageName());
                 if (drawableResourceId > 0) {
-                    return BitmapFactory.decodeResource(context.getResources(),
+                    bitmap = BitmapFactory.decodeResource(context.getResources(),
                             drawableResourceId);
                 }
             }
+            if (bitmap != null){
+                return bitmap;
+            }
         }
-        int appIcon = android.R.drawable.ic_dialog_alert;
+        int appIcon = -1;
         try {
             appIcon = context.getPackageManager().getApplicationInfo(context.getPackageName(), 0).icon;
         } catch (PackageManager.NameNotFoundException e) {
             // use the ic_dialog_alert icon if the app's can not be found
         }
 
-        return BitmapFactory.decodeResource(context.getResources(),
+        bitmap = BitmapFactory.decodeResource(context.getResources(),
                 appIcon);
+        if (bitmap == null){
+            bitmap = BitmapFactory.decodeResource(context.getResources(),
+                    context.getResources().getIdentifier("ic_dialog_alert", "drawable", "android"));
+        }
+        return bitmap;
     }
 
     public int getLightColorArgb(){

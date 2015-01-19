@@ -237,6 +237,21 @@ public class PushTests extends AndroidTestCase {
         assertNotNull(message.getLargeIcon(null));
     }
 
+    public void testLargeIconFromResources(){
+        Intent pushIntent = new Intent();
+        Bundle extras = getMpExtras(MP_JSON);
+        extras.putString("m_li","yuan" );
+        pushIntent.putExtras(extras);
+
+        MPCloudNotificationMessage message = null;
+        try {
+            message = (MPCloudNotificationMessage) AbstractCloudMessage.createMessage(pushIntent, null);
+        } catch (AbstractCloudMessage.InvalidGcmMessageException e) {
+
+        }
+        assertNotNull(message.getLargeIcon(getContext()));
+    }
+
     public void testSilentPush(){
         Bundle extras = getMpExtras(MP_JSON);
         extras.putString("m_cmd", Integer.toString(MPCloudNotificationMessage.COMMAND_DONOTHING));
