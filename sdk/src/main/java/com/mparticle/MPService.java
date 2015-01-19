@@ -20,6 +20,7 @@ import android.util.Log;
 import com.mparticle.internal.AppStateManager;
 import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.Constants;
+import com.mparticle.internal.MPUtility;
 import com.mparticle.messaging.AbstractCloudMessage;
 import com.mparticle.messaging.CloudAction;
 import com.mparticle.messaging.MPCloudBackgroundMessage;
@@ -98,7 +99,11 @@ public class MPService extends IntentService {
                 MParticle.start(getApplicationContext());
                 MParticle.getInstance().mEmbeddedKitManager.handleIntent(intent);
             } else if (action.equals("com.google.android.c2dm.intent.RECEIVE")) {
-                generateCloudMessage(intent);
+                if (MPUtility.isSupportLibAvailable()) {
+                    generateCloudMessage(intent);
+                }else{
+                    Log.e(Constants.LOG_TAG, "GCM received but the support library is missing, not notification will be shown.");
+                }
             } else if (action.startsWith(INTERNAL_NOTIFICATION_TAP)) {
                 handleNotificationTapInternal(intent);
             } else if (action.equals(MessagingUtils.BROADCAST_NOTIFICATION_TAPPED)) {
