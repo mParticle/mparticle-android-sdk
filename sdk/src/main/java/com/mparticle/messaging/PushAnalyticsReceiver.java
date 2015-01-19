@@ -35,19 +35,19 @@ public class PushAnalyticsReceiver extends BroadcastReceiver {
     @Override
     public final void onReceive(Context context, Intent intent) {
         mContext = context;
-        if (MessagingUtils.BROADCAST_NOTIFICATION_TAPPED.equalsIgnoreCase(intent.getAction())){
-            AbstractCloudMessage message = intent.getParcelableExtra(MessagingUtils.CLOUD_MESSAGE_EXTRA);
-            CloudAction action = intent.getParcelableExtra(MessagingUtils.CLOUD_ACTION_EXTRA);
+        if (MPMessagingAPI.BROADCAST_NOTIFICATION_TAPPED.equalsIgnoreCase(intent.getAction())){
+            AbstractCloudMessage message = intent.getParcelableExtra(MPMessagingAPI.CLOUD_MESSAGE_EXTRA);
+            CloudAction action = intent.getParcelableExtra(MPMessagingAPI.CLOUD_ACTION_EXTRA);
             if (!onNotificationTapped(message, action)){
-                intent.putExtra(MessagingUtils.CLOUD_MESSAGE_EXTRA, message);
-                intent.putExtra(MessagingUtils.CLOUD_ACTION_EXTRA, action);
+                intent.putExtra(MPMessagingAPI.CLOUD_MESSAGE_EXTRA, message);
+                intent.putExtra(MPMessagingAPI.CLOUD_ACTION_EXTRA, action);
                 MPService.runIntentInService(context, intent);
             }
             return;
-        } else if (MessagingUtils.BROADCAST_NOTIFICATION_RECEIVED.equalsIgnoreCase(intent.getAction())){
-            AbstractCloudMessage message = intent.getParcelableExtra(MessagingUtils.CLOUD_MESSAGE_EXTRA);
+        } else if (MPMessagingAPI.BROADCAST_NOTIFICATION_RECEIVED.equalsIgnoreCase(intent.getAction())){
+            AbstractCloudMessage message = intent.getParcelableExtra(MPMessagingAPI.CLOUD_MESSAGE_EXTRA);
             if (!onNotificationReceived(message)){
-                intent.putExtra(MessagingUtils.CLOUD_MESSAGE_EXTRA, message);
+                intent.putExtra(MPMessagingAPI.CLOUD_MESSAGE_EXTRA, message);
                 MPService.runIntentInService(context, intent);
             }
             return;

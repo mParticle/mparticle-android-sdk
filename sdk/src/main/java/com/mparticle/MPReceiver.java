@@ -13,7 +13,7 @@ import com.mparticle.messaging.AbstractCloudMessage;
 import com.mparticle.messaging.CloudAction;
 
 import com.mparticle.internal.Constants;
-import com.mparticle.messaging.MessagingUtils;
+import com.mparticle.messaging.MPMessagingAPI;
 
 
 /**
@@ -82,15 +82,15 @@ public class MPReceiver extends BroadcastReceiver {
                 String referrer = intent.getStringExtra("referrer");
                 SharedPreferences preferences = context.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
                 preferences.edit().putString(Constants.PrefKeys.INSTALL_REFERRER, referrer).commit();
-            } else if (MessagingUtils.BROADCAST_NOTIFICATION_TAPPED.equalsIgnoreCase(intent.getAction())){
-                AbstractCloudMessage message = intent.getParcelableExtra(MessagingUtils.CLOUD_MESSAGE_EXTRA);
-                CloudAction action = intent.getParcelableExtra(MessagingUtils.CLOUD_ACTION_EXTRA);
+            } else if (MPMessagingAPI.BROADCAST_NOTIFICATION_TAPPED.equalsIgnoreCase(intent.getAction())){
+                AbstractCloudMessage message = intent.getParcelableExtra(MPMessagingAPI.CLOUD_MESSAGE_EXTRA);
+                CloudAction action = intent.getParcelableExtra(MPMessagingAPI.CLOUD_ACTION_EXTRA);
                 if (!onNotificationTapped(message, action)){
                     MPService.runIntentInService(context, intent);
                 }
                 return;
-            } else if (MessagingUtils.BROADCAST_NOTIFICATION_RECEIVED.equalsIgnoreCase(intent.getAction())){
-                AbstractCloudMessage message = intent.getParcelableExtra(MessagingUtils.CLOUD_MESSAGE_EXTRA);
+            } else if (MPMessagingAPI.BROADCAST_NOTIFICATION_RECEIVED.equalsIgnoreCase(intent.getAction())){
+                AbstractCloudMessage message = intent.getParcelableExtra(MPMessagingAPI.CLOUD_MESSAGE_EXTRA);
                 if (!onNotificationReceived(message)){
                     MPService.runIntentInService(context, intent);
                 }

@@ -48,7 +48,7 @@ import com.mparticle.licensing.ServerManagedPolicy;
 
 import com.mparticle.messaging.CloudAction;
 import com.mparticle.messaging.MPCloudNotificationMessage;
-import com.mparticle.messaging.MessagingUtils;
+import com.mparticle.messaging.MPMessagingAPI;
 import com.mparticle.messaging.ProviderCloudMessage;
 import com.mparticle.segmentation.SegmentListener;
 
@@ -131,7 +131,7 @@ public class MParticle {
             Process.THREAD_PRIORITY_BACKGROUND);
 
     private final MParticleInternal mInternal;
-    private MessagingUtils mMessaging;
+    private MPMessagingAPI mMessaging;
     private MPMediaAPI mMedia;
 
     MParticle(Context context, MessageManager messageManager, ConfigManager configManager, EmbeddedKitManager embeddedKitManager) {
@@ -1454,9 +1454,9 @@ public class MParticle {
      *
      * @return a helper object that allows for interaction with the Messaging APIs
      */
-    public MessagingUtils Messaging() {
+    public MPMessagingAPI Messaging() {
         if (mMessaging == null){
-            mMessaging = new MessagingUtils(mAppContext, mConfigManager);
+            mMessaging = new MPMessagingAPI(mAppContext, mConfigManager);
         }
         return mMessaging;
     }

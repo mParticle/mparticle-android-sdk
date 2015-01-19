@@ -14,7 +14,7 @@ import com.mparticle.internal.PushRegistrationHelper;
  * @see {@link com.mparticle.MParticle#Messaging()}
  *
  */
-public class MessagingUtils {
+public class MPMessagingAPI {
     private final ConfigManager mConfigManager;
     private final Context mContext;
 
@@ -36,7 +36,7 @@ public class MessagingUtils {
      */
     public static final String BROADCAST_NOTIFICATION_TAPPED = "com.mparticle.push.TAP";
 
-    public MessagingUtils(Context context, ConfigManager configManager) {
+    public MPMessagingAPI(Context context, ConfigManager configManager) {
         super();
         mContext = context;
         mConfigManager = configManager;

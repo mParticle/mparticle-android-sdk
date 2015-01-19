@@ -56,7 +56,7 @@ public abstract class AbstractCloudMessage implements Parcelable {
     protected Intent getDefaultOpenIntent(Context context, AbstractCloudMessage message) {
         PackageManager pm = context.getPackageManager();
         Intent intent = pm.getLaunchIntentForPackage(context.getPackageName());
-        intent.putExtra(MessagingUtils.CLOUD_MESSAGE_EXTRA, message);
+        intent.putExtra(MPMessagingAPI.CLOUD_MESSAGE_EXTRA, message);
         return intent;
     }
 
@@ -92,8 +92,8 @@ public abstract class AbstractCloudMessage implements Parcelable {
     protected static PendingIntent getLoopbackIntent(Context context, AbstractCloudMessage message, CloudAction action){
         Intent intent = new Intent(MPService.INTERNAL_NOTIFICATION_TAP + action.getActionIdentifier());
         intent.setClass(context, MPService.class);
-        intent.putExtra(MessagingUtils.CLOUD_MESSAGE_EXTRA, message);
-        intent.putExtra(MessagingUtils.CLOUD_ACTION_EXTRA, action);
+        intent.putExtra(MPMessagingAPI.CLOUD_MESSAGE_EXTRA, message);
+        intent.putExtra(MPMessagingAPI.CLOUD_ACTION_EXTRA, action);
 
         return PendingIntent.getService(context, action.getActionIdentifier().hashCode(), intent, PendingIntent.FLAG_UPDATE_CURRENT);
     }
