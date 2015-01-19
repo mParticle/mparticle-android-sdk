@@ -5,18 +5,12 @@ import android.app.Activity;
 import android.app.Application;
 import android.content.ComponentName;
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Handler;
-import android.os.Parcelable;
-import android.support.v4.app.FragmentActivity;
 
 import com.mparticle.MParticle;
 import com.mparticle.internal.embedded.EmbeddedKitManager;
-import com.mparticle.messaging.CloudDialog;
-import com.mparticle.messaging.MPCloudNotificationMessage;
-import com.mparticle.messaging.MessagingUtils;
 
 import org.json.JSONObject;
 
@@ -172,10 +166,10 @@ public class AppStateManager implements MPActivityCallbacks{
     @Override
     public void onActivityResumed(Activity activity, int currentCount){
         mEmbeddedKitManager.onActivityResumed(activity, mActivities.get());
-        showCloudDialog(activity);
+        //showCloudDialog(activity);
     }
 
-    private void showCloudDialog(Activity activity){
+   /* private void showCloudDialog(Activity activity){
         Intent intent = activity.getIntent();
         if (mSupportLib && intent != null && activity instanceof FragmentActivity){
             Parcelable message = intent.getParcelableExtra(MessagingUtils.CLOUD_MESSAGE_EXTRA);
@@ -189,7 +183,7 @@ public class AppStateManager implements MPActivityCallbacks{
                 }
             }
         }
-    }
+    }*/
 
     @Override
     public void onActivityPaused(Activity activity, int activityCount) {
