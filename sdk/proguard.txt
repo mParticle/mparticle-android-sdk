@@ -97,6 +97,9 @@
 -keep class org.fmod.** { *; }
 -dontwarn org.fmod.**
 
+-keep class com.mparticle.internal.PushRegistrationHelper
+-keep class com.mparticle.internal.np.** { *; }
+
 -keep class com.kochava.** { *; }
 -keep class com.mobileapptracker.** { *; }
 -keep class com.kahuna.** { *; }
