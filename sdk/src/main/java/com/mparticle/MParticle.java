@@ -22,7 +22,8 @@ import android.webkit.WebView;
 
 
 import com.mparticle.internal.MessageManager;
-import com.mparticle.messaging.AbstractCloudMessage;
+import com.mparticle.media.MPMediaAPI;
+import com.mparticle.media.MediaCallbacks;
 
 import com.mparticle.internal.AppStateManager;
 import com.mparticle.internal.ConfigManager;
@@ -131,6 +132,7 @@ public class MParticle {
 
     private final MParticleInternal mInternal;
     private MessagingUtils mMessaging;
+    private MPMediaAPI mMedia;
 
     MParticle(Context context, MessageManager messageManager, ConfigManager configManager, EmbeddedKitManager embeddedKitManager) {
 
@@ -1457,6 +1459,28 @@ public class MParticle {
             mMessaging = new MessagingUtils(mAppContext, mConfigManager);
         }
         return mMessaging;
+    }
+
+    /**
+     * Entry point to the Media APIs
+     *
+     * @return a helper object that allows for interaction with the Media APIs
+     */
+    public MPMediaAPI Media() {
+        if (mMedia == null){
+            mMedia = new MPMediaAPI(mAppContext, new MediaCallbacks() {
+                @Override
+                public void onAudioPlaying() {
+                    ensureActiveSession();
+                }
+
+                @Override
+                public void onAudioStopped() {
+                    mLastEventTime = System.currentTimeMillis();
+                }
+            });
+        }
+        return mMedia;
     }
 
     /**
