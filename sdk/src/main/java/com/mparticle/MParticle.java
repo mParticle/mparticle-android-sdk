@@ -428,7 +428,7 @@ public class MParticle {
         long now = System.currentTimeMillis();
         if (0 != mSessionStartTime &&
                 mAppStateManager.isBackgrounded() &&
-                (mConfigManager.getSessionTimeout() < now - mLastEventTime)) {
+                (mConfigManager.getSessionTimeout() < now - mLastEventTime) && !MParticle.getInstance().Media().getAudioPlaying()) {
             ConfigManager.log(LogLevel.DEBUG, "Session timed out");
 
             endSession(mLastEventTime);

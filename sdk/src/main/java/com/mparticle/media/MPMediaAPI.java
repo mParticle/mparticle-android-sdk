@@ -11,6 +11,8 @@ import android.content.Context;
 public class MPMediaAPI {
     private final MediaCallbacks mCallbacks;
     private final Context mContext;
+    private boolean mAudioPlaying = false;
+    private boolean audioPlaying;
 
     private MPMediaAPI(){
         mContext = null;
@@ -36,10 +38,15 @@ public class MPMediaAPI {
      * @param playing Is your app currently playing music for the user.
      */
     public void setAudioPlaying(boolean playing){
+        mAudioPlaying = playing;
         if (playing){
             mCallbacks.onAudioPlaying();
         }else{
             mCallbacks.onAudioStopped();
         }
+    }
+
+    public boolean getAudioPlaying() {
+        return audioPlaying;
     }
 }
