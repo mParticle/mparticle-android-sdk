@@ -5,7 +5,7 @@
     android:versionCode="1"
     android:versionName="1">
     <uses-sdk
-        android:minSdkVersion="8"
+        android:minSdkVersion="9"
         android:targetSdkVersion="19" />
     <!-- Required for the mParticle SDK -->
     <uses-permission android:name="android.permission.INTERNET" />
@@ -25,19 +25,10 @@
         android:protectionLevel="signature" />
     <uses-permission android:name="YOURPACKAGENAME.permission.C2D_MESSAGE" />
     <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
-    <!-- A device must re-register for push notifications when it's operating system version changes (in the case of an upgrade). -->
-    <!-- On device boot, the mParticle SDK will check if an upgrade has occurred -->
-    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <!-- Prevent the application from sleeping while a GCM notification is being processed -->
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <!-- END REQUIRED PERMISSIONS FOR PUSH -->
-    <!-- BEGIN OPTIONAL PERMISSIONS FOR PUSH -->
-    <!-- Required to receive secure broadcasts when a GCM notification is received/tapped -->
-    <permission
-        android:name="YOURPACKAGENAME.mparticle.permission.NOTIFICATIONS"
-        android:protectionLevel="signature" />
-    <uses-permission android:name="YOURPACKAGENAME.mparticle.permission.NOTIFICATIONS" />
-    <!-- END OPTIONAL PERMISSIONS FOR PUSH -->
+
     <application>
         <activity android:name=".MainActivity">
             <intent-filter>
@@ -51,35 +42,27 @@
             android:permission="com.google.android.c2dm.permission.SEND">
             <intent-filter>
                 <action android:name="com.google.android.c2dm.intent.RECEIVE" />
-                <action android:name="com.google.android.c2dm.intent.REGISTRATION" />
-                <action android:name="com.google.android.c2dm.intent.UNREGISTER" />
                 <!-- Use your package name as the category -->
                 <category android:name="YOURPACKAGENAME" />
             </intent-filter>
-            <!-- BOOT_COMPLETED is used to detect if the operating system has been updated, which requires re-registration for GCM -->
+        </receiver>
+
+        <!-- REQUIRED FOR AUTOMATIC INSTALL REFERRER TRACKING -->
+        <receiver android:name="com.mparticle.ReferrerReceiver" android:exported="true">
             <intent-filter>
-                <action android:name="android.intent.action.BOOT_COMPLETED" />
-            </intent-filter>
-            <!-- PACKAGE_REPLACED is used to detect if the application version has changed, which requires re-registration for GCM -->
-            <intent-filter>
-                <action android:name="android.intent.action.PACKAGE_REPLACED" />
-                <data
-                    android:scheme="package"
-                    android:path="YOURPACKAGENAME" />
-            </intent-filter>
-            <!-- REQUIRED FOR AUTOMATIC INSTALL REFERRER TRACKING -->
-            <intent-filter>
-                <action android:name="com.android.vending.INSTALL_REFERRER" />
+                <action android:name="com.android.vending.INSTALL_REFERRER"/>
             </intent-filter>
         </receiver>
+
         <!-- REQUIRED FOR PUSH. This is the service that does the heavy lifting in parsing, showing, and tracking GCM notifications. -->
         <service android:name="com.mparticle.MPService" />
- 
-        <!-- Change the name to the fully qualified package and class name of the new BroadcastReceiver -->
-        <receiver android:name="com.some.package.MyReceiver">
+
+        <!-- OPTIONAL FOR PUSH: Change the name to the fully qualified package and class name of the new BroadcastReceiver -->
+        <receiver android:name="com.some.package.MyReceiver" android:exported="true">
             <intent-filter>
-                <action android:name="com.mparticle.push.NOTIFICATION_TAPPED"/>
-                <action android:name="com.mparticle.push.NOTIFICATION_RECEIVED"/>
+                <action android:name="com.mparticle.push.RECEIVE" />
+                <action android:name="com.mparticle.push.TAP" />
+                <category android:name="YOURPACKAGENAME"/>
             </intent-filter>
         </receiver>
     </application>
