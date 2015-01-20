@@ -5,6 +5,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 
+import com.mparticle.internal.Constants;
+
 /**
  * <code>BroadcastReceiver</code> required to capture attribution data via the Google Play install referrer broadcast.
  *

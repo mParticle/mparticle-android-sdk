@@ -1,19 +1,34 @@
 package com.mparticle;
 
 import android.annotation.SuppressLint;
+import android.app.AlarmManager;
 import android.app.IntentService;
+
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.content.pm.PackageManager.NameNotFoundException;
-import android.content.res.Resources;
-import android.graphics.drawable.Drawable;
-import android.os.Bundle;
+import android.content.pm.ResolveInfo;
+import android.os.AsyncTask;
+import android.os.Build;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.PowerManager;
 import android.util.Log;
+
+import com.mparticle.internal.AppStateManager;
+import com.mparticle.internal.ConfigManager;
+import com.mparticle.internal.Constants;
+import com.mparticle.internal.MPUtility;
+import com.mparticle.messaging.AbstractCloudMessage;
+import com.mparticle.messaging.CloudAction;
+import com.mparticle.messaging.MPCloudBackgroundMessage;
+import com.mparticle.messaging.MPCloudNotificationMessage;
+import com.mparticle.messaging.MPMessagingAPI;
+import com.mparticle.messaging.ProviderCloudMessage;
+
+import java.util.List;
 
 /**
  * {@code IntentService } used internally by the SDK to process incoming broadcast messages in the background. Required for push notification functionality.
@@ -28,21 +43,36 @@ import android.util.Log;
 @SuppressLint("Registered")
 public class MPService extends IntentService {
 
+    { // http://stackoverflow.com/questions/4280330/onpostexecute-not-being-called-in-asynctask-handler-runtime-exception
+        Looper looper = Looper.getMainLooper();
+        Handler handler = new Handler(looper);
+        handler.post(new Runnable() {
+            public void run() {
+                try {
+                    Class.forName("android.os.AsyncTask");
+                } catch (ClassNotFoundException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+    }
+
     private static final String TAG = Constants.LOG_TAG;
-    private static final String MPARTICLE_NOTIFICATION_OPENED = "com.mparticle.push.notification_opened";
+    public static final String INTERNAL_NOTIFICATION_TAP = "com.mparticle.push.notification_tapped";
     private static final Object LOCK = MPService.class;
+    private static final String INTERNAL_DELAYED_RECEIVE = "com.mparticle.delayeddelivery";
 
     private static PowerManager.WakeLock sWakeLock;
-    private static final String APP_STATE = "com.mparticle.push.appstate";
-    private static final String PUSH_ORIGINAL_PAYLOAD = "com.mparticle.push.originalpayload";
-    private static final String PUSH_REDACTED_PAYLOAD = "com.mparticle.push.redactedpayload";
-    private static final String BROADCAST_PERMISSION = ".mparticle.permission.NOTIFICATIONS";
 
     public MPService() {
         super("com.mparticle.MPService");
     }
 
-    static void runIntentInService(Context context, Intent intent) {
+    /**
+     * @hide
+     *
+     */
+    public static void runIntentInService(Context context, Intent intent) {
         synchronized (LOCK) {
             if (sWakeLock == null) {
                 PowerManager pm = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
@@ -54,213 +84,189 @@ public class MPService extends IntentService {
         context.startService(intent);
     }
 
+    /**
+     * @hide
+     *
+     */
     @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.i("MPService", "onStartCommand");
-        return super.onStartCommand(intent, flags, startId);
-    }
-
-    @Override
-    public final void onHandleIntent(Intent intent) {
+    public final void onHandleIntent(final Intent intent) {
+        boolean release = true;
         try {
-
-            MParticle.start(getApplicationContext());
-            MParticle.getInstance().mEmbeddedKitManager.handleIntent(intent);
-
             String action = intent.getAction();
             Log.i("MPService", "Handling action: " + action);
             if (action.equals("com.google.android.c2dm.intent.REGISTRATION")) {
-                handleRegistration(intent);
+                MParticle.start(getApplicationContext());
+                MParticle.getInstance().mEmbeddedKitManager.handleIntent(intent);
             } else if (action.equals("com.google.android.c2dm.intent.RECEIVE")) {
-                handleMessage(intent);
-            } else if (action.equals("com.google.android.c2dm.intent.UNREGISTER")) {
-                intent.putExtra("unregistered", "true");
-                handleRegistration(intent);
-            } else if (action.equals(MPARTICLE_NOTIFICATION_OPENED)) {
-                handleNotificationClick(intent);
-            } else {
-                handeReRegistration();
+                if (MPUtility.isSupportLibAvailable()) {
+                    generateCloudMessage(intent);
+                }else{
+                    Log.e(Constants.LOG_TAG, "GCM received but the support library is missing, not notification will be shown.");
+                }
+            } else if (action.startsWith(INTERNAL_NOTIFICATION_TAP)) {
+                handleNotificationTapInternal(intent);
+            } else if (action.equals(MPMessagingAPI.BROADCAST_NOTIFICATION_TAPPED)) {
+                handleNotificationTap(intent);
+            } else if (action.equals(MPMessagingAPI.BROADCAST_NOTIFICATION_RECEIVED)){
+                final AbstractCloudMessage message = intent.getParcelableExtra(MPMessagingAPI.CLOUD_MESSAGE_EXTRA);
+                showNotification(message);
+                release = false;
+            } else if (action.equals(INTERNAL_DELAYED_RECEIVE)){
+                final MPCloudNotificationMessage message = intent.getParcelableExtra(MPMessagingAPI.CLOUD_MESSAGE_EXTRA);
+                broadcastNotificationReceived(message);
             }
         } finally {
             synchronized (LOCK) {
-                if (sWakeLock != null && sWakeLock.isHeld()) {
+                if (release && sWakeLock != null && sWakeLock.isHeld()) {
                     sWakeLock.release();
                 }
             }
         }
     }
 
-    private void handeReRegistration() {
-        MParticle.start(getApplicationContext());
-        MParticle.getInstance();
-    }
-
-    private void handleNotificationClick(Intent intent) {
-
-        broadcastNotificationClicked(intent.getBundleExtra(PUSH_ORIGINAL_PAYLOAD));
-
-        try {
-            MParticle.start(getApplicationContext());
-            MParticle mMParticle = MParticle.getInstance();
-            Bundle extras = intent.getExtras();
-            String appState = extras.getString(APP_STATE);
-            mMParticle.logNotification(intent.getExtras().getBundle(PUSH_REDACTED_PAYLOAD),
-                                        appState);
-        } catch (Throwable t) {
-
+    private void showNotification(final AbstractCloudMessage message) {
+        final boolean isNetworkingEnabled = ConfigManager.isNetworkPerformanceEnabled();
+        if (isNetworkingEnabled){
+            ConfigManager.setNetworkingEnabled(false);
         }
-        PackageManager packageManager = getPackageManager();
-        Intent launchIntent = packageManager.getLaunchIntentForPackage(getPackageName());
-        launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        launchIntent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-        startActivity(launchIntent);
-    }
-
-    private void handleRegistration(Intent intent) {
-        try {
-            MParticle mMParticle = MParticle.getInstance();
-            String registrationId = intent.getStringExtra("registration_id");
-            String unregistered = intent.getStringExtra("unregistered");
-            String error = intent.getStringExtra("error");
-
-            if (registrationId != null) {
-                // registration succeeded
-                mMParticle.setPushRegistrationId(registrationId);
-            } else if (unregistered != null) {
-                // unregistration succeeded
-                mMParticle.clearPushNotificationId();
-            } else if (error != null) {
-                // Unrecoverable error, log it
-                Log.i(TAG, "GCM registration error: " + error);
-            }
-        } catch (Throwable t) {
-            // failure to instantiate mParticle likely means that the
-            // mparticle.properties file is not correct
-            // and a warning message will already have been logged
-            return;
-        }
-    }
-
-    private void handleMessage(Intent intent) {
-
-        try {
-
-            Bundle newExtras = new Bundle();
-            newExtras.putBundle(PUSH_ORIGINAL_PAYLOAD, intent.getExtras());
-            newExtras.putBundle(PUSH_REDACTED_PAYLOAD, intent.getExtras());
-
-            if (!MParticle.appRunning) {
-                newExtras.putString(APP_STATE, AppStateManager.APP_STATE_NOTRUNNING);
+        MParticle.getInstance().setNetworkTrackingEnabled(false);
+        (new AsyncTask<AbstractCloudMessage, Void, Notification>() {
+            @Override
+            protected Notification doInBackground(AbstractCloudMessage... params) {
+                String appState = getAppState();
+                AbstractCloudMessage message = params[0];
+                if (message instanceof ProviderCloudMessage){
+                    MParticle.getInstance().internal().logNotification((ProviderCloudMessage)message, false, appState);
+                }else if (message instanceof MPCloudNotificationMessage){
+                    MParticle.getInstance().internal().logNotification((MPCloudNotificationMessage)message, null, false, appState, AbstractCloudMessage.FLAG_RECEIVED | AbstractCloudMessage.FLAG_DISPLAYED);
+                }
+                return message.buildNotification(MPService.this, System.currentTimeMillis());
             }
 
-            MParticle mMParticle = MParticle.getInstance();
-            if (!newExtras.containsKey(Constants.MessageKey.APP_STATE)) {
-                if (mMParticle.mAppStateManager.isBackgrounded()) {
-                    newExtras.putString(APP_STATE, AppStateManager.APP_STATE_BACKGROUND);
-                } else {
-                    newExtras.putString(APP_STATE, AppStateManager.APP_STATE_FOREGROUND);
+            @Override
+            protected void onPostExecute(Notification notification) {
+                super.onPostExecute(notification);
+                if (notification != null) {
+                    NotificationManager mNotifyMgr =
+                            (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+                    mNotifyMgr.cancel(message.getId());
+                    mNotifyMgr.notify(message.getId(), notification);
+                }
+
+                if (isNetworkingEnabled){
+                    ConfigManager.setNetworkingEnabled(true);
+                }
+                synchronized (LOCK) {
+                    if (sWakeLock != null && sWakeLock.isHeld()) {
+                        sWakeLock.release();
+                    }
                 }
             }
+        }).execute(message);
 
-            String title = "Unknown";
+    }
+
+    private void handleNotificationTap(Intent intent) {
+        CloudAction action = intent.getParcelableExtra(MPMessagingAPI.CLOUD_ACTION_EXTRA);
+        AbstractCloudMessage message = intent.getParcelableExtra(MPMessagingAPI.CLOUD_MESSAGE_EXTRA);
+        PendingIntent actionIntent = action.getIntent(getApplicationContext(), message, action);
+        if (actionIntent != null) {
             try {
-                int stringId = getApplicationInfo().labelRes;
-                title = getResources().getString(stringId);
-            } catch (Resources.NotFoundException ex) {
+                actionIntent.send();
+            } catch (PendingIntent.CanceledException e) {
 
             }
-
-            String[] possibleKeys = mMParticle.mConfigManager.getPushKeys();
-            String key = findMessageKey(possibleKeys, newExtras.getBundle(PUSH_ORIGINAL_PAYLOAD));
-            String message = newExtras.getBundle(PUSH_ORIGINAL_PAYLOAD).getString(key);
-            newExtras.getBundle(PUSH_REDACTED_PAYLOAD).putString(key, "");
-            newExtras.getBundle(PUSH_ORIGINAL_PAYLOAD).putString(MParticlePushUtility.PUSH_ALERT_EXTRA, message);
-            int titleResId = MParticle.getInstance().mConfigManager.getPushTitle();
-            if (titleResId > 0){
-                try{
-                    title = getString(titleResId);
-                }catch(Resources.NotFoundException e){
-
-                }
-            }
-
-            showPushWithMessage(title, message, newExtras);
-
-            broadcastNotificationReceived(newExtras.getBundle(PUSH_ORIGINAL_PAYLOAD));
-        } catch (Throwable t) {
-            // failure to instantiate mParticle likely means that the
-            // mparticle.properties file is not correct
-            // and a warning message will already have been logged
-            return;
         }
     }
 
-    private void broadcastNotificationReceived(Bundle originalPayload) {
-        Intent intent = new Intent(MParticlePushUtility.BROADCAST_NOTIFICATION_RECEIVED);
-        intent.putExtras(originalPayload);
-        String packageName = getPackageName();
-        sendBroadcast(intent, packageName + BROADCAST_PERMISSION);
-    }
-
-    private void broadcastNotificationClicked(Bundle originalPayload) {
-        Intent intent = new Intent(MParticlePushUtility.BROADCAST_NOTIFICATION_TAPPED);
-        intent.putExtras(originalPayload);
-        String packageName = getPackageName();
-        sendBroadcast(intent, packageName + BROADCAST_PERMISSION);
-    }
-
-    private String findMessageKey(String[] possibleKeys, Bundle extras){
-        if (possibleKeys != null) {
-            for (String key : possibleKeys) {
-                String message = extras.getString(key);
-                if (message != null && message.length() > 0) {
-                    return key;
-                }
+    private String getAppState(){
+        String appState = AppStateManager.APP_STATE_NOTRUNNING;
+        if (AppStateManager.appRunning) {
+            if (MParticle.getInstance().mAppStateManager.isBackgrounded()) {
+                appState = AppStateManager.APP_STATE_BACKGROUND;
+            } else {
+                appState = AppStateManager.APP_STATE_FOREGROUND;
             }
         }
-        Log.w(Constants.LOG_TAG, "Failed to extract push alert message using configuration.");
-        return null;
+        return appState;
     }
 
-    private void showPushWithMessage(String title, String message, Bundle newExtras) {
-        PackageManager packageManager = getPackageManager();
-        String packageName = getPackageName();
+    private void generateCloudMessage(Intent intent) {
+        if (!MPCloudBackgroundMessage.processSilentPush(this, intent.getExtras())){
+            try {
+                AbstractCloudMessage cloudMessage = AbstractCloudMessage.createMessage(intent, ConfigManager.getPushKeys(this));
+                String appState = getAppState();
+                if (cloudMessage instanceof MPCloudNotificationMessage){
+
+                    MParticle.start(this);
+                    MParticle.getInstance().saveGcmMessage(((MPCloudNotificationMessage)cloudMessage), appState);
+                    if (((MPCloudNotificationMessage)cloudMessage).isDelayed()){
+                        MParticle.getInstance().internal().logNotification((MPCloudNotificationMessage)cloudMessage, null, false, appState, AbstractCloudMessage.FLAG_RECEIVED);
+                        scheduleFutureNotification((MPCloudNotificationMessage) cloudMessage);
+                        return;
+                    }
+                }else if (cloudMessage instanceof ProviderCloudMessage){
+                    MParticle.getInstance().saveGcmMessage(((ProviderCloudMessage)cloudMessage), appState);
+                }
+                broadcastNotificationReceived(cloudMessage);
+            }catch (Exception e){
+                Log.w(TAG, "GCM parsing error: " + e.toString());
+            }
+        }
+    }
+
+    private void scheduleFutureNotification(MPCloudNotificationMessage message){
+        AlarmManager alarmService = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+
+        Intent intent = new Intent(MPService.INTERNAL_DELAYED_RECEIVE);
+        intent.setClass(this, MPService.class);
+        intent.putExtra(MPMessagingAPI.CLOUD_MESSAGE_EXTRA, message);
+
+        PendingIntent pIntent = PendingIntent.getService(this, message.getId(), intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT){
+            alarmService.setExact(AlarmManager.RTC, message.getDeliveryTime(), pIntent);
+        }else{
+            alarmService.set(AlarmManager.RTC, message.getDeliveryTime(), pIntent);
+        }
+    }
+
+    private void broadcastNotificationReceived(AbstractCloudMessage message) {
+        Intent intent = new Intent(MPMessagingAPI.BROADCAST_NOTIFICATION_RECEIVED);
+        intent.putExtra(MPMessagingAPI.CLOUD_MESSAGE_EXTRA, message);
+        intent.addCategory(getPackageName());
+
+        List<ResolveInfo> result = getPackageManager().queryBroadcastReceivers(intent, 0);
+        if (result != null && result.size() > 0){
+            sendBroadcast(intent, null);
+        } else {
+            onHandleIntent(intent);
+        }
+    }
+
+    private void handleNotificationTapInternal(Intent intent) {
+        AbstractCloudMessage message = intent.getParcelableExtra(MPMessagingAPI.CLOUD_MESSAGE_EXTRA);
+        CloudAction action = intent.getParcelableExtra(MPMessagingAPI.CLOUD_ACTION_EXTRA);
+
+        NotificationManager manager =
+                (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        manager.cancel(message.getId());
 
         MParticle.start(getApplicationContext());
-        int iconResId = MParticle.getInstance().mConfigManager.getPushIcon();
-        try{
-            Drawable draw = getResources().getDrawable(iconResId);
-        }catch (Resources.NotFoundException nfe){
-            iconResId = 0;
+        if (message instanceof MPCloudNotificationMessage) {
+            MParticle.getInstance().internal().logNotification((MPCloudNotificationMessage) message,
+                    action, true, getAppState(), AbstractCloudMessage.FLAG_READ | AbstractCloudMessage.FLAG_DIRECT_OPEN);
         }
 
-        if (iconResId == 0){
-            try {
-                iconResId = packageManager.getApplicationInfo(packageName, 0).icon;
-            } catch (NameNotFoundException e) {
-                // use the ic_dialog_alert icon if the app's can not be found
-            }
-            if (0 == iconResId) {
-                iconResId = android.R.drawable.ic_dialog_alert;
-            }
-        }
-        NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        MParticle mMParticle = MParticle.getInstance();
-        Intent launchIntent = new Intent(getApplicationContext(), MPService.class);
-        launchIntent.setAction(MPARTICLE_NOTIFICATION_OPENED);
-        launchIntent.putExtras(newExtras);
-        PendingIntent notifyIntent = PendingIntent.getService(getApplicationContext(), 0, launchIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+        Intent broadcast = new Intent(MPMessagingAPI.BROADCAST_NOTIFICATION_TAPPED);
+        broadcast.putExtra(MPMessagingAPI.CLOUD_MESSAGE_EXTRA, message);
+        broadcast.putExtra(MPMessagingAPI.CLOUD_ACTION_EXTRA, action);
 
-        Notification notification = new Notification(iconResId, message, System.currentTimeMillis());
-        if (mMParticle.mConfigManager.isPushSoundEnabled()) {
-            notification.flags |= Notification.DEFAULT_SOUND;
+        List<ResolveInfo> result = getPackageManager().queryBroadcastReceivers(broadcast, 0);
+        if (result != null && result.size() > 0){
+            sendBroadcast(broadcast, null);
+        } else {
+            onHandleIntent(broadcast);
         }
-        if (mMParticle.mConfigManager.isPushVibrationEnabled()) {
-            notification.flags |= Notification.DEFAULT_VIBRATE;
-        }
-        notification.flags |= Notification.FLAG_AUTO_CANCEL;
-        notification.setLatestEventInfo(this, title, message, notifyIntent);
-        notificationManager.notify(message.hashCode(), notification);
     }
 
 }

@@ -18,7 +18,7 @@
 #-keepclassmembers class fqcn.of.javascript.interface.for.webview {
 #   public *;
 #}
-
+-optimizations !code/allocation/variable
 -printmapping out.map
 
 -keepparameternames
@@ -26,7 +26,23 @@
 -keepattributes Exceptions,InnerClasses,Signature,Deprecated,
                 SourceFile,LineNumberTable,*Annotation*,EnclosingMethod
 
--keep public class * {
+-keep public class com.mparticle.* {
+    public protected *;
+}
+
+-keep public class com.mparticle.activity.* {
+    public protected *;
+}
+
+-keep public class com.mparticle.licensing.* {
+    public protected *;
+}
+
+-keep public class com.mparticle.messaging.* {
+    public protected *;
+}
+
+-keep public class com.mparticle.segmentation.* {
     public protected *;
 }
 
@@ -81,6 +97,9 @@
 -keep class org.fmod.** { *; }
 -dontwarn org.fmod.**
 
+-keep class com.mparticle.internal.PushRegistrationHelper
+-keep class com.mparticle.internal.np.** { *; }
+
 -keep class com.kochava.** { *; }
 -keep class com.mobileapptracker.** { *; }
 -keep class com.kahuna.** { *; }
@@ -89,5 +108,5 @@
 -keep class com.comscore.** { *; }
 -dontwarn com.comscore.**
 
--classobfuscationdictionary names.txt
+
 

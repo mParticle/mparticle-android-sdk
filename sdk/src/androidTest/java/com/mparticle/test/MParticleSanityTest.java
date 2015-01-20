@@ -4,9 +4,6 @@ import android.test.AndroidTestCase;
 
 import com.mparticle.MParticle;
 
-/**
- * Created by sdozor on 11/6/14.
- */
 public class MParticleSanityTest extends AndroidTestCase {
 
     @Override
@@ -19,7 +16,7 @@ public class MParticleSanityTest extends AndroidTestCase {
         }
     }
 
-    public void testSdkStart() {
+    public void testSdkStarted() {
         MParticle instance = MParticle.getInstance();
         assertNotNull(instance);
     }
@@ -46,7 +43,7 @@ public class MParticleSanityTest extends AndroidTestCase {
 
     public void testSessionTimeout(){
         //configured in mParticle.xml
-        assertEquals(MParticle.getInstance().getSessionTimeout(), 30);
+        assertEquals(MParticle.getInstance().getSessionTimeout(), 60);
         MParticle.getInstance().setSessionTimeout(31);
         assertEquals(MParticle.getInstance().getSessionTimeout(), 31);
     }
