@@ -24,7 +24,7 @@ public class MPProduct extends HashMap<String, String> {
         REMOVE_FROM_WISHLIST("Removed from Wishlist"),
         ADD_TO_CART("Added to Cart"),
         REMOVE_FROM_CART("Removed from Cart"),
-        PURCHASE("Product Purchased");
+        PURCHASE("Log Transaction");
 
         private final String description;
         Event(String description){
