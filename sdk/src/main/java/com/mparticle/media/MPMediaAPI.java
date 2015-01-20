@@ -3,7 +3,7 @@ package com.mparticle.media;
 import android.content.Context;
 
 /**
- * Utility class to interact with the MParticle Media APIs. Do not directly instantiate this.
+ * Utility class to interact with the mParticle Media APIs. Do not directly instantiate this.
  *
  * @see com.mparticle.MParticle#Media()
  *
