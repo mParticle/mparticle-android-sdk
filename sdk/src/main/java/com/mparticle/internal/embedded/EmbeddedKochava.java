@@ -90,13 +90,13 @@ class EmbeddedKochava extends EmbeddedProvider implements MPActivityCallbacks {
             if (identityType == MParticle.IdentityType.CustomerId) {
                 if (!properties.containsKey(USE_CUSTOMER_ID) ||
                         Boolean.parseBoolean(properties.get(USE_CUSTOMER_ID))) {
-                    Map<String, String> map = new HashMap<>(1);
+                    Map<String, String> map = new HashMap<String,String>(1);
                     map.put(identityType.name(), id);
                     feature.linkIdentity(map);
                 }
             } else {
                 if (Boolean.parseBoolean(properties.get(INCLUDE_ALL_IDS))) {
-                    Map<String, String> map = new HashMap<>(1);
+                    Map<String, String> map = new HashMap<String,String>(1);
                     map.put(identityType.name(), id);
                     feature.linkIdentity(map);
                 }

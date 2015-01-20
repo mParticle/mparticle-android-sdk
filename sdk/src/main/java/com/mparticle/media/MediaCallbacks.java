@@ -1,7 +1,7 @@
 package com.mparticle.media;
 
 /**
- * Created by sdozor on 1/19/15.
+ * @hide
  */
 public interface MediaCallbacks {
     public void onAudioPlaying();

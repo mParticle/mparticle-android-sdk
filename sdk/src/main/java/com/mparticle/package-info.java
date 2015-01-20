@@ -1,6 +1,6 @@
 /**
  *
- * The primary package for the mParticle SDK - most of the public APIs reside here.
+ * The primary package for the mParticle SDK where most of the public APIs reside - start here.
  *
  */
 package com.mparticle;

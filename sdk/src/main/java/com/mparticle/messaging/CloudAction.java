@@ -12,6 +12,7 @@ import com.mparticle.MPService;
 import java.util.UUID;
 
 /**
+ *
  * Represents a tappable action to be associated with an {@link MPCloudNotificationMessage}
  */
 public class CloudAction implements Parcelable {

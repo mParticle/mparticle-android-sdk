@@ -11,6 +11,9 @@ import android.support.v4.app.DialogFragment;
 import android.view.ContextThemeWrapper;
 
 /**
+ *
+ * @hide
+ *
  * A basic DialogFragment designed to show an in-app push message to the user. The mParticle
  * SDK will automatically show this for push messages that are configured for it.
  *

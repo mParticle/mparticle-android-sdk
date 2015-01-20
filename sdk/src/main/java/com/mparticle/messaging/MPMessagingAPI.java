@@ -11,11 +11,11 @@ import com.mparticle.internal.PushRegistrationHelper;
 /**
  * Utility class to enable and adjust push notification behavior. Do not directly instantiate this class.
  *
- * @see {@link com.mparticle.MParticle#Messaging()}
+ * @see com.mparticle.MParticle#Messaging()
  *
  */
 public class MPMessagingAPI {
-    private final ConfigManager mConfigManager;
+    private final MessagingConfigCallbacks mMessagingConfigCallbacks;
     private final Context mContext;
 
     public static final String CLOUD_MESSAGE_EXTRA = "mp-push-message";
@@ -36,10 +36,19 @@ public class MPMessagingAPI {
      */
     public static final String BROADCAST_NOTIFICATION_TAPPED = "com.mparticle.push.TAP";
 
-    public MPMessagingAPI(Context context, ConfigManager configManager) {
+    private MPMessagingAPI(){
+        mMessagingConfigCallbacks = null;
+        mContext = null;
+    }
+
+    /**
+     * @hide
+     *
+     */
+    public MPMessagingAPI(Context context, MessagingConfigCallbacks listener) {
         super();
         mContext = context;
-        mConfigManager = configManager;
+        mMessagingConfigCallbacks = listener;
     }
 
     /**
@@ -50,7 +59,7 @@ public class MPMessagingAPI {
      * @param resId the resource id of a drawable
      */
     public void setPushNotificationIcon(int resId) {
-        mConfigManager.setPushNotificationIcon(resId);
+        mMessagingConfigCallbacks.setPushNotificationIcon(resId);
     }
 
     /**
@@ -61,7 +70,7 @@ public class MPMessagingAPI {
      * @param resId the resource id of a string
      */
     public void setPushNotificationTitle(int resId) {
-        mConfigManager.setPushNotificationTitle(resId);
+        mMessagingConfigCallbacks.setPushNotificationTitle(resId);
     }
 
     /**
@@ -77,7 +86,7 @@ public class MPMessagingAPI {
         }else if (!MPUtility.checkPermission(mContext, "com.google.android.c2dm.permission.RECEIVE")){
             ConfigManager.log(MParticle.LogLevel.ERROR, "Attempted to enable push notifications without required permission: ", "\"com.google.android.c2dm.permission.RECEIVE\"");
         }else {
-            mConfigManager.setPushSenderId(senderId);
+            mMessagingConfigCallbacks.setPushSenderId(senderId);
             PushRegistrationHelper.enablePushNotifications(mContext, senderId);
         }
     }
@@ -96,7 +105,7 @@ public class MPMessagingAPI {
      * @param enabled
      */
     public void setNotificationSoundEnabled(Boolean enabled) {
-        mConfigManager.setPushSoundEnabled(enabled);
+        mMessagingConfigCallbacks.setPushSoundEnabled(enabled);
     }
 
     /**
@@ -106,6 +115,6 @@ public class MPMessagingAPI {
      * @param enabled
      */
     public void setNotificationVibrationEnabled(Boolean enabled) {
-        mConfigManager.setPushVibrationEnabled(enabled);
+        mMessagingConfigCallbacks.setPushVibrationEnabled(enabled);
     }
 }

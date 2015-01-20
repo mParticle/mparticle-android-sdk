@@ -14,6 +14,7 @@ import org.json.JSONObject;
 import com.mparticle.MParticle;
 import com.mparticle.MParticle.LogLevel;
 import com.mparticle.internal.embedded.EmbeddedKitManager;
+import com.mparticle.messaging.MessagingConfigCallbacks;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -22,7 +23,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Iterator;
 
-public class ConfigManager {
+public class ConfigManager implements MessagingConfigCallbacks {
     public static final String CONFIG_JSON = "json";
     private static final String KEY_TRIGGER_ITEMS = "tri";
     private static final String KEY_MESSAGE_MATCHES = "mm";

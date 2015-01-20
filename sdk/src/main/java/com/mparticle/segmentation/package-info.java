@@ -1,6 +1,6 @@
 /**
  *
- * Classes related to mParticle Segments.
+ * Package containing the mParticle Segmentation APIs
  *
  */
 package com.mparticle.segmentation;

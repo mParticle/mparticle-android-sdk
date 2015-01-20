@@ -5,7 +5,7 @@ import android.content.Context;
 /**
  * Utility class to interact with the MParticle Media APIs. Do not directly instantiate this.
  *
- * @see {@link com.mparticle.MParticle#Media()}
+ * @see com.mparticle.MParticle#Media()
  *
  */
 public class MPMediaAPI {
