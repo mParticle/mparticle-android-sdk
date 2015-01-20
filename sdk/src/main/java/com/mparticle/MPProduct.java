@@ -42,7 +42,7 @@ public class MPProduct extends HashMap<String, String> {
     public static final String AFFILIATION = "TransactionAffiliation";
     public static final String UNITPRICE = "ProductUnitPrice";
     public static final String QUANTITY = "ProductQuantity";
-    public static final String REVENUE = "RevenueAmount";
+    public static final String TOTALAMOUNT = "RevenueAmount";
     public static final String TAX = "TaxAmount";
     public static final String SHIPPING = "ShippingAmount";
     public static final String CATEGORY = "ProductCategory";
@@ -75,8 +75,8 @@ public class MPProduct extends HashMap<String, String> {
         if (builder.quantity != null)
             put(QUANTITY, Double.toString(builder.quantity));
 
-        if (builder.revenueAmount != null)
-            put(REVENUE, Double.toString(builder.revenueAmount));
+        if (builder.totalAmount != null)
+            put(TOTALAMOUNT, Double.toString(builder.totalAmount));
 
         if (builder.taxAmount != null)
             put(TAX, Double.toString(builder.taxAmount));
@@ -107,8 +107,8 @@ public class MPProduct extends HashMap<String, String> {
         return get(CATEGORY, null);
     }
 
-    public double getTotalRevenue(){
-        return Double.parseDouble(get(REVENUE, "0"));
+    public double getTotalAmount(){
+        return Double.parseDouble(get(TOTALAMOUNT, "0"));
     }
 
     public double getTaxAmount(){
@@ -151,7 +151,7 @@ public class MPProduct extends HashMap<String, String> {
         private Double productUnitPrice;
         private Integer quantity;
         private String productCategory = null;
-        private Double revenueAmount;
+        private Double totalAmount;
         private Double taxAmount;
         private Double shippingAmount;
         private String currencyCode = null;
@@ -206,13 +206,13 @@ public class MPProduct extends HashMap<String, String> {
         }
 
         /**
-         * The total revenue received from this transaction
+         * The total monetary amount received from this transaction
          *
-         * @param val total revenue
-         * @return The {@code Builder} with the total revenue set.
+         * @param val total amount
+         * @return The {@code Builder} with the total monetary amount set.
          */
-        public Builder totalRevenue(double val) {
-            revenueAmount = val;
+        public Builder totalAmount(double val) {
+            totalAmount = val;
             return this;
         }
 

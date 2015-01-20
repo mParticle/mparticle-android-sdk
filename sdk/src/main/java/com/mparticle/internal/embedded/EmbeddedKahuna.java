@@ -104,7 +104,7 @@ class EmbeddedKahuna extends EmbeddedProvider implements MPActivityCallbacks {
     @Override
     public void logTransaction(MPProduct transaction) throws Exception {
         if (sendTransactionData && transaction != null){
-            Double revenue = transaction.getTotalRevenue() * 100;
+            Double revenue = transaction.getTotalAmount() * 100;
             KahunaAnalytics.trackEvent("purchase", (int) transaction.getQuantity(), revenue.intValue());
         }
     }
