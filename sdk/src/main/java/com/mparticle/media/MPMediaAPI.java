@@ -12,7 +12,6 @@ public class MPMediaAPI {
     private final MediaCallbacks mCallbacks;
     private final Context mContext;
     private boolean mAudioPlaying = false;
-    private boolean audioPlaying;
 
     private MPMediaAPI(){
         mContext = null;
@@ -47,6 +46,6 @@ public class MPMediaAPI {
     }
 
     public boolean getAudioPlaying() {
-        return audioPlaying;
+        return mAudioPlaying;
     }
 }

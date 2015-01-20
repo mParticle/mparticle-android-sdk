@@ -3,6 +3,7 @@ package com.mparticle.test;
 import android.test.AndroidTestCase;
 
 import com.mparticle.MParticle;
+import com.mparticle.media.MPMediaAPI;
 
 public class MParticleSanityTest extends AndroidTestCase {
 
@@ -48,4 +49,12 @@ public class MParticleSanityTest extends AndroidTestCase {
         assertEquals(MParticle.getInstance().getSessionTimeout(), 31);
     }
 
+    public void testMediaTimeout(){
+        MPMediaAPI instance = MParticle.getInstance().Media();
+        assertFalse(instance.getAudioPlaying());
+        MParticle.getInstance().Media().setAudioPlaying(true);
+        assertTrue(instance.getAudioPlaying());
+        instance.setAudioPlaying(false);
+        assertFalse(MParticle.getInstance().Media().getAudioPlaying());
+    }
 }
