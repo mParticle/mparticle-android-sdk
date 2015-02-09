@@ -188,18 +188,7 @@ import java.util.TimeZone;
             attributes.put(MessageKey.DEVICE_ANID, MPUtility.getAndroidID(appContext));
             attributes.put(MessageKey.DEVICE_OPEN_UDID, MPUtility.getOpenUDID(appContext));
 
-            if (MPUtility.isGmsAdIdAvailable()) {
-                try {
-                    com.google.android.gms.ads.identifier.AdvertisingIdClient.Info adInfo = com.google.android.gms.ads.identifier.AdvertisingIdClient.getAdvertisingIdInfo(appContext);
-                    if (!adInfo.isLimitAdTrackingEnabled()) {
-                        attributes.put(MessageKey.GOOGLE_ADV_ID, adInfo.getId());
-                    }
-                    attributes.put(MessageKey.LIMIT_AD_TRACKING, adInfo.isLimitAdTrackingEnabled());
-                }catch (Exception e){
 
-                }
-
-            }
         } catch (JSONException e) {
             // ignore JSON exceptions
         }

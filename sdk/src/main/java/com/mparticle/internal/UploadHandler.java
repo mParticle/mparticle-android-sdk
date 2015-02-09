@@ -117,6 +117,18 @@ public final class UploadHandler extends Handler {
         if (deviceInfo == null){
             deviceInfo = DeviceAttributes.collectDeviceInfo(mContext);
         }
+        if (MPUtility.isGmsAdIdAvailable()) {
+            try {
+                com.google.android.gms.ads.identifier.AdvertisingIdClient.Info adInfo = com.google.android.gms.ads.identifier.AdvertisingIdClient.getAdvertisingIdInfo(mContext);
+                if (!adInfo.isLimitAdTrackingEnabled()) {
+                    deviceInfo.put(MessageKey.GOOGLE_ADV_ID, adInfo.getId());
+                }
+                deviceInfo.put(MessageKey.LIMIT_AD_TRACKING, adInfo.isLimitAdTrackingEnabled());
+            }catch (Exception e){
+
+            }
+
+        }
         return deviceInfo;
     }
 
