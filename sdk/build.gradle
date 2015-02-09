@@ -7,7 +7,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:1.+'
+        classpath 'com.android.tools.build:gradle:1.0.+'
 
     }
 }
@@ -129,7 +129,7 @@ dependencies {
     compile files('embeddedkits/Kahuna489.jar')
     compile files('embeddedkits/KochavaSDK.jar')
     compile files('embeddedkits/comscore2140923.jar')
-    provided 'com.google.android.gms:play-services:6.5.87'
+    provided 'com.google.android.gms:play-services:[3.1,)'
     provided 'com.android.support:support-v4:21.0.3'
 
     unityCompile project('unityskeleton')
