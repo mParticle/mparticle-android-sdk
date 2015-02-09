@@ -126,6 +126,7 @@ public final class UploadHandler extends Handler {
         }
         try {
             appInfo.put(MessageKey.ENVIRONMENT, mConfigManager.getEnvironment().getValue());
+            appInfo.put(MessageKey.INSTALL_REFERRER, mPreferences.getString(PrefKeys.INSTALL_REFERRER, null));
         }catch (JSONException e){
 
         }

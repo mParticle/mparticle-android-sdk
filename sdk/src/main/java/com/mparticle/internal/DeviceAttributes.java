@@ -64,7 +64,7 @@ import java.util.TimeZone;
                 // ignore missing data
             }
 
-            attributes.put(MessageKey.INSTALL_REFERRER, preferences.getString(PrefKeys.INSTALL_REFERRER, null));
+
             attributes.put(MessageKey.BUILD_ID, MPUtility.getBuildUUID(appContext));
             attributes.put(MessageKey.APP_DEBUG_SIGNING, ( 0 != ( appContext.getApplicationInfo().flags &= ApplicationInfo.FLAG_DEBUGGABLE ) ));
             attributes.put(MessageKey.APP_PIRATED, preferences.getBoolean(PrefKeys.PIRATED, false));
