@@ -107,6 +107,7 @@ public class Constants {
     public static final long TRIGGER_MESSAGE_DELAY = 5000;
     //special session id for messages logged without a session
     public static final String NO_SESSION_ID = "NO-SESSION";
+    public static final String REFERRER = "referrer";
 
     public interface MethodName {
         public static final String METHOD_NAME = "$MethodName";

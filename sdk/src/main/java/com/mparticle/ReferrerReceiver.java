@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.util.Log;
 
 import com.mparticle.internal.Constants;
 
@@ -33,10 +34,24 @@ import com.mparticle.internal.Constants;
 public class ReferrerReceiver extends BroadcastReceiver {
     @Override
     public final void onReceive(Context context, Intent intent) {
+        if (context == null){
+            Log.e(Constants.LOG_TAG, "ReferrerReceiver Context can not be null");
+            return;
+        }
+        if (intent == null){
+            Log.e(Constants.LOG_TAG, "ReferrerReceiver intent can not be null");
+            return;
+        }
         if ("com.android.vending.INSTALL_REFERRER".equals(intent.getAction())) {
-            String referrer = intent.getStringExtra("referrer");
+            String referrer = intent.getStringExtra(Constants.REFERRER);
             SharedPreferences preferences = context.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
             preferences.edit().putString(Constants.PrefKeys.INSTALL_REFERRER, referrer).commit();
+            try {
+                new com.adjust.sdk.ReferrerReceiver().onReceive(context, intent);
+            }catch (Exception e){
+                Log.w(Constants.LOG_TAG, "Failed to pass referrer to Adjust SDK: " + e.getMessage());
+            }
         }
+
     }
 }

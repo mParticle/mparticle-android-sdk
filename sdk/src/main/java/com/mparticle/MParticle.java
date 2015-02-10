@@ -3,6 +3,7 @@ package com.mparticle;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
@@ -468,6 +469,9 @@ public class MParticle {
      */
     public void setInstallReferrer(String referrer) {
         sPreferences.edit().putString(PrefKeys.INSTALL_REFERRER, referrer).commit();
+        Intent fakeReferralIntent = new Intent();
+        fakeReferralIntent.putExtra(Constants.REFERRER, referrer);
+        new com.adjust.sdk.ReferrerReceiver().onReceive(mAppContext, fakeReferralIntent);
         ConfigManager.log(LogLevel.DEBUG, "Set installReferrer: ", referrer);
     }
 
