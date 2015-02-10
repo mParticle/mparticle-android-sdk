@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.util.Log;
 
+import com.kochava.android.tracker.ReferralCapture;
 import com.mparticle.internal.Constants;
 
 /**
@@ -51,7 +52,11 @@ public class ReferrerReceiver extends BroadcastReceiver {
             }catch (Exception e){
                 Log.w(Constants.LOG_TAG, "Failed to pass referrer to Adjust SDK: " + e.getMessage());
             }
+            try {
+                new ReferralCapture().onReceive(context, intent);
+            }catch (Exception e){
+                Log.w(Constants.LOG_TAG, "Failed to pass referrer to Kochava SDK: " + e.getMessage());
+            }
         }
-
     }
 }

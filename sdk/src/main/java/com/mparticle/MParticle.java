@@ -22,6 +22,7 @@ import android.util.Log;
 import android.webkit.WebView;
 
 
+import com.kochava.android.tracker.ReferralCapture;
 import com.mparticle.internal.MessageManager;
 import com.mparticle.media.MPMediaAPI;
 import com.mparticle.media.MediaCallbacks;
@@ -471,7 +472,16 @@ public class MParticle {
         sPreferences.edit().putString(PrefKeys.INSTALL_REFERRER, referrer).commit();
         Intent fakeReferralIntent = new Intent();
         fakeReferralIntent.putExtra(Constants.REFERRER, referrer);
-        new com.adjust.sdk.ReferrerReceiver().onReceive(mAppContext, fakeReferralIntent);
+        try {
+            new com.adjust.sdk.ReferrerReceiver().onReceive(mAppContext, fakeReferralIntent);
+        }catch (Exception e){
+            Log.w(Constants.LOG_TAG, "Failed to pass referrer to Adjust SDK: " + e.getMessage());
+        }
+        try {
+            new ReferralCapture().onReceive(mAppContext, fakeReferralIntent);
+        }catch (Exception e){
+            Log.w(Constants.LOG_TAG, "Failed to pass referrer to Kochava SDK: " + e.getMessage());
+        }
         ConfigManager.log(LogLevel.DEBUG, "Set installReferrer: ", referrer);
     }
 
