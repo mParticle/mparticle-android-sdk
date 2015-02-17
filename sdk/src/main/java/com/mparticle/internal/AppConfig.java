@@ -62,7 +62,7 @@ class AppConfig {
             Log.w(Constants.LOG_TAG, "Initialized with a forced environment: " + environment.toString());
             mEnvironment = environment;
         }
-        if (mEnvironment == MParticle.Environment.Development){
+        if (MPUtility.isAppDebuggable(context)){
             logLevel = MParticle.LogLevel.DEBUG;
         }
     }
