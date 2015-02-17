@@ -48,7 +48,7 @@ class AppConfig {
     public volatile boolean networkingEnabled;
     public int audienceTimeout = 100;
     private MParticle.Environment mEnvironment;
-    public MParticle.LogLevel logLevel = MParticle.LogLevel.DEBUG;
+    public MParticle.LogLevel logLevel = MParticle.LogLevel.NONE;
 
     public AppConfig(Context context, MParticle.Environment environment) {
         mContext = context;
@@ -113,6 +113,9 @@ class AppConfig {
                 ConfigManager.log(MParticle.LogLevel.WARNING, "Forcing SDK into production mode based on configuration XML key: " + PREFKEY_FORCE_ENVIRONMENT + " and value: " + mode);
                 mEnvironment = MParticle.Environment.Production;
             }
+        }
+        if (mEnvironment == MParticle.Environment.Development){
+            logLevel = MParticle.LogLevel.DEBUG;
         }
     }
 
