@@ -66,7 +66,7 @@ import java.util.TimeZone;
 
 
             attributes.put(MessageKey.BUILD_ID, MPUtility.getBuildUUID(appContext));
-            attributes.put(MessageKey.APP_DEBUG_SIGNING, ( 0 != ( appContext.getApplicationInfo().flags &= ApplicationInfo.FLAG_DEBUGGABLE ) ));
+            attributes.put(MessageKey.APP_DEBUG_SIGNING, MPUtility.isAppDebuggable(appContext));
             attributes.put(MessageKey.APP_PIRATED, preferences.getBoolean(PrefKeys.PIRATED, false));
 
             attributes.put(MessageKey.MPARTICLE_INSTALL_TIME, preferences.getLong(PrefKeys.INSTALL_TIME, now));

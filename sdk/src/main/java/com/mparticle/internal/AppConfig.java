@@ -47,11 +47,24 @@ class AppConfig {
     public boolean autoTrackingEnabled;
     public volatile boolean networkingEnabled;
     public int audienceTimeout = 100;
-    public MParticle.Environment forcedEnvironment = MParticle.Environment.AutoDetect;
-    public MParticle.LogLevel logLevel = MParticle.LogLevel.DEBUG;
+    private MParticle.Environment mEnvironment;
+    public MParticle.LogLevel logLevel = MParticle.LogLevel.NONE;
 
-    public AppConfig(Context context) {
+    public AppConfig(Context context, MParticle.Environment environment) {
         mContext = context;
+        if (environment == null || environment == MParticle.Environment.AutoDetect){
+            if (MPUtility.isAppDebuggable(context)){
+               mEnvironment = MParticle.Environment.Development;
+            }else{
+               mEnvironment = MParticle.Environment.Production;
+            }
+        }else{
+            Log.w(Constants.LOG_TAG, "Initialized with a forced environment: " + environment.toString());
+            mEnvironment = environment;
+        }
+        if (MPUtility.isAppDebuggable(context)){
+            logLevel = MParticle.LogLevel.DEBUG;
+        }
     }
 
     public void init(SharedPreferences preferences) {
@@ -98,12 +111,16 @@ class AppConfig {
         if (mode != null) {
             if (mode.toLowerCase().contains("dev")) {
                 ConfigManager.log(MParticle.LogLevel.WARNING, "Forcing SDK into development mode based on configuration XML key: " + PREFKEY_FORCE_ENVIRONMENT + " and value: " + mode);
-                forcedEnvironment = MParticle.Environment.Development;
+                mEnvironment = MParticle.Environment.Development;
             } else if (mode.toLowerCase().contains("prod")) {
                 ConfigManager.log(MParticle.LogLevel.WARNING, "Forcing SDK into production mode based on configuration XML key: " + PREFKEY_FORCE_ENVIRONMENT + " and value: " + mode);
-                forcedEnvironment = MParticle.Environment.Production;
+                mEnvironment = MParticle.Environment.Production;
+            }
+            if (mEnvironment == MParticle.Environment.Development){
+                logLevel = MParticle.LogLevel.DEBUG;
             }
         }
+
     }
 
     private int getResourceId(String key, String type) {
@@ -135,5 +152,9 @@ class AppConfig {
             return defaultValue;
         }
         return mContext.getResources().getInteger(id);
+    }
+
+    public MParticle.Environment getEnvironment() {
+        return mEnvironment;
     }
 }

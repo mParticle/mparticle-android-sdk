@@ -185,7 +185,7 @@ class EmbeddedComscore extends EmbeddedProvider implements MPActivityCallbacks {
 
         boolean useHttps = Boolean.parseBoolean(properties.get(USE_HTTPS));
         comScore.setSecure(useHttps);
-        comScore.setDebug(MParticle.getInstance().internal().getConfigurationManager().isDebugEnvironment());
+        comScore.setDebug(MParticle.getInstance().internal().getConfigurationManager().getEnvironment() == MParticle.Environment.Development);
         isEnterprise = "enterprise".equals(properties.get(PRODUCT));
         String appName = properties.get(APPNAME);
         if (appName != null){
