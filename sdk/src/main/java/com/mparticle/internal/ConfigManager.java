@@ -59,7 +59,6 @@ public class ConfigManager implements MessagingConfigCallbacks {
     private JSONObject mProviderPersistence;
     private String mNetworkPerformance = "";
 
-    private static boolean sIsDebugEnvironment = false;
     private int mRampValue = -1;
 
     private int mSessionTimeoutInterval = -1;
@@ -71,14 +70,11 @@ public class ConfigManager implements MessagingConfigCallbacks {
 
     }
 
-    public ConfigManager(Context context, EmbeddedKitManager embeddedKitManager) {
+    public ConfigManager(Context context, EmbeddedKitManager embeddedKitManager, MParticle.Environment environment) {
         mContext = context.getApplicationContext();
-        sIsDebugEnvironment = ( 0 != ( mContext.getApplicationInfo().flags &= ApplicationInfo.FLAG_DEBUGGABLE ) );
+
         mPreferences = mContext.getSharedPreferences(PREFERENCES_FILE, Context.MODE_PRIVATE);
-        sLocalPrefs = new AppConfig(mContext);
-        if (sIsDebugEnvironment){
-            sLocalPrefs.logLevel = LogLevel.DEBUG;
-        }
+        sLocalPrefs = new AppConfig(mContext, environment);
         sLocalPrefs.init(mPreferences);
         mEmbeddedKitManager = embeddedKitManager;
     }
@@ -218,16 +214,8 @@ public class ConfigManager implements MessagingConfigCallbacks {
         }
     }
 
-    public static boolean isDebugEnvironment(){
-        return sIsDebugEnvironment;
-    }
-
     public static MParticle.Environment getEnvironment() {
-        if (sLocalPrefs.forcedEnvironment != MParticle.Environment.AutoDetect){
-            return sLocalPrefs.forcedEnvironment;
-        }else{
-            return isDebugEnvironment() ? MParticle.Environment.Development : MParticle.Environment.Production;
-        }
+        return sLocalPrefs.getEnvironment();
     }
 
     public void setUploadInterval(int uploadInterval) {
@@ -483,10 +471,6 @@ public class ConfigManager implements MessagingConfigCallbacks {
 
     public int getAudienceTimeout() {
         return sLocalPrefs.audienceTimeout;
-    }
-
-    public void setForceEnvironment(MParticle.Environment environment) {
-        sLocalPrefs.forcedEnvironment = environment;
     }
 
     public void setLogLevel(LogLevel level) {
