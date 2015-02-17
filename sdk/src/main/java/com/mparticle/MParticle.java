@@ -1278,6 +1278,19 @@ public class MParticle {
     }
 
     /**
+     *
+     * This method is deprecated. Use <code>start()</code> or XML configuration if you need to customize the environment.
+     *
+     * @see #start(android.content.Context, com.mparticle.MParticle.InstallType, com.mparticle.MParticle.Environment)
+     *
+     * @param environment
+     */
+    @Deprecated
+    public void setEnvironment(Environment environment) {
+        Log.w(Constants.LOG_TAG, "setEnvironment is deprecated and is no-op. Use start() or XML configuration you must customize environmnet");
+    }
+
+    /**
      * Get the current Environment that the SDK has interpreted. Will never return AutoDetect.
      *
      * @return
