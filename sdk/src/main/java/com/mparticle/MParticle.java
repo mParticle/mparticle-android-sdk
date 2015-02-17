@@ -1287,7 +1287,7 @@ public class MParticle {
      */
     @Deprecated
     public void setEnvironment(Environment environment) {
-        Log.w(Constants.LOG_TAG, "setEnvironment is deprecated and is no-op. Use start() or XML configuration you must customize environmnet");
+        Log.w(Constants.LOG_TAG, "setEnvironment is deprecated and is a no-op. Use start() or XML configuration if you must customize environment.");
     }
 
     /**
