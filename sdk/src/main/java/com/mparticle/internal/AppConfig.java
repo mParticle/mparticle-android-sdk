@@ -2,7 +2,6 @@ package com.mparticle.internal;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.content.pm.ApplicationInfo;
 import android.util.Log;
 
 import com.mparticle.MParticle;
