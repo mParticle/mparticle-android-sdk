@@ -62,6 +62,9 @@ class AppConfig {
             Log.w(Constants.LOG_TAG, "Initialized with a forced environment: " + environment.toString());
             mEnvironment = environment;
         }
+        if (mEnvironment == MParticle.Environment.Development){
+            logLevel = MParticle.LogLevel.DEBUG;
+        }
     }
 
     public void init(SharedPreferences preferences) {
@@ -113,10 +116,11 @@ class AppConfig {
                 ConfigManager.log(MParticle.LogLevel.WARNING, "Forcing SDK into production mode based on configuration XML key: " + PREFKEY_FORCE_ENVIRONMENT + " and value: " + mode);
                 mEnvironment = MParticle.Environment.Production;
             }
+            if (mEnvironment == MParticle.Environment.Development){
+                logLevel = MParticle.LogLevel.DEBUG;
+            }
         }
-        if (mEnvironment == MParticle.Environment.Development){
-            logLevel = MParticle.LogLevel.DEBUG;
-        }
+
     }
 
     private int getResourceId(String key, String type) {
