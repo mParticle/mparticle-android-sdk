@@ -223,7 +223,7 @@ public class ConfigManager implements MessagingConfigCallbacks {
     }
 
     public static MParticle.Environment getEnvironment() {
-        if (sLocalPrefs.forcedEnvironment != MParticle.Environment.AutoDetect){
+        if (!sLocalPrefs.forcedEnvironment.equals(MParticle.Environment.AutoDetect)){
             return sLocalPrefs.forcedEnvironment;
         }else{
             return isDebugEnvironment() ? MParticle.Environment.Development : MParticle.Environment.Production;

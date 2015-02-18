@@ -424,6 +424,8 @@ public class MParticle {
         mLastEventTime = System.currentTimeMillis();
         if (!isSessionActive()) {
             newSession();
+        }else{
+            mMessageManager.updateSessionEnd(mSessionID, mLastEventTime, mLastEventTime - mSessionStartTime);
         }
     }
 

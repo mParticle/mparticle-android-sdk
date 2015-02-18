@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Handler;
+import android.os.SystemClock;
 
 import com.mparticle.MParticle;
 import com.mparticle.internal.embedded.EmbeddedKitManager;
@@ -43,7 +44,7 @@ public class AppStateManager implements MPActivityCallbacks{
 
     public AppStateManager(Context context, EmbeddedKitManager embeddedKitManager) {
         mContext = context.getApplicationContext();
-        mLastStoppedTime = System.currentTimeMillis();
+        mLastStoppedTime = SystemClock.elapsedRealtime();
         mEmbeddedKitManager = embeddedKitManager;
 
         mSupportLib = MPUtility.isSupportLibAvailable();
@@ -79,26 +80,26 @@ public class AppStateManager implements MPActivityCallbacks{
                     previousSessionParameters,
                     previousSessionPackage,
                     0);
-            mLastForegroundTime = System.currentTimeMillis();
+            mLastForegroundTime = SystemClock.elapsedRealtime();
         }else if (isBackgrounded() && mLastStoppedTime > 0) {
             long totalTimeInBackground = mPreferences.getLong(Constants.PrefKeys.TIME_IN_BG, -1);
             if (totalTimeInBackground > -1){
-                totalTimeInBackground += (System.currentTimeMillis() - mLastStoppedTime);
+                totalTimeInBackground += (SystemClock.elapsedRealtime() - mLastStoppedTime);
             }else{
                 totalTimeInBackground = 0;
             }
-
             mPreferences.edit().putLong(Constants.PrefKeys.TIME_IN_BG, totalTimeInBackground).commit();
+
             MParticle.getInstance().internal().logStateTransition(Constants.StateTransitionType.STATE_TRANS_FORE,
                     mCurrentActivity,
                     mLastStoppedTime - mLastForegroundTime,
-                    System.currentTimeMillis() - mLastStoppedTime,
+                    SystemClock.elapsedRealtime() - mLastStoppedTime,
                     previousSessionUri,
                     previousSessionParameters,
                     previousSessionPackage,
                     interruptions);
             ConfigManager.log(MParticle.LogLevel.DEBUG, "App foregrounded.");
-            mLastForegroundTime = System.currentTimeMillis();
+            mLastForegroundTime = SystemClock.elapsedRealtime();
         }
 
         mActivities.getAndIncrement();
@@ -136,7 +137,7 @@ public class AppStateManager implements MPActivityCallbacks{
     @Override
     public void onActivityStopped(Activity activity, int currentCount) {
         mPreferences.edit().putBoolean(Constants.PrefKeys.CRASHED_IN_FOREGROUND, false).commit();
-        mLastStoppedTime = System.currentTimeMillis();
+        mLastStoppedTime = SystemClock.elapsedRealtime();
 
         if (mActivities.decrementAndGet() < 1) {
             if (unityActivity != null && unityActivity.isInstance(activity)){
@@ -203,7 +204,7 @@ public class AppStateManager implements MPActivityCallbacks{
     }
 
     public boolean isBackgrounded() {
-        return mActivities.get() < 1 && (System.currentTimeMillis() - mLastStoppedTime >= ACTIVITY_DELAY);
+        return mActivities.get() < 1 && (SystemClock.elapsedRealtime() - mLastStoppedTime >= ACTIVITY_DELAY);
     }
 
     private static String getActivityName(Activity activity) {
