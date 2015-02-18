@@ -245,13 +245,12 @@ public class MessageManager implements MessageManagerCallbacks {
         return mPreferences.getInt(Constants.PrefKeys.SESSION_COUNTER, 0);
     }
 
-    public void stopSession(String sessionId, long stopTime, long sessionLength) {
+    public void updateSessionEnd(String sessionId, long stopTime, long sessionLength) {
         try {
             long timeInBackground = mPreferences.getLong(Constants.PrefKeys.TIME_IN_BG, 0);
             long foregroundLength = sessionLength - timeInBackground;
             SharedPreferences.Editor editor = mPreferences.edit();
             editor.putLong(Constants.PrefKeys.PREVIOUS_SESSION_FOREGROUND, foregroundLength > 0 ? foregroundLength : sessionLength);
-            editor.remove(Constants.PrefKeys.TIME_IN_BG);
             editor.commit();
 
             JSONObject sessionTiming = new JSONObject();
@@ -268,7 +267,8 @@ public class MessageManager implements MessageManagerCallbacks {
     }
 
     public void endSession(String sessionId, long stopTime, long sessionLength) {
-        stopSession(sessionId, stopTime, sessionLength);
+        updateSessionEnd(sessionId, stopTime, sessionLength);
+        mPreferences.edit().remove(Constants.PrefKeys.TIME_IN_BG).commit();
         mMessageHandler
                 .sendMessage(mMessageHandler.obtainMessage(MessageHandler.CREATE_SESSION_END_MESSAGE, sessionId));
     }
