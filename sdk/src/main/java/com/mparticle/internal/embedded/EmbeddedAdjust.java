@@ -16,7 +16,7 @@ import java.util.Map;
 
 /**
  * <p/>
- * Embedded implementation of the Adjust SDK 4.x
+ * Embedded implementation of the Adjust SDK 3.x
  * <p/>
  */
 class EmbeddedAdjust extends EmbeddedProvider implements MPActivityCallbacks {

@@ -212,10 +212,34 @@ public class MParticle {
      */
 
     public static void start(Context context, InstallType installType) {
+        start(context, installType, Environment.AutoDetect);
+    }
+
+    /**
+     * Start the mParticle SDK and begin tracking a user session. This method must be called prior to {@link #getInstance()}.
+     * This method requires that your API key and secret are contained in your XML configuration.
+     * <p/>
+     *
+     *
+     * @param context     Required reference to a Context object
+     * @param installType The InstallType parameter is used to determine if this is a new install or an upgrade. In
+     * the case where the mParticle SDK is being added to an existing app with existing users, this
+     * parameter prevents mParticle from categorizing all users as new users.
+     * @param environment Force the SDK into either Production or Development mode. See {@link com.mparticle.MParticle.Environment}
+     * for implications of each mode. The SDK automatically determines which mode it should be in depending
+     * on the signing and the DEBUGGABLE flag of your application's AndroidManifest.xml, so this initializer is not typically needed.
+     * <p/>
+     *
+     * This initializer can however be useful while you're testing a release-signed version of your application, and you have *not* set the
+     * debuggable flag in your AndroidManifest.xml. In this case, you can force the SDK into development mode to prevent sending
+     * your test usage/data as production data. It's crucial, however, that prior to submission to Google Play that you ensure
+     * you are no longer forcing development mode.
+     */
+    public static void start(Context context, InstallType installType, Environment environment){
         if (context == null) {
             throw new IllegalArgumentException("mParticle failed to start: context is required.");
         }
-        MParticle.getInstance(context.getApplicationContext(), installType);
+        MParticle.getInstance(context.getApplicationContext(), installType, environment);
     }
 
     /**
@@ -226,7 +250,7 @@ public class MParticle {
      * @param context the Activity that is creating the instance
      * @return An instance of the mParticle SDK configured with your API key
      */
-    private static MParticle getInstance(Context context, InstallType installType) {
+    private static MParticle getInstance(Context context, InstallType installType, Environment environment) {
         if (instance == null) {
             synchronized (MParticle.class) {
                 if (instance == null) {
@@ -244,7 +268,7 @@ public class MParticle {
                     }
 
                     EmbeddedKitManager embeddedKitManager = new EmbeddedKitManager(context);
-                    ConfigManager appConfigManager = new ConfigManager(context, embeddedKitManager);
+                    ConfigManager appConfigManager = new ConfigManager(context, embeddedKitManager, environment);
                     Context appContext = context.getApplicationContext();
 
                     Boolean firstRun = sPreferences.getBoolean(PrefKeys.FIRSTRUN + appConfigManager.getApiKey(), true);
@@ -288,7 +312,7 @@ public class MParticle {
         if (instance == null) {
             Log.e(Constants.LOG_TAG, "Failed to get MParticle instance, getInstance() called prior to start().");
         }
-        return getInstance(null, null);
+        return getInstance(null, null, null);
     }
 
 
@@ -1256,35 +1280,16 @@ public class MParticle {
     }
 
     /**
-     * Force the SDK into either Production or Development mode. See {@link com.mparticle.MParticle.Environment}
-     * for implications of each mode. The SDK automatically determines which mode it should be in depending
-     * on the signing and the DEBUGGABLE flag of your application's AndroidManifest.xml, so this method should
-     * typically not be used.
-     * <p/>
-     * This method can however be useful while you're testing a release-signed version of your application, and you have *not* set the
-     * debuggable flag in your AndroidManifest.xml. In this case, you can force the SDK into development mode to prevent sending
-     * your test usage/data as production data. It's crucial, however, that prior to submission to Google Play that you ensure
-     * you are no longer forcing development mode.
+     *
+     * This method is deprecated. Use <code>start()</code> or XML configuration if you need to customize the environment.
+     *
+     * @see #start(android.content.Context, com.mparticle.MParticle.InstallType, com.mparticle.MParticle.Environment)
      *
      * @param environment
      */
+    @Deprecated
     public void setEnvironment(Environment environment) {
-        if (environment != null) {
-            if (environment.equals(Environment.Development)) {
-                if (mConfigManager.isDebugEnvironment()) {
-                    Log.w(Constants.LOG_TAG, "Forcing environment to DEVELOPMENT, but your app is already debuggable and hence in DEVELOPMENT mode - did you mean to call forceEnvironment(Environment.Production) instead?");
-                } else {
-                    Log.w(Constants.LOG_TAG, "Forcing environment to DEVELOPMENT on a production app! Be careful, be sure not to do this in an application that you submit to Google Play.");
-                }
-            } else if (environment.equals(Environment.Production)) {
-                if (mConfigManager.isDebugEnvironment()) {
-                    Log.w(Constants.LOG_TAG, "Forcing environment to PRODUCTION on a debuggable app. Be careful, you are now in PRODUCTION and any test event data will be mixed with live event data!");
-                } else {
-                    Log.w(Constants.LOG_TAG, "Forcing environment to PRODUCTION, but your app is already in PRODUCTION mode - did you mean to call forceEnvironment(Environment.Development) instead?");
-                }
-            }
-        }
-        mConfigManager.setForceEnvironment(environment);
+        Log.w(Constants.LOG_TAG, "setEnvironment is deprecated and is a no-op. Use start() or XML configuration if you must customize environment.");
     }
 
     /**
@@ -1611,12 +1616,12 @@ public class MParticle {
     }
 
     /**
-     * The Environment in which the SDK and hosting app are running. The method should not usually be necessary - the SDK
+     * The Environment in which the SDK and hosting app are running. The SDK
      * automatically detects the Environment based on the <code>DEBUGGABLE</code> flag of your application. The <code>DEBUGGABLE</code>  flag of your
      * application will be <code>TRUE</code> when signing with a debug certificate during development, or if you have explicitly set your
      * application to debug within your AndroidManifest.xml.
      *
-     * @see {@link #setEnvironment(com.mparticle.MParticle.Environment)} to override this behavior.
+     * @see {@link #start(android.content.Context, com.mparticle.MParticle.InstallType, com.mparticle.MParticle.Environment)}
      * to override this behavior.
      *
      */
