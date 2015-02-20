@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.location.Location;
 import android.net.Uri;
 
+import com.mparticle.MPEvent;
 import com.mparticle.MParticle;
 import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.Constants;
@@ -23,7 +24,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class EmbeddedKitManager implements IEmbeddedKit, MPActivityCallbacks {
+public class EmbeddedKitManager implements MPActivityCallbacks {
     private ConcurrentHashMap<Integer,EmbeddedProvider> providers = new ConcurrentHashMap<Integer, EmbeddedProvider>(0);
 
     Context context;
@@ -84,12 +85,11 @@ public class EmbeddedKitManager implements IEmbeddedKit, MPActivityCallbacks {
         }
     }
 
-    @Override
-    public void logEvent(MParticle.EventType type, String name, Map<String, String> eventAttributes) {
+    public void logEvent(MPEvent event) {
         for (EmbeddedProvider provider : providers.values()){
             try {
-                if (!provider.optedOut() && provider.shouldLogEvent(type, name)) {
-                    provider.logEvent(type, name, provider.filterEventAttributes(type, name, provider.mAttributeFilters, eventAttributes));
+                if (!provider.optedOut() && provider.shouldLogEvent(event.getEventType(), event.getEventName())) {
+                    provider.logEvent(event, provider.filterEventAttributes(event.getEventType(), event.getEventName(), provider.mAttributeFilters, event.getInfo()));
                 }
             } catch (Exception e) {
                 ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to call logEvent for embedded provider: " + provider.getName() + ": " + e.getMessage());
@@ -97,7 +97,6 @@ public class EmbeddedKitManager implements IEmbeddedKit, MPActivityCallbacks {
         }
     }
 
-    @Override
     public void logTransaction(MPProduct product) {
         for (EmbeddedProvider provider : providers.values()){
             try {
@@ -110,7 +109,6 @@ public class EmbeddedKitManager implements IEmbeddedKit, MPActivityCallbacks {
         }
     }
 
-    @Override
     public void logScreen(String screenName, Map<String, String> eventAttributes) {
         for (EmbeddedProvider provider : providers.values()){
             try {
@@ -123,7 +121,6 @@ public class EmbeddedKitManager implements IEmbeddedKit, MPActivityCallbacks {
         }
     }
 
-    @Override
     public void setLocation(Location location) {
         for (EmbeddedProvider provider : providers.values()){
             try {
@@ -136,7 +133,6 @@ public class EmbeddedKitManager implements IEmbeddedKit, MPActivityCallbacks {
         }
     }
 
-    @Override
     public void setUserAttributes(JSONObject mUserAttributes) {
         for (EmbeddedProvider provider : providers.values()){
             try {
@@ -149,7 +145,6 @@ public class EmbeddedKitManager implements IEmbeddedKit, MPActivityCallbacks {
         }
     }
 
-    @Override
     public void removeUserAttribute(String key) {
         for (EmbeddedProvider provider : providers.values()){
             try {
@@ -162,7 +157,6 @@ public class EmbeddedKitManager implements IEmbeddedKit, MPActivityCallbacks {
         }
     }
 
-    @Override
     public void setUserIdentity(String id, MParticle.IdentityType identityType) {
         for (EmbeddedProvider provider : providers.values()){
             try {
@@ -175,7 +169,6 @@ public class EmbeddedKitManager implements IEmbeddedKit, MPActivityCallbacks {
         }
     }
 
-    @Override
     public void logout() {
         for (EmbeddedProvider provider : providers.values()){
             try {
@@ -188,7 +181,6 @@ public class EmbeddedKitManager implements IEmbeddedKit, MPActivityCallbacks {
         }
     }
 
-    @Override
     public void removeUserIdentity(String id) {
         for (EmbeddedProvider provider : providers.values()){
             try {
@@ -201,7 +193,6 @@ public class EmbeddedKitManager implements IEmbeddedKit, MPActivityCallbacks {
         }
     }
 
-    @Override
     public void handleIntent(Intent intent) {
         for (EmbeddedProvider provider : providers.values()){
             try {
@@ -214,7 +205,6 @@ public class EmbeddedKitManager implements IEmbeddedKit, MPActivityCallbacks {
         }
     }
 
-    @Override
     public void startSession() {
         for (EmbeddedProvider provider : providers.values()){
             try {
@@ -227,7 +217,6 @@ public class EmbeddedKitManager implements IEmbeddedKit, MPActivityCallbacks {
         }
     }
 
-    @Override
     public void endSession() {
         for (EmbeddedProvider provider : providers.values()){
             try {

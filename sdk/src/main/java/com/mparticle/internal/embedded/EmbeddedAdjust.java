@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.location.Location;
 
 import com.adjust.sdk.Adjust;
+import com.mparticle.MPEvent;
 import com.mparticle.MPProduct;
 import com.mparticle.MParticle;
 import com.mparticle.internal.MPActivityCallbacks;
@@ -91,7 +92,9 @@ class EmbeddedAdjust extends EmbeddedProvider implements MPActivityCallbacks {
     public void onActivityStarted(Activity activity, int currentCount) {}
 
     @Override
-    public void logEvent(MParticle.EventType type, String name, Map<String, String> eventAttributes) {}
+    public void logEvent(MPEvent event, Map<String, String> attributes) throws Exception {
+
+    }
 
     @Override
     public void logTransaction(MPProduct transaction) {}

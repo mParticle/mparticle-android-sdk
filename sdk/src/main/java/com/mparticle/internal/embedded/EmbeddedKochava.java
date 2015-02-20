@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.location.Location;
 
 import com.kochava.android.tracker.Feature;
+import com.mparticle.MPEvent;
 import com.mparticle.MPProduct;
 import com.mparticle.MParticle;
 import com.mparticle.internal.MPActivityCallbacks;
@@ -56,8 +57,9 @@ class EmbeddedKochava extends EmbeddedProvider implements MPActivityCallbacks {
     }
 
     @Override
-    public void logEvent(MParticle.EventType type, String name, Map<String, String> eventAttributes) throws Exception { }
+    public void logEvent(MPEvent event, Map<String, String> attributes) throws Exception {
 
+    }
 
     @Override
     public void logTransaction(MPProduct transaction) throws Exception {}

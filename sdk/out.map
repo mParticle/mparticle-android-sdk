@@ -3757,14 +3757,14 @@ com.mparticle.internal.UploadHandler -> com.mparticle.internal.q:
     117:132:org.json.JSONObject getDeviceInfo() -> a
     136:145:org.json.JSONObject getAppInfo() -> b
     149:150:void setConnected(boolean) -> a
-    154:219:void handleMessage(android.os.Message) -> handleMessage
-    228:316:void prepareUploads(boolean) -> b
-    323:381:boolean processUploads(boolean) -> c
-    427:496:org.json.JSONObject createUploadMessage(org.json.JSONArray,boolean) -> a
-    504:544:void addGCMHistory(org.json.JSONObject) -> a
-    555:560:void dbInsertUpload(org.json.JSONObject) -> b
-    563:565:void dbDeleteProcessedMessages(java.lang.String) -> a
-    602:603:void fetchSegments(long,java.lang.String,com.mparticle.segmentation.SegmentListener) -> a
+    154:221:void handleMessage(android.os.Message) -> handleMessage
+    230:318:void prepareUploads(boolean) -> b
+    325:383:boolean processUploads(boolean) -> c
+    429:498:org.json.JSONObject createUploadMessage(org.json.JSONArray,boolean) -> a
+    506:546:void addGCMHistory(org.json.JSONObject) -> a
+    557:562:void dbInsertUpload(org.json.JSONObject) -> b
+    565:567:void dbDeleteProcessedMessages(java.lang.String) -> a
+    604:605:void fetchSegments(long,java.lang.String,com.mparticle.segmentation.SegmentListener) -> a
     50:50:com.mparticle.internal.IMPApiClient access$000(com.mparticle.internal.UploadHandler) -> a
     50:50:void access$100(com.mparticle.internal.UploadHandler,org.json.JSONObject) -> a
     50:50:com.mparticle.segmentation.SegmentMembership access$200(com.mparticle.internal.UploadHandler,java.lang.String) -> a
@@ -3774,12 +3774,12 @@ com.mparticle.internal.UploadHandler$SegmentTask -> com.mparticle.internal.q$a:
     com.mparticle.segmentation.SegmentListener listener -> d
     long timeout -> e
     com.mparticle.internal.UploadHandler this$0 -> a
-    744:766:com.mparticle.segmentation.SegmentMembership doInBackground$30860a48() -> a
-    732:732:void onPostExecute(java.lang.Object) -> onPostExecute
-    732:732:java.lang.Object doInBackground(java.lang.Object[]) -> doInBackground
+    746:768:com.mparticle.segmentation.SegmentMembership doInBackground$30860a48() -> a
+    734:734:void onPostExecute(java.lang.Object) -> onPostExecute
+    734:734:java.lang.Object doInBackground(java.lang.Object[]) -> doInBackground
 com.mparticle.internal.UploadHandler$SegmentTask$1 -> com.mparticle.internal.q$a$1:
     com.mparticle.internal.UploadHandler$SegmentTask this$1 -> a
-    744:744:java.lang.Object call() -> call
+    746:746:java.lang.Object call() -> call
 com.mparticle.internal.embedded.EmbeddedAdjust -> com.mparticle.internal.embedded.a:
     boolean initialized -> f
     34:42:void initAdjust() -> g

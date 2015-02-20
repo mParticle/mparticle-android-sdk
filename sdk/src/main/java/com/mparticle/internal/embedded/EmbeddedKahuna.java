@@ -12,6 +12,7 @@ import com.kahuna.sdk.KahunaPushReceiver;
 import com.kahuna.sdk.KahunaPushService;
 import com.kahuna.sdk.KahunaUserAttributesKeys;
 import com.kahuna.sdk.KahunaUserCredentialKeys;
+import com.mparticle.MPEvent;
 import com.mparticle.MPProduct;
 import com.mparticle.MPReceiver;
 import com.mparticle.MParticle;
@@ -85,15 +86,15 @@ class EmbeddedKahuna extends EmbeddedProvider implements MPActivityCallbacks {
     }
 
     @Override
-    public void logEvent(MParticle.EventType type, String name, Map<String, String> eventAttributes) throws Exception {
-        if (!TextUtils.isEmpty(name)) {
+    public void logEvent(MPEvent event, Map<String, String> eventAttributes) throws Exception {
+        if (!TextUtils.isEmpty(event.getEventName())) {
             if (sendTransactionData && eventAttributes != null && eventAttributes.containsKey(Constants.MessageKey.RESERVED_KEY_LTV)) {
                 Double amount = Double.parseDouble(eventAttributes.get(Constants.MessageKey.RESERVED_KEY_LTV)) * 100;
                 KahunaAnalytics.trackEvent("purchase", 1, amount.intValue());
                 if (eventAttributes != null)
                     this.setUserAttributes(eventAttributes);
             } else {
-                KahunaAnalytics.trackEvent(name);
+                KahunaAnalytics.trackEvent(event.getEventName());
                 if (eventAttributes != null) {
                     this.setUserAttributes(eventAttributes);
                 }

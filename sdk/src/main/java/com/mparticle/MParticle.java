@@ -549,7 +549,7 @@ public class MParticle {
                 mMessageManager.logEvent(mSessionID, mSessionStartTime, mLastEventTime, event, mAppStateManager.getCurrentActivity());
                 ConfigManager.log(LogLevel.DEBUG, "Logged event: ", event.toString());
             }
-           // mEmbeddedKitManager.logEvent(eventType, eventName, eventInfo);
+            mEmbeddedKitManager.logEvent(event);
         }
     }
 
@@ -679,7 +679,6 @@ public class MParticle {
             ensureActiveSession();
             mMessageManager.logBreadcrumb(mSessionID, mSessionStartTime, mLastEventTime, breadcrumb);
             ConfigManager.log(LogLevel.DEBUG, "Logged breadcrumb: " + breadcrumb);
-
         }
     }
 
