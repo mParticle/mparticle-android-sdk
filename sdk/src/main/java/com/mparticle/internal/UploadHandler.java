@@ -164,6 +164,8 @@ public final class UploadHandler extends Handler {
                     ConfigManager.log(MParticle.LogLevel.DEBUG, e.getMessage());
                 } catch (MParticleApiClient.MPConfigException e) {
                     ConfigManager.log(MParticle.LogLevel.DEBUG, "Failed to update configuration: ", e.toString());
+                } catch (Exception e){
+                    ConfigManager.log(MParticle.LogLevel.DEBUG, "Failed to update configuration: ", e.toString());
                 }
                 break;
             case UPLOAD_MESSAGES:
