@@ -125,7 +125,7 @@ public final class UploadHandler extends Handler {
                 }
                 deviceInfo.put(MessageKey.LIMIT_AD_TRACKING, adInfo.isLimitAdTrackingEnabled());
             }catch (Exception e){
-
+                ConfigManager.log(MParticle.LogLevel.DEBUG, "Failed while building device-info object: ", e.toString());
             }
 
         }
@@ -140,7 +140,7 @@ public final class UploadHandler extends Handler {
             appInfo.put(MessageKey.ENVIRONMENT, mConfigManager.getEnvironment().getValue());
             appInfo.put(MessageKey.INSTALL_REFERRER, mPreferences.getString(PrefKeys.INSTALL_REFERRER, null));
         }catch (JSONException e){
-
+            ConfigManager.log(MParticle.LogLevel.DEBUG, "Failed while building app-info object: ", e.toString());
         }
         return appInfo;
     }

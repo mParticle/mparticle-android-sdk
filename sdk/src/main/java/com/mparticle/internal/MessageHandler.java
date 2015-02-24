@@ -86,12 +86,8 @@ import org.json.JSONObject;
 
                     mMessageManagerCallbacks.checkForTrigger(message);
 
-                } catch (SQLiteException e) {
+                } catch (Exception e) {
                     ConfigManager.log(MParticle.LogLevel.ERROR, e, "Error saving event to mParticle DB");
-                } catch (JSONException e) {
-                    ConfigManager.log(MParticle.LogLevel.ERROR, e, "Error with JSON object");
-                } finally {
-
                 }
                 break;
             case UPDATE_SESSION_ATTRIBUTES:
@@ -100,12 +96,8 @@ import org.json.JSONObject;
                     String sessionId = sessionAttributes.getString(MessageKey.SESSION_ID);
                     String attributes = sessionAttributes.getString(MessageKey.ATTRIBUTES);
                     dbUpdateSessionAttributes(sessionId, attributes);
-                } catch (SQLiteException e) {
+                } catch (Exception e) {
                     ConfigManager.log(MParticle.LogLevel.ERROR, e, "Error updating session attributes in mParticle DB");
-                } catch (JSONException e) {
-                    ConfigManager.log(MParticle.LogLevel.ERROR, e, "Error with JSON object");
-                } finally {
-
                 }
                 break;
             case UPDATE_SESSION_END:
@@ -117,12 +109,8 @@ import org.json.JSONObject;
 
 
                     dbUpdateSessionEndTime(sessionId, time, sessionLength);
-                } catch (SQLiteException e) {
+                } catch (Exception e) {
                     ConfigManager.log(MParticle.LogLevel.ERROR, e, "Error updating session end time in mParticle DB");
-                } catch (JSONException e) {
-                    ConfigManager.log(MParticle.LogLevel.ERROR, e, "Error with JSON object");
-                } finally {
-
                 }
                 break;
             case CREATE_SESSION_END_MESSAGE:
@@ -160,12 +148,8 @@ import org.json.JSONObject;
                     }
                     selectCursor.close();
 
-                } catch (SQLiteException e) {
+                } catch (Exception e) {
                     ConfigManager.log(MParticle.LogLevel.ERROR, e, "Error creating session end message in mParticle DB");
-                } catch (JSONException e) {
-                    ConfigManager.log(MParticle.LogLevel.ERROR, e, "Error with JSON object");
-                } finally {
-
                 }
                 break;
             case END_ORPHAN_SESSIONS:
@@ -183,34 +167,24 @@ import org.json.JSONObject;
                         sendMessage(obtainMessage(MessageHandler.CREATE_SESSION_END_MESSAGE, sessionId));
                     }
                     selectCursor.close();
-                } catch (SQLiteException e) {
+                } catch (Exception e) {
                     ConfigManager.log(MParticle.LogLevel.ERROR, e, "Error processing initialization in mParticle DB");
-                } finally {
-
                 }
                 break;
             case STORE_BREADCRUMB:
                 try {
                     MPMessage message = (MPMessage) msg.obj;
                     dbInsertBreadcrumb(message);
-                } catch (SQLiteException e) {
+                } catch (Exception e) {
                     ConfigManager.log(MParticle.LogLevel.ERROR, e, "Error saving breadcrumb to mParticle DB");
-                } catch (JSONException e) {
-                    ConfigManager.log(MParticle.LogLevel.ERROR, e, "Error with JSON object");
-                } finally {
-
                 }
                 break;
             case STORE_GCM_MESSAGE:
                 try {
                     AbstractCloudMessage message = (AbstractCloudMessage) msg.obj;
                     dbInsertGcmMessage(message, msg.getData().getString(MParticleDatabase.GcmMessageTable.APPSTATE));
-                } catch (SQLiteException e) {
-                    ConfigManager.log(MParticle.LogLevel.ERROR, e, "Error saving GCM message to mParticle DB");
-                } catch (JSONException e) {
-                    ConfigManager.log(MParticle.LogLevel.ERROR, e, "Error with JSON object");
-                } finally {
-
+                } catch (Exception e) {
+                    ConfigManager.log(MParticle.LogLevel.ERROR, e, "Error saving GCM message to mParticle DB", e.toString());
                 }
                 break;
             case MARK_INFLUENCE_OPEN_GCM:
@@ -218,7 +192,11 @@ import org.json.JSONObject;
                 logInfluenceOpenGcmMessages(openTimestamp);
                 break;
             case CLEAR_PROVIDER_GCM:
-                clearOldProviderGcm();
+                try {
+                    clearOldProviderGcm();
+                }catch (Exception e){
+                    ConfigManager.log(MParticle.LogLevel.ERROR, e, "Error while clearing provider GCM messages: ", e.toString());
+                }
                 break;
         }
         mIsProcessingMessage = false;
@@ -333,7 +311,7 @@ import org.json.JSONObject;
                         );
             }
         }catch (Exception e){
-
+            ConfigManager.log(MParticle.LogLevel.ERROR, e, "Error logging influence-open message to mParticle DB ", e.toString());
         }finally {
             if (gcmCursor != null && !gcmCursor.isClosed()){
                 gcmCursor.close();
