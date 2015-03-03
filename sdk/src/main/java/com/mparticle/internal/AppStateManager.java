@@ -16,6 +16,7 @@ import com.mparticle.internal.embedded.EmbeddedKitManager;
 import org.json.JSONObject;
 
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 public class AppStateManager implements MPActivityCallbacks{
 
@@ -30,7 +31,7 @@ public class AppStateManager implements MPActivityCallbacks{
     private boolean mInitialized;
     Context mContext;
     AtomicInteger mActivities = new AtomicInteger(0);
-    long mLastStoppedTime;
+    AtomicLong mLastStoppedTime;
     Handler delayedBackgroundCheckHandler = new Handler();
     private String previousSessionPackage;
     private String previousSessionParameters;
@@ -44,7 +45,7 @@ public class AppStateManager implements MPActivityCallbacks{
 
     public AppStateManager(Context context, EmbeddedKitManager embeddedKitManager) {
         mContext = context.getApplicationContext();
-        mLastStoppedTime = SystemClock.elapsedRealtime();
+        mLastStoppedTime = new AtomicLong(SystemClock.elapsedRealtime());
         mEmbeddedKitManager = embeddedKitManager;
 
         mSupportLib = MPUtility.isSupportLibAvailable();
@@ -81,10 +82,10 @@ public class AppStateManager implements MPActivityCallbacks{
                     previousSessionPackage,
                     0);
             mLastForegroundTime = SystemClock.elapsedRealtime();
-        }else if (isBackgrounded() && mLastStoppedTime > 0) {
+        }else if (isBackgrounded() && mLastStoppedTime.get() > 0) {
             long totalTimeInBackground = mPreferences.getLong(Constants.PrefKeys.TIME_IN_BG, -1);
             if (totalTimeInBackground > -1){
-                totalTimeInBackground += (SystemClock.elapsedRealtime() - mLastStoppedTime);
+                totalTimeInBackground += (SystemClock.elapsedRealtime() - mLastStoppedTime.get());
             }else{
                 totalTimeInBackground = 0;
             }
@@ -92,8 +93,8 @@ public class AppStateManager implements MPActivityCallbacks{
 
             MParticle.getInstance().internal().logStateTransition(Constants.StateTransitionType.STATE_TRANS_FORE,
                     mCurrentActivity,
-                    mLastStoppedTime - mLastForegroundTime,
-                    SystemClock.elapsedRealtime() - mLastStoppedTime,
+                    mLastStoppedTime.get() - mLastForegroundTime,
+                    SystemClock.elapsedRealtime() - mLastStoppedTime.get(),
                     previousSessionUri,
                     previousSessionParameters,
                     previousSessionPackage,
@@ -137,7 +138,7 @@ public class AppStateManager implements MPActivityCallbacks{
     @Override
     public void onActivityStopped(Activity activity, int currentCount) {
         mPreferences.edit().putBoolean(Constants.PrefKeys.CRASHED_IN_FOREGROUND, false).commit();
-        mLastStoppedTime = SystemClock.elapsedRealtime();
+        mLastStoppedTime = new AtomicLong(SystemClock.elapsedRealtime());
 
         if (mActivities.decrementAndGet() < 1) {
             if (unityActivity != null && unityActivity.isInstance(activity)){
@@ -204,7 +205,7 @@ public class AppStateManager implements MPActivityCallbacks{
     }
 
     public boolean isBackgrounded() {
-        return mActivities.get() < 1 && (SystemClock.elapsedRealtime() - mLastStoppedTime >= ACTIVITY_DELAY);
+        return mActivities.get() < 1 && (SystemClock.elapsedRealtime() - mLastStoppedTime.get() >= ACTIVITY_DELAY);
     }
 
     private static String getActivityName(Activity activity) {

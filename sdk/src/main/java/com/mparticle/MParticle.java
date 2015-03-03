@@ -1737,6 +1737,10 @@ public class MParticle {
             return mSessionID;
         }
 
+        public boolean isBackgrounded(){
+            return mAppStateManager.isBackgrounded();
+        }
+
         public void enableUncaughtExceptionLogging(boolean userTriggered) {
             if (null == mExHandler) {
                 UncaughtExceptionHandler currentUncaughtExceptionHandler = Thread.getDefaultUncaughtExceptionHandler();

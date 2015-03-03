@@ -30,7 +30,7 @@ class MPLifecycleCallbackDelegate implements Application.ActivityLifecycleCallba
 
     @Override
     public void onActivityPaused(Activity activity) {
-
+        mStateManager.onActivityPaused(activity, 0);
     }
 
     @Override

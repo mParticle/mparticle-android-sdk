@@ -38,9 +38,13 @@ class EmbeddedAdjust extends EmbeddedProvider implements MPActivityCallbacks {
                     MParticle.getInstance().getEnvironment() == MParticle.Environment.Production ? "production" : "sandbox",
                     "info",
                     false);
+            if (!MParticle.getInstance().internal().isBackgrounded()){
+                Adjust.onResume(context);
+            }
             initialized = true;
         }
     }
+
 
     @Override
     protected EmbeddedProvider update() {
