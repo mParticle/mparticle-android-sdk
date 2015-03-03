@@ -66,7 +66,6 @@ import java.net.SocketImpl;
 import java.net.SocketImplFactory;
 import java.net.URL;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.UUID;
 
@@ -440,7 +439,7 @@ public class MParticle {
         Intent fakeReferralIntent = new Intent();
         fakeReferralIntent.putExtra(Constants.REFERRER, referrer);
         try {
-            new com.adjust.sdk.ReferrerReceiver().onReceive(mAppContext, fakeReferralIntent);
+            new com.mparticle.internal.embedded.adjust.sdk.ReferrerReceiver().onReceive(mAppContext, fakeReferralIntent);
         }catch (Exception e){
             Log.w(Constants.LOG_TAG, "Failed to pass referrer to Adjust SDK: " + e.getMessage());
         }

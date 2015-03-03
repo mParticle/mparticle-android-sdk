@@ -5,7 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
 
-import com.adjust.sdk.Adjust;
+import com.mparticle.internal.embedded.adjust.sdk.Adjust;
 import com.mparticle.MPEvent;
 import com.mparticle.MPProduct;
 import com.mparticle.MParticle;
@@ -23,7 +23,7 @@ import java.util.Map;
 class EmbeddedAdjust extends EmbeddedProvider implements MPActivityCallbacks {
 
     private static final String APP_TOKEN = "appToken";
-    private static final String HOST = "app.adjust.com";
+    private static final String HOST = "app.adjust.io";
 
     boolean initialized = false;
 
