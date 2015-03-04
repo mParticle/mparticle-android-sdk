@@ -14,10 +14,11 @@ import com.mparticle.internal.MPActivityCallbacks;
 import org.json.JSONObject;
 
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * <p/>
- * Embedded implementation of the Adjust SDK 3.x
+ * Embedded implementation of the Adjust SDK 3.6.2
  * <p/>
  */
 class EmbeddedAdjust extends EmbeddedProvider implements MPActivityCallbacks {
@@ -26,6 +27,7 @@ class EmbeddedAdjust extends EmbeddedProvider implements MPActivityCallbacks {
     private static final String HOST = "app.adjust.io";
 
     boolean initialized = false;
+    private AtomicBoolean hasResumed = new AtomicBoolean(false);
 
     EmbeddedAdjust(Context context) {
         super(context);
@@ -38,8 +40,11 @@ class EmbeddedAdjust extends EmbeddedProvider implements MPActivityCallbacks {
                     MParticle.getInstance().getEnvironment() == MParticle.Environment.Production ? "production" : "sandbox",
                     "info",
                     false);
-            if (!MParticle.getInstance().internal().isBackgrounded()){
-                Adjust.onResume(context);
+            if (!MParticle.getInstance().internal().isBackgrounded()) {
+                if (!hasResumed.get()) {
+                    Adjust.onResume(context);
+                    hasResumed.set(true);
+                }
             }
             initialized = true;
         }
@@ -48,15 +53,14 @@ class EmbeddedAdjust extends EmbeddedProvider implements MPActivityCallbacks {
 
     @Override
     protected EmbeddedProvider update() {
-        if (initialized) {
-            String installReferrer = MParticle.getInstance().getInstallReferrer();
-            if (installReferrer != null) {
-                MParticle.getInstance().setInstallReferrer(installReferrer);
-            }
-            boolean optOut = MParticle.getInstance().getOptOut();
-            if (optOut != Adjust.isEnabled()){
-                Adjust.setEnabled(!optOut);
-            }
+        initAdjust();
+        String installReferrer = MParticle.getInstance().getInstallReferrer();
+        if (installReferrer != null) {
+            MParticle.getInstance().setInstallReferrer(installReferrer);
+        }
+        boolean optOut = MParticle.getInstance().getOptOut();
+        if (optOut != Adjust.isEnabled()){
+            Adjust.setEnabled(!optOut);
         }
 
         return this;
@@ -74,19 +78,21 @@ class EmbeddedAdjust extends EmbeddedProvider implements MPActivityCallbacks {
 
     @Override
     public void onActivityCreated(Activity activity, int activityCount) {
-        initAdjust();
+
     }
 
     @Override
     public void onActivityResumed(Activity activity, int currentCount) {
-        initAdjust();
-        Adjust.onResume(activity);
+        if (!hasResumed.get()) {
+            Adjust.onResume(activity);
+            hasResumed.set(true);
+        }
     }
 
     @Override
     public void onActivityPaused(Activity activity, int activityCount) {
-        initAdjust();
         Adjust.onPause();
+        hasResumed.set(false);
     }
 
     @Override
