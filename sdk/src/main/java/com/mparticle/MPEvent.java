@@ -291,7 +291,7 @@ public class MPEvent {
                 }
                 if (json.has(EVENT_INFO)){
                     JSONObject infoObject = json.getJSONObject(EVENT_INFO);
-                    Map<String, String> info = new HashMap<>();
+                    Map<String, String> info = new HashMap<String, String>();
                     Iterator<?> keys = infoObject.keys();
 
                     while( keys.hasNext() ){
