@@ -1,10 +1,16 @@
 package com.mparticle;
 
 
+import android.util.Log;
+
 import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.Constants;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 public class MPEvent {
@@ -125,6 +131,8 @@ public class MPEvent {
         private Double duration = null, startTime = null, endTime = null;
 
 
+        private Builder(){}
+
         /**
          * Starting point of the builder with two required parameters. The rest of the fields
          * of this class are optional. Once the desired fields have been set, use {@link #build()} to
@@ -204,34 +212,147 @@ public class MPEvent {
         }
 
         /**
-         * the time when this event started.
+         * Manually set the time when this event started - should be epoch time milliseconds.
          *
          * Note that by using {@link #duration(double)}, this value will be ignored.
+         *
+         * Also, you can use {@link #startTime()} and {@link #endTime()}, rather than setting the time manually.
          *
          * @param startTimeMillis
          * @return
          */
-        public Builder startTime(double startTimeMillis){
+        private Builder startTime(double startTimeMillis){
             this.startTime = startTimeMillis;
             return this;
         }
 
         /**
+         * Events can have a duration associate with them. This method will set the start time to the current time.
          *
-         * The time when this event ended, in milliseconds.
+         * Note that by using {@link #duration(double)}, this value will be ignored.
+         *
+         * @return
+         */
+        public Builder startTime(){
+            return startTime(System.currentTimeMillis());
+        }
+
+        /**
+         * Events can have a duration associate with them. This method will set the end time to the current time.
+         *
+         * Note that by using {@link #duration(double)}, this value will be ignored.
+         *
+         * @return
+         */
+        public Builder endTime(){
+            return endTime(System.currentTimeMillis());
+        }
+
+        /**
+         *
+         * Manually set the time when this event ended - should be epoch time milliseconds.
+         *
+         *
          *
          * Note that by using {@link #duration(double)}, this value will be ignored.
          *
          * @param endTimeMillis
          * @return
          */
-        public Builder endTime(double endTimeMillis){
+        private Builder endTime(double endTimeMillis){
             this.endTime = endTimeMillis;
             return this;
         }
 
         public MPEvent build(){
             return new MPEvent(this);
+        }
+
+        /**
+         * Use this method to deserialize the result of {@link #toString()}. This can be used to persist an event object across app sessions.
+         *
+         * @param builderString a string originally acquired by calling {@link #toString()}
+         * @return
+         */
+        public static Builder parseString(String builderString){
+            Builder builder = null;
+            try{
+                JSONObject json = new JSONObject(builderString);
+                builder = new Builder(json.getString(EVENT_NAME), MParticle.EventType.valueOf(json.getString(EVENT_TYPE)));
+                builder.category = json.optString(EVENT_CATEGORY);
+                if (json.has(EVENT_DURATION)){
+                    builder.duration = json.getDouble(EVENT_DURATION);
+                }
+                if (json.has(EVENT_START_TIME)){
+                    builder.startTime = json.getDouble(EVENT_START_TIME);
+                }
+                if (json.has(EVENT_END_TIME)){
+                    builder.endTime = json.getDouble(EVENT_END_TIME);
+                }
+                if (json.has(EVENT_INFO)){
+                    JSONObject infoObject = json.getJSONObject(EVENT_INFO);
+                    Map<String, String> info = new HashMap<>();
+                    Iterator<?> keys = infoObject.keys();
+
+                    while( keys.hasNext() ){
+                        String key = (String)keys.next();
+                        info.put(key, infoObject.getString(key));
+                    }
+                    builder.info = info;
+                }
+
+                return builder;
+            }catch (Exception e){
+                Log.w(Constants.LOG_TAG, "Failed to deserialize MPEvent.Builder: " + e.toString());
+                return builder;
+            }
+        }
+
+        private final static String EVENT_TYPE = "eventType";
+        private final static String EVENT_NAME = "eventName";
+        private final static String EVENT_CATEGORY = "category";
+        private final static String EVENT_DURATION = "duration";
+        private final static String EVENT_INFO = "info";
+        private final static String EVENT_START_TIME= "startTime";
+        private final static String EVENT_END_TIME= "endTime";
+
+        /**
+         * Use this method to serialize an event builder to persist the object across app sessions. The JSON string
+         * produced by this method should be passed to {@link #parseString(String)}.
+         *
+         * @return a JSON object describing this builder
+         */
+        @Override
+        public String toString() {
+            try{
+                JSONObject jsonObject = new JSONObject();
+                jsonObject.put(EVENT_TYPE, eventType.toString());
+                jsonObject.put(EVENT_NAME, eventName);
+                if (category != null) {
+                    jsonObject.put(EVENT_CATEGORY, category);
+                }
+                if (duration != null){
+                    jsonObject.put(EVENT_DURATION, duration);
+                }
+                if (info != null){
+                    JSONObject jsonInfo = new JSONObject();
+                    for (Map.Entry<String, String> entry : info.entrySet())
+                    {
+                        jsonInfo.put(entry.getKey(), entry.getValue());
+                    }
+                    jsonObject.put(EVENT_INFO, jsonInfo);
+                }
+                if (startTime != null){
+                    jsonObject.put(EVENT_START_TIME, startTime);
+                }
+                if (endTime != null){
+                    jsonObject.put(EVENT_END_TIME, endTime);
+                }
+                return jsonObject.toString();
+            }catch (JSONException jse){
+                Log.w(Constants.LOG_TAG, "Failed to serialize MPEvent.Builder: " + jse.toString());
+            }
+            return super.toString();
         }
     }
 }
