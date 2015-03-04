@@ -24,15 +24,6 @@ public class MParticleSanityTest extends AndroidTestCase {
 
     public void testEnvironment() {
         assertEquals(MParticle.getInstance().getEnvironment(), MParticle.Environment.Development);
-
-        MParticle.getInstance().setEnvironment(MParticle.Environment.AutoDetect);
-        assertEquals(MParticle.getInstance().getEnvironment(), MParticle.Environment.Development);
-
-        MParticle.getInstance().setEnvironment(MParticle.Environment.Development);
-        assertEquals(MParticle.getInstance().getEnvironment(), MParticle.Environment.Development);
-
-        MParticle.getInstance().setEnvironment(MParticle.Environment.Production);
-        assertEquals(MParticle.getInstance().getEnvironment(), MParticle.Environment.Production);
     }
 
     public void testOptOut(){
