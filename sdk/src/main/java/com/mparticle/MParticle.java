@@ -1672,7 +1672,9 @@ public class MParticle {
 
         @Override
         public void onLocationChanged(Location location) {
-            mParticle.setLocation(location);
+            if (mParticle != null) {
+                mParticle.setLocation(location);
+            }
         }
 
         @Override
