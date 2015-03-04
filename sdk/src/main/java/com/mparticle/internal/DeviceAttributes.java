@@ -122,9 +122,6 @@ import java.util.TimeZone;
         JSONObject attributes = new JSONObject();
 
         try {
-            // device ID
-            attributes.put(MessageKey.DEVICE_ID, Settings.Secure.getString(appContext.getContentResolver(),
-                    Settings.Secure.ANDROID_ID));
             // device/OS attributes
             attributes.put(MessageKey.BUILD_ID, android.os.Build.ID);
             attributes.put(MessageKey.BRAND, Build.BRAND);
@@ -134,12 +131,17 @@ import java.util.TimeZone;
             attributes.put(MessageKey.PLATFORM, "Android");
             attributes.put(MessageKey.OS_VERSION, Build.VERSION.SDK);
             attributes.put(MessageKey.OS_VERSION_INT, Build.VERSION.SDK_INT);
+            attributes.put(MessageKey.MODEL, android.os.Build.MODEL);
+            attributes.put(MessageKey.RELEASE_VERSION, Build.VERSION.RELEASE);
+
+            // device ID
+            attributes.put(MessageKey.DEVICE_ID, Settings.Secure.getString(appContext.getContentResolver(),
+                    Settings.Secure.ANDROID_ID));
             attributes.put(MessageKey.DEVICE_BLUETOOTH_ENABLED, MPUtility.isBluetoothEnabled(appContext));
             attributes.put(MessageKey.DEVICE_BLUETOOTH_VERSION, MPUtility.getBluetoothVersion(appContext));
             attributes.put(MessageKey.DEVICE_SUPPORTS_NFC, MPUtility.hasNfc(appContext));
             attributes.put(MessageKey.DEVICE_SUPPORTS_TELEPHONY, MPUtility.hasTelephony(appContext));
-            attributes.put(MessageKey.MODEL, android.os.Build.MODEL);
-            attributes.put(MessageKey.RELEASE_VERSION, Build.VERSION.RELEASE);
+
 
 
             JSONObject rootedObject = new JSONObject();

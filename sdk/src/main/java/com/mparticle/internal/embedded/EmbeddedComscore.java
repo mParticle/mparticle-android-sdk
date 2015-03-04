@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.location.Location;
 
 import com.comscore.analytics.comScore;
+import com.mparticle.MPEvent;
 import com.mparticle.MPProduct;
 import com.mparticle.MParticle;
 import com.mparticle.internal.MPActivityCallbacks;
@@ -51,22 +52,22 @@ class EmbeddedComscore extends EmbeddedProvider implements MPActivityCallbacks {
     }
 
     @Override
-    public void logEvent(MParticle.EventType type, String name, Map<String, String> eventAttributes) {
+    public void logEvent(MPEvent event, Map<String, String> attributes) {
         if (isEnterprise) {
             HashMap<String, String> comscoreLabels;
-            if (eventAttributes == null) {
+            if (attributes == null) {
                 comscoreLabels = new HashMap<String, String>();
-            }else if (!(eventAttributes instanceof HashMap)){
+            }else if (!(attributes instanceof HashMap)){
                 comscoreLabels = new HashMap<String, String>();
-                for (Map.Entry<String, String> entry : eventAttributes.entrySet())
+                for (Map.Entry<String, String> entry : attributes.entrySet())
                 {
                     comscoreLabels.put(entry.getKey(), entry.getValue());
                 }
             }else {
-                comscoreLabels = (HashMap<String, String>) eventAttributes;
+                comscoreLabels = (HashMap<String, String>) attributes;
             }
-            comscoreLabels.put(COMSCORE_DEFAULT_LABEL_KEY, name);
-            if (MParticle.EventType.Navigation.equals(type)){
+            comscoreLabels.put(COMSCORE_DEFAULT_LABEL_KEY, event.getEventName());
+            if (MParticle.EventType.Navigation.equals(event.getEventType())){
                 comScore.view(comscoreLabels);
             }else{
                 comScore.hidden(comscoreLabels);
@@ -81,7 +82,10 @@ class EmbeddedComscore extends EmbeddedProvider implements MPActivityCallbacks {
 
     @Override
     public void logScreen(String screenName, Map<String, String> eventAttributes) throws Exception {
-        logEvent(MParticle.EventType.Navigation, screenName, eventAttributes);
+        logEvent(
+                new MPEvent.Builder(screenName, MParticle.EventType.Navigation).build(),
+                eventAttributes
+        );
     }
 
     @Override

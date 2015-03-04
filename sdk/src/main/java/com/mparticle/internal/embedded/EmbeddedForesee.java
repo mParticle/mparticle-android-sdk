@@ -7,6 +7,7 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.net.Uri;
 
+import com.mparticle.MPEvent;
 import com.mparticle.MPProduct;
 import com.mparticle.MParticle;
 import com.mparticle.internal.embedded.ISurveyProvider;
@@ -43,8 +44,9 @@ class EmbeddedForesee extends EmbeddedProvider implements ISurveyProvider {
         return this;
     }
 
+
     @Override
-    public void logEvent(MParticle.EventType type, String name, Map<String, String> eventAttributes) throws Exception {
+    public void logEvent(MPEvent event, Map<String, String> attributes) throws Exception {
 
     }
 

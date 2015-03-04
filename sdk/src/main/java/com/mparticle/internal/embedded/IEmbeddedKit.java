@@ -3,6 +3,7 @@ package com.mparticle.internal.embedded;
 import android.content.Intent;
 import android.location.Location;
 
+import com.mparticle.MPEvent;
 import com.mparticle.MParticle;
 import com.mparticle.MPProduct;
 
@@ -11,7 +12,7 @@ import org.json.JSONObject;
 import java.util.Map;
 
 interface IEmbeddedKit {
-    void logEvent(MParticle.EventType type, String name, Map<String, String> eventAttributes) throws Exception;
+    void logEvent(MPEvent event, Map<String, String> attributes) throws Exception;
     void logTransaction(MPProduct transaction) throws Exception;
     void logScreen(String screenName, Map<String, String> eventAttributes) throws Exception;
     void setLocation(Location location);

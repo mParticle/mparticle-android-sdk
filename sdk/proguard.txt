@@ -107,7 +107,7 @@
 -keep class com.kochava.** { *; }
 -keep class com.mobileapptracker.** { *; }
 -keep class com.kahuna.** { *; }
--keep class com.adjust.sdk.** { *; }
+-keep class com.mparticle.internal.embedded.adjust.sdk.** { *; }
 
 -keep class com.comscore.** { *; }
 -dontwarn com.comscore.**

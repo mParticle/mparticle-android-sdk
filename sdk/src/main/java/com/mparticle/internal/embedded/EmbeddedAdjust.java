@@ -5,7 +5,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
 
-import com.adjust.sdk.Adjust;
+import com.mparticle.internal.embedded.adjust.sdk.Adjust;
+import com.mparticle.MPEvent;
 import com.mparticle.MPProduct;
 import com.mparticle.MParticle;
 import com.mparticle.internal.MPActivityCallbacks;
@@ -22,7 +23,7 @@ import java.util.Map;
 class EmbeddedAdjust extends EmbeddedProvider implements MPActivityCallbacks {
 
     private static final String APP_TOKEN = "appToken";
-    private static final String HOST = "app.adjust.com";
+    private static final String HOST = "app.adjust.io";
 
     boolean initialized = false;
 
@@ -37,9 +38,13 @@ class EmbeddedAdjust extends EmbeddedProvider implements MPActivityCallbacks {
                     MParticle.getInstance().getEnvironment() == MParticle.Environment.Production ? "production" : "sandbox",
                     "info",
                     false);
+            if (!MParticle.getInstance().internal().isBackgrounded()){
+                Adjust.onResume(context);
+            }
             initialized = true;
         }
     }
+
 
     @Override
     protected EmbeddedProvider update() {
@@ -91,7 +96,9 @@ class EmbeddedAdjust extends EmbeddedProvider implements MPActivityCallbacks {
     public void onActivityStarted(Activity activity, int currentCount) {}
 
     @Override
-    public void logEvent(MParticle.EventType type, String name, Map<String, String> eventAttributes) {}
+    public void logEvent(MPEvent event, Map<String, String> attributes) throws Exception {
+
+    }
 
     @Override
     public void logTransaction(MPProduct transaction) {}

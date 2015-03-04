@@ -2,6 +2,8 @@ package com.mparticle.media;
 
 import android.content.Context;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 /**
  * Utility class to interact with the mParticle Media APIs. Do not directly instantiate this.
  *
@@ -11,7 +13,7 @@ import android.content.Context;
 public class MPMediaAPI {
     private final MediaCallbacks mCallbacks;
     private final Context mContext;
-    private boolean mAudioPlaying = false;
+    private AtomicBoolean mAudioPlaying = new AtomicBoolean(false);
 
     private MPMediaAPI(){
         mContext = null;
@@ -37,7 +39,7 @@ public class MPMediaAPI {
      * @param playing Is your app currently playing music for the user.
      */
     public void setAudioPlaying(boolean playing){
-        mAudioPlaying = playing;
+        mAudioPlaying.set(playing);
         if (playing){
             mCallbacks.onAudioPlaying();
         }else{
@@ -46,6 +48,6 @@ public class MPMediaAPI {
     }
 
     public boolean getAudioPlaying() {
-        return mAudioPlaying;
+        return mAudioPlaying.get();
     }
 }

@@ -20,6 +20,7 @@ import android.text.TextUtils;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 
+import com.mparticle.MPEvent;
 import com.mparticle.MPUnityException;
 import com.mparticle.MParticle;
 import com.mparticle.internal.Constants.MessageKey;
@@ -273,19 +274,19 @@ public class MessageManager implements MessageManagerCallbacks {
                 .sendMessage(mMessageHandler.obtainMessage(MessageHandler.CREATE_SESSION_END_MESSAGE, sessionId));
     }
 
-    public void logEvent(String sessionId, long sessionStartTime, long time, String eventName, EventType eventType, JSONObject attributes, long eventLength, String currentActivity) {
+    public void logEvent(String sessionId, long sessionStartTime, long time, MPEvent event, String currentActivity) {
         try {
             MPMessage message = new MPMessage.Builder(MessageType.EVENT, sessionId, mLocation)
-                    .name(eventName)
+                    .name(event.getEventName())
                     .sessionStartTime(sessionStartTime)
                     .timestamp(time)
-                    .attributes(attributes)
+                    .attributes(MPUtility.enforceAttributeConstraints(event.getInfo()))
                     .build();
 
-            message.put(MessageKey.EVENT_TYPE, eventType);
+            message.put(MessageKey.EVENT_TYPE, event.getEventType());
             // NOTE: event timing is not supported (yet) but the server expects this data
             message.put(MessageKey.EVENT_START_TIME, time);
-            message.put(MessageKey.EVENT_DURATION, eventLength);
+            message.put(MessageKey.EVENT_DURATION, event.getLength());
             if (currentActivity != null){
                 message.put(MessageKey.CURRENT_ACTIVITY, currentActivity);
             }

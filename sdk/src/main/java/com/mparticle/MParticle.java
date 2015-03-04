@@ -66,7 +66,6 @@ import java.net.SocketImpl;
 import java.net.SocketImplFactory;
 import java.net.URL;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.UUID;
 
@@ -316,65 +315,6 @@ public class MParticle {
     }
 
 
-    private static Boolean setCheckedAttribute(JSONObject attributes, String key, Object value, boolean increment) {
-        return setCheckedAttribute(attributes, key, value, false, increment);
-    }
-
-
-    private static Boolean setCheckedAttribute(JSONObject attributes, String key, Object value, Boolean caseInsensitive, boolean increment) {
-        if (null == attributes || null == key) {
-            return false;
-        }
-        try {
-            if (caseInsensitive) {
-                key = findCaseInsensitiveKey(attributes, key);
-            }
-
-            if (Constants.LIMIT_ATTR_COUNT == attributes.length() && !attributes.has(key)) {
-                ConfigManager.log(LogLevel.ERROR, "Attribute count exceeds limit. Discarding attribute: " + key);
-                return false;
-            }
-            if (null != value && value.toString().length() > Constants.LIMIT_ATTR_VALUE) {
-                ConfigManager.log(LogLevel.ERROR, "Attribute value length exceeds limit. Discarding attribute: " + key);
-                return false;
-            }
-            if (key.length() > Constants.LIMIT_ATTR_NAME) {
-                ConfigManager.log(LogLevel.ERROR, "Attribute name length exceeds limit. Discarding attribute: " + key);
-                return false;
-            }
-            if (value == null) {
-                value = JSONObject.NULL;
-            }
-            if (increment){
-                String oldValue = attributes.optString(key, "0");
-                int oldInt = Integer.parseInt(oldValue);
-                value = Integer.toString((Integer)value + oldInt);
-            }
-            attributes.put(key, value);
-        } catch (JSONException e) {
-            ConfigManager.log(LogLevel.ERROR, "JSON error processing attributes. Discarding attribute: " + key);
-            return false;
-        } catch (NumberFormatException nfe){
-            ConfigManager.log(LogLevel.ERROR, "Attempted to increment a key that could not be parsed as an integer: " + key);
-            return false;
-        } catch (Exception e){
-            ConfigManager.log(LogLevel.ERROR, "Failed to add attribute: " + e.getMessage());
-            return false;
-        }
-        return true;
-    }
-
-    private static String findCaseInsensitiveKey(JSONObject jsonObject, String key) {
-        Iterator<String> keys = jsonObject.keys();
-        while (keys.hasNext()) {
-            String currentKey = keys.next();
-            if (currentKey.equalsIgnoreCase(key)) {
-                return currentKey;
-            }
-        }
-        return key;
-    }
-
     /**
      * Track that an Activity has started. Should only be called within the onStart method of your Activities,
      * and is only necessary for pre-API level 14 devices. Not necessary to use if your Activity extends an mParticle
@@ -499,7 +439,7 @@ public class MParticle {
         Intent fakeReferralIntent = new Intent();
         fakeReferralIntent.putExtra(Constants.REFERRER, referrer);
         try {
-            new com.adjust.sdk.ReferrerReceiver().onReceive(mAppContext, fakeReferralIntent);
+            new com.mparticle.internal.embedded.adjust.sdk.ReferrerReceiver().onReceive(mAppContext, fakeReferralIntent);
         }catch (Exception e){
             Log.w(Constants.LOG_TAG, "Failed to pass referrer to Adjust SDK: " + e.getMessage());
         }
@@ -592,36 +532,23 @@ public class MParticle {
      * @param category    the Google Analytics category with which to associate this event
      */
     public void logEvent(String eventName, EventType eventType, Map<String, String> eventInfo, long eventLength, String category) {
-        if (null == eventName) {
-            ConfigManager.log(LogLevel.ERROR, "eventName is required for logEvent");
-            return;
-        }
+       logEvent(
+               new MPEvent.Builder(eventName, eventType)
+                       .info(eventInfo)
+                       .duration(eventLength)
+                       .category(category)
+                       .build()
+       );
+    }
 
-        if (eventName.length() > Constants.LIMIT_NAME) {
-            ConfigManager.log(LogLevel.ERROR, "The event name was too long. Discarding event.");
-            return;
-        }
+    public void logEvent(MPEvent event){
         ensureActiveSession();
         if (checkEventLimit()) {
-            if (category != null) {
-                if (eventInfo == null) {
-                    eventInfo = new HashMap<String, String>();
-                }
-                eventInfo.put(Constants.MessageKey.EVENT_CATEGORY, category);
-            }
-            JSONObject eventDataJSON = enforceAttributeConstraints(eventInfo);
             if (mConfigManager.getSendOoEvents()) {
-                mMessageManager.logEvent(mSessionID, mSessionStartTime, mLastEventTime, eventName, eventType, eventDataJSON, eventLength, mAppStateManager.getCurrentActivity());
-
-                if (null == eventDataJSON) {
-                    ConfigManager.log(LogLevel.DEBUG, "Logged event: ", eventName);
-                } else {
-                    ConfigManager.log(LogLevel.DEBUG, "Logged event: ", eventName, " with data ", eventDataJSON.toString());
-                }
-
-
+                mMessageManager.logEvent(mSessionID, mSessionStartTime, mLastEventTime, event, mAppStateManager.getCurrentActivity());
+                ConfigManager.log(LogLevel.DEBUG, "Logged event: ", event.toString());
             }
-            mEmbeddedKitManager.logEvent(eventType, eventName, eventInfo);
+            mEmbeddedKitManager.logEvent(event);
         }
     }
 
@@ -693,9 +620,9 @@ public class MParticle {
 
         ensureActiveSession();
         if (checkEventLimit()) {
-            JSONObject transactionJson = enforceAttributeConstraints(product);
-            mMessageManager.logEvent(mSessionID, mSessionStartTime, mLastEventTime, event.toString(), EventType.Transaction, transactionJson, 0, mAppStateManager.getCurrentActivity());
-            ConfigManager.log(LogLevel.DEBUG, "Logged product event with data: ", product.toString());
+            MPEvent productEvent = new MPEvent.Builder(event.toString(), EventType.Transaction).info(product).build();
+            mMessageManager.logEvent(mSessionID, mSessionStartTime, mLastEventTime, productEvent, mAppStateManager.getCurrentActivity());
+            ConfigManager.log(LogLevel.DEBUG, "Logged product event: ", productEvent.toString());
         }
         if (purchaseEvent) {
             mEmbeddedKitManager.logTransaction(product);
@@ -751,7 +678,6 @@ public class MParticle {
             ensureActiveSession();
             mMessageManager.logBreadcrumb(mSessionID, mSessionStartTime, mLastEventTime, breadcrumb);
             ConfigManager.log(LogLevel.DEBUG, "Logged breadcrumb: " + breadcrumb);
-
         }
     }
 
@@ -778,7 +704,7 @@ public class MParticle {
             }
             ensureActiveSession();
             if (checkEventLimit()) {
-                JSONObject eventDataJSON = enforceAttributeConstraints(eventData);
+                JSONObject eventDataJSON = MPUtility.enforceAttributeConstraints(eventData);
                 mMessageManager.logErrorEvent(mSessionID, mSessionStartTime, mLastEventTime, message, null, eventDataJSON);
                 ConfigManager.log(LogLevel.DEBUG,
                         "Logged error with message: " + (message == null ? "<none>" : message) +
@@ -927,7 +853,7 @@ public class MParticle {
         if (mConfigManager.getSendOoEvents()) {
             ensureActiveSession();
             if (checkEventLimit()) {
-                JSONObject eventDataJSON = enforceAttributeConstraints(eventData);
+                JSONObject eventDataJSON = MPUtility.enforceAttributeConstraints(eventData);
                 mMessageManager.logErrorEvent(mSessionID, mSessionStartTime, mLastEventTime, message, exception, eventDataJSON);
                 ConfigManager.log(LogLevel.DEBUG,
                         "Logged exception with message: " + (message == null ? "<none>" : message) +
@@ -1009,7 +935,7 @@ public class MParticle {
             ensureActiveSession();
             ConfigManager.log(LogLevel.DEBUG, "Set session attribute: " + key + "=" + value);
 
-            if (setCheckedAttribute(mSessionAttributes, key, value, true, false)) {
+            if (MPUtility.setCheckedAttribute(mSessionAttributes, key, value, true, false)) {
                 mMessageManager.setSessionAttributes(mSessionID, mSessionAttributes);
             }
         }
@@ -1031,7 +957,7 @@ public class MParticle {
             ConfigManager.log(LogLevel.DEBUG, "Incrementing session attribute: " + key + "=" + value);
 
 
-            if (setCheckedAttribute(mSessionAttributes, key, value, true, true)) {
+            if (MPUtility.setCheckedAttribute(mSessionAttributes, key, value, true, true)) {
                 mMessageManager.setSessionAttributes(mSessionID, mSessionAttributes);
             }
         }
@@ -1072,7 +998,7 @@ public class MParticle {
             ConfigManager.log(LogLevel.DEBUG, "Set user attribute: " + key);
         }
 
-        if (setCheckedAttribute(mUserAttributes, key, value, false)) {
+        if (MPUtility.setCheckedAttribute(mUserAttributes, key, value, false)) {
             sPreferences.edit().putString(PrefKeys.USER_ATTRS + mApiKey, mUserAttributes.toString()).commit();
             mEmbeddedKitManager.setUserAttributes(mUserAttributes);
         }
@@ -1092,7 +1018,7 @@ public class MParticle {
         }
         ConfigManager.log(LogLevel.DEBUG, "Incrementing user attribute: " + key + " with value " + value);
 
-        if (setCheckedAttribute(mUserAttributes, key, value, true)) {
+        if (MPUtility.setCheckedAttribute(mUserAttributes, key, value, true)) {
             sPreferences.edit().putString(PrefKeys.USER_ATTRS + mApiKey, mUserAttributes.toString()).commit();
             mEmbeddedKitManager.setUserAttributes(mUserAttributes);
         }
@@ -1108,7 +1034,7 @@ public class MParticle {
         if (key != null) {
             ConfigManager.log(LogLevel.DEBUG, "Removing user attribute: " + key);
         }
-        if (mUserAttributes.has(key) || mUserAttributes.has(findCaseInsensitiveKey(mUserAttributes, key))) {
+        if (mUserAttributes.has(key) || mUserAttributes.has(MPUtility.findCaseInsensitiveKey(mUserAttributes, key))) {
             mUserAttributes.remove(key);
             sPreferences.edit().putString(PrefKeys.USER_ATTRS + mApiKey, mUserAttributes.toString()).commit();
             attributeRemoved(key);
@@ -1338,27 +1264,6 @@ public class MParticle {
             ConfigManager.log(MParticle.LogLevel.WARNING, "The event limit has been exceeded for this session.");
             return false;
         }
-    }
-
-    /**
-     * This method makes sure the constraints on event attributes are enforced. A JSONObject version
-     * of the attributes is return with data that exceeds the limits removed. NOTE: Non-string
-     * attributes are not converted to strings, currently.
-     *
-     * @param attributes the user-provided JSONObject
-     * @return a cleansed copy of the JSONObject
-     */
-    private JSONObject enforceAttributeConstraints(Map<String, String> attributes) {
-        if (null == attributes) {
-            return null;
-        }
-        JSONObject checkedAttributes = new JSONObject();
-        for (Map.Entry<String, String> entry : attributes.entrySet()) {
-            String key = entry.getKey();
-            String value = entry.getValue();
-            setCheckedAttribute(checkedAttributes, key, value, false);
-        }
-        return checkedAttributes;
     }
 
     private void performLicenseCheck() {
@@ -1767,7 +1672,9 @@ public class MParticle {
 
         @Override
         public void onLocationChanged(Location location) {
-            mParticle.setLocation(location);
+            if (mParticle != null) {
+                mParticle.setLocation(location);
+            }
         }
 
         @Override
@@ -1829,6 +1736,10 @@ public class MParticle {
 
         public String getSessionId(){
             return mSessionID;
+        }
+
+        public boolean isBackgrounded(){
+            return mAppStateManager.isBackgrounded();
         }
 
         public void enableUncaughtExceptionLogging(boolean userTriggered) {
@@ -1904,7 +1815,7 @@ public class MParticle {
             }
             ensureActiveSession();
             if (checkEventLimit()) {
-                JSONObject eventDataJSON = enforceAttributeConstraints(eventData);
+                JSONObject eventDataJSON = MPUtility.enforceAttributeConstraints(eventData);
                 if (mConfigManager.getSendOoEvents()) {
                     mMessageManager.logScreen(mSessionID, mSessionStartTime, mLastEventTime, screenName, eventDataJSON, started);
 
