@@ -13,6 +13,16 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+
+/**
+ *
+ * Class representation of an event.
+ *
+ * <code>MPEvent</code> implements the Builder pattern, see {@link com.mparticle.MPEvent.Builder} for more information.
+ *
+ * @see com.mparticle.MParticle#logEvent(MPEvent)
+ *
+ */
 public class MPEvent {
     private MParticle.EventType eventType;
     private String eventName;
