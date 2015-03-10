@@ -206,15 +206,6 @@ public class MParticleApiClient implements IMPApiClient {
         checkThrottleTime();
         checkRampValue();
 
-        if (DEBUGGING){
-            try{
-                JSONObject messageJson = new JSONObject(message);
-                Log.d("mParticle API request", messageJson.toString(4));
-            }catch (Exception e){
-
-            }
-        }
-
         byte[] messageBytes = message.getBytes();
         HttpURLConnection connection = (HttpURLConnection) mEventUrl.openConnection();
         connection.setDoOutput(true);

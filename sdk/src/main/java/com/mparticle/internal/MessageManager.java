@@ -772,16 +772,20 @@ public class MessageManager implements MessageManagerCallbacks {
     private class StatusBroadcastReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context appContext, Intent intent) {
-            if (ConnectivityManager.CONNECTIVITY_ACTION.equals(intent.getAction())) {
-                ConnectivityManager connectivyManager = (ConnectivityManager) appContext
-                        .getSystemService(Context.CONNECTIVITY_SERVICE);
-                NetworkInfo activeNetwork = connectivyManager.getActiveNetworkInfo();
-                MessageManager.this.setDataConnection(activeNetwork);
-            } else if (Intent.ACTION_BATTERY_CHANGED.equals(intent.getAction())) {
-                int level = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
-                int scale = intent.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
-                sBatteryLevel = level / (double) scale;
-
+            try {
+                if (ConnectivityManager.CONNECTIVITY_ACTION.equals(intent.getAction())) {
+                    ConnectivityManager connectivyManager = (ConnectivityManager) appContext
+                            .getSystemService(Context.CONNECTIVITY_SERVICE);
+                    NetworkInfo activeNetwork = connectivyManager.getActiveNetworkInfo();
+                    MessageManager.this.setDataConnection(activeNetwork);
+                } else if (Intent.ACTION_BATTERY_CHANGED.equals(intent.getAction())) {
+                    int level = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
+                    int scale = intent.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
+                    sBatteryLevel = level / (double) scale;
+                }
+            }catch (Exception e){
+                //sometimes we're given a null intent,
+                //or even if we have permissions to ACCESS_NETWORK_STATE, the call may fail.
             }
         }
     }
