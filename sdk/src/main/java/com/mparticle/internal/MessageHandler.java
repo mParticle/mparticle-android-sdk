@@ -66,6 +66,7 @@ import java.util.UUID;
                 return;
             }
         }
+        mMessageManagerCallbacks.delayedStart();
         switch (msg.what) {
             case STORE_MESSAGE:
                 try {

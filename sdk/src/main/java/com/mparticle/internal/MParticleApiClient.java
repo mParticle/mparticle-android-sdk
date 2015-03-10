@@ -97,13 +97,14 @@ public class MParticleApiClient implements IMPApiClient {
     private static final char[] HEX_CHARS = "0123456789abcdef".toCharArray();
     private final ConfigManager mConfigManager;
     private final String mApiSecret;
-    private final URL mConfigUrl;
-    private final URL mEventUrl;
+    private URL mConfigUrl;
+    private URL mEventUrl;
     private final String mUserAgent;
     private final SharedPreferences mPreferences;
     private final String mApiKey;
-    private final int mDeviceRampNumber;
-    private static String supportedKits;
+    private final Context mContext;
+    private Integer mDeviceRampNumber = null;
+    private static String mSupportedKits;
     private SSLSocketFactory socketFactory;
     private String etag = null;
     private String modified = null;
@@ -114,29 +115,24 @@ public class MParticleApiClient implements IMPApiClient {
     private static final long THROTTLE = 1000*60*60*2;
 
     public MParticleApiClient(ConfigManager configManager, SharedPreferences sharedPreferences, Context context) throws MalformedURLException {
+        mContext = context;
         mConfigManager = configManager;
         mApiSecret = configManager.getApiSecret();
         mPreferences = sharedPreferences;
         mApiKey = configManager.getApiKey();
-        mConfigUrl = new URL(SECURE_SERVICE_SCHEME, CONFIG_HOST, SERVICE_VERSION_3 + "/" + mApiKey + "/config");
-        mEventUrl = new URL(SECURE_SERVICE_SCHEME, API_HOST, SERVICE_VERSION_1 + "/" + mApiKey + "/events");
         mUserAgent = "mParticle Android SDK/" + Constants.MPARTICLE_VERSION;
-        mDeviceRampNumber = MPUtility.hashDeviceIdForRamping(
-                        Settings.Secure.getString(context.getContentResolver(),
-                        Settings.Secure.ANDROID_ID).getBytes())
-                    .mod(BigInteger.valueOf(100))
-                    .intValue();
-
-        supportedKits = getSupportedKitString();
     }
 
     public void fetchConfig() throws IOException, MPThrottleException, MPConfigException {
         try {
             checkThrottleTime();
+            if (mConfigUrl == null){
+                mConfigUrl = new URL(SECURE_SERVICE_SCHEME, CONFIG_HOST, SERVICE_VERSION_3 + "/" + mApiKey + "/config");
+            }
             HttpURLConnection connection = (HttpURLConnection) mConfigUrl.openConnection();
             connection.setRequestProperty("Accept-Encoding", "gzip");
             connection.setRequestProperty(HEADER_ENVIRONMENT, Integer.toString(mConfigManager.getEnvironment().getValue()));
-            connection.setRequestProperty(HEADER_KITS, supportedKits);
+            connection.setRequestProperty(HEADER_KITS, getSupportedKitString());
             connection.setRequestProperty(HTTP.USER_AGENT, mUserAgent);
             if (etag != null){
                 connection.setRequestProperty("If-None-Match", etag);
@@ -205,7 +201,9 @@ public class MParticleApiClient implements IMPApiClient {
     public HttpURLConnection sendMessageBatch(String message) throws IOException, MPThrottleException, MPRampException {
         checkThrottleTime();
         checkRampValue();
-
+        if (mEventUrl == null){
+            mEventUrl = new URL(SECURE_SERVICE_SCHEME, API_HOST, SERVICE_VERSION_1 + "/" + mApiKey + "/events");
+        }
         byte[] messageBytes = message.getBytes();
         HttpURLConnection connection = (HttpURLConnection) mEventUrl.openConnection();
         connection.setDoOutput(true);
@@ -472,6 +470,13 @@ public class MParticleApiClient implements IMPApiClient {
     }
 
     private void checkRampValue() throws MPRampException {
+        if (mDeviceRampNumber == null){
+            mDeviceRampNumber = MPUtility.hashDeviceIdForRamping(
+                    Settings.Secure.getString(mContext.getContentResolver(),
+                            Settings.Secure.ANDROID_ID).getBytes())
+                    .mod(BigInteger.valueOf(100))
+                    .intValue();
+        }
         int currentRamp = mConfigManager.getCurrentRampValue();
         if (currentRamp > 0 && currentRamp < 100 &&
                 mDeviceRampNumber > mConfigManager.getCurrentRampValue()){
@@ -480,20 +485,23 @@ public class MParticleApiClient implements IMPApiClient {
     }
 
     private static String getSupportedKitString(){
-        ArrayList<Integer> supportedKitIds = EmbeddedKitManager.BaseEmbeddedKitFactory.getSupportedKits();
-        if (supportedKitIds.size() > 0) {
-            StringBuilder buffer = new StringBuilder(supportedKitIds.size() * 3);
-            Iterator<Integer> it = supportedKitIds.iterator();
-            while (it.hasNext()) {
-                Integer next = it.next();
-                buffer.append(next);
-                if (it.hasNext()) {
-                    buffer.append(",");
+        if (mSupportedKits == null) {
+            ArrayList<Integer> supportedKitIds = EmbeddedKitManager.BaseEmbeddedKitFactory.getSupportedKits();
+            if (supportedKitIds.size() > 0) {
+                StringBuilder buffer = new StringBuilder(supportedKitIds.size() * 3);
+                Iterator<Integer> it = supportedKitIds.iterator();
+                while (it.hasNext()) {
+                    Integer next = it.next();
+                    buffer.append(next);
+                    if (it.hasNext()) {
+                        buffer.append(",");
+                    }
                 }
+                mSupportedKits = buffer.toString();
+            } else {
+                mSupportedKits = "";
             }
-            return buffer.toString();
-        }else {
-            return "";
         }
+        return mSupportedKits;
     }
 }

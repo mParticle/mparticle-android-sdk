@@ -57,11 +57,6 @@ class EmbeddedAdjust extends EmbeddedProvider implements MPActivityCallbacks {
         if (installReferrer != null) {
             MParticle.getInstance().setInstallReferrer(installReferrer);
         }
-        boolean optOut = MParticle.getInstance().getOptOut();
-        if (optOut != Adjust.isEnabled()){
-            Adjust.setEnabled(!optOut);
-        }
-
         return this;
     }
 

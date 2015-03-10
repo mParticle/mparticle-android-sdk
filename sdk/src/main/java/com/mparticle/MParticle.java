@@ -141,7 +141,7 @@ public class MParticle {
     private MPMessagingAPI mMessaging;
     private MPMediaAPI mMedia;
 
-    MParticle(Context context, MessageManager messageManager, ConfigManager configManager, EmbeddedKitManager embeddedKitManager, SharedPreferences preferences) {
+    MParticle(Context context, MessageManager messageManager, ConfigManager configManager, EmbeddedKitManager embeddedKitManager) {
         mAppContext = context.getApplicationContext();
         mConfigManager = configManager;
         mApiKey = mConfigManager.getApiKey();
@@ -150,7 +150,7 @@ public class MParticle {
         measuredRequestManager = new MeasuredRequestManager();
         mEmbeddedKitManager = embeddedKitManager;
         mInternal = new MParticleInternal();
-        mPreferences = preferences;
+        mPreferences = mAppContext.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
 
         String userAttrs = mPreferences.getString(Constants.PrefKeys.USER_ATTRS + mApiKey, null);
         try {
@@ -233,21 +233,14 @@ public class MParticle {
                         Log.e(Constants.LOG_TAG, "mParticle requires android.permission.INTERNET permission");
                     }
 
-                    SharedPreferences preferences = context.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
-
                     EmbeddedKitManager embeddedKitManager = new EmbeddedKitManager(context);
                     ConfigManager appConfigManager = new ConfigManager(context, embeddedKitManager, environment);
+                    MessageManager messageManager = new MessageManager(context, appConfigManager, installType);
 
-                    Boolean firstRun = preferences.getBoolean(PrefKeys.FIRSTRUN + appConfigManager.getApiKey(), true);
-                    if (firstRun) {
-                        preferences.edit().putBoolean(PrefKeys.FIRSTRUN + appConfigManager.getApiKey(), false).apply();
-                    }
-
-                    MessageManager messageManager = new MessageManager(context, appConfigManager);
-                    instance = new MParticle(context, messageManager, appConfigManager, embeddedKitManager, preferences);
+                    instance = new MParticle(context, messageManager, appConfigManager, embeddedKitManager);
                     appConfigManager.restore();
 
-                    messageManager.start(context, firstRun, installType);
+                    messageManager.refreshConfiguration();
 
                     if (appConfigManager.getLogUnhandledExceptions()) {
                         instance.enableUncaughtExceptionLogging();
@@ -272,6 +265,7 @@ public class MParticle {
     public static MParticle getInstance() {
         if (instance == null) {
             Log.e(Constants.LOG_TAG, "Failed to get MParticle instance, getInstance() called prior to start().");
+            return null;
         }
         return getInstance(null, null, null);
     }

@@ -88,49 +88,63 @@ public final class UploadHandler extends Handler {
 
     private final String mApiKey;
     private final SegmentDatabase audienceDB;
+
     /**
      * API client interface reference, useful for the unit test suite project.
      */
     private IMPApiClient mApiClient;
 
     /**
+     * The following get*Query methods were once static fields, but in order to save on app startup time, they're
+     * now created as needed.
+     */
+
+    /**
      * The beginning of the delete query used to clear the uploads table after a successful upload.
      */
-    public static final String SQL_DELETABLE_MESSAGES = String.format(
-            "(%s='NO-SESSION')",
-            MessageTable.SESSION_ID);
+    private static String getDeletableMessagesQuery() {
+        return String.format(
+                "(%s='NO-SESSION')",
+                MessageTable.SESSION_ID);
+    }
 
     /**
      * Query to determine all of the generated uploads that are ready for the wire.
      */
-    public static final String SQL_UPLOADABLE_MESSAGES = String.format(
-            "((%s='NO-SESSION') or ((%s>=?) and (%s!=%d)))",
-            MessageTable.SESSION_ID,
-            MessageTable.STATUS,
-            MessageTable.STATUS,
-            Status.UPLOADED);
+    private static String getUploadableMessagesQuery() {
+        return String.format(
+                "((%s='NO-SESSION') or ((%s>=?) and (%s!=%d)))",
+                MessageTable.SESSION_ID,
+                MessageTable.STATUS,
+                MessageTable.STATUS,
+                Status.UPLOADED);
+    }
 
     /**
      * Query to determine all the session history batches that are ready for the wire
      */
-    public static final String SQL_HISTORY_MESSAGES = String.format(
-            "((%s!='NO-SESSION') and ((%s>=?) and (%s=%d) and (%s != ?)))",
-            MessageTable.SESSION_ID,
-            MessageTable.STATUS,
-            MessageTable.STATUS,
-            Status.UPLOADED,
-            MessageTable.SESSION_ID);
+    private static String getSessionHistoryBatchesQuery() {
+        return String.format(
+                "((%s!='NO-SESSION') and ((%s>=?) and (%s=%d) and (%s != ?)))",
+                MessageTable.SESSION_ID,
+                MessageTable.STATUS,
+                MessageTable.STATUS,
+                Status.UPLOADED,
+                MessageTable.SESSION_ID);
+    }
 
     /**
      * Query used to clear session history uploads after a successful upload to the SDK server.
      */
-    public static final String SQL_FINISHED_HISTORY_MESSAGES = String.format(
-            "((%s='NO-SESSION') or ((%s>=?) and (%s=%d) and (%s=?)))",
-            MessageTable.SESSION_ID,
-            MessageTable.STATUS,
-            MessageTable.STATUS,
-            Status.UPLOADED,
-            MessageTable.SESSION_ID);
+    private static String getSqlFinishedHistoryMessagesQuery() {
+        return String.format(
+                "((%s='NO-SESSION') or ((%s>=?) and (%s=%d) and (%s=?)))",
+                MessageTable.SESSION_ID,
+                MessageTable.STATUS,
+                MessageTable.STATUS,
+                Status.UPLOADED,
+                MessageTable.SESSION_ID);
+    }
 
     /**
      * Boolean used to determine if we're currently connected to the network. If we're not connected to the network,
@@ -292,10 +306,10 @@ public final class UploadHandler extends Handler {
             String selection;
             String[] selectionArgs;
             if (history) {
-                selection = SQL_HISTORY_MESSAGES;
+                selection = getSessionHistoryBatchesQuery();
                 selectionArgs = new String[]{Integer.toString(Status.READY), MParticle.getInstance().internal().getSessionId()};
             } else {
-                selection = SQL_UPLOADABLE_MESSAGES;
+                selection = getUploadableMessagesQuery();
                 selectionArgs = defaultSelectionArgs;
             }
 
@@ -567,17 +581,17 @@ public final class UploadHandler extends Handler {
 
     private void dbDeleteProcessedMessages(String sessionId) {
         String[] whereArgs = new String[]{Integer.toString(Status.UPLOADED), sessionId};
-        int rowsdeleted = db.delete(MessageTable.TABLE_NAME, SQL_FINISHED_HISTORY_MESSAGES, whereArgs);
+        int rowsdeleted = db.delete(MessageTable.TABLE_NAME, UploadHandler.getSqlFinishedHistoryMessagesQuery(), whereArgs);
     }
 
     private void dbMarkAsUploadedMessage(int lastMessageId) {
         //non-session messages can be deleted, they're not part of session history
         String[] whereArgs = new String[]{Long.toString(lastMessageId)};
-        String whereClause = SQL_DELETABLE_MESSAGES + " and (_id<=?)";
+        String whereClause = getDeletableMessagesQuery() + " and (_id<=?)";
         int rowsdeleted = db.delete(MessageTable.TABLE_NAME, whereClause, whereArgs);
 
         whereArgs = new String[]{Integer.toString(Status.READY), Long.toString(lastMessageId)};
-        whereClause = SQL_UPLOADABLE_MESSAGES + " and (_id<=?)";
+        whereClause = getUploadableMessagesQuery() + " and (_id<=?)";
         ContentValues contentValues = new ContentValues();
         contentValues.put(MessageTable.STATUS, Status.UPLOADED);
         int rowsupdated = db.update(MessageTable.TABLE_NAME, contentValues, whereClause, whereArgs);

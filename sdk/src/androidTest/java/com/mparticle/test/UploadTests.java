@@ -111,6 +111,11 @@ public class UploadTests extends AndroidTestCase {
             public JSONObject fetchAudiences() {
                 return null;
             }
+
+            @Override
+            public boolean isThrottled() {
+                return false;
+            }
         });
 
         MParticle.getInstance().internal().logNotification(message, null, true, AppStateManager.APP_STATE_NOTRUNNING, AbstractCloudMessage.FLAG_RECEIVED);

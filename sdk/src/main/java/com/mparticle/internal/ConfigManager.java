@@ -76,19 +76,21 @@ public class ConfigManager implements MessagingConfigCallbacks {
 
     public ConfigManager(Context context, EmbeddedKitManager embeddedKitManager, MParticle.Environment environment) {
         mContext = context.getApplicationContext();
-
         mPreferences = mContext.getSharedPreferences(PREFERENCES_FILE, Context.MODE_PRIVATE);
-        sLocalPrefs = new AppConfig(mContext, environment);
-        sLocalPrefs.init(mPreferences);
+        sLocalPrefs = new AppConfig(mContext, environment, mPreferences);
         mEmbeddedKitManager = embeddedKitManager;
     }
 
+    /**
+     * The is called on startup. The only thing that's completely necessary is that we fire up embedded kits.
+     */
     public void restore(){
         String oldConfig = mPreferences.getString(CONFIG_JSON, null);
         if (!TextUtils.isEmpty(oldConfig)){
             try{
-                updateConfig(new JSONObject(oldConfig), false);
-            }catch (JSONException jse){
+                JSONObject oldConfigJson = new JSONObject(oldConfig);
+                mEmbeddedKitManager.updateKits(oldConfigJson.optJSONArray(KEY_EMBEDDED_KITS));
+            }catch (Exception jse){
 
             }
         }
@@ -165,6 +167,7 @@ public class ConfigManager implements MessagingConfigCallbacks {
 
      */
     public void delayedStart(){
+        sLocalPrefs.delayedInit();
         if (isPushEnabled()) {
             MParticle.getInstance().Messaging().enablePushNotifications(getPushSenderId());
         }

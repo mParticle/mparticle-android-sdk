@@ -84,11 +84,6 @@ public class MessageManager implements MessageManagerCallbacks {
      */
     private Location mLocation;
     /**
-     * There are various reasons that we need to know that this is the first time that the SDK has ever been run on this device,
-     * including but not limited to the first run message.
-     */
-    private static boolean sFirstRun;
-    /**
      * This broadcast receiver is used to determine the current state of connectivity and battery level.
      * We could query these things every time a message is generated, but this should be more performant.
      */
@@ -115,62 +110,24 @@ public class MessageManager implements MessageManagerCallbacks {
      * Batches/messages need to communicate the current telephony status when available.
      */
     private static TelephonyManager sTelephonyManager;
+    private boolean mFirstRun = true;
 
-    public MessageManager(Context appContext, ConfigManager configManager) {
+
+    public MessageManager(Context appContext, ConfigManager configManager, MParticle.InstallType installType) {
         mContext = appContext.getApplicationContext();
         mConfigManager = configManager;
         MParticleDatabase database = new MParticleDatabase(appContext);
         mMessageHandler = new MessageHandler(sMessageHandlerThread.getLooper(), this, database);
         mUploadHandler = new UploadHandler(appContext, sUploadHandlerThread.getLooper(), configManager, database);
         mPreferences = appContext.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
+        mInstallType = installType;
     }
 
-    private static TelephonyManager getTelephonyManager(){
-        if (sTelephonyManager == null){
+    private static TelephonyManager getTelephonyManager() {
+        if (sTelephonyManager == null) {
             sTelephonyManager = (TelephonyManager) mContext.getSystemService(Context.TELEPHONY_SERVICE);
         }
         return sTelephonyManager;
-    }
-
-    public void start(Context appContext, Boolean firstRun, MParticle.InstallType installType) {
-        if (sStatusBroadcastReceiver == null) {
-
-            //get the previous Intent otherwise the first few messages will have 0 for battery level
-            Intent batteryIntent = mContext.getApplicationContext().registerReceiver(null,
-                    new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
-            int level = batteryIntent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
-            int scale = batteryIntent.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
-            sBatteryLevel = level / (double) scale;
-
-            sStatusBroadcastReceiver = new StatusBroadcastReceiver();
-            // NOTE: if permissions are not correct all messages will be tagged as 'offline'
-            IntentFilter filter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
-            if (MPUtility.checkPermission(mContext, android.Manifest.permission.ACCESS_NETWORK_STATE)) {
-                //same as with battery, get current connection so we don't have to wait for the next change
-                ConnectivityManager connectivyManager = (ConnectivityManager) appContext
-                        .getSystemService(Context.CONNECTIVITY_SERVICE);
-                NetworkInfo activeNetwork = connectivyManager.getActiveNetworkInfo();
-                setDataConnection(activeNetwork);
-                filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
-            }
-            mContext.registerReceiver(sStatusBroadcastReceiver, filter);
-        }
-
-        sFirstRun = firstRun;
-        mInstallType = installType;
-
-        if (!sFirstRun) {
-            mMessageHandler.sendEmptyMessage(MessageHandler.END_ORPHAN_SESSIONS);
-            // mUploadHandler.sendEmptyMessageDelayed(UploadHandler.CLEANUP, Constants.INITIAL_UPLOAD_DELAY);
-        }else{
-            boolean installDetected = !MParticle.InstallType.KnownUpgrade.equals(mInstallType) &&
-                    (MParticle.InstallType.KnownInstall.equals(mInstallType) ||
-                            (mInstallType == MParticle.InstallType.AutoDetect && autoDetectInstall()));
-            mPreferences.edit().putBoolean(Constants.PrefKeys.FIRST_RUN_INSTALL, installDetected).apply();
-        }
-
-        refreshConfiguration();
-
     }
 
     public static JSONObject getStateInfo() throws JSONException {
@@ -259,17 +216,21 @@ public class MessageManager implements MessageManagerCallbacks {
 
             editor.apply();
 
-            mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
-
-            if (sFirstRun) {
+            mFirstRun = !mPreferences.contains(Constants.PrefKeys.FIRSTRUN + mConfigManager.getApiKey());
+            if (mFirstRun) {
+                mPreferences.edit().putBoolean(Constants.PrefKeys.FIRSTRUN + mConfigManager.getApiKey(), false).apply();
                 try {
                     JSONObject firstRunMessage = createFirstRunMessage(time, sessionId);
                     mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, firstRunMessage));
-                    sFirstRun = false;
                 } catch (JSONException e) {
                     ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to create First Run Message");
                 }
+            }else{
+                mMessageHandler.sendEmptyMessage(MessageHandler.END_ORPHAN_SESSIONS);
             }
+
+
+            mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
 
             incrementSessionCounter();
 
@@ -531,7 +492,7 @@ public class MessageManager implements MessageManagerCallbacks {
             if (stateTransInit.equals(Constants.StateTransitionType.STATE_TRANS_INIT)){
                 SharedPreferences.Editor editor = mPreferences.edit();
 
-                if (!sFirstRun) {
+                if (!mFirstRun) {
                     message.put(MessageKey.APP_INIT_CRASHED, !mPreferences.getBoolean(Constants.PrefKeys.CRASHED_IN_FOREGROUND, false));
                 }
 
@@ -551,7 +512,7 @@ public class MessageManager implements MessageManagerCallbacks {
                         (mInstallType == MParticle.InstallType.KnownUpgrade ||
                                 !installDetected);
 
-                message.put(MessageKey.APP_INIT_FIRST_RUN, sFirstRun);
+                message.put(MessageKey.APP_INIT_FIRST_RUN, mFirstRun);
                 message.put(MessageKey.APP_INIT_UPGRADE, globalUpgrade);
             }
 
@@ -743,6 +704,36 @@ public class MessageManager implements MessageManagerCallbacks {
     @Override
     public String getApiKey() {
         return mConfigManager.getApiKey();
+    }
+
+    @Override
+    public void delayedStart() {
+        try {
+            if (sStatusBroadcastReceiver == null) {
+
+                //get the previous Intent otherwise the first few messages will have 0 for battery level
+                Intent batteryIntent = mContext.getApplicationContext().registerReceiver(null,
+                        new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
+                int level = batteryIntent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
+                int scale = batteryIntent.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
+                sBatteryLevel = level / (double) scale;
+
+                sStatusBroadcastReceiver = new StatusBroadcastReceiver();
+                // NOTE: if permissions are not correct all messages will be tagged as 'offline'
+                IntentFilter filter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
+                if (MPUtility.checkPermission(mContext, android.Manifest.permission.ACCESS_NETWORK_STATE)) {
+                    //same as with battery, get current connection so we don't have to wait for the next change
+                    ConnectivityManager connectivyManager = (ConnectivityManager) mContext
+                            .getSystemService(Context.CONNECTIVITY_SERVICE);
+                    NetworkInfo activeNetwork = connectivyManager.getActiveNetworkInfo();
+                    setDataConnection(activeNetwork);
+                    filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
+                }
+                mContext.registerReceiver(sStatusBroadcastReceiver, filter);
+            }
+        }catch (Exception e){
+            //this can sometimes fail due to wonky-device reasons.
+        }
     }
 
     public void refreshConfiguration() {
