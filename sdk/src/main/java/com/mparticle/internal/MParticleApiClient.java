@@ -13,7 +13,6 @@ import com.mparticle.MParticle;
 import com.mparticle.internal.embedded.EmbeddedKitManager;
 
 import org.apache.http.HttpStatus;
-import org.apache.http.impl.cookie.DateUtils;
 import org.apache.http.protocol.HTTP;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -37,6 +36,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
@@ -55,8 +55,17 @@ import javax.net.ssl.TrustManagerFactory;
  */
 public class MParticleApiClient implements IMPApiClient {
 
+    /**
+     * Signature header used for authentication with the client key/secret
+     */
     private static final String HEADER_SIGNATURE = "x-mp-signature";
+    /**
+     * Environment header used to tell the SDK server if this is a development or production request
+     */
     private static final String HEADER_ENVIRONMENT = "x-mp-env";
+    /**
+     * Embedded kit header used to tell both the supported EKs (/config), and the currently active EKs (/events)
+     */
     private static final String HEADER_KITS = "x-mp-kits";
     private static final String SECURE_SERVICE_SCHEME = TextUtils.isEmpty(BuildConfig.MP_URL) ? "https" : "http";
 
@@ -67,9 +76,22 @@ public class MParticleApiClient implements IMPApiClient {
 
     private static final String SERVICE_VERSION_1 = "/v1";
     private static final String SERVICE_VERSION_3 = "/v3";
+    /**
+     * mParticle cookies are a simplified form of real-cookies. The SDK server is stateless, so we need
+     * a mechanism for server-state persistence.
+     */
     private static final String COOKIES = "ck";
+    /**
+     * Crucial LTV value key used to sync LTV between the SDK and the SDK server whenever LTV has changed.
+     */
     private static final String LTV = "iltv";
+    /**
+     * Wrapper around cookies, MPID, and other server-response info that requires parsing.
+     */
     private static final String CONSUMER_INFO = "ci";
+    /**
+     * Key to extract the user/device's mpid, required for segments.
+     */
     private static final String MPID = "mpid";
 
     private static final char[] HEX_CHARS = "0123456789abcdef".toCharArray();
@@ -85,6 +107,10 @@ public class MParticleApiClient implements IMPApiClient {
     private SSLSocketFactory socketFactory;
     private String etag = null;
     private String modified = null;
+    /**
+     * Default throttle time - in the worst case scenario if the server is busy, the soonest
+     * the SDK will attempt to contact the server again will be after this 2 hour window.
+     */
     private static final long THROTTLE = 1000*60*60*2;
 
     public MParticleApiClient(ConfigManager configManager, SharedPreferences sharedPreferences, Context context) throws MalformedURLException {
@@ -164,6 +190,16 @@ public class MParticleApiClient implements IMPApiClient {
             ConfigManager.log(MParticle.LogLevel.ERROR, "Segment call failed: " + e.getMessage());
         }
         return response;
+    }
+
+    @Override
+    public boolean isThrottled() {
+        try {
+            checkThrottleTime();
+        }catch (MPThrottleException t){
+            return true;
+        }
+        return false;
     }
 
     public HttpURLConnection sendMessageBatch(String message) throws IOException, MPThrottleException, MPRampException {
@@ -267,11 +303,8 @@ public class MParticleApiClient implements IMPApiClient {
     private void addMessageSignature(HttpURLConnection request, String message) {
         try {
             String method = request.getRequestMethod();
-            String dateHeader = DateUtils.formatDate(new Date());
-            if (dateHeader.length() > DateUtils.PATTERN_RFC1123.length()) {
-                // handle a problem on some devices where TZ offset is appended
-                dateHeader = dateHeader.substring(0, DateUtils.PATTERN_RFC1123.length());
-            }
+            SimpleDateFormat format = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz");
+            String dateHeader = format.format(new Date());
             String path = request.getURL().getFile();
             StringBuilder hashString = new StringBuilder()
                                             .append(method)
@@ -332,6 +365,9 @@ public class MParticleApiClient implements IMPApiClient {
         return certificate;
     }
 
+    /**
+     * Custom socket factory used for certificate pinning.
+     */
     private SSLSocketFactory getSocketFactory() throws Exception{
         if (socketFactory == null){
             String keyStoreType = KeyStore.getDefaultType();

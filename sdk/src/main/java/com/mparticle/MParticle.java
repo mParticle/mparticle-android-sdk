@@ -19,6 +19,7 @@ import com.kochava.android.tracker.ReferralCapture;
 import com.mparticle.internal.MPLicenseCheckerCallback;
 import com.mparticle.internal.MPLocationListener;
 import com.mparticle.internal.MessageManager;
+import com.mparticle.internal.UploadHandler;
 import com.mparticle.media.MPMediaAPI;
 import com.mparticle.media.MediaCallbacks;
 
@@ -364,6 +365,7 @@ public class MParticle {
         mMessageManager.startSession(mSessionID, mSessionStartTime);
         ConfigManager.log(LogLevel.DEBUG, "Started new session");
         mEmbeddedKitManager.startSession();
+        mMessageManager.startUploadLoop();
     }
 
     /**

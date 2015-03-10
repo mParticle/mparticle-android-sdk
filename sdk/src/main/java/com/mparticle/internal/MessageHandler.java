@@ -62,13 +62,14 @@ import java.util.UUID;
                 try {
 
                     MPMessage message = (MPMessage) msg.obj;
-                    message.put(Constants.MessageKey.ID, UUID.randomUUID().toString());
                     message.put(MessageKey.STATE_INFO_KEY, MessageManager.getStateInfo());
                     String messageType = message.getString(MessageKey.TYPE);
                     // handle the special case of session-start by creating the
                     // session record first
                     if (MessageType.SESSION_START == messageType) {
                         dbInsertSession(message);
+                    }else{
+                        message.put(Constants.MessageKey.ID, UUID.randomUUID().toString());
                     }
                     if (MessageType.ERROR == messageType){
                         appendBreadcrumbs(message);

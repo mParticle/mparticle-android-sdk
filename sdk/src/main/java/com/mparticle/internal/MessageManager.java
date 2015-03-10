@@ -170,7 +170,7 @@ public class MessageManager implements MessageManagerCallbacks {
         }
 
         refreshConfiguration();
-        mUploadHandler.sendEmptyMessageDelayed(UploadHandler.UPLOAD_MESSAGES, Constants.INITIAL_UPLOAD_DELAY);
+
     }
 
     public static JSONObject getStateInfo() throws JSONException {
@@ -479,6 +479,14 @@ public class MessageManager implements MessageManagerCallbacks {
         } catch (JSONException e) {
             ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to send update session attributes message");
         }
+    }
+
+    /**
+     * We will attempt to upload by default every 10 minutes until the session times out.
+     */
+    public void startUploadLoop() {
+        mUploadHandler.removeMessages(UploadHandler.UPLOAD_MESSAGES);
+        mUploadHandler.sendEmptyMessageDelayed(UploadHandler.UPLOAD_MESSAGES, Constants.INITIAL_UPLOAD_DELAY);
     }
 
     public void doUpload() {

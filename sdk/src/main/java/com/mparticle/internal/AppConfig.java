@@ -8,7 +8,6 @@ import com.mparticle.MParticle;
 
 /**
  * This class is primarily responsible for parsing and representing XML/resource-based configuration.
- *
  */
 class AppConfig {
     public static final String PREFKEY_API_KEY = "mp_key";

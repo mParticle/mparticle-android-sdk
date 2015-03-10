@@ -15,4 +15,5 @@ public interface IMPApiClient {
     public HttpURLConnection sendMessageBatch(String message) throws IOException, MParticleApiClient.MPThrottleException, MParticleApiClient.MPRampException;
     public HttpURLConnection sendCommand(String commandUrl, String method, String postData, String headers) throws IOException, JSONException;
     public JSONObject fetchAudiences();
+    boolean isThrottled();
 }

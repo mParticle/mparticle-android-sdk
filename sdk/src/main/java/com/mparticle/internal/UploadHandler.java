@@ -219,45 +219,36 @@ public final class UploadHandler extends Handler {
                 break;
             case UPLOAD_MESSAGES:
             case UPLOAD_TRIGGER_MESSAGES:
-                boolean needsHistory;
-                // execute all the upload steps
                 long uploadInterval = mConfigManager.getUploadInterval();
-                if (uploadInterval > 0 || msg.arg1 == 1) {
-                    prepareUploads(false);
-                    if (isNetworkConnected) {
-                        needsHistory = processUploads(false);
-                        processCommands();
+                if (isNetworkConnected && !mApiClient.isThrottled()) {
+                    if (uploadInterval > 0 || msg.arg1 == 1) {
+                        prepareUploads(false);
+                        boolean needsHistory = processUploads(false);
                         if (needsHistory) {
                             this.sendEmptyMessage(UPLOAD_HISTORY);
                         }
                     }
+
                 }
-                // trigger another upload check unless configured for manual uploads
-                if (uploadInterval > 0 && msg.arg1 == 0) {
+                if (MParticle.getInstance().internal().isSessionActive() && uploadInterval > 0 && msg.arg1 == 0) {
                     this.sendEmptyMessageDelayed(UPLOAD_MESSAGES, uploadInterval);
                 }
                 break;
             case UPLOAD_HISTORY:
                 Cursor cursor = null;
                 try {
-                    ConfigManager.log(MParticle.LogLevel.DEBUG, "Performing history upload.");
-
                     // if the uploads table is empty (no old uploads)
                     // and the messages table has messages that are not from the current session,
                     // or there is no current session
                     // then create a history upload and send it
                     cursor = db.rawQuery("select * from " + UploadTable.TABLE_NAME, null);
                     if ((cursor == null) || (cursor.getCount() == 0)) {
-
                         this.removeMessages(UPLOAD_HISTORY);
                         // execute all the upload steps
                         prepareUploads(true);
                         if (isNetworkConnected) {
                             processUploads(true);
                         }
-                    } else {
-                        // the previous upload is not done, try again in 30 seconds
-                        this.sendEmptyMessageDelayed(UPLOAD_HISTORY, 30 * 1000);
                     }
 
                 }catch (Exception e){
