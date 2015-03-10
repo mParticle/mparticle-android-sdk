@@ -49,6 +49,10 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManagerFactory;
 
+/**
+ * Class responsible for all network communication to the mParticle SDK server.
+ *
+ */
 public class MParticleApiClient implements IMPApiClient {
 
     private static final String HEADER_SIGNATURE = "x-mp-signature";
@@ -189,7 +193,6 @@ public class MParticleApiClient implements IMPApiClient {
         if (mConfigManager.getEnvironment().equals(MParticle.Environment.Development)) {
             logUpload(message);
         }
-
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH && connection instanceof HttpsURLConnection) {
             try {
@@ -404,7 +407,7 @@ public class MParticleApiClient implements IMPApiClient {
                 BigDecimal serverLtv = new BigDecimal(jsonResponse.getString(LTV));
                 BigDecimal mostRecentClientLtc = new BigDecimal(mPreferences.getString(Constants.PrefKeys.LTV, "0"));
                 BigDecimal sum = serverLtv.add(mostRecentClientLtc);
-                mPreferences.edit().putString(Constants.PrefKeys.LTV, sum.toPlainString()).commit();
+                mPreferences.edit().putString(Constants.PrefKeys.LTV, sum.toPlainString()).apply();
             }
 
         } catch (JSONException jse) {
@@ -414,7 +417,7 @@ public class MParticleApiClient implements IMPApiClient {
 
     private void setNextAllowedRequestTime() {
         long nextTime = System.currentTimeMillis() + THROTTLE;
-        mPreferences.edit().putLong(Constants.PrefKeys.NEXT_REQUEST_TIME, nextTime).commit();
+        mPreferences.edit().putLong(Constants.PrefKeys.NEXT_REQUEST_TIME, nextTime).apply();
     }
 
     public final class MPThrottleException extends Exception {

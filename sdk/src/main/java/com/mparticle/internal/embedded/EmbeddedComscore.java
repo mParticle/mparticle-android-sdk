@@ -25,7 +25,7 @@ import java.util.Map;
  */
 class EmbeddedComscore extends EmbeddedProvider implements MPActivityCallbacks {
     //Server config constants defined for this provider
-    //keys to provide access to the MAT account.
+    //keys to provide access to the comscore account.
     private static final String CLIENT_ID = "CustomerC2Value";
     private static final String PUBLISHER_SECRET = "PublisherSecret";
     private static final String USE_HTTPS = "UseHttps";
@@ -34,7 +34,6 @@ class EmbeddedComscore extends EmbeddedProvider implements MPActivityCallbacks {
     private static final String AUTOUPDATE_MODE_KEY = "autoUpdateMode";
     private static final String AUTOUPDATE_INTERVAL = "autoUpdateInterval";
 
-    private static final String AUTOUPDATE_MODE_DISABLED = "disabled";
     private static final String AUTOUPDATE_MODE_FOREONLY = "foreonly";
     private static final String AUTOUPDATE_MODE_FOREBACK = "foreback";
     private static final String COMSCORE_DEFAULT_LABEL_KEY = "name";
@@ -125,7 +124,7 @@ class EmbeddedComscore extends EmbeddedProvider implements MPActivityCallbacks {
 
     @Override
     public void removeUserAttribute(String key) {
-        //MAT doesn't really support this...all of their attributes are primitives/non-nulls.
+        //Comscore doesn't really support this...all of their attributes are primitives/non-nulls.
     }
 
     @Override
@@ -213,6 +212,16 @@ class EmbeddedComscore extends EmbeddedProvider implements MPActivityCallbacks {
     }
 
     @Override
+    public void onActivityStopped(Activity activity, int currentCount) {
+        comScore.onExitForeground();
+    }
+
+    @Override
+    public void onActivityStarted(Activity activity, int currentCount) {
+        comScore.onEnterForeground();
+    }
+
+    @Override
     public void onActivityCreated(Activity activity, int activityCount) {
 
     }
@@ -226,13 +235,5 @@ class EmbeddedComscore extends EmbeddedProvider implements MPActivityCallbacks {
     public void onActivityPaused(Activity activity, int activityCount) {
     }
 
-    @Override
-    public void onActivityStopped(Activity activity, int currentCount) {
-        comScore.onExitForeground();
-    }
 
-    @Override
-    public void onActivityStarted(Activity activity, int currentCount) {
-        comScore.onEnterForeground();
-    }
 }

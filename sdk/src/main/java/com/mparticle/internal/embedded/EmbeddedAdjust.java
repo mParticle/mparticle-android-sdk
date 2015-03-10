@@ -50,7 +50,6 @@ class EmbeddedAdjust extends EmbeddedProvider implements MPActivityCallbacks {
         }
     }
 
-
     @Override
     protected EmbeddedProvider update() {
         initAdjust();
@@ -77,11 +76,6 @@ class EmbeddedAdjust extends EmbeddedProvider implements MPActivityCallbacks {
     }
 
     @Override
-    public void onActivityCreated(Activity activity, int activityCount) {
-
-    }
-
-    @Override
     public void onActivityResumed(Activity activity, int currentCount) {
         if (!hasResumed.get()) {
             Adjust.onResume(activity);
@@ -96,15 +90,16 @@ class EmbeddedAdjust extends EmbeddedProvider implements MPActivityCallbacks {
     }
 
     @Override
+    public void onActivityCreated(Activity activity, int activityCount) {}
+
+    @Override
     public void onActivityStopped(Activity activity, int currentCount) {}
 
     @Override
     public void onActivityStarted(Activity activity, int currentCount) {}
 
     @Override
-    public void logEvent(MPEvent event, Map<String, String> attributes) throws Exception {
-
-    }
+    public void logEvent(MPEvent event, Map<String, String> attributes) throws Exception {}
 
     @Override
     public void logTransaction(MPProduct transaction) {}

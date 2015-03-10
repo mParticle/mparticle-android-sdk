@@ -46,7 +46,7 @@ public class ReferrerReceiver extends BroadcastReceiver {
         if ("com.android.vending.INSTALL_REFERRER".equals(intent.getAction())) {
             String referrer = intent.getStringExtra(Constants.REFERRER);
             SharedPreferences preferences = context.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
-            preferences.edit().putString(Constants.PrefKeys.INSTALL_REFERRER, referrer).commit();
+            preferences.edit().putString(Constants.PrefKeys.INSTALL_REFERRER, referrer).apply();
             try {
                 new com.mparticle.internal.embedded.adjust.sdk.ReferrerReceiver().onReceive(context, intent);
             }catch (Exception e){

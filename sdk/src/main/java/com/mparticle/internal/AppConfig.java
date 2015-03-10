@@ -6,6 +6,10 @@ import android.util.Log;
 
 import com.mparticle.MParticle;
 
+/**
+ * This class is primarily responsible for parsing and representing XML/resource-based configuration.
+ *
+ */
 class AppConfig {
     public static final String PREFKEY_API_KEY = "mp_key";
     public static final String PREFKEY_API_SECRET = "mp_secret";
@@ -30,7 +34,6 @@ class AppConfig {
     public static final boolean DEFAULT_ENABLE_PUSH_VIBRATION = false;
     public static final int DEFAULT_BREADCRUMB_LIMIT = 50;
     public static final boolean DEFAULT_NETWORK_MEASUREMENT = false;
-
 
     private final Context mContext;
 
@@ -84,7 +87,7 @@ class AppConfig {
         preferences.edit()
                 .putString(Constants.PrefKeys.API_KEY, mKey)
                 .putString(Constants.PrefKeys.API_SECRET, mSecret)
-                .commit();
+                .apply();
 
         reportUncaughtExceptions = getBoolean(PREFKEY_EXCEPTIONS, DEFAULT_REPORT_UNCAUGHT_EXCEPTIONS);
         sessionTimeout = getInteger(PREFKEY_SESSION_TIMEOUT, DEFAULT_SESSION_TIMEOUT);

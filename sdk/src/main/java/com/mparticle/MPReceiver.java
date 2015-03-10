@@ -56,7 +56,11 @@ import com.mparticle.messaging.MPMessagingAPI;
  */
 public class MPReceiver extends BroadcastReceiver {
 
-    { // http://stackoverflow.com/questions/4280330/onpostexecute-not-being-called-in-asynctask-handler-runtime-exception
+    { // This a required workaround for a bug in AsyncTask in the Android framework.
+      // AsyncTask.java has code that needs to run on the main thread,
+      // but that is not guaranteed since it will be initialized on whichever
+      // thread happens to cause the class to run its static initializers.
+      // https://code.google.com/p/android/issues/detail?id=20915
         Looper looper = Looper.getMainLooper();
         Handler handler = new Handler(looper);
         handler.post(new Runnable() {
@@ -81,7 +85,7 @@ public class MPReceiver extends BroadcastReceiver {
             if ("com.android.vending.INSTALL_REFERRER".equals(intent.getAction())) {
                 String referrer = intent.getStringExtra("referrer");
                 SharedPreferences preferences = context.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
-                preferences.edit().putString(Constants.PrefKeys.INSTALL_REFERRER, referrer).commit();
+                preferences.edit().putString(Constants.PrefKeys.INSTALL_REFERRER, referrer).apply();
             } else if (MPMessagingAPI.BROADCAST_NOTIFICATION_TAPPED.equalsIgnoreCase(intent.getAction())){
                 AbstractCloudMessage message = intent.getParcelableExtra(MPMessagingAPI.CLOUD_MESSAGE_EXTRA);
                 CloudAction action = intent.getParcelableExtra(MPMessagingAPI.CLOUD_ACTION_EXTRA);

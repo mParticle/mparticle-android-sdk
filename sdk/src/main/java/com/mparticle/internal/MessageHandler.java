@@ -24,6 +24,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.UUID;
+
 /* package-private */final class MessageHandler extends Handler {
 
     private static final String TAG = Constants.LOG_TAG;
@@ -60,6 +62,7 @@ import org.json.JSONObject;
                 try {
 
                     MPMessage message = (MPMessage) msg.obj;
+                    message.put(Constants.MessageKey.ID, UUID.randomUUID().toString());
                     message.put(MessageKey.STATE_INFO_KEY, MessageManager.getStateInfo());
                     String messageType = message.getString(MessageKey.TYPE);
                     // handle the special case of session-start by creating the
@@ -87,7 +90,7 @@ import org.json.JSONObject;
                     mMessageManagerCallbacks.checkForTrigger(message);
 
                 } catch (Exception e) {
-                    ConfigManager.log(MParticle.LogLevel.ERROR, e, "Error saving event to mParticle DB");
+                    ConfigManager.log(MParticle.LogLevel.ERROR, e, "Error saving message to mParticle DB.");
                 }
                 break;
             case UPDATE_SESSION_ATTRIBUTES:
@@ -97,7 +100,7 @@ import org.json.JSONObject;
                     String attributes = sessionAttributes.getString(MessageKey.ATTRIBUTES);
                     dbUpdateSessionAttributes(sessionId, attributes);
                 } catch (Exception e) {
-                    ConfigManager.log(MParticle.LogLevel.ERROR, e, "Error updating session attributes in mParticle DB");
+                    ConfigManager.log(MParticle.LogLevel.ERROR, e, "Error updating session attributes in mParticle DB.");
                 }
                 break;
             case UPDATE_SESSION_END:
@@ -135,6 +138,7 @@ import org.json.JSONObject;
                         try {
                             MPMessage endMessage = mMessageManagerCallbacks.createMessageSessionEnd(sessionId, start, end, foregroundLength,
                                     sessionAttributes);
+                            endMessage.put(Constants.MessageKey.ID, UUID.randomUUID().toString());
                             // insert the record into messages with duration
                             dbInsertMessage(endMessage);
                         }catch (JSONException jse){
@@ -174,6 +178,7 @@ import org.json.JSONObject;
             case STORE_BREADCRUMB:
                 try {
                     MPMessage message = (MPMessage) msg.obj;
+                    message.put(Constants.MessageKey.ID, UUID.randomUUID().toString());
                     dbInsertBreadcrumb(message);
                 } catch (Exception e) {
                     ConfigManager.log(MParticle.LogLevel.ERROR, e, "Error saving breadcrumb to mParticle DB");

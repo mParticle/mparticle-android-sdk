@@ -84,12 +84,6 @@ final class MeasuredRequest {
         return streamSystemNanoEndTime - streamSystemNanoStartTime;
     }
 
-    /*public String getKey() {
-        String key = (getStartTime() / 1000) + getUri() + requestMethod;
-       // Log.e(Constants.LOG_TAG, "KEY: " + key);
-        return key;
-    }*/
-
     public void parseUrlResponse(HttpURLConnection connection) {
         streamSystemNanoEndTime = MPUtility.millitime();
         if (!foundHeaderTiming() && responseContentLength == 0) {
@@ -313,18 +307,6 @@ final class MeasuredRequest {
         str = str + "Bytes sent               : " + getBytesSent() + "\n";
         str = str + "Bytes received           : " + getBytesReceived() + "\n";
         str = str + "Response code            : " + responseCode + "\n";
-        /*
-        str = str + "ID                       : " + id + "\n";
-        str = str + "Stream start time        : " + streamStartTime + "\n";
-        str = str + "Stream end time          : " + streamEndTime + "\n";
-        str = str + "Header start time        : " + headerStartTime + "\n";
-        str = str + "Header end time          : " + headerEndTime + "\n";
-        str = str + "Req. Content-Length      : " + requestContentLength + "\n";
-        str = str + "Resp. Content-Length     : " + responseContentLength + "\n";
-        str = str + "Stream bytes written     : " + streamBytesWritten + "\n";
-        str = str + "Stream bytes read        : " + streamBytesRead + "\n";
-        str = str + "Key                      : " + getKey() + "\n";
-        */
         return str;
     }
 

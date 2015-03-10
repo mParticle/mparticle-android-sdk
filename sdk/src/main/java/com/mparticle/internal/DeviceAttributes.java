@@ -26,7 +26,7 @@ import java.util.TimeZone;
     private static final String UNKNOWN = "unknown";
 
     /**
-     * Generates a collection of application attributes
+     * Generates a collection of application attributes.  This will be lazy-loaded, and only ever called once per app run.
      *
      * @param appContext the application context
      * @return a JSONObject of application-specific attributes
@@ -107,13 +107,13 @@ import java.util.TimeZone;
         } catch (JSONException e) {
             // ignore JSON exceptions
         } finally {
-            editor.commit();
+            editor.apply();
         }
         return attributes;
     }
 
     /**
-     * Generates a collection of device attributes
+     * Generates a collection of device attributes. This will be lazy-loaded, and only ever called once per app run.
      *
      * @param appContext the application context
      * @return a JSONObject of device-specific attributes

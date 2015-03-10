@@ -47,6 +47,10 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.jar.JarFile;
 
+/**
+ * Mixin utility class responsible for generating all sorts of device information, mostly
+ * used by the DeviceInfo and AppInfo dictionaries within batch messages.
+ */
 public class MPUtility {
 
     static final String NO_BLUETOOTH = "none";
@@ -232,7 +236,7 @@ public class MPUtility {
 
                 SharedPreferences.Editor editor = sharedPrefs.edit();
                 editor.putString(Constants.PrefKeys.OPEN_UDID, sOpenUDID);
-                editor.commit();
+                editor.apply();
             }
         }
         return sOpenUDID;

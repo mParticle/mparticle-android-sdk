@@ -7,7 +7,7 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 
 /**
- * Created by sdozor on 12/31/14.
+ * API client interface primarily needed for mocking/testing.
  */
 public interface IMPApiClient {
 

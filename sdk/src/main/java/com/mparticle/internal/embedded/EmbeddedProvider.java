@@ -1,7 +1,6 @@
 package com.mparticle.internal.embedded;
 
 import android.content.Context;
-import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 
 import com.mparticle.MParticle;
@@ -16,6 +15,11 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 
+/**
+ * Base EmbeddedProvider - all EKs subclass this. The primary function is to parse the common EK configuration structures
+ * such as filters.
+ *
+ */
 abstract class EmbeddedProvider implements IEmbeddedKit {
 
     final static String KEY_ID = "id";
@@ -138,7 +142,7 @@ abstract class EmbeddedProvider implements IEmbeddedKit {
 
     public boolean optedOut(){
         return Boolean.parseBoolean(properties.containsKey(HONOR_OPT_OUT) ? properties.get(HONOR_OPT_OUT) : "true")
-                && !MParticle.getInstance().internal().getConfigurationManager().getSendOoEvents();
+                && !MParticle.getInstance().internal().getConfigurationManager().isEnabled();
     }
 
     private static int hash(String input) {

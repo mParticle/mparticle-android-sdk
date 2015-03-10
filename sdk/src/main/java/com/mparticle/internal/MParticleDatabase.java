@@ -5,6 +5,15 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.provider.BaseColumns;
 
+/**
+ * Class that generates/provides and interface to the mParticle database
+ * that's responsible for storing and upload messages.
+ *
+ * The general flow is that a message is logged the MessageTable. The MessageTable is then
+ * processed and purged to create batches of messages to be uploaded, which are then inserted in the UploadTable.
+ * Finally, as we successfully upload batches, we remove them from the UploadTable
+ *
+ */
 /* package-private */class MParticleDatabase extends SQLiteOpenHelper {
 
     private static final int DB_VERSION = 3;

@@ -15,7 +15,6 @@ import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSocket;
 
 final class MPSSLSocket extends SSLSocket {
-    private final Queue requestQueue = new LinkedList();
     private SSLSocket localSocket;
     private OutputStream outputStream;
     private MPInputStream inputStream;
@@ -23,9 +22,7 @@ final class MPSSLSocket extends SSLSocket {
     public MPSSLSocket(String host, SSLSocket localSocket) {
         if (localSocket == null)
             throw new NullPointerException("SSLSocket was null");
-
         this.localSocket = localSocket;
-
     }
 
     @Override

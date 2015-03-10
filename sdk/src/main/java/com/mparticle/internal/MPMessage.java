@@ -20,7 +20,7 @@ public class MPMessage extends JSONObject{
                 put(Constants.MessageKey.SESSION_ID, builder.mSessionId);
             }
 
-            put(Constants.MessageKey.ID, UUID.randomUUID().toString());
+
             if (builder.mSessionStartTime > 0) {
                 put(Constants.MessageKey.SESSION_START_TIMESTAMP, builder.mSessionStartTime);
             }

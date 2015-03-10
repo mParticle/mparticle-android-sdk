@@ -18,52 +18,82 @@ import org.json.JSONObject;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
+/**
+ * This class is responsible for managing sessions, by detecting how many
+ *
+ */
 public class AppStateManager implements MPActivityCallbacks{
 
+    private final ConfigManager mConfigManager;
+    Context mContext;
+    private final SharedPreferences mPreferences;
+    private final EmbeddedKitManager mEmbeddedKitManager;
+
+    private String mCurrentActivity;
+    /**
+     * This boolean is important in determining if the app is running due to the user opening the app,
+     * or if we're running due to the reception of a Intent such as a GCM message.
+     */
+    public static boolean mInitialized;
+
+    /**
+     * Keep track of how many active activities there are to determine if the app is in the foreground/visible
+     * to the user.
+     */
+    AtomicInteger mActivities = new AtomicInteger(0);
+    AtomicLong mLastStoppedTime;
+    /**
+     * it can take some time between when an activity stops and when a new one (or the same one on a configuration change/rotation)
+     * starts again, so use this handler and ACTIVITY_DELAY to determine when we're *really" in the background
+     */
+    Handler delayedBackgroundCheckHandler = new Handler();
+    private static final long ACTIVITY_DELAY = 1000;
+
+
+    /**
+     * Some providers need to know for the given session, how many 'interruptions' there were - how many
+     * times did the user leave and return prior to the session timing out.
+     */
+    AtomicInteger mInterruptionCount = new AtomicInteger(0);
+
+    /**
+     * Constants used by the messaging/push framework to describe the app state when various
+     * interactions occur (receive/show/tap).
+     */
     public static final String APP_STATE_FOREGROUND = "foreground";
     public static final String APP_STATE_BACKGROUND = "background";
     public static final String APP_STATE_NOTRUNNING = "not_running";
-    private final SharedPreferences mPreferences;
-    private final EmbeddedKitManager mEmbeddedKitManager;
-    private final boolean mSupportLib;
-    private Class unityActivity = null;
-    private String mCurrentActivity;
-    private boolean mInitialized;
-    Context mContext;
-    AtomicInteger mActivities = new AtomicInteger(0);
-    AtomicLong mLastStoppedTime;
-    Handler delayedBackgroundCheckHandler = new Handler();
+
+    /**
+     * Important to determine foreground-time length for a given session.
+     * Uses the system-uptime clock to avoid devices which wonky clocks, or clocks
+     * that change while the app is running.
+     */
+    private long mLastForegroundTime;
+    /**
+     * Various fields required to log along with state-transition messages to associate
+     * outside apps/packages with user activity.
+     */
     private String previousSessionPackage;
     private String previousSessionParameters;
     private String previousSessionUri;
-    AtomicInteger mInterruptionCount = new AtomicInteger(0);
-    //it can take some time between when an activity stops and when a new one (or the same one)
-    //starts again, so don't declared that we're backgrounded immediately.
-    private static final long ACTIVITY_DELAY = 1000;
-    private long mLastForegroundTime;
-    public static boolean appRunning = false;
 
-    public AppStateManager(Context context, EmbeddedKitManager embeddedKitManager) {
+
+    public AppStateManager(Context context, EmbeddedKitManager embeddedKitManager, ConfigManager configManager) {
         mContext = context.getApplicationContext();
         mLastStoppedTime = new AtomicLong(SystemClock.elapsedRealtime());
         mEmbeddedKitManager = embeddedKitManager;
-
-        mSupportLib = MPUtility.isSupportLibAvailable();
+        mConfigManager = configManager;
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
             setupLifecycleCallbacks();
         }
         mPreferences = context.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
-        try {
-            unityActivity = Class.forName("com.unity3d.player.UnityPlayerNativeActivity");
-        }catch (ClassNotFoundException cne){
-
-        }
     }
     @Override
     public void onActivityStarted(Activity activity, int currentCount) {
-        appRunning = true;
-        mPreferences.edit().putBoolean(Constants.PrefKeys.CRASHED_IN_FOREGROUND, true).commit();
+
+        mPreferences.edit().putBoolean(Constants.PrefKeys.CRASHED_IN_FOREGROUND, true).apply();
         mCurrentActivity = AppStateManager.getActivityName(activity);
 
         int interruptions = mInterruptionCount.get();
@@ -89,7 +119,7 @@ public class AppStateManager implements MPActivityCallbacks{
             }else{
                 totalTimeInBackground = 0;
             }
-            mPreferences.edit().putLong(Constants.PrefKeys.TIME_IN_BG, totalTimeInBackground).commit();
+            mPreferences.edit().putLong(Constants.PrefKeys.TIME_IN_BG, totalTimeInBackground).apply();
 
             MParticle.getInstance().internal().logStateTransition(Constants.StateTransitionType.STATE_TRANS_FORE,
                     mCurrentActivity,
@@ -134,30 +164,35 @@ public class AppStateManager implements MPActivityCallbacks{
         }
     }
 
-
     @Override
     public void onActivityStopped(Activity activity, int currentCount) {
-        mPreferences.edit().putBoolean(Constants.PrefKeys.CRASHED_IN_FOREGROUND, false).commit();
+        mPreferences.edit().putBoolean(Constants.PrefKeys.CRASHED_IN_FOREGROUND, false).apply();
         mLastStoppedTime = new AtomicLong(SystemClock.elapsedRealtime());
 
         if (mActivities.decrementAndGet() < 1) {
-            if (unityActivity != null && unityActivity.isInstance(activity)){
-                logBackgrounded();
-            }else {
                 delayedBackgroundCheckHandler.postDelayed(new Runnable() {
                     @Override
                     public void run() {
                         if (isBackgrounded()) {
+                            checkSessionTimeout();
                             logBackgrounded();
                         }
                     }
                 }, ACTIVITY_DELAY);
-            }
         }
         if (MParticle.getInstance().isAutoTrackingEnabled()) {
             MParticle.getInstance().internal().logScreen(AppStateManager.getActivityName(activity), null, false);
         }
         mEmbeddedKitManager.onActivityStopped(activity, mActivities.get());
+    }
+
+    private void checkSessionTimeout() {
+        delayedBackgroundCheckHandler.postDelayed( new Runnable() {
+            @Override
+            public void run() {
+                MParticle.getInstance().internal().checkSessionTimeout();
+            }
+        }, mConfigManager.getSessionTimeout());
     }
 
     @Override
@@ -168,24 +203,7 @@ public class AppStateManager implements MPActivityCallbacks{
     @Override
     public void onActivityResumed(Activity activity, int currentCount){
         mEmbeddedKitManager.onActivityResumed(activity, mActivities.get());
-        //showCloudDialog(activity);
     }
-
-   /* private void showCloudDialog(Activity activity){
-        Intent intent = activity.getIntent();
-        if (mSupportLib && intent != null && activity instanceof FragmentActivity){
-            Parcelable message = intent.getParcelableExtra(MessagingUtils.CLOUD_MESSAGE_EXTRA);
-            if (message != null) {
-                int contentId = ((MPCloudNotificationMessage) message).getContentId();
-                int shownId = intent.getIntExtra("mp_content_shown", 0);
-                if (((MPCloudNotificationMessage) message).getShowInApp() && contentId != shownId) {
-                    activity.getIntent().putExtra("mp_content_shown", ((MPCloudNotificationMessage) message).getContentId());
-                    CloudDialog.newInstance((MPCloudNotificationMessage) message)
-                            .show(((FragmentActivity) activity).getSupportFragmentManager(), CloudDialog.TAG);
-                }
-            }
-        }
-    }*/
 
     @Override
     public void onActivityPaused(Activity activity, int activityCount) {
