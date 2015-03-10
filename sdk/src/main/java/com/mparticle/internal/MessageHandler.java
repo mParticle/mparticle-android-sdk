@@ -1,9 +1,11 @@
 package com.mparticle.internal;
 
 import android.content.ContentValues;
+import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
+import android.database.sqlite.SQLiteOpenHelper;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -28,9 +30,9 @@ import java.util.UUID;
 
 /* package-private */final class MessageHandler extends Handler {
 
-    private static final String TAG = Constants.LOG_TAG;
+    private final SQLiteOpenHelper mDbHelper;
 
-    private final SQLiteDatabase db;
+    private SQLiteDatabase db;
 
     public static final int STORE_MESSAGE = 0;
     public static final int UPDATE_SESSION_ATTRIBUTES = 1;
@@ -47,16 +49,23 @@ import java.util.UUID;
     // this is not used in the normal execution.
     /* package-private */ boolean mIsProcessingMessage = false;
 
-    public MessageHandler(Looper looper, SQLiteDatabase database, MessageManagerCallbacks messageManager) {
+    public MessageHandler(Looper looper, MessageManagerCallbacks messageManager, SQLiteOpenHelper dbHelper) {
         super(looper);
-        db = database;
         mMessageManagerCallbacks = messageManager;
+        mDbHelper = dbHelper;
     }
 
     @Override
     public void handleMessage(Message msg) {
         mIsProcessingMessage = true;
-
+        if (db == null){
+            try {
+                db = mDbHelper.getWritableDatabase();
+            }catch (Exception e){
+                //if we failed to create the database, there's not much we can do, so just bail out.
+                return;
+            }
+        }
         switch (msg.what) {
             case STORE_MESSAGE:
                 try {

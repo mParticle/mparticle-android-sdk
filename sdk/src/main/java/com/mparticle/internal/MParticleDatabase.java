@@ -17,7 +17,7 @@ import android.provider.BaseColumns;
 /* package-private */class MParticleDatabase extends SQLiteOpenHelper {
 
     private static final int DB_VERSION = 3;
-    private static final String DB_NAME = "mparticle.db";
+    public static final String DB_NAME = "mparticle.db";
 
     interface BreadcrumbTable {
         public final static String TABLE_NAME = "breadcrumbs";

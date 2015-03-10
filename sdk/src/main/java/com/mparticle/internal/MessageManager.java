@@ -119,8 +119,8 @@ public class MessageManager implements MessageManagerCallbacks {
     public MessageManager(Context appContext, ConfigManager configManager) {
         mContext = appContext.getApplicationContext();
         mConfigManager = configManager;
-        SQLiteDatabase database = new MParticleDatabase(appContext).getWritableDatabase();
-        mMessageHandler = new MessageHandler(sMessageHandlerThread.getLooper(), database, this);
+        MParticleDatabase database = new MParticleDatabase(appContext);
+        mMessageHandler = new MessageHandler(sMessageHandlerThread.getLooper(), this, database);
         mUploadHandler = new UploadHandler(appContext, sUploadHandlerThread.getLooper(), configManager, database);
         mPreferences = appContext.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
     }

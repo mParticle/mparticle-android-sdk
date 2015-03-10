@@ -53,6 +53,7 @@ import javax.net.ssl.SSLHandshakeException;
 public final class UploadHandler extends Handler {
 
     private final Context mContext;
+    private final MParticleDatabase mDbHelper;
     private ConfigManager mConfigManager;
     /**
      * Message used to trigger the primary upload logic - will upload all non-history batches that are ready to go.
@@ -82,7 +83,7 @@ public final class UploadHandler extends Handler {
     /**
      * Reference to the primary database where messages, uploads, and sessions are stored.
      */
-    private final SQLiteDatabase db;
+    private SQLiteDatabase db;
     private final SharedPreferences mPreferences;
 
     private final String mApiKey;
@@ -144,17 +145,15 @@ public final class UploadHandler extends Handler {
     private JSONObject deviceInfo;
     private JSONObject appInfo;
 
-    public UploadHandler(Context context, Looper looper, ConfigManager configManager, SQLiteDatabase database) {
+    public UploadHandler(Context context, Looper looper, ConfigManager configManager, MParticleDatabase database) {
         super(looper);
         mConfigManager = configManager;
-
-        mContext = context.getApplicationContext();
+        mContext = context;
         mApiKey = mConfigManager.getApiKey();
 
-        db = database;
         audienceDB = new SegmentDatabase(mContext);
         mPreferences = mContext.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
-
+        mDbHelper = database;
         try {
             setApiClient(new MParticleApiClient(configManager, mPreferences, context));
         } catch (MalformedURLException e) {
@@ -201,6 +200,13 @@ public final class UploadHandler extends Handler {
     @Override
     public void handleMessage(Message msg) {
         super.handleMessage(msg);
+        if (db == null){
+            try {
+                db = mDbHelper.getWritableDatabase();
+            }catch (Exception e){
+                return;
+            }
+        }
         switch (msg.what) {
             case UPDATE_CONFIG:
                 try {
@@ -279,7 +285,7 @@ public final class UploadHandler extends Handler {
      * This method is responsible for looking for messages that have been logged, and assembling them into batches to be uploaded.
      * It does not trigger network comms.
      */
-    void prepareUploads(boolean history) {
+    private void prepareUploads(boolean history) {
         Cursor readyMessagesCursor = null;
         try {
             // select messages ready to upload
