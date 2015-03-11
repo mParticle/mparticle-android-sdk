@@ -42,94 +42,92 @@ import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
 
-
+/**
+ * This class is primarily responsible for generating MPMessage objects, and then adding them to a
+ * queue which is then processed in a background thread for further processing and database storage.
+ *
+ */
 public class MessageManager implements MessageManagerCallbacks {
 
+    private static Context mContext = null;
+    private static SharedPreferences mPreferences = null;
+    private ConfigManager mConfigManager = null;
+
+    /**
+     * These two threads are used to do the heavy lifting.
+     * The Message Handler primarly stores messages in the database.
+     */
     private static final HandlerThread sMessageHandlerThread = new HandlerThread("mParticleMessageHandler",
             Process.THREAD_PRIORITY_BACKGROUND);
+    /**
+     * The upload handler thread primarily queries the database for messages to upload, and then handles network communication.
+     */
     private static final HandlerThread sUploadHandlerThread = new HandlerThread("mParticleUploadHandler",
             Process.THREAD_PRIORITY_BACKGROUND);
-    static final Runtime rt = Runtime.getRuntime();
-    private static String sActiveNetworkName = "offline";
-    private Location mLocation;
-
-    private static boolean sFirstRun;
-    private static BroadcastReceiver sStatusBroadcastReceiver;
-    private static double sBatteryLevel;
-
+    /**
+     * These are the handlers which manage the queues and threads mentioned above.
+     */
     private final MessageHandler mMessageHandler;
     public final UploadHandler mUploadHandler;
-
+    /**
+     * Ideally these threads would not be started in a static initializer
+     * block. but this is cleaner than checking if they have been started in
+     * the constructor.
+     */
     static {
-        // ideally these threads would not be started in a static initializer
-        // block. but this is cleaner than checking if they have been started in
-        // the constructor.
         sMessageHandlerThread.start();
         sUploadHandlerThread.start();
     }
-
-    private static Context mContext = null;
+    /**
+     * Used to communicate the current location at the time of message generation. Can be set
+     * manually by the customer, or automatically via our our location listener, if enabled.
+     */
+    private Location mLocation;
+    /**
+     * This broadcast receiver is used to determine the current state of connectivity and battery level.
+     * We could query these things every time a message is generated, but this should be more performant.
+     */
+    private static BroadcastReceiver sStatusBroadcastReceiver;
+    /**
+     * Used to communicate the current network state at the time of message generation.
+     * Also, if we don't have a network communicate, the SDK will not even try to query and upload a batch message
+     * to try and save on battery life and memory.
+     */
+    private static String sActiveNetworkName = "offline";
+    /**
+     * Keep a reference to the current battery life as populated by the BroadcastReceiver described above.
+     */
+    private static double sBatteryLevel;
+    /**
+     * The app-info dictionary in each batch need to know the runtime of the SDK/app itself.
+     */
     private static long sStartTime = MPUtility.millitime();
-    private static SharedPreferences mPreferences = null;
-    private ConfigManager mConfigManager = null;
+    /**
+     * Every state-transition message needs to know if this was an upgrade or an install.
+     */
     private MParticle.InstallType mInstallType;
+    /**
+     * Batches/messages need to communicate the current telephony status when available.
+     */
     private static TelephonyManager sTelephonyManager;
+    private boolean mFirstRun = true;
 
-    public MessageManager(Context appContext, ConfigManager configManager) {
+
+    public MessageManager(Context appContext, ConfigManager configManager, MParticle.InstallType installType) {
         mContext = appContext.getApplicationContext();
         mConfigManager = configManager;
-        SQLiteDatabase database = new MParticleDatabase(appContext).getWritableDatabase();
-        mMessageHandler = new MessageHandler(sMessageHandlerThread.getLooper(), database, this);
+        MParticleDatabase database = new MParticleDatabase(appContext);
+        mMessageHandler = new MessageHandler(sMessageHandlerThread.getLooper(), this, database);
         mUploadHandler = new UploadHandler(appContext, sUploadHandlerThread.getLooper(), configManager, database);
         mPreferences = appContext.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
+        mInstallType = installType;
     }
 
-    private static TelephonyManager getTelephonyManager(){
-        if (sTelephonyManager == null){
+    private static TelephonyManager getTelephonyManager() {
+        if (sTelephonyManager == null) {
             sTelephonyManager = (TelephonyManager) mContext.getSystemService(Context.TELEPHONY_SERVICE);
         }
         return sTelephonyManager;
-    }
-
-    public void start(Context appContext, Boolean firstRun, MParticle.InstallType installType) {
-        if (sStatusBroadcastReceiver == null) {
-
-            //get the previous Intent otherwise the first few messages will have 0 for battery level
-            Intent batteryIntent = mContext.getApplicationContext().registerReceiver(null,
-                    new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
-            int level = batteryIntent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
-            int scale = batteryIntent.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
-            sBatteryLevel = level / (double) scale;
-
-            sStatusBroadcastReceiver = new StatusBroadcastReceiver();
-            // NOTE: if permissions are not correct all messages will be tagged as 'offline'
-            IntentFilter filter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
-            if (MPUtility.checkPermission(mContext, android.Manifest.permission.ACCESS_NETWORK_STATE)) {
-                //same as with battery, get current connection so we don't have to wait for the next change
-                ConnectivityManager connectivyManager = (ConnectivityManager) appContext
-                        .getSystemService(Context.CONNECTIVITY_SERVICE);
-                NetworkInfo activeNetwork = connectivyManager.getActiveNetworkInfo();
-                setDataConnection(activeNetwork);
-                filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
-            }
-            mContext.registerReceiver(sStatusBroadcastReceiver, filter);
-        }
-
-        sFirstRun = firstRun;
-        mInstallType = installType;
-
-        if (!sFirstRun) {
-            mMessageHandler.sendEmptyMessage(MessageHandler.END_ORPHAN_SESSIONS);
-            // mUploadHandler.sendEmptyMessageDelayed(UploadHandler.CLEANUP, Constants.INITIAL_UPLOAD_DELAY);
-        }else{
-            boolean installDetected = !MParticle.InstallType.KnownUpgrade.equals(mInstallType) &&
-                    (MParticle.InstallType.KnownInstall.equals(mInstallType) ||
-                            (mInstallType == MParticle.InstallType.AutoDetect && autoDetectInstall()));
-            mPreferences.edit().putBoolean(Constants.PrefKeys.FIRST_RUN_INSTALL, installDetected).commit();
-        }
-
-        refreshConfiguration();
-        mUploadHandler.sendEmptyMessageDelayed(UploadHandler.UPLOAD_MESSAGES, Constants.INITIAL_UPLOAD_DELAY);
     }
 
     public static JSONObject getStateInfo() throws JSONException {
@@ -141,9 +139,12 @@ public class MessageManager implements MessageManagerCallbacks {
         infoJson.put(MessageKey.STATE_INFO_TIME_SINCE_START, MPUtility.millitime() - sStartTime);
         infoJson.put(MessageKey.STATE_INFO_AVAILABLE_DISK, MPUtility.getAvailableInternalDisk());
         infoJson.put(MessageKey.STATE_INFO_AVAILABLE_EXT_DISK, MPUtility.getAvailableExternalDisk());
+
+        final Runtime rt = Runtime.getRuntime();
         infoJson.put(MessageKey.STATE_INFO_APP_MEMORY_USAGE, rt.totalMemory());
         infoJson.put(MessageKey.STATE_INFO_APP_MEMORY_AVAIL, rt.freeMemory());
         infoJson.put(MessageKey.STATE_INFO_APP_MEMORY_MAX, rt.maxMemory());
+
         String gps = MPUtility.getGpsEnabled(mContext);
         if (gps != null){
             infoJson.put(MessageKey.STATE_INFO_GPS,Boolean.parseBoolean(gps));
@@ -164,7 +165,7 @@ public class MessageManager implements MessageManagerCallbacks {
             total = MPUtility.getTotalMemory(mContext);
             SharedPreferences.Editor edit = mPreferences.edit();
             edit.putLong(Constants.MiscStorageKeys.TOTAL_MEMORY, total);
-            edit.commit();
+            edit.apply();
         }
         return total;
     }
@@ -175,7 +176,7 @@ public class MessageManager implements MessageManagerCallbacks {
             threshold = MPUtility.getSystemMemoryThreshold(mContext);
             SharedPreferences.Editor edit = mPreferences.edit();
             edit.putLong(Constants.MiscStorageKeys.MEMORY_THRESHOLD, threshold);
-            edit.commit();
+            edit.apply();
         }
         return threshold;
     }
@@ -213,19 +214,23 @@ public class MessageManager implements MessageManagerCallbacks {
                 message.put(MessageKey.PREVIOUS_SESSION_START, prevSessionStart);
             }
 
-            editor.commit();
+            editor.apply();
 
-            mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
-
-            if (sFirstRun) {
+            mFirstRun = !mPreferences.contains(Constants.PrefKeys.FIRSTRUN + mConfigManager.getApiKey());
+            if (mFirstRun) {
+                mPreferences.edit().putBoolean(Constants.PrefKeys.FIRSTRUN + mConfigManager.getApiKey(), false).apply();
                 try {
                     JSONObject firstRunMessage = createFirstRunMessage(time, sessionId);
                     mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, firstRunMessage));
-                    sFirstRun = false;
                 } catch (JSONException e) {
                     ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to create First Run Message");
                 }
+            }else{
+                mMessageHandler.sendEmptyMessage(MessageHandler.END_ORPHAN_SESSIONS);
             }
+
+
+            mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
 
             incrementSessionCounter();
 
@@ -239,7 +244,7 @@ public class MessageManager implements MessageManagerCallbacks {
         if (nextCount >= (Integer.MAX_VALUE / 100)){
             nextCount = 0;
         }
-        mPreferences.edit().putInt(Constants.PrefKeys.SESSION_COUNTER, nextCount).commit();
+        mPreferences.edit().putInt(Constants.PrefKeys.SESSION_COUNTER, nextCount).apply();
     }
 
     private int getCurrentSessionCounter(){
@@ -252,7 +257,7 @@ public class MessageManager implements MessageManagerCallbacks {
             long foregroundLength = sessionLength - timeInBackground;
             SharedPreferences.Editor editor = mPreferences.edit();
             editor.putLong(Constants.PrefKeys.PREVIOUS_SESSION_FOREGROUND, foregroundLength > 0 ? foregroundLength : sessionLength);
-            editor.commit();
+            editor.apply();
 
             JSONObject sessionTiming = new JSONObject();
             sessionTiming.put(MessageKey.SESSION_ID, sessionId);
@@ -269,7 +274,7 @@ public class MessageManager implements MessageManagerCallbacks {
 
     public void endSession(String sessionId, long stopTime, long sessionLength) {
         updateSessionEnd(sessionId, stopTime, sessionLength);
-        mPreferences.edit().remove(Constants.PrefKeys.TIME_IN_BG).commit();
+        mPreferences.edit().remove(Constants.PrefKeys.TIME_IN_BG).apply();
         mMessageHandler
                 .sendMessage(mMessageHandler.obtainMessage(MessageHandler.CREATE_SESSION_END_MESSAGE, sessionId));
     }
@@ -292,7 +297,7 @@ public class MessageManager implements MessageManagerCallbacks {
             }
             int count = mPreferences.getInt(Constants.PrefKeys.EVENT_COUNTER, 0);
             message.put(MessageKey.EVENT_COUNTER, count);
-            mPreferences.edit().putInt(Constants.PrefKeys.EVENT_COUNTER, ++count).commit();
+            mPreferences.edit().putInt(Constants.PrefKeys.EVENT_COUNTER, ++count).apply();
 
             mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
         } catch (JSONException e) {
@@ -301,7 +306,7 @@ public class MessageManager implements MessageManagerCallbacks {
     }
 
     private static void resetEventCounter(){
-        mPreferences.edit().putInt(Constants.PrefKeys.EVENT_COUNTER, 0).commit();
+        mPreferences.edit().putInt(Constants.PrefKeys.EVENT_COUNTER, 0).apply();
     }
 
     public void logScreen(String sessionId, long sessionStartTime, long time, String screenName, JSONObject attributes, boolean started) {
@@ -437,6 +442,14 @@ public class MessageManager implements MessageManagerCallbacks {
         }
     }
 
+    /**
+     * We will attempt to upload by default every 10 minutes until the session times out.
+     */
+    public void startUploadLoop() {
+        mUploadHandler.removeMessages(UploadHandler.UPLOAD_MESSAGES);
+        mUploadHandler.sendEmptyMessageDelayed(UploadHandler.UPLOAD_MESSAGES, Constants.INITIAL_UPLOAD_DELAY);
+    }
+
     public void doUpload() {
         mUploadHandler.sendMessage(mUploadHandler.obtainMessage(UploadHandler.UPLOAD_MESSAGES, 1, 0));
     }
@@ -479,7 +492,7 @@ public class MessageManager implements MessageManagerCallbacks {
             if (stateTransInit.equals(Constants.StateTransitionType.STATE_TRANS_INIT)){
                 SharedPreferences.Editor editor = mPreferences.edit();
 
-                if (!sFirstRun) {
+                if (!mFirstRun) {
                     message.put(MessageKey.APP_INIT_CRASHED, !mPreferences.getBoolean(Constants.PrefKeys.CRASHED_IN_FOREGROUND, false));
                 }
 
@@ -491,7 +504,7 @@ public class MessageManager implements MessageManagerCallbacks {
 
                 }
                 boolean upgrade = (versionCode != mPreferences.getInt(Constants.PrefKeys.INITUPGRADE, 0));
-                editor.putInt(Constants.PrefKeys.INITUPGRADE, versionCode).commit();
+                editor.putInt(Constants.PrefKeys.INITUPGRADE, versionCode).apply();
 
                 boolean installDetected = (mInstallType == MParticle.InstallType.AutoDetect && autoDetectInstall());
 
@@ -499,7 +512,7 @@ public class MessageManager implements MessageManagerCallbacks {
                         (mInstallType == MParticle.InstallType.KnownUpgrade ||
                                 !installDetected);
 
-                message.put(MessageKey.APP_INIT_FIRST_RUN, sFirstRun);
+                message.put(MessageKey.APP_INIT_FIRST_RUN, mFirstRun);
                 message.put(MessageKey.APP_INIT_UPGRADE, globalUpgrade);
             }
 
@@ -693,8 +706,42 @@ public class MessageManager implements MessageManagerCallbacks {
         return mConfigManager.getApiKey();
     }
 
+    @Override
+    public void delayedStart() {
+        try {
+            if (sStatusBroadcastReceiver == null) {
+
+                //get the previous Intent otherwise the first few messages will have 0 for battery level
+                Intent batteryIntent = mContext.getApplicationContext().registerReceiver(null,
+                        new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
+                int level = batteryIntent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
+                int scale = batteryIntent.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
+                sBatteryLevel = level / (double) scale;
+
+                sStatusBroadcastReceiver = new StatusBroadcastReceiver();
+                // NOTE: if permissions are not correct all messages will be tagged as 'offline'
+                IntentFilter filter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
+                if (MPUtility.checkPermission(mContext, android.Manifest.permission.ACCESS_NETWORK_STATE)) {
+                    //same as with battery, get current connection so we don't have to wait for the next change
+                    ConnectivityManager connectivyManager = (ConnectivityManager) mContext
+                            .getSystemService(Context.CONNECTIVITY_SERVICE);
+                    NetworkInfo activeNetwork = connectivyManager.getActiveNetworkInfo();
+                    setDataConnection(activeNetwork);
+                    filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
+                }
+                mContext.registerReceiver(sStatusBroadcastReceiver, filter);
+            }
+        }catch (Exception e){
+            //this can sometimes fail due to wonky-device reasons.
+        }
+    }
+
     public void refreshConfiguration() {
         mUploadHandler.sendEmptyMessage(UploadHandler.UPDATE_CONFIG);
+    }
+
+    public void initConfigDelayed() {
+        mUploadHandler.sendEmptyMessageDelayed(UploadHandler.INIT_CONFIG, 20 * 1000);
     }
 
     public void saveGcmMessage(MPCloudNotificationMessage cloudMessage, String appState) {
@@ -716,16 +763,20 @@ public class MessageManager implements MessageManagerCallbacks {
     private class StatusBroadcastReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context appContext, Intent intent) {
-            if (ConnectivityManager.CONNECTIVITY_ACTION.equals(intent.getAction())) {
-                ConnectivityManager connectivyManager = (ConnectivityManager) appContext
-                        .getSystemService(Context.CONNECTIVITY_SERVICE);
-                NetworkInfo activeNetwork = connectivyManager.getActiveNetworkInfo();
-                MessageManager.this.setDataConnection(activeNetwork);
-            } else if (Intent.ACTION_BATTERY_CHANGED.equals(intent.getAction())) {
-                int level = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
-                int scale = intent.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
-                sBatteryLevel = level / (double) scale;
-
+            try {
+                if (ConnectivityManager.CONNECTIVITY_ACTION.equals(intent.getAction())) {
+                    ConnectivityManager connectivyManager = (ConnectivityManager) appContext
+                            .getSystemService(Context.CONNECTIVITY_SERVICE);
+                    NetworkInfo activeNetwork = connectivyManager.getActiveNetworkInfo();
+                    MessageManager.this.setDataConnection(activeNetwork);
+                } else if (Intent.ACTION_BATTERY_CHANGED.equals(intent.getAction())) {
+                    int level = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
+                    int scale = intent.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
+                    sBatteryLevel = level / (double) scale;
+                }
+            }catch (Exception e){
+                //sometimes we're given a null intent,
+                //or even if we have permissions to ACCESS_NETWORK_STATE, the call may fail.
             }
         }
     }

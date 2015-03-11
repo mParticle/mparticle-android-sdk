@@ -13,7 +13,6 @@ import com.mparticle.MParticle;
 import com.mparticle.internal.embedded.EmbeddedKitManager;
 
 import org.apache.http.HttpStatus;
-import org.apache.http.impl.cookie.DateUtils;
 import org.apache.http.protocol.HTTP;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -37,6 +36,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
@@ -49,10 +49,23 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManagerFactory;
 
+/**
+ * Class responsible for all network communication to the mParticle SDK server.
+ *
+ */
 public class MParticleApiClient implements IMPApiClient {
 
+    /**
+     * Signature header used for authentication with the client key/secret
+     */
     private static final String HEADER_SIGNATURE = "x-mp-signature";
+    /**
+     * Environment header used to tell the SDK server if this is a development or production request
+     */
     private static final String HEADER_ENVIRONMENT = "x-mp-env";
+    /**
+     * Embedded kit header used to tell both the supported EKs (/config), and the currently active EKs (/events)
+     */
     private static final String HEADER_KITS = "x-mp-kits";
     private static final String SECURE_SERVICE_SCHEME = TextUtils.isEmpty(BuildConfig.MP_URL) ? "https" : "http";
 
@@ -63,50 +76,63 @@ public class MParticleApiClient implements IMPApiClient {
 
     private static final String SERVICE_VERSION_1 = "/v1";
     private static final String SERVICE_VERSION_3 = "/v3";
+    /**
+     * mParticle cookies are a simplified form of real-cookies. The SDK server is stateless, so we need
+     * a mechanism for server-state persistence.
+     */
     private static final String COOKIES = "ck";
+    /**
+     * Crucial LTV value key used to sync LTV between the SDK and the SDK server whenever LTV has changed.
+     */
     private static final String LTV = "iltv";
+    /**
+     * Wrapper around cookies, MPID, and other server-response info that requires parsing.
+     */
     private static final String CONSUMER_INFO = "ci";
+    /**
+     * Key to extract the user/device's mpid, required for segments.
+     */
     private static final String MPID = "mpid";
 
     private static final char[] HEX_CHARS = "0123456789abcdef".toCharArray();
     private final ConfigManager mConfigManager;
     private final String mApiSecret;
-    private final URL mConfigUrl;
-    private final URL mEventUrl;
+    private URL mConfigUrl;
+    private URL mEventUrl;
     private final String mUserAgent;
     private final SharedPreferences mPreferences;
     private final String mApiKey;
-    private final int mDeviceRampNumber;
-    private static String supportedKits;
+    private final Context mContext;
+    private Integer mDeviceRampNumber = null;
+    private static String mSupportedKits;
     private SSLSocketFactory socketFactory;
     private String etag = null;
     private String modified = null;
+    /**
+     * Default throttle time - in the worst case scenario if the server is busy, the soonest
+     * the SDK will attempt to contact the server again will be after this 2 hour window.
+     */
     private static final long THROTTLE = 1000*60*60*2;
 
     public MParticleApiClient(ConfigManager configManager, SharedPreferences sharedPreferences, Context context) throws MalformedURLException {
+        mContext = context;
         mConfigManager = configManager;
         mApiSecret = configManager.getApiSecret();
         mPreferences = sharedPreferences;
         mApiKey = configManager.getApiKey();
-        mConfigUrl = new URL(SECURE_SERVICE_SCHEME, CONFIG_HOST, SERVICE_VERSION_3 + "/" + mApiKey + "/config");
-        mEventUrl = new URL(SECURE_SERVICE_SCHEME, API_HOST, SERVICE_VERSION_1 + "/" + mApiKey + "/events");
         mUserAgent = "mParticle Android SDK/" + Constants.MPARTICLE_VERSION;
-        mDeviceRampNumber = MPUtility.hashDeviceIdForRamping(
-                        Settings.Secure.getString(context.getContentResolver(),
-                        Settings.Secure.ANDROID_ID).getBytes())
-                    .mod(BigInteger.valueOf(100))
-                    .intValue();
-
-        supportedKits = getSupportedKitString();
     }
 
     public void fetchConfig() throws IOException, MPThrottleException, MPConfigException {
         try {
             checkThrottleTime();
+            if (mConfigUrl == null){
+                mConfigUrl = new URL(SECURE_SERVICE_SCHEME, CONFIG_HOST, SERVICE_VERSION_3 + "/" + mApiKey + "/config");
+            }
             HttpURLConnection connection = (HttpURLConnection) mConfigUrl.openConnection();
             connection.setRequestProperty("Accept-Encoding", "gzip");
             connection.setRequestProperty(HEADER_ENVIRONMENT, Integer.toString(mConfigManager.getEnvironment().getValue()));
-            connection.setRequestProperty(HEADER_KITS, supportedKits);
+            connection.setRequestProperty(HEADER_KITS, getSupportedKitString());
             connection.setRequestProperty(HTTP.USER_AGENT, mUserAgent);
             if (etag != null){
                 connection.setRequestProperty("If-None-Match", etag);
@@ -162,19 +188,22 @@ public class MParticleApiClient implements IMPApiClient {
         return response;
     }
 
+    @Override
+    public boolean isThrottled() {
+        try {
+            checkThrottleTime();
+        }catch (MPThrottleException t){
+            return true;
+        }
+        return false;
+    }
+
     public HttpURLConnection sendMessageBatch(String message) throws IOException, MPThrottleException, MPRampException {
         checkThrottleTime();
         checkRampValue();
-
-        if (DEBUGGING){
-            try{
-                JSONObject messageJson = new JSONObject(message);
-                Log.d("mParticle API request", messageJson.toString(4));
-            }catch (Exception e){
-
-            }
+        if (mEventUrl == null){
+            mEventUrl = new URL(SECURE_SERVICE_SCHEME, API_HOST, SERVICE_VERSION_1 + "/" + mApiKey + "/events");
         }
-
         byte[] messageBytes = message.getBytes();
         HttpURLConnection connection = (HttpURLConnection) mEventUrl.openConnection();
         connection.setDoOutput(true);
@@ -189,7 +218,6 @@ public class MParticleApiClient implements IMPApiClient {
         if (mConfigManager.getEnvironment().equals(MParticle.Environment.Development)) {
             logUpload(message);
         }
-
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH && connection instanceof HttpsURLConnection) {
             try {
@@ -264,11 +292,8 @@ public class MParticleApiClient implements IMPApiClient {
     private void addMessageSignature(HttpURLConnection request, String message) {
         try {
             String method = request.getRequestMethod();
-            String dateHeader = DateUtils.formatDate(new Date());
-            if (dateHeader.length() > DateUtils.PATTERN_RFC1123.length()) {
-                // handle a problem on some devices where TZ offset is appended
-                dateHeader = dateHeader.substring(0, DateUtils.PATTERN_RFC1123.length());
-            }
+            SimpleDateFormat format = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz");
+            String dateHeader = format.format(new Date());
             String path = request.getURL().getFile();
             StringBuilder hashString = new StringBuilder()
                                             .append(method)
@@ -329,6 +354,9 @@ public class MParticleApiClient implements IMPApiClient {
         return certificate;
     }
 
+    /**
+     * Custom socket factory used for certificate pinning.
+     */
     private SSLSocketFactory getSocketFactory() throws Exception{
         if (socketFactory == null){
             String keyStoreType = KeyStore.getDefaultType();
@@ -404,7 +432,7 @@ public class MParticleApiClient implements IMPApiClient {
                 BigDecimal serverLtv = new BigDecimal(jsonResponse.getString(LTV));
                 BigDecimal mostRecentClientLtc = new BigDecimal(mPreferences.getString(Constants.PrefKeys.LTV, "0"));
                 BigDecimal sum = serverLtv.add(mostRecentClientLtc);
-                mPreferences.edit().putString(Constants.PrefKeys.LTV, sum.toPlainString()).commit();
+                mPreferences.edit().putString(Constants.PrefKeys.LTV, sum.toPlainString()).apply();
             }
 
         } catch (JSONException jse) {
@@ -414,7 +442,7 @@ public class MParticleApiClient implements IMPApiClient {
 
     private void setNextAllowedRequestTime() {
         long nextTime = System.currentTimeMillis() + THROTTLE;
-        mPreferences.edit().putLong(Constants.PrefKeys.NEXT_REQUEST_TIME, nextTime).commit();
+        mPreferences.edit().putLong(Constants.PrefKeys.NEXT_REQUEST_TIME, nextTime).apply();
     }
 
     public final class MPThrottleException extends Exception {
@@ -442,6 +470,13 @@ public class MParticleApiClient implements IMPApiClient {
     }
 
     private void checkRampValue() throws MPRampException {
+        if (mDeviceRampNumber == null){
+            mDeviceRampNumber = MPUtility.hashDeviceIdForRamping(
+                    Settings.Secure.getString(mContext.getContentResolver(),
+                            Settings.Secure.ANDROID_ID).getBytes())
+                    .mod(BigInteger.valueOf(100))
+                    .intValue();
+        }
         int currentRamp = mConfigManager.getCurrentRampValue();
         if (currentRamp > 0 && currentRamp < 100 &&
                 mDeviceRampNumber > mConfigManager.getCurrentRampValue()){
@@ -450,20 +485,23 @@ public class MParticleApiClient implements IMPApiClient {
     }
 
     private static String getSupportedKitString(){
-        ArrayList<Integer> supportedKitIds = EmbeddedKitManager.BaseEmbeddedKitFactory.getSupportedKits();
-        if (supportedKitIds.size() > 0) {
-            StringBuilder buffer = new StringBuilder(supportedKitIds.size() * 3);
-            Iterator<Integer> it = supportedKitIds.iterator();
-            while (it.hasNext()) {
-                Integer next = it.next();
-                buffer.append(next);
-                if (it.hasNext()) {
-                    buffer.append(",");
+        if (mSupportedKits == null) {
+            ArrayList<Integer> supportedKitIds = EmbeddedKitManager.BaseEmbeddedKitFactory.getSupportedKits();
+            if (supportedKitIds.size() > 0) {
+                StringBuilder buffer = new StringBuilder(supportedKitIds.size() * 3);
+                Iterator<Integer> it = supportedKitIds.iterator();
+                while (it.hasNext()) {
+                    Integer next = it.next();
+                    buffer.append(next);
+                    if (it.hasNext()) {
+                        buffer.append(",");
+                    }
                 }
+                mSupportedKits = buffer.toString();
+            } else {
+                mSupportedKits = "";
             }
-            return buffer.toString();
-        }else {
-            return "";
         }
+        return mSupportedKits;
     }
 }

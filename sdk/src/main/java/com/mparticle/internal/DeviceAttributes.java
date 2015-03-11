@@ -26,7 +26,7 @@ import java.util.TimeZone;
     private static final String UNKNOWN = "unknown";
 
     /**
-     * Generates a collection of application attributes
+     * Generates a collection of application attributes.  This will be lazy-loaded, and only ever called once per app run.
      *
      * @param appContext the application context
      * @return a JSONObject of application-specific attributes
@@ -104,16 +104,17 @@ import java.util.TimeZone;
             boolean install = preferences.getBoolean(PrefKeys.FIRST_RUN_INSTALL, true);
             attributes.put(MessageKey.FIRST_SEEN_INSTALL, install);
 
-        } catch (JSONException e) {
-            // ignore JSON exceptions
+        } catch (Exception e) {
+            // again difference devices can do terrible things, make sure that we don't bail out completely
+            // and return at least what we've built so far.
         } finally {
-            editor.commit();
+            editor.apply();
         }
         return attributes;
     }
 
     /**
-     * Generates a collection of device attributes
+     * Generates a collection of device attributes. This will be lazy-loaded, and only ever called once per app run.
      *
      * @param appContext the application context
      * @return a JSONObject of device-specific attributes
@@ -191,8 +192,9 @@ import java.util.TimeZone;
             attributes.put(MessageKey.DEVICE_OPEN_UDID, MPUtility.getOpenUDID(appContext));
 
 
-        } catch (JSONException e) {
-            // ignore JSON exceptions
+        } catch (Exception e) {
+            //believe it or not, difference devices can be missing build.prop fields, or have otherwise
+            //strange version/builds of Android that cause unpredictable behavior
         }
 
         return attributes;

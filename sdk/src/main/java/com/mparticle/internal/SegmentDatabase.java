@@ -4,6 +4,13 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
+/**
+ * Separate database form the primary detected solely to storing segment membership information.
+ *
+ * The reason it's separate is that a client/customer may want to query this at any time. Particularly for ad-display
+ * it's crucial that those queries return as quickly as possible. Keeping this as a separate database allows for the SDK
+ * to write/read from the primary database in parallel without worrying about getting in the way.
+ */
 /* package-private */class SegmentDatabase extends SQLiteOpenHelper {
 
     private static final int DB_VERSION = 1;

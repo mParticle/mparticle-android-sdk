@@ -47,6 +47,10 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.jar.JarFile;
 
+/**
+ * Mixin utility class responsible for generating all sorts of device information, mostly
+ * used by the DeviceInfo and AppInfo dictionaries within batch messages.
+ */
 public class MPUtility {
 
     static final String NO_BLUETOOTH = "none";
@@ -55,14 +59,14 @@ public class MPUtility {
     public static String getCpuUsage() {
         String str1 = "unknown";
         String str2 = String.valueOf(android.os.Process.myPid());
-        java.lang.Process localProcess = null;
-        BufferedReader localBufferedReader = null;
+        java.lang.Process process = null;
+        BufferedReader bufferedReader = null;
         String str3 = null;
         try {
             String[] command = {"top", "-d", "1", "-n", "1"};
-            localProcess = new ProcessBuilder().command(command).redirectErrorStream(true).start();
-            localBufferedReader = new BufferedReader(new InputStreamReader(localProcess.getInputStream()));
-            while ((str3 = localBufferedReader.readLine()) != null)
+            process = new ProcessBuilder().command(command).redirectErrorStream(true).start();
+            bufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            while ((str3 = bufferedReader.readLine()) != null)
                 if (str3.contains(str2)) {
                     String[] arrayOfString = str3.split(" ");
                     if (arrayOfString != null) {
@@ -79,17 +83,17 @@ public class MPUtility {
             ConfigManager.log(MParticle.LogLevel.WARNING, "Error computing CPU usage");
         } finally {
             try {
-                if (localBufferedReader != null) {
-                    localBufferedReader.close();
+                if (bufferedReader != null) {
+                    bufferedReader.close();
                 }
-                if (localProcess != null) {
+                if (process != null) {
                     try {
                         // use exitValue() to determine if process is still running.
-                        localProcess.exitValue();
+                        process.exitValue();
 
                     } catch (IllegalThreadStateException e) {
                         // process is still running, kill it.
-                        localProcess.destroy();
+                        process.destroy();
                     }
                 }
             } catch (IOException localIOException4) {
@@ -130,27 +134,23 @@ public class MPUtility {
         }
     }
 
-    @TargetApi(18)
     public static long getAvailableInternalDisk() {
-        long availableSpace = -1L;
         File path = Environment.getDataDirectory();
-        StatFs stat = new StatFs(path.getPath());
-        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.JELLY_BEAN_MR1) {
-            availableSpace = stat.getAvailableBlocksLong() * stat.getBlockSizeLong();
-        } else {
-            availableSpace = (long) stat.getAvailableBlocks() * (long) stat.getBlockSize();
-        }
-        return availableSpace;
+        return getDiskSpace(path);
     }
 
-    @TargetApi(18)
     public static long getAvailableExternalDisk() {
-        long availableSpace = -1L;
         File path = Environment.getExternalStorageDirectory();
+        return getDiskSpace(path);
+    }
+
+    public static long getDiskSpace(File path){
+        long availableSpace = -1L;
         StatFs stat = new StatFs(path.getPath());
         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.JELLY_BEAN_MR1) {
-            availableSpace = stat.getAvailableBlocksLong() * stat.getBlockSizeLong();
-        } else {
+            availableSpace = JellybeanHelper.getAvailableMemory(stat);
+        }
+        if (availableSpace == 0){
             availableSpace = (long) stat.getAvailableBlocks() * (long) stat.getBlockSize();
         }
         return availableSpace;
@@ -161,8 +161,7 @@ public class MPUtility {
     }
 
     public static synchronized String getAndroidID(Context paramContext) {
-        String str = Settings.Secure.getString(paramContext.getContentResolver(), "android_id");
-        return (str == null) || (str.equals("9774d56d682e549c")) || (str.equals("0000000000000000")) || (str.length() < 15) ? null : str;
+        return Settings.Secure.getString(paramContext.getContentResolver(), "android_id");
     }
 
     public static String getTimeZone() {
@@ -232,7 +231,7 @@ public class MPUtility {
 
                 SharedPreferences.Editor editor = sharedPrefs.edit();
                 editor.putString(Constants.PrefKeys.OPEN_UDID, sOpenUDID);
-                editor.commit();
+                editor.apply();
             }
         }
         return sOpenUDID;

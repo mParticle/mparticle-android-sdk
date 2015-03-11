@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.os.Build;
+import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -14,6 +15,9 @@ import org.json.JSONObject;
 import com.mparticle.MParticle;
 import com.mparticle.MParticle.LogLevel;
 import com.mparticle.internal.embedded.EmbeddedKitManager;
+import com.mparticle.licensing.AESObfuscator;
+import com.mparticle.licensing.LicenseChecker;
+import com.mparticle.licensing.ServerManagedPolicy;
 import com.mparticle.messaging.MessagingConfigCallbacks;
 
 import java.text.ParseException;
@@ -51,7 +55,7 @@ public class ConfigManager implements MessagingConfigCallbacks {
     private SharedPreferences mPreferences;
 
     private EmbeddedKitManager mEmbeddedKitManager;
-    private static AppConfig sLocalPrefs;
+    private AppConfig sLocalPrefs;
     private static JSONArray sPushKeys;
     private String mLogUnhandledExceptions = VALUE_APP_DEFINED;
 
@@ -72,19 +76,21 @@ public class ConfigManager implements MessagingConfigCallbacks {
 
     public ConfigManager(Context context, EmbeddedKitManager embeddedKitManager, MParticle.Environment environment) {
         mContext = context.getApplicationContext();
-
         mPreferences = mContext.getSharedPreferences(PREFERENCES_FILE, Context.MODE_PRIVATE);
-        sLocalPrefs = new AppConfig(mContext, environment);
-        sLocalPrefs.init(mPreferences);
+        sLocalPrefs = new AppConfig(mContext, environment, mPreferences);
         mEmbeddedKitManager = embeddedKitManager;
     }
 
+    /**
+     * The is called on startup. The only thing that's completely necessary is that we fire up embedded kits.
+     */
     public void restore(){
         String oldConfig = mPreferences.getString(CONFIG_JSON, null);
         if (!TextUtils.isEmpty(oldConfig)){
             try{
-                updateConfig(new JSONObject(oldConfig), false);
-            }catch (JSONException jse){
+                JSONObject oldConfigJson = new JSONObject(oldConfig);
+                mEmbeddedKitManager.updateKits(oldConfigJson.optJSONArray(KEY_EMBEDDED_KITS));
+            }catch (Exception jse){
 
             }
         }
@@ -148,15 +154,42 @@ public class ConfigManager implements MessagingConfigCallbacks {
             mInfluenceOpenTimeout = 3600;
         }
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD) {
-            editor.apply();
-        } else {
-            editor.commit();
-        }
+        editor.apply();
         applyConfig();
 
         mEmbeddedKitManager.updateKits(responseJSON.optJSONArray(KEY_EMBEDDED_KITS));
 
+    }
+
+    /**
+     * When the Config manager starts up, we don't want to enable everything immediately to save on app-load time.
+     * This method will be called from a background thread after startup is already complete.
+
+     */
+    public void delayedStart(){
+        sLocalPrefs.delayedInit();
+        if (isPushEnabled()) {
+            MParticle.getInstance().Messaging().enablePushNotifications(getPushSenderId());
+        }
+        if (isLicensingEnabled()) {
+            performLicenseCheck();
+        }
+        if (isNetworkPerformanceEnabled()) {
+            MParticle.getInstance().setNetworkTrackingEnabled(true);
+        }
+    }
+
+    private void performLicenseCheck() {
+        String deviceId = Settings.Secure.getString(mContext.getContentResolver(), Settings.Secure.ANDROID_ID);
+
+        MPLicenseCheckerCallback licenseCheckerCallback = new MPLicenseCheckerCallback(mPreferences, null);
+
+        LicenseChecker checker = new LicenseChecker(
+                mContext, new ServerManagedPolicy(mContext,
+                new AESObfuscator(Constants.LICENSE_CHECK_SALT, mContext.getPackageName(), deviceId)),
+                getLicenseKey()
+        );
+        checker.checkAccess(licenseCheckerCallback);
     }
 
     public JSONArray getTriggerMessageMatches(){
@@ -215,7 +248,7 @@ public class ConfigManager implements MessagingConfigCallbacks {
     }
 
     public static MParticle.Environment getEnvironment() {
-        return sLocalPrefs.getEnvironment();
+        return AppConfig.getEnvironment();
     }
 
     public void setUploadInterval(int uploadInterval) {
@@ -249,7 +282,7 @@ public class ConfigManager implements MessagingConfigCallbacks {
         mPreferences.edit()
                 .putString(Constants.PrefKeys.PUSH_SENDER_ID, senderId)
                 .putBoolean(Constants.PrefKeys.PUSH_ENABLED, true)
-                .commit();
+                .apply();
     }
 
     public static void log(LogLevel priority, String... messages) {
@@ -257,7 +290,7 @@ public class ConfigManager implements MessagingConfigCallbacks {
     }
 
     static void log(LogLevel priority, Throwable error, String... messages){
-        if (messages != null && sLocalPrefs.logLevel.ordinal() >= priority.ordinal() &&
+        if (messages != null && AppConfig.logLevel.ordinal() >= priority.ordinal() &&
                 getEnvironment().equals(MParticle.Environment.Development)) {
             StringBuilder logMessage = new StringBuilder();
             for (String m : messages){
@@ -301,24 +334,23 @@ public class ConfigManager implements MessagingConfigCallbacks {
     public void setPushSoundEnabled(boolean pushSoundEnabled) {
         mPreferences.edit()
             .putBoolean(Constants.PrefKeys.PUSH_ENABLE_SOUND, pushSoundEnabled)
-            .commit();
+            .apply();
     }
 
     public void setPushVibrationEnabled(boolean pushVibrationEnabled) {
         mPreferences.edit()
             .putBoolean(Constants.PrefKeys.PUSH_ENABLE_VIBRATION, pushVibrationEnabled)
-            .commit();
+            .apply();
     }
 
-    public boolean getSendOoEvents(){
+    public boolean isEnabled(){
         boolean optedOut = this.getOptedOut();
         return !optedOut || mSendOoEvents;
-
     }
 
     public void setOptOut(boolean optOut){
         mPreferences
-                .edit().putBoolean(Constants.PrefKeys.OPTOUT, optOut).commit();
+                .edit().putBoolean(Constants.PrefKeys.OPTOUT, optOut).apply();
     }
 
     public boolean getOptedOut(){
@@ -339,13 +371,13 @@ public class ConfigManager implements MessagingConfigCallbacks {
     public void setPushNotificationIcon(int pushNotificationIcon) {
         mPreferences.edit()
                 .putInt(Constants.PrefKeys.PUSH_ICON, pushNotificationIcon)
-                .commit();
+                .apply();
     }
 
     public void setPushNotificationTitle(int pushNotificationTitle) {
         mPreferences.edit()
                 .putInt(Constants.PrefKeys.PUSH_TITLE, pushNotificationTitle)
-                .commit();
+                .apply();
     }
 
     private static SharedPreferences getPreferences(Context context){
@@ -381,7 +413,7 @@ public class ConfigManager implements MessagingConfigCallbacks {
     public void setBreadcrumbLimit(int newLimit){
         mPreferences.edit()
                 .putInt(Constants.PrefKeys.BREADCRUMB_LIMIT, newLimit)
-                .commit();
+                .apply();
     }
 
     private synchronized void setProviderPersistence(JSONObject persistence){
@@ -393,14 +425,12 @@ public class ConfigManager implements MessagingConfigCallbacks {
     }
 
     public static boolean isNetworkPerformanceEnabled() {
-        return Build.VERSION.SDK_INT > Build.VERSION_CODES.FROYO && sLocalPrefs != null &&
-                sLocalPrefs.networkingEnabled;
+        return Build.VERSION.SDK_INT > Build.VERSION_CODES.FROYO &&
+                AppConfig.networkingEnabled;
     }
 
     public static void setNetworkingEnabled(boolean networkingEnabled) {
-        if (sLocalPrefs != null) {
-            sLocalPrefs.networkingEnabled = networkingEnabled;
-        }
+        AppConfig.networkingEnabled = networkingEnabled;
     }
 
     public void setCookies(JSONObject serverCookies) {
@@ -413,7 +443,7 @@ public class ConfigManager implements MessagingConfigCallbacks {
                 localCookies.put(key, serverCookies.getJSONObject(key));
             }
             mCurrentCookies = localCookies;
-            mPreferences.edit().putString(Constants.PrefKeys.Cookies, mCurrentCookies.toString()).commit();
+            mPreferences.edit().putString(Constants.PrefKeys.Cookies, mCurrentCookies.toString()).apply();
         }catch (JSONException jse){
 
         }
@@ -424,7 +454,7 @@ public class ConfigManager implements MessagingConfigCallbacks {
             String currentCookies = mPreferences.getString(Constants.PrefKeys.Cookies, null);
             if (TextUtils.isEmpty(currentCookies)){
                 mCurrentCookies = new JSONObject();
-                mPreferences.edit().putString(Constants.PrefKeys.Cookies, mCurrentCookies.toString()).commit();
+                mPreferences.edit().putString(Constants.PrefKeys.Cookies, mCurrentCookies.toString()).apply();
                 return mCurrentCookies;
             }else {
                 mCurrentCookies = new JSONObject(currentCookies);
@@ -453,7 +483,7 @@ public class ConfigManager implements MessagingConfigCallbacks {
                 mCurrentCookies.remove(key);
             }
             if (keysToRemove.size() > 0) {
-                mPreferences.edit().putString(Constants.PrefKeys.Cookies, mCurrentCookies.toString()).commit();
+                mPreferences.edit().putString(Constants.PrefKeys.Cookies, mCurrentCookies.toString()).apply();
             }
             return mCurrentCookies;
         }else{
@@ -462,7 +492,7 @@ public class ConfigManager implements MessagingConfigCallbacks {
     }
 
     public void setMpid(long mpid) {
-        mPreferences.edit().putLong(Constants.PrefKeys.Mpid, mpid).commit();
+        mPreferences.edit().putLong(Constants.PrefKeys.Mpid, mpid).apply();
     }
 
     public long getMpid() {

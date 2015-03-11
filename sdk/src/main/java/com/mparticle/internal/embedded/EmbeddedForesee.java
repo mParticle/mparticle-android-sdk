@@ -18,6 +18,11 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.UUID;
 
+/**
+ * This is not really a true embedded kit - it only supports getSurveyUrl, which is Foresee's
+ * primary use-case on the client-side. Everything else is forwarded server-side.
+ *
+ */
 class EmbeddedForesee extends EmbeddedProvider implements ISurveyProvider {
 
     public static final String ROOT_URL = "rootUrl";

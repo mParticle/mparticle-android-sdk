@@ -108,6 +108,7 @@ public class Constants {
     //special session id for messages logged without a session
     public static final String NO_SESSION_ID = "NO-SESSION";
     public static final String REFERRER = "referrer";
+    public static final String GOOGLE_GCM = "google";
 
     public interface MethodName {
         public static final String METHOD_NAME = "$MethodName";

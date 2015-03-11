@@ -7,7 +7,7 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 
 /**
- * Created by sdozor on 12/31/14.
+ * API client interface primarily needed for mocking/testing.
  */
 public interface IMPApiClient {
 
@@ -15,4 +15,5 @@ public interface IMPApiClient {
     public HttpURLConnection sendMessageBatch(String message) throws IOException, MParticleApiClient.MPThrottleException, MParticleApiClient.MPRampException;
     public HttpURLConnection sendCommand(String commandUrl, String method, String postData, String headers) throws IOException, JSONException;
     public JSONObject fetchAudiences();
+    boolean isThrottled();
 }

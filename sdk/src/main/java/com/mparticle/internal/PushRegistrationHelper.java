@@ -89,7 +89,7 @@ public class PushRegistrationHelper {
         editor.putString(Constants.PrefKeys.PUSH_REGISTRATION_ID, regId);
         editor.putInt(Constants.PrefKeys.PROPERTY_APP_VERSION, appVersion);
         editor.putInt(Constants.PrefKeys.PROPERTY_OS_VERSION, Build.VERSION.SDK_INT);
-        editor.commit();
+        editor.apply();
     }
 
     /**
@@ -120,6 +120,6 @@ public class PushRegistrationHelper {
         preferences.edit()
                 .remove(Constants.PrefKeys.PUSH_REGISTRATION_ID)
                 .putBoolean(Constants.PrefKeys.PUSH_ENABLED, false)
-                .commit();
+                .apply();
     }
 }

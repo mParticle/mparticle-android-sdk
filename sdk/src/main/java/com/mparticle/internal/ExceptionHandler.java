@@ -5,14 +5,20 @@ import android.util.Log;
 import com.mparticle.MParticle;
 
 import java.lang.Thread.UncaughtExceptionHandler;
+import java.lang.ref.WeakReference;
 
+/**
+ * Class used to capture uncaught exceptions. Maintains a WeakReference to the original exception handler
+ * so that we can support at least 2 exception handlers at a time.
+ */
 /* package-private */public class ExceptionHandler implements UncaughtExceptionHandler {
 
     private static final String TAG = Constants.LOG_TAG;
-    private final UncaughtExceptionHandler mOriginalUncaughtExceptionHandler;
+    private WeakReference<UncaughtExceptionHandler> mOriginalUncaughtExceptionHandler = null;
 
     public ExceptionHandler(UncaughtExceptionHandler originalUncaughtExceptionHandler) {
-        mOriginalUncaughtExceptionHandler = originalUncaughtExceptionHandler;
+        if (originalUncaughtExceptionHandler != null)
+        mOriginalUncaughtExceptionHandler = new WeakReference<UncaughtExceptionHandler>(originalUncaughtExceptionHandler);
     }
 
     @Override
@@ -20,10 +26,11 @@ import java.lang.Thread.UncaughtExceptionHandler;
         try {
             MParticle.getInstance().internal().logUnhandledError(ex);
 
-            if (null != mOriginalUncaughtExceptionHandler) {
-                mOriginalUncaughtExceptionHandler.uncaughtException(thread, ex);
-            } else {
-                Thread.getDefaultUncaughtExceptionHandler().uncaughtException(thread, ex);
+            if (mOriginalUncaughtExceptionHandler != null) {
+                UncaughtExceptionHandler originalHandler = mOriginalUncaughtExceptionHandler.get();
+                if (originalHandler != null) {
+                    originalHandler.uncaughtException(thread, ex);
+                }
             }
         } catch (Exception t) {
             Log.e(TAG, "Failed to log error event for uncaught exception", t);
@@ -32,7 +39,10 @@ import java.lang.Thread.UncaughtExceptionHandler;
     }
 
     public UncaughtExceptionHandler getOriginalExceptionHandler() {
-        return mOriginalUncaughtExceptionHandler;
+        if (mOriginalUncaughtExceptionHandler == null){
+            return null;
+        }
+        return mOriginalUncaughtExceptionHandler.get();
     }
 
 }

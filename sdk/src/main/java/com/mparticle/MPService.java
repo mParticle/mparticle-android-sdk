@@ -43,7 +43,11 @@ import java.util.List;
 @SuppressLint("Registered")
 public class MPService extends IntentService {
 
-    { // http://stackoverflow.com/questions/4280330/onpostexecute-not-being-called-in-asynctask-handler-runtime-exception
+    {   // This a required workaround for a bug in AsyncTask in the Android framework.
+        // AsyncTask.java has code that needs to run on the main thread,
+        // but that is not guaranteed since it will be initialized on whichever
+        // thread happens to cause the class to run its static initializers.
+        // https://code.google.com/p/android/issues/detail?id=20915
         Looper looper = Looper.getMainLooper();
         Handler handler = new Handler(looper);
         handler.post(new Runnable() {
@@ -181,7 +185,7 @@ public class MPService extends IntentService {
 
     private String getAppState(){
         String appState = AppStateManager.APP_STATE_NOTRUNNING;
-        if (AppStateManager.appRunning) {
+        if (AppStateManager.mInitialized) {
             if (MParticle.getInstance().mAppStateManager.isBackgrounded()) {
                 appState = AppStateManager.APP_STATE_BACKGROUND;
             } else {

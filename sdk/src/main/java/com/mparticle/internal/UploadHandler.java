@@ -47,65 +47,127 @@ import java.util.concurrent.TimeoutException;
 
 import javax.net.ssl.SSLHandshakeException;
 
+/**
+ * Primary queue handler which is responsible for querying, packaging, and uploading data.
+ */
 public final class UploadHandler extends Handler {
 
+    private final Context mContext;
+    private final MParticleDatabase mDbHelper;
+    private ConfigManager mConfigManager;
+    /**
+     * Message used to trigger the primary upload logic - will upload all non-history batches that are ready to go.
+     */
     public static final int UPLOAD_MESSAGES = 1;
-    public static final int CLEANUP = 2;
+    /**
+     * Message that triggers much of the same logic as above, but is specifically for session-history. Typically the SDK will upload all messages
+     * in a given batch that are ready for upload. But, some service-providers such as Flurry need to be sent all of the session information at once
+     * With *history*, the SDK will package all of the messages that occur in a particular session.
+     */
     public static final int UPLOAD_HISTORY = 3;
+    /**
+     * Trigger a configuration update out of band from a typical upload.
+     */
     public static final int UPDATE_CONFIG = 4;
+    /**
+     * Some messages need to be uploaded immediately for accurate attribution and segmentation/audience behavior, this message will be trigger after
+     * one of these messages has been detected.
+     */
     public static final int UPLOAD_TRIGGER_MESSAGES = 5;
 
-    private final SQLiteDatabase db;
+    /**
+     * Used on app startup to defer a few tasks to provide a quicker launch time.
+     */
+    public static final int INIT_CONFIG = 6;
+
+    /**
+     * Reference to the primary database where messages, uploads, and sessions are stored.
+     */
+    private SQLiteDatabase db;
     private final SharedPreferences mPreferences;
-    private final Context mContext;
+
     private final String mApiKey;
     private final SegmentDatabase audienceDB;
+
+    /**
+     * API client interface reference, useful for the unit test suite project.
+     */
     private IMPApiClient mApiClient;
 
-    private ConfigManager mConfigManager;
+    /**
+     * The following get*Query methods were once static fields, but in order to save on app startup time, they're
+     * now created as needed.
+     */
 
-    public static final String SQL_DELETABLE_MESSAGES = String.format(
-            "(%s='NO-SESSION')",
-            MessageTable.SESSION_ID);
+    /**
+     * The beginning of the delete query used to clear the uploads table after a successful upload.
+     */
+    private static String getDeletableMessagesQuery() {
+        return String.format(
+                "(%s='NO-SESSION')",
+                MessageTable.SESSION_ID);
+    }
 
-    public static final String SQL_UPLOADABLE_MESSAGES = String.format(
-            "((%s='NO-SESSION') or ((%s>=?) and (%s!=%d)))",
-            MessageTable.SESSION_ID,
-            MessageTable.STATUS,
-            MessageTable.STATUS,
-            Status.UPLOADED);
+    /**
+     * Query to determine all of the generated uploads that are ready for the wire.
+     */
+    private static String getUploadableMessagesQuery() {
+        return String.format(
+                "((%s='NO-SESSION') or ((%s>=?) and (%s!=%d)))",
+                MessageTable.SESSION_ID,
+                MessageTable.STATUS,
+                MessageTable.STATUS,
+                Status.UPLOADED);
+    }
 
-    public static final String SQL_HISTORY_MESSAGES = String.format(
-            "((%s!='NO-SESSION') and ((%s>=?) and (%s=%d) and (%s != ?)))",
-            MessageTable.SESSION_ID,
-            MessageTable.STATUS,
-            MessageTable.STATUS,
-            Status.UPLOADED,
-            MessageTable.SESSION_ID);
+    /**
+     * Query to determine all the session history batches that are ready for the wire
+     */
+    private static String getSessionHistoryBatchesQuery() {
+        return String.format(
+                "((%s!='NO-SESSION') and ((%s>=?) and (%s=%d) and (%s != ?)))",
+                MessageTable.SESSION_ID,
+                MessageTable.STATUS,
+                MessageTable.STATUS,
+                Status.UPLOADED,
+                MessageTable.SESSION_ID);
+    }
 
-    public static final String SQL_FINISHED_HISTORY_MESSAGES = String.format(
-            "((%s='NO-SESSION') or ((%s>=?) and (%s=%d) and (%s=?)))",
-            MessageTable.SESSION_ID,
-            MessageTable.STATUS,
-            MessageTable.STATUS,
-            Status.UPLOADED,
-            MessageTable.SESSION_ID);
+    /**
+     * Query used to clear session history uploads after a successful upload to the SDK server.
+     */
+    private static String getSqlFinishedHistoryMessagesQuery() {
+        return String.format(
+                "((%s='NO-SESSION') or ((%s>=?) and (%s=%d) and (%s=?)))",
+                MessageTable.SESSION_ID,
+                MessageTable.STATUS,
+                MessageTable.STATUS,
+                Status.UPLOADED,
+                MessageTable.SESSION_ID);
+    }
 
+    /**
+     * Boolean used to determine if we're currently connected to the network. If we're not connected to the network,
+     * don't even try to query or upload, just shut down to save on battery life.
+     */
     private volatile boolean isNetworkConnected = true;
+
+    /**
+     * Maintain a reference to these two objects as they primary do not change over the course of an app execution, so we
+     * shouldn't be recreating them every time we need them.
+     */
     private JSONObject deviceInfo;
     private JSONObject appInfo;
 
-    public UploadHandler(Context context, Looper looper, ConfigManager configManager, SQLiteDatabase database) {
+    public UploadHandler(Context context, Looper looper, ConfigManager configManager, MParticleDatabase database) {
         super(looper);
         mConfigManager = configManager;
-
-        mContext = context.getApplicationContext();
+        mContext = context;
         mApiKey = mConfigManager.getApiKey();
 
-        db = database;
         audienceDB = new SegmentDatabase(mContext);
         mPreferences = mContext.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
-
+        mDbHelper = database;
         try {
             setApiClient(new MParticleApiClient(configManager, mPreferences, context));
         } catch (MalformedURLException e) {
@@ -152,6 +214,13 @@ public final class UploadHandler extends Handler {
     @Override
     public void handleMessage(Message msg) {
         super.handleMessage(msg);
+        if (db == null){
+            try {
+                db = mDbHelper.getWritableDatabase();
+            }catch (Exception e){
+                return;
+            }
+        }
         switch (msg.what) {
             case UPDATE_CONFIG:
                 try {
@@ -170,52 +239,52 @@ public final class UploadHandler extends Handler {
                 break;
             case UPLOAD_MESSAGES:
             case UPLOAD_TRIGGER_MESSAGES:
-                boolean needsHistory;
-                // execute all the upload steps
                 long uploadInterval = mConfigManager.getUploadInterval();
-                if (uploadInterval > 0 || msg.arg1 == 1) {
-                    prepareUploads(false);
-                    if (isNetworkConnected) {
-                        needsHistory = processUploads(false);
-                        processCommands();
+                if (isNetworkConnected && !mApiClient.isThrottled()) {
+                    if (uploadInterval > 0 || msg.arg1 == 1) {
+                        prepareUploads(false);
+                        boolean needsHistory = processUploads(false);
                         if (needsHistory) {
                             this.sendEmptyMessage(UPLOAD_HISTORY);
                         }
                     }
+
                 }
-                // trigger another upload check unless configured for manual uploads
-                if (uploadInterval > 0 && msg.arg1 == 0) {
+                if (MParticle.getInstance().internal().isSessionActive() && uploadInterval > 0 && msg.arg1 == 0) {
                     this.sendEmptyMessageDelayed(UPLOAD_MESSAGES, uploadInterval);
                 }
                 break;
             case UPLOAD_HISTORY:
-                ConfigManager.log(MParticle.LogLevel.DEBUG, "Performing history upload.");
-
-                // if the uploads table is empty (no old uploads)
-                //  and the messages table has messages that are not from the current session,
-                //  or there is no current session
-                //  then create a history upload and send it
-                Cursor isempty = db.rawQuery("select * from " + UploadTable.TABLE_NAME, null);
-                if ((isempty == null) || (isempty.getCount() == 0)) {
-
-                    this.removeMessages(UPLOAD_HISTORY);
-                    // execute all the upload steps
-                    prepareUploads(true);
-                    if (isNetworkConnected) {
-                        processUploads(true);
+                Cursor cursor = null;
+                try {
+                    // if the uploads table is empty (no old uploads)
+                    // and the messages table has messages that are not from the current session,
+                    // or there is no current session
+                    // then create a history upload and send it
+                    cursor = db.rawQuery("select * from " + UploadTable.TABLE_NAME, null);
+                    if ((cursor == null) || (cursor.getCount() == 0)) {
+                        this.removeMessages(UPLOAD_HISTORY);
+                        // execute all the upload steps
+                        prepareUploads(true);
+                        if (isNetworkConnected) {
+                            processUploads(true);
+                        }
                     }
-                } else {
-                    // the previous upload is not done, try again in 30 seconds
-                    this.sendEmptyMessageDelayed(UPLOAD_HISTORY, 30 * 1000);
-                }
-                if (isempty != null && !isempty.isClosed()){
-                    isempty.close();
+
+                }catch (Exception e){
+                    ConfigManager.log(MParticle.LogLevel.DEBUG, "Failed to upload session history: ", e.toString());
+                }finally {
+                    if (cursor != null && !cursor.isClosed()) {
+                        cursor.close();
+                    }
                 }
                 break;
-            case CLEANUP:
-                // delete stale commands, uploads, messages, and sessions
-                //cleanupDatabase(Constants.DB_CLEANUP_EXPIRATION);
-                //this.sendEmptyMessageDelayed(CLEANUP, Constants.DB_CLEANUP_INTERVAL);
+            case INIT_CONFIG:
+                try {
+                    mConfigManager.delayedStart();
+                }catch (Exception e){
+                    ConfigManager.log(MParticle.LogLevel.DEBUG, "Failed to init configuration: ", e.toString());
+                }
                 break;
         }
     }
@@ -226,17 +295,21 @@ public final class UploadHandler extends Handler {
     String[] prepareSelection = new String[]{"_id", MessageTable.MESSAGE, MessageTable.CREATED_AT, MessageTable.STATUS, MessageTable.SESSION_ID};
     String[] defaultSelectionArgs = new String[]{Integer.toString(Status.READY)};
 
-    void prepareUploads(boolean history) {
+    /**
+     * This method is responsible for looking for messages that have been logged, and assembling them into batches to be uploaded.
+     * It does not trigger network comms.
+     */
+    private void prepareUploads(boolean history) {
         Cursor readyMessagesCursor = null;
         try {
             // select messages ready to upload
             String selection;
             String[] selectionArgs;
             if (history) {
-                selection = SQL_HISTORY_MESSAGES;
+                selection = getSessionHistoryBatchesQuery();
                 selectionArgs = new String[]{Integer.toString(Status.READY), MParticle.getInstance().internal().getSessionId()};
             } else {
-                selection = SQL_UPLOADABLE_MESSAGES;
+                selection = getUploadableMessagesQuery();
                 selectionArgs = defaultSelectionArgs;
             }
 
@@ -321,13 +394,13 @@ public final class UploadHandler extends Handler {
     String[] uploadColumns = new String[]{"_id", UploadTable.MESSAGE};
     String containsClause = "\"" + MessageKey.TYPE + "\":\"" + MessageType.SESSION_END + "\"";
 
+    /**
+     * This method is responsible for looking for batches that are ready to be uploaded, and uploading them.
+     */
     private boolean processUploads(boolean history) {
         boolean processingSessionEnd = false;
         Cursor readyUploadsCursor = null;
         try {
-            // read batches ready to upload
-
-
             readyUploadsCursor = db.query(UploadTable.TABLE_NAME, uploadColumns,
                     null, null, null, null, UploadTable.CREATED_AT);
 
@@ -383,11 +456,18 @@ public final class UploadHandler extends Handler {
         return processingSessionEnd;
     }
 
+    /**
+     * Delete messages if they're accepted (202), or 4xx, which means we're sending bad data.
+     */
     boolean shouldDelete(int statusCode) {
         return HttpStatus.SC_ACCEPTED == statusCode ||
                 (statusCode >= HttpStatus.SC_BAD_REQUEST && statusCode < HttpStatus.SC_INTERNAL_SERVER_ERROR);
     }
 
+    /**
+     * Primarily deprecated functionality that lets the server tell the SDK to make requests to 3rd parties.
+     * Once upon a time this was required for Google Analytics, but is no longer used for any service provider.
+     */
     private void processCommands() {
         try {
 
@@ -425,82 +505,28 @@ public final class UploadHandler extends Handler {
         }
     }
 
+    /**
+     * Method that is responsible for building an upload message to be sent over the wire.
+     */
     private JSONObject createUploadMessage(JSONArray messagesArray, boolean history) throws JSONException {
-        JSONObject uploadMessage = new JSONObject();
-
-        uploadMessage.put(MessageKey.TYPE, MessageType.REQUEST_HEADER);
-        uploadMessage.put(MessageKey.ID, UUID.randomUUID().toString());
-        uploadMessage.put(MessageKey.TIMESTAMP, System.currentTimeMillis());
-        uploadMessage.put(MessageKey.MPARTICLE_VERSION, Constants.MPARTICLE_VERSION);
-        uploadMessage.put(MessageKey.OPT_OUT_HEADER, mConfigManager.getOptedOut());
-        uploadMessage.put(MessageKey.CONFIG_UPLOAD_INTERVAL, mConfigManager.getUploadInterval()/1000);
-        uploadMessage.put(MessageKey.CONFIG_SESSION_TIMEOUT, mConfigManager.getSessionTimeout()/1000);
-
-
-        uploadMessage.put(MessageKey.APP_INFO, getAppInfo());
-        // if there is notification key then include it
-        String regId = PushRegistrationHelper.getRegistrationId(mContext);
-        if ((regId != null) && (regId.length() > 0)) {
-            getDeviceInfo().put(MessageKey.PUSH_TOKEN, regId);
-            getDeviceInfo().put(MessageKey.PUSH_TOKEN_TYPE, "google");
-        } else {
-            getDeviceInfo().remove(MessageKey.PUSH_TOKEN);
-            getDeviceInfo().remove(MessageKey.PUSH_TOKEN_TYPE);
-        }
-
-        getDeviceInfo().put(MessageKey.PUSH_SOUND_ENABLED, mConfigManager.isPushSoundEnabled());
-        getDeviceInfo().put(MessageKey.PUSH_VIBRATION_ENABLED, mConfigManager.isPushVibrationEnabled());
-
-        uploadMessage.put(MessageKey.DEVICE_INFO, getDeviceInfo());
-        uploadMessage.put(MessageKey.SANDBOX, mConfigManager.getEnvironment().equals(MParticle.Environment.Development));
-
-        uploadMessage.put(MessageKey.LTV, new BigDecimal(mPreferences.getString(PrefKeys.LTV, "0")));
-
-        String userAttrs = mPreferences.getString(PrefKeys.USER_ATTRS + mApiKey, null);
-        if (null != userAttrs) {
-            uploadMessage.put(MessageKey.USER_ATTRIBUTES, new JSONObject(userAttrs));
-        }
-
-        if (history) {
-            String deletedAttr = mPreferences.getString(PrefKeys.DELETED_USER_ATTRS + mApiKey, null);
-            if (null != deletedAttr) {
-                uploadMessage.put(MessageKey.DELETED_USER_ATTRIBUTES, new JSONArray(userAttrs));
-                mPreferences.edit().remove(PrefKeys.DELETED_USER_ATTRS + mApiKey).commit();
-            }
-        }
-
-        String userIds = mPreferences.getString(PrefKeys.USER_IDENTITIES + mApiKey, null);
-        if (null != userIds) {
-            JSONArray identities = new JSONArray(userIds);
-            boolean changeMade = false;
-            for (int i = 0; i < identities.length(); i++) {
-                if (identities.getJSONObject(i).getBoolean(MessageKey.IDENTITY_FIRST_SEEN)){
-                    identities.getJSONObject(i).put(MessageKey.IDENTITY_FIRST_SEEN, false);
-                    changeMade = true;
-                }
-            }
-            if (changeMade) {
-                uploadMessage.put(MessageKey.USER_IDENTITIES, new JSONArray(userIds));
-                mPreferences.edit().putString(PrefKeys.USER_IDENTITIES + mApiKey, identities.toString()).commit();
-            }else{
-                uploadMessage.put(MessageKey.USER_IDENTITIES, identities);
-            }
-        }
-
-        uploadMessage.put(history ? MessageKey.HISTORY : MessageKey.MESSAGES, messagesArray);
-
-        MParticleApiClient.addCookies(uploadMessage, mConfigManager);
-
-        uploadMessage.put(MessageKey.PROVIDER_PERSISTENCE, mConfigManager.getProviderPersistence());
-
-        addGCMHistory(uploadMessage);
-
-        return uploadMessage;
+        JSONObject batchMessage = MessageBatch.create(mContext,
+                messagesArray,
+                history,
+                getAppInfo(),
+                getDeviceInfo(),
+                mConfigManager,
+                mPreferences);
+        addGCMHistory(batchMessage);
+        return batchMessage;
     }
-
 
     String gcmDeleteWhere = MParticleDatabase.GcmMessageTable.EXPIRATION + " < ? and " + MParticleDatabase.GcmMessageTable.DISPLAYED_AT + " > 0";
     String[] gcmColumns = {MParticleDatabase.GcmMessageTable.CONTENT_ID, MParticleDatabase.GcmMessageTable.CAMPAIGN_ID, MParticleDatabase.GcmMessageTable.EXPIRATION, MParticleDatabase.GcmMessageTable.DISPLAYED_AT};
+
+    /**
+     * If the customer is using our GCM solution, query and append all of the history used for attribution.
+     *
+     */
     private void addGCMHistory(JSONObject uploadMessage) {
         //first remove expired
         Cursor gcmHistory = null;
@@ -545,14 +571,6 @@ public final class UploadHandler extends Handler {
         }
     }
 
-    private void cleanupDatabase(int expirationPeriod) {
-        String[] whereArgs = {Long.toString(System.currentTimeMillis() - expirationPeriod)};
-        db.delete(CommandTable.TABLE_NAME, CommandTable.CREATED_AT + "<?", whereArgs);
-        db.delete(UploadTable.TABLE_NAME, UploadTable.CREATED_AT + "<?", whereArgs);
-        db.delete(MessageTable.TABLE_NAME, MessageTable.CREATED_AT + "<?", whereArgs);
-        db.delete(SessionTable.TABLE_NAME, SessionTable.END_TIME + "<?", whereArgs);
-    }
-
     private void dbInsertUpload(JSONObject message) throws JSONException {
         ContentValues contentValues = new ContentValues();
         contentValues.put(UploadTable.API_KEY, mApiKey);
@@ -563,17 +581,17 @@ public final class UploadHandler extends Handler {
 
     private void dbDeleteProcessedMessages(String sessionId) {
         String[] whereArgs = new String[]{Integer.toString(Status.UPLOADED), sessionId};
-        int rowsdeleted = db.delete(MessageTable.TABLE_NAME, SQL_FINISHED_HISTORY_MESSAGES, whereArgs);
+        int rowsdeleted = db.delete(MessageTable.TABLE_NAME, UploadHandler.getSqlFinishedHistoryMessagesQuery(), whereArgs);
     }
 
     private void dbMarkAsUploadedMessage(int lastMessageId) {
         //non-session messages can be deleted, they're not part of session history
         String[] whereArgs = new String[]{Long.toString(lastMessageId)};
-        String whereClause = SQL_DELETABLE_MESSAGES + " and (_id<=?)";
+        String whereClause = getDeletableMessagesQuery() + " and (_id<=?)";
         int rowsdeleted = db.delete(MessageTable.TABLE_NAME, whereClause, whereArgs);
 
         whereArgs = new String[]{Integer.toString(Status.READY), Long.toString(lastMessageId)};
-        whereClause = SQL_UPLOADABLE_MESSAGES + " and (_id<=?)";
+        whereClause = getUploadableMessagesQuery() + " and (_id<=?)";
         ContentValues contentValues = new ContentValues();
         contentValues.put(MessageTable.STATUS, Status.UPLOADED);
         int rowsupdated = db.update(MessageTable.TABLE_NAME, contentValues, whereClause, whereArgs);
@@ -600,177 +618,14 @@ public final class UploadHandler extends Handler {
         db.insert(CommandTable.TABLE_NAME, null, contentValues);
     }
 
-    public void fetchSegments(long timeout, final String endpointId, final SegmentListener listener) {
-        new SegmentTask(timeout, endpointId, listener).execute();
-    }
-
-    private SegmentMembership queryAudiences(String endpointId) {
-        SQLiteDatabase db = audienceDB.getReadableDatabase();
-
-        String selection = null;
-        String[] args = null;
-        if (endpointId != null && endpointId.length() > 0){
-            selection = SegmentDatabase.SegmentTable.ENDPOINTS + " like ?";
-            args = new String[1];
-            args[0] = "%\"" + endpointId + "\"%";
-        }
-
-        Cursor audienceCursor = db.query(SegmentDatabase.SegmentTable.TABLE_NAME,
-                                        null,
-                                        selection,
-                                        args,
-                                        null,
-                                        null,
-                                        AUDIENCE_QUERY);
-        SparseArray<Segment> audiences = new SparseArray<Segment>();
-
-        StringBuilder keys = new StringBuilder("(");
-        if (audienceCursor.getCount() > 0){
-            while (audienceCursor.moveToNext()){
-                int id = audienceCursor.getInt(audienceCursor.getColumnIndex(SegmentDatabase.SegmentTable.SEGMENT_ID));
-
-                Segment segment = new Segment(id,
-                        audienceCursor.getString(audienceCursor.getColumnIndex(SegmentDatabase.SegmentTable.NAME)),
-                        audienceCursor.getString(audienceCursor.getColumnIndex(SegmentDatabase.SegmentTable.ENDPOINTS)));
-                audiences.put(id, segment);
-                keys.append(id);
-                keys.append(", ");
-            }
-            audienceCursor.close();
-
-            keys.delete(keys.length()-2, keys.length());
-            keys.append(")");
-
-            long currentTime = System.currentTimeMillis();
-            Cursor membershipCursor = db.query(false,
-                    SegmentDatabase.SegmentMembershipTable.TABLE_NAME,
-                    MEMBERSHIP_QUERY_COLUMNS,
-                    String.format(MEMBERSHIP_QUERY_SELECTION,
-                            keys.toString(),
-                            currentTime),
-                    null,
-                    null,
-                    null,
-                    MEMBERSHIP_QUERY_ORDER,
-                    null);
-
-
-            ArrayList<Segment> finalSegments = new ArrayList<Segment>();
-            int currentId = -1;
-            while (membershipCursor.moveToNext()){
-                int id = membershipCursor.getInt(1);
-                if (id != currentId) {
-                    currentId = id;
-                    String action = membershipCursor.getString(2);
-                    if (action.equals(Constants.Audience.ACTION_ADD)){
-                        finalSegments.add(audiences.get(currentId));
-                    }
-                }
-            }
-            membershipCursor.close();
-
-            db.close();
-            return new SegmentMembership(finalSegments);
-        }else{
-            return new SegmentMembership(new ArrayList<Segment>());
-        }
-
-    }
-
-    private final static String AUDIENCE_QUERY = SegmentDatabase.SegmentTable.SEGMENT_ID + " desc";
-    private final static String MEMBERSHIP_QUERY_ORDER = SegmentDatabase.SegmentMembershipTable.SEGMENT_ID + " desc, " + SegmentDatabase.SegmentMembershipTable.TIMESTAMP + " desc";
-    private final static String[] MEMBERSHIP_QUERY_COLUMNS = new String[]
-                                                                {
-                                                                    SegmentDatabase.SegmentMembershipTable.ID,
-                                                                    SegmentDatabase.SegmentMembershipTable.SEGMENT_ID,
-                                                                    SegmentDatabase.SegmentMembershipTable.MEMBERSHIP_ACTION
-                                                                };
-    private final static String MEMBERSHIP_QUERY_SELECTION = SegmentDatabase.SegmentMembershipTable.SEGMENT_ID+ " in %s and " + SegmentDatabase.SegmentMembershipTable.TIMESTAMP + " < %d";
-
-    private void insertAudiences(JSONObject audiences) throws JSONException {
-        SQLiteDatabase db = audienceDB.getWritableDatabase();
-        JSONArray audienceList = audiences.getJSONArray(Constants.Audience.API_AUDIENCE_LIST);
-        db.beginTransaction();
-        boolean success = false;
-        try {
-            db.delete(SegmentDatabase.SegmentMembershipTable.TABLE_NAME, null, null);
-            db.delete(SegmentDatabase.SegmentTable.TABLE_NAME, null, null);
-            for (int i = 0; i < audienceList.length(); i++) {
-                ContentValues audienceRow = new ContentValues();
-                JSONObject audience = audienceList.getJSONObject(i);
-                int id = audience.getInt(Constants.Audience.API_AUDIENCE_ID);
-                String name = audience.getString(Constants.Audience.API_AUDIENCE_NAME);
-                String endPointIds = audience.getJSONArray(Constants.Audience.API_AUDIENCE_ENDPOINTS).toString();
-                audienceRow.put(SegmentDatabase.SegmentTable.SEGMENT_ID, id);
-                audienceRow.put(SegmentDatabase.SegmentTable.NAME, name);
-                audienceRow.put(SegmentDatabase.SegmentTable.ENDPOINTS, endPointIds);
-                db.insert(SegmentDatabase.SegmentTable.TABLE_NAME, null, audienceRow);
-                JSONArray memberships = audience.getJSONArray(Constants.Audience.API_AUDIENCE_MEMBERSHIPS);
-                for (int j = 0; j < memberships.length(); j++) {
-                    ContentValues membershipRow = new ContentValues();
-                    membershipRow.put(SegmentDatabase.SegmentMembershipTable.SEGMENT_ID, id);
-                    membershipRow.put(SegmentDatabase.SegmentMembershipTable.MEMBERSHIP_ACTION, memberships.getJSONObject(j).getString(Constants.Audience.API_AUDIENCE_ACTION));
-                    membershipRow.put(SegmentDatabase.SegmentMembershipTable.TIMESTAMP, memberships.getJSONObject(j).optLong(Constants.Audience.API_AUDIENCE_MEMBERSHIP_TIMESTAMP, 0));
-                    db.insert(SegmentDatabase.SegmentMembershipTable.TABLE_NAME, null, membershipRow);
-                }
-            }
-            success = true;
-        }catch (Exception e){
-            ConfigManager.log(MParticle.LogLevel.DEBUG, "Failed to insert audiences: " + e.getMessage());
-        }finally {
-            if (success){
-                db.setTransactionSuccessful();
-            }
-            db.endTransaction();
-            db.close();
-        }
-
-    }
-
+    /**
+     * Used by the test suite for mocking
+     */
     public void setApiClient(IMPApiClient apiClient) {
         mApiClient = apiClient;
     }
 
-    class SegmentTask extends AsyncTask<Void, Void, SegmentMembership> {
-        ExecutorService executor = Executors.newSingleThreadExecutor();
-        String endpointId;
-        SegmentListener listener;
-        long timeout;
-        SegmentTask(long timeout, String endpointId, SegmentListener listener){
-            this.timeout = timeout;
-            this.endpointId = endpointId;
-            this.listener = listener;
-        }
-        @Override
-        protected SegmentMembership doInBackground(Void... params) {
-            FutureTask<Boolean> futureTask1 = new FutureTask<Boolean>(new Callable<Boolean>() {
-                @Override
-                public Boolean call() throws Exception {
-                    JSONObject audiences = mApiClient.fetchAudiences();
-                    if (audiences != null){
-                        insertAudiences(audiences);
-                    }
-                    return audiences != null;
-                }
-            });
-
-            executor.execute(futureTask1);
-            try {
-                futureTask1.get(timeout, TimeUnit.MILLISECONDS);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            } catch (ExecutionException e) {
-                e.printStackTrace();
-            } catch (TimeoutException e) {
-                e.printStackTrace();
-            }
-            executor.shutdown();
-            return queryAudiences(endpointId);
-        }
-
-        @Override
-        protected void onPostExecute(SegmentMembership segmentMembership) {
-            listener.onSegmentsRetrieved(segmentMembership);
-        }
+    public void fetchSegments(long timeout, String endpointId, SegmentListener listener) {
+        new SegmentRetriever(audienceDB, mApiClient).fetchSegments(timeout, endpointId, listener);
     }
 }

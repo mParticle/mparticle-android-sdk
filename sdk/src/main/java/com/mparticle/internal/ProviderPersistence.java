@@ -13,6 +13,12 @@ import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * This class is responsible for pulling persistence from files from *other* SDKs, and serializing itself as a part of a batch.
+ * The idea here is that a customer may want to remove an SDK from their app and move it
+ * server side via mParticle. Rather than start from stratch, it's crucial that we can query data that
+ * the given SDK had been storing client-side.
+ */
 class ProviderPersistence extends JSONObject{
 
     static final String KEY_PERSISTENCE = "cms";
@@ -80,7 +86,7 @@ class ProviderPersistence extends JSONObject{
                             }
 
                             editor.putString(mpPersistenceKey, resolvedValue);
-                            editor.commit();
+                            editor.apply();
                             values.put(mpKey, resolvedValue);
                         }
 
@@ -94,14 +100,15 @@ class ProviderPersistence extends JSONObject{
 
     }
 
-
-
     private static final String MACRO_GUID_NO_DASHES = "%gn%";
     private static final String MACRO_OMNITURE_AID = "%oaid%";
     private static final String MACRO_GUID = "%g%";
     private static final String MACRO_TIMESTAMP = "%ts%";
     private static final String MACRO_GUID_LEAST_SIG = "%glsb%";
 
+    /**
+     * Macros are used so that the /config API call can come from a CDN (not user-specific)
+     */
     private static String applyMacro(String defaultString) {
         if (!TextUtils.isEmpty(defaultString) && defaultString.startsWith("%")){
             defaultString = defaultString.toLowerCase();

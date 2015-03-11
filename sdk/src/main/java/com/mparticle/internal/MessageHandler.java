@@ -1,9 +1,11 @@
 package com.mparticle.internal;
 
 import android.content.ContentValues;
+import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
+import android.database.sqlite.SQLiteOpenHelper;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -24,11 +26,13 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.UUID;
+
 /* package-private */final class MessageHandler extends Handler {
 
-    private static final String TAG = Constants.LOG_TAG;
+    private final SQLiteOpenHelper mDbHelper;
 
-    private final SQLiteDatabase db;
+    private SQLiteDatabase db;
 
     public static final int STORE_MESSAGE = 0;
     public static final int UPDATE_SESSION_ATTRIBUTES = 1;
@@ -45,16 +49,24 @@ import org.json.JSONObject;
     // this is not used in the normal execution.
     /* package-private */ boolean mIsProcessingMessage = false;
 
-    public MessageHandler(Looper looper, SQLiteDatabase database, MessageManagerCallbacks messageManager) {
+    public MessageHandler(Looper looper, MessageManagerCallbacks messageManager, SQLiteOpenHelper dbHelper) {
         super(looper);
-        db = database;
         mMessageManagerCallbacks = messageManager;
+        mDbHelper = dbHelper;
     }
 
     @Override
     public void handleMessage(Message msg) {
         mIsProcessingMessage = true;
-
+        if (db == null){
+            try {
+                db = mDbHelper.getWritableDatabase();
+            }catch (Exception e){
+                //if we failed to create the database, there's not much we can do, so just bail out.
+                return;
+            }
+        }
+        mMessageManagerCallbacks.delayedStart();
         switch (msg.what) {
             case STORE_MESSAGE:
                 try {
@@ -66,6 +78,8 @@ import org.json.JSONObject;
                     // session record first
                     if (MessageType.SESSION_START == messageType) {
                         dbInsertSession(message);
+                    }else{
+                        message.put(Constants.MessageKey.ID, UUID.randomUUID().toString());
                     }
                     if (MessageType.ERROR == messageType){
                         appendBreadcrumbs(message);
@@ -87,7 +101,7 @@ import org.json.JSONObject;
                     mMessageManagerCallbacks.checkForTrigger(message);
 
                 } catch (Exception e) {
-                    ConfigManager.log(MParticle.LogLevel.ERROR, e, "Error saving event to mParticle DB");
+                    ConfigManager.log(MParticle.LogLevel.ERROR, e, "Error saving message to mParticle DB.");
                 }
                 break;
             case UPDATE_SESSION_ATTRIBUTES:
@@ -97,7 +111,7 @@ import org.json.JSONObject;
                     String attributes = sessionAttributes.getString(MessageKey.ATTRIBUTES);
                     dbUpdateSessionAttributes(sessionId, attributes);
                 } catch (Exception e) {
-                    ConfigManager.log(MParticle.LogLevel.ERROR, e, "Error updating session attributes in mParticle DB");
+                    ConfigManager.log(MParticle.LogLevel.ERROR, e, "Error updating session attributes in mParticle DB.");
                 }
                 break;
             case UPDATE_SESSION_END:
@@ -135,6 +149,7 @@ import org.json.JSONObject;
                         try {
                             MPMessage endMessage = mMessageManagerCallbacks.createMessageSessionEnd(sessionId, start, end, foregroundLength,
                                     sessionAttributes);
+                            endMessage.put(Constants.MessageKey.ID, UUID.randomUUID().toString());
                             // insert the record into messages with duration
                             dbInsertMessage(endMessage);
                         }catch (JSONException jse){
@@ -174,6 +189,7 @@ import org.json.JSONObject;
             case STORE_BREADCRUMB:
                 try {
                     MPMessage message = (MPMessage) msg.obj;
+                    message.put(Constants.MessageKey.ID, UUID.randomUUID().toString());
                     dbInsertBreadcrumb(message);
                 } catch (Exception e) {
                     ConfigManager.log(MParticle.LogLevel.ERROR, e, "Error saving breadcrumb to mParticle DB");

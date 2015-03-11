@@ -85,26 +85,6 @@ public final class MeasuredRequestManager {
             }
         }
 
-        private String redactQuery(String uri) {
-            int queryIndex = uri.indexOf("?");
-            if (queryIndex > 0){
-                return uri.substring(0, queryIndex);
-            }else if ((queryIndex = uri.indexOf(("%3F"))) > 0){
-                return  uri.substring(0, queryIndex);
-            }
-            return uri;
-        }
-
-        private boolean isUriQueryAllowed(String uri) {
-            for (String queryFilter : queryStringFilters){
-                if (uri.contains(queryFilter)){
-                    return true;
-                }
-            }
-            return false;
-        }
-
-
     };
 
     public void addExcludedUrl(String url) {

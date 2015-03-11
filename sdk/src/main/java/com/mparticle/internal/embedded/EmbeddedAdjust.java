@@ -50,7 +50,6 @@ class EmbeddedAdjust extends EmbeddedProvider implements MPActivityCallbacks {
         }
     }
 
-
     @Override
     protected EmbeddedProvider update() {
         initAdjust();
@@ -58,11 +57,6 @@ class EmbeddedAdjust extends EmbeddedProvider implements MPActivityCallbacks {
         if (installReferrer != null) {
             MParticle.getInstance().setInstallReferrer(installReferrer);
         }
-        boolean optOut = MParticle.getInstance().getOptOut();
-        if (optOut != Adjust.isEnabled()){
-            Adjust.setEnabled(!optOut);
-        }
-
         return this;
     }
 
@@ -74,11 +68,6 @@ class EmbeddedAdjust extends EmbeddedProvider implements MPActivityCallbacks {
     @Override
     public boolean isOriginator(String uri) {
         return uri != null && uri.toLowerCase().contains(HOST);
-    }
-
-    @Override
-    public void onActivityCreated(Activity activity, int activityCount) {
-
     }
 
     @Override
@@ -96,15 +85,16 @@ class EmbeddedAdjust extends EmbeddedProvider implements MPActivityCallbacks {
     }
 
     @Override
+    public void onActivityCreated(Activity activity, int activityCount) {}
+
+    @Override
     public void onActivityStopped(Activity activity, int currentCount) {}
 
     @Override
     public void onActivityStarted(Activity activity, int currentCount) {}
 
     @Override
-    public void logEvent(MPEvent event, Map<String, String> attributes) throws Exception {
-
-    }
+    public void logEvent(MPEvent event, Map<String, String> attributes) throws Exception {}
 
     @Override
     public void logTransaction(MPProduct transaction) {}

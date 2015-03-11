@@ -6,6 +6,9 @@ import android.util.Log;
 
 import com.mparticle.MParticle;
 
+/**
+ * This class is primarily responsible for parsing and representing XML/resource-based configuration.
+ */
 class AppConfig {
     public static final String PREFKEY_API_KEY = "mp_key";
     public static final String PREFKEY_API_SECRET = "mp_secret";
@@ -31,26 +34,25 @@ class AppConfig {
     public static final int DEFAULT_BREADCRUMB_LIMIT = 50;
     public static final boolean DEFAULT_NETWORK_MEASUREMENT = false;
 
-
     private final Context mContext;
 
     public String mKey = null;
     public String mSecret = null;
 
     public boolean reportUncaughtExceptions;
-    public int sessionTimeout;
-    public int uploadInterval;
-    public boolean isPushEnabled;
-    public String pushSenderId;
-    public String licenseKey;
-    public boolean isLicensingEnabled;
-    public boolean autoTrackingEnabled;
-    public volatile boolean networkingEnabled;
+    public int sessionTimeout = DEFAULT_SESSION_TIMEOUT;
+    public int uploadInterval = DEFAULT_UPLOAD_INTERVAL;
+    public boolean isPushEnabled = DEFAULT_ENABLE_PUSH;
+    public String pushSenderId = null;
+    public String licenseKey = null;
+    public boolean isLicensingEnabled = DEFAULT_ENABLE_LICENSING;
+    public boolean autoTrackingEnabled = DEFAULT_ENABLE_AUTO_TRACKING;
+    public static volatile boolean networkingEnabled = DEFAULT_NETWORK_MEASUREMENT;
     public int audienceTimeout = 100;
-    private MParticle.Environment mEnvironment;
-    public MParticle.LogLevel logLevel = MParticle.LogLevel.NONE;
+    private static MParticle.Environment mEnvironment = MParticle.Environment.Production;
+    public static MParticle.LogLevel logLevel = MParticle.LogLevel.NONE;
 
-    public AppConfig(Context context, MParticle.Environment environment) {
+    public AppConfig(Context context, MParticle.Environment environment, SharedPreferences preferences) {
         mContext = context;
         if (environment == null || environment == MParticle.Environment.AutoDetect){
             if (MPUtility.isAppDebuggable(context)){
@@ -65,9 +67,6 @@ class AppConfig {
         if (MPUtility.isAppDebuggable(context)){
             logLevel = MParticle.LogLevel.DEBUG;
         }
-    }
-
-    public void init(SharedPreferences preferences) {
         mKey = getString(PREFKEY_API_KEY, mKey);
         if (mKey == null &&
                 (mKey = preferences.getString(Constants.PrefKeys.API_KEY, mKey)) == null) {
@@ -84,9 +83,13 @@ class AppConfig {
         preferences.edit()
                 .putString(Constants.PrefKeys.API_KEY, mKey)
                 .putString(Constants.PrefKeys.API_SECRET, mSecret)
-                .commit();
+                .apply();
 
         reportUncaughtExceptions = getBoolean(PREFKEY_EXCEPTIONS, DEFAULT_REPORT_UNCAUGHT_EXCEPTIONS);
+    }
+
+    public void delayedInit() {
+
         sessionTimeout = getInteger(PREFKEY_SESSION_TIMEOUT, DEFAULT_SESSION_TIMEOUT);
         uploadInterval = getInteger(PREFKEY_PROD_UPLOAD_INTERVAL, DEFAULT_UPLOAD_INTERVAL);
         isPushEnabled = getBoolean(PREFKEY_PUSH_ENABLED, DEFAULT_ENABLE_PUSH);
@@ -154,7 +157,7 @@ class AppConfig {
         return mContext.getResources().getInteger(id);
     }
 
-    public MParticle.Environment getEnvironment() {
+    public static MParticle.Environment getEnvironment() {
         return mEnvironment;
     }
 }

@@ -6,9 +6,6 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-/**
- * Created by sdozor on 1/2/15.
- */
 public class MockHttpUrlConnection extends HttpURLConnection {
     private int mockResponseCode = 202;
     protected MockHttpUrlConnection(URL url) {

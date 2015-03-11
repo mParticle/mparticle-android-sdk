@@ -34,6 +34,6 @@ public class ReferrerReceiver extends BroadcastReceiver {
         }
 
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-        preferences.edit().putString(REFERRER_KEY, referrer).commit();
+        preferences.edit().putString(REFERRER_KEY, referrer).apply();
     }
 }

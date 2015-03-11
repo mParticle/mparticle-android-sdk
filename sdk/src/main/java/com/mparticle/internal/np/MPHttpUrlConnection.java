@@ -53,7 +53,6 @@ final class MPHttpUrlConnection extends HttpURLConnection {
 
     @Override
     public int getResponseCode() throws IOException {
-      //  getRequest().startTiming();
         int code = delegateConnection.getResponseCode();
         getRequest().parseUrlResponse(delegateConnection);
         return code;
@@ -61,7 +60,6 @@ final class MPHttpUrlConnection extends HttpURLConnection {
 
     @Override
     public String getResponseMessage() throws IOException {
-     //   getRequest().startTiming();
         String message = delegateConnection.getResponseMessage();
         getRequest().parseUrlResponse(delegateConnection);
         return message;
@@ -74,7 +72,6 @@ final class MPHttpUrlConnection extends HttpURLConnection {
 
     @Override
     public String getContentEncoding() {
-      //  getRequest().startTiming();
         String encoding = delegateConnection.getContentEncoding();
         getRequest().parseUrlResponse(delegateConnection);
         return encoding;
@@ -107,7 +104,6 @@ final class MPHttpUrlConnection extends HttpURLConnection {
 
     @Override
     public void connect() throws IOException {
-     //   getRequest().startTiming();
         delegateConnection.connect();
         getRequest().parseUrlResponse(delegateConnection);
     }
