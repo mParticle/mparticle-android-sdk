@@ -6,12 +6,9 @@ import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
-import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.util.Log;
-import android.util.SparseArray;
 
 import com.mparticle.MParticle;
 import com.mparticle.internal.Constants.MessageKey;
@@ -20,11 +17,8 @@ import com.mparticle.internal.Constants.PrefKeys;
 import com.mparticle.internal.Constants.Status;
 import com.mparticle.internal.MParticleDatabase.CommandTable;
 import com.mparticle.internal.MParticleDatabase.MessageTable;
-import com.mparticle.internal.MParticleDatabase.SessionTable;
 import com.mparticle.internal.MParticleDatabase.UploadTable;
-import com.mparticle.segmentation.Segment;
 import com.mparticle.segmentation.SegmentListener;
-import com.mparticle.segmentation.SegmentMembership;
 
 import org.apache.http.HttpStatus;
 import org.json.JSONArray;
@@ -32,18 +26,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
-import java.util.ArrayList;
-import java.util.UUID;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.FutureTask;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 import javax.net.ssl.SSLHandshakeException;
 
@@ -234,24 +218,28 @@ public final class UploadHandler extends Handler {
                 } catch (MParticleApiClient.MPConfigException e) {
                     ConfigManager.log(MParticle.LogLevel.DEBUG, "Failed to update configuration: ", e.toString());
                 } catch (Exception e){
-                    ConfigManager.log(MParticle.LogLevel.DEBUG, "Failed to update configuration: ", e.toString());
+
                 }
                 break;
             case UPLOAD_MESSAGES:
             case UPLOAD_TRIGGER_MESSAGES:
-                long uploadInterval = mConfigManager.getUploadInterval();
-                if (isNetworkConnected && !mApiClient.isThrottled()) {
-                    if (uploadInterval > 0 || msg.arg1 == 1) {
-                        prepareUploads(false);
-                        boolean needsHistory = processUploads(false);
-                        if (needsHistory) {
-                            this.sendEmptyMessage(UPLOAD_HISTORY);
+                try {
+                    long uploadInterval = mConfigManager.getUploadInterval();
+                    if (isNetworkConnected && !mApiClient.isThrottled()) {
+                        if (uploadInterval > 0 || msg.arg1 == 1) {
+                            prepareUploads(false);
+                            boolean needsHistory = processUploads(false);
+                            if (needsHistory) {
+                                this.sendEmptyMessage(UPLOAD_HISTORY);
+                            }
                         }
-                    }
 
-                }
-                if (MParticle.getInstance().internal().isSessionActive() && uploadInterval > 0 && msg.arg1 == 0) {
-                    this.sendEmptyMessageDelayed(UPLOAD_MESSAGES, uploadInterval);
+                    }
+                    if (MParticle.getInstance().internal().isSessionActive() && uploadInterval > 0 && msg.arg1 == 0) {
+                        this.sendEmptyMessageDelayed(UPLOAD_MESSAGES, uploadInterval);
+                    }
+                }catch (Exception e){
+
                 }
                 break;
             case UPLOAD_HISTORY:
@@ -272,7 +260,7 @@ public final class UploadHandler extends Handler {
                     }
 
                 }catch (Exception e){
-                    ConfigManager.log(MParticle.LogLevel.DEBUG, "Failed to upload session history: ", e.toString());
+
                 }finally {
                     if (cursor != null && !cursor.isClosed()) {
                         cursor.close();
@@ -414,12 +402,7 @@ public final class UploadHandler extends Handler {
                     }
                 }
 
-                HttpURLConnection connection = null;
-                try {
-                    connection = mApiClient.sendMessageBatch(message);
-                } catch (MParticleApiClient.MPRampException e) {
-                    ConfigManager.log(MParticle.LogLevel.DEBUG, e.toString());
-                }
+                HttpURLConnection connection = mApiClient.sendMessageBatch(message);
 
                 if (connection != null && shouldDelete(connection.getResponseCode())) {
                     dbDeleteUpload(id);
@@ -441,8 +424,9 @@ public final class UploadHandler extends Handler {
                     ConfigManager.log(MParticle.LogLevel.WARNING, "Upload failed and will be retried.");
                 }
             }
+        } catch (MParticleApiClient.MPRampException e){
         } catch (MParticleApiClient.MPThrottleException e) {
-            ConfigManager.log(MParticle.LogLevel.DEBUG, e.getMessage());
+            //ConfigManager.log(MParticle.LogLevel.DEBUG, e.getMessage());
         } catch (SSLHandshakeException ssle){
             ConfigManager.log(MParticle.LogLevel.DEBUG, "SSL handshake failed while preparing uploads - possible MITM attack detected.");
         } catch (Exception e){
