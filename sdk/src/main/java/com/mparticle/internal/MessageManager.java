@@ -285,13 +285,14 @@ public class MessageManager implements MessageManagerCallbacks {
                     .name(event.getEventName())
                     .sessionStartTime(sessionStartTime)
                     .timestamp(time)
+                    .length(event.getLength())
                     .attributes(MPUtility.enforceAttributeConstraints(event.getInfo()))
                     .build();
 
             message.put(MessageKey.EVENT_TYPE, event.getEventType());
             // NOTE: event timing is not supported (yet) but the server expects this data
             message.put(MessageKey.EVENT_START_TIME, time);
-            message.put(MessageKey.EVENT_DURATION, event.getLength());
+
             if (currentActivity != null){
                 message.put(MessageKey.CURRENT_ACTIVITY, currentActivity);
             }
