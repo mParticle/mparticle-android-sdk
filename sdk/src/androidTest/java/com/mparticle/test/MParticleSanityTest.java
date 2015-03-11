@@ -1,8 +1,11 @@
 package com.mparticle.test;
 
+import android.content.Intent;
 import android.test.AndroidTestCase;
 
 import com.mparticle.MParticle;
+import com.mparticle.ReferrerReceiver;
+import com.mparticle.internal.Constants;
 import com.mparticle.media.MPMediaAPI;
 
 public class MParticleSanityTest extends AndroidTestCase {
@@ -47,5 +50,21 @@ public class MParticleSanityTest extends AndroidTestCase {
         assertTrue(instance.getAudioPlaying());
         instance.setAudioPlaying(false);
         assertFalse(MParticle.getInstance().Media().getAudioPlaying());
+    }
+
+    public void testReferrerReceiver(){
+        String referrer = "this is a test referrer string";
+        Intent fakeReferralIntent = new Intent("com.android.vending.INSTALL_REFERRER");
+        fakeReferralIntent.putExtra(Constants.REFERRER, referrer);
+        new ReferrerReceiver().onReceive(getContext(), fakeReferralIntent);
+        String persistedReferrer = MParticle.getInstance().getInstallReferrer();
+        assertEquals(referrer, persistedReferrer);
+    }
+
+    public void testReferrerSetter(){
+        String referrer = "this is another test referrer string";
+        MParticle.getInstance().setInstallReferrer(referrer);
+        String persistedReferrer = MParticle.getInstance().getInstallReferrer();
+        assertEquals(referrer, persistedReferrer);
     }
 }
