@@ -2965,12 +2965,12 @@ com.mparticle.internal.AppConfig -> com.mparticle.internal.a:
     boolean networkingEnabled -> k
     com.mparticle.MParticle$Environment mEnvironment -> n
     com.mparticle.MParticle$LogLevel logLevel -> l
-    93:127:void delayedInit() -> a
-    130:130:int getResourceId(java.lang.String,java.lang.String) -> a
-    134:139:java.lang.String getString(java.lang.String,java.lang.String) -> b
-    143:148:boolean getBoolean(java.lang.String,boolean) -> a
-    152:157:int getInteger(java.lang.String,int) -> a
-    161:161:com.mparticle.MParticle$Environment getEnvironment() -> b
+    107:129:void delayedInit() -> a
+    132:132:int getResourceId(java.lang.String,java.lang.String) -> a
+    136:143:java.lang.String getString(java.lang.String,java.lang.String) -> b
+    147:152:boolean getBoolean(java.lang.String,boolean) -> a
+    156:161:int getInteger(java.lang.String,int) -> a
+    165:165:com.mparticle.MParticle$Environment getEnvironment() -> b
 com.mparticle.internal.AppStateManager -> com.mparticle.internal.b:
     com.mparticle.internal.ConfigManager mConfigManager -> b
     android.content.Context mContext -> c
@@ -2986,20 +2986,20 @@ com.mparticle.internal.AppStateManager -> com.mparticle.internal.b:
     java.lang.String previousSessionPackage -> l
     java.lang.String previousSessionParameters -> m
     java.lang.String previousSessionUri -> n
-    96:142:void onActivityStarted(android.app.Activity,int) -> a
-    169:187:void onActivityStopped(android.app.Activity,int) -> b
-    200:201:void onActivityCreated(android.app.Activity,int) -> c
-    205:206:void onActivityResumed(android.app.Activity,int) -> d
-    210:211:void onActivityPaused(android.app.Activity,int) -> e
-    226:226:boolean isBackgrounded() -> a
-    234:234:java.lang.String getCurrentActivity() -> b
-    25:25:void access$000(com.mparticle.internal.AppStateManager) -> a
-    25:25:void access$100(com.mparticle.internal.AppStateManager) -> b
+    97:146:void onActivityStarted(android.app.Activity,int) -> a
+    174:199:void onActivityStopped(android.app.Activity,int) -> b
+    212:213:void onActivityCreated(android.app.Activity,int) -> c
+    217:218:void onActivityResumed(android.app.Activity,int) -> d
+    222:223:void onActivityPaused(android.app.Activity,int) -> e
+    238:238:boolean isBackgrounded() -> a
+    246:246:java.lang.String getCurrentActivity() -> b
+    26:26:void access$000(com.mparticle.internal.AppStateManager) -> a
+    26:26:void access$100(com.mparticle.internal.AppStateManager) -> b
 com.mparticle.internal.AppStateManager$1 -> com.mparticle.internal.b$1:
     com.mparticle.internal.AppStateManager this$0 -> a
-    176:180:void run() -> run
+    182:189:void run() -> run
 com.mparticle.internal.AppStateManager$2 -> com.mparticle.internal.b$2:
-    193:194:void run() -> run
+    205:206:void run() -> run
 com.mparticle.internal.ConfigManager -> com.mparticle.internal.c:
     org.json.JSONObject mCurrentCookies -> a
     android.content.Context mContext -> b
@@ -3175,21 +3175,22 @@ com.mparticle.internal.MParticleApiClient -> com.mparticle.internal.m:
     javax.net.ssl.SSLSocketFactory socketFactory -> p
     java.lang.String etag -> q
     java.lang.String modified -> r
-    128:162:void fetchConfig() -> a
-    170:188:org.json.JSONObject fetchAudiences() -> b
-    194:198:boolean isThrottled() -> c
-    202:241:java.net.HttpURLConnection sendMessageBatch(java.lang.String) -> a
-    273:290:void logUpload(java.lang.String) -> b
-    294:316:void addMessageSignature(java.net.HttpURLConnection,java.lang.String) -> a
-    327:332:java.lang.String asHex(byte[]) -> a
-    337:343:void addCookies(org.json.JSONObject,com.mparticle.internal.ConfigManager) -> a
-    347:354:java.security.cert.Certificate generateCertificate(java.security.cert.CertificateFactory,java.lang.String) -> a
-    361:379:javax.net.ssl.SSLSocketFactory getSocketFactory() -> d
-    384:400:java.net.HttpURLConnection makeUrlRequest(java.net.HttpURLConnection,boolean) -> a
-    404:417:org.json.JSONObject getJsonResponse(java.net.HttpURLConnection) -> a
-    422:441:void parseMparticleJson(org.json.JSONObject) -> a
-    467:470:void checkThrottleTime() -> e
-    488:505:java.lang.String getSupportedKitString() -> f
+    boolean alreadyWarned -> s
+    129:163:void fetchConfig() -> a
+    171:189:org.json.JSONObject fetchAudiences() -> b
+    195:199:boolean isThrottled() -> c
+    203:242:java.net.HttpURLConnection sendMessageBatch(java.lang.String) -> a
+    274:291:void logUpload(java.lang.String) -> b
+    295:317:void addMessageSignature(java.net.HttpURLConnection,java.lang.String) -> a
+    328:333:java.lang.String asHex(byte[]) -> a
+    338:344:void addCookies(org.json.JSONObject,com.mparticle.internal.ConfigManager) -> a
+    348:355:java.security.cert.Certificate generateCertificate(java.security.cert.CertificateFactory,java.lang.String) -> a
+    362:380:javax.net.ssl.SSLSocketFactory getSocketFactory() -> d
+    385:402:java.net.HttpURLConnection makeUrlRequest(java.net.HttpURLConnection,boolean) -> a
+    406:419:org.json.JSONObject getJsonResponse(java.net.HttpURLConnection) -> a
+    424:443:void parseMparticleJson(org.json.JSONObject) -> a
+    469:472:void checkThrottleTime() -> e
+    490:507:java.lang.String getSupportedKitString() -> f
 com.mparticle.internal.MParticleApiClient$MPConfigException -> com.mparticle.internal.m$a:
 com.mparticle.internal.MParticleApiClient$MPRampException -> com.mparticle.internal.m$b:
 com.mparticle.internal.MParticleApiClient$MPThrottleException -> com.mparticle.internal.m$c:
@@ -3203,12 +3204,12 @@ com.mparticle.internal.MessageHandler -> com.mparticle.internal.p:
     com.mparticle.internal.MessageManagerCallbacks mMessageManagerCallbacks -> c
     java.lang.String[] breadcrumbColumns -> d
     java.lang.String[] idColumns -> e
-    60:218:void handleMessage(android.os.Message) -> handleMessage
-    227:288:boolean validateBehaviorFlags(com.mparticle.internal.MPMessage) -> a
-    306:336:void logInfluenceOpenGcmMessages(long) -> a
-    367:384:void appendBreadcrumbs(org.json.JSONObject) -> a
-    440:458:void dbInsertMessage(com.mparticle.internal.MPMessage) -> b
-    475:482:void dbUpdateSessionEndTime(java.lang.String,long,long) -> a
+    60:220:void handleMessage(android.os.Message) -> handleMessage
+    229:290:boolean validateBehaviorFlags(com.mparticle.internal.MPMessage) -> a
+    308:338:void logInfluenceOpenGcmMessages(long) -> a
+    369:386:void appendBreadcrumbs(org.json.JSONObject) -> a
+    442:460:void dbInsertMessage(com.mparticle.internal.MPMessage) -> b
+    477:484:void dbUpdateSessionEndTime(java.lang.String,long,long) -> a
 com.mparticle.internal.MessageManager -> com.mparticle.internal.q:
     android.content.Context mContext -> b
     android.content.SharedPreferences mPreferences -> c
@@ -3227,7 +3228,7 @@ com.mparticle.internal.MessageManager -> com.mparticle.internal.q:
     boolean mFirstRun -> o
     134:159:org.json.JSONObject getStateInfo() -> a
     193:240:void startSession(java.lang.String,long) -> a
-    251:251:int getCurrentSessionCounter() -> e
+    251:251:int getCurrentSessionCounter() -> f
     256:273:void updateSessionEnd(java.lang.String,long,long) -> a
     276:280:void endSession(java.lang.String,long,long) -> b
     284:306:void logEvent(java.lang.String,long,long,com.mparticle.MPEvent,java.lang.String) -> a
@@ -3248,19 +3249,21 @@ com.mparticle.internal.MessageManager -> com.mparticle.internal.q:
     690:701:com.mparticle.internal.MPMessage createMessageSessionEnd(java.lang.String,long,long,long,org.json.JSONObject) -> a
     706:706:java.lang.String getApiKey() -> b
     712:737:void delayedStart() -> c
-    740:741:void refreshConfiguration() -> d
-    748:753:void saveGcmMessage(com.mparticle.messaging.MPCloudNotificationMessage,java.lang.String) -> a
-    756:761:void saveGcmMessage(com.mparticle.messaging.ProviderCloudMessage,java.lang.String) -> a
-    785:797:void setDataConnection(android.net.NetworkInfo) -> a
+    741:743:void endUploadLoop() -> d
+    746:747:void refreshConfiguration() -> e
+    754:759:void saveGcmMessage(com.mparticle.messaging.MPCloudNotificationMessage,java.lang.String) -> a
+    762:767:void saveGcmMessage(com.mparticle.messaging.ProviderCloudMessage,java.lang.String) -> a
+    791:803:void setDataConnection(android.net.NetworkInfo) -> a
     50:50:double access$102(double) -> a
 com.mparticle.internal.MessageManager$StatusBroadcastReceiver -> com.mparticle.internal.q$a:
     com.mparticle.internal.MessageManager this$0 -> a
-    767:781:void onReceive(android.content.Context,android.content.Intent) -> onReceive
+    773:787:void onReceive(android.content.Context,android.content.Intent) -> onReceive
 com.mparticle.internal.MessageManagerCallbacks -> com.mparticle.internal.r:
     void checkForTrigger(com.mparticle.internal.MPMessage) -> a
     com.mparticle.internal.MPMessage createMessageSessionEnd(java.lang.String,long,long,long,org.json.JSONObject) -> a
     java.lang.String getApiKey() -> b
     void delayedStart() -> c
+    void endUploadLoop() -> d
 com.mparticle.internal.PushRegistrationHelper -> com.mparticle.internal.PushRegistrationHelper:
     21:26:int getAppVersion(android.content.Context) -> d
     39:55:java.lang.String getRegistrationId(android.content.Context) -> a
@@ -3316,18 +3319,18 @@ com.mparticle.internal.UploadHandler -> com.mparticle.internal.u:
     java.lang.String containsClause -> p
     java.lang.String gcmDeleteWhere -> q
     java.lang.String[] gcmColumns -> r
-    115:115:java.lang.String getUploadableMessagesQuery() -> a
-    179:194:org.json.JSONObject getDeviceInfo() -> b
-    198:207:org.json.JSONObject getAppInfo() -> c
-    211:212:void setConnected(boolean) -> a
-    216:290:void handleMessage(android.os.Message) -> handleMessage
-    303:391:void prepareUploads(boolean) -> b
-    401:456:boolean processUploads(boolean) -> c
-    512:520:org.json.JSONObject createUploadMessage(org.json.JSONArray,boolean) -> a
-    532:572:void addGCMHistory(org.json.JSONObject) -> a
-    575:580:void dbInsertUpload(org.json.JSONObject) -> b
-    583:585:void dbDeleteProcessedMessages(java.lang.String) -> a
-    629:630:void fetchSegments(long,java.lang.String,com.mparticle.segmentation.SegmentListener) -> a
+    99:99:java.lang.String getUploadableMessagesQuery() -> a
+    163:178:org.json.JSONObject getDeviceInfo() -> b
+    182:191:org.json.JSONObject getAppInfo() -> c
+    195:196:void setConnected(boolean) -> a
+    200:276:void handleMessage(android.os.Message) -> handleMessage
+    289:375:void prepareUploads(boolean) -> b
+    385:436:boolean processUploads(boolean) -> c
+    492:500:org.json.JSONObject createUploadMessage(org.json.JSONArray,boolean) -> a
+    512:552:void addGCMHistory(org.json.JSONObject) -> a
+    555:560:void dbInsertUpload(org.json.JSONObject) -> b
+    563:565:void dbDeleteProcessedMessages(java.lang.String) -> a
+    609:610:void fetchSegments(long,java.lang.String,com.mparticle.segmentation.SegmentListener) -> a
 com.mparticle.internal.embedded.EmbeddedAdjust -> com.mparticle.internal.embedded.a:
     boolean initialized -> f
     java.util.concurrent.atomic.AtomicBoolean hasResumed -> g
