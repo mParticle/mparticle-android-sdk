@@ -9,6 +9,7 @@ import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Handler;
 import android.os.SystemClock;
+import android.util.Log;
 
 import com.mparticle.MParticle;
 import com.mparticle.internal.embedded.EmbeddedKitManager;
@@ -92,53 +93,56 @@ public class AppStateManager implements MPActivityCallbacks{
     }
     @Override
     public void onActivityStarted(Activity activity, int currentCount) {
+        try {
+            mPreferences.edit().putBoolean(Constants.PrefKeys.CRASHED_IN_FOREGROUND, true).apply();
+            mCurrentActivity = AppStateManager.getActivityName(activity);
 
-        mPreferences.edit().putBoolean(Constants.PrefKeys.CRASHED_IN_FOREGROUND, true).apply();
-        mCurrentActivity = AppStateManager.getActivityName(activity);
-
-        int interruptions = mInterruptionCount.get();
-        if (!mInitialized || !MParticle.getInstance().internal().isSessionActive()) {
-            gatherSourceInfo(activity);
-        }
-
-        if (!mInitialized){
-            mInitialized = true;
-            MParticle.getInstance().internal().logStateTransition(Constants.StateTransitionType.STATE_TRANS_INIT,
-                    mCurrentActivity,
-                    0,
-                    0,
-                    previousSessionUri,
-                    previousSessionParameters,
-                    previousSessionPackage,
-                    0);
-            mLastForegroundTime = SystemClock.elapsedRealtime();
-        }else if (isBackgrounded() && mLastStoppedTime.get() > 0) {
-            long totalTimeInBackground = mPreferences.getLong(Constants.PrefKeys.TIME_IN_BG, -1);
-            if (totalTimeInBackground > -1){
-                totalTimeInBackground += (SystemClock.elapsedRealtime() - mLastStoppedTime.get());
-            }else{
-                totalTimeInBackground = 0;
+            int interruptions = mInterruptionCount.get();
+            if (!mInitialized || !MParticle.getInstance().internal().isSessionActive()) {
+                gatherSourceInfo(activity);
             }
-            mPreferences.edit().putLong(Constants.PrefKeys.TIME_IN_BG, totalTimeInBackground).apply();
 
-            MParticle.getInstance().internal().logStateTransition(Constants.StateTransitionType.STATE_TRANS_FORE,
-                    mCurrentActivity,
-                    mLastStoppedTime.get() - mLastForegroundTime,
-                    SystemClock.elapsedRealtime() - mLastStoppedTime.get(),
-                    previousSessionUri,
-                    previousSessionParameters,
-                    previousSessionPackage,
-                    interruptions);
-            ConfigManager.log(MParticle.LogLevel.DEBUG, "App foregrounded.");
-            mLastForegroundTime = SystemClock.elapsedRealtime();
+            if (!mInitialized) {
+                mInitialized = true;
+                MParticle.getInstance().internal().logStateTransition(Constants.StateTransitionType.STATE_TRANS_INIT,
+                        mCurrentActivity,
+                        0,
+                        0,
+                        previousSessionUri,
+                        previousSessionParameters,
+                        previousSessionPackage,
+                        0);
+                mLastForegroundTime = SystemClock.elapsedRealtime();
+            } else if (isBackgrounded() && mLastStoppedTime.get() > 0) {
+                long totalTimeInBackground = mPreferences.getLong(Constants.PrefKeys.TIME_IN_BG, -1);
+                if (totalTimeInBackground > -1) {
+                    totalTimeInBackground += (SystemClock.elapsedRealtime() - mLastStoppedTime.get());
+                } else {
+                    totalTimeInBackground = 0;
+                }
+                mPreferences.edit().putLong(Constants.PrefKeys.TIME_IN_BG, totalTimeInBackground).apply();
+
+                MParticle.getInstance().internal().logStateTransition(Constants.StateTransitionType.STATE_TRANS_FORE,
+                        mCurrentActivity,
+                        mLastStoppedTime.get() - mLastForegroundTime,
+                        SystemClock.elapsedRealtime() - mLastStoppedTime.get(),
+                        previousSessionUri,
+                        previousSessionParameters,
+                        previousSessionPackage,
+                        interruptions);
+                ConfigManager.log(MParticle.LogLevel.DEBUG, "App foregrounded.");
+                mLastForegroundTime = SystemClock.elapsedRealtime();
+            }
+
+            mActivities.getAndIncrement();
+
+            if (MParticle.getInstance().isAutoTrackingEnabled()) {
+                MParticle.getInstance().internal().logScreen(mCurrentActivity, null, true);
+            }
+            mEmbeddedKitManager.onActivityStarted(activity, mActivities.get());
+        }catch (Exception e){
+            Log.w(Constants.LOG_TAG, "Failed while trying to track activity start: " + e.getMessage());
         }
-
-        mActivities.getAndIncrement();
-
-        if (MParticle.getInstance().isAutoTrackingEnabled()) {
-            MParticle.getInstance().internal().logScreen(mCurrentActivity, null, true);
-        }
-        mEmbeddedKitManager.onActivityStarted(activity, mActivities.get());
     }
 
     private void gatherSourceInfo(Activity activity) {
@@ -166,24 +170,32 @@ public class AppStateManager implements MPActivityCallbacks{
 
     @Override
     public void onActivityStopped(Activity activity, int currentCount) {
-        mPreferences.edit().putBoolean(Constants.PrefKeys.CRASHED_IN_FOREGROUND, false).apply();
-        mLastStoppedTime = new AtomicLong(SystemClock.elapsedRealtime());
+        try {
+            mPreferences.edit().putBoolean(Constants.PrefKeys.CRASHED_IN_FOREGROUND, false).apply();
+            mLastStoppedTime = new AtomicLong(SystemClock.elapsedRealtime());
 
-        if (mActivities.decrementAndGet() < 1) {
+            if (mActivities.decrementAndGet() < 1) {
                 delayedBackgroundCheckHandler.postDelayed(new Runnable() {
                     @Override
                     public void run() {
-                        if (isBackgrounded()) {
-                            checkSessionTimeout();
-                            logBackgrounded();
+                        try {
+                            if (isBackgrounded()) {
+                                checkSessionTimeout();
+                                logBackgrounded();
+                            }
+                        }catch (Exception e){
+
                         }
                     }
                 }, ACTIVITY_DELAY);
+            }
+            if (MParticle.getInstance().isAutoTrackingEnabled()) {
+                MParticle.getInstance().internal().logScreen(AppStateManager.getActivityName(activity), null, false);
+            }
+            mEmbeddedKitManager.onActivityStopped(activity, mActivities.get());
+        }catch (Exception e){
+            Log.w(Constants.LOG_TAG, "Failed while trying to track activity stop: " + e.getMessage());
         }
-        if (MParticle.getInstance().isAutoTrackingEnabled()) {
-            MParticle.getInstance().internal().logScreen(AppStateManager.getActivityName(activity), null, false);
-        }
-        mEmbeddedKitManager.onActivityStopped(activity, mActivities.get());
     }
 
     private void checkSessionTimeout() {
