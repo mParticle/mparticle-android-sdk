@@ -3,6 +3,7 @@ package com.mparticle.test;
 import android.test.AndroidTestCase;
 
 import com.mparticle.MParticle;
+import com.mparticle.internal.AppStateManager;
 import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.MPUtility;
 
@@ -21,6 +22,7 @@ public class ConfigurationTests extends AndroidTestCase {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
+        assertFalse(AppStateManager.mInitialized);
         MParticle.start(getContext());
         manager = MParticle.getInstance().internal().getConfigurationManager();
     }
@@ -74,7 +76,6 @@ public class ConfigurationTests extends AndroidTestCase {
             fail(jse.toString());
         }
     }
-
     public void testCaptureNetworkPerformance(){
         assertFalse(manager.isNetworkPerformanceEnabled());
         /*
