@@ -736,6 +736,12 @@ public class MessageManager implements MessageManagerCallbacks {
         }
     }
 
+    @Override
+    public void endUploadLoop() {
+        mUploadHandler.removeMessages(UploadHandler.UPLOAD_MESSAGES);
+        MParticle.getInstance().upload();
+    }
+
     public void refreshConfiguration() {
         mUploadHandler.sendEmptyMessage(UploadHandler.UPDATE_CONFIG);
     }

@@ -165,6 +165,8 @@ import java.util.UUID;
 
                 } catch (Exception e) {
                     ConfigManager.log(MParticle.LogLevel.ERROR, e, "Error creating session end message in mParticle DB");
+                } finally {
+                    mMessageManagerCallbacks.endUploadLoop();
                 }
                 break;
             case END_ORPHAN_SESSIONS:

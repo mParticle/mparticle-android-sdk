@@ -214,9 +214,7 @@ public final class UploadHandler extends Handler {
                 } catch (IOException ioe) {
                     ConfigManager.log(MParticle.LogLevel.DEBUG, "Failed to update configuration: ", ioe.toString());
                 } catch (MParticleApiClient.MPThrottleException e) {
-                    ConfigManager.log(MParticle.LogLevel.DEBUG, e.getMessage());
                 } catch (MParticleApiClient.MPConfigException e) {
-                    ConfigManager.log(MParticle.LogLevel.DEBUG, "Failed to update configuration: ", e.toString());
                 } catch (Exception e){
 
                 }
@@ -312,8 +310,6 @@ public final class UploadHandler extends Handler {
 
             if (readyMessagesCursor.getCount() > 0) {
                 mApiClient.fetchConfig();
-                ConfigManager.log(MParticle.LogLevel.DEBUG, "Preparing " + readyMessagesCursor.getCount() + " events for upload");
-
                 if (history) {
                     String currentSessionId;
                     int sessionIndex = readyMessagesCursor.getColumnIndex(MessageTable.SESSION_ID);
@@ -366,9 +362,9 @@ public final class UploadHandler extends Handler {
         } catch (SSLHandshakeException ssle){
             ConfigManager.log(MParticle.LogLevel.DEBUG, "SSL handshake failed while fetching configuration during upload preparation - possible MITM attack detected.");
         } catch (MParticleApiClient.MPThrottleException e) {
-            ConfigManager.log(MParticle.LogLevel.DEBUG, e.getMessage());
-        }  catch (MParticleApiClient.MPConfigException e) {
-            ConfigManager.log(MParticle.LogLevel.DEBUG, e.getMessage());
+
+        } catch (MParticleApiClient.MPConfigException e) {
+
         } catch (Exception e){
             ConfigManager.log(MParticle.LogLevel.ERROR, "Error preparing batch upload in mParticle DB: " + e.getMessage());
         } finally {

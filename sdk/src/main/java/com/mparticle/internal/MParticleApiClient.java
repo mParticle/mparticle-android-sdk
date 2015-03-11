@@ -113,6 +113,7 @@ public class MParticleApiClient implements IMPApiClient {
      * the SDK will attempt to contact the server again will be after this 2 hour window.
      */
     private static final long THROTTLE = 1000*60*60*2;
+    private boolean alreadyWarned;
 
     public MParticleApiClient(ConfigManager configManager, SharedPreferences sharedPreferences, Context context) throws MalformedURLException {
         mContext = context;
@@ -215,7 +216,7 @@ public class MParticleApiClient implements IMPApiClient {
 
         addMessageSignature(connection, message);
 
-        if (mConfigManager.getEnvironment().equals(MParticle.Environment.Development)) {
+        if (DEBUGGING) {
             logUpload(message);
         }
 
@@ -390,7 +391,8 @@ public class MParticleApiClient implements IMPApiClient {
         }
         if (mParticle) {
             int statusCode = connection.getResponseCode();
-            if (statusCode == HttpStatus.SC_BAD_REQUEST) {
+            if (statusCode == HttpStatus.SC_BAD_REQUEST && !alreadyWarned) {
+                alreadyWarned = true;
                 ConfigManager.log(MParticle.LogLevel.ERROR, "Bad API request - is the correct API key and secret configured?");
             }
             if (statusCode == HttpStatus.SC_SERVICE_UNAVAILABLE && !DEBUGGING) {
