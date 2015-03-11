@@ -9,9 +9,13 @@ import com.mparticle.MParticle;
 import com.mparticle.internal.AppStateManager;
 import com.mparticle.internal.Constants;
 import com.mparticle.internal.IMPApiClient;
+import com.mparticle.internal.MPMessage;
 import com.mparticle.internal.MParticleApiClient;
+import com.mparticle.internal.MessageBatch;
 import com.mparticle.messaging.AbstractCloudMessage;
 import com.mparticle.messaging.MPCloudNotificationMessage;
+
+import junit.framework.Test;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -41,6 +45,34 @@ public class UploadTests extends AndroidTestCase {
     public void setException(Exception e) {
         synchronized (exceptionLock) {
             exception = e;
+        }
+    }
+
+    public void testMessageBatchFormat() {
+        try {
+            MParticle.getInstance().setUserIdentity("some id", MParticle.IdentityType.CustomerId);
+            MParticle.getInstance().setUserAttribute("some key", "some value");
+            MPMessage message = new MPMessage.Builder("type", "id", null).build();
+            JSONArray array = new JSONArray();
+            array.put(message);
+            JSONObject batch = MessageBatch.create(getContext(), array, false, new JSONObject(), new JSONObject(), MParticle.getInstance().internal().getConfigurationManager(), TestUtils.getSharedPrefs(getContext()));
+            assertNotNull(batch);
+            assertNotNull(batch.get(Constants.MessageKey.TYPE));
+            assertNotNull(batch.get(Constants.MessageKey.ID));
+            assertNotNull(batch.get(Constants.MessageKey.TIMESTAMP));
+            assertNotNull(batch.get(Constants.MessageKey.MPARTICLE_VERSION));
+            assertNotNull(batch.get(Constants.MessageKey.OPT_OUT_HEADER));
+            assertNotNull(batch.get(Constants.MessageKey.CONFIG_UPLOAD_INTERVAL));
+            assertNotNull(batch.get(Constants.MessageKey.CONFIG_SESSION_TIMEOUT));
+            assertNotNull(batch.get(Constants.MessageKey.APP_INFO));
+            assertNotNull(batch.get(Constants.MessageKey.DEVICE_INFO));
+            assertNotNull(batch.get(Constants.MessageKey.SANDBOX));
+            assertNotNull(batch.get(Constants.MessageKey.LTV));
+            assertNotNull(batch.get(Constants.MessageKey.USER_ATTRIBUTES));
+            assertNotNull(batch.get(Constants.MessageKey.USER_IDENTITIES));
+            assertNotNull(batch.get(Constants.MessageKey.MESSAGES));
+        }catch (Exception e){
+            fail(e.toString());
         }
     }
 

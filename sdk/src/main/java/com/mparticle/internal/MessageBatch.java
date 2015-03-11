@@ -14,7 +14,7 @@ import java.util.UUID;
 
 public class MessageBatch {
 
-    static JSONObject create(Context context, JSONArray messagesArray, boolean history, JSONObject appInfo, JSONObject deviceInfo, ConfigManager configManager, SharedPreferences preferences) throws JSONException {
+    public static JSONObject create(Context context, JSONArray messagesArray, boolean history, JSONObject appInfo, JSONObject deviceInfo, ConfigManager configManager, SharedPreferences preferences) throws JSONException {
         JSONObject uploadMessage = new JSONObject();
 
         uploadMessage.put(Constants.MessageKey.TYPE, Constants.MessageType.REQUEST_HEADER);

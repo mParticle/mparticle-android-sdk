@@ -20,9 +20,6 @@ import org.json.JSONObject;
 import java.util.Iterator;
 import java.util.UUID;
 
-/**
- * Created by sdozor on 12/29/14.
- */
 public class PushTests extends AndroidTestCase {
 
     static final String[] MESSAGE_KEYS = {"mp_message","com.urbanairship.push.ALERT","alert","a","message"};

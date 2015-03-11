@@ -29,14 +29,14 @@ public class UserTests extends AndroidTestCase {
         try {
             assertEquals(userAttributes.get("hair"), "brown");
             MParticle.getInstance().removeUserAttribute("hair");
-            assertNull(userAttributes.get("hair"));
+            assertNull(userAttributes.opt("hair"));
             MParticle.getInstance().setUserTag("whatever");
             assertNotNull(userAttributes.get("whatever"));
         } catch (JSONException e) {
             fail(e.getMessage());
         }
     }
-    
+
     public void testUserIdentities() {
         try{
             JSONArray identities = MParticle.getInstance().internal().getUserIdentities();
