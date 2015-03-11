@@ -47,10 +47,10 @@ class AppConfig {
     public String licenseKey = null;
     public boolean isLicensingEnabled = DEFAULT_ENABLE_LICENSING;
     public boolean autoTrackingEnabled = DEFAULT_ENABLE_AUTO_TRACKING;
-    public volatile boolean networkingEnabled = DEFAULT_NETWORK_MEASUREMENT;
+    public static volatile boolean networkingEnabled = DEFAULT_NETWORK_MEASUREMENT;
     public int audienceTimeout = 100;
-    private MParticle.Environment mEnvironment = MParticle.Environment.Production;
-    public MParticle.LogLevel logLevel = MParticle.LogLevel.NONE;
+    private static MParticle.Environment mEnvironment = MParticle.Environment.Production;
+    public static MParticle.LogLevel logLevel = MParticle.LogLevel.NONE;
 
     public AppConfig(Context context, MParticle.Environment environment, SharedPreferences preferences) {
         mContext = context;
@@ -157,7 +157,7 @@ class AppConfig {
         return mContext.getResources().getInteger(id);
     }
 
-    public MParticle.Environment getEnvironment() {
+    public static MParticle.Environment getEnvironment() {
         return mEnvironment;
     }
 }

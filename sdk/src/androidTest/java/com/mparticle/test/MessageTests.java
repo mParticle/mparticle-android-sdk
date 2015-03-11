@@ -32,7 +32,6 @@ public class MessageTests extends AndroidTestCase {
 
             assertTrue(mpMessage.getSessionId().equals(sessionId));
             assertTrue(mpMessage.getString("sid").equals(sessionId));
-            assertFalse(TextUtils.isEmpty(mpMessage.getString("id")));
             assertTrue(mpMessage.getString("ct").equals(Long.toString(firstRunTime)));
             assertFalse(TextUtils.isEmpty(mpMessage.getString("dct")));
         }catch (JSONException jse){

@@ -55,7 +55,7 @@ public class ConfigManager implements MessagingConfigCallbacks {
     private SharedPreferences mPreferences;
 
     private EmbeddedKitManager mEmbeddedKitManager;
-    private static AppConfig sLocalPrefs;
+    private AppConfig sLocalPrefs;
     private static JSONArray sPushKeys;
     private String mLogUnhandledExceptions = VALUE_APP_DEFINED;
 
@@ -248,7 +248,7 @@ public class ConfigManager implements MessagingConfigCallbacks {
     }
 
     public static MParticle.Environment getEnvironment() {
-        return sLocalPrefs.getEnvironment();
+        return AppConfig.getEnvironment();
     }
 
     public void setUploadInterval(int uploadInterval) {
@@ -290,7 +290,7 @@ public class ConfigManager implements MessagingConfigCallbacks {
     }
 
     static void log(LogLevel priority, Throwable error, String... messages){
-        if (messages != null && sLocalPrefs.logLevel.ordinal() >= priority.ordinal() &&
+        if (messages != null && AppConfig.logLevel.ordinal() >= priority.ordinal() &&
                 getEnvironment().equals(MParticle.Environment.Development)) {
             StringBuilder logMessage = new StringBuilder();
             for (String m : messages){
@@ -425,14 +425,12 @@ public class ConfigManager implements MessagingConfigCallbacks {
     }
 
     public static boolean isNetworkPerformanceEnabled() {
-        return Build.VERSION.SDK_INT > Build.VERSION_CODES.FROYO && sLocalPrefs != null &&
-                sLocalPrefs.networkingEnabled;
+        return Build.VERSION.SDK_INT > Build.VERSION_CODES.FROYO &&
+                AppConfig.networkingEnabled;
     }
 
     public static void setNetworkingEnabled(boolean networkingEnabled) {
-        if (sLocalPrefs != null) {
-            sLocalPrefs.networkingEnabled = networkingEnabled;
-        }
+        AppConfig.networkingEnabled = networkingEnabled;
     }
 
     public void setCookies(JSONObject serverCookies) {
