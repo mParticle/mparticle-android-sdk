@@ -375,7 +375,7 @@ public class MParticle {
      */
     public void setInstallReferrer(String referrer) {
         mPreferences.edit().putString(PrefKeys.INSTALL_REFERRER, referrer).apply();
-        Intent fakeReferralIntent = new Intent();
+        Intent fakeReferralIntent = new Intent("com.android.vending.INSTALL_REFERRER");
         fakeReferralIntent.putExtra(Constants.REFERRER, referrer);
         try {
             new com.mparticle.internal.embedded.adjust.sdk.ReferrerReceiver().onReceive(mAppContext, fakeReferralIntent);
