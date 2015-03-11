@@ -26,6 +26,11 @@ public class MPEventTests extends AndroidTestCase {
         assertTrue(event.getLength() == 1234);
     }
 
+    public void testEventLength() {
+        MPEvent event = new MPEvent.Builder("test name", MParticle.EventType.Navigation).category("test category").build();
+        assertNull(event.getLength());
+    }
+
     public void testTimer(){
         MPEvent.Builder eventBuilder = new MPEvent.Builder("test name", MParticle.EventType.Navigation);
 
