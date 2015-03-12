@@ -18,6 +18,9 @@ import com.mparticle.internal.MPUtility;
 import org.json.JSONObject;
 
 import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLConnection;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -226,8 +229,10 @@ public class MPCloudNotificationMessage extends AbstractCloudMessage {
         if (!TextUtils.isEmpty(largeIconUri)) {
             if (largeIconUri.contains("http:") || largeIconUri.contains("https:") ) {
                 try {
-                    InputStream in = new java.net.URL(largeIconUri).openStream();
-                    bitmap = BitmapFactory.decodeStream(in);
+                    URLConnection connection = new URL(largeIconUri).openConnection();
+                    connection.setConnectTimeout(2000);
+                    connection.setReadTimeout(20000);
+                    bitmap = BitmapFactory.decodeStream(connection.getInputStream());
                 } catch (Exception e) {
 
 
@@ -323,8 +328,10 @@ public class MPCloudNotificationMessage extends AbstractCloudMessage {
         String image = mExtras.getString(BIG_IMAGE);
         if (!TextUtils.isEmpty(image)){
             try {
-                InputStream in = new java.net.URL(image).openStream();
-                return BitmapFactory.decodeStream(in);
+                URLConnection connection = new URL(image).openConnection();
+                connection.setConnectTimeout(2000);
+                connection.setReadTimeout(20000);
+                return BitmapFactory.decodeStream(connection.getInputStream());
             }catch (Exception e){
 
             }

@@ -131,6 +131,8 @@ public class MParticleApiClient implements IMPApiClient {
                 mConfigUrl = new URL(SECURE_SERVICE_SCHEME, CONFIG_HOST, SERVICE_VERSION_3 + "/" + mApiKey + "/config");
             }
             HttpURLConnection connection = (HttpURLConnection) mConfigUrl.openConnection();
+            connection.setConnectTimeout(2000);
+            connection.setReadTimeout(10000);
             connection.setRequestProperty("Accept-Encoding", "gzip");
             connection.setRequestProperty(HEADER_ENVIRONMENT, Integer.toString(mConfigManager.getEnvironment().getValue()));
             connection.setRequestProperty(HEADER_KITS, getSupportedKitString());
@@ -172,6 +174,8 @@ public class MParticleApiClient implements IMPApiClient {
         try {
             ConfigManager.log(MParticle.LogLevel.DEBUG, "Starting Segment Network request");
             HttpURLConnection connection = (HttpURLConnection) getAudienceUrl().openConnection();
+            connection.setConnectTimeout(2000);
+            connection.setReadTimeout(10000);
             connection.setRequestProperty("Accept-Encoding", "gzip");
             connection.setRequestProperty(HTTP.USER_AGENT, mUserAgent);
 
@@ -207,6 +211,8 @@ public class MParticleApiClient implements IMPApiClient {
         }
         byte[] messageBytes = message.getBytes();
         HttpURLConnection connection = (HttpURLConnection) mEventUrl.openConnection();
+        connection.setConnectTimeout(2000);
+        connection.setReadTimeout(10000);
         connection.setDoOutput(true);
         connection.setRequestMethod("POST");
         connection.setRequestProperty(HTTP.CONTENT_TYPE, "application/json");
