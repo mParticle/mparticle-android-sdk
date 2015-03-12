@@ -5,9 +5,6 @@ import android.location.Location;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.math.BigInteger;
-import java.util.UUID;
-
 public class MPMessage extends JSONObject{
 
     private MPMessage(){}

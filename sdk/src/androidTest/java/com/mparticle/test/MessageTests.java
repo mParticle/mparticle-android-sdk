@@ -16,9 +16,7 @@ import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Created by sdozor on 12/30/14.
- */
+
 public class MessageTests extends AndroidTestCase {
 
     @Override
