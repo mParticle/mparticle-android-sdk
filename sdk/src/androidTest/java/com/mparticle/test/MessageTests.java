@@ -3,18 +3,20 @@ package com.mparticle.test;
 import android.test.AndroidTestCase;
 import android.text.TextUtils;
 
+import com.mparticle.MPEvent;
 import com.mparticle.MPProduct;
 import com.mparticle.MParticle;
+import com.mparticle.internal.Constants;
 import com.mparticle.internal.MPMessage;
+import com.mparticle.internal.MPUtility;
 
 import org.json.JSONException;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
+import java.util.Map;
 
-/**
- * Created by sdozor on 12/30/14.
- */
+
 public class MessageTests extends AndroidTestCase {
 
     @Override
@@ -57,6 +59,50 @@ public class MessageTests extends AndroidTestCase {
             MParticle.getInstance().logError("message", null);
             MParticle.getInstance().logError("message", new HashMap<String, String>());
         }catch (Exception e){
+            fail(e.toString());
+        }
+    }
+
+    public void testEventLength() {
+        try {
+            MPEvent event = new MPEvent.Builder("test name", MParticle.EventType.Navigation).build();
+            MPMessage message = new MPMessage.Builder(Constants.MessageType.EVENT, "whatever", null)
+                    .name(event.getEventName())
+                    .sessionStartTime(1234)
+                    .timestamp(1235)
+                    .length(event.getLength())
+                    .attributes(MPUtility.enforceAttributeConstraints(event.getInfo()))
+                    .build();
+
+            assertNull(message.opt("el"));
+            assertNull(message.getAttributes());
+
+            Map<String, String> info = new HashMap<String, String>(1);
+            info.put("EventLength", "321");
+            MPEvent event2 = new MPEvent.Builder("test name", MParticle.EventType.Navigation).duration(123).info(info).build();
+            MPMessage message2 = new MPMessage.Builder(Constants.MessageType.EVENT, "whatever", null)
+                    .name(event2.getEventName())
+                    .sessionStartTime(1234)
+                    .timestamp(1235)
+                    .length(event2.getLength())
+                    .attributes(MPUtility.enforceAttributeConstraints(event2.getInfo()))
+                    .build();
+
+            assertEquals(message2.getAttributes().getString("EventLength"), "321");
+
+            MPEvent event3 = new MPEvent.Builder("test name", MParticle.EventType.Navigation).duration(123).build();
+            MPMessage message3 = new MPMessage.Builder(Constants.MessageType.EVENT, "whatever", null)
+                    .name(event3.getEventName())
+                    .sessionStartTime(1234)
+                    .timestamp(1235)
+                    .length(event3.getLength())
+                    .attributes(MPUtility.enforceAttributeConstraints(event.getInfo()))
+                    .build();
+
+            assertEquals(message3.getAttributes().getString("EventLength"), "123");
+
+
+        }catch(Exception e){
             fail(e.toString());
         }
     }

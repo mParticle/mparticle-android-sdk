@@ -81,8 +81,8 @@ public class MPEvent {
             .append(eventType.name())
             .append("\n");
         }
-        double length = getLength();
-        if (length > 0){
+        Double length = getLength();
+        if (length != null && length > 0){
             builder.append("length: ")
                     .append(length).append("ms")
                     .append("\n");
@@ -116,16 +116,15 @@ public class MPEvent {
         return eventType;
     }
 
-    public double getLength() {
+    public Double getLength() {
         if (duration != null) {
             return duration;
         }
         if (endTime != null && startTime != null) {
             double length = endTime - startTime;
             return length > 0 ? length : 0;
-        }else {
-            return 0;
         }
+        return null;
     }
 
     /**

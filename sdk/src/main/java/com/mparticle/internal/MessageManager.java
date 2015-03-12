@@ -7,7 +7,6 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.database.sqlite.SQLiteDatabase;
 import android.location.Location;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -16,17 +15,14 @@ import android.os.Bundle;
 import android.os.HandlerThread;
 import android.os.Message;
 import android.os.Process;
-import android.text.TextUtils;
 import android.telephony.TelephonyManager;
-import android.util.Log;
+import android.text.TextUtils;
 
 import com.mparticle.MPEvent;
 import com.mparticle.MPUnityException;
 import com.mparticle.MParticle;
 import com.mparticle.internal.Constants.MessageKey;
 import com.mparticle.internal.Constants.MessageType;
-import com.mparticle.MParticle.EventType;
-import com.mparticle.messaging.AbstractCloudMessage;
 import com.mparticle.messaging.CloudAction;
 import com.mparticle.messaging.MPCloudNotificationMessage;
 import com.mparticle.messaging.ProviderCloudMessage;
@@ -285,13 +281,14 @@ public class MessageManager implements MessageManagerCallbacks {
                     .name(event.getEventName())
                     .sessionStartTime(sessionStartTime)
                     .timestamp(time)
+                    .length(event.getLength())
                     .attributes(MPUtility.enforceAttributeConstraints(event.getInfo()))
                     .build();
 
             message.put(MessageKey.EVENT_TYPE, event.getEventType());
             // NOTE: event timing is not supported (yet) but the server expects this data
             message.put(MessageKey.EVENT_START_TIME, time);
-            message.put(MessageKey.EVENT_DURATION, event.getLength());
+
             if (currentActivity != null){
                 message.put(MessageKey.CURRENT_ACTIVITY, currentActivity);
             }

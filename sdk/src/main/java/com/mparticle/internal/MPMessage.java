@@ -5,8 +5,6 @@ import android.location.Location;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.UUID;
-
 public class MPMessage extends JSONObject{
 
     private MPMessage(){}
@@ -25,12 +23,26 @@ public class MPMessage extends JSONObject{
                 put(Constants.MessageKey.SESSION_START_TIMESTAMP, builder.mSessionStartTime);
             }
         }
+
         if (builder.mName != null) {
             put(Constants.MessageKey.NAME, builder.mName);
         }
+
+        if (builder.mLength != null){
+            put(Constants.MessageKey.EVENT_DURATION, builder.mLength);
+            if (builder.mAttributes == null){
+                builder.mAttributes = new JSONObject();
+            }
+            if (!builder.mAttributes.has("EventLength")) {
+                //can't be longer than max int milliseconds
+                builder.mAttributes.put("EventLength", builder.mLength.intValue());
+            }
+        }
+
         if (builder.mAttributes != null) {
             put(Constants.MessageKey.ATTRIBUTES, builder.mAttributes);
         }
+
         if (builder.mDataConnection != null) {
             put(Constants.MessageKey.STATE_INFO_DATA_CONNECTION, builder.mDataConnection);
         }
@@ -45,6 +57,10 @@ public class MPMessage extends JSONObject{
                 put(Constants.MessageKey.LOCATION, locJSON);
             }
         }
+    }
+
+    public JSONObject getAttributes(){
+        return optJSONObject(Constants.MessageKey.ATTRIBUTES);
     }
 
     public long getTimestamp(){
@@ -89,6 +105,7 @@ public class MPMessage extends JSONObject{
         private JSONObject mAttributes;
         private Location mLocation;
         private String mDataConnection;
+        private Double mLength = null;
 
         public Builder(String messageType, String sessionId, Location location){
             mMessageType = messageType;
@@ -119,6 +136,11 @@ public class MPMessage extends JSONObject{
 
         public Builder dataConnection(String dataConnection) {
             mDataConnection = dataConnection;
+            return this;
+        }
+
+        public Builder length(Double length) {
+            mLength = length;
             return this;
         }
     }
