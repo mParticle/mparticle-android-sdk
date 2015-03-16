@@ -29,6 +29,7 @@ def getDate() {
 android {
     compileSdkVersion 21
     buildToolsVersion "21.1.2"
+    defaultPublishConfig "embeddedKitsRelease"
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_7
@@ -63,6 +64,17 @@ android {
         buildConfigField "String", "MP_URL", url
         buildConfigField "String", "MP_CONFIG_URL", configurationUrl
 
+    }
+
+    productFlavors {
+
+        embeddedKits {
+
+        }
+
+        nokits {
+
+        }
     }
 
     buildTypes {
@@ -130,9 +142,9 @@ uploadArchives {
 
 dependencies {
     deployerJars "org.kuali.maven.wagons:maven-s3-wagon:1.2.1"
-    compile files('embeddedkits/Kahuna489.jar')
-    compile files('embeddedkits/KochavaSDK.jar')
-    compile files('embeddedkits/comscore2140923.jar')
+    embeddedKitsCompile files('embeddedkits/Kahuna489.jar')
+    embeddedKitsCompile files('embeddedkits/KochavaSDK.jar')
+    embeddedKitsCompile files('embeddedkits/comscore2140923.jar')
     compile 'com.google.android.gms:play-services:[3.1,)'
     compile 'com.android.support:support-v4:21.0.3'
     unityCompile project('unityskeleton')

@@ -6,11 +6,10 @@ import android.os.Build;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Base64;
-import android.util.Log;
 
 import com.mparticle.BuildConfig;
 import com.mparticle.MParticle;
-import com.mparticle.internal.embedded.EmbeddedKitManager;
+import com.mparticle.internal.embedded.BaseEmbeddedKitFactory;
 
 import org.apache.http.HttpStatus;
 import org.apache.http.protocol.HTTP;
@@ -494,7 +493,7 @@ public class MParticleApiClient implements IMPApiClient {
 
     private static String getSupportedKitString(){
         if (mSupportedKits == null) {
-            ArrayList<Integer> supportedKitIds = EmbeddedKitManager.BaseEmbeddedKitFactory.getSupportedKits();
+            ArrayList<Integer> supportedKitIds = BaseEmbeddedKitFactory.getSupportedKits();
             if (supportedKitIds.size() > 0) {
                 StringBuilder buffer = new StringBuilder(supportedKitIds.size() * 3);
                 Iterator<Integer> it = supportedKitIds.iterator();

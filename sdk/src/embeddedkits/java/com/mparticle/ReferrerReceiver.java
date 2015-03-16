@@ -35,6 +35,10 @@ import com.mparticle.internal.Constants;
 public class ReferrerReceiver extends BroadcastReceiver {
     @Override
     public final void onReceive(Context context, Intent intent) {
+       ReferrerReceiver.setInstallReferrer(context, intent);
+    }
+
+    static void setInstallReferrer(Context context, Intent intent){
         if (context == null){
             Log.e(Constants.LOG_TAG, "ReferrerReceiver Context can not be null");
             return;

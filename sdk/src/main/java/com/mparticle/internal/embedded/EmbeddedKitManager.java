@@ -39,13 +39,14 @@ public class EmbeddedKitManager implements MPActivityCallbacks {
             providers.clear();
         }else{
             HashSet<Integer> activeIds = new HashSet<Integer>();
+            EmbeddedKitFactory ekFactory = new EmbeddedKitFactory();
             for (int i = 0; i < kitConfigs.length(); i++) {
                 try {
                     JSONObject current = kitConfigs.getJSONObject(i);
                     int currentId = current.getInt(EmbeddedProvider.KEY_ID);
                     activeIds.add(currentId);
                     if (!providers.containsKey(currentId)) {
-                        providers.put(currentId, new BaseEmbeddedKitFactory().createInstance(currentId, context));
+                        providers.put(currentId, ekFactory.createInstance(currentId, context));
                     }
                     providers.get(currentId).parseConfig(current).update();
                     if (!providers.get(currentId).optedOut()) {
@@ -338,41 +339,6 @@ public class EmbeddedKitManager implements MPActivityCallbacks {
             return ((ISurveyProvider)provider).getSurveyUrl(provider.filterAttributes(provider.mUserAttributeFilters, userAttributes));
         } else{
             return null;
-        }
-    }
-
-    public static class BaseEmbeddedKitFactory {
-        private final static int KOCHAVA = 37;
-        private final static int COMSCORE = 39;
-        private final static int KAHUNA = 56;
-        private final static int FORESEE = MParticle.ServiceProviders.FORESEE_ID;
-        private final static int ADJUST = 68;
-
-        protected EmbeddedProvider createInstance(int id, Context context) throws JSONException, ClassNotFoundException{
-            switch (id){
-                case KOCHAVA:
-                    return new EmbeddedKochava(context);
-                case COMSCORE:
-                    return new EmbeddedComscore(context);
-                case KAHUNA:
-                    return new EmbeddedKahuna(context);
-                case FORESEE:
-                    return new EmbeddedForesee(context);
-                case ADJUST:
-                    return new EmbeddedAdjust(context);
-                default:
-                    return null;
-            }
-        }
-
-        public static ArrayList<Integer> getSupportedKits() {
-            ArrayList<Integer> supportedKitIds = new ArrayList<Integer>();
-            supportedKitIds.add(KOCHAVA);
-            supportedKitIds.add(COMSCORE);
-            supportedKitIds.add(KAHUNA);
-            supportedKitIds.add(FORESEE);
-            supportedKitIds.add(ADJUST);
-            return supportedKitIds;
         }
     }
 }
