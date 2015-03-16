@@ -14,36 +14,31 @@ import android.provider.Settings;
 import android.util.Log;
 import android.webkit.WebView;
 
-
-import com.kochava.android.tracker.ReferralCapture;
-import com.mparticle.internal.MPLicenseCheckerCallback;
-import com.mparticle.internal.MPLocationListener;
-import com.mparticle.internal.MessageManager;
-import com.mparticle.internal.UploadHandler;
-import com.mparticle.media.MPMediaAPI;
-import com.mparticle.media.MediaCallbacks;
-
 import com.mparticle.internal.AppStateManager;
 import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.Constants;
-
-import com.mparticle.internal.embedded.EmbeddedKitManager;
+import com.mparticle.internal.Constants.MessageKey;
+import com.mparticle.internal.Constants.PrefKeys;
 import com.mparticle.internal.ExceptionHandler;
 import com.mparticle.internal.KitKatHelper;
+import com.mparticle.internal.MPLicenseCheckerCallback;
+import com.mparticle.internal.MPLocationListener;
+import com.mparticle.internal.MPUtility;
+import com.mparticle.internal.MParticleJSInterface;
+import com.mparticle.internal.MessageManager;
+import com.mparticle.internal.PushRegistrationHelper;
+import com.mparticle.internal.embedded.EmbeddedKitManager;
 import com.mparticle.internal.np.MPSSLSocketFactory;
 import com.mparticle.internal.np.MPSocketImplFactory;
 import com.mparticle.internal.np.MPUrlStreamHandlerFactory;
-import com.mparticle.internal.MPUtility;
-import com.mparticle.internal.MParticleJSInterface;
 import com.mparticle.internal.np.MeasuredRequestManager;
-
-import com.mparticle.internal.PushRegistrationHelper;
 import com.mparticle.licensing.AESObfuscator;
 import com.mparticle.licensing.LicenseChecker;
 import com.mparticle.licensing.LicenseCheckerCallback;
 import com.mparticle.licensing.Policy;
 import com.mparticle.licensing.ServerManagedPolicy;
-
+import com.mparticle.media.MPMediaAPI;
+import com.mparticle.media.MediaCallbacks;
 import com.mparticle.messaging.CloudAction;
 import com.mparticle.messaging.MPCloudNotificationMessage;
 import com.mparticle.messaging.MPMessagingAPI;
@@ -66,7 +61,6 @@ import java.util.Map;
 import java.util.UUID;
 
 import javax.net.ssl.HttpsURLConnection;
-import com.mparticle.internal.Constants.*;
 
 /**
  * The primary access point to the mParticle SDK. In order to use this class, you must first call {@link #start(android.content.Context)}, which requires
@@ -374,20 +368,9 @@ public class MParticle {
      * automatically retrieved upon installation from Google Play.
      */
     public void setInstallReferrer(String referrer) {
-        mPreferences.edit().putString(PrefKeys.INSTALL_REFERRER, referrer).apply();
         Intent fakeReferralIntent = new Intent("com.android.vending.INSTALL_REFERRER");
         fakeReferralIntent.putExtra(Constants.REFERRER, referrer);
-        try {
-            new com.mparticle.internal.embedded.adjust.sdk.ReferrerReceiver().onReceive(mAppContext, fakeReferralIntent);
-        }catch (Exception e){
-            Log.w(Constants.LOG_TAG, "Failed to pass referrer to Adjust SDK: " + e.getMessage());
-        }
-        try {
-            new ReferralCapture().onReceive(mAppContext, fakeReferralIntent);
-        }catch (Exception e){
-            Log.w(Constants.LOG_TAG, "Failed to pass referrer to Kochava SDK: " + e.getMessage());
-        }
-        ConfigManager.log(LogLevel.DEBUG, "Set installReferrer: ", referrer);
+        ReferrerReceiver.setInstallReferrer(mAppContext, fakeReferralIntent);
     }
 
     public String getInstallReferrer(){
