@@ -29,7 +29,7 @@ def getDate() {
 android {
     compileSdkVersion 21
     buildToolsVersion "21.1.2"
-    publishNonDefault true
+    defaultPublishConfig "embeddedKitsRelease"
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_7
