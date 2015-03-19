@@ -9,7 +9,7 @@ import org.json.JSONException;
 
 import java.util.ArrayList;
 
-class EmbeddedKitFactory {
+public class EmbeddedKitFactory {
     private final static int KOCHAVA = 37;
     private final static int COMSCORE = 39;
     private final static int KAHUNA = 56;

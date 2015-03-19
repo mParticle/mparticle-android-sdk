@@ -7,17 +7,16 @@ import android.location.Location;
 import android.net.Uri;
 
 import com.mparticle.MPEvent;
+import com.mparticle.MPProduct;
 import com.mparticle.MParticle;
 import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.Constants;
 import com.mparticle.internal.MPActivityCallbacks;
-import com.mparticle.MPProduct;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
