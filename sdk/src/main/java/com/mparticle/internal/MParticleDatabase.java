@@ -20,12 +20,12 @@ import android.provider.BaseColumns;
     public static final String DB_NAME = "mparticle.db";
 
     interface BreadcrumbTable {
-        public final static String TABLE_NAME = "breadcrumbs";
-        public final static String SESSION_ID = "session_id";
-        public final static String API_KEY = "api_key";
-        public final static String MESSAGE = "message";
-        public final static String CREATED_AT = "breadcrumb_time";
-        public final static String CF_UUID = "cfuuid";
+        String TABLE_NAME = "breadcrumbs";
+        String SESSION_ID = "session_id";
+        String API_KEY = "api_key";
+        String MESSAGE = "message";
+        String CREATED_AT = "breadcrumb_time";
+        String CF_UUID = "cfuuid";
     }
 
     private static final String CREATE_BREADCRUMBS_DDL =
@@ -39,14 +39,14 @@ import android.provider.BaseColumns;
                     ");";
 
     interface SessionTable {
-        public final static String TABLE_NAME = "sessions";
-        public final static String SESSION_ID = "session_id";
-        public final static String API_KEY = "api_key";
-        public final static String START_TIME = "start_time";
-        public final static String END_TIME = "end_time";
-        public final static String SESSION_FOREGROUND_LENGTH = "session_length";
-        public final static String ATTRIBUTES = "attributes";
-        public final static String CF_UUID = "cfuuid";
+        String TABLE_NAME = "sessions";
+        String SESSION_ID = "session_id";
+        String API_KEY = "api_key";
+        String START_TIME = "start_time";
+        String END_TIME = "end_time";
+        String SESSION_FOREGROUND_LENGTH = "session_length";
+        String ATTRIBUTES = "attributes";
+        String CF_UUID = "cfuuid";
     }
 
     private static final String CREATE_SESSIONS_DDL =
@@ -63,14 +63,14 @@ import android.provider.BaseColumns;
 
 
     interface MessageTable {
-        public final static String TABLE_NAME = "messages";
-        public final static String SESSION_ID = "session_id";
-        public final static String API_KEY = "api_key";
-        public final static String MESSAGE = "message";
-        public final static String STATUS = "upload_status";
-        public final static String CREATED_AT = "message_time";
-        public final static String MESSAGE_TYPE = "message_type";
-        public final static String CF_UUID = "cfuuid";
+        String TABLE_NAME = "messages";
+        String SESSION_ID = "session_id";
+        String API_KEY = "api_key";
+        String MESSAGE = "message";
+        String STATUS = "upload_status";
+        String CREATED_AT = "message_time";
+        String MESSAGE_TYPE = "message_type";
+        String CF_UUID = "cfuuid";
     }
 
     private static final String CREATE_MESSAGES_DDL =
@@ -86,12 +86,12 @@ import android.provider.BaseColumns;
                     ");";
 
     interface UploadTable {
-        public final static String TABLE_NAME = "uploads";
-        public final static String API_KEY = "api_key";
-        public final static String MESSAGE = "message";
-        public final static String CREATED_AT = "message_time";
-        public final static String CF_UUID = "cfuuid";
-        public final static String SESSION_ID = "session_id";
+        String TABLE_NAME = "uploads";
+        String API_KEY = "api_key";
+        String MESSAGE = "message";
+        String CREATED_AT = "message_time";
+        String CF_UUID = "cfuuid";
+        String SESSION_ID = "session_id";
     }
 
     private static final String CREATE_UPLOADS_DDL =
@@ -105,15 +105,15 @@ import android.provider.BaseColumns;
                     ");";
 
     interface CommandTable {
-        public final static String TABLE_NAME = "commands";
-        public final static String URL = "url";
-        public final static String METHOD = "method";
-        public final static String POST_DATA = "post_data";
-        public final static String HEADERS = "headers";
-        public final static String CREATED_AT = "timestamp";
-        public final static String SESSION_ID = "session_id";
-        public final static String API_KEY = "api_key";
-        public final static String CF_UUID = "cfuuid";
+        String TABLE_NAME = "commands";
+        String URL = "url";
+        String METHOD = "method";
+        String POST_DATA = "post_data";
+        String HEADERS = "headers";
+        String CREATED_AT = "timestamp";
+        String SESSION_ID = "session_id";
+        String API_KEY = "api_key";
+        String CF_UUID = "cfuuid";
     }
 
     private static final String CREATE_COMMANDS_DDL =
@@ -130,16 +130,16 @@ import android.provider.BaseColumns;
                     ");";
 
     interface GcmMessageTable {
-        public final static String CONTENT_ID = "content_id";
-        public final static String CAMPAIGN_ID = "campaign_id";
-        public final static String TABLE_NAME = "gcm_messages";
-        public final static String PAYLOAD = "payload";
-        public final static String CREATED_AT = "message_time";
-        public final static String DISPLAYED_AT = "displayed_time";
-        public final static String EXPIRATION = "expiration";
-        public final static String BEHAVIOR = "behavior";
-        public final static String APPSTATE = "appstate";
-        public final static int PROVIDER_CONTENT_ID = -1;
+        String CONTENT_ID = "content_id";
+        String CAMPAIGN_ID = "campaign_id";
+        String TABLE_NAME = "gcm_messages";
+        String PAYLOAD = "payload";
+        String CREATED_AT = "message_time";
+        String DISPLAYED_AT = "displayed_time";
+        String EXPIRATION = "expiration";
+        String BEHAVIOR = "behavior";
+        String APPSTATE = "appstate";
+        int PROVIDER_CONTENT_ID = -1;
     }
 
     private static final String CREATE_GCM_MSG_DDL =
