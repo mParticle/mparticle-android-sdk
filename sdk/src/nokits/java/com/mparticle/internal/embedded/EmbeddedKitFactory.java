@@ -9,7 +9,7 @@ import org.json.JSONException;
 
 import java.util.ArrayList;
 
-class EmbeddedKitFactory {
+public class EmbeddedKitFactory {
 
 
     protected EmbeddedProvider createInstance(int id, Context context) throws JSONException, ClassNotFoundException{
