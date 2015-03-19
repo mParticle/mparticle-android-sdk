@@ -16,7 +16,7 @@ import org.json.JSONObject;
 import java.util.HashMap;
 import java.util.Map;
 
-class EmbeddedKochava extends EmbeddedProvider implements MPActivityCallbacks {
+class EmbeddedKochava extends EmbeddedProvider {
     private static final String APP_ID = "appId";
     private static final String USE_CUSTOMER_ID = "useCustomerId";
     private static final String INCLUDE_ALL_IDS = "passAllOtherIdentities";
@@ -53,35 +53,12 @@ class EmbeddedKochava extends EmbeddedProvider implements MPActivityCallbacks {
     }
 
     @Override
-    public void logEvent(MPEvent event, Map<String, String> attributes) throws Exception {
-
-    }
-
-    @Override
-    public void logTransaction(MPProduct transaction) throws Exception {
-    }
-
-    @Override
-    public void logScreen(String screenName, Map<String, String> eventAttributes) throws Exception {
-    }
-
-    @Override
     public void setLocation(Location location) {
         if (feature != null && location != null) {
             feature.setLatlong(
                     Double.toString(location.getLatitude()),
                     Double.toString(location.getLongitude()));
         }
-    }
-
-    @Override
-    public void setUserAttributes(JSONObject mUserAttributes) {
-
-    }
-
-    @Override
-    public void removeUserAttribute(String key) {
-
     }
 
     @Override
@@ -104,31 +81,6 @@ class EmbeddedKochava extends EmbeddedProvider implements MPActivityCallbacks {
         }
     }
 
-    @Override
-    public void logout() {
-        //no matching feature in Kochava
-    }
-
-    @Override
-    public void removeUserIdentity(String id) {
-
-    }
-
-    @Override
-    public void handleIntent(Intent intent) {
-
-    }
-
-    @Override
-    public void startSession() {
-
-    }
-
-    @Override
-    public void endSession() {
-
-    }
-
     private void createKochava(Activity activity) {
         if (feature == null) {
             HashMap<String, Object> datamap = new HashMap<String, Object>();
@@ -143,29 +95,5 @@ class EmbeddedKochava extends EmbeddedProvider implements MPActivityCallbacks {
             datamap.put(Feature.INPUTITEMS.REQUEST_ATTRIBUTION, Boolean.parseBoolean(properties.get(RETRIEVE_ATT_DATA)));
             feature = new Feature(activity, datamap);
         }
-    }
-
-    @Override
-    public void onActivityCreated(Activity activity, int activityCount) {
-        createKochava(activity);
-    }
-
-    @Override
-    public void onActivityResumed(Activity activity, int activityCount) {
-        createKochava(activity);
-    }
-
-    @Override
-    public void onActivityPaused(Activity activity, int activityCount) {
-    }
-
-    @Override
-    public void onActivityStopped(Activity activity, int activityCount) {
-        feature = null;
-    }
-
-    @Override
-    public void onActivityStarted(Activity activity, int activityCount) {
-        createKochava(activity);
     }
 }

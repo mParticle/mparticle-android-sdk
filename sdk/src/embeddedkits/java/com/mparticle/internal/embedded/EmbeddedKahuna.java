@@ -29,7 +29,7 @@ import java.util.Map;
 
 /**
  * <p/>
- * Embedded implementation of the Kochava SDK
+ * Embedded implementation of the Kahuna SDK
  * <p/>
  */
 class EmbeddedKahuna extends EmbeddedProvider implements MPActivityCallbacks {

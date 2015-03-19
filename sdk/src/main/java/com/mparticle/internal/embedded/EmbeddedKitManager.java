@@ -32,7 +32,7 @@ public class EmbeddedKitManager implements MPActivityCallbacks {
         this.context = context;
     }
 
-
+    //called from a background thread by the ConfigManager when we get new configuration
     public void updateKits(JSONArray kitConfigs){
         if (kitConfigs == null) {
             providers.clear();
@@ -43,14 +43,16 @@ public class EmbeddedKitManager implements MPActivityCallbacks {
                 try {
                     JSONObject current = kitConfigs.getJSONObject(i);
                     int currentId = current.getInt(EmbeddedProvider.KEY_ID);
-                    activeIds.add(currentId);
-                    if (!providers.containsKey(currentId)) {
-                        providers.put(currentId, ekFactory.createInstance(currentId, context));
-                    }
-                    providers.get(currentId).parseConfig(current).update();
-                    if (!providers.get(currentId).optedOut()) {
-                        providers.get(currentId).setUserAttributes(MParticle.getInstance().internal().getUserAttributes());
-                        syncUserIdentities(providers.get(currentId));
+                    if (ekFactory.isSupported(currentId)) {
+                        activeIds.add(currentId);
+                        if (!providers.containsKey(currentId)) {
+                            providers.put(currentId, ekFactory.createInstance(currentId, context));
+                        }
+                        providers.get(currentId).parseConfig(current).update();
+                        if (!providers.get(currentId).optedOut()) {
+                            providers.get(currentId).setUserAttributes(MParticle.getInstance().internal().getUserAttributes());
+                            syncUserIdentities(providers.get(currentId));
+                        }
                     }
                 } catch (JSONException jse) {
                     ConfigManager.log(MParticle.LogLevel.ERROR, "Exception while parsing embedded kit configuration: " + jse.getMessage());

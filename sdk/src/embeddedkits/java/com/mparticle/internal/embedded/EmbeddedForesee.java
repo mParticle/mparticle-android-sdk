@@ -49,73 +49,8 @@ class EmbeddedForesee extends EmbeddedProvider implements ISurveyProvider {
         return this;
     }
 
-
-    @Override
-    public void logEvent(MPEvent event, Map<String, String> attributes) throws Exception {
-
-    }
-
-    @Override
-    public void logTransaction(MPProduct transaction) throws Exception {
-
-    }
-
-    @Override
-    public void logScreen(String screenName, Map<String, String> eventAttributes) throws Exception {
-
-    }
-
-    @Override
-    public void setLocation(Location location) {
-
-    }
-
-    @Override
-    public void setUserAttributes(JSONObject mUserAttributes) {
-
-    }
-
-    @Override
-    public void removeUserAttribute(String key) {
-
-    }
-
-    @Override
-    public void setUserIdentity(String id, MParticle.IdentityType identityType) {
-
-    }
-
-    @Override
-    public void logout() {
-
-    }
-
-    @Override
-    public void removeUserIdentity(String id) {
-
-    }
-
-    @Override
-    public void handleIntent(Intent intent) {
-
-    }
-
-    @Override
-    public void startSession() {
-
-    }
-
-    @Override
-    public void endSession() {
-
-    }
-
     /**
      *
-     *
-     *
-     * @param userAttributes
-     * @return
      *
      * example: http://survey.foreseeresults.com/survey/display?cid=8NNxB5BIVJdMBEBUBJ1Fpg==&sid=link&cpp[custid]=1234
      */

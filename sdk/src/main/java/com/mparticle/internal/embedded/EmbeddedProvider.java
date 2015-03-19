@@ -1,8 +1,12 @@
 package com.mparticle.internal.embedded;
 
 import android.content.Context;
+import android.content.Intent;
+import android.location.Location;
 import android.util.SparseBooleanArray;
 
+import com.mparticle.MPEvent;
+import com.mparticle.MPProduct;
 import com.mparticle.MParticle;
 import com.mparticle.internal.ConfigManager;
 
@@ -20,7 +24,7 @@ import java.util.Map;
  * such as filters.
  *
  */
-abstract class EmbeddedProvider implements IEmbeddedKit {
+abstract class EmbeddedProvider {
 
     final static String KEY_ID = "id";
     private final static String KEY_PROPERTIES = "as";
@@ -223,6 +227,43 @@ abstract class EmbeddedProvider implements IEmbeddedKit {
         }else{
             return attributes;
         }
+    }
+
+    public void logEvent(MPEvent event, Map<String, String> attributes) throws Exception {
+
+    }
+    public void logTransaction(MPProduct transaction) throws Exception {
+
+    }
+    void logScreen(String screenName, Map<String, String> eventAttributes) throws Exception {
+
+    }
+    void setLocation(Location location) {
+
+    }
+    void setUserAttributes(JSONObject mUserAttributes) {
+
+    }
+    void removeUserAttribute(String key) {
+
+    }
+    void setUserIdentity(String id, MParticle.IdentityType identityType) {
+
+    }
+    void logout() {
+
+    }
+    void removeUserIdentity(String id) {
+
+    }
+    void handleIntent(Intent intent) {
+
+    }
+    void startSession() {
+
+    }
+    void endSession() {
+
     }
 
     public boolean shouldSetIdentity(MParticle.IdentityType identityType) {

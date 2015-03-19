@@ -75,21 +75,11 @@ class EmbeddedComscore extends EmbeddedProvider implements MPActivityCallbacks {
     }
 
     @Override
-    public void logTransaction(MPProduct transaction) {
-
-    }
-
-    @Override
     public void logScreen(String screenName, Map<String, String> eventAttributes) throws Exception {
         logEvent(
                 new MPEvent.Builder(screenName, MParticle.EventType.Navigation).build(),
                 eventAttributes
         );
-    }
-
-    @Override
-    public void setLocation(Location location) {
-
     }
 
     @Override
@@ -123,40 +113,10 @@ class EmbeddedComscore extends EmbeddedProvider implements MPActivityCallbacks {
     }
 
     @Override
-    public void removeUserAttribute(String key) {
-        //Comscore doesn't really support this...all of their attributes are primitives/non-nulls.
-    }
-
-    @Override
     public void setUserIdentity(String id, MParticle.IdentityType identityType) {
         if (isEnterprise){
             comScore.setLabel(identityType.toString(), id);
         }
-    }
-
-    @Override
-    public void logout() {
-
-    }
-
-    @Override
-    public void removeUserIdentity(String id) {
-
-    }
-
-    @Override
-    public void handleIntent(Intent intent) {
-
-    }
-
-    @Override
-    public void startSession() {
-        comScore.onUxActive();
-    }
-
-    @Override
-    public void endSession() {
-        comScore.onUxInactive();
     }
 
     @Override

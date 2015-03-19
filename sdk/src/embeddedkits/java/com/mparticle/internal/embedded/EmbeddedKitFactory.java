@@ -16,7 +16,7 @@ public class EmbeddedKitFactory {
     private final static int FORESEE = MParticle.ServiceProviders.FORESEE_ID;
     private final static int ADJUST = 68;
 
-    protected EmbeddedProvider createInstance(int id, Context context) throws JSONException, ClassNotFoundException{
+    final EmbeddedProvider createInstance(int id, Context context) throws JSONException, ClassNotFoundException{
         switch (id){
             case KOCHAVA:
                 return new EmbeddedKochava(context);
@@ -41,5 +41,17 @@ public class EmbeddedKitFactory {
         supportedKitIds.add(FORESEE);
         supportedKitIds.add(ADJUST);
         return supportedKitIds;
+    }
+
+    public boolean isSupported(int kitModuleId) {
+        switch (kitModuleId){
+            case KOCHAVA:
+            case COMSCORE:
+            case KAHUNA:
+            case FORESEE:
+            case ADJUST:
+                return true;
+        }
+        return false;
     }
 }
