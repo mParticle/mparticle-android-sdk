@@ -132,8 +132,6 @@ public class Constants {
         String ERROR = "x";
         String PUSH_REGISTRATION = "pr";
         String REQUEST_HEADER = "h";
-        String RESPONSE_HEADER = "rh";
-        String HTTP_COMMAND = "hc";
         String FIRST_RUN = "fr";
         String APP_STATE_TRANSITION = "ast";
         String PUSH_RECEIVED = "pm";
@@ -213,13 +211,9 @@ public class Constants {
         String DEVICE_LOCALE_LANGUAGE = "dll";
         String DEVICE_ROOTED = "jb";
         String DEVICE_ROOTED_CYDIA = "cydia";
-        String DEVICE_MAC_WIFI = "wmac";
-        String DEVICE_MAC_BLUETOOTH = "bmac";
-        String DEVICE_IMEI = "imei";
         String DEVICE_ANID = "anid";
         String DEVICE_TIMEZONE_NAME = "tzn";
         String DEVICE_OPEN_UDID = "ouid";
-        String DEVICE_PUSH_TOKEN = "to";
         String DEVICE_IS_TABLET = "it";
         String PUSH_SOUND_ENABLED = "se";
         String PUSH_VIBRATION_ENABLED = "ve";
@@ -229,7 +223,6 @@ public class Constants {
         String DEVICE_BLUETOOTH_VERSION = "dbv";
         String GOOGLE_ADV_ID = "gaid";
         String LIMIT_AD_TRACKING = "lat";
-        String ADTRUTH_ID = "atp";
 
         // state info
         String STATE_INFO_KEY = "cs";
@@ -273,7 +266,6 @@ public class Constants {
         String POST = "d";
         String HEADERS = "h";
         // config
-        String SESSION_UPLOAD = "su";
         String TIMEZONE = "tz";
         // opt-out
         String OPT_OUT_STATUS = "s";
@@ -345,9 +337,7 @@ public class Constants {
         String DELETED_USER_ATTRS = "mp::deleted_user_attrs::";
         String USER_IDENTITIES = "mp::user_ids::";
         String FIRSTRUN = "mp::firstrun::";
-        String FIRSTINIT = "mp::firstinit";
         String INITUPGRADE = "mp::initupgrade";
-        String UPLOAD_MODE = "mp::batch";
         String PROPERTY_APP_VERSION = "mp::appversion";
         String PROPERTY_OS_VERSION = "mp::osversion";
         String PUSH_ENABLED = "mp::push_enabled";
@@ -359,9 +349,6 @@ public class Constants {
         String PUSH_TITLE = "mp::push::title";
         String SESSION_COUNTER = "mp::breadcrumbs::sessioncount";
         String BREADCRUMB_LIMIT = "mp::breadcrumbs::limit";
-        //MAT embedded
-        String MAT_EXISTING_USER = "mp::embedded::mat::existinguser";
-        String INSTALL_DATE = "mp::installdate";
         String TOTAL_SINCE_UPGRADE = "mp::launch_since_upgrade";
         String UPGRADE_DATE = "mp::upgrade_date";
         String COUNTER_VERSION = "mp::version::counter";
@@ -374,18 +361,11 @@ public class Constants {
         String TIME_IN_BG = "mp::time_in_bg";
         String PREVIOUS_SESSION_FOREGROUND = "mp::time_in_fg";
         String NEXT_REQUEST_TIME = "mp::next_valid_request_time";
-        String ADTRUTH_PAYLOAD = "mp::adtruth::payload";
-        String ADTRUTH_LAST_TIMESTAMP = "mp::adtruth::timestamp";
         String EVENT_COUNTER = "mp::events::counter";
         String PREVIOUS_SESSION_ID = "mp::session::previous_id";
         String PREVIOUS_SESSION_START = "mp::session::previous_start";
         String API_KEY = "mp::config::apikey";
         String API_SECRET = "mp::config::apisecret";
-        String MACRO_GN = "mp:macros::gn";
-        String MACRO_OAID = "mp:macros::oaid";
-        String MACRO_G = "mp:macros::g";
-        String MACRO_TS = "mp:macros::ts";
-        String MACRO_GLSB = "mp:macros::glsb";
         String FIRST_RUN_INSTALL = "mp::firstrun::install";
     }
 
@@ -395,8 +375,7 @@ public class Constants {
     }
 
     public interface Status {
-        int UNKNOWN = -1;
-        int READY = 1; // stream
+        int READY = 1;
         int BATCH_READY = 2;
         int UPLOADED = 3;
     }
