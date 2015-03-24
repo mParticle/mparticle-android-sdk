@@ -30,8 +30,8 @@ class EmbeddedForesee extends EmbeddedProvider implements ISurveyProvider {
     public static final String SURVEY_ID = "surveyId";
     public static final String SEND_APP_VERSION = "sendAppVersion";
 
-    public EmbeddedForesee(Context context) {
-        super(context);
+    public EmbeddedForesee(EmbeddedKitManager ekManager) {
+        super(ekManager);
     }
 
     @Override

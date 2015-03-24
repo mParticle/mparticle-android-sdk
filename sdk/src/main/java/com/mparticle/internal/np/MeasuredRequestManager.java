@@ -1,7 +1,8 @@
 package com.mparticle.internal.np;
 
 import com.mparticle.MParticle;
-import com.mparticle.internal.ConfigManager;
+import com.mparticle.ConfigManager;
+import com.mparticle.internal.embedded.EmbeddedKitManager;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -17,6 +18,7 @@ public final class MeasuredRequestManager {
     private final ScheduledExecutorService scheduler =
             Executors.newScheduledThreadPool(1);
     final HashSet<MeasuredRequest> requests = new HashSet<MeasuredRequest>();
+    private final EmbeddedKitManager mEmbeddedKitManager;
     private CopyOnWriteArrayList<String> excludedUrlFilters = new CopyOnWriteArrayList<String>();
     private CopyOnWriteArrayList<String> queryStringFilters = new CopyOnWriteArrayList<String>();
     private static final String MPARTICLEHOST = ".mparticle.com";
@@ -29,8 +31,8 @@ public final class MeasuredRequestManager {
         }
     }
 
-    public MeasuredRequestManager() {
-
+    public MeasuredRequestManager(EmbeddedKitManager ekManager) {
+        mEmbeddedKitManager = ekManager;
     }
 
     final Runnable processPending = new Runnable() {
@@ -49,7 +51,9 @@ public final class MeasuredRequestManager {
                     try {
                         String uri = request.getUri();
                         String requestString = request.getRequestString();
-                        boolean allowed = MParticle.getInstance().internal().shouldProcessUrl(uri);
+                        boolean allowed = ConfigManager.isNetworkPerformanceEnabled() &&
+                                isUriAllowed(uri) && !mEmbeddedKitManager.isEmbeddedKitUri(uri);
+
                         if (request.readyForLogging() && !loggedUris.contains(uri)) {
                             if (allowed) {
                         /* disabling this for the server-side extractors...for now

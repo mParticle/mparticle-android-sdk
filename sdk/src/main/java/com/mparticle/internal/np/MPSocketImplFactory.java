@@ -1,7 +1,7 @@
 package com.mparticle.internal.np;
 
 import com.mparticle.MParticle;
-import com.mparticle.internal.ConfigManager;
+import com.mparticle.ConfigManager;
 
 import java.net.SocketImpl;
 import java.net.SocketImplFactory;

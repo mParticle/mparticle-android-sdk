@@ -1,11 +1,15 @@
 package com.mparticle.test;
 
-import android.test.AndroidTestCase;
-
 import com.mparticle.MPProduct;
 
-public class MPProductTest extends AndroidTestCase {
+import org.junit.Test;
 
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertNotNull;
+
+public class MPProductTest  {
+
+    @Test
     public void testBuilder(){
         MPProduct product = new MPProduct.Builder("test product name", "test-product-sku-0").build();
         assertNotNull(product);

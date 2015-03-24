@@ -31,8 +31,8 @@ class EmbeddedAdjust extends EmbeddedProvider implements MPActivityCallbacks {
     //check once per run to make sure we've set the referrer.
     private boolean referrerSet = false;
 
-    EmbeddedAdjust(Context context) {
-        super(context);
+    EmbeddedAdjust(EmbeddedKitManager ekManager) {
+        super(ekManager);
     }
 
     private void initAdjust(){
@@ -42,7 +42,7 @@ class EmbeddedAdjust extends EmbeddedProvider implements MPActivityCallbacks {
                     MParticle.getInstance().getEnvironment() == MParticle.Environment.Production ? "production" : "sandbox",
                     "info",
                     false);
-            if (!MParticle.getInstance().internal().isBackgrounded()) {
+            if (!mEkManager.getAppStateManager().isBackgrounded()) {
                 if (!hasResumed.get()) {
                     Adjust.onResume(context);
                     hasResumed.set(true);

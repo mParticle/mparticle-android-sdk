@@ -3,6 +3,7 @@ package com.mparticle.internal.embedded;
 
 import android.content.Context;
 
+import com.mparticle.ConfigManager;
 import com.mparticle.MParticle;
 
 import org.json.JSONException;
@@ -16,18 +17,18 @@ public class EmbeddedKitFactory {
     private final static int FORESEE = MParticle.ServiceProviders.FORESEE_ID;
     private final static int ADJUST = 68;
 
-    final EmbeddedProvider createInstance(int id, Context context) throws JSONException, ClassNotFoundException{
+    final EmbeddedProvider createInstance(int id, EmbeddedKitManager ekManager) throws JSONException, ClassNotFoundException{
         switch (id){
             case KOCHAVA:
-                return new EmbeddedKochava(context);
+                return new EmbeddedKochava(ekManager);
             case COMSCORE:
-                return new EmbeddedComscore(context);
+                return new EmbeddedComscore(ekManager);
             case KAHUNA:
-                return new EmbeddedKahuna(context);
+                return new EmbeddedKahuna(ekManager);
             case FORESEE:
-                return new EmbeddedForesee(context);
+                return new EmbeddedForesee(ekManager);
             case ADJUST:
-                return new EmbeddedAdjust(context);
+                return new EmbeddedAdjust(ekManager);
             default:
                 return null;
         }

@@ -27,7 +27,7 @@ class EmbeddedKochava extends EmbeddedProvider {
     private static final String HOST = "kochava.com";
     private Feature feature;
 
-    EmbeddedKochava(Context context) {
+    EmbeddedKochava(EmbeddedKitManager context) {
         super(context);
     }
 

@@ -4,7 +4,7 @@ import android.content.Context;
 
 import com.mparticle.MPService;
 import com.mparticle.MParticle;
-import com.mparticle.internal.ConfigManager;
+import com.mparticle.ConfigManager;
 import com.mparticle.internal.MPUtility;
 import com.mparticle.internal.PushRegistrationHelper;
 

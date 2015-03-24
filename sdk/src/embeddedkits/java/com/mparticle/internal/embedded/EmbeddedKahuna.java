@@ -16,7 +16,7 @@ import com.mparticle.MPEvent;
 import com.mparticle.MPProduct;
 import com.mparticle.MPReceiver;
 import com.mparticle.MParticle;
-import com.mparticle.internal.ConfigManager;
+import com.mparticle.ConfigManager;
 import com.mparticle.internal.Constants;
 import com.mparticle.internal.MPActivityCallbacks;
 import com.mparticle.internal.MPUtility;
@@ -40,17 +40,17 @@ class EmbeddedKahuna extends EmbeddedProvider implements MPActivityCallbacks {
     private static final String KEY_SECRET_KEY = "secretKey";
     private boolean sendTransactionData = false;
 
-    public EmbeddedKahuna(Context context) {
-        super(context);
+    public EmbeddedKahuna(EmbeddedKitManager ekManager) {
+        super(ekManager);
     }
 
     @Override
     protected EmbeddedProvider update() {
         if (!initialized) {
-            KahunaAnalytics.setDebugMode(MParticle.getInstance().internal().getConfigurationManager().getEnvironment() == MParticle.Environment.Development);
-            if (MParticle.getInstance().internal().getConfigurationManager().isPushEnabled()) {
+            KahunaAnalytics.setDebugMode(mEkManager.getConfigurationManager().getEnvironment() == MParticle.Environment.Development);
+            if (mEkManager.getConfigurationManager().isPushEnabled()) {
                 // registerForPush(context);
-                KahunaAnalytics.onAppCreate(context, properties.get(KEY_SECRET_KEY), MParticle.getInstance().internal().getConfigurationManager().getPushSenderId());
+                KahunaAnalytics.onAppCreate(context, properties.get(KEY_SECRET_KEY), mEkManager.getConfigurationManager().getPushSenderId());
                 KahunaAnalytics.disableKahunaGenerateNotifications();
             } else {
                 KahunaAnalytics.onAppCreate(context, properties.get(KEY_SECRET_KEY), null);

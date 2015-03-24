@@ -7,6 +7,7 @@ import android.content.pm.PackageManager;
 import android.os.Build;
 
 import com.google.android.gms.gcm.GoogleCloudMessaging;
+import com.mparticle.ConfigManager;
 import com.mparticle.MParticle;
 
 import java.io.IOException;

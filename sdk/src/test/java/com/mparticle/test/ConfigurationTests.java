@@ -1,38 +1,54 @@
 package com.mparticle.test;
 
-import android.test.AndroidTestCase;
-
 import com.mparticle.MParticle;
-import com.mparticle.internal.AppStateManager;
-import com.mparticle.internal.ConfigManager;
+import com.mparticle.AppStateManager;
+import com.mparticle.ConfigManager;
 import com.mparticle.internal.MPUtility;
+import com.mparticle.internal.embedded.EmbeddedKitManager;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.Before;
+import org.junit.Test;
 
-/**
- * Created by sdozor on 12/30/14.
- */
-public class ConfigurationTests extends AndroidTestCase {
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertFalse;
+import static junit.framework.Assert.assertNotNull;
+import static junit.framework.Assert.assertNull;
+import static junit.framework.Assert.assertTrue;
+import static junit.framework.Assert.fail;
+
+public class ConfigurationTests  {
 
 
+    final MockContext context = new MockContext();
     private ConfigManager manager;
+    final MockMParticle mParticle = new MockMParticle();
 
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
+    @Before
+    public void setUp() throws Exception {
         assertFalse(AppStateManager.mInitialized);
-        MParticle.start(getContext());
-        manager = MParticle.getInstance().internal().getConfigurationManager();
+         manager = new ConfigManager(context, new EmbeddedKitManager(context), MParticle.Environment.AutoDetect);
     }
 
+    @Test
     public void testApiCredentials(){
-        assertEquals(manager.getApiKey(), getContext().getResources().getString(R.string.mp_key));
-        assertEquals(manager.getApiSecret(), getContext().getResources().getString(R.string.mp_secret));
+       // assertEquals(manager.getApiKey(), getContext().getResources().getString(R.string.mp_key));
+       // assertEquals(manager.getApiSecret(), getContext().getResources().getString(R.string.mp_secret));
     }
 
+    @Test
+    public void testOptOut(){
+        assertFalse(manager.getOptedOut());
+        mParticle.setOptOut(true);
+        assertTrue(MParticle.getInstance().getOptOut());
+        mParticle.setOptOut(false);
+    }
+
+    @Test
     public void testCatchUnhandledExceptions(){
+
         assertFalse(manager.getLogUnhandledExceptions());
         try {
             JSONObject unhandleExceptions = new JSONObject();
@@ -44,7 +60,7 @@ public class ConfigurationTests extends AndroidTestCase {
             manager.updateConfig(unhandleExceptions);
             assertFalse(manager.getLogUnhandledExceptions());
 
-            MParticle.getInstance().enableUncaughtExceptionLogging();
+            manager.enableUncaughtExceptionLogging(true);
             assertTrue(manager.getLogUnhandledExceptions());
 
             unhandleExceptions.put("cue", "forceignore");
@@ -54,7 +70,7 @@ public class ConfigurationTests extends AndroidTestCase {
             unhandleExceptions.put("cue", "appdefined");
             manager.updateConfig(unhandleExceptions);
             assertTrue(manager.getLogUnhandledExceptions());
-            MParticle.getInstance().disableUncaughtExceptionLogging();
+            manager.disableUncaughtExceptionLogging(true);
             assertFalse(manager.getLogUnhandledExceptions());
 
         }catch (JSONException jse){
@@ -62,8 +78,9 @@ public class ConfigurationTests extends AndroidTestCase {
         }
     }
 
+    @Test
     public void testPushMessageKeys(){
-        assertNotNull(ConfigManager.getPushKeys(getContext()));
+        assertNotNull(ConfigManager.getPushKeys(context));
         JSONObject json = new JSONObject();
         JSONArray keys = new JSONArray();
         keys.put("key1");
@@ -71,11 +88,12 @@ public class ConfigurationTests extends AndroidTestCase {
         try {
             json.put("pmk", keys);
             manager.updateConfig(json);
-            assertTrue(ConfigManager.getPushKeys(getContext()).length() == 2);
+            assertTrue(ConfigManager.getPushKeys(context).length() == 2);
         }catch (JSONException jse){
             fail(jse.toString());
         }
     }
+    @Test
     public void testCaptureNetworkPerformance(){
         assertFalse(manager.isNetworkPerformanceEnabled());
         /*
@@ -107,6 +125,7 @@ public class ConfigurationTests extends AndroidTestCase {
         }*/
     }
 
+    @Test
     public void testRampPercentage(){
         assertEquals(-1, manager.getCurrentRampValue());
         int ramp = 12;
@@ -121,6 +140,7 @@ public class ConfigurationTests extends AndroidTestCase {
         assertEquals(ramp, manager.getCurrentRampValue());
     }
 
+    @Test
     public void testTriggerItems(){
         try {
             assertNull(manager.getTriggerMessageHashes());

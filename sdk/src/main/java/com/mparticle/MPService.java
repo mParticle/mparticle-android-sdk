@@ -17,8 +17,6 @@ import android.os.Looper;
 import android.os.PowerManager;
 import android.util.Log;
 
-import com.mparticle.internal.AppStateManager;
-import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.Constants;
 import com.mparticle.internal.MPUtility;
 import com.mparticle.messaging.AbstractCloudMessage;

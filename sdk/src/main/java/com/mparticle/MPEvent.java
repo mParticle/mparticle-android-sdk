@@ -3,7 +3,6 @@ package com.mparticle;
 
 import android.util.Log;
 
-import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.Constants;
 
 import org.json.JSONException;

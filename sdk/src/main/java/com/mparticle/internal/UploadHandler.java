@@ -10,6 +10,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 
+import com.mparticle.ConfigManager;
 import com.mparticle.MParticle;
 import com.mparticle.internal.Constants.MessageKey;
 import com.mparticle.internal.Constants.MessageType;
@@ -426,7 +427,7 @@ public final class UploadHandler extends Handler {
         } catch (SSLHandshakeException ssle){
             ConfigManager.log(MParticle.LogLevel.DEBUG, "SSL handshake failed while preparing uploads - possible MITM attack detected.");
         } catch (Exception e){
-            ConfigManager.log(MParticle.LogLevel.ERROR, e, "Error processing batch uploads in mParticle DB");
+            ConfigManager.log(MParticle.LogLevel.ERROR, "Error processing batch uploads in mParticle DB");
         }finally {
             if (readyUploadsCursor != null && !readyUploadsCursor.isClosed()){
                 readyUploadsCursor.close();
@@ -495,7 +496,8 @@ public final class UploadHandler extends Handler {
                 getAppInfo(),
                 getDeviceInfo(),
                 mConfigManager,
-                mPreferences);
+                mPreferences,
+                mApiClient.getCookies());
         addGCMHistory(batchMessage);
         return batchMessage;
     }

@@ -1,14 +1,12 @@
 apply plugin: 'com.android.library'
 apply plugin: 'maven'
 
-
 buildscript {
     repositories {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:1.+'
-
+        classpath 'com.android.tools.build:gradle:1.1.0'
     }
 }
 
@@ -34,6 +32,9 @@ android {
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_7
         targetCompatibility JavaVersion.VERSION_1_7
+    }
+    testOptions {
+        //unitTests.returnDefaultValues = true
     }
 
     String url = "\"\"";
@@ -89,7 +90,7 @@ android {
         }
 
         release {
-            minifyEnabled true
+            minifyEnabled false
             proguardFile 'proguard.txt'
         }
     }
@@ -148,4 +149,6 @@ dependencies {
     compile 'com.google.android.gms:play-services:[3.1,)'
     compile 'com.android.support:support-v4:21.0.3'
     unityCompile project('unityskeleton')
+    testCompile 'junit:junit:+'
+    testCompile files('libs/java-json.jar')
 }

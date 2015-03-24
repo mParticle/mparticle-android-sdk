@@ -2,6 +2,7 @@ package com.mparticle.internal;
 
 import android.content.SharedPreferences;
 
+import com.mparticle.ConfigManager;
 import com.mparticle.MParticle;
 import com.mparticle.licensing.LicenseCheckerCallback;
 import com.mparticle.licensing.Policy;

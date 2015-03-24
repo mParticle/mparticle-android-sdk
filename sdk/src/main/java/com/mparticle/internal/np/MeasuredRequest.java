@@ -22,6 +22,7 @@ final class MeasuredRequest {
     //max time to wait before logging this request
     //TODO: this could be set to the timeout of the given socket/connection
     private static final long TIMEOUT = 120;
+    private final MeasuredRequestManager mManager;
     boolean endOfStream = false;
     private long headerStartTime = 0L;
     private long streamSystemNanoEndTime = 0L;
@@ -43,7 +44,8 @@ final class MeasuredRequest {
     private boolean added;
     private boolean secure;
 
-    public MeasuredRequest() {
+    public MeasuredRequest(MeasuredRequestManager manager) {
+        mManager = manager;
         log();
         startTiming();
     }
@@ -127,7 +129,7 @@ final class MeasuredRequest {
         if (!"CONNECT".equalsIgnoreCase(requestMethod)) {
             added = true;
             startTiming();
-            MParticle.getInstance().internal().getMeasuredRequestManager().addRequest(this);
+            mManager.addRequest(this);
         }
     }
 

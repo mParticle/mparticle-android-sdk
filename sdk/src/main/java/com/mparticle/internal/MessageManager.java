@@ -18,6 +18,7 @@ import android.os.Process;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 
+import com.mparticle.ConfigManager;
 import com.mparticle.MPEvent;
 import com.mparticle.MPUnityException;
 import com.mparticle.MParticle;
@@ -27,14 +28,12 @@ import com.mparticle.messaging.CloudAction;
 import com.mparticle.messaging.MPCloudNotificationMessage;
 import com.mparticle.messaging.ProviderCloudMessage;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
 
@@ -63,8 +62,8 @@ public class MessageManager implements MessageManagerCallbacks {
     /**
      * These are the handlers which manage the queues and threads mentioned above.
      */
-    private final MessageHandler mMessageHandler;
-    public final UploadHandler mUploadHandler;
+    private MessageHandler mMessageHandler;
+    public UploadHandler mUploadHandler;
     /**
      * Ideally these threads would not be started in a static initializer
      * block. but this is cleaner than checking if they have been started in
@@ -108,6 +107,12 @@ public class MessageManager implements MessageManagerCallbacks {
     private static TelephonyManager sTelephonyManager;
     private boolean mFirstRun = true;
 
+    /**
+     * Used solely for unit testing
+     */
+    public MessageManager() {
+        super();
+    }
 
     public MessageManager(Context appContext, ConfigManager configManager, MParticle.InstallType installType) {
         mContext = appContext.getApplicationContext();
@@ -483,7 +488,8 @@ public class MessageManager implements MessageManagerCallbacks {
                 if (interruptions >= 0){
                     message.put(MessageKey.ST_INTERRUPTIONS, interruptions);
                 }
-                mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.MARK_INFLUENCE_OPEN_GCM, message.getTimestamp()));
+                InfluenceOpenMessage influenceOpenMessage = new InfluenceOpenMessage(message.getTimestamp(), mConfigManager.getInfluenceOpenTimeoutMillis());
+                mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.MARK_INFLUENCE_OPEN_GCM, influenceOpenMessage));
             }
 
             if (stateTransInit.equals(Constants.StateTransitionType.STATE_TRANS_INIT)){
@@ -626,63 +632,6 @@ public class MessageManager implements MessageManagerCallbacks {
     }
 
     @Override
-    public void checkForTrigger(MPMessage message) {
-        JSONArray messageMatches = mConfigManager.getTriggerMessageMatches();
-        JSONArray triggerHashes = mConfigManager.getTriggerMessageHashes();
-
-        boolean shouldTrigger = message.getMessageType().equals(MessageType.PUSH_RECEIVED);
-
-        if (!shouldTrigger && messageMatches != null && messageMatches.length() > 0){
-            shouldTrigger = true;
-            int i = 0;
-            while (shouldTrigger && i < messageMatches.length()){
-                try {
-                    JSONObject messageMatch = messageMatches.getJSONObject(i);
-                    Iterator<?> keys = messageMatch.keys();
-                    while(shouldTrigger && keys.hasNext() ){
-                        String key = (String)keys.next();
-                        shouldTrigger = message.has(key);
-                        if (shouldTrigger){
-                            try {
-                                shouldTrigger = messageMatch.getString(key).equalsIgnoreCase(message.getString(key));
-                            }catch (JSONException stringex){
-                                try {
-                                    shouldTrigger = message.getBoolean(key) == messageMatch.getBoolean(key);
-                                }catch (JSONException boolex){
-                                    try{
-                                        shouldTrigger = message.getDouble(key) == messageMatch.getDouble(key);
-                                    }catch (JSONException doubleex){
-                                        shouldTrigger = false;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                } catch (Exception e) {
-
-                }
-                i++;
-            }
-        }
-        if (!shouldTrigger && triggerHashes != null){
-            for (int i = 0; i < triggerHashes.length(); i++){
-                try {
-                    if (triggerHashes.getInt(i) == message.getTypeNameHash()) {
-                        shouldTrigger = true;
-                        break;
-                    }
-                }catch (JSONException jse){
-
-                }
-            }
-        }
-        if (shouldTrigger) {
-            mUploadHandler.removeMessages(UploadHandler.UPLOAD_TRIGGER_MESSAGES);
-            mUploadHandler.sendMessageDelayed(mUploadHandler.obtainMessage(UploadHandler.UPLOAD_TRIGGER_MESSAGES, 1, 0), Constants.TRIGGER_MESSAGE_DELAY);
-        }
-    }
-
-    @Override
     public MPMessage createMessageSessionEnd(String sessionId, long start, long end, long foregroundLength, JSONObject sessionAttributes) throws JSONException{
         int eventCounter = mPreferences.getInt(Constants.PrefKeys.EVENT_COUNTER, 0);
         resetEventCounter();
@@ -737,6 +686,14 @@ public class MessageManager implements MessageManagerCallbacks {
     public void endUploadLoop() {
         mUploadHandler.removeMessages(UploadHandler.UPLOAD_MESSAGES);
         MParticle.getInstance().upload();
+    }
+
+    @Override
+    public void checkForTrigger(MPMessage message) {
+        if (mConfigManager.shouldTrigger(message)){
+            mUploadHandler.removeMessages(UploadHandler.UPLOAD_TRIGGER_MESSAGES);
+            mUploadHandler.sendMessageDelayed(mUploadHandler.obtainMessage(UploadHandler.UPLOAD_TRIGGER_MESSAGES, 1, 0), Constants.TRIGGER_MESSAGE_DELAY);
+        }
     }
 
     public void refreshConfiguration() {
@@ -797,5 +754,15 @@ public class MessageManager implements MessageManagerCallbacks {
 
         mUploadHandler.setConnected(activeNetwork != null && activeNetwork.isConnectedOrConnecting());
         ConfigManager.log(MParticle.LogLevel.DEBUG, "Active network has changed: " + sActiveNetworkName);
+    }
+
+    public class InfluenceOpenMessage {
+        public final long mTimeStamp;
+        public final long mTimeout;
+
+        public InfluenceOpenMessage(long timestamp, long influenceOpenTimeoutMillis) {
+            mTimeStamp = timestamp;
+            mTimeout = influenceOpenTimeoutMillis;
+        }
     }
 }

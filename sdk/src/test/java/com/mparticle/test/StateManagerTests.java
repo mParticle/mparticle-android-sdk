@@ -4,7 +4,8 @@ package com.mparticle.test;
 import android.test.ActivityInstrumentationTestCase2;
 
 import com.mparticle.MParticle;
-import com.mparticle.internal.AppStateManager;
+import com.mparticle.AppStateManager;
+import org.junit.Test;
 
 public class StateManagerTests extends ActivityInstrumentationTestCase2 {
 
@@ -21,6 +22,7 @@ public class StateManagerTests extends ActivityInstrumentationTestCase2 {
         assertTrue(AppStateManager.mInitialized);
     }
 
+    @Test
     public void testBackgroundForeground() {
         assertFalse(MParticle.getInstance().internal().isBackgrounded());
         getInstrumentation().callActivityOnStop(getActivity());

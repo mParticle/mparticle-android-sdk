@@ -1,17 +1,14 @@
 package com.mparticle.internal;
 
 import android.content.ContentValues;
-import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.util.Log;
 
+import com.mparticle.ConfigManager;
 import com.mparticle.MParticle;
 import com.mparticle.internal.Constants.MessageKey;
 import com.mparticle.internal.Constants.MessageType;
@@ -206,8 +203,8 @@ import java.util.UUID;
                 }
                 break;
             case MARK_INFLUENCE_OPEN_GCM:
-               long openTimestamp = (Long) msg.obj;
-                logInfluenceOpenGcmMessages(openTimestamp);
+                MessageManager.InfluenceOpenMessage message = (MessageManager.InfluenceOpenMessage) msg.obj;
+                logInfluenceOpenGcmMessages(message);
                 break;
             case CLEAR_PROVIDER_GCM:
                 try {
@@ -304,16 +301,16 @@ import java.util.UUID;
         return behavior;
     }
 
-    private void logInfluenceOpenGcmMessages(long openTimestamp) {
+    private void logInfluenceOpenGcmMessages(MessageManager.InfluenceOpenMessage message) {
         Cursor gcmCursor = null;
         try{
-            long influenceOpenTimeout = MParticle.getInstance().internal().getConfigurationManager().getInfluenceOpenTimeoutMillis();
+
             gcmCursor = db.query(MParticleDatabase.GcmMessageTable.TABLE_NAME,
                     null,MParticleDatabase.GcmMessageTable.CONTENT_ID + " != " + MParticleDatabase.GcmMessageTable.PROVIDER_CONTENT_ID + " and " +
                     MParticleDatabase.GcmMessageTable.DISPLAYED_AT +
                             " > 0 and " +
                             MParticleDatabase.GcmMessageTable.DISPLAYED_AT +
-                            " > " + (openTimestamp - influenceOpenTimeout) +
+                            " > " + (message.mTimeStamp - message.mTimeout) +
                             " and ((" + MParticleDatabase.GcmMessageTable.BEHAVIOR + " & " + AbstractCloudMessage.FLAG_INFLUENCE_OPEN + "" + ") != " + AbstractCloudMessage.FLAG_INFLUENCE_OPEN + ")",
                     null,
                     null,

@@ -1,10 +1,13 @@
-package com.mparticle.internal;
+package com.mparticle;
 
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Log;
 
+import com.mparticle.ConfigManager;
 import com.mparticle.MParticle;
+import com.mparticle.internal.Constants;
+import com.mparticle.internal.MPUtility;
 
 /**
  * This class is primarily responsible for parsing and representing XML/resource-based configuration.
@@ -140,7 +143,11 @@ class AppConfig {
             }
             return defaultString;
         }
-        return this.mContext.getString(id);
+        try {
+            return this.mContext.getResources().getString(id);
+        }catch (android.content.res.Resources.NotFoundException nfe){
+            return defaultString;
+        }
     }
 
     public boolean getBoolean(String key, boolean defaultValue) {
@@ -149,7 +156,11 @@ class AppConfig {
             ConfigManager.log(MParticle.LogLevel.DEBUG, String.format("Configuration: No string resource for: %s, using default: %b", key, defaultValue));
             return defaultValue;
         }
-        return this.mContext.getResources().getBoolean(id);
+        try {
+            return this.mContext.getResources().getBoolean(id);
+        }catch (android.content.res.Resources.NotFoundException nfe){
+            return defaultValue;
+        }
     }
 
     public int getInteger(String key, int defaultValue) {
@@ -158,7 +169,11 @@ class AppConfig {
             ConfigManager.log(MParticle.LogLevel.DEBUG, String.format("Configuration: No string resource for: %s, using default: %d", key, defaultValue));
             return defaultValue;
         }
-        return mContext.getResources().getInteger(id);
+        try {
+            return this.mContext.getResources().getInteger(id);
+        }catch (android.content.res.Resources.NotFoundException nfe){
+            return defaultValue;
+        }
     }
 
     public static MParticle.Environment getEnvironment() {

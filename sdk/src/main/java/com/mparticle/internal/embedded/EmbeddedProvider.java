@@ -8,7 +8,7 @@ import android.util.SparseBooleanArray;
 import com.mparticle.MPEvent;
 import com.mparticle.MPProduct;
 import com.mparticle.MParticle;
-import com.mparticle.internal.ConfigManager;
+import com.mparticle.ConfigManager;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -41,6 +41,7 @@ abstract class EmbeddedProvider {
 
     //If set to true, our sdk honor user's optout wish. If false, we still collect data on opt-ed out users, but only for reporting
     private static final String HONOR_OPT_OUT = "honorOptOut";
+    protected final EmbeddedKitManager mEkManager;
 
     protected HashMap<String, String> properties = new HashMap<String, String>(0);
     protected SparseBooleanArray mTypeFilters = new SparseBooleanArray(0);
@@ -54,8 +55,9 @@ abstract class EmbeddedProvider {
 
     protected Context context;
 
-    public EmbeddedProvider(Context context) {
-        this.context = context;
+    public EmbeddedProvider(EmbeddedKitManager ekManager) {
+        this.mEkManager = ekManager;
+        this.context = ekManager.getContext();
     }
 
     protected EmbeddedProvider parseConfig(JSONObject json) throws JSONException {
@@ -146,7 +148,7 @@ abstract class EmbeddedProvider {
 
     public boolean optedOut(){
         return Boolean.parseBoolean(properties.containsKey(HONOR_OPT_OUT) ? properties.get(HONOR_OPT_OUT) : "true")
-                && !MParticle.getInstance().internal().getConfigurationManager().isEnabled();
+                && !mEkManager.getConfigurationManager().isEnabled();
     }
 
     private static int hash(String input) {

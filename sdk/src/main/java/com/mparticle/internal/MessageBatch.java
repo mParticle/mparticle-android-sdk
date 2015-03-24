@@ -3,6 +3,7 @@ package com.mparticle.internal;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import com.mparticle.ConfigManager;
 import com.mparticle.MParticle;
 
 import org.json.JSONArray;
@@ -14,7 +15,7 @@ import java.util.UUID;
 
 public class MessageBatch {
 
-    public static JSONObject create(Context context, JSONArray messagesArray, boolean history, JSONObject appInfo, JSONObject deviceInfo, ConfigManager configManager, SharedPreferences preferences) throws JSONException {
+    public static JSONObject create(Context context, JSONArray messagesArray, boolean history, JSONObject appInfo, JSONObject deviceInfo, ConfigManager configManager, SharedPreferences preferences, JSONObject cookies) throws JSONException {
         JSONObject uploadMessage = new JSONObject();
 
         uploadMessage.put(Constants.MessageKey.TYPE, Constants.MessageType.REQUEST_HEADER);
@@ -77,9 +78,7 @@ public class MessageBatch {
         }
 
         uploadMessage.put(history ? Constants.MessageKey.HISTORY : Constants.MessageKey.MESSAGES, messagesArray);
-
-        MParticleApiClient.addCookies(uploadMessage, configManager);
-
+        uploadMessage.put(Constants.MessageKey.COOKIES, cookies);
         uploadMessage.put(Constants.MessageKey.PROVIDER_PERSISTENCE, configManager.getProviderPersistence());
 
         return uploadMessage;

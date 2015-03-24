@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<resources>
+
+    <!-- Production Credential-->
+    <string name="mp_key2">6c70aedea9a7ad4fa05383e6d4dbd789</string>
+
+    <string name="mp_secret2">ZyvjLdQYmM5URu4NTOQil1fQPHd3gdlo2j6ipOtzY4_nYVps1A9qxnBSLcEtDwx5</string>
+
+    <!-- QA Credentials-->
+    <string name="mp_key">f91b979f611b8c418dbec485814fcd16</string>
+    <string name="mp_secret">DVMyDluWItvZ0fUB6Q8lF0ypIwL0-nq_j2iRZQx1lqVP9bYhdQuLWKMZG--koCXF</string>
+
+</resources>
