@@ -14,11 +14,12 @@ import java.lang.ref.WeakReference;
 /* package-private */public class ExceptionHandler implements UncaughtExceptionHandler {
 
     private static final String TAG = Constants.LOG_TAG;
-    private WeakReference<UncaughtExceptionHandler> mOriginalUncaughtExceptionHandler = null;
+    private UncaughtExceptionHandler mOriginalUncaughtExceptionHandler = null;
 
     public ExceptionHandler(UncaughtExceptionHandler originalUncaughtExceptionHandler) {
-        if (originalUncaughtExceptionHandler != null)
-        mOriginalUncaughtExceptionHandler = new WeakReference<UncaughtExceptionHandler>(originalUncaughtExceptionHandler);
+        if (originalUncaughtExceptionHandler != null && !(originalUncaughtExceptionHandler instanceof ExceptionHandler)) {
+            mOriginalUncaughtExceptionHandler = originalUncaughtExceptionHandler;
+        }
     }
 
     @Override
@@ -27,10 +28,7 @@ import java.lang.ref.WeakReference;
             MParticle.getInstance().internal().logUnhandledError(ex);
 
             if (mOriginalUncaughtExceptionHandler != null) {
-                UncaughtExceptionHandler originalHandler = mOriginalUncaughtExceptionHandler.get();
-                if (originalHandler != null) {
-                    originalHandler.uncaughtException(thread, ex);
-                }
+                mOriginalUncaughtExceptionHandler.uncaughtException(thread, ex);
             }
         } catch (Exception t) {
             Log.e(TAG, "Failed to log error event for uncaught exception", t);
@@ -39,10 +37,7 @@ import java.lang.ref.WeakReference;
     }
 
     public UncaughtExceptionHandler getOriginalExceptionHandler() {
-        if (mOriginalUncaughtExceptionHandler == null){
-            return null;
-        }
-        return mOriginalUncaughtExceptionHandler.get();
+        return mOriginalUncaughtExceptionHandler;
     }
 
 }
