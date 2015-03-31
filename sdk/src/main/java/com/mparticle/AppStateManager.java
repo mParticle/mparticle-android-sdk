@@ -14,6 +14,7 @@ import android.util.Log;
 import com.mparticle.internal.Constants;
 import com.mparticle.internal.MPActivityCallbacks;
 import com.mparticle.internal.MPUtility;
+import com.mparticle.internal.Session;
 import com.mparticle.internal.embedded.EmbeddedKitManager;
 
 import org.json.JSONObject;
@@ -31,6 +32,7 @@ import java.util.concurrent.atomic.AtomicLong;
     Context mContext;
     private final SharedPreferences mPreferences;
     private EmbeddedKitManager mEmbeddedKitManager;
+    private Session mCurrentSession = new Session();
 
     private String mCurrentActivity;
     /**
@@ -255,5 +257,17 @@ import java.util.concurrent.atomic.AtomicLong;
 
     public String getCurrentActivity() {
         return mCurrentActivity;
+    }
+
+    public Session getSession() {
+        return mCurrentSession;
+    }
+
+    public void endSession() {
+        mCurrentSession = new Session();
+    }
+
+    public void startSession() {
+        mCurrentSession = new Session().start();
     }
 }

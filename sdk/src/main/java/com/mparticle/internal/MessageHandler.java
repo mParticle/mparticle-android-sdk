@@ -23,6 +23,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.lang.ref.WeakReference;
 import java.util.UUID;
 
 /* package-private */final class MessageHandler extends Handler {
@@ -317,13 +318,12 @@ import java.util.UUID;
                     null,
                     null);
             while (gcmCursor.moveToNext()){
-                MParticle.getInstance().internal().logNotification(gcmCursor.getInt(gcmCursor.getColumnIndex(MParticleDatabase.GcmMessageTable.CONTENT_ID)),
+                mMessageManagerCallbacks.logNotification(gcmCursor.getInt(gcmCursor.getColumnIndex(MParticleDatabase.GcmMessageTable.CONTENT_ID)),
                         gcmCursor.getString(gcmCursor.getColumnIndex(MParticleDatabase.GcmMessageTable.PAYLOAD)),
                         null,
-                        true,
                         gcmCursor.getString(gcmCursor.getColumnIndex(MParticleDatabase.GcmMessageTable.APPSTATE)),
-                         AbstractCloudMessage.FLAG_INFLUENCE_OPEN
-                        );
+                        AbstractCloudMessage.FLAG_INFLUENCE_OPEN
+                );
             }
         }catch (Exception e){
             ConfigManager.log(MParticle.LogLevel.ERROR, e, "Error logging influence-open message to mParticle DB ", e.toString());
@@ -336,6 +336,7 @@ import java.util.UUID;
 
     private void appendLatestPushNotification(MPMessage message) {
         Cursor pushCursor = null;
+        WeakReference test;
         try {
             pushCursor = db.query(MParticleDatabase.GcmMessageTable.TABLE_NAME,
                     null,
@@ -369,7 +370,7 @@ import java.util.UUID;
                 null,
                 null,
                 null,
-                BreadcrumbTable.CREATED_AT + " desc limit " + MParticle.getInstance().internal().getConfigurationManager().getBreadcrumbLimit());
+                BreadcrumbTable.CREATED_AT + " desc limit " + ConfigManager.getBreadcrumbLimit());
 
         if (breadcrumbCursor.getCount() > 0){
             JSONArray breadcrumbs = new JSONArray();
@@ -396,8 +397,8 @@ import java.util.UUID;
         Cursor cursor = db.query(BreadcrumbTable.TABLE_NAME, idColumns, null, null, null, null, " _id desc limit 1");
         if (cursor.moveToFirst()){
             int maxId = cursor.getInt(0);
-            if (maxId > MParticle.getInstance().internal().getConfigurationManager().getBreadcrumbLimit()){
-                String[] limit = {Integer.toString(maxId - MParticle.getInstance().internal().getConfigurationManager().getBreadcrumbLimit())};
+            if (maxId > ConfigManager.getBreadcrumbLimit()){
+                String[] limit = {Integer.toString(maxId - ConfigManager.getBreadcrumbLimit())};
                 db.delete(BreadcrumbTable.TABLE_NAME, " _id < ?", limit);
             }
         }

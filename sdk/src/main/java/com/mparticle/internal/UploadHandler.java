@@ -10,6 +10,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 
+import com.mparticle.AppStateManager;
 import com.mparticle.ConfigManager;
 import com.mparticle.MParticle;
 import com.mparticle.internal.Constants.MessageKey;
@@ -39,6 +40,7 @@ public final class UploadHandler extends Handler {
 
     private final Context mContext;
     private final MParticleDatabase mDbHelper;
+    private final AppStateManager mAppStateManager;
     private ConfigManager mConfigManager;
     /**
      * Message used to trigger the primary upload logic - will upload all non-history batches that are ready to go.
@@ -144,12 +146,12 @@ public final class UploadHandler extends Handler {
     private JSONObject deviceInfo;
     private JSONObject appInfo;
 
-    public UploadHandler(Context context, Looper looper, ConfigManager configManager, MParticleDatabase database) {
+    public UploadHandler(Context context, Looper looper, ConfigManager configManager, MParticleDatabase database, AppStateManager appStateManager) {
         super(looper);
         mConfigManager = configManager;
         mContext = context;
         mApiKey = mConfigManager.getApiKey();
-
+        mAppStateManager = appStateManager;
         audienceDB = new SegmentDatabase(mContext);
         mPreferences = mContext.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
         mDbHelper = database;
@@ -234,7 +236,7 @@ public final class UploadHandler extends Handler {
                         }
 
                     }
-                    if (MParticle.getInstance().internal().isSessionActive() && uploadInterval > 0 && msg.arg1 == 0) {
+                    if (mAppStateManager.getSession().isActive() && uploadInterval > 0 && msg.arg1 == 0) {
                         this.sendEmptyMessageDelayed(UPLOAD_MESSAGES, uploadInterval);
                     }
                 }catch (Exception e){
@@ -294,7 +296,7 @@ public final class UploadHandler extends Handler {
             String[] selectionArgs;
             if (history) {
                 selection = getSessionHistoryBatchesQuery();
-                selectionArgs = new String[]{Integer.toString(Status.READY), MParticle.getInstance().internal().getSessionId()};
+                selectionArgs = new String[]{Integer.toString(Status.READY), mAppStateManager.getSession().mSessionID};
             } else {
                 selection = getUploadableMessagesQuery();
                 selectionArgs = defaultSelectionArgs;

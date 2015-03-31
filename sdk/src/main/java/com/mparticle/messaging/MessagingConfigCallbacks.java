@@ -13,4 +13,6 @@ public interface MessagingConfigCallbacks {
     void setPushSoundEnabled(boolean enabled);
 
     void setPushVibrationEnabled(boolean enabled);
+
+    void setPushRegistrationId(String registrationId);
 }

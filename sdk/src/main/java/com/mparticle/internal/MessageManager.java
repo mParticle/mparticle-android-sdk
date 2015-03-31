@@ -8,6 +8,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.media.session.MediaSession;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.BatteryManager;
@@ -18,6 +19,7 @@ import android.os.Process;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 
+import com.mparticle.AppStateManager;
 import com.mparticle.ConfigManager;
 import com.mparticle.MPEvent;
 import com.mparticle.MPUnityException;
@@ -46,7 +48,9 @@ public class MessageManager implements MessageManagerCallbacks {
 
     private static Context mContext = null;
     private static SharedPreferences mPreferences = null;
+    private AppStateManager mAppStateManager;
     private ConfigManager mConfigManager = null;
+
 
     /**
      * These two threads are used to do the heavy lifting.
@@ -114,12 +118,13 @@ public class MessageManager implements MessageManagerCallbacks {
         super();
     }
 
-    public MessageManager(Context appContext, ConfigManager configManager, MParticle.InstallType installType) {
+    public MessageManager(Context appContext, ConfigManager configManager, MParticle.InstallType installType, AppStateManager appStateManager) {
         mContext = appContext.getApplicationContext();
         mConfigManager = configManager;
+        mAppStateManager = appStateManager;
         MParticleDatabase database = new MParticleDatabase(appContext);
         mMessageHandler = new MessageHandler(sMessageHandlerThread.getLooper(), this, database);
-        mUploadHandler = new UploadHandler(appContext, sUploadHandlerThread.getLooper(), configManager, database);
+        mUploadHandler = new UploadHandler(appContext, sUploadHandlerThread.getLooper(), configManager, database, appStateManager);
         mPreferences = appContext.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
         mInstallType = installType;
     }
@@ -182,17 +187,17 @@ public class MessageManager implements MessageManagerCallbacks {
         return threshold;
     }
 
-    public MPMessage createFirstRunMessage(long time, String sessionId) throws JSONException {
-        return new MPMessage.Builder(MessageType.FIRST_RUN, sessionId, mLocation)
-                .timestamp(time)
+    public MPMessage createFirstRunMessage() throws JSONException {
+        return new MPMessage.Builder(MessageType.FIRST_RUN, mAppStateManager.getSession().mSessionID, mLocation)
+                .timestamp(mAppStateManager.getSession().mSessionStartTime)
                 .dataConnection(sActiveNetworkName)
                 .build();
     }
 
-    public void startSession(String sessionId, long time) {
+    public void startSession() {
         try {
-            MPMessage message = new MPMessage.Builder(MessageType.SESSION_START, sessionId, mLocation)
-                    .sessionStartTime(time)
+            MPMessage message = new MPMessage.Builder(MessageType.SESSION_START, mAppStateManager.getSession().mSessionID, mLocation)
+                    .sessionStartTime(mAppStateManager.getSession().mSessionStartTime)
                     .timestamp(System.currentTimeMillis())
                     .build();
 
@@ -203,13 +208,13 @@ public class MessageManager implements MessageManagerCallbacks {
                 editor.remove(Constants.PrefKeys.PREVIOUS_SESSION_FOREGROUND);
             }
             String prevSessionId = mPreferences.getString(Constants.PrefKeys.PREVIOUS_SESSION_ID, "");
-            editor.putString(Constants.PrefKeys.PREVIOUS_SESSION_ID, sessionId);
+            editor.putString(Constants.PrefKeys.PREVIOUS_SESSION_ID, mAppStateManager.getSession().mSessionID);
             if (prevSessionId != null && prevSessionId.length() > 0) {
                 message.put(MessageKey.PREVIOUS_SESSION_ID, prevSessionId);
             }
 
             long prevSessionStart = mPreferences.getLong(Constants.PrefKeys.PREVIOUS_SESSION_START, -1);
-            editor.putLong(Constants.PrefKeys.PREVIOUS_SESSION_START, time);
+            editor.putLong(Constants.PrefKeys.PREVIOUS_SESSION_START, mAppStateManager.getSession().mSessionStartTime);
 
             if (prevSessionStart > 0) {
                 message.put(MessageKey.PREVIOUS_SESSION_START, prevSessionStart);
@@ -221,7 +226,7 @@ public class MessageManager implements MessageManagerCallbacks {
             if (mFirstRun) {
                 mPreferences.edit().putBoolean(Constants.PrefKeys.FIRSTRUN + mConfigManager.getApiKey(), false).apply();
                 try {
-                    JSONObject firstRunMessage = createFirstRunMessage(time, sessionId);
+                    JSONObject firstRunMessage = createFirstRunMessage();
                     mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, firstRunMessage));
                 } catch (JSONException e) {
                     ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to create First Run Message");
@@ -252,16 +257,17 @@ public class MessageManager implements MessageManagerCallbacks {
         return mPreferences.getInt(Constants.PrefKeys.SESSION_COUNTER, 0);
     }
 
-    public void updateSessionEnd(String sessionId, long stopTime, long sessionLength) {
+    public void updateSessionEnd(long stopTime) {
         try {
             long timeInBackground = mPreferences.getLong(Constants.PrefKeys.TIME_IN_BG, 0);
+            long sessionLength = stopTime - mAppStateManager.getSession().mSessionStartTime;
             long foregroundLength = sessionLength - timeInBackground;
             SharedPreferences.Editor editor = mPreferences.edit();
             editor.putLong(Constants.PrefKeys.PREVIOUS_SESSION_FOREGROUND, foregroundLength > 0 ? foregroundLength : sessionLength);
             editor.apply();
 
             JSONObject sessionTiming = new JSONObject();
-            sessionTiming.put(MessageKey.SESSION_ID, sessionId);
+            sessionTiming.put(MessageKey.SESSION_ID, mAppStateManager.getSession().mSessionID);
             sessionTiming.put(MessageKey.TIMESTAMP, stopTime);
             sessionTiming.put(MessageKey.SESSION_LENGTH, foregroundLength);
 
@@ -273,26 +279,27 @@ public class MessageManager implements MessageManagerCallbacks {
         }
     }
 
-    public void endSession(String sessionId, long stopTime, long sessionLength) {
-        updateSessionEnd(sessionId, stopTime, sessionLength);
+    public void endSession(long stopTime) {
+        updateSessionEnd(stopTime);
         mPreferences.edit().remove(Constants.PrefKeys.TIME_IN_BG).apply();
         mMessageHandler
-                .sendMessage(mMessageHandler.obtainMessage(MessageHandler.CREATE_SESSION_END_MESSAGE, sessionId));
+                .sendMessage(mMessageHandler.obtainMessage(MessageHandler.CREATE_SESSION_END_MESSAGE, mAppStateManager.getSession().mSessionID));
+        mAppStateManager.endSession();
     }
 
-    public void logEvent(String sessionId, long sessionStartTime, long time, MPEvent event, String currentActivity) {
+    public void logEvent(MPEvent event, String currentActivity) {
         try {
-            MPMessage message = new MPMessage.Builder(MessageType.EVENT, sessionId, mLocation)
+            MPMessage message = new MPMessage.Builder(MessageType.EVENT, mAppStateManager.getSession().mSessionID, mLocation)
                     .name(event.getEventName())
-                    .sessionStartTime(sessionStartTime)
-                    .timestamp(time)
+                    .sessionStartTime(mAppStateManager.getSession().mSessionStartTime)
+                    .timestamp(mAppStateManager.getSession().mLastEventTime)
                     .length(event.getLength())
                     .attributes(MPUtility.enforceAttributeConstraints(event.getInfo()))
                     .build();
 
             message.put(MessageKey.EVENT_TYPE, event.getEventType());
             // NOTE: event timing is not supported (yet) but the server expects this data
-            message.put(MessageKey.EVENT_START_TIME, time);
+            message.put(MessageKey.EVENT_START_TIME, mAppStateManager.getSession().mLastEventTime);
 
             if (currentActivity != null){
                 message.put(MessageKey.CURRENT_ACTIVITY, currentActivity);
@@ -311,16 +318,16 @@ public class MessageManager implements MessageManagerCallbacks {
         mPreferences.edit().putInt(Constants.PrefKeys.EVENT_COUNTER, 0).apply();
     }
 
-    public void logScreen(String sessionId, long sessionStartTime, long time, String screenName, JSONObject attributes, boolean started) {
+    public void logScreen(String screenName, JSONObject attributes, boolean started) {
         try {
-            MPMessage message = new MPMessage.Builder(MessageType.SCREEN_VIEW, sessionId, mLocation)
-                    .sessionStartTime(sessionStartTime)
-                    .timestamp(time)
+            MPMessage message = new MPMessage.Builder(MessageType.SCREEN_VIEW, mAppStateManager.getSession().mSessionID, mLocation)
+                    .sessionStartTime(mAppStateManager.getSession().mSessionStartTime)
+                    .timestamp(mAppStateManager.getSession().mLastEventTime)
                     .name(screenName)
                     .attributes(attributes)
                     .build();
-            // NOTE: event timing is not supported (yet) but the server expects this data
-            message.put(MessageKey.EVENT_START_TIME, time);
+
+            message.put(MessageKey.EVENT_START_TIME, mAppStateManager.getSession().mLastEventTime);
             message.put(MessageKey.EVENT_DURATION, 0);
             message.put(MessageKey.SCREEN_STARTED, started ? "activity_started" : "activity_stopped");
             mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
@@ -329,14 +336,14 @@ public class MessageManager implements MessageManagerCallbacks {
         }
     }
 
-    public void logBreadcrumb(String sessionId, long sessionStartTime, long time, String breadcrumb) {
+    public void logBreadcrumb(String breadcrumb) {
         try {
-            MPMessage message = new MPMessage.Builder(MessageType.BREADCRUMB, sessionId, mLocation)
-                    .sessionStartTime(sessionStartTime)
-                    .timestamp(time)
+            MPMessage message = new MPMessage.Builder(MessageType.BREADCRUMB, mAppStateManager.getSession().mSessionID, mLocation)
+                    .sessionStartTime(mAppStateManager.getSession().mSessionStartTime)
+                    .timestamp(mAppStateManager.getSession().mLastEventTime)
                     .build();
-            // NOTE: event timing is not supported (yet) but the server expects this data
-            message.put(MessageKey.EVENT_START_TIME, time);
+
+            message.put(MessageKey.EVENT_START_TIME, mAppStateManager.getSession().mLastEventTime);
             message.put(MessageKey.BREADCRUMB_SESSION_COUNTER, getCurrentSessionCounter());
             message.put(MessageKey.BREADCRUMB_LABEL, breadcrumb);
             mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
@@ -346,10 +353,10 @@ public class MessageManager implements MessageManagerCallbacks {
         }
     }
 
-    public void optOut(String sessionId, long sessionStartTime, long time, boolean optOutStatus) {
+    public void optOut(long time, boolean optOutStatus) {
         try {
-            MPMessage message = new MPMessage.Builder(MessageType.OPT_OUT, sessionId, mLocation)
-                    .sessionStartTime(sessionStartTime)
+            MPMessage message = new MPMessage.Builder(MessageType.OPT_OUT, mAppStateManager.getSession().mSessionID, mLocation)
+                    .sessionStartTime(mAppStateManager.getSession().mSessionStartTime)
                     .timestamp(time)
                     .build();
             message.put(MessageKey.OPT_OUT_STATUS, optOutStatus);
@@ -359,15 +366,15 @@ public class MessageManager implements MessageManagerCallbacks {
         }
     }
 
-    public void logErrorEvent(String sessionId, long sessionStartTime, long time, String errorMessage, Throwable t, JSONObject attributes) {
-        logErrorEvent(sessionId, sessionStartTime, time, errorMessage, t, attributes, true);
+    public void logErrorEvent(String errorMessage, Throwable t, JSONObject attributes) {
+        logErrorEvent(errorMessage, t, attributes, true);
     }
 
-    public void logErrorEvent(String sessionId, long sessionStartTime, long time, String errorMessage, Throwable t, JSONObject attributes, boolean caught) {
+    public void logErrorEvent(String errorMessage, Throwable t, JSONObject attributes, boolean caught) {
         try {
-            MPMessage message = new MPMessage.Builder(MessageType.ERROR, sessionId, mLocation)
-                    .sessionStartTime(sessionStartTime)
-                    .timestamp(time)
+            MPMessage message = new MPMessage.Builder(MessageType.ERROR, mAppStateManager.getSession().mSessionID, mLocation)
+                    .sessionStartTime(mAppStateManager.getSession().mSessionStartTime)
+                    .timestamp(mAppStateManager.getSession().mLastEventTime)
                     .attributes(attributes)
                     .build();
             if (t != null) {
@@ -395,10 +402,10 @@ public class MessageManager implements MessageManagerCallbacks {
         }
     }
 
-    public void logNetworkPerformanceEvent(String sessionId, long sessionStartTime, long time, String method, String url, long length, long bytesSent, long bytesReceived, String requestString) {
+    public void logNetworkPerformanceEvent(long time, String method, String url, long length, long bytesSent, long bytesReceived, String requestString) {
         try {
-            MPMessage message = new MPMessage.Builder(MessageType.NETWORK_PERFORMNACE, sessionId, mLocation)
-                    .sessionStartTime(sessionStartTime)
+            MPMessage message = new MPMessage.Builder(MessageType.NETWORK_PERFORMNACE, mAppStateManager.getSession().mSessionID, mLocation)
+                    .sessionStartTime(mAppStateManager.getSession().mSessionStartTime)
                     .timestamp(time)
                     .build();
             message.put(MessageKey.NPE_METHOD, method);
@@ -416,11 +423,11 @@ public class MessageManager implements MessageManagerCallbacks {
     }
 
 
-    public void setPushRegistrationId(String sessionId, long sessionStartTime, long time, String token, boolean registeringFlag) {
+    public void setPushRegistrationId(String token, boolean registeringFlag) {
         try {
-            MPMessage message = new MPMessage.Builder(MessageType.PUSH_REGISTRATION, sessionId, mLocation)
-                    .sessionStartTime(sessionStartTime)
-                    .timestamp(time)
+            MPMessage message = new MPMessage.Builder(MessageType.PUSH_REGISTRATION, mAppStateManager.getSession().mSessionID, mLocation)
+                    .sessionStartTime(mAppStateManager.getSession().mSessionStartTime)
+                    .timestamp(System.currentTimeMillis())
                     .build();
             message.put(MessageKey.PUSH_TOKEN, token);
             message.put(MessageKey.PUSH_TOKEN_TYPE, "google");
@@ -432,10 +439,10 @@ public class MessageManager implements MessageManagerCallbacks {
         }
     }
 
-    public void setSessionAttributes(String sessionId, JSONObject mSessionAttributes) {
+    public void setSessionAttributes(JSONObject mSessionAttributes) {
         try {
             JSONObject sessionAttributes = new JSONObject();
-            sessionAttributes.put(MessageKey.SESSION_ID, sessionId);
+            sessionAttributes.put(MessageKey.SESSION_ID, mAppStateManager.getSession().mSessionID);
             sessionAttributes.put(MessageKey.ATTRIBUTES, mSessionAttributes);
             mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.UPDATE_SESSION_ATTRIBUTES,
                     sessionAttributes));
@@ -461,11 +468,11 @@ public class MessageManager implements MessageManagerCallbacks {
         ConfigManager.log(MParticle.LogLevel.DEBUG, "Received location update: " + location);
     }
 
-    public void logStateTransition(String stateTransInit, String sessionId, long sessionStartTime, String currentActivity,
+    public void logStateTransition(String stateTransInit, String currentActivity,
                                    String launchUri, String launchExtras, String launchSourcePackage, long previousForegroundTime, long suspendedTime, int interruptions) {
         try {
-            MPMessage message = new MPMessage.Builder(MessageType.APP_STATE_TRANSITION, sessionId, mLocation)
-                    .sessionStartTime(sessionStartTime)
+            MPMessage message = new MPMessage.Builder(MessageType.APP_STATE_TRANSITION, mAppStateManager.getSession().mSessionID, mLocation)
+                    .sessionStartTime(mAppStateManager.getSession().mSessionStartTime)
                     .timestamp(System.currentTimeMillis())
                     .build();
 
@@ -555,10 +562,10 @@ public class MessageManager implements MessageManagerCallbacks {
         return true;
     }
 
-    public void logNotification(String sessionId, long sessionStartTime, ProviderCloudMessage cloudMessage, String appState) {
+    public void logNotification(ProviderCloudMessage cloudMessage, String appState) {
         try{
-            MPMessage message = new MPMessage.Builder(MessageType.PUSH_RECEIVED, sessionId, mLocation)
-                    .sessionStartTime(sessionStartTime)
+            MPMessage message = new MPMessage.Builder(MessageType.PUSH_RECEIVED, mAppStateManager.getSession().mSessionID, mLocation)
+                    .sessionStartTime(mAppStateManager.getSession().mSessionStartTime)
                     .timestamp(System.currentTimeMillis())
                     .name("gcm")
                     .build();
@@ -578,10 +585,11 @@ public class MessageManager implements MessageManagerCallbacks {
         }
     }
 
-    public void logNotification(String sessionId, long sessionStartTime, int contentId, String payload, CloudAction action, String appState, int newBehavior) {
+    @Override
+    public void logNotification(int contentId, String payload, CloudAction action, String appState, int newBehavior) {
         try{
-            MPMessage message = new MPMessage.Builder(MessageType.PUSH_RECEIVED, sessionId, mLocation)
-                    .sessionStartTime(sessionStartTime)
+            MPMessage message = new MPMessage.Builder(MessageType.PUSH_RECEIVED, mAppStateManager.getSession().mSessionID, mLocation)
+                    .sessionStartTime(mAppStateManager.getSession().mSessionStartTime)
                     .timestamp(System.currentTimeMillis())
                     .name("gcm")
                     .build();
@@ -615,11 +623,11 @@ public class MessageManager implements MessageManagerCallbacks {
 
     }
 
-    public void logProfileAction(String action, String sessionId, long sessionStartTime) {
+    public void logProfileAction(String action) {
         try {
 
-            MPMessage message = new MPMessage.Builder(MessageType.PROFILE, sessionId, mLocation)
-                    .sessionStartTime(sessionStartTime)
+            MPMessage message = new MPMessage.Builder(MessageType.PROFILE, mAppStateManager.getSession().mSessionID, mLocation)
+                    .sessionStartTime(mAppStateManager.getSession().mSessionStartTime)
                     .timestamp(System.currentTimeMillis())
                     .build();
 

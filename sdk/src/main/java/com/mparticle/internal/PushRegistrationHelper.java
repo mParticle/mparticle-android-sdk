@@ -9,6 +9,7 @@ import android.os.Build;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 import com.mparticle.ConfigManager;
 import com.mparticle.MParticle;
+import com.mparticle.messaging.MessagingConfigCallbacks;
 
 import java.io.IOException;
 
@@ -60,15 +61,17 @@ public class PushRegistrationHelper {
      * Register the application for GCM notifications
      *
      * @param senderId the SENDER_ID for the application
+     * @param mMessagingConfigCallbacks
      */
-    public static void enablePushNotifications(final Context context, final String senderId) {
+    public static void enablePushNotifications(final Context context, final String senderId, final MessagingConfigCallbacks mMessagingConfigCallbacks) {
         if (getRegistrationId(context) == null && MPUtility.isSupportLibAvailable() && MPUtility.isGcmServicesAvailable()) {
             new Thread(new Runnable() {
                 @Override
                 public void run() {
                     try {
                         String registrationId =  GoogleCloudMessaging.getInstance(context).register(senderId);
-                        MParticle.getInstance().internal().setPushRegistrationId(registrationId);
+                        storeRegistrationId(context, registrationId);
+                        mMessagingConfigCallbacks.setPushRegistrationId(registrationId);
                     } catch (Exception ex) {
                         ConfigManager.log(MParticle.LogLevel.ERROR, "Error registering for GCM", ex.getMessage());
                     }

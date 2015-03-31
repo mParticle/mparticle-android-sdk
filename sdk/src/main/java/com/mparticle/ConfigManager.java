@@ -47,7 +47,7 @@ public class ConfigManager implements MessagingConfigCallbacks {
     private static final int DEVMODE_UPLOAD_INTERVAL_MILLISECONDS = 10 * 1000;
     private Context mContext;
 
-    private SharedPreferences mPreferences;
+    private static SharedPreferences mPreferences;
 
     private EmbeddedKitManager mEmbeddedKitManager;
     private AppConfig sLocalPrefs;
@@ -372,6 +372,11 @@ public class ConfigManager implements MessagingConfigCallbacks {
             .apply();
     }
 
+    @Override
+    public void setPushRegistrationId(String registrationId) {
+        MParticle.getInstance().logPushRegistration(registrationId);
+    }
+
     public boolean isEnabled(){
         boolean optedOut = this.getOptedOut();
         return !optedOut || mSendOoEvents;
@@ -435,8 +440,11 @@ public class ConfigManager implements MessagingConfigCallbacks {
                 .getInt(Constants.PrefKeys.PUSH_ICON, 0);
     }
 
-    public int getBreadcrumbLimit() {
-        return mPreferences.getInt(Constants.PrefKeys.BREADCRUMB_LIMIT, AppConfig.DEFAULT_BREADCRUMB_LIMIT);
+    public static int getBreadcrumbLimit() {
+        if (mPreferences != null){
+            return mPreferences.getInt(Constants.PrefKeys.BREADCRUMB_LIMIT, AppConfig.DEFAULT_BREADCRUMB_LIMIT);
+        }
+        return AppConfig.DEFAULT_BREADCRUMB_LIMIT;
     }
 
     public void setBreadcrumbLimit(int newLimit){
