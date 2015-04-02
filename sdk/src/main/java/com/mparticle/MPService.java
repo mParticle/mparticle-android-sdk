@@ -12,6 +12,7 @@ import android.content.Intent;
 import android.content.pm.ResolveInfo;
 import android.os.AsyncTask;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.PowerManager;
@@ -21,7 +22,6 @@ import com.mparticle.internal.Constants;
 import com.mparticle.internal.MPUtility;
 import com.mparticle.messaging.AbstractCloudMessage;
 import com.mparticle.messaging.CloudAction;
-import com.mparticle.messaging.MPCloudBackgroundMessage;
 import com.mparticle.messaging.MPCloudNotificationMessage;
 import com.mparticle.messaging.MPMessagingAPI;
 import com.mparticle.messaging.ProviderCloudMessage;
@@ -194,7 +194,7 @@ public class MPService extends IntentService {
     }
 
     private void generateCloudMessage(Intent intent) {
-        if (!MPCloudBackgroundMessage.processSilentPush(this, intent.getExtras())){
+        if (!processSilentPush(getApplicationContext(), intent.getExtras())){
             try {
                 AbstractCloudMessage cloudMessage = AbstractCloudMessage.createMessage(intent, ConfigManager.getPushKeys(this));
                 String appState = getAppState();
@@ -215,6 +215,25 @@ public class MPService extends IntentService {
                 Log.w(TAG, "GCM parsing error: " + e.toString());
             }
         }
+    }
+
+    private boolean processSilentPush(Context context, Bundle extras) {
+        if (extras != null &&
+                extras.containsKey(MPCloudNotificationMessage.COMMAND)){
+            int command = Integer.parseInt(extras.getString(MPCloudNotificationMessage.COMMAND));
+            switch (command){
+                case MPCloudNotificationMessage.COMMAND_ALERT_CONFIG_REFRESH:
+                    MParticle.start(context);
+                    MParticle.getInstance().refreshConfiguration();
+                case MPCloudNotificationMessage.COMMAND_DONOTHING:
+                    return true;
+                default:
+                    return false;
+            }
+
+
+        }
+        return false;
     }
 
     private void scheduleFutureNotification(MPCloudNotificationMessage message){

@@ -1456,6 +1456,11 @@ public class MParticle {
         }
     }
 
+    void refreshConfiguration() {
+        ConfigManager.log(LogLevel.DEBUG, "Refreshing configuration...");
+        mMessageManager.refreshConfiguration();
+    }
+
     /**
      * Event type to use when logging events.
      *
@@ -1730,10 +1735,7 @@ public class MParticle {
                     measuredRequestManager.isUriAllowed(url) && !mEmbeddedKitManager.isEmbeddedKitUri(url);
         }
 
-        public void refreshConfiguration() {
-            ConfigManager.log(LogLevel.DEBUG, "Refreshing configuration...");
-            mMessageManager.refreshConfiguration();
-        }
+
 
 
 
