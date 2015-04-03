@@ -132,7 +132,6 @@ public class MParticleApiClient implements IMPApiClient {
             HttpURLConnection connection = (HttpURLConnection) mConfigUrl.openConnection();
             connection.setConnectTimeout(2000);
             connection.setReadTimeout(10000);
-            connection.setRequestProperty("Accept-Encoding", "gzip");
             connection.setRequestProperty(HEADER_ENVIRONMENT, Integer.toString(mConfigManager.getEnvironment().getValue()));
             connection.setRequestProperty(HEADER_KITS, getSupportedKitString());
             connection.setRequestProperty(HTTP.USER_AGENT, mUserAgent);
