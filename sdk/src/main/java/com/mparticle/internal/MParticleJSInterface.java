@@ -136,7 +136,7 @@ public class MParticleJSInterface {
     public void setUserIdentity(String json){
         try {
             JSONObject attribute = new JSONObject(json);
-            MParticle.getInstance().setUserIdentity(attribute.getString("Identity"), convertIdentityType(attribute.getInt("Type")));
+            MParticle.getInstance().setUserIdentity(attribute.getString("Identity"), MParticle.IdentityType.parseInt(attribute.getInt("Type")));
         } catch (JSONException jse) {
             ConfigManager.log(MParticle.LogLevel.WARNING, String.format(errorMsg, jse.getMessage()));
         }
@@ -191,27 +191,6 @@ public class MParticleJSInterface {
                 return EventType.Social;
             default:
                 return EventType.Other;
-        }
-    }
-
-    private MParticle.IdentityType convertIdentityType(int identityType) {
-        switch (identityType) {
-            case 0:
-                return MParticle.IdentityType.Other;
-            case 1:
-                return MParticle.IdentityType.CustomerId;
-            case 2:
-                return MParticle.IdentityType.Facebook;
-            case 3:
-                return MParticle.IdentityType.Twitter;
-            case 4:
-                return  MParticle.IdentityType.Google;
-            case 5:
-                return  MParticle.IdentityType.Microsoft;
-            case 6:
-                return  MParticle.IdentityType.Yahoo;
-            default:
-                return  MParticle.IdentityType.Email;
         }
     }
 }
