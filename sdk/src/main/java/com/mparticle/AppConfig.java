@@ -64,7 +64,6 @@ class AppConfig {
                mEnvironment = MParticle.Environment.Production;
             }
         }else{
-            Log.w(Constants.LOG_TAG, "Initialized with a forced environment: " + environment.toString());
             mEnvironment = environment;
         }
         if (MPUtility.isAppDebuggable(context)){

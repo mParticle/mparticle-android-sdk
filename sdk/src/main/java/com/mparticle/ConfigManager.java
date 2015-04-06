@@ -31,27 +31,27 @@ public class ConfigManager implements MessagingConfigCallbacks {
     private static final String KEY_TRIGGER_ITEM_TYPES = "dts";
     private static final String KEY_TRIGGER_ITEM_HASHES = "evts";
     private static final String KEY_INFLUENCE_OPEN = "pio";
-    private static final String KEY_OPT_OUT = "oo";
+    static final String KEY_OPT_OUT = "oo";
     public static final String KEY_UNHANDLED_EXCEPTIONS = "cue";
     public static final String KEY_PUSH_MESSAGES = "pmk";
     public static final String KEY_NETWORK_PERFORMANCE = "cnp";
     public static final String KEY_EMBEDDED_KITS = "eks";
-    private static final String KEY_UPLOAD_INTERVAL = "uitl";
-    private static final String KEY_SESSION_TIMEOUT = "stl";
+    static final String KEY_UPLOAD_INTERVAL = "uitl";
+    static final String KEY_SESSION_TIMEOUT = "stl";
     public static final String VALUE_APP_DEFINED = "appdefined";
     public static final String VALUE_CUE_CATCH = "forcecatch";
     public static final String VALUE_CUE_IGNORE = "forceignore";
     public static final String VALUE_CNP_CAPTURE = "forcetrue";
     public static final String VALUE_CNP_NO_CAPTURE = "forcefalse";
     private static final String PREFERENCES_FILE = "mp_preferences";
-    private static final String KEY_RAMP = "rp";
+    static final String KEY_RAMP = "rp";
     private static final int DEVMODE_UPLOAD_INTERVAL_MILLISECONDS = 10 * 1000;
     private Context mContext;
 
     static SharedPreferences mPreferences;
 
     private EmbeddedKitManager mEmbeddedKitManager;
-    private AppConfig sLocalPrefs;
+    AppConfig sLocalPrefs;
     private static JSONArray sPushKeys;
     private String mLogUnhandledExceptions = VALUE_APP_DEFINED;
 
@@ -63,7 +63,7 @@ public class ConfigManager implements MessagingConfigCallbacks {
 
     private int mSessionTimeoutInterval = -1;
     private int mUploadInterval = -1;
-    private long mInfluenceOpenTimeout = 3600;
+    private long mInfluenceOpenTimeout = 3600 * 1000;
     private JSONArray mTriggerMessageMatches, mTriggerMessageHashes = null;
     private ExceptionHandler mExHandler;
 
@@ -126,6 +126,8 @@ public class ConfigManager implements MessagingConfigCallbacks {
 
         if (responseJSON.has(KEY_OPT_OUT)){
             mSendOoEvents = responseJSON.getBoolean(KEY_OPT_OUT);
+        }else{
+            mSendOoEvents = false;
         }
 
         if (responseJSON.has(ProviderPersistence.KEY_PERSISTENCE)) {
@@ -157,7 +159,7 @@ public class ConfigManager implements MessagingConfigCallbacks {
         if (responseJSON.has(KEY_INFLUENCE_OPEN)){
             mInfluenceOpenTimeout = responseJSON.getLong(KEY_INFLUENCE_OPEN) * 60 * 1000;
         }else{
-            mInfluenceOpenTimeout = 3600;
+            mInfluenceOpenTimeout = 30 * 60 * 1000;
         }
 
         editor.apply();
