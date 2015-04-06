@@ -218,7 +218,8 @@ public class MParticle {
                     instance.mApiKey = configManager.getApiKey();
                     instance.mAppStateManager = appStateManager;
                     instance.mMessageManager = new MessageManager(context, configManager, installType, appStateManager);
-                    instance.measuredRequestManager = new MeasuredRequestManager(embeddedKitManager);
+                    instance.measuredRequestManager = MeasuredRequestManager.INSTANCE;
+                    instance.measuredRequestManager.start(embeddedKitManager);
                     instance.mEmbeddedKitManager = embeddedKitManager;
                     instance.mPreferences = context.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
 

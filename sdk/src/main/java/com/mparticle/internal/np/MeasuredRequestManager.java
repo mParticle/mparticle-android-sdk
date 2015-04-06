@@ -14,11 +14,13 @@ import java.util.concurrent.ScheduledFuture;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
 
-public final class MeasuredRequestManager {
+public enum MeasuredRequestManager {
+    INSTANCE;
+
     private final ScheduledExecutorService scheduler =
             Executors.newScheduledThreadPool(1);
     final HashSet<MeasuredRequest> requests = new HashSet<MeasuredRequest>();
-    private final EmbeddedKitManager mEmbeddedKitManager;
+    private EmbeddedKitManager mEmbeddedKitManager;
     private CopyOnWriteArrayList<String> excludedUrlFilters = new CopyOnWriteArrayList<String>();
     private CopyOnWriteArrayList<String> queryStringFilters = new CopyOnWriteArrayList<String>();
     private static final String MPARTICLEHOST = ".mparticle.com";
@@ -31,8 +33,13 @@ public final class MeasuredRequestManager {
         }
     }
 
-    public MeasuredRequestManager(EmbeddedKitManager ekManager) {
+    public void start(EmbeddedKitManager ekManager) {
         mEmbeddedKitManager = ekManager;
+    }
+
+    public boolean shouldProcessUrl(String url){
+        return ConfigManager.isNetworkPerformanceEnabled() &&
+                isUriAllowed(url) && !mEmbeddedKitManager.isEmbeddedKitUri(url);
     }
 
     final Runnable processPending = new Runnable() {

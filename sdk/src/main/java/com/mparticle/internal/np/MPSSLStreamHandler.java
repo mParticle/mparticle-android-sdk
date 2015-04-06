@@ -22,7 +22,7 @@ final class MPSSLStreamHandler extends MPAbstractStreamHandler {
 
     protected final URLConnection openConnection(URL u) throws IOException {
         HttpsURLConnection connection = (HttpsURLConnection) super.openConnection(u);
-        if (MParticle.getInstance().internal().shouldProcessUrl(u.toString())) {
+        if (u != null && MeasuredRequestManager.INSTANCE.shouldProcessUrl(u.toString())) {
             return new MPHttpsUrlConnection(connection);
         } else {
             return connection;
@@ -32,7 +32,7 @@ final class MPSSLStreamHandler extends MPAbstractStreamHandler {
 
     protected final URLConnection openConnection(URL u, Proxy proxy) throws IOException {
         HttpsURLConnection connection = (HttpsURLConnection) super.openConnection(u, proxy);
-        if (MParticle.getInstance().internal().shouldProcessUrl(u.toString())) {
+        if (u != null && MeasuredRequestManager.INSTANCE.shouldProcessUrl(u.toString())) {
             return new MPHttpsUrlConnection(connection);
         } else {
             return connection;
