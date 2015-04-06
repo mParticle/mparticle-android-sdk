@@ -8,8 +8,8 @@ import android.os.Bundle;
 import android.test.AndroidTestCase;
 import android.text.TextUtils;
 
+import com.mparticle.MPService;
 import com.mparticle.messaging.AbstractCloudMessage;
-import com.mparticle.messaging.MPCloudBackgroundMessage;
 import com.mparticle.messaging.MPCloudNotificationMessage;
 import com.mparticle.messaging.ProviderCloudMessage;
 
@@ -20,7 +20,6 @@ import org.json.JSONObject;
 import java.util.Iterator;
 import java.util.UUID;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 
 public class PushTests extends AndroidTestCase {
 
@@ -264,15 +263,16 @@ public class PushTests extends AndroidTestCase {
 
     @Test
     public void testSilentPush(){
+        MPService service = new MPService();
         Bundle extras = getMpExtras(MP_JSON);
         extras.putString("m_cmd", Integer.toString(MPCloudNotificationMessage.COMMAND_DONOTHING));
-        assertTrue(MPCloudBackgroundMessage.processSilentPush(getContext(), extras));
+        assertTrue(service.processSilentPush(getContext(), extras));
 
         extras.putString("m_cmd", Integer.toString(MPCloudNotificationMessage.COMMAND_ALERT_CONFIG_REFRESH));
-        assertTrue(MPCloudBackgroundMessage.processSilentPush(getContext(), extras));
+        assertTrue(service.processSilentPush(getContext(), extras));
 
         extras.putString("m_cmd", Integer.toString(MPCloudNotificationMessage.COMMAND_ALERT_NOW));
-        assertFalse(MPCloudBackgroundMessage.processSilentPush(getContext(), extras));
+        assertFalse(service.processSilentPush(getContext(), extras));
     }
 
     private JSONArray getMockMessageKeys(){

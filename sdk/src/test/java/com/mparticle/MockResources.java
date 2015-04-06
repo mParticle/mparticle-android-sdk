@@ -1,4 +1,4 @@
-package com.mparticle.test;
+package com.mparticle;
 
 /**
  * Created by sdozor on 3/23/15.

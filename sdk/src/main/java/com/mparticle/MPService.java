@@ -217,7 +217,7 @@ public class MPService extends IntentService {
         }
     }
 
-    private boolean processSilentPush(Context context, Bundle extras) {
+    public boolean processSilentPush(Context context, Bundle extras) {
         if (extras != null &&
                 extras.containsKey(MPCloudNotificationMessage.COMMAND)){
             int command = Integer.parseInt(extras.getString(MPCloudNotificationMessage.COMMAND));

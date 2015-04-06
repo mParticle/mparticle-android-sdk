@@ -1,14 +1,19 @@
 package com.mparticle.test;
 
-import android.test.AndroidTestCase;
+
 
 import com.mparticle.MPEvent;
 import com.mparticle.MParticle;
 
-/**
- * Created by sdozor on 3/4/15.
- */
-public class MPEventTests extends AndroidTestCase {
+import org.junit.Test;
+
+import static junit.framework.Assert.assertNull;
+import static junit.framework.Assert.assertTrue;
+import static junit.framework.Assert.fail;
+
+public class MPEventTests  {
+
+    @Test
     public void testBasicBuilder(){
         MPEvent event = new MPEvent.Builder("test name", MParticle.EventType.Navigation).category("test category").duration(1234).build();
         assertTrue(event.getEventName().equals("test name"));
@@ -17,6 +22,7 @@ public class MPEventTests extends AndroidTestCase {
         assertTrue(event.getLength() == 1234);
     }
 
+    @Test
     public void testSerialization(){
         String eventString = new MPEvent.Builder("test name", MParticle.EventType.Navigation).category("test category").duration(1234).toString();
         MPEvent event = MPEvent.Builder.parseString(eventString).build();
@@ -26,11 +32,13 @@ public class MPEventTests extends AndroidTestCase {
         assertTrue(event.getLength() == 1234);
     }
 
+    @Test
     public void testEventLength() {
         MPEvent event = new MPEvent.Builder("test name", MParticle.EventType.Navigation).category("test category").build();
         assertNull(event.getLength());
     }
 
+    @Test
     public void testTimer(){
         MPEvent.Builder eventBuilder = new MPEvent.Builder("test name", MParticle.EventType.Navigation);
 
@@ -43,4 +51,6 @@ public class MPEventTests extends AndroidTestCase {
         eventBuilder.endTime();
         assertTrue(eventBuilder.build().getLength() >= 1000);
     }
+
+
 }

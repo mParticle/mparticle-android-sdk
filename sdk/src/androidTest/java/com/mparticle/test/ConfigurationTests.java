@@ -1,10 +1,11 @@
 package com.mparticle.test;
 
-import com.mparticle.MParticle;
+import android.test.AndroidTestCase;
+
 import com.mparticle.AppStateManager;
 import com.mparticle.ConfigManager;
+import com.mparticle.MParticle;
 import com.mparticle.internal.MPUtility;
-import com.mparticle.internal.embedded.EmbeddedKitManager;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -19,7 +20,7 @@ import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertTrue;
 import static junit.framework.Assert.fail;
 
-public class ConfigurationTests  {
+public class ConfigurationTests extends AndroidTestCase{
 
 
     final MockContext context = new MockContext();
@@ -29,7 +30,7 @@ public class ConfigurationTests  {
     @Before
     public void setUp() throws Exception {
         assertFalse(AppStateManager.mInitialized);
-         manager = new ConfigManager(context, new EmbeddedKitManager(context), MParticle.Environment.AutoDetect);
+        manager = new ConfigManager(context, MParticle.Environment.AutoDetect);
     }
 
     @Test

@@ -47,7 +47,7 @@ public class ConfigManager implements MessagingConfigCallbacks {
     private static final int DEVMODE_UPLOAD_INTERVAL_MILLISECONDS = 10 * 1000;
     private Context mContext;
 
-    private static SharedPreferences mPreferences;
+    static SharedPreferences mPreferences;
 
     private EmbeddedKitManager mEmbeddedKitManager;
     private AppConfig sLocalPrefs;
@@ -95,13 +95,19 @@ public class ConfigManager implements MessagingConfigCallbacks {
         }
     }
 
+    void saveConfigJson(JSONObject json){
+        if (json != null) {
+            mPreferences.edit().putString(CONFIG_JSON, json.toString()).apply();
+        }
+    }
+
     public synchronized void updateConfig(JSONObject responseJSON) throws JSONException {
         updateConfig(responseJSON, true);
     }
     public synchronized void updateConfig(JSONObject responseJSON, boolean persistJson) throws JSONException {
         SharedPreferences.Editor editor = mPreferences.edit();
         if (persistJson) {
-            editor.putString(CONFIG_JSON, responseJSON.toString());
+            saveConfigJson(responseJSON);
         }
 
         if (responseJSON.has(KEY_UNHANDLED_EXCEPTIONS)) {
