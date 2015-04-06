@@ -15,6 +15,7 @@ import com.mparticle.MParticle.LogLevel;
 import com.mparticle.internal.Constants;
 import com.mparticle.internal.MPLicenseCheckerCallback;
 import com.mparticle.internal.MPMessage;
+import com.mparticle.internal.MPUtility;
 import com.mparticle.internal.embedded.EmbeddedKitManager;
 import com.mparticle.licensing.AESObfuscator;
 import com.mparticle.licensing.LicenseChecker;
@@ -85,7 +86,7 @@ public class ConfigManager implements MessagingConfigCallbacks {
      */
     public void restore(){
         String oldConfig = mPreferences.getString(CONFIG_JSON, null);
-        if (!TextUtils.isEmpty(oldConfig)){
+        if (!MPUtility.isEmpty(oldConfig)){
             try{
                 JSONObject oldConfigJson = new JSONObject(oldConfig);
                 mEmbeddedKitManager.updateKits(oldConfigJson.optJSONArray(KEY_EMBEDDED_KITS));
@@ -188,7 +189,7 @@ public class ConfigManager implements MessagingConfigCallbacks {
         }
     }
 
-    private void performLicenseCheck() {
+    protected void performLicenseCheck() {
         String deviceId = Settings.Secure.getString(mContext.getContentResolver(), Settings.Secure.ANDROID_ID);
 
         MPLicenseCheckerCallback licenseCheckerCallback = new MPLicenseCheckerCallback(mPreferences, null);

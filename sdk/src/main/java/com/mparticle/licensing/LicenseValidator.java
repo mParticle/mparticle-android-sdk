@@ -20,6 +20,8 @@ import android.text.TextUtils;
 import android.util.Log;
 
 
+import com.mparticle.internal.MPUtility;
+
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
@@ -150,7 +152,7 @@ class LicenseValidator {
 
             // Application-specific user identifier.
             userId = data.userId;
-            if (TextUtils.isEmpty(userId)) {
+            if (MPUtility.isEmpty(userId)) {
                 Log.e(TAG, "User identifier is empty.");
                 handleInvalidResponse();
                 return;

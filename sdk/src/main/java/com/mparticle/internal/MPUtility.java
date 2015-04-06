@@ -125,6 +125,13 @@ public class MPUtility {
         return mi.threshold;
     }
 
+    public static boolean isEmpty(CharSequence str) {
+        if (str == null || str.length() == 0)
+            return true;
+        else
+            return false;
+    }
+
     public static String getGpsEnabled(Context context) {
         if (PackageManager.PERMISSION_GRANTED == context
                 .checkCallingOrSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION)) {

@@ -43,7 +43,7 @@ public class MessageTests  {
             assertTrue(mpMessage.getSessionId().equals(sessionId));
             assertTrue(mpMessage.getString("sid").equals(sessionId));
             assertTrue(mpMessage.getString("ct").equals(Long.toString(firstRunTime)));
-            assertFalse(TextUtils.isEmpty(mpMessage.getString("dct")));
+            assertFalse(MPUtility.isEmpty(mpMessage.getString("dct")));
         }catch (JSONException jse){
             fail(jse.toString());
         }

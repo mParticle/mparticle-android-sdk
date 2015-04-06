@@ -8,6 +8,7 @@ import android.os.Parcelable;
 import android.text.TextUtils;
 
 import com.mparticle.MPService;
+import com.mparticle.internal.MPUtility;
 
 import java.util.UUID;
 
@@ -30,10 +31,10 @@ public class CloudAction implements Parcelable {
         mActionActivity = actionActivity;
         mActionId = actionId;
 
-        if (TextUtils.isEmpty(mActionId)){
-            if (!TextUtils.isEmpty(mActionTitle)){
+        if (MPUtility.isEmpty(mActionId)){
+            if (!MPUtility.isEmpty(mActionTitle)){
                 mActionIdentifier = mActionTitle;
-            }else if (!TextUtils.isEmpty(mActionIcon)){
+            }else if (!MPUtility.isEmpty(mActionIcon)){
                 mActionIdentifier = mActionIcon;
             }else{
                 mActionIdentifier = UUID.randomUUID().toString();
@@ -108,7 +109,7 @@ public class CloudAction implements Parcelable {
     }
 
     public int getIconId(Context context) {
-        if (!TextUtils.isEmpty(mActionIcon)) {
+        if (!MPUtility.isEmpty(mActionIcon)) {
             int id = context.getResources().getIdentifier(mActionIcon, "drawable", context.getPackageName());
             if (id > 0){
                 return id;

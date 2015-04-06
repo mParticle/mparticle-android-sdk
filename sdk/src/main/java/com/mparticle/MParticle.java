@@ -262,6 +262,16 @@ public class MParticle {
         return getInstance(null, null, null);
     }
 
+    /**
+     *
+     * This method is only to be used while unit testing.
+     *
+     * @param instance
+     */
+    public static void setInstance(MParticle instance) {
+        MParticle.instance = instance;
+    }
+
 
     /**
      * Track that an Activity has started. Should only be called within the onStart method of your Activities,

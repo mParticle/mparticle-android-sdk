@@ -69,12 +69,12 @@ public class MParticleApiClient implements IMPApiClient {
      * Embedded kit header used to tell both the supported EKs (/config), and the currently active EKs (/events)
      */
     private static final String HEADER_KITS = "x-mp-kits";
-    private static final String SECURE_SERVICE_SCHEME = TextUtils.isEmpty(BuildConfig.MP_URL) ? "https" : "http";
+    private static final String SECURE_SERVICE_SCHEME = MPUtility.isEmpty(BuildConfig.MP_URL) ? "https" : "http";
 
-    private static final String API_HOST = TextUtils.isEmpty(BuildConfig.MP_URL) ? "nativesdks.mparticle.com" : BuildConfig.MP_URL;
-    private static final String CONFIG_HOST = TextUtils.isEmpty(BuildConfig.MP_CONFIG_URL) ? "config2.mparticle.com" : BuildConfig.MP_CONFIG_URL;
+    private static final String API_HOST = MPUtility.isEmpty(BuildConfig.MP_URL) ? "nativesdks.mparticle.com" : BuildConfig.MP_URL;
+    private static final String CONFIG_HOST = MPUtility.isEmpty(BuildConfig.MP_CONFIG_URL) ? "config2.mparticle.com" : BuildConfig.MP_CONFIG_URL;
 
-    private static boolean DEBUGGING = !TextUtils.isEmpty(BuildConfig.MP_URL) && BuildConfig.MP_URL.equals("api-qa.mparticle.com");
+    private static boolean DEBUGGING = !MPUtility.isEmpty(BuildConfig.MP_URL) && BuildConfig.MP_URL.equals("api-qa.mparticle.com");
 
     private static final String SERVICE_VERSION_1 = "/v1";
     private static final String SERVICE_VERSION_3 = "/v3";
@@ -529,7 +529,7 @@ public class MParticleApiClient implements IMPApiClient {
     public JSONObject getCookies()  {
         if (mCurrentCookies == null){
             String currentCookies = mPreferences.getString(Constants.PrefKeys.Cookies, null);
-            if (TextUtils.isEmpty(currentCookies)){
+            if (MPUtility.isEmpty(currentCookies)){
                 mCurrentCookies = new JSONObject();
                 mPreferences.edit().putString(Constants.PrefKeys.Cookies, mCurrentCookies.toString()).apply();
                 return mCurrentCookies;

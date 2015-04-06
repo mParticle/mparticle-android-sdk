@@ -87,7 +87,7 @@ public class PushTests extends AndroidTestCase {
             fail(e.getMessage());
         }
         String text = message.getPrimaryMessage(getContext());
-        assertFalse(TextUtils.isEmpty(text));
+        assertFalse(MPUtility.isEmpty(text));
         assertFalse(message.getRedactedJsonPayload().toString().contains(text));
     }
 
@@ -224,9 +224,9 @@ public class PushTests extends AndroidTestCase {
         } catch (AbstractCloudMessage.InvalidGcmMessageException e) {
 
         }
-        assertFalse(TextUtils.isEmpty(message.getPrimaryMessage(getContext())));
+        assertFalse(MPUtility.isEmpty(message.getPrimaryMessage(getContext())));
         assertNotNull(message.getLargeIcon(getContext()));
-        assertFalse(TextUtils.isEmpty(message.getContentTitle(getContext())));
+        assertFalse(MPUtility.isEmpty(message.getContentTitle(getContext())));
     }
 
     @Test
