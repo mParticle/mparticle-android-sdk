@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteException;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -80,58 +79,6 @@ public final class UploadHandler extends Handler {
      * API client interface reference, useful for the unit test suite project.
      */
     private IMPApiClient mApiClient;
-
-    /**
-     * The following get*Query methods were once static fields, but in order to save on app startup time, they're
-     * now created as needed.
-     */
-
-    /**
-     * The beginning of the delete query used to clear the uploads table after a successful upload.
-     */
-    private static String getDeletableMessagesQuery() {
-        return String.format(
-                "(%s='NO-SESSION')",
-                MessageTable.SESSION_ID);
-    }
-
-    /**
-     * Query to determine all of the generated uploads that are ready for the wire.
-     */
-    private static String getUploadableMessagesQuery() {
-        return String.format(
-                "((%s='NO-SESSION') or ((%s>=?) and (%s!=%d)))",
-                MessageTable.SESSION_ID,
-                MessageTable.STATUS,
-                MessageTable.STATUS,
-                Status.UPLOADED);
-    }
-
-    /**
-     * Query to determine all the session history batches that are ready for the wire
-     */
-    private static String getSessionHistoryBatchesQuery() {
-        return String.format(
-                "((%s!='NO-SESSION') and ((%s>=?) and (%s=%d) and (%s != ?)))",
-                MessageTable.SESSION_ID,
-                MessageTable.STATUS,
-                MessageTable.STATUS,
-                Status.UPLOADED,
-                MessageTable.SESSION_ID);
-    }
-
-    /**
-     * Query used to clear session history uploads after a successful upload to the SDK server.
-     */
-    private static String getSqlFinishedHistoryMessagesQuery() {
-        return String.format(
-                "((%s='NO-SESSION') or ((%s>=?) and (%s=%d) and (%s=?)))",
-                MessageTable.SESSION_ID,
-                MessageTable.STATUS,
-                MessageTable.STATUS,
-                Status.UPLOADED,
-                MessageTable.SESSION_ID);
-    }
 
     /**
      * Boolean used to determine if we're currently connected to the network. If we're not connected to the network,
@@ -232,11 +179,9 @@ public final class UploadHandler extends Handler {
                 try {
                     mApiClient.fetchConfig();
                 } catch (SSLHandshakeException ssle){
-                        ConfigManager.log(MParticle.LogLevel.DEBUG, "SSL handshake failed while update configuration - possible MITM attack detected.");
+                    ConfigManager.log(MParticle.LogLevel.DEBUG, "SSL handshake failed while update configuration - possible MITM attack detected.");
                 } catch (IOException ioe) {
                     ConfigManager.log(MParticle.LogLevel.DEBUG, "Failed to update configuration: ", ioe.toString());
-                } catch (MParticleApiClient.MPThrottleException e) {
-                } catch (MParticleApiClient.MPConfigException e) {
                 } catch (Exception e){
 
                 }
@@ -299,26 +244,11 @@ public final class UploadHandler extends Handler {
         }
     }
 
-    String prepareOrderBy = MessageTable.CREATED_AT + ", " + MessageTable.SESSION_ID + " , _id asc";
-    String[] prepareSelection = new String[]{"_id", MessageTable.MESSAGE, MessageTable.CREATED_AT, MessageTable.STATUS, MessageTable.SESSION_ID};
-    String[] defaultSelectionArgs = new String[]{Integer.toString(Status.READY)};
-
     void prepareHistoryUpload(){
         Cursor readyMessagesCursor = null;
         try {
             // select messages ready to upload
-            String selection = getSessionHistoryBatchesQuery();
-            String[] selectionArgs = new String[]{Integer.toString(Status.READY), mAppStateManager.getSession().mSessionID};;
-
-            readyMessagesCursor = db.query(
-                    MessageTable.TABLE_NAME,
-                    prepareSelection,
-                    selection,
-                    selectionArgs,
-                    null,
-                    null,
-                    prepareOrderBy);
-
+            readyMessagesCursor = MParticleDatabase.getSessionHistory(db, mAppStateManager.getSession().mSessionID);
             if (readyMessagesCursor.getCount() > 0) {
                 mApiClient.fetchConfig();
                 int sessionIndex = readyMessagesCursor.getColumnIndex(MessageTable.SESSION_ID);
@@ -351,19 +281,7 @@ public final class UploadHandler extends Handler {
     private void prepareMessageUpload() {
         Cursor readyMessagesCursor = null;
         try {
-            // select messages ready to upload
-            String selection = getUploadableMessagesQuery();
-            String[] selectionArgs = defaultSelectionArgs;
-
-            readyMessagesCursor = db.query(
-                    MessageTable.TABLE_NAME,
-                    prepareSelection,
-                    selection,
-                    selectionArgs,
-                    null,
-                    null,
-                    prepareOrderBy);
-
+            readyMessagesCursor = MParticleDatabase.getMessagesForUpload(db);
             if (readyMessagesCursor.getCount() > 0) {
                 mApiClient.fetchConfig();
                 JSONArray messagesArray = new JSONArray();
@@ -433,7 +351,6 @@ public final class UploadHandler extends Handler {
             }
         } catch (MParticleApiClient.MPRampException e){
         } catch (MParticleApiClient.MPThrottleException e) {
-            //ConfigManager.log(MParticle.LogLevel.DEBUG, e.getMessage());
         } catch (SSLHandshakeException ssle){
             ConfigManager.log(MParticle.LogLevel.DEBUG, "SSL handshake failed while preparing uploads - possible MITM attack detected.");
         } catch (Exception e){
@@ -454,7 +371,7 @@ public final class UploadHandler extends Handler {
         return HttpStatus.SC_ACCEPTED == statusCode ||
                 (statusCode >= HttpStatus.SC_BAD_REQUEST && statusCode < HttpStatus.SC_INTERNAL_SERVER_ERROR);
     }
-    
+
     /**
      * Method that is responsible for building an upload message to be sent over the wire.
      */
@@ -471,31 +388,18 @@ public final class UploadHandler extends Handler {
         return batchMessage;
     }
 
-    String gcmDeleteWhere = MParticleDatabase.GcmMessageTable.EXPIRATION + " < ? and " + MParticleDatabase.GcmMessageTable.DISPLAYED_AT + " > 0";
-    String[] gcmColumns = {MParticleDatabase.GcmMessageTable.CONTENT_ID, MParticleDatabase.GcmMessageTable.CAMPAIGN_ID, MParticleDatabase.GcmMessageTable.EXPIRATION, MParticleDatabase.GcmMessageTable.DISPLAYED_AT};
-
     /**
      * If the customer is using our GCM solution, query and append all of the history used for attribution.
      *
      */
     void addGCMHistory(JSONObject uploadMessage) {
-        //first remove expired
         Cursor gcmHistory = null;
         try {
-            String[] deleteWhereArgs = {Long.toString(System.currentTimeMillis())};
-            db.delete(MParticleDatabase.GcmMessageTable.TABLE_NAME, gcmDeleteWhere, deleteWhereArgs);
-
-            gcmHistory = db.query(MParticleDatabase.GcmMessageTable.TABLE_NAME,
-                    gcmColumns,
-                    null,
-                    null,
-                    null,
-                    null,
-                    MParticleDatabase.GcmMessageTable.EXPIRATION + " desc"); //this order to necessary so that we only append the latest push messages
+            MParticleDatabase.deleteExpiredGcmMessages(db);
+            gcmHistory = MParticleDatabase.getGcmHistory(db);
             if (gcmHistory.getCount() > 0) {
                 JSONObject historyObject = new JSONObject();
                 while (gcmHistory.moveToNext()) {
-
                     int contentId = gcmHistory.getInt(gcmHistory.getColumnIndex(MParticleDatabase.GcmMessageTable.CONTENT_ID));
                     if (contentId != MParticleDatabase.GcmMessageTable.PROVIDER_CONTENT_ID) {
                         int campaignId = gcmHistory.getInt(gcmHistory.getColumnIndex(MParticleDatabase.GcmMessageTable.CAMPAIGN_ID));
@@ -532,17 +436,17 @@ public final class UploadHandler extends Handler {
 
     void dbDeleteProcessedMessages(String sessionId) {
         String[] whereArgs = new String[]{Integer.toString(Status.UPLOADED), sessionId};
-        int rowsdeleted = db.delete(MessageTable.TABLE_NAME, UploadHandler.getSqlFinishedHistoryMessagesQuery(), whereArgs);
+        int rowsdeleted = db.delete(MessageTable.TABLE_NAME, MParticleDatabase.getSqlFinishedHistoryMessagesQuery(), whereArgs);
     }
 
     void dbMarkAsUploadedMessage(int lastMessageId) {
         //non-session messages can be deleted, they're not part of session history
         String[] whereArgs = new String[]{Long.toString(lastMessageId)};
-        String whereClause = getDeletableMessagesQuery() + " and (_id<=?)";
+        String whereClause = MParticleDatabase.getDeletableMessagesQuery() + " and (_id<=?)";
         int rowsdeleted = db.delete(MessageTable.TABLE_NAME, whereClause, whereArgs);
 
         whereArgs = new String[]{Integer.toString(Status.READY), Long.toString(lastMessageId)};
-        whereClause = getUploadableMessagesQuery() + " and (_id<=?)";
+        whereClause = MParticleDatabase.getUploadableMessagesQuery() + " and (_id<=?)";
         ContentValues contentValues = new ContentValues();
         contentValues.put(MessageTable.STATUS, Status.UPLOADED);
         int rowsupdated = db.update(MessageTable.TABLE_NAME, contentValues, whereClause, whereArgs);
@@ -551,11 +455,6 @@ public final class UploadHandler extends Handler {
     void dbDeleteUpload(int id) {
         String[] whereArgs = {Long.toString(id)};
         int rowsdeleted = db.delete(UploadTable.TABLE_NAME, "_id=?", whereArgs);
-    }
-
-    void dbDeleteCommand(int id) {
-        String[] whereArgs = {Long.toString(id)};
-        db.delete(CommandTable.TABLE_NAME, "_id=?", whereArgs);
     }
 
     void dbInsertCommand(JSONObject command) throws JSONException {
