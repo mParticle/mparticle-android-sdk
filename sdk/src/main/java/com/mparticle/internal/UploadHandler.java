@@ -146,6 +146,26 @@ public final class UploadHandler extends Handler {
     private JSONObject deviceInfo;
     private JSONObject appInfo;
 
+    /**
+     *
+     * Only used for unit testing
+     */
+    UploadHandler(Context context, ConfigManager configManager, MParticleDatabase database, AppStateManager appStateManager) {
+        mConfigManager = configManager;
+        mContext = context;
+        mApiKey = mConfigManager.getApiKey();
+        mAppStateManager = appStateManager;
+        audienceDB = new SegmentDatabase(mContext);
+        mPreferences = mContext.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
+        mDbHelper = database;
+        try {
+            setApiClient(new MParticleApiClient(configManager, mPreferences, context));
+        } catch (MalformedURLException e) {
+            //this should never happen - the URLs are created by constants.
+        }
+    }
+
+
     public UploadHandler(Context context, Looper looper, ConfigManager configManager, MParticleDatabase database, AppStateManager appStateManager) {
         super(looper);
         mConfigManager = configManager;
@@ -162,7 +182,7 @@ public final class UploadHandler extends Handler {
         }
     }
 
-    private JSONObject getDeviceInfo(){
+    JSONObject getDeviceInfo(){
         if (deviceInfo == null){
             deviceInfo = DeviceAttributes.collectDeviceInfo(mContext);
         }
@@ -181,7 +201,7 @@ public final class UploadHandler extends Handler {
         return deviceInfo;
     }
 
-    private JSONObject getAppInfo(){
+    JSONObject getAppInfo(){
         if (appInfo == null){
             appInfo = DeviceAttributes.collectAppInfo(mContext);
         }
@@ -288,7 +308,7 @@ public final class UploadHandler extends Handler {
      * This method is responsible for looking for messages that have been logged, and assembling them into batches to be uploaded.
      * It does not trigger network comms.
      */
-    private void prepareUploads(boolean history) {
+    void prepareUploads(boolean history) {
         Cursor readyMessagesCursor = null;
         try {
             // select messages ready to upload
@@ -384,7 +404,7 @@ public final class UploadHandler extends Handler {
     /**
      * This method is responsible for looking for batches that are ready to be uploaded, and uploading them.
      */
-    private boolean processUploads(boolean history) {
+    boolean processUploads(boolean history) {
         boolean processingSessionEnd = false;
         Cursor readyUploadsCursor = null;
         try {
@@ -451,7 +471,7 @@ public final class UploadHandler extends Handler {
      * Primarily deprecated functionality that lets the server tell the SDK to make requests to 3rd parties.
      * Once upon a time this was required for Google Analytics, but is no longer used for any service provider.
      */
-    private void processCommands() {
+    void processCommands() {
         try {
 
             String[] selectionColumns = new String[]{"_id", CommandTable.URL, CommandTable.METHOD,
@@ -491,7 +511,7 @@ public final class UploadHandler extends Handler {
     /**
      * Method that is responsible for building an upload message to be sent over the wire.
      */
-    private JSONObject createUploadMessage(JSONArray messagesArray, boolean history) throws JSONException {
+    JSONObject createUploadMessage(JSONArray messagesArray, boolean history) throws JSONException {
         JSONObject batchMessage = MessageBatch.create(mContext,
                 messagesArray,
                 history,
@@ -511,7 +531,7 @@ public final class UploadHandler extends Handler {
      * If the customer is using our GCM solution, query and append all of the history used for attribution.
      *
      */
-    private void addGCMHistory(JSONObject uploadMessage) {
+    void addGCMHistory(JSONObject uploadMessage) {
         //first remove expired
         Cursor gcmHistory = null;
         try {
@@ -555,7 +575,7 @@ public final class UploadHandler extends Handler {
         }
     }
 
-    private void dbInsertUpload(JSONObject message) throws JSONException {
+    void dbInsertUpload(JSONObject message) throws JSONException {
         ContentValues contentValues = new ContentValues();
         contentValues.put(UploadTable.API_KEY, mApiKey);
         contentValues.put(UploadTable.CREATED_AT, message.getLong(MessageKey.TIMESTAMP));
@@ -563,12 +583,12 @@ public final class UploadHandler extends Handler {
         db.insert(UploadTable.TABLE_NAME, null, contentValues);
     }
 
-    private void dbDeleteProcessedMessages(String sessionId) {
+    void dbDeleteProcessedMessages(String sessionId) {
         String[] whereArgs = new String[]{Integer.toString(Status.UPLOADED), sessionId};
         int rowsdeleted = db.delete(MessageTable.TABLE_NAME, UploadHandler.getSqlFinishedHistoryMessagesQuery(), whereArgs);
     }
 
-    private void dbMarkAsUploadedMessage(int lastMessageId) {
+    void dbMarkAsUploadedMessage(int lastMessageId) {
         //non-session messages can be deleted, they're not part of session history
         String[] whereArgs = new String[]{Long.toString(lastMessageId)};
         String whereClause = getDeletableMessagesQuery() + " and (_id<=?)";
@@ -581,17 +601,17 @@ public final class UploadHandler extends Handler {
         int rowsupdated = db.update(MessageTable.TABLE_NAME, contentValues, whereClause, whereArgs);
     }
 
-    private void dbDeleteUpload(int id) {
+    void dbDeleteUpload(int id) {
         String[] whereArgs = {Long.toString(id)};
         int rowsdeleted = db.delete(UploadTable.TABLE_NAME, "_id=?", whereArgs);
     }
 
-    private void dbDeleteCommand(int id) {
+    void dbDeleteCommand(int id) {
         String[] whereArgs = {Long.toString(id)};
         db.delete(CommandTable.TABLE_NAME, "_id=?", whereArgs);
     }
 
-    private void dbInsertCommand(JSONObject command) throws JSONException {
+    void dbInsertCommand(JSONObject command) throws JSONException {
         ContentValues contentValues = new ContentValues();
         contentValues.put(CommandTable.URL, command.getString(MessageKey.URL));
         contentValues.put(CommandTable.METHOD, command.getString(MessageKey.METHOD));
@@ -605,7 +625,7 @@ public final class UploadHandler extends Handler {
     /**
      * Used by the test suite for mocking
      */
-    public void setApiClient(IMPApiClient apiClient) {
+    void setApiClient(IMPApiClient apiClient) {
         mApiClient = apiClient;
     }
 
