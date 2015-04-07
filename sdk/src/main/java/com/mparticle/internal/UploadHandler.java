@@ -247,7 +247,7 @@ public final class UploadHandler extends Handler {
                     long uploadInterval = mConfigManager.getUploadInterval();
                     if (isNetworkConnected && !mApiClient.isThrottled()) {
                         if (uploadInterval > 0 || msg.arg1 == 1) {
-                            prepareUploads(false);
+                            prepareMessageUpload();
                             boolean needsHistory = processUploads(false);
                             if (needsHistory) {
                                 this.sendEmptyMessage(UPLOAD_HISTORY);
@@ -271,17 +271,19 @@ public final class UploadHandler extends Handler {
                     // then create a history upload and send it
                     cursor = db.rawQuery("select * from " + UploadTable.TABLE_NAME, null);
                     if ((cursor == null) || (cursor.getCount() == 0)) {
+                        if (cursor != null && !cursor.isClosed()) {
+                            cursor.close();
+                        }
                         this.removeMessages(UPLOAD_HISTORY);
                         // execute all the upload steps
-                        prepareUploads(true);
+                        prepareHistoryUpload();
                         if (isNetworkConnected) {
                             processUploads(true);
                         }
                     }
+                } catch (Exception e){
 
-                }catch (Exception e){
-
-                }finally {
+                } finally {
                     if (cursor != null && !cursor.isClosed()) {
                         cursor.close();
                     }
@@ -297,29 +299,16 @@ public final class UploadHandler extends Handler {
         }
     }
 
-
-
     String prepareOrderBy = MessageTable.CREATED_AT + ", " + MessageTable.SESSION_ID + " , _id asc";
     String[] prepareSelection = new String[]{"_id", MessageTable.MESSAGE, MessageTable.CREATED_AT, MessageTable.STATUS, MessageTable.SESSION_ID};
     String[] defaultSelectionArgs = new String[]{Integer.toString(Status.READY)};
 
-    /**
-     * This method is responsible for looking for messages that have been logged, and assembling them into batches to be uploaded.
-     * It does not trigger network comms.
-     */
-    void prepareUploads(boolean history) {
+    void prepareHistoryUpload(){
         Cursor readyMessagesCursor = null;
         try {
             // select messages ready to upload
-            String selection;
-            String[] selectionArgs;
-            if (history) {
-                selection = getSessionHistoryBatchesQuery();
-                selectionArgs = new String[]{Integer.toString(Status.READY), mAppStateManager.getSession().mSessionID};
-            } else {
-                selection = getUploadableMessagesQuery();
-                selectionArgs = defaultSelectionArgs;
-            }
+            String selection = getSessionHistoryBatchesQuery();
+            String[] selectionArgs = new String[]{Integer.toString(Status.READY), mAppStateManager.getSession().mSessionID};;
 
             readyMessagesCursor = db.query(
                     MessageTable.TABLE_NAME,
@@ -332,63 +321,64 @@ public final class UploadHandler extends Handler {
 
             if (readyMessagesCursor.getCount() > 0) {
                 mApiClient.fetchConfig();
-                if (history) {
-                    String currentSessionId;
-                    int sessionIndex = readyMessagesCursor.getColumnIndex(MessageTable.SESSION_ID);
-                    JSONArray messagesArray = new JSONArray();
-                    boolean sessionEndFound = false;
-                    while (readyMessagesCursor.moveToNext()) {
-                        currentSessionId = readyMessagesCursor.getString(sessionIndex);
-                        JSONObject msgObject = new JSONObject(readyMessagesCursor.getString(1));
-
-                        if (msgObject.getString(MessageKey.TYPE).equals(MessageType.SESSION_END)) {
-                            sessionEndFound = true;
+                int sessionIndex = readyMessagesCursor.getColumnIndex(MessageTable.SESSION_ID);
+                JSONArray messagesArray = new JSONArray();
+                String lastSessionId = null;
+                while (readyMessagesCursor.moveToNext()) {
+                    String currentSessionId = readyMessagesCursor.getString(sessionIndex);
+                    MPMessage message = new MPMessage(readyMessagesCursor.getString(1));
+                    if (lastSessionId != null && !lastSessionId.equals(currentSessionId)){
+                        JSONObject uploadMessage = createUploadMessage(messagesArray, true);
+                        if (uploadMessage != null) {
+                            dbInsertUpload(uploadMessage);
+                            dbDeleteProcessedMessages(lastSessionId);
                         }
-                        messagesArray.put(msgObject);
-
-                        if (readyMessagesCursor.isLast()) {
-                            JSONObject uploadMessage = createUploadMessage(messagesArray, history);
-                            // store in uploads table
-                            if (sessionEndFound) {
-                                dbInsertUpload(uploadMessage);
-                                dbDeleteProcessedMessages(currentSessionId);
-                            }
-                        } else {
-                            if (readyMessagesCursor.moveToNext() && !readyMessagesCursor.getString(sessionIndex).equals(currentSessionId)) {
-                                JSONObject uploadMessage = createUploadMessage(messagesArray, history);
-                                // store in uploads table
-                                if (uploadMessage != null) {
-                                    dbInsertUpload(uploadMessage);
-                                    dbDeleteProcessedMessages(currentSessionId);
-                                }
-                                messagesArray = new JSONArray();
-                            }
-                            readyMessagesCursor.moveToPrevious();
-                        }
+                        messagesArray = new JSONArray();
                     }
-                } else {
-                    JSONArray messagesArray = new JSONArray();
-                    int lastMessageId = 0;
-                    while (readyMessagesCursor.moveToNext()) {
-                        JSONObject msgObject = new JSONObject(readyMessagesCursor.getString(1));
-                        messagesArray.put(msgObject);
-                        lastMessageId = readyMessagesCursor.getInt(0);
-                    }
-                    JSONObject uploadMessage = createUploadMessage(messagesArray, history);
-                    // store in uploads table
-                    dbInsertUpload(uploadMessage);
-                    dbMarkAsUploadedMessage(lastMessageId);
-
+                    lastSessionId = currentSessionId;
+                    messagesArray.put(message);
                 }
             }
-        } catch (SSLHandshakeException ssle){
-            ConfigManager.log(MParticle.LogLevel.DEBUG, "SSL handshake failed while fetching configuration during upload preparation - possible MITM attack detected.");
-        } catch (MParticleApiClient.MPThrottleException e) {
-
-        } catch (MParticleApiClient.MPConfigException e) {
-
         } catch (Exception e){
-            ConfigManager.log(MParticle.LogLevel.ERROR, "Error preparing batch upload in mParticle DB: " + e.getMessage());
+            ConfigManager.log(MParticle.LogLevel.DEBUG, "Error preparing batch upload in mParticle DB: " + e.getMessage());
+        } finally {
+            if (readyMessagesCursor != null && !readyMessagesCursor.isClosed()){
+                readyMessagesCursor.close();
+            }
+        }
+    }
+
+    private void prepareMessageUpload() {
+        Cursor readyMessagesCursor = null;
+        try {
+            // select messages ready to upload
+            String selection = getUploadableMessagesQuery();
+            String[] selectionArgs = defaultSelectionArgs;
+
+            readyMessagesCursor = db.query(
+                    MessageTable.TABLE_NAME,
+                    prepareSelection,
+                    selection,
+                    selectionArgs,
+                    null,
+                    null,
+                    prepareOrderBy);
+
+            if (readyMessagesCursor.getCount() > 0) {
+                mApiClient.fetchConfig();
+                JSONArray messagesArray = new JSONArray();
+                int highestMessageId = 0;
+                while (readyMessagesCursor.moveToNext()) {
+                    JSONObject msgObject = new JSONObject(readyMessagesCursor.getString(1));
+                    messagesArray.put(msgObject);
+                    highestMessageId = readyMessagesCursor.getInt(0);
+                }
+                JSONObject uploadMessage = createUploadMessage(messagesArray, false);
+                dbInsertUpload(uploadMessage);
+                dbMarkAsUploadedMessage(highestMessageId);
+            }
+        } catch (Exception e){
+            ConfigManager.log(MParticle.LogLevel.DEBUG, "Error preparing batch upload in mParticle DB: " + e.getMessage());
         } finally {
             if (readyMessagesCursor != null && !readyMessagesCursor.isClosed()){
                 readyMessagesCursor.close();

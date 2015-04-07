@@ -8,6 +8,11 @@ import org.json.JSONObject;
 public class MPMessage extends JSONObject{
 
     private MPMessage(){}
+
+    public MPMessage(String json) throws JSONException {
+        super(json);
+    }
+
     private MPMessage(Builder builder) throws JSONException{
         put(Constants.MessageKey.TYPE, builder.mMessageType);
         put(Constants.MessageKey.TIMESTAMP, builder.mTimestamp);
