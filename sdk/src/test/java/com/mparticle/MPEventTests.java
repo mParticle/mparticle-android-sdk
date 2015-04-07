@@ -1,4 +1,4 @@
-package com.mparticle.test;
+package com.mparticle;
 
 
 
