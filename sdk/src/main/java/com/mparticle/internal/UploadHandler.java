@@ -386,7 +386,6 @@ public final class UploadHandler extends Handler {
         }
     }
 
-
     String[] uploadColumns = new String[]{"_id", UploadTable.MESSAGE};
     String containsClause = "\"" + MessageKey.TYPE + "\":\"" + MessageType.SESSION_END + "\"";
 
@@ -455,48 +454,7 @@ public final class UploadHandler extends Handler {
         return HttpStatus.SC_ACCEPTED == statusCode ||
                 (statusCode >= HttpStatus.SC_BAD_REQUEST && statusCode < HttpStatus.SC_INTERNAL_SERVER_ERROR);
     }
-
-    /**
-     * Primarily deprecated functionality that lets the server tell the SDK to make requests to 3rd parties.
-     * Once upon a time this was required for Google Analytics, but is no longer used for any service provider.
-     */
-    void processCommands() {
-        try {
-
-            String[] selectionColumns = new String[]{"_id", CommandTable.URL, CommandTable.METHOD,
-                    CommandTable.POST_DATA, CommandTable.HEADERS};
-            Cursor commandsCursor = db.query(CommandTable.TABLE_NAME, selectionColumns,
-                    null, null, null, null, "_id");
-            while (commandsCursor.moveToNext()) {
-                int id = commandsCursor.getInt(0);
-                String commandUrl = commandsCursor.getString(1);
-                String method = commandsCursor.getString(2);
-                String postData = commandsCursor.getString(3);
-                String headers = commandsCursor.getString(4);
-
-                HttpURLConnection connection = null;
-                int responseCode = -1;
-                try {
-                    connection = mApiClient.sendCommand(commandUrl, method, postData, headers);
-                    responseCode = connection.getResponseCode();
-                } catch (Throwable t) {
-                    // fail silently. a message will be logged if debug mode is enabled
-                } finally {
-                    if (connection != null && responseCode > -1) {
-                        dbDeleteCommand(id);
-                    } else {
-                        ConfigManager.log(MParticle.LogLevel.DEBUG, "Provider command processing failed and will be retried.");
-                    }
-                }
-            }
-            commandsCursor.close();
-        } catch (SQLiteException e) {
-            ConfigManager.log(MParticle.LogLevel.WARNING, e, "Error processing provider command uploads in mParticle DB");
-        } finally {
-
-        }
-    }
-
+    
     /**
      * Method that is responsible for building an upload message to be sent over the wire.
      */
