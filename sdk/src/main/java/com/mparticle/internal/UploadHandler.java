@@ -137,7 +137,7 @@ public final class UploadHandler extends Handler {
      * Boolean used to determine if we're currently connected to the network. If we're not connected to the network,
      * don't even try to query or upload, just shut down to save on battery life.
      */
-    private volatile boolean isNetworkConnected = true;
+    volatile boolean isNetworkConnected = true;
 
     /**
      * Maintain a reference to these two objects as they primary do not change over the course of an app execution, so we
@@ -220,7 +220,6 @@ public final class UploadHandler extends Handler {
 
     @Override
     public void handleMessage(Message msg) {
-        super.handleMessage(msg);
         if (db == null){
             try {
                 db = mDbHelper.getWritableDatabase();
