@@ -10,6 +10,8 @@ public class Constants {
 
     // maximum number of events per session
     public static final int EVENT_LIMIT = 1000;
+    // maximum messages to be sent in a single non-session history batch
+    public static final int BATCH_LIMIT = 50;
     // delay (millis) before processing uploads to allow app to get started
     public static final long INITIAL_UPLOAD_DELAY = 10 * 1000;
 
