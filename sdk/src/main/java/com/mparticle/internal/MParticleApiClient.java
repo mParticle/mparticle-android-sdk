@@ -74,8 +74,6 @@ public class MParticleApiClient implements IMPApiClient {
     private static final String API_HOST = MPUtility.isEmpty(BuildConfig.MP_URL) ? "nativesdks.mparticle.com" : BuildConfig.MP_URL;
     private static final String CONFIG_HOST = MPUtility.isEmpty(BuildConfig.MP_CONFIG_URL) ? "config2.mparticle.com" : BuildConfig.MP_CONFIG_URL;
 
-    private static boolean DEBUGGING = !MPUtility.isEmpty(BuildConfig.MP_URL) && BuildConfig.MP_URL.equals("api-qa.mparticle.com");
-
     private static final String SERVICE_VERSION_1 = "/v1";
     private static final String SERVICE_VERSION_3 = "/v3";
 
@@ -225,7 +223,7 @@ public class MParticleApiClient implements IMPApiClient {
 
         addMessageSignature(connection, message);
 
-        if (DEBUGGING) {
+        if (BuildConfig.MP_DEBUG) {
             logUpload(message);
         }
 
@@ -395,7 +393,7 @@ public class MParticleApiClient implements IMPApiClient {
                 alreadyWarned = true;
                 ConfigManager.log(MParticle.LogLevel.ERROR, "Bad API request - is the correct API key and secret configured?");
             }
-            if (statusCode == HttpStatus.SC_SERVICE_UNAVAILABLE && !DEBUGGING) {
+            if (statusCode == HttpStatus.SC_SERVICE_UNAVAILABLE && !BuildConfig.MP_DEBUG) {
                 setNextAllowedRequestTime();
             }
         }

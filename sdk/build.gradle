@@ -58,6 +58,7 @@ android {
 
         buildConfigField "String", "MP_URL", url
         buildConfigField "String", "MP_CONFIG_URL", configurationUrl
+        buildConfigField "Boolean", "MP_DEBUG", "false"
 
     }
 
@@ -76,6 +77,7 @@ android {
 
         debug {
             minifyEnabled false
+            buildConfigField "Boolean", "MP_DEBUG", "true"
         }
 
         unity {
@@ -86,6 +88,7 @@ android {
         release {
             minifyEnabled true
             proguardFile 'proguard.txt'
+           // buildConfigField "Boolean", "MP_DEBUG", "true"
         }
     }
 
