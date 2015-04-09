@@ -23,7 +23,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.lang.ref.WeakReference;
 import java.util.UUID;
 
 /* package-private */final class MessageHandler extends Handler {
@@ -43,10 +42,6 @@ import java.util.UUID;
     public static final int CLEAR_PROVIDER_GCM = 8;
     private final MessageManagerCallbacks mMessageManagerCallbacks;
 
-    // boolean flag used in unit tests to wait until processing is finished.
-    // this is not used in the normal execution.
-    /* package-private */ boolean mIsProcessingMessage = false;
-
     public MessageHandler(Looper looper, MessageManagerCallbacks messageManager, SQLiteOpenHelper dbHelper) {
         super(looper);
         mMessageManagerCallbacks = messageManager;
@@ -55,7 +50,6 @@ import java.util.UUID;
 
     @Override
     public void handleMessage(Message msg) {
-        mIsProcessingMessage = true;
         if (db == null){
             try {
                 db = mDbHelper.getWritableDatabase();
@@ -74,27 +68,24 @@ import java.util.UUID;
                     String messageType = message.getString(MessageKey.TYPE);
                     // handle the special case of session-start by creating the
                     // session record first
-                    if (MessageType.SESSION_START == messageType) {
+                    if (MessageType.SESSION_START.equals(messageType)) {
                         dbInsertSession(message);
                     }else{
+                        dbUpdateSessionEndTime(message.getSessionId(), message.getLong(MessageKey.TIMESTAMP), 0);
                         message.put(Constants.MessageKey.ID, UUID.randomUUID().toString());
                     }
-                    if (MessageType.ERROR == messageType){
+                    if (MessageType.ERROR.equals(messageType)){
                         appendBreadcrumbs(message);
                     }
-                    if (MessageType.APP_STATE_TRANSITION == messageType){
+                    if (MessageType.APP_STATE_TRANSITION.equals(messageType)){
                         appendLatestPushNotification(message);
                     }
-                    if (MessageType.PUSH_RECEIVED == messageType &&
+                    if (MessageType.PUSH_RECEIVED.equals(messageType) &&
                             message.has(MessageKey.PUSH_BEHAVIOR) &&
                             !validateBehaviorFlags(message)){
                         return;
                     }
                     dbInsertMessage(message);
-
-                    if (MessageType.SESSION_START != messageType) {
-                        dbUpdateSessionEndTime(message.getSessionId(), message.getLong(MessageKey.TIMESTAMP), 0);
-                    }
 
                     mMessageManagerCallbacks.checkForTrigger(message);
 
@@ -118,8 +109,6 @@ import java.util.UUID;
                     String sessionId = sessionTiming.getString(MessageKey.SESSION_ID);
                     long time = sessionTiming.getLong(MessageKey.TIMESTAMP);
                     long sessionLength = sessionTiming.getLong(MessageKey.SESSION_LENGTH);
-
-
                     dbUpdateSessionEndTime(sessionId, time, sessionLength);
                 } catch (Exception e) {
                     ConfigManager.log(MParticle.LogLevel.ERROR, e, "Error updating session end time in mParticle DB");
@@ -215,7 +204,6 @@ import java.util.UUID;
                 }
                 break;
         }
-        mIsProcessingMessage = false;
     }
 
     private void clearOldProviderGcm() {
@@ -336,7 +324,6 @@ import java.util.UUID;
 
     private void appendLatestPushNotification(MPMessage message) {
         Cursor pushCursor = null;
-        WeakReference test;
         try {
             pushCursor = db.query(MParticleDatabase.GcmMessageTable.TABLE_NAME,
                     null,
