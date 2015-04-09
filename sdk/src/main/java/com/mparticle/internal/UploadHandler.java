@@ -173,7 +173,7 @@ public final class UploadHandler extends Handler {
 
         }catch (Exception e){
             if (BuildConfig.MP_DEBUG){
-                Log.d(Constants.LOG_TAG, "UploadHandler Exception while handling message: " + msg.what + "\n" + e.toString());
+                ConfigManager.log(MParticle.LogLevel.DEBUG, "UploadHandler Exception while handling message: " + msg.what + "\n" + e.toString());
             }
         }
     }
