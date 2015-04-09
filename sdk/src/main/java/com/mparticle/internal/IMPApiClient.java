@@ -12,7 +12,7 @@ import java.net.HttpURLConnection;
 public interface IMPApiClient {
 
     void fetchConfig()  throws IOException, MParticleApiClient.MPThrottleException, MParticleApiClient.MPConfigException;
-    HttpURLConnection sendMessageBatch(String message) throws IOException, MParticleApiClient.MPThrottleException, MParticleApiClient.MPRampException;
+    int sendMessageBatch(String message) throws IOException, MParticleApiClient.MPThrottleException, MParticleApiClient.MPRampException;
     HttpURLConnection sendCommand(String commandUrl, String method, String postData, String headers) throws IOException, JSONException;
     JSONObject fetchAudiences();
     boolean isThrottled();

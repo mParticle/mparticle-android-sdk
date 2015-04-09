@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Build;
 import android.provider.Settings;
-import android.text.TextUtils;
 import android.util.Base64;
 
 import com.mparticle.BuildConfig;
@@ -204,7 +203,7 @@ public class MParticleApiClient implements IMPApiClient {
         mActiveModuleIds = activeModuleIds;
     }
 
-    public HttpURLConnection sendMessageBatch(String message) throws IOException, MPThrottleException, MPRampException {
+    public int sendMessageBatch(String message) throws IOException, MPThrottleException, MPRampException {
         checkThrottleTime();
         checkRampValue();
         if (mEventUrl == null){
@@ -242,11 +241,12 @@ public class MParticleApiClient implements IMPApiClient {
         }
 
         makeUrlRequest(connection, true);
-        if (connection.getResponseCode() >= HttpStatus.SC_OK && connection.getResponseCode() < HttpStatus.SC_MULTIPLE_CHOICES) {
+        int responseCode = connection.getResponseCode();
+        if (responseCode >= HttpStatus.SC_OK && responseCode < HttpStatus.SC_MULTIPLE_CHOICES) {
             JSONObject response = getJsonResponse(connection);
             parseMparticleJson(response);
         }
-        return connection;
+        return connection.getResponseCode();
     }
 
     public HttpURLConnection sendCommand(String commandUrl, String method, String postData, String headers) throws IOException, JSONException {

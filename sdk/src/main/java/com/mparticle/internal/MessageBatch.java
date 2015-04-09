@@ -13,10 +13,14 @@ import org.json.JSONObject;
 import java.math.BigDecimal;
 import java.util.UUID;
 
-public class MessageBatch {
+public class MessageBatch extends JSONObject {
 
-    public static JSONObject create(Context context, JSONArray messagesArray, boolean history, JSONObject appInfo, JSONObject deviceInfo, ConfigManager configManager, SharedPreferences preferences, JSONObject cookies) throws JSONException {
-        JSONObject uploadMessage = new JSONObject();
+    public MessageBatch() {
+        super();
+    }
+
+    public static MessageBatch create(Context context, JSONArray messagesArray, boolean history, JSONObject appInfo, JSONObject deviceInfo, ConfigManager configManager, SharedPreferences preferences, JSONObject cookies) throws JSONException {
+        MessageBatch uploadMessage = new MessageBatch();
 
         uploadMessage.put(Constants.MessageKey.TYPE, Constants.MessageType.REQUEST_HEADER);
         uploadMessage.put(Constants.MessageKey.ID, UUID.randomUUID().toString());

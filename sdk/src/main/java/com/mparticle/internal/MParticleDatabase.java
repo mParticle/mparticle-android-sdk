@@ -31,47 +31,6 @@ import android.provider.BaseColumns;
                 MessageTable.SESSION_ID);
     }
 
-    /**
-     * Query to determine all of the generated uploads that are ready for the wire.
-     */
-    static String getUploadableMessagesQuery() {
-        return String.format(
-                "((%s='NO-SESSION') or ((%s>=?) and (%s!=%d)))",
-                MessageTable.SESSION_ID,
-                MessageTable.STATUS,
-                MessageTable.STATUS,
-                Constants.Status.UPLOADED);
-    }
-
-    /**
-     * Query to determine all the session history batches that are ready for the wire
-     */
-    private static String getSessionHistoryBatchesQuery() {
-        return String.format(
-                "((%s!='NO-SESSION') and ((%s>=?) and (%s=%d) and (%s != ?)))",
-                MessageTable.SESSION_ID,
-                MessageTable.STATUS,
-                MessageTable.STATUS,
-                Constants.Status.UPLOADED,
-                MessageTable.SESSION_ID);
-    }
-
-    /**
-     * Query used to clear session history uploads after a successful upload to the SDK server.
-     */
-    static String getSqlFinishedHistoryMessagesQuery() {
-        return String.format(
-                "((%s='NO-SESSION') or ((%s>=?) and (%s=%d) and (%s=?)))",
-                MessageTable.SESSION_ID,
-                MessageTable.STATUS,
-                MessageTable.STATUS,
-                Constants.Status.UPLOADED,
-                MessageTable.SESSION_ID);
-    }
-
-    private static String prepareOrderBy = MessageTable.CREATED_AT + ", " + MessageTable.SESSION_ID + " , _id asc";
-    private static String[] prepareSelection = new String[]{"_id", MessageTable.MESSAGE, MessageTable.CREATED_AT, MessageTable.STATUS, MessageTable.SESSION_ID};
-    private static String[] defaultSelectionArgs = new String[]{Integer.toString(Constants.Status.READY)};
     private static String[] gcmColumns = {MParticleDatabase.GcmMessageTable.CONTENT_ID, MParticleDatabase.GcmMessageTable.CAMPAIGN_ID, MParticleDatabase.GcmMessageTable.EXPIRATION, MParticleDatabase.GcmMessageTable.DISPLAYED_AT};
     private static String gcmDeleteWhere = MParticleDatabase.GcmMessageTable.EXPIRATION + " < ? and " + MParticleDatabase.GcmMessageTable.DISPLAYED_AT + " > 0";
 
@@ -90,27 +49,34 @@ import android.provider.BaseColumns;
         return database.delete(MParticleDatabase.GcmMessageTable.TABLE_NAME, gcmDeleteWhere, deleteWhereArgs);
     }
 
-    static Cursor getSessionHistory(SQLiteDatabase database, String currentSessionId){
-        String selection = getSessionHistoryBatchesQuery();
-        String[] selectionArgs = new String[]{Integer.toString(Constants.Status.READY), currentSessionId};
+    private static String[] prepareSelection = new String[]{"_id", MessageTable.MESSAGE, MessageTable.CREATED_AT, MessageTable.STATUS, MessageTable.SESSION_ID};
+    private static String prepareOrderBy = MessageTable.CREATED_AT + ", " + MessageTable.SESSION_ID + " , _id asc";
 
+    private static String sessionHistorySelection = String.format(
+            "(%s = %d) and (%s != ?)",
+            MessageTable.STATUS,
+            Constants.Status.UPLOADED,
+            MessageTable.SESSION_ID);
+
+    static Cursor getSessionHistory(SQLiteDatabase database, String currentSessionId){
+        String[] selectionArgs = new String[]{currentSessionId};
         return database.query(
                 MessageTable.TABLE_NAME,
                 prepareSelection,
-                selection,
+                sessionHistorySelection,
                 selectionArgs,
                 null,
                 null,
                 prepareOrderBy);
     }
+    private static String[] readyMessages = new String[]{Integer.toString(Constants.Status.UPLOADED)};
 
     static Cursor getMessagesForUpload(SQLiteDatabase database){
-        String selection = getUploadableMessagesQuery();
         return database.query(
                 MessageTable.TABLE_NAME,
-                prepareSelection,
-                selection,
-                defaultSelectionArgs,
+                null,
+                MessageTable.STATUS + " != ?",
+                readyMessages,
                 null,
                 null,
                 prepareOrderBy);
@@ -162,7 +128,7 @@ import android.provider.BaseColumns;
                     ");";
 
 
-    interface MessageTable {
+    interface MessageTable extends BaseColumns{
         String TABLE_NAME = "messages";
         String SESSION_ID = "session_id";
         String API_KEY = "api_key";
@@ -185,7 +151,7 @@ import android.provider.BaseColumns;
                     MessageTable.CF_UUID + " TEXT" +
                     ");";
 
-    interface UploadTable {
+    interface UploadTable extends BaseColumns{
         String TABLE_NAME = "uploads";
         String API_KEY = "api_key";
         String MESSAGE = "message";
