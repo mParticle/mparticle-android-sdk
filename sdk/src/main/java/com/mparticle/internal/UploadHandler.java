@@ -8,8 +8,10 @@ import android.database.sqlite.SQLiteDatabase;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.util.Log;
 
 import com.mparticle.AppStateManager;
+import com.mparticle.BuildConfig;
 import com.mparticle.ConfigManager;
 import com.mparticle.MParticle;
 import com.mparticle.internal.Constants.MessageKey;
@@ -26,7 +28,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 
@@ -129,6 +130,54 @@ public final class UploadHandler extends Handler {
         }
     }
 
+    @Override
+    public void handleMessage(Message msg) {
+        try {
+
+            if (db == null){
+                db = mDbHelper.getWritableDatabase();
+            }
+
+            switch (msg.what) {
+                case UPDATE_CONFIG:
+                    mApiClient.fetchConfig();
+                    break;
+                case INIT_CONFIG:
+                    mConfigManager.delayedStart();
+                    break;
+                case UPLOAD_MESSAGES:
+                case UPLOAD_TRIGGER_MESSAGES:
+                    long uploadInterval = mConfigManager.getUploadInterval();
+                    if (isNetworkConnected && !mApiClient.isThrottled()) {
+                        if (uploadInterval > 0 || msg.arg1 == 1) {
+                            prepareMessageUpload();
+                            boolean needsHistory = processUploads(false);
+                            if (needsHistory) {
+                                this.sendEmptyMessage(UPLOAD_HISTORY);
+                            }
+                        }
+                    }
+                    if (mAppStateManager.getSession().isActive() && uploadInterval > 0 && msg.arg1 == 0) {
+                        this.sendEmptyMessageDelayed(UPLOAD_MESSAGES, uploadInterval);
+                    }
+                    break;
+                case UPLOAD_HISTORY:
+                    removeMessages(UPLOAD_HISTORY);
+                    prepareHistoryUpload();
+                    if (isNetworkConnected) {
+                        processUploads(true);
+                    }
+                    break;
+
+            }
+
+        }catch (Exception e){
+            if (BuildConfig.MP_DEBUG){
+                Log.d(Constants.LOG_TAG, "UploadHandler Exception while handling message: " + msg.what + "\n" + e.toString());
+            }
+        }
+    }
+
     JSONObject getDeviceInfo(){
         if (deviceInfo == null){
             deviceInfo = DeviceAttributes.collectDeviceInfo(mContext);
@@ -165,96 +214,17 @@ public final class UploadHandler extends Handler {
         isNetworkConnected = connected;
     }
 
-    @Override
-    public void handleMessage(Message msg) {
-        if (db == null){
-            try {
-                db = mDbHelper.getWritableDatabase();
-            }catch (Exception e){
-                return;
-            }
-        }
-        switch (msg.what) {
-            case UPDATE_CONFIG:
-                try {
-                    mApiClient.fetchConfig();
-                } catch (SSLHandshakeException ssle){
-                    ConfigManager.log(MParticle.LogLevel.DEBUG, "SSL handshake failed while update configuration - possible MITM attack detected.");
-                } catch (IOException ioe) {
-                    ConfigManager.log(MParticle.LogLevel.DEBUG, "Failed to update configuration: ", ioe.toString());
-                } catch (Exception e){
-
-                }
-                break;
-            case UPLOAD_MESSAGES:
-            case UPLOAD_TRIGGER_MESSAGES:
-                try {
-                    long uploadInterval = mConfigManager.getUploadInterval();
-                    if (isNetworkConnected && !mApiClient.isThrottled()) {
-                        if (uploadInterval > 0 || msg.arg1 == 1) {
-                            prepareMessageUpload();
-                            boolean needsHistory = processUploads(false);
-                            if (needsHistory) {
-                                this.sendEmptyMessage(UPLOAD_HISTORY);
-                            }
-                        }
-
-                    }
-                    if (mAppStateManager.getSession().isActive() && uploadInterval > 0 && msg.arg1 == 0) {
-                        this.sendEmptyMessageDelayed(UPLOAD_MESSAGES, uploadInterval);
-                    }
-                }catch (Exception e){
-
-                }
-                break;
-            case UPLOAD_HISTORY:
-                Cursor cursor = null;
-                try {
-                    // if the uploads table is empty (no old uploads)
-                    // and the messages table has messages that are not from the current session,
-                    // or there is no current session
-                    // then create a history upload and send it
-                    cursor = db.rawQuery("select * from " + UploadTable.TABLE_NAME, null);
-                    if ((cursor == null) || (cursor.getCount() == 0)) {
-                        if (cursor != null && !cursor.isClosed()) {
-                            cursor.close();
-                        }
-                        this.removeMessages(UPLOAD_HISTORY);
-                        // execute all the upload steps
-                        prepareHistoryUpload();
-                        if (isNetworkConnected) {
-                            processUploads(true);
-                        }
-                    }
-                } catch (Exception e){
-
-                } finally {
-                    if (cursor != null && !cursor.isClosed()) {
-                        cursor.close();
-                    }
-                }
-                break;
-            case INIT_CONFIG:
-                try {
-                    mConfigManager.delayedStart();
-                }catch (Exception e){
-                    ConfigManager.log(MParticle.LogLevel.DEBUG, "Failed to init configuration: ", e.toString());
-                }
-                break;
-        }
-    }
-
     void prepareHistoryUpload(){
         Cursor readyMessagesCursor = null;
         try {
-            // select messages ready to upload
             readyMessagesCursor = MParticleDatabase.getSessionHistory(db, mAppStateManager.getSession().mSessionID);
             if (readyMessagesCursor.getCount() > 0) {
+                readyMessagesCursor.moveToFirst();
                 mApiClient.fetchConfig();
                 int sessionIndex = readyMessagesCursor.getColumnIndex(MessageTable.SESSION_ID);
                 JSONArray messagesArray = new JSONArray();
                 String lastSessionId = null;
-                while (readyMessagesCursor.moveToNext()) {
+                do {
                     String currentSessionId = readyMessagesCursor.getString(sessionIndex);
                     MPMessage message = new MPMessage(readyMessagesCursor.getString(1));
                     if (lastSessionId != null && !lastSessionId.equals(currentSessionId)){
@@ -268,6 +238,7 @@ public final class UploadHandler extends Handler {
                     lastSessionId = currentSessionId;
                     messagesArray.put(message);
                 }
+                while (readyMessagesCursor.moveToNext());
             }
         } catch (Exception e){
             ConfigManager.log(MParticle.LogLevel.DEBUG, "Error preparing batch upload in mParticle DB: " + e.getMessage());
