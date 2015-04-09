@@ -188,7 +188,7 @@ public class MessageManager implements MessageManagerCallbacks {
     }
 
     public MPMessage createFirstRunMessage() throws JSONException {
-        return new MPMessage.Builder(MessageType.FIRST_RUN, mAppStateManager.getSession().mSessionID, mLocation)
+        return new MPMessage.Builder(MessageType.FIRST_RUN, mAppStateManager.getSession(), mLocation)
                 .timestamp(mAppStateManager.getSession().mSessionStartTime)
                 .dataConnection(sActiveNetworkName)
                 .build();
@@ -196,8 +196,7 @@ public class MessageManager implements MessageManagerCallbacks {
 
     public void startSession() {
         try {
-            MPMessage message = new MPMessage.Builder(MessageType.SESSION_START, mAppStateManager.getSession().mSessionID, mLocation)
-                    .sessionStartTime(mAppStateManager.getSession().mSessionStartTime)
+            MPMessage message = new MPMessage.Builder(MessageType.SESSION_START, mAppStateManager.getSession(), mLocation)
                     .timestamp(System.currentTimeMillis())
                     .build();
 
@@ -289,9 +288,8 @@ public class MessageManager implements MessageManagerCallbacks {
 
     public void logEvent(MPEvent event, String currentActivity) {
         try {
-            MPMessage message = new MPMessage.Builder(MessageType.EVENT, mAppStateManager.getSession().mSessionID, mLocation)
+            MPMessage message = new MPMessage.Builder(MessageType.EVENT, mAppStateManager.getSession(), mLocation)
                     .name(event.getEventName())
-                    .sessionStartTime(mAppStateManager.getSession().mSessionStartTime)
                     .timestamp(mAppStateManager.getSession().mLastEventTime)
                     .length(event.getLength())
                     .attributes(MPUtility.enforceAttributeConstraints(event.getInfo()))
@@ -320,8 +318,7 @@ public class MessageManager implements MessageManagerCallbacks {
 
     public void logScreen(String screenName, JSONObject attributes, boolean started) {
         try {
-            MPMessage message = new MPMessage.Builder(MessageType.SCREEN_VIEW, mAppStateManager.getSession().mSessionID, mLocation)
-                    .sessionStartTime(mAppStateManager.getSession().mSessionStartTime)
+            MPMessage message = new MPMessage.Builder(MessageType.SCREEN_VIEW, mAppStateManager.getSession(), mLocation)
                     .timestamp(mAppStateManager.getSession().mLastEventTime)
                     .name(screenName)
                     .attributes(attributes)
@@ -338,8 +335,7 @@ public class MessageManager implements MessageManagerCallbacks {
 
     public void logBreadcrumb(String breadcrumb) {
         try {
-            MPMessage message = new MPMessage.Builder(MessageType.BREADCRUMB, mAppStateManager.getSession().mSessionID, mLocation)
-                    .sessionStartTime(mAppStateManager.getSession().mSessionStartTime)
+            MPMessage message = new MPMessage.Builder(MessageType.BREADCRUMB, mAppStateManager.getSession(), mLocation)
                     .timestamp(mAppStateManager.getSession().mLastEventTime)
                     .build();
 
@@ -355,8 +351,7 @@ public class MessageManager implements MessageManagerCallbacks {
 
     public void optOut(long time, boolean optOutStatus) {
         try {
-            MPMessage message = new MPMessage.Builder(MessageType.OPT_OUT, mAppStateManager.getSession().mSessionID, mLocation)
-                    .sessionStartTime(mAppStateManager.getSession().mSessionStartTime)
+            MPMessage message = new MPMessage.Builder(MessageType.OPT_OUT, mAppStateManager.getSession(), mLocation)
                     .timestamp(time)
                     .build();
             message.put(MessageKey.OPT_OUT_STATUS, optOutStatus);
@@ -372,8 +367,7 @@ public class MessageManager implements MessageManagerCallbacks {
 
     public void logErrorEvent(String errorMessage, Throwable t, JSONObject attributes, boolean caught) {
         try {
-            MPMessage message = new MPMessage.Builder(MessageType.ERROR, mAppStateManager.getSession().mSessionID, mLocation)
-                    .sessionStartTime(mAppStateManager.getSession().mSessionStartTime)
+            MPMessage message = new MPMessage.Builder(MessageType.ERROR, mAppStateManager.getSession(), mLocation)
                     .timestamp(mAppStateManager.getSession().mLastEventTime)
                     .attributes(attributes)
                     .build();
@@ -404,8 +398,7 @@ public class MessageManager implements MessageManagerCallbacks {
 
     public void logNetworkPerformanceEvent(long time, String method, String url, long length, long bytesSent, long bytesReceived, String requestString) {
         try {
-            MPMessage message = new MPMessage.Builder(MessageType.NETWORK_PERFORMNACE, mAppStateManager.getSession().mSessionID, mLocation)
-                    .sessionStartTime(mAppStateManager.getSession().mSessionStartTime)
+            MPMessage message = new MPMessage.Builder(MessageType.NETWORK_PERFORMNACE, mAppStateManager.getSession(), mLocation)
                     .timestamp(time)
                     .build();
             message.put(MessageKey.NPE_METHOD, method);
@@ -425,8 +418,7 @@ public class MessageManager implements MessageManagerCallbacks {
 
     public void setPushRegistrationId(String token, boolean registeringFlag) {
         try {
-            MPMessage message = new MPMessage.Builder(MessageType.PUSH_REGISTRATION, mAppStateManager.getSession().mSessionID, mLocation)
-                    .sessionStartTime(mAppStateManager.getSession().mSessionStartTime)
+            MPMessage message = new MPMessage.Builder(MessageType.PUSH_REGISTRATION, mAppStateManager.getSession(), mLocation)
                     .timestamp(System.currentTimeMillis())
                     .build();
             message.put(MessageKey.PUSH_TOKEN, token);
@@ -471,8 +463,7 @@ public class MessageManager implements MessageManagerCallbacks {
     public void logStateTransition(String stateTransInit, String currentActivity,
                                    String launchUri, String launchExtras, String launchSourcePackage, long previousForegroundTime, long suspendedTime, int interruptions) {
         try {
-            MPMessage message = new MPMessage.Builder(MessageType.APP_STATE_TRANSITION, mAppStateManager.getSession().mSessionID, mLocation)
-                    .sessionStartTime(mAppStateManager.getSession().mSessionStartTime)
+            MPMessage message = new MPMessage.Builder(MessageType.APP_STATE_TRANSITION, mAppStateManager.getSession(), mLocation)
                     .timestamp(System.currentTimeMillis())
                     .build();
 
@@ -564,8 +555,7 @@ public class MessageManager implements MessageManagerCallbacks {
 
     public void logNotification(ProviderCloudMessage cloudMessage, String appState) {
         try{
-            MPMessage message = new MPMessage.Builder(MessageType.PUSH_RECEIVED, mAppStateManager.getSession().mSessionID, mLocation)
-                    .sessionStartTime(mAppStateManager.getSession().mSessionStartTime)
+            MPMessage message = new MPMessage.Builder(MessageType.PUSH_RECEIVED, mAppStateManager.getSession(), mLocation)
                     .timestamp(System.currentTimeMillis())
                     .name("gcm")
                     .build();
@@ -588,8 +578,7 @@ public class MessageManager implements MessageManagerCallbacks {
     @Override
     public void logNotification(int contentId, String payload, CloudAction action, String appState, int newBehavior) {
         try{
-            MPMessage message = new MPMessage.Builder(MessageType.PUSH_RECEIVED, mAppStateManager.getSession().mSessionID, mLocation)
-                    .sessionStartTime(mAppStateManager.getSession().mSessionStartTime)
+            MPMessage message = new MPMessage.Builder(MessageType.PUSH_RECEIVED, mAppStateManager.getSession(), mLocation)
                     .timestamp(System.currentTimeMillis())
                     .name("gcm")
                     .build();
@@ -626,8 +615,7 @@ public class MessageManager implements MessageManagerCallbacks {
     public void logProfileAction(String action) {
         try {
 
-            MPMessage message = new MPMessage.Builder(MessageType.PROFILE, mAppStateManager.getSession().mSessionID, mLocation)
-                    .sessionStartTime(mAppStateManager.getSession().mSessionStartTime)
+            MPMessage message = new MPMessage.Builder(MessageType.PROFILE, mAppStateManager.getSession(), mLocation)
                     .timestamp(System.currentTimeMillis())
                     .build();
 
@@ -643,8 +631,10 @@ public class MessageManager implements MessageManagerCallbacks {
     public MPMessage createMessageSessionEnd(String sessionId, long start, long end, long foregroundLength, JSONObject sessionAttributes) throws JSONException{
         int eventCounter = mPreferences.getInt(Constants.PrefKeys.EVENT_COUNTER, 0);
         resetEventCounter();
-        MPMessage message = new MPMessage.Builder(MessageType.SESSION_END, sessionId, mLocation)
-                .sessionStartTime(start)
+        Session session = new Session();
+        session.mSessionID = sessionId;
+        session.mSessionStartTime = start;
+        MPMessage message = new MPMessage.Builder(MessageType.SESSION_END, session, mLocation)
                 .timestamp(end)
                 .attributes(sessionAttributes)
                 .build();

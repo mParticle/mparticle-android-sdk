@@ -14,6 +14,19 @@ public class Session {
     public long mSessionStartTime = 0;
     public long mLastEventTime = 0;
 
+    public Session() {
+        super();
+    }
+
+
+    public Session(Session session) {
+        super();
+        mEventCount = session.mEventCount;
+        mSessionID = session.mSessionID;
+        mSessionStartTime = session.mSessionStartTime;
+        mLastEventTime = session.mLastEventTime;
+    }
+
     public boolean isActive() {
         return mSessionStartTime > 0 && !Constants.NO_SESSION_ID.equals(mSessionID);
     }
@@ -38,4 +51,6 @@ public class Session {
     public boolean isTimedOut(int sessionTimeout) {
         return sessionTimeout < (System.currentTimeMillis() - mLastEventTime);
     }
+
+
 }
