@@ -104,7 +104,7 @@ import java.util.TimeZone;
             boolean install = preferences.getBoolean(PrefKeys.FIRST_RUN_INSTALL, true);
             attributes.put(MessageKey.FIRST_SEEN_INSTALL, install);
 
-        } catch (Exception e) {
+        } catch (JSONException e) {
             // again difference devices can do terrible things, make sure that we don't bail out completely
             // and return at least what we've built so far.
         } finally {
