@@ -2,7 +2,6 @@ package com.mparticle.internal;
 
 
 
-import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Message;
 
@@ -10,20 +9,13 @@ import com.mparticle.AppStateManager;
 import com.mparticle.MockConfigManager;
 import com.mparticle.MockContext;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
-import org.mockito.stubbing.OngoingStubbing;
-
-import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.sql.SQLInput;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 

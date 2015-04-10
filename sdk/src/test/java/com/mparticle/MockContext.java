@@ -5,9 +5,6 @@ import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.res.Resources;
 
-/**
- * Created by sdozor on 3/23/15.
- */
 public class MockContext extends android.test.mock.MockContext {
 
     SharedPreferences sharedPreferences = new MockSharedPreferences();
