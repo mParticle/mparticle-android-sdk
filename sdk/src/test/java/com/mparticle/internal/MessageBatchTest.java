@@ -19,45 +19,45 @@ public class MessageBatchTest {
         MockSharedPreferences sharedPrefs = new MockSharedPreferences();
         boolean sessionHistory = true;
         MessageBatch batch = MessageBatch.create(new MockContext(), new JSONArray(), sessionHistory, new JSONObject(), new JSONObject(), manager, sharedPrefs, new JSONObject());
-        assertNotNull(batch.getString(Constants.MessageKey.TYPE));
-        assertNotNull(batch.getString(Constants.MessageKey.ID));
-        assertNotNull(batch.getDouble(Constants.MessageKey.TIMESTAMP));
-        assertNotNull(batch.getString(Constants.MessageKey.MPARTICLE_VERSION));
-        assertNotNull(batch.getBoolean(Constants.MessageKey.OPT_OUT_HEADER));
-        assertNotNull(batch.getDouble(Constants.MessageKey.CONFIG_UPLOAD_INTERVAL));
-        assertNotNull(batch.getDouble(Constants.MessageKey.CONFIG_SESSION_TIMEOUT));
-        assertNotNull(batch.getJSONObject(Constants.MessageKey.APP_INFO));
+        assertNotNull(batch.getString("dt"));
+        assertNotNull(batch.getString("id"));
+        assertNotNull(batch.getDouble("ct"));
+        assertNotNull(batch.getString("sdk"));
+        assertNotNull(batch.getBoolean("oo"));
+        assertNotNull(batch.getDouble("uitl"));
+        assertNotNull(batch.getDouble("stl"));
+        assertNotNull(batch.getJSONObject("ai"));
 
-        JSONObject deviceInfo = batch.getJSONObject(Constants.MessageKey.DEVICE_INFO);
+        JSONObject deviceInfo = batch.getJSONObject("di");
         assertNotNull(deviceInfo);
-        assertNotNull(deviceInfo.getBoolean(Constants.MessageKey.PUSH_SOUND_ENABLED));
-        assertNotNull(deviceInfo.getBoolean(Constants.MessageKey.PUSH_VIBRATION_ENABLED));
-        assertNotNull(batch.get(Constants.MessageKey.LTV));
-        assertNotNull(batch.getJSONArray(Constants.MessageKey.HISTORY)); //history batch
-        assertNotNull(batch.getJSONObject(Constants.MessageKey.COOKIES));
+        assertNotNull(deviceInfo.getBoolean("se"));
+        assertNotNull(deviceInfo.getBoolean("ve"));
+        assertNotNull(batch.get("ltv"));
+        assertNotNull(batch.getJSONArray("sh")); //history batch
+        assertNotNull(batch.getJSONObject("ck"));
         if (manager.getProviderPersistence() != null) {
-            assertNotNull(batch.getJSONObject(Constants.MessageKey.PROVIDER_PERSISTENCE));
+            assertNotNull(batch.getJSONObject("cms"));
         }
         sessionHistory = false;
         batch = MessageBatch.create(new MockContext(), new JSONArray(), sessionHistory, new JSONObject(), new JSONObject(), manager, sharedPrefs, new JSONObject());
-        assertNotNull(batch.getString(Constants.MessageKey.TYPE));
-        assertNotNull(batch.getString(Constants.MessageKey.ID));
-        assertNotNull(batch.getDouble(Constants.MessageKey.TIMESTAMP));
-        assertNotNull(batch.getString(Constants.MessageKey.MPARTICLE_VERSION));
-        assertNotNull(batch.getBoolean(Constants.MessageKey.OPT_OUT_HEADER));
-        assertNotNull(batch.getDouble(Constants.MessageKey.CONFIG_UPLOAD_INTERVAL));
-        assertNotNull(batch.getDouble(Constants.MessageKey.CONFIG_SESSION_TIMEOUT));
-        assertNotNull(batch.getJSONObject(Constants.MessageKey.APP_INFO));
+        assertNotNull(batch.getString("dt"));
+        assertNotNull(batch.getString("id"));
+        assertNotNull(batch.getDouble("ct"));
+        assertNotNull(batch.getString("sdk"));
+        assertNotNull(batch.getBoolean("oo"));
+        assertNotNull(batch.getDouble("uitl"));
+        assertNotNull(batch.getDouble("stl"));
+        assertNotNull(batch.getJSONObject("ai"));
 
-        deviceInfo = batch.getJSONObject(Constants.MessageKey.DEVICE_INFO);
+        deviceInfo = batch.getJSONObject("di");
         assertNotNull(deviceInfo);
-        assertNotNull(deviceInfo.getBoolean(Constants.MessageKey.PUSH_SOUND_ENABLED));
-        assertNotNull(deviceInfo.getBoolean(Constants.MessageKey.PUSH_VIBRATION_ENABLED));
-        assertNotNull(batch.get(Constants.MessageKey.LTV));
-        assertNotNull(batch.getJSONArray(Constants.MessageKey.MESSAGES)); //history batch
-        assertNotNull(batch.getJSONObject(Constants.MessageKey.COOKIES));
+        assertNotNull(deviceInfo.getBoolean("se"));
+        assertNotNull(deviceInfo.getBoolean("ve"));
+        assertNotNull(batch.get("ltv"));
+        assertNotNull(batch.getJSONArray("msgs")); //history batch
+        assertNotNull(batch.getJSONObject("ck"));
         if (manager.getProviderPersistence() != null) {
-            assertNotNull(batch.getJSONObject(Constants.MessageKey.PROVIDER_PERSISTENCE));
+            assertNotNull(batch.getJSONObject("cms"));
         }
 
 
