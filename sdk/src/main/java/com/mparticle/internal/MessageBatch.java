@@ -34,7 +34,7 @@ public class MessageBatch extends JSONObject {
         uploadMessage.put(Constants.MessageKey.APP_INFO, appInfo);
         // if there is notification key then include it
         String regId = PushRegistrationHelper.getRegistrationId(context);
-        if ((regId != null) && (regId.length() > 0)) {
+        if (!MPUtility.isEmpty(regId)) {
             deviceInfo.put(Constants.MessageKey.PUSH_TOKEN, regId);
             deviceInfo.put(Constants.MessageKey.PUSH_TOKEN_TYPE, Constants.GOOGLE_GCM);
         } else {
