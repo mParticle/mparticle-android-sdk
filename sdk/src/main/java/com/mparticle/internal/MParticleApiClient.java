@@ -2,6 +2,7 @@ package com.mparticle.internal;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Build;
 import android.provider.Settings;
 import android.util.Base64;
@@ -75,7 +76,7 @@ public class MParticleApiClient implements IMPApiClient {
 
     private static final String SERVICE_VERSION_1 = "/v1";
     private static final String SERVICE_VERSION_3 = "/v3";
-    private static final int HTTP_TOO_MANY_REQUESTS = 429;
+    static final int HTTP_TOO_MANY_REQUESTS = 429;
 
     /**
      * Crucial LTV value key used to sync LTV between the SDK and the SDK server whenever LTV has changed.
@@ -126,7 +127,14 @@ public class MParticleApiClient implements IMPApiClient {
         try {
             checkThrottleTime();
             if (mConfigUrl == null){
-                mConfigUrl = new URL(SECURE_SERVICE_SCHEME, CONFIG_HOST, SERVICE_VERSION_3 + "/" + mApiKey + "/config");
+                Uri uri = new Uri.Builder()
+                        .scheme(SECURE_SERVICE_SCHEME)
+                        .authority(CONFIG_HOST)
+                        .path(SERVICE_VERSION_3 + "/" + mApiKey + "/config")
+                        .appendQueryParameter("av", MPUtility.getAppVersionName(mContext))
+                        .appendQueryParameter("sv", Constants.MPARTICLE_VERSION)
+                        .build();
+                mConfigUrl = new URL(uri.toString());
             }
             HttpURLConnection connection = (HttpURLConnection) mConfigUrl.openConnection();
             connection.setConnectTimeout(2000);

@@ -72,7 +72,11 @@ public class UploadHandlerTest {
         for (int i = 203 ; i < 400; i++){
             assertFalse(handler.shouldDelete(i));
         }
-        for (int i = 400 ; i < 500; i++){
+        for (int i = 400 ; i < 429; i++){
+            assertTrue(handler.shouldDelete(i));
+        }
+        assertFalse(handler.shouldDelete(429));
+        for (int i = 430 ; i < 500; i++){
             assertTrue(handler.shouldDelete(i));
         }
         for (int i = 500 ; i < 600; i++){

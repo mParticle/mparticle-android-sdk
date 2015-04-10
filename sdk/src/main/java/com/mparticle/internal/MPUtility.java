@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.location.LocationManager;
@@ -150,6 +151,16 @@ public class MPUtility {
     public static long getAvailableExternalDisk() {
         File path = Environment.getExternalStorageDirectory();
         return getDiskSpace(path);
+    }
+
+    public static String getAppVersionName(Context context) {
+        try {
+            PackageInfo pInfo = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
+            return pInfo.versionName;
+        } catch (Exception e) {
+            // ignore missing data
+        }
+        return "unknown";
     }
 
     public static long getDiskSpace(File path){

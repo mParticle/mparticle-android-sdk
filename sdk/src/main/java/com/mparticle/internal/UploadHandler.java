@@ -302,8 +302,8 @@ public final class UploadHandler extends Handler {
      * Delete messages if they're accepted (202), or 4xx, which means we're sending bad data.
      */
     boolean shouldDelete(int statusCode) {
-        return HttpStatus.SC_ACCEPTED == statusCode ||
-                (statusCode >= HttpStatus.SC_BAD_REQUEST && statusCode < HttpStatus.SC_INTERNAL_SERVER_ERROR);
+        return statusCode != MParticleApiClient.HTTP_TOO_MANY_REQUESTS && (HttpStatus.SC_ACCEPTED == statusCode ||
+                (statusCode >= HttpStatus.SC_BAD_REQUEST && statusCode < HttpStatus.SC_INTERNAL_SERVER_ERROR));
     }
 
     /**
