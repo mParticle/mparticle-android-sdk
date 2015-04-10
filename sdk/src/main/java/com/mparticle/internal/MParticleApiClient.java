@@ -75,6 +75,7 @@ public class MParticleApiClient implements IMPApiClient {
 
     private static final String SERVICE_VERSION_1 = "/v1";
     private static final String SERVICE_VERSION_3 = "/v3";
+    private static final int HTTP_TOO_MANY_REQUESTS = 429;
 
     /**
      * Crucial LTV value key used to sync LTV between the SDK and the SDK server whenever LTV has changed.
@@ -393,7 +394,7 @@ public class MParticleApiClient implements IMPApiClient {
                 alreadyWarned = true;
                 ConfigManager.log(MParticle.LogLevel.ERROR, "Bad API request - is the correct API key and secret configured?");
             }
-            if (statusCode == HttpStatus.SC_SERVICE_UNAVAILABLE && !BuildConfig.MP_DEBUG) {
+            if ((statusCode == HttpStatus.SC_SERVICE_UNAVAILABLE || statusCode == HTTP_TOO_MANY_REQUESTS) && !BuildConfig.MP_DEBUG) {
                 setNextAllowedRequestTime();
             }
         }
