@@ -21,7 +21,7 @@ final class MPStreamHandler extends MPAbstractStreamHandler {
 
     protected final URLConnection openConnection(URL u) throws IOException {
         HttpURLConnection connection = (HttpURLConnection) super.openConnection(u);
-        if (MParticle.getInstance().internal().shouldProcessUrl(u.toString())) {
+        if (u != null && MeasuredRequestManager.INSTANCE.shouldProcessUrl(u.toString())) {
             return new MPHttpUrlConnection(connection);
         } else {
             return connection;
@@ -30,7 +30,7 @@ final class MPStreamHandler extends MPAbstractStreamHandler {
 
     protected final URLConnection openConnection(URL u, Proxy proxy) throws IOException {
         HttpURLConnection connection = (HttpURLConnection) super.openConnection(u, proxy);
-        if (MParticle.getInstance().internal().shouldProcessUrl(u.toString())) {
+        if (u != null && MeasuredRequestManager.INSTANCE.shouldProcessUrl(u.toString())) {
             return new MPHttpUrlConnection(connection);
         } else {
             return connection;

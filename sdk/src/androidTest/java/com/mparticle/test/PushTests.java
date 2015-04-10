@@ -8,8 +8,8 @@ import android.os.Bundle;
 import android.test.AndroidTestCase;
 import android.text.TextUtils;
 
+import com.mparticle.MPService;
 import com.mparticle.messaging.AbstractCloudMessage;
-import com.mparticle.messaging.MPCloudBackgroundMessage;
 import com.mparticle.messaging.MPCloudNotificationMessage;
 import com.mparticle.messaging.ProviderCloudMessage;
 
@@ -19,6 +19,7 @@ import org.json.JSONObject;
 
 import java.util.Iterator;
 import java.util.UUID;
+import org.junit.Test;
 
 public class PushTests extends AndroidTestCase {
 
@@ -50,6 +51,7 @@ public class PushTests extends AndroidTestCase {
         assertNotNull(notification.contentIntent);
     }
 
+    @Test
     public void testBasicMpMessageCreation(){
         JSONArray messageKeys = getMockMessageKeys();
 
@@ -70,6 +72,7 @@ public class PushTests extends AndroidTestCase {
         assertNotNull(notification.contentIntent);
     }
 
+    @Test
     public void testMpMessageRedacted(){
         JSONArray messageKeys = getMockMessageKeys();
 
@@ -84,10 +87,11 @@ public class PushTests extends AndroidTestCase {
             fail(e.getMessage());
         }
         String text = message.getPrimaryMessage(getContext());
-        assertFalse(TextUtils.isEmpty(text));
+        assertFalse(MPUtility.isEmpty(text));
         assertFalse(message.getRedactedJsonPayload().toString().contains(text));
     }
 
+    @Test
     public void testPushActionCreation(){
         JSONArray messageKeys = getMockMessageKeys();
 
@@ -108,6 +112,7 @@ public class PushTests extends AndroidTestCase {
         assertEquals(actionId, message.getActions()[0].getActionIdentifier());
     }
 
+    @Test
     public void testMpPushMessageIntent(){
         JSONArray messageKeys = getMockMessageKeys();
 
@@ -124,6 +129,7 @@ public class PushTests extends AndroidTestCase {
         assertNotNull(message.buildNotification(getContext()).contentIntent);
     }
 
+    @Test
     public void testProviderMessageRedacted(){
         JSONArray messageKeys = getMockMessageKeys();
         String key = MESSAGE_KEYS[2];
@@ -142,6 +148,7 @@ public class PushTests extends AndroidTestCase {
         assertFalse(message.getRedactedJsonPayload().toString().contains(notificationMessage));
     }
 
+    @Test
     public void testMpMessageExpiry(){
         JSONArray messageKeys = getMockMessageKeys();
 
@@ -160,6 +167,7 @@ public class PushTests extends AndroidTestCase {
         fail("Message should have been expired!");
     }
 
+    @Test
     public void testCampaignBatchExpiration(){
         JSONArray messageKeys = getMockMessageKeys();
 
@@ -177,6 +185,7 @@ public class PushTests extends AndroidTestCase {
         }
     }
 
+    @Test
     public void testCommands(){
         Intent pushIntent = new Intent();
         Bundle extras = getMpExtras(MP_JSON);
@@ -203,6 +212,7 @@ public class PushTests extends AndroidTestCase {
         assertTrue("Message should have been displayed.", message.shouldDisplay());
     }
 
+    @Test
     public void testVariousDefaultFields(){
         Intent pushIntent = new Intent();
         Bundle extras = getMpExtras(MP_JSON);
@@ -214,11 +224,12 @@ public class PushTests extends AndroidTestCase {
         } catch (AbstractCloudMessage.InvalidGcmMessageException e) {
 
         }
-        assertFalse(TextUtils.isEmpty(message.getPrimaryMessage(getContext())));
+        assertFalse(MPUtility.isEmpty(message.getPrimaryMessage(getContext())));
         assertNotNull(message.getLargeIcon(getContext()));
-        assertFalse(TextUtils.isEmpty(message.getContentTitle(getContext())));
+        assertFalse(MPUtility.isEmpty(message.getContentTitle(getContext())));
     }
 
+    @Test
     public void testDownloadedImages(){
         Intent pushIntent = new Intent();
         Bundle extras = getMpExtras(MP_JSON);
@@ -234,6 +245,7 @@ public class PushTests extends AndroidTestCase {
         assertNotNull(message.getLargeIcon(null));
     }
 
+    @Test
     public void testLargeIconFromResources(){
         Intent pushIntent = new Intent();
         Bundle extras = getMpExtras(MP_JSON);
@@ -249,16 +261,18 @@ public class PushTests extends AndroidTestCase {
         assertNotNull(message.getLargeIcon(getContext()));
     }
 
+    @Test
     public void testSilentPush(){
+        MPService service = new MPService();
         Bundle extras = getMpExtras(MP_JSON);
         extras.putString("m_cmd", Integer.toString(MPCloudNotificationMessage.COMMAND_DONOTHING));
-        assertTrue(MPCloudBackgroundMessage.processSilentPush(getContext(), extras));
+        assertTrue(service.processSilentPush(getContext(), extras));
 
         extras.putString("m_cmd", Integer.toString(MPCloudNotificationMessage.COMMAND_ALERT_CONFIG_REFRESH));
-        assertTrue(MPCloudBackgroundMessage.processSilentPush(getContext(), extras));
+        assertTrue(service.processSilentPush(getContext(), extras));
 
         extras.putString("m_cmd", Integer.toString(MPCloudNotificationMessage.COMMAND_ALERT_NOW));
-        assertFalse(MPCloudBackgroundMessage.processSilentPush(getContext(), extras));
+        assertFalse(service.processSilentPush(getContext(), extras));
     }
 
     private JSONArray getMockMessageKeys(){

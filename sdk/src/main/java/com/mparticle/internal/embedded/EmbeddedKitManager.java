@@ -6,18 +6,18 @@ import android.content.Intent;
 import android.location.Location;
 import android.net.Uri;
 
+import com.mparticle.AppStateManager;
 import com.mparticle.MPEvent;
+import com.mparticle.MPProduct;
 import com.mparticle.MParticle;
-import com.mparticle.internal.ConfigManager;
+import com.mparticle.ConfigManager;
 import com.mparticle.internal.Constants;
 import com.mparticle.internal.MPActivityCallbacks;
-import com.mparticle.MPProduct;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
@@ -25,6 +25,8 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class EmbeddedKitManager implements MPActivityCallbacks {
+    private ConfigManager mConfigManager;
+    private AppStateManager mAppStateManager;
     private ConcurrentHashMap<Integer,EmbeddedProvider> providers = new ConcurrentHashMap<Integer, EmbeddedProvider>(0);
 
     Context context;
@@ -33,7 +35,7 @@ public class EmbeddedKitManager implements MPActivityCallbacks {
         this.context = context;
     }
 
-
+    //called from a background thread by the ConfigManager when we get new configuration
     public void updateKits(JSONArray kitConfigs){
         if (kitConfigs == null) {
             providers.clear();
@@ -44,14 +46,16 @@ public class EmbeddedKitManager implements MPActivityCallbacks {
                 try {
                     JSONObject current = kitConfigs.getJSONObject(i);
                     int currentId = current.getInt(EmbeddedProvider.KEY_ID);
-                    activeIds.add(currentId);
-                    if (!providers.containsKey(currentId)) {
-                        providers.put(currentId, ekFactory.createInstance(currentId, context));
-                    }
-                    providers.get(currentId).parseConfig(current).update();
-                    if (!providers.get(currentId).optedOut()) {
-                        providers.get(currentId).setUserAttributes(MParticle.getInstance().internal().getUserAttributes());
-                        syncUserIdentities(providers.get(currentId));
+                    if (ekFactory.isSupported(currentId)) {
+                        activeIds.add(currentId);
+                        if (!providers.containsKey(currentId)) {
+                            providers.put(currentId, ekFactory.createInstance(currentId, this));
+                        }
+                        providers.get(currentId).parseConfig(current).update();
+                        if (!providers.get(currentId).optedOut()) {
+                            providers.get(currentId).setUserAttributes(MParticle.getInstance().getUserAttributes());
+                            syncUserIdentities(providers.get(currentId));
+                        }
                     }
                 } catch (JSONException jse) {
                     ConfigManager.log(MParticle.LogLevel.ERROR, "Exception while parsing embedded kit configuration: " + jse.getMessage());
@@ -71,7 +75,7 @@ public class EmbeddedKitManager implements MPActivityCallbacks {
     }
 
     private void syncUserIdentities(EmbeddedProvider provider) {
-        JSONArray identities = MParticle.getInstance().internal().getUserIdentities();
+        JSONArray identities = MParticle.getInstance().getUserIdentities();
         if (identities != null) {
             for (int i = 0; i < identities.length(); i++) {
                 try {
@@ -134,11 +138,11 @@ public class EmbeddedKitManager implements MPActivityCallbacks {
         }
     }
 
-    public void setUserAttributes(JSONObject mUserAttributes) {
+    public void setUserAttributes(JSONObject userAttributes) {
         for (EmbeddedProvider provider : providers.values()){
             try {
                 if (!provider.optedOut()) {
-                    provider.setUserAttributes(provider.filterAttributes(provider.mUserAttributeFilters, mUserAttributes));
+                    provider.setUserAttributes(provider.filterAttributes(provider.mUserAttributeFilters, userAttributes));
                 }
             } catch (Exception e) {
                 ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to call setUserAttributes for embedded provider: " + provider.getName() + ": " + e.getMessage());
@@ -340,5 +344,25 @@ public class EmbeddedKitManager implements MPActivityCallbacks {
         } else{
             return null;
         }
+    }
+
+    public Context getContext() {
+        return context;
+    }
+
+    public ConfigManager getConfigurationManager() {
+        return mConfigManager;
+    }
+
+    public AppStateManager getAppStateManager() {
+        return mAppStateManager;
+    }
+
+    public void setConfigManager(ConfigManager configManager) {
+        mConfigManager = configManager;
+    }
+
+    public void setAppStateManager(AppStateManager appStateManager) {
+        this.mAppStateManager = appStateManager;
     }
 }

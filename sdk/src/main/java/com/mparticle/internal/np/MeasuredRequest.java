@@ -127,7 +127,7 @@ final class MeasuredRequest {
         if (!"CONNECT".equalsIgnoreCase(requestMethod)) {
             added = true;
             startTiming();
-            MParticle.getInstance().internal().getMeasuredRequestManager().addRequest(this);
+            MeasuredRequestManager.INSTANCE.addRequest(this);
         }
     }
 

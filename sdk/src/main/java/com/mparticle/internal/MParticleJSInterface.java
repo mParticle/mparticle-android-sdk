@@ -3,6 +3,7 @@ package com.mparticle.internal;
 
 import android.webkit.JavascriptInterface;
 
+import com.mparticle.ConfigManager;
 import com.mparticle.MParticle;
 import com.mparticle.MParticle.EventType;
 
@@ -60,9 +61,8 @@ public class MParticleJSInterface {
                             eventAttributes);
                     break;
                 case JS_MSG_TYPE_PV:
-                    MParticle.getInstance().internal().logScreen(name,
-                            eventAttributes,
-                            true);
+                    MParticle.getInstance().logScreen(name,
+                            eventAttributes);
                     break;
                 case JS_MSG_TYPE_OO:
                     MParticle.getInstance().setOptOut(event.optBoolean(JS_KEY_OPTOUT));

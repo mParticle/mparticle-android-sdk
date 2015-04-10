@@ -9,6 +9,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 public class UserTests extends AndroidTestCase {
 
@@ -18,7 +20,7 @@ public class UserTests extends AndroidTestCase {
         MParticle.start(getContext());
     }
 
-
+    @Test
     public void testUserAttributesAndTags() {
         JSONObject userAttributes = MParticle.getInstance().internal().getUserAttributes();
 
@@ -37,6 +39,7 @@ public class UserTests extends AndroidTestCase {
         }
     }
 
+    @Test
     public void testUserIdentities() {
         try{
             JSONArray identities = MParticle.getInstance().internal().getUserIdentities();

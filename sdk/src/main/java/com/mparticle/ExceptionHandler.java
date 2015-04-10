@@ -1,8 +1,9 @@
-package com.mparticle.internal;
+package com.mparticle;
 
 import android.util.Log;
 
 import com.mparticle.MParticle;
+import com.mparticle.internal.Constants;
 
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.lang.ref.WeakReference;
@@ -25,7 +26,7 @@ import java.lang.ref.WeakReference;
     @Override
     public void uncaughtException(Thread thread, Throwable ex) {
         try {
-            MParticle.getInstance().internal().logUnhandledError(ex);
+            MParticle.getInstance().logUnhandledError(ex);
 
             if (mOriginalUncaughtExceptionHandler != null) {
                 mOriginalUncaughtExceptionHandler.uncaughtException(thread, ex);

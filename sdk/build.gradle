@@ -1,14 +1,12 @@
 apply plugin: 'com.android.library'
 apply plugin: 'maven'
 
-
 buildscript {
     repositories {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:1.+'
-
+        classpath 'com.android.tools.build:gradle:1.1.0'
     }
 }
 
@@ -29,7 +27,9 @@ def getDate() {
 android {
     compileSdkVersion 21
     buildToolsVersion "21.1.2"
-    defaultPublishConfig "embeddedKitsRelease"
+
+    defaultPublishConfig "embeddedkitsRelease"
+
 
     String url = "\"\"";
     String configurationUrl = "\"\"";
@@ -58,12 +58,13 @@ android {
 
         buildConfigField "String", "MP_URL", url
         buildConfigField "String", "MP_CONFIG_URL", configurationUrl
+        buildConfigField "Boolean", "MP_DEBUG", "false"
 
     }
 
     productFlavors {
 
-        embeddedKits {
+        embeddedkits {
 
         }
 
@@ -76,6 +77,7 @@ android {
 
         debug {
             minifyEnabled false
+            buildConfigField "Boolean", "MP_DEBUG", "true"
         }
 
         unity {
@@ -86,6 +88,7 @@ android {
         release {
             minifyEnabled true
             proguardFile 'proguard.txt'
+           // buildConfigField "Boolean", "MP_DEBUG", "true"
         }
     }
 
@@ -137,10 +140,13 @@ uploadArchives {
 
 dependencies {
     deployerJars "org.kuali.maven.wagons:maven-s3-wagon:1.2.1"
-    embeddedKitsCompile files('embeddedkits/Kahuna489.jar')
-    embeddedKitsCompile files('embeddedkits/KochavaSDK.jar')
-    embeddedKitsCompile files('embeddedkits/comscore2140923.jar')
+    embeddedkitsCompile files('embeddedkits/Kahuna489.jar')
+    embeddedkitsCompile files('embeddedkits/KochavaSDK.jar')
+    embeddedkitsCompile files('embeddedkits/comscore2140923.jar')
     compile 'com.google.android.gms:play-services:[3.1,)'
     compile 'com.android.support:support-v4:21.0.3'
     unityCompile project('unityskeleton')
+    testCompile 'junit:junit:4.12'
+    testCompile  files('libs/java-json.jar')
+    testCompile "org.mockito:mockito-core:1.+"
 }

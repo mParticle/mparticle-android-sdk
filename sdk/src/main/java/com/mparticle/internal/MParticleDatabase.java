@@ -1,6 +1,7 @@
 package com.mparticle.internal;
 
 import android.content.Context;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.provider.BaseColumns;
@@ -16,16 +17,81 @@ import android.provider.BaseColumns;
  */
 /* package-private */class MParticleDatabase extends SQLiteOpenHelper {
 
+    /**
+     * The following get*Query methods were once static fields, but in order to save on app startup time, they're
+     * now created as needed.
+     */
+
+    /**
+     * The beginning of the delete query used to clear the uploads table after a successful upload.
+     */
+    static String getDeletableMessagesQuery() {
+        return String.format(
+                "(%s='NO-SESSION')",
+                MessageTable.SESSION_ID);
+    }
+
+    private static String[] gcmColumns = {MParticleDatabase.GcmMessageTable.CONTENT_ID, MParticleDatabase.GcmMessageTable.CAMPAIGN_ID, MParticleDatabase.GcmMessageTable.EXPIRATION, MParticleDatabase.GcmMessageTable.DISPLAYED_AT};
+    private static String gcmDeleteWhere = MParticleDatabase.GcmMessageTable.EXPIRATION + " < ? and " + MParticleDatabase.GcmMessageTable.DISPLAYED_AT + " > 0";
+
+    static Cursor getGcmHistory(SQLiteDatabase database){
+        return database.query(GcmMessageTable.TABLE_NAME,
+                gcmColumns,
+                null,
+                null,
+                null,
+                null,
+                GcmMessageTable.EXPIRATION + " desc");
+    }
+
+    static int deleteExpiredGcmMessages(SQLiteDatabase database){
+        String[] deleteWhereArgs = {Long.toString(System.currentTimeMillis())};
+        return database.delete(MParticleDatabase.GcmMessageTable.TABLE_NAME, gcmDeleteWhere, deleteWhereArgs);
+    }
+
+    private static String[] prepareSelection = new String[]{"_id", MessageTable.MESSAGE, MessageTable.CREATED_AT, MessageTable.STATUS, MessageTable.SESSION_ID};
+    private static String prepareOrderBy = MessageTable.CREATED_AT + ", " + MessageTable.SESSION_ID + " , _id asc";
+
+    private static String sessionHistorySelection = String.format(
+            "(%s = %d) and (%s != ?)",
+            MessageTable.STATUS,
+            Constants.Status.UPLOADED,
+            MessageTable.SESSION_ID);
+
+    static Cursor getSessionHistory(SQLiteDatabase database, String currentSessionId){
+        String[] selectionArgs = new String[]{currentSessionId};
+        return database.query(
+                MessageTable.TABLE_NAME,
+                prepareSelection,
+                sessionHistorySelection,
+                selectionArgs,
+                null,
+                null,
+                prepareOrderBy);
+    }
+    private static String[] readyMessages = new String[]{Integer.toString(Constants.Status.UPLOADED)};
+
+    static Cursor getMessagesForUpload(SQLiteDatabase database){
+        return database.query(
+                MessageTable.TABLE_NAME,
+                null,
+                MessageTable.STATUS + " != ?",
+                readyMessages,
+                null,
+                null,
+                prepareOrderBy);
+    }
+
     private static final int DB_VERSION = 3;
     public static final String DB_NAME = "mparticle.db";
 
     interface BreadcrumbTable {
-        public final static String TABLE_NAME = "breadcrumbs";
-        public final static String SESSION_ID = "session_id";
-        public final static String API_KEY = "api_key";
-        public final static String MESSAGE = "message";
-        public final static String CREATED_AT = "breadcrumb_time";
-        public final static String CF_UUID = "cfuuid";
+        String TABLE_NAME = "breadcrumbs";
+        String SESSION_ID = "session_id";
+        String API_KEY = "api_key";
+        String MESSAGE = "message";
+        String CREATED_AT = "breadcrumb_time";
+        String CF_UUID = "cfuuid";
     }
 
     private static final String CREATE_BREADCRUMBS_DDL =
@@ -39,14 +105,14 @@ import android.provider.BaseColumns;
                     ");";
 
     interface SessionTable {
-        public final static String TABLE_NAME = "sessions";
-        public final static String SESSION_ID = "session_id";
-        public final static String API_KEY = "api_key";
-        public final static String START_TIME = "start_time";
-        public final static String END_TIME = "end_time";
-        public final static String SESSION_FOREGROUND_LENGTH = "session_length";
-        public final static String ATTRIBUTES = "attributes";
-        public final static String CF_UUID = "cfuuid";
+        String TABLE_NAME = "sessions";
+        String SESSION_ID = "session_id";
+        String API_KEY = "api_key";
+        String START_TIME = "start_time";
+        String END_TIME = "end_time";
+        String SESSION_FOREGROUND_LENGTH = "session_length";
+        String ATTRIBUTES = "attributes";
+        String CF_UUID = "cfuuid";
     }
 
     private static final String CREATE_SESSIONS_DDL =
@@ -62,15 +128,15 @@ import android.provider.BaseColumns;
                     ");";
 
 
-    interface MessageTable {
-        public final static String TABLE_NAME = "messages";
-        public final static String SESSION_ID = "session_id";
-        public final static String API_KEY = "api_key";
-        public final static String MESSAGE = "message";
-        public final static String STATUS = "upload_status";
-        public final static String CREATED_AT = "message_time";
-        public final static String MESSAGE_TYPE = "message_type";
-        public final static String CF_UUID = "cfuuid";
+    interface MessageTable extends BaseColumns{
+        String TABLE_NAME = "messages";
+        String SESSION_ID = "session_id";
+        String API_KEY = "api_key";
+        String MESSAGE = "message";
+        String STATUS = "upload_status";
+        String CREATED_AT = "message_time";
+        String MESSAGE_TYPE = "message_type";
+        String CF_UUID = "cfuuid";
     }
 
     private static final String CREATE_MESSAGES_DDL =
@@ -85,13 +151,13 @@ import android.provider.BaseColumns;
                     MessageTable.CF_UUID + " TEXT" +
                     ");";
 
-    interface UploadTable {
-        public final static String TABLE_NAME = "uploads";
-        public final static String API_KEY = "api_key";
-        public final static String MESSAGE = "message";
-        public final static String CREATED_AT = "message_time";
-        public final static String CF_UUID = "cfuuid";
-        public final static String SESSION_ID = "session_id";
+    interface UploadTable extends BaseColumns{
+        String TABLE_NAME = "uploads";
+        String API_KEY = "api_key";
+        String MESSAGE = "message";
+        String CREATED_AT = "message_time";
+        String CF_UUID = "cfuuid";
+        String SESSION_ID = "session_id";
     }
 
     private static final String CREATE_UPLOADS_DDL =
@@ -105,15 +171,15 @@ import android.provider.BaseColumns;
                     ");";
 
     interface CommandTable {
-        public final static String TABLE_NAME = "commands";
-        public final static String URL = "url";
-        public final static String METHOD = "method";
-        public final static String POST_DATA = "post_data";
-        public final static String HEADERS = "headers";
-        public final static String CREATED_AT = "timestamp";
-        public final static String SESSION_ID = "session_id";
-        public final static String API_KEY = "api_key";
-        public final static String CF_UUID = "cfuuid";
+        String TABLE_NAME = "commands";
+        String URL = "url";
+        String METHOD = "method";
+        String POST_DATA = "post_data";
+        String HEADERS = "headers";
+        String CREATED_AT = "timestamp";
+        String SESSION_ID = "session_id";
+        String API_KEY = "api_key";
+        String CF_UUID = "cfuuid";
     }
 
     private static final String CREATE_COMMANDS_DDL =
@@ -130,16 +196,16 @@ import android.provider.BaseColumns;
                     ");";
 
     interface GcmMessageTable {
-        public final static String CONTENT_ID = "content_id";
-        public final static String CAMPAIGN_ID = "campaign_id";
-        public final static String TABLE_NAME = "gcm_messages";
-        public final static String PAYLOAD = "payload";
-        public final static String CREATED_AT = "message_time";
-        public final static String DISPLAYED_AT = "displayed_time";
-        public final static String EXPIRATION = "expiration";
-        public final static String BEHAVIOR = "behavior";
-        public final static String APPSTATE = "appstate";
-        public final static int PROVIDER_CONTENT_ID = -1;
+        String CONTENT_ID = "content_id";
+        String CAMPAIGN_ID = "campaign_id";
+        String TABLE_NAME = "gcm_messages";
+        String PAYLOAD = "payload";
+        String CREATED_AT = "message_time";
+        String DISPLAYED_AT = "displayed_time";
+        String EXPIRATION = "expiration";
+        String BEHAVIOR = "behavior";
+        String APPSTATE = "appstate";
+        int PROVIDER_CONTENT_ID = -1;
     }
 
     private static final String CREATE_GCM_MSG_DDL =
@@ -178,4 +244,6 @@ import android.provider.BaseColumns;
         db.execSQL(CREATE_BREADCRUMBS_DDL);
         db.execSQL(CREATE_GCM_MSG_DDL);
     }
+
+
 }

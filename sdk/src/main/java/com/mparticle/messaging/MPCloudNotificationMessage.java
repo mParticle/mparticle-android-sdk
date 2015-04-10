@@ -17,7 +17,8 @@ import com.mparticle.internal.MPUtility;
 
 import org.json.JSONObject;
 
-import java.io.InputStream;
+import java.net.URL;
+import java.net.URLConnection;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -181,7 +182,7 @@ public class MPCloudNotificationMessage extends AbstractCloudMessage {
 
     public int getSmallIconResourceId(Context context){
         String resourceName = mExtras.getString(SMALL_ICON);
-        if (!TextUtils.isEmpty(resourceName)) {
+        if (!MPUtility.isEmpty(resourceName)) {
             int id = context.getResources().getIdentifier(resourceName, "drawable", context.getPackageName());
             if (id > 0){
                 return id;
@@ -192,7 +193,7 @@ public class MPCloudNotificationMessage extends AbstractCloudMessage {
 
     public String getContentTitle(Context context){
         String title = mExtras.getString(TITLE);
-        if (TextUtils.isEmpty(title)){
+        if (MPUtility.isEmpty(title)){
             return AbstractCloudMessage.getFallbackTitle(context);
         }else{
             return title;
@@ -201,7 +202,7 @@ public class MPCloudNotificationMessage extends AbstractCloudMessage {
 
     public String getPrimaryMessage(Context context){
         String text = mExtras.getString(PRIMARY_MESSAGE);
-        if (TextUtils.isEmpty(text)){
+        if (MPUtility.isEmpty(text)){
             return AbstractCloudMessage.getFallbackTitle(context);
         }else{
             return text;
@@ -223,11 +224,13 @@ public class MPCloudNotificationMessage extends AbstractCloudMessage {
     public Bitmap getLargeIcon(Context context){
         Bitmap bitmap = null;
         String largeIconUri = mExtras.getString(LARGE_ICON);
-        if (!TextUtils.isEmpty(largeIconUri)) {
+        if (!MPUtility.isEmpty(largeIconUri)) {
             if (largeIconUri.contains("http:") || largeIconUri.contains("https:") ) {
                 try {
-                    InputStream in = new java.net.URL(largeIconUri).openStream();
-                    bitmap = BitmapFactory.decodeStream(in);
+                    URLConnection connection = new URL(largeIconUri).openConnection();
+                    connection.setConnectTimeout(2000);
+                    connection.setReadTimeout(20000);
+                    bitmap = BitmapFactory.decodeStream(connection.getInputStream());
                 } catch (Exception e) {
 
 
@@ -312,7 +315,7 @@ public class MPCloudNotificationMessage extends AbstractCloudMessage {
 
     public Uri getSound(Context context){
         String sound = mExtras.getString(SOUND);
-        if (!TextUtils.isEmpty(sound)) {
+        if (!MPUtility.isEmpty(sound)) {
             return Uri.parse("android.resource://" + context.getPackageName() + "/raw/" + mExtras.getString(SOUND));
         }else{
             return null;
@@ -321,10 +324,12 @@ public class MPCloudNotificationMessage extends AbstractCloudMessage {
 
     public Bitmap getBigPicture(Context context){
         String image = mExtras.getString(BIG_IMAGE);
-        if (!TextUtils.isEmpty(image)){
+        if (!MPUtility.isEmpty(image)){
             try {
-                InputStream in = new java.net.URL(image).openStream();
-                return BitmapFactory.decodeStream(in);
+                URLConnection connection = new URL(image).openConnection();
+                connection.setConnectTimeout(2000);
+                connection.setReadTimeout(20000);
+                return BitmapFactory.decodeStream(connection.getInputStream());
             }catch (Exception e){
 
             }
@@ -343,23 +348,23 @@ public class MPCloudNotificationMessage extends AbstractCloudMessage {
     public ArrayList<String> getInboxLines(){
         ArrayList<String> lines = new ArrayList<String>();
         String line_1 = mExtras.getString(INBOX_TEXT_1);
-        if (!TextUtils.isEmpty(line_1)){
+        if (!MPUtility.isEmpty(line_1)){
             lines.add(line_1);
         }
         String line_2 = mExtras.getString(INBOX_TEXT_2);
-        if (!TextUtils.isEmpty(line_2)){
+        if (!MPUtility.isEmpty(line_2)){
             lines.add(line_2);
         }
         String line_3 = mExtras.getString(INBOX_TEXT_3);
-        if (!TextUtils.isEmpty(line_3)){
+        if (!MPUtility.isEmpty(line_3)){
             lines.add(line_3);
         }
         String line_4 = mExtras.getString(INBOX_TEXT_4);
-        if (!TextUtils.isEmpty(line_4)){
+        if (!MPUtility.isEmpty(line_4)){
             lines.add(line_4);
         }
         String line_5 = mExtras.getString(INBOX_TEXT_5);
-        if (!TextUtils.isEmpty(line_5)){
+        if (!MPUtility.isEmpty(line_5)){
             lines.add(line_5);
         }
         return lines;
@@ -367,7 +372,7 @@ public class MPCloudNotificationMessage extends AbstractCloudMessage {
 
     public long[] getVibrationPattern(){
         String patternString = mExtras.getString(VIBRATION_PATTERN);
-        if (!TextUtils.isEmpty(patternString)){
+        if (!MPUtility.isEmpty(patternString)){
             try {
                 String[] patterns = patternString.split(",");
                 long[] primPatterns = new long[patterns.length];
@@ -425,7 +430,7 @@ public class MPCloudNotificationMessage extends AbstractCloudMessage {
             NotificationCompat.BigPictureStyle style = new NotificationCompat.BigPictureStyle();
             style.bigPicture(bigImage);
 
-            if (!TextUtils.isEmpty(bigContentTitle)) {
+            if (!MPUtility.isEmpty(bigContentTitle)) {
                 style.setBigContentTitle(bigContentTitle);
             }
             notification.setStyle(style);
@@ -435,15 +440,15 @@ public class MPCloudNotificationMessage extends AbstractCloudMessage {
                 style.addLine(line);
             }
 
-            if (!TextUtils.isEmpty(bigContentTitle)) {
+            if (!MPUtility.isEmpty(bigContentTitle)) {
                 style.setBigContentTitle(bigContentTitle);
             }
             notification.setStyle(style);
         } else {
             String bigText = getBigText();
-            NotificationCompat.BigTextStyle style = new NotificationCompat.BigTextStyle().bigText(TextUtils.isEmpty(bigText) ? getPrimaryMessage(context) : bigText);
+            NotificationCompat.BigTextStyle style = new NotificationCompat.BigTextStyle().bigText(MPUtility.isEmpty(bigText) ? getPrimaryMessage(context) : bigText);
 
-            if (!TextUtils.isEmpty(bigContentTitle)) {
+            if (!MPUtility.isEmpty(bigContentTitle)) {
                 style.setBigContentTitle(bigContentTitle);
             }
             notification.setStyle(style);
@@ -500,7 +505,7 @@ public class MPCloudNotificationMessage extends AbstractCloudMessage {
     public long getDeliveryTime() {
         String time = mExtras.getString(LOCAL_DELIVERY_TIME);
         long deliveryTime = System.currentTimeMillis();
-        if (!TextUtils.isEmpty(time)){
+        if (!MPUtility.isEmpty(time)){
             SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
             try {
                 deliveryTime = format.parse(time).getTime();

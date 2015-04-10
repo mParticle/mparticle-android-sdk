@@ -4,12 +4,12 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Build;
 import android.provider.Settings;
-import android.text.TextUtils;
 import android.util.Base64;
 
 import com.mparticle.BuildConfig;
+import com.mparticle.ConfigManager;
 import com.mparticle.MParticle;
-import com.mparticle.internal.embedded.BaseEmbeddedKitFactory;
+import com.mparticle.internal.embedded.EmbeddedKitFactory;
 
 import org.apache.http.HttpStatus;
 import org.apache.http.protocol.HTTP;
@@ -35,8 +35,10 @@ import java.security.NoSuchAlgorithmException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.zip.GZIPOutputStream;
@@ -66,20 +68,14 @@ public class MParticleApiClient implements IMPApiClient {
      * Embedded kit header used to tell both the supported EKs (/config), and the currently active EKs (/events)
      */
     private static final String HEADER_KITS = "x-mp-kits";
-    private static final String SECURE_SERVICE_SCHEME = TextUtils.isEmpty(BuildConfig.MP_URL) ? "https" : "http";
+    private static final String SECURE_SERVICE_SCHEME = MPUtility.isEmpty(BuildConfig.MP_URL) ? "https" : "http";
 
-    private static final String API_HOST = TextUtils.isEmpty(BuildConfig.MP_URL) ? "nativesdks.mparticle.com" : BuildConfig.MP_URL;
-    private static final String CONFIG_HOST = TextUtils.isEmpty(BuildConfig.MP_CONFIG_URL) ? "config2.mparticle.com" : BuildConfig.MP_CONFIG_URL;
-
-    private static boolean DEBUGGING = !TextUtils.isEmpty(BuildConfig.MP_URL) && BuildConfig.MP_URL.equals("api-qa.mparticle.com");
+    private static final String API_HOST = MPUtility.isEmpty(BuildConfig.MP_URL) ? "nativesdks.mparticle.com" : BuildConfig.MP_URL;
+    private static final String CONFIG_HOST = MPUtility.isEmpty(BuildConfig.MP_CONFIG_URL) ? "config2.mparticle.com" : BuildConfig.MP_CONFIG_URL;
 
     private static final String SERVICE_VERSION_1 = "/v1";
     private static final String SERVICE_VERSION_3 = "/v3";
-    /**
-     * mParticle cookies are a simplified form of real-cookies. The SDK server is stateless, so we need
-     * a mechanism for server-state persistence.
-     */
-    private static final String COOKIES = "ck";
+
     /**
      * Crucial LTV value key used to sync LTV between the SDK and the SDK server whenever LTV has changed.
      */
@@ -107,11 +103,14 @@ public class MParticleApiClient implements IMPApiClient {
     private SSLSocketFactory socketFactory;
     private String etag = null;
     private String modified = null;
+    private JSONObject mCurrentCookies;
     /**
      * Default throttle time - in the worst case scenario if the server is busy, the soonest
      * the SDK will attempt to contact the server again will be after this 2 hour window.
      */
     private static final long THROTTLE = 1000*60*60*2;
+    private boolean alreadyWarned;
+    private String mActiveModuleIds;
 
     public MParticleApiClient(ConfigManager configManager, SharedPreferences sharedPreferences, Context context) throws MalformedURLException {
         mContext = context;
@@ -129,7 +128,8 @@ public class MParticleApiClient implements IMPApiClient {
                 mConfigUrl = new URL(SECURE_SERVICE_SCHEME, CONFIG_HOST, SERVICE_VERSION_3 + "/" + mApiKey + "/config");
             }
             HttpURLConnection connection = (HttpURLConnection) mConfigUrl.openConnection();
-            connection.setRequestProperty("Accept-Encoding", "gzip");
+            connection.setConnectTimeout(2000);
+            connection.setReadTimeout(10000);
             connection.setRequestProperty(HEADER_ENVIRONMENT, Integer.toString(mConfigManager.getEnvironment().getValue()));
             connection.setRequestProperty(HEADER_KITS, getSupportedKitString());
             connection.setRequestProperty(HTTP.USER_AGENT, mUserAgent);
@@ -154,7 +154,7 @@ public class MParticleApiClient implements IMPApiClient {
                 throw new MPConfigException();
             }
         } catch (MalformedURLException e) {
-            ConfigManager.log(MParticle.LogLevel.ERROR, e, "Error constructing config service URL");
+            ConfigManager.log(MParticle.LogLevel.ERROR, "Error constructing config service URL");
         } catch (JSONException e) {
             ConfigManager.log(MParticle.LogLevel.ERROR, "Config request failed to process response message JSON");
         }
@@ -170,6 +170,8 @@ public class MParticleApiClient implements IMPApiClient {
         try {
             ConfigManager.log(MParticle.LogLevel.DEBUG, "Starting Segment Network request");
             HttpURLConnection connection = (HttpURLConnection) getAudienceUrl().openConnection();
+            connection.setConnectTimeout(2000);
+            connection.setReadTimeout(10000);
             connection.setRequestProperty("Accept-Encoding", "gzip");
             connection.setRequestProperty(HTTP.USER_AGENT, mUserAgent);
 
@@ -197,7 +199,11 @@ public class MParticleApiClient implements IMPApiClient {
         return false;
     }
 
-    public HttpURLConnection sendMessageBatch(String message) throws IOException, MPThrottleException, MPRampException {
+    public void setActiveModuleIds(String activeModuleIds) {
+        mActiveModuleIds = activeModuleIds;
+    }
+
+    public int sendMessageBatch(String message) throws IOException, MPThrottleException, MPRampException {
         checkThrottleTime();
         checkRampValue();
         if (mEventUrl == null){
@@ -205,16 +211,18 @@ public class MParticleApiClient implements IMPApiClient {
         }
         byte[] messageBytes = message.getBytes();
         HttpURLConnection connection = (HttpURLConnection) mEventUrl.openConnection();
+        connection.setConnectTimeout(2000);
+        connection.setReadTimeout(10000);
         connection.setDoOutput(true);
         connection.setRequestMethod("POST");
         connection.setRequestProperty(HTTP.CONTENT_TYPE, "application/json");
         connection.setRequestProperty(HTTP.CONTENT_ENCODING, "gzip");
         connection.setRequestProperty(HTTP.USER_AGENT, mUserAgent);
-        connection.setRequestProperty(HEADER_KITS, MParticle.getInstance().internal().getEmbeddedKitManager().getActiveModuleIds());
+        connection.setRequestProperty(HEADER_KITS, mConfigManager.getActiveModuleIds());
 
         addMessageSignature(connection, message);
 
-        if (mConfigManager.getEnvironment().equals(MParticle.Environment.Development)) {
+        if (BuildConfig.MP_DEBUG) {
             logUpload(message);
         }
 
@@ -233,11 +241,12 @@ public class MParticleApiClient implements IMPApiClient {
         }
 
         makeUrlRequest(connection, true);
-        if (connection.getResponseCode() >= HttpStatus.SC_OK && connection.getResponseCode() < HttpStatus.SC_MULTIPLE_CHOICES) {
+        int responseCode = connection.getResponseCode();
+        if (responseCode >= HttpStatus.SC_OK && responseCode < HttpStatus.SC_MULTIPLE_CHOICES) {
             JSONObject response = getJsonResponse(connection);
             parseMparticleJson(response);
         }
-        return connection;
+        return connection.getResponseCode();
     }
 
     public HttpURLConnection sendCommand(String commandUrl, String method, String postData, String headers) throws IOException, JSONException {
@@ -306,11 +315,11 @@ public class MParticleApiClient implements IMPApiClient {
             request.setRequestProperty(HTTP.DATE_HEADER, dateHeader);
             request.setRequestProperty(HEADER_SIGNATURE, hmacSha256Encode(mApiSecret, hashString.toString()));
         } catch (InvalidKeyException e) {
-            ConfigManager.log(MParticle.LogLevel.ERROR, e, "Error signing message.");
+            ConfigManager.log(MParticle.LogLevel.ERROR, "Error signing message.");
         } catch (NoSuchAlgorithmException e) {
-            ConfigManager.log(MParticle.LogLevel.ERROR, e, "Error signing message.");
+            ConfigManager.log(MParticle.LogLevel.ERROR, "Error signing message.");
         } catch (UnsupportedEncodingException e){
-            ConfigManager.log(MParticle.LogLevel.ERROR, e, "Error signing message.");
+            ConfigManager.log(MParticle.LogLevel.ERROR, "Error signing message.");
         }
     }
 
@@ -331,15 +340,6 @@ public class MParticleApiClient implements IMPApiClient {
         return new String(chars);
     }
 
-    static void addCookies(JSONObject uploadMessage, ConfigManager manager) {
-        try {
-            if (uploadMessage != null) {
-                uploadMessage.put(COOKIES, manager.getCookies());
-            }
-        }catch (JSONException jse){
-
-        }
-    }
 
 
     private static Certificate generateCertificate(CertificateFactory certificateFactory, String encodedCertificate) throws IOException, CertificateException {
@@ -389,10 +389,11 @@ public class MParticleApiClient implements IMPApiClient {
         }
         if (mParticle) {
             int statusCode = connection.getResponseCode();
-            if (statusCode == HttpStatus.SC_BAD_REQUEST) {
+            if (statusCode == HttpStatus.SC_BAD_REQUEST && !alreadyWarned) {
+                alreadyWarned = true;
                 ConfigManager.log(MParticle.LogLevel.ERROR, "Bad API request - is the correct API key and secret configured?");
             }
-            if (statusCode == HttpStatus.SC_SERVICE_UNAVAILABLE && !DEBUGGING) {
+            if (statusCode == HttpStatus.SC_SERVICE_UNAVAILABLE && !BuildConfig.MP_DEBUG) {
                 setNextAllowedRequestTime();
             }
         }
@@ -423,9 +424,9 @@ public class MParticleApiClient implements IMPApiClient {
                 if (consumerInfo.has(MPID)) {
                     mConfigManager.setMpid(consumerInfo.getLong(MPID));
                 }
-                if (consumerInfo.has(COOKIES)) {
-                    mConfigManager.setCookies(consumerInfo.getJSONObject(COOKIES));
-                }
+
+                setCookies(consumerInfo.optJSONObject(Constants.MessageKey.COOKIES));
+
             }
             if (jsonResponse.has(LTV)) {
                 BigDecimal serverLtv = new BigDecimal(jsonResponse.getString(LTV));
@@ -485,7 +486,7 @@ public class MParticleApiClient implements IMPApiClient {
 
     private static String getSupportedKitString(){
         if (mSupportedKits == null) {
-            ArrayList<Integer> supportedKitIds = BaseEmbeddedKitFactory.getSupportedKits();
+            ArrayList<Integer> supportedKitIds = EmbeddedKitFactory.getSupportedKits();
             if (supportedKitIds.size() > 0) {
                 StringBuilder buffer = new StringBuilder(supportedKitIds.size() * 3);
                 Iterator<Integer> it = supportedKitIds.iterator();
@@ -502,5 +503,73 @@ public class MParticleApiClient implements IMPApiClient {
             }
         }
         return mSupportedKits;
+    }
+
+    public void setCookies(JSONObject serverCookies) {
+        if (serverCookies != null) {
+            try {
+                JSONObject localCookies = getCookies();
+                Iterator<?> keys = serverCookies.keys();
+
+                while (keys.hasNext()) {
+                    String key = (String) keys.next();
+                    localCookies.put(key, serverCookies.getJSONObject(key));
+                }
+                mCurrentCookies = localCookies;
+                mPreferences.edit().putString(Constants.PrefKeys.Cookies, mCurrentCookies.toString()).apply();
+            } catch (JSONException jse) {
+
+            }
+        }
+    }
+
+    public JSONObject getCookies()  {
+        if (mCurrentCookies == null){
+            String currentCookies = mPreferences.getString(Constants.PrefKeys.Cookies, null);
+            if (MPUtility.isEmpty(currentCookies)){
+                mCurrentCookies = new JSONObject();
+                mPreferences.edit().putString(Constants.PrefKeys.Cookies, mCurrentCookies.toString()).apply();
+                return mCurrentCookies;
+            }else {
+                try {
+                    mCurrentCookies = new JSONObject(currentCookies);
+                } catch (JSONException e) {
+                    mCurrentCookies = new JSONObject();
+                }
+            }
+            Calendar nowCalendar = Calendar.getInstance();
+            nowCalendar.set(Calendar.YEAR, 1990);
+            Date oldDate = nowCalendar.getTime();
+            SimpleDateFormat parser = new SimpleDateFormat("yyyy");
+            Iterator<?> keys = mCurrentCookies.keys();
+            ArrayList<String> keysToRemove = new ArrayList<String>();
+            while (keys.hasNext()) {
+                try {
+                    String key = (String) keys.next();
+                    if (mCurrentCookies.get(key) instanceof JSONObject) {
+                        String expiration = ((JSONObject) mCurrentCookies.get(key)).getString("e");
+                        try {
+                            Date date = parser.parse(expiration);
+                            if (date.before(oldDate)) {
+                                keysToRemove.add(key);
+                            }
+                        } catch (ParseException dpe) {
+
+                        }
+                    }
+                }catch (JSONException jse){
+
+                }
+            }
+            for (String key : keysToRemove){
+                mCurrentCookies.remove(key);
+            }
+            if (keysToRemove.size() > 0) {
+                mPreferences.edit().putString(Constants.PrefKeys.Cookies, mCurrentCookies.toString()).apply();
+            }
+            return mCurrentCookies;
+        }else{
+            return mCurrentCookies;
+        }
     }
 }

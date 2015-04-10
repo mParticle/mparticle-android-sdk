@@ -1,8 +1,10 @@
-package com.mparticle.internal;
+package com.mparticle;
 
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.text.TextUtils;
+
+import com.mparticle.internal.MPUtility;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -110,7 +112,7 @@ class ProviderPersistence extends JSONObject{
      * Macros are used so that the /config API call can come from a CDN (not user-specific)
      */
     private static String applyMacro(String defaultString) {
-        if (!TextUtils.isEmpty(defaultString) && defaultString.startsWith("%")){
+        if (!MPUtility.isEmpty(defaultString) && defaultString.startsWith("%")){
             defaultString = defaultString.toLowerCase();
             if (defaultString.equalsIgnoreCase(MACRO_GUID_NO_DASHES)){
                 return UUID.randomUUID().toString().replace("-", "");

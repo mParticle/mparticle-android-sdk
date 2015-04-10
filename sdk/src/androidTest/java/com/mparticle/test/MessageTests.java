@@ -11,20 +11,28 @@ import com.mparticle.internal.MPMessage;
 import com.mparticle.internal.MPUtility;
 
 import org.json.JSONException;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
 
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertFalse;
+import static junit.framework.Assert.assertNull;
+import static junit.framework.Assert.assertTrue;
+import static junit.framework.Assert.fail;
 
-public class MessageTests extends AndroidTestCase {
 
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-        MParticle.start(getContext());
+public class MessageTests  {
+
+    @Before
+    public void setUp()  {
+       // MParticle.start(getContext());
     }
 
+    @Test
     public void testFirstRunMessage(){
         long firstRunTime = System.currentTimeMillis();
         String sessionId = "coolsessionId";
@@ -35,12 +43,13 @@ public class MessageTests extends AndroidTestCase {
             assertTrue(mpMessage.getSessionId().equals(sessionId));
             assertTrue(mpMessage.getString("sid").equals(sessionId));
             assertTrue(mpMessage.getString("ct").equals(Long.toString(firstRunTime)));
-            assertFalse(TextUtils.isEmpty(mpMessage.getString("dct")));
+            assertFalse(MPUtility.isEmpty(mpMessage.getString("dct")));
         }catch (JSONException jse){
             fail(jse.toString());
         }
     }
 
+    @Test
     public void testLogEvent(){
         try {
             MParticle.getInstance().logEvent(null, null);
@@ -52,6 +61,7 @@ public class MessageTests extends AndroidTestCase {
         }
     }
 
+    @Test
     public void testLogError(){
         try {
             MParticle.getInstance().logError("message");
@@ -63,6 +73,7 @@ public class MessageTests extends AndroidTestCase {
         }
     }
 
+    @Test
     public void testEventLength() {
         try {
             MPEvent event = new MPEvent.Builder("test name", MParticle.EventType.Navigation).build();
@@ -107,6 +118,7 @@ public class MessageTests extends AndroidTestCase {
         }
     }
 
+    @Test
     public void testLogLtv(){
         try {
             MParticle.getInstance().logLtvIncrease(null, "event name", new HashMap<String, String>());
@@ -118,6 +130,7 @@ public class MessageTests extends AndroidTestCase {
         }
     }
 
+    @Test
     public void testLogProductEvent(){
         try{
             MParticle.getInstance().logProductEvent(MPProduct.Event.ADD_TO_CART, new MPProduct.Builder("name", "sku").build());
@@ -128,6 +141,7 @@ public class MessageTests extends AndroidTestCase {
         }
     }
 
+    @Test
     public void testBreadcrumb(){
         try{
             MParticle.getInstance().leaveBreadcrumb(null);
@@ -137,6 +151,7 @@ public class MessageTests extends AndroidTestCase {
         }
     }
 
+    @Test
     public void testLogScreen(){
         try{
             MParticle.getInstance().logScreen(null);
@@ -148,6 +163,7 @@ public class MessageTests extends AndroidTestCase {
         }
     }
 
+    @Test
     public void testLogException(){
         try{
             MParticle.getInstance().logException(new NullPointerException());

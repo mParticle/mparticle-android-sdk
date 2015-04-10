@@ -6,7 +6,7 @@ import android.test.AndroidTestCase;
 import android.util.Log;
 
 import com.mparticle.MParticle;
-import com.mparticle.internal.AppStateManager;
+import com.mparticle.AppStateManager;
 import com.mparticle.internal.Constants;
 import com.mparticle.internal.IMPApiClient;
 import com.mparticle.internal.MPMessage;
@@ -14,8 +14,6 @@ import com.mparticle.internal.MParticleApiClient;
 import com.mparticle.internal.MessageBatch;
 import com.mparticle.messaging.AbstractCloudMessage;
 import com.mparticle.messaging.MPCloudNotificationMessage;
-
-import junit.framework.Test;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -26,9 +24,8 @@ import java.net.URL;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-/**
- * Created by sdozor on 12/31/14.
- */
+import org.junit.Test;
+
 public class UploadTests extends AndroidTestCase {
 
     private static final Object exceptionLock = new Object();
@@ -48,6 +45,7 @@ public class UploadTests extends AndroidTestCase {
         }
     }
 
+    @Test
     public void testMessageBatchFormat() {
         try {
             MParticle.getInstance().setUserIdentity("some id", MParticle.IdentityType.CustomerId);
@@ -55,7 +53,7 @@ public class UploadTests extends AndroidTestCase {
             MPMessage message = new MPMessage.Builder("type", "id", null).build();
             JSONArray array = new JSONArray();
             array.put(message);
-            JSONObject batch = MessageBatch.create(getContext(), array, false, new JSONObject(), new JSONObject(), MParticle.getInstance().internal().getConfigurationManager(), TestUtils.getSharedPrefs(getContext()));
+            JSONObject batch = MessageBatch.create(getContext(), array, false, new JSONObject(), new JSONObject(), MParticle.getInstance().internal().getConfigurationManager(), TestUtils.getSharedPrefs(getContext()), null);
             assertNotNull(batch);
             assertNotNull(batch.get(Constants.MessageKey.TYPE));
             assertNotNull(batch.get(Constants.MessageKey.ID));
@@ -76,6 +74,7 @@ public class UploadTests extends AndroidTestCase {
         }
     }
 
+    @Test
     public void testPushIntegration(){
 
         final CountDownLatch signal = new CountDownLatch(1);
@@ -147,6 +146,11 @@ public class UploadTests extends AndroidTestCase {
             @Override
             public boolean isThrottled() {
                 return false;
+            }
+
+            @Override
+            public JSONObject getCookies() {
+                return null;
             }
         });
 

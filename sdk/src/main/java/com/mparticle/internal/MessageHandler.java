@@ -1,17 +1,14 @@
 package com.mparticle.internal;
 
 import android.content.ContentValues;
-import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.util.Log;
 
+import com.mparticle.ConfigManager;
 import com.mparticle.MParticle;
 import com.mparticle.internal.Constants.MessageKey;
 import com.mparticle.internal.Constants.MessageType;
@@ -45,10 +42,6 @@ import java.util.UUID;
     public static final int CLEAR_PROVIDER_GCM = 8;
     private final MessageManagerCallbacks mMessageManagerCallbacks;
 
-    // boolean flag used in unit tests to wait until processing is finished.
-    // this is not used in the normal execution.
-    /* package-private */ boolean mIsProcessingMessage = false;
-
     public MessageHandler(Looper looper, MessageManagerCallbacks messageManager, SQLiteOpenHelper dbHelper) {
         super(looper);
         mMessageManagerCallbacks = messageManager;
@@ -57,7 +50,6 @@ import java.util.UUID;
 
     @Override
     public void handleMessage(Message msg) {
-        mIsProcessingMessage = true;
         if (db == null){
             try {
                 db = mDbHelper.getWritableDatabase();
@@ -76,27 +68,24 @@ import java.util.UUID;
                     String messageType = message.getString(MessageKey.TYPE);
                     // handle the special case of session-start by creating the
                     // session record first
-                    if (MessageType.SESSION_START == messageType) {
+                    if (MessageType.SESSION_START.equals(messageType)) {
                         dbInsertSession(message);
                     }else{
+                        dbUpdateSessionEndTime(message.getSessionId(), message.getLong(MessageKey.TIMESTAMP), 0);
                         message.put(Constants.MessageKey.ID, UUID.randomUUID().toString());
                     }
-                    if (MessageType.ERROR == messageType){
+                    if (MessageType.ERROR.equals(messageType)){
                         appendBreadcrumbs(message);
                     }
-                    if (MessageType.APP_STATE_TRANSITION == messageType){
+                    if (MessageType.APP_STATE_TRANSITION.equals(messageType)){
                         appendLatestPushNotification(message);
                     }
-                    if (MessageType.PUSH_RECEIVED == messageType &&
+                    if (MessageType.PUSH_RECEIVED.equals(messageType) &&
                             message.has(MessageKey.PUSH_BEHAVIOR) &&
                             !validateBehaviorFlags(message)){
                         return;
                     }
                     dbInsertMessage(message);
-
-                    if (MessageType.SESSION_START != messageType) {
-                        dbUpdateSessionEndTime(message.getSessionId(), message.getLong(MessageKey.TIMESTAMP), 0);
-                    }
 
                     mMessageManagerCallbacks.checkForTrigger(message);
 
@@ -120,8 +109,6 @@ import java.util.UUID;
                     String sessionId = sessionTiming.getString(MessageKey.SESSION_ID);
                     long time = sessionTiming.getLong(MessageKey.TIMESTAMP);
                     long sessionLength = sessionTiming.getLong(MessageKey.SESSION_LENGTH);
-
-
                     dbUpdateSessionEndTime(sessionId, time, sessionLength);
                 } catch (Exception e) {
                     ConfigManager.log(MParticle.LogLevel.ERROR, e, "Error updating session end time in mParticle DB");
@@ -165,6 +152,8 @@ import java.util.UUID;
 
                 } catch (Exception e) {
                     ConfigManager.log(MParticle.LogLevel.ERROR, e, "Error creating session end message in mParticle DB");
+                } finally {
+                    mMessageManagerCallbacks.endUploadLoop();
                 }
                 break;
             case END_ORPHAN_SESSIONS:
@@ -204,8 +193,8 @@ import java.util.UUID;
                 }
                 break;
             case MARK_INFLUENCE_OPEN_GCM:
-               long openTimestamp = (Long) msg.obj;
-                logInfluenceOpenGcmMessages(openTimestamp);
+                MessageManager.InfluenceOpenMessage message = (MessageManager.InfluenceOpenMessage) msg.obj;
+                logInfluenceOpenGcmMessages(message);
                 break;
             case CLEAR_PROVIDER_GCM:
                 try {
@@ -215,7 +204,6 @@ import java.util.UUID;
                 }
                 break;
         }
-        mIsProcessingMessage = false;
     }
 
     private void clearOldProviderGcm() {
@@ -302,29 +290,28 @@ import java.util.UUID;
         return behavior;
     }
 
-    private void logInfluenceOpenGcmMessages(long openTimestamp) {
+    private void logInfluenceOpenGcmMessages(MessageManager.InfluenceOpenMessage message) {
         Cursor gcmCursor = null;
         try{
-            long influenceOpenTimeout = MParticle.getInstance().internal().getConfigurationManager().getInfluenceOpenTimeoutMillis();
+
             gcmCursor = db.query(MParticleDatabase.GcmMessageTable.TABLE_NAME,
                     null,MParticleDatabase.GcmMessageTable.CONTENT_ID + " != " + MParticleDatabase.GcmMessageTable.PROVIDER_CONTENT_ID + " and " +
                     MParticleDatabase.GcmMessageTable.DISPLAYED_AT +
                             " > 0 and " +
                             MParticleDatabase.GcmMessageTable.DISPLAYED_AT +
-                            " > " + (openTimestamp - influenceOpenTimeout) +
+                            " > " + (message.mTimeStamp - message.mTimeout) +
                             " and ((" + MParticleDatabase.GcmMessageTable.BEHAVIOR + " & " + AbstractCloudMessage.FLAG_INFLUENCE_OPEN + "" + ") != " + AbstractCloudMessage.FLAG_INFLUENCE_OPEN + ")",
                     null,
                     null,
                     null,
                     null);
             while (gcmCursor.moveToNext()){
-                MParticle.getInstance().internal().logNotification(gcmCursor.getInt(gcmCursor.getColumnIndex(MParticleDatabase.GcmMessageTable.CONTENT_ID)),
+                mMessageManagerCallbacks.logNotification(gcmCursor.getInt(gcmCursor.getColumnIndex(MParticleDatabase.GcmMessageTable.CONTENT_ID)),
                         gcmCursor.getString(gcmCursor.getColumnIndex(MParticleDatabase.GcmMessageTable.PAYLOAD)),
                         null,
-                        true,
                         gcmCursor.getString(gcmCursor.getColumnIndex(MParticleDatabase.GcmMessageTable.APPSTATE)),
-                         AbstractCloudMessage.FLAG_INFLUENCE_OPEN
-                        );
+                        AbstractCloudMessage.FLAG_INFLUENCE_OPEN
+                );
             }
         }catch (Exception e){
             ConfigManager.log(MParticle.LogLevel.ERROR, e, "Error logging influence-open message to mParticle DB ", e.toString());
@@ -370,7 +357,7 @@ import java.util.UUID;
                 null,
                 null,
                 null,
-                BreadcrumbTable.CREATED_AT + " desc limit " + MParticle.getInstance().internal().getConfigurationManager().getBreadcrumbLimit());
+                BreadcrumbTable.CREATED_AT + " desc limit " + ConfigManager.getBreadcrumbLimit());
 
         if (breadcrumbCursor.getCount() > 0){
             JSONArray breadcrumbs = new JSONArray();
@@ -397,8 +384,8 @@ import java.util.UUID;
         Cursor cursor = db.query(BreadcrumbTable.TABLE_NAME, idColumns, null, null, null, null, " _id desc limit 1");
         if (cursor.moveToFirst()){
             int maxId = cursor.getInt(0);
-            if (maxId > MParticle.getInstance().internal().getConfigurationManager().getBreadcrumbLimit()){
-                String[] limit = {Integer.toString(maxId - MParticle.getInstance().internal().getConfigurationManager().getBreadcrumbLimit())};
+            if (maxId > ConfigManager.getBreadcrumbLimit()){
+                String[] limit = {Integer.toString(maxId - ConfigManager.getBreadcrumbLimit())};
                 db.delete(BreadcrumbTable.TABLE_NAME, " _id < ?", limit);
             }
         }

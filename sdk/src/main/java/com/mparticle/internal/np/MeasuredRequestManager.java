@@ -1,7 +1,8 @@
 package com.mparticle.internal.np;
 
 import com.mparticle.MParticle;
-import com.mparticle.internal.ConfigManager;
+import com.mparticle.ConfigManager;
+import com.mparticle.internal.embedded.EmbeddedKitManager;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -13,10 +14,13 @@ import java.util.concurrent.ScheduledFuture;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
 
-public final class MeasuredRequestManager {
+public enum MeasuredRequestManager {
+    INSTANCE;
+
     private final ScheduledExecutorService scheduler =
             Executors.newScheduledThreadPool(1);
     final HashSet<MeasuredRequest> requests = new HashSet<MeasuredRequest>();
+    private EmbeddedKitManager mEmbeddedKitManager;
     private CopyOnWriteArrayList<String> excludedUrlFilters = new CopyOnWriteArrayList<String>();
     private CopyOnWriteArrayList<String> queryStringFilters = new CopyOnWriteArrayList<String>();
     private static final String MPARTICLEHOST = ".mparticle.com";
@@ -29,8 +33,13 @@ public final class MeasuredRequestManager {
         }
     }
 
-    public MeasuredRequestManager() {
+    public void start(EmbeddedKitManager ekManager) {
+        mEmbeddedKitManager = ekManager;
+    }
 
+    public boolean shouldProcessUrl(String url){
+        return ConfigManager.isNetworkPerformanceEnabled() &&
+                isUriAllowed(url) && !mEmbeddedKitManager.isEmbeddedKitUri(url);
     }
 
     final Runnable processPending = new Runnable() {
@@ -49,7 +58,9 @@ public final class MeasuredRequestManager {
                     try {
                         String uri = request.getUri();
                         String requestString = request.getRequestString();
-                        boolean allowed = MParticle.getInstance().internal().shouldProcessUrl(uri);
+                        boolean allowed = ConfigManager.isNetworkPerformanceEnabled() &&
+                                isUriAllowed(uri) && !mEmbeddedKitManager.isEmbeddedKitUri(uri);
+
                         if (request.readyForLogging() && !loggedUris.contains(uri)) {
                             if (allowed) {
                         /* disabling this for the server-side extractors...for now

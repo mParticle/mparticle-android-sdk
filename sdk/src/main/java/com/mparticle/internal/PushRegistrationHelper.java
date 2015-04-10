@@ -7,7 +7,9 @@ import android.content.pm.PackageManager;
 import android.os.Build;
 
 import com.google.android.gms.gcm.GoogleCloudMessaging;
+import com.mparticle.ConfigManager;
 import com.mparticle.MParticle;
+import com.mparticle.messaging.MessagingConfigCallbacks;
 
 import java.io.IOException;
 
@@ -38,8 +40,7 @@ public class PushRegistrationHelper {
     static String getRegistrationId(Context context) {
         SharedPreferences preferences = context.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
         String registrationId = preferences.getString(Constants.PrefKeys.PUSH_REGISTRATION_ID, "");
-        if (registrationId == null || registrationId.length() == 0) {
-            ConfigManager.log(MParticle.LogLevel.DEBUG, "GCM Registration ID not found.");
+        if (MPUtility.isEmpty(registrationId)) {
             return null;
         }
         // Check if app was updated; if so, it must clear the registration ID
@@ -49,7 +50,7 @@ public class PushRegistrationHelper {
         int currentVersion = getAppVersion(context);
         int osVersion = preferences.getInt(Constants.PrefKeys.PROPERTY_OS_VERSION, Integer.MIN_VALUE);
         if (registeredVersion != currentVersion || osVersion != Build.VERSION.SDK_INT) {
-            ConfigManager.log(MParticle.LogLevel.DEBUG, "App or OS version changed.");
+            ConfigManager.log(MParticle.LogLevel.DEBUG, "App or OS version changed, clearing push reg ID.");
             return null;
         }
         return registrationId;
@@ -59,15 +60,17 @@ public class PushRegistrationHelper {
      * Register the application for GCM notifications
      *
      * @param senderId the SENDER_ID for the application
+     * @param mMessagingConfigCallbacks
      */
-    public static void enablePushNotifications(final Context context, final String senderId) {
+    public static void enablePushNotifications(final Context context, final String senderId, final MessagingConfigCallbacks mMessagingConfigCallbacks) {
         if (getRegistrationId(context) == null && MPUtility.isSupportLibAvailable() && MPUtility.isGcmServicesAvailable()) {
             new Thread(new Runnable() {
                 @Override
                 public void run() {
                     try {
                         String registrationId =  GoogleCloudMessaging.getInstance(context).register(senderId);
-                        MParticle.getInstance().internal().setPushRegistrationId(registrationId);
+                        storeRegistrationId(context, registrationId);
+                        mMessagingConfigCallbacks.setPushRegistrationId(registrationId);
                     } catch (Exception ex) {
                         ConfigManager.log(MParticle.LogLevel.ERROR, "Error registering for GCM", ex.getMessage());
                     }

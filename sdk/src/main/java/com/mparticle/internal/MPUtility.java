@@ -20,6 +20,7 @@ import android.util.Log;
 import android.view.Display;
 import android.view.WindowManager;
 
+import com.mparticle.ConfigManager;
 import com.mparticle.MParticle;
 import com.mparticle.MParticle.LogLevel;
 
@@ -122,6 +123,13 @@ public class MPUtility {
         ActivityManager activityManager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
         activityManager.getMemoryInfo(mi);
         return mi.threshold;
+    }
+
+    public static boolean isEmpty(CharSequence str) {
+        if (str == null || str.length() == 0)
+            return true;
+        else
+            return false;
     }
 
     public static String getGpsEnabled(Context context) {
@@ -481,7 +489,7 @@ public class MPUtility {
         try {
             Class.forName("android.support.v4.app.FragmentActivity");
             return true;
-        } catch (ClassNotFoundException cnfe) {
+        } catch (Exception cnfe) {
 
         }
         return false;
@@ -491,7 +499,7 @@ public class MPUtility {
         try {
             Class.forName("com.google.android.gms.gcm.GoogleCloudMessaging");
             return true;
-        } catch (ClassNotFoundException cnfe) {
+        } catch (Exception cnfe) {
 
         }
         return false;
@@ -524,7 +532,7 @@ public class MPUtility {
         return false;
     }
 
-    static JSONObject wrapExtras(Bundle extras) {
+    public static JSONObject wrapExtras(Bundle extras) {
         if (extras != null && !extras.isEmpty()) {
             JSONObject parameters = new JSONObject();
             for (String key : extras.keySet()) {

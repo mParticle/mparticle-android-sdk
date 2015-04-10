@@ -1,10 +1,13 @@
-package com.mparticle.internal;
+package com.mparticle;
 
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Log;
 
+import com.mparticle.ConfigManager;
 import com.mparticle.MParticle;
+import com.mparticle.internal.Constants;
+import com.mparticle.internal.MPUtility;
 
 /**
  * This class is primarily responsible for parsing and representing XML/resource-based configuration.
@@ -61,7 +64,6 @@ class AppConfig {
                mEnvironment = MParticle.Environment.Production;
             }
         }else{
-            Log.w(Constants.LOG_TAG, "Initialized with a forced environment: " + environment.toString());
             mEnvironment = environment;
         }
         if (MPUtility.isAppDebuggable(context)){
@@ -86,6 +88,20 @@ class AppConfig {
                 .apply();
 
         reportUncaughtExceptions = getBoolean(PREFKEY_EXCEPTIONS, DEFAULT_REPORT_UNCAUGHT_EXCEPTIONS);
+
+        String mode = getString(PREFKEY_FORCE_ENVIRONMENT, null);
+        if (mode != null) {
+            if (mode.toLowerCase().contains("dev")) {
+                ConfigManager.log(MParticle.LogLevel.WARNING, "Forcing SDK into development mode based on configuration XML key: " + PREFKEY_FORCE_ENVIRONMENT + " and value: " + mode);
+                mEnvironment = MParticle.Environment.Development;
+            } else if (mode.toLowerCase().contains("prod")) {
+                ConfigManager.log(MParticle.LogLevel.WARNING, "Forcing SDK into production mode based on configuration XML key: " + PREFKEY_FORCE_ENVIRONMENT + " and value: " + mode);
+                mEnvironment = MParticle.Environment.Production;
+            }
+            if (mEnvironment == MParticle.Environment.Development){
+                logLevel = MParticle.LogLevel.DEBUG;
+            }
+        }
     }
 
     public void delayedInit() {
@@ -110,19 +126,7 @@ class AppConfig {
         autoTrackingEnabled = getBoolean(PREFKEY_AUTOTRACKING, DEFAULT_ENABLE_AUTO_TRACKING);
         networkingEnabled = getBoolean(PREFKEY_NETWORK_MEASUREMENT, DEFAULT_NETWORK_MEASUREMENT);
 
-        String mode = getString(PREFKEY_FORCE_ENVIRONMENT, MParticle.Environment.AutoDetect.name());
-        if (mode != null) {
-            if (mode.toLowerCase().contains("dev")) {
-                ConfigManager.log(MParticle.LogLevel.WARNING, "Forcing SDK into development mode based on configuration XML key: " + PREFKEY_FORCE_ENVIRONMENT + " and value: " + mode);
-                mEnvironment = MParticle.Environment.Development;
-            } else if (mode.toLowerCase().contains("prod")) {
-                ConfigManager.log(MParticle.LogLevel.WARNING, "Forcing SDK into production mode based on configuration XML key: " + PREFKEY_FORCE_ENVIRONMENT + " and value: " + mode);
-                mEnvironment = MParticle.Environment.Production;
-            }
-            if (mEnvironment == MParticle.Environment.Development){
-                logLevel = MParticle.LogLevel.DEBUG;
-            }
-        }
+
 
     }
 
@@ -133,10 +137,16 @@ class AppConfig {
     public String getString(String key, String defaultString) {
         int id = getResourceId(key, "string");
         if (id == 0) {
-            ConfigManager.log(MParticle.LogLevel.DEBUG, String.format("Configuration: No string resource for: %s, using default: %s", key, defaultString));
+            if (defaultString != null) {
+                ConfigManager.log(MParticle.LogLevel.DEBUG, String.format("Configuration: No string resource for: %s, using default: %s", key, defaultString));
+            }
             return defaultString;
         }
-        return this.mContext.getString(id);
+        try {
+            return this.mContext.getResources().getString(id);
+        }catch (android.content.res.Resources.NotFoundException nfe){
+            return defaultString;
+        }
     }
 
     public boolean getBoolean(String key, boolean defaultValue) {
@@ -145,7 +155,11 @@ class AppConfig {
             ConfigManager.log(MParticle.LogLevel.DEBUG, String.format("Configuration: No string resource for: %s, using default: %b", key, defaultValue));
             return defaultValue;
         }
-        return this.mContext.getResources().getBoolean(id);
+        try {
+            return this.mContext.getResources().getBoolean(id);
+        }catch (android.content.res.Resources.NotFoundException nfe){
+            return defaultValue;
+        }
     }
 
     public int getInteger(String key, int defaultValue) {
@@ -154,7 +168,11 @@ class AppConfig {
             ConfigManager.log(MParticle.LogLevel.DEBUG, String.format("Configuration: No string resource for: %s, using default: %d", key, defaultValue));
             return defaultValue;
         }
-        return mContext.getResources().getInteger(id);
+        try {
+            return this.mContext.getResources().getInteger(id);
+        }catch (android.content.res.Resources.NotFoundException nfe){
+            return defaultValue;
+        }
     }
 
     public static MParticle.Environment getEnvironment() {

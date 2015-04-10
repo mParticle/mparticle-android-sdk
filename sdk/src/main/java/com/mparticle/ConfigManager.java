@@ -1,8 +1,7 @@
-package com.mparticle.internal;
+package com.mparticle;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.content.pm.ApplicationInfo;
 import android.os.Build;
 import android.provider.Settings;
 import android.text.TextUtils;
@@ -12,19 +11,17 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.mparticle.MParticle;
 import com.mparticle.MParticle.LogLevel;
+import com.mparticle.internal.Constants;
+import com.mparticle.internal.MPLicenseCheckerCallback;
+import com.mparticle.internal.MPMessage;
+import com.mparticle.internal.MPUtility;
 import com.mparticle.internal.embedded.EmbeddedKitManager;
 import com.mparticle.licensing.AESObfuscator;
 import com.mparticle.licensing.LicenseChecker;
 import com.mparticle.licensing.ServerManagedPolicy;
 import com.mparticle.messaging.MessagingConfigCallbacks;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.Iterator;
 
 public class ConfigManager implements MessagingConfigCallbacks {
@@ -34,28 +31,27 @@ public class ConfigManager implements MessagingConfigCallbacks {
     private static final String KEY_TRIGGER_ITEM_TYPES = "dts";
     private static final String KEY_TRIGGER_ITEM_HASHES = "evts";
     private static final String KEY_INFLUENCE_OPEN = "pio";
-    private static final String KEY_OPT_OUT = "oo";
+    static final String KEY_OPT_OUT = "oo";
     public static final String KEY_UNHANDLED_EXCEPTIONS = "cue";
     public static final String KEY_PUSH_MESSAGES = "pmk";
     public static final String KEY_NETWORK_PERFORMANCE = "cnp";
     public static final String KEY_EMBEDDED_KITS = "eks";
-    private static final String KEY_UPLOAD_INTERVAL = "uitl";
-    private static final String KEY_SESSION_TIMEOUT = "stl";
+    static final String KEY_UPLOAD_INTERVAL = "uitl";
+    static final String KEY_SESSION_TIMEOUT = "stl";
     public static final String VALUE_APP_DEFINED = "appdefined";
     public static final String VALUE_CUE_CATCH = "forcecatch";
     public static final String VALUE_CUE_IGNORE = "forceignore";
     public static final String VALUE_CNP_CAPTURE = "forcetrue";
     public static final String VALUE_CNP_NO_CAPTURE = "forcefalse";
     private static final String PREFERENCES_FILE = "mp_preferences";
-    private static final String KEY_RAMP = "rp";
+    static final String KEY_RAMP = "rp";
     private static final int DEVMODE_UPLOAD_INTERVAL_MILLISECONDS = 10 * 1000;
-    private JSONObject mCurrentCookies;
     private Context mContext;
 
-    private SharedPreferences mPreferences;
+    static SharedPreferences mPreferences;
 
     private EmbeddedKitManager mEmbeddedKitManager;
-    private AppConfig sLocalPrefs;
+    AppConfig sLocalPrefs;
     private static JSONArray sPushKeys;
     private String mLogUnhandledExceptions = VALUE_APP_DEFINED;
 
@@ -67,18 +63,22 @@ public class ConfigManager implements MessagingConfigCallbacks {
 
     private int mSessionTimeoutInterval = -1;
     private int mUploadInterval = -1;
-    private long mInfluenceOpenTimeout = 3600;
+    private long mInfluenceOpenTimeout = 3600 * 1000;
     private JSONArray mTriggerMessageMatches, mTriggerMessageHashes = null;
+    private ExceptionHandler mExHandler;
 
     private ConfigManager(){
 
     }
 
-    public ConfigManager(Context context, EmbeddedKitManager embeddedKitManager, MParticle.Environment environment) {
+    public ConfigManager(Context context, MParticle.Environment environment) {
         mContext = context.getApplicationContext();
         mPreferences = mContext.getSharedPreferences(PREFERENCES_FILE, Context.MODE_PRIVATE);
         sLocalPrefs = new AppConfig(mContext, environment, mPreferences);
-        mEmbeddedKitManager = embeddedKitManager;
+    }
+
+    public void setEmbeddedKitManager(EmbeddedKitManager manager){
+        mEmbeddedKitManager = manager;
     }
 
     /**
@@ -86,7 +86,7 @@ public class ConfigManager implements MessagingConfigCallbacks {
      */
     public void restore(){
         String oldConfig = mPreferences.getString(CONFIG_JSON, null);
-        if (!TextUtils.isEmpty(oldConfig)){
+        if (!MPUtility.isEmpty(oldConfig)){
             try{
                 JSONObject oldConfigJson = new JSONObject(oldConfig);
                 mEmbeddedKitManager.updateKits(oldConfigJson.optJSONArray(KEY_EMBEDDED_KITS));
@@ -96,13 +96,19 @@ public class ConfigManager implements MessagingConfigCallbacks {
         }
     }
 
+    void saveConfigJson(JSONObject json){
+        if (json != null) {
+            mPreferences.edit().putString(CONFIG_JSON, json.toString()).apply();
+        }
+    }
+
     public synchronized void updateConfig(JSONObject responseJSON) throws JSONException {
         updateConfig(responseJSON, true);
     }
     public synchronized void updateConfig(JSONObject responseJSON, boolean persistJson) throws JSONException {
         SharedPreferences.Editor editor = mPreferences.edit();
         if (persistJson) {
-            editor.putString(CONFIG_JSON, responseJSON.toString());
+            saveConfigJson(responseJSON);
         }
 
         if (responseJSON.has(KEY_UNHANDLED_EXCEPTIONS)) {
@@ -120,6 +126,8 @@ public class ConfigManager implements MessagingConfigCallbacks {
 
         if (responseJSON.has(KEY_OPT_OUT)){
             mSendOoEvents = responseJSON.getBoolean(KEY_OPT_OUT);
+        }else{
+            mSendOoEvents = false;
         }
 
         if (responseJSON.has(ProviderPersistence.KEY_PERSISTENCE)) {
@@ -151,7 +159,7 @@ public class ConfigManager implements MessagingConfigCallbacks {
         if (responseJSON.has(KEY_INFLUENCE_OPEN)){
             mInfluenceOpenTimeout = responseJSON.getLong(KEY_INFLUENCE_OPEN) * 60 * 1000;
         }else{
-            mInfluenceOpenTimeout = 3600;
+            mInfluenceOpenTimeout = 30 * 60 * 1000;
         }
 
         editor.apply();
@@ -159,6 +167,10 @@ public class ConfigManager implements MessagingConfigCallbacks {
 
         mEmbeddedKitManager.updateKits(responseJSON.optJSONArray(KEY_EMBEDDED_KITS));
 
+    }
+
+    public String getActiveModuleIds(){
+        return mEmbeddedKitManager.getActiveModuleIds();
     }
 
     /**
@@ -179,7 +191,7 @@ public class ConfigManager implements MessagingConfigCallbacks {
         }
     }
 
-    private void performLicenseCheck() {
+    protected void performLicenseCheck() {
         String deviceId = Settings.Secure.getString(mContext.getContentResolver(), Settings.Secure.ANDROID_ID);
 
         MPLicenseCheckerCallback licenseCheckerCallback = new MPLicenseCheckerCallback(mPreferences, null);
@@ -202,15 +214,41 @@ public class ConfigManager implements MessagingConfigCallbacks {
 
     private void applyConfig() {
         if (getLogUnhandledExceptions()) {
-            MParticle.getInstance().internal().enableUncaughtExceptionLogging(false);
+            enableUncaughtExceptionLogging(false);
         } else {
-            MParticle.getInstance().internal().disableUncaughtExceptionLogging(false);
+            disableUncaughtExceptionLogging(false);
         }
         if (!VALUE_APP_DEFINED.equals(mNetworkPerformance)){
             if (VALUE_CNP_CAPTURE.equals(mNetworkPerformance)){
-                MParticle.getInstance().internal().beginMeasuringNetworkPerformance(false);
+                MParticle.getInstance().setNetworkTrackingEnabled(true, false);
             }else if (VALUE_CNP_NO_CAPTURE.equals(mNetworkPerformance)){
-                MParticle.getInstance().internal().endMeasuringNetworkPerformance(false);
+                MParticle.getInstance().setNetworkTrackingEnabled(false, false);
+            }
+        }
+    }
+
+    public void enableUncaughtExceptionLogging(boolean userTriggered) {
+        if (null == mExHandler) {
+            Thread.UncaughtExceptionHandler currentUncaughtExceptionHandler = Thread.getDefaultUncaughtExceptionHandler();
+            if (!(currentUncaughtExceptionHandler instanceof ExceptionHandler)) {
+                mExHandler = new ExceptionHandler(currentUncaughtExceptionHandler);
+                Thread.setDefaultUncaughtExceptionHandler(mExHandler);
+                if (userTriggered) {
+                    setLogUnhandledExceptions(true);
+                }
+            }
+        }
+    }
+
+    public void disableUncaughtExceptionLogging(boolean userTriggered) {
+        if (null != mExHandler) {
+            Thread.UncaughtExceptionHandler currentUncaughtExceptionHandler = Thread.getDefaultUncaughtExceptionHandler();
+            if (currentUncaughtExceptionHandler instanceof ExceptionHandler) {
+                Thread.setDefaultUncaughtExceptionHandler(mExHandler.getOriginalExceptionHandler());
+                mExHandler = null;
+                if (userTriggered) {
+                    setLogUnhandledExceptions(false);
+                }
             }
         }
     }
@@ -289,7 +327,7 @@ public class ConfigManager implements MessagingConfigCallbacks {
         log(priority, null, messages);
     }
 
-    static void log(LogLevel priority, Throwable error, String... messages){
+    public static void log(LogLevel priority, Throwable error, String... messages){
         if (messages != null && AppConfig.logLevel.ordinal() >= priority.ordinal() &&
                 getEnvironment().equals(MParticle.Environment.Development)) {
             StringBuilder logMessage = new StringBuilder();
@@ -341,6 +379,11 @@ public class ConfigManager implements MessagingConfigCallbacks {
         mPreferences.edit()
             .putBoolean(Constants.PrefKeys.PUSH_ENABLE_VIBRATION, pushVibrationEnabled)
             .apply();
+    }
+
+    @Override
+    public void setPushRegistrationId(String registrationId) {
+        MParticle.getInstance().logPushRegistration(registrationId);
     }
 
     public boolean isEnabled(){
@@ -406,8 +449,11 @@ public class ConfigManager implements MessagingConfigCallbacks {
                 .getInt(Constants.PrefKeys.PUSH_ICON, 0);
     }
 
-    public int getBreadcrumbLimit() {
-        return mPreferences.getInt(Constants.PrefKeys.BREADCRUMB_LIMIT, AppConfig.DEFAULT_BREADCRUMB_LIMIT);
+    public static int getBreadcrumbLimit() {
+        if (mPreferences != null){
+            return mPreferences.getInt(Constants.PrefKeys.BREADCRUMB_LIMIT, AppConfig.DEFAULT_BREADCRUMB_LIMIT);
+        }
+        return AppConfig.DEFAULT_BREADCRUMB_LIMIT;
     }
 
     public void setBreadcrumbLimit(int newLimit){
@@ -433,64 +479,6 @@ public class ConfigManager implements MessagingConfigCallbacks {
         AppConfig.networkingEnabled = networkingEnabled;
     }
 
-    public void setCookies(JSONObject serverCookies) {
-        try {
-            JSONObject localCookies = getCookies();
-            Iterator<?> keys = serverCookies.keys();
-
-            while (keys.hasNext()) {
-                String key = (String) keys.next();
-                localCookies.put(key, serverCookies.getJSONObject(key));
-            }
-            mCurrentCookies = localCookies;
-            mPreferences.edit().putString(Constants.PrefKeys.Cookies, mCurrentCookies.toString()).apply();
-        }catch (JSONException jse){
-
-        }
-    }
-
-    public JSONObject getCookies() throws JSONException {
-        if (mCurrentCookies == null){
-            String currentCookies = mPreferences.getString(Constants.PrefKeys.Cookies, null);
-            if (TextUtils.isEmpty(currentCookies)){
-                mCurrentCookies = new JSONObject();
-                mPreferences.edit().putString(Constants.PrefKeys.Cookies, mCurrentCookies.toString()).apply();
-                return mCurrentCookies;
-            }else {
-                mCurrentCookies = new JSONObject(currentCookies);
-            }
-            Calendar nowCalendar = Calendar.getInstance();
-            nowCalendar.set(Calendar.YEAR, 1990);
-            Date oldDate = nowCalendar.getTime();
-            SimpleDateFormat parser = new SimpleDateFormat("yyyy");
-            Iterator<?> keys = mCurrentCookies.keys();
-            ArrayList<String> keysToRemove = new ArrayList<String>();
-            while (keys.hasNext()) {
-                String key = (String) keys.next();
-                if( mCurrentCookies.get(key) instanceof JSONObject ){
-                    String expiration = ((JSONObject) mCurrentCookies.get(key)).getString("e");
-                    try {
-                        Date date = parser.parse(expiration);
-                        if (date.before(oldDate)){
-                            keysToRemove.add(key);
-                        }
-                    }catch (ParseException dpe){
-
-                    }
-                }
-            }
-            for (String key : keysToRemove){
-                mCurrentCookies.remove(key);
-            }
-            if (keysToRemove.size() > 0) {
-                mPreferences.edit().putString(Constants.PrefKeys.Cookies, mCurrentCookies.toString()).apply();
-            }
-            return mCurrentCookies;
-        }else{
-            return mCurrentCookies;
-        }
-    }
-
     public void setMpid(long mpid) {
         mPreferences.edit().putLong(Constants.PrefKeys.Mpid, mpid).apply();
     }
@@ -513,5 +501,59 @@ public class ConfigManager implements MessagingConfigCallbacks {
 
     public JSONArray getTriggerMessageHashes() {
         return mTriggerMessageHashes;
+    }
+
+    public boolean shouldTrigger(MPMessage message) {
+        JSONArray messageMatches = getTriggerMessageMatches();
+        JSONArray triggerHashes = getTriggerMessageHashes();
+
+        //always trigger for PUSH_RECEIVED
+        boolean shouldTrigger = message.getMessageType().equals(Constants.MessageType.PUSH_RECEIVED);
+
+        if (!shouldTrigger && messageMatches != null && messageMatches.length() > 0){
+            shouldTrigger = true;
+            int i = 0;
+            while (shouldTrigger && i < messageMatches.length()){
+                try {
+                    JSONObject messageMatch = messageMatches.getJSONObject(i);
+                    Iterator<?> keys = messageMatch.keys();
+                    while(shouldTrigger && keys.hasNext() ){
+                        String key = (String)keys.next();
+                        shouldTrigger = message.has(key);
+                        if (shouldTrigger){
+                            try {
+                                shouldTrigger = messageMatch.getString(key).equalsIgnoreCase(message.getString(key));
+                            }catch (JSONException stringex){
+                                try {
+                                    shouldTrigger = message.getBoolean(key) == messageMatch.getBoolean(key);
+                                }catch (JSONException boolex){
+                                    try{
+                                        shouldTrigger = message.getDouble(key) == messageMatch.getDouble(key);
+                                    }catch (JSONException doubleex){
+                                        shouldTrigger = false;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                } catch (Exception e) {
+
+                }
+                i++;
+            }
+        }
+        if (!shouldTrigger && triggerHashes != null){
+            for (int i = 0; i < triggerHashes.length(); i++){
+                try {
+                    if (triggerHashes.getInt(i) == message.getTypeNameHash()) {
+                        shouldTrigger = true;
+                        break;
+                    }
+                }catch (JSONException jse){
+
+                }
+            }
+        }
+        return shouldTrigger;
     }
 }
