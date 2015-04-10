@@ -37,7 +37,7 @@ public class MPMessage extends JSONObject{
             }
             if (!builder.mAttributes.has("EventLength")) {
                 //can't be longer than max int milliseconds
-                builder.mAttributes.put("EventLength", builder.mLength.intValue());
+                builder.mAttributes.put("EventLength", Integer.toString(builder.mLength.intValue()));
             }
         }
 
