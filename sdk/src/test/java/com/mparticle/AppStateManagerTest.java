@@ -1,0 +1,90 @@
+package com.mparticle;
+
+import android.app.Activity;
+import android.os.Handler;
+
+import com.mparticle.internal.Constants;
+import com.mparticle.internal.Session;
+import com.mparticle.internal.embedded.EmbeddedKitManager;
+import com.mparticle.mock.MockApplication;
+import com.mparticle.mock.MockContext;
+import com.mparticle.mock.MockSharedPreferences;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.Mockito;
+
+import static org.junit.Assert.*;
+
+
+public class AppStateManagerTest {
+
+    AppStateManager manager;
+    private MockApplication mockContext;
+    private Activity activity = Mockito.mock(Activity.class);
+    private MockSharedPreferences prefs;
+
+    @Before
+    public void setup(){
+        MockContext context = new MockContext();
+
+        mockContext = (MockApplication) context.getApplicationContext();
+        manager = new AppStateManager(mockContext, true);
+        prefs = (MockSharedPreferences) mockContext.getSharedPreferences(null, 0);
+        manager.setConfigManager(Mockito.mock(ConfigManager.class));
+        manager.setEmbeddedKitManager(Mockito.mock(EmbeddedKitManager.class));
+        MParticle.setInstance(Mockito.mock(MParticle.class));
+        manager.delayedBackgroundCheckHandler = Mockito.mock(Handler.class);
+    }
+
+    @Test
+    public void testInit() throws Exception {
+        manager.init(10);
+        assertNull(mockContext.mCallbacks);
+        manager.init(14);
+        assertNotNull(mockContext.mCallbacks);
+    }
+
+    @Test
+    public void testOnActivityStarted() throws Exception {
+        assertEquals(true, manager.isBackgrounded());
+        manager.onActivityStarted(activity, 0);
+        assertTrue(manager.mInitialized);
+        assertEquals(false, manager.isBackgrounded());
+        assertEquals(true, prefs.getBoolean(Constants.PrefKeys.CRASHED_IN_FOREGROUND, false));
+        manager.onActivityStarted(activity, 0);
+    }
+
+    @Test
+    public void testOnActivityStopped() throws Exception {
+
+        manager.onActivityStarted(activity, 0);
+
+        assertEquals(false, manager.isBackgrounded());
+
+        manager.onActivityStopped(activity, 0);
+
+        assertEquals(false, prefs.getBoolean(Constants.PrefKeys.CRASHED_IN_FOREGROUND, true));
+        Thread.sleep(1000);
+        assertEquals(true, manager.isBackgrounded());
+        assertTrue(manager.mInitialized);
+        assertTrue(manager.mLastStoppedTime.get() > 0);
+        manager.onActivityStarted(activity, 0);
+        assertTrue(prefs.getLong(Constants.PrefKeys.TIME_IN_BG, -42) > 1000);
+    }
+
+    @Test
+    public void testEndSession() throws Exception {
+        manager.startSession();
+        manager.endSession();
+        assertTrue(manager.getSession().mSessionID.equals("NO-SESSION"));
+    }
+
+    @Test
+    public void testStartSession() throws Exception {
+        Session session = manager.getSession();
+        assertTrue(session.mSessionID.equals("NO-SESSION"));
+        manager.startSession();
+        assertNotEquals(manager.getSession().mSessionID, session.mSessionID);
+    }
+}

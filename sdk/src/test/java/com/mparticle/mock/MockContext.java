@@ -1,4 +1,4 @@
-package com.mparticle;
+package com.mparticle.mock;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -7,7 +7,6 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 
-import org.mockito.Mock;
 import org.mockito.Mockito;
 
 import static junit.framework.Assert.fail;
@@ -16,9 +15,14 @@ public class MockContext extends android.test.mock.MockContext {
 
     SharedPreferences sharedPreferences = new MockSharedPreferences();
     Resources resources = new MockResources();
+    MockApplication application = null;
+
     @Override
     public Context getApplicationContext() {
-        return this;
+        if (application == null){
+            application = new MockApplication(this);
+        }
+        return application;
     }
 
     public void setSharedPreferences(SharedPreferences prefs){

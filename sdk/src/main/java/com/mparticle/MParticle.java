@@ -241,7 +241,7 @@ public class MParticle {
                     //there are a number of settings that don't need to be enabled right away
                     //queue up a delayed init and let the start() call return ASAP.
                     instance.mMessageManager.initConfigDelayed();
-                    appStateManager.init();
+                    appStateManager.init(Build.VERSION.SDK_INT);
                 }
             }
         }

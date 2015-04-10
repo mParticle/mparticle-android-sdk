@@ -22,6 +22,8 @@ import org.json.JSONObject;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
+import static junit.framework.Assert.fail;
+
 /**
  * This class is responsible for managing sessions, by detecting how many
  *
@@ -82,16 +84,21 @@ import java.util.concurrent.atomic.AtomicLong;
     private String previousSessionPackage;
     private String previousSessionParameters;
     private String previousSessionUri;
+    boolean mUnitTesting = false;
 
-
-    public AppStateManager(Context context) {
+    AppStateManager(Context context, boolean unitTesting){
+        mUnitTesting = unitTesting;
         mContext = context.getApplicationContext();
-        mLastStoppedTime = new AtomicLong(SystemClock.elapsedRealtime());
+        mLastStoppedTime = new AtomicLong(getTime());
         mPreferences = context.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
     }
 
-    public void init() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+    public AppStateManager(Context context) {
+        this(context, false);
+    }
+
+    public void init(int apiVersion) {
+        if (apiVersion >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
             setupLifecycleCallbacks();
         }
     }
@@ -104,9 +111,18 @@ import java.util.concurrent.atomic.AtomicLong;
         mConfigManager = manager;
     }
 
+    private long getTime(){
+        if (mUnitTesting){
+            return System.currentTimeMillis();
+        }else {
+            return SystemClock.elapsedRealtime();
+        }
+    }
+
     @Override
     public void onActivityStarted(Activity activity, int currentCount) {
         try {
+
             mPreferences.edit().putBoolean(Constants.PrefKeys.CRASHED_IN_FOREGROUND, true).apply();
             mCurrentActivity = AppStateManager.getActivityName(activity);
 
@@ -125,26 +141,22 @@ import java.util.concurrent.atomic.AtomicLong;
                         previousSessionParameters,
                         previousSessionPackage,
                         0);
-                mLastForegroundTime = SystemClock.elapsedRealtime();
+                mLastForegroundTime = getTime();
             } else if (isBackgrounded() && mLastStoppedTime.get() > 0) {
-                long totalTimeInBackground = mPreferences.getLong(Constants.PrefKeys.TIME_IN_BG, -1);
-                if (totalTimeInBackground > -1) {
-                    totalTimeInBackground += (SystemClock.elapsedRealtime() - mLastStoppedTime.get());
-                } else {
-                    totalTimeInBackground = 0;
-                }
+                long totalTimeInBackground = mPreferences.getLong(Constants.PrefKeys.TIME_IN_BG, 0);
+                totalTimeInBackground += (getTime() - mLastStoppedTime.get());
                 mPreferences.edit().putLong(Constants.PrefKeys.TIME_IN_BG, totalTimeInBackground).apply();
 
                 MParticle.getInstance().logStateTransition(Constants.StateTransitionType.STATE_TRANS_FORE,
                         mCurrentActivity,
                         mLastStoppedTime.get() - mLastForegroundTime,
-                        SystemClock.elapsedRealtime() - mLastStoppedTime.get(),
+                        getTime() - mLastStoppedTime.get(),
                         previousSessionUri,
                         previousSessionParameters,
                         previousSessionPackage,
                         interruptions);
                 ConfigManager.log(MParticle.LogLevel.DEBUG, "App foregrounded.");
-                mLastForegroundTime = SystemClock.elapsedRealtime();
+                mLastForegroundTime = getTime();
             }
 
             mActivities.getAndIncrement();
@@ -154,7 +166,12 @@ import java.util.concurrent.atomic.AtomicLong;
             }
             mEmbeddedKitManager.onActivityStarted(activity, mActivities.get());
         }catch (Exception e){
-            Log.w(Constants.LOG_TAG, "Failed while trying to track activity start: " + e.getMessage());
+            if (BuildConfig.MP_DEBUG) {
+                ConfigManager.log(MParticle.LogLevel.ERROR, "Failed while trying to track activity start: " + e.getMessage());
+                if (mUnitTesting){
+                    throw e;
+                }
+            }
         }
     }
 
@@ -185,7 +202,7 @@ import java.util.concurrent.atomic.AtomicLong;
     public void onActivityStopped(Activity activity, int currentCount) {
         try {
             mPreferences.edit().putBoolean(Constants.PrefKeys.CRASHED_IN_FOREGROUND, false).apply();
-            mLastStoppedTime = new AtomicLong(SystemClock.elapsedRealtime());
+            mLastStoppedTime = new AtomicLong(getTime());
 
             if (mActivities.decrementAndGet() < 1) {
                 delayedBackgroundCheckHandler.postDelayed(new Runnable() {
@@ -207,7 +224,12 @@ import java.util.concurrent.atomic.AtomicLong;
             }
             mEmbeddedKitManager.onActivityStopped(activity, mActivities.get());
         }catch (Exception e){
-            Log.w(Constants.LOG_TAG, "Failed while trying to track activity stop: " + e.getMessage());
+            if (BuildConfig.MP_DEBUG) {
+                ConfigManager.log(MParticle.LogLevel.ERROR, "Failed while trying to track activity stop: " + e.getMessage());
+                if (mUnitTesting){
+                    throw e;
+                }
+            }
         }
     }
 
@@ -248,7 +270,7 @@ import java.util.concurrent.atomic.AtomicLong;
     }
 
     public boolean isBackgrounded() {
-        return mActivities.get() < 1 && (SystemClock.elapsedRealtime() - mLastStoppedTime.get() >= ACTIVITY_DELAY);
+        return !mInitialized || (mActivities.get() < 1 && (getTime() - mLastStoppedTime.get() >= ACTIVITY_DELAY));
     }
 
     private static String getActivityName(Activity activity) {

@@ -2,8 +2,8 @@ package com.mparticle.internal;
 
 import com.mparticle.ConfigManager;
 import com.mparticle.MParticle;
-import com.mparticle.MockContext;
-import com.mparticle.MockSharedPreferences;
+import com.mparticle.mock.MockContext;
+import com.mparticle.mock.MockSharedPreferences;
 
 import org.json.JSONArray;
 import org.json.JSONObject;

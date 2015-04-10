@@ -1,4 +1,4 @@
-package com.mparticle;
+package com.mparticle.mock;
 
 /**
  * Created by sdozor on 3/23/15.

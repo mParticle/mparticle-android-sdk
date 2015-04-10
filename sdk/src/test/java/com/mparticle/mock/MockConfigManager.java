@@ -1,6 +1,8 @@
-package com.mparticle;
+package com.mparticle.mock;
 
 
+import com.mparticle.ConfigManager;
+import com.mparticle.MParticle;
 
 public class MockConfigManager extends ConfigManager {
     public MockConfigManager() {

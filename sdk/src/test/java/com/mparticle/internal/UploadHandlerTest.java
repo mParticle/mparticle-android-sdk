@@ -6,8 +6,8 @@ import android.database.sqlite.SQLiteDatabase;
 import android.os.Message;
 
 import com.mparticle.AppStateManager;
-import com.mparticle.MockConfigManager;
-import com.mparticle.MockContext;
+import com.mparticle.mock.MockConfigManager;
+import com.mparticle.mock.MockContext;
 
 import org.json.JSONObject;
 import org.junit.Before;

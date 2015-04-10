@@ -7,6 +7,9 @@ import android.location.Location;
 import android.net.Uri;
 import android.webkit.WebView;
 
+import com.mparticle.MPEvent;
+import com.mparticle.MPProduct;
+import com.mparticle.MParticle;
 import com.mparticle.media.MPMediaAPI;
 import com.mparticle.messaging.CloudAction;
 import com.mparticle.messaging.MPCloudNotificationMessage;

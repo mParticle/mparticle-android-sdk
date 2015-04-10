@@ -1,10 +1,9 @@
 package com.mparticle.internal;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 
-import com.mparticle.MockContext;
-import com.mparticle.MockSharedPreferences;
+import com.mparticle.mock.MockContext;
+import com.mparticle.mock.MockSharedPreferences;
 
 import org.json.JSONObject;
 import org.junit.Test;
@@ -17,33 +16,33 @@ public class DeviceAttributesTest {
     @Test
     public void testCollectAppInfo() throws Exception {
         JSONObject appInfo = DeviceAttributes.collectAppInfo(new MockContext());
-        assertTrue(appInfo.getString(Constants.MessageKey.APP_PACKAGE_NAME).equals("com.mparticle.test"));
-        assertTrue(appInfo.getString(Constants.MessageKey.APP_VERSION_CODE).equals("42"));
-        assertTrue(appInfo.getString(Constants.MessageKey.APP_INSTALLER_NAME).equals("com.mparticle.test.installer"));
-        assertTrue(appInfo.getString(Constants.MessageKey.APP_NAME).equals("test label"));
-        assertTrue(appInfo.getString(Constants.MessageKey.APP_VERSION).equals("42"));
-        assertTrue(!MPUtility.isEmpty(appInfo.getString(Constants.MessageKey.BUILD_ID)));
-        assertNotNull(appInfo.getBoolean(Constants.MessageKey.APP_DEBUG_SIGNING));
-        assertNotNull(appInfo.getBoolean(Constants.MessageKey.APP_PIRATED));
-        assertNotNull(appInfo.getLong(Constants.MessageKey.MPARTICLE_INSTALL_TIME));
-        assertNotNull(appInfo.getInt(Constants.MessageKey.LAUNCH_COUNT));
-        assertNotNull(appInfo.getLong(Constants.MessageKey.LAST_USE_DATE));
-        assertNotNull(appInfo.getInt(Constants.MessageKey.LAUNCH_COUNT_SINCE_UPGRADE));
-        assertNotNull(appInfo.getLong(Constants.MessageKey.UPGRADE_DATE));
-        assertNotNull(appInfo.getBoolean(Constants.MessageKey.FIRST_SEEN_INSTALL));
+        assertTrue(appInfo.getString("apn").equals("com.mparticle.test"));
+        assertTrue(appInfo.getString("abn").equals("42"));
+        assertTrue(appInfo.getString("ain").equals("com.mparticle.test.installer"));
+        assertTrue(appInfo.getString("an").equals("test label"));
+        assertTrue(appInfo.getString("av").equals("42"));
+        assertTrue(!MPUtility.isEmpty(appInfo.getString("bid")));
+        assertNotNull(appInfo.getBoolean("dbg"));
+        assertNotNull(appInfo.getBoolean("pir"));
+        assertNotNull(appInfo.getLong("ict"));
+        assertNotNull(appInfo.getInt("lc"));
+        assertNotNull(appInfo.getLong("lud"));
+        assertNotNull(appInfo.getInt("lcu"));
+        assertNotNull(appInfo.getLong("ud"));
+        assertNotNull(appInfo.getBoolean("fi"));
     }
 
     @Test
     public void testAppInfoInstallTime() throws Exception {
         MockContext context = new MockContext();
         MockSharedPreferences prefs = (MockSharedPreferences) context.getSharedPreferences(null, 0);
-        long now = System.currentTimeMillis();
-        prefs.putLong(Constants.PrefKeys.INSTALL_TIME, now);
+        long now = 10012;
+        prefs.putLong("mp::ict", now).commit();
         JSONObject appInfo = DeviceAttributes.collectAppInfo(context);
-        assertTrue(appInfo.getLong(Constants.MessageKey.MPARTICLE_INSTALL_TIME) == now);
+        assertEquals(now, appInfo.getLong("ict"));
 
         JSONObject appInfo2 = DeviceAttributes.collectAppInfo(context);
-        assertTrue(appInfo2.getLong(Constants.MessageKey.MPARTICLE_INSTALL_TIME) == now);
+        assertEquals(now, appInfo2.getLong("ict"));
     }
 
     @Test
@@ -55,6 +54,6 @@ public class DeviceAttributesTest {
             appInfo = DeviceAttributes.collectAppInfo(context);
         }
 
-        assertEquals(launchCount, appInfo.getInt(Constants.MessageKey.LAUNCH_COUNT));
+        assertEquals(launchCount, appInfo.getInt("lc"));
     }
 }

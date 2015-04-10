@@ -1,4 +1,4 @@
-package com.mparticle;
+package com.mparticle.mock;
 
 import android.content.SharedPreferences;
 
