@@ -33,7 +33,7 @@ import javax.net.ssl.SSLHandshakeException;
 /**
  * Primary queue handler which is responsible for querying, packaging, and uploading data.
  */
-public final class UploadHandler extends Handler {
+public class UploadHandler extends Handler {
 
     private final Context mContext;
     private final MParticleDatabase mDbHelper;

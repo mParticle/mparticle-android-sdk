@@ -25,7 +25,7 @@ import org.json.JSONObject;
 
 import java.util.UUID;
 
-/* package-private */final class MessageHandler extends Handler {
+/* package-private */ class MessageHandler extends Handler {
 
     private final SQLiteOpenHelper mDbHelper;
 

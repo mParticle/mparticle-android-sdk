@@ -118,6 +118,19 @@ public class MessageManager implements MessageManagerCallbacks {
         super();
     }
 
+    /**
+     * Used solely for unit testing
+     */
+    public MessageManager(Context appContext, ConfigManager configManager, MParticle.InstallType installType, AppStateManager appStateManager, MessageHandler messageHandler, UploadHandler uploadHandler) {
+        mContext = appContext.getApplicationContext();
+        mConfigManager = configManager;
+        mAppStateManager = appStateManager;
+        mMessageHandler = messageHandler;
+        mUploadHandler = uploadHandler;
+        mPreferences = appContext.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
+        mInstallType = installType;
+    }
+
     public MessageManager(Context appContext, ConfigManager configManager, MParticle.InstallType installType, AppStateManager appStateManager) {
         mContext = appContext.getApplicationContext();
         mConfigManager = configManager;
@@ -194,7 +207,7 @@ public class MessageManager implements MessageManagerCallbacks {
                 .build();
     }
 
-    public void startSession() {
+    public MPMessage startSession() {
         try {
             MPMessage message = new MPMessage.Builder(MessageType.SESSION_START, mAppStateManager.getSession(), mLocation)
                     .timestamp(System.currentTimeMillis())
@@ -208,7 +221,7 @@ public class MessageManager implements MessageManagerCallbacks {
             }
             String prevSessionId = mPreferences.getString(Constants.PrefKeys.PREVIOUS_SESSION_ID, "");
             editor.putString(Constants.PrefKeys.PREVIOUS_SESSION_ID, mAppStateManager.getSession().mSessionID);
-            if (prevSessionId != null && prevSessionId.length() > 0) {
+            if (!MPUtility.isEmpty(prevSessionId)) {
                 message.put(MessageKey.PREVIOUS_SESSION_ID, prevSessionId);
             }
 
@@ -238,9 +251,10 @@ public class MessageManager implements MessageManagerCallbacks {
             mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
 
             incrementSessionCounter();
-
+            return message;
         } catch (JSONException e) {
             ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to create mParticle start session message");
+            return null;
         }
     }
 

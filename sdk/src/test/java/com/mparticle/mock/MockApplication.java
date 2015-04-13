@@ -35,6 +35,11 @@ public class MockApplication extends android.test.mock.MockApplication {
     }
 
     @Override
+    public Object getSystemService(String name) {
+        return mContext.getSystemService(name);
+    }
+
+    @Override
     public SharedPreferences getSharedPreferences(String name, int mode) {
         return mContext.getSharedPreferences(name, mode);
     }

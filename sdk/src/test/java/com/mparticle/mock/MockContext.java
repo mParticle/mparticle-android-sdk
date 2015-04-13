@@ -6,6 +6,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
+import android.telephony.TelephonyManager;
 
 import org.mockito.Mockito;
 
@@ -32,6 +33,14 @@ public class MockContext extends android.test.mock.MockContext {
     @Override
     public SharedPreferences getSharedPreferences(String name, int mode) {
         return sharedPreferences;
+    }
+
+    @Override
+    public Object getSystemService(String name) {
+        if (name.equals(Context.TELEPHONY_SERVICE)){
+            return Mockito.mock(TelephonyManager.class);
+        }
+        return super.getSystemService(name);
     }
 
     @Override

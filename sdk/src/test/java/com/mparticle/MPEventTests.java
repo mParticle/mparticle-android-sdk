@@ -2,9 +2,6 @@ package com.mparticle;
 
 
 
-import com.mparticle.MPEvent;
-import com.mparticle.MParticle;
-
 import org.junit.Test;
 
 import static junit.framework.Assert.assertNull;
@@ -51,6 +48,4 @@ public class MPEventTests  {
         eventBuilder.endTime();
         assertTrue(eventBuilder.build().getLength() >= 1000);
     }
-
-
 }
