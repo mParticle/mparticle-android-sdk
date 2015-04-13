@@ -17,7 +17,7 @@ public class EmbeddedKitFactory {
     private final static int FORESEE = MParticle.ServiceProviders.FORESEE_ID;
     private final static int ADJUST = 68;
 
-    final EmbeddedProvider createInstance(int id, EmbeddedKitManager ekManager) throws JSONException, ClassNotFoundException{
+    EmbeddedProvider createInstance(int id, EmbeddedKitManager ekManager) throws JSONException, ClassNotFoundException{
         switch (id){
             case KOCHAVA:
                 return new EmbeddedKochava(ekManager);

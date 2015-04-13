@@ -25,6 +25,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class EmbeddedKitManager implements MPActivityCallbacks {
+    EmbeddedKitFactory ekFactory;
     private ConfigManager mConfigManager;
     private AppStateManager mAppStateManager;
     ConcurrentHashMap<Integer,EmbeddedProvider> providers = new ConcurrentHashMap<Integer, EmbeddedProvider>(0);
@@ -33,6 +34,7 @@ public class EmbeddedKitManager implements MPActivityCallbacks {
 
     public EmbeddedKitManager(Context context){
         this.context = context;
+        ekFactory = new EmbeddedKitFactory();
     }
 
     //called from a background thread by the ConfigManager when we get new configuration
@@ -41,7 +43,7 @@ public class EmbeddedKitManager implements MPActivityCallbacks {
             providers.clear();
         }else{
             HashSet<Integer> activeIds = new HashSet<Integer>();
-            EmbeddedKitFactory ekFactory = new EmbeddedKitFactory();
+
             for (int i = 0; i < kitConfigs.length(); i++) {
                 try {
                     JSONObject current = kitConfigs.getJSONObject(i);
