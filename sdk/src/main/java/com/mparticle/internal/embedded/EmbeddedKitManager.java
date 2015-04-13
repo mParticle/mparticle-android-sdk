@@ -27,7 +27,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class EmbeddedKitManager implements MPActivityCallbacks {
     private ConfigManager mConfigManager;
     private AppStateManager mAppStateManager;
-    private ConcurrentHashMap<Integer,EmbeddedProvider> providers = new ConcurrentHashMap<Integer, EmbeddedProvider>(0);
+    ConcurrentHashMap<Integer,EmbeddedProvider> providers = new ConcurrentHashMap<Integer, EmbeddedProvider>(0);
 
     Context context;
 
