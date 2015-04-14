@@ -331,6 +331,7 @@ public class MParticle {
         ConfigManager.log(LogLevel.DEBUG, "Ended session");
         mEmbeddedKitManager.endSession();
         mMessageManager.endSession(session);
+        disableLocationTracking(false);
     }
 
 
@@ -357,6 +358,7 @@ public class MParticle {
         ConfigManager.log(LogLevel.DEBUG, "Started new session");
         mEmbeddedKitManager.startSession();
         mMessageManager.startUploadLoop();
+        enableLocationTracking();
     }
 
     /**
@@ -874,8 +876,25 @@ public class MParticle {
                     locationManager.removeUpdates(mLocationListener);
                 }
                 locationManager.requestLocationUpdates(provider, minTime, minDistance, mLocationListener);
+                SharedPreferences.Editor editor = mPreferences.edit();
+                editor.putString(PrefKeys.LOCATION_PROVIDER, provider)
+                        .putLong(PrefKeys.LOCATION_MINTIME, minTime)
+                        .putLong(PrefKeys.LOCATION_MINDISTANCE, minDistance)
+                        .apply();
+
             } catch (SecurityException e) {
                 ConfigManager.log(LogLevel.ERROR, "The app must require the appropriate permissions to track location using this provider");
+            }
+        }
+    }
+
+    private void enableLocationTracking(){
+        if (mPreferences.contains(PrefKeys.LOCATION_PROVIDER)){
+            String provider = mPreferences.getString(PrefKeys.LOCATION_PROVIDER, null);
+            long minTime = mPreferences.getLong(PrefKeys.LOCATION_MINTIME, 0);
+            long minDistance = mPreferences.getLong(PrefKeys.LOCATION_MINDISTANCE, 0);
+            if (provider != null && minTime > 0 && minDistance > 0){
+                enableLocationTracking(provider, minTime, minDistance);
             }
         }
     }
@@ -884,10 +903,29 @@ public class MParticle {
      * Disables any mParticle location tracking that had been started
      */
     public void disableLocationTracking() {
-        if (null != mLocationListener) {
-            LocationManager locationManager = (LocationManager) mAppContext.getSystemService(Context.LOCATION_SERVICE);
-            locationManager.removeUpdates(mLocationListener);
-            mLocationListener = null;
+        disableLocationTracking(true);
+    }
+
+    /**
+     * Disables any mParticle location tracking that had been started
+     */
+    private void disableLocationTracking(boolean userTriggered) {
+        if (mLocationListener != null) {
+            try {
+                LocationManager locationManager = (LocationManager) mAppContext.getSystemService(Context.LOCATION_SERVICE);
+
+                locationManager.removeUpdates(mLocationListener);
+                mLocationListener = null;
+                if (userTriggered){
+                    SharedPreferences.Editor editor = mPreferences.edit();
+                    editor.remove(PrefKeys.LOCATION_PROVIDER)
+                            .remove(PrefKeys.LOCATION_MINTIME)
+                            .remove(PrefKeys.LOCATION_MINDISTANCE)
+                            .apply();
+                }
+            }catch (Exception e){
+
+            }
         }
     }
 

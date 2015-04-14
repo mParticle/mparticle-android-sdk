@@ -373,6 +373,9 @@ public class Constants {
         String API_KEY = "mp::config::apikey";
         String API_SECRET = "mp::config::apisecret";
         String FIRST_RUN_INSTALL = "mp::firstrun::install";
+        String LOCATION_PROVIDER = "mp::location:provider";
+        String LOCATION_MINTIME = "mp::location:mintime";
+        String LOCATION_MINDISTANCE = "mp::location:mindistance";
     }
 
     public interface MiscStorageKeys {
