@@ -105,11 +105,8 @@ import java.util.UUID;
                 break;
             case UPDATE_SESSION_END:
                 try {
-                    JSONObject sessionTiming = (JSONObject) msg.obj;
-                    String sessionId = sessionTiming.getString(MessageKey.SESSION_ID);
-                    long time = sessionTiming.getLong(MessageKey.TIMESTAMP);
-                    long sessionLength = sessionTiming.getLong(MessageKey.SESSION_LENGTH);
-                    dbUpdateSessionEndTime(sessionId, time, sessionLength);
+                    Session session = (Session) msg.obj;
+                    dbUpdateSessionEndTime(session.mSessionID, session.mLastEventTime, session.getForegroundTime());
                 } catch (Exception e) {
                     ConfigManager.log(MParticle.LogLevel.ERROR, e, "Error updating session end time in mParticle DB");
                 }

@@ -4,15 +4,14 @@ import com.mparticle.ConfigManager;
 import com.mparticle.MParticle;
 
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicLong;
 
-/**
- * Created by sdozor on 3/30/15.
- */
 public class Session {
     public int mEventCount = 0;
     public String mSessionID = Constants.NO_SESSION_ID;
     public long mSessionStartTime = 0;
     public long mLastEventTime = 0;
+    private long mTimeInBackground = 0;
 
     public Session() {
         super();
@@ -25,6 +24,7 @@ public class Session {
         mSessionID = session.mSessionID;
         mSessionStartTime = session.mSessionStartTime;
         mLastEventTime = session.mLastEventTime;
+        mTimeInBackground = session.mTimeInBackground;
     }
 
     public boolean isActive() {
@@ -35,6 +35,7 @@ public class Session {
         mLastEventTime = mSessionStartTime = System.currentTimeMillis();
         mSessionID = UUID.randomUUID().toString();
         mEventCount = 0;
+        mTimeInBackground = 0;
         return this;
     }
 
@@ -52,5 +53,26 @@ public class Session {
         return sessionTimeout < (System.currentTimeMillis() - mLastEventTime);
     }
 
+    public long getLength() {
+        long time = mLastEventTime - mSessionStartTime;
+        if (time >= 0){
+            return time;
+        }
+        return time;
+    }
 
+    public long getBackgroundTime() {
+        return mTimeInBackground;
+    }
+
+    public long getForegroundTime() {
+        return getLength() - getBackgroundTime();
+    }
+
+    public void updateBackgroundTime(AtomicLong lastStoppedTime, long currentTime) {
+        long time = lastStoppedTime.get();
+        if (time >= mSessionStartTime){
+            mTimeInBackground += (currentTime - time);
+        }
+    }
 }

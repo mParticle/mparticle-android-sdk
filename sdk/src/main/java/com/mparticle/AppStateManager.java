@@ -86,7 +86,7 @@ import static junit.framework.Assert.fail;
     private String previousSessionUri;
     boolean mUnitTesting = false;
 
-    AppStateManager(Context context, boolean unitTesting){
+    public AppStateManager(Context context, boolean unitTesting){
         mUnitTesting = unitTesting;
         mContext = context.getApplicationContext();
         mLastStoppedTime = new AtomicLong(getTime());
@@ -122,7 +122,6 @@ import static junit.framework.Assert.fail;
     @Override
     public void onActivityStarted(Activity activity, int currentCount) {
         try {
-
             mPreferences.edit().putBoolean(Constants.PrefKeys.CRASHED_IN_FOREGROUND, true).apply();
             mCurrentActivity = AppStateManager.getActivityName(activity);
 
@@ -130,6 +129,8 @@ import static junit.framework.Assert.fail;
             if (!mInitialized || !MParticle.getInstance().isSessionActive()) {
                 gatherSourceInfo(activity);
             }
+
+            mCurrentSession.updateBackgroundTime(mLastStoppedTime, getTime());
 
             if (!mInitialized) {
                 mInitialized = true;
@@ -143,10 +144,6 @@ import static junit.framework.Assert.fail;
                         0);
                 mLastForegroundTime = getTime();
             } else if (isBackgrounded() && mLastStoppedTime.get() > 0) {
-                long totalTimeInBackground = mPreferences.getLong(Constants.PrefKeys.TIME_IN_BG, 0);
-                totalTimeInBackground += (getTime() - mLastStoppedTime.get());
-                mPreferences.edit().putLong(Constants.PrefKeys.TIME_IN_BG, totalTimeInBackground).apply();
-
                 MParticle.getInstance().logStateTransition(Constants.StateTransitionType.STATE_TRANS_FORE,
                         mCurrentActivity,
                         mLastStoppedTime.get() - mLastForegroundTime,

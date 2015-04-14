@@ -365,7 +365,6 @@ public class Constants {
         String Mpid = "mp::mpid";
         String CRASHED_IN_FOREGROUND = "mp::crashed_in_foreground";
         String LTV = "mp::ltv";
-        String TIME_IN_BG = "mp::time_in_bg";
         String PREVIOUS_SESSION_FOREGROUND = "mp::time_in_fg";
         String NEXT_REQUEST_TIME = "mp::next_valid_request_time";
         String EVENT_COUNTER = "mp::events::counter";

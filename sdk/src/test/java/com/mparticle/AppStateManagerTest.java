@@ -57,20 +57,16 @@ public class AppStateManagerTest {
 
     @Test
     public void testOnActivityStopped() throws Exception {
-
         manager.onActivityStarted(activity, 0);
-
         assertEquals(false, manager.isBackgrounded());
-
         manager.onActivityStopped(activity, 0);
-
         assertEquals(false, prefs.getBoolean(Constants.PrefKeys.CRASHED_IN_FOREGROUND, true));
         Thread.sleep(1000);
         assertEquals(true, manager.isBackgrounded());
         assertTrue(manager.mInitialized);
         assertTrue(manager.mLastStoppedTime.get() > 0);
         manager.onActivityStarted(activity, 0);
-        assertTrue(prefs.getLong(Constants.PrefKeys.TIME_IN_BG, -42) > 1000);
+        assertTrue(manager.getSession().getBackgroundTime() >= 1000 && manager.getSession().getBackgroundTime() < 1200);
     }
 
     @Test

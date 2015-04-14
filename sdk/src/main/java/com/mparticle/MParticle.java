@@ -322,15 +322,15 @@ public class MParticle {
      */
     public void endSession() {
         if (mConfigManager.isEnabled()) {
-            long sessionEndTime = System.currentTimeMillis();
-            endSession(sessionEndTime);
+            mAppStateManager.getSession().mLastEventTime = System.currentTimeMillis();
+            endSession(mAppStateManager.getSession());
         }
     }
 
-    private void endSession(long sessionEndTime) {
+    private void endSession(Session session) {
         ConfigManager.log(LogLevel.DEBUG, "Ended session");
         mEmbeddedKitManager.endSession();
-        mMessageManager.endSession(sessionEndTime);
+        mMessageManager.endSession(session);
     }
 
 
@@ -343,7 +343,7 @@ public class MParticle {
         if (!isSessionActive()) {
             newSession();
         }else{
-            mMessageManager.updateSessionEnd(mAppStateManager.getSession().mLastEventTime);
+            mMessageManager.updateSessionEnd(mAppStateManager.getSession());
         }
     }
 
@@ -1636,17 +1636,15 @@ public class MParticle {
         DEBUG
     }
 
-
     void logUnhandledError(Throwable t) {
         if (mConfigManager.isEnabled()) {
-            ensureActiveSession();
             mMessageManager.logErrorEvent(t != null ? t.getMessage() : null, t, null, false);
             //we know that the app is about to crash and therefore exit
             logStateTransition(Constants.StateTransitionType.STATE_TRANS_EXIT, mAppStateManager.getCurrentActivity());
-            endSession(System.currentTimeMillis());
+            mAppStateManager.getSession().mLastEventTime = System.currentTimeMillis();
+            endSession(mAppStateManager.getSession());
         }
     }
-
 
     /**
      * This interface defines constants that can be used to interact with specific 3rd-party services.

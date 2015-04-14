@@ -270,37 +270,27 @@ public class MessageManager implements MessageManagerCallbacks {
         return mPreferences.getInt(Constants.PrefKeys.SESSION_COUNTER, 0);
     }
 
-    public void updateSessionEnd(long stopTime) {
+    public void updateSessionEnd(Session session) {
         try {
-            long timeInBackground = mPreferences.getLong(Constants.PrefKeys.TIME_IN_BG, 0);
-            long sessionLength = stopTime - mAppStateManager.getSession().mSessionStartTime;
-            long foregroundLength = sessionLength - timeInBackground;
             SharedPreferences.Editor editor = mPreferences.edit();
-            editor.putLong(Constants.PrefKeys.PREVIOUS_SESSION_FOREGROUND, foregroundLength > 0 ? foregroundLength : sessionLength);
+            editor.putLong(Constants.PrefKeys.PREVIOUS_SESSION_FOREGROUND, session.getForegroundTime());
             editor.apply();
 
-            JSONObject sessionTiming = new JSONObject();
-            sessionTiming.put(MessageKey.SESSION_ID, mAppStateManager.getSession().mSessionID);
-            sessionTiming.put(MessageKey.TIMESTAMP, stopTime);
-            sessionTiming.put(MessageKey.SESSION_LENGTH, foregroundLength);
-
             mMessageHandler
-                    .sendMessage(mMessageHandler.obtainMessage(MessageHandler.UPDATE_SESSION_END, sessionTiming));
-
-        } catch (JSONException e) {
+                    .sendMessage(mMessageHandler.obtainMessage(MessageHandler.UPDATE_SESSION_END, session));
+        } catch (Exception e) {
             ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to send update session end message");
         }
     }
 
-    public void endSession(long stopTime) {
-        updateSessionEnd(stopTime);
-        mPreferences.edit().remove(Constants.PrefKeys.TIME_IN_BG).apply();
+    public void endSession(Session session) {
+        updateSessionEnd(session);
         mMessageHandler
-                .sendMessage(mMessageHandler.obtainMessage(MessageHandler.CREATE_SESSION_END_MESSAGE, mAppStateManager.getSession().mSessionID));
+                .sendMessage(mMessageHandler.obtainMessage(MessageHandler.CREATE_SESSION_END_MESSAGE, session.mSessionID));
         mAppStateManager.endSession();
     }
 
-    public void logEvent(MPEvent event, String currentActivity) {
+    public MPMessage logEvent(MPEvent event, String currentActivity) {
         try {
             MPMessage message = new MPMessage.Builder(MessageType.EVENT, mAppStateManager.getSession(), mLocation)
                     .name(event.getEventName())
@@ -308,29 +298,30 @@ public class MessageManager implements MessageManagerCallbacks {
                     .length(event.getLength())
                     .attributes(MPUtility.enforceAttributeConstraints(event.getInfo()))
                     .build();
-
             message.put(MessageKey.EVENT_TYPE, event.getEventType());
-            // NOTE: event timing is not supported (yet) but the server expects this data
-            message.put(MessageKey.EVENT_START_TIME, mAppStateManager.getSession().mLastEventTime);
+            message.put(MessageKey.EVENT_START_TIME, message.getTimestamp());
 
             if (currentActivity != null){
                 message.put(MessageKey.CURRENT_ACTIVITY, currentActivity);
             }
+
             int count = mPreferences.getInt(Constants.PrefKeys.EVENT_COUNTER, 0);
             message.put(MessageKey.EVENT_COUNTER, count);
             mPreferences.edit().putInt(Constants.PrefKeys.EVENT_COUNTER, ++count).apply();
 
             mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
+            return message;
         } catch (JSONException e) {
             ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to create mParticle log event message");
+            return null;
         }
     }
 
-    private static void resetEventCounter(){
+    static void resetEventCounter(){
         mPreferences.edit().putInt(Constants.PrefKeys.EVENT_COUNTER, 0).apply();
     }
 
-    public void logScreen(String screenName, JSONObject attributes, boolean started) {
+    public MPMessage logScreen(String screenName, JSONObject attributes, boolean started) {
         try {
             MPMessage message = new MPMessage.Builder(MessageType.SCREEN_VIEW, mAppStateManager.getSession(), mLocation)
                     .timestamp(mAppStateManager.getSession().mLastEventTime)
@@ -342,12 +333,14 @@ public class MessageManager implements MessageManagerCallbacks {
             message.put(MessageKey.EVENT_DURATION, 0);
             message.put(MessageKey.SCREEN_STARTED, started ? "activity_started" : "activity_stopped");
             mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
+            return message;
         } catch (JSONException e) {
             ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to create mParticle log event message");
+            return null;
         }
     }
 
-    public void logBreadcrumb(String breadcrumb) {
+    public MPMessage logBreadcrumb(String breadcrumb) {
         try {
             MPMessage message = new MPMessage.Builder(MessageType.BREADCRUMB, mAppStateManager.getSession(), mLocation)
                     .timestamp(mAppStateManager.getSession().mLastEventTime)
@@ -358,20 +351,24 @@ public class MessageManager implements MessageManagerCallbacks {
             message.put(MessageKey.BREADCRUMB_LABEL, breadcrumb);
             mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
             mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_BREADCRUMB, message));
+            return message;
         } catch (JSONException e) {
             ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to create mParticle breadcrumb message");
+            return null;
         }
     }
 
-    public void optOut(long time, boolean optOutStatus) {
+    public MPMessage optOut(long time, boolean optOutStatus) {
         try {
             MPMessage message = new MPMessage.Builder(MessageType.OPT_OUT, mAppStateManager.getSession(), mLocation)
                     .timestamp(time)
                     .build();
             message.put(MessageKey.OPT_OUT_STATUS, optOutStatus);
             mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
+            return message;
         } catch (JSONException e) {
             ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to create mParticle opt out message");
+            return null;
         }
     }
 

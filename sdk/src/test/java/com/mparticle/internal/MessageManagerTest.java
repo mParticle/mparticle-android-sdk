@@ -5,6 +5,7 @@ import android.os.Message;
 
 import com.mparticle.AppStateManager;
 import com.mparticle.ConfigManager;
+import com.mparticle.MPEvent;
 import com.mparticle.MParticle;
 import com.mparticle.mock.MockContext;
 import com.mparticle.mock.MockSharedPreferences;
@@ -15,14 +16,19 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Answers;
 import org.mockito.Mockito;
-import org.mockito.Spy;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
-import static org.junit.Assert.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicLong;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 @RunWith(PowerMockRunner.class)
 public class MessageManagerTest {
@@ -31,7 +37,6 @@ public class MessageManagerTest {
     private ConfigManager configManager;
     private AppStateManager appStateManager;
     private MessageManager manager;
-    private Session session;
     private MessageHandler messageHandler;
     private UploadHandler uploadHandler;
 
@@ -39,7 +44,7 @@ public class MessageManagerTest {
     public void setup() throws Exception {
         context = new MockContext();
         configManager = Mockito.mock(ConfigManager.class);
-        appStateManager = Mockito.mock(AppStateManager.class);
+        appStateManager = new AppStateManager(context, true);
         messageHandler = Mockito.mock(MessageHandler.class);
         uploadHandler = Mockito.mock(UploadHandler.class);
         manager = new MessageManager(context,
@@ -47,10 +52,6 @@ public class MessageManagerTest {
                 MParticle.InstallType.AutoDetect, appStateManager,
                 messageHandler,
                 uploadHandler);
-        session = new Session().start();
-        assertTrue(session.mSessionID.length() > 0);
-        Mockito.when(appStateManager.getSession()).thenReturn(session);
-
     }
 
     @Test
@@ -103,10 +104,11 @@ public class MessageManagerTest {
 
     @Test
     public void testCreateFirstRunMessage() throws Exception {
+        appStateManager.getSession().start();
         MPMessage firstRun = manager.createFirstRunMessage();
         assertEquals(Constants.MessageType.FIRST_RUN, firstRun.getMessageType());
-        assertEquals(firstRun.getSessionId(), session.mSessionID);
-        assertEquals(session.mSessionStartTime, firstRun.getTimestamp());
+        assertEquals(firstRun.getSessionId(), appStateManager.getSession().mSessionID);
+        assertEquals(appStateManager.getSession().mSessionStartTime, firstRun.getTimestamp());
     }
 
     @Test
@@ -119,7 +121,7 @@ public class MessageManagerTest {
         assertFalse(sessionStart.has(Constants.MessageKey.PREVIOUS_SESSION_LENGTH));
         assertNull(sessionStart.optString(Constants.MessageKey.PREVIOUS_SESSION_ID, null));
         assertFalse(sessionStart.has(Constants.MessageKey.PREVIOUS_SESSION_START));
-        assertEquals(session.mSessionID, prefs.getString(Constants.PrefKeys.PREVIOUS_SESSION_ID, null));
+        assertEquals(appStateManager.getSession().mSessionID, prefs.getString(Constants.PrefKeys.PREVIOUS_SESSION_ID, null));
         assertFalse(prefs.getBoolean(Constants.PrefKeys.FIRSTRUN + configManager.getApiKey(), true));
         prefs.putLong(Constants.PrefKeys.PREVIOUS_SESSION_FOREGROUND, 42000);
         prefs.putLong(Constants.PrefKeys.PREVIOUS_SESSION_START, 24000);
@@ -142,32 +144,90 @@ public class MessageManagerTest {
         count = context.getSharedPreferences(null, 0).getInt(Constants.PrefKeys.SESSION_COUNTER, -5);
         assertEquals(10, count);
     }
-/*
+
     @Test
     public void testUpdateSessionEnd() throws Exception {
-
+        Session session = new Session().start();
+        long currentTime = System.currentTimeMillis();
+        session.mSessionStartTime = currentTime - 10000;
+        AtomicLong stoppedTime = new AtomicLong(currentTime - 5000);
+        session.updateBackgroundTime(stoppedTime, currentTime);
+        session.mLastEventTime = currentTime;
+        manager.updateSessionEnd(session);
+        Mockito.verify(messageHandler, Mockito.times(1)).sendMessage(Mockito.any(Message.class));
+        long time = context.getSharedPreferences(null, 0).getLong(Constants.PrefKeys.PREVIOUS_SESSION_FOREGROUND, -1);
+        assertEquals(5000, time);
     }
 
     @Test
     public void testEndSession() throws Exception {
-
+        Session session = appStateManager.getSession().start();
+        assertNotEquals(Constants.NO_SESSION_ID, session.mSessionID);
+        manager.endSession(session);
+        Session newSession = appStateManager.getSession();
+        assertEquals(Constants.NO_SESSION_ID, newSession.mSessionID);
     }
 
     @Test
     public void testLogEvent() throws Exception {
-
+        appStateManager.getSession().start();
+        Map<String, String> info = new HashMap<String, String>(1);
+        info.put("test key", "test value");
+        MPEvent event = new MPEvent.Builder("test event name", MParticle.EventType.Location).duration(100).info(info).build();
+        MPMessage message = manager.logEvent(event, "test screen name");
+        assertNotNull(message);
+        assertEquals(Constants.MessageType.EVENT, message.getMessageType());
+        assertEquals(appStateManager.getSession().mSessionID, message.getSessionId());
+        assertEquals(message.getLong(Constants.MessageKey.EVENT_START_TIME), appStateManager.getSession().mLastEventTime);
+        assertEquals(message.getDouble(Constants.MessageKey.EVENT_DURATION), event.getLength().doubleValue(), 2);
+        JSONObject attrs = message.getJSONObject(Constants.MessageKey.ATTRIBUTES);
+        assertNotNull(attrs);
+        assertEquals("test value", attrs.getString("test key"));
+        assertEquals("test event name", message.getName());
+        assertEquals(message.get(Constants.MessageKey.EVENT_TYPE), MParticle.EventType.Location);
+        assertEquals("test screen name", message.getString(Constants.MessageKey.CURRENT_ACTIVITY));
+        assertEquals(1, context.getSharedPreferences("name", 0).getInt(Constants.PrefKeys.EVENT_COUNTER, -1));
+        for (int i = 0; i < 100; i++){
+            manager.logEvent(event, "test screen name");
+        }
+        assertEquals(101, context.getSharedPreferences("name", 0).getInt(Constants.PrefKeys.EVENT_COUNTER, -1));
+        Mockito.verify(messageHandler, Mockito.times(101)).sendMessage(Mockito.any(Message.class));
     }
 
     @Test
     public void testLogScreen() throws Exception {
-
+        appStateManager.getSession().start();
+        JSONObject info = new JSONObject();
+        info.put("test key", "test value");
+        MPMessage message = manager.logScreen("screen name", info, true);
+        assertNotNull(message);
+        assertEquals(Constants.MessageType.SCREEN_VIEW, message.getMessageType());
+        assertEquals(appStateManager.getSession().mSessionID, message.getSessionId());
+        assertEquals(message.getDouble(Constants.MessageKey.EVENT_DURATION), 0, 2);
+        assertEquals(message.getString(Constants.MessageKey.SCREEN_STARTED), "activity_started");
+        assertEquals(message.getLong(Constants.MessageKey.EVENT_START_TIME), appStateManager.getSession().mLastEventTime);
+        JSONObject attrs = message.getJSONObject(Constants.MessageKey.ATTRIBUTES);
+        assertNotNull(attrs);
+        assertEquals("test value", attrs.getString("test key"));
+        assertEquals("screen name", message.getName());
+        message = manager.logScreen("screen name 2", info, false);
+        assertEquals(message.getString(Constants.MessageKey.SCREEN_STARTED), "activity_stopped");
+        Mockito.verify(messageHandler, Mockito.times(2)).sendMessage(Mockito.any(Message.class));
     }
 
     @Test
     public void testLogBreadcrumb() throws Exception {
-
+        appStateManager.getSession().start();
+        MPMessage message = manager.logBreadcrumb("test crumb");
+        assertEquals(Constants.MessageType.BREADCRUMB, message.getMessageType());
+        assertEquals(appStateManager.getSession().mLastEventTime, message.getTimestamp());
+        assertEquals(appStateManager.getSession().mSessionID, message.getSessionId());
+        assertEquals(message.getLong(Constants.MessageKey.EVENT_START_TIME), appStateManager.getSession().mLastEventTime);
+        assertEquals(message.getInt(Constants.MessageKey.BREADCRUMB_SESSION_COUNTER), manager.getCurrentSessionCounter());
+        assertEquals(message.getString(Constants.MessageKey.BREADCRUMB_LABEL), "test crumb");
+        Mockito.verify(messageHandler, Mockito.times(2)).sendMessage(Mockito.any(Message.class));
     }
-
+/*
     @Test
     public void testOptOut() throws Exception {
 
