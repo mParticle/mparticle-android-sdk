@@ -131,6 +131,17 @@ public class MessageManagerTest {
         assertEquals(24000, sessionStart.getLong(Constants.MessageKey.PREVIOUS_SESSION_START));
         Mockito.verify(messageHandler, Mockito.times(1)).sendEmptyMessage(MessageHandler.END_ORPHAN_SESSIONS);
     }
+
+    @Test
+    public void testIncrementSessionCounter(){
+        int count = context.getSharedPreferences(null, 0).getInt(Constants.PrefKeys.SESSION_COUNTER, -5);
+        assertEquals(-5, count);
+        for (int i = 0; i < 10; i++){
+            manager.incrementSessionCounter();
+        }
+        count = context.getSharedPreferences(null, 0).getInt(Constants.PrefKeys.SESSION_COUNTER, -5);
+        assertEquals(10, count);
+    }
 /*
     @Test
     public void testUpdateSessionEnd() throws Exception {

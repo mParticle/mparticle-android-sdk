@@ -258,7 +258,7 @@ public class MessageManager implements MessageManagerCallbacks {
         }
     }
 
-    private void incrementSessionCounter() {
+    void incrementSessionCounter() {
         int nextCount = getCurrentSessionCounter() + 1;
         if (nextCount >= (Integer.MAX_VALUE / 100)){
             nextCount = 0;
@@ -266,7 +266,7 @@ public class MessageManager implements MessageManagerCallbacks {
         mPreferences.edit().putInt(Constants.PrefKeys.SESSION_COUNTER, nextCount).apply();
     }
 
-    private int getCurrentSessionCounter(){
+    int getCurrentSessionCounter(){
         return mPreferences.getInt(Constants.PrefKeys.SESSION_COUNTER, 0);
     }
 
