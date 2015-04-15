@@ -122,7 +122,6 @@ import static junit.framework.Assert.fail;
     @Override
     public void onActivityStarted(Activity activity, int currentCount) {
         try {
-            mPreferences.edit().putBoolean(Constants.PrefKeys.CRASHED_IN_FOREGROUND, true).apply();
             mCurrentActivity = AppStateManager.getActivityName(activity);
 
             int interruptions = mInterruptionCount.get();

@@ -51,7 +51,6 @@ public class AppStateManagerTest {
         manager.onActivityStarted(activity, 0);
         assertTrue(manager.mInitialized);
         assertEquals(false, manager.isBackgrounded());
-        assertEquals(true, prefs.getBoolean(Constants.PrefKeys.CRASHED_IN_FOREGROUND, false));
         manager.onActivityStarted(activity, 0);
     }
 
@@ -60,7 +59,6 @@ public class AppStateManagerTest {
         manager.onActivityStarted(activity, 0);
         assertEquals(false, manager.isBackgrounded());
         manager.onActivityStopped(activity, 0);
-        assertEquals(false, prefs.getBoolean(Constants.PrefKeys.CRASHED_IN_FOREGROUND, true));
         Thread.sleep(1000);
         assertEquals(true, manager.isBackgrounded());
         assertTrue(manager.mInitialized);
