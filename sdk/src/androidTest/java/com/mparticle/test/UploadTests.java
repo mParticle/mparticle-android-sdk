@@ -6,7 +6,7 @@ import android.test.AndroidTestCase;
 import android.util.Log;
 
 import com.mparticle.MParticle;
-import com.mparticle.AppStateManager;
+import com.mparticle.internal.AppStateManager;
 import com.mparticle.internal.Constants;
 import com.mparticle.internal.IMPApiClient;
 import com.mparticle.internal.MPMessage;

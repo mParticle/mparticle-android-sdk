@@ -137,11 +137,6 @@ public class MockMParticle extends MParticle {
     }
 
     @Override
-    void logScreen(String screenName, Map<String, String> eventData, Boolean started) {
-        super.logScreen(screenName, eventData, started);
-    }
-
-    @Override
     public void leaveBreadcrumb(String breadcrumb) {
         super.leaveBreadcrumb(breadcrumb);
     }
@@ -164,11 +159,6 @@ public class MockMParticle extends MParticle {
     @Override
     public void setNetworkTrackingEnabled(boolean enabled) {
         super.setNetworkTrackingEnabled(enabled);
-    }
-
-    @Override
-    void setNetworkTrackingEnabled(boolean enabled, boolean userTriggered) {
-        super.setNetworkTrackingEnabled(enabled, userTriggered);
     }
 
     @Override
@@ -311,15 +301,6 @@ public class MockMParticle extends MParticle {
 
     }
 
-    @Override
-    void logStateTransition(String transitionType, String currentActivity) {
-
-    }
-
-    @Override
-    void logStateTransition(String transitionType, String currentActivity, long previousForegroundTime, long suspendedTime, String dataString, String launchParameters, String launchPackage, int interruptions) {
-
-    }
 
     @Override
     public Boolean isAutoTrackingEnabled() {

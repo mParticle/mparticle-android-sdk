@@ -9,9 +9,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 
-import com.mparticle.AppStateManager;
 import com.mparticle.BuildConfig;
-import com.mparticle.ConfigManager;
 import com.mparticle.MParticle;
 import com.mparticle.internal.Constants.MessageKey;
 import com.mparticle.internal.Constants.MessageType;
@@ -436,18 +434,6 @@ public class UploadHandler extends Handler {
     JSONObject getDeviceInfo(){
         if (deviceInfo == null){
             deviceInfo = DeviceAttributes.collectDeviceInfo(mContext);
-        }
-        if (MPUtility.isGmsAdIdAvailable()) {
-            try {
-                com.google.android.gms.ads.identifier.AdvertisingIdClient.Info adInfo = com.google.android.gms.ads.identifier.AdvertisingIdClient.getAdvertisingIdInfo(mContext);
-                if (!adInfo.isLimitAdTrackingEnabled()) {
-                    deviceInfo.put(MessageKey.GOOGLE_ADV_ID, adInfo.getId());
-                }
-                deviceInfo.put(MessageKey.LIMIT_AD_TRACKING, adInfo.isLimitAdTrackingEnabled());
-            }catch (Exception e){
-                ConfigManager.log(MParticle.LogLevel.DEBUG, "Failed while building device-info object: ", e.toString());
-            }
-
         }
         return deviceInfo;
     }

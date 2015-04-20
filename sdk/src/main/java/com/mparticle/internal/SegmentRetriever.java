@@ -6,7 +6,6 @@ import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
 import android.util.SparseArray;
 
-import com.mparticle.ConfigManager;
 import com.mparticle.MParticle;
 import com.mparticle.segmentation.Segment;
 import com.mparticle.segmentation.SegmentListener;

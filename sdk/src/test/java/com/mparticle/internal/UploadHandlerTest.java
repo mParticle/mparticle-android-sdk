@@ -5,7 +5,6 @@ package com.mparticle.internal;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Message;
 
-import com.mparticle.AppStateManager;
 import com.mparticle.mock.MockConfigManager;
 import com.mparticle.mock.MockContext;
 

@@ -5,7 +5,7 @@ import android.app.Activity;
 import android.location.Location;
 import android.net.Uri;
 
-import com.mparticle.ConfigManager;
+import com.mparticle.internal.ConfigManager;
 import com.mparticle.MPEvent;
 import com.mparticle.MPProduct;
 import com.mparticle.MParticle;

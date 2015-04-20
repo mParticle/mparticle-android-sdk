@@ -6,7 +6,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:1.1.0'
+        classpath 'com.android.tools.build:gradle:1.1.+'
     }
 }
 
@@ -25,8 +25,8 @@ def getDate() {
 }
 
 android {
-    compileSdkVersion 21
-    buildToolsVersion "21.1.2"
+    compileSdkVersion 19
+    buildToolsVersion "22.0.1"
 
     defaultPublishConfig "embeddedkitsRelease"
 
@@ -144,11 +144,11 @@ dependencies {
     embeddedkitsCompile files('embeddedkits/KochavaSDK.jar')
     embeddedkitsCompile files('embeddedkits/comscore2140923.jar')
     compile 'com.google.android.gms:play-services:[3.1,)'
-    compile 'com.android.support:support-v4:21.0.3'
+    provided files('libs/android-support-v4.jar')
     unityCompile project('unityskeleton')
     testCompile 'junit:junit:4.12'
     testCompile  files('libs/java-json.jar')
-    testCompile "org.mockito:mockito-core:1.+"
+    testCompile "org.mockito:mockito-core:1.7"
     testCompile "org.powermock:powermock-module-junit4:1.6.2"
     testCompile "org.powermock:powermock-api-mockito:1.6.2"
     testCompile "org.powermock:powermock-core:1.6.2"

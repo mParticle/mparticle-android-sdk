@@ -4,7 +4,7 @@ package com.mparticle.test;
 import android.test.ActivityInstrumentationTestCase2;
 
 import com.mparticle.MParticle;
-import com.mparticle.AppStateManager;
+import com.mparticle.internal.AppStateManager;
 import org.junit.Test;
 
 public class StateManagerTests extends ActivityInstrumentationTestCase2 {

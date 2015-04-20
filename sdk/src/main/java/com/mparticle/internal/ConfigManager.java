@@ -1,21 +1,19 @@
-package com.mparticle;
+package com.mparticle.internal;
 
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Build;
 import android.provider.Settings;
-import android.text.TextUtils;
 import android.util.Log;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+
+import com.mparticle.ExceptionHandler;
+import com.mparticle.MParticle;
 import com.mparticle.MParticle.LogLevel;
-import com.mparticle.internal.Constants;
-import com.mparticle.internal.MPLicenseCheckerCallback;
-import com.mparticle.internal.MPMessage;
-import com.mparticle.internal.MPUtility;
 import com.mparticle.internal.embedded.EmbeddedKitManager;
 import com.mparticle.licensing.AESObfuscator;
 import com.mparticle.licensing.LicenseChecker;
@@ -220,9 +218,9 @@ public class ConfigManager implements MessagingConfigCallbacks {
         }
         if (!VALUE_APP_DEFINED.equals(mNetworkPerformance)){
             if (VALUE_CNP_CAPTURE.equals(mNetworkPerformance)){
-                MParticle.getInstance().setNetworkTrackingEnabled(true, false);
+                MParticle.getInstance().setNetworkTrackingEnabled(true);
             }else if (VALUE_CNP_NO_CAPTURE.equals(mNetworkPerformance)){
-                MParticle.getInstance().setNetworkTrackingEnabled(false, false);
+                MParticle.getInstance().setNetworkTrackingEnabled(false);
             }
         }
     }

@@ -2,6 +2,9 @@ package com.mparticle.internal;
 
 import com.mparticle.BuildConfig;
 
+/**
+ * @serial @exclude
+ */
 public class Constants {
 
     public final static String LOG_TAG = "mParticle SDK";

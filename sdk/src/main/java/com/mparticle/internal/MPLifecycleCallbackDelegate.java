@@ -1,4 +1,4 @@
-package com.mparticle;
+package com.mparticle.internal;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
@@ -6,7 +6,7 @@ import android.app.Application;
 import android.os.Build;
 import android.os.Bundle;
 
-import com.mparticle.AppStateManager;
+import com.mparticle.internal.AppStateManager;
 
 /**
  * This class is used by the AppStateManager to determine when the app is visible or in the background.

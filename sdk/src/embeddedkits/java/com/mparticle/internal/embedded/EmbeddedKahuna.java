@@ -1,11 +1,9 @@
 package com.mparticle.internal.embedded;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.location.Location;
-import android.text.TextUtils;
 
 import com.kahuna.sdk.KahunaAnalytics;
 import com.kahuna.sdk.KahunaPushReceiver;
@@ -16,7 +14,7 @@ import com.mparticle.MPEvent;
 import com.mparticle.MPProduct;
 import com.mparticle.MPReceiver;
 import com.mparticle.MParticle;
-import com.mparticle.ConfigManager;
+import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.Constants;
 import com.mparticle.internal.MPActivityCallbacks;
 import com.mparticle.internal.MPUtility;

@@ -1,10 +1,9 @@
-package com.mparticle;
+package com.mparticle.internal;
 
 import android.app.Activity;
 import android.os.Handler;
 
-import com.mparticle.internal.Constants;
-import com.mparticle.internal.Session;
+import com.mparticle.MParticle;
 import com.mparticle.internal.embedded.EmbeddedKitManager;
 import com.mparticle.mock.MockApplication;
 import com.mparticle.mock.MockContext;
@@ -14,7 +13,11 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 
 public class AppStateManagerTest {

@@ -3,7 +3,6 @@ package com.mparticle.internal;
 import android.content.Context;
 import android.content.SharedPreferences;
 
-import com.mparticle.ConfigManager;
 import com.mparticle.MParticle;
 
 import org.json.JSONArray;

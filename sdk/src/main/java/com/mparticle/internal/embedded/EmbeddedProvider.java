@@ -8,7 +8,7 @@ import android.util.SparseBooleanArray;
 import com.mparticle.MPEvent;
 import com.mparticle.MPProduct;
 import com.mparticle.MParticle;
-import com.mparticle.ConfigManager;
+import com.mparticle.internal.ConfigManager;
 
 import org.json.JSONArray;
 import org.json.JSONException;

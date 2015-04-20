@@ -8,7 +8,6 @@ import android.provider.Settings;
 import android.util.Base64;
 
 import com.mparticle.BuildConfig;
-import com.mparticle.ConfigManager;
 import com.mparticle.MParticle;
 import com.mparticle.internal.embedded.EmbeddedKitFactory;
 

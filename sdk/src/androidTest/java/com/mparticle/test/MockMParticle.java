@@ -4,7 +4,7 @@ import android.content.Context;
 
 import com.mparticle.MPEvent;
 import com.mparticle.MParticle;
-import com.mparticle.ConfigManager;
+import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.MessageManager;
 import com.mparticle.internal.embedded.EmbeddedKitManager;
 

@@ -12,7 +12,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.mparticle.MPService;
-import com.mparticle.ConfigManager;
+import com.mparticle.internal.ConfigManager;
 
 import org.json.JSONArray;
 import org.json.JSONObject;

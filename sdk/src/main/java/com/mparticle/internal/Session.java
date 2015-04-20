@@ -1,7 +1,9 @@
 package com.mparticle.internal;
 
-import com.mparticle.ConfigManager;
 import com.mparticle.MParticle;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
@@ -12,6 +14,8 @@ public class Session {
     public long mSessionStartTime = 0;
     public long mLastEventTime = 0;
     private long mTimeInBackground = 0;
+    public JSONObject mSessionAttributes = new JSONObject();
+
 
     public Session() {
         super();
@@ -25,6 +29,11 @@ public class Session {
         mSessionStartTime = session.mSessionStartTime;
         mLastEventTime = session.mLastEventTime;
         mTimeInBackground = session.mTimeInBackground;
+        try {
+            mSessionAttributes = new JSONObject(session.mSessionAttributes.toString());
+        }catch (JSONException jse){
+
+        }
     }
 
     public boolean isActive() {
@@ -34,6 +43,7 @@ public class Session {
     public Session start() {
         mLastEventTime = mSessionStartTime = System.currentTimeMillis();
         mSessionID = UUID.randomUUID().toString();
+        mSessionAttributes = new JSONObject();
         mEventCount = 0;
         mTimeInBackground = 0;
         return this;

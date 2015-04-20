@@ -1,6 +1,5 @@
 package com.mparticle.internal;
 
-import com.mparticle.ConfigManager;
 import com.mparticle.MParticle;
 import com.mparticle.mock.MockContext;
 import com.mparticle.mock.MockSharedPreferences;

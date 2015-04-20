@@ -1,11 +1,11 @@
-package com.mparticle;
+package com.mparticle.internal;
 
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Log;
 
-import com.mparticle.ConfigManager;
 import com.mparticle.MParticle;
+import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.Constants;
 import com.mparticle.internal.MPUtility;
 

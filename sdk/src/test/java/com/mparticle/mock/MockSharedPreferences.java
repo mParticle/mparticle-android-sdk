@@ -14,8 +14,8 @@ import java.util.Set;
  */
 public class MockSharedPreferences implements SharedPreferences, SharedPreferences.Editor {
 
-    private HashMap<String, Object> mValues = new HashMap<>();
-    private HashMap<String, Object> mTempValues = new HashMap<>();
+    private HashMap<String, Object> mValues = new HashMap<String, Object>();
+    private HashMap<String, Object> mTempValues = new HashMap<String, Object>();
 
     public Editor edit() {
         return this;

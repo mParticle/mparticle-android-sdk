@@ -1,4 +1,4 @@
-package com.mparticle;
+package com.mparticle.internal;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
@@ -9,12 +9,9 @@ import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Handler;
 import android.os.SystemClock;
-import android.util.Log;
 
-import com.mparticle.internal.Constants;
-import com.mparticle.internal.MPActivityCallbacks;
-import com.mparticle.internal.MPUtility;
-import com.mparticle.internal.Session;
+import com.mparticle.BuildConfig;
+import com.mparticle.MParticle;
 import com.mparticle.internal.embedded.EmbeddedKitManager;
 
 import org.json.JSONObject;
@@ -22,9 +19,10 @@ import org.json.JSONObject;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
-import static junit.framework.Assert.fail;
 
 /**
+ * @hide
+ *
  * This class is responsible for managing sessions, by detecting how many
  *
  */
@@ -85,6 +83,7 @@ import static junit.framework.Assert.fail;
     private String previousSessionParameters;
     private String previousSessionUri;
     boolean mUnitTesting = false;
+    private MessageManager mMessageManager;
 
     public AppStateManager(Context context, boolean unitTesting){
         mUnitTesting = unitTesting;
@@ -111,6 +110,10 @@ import static junit.framework.Assert.fail;
         mConfigManager = manager;
     }
 
+    public void setMessageManager(MessageManager manager){
+        mMessageManager = manager;
+    }
+
     private long getTime(){
         if (mUnitTesting){
             return System.currentTimeMillis();
@@ -125,7 +128,7 @@ import static junit.framework.Assert.fail;
             mCurrentActivity = AppStateManager.getActivityName(activity);
 
             int interruptions = mInterruptionCount.get();
-            if (!mInitialized || !MParticle.getInstance().isSessionActive()) {
+            if (!mInitialized || !getSession().isActive()) {
                 gatherSourceInfo(activity);
             }
 
@@ -133,7 +136,7 @@ import static junit.framework.Assert.fail;
 
             if (!mInitialized) {
                 mInitialized = true;
-                MParticle.getInstance().logStateTransition(Constants.StateTransitionType.STATE_TRANS_INIT,
+                 logStateTransition(Constants.StateTransitionType.STATE_TRANS_INIT,
                         mCurrentActivity,
                         0,
                         0,
@@ -143,7 +146,7 @@ import static junit.framework.Assert.fail;
                         0);
                 mLastForegroundTime = getTime();
             } else if (isBackgrounded() && mLastStoppedTime.get() > 0) {
-                MParticle.getInstance().logStateTransition(Constants.StateTransitionType.STATE_TRANS_FORE,
+                logStateTransition(Constants.StateTransitionType.STATE_TRANS_FORE,
                         mCurrentActivity,
                         mLastStoppedTime.get() - mLastForegroundTime,
                         getTime() - mLastStoppedTime.get(),
@@ -158,15 +161,12 @@ import static junit.framework.Assert.fail;
             mActivities.getAndIncrement();
 
             if (MParticle.getInstance().isAutoTrackingEnabled()) {
-                MParticle.getInstance().logScreen(mCurrentActivity, null, true);
+                MParticle.getInstance().internalLogScreen(mCurrentActivity, null, true);
             }
             mEmbeddedKitManager.onActivityStarted(activity, mActivities.get());
         }catch (Exception e){
             if (BuildConfig.MP_DEBUG) {
                 ConfigManager.log(MParticle.LogLevel.ERROR, "Failed while trying to track activity start: " + e.getMessage());
-                if (mUnitTesting){
-                    throw e;
-                }
             }
         }
     }
@@ -216,15 +216,65 @@ import static junit.framework.Assert.fail;
                 }, ACTIVITY_DELAY);
             }
             if (MParticle.getInstance().isAutoTrackingEnabled()) {
-                MParticle.getInstance().logScreen(AppStateManager.getActivityName(activity), null, false);
+                MParticle.getInstance().internalLogScreen(AppStateManager.getActivityName(activity), null, false);
             }
             mEmbeddedKitManager.onActivityStopped(activity, mActivities.get());
         }catch (Exception e){
             if (BuildConfig.MP_DEBUG) {
                 ConfigManager.log(MParticle.LogLevel.ERROR, "Failed while trying to track activity stop: " + e.getMessage());
-                if (mUnitTesting){
-                    throw e;
-                }
+            }
+        }
+    }
+
+    private void ensureActiveSession() {
+        Session session = getSession();
+        session.mLastEventTime = System.currentTimeMillis();
+        if (!session.isActive()) {
+            newSession();
+        }else{
+            mMessageManager.updateSessionEnd(getSession());
+        }
+    }
+
+    void logStateTransition(String transitionType, String currentActivity, long previousForegroundTime, long suspendedTime, String dataString, String launchParameters, String launchPackage, int interruptions) {
+        if (mConfigManager.isEnabled()) {
+            ensureActiveSession();
+
+            mMessageManager.logStateTransition(transitionType,
+                    currentActivity,
+                    dataString,
+                    launchParameters,
+                    launchPackage,
+                    previousForegroundTime,
+                    suspendedTime,
+                    interruptions
+            );
+        }
+    }
+
+    public void logStateTransition(String transitionType, String currentActivity) {
+        logStateTransition(transitionType, currentActivity, 0, 0, null, null, null, 0);
+    }
+
+    /**
+     * Creates a new session and generates the start-session message.
+     */
+    private void newSession() {
+        startSession();
+        mMessageManager.startSession();
+        ConfigManager.log(MParticle.LogLevel.DEBUG, "Started new session");
+        mEmbeddedKitManager.startSession();
+        mMessageManager.startUploadLoop();
+        enableLocationTracking();
+    }
+
+    private void enableLocationTracking(){
+        if (mPreferences.contains(Constants.PrefKeys.LOCATION_PROVIDER)){
+            String provider = mPreferences.getString(Constants.PrefKeys.LOCATION_PROVIDER, null);
+            long minTime = mPreferences.getLong(Constants.PrefKeys.LOCATION_MINTIME, 0);
+            long minDistance = mPreferences.getLong(Constants.PrefKeys.LOCATION_MINDISTANCE, 0);
+            if (provider != null && minTime > 0 && minDistance > 0){
+                MParticle.getInstance().enableLocationTracking(provider, minTime, minDistance);
             }
         }
     }
@@ -233,7 +283,14 @@ import static junit.framework.Assert.fail;
         delayedBackgroundCheckHandler.postDelayed( new Runnable() {
             @Override
             public void run() {
-                MParticle.getInstance().checkSessionTimeout();
+                Session session = getSession();
+                if (0 != session.mSessionStartTime &&
+                        isBackgrounded()
+                        && session.isTimedOut(mConfigManager.getSessionTimeout())
+                        && !MParticle.getInstance().Media().getAudioPlaying()) {
+                    ConfigManager.log(MParticle.LogLevel.DEBUG, "Session timed out");
+                    endSession();
+                }
             }
         }, mConfigManager.getSessionTimeout());
     }
@@ -254,7 +311,7 @@ import static junit.framework.Assert.fail;
     }
 
     private void logBackgrounded(){
-        MParticle.getInstance().logStateTransition(Constants.StateTransitionType.STATE_TRANS_BG, mCurrentActivity);
+        logStateTransition(Constants.StateTransitionType.STATE_TRANS_BG, mCurrentActivity);
         mCurrentActivity = null;
         ConfigManager.log(MParticle.LogLevel.DEBUG, "App backgrounded.");
         mInterruptionCount.incrementAndGet();
@@ -287,5 +344,6 @@ import static junit.framework.Assert.fail;
 
     public void startSession() {
         mCurrentSession = new Session().start();
+        enableLocationTracking();
     }
 }

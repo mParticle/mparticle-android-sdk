@@ -1,5 +1,9 @@
-package com.mparticle;
+package com.mparticle.internal;
 
+
+import com.mparticle.MParticle;
+import com.mparticle.MockMParticle;
+import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.embedded.EmbeddedKitManager;
 import com.mparticle.messaging.MPMessagingAPI;
 

@@ -3,7 +3,6 @@ package com.mparticle.internal;
 
 import android.webkit.JavascriptInterface;
 
-import com.mparticle.ConfigManager;
 import com.mparticle.MParticle;
 import com.mparticle.MParticle.EventType;
 

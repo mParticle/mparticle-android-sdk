@@ -8,7 +8,6 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.location.Location;
-import android.media.session.MediaSession;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.BatteryManager;
@@ -17,10 +16,7 @@ import android.os.HandlerThread;
 import android.os.Message;
 import android.os.Process;
 import android.telephony.TelephonyManager;
-import android.text.TextUtils;
 
-import com.mparticle.AppStateManager;
-import com.mparticle.ConfigManager;
 import com.mparticle.MPEvent;
 import com.mparticle.MPUnityException;
 import com.mparticle.MParticle;
@@ -135,11 +131,13 @@ public class MessageManager implements MessageManagerCallbacks {
         mContext = appContext.getApplicationContext();
         mConfigManager = configManager;
         mAppStateManager = appStateManager;
+        mAppStateManager.setMessageManager(this);
         MParticleDatabase database = new MParticleDatabase(appContext);
         mMessageHandler = new MessageHandler(sMessageHandlerThread.getLooper(), this, database);
         mUploadHandler = new UploadHandler(appContext, sUploadHandlerThread.getLooper(), configManager, database, appStateManager);
         mPreferences = appContext.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
         mInstallType = installType;
+
     }
 
     private static TelephonyManager getTelephonyManager() {
@@ -460,12 +458,13 @@ public class MessageManager implements MessageManagerCallbacks {
         return null;
     }
 
-    public void setSessionAttributes(JSONObject attributes) {
-        if (attributes != null) {
+    public void setSessionAttributes() {
+        Session session = mAppStateManager.getSession();
+        if (session.mSessionAttributes != null) {
             try {
                 JSONObject sessionAttributes = new JSONObject();
                 sessionAttributes.put(MessageKey.SESSION_ID, mAppStateManager.getSession().mSessionID);
-                sessionAttributes.put(MessageKey.ATTRIBUTES, attributes);
+                sessionAttributes.put(MessageKey.ATTRIBUTES, session.mSessionAttributes);
                 mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.UPDATE_SESSION_ATTRIBUTES,
                         sessionAttributes));
             } catch (JSONException e) {

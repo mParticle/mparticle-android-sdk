@@ -6,11 +6,11 @@ import android.content.Intent;
 import android.location.Location;
 import android.net.Uri;
 
-import com.mparticle.AppStateManager;
+import com.mparticle.internal.AppStateManager;
 import com.mparticle.MPEvent;
 import com.mparticle.MPProduct;
 import com.mparticle.MParticle;
-import com.mparticle.ConfigManager;
+import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.Constants;
 import com.mparticle.internal.MPActivityCallbacks;
 

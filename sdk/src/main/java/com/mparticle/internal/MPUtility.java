@@ -21,7 +21,6 @@ import android.util.Log;
 import android.view.Display;
 import android.view.WindowManager;
 
-import com.mparticle.ConfigManager;
 import com.mparticle.MParticle;
 import com.mparticle.MParticle.LogLevel;
 

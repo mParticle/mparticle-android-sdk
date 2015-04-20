@@ -14,6 +14,8 @@ import android.provider.Settings;
 import android.util.Log;
 import android.webkit.WebView;
 
+import com.mparticle.internal.AppStateManager;
+import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.Constants;
 import com.mparticle.internal.Constants.MessageKey;
 import com.mparticle.internal.Constants.PrefKeys;
@@ -97,7 +99,7 @@ public class MParticle {
     ConfigManager mConfigManager;
 
     /**
-     * Used to filter, log, and drain a queue of measured HTTP requests
+     * Used to filter, log, and drain a queue of measured HTTP requests.
      */
     MeasuredRequestManager measuredRequestManager;
 
@@ -115,7 +117,7 @@ public class MParticle {
 
 
     private JSONObject mUserAttributes = new JSONObject();
-    private JSONObject mSessionAttributes;
+   // private JSONObject mSessionAttributes;
 
     private MessageManager mMessageManager;
     private static volatile MParticle instance;
@@ -127,7 +129,8 @@ public class MParticle {
 
     private MPMessagingAPI mMessaging;
     private MPMediaAPI mMedia;
-    public MParticle() {}
+
+    MParticle() {}
 
 
     /**
@@ -353,12 +356,10 @@ public class MParticle {
      */
     private void newSession() {
         mAppStateManager.startSession();
-        mSessionAttributes = new JSONObject();
         mMessageManager.startSession();
         ConfigManager.log(LogLevel.DEBUG, "Started new session");
         mEmbeddedKitManager.startSession();
         mMessageManager.startUploadLoop();
-        enableLocationTracking();
     }
 
     /**
@@ -581,7 +582,7 @@ public class MParticle {
      * @param eventData  a Map of data attributes to associate with this screen view
      */
     public void logScreen(String screenName, Map<String, String> eventData) {
-        logScreen(screenName, eventData, true);
+        internalLogScreen(screenName, eventData, true);
     }
 
     /**
@@ -589,7 +590,7 @@ public class MParticle {
      *
      * @param started true if we're navigating to a screen (onStart), false if we're leaving a screen (onStop)
      */
-     void logScreen(String screenName, Map<String, String> eventData, Boolean started) {
+     public void internalLogScreen(String screenName, Map<String, String> eventData, Boolean started) {
         if (null == screenName) {
             ConfigManager.log(LogLevel.ERROR, "screenName is required for logScreen");
             return;
@@ -750,7 +751,7 @@ public class MParticle {
 
     }
 
-    void setNetworkTrackingEnabled(boolean enabled, boolean userTriggered){
+    private void setNetworkTrackingEnabled(boolean enabled, boolean userTriggered){
         if (enabled) {
             if (!measuredRequestManager.getEnabled()) {
                 if (userTriggered) {
@@ -888,16 +889,7 @@ public class MParticle {
         }
     }
 
-    private void enableLocationTracking(){
-        if (mPreferences.contains(PrefKeys.LOCATION_PROVIDER)){
-            String provider = mPreferences.getString(PrefKeys.LOCATION_PROVIDER, null);
-            long minTime = mPreferences.getLong(PrefKeys.LOCATION_MINTIME, 0);
-            long minDistance = mPreferences.getLong(PrefKeys.LOCATION_MINDISTANCE, 0);
-            if (provider != null && minTime > 0 && minDistance > 0){
-                enableLocationTracking(provider, minTime, minDistance);
-            }
-        }
-    }
+
 
     /**
      * Disables any mParticle location tracking that had been started
@@ -957,8 +949,8 @@ public class MParticle {
             ensureActiveSession();
             ConfigManager.log(LogLevel.DEBUG, "Set session attribute: " + key + "=" + value);
 
-            if (MPUtility.setCheckedAttribute(mSessionAttributes, key, value, true, false)) {
-                mMessageManager.setSessionAttributes(mSessionAttributes);
+            if (MPUtility.setCheckedAttribute(mAppStateManager.getSession().mSessionAttributes, key, value, true, false)) {
+                mMessageManager.setSessionAttributes();
             }
         }
     }
@@ -979,8 +971,8 @@ public class MParticle {
             ConfigManager.log(LogLevel.DEBUG, "Incrementing session attribute: " + key + "=" + value);
 
 
-            if (MPUtility.setCheckedAttribute(mSessionAttributes, key, value, true, true)) {
-                mMessageManager.setSessionAttributes(mSessionAttributes);
+            if (MPUtility.setCheckedAttribute(mAppStateManager.getSession().mSessionAttributes, key, value, true, true)) {
+                mMessageManager.setSessionAttributes();
             }
         }
     }
@@ -1279,7 +1271,7 @@ public class MParticle {
     /**
      * Get the current Environment that the SDK has interpreted. Will never return AutoDetect.
      *
-     * @return
+     * @return the current environment, either production or development
      */
     public Environment getEnvironment() {
         return ConfigManager.getEnvironment();
@@ -1318,25 +1310,6 @@ public class MParticle {
         return mAppStateManager.getSession().checkEventLimit();
     }
 
-    void logStateTransition(String transitionType, String currentActivity) {
-        logStateTransition(transitionType, currentActivity, 0, 0, null, null, null, 0);
-    }
-
-    void logStateTransition(String transitionType, String currentActivity, long previousForegroundTime, long suspendedTime, String dataString, String launchParameters, String launchPackage, int interruptions) {
-        if (mConfigManager.isEnabled()) {
-            ensureActiveSession();
-
-            mMessageManager.logStateTransition(transitionType,
-                    currentActivity,
-                    dataString,
-                    launchParameters,
-                    launchPackage,
-                    previousForegroundTime,
-                    suspendedTime,
-                    interruptions
-            );
-        }
-    }
 
     /**
      * Performs a license check to ensure that the application
@@ -1613,7 +1586,7 @@ public class MParticle {
      * application will be <code>TRUE</code> when signing with a debug certificate during development, or if you have explicitly set your
      * application to debug within your AndroidManifest.xml.
      *
-     * @see {@link #start(android.content.Context, com.mparticle.MParticle.InstallType, com.mparticle.MParticle.Environment)}
+     * @see com.mparticle.MParticle#start(Context, InstallType, Environment)
      * to override this behavior.
      *
      */
@@ -1678,7 +1651,7 @@ public class MParticle {
         if (mConfigManager.isEnabled()) {
             mMessageManager.logErrorEvent(t != null ? t.getMessage() : null, t, null, false);
             //we know that the app is about to crash and therefore exit
-            logStateTransition(Constants.StateTransitionType.STATE_TRANS_EXIT, mAppStateManager.getCurrentActivity());
+            mAppStateManager.logStateTransition(Constants.StateTransitionType.STATE_TRANS_EXIT, mAppStateManager.getCurrentActivity());
             mAppStateManager.getSession().mLastEventTime = System.currentTimeMillis();
             endSession(mAppStateManager.getSession());
         }

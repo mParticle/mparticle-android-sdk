@@ -1,9 +1,6 @@
 package com.mparticle.internal.embedded;
 
 
-import android.content.Context;
-
-import com.mparticle.ConfigManager;
 import com.mparticle.MParticle;
 
 import org.json.JSONException;

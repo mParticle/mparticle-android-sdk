@@ -1,4 +1,4 @@
-package com.mparticle;
+package com.mparticle.internal;
 
 import android.content.Context;
 import android.content.SharedPreferences;

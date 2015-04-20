@@ -4,8 +4,6 @@ import android.content.SharedPreferences;
 import android.location.Location;
 import android.os.Message;
 
-import com.mparticle.AppStateManager;
-import com.mparticle.ConfigManager;
 import com.mparticle.MPEvent;
 import com.mparticle.MParticle;
 import com.mparticle.mock.MockContext;
@@ -343,8 +341,7 @@ public class MessageManagerTest {
 
     @Test
     public void testSetSessionAttributes() throws Exception {
-        manager.setSessionAttributes(null);
-        manager.setSessionAttributes(new JSONObject());
+        manager.setSessionAttributes();
         Mockito.verify(messageHandler, Mockito.times(1)).sendMessage(Mockito.any(Message.class));
     }
 

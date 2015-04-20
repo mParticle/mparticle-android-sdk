@@ -2,8 +2,8 @@ package com.mparticle.test;
 
 import android.test.AndroidTestCase;
 
-import com.mparticle.AppStateManager;
-import com.mparticle.ConfigManager;
+import com.mparticle.internal.AppStateManager;
+import com.mparticle.internal.ConfigManager;
 import com.mparticle.MParticle;
 import com.mparticle.internal.MPUtility;
 
