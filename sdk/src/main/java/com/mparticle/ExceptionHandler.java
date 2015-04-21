@@ -9,8 +9,7 @@ import java.lang.Thread.UncaughtExceptionHandler;
 import java.lang.ref.WeakReference;
 
 /**
- * Class used to capture uncaught exceptions. Maintains a WeakReference to the original exception handler
- * so that we can support at least 2 exception handlers at a time.
+ * Class used to capture and log uncaught exceptions.
  */
 /* package-private */public class ExceptionHandler implements UncaughtExceptionHandler {
 
