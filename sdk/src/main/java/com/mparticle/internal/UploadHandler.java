@@ -225,9 +225,11 @@ public class UploadHandler extends Handler {
                 while (readyMessagesCursor.moveToNext()) {
                     String currentSessionId = readyMessagesCursor.getString(sessionIndex);
                     MPMessage message = new MPMessage(readyMessagesCursor.getString(messageIndex));
-                    if (lastSessionId == null || lastSessionId.equals(currentSessionId)){
+                    boolean sameSession = lastSessionId == null || lastSessionId.equals(currentSessionId);
+                    if (sameSession){
                         messagesArray.put(message);
-                    }else {
+                    }
+                    if (!sameSession || readyMessagesCursor.isLast()) {
                         MessageBatch uploadMessage = createUploadMessage(messagesArray, true);
                         if (uploadMessage != null) {
                             dbInsertUpload(uploadMessage);
