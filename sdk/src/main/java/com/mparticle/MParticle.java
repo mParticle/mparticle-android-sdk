@@ -326,16 +326,10 @@ public class MParticle {
     public void endSession() {
         if (mConfigManager.isEnabled()) {
             mAppStateManager.getSession().mLastEventTime = System.currentTimeMillis();
-            endSession(mAppStateManager.getSession());
+            mAppStateManager.endSession();
         }
     }
 
-    private void endSession(Session session) {
-        ConfigManager.log(LogLevel.DEBUG, "Ended session");
-        mEmbeddedKitManager.endSession();
-        mMessageManager.endSession(session);
-        disableLocationTracking(false);
-    }
 
 
     boolean isSessionActive() {
@@ -586,7 +580,7 @@ public class MParticle {
     }
 
     /**
-     * Internal logScreen needed to signify if we're coming or going from a screen
+     * Internal logScreen - do not use.
      *
      * @param started true if we're navigating to a screen (onStart), false if we're leaving a screen (onStop)
      */
@@ -1653,7 +1647,7 @@ public class MParticle {
             //we know that the app is about to crash and therefore exit
             mAppStateManager.logStateTransition(Constants.StateTransitionType.STATE_TRANS_EXIT, mAppStateManager.getCurrentActivity());
             mAppStateManager.getSession().mLastEventTime = System.currentTimeMillis();
-            endSession(mAppStateManager.getSession());
+            mAppStateManager.endSession();
         }
     }
 
@@ -1716,60 +1710,4 @@ public class MParticle {
         String LASTNAME = "$LastName";
     }
 
-    /**
-     * Check current session timeout and end the session if needed. Will not start a new session.
-     */
-    Boolean checkSessionTimeout() {
-        Session session = mAppStateManager.getSession();
-        if (0 != session.mSessionStartTime &&
-                mAppStateManager.isBackgrounded()
-                && session.isTimedOut(mConfigManager.getSessionTimeout())
-                && !MParticle.getInstance().Media().getAudioPlaying()) {
-            ConfigManager.log(LogLevel.DEBUG, "Session timed out");
-            endSession();
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * @hide
-     *
-     */
-    public class MParticleInternal {
-
-
-
-
-        /*public EmbeddedKitManager getEmbeddedKitManager() {
-            return mEmbeddedKitManager;
-        }
-
-        public void clearPushNotificationId() {
-            PushRegistrationHelper.clearPushRegistrationId(mAppContext);
-            mMessageManager.setPushRegistrationId(mSessionID, mSessionStartTime, System.currentTimeMillis(), null, true);
-        }
-
-        public void setPushRegistrationId(String registrationId) {
-            PushRegistrationHelper.storeRegistrationId(mAppContext, registrationId);
-            mMessageManager.setPushRegistrationId(mSessionID, mSessionStartTime, System.currentTimeMillis(), registrationId, true);
-        }
-
-        public Boolean shouldProcessUrl(String url) {
-            return ConfigManager.isNetworkPerformanceEnabled() &&
-                    measuredRequestManager.isUriAllowed(url) && !mEmbeddedKitManager.isEmbeddedKitUri(url);
-        }
-
-
-
-
-
-
-
-        public MessageManager getMessageManager() {
-            return mMessageManager;
-        }
-*/
-
-    }
 }
