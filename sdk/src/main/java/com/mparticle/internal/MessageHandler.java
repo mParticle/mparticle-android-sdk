@@ -145,11 +145,14 @@ import java.util.UUID;
                         ConfigManager.log(MParticle.LogLevel.ERROR, "Error creating session end, no entry for sessionId in mParticle DB");
                     }
                     selectCursor.close();
-
+                    //1 means this came from ending the session
+                    if (msg.arg1 == 1){
+                        mMessageManagerCallbacks.endUploadLoop();
+                    }
                 } catch (Exception e) {
                     ConfigManager.log(MParticle.LogLevel.ERROR, e, "Error creating session end message in mParticle DB");
-                } finally {
-                    mMessageManagerCallbacks.endUploadLoop();
+                }finally {
+
                 }
                 break;
             case END_ORPHAN_SESSIONS:
@@ -164,7 +167,7 @@ import java.util.UUID;
                     // process any that are found
                     while (selectCursor.moveToNext()) {
                         String sessionId = selectCursor.getString(0);
-                        sendMessage(obtainMessage(MessageHandler.CREATE_SESSION_END_MESSAGE, sessionId));
+                        sendMessage(obtainMessage(MessageHandler.CREATE_SESSION_END_MESSAGE, 0, 0, sessionId));
                     }
                     selectCursor.close();
                 } catch (Exception e) {

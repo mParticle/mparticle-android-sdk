@@ -284,8 +284,7 @@ public class MessageManager implements MessageManagerCallbacks {
     public void endSession(Session session) {
         updateSessionEnd(session);
         mMessageHandler
-                .sendMessage(mMessageHandler.obtainMessage(MessageHandler.CREATE_SESSION_END_MESSAGE, session.mSessionID));
-        mAppStateManager.endSession();
+                .sendMessage(mMessageHandler.obtainMessage(MessageHandler.CREATE_SESSION_END_MESSAGE, 1, 1, session.mSessionID));
     }
 
     public MPMessage logEvent(MPEvent event, String currentActivity) {
