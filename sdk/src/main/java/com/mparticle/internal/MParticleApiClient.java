@@ -234,7 +234,7 @@ public class MParticleApiClient implements IMPApiClient {
             logUpload(message);
         }
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH && connection instanceof HttpsURLConnection) {
+        if (!BuildConfig.MP_DEBUG && Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH && connection instanceof HttpsURLConnection) {
             try {
                 ((HttpsURLConnection) connection).setSSLSocketFactory(getSocketFactory());
             }catch (Exception e){
@@ -388,7 +388,7 @@ public class MParticleApiClient implements IMPApiClient {
 
     public HttpURLConnection makeUrlRequest(HttpURLConnection connection, boolean mParticle) throws IOException{
         //gingerbread seems to dislike pinning w/ godaddy. Being that GB is near-dead anyway, just disable pinning for it.
-        if (mParticle && Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH && connection instanceof HttpsURLConnection) {
+        if (!BuildConfig.MP_DEBUG && mParticle && Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH && connection instanceof HttpsURLConnection) {
             try {
                 ((HttpsURLConnection) connection).setSSLSocketFactory(getSocketFactory());
             }catch (Exception e){
