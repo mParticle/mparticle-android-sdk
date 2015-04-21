@@ -339,7 +339,20 @@ import java.util.concurrent.atomic.AtomicLong;
     }
 
     public void endSession() {
+        ConfigManager.log(MParticle.LogLevel.DEBUG, "Ended session");
+        mEmbeddedKitManager.endSession();
+        mMessageManager.endSession(mCurrentSession);
+        disableLocationTracking();
         mCurrentSession = new Session();
+    }
+
+    private void disableLocationTracking() {
+        SharedPreferences.Editor editor = mPreferences.edit();
+        editor.remove(Constants.PrefKeys.LOCATION_PROVIDER)
+                .remove(Constants.PrefKeys.LOCATION_MINTIME)
+                .remove(Constants.PrefKeys.LOCATION_MINDISTANCE)
+                .apply();
+        MParticle.getInstance().disableLocationTracking();
     }
 
     public void startSession() {
