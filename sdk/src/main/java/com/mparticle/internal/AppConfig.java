@@ -102,10 +102,10 @@ class AppConfig {
                 logLevel = MParticle.LogLevel.DEBUG;
             }
         }
+        autoTrackingEnabled = getBoolean(PREFKEY_AUTOTRACKING, DEFAULT_ENABLE_AUTO_TRACKING);
     }
 
     public void delayedInit() {
-
         sessionTimeout = getInteger(PREFKEY_SESSION_TIMEOUT, DEFAULT_SESSION_TIMEOUT);
         uploadInterval = getInteger(PREFKEY_PROD_UPLOAD_INTERVAL, DEFAULT_UPLOAD_INTERVAL);
         isPushEnabled = getBoolean(PREFKEY_PUSH_ENABLED, DEFAULT_ENABLE_PUSH);
@@ -123,10 +123,8 @@ class AppConfig {
                 ConfigManager.log(MParticle.LogLevel.ERROR, "Configuration issue: Licensing enabled but no license key specified.");
             }
         }
-        autoTrackingEnabled = getBoolean(PREFKEY_AUTOTRACKING, DEFAULT_ENABLE_AUTO_TRACKING);
+
         networkingEnabled = getBoolean(PREFKEY_NETWORK_MEASUREMENT, DEFAULT_NETWORK_MEASUREMENT);
-
-
 
     }
 
