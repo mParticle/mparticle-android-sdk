@@ -167,8 +167,6 @@ public class MessageManagerTest {
         Session session = appStateManager.getSession().start();
         assertNotEquals(Constants.NO_SESSION_ID, session.mSessionID);
         manager.endSession(session);
-        Session newSession = appStateManager.getSession();
-        assertEquals(Constants.NO_SESSION_ID, newSession.mSessionID);
     }
 
     @Test

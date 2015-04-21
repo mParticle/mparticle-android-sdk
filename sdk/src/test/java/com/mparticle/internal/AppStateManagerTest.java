@@ -36,6 +36,7 @@ public class AppStateManagerTest {
         prefs = (MockSharedPreferences) mockContext.getSharedPreferences(null, 0);
         manager.setConfigManager(Mockito.mock(ConfigManager.class));
         manager.setEmbeddedKitManager(Mockito.mock(EmbeddedKitManager.class));
+        manager.setMessageManager(Mockito.mock(MessageManager.class));
         MParticle.setInstance(Mockito.mock(MParticle.class));
         manager.delayedBackgroundCheckHandler = Mockito.mock(Handler.class);
     }
