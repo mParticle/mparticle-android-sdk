@@ -81,8 +81,6 @@ public class Session {
 
     public void updateBackgroundTime(AtomicLong lastStoppedTime, long currentTime) {
         long time = lastStoppedTime.get();
-        if (time >= mSessionStartTime){
-            mTimeInBackground += (currentTime - time);
-        }
+        mTimeInBackground += (currentTime - time);
     }
 }
