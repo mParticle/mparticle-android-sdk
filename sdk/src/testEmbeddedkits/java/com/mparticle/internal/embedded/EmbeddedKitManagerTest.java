@@ -36,6 +36,7 @@ public class EmbeddedKitManagerTest extends TestCase {
         EmbeddedKitFactory factory = Mockito.mock(EmbeddedKitFactory.class);
         Mockito.when(factory.isSupported(Mockito.anyInt())).thenReturn(true);
         EmbeddedProvider mockProvider = Mockito.mock(EmbeddedProvider.class);
+        Mockito.when(mockProvider.isRunning()).thenReturn(true);
         Mockito.when(mockProvider.parseConfig(Mockito.any(JSONObject.class))).thenReturn(mockProvider);
         Mockito.when(factory.createInstance(Mockito.anyInt(), Mockito.any(EmbeddedKitManager.class))).thenReturn(mockProvider);
         MParticle.setInstance(Mockito.mock(MParticle.class));
@@ -126,6 +127,7 @@ public class EmbeddedKitManagerTest extends TestCase {
         for (String id : ids){
             assertTrue(idList.contains(id.trim()));
         }
+
     }
 
     public void testGetSurveyUrl() throws Exception {

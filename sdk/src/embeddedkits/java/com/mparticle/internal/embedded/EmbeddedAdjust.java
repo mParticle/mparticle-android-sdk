@@ -27,7 +27,6 @@ class EmbeddedAdjust extends EmbeddedProvider implements MPActivityCallbacks, On
 
     private static final String APP_TOKEN = "appToken";
     private static final String HOST = "app.adjust.io";
-    boolean isRunning = false;
     boolean initialized = false;
     private AtomicBoolean hasResumed = new AtomicBoolean(false);
     //check once per run to make sure we've set the referrer.
@@ -35,6 +34,7 @@ class EmbeddedAdjust extends EmbeddedProvider implements MPActivityCallbacks, On
 
     EmbeddedAdjust(EmbeddedKitManager ekManager) {
         super(ekManager);
+        setRunning(false);
     }
 
     private void initAdjust(){
@@ -112,14 +112,9 @@ class EmbeddedAdjust extends EmbeddedProvider implements MPActivityCallbacks, On
     }
 
     @Override
-    public boolean isRunning() {
-        return isRunning;
-    }
-
-    @Override
     public void onFinishedTracking(ResponseData responseData) {
         if (!this.isRunning() && responseData != null && responseData.wasSuccess()){
-            isRunning = true;
+            setRunning(true);
             Adjust.setOnFinishedListener(null);
         }
     }

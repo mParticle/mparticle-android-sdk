@@ -54,6 +54,7 @@ abstract class EmbeddedProvider {
     protected HashSet<String> includedEvents, includedAttributes;
 
     protected Context context;
+    private boolean mRunning = true;
 
     public EmbeddedProvider(EmbeddedKitManager ekManager) {
         this.mEkManager = ekManager;
@@ -168,7 +169,7 @@ abstract class EmbeddedProvider {
 
     protected boolean shouldLogEvent(MParticle.EventType type, String name){
         int typeHash = hash(type.ordinal() + "");
-        int typeNameHash = hash(type.ordinal() + ""+ name);
+        int typeNameHash = hash(type.ordinal() + "" + name);
         return mTypeFilters.get(typeHash, true) && mNameFilters.get(typeNameHash, true);
     }
 
@@ -269,10 +270,14 @@ abstract class EmbeddedProvider {
     }
 
     public boolean isRunning() {
-        return true;
+        return mRunning;
     }
 
     public boolean shouldSetIdentity(MParticle.IdentityType identityType) {
         return mUserIdentityFilters == null || mUserIdentityFilters.size() == 0 || mUserIdentityFilters.get(identityType.getValue(), true);
+    }
+
+    public void setRunning(boolean running) {
+        this.mRunning = running;
     }
 }
