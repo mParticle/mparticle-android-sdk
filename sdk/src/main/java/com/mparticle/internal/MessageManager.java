@@ -795,12 +795,13 @@ public class MessageManager implements MessageManagerCallbacks {
                 activeNetworkName += "/" + activeNetwork.getSubtypeName();
             }
             sActiveNetworkName = activeNetworkName.toLowerCase(Locale.US);
+            mUploadHandler.setConnected(activeNetwork.isConnectedOrConnecting());
         } else {
             sActiveNetworkName = "offline";
+            mUploadHandler.setConnected(false);
         }
 
-        mUploadHandler.setConnected(activeNetwork != null && activeNetwork.isConnectedOrConnecting());
-        ConfigManager.log(MParticle.LogLevel.DEBUG, "Active network has changed: " + sActiveNetworkName);
+
     }
 
     public class InfluenceOpenMessage {
