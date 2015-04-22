@@ -330,9 +330,11 @@ public class EmbeddedKitManager implements MPActivityCallbacks {
             Iterator<Integer> it = keys.iterator();
             while (it.hasNext()) {
                 Integer next = it.next();
-                buffer.append(next);
-                if (it.hasNext()) {
-                    buffer.append(",");
+                if (providers.get(next) != null && providers.get(next).isRunning()) {
+                    buffer.append(next);
+                    if (it.hasNext()) {
+                        buffer.append(",");
+                    }
                 }
             }
             return buffer.toString();

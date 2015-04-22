@@ -268,6 +268,10 @@ abstract class EmbeddedProvider {
 
     }
 
+    public boolean isRunning() {
+        return true;
+    }
+
     public boolean shouldSetIdentity(MParticle.IdentityType identityType) {
         return mUserIdentityFilters == null || mUserIdentityFilters.size() == 0 || mUserIdentityFilters.get(identityType.getValue(), true);
     }

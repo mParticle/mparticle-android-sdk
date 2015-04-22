@@ -10,6 +10,8 @@ import com.mparticle.MPEvent;
 import com.mparticle.MPProduct;
 import com.mparticle.MParticle;
 import com.mparticle.internal.MPActivityCallbacks;
+import com.mparticle.internal.embedded.adjust.sdk.OnFinishedListener;
+import com.mparticle.internal.embedded.adjust.sdk.ResponseData;
 
 import org.json.JSONObject;
 
@@ -21,11 +23,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * Embedded implementation of the Adjust SDK 3.6.2
  * <p/>
  */
-class EmbeddedAdjust extends EmbeddedProvider implements MPActivityCallbacks {
+class EmbeddedAdjust extends EmbeddedProvider implements MPActivityCallbacks, OnFinishedListener {
 
     private static final String APP_TOKEN = "appToken";
     private static final String HOST = "app.adjust.io";
-
+    boolean isRunning = false;
     boolean initialized = false;
     private AtomicBoolean hasResumed = new AtomicBoolean(false);
     //check once per run to make sure we've set the referrer.
@@ -37,11 +39,13 @@ class EmbeddedAdjust extends EmbeddedProvider implements MPActivityCallbacks {
 
     private void initAdjust(){
         if (!initialized) {
+            boolean production = MParticle.Environment.Production.equals(MParticle.getInstance().getEnvironment());
             Adjust.appDidLaunch(context,
                     properties.get(APP_TOKEN),
-                    MParticle.getInstance().getEnvironment() == MParticle.Environment.Production ? "production" : "sandbox",
-                    "info",
+                    production ? "production" : "sandbox",
+                    production ? "info" : "verbose",
                     false);
+            Adjust.setOnFinishedListener(this);
             if (!mEkManager.getAppStateManager().isBackgrounded()) {
                 if (!hasResumed.get()) {
                     Adjust.onResume(context);
@@ -100,8 +104,23 @@ class EmbeddedAdjust extends EmbeddedProvider implements MPActivityCallbacks {
 
     }
 
+
+
     @Override
     public void onActivityStarted(Activity activity, int activityCount) {
 
+    }
+
+    @Override
+    public boolean isRunning() {
+        return isRunning;
+    }
+
+    @Override
+    public void onFinishedTracking(ResponseData responseData) {
+        if (!this.isRunning() && responseData != null && responseData.wasSuccess()){
+            isRunning = true;
+            Adjust.setOnFinishedListener(null);
+        }
     }
 }
