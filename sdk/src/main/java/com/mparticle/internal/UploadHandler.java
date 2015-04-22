@@ -199,7 +199,9 @@ public class UploadHandler extends Handler {
                 }
             }
         } catch (Exception e){
-            ConfigManager.log(MParticle.LogLevel.DEBUG, "Error preparing batch upload in mParticle DB: " + e.getMessage());
+            if (BuildConfig.MP_DEBUG) {
+                ConfigManager.log(MParticle.LogLevel.DEBUG, "Error preparing batch upload in mParticle DB: " + e.getMessage());
+            }
         } finally {
             if (readyMessagesCursor != null && !readyMessagesCursor.isClosed()){
                 readyMessagesCursor.close();
