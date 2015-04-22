@@ -192,14 +192,7 @@ class EmbeddedKahuna extends EmbeddedProvider implements MPActivityCallbacks {
 
     @Override
     public void removeUserIdentity(String id) {
-        Map<String, String> credentials = KahunaAnalytics.getUserCredentials();
-        if (credentials != null) {
-            for (Map.Entry<String, String> entry : credentials.entrySet()) {
-                if (entry.getValue().equalsIgnoreCase(id)){
-                    KahunaAnalytics.removeUserCredential(entry.getValue());
-                }
-            }
-        }
+
     }
 
     @Override

@@ -36,7 +36,6 @@ class EmbeddedKochava extends EmbeddedProvider {
         if (feature != null) {
             feature.setAppLimitTracking(Boolean.parseBoolean(properties.get(LIMIT_ADD_TRACKING)));
             Feature.setErrorDebug(Boolean.parseBoolean(properties.get(ENABLE_LOGGING)));
-            Feature.setRequestAttributionData(Boolean.parseBoolean(properties.get(RETRIEVE_ATT_DATA)));
         }
 
         return this;
