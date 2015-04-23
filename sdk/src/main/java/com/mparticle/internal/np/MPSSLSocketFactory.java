@@ -25,7 +25,7 @@ public final class MPSSLSocketFactory extends SSLSocketFactory {
     }
 
     private Socket createSocket(String host, Socket socket) throws IOException{
-        if (socket != null && socket instanceof SSLSocket && MParticle.getInstance().internal().shouldProcessUrl(host)){
+        if (socket != null && socket instanceof SSLSocket && MeasuredRequestManager.INSTANCE.shouldProcessUrl(host)){
             return new MPSSLSocket(host, (SSLSocket) socket);
         }
         return socket;

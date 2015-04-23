@@ -26,9 +26,18 @@
 -keepattributes Exceptions,InnerClasses,Signature,Deprecated,
                 SourceFile,LineNumberTable,*Annotation*,EnclosingMethod
 
--keep public class com.mparticle.* {
-    public protected *;
-}
+-keep class com.mparticle.MPEvent { *; }
+-keep class com.mparticle.MParticle { *; }
+-keep class com.mparticle.MParticle$* { *; }
+-keep class com.mparticle.MPProduct { *; }
+-keep class com.mparticle.MPProduct$* { *; }
+-keep class com.mparticle.MPEvent$* { *; }
+-keep class com.mparticle.BuildConfig { *; }
+-keep class com.mparticle.MPReceiver { *; }
+-keep class com.mparticle.MPService { *; }
+-keep class com.mparticle.MPUnityException { *; }
+-keep class com.mparticle.ReferrerReceiver { *; }
+
 
 -keep public class com.mparticle.activity.* {
     public protected *;

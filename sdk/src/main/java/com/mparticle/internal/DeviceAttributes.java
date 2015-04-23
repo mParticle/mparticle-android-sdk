@@ -17,6 +17,7 @@ import com.mparticle.internal.Constants.PrefKeys;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.lang.reflect.Method;
 import java.util.Locale;
 import java.util.TimeZone;
 
@@ -104,7 +105,7 @@ import java.util.TimeZone;
             boolean install = preferences.getBoolean(PrefKeys.FIRST_RUN_INSTALL, true);
             attributes.put(MessageKey.FIRST_SEEN_INSTALL, install);
 
-        } catch (Exception e) {
+        } catch (JSONException e) {
             // again difference devices can do terrible things, make sure that we don't bail out completely
             // and return at least what we've built so far.
         } finally {
@@ -190,6 +191,23 @@ import java.util.TimeZone;
             attributes.put(MessageKey.DEVICE_IS_TABLET, MPUtility.isTablet(appContext));
             attributes.put(MessageKey.DEVICE_ANID, MPUtility.getAndroidID(appContext));
             attributes.put(MessageKey.DEVICE_OPEN_UDID, MPUtility.getOpenUDID(appContext));
+
+            Class AdvertisingIdClient = Class
+                    .forName("com.google.android.gms.ads.identifier.AdvertisingIdClient");
+            Method getAdvertisingInfo = AdvertisingIdClient.getMethod("getAdvertisingIdInfo",
+                    Context.class);
+            Object advertisingInfo = getAdvertisingInfo.invoke(null, appContext);
+            Method isLimitAdTrackingEnabled = advertisingInfo.getClass().getMethod(
+                    "isLimitAdTrackingEnabled");
+            Boolean limitAdTrackingEnabled = (Boolean) isLimitAdTrackingEnabled
+                    .invoke(advertisingInfo);
+
+            attributes.put(MessageKey.LIMIT_AD_TRACKING, limitAdTrackingEnabled);
+            if (!limitAdTrackingEnabled) {
+                Method getId = advertisingInfo.getClass().getMethod("getId");
+                String advertisingId = (String) getId.invoke(advertisingInfo);
+                attributes.put(MessageKey.GOOGLE_ADV_ID, advertisingId);
+            }
 
 
         } catch (Exception e) {

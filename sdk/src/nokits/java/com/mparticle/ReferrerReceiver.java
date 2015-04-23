@@ -4,8 +4,8 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.util.Log;
 
+import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.Constants;
 
 /**
@@ -39,11 +39,11 @@ public class ReferrerReceiver extends BroadcastReceiver {
 
     static void setInstallReferrer(Context context, Intent intent){
         if (context == null){
-            Log.e(Constants.LOG_TAG, "ReferrerReceiver Context can not be null");
+            ConfigManager.log(MParticle.LogLevel.ERROR, "ReferrerReceiver Context can not be null");
             return;
         }
         if (intent == null){
-            Log.e(Constants.LOG_TAG, "ReferrerReceiver intent can not be null");
+            ConfigManager.log(MParticle.LogLevel.ERROR, "ReferrerReceiver intent can not be null");
             return;
         }
         if ("com.android.vending.INSTALL_REFERRER".equals(intent.getAction())) {

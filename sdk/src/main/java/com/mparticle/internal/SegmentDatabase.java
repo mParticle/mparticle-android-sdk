@@ -5,7 +5,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
 /**
- * Separate database form the primary detected solely to storing segment membership information.
+ * Separate database dedicated to storing segment membership information.
  *
  * The reason it's separate is that a client/customer may want to query this at any time. Particularly for ad-display
  * it's crucial that those queries return as quickly as possible. Keeping this as a separate database allows for the SDK
@@ -17,10 +17,10 @@ import android.database.sqlite.SQLiteOpenHelper;
     private static final String DB_NAME = "mparticle_segment.db";
 
     interface SegmentTable {
-        public final static String TABLE_NAME = "segments";
-        public final static String SEGMENT_ID = "_id";
-        public final static String NAME = "name";
-        public final static String ENDPOINTS = "endpoint_ids";
+        String TABLE_NAME = "segments";
+        String SEGMENT_ID = "_id";
+        String NAME = "name";
+        String ENDPOINTS = "endpoint_ids";
     }
 
     private static final String CREATE_SEGMENT_DDL =
@@ -31,11 +31,11 @@ import android.database.sqlite.SQLiteOpenHelper;
                     ");";
 
     interface SegmentMembershipTable {
-        public final static String TABLE_NAME = "segment_memberships";
-        public final static String ID = "_id";
-        public final static String SEGMENT_ID = "segment_id";
-        public final static String TIMESTAMP = "timestamp";
-        public final static String MEMBERSHIP_ACTION = "action";
+        String TABLE_NAME = "segment_memberships";
+        String ID = "_id";
+        String SEGMENT_ID = "segment_id";
+        String TIMESTAMP = "timestamp";
+        String MEMBERSHIP_ACTION = "action";
     }
 
     private static final String CREATE_SEGMENT_MEMBERSHIP_DDL =

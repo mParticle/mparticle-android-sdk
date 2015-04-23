@@ -87,7 +87,7 @@ public class MPMessagingAPI {
             ConfigManager.log(MParticle.LogLevel.ERROR, "Attempted to enable push notifications without required permission: ", "\"com.google.android.c2dm.permission.RECEIVE\"");
         }else {
             mMessagingConfigCallbacks.setPushSenderId(senderId);
-            PushRegistrationHelper.enablePushNotifications(mContext, senderId);
+            PushRegistrationHelper.enablePushNotifications(mContext, senderId, mMessagingConfigCallbacks);
         }
     }
 

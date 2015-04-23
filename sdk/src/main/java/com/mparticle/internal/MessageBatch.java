@@ -12,10 +12,14 @@ import org.json.JSONObject;
 import java.math.BigDecimal;
 import java.util.UUID;
 
-public class MessageBatch {
+public class MessageBatch extends JSONObject {
 
-    public static JSONObject create(Context context, JSONArray messagesArray, boolean history, JSONObject appInfo, JSONObject deviceInfo, ConfigManager configManager, SharedPreferences preferences) throws JSONException {
-        JSONObject uploadMessage = new JSONObject();
+    public MessageBatch() {
+        super();
+    }
+
+    public static MessageBatch create(Context context, JSONArray messagesArray, boolean history, JSONObject appInfo, JSONObject deviceInfo, ConfigManager configManager, SharedPreferences preferences, JSONObject cookies) throws JSONException {
+        MessageBatch uploadMessage = new MessageBatch();
 
         uploadMessage.put(Constants.MessageKey.TYPE, Constants.MessageType.REQUEST_HEADER);
         uploadMessage.put(Constants.MessageKey.ID, UUID.randomUUID().toString());
@@ -29,7 +33,7 @@ public class MessageBatch {
         uploadMessage.put(Constants.MessageKey.APP_INFO, appInfo);
         // if there is notification key then include it
         String regId = PushRegistrationHelper.getRegistrationId(context);
-        if ((regId != null) && (regId.length() > 0)) {
+        if (!MPUtility.isEmpty(regId)) {
             deviceInfo.put(Constants.MessageKey.PUSH_TOKEN, regId);
             deviceInfo.put(Constants.MessageKey.PUSH_TOKEN_TYPE, Constants.GOOGLE_GCM);
         } else {
@@ -77,9 +81,7 @@ public class MessageBatch {
         }
 
         uploadMessage.put(history ? Constants.MessageKey.HISTORY : Constants.MessageKey.MESSAGES, messagesArray);
-
-        MParticleApiClient.addCookies(uploadMessage, configManager);
-
+        uploadMessage.put(Constants.MessageKey.COOKIES, cookies);
         uploadMessage.put(Constants.MessageKey.PROVIDER_PERSISTENCE, configManager.getProviderPersistence());
 
         return uploadMessage;

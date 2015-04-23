@@ -45,8 +45,8 @@ class EmbeddedComscore extends EmbeddedProvider implements MPActivityCallbacks {
     private static final String HOST = "scorecardresearch.com";
     private boolean isEnterprise;
 
-    EmbeddedComscore(Context context) {
-        super(context);
+    EmbeddedComscore(EmbeddedKitManager ekManager) {
+        super(ekManager);
         comScore.setAppContext(context);
     }
 
@@ -75,21 +75,11 @@ class EmbeddedComscore extends EmbeddedProvider implements MPActivityCallbacks {
     }
 
     @Override
-    public void logTransaction(MPProduct transaction) {
-
-    }
-
-    @Override
     public void logScreen(String screenName, Map<String, String> eventAttributes) throws Exception {
         logEvent(
                 new MPEvent.Builder(screenName, MParticle.EventType.Navigation).build(),
                 eventAttributes
         );
-    }
-
-    @Override
-    public void setLocation(Location location) {
-
     }
 
     @Override
@@ -123,40 +113,10 @@ class EmbeddedComscore extends EmbeddedProvider implements MPActivityCallbacks {
     }
 
     @Override
-    public void removeUserAttribute(String key) {
-        //Comscore doesn't really support this...all of their attributes are primitives/non-nulls.
-    }
-
-    @Override
     public void setUserIdentity(String id, MParticle.IdentityType identityType) {
         if (isEnterprise){
             comScore.setLabel(identityType.toString(), id);
         }
-    }
-
-    @Override
-    public void logout() {
-
-    }
-
-    @Override
-    public void removeUserIdentity(String id) {
-
-    }
-
-    @Override
-    public void handleIntent(Intent intent) {
-
-    }
-
-    @Override
-    public void startSession() {
-        comScore.onUxActive();
-    }
-
-    @Override
-    public void endSession() {
-        comScore.onUxInactive();
     }
 
     @Override
@@ -188,7 +148,7 @@ class EmbeddedComscore extends EmbeddedProvider implements MPActivityCallbacks {
 
         boolean useHttps = Boolean.parseBoolean(properties.get(USE_HTTPS));
         comScore.setSecure(useHttps);
-        comScore.setDebug(MParticle.getInstance().internal().getConfigurationManager().getEnvironment() == MParticle.Environment.Development);
+        comScore.setDebug(mEkManager.getConfigurationManager().getEnvironment() == MParticle.Environment.Development);
         isEnterprise = "enterprise".equals(properties.get(PRODUCT));
         String appName = properties.get(APPNAME);
         if (appName != null){

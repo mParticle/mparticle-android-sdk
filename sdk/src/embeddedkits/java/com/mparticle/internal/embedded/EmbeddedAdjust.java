@@ -10,6 +10,8 @@ import com.mparticle.MPEvent;
 import com.mparticle.MPProduct;
 import com.mparticle.MParticle;
 import com.mparticle.internal.MPActivityCallbacks;
+import com.mparticle.internal.embedded.adjust.sdk.OnFinishedListener;
+import com.mparticle.internal.embedded.adjust.sdk.ResponseData;
 
 import org.json.JSONObject;
 
@@ -21,26 +23,30 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * Embedded implementation of the Adjust SDK 3.6.2
  * <p/>
  */
-class EmbeddedAdjust extends EmbeddedProvider implements MPActivityCallbacks {
+class EmbeddedAdjust extends EmbeddedProvider implements MPActivityCallbacks, OnFinishedListener {
 
     private static final String APP_TOKEN = "appToken";
     private static final String HOST = "app.adjust.io";
-
     boolean initialized = false;
     private AtomicBoolean hasResumed = new AtomicBoolean(false);
+    //check once per run to make sure we've set the referrer.
+    private boolean referrerSet = false;
 
-    EmbeddedAdjust(Context context) {
-        super(context);
+    EmbeddedAdjust(EmbeddedKitManager ekManager) {
+        super(ekManager);
+        setRunning(false);
     }
 
     private void initAdjust(){
         if (!initialized) {
+            boolean production = MParticle.Environment.Production.equals(MParticle.getInstance().getEnvironment());
             Adjust.appDidLaunch(context,
                     properties.get(APP_TOKEN),
-                    MParticle.getInstance().getEnvironment() == MParticle.Environment.Production ? "production" : "sandbox",
-                    "info",
+                    production ? "production" : "sandbox",
+                    production ? "info" : "verbose",
                     false);
-            if (!MParticle.getInstance().internal().isBackgrounded()) {
+            Adjust.setOnFinishedListener(this);
+            if (!mEkManager.getAppStateManager().isBackgrounded()) {
                 if (!hasResumed.get()) {
                     Adjust.onResume(context);
                     hasResumed.set(true);
@@ -53,9 +59,13 @@ class EmbeddedAdjust extends EmbeddedProvider implements MPActivityCallbacks {
     @Override
     protected EmbeddedProvider update() {
         initAdjust();
-        String installReferrer = MParticle.getInstance().getInstallReferrer();
-        if (installReferrer != null) {
-            MParticle.getInstance().setInstallReferrer(installReferrer);
+
+        if (!referrerSet) {
+            String installReferrer = MParticle.getInstance().getInstallReferrer();
+            if (installReferrer != null) {
+                referrerSet = true;
+                MParticle.getInstance().setInstallReferrer(installReferrer);
+            }
         }
         return this;
     }
@@ -68,6 +78,11 @@ class EmbeddedAdjust extends EmbeddedProvider implements MPActivityCallbacks {
     @Override
     public boolean isOriginator(String uri) {
         return uri != null && uri.toLowerCase().contains(HOST);
+    }
+
+    @Override
+    public void onActivityCreated(Activity activity, int activityCount) {
+
     }
 
     @Override
@@ -85,47 +100,22 @@ class EmbeddedAdjust extends EmbeddedProvider implements MPActivityCallbacks {
     }
 
     @Override
-    public void onActivityCreated(Activity activity, int activityCount) {}
+    public void onActivityStopped(Activity activity, int activityCount) {
+
+    }
+
+
 
     @Override
-    public void onActivityStopped(Activity activity, int currentCount) {}
+    public void onActivityStarted(Activity activity, int activityCount) {
+
+    }
 
     @Override
-    public void onActivityStarted(Activity activity, int currentCount) {}
-
-    @Override
-    public void logEvent(MPEvent event, Map<String, String> attributes) throws Exception {}
-
-    @Override
-    public void logTransaction(MPProduct transaction) {}
-
-    @Override
-    public void logScreen(String screenName, Map<String, String> eventAttributes) throws Exception {}
-
-    @Override
-    public void setLocation(Location location) {}
-
-    @Override
-    public void setUserAttributes(JSONObject mUserAttributes) {}
-
-    @Override
-    public void removeUserAttribute(String key) {}
-
-    @Override
-    public void setUserIdentity(String id, MParticle.IdentityType identityType) {}
-
-    @Override
-    public void logout() {}
-
-    @Override
-    public void removeUserIdentity(String id) {}
-
-    @Override
-    public void handleIntent(Intent intent) {}
-
-    @Override
-    public void startSession() {}
-
-    @Override
-    public void endSession() {}
+    public void onFinishedTracking(ResponseData responseData) {
+        if (!this.isRunning() && responseData != null && responseData.wasSuccess()){
+            setRunning(true);
+            Adjust.setOnFinishedListener(null);
+        }
+    }
 }

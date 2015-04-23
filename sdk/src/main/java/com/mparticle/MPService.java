@@ -12,6 +12,7 @@ import android.content.Intent;
 import android.content.pm.ResolveInfo;
 import android.os.AsyncTask;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.PowerManager;
@@ -23,7 +24,6 @@ import com.mparticle.internal.Constants;
 import com.mparticle.internal.MPUtility;
 import com.mparticle.messaging.AbstractCloudMessage;
 import com.mparticle.messaging.CloudAction;
-import com.mparticle.messaging.MPCloudBackgroundMessage;
 import com.mparticle.messaging.MPCloudNotificationMessage;
 import com.mparticle.messaging.MPMessagingAPI;
 import com.mparticle.messaging.ProviderCloudMessage;
@@ -140,9 +140,9 @@ public class MPService extends IntentService {
                 String appState = getAppState();
                 AbstractCloudMessage message = params[0];
                 if (message instanceof ProviderCloudMessage){
-                    MParticle.getInstance().internal().logNotification((ProviderCloudMessage)message, false, appState);
+                    MParticle.getInstance().logNotification((ProviderCloudMessage)message, false, appState);
                 }else if (message instanceof MPCloudNotificationMessage){
-                    MParticle.getInstance().internal().logNotification((MPCloudNotificationMessage)message, null, false, appState, AbstractCloudMessage.FLAG_RECEIVED | AbstractCloudMessage.FLAG_DISPLAYED);
+                    MParticle.getInstance().logNotification((MPCloudNotificationMessage)message, null, false, appState, AbstractCloudMessage.FLAG_RECEIVED | AbstractCloudMessage.FLAG_DISPLAYED);
                 }
                 return message.buildNotification(MPService.this, System.currentTimeMillis());
             }
@@ -196,7 +196,7 @@ public class MPService extends IntentService {
     }
 
     private void generateCloudMessage(Intent intent) {
-        if (!MPCloudBackgroundMessage.processSilentPush(this, intent.getExtras())){
+        if (!processSilentPush(getApplicationContext(), intent.getExtras())){
             try {
                 AbstractCloudMessage cloudMessage = AbstractCloudMessage.createMessage(intent, ConfigManager.getPushKeys(this));
                 String appState = getAppState();
@@ -205,7 +205,7 @@ public class MPService extends IntentService {
                     MParticle.start(this);
                     MParticle.getInstance().saveGcmMessage(((MPCloudNotificationMessage)cloudMessage), appState);
                     if (((MPCloudNotificationMessage)cloudMessage).isDelayed()){
-                        MParticle.getInstance().internal().logNotification((MPCloudNotificationMessage)cloudMessage, null, false, appState, AbstractCloudMessage.FLAG_RECEIVED);
+                        MParticle.getInstance().logNotification((MPCloudNotificationMessage)cloudMessage, null, false, appState, AbstractCloudMessage.FLAG_RECEIVED);
                         scheduleFutureNotification((MPCloudNotificationMessage) cloudMessage);
                         return;
                     }
@@ -217,6 +217,25 @@ public class MPService extends IntentService {
                 Log.w(TAG, "GCM parsing error: " + e.toString());
             }
         }
+    }
+
+    public boolean processSilentPush(Context context, Bundle extras) {
+        if (extras != null &&
+                extras.containsKey(MPCloudNotificationMessage.COMMAND)){
+            int command = Integer.parseInt(extras.getString(MPCloudNotificationMessage.COMMAND));
+            switch (command){
+                case MPCloudNotificationMessage.COMMAND_ALERT_CONFIG_REFRESH:
+                    MParticle.start(context);
+                    MParticle.getInstance().refreshConfiguration();
+                case MPCloudNotificationMessage.COMMAND_DONOTHING:
+                    return true;
+                default:
+                    return false;
+            }
+
+
+        }
+        return false;
     }
 
     private void scheduleFutureNotification(MPCloudNotificationMessage message){
@@ -257,7 +276,7 @@ public class MPService extends IntentService {
 
         MParticle.start(getApplicationContext());
         if (message instanceof MPCloudNotificationMessage) {
-            MParticle.getInstance().internal().logNotification((MPCloudNotificationMessage) message,
+            MParticle.getInstance().logNotification((MPCloudNotificationMessage) message,
                     action, true, getAppState(), AbstractCloudMessage.FLAG_READ | AbstractCloudMessage.FLAG_DIRECT_OPEN);
         }
 

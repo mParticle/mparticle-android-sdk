@@ -8,19 +8,21 @@ import org.json.JSONObject;
 public class MPMessage extends JSONObject{
 
     private MPMessage(){}
+
+    public MPMessage(String json) throws JSONException {
+        super(json);
+    }
+
     private MPMessage(Builder builder) throws JSONException{
         put(Constants.MessageKey.TYPE, builder.mMessageType);
         put(Constants.MessageKey.TIMESTAMP, builder.mTimestamp);
         if (Constants.MessageType.SESSION_START == builder.mMessageType) {
-            put(Constants.MessageKey.ID, builder.mSessionId);
+            put(Constants.MessageKey.ID, builder.mSession.mSessionID);
         } else {
-            if (builder.mSessionId != null) {
-                put(Constants.MessageKey.SESSION_ID, builder.mSessionId);
-            }
+            put(Constants.MessageKey.SESSION_ID, builder.mSession.mSessionID);
 
-
-            if (builder.mSessionStartTime > 0) {
-                put(Constants.MessageKey.SESSION_START_TIMESTAMP, builder.mSessionStartTime);
+            if (builder.mSession.mSessionStartTime > 0) {
+                put(Constants.MessageKey.SESSION_START_TIMESTAMP, builder.mSession.mSessionStartTime);
             }
         }
 
@@ -35,7 +37,7 @@ public class MPMessage extends JSONObject{
             }
             if (!builder.mAttributes.has("EventLength")) {
                 //can't be longer than max int milliseconds
-                builder.mAttributes.put("EventLength", builder.mLength.intValue());
+                builder.mAttributes.put("EventLength", Integer.toString(builder.mLength.intValue()));
             }
         }
 
@@ -98,8 +100,7 @@ public class MPMessage extends JSONObject{
 
     public static class Builder {
         private final String mMessageType;
-        private final String mSessionId;
-        private long mSessionStartTime;
+        private final Session mSession;
         private long mTimestamp;
         private String mName;
         private JSONObject mAttributes;
@@ -107,16 +108,12 @@ public class MPMessage extends JSONObject{
         private String mDataConnection;
         private Double mLength = null;
 
-        public Builder(String messageType, String sessionId, Location location){
+        public Builder(String messageType, Session session, Location location){
             mMessageType = messageType;
-            mSessionId = sessionId;
+            mSession = new Session(session);
             mLocation = location;
         }
 
-        public Builder sessionStartTime(long sessionStartTime){
-            mSessionStartTime = sessionStartTime;
-            return this;
-        }
         public Builder timestamp(long timestamp){
             mTimestamp = timestamp;
             return this;

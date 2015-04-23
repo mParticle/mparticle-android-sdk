@@ -1,8 +1,12 @@
 package com.mparticle.internal.embedded;
 
 import android.content.Context;
+import android.content.Intent;
+import android.location.Location;
 import android.util.SparseBooleanArray;
 
+import com.mparticle.MPEvent;
+import com.mparticle.MPProduct;
 import com.mparticle.MParticle;
 import com.mparticle.internal.ConfigManager;
 
@@ -20,7 +24,7 @@ import java.util.Map;
  * such as filters.
  *
  */
-abstract class EmbeddedProvider implements IEmbeddedKit {
+abstract class EmbeddedProvider {
 
     final static String KEY_ID = "id";
     private final static String KEY_PROPERTIES = "as";
@@ -37,6 +41,7 @@ abstract class EmbeddedProvider implements IEmbeddedKit {
 
     //If set to true, our sdk honor user's optout wish. If false, we still collect data on opt-ed out users, but only for reporting
     private static final String HONOR_OPT_OUT = "honorOptOut";
+    protected final EmbeddedKitManager mEkManager;
 
     protected HashMap<String, String> properties = new HashMap<String, String>(0);
     protected SparseBooleanArray mTypeFilters = new SparseBooleanArray(0);
@@ -49,9 +54,11 @@ abstract class EmbeddedProvider implements IEmbeddedKit {
     protected HashSet<String> includedEvents, includedAttributes;
 
     protected Context context;
+    private boolean mRunning = true;
 
-    public EmbeddedProvider(Context context) {
-        this.context = context;
+    public EmbeddedProvider(EmbeddedKitManager ekManager) {
+        this.mEkManager = ekManager;
+        this.context = ekManager.getContext();
     }
 
     protected EmbeddedProvider parseConfig(JSONObject json) throws JSONException {
@@ -142,7 +149,7 @@ abstract class EmbeddedProvider implements IEmbeddedKit {
 
     public boolean optedOut(){
         return Boolean.parseBoolean(properties.containsKey(HONOR_OPT_OUT) ? properties.get(HONOR_OPT_OUT) : "true")
-                && !MParticle.getInstance().internal().getConfigurationManager().isEnabled();
+                && !mEkManager.getConfigurationManager().isEnabled();
     }
 
     private static int hash(String input) {
@@ -162,7 +169,7 @@ abstract class EmbeddedProvider implements IEmbeddedKit {
 
     protected boolean shouldLogEvent(MParticle.EventType type, String name){
         int typeHash = hash(type.ordinal() + "");
-        int typeNameHash = hash(type.ordinal() + ""+ name);
+        int typeNameHash = hash(type.ordinal() + "" + name);
         return mTypeFilters.get(typeHash, true) && mNameFilters.get(typeNameHash, true);
     }
 
@@ -225,7 +232,52 @@ abstract class EmbeddedProvider implements IEmbeddedKit {
         }
     }
 
+    public void logEvent(MPEvent event, Map<String, String> attributes) throws Exception {
+
+    }
+    public void logTransaction(MPProduct transaction) throws Exception {
+
+    }
+    void logScreen(String screenName, Map<String, String> eventAttributes) throws Exception {
+
+    }
+    void setLocation(Location location) {
+
+    }
+    void setUserAttributes(JSONObject mUserAttributes) {
+
+    }
+    void removeUserAttribute(String key) {
+
+    }
+    void setUserIdentity(String id, MParticle.IdentityType identityType) {
+
+    }
+    void logout() {
+
+    }
+    void removeUserIdentity(String id) {
+
+    }
+    void handleIntent(Intent intent) {
+
+    }
+    void startSession() {
+
+    }
+    void endSession() {
+
+    }
+
+    public boolean isRunning() {
+        return mRunning;
+    }
+
     public boolean shouldSetIdentity(MParticle.IdentityType identityType) {
         return mUserIdentityFilters == null || mUserIdentityFilters.size() == 0 || mUserIdentityFilters.get(identityType.getValue(), true);
+    }
+
+    public void setRunning(boolean running) {
+        this.mRunning = running;
     }
 }

@@ -16,7 +16,6 @@ import android.os.HandlerThread;
 import android.os.Message;
 import android.os.Process;
 import android.telephony.TelephonyManager;
-import android.text.TextUtils;
 
 import com.mparticle.MPEvent;
 import com.mparticle.MPUnityException;
@@ -27,14 +26,12 @@ import com.mparticle.messaging.CloudAction;
 import com.mparticle.messaging.MPCloudNotificationMessage;
 import com.mparticle.messaging.ProviderCloudMessage;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
 
@@ -47,7 +44,9 @@ public class MessageManager implements MessageManagerCallbacks {
 
     private static Context mContext = null;
     private static SharedPreferences mPreferences = null;
+    private AppStateManager mAppStateManager;
     private ConfigManager mConfigManager = null;
+
 
     /**
      * These two threads are used to do the heavy lifting.
@@ -63,8 +62,8 @@ public class MessageManager implements MessageManagerCallbacks {
     /**
      * These are the handlers which manage the queues and threads mentioned above.
      */
-    private final MessageHandler mMessageHandler;
-    public final UploadHandler mUploadHandler;
+    private MessageHandler mMessageHandler;
+    public UploadHandler mUploadHandler;
     /**
      * Ideally these threads would not be started in a static initializer
      * block. but this is cleaner than checking if they have been started in
@@ -101,22 +100,44 @@ public class MessageManager implements MessageManagerCallbacks {
     /**
      * Every state-transition message needs to know if this was an upgrade or an install.
      */
-    private MParticle.InstallType mInstallType;
+    MParticle.InstallType mInstallType = MParticle.InstallType.AutoDetect;
     /**
      * Batches/messages need to communicate the current telephony status when available.
      */
     private static TelephonyManager sTelephonyManager;
     private boolean mFirstRun = true;
 
+    /**
+     * Used solely for unit testing
+     */
+    public MessageManager() {
+        super();
+    }
 
-    public MessageManager(Context appContext, ConfigManager configManager, MParticle.InstallType installType) {
+    /**
+     * Used solely for unit testing
+     */
+    public MessageManager(Context appContext, ConfigManager configManager, MParticle.InstallType installType, AppStateManager appStateManager, MessageHandler messageHandler, UploadHandler uploadHandler) {
         mContext = appContext.getApplicationContext();
         mConfigManager = configManager;
-        MParticleDatabase database = new MParticleDatabase(appContext);
-        mMessageHandler = new MessageHandler(sMessageHandlerThread.getLooper(), this, database);
-        mUploadHandler = new UploadHandler(appContext, sUploadHandlerThread.getLooper(), configManager, database);
+        mAppStateManager = appStateManager;
+        mMessageHandler = messageHandler;
+        mUploadHandler = uploadHandler;
         mPreferences = appContext.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
         mInstallType = installType;
+    }
+
+    public MessageManager(Context appContext, ConfigManager configManager, MParticle.InstallType installType, AppStateManager appStateManager) {
+        mContext = appContext.getApplicationContext();
+        mConfigManager = configManager;
+        mAppStateManager = appStateManager;
+        mAppStateManager.setMessageManager(this);
+        MParticleDatabase database = new MParticleDatabase(appContext);
+        mMessageHandler = new MessageHandler(sMessageHandlerThread.getLooper(), this, database);
+        mUploadHandler = new UploadHandler(appContext, sUploadHandlerThread.getLooper(), configManager, database, appStateManager);
+        mPreferences = appContext.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
+        mInstallType = installType;
+
     }
 
     private static TelephonyManager getTelephonyManager() {
@@ -177,17 +198,16 @@ public class MessageManager implements MessageManagerCallbacks {
         return threshold;
     }
 
-    public MPMessage createFirstRunMessage(long time, String sessionId) throws JSONException {
-        return new MPMessage.Builder(MessageType.FIRST_RUN, sessionId, mLocation)
-                .timestamp(time)
+    public MPMessage createFirstRunMessage() throws JSONException {
+        return new MPMessage.Builder(MessageType.FIRST_RUN, mAppStateManager.getSession(), mLocation)
+                .timestamp(mAppStateManager.getSession().mSessionStartTime)
                 .dataConnection(sActiveNetworkName)
                 .build();
     }
 
-    public void startSession(String sessionId, long time) {
+    public MPMessage startSession() {
         try {
-            MPMessage message = new MPMessage.Builder(MessageType.SESSION_START, sessionId, mLocation)
-                    .sessionStartTime(time)
+            MPMessage message = new MPMessage.Builder(MessageType.SESSION_START, mAppStateManager.getSession(), mLocation)
                     .timestamp(System.currentTimeMillis())
                     .build();
 
@@ -198,13 +218,13 @@ public class MessageManager implements MessageManagerCallbacks {
                 editor.remove(Constants.PrefKeys.PREVIOUS_SESSION_FOREGROUND);
             }
             String prevSessionId = mPreferences.getString(Constants.PrefKeys.PREVIOUS_SESSION_ID, "");
-            editor.putString(Constants.PrefKeys.PREVIOUS_SESSION_ID, sessionId);
-            if (prevSessionId != null && prevSessionId.length() > 0) {
+            editor.putString(Constants.PrefKeys.PREVIOUS_SESSION_ID, mAppStateManager.getSession().mSessionID);
+            if (!MPUtility.isEmpty(prevSessionId)) {
                 message.put(MessageKey.PREVIOUS_SESSION_ID, prevSessionId);
             }
 
             long prevSessionStart = mPreferences.getLong(Constants.PrefKeys.PREVIOUS_SESSION_START, -1);
-            editor.putLong(Constants.PrefKeys.PREVIOUS_SESSION_START, time);
+            editor.putLong(Constants.PrefKeys.PREVIOUS_SESSION_START, mAppStateManager.getSession().mSessionStartTime);
 
             if (prevSessionStart > 0) {
                 message.put(MessageKey.PREVIOUS_SESSION_START, prevSessionStart);
@@ -216,7 +236,7 @@ public class MessageManager implements MessageManagerCallbacks {
             if (mFirstRun) {
                 mPreferences.edit().putBoolean(Constants.PrefKeys.FIRSTRUN + mConfigManager.getApiKey(), false).apply();
                 try {
-                    JSONObject firstRunMessage = createFirstRunMessage(time, sessionId);
+                    JSONObject firstRunMessage = createFirstRunMessage();
                     mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, firstRunMessage));
                 } catch (JSONException e) {
                     ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to create First Run Message");
@@ -229,13 +249,14 @@ public class MessageManager implements MessageManagerCallbacks {
             mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
 
             incrementSessionCounter();
-
+            return message;
         } catch (JSONException e) {
             ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to create mParticle start session message");
+            return null;
         }
     }
 
-    private void incrementSessionCounter() {
+    void incrementSessionCounter() {
         int nextCount = getCurrentSessionCounter() + 1;
         if (nextCount >= (Integer.MAX_VALUE / 100)){
             nextCount = 0;
@@ -243,126 +264,127 @@ public class MessageManager implements MessageManagerCallbacks {
         mPreferences.edit().putInt(Constants.PrefKeys.SESSION_COUNTER, nextCount).apply();
     }
 
-    private int getCurrentSessionCounter(){
+    int getCurrentSessionCounter(){
         return mPreferences.getInt(Constants.PrefKeys.SESSION_COUNTER, 0);
     }
 
-    public void updateSessionEnd(String sessionId, long stopTime, long sessionLength) {
+    public void updateSessionEnd(Session session) {
         try {
-            long timeInBackground = mPreferences.getLong(Constants.PrefKeys.TIME_IN_BG, 0);
-            long foregroundLength = sessionLength - timeInBackground;
             SharedPreferences.Editor editor = mPreferences.edit();
-            editor.putLong(Constants.PrefKeys.PREVIOUS_SESSION_FOREGROUND, foregroundLength > 0 ? foregroundLength : sessionLength);
+            editor.putLong(Constants.PrefKeys.PREVIOUS_SESSION_FOREGROUND, session.getForegroundTime());
             editor.apply();
 
-            JSONObject sessionTiming = new JSONObject();
-            sessionTiming.put(MessageKey.SESSION_ID, sessionId);
-            sessionTiming.put(MessageKey.TIMESTAMP, stopTime);
-            sessionTiming.put(MessageKey.SESSION_LENGTH, foregroundLength);
-
             mMessageHandler
-                    .sendMessage(mMessageHandler.obtainMessage(MessageHandler.UPDATE_SESSION_END, sessionTiming));
-
-        } catch (JSONException e) {
+                    .sendMessage(mMessageHandler.obtainMessage(MessageHandler.UPDATE_SESSION_END, session));
+        } catch (Exception e) {
             ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to send update session end message");
         }
     }
 
-    public void endSession(String sessionId, long stopTime, long sessionLength) {
-        updateSessionEnd(sessionId, stopTime, sessionLength);
-        mPreferences.edit().remove(Constants.PrefKeys.TIME_IN_BG).apply();
+    public void endSession(Session session) {
+        updateSessionEnd(session);
         mMessageHandler
-                .sendMessage(mMessageHandler.obtainMessage(MessageHandler.CREATE_SESSION_END_MESSAGE, sessionId));
+                .sendMessage(mMessageHandler.obtainMessage(MessageHandler.CREATE_SESSION_END_MESSAGE, 1, 1, session.mSessionID));
     }
 
-    public void logEvent(String sessionId, long sessionStartTime, long time, MPEvent event, String currentActivity) {
-        try {
-            MPMessage message = new MPMessage.Builder(MessageType.EVENT, sessionId, mLocation)
-                    .name(event.getEventName())
-                    .sessionStartTime(sessionStartTime)
-                    .timestamp(time)
-                    .length(event.getLength())
-                    .attributes(MPUtility.enforceAttributeConstraints(event.getInfo()))
-                    .build();
+    public MPMessage logEvent(MPEvent event, String currentActivity) {
+        if (event != null) {
+            try {
 
-            message.put(MessageKey.EVENT_TYPE, event.getEventType());
-            // NOTE: event timing is not supported (yet) but the server expects this data
-            message.put(MessageKey.EVENT_START_TIME, time);
+                MPMessage message = new MPMessage.Builder(MessageType.EVENT, mAppStateManager.getSession(), mLocation)
+                        .name(event.getEventName())
+                        .timestamp(mAppStateManager.getSession().mLastEventTime)
+                        .length(event.getLength())
+                        .attributes(MPUtility.enforceAttributeConstraints(event.getInfo()))
+                        .build();
+                message.put(MessageKey.EVENT_TYPE, event.getEventType());
+                message.put(MessageKey.EVENT_START_TIME, message.getTimestamp());
 
-            if (currentActivity != null){
-                message.put(MessageKey.CURRENT_ACTIVITY, currentActivity);
+                if (currentActivity != null) {
+                    message.put(MessageKey.CURRENT_ACTIVITY, currentActivity);
+                }
+
+                int count = mPreferences.getInt(Constants.PrefKeys.EVENT_COUNTER, 0);
+                message.put(MessageKey.EVENT_COUNTER, count);
+                mPreferences.edit().putInt(Constants.PrefKeys.EVENT_COUNTER, ++count).apply();
+
+                mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
+                return message;
+            } catch (JSONException e) {
+                ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to create mParticle log event message");
             }
-            int count = mPreferences.getInt(Constants.PrefKeys.EVENT_COUNTER, 0);
-            message.put(MessageKey.EVENT_COUNTER, count);
-            mPreferences.edit().putInt(Constants.PrefKeys.EVENT_COUNTER, ++count).apply();
-
-            mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
-        } catch (JSONException e) {
-            ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to create mParticle log event message");
         }
+        return null;
     }
 
-    private static void resetEventCounter(){
+    static void resetEventCounter(){
         mPreferences.edit().putInt(Constants.PrefKeys.EVENT_COUNTER, 0).apply();
     }
 
-    public void logScreen(String sessionId, long sessionStartTime, long time, String screenName, JSONObject attributes, boolean started) {
-        try {
-            MPMessage message = new MPMessage.Builder(MessageType.SCREEN_VIEW, sessionId, mLocation)
-                    .sessionStartTime(sessionStartTime)
-                    .timestamp(time)
-                    .name(screenName)
-                    .attributes(attributes)
-                    .build();
-            // NOTE: event timing is not supported (yet) but the server expects this data
-            message.put(MessageKey.EVENT_START_TIME, time);
-            message.put(MessageKey.EVENT_DURATION, 0);
-            message.put(MessageKey.SCREEN_STARTED, started ? "activity_started" : "activity_stopped");
-            mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
-        } catch (JSONException e) {
-            ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to create mParticle log event message");
+    public MPMessage logScreen(String screenName, JSONObject attributes, boolean started) {
+        if (screenName != null) {
+            try {
+                MPMessage message = new MPMessage.Builder(MessageType.SCREEN_VIEW, mAppStateManager.getSession(), mLocation)
+                        .timestamp(mAppStateManager.getSession().mLastEventTime)
+                        .name(screenName)
+                        .attributes(attributes)
+                        .build();
+
+                message.put(MessageKey.EVENT_START_TIME, mAppStateManager.getSession().mLastEventTime);
+                message.put(MessageKey.EVENT_DURATION, 0);
+                message.put(MessageKey.SCREEN_STARTED, started ? "activity_started" : "activity_stopped");
+                mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
+                return message;
+            } catch (JSONException e) {
+                ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to create mParticle log event message");
+            }
         }
+        return null;
     }
 
-    public void logBreadcrumb(String sessionId, long sessionStartTime, long time, String breadcrumb) {
-        try {
-            MPMessage message = new MPMessage.Builder(MessageType.BREADCRUMB, sessionId, mLocation)
-                    .sessionStartTime(sessionStartTime)
-                    .timestamp(time)
-                    .build();
-            // NOTE: event timing is not supported (yet) but the server expects this data
-            message.put(MessageKey.EVENT_START_TIME, time);
-            message.put(MessageKey.BREADCRUMB_SESSION_COUNTER, getCurrentSessionCounter());
-            message.put(MessageKey.BREADCRUMB_LABEL, breadcrumb);
-            mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
-            mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_BREADCRUMB, message));
-        } catch (JSONException e) {
-            ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to create mParticle breadcrumb message");
+    public MPMessage logBreadcrumb(String breadcrumb) {
+        if (breadcrumb != null) {
+            try {
+                MPMessage message = new MPMessage.Builder(MessageType.BREADCRUMB, mAppStateManager.getSession(), mLocation)
+                        .timestamp(mAppStateManager.getSession().mLastEventTime)
+                        .build();
+
+                message.put(MessageKey.EVENT_START_TIME, mAppStateManager.getSession().mLastEventTime);
+                message.put(MessageKey.BREADCRUMB_SESSION_COUNTER, getCurrentSessionCounter());
+                message.put(MessageKey.BREADCRUMB_LABEL, breadcrumb);
+                mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
+                mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_BREADCRUMB, message));
+                return message;
+            } catch (JSONException e) {
+                ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to create mParticle breadcrumb message");
+
+            }
         }
+        return null;
     }
 
-    public void optOut(String sessionId, long sessionStartTime, long time, boolean optOutStatus) {
+    public MPMessage optOut(long time, boolean optOutStatus) {
         try {
-            MPMessage message = new MPMessage.Builder(MessageType.OPT_OUT, sessionId, mLocation)
-                    .sessionStartTime(sessionStartTime)
+            MPMessage message = new MPMessage.Builder(MessageType.OPT_OUT, mAppStateManager.getSession(), mLocation)
                     .timestamp(time)
                     .build();
             message.put(MessageKey.OPT_OUT_STATUS, optOutStatus);
             mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
+            return message;
         } catch (JSONException e) {
             ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to create mParticle opt out message");
+            return null;
         }
     }
 
-    public void logErrorEvent(String sessionId, long sessionStartTime, long time, String errorMessage, Throwable t, JSONObject attributes) {
-        logErrorEvent(sessionId, sessionStartTime, time, errorMessage, t, attributes, true);
+    public MPMessage logErrorEvent(String errorMessage, Throwable t, JSONObject attributes) {
+        return logErrorEvent(errorMessage, t, attributes, true);
     }
 
-    public void logErrorEvent(String sessionId, long sessionStartTime, long time, String errorMessage, Throwable t, JSONObject attributes, boolean caught) {
+    public MPMessage logErrorEvent(String errorMessage, Throwable t, JSONObject attributes, boolean caught) {
         try {
-            MPMessage message = new MPMessage.Builder(MessageType.ERROR, sessionId, mLocation)
-                    .sessionStartTime(sessionStartTime)
-                    .timestamp(time)
+            MPMessage message = new MPMessage.Builder(MessageType.ERROR, mAppStateManager.getSession(), mLocation)
+                    .timestamp(mAppStateManager.getSession().mLastEventTime)
                     .attributes(attributes)
                     .build();
             if (t != null) {
@@ -379,63 +401,74 @@ public class MessageManager implements MessageManagerCallbacks {
                 }
                 message.put(MessageKey.ERROR_UNCAUGHT, String.valueOf(caught));
                 message.put(MessageKey.ERROR_SESSION_COUNT, getCurrentSessionCounter());
-
-            } else {
+                mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
+            } else if (errorMessage != null) {
                 message.put(MessageKey.ERROR_SEVERITY, "error");
                 message.put(MessageKey.ERROR_MESSAGE, errorMessage);
+                mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
             }
-            mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
+            return message;
         } catch (JSONException e) {
             ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to create mParticle error message");
         }
+        return null;
     }
 
-    public void logNetworkPerformanceEvent(String sessionId, long sessionStartTime, long time, String method, String url, long length, long bytesSent, long bytesReceived, String requestString) {
-        try {
-            MPMessage message = new MPMessage.Builder(MessageType.NETWORK_PERFORMNACE, sessionId, mLocation)
-                    .sessionStartTime(sessionStartTime)
-                    .timestamp(time)
-                    .build();
-            message.put(MessageKey.NPE_METHOD, method);
-            message.put(MessageKey.NPE_URL, url);
-            message.put(MessageKey.NPE_LENGTH, length);
-            message.put(MessageKey.NPE_SENT, bytesSent);
-            message.put(MessageKey.NPE_REC, bytesReceived);
-            if (requestString != null){
-                message.put(MessageKey.NPE_POST_DATA, requestString);
+    public MPMessage logNetworkPerformanceEvent(long time, String method, String url, long length, long bytesSent, long bytesReceived, String requestString) {
+        if (!MPUtility.isEmpty(url) && !MPUtility.isEmpty(method)) {
+            try {
+                MPMessage message = new MPMessage.Builder(MessageType.NETWORK_PERFORMNACE, mAppStateManager.getSession(), mLocation)
+                        .timestamp(time)
+                        .build();
+                message.put(MessageKey.NPE_METHOD, method);
+                message.put(MessageKey.NPE_URL, url);
+                message.put(MessageKey.NPE_LENGTH, length);
+                message.put(MessageKey.NPE_SENT, bytesSent);
+                message.put(MessageKey.NPE_REC, bytesReceived);
+                if (requestString != null) {
+                    message.put(MessageKey.NPE_POST_DATA, requestString);
+                }
+                mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
+                return message;
+            } catch (JSONException e) {
+                ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to create mParticle error message");
             }
-            mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
-        } catch (JSONException e) {
-            ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to create mParticle error message");
         }
+        return null;
     }
 
 
-    public void setPushRegistrationId(String sessionId, long sessionStartTime, long time, String token, boolean registeringFlag) {
-        try {
-            MPMessage message = new MPMessage.Builder(MessageType.PUSH_REGISTRATION, sessionId, mLocation)
-                    .sessionStartTime(sessionStartTime)
-                    .timestamp(time)
-                    .build();
-            message.put(MessageKey.PUSH_TOKEN, token);
-            message.put(MessageKey.PUSH_TOKEN_TYPE, "google");
-            message.put(MessageKey.PUSH_REGISTER_FLAG, registeringFlag);
+    public MPMessage setPushRegistrationId(String token, boolean registeringFlag) {
+        if (!MPUtility.isEmpty(token)) {
+            try {
+                MPMessage message = new MPMessage.Builder(MessageType.PUSH_REGISTRATION, mAppStateManager.getSession(), mLocation)
+                        .timestamp(System.currentTimeMillis())
+                        .build();
+                message.put(MessageKey.PUSH_TOKEN, token);
+                message.put(MessageKey.PUSH_TOKEN_TYPE, "google");
+                message.put(MessageKey.PUSH_REGISTER_FLAG, registeringFlag);
 
-            mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
-        } catch (JSONException e) {
-            ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to create mParticle push registration message");
+                mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
+                return message;
+            } catch (JSONException e) {
+                ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to create mParticle push registration message");
+            }
         }
+        return null;
     }
 
-    public void setSessionAttributes(String sessionId, JSONObject mSessionAttributes) {
-        try {
-            JSONObject sessionAttributes = new JSONObject();
-            sessionAttributes.put(MessageKey.SESSION_ID, sessionId);
-            sessionAttributes.put(MessageKey.ATTRIBUTES, mSessionAttributes);
-            mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.UPDATE_SESSION_ATTRIBUTES,
-                    sessionAttributes));
-        } catch (JSONException e) {
-            ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to send update session attributes message");
+    public void setSessionAttributes() {
+        Session session = mAppStateManager.getSession();
+        if (session.mSessionAttributes != null) {
+            try {
+                JSONObject sessionAttributes = new JSONObject();
+                sessionAttributes.put(MessageKey.SESSION_ID, mAppStateManager.getSession().mSessionID);
+                sessionAttributes.put(MessageKey.ATTRIBUTES, session.mSessionAttributes);
+                mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.UPDATE_SESSION_ATTRIBUTES,
+                        sessionAttributes));
+            } catch (JSONException e) {
+                ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to send update session attributes message");
+            }
         }
     }
 
@@ -456,75 +489,95 @@ public class MessageManager implements MessageManagerCallbacks {
         ConfigManager.log(MParticle.LogLevel.DEBUG, "Received location update: " + location);
     }
 
-    public void logStateTransition(String stateTransInit, String sessionId, long sessionStartTime, String currentActivity,
-                                   String launchUri, String launchExtras, String launchSourcePackage, long previousForegroundTime, long suspendedTime, int interruptions) {
-        try {
-            MPMessage message = new MPMessage.Builder(MessageType.APP_STATE_TRANSITION, sessionId, mLocation)
-                    .sessionStartTime(sessionStartTime)
-                    .timestamp(System.currentTimeMillis())
-                    .build();
-
-            message.put(MessageKey.STATE_TRANSITION_TYPE, stateTransInit);
-            if (currentActivity != null){
-                message.put(MessageKey.CURRENT_ACTIVITY, currentActivity);
-            }
-
-            if (stateTransInit.equals(Constants.StateTransitionType.STATE_TRANS_INIT)||
-                    stateTransInit.equals(Constants.StateTransitionType.STATE_TRANS_FORE)){
-                message.put(MessageKey.ST_LAUNCH_REFERRER, launchUri);
-                message.put(MessageKey.ST_LAUNCH_PARAMS, launchExtras);
-                message.put(MessageKey.ST_LAUNCH_SOURCE_PACKAGE, launchSourcePackage);
-                if (previousForegroundTime > 0) {
-                    message.put(MessageKey.ST_LAUNCH_PRV_FORE_TIME, previousForegroundTime);
-                }
-                if (suspendedTime > 0) {
-                    message.put(MessageKey.ST_LAUNCH_TIME_SUSPENDED, suspendedTime);
-                }
-                if (interruptions >= 0){
-                    message.put(MessageKey.ST_INTERRUPTIONS, interruptions);
-                }
-                mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.MARK_INFLUENCE_OPEN_GCM, message.getTimestamp()));
-            }
-
-            if (stateTransInit.equals(Constants.StateTransitionType.STATE_TRANS_INIT)){
-                SharedPreferences.Editor editor = mPreferences.edit();
-
-                if (!mFirstRun) {
-                    message.put(MessageKey.APP_INIT_CRASHED, !mPreferences.getBoolean(Constants.PrefKeys.CRASHED_IN_FOREGROUND, false));
-                }
-
-                int versionCode = 0;
-                try {
-                    PackageInfo pInfo = mContext.getPackageManager().getPackageInfo(mContext.getPackageName(), 0);
-                    versionCode = pInfo.versionCode;
-                } catch (PackageManager.NameNotFoundException nnfe) {
-
-                }
-                boolean upgrade = (versionCode != mPreferences.getInt(Constants.PrefKeys.INITUPGRADE, 0));
-                editor.putInt(Constants.PrefKeys.INITUPGRADE, versionCode).apply();
-
-                boolean installDetected = (mInstallType == MParticle.InstallType.AutoDetect && autoDetectInstall());
-
-                boolean globalUpgrade = upgrade ||
-                        (mInstallType == MParticle.InstallType.KnownUpgrade ||
-                                !installDetected);
-
-                message.put(MessageKey.APP_INIT_FIRST_RUN, mFirstRun);
-                message.put(MessageKey.APP_INIT_UPGRADE, globalUpgrade);
-            }
-
-            if (stateTransInit.equals(Constants.StateTransitionType.STATE_TRANS_BG)){
-                mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.CLEAR_PROVIDER_GCM, message.getTimestamp()));
-            }
-
-            mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
-        } catch (JSONException e) {
-            ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to create mParticle state transition message");
-        }
+    public Location getLocation() {
+        return mLocation;
     }
 
-    private boolean autoDetectInstall() {
+    public MPMessage logStateTransition(String stateTransInit, String currentActivity,
+                                   String launchUri, String launchExtras, String launchSourcePackage, long previousForegroundTime, long suspendedTime, int interruptions) {
+        if (!MPUtility.isEmpty(stateTransInit)) {
+            try {
+                MPMessage message = new MPMessage.Builder(MessageType.APP_STATE_TRANSITION, mAppStateManager.getSession(), mLocation)
+                        .timestamp(System.currentTimeMillis())
+                        .build();
+
+                message.put(MessageKey.STATE_TRANSITION_TYPE, stateTransInit);
+                if (currentActivity != null) {
+                    message.put(MessageKey.CURRENT_ACTIVITY, currentActivity);
+                }
+
+                boolean crashedInForeground = mPreferences.getBoolean(Constants.PrefKeys.CRASHED_IN_FOREGROUND, false);
+
+                if (stateTransInit.equals(Constants.StateTransitionType.STATE_TRANS_INIT) ||
+                        stateTransInit.equals(Constants.StateTransitionType.STATE_TRANS_FORE)) {
+                    mPreferences.edit().putBoolean(Constants.PrefKeys.CRASHED_IN_FOREGROUND, true).apply();
+                    message.put(MessageKey.ST_LAUNCH_REFERRER, launchUri);
+                    message.put(MessageKey.ST_LAUNCH_PARAMS, launchExtras);
+                    message.put(MessageKey.ST_LAUNCH_SOURCE_PACKAGE, launchSourcePackage);
+                    if (previousForegroundTime > 0) {
+                        message.put(MessageKey.ST_LAUNCH_PRV_FORE_TIME, previousForegroundTime);
+                    }
+                    if (suspendedTime > 0) {
+                        message.put(MessageKey.ST_LAUNCH_TIME_SUSPENDED, suspendedTime);
+                    }
+                    if (interruptions >= 0) {
+                        message.put(MessageKey.ST_INTERRUPTIONS, interruptions);
+                    }
+                    InfluenceOpenMessage influenceOpenMessage = new InfluenceOpenMessage(message.getTimestamp(), mConfigManager.getInfluenceOpenTimeoutMillis());
+                    mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.MARK_INFLUENCE_OPEN_GCM, influenceOpenMessage));
+                }
+
+                if (stateTransInit.equals(Constants.StateTransitionType.STATE_TRANS_INIT)) {
+                    SharedPreferences.Editor editor = mPreferences.edit();
+
+                    if (!mFirstRun) {
+                        message.put(MessageKey.APP_INIT_CRASHED, crashedInForeground);
+                    }
+
+
+                    int versionCode = 0;
+                    try {
+                        PackageInfo pInfo = mContext.getPackageManager().getPackageInfo(mContext.getPackageName(), 0);
+                        versionCode = pInfo.versionCode;
+                    } catch (PackageManager.NameNotFoundException nnfe) {
+
+                    }
+                    //if we've seen this device before, and the versionCode is different, then we know it's an upgrade
+                    boolean upgrade = (versionCode != mPreferences.getInt(Constants.PrefKeys.INITUPGRADE, versionCode));
+                    editor.putInt(Constants.PrefKeys.INITUPGRADE, versionCode).apply();
+
+                    if (!upgrade) {
+                        if (mInstallType == MParticle.InstallType.KnownUpgrade) {
+                            upgrade = true;
+                        } else if (mInstallType == MParticle.InstallType.KnownInstall) {
+                            upgrade = false;
+                        } else {
+                            upgrade = !autoDetectInstall();
+                        }
+                    }
+
+                    message.put(MessageKey.APP_INIT_FIRST_RUN, mFirstRun);
+                    message.put(MessageKey.APP_INIT_UPGRADE, upgrade);
+                }
+
+                if (stateTransInit.equals(Constants.StateTransitionType.STATE_TRANS_BG)) {
+                    mPreferences.edit().putBoolean(Constants.PrefKeys.CRASHED_IN_FOREGROUND, false).apply();
+                    mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.CLEAR_PROVIDER_GCM, message.getTimestamp()));
+                }
+
+                mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
+                return message;
+            } catch (JSONException e) {
+                ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to create mParticle state transition message");
+            }
+        }
+        return null;
+    }
+
+    boolean autoDetectInstall() {
         //heuristic 1: look for install referrer
+        //this code assumes we've already checked if
+        //we've seen this version code before, otherwise it's useless
         if (mPreferences.contains(Constants.PrefKeys.INSTALL_REFERRER)){
             return true;
         }
@@ -549,10 +602,9 @@ public class MessageManager implements MessageManagerCallbacks {
         return true;
     }
 
-    public void logNotification(String sessionId, long sessionStartTime, ProviderCloudMessage cloudMessage, String appState) {
+    public void logNotification(ProviderCloudMessage cloudMessage, String appState) {
         try{
-            MPMessage message = new MPMessage.Builder(MessageType.PUSH_RECEIVED, sessionId, mLocation)
-                    .sessionStartTime(sessionStartTime)
+            MPMessage message = new MPMessage.Builder(MessageType.PUSH_RECEIVED, mAppStateManager.getSession(), mLocation)
                     .timestamp(System.currentTimeMillis())
                     .name("gcm")
                     .build();
@@ -572,10 +624,10 @@ public class MessageManager implements MessageManagerCallbacks {
         }
     }
 
-    public void logNotification(String sessionId, long sessionStartTime, int contentId, String payload, CloudAction action, String appState, int newBehavior) {
+    @Override
+    public void logNotification(int contentId, String payload, CloudAction action, String appState, int newBehavior) {
         try{
-            MPMessage message = new MPMessage.Builder(MessageType.PUSH_RECEIVED, sessionId, mLocation)
-                    .sessionStartTime(sessionStartTime)
+            MPMessage message = new MPMessage.Builder(MessageType.PUSH_RECEIVED, mAppStateManager.getSession(), mLocation)
                     .timestamp(System.currentTimeMillis())
                     .name("gcm")
                     .build();
@@ -590,7 +642,7 @@ public class MessageManager implements MessageManagerCallbacks {
                 message.put(MessageKey.PUSH_TYPE, Constants.Push.MESSAGE_TYPE_ACTION);
                 message.put(MessageKey.PUSH_ACTION_TAKEN, action.getActionIdentifier());
                 String title = action.getTitle();
-                if (TextUtils.isEmpty(title)){
+                if (MPUtility.isEmpty(title)){
                     title = action.getActionIdentifier();
                 }
                 message.put(MessageKey.PUSH_ACTION_NAME, title);
@@ -609,11 +661,10 @@ public class MessageManager implements MessageManagerCallbacks {
 
     }
 
-    public void logProfileAction(String action, String sessionId, long sessionStartTime) {
+    public void logProfileAction(String action) {
         try {
 
-            MPMessage message = new MPMessage.Builder(MessageType.PROFILE, sessionId, mLocation)
-                    .sessionStartTime(sessionStartTime)
+            MPMessage message = new MPMessage.Builder(MessageType.PROFILE, mAppStateManager.getSession(), mLocation)
                     .timestamp(System.currentTimeMillis())
                     .build();
 
@@ -626,68 +677,13 @@ public class MessageManager implements MessageManagerCallbacks {
     }
 
     @Override
-    public void checkForTrigger(MPMessage message) {
-        JSONArray messageMatches = mConfigManager.getTriggerMessageMatches();
-        JSONArray triggerHashes = mConfigManager.getTriggerMessageHashes();
-
-        boolean shouldTrigger = message.getMessageType().equals(MessageType.PUSH_RECEIVED);
-
-        if (!shouldTrigger && messageMatches != null && messageMatches.length() > 0){
-            shouldTrigger = true;
-            int i = 0;
-            while (shouldTrigger && i < messageMatches.length()){
-                try {
-                    JSONObject messageMatch = messageMatches.getJSONObject(i);
-                    Iterator<?> keys = messageMatch.keys();
-                    while(shouldTrigger && keys.hasNext() ){
-                        String key = (String)keys.next();
-                        shouldTrigger = message.has(key);
-                        if (shouldTrigger){
-                            try {
-                                shouldTrigger = messageMatch.getString(key).equalsIgnoreCase(message.getString(key));
-                            }catch (JSONException stringex){
-                                try {
-                                    shouldTrigger = message.getBoolean(key) == messageMatch.getBoolean(key);
-                                }catch (JSONException boolex){
-                                    try{
-                                        shouldTrigger = message.getDouble(key) == messageMatch.getDouble(key);
-                                    }catch (JSONException doubleex){
-                                        shouldTrigger = false;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                } catch (Exception e) {
-
-                }
-                i++;
-            }
-        }
-        if (!shouldTrigger && triggerHashes != null){
-            for (int i = 0; i < triggerHashes.length(); i++){
-                try {
-                    if (triggerHashes.getInt(i) == message.getTypeNameHash()) {
-                        shouldTrigger = true;
-                        break;
-                    }
-                }catch (JSONException jse){
-
-                }
-            }
-        }
-        if (shouldTrigger) {
-            mUploadHandler.removeMessages(UploadHandler.UPLOAD_TRIGGER_MESSAGES);
-            mUploadHandler.sendMessageDelayed(mUploadHandler.obtainMessage(UploadHandler.UPLOAD_TRIGGER_MESSAGES, 1, 0), Constants.TRIGGER_MESSAGE_DELAY);
-        }
-    }
-
-    @Override
     public MPMessage createMessageSessionEnd(String sessionId, long start, long end, long foregroundLength, JSONObject sessionAttributes) throws JSONException{
         int eventCounter = mPreferences.getInt(Constants.PrefKeys.EVENT_COUNTER, 0);
         resetEventCounter();
-        MPMessage message = new MPMessage.Builder(MessageType.SESSION_END, sessionId, mLocation)
-                .sessionStartTime(start)
+        Session session = new Session();
+        session.mSessionID = sessionId;
+        session.mSessionStartTime = start;
+        MPMessage message = new MPMessage.Builder(MessageType.SESSION_END, session, mLocation)
                 .timestamp(end)
                 .attributes(sessionAttributes)
                 .build();
@@ -737,6 +733,14 @@ public class MessageManager implements MessageManagerCallbacks {
     public void endUploadLoop() {
         mUploadHandler.removeMessages(UploadHandler.UPLOAD_MESSAGES);
         MParticle.getInstance().upload();
+    }
+
+    @Override
+    public void checkForTrigger(MPMessage message) {
+        if (mConfigManager.shouldTrigger(message)){
+            mUploadHandler.removeMessages(UploadHandler.UPLOAD_TRIGGER_MESSAGES);
+            mUploadHandler.sendMessageDelayed(mUploadHandler.obtainMessage(UploadHandler.UPLOAD_TRIGGER_MESSAGES, 1, 0), Constants.TRIGGER_MESSAGE_DELAY);
+        }
     }
 
     public void refreshConfiguration() {
@@ -791,11 +795,22 @@ public class MessageManager implements MessageManagerCallbacks {
                 activeNetworkName += "/" + activeNetwork.getSubtypeName();
             }
             sActiveNetworkName = activeNetworkName.toLowerCase(Locale.US);
+            mUploadHandler.setConnected(activeNetwork.isConnectedOrConnecting());
         } else {
             sActiveNetworkName = "offline";
+            mUploadHandler.setConnected(false);
         }
 
-        mUploadHandler.setConnected(activeNetwork != null && activeNetwork.isConnectedOrConnecting());
-        ConfigManager.log(MParticle.LogLevel.DEBUG, "Active network has changed: " + sActiveNetworkName);
+
+    }
+
+    public class InfluenceOpenMessage {
+        public final long mTimeStamp;
+        public final long mTimeout;
+
+        public InfluenceOpenMessage(long timestamp, long influenceOpenTimeoutMillis) {
+            mTimeStamp = timestamp;
+            mTimeout = influenceOpenTimeoutMillis;
+        }
     }
 }

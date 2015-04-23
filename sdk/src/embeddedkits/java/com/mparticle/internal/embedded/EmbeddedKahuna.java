@@ -1,11 +1,9 @@
 package com.mparticle.internal.embedded;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.location.Location;
-import android.text.TextUtils;
 
 import com.kahuna.sdk.KahunaAnalytics;
 import com.kahuna.sdk.KahunaPushReceiver;
@@ -29,7 +27,7 @@ import java.util.Map;
 
 /**
  * <p/>
- * Embedded implementation of the Kochava SDK
+ * Embedded implementation of the Kahuna SDK
  * <p/>
  */
 class EmbeddedKahuna extends EmbeddedProvider implements MPActivityCallbacks {
@@ -40,17 +38,17 @@ class EmbeddedKahuna extends EmbeddedProvider implements MPActivityCallbacks {
     private static final String KEY_SECRET_KEY = "secretKey";
     private boolean sendTransactionData = false;
 
-    public EmbeddedKahuna(Context context) {
-        super(context);
+    public EmbeddedKahuna(EmbeddedKitManager ekManager) {
+        super(ekManager);
     }
 
     @Override
     protected EmbeddedProvider update() {
         if (!initialized) {
-            KahunaAnalytics.setDebugMode(MParticle.getInstance().internal().getConfigurationManager().getEnvironment() == MParticle.Environment.Development);
-            if (MParticle.getInstance().internal().getConfigurationManager().isPushEnabled()) {
+            KahunaAnalytics.setDebugMode(mEkManager.getConfigurationManager().getEnvironment() == MParticle.Environment.Development);
+            if (mEkManager.getConfigurationManager().isPushEnabled()) {
                 // registerForPush(context);
-                KahunaAnalytics.onAppCreate(context, properties.get(KEY_SECRET_KEY), MParticle.getInstance().internal().getConfigurationManager().getPushSenderId());
+                KahunaAnalytics.onAppCreate(context, properties.get(KEY_SECRET_KEY), mEkManager.getConfigurationManager().getPushSenderId());
                 KahunaAnalytics.disableKahunaGenerateNotifications();
             } else {
                 KahunaAnalytics.onAppCreate(context, properties.get(KEY_SECRET_KEY), null);
@@ -87,7 +85,7 @@ class EmbeddedKahuna extends EmbeddedProvider implements MPActivityCallbacks {
 
     @Override
     public void logEvent(MPEvent event, Map<String, String> eventAttributes) throws Exception {
-        if (!TextUtils.isEmpty(event.getEventName())) {
+        if (!MPUtility.isEmpty(event.getEventName())) {
             if (sendTransactionData && eventAttributes != null && eventAttributes.containsKey(Constants.MessageKey.RESERVED_KEY_LTV)) {
                 Double amount = Double.parseDouble(eventAttributes.get(Constants.MessageKey.RESERVED_KEY_LTV)) * 100;
                 KahunaAnalytics.trackEvent("purchase", 1, amount.intValue());
@@ -194,14 +192,7 @@ class EmbeddedKahuna extends EmbeddedProvider implements MPActivityCallbacks {
 
     @Override
     public void removeUserIdentity(String id) {
-        Map<String, String> credentials = KahunaAnalytics.getUserCredentials();
-        if (credentials != null) {
-            for (Map.Entry<String, String> entry : credentials.entrySet()) {
-                if (entry.getValue().equalsIgnoreCase(id)){
-                    KahunaAnalytics.removeUserCredential(entry.getValue());
-                }
-            }
-        }
+
     }
 
     @Override

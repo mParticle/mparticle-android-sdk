@@ -1,14 +1,12 @@
 apply plugin: 'com.android.library'
 apply plugin: 'maven'
 
-
 buildscript {
     repositories {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:1.+'
-
+        classpath 'com.android.tools.build:gradle:1.1.0'
     }
 }
 
@@ -27,9 +25,11 @@ def getDate() {
 }
 
 android {
-    compileSdkVersion 21
-    buildToolsVersion "21.1.2"
+    compileSdkVersion 19
+    buildToolsVersion "22.0.1"
+
     defaultPublishConfig "embeddedkitsRelease"
+
 
     String url = "\"\"";
     String configurationUrl = "\"\"";
@@ -58,6 +58,7 @@ android {
 
         buildConfigField "String", "MP_URL", url
         buildConfigField "String", "MP_CONFIG_URL", configurationUrl
+        buildConfigField "Boolean", "MP_DEBUG", "false"
 
     }
 
@@ -76,6 +77,7 @@ android {
 
         debug {
             minifyEnabled false
+            buildConfigField "Boolean", "MP_DEBUG", "true"
         }
 
         unity {
@@ -86,6 +88,7 @@ android {
         release {
             minifyEnabled true
             proguardFile 'proguard.txt'
+           // buildConfigField "Boolean", "MP_DEBUG", "true"
         }
     }
 
@@ -122,14 +125,29 @@ uploadArchives {
             if (mavenrepo == "s3") {
                 configuration = configurations.deployerJars
                 repository(url: "s3://maven.mparticle.com")
-                pom.version = sdkversion
-                pom.artifactId = 'android-sdk'
-                pom.groupId = 'com.mparticle'
             }else{
                 repository url: 'file://' + new File(System.getProperty('user.home'), '.m2/repository').absolutePath
-                pom.version = sdkversion
-                pom.artifactId = 'android-sdk'
-                pom.groupId = 'com.mparticle'
+            }
+
+            pom.project {
+                version = sdkversion
+                artifactId = 'android-sdk'
+                groupId = 'com.mparticle'
+                packaging 'aar'
+                description 'mParticle Android SDK'
+                url 'http://www.mparticle.com'
+                developers {
+                    developer {
+                        id 'samdozor'
+                        name 'Sam Dozor'
+                        email 'sdozor@mparticle.com'
+                    }
+                }
+            }
+
+            pom.whenConfigured { pom ->
+                pom.dependencies*.optional = true
+                pom.dependencies*.scope = 'provided'
             }
         }
     }
@@ -137,11 +155,16 @@ uploadArchives {
 
 dependencies {
     deployerJars "org.kuali.maven.wagons:maven-s3-wagon:1.2.1"
-    embeddedkitsCompile files('embeddedkits/Kahuna489.jar')
-    embeddedkitsCompile files('embeddedkits/KochavaSDK.jar')
+    embeddedkitsCompile files('embeddedkits/Kahuna556.jar')
+    embeddedkitsCompile files('embeddedkits/Kochava20150312.jar')
     embeddedkitsCompile files('embeddedkits/comscore2140923.jar')
-    compile 'com.google.android.gms:play-services:[3.1,)'
-    compile 'com.android.support:support-v4:21.0.3'
+    compile 'com.google.android.gms:play-services-gcm:[7.0,)'
+    provided files('libs/android-support-v4.jar')
     unityCompile project('unityskeleton')
     testCompile 'junit:junit:4.12'
+    testCompile  files('libs/java-json.jar')
+    testCompile "org.mockito:mockito-core:1.+"
+    testCompile "org.powermock:powermock-module-junit4:1.6.2"
+    testCompile "org.powermock:powermock-api-mockito:1.6.2"
+    testCompile "org.powermock:powermock-core:1.6.2"
 }
