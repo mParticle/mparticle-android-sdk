@@ -25,7 +25,6 @@ import com.mparticle.internal.MPLocationListener;
 import com.mparticle.internal.MPUtility;
 import com.mparticle.internal.MParticleJSInterface;
 import com.mparticle.internal.MessageManager;
-import com.mparticle.internal.Session;
 import com.mparticle.internal.embedded.EmbeddedKitManager;
 import com.mparticle.internal.np.MPSSLSocketFactory;
 import com.mparticle.internal.np.MPSocketImplFactory;
@@ -117,13 +116,11 @@ public class MParticle {
 
 
     private JSONObject mUserAttributes = new JSONObject();
-   // private JSONObject mSessionAttributes;
 
     private MessageManager mMessageManager;
     private static volatile MParticle instance;
     private SharedPreferences mPreferences;
     private MPLocationListener mLocationListener;
-  //  private ExceptionHandler mExHandler;
     private Context mAppContext;
     private String mApiKey;
 
@@ -267,7 +264,8 @@ public class MParticle {
 
     /**
      *
-     * This method is only to be used while unit testing.
+     * Use this method for your own unit testing. Using a framework such as Mockito, or
+     * by extending MParticle, use this method to set a mock of mParticle.
      *
      * @param instance
      */
@@ -313,7 +311,7 @@ public class MParticle {
     /**
      * Explicitly begin tracking a new session. Usually not necessary unless {@link #endSession()} is also explicitly used.
      */
-    public void beginSession() {
+    private void beginSession() {
         if (mConfigManager.isEnabled()) {
             endSession();
             newSession();
@@ -323,14 +321,12 @@ public class MParticle {
     /**
      * Explicitly terminate the current user's session.
      */
-    public void endSession() {
+    private void endSession() {
         if (mConfigManager.isEnabled()) {
             mAppStateManager.getSession().mLastEventTime = System.currentTimeMillis();
             mAppStateManager.endSession();
         }
     }
-
-
 
     boolean isSessionActive() {
         return mAppStateManager.getSession().isActive();
@@ -467,7 +463,7 @@ public class MParticle {
         if (mConfigManager.isEnabled() && checkEventLimit()) {
             ensureActiveSession();
             mMessageManager.logEvent(event, mAppStateManager.getCurrentActivity());
-            ConfigManager.log(LogLevel.DEBUG, "Logged event: ", event.toString());
+            ConfigManager.log(LogLevel.DEBUG, "Logged event - \n", event.toString());
             mEmbeddedKitManager.logEvent(event);
         }
     }
@@ -492,7 +488,6 @@ public class MParticle {
         contextInfo.put(Constants.MethodName.METHOD_NAME, Constants.MethodName.LOG_LTV);
         logEvent(eventName == null ? "Increase LTV" : eventName, EventType.Transaction, contextInfo);
     }
-
 
     /**
      * Log an E-Commerce related event associated to a product
@@ -542,7 +537,7 @@ public class MParticle {
         if (checkEventLimit()) {
             MPEvent productEvent = new MPEvent.Builder(event.toString(), EventType.Transaction).info(product).build();
             mMessageManager.logEvent(productEvent, mAppStateManager.getCurrentActivity());
-            ConfigManager.log(LogLevel.DEBUG, "Logged product event: ", productEvent.toString());
+            ConfigManager.log(LogLevel.DEBUG, "Logged product event - \n", productEvent.toString());
         }
         if (purchaseEvent) {
             mEmbeddedKitManager.logTransaction(product);
@@ -585,7 +580,7 @@ public class MParticle {
      * @param started true if we're navigating to a screen (onStart), false if we're leaving a screen (onStop)
      */
      public void internalLogScreen(String screenName, Map<String, String> eventData, Boolean started) {
-        if (null == screenName) {
+        if (MPUtility.isEmpty(screenName)) {
             ConfigManager.log(LogLevel.ERROR, "screenName is required for logScreen");
             return;
         }
@@ -593,7 +588,6 @@ public class MParticle {
             ConfigManager.log(LogLevel.ERROR, "The screen name was too long. Discarding event.");
             return;
         }
-
         if (checkEventLimit()) {
             ensureActiveSession();
             JSONObject eventDataJSON = MPUtility.enforceAttributeConstraints(eventData);
@@ -621,7 +615,7 @@ public class MParticle {
      */
     public void leaveBreadcrumb(String breadcrumb) {
         if (mConfigManager.isEnabled()) {
-            if (null == breadcrumb) {
+            if (MPUtility.isEmpty(breadcrumb)) {
                 ConfigManager.log(LogLevel.ERROR, "breadcrumb is required for leaveBreadcrumb");
                 return;
             }
@@ -652,7 +646,7 @@ public class MParticle {
      */
     public void logError(String message, Map<String, String> eventData) {
         if (mConfigManager.isEnabled()) {
-            if (null == message) {
+            if (MPUtility.isEmpty(message)) {
                 ConfigManager.log(LogLevel.ERROR, "message is required for logErrorEvent");
                 return;
             }
@@ -964,7 +958,6 @@ public class MParticle {
             ensureActiveSession();
             ConfigManager.log(LogLevel.DEBUG, "Incrementing session attribute: " + key + "=" + value);
 
-
             if (MPUtility.setCheckedAttribute(mAppStateManager.getSession().mSessionAttributes, key, value, true, true)) {
                 mMessageManager.setSessionAttributes();
             }
@@ -1086,7 +1079,6 @@ public class MParticle {
      * @param id
      * @param identityType
      */
-
     public void setUserIdentity(String id, IdentityType identityType) {
         if (id != null && id.length() > 0) {
             ConfigManager.log(LogLevel.DEBUG, "Setting user identity: " + id);
@@ -1451,7 +1443,6 @@ public class MParticle {
 
     public void logPushRegistration(String registrationId) {
         mMessageManager.setPushRegistrationId(registrationId, true);
-
     }
 
     void logNotification(MPCloudNotificationMessage cloudMessage, CloudAction action, boolean startSession, String appState, int behavior) {
@@ -1628,7 +1619,7 @@ public class MParticle {
          */
         NONE,
         /**
-         * Used for critical issues with the SDK or it's configuration.
+         * Used for critical issues with the SDK or its configuration.
          */
         ERROR,
         /**
@@ -1709,5 +1700,4 @@ public class MParticle {
          */
         String LASTNAME = "$LastName";
     }
-
 }
