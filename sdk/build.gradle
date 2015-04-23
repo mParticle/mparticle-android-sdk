@@ -159,7 +159,6 @@ dependencies {
     embeddedkitsCompile files('embeddedkits/Kochava20150312.jar')
     embeddedkitsCompile files('embeddedkits/comscore2140923.jar')
     compile 'com.google.android.gms:play-services-gcm:[7.0,)'
-    provided files('libs/android-support-v4.jar')
     unityCompile project('unityskeleton')
     testCompile 'junit:junit:4.12'
     testCompile  files('libs/java-json.jar')
