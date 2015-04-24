@@ -158,6 +158,8 @@ dependencies {
     embeddedkitsCompile files('embeddedkits/Kahuna556.jar')
     embeddedkitsCompile files('embeddedkits/Kochava20150312.jar')
     embeddedkitsCompile files('embeddedkits/comscore2140923.jar')
+  //  embeddedkitsCompile files('embeddedkits/appboyui171.jar')
+    embeddedkitsCompile files('embeddedkits/appboysdk171.jar')
     compile 'com.google.android.gms:play-services-gcm:[7.0,)'
     unityCompile project('unityskeleton')
     testCompile 'junit:junit:4.12'

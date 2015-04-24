@@ -120,6 +120,9 @@
 
 -keep class com.comscore.** { *; }
 -dontwarn com.comscore.**
-
+-dontwarn com.amazon.device.messaging.**
+-dontwarn bo.app.**
+-keep class bo.app.** { *; }
+-keep class com.appboy.** { *; }
 
 
