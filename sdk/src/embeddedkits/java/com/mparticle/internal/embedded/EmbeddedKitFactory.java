@@ -8,6 +8,7 @@ import org.json.JSONException;
 import java.util.ArrayList;
 
 public class EmbeddedKitFactory {
+    private final static int APPBOY = 28;
     private final static int KOCHAVA = 37;
     private final static int COMSCORE = 39;
     private final static int KAHUNA = 56;
@@ -26,6 +27,8 @@ public class EmbeddedKitFactory {
                 return new EmbeddedForesee(ekManager);
             case ADJUST:
                 return new EmbeddedAdjust(ekManager);
+            case APPBOY:
+                return new EmbeddedAppboy(ekManager);
             default:
                 return null;
         }
@@ -33,6 +36,7 @@ public class EmbeddedKitFactory {
 
     public static ArrayList<Integer> getSupportedKits() {
         ArrayList<Integer> supportedKitIds = new ArrayList<Integer>();
+        supportedKitIds.add(APPBOY);
         supportedKitIds.add(KOCHAVA);
         supportedKitIds.add(COMSCORE);
         supportedKitIds.add(KAHUNA);
@@ -48,6 +52,7 @@ public class EmbeddedKitFactory {
             case KAHUNA:
             case FORESEE:
             case ADJUST:
+            case APPBOY:
                 return true;
         }
         return false;
