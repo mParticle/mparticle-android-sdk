@@ -1042,7 +1042,7 @@ public class MParticle {
     }
 
     private void attributeRemoved(String key) {
-        String serializedJsonArray = mPreferences.getString(PrefKeys.USER_ATTRS + mApiKey, null);
+        String serializedJsonArray = mPreferences.getString(PrefKeys.DELETED_USER_ATTRS + mApiKey, null);
         JSONArray deletedAtributes;
         try {
             deletedAtributes = new JSONArray(serializedJsonArray);
@@ -1051,7 +1051,7 @@ public class MParticle {
         }
         deletedAtributes.put(key);
 
-        mPreferences.edit().putString(PrefKeys.USER_ATTRS + mApiKey, deletedAtributes.toString()).apply();
+        mPreferences.edit().putString(PrefKeys.DELETED_USER_ATTRS + mApiKey, deletedAtributes.toString()).apply();
     }
 
     /**
