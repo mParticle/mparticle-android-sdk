@@ -482,7 +482,13 @@ public class ConfigManager implements MessagingConfigCallbacks {
     }
 
     public long getMpid() {
-        return mPreferences.getLong(Constants.PrefKeys.Mpid, 0);
+        if (mPreferences.contains(Constants.PrefKeys.Mpid)){
+            return mPreferences.getLong(Constants.PrefKeys.Mpid, 0);
+        }else{
+            long mpid = MPUtility.generateMpid();
+            mPreferences.edit().putLong(Constants.PrefKeys.Mpid, mpid).apply();
+            return mpid;
+        }
     }
 
     public int getAudienceTimeout() {

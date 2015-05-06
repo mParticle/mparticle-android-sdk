@@ -28,7 +28,7 @@ public class MessageBatch extends JSONObject {
         uploadMessage.put(Constants.MessageKey.OPT_OUT_HEADER, configManager.getOptedOut());
         uploadMessage.put(Constants.MessageKey.CONFIG_UPLOAD_INTERVAL, configManager.getUploadInterval()/1000);
         uploadMessage.put(Constants.MessageKey.CONFIG_SESSION_TIMEOUT, configManager.getSessionTimeout()/1000);
-
+        uploadMessage.put(Constants.MessageKey.MPID, configManager.getMpid());
 
         uploadMessage.put(Constants.MessageKey.APP_INFO, appInfo);
         // if there is notification key then include it
