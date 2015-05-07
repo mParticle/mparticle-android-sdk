@@ -51,13 +51,15 @@ public class EmbeddedKitManager implements MPActivityCallbacks {
                     if (ekFactory.isSupported(currentId)) {
                         activeIds.add(currentId);
                         if (!providers.containsKey(currentId)) {
-                            providers.put(currentId, ekFactory.createInstance(currentId, this));
+                            EmbeddedProvider provider = ekFactory.createInstance(currentId, this);
+                            if (provider.disabled()){
+                                continue;
+                            }
+                            providers.put(currentId, provider);
                         }
                         providers.get(currentId).parseConfig(current).update();
-                        if (!providers.get(currentId).optedOut()) {
-                            providers.get(currentId).setUserAttributes(MParticle.getInstance().getUserAttributes());
-                            syncUserIdentities(providers.get(currentId));
-                        }
+                        providers.get(currentId).setUserAttributes(MParticle.getInstance().getUserAttributes());
+                        syncUserIdentities(providers.get(currentId));
                     }
                 } catch (JSONException jse) {
                     ConfigManager.log(MParticle.LogLevel.ERROR, "Exception while parsing embedded kit configuration: " + jse.getMessage());
@@ -95,7 +97,7 @@ public class EmbeddedKitManager implements MPActivityCallbacks {
     public void logEvent(MPEvent event) {
         for (EmbeddedProvider provider : providers.values()){
             try {
-                if (!provider.optedOut() && provider.shouldLogEvent(event.getEventType(), event.getEventName())) {
+                if (!provider.disabled() && provider.shouldLogEvent(event.getEventType(), event.getEventName())) {
                     provider.logEvent(event, provider.filterEventAttributes(event.getEventType(), event.getEventName(), provider.mAttributeFilters, event.getInfo()));
                 }
             } catch (Exception e) {
@@ -107,7 +109,7 @@ public class EmbeddedKitManager implements MPActivityCallbacks {
     public void logTransaction(MPProduct product) {
         for (EmbeddedProvider provider : providers.values()){
             try {
-                if (!provider.optedOut()) {
+                if (!provider.disabled()) {
                     provider.logTransaction(product);
                 }
             } catch (Exception e) {
@@ -119,7 +121,7 @@ public class EmbeddedKitManager implements MPActivityCallbacks {
     public void logScreen(String screenName, Map<String, String> eventAttributes) {
         for (EmbeddedProvider provider : providers.values()){
             try {
-                if (!provider.optedOut() && provider.shouldLogScreen(screenName)) {
+                if (!provider.disabled() && provider.shouldLogScreen(screenName)) {
                     provider.logScreen(screenName, provider.filterEventAttributes(null, screenName, provider.mScreenAttributeFilters, eventAttributes));
                 }
             } catch (Exception e) {
@@ -131,7 +133,7 @@ public class EmbeddedKitManager implements MPActivityCallbacks {
     public void setLocation(Location location) {
         for (EmbeddedProvider provider : providers.values()){
             try {
-                if (!provider.optedOut()) {
+                if (!provider.disabled()) {
                     provider.setLocation(location);
                 }
             } catch (Exception e) {
@@ -143,7 +145,7 @@ public class EmbeddedKitManager implements MPActivityCallbacks {
     public void setUserAttributes(JSONObject userAttributes) {
         for (EmbeddedProvider provider : providers.values()){
             try {
-                if (!provider.optedOut()) {
+                if (!provider.disabled()) {
                     provider.setUserAttributes(provider.filterAttributes(provider.mUserAttributeFilters, userAttributes));
                 }
             } catch (Exception e) {
@@ -155,7 +157,7 @@ public class EmbeddedKitManager implements MPActivityCallbacks {
     public void removeUserAttribute(String key) {
         for (EmbeddedProvider provider : providers.values()){
             try {
-                if (!provider.optedOut()) {
+                if (!provider.disabled()) {
                     provider.removeUserAttribute(key);
                 }
             } catch (Exception e) {
@@ -167,7 +169,7 @@ public class EmbeddedKitManager implements MPActivityCallbacks {
     public void setUserIdentity(String id, MParticle.IdentityType identityType) {
         for (EmbeddedProvider provider : providers.values()){
             try {
-                if (!provider.optedOut() && provider.shouldSetIdentity(identityType)) {
+                if (!provider.disabled() && provider.shouldSetIdentity(identityType)) {
                     provider.setUserIdentity(id, identityType);
                 }
             } catch (Exception e) {
@@ -179,7 +181,7 @@ public class EmbeddedKitManager implements MPActivityCallbacks {
     public void logout() {
         for (EmbeddedProvider provider : providers.values()){
             try {
-                if (!provider.optedOut()) {
+                if (!provider.disabled()) {
                     provider.logout();
                 }
             } catch (Exception e) {
@@ -191,7 +193,7 @@ public class EmbeddedKitManager implements MPActivityCallbacks {
     public void removeUserIdentity(String id) {
         for (EmbeddedProvider provider : providers.values()){
             try {
-                if (!provider.optedOut()) {
+                if (!provider.disabled()) {
                     provider.removeUserIdentity(id);
                 }
             } catch (Exception e) {
@@ -203,7 +205,7 @@ public class EmbeddedKitManager implements MPActivityCallbacks {
     public void handleIntent(Intent intent) {
         for (EmbeddedProvider provider : providers.values()){
             try {
-                if (!provider.optedOut()) {
+                if (!provider.disabled()) {
                     provider.handleIntent(intent);
                 }
             } catch (Exception e) {
@@ -215,7 +217,7 @@ public class EmbeddedKitManager implements MPActivityCallbacks {
     public void startSession() {
         for (EmbeddedProvider provider : providers.values()){
             try {
-                if (!provider.optedOut()) {
+                if (!provider.disabled()) {
                     provider.startSession();
                 }
             } catch (Exception e) {
@@ -227,7 +229,7 @@ public class EmbeddedKitManager implements MPActivityCallbacks {
     public void endSession() {
         for (EmbeddedProvider provider : providers.values()){
             try {
-                if (!provider.optedOut()) {
+                if (!provider.disabled()) {
                     provider.endSession();
                 }
             } catch (Exception e) {
@@ -241,7 +243,7 @@ public class EmbeddedKitManager implements MPActivityCallbacks {
         for (EmbeddedProvider provider : providers.values()){
             if (provider instanceof MPActivityCallbacks) {
                 try {
-                    if (!provider.optedOut()) {
+                    if (!provider.disabled()) {
                         ((MPActivityCallbacks) provider).onActivityCreated(activity, activityCount);
                     }
                 } catch (Exception e) {
@@ -256,7 +258,7 @@ public class EmbeddedKitManager implements MPActivityCallbacks {
         for (EmbeddedProvider provider : providers.values()){
             if (provider instanceof MPActivityCallbacks) {
                 try {
-                    if (!provider.optedOut()) {
+                    if (!provider.disabled()) {
                         ((MPActivityCallbacks) provider).onActivityResumed(activity, currentCount);
                     }
                 } catch (Exception e) {
@@ -271,7 +273,7 @@ public class EmbeddedKitManager implements MPActivityCallbacks {
         for (EmbeddedProvider provider : providers.values()){
             if (provider instanceof MPActivityCallbacks) {
                 try {
-                    if (!provider.optedOut()) {
+                    if (!provider.disabled()) {
                         ((MPActivityCallbacks) provider).onActivityPaused(activity, activityCount);
                     }
                 } catch (Exception e) {
@@ -286,7 +288,7 @@ public class EmbeddedKitManager implements MPActivityCallbacks {
         for (EmbeddedProvider provider : providers.values()){
             if (provider instanceof MPActivityCallbacks) {
                 try {
-                    if (!provider.optedOut()) {
+                    if (!provider.disabled()) {
                         ((MPActivityCallbacks) provider).onActivityStopped(activity, currentCount);
                     }
                 } catch (Exception e) {
@@ -301,7 +303,7 @@ public class EmbeddedKitManager implements MPActivityCallbacks {
         for (EmbeddedProvider provider : providers.values()){
             if (provider instanceof MPActivityCallbacks) {
                 try {
-                    if (!provider.optedOut()) {
+                    if (!provider.disabled()) {
                         ((MPActivityCallbacks) provider).onActivityStarted(activity, currentCount);
                     }
                 } catch (Exception e) {
@@ -330,7 +332,7 @@ public class EmbeddedKitManager implements MPActivityCallbacks {
             Iterator<Integer> it = keys.iterator();
             while (it.hasNext()) {
                 Integer next = it.next();
-                if (providers.get(next) != null && providers.get(next).isRunning()) {
+                if (providers.get(next) != null && providers.get(next).isRunning() && !providers.get(next).disabled()) {
                     buffer.append(next);
                     if (it.hasNext()) {
                         buffer.append(",");
