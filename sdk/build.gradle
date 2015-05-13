@@ -25,7 +25,7 @@ def getDate() {
 }
 
 android {
-    compileSdkVersion 19
+    compileSdkVersion 22
     buildToolsVersion "22.0.1"
 
     defaultPublishConfig "embeddedkitsRelease"
@@ -48,7 +48,7 @@ android {
 
     defaultConfig {
         minSdkVersion 9
-        targetSdkVersion 21
+        targetSdkVersion 22
         versionName sdkversion
         versionCode getDate()
         testApplicationId "com.mparticle.test"
@@ -88,7 +88,7 @@ android {
         release {
             minifyEnabled true
             proguardFile 'proguard.txt'
-           // buildConfigField "Boolean", "MP_DEBUG", "true"
+            //buildConfigField "Boolean", "MP_DEBUG", "true"
         }
     }
 
