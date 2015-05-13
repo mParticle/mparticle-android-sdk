@@ -8,12 +8,12 @@ import org.json.JSONException;
 import java.util.ArrayList;
 
 public class EmbeddedKitFactory {
-    private final static int APPBOY = 28;
-    private final static int KOCHAVA = 37;
-    private final static int COMSCORE = 39;
-    private final static int KAHUNA = 56;
-    private final static int FORESEE = MParticle.ServiceProviders.FORESEE_ID;
-    private final static int ADJUST = 68;
+    final static int APPBOY = 28;
+    final static int KOCHAVA = 37;
+    final static int COMSCORE = 39;
+    final static int KAHUNA = 56;
+    final static int FORESEE = MParticle.ServiceProviders.FORESEE_ID;
+    final static int ADJUST = 68;
 
     EmbeddedProvider createInstance(int id, EmbeddedKitManager ekManager) throws JSONException, ClassNotFoundException{
         switch (id){

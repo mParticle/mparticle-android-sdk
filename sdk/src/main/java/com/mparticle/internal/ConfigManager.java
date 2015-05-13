@@ -383,6 +383,7 @@ public class ConfigManager implements MessagingConfigCallbacks {
 
     @Override
     public void setPushRegistrationId(String registrationId) {
+        PushRegistrationHelper.storeRegistrationId(mContext, registrationId);
         MParticle.getInstance().logPushRegistration(registrationId);
     }
 

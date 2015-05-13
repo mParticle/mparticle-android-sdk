@@ -13,6 +13,7 @@ import com.mparticle.MParticle;
 import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.Constants;
 import com.mparticle.internal.MPActivityCallbacks;
+import com.mparticle.messaging.AbstractCloudMessage;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -370,5 +371,23 @@ public class EmbeddedKitManager implements MPActivityCallbacks {
 
     public void setAppStateManager(AppStateManager appStateManager) {
         this.mAppStateManager = appStateManager;
+    }
+
+    public boolean handleGcmMessage(Intent intent) {
+        for (EmbeddedProvider provider : providers.values()){
+            if (provider instanceof PushProvider) {
+                try {
+                    if (!provider.disabled()) {
+                        boolean handled = ((PushProvider)provider).handleGcmMessage(intent);
+                        if (handled) {
+                            return true;
+                        }
+                    }
+                } catch (Exception e) {
+                    ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to call handleGcmMessage for embedded provider: " + provider.getName() + ": " + e.getMessage());
+                }
+            }
+        }
+        return false;
     }
 }

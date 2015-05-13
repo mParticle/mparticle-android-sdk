@@ -129,45 +129,45 @@ public class MPService extends IntentService {
     }
 
     private void showNotification(final AbstractCloudMessage message) {
-        final boolean isNetworkingEnabled = ConfigManager.isNetworkPerformanceEnabled();
-        if (isNetworkingEnabled){
-            ConfigManager.setNetworkingEnabled(false);
-        }
-        MParticle.getInstance().setNetworkTrackingEnabled(false);
-        (new AsyncTask<AbstractCloudMessage, Void, Notification>() {
-            @Override
-            protected Notification doInBackground(AbstractCloudMessage... params) {
-                String appState = getAppState();
-                AbstractCloudMessage message = params[0];
-                if (message instanceof ProviderCloudMessage){
-                    MParticle.getInstance().logNotification((ProviderCloudMessage)message, false, appState);
-                }else if (message instanceof MPCloudNotificationMessage){
-                    MParticle.getInstance().logNotification((MPCloudNotificationMessage)message, null, false, appState, AbstractCloudMessage.FLAG_RECEIVED | AbstractCloudMessage.FLAG_DISPLAYED);
-                }
-                return message.buildNotification(MPService.this, System.currentTimeMillis());
+        if (!message.getDisplayed()) {
+            final boolean isNetworkingEnabled = ConfigManager.isNetworkPerformanceEnabled();
+            if (isNetworkingEnabled) {
+                ConfigManager.setNetworkingEnabled(false);
             }
-
-            @Override
-            protected void onPostExecute(Notification notification) {
-                super.onPostExecute(notification);
-                if (notification != null) {
-                    NotificationManager mNotifyMgr =
-                            (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-                    mNotifyMgr.cancel(message.getId());
-                    mNotifyMgr.notify(message.getId(), notification);
+            MParticle.getInstance().setNetworkTrackingEnabled(false);
+            (new AsyncTask<AbstractCloudMessage, Void, Notification>() {
+                @Override
+                protected Notification doInBackground(AbstractCloudMessage... params) {
+                    return message.buildNotification(MPService.this, System.currentTimeMillis());
                 }
 
-                if (isNetworkingEnabled){
-                    ConfigManager.setNetworkingEnabled(true);
-                }
-                synchronized (LOCK) {
-                    if (sWakeLock != null && sWakeLock.isHeld()) {
-                        sWakeLock.release();
+                @Override
+                protected void onPostExecute(Notification notification) {
+                    super.onPostExecute(notification);
+                    if (notification != null) {
+                        NotificationManager mNotifyMgr =
+                                (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+                        mNotifyMgr.cancel(message.getId());
+                        mNotifyMgr.notify(message.getId(), notification);
+                    }
+
+                    if (isNetworkingEnabled) {
+                        ConfigManager.setNetworkingEnabled(true);
+                    }
+                    synchronized (LOCK) {
+                        if (sWakeLock != null && sWakeLock.isHeld()) {
+                            sWakeLock.release();
+                        }
                     }
                 }
-            }
-        }).execute(message);
-
+            }).execute(message);
+        }
+        String appState = getAppState();
+        if (message instanceof ProviderCloudMessage) {
+            MParticle.getInstance().logNotification((ProviderCloudMessage) message, false, appState);
+        } else if (message instanceof MPCloudNotificationMessage) {
+            MParticle.getInstance().logNotification((MPCloudNotificationMessage) message, null, false, appState, AbstractCloudMessage.FLAG_RECEIVED | AbstractCloudMessage.FLAG_DISPLAYED);
+        }
     }
 
     private void handleNotificationTap(Intent intent) {
@@ -198,11 +198,12 @@ public class MPService extends IntentService {
     private void generateCloudMessage(Intent intent) {
         if (!processSilentPush(getApplicationContext(), intent.getExtras())){
             try {
+                MParticle.start(this);
+                boolean handled = MParticle.getInstance().mEmbeddedKitManager.handleGcmMessage(intent);
                 AbstractCloudMessage cloudMessage = AbstractCloudMessage.createMessage(intent, ConfigManager.getPushKeys(this));
+                cloudMessage.setDisplayed(handled);
                 String appState = getAppState();
                 if (cloudMessage instanceof MPCloudNotificationMessage){
-
-                    MParticle.start(this);
                     MParticle.getInstance().saveGcmMessage(((MPCloudNotificationMessage)cloudMessage), appState);
                     if (((MPCloudNotificationMessage)cloudMessage).isDelayed()){
                         MParticle.getInstance().logNotification((MPCloudNotificationMessage)cloudMessage, null, false, appState, AbstractCloudMessage.FLAG_RECEIVED);
