@@ -1,6 +1,7 @@
 package com.mparticle.mock;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
@@ -28,6 +29,11 @@ public class MockContext extends android.test.mock.MockContext {
 
     public void setSharedPreferences(SharedPreferences prefs){
         sharedPreferences = prefs;
+    }
+
+    @Override
+    public void sendBroadcast(Intent intent) {
+        
     }
 
     @Override
