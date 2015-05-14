@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android">
+  <ImageView
+      android:id="@+id/com_appboy_banner_image_card_image"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:scaleType="centerCrop"
+      android:adjustViewBounds="true"
+      style="@style/Appboy.Cards.BannerImage.Image"/>
+</merge><!-- From: file:/Users/brianwheeler/appboy_code/android-sdk/build/appboy-android-sdk/android-sdk-ui/res/layout/com_appboy_banner_image_card.xml -->

@@ -1,0 +1,73 @@
+apply plugin: 'com.android.library'
+apply plugin: 'maven'
+
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:1.2.3'
+    }
+}
+
+repositories {
+    maven { url "http://maven.mparticle.com/" }
+    mavenCentral()
+}
+configurations {
+    deployerJars
+}
+
+android {
+    compileSdkVersion 22
+    buildToolsVersion "22.0.1"
+
+    defaultConfig {
+        minSdkVersion 9
+        targetSdkVersion 22
+        versionCode 1
+        versionName "1.0"
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            if (mavenrepo == "s3") {
+                configuration = configurations.deployerJars
+                repository(url: "s3://maven.mparticle.com")
+            }else{
+                repository url: 'file://' + new File(System.getProperty('user.home'), '.m2/repository').absolutePath
+            }
+
+            pom.project {
+                version = sdkversion
+                artifactId = 'android-sdk-extended'
+                groupId = 'com.mparticle'
+                packaging 'aar'
+                description 'mParticle Android SDK'
+                url 'http://www.mparticle.com'
+                developers {
+                    developer {
+                        id 'samdozor'
+                        name 'Sam Dozor'
+                        email 'sdozor@mparticle.com'
+                    }
+                }
+            }
+        }
+    }
+}
+
+dependencies {
+    deployerJars "org.kuali.maven.wagons:maven-s3-wagon:1.2.1"
+    compile 'com.android.support:support-v4:22.1.0'
+    compile 'com.mparticle:android-sdk:+'
+
+}
