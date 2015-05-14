@@ -1433,6 +1433,46 @@ public class MParticle {
         return mMedia;
     }
 
+    /**
+     * Detect whether the given service provider is active. Use this method or {@link #getProvider(AppBoyListener)}
+     * only when you need to make direct calls to an embedded SDK.
+     *
+     * @param serviceProviderId
+     * @return True if you can safely make direct calls to the given service provider.
+     *
+     * @see com.mparticle.MParticle.ServiceProviders
+     */
+    public boolean isProviderActive(int serviceProviderId){
+        return mEmbeddedKitManager.isProviderActive(serviceProviderId);
+    }
+
+    /**
+     * Register a listener to be called when Appboy is available.
+     *
+     * If the Appboy SDK is enabled for this app and user, the listener will be called immediately
+     * on the same thread as the caller of this method.
+     *
+     * If the Appboy SDK is not currently available, this listener will be called <b>on the main thread</b>
+     * if and when Appboy becomes available.
+     *
+     * Be sure to unregister your listener if you no longer need it using {@link #unregisterProviderListener(AppBoyListener)}
+     *
+     * @param listener the listener to be invoked when Appboy is available
+     */
+    public void getProvider(AppBoyListener listener){
+        mEmbeddedKitManager.getProvider(listener);
+    }
+
+    /**
+     * Remove your listener if you no longer need it. It's a good idea to call this when
+     * navigating away an Activity or Fragment
+     *
+     * @param listener
+     */
+    public void unregisterProviderListener(AppBoyListener listener){
+        mEmbeddedKitManager.unregisterListener(listener);
+    }
+
     void saveGcmMessage(MPCloudNotificationMessage cloudMessage, String appState) {
         mMessageManager.saveGcmMessage(cloudMessage, appState);
     }
@@ -1649,6 +1689,7 @@ public class MParticle {
      */
     public interface ServiceProviders {
         int FORESEE_ID = 64;
+        int APPBOY = 28;
     }
 
     /**

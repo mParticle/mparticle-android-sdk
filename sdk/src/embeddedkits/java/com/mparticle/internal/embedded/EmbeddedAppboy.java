@@ -79,6 +79,7 @@ public class EmbeddedAppboy extends EmbeddedProvider implements MPActivityCallba
                     setPushRegistrationId(regId);
                 }
             }
+            mEkManager.onProviderActive(Appboy.getInstance(context));
         }
         return this;
     }
@@ -271,5 +272,9 @@ public class EmbeddedAppboy extends EmbeddedProvider implements MPActivityCallba
     public void setPushRegistrationId(String registrationId) {
         Appboy.getInstance(context).registerAppboyGcmMessages(registrationId);
         Appboy.getInstance(context).requestImmediateDataFlush();
+    }
+
+    public Appboy getAppboy() {
+        return Appboy.getInstance(context);
     }
 }

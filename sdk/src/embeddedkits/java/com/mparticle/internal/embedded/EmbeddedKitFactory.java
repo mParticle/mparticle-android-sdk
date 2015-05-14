@@ -2,13 +2,15 @@ package com.mparticle.internal.embedded;
 
 
 import com.mparticle.MParticle;
+import com.mparticle.internal.MPUtility;
 
 import org.json.JSONException;
 
+import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 
 public class EmbeddedKitFactory {
-    final static int APPBOY = 28;
+    final static int APPBOY = MParticle.ServiceProviders.APPBOY;
     final static int KOCHAVA = 37;
     final static int COMSCORE = 39;
     final static int KAHUNA = 56;
@@ -28,7 +30,17 @@ public class EmbeddedKitFactory {
             case ADJUST:
                 return new EmbeddedAdjust(ekManager);
             case APPBOY:
-                return new EmbeddedAppboy(ekManager);
+                Class<?> appboyClass = MPUtility.isAppboyUiAvailable();
+                if (appboyClass != null){
+                    try {
+                        Constructor<?> constructor = appboyClass.getConstructor(EmbeddedKitManager.class);
+                        return (EmbeddedAppboy)constructor.newInstance(ekManager);
+                    } catch (Exception e) {
+                        return new EmbeddedAppboy(ekManager);
+                    }
+                }else {
+                    return new EmbeddedAppboy(ekManager);
+                }
             default:
                 return null;
         }

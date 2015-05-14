@@ -5,7 +5,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
 import android.net.Uri;
+import android.os.Handler;
+import android.os.Looper;
 
+import com.appboy.Appboy;
+import com.mparticle.AppBoyListener;
 import com.mparticle.internal.AppStateManager;
 import com.mparticle.MPEvent;
 import com.mparticle.MPProduct;
@@ -32,6 +36,7 @@ public class EmbeddedKitManager implements MPActivityCallbacks {
     ConcurrentHashMap<Integer,EmbeddedProvider> providers = new ConcurrentHashMap<Integer, EmbeddedProvider>(0);
 
     Context context;
+    private HashSet<AppBoyListener> appBoyListeners = new HashSet<AppBoyListener>(0);
 
     public EmbeddedKitManager(Context context){
         this.context = context;
@@ -389,5 +394,38 @@ public class EmbeddedKitManager implements MPActivityCallbacks {
             }
         }
         return false;
+    }
+
+    public boolean isProviderActive(int serviceProviderId) {
+        EmbeddedProvider provider = providers.get(serviceProviderId);
+        return provider != null && !provider.disabled() && provider.isRunning();
+    }
+
+    public void getProvider(AppBoyListener listener) {
+        EmbeddedProvider provider = providers.get(MParticle.ServiceProviders.APPBOY);
+        if (provider != null && !provider.disabled() && provider.isRunning()){
+            try {
+                listener.onAppboy(((EmbeddedAppboy) provider).getAppboy());
+            }catch (Exception e){}
+        }else{
+            appBoyListeners.add(listener);
+        }
+    }
+
+    public void unregisterListener(AppBoyListener listener){
+        appBoyListeners.remove(listener);
+    }
+
+    public void onProviderActive(final Appboy appboy){
+        new Handler(Looper.getMainLooper()).post(new Runnable() {
+            @Override
+            public void run() {
+                for (AppBoyListener listener : appBoyListeners) {
+                    listener.onAppboy(appboy);
+                }
+                appBoyListeners.clear();
+            }
+        });
+
     }
 }
