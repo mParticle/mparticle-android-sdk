@@ -79,7 +79,6 @@ public class EmbeddedAppboy extends EmbeddedProvider implements MPActivityCallba
                     setPushRegistrationId(regId);
                 }
             }
-            mEkManager.onProviderActive(Appboy.getInstance(context));
         }
         return this;
     }

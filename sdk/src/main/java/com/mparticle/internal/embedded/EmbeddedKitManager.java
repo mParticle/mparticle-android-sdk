@@ -8,8 +8,6 @@ import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
 
-import com.appboy.Appboy;
-import com.mparticle.AppBoyListener;
 import com.mparticle.internal.AppStateManager;
 import com.mparticle.MPEvent;
 import com.mparticle.MPProduct;
@@ -17,7 +15,6 @@ import com.mparticle.MParticle;
 import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.Constants;
 import com.mparticle.internal.MPActivityCallbacks;
-import com.mparticle.messaging.AbstractCloudMessage;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -36,7 +33,6 @@ public class EmbeddedKitManager implements MPActivityCallbacks {
     ConcurrentHashMap<Integer,EmbeddedProvider> providers = new ConcurrentHashMap<Integer, EmbeddedProvider>(0);
 
     Context context;
-    private HashSet<AppBoyListener> appBoyListeners = new HashSet<AppBoyListener>(0);
 
     public EmbeddedKitManager(Context context){
         this.context = context;
@@ -64,6 +60,11 @@ public class EmbeddedKitManager implements MPActivityCallbacks {
                             providers.put(currentId, provider);
                         }
                         providers.get(currentId).parseConfig(current).update();
+                        if (providers.get(currentId).isRunning()) {
+                            Intent intent = new Intent(MParticle.ServiceProviders.BROADCAST_ACTIVE + currentId);
+                            context.sendBroadcast(intent);
+                        }
+
                         providers.get(currentId).setUserAttributes(MParticle.getInstance().getUserAttributes());
                         syncUserIdentities(providers.get(currentId));
                     }
@@ -79,6 +80,8 @@ public class EmbeddedKitManager implements MPActivityCallbacks {
                 Integer id = ids.next();
                 if (!activeIds.contains(id)) {
                     ids.remove();
+                    Intent intent = new Intent(MParticle.ServiceProviders.BROADCAST_DISABLED + id);
+                    context.sendBroadcast(intent);
                 }
             }
         }
@@ -399,33 +402,5 @@ public class EmbeddedKitManager implements MPActivityCallbacks {
     public boolean isProviderActive(int serviceProviderId) {
         EmbeddedProvider provider = providers.get(serviceProviderId);
         return provider != null && !provider.disabled() && provider.isRunning();
-    }
-
-    public void getProvider(AppBoyListener listener) {
-        EmbeddedProvider provider = providers.get(MParticle.ServiceProviders.APPBOY);
-        if (provider != null && !provider.disabled() && provider.isRunning()){
-            try {
-                listener.onAppboy(((EmbeddedAppboy) provider).getAppboy());
-            }catch (Exception e){}
-        }else{
-            appBoyListeners.add(listener);
-        }
-    }
-
-    public void unregisterListener(AppBoyListener listener){
-        appBoyListeners.remove(listener);
-    }
-
-    public void onProviderActive(final Appboy appboy){
-        new Handler(Looper.getMainLooper()).post(new Runnable() {
-            @Override
-            public void run() {
-                for (AppBoyListener listener : appBoyListeners) {
-                    listener.onAppboy(appboy);
-                }
-                appBoyListeners.clear();
-            }
-        });
-
     }
 }

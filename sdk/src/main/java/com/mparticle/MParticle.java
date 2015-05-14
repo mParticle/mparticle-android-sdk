@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
@@ -1434,8 +1435,17 @@ public class MParticle {
     }
 
     /**
-     * Detect whether the given service provider is active. Use this method or {@link #getProvider(AppBoyListener)}
+     * Detect whether the given service provider is active. Use this method
      * only when you need to make direct calls to an embedded SDK.
+     *
+     * You can also register a {@link android.content.BroadcastReceiver} with an {@link android.content.IntentFilter}, using an action of
+     * {@link com.mparticle.MParticle.ServiceProviders#BROADCAST_ACTIVE} or {@link com.mparticle.MParticle.ServiceProviders#BROADCAST_DISABLED}
+     * concatenated with the service provider ID:
+     *
+     * <pre>
+     * {@code
+     * Context.registerReceiver(yourReceiver, new IntentFilter(MParticle.ServiceProviders.BROADCAST_ACTIVE + MParticle.ServiceProviders.APPBOY));}
+     * </pre>
      *
      * @param serviceProviderId
      * @return True if you can safely make direct calls to the given service provider.
@@ -1444,33 +1454,6 @@ public class MParticle {
      */
     public boolean isProviderActive(int serviceProviderId){
         return mEmbeddedKitManager.isProviderActive(serviceProviderId);
-    }
-
-    /**
-     * Register a listener to be called when Appboy is available.
-     *
-     * If the Appboy SDK is enabled for this app and user, the listener will be called immediately
-     * on the same thread as the caller of this method.
-     *
-     * If the Appboy SDK is not currently available, this listener will be called <b>on the main thread</b>
-     * if and when Appboy becomes available.
-     *
-     * Be sure to unregister your listener if you no longer need it using {@link #unregisterProviderListener(AppBoyListener)}
-     *
-     * @param listener the listener to be invoked when Appboy is available
-     */
-    public void getProvider(AppBoyListener listener){
-        mEmbeddedKitManager.getProvider(listener);
-    }
-
-    /**
-     * Remove your listener if you no longer need it. It's a good idea to call this when
-     * navigating away an Activity or Fragment
-     *
-     * @param listener
-     */
-    public void unregisterProviderListener(AppBoyListener listener){
-        mEmbeddedKitManager.unregisterListener(listener);
     }
 
     void saveGcmMessage(MPCloudNotificationMessage cloudMessage, String appState) {
@@ -1690,6 +1673,8 @@ public class MParticle {
     public interface ServiceProviders {
         int FORESEE_ID = 64;
         int APPBOY = 28;
+        String BROADCAST_ACTIVE = "MPARTICLE_SERVICE_PROVIDER_ACTIVE";
+        String BROADCAST_DISABLED = "MPARTICLE_SERVICE_PROVIDER_DISABLED";
     }
 
     /**
