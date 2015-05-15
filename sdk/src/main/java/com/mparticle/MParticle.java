@@ -1673,6 +1673,10 @@ public class MParticle {
     public interface ServiceProviders {
         int FORESEE_ID = 64;
         int APPBOY = 28;
+        int ADJUST = 68;
+        int KOCHAVA = 37;
+        int COMSCORE = 39;
+        int KAHUNA = 56;
         String BROADCAST_ACTIVE = "MPARTICLE_SERVICE_PROVIDER_ACTIVE";
         String BROADCAST_DISABLED = "MPARTICLE_SERVICE_PROVIDER_DISABLED";
     }

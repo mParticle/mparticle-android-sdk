@@ -11,11 +11,11 @@ import java.util.ArrayList;
 
 public class EmbeddedKitFactory {
     final static int APPBOY = MParticle.ServiceProviders.APPBOY;
-    final static int KOCHAVA = 37;
-    final static int COMSCORE = 39;
-    final static int KAHUNA = 56;
     final static int FORESEE = MParticle.ServiceProviders.FORESEE_ID;
-    final static int ADJUST = 68;
+    final static int ADJUST = MParticle.ServiceProviders.ADJUST;
+    final static int KOCHAVA = MParticle.ServiceProviders.KOCHAVA;
+    final static int COMSCORE = MParticle.ServiceProviders.COMSCORE;
+    final static int KAHUNA = MParticle.ServiceProviders.KAHUNA;
 
     EmbeddedProvider createInstance(int id, EmbeddedKitManager ekManager) throws JSONException, ClassNotFoundException{
         switch (id){
