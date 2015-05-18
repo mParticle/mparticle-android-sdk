@@ -203,27 +203,12 @@ public class EmbeddedAppboy extends EmbeddedProvider implements MPActivityCallba
     public void onActivityStarted(Activity activity, int activityCount) {
         started = true;
         Appboy.getInstance(activity).openSession(activity);
-        Appboy.getInstance(context).requestImmediateDataFlush();
     }
 
     @Override
     public boolean handleGcmMessage(Intent intent) {
         if (AppboyNotificationUtils.isAppboyPushMessage(intent)) {
             new AppboyGcmReceiver().onReceive(context, intent);
-            IntentFilter intentFilter = new IntentFilter(context.getPackageName() + ".intent.APPBOY_NOTIFICATION_OPENED");
-            context.registerReceiver(new BroadcastReceiver() {
-                @Override
-                public void onReceive(Context context, Intent intent) {
-                    try {
-                        String campaignId = intent.getStringExtra(AppboyGcmReceiver.CAMPAIGN_ID_KEY);
-                        if (!MPUtility.isEmpty(campaignId)) {
-                            Appboy.getInstance(context).logPushNotificationOpened(campaignId);
-                        }
-                    }catch (Exception e){
-
-                    }
-                }
-            }, intentFilter);
             return true;
         }
         return false;

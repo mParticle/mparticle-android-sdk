@@ -70,7 +70,7 @@ public class PushRegistrationHelper {
                         String registrationId =  GoogleCloudMessaging.getInstance(context).register(senderId);
                         mMessagingConfigCallbacks.setPushRegistrationId(registrationId);
                     } catch (Exception ex) {
-                        ConfigManager.log(MParticle.LogLevel.ERROR, "Error registering for GCM", ex.getMessage());
+                        ConfigManager.log(MParticle.LogLevel.ERROR, "Error registering for GCM: ", ex.getMessage());
                     }
                 }
             }).start();

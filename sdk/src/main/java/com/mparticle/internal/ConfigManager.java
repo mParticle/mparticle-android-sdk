@@ -311,8 +311,9 @@ public class ConfigManager implements MessagingConfigCallbacks {
     }
 
     public String getPushSenderId() {
-        if (sLocalPrefs.pushSenderId != null && sLocalPrefs.pushSenderId.length() > 0)
-            return sLocalPrefs.pushSenderId;
+        String senderId = sLocalPrefs.getPushSenderId();
+        if (!MPUtility.isEmpty(senderId))
+            return senderId;
         else return mPreferences.getString(Constants.PrefKeys.PUSH_SENDER_ID, null);
     }
 
