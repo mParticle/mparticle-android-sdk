@@ -1,17 +1,13 @@
 package com.mparticle.internal.embedded;
 
 import android.app.Activity;
-import android.app.Notification;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.os.Bundle;
-import android.os.Parcel;
 
 import com.appboy.Appboy;
 import com.appboy.AppboyUser;
-import com.appboy.IAppboyNotificationFactory;
 import com.appboy.enums.Gender;
 import com.appboy.models.outgoing.AppboyProperties;
 import com.mparticle.MPEvent;
@@ -24,11 +20,8 @@ import com.mparticle.internal.MPUtility;
 import com.mparticle.internal.PushRegistrationHelper;
 import com.mparticle.internal.embedded.appboy.AppboyGcmReceiver;
 import com.mparticle.internal.embedded.appboy.push.AppboyNotificationUtils;
-import com.mparticle.messaging.AbstractCloudMessage;
 import com.mparticle.messaging.MessagingConfigCallbacks;
-import com.mparticle.messaging.ProviderCloudMessage;
 
-import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.math.BigDecimal;
@@ -215,11 +208,6 @@ public class EmbeddedAppboy extends EmbeddedProvider implements MPActivityCallba
     }
 
     @Override
-    public void onRegistered(String registrationId) {
-        Appboy.getInstance(context).registerAppboyGcmMessages(registrationId);
-    }
-
-    @Override
     public boolean handleGcmMessage(Intent intent) {
         if (AppboyNotificationUtils.isAppboyPushMessage(intent)) {
             new AppboyGcmReceiver().onReceive(context, intent);
@@ -270,7 +258,6 @@ public class EmbeddedAppboy extends EmbeddedProvider implements MPActivityCallba
     @Override
     public void setPushRegistrationId(String registrationId) {
         Appboy.getInstance(context).registerAppboyGcmMessages(registrationId);
-        Appboy.getInstance(context).requestImmediateDataFlush();
     }
 
     public Appboy getAppboy() {
