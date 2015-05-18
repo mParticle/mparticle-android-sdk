@@ -30,17 +30,7 @@ public class EmbeddedKitFactory {
             case ADJUST:
                 return new EmbeddedAdjust(ekManager);
             case APPBOY:
-                Class<?> appboyClass = MPUtility.isAppboyUiAvailable();
-                if (appboyClass != null){
-                    try {
-                        Constructor<?> constructor = appboyClass.getConstructor(EmbeddedKitManager.class);
-                        return (EmbeddedAppboy)constructor.newInstance(ekManager);
-                    } catch (Exception e) {
-                        return new EmbeddedAppboy(ekManager);
-                    }
-                }else {
-                    return new EmbeddedAppboy(ekManager);
-                }
+                return new EmbeddedAppboy(ekManager);
             default:
                 return null;
         }

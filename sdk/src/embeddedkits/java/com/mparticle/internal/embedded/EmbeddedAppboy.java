@@ -38,7 +38,6 @@ public class EmbeddedAppboy extends EmbeddedProvider implements MPActivityCallba
     public static final String REGISTER_INAPP = "register_inapp";
     boolean started = false;
     boolean running = false;
-    public String senderId = null;
     private boolean pushEnabled;
 
     public EmbeddedAppboy(EmbeddedKitManager ekManager) {

@@ -505,16 +505,6 @@ public class MPUtility {
         return false;
     }
 
-    public static Class<?> isAppboyUiAvailable(){
-
-        try {
-            return Class.forName("com.mparticle.extended.AppboyExtended");
-        } catch (Exception cnfe) {
-
-        }
-        return null;
-    }
-
     public static boolean isGcmServicesAvailable() {
         try {
             Class.forName("com.google.android.gms.gcm.GoogleCloudMessaging");
