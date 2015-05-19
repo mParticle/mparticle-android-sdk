@@ -1,6 +1,8 @@
 package com.mparticle.internal;
 
 
+import android.content.SharedPreferences;
+
 import com.mparticle.MParticle;
 import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.embedded.EmbeddedKitManager;
@@ -292,5 +294,22 @@ public class ConfigManagerTest {
     @Test
     public void testShouldTrigger() throws Exception {
 
+    }
+
+    @Test
+    public void testGetMpid() throws Exception {
+        SharedPreferences prefs = context.getSharedPreferences(null, 0);
+        long mpid = prefs.getLong(Constants.PrefKeys.Mpid, 0);
+        assertTrue(mpid == 0);
+        mpid = manager.getMpid();
+        long storedMpid = prefs.getLong(Constants.PrefKeys.Mpid, 0);
+        assertTrue(mpid != 0);
+        assertTrue(storedMpid == mpid);
+    }
+
+    @Test
+    public void testGetUserBucket() throws Exception {
+        int bucket = manager.getUserBucket();
+        assertTrue(bucket >= 0 && bucket <= 100);
     }
 }

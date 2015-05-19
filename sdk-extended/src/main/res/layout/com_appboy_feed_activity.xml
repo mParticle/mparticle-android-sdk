@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+  <fragment android:name="com.appboy.ui.AppboyFeedFragment"
+      android:id="@+id/com_appboy_feed"
+      android:layout_width="match_parent"
+      android:layout_height="match_parent"/>
+</LinearLayout><!-- From: file:/Users/brianwheeler/appboy_code/android-sdk/build/appboy-android-sdk/android-sdk-ui/res/layout/com_appboy_feed_activity.xml -->

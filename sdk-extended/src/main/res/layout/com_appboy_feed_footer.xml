@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<View xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/tag"
+    android:layout_width="match_parent"
+    android:layout_height="0dp"/>
+<!-- From: file:/Users/brianwheeler/appboy_code/android-sdk/build/appboy-android-sdk/android-sdk-ui/res/layout/com_appboy_feed_footer.xml -->

@@ -1,2 +1,4 @@
 include ':sdk:unityskeleton'
+include ':sdk:sdk-extended'
 include ':sdk'
+

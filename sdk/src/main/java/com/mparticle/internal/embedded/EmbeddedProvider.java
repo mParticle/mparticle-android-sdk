@@ -29,6 +29,7 @@ abstract class EmbeddedProvider {
     final static String KEY_ID = "id";
     private final static String KEY_PROPERTIES = "as";
     private final static String KEY_FILTERS = "hs";
+    private final static String KEY_BRACKETING = "bk";
     private final static String KEY_EVENT_LIST = "eventList";
     private final static String KEY_ATTRIBUTE_LIST = "attributeList";
     private final static String KEY_EVENT_TYPES_FILTER = "et";
@@ -38,6 +39,8 @@ abstract class EmbeddedProvider {
     private final static String KEY_SCREEN_ATTRIBUTES_FILTER = "svea";
     private final static String KEY_USER_IDENTITY_FILTER = "uid";
     private final static String KEY_USER_ATTRIBUTE_FILTER = "ua";
+    private final static String KEY_BRACKETING_LOW = "lo";
+    private final static String KEY_BRACKETING_HIGH = "hi";
 
     //If set to true, our sdk honor user's optout wish. If false, we still collect data on opt-ed out users, but only for reporting
     private static final String HONOR_OPT_OUT = "honorOptOut";
@@ -52,6 +55,8 @@ abstract class EmbeddedProvider {
     protected SparseBooleanArray mUserIdentityFilters = new SparseBooleanArray(0);
     protected SparseBooleanArray mUserAttributeFilters = new SparseBooleanArray(0);
     protected HashSet<String> includedEvents, includedAttributes;
+    protected int lowBracket = 0;
+    protected int highBracket = 101;
 
     protected Context context;
     private boolean mRunning = true;
@@ -131,6 +136,15 @@ abstract class EmbeddedProvider {
             }
         }
 
+        if (json.has(KEY_BRACKETING)){
+            JSONObject bracketing = json.getJSONObject(KEY_BRACKETING);
+            lowBracket = bracketing.optInt(KEY_BRACKETING_LOW, 0);
+            highBracket = bracketing.optInt(KEY_BRACKETING_HIGH, 101);
+        }else{
+            lowBracket = 0;
+            highBracket = 101;
+        }
+
         return this;
     }
 
@@ -147,9 +161,22 @@ abstract class EmbeddedProvider {
         return map;
     }
 
-    public boolean optedOut(){
-        return Boolean.parseBoolean(properties.containsKey(HONOR_OPT_OUT) ? properties.get(HONOR_OPT_OUT) : "true")
-                && !mEkManager.getConfigurationManager().isEnabled();
+    private boolean shouldHonorOptOut() {
+        if (properties.containsKey(HONOR_OPT_OUT)){
+            String optOut = properties.get(HONOR_OPT_OUT);
+            return Boolean.parseBoolean(optOut);
+        }
+        return true;
+    }
+
+    public boolean disabled(){
+        return !passesBracketing()
+                || (shouldHonorOptOut() && !mEkManager.getConfigurationManager().isEnabled());
+    }
+
+    private boolean passesBracketing() {
+        int userBucket = mEkManager.getConfigurationManager().getUserBucket();
+        return userBucket >= lowBracket && userBucket < highBracket;
     }
 
     private static int hash(String input) {

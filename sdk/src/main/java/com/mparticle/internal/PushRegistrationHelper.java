@@ -36,7 +36,7 @@ public class PushRegistrationHelper {
      * @return registration ID, or empty string if there is no existing
      * registration ID.
      */
-    static String getRegistrationId(Context context) {
+    public static String getRegistrationId(Context context) {
         SharedPreferences preferences = context.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
         String registrationId = preferences.getString(Constants.PrefKeys.PUSH_REGISTRATION_ID, "");
         if (MPUtility.isEmpty(registrationId)) {
@@ -68,10 +68,9 @@ public class PushRegistrationHelper {
                 public void run() {
                     try {
                         String registrationId =  GoogleCloudMessaging.getInstance(context).register(senderId);
-                        storeRegistrationId(context, registrationId);
                         mMessagingConfigCallbacks.setPushRegistrationId(registrationId);
                     } catch (Exception ex) {
-                        ConfigManager.log(MParticle.LogLevel.ERROR, "Error registering for GCM", ex.getMessage());
+                        ConfigManager.log(MParticle.LogLevel.ERROR, "Error registering for GCM: ", ex.getMessage());
                     }
                 }
             }).start();

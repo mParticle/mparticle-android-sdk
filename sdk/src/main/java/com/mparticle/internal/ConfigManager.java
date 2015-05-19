@@ -43,6 +43,7 @@ public class ConfigManager implements MessagingConfigCallbacks {
     public static final String VALUE_CNP_NO_CAPTURE = "forcefalse";
     private static final String PREFERENCES_FILE = "mp_preferences";
     static final String KEY_RAMP = "rp";
+
     private static final int DEVMODE_UPLOAD_INTERVAL_MILLISECONDS = 10 * 1000;
     private Context mContext;
 
@@ -58,6 +59,7 @@ public class ConfigManager implements MessagingConfigCallbacks {
     private String mNetworkPerformance = "";
 
     private int mRampValue = -1;
+    private int mUserBucket = -1;
 
     private int mSessionTimeoutInterval = -1;
     private int mUploadInterval = -1;
@@ -309,8 +311,9 @@ public class ConfigManager implements MessagingConfigCallbacks {
     }
 
     public String getPushSenderId() {
-        if (sLocalPrefs.pushSenderId != null && sLocalPrefs.pushSenderId.length() > 0)
-            return sLocalPrefs.pushSenderId;
+        String senderId = sLocalPrefs.getPushSenderId();
+        if (!MPUtility.isEmpty(senderId))
+            return senderId;
         else return mPreferences.getString(Constants.PrefKeys.PUSH_SENDER_ID, null);
     }
 
@@ -381,6 +384,7 @@ public class ConfigManager implements MessagingConfigCallbacks {
 
     @Override
     public void setPushRegistrationId(String registrationId) {
+        PushRegistrationHelper.storeRegistrationId(mContext, registrationId);
         MParticle.getInstance().logPushRegistration(registrationId);
     }
 
@@ -482,7 +486,13 @@ public class ConfigManager implements MessagingConfigCallbacks {
     }
 
     public long getMpid() {
-        return mPreferences.getLong(Constants.PrefKeys.Mpid, 0);
+        if (mPreferences.contains(Constants.PrefKeys.Mpid)){
+            return mPreferences.getLong(Constants.PrefKeys.Mpid, 0);
+        }else{
+            long mpid = MPUtility.generateMpid();
+            mPreferences.edit().putLong(Constants.PrefKeys.Mpid, mpid).apply();
+            return mpid;
+        }
     }
 
     public int getAudienceTimeout() {
@@ -553,5 +563,12 @@ public class ConfigManager implements MessagingConfigCallbacks {
             }
         }
         return shouldTrigger;
+    }
+
+    public int getUserBucket() {
+        if (mUserBucket < 0){
+            mUserBucket = (int)(Math.abs(getMpid() >> 8) % 100);
+        }
+        return mUserBucket;
     }
 }

@@ -46,7 +46,7 @@ class AppConfig {
     public int sessionTimeout = DEFAULT_SESSION_TIMEOUT;
     public int uploadInterval = DEFAULT_UPLOAD_INTERVAL;
     public boolean isPushEnabled = DEFAULT_ENABLE_PUSH;
-    public String pushSenderId = null;
+    private String pushSenderId = null;
     public String licenseKey = null;
     public boolean isLicensingEnabled = DEFAULT_ENABLE_LICENSING;
     public boolean autoTrackingEnabled = DEFAULT_ENABLE_AUTO_TRACKING;
@@ -174,5 +174,12 @@ class AppConfig {
 
     public static MParticle.Environment getEnvironment() {
         return mEnvironment;
+    }
+
+    public String getPushSenderId() {
+        if (MPUtility.isEmpty(pushSenderId)){
+            pushSenderId = getString(PREFKEY_PUSH_SENDER_ID, null);
+        }
+        return pushSenderId;
     }
 }

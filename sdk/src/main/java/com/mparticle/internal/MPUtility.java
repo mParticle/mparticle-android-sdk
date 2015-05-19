@@ -515,7 +515,7 @@ public class MPUtility {
         return false;
     }
 
-    public static BigInteger hashDeviceIdForRamping(byte[] data) {
+    public static BigInteger hashFnv1A(byte[] data) {
         final BigInteger INIT64 = new BigInteger("cbf29ce484222325", 16);
         final BigInteger PRIME64 = new BigInteger("100000001b3", 16);
         final BigInteger MOD64 = new BigInteger("2").pow(64);
@@ -650,5 +650,15 @@ public class MPUtility {
             }
         }
         return key;
+    }
+
+    public static long generateMpid() {
+        while (true)
+        {
+            long id = hashFnv1A(UUID.randomUUID().toString().getBytes()).longValue();
+            if (id != 0) {
+                return id;
+            }
+        }
     }
 }

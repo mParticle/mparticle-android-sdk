@@ -331,8 +331,9 @@ public class Constants {
         String PUSH_CONTENT_ID = "cntid";
         String PUSH_CAMPAIGN_HISTORY = "pch";
         String PUSH_CAMPAIGN_HISTORY_TIMESTAMP = "ts";
-
         String STATE_INFO_NETWORK_TYPE = "ant";
+        
+        String MPID = "mpid";
     }
 
     public interface PrefKeys {

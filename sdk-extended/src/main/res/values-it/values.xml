@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- From: file:/Users/brianwheeler/appboy_code/android-sdk/build/appboy-android-sdk/android-sdk-ui/res/values-it/strings.xml -->
+    <eat-comment/>
+    <string name="com_appboy_feed_connection_error_body">Impossibile stabilire una connessione di rete. Riprovare più tardi.</string>
+    <string name="com_appboy_feed_connection_error_title">Errore di connessione</string>
+    <string name="com_appboy_feed_empty">Non ci sono aggiornamenti. Ricontrollare più tardi.</string>
+    <string name="com_appboy_feedback_form_cancel">Annulla</string>
+    <string name="com_appboy_feedback_form_email">E-mail</string>
+    <string name="com_appboy_feedback_form_empty_email">È necessario un indirizzo e-mail.</string>
+    <string name="com_appboy_feedback_form_invalid_email">Indirizzo e-mail non valido</string>
+    <string name="com_appboy_feedback_form_invalid_message">Inserire un feedback.</string>
+    <string name="com_appboy_feedback_form_is_bug">Vuoi segnalare un problema?</string>
+    <string name="com_appboy_feedback_form_message">Messaggio</string>
+    <string name="com_appboy_feedback_form_send">Invia</string>
+    <string name="com_appboy_notification_time_twelve_hour_format">h:mm a</string>
+    <string name="com_appboy_notification_time_twenty_four_hour_format">HH:mm</string>
+    <string name="com_appboy_recommendation_free">Gratis</string>
+</resources>

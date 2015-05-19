@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
@@ -1042,7 +1043,7 @@ public class MParticle {
     }
 
     private void attributeRemoved(String key) {
-        String serializedJsonArray = mPreferences.getString(PrefKeys.USER_ATTRS + mApiKey, null);
+        String serializedJsonArray = mPreferences.getString(PrefKeys.DELETED_USER_ATTRS + mApiKey, null);
         JSONArray deletedAtributes;
         try {
             deletedAtributes = new JSONArray(serializedJsonArray);
@@ -1051,7 +1052,7 @@ public class MParticle {
         }
         deletedAtributes.put(key);
 
-        mPreferences.edit().putString(PrefKeys.USER_ATTRS + mApiKey, deletedAtributes.toString()).apply();
+        mPreferences.edit().putString(PrefKeys.DELETED_USER_ATTRS + mApiKey, deletedAtributes.toString()).apply();
     }
 
     /**
@@ -1433,6 +1434,28 @@ public class MParticle {
         return mMedia;
     }
 
+    /**
+     * Detect whether the given service provider is active. Use this method
+     * only when you need to make direct calls to an embedded SDK.
+     *
+     * You can also register a {@link android.content.BroadcastReceiver} with an {@link android.content.IntentFilter}, using an action of
+     * {@link com.mparticle.MParticle.ServiceProviders#BROADCAST_ACTIVE} or {@link com.mparticle.MParticle.ServiceProviders#BROADCAST_DISABLED}
+     * concatenated with the service provider ID:
+     *
+     * <pre>
+     * {@code
+     * Context.registerReceiver(yourReceiver, new IntentFilter(MParticle.ServiceProviders.BROADCAST_ACTIVE + MParticle.ServiceProviders.APPBOY));}
+     * </pre>
+     *
+     * @param serviceProviderId
+     * @return True if you can safely make direct calls to the given service provider.
+     *
+     * @see com.mparticle.MParticle.ServiceProviders
+     */
+    public boolean isProviderActive(int serviceProviderId){
+        return mEmbeddedKitManager.isProviderActive(serviceProviderId);
+    }
+
     void saveGcmMessage(MPCloudNotificationMessage cloudMessage, String appState) {
         mMessageManager.saveGcmMessage(cloudMessage, appState);
     }
@@ -1649,6 +1672,13 @@ public class MParticle {
      */
     public interface ServiceProviders {
         int FORESEE_ID = 64;
+        int APPBOY = 28;
+        int ADJUST = 68;
+        int KOCHAVA = 37;
+        int COMSCORE = 39;
+        int KAHUNA = 56;
+        String BROADCAST_ACTIVE = "MPARTICLE_SERVICE_PROVIDER_ACTIVE_";
+        String BROADCAST_DISABLED = "MPARTICLE_SERVICE_PROVIDER_DISABLED_";
     }
 
     /**

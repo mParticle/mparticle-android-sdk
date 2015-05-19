@@ -34,6 +34,7 @@ public abstract class AbstractCloudMessage implements Parcelable {
 
     private long mActualDeliveryTime = 0;
     protected Bundle mExtras;
+    private boolean mDisplayed;
 
     public AbstractCloudMessage(Parcel pc) {
         mExtras = pc.readBundle();
@@ -108,6 +109,14 @@ public abstract class AbstractCloudMessage implements Parcelable {
 
     public void setActualDeliveryTime(long time){
         mActualDeliveryTime = time;
+    }
+
+    public void setDisplayed(boolean displayed) {
+        mDisplayed = displayed;
+    }
+
+    public boolean getDisplayed() {
+        return mDisplayed;
     }
 
     /**

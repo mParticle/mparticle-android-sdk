@@ -85,10 +85,7 @@ public class MParticleApiClient implements IMPApiClient {
      * Wrapper around cookies, MPID, and other server-response info that requires parsing.
      */
     private static final String CONSUMER_INFO = "ci";
-    /**
-     * Key to extract the user/device's mpid, required for segments.
-     */
-    private static final String MPID = "mpid";
+
 
     private static final char[] HEX_CHARS = "0123456789abcdef".toCharArray();
     private final ConfigManager mConfigManager;
@@ -429,8 +426,8 @@ public class MParticleApiClient implements IMPApiClient {
         try {
             if (jsonResponse.has(CONSUMER_INFO)) {
                 JSONObject consumerInfo = jsonResponse.getJSONObject(CONSUMER_INFO);
-                if (consumerInfo.has(MPID)) {
-                    mConfigManager.setMpid(consumerInfo.getLong(MPID));
+                if (consumerInfo.has(Constants.MessageKey.MPID)) {
+                    mConfigManager.setMpid(consumerInfo.getLong(Constants.MessageKey.MPID));
                 }
 
                 setCookies(consumerInfo.optJSONObject(Constants.MessageKey.COOKIES));
@@ -479,7 +476,7 @@ public class MParticleApiClient implements IMPApiClient {
 
     private void checkRampValue() throws MPRampException {
         if (mDeviceRampNumber == null){
-            mDeviceRampNumber = MPUtility.hashDeviceIdForRamping(
+            mDeviceRampNumber = MPUtility.hashFnv1A(
                     Settings.Secure.getString(mContext.getContentResolver(),
                             Settings.Secure.ANDROID_ID).getBytes())
                     .mod(BigInteger.valueOf(100))

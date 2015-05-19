@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- From: file:/Users/brianwheeler/appboy_code/android-sdk/build/appboy-android-sdk/android-sdk-ui/res/values-th/strings.xml -->
+    <eat-comment/>
+    <string name="com_appboy_feed_connection_error_body">ไม่สามารถสร้างการเชื่อมต่อเครือข่าย กรุณาลองใหม่ภายหลัง.</string>
+    <string name="com_appboy_feed_connection_error_title">ผิดพลาดการเชื่อมต่อ</string>
+    <string name="com_appboy_feed_empty">เราไม่มีการอัพเดต กรุณาตรวจสอบภายหลัง.</string>
+    <string name="com_appboy_feedback_form_cancel">ยกเลิก</string>
+    <string name="com_appboy_feedback_form_email">อีเมล</string>
+    <string name="com_appboy_feedback_form_empty_email">ต้องใส่ที่อยู่อีเมล.</string>
+    <string name="com_appboy_feedback_form_invalid_email">ที่อยู่อีเมลใช้ไม่ได้</string>
+    <string name="com_appboy_feedback_form_invalid_message">กรุณาใส่ข้อความข้อคิดเห็น.</string>
+    <string name="com_appboy_feedback_form_is_bug">รายงานปัญหา?</string>
+    <string name="com_appboy_feedback_form_message">ข้อความ</string>
+    <string name="com_appboy_feedback_form_send">ส่ง</string>
+    <string name="com_appboy_notification_time_twelve_hour_format">h:mm a</string>
+    <string name="com_appboy_notification_time_twenty_four_hour_format">HH:mm</string>
+    <string name="com_appboy_recommendation_free">ฟรี</string>
+</resources>
