@@ -86,12 +86,12 @@ public class EmbeddedAppboy extends EmbeddedProvider implements MPActivityCallba
     }
 
     @Override
-    public void logEvent(MPEvent event, Map<String, String> attributes) throws Exception {
-        if (attributes == null) {
+    public void logEvent(MPEvent event) throws Exception {
+        if (event.getInfo() == null) {
             Appboy.getInstance(context).logCustomEvent(event.getEventName());
         }else{
             AppboyProperties properties = new AppboyProperties();
-            for (Map.Entry<String, String> entry : attributes.entrySet()){
+            for (Map.Entry<String, String> entry : event.getInfo().entrySet()){
                 properties.addProperty(entry.getKey(), entry.getValue());
             }
             Appboy.getInstance(context).logCustomEvent(event.getEventName(), properties);

@@ -5735,12 +5735,13 @@ com.mparticle.MPEvent -> com.mparticle.MPEvent:
     java.lang.Double duration -> duration
     java.lang.Double startTime -> startTime
     java.lang.Double endTime -> endTime
-    73:100:java.lang.String toString() -> toString
-    104:104:java.lang.String getEventName() -> getEventName
-    108:108:java.lang.String getCategory() -> getCategory
-    112:112:java.util.Map getInfo() -> getInfo
-    116:116:com.mparticle.MParticle$EventType getEventType() -> getEventType
-    120:127:java.lang.Double getLength() -> getLength
+    71:72:void setInfo(java.util.Map) -> setInfo
+    88:115:java.lang.String toString() -> toString
+    119:119:java.lang.String getEventName() -> getEventName
+    123:123:java.lang.String getCategory() -> getCategory
+    127:127:java.util.Map getInfo() -> getInfo
+    131:131:com.mparticle.MParticle$EventType getEventType() -> getEventType
+    135:142:java.lang.Double getLength() -> getLength
 com.mparticle.MPEvent$1 -> com.mparticle.MPEvent$1:
 com.mparticle.MPEvent$Builder -> com.mparticle.MPEvent$Builder:
     com.mparticle.MParticle$EventType eventType -> eventType
@@ -5757,25 +5758,25 @@ com.mparticle.MPEvent$Builder -> com.mparticle.MPEvent$Builder:
     java.lang.String EVENT_INFO -> EVENT_INFO
     java.lang.String EVENT_START_TIME -> EVENT_START_TIME
     java.lang.String EVENT_END_TIME -> EVENT_END_TIME
-    166:169:com.mparticle.MPEvent$Builder eventName(java.lang.String) -> eventName
-    181:184:com.mparticle.MPEvent$Builder eventType(com.mparticle.MParticle$EventType) -> eventType
-    195:196:com.mparticle.MPEvent$Builder category(java.lang.String) -> category
-    208:209:com.mparticle.MPEvent$Builder duration(double) -> duration
-    219:220:com.mparticle.MPEvent$Builder info(java.util.Map) -> info
-    234:235:com.mparticle.MPEvent$Builder startTime(double) -> startTime
-    246:246:com.mparticle.MPEvent$Builder startTime() -> startTime
-    257:257:com.mparticle.MPEvent$Builder endTime() -> endTime
-    272:273:com.mparticle.MPEvent$Builder endTime(double) -> endTime
-    277:277:com.mparticle.MPEvent build() -> build
-    287:316:com.mparticle.MPEvent$Builder parseString(java.lang.String) -> parseString
-    337:364:java.lang.String toString() -> toString
-    135:135:com.mparticle.MParticle$EventType access$000(com.mparticle.MPEvent$Builder) -> access$000
-    135:135:java.lang.String access$100(com.mparticle.MPEvent$Builder) -> access$100
-    135:135:java.util.Map access$200(com.mparticle.MPEvent$Builder) -> access$200
-    135:135:java.lang.String access$300(com.mparticle.MPEvent$Builder) -> access$300
-    135:135:java.lang.Double access$400(com.mparticle.MPEvent$Builder) -> access$400
-    135:135:java.lang.Double access$500(com.mparticle.MPEvent$Builder) -> access$500
-    135:135:java.lang.Double access$600(com.mparticle.MPEvent$Builder) -> access$600
+    181:184:com.mparticle.MPEvent$Builder eventName(java.lang.String) -> eventName
+    196:199:com.mparticle.MPEvent$Builder eventType(com.mparticle.MParticle$EventType) -> eventType
+    210:211:com.mparticle.MPEvent$Builder category(java.lang.String) -> category
+    223:224:com.mparticle.MPEvent$Builder duration(double) -> duration
+    234:235:com.mparticle.MPEvent$Builder info(java.util.Map) -> info
+    249:250:com.mparticle.MPEvent$Builder startTime(double) -> startTime
+    261:261:com.mparticle.MPEvent$Builder startTime() -> startTime
+    272:272:com.mparticle.MPEvent$Builder endTime() -> endTime
+    287:288:com.mparticle.MPEvent$Builder endTime(double) -> endTime
+    292:292:com.mparticle.MPEvent build() -> build
+    302:331:com.mparticle.MPEvent$Builder parseString(java.lang.String) -> parseString
+    352:379:java.lang.String toString() -> toString
+    150:150:com.mparticle.MParticle$EventType access$000(com.mparticle.MPEvent$Builder) -> access$000
+    150:150:java.lang.String access$100(com.mparticle.MPEvent$Builder) -> access$100
+    150:150:java.util.Map access$200(com.mparticle.MPEvent$Builder) -> access$200
+    150:150:java.lang.String access$300(com.mparticle.MPEvent$Builder) -> access$300
+    150:150:java.lang.Double access$400(com.mparticle.MPEvent$Builder) -> access$400
+    150:150:java.lang.Double access$500(com.mparticle.MPEvent$Builder) -> access$500
+    150:150:java.lang.Double access$600(com.mparticle.MPEvent$Builder) -> access$600
 com.mparticle.MPProduct -> com.mparticle.MPProduct:
     java.lang.String NAME -> NAME
     java.lang.String SKU -> SKU
@@ -6520,7 +6521,7 @@ com.mparticle.internal.embedded.EmbeddedAppboy -> com.mparticle.internal.embedde
     59:75:com.mparticle.internal.embedded.EmbeddedProvider update() -> a
     81:81:void onActivityCreated(android.app.Activity,int) -> c
     85:85:boolean isRunning() -> c
-    90:99:void logEvent(com.mparticle.MPEvent,java.util.Map) -> a
+    90:99:void logEvent(com.mparticle.MPEvent) -> a
     103:106:void removeUserAttribute(java.lang.String) -> b
     110:118:void setUserIdentity(java.lang.String,com.mparticle.MParticle$IdentityType) -> a
     122:153:void setUserAttributes(org.json.JSONObject) -> a
@@ -6536,6 +6537,7 @@ com.mparticle.internal.embedded.EmbeddedAppboy -> com.mparticle.internal.embedde
     235:235:void setPushSoundEnabled(boolean) -> setPushSoundEnabled
     240:240:void setPushVibrationEnabled(boolean) -> setPushVibrationEnabled
     244:245:void setPushRegistrationId(java.lang.String) -> setPushRegistrationId
+    35:35:java.util.List projectEvents(com.mparticle.MPEvent) -> b
     35:35:void setRunning(boolean) -> a
     35:35:boolean shouldSetIdentity(com.mparticle.MParticle$IdentityType) -> a
     35:35:org.json.JSONObject filterAttributes(android.util.SparseBooleanArray,org.json.JSONObject) -> a
@@ -6547,8 +6549,8 @@ com.mparticle.internal.embedded.EmbeddedComscore -> com.mparticle.internal.embed
     java.lang.String autoUpdateMode -> i
     int autoUpdateInterval -> j
     boolean isEnterprise -> k
-    55:75:void logEvent(com.mparticle.MPEvent,java.util.Map) -> a
-    79:83:void logScreen(java.lang.String,java.util.Map) -> a
+    55:76:void logEvent(com.mparticle.MPEvent) -> a
+    80:83:void logScreen(java.lang.String,java.util.Map) -> a
     87:113:void setUserAttributes(org.json.JSONObject) -> a
     117:120:void setUserIdentity(java.lang.String,com.mparticle.MParticle$IdentityType) -> a
     124:157:com.mparticle.internal.embedded.EmbeddedProvider update() -> a
@@ -6572,22 +6574,22 @@ com.mparticle.internal.embedded.EmbeddedKahuna -> com.mparticle.internal.embedde
     68:74:void registerForPush() -> f
     78:78:java.lang.String getName() -> b
     83:83:boolean isOriginator(java.lang.String) -> a
-    88:101:void logEvent(com.mparticle.MPEvent,java.util.Map) -> a
-    105:109:void logTransaction(com.mparticle.MPProduct) -> a
-    114:114:void logScreen(java.lang.String,java.util.Map) -> a
-    119:119:void setLocation(android.location.Location) -> a
-    123:138:void setUserAttributes(org.json.JSONObject) -> a
-    141:148:void setUserAttributes(java.util.Map) -> a
-    151:158:java.lang.String convertMpKeyToKahuna(java.lang.String) -> d
-    165:165:void removeUserAttribute(java.lang.String) -> b
-    170:191:void setUserIdentity(java.lang.String,com.mparticle.MParticle$IdentityType) -> a
-    200:215:void handleIntent(android.content.Intent) -> a_
-    229:230:void logout() -> e
-    236:237:void onActivityCreated(android.app.Activity,int) -> c
-    242:242:void onActivityResumed(android.app.Activity,int) -> d
-    247:247:void onActivityPaused(android.app.Activity,int) -> e
-    251:253:void onActivityStopped(android.app.Activity,int) -> b
-    257:259:void onActivityStarted(android.app.Activity,int) -> a
+    88:102:void logEvent(com.mparticle.MPEvent) -> a
+    106:110:void logTransaction(com.mparticle.MPProduct) -> a
+    115:115:void logScreen(java.lang.String,java.util.Map) -> a
+    120:120:void setLocation(android.location.Location) -> a
+    124:139:void setUserAttributes(org.json.JSONObject) -> a
+    142:149:void setUserAttributes(java.util.Map) -> a
+    152:159:java.lang.String convertMpKeyToKahuna(java.lang.String) -> d
+    166:166:void removeUserAttribute(java.lang.String) -> b
+    171:192:void setUserIdentity(java.lang.String,com.mparticle.MParticle$IdentityType) -> a
+    201:216:void handleIntent(android.content.Intent) -> a_
+    230:231:void logout() -> e
+    237:238:void onActivityCreated(android.app.Activity,int) -> c
+    243:243:void onActivityResumed(android.app.Activity,int) -> d
+    248:248:void onActivityPaused(android.app.Activity,int) -> e
+    252:254:void onActivityStopped(android.app.Activity,int) -> b
+    258:260:void onActivityStarted(android.app.Activity,int) -> a
 com.mparticle.internal.embedded.EmbeddedKahuna$1 -> com.mparticle.internal.embedded.e$1:
     int[] $SwitchMap$com$mparticle$MParticle$IdentityType -> a
 com.mparticle.internal.embedded.EmbeddedKitFactory -> com.mparticle.internal.embedded.f:
@@ -6597,34 +6599,34 @@ com.mparticle.internal.embedded.EmbeddedKitManager -> com.mparticle.internal.emb
     com.mparticle.internal.AppStateManager mAppStateManager -> d
     java.util.concurrent.ConcurrentHashMap providers -> e
     android.content.Context context -> a
-    44:88:void updateKits(org.json.JSONArray) -> a
-    91:104:void syncUserIdentities(com.mparticle.internal.embedded.EmbeddedProvider) -> a
-    107:116:void logEvent(com.mparticle.MPEvent) -> a
-    119:128:void logTransaction(com.mparticle.MPProduct) -> a
-    131:140:void logScreen(java.lang.String,java.util.Map) -> a
-    143:152:void setLocation(android.location.Location) -> a
-    155:164:void setUserAttributes(org.json.JSONObject) -> a
-    167:176:void removeUserAttribute(java.lang.String) -> a
-    179:188:void setUserIdentity(java.lang.String,com.mparticle.MParticle$IdentityType) -> a
-    191:200:void logout() -> a
-    203:212:void removeUserIdentity(java.lang.String) -> b
-    215:224:void handleIntent(android.content.Intent) -> a
-    227:236:void startSession() -> b
-    239:248:void endSession() -> c
-    252:263:void onActivityCreated(android.app.Activity,int) -> c
-    267:278:void onActivityResumed(android.app.Activity,int) -> d
-    282:293:void onActivityPaused(android.app.Activity,int) -> e
-    297:308:void onActivityStopped(android.app.Activity,int) -> b
-    312:323:void onActivityStarted(android.app.Activity,int) -> a
-    326:331:boolean isEmbeddedKitUri(java.lang.String) -> c
-    335:351:java.lang.String getActiveModuleIds() -> d
-    356:360:android.net.Uri getSurveyUrl(int,org.json.JSONObject) -> a
-    369:369:com.mparticle.internal.ConfigManager getConfigurationManager() -> e
-    373:373:com.mparticle.internal.AppStateManager getAppStateManager() -> f
-    377:378:void setConfigManager(com.mparticle.internal.ConfigManager) -> a
-    381:382:void setAppStateManager(com.mparticle.internal.AppStateManager) -> a
-    385:399:boolean handleGcmMessage(android.content.Intent) -> b
-    403:404:boolean isProviderActive(int) -> a
+    45:89:void updateKits(org.json.JSONArray) -> a
+    92:105:void syncUserIdentities(com.mparticle.internal.embedded.EmbeddedProvider) -> a
+    108:122:void logEvent(com.mparticle.MPEvent) -> a
+    125:134:void logTransaction(com.mparticle.MPProduct) -> a
+    137:146:void logScreen(java.lang.String,java.util.Map) -> a
+    149:158:void setLocation(android.location.Location) -> a
+    161:170:void setUserAttributes(org.json.JSONObject) -> a
+    173:182:void removeUserAttribute(java.lang.String) -> a
+    185:194:void setUserIdentity(java.lang.String,com.mparticle.MParticle$IdentityType) -> a
+    197:206:void logout() -> a
+    209:218:void removeUserIdentity(java.lang.String) -> b
+    221:230:void handleIntent(android.content.Intent) -> a
+    233:242:void startSession() -> b
+    245:254:void endSession() -> c
+    258:269:void onActivityCreated(android.app.Activity,int) -> c
+    273:284:void onActivityResumed(android.app.Activity,int) -> d
+    288:299:void onActivityPaused(android.app.Activity,int) -> e
+    303:314:void onActivityStopped(android.app.Activity,int) -> b
+    318:329:void onActivityStarted(android.app.Activity,int) -> a
+    332:337:boolean isEmbeddedKitUri(java.lang.String) -> c
+    341:357:java.lang.String getActiveModuleIds() -> d
+    362:366:android.net.Uri getSurveyUrl(int,org.json.JSONObject) -> a
+    375:375:com.mparticle.internal.ConfigManager getConfigurationManager() -> e
+    379:379:com.mparticle.internal.AppStateManager getAppStateManager() -> f
+    383:384:void setConfigManager(com.mparticle.internal.ConfigManager) -> a
+    387:388:void setAppStateManager(com.mparticle.internal.AppStateManager) -> a
+    391:405:boolean handleGcmMessage(android.content.Intent) -> b
+    409:410:boolean isProviderActive(int) -> a
 com.mparticle.internal.embedded.EmbeddedKochava -> com.mparticle.internal.embedded.h:
     36:36:com.mparticle.internal.embedded.EmbeddedProvider update() -> a
     46:46:java.lang.String getName() -> b
@@ -6647,32 +6649,36 @@ com.mparticle.internal.embedded.EmbeddedProvider -> com.mparticle.internal.embed
     int highBracket -> n
     android.content.Context context -> f
     boolean mRunning -> o
-    71:148:com.mparticle.internal.embedded.EmbeddedProvider parseConfig(org.json.JSONObject) -> c
-    152:161:android.util.SparseBooleanArray convertToSparseArray(org.json.JSONObject) -> b
-    173:173:boolean disabled() -> d
-    183:194:int hash(java.lang.String) -> d
-    198:200:boolean shouldLogEvent(com.mparticle.MParticle$EventType,java.lang.String) -> a
-    204:208:boolean shouldLogScreen(java.lang.String) -> c
-    212:230:java.util.Map filterEventAttributes(com.mparticle.MParticle$EventType,java.lang.String,android.util.SparseBooleanArray,java.util.Map) -> a
+    73:158:com.mparticle.internal.embedded.EmbeddedProvider parseConfig(org.json.JSONObject) -> c
+    162:171:android.util.SparseBooleanArray convertToSparseArray(org.json.JSONObject) -> b
+    183:183:boolean disabled() -> d
+    193:204:int hash(java.lang.String) -> d
+    208:210:boolean shouldLogEvent(com.mparticle.MParticle$EventType,java.lang.String) -> a
+    214:218:boolean shouldLogScreen(java.lang.String) -> c
+    222:240:java.util.Map filterEventAttributes(com.mparticle.MParticle$EventType,java.lang.String,android.util.SparseBooleanArray,java.util.Map) -> a
     java.lang.String getName() -> b
     boolean isOriginator(java.lang.String) -> a
     com.mparticle.internal.embedded.EmbeddedProvider update() -> a
-    241:258:org.json.JSONObject filterAttributes(android.util.SparseBooleanArray,org.json.JSONObject) -> a
-    264:264:void logEvent(com.mparticle.MPEvent,java.util.Map) -> a
-    267:267:void logTransaction(com.mparticle.MPProduct) -> a
-    270:270:void logScreen(java.lang.String,java.util.Map) -> a
-    273:273:void setLocation(android.location.Location) -> a
-    276:276:void setUserAttributes(org.json.JSONObject) -> a
-    279:279:void removeUserAttribute(java.lang.String) -> b
-    282:282:void setUserIdentity(java.lang.String,com.mparticle.MParticle$IdentityType) -> a
-    285:285:void logout() -> e
-    291:291:void handleIntent(android.content.Intent) -> a_
-    300:300:boolean isRunning() -> c
-    304:304:boolean shouldSetIdentity(com.mparticle.MParticle$IdentityType) -> a
-    308:309:void setRunning(boolean) -> a
+    251:268:org.json.JSONObject filterAttributes(android.util.SparseBooleanArray,org.json.JSONObject) -> a
+    274:274:void logEvent(com.mparticle.MPEvent) -> a
+    277:277:void logTransaction(com.mparticle.MPProduct) -> a
+    280:280:void logScreen(java.lang.String,java.util.Map) -> a
+    283:283:void setLocation(android.location.Location) -> a
+    286:286:void setUserAttributes(org.json.JSONObject) -> a
+    289:289:void removeUserAttribute(java.lang.String) -> b
+    292:292:void setUserIdentity(java.lang.String,com.mparticle.MParticle$IdentityType) -> a
+    295:295:void logout() -> e
+    301:301:void handleIntent(android.content.Intent) -> a_
+    310:310:boolean isRunning() -> c
+    314:314:boolean shouldSetIdentity(com.mparticle.MParticle$IdentityType) -> a
+    318:319:void setRunning(boolean) -> a
+    322:324:java.util.List projectEvents(com.mparticle.MPEvent) -> b
 com.mparticle.internal.embedded.ISurveyProvider -> com.mparticle.internal.embedded.j:
     android.net.Uri getSurveyUrl(org.json.JSONObject) -> b
-com.mparticle.internal.embedded.PushProvider -> com.mparticle.internal.embedded.k:
+com.mparticle.internal.embedded.Projection -> com.mparticle.internal.embedded.k:
+    java.util.List mAttributeProjectionList -> a
+com.mparticle.internal.embedded.Projection$AttributeProjection -> com.mparticle.internal.embedded.k$a:
+com.mparticle.internal.embedded.PushProvider -> com.mparticle.internal.embedded.l:
     boolean handleGcmMessage(android.content.Intent) -> a
 com.mparticle.internal.embedded.adjust.sdk.ActivityHandler -> com.mparticle.internal.embedded.adjust.sdk.ActivityHandler:
     long TIMER_INTERVAL -> TIMER_INTERVAL

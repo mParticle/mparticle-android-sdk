@@ -22,6 +22,7 @@ import org.json.JSONObject;
 
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -107,7 +108,12 @@ public class EmbeddedKitManager implements MPActivityCallbacks {
         for (EmbeddedProvider provider : providers.values()){
             try {
                 if (!provider.disabled() && provider.shouldLogEvent(event.getEventType(), event.getEventName())) {
-                    provider.logEvent(event, provider.filterEventAttributes(event.getEventType(), event.getEventName(), provider.mAttributeFilters, event.getInfo()));
+                    MPEvent providerEvent = new MPEvent(event);
+                    providerEvent.setInfo(provider.filterEventAttributes(providerEvent.getEventType(), providerEvent.getEventName(), provider.mAttributeFilters, providerEvent.getInfo()));
+                    List<MPEvent> projectedEvents = provider.projectEvents(providerEvent);
+                    for (int i = 0; i < projectedEvents.size(); i++) {
+                        provider.logEvent(event);
+                    }
                 }
             } catch (Exception e) {
                 ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to call logEvent for embedded provider: " + provider.getName() + ": " + e.getMessage());

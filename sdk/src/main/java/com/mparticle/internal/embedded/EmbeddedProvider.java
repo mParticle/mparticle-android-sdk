@@ -17,12 +17,13 @@ import org.json.JSONObject;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 /**
  * Base EmbeddedProvider - all EKs subclass this. The primary function is to parse the common EK configuration structures
  * such as filters.
- *
  */
 abstract class EmbeddedProvider {
 
@@ -44,6 +45,7 @@ abstract class EmbeddedProvider {
 
     //If set to true, our sdk honor user's optout wish. If false, we still collect data on opt-ed out users, but only for reporting
     private static final String HONOR_OPT_OUT = "honorOptOut";
+    private static final String KEY_PROJECTIONS = "pr";
     protected final EmbeddedKitManager mEkManager;
 
     protected HashMap<String, String> properties = new HashMap<String, String>(0);
@@ -143,6 +145,14 @@ abstract class EmbeddedProvider {
         }else{
             lowBracket = 0;
             highBracket = 101;
+        }
+        List<Projection> projectionList = new LinkedList<Projection>();
+        if (json.has(KEY_PROJECTIONS)){
+            JSONArray projections = json.getJSONArray(KEY_PROJECTIONS);
+            for (int i = 0; i < projections.length(); i++){
+                Projection projection = new Projection(projections.getJSONObject(i));
+                projectionList.add(projection);
+            }
         }
 
         return this;
@@ -259,7 +269,7 @@ abstract class EmbeddedProvider {
         }
     }
 
-    public void logEvent(MPEvent event, Map<String, String> attributes) throws Exception {
+    public void logEvent(MPEvent event) throws Exception {
 
     }
     public void logTransaction(MPProduct transaction) throws Exception {
@@ -306,5 +316,11 @@ abstract class EmbeddedProvider {
 
     public void setRunning(boolean running) {
         this.mRunning = running;
+    }
+
+    public List<MPEvent> projectEvents(MPEvent event) {
+        List<MPEvent> events = new LinkedList<MPEvent>();
+        events.add(event);
+        return events;
     }
 }

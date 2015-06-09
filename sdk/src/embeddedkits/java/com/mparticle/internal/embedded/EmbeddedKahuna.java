@@ -84,8 +84,9 @@ class EmbeddedKahuna extends EmbeddedProvider implements MPActivityCallbacks {
     }
 
     @Override
-    public void logEvent(MPEvent event, Map<String, String> eventAttributes) throws Exception {
+    public void logEvent(MPEvent event) throws Exception {
         if (!MPUtility.isEmpty(event.getEventName())) {
+            Map<String, String> eventAttributes = event.getInfo();
             if (sendTransactionData && eventAttributes != null && eventAttributes.containsKey(Constants.MessageKey.RESERVED_KEY_LTV)) {
                 Double amount = Double.parseDouble(eventAttributes.get(Constants.MessageKey.RESERVED_KEY_LTV)) * 100;
                 KahunaAnalytics.trackEvent("purchase", 1, amount.intValue());

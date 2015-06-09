@@ -67,6 +67,21 @@ public class MPEvent {
         }
     }
 
+    public void setInfo(Map<String, String> info){
+        this.info = info;
+    }
+
+    public MPEvent(MPEvent mpEvent) {
+        eventType = mpEvent.eventType;
+        eventName = mpEvent.eventName;
+        Map<String, String> shallowCopy = new HashMap<String, String>();
+        shallowCopy.putAll(mpEvent.info);
+        info = shallowCopy;
+        category = mpEvent.category;
+        duration = mpEvent.duration;
+        endTime = mpEvent.endTime;
+        startTime = mpEvent.startTime;
+    }
 
     @Override
     public String toString() {
