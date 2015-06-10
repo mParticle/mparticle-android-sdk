@@ -1,36 +1,107 @@
+//
+//  Logger.java
+//  Adjust
+//
+//  Created by Christian Wellenbrock on 2013-04-18.
+//  Copyright (c) 2013 adjust GmbH. All rights reserved.
+//  See the file MIT-LICENSE for copying permission.
+//
+
 package com.mparticle.internal.embedded.adjust.sdk;
 
 import android.util.Log;
 
-public interface Logger {
+import java.util.Arrays;
+import java.util.Locale;
 
-    public enum LogLevel {
-        VERBOSE(Log.VERBOSE), DEBUG(Log.DEBUG), INFO(Log.INFO), WARN(Log.WARN), ERROR(Log.ERROR), ASSERT(Log.ASSERT);
-        final int androidLogLevel;
+import static com.mparticle.internal.embedded.adjust.sdk.Constants.LOGTAG;
 
-        LogLevel(final int androidLogLevel) {
-            this.androidLogLevel = androidLogLevel;
-        }
+public class Logger implements ILogger {
 
-        public int getAndroidLogLevel() {
-            return androidLogLevel;
+    private LogLevel logLevel;
+    private static String formatErrorMessage = "Error formating log message: %s, with params: %s";
+
+    public Logger() {
+        setLogLevel(LogLevel.INFO);
+    }
+
+    @Override
+    public void setLogLevel(LogLevel logLevel) {
+        this.logLevel = logLevel;
+    }
+
+    @Override
+    public void setLogLevelString(String logLevelString) {
+        if (null != logLevelString) {
+            try {
+                setLogLevel(LogLevel.valueOf(logLevelString.toUpperCase(Locale.US)));
+            } catch (IllegalArgumentException iae) {
+                error("Malformed logLevel '%s', falling back to 'info'", logLevelString);
+            }
         }
     }
 
-    public void setLogLevel(LogLevel logLevel);
+    @Override
+    public void verbose(String message, Object... parameters) {
+        if (logLevel.androidLogLevel <= Log.VERBOSE) {
+            try {
+                Log.v(LOGTAG, String.format(Locale.US, message, parameters));
+            } catch (Exception e) {
+                Log.e(LOGTAG, String.format(Locale.US, formatErrorMessage, message, Arrays.toString(parameters)));
+            }
+        }
+    }
 
-    public void setLogLevelString(String logLevelString);
+    @Override
+    public void debug(String message, Object... parameters) {
+        if (logLevel.androidLogLevel <= Log.DEBUG) {
+            try {
+                Log.d(LOGTAG, String.format(Locale.US, message, parameters));
+            } catch (Exception e) {
+                Log.e(LOGTAG, String.format(Locale.US, formatErrorMessage, message, Arrays.toString(parameters)));
+            }
+        }
+    }
 
-    public void verbose(String message, Object ...parameters);
+    @Override
+    public void info(String message, Object... parameters) {
+        if (logLevel.androidLogLevel <= Log.INFO) {
+            try {
+                Log.i(LOGTAG, String.format(Locale.US, message, parameters));
+            } catch (Exception e) {
+                Log.e(LOGTAG, String.format(Locale.US, formatErrorMessage, message, Arrays.toString(parameters)));
+            }
+        }
+    }
 
-    public void debug(String message, Object ...parameters);
+    @Override
+    public void warn(String message, Object... parameters) {
+        if (logLevel.androidLogLevel <= Log.WARN) {
+            try {
+                Log.w(LOGTAG, String.format(Locale.US, message, parameters));
+            } catch (Exception e) {
+                Log.e(LOGTAG, String.format(Locale.US, formatErrorMessage, message, Arrays.toString(parameters)));
+            }
+        }
+    }
 
-    public void info(String message, Object ...parameters);
+    @Override
+    public void error(String message, Object... parameters) {
+        if (logLevel.androidLogLevel <= Log.ERROR) {
+            try {
+                Log.e(LOGTAG, String.format(Locale.US, message, parameters));
+            } catch (Exception e) {
+                Log.e(LOGTAG, String.format(Locale.US, formatErrorMessage, message, Arrays.toString(parameters)));
+            }
+        }
+    }
 
-    public void warn(String message, Object ...parameters);
-
-    public void error(String message, Object ...parameters);
-
-    public void Assert(String message, Object ...parameters);
-
+    @Override
+    public void Assert(String message, Object... parameters) {
+        try {
+            Log.println(Log.ASSERT, LOGTAG, String.format(Locale.US, message, parameters));
+        } catch (Exception e) {
+            Log.e(LOGTAG, String.format(Locale.US, formatErrorMessage, message, Arrays.toString(parameters)));
+        }
+    }
 }

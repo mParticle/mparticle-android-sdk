@@ -9,7 +9,22 @@
 
 package com.mparticle.internal.embedded.adjust.sdk;
 
-import java.io.ByteArrayOutputStream;
+import android.os.Handler;
+import android.os.HandlerThread;
+import android.os.Looper;
+import android.os.Message;
+
+import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.client.utils.URLEncodedUtils;
+import org.apache.http.message.BasicNameValuePair;
+import org.json.JSONObject;
+
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.lang.ref.WeakReference;
@@ -19,34 +34,11 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.client.utils.URLEncodedUtils;
-import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.params.BasicHttpParams;
-import org.apache.http.params.HttpConnectionParams;
-import org.apache.http.params.HttpParams;
-import org.json.JSONObject;
-
-import android.os.Handler;
-import android.os.HandlerThread;
-import android.os.Looper;
-import android.os.Message;
-
 public class RequestHandler extends HandlerThread implements IRequestHandler {
-    private static final int CONNECTION_TIMEOUT = Constants.ONE_MINUTE;
-    private static final int SOCKET_TIMEOUT     = Constants.ONE_MINUTE;
-
     private InternalHandler internalHandler;
     private IPackageHandler packageHandler;
-    private HttpClient      httpClient;
-    private Logger          logger;
+    private HttpClient httpClient;
+    private ILogger logger;
 
     public RequestHandler(IPackageHandler packageHandler) {
         super(Constants.LOGTAG, MIN_PRIORITY);
@@ -55,11 +47,16 @@ public class RequestHandler extends HandlerThread implements IRequestHandler {
 
         this.logger = AdjustFactory.getLogger();
         this.internalHandler = new InternalHandler(getLooper(), this);
-        this.packageHandler = packageHandler;
+        init(packageHandler);
 
         Message message = Message.obtain();
         message.arg1 = InternalHandler.INIT;
         internalHandler.sendMessage(message);
+    }
+
+    @Override
+    public void init(IPackageHandler packageHandler) {
+        this.packageHandler = packageHandler;
     }
 
     @Override
@@ -70,9 +67,19 @@ public class RequestHandler extends HandlerThread implements IRequestHandler {
         internalHandler.sendMessage(message);
     }
 
+    @Override
+    public void sendClickPackage(ActivityPackage clickPackage) {
+        Message message = Message.obtain();
+        message.arg1 = InternalHandler.SEND_CLICK;
+        message.obj = clickPackage;
+        internalHandler.sendMessage(message);
+
+    }
+
     private static final class InternalHandler extends Handler {
         private static final int INIT = 72401;
         private static final int SEND = 72400;
+        private static final int SEND_CLICK = 72402;
 
         private final WeakReference<RequestHandler> requestHandlerReference;
 
@@ -86,7 +93,7 @@ public class RequestHandler extends HandlerThread implements IRequestHandler {
             super.handleMessage(message);
 
             RequestHandler requestHandler = requestHandlerReference.get();
-            if (null == requestHandler) {
+            if (requestHandler == null) {
                 return;
             }
 
@@ -96,97 +103,81 @@ public class RequestHandler extends HandlerThread implements IRequestHandler {
                     break;
                 case SEND:
                     ActivityPackage activityPackage = (ActivityPackage) message.obj;
-                    requestHandler.sendInternal(activityPackage);
+                    requestHandler.sendInternal(activityPackage, true);
+                    break;
+                case SEND_CLICK:
+                    ActivityPackage clickPackage = (ActivityPackage) message.obj;
+                    requestHandler.sendInternal(clickPackage, false);
                     break;
             }
         }
     }
 
     private void initInternal() {
-        HttpParams httpParams = new BasicHttpParams();
-        HttpConnectionParams.setConnectionTimeout(httpParams, CONNECTION_TIMEOUT);
-        HttpConnectionParams.setSoTimeout(httpParams, SOCKET_TIMEOUT);
-        httpClient = AdjustFactory.getHttpClient(httpParams);
+        httpClient = Util.getHttpClient();
     }
 
-    private void sendInternal(ActivityPackage activityPackage) {
+    private void sendInternal(ActivityPackage activityPackage, boolean sendToPackageHandler) {
         try {
             HttpUriRequest request = getRequest(activityPackage);
             HttpResponse response = httpClient.execute(request);
-            requestFinished(response, activityPackage);
+            requestFinished(response, sendToPackageHandler);
         } catch (UnsupportedEncodingException e) {
-            sendNextPackage(activityPackage, "Failed to encode parameters", e);
+            sendNextPackage(activityPackage, "Failed to encode parameters", e, sendToPackageHandler);
         } catch (ClientProtocolException e) {
-            closePackage(activityPackage, "Client protocol error", e);
+            closePackage(activityPackage, "Client protocol error", e, sendToPackageHandler);
         } catch (SocketTimeoutException e) {
-            closePackage(activityPackage, "Request timed out", e);
+            closePackage(activityPackage, "Request timed out", e, sendToPackageHandler);
         } catch (IOException e) {
-            closePackage(activityPackage, "Request failed", e);
+            closePackage(activityPackage, "Request failed", e, sendToPackageHandler);
         } catch (Throwable e) {
-            sendNextPackage(activityPackage, "Runtime exception", e);
+            sendNextPackage(activityPackage, "Runtime exception", e, sendToPackageHandler);
         }
     }
 
-    private void requestFinished(HttpResponse response, ActivityPackage activityPackage) {
-        int statusCode = response.getStatusLine().getStatusCode();
-        String responseString = parseResponse(response);
-        JSONObject jsonResponse = Util.buildJsonObject(responseString);
-        ResponseData responseData = ResponseData.fromJson(jsonResponse, responseString);
+    private void requestFinished(HttpResponse response, boolean sendToPackageHandler) {
+        JSONObject jsonResponse = Util.parseJsonResponse(response);
 
-        if (HttpStatus.SC_OK == statusCode) {
-            // success
-            responseData.setWasSuccess(true);
-            logger.info(activityPackage.getSuccessMessage());
-        } else {
-            // wrong status code
-            logger.error("%s. (%s)", activityPackage.getFailureMessage(), responseData.getError());
+        if (jsonResponse == null) {
+            if (sendToPackageHandler) {
+                packageHandler.closeFirstPackage();
+            }
+            return;
         }
 
-        packageHandler.finishedTrackingActivity(activityPackage, responseData, jsonResponse);
-        packageHandler.sendNextPackage();
-    }
-
-    private String parseResponse(HttpResponse response) {
-        try {
-            ByteArrayOutputStream out = new ByteArrayOutputStream();
-            response.getEntity().writeTo(out);
-            out.close();
-            return out.toString().trim();
-        } catch (Exception e) {
-            logger.error("Failed to parse response (%s)", e);
-            return "Failed to parse response";
+        packageHandler.finishedTrackingActivity(jsonResponse);
+        if (sendToPackageHandler) {
+            packageHandler.sendNextPackage();
         }
     }
 
     // close current package because it failed
-    private void closePackage(ActivityPackage activityPackage, String message, Throwable throwable) {
+    private void closePackage(ActivityPackage activityPackage, String message, Throwable throwable, boolean sendToPackageHandler) {
         final String packageMessage = activityPackage.getFailureMessage();
-        final String handlerMessage = packageHandler.getFailureMessage();
         final String reasonString = getReasonString(message, throwable);
-        logger.error("%s. (%s) %s", packageMessage, reasonString, handlerMessage);
+        logger.error("%s. (%s) Will retry later", packageMessage, reasonString);
 
-        ResponseData responseData = ResponseData.fromError(reasonString);
-        responseData.setWillRetry(!packageHandler.dropsOfflineActivities());
-        packageHandler.finishedTrackingActivity(activityPackage, responseData, null);
-        packageHandler.closeFirstPackage();
+        if (sendToPackageHandler) {
+            packageHandler.closeFirstPackage();
+        }
     }
 
     // send next package because the current package failed
-    private void sendNextPackage(ActivityPackage activityPackage, String message, Throwable throwable) {
+    private void sendNextPackage(ActivityPackage activityPackage, String message, Throwable throwable, boolean sendToPackageHandler) {
         final String failureMessage = activityPackage.getFailureMessage();
         final String reasonString = getReasonString(message, throwable);
         logger.error("%s. (%s)", failureMessage, reasonString);
 
-        ResponseData responseData = ResponseData.fromError(reasonString);
-        packageHandler.finishedTrackingActivity(activityPackage, responseData, null);
-        packageHandler.sendNextPackage();
+        if (sendToPackageHandler) {
+            packageHandler.sendNextPackage();
+        }
     }
 
     private String getReasonString(String message, Throwable throwable) {
         if (throwable != null) {
-            return String.format("%s: %s", message, throwable);
+            return String.format(Locale.US, "%s: %s", message, throwable);
         } else {
-            return String.format("%s", message);
+            return String.format(Locale.US, "%s", message);
         }
     }
 
@@ -195,13 +186,12 @@ public class RequestHandler extends HandlerThread implements IRequestHandler {
         HttpPost request = new HttpPost(url);
 
         String language = Locale.getDefault().getLanguage();
-        request.addHeader("User-Agent", activityPackage.getUserAgent());
         request.addHeader("Client-SDK", activityPackage.getClientSdk());
         request.addHeader("Accept-Language", language);
 
         List<NameValuePair> pairs = new ArrayList<NameValuePair>();
-        for (Map.Entry<String, String> entity : activityPackage.getParameters().entrySet()) {
-            NameValuePair pair = new BasicNameValuePair(entity.getKey(), entity.getValue());
+        for (Map.Entry<String, String> entry : activityPackage.getParameters().entrySet()) {
+            NameValuePair pair = new BasicNameValuePair(entry.getKey(), entry.getValue());
             pairs.add(pair);
         }
 

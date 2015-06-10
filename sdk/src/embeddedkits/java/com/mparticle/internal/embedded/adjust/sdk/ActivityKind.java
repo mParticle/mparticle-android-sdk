@@ -1,17 +1,17 @@
 package com.mparticle.internal.embedded.adjust.sdk;
 
 public enum ActivityKind {
-    UNKNOWN, SESSION, EVENT, REVENUE, REATTRIBUTION;
+    UNKNOWN, SESSION, EVENT, CLICK, ATTRIBUTION, REVENUE, REATTRIBUTION;
 
-    public static ActivityKind  fromString(String string) {
+    public static ActivityKind fromString(String string) {
         if ("session".equals(string)) {
             return SESSION;
         } else if ("event".equals(string)) {
             return EVENT;
-        } else if ("revenue".equals(string)) {
-            return REVENUE;
-        } else if ("reattribution".equals(string)) {
-            return REATTRIBUTION;
+        } else if ("click".equals(string)) {
+            return CLICK;
+        } else if ("attribution".equals(string)) {
+            return ATTRIBUTION;
         } else {
             return UNKNOWN;
         }
@@ -19,12 +19,17 @@ public enum ActivityKind {
 
     @Override
     public String toString() {
-        switch(this) {
-        case SESSION:       return "session";
-        case EVENT:         return "event";
-        case REVENUE:       return "revenue";
-        case REATTRIBUTION: return "reattribution";
-        default:            return "unknown";
+        switch (this) {
+            case SESSION:
+                return "session";
+            case EVENT:
+                return "event";
+            case CLICK:
+                return "click";
+            case ATTRIBUTION:
+                return "attribution";
+            default:
+                return "unknown";
         }
     }
 }

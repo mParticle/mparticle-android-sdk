@@ -17,32 +17,36 @@ import java.util.List;
  * @since 8.11.13
  */
 public interface Constants {
-    int ONE_SECOND     = 1000;
-    int ONE_MINUTE     = 60 * ONE_SECOND;
+    int ONE_SECOND = 1000;
+    int ONE_MINUTE = 60 * ONE_SECOND;
     int THIRTY_MINUTES = 30 * ONE_MINUTE;
 
-    String BASE_URL   = "https://app.adjust.io";
-    String CLIENT_SDK = "android3.6.2";
-    String LOGTAG     = "Adjust";
+    int CONNECTION_TIMEOUT = Constants.ONE_MINUTE;
+    int SOCKET_TIMEOUT = Constants.ONE_MINUTE;
 
-    String SESSION_STATE_FILENAME    = "AdjustIoActivityState";
-    String NO_ACTIVITY_HANDLER_FOUND = "No activity handler found";
+    String BASE_URL = "https://app.adjust.com";
+    String SCHEME = "https";
+    String AUTHORITY = "app.adjust.com";
+    String CLIENT_SDK = "android4.0.8";
+    String LOGTAG = "Adjust";
 
-    String UNKNOWN   = "unknown";
+    String ACTIVITY_STATE_FILENAME = "AdjustIoActivityState";
+    String ATTRIBUTION_FILENAME = "AdjustAttribution";
+
     String MALFORMED = "malformed";
-    String SMALL     = "small";
-    String NORMAL    = "normal";
-    String LONG      = "long";
-    String LARGE     = "large";
-    String XLARGE    = "xlarge";
-    String LOW       = "low";
-    String MEDIUM    = "medium";
-    String HIGH      = "high";
-    String REFERRER  = "referrer";
+    String SMALL = "small";
+    String NORMAL = "normal";
+    String LONG = "long";
+    String LARGE = "large";
+    String XLARGE = "xlarge";
+    String LOW = "low";
+    String MEDIUM = "medium";
+    String HIGH = "high";
+    String REFERRER = "referrer";
 
     String ENCODING = "UTF-8";
-    String MD5      = "MD5";
-    String SHA1     = "SHA-1";
+    String MD5 = "MD5";
+    String SHA1 = "SHA-1";
 
     // List of known plugins, possibly not active
     List<String> PLUGINS = Arrays.asList();

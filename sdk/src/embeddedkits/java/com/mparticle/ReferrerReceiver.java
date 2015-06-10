@@ -52,7 +52,7 @@ public class ReferrerReceiver extends BroadcastReceiver {
             SharedPreferences preferences = context.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
             preferences.edit().putString(Constants.PrefKeys.INSTALL_REFERRER, referrer).apply();
             try {
-                new com.mparticle.internal.embedded.adjust.sdk.ReferrerReceiver().onReceive(context, intent);
+                new com.mparticle.internal.embedded.adjust.sdk.AdjustReferrerReceiver().onReceive(context, intent);
             }catch (Exception e){
                 ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to pass referrer to Adjust SDK: " + e.getMessage());
             }

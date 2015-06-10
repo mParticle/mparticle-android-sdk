@@ -9,318 +9,211 @@
 
 package com.mparticle.internal.embedded.adjust.sdk;
 
+import android.text.TextUtils;
+
+import org.json.JSONObject;
+
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
-import org.json.JSONObject;
-
-import android.content.Context;
-import android.text.TextUtils;
-import android.util.Base64;
-
-public class PackageBuilder {
-
-    private Context context;
-
-    // general
-    private String appToken;
-    private String macSha1;
-    private String macShortMd5;
-    private String androidId;
-    private String fbAttributionId;
-    private String userAgent;
-    private String clientSdk;
-    private String uuid;
-    private String environment;
-    private Map<String, String> pluginsKeys;
-
-    // sessions
-    private int    sessionCount;
-    private int    subsessionCount;
-    private long   createdAt;
-    private long   sessionLength;
-    private long   timeSpent;
-    private long   lastInterval;
-    private String defaultTracker;
-    private String referrer;
-
-    // events
-    private int                 eventCount;
-    private String              eventToken;
-    private double              amountInCents;
-    private Map<String, String> callbackParameters;
+class PackageBuilder {
+    private AdjustConfig adjustConfig;
+    private DeviceInfo deviceInfo;
+    private ActivityState activityState;
+    private long createdAt;
 
     // reattributions
-    private Map<String, String> deepLinkParameters;
+    Map<String, String> extraParameters;
+    AdjustAttribution attribution;
+    String reftag;
 
-    public PackageBuilder(Context context)
-    {
-        this.context = context;
-    }
+    private static ILogger logger = AdjustFactory.getLogger();
 
-    public void setAppToken(String appToken) {
-        this.appToken = appToken;
-    }
-
-    public void setMacSha1(String macSha1) {
-        this.macSha1 = macSha1;
-    }
-
-    public void setMacShortMd5(String macShortMd5) {
-        this.macShortMd5 = macShortMd5;
-    }
-
-    public void setAndroidId(String androidId) {
-        this.androidId = androidId;
-    }
-
-    public void setUuid(String uuid) {
-        this.uuid = uuid;
-    }
-
-    public void setFbAttributionId(String fbAttributionId) {
-        this.fbAttributionId = fbAttributionId;
-    }
-
-    public void setUserAgent(String userAgent) {
-        this.userAgent = userAgent;
-    }
-
-    public void setClientSdk(String clientSdk) {
-        this.clientSdk = clientSdk;
-    }
-
-    public void setEnvironment(String environment) {
-        this.environment = environment;
-    }
-
-    public void setSessionCount(int sessionCount) {
-        this.sessionCount = sessionCount;
-    }
-
-    public void setSubsessionCount(int subsessionCount) {
-        this.subsessionCount = subsessionCount;
-    }
-
-    public void setCreatedAt(long createdAt) {
+    public PackageBuilder(AdjustConfig adjustConfig,
+                          DeviceInfo deviceInfo,
+                          ActivityState activityState,
+                          long createdAt) {
+        this.adjustConfig = adjustConfig;
+        this.deviceInfo = deviceInfo;
+        this.activityState = activityState == null ? null : activityState.shallowCopy();
         this.createdAt = createdAt;
-    }
-
-    public void setSessionLength(long sessionLength) {
-        this.sessionLength = sessionLength;
-    }
-
-    public void setTimeSpent(long timeSpent) {
-        this.timeSpent = timeSpent;
-    }
-
-    public void setLastInterval(long lastInterval) {
-        this.lastInterval = lastInterval;
-    }
-
-    public void setDefaultTracker(String defaultTracker) {
-        this.defaultTracker = defaultTracker;
-    }
-
-    public void setReferrer(String referrer) {
-        this.referrer = referrer;
-    }
-
-    public void setEventCount(int eventCount) {
-        this.eventCount = eventCount;
-    }
-
-    public String getEventToken() {
-        return eventToken;
-    }
-
-    public void setEventToken(String eventToken) {
-        this.eventToken = eventToken;
-    }
-
-    public double getAmountInCents() {
-        return amountInCents;
-    }
-
-    public void setAmountInCents(double amountInCents) {
-        this.amountInCents = amountInCents;
-    }
-
-    public void setCallbackParameters(Map<String, String> callbackParameters) {
-        this.callbackParameters = callbackParameters;
-    }
-
-    public void setDeepLinkParameters(Map<String, String> deepLinkParameters) {
-        this.deepLinkParameters = deepLinkParameters;
-    }
-
-    public void setPluginKeys(Map<String, String> pluginKeys) {
-        this.pluginsKeys = pluginKeys;
-    }
-
-    public boolean isValidForEvent() {
-        if (null == eventToken) {
-            Logger logger = AdjustFactory.getLogger();
-            logger.error("Missing Event Token");
-            return false; // non revenue events need event tokens
-        }
-        return isEventTokenValid(); // and they must be valid
-    }
-
-    public boolean isValidForRevenue() {
-        if (amountInCents < 0.0) {
-            Logger logger = AdjustFactory.getLogger();
-            logger.error("Invalid amount %f", amountInCents);
-            return false;
-        }
-        if (eventToken == null) {
-            return true; // revenue events don't need event tokens
-        }
-        return isEventTokenValid(); // but if they have one, it must be valid
     }
 
     public ActivityPackage buildSessionPackage() {
         Map<String, String> parameters = getDefaultParameters();
-        addDuration(parameters, "last_interval", lastInterval);
-        addString(parameters, "default_tracker", defaultTracker);
-        addString(parameters, Constants.REFERRER, referrer);
+        addDuration(parameters, "last_interval", activityState.lastInterval);
+        addString(parameters, "default_tracker", adjustConfig.defaultTracker);
 
-        ActivityPackage sessionPackage = getDefaultActivityPackage();
-        sessionPackage.setPath("/startup");
-        sessionPackage.setActivityKind(ActivityKind.SESSION);
+        ActivityPackage sessionPackage = getDefaultActivityPackage(ActivityKind.SESSION);
+        sessionPackage.setPath("/session");
         sessionPackage.setSuffix("");
         sessionPackage.setParameters(parameters);
 
         return sessionPackage;
     }
 
-    public ActivityPackage buildEventPackage() {
+    public ActivityPackage buildEventPackage(AdjustEvent event) {
         Map<String, String> parameters = getDefaultParameters();
-        injectEventParameters(parameters);
+        addInt(parameters, "event_count", activityState.eventCount);
+        addString(parameters, "event_token", event.eventToken);
+        addDouble(parameters, "revenue", event.revenue);
+        addString(parameters, "currency", event.currency);
+        addMapJson(parameters, "callback_params", event.callbackParameters);
+        addMapJson(parameters, "partner_params", event.partnerParameters);
 
-        ActivityPackage eventPackage = getDefaultActivityPackage();
+        ActivityPackage eventPackage = getDefaultActivityPackage(ActivityKind.EVENT);
         eventPackage.setPath("/event");
-        eventPackage.setActivityKind(ActivityKind.EVENT);
-        eventPackage.setSuffix(getEventSuffix());
+        eventPackage.setSuffix(getEventSuffix(event));
         eventPackage.setParameters(parameters);
 
         return eventPackage;
     }
 
-    public ActivityPackage buildRevenuePackage() {
-        Map<String, String> parameters = getDefaultParameters();
-        injectEventParameters(parameters);
-        addString(parameters, "amount", getAmountString());
+    public ActivityPackage buildClickPackage(String source, long clickTime) {
+        Map<String, String> parameters = getIdsParameters();
 
-        ActivityPackage revenuePackage = getDefaultActivityPackage();
-        revenuePackage.setPath("/revenue");
-        revenuePackage.setActivityKind(ActivityKind.REVENUE);
-        revenuePackage.setSuffix(getRevenueSuffix());
-        revenuePackage.setParameters(parameters);
+        addString(parameters, "source", source);
+        addDate(parameters, "click_time", clickTime);
+        addString(parameters, "reftag", reftag);
+        addMapJson(parameters, "params", extraParameters);
+        injectAttribution(parameters);
 
-        return revenuePackage;
+        ActivityPackage clickPackage = getDefaultActivityPackage(ActivityKind.CLICK);
+        clickPackage.setPath("/sdk_click");
+        clickPackage.setSuffix("");
+        clickPackage.setParameters(parameters);
+
+        return clickPackage;
     }
 
-    public ActivityPackage buildReattributionPackage() {
-        Map<String, String> parameters = getDefaultParameters();
-        addMapJson(parameters, "deeplink_parameters", deepLinkParameters);
+    public ActivityPackage buildAttributionPackage() {
+        Map<String, String> parameters = getIdsParameters();
 
-        ActivityPackage reattributionPackage = getDefaultActivityPackage();
-        reattributionPackage.setPath("/reattribute");
-        reattributionPackage.setActivityKind(ActivityKind.REATTRIBUTION);
-        reattributionPackage.setSuffix("");
-        reattributionPackage.setParameters(parameters);
+        ActivityPackage attributionPackage = getDefaultActivityPackage(ActivityKind.ATTRIBUTION);
+        attributionPackage.setPath("attribution"); // does not contain '/' because of Uri.Builder.appendPath
+        attributionPackage.setSuffix("");
+        attributionPackage.setParameters(parameters);
 
-        return reattributionPackage;
+        return attributionPackage;
     }
 
-    private boolean isEventTokenValid() {
-        if (6 != eventToken.length()) {
-            Logger logger = AdjustFactory.getLogger();
-            logger.error("Malformed Event Token '%s'", eventToken);
-            return false;
-        }
-        return true;
-    }
-
-    private ActivityPackage getDefaultActivityPackage() {
-        ActivityPackage activityPackage = new ActivityPackage();
-        activityPackage.setUserAgent(userAgent);
-        activityPackage.setClientSdk(clientSdk);
+    private ActivityPackage getDefaultActivityPackage(ActivityKind activityKind) {
+        ActivityPackage activityPackage = new ActivityPackage(activityKind);
+        activityPackage.setClientSdk(deviceInfo.clientSdk);
         return activityPackage;
     }
 
     private Map<String, String> getDefaultParameters() {
         Map<String, String> parameters = new HashMap<String, String>();
 
-        // general
-        addDate(parameters, "created_at", createdAt);
-        addString(parameters, "app_token", appToken);
-        addString(parameters, "mac_sha1", macSha1);
-        addString(parameters, "mac_md5", macShortMd5);
-        addString(parameters, "android_id", androidId);
-        addString(parameters, "android_uuid", uuid);
-        addString(parameters, "fb_id", fbAttributionId);
-        addString(parameters, "environment", environment);
-        String playAdId = Util.getPlayAdId(context);
-        addString(parameters, "gps_adid", playAdId);
-        Boolean isTrackingEnabled = Util.isPlayTrackingEnabled(context);
-        addBoolean(parameters, "tracking_enabled", isTrackingEnabled);
-        fillPluginKeys(parameters);
-        checkDeviceIds(parameters);
+        injectDeviceInfo(parameters);
+        injectConfig(parameters);
+        injectActivityState(parameters);
+        injectCreatedAt(parameters);
 
-        // session related (used for events as well)
-        addInt(parameters, "session_count", sessionCount);
-        addInt(parameters, "subsession_count", subsessionCount);
-        addDuration(parameters, "session_length", sessionLength);
-        addDuration(parameters, "time_spent", timeSpent);
+        // general
+        checkDeviceIds(parameters);
 
         return parameters;
     }
 
+    private Map<String, String> getIdsParameters() {
+        Map<String, String> parameters = new HashMap<String, String>();
+
+        injectDeviceInfoIds(parameters);
+        injectConfig(parameters);
+        injectCreatedAt(parameters);
+
+        checkDeviceIds(parameters);
+
+        return parameters;
+    }
+
+    private void injectDeviceInfo(Map<String, String> parameters) {
+        injectDeviceInfoIds(parameters);
+        addString(parameters, "fb_id", deviceInfo.fbAttributionId);
+        addString(parameters, "package_name", deviceInfo.packageName);
+        addString(parameters, "app_version", deviceInfo.appVersion);
+        addString(parameters, "device_type", deviceInfo.deviceType);
+        addString(parameters, "device_name", deviceInfo.deviceName);
+        addString(parameters, "device_manufacturer", deviceInfo.deviceManufacturer);
+        addString(parameters, "os_name", deviceInfo.osName);
+        addString(parameters, "os_version", deviceInfo.osVersion);
+        addString(parameters, "language", deviceInfo.language);
+        addString(parameters, "country", deviceInfo.country);
+        addString(parameters, "screen_size", deviceInfo.screenSize);
+        addString(parameters, "screen_format", deviceInfo.screenFormat);
+        addString(parameters, "screen_density", deviceInfo.screenDensity);
+        addString(parameters, "display_width", deviceInfo.displayWidth);
+        addString(parameters, "display_height", deviceInfo.displayHeight);
+        fillPluginKeys(parameters);
+    }
+
+    private void injectDeviceInfoIds(Map<String, String> parameters) {
+        addString(parameters, "mac_sha1", deviceInfo.macSha1);
+        addString(parameters, "mac_md5", deviceInfo.macShortMd5);
+        addString(parameters, "android_id", deviceInfo.androidId);
+    }
+
+    private void injectConfig(Map<String, String> parameters) {
+        addString(parameters, "app_token", adjustConfig.appToken);
+        addString(parameters, "environment", adjustConfig.environment);
+        addBoolean(parameters, "device_known", adjustConfig.knownDevice);
+        addBoolean(parameters, "needs_attribution_data", adjustConfig.hasListener());
+
+        String playAdId = Util.getPlayAdId(adjustConfig.context);
+        addString(parameters, "gps_adid", playAdId);
+        Boolean isTrackingEnabled = Util.isPlayTrackingEnabled(adjustConfig.context);
+        addBoolean(parameters, "tracking_enabled", isTrackingEnabled);
+    }
+
+    private void injectActivityState(Map<String, String> parameters) {
+        addString(parameters, "android_uuid", activityState.uuid);
+        addInt(parameters, "session_count", activityState.sessionCount);
+        addInt(parameters, "subsession_count", activityState.subsessionCount);
+        addDuration(parameters, "session_length", activityState.sessionLength);
+        addDuration(parameters, "time_spent", activityState.timeSpent);
+    }
+
+    private void injectCreatedAt(Map<String, String> parameters) {
+        addDate(parameters, "created_at", createdAt);
+    }
+
+    private void injectAttribution(Map<String, String> parameters) {
+        if (attribution == null) {
+            return;
+        }
+        addString(parameters, "tracker", attribution.trackerName);
+        addString(parameters, "campaign", attribution.campaign);
+        addString(parameters, "adgroup", attribution.adgroup);
+        addString(parameters, "creative", attribution.creative);
+    }
+
     private void checkDeviceIds(Map<String, String> parameters) {
         if (!parameters.containsKey("mac_sha1")
-            && !parameters.containsKey("mac_md5")
-            && !parameters.containsKey("android_id")
-            && !parameters.containsKey("gps_adid"))
-        {
-            Logger logger = AdjustFactory.getLogger();
+                && !parameters.containsKey("mac_md5")
+                && !parameters.containsKey("android_id")
+                && !parameters.containsKey("gps_adid")) {
             logger.error("Missing device id's. Please check if Proguard is correctly set with Adjust SDK");
         }
     }
 
     private void fillPluginKeys(Map<String, String> parameters) {
-        if (pluginsKeys == null) {
+        if (deviceInfo.pluginKeys == null) {
             return;
         }
 
-        for (Map.Entry<String, String> pluginEntry : pluginsKeys.entrySet()) {
-            addString(parameters, pluginEntry.getKey(), pluginEntry.getValue());
+        for (Map.Entry<String, String> entry : deviceInfo.pluginKeys.entrySet()) {
+            addString(parameters, entry.getKey(), entry.getValue());
         }
     }
 
-    private void injectEventParameters(Map<String, String> parameters) {
-        addInt(parameters, "event_count", eventCount);
-        addString(parameters, "event_token", eventToken);
-        addMapBase64(parameters, "params", callbackParameters);
-    }
-
-    private String getAmountString() {
-        long amountInMillis = Math.round(10 * amountInCents);
-        amountInCents = amountInMillis / 10.0; // now rounded to one decimal point
-        return Long.toString(amountInMillis);
-    }
-
-    private String getEventSuffix() {
-        return String.format(" '%s'", eventToken);
-    }
-
-    private String getRevenueSuffix() {
-        if (eventToken != null) {
-            return String.format(Locale.US, " (%.1f cent, '%s')", amountInCents, eventToken);
+    private String getEventSuffix(AdjustEvent event) {
+        if (event.revenue == null) {
+            return String.format(Locale.US, " '%s'", event.eventToken);
         } else {
-            return String.format(Locale.US, " (%.1f cent)", amountInCents);
+            return String.format(Locale.US, " (%.4f %s, '%s')", event.revenue, event.currency, event.eventToken);
         }
     }
 
@@ -359,20 +252,12 @@ public class PackageBuilder {
         addInt(parameters, key, durationInSeconds);
     }
 
-    private void addMapBase64(Map<String, String> parameters, String key, Map<String, String> map) {
-        if (null == map) {
+    private void addMapJson(Map<String, String> parameters, String key, Map<String, String> map) {
+        if (map == null) {
             return;
         }
 
-        JSONObject jsonObject = new JSONObject(map);
-        byte[] jsonBytes = jsonObject.toString().getBytes();
-        String encodedMap = Base64.encodeToString(jsonBytes, Base64.NO_WRAP);
-
-        addString(parameters, key, encodedMap);
-    }
-
-    private void addMapJson(Map<String, String> parameters, String key, Map<String, String> map) {
-        if (null == map) {
+        if (map.size() == 0) {
             return;
         }
 
@@ -387,8 +272,16 @@ public class PackageBuilder {
             return;
         }
 
-        int intValue = value? 1 : 0;
+        int intValue = value ? 1 : 0;
 
         addInt(parameters, key, intValue);
+    }
+
+    private void addDouble(Map<String, String> parameters, String key, Double value) {
+        if (value == null) return;
+
+        String doubleString = String.format(Locale.US, "%.5f", value);
+
+        addString(parameters, key, doubleString);
     }
 }
