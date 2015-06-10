@@ -179,8 +179,10 @@ public class UploadHandler extends Handler {
     private void prepareMessageUploads() {
         Cursor readyMessagesCursor = null;
         try {
+            db.beginTransaction();
             readyMessagesCursor = MParticleDatabase.getMessagesForUpload(db);
             if (readyMessagesCursor.getCount() > 0) {
+
                 mApiClient.fetchConfig();
                 int messageIdIndex = readyMessagesCursor.getColumnIndex(MessageTable._ID);
                 int messageIndex = readyMessagesCursor.getColumnIndex(MessageTable.MESSAGE);
@@ -197,6 +199,7 @@ public class UploadHandler extends Handler {
                     dbInsertUpload(uploadMessage);
                     dbMarkAsUploadedMessage(highestMessageId);
                 }
+                db.setTransactionSuccessful();
             }
         } catch (Exception e){
             if (BuildConfig.MP_DEBUG) {
@@ -206,6 +209,7 @@ public class UploadHandler extends Handler {
             if (readyMessagesCursor != null && !readyMessagesCursor.isClosed()){
                 readyMessagesCursor.close();
             }
+            db.endTransaction();
         }
     }
 
@@ -217,6 +221,7 @@ public class UploadHandler extends Handler {
     void prepareHistoryUploads(){
         Cursor readyMessagesCursor = null;
         try {
+            db.beginTransaction();
             readyMessagesCursor = MParticleDatabase.getSessionHistory(db, mAppStateManager.getSession().mSessionID);
             if (readyMessagesCursor.getCount() > 0) {
                 mApiClient.fetchConfig();
@@ -244,12 +249,14 @@ public class UploadHandler extends Handler {
                 }
 
             }
+            db.setTransactionSuccessful();
         } catch (Exception e){
             ConfigManager.log(MParticle.LogLevel.DEBUG, "Error preparing batch upload in mParticle DB: " + e.getMessage());
         } finally {
             if (readyMessagesCursor != null && !readyMessagesCursor.isClosed()){
                 readyMessagesCursor.close();
             }
+            db.endTransaction();
         }
     }
 
