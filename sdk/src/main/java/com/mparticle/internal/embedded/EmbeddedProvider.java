@@ -9,6 +9,7 @@ import com.mparticle.MPEvent;
 import com.mparticle.MPProduct;
 import com.mparticle.MParticle;
 import com.mparticle.internal.ConfigManager;
+import com.mparticle.internal.MPUtility;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -62,6 +63,8 @@ abstract class EmbeddedProvider {
 
     protected Context context;
     private boolean mRunning = true;
+    private LinkedList<Projection> projectionList;
+    private Projection defaultProjection = null;
 
     public EmbeddedProvider(EmbeddedKitManager ekManager) {
         this.mEkManager = ekManager;
@@ -146,13 +149,21 @@ abstract class EmbeddedProvider {
             lowBracket = 0;
             highBracket = 101;
         }
-        List<Projection> projectionList = new LinkedList<Projection>();
+        projectionList = new LinkedList<Projection>();
+        defaultProjection = null;
         if (json.has(KEY_PROJECTIONS)){
             JSONArray projections = json.getJSONArray(KEY_PROJECTIONS);
             for (int i = 0; i < projections.length(); i++){
                 Projection projection = new Projection(projections.getJSONObject(i));
-                projectionList.add(projection);
+                if (projection.isDefault()){
+                    defaultProjection = projection;
+                }else {
+                    projectionList.add(projection);
+                }
             }
+        }
+        if (defaultProjection == null){
+            projectionList = null;
         }
 
         return this;
@@ -189,29 +200,13 @@ abstract class EmbeddedProvider {
         return userBucket >= lowBracket && userBucket < highBracket;
     }
 
-    private static int hash(String input) {
-        int hash = 0;
-
-        if (input == null || input.length() == 0)
-            return hash;
-
-        char[] chars = input.toLowerCase().toCharArray();
-
-        for (char c : chars) {
-            hash = ((hash << 5) - hash) + c;
-        }
-
-        return hash;
-    }
-
-    protected boolean shouldLogEvent(MParticle.EventType type, String name){
-        int typeHash = hash(type.ordinal() + "");
-        int typeNameHash = hash(type.ordinal() + "" + name);
-        return mTypeFilters.get(typeHash, true) && mNameFilters.get(typeNameHash, true);
+    protected boolean shouldLogEvent(MPEvent event){
+        int typeHash = MPUtility.mpHash(event.getEventType().ordinal() + "");
+        return mTypeFilters.get(typeHash, true) && mNameFilters.get(event.getEventHash(), true);
     }
 
     public boolean shouldLogScreen(String screenName) {
-        int nameHash = hash("0" + screenName);
+        int nameHash = MPUtility.mpHash("0" + screenName);
         if (mScreenNameFilters.size() > 0 && !mScreenNameFilters.get(nameHash, true)){
             return false;
         }
@@ -230,7 +225,7 @@ abstract class EmbeddedProvider {
             while (attIterator.hasNext()) {
                 Map.Entry<String, String> entry = attIterator.next();
                 String key = entry.getKey();
-                int hash = hash(eventTypeStr + eventName + key);
+                int hash = MPUtility.mpHash(eventTypeStr + eventName + key);
                 if (filter.get(hash, true)) {
                     newAttributes.put(key, entry.getValue());
                 }
@@ -254,7 +249,7 @@ abstract class EmbeddedProvider {
             JSONObject newAttributes = new JSONObject();
             while (attIterator.hasNext()) {
                 String entry = attIterator.next();
-                int hash = hash(entry);
+                int hash = MPUtility.mpHash(entry);
                 if (attributeFilters.get(hash, true)) {
                     try {
                         newAttributes.put(entry, attributes.getString(entry));
@@ -320,7 +315,52 @@ abstract class EmbeddedProvider {
 
     public List<MPEvent> projectEvents(MPEvent event) {
         List<MPEvent> events = new LinkedList<MPEvent>();
-        events.add(event);
+
+        if (defaultProjection == null) {
+            events.add(event);
+            return events;
+        }
+
+        MPEventWrapper wrapper = new MPEventWrapper(event);
+        for (int i = 0; i < projectionList.size(); i++){
+            Projection projection = projectionList.get(i);
+            if (projection.isMatch(wrapper)){
+                MPEvent newEvent = projection.project(wrapper);
+                if (newEvent != null) {
+                    events.add(newEvent);
+                }
+            }
+        }
+
+        if (events.isEmpty()){
+            events.add(defaultProjection.project(wrapper));
+        }
+
         return events;
+    }
+
+    class MPEventWrapper {
+        private final MPEvent mEvent;
+
+        public MPEventWrapper(MPEvent event) {
+            this.mEvent = event;
+        }
+
+        private Map<Integer, String> attributeHashes;
+
+        public Map<Integer, String> getAttributeHashes() {
+            if (attributeHashes == null) {
+                attributeHashes = new HashMap<Integer, String>();
+                for (Map.Entry<String, String> entry : mEvent.getInfo().entrySet()) {
+                    int hash = MPUtility.mpHash(mEvent.getEventType().ordinal() + mEvent.getEventName() + entry.getKey());
+                    attributeHashes.put(hash, entry.getKey());
+                }
+            }
+            return attributeHashes;
+        }
+
+        public MPEvent getEvent() {
+            return mEvent;
+        }
     }
 }

@@ -5,13 +5,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
 import android.net.Uri;
-import android.os.Handler;
-import android.os.Looper;
 
-import com.mparticle.internal.AppStateManager;
 import com.mparticle.MPEvent;
 import com.mparticle.MPProduct;
 import com.mparticle.MParticle;
+import com.mparticle.internal.AppStateManager;
 import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.Constants;
 import com.mparticle.internal.MPActivityCallbacks;
@@ -107,7 +105,7 @@ public class EmbeddedKitManager implements MPActivityCallbacks {
     public void logEvent(MPEvent event) {
         for (EmbeddedProvider provider : providers.values()){
             try {
-                if (!provider.disabled() && provider.shouldLogEvent(event.getEventType(), event.getEventName())) {
+                if (!provider.disabled() && provider.shouldLogEvent(event)) {
                     MPEvent providerEvent = new MPEvent(event);
                     providerEvent.setInfo(provider.filterEventAttributes(providerEvent.getEventType(), providerEvent.getEventName(), provider.mAttributeFilters, providerEvent.getInfo()));
                     List<MPEvent> projectedEvents = provider.projectEvents(providerEvent);

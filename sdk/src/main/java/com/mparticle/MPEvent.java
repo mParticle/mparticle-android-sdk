@@ -5,6 +5,7 @@ import android.util.Log;
 
 import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.Constants;
+import com.mparticle.internal.MPUtility;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -29,6 +30,7 @@ public class MPEvent {
     private String category;
     private Map<String, String> info;
     private Double duration = null, startTime = null, endTime = null;
+    private int eventHash;
 
     private MPEvent(){}
     private MPEvent(Builder builder){
@@ -119,6 +121,13 @@ public class MPEvent {
         return eventName;
     }
 
+    public int getEventHash() {
+        if (eventHash == 0){
+            eventHash = MPUtility.mpHash(eventType.ordinal() + eventName);
+        }
+        return eventHash;
+    }
+
     public String getCategory() {
         return category;
     }
@@ -169,6 +178,16 @@ public class MPEvent {
         public Builder(String eventName, MParticle.EventType eventType){
             this.eventName = eventName;
             this.eventType = eventType;
+        }
+
+        public Builder(MPEvent event) {
+            this.eventName = event.getEventName();
+            this.eventType = event.getEventType();
+            this.category = event.getCategory();
+            this.info = event.getInfo();
+            this.duration = event.duration;
+            this.startTime = event.startTime;
+            this.endTime = event.endTime;
         }
 
         /**

@@ -1,13 +1,24 @@
 package com.mparticle.internal.embedded;
 
+import com.mparticle.MPEvent;
+import com.mparticle.internal.MPUtility;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 public class Projection {
+    private static final String MATCH_TYPE_STRING = "S";
+    private static final String MATCH_TYPE_HASH = "H";
+    private static final String MATCH_TYPE_FIELD = "F";
+    private static final String MATCH_TYPE_STATIC = "Sta";
     private final int mID;
     private final int mMappingId;
     private final int mModuleMappingId;
@@ -21,6 +32,10 @@ public class Projection {
     private final boolean mIsDefault;
     private final String mProjectedEventName;
     private final List<AttributeProjection> mAttributeProjectionList;
+    private final List<AttributeProjection> mStaticAttributeProjectionList;
+    private final List<AttributeProjection> mRequiredAttributeProjectionList;
+    private final int mEventHash;
+    private AttributeProjection nameFieldProjection = null;
 
     public Projection(JSONObject projectionJson) throws JSONException {
         mID = projectionJson.getInt("id");
@@ -30,10 +45,21 @@ public class Projection {
             JSONObject match = projectionJson.getJSONObject("match");
             mMessageType = match.optInt("message_type");
             mMatchType = match.optString("event_match_type", "String");
-            mEventName = match.optString("event");
-            mAttributeKey = match.optString("$MethodName");
-            mAttributeValue = match.optString("$AddToCart");
-        }else{
+
+            if (mMatchType.startsWith(MATCH_TYPE_HASH)) {
+                mEventHash = Integer.parseInt(match.optString("event"));
+                mAttributeKey = null;
+                mAttributeValue = null;
+                mEventName = null;
+            } else {
+                mEventHash = 0;
+                mEventName = match.optString("event");
+                mAttributeKey = match.optString("attribute_key");
+                mAttributeValue = match.optString("attribute_value");
+            }
+
+        } else {
+            mEventHash = 0;
             mMessageType = -1;
             mMatchType = "String";
             mEventName = null;
@@ -42,29 +68,155 @@ public class Projection {
         }
         if (projectionJson.has("behaviors")) {
             JSONObject behaviors = projectionJson.getJSONObject("behaviors");
-            mMaxCustomParams = behaviors.optInt("max_custom_params");
+            mMaxCustomParams = behaviors.optInt("max_custom_params", Integer.MAX_VALUE);
             mAppendUnmappedAsIs = behaviors.optBoolean("append_unmapped_as_is");
             mIsDefault = behaviors.optBoolean("is_default");
-        }else{
-            mMaxCustomParams = 0;
+        } else {
+            mMaxCustomParams = Integer.MAX_VALUE;
             mAppendUnmappedAsIs = false;
             mIsDefault = false;
         }
-        mAttributeProjectionList = new LinkedList<AttributeProjection>();
+
         if (projectionJson.has("action")) {
             JSONObject action = projectionJson.getJSONObject("action");
             mProjectedEventName = action.optString("projected_event_name");
             if (action.has("attribute_maps")) {
+                mAttributeProjectionList = new LinkedList<AttributeProjection>();
+                mRequiredAttributeProjectionList = new LinkedList<AttributeProjection>();
+                mStaticAttributeProjectionList = new LinkedList<AttributeProjection>();
                 JSONArray attributeMapList = action.getJSONArray("attribute_maps");
 
                 for (int i = 0; i < attributeMapList.length(); i++) {
                     AttributeProjection attProjection = new AttributeProjection(attributeMapList.getJSONObject(i));
-                    mAttributeProjectionList.add(attProjection);
+                    if (attProjection.mIsRequired) {
+                        mRequiredAttributeProjectionList.add(attProjection);
+                    } else if (attProjection.mMatchType.startsWith(MATCH_TYPE_STATIC)) {
+                        mStaticAttributeProjectionList.add(attProjection);
+                    } else if (attProjection.mMatchType.startsWith(MATCH_TYPE_FIELD)) {
+                        nameFieldProjection = attProjection;
+                    } else {
+                        mAttributeProjectionList.add(attProjection);
+                    }
                 }
+            } else {
+                mAttributeProjectionList = null;
+                mRequiredAttributeProjectionList = null;
+                mStaticAttributeProjectionList = null;
             }
-        }else{
+        } else {
+            mAttributeProjectionList = null;
+            mRequiredAttributeProjectionList = null;
+            mStaticAttributeProjectionList = null;
             mProjectedEventName = null;
         }
+    }
+
+    public boolean isDefault() {
+        return mIsDefault;
+    }
+
+    public boolean isMatch(EmbeddedProvider.MPEventWrapper eventWrapper) {
+        if (mIsDefault) {
+            return true;
+        }
+        MPEvent event = eventWrapper.getEvent();
+        if (nameFieldProjection != null && nameFieldProjection.mIsRequired) {
+            if (!nameFieldProjection.matchesDataType(event.getEventName())) {
+                return false;
+            }
+        }
+        if (mMatchType.startsWith(MATCH_TYPE_HASH) && event.getEventHash() == mEventHash) {
+            return true;
+        } else if (mMatchType.startsWith(MATCH_TYPE_STRING) &&
+                event.getEventName().equalsIgnoreCase(mEventName) &&
+                event.getInfo() != null &&
+                mAttributeValue.equalsIgnoreCase(event.getInfo().get(mAttributeKey))) {
+            return true;
+        }
+        return false;
+    }
+
+    public MPEvent project(EmbeddedProvider.MPEventWrapper eventWrapper) {
+        MPEvent event = eventWrapper.getEvent();
+        String eventName = MPUtility.isEmpty(mProjectedEventName) ? event.getEventName() : mProjectedEventName;
+        MPEvent.Builder builder = new MPEvent.Builder(event);
+        builder.eventName(eventName);
+        builder.info(null);
+        Map<String, String> attributes = new HashMap<>(event.getInfo());
+        Map<String, String> newAttributes = new HashMap<String, String>();
+        if (mRequiredAttributeProjectionList != null) {
+            for (int i = 0; i < mRequiredAttributeProjectionList.size(); i++) {
+                AttributeProjection attProjection = mRequiredAttributeProjectionList.get(i);
+                if (attProjection.mMatchType.startsWith(MATCH_TYPE_STRING)) {
+                    String value = attributes.get(attProjection.mValue);
+                    if (value != null && attProjection.matchesDataType(value)) {
+                        String name = MPUtility.isEmpty(attProjection.mProjectedAttributeName) ? attProjection.mValue : attProjection.mProjectedAttributeName;
+                        newAttributes.put(name, value);
+                        attributes.remove(attProjection.mValue);
+                    } else {
+                        return null;
+                    }
+                } else if (attProjection.mMatchType.startsWith(MATCH_TYPE_HASH)) {
+                    String key = eventWrapper.getAttributeHashes().get(attProjection.mValue);
+                    if (key == null) {
+                        return null;
+                    }
+                    String value = attributes.get(key);
+                    if (!attProjection.matchesDataType(value)) {
+                        return null;
+                    }
+                    if (!MPUtility.isEmpty(attProjection.mProjectedAttributeName)) {
+                        key = attProjection.mProjectedAttributeName;
+                    }
+                    newAttributes.put(key, value);
+                    attributes.remove(attProjection.mValue);
+                }
+            }
+        }
+        if (mAttributeProjectionList != null) {
+            for (int i = 0; i < mAttributeProjectionList.size(); i++) {
+                AttributeProjection attProjection = mAttributeProjectionList.get(i);
+                if (attProjection.mMatchType.startsWith(MATCH_TYPE_STRING)) {
+                    String value = attributes.get(attProjection.mValue);
+                    if (value != null) {
+                        String name = MPUtility.isEmpty(attProjection.mProjectedAttributeName) ? attProjection.mValue : attProjection.mProjectedAttributeName;
+                        newAttributes.put(name, value);
+
+                        attributes.remove(attProjection.mValue);
+                    }
+                } else if (attProjection.mMatchType.startsWith(MATCH_TYPE_HASH)) {
+                    String key = eventWrapper.getAttributeHashes().get(attProjection.mValue);
+                    String value = attributes.get(key);
+                    if (!MPUtility.isEmpty(attProjection.mProjectedAttributeName)) {
+                        key = attProjection.mProjectedAttributeName;
+                    }
+                    newAttributes.put(key, value);
+                    attributes.remove(attProjection.mValue);
+                }
+            }
+        }
+        if (mStaticAttributeProjectionList != null) {
+            for (int i = 0; i < mStaticAttributeProjectionList.size(); i++) {
+                AttributeProjection attProjection = mStaticAttributeProjectionList.get(i);
+                newAttributes.put(attProjection.mProjectedAttributeName, attProjection.mValue);
+                attributes.remove(attProjection.mValue);
+            }
+        }
+        if (nameFieldProjection != null) {
+            attributes.put(nameFieldProjection.mProjectedAttributeName, event.getEventName());
+        }
+        if (mAppendUnmappedAsIs && mMaxCustomParams > 0 && newAttributes.size() < mMaxCustomParams) {
+            List<String> sortedKeys = new ArrayList(attributes.keySet());
+            Collections.sort(sortedKeys);
+            for (int i = 0; (i < sortedKeys.size() && newAttributes.size() < mMaxCustomParams); i++) {
+                String key = sortedKeys.get(i);
+                if (!newAttributes.containsKey(key)) {
+                    newAttributes.put(key, attributes.get(key));
+                }
+            }
+        }
+        builder.info(newAttributes);
+        return builder.build();
     }
 
     private class AttributeProjection {
@@ -78,8 +230,42 @@ public class Projection {
             mProjectedAttributeName = attributeMapJson.optString("projected_attribute_name");
             mMatchType = attributeMapJson.optString("match_type", "String");
             mValue = attributeMapJson.optString("value");
-            mDataType = attributeMapJson.optInt("data_type");
+            mDataType = attributeMapJson.optInt("data_type", 1);
             mIsRequired = attributeMapJson.optBoolean("is_required");
+        }
+
+        @Override
+        public String toString() {
+            return "projected_attribute_name: " + mProjectedAttributeName + "\n" +
+                    "match_type: " + mMatchType + "\n" +
+                    "value: " + mValue + "\n" +
+                    "data_type: " + mDataType + "\n" +
+                    "is_required: " + mIsRequired;
+        }
+
+        public boolean matchesDataType(String value) {
+            switch (mDataType) {
+                case 1:
+                    return true;
+                case 2:
+                    try {
+                        Integer.parseInt(value);
+                        return true;
+                    } catch (NumberFormatException nfe) {
+                        return false;
+                    }
+                case 3:
+                    return Boolean.parseBoolean(value) || "false".equalsIgnoreCase(value);
+                case 4:
+                    try {
+                        Double.parseDouble(value);
+                        return true;
+                    } catch (NumberFormatException nfe) {
+                        return false;
+                    }
+                default:
+                    return false;
+            }
         }
     }
 }
