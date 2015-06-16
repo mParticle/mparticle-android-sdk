@@ -32,8 +32,6 @@ abstract class EmbeddedProvider {
     private final static String KEY_PROPERTIES = "as";
     private final static String KEY_FILTERS = "hs";
     private final static String KEY_BRACKETING = "bk";
-    private final static String KEY_EVENT_LIST = "eventList";
-    private final static String KEY_ATTRIBUTE_LIST = "attributeList";
     private final static String KEY_EVENT_TYPES_FILTER = "et";
     private final static String KEY_EVENT_NAMES_FILTER = "ec";
     private final static String KEY_EVENT_ATTRIBUTES_FILTER = "ea";
@@ -57,14 +55,14 @@ abstract class EmbeddedProvider {
     protected SparseBooleanArray mScreenAttributeFilters = new SparseBooleanArray(0);
     protected SparseBooleanArray mUserIdentityFilters = new SparseBooleanArray(0);
     protected SparseBooleanArray mUserAttributeFilters = new SparseBooleanArray(0);
-    protected HashSet<String> includedEvents, includedAttributes;
     protected int lowBracket = 0;
     protected int highBracket = 101;
 
     protected Context context;
     private boolean mRunning = true;
-    private LinkedList<Projection> projectionList;
-    private Projection defaultProjection = null;
+    LinkedList<Projection> projectionList;
+    Projection defaultProjection = null;
+    Projection defaultScreenProjection = null;
 
     public EmbeddedProvider(EmbeddedKitManager ekManager) {
         this.mEkManager = ekManager;
@@ -77,29 +75,7 @@ abstract class EmbeddedProvider {
             JSONObject propJson = json.getJSONObject(KEY_PROPERTIES);
             for (Iterator<String> iterator = propJson.keys(); iterator.hasNext();) {
                 String key = iterator.next();
-                properties.put(key, propJson.getString(key));
-            }
-            if (propJson.has(KEY_EVENT_LIST)){
-                try {
-                    JSONArray inclusions = new JSONArray(propJson.getString(KEY_EVENT_LIST));
-                    includedEvents = new HashSet<String>(inclusions.length());
-                    for (int i = 0; i < inclusions.length(); i++){
-                        includedEvents.add(inclusions.getString(i).toLowerCase());
-                    }
-                }catch (JSONException jse){
-
-                }
-            }
-            if (propJson.has(KEY_ATTRIBUTE_LIST)){
-                try {
-                    JSONArray inclusions = new JSONArray(propJson.getString(KEY_ATTRIBUTE_LIST));
-                    includedAttributes = new HashSet<String>(inclusions.length());
-                    for (int i = 0; i < inclusions.length(); i++){
-                        includedAttributes.add(inclusions.getString(i).toLowerCase());
-                    }
-                }catch (JSONException jse){
-
-                }
+                properties.put(key, propJson.optString(key));
             }
         }
         if (json.has(KEY_FILTERS)){
@@ -156,7 +132,11 @@ abstract class EmbeddedProvider {
             for (int i = 0; i < projections.length(); i++){
                 Projection projection = new Projection(projections.getJSONObject(i));
                 if (projection.isDefault()){
-                    defaultProjection = projection;
+                    if (projection.getMessageType() == 4) {
+                        defaultProjection = projection;
+                    }else{
+                        defaultScreenProjection = projection;
+                    }
                 }else {
                     projectionList.add(projection);
                 }
@@ -169,7 +149,7 @@ abstract class EmbeddedProvider {
         return this;
     }
 
-    private SparseBooleanArray convertToSparseArray(JSONObject json){
+    protected SparseBooleanArray convertToSparseArray(JSONObject json){
         SparseBooleanArray map = new SparseBooleanArray();
         for (Iterator<String> iterator = json.keys(); iterator.hasNext();) {
             try {
@@ -339,7 +319,7 @@ abstract class EmbeddedProvider {
         return events;
     }
 
-    class MPEventWrapper {
+    static class MPEventWrapper {
         private final MPEvent mEvent;
 
         public MPEventWrapper(MPEvent event) {

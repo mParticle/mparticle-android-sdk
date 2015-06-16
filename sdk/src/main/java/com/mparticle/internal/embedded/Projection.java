@@ -10,32 +10,34 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class Projection {
-    private static final String MATCH_TYPE_STRING = "S";
-    private static final String MATCH_TYPE_HASH = "H";
-    private static final String MATCH_TYPE_FIELD = "F";
-    private static final String MATCH_TYPE_STATIC = "Sta";
-    private final int mID;
-    private final int mMappingId;
-    private final int mModuleMappingId;
-    private final int mMessageType;
-    private final String mMatchType;
-    private final String mEventName;
-    private final String mAttributeKey;
-    private final String mAttributeValue;
-    private final int mMaxCustomParams;
-    private final boolean mAppendUnmappedAsIs;
-    private final boolean mIsDefault;
-    private final String mProjectedEventName;
-    private final List<AttributeProjection> mAttributeProjectionList;
-    private final List<AttributeProjection> mStaticAttributeProjectionList;
-    private final List<AttributeProjection> mRequiredAttributeProjectionList;
-    private final int mEventHash;
-    private AttributeProjection nameFieldProjection = null;
+    static final String MATCH_TYPE_STRING = "S";
+    static final String MATCH_TYPE_HASH = "H";
+    static final String MATCH_TYPE_FIELD = "F";
+    static final String MATCH_TYPE_STATIC = "Sta";
+    final int mID;
+    final int mMappingId;
+    final int mModuleMappingId;
+    final int mMessageType;
+    final String mMatchType;
+    final String mEventName;
+    final String mAttributeKey;
+    final String mAttributeValue;
+    final int mMaxCustomParams;
+    final boolean mAppendUnmappedAsIs;
+    final boolean mIsDefault;
+    final String mProjectedEventName;
+    final List<AttributeProjection> mAttributeProjectionList;
+    final List<AttributeProjection> mStaticAttributeProjectionList;
+    final List<AttributeProjection> mRequiredAttributeProjectionList;
+    final int mEventHash;
+    AttributeProjection nameFieldProjection = null;
 
     public Projection(JSONObject projectionJson) throws JSONException {
         mID = projectionJson.getInt("id");
@@ -66,8 +68,8 @@ public class Projection {
             mAttributeKey = null;
             mAttributeValue = null;
         }
-        if (projectionJson.has("behaviors")) {
-            JSONObject behaviors = projectionJson.getJSONObject("behaviors");
+        if (projectionJson.has("behavior")) {
+            JSONObject behaviors = projectionJson.getJSONObject("behavior");
             mMaxCustomParams = behaviors.optInt("max_custom_params", Integer.MAX_VALUE);
             mAppendUnmappedAsIs = behaviors.optBoolean("append_unmapped_as_is");
             mIsDefault = behaviors.optBoolean("is_default");
@@ -142,8 +144,14 @@ public class Projection {
         MPEvent.Builder builder = new MPEvent.Builder(event);
         builder.eventName(eventName);
         builder.info(null);
-        Map<String, String> attributes = new HashMap<>(event.getInfo());
+        Map<String, String> attributes;
+        if (event.getInfo() != null){
+            attributes = new HashMap<String, String>(event.getInfo());
+        }else{
+            attributes = new HashMap<String, String>();
+        }
         Map<String, String> newAttributes = new HashMap<String, String>();
+        Set<String> usedAttributes = new HashSet<String>();
         if (mRequiredAttributeProjectionList != null) {
             for (int i = 0; i < mRequiredAttributeProjectionList.size(); i++) {
                 AttributeProjection attProjection = mRequiredAttributeProjectionList.get(i);
@@ -152,12 +160,12 @@ public class Projection {
                     if (value != null && attProjection.matchesDataType(value)) {
                         String name = MPUtility.isEmpty(attProjection.mProjectedAttributeName) ? attProjection.mValue : attProjection.mProjectedAttributeName;
                         newAttributes.put(name, value);
-                        attributes.remove(attProjection.mValue);
+                        usedAttributes.add(attProjection.mValue);
                     } else {
                         return null;
                     }
                 } else if (attProjection.mMatchType.startsWith(MATCH_TYPE_HASH)) {
-                    String key = eventWrapper.getAttributeHashes().get(attProjection.mValue);
+                    String key = eventWrapper.getAttributeHashes().get(Integer.parseInt(attProjection.mValue));
                     if (key == null) {
                         return null;
                     }
@@ -169,7 +177,7 @@ public class Projection {
                         key = attProjection.mProjectedAttributeName;
                     }
                     newAttributes.put(key, value);
-                    attributes.remove(attProjection.mValue);
+                    usedAttributes.add(attProjection.mValue);
                 }
             }
         }
@@ -181,17 +189,16 @@ public class Projection {
                     if (value != null) {
                         String name = MPUtility.isEmpty(attProjection.mProjectedAttributeName) ? attProjection.mValue : attProjection.mProjectedAttributeName;
                         newAttributes.put(name, value);
-
-                        attributes.remove(attProjection.mValue);
+                        usedAttributes.add(attProjection.mValue);
                     }
                 } else if (attProjection.mMatchType.startsWith(MATCH_TYPE_HASH)) {
-                    String key = eventWrapper.getAttributeHashes().get(attProjection.mValue);
+                    String key = eventWrapper.getAttributeHashes().get(Integer.parseInt(attProjection.mValue));
                     String value = attributes.get(key);
                     if (!MPUtility.isEmpty(attProjection.mProjectedAttributeName)) {
                         key = attProjection.mProjectedAttributeName;
                     }
                     newAttributes.put(key, value);
-                    attributes.remove(attProjection.mValue);
+                    usedAttributes.add(attProjection.mValue);
                 }
             }
         }
@@ -199,18 +206,19 @@ public class Projection {
             for (int i = 0; i < mStaticAttributeProjectionList.size(); i++) {
                 AttributeProjection attProjection = mStaticAttributeProjectionList.get(i);
                 newAttributes.put(attProjection.mProjectedAttributeName, attProjection.mValue);
-                attributes.remove(attProjection.mValue);
+                usedAttributes.add(attProjection.mValue);
             }
         }
         if (nameFieldProjection != null) {
-            attributes.put(nameFieldProjection.mProjectedAttributeName, event.getEventName());
+            newAttributes.put(nameFieldProjection.mProjectedAttributeName, event.getEventName());
         }
         if (mAppendUnmappedAsIs && mMaxCustomParams > 0 && newAttributes.size() < mMaxCustomParams) {
+
             List<String> sortedKeys = new ArrayList(attributes.keySet());
             Collections.sort(sortedKeys);
             for (int i = 0; (i < sortedKeys.size() && newAttributes.size() < mMaxCustomParams); i++) {
                 String key = sortedKeys.get(i);
-                if (!newAttributes.containsKey(key)) {
+                if (!usedAttributes.contains(key) && !newAttributes.containsKey(key)) {
                     newAttributes.put(key, attributes.get(key));
                 }
             }
@@ -219,12 +227,16 @@ public class Projection {
         return builder.build();
     }
 
-    private class AttributeProjection {
-        private final String mProjectedAttributeName;
-        private final String mValue;
-        private final int mDataType;
-        private final String mMatchType;
-        private final boolean mIsRequired;
+    public int getMessageType() {
+        return mMessageType;
+    }
+
+    static class AttributeProjection {
+        final String mProjectedAttributeName;
+        final String mValue;
+        final int mDataType;
+        final String mMatchType;
+        final boolean mIsRequired;
 
         public AttributeProjection(JSONObject attributeMapJson) {
             mProjectedAttributeName = attributeMapJson.optString("projected_attribute_name");
@@ -232,6 +244,11 @@ public class Projection {
             mValue = attributeMapJson.optString("value");
             mDataType = attributeMapJson.optInt("data_type", 1);
             mIsRequired = attributeMapJson.optBoolean("is_required");
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            return super.equals(o) || this.toString().equals(o.toString());
         }
 
         @Override

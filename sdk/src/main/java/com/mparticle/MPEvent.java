@@ -10,8 +10,11 @@ import com.mparticle.internal.MPUtility;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 
@@ -69,6 +72,11 @@ public class MPEvent {
         }
     }
 
+    @Override
+    public boolean equals(Object o) {
+        return super.equals(o) || (o != null && this.toString().equals(o.toString()));
+    }
+
     public void setInfo(Map<String, String> info){
         this.info = info;
     }
@@ -106,11 +114,13 @@ public class MPEvent {
         }
         if (info != null){
             builder.append("info:\n");
-            for (Map.Entry<String, String> entry : info.entrySet())
+            List<String> sortedKeys = new ArrayList(info.keySet());
+
+            for (String key : sortedKeys)
             {
-                builder.append(entry.getKey())
+                builder.append(key)
                 .append(":")
-                .append(entry.getValue())
+                .append(info.get(key))
                 .append("\n");
             }
         }
