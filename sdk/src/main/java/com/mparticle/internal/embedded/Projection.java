@@ -90,7 +90,7 @@ public class Projection {
 
                 for (int i = 0; i < attributeMapList.length(); i++) {
                     AttributeProjection attProjection = new AttributeProjection(attributeMapList.getJSONObject(i));
-                    if (attProjection.mIsRequired) {
+                    if (attProjection.mIsRequired && !attProjection.mMatchType.startsWith(MATCH_TYPE_FIELD)) {
                         mRequiredAttributeProjectionList.add(attProjection);
                     } else if (attProjection.mMatchType.startsWith(MATCH_TYPE_STATIC)) {
                         mStaticAttributeProjectionList.add(attProjection);
@@ -117,17 +117,24 @@ public class Projection {
         return mIsDefault;
     }
 
+    /**
+     * This is an optimization - check the basic stuff to see if we have a match before actually trying to do the projection
+     *
+     */
     public boolean isMatch(EmbeddedProvider.MPEventWrapper eventWrapper) {
         if (mIsDefault) {
             return true;
         }
         MPEvent event = eventWrapper.getEvent();
+        if (eventWrapper.getMessageType() != mMessageType) {
+            return false;
+        }
         if (nameFieldProjection != null && nameFieldProjection.mIsRequired) {
             if (!nameFieldProjection.matchesDataType(event.getEventName())) {
                 return false;
             }
         }
-        if (mMatchType.startsWith(MATCH_TYPE_HASH) && event.getEventHash() == mEventHash) {
+        if (mMatchType.startsWith(MATCH_TYPE_HASH) && eventWrapper.getEventHash() == mEventHash) {
             return true;
         } else if (mMatchType.startsWith(MATCH_TYPE_STRING) &&
                 event.getEventName().equalsIgnoreCase(mEventName) &&
@@ -138,17 +145,21 @@ public class Projection {
         return false;
     }
 
+    /**
+     *
+     *
+     */
     public MPEvent project(EmbeddedProvider.MPEventWrapper eventWrapper) {
         MPEvent event = eventWrapper.getEvent();
         String eventName = MPUtility.isEmpty(mProjectedEventName) ? event.getEventName() : mProjectedEventName;
         MPEvent.Builder builder = new MPEvent.Builder(event);
         builder.eventName(eventName);
         builder.info(null);
-        Map<String, String> attributes;
+        Map<String, String> originalAttributes;
         if (event.getInfo() != null){
-            attributes = new HashMap<String, String>(event.getInfo());
+            originalAttributes = new HashMap<String, String>(event.getInfo());
         }else{
-            attributes = new HashMap<String, String>();
+            originalAttributes = new HashMap<String, String>();
         }
         Map<String, String> newAttributes = new HashMap<String, String>();
         Set<String> usedAttributes = new HashSet<String>();
@@ -156,7 +167,7 @@ public class Projection {
             for (int i = 0; i < mRequiredAttributeProjectionList.size(); i++) {
                 AttributeProjection attProjection = mRequiredAttributeProjectionList.get(i);
                 if (attProjection.mMatchType.startsWith(MATCH_TYPE_STRING)) {
-                    String value = attributes.get(attProjection.mValue);
+                    String value = originalAttributes.get(attProjection.mValue);
                     if (value != null && attProjection.matchesDataType(value)) {
                         String name = MPUtility.isEmpty(attProjection.mProjectedAttributeName) ? attProjection.mValue : attProjection.mProjectedAttributeName;
                         newAttributes.put(name, value);
@@ -169,7 +180,7 @@ public class Projection {
                     if (key == null) {
                         return null;
                     }
-                    String value = attributes.get(key);
+                    String value = originalAttributes.get(key);
                     if (!attProjection.matchesDataType(value)) {
                         return null;
                     }
@@ -185,15 +196,22 @@ public class Projection {
             for (int i = 0; i < mAttributeProjectionList.size(); i++) {
                 AttributeProjection attProjection = mAttributeProjectionList.get(i);
                 if (attProjection.mMatchType.startsWith(MATCH_TYPE_STRING)) {
-                    String value = attributes.get(attProjection.mValue);
-                    if (value != null) {
-                        String name = MPUtility.isEmpty(attProjection.mProjectedAttributeName) ? attProjection.mValue : attProjection.mProjectedAttributeName;
-                        newAttributes.put(name, value);
-                        usedAttributes.add(attProjection.mValue);
+                    String value = originalAttributes.get(attProjection.mValue);
+                    if (value == null || !attProjection.matchesDataType(value)) {
+                        continue;
                     }
+                    String name = MPUtility.isEmpty(attProjection.mProjectedAttributeName) ? attProjection.mValue : attProjection.mProjectedAttributeName;
+                    newAttributes.put(name, value);
+                    usedAttributes.add(attProjection.mValue);
                 } else if (attProjection.mMatchType.startsWith(MATCH_TYPE_HASH)) {
                     String key = eventWrapper.getAttributeHashes().get(Integer.parseInt(attProjection.mValue));
-                    String value = attributes.get(key);
+                    if (key == null){
+                        continue;
+                    }
+                    String value = originalAttributes.get(key);
+                    if (!attProjection.matchesDataType(value)) {
+                        continue;
+                    }
                     if (!MPUtility.isEmpty(attProjection.mProjectedAttributeName)) {
                         key = attProjection.mProjectedAttributeName;
                     }
@@ -213,13 +231,12 @@ public class Projection {
             newAttributes.put(nameFieldProjection.mProjectedAttributeName, event.getEventName());
         }
         if (mAppendUnmappedAsIs && mMaxCustomParams > 0 && newAttributes.size() < mMaxCustomParams) {
-
-            List<String> sortedKeys = new ArrayList(attributes.keySet());
+            List<String> sortedKeys = new ArrayList(originalAttributes.keySet());
             Collections.sort(sortedKeys);
             for (int i = 0; (i < sortedKeys.size() && newAttributes.size() < mMaxCustomParams); i++) {
                 String key = sortedKeys.get(i);
                 if (!usedAttributes.contains(key) && !newAttributes.containsKey(key)) {
-                    newAttributes.put(key, attributes.get(key));
+                    newAttributes.put(key, originalAttributes.get(key));
                 }
             }
         }

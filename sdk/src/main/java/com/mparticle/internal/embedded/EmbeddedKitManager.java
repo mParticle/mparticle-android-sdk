@@ -109,8 +109,12 @@ public class EmbeddedKitManager implements MPActivityCallbacks {
                     MPEvent providerEvent = new MPEvent(event);
                     providerEvent.setInfo(provider.filterEventAttributes(providerEvent.getEventType(), providerEvent.getEventName(), provider.mAttributeFilters, providerEvent.getInfo()));
                     List<MPEvent> projectedEvents = provider.projectEvents(providerEvent);
-                    for (int i = 0; i < projectedEvents.size(); i++) {
-                        provider.logEvent(event);
+                    if (projectedEvents == null){
+                        provider.logEvent(providerEvent);
+                    }else {
+                        for (int i = 0; i < projectedEvents.size(); i++) {
+                            provider.logEvent(projectedEvents.get(i));
+                        }
                     }
                 }
             } catch (Exception e) {
@@ -135,7 +139,16 @@ public class EmbeddedKitManager implements MPActivityCallbacks {
         for (EmbeddedProvider provider : providers.values()){
             try {
                 if (!provider.disabled() && provider.shouldLogScreen(screenName)) {
-                    provider.logScreen(screenName, provider.filterEventAttributes(null, screenName, provider.mScreenAttributeFilters, eventAttributes));
+                    MPEvent syntheticScreenEvent = new MPEvent.Builder(screenName, MParticle.EventType.Navigation).info(eventAttributes).build();
+                    syntheticScreenEvent.setInfo(provider.filterEventAttributes(null, screenName, provider.mScreenAttributeFilters, eventAttributes));
+                    List<MPEvent> projectedEvents = provider.projectEvents(syntheticScreenEvent, true);
+                    if (projectedEvents == null) {
+                        provider.logScreen(screenName, syntheticScreenEvent.getInfo());
+                    }else{
+                        for (int i = 0; i < projectedEvents.size(); i++) {
+                            provider.logEvent(projectedEvents.get(i));
+                        }
+                    }
                 }
             } catch (Exception e) {
                 ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to call logScreen for embedded provider: " + provider.getName() + ": " + e.getMessage());
