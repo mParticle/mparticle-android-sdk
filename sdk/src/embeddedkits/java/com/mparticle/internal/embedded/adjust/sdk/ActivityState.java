@@ -10,39 +10,53 @@
 package com.mparticle.internal.embedded.adjust.sdk;
 
 import java.io.IOException;
-import java.io.NotActiveException;
 import java.io.ObjectInputStream;
 import java.io.ObjectInputStream.GetField;
+import java.io.ObjectOutputStream;
+import java.io.ObjectStreamField;
 import java.io.Serializable;
-import java.util.Date;
+import java.util.Calendar;
 import java.util.Locale;
 
-import android.util.Log;
-
-public class ActivityState implements Serializable {
+public class ActivityState implements Serializable, Cloneable {
     private static final long serialVersionUID = 9039439291143138148L;
+    private transient ILogger logger;
+    private static final ObjectStreamField[] serialPersistentFields = {
+            new ObjectStreamField("uuid", String.class),
+            new ObjectStreamField("enabled", boolean.class),
+            new ObjectStreamField("askingAttribution", boolean.class),
+            new ObjectStreamField("eventCount", int.class),
+            new ObjectStreamField("sessionCount", int.class),
+            new ObjectStreamField("subsessionCount", int.class),
+            new ObjectStreamField("sessionLength", long.class),
+            new ObjectStreamField("timeSpent", long.class),
+            new ObjectStreamField("lastActivity", long.class),
+            new ObjectStreamField("lastInterval", long.class)
+    };
 
     // persistent data
     protected String uuid;
-    protected Boolean enabled;
+    protected boolean enabled;
+    protected boolean askingAttribution;
 
     // global counters
     protected int eventCount;
     protected int sessionCount;
 
     // session attributes
-    protected int  subsessionCount;
+    protected int subsessionCount;
     protected long sessionLength;   // all durations in milliseconds
     protected long timeSpent;
     protected long lastActivity;    // all times in milliseconds since 1970
 
-    protected long createdAt;
     protected long lastInterval;
 
     protected ActivityState() {
+        logger = AdjustFactory.getLogger();
         // create UUID for new devices
         uuid = Util.createUuid();
         enabled = true;
+        askingAttribution = false;
 
         eventCount = 0; // no events yet
         sessionCount = 0; // the first session just started
@@ -50,7 +64,6 @@ public class ActivityState implements Serializable {
         sessionLength = -1; // same for session length and time spent
         timeSpent = -1; // this information will be collected and attached to the next session
         lastActivity = -1;
-        createdAt = -1;
         lastInterval = -1;
     }
 
@@ -59,77 +72,94 @@ public class ActivityState implements Serializable {
         sessionLength = 0; // no session length yet
         timeSpent = 0; // no time spent yet
         lastActivity = now;
-        createdAt = -1;
         lastInterval = -1;
-    }
-
-    protected void injectSessionAttributes(PackageBuilder builder) {
-        injectGeneralAttributes(builder);
-        builder.setLastInterval(lastInterval);
-    }
-
-    protected void injectEventAttributes(PackageBuilder builder) {
-        injectGeneralAttributes(builder);
-        builder.setEventCount(eventCount);
     }
 
     @Override
     public String toString() {
         return String.format(Locale.US,
-                             "ec:%d sc:%d ssc:%d sl:%.1f ts:%.1f la:%s",
-                             eventCount, sessionCount, subsessionCount,
-                             sessionLength / 1000.0, timeSpent / 1000.0,
-                             stamp(lastActivity));
+                "ec:%d sc:%d ssc:%d sl:%.1f ts:%.1f la:%s uuid:%s",
+                eventCount, sessionCount, subsessionCount,
+                sessionLength / 1000.0, timeSpent / 1000.0,
+                stamp(lastActivity), uuid);
     }
 
-    private void readObject(ObjectInputStream stream) throws NotActiveException, IOException, ClassNotFoundException {
+    public ActivityState shallowCopy() {
+        try {
+            return (ActivityState) super.clone();
+        } catch (CloneNotSupportedException e) {
+            return null;
+        }
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        if (other == this) return true;
+        if (other == null) return false;
+        if (getClass() != other.getClass()) return false;
+        ActivityState otherActivityState = (ActivityState) other;
+
+        if (!Util.equalString(uuid, otherActivityState.uuid))               return false;
+        if (!Util.equalBoolean(enabled, otherActivityState.enabled))            return false;
+        if (!Util.equalBoolean(askingAttribution, otherActivityState.askingAttribution))  return false;
+        if (!Util.equalInt(eventCount, otherActivityState.eventCount))         return false;
+        if (!Util.equalInt(sessionCount, otherActivityState.sessionCount))       return false;
+        if (!Util.equalInt(subsessionCount, otherActivityState.subsessionCount))    return false;
+        if (!Util.equalLong(sessionLength, otherActivityState.sessionLength))      return false;
+        if (!Util.equalLong(timeSpent, otherActivityState.timeSpent))          return false;
+        if (!Util.equalLong(lastInterval, otherActivityState.lastInterval))       return false;
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int hashCode = 17;
+        hashCode = 37 * hashCode + Util.hashString(uuid);
+        hashCode = 37 * hashCode + Util.hashBoolean(enabled);
+        hashCode = 37 * hashCode + Util.hashBoolean(askingAttribution);
+        hashCode = 37 * hashCode + eventCount;
+        hashCode = 37 * hashCode + sessionCount;
+        hashCode = 37 * hashCode + subsessionCount;
+        hashCode = 37 * hashCode + Util.hashLong(sessionLength);
+        hashCode = 37 * hashCode + Util.hashLong(timeSpent);
+        hashCode = 37 * hashCode + Util.hashLong(lastInterval);
+        return hashCode;
+    }
+
+
+    private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {
         GetField fields = stream.readFields();
 
-        eventCount = fields.get("eventCount", 0);
-        sessionCount = fields.get("sessionCount", 0);
-        subsessionCount = fields.get("subsessionCount", -1);
-        sessionLength = fields.get("sessionLength", -1l);
-        timeSpent = fields.get("timeSpent", -1l);
-        lastActivity = fields.get("lastActivity", -1l);
-        createdAt = fields.get("createdAt", -1l);
-        lastInterval = fields.get("lastInterval", -1l);
+        eventCount = Util.readIntField(fields, "eventCount", 0);
+        sessionCount = Util.readIntField(fields, "sessionCount", 0);
+        subsessionCount = Util.readIntField(fields, "subsessionCount", -1);
+        sessionLength = Util.readLongField(fields, "sessionLength", -1l);
+        timeSpent = Util.readLongField(fields, "timeSpent", -1l);
+        lastActivity = Util.readLongField(fields, "lastActivity", -1l);
+        lastInterval = Util.readLongField(fields, "lastInterval", -1l);
 
-        // default values for migrating devices
-        uuid = null;
-        enabled = true;
-        // try to read in order of less recent new fields
-        try {
-            uuid = (String)fields.get("uuid", null);
-            enabled = fields.get("enabled", true);
-            // add new fields here
-        } catch (Exception e) {
-            Logger logger = AdjustFactory.getLogger();
-            logger.debug("Unable to read new field in migration device with error (%s)",
-                    e.getMessage());
-        }
+        // new fields
+        uuid = Util.readStringField(fields, "uuid", null);
+        enabled = Util.readBooleanField(fields, "enabled", true);
+        askingAttribution = Util.readBooleanField(fields, "askingAttribution", false);
 
         // create UUID for migrating devices
         if (uuid == null) {
             uuid = Util.createUuid();
-            Log.d("XXX", "migrate " + uuid);
         }
     }
 
-    private static String stamp(long dateMillis) {
-        Date date = new Date(dateMillis);
-        return String.format(Locale.US,
-                             "%02d:%02d:%02d",
-                             date.getHours(),
-                             date.getMinutes(),
-                             date.getSeconds());
-    }
+    private void writeObject(ObjectOutputStream stream) throws IOException {
+        stream.defaultWriteObject();
+     }
 
-    private void injectGeneralAttributes(PackageBuilder builder) {
-        builder.setSessionCount(sessionCount);
-        builder.setSubsessionCount(subsessionCount);
-        builder.setSessionLength(sessionLength);
-        builder.setTimeSpent(timeSpent);
-        builder.setCreatedAt(createdAt);
-        builder.setUuid(uuid);
+    private static String stamp(long dateMillis) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(dateMillis);
+        return String.format(Locale.US,
+                "%02d:%02d:%02d",
+                calendar.HOUR_OF_DAY,
+                calendar.MINUTE,
+                calendar.SECOND);
     }
 }

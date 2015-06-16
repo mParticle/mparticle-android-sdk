@@ -1,25 +1,31 @@
 package com.mparticle.internal.embedded.adjust.sdk;
 
+import android.content.Context;
+
 import org.apache.http.client.HttpClient;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.params.HttpParams;
 
-import android.content.Context;
-
 public class AdjustFactory {
     private static IPackageHandler packageHandler = null;
     private static IRequestHandler requestHandler = null;
-    private static Logger logger = null;
+    private static IAttributionHandler attributionHandler = null;
+    private static IActivityHandler activityHandler = null;
+    private static ILogger logger = null;
     private static HttpClient httpClient = null;
 
     private static long timerInterval = -1;
+    private static long timerStart = -1;
     private static long sessionInterval = -1;
     private static long subsessionInterval = -1;
 
-    public static IPackageHandler getPackageHandler(ActivityHandler activityHandler, Context context, boolean dropOfflineActivities) {
+    public static IPackageHandler getPackageHandler(ActivityHandler activityHandler,
+                                                    Context context,
+                                                    boolean startPaused) {
         if (packageHandler == null) {
-            return new PackageHandler(activityHandler, context, dropOfflineActivities);
+            return new PackageHandler(activityHandler, context, startPaused);
         }
+        packageHandler.init(activityHandler, context, startPaused);
         return packageHandler;
     }
 
@@ -27,13 +33,14 @@ public class AdjustFactory {
         if (requestHandler == null) {
             return new RequestHandler(packageHandler);
         }
+        requestHandler.init(packageHandler);
         return requestHandler;
     }
 
-    public static Logger getLogger() {
+    public static ILogger getLogger() {
         if (logger == null) {
             // Logger needs to be "static" to retain the configuration throughout the app
-            logger = new LogCatLogger();
+            logger = new Logger();
         }
         return logger;
     }
@@ -52,6 +59,13 @@ public class AdjustFactory {
         return timerInterval;
     }
 
+    public static long getTimerStart() {
+        if (timerStart == -1) {
+            return 0;
+        }
+        return timerStart;
+    }
+
     public static long getSessionInterval() {
         if (sessionInterval == -1) {
             return Constants.THIRTY_MINUTES;
@@ -66,6 +80,25 @@ public class AdjustFactory {
         return subsessionInterval;
     }
 
+    public static IActivityHandler getActivityHandler(AdjustConfig config) {
+        if (activityHandler == null) {
+            return ActivityHandler.getInstance(config);
+        }
+        activityHandler.init(config);
+        return activityHandler;
+    }
+
+    public static IAttributionHandler getAttributionHandler(IActivityHandler activityHandler,
+                                                            ActivityPackage attributionPackage,
+                                                            boolean startPaused,
+                                                            boolean hasListener) {
+        if (attributionHandler == null) {
+            return new AttributionHandler(activityHandler, attributionPackage, startPaused, hasListener);
+        }
+        attributionHandler.init(activityHandler, attributionPackage, startPaused, hasListener);
+        return attributionHandler;
+    }
+
     public static void setPackageHandler(IPackageHandler packageHandler) {
         AdjustFactory.packageHandler = packageHandler;
     }
@@ -74,7 +107,7 @@ public class AdjustFactory {
         AdjustFactory.requestHandler = requestHandler;
     }
 
-    public static void setLogger(Logger logger) {
+    public static void setLogger(ILogger logger) {
         AdjustFactory.logger = logger;
     }
 
@@ -86,12 +119,24 @@ public class AdjustFactory {
         AdjustFactory.timerInterval = timerInterval;
     }
 
+    public static void setTimerStart(long timerStart) {
+        AdjustFactory.timerStart = timerStart;
+    }
+
     public static void setSessionInterval(long sessionInterval) {
         AdjustFactory.sessionInterval = sessionInterval;
     }
 
     public static void setSubsessionInterval(long subsessionInterval) {
         AdjustFactory.subsessionInterval = subsessionInterval;
+    }
+
+    public static void setActivityHandler(IActivityHandler activityHandler) {
+        AdjustFactory.activityHandler = activityHandler;
+    }
+
+    public static void setAttributionHandler(IAttributionHandler attributionHandler) {
+        AdjustFactory.attributionHandler = attributionHandler;
     }
 
 }

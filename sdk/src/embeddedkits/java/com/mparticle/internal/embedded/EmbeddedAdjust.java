@@ -1,29 +1,21 @@
 package com.mparticle.internal.embedded;
 
 import android.app.Activity;
-import android.content.Context;
-import android.content.Intent;
-import android.location.Location;
 
-import com.mparticle.internal.embedded.adjust.sdk.Adjust;
-import com.mparticle.MPEvent;
-import com.mparticle.MPProduct;
 import com.mparticle.MParticle;
 import com.mparticle.internal.MPActivityCallbacks;
-import com.mparticle.internal.embedded.adjust.sdk.OnFinishedListener;
-import com.mparticle.internal.embedded.adjust.sdk.ResponseData;
+import com.mparticle.internal.embedded.adjust.sdk.Adjust;
+import com.mparticle.internal.embedded.adjust.sdk.AdjustConfig;
+import com.mparticle.internal.embedded.adjust.sdk.LogLevel;
 
-import org.json.JSONObject;
-
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * <p/>
- * Embedded implementation of the Adjust SDK 3.6.2
+ * Embedded implementation of the Adjust SDK 4.0.6
  * <p/>
  */
-class EmbeddedAdjust extends EmbeddedProvider implements MPActivityCallbacks, OnFinishedListener {
+class EmbeddedAdjust extends EmbeddedProvider implements MPActivityCallbacks {
 
     private static final String APP_TOKEN = "appToken";
     private static final String HOST = "app.adjust.io";
@@ -40,15 +32,19 @@ class EmbeddedAdjust extends EmbeddedProvider implements MPActivityCallbacks, On
     private void initAdjust(){
         if (!initialized) {
             boolean production = MParticle.Environment.Production.equals(MParticle.getInstance().getEnvironment());
-            Adjust.appDidLaunch(context,
+
+            AdjustConfig config = new AdjustConfig(context,
                     properties.get(APP_TOKEN),
-                    production ? "production" : "sandbox",
-                    production ? "info" : "verbose",
-                    false);
-            Adjust.setOnFinishedListener(this);
+                    production ? AdjustConfig.ENVIRONMENT_PRODUCTION : AdjustConfig.ENVIRONMENT_SANDBOX);
+            if (!production){
+                config.setLogLevel(LogLevel.VERBOSE);
+            }
+            config.setEventBufferingEnabled(false);
+            Adjust.onCreate(config);
+            setRunning(true);
             if (!mEkManager.getAppStateManager().isBackgrounded()) {
                 if (!hasResumed.get()) {
-                    Adjust.onResume(context);
+                    Adjust.onResume();
                     hasResumed.set(true);
                 }
             }
@@ -88,7 +84,7 @@ class EmbeddedAdjust extends EmbeddedProvider implements MPActivityCallbacks, On
     @Override
     public void onActivityResumed(Activity activity, int currentCount) {
         if (!hasResumed.get()) {
-            Adjust.onResume(activity);
+            Adjust.onResume();
             hasResumed.set(true);
         }
     }
@@ -109,13 +105,5 @@ class EmbeddedAdjust extends EmbeddedProvider implements MPActivityCallbacks, On
     @Override
     public void onActivityStarted(Activity activity, int activityCount) {
 
-    }
-
-    @Override
-    public void onFinishedTracking(ResponseData responseData) {
-        if (!this.isRunning() && responseData != null && responseData.wasSuccess()){
-            setRunning(true);
-            Adjust.setOnFinishedListener(null);
-        }
     }
 }

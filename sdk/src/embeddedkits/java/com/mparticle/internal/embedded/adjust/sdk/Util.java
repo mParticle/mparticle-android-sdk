@@ -9,49 +9,40 @@
 
 package com.mparticle.internal.embedded.adjust.sdk;
 
-import static com.mparticle.internal.embedded.adjust.sdk.Constants.ENCODING;
-import static com.mparticle.internal.embedded.adjust.sdk.Constants.HIGH;
-import static com.mparticle.internal.embedded.adjust.sdk.Constants.LARGE;
-import static com.mparticle.internal.embedded.adjust.sdk.Constants.LONG;
-import static com.mparticle.internal.embedded.adjust.sdk.Constants.LOW;
-import static com.mparticle.internal.embedded.adjust.sdk.Constants.MD5;
-import static com.mparticle.internal.embedded.adjust.sdk.Constants.MEDIUM;
-import static com.mparticle.internal.embedded.adjust.sdk.Constants.NORMAL;
-import static com.mparticle.internal.embedded.adjust.sdk.Constants.PLUGINS;
-import static com.mparticle.internal.embedded.adjust.sdk.Constants.SHA1;
-import static com.mparticle.internal.embedded.adjust.sdk.Constants.SMALL;
-import static com.mparticle.internal.embedded.adjust.sdk.Constants.UNKNOWN;
-import static com.mparticle.internal.embedded.adjust.sdk.Constants.XLARGE;
+import android.content.Context;
+import android.content.pm.PackageManager;
 
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.client.HttpClient;
+import org.apache.http.params.BasicHttpParams;
+import org.apache.http.params.HttpConnectionParams;
+import org.apache.http.params.HttpParams;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.Closeable;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.NotSerializableException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import android.content.ContentResolver;
-import android.content.Context;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
-import android.content.pm.PackageManager.NameNotFoundException;
-import android.content.res.Configuration;
-import android.content.res.Resources;
-import android.database.Cursor;
-import android.net.Uri;
-import android.os.Build;
-import android.text.TextUtils;
-import android.util.DisplayMetrics;
-
-import com.mparticle.internal.embedded.adjust.sdk.plugin.Plugin;
+import static com.mparticle.internal.embedded.adjust.sdk.Constants.ENCODING;
+import static com.mparticle.internal.embedded.adjust.sdk.Constants.MD5;
+import static com.mparticle.internal.embedded.adjust.sdk.Constants.SHA1;
 
 /**
  * Collects utility functions used by Adjust.
@@ -59,193 +50,15 @@ import com.mparticle.internal.embedded.adjust.sdk.plugin.Plugin;
 public class Util {
 
     private static SimpleDateFormat dateFormat;
-    private static final String DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss'Z'Z";
+    private static final String DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'Z";
+    private static final String fieldReadErrorMessage = "Unable to read '%s' field in migration device with message (%s)";
 
-    protected static String getUserAgent(final Context context) {
-        final Resources resources = context.getResources();
-        final DisplayMetrics displayMetrics = resources.getDisplayMetrics();
-        final Configuration configuration = resources.getConfiguration();
-        final Locale locale = configuration.locale;
-        final int screenLayout = configuration.screenLayout;
-
-        final String[] parts = {
-            getPackageName(context),
-            getAppVersion(context),
-            getDeviceType(screenLayout),
-            getDeviceName(),
-            getOsName(),
-            getOsVersion(),
-            getLanguage(locale),
-            getCountry(locale),
-            getScreenSize(screenLayout),
-            getScreenFormat(screenLayout),
-            getScreenDensity(displayMetrics),
-            getDisplayWidth(displayMetrics),
-            getDisplayHeight(displayMetrics)
-        };
-        return TextUtils.join(" ", parts);
-    }
-
-    private static String getPackageName(final Context context) {
-        final String packageName = context.getPackageName();
-        return sanitizeString(packageName);
-    }
-
-    private static String getAppVersion(final Context context) {
-        try {
-            final PackageManager packageManager = context.getPackageManager();
-            final String name = context.getPackageName();
-            final PackageInfo info = packageManager.getPackageInfo(name, 0);
-            final String versionName = info.versionName;
-            return sanitizeString(versionName);
-        } catch (NameNotFoundException e) {
-            return UNKNOWN;
-        }
-    }
-
-    private static String getDeviceType(final int screenLayout) {
-        int screenSize = screenLayout & Configuration.SCREENLAYOUT_SIZE_MASK;
-
-        switch (screenSize) {
-            case Configuration.SCREENLAYOUT_SIZE_SMALL:
-            case Configuration.SCREENLAYOUT_SIZE_NORMAL:
-                return "phone";
-            case Configuration.SCREENLAYOUT_SIZE_LARGE:
-            case 4:
-                return "tablet";
-            default:
-                return UNKNOWN;
-        }
-    }
-
-    private static String getDeviceName() {
-        final String deviceName = Build.MODEL;
-        return sanitizeString(deviceName);
-    }
-
-    private static String getOsName() {
-        return "android";
-    }
-
-    private static String getOsVersion() {
-        final String osVersion = "" + Build.VERSION.SDK_INT;
-        return sanitizeString(osVersion);
-    }
-
-    private static String getLanguage(final Locale locale) {
-        final String language = locale.getLanguage();
-        return sanitizeStringShort(language);
-    }
-
-    private static String getCountry(final Locale locale) {
-        final String country = locale.getCountry();
-        return sanitizeStringShort(country);
-    }
-
-    private static String getScreenSize(final int screenLayout) {
-        final int screenSize = screenLayout & Configuration.SCREENLAYOUT_SIZE_MASK;
-
-        switch (screenSize) {
-            case Configuration.SCREENLAYOUT_SIZE_SMALL:
-                return SMALL;
-            case Configuration.SCREENLAYOUT_SIZE_NORMAL:
-                return NORMAL;
-            case Configuration.SCREENLAYOUT_SIZE_LARGE:
-                return LARGE;
-            case 4:
-                return XLARGE;
-            default:
-                return UNKNOWN;
-        }
-    }
-
-    private static String getScreenFormat(final int screenLayout) {
-        final int screenFormat = screenLayout & Configuration.SCREENLAYOUT_LONG_MASK;
-
-        switch (screenFormat) {
-            case Configuration.SCREENLAYOUT_LONG_YES:
-                return LONG;
-            case Configuration.SCREENLAYOUT_LONG_NO:
-                return NORMAL;
-            default:
-                return UNKNOWN;
-        }
-    }
-
-    private static String getScreenDensity(final DisplayMetrics displayMetrics) {
-        final int density = displayMetrics.densityDpi;
-        final int low = (DisplayMetrics.DENSITY_MEDIUM + DisplayMetrics.DENSITY_LOW) / 2;
-        final int high = (DisplayMetrics.DENSITY_MEDIUM + DisplayMetrics.DENSITY_HIGH) / 2;
-
-        if (0 == density) {
-            return UNKNOWN;
-        } else if (density < low) {
-            return LOW;
-        } else if (density > high) {
-            return HIGH;
-        }
-        return MEDIUM;
-    }
-
-    private static String getDisplayWidth(DisplayMetrics displayMetrics) {
-        final String displayWidth = String.valueOf(displayMetrics.widthPixels);
-        return sanitizeString(displayWidth);
-    }
-
-    private static String getDisplayHeight(DisplayMetrics displayMetrics) {
-        final String displayHeight = String.valueOf(displayMetrics.heightPixels);
-        return sanitizeString(displayHeight);
+    private static ILogger getLogger() {
+        return AdjustFactory.getLogger();
     }
 
     protected static String createUuid() {
         return UUID.randomUUID().toString();
-    }
-
-    // removes spaces and replaces empty string with "unknown"
-    private static String sanitizeString(final String string) {
-        return sanitizeString(string, UNKNOWN);
-    }
-
-    private static String sanitizeStringShort(final String string) {
-        return sanitizeString(string, "zz");
-    }
-
-    private static String sanitizeString(final String string, final String defaultString) {
-        String result = string;
-        if (TextUtils.isEmpty(result)) {
-            result = defaultString;
-        }
-
-        result = result.replaceAll("\\s", "");
-        if (TextUtils.isEmpty(result)) {
-            result = defaultString;
-        }
-
-        return result;
-    }
-
-    protected static String getAttributionId(final Context context) {
-        try {
-            final ContentResolver contentResolver = context.getContentResolver();
-            final Uri uri = Uri.parse("content://com.facebook.katana.provider.AttributionIdProvider");
-            final String columnName = "aid";
-            final String[] projection = {columnName};
-            final Cursor cursor = contentResolver.query(uri, projection, null, null, null);
-
-            if (null == cursor) {
-                return null;
-            }
-            if (!cursor.moveToFirst()) {
-                cursor.close();
-                return null;
-            }
-
-            final String attributionId = cursor.getString(cursor.getColumnIndex(columnName));
-            cursor.close();
-            return attributionId;
-        } catch (Exception e) {
-            return null;
-        }
     }
 
     public static String quote(String string) {
@@ -259,26 +72,14 @@ public class Util {
             return string;
         }
 
-        return String.format("'%s'", string);
+        return String.format(Locale.US, "'%s'", string);
     }
 
     public static String dateFormat(long date) {
-        if (null == dateFormat) {
+        if (dateFormat == null) {
             dateFormat = new SimpleDateFormat(DATE_FORMAT, Locale.US);
         }
         return dateFormat.format(date);
-    }
-
-
-    public static JSONObject buildJsonObject(String jsonString) {
-        JSONObject jsonObject = null;
-
-        try {
-            jsonObject = new JSONObject(jsonString);
-        } catch (JSONException e){
-        }
-
-        return jsonObject;
     }
 
     public static String getPlayAdId(Context context) {
@@ -289,90 +90,269 @@ public class Util {
         return Reflection.isPlayTrackingEnabled(context);
     }
 
-    public static boolean isGooglePlayServicesAvailable(Context context) {
-        return Reflection.isGooglePlayServicesAvailable(context);
+    public static <T> T readObject(Context context, String filename, String objectName) {
+        Closeable closable = null;
+        @SuppressWarnings("unchecked")
+        T object = null;
+        try {
+            FileInputStream inputStream = context.openFileInput(filename);
+            closable = inputStream;
+
+            BufferedInputStream bufferedStream = new BufferedInputStream(inputStream);
+            closable = bufferedStream;
+
+            ObjectInputStream objectStream = new ObjectInputStream(bufferedStream);
+            closable = objectStream;
+
+            try {
+                object = (T) objectStream.readObject();
+                getLogger().debug("Read %s: %s", objectName, object);
+            } catch (ClassNotFoundException e) {
+                getLogger().error("Failed to find %s class (%s)", objectName, e.getMessage());
+            } catch (ClassCastException e) {
+                getLogger().error("Failed to cast %s object (%s)", objectName, e.getMessage());
+            } catch (Exception e) {
+                getLogger().error("Failed to read %s object (%s)", objectName, e.getMessage());
+            }
+        } catch (FileNotFoundException e) {
+            getLogger().verbose("%s file not found", objectName);
+        } catch (Exception e) {
+            getLogger().error("Failed to open %s file for reading (%s)", objectName, e);
+        }
+        try {
+            if (closable != null) {
+                closable.close();
+            }
+        } catch (Exception e) {
+            getLogger().error("Failed to close %s file for reading (%s)", objectName, e);
+        }
+
+        return object;
     }
 
-    public static String getMacAddress(Context context) {
-        return Reflection.getMacAddress(context);
+    public static <T> void writeObject(T object, Context context, String filename, String objectName) {
+        Closeable closable = null;
+        try {
+            FileOutputStream outputStream = context.openFileOutput(filename, Context.MODE_PRIVATE);
+            closable = outputStream;
+
+            BufferedOutputStream bufferedStream = new BufferedOutputStream(outputStream);
+            closable = bufferedStream;
+
+            ObjectOutputStream objectStream = new ObjectOutputStream(bufferedStream);
+            closable = objectStream;
+
+            try {
+                objectStream.writeObject(object);
+                getLogger().debug("Wrote %s: %s", objectName, object);
+            } catch (NotSerializableException e) {
+                getLogger().error("Failed to serialize %s", objectName);
+            }
+        } catch (Exception e) {
+            getLogger().error("Failed to open %s for writing (%s)", objectName, e);
+        }
+        try {
+            if (closable != null) {
+                closable.close();
+            }
+        } catch (Exception e) {
+            getLogger().error("Failed to close %s file for writing (%s)", objectName, e);
+        }
     }
 
-    public static String getMacSha1(String macAddress) {
-        if (macAddress == null) {
+    public static JSONObject parseJsonResponse(HttpResponse httpResponse) {
+        if (httpResponse == null) {
             return null;
         }
-        String macSha1 = sha1(macAddress);
-
-        return macSha1;
-    }
-
-    public static String getMacShortMd5(String macAddress) {
-        if (macAddress == null) {
-            return null;
+        String stringResponse = null;
+        try {
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            httpResponse.getEntity().writeTo(out);
+            out.close();
+            stringResponse = out.toString().trim();
+        } catch (Exception e) {
+            getLogger().error("Failed to parse json response. (%s)", e.getMessage());
         }
-        String macShort = macAddress.replaceAll(":", "");
-        String macShortMd5 = md5(macShort);
 
-        return macShortMd5;
+        getLogger().verbose("Response: %s", stringResponse);
+        if (stringResponse == null) return null;
+
+        JSONObject jsonResponse = null;
+        try {
+            jsonResponse = new JSONObject(stringResponse);
+        } catch (JSONException e) {
+            getLogger().error("Failed to parse json response. (%s)", e.getMessage());
+        }
+
+        if (jsonResponse == null) return null;
+
+        String message = jsonResponse.optString("message", null);
+
+        if (message == null) {
+            message = "No message found";
+        }
+
+        if (httpResponse.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+            getLogger().info("%s", message);
+        } else {
+            getLogger().error("%s", message);
+        }
+
+        return jsonResponse;
     }
 
-    public static String getAndroidId(Context context) {
-        return Reflection.getAndroidId(context);
+    public static HttpClient getHttpClient() {
+        HttpParams httpParams = new BasicHttpParams();
+        HttpConnectionParams.setConnectionTimeout(httpParams, Constants.CONNECTION_TIMEOUT);
+        HttpConnectionParams.setSoTimeout(httpParams, Constants.SOCKET_TIMEOUT);
+        return AdjustFactory.getHttpClient(httpParams);
     }
 
-    private static String sha1(final String text) {
+    public static boolean checkPermission(Context context, String permission) {
+        int result = context.checkCallingOrSelfPermission(permission);
+        return result == PackageManager.PERMISSION_GRANTED;
+    }
+
+    public static String readStringField(ObjectInputStream.GetField fields, String name, String defaultValue) {
+        return readObjectField(fields, name, defaultValue);
+    }
+
+    public static <T> T readObjectField(ObjectInputStream.GetField fields, String name, T defaultValue) {
+        try {
+            return (T) fields.get(name, defaultValue);
+        } catch (Exception e) {
+            getLogger().debug(fieldReadErrorMessage, name, e.getMessage());
+            return defaultValue;
+        }
+    }
+
+    public static boolean readBooleanField(ObjectInputStream.GetField fields, String name, boolean defaultValue) {
+        try {
+            return fields.get(name, defaultValue);
+        } catch (Exception e) {
+            getLogger().debug(fieldReadErrorMessage, name, e.getMessage());
+            return defaultValue;
+        }
+    }
+
+    public static int readIntField(ObjectInputStream.GetField fields, String name, int defaultValue) {
+        try {
+            return fields.get(name, defaultValue);
+        } catch (Exception e) {
+            getLogger().debug(fieldReadErrorMessage, name, e.getMessage());
+            return defaultValue;
+        }
+    }
+
+    public static long readLongField(ObjectInputStream.GetField fields, String name, long defaultValue) {
+        try {
+            return fields.get(name, defaultValue);
+        } catch (Exception e) {
+            getLogger().debug(fieldReadErrorMessage, name, e.getMessage());
+            return defaultValue;
+        }
+    }
+
+    public static boolean equalObject(Object first, Object second) {
+        if (first == null || second == null) {
+            return first == null && second == null;
+        }
+        return first.equals(second);
+    }
+
+    public static boolean equalsMap(Map first, Map second) {
+        if (first == null || second == null) {
+            return first == null && second == null;
+        }
+        return first.entrySet().equals(second.entrySet());
+    }
+
+    public static boolean equalsDouble(Double first, Double second) {
+        if (first == null || second == null) {
+            return first == null && second == null;
+        }
+        return Double.doubleToLongBits(first) == Double.doubleToLongBits(second);
+    }
+
+    public static boolean equalString(String first, String second) {
+        return equalObject(first, second);
+    }
+
+    public static boolean equalEnum(Enum first, Enum second) {
+        return equalObject(first, second);
+    }
+
+    public static boolean equalLong(Long first, Long second) {
+        return equalObject(first, second);
+    }
+
+    public static boolean equalInt(Integer first, Integer second) {
+        return equalObject(first, second);
+    }
+
+    public static boolean equalBoolean(Boolean first, Boolean second) {
+        return equalObject(first, second);
+    }
+
+    public static int hashBoolean(Boolean value) {
+        if (value == null) {
+            return 0;
+        }
+        return value.hashCode();
+    }
+
+    public static int hashLong(Long value) {
+        if (value == null) {
+            return 0;
+        }
+        return value.hashCode();
+    }
+
+    public static int hashString(String value) {
+        if (value == null) {
+            return 0;
+        }
+        return value.hashCode();
+    }
+
+    public static int hashEnum(Enum value) {
+        if (value == null) {
+            return 0;
+        }
+        return value.hashCode();
+    }
+
+    public static int hashMap(Map value) {
+        if (value == null) {
+            return 0;
+        }
+        return value.entrySet().hashCode();
+    }
+
+    public static String sha1(final String text) {
         return hash(text, SHA1);
     }
 
-    private static String md5(final String text) {
+    public static String md5(final String text) {
         return hash(text, MD5);
     }
 
-    private static String hash(final String text, final String method) {
+    public static String hash(final String text, final String method) {
+        String hashString = null;
         try {
             final byte[] bytes = text.getBytes(ENCODING);
             final MessageDigest mesd = MessageDigest.getInstance(method);
             mesd.update(bytes, 0, bytes.length);
             final byte[] hash = mesd.digest();
-            return convertToHex(hash);
+            hashString = convertToHex(hash);
         } catch (Exception e) {
-            return null;
         }
+        return hashString;
     }
 
-    private static String convertToHex(final byte[] bytes) {
+    public static String convertToHex(final byte[] bytes) {
         final BigInteger bigInt = new BigInteger(1, bytes);
         final String formatString = "%0" + (bytes.length << 1) + "x";
-        return String.format(formatString, bigInt);
-    }
-
-    public static Map<String, String> getPluginKeys(Context context) {
-        Map<String, String> pluginKeys = new HashMap<String, String>();
-
-        for (Plugin plugin : getPlugins()) {
-            Map.Entry<String, String> pluginEntry = plugin.getParameter(context);
-            if (pluginEntry != null) {
-                pluginKeys.put(pluginEntry.getKey(), pluginEntry.getValue());
-            }
-        }
-
-        if (pluginKeys.size() == 0) {
-            return null;
-        } else {
-            return pluginKeys;
-        }
-    }
-
-    private static List<Plugin> getPlugins() {
-        List<Plugin> plugins = new ArrayList<Plugin>(PLUGINS.size());
-
-        for (String pluginName : PLUGINS) {
-            Object pluginObject = Reflection.createDefaultInstance(pluginName);
-            if (pluginObject != null && pluginObject instanceof Plugin) {
-                plugins.add((Plugin) pluginObject);
-            }
-        }
-
-        return plugins;
+        return String.format(Locale.US, formatString, bigInt);
     }
 }

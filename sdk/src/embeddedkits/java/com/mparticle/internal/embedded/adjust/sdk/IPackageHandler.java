@@ -1,8 +1,12 @@
 package com.mparticle.internal.embedded.adjust.sdk;
 
+import android.content.Context;
+
 import org.json.JSONObject;
 
 public interface IPackageHandler {
+    public void init(IActivityHandler activityHandler, Context context, boolean startPaused);
+
     public void addPackage(ActivityPackage pack);
 
     public void sendFirstPackage();
@@ -15,9 +19,7 @@ public interface IPackageHandler {
 
     public void resumeSending();
 
-    public String getFailureMessage();
+    public void finishedTrackingActivity(JSONObject jsonResponse);
 
-    public boolean dropsOfflineActivities();
-
-    public void finishedTrackingActivity(ActivityPackage activityPackage, ResponseData responseData, JSONObject jsonResponse);
+    public void sendClickPackage(ActivityPackage clickPackage);
 }

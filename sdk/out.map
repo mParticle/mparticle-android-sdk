@@ -6493,25 +6493,24 @@ com.mparticle.internal.UploadHandler -> com.mparticle.internal.v:
     java.lang.String[] uploadColumns -> m
     java.lang.String containsClause -> n
     131:171:void handleMessage(android.os.Message) -> handleMessage
-    218:254:void prepareHistoryUploads() -> a
-    263:300:boolean upload(boolean) -> a
-    315:324:com.mparticle.internal.MessageBatch createUploadMessage(org.json.JSONArray,boolean) -> a
-    372:377:void dbInsertUpload(com.mparticle.internal.MessageBatch) -> a
-    435:436:void fetchSegments(long,java.lang.String,com.mparticle.segmentation.SegmentListener) -> a
-    446:455:org.json.JSONObject getAppInfo() -> b
+    222:260:void prepareHistoryUploads() -> a
+    270:307:boolean upload(boolean) -> a
+    322:331:com.mparticle.internal.MessageBatch createUploadMessage(org.json.JSONArray,boolean) -> a
+    379:384:void dbInsertUpload(com.mparticle.internal.MessageBatch) -> a
+    442:443:void fetchSegments(long,java.lang.String,com.mparticle.segmentation.SegmentListener) -> a
+    453:462:org.json.JSONObject getAppInfo() -> b
 com.mparticle.internal.embedded.EmbeddedAdjust -> com.mparticle.internal.embedded.a:
     boolean initialized -> g
     java.util.concurrent.atomic.AtomicBoolean hasResumed -> h
     boolean referrerSet -> i
-    61:70:com.mparticle.internal.embedded.EmbeddedProvider update() -> a
-    75:75:java.lang.String getName() -> b
-    80:80:boolean isOriginator(java.lang.String) -> a
-    86:86:void onActivityCreated(android.app.Activity,int) -> c
-    90:94:void onActivityResumed(android.app.Activity,int) -> d
-    98:100:void onActivityPaused(android.app.Activity,int) -> e
-    105:105:void onActivityStopped(android.app.Activity,int) -> b
-    112:112:void onActivityStarted(android.app.Activity,int) -> a
-    116:120:void onFinishedTracking(com.mparticle.internal.embedded.adjust.sdk.ResponseData) -> onFinishedTracking
+    57:66:com.mparticle.internal.embedded.EmbeddedProvider update() -> a
+    71:71:java.lang.String getName() -> b
+    76:76:boolean isOriginator(java.lang.String) -> a
+    82:82:void onActivityCreated(android.app.Activity,int) -> c
+    86:90:void onActivityResumed(android.app.Activity,int) -> d
+    94:96:void onActivityPaused(android.app.Activity,int) -> e
+    101:101:void onActivityStopped(android.app.Activity,int) -> b
+    108:108:void onActivityStarted(android.app.Activity,int) -> a
 com.mparticle.internal.embedded.EmbeddedAppboy -> com.mparticle.internal.embedded.b:
     boolean started -> g
     boolean running -> h
@@ -6682,205 +6681,330 @@ com.mparticle.internal.embedded.PushProvider -> com.mparticle.internal.embedded.
     boolean handleGcmMessage(android.content.Intent) -> a
 com.mparticle.internal.embedded.adjust.sdk.ActivityHandler -> com.mparticle.internal.embedded.adjust.sdk.ActivityHandler:
     long TIMER_INTERVAL -> TIMER_INTERVAL
+    long TIMER_START -> TIMER_START
     long SESSION_INTERVAL -> SESSION_INTERVAL
     long SUBSESSION_INTERVAL -> SUBSESSION_INTERVAL
     java.lang.String TIME_TRAVEL -> TIME_TRAVEL
     java.lang.String ADJUST_PREFIX -> ADJUST_PREFIX
+    java.lang.String ACTIVITY_STATE_NAME -> ACTIVITY_STATE_NAME
+    java.lang.String ATTRIBUTION_NAME -> ATTRIBUTION_NAME
     com.mparticle.internal.embedded.adjust.sdk.ActivityHandler$SessionHandler sessionHandler -> sessionHandler
     com.mparticle.internal.embedded.adjust.sdk.IPackageHandler packageHandler -> packageHandler
-    com.mparticle.internal.embedded.adjust.sdk.OnFinishedListener onFinishedListener -> onFinishedListener
     com.mparticle.internal.embedded.adjust.sdk.ActivityState activityState -> activityState
-    com.mparticle.internal.embedded.adjust.sdk.Logger logger -> logger
-    java.util.concurrent.ScheduledExecutorService timer -> timer
-    android.content.Context context -> context
-    java.lang.String environment -> environment
-    java.lang.String defaultTracker -> defaultTracker
-    boolean eventBuffering -> eventBuffering
-    boolean dropOfflineActivities -> dropOfflineActivities
+    com.mparticle.internal.embedded.adjust.sdk.ILogger logger -> logger
+    com.mparticle.internal.embedded.adjust.sdk.TimerCycle timer -> timer
     boolean enabled -> enabled
-    java.lang.String appToken -> appToken
-    java.lang.String macSha1 -> macSha1
-    java.lang.String macShortMd5 -> macShortMd5
-    java.lang.String androidId -> androidId
-    java.lang.String fbAttributionId -> fbAttributionId
-    java.lang.String userAgent -> userAgent
-    java.lang.String clientSdk -> clientSdk
-    java.util.Map pluginKeys -> pluginKeys
-    101:114:void initActivityHandler(android.content.Context) -> initActivityHandler
-    117:118:void setSdkPrefix(java.lang.String) -> setSdkPrefix
-    121:122:void setOnFinishedListener(com.mparticle.internal.embedded.adjust.sdk.OnFinishedListener) -> setOnFinishedListener
-    125:128:void trackSubsessionStart() -> trackSubsessionStart
-    131:134:void trackSubsessionEnd() -> trackSubsessionEnd
-    137:145:void trackEvent(java.lang.String,java.util.Map) -> trackEvent
-    148:157:void trackRevenue(double,java.lang.String,java.util.Map) -> trackRevenue
-    160:176:void finishedTrackingActivity(com.mparticle.internal.embedded.adjust.sdk.ResponseData,java.lang.String) -> finishedTrackingActivity
-    179:187:void setEnabled(java.lang.Boolean) -> setEnabled
-    190:193:java.lang.Boolean isEnabled() -> isEnabled
-    198:202:void readOpenUrl(android.net.Uri) -> readOpenUrl
-    261:291:void initInternal(boolean,java.lang.String) -> initInternal
-    294:294:boolean canInit(java.lang.String) -> canInit
-    301:361:void startInternal() -> startInternal
-    364:372:void endInternal() -> endInternal
-    375:401:void trackEventInternal(com.mparticle.internal.embedded.adjust.sdk.PackageBuilder) -> trackEventInternal
-    404:431:void trackRevenueInternal(com.mparticle.internal.embedded.adjust.sdk.PackageBuilder) -> trackRevenueInternal
-    434:474:void readOpenUrlInternal(android.net.Uri) -> readOpenUrlInternal
-    477:480:void runDelegateMain(com.mparticle.internal.embedded.adjust.sdk.ResponseData) -> runDelegateMain
-    483:502:void launchDeepLinkMain(java.lang.String) -> launchDeepLinkMain
-    505:505:boolean canTrackEvent(com.mparticle.internal.embedded.adjust.sdk.PackageBuilder) -> canTrackEvent
-    511:511:boolean canTrackRevenue(com.mparticle.internal.embedded.adjust.sdk.PackageBuilder) -> canTrackRevenue
-    517:536:void updateActivityState(long) -> updateActivityState
-    540:568:void readActivityState() -> readActivityState
-    572:588:void writeActivityState() -> writeActivityState
-    591:591:java.lang.Boolean deleteActivityState(android.content.Context) -> deleteActivityState
-    595:602:void transferSessionPackage() -> transferSessionPackage
-    605:615:void injectGeneralAttributes(com.mparticle.internal.embedded.adjust.sdk.PackageBuilder) -> injectGeneralAttributes
-    619:625:void injectReferrer(com.mparticle.internal.embedded.adjust.sdk.PackageBuilder) -> injectReferrer
-    628:638:void startTimer() -> startTimer
-    642:646:void stopTimer() -> stopTimer
-    649:658:void timerFired() -> timerFired
-    661:671:boolean checkPermissions(android.content.Context) -> checkPermissions
-    675:687:java.lang.String processApplicationBundle() -> processApplicationBundle
-    691:708:void setEnvironment(java.lang.String) -> setEnvironment
-    711:715:void setEventBuffering(boolean) -> setEventBuffering
-    718:722:void setDefaultTracker(java.lang.String) -> setDefaultTracker
-    725:729:void setDropOfflineActivities(boolean) -> setDropOfflineActivities
-    734:742:android.os.Bundle getApplicationBundle() -> getApplicationBundle
-    746:750:boolean checkContext(android.content.Context) -> checkContext
-    754:755:boolean checkPermission(android.content.Context,java.lang.String) -> checkPermission
-    759:763:boolean checkActivityState(com.mparticle.internal.embedded.adjust.sdk.ActivityState) -> checkActivityState
-    767:771:boolean checkAppTokenNotNull(java.lang.String) -> checkAppTokenNotNull
-    775:779:boolean checkAppTokenLength(java.lang.String) -> checkAppTokenLength
-    44:44:void access$000(com.mparticle.internal.embedded.adjust.sdk.ActivityHandler,com.mparticle.internal.embedded.adjust.sdk.ResponseData) -> access$000
-    44:44:void access$100(com.mparticle.internal.embedded.adjust.sdk.ActivityHandler,java.lang.String) -> access$100
-    44:44:void access$200(com.mparticle.internal.embedded.adjust.sdk.ActivityHandler,boolean,java.lang.String) -> access$200
-    44:44:void access$300(com.mparticle.internal.embedded.adjust.sdk.ActivityHandler) -> access$300
-    44:44:void access$400(com.mparticle.internal.embedded.adjust.sdk.ActivityHandler) -> access$400
-    44:44:void access$500(com.mparticle.internal.embedded.adjust.sdk.ActivityHandler,com.mparticle.internal.embedded.adjust.sdk.PackageBuilder) -> access$500
-    44:44:void access$600(com.mparticle.internal.embedded.adjust.sdk.ActivityHandler,com.mparticle.internal.embedded.adjust.sdk.PackageBuilder) -> access$600
-    44:44:void access$700(com.mparticle.internal.embedded.adjust.sdk.ActivityHandler,android.net.Uri) -> access$700
-    44:44:void access$800(com.mparticle.internal.embedded.adjust.sdk.ActivityHandler) -> access$800
+    boolean offline -> offline
+    com.mparticle.internal.embedded.adjust.sdk.DeviceInfo deviceInfo -> deviceInfo
+    com.mparticle.internal.embedded.adjust.sdk.AdjustConfig adjustConfig -> adjustConfig
+    com.mparticle.internal.embedded.adjust.sdk.AdjustAttribution attribution -> attribution
+    com.mparticle.internal.embedded.adjust.sdk.IAttributionHandler attributionHandler -> attributionHandler
+    75:76:void init(com.mparticle.internal.embedded.adjust.sdk.AdjustConfig) -> init
+    79:109:com.mparticle.internal.embedded.adjust.sdk.ActivityHandler getInstance(com.mparticle.internal.embedded.adjust.sdk.AdjustConfig) -> getInstance
+    114:117:void trackSubsessionStart() -> trackSubsessionStart
+    121:124:void trackSubsessionEnd() -> trackSubsessionEnd
+    128:136:void trackEvent(com.mparticle.internal.embedded.adjust.sdk.AdjustEvent) -> trackEvent
+    140:148:void finishedTrackingActivity(org.json.JSONObject) -> finishedTrackingActivity
+    152:176:void setEnabled(boolean) -> setEnabled
+    180:199:void setOfflineMode(boolean) -> setOfflineMode
+    203:206:boolean isEnabled() -> isEnabled
+    212:217:void readOpenUrl(android.net.Uri,long) -> readOpenUrl
+    221:229:boolean tryUpdateAttribution(com.mparticle.internal.embedded.adjust.sdk.AdjustAttribution) -> tryUpdateAttribution
+    233:235:void saveAttribution(com.mparticle.internal.embedded.adjust.sdk.AdjustAttribution) -> saveAttribution
+    238:249:void launchAttributionListener() -> launchAttributionListener
+    253:255:void setAskingAttribution(boolean) -> setAskingAttribution
+    259:264:com.mparticle.internal.embedded.adjust.sdk.ActivityPackage getAttributionPackage() -> getAttributionPackage
+    269:274:void sendReferrer(java.lang.String,long) -> sendReferrer
+    297:300:void updateStatus() -> updateStatus
+    303:306:void timerFired() -> timerFired
+    373:420:void initInternal() -> initInternal
+    424:436:void startInternal() -> startInternal
+    439:483:void processSession() -> processSession
+    487:497:void checkAttributionState() -> checkAttributionState
+    500:506:void endInternal() -> endInternal
+    509:528:void trackEventInternal(com.mparticle.internal.embedded.adjust.sdk.AdjustEvent) -> trackEventInternal
+    531:538:void finishedTrackingActivityInternal(org.json.JSONObject) -> finishedTrackingActivityInternal
+    541:549:void sendReferrerInternal(java.lang.String,long) -> sendReferrerInternal
+    552:564:void readOpenUrlInternal(android.net.Uri,long) -> readOpenUrlInternal
+    567:594:com.mparticle.internal.embedded.adjust.sdk.ActivityPackage buildQueryStringClickPackage(java.lang.String,java.lang.String,long) -> buildQueryStringClickPackage
+    600:616:boolean readQueryString(java.lang.String,java.util.Map,com.mparticle.internal.embedded.adjust.sdk.AdjustAttribution) -> readQueryString
+    622:642:boolean trySetAttribution(com.mparticle.internal.embedded.adjust.sdk.AdjustAttribution,java.lang.String,java.lang.String) -> trySetAttribution
+    646:648:void updateStatusInternal() -> updateStatusInternal
+    651:659:void updateAttributionHandlerStatus() -> updateAttributionHandlerStatus
+    662:670:void updatePackageHandlerStatus() -> updatePackageHandlerStatus
+    673:692:void launchDeeplinkMain(java.lang.String) -> launchDeeplinkMain
+    695:708:boolean updateActivityState(long) -> updateActivityState
+    712:712:boolean deleteActivityState(android.content.Context) -> deleteActivityState
+    716:716:boolean deleteAttribution(android.content.Context) -> deleteAttribution
+    720:724:void transferSessionPackage(long) -> transferSessionPackage
+    728:733:void startTimer() -> startTimer
+    736:737:void stopTimer() -> stopTimer
+    740:752:void timerFiredInternal() -> timerFiredInternal
+    755:756:void readActivityState() -> readActivityState
+    759:760:void readAttribution() -> readAttribution
+    763:764:void writeActivityState() -> writeActivityState
+    767:768:void writeAttribution() -> writeAttribution
+    771:781:boolean checkEvent(com.mparticle.internal.embedded.adjust.sdk.AdjustEvent) -> checkEvent
+    785:785:boolean paused() -> paused
+    34:34:com.mparticle.internal.embedded.adjust.sdk.AdjustAttribution access$000(com.mparticle.internal.embedded.adjust.sdk.ActivityHandler) -> access$000
+    34:34:com.mparticle.internal.embedded.adjust.sdk.AdjustConfig access$100(com.mparticle.internal.embedded.adjust.sdk.ActivityHandler) -> access$100
+    34:34:void access$200(com.mparticle.internal.embedded.adjust.sdk.ActivityHandler) -> access$200
+    34:34:void access$300(com.mparticle.internal.embedded.adjust.sdk.ActivityHandler) -> access$300
+    34:34:void access$400(com.mparticle.internal.embedded.adjust.sdk.ActivityHandler) -> access$400
+    34:34:void access$500(com.mparticle.internal.embedded.adjust.sdk.ActivityHandler,com.mparticle.internal.embedded.adjust.sdk.AdjustEvent) -> access$500
+    34:34:void access$600(com.mparticle.internal.embedded.adjust.sdk.ActivityHandler,org.json.JSONObject) -> access$600
+    34:34:void access$700(com.mparticle.internal.embedded.adjust.sdk.ActivityHandler,android.net.Uri,long) -> access$700
+    34:34:void access$800(com.mparticle.internal.embedded.adjust.sdk.ActivityHandler,java.lang.String,long) -> access$800
+    34:34:void access$900(com.mparticle.internal.embedded.adjust.sdk.ActivityHandler) -> access$900
+    34:34:void access$1000(com.mparticle.internal.embedded.adjust.sdk.ActivityHandler) -> access$1000
+    34:34:void access$1100(com.mparticle.internal.embedded.adjust.sdk.ActivityHandler) -> access$1100
 com.mparticle.internal.embedded.adjust.sdk.ActivityHandler$1 -> com.mparticle.internal.embedded.adjust.sdk.ActivityHandler$1:
-    com.mparticle.internal.embedded.adjust.sdk.ResponseData val$responseData -> val$responseData
-    java.lang.String val$deepLink -> val$deepLink
     com.mparticle.internal.embedded.adjust.sdk.ActivityHandler this$0 -> this$0
-    169:173:void run() -> run
+    245:246:void run() -> run
 com.mparticle.internal.embedded.adjust.sdk.ActivityHandler$2 -> com.mparticle.internal.embedded.adjust.sdk.ActivityHandler$2:
     com.mparticle.internal.embedded.adjust.sdk.ActivityHandler this$0 -> this$0
-    635:636:void run() -> run
+    417:418:void run() -> run
+com.mparticle.internal.embedded.adjust.sdk.ActivityHandler$ReferrerClickTime -> com.mparticle.internal.embedded.adjust.sdk.ActivityHandler$ReferrerClickTime:
+    java.lang.String referrer -> referrer
+    long clickTime -> clickTime
+    com.mparticle.internal.embedded.adjust.sdk.ActivityHandler this$0 -> this$0
 com.mparticle.internal.embedded.adjust.sdk.ActivityHandler$SessionHandler -> com.mparticle.internal.embedded.adjust.sdk.ActivityHandler$SessionHandler:
-    int INIT_BUNDLE -> INIT_BUNDLE
-    int INIT_PRESET -> INIT_PRESET
+    int BASE_ADDRESS -> BASE_ADDRESS
+    int INIT -> INIT
     int START -> START
     int END -> END
     int EVENT -> EVENT
-    int REVENUE -> REVENUE
+    int FINISH_TRACKING -> FINISH_TRACKING
     int DEEP_LINK -> DEEP_LINK
+    int SEND_REFERRER -> SEND_REFERRER
+    int UPDATE_STATUS -> UPDATE_STATUS
+    int TIMER_FIRED -> TIMER_FIRED
     java.lang.ref.WeakReference sessionHandlerReference -> sessionHandlerReference
-    223:257:void handleMessage(android.os.Message) -> handleMessage
+    329:369:void handleMessage(android.os.Message) -> handleMessage
+com.mparticle.internal.embedded.adjust.sdk.ActivityHandler$UrlClickTime -> com.mparticle.internal.embedded.adjust.sdk.ActivityHandler$UrlClickTime:
+    android.net.Uri url -> url
+    long clickTime -> clickTime
+    com.mparticle.internal.embedded.adjust.sdk.ActivityHandler this$0 -> this$0
 com.mparticle.internal.embedded.adjust.sdk.ActivityKind -> com.mparticle.internal.embedded.adjust.sdk.ActivityKind:
     com.mparticle.internal.embedded.adjust.sdk.ActivityKind UNKNOWN -> UNKNOWN
     com.mparticle.internal.embedded.adjust.sdk.ActivityKind SESSION -> SESSION
     com.mparticle.internal.embedded.adjust.sdk.ActivityKind EVENT -> EVENT
+    com.mparticle.internal.embedded.adjust.sdk.ActivityKind CLICK -> CLICK
+    com.mparticle.internal.embedded.adjust.sdk.ActivityKind ATTRIBUTION -> ATTRIBUTION
     com.mparticle.internal.embedded.adjust.sdk.ActivityKind REVENUE -> REVENUE
     com.mparticle.internal.embedded.adjust.sdk.ActivityKind REATTRIBUTION -> REATTRIBUTION
     com.mparticle.internal.embedded.adjust.sdk.ActivityKind[] $VALUES -> $VALUES
     3:3:com.mparticle.internal.embedded.adjust.sdk.ActivityKind[] values() -> values
     3:3:com.mparticle.internal.embedded.adjust.sdk.ActivityKind valueOf(java.lang.String) -> valueOf
     7:16:com.mparticle.internal.embedded.adjust.sdk.ActivityKind fromString(java.lang.String) -> fromString
-    22:27:java.lang.String toString() -> toString
+    22:32:java.lang.String toString() -> toString
 com.mparticle.internal.embedded.adjust.sdk.ActivityKind$1 -> com.mparticle.internal.embedded.adjust.sdk.ActivityKind$1:
     int[] $SwitchMap$com$mparticle$internal$embedded$adjust$sdk$ActivityKind -> $SwitchMap$com$mparticle$internal$embedded$adjust$sdk$ActivityKind
 com.mparticle.internal.embedded.adjust.sdk.ActivityPackage -> com.mparticle.internal.embedded.adjust.sdk.ActivityPackage:
     long serialVersionUID -> serialVersionUID
+    java.io.ObjectStreamField[] serialPersistentFields -> serialPersistentFields
+    int hashCode -> hashCode
     java.lang.String path -> path
-    java.lang.String userAgent -> userAgent
     java.lang.String clientSdk -> clientSdk
     java.util.Map parameters -> parameters
     com.mparticle.internal.embedded.adjust.sdk.ActivityKind activityKind -> activityKind
     java.lang.String suffix -> suffix
-    29:29:java.lang.String getPath() -> getPath
-    33:34:void setPath(java.lang.String) -> setPath
-    37:37:java.lang.String getUserAgent() -> getUserAgent
-    41:42:void setUserAgent(java.lang.String) -> setUserAgent
-    45:45:java.lang.String getClientSdk() -> getClientSdk
-    49:50:void setClientSdk(java.lang.String) -> setClientSdk
-    53:53:java.util.Map getParameters() -> getParameters
-    57:58:void setParameters(java.util.Map) -> setParameters
-    61:61:com.mparticle.internal.embedded.adjust.sdk.ActivityKind getActivityKind() -> getActivityKind
-    65:66:void setActivityKind(com.mparticle.internal.embedded.adjust.sdk.ActivityKind) -> setActivityKind
-    69:69:java.lang.String getSuffix() -> getSuffix
-    73:74:void setSuffix(java.lang.String) -> setSuffix
-    77:77:java.lang.String toString() -> toString
-    81:92:java.lang.String getExtendedString() -> getExtendedString
-    97:99:java.lang.String getSuccessMessage() -> getSuccessMessage
-    105:107:java.lang.String getFailureMessage() -> getFailureMessage
+    45:45:java.lang.String getPath() -> getPath
+    49:50:void setPath(java.lang.String) -> setPath
+    53:53:java.lang.String getClientSdk() -> getClientSdk
+    57:58:void setClientSdk(java.lang.String) -> setClientSdk
+    61:61:java.util.Map getParameters() -> getParameters
+    65:66:void setParameters(java.util.Map) -> setParameters
+    69:69:com.mparticle.internal.embedded.adjust.sdk.ActivityKind getActivityKind() -> getActivityKind
+    73:73:java.lang.String getSuffix() -> getSuffix
+    77:78:void setSuffix(java.lang.String) -> setSuffix
+    85:85:java.lang.String toString() -> toString
+    89:100:java.lang.String getExtendedString() -> getExtendedString
+    104:104:java.lang.String getFailureMessage() -> getFailureMessage
+    108:109:void writeObject(java.io.ObjectOutputStream) -> writeObject
+    112:119:void readObject(java.io.ObjectInputStream) -> readObject
+    123:133:boolean equals(java.lang.Object) -> equals
+    138:146:int hashCode() -> hashCode
 com.mparticle.internal.embedded.adjust.sdk.ActivityState -> com.mparticle.internal.embedded.adjust.sdk.ActivityState:
     long serialVersionUID -> serialVersionUID
+    com.mparticle.internal.embedded.adjust.sdk.ILogger logger -> logger
+    java.io.ObjectStreamField[] serialPersistentFields -> serialPersistentFields
     java.lang.String uuid -> uuid
-    java.lang.Boolean enabled -> enabled
+    boolean enabled -> enabled
+    boolean askingAttribution -> askingAttribution
     int eventCount -> eventCount
     int sessionCount -> sessionCount
     int subsessionCount -> subsessionCount
     long sessionLength -> sessionLength
     long timeSpent -> timeSpent
     long lastActivity -> lastActivity
-    long createdAt -> createdAt
     long lastInterval -> lastInterval
-    58:64:void resetSessionAttributes(long) -> resetSessionAttributes
-    67:69:void injectSessionAttributes(com.mparticle.internal.embedded.adjust.sdk.PackageBuilder) -> injectSessionAttributes
-    72:74:void injectEventAttributes(com.mparticle.internal.embedded.adjust.sdk.PackageBuilder) -> injectEventAttributes
-    78:78:java.lang.String toString() -> toString
-    86:116:void readObject(java.io.ObjectInputStream) -> readObject
-    119:120:java.lang.String stamp(long) -> stamp
-    128:134:void injectGeneralAttributes(com.mparticle.internal.embedded.adjust.sdk.PackageBuilder) -> injectGeneralAttributes
+    71:76:void resetSessionAttributes(long) -> resetSessionAttributes
+    80:80:java.lang.String toString() -> toString
+    89:91:com.mparticle.internal.embedded.adjust.sdk.ActivityState shallowCopy() -> shallowCopy
+    97:111:boolean equals(java.lang.Object) -> equals
+    116:126:int hashCode() -> hashCode
+    131:150:void readObject(java.io.ObjectInputStream) -> readObject
+    153:154:void writeObject(java.io.ObjectOutputStream) -> writeObject
+    157:159:java.lang.String stamp(long) -> stamp
 com.mparticle.internal.embedded.adjust.sdk.Adjust -> com.mparticle.internal.embedded.adjust.sdk.Adjust:
-    com.mparticle.internal.embedded.adjust.sdk.ActivityHandler activityHandler -> activityHandler
-    34:38:void onResume(android.content.Context) -> onResume
-    48:53:void onPause() -> onPause
-    57:61:void setOnFinishedListener(com.mparticle.internal.embedded.adjust.sdk.OnFinishedListener) -> setOnFinishedListener
-    77:78:void trackEvent(java.lang.String) -> trackEvent
-    82:86:void trackEvent(java.lang.String,java.util.Map) -> trackEvent
-    103:104:void trackRevenue(double) -> trackRevenue
-    107:108:void trackRevenue(double,java.lang.String) -> trackRevenue
-    112:116:void trackRevenue(double,java.lang.String,java.util.Map) -> trackRevenue
-    125:129:void setEnabled(java.lang.Boolean) -> setEnabled
-    136:140:java.lang.Boolean isEnabled() -> isEnabled
-    145:150:void appWillOpenUrl(android.net.Uri) -> appWillOpenUrl
-    155:156:void appDidLaunch(android.content.Context,java.lang.String,java.lang.String,java.lang.String,boolean) -> appDidLaunch
-    160:161:void setSdkPrefix(java.lang.String) -> setSdkPrefix
-    168:168:com.mparticle.internal.embedded.adjust.sdk.Logger getLogger() -> getLogger
+    com.mparticle.internal.embedded.adjust.sdk.AdjustInstance defaultInstance -> defaultInstance
+    27:30:com.mparticle.internal.embedded.adjust.sdk.AdjustInstance getDefaultInstance() -> getDefaultInstance
+    34:36:void onCreate(com.mparticle.internal.embedded.adjust.sdk.AdjustConfig) -> onCreate
+    39:41:void trackEvent(com.mparticle.internal.embedded.adjust.sdk.AdjustEvent) -> trackEvent
+    44:46:void onResume() -> onResume
+    49:51:void onPause() -> onPause
+    54:56:void setEnabled(boolean) -> setEnabled
+    59:60:boolean isEnabled() -> isEnabled
+    64:66:void appWillOpenUrl(android.net.Uri) -> appWillOpenUrl
+    69:71:void setReferrer(java.lang.String) -> setReferrer
+    74:76:void setOfflineMode(boolean) -> setOfflineMode
+com.mparticle.internal.embedded.adjust.sdk.AdjustAttribution -> com.mparticle.internal.embedded.adjust.sdk.AdjustAttribution:
+    long serialVersionUID -> serialVersionUID
+    java.io.ObjectStreamField[] serialPersistentFields -> serialPersistentFields
+    java.lang.String trackerToken -> trackerToken
+    java.lang.String trackerName -> trackerName
+    java.lang.String network -> network
+    java.lang.String campaign -> campaign
+    java.lang.String adgroup -> adgroup
+    java.lang.String creative -> creative
+    java.lang.String clickLabel -> clickLabel
+    36:48:com.mparticle.internal.embedded.adjust.sdk.AdjustAttribution fromJson(org.json.JSONObject) -> fromJson
+    53:65:boolean equals(java.lang.Object) -> equals
+    70:78:int hashCode() -> hashCode
+    84:84:java.lang.String toString() -> toString
+    89:90:void writeObject(java.io.ObjectOutputStream) -> writeObject
+    93:94:void readObject(java.io.ObjectInputStream) -> readObject
+com.mparticle.internal.embedded.adjust.sdk.AdjustConfig -> com.mparticle.internal.embedded.adjust.sdk.AdjustConfig:
+    android.content.Context context -> context
+    java.lang.String appToken -> appToken
+    java.lang.String environment -> environment
+    java.lang.String processName -> processName
+    com.mparticle.internal.embedded.adjust.sdk.LogLevel logLevel -> logLevel
+    java.lang.String sdkPrefix -> sdkPrefix
+    java.lang.Boolean eventBufferingEnabled -> eventBufferingEnabled
+    java.lang.String defaultTracker -> defaultTracker
+    com.mparticle.internal.embedded.adjust.sdk.OnAttributionChangedListener onAttributionChangedListener -> onAttributionChangedListener
+    java.lang.String referrer -> referrer
+    long referrerClickTime -> referrerClickTime
+    java.lang.Boolean knownDevice -> knownDevice
+    java.lang.String ENVIRONMENT_SANDBOX -> ENVIRONMENT_SANDBOX
+    java.lang.String ENVIRONMENT_PRODUCTION -> ENVIRONMENT_PRODUCTION
+    40:41:void setEventBufferingEnabled(java.lang.Boolean) -> setEventBufferingEnabled
+    44:45:void setLogLevel(com.mparticle.internal.embedded.adjust.sdk.LogLevel) -> setLogLevel
+    48:49:void setSdkPrefix(java.lang.String) -> setSdkPrefix
+    51:51:void setProcessName(java.lang.String) -> setProcessName
+    54:55:void setDefaultTracker(java.lang.String) -> setDefaultTracker
+    58:59:void setOnAttributionChangedListener(com.mparticle.internal.embedded.adjust.sdk.OnAttributionChangedListener) -> setOnAttributionChangedListener
+    62:62:boolean hasListener() -> hasListener
+    66:66:boolean isValid() -> isValid
+    70:74:boolean isValid(android.content.Context,java.lang.String,java.lang.String) -> isValid
+    78:89:boolean checkContext(android.content.Context) -> checkContext
+    93:104:boolean checkAppToken(java.lang.String) -> checkAppToken
+    108:129:boolean checkEnvironment(java.lang.String) -> checkEnvironment
+com.mparticle.internal.embedded.adjust.sdk.AdjustEvent -> com.mparticle.internal.embedded.adjust.sdk.AdjustEvent:
+    java.lang.String eventToken -> eventToken
+    java.lang.Double revenue -> revenue
+    java.lang.String currency -> currency
+    java.util.Map callbackParameters -> callbackParameters
+    java.util.Map partnerParameters -> partnerParameters
+    com.mparticle.internal.embedded.adjust.sdk.ILogger logger -> logger
+    26:30:void setRevenue(double,java.lang.String) -> setRevenue
+    33:45:void addCallbackParameter(java.lang.String,java.lang.String) -> addCallbackParameter
+    48:60:void addPartnerParameter(java.lang.String,java.lang.String) -> addPartnerParameter
+    63:63:boolean isValid() -> isValid
+    67:75:boolean checkEventToken(java.lang.String,com.mparticle.internal.embedded.adjust.sdk.ILogger) -> checkEventToken
+    79:98:boolean checkRevenue(java.lang.Double,java.lang.String) -> checkRevenue
+    102:111:boolean isValidParameter(java.lang.String,java.lang.String,java.lang.String) -> isValidParameter
 com.mparticle.internal.embedded.adjust.sdk.AdjustFactory -> com.mparticle.internal.embedded.adjust.sdk.AdjustFactory:
     com.mparticle.internal.embedded.adjust.sdk.IPackageHandler packageHandler -> packageHandler
     com.mparticle.internal.embedded.adjust.sdk.IRequestHandler requestHandler -> requestHandler
-    com.mparticle.internal.embedded.adjust.sdk.Logger logger -> logger
+    com.mparticle.internal.embedded.adjust.sdk.IAttributionHandler attributionHandler -> attributionHandler
+    com.mparticle.internal.embedded.adjust.sdk.IActivityHandler activityHandler -> activityHandler
+    com.mparticle.internal.embedded.adjust.sdk.ILogger logger -> logger
     org.apache.http.client.HttpClient httpClient -> httpClient
     long timerInterval -> timerInterval
+    long timerStart -> timerStart
     long sessionInterval -> sessionInterval
     long subsessionInterval -> subsessionInterval
-    20:23:com.mparticle.internal.embedded.adjust.sdk.IPackageHandler getPackageHandler(com.mparticle.internal.embedded.adjust.sdk.ActivityHandler,android.content.Context,boolean) -> getPackageHandler
-    27:30:com.mparticle.internal.embedded.adjust.sdk.IRequestHandler getRequestHandler(com.mparticle.internal.embedded.adjust.sdk.IPackageHandler) -> getRequestHandler
-    34:38:com.mparticle.internal.embedded.adjust.sdk.Logger getLogger() -> getLogger
-    42:45:org.apache.http.client.HttpClient getHttpClient(org.apache.http.params.HttpParams) -> getHttpClient
-    49:52:long getTimerInterval() -> getTimerInterval
-    56:59:long getSessionInterval() -> getSessionInterval
-    63:66:long getSubsessionInterval() -> getSubsessionInterval
-    70:71:void setPackageHandler(com.mparticle.internal.embedded.adjust.sdk.IPackageHandler) -> setPackageHandler
-    74:75:void setRequestHandler(com.mparticle.internal.embedded.adjust.sdk.IRequestHandler) -> setRequestHandler
-    78:79:void setLogger(com.mparticle.internal.embedded.adjust.sdk.Logger) -> setLogger
-    82:83:void setHttpClient(org.apache.http.client.HttpClient) -> setHttpClient
-    86:87:void setTimerInterval(long) -> setTimerInterval
-    90:91:void setSessionInterval(long) -> setSessionInterval
-    94:95:void setSubsessionInterval(long) -> setSubsessionInterval
+    25:29:com.mparticle.internal.embedded.adjust.sdk.IPackageHandler getPackageHandler(com.mparticle.internal.embedded.adjust.sdk.ActivityHandler,android.content.Context,boolean) -> getPackageHandler
+    33:37:com.mparticle.internal.embedded.adjust.sdk.IRequestHandler getRequestHandler(com.mparticle.internal.embedded.adjust.sdk.IPackageHandler) -> getRequestHandler
+    41:45:com.mparticle.internal.embedded.adjust.sdk.ILogger getLogger() -> getLogger
+    49:52:org.apache.http.client.HttpClient getHttpClient(org.apache.http.params.HttpParams) -> getHttpClient
+    56:59:long getTimerInterval() -> getTimerInterval
+    63:66:long getTimerStart() -> getTimerStart
+    70:73:long getSessionInterval() -> getSessionInterval
+    77:80:long getSubsessionInterval() -> getSubsessionInterval
+    84:88:com.mparticle.internal.embedded.adjust.sdk.IActivityHandler getActivityHandler(com.mparticle.internal.embedded.adjust.sdk.AdjustConfig) -> getActivityHandler
+    95:99:com.mparticle.internal.embedded.adjust.sdk.IAttributionHandler getAttributionHandler(com.mparticle.internal.embedded.adjust.sdk.IActivityHandler,com.mparticle.internal.embedded.adjust.sdk.ActivityPackage,boolean,boolean) -> getAttributionHandler
+    103:104:void setPackageHandler(com.mparticle.internal.embedded.adjust.sdk.IPackageHandler) -> setPackageHandler
+    107:108:void setRequestHandler(com.mparticle.internal.embedded.adjust.sdk.IRequestHandler) -> setRequestHandler
+    111:112:void setLogger(com.mparticle.internal.embedded.adjust.sdk.ILogger) -> setLogger
+    115:116:void setHttpClient(org.apache.http.client.HttpClient) -> setHttpClient
+    119:120:void setTimerInterval(long) -> setTimerInterval
+    123:124:void setTimerStart(long) -> setTimerStart
+    127:128:void setSessionInterval(long) -> setSessionInterval
+    131:132:void setSubsessionInterval(long) -> setSubsessionInterval
+    135:136:void setActivityHandler(com.mparticle.internal.embedded.adjust.sdk.IActivityHandler) -> setActivityHandler
+    139:140:void setAttributionHandler(com.mparticle.internal.embedded.adjust.sdk.IAttributionHandler) -> setAttributionHandler
+com.mparticle.internal.embedded.adjust.sdk.AdjustInstance -> com.mparticle.internal.embedded.adjust.sdk.AdjustInstance:
+    java.lang.String referrer -> referrer
+    long referrerClickTime -> referrerClickTime
+    com.mparticle.internal.embedded.adjust.sdk.ActivityHandler activityHandler -> activityHandler
+    15:15:com.mparticle.internal.embedded.adjust.sdk.ILogger getLogger() -> getLogger
+    19:28:void onCreate(com.mparticle.internal.embedded.adjust.sdk.AdjustConfig) -> onCreate
+    31:33:void trackEvent(com.mparticle.internal.embedded.adjust.sdk.AdjustEvent) -> trackEvent
+    36:38:void onResume() -> onResume
+    41:43:void onPause() -> onPause
+    46:48:void setEnabled(boolean) -> setEnabled
+    51:52:boolean isEnabled() -> isEnabled
+    56:59:void appWillOpenUrl(android.net.Uri) -> appWillOpenUrl
+    62:71:void sendReferrer(java.lang.String) -> sendReferrer
+    74:76:void setOfflineMode(boolean) -> setOfflineMode
+    79:83:boolean checkActivityHandler() -> checkActivityHandler
+com.mparticle.internal.embedded.adjust.sdk.AdjustReferrerReceiver -> com.mparticle.internal.embedded.adjust.sdk.AdjustReferrerReceiver:
+    20:34:void onReceive(android.content.Context,android.content.Intent) -> onReceive
+com.mparticle.internal.embedded.adjust.sdk.AttributionHandler -> com.mparticle.internal.embedded.adjust.sdk.AttributionHandler:
+    java.util.concurrent.ScheduledExecutorService scheduler -> scheduler
+    com.mparticle.internal.embedded.adjust.sdk.IActivityHandler activityHandler -> activityHandler
+    com.mparticle.internal.embedded.adjust.sdk.ILogger logger -> logger
+    com.mparticle.internal.embedded.adjust.sdk.ActivityPackage attributionPackage -> attributionPackage
+    com.mparticle.internal.embedded.adjust.sdk.TimerOnce timer -> timer
+    org.apache.http.client.HttpClient httpClient -> httpClient
+    boolean paused -> paused
+    boolean hasListener -> hasListener
+    52:56:void init(com.mparticle.internal.embedded.adjust.sdk.IActivityHandler,com.mparticle.internal.embedded.adjust.sdk.ActivityPackage,boolean,boolean) -> init
+    60:61:void getAttribution() -> getAttribution
+    65:71:void checkAttribution(org.json.JSONObject) -> checkAttribution
+    75:76:void pauseSending() -> pauseSending
+    80:81:void resumeSending() -> resumeSending
+    85:95:void getAttribution(long) -> getAttribution
+    98:117:void checkAttributionInternal(org.json.JSONObject) -> checkAttributionInternal
+    120:140:void getAttributionInternal() -> getAttributionInternal
+    143:153:android.net.Uri buildUri(com.mparticle.internal.embedded.adjust.sdk.ActivityPackage) -> buildUri
+    157:163:org.apache.http.client.methods.HttpGet getRequest(com.mparticle.internal.embedded.adjust.sdk.ActivityPackage) -> getRequest
+    21:21:void access$000(com.mparticle.internal.embedded.adjust.sdk.AttributionHandler) -> access$000
+    21:21:void access$100(com.mparticle.internal.embedded.adjust.sdk.AttributionHandler,org.json.JSONObject) -> access$100
+com.mparticle.internal.embedded.adjust.sdk.AttributionHandler$1 -> com.mparticle.internal.embedded.adjust.sdk.AttributionHandler$1:
+    com.mparticle.internal.embedded.adjust.sdk.AttributionHandler this$0 -> this$0
+    41:42:void run() -> run
+com.mparticle.internal.embedded.adjust.sdk.AttributionHandler$2 -> com.mparticle.internal.embedded.adjust.sdk.AttributionHandler$2:
+    org.json.JSONObject val$jsonResponse -> val$jsonResponse
+    com.mparticle.internal.embedded.adjust.sdk.AttributionHandler this$0 -> this$0
+    68:69:void run() -> run
 com.mparticle.internal.embedded.adjust.sdk.Constants -> com.mparticle.internal.embedded.adjust.sdk.Constants:
     int ONE_SECOND -> ONE_SECOND
     int ONE_MINUTE -> ONE_MINUTE
     int THIRTY_MINUTES -> THIRTY_MINUTES
+    int CONNECTION_TIMEOUT -> CONNECTION_TIMEOUT
+    int SOCKET_TIMEOUT -> SOCKET_TIMEOUT
     java.lang.String BASE_URL -> BASE_URL
+    java.lang.String SCHEME -> SCHEME
+    java.lang.String AUTHORITY -> AUTHORITY
     java.lang.String CLIENT_SDK -> CLIENT_SDK
     java.lang.String LOGTAG -> LOGTAG
-    java.lang.String SESSION_STATE_FILENAME -> SESSION_STATE_FILENAME
-    java.lang.String NO_ACTIVITY_HANDLER_FOUND -> NO_ACTIVITY_HANDLER_FOUND
-    java.lang.String UNKNOWN -> UNKNOWN
+    java.lang.String ACTIVITY_STATE_FILENAME -> ACTIVITY_STATE_FILENAME
+    java.lang.String ATTRIBUTION_FILENAME -> ATTRIBUTION_FILENAME
     java.lang.String MALFORMED -> MALFORMED
     java.lang.String SMALL -> SMALL
     java.lang.String NORMAL -> NORMAL
@@ -6895,30 +7019,69 @@ com.mparticle.internal.embedded.adjust.sdk.Constants -> com.mparticle.internal.e
     java.lang.String MD5 -> MD5
     java.lang.String SHA1 -> SHA1
     java.util.List PLUGINS -> PLUGINS
-com.mparticle.internal.embedded.adjust.sdk.IPackageHandler -> com.mparticle.internal.embedded.adjust.sdk.IPackageHandler:
-    void addPackage(com.mparticle.internal.embedded.adjust.sdk.ActivityPackage) -> addPackage
-    void sendFirstPackage() -> sendFirstPackage
-    void sendNextPackage() -> sendNextPackage
-    void closeFirstPackage() -> closeFirstPackage
+com.mparticle.internal.embedded.adjust.sdk.DeviceInfo -> com.mparticle.internal.embedded.adjust.sdk.DeviceInfo:
+    java.lang.String macSha1 -> macSha1
+    java.lang.String macShortMd5 -> macShortMd5
+    java.lang.String androidId -> androidId
+    java.lang.String fbAttributionId -> fbAttributionId
+    java.lang.String clientSdk -> clientSdk
+    java.lang.String packageName -> packageName
+    java.lang.String appVersion -> appVersion
+    java.lang.String deviceType -> deviceType
+    java.lang.String deviceName -> deviceName
+    java.lang.String deviceManufacturer -> deviceManufacturer
+    java.lang.String osName -> osName
+    java.lang.String osVersion -> osVersion
+    java.lang.String language -> language
+    java.lang.String country -> country
+    java.lang.String screenSize -> screenSize
+    java.lang.String screenFormat -> screenFormat
+    java.lang.String screenDensity -> screenDensity
+    java.lang.String displayWidth -> displayWidth
+    java.lang.String displayHeight -> displayHeight
+    java.util.Map pluginKeys -> pluginKeys
+    83:89:java.lang.String getMacAddress(android.content.Context,boolean) -> getMacAddress
+    94:94:java.lang.String getPackageName(android.content.Context) -> getPackageName
+    99:104:java.lang.String getAppVersion(android.content.Context) -> getAppVersion
+    109:119:java.lang.String getDeviceType(int) -> getDeviceType
+    124:124:java.lang.String getDeviceName() -> getDeviceName
+    128:128:java.lang.String getDeviceManufacturer() -> getDeviceManufacturer
+    132:132:java.lang.String getOsName() -> getOsName
+    136:136:java.lang.String getOsVersion() -> getOsVersion
+    140:140:java.lang.String getLanguage(java.util.Locale) -> getLanguage
+    144:144:java.lang.String getCountry(java.util.Locale) -> getCountry
+    148:160:java.lang.String getScreenSize(int) -> getScreenSize
+    165:173:java.lang.String getScreenFormat(int) -> getScreenFormat
+    178:189:java.lang.String getScreenDensity(android.util.DisplayMetrics) -> getScreenDensity
+    193:193:java.lang.String getDisplayWidth(android.util.DisplayMetrics) -> getDisplayWidth
+    197:197:java.lang.String getDisplayHeight(android.util.DisplayMetrics) -> getDisplayHeight
+    201:204:java.lang.String getClientSdk(java.lang.String) -> getClientSdk
+    209:214:java.lang.String getMacSha1(java.lang.String) -> getMacSha1
+    218:224:java.lang.String getMacShortMd5(java.lang.String) -> getMacShortMd5
+    228:231:java.lang.String getAndroidId(android.content.Context,boolean) -> getAndroidId
+    237:255:java.lang.String getFacebookAttributionId(android.content.Context) -> getFacebookAttributionId
+com.mparticle.internal.embedded.adjust.sdk.IActivityHandler -> com.mparticle.internal.embedded.adjust.sdk.IActivityHandler:
+    void init(com.mparticle.internal.embedded.adjust.sdk.AdjustConfig) -> init
+    void trackSubsessionStart() -> trackSubsessionStart
+    void trackSubsessionEnd() -> trackSubsessionEnd
+    void trackEvent(com.mparticle.internal.embedded.adjust.sdk.AdjustEvent) -> trackEvent
+    void finishedTrackingActivity(org.json.JSONObject) -> finishedTrackingActivity
+    void setEnabled(boolean) -> setEnabled
+    boolean isEnabled() -> isEnabled
+    void readOpenUrl(android.net.Uri,long) -> readOpenUrl
+    boolean tryUpdateAttribution(com.mparticle.internal.embedded.adjust.sdk.AdjustAttribution) -> tryUpdateAttribution
+    void sendReferrer(java.lang.String,long) -> sendReferrer
+    void setOfflineMode(boolean) -> setOfflineMode
+    void setAskingAttribution(boolean) -> setAskingAttribution
+    com.mparticle.internal.embedded.adjust.sdk.ActivityPackage getAttributionPackage() -> getAttributionPackage
+com.mparticle.internal.embedded.adjust.sdk.IAttributionHandler -> com.mparticle.internal.embedded.adjust.sdk.IAttributionHandler:
+    void init(com.mparticle.internal.embedded.adjust.sdk.IActivityHandler,com.mparticle.internal.embedded.adjust.sdk.ActivityPackage,boolean,boolean) -> init
+    void getAttribution() -> getAttribution
+    void checkAttribution(org.json.JSONObject) -> checkAttribution
     void pauseSending() -> pauseSending
     void resumeSending() -> resumeSending
-    java.lang.String getFailureMessage() -> getFailureMessage
-    boolean dropsOfflineActivities() -> dropsOfflineActivities
-    void finishedTrackingActivity(com.mparticle.internal.embedded.adjust.sdk.ActivityPackage,com.mparticle.internal.embedded.adjust.sdk.ResponseData,org.json.JSONObject) -> finishedTrackingActivity
-com.mparticle.internal.embedded.adjust.sdk.IRequestHandler -> com.mparticle.internal.embedded.adjust.sdk.IRequestHandler:
-    void sendPackage(com.mparticle.internal.embedded.adjust.sdk.ActivityPackage) -> sendPackage
-com.mparticle.internal.embedded.adjust.sdk.LogCatLogger -> com.mparticle.internal.embedded.adjust.sdk.LogCatLogger:
-    com.mparticle.internal.embedded.adjust.sdk.Logger$LogLevel logLevel -> logLevel
-    28:29:void setLogLevel(com.mparticle.internal.embedded.adjust.sdk.Logger$LogLevel) -> setLogLevel
-    33:40:void setLogLevelString(java.lang.String) -> setLogLevelString
-    44:47:void verbose(java.lang.String,java.lang.Object[]) -> verbose
-    51:54:void debug(java.lang.String,java.lang.Object[]) -> debug
-    58:61:void info(java.lang.String,java.lang.Object[]) -> info
-    65:68:void warn(java.lang.String,java.lang.Object[]) -> warn
-    72:75:void error(java.lang.String,java.lang.Object[]) -> error
-    79:80:void Assert(java.lang.String,java.lang.Object[]) -> Assert
-com.mparticle.internal.embedded.adjust.sdk.Logger -> com.mparticle.internal.embedded.adjust.sdk.Logger:
-    void setLogLevel(com.mparticle.internal.embedded.adjust.sdk.Logger$LogLevel) -> setLogLevel
+com.mparticle.internal.embedded.adjust.sdk.ILogger -> com.mparticle.internal.embedded.adjust.sdk.ILogger:
+    void setLogLevel(com.mparticle.internal.embedded.adjust.sdk.LogLevel) -> setLogLevel
     void setLogLevelString(java.lang.String) -> setLogLevelString
     void verbose(java.lang.String,java.lang.Object[]) -> verbose
     void debug(java.lang.String,java.lang.Object[]) -> debug
@@ -6926,238 +7089,211 @@ com.mparticle.internal.embedded.adjust.sdk.Logger -> com.mparticle.internal.embe
     void warn(java.lang.String,java.lang.Object[]) -> warn
     void error(java.lang.String,java.lang.Object[]) -> error
     void Assert(java.lang.String,java.lang.Object[]) -> Assert
-com.mparticle.internal.embedded.adjust.sdk.Logger$LogLevel -> com.mparticle.internal.embedded.adjust.sdk.Logger$LogLevel:
-    com.mparticle.internal.embedded.adjust.sdk.Logger$LogLevel VERBOSE -> VERBOSE
-    com.mparticle.internal.embedded.adjust.sdk.Logger$LogLevel DEBUG -> DEBUG
-    com.mparticle.internal.embedded.adjust.sdk.Logger$LogLevel INFO -> INFO
-    com.mparticle.internal.embedded.adjust.sdk.Logger$LogLevel WARN -> WARN
-    com.mparticle.internal.embedded.adjust.sdk.Logger$LogLevel ERROR -> ERROR
-    com.mparticle.internal.embedded.adjust.sdk.Logger$LogLevel ASSERT -> ASSERT
+com.mparticle.internal.embedded.adjust.sdk.IPackageHandler -> com.mparticle.internal.embedded.adjust.sdk.IPackageHandler:
+    void init(com.mparticle.internal.embedded.adjust.sdk.IActivityHandler,android.content.Context,boolean) -> init
+    void addPackage(com.mparticle.internal.embedded.adjust.sdk.ActivityPackage) -> addPackage
+    void sendFirstPackage() -> sendFirstPackage
+    void sendNextPackage() -> sendNextPackage
+    void closeFirstPackage() -> closeFirstPackage
+    void pauseSending() -> pauseSending
+    void resumeSending() -> resumeSending
+    void finishedTrackingActivity(org.json.JSONObject) -> finishedTrackingActivity
+    void sendClickPackage(com.mparticle.internal.embedded.adjust.sdk.ActivityPackage) -> sendClickPackage
+com.mparticle.internal.embedded.adjust.sdk.IRequestHandler -> com.mparticle.internal.embedded.adjust.sdk.IRequestHandler:
+    void init(com.mparticle.internal.embedded.adjust.sdk.IPackageHandler) -> init
+    void sendPackage(com.mparticle.internal.embedded.adjust.sdk.ActivityPackage) -> sendPackage
+    void sendClickPackage(com.mparticle.internal.embedded.adjust.sdk.ActivityPackage) -> sendClickPackage
+com.mparticle.internal.embedded.adjust.sdk.LogLevel -> com.mparticle.internal.embedded.adjust.sdk.LogLevel:
+    com.mparticle.internal.embedded.adjust.sdk.LogLevel VERBOSE -> VERBOSE
+    com.mparticle.internal.embedded.adjust.sdk.LogLevel DEBUG -> DEBUG
+    com.mparticle.internal.embedded.adjust.sdk.LogLevel INFO -> INFO
+    com.mparticle.internal.embedded.adjust.sdk.LogLevel WARN -> WARN
+    com.mparticle.internal.embedded.adjust.sdk.LogLevel ERROR -> ERROR
+    com.mparticle.internal.embedded.adjust.sdk.LogLevel ASSERT -> ASSERT
     int androidLogLevel -> androidLogLevel
-    com.mparticle.internal.embedded.adjust.sdk.Logger$LogLevel[] $VALUES -> $VALUES
-    7:7:com.mparticle.internal.embedded.adjust.sdk.Logger$LogLevel[] values() -> values
-    7:7:com.mparticle.internal.embedded.adjust.sdk.Logger$LogLevel valueOf(java.lang.String) -> valueOf
-    16:16:int getAndroidLogLevel() -> getAndroidLogLevel
-com.mparticle.internal.embedded.adjust.sdk.OnFinishedListener -> com.mparticle.internal.embedded.adjust.sdk.OnFinishedListener:
-    void onFinishedTracking(com.mparticle.internal.embedded.adjust.sdk.ResponseData) -> onFinishedTracking
+    com.mparticle.internal.embedded.adjust.sdk.LogLevel[] $VALUES -> $VALUES
+    8:8:com.mparticle.internal.embedded.adjust.sdk.LogLevel[] values() -> values
+    8:8:com.mparticle.internal.embedded.adjust.sdk.LogLevel valueOf(java.lang.String) -> valueOf
+    17:17:int getAndroidLogLevel() -> getAndroidLogLevel
+com.mparticle.internal.embedded.adjust.sdk.Logger -> com.mparticle.internal.embedded.adjust.sdk.Logger:
+    com.mparticle.internal.embedded.adjust.sdk.LogLevel logLevel -> logLevel
+    java.lang.String formatErrorMessage -> formatErrorMessage
+    30:31:void setLogLevel(com.mparticle.internal.embedded.adjust.sdk.LogLevel) -> setLogLevel
+    35:42:void setLogLevelString(java.lang.String) -> setLogLevelString
+    46:53:void verbose(java.lang.String,java.lang.Object[]) -> verbose
+    57:64:void debug(java.lang.String,java.lang.Object[]) -> debug
+    68:75:void info(java.lang.String,java.lang.Object[]) -> info
+    79:86:void warn(java.lang.String,java.lang.Object[]) -> warn
+    90:97:void error(java.lang.String,java.lang.Object[]) -> error
+    102:106:void Assert(java.lang.String,java.lang.Object[]) -> Assert
+com.mparticle.internal.embedded.adjust.sdk.OnAttributionChangedListener -> com.mparticle.internal.embedded.adjust.sdk.OnAttributionChangedListener:
+    void onAttributionChanged(com.mparticle.internal.embedded.adjust.sdk.AdjustAttribution) -> onAttributionChanged
 com.mparticle.internal.embedded.adjust.sdk.PackageBuilder -> com.mparticle.internal.embedded.adjust.sdk.PackageBuilder:
-    android.content.Context context -> context
-    java.lang.String appToken -> appToken
-    java.lang.String macSha1 -> macSha1
-    java.lang.String macShortMd5 -> macShortMd5
-    java.lang.String androidId -> androidId
-    java.lang.String fbAttributionId -> fbAttributionId
-    java.lang.String userAgent -> userAgent
-    java.lang.String clientSdk -> clientSdk
-    java.lang.String uuid -> uuid
-    java.lang.String environment -> environment
-    java.util.Map pluginsKeys -> pluginsKeys
-    int sessionCount -> sessionCount
-    int subsessionCount -> subsessionCount
+    com.mparticle.internal.embedded.adjust.sdk.AdjustConfig adjustConfig -> adjustConfig
+    com.mparticle.internal.embedded.adjust.sdk.DeviceInfo deviceInfo -> deviceInfo
+    com.mparticle.internal.embedded.adjust.sdk.ActivityState activityState -> activityState
     long createdAt -> createdAt
-    long sessionLength -> sessionLength
-    long timeSpent -> timeSpent
-    long lastInterval -> lastInterval
-    java.lang.String defaultTracker -> defaultTracker
-    java.lang.String referrer -> referrer
-    int eventCount -> eventCount
-    java.lang.String eventToken -> eventToken
-    double amountInCents -> amountInCents
-    java.util.Map callbackParameters -> callbackParameters
-    java.util.Map deepLinkParameters -> deepLinkParameters
-    63:64:void setAppToken(java.lang.String) -> setAppToken
-    67:68:void setMacSha1(java.lang.String) -> setMacSha1
-    71:72:void setMacShortMd5(java.lang.String) -> setMacShortMd5
-    75:76:void setAndroidId(java.lang.String) -> setAndroidId
-    79:80:void setUuid(java.lang.String) -> setUuid
-    83:84:void setFbAttributionId(java.lang.String) -> setFbAttributionId
-    87:88:void setUserAgent(java.lang.String) -> setUserAgent
-    91:92:void setClientSdk(java.lang.String) -> setClientSdk
-    95:96:void setEnvironment(java.lang.String) -> setEnvironment
-    99:100:void setSessionCount(int) -> setSessionCount
-    103:104:void setSubsessionCount(int) -> setSubsessionCount
-    107:108:void setCreatedAt(long) -> setCreatedAt
-    111:112:void setSessionLength(long) -> setSessionLength
-    115:116:void setTimeSpent(long) -> setTimeSpent
-    119:120:void setLastInterval(long) -> setLastInterval
-    123:124:void setDefaultTracker(java.lang.String) -> setDefaultTracker
-    127:128:void setReferrer(java.lang.String) -> setReferrer
-    131:132:void setEventCount(int) -> setEventCount
-    135:135:java.lang.String getEventToken() -> getEventToken
-    139:140:void setEventToken(java.lang.String) -> setEventToken
-    143:143:double getAmountInCents() -> getAmountInCents
-    147:148:void setAmountInCents(double) -> setAmountInCents
-    151:152:void setCallbackParameters(java.util.Map) -> setCallbackParameters
-    155:156:void setDeepLinkParameters(java.util.Map) -> setDeepLinkParameters
-    159:160:void setPluginKeys(java.util.Map) -> setPluginKeys
-    163:168:boolean isValidForEvent() -> isValidForEvent
-    172:180:boolean isValidForRevenue() -> isValidForRevenue
-    184:195:com.mparticle.internal.embedded.adjust.sdk.ActivityPackage buildSessionPackage() -> buildSessionPackage
-    199:208:com.mparticle.internal.embedded.adjust.sdk.ActivityPackage buildEventPackage() -> buildEventPackage
-    212:222:com.mparticle.internal.embedded.adjust.sdk.ActivityPackage buildRevenuePackage() -> buildRevenuePackage
-    226:235:com.mparticle.internal.embedded.adjust.sdk.ActivityPackage buildReattributionPackage() -> buildReattributionPackage
-    239:244:boolean isEventTokenValid() -> isEventTokenValid
-    248:251:com.mparticle.internal.embedded.adjust.sdk.ActivityPackage getDefaultActivityPackage() -> getDefaultActivityPackage
-    255:279:java.util.Map getDefaultParameters() -> getDefaultParameters
-    283:291:void checkDeviceIds(java.util.Map) -> checkDeviceIds
-    294:301:void fillPluginKeys(java.util.Map) -> fillPluginKeys
-    304:307:void injectEventParameters(java.util.Map) -> injectEventParameters
-    310:312:java.lang.String getAmountString() -> getAmountString
-    316:316:java.lang.String getEventSuffix() -> getEventSuffix
-    320:323:java.lang.String getRevenueSuffix() -> getRevenueSuffix
-    328:333:void addString(java.util.Map,java.lang.String,java.lang.String) -> addString
-    336:342:void addInt(java.util.Map,java.lang.String,long) -> addInt
-    345:351:void addDate(java.util.Map,java.lang.String,long) -> addDate
-    354:360:void addDuration(java.util.Map,java.lang.String,long) -> addDuration
-    363:372:void addMapBase64(java.util.Map,java.lang.String,java.util.Map) -> addMapBase64
-    375:383:void addMapJson(java.util.Map,java.lang.String,java.util.Map) -> addMapJson
-    386:393:void addBoolean(java.util.Map,java.lang.String,java.lang.Boolean) -> addBoolean
+    java.util.Map extraParameters -> extraParameters
+    com.mparticle.internal.embedded.adjust.sdk.AdjustAttribution attribution -> attribution
+    java.lang.String reftag -> reftag
+    com.mparticle.internal.embedded.adjust.sdk.ILogger logger -> logger
+    44:53:com.mparticle.internal.embedded.adjust.sdk.ActivityPackage buildSessionPackage() -> buildSessionPackage
+    57:70:com.mparticle.internal.embedded.adjust.sdk.ActivityPackage buildEventPackage(com.mparticle.internal.embedded.adjust.sdk.AdjustEvent) -> buildEventPackage
+    74:87:com.mparticle.internal.embedded.adjust.sdk.ActivityPackage buildClickPackage(java.lang.String,long) -> buildClickPackage
+    91:98:com.mparticle.internal.embedded.adjust.sdk.ActivityPackage buildAttributionPackage() -> buildAttributionPackage
+    102:104:com.mparticle.internal.embedded.adjust.sdk.ActivityPackage getDefaultActivityPackage(com.mparticle.internal.embedded.adjust.sdk.ActivityKind) -> getDefaultActivityPackage
+    108:118:java.util.Map getDefaultParameters() -> getDefaultParameters
+    122:130:java.util.Map getIdsParameters() -> getIdsParameters
+    134:151:void injectDeviceInfo(java.util.Map) -> injectDeviceInfo
+    154:157:void injectDeviceInfoIds(java.util.Map) -> injectDeviceInfoIds
+    160:169:void injectConfig(java.util.Map) -> injectConfig
+    172:177:void injectActivityState(java.util.Map) -> injectActivityState
+    180:181:void injectCreatedAt(java.util.Map) -> injectCreatedAt
+    184:191:void injectAttribution(java.util.Map) -> injectAttribution
+    194:200:void checkDeviceIds(java.util.Map) -> checkDeviceIds
+    203:210:void fillPluginKeys(java.util.Map) -> fillPluginKeys
+    213:216:java.lang.String getEventSuffix(com.mparticle.internal.embedded.adjust.sdk.AdjustEvent) -> getEventSuffix
+    221:226:void addString(java.util.Map,java.lang.String,java.lang.String) -> addString
+    229:235:void addInt(java.util.Map,java.lang.String,long) -> addInt
+    238:244:void addDate(java.util.Map,java.lang.String,long) -> addDate
+    247:253:void addDuration(java.util.Map,java.lang.String,long) -> addDuration
+    256:268:void addMapJson(java.util.Map,java.lang.String,java.util.Map) -> addMapJson
+    271:278:void addBoolean(java.util.Map,java.lang.String,java.lang.Boolean) -> addBoolean
+    281:286:void addDouble(java.util.Map,java.lang.String,java.lang.Double) -> addDouble
 com.mparticle.internal.embedded.adjust.sdk.PackageHandler -> com.mparticle.internal.embedded.adjust.sdk.PackageHandler:
     java.lang.String PACKAGE_QUEUE_FILENAME -> PACKAGE_QUEUE_FILENAME
+    java.lang.String PACKAGE_QUEUE_NAME -> PACKAGE_QUEUE_NAME
     com.mparticle.internal.embedded.adjust.sdk.PackageHandler$InternalHandler internalHandler -> internalHandler
     com.mparticle.internal.embedded.adjust.sdk.IRequestHandler requestHandler -> requestHandler
-    com.mparticle.internal.embedded.adjust.sdk.ActivityHandler activityHandler -> activityHandler
+    com.mparticle.internal.embedded.adjust.sdk.IActivityHandler activityHandler -> activityHandler
     java.util.List packageQueue -> packageQueue
     java.util.concurrent.atomic.AtomicBoolean isSending -> isSending
     boolean paused -> paused
     android.content.Context context -> context
-    boolean dropOfflineActivities -> dropOfflineActivities
-    com.mparticle.internal.embedded.adjust.sdk.Logger logger -> logger
-    68:72:void addPackage(com.mparticle.internal.embedded.adjust.sdk.ActivityPackage) -> addPackage
-    77:80:void sendFirstPackage() -> sendFirstPackage
-    86:89:void sendNextPackage() -> sendNextPackage
-    94:99:void closeFirstPackage() -> closeFirstPackage
-    104:105:void pauseSending() -> pauseSending
-    110:111:void resumeSending() -> resumeSending
-    116:119:java.lang.String getFailureMessage() -> getFailureMessage
-    125:125:boolean dropsOfflineActivities() -> dropsOfflineActivities
-    130:139:void finishedTrackingActivity(com.mparticle.internal.embedded.adjust.sdk.ActivityPackage,com.mparticle.internal.embedded.adjust.sdk.ResponseData,org.json.JSONObject) -> finishedTrackingActivity
-    184:189:void initInternal() -> initInternal
-    192:197:void addInternal(com.mparticle.internal.embedded.adjust.sdk.ActivityPackage) -> addInternal
-    200:215:void sendFirstInternal() -> sendFirstInternal
-    218:222:void sendNextInternal() -> sendNextInternal
-    225:261:void readPackageQueue() -> readPackageQueue
-    264:264:java.lang.Boolean deletePackageQueue(android.content.Context) -> deletePackageQueue
-    269:290:void writePackageQueue() -> writePackageQueue
-    36:36:void access$000(com.mparticle.internal.embedded.adjust.sdk.PackageHandler) -> access$000
-    36:36:void access$100(com.mparticle.internal.embedded.adjust.sdk.PackageHandler,com.mparticle.internal.embedded.adjust.sdk.ActivityPackage) -> access$100
-    36:36:void access$200(com.mparticle.internal.embedded.adjust.sdk.PackageHandler) -> access$200
-    36:36:void access$300(com.mparticle.internal.embedded.adjust.sdk.PackageHandler) -> access$300
+    com.mparticle.internal.embedded.adjust.sdk.ILogger logger -> logger
+    57:60:void init(com.mparticle.internal.embedded.adjust.sdk.IActivityHandler,android.content.Context,boolean) -> init
+    65:69:void addPackage(com.mparticle.internal.embedded.adjust.sdk.ActivityPackage) -> addPackage
+    74:77:void sendFirstPackage() -> sendFirstPackage
+    83:86:void sendNextPackage() -> sendNextPackage
+    91:92:void closeFirstPackage() -> closeFirstPackage
+    97:98:void pauseSending() -> pauseSending
+    103:104:void resumeSending() -> resumeSending
+    108:109:void finishedTrackingActivity(org.json.JSONObject) -> finishedTrackingActivity
+    113:116:void sendClickPackage(com.mparticle.internal.embedded.adjust.sdk.ActivityPackage) -> sendClickPackage
+    161:166:void initInternal() -> initInternal
+    169:174:void addInternal(com.mparticle.internal.embedded.adjust.sdk.ActivityPackage) -> addInternal
+    177:192:void sendFirstInternal() -> sendFirstInternal
+    195:199:void sendNextInternal() -> sendNextInternal
+    202:209:void readPackageQueue() -> readPackageQueue
+    212:214:void writePackageQueue() -> writePackageQueue
+    217:217:java.lang.Boolean deletePackageQueue(android.content.Context) -> deletePackageQueue
+    26:26:void access$000(com.mparticle.internal.embedded.adjust.sdk.PackageHandler) -> access$000
+    26:26:void access$100(com.mparticle.internal.embedded.adjust.sdk.PackageHandler,com.mparticle.internal.embedded.adjust.sdk.ActivityPackage) -> access$100
+    26:26:void access$200(com.mparticle.internal.embedded.adjust.sdk.PackageHandler) -> access$200
+    26:26:void access$300(com.mparticle.internal.embedded.adjust.sdk.PackageHandler) -> access$300
 com.mparticle.internal.embedded.adjust.sdk.PackageHandler$InternalHandler -> com.mparticle.internal.embedded.adjust.sdk.PackageHandler$InternalHandler:
     int INIT -> INIT
     int ADD -> ADD
     int SEND_NEXT -> SEND_NEXT
     int SEND_FIRST -> SEND_FIRST
     java.lang.ref.WeakReference packageHandlerReference -> packageHandlerReference
-    156:178:void handleMessage(android.os.Message) -> handleMessage
-com.mparticle.internal.embedded.adjust.sdk.ReferrerReceiver -> com.mparticle.internal.embedded.adjust.sdk.ReferrerReceiver:
-    java.lang.String REFERRER_KEY -> REFERRER_KEY
-    24:38:void onReceive(android.content.Context,android.content.Intent) -> onReceive
+    133:155:void handleMessage(android.os.Message) -> handleMessage
 com.mparticle.internal.embedded.adjust.sdk.Reflection -> com.mparticle.internal.embedded.adjust.sdk.Reflection:
-    13:20:java.lang.String getPlayAdId(android.content.Context) -> getPlayAdId
-    26:33:java.lang.Boolean isPlayTrackingEnabled(android.content.Context) -> isPlayTrackingEnabled
-    39:50:boolean isGooglePlayServicesAvailable(android.content.Context) -> isGooglePlayServicesAvailable
-    56:65:java.lang.String getMacAddress(android.content.Context) -> getMacAddress
-    71:77:java.lang.String getAndroidId(android.content.Context) -> getAndroidId
-    83:83:java.lang.Object getAdvertisingInfoObject(android.content.Context) -> getAdvertisingInfoObject
-    90:104:boolean isConnectionResultSuccess(java.lang.Integer) -> isConnectionResultSuccess
-    110:113:java.lang.Class forName(java.lang.String) -> forName
-    118:120:java.lang.Object createDefaultInstance(java.lang.String) -> createDefaultInstance
-    125:128:java.lang.Object createDefaultInstance(java.lang.Class) -> createDefaultInstance
-    134:139:java.lang.Object createInstance(java.lang.String,java.lang.Class[],java.lang.Object[]) -> createInstance
-    145:147:java.lang.Object invokeStaticMethod(java.lang.String,java.lang.String,java.lang.Class[],java.lang.Object[]) -> invokeStaticMethod
-    152:154:java.lang.Object invokeInstanceMethod(java.lang.Object,java.lang.String,java.lang.Class[],java.lang.Object[]) -> invokeInstanceMethod
-    159:163:java.lang.Object invokeMethod(java.lang.Class,java.lang.String,java.lang.Object,java.lang.Class[],java.lang.Object[]) -> invokeMethod
+    21:27:java.lang.String getPlayAdId(android.content.Context) -> getPlayAdId
+    33:39:java.lang.Boolean isPlayTrackingEnabled(android.content.Context) -> isPlayTrackingEnabled
+    45:53:java.lang.String getMacAddress(android.content.Context) -> getMacAddress
+    59:64:java.lang.String getAndroidId(android.content.Context) -> getAndroidId
+    70:70:java.lang.Object getAdvertisingInfoObject(android.content.Context) -> getAdvertisingInfoObject
+    77:90:boolean isConnectionResultSuccess(java.lang.Integer) -> isConnectionResultSuccess
+    96:99:java.lang.Class forName(java.lang.String) -> forName
+    104:106:java.lang.Object createDefaultInstance(java.lang.String) -> createDefaultInstance
+    111:114:java.lang.Object createDefaultInstance(java.lang.Class) -> createDefaultInstance
+    120:126:java.lang.Object createInstance(java.lang.String,java.lang.Class[],java.lang.Object[]) -> createInstance
+    132:134:java.lang.Object invokeStaticMethod(java.lang.String,java.lang.String,java.lang.Class[],java.lang.Object[]) -> invokeStaticMethod
+    139:141:java.lang.Object invokeInstanceMethod(java.lang.Object,java.lang.String,java.lang.Class[],java.lang.Object[]) -> invokeInstanceMethod
+    147:151:java.lang.Object invokeMethod(java.lang.Class,java.lang.String,java.lang.Object,java.lang.Class[],java.lang.Object[]) -> invokeMethod
+    155:167:java.util.Map getPluginKeys(android.content.Context) -> getPluginKeys
+    172:181:java.util.List getPlugins() -> getPlugins
 com.mparticle.internal.embedded.adjust.sdk.RequestHandler -> com.mparticle.internal.embedded.adjust.sdk.RequestHandler:
-    int CONNECTION_TIMEOUT -> CONNECTION_TIMEOUT
-    int SOCKET_TIMEOUT -> SOCKET_TIMEOUT
     com.mparticle.internal.embedded.adjust.sdk.RequestHandler$InternalHandler internalHandler -> internalHandler
     com.mparticle.internal.embedded.adjust.sdk.IPackageHandler packageHandler -> packageHandler
     org.apache.http.client.HttpClient httpClient -> httpClient
-    com.mparticle.internal.embedded.adjust.sdk.Logger logger -> logger
-    67:71:void sendPackage(com.mparticle.internal.embedded.adjust.sdk.ActivityPackage) -> sendPackage
-    106:110:void initInternal() -> initInternal
-    114:128:void sendInternal(com.mparticle.internal.embedded.adjust.sdk.ActivityPackage) -> sendInternal
-    131:147:void requestFinished(org.apache.http.HttpResponse,com.mparticle.internal.embedded.adjust.sdk.ActivityPackage) -> requestFinished
-    151:157:java.lang.String parseResponse(org.apache.http.HttpResponse) -> parseResponse
-    163:172:void closePackage(com.mparticle.internal.embedded.adjust.sdk.ActivityPackage,java.lang.String,java.lang.Throwable) -> closePackage
-    176:183:void sendNextPackage(com.mparticle.internal.embedded.adjust.sdk.ActivityPackage,java.lang.String,java.lang.Throwable) -> sendNextPackage
-    186:189:java.lang.String getReasonString(java.lang.String,java.lang.Throwable) -> getReasonString
-    194:217:org.apache.http.client.methods.HttpUriRequest getRequest(com.mparticle.internal.embedded.adjust.sdk.ActivityPackage) -> getRequest
-    42:42:void access$000(com.mparticle.internal.embedded.adjust.sdk.RequestHandler) -> access$000
-    42:42:void access$100(com.mparticle.internal.embedded.adjust.sdk.RequestHandler,com.mparticle.internal.embedded.adjust.sdk.ActivityPackage) -> access$100
+    com.mparticle.internal.embedded.adjust.sdk.ILogger logger -> logger
+    59:60:void init(com.mparticle.internal.embedded.adjust.sdk.IPackageHandler) -> init
+    64:68:void sendPackage(com.mparticle.internal.embedded.adjust.sdk.ActivityPackage) -> sendPackage
+    72:77:void sendClickPackage(com.mparticle.internal.embedded.adjust.sdk.ActivityPackage) -> sendClickPackage
+    117:118:void initInternal() -> initInternal
+    122:136:void sendInternal(com.mparticle.internal.embedded.adjust.sdk.ActivityPackage,boolean) -> sendInternal
+    139:152:void requestFinished(org.apache.http.HttpResponse,boolean) -> requestFinished
+    156:163:void closePackage(com.mparticle.internal.embedded.adjust.sdk.ActivityPackage,java.lang.String,java.lang.Throwable,boolean) -> closePackage
+    167:174:void sendNextPackage(com.mparticle.internal.embedded.adjust.sdk.ActivityPackage,java.lang.String,java.lang.Throwable,boolean) -> sendNextPackage
+    177:180:java.lang.String getReasonString(java.lang.String,java.lang.Throwable) -> getReasonString
+    185:207:org.apache.http.client.methods.HttpUriRequest getRequest(com.mparticle.internal.embedded.adjust.sdk.ActivityPackage) -> getRequest
+    37:37:void access$000(com.mparticle.internal.embedded.adjust.sdk.RequestHandler) -> access$000
+    37:37:void access$100(com.mparticle.internal.embedded.adjust.sdk.RequestHandler,com.mparticle.internal.embedded.adjust.sdk.ActivityPackage,boolean) -> access$100
 com.mparticle.internal.embedded.adjust.sdk.RequestHandler$InternalHandler -> com.mparticle.internal.embedded.adjust.sdk.RequestHandler$InternalHandler:
     int INIT -> INIT
     int SEND -> SEND
+    int SEND_CLICK -> SEND_CLICK
     java.lang.ref.WeakReference requestHandlerReference -> requestHandlerReference
-    86:102:void handleMessage(android.os.Message) -> handleMessage
-com.mparticle.internal.embedded.adjust.sdk.ResponseData -> com.mparticle.internal.embedded.adjust.sdk.ResponseData:
-    com.mparticle.internal.embedded.adjust.sdk.ActivityKind activityKind -> activityKind
-    boolean success -> success
-    boolean willRetry -> willRetry
-    java.lang.String error -> error
-    java.lang.String trackerToken -> trackerToken
-    java.lang.String trackerName -> trackerName
-    java.lang.String network -> network
-    java.lang.String campaign -> campaign
-    java.lang.String adgroup -> adgroup
-    java.lang.String creative -> creative
-    22:22:com.mparticle.internal.embedded.adjust.sdk.ActivityKind getActivityKind() -> getActivityKind
-    28:28:java.lang.String getActivityKindString() -> getActivityKindString
-    34:34:boolean wasSuccess() -> wasSuccess
-    39:39:boolean willRetry() -> willRetry
-    47:47:java.lang.String getError() -> getError
-    54:54:java.lang.String getTrackerToken() -> getTrackerToken
-    59:59:java.lang.String getTrackerName() -> getTrackerName
-    64:64:java.lang.String getNetwork() -> getNetwork
-    69:69:java.lang.String getCampaign() -> getCampaign
-    74:74:java.lang.String getAdgroup() -> getAdgroup
-    79:79:java.lang.String getCreative() -> getCreative
-    97:112:com.mparticle.internal.embedded.adjust.sdk.ResponseData fromJson(org.json.JSONObject,java.lang.String) -> fromJson
-    116:118:com.mparticle.internal.embedded.adjust.sdk.ResponseData fromError(java.lang.String) -> fromError
-    123:123:java.lang.String toString() -> toString
-    140:141:void setActivityKind(com.mparticle.internal.embedded.adjust.sdk.ActivityKind) -> setActivityKind
-    144:145:void setWasSuccess(boolean) -> setWasSuccess
-    148:149:void setWillRetry(boolean) -> setWillRetry
-    152:186:java.util.Map toDic() -> toDic
+    93:113:void handleMessage(android.os.Message) -> handleMessage
+com.mparticle.internal.embedded.adjust.sdk.TimerCycle -> com.mparticle.internal.embedded.adjust.sdk.TimerCycle:
+    java.util.concurrent.ScheduledExecutorService scheduler -> scheduler
+    java.util.concurrent.ScheduledFuture waitingTask -> waitingTask
+    java.lang.Runnable command -> command
+    long initialDelay -> initialDelay
+    long cycleDelay -> cycleDelay
+    boolean isPaused -> isPaused
+    29:34:void start() -> start
+    37:46:void suspend() -> suspend
+com.mparticle.internal.embedded.adjust.sdk.TimerOnce -> com.mparticle.internal.embedded.adjust.sdk.TimerOnce:
+    java.util.concurrent.ScheduledExecutorService scheduler -> scheduler
+    java.util.concurrent.ScheduledFuture waitingTask -> waitingTask
+    java.lang.Runnable command -> command
+    boolean isRunning -> isRunning
+    25:29:void startIn(long) -> startIn
+    32:35:long getFireIn() -> getFireIn
+com.mparticle.internal.embedded.adjust.sdk.UnitTestActivity -> com.mparticle.internal.embedded.adjust.sdk.UnitTestActivity:
+    12:14:void onCreate(android.os.Bundle) -> onCreate
+    21:21:boolean onCreateOptionsMenu(android.view.Menu) -> onCreateOptionsMenu
+    36:36:boolean onOptionsItemSelected(android.view.MenuItem) -> onOptionsItemSelected
 com.mparticle.internal.embedded.adjust.sdk.Util -> com.mparticle.internal.embedded.adjust.sdk.Util:
     java.text.SimpleDateFormat dateFormat -> dateFormat
     java.lang.String DATE_FORMAT -> DATE_FORMAT
-    65:86:java.lang.String getUserAgent(android.content.Context) -> getUserAgent
-    90:91:java.lang.String getPackageName(android.content.Context) -> getPackageName
-    96:102:java.lang.String getAppVersion(android.content.Context) -> getAppVersion
-    107:117:java.lang.String getDeviceType(int) -> getDeviceType
-    122:123:java.lang.String getDeviceName() -> getDeviceName
-    127:127:java.lang.String getOsName() -> getOsName
-    131:132:java.lang.String getOsVersion() -> getOsVersion
-    136:137:java.lang.String getLanguage(java.util.Locale) -> getLanguage
-    141:142:java.lang.String getCountry(java.util.Locale) -> getCountry
-    146:158:java.lang.String getScreenSize(int) -> getScreenSize
-    163:171:java.lang.String getScreenFormat(int) -> getScreenFormat
-    176:187:java.lang.String getScreenDensity(android.util.DisplayMetrics) -> getScreenDensity
-    191:192:java.lang.String getDisplayWidth(android.util.DisplayMetrics) -> getDisplayWidth
-    196:197:java.lang.String getDisplayHeight(android.util.DisplayMetrics) -> getDisplayHeight
-    201:201:java.lang.String createUuid() -> createUuid
-    206:206:java.lang.String sanitizeString(java.lang.String) -> sanitizeString
-    210:210:java.lang.String sanitizeStringShort(java.lang.String) -> sanitizeStringShort
-    214:224:java.lang.String sanitizeString(java.lang.String,java.lang.String) -> sanitizeString
-    229:247:java.lang.String getAttributionId(android.content.Context) -> getAttributionId
-    252:262:java.lang.String quote(java.lang.String) -> quote
-    266:269:java.lang.String dateFormat(long) -> dateFormat
-    274:281:org.json.JSONObject buildJsonObject(java.lang.String) -> buildJsonObject
-    285:285:java.lang.String getPlayAdId(android.content.Context) -> getPlayAdId
-    289:289:java.lang.Boolean isPlayTrackingEnabled(android.content.Context) -> isPlayTrackingEnabled
-    293:293:boolean isGooglePlayServicesAvailable(android.content.Context) -> isGooglePlayServicesAvailable
-    297:297:java.lang.String getMacAddress(android.content.Context) -> getMacAddress
-    301:306:java.lang.String getMacSha1(java.lang.String) -> getMacSha1
-    310:316:java.lang.String getMacShortMd5(java.lang.String) -> getMacShortMd5
-    320:320:java.lang.String getAndroidId(android.content.Context) -> getAndroidId
-    324:324:java.lang.String sha1(java.lang.String) -> sha1
-    328:328:java.lang.String md5(java.lang.String) -> md5
-    333:339:java.lang.String hash(java.lang.String,java.lang.String) -> hash
-    344:346:java.lang.String convertToHex(byte[]) -> convertToHex
-    350:362:java.util.Map getPluginKeys(android.content.Context) -> getPluginKeys
-    367:376:java.util.List getPlugins() -> getPlugins
+    java.lang.String fieldReadErrorMessage -> fieldReadErrorMessage
+    57:57:com.mparticle.internal.embedded.adjust.sdk.ILogger getLogger() -> getLogger
+    61:61:java.lang.String createUuid() -> createUuid
+    65:75:java.lang.String quote(java.lang.String) -> quote
+    79:82:java.lang.String dateFormat(long) -> dateFormat
+    86:86:java.lang.String getPlayAdId(android.content.Context) -> getPlayAdId
+    90:90:java.lang.Boolean isPlayTrackingEnabled(android.content.Context) -> isPlayTrackingEnabled
+    94:130:java.lang.Object readObject(android.content.Context,java.lang.String,java.lang.String) -> readObject
+    134:161:void writeObject(java.lang.Object,android.content.Context,java.lang.String,java.lang.String) -> writeObject
+    164:201:org.json.JSONObject parseJsonResponse(org.apache.http.HttpResponse) -> parseJsonResponse
+    205:208:org.apache.http.client.HttpClient getHttpClient() -> getHttpClient
+    212:213:boolean checkPermission(android.content.Context,java.lang.String) -> checkPermission
+    217:217:java.lang.String readStringField(java.io.ObjectInputStream$GetField,java.lang.String,java.lang.String) -> readStringField
+    222:225:java.lang.Object readObjectField(java.io.ObjectInputStream$GetField,java.lang.String,java.lang.Object) -> readObjectField
+    231:234:boolean readBooleanField(java.io.ObjectInputStream$GetField,java.lang.String,boolean) -> readBooleanField
+    240:243:int readIntField(java.io.ObjectInputStream$GetField,java.lang.String,int) -> readIntField
+    249:252:long readLongField(java.io.ObjectInputStream$GetField,java.lang.String,long) -> readLongField
+    257:260:boolean equalObject(java.lang.Object,java.lang.Object) -> equalObject
+    264:267:boolean equalsMap(java.util.Map,java.util.Map) -> equalsMap
+    271:274:boolean equalsDouble(java.lang.Double,java.lang.Double) -> equalsDouble
+    278:278:boolean equalString(java.lang.String,java.lang.String) -> equalString
+    282:282:boolean equalEnum(java.lang.Enum,java.lang.Enum) -> equalEnum
+    286:286:boolean equalLong(java.lang.Long,java.lang.Long) -> equalLong
+    290:290:boolean equalInt(java.lang.Integer,java.lang.Integer) -> equalInt
+    294:294:boolean equalBoolean(java.lang.Boolean,java.lang.Boolean) -> equalBoolean
+    298:301:int hashBoolean(java.lang.Boolean) -> hashBoolean
+    305:308:int hashLong(java.lang.Long) -> hashLong
+    312:315:int hashString(java.lang.String) -> hashString
+    319:322:int hashEnum(java.lang.Enum) -> hashEnum
+    326:329:int hashMap(java.util.Map) -> hashMap
+    333:333:java.lang.String sha1(java.lang.String) -> sha1
+    337:337:java.lang.String md5(java.lang.String) -> md5
+    341:350:java.lang.String hash(java.lang.String,java.lang.String) -> hash
+    354:356:java.lang.String convertToHex(byte[]) -> convertToHex
 com.mparticle.internal.embedded.adjust.sdk.plugin.AndroidIdUtil -> com.mparticle.internal.embedded.adjust.sdk.plugin.AndroidIdUtil:
     8:8:java.lang.String getAndroidId(android.content.Context) -> getAndroidId
 com.mparticle.internal.embedded.adjust.sdk.plugin.MacAddressUtil -> com.mparticle.internal.embedded.adjust.sdk.plugin.MacAddressUtil:
@@ -7165,12 +7301,6 @@ com.mparticle.internal.embedded.adjust.sdk.plugin.MacAddressUtil -> com.mparticl
     24:46:java.lang.String getRawMacAddress(android.content.Context) -> getRawMacAddress
     51:66:java.lang.String loadAddress(java.lang.String) -> loadAddress
     71:80:java.lang.String removeSpaceString(java.lang.String) -> removeSpaceString
-com.mparticle.internal.embedded.adjust.sdk.plugin.MapEntry -> com.mparticle.internal.embedded.adjust.sdk.plugin.MapEntry:
-    java.lang.Object key -> key
-    java.lang.Object value -> value
-    20:20:java.lang.Object getKey() -> getKey
-    25:25:java.lang.Object getValue() -> getValue
-    30:31:java.lang.Object setValue(java.lang.Object) -> setValue
 com.mparticle.internal.embedded.adjust.sdk.plugin.Plugin -> com.mparticle.internal.embedded.adjust.sdk.plugin.Plugin:
     java.util.Map$Entry getParameter(android.content.Context) -> getParameter
 com.mparticle.internal.embedded.appboy.AppboyAdmReceiver -> com.mparticle.internal.embedded.appboy.AppboyAdmReceiver:

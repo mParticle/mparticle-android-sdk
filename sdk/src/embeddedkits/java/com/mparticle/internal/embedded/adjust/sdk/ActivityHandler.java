@@ -9,207 +9,313 @@
 
 package com.mparticle.internal.embedded.adjust.sdk;
 
+import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.net.Uri;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
-import android.preference.PreferenceManager;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.NotSerializableException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.OptionalDataException;
+import org.json.JSONObject;
+
 import java.lang.ref.WeakReference;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
-public class ActivityHandler extends HandlerThread {
+import static com.mparticle.internal.embedded.adjust.sdk.Constants.ACTIVITY_STATE_FILENAME;
+import static com.mparticle.internal.embedded.adjust.sdk.Constants.ATTRIBUTION_FILENAME;
+import static com.mparticle.internal.embedded.adjust.sdk.Constants.LOGTAG;
+
+public class ActivityHandler extends HandlerThread implements IActivityHandler {
 
     private static long TIMER_INTERVAL;
+    private static long TIMER_START;
     private static long SESSION_INTERVAL;
     private static long SUBSESSION_INTERVAL;
     private static final String TIME_TRAVEL = "Time travel!";
     private static final String ADJUST_PREFIX = "adjust_";
+    private static final String ACTIVITY_STATE_NAME = "Activity state";
+    private static final String ATTRIBUTION_NAME = "Attribution";
 
-    private        SessionHandler           sessionHandler;
-    private        IPackageHandler          packageHandler;
-    private        OnFinishedListener       onFinishedListener;
-    private        ActivityState            activityState;
-    private        Logger                   logger;
-    private static ScheduledExecutorService timer;
-    private        Context                  context;
-    private        String                   environment;
-    private        String                   defaultTracker;
-    private        boolean                  eventBuffering;
-    private        boolean                  dropOfflineActivities;
-    private        boolean                  enabled;
+    private SessionHandler sessionHandler;
+    private IPackageHandler packageHandler;
+    private ActivityState activityState;
+    private ILogger logger;
+    private TimerCycle timer;
+    private boolean enabled;
+    private boolean offline;
 
-    private String appToken;
-    private String macSha1;
-    private String macShortMd5;
-    private String androidId;       // everything else here could be persisted
-    private String fbAttributionId;
-    private String userAgent;       // changes, should be updated periodically
-    private String clientSdk;
-    private Map<String,String> pluginKeys;
+    private DeviceInfo deviceInfo;
+    private AdjustConfig adjustConfig; // always valid after construction
+    private AdjustAttribution attribution;
+    private IAttributionHandler attributionHandler;
 
-    public ActivityHandler(Context context) {
-        super(Constants.LOGTAG, MIN_PRIORITY);
-
-        initActivityHandler(context);
-
-        Message message = Message.obtain();
-        message.arg1 = SessionHandler.INIT_BUNDLE;
-        sessionHandler.sendMessage(message);
-    }
-
-    public ActivityHandler(Context context, String appToken,
-            String environment, String logLevel, boolean eventBuffering) {
-        super(Constants.LOGTAG, MIN_PRIORITY);
-
-        initActivityHandler(context);
-
-        this.environment = environment;
-        this.eventBuffering = eventBuffering;
-        logger.setLogLevelString(logLevel);
-
-        Message message = Message.obtain();
-        message.arg1 = SessionHandler.INIT_PRESET;
-        message.obj = appToken;
-        sessionHandler.sendMessage(message);
-    }
-
-    private void initActivityHandler(Context context) {
+    private ActivityHandler(AdjustConfig adjustConfig) {
+        super(LOGTAG, MIN_PRIORITY);
         setDaemon(true);
         start();
 
-        TIMER_INTERVAL = AdjustFactory.getTimerInterval();
-        SESSION_INTERVAL = AdjustFactory.getSessionInterval();
-        SUBSESSION_INTERVAL = AdjustFactory.getSubsessionInterval();
-        sessionHandler = new SessionHandler(getLooper(), this);
-        this.context = context.getApplicationContext();
-        clientSdk = Constants.CLIENT_SDK;
-        pluginKeys = Util.getPluginKeys(this.context);
-        enabled = true;
-
         logger = AdjustFactory.getLogger();
+        sessionHandler = new SessionHandler(getLooper(), this);
+        enabled = true;
+        init(adjustConfig);
+
+        Message message = Message.obtain();
+        message.arg1 = SessionHandler.INIT;
+        sessionHandler.sendMessage(message);
     }
 
-    public void setSdkPrefix(String sdkPrefx) {
-        clientSdk = String.format("%s@%s", sdkPrefx, clientSdk);
+    @Override
+    public void init(AdjustConfig adjustConfig) {
+        this.adjustConfig = adjustConfig;
     }
 
-    public void setOnFinishedListener(OnFinishedListener listener) {
-        onFinishedListener = listener;
+    public static ActivityHandler getInstance(AdjustConfig adjustConfig) {
+        if (adjustConfig == null) {
+            AdjustFactory.getLogger().error("AdjustConfig missing");
+            return null;
+        }
+
+        if (!adjustConfig.isValid()) {
+            AdjustFactory.getLogger().error("AdjustConfig not initialized correctly");
+            return null;
+        }
+
+        if (adjustConfig.processName != null) {
+            int currentPid = android.os.Process.myPid();
+            ActivityManager manager = (ActivityManager) adjustConfig.context.getSystemService(Context.ACTIVITY_SERVICE);
+
+            if (manager == null) {
+                return null;
+            }
+
+            for (ActivityManager.RunningAppProcessInfo processInfo : manager.getRunningAppProcesses()) {
+                if (processInfo.pid == currentPid) {
+                    if (!processInfo.processName.equalsIgnoreCase(adjustConfig.processName)) {
+                        AdjustFactory.getLogger().info("Skipping initialization in background process (%s)", processInfo.processName);
+                        return null;
+                    }
+                    break;
+                }
+            }
+        }
+
+        ActivityHandler activityHandler = new ActivityHandler(adjustConfig);
+        return activityHandler;
     }
 
+    @Override
     public void trackSubsessionStart() {
         Message message = Message.obtain();
         message.arg1 = SessionHandler.START;
         sessionHandler.sendMessage(message);
     }
 
+    @Override
     public void trackSubsessionEnd() {
         Message message = Message.obtain();
         message.arg1 = SessionHandler.END;
         sessionHandler.sendMessage(message);
     }
 
-    public void trackEvent(String eventToken, Map<String, String> parameters) {
-        PackageBuilder builder = new PackageBuilder(context);
-        builder.setEventToken(eventToken);
-        builder.setCallbackParameters(parameters);
+    @Override
+    public void trackEvent(AdjustEvent event) {
+        if (activityState == null) {
+            trackSubsessionStart();
+        }
 
         Message message = Message.obtain();
         message.arg1 = SessionHandler.EVENT;
-        message.obj = builder;
+        message.obj = event;
         sessionHandler.sendMessage(message);
     }
 
-    public void trackRevenue(double amountInCents, String eventToken, Map<String, String> parameters) {
-        PackageBuilder builder = new PackageBuilder(context);
-        builder.setAmountInCents(amountInCents);
-        builder.setEventToken(eventToken);
-        builder.setCallbackParameters(parameters);
-
-        Message message = Message.obtain();
-        message.arg1 = SessionHandler.REVENUE;
-        message.obj = builder;
-        sessionHandler.sendMessage(message);
-    }
-
-    public void finishedTrackingActivity(final ResponseData responseData, final String deepLink) {
-        if (onFinishedListener == null && deepLink == null) {
+    @Override
+    public void finishedTrackingActivity(JSONObject jsonResponse) {
+        if (jsonResponse == null) {
             return;
         }
 
-        Handler handler = new Handler(context.getMainLooper());
+        Message message = Message.obtain();
+        message.arg1 = SessionHandler.FINISH_TRACKING;
+        message.obj = jsonResponse;
+        sessionHandler.sendMessage(message);
+    }
+
+    @Override
+    public void setEnabled(boolean enabled) {
+        if (enabled == this.enabled) {
+            if (enabled) {
+                logger.debug("Adjust already enabled");
+            } else {
+                logger.debug("Adjust already disabled");
+            }
+            return;
+        }
+        this.enabled = enabled;
+        if (activityState != null) {
+            activityState.enabled = enabled;
+            writeActivityState();
+        }
+        if (enabled) {
+            if (paused()) {
+                logger.info("Package and attribution handler remain paused due to the SDK is offline");
+            } else {
+                logger.info("Resuming package handler and attribution handler to enabled the SDK");
+            }
+            trackSubsessionStart();
+        } else {
+            logger.info("Pausing package handler and attribution handler to disable the SDK");
+            trackSubsessionEnd();
+        }
+    }
+
+    @Override
+    public void setOfflineMode(boolean offline) {
+        if (offline == this.offline) {
+            if (offline) {
+                logger.debug("Adjust already in offline mode");
+            } else {
+                logger.debug("Adjust already in online mode");
+            }
+            return;
+        }
+        this.offline = offline;
+        if (offline) {
+            logger.info("Pausing package and attribution handler to put in offline mode");
+        } else {
+            if (paused()) {
+                logger.info("Package and attribution handler remain paused because the SDK is disabled");
+            } else {
+                logger.info("Resuming package handler and attribution handler to put in online mode");
+            }
+        }
+        updateStatus();
+    }
+
+    @Override
+    public boolean isEnabled() {
+        if (activityState != null) {
+            return activityState.enabled;
+        } else {
+            return enabled;
+        }
+    }
+
+    @Override
+    public void readOpenUrl(Uri url, long clickTime) {
+        Message message = Message.obtain();
+        message.arg1 = SessionHandler.DEEP_LINK;
+        UrlClickTime urlClickTime = new UrlClickTime(url, clickTime);
+        message.obj = urlClickTime;
+        sessionHandler.sendMessage(message);
+    }
+
+    @Override
+    public boolean tryUpdateAttribution(AdjustAttribution attribution) {
+        if (attribution == null) return false;
+
+        if (attribution.equals(this.attribution)) {
+            return false;
+        }
+
+        saveAttribution(attribution);
+        launchAttributionListener();
+        return true;
+    }
+
+    private void saveAttribution(AdjustAttribution attribution) {
+        this.attribution = attribution;
+        writeAttribution();
+    }
+
+    private void launchAttributionListener() {
+        if (adjustConfig.onAttributionChangedListener == null) {
+            return;
+        }
+        Handler handler = new Handler(adjustConfig.context.getMainLooper());
         Runnable runnable = new Runnable() {
             @Override
             public void run() {
-                try {
-                    runDelegateMain(responseData);
-                    launchDeepLinkMain(deepLink);
-                } catch (NullPointerException e) {
-                }
+                adjustConfig.onAttributionChangedListener.onAttributionChanged(attribution);
             }
         };
         handler.post(runnable);
     }
 
-    public void setEnabled(Boolean enabled) {
-        this.enabled = enabled;
-        if (checkActivityState(activityState))
-            activityState.enabled = enabled;
-        if (enabled) {
-            this.trackSubsessionStart();
-        } else {
-            this.trackSubsessionEnd();
-        }
+    @Override
+    public void setAskingAttribution(boolean askingAttribution) {
+        activityState.askingAttribution = askingAttribution;
+        writeActivityState();
     }
 
-    public Boolean isEnabled() {
-        if (checkActivityState(activityState)) {
-            return activityState.enabled;
-        } else {
-            return this.enabled;
-        }
+    @Override
+    public ActivityPackage getAttributionPackage() {
+        long now = System.currentTimeMillis();
+        PackageBuilder attributionBuilder = new PackageBuilder(adjustConfig,
+                deviceInfo,
+                activityState,
+                now);
+        return attributionBuilder.buildAttributionPackage();
     }
 
-    public void readOpenUrl(Uri url) {
+    @Override
+    public void sendReferrer(String referrer, long clickTime) {
         Message message = Message.obtain();
-        message.arg1 = SessionHandler.DEEP_LINK;
-        message.obj = url;
+        message.arg1 = SessionHandler.SEND_REFERRER;
+        ReferrerClickTime referrerClickTime = new ReferrerClickTime(referrer, clickTime);
+        message.obj = referrerClickTime;
+        sessionHandler.sendMessage(message);
+    }
+
+    private class UrlClickTime {
+        Uri url;
+        long clickTime;
+
+        UrlClickTime(Uri url, long clickTime) {
+            this.url = url;
+            this.clickTime = clickTime;
+        }
+    }
+
+    private class ReferrerClickTime {
+        String referrer;
+        long clickTime;
+
+        ReferrerClickTime(String referrer, long clickTime) {
+            this.referrer = referrer;
+            this.clickTime = clickTime;
+        }
+    }
+
+    private void updateStatus() {
+        Message message = Message.obtain();
+        message.arg1 = SessionHandler.UPDATE_STATUS;
+        sessionHandler.sendMessage(message);
+    }
+
+    private void timerFired() {
+        Message message = Message.obtain();
+        message.arg1 = SessionHandler.TIMER_FIRED;
         sessionHandler.sendMessage(message);
     }
 
     private static final class SessionHandler extends Handler {
-        private static final int INIT_BUNDLE = 72630;
-        private static final int INIT_PRESET = 72633;
-        private static final int START       = 72640;
-        private static final int END         = 72650;
-        private static final int EVENT       = 72660;
-        private static final int REVENUE     = 72670;
-        private static final int DEEP_LINK   = 72680;
-
+        private static final int BASE_ADDRESS = 72630;
+        private static final int INIT = BASE_ADDRESS + 1;
+        private static final int START = BASE_ADDRESS + 2;
+        private static final int END = BASE_ADDRESS + 3;
+        private static final int EVENT = BASE_ADDRESS + 4;
+        private static final int FINISH_TRACKING = BASE_ADDRESS + 5;
+        private static final int DEEP_LINK = BASE_ADDRESS + 6;
+        private static final int SEND_REFERRER = BASE_ADDRESS + 7;
+        private static final int UPDATE_STATUS = BASE_ADDRESS + 8;
+        private static final int TIMER_FIRED = BASE_ADDRESS + 9;
 
         private final WeakReference<ActivityHandler> sessionHandlerReference;
 
@@ -228,12 +334,8 @@ public class ActivityHandler extends HandlerThread {
             }
 
             switch (message.arg1) {
-                case INIT_BUNDLE:
-                    sessionHandler.initInternal(true, null);
-                    break;
-                case INIT_PRESET:
-                    String appToken = (String) message.obj;
-                    sessionHandler.initInternal(false, appToken);
+                case INIT:
+                    sessionHandler.initInternal();
                     break;
                 case START:
                     sessionHandler.startInternal();
@@ -242,87 +344,109 @@ public class ActivityHandler extends HandlerThread {
                     sessionHandler.endInternal();
                     break;
                 case EVENT:
-                    PackageBuilder eventBuilder = (PackageBuilder) message.obj;
-                    sessionHandler.trackEventInternal(eventBuilder);
+                    AdjustEvent event = (AdjustEvent) message.obj;
+                    sessionHandler.trackEventInternal(event);
                     break;
-                case REVENUE:
-                    PackageBuilder revenueBuilder = (PackageBuilder) message.obj;
-                    sessionHandler.trackRevenueInternal(revenueBuilder);
+                case FINISH_TRACKING:
+                    JSONObject jsonResponse = (JSONObject) message.obj;
+                    sessionHandler.finishedTrackingActivityInternal(jsonResponse);
                     break;
                 case DEEP_LINK:
-                    Uri url = (Uri) message.obj;
-                    sessionHandler.readOpenUrlInternal(url);
+                    UrlClickTime urlClickTime = (UrlClickTime) message.obj;
+                    sessionHandler.readOpenUrlInternal(urlClickTime.url, urlClickTime.clickTime);
+                    break;
+                case SEND_REFERRER:
+                    ReferrerClickTime referrerClickTime = (ReferrerClickTime) message.obj;
+                    sessionHandler.sendReferrerInternal(referrerClickTime.referrer, referrerClickTime.clickTime);
+                    break;
+                case UPDATE_STATUS:
+                    sessionHandler.updateStatusInternal();
+                    break;
+                case TIMER_FIRED:
+                    sessionHandler.timerFiredInternal();
                     break;
             }
         }
     }
 
-    private void initInternal(boolean fromBundle, String appToken) {
-        if (fromBundle) {
-            appToken = processApplicationBundle();
+    private void initInternal() {
+        TIMER_INTERVAL = AdjustFactory.getTimerInterval();
+        TIMER_START = AdjustFactory.getTimerStart();
+        SESSION_INTERVAL = AdjustFactory.getSessionInterval();
+        SUBSESSION_INTERVAL = AdjustFactory.getSubsessionInterval();
+
+        deviceInfo = new DeviceInfo(adjustConfig.context, adjustConfig.sdkPrefix);
+
+        if (AdjustConfig.ENVIRONMENT_PRODUCTION.equals(adjustConfig.environment)) {
+            logger.setLogLevel(LogLevel.ASSERT);
         } else {
-            setEnvironment(environment);
-            setEventBuffering(eventBuffering);
+            logger.setLogLevel(adjustConfig.logLevel);
         }
 
-        if (!canInit(appToken)) {
-            return;
+        if (adjustConfig.eventBufferingEnabled) {
+            logger.info("Event buffering is enabled");
         }
 
-        this.appToken = appToken;
-        androidId = Util.getAndroidId(context);
-        fbAttributionId = Util.getAttributionId(context);
-        userAgent = Util.getUserAgent(context);
-
-        String playAdId = Util.getPlayAdId(context);
+        String playAdId = Util.getPlayAdId(adjustConfig.context);
         if (playAdId == null) {
             logger.info("Unable to get Google Play Services Advertising ID at start time");
         }
 
-        if  (!Util.isGooglePlayServicesAvailable(context)) {
-            String macAddress = Util.getMacAddress(context);
-            macSha1 = Util.getMacSha1(macAddress);
-            macShortMd5 = Util.getMacShortMd5(macAddress);
+        if (adjustConfig.defaultTracker != null) {
+            logger.info("Default tracker: '%s'", adjustConfig.defaultTracker);
         }
 
-        packageHandler = AdjustFactory.getPackageHandler(this, context, dropOfflineActivities);
+        if (adjustConfig.referrer != null) {
+            sendReferrer(adjustConfig.referrer, adjustConfig.referrerClickTime); // send to background queue to make sure that activityState is valid
+        }
 
+        readAttribution();
         readActivityState();
-    }
 
-    private boolean canInit(String appToken) {
-        return checkAppTokenNotNull(appToken)
-            && checkAppTokenLength(appToken)
-            && checkContext(context)
-            && checkPermissions(context);
+        packageHandler = AdjustFactory.getPackageHandler(this, adjustConfig.context, paused());
+
+        ActivityPackage attributionPackage = getAttributionPackage();
+        attributionHandler = AdjustFactory.getAttributionHandler(this,
+                attributionPackage,
+                paused(),
+                adjustConfig.hasListener());
+
+        timer = new TimerCycle(new Runnable() {
+            @Override
+            public void run() {
+                timerFired();
+            }
+        },TIMER_START, TIMER_INTERVAL);
     }
 
     private void startInternal() {
-        if (!checkAppTokenNotNull(appToken)) {
-            return;
-        }
-
+        // it shouldn't start if it was disabled after a first session
         if (activityState != null
-            && !activityState.enabled) {
+                && !activityState.enabled) {
             return;
         }
 
-        packageHandler.resumeSending();
-        startTimer();
+        updateStatusInternal();
 
+        processSession();
+
+        checkAttributionState();
+
+        startTimer();
+    }
+
+    private void processSession() {
         long now = System.currentTimeMillis();
 
         // very first session
-        if (null == activityState) {
+        if (activityState == null) {
             activityState = new ActivityState();
             activityState.sessionCount = 1; // this is the first session
-            activityState.createdAt = now;  // starting now
 
-            transferSessionPackage();
+            transferSessionPackage(now);
             activityState.resetSessionAttributes(now);
             activityState.enabled = this.enabled;
             writeActivityState();
-            logger.info("First session");
             return;
         }
 
@@ -338,444 +462,326 @@ public class ActivityHandler extends HandlerThread {
         // new session
         if (lastInterval > SESSION_INTERVAL) {
             activityState.sessionCount++;
-            activityState.createdAt = now;
             activityState.lastInterval = lastInterval;
 
-            transferSessionPackage();
+            transferSessionPackage(now);
             activityState.resetSessionAttributes(now);
             writeActivityState();
-            logger.debug("Session %d", activityState.sessionCount);
             return;
         }
 
         // new subsession
         if (lastInterval > SUBSESSION_INTERVAL) {
             activityState.subsessionCount++;
+            activityState.sessionLength += lastInterval;
+            activityState.lastActivity = now;
+            writeActivityState();
             logger.info("Started subsession %d of session %d",
                     activityState.subsessionCount,
                     activityState.sessionCount);
         }
-        activityState.sessionLength += lastInterval;
-        activityState.lastActivity = now;
-        writeActivityState();
+    }
+
+    private void checkAttributionState() {
+        // if it's a new session
+        if (activityState.subsessionCount <= 1) {
+            return;
+        }
+
+        // if there is already an attribution saved and there was no attribution being asked
+        if (attribution != null && !activityState.askingAttribution) {
+            return;
+        }
+
+        attributionHandler.getAttribution();
     }
 
     private void endInternal() {
-        if (!checkAppTokenNotNull(appToken)) {
-            return;
-        }
-
         packageHandler.pauseSending();
+        attributionHandler.pauseSending();
         stopTimer();
-        updateActivityState(System.currentTimeMillis());
-        writeActivityState();
+        if (updateActivityState(System.currentTimeMillis())) {
+            writeActivityState();
+        }
     }
 
-    private void trackEventInternal(PackageBuilder eventBuilder) {
-        if (!canTrackEvent(eventBuilder)) {
-            return;
-        }
-
-        if (!activityState.enabled) {
-            return;
-        }
+    private void trackEventInternal(AdjustEvent event) {
+        if (!isEnabled()) return;
+        if (!checkEvent(event)) return;
 
         long now = System.currentTimeMillis();
-        activityState.createdAt = now;
+
         activityState.eventCount++;
         updateActivityState(now);
 
-        injectGeneralAttributes(eventBuilder);
-        activityState.injectEventAttributes(eventBuilder);
-        ActivityPackage eventPackage = eventBuilder.buildEventPackage();
+        PackageBuilder eventBuilder = new PackageBuilder(adjustConfig, deviceInfo, activityState, now);
+        ActivityPackage eventPackage = eventBuilder.buildEventPackage(event);
         packageHandler.addPackage(eventPackage);
 
-        if (eventBuffering) {
+        if (adjustConfig.eventBufferingEnabled) {
             logger.info("Buffered event %s", eventPackage.getSuffix());
         } else {
             packageHandler.sendFirstPackage();
         }
 
         writeActivityState();
-        logger.debug("Event %d", activityState.eventCount);
     }
 
-    private void trackRevenueInternal(PackageBuilder revenueBuilder) {
-        if (!canTrackRevenue(revenueBuilder)) {
+    private void finishedTrackingActivityInternal(JSONObject jsonResponse) {
+        if (jsonResponse == null) {
             return;
         }
 
-        if (!activityState.enabled) {
+        String deeplink = jsonResponse.optString("deeplink", null);
+        launchDeeplinkMain(deeplink);
+        attributionHandler.checkAttribution(jsonResponse);
+    }
+
+    private void sendReferrerInternal(String referrer, long clickTime) {
+        ActivityPackage clickPackage = buildQueryStringClickPackage(referrer,
+                "reftag",
+                clickTime);
+        if (clickPackage == null) {
             return;
         }
 
-        long now = System.currentTimeMillis();
-
-        activityState.createdAt = now;
-        activityState.eventCount++;
-        updateActivityState(now);
-
-        injectGeneralAttributes(revenueBuilder);
-        activityState.injectEventAttributes(revenueBuilder);
-        ActivityPackage eventPackage = revenueBuilder.buildRevenuePackage();
-        packageHandler.addPackage(eventPackage);
-
-        if (eventBuffering) {
-            logger.info("Buffered revenue %s", eventPackage.getSuffix());
-        } else {
-            packageHandler.sendFirstPackage();
-        }
-
-        writeActivityState();
-        logger.debug("Event %d (revenue)", activityState.eventCount);
+        packageHandler.sendClickPackage(clickPackage);
     }
 
-    private void readOpenUrlInternal(Uri url) {
+    private void readOpenUrlInternal(Uri url, long clickTime) {
         if (url == null) {
             return;
         }
 
         String queryString = url.getQuery();
-        if (queryString == null) {
+
+        ActivityPackage clickPackage = buildQueryStringClickPackage(queryString, "deeplink", clickTime);
+        if (clickPackage == null) {
             return;
         }
 
-        Map<String, String> adjustDeepLinks = new HashMap<String, String>();
+        packageHandler.sendClickPackage(clickPackage);
+    }
+
+    private ActivityPackage buildQueryStringClickPackage(String queryString, String source, long clickTime) {
+        if (queryString == null) {
+            return null;
+        }
+
+        Map<String, String> queryStringParameters = new LinkedHashMap<String, String>();
+        AdjustAttribution queryStringAttribution = new AdjustAttribution();
+        boolean hasAdjustTags = false;
 
         String[] queryPairs = queryString.split("&");
         for (String pair : queryPairs) {
-            String[] pairComponents = pair.split("=");
-            if (pairComponents.length != 2) continue;
-
-            String key = pairComponents[0];
-            if (!key.startsWith(ADJUST_PREFIX)) continue;
-
-            String value = pairComponents[1];
-            if (value.length() == 0) continue;
-
-            String keyWOutPrefix = key.substring(ADJUST_PREFIX.length());
-            if (keyWOutPrefix.length() == 0) continue;
-
-            adjustDeepLinks.put(keyWOutPrefix, value);
+            if (readQueryString(pair, queryStringParameters, queryStringAttribution)) {
+                hasAdjustTags = true;
+            }
         }
 
-        if (adjustDeepLinks.size() == 0) {
+        if (!hasAdjustTags) {
+            return null;
+        }
+
+        String reftag = queryStringParameters.remove("reftag");
+
+        long now = System.currentTimeMillis();
+        PackageBuilder builder = new PackageBuilder(adjustConfig, deviceInfo, activityState, now);
+        builder.extraParameters = queryStringParameters;
+        builder.attribution = queryStringAttribution;
+        builder.reftag = reftag;
+        ActivityPackage clickPackage = builder.buildClickPackage(source, clickTime);
+        return clickPackage;
+    }
+
+    private boolean readQueryString(String queryString,
+                                    Map<String, String> extraParameters,
+                                    AdjustAttribution queryStringAttribution) {
+        String[] pairComponents = queryString.split("=");
+        if (pairComponents.length != 2) return false;
+
+        String key = pairComponents[0];
+        if (!key.startsWith(ADJUST_PREFIX)) return false;
+
+        String value = pairComponents[1];
+        if (value.length() == 0) return false;
+
+        String keyWOutPrefix = key.substring(ADJUST_PREFIX.length());
+        if (keyWOutPrefix.length() == 0) return false;
+
+        if (!trySetAttribution(queryStringAttribution, keyWOutPrefix, value)) {
+            extraParameters.put(keyWOutPrefix, value);
+        }
+
+        return true;
+    }
+
+    private boolean trySetAttribution(AdjustAttribution queryStringAttribution,
+                                      String key,
+                                      String value) {
+        if (key.equals("tracker")) {
+            queryStringAttribution.trackerName = value;
+            return true;
+        }
+
+        if (key.equals("campaign")) {
+            queryStringAttribution.campaign = value;
+            return true;
+        }
+
+        if (key.equals("adgroup")) {
+            queryStringAttribution.adgroup = value;
+            return true;
+        }
+
+        if (key.equals("creative")) {
+            queryStringAttribution.creative = value;
+            return true;
+        }
+
+        return false;
+    }
+
+    private void updateStatusInternal() {
+        updateAttributionHandlerStatus();
+        updatePackageHandlerStatus();
+    }
+
+    private void updateAttributionHandlerStatus() {
+        if (attributionHandler == null) {
             return;
         }
-
-        PackageBuilder builder = new PackageBuilder(context);
-        builder.setDeepLinkParameters(adjustDeepLinks);
-        injectGeneralAttributes(builder);
-        ActivityPackage reattributionPackage = builder.buildReattributionPackage();
-        packageHandler.addPackage(reattributionPackage);
-        packageHandler.sendFirstPackage();
-
-        logger.debug("Reattribution %s", adjustDeepLinks.toString());
+        if (paused()) {
+            attributionHandler.pauseSending();
+        } else {
+            attributionHandler.resumeSending();
+        }
     }
 
-    private void runDelegateMain(ResponseData responseData) {
-        if (onFinishedListener == null) return;
-        if (responseData == null) return;
-        onFinishedListener.onFinishedTracking(responseData);
+    private void updatePackageHandlerStatus() {
+        if (packageHandler == null) {
+            return;
+        }
+        if (paused()) {
+            packageHandler.pauseSending();
+        } else {
+            packageHandler.resumeSending();
+        }
     }
 
-    private void launchDeepLinkMain(String deepLink) {
-        if (deepLink == null) return;
+    private void launchDeeplinkMain(String deeplink) {
+        if (deeplink == null) return;
 
-        Uri location = Uri.parse(deepLink);
+        Uri location = Uri.parse(deeplink);
         Intent mapIntent = new Intent(Intent.ACTION_VIEW, location);
         mapIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
         // Verify it resolves
-        PackageManager packageManager = context.getPackageManager();
+        PackageManager packageManager = adjustConfig.context.getPackageManager();
         List<ResolveInfo> activities = packageManager.queryIntentActivities(mapIntent, 0);
         boolean isIntentSafe = activities.size() > 0;
 
         // Start an activity if it's safe
         if (!isIntentSafe) {
-            logger.error("Unable to open deep link (%s)", deepLink);
+            logger.error("Unable to open deep link (%s)", deeplink);
             return;
         }
 
-        logger.info("Open deep link (%s)", deepLink);
-        context.startActivity(mapIntent);
+        logger.info("Open deep link (%s)", deeplink);
+        adjustConfig.context.startActivity(mapIntent);
     }
 
-    private boolean canTrackEvent(PackageBuilder revenueBuilder) {
-        return checkAppTokenNotNull(appToken)
-            && checkActivityState(activityState)
-            && revenueBuilder.isValidForEvent();
-    }
-
-    private boolean canTrackRevenue(PackageBuilder revenueBuilder) {
-        return checkAppTokenNotNull(appToken)
-            && checkActivityState(activityState)
-            && revenueBuilder.isValidForRevenue();
-    }
-
-    private void updateActivityState(long now) {
-        if (!checkActivityState(activityState)) {
-            return;
-        }
-
+    private boolean updateActivityState(long now) {
         long lastInterval = now - activityState.lastActivity;
-        if (lastInterval < 0) {
-            logger.error(TIME_TRAVEL);
-            activityState.lastActivity = now;
-            return;
-        }
-
         // ignore late updates
         if (lastInterval > SESSION_INTERVAL) {
-            return;
+            return false;
         }
-
-        activityState.sessionLength += lastInterval;
-        activityState.timeSpent += lastInterval;
         activityState.lastActivity = now;
-    }
 
-    private void readActivityState() {
-        try {
-            FileInputStream inputStream = context.openFileInput(Constants.SESSION_STATE_FILENAME);
-            BufferedInputStream bufferedStream = new BufferedInputStream(inputStream);
-            ObjectInputStream objectStream = new ObjectInputStream(bufferedStream);
-
-            try {
-                activityState = (ActivityState) objectStream.readObject();
-                logger.debug("Read activity state: %s uuid:%s", activityState, activityState.uuid);
-                return;
-            } catch (ClassNotFoundException e) {
-                logger.error("Failed to find activity state class");
-            } catch (OptionalDataException e) {
-                /* no-op */
-            } catch (IOException e) {
-                logger.error("Failed to read activity states object");
-            } catch (ClassCastException e) {
-                logger.error("Failed to cast activity state object");
-            } finally {
-                objectStream.close();
-            }
-
-        } catch (FileNotFoundException e) {
-            logger.verbose("Activity state file not found");
-        } catch (Exception e) {
-            logger.error("Failed to open activity state file for reading (%s)", e);
+        if (lastInterval < 0) {
+            logger.error(TIME_TRAVEL);
+        } else {
+            activityState.sessionLength += lastInterval;
+            activityState.timeSpent += lastInterval;
         }
-
-        // start with a fresh activity state in case of any exception
-        activityState = null;
+        return true;
     }
 
-    private void writeActivityState() {
-        try {
-            FileOutputStream outputStream = context.openFileOutput(Constants.SESSION_STATE_FILENAME, Context.MODE_PRIVATE);
-            BufferedOutputStream bufferedStream = new BufferedOutputStream(outputStream);
-            ObjectOutputStream objectStream = new ObjectOutputStream(bufferedStream);
-
-            try {
-                objectStream.writeObject(activityState);
-                logger.debug("Wrote activity state: %s", activityState);
-            } catch (NotSerializableException e) {
-                logger.error("Failed to serialize activity state");
-            } finally {
-                objectStream.close();
-            }
-
-        } catch (Exception e) {
-            logger.error("Failed to open activity state for writing (%s)", e);
-        }
+    public static boolean deleteActivityState(Context context) {
+        return context.deleteFile(ACTIVITY_STATE_FILENAME);
     }
 
-    public static Boolean deleteActivityState(Context context) {
-        return context.deleteFile(Constants.SESSION_STATE_FILENAME);
+    public static boolean deleteAttribution(Context context) {
+        return context.deleteFile(ATTRIBUTION_FILENAME);
     }
 
-    private void transferSessionPackage() {
-        PackageBuilder builder = new PackageBuilder(context);
-        injectGeneralAttributes(builder);
-        injectReferrer(builder);
-        activityState.injectSessionAttributes(builder);
+    private void transferSessionPackage(long now) {
+        PackageBuilder builder = new PackageBuilder(adjustConfig, deviceInfo, activityState, now);
         ActivityPackage sessionPackage = builder.buildSessionPackage();
         packageHandler.addPackage(sessionPackage);
         packageHandler.sendFirstPackage();
     }
 
-    private void injectGeneralAttributes(PackageBuilder builder) {
-        builder.setAppToken(appToken);
-        builder.setMacShortMd5(macShortMd5);
-        builder.setMacSha1(macSha1);
-        builder.setAndroidId(androidId);
-        builder.setFbAttributionId(fbAttributionId);
-        builder.setUserAgent(userAgent);
-        builder.setClientSdk(clientSdk);
-        builder.setEnvironment(environment);
-        builder.setDefaultTracker(defaultTracker);
-        builder.setPluginKeys(pluginKeys);
-    }
-
-    private void injectReferrer(PackageBuilder builder) {
-        try {
-            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-            builder.setReferrer(preferences.getString(ReferrerReceiver.REFERRER_KEY, null));
-        }
-        catch (Exception e) {
-            logger.error("Failed to inject referrer (%s)", e);
-        }
-    }
-
     private void startTimer() {
-        if (timer != null) {
-            stopTimer();
-        }
-        timer = Executors.newSingleThreadScheduledExecutor();
-        timer.scheduleWithFixedDelay(new Runnable() {
-            @Override
-            public void run() {
-                timerFired();
-            }
-        }, 1000, TIMER_INTERVAL, TimeUnit.MILLISECONDS);
-    }
-
-    private void stopTimer() {
-        try {
-            timer.shutdown();
-        } catch (NullPointerException e) {
-            logger.error("No timer found");
-        }
-    }
-
-    private void timerFired() {
-        if (null != activityState
-            && !activityState.enabled) {
+        // don't start the timer if it's disabled/offline
+        if (paused()) {
             return;
         }
 
+        timer.start();
+    }
+
+    private void stopTimer() {
+        timer.suspend();
+    }
+
+    private void timerFiredInternal() {
+        if (paused()) {
+            // stop the timer cycle if it's disabled/offline
+            stopTimer();
+            return;
+        }
+
+        logger.debug("Session timer fired");
         packageHandler.sendFirstPackage();
 
-        updateActivityState(System.currentTimeMillis());
-        writeActivityState();
-    }
-
-    private boolean checkPermissions(Context context) {
-        boolean result = true;
-
-        if (!checkPermission(context, android.Manifest.permission.INTERNET)) {
-            logger.error("Missing permission: INTERNET");
-            result = false;
-        }
-        if (!checkPermission(context, android.Manifest.permission.ACCESS_WIFI_STATE)) {
-            logger.warn("Missing permission: ACCESS_WIFI_STATE");
-        }
-
-        return result;
-    }
-
-    private String processApplicationBundle() {
-        Bundle bundle = getApplicationBundle();
-        if (null == bundle) {
-            return null;
-        }
-
-        String appToken = bundle.getString("AdjustAppToken");
-        setEnvironment(bundle.getString("AdjustEnvironment"));
-        setDefaultTracker(bundle.getString("AdjustDefaultTracker"));
-        setEventBuffering(bundle.getBoolean("AdjustEventBuffering"));
-        logger.setLogLevelString(bundle.getString("AdjustLogLevel"));
-        setDropOfflineActivities(bundle.getBoolean("AdjustDropOfflineActivities"));
-
-        return appToken;
-    }
-
-    private void setEnvironment(String env) {
-        environment = env;
-        if (null == environment) {
-            logger.Assert("Missing environment");
-            logger.setLogLevel(Logger.LogLevel.ASSERT);
-            environment = Constants.UNKNOWN;
-        } else if ("sandbox".equalsIgnoreCase(environment)) {
-            logger.Assert(
-              "SANDBOX: Adjust is running in Sandbox mode. Use this setting for testing. Don't forget to set the environment to `production` before publishing!");
-        } else if ("production".equalsIgnoreCase(environment)) {
-            logger.Assert(
-              "PRODUCTION: Adjust is running in Production mode. Use this setting only for the build that you want to publish. Set the environment to `sandbox` if you want to test your app!");
-            logger.setLogLevel(Logger.LogLevel.ASSERT);
-        } else {
-            logger.Assert("Malformed environment '%s'", environment);
-            logger.setLogLevel(Logger.LogLevel.ASSERT);
-            environment = Constants.MALFORMED;
+        if (updateActivityState(System.currentTimeMillis())) {
+            writeActivityState();
         }
     }
 
-    private void setEventBuffering(boolean buffering) {
-        eventBuffering = buffering;
-        if (eventBuffering) {
-            logger.info("Event buffering is enabled");
-        }
+    private void readActivityState() {
+        activityState = Util.readObject(adjustConfig.context, ACTIVITY_STATE_FILENAME, ACTIVITY_STATE_NAME);
     }
 
-    private void setDefaultTracker(String tracker) {
-        defaultTracker = tracker;
-        if (defaultTracker != null) {
-            logger.info("Default tracker: '%s'", defaultTracker);
-        }
+    private void readAttribution() {
+        attribution = Util.readObject(adjustConfig.context, ATTRIBUTION_FILENAME, ATTRIBUTION_NAME);
     }
 
-    private void setDropOfflineActivities(boolean drop) {
-        dropOfflineActivities = drop;
-        if (dropOfflineActivities) {
-            logger.info("Offline activities will get dropped");
-        }
+    private synchronized void writeActivityState() {
+        Util.writeObject(activityState, adjustConfig.context, ACTIVITY_STATE_FILENAME, ACTIVITY_STATE_NAME);
     }
 
-    private Bundle getApplicationBundle() {
-        final ApplicationInfo applicationInfo;
-        try {
-            String packageName = context.getPackageName();
-            applicationInfo = context.getPackageManager().getApplicationInfo(packageName, PackageManager.GET_META_DATA);
-            return applicationInfo.metaData;
-        } catch (PackageManager.NameNotFoundException e) {
-            logger.error("ApplicationInfo not found");
-        } catch (Exception e) {
-            logger.error("Failed to get ApplicationBundle (%s)", e);
-        }
-        return null;
+    private void writeAttribution() {
+        Util.writeObject(attribution, adjustConfig.context, ATTRIBUTION_FILENAME, ATTRIBUTION_NAME);
     }
 
-    private boolean checkContext(Context context) {
-        if (null == context) {
-            logger.error("Missing context");
+    private boolean checkEvent(AdjustEvent event) {
+        if (event == null) {
+            logger.error("Event missing");
             return false;
         }
+
+        if (!event.isValid()) {
+            logger.error("Event not initialized correctly");
+            return false;
+        }
+
         return true;
     }
 
-    private static boolean checkPermission(Context context, String permission) {
-        int result = context.checkCallingOrSelfPermission(permission);
-        return result == PackageManager.PERMISSION_GRANTED;
-    }
-
-    private boolean checkActivityState(ActivityState activityState) {
-        if (null == activityState) {
-            logger.error("Missing activity state.");
-            return false;
-        }
-        return true;
-    }
-
-    private boolean checkAppTokenNotNull(String appToken) {
-        if (null == appToken) {
-            logger.error("Missing App Token.");
-            return false;
-        }
-        return true;
-    }
-
-    private boolean checkAppTokenLength(String appToken) {
-        if (12 != appToken.length()) {
-            logger.error("Malformed App Token '%s'", appToken);
-            return false;
-        }
-        return true;
+    private boolean paused() {
+        return offline || !isEnabled();
     }
 }

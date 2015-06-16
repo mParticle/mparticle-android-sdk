@@ -1,10 +1,18 @@
 package com.mparticle.internal.embedded.adjust.sdk;
 
+import android.content.Context;
+
+import com.mparticle.internal.embedded.adjust.sdk.plugin.Plugin;
+
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-import android.content.Context;
+import static com.mparticle.internal.embedded.adjust.sdk.Constants.PLUGINS;
 
 public class Reflection {
 
@@ -15,8 +23,7 @@ public class Reflection {
             String playAdid = (String) invokeInstanceMethod(AdvertisingInfoObject, "getId", null);
 
             return playAdid;
-        }
-        catch (Throwable t) {
+        } catch (Throwable t) {
             return null;
         }
     }
@@ -28,26 +35,8 @@ public class Reflection {
             Boolean isLimitedTrackingEnabled = (Boolean) invokeInstanceMethod(AdvertisingInfoObject, "isLimitAdTrackingEnabled", null);
 
             return !isLimitedTrackingEnabled;
-        }
-        catch (Throwable t) {
+        } catch (Throwable t) {
             return null;
-        }
-    }
-
-    public static boolean isGooglePlayServicesAvailable(Context context) {
-        try {
-            Integer isGooglePlayServicesAvailableStatusCode = (Integer) invokeStaticMethod(
-                    "com.google.android.gms.common.GooglePlayServicesUtil",
-                    "isGooglePlayServicesAvailable",
-                    new Class[] {Context.class}, context
-            );
-
-            boolean isGooglePlayServicesAvailable = (Boolean) isConnectionResultSuccess(isGooglePlayServicesAvailableStatusCode);
-
-            return isGooglePlayServicesAvailable;
-        }
-        catch (Throwable t) {
-            return false;
         }
     }
 
@@ -56,12 +45,11 @@ public class Reflection {
             String macSha1 = (String) invokeStaticMethod(
                     "com.mparticle.internal.embedded.adjust.sdk.plugin.MacAddressUtil",
                     "getMacAddress",
-                    new Class[] {Context.class}, context
+                    new Class[]{Context.class}, context
             );
 
             return macSha1;
-        }
-        catch (Throwable t) {
+        } catch (Throwable t) {
             return null;
         }
     }
@@ -69,11 +57,10 @@ public class Reflection {
     public static String getAndroidId(Context context) {
         try {
             String androidId = (String) invokeStaticMethod("com.mparticle.internal.embedded.adjust.sdk.plugin.AndroidIdUtil", "getAndroidId"
-                    ,new Class[] {Context.class}, context);
+                    , new Class[]{Context.class}, context);
 
             return androidId;
-        }
-        catch (Throwable t) {
+        } catch (Throwable t) {
             return null;
         }
     }
@@ -82,7 +69,7 @@ public class Reflection {
             throws Exception {
         return invokeStaticMethod("com.google.android.gms.ads.identifier.AdvertisingIdClient",
                 "getAdvertisingIdInfo",
-                new Class[] {Context.class} , context
+                new Class[]{Context.class}, context
         );
     }
 
@@ -99,8 +86,7 @@ public class Reflection {
             int successStatusCode = SuccessField.getInt(null);
 
             return successStatusCode == statusCode;
-        }
-        catch (Throwable t) {
+        } catch (Throwable t) {
             return false;
         }
     }
@@ -124,7 +110,7 @@ public class Reflection {
         try {
             Object instance = classObject.newInstance();
             return instance;
-        }catch (Throwable t) {
+        } catch (Throwable t) {
             return null;
         }
     }
@@ -132,10 +118,11 @@ public class Reflection {
     public static Object createInstance(String className, Class[] cArgs, Object... args) {
         try {
             Class classObject = Class.forName(className);
+            @SuppressWarnings("unchecked")
             Constructor constructor = classObject.getConstructor(cArgs);
             Object instance = constructor.newInstance(args);
             return instance;
-        }catch (Throwable t) {
+        } catch (Throwable t) {
             return null;
         }
     }
@@ -156,10 +143,41 @@ public class Reflection {
 
     public static Object invokeMethod(Class classObject, String methodName, Object instance, Class[] cArgs, Object... args)
             throws Exception {
+        @SuppressWarnings("unchecked")
         Method methodObject = classObject.getMethod(methodName, cArgs);
 
         Object resultObject = methodObject.invoke(instance, args);
 
         return resultObject;
+    }
+
+    public static Map<String, String> getPluginKeys(Context context) {
+        Map<String, String> pluginKeys = new HashMap<String, String>();
+
+        for (Plugin plugin : getPlugins()) {
+            Map.Entry<String, String> pluginEntry = plugin.getParameter(context);
+            if (pluginEntry != null) {
+                pluginKeys.put(pluginEntry.getKey(), pluginEntry.getValue());
+            }
+        }
+
+        if (pluginKeys.size() == 0) {
+            return null;
+        } else {
+            return pluginKeys;
+        }
+    }
+
+    private static List<Plugin> getPlugins() {
+        List<Plugin> plugins = new ArrayList<Plugin>(PLUGINS.size());
+
+        for (String pluginName : PLUGINS) {
+            Object pluginObject = Reflection.createDefaultInstance(pluginName);
+            if (pluginObject != null && pluginObject instanceof Plugin) {
+                plugins.add((Plugin) pluginObject);
+            }
+        }
+
+        return plugins;
     }
 }

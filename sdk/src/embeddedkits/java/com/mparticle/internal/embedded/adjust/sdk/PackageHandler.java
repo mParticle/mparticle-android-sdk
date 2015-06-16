@@ -9,57 +9,54 @@
 
 package com.mparticle.internal.embedded.adjust.sdk;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.NotSerializableException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.OptionalDataException;
-import java.lang.ref.WeakReference;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import org.json.JSONObject;
-
 import android.content.Context;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
 
+import org.json.JSONObject;
+
+import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 // persistent
 public class PackageHandler extends HandlerThread implements IPackageHandler {
     private static final String PACKAGE_QUEUE_FILENAME = "AdjustIoPackageQueue";
+    private static final String PACKAGE_QUEUE_NAME = "Package queue";
 
-    private final InternalHandler       internalHandler;
-    private       IRequestHandler       requestHandler;
-    private       ActivityHandler       activityHandler;
-    private       List<ActivityPackage> packageQueue;
-    private       AtomicBoolean         isSending;
-    private       boolean               paused;
-    private       Context               context;
-    private       boolean               dropOfflineActivities;
-    private       Logger                logger;
+    private final InternalHandler internalHandler;
+    private IRequestHandler requestHandler;
+    private IActivityHandler activityHandler;
+    private List<ActivityPackage> packageQueue;
+    private AtomicBoolean isSending;
+    private boolean paused;
+    private Context context;
+    private ILogger logger;
 
-    public PackageHandler(ActivityHandler activityHandler, Context context, boolean dropOfflineActivities) {
+    public PackageHandler(IActivityHandler activityHandler,
+                          Context context,
+                          boolean startPaused) {
         super(Constants.LOGTAG, MIN_PRIORITY);
         setDaemon(true);
         start();
         this.internalHandler = new InternalHandler(getLooper(), this);
         this.logger = AdjustFactory.getLogger();
 
-        this.activityHandler = activityHandler;
-        this.context = context;
-        this.dropOfflineActivities = dropOfflineActivities;
+        init(activityHandler, context, startPaused);
 
         Message message = Message.obtain();
         message.arg1 = InternalHandler.INIT;
         internalHandler.sendMessage(message);
+    }
+
+    @Override
+    public void init(IActivityHandler activityHandler, Context context, boolean startPaused) {
+        this.activityHandler = activityHandler;
+        this.context = context;
+        this.paused = startPaused;
     }
 
     // add a package to the queue
@@ -91,11 +88,7 @@ public class PackageHandler extends HandlerThread implements IPackageHandler {
     // close the package to retry in the future (after temporary failure)
     @Override
     public void closeFirstPackage() {
-        if (dropOfflineActivities) {
-            sendNextPackage();
-        } else {
-            isSending.set(false);
-        }
+        isSending.set(false);
     }
 
     // interrupt the sending loop after the current request has finished
@@ -110,38 +103,22 @@ public class PackageHandler extends HandlerThread implements IPackageHandler {
         paused = false;
     }
 
-    // short info about how failing packages are handled
     @Override
-    public String getFailureMessage() {
-        if (dropOfflineActivities) {
-            return "Dropping offline activity.";
-        } else {
-            return "Will retry later.";
-        }
+    public void finishedTrackingActivity(JSONObject jsonResponse) {
+        activityHandler.finishedTrackingActivity(jsonResponse);
     }
 
     @Override
-    public boolean dropsOfflineActivities() {
-        return dropOfflineActivities;
-    }
-
-    @Override
-    public void finishedTrackingActivity(ActivityPackage activityPackage, ResponseData responseData, JSONObject jsonResponse) {
-        responseData.setActivityKind(activityPackage.getActivityKind());
-
-        String deepLink = null;
-
-        if (jsonResponse != null) {
-            deepLink = jsonResponse.optString("deeplink", null);
-        }
-
-        activityHandler.finishedTrackingActivity(responseData, deepLink);
+    public void sendClickPackage(ActivityPackage clickPackage) {
+        logger.debug("Sending click package (%s)", clickPackage);
+        logger.verbose("%s", clickPackage.getExtendedString());
+        requestHandler.sendClickPackage(clickPackage);
     }
 
     private static final class InternalHandler extends Handler {
-        private static final int INIT       = 1;
-        private static final int ADD        = 2;
-        private static final int SEND_NEXT  = 3;
+        private static final int INIT = 1;
+        private static final int ADD = 2;
+        private static final int SEND_NEXT = 3;
         private static final int SEND_FIRST = 4;
 
         private final WeakReference<PackageHandler> packageHandlerReference;
@@ -156,7 +133,7 @@ public class PackageHandler extends HandlerThread implements IPackageHandler {
             super.handleMessage(message);
 
             PackageHandler packageHandler = packageHandlerReference.get();
-            if (null == packageHandler) {
+            if (packageHandler == null) {
                 return;
             }
 
@@ -191,7 +168,7 @@ public class PackageHandler extends HandlerThread implements IPackageHandler {
     private void addInternal(ActivityPackage newPackage) {
         packageQueue.add(newPackage);
         logger.debug("Added package %d (%s)", packageQueue.size(), newPackage);
-        logger.verbose(newPackage.getExtendedString());
+        logger.verbose("%s", newPackage.getExtendedString());
 
         writePackageQueue();
     }
@@ -222,70 +199,21 @@ public class PackageHandler extends HandlerThread implements IPackageHandler {
     }
 
     private void readPackageQueue() {
-        if (dropOfflineActivities) {
+        packageQueue = Util.readObject(context, PACKAGE_QUEUE_FILENAME, PACKAGE_QUEUE_NAME);
+
+        if (packageQueue != null) {
+            logger.debug("Package handler read %d packages", packageQueue.size());
+        } else {
             packageQueue = new ArrayList<ActivityPackage>();
-            return; // don't read old packages when offline tracking is disabled
         }
+    }
 
-        try {
-            FileInputStream inputStream = context.openFileInput(PACKAGE_QUEUE_FILENAME);
-            BufferedInputStream bufferedStream = new BufferedInputStream(inputStream);
-            ObjectInputStream objectStream = new ObjectInputStream(bufferedStream);
-
-            try {
-                Object object = objectStream.readObject();
-                @SuppressWarnings("unchecked")
-                List<ActivityPackage> packageQueue = (List<ActivityPackage>) object;
-                logger.debug("Package handler read %d packages", packageQueue.size());
-                this.packageQueue = packageQueue;
-                return;
-            } catch (ClassNotFoundException e) {
-                logger.error("Failed to find package queue class");
-            } catch (OptionalDataException e) {
-                /* no-op */
-            } catch (IOException e) {
-                logger.error("Failed to read package queue object");
-            } catch (ClassCastException e) {
-                logger.error("Failed to cast package queue object");
-            } finally {
-                objectStream.close();
-            }
-        } catch (FileNotFoundException e) {
-            logger.verbose("Package queue file not found");
-        } catch (Exception e) {
-            logger.error("Failed to read package queue file");
-        }
-
-        // start with a fresh package queue in case of any exception
-        packageQueue = new ArrayList<ActivityPackage>();
+    private void writePackageQueue() {
+        Util.writeObject(packageQueue, context, PACKAGE_QUEUE_FILENAME, PACKAGE_QUEUE_NAME);
+        logger.debug("Package handler wrote %d packages", packageQueue.size());
     }
 
     public static Boolean deletePackageQueue(Context context) {
         return context.deleteFile(PACKAGE_QUEUE_FILENAME);
-    }
-
-
-    private void writePackageQueue() {
-        if (dropOfflineActivities) {
-            return; // don't write packages when offline tracking is disabled
-        }
-
-        try {
-            FileOutputStream outputStream = context.openFileOutput(PACKAGE_QUEUE_FILENAME, Context.MODE_PRIVATE);
-            BufferedOutputStream bufferedStream = new BufferedOutputStream(outputStream);
-            ObjectOutputStream objectStream = new ObjectOutputStream(bufferedStream);
-
-            try {
-                objectStream.writeObject(packageQueue);
-                logger.debug("Package handler wrote %d packages", packageQueue.size());
-            } catch (NotSerializableException e) {
-                logger.error("Failed to serialize packages");
-            } finally {
-                objectStream.close();
-            }
-        } catch (Exception e) {
-            logger.error("Failed to write packages (%s)", e.getLocalizedMessage());
-            e.printStackTrace();
-        }
     }
 }
