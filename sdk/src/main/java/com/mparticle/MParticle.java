@@ -15,6 +15,7 @@ import android.provider.Settings;
 import android.util.Log;
 import android.webkit.WebView;
 
+import com.mparticle.commerce.CommerceEvent;
 import com.mparticle.internal.AppStateManager;
 import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.Constants;
@@ -467,6 +468,10 @@ public class MParticle {
             ConfigManager.log(LogLevel.DEBUG, "Logged event - \n", event.toString());
             mEmbeddedKitManager.logEvent(event);
         }
+    }
+
+    public void logEvent(CommerceEvent event) {
+
     }
 
     /**
