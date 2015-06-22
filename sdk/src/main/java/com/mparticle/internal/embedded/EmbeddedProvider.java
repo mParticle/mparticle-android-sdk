@@ -9,20 +9,21 @@ import com.mparticle.MPEvent;
 import com.mparticle.MPProduct;
 import com.mparticle.MParticle;
 import com.mparticle.internal.ConfigManager;
+import com.mparticle.internal.MPUtility;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 /**
  * Base EmbeddedProvider - all EKs subclass this. The primary function is to parse the common EK configuration structures
  * such as filters.
- *
  */
 abstract class EmbeddedProvider {
 
@@ -30,8 +31,6 @@ abstract class EmbeddedProvider {
     private final static String KEY_PROPERTIES = "as";
     private final static String KEY_FILTERS = "hs";
     private final static String KEY_BRACKETING = "bk";
-    private final static String KEY_EVENT_LIST = "eventList";
-    private final static String KEY_ATTRIBUTE_LIST = "attributeList";
     private final static String KEY_EVENT_TYPES_FILTER = "et";
     private final static String KEY_EVENT_NAMES_FILTER = "ec";
     private final static String KEY_EVENT_ATTRIBUTES_FILTER = "ea";
@@ -44,6 +43,7 @@ abstract class EmbeddedProvider {
 
     //If set to true, our sdk honor user's optout wish. If false, we still collect data on opt-ed out users, but only for reporting
     private static final String HONOR_OPT_OUT = "honorOptOut";
+    private static final String KEY_PROJECTIONS = "pr";
     protected final EmbeddedKitManager mEkManager;
 
     protected HashMap<String, String> properties = new HashMap<String, String>(0);
@@ -54,12 +54,14 @@ abstract class EmbeddedProvider {
     protected SparseBooleanArray mScreenAttributeFilters = new SparseBooleanArray(0);
     protected SparseBooleanArray mUserIdentityFilters = new SparseBooleanArray(0);
     protected SparseBooleanArray mUserAttributeFilters = new SparseBooleanArray(0);
-    protected HashSet<String> includedEvents, includedAttributes;
     protected int lowBracket = 0;
     protected int highBracket = 101;
 
     protected Context context;
     private boolean mRunning = true;
+    LinkedList<Projection> projectionList;
+    Projection defaultProjection = null;
+    Projection defaultScreenProjection = null;
 
     public EmbeddedProvider(EmbeddedKitManager ekManager) {
         this.mEkManager = ekManager;
@@ -68,93 +70,88 @@ abstract class EmbeddedProvider {
 
     protected EmbeddedProvider parseConfig(JSONObject json) throws JSONException {
 
-        if (json.has(KEY_PROPERTIES)){
+        if (json.has(KEY_PROPERTIES)) {
             JSONObject propJson = json.getJSONObject(KEY_PROPERTIES);
-            for (Iterator<String> iterator = propJson.keys(); iterator.hasNext();) {
+            for (Iterator<String> iterator = propJson.keys(); iterator.hasNext(); ) {
                 String key = iterator.next();
-                properties.put(key, propJson.getString(key));
-            }
-            if (propJson.has(KEY_EVENT_LIST)){
-                try {
-                    JSONArray inclusions = new JSONArray(propJson.getString(KEY_EVENT_LIST));
-                    includedEvents = new HashSet<String>(inclusions.length());
-                    for (int i = 0; i < inclusions.length(); i++){
-                        includedEvents.add(inclusions.getString(i).toLowerCase());
-                    }
-                }catch (JSONException jse){
-
-                }
-            }
-            if (propJson.has(KEY_ATTRIBUTE_LIST)){
-                try {
-                    JSONArray inclusions = new JSONArray(propJson.getString(KEY_ATTRIBUTE_LIST));
-                    includedAttributes = new HashSet<String>(inclusions.length());
-                    for (int i = 0; i < inclusions.length(); i++){
-                        includedAttributes.add(inclusions.getString(i).toLowerCase());
-                    }
-                }catch (JSONException jse){
-
-                }
+                properties.put(key, propJson.optString(key));
             }
         }
-        if (json.has(KEY_FILTERS)){
+        if (json.has(KEY_FILTERS)) {
             JSONObject filterJson = json.getJSONObject(KEY_FILTERS);
-            if (filterJson.has(KEY_EVENT_TYPES_FILTER)){
+            if (filterJson.has(KEY_EVENT_TYPES_FILTER)) {
                 mTypeFilters = convertToSparseArray(filterJson.getJSONObject(KEY_EVENT_TYPES_FILTER));
-            }else {
+            } else {
                 mTypeFilters.clear();
             }
-            if (filterJson.has(KEY_EVENT_NAMES_FILTER)){
+            if (filterJson.has(KEY_EVENT_NAMES_FILTER)) {
                 mNameFilters = convertToSparseArray(filterJson.getJSONObject(KEY_EVENT_NAMES_FILTER));
-            }else{
+            } else {
                 mNameFilters.clear();
             }
-            if (filterJson.has(KEY_EVENT_ATTRIBUTES_FILTER)){
+            if (filterJson.has(KEY_EVENT_ATTRIBUTES_FILTER)) {
                 mAttributeFilters = convertToSparseArray(filterJson.getJSONObject(KEY_EVENT_ATTRIBUTES_FILTER));
-            }else{
+            } else {
                 mAttributeFilters.clear();
             }
-            if (filterJson.has(KEY_SCREEN_NAME_FILTER)){
+            if (filterJson.has(KEY_SCREEN_NAME_FILTER)) {
                 mScreenNameFilters = convertToSparseArray(filterJson.getJSONObject(KEY_SCREEN_NAME_FILTER));
-            }else{
+            } else {
                 mScreenNameFilters.clear();
             }
-            if (filterJson.has(KEY_SCREEN_ATTRIBUTES_FILTER)){
+            if (filterJson.has(KEY_SCREEN_ATTRIBUTES_FILTER)) {
                 mScreenAttributeFilters = convertToSparseArray(filterJson.getJSONObject(KEY_SCREEN_ATTRIBUTES_FILTER));
-            }else{
+            } else {
                 mScreenAttributeFilters.clear();
             }
-            if (filterJson.has(KEY_USER_IDENTITY_FILTER)){
+            if (filterJson.has(KEY_USER_IDENTITY_FILTER)) {
                 mUserIdentityFilters = convertToSparseArray(filterJson.getJSONObject(KEY_USER_IDENTITY_FILTER));
-            }else{
+            } else {
                 mUserIdentityFilters.clear();
             }
-            if (filterJson.has(KEY_USER_ATTRIBUTE_FILTER)){
+            if (filterJson.has(KEY_USER_ATTRIBUTE_FILTER)) {
                 mUserAttributeFilters = convertToSparseArray(filterJson.getJSONObject(KEY_USER_ATTRIBUTE_FILTER));
-            }else{
+            } else {
                 mUserAttributeFilters.clear();
             }
         }
 
-        if (json.has(KEY_BRACKETING)){
+        if (json.has(KEY_BRACKETING)) {
             JSONObject bracketing = json.getJSONObject(KEY_BRACKETING);
             lowBracket = bracketing.optInt(KEY_BRACKETING_LOW, 0);
             highBracket = bracketing.optInt(KEY_BRACKETING_HIGH, 101);
-        }else{
+        } else {
             lowBracket = 0;
             highBracket = 101;
+        }
+        projectionList = new LinkedList<Projection>();
+        defaultProjection = null;
+        if (json.has(KEY_PROJECTIONS)) {
+            JSONArray projections = json.getJSONArray(KEY_PROJECTIONS);
+            for (int i = 0; i < projections.length(); i++) {
+                Projection projection = new Projection(projections.getJSONObject(i));
+                if (projection.isDefault()) {
+                    if (projection.getMessageType() == 4) {
+                        defaultProjection = projection;
+                    } else {
+                        defaultScreenProjection = projection;
+                    }
+                } else {
+                    projectionList.add(projection);
+                }
+            }
         }
 
         return this;
     }
 
-    private SparseBooleanArray convertToSparseArray(JSONObject json){
+    protected SparseBooleanArray convertToSparseArray(JSONObject json) {
         SparseBooleanArray map = new SparseBooleanArray();
-        for (Iterator<String> iterator = json.keys(); iterator.hasNext();) {
+        for (Iterator<String> iterator = json.keys(); iterator.hasNext(); ) {
             try {
                 String key = iterator.next();
                 map.put(Integer.parseInt(key), json.getInt(key) == 1);
-            }catch (JSONException jse){
+            } catch (JSONException jse) {
                 ConfigManager.log(MParticle.LogLevel.ERROR, "Issue while parsing embedded kit configuration: " + jse.getMessage());
             }
         }
@@ -162,14 +159,14 @@ abstract class EmbeddedProvider {
     }
 
     private boolean shouldHonorOptOut() {
-        if (properties.containsKey(HONOR_OPT_OUT)){
+        if (properties.containsKey(HONOR_OPT_OUT)) {
             String optOut = properties.get(HONOR_OPT_OUT);
             return Boolean.parseBoolean(optOut);
         }
         return true;
     }
 
-    public boolean disabled(){
+    public boolean disabled() {
         return !passesBracketing()
                 || (shouldHonorOptOut() && !mEkManager.getConfigurationManager().isEnabled());
     }
@@ -179,40 +176,24 @@ abstract class EmbeddedProvider {
         return userBucket >= lowBracket && userBucket < highBracket;
     }
 
-    private static int hash(String input) {
-        int hash = 0;
-
-        if (input == null || input.length() == 0)
-            return hash;
-
-        char[] chars = input.toLowerCase().toCharArray();
-
-        for (char c : chars) {
-            hash = ((hash << 5) - hash) + c;
-        }
-
-        return hash;
-    }
-
-    protected boolean shouldLogEvent(MParticle.EventType type, String name){
-        int typeHash = hash(type.ordinal() + "");
-        int typeNameHash = hash(type.ordinal() + "" + name);
-        return mTypeFilters.get(typeHash, true) && mNameFilters.get(typeNameHash, true);
+    protected boolean shouldLogEvent(MPEvent event) {
+        int typeHash = MPUtility.mpHash(event.getEventType().ordinal() + "");
+        return mTypeFilters.get(typeHash, true) && mNameFilters.get(event.getEventHash(), true);
     }
 
     public boolean shouldLogScreen(String screenName) {
-        int nameHash = hash("0" + screenName);
-        if (mScreenNameFilters.size() > 0 && !mScreenNameFilters.get(nameHash, true)){
+        int nameHash = MPUtility.mpHash("0" + screenName);
+        if (mScreenNameFilters.size() > 0 && !mScreenNameFilters.get(nameHash, true)) {
             return false;
         }
         return true;
     }
 
-    protected Map<String, String> filterEventAttributes(MParticle.EventType eventType, String eventName, SparseBooleanArray filter, Map<String, String> eventAttributes){
+    protected Map<String, String> filterEventAttributes(MParticle.EventType eventType, String eventName, SparseBooleanArray filter, Map<String, String> eventAttributes) {
         if (eventAttributes != null && eventAttributes.size() > 0 && filter != null && filter.size() > 0) {
 
             String eventTypeStr = "0";
-            if (eventType != null){
+            if (eventType != null) {
                 eventTypeStr = eventType.ordinal() + "";
             }
             Iterator<Map.Entry<String, String>> attIterator = eventAttributes.entrySet().iterator();
@@ -220,13 +201,13 @@ abstract class EmbeddedProvider {
             while (attIterator.hasNext()) {
                 Map.Entry<String, String> entry = attIterator.next();
                 String key = entry.getKey();
-                int hash = hash(eventTypeStr + eventName + key);
+                int hash = MPUtility.mpHash(eventTypeStr + eventName + key);
                 if (filter.get(hash, true)) {
                     newAttributes.put(key, entry.getValue());
                 }
             }
             return newAttributes;
-        }else{
+        } else {
             return eventAttributes;
         }
     }
@@ -244,54 +225,65 @@ abstract class EmbeddedProvider {
             JSONObject newAttributes = new JSONObject();
             while (attIterator.hasNext()) {
                 String entry = attIterator.next();
-                int hash = hash(entry);
+                int hash = MPUtility.mpHash(entry);
                 if (attributeFilters.get(hash, true)) {
                     try {
                         newAttributes.put(entry, attributes.getString(entry));
-                    }catch (JSONException jse){
+                    } catch (JSONException jse) {
 
                     }
                 }
             }
             return newAttributes;
-        }else{
+        } else {
             return attributes;
         }
     }
 
-    public void logEvent(MPEvent event, Map<String, String> attributes) throws Exception {
+    public void logEvent(MPEvent event) throws Exception {
 
     }
+
     public void logTransaction(MPProduct transaction) throws Exception {
 
     }
+
     void logScreen(String screenName, Map<String, String> eventAttributes) throws Exception {
 
     }
+
     void setLocation(Location location) {
 
     }
+
     void setUserAttributes(JSONObject mUserAttributes) {
 
     }
+
     void removeUserAttribute(String key) {
 
     }
+
     void setUserIdentity(String id, MParticle.IdentityType identityType) {
 
     }
+
     void logout() {
 
     }
+
     void removeUserIdentity(String id) {
 
     }
+
     void handleIntent(Intent intent) {
 
     }
+
     void startSession() {
 
     }
+
     void endSession() {
 
     }
@@ -306,5 +298,93 @@ abstract class EmbeddedProvider {
 
     public void setRunning(boolean running) {
         this.mRunning = running;
+    }
+
+    public List<MPEvent> projectEvents(MPEvent event) {
+        return projectEvents(event, false);
+    }
+
+    public List<MPEvent> projectEvents(MPEvent event, boolean isScreenEvent) {
+        List<MPEvent> events = new LinkedList<MPEvent>();
+
+        MPEventWrapper wrapper = new MPEventWrapper(event);
+        wrapper.setIsScreenEvent(isScreenEvent);
+        for (int i = 0; i < projectionList.size(); i++) {
+            Projection projection = projectionList.get(i);
+            if (projection.isMatch(wrapper)) {
+                MPEvent newEvent = projection.project(wrapper);
+                if (newEvent != null) {
+                    events.add(newEvent);
+                }
+            }
+        }
+
+        if (events.isEmpty()) {
+            if (isScreenEvent) {
+                if (defaultScreenProjection != null) {
+                    events.add(defaultScreenProjection.project(wrapper));
+                } else {
+                    return null;
+                }
+            } else {
+                if (defaultProjection != null) {
+                    events.add(defaultProjection.project(wrapper));
+                } else {
+                    return null;
+                }
+            }
+        }
+
+        return events;
+    }
+
+    static class MPEventWrapper {
+        private final MPEvent mEvent;
+        private boolean mIsScreenEvent;
+
+        public MPEventWrapper(MPEvent event) {
+            this.mEvent = event;
+        }
+
+        private Map<Integer, String> attributeHashes;
+
+        public Map<Integer, String> getAttributeHashes() {
+            if (attributeHashes == null) {
+                attributeHashes = new HashMap<Integer, String>();
+                for (Map.Entry<String, String> entry : mEvent.getInfo().entrySet()) {
+                    int hash = MPUtility.mpHash(getEventTypeOrdinal() + mEvent.getEventName() + entry.getKey());
+                    attributeHashes.put(hash, entry.getKey());
+                }
+            }
+            return attributeHashes;
+        }
+
+        public MPEvent getEvent() {
+            return mEvent;
+        }
+
+        public void setIsScreenEvent(boolean isScreenEvent) {
+            this.mIsScreenEvent = isScreenEvent;
+        }
+
+        public int getEventTypeOrdinal() {
+            if (mIsScreenEvent) {
+                return 0;
+            } else {
+                return mEvent.getEventType().ordinal();
+            }
+        }
+
+        public int getEventHash() {
+            if (mIsScreenEvent) {
+                return MPUtility.mpHash("0" + mEvent.getEventName());
+            } else {
+                return mEvent.getEventHash();
+            }
+        }
+
+        public int getMessageType() {
+            return mIsScreenEvent ? 3 : 4;
+        }
     }
 }

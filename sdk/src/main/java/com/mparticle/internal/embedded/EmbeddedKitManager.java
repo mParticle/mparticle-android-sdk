@@ -5,13 +5,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
 import android.net.Uri;
-import android.os.Handler;
-import android.os.Looper;
 
-import com.mparticle.internal.AppStateManager;
 import com.mparticle.MPEvent;
 import com.mparticle.MPProduct;
 import com.mparticle.MParticle;
+import com.mparticle.internal.AppStateManager;
 import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.Constants;
 import com.mparticle.internal.MPActivityCallbacks;
@@ -22,6 +20,7 @@ import org.json.JSONObject;
 
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -106,8 +105,17 @@ public class EmbeddedKitManager implements MPActivityCallbacks {
     public void logEvent(MPEvent event) {
         for (EmbeddedProvider provider : providers.values()){
             try {
-                if (!provider.disabled() && provider.shouldLogEvent(event.getEventType(), event.getEventName())) {
-                    provider.logEvent(event, provider.filterEventAttributes(event.getEventType(), event.getEventName(), provider.mAttributeFilters, event.getInfo()));
+                if (!provider.disabled() && provider.shouldLogEvent(event)) {
+                    MPEvent providerEvent = new MPEvent(event);
+                    providerEvent.setInfo(provider.filterEventAttributes(providerEvent.getEventType(), providerEvent.getEventName(), provider.mAttributeFilters, providerEvent.getInfo()));
+                    List<MPEvent> projectedEvents = provider.projectEvents(providerEvent);
+                    if (projectedEvents == null){
+                        provider.logEvent(providerEvent);
+                    }else {
+                        for (int i = 0; i < projectedEvents.size(); i++) {
+                            provider.logEvent(projectedEvents.get(i));
+                        }
+                    }
                 }
             } catch (Exception e) {
                 ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to call logEvent for embedded provider: " + provider.getName() + ": " + e.getMessage());
@@ -131,7 +139,16 @@ public class EmbeddedKitManager implements MPActivityCallbacks {
         for (EmbeddedProvider provider : providers.values()){
             try {
                 if (!provider.disabled() && provider.shouldLogScreen(screenName)) {
-                    provider.logScreen(screenName, provider.filterEventAttributes(null, screenName, provider.mScreenAttributeFilters, eventAttributes));
+                    MPEvent syntheticScreenEvent = new MPEvent.Builder(screenName, MParticle.EventType.Navigation).info(eventAttributes).build();
+                    syntheticScreenEvent.setInfo(provider.filterEventAttributes(null, screenName, provider.mScreenAttributeFilters, eventAttributes));
+                    List<MPEvent> projectedEvents = provider.projectEvents(syntheticScreenEvent, true);
+                    if (projectedEvents == null) {
+                        provider.logScreen(screenName, syntheticScreenEvent.getInfo());
+                    }else{
+                        for (int i = 0; i < projectedEvents.size(); i++) {
+                            provider.logEvent(projectedEvents.get(i));
+                        }
+                    }
                 }
             } catch (Exception e) {
                 ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to call logScreen for embedded provider: " + provider.getName() + ": " + e.getMessage());

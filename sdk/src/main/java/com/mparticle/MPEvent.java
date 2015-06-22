@@ -5,12 +5,16 @@ import android.util.Log;
 
 import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.Constants;
+import com.mparticle.internal.MPUtility;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 
@@ -29,6 +33,7 @@ public class MPEvent {
     private String category;
     private Map<String, String> info;
     private Double duration = null, startTime = null, endTime = null;
+    private int eventHash;
 
     private MPEvent(){}
     private MPEvent(Builder builder){
@@ -67,6 +72,26 @@ public class MPEvent {
         }
     }
 
+    @Override
+    public boolean equals(Object o) {
+        return super.equals(o) || (o != null && this.toString().equals(o.toString()));
+    }
+
+    public void setInfo(Map<String, String> info){
+        this.info = info;
+    }
+
+    public MPEvent(MPEvent mpEvent) {
+        eventType = mpEvent.eventType;
+        eventName = mpEvent.eventName;
+        Map<String, String> shallowCopy = new HashMap<String, String>();
+        shallowCopy.putAll(mpEvent.info);
+        info = shallowCopy;
+        category = mpEvent.category;
+        duration = mpEvent.duration;
+        endTime = mpEvent.endTime;
+        startTime = mpEvent.startTime;
+    }
 
     @Override
     public String toString() {
@@ -89,11 +114,13 @@ public class MPEvent {
         }
         if (info != null){
             builder.append("info:\n");
-            for (Map.Entry<String, String> entry : info.entrySet())
+            List<String> sortedKeys = new ArrayList(info.keySet());
+
+            for (String key : sortedKeys)
             {
-                builder.append(entry.getKey())
+                builder.append(key)
                 .append(":")
-                .append(entry.getValue())
+                .append(info.get(key))
                 .append("\n");
             }
         }
@@ -102,6 +129,13 @@ public class MPEvent {
 
     public String getEventName() {
         return eventName;
+    }
+
+    public int getEventHash() {
+        if (eventHash == 0){
+            eventHash = MPUtility.mpHash(eventType.ordinal() + eventName);
+        }
+        return eventHash;
     }
 
     public String getCategory() {
@@ -154,6 +188,16 @@ public class MPEvent {
         public Builder(String eventName, MParticle.EventType eventType){
             this.eventName = eventName;
             this.eventType = eventType;
+        }
+
+        public Builder(MPEvent event) {
+            this.eventName = event.getEventName();
+            this.eventType = event.getEventType();
+            this.category = event.getCategory();
+            this.info = event.getInfo();
+            this.duration = event.duration;
+            this.startTime = event.startTime;
+            this.endTime = event.endTime;
         }
 
         /**

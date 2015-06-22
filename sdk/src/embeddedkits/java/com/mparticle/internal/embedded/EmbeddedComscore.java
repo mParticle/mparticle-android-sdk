@@ -51,9 +51,10 @@ class EmbeddedComscore extends EmbeddedProvider implements MPActivityCallbacks {
     }
 
     @Override
-    public void logEvent(MPEvent event, Map<String, String> attributes) {
+    public void logEvent(MPEvent event) {
         if (isEnterprise) {
             HashMap<String, String> comscoreLabels;
+            Map<String, String> attributes = event.getInfo();
             if (attributes == null) {
                 comscoreLabels = new HashMap<String, String>();
             }else if (!(attributes instanceof HashMap)){
@@ -77,8 +78,7 @@ class EmbeddedComscore extends EmbeddedProvider implements MPActivityCallbacks {
     @Override
     public void logScreen(String screenName, Map<String, String> eventAttributes) throws Exception {
         logEvent(
-                new MPEvent.Builder(screenName, MParticle.EventType.Navigation).build(),
-                eventAttributes
+                new MPEvent.Builder(screenName, MParticle.EventType.Navigation).info(eventAttributes).build()
         );
     }
 
