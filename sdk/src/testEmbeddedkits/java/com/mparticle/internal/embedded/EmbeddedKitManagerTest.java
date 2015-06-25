@@ -65,7 +65,6 @@ public class EmbeddedKitManagerTest extends TestCase {
     }
 
     public void testLogEvent() throws Exception {
-        manager.logEvent(null);
         manager.logEvent(new MPEvent.Builder("test name", MParticle.EventType.Location).build());
     }
 
