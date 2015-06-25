@@ -1,11 +1,11 @@
 package com.mparticle.internal;
 
+import com.mparticle.MParticle;
 import com.mparticle.commerce.CommerceEvent;
 import com.mparticle.commerce.Product;
 import com.mparticle.commerce.TransactionAttributes;
 
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 class CommerceEventUtil {
@@ -102,8 +102,12 @@ class CommerceEventUtil {
                     message.put(Constants.Commerce.IMPRESSION_OBJECT, impressions);
                 }
             }
+            JSONObject cartJsonObject = new JSONObject(MParticle.getInstance().Commerce().cart().toString());
+            if (cartJsonObject.length() > 0){
+                message.put("sc", cartJsonObject);
+            }
 
-        } catch (JSONException jse) {
+        } catch (Exception jse) {
 
         }
     }

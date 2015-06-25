@@ -15,6 +15,7 @@ import android.provider.Settings;
 import android.util.Log;
 import android.webkit.WebView;
 
+import com.mparticle.commerce.CommerceApi;
 import com.mparticle.commerce.CommerceEvent;
 import com.mparticle.internal.AppStateManager;
 import com.mparticle.internal.ConfigManager;
@@ -128,6 +129,7 @@ public class MParticle {
 
     private MPMessagingAPI mMessaging;
     private MPMediaAPI mMedia;
+    private CommerceApi mCommerce;
 
     MParticle() {}
 
@@ -219,11 +221,13 @@ public class MParticle {
                     instance.mConfigManager = configManager;
                     instance.mApiKey = configManager.getApiKey();
                     instance.mAppStateManager = appStateManager;
+                    instance.mCommerce = new CommerceApi(context);
                     instance.mMessageManager = new MessageManager(context, configManager, installType, appStateManager);
                     instance.measuredRequestManager = MeasuredRequestManager.INSTANCE;
                     instance.measuredRequestManager.start(embeddedKitManager);
                     instance.mEmbeddedKitManager = embeddedKitManager;
                     instance.mPreferences = context.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
+
 
                     String userAttrs = instance.mPreferences.getString(Constants.PrefKeys.USER_ATTRS + instance.mApiKey, null);
                     try {
@@ -1416,6 +1420,10 @@ public class MParticle {
             mMessaging = new MPMessagingAPI(mAppContext, mConfigManager);
         }
         return mMessaging;
+    }
+
+    public CommerceApi Commerce() {
+        return mCommerce;
     }
 
     /**

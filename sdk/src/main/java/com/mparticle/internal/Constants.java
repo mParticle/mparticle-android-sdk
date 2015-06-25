@@ -20,6 +20,7 @@ public class Constants {
 
     // preferences persistence
     public static final String PREFS_FILE = "mParticlePrefs";
+    public static final String CART_PREFS_FILE = "mParticlePrefs_cart";
 
     public static final int LIMIT_ATTR_COUNT = 100;
     public static final int LIMIT_ATTR_NAME = 255;
@@ -405,6 +406,8 @@ public class Constants {
         String LOCATION_PROVIDER = "mp::location:provider";
         String LOCATION_MINTIME = "mp::location:mintime";
         String LOCATION_MINDISTANCE = "mp::location:mindistance";
+
+        String CART = "mp::cart";
     }
 
     public interface MiscStorageKeys {

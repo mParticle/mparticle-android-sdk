@@ -5,12 +5,14 @@ import org.json.JSONObject;
 
 import java.lang.Object;import java.lang.String;import java.math.BigDecimal;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 
 public final class Product extends HashMap<String, Object> {
 
+    private static EqualityComparator mComparator = null;
     private Map<String, String> mCustomAttributes;
     private String mName = null;
     private String mCategory;
@@ -22,6 +24,15 @@ public final class Product extends HashMap<String, Object> {
     private Integer mQuantity;
     private String mBrand;
     private String mVariant;
+    private int quantity;
+
+    public interface EqualityComparator {
+        boolean equals(Product product1, Product product2);
+    }
+
+    public static void setEqualityComparator(EqualityComparator comparator){
+        mComparator = comparator;
+    }
 
     private Product(){}
 
@@ -38,7 +49,7 @@ public final class Product extends HashMap<String, Object> {
         mCustomAttributes = builder.mCustomAttributes;
     }
 
-    public String getmName() {
+    public String getName() {
         return mName;
     }
 
@@ -66,6 +77,25 @@ public final class Product extends HashMap<String, Object> {
         return mQuantity;
     }
 
+    @Override
+    public boolean equals(Object object) {
+        if (object == null){
+            return false;
+        }
+        if (object == this) {
+            return true;
+        }
+        if (!(object instanceof Product)) {
+            return false;
+        }
+        Product product = (Product)object;
+        if (mComparator == null){
+            return product.getName().equalsIgnoreCase(this.getName());
+        }else{
+            return mComparator.equals(this, product);
+        }
+    }
+
     public String getBrand() {
         return mBrand;
     }
@@ -76,6 +106,57 @@ public final class Product extends HashMap<String, Object> {
 
     @Override
     public String toString() {
+        return toJson().toString();
+    }
+
+    public static Product fromString(String json) {
+        try{
+            JSONObject jsonObject = new JSONObject(json);
+            return fromJson(jsonObject);
+        }catch (JSONException jse){
+
+        }
+        return null;
+    }
+
+    static Product fromJson(JSONObject jsonObject) {
+        try{
+            Product.Builder builder =  new Product.Builder(jsonObject.getString("nm"));
+            builder.category(jsonObject.optString("ca", null));
+            builder.couponCode(jsonObject.optString("cc", null));
+            builder.sku(jsonObject.optString("id", null));
+            if (jsonObject.has("ps")) {
+                builder.position(jsonObject.optInt("ps", 0));
+            }
+            if (jsonObject.has("pr")) {
+                builder.unitPrice(jsonObject.optDouble("pr", 0));
+            }
+            if (jsonObject.has("qt")) {
+                builder.quantity(jsonObject.optInt("qt", 1));
+            }
+            builder.brand(jsonObject.optString("br", null));
+            builder.variant(jsonObject.optString("va", null));
+            if (jsonObject.has("attrs")){
+                JSONObject attributesJson = jsonObject.getJSONObject("attrs");
+                if (attributesJson.length() > 0) {
+                    Map<String, String> customAttributes = new HashMap<String, String>();
+                    Iterator<String> keys = attributesJson.keys();
+
+                    while( keys.hasNext() ) {
+                        String key = keys.next();
+                        customAttributes.put(key, attributesJson.getString(key));
+                    }
+                    builder.customAttributes(customAttributes);
+                }
+            }
+            return builder.build();
+        }catch (JSONException jse){
+
+        }
+        return null;
+    }
+
+    JSONObject toJson() {
         try{
             JSONObject productJson = new JSONObject();
             if (mName != null){
@@ -113,11 +194,15 @@ public final class Product extends HashMap<String, Object> {
                 }
                 productJson.put("attrs", attributes);
             }
-            return productJson.toString();
+            return productJson;
         }catch(JSONException jse){
 
         }
-        return super.toString();
+        return new JSONObject();
+    }
+
+    void setQuantity(int quantity) {
+        this.quantity = quantity;
     }
 
     public static class Builder {

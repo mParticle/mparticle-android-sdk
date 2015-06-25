@@ -1,16 +1,18 @@
 package com.mparticle.commerce;
 
-
-import java.math.BigDecimal;
+import android.content.Context;
 
 public class CommerceApi {
 
-    static Cart cart;
-    public static Cart cart() {
-        return cart;
+    private CommerceApi(){}
+
+    Context mContext;
+    public CommerceApi(Context context) {
+        mContext = context;
     }
 
-    public BigDecimal getLtv() {
-        return null;
+    public Cart cart() {
+        return Cart.getInstance(mContext);
     }
+
 }
