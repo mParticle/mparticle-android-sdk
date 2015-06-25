@@ -2,9 +2,9 @@ package com.mparticle.commerce;
 
 public class TransactionAttributes {
     private String mAffiliation = null;
-    private double mRevenue;
-    private double mShipping;
-    private double mTax;
+    private Double mRevenue;
+    private Double mShipping;
+    private Double mTax;
     private String mCouponCode = null;
     private String mId = null;
 
@@ -26,7 +26,7 @@ public class TransactionAttributes {
         return this;
     }
 
-    public double getTax() {
+    public Double getTax() {
         return mTax;
     }
 
@@ -35,7 +35,7 @@ public class TransactionAttributes {
         return this;
     }
 
-    public double getShipping() {
+    public Double getShipping() {
         return mShipping;
     }
 
@@ -44,7 +44,7 @@ public class TransactionAttributes {
         return this;
     }
 
-    public double getRevenue() {
+    public Double getRevenue() {
         return mRevenue;
     }
 

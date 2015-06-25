@@ -20,6 +20,7 @@ import android.telephony.TelephonyManager;
 import com.mparticle.MPEvent;
 import com.mparticle.MPUnityException;
 import com.mparticle.MParticle;
+import com.mparticle.commerce.CommerceEvent;
 import com.mparticle.internal.Constants.MessageKey;
 import com.mparticle.internal.Constants.MessageType;
 import com.mparticle.messaging.CloudAction;
@@ -308,6 +309,23 @@ public class MessageManager implements MessageManagerCallbacks {
                 message.put(MessageKey.EVENT_COUNTER, count);
                 mPreferences.edit().putInt(Constants.PrefKeys.EVENT_COUNTER, ++count).apply();
 
+                mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
+                return message;
+            } catch (JSONException e) {
+                ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to create mParticle log event message");
+            }
+        }
+        return null;
+    }
+
+    public MPMessage logEvent(CommerceEvent event) {
+        if (event != null) {
+            try {
+                MPMessage message = new MPMessage.Builder(event, mAppStateManager.getSession(), mLocation)
+                        .name(event.getEventName())
+                        .timestamp(mAppStateManager.getSession().mLastEventTime)
+                        .attributes(MPUtility.enforceAttributeConstraints(event.getCustomAttributes()))
+                        .build();
                 mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
                 return message;
             } catch (JSONException e) {

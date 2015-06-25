@@ -125,7 +125,6 @@ public class Constants {
         String LOG_ECOMMERCE_REMOVE_FROM_CART = "$RemovedFromCart";
         String LOG_ECOMMERCE_ADD_TO_WISHLIST = "$AddedToWishlist";
         String LOG_ECOMMERCE_REMOVE_FROM_WISHLIST = "$RemovedFromWishlist";
-
     }
 
     public interface MessageType {
@@ -133,6 +132,7 @@ public class Constants {
         String SESSION_END = "se";
         String EVENT = "e";
         String SCREEN_VIEW = "v";
+        String COMMERCE_EVENT = "cm";
         String OPT_OUT = "o";
         String ERROR = "x";
         String PUSH_REGISTRATION = "pr";
@@ -334,6 +334,31 @@ public class Constants {
         String STATE_INFO_NETWORK_TYPE = "ant";
         
         String MPID = "mpid";
+    }
+
+    public interface Commerce {
+        String SCREEN_NAME = "sn";
+        String NON_INTERACTION = "ni";
+        String CURRENCY = "cu";
+        String PRODUCT_ACTION_OBJECT = "pd";
+        String PRODUCT_ACTION = "an";
+        String CHECKOUT_STEP = "cs";
+        String CHECKOUT_OPTIONS = "co";
+        String PRODUCT_LIST_NAME = "pal";
+        String PRODUCT_LIST_SOURCE = "pls";
+        String TRANSACTION_ID = "ti";
+        String TRANSACTION_AFFILIATION = "ta";
+        String TRANSACTION_REVENUE = "tr";
+        String TRANSACTION_TAX = "tt";
+        String TRANSACTION_SHIPPING = "ts";
+        String TRANSACTION_COUPON_CODE = "tcc";
+        String PRODUCT_LIST = "pl";
+        String PROMOTION_ACTION_OBJECT = "pm";
+        String PROMOTION_ACTION = "an";
+        String PROMOTION_LIST = "pl";
+        String IMPRESSION_OBJECT = "pi";
+        String IMPRESSION_LOCATION = "pil";
+        String IMPRESSION_PRODUCT_LIST = "pl";
     }
 
     public interface PrefKeys {

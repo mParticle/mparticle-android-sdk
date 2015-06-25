@@ -9,6 +9,7 @@ import android.net.Uri;
 import com.mparticle.MPEvent;
 import com.mparticle.MPProduct;
 import com.mparticle.MParticle;
+import com.mparticle.commerce.CommerceEvent;
 import com.mparticle.internal.AppStateManager;
 import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.Constants;
@@ -121,6 +122,27 @@ public class EmbeddedKitManager implements MPActivityCallbacks {
                 ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to call logEvent for embedded provider: " + provider.getName() + ": " + e.getMessage());
             }
         }
+    }
+
+    public void logEvent(CommerceEvent event) {
+      /*  for (EmbeddedProvider provider : providers.values()){
+            try {
+                if (!provider.disabled() && provider.shouldLogEvent(event)) {
+                    MPEvent providerEvent = new MPEvent(event);
+                    providerEvent.setInfo(provider.filterEventAttributes(providerEvent.getEventType(), providerEvent.getEventName(), provider.mAttributeFilters, providerEvent.getInfo()));
+                    List<MPEvent> projectedEvents = provider.projectEvents(providerEvent);
+                    if (projectedEvents == null){
+                        provider.logEvent(providerEvent);
+                    }else {
+                        for (int i = 0; i < projectedEvents.size(); i++) {
+                            provider.logEvent(projectedEvents.get(i));
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to call logEvent for embedded provider: " + provider.getName() + ": " + e.getMessage());
+            }
+        }*/
     }
 
     public void logTransaction(MPProduct product) {
