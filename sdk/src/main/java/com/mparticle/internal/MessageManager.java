@@ -322,7 +322,6 @@ public class MessageManager implements MessageManagerCallbacks {
         if (event != null) {
             try {
                 MPMessage message = new MPMessage.Builder(event, mAppStateManager.getSession(), mLocation)
-                        .name(event.getEventName())
                         .timestamp(mAppStateManager.getSession().mLastEventTime)
                         .attributes(MPUtility.enforceAttributeConstraints(event.getCustomAttributes()))
                         .build();

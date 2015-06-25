@@ -32,7 +32,6 @@ public final class CommerceEvent {
     private TransactionAttributes mTransactionAttributes;
     private String mScreen;
     private Boolean mNonIteraction;
-    private String eventName;
 
     private CommerceEvent(Builder builder) {
         super();
@@ -50,13 +49,6 @@ public final class CommerceEvent {
         mScreen = builder.mScreen;
         mImpressions = builder.impressions;
         mNonIteraction = builder.mNonIteraction;
-        if (builder.mEventName != null) {
-            eventName = builder.mEventName;
-        } else if (builder.mProductAction != null) {
-            eventName = builder.mProductAction;
-        } else {
-            eventName = builder.mPromotionAction;
-        }
     }
 
     private CommerceEvent() {
@@ -158,10 +150,6 @@ public final class CommerceEvent {
 
         }
         return super.toString();
-    }
-
-    public String getEventName() {
-        return eventName;
     }
 
     public Map<String, String> getCustomAttributes() {
