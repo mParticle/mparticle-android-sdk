@@ -45,20 +45,22 @@ public final class Cart {
     public synchronized Cart add(Product... products) {
         if (products != null) {
             for (Product product : products) {
-                int index = productList.indexOf(product);
-                if (index >= 0) {
-                    Product currentProduct = productList.get(index);
-                    Integer quantity = product.getQuantity();
-                    if (quantity == null) {
-                        quantity = 1;
+                if (product != null) {
+                    int index = productList.indexOf(product);
+                    if (index >= 0) {
+                        Product currentProduct = productList.get(index);
+                        Integer quantity = product.getQuantity();
+                        if (quantity == null) {
+                            quantity = 1;
+                        }
+                        Integer currentQuantity = currentProduct.getQuantity();
+                        if (currentQuantity == null) {
+                            currentQuantity = 1;
+                        }
+                        currentProduct.setQuantity(currentQuantity + quantity);
+                    } else {
+                        productList.add(product);
                     }
-                    Integer currentQuantity = currentProduct.getQuantity();
-                    if (currentQuantity == null) {
-                        currentQuantity = 1;
-                    }
-                    currentProduct.setQuantity(currentQuantity + quantity);
-                } else {
-                    productList.add(product);
                 }
             }
             save();
@@ -69,25 +71,29 @@ public final class Cart {
         return this;
     }
 
-    public synchronized void remove(Product product) {
-        if (product != null) {
-            if (productList.contains(product)) {
-                Product currentProduct = productList.get(productList.indexOf(product));
-                int currentQuantity = currentProduct.getQuantity() == null ? 1 : currentProduct.getQuantity();
-                int removeQuantity = product.getQuantity() == null ? 1 : product.getQuantity();
-                int newQuantity = currentQuantity - removeQuantity;
-                if (newQuantity < 0) {
-                    newQuantity = 0;
-                }
-                if (newQuantity == 0) {
-                    productList.remove(product);
-                } else {
-                    currentProduct.setQuantity(newQuantity);
+    public synchronized void remove(Product... products) {
+        if (products != null) {
+            for (Product product : products) {
+                if (product != null) {
+                    if (productList.contains(product)) {
+                        Product currentProduct = productList.get(productList.indexOf(product));
+                        int currentQuantity = currentProduct.getQuantity() == null ? 1 : currentProduct.getQuantity();
+                        int removeQuantity = product.getQuantity() == null ? 1 : product.getQuantity();
+                        int newQuantity = currentQuantity - removeQuantity;
+                        if (newQuantity < 0) {
+                            newQuantity = 0;
+                        }
+                        if (newQuantity == 0) {
+                            productList.remove(product);
+                        } else {
+                            currentProduct.setQuantity(newQuantity);
+                        }
+                    }
                 }
             }
 
             save();
-            CommerceEvent event = new CommerceEvent.Builder(CommerceEvent.REMOVE, product)
+            CommerceEvent event = new CommerceEvent.Builder(CommerceEvent.REMOVE, products)
                     .build();
             MParticle.getInstance().logEvent(event);
         }
@@ -106,7 +112,7 @@ public final class Cart {
     }
 
     public synchronized void checkout(int step, String options) {
-        CommerceEvent event = new CommerceEvent.Builder(CommerceEvent.CHECKOUT, (Product[]) productList.toArray())
+        CommerceEvent event = new CommerceEvent.Builder(CommerceEvent.CHECKOUT, productList.toArray(new Product[productList.size()]))
                 .checkoutStep(step)
                 .checkoutOptions(options)
                 .build();
@@ -114,7 +120,7 @@ public final class Cart {
     }
 
     public synchronized void checkout() {
-        CommerceEvent event = new CommerceEvent.Builder(CommerceEvent.CHECKOUT, (Product[]) productList.toArray())
+        CommerceEvent event = new CommerceEvent.Builder(CommerceEvent.CHECKOUT, productList.toArray(new Product[productList.size()]))
                 .build();
         MParticle.getInstance().logEvent(event);
     }
@@ -124,7 +130,7 @@ public final class Cart {
     }
 
     public synchronized void purchase(TransactionAttributes attributes, boolean clearCart) {
-        CommerceEvent event = new CommerceEvent.Builder(CommerceEvent.PURCHASE, (Product[]) productList.toArray())
+        CommerceEvent event = new CommerceEvent.Builder(CommerceEvent.PURCHASE, productList.toArray(new Product[productList.size()]))
                 .transactionAttributes(attributes)
                 .build();
         if (clearCart) {
@@ -135,13 +141,13 @@ public final class Cart {
     }
 
     public void refund() {
-        CommerceEvent event = new CommerceEvent.Builder(CommerceEvent.REFUND, (Product[]) productList.toArray())
+        CommerceEvent event = new CommerceEvent.Builder(CommerceEvent.REFUND, productList.toArray(new Product[productList.size()]))
                 .build();
         MParticle.getInstance().logEvent(event);
     }
 
     public void refund(TransactionAttributes attributes) {
-        CommerceEvent event = new CommerceEvent.Builder(CommerceEvent.REFUND, (Product[]) productList.toArray())
+        CommerceEvent event = new CommerceEvent.Builder(CommerceEvent.REFUND, productList.toArray(new Product[productList.size()]))
                 .transactionAttributes(attributes)
                 .build();
         MParticle.getInstance().logEvent(event);
@@ -191,13 +197,13 @@ public final class Cart {
         prefs.edit().putString(Constants.PrefKeys.CART, serializedCart).apply();
     }
 
-    public synchronized int findProduct(String sku) {
+    public synchronized Product getProduct(String name) {
         for (int i = 0; i < productList.size(); i++) {
-            if (productList.get(i).getSku() != null && productList.get(i).getSku().equalsIgnoreCase(sku)) {
-                return i;
+            if (productList.get(i).getName() != null && productList.get(i).getName().equalsIgnoreCase(name)) {
+                return productList.get(i);
             }
         }
-        return -1;
+        return null;
     }
 
     public List<Product> products() {

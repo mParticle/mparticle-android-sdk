@@ -24,7 +24,6 @@ public final class Product extends HashMap<String, Object> {
     private Integer mQuantity;
     private String mBrand;
     private String mVariant;
-    private int quantity;
 
     public interface EqualityComparator {
         boolean equals(Product product1, Product product2);
@@ -90,7 +89,7 @@ public final class Product extends HashMap<String, Object> {
         }
         Product product = (Product)object;
         if (mComparator == null){
-            return product.getName().equalsIgnoreCase(this.getName());
+            return false;
         }else{
             return mComparator.equals(this, product);
         }
@@ -202,7 +201,7 @@ public final class Product extends HashMap<String, Object> {
     }
 
     void setQuantity(int quantity) {
-        this.quantity = quantity;
+        mQuantity = quantity;
     }
 
     public static class Builder {
