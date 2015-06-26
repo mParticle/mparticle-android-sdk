@@ -109,7 +109,6 @@ public class CartTest {
 
     @Test
     public void testRefund() throws Exception {
-        cart.refund();
         cart.refund(null);
         cart.refund(new TransactionAttributes());
     }
