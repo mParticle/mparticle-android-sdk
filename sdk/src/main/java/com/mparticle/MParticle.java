@@ -511,6 +511,8 @@ public class MParticle {
      * @param product
      * @see MPProduct
      * @see MPProduct.Event
+     *
+     * @deprecated This method has been deprecated in favor of {@link CommerceEvent} and {@link #logEvent(CommerceEvent)}
      */
     public void logProductEvent(final MPProduct.Event event, MPProduct product) {
         if (product == null) {
@@ -549,13 +551,13 @@ public class MParticle {
         }
 
         ensureActiveSession();
+        MPEvent productEvent = new MPEvent.Builder(event.toString(), EventType.Transaction).info(product).build();
         if (checkEventLimit()) {
-            MPEvent productEvent = new MPEvent.Builder(event.toString(), EventType.Transaction).info(product).build();
             mMessageManager.logEvent(productEvent, mAppStateManager.getCurrentActivity());
             ConfigManager.log(LogLevel.DEBUG, "Logged product event - \n", productEvent.toString());
         }
         if (purchaseEvent) {
-            mEmbeddedKitManager.logTransaction(product);
+            mEmbeddedKitManager.logTransaction(productEvent);
         }
 
     }
@@ -565,6 +567,8 @@ public class MParticle {
      *
      * @param product (required not null)
      * @see MPProduct
+     *
+     * @deprecated This method has been deprecated in favor of {@link CommerceEvent} and {@link #logEvent(CommerceEvent)}
      */
     public void logTransaction(MPProduct product) {
         logProductEvent(MPProduct.Event.PURCHASE, product);

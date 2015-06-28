@@ -145,11 +145,11 @@ public class EmbeddedKitManager implements MPActivityCallbacks {
         }*/
     }
 
-    public void logTransaction(MPProduct product) {
+    public void logTransaction(MPEvent productEvent) {
         for (EmbeddedProvider provider : providers.values()){
             try {
                 if (!provider.disabled()) {
-                    provider.logTransaction(product);
+                    provider.logTransaction((MPProduct)productEvent.getInfo());
                 }
             } catch (Exception e) {
                 ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to call logTransaction for embedded provider: " + provider.getName() + ": " + e.getMessage());

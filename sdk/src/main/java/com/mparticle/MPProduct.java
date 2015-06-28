@@ -9,6 +9,10 @@ import java.util.HashMap;
  *  @see com.mparticle.MParticle#logProductEvent(MPProduct.Event, MPProduct)
  *  @see com.mparticle.MParticle#logTransaction(MPProduct)
  *
+ *  @deprecated This class has been deprecated in favor of the com.mparticle.commerce APIs.
+ *  New implementations should use the {@link com.mparticle.commerce.Product} object
+ *  and {@link com.mparticle.commerce.CommerceEvent} and/or the {@link com.mparticle.commerce.Cart} class.
+ *
  */
     
 public class MPProduct extends HashMap<String, String> {
@@ -17,6 +21,8 @@ public class MPProduct extends HashMap<String, String> {
      *  Use this enumeration to conveniently log common product interactions.
      *
      *  @see com.mparticle.MParticle#logProductEvent(MPProduct.Event, MPProduct)
+     *
+     *  @deprecated This enum has been deprecated. See {@link com.mparticle.commerce.CommerceEvent.Builder}
      */
     public static enum Event {
         VIEW("Product View"),
