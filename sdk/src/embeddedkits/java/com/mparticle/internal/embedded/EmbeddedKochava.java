@@ -1,22 +1,16 @@
 package com.mparticle.internal.embedded;
 
 import android.app.Activity;
-import android.content.Context;
-import android.content.Intent;
 import android.location.Location;
 
 import com.kochava.android.tracker.Feature;
-import com.mparticle.MPEvent;
-import com.mparticle.MPProduct;
 import com.mparticle.MParticle;
 import com.mparticle.internal.MPActivityCallbacks;
-
-import org.json.JSONObject;
 
 import java.util.HashMap;
 import java.util.Map;
 
-class EmbeddedKochava extends EmbeddedProvider {
+class EmbeddedKochava extends EmbeddedProvider implements MPActivityCallbacks {
     private static final String APP_ID = "appId";
     private static final String USE_CUSTOMER_ID = "useCustomerId";
     private static final String INCLUDE_ALL_IDS = "passAllOtherIdentities";
@@ -78,6 +72,31 @@ class EmbeddedKochava extends EmbeddedProvider {
                 }
             }
         }
+    }
+
+
+    @Override
+    public void onActivityCreated(Activity activity, int activityCount) {
+        createKochava(activity);
+    }
+
+    @Override
+    public void onActivityResumed(Activity activity, int activityCount) {
+        createKochava(activity);
+    }
+
+    @Override
+    public void onActivityPaused(Activity activity, int activityCount) {
+    }
+
+    @Override
+    public void onActivityStopped(Activity activity, int activityCount) {
+        feature = null;
+    }
+
+    @Override
+    public void onActivityStarted(Activity activity, int activityCount) {
+        createKochava(activity);
     }
 
     private void createKochava(Activity activity) {
