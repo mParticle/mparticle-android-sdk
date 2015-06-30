@@ -73,6 +73,6 @@ uploadArchives {
 dependencies {
     deployerJars "org.kuali.maven.wagons:maven-s3-wagon:1.2.1"
     compile 'com.android.support:support-v4:22.1.0'
-    compile 'com.mparticle:android-sdk:+'
+    compile 'com.mparticle:android-sdk:' + sdkversion
 
 }
