@@ -20,7 +20,9 @@ public class CartTest {
 
     @BeforeClass
     public static void setupAll() {
-        MParticle.setInstance(Mockito.mock(MParticle.class));
+        MParticle mockMp = Mockito.mock(MParticle.class);
+        Mockito.when(mockMp.getEnvironment()).thenReturn(MParticle.Environment.Development);
+        MParticle.setInstance(mockMp);
         cart = Cart.getInstance(new MockContext());
     }
 
@@ -32,8 +34,8 @@ public class CartTest {
 
     @Test
     public void testSetProductEqualityComparator() throws Exception {
-        Product product = new Product.Builder().name("matching name").build();
-        Product product2 = new Product.Builder().name("matching name").build();
+        Product product = new Product.Builder("matching name", "sku").build();
+        Product product2 = new Product.Builder("matching name", "sku").build();
         cart.add(product);
         assertEquals(1, cart.products().size());
         cart.remove(product2);
@@ -52,8 +54,8 @@ public class CartTest {
     public void testAdd() throws Exception {
         Product nullProduct = null;
         cart.add(nullProduct);
-        Product product = new Product.Builder().name("name 1").build();
-        Product product2 = new Product.Builder().name("name 2").build();
+        Product product = new Product.Builder("name 1", "sku").build();
+        Product product2 = new Product.Builder("name 2", "sku").build();
         cart.add(product, product2, nullProduct);
         assertEquals(2, cart.products().size());
         cart.add(product, product2);
@@ -71,8 +73,8 @@ public class CartTest {
             }
         });
         Product nullProduct = null;
-        Product product = new Product.Builder().name("name 1").build();
-        Product product2 = new Product.Builder().name("name 2").build();
+        Product product = new Product.Builder("name 1", "sku 1").build();
+        Product product2 = new Product.Builder("name 2", "sku 2").build();
         cart.remove(nullProduct);
         cart.remove(product, product2, nullProduct);
         assertEquals(1, (int) cart.getProduct("name 1").getQuantity());
@@ -101,16 +103,37 @@ public class CartTest {
     @Test
     public void testPurchase() throws Exception {
         testAdd();
-        cart.purchase(null);
+        try {
+            cart.purchase(null);
+        }catch (IllegalStateException stateException){
+
+        }
         assertEquals(2, cart.products().size());
-        cart.purchase(null, true);
+        try {
+            cart.purchase(new TransactionAttributes());
+        }catch (IllegalStateException stateException){
+
+        }
+        assertEquals(2, cart.products().size());
+        cart.purchase(new TransactionAttributes("trans id"));
+        assertEquals(2, cart.products().size());
+        cart.purchase(new TransactionAttributes("trans id"), true);
         assertEquals(0, cart.products().size());
     }
 
     @Test
     public void testRefund() throws Exception {
-        cart.refund(null);
-        cart.refund(new TransactionAttributes());
+        try {
+            cart.refund(null);
+        }catch (IllegalStateException stateexception){
+
+        }
+        try {
+            cart.refund(new TransactionAttributes());
+        }catch (IllegalStateException illegalstateexception){
+
+        }
+        cart.refund(new TransactionAttributes("trans id"));
     }
 
     @Test
@@ -150,7 +173,7 @@ public class CartTest {
     public void testProducts() throws Exception {
         Exception e = null;
         try {
-            cart.products().add(new Product.Builder("shouldn't work").build());
+            cart.products().add(new Product.Builder("name","sku").build());
         } catch (Exception uoe) {
             e = uoe;
         }

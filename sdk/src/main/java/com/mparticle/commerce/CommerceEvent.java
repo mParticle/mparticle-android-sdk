@@ -1,6 +1,10 @@
 package com.mparticle.commerce;
 
 
+import com.mparticle.MParticle;
+import com.mparticle.internal.ConfigManager;
+import com.mparticle.internal.MPUtility;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -49,6 +53,30 @@ public final class CommerceEvent {
         mScreen = builder.mScreen;
         mImpressions = builder.impressions;
         mNonIteraction = builder.mNonIteraction;
+
+        boolean devMode = MParticle.getInstance().getEnvironment().equals(MParticle.Environment.Development);
+
+        if (MPUtility.isEmpty(mProductAction) && MPUtility.isEmpty(mPromotionAction)){
+            if (devMode){
+                throw new IllegalStateException("CommerceEvent must be created with either a product action or promotion action");
+            }else{
+                ConfigManager.log(MParticle.LogLevel.ERROR, "CommerceEvent must be created with either a product action or promotion action");
+            }
+        }
+
+        if (mProductAction != null){
+            if (mProductAction.equalsIgnoreCase(CommerceEvent.PURCHASE) ||
+                    mProductAction.equalsIgnoreCase(CommerceEvent.REFUND)){
+                if (mTransactionAttributes == null || MPUtility.isEmpty(mTransactionAttributes.getId())) {
+                    String message = "CommerceEvent with action " + mPromotionAction + " must include a TransactionAttributes object with a transaction ID.";
+                    if (devMode) {
+                        throw new IllegalStateException(message);
+                    } else {
+                        ConfigManager.log(MParticle.LogLevel.ERROR, message);
+                    }
+                }
+            }
+        }
     }
 
     private CommerceEvent() {
@@ -225,7 +253,6 @@ public final class CommerceEvent {
         private String mScreen = null;
         private Boolean mNonIteraction;
         private List<Impression> impressions;
-        private String mEventName = null;
 
         private Builder() {
             mProductAction = mPromotionAction = null;
@@ -255,11 +282,6 @@ public final class CommerceEvent {
                     promotionList.add(promotion);
                 }
             }
-        }
-
-        public Builder eventName(String eventName) {
-            mEventName = eventName;
-            return this;
         }
 
         public Builder screen(String screenName) {

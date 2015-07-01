@@ -105,14 +105,10 @@ public final class Cart {
                     int index = productList.indexOf(product);
                     if (index >= 0) {
                         Product currentProduct = productList.get(index);
-                        Integer quantity = product.getQuantity();
-                        if (quantity == null) {
-                            quantity = 1;
-                        }
-                        Integer currentQuantity = currentProduct.getQuantity();
-                        if (currentQuantity == null) {
-                            currentQuantity = 1;
-                        }
+                        double quantity = product.getQuantity();
+
+                        double currentQuantity = currentProduct.getQuantity();
+
                         currentProduct.setQuantity(currentQuantity + quantity);
                     } else {
                         productList.add(product);
@@ -146,9 +142,9 @@ public final class Cart {
                 if (product != null) {
                     if (productList.contains(product)) {
                         Product currentProduct = productList.get(productList.indexOf(product));
-                        int currentQuantity = currentProduct.getQuantity() == null ? 1 : currentProduct.getQuantity();
-                        int removeQuantity = product.getQuantity() == null ? 1 : product.getQuantity();
-                        int newQuantity = currentQuantity - removeQuantity;
+                        double currentQuantity = currentProduct.getQuantity();
+                        double removeQuantity = product.getQuantity();
+                        double newQuantity = currentQuantity - removeQuantity;
                         if (newQuantity < 0) {
                             newQuantity = 0;
                         }
@@ -335,7 +331,7 @@ public final class Cart {
     /**
      * Find a product by name
      *
-     * @param a product name
+     * @param name the product name
      * @return a Product object, or null if no matching Products were found.
      */
     public synchronized Product getProduct(String name) {

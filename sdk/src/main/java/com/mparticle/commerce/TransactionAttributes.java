@@ -12,6 +12,29 @@ public class TransactionAttributes {
         return mId;
     }
 
+    /**
+     * Create a TransactionAttributes object to be associated with a {@link CommerceEvent}.
+     *
+     * Note that transaction ID is required for {@link CommerceEvent#PURCHASE} and {@link CommerceEvent#REFUND} events.
+     *
+     */
+    public TransactionAttributes() {
+        super();
+    }
+
+    /**
+     * Create a TransactionAttributes object to be associated with a {@link CommerceEvent}.
+     *
+     * Note that transaction ID is required for {@link CommerceEvent#PURCHASE} and {@link CommerceEvent#REFUND} events.
+     *
+     * @param transactionId a unique ID for this transaction
+     */
+    public TransactionAttributes(String transactionId) {
+        super();
+        setId(transactionId);
+    }
+
+
     public TransactionAttributes setId(String id) {
         mId = id;
         return this;

@@ -1,5 +1,10 @@
 package com.mparticle.commerce;
 
+import com.mparticle.MParticle;
+import com.mparticle.internal.ConfigManager;
+import com.mparticle.internal.Constants;
+import com.mparticle.internal.MPUtility;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -21,7 +26,7 @@ public final class Product extends HashMap<String, Object> {
 
     private Integer mPosition;
     private Double mPrice;
-    private Integer mQuantity;
+    private double mQuantity;
     private String mBrand;
     private String mVariant;
 
@@ -46,6 +51,26 @@ public final class Product extends HashMap<String, Object> {
         mBrand = builder.mBrand;
         mVariant = builder.mVariant;
         mCustomAttributes = builder.mCustomAttributes;
+
+        boolean devMode = MParticle.getInstance().getEnvironment().equals(MParticle.Environment.Development);
+
+        if (MPUtility.isEmpty(mName)){
+            String message = "Product name is required.";
+            if (devMode){
+                throw new IllegalArgumentException(message);
+            }else {
+                mName = "Unknown";
+                ConfigManager.log(MParticle.LogLevel.ERROR, message);
+            }
+        }else if (MPUtility.isEmpty(mSku)){
+            String message = "Product sku is required.";
+            if (devMode){
+                throw new IllegalArgumentException(message);
+            }else{
+                mSku = "Unknown";
+                ConfigManager.log(MParticle.LogLevel.ERROR, message);
+            }
+        }
     }
 
     public String getName() {
@@ -72,7 +97,7 @@ public final class Product extends HashMap<String, Object> {
         return mPrice;
     }
 
-    public Integer getQuantity() {
+    public double getQuantity() {
         return mQuantity;
     }
 
@@ -120,10 +145,9 @@ public final class Product extends HashMap<String, Object> {
 
     static Product fromJson(JSONObject jsonObject) {
         try{
-            Product.Builder builder =  new Product.Builder(jsonObject.getString("nm"));
+            Product.Builder builder =  new Product.Builder(jsonObject.getString("nm"), jsonObject.optString("id", null));
             builder.category(jsonObject.optString("ca", null));
             builder.couponCode(jsonObject.optString("cc", null));
-            builder.sku(jsonObject.optString("id", null));
             if (jsonObject.has("ps")) {
                 builder.position(jsonObject.optInt("ps", 0));
             }
@@ -176,9 +200,8 @@ public final class Product extends HashMap<String, Object> {
             if (mPrice != null){
                 productJson.put("pr", mPrice);
             }
-            if (mQuantity != null){
-                productJson.put("qt", mQuantity);
-            }
+            productJson.put("qt", mQuantity);
+
             if (mBrand != null){
                 productJson.put("br", mBrand);
             }
@@ -200,7 +223,7 @@ public final class Product extends HashMap<String, Object> {
         return new JSONObject();
     }
 
-    void setQuantity(int quantity) {
+    void setQuantity(double quantity) {
         mQuantity = quantity;
     }
 
@@ -212,14 +235,16 @@ public final class Product extends HashMap<String, Object> {
 
         private Integer mPosition;
         private Double mPrice;
-        private Integer mQuantity;
+        private double mQuantity = 1;
         private String mBrand;
         private String mVariant;
         private Map<String, String> mCustomAttributes = null;
 
-        public Builder(){}
-        public Builder(String name){
+        private Builder(){}
+
+        public Builder(String name, String sku){
             mName = name;
+            mSku = sku;
         }
 
         public Builder(Product product){
@@ -261,7 +286,7 @@ public final class Product extends HashMap<String, Object> {
             return this;
         }
 
-        public Builder quantity(Integer quantity) {
+        public Builder quantity(double quantity) {
             mQuantity = quantity;
             return this;
         }
