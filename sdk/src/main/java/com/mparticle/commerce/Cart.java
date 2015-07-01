@@ -87,7 +87,7 @@ public final class Cart {
     /**
      * Add one or more products to the Cart and log a {@link CommerceEvent}.
      *
-     * This method will log a {@link CommerceEvent} with the {@link CommerceEvent#ADD} action. Products added here
+     * This method will log a {@link CommerceEvent} with the {@link CommerceEvent#ADD_TO_CART} action. Products added here
      * will remain in the cart across app restarts, and will be included in future calls to {@link #purchase(TransactionAttributes)}
      *
      * You can use this method to adjust the quantity of a Product in the cart, by passing a Product that is already contained
@@ -116,7 +116,7 @@ public final class Cart {
                 }
             }
             save();
-            CommerceEvent event = new CommerceEvent.Builder(CommerceEvent.ADD, products)
+            CommerceEvent event = new CommerceEvent.Builder(CommerceEvent.ADD_TO_CART, products)
                     .build();
             MParticle.getInstance().logEvent(event);
         }
@@ -126,7 +126,7 @@ public final class Cart {
     /**
      * Remove one or more products from the Cart and log a {@link CommerceEvent}.
      *
-     * This method will log a {@link CommerceEvent} with the {@link CommerceEvent#REMOVE} action.
+     * This method will log a {@link CommerceEvent} with the {@link CommerceEvent#REMOVE_FROM_CART} action.
      *
      * You can use this method to adjust the quantity of a Product in the cart, by passing a Product that is already contained
      * in the Cart.
@@ -158,7 +158,7 @@ public final class Cart {
             }
 
             save();
-            CommerceEvent event = new CommerceEvent.Builder(CommerceEvent.REMOVE, products)
+            CommerceEvent event = new CommerceEvent.Builder(CommerceEvent.REMOVE_FROM_CART, products)
                     .build();
             MParticle.getInstance().logEvent(event);
         }
@@ -167,7 +167,7 @@ public final class Cart {
     /**
      * Remove a product from the Cart by index and log a {@link CommerceEvent}.
      *
-     * This method will log a {@link CommerceEvent} with the {@link CommerceEvent#REMOVE} action.
+     * This method will log a {@link CommerceEvent} with the {@link CommerceEvent#REMOVE_FROM_CART} action.
      *
      *
      * @param index of the Product to remove
@@ -180,7 +180,7 @@ public final class Cart {
         if (index >= 0 && productList.size() > index) {
             Product product = productList.remove(index);
             save();
-            CommerceEvent event = new CommerceEvent.Builder(CommerceEvent.REMOVE, product)
+            CommerceEvent event = new CommerceEvent.Builder(CommerceEvent.REMOVE_FROM_CART, product)
                     .build();
             MParticle.getInstance().logEvent(event);
         }
