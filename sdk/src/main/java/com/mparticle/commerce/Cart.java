@@ -88,37 +88,41 @@ public final class Cart {
      * Add one or more products to the Cart and log a {@link CommerceEvent}.
      *
      * This method will log a {@link CommerceEvent} with the {@link CommerceEvent#ADD_TO_CART} action. Products added here
-     * will remain in the cart across app restarts, and will be included in future calls to {@link #purchase(TransactionAttributes)}
+     * will remain in the cart across app restarts, and will be included in future calls to {@link CommerceApi#purchase(TransactionAttributes)}
+     * or {@link CommerceEvent}'s with a product action {@link CommerceEvent#PURCHASE}
      *
      * You can use this method to adjust the quantity of a Product in the cart, by passing a Product that is already contained
      * in the Cart.
      *
      * @see #setProductEqualityComparator(Product.EqualityComparator)
      *
-     * @param products the product objects to add to the Cart
+     * @param product the product to add to the Cart
      * @return the Cart object, useful for chaining several commands
      */
-    public synchronized Cart add(Product... products) {
-        if (products != null) {
-            for (Product product : products) {
-                if (product != null) {
-                    int index = productList.indexOf(product);
-                    if (index >= 0) {
-                        Product currentProduct = productList.get(index);
-                        double quantity = product.getQuantity();
+    public synchronized Cart add(Product product) {
+        return add(product, true);
+    }
 
-                        double currentQuantity = currentProduct.getQuantity();
-
-                        currentProduct.setQuantity(currentQuantity + quantity);
-                    } else {
-                        productList.add(product);
-                    }
-                }
+    public synchronized Cart add(Product product, boolean logEvent){
+        if (product != null) {
+            int index = productList.indexOf(product);
+            if (index >= 0) {
+                Product currentProduct = productList.get(index);
+                double quantity = product.getQuantity();
+                double currentQuantity = currentProduct.getQuantity();
+                currentProduct.updateTimeAdded();
+                currentProduct.setQuantity(currentQuantity + quantity);
+            } else {
+                product.updateTimeAdded();
+                productList.add(product);
             }
+
             save();
-            CommerceEvent event = new CommerceEvent.Builder(CommerceEvent.ADD_TO_CART, products)
-                    .build();
-            MParticle.getInstance().logEvent(event);
+            if (logEvent) {
+                CommerceEvent event = new CommerceEvent.Builder(CommerceEvent.ADD_TO_CART, product)
+                        .build();
+                MParticle.getInstance().logEvent(event);
+            }
         }
         return this;
     }
@@ -133,35 +137,49 @@ public final class Cart {
      *
      * @see #setProductEqualityComparator(Product.EqualityComparator)
      *
-     * @param products the product objects to remove from the Cart
+     * @param product the product objects to remove from the Cart
      * @return the Cart object, useful for chaining several commands
      */
-    public synchronized void remove(Product... products) {
-        if (products != null) {
-            for (Product product : products) {
-                if (product != null) {
-                    if (productList.contains(product)) {
-                        Product currentProduct = productList.get(productList.indexOf(product));
-                        double currentQuantity = currentProduct.getQuantity();
-                        double removeQuantity = product.getQuantity();
-                        double newQuantity = currentQuantity - removeQuantity;
-                        if (newQuantity < 0) {
-                            newQuantity = 0;
-                        }
-                        if (newQuantity == 0) {
-                            productList.remove(product);
-                        } else {
-                            currentProduct.setQuantity(newQuantity);
-                        }
-                    }
+    public synchronized Cart remove(Product product) {
+       return remove(product, true);
+    }
+
+    /**
+     * Remove one or more products from the Cart and log a {@link CommerceEvent}.
+     *
+     * This method will log a {@link CommerceEvent} with the {@link CommerceEvent#REMOVE_FROM_CART} action.
+     *
+     * You can use this method to adjust the quantity of a Product in the cart, by passing a Product that is already contained
+     * in the Cart.
+     *
+     * @see #setProductEqualityComparator(Product.EqualityComparator)
+     *
+     * @param product the product to remove from the Cart
+     * @return the Cart object, useful for chaining several commands
+     */
+    public synchronized Cart remove(Product product, boolean logEvent) {
+        if (product != null) {
+            if (productList.contains(product)) {
+                Product currentProduct = productList.get(productList.indexOf(product));
+                double currentQuantity = currentProduct.getQuantity();
+                double removeQuantity = product.getQuantity();
+                double newQuantity = currentQuantity - removeQuantity;
+                if (newQuantity < 0) {
+                    newQuantity = 0;
+                }
+                if (newQuantity == 0) {
+                    productList.remove(product);
+                } else {
+                    currentProduct.setQuantity(newQuantity);
                 }
             }
-
             save();
-            CommerceEvent event = new CommerceEvent.Builder(CommerceEvent.REMOVE_FROM_CART, products)
-                    .build();
-            MParticle.getInstance().logEvent(event);
+            if (logEvent) {
+                CommerceEvent event = new CommerceEvent.Builder(CommerceEvent.REMOVE_FROM_CART, product).build();
+                MParticle.getInstance().logEvent(event);
+            }
         }
+        return this;
     }
 
     /**
@@ -185,83 +203,6 @@ public final class Cart {
             MParticle.getInstance().logEvent(event);
         }
         return removed;
-    }
-
-    /**
-     * Log a {@link CommerceEvent} with the {@link CommerceEvent#CHECKOUT} action, including the Products that are
-     * currently in the Cart.
-     *
-     * You should call {@link #add(Product...)} prior to this method.
-     *
-     * @param step the checkout progress/step for apps that have a multi-step checkout process
-     * @param options a label to associate with the checkout event
-     */
-    public synchronized void checkout(int step, String options) {
-        CommerceEvent event = new CommerceEvent.Builder(CommerceEvent.CHECKOUT, productList.toArray(new Product[productList.size()]))
-                .checkoutStep(step)
-                .checkoutOptions(options)
-                .build();
-        MParticle.getInstance().logEvent(event);
-    }
-
-    /**
-     * Log a {@link CommerceEvent} with the {@link CommerceEvent#CHECKOUT} action, including the Products that are
-     * currently in the Cart.
-     *
-     * You should call {@link #add(Product...)} prior to this method.
-     *
-     */
-    public synchronized void checkout() {
-        CommerceEvent event = new CommerceEvent.Builder(CommerceEvent.CHECKOUT, productList.toArray(new Product[productList.size()]))
-                .build();
-        MParticle.getInstance().logEvent(event);
-    }
-
-    /**
-     * Log a {@link CommerceEvent} with the {@link CommerceEvent#PURCHASE} action for the Products that are
-     * currently in the Cart.
-     *
-     * By default, this method will *not* clear the cart. You must manually call {@link #clear()}.
-     *
-     * You should call {@link #add(Product...)} prior to this method.
-     *
-     * @param attributes the attributes to associate with this purchase
-     */
-    public void purchase(TransactionAttributes attributes) {
-        purchase(attributes, false);
-    }
-
-    /**
-     * Log a {@link CommerceEvent} with the {@link CommerceEvent#PURCHASE} action for the Products that are
-     * currently in the Cart.
-     *
-     * You should call {@link #add(Product...)} prior to this method.
-     *
-     * @param attributes the attributes to associate with this purchase
-     * @param clearCart boolean determining if the cart should remove its contents after the purchase
-     */
-    public synchronized void purchase(TransactionAttributes attributes, boolean clearCart) {
-        CommerceEvent event = new CommerceEvent.Builder(CommerceEvent.PURCHASE, productList.toArray(new Product[productList.size()]))
-                .transactionAttributes(attributes)
-                .build();
-        if (clearCart) {
-            productList.clear();
-            save();
-        }
-        MParticle.getInstance().logEvent(event);
-    }
-
-    /**
-     * Log a {@link CommerceEvent} with the {@link CommerceEvent#REFUND} action for the Products that are
-     * currently in the Cart.
-     *
-     * @param attributes the attributes to associate with this refund. Typically at least the transaction ID is required.
-     */
-    public void refund(TransactionAttributes attributes) {
-        CommerceEvent event = new CommerceEvent.Builder(CommerceEvent.REFUND, productList.toArray(new Product[productList.size()]))
-                .transactionAttributes(attributes)
-                .build();
-        MParticle.getInstance().logEvent(event);
     }
 
     /**

@@ -238,7 +238,6 @@ public final class CommerceEvent {
         return mCurrency;
     }
 
-
     public static class Builder {
 
         private final String mProductAction;
@@ -268,7 +267,9 @@ public final class CommerceEvent {
                     productList = new LinkedList<Product>();
                 }
                 for (Product product : products) {
-                    productList.add(product);
+                    if (product != null) {
+                        productList.add(product);
+                    }
                 }
             }
         }
@@ -370,6 +371,7 @@ public final class CommerceEvent {
             mProductListSource = listSource;
             return this;
         }
+
     }
 
     public static class Impression {

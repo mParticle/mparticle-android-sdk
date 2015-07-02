@@ -23,7 +23,7 @@ public final class Product extends HashMap<String, Object> {
     private String mCategory;
     private String mCouponCode;
     private String mSku;
-
+    private double mTimeAdded;
     private Integer mPosition;
     private Double mPrice;
     private double mQuantity;
@@ -51,6 +51,7 @@ public final class Product extends HashMap<String, Object> {
         mBrand = builder.mBrand;
         mVariant = builder.mVariant;
         mCustomAttributes = builder.mCustomAttributes;
+        updateTimeAdded();
 
         boolean devMode = MParticle.getInstance().getEnvironment().equals(MParticle.Environment.Development);
 
@@ -71,6 +72,10 @@ public final class Product extends HashMap<String, Object> {
                 ConfigManager.log(MParticle.LogLevel.ERROR, message);
             }
         }
+    }
+
+    void updateTimeAdded(){
+        mTimeAdded = System.currentTimeMillis();
     }
 
     public String getName() {
@@ -172,7 +177,9 @@ public final class Product extends HashMap<String, Object> {
                     builder.customAttributes(customAttributes);
                 }
             }
-            return builder.build();
+            Product product = builder.build();
+            product.mTimeAdded = jsonObject.optDouble("act", 0);
+            return product;
         }catch (JSONException jse){
 
         }
@@ -201,6 +208,8 @@ public final class Product extends HashMap<String, Object> {
                 productJson.put("pr", mPrice);
             }
             productJson.put("qt", mQuantity);
+
+            productJson.put("act", mTimeAdded);
 
             if (mBrand != null){
                 productJson.put("br", mBrand);

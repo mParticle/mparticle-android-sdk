@@ -56,9 +56,9 @@ public class CartTest {
         cart.add(nullProduct);
         Product product = new Product.Builder("name 1", "sku").build();
         Product product2 = new Product.Builder("name 2", "sku").build();
-        cart.add(product, product2, nullProduct);
+        cart.add(product).add(product2).add(nullProduct);
         assertEquals(2, cart.products().size());
-        cart.add(product, product2);
+        cart.add(product).add(product2);
         assertEquals(2, (int) cart.products().get(0).getQuantity());
         assertEquals(2, (int) cart.products().get(1).getQuantity());
     }
@@ -76,10 +76,10 @@ public class CartTest {
         Product product = new Product.Builder("name 1", "sku 1").build();
         Product product2 = new Product.Builder("name 2", "sku 2").build();
         cart.remove(nullProduct);
-        cart.remove(product, product2, nullProduct);
+        cart.remove(product).remove(product2).remove(nullProduct);
         assertEquals(1, (int) cart.getProduct("name 1").getQuantity());
         assertEquals(1, (int) cart.getProduct("name 2").getQuantity());
-        cart.remove(product, product2, nullProduct);
+        cart.remove(product).remove(product2).remove(nullProduct);
         assertNull(cart.getProduct("name 1"));
         assertNull(cart.getProduct("name 2"));
     }
@@ -92,49 +92,7 @@ public class CartTest {
         cart.remove(6);
     }
 
-    @Test
-    public void testCheckout() throws Exception {
-        cart.checkout();
-        cart.checkout(-1, null);
-        cart.checkout(0, "");
-    }
 
-
-    @Test
-    public void testPurchase() throws Exception {
-        testAdd();
-        try {
-            cart.purchase(null);
-        }catch (IllegalStateException stateException){
-
-        }
-        assertEquals(2, cart.products().size());
-        try {
-            cart.purchase(new TransactionAttributes());
-        }catch (IllegalStateException stateException){
-
-        }
-        assertEquals(2, cart.products().size());
-        cart.purchase(new TransactionAttributes("trans id"));
-        assertEquals(2, cart.products().size());
-        cart.purchase(new TransactionAttributes("trans id"), true);
-        assertEquals(0, cart.products().size());
-    }
-
-    @Test
-    public void testRefund() throws Exception {
-        try {
-            cart.refund(null);
-        }catch (IllegalStateException stateexception){
-
-        }
-        try {
-            cart.refund(new TransactionAttributes());
-        }catch (IllegalStateException illegalstateexception){
-
-        }
-        cart.refund(new TransactionAttributes("trans id"));
-    }
 
     @Test
     public void testLoadFromString() throws Exception {

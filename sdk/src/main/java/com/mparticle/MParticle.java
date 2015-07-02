@@ -15,8 +15,10 @@ import android.provider.Settings;
 import android.util.Log;
 import android.webkit.WebView;
 
+import com.mparticle.commerce.Cart;
 import com.mparticle.commerce.CommerceApi;
 import com.mparticle.commerce.CommerceEvent;
+import com.mparticle.commerce.Product;
 import com.mparticle.internal.AppStateManager;
 import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.Constants;
@@ -57,6 +59,7 @@ import java.net.SocketImpl;
 import java.net.SocketImplFactory;
 import java.net.URL;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -465,6 +468,11 @@ public class MParticle {
        );
     }
 
+    /**
+     *
+     *
+     * @param event
+     */
     public void logEvent(MPEvent event){
         if (mConfigManager.isEnabled() && checkEventLimit()) {
             ensureActiveSession();
@@ -474,8 +482,30 @@ public class MParticle {
         }
     }
 
+    /**
+     *
+     *
+     * @param event
+     */
     public void logEvent(CommerceEvent event) {
         if (mConfigManager.isEnabled() && checkEventLimit()) {
+            Cart cart = Cart.getInstance(mAppContext);
+            if (event.getProductAction() != null){
+                List<Product> productList = event.getProducts();
+                if (event.getProductAction().equalsIgnoreCase(CommerceEvent.ADD_TO_CART)){
+                    if (productList != null) {
+                        for (Product product : productList) {
+                            cart.add(product, false);
+                        }
+                    }
+                }else if (event.getProductAction().equalsIgnoreCase(CommerceEvent.REMOVE_FROM_CART)){
+                    if (productList != null) {
+                        for (Product product : productList) {
+                            cart.remove(product, false);
+                        }
+                    }
+                }
+            }
             ensureActiveSession();
             mMessageManager.logEvent(event);
             ConfigManager.log(LogLevel.DEBUG, "Logged commerce event - \n", event.toString());
