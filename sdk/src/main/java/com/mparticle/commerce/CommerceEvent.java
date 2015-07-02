@@ -58,17 +58,17 @@ public final class CommerceEvent {
 
         boolean devMode = MParticle.getInstance().getEnvironment().equals(MParticle.Environment.Development);
 
-        if (MPUtility.isEmpty(mProductAction) && MPUtility.isEmpty(mPromotionAction)){
-            if (devMode){
+        if (MPUtility.isEmpty(mProductAction) && MPUtility.isEmpty(mPromotionAction)) {
+            if (devMode) {
                 throw new IllegalStateException("CommerceEvent must be created with either a product action or promotion action");
-            }else{
+            } else {
                 ConfigManager.log(MParticle.LogLevel.ERROR, "CommerceEvent must be created with either a product action or promotion action");
             }
         }
 
-        if (mProductAction != null){
+        if (mProductAction != null) {
             if (mProductAction.equalsIgnoreCase(CommerceEvent.PURCHASE) ||
-                    mProductAction.equalsIgnoreCase(CommerceEvent.REFUND)){
+                    mProductAction.equalsIgnoreCase(CommerceEvent.REFUND)) {
                 if (mTransactionAttributes == null || MPUtility.isEmpty(mTransactionAttributes.getId())) {
                     String message = "CommerceEvent with action " + mPromotionAction + " must include a TransactionAttributes object with a transaction ID.";
                     if (devMode) {
@@ -78,6 +78,28 @@ public final class CommerceEvent {
                     }
                 }
             }
+        }
+
+        if (mTransactionAttributes == null || mTransactionAttributes.getRevenue() == null) {
+            double transactionRevenue = 0;
+            if (mTransactionAttributes == null) {
+                mTransactionAttributes = new TransactionAttributes();
+            } else {
+                Double shipping = mTransactionAttributes.getShipping();
+                Double tax = mTransactionAttributes.getTax();
+                transactionRevenue += (shipping != null ? shipping : 0);
+                transactionRevenue += (tax != null ? tax : 0);
+            }
+            if (productList != null) {
+                for (Product product : productList) {
+                    if (product != null) {
+                        Double productPrice = (product.getPrice() != null ? product.getPrice() : 0);
+                        productPrice *= product.getQuantity();
+                        transactionRevenue += productPrice;
+                    }
+                }
+            }
+            mTransactionAttributes.setRevenue(transactionRevenue);
         }
     }
 
