@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Map;
 
 
-public final class Product extends HashMap<String, Object> {
+public final class Product {
 
     private static EqualityComparator mComparator = null;
     private Map<String, String> mCustomAttributes;
@@ -29,6 +29,10 @@ public final class Product extends HashMap<String, Object> {
     private double mQuantity;
     private String mBrand;
     private String mVariant;
+
+    public Map<String, String> getCustomAttributes() {
+        return mCustomAttributes;
+    }
 
     public interface EqualityComparator {
         boolean equals(Product product1, Product product2);
