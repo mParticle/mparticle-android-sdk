@@ -91,11 +91,14 @@ public class CommerceApi {
      *
      * @param attributes the attributes to associate with this refund. Typically at least the transaction ID is required.
      */
-    public void refund(TransactionAttributes attributes) {
+    public void refund(TransactionAttributes attributes, boolean clearCart) {
         List<Product> productList = Cart.getInstance(mContext).products();
         CommerceEvent event = new CommerceEvent.Builder(CommerceEvent.REFUND, productList.toArray(new Product[productList.size()]))
                 .transactionAttributes(attributes)
                 .build();
+        if (clearCart) {
+            Cart.getInstance(mContext).clear();
+        }
         MParticle.getInstance().logEvent(event);
     }
 
