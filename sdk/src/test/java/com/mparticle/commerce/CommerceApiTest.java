@@ -70,15 +70,15 @@ public class CommerceApiTest {
     @Test
     public void testRefund() throws Exception {
         try {
-            commerceApi.refund(null);
+            commerceApi.refund(null, false);
         }catch (IllegalStateException stateexception){
 
         }
         try {
-            commerceApi.refund(new TransactionAttributes());
+            commerceApi.refund(new TransactionAttributes(), false);
         }catch (IllegalStateException illegalstateexception){
 
         }
-        commerceApi.refund(new TransactionAttributes("trans id"));
+        commerceApi.refund(new TransactionAttributes("trans id"), false);
     }
 }
