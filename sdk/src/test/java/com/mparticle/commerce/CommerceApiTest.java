@@ -42,8 +42,8 @@ public class CommerceApiTest {
     public void testPurchase() throws Exception {
         Product nullProduct = null;
         cart.add(nullProduct);
-        Product product = new Product.Builder("name 1", "sku").build();
-        Product product2 = new Product.Builder("name 2", "sku").build();
+        Product product = new Product.Builder("name 1", "sku", 5).build();
+        Product product2 = new Product.Builder("name 2", "sku", 2).build();
         cart.add(product).add(product2).add(nullProduct);
         assertEquals(2, cart.products().size());
         try {

@@ -25,7 +25,7 @@ public final class Product {
     private String mSku;
     private double mTimeAdded;
     private Integer mPosition;
-    private Double mPrice;
+    private double mPrice;
     private double mQuantity;
     private String mBrand;
     private String mVariant;
@@ -102,7 +102,7 @@ public final class Product {
         return mPosition;
     }
 
-    public Double getPrice() {
+    public double getUnitPrice() {
         return mPrice;
     }
 
@@ -154,14 +154,11 @@ public final class Product {
 
     static Product fromJson(JSONObject jsonObject) {
         try{
-            Product.Builder builder =  new Product.Builder(jsonObject.getString("nm"), jsonObject.optString("id", null));
+            Product.Builder builder =  new Product.Builder(jsonObject.getString("nm"), jsonObject.optString("id", null), jsonObject.optDouble("pr", 0));
             builder.category(jsonObject.optString("ca", null));
             builder.couponCode(jsonObject.optString("cc", null));
             if (jsonObject.has("ps")) {
                 builder.position(jsonObject.optInt("ps", 0));
-            }
-            if (jsonObject.has("pr")) {
-                builder.unitPrice(jsonObject.optDouble("pr", 0));
             }
             if (jsonObject.has("qt")) {
                 builder.quantity(jsonObject.optInt("qt", 1));
@@ -208,9 +205,9 @@ public final class Product {
             if (mPosition != null){
                 productJson.put("ps", mPosition);
             }
-            if (mPrice != null){
-                productJson.put("pr", mPrice);
-            }
+
+            productJson.put("pr", mPrice);
+
             productJson.put("qt", mQuantity);
 
             productJson.put("act", mTimeAdded);
@@ -247,7 +244,7 @@ public final class Product {
         private String mSku;
 
         private Integer mPosition;
-        private Double mPrice;
+        private double mPrice;
         private double mQuantity = 1;
         private String mBrand;
         private String mVariant;
@@ -255,9 +252,10 @@ public final class Product {
 
         private Builder(){}
 
-        public Builder(String name, String sku){
+        public Builder(String name, String sku, double unitPrice){
             mName = name;
             mSku = sku;
+            mPrice = unitPrice;
         }
 
         public Builder(Product product){
@@ -294,7 +292,7 @@ public final class Product {
             return this;
         }
 
-        public Builder unitPrice(Double price) {
+        public Builder unitPrice(double price) {
             mPrice = price;
             return this;
         }

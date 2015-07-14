@@ -194,7 +194,7 @@ public class EmbeddedAppboy extends EmbeddedProvider implements MPActivityCallba
         Appboy.getInstance(context).logPurchase(
                 product.getSku(),
                 currency,
-                new BigDecimal(product.getPrice()),
+                new BigDecimal(product.getUnitPrice()),
                 (int) product.getQuantity(),
                 purchaseProperties
         );

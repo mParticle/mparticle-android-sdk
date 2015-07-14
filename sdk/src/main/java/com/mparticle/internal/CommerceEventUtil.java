@@ -84,9 +84,8 @@ public class CommerceEventUtil {
             if (product.getPosition() != null) {
                 attributes.put(Constants.Commerce.ATT_PRODUCT_POSITION, Integer.toString(product.getPosition()));
             }
-            if (product.getPrice() != null) {
-                attributes.put(Constants.Commerce.ATT_PRODUCT_PRICE, Double.toString(product.getPrice()));
-            }
+            attributes.put(Constants.Commerce.ATT_PRODUCT_PRICE, Double.toString(product.getUnitPrice()));
+
 
             attributes.put(Constants.Commerce.ATT_PRODUCT_QUANTITY, Double.toString(product.getQuantity()));
         }

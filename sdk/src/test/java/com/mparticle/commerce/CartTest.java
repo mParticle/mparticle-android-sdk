@@ -34,8 +34,8 @@ public class CartTest {
 
     @Test
     public void testSetProductEqualityComparator() throws Exception {
-        Product product = new Product.Builder("matching name", "sku").build();
-        Product product2 = new Product.Builder("matching name", "sku").build();
+        Product product = new Product.Builder("matching name", "sku", 5).build();
+        Product product2 = new Product.Builder("matching name", "sku", 2).build();
         cart.add(product);
         assertEquals(1, cart.products().size());
         cart.remove(product2);
@@ -54,8 +54,8 @@ public class CartTest {
     public void testAdd() throws Exception {
         Product nullProduct = null;
         cart.add(nullProduct);
-        Product product = new Product.Builder("name 1", "sku").build();
-        Product product2 = new Product.Builder("name 2", "sku").build();
+        Product product = new Product.Builder("name 1", "sku", 5).build();
+        Product product2 = new Product.Builder("name 2", "sku", 2).build();
         cart.add(product).add(product2).add(nullProduct);
         assertEquals(2, cart.products().size());
         cart.add(product).add(product2);
@@ -73,8 +73,8 @@ public class CartTest {
             }
         });
         Product nullProduct = null;
-        Product product = new Product.Builder("name 1", "sku 1").build();
-        Product product2 = new Product.Builder("name 2", "sku 2").build();
+        Product product = new Product.Builder("name 1", "sku 1", 5).build();
+        Product product2 = new Product.Builder("name 2", "sku 2", 2).build();
         cart.remove(nullProduct);
         cart.remove(product).remove(product2).remove(nullProduct);
         assertNull(cart.getProduct("name 1"));
@@ -128,7 +128,7 @@ public class CartTest {
     public void testProducts() throws Exception {
         Exception e = null;
         try {
-            cart.products().add(new Product.Builder("name","sku").build());
+            cart.products().add(new Product.Builder("name","sku", 5).build());
         } catch (Exception uoe) {
             e = uoe;
         }

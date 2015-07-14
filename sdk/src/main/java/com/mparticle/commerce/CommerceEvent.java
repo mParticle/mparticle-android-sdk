@@ -93,9 +93,9 @@ public final class CommerceEvent {
             if (productList != null) {
                 for (Product product : productList) {
                     if (product != null) {
-                        Double productPrice = (product.getPrice() != null ? product.getPrice() : 0);
-                        productPrice *= product.getQuantity();
-                        transactionRevenue += productPrice;
+                        double price = product.getUnitPrice();
+                        price *= product.getQuantity();
+                        transactionRevenue += price;
                     }
                 }
             }
