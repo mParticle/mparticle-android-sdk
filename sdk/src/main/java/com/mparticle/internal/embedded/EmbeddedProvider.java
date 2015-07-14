@@ -8,6 +8,7 @@ import android.util.SparseBooleanArray;
 import com.mparticle.MPEvent;
 import com.mparticle.MPProduct;
 import com.mparticle.MParticle;
+import com.mparticle.commerce.CommerceEvent;
 import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.MPUtility;
 
@@ -181,6 +182,11 @@ abstract class EmbeddedProvider {
         return mTypeFilters.get(typeHash, true) && mNameFilters.get(event.getEventHash(), true);
     }
 
+    protected boolean shouldLogEvent(CommerceEvent event) {
+        //TODO
+        return true;
+    }
+
     public boolean shouldLogScreen(String screenName) {
         int nameHash = MPUtility.mpHash("0" + screenName);
         if (mScreenNameFilters.size() > 0 && !mScreenNameFilters.get(nameHash, true)) {
@@ -336,6 +342,9 @@ abstract class EmbeddedProvider {
         }
 
         return events;
+    }
+
+    public void logEvent(CommerceEvent event) throws Exception {
     }
 
     static class MPEventWrapper {

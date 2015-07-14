@@ -360,6 +360,34 @@ public class Constants {
         String IMPRESSION_OBJECT = "pi";
         String IMPRESSION_LOCATION = "pil";
         String IMPRESSION_PRODUCT_LIST = "pl";
+
+        String ATT_AFFILIATION = "Affiliation";
+
+        String ATT_TRANSACTION_COUPON_CODE = "Coupon Code";
+        String ATT_TOTAL = "Total Amount";
+        String ATT_SHIPPING = "Shipping Amount";
+        String ATT_TAX = "Tax Amount";
+        String ATT_TRANSACTION_ID = "Transaction Id";
+        String ATT_PRODUCT_QUANTITY = "Quantity";
+        String ATT_PRODUCT_POSITION = "Position";
+        String ATT_PRODUCT_VARIANT = "Variant";
+        String ATT_PRODUCT_ID = "Id";
+        String ATT_PRODUCT_NAME = "Name";
+        String ATT_PRODUCT_CATEGORY = "Category";
+        String ATT_PRODUCT_BRAND = "Brand";
+        String ATT_PRODUCT_COUPON_CODE = "Coupon Code";
+        String ATT_PRODUCT_PRICE = "Item Price";
+        String ATT_ACTION_PRODUCT_ACTION_LIST = "Product Action List";
+        String ATT_ACTION_PRODUCT_LIST_SOURCE = "Product List Source";
+        String ATT_ACTION_CHECKOUT_OPTIONS = "Checkout Options";
+        String ATT_ACTION_CHECKOUT_STEP = "Checkout Step";
+        String ATT_ACTION_CURRENCY_CODE = "Currency Code";
+
+        /**
+         * This is only set when required. Otherwise default to null.
+         */
+        String DEFAULT_CURRENCY_CODE = "USD";
+
     }
 
     public interface PrefKeys {

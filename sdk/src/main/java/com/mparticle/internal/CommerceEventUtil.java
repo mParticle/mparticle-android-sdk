@@ -15,7 +15,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-class CommerceEventUtil {
+public class CommerceEventUtil {
 
     private static final String PLUSONE_NAME = "eCommerce - %s - Total";
     private static final String ITEM_NAME = "eCommerce - %s - Item";
@@ -42,20 +42,7 @@ class CommerceEventUtil {
             if (event.getCustomAttributes() != null) {
                 attributes.putAll(event.getCustomAttributes());
             }
-            String currency = event.getCurrency();
-            if (MPUtility.isEmpty(currency)) {
-                currency = "USD";
-            }
-            attributes.put("Currency Code", currency);
-            attributes.putAll(extractTransactionAttributes(event));
-            String checkoutOptions = event.getCheckoutOptions();
-            if (!MPUtility.isEmpty(checkoutOptions)) {
-                attributes.put("Checkout Options", checkoutOptions);
-            }
-            if (event.getCheckoutStep() != null) {
-                attributes.put("Checkout Step", Integer.toString(event.getCheckoutStep()));
-            }
-
+            extractActionAttributes(event, attributes);
             events.add(plusOne.info(attributes).build());
         }
         List<Product> products = event.getProducts();
@@ -77,61 +64,83 @@ class CommerceEventUtil {
                 attributes.putAll(product.getCustomAttributes());
             }
             if (!MPUtility.isEmpty(product.getCouponCode())) {
-                attributes.put("Coupon Code", product.getCouponCode());
+                attributes.put(Constants.Commerce.ATT_PRODUCT_COUPON_CODE, product.getCouponCode());
             }
             if (!MPUtility.isEmpty(product.getBrand())) {
-                attributes.put("Brand", product.getCouponCode());
+                attributes.put(Constants.Commerce.ATT_PRODUCT_BRAND, product.getBrand());
             }
             if (!MPUtility.isEmpty(product.getCategory())) {
-                attributes.put("Category", product.getCouponCode());
+                attributes.put(Constants.Commerce.ATT_PRODUCT_CATEGORY, product.getCategory());
             }
             if (!MPUtility.isEmpty(product.getName())) {
-                attributes.put("Name", product.getCouponCode());
+                attributes.put(Constants.Commerce.ATT_PRODUCT_NAME, product.getName());
             }
             if (!MPUtility.isEmpty(product.getSku())) {
-                attributes.put("Id", product.getCouponCode());
+                attributes.put(Constants.Commerce.ATT_PRODUCT_ID, product.getSku());
             }
             if (!MPUtility.isEmpty(product.getVariant())) {
-                attributes.put("Variant", product.getCouponCode());
+                attributes.put(Constants.Commerce.ATT_PRODUCT_VARIANT, product.getVariant());
             }
             if (product.getPosition() != null) {
-                attributes.put("Position", product.getCouponCode());
+                attributes.put(Constants.Commerce.ATT_PRODUCT_POSITION, Integer.toString(product.getPosition()));
             }
             if (product.getPrice() != null) {
-                attributes.put("Item Price", product.getCouponCode());
+                attributes.put(Constants.Commerce.ATT_PRODUCT_PRICE, Double.toString(product.getPrice()));
             }
 
-            attributes.put("Quantity", Double.toString(product.getQuantity()));
+            attributes.put(Constants.Commerce.ATT_PRODUCT_QUANTITY, Double.toString(product.getQuantity()));
         }
     }
 
     private static void extractTransactionId(CommerceEvent event, Map<String, String> attributes) {
         if (event != null && event.getTransactionAttributes() != null && !MPUtility.isEmpty(event.getTransactionAttributes().getId())) {
-            attributes.put("Transaction Id" , event.getTransactionAttributes().getId());
+            attributes.put(Constants.Commerce.ATT_TRANSACTION_ID, event.getTransactionAttributes().getId());
         }
     }
 
-    private static Map<String, String> extractTransactionAttributes(CommerceEvent event) {
-        Map<String, String> attributes = new HashMap<String, String>(6);
+    public static void extractActionAttributes(CommerceEvent event, Map<String, String> attributes)  {
+        extractTransactionAttributes(event, attributes);
+        extractTransactionId(event, attributes);
+        String currency = event.getCurrency();
+        if (MPUtility.isEmpty(currency)) {
+            currency = Constants.Commerce.DEFAULT_CURRENCY_CODE;
+        }
+        attributes.put(Constants.Commerce.ATT_ACTION_CURRENCY_CODE, currency);
+        String checkoutOptions = event.getCheckoutOptions();
+        if (!MPUtility.isEmpty(checkoutOptions)) {
+            attributes.put(Constants.Commerce.ATT_ACTION_CHECKOUT_OPTIONS, checkoutOptions);
+        }
+        if (event.getCheckoutStep() != null) {
+            attributes.put(Constants.Commerce.ATT_ACTION_CHECKOUT_STEP, Integer.toString(event.getCheckoutStep()));
+        }
+        if (!MPUtility.isEmpty(event.getProductListSource())) {
+            attributes.put(Constants.Commerce.ATT_ACTION_PRODUCT_LIST_SOURCE, event.getProductListSource());
+        }
+        if (!MPUtility.isEmpty(event.getProductListName())) {
+            attributes.put(Constants.Commerce.ATT_ACTION_PRODUCT_ACTION_LIST, event.getProductListName());
+        }
+    }
+
+    public static Map<String, String> extractTransactionAttributes(CommerceEvent event, Map<String, String> attributes) {
         if (event == null || event.getTransactionAttributes() == null){
             return attributes;
         }
         TransactionAttributes transactionAttributes = event.getTransactionAttributes();
         extractTransactionId(event, attributes);
         if (!MPUtility.isEmpty(transactionAttributes.getAffiliation())) {
-            attributes.put("Affiliation", transactionAttributes.getAffiliation());
+            attributes.put(Constants.Commerce.ATT_AFFILIATION, transactionAttributes.getAffiliation());
         }
         if (!MPUtility.isEmpty(transactionAttributes.getCouponCode())) {
-            attributes.put("Coupon Code", transactionAttributes.getCouponCode());
+            attributes.put(Constants.Commerce.ATT_TRANSACTION_COUPON_CODE, transactionAttributes.getCouponCode());
         }
         if (transactionAttributes.getRevenue() != null) {
-            attributes.put("Total Amount", Double.toString(transactionAttributes.getRevenue()));
+            attributes.put(Constants.Commerce.ATT_TOTAL, Double.toString(transactionAttributes.getRevenue()));
         }
         if (transactionAttributes.getShipping() != null) {
-            attributes.put("Shipping Amount", Double.toString(transactionAttributes.getShipping()));
+            attributes.put(Constants.Commerce.ATT_SHIPPING, Double.toString(transactionAttributes.getShipping()));
         }
         if (transactionAttributes.getTax() != null) {
-            attributes.put("Tax Amount", Double.toString(transactionAttributes.getTax()));
+            attributes.put(Constants.Commerce.ATT_TAX, Double.toString(transactionAttributes.getTax()));
         }
 
         return attributes;

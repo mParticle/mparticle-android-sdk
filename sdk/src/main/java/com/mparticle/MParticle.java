@@ -509,7 +509,7 @@ public class MParticle {
             ensureActiveSession();
             mMessageManager.logEvent(event);
             ConfigManager.log(LogLevel.DEBUG, "Logged commerce event - \n", event.toString());
-            mEmbeddedKitManager.logEvent(event);
+            mEmbeddedKitManager.logCommerceEvent(event);
         }
     }
 
