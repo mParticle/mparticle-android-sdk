@@ -46,9 +46,6 @@ public class CommerceApiTest {
         Product product2 = new Product.Builder("name 2", "sku").build();
         cart.add(product).add(product2).add(nullProduct);
         assertEquals(2, cart.products().size());
-        cart.add(product).add(product2);
-        assertEquals(2, (int) cart.products().get(0).getQuantity());
-        assertEquals(2, (int) cart.products().get(1).getQuantity());
         try {
             commerceApi.purchase(null);
         }catch (IllegalStateException stateException){

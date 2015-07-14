@@ -18,18 +18,18 @@ import java.util.List;
 /**
  * The Cart is a utility singleton that abstracts the creation of {@link com.mparticle.commerce.CommerceEvent} objects and maintains
  * a state, containing a list of {@link com.mparticle.commerce.Product} objects.
- *
+ * <p/>
  * The Cart will persist state across app-restarts.
- *
+ * <p/>
  * You may access the cart via the {@link MParticle#Commerce()} object:
- *
+ * <p/>
  * <pre>
  * {@code
  * MParticle.getInstance().Commerce().cart()}
  * </pre>
- *
+ * <p/>
  * You can also access the Cart directly:
- *
+ * <p/>
  * <pre>
  * {@code
  * Cart.getInstance(context)}
@@ -61,7 +61,7 @@ public final class Cart {
      * @return the global Cart instance
      */
     public static Cart getInstance(Context context) {
-        if (context != null){
+        if (context != null) {
             context = context.getApplicationContext();
         }
         mContext = context;
@@ -69,16 +69,14 @@ public final class Cart {
     }
 
     /**
-     * Replace the default equality comparator. The Cart compares products as they are added and removed. For example
-     * in the case of adding a Product, if there's already a Product in the cart that is considered equal, the Cart
-     * will adjust the quantity, rather than creating a new line-item. Similary, when removing from the Cart, the
-     * equality comparator is used to ensure the correct Product is removed.
-     *
+     * Replace the default equality comparator.
+     * <p/>
      * By default, the Cart will only compare Product objects by reference. If you would like to consider all Products that
      * share the same SKU, for example, as the same Product, use this function to set your own comparator.
      *
-     *
      * @param comparator
+     * @see #add(Product)
+     * @see #remove(int)
      */
     public static void setProductEqualityComparator(Product.EqualityComparator comparator) {
         Product.setEqualityComparator(comparator);
@@ -86,42 +84,43 @@ public final class Cart {
 
     /**
      * Add one or more products to the Cart and log a {@link CommerceEvent}.
-     *
+     * <p/>
      * This method will log a {@link CommerceEvent} with the {@link CommerceEvent#ADD_TO_CART} action. Products added here
      * will remain in the cart across app restarts, and will be included in future calls to {@link CommerceApi#purchase(TransactionAttributes)}
      * or {@link CommerceEvent}'s with a product action {@link CommerceEvent#PURCHASE}
-     *
-     * You can use this method to adjust the quantity of a Product in the cart, by passing a Product that is already contained
-     * in the Cart.
-     *
-     * @see #setProductEqualityComparator(Product.EqualityComparator)
+     * <p/>
+     * If the Cart already contains a Product that is considered equal, this method is a no-op.
      *
      * @param product the product to add to the Cart
      * @return the Cart object, useful for chaining several commands
+     * @see #setProductEqualityComparator(Product.EqualityComparator)
      */
     public synchronized Cart add(Product product) {
         return add(product, true);
     }
 
-    public synchronized Cart add(Product product, boolean logEvent){
-        if (product != null) {
-            int index = productList.indexOf(product);
-            if (index >= 0) {
-                Product currentProduct = productList.get(index);
-                double quantity = product.getQuantity();
-                double currentQuantity = currentProduct.getQuantity();
-                currentProduct.updateTimeAdded();
-                currentProduct.setQuantity(currentQuantity + quantity);
-            } else {
-                product.updateTimeAdded();
-                productList.add(product);
-            }
-
+    /**
+     * Add one or more products to the Cart and log a {@link CommerceEvent}.
+     * <p/>
+     * This method will log a {@link CommerceEvent} with the {@link CommerceEvent#ADD_TO_CART} action. Products added here
+     * will remain in the cart across app restarts, and will be included in future calls to {@link CommerceApi#purchase(TransactionAttributes)}
+     * or {@link CommerceEvent}'s with a product action {@link CommerceEvent#PURCHASE}
+     * <p/>
+     * If the Cart already contains a Product that is considered equal, this method is a no-op.
+     *
+     * @param product the product to add to the Cart
+     * @return the Cart object, useful for chaining several commands
+     * @see #setProductEqualityComparator(Product.EqualityComparator)
+     */
+    public synchronized Cart add(Product product, boolean logEvent) {
+        if (product != null && !productList.contains(product)) {
+            product.updateTimeAdded();
+            productList.add(product);
             save();
             if (logEvent) {
-                CommerceEvent event = new CommerceEvent.Builder(CommerceEvent.ADD_TO_CART, product)
-                        .build();
-                MParticle.getInstance().logEvent(event);
+                MParticle.getInstance().logEvent(
+                        new CommerceEvent.Builder(CommerceEvent.ADD_TO_CART, product).build()
+                );
             }
         }
         return this;
@@ -129,50 +128,32 @@ public final class Cart {
 
     /**
      * Remove one or more products from the Cart and log a {@link CommerceEvent}.
-     *
+     * <p/>
      * This method will log a {@link CommerceEvent} with the {@link CommerceEvent#REMOVE_FROM_CART} action.
-     *
-     * You can use this method to adjust the quantity of a Product in the cart, by passing a Product that is already contained
-     * in the Cart.
-     *
-     * @see #setProductEqualityComparator(Product.EqualityComparator)
+     * <p/>
+     * If the Cart already contains a Product that is considered equal, the Product will be removed. Otherwise, this method is a no-op.
      *
      * @param product the product objects to remove from the Cart
      * @return the Cart object, useful for chaining several commands
+     * @see #setProductEqualityComparator(Product.EqualityComparator)
      */
     public synchronized Cart remove(Product product) {
-       return remove(product, true);
+        return remove(product, true);
     }
 
     /**
      * Remove one or more products from the Cart and log a {@link CommerceEvent}.
-     *
+     * <p/>
      * This method will log a {@link CommerceEvent} with the {@link CommerceEvent#REMOVE_FROM_CART} action.
-     *
-     * You can use this method to adjust the quantity of a Product in the cart, by passing a Product that is already contained
-     * in the Cart.
-     *
-     * @see #setProductEqualityComparator(Product.EqualityComparator)
+     * <p/>
+     * If the Cart already contains a Product that is considered equal, the Product will be removed. Otherwise, this method is a no-op..
      *
      * @param product the product to remove from the Cart
      * @return the Cart object, useful for chaining several commands
+     * @see #setProductEqualityComparator(Product.EqualityComparator)
      */
     public synchronized Cart remove(Product product, boolean logEvent) {
-        if (product != null) {
-            if (productList.contains(product)) {
-                Product currentProduct = productList.get(productList.indexOf(product));
-                double currentQuantity = currentProduct.getQuantity();
-                double removeQuantity = product.getQuantity();
-                double newQuantity = currentQuantity - removeQuantity;
-                if (newQuantity < 0) {
-                    newQuantity = 0;
-                }
-                if (newQuantity == 0) {
-                    productList.remove(product);
-                } else {
-                    currentProduct.setQuantity(newQuantity);
-                }
-            }
+        if (product != null && productList.remove(product)) {
             save();
             if (logEvent) {
                 CommerceEvent event = new CommerceEvent.Builder(CommerceEvent.REMOVE_FROM_CART, product).build();
@@ -184,13 +165,11 @@ public final class Cart {
 
     /**
      * Remove a product from the Cart by index and log a {@link CommerceEvent}.
-     *
+     * <p/>
      * This method will log a {@link CommerceEvent} with the {@link CommerceEvent#REMOVE_FROM_CART} action.
-     *
      *
      * @param index of the Product to remove
      * @return boolean determining if a product was actually removed.
-     *
      * @see #products()
      */
     public synchronized boolean remove(int index) {
@@ -233,7 +212,6 @@ public final class Cart {
      * support multiple-cart use-cases.
      *
      * @return a JSON representation of the Cart
-     *
      * @see #loadFromString(String)
      */
     @Override
@@ -286,7 +264,7 @@ public final class Cart {
 
     /**
      * Retrieve the current list of Products in the Cart.
-     *
+     * <p/>
      * Note that this returns an {@code UnmodifiableCollection} that will throw an {@code UnsupportedOperationException}
      * if you attempt to add or remove Products.
      *
