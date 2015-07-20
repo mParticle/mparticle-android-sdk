@@ -127,8 +127,11 @@ public class EmbeddedKitManager implements MPActivityCallbacks {
     public void logCommerceEvent(CommerceEvent event) {
         for (EmbeddedProvider provider : providers.values()){
             try {
-                if (!provider.disabled() && provider.shouldLogEvent(event)) {
-                    provider.logEvent(event);
+                if (!provider.disabled()) {
+                    CommerceEvent filteredEvent = provider.filterCommerceEvent(event);
+                    if (filteredEvent != null) {
+                        provider.logEvent(filteredEvent);
+                    }
                 }
             } catch (Exception e) {
                 ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to call logCommerceEvent for embedded provider: " + provider.getName() + ": " + e.getMessage());

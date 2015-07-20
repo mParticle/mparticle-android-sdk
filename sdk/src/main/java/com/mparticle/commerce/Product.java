@@ -2,16 +2,13 @@ package com.mparticle.commerce;
 
 import com.mparticle.MParticle;
 import com.mparticle.internal.ConfigManager;
-import com.mparticle.internal.Constants;
 import com.mparticle.internal.MPUtility;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.lang.Object;import java.lang.String;import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 
 
@@ -38,11 +35,12 @@ public final class Product {
         boolean equals(Product product1, Product product2);
     }
 
-    public static void setEqualityComparator(EqualityComparator comparator){
+    public static void setEqualityComparator(EqualityComparator comparator) {
         mComparator = comparator;
     }
 
-    private Product(){}
+    private Product() {
+    }
 
     public Product(Builder builder) {
         mName = builder.mName;
@@ -59,26 +57,26 @@ public final class Product {
 
         boolean devMode = MParticle.getInstance().getEnvironment().equals(MParticle.Environment.Development);
 
-        if (MPUtility.isEmpty(mName)){
+        if (MPUtility.isEmpty(mName)) {
             String message = "Product name is required.";
-            if (devMode){
+            if (devMode) {
                 throw new IllegalArgumentException(message);
-            }else {
+            } else {
                 mName = "Unknown";
                 ConfigManager.log(MParticle.LogLevel.ERROR, message);
             }
-        }else if (MPUtility.isEmpty(mSku)){
+        } else if (MPUtility.isEmpty(mSku)) {
             String message = "Product sku is required.";
-            if (devMode){
+            if (devMode) {
                 throw new IllegalArgumentException(message);
-            }else{
+            } else {
                 mSku = "Unknown";
                 ConfigManager.log(MParticle.LogLevel.ERROR, message);
             }
         }
     }
 
-    void updateTimeAdded(){
+    void updateTimeAdded() {
         mTimeAdded = System.currentTimeMillis();
     }
 
@@ -112,7 +110,7 @@ public final class Product {
 
     @Override
     public boolean equals(Object object) {
-        if (object == null){
+        if (object == null) {
             return false;
         }
         if (object == this) {
@@ -121,10 +119,10 @@ public final class Product {
         if (!(object instanceof Product)) {
             return false;
         }
-        Product product = (Product)object;
-        if (mComparator == null){
+        Product product = (Product) object;
+        if (mComparator == null) {
             return false;
-        }else{
+        } else {
             return mComparator.equals(this, product);
         }
     }
@@ -143,18 +141,18 @@ public final class Product {
     }
 
     public static Product fromString(String json) {
-        try{
+        try {
             JSONObject jsonObject = new JSONObject(json);
             return fromJson(jsonObject);
-        }catch (JSONException jse){
+        } catch (JSONException jse) {
 
         }
         return null;
     }
 
     static Product fromJson(JSONObject jsonObject) {
-        try{
-            Product.Builder builder =  new Product.Builder(jsonObject.getString("nm"), jsonObject.optString("id", null), jsonObject.optDouble("pr", 0));
+        try {
+            Product.Builder builder = new Product.Builder(jsonObject.getString("nm"), jsonObject.optString("id", null), jsonObject.optDouble("pr", 0));
             builder.category(jsonObject.optString("ca", null));
             builder.couponCode(jsonObject.optString("cc", null));
             if (jsonObject.has("ps")) {
@@ -165,13 +163,13 @@ public final class Product {
             }
             builder.brand(jsonObject.optString("br", null));
             builder.variant(jsonObject.optString("va", null));
-            if (jsonObject.has("attrs")){
+            if (jsonObject.has("attrs")) {
                 JSONObject attributesJson = jsonObject.getJSONObject("attrs");
                 if (attributesJson.length() > 0) {
                     Map<String, String> customAttributes = new HashMap<String, String>();
                     Iterator<String> keys = attributesJson.keys();
 
-                    while( keys.hasNext() ) {
+                    while (keys.hasNext()) {
                         String key = keys.next();
                         customAttributes.put(key, attributesJson.getString(key));
                     }
@@ -181,28 +179,28 @@ public final class Product {
             Product product = builder.build();
             product.mTimeAdded = jsonObject.optDouble("act", 0);
             return product;
-        }catch (JSONException jse){
+        } catch (JSONException jse) {
 
         }
         return null;
     }
 
     JSONObject toJson() {
-        try{
+        try {
             JSONObject productJson = new JSONObject();
-            if (mName != null){
+            if (mName != null) {
                 productJson.put("nm", mName);
             }
-            if (mCategory != null){
+            if (mCategory != null) {
                 productJson.put("ca", mCategory);
             }
-            if (mCouponCode != null){
+            if (mCouponCode != null) {
                 productJson.put("cc", mCouponCode);
             }
-            if (mSku != null){
+            if (mSku != null) {
                 productJson.put("id", mSku);
             }
-            if (mPosition != null){
+            if (mPosition != null) {
                 productJson.put("ps", mPosition);
             }
 
@@ -212,22 +210,21 @@ public final class Product {
 
             productJson.put("act", mTimeAdded);
 
-            if (mBrand != null){
+            if (mBrand != null) {
                 productJson.put("br", mBrand);
             }
-            if (mVariant != null){
+            if (mVariant != null) {
                 productJson.put("va", mVariant);
             }
-            if (mCustomAttributes != null && mCustomAttributes.size() > 0){
+            if (mCustomAttributes != null && mCustomAttributes.size() > 0) {
                 JSONObject attributes = new JSONObject();
-                for (Map.Entry<String, String> entry : mCustomAttributes.entrySet())
-                {
+                for (Map.Entry<String, String> entry : mCustomAttributes.entrySet()) {
                     attributes.put(entry.getKey(), entry.getValue());
                 }
                 productJson.put("attrs", attributes);
             }
             return productJson;
-        }catch(JSONException jse){
+        } catch (JSONException jse) {
 
         }
         return new JSONObject();
@@ -250,16 +247,29 @@ public final class Product {
         private String mVariant;
         private Map<String, String> mCustomAttributes = null;
 
-        private Builder(){}
+        private Builder() {
+        }
 
-        public Builder(String name, String sku, double unitPrice){
+        public Builder(String name, String sku, double unitPrice) {
             mName = name;
             mSku = sku;
             mPrice = unitPrice;
         }
 
-        public Builder(Product product){
-
+        public Builder(Product product) {
+            this(product.getName(), product.getSku(), product.getUnitPrice());
+            mCategory = product.mCategory;
+            mCouponCode = product.mCouponCode;
+            mPosition = product.mPosition;
+            mPrice = product.mPrice;
+            mQuantity = product.mQuantity;
+            mBrand = product.mBrand;
+            mVariant = product.mVariant;
+            if (product.getCustomAttributes() != null) {
+                Map<String, String> shallowCopy = new HashMap<String, String>();
+                shallowCopy.putAll(product.getCustomAttributes());
+                mCustomAttributes = shallowCopy;
+            }
         }
 
         public Builder customAttributes(Map<String, String> attributes) {
@@ -307,7 +317,7 @@ public final class Product {
             return this;
         }
 
-        public Builder variant(String variant){
+        public Builder variant(String variant) {
             mVariant = variant;
             return this;
         }

@@ -382,12 +382,33 @@ public class Constants {
         String ATT_ACTION_CHECKOUT_OPTIONS = "Checkout Options";
         String ATT_ACTION_CHECKOUT_STEP = "Checkout Step";
         String ATT_ACTION_CURRENCY_CODE = "Currency Code";
+        String ATT_SCREEN_NAME = "Screen Name";
+        String ATT_PROMOTION_ID = "Id";
+        String ATT_PROMOTION_POSITION = "Position";
+        String ATT_PROMOTION_NAME = "Name";
+        String ATT_PROMOTION_CREATIVE = "Creative";
 
         /**
          * This is only set when required. Otherwise default to null.
          */
         String DEFAULT_CURRENCY_CODE = "USD";
 
+        int EVENT_TYPE_ADD_TO_CART = 10;
+        int EVENT_TYPE_REMOVE_FROM_CART = 11;
+        int EVENT_TYPE_CHECKOUT = 12;
+        int EVENT_TYPE_CHECKOUT_OPTION = 13;
+        int EVENT_TYPE_CLICK = 14;
+        int EVENT_TYPE_VIEW_DETAIL = 15;
+        int EVENT_TYPE_PURCHASE = 16;
+        int EVENT_TYPE_REFUND = 17;
+        int EVENT_TYPE_PROMOTION_VIEW = 18;
+        int EVENT_TYPE_PROMOTION_CLICK = 19;
+        int EVENT_TYPE_ADD_TO_WISHLIST = 20;
+        int EVENT_TYPE_REMOVE_FROM_WISHLIST = 21;
+        int EVENT_TYPE_IMPRESSION = 22;
+
+        int ENTITY_PRODUCT = 1;
+        int ENTITY_PROMOTION = 2;
     }
 
     public interface PrefKeys {

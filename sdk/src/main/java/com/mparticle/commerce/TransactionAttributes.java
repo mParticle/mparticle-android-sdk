@@ -8,6 +8,15 @@ public class TransactionAttributes {
     private String mCouponCode = null;
     private String mId = null;
 
+    public TransactionAttributes(TransactionAttributes transactionAttributes) {
+        mAffiliation = transactionAttributes.mAffiliation;
+        mRevenue = transactionAttributes.mRevenue;
+        mShipping = transactionAttributes.mShipping;
+        mTax = transactionAttributes.mTax;
+        mCouponCode = transactionAttributes.mCouponCode;
+        mId = transactionAttributes.mId;
+    }
+
     public String getId() {
         return mId;
     }
@@ -53,7 +62,7 @@ public class TransactionAttributes {
         return mTax;
     }
 
-    public TransactionAttributes setTax(double tax) {
+    public TransactionAttributes setTax(Double tax) {
         this.mTax = tax;
         return this;
     }
@@ -62,7 +71,7 @@ public class TransactionAttributes {
         return mShipping;
     }
 
-    public TransactionAttributes setShipping(double shipping) {
+    public TransactionAttributes setShipping(Double shipping) {
         this.mShipping = shipping;
         return this;
     }
@@ -71,7 +80,7 @@ public class TransactionAttributes {
         return mRevenue;
     }
 
-    public TransactionAttributes setRevenue(double revenue) {
+    public TransactionAttributes setRevenue(Double revenue) {
         this.mRevenue = revenue;
         return this;
     }

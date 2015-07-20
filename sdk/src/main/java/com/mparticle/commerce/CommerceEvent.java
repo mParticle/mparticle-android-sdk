@@ -9,6 +9,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -53,16 +54,18 @@ public final class CommerceEvent {
         mCurrency = builder.mCurrency;
         mTransactionAttributes = builder.mTransactionAttributes;
         mScreen = builder.mScreen;
-        mImpressions = builder.impressions;
+        mImpressions = builder.mImpressions;
         mNonIteraction = builder.mNonIteraction;
 
         boolean devMode = MParticle.getInstance().getEnvironment().equals(MParticle.Environment.Development);
 
-        if (MPUtility.isEmpty(mProductAction) && MPUtility.isEmpty(mPromotionAction)) {
+        if (MPUtility.isEmpty(mProductAction)
+                && MPUtility.isEmpty(mPromotionAction)
+                && (mImpressions == null || mImpressions.size() == 0)) {
             if (devMode) {
-                throw new IllegalStateException("CommerceEvent must be created with either a product action or promotion action");
+                throw new IllegalStateException("CommerceEvent must be created with either a product action. promotion action, or an impression");
             } else {
-                ConfigManager.log(MParticle.LogLevel.ERROR, "CommerceEvent must be created with either a product action or promotion action");
+                ConfigManager.log(MParticle.LogLevel.ERROR, "CommerceEvent must be created with either a product action, promotion action, or an impression");
             }
         }
 
@@ -70,7 +73,7 @@ public final class CommerceEvent {
             if (mProductAction.equalsIgnoreCase(CommerceEvent.PURCHASE) ||
                     mProductAction.equalsIgnoreCase(CommerceEvent.REFUND)) {
                 if (mTransactionAttributes == null || MPUtility.isEmpty(mTransactionAttributes.getId())) {
-                    String message = "CommerceEvent with action " + mPromotionAction + " must include a TransactionAttributes object with a transaction ID.";
+                    String message = "CommerceEvent with action " + mProductAction + " must include a TransactionAttributes object with a transaction ID.";
                     if (devMode) {
                         throw new IllegalStateException(message);
                     } else {
@@ -178,13 +181,13 @@ public final class CommerceEvent {
                 JSONArray impressions = new JSONArray();
                 for (Impression impression : mImpressions) {
                     JSONObject impressionJson = new JSONObject();
-                    if (impression.where != null) {
-                        impressionJson.put("pil", impression.where);
+                    if (impression.mListName != null) {
+                        impressionJson.put("pil", impression.mListName);
                     }
-                    if (impression.products != null && impression.products.length > 0) {
+                    if (impression.mProducts != null && impression.mProducts.size() > 0) {
                         JSONArray productsJson = new JSONArray();
                         impressionJson.put("pl", productsJson);
-                        for (Product product : impression.products) {
+                        for (Product product : impression.mProducts) {
                             productsJson.put(new JSONObject(product.toString()));
                         }
                     }
@@ -275,7 +278,7 @@ public final class CommerceEvent {
         private TransactionAttributes mTransactionAttributes = null;
         private String mScreen = null;
         private Boolean mNonIteraction;
-        private List<Impression> impressions;
+        private List<Impression> mImpressions;
 
         private Builder() {
             mProductAction = mPromotionAction = null;
@@ -303,10 +306,54 @@ public final class CommerceEvent {
                 if (promotionList == null) {
                     promotionList = new LinkedList<Promotion>();
                 }
-                for (Promotion promotion : promotionList) {
-                    promotionList.add(promotion);
+                for (Promotion promotion : promotions) {
+                    if (promotion != null) {
+                        promotionList.add(promotion);
+                    }
                 }
             }
+        }
+
+        public Builder(Impression impression) {
+            addImpression(impression);
+            mPromotionAction = null;
+            mProductAction = null;
+        }
+
+        public Builder(CommerceEvent event) {
+            mProductAction = event.getProductAction();
+            mPromotionAction = event.getPromotionAction();
+            if (event.getCustomAttributes() != null) {
+                Map<String, String> shallowCopy = new HashMap<String, String>();
+                shallowCopy.putAll(event.getCustomAttributes());
+                customAttributes = shallowCopy;
+            }
+            if (event.getPromotions() != null) {
+                for (Promotion promotion : event.getPromotions()) {
+                    addPromotion(new Promotion(promotion));
+                }
+            }
+            if (event.getProducts() != null) {
+                for (Product product : event.getProducts()) {
+                    addProduct(new Product.Builder(product).build());
+                }
+            }
+            mCheckoutStep = event.getCheckoutStep();
+            mCheckoutOptions = event.getCheckoutOptions();
+            mProductListName = event.getProductListName();
+            mProductListSource = event.getProductListSource();
+            mCurrency = event.getCurrency();
+            if (event.getTransactionAttributes() != null) {
+                mTransactionAttributes = new TransactionAttributes(event.getTransactionAttributes());
+            }
+            mScreen = event.mScreen;
+            mNonIteraction = event.mNonIteraction;
+            if (event.getImpressions() != null) {
+                for (Impression impression : event.getImpressions()) {
+                    addImpression(new Impression(impression));
+                }
+            }
+
         }
 
         public Builder screen(String screenName) {
@@ -350,27 +397,19 @@ public final class CommerceEvent {
             return this;
         }
 
-        public Builder checkoutStep(int step) {
-            if (step >= 0) {
+        public Builder checkoutStep(Integer step) {
+            if (step == null || step >= 0) {
                 mCheckoutStep = step;
             }
             return this;
         }
 
-        public Builder addImpression(String where, Product... products) {
-            Impression impression = new Impression();
-            impression.where = where;
-            impression.products = products;
-            if (impressions == null) {
-                impressions = new LinkedList<Impression>();
-            }
-            impressions.add(impression);
-            return this;
-        }
-
         public Builder addImpression(Impression impression) {
             if (impression != null) {
-                addImpression(impression.where, impression.products);
+                if (mImpressions == null) {
+                    mImpressions = new LinkedList<Impression>();
+                }
+                mImpressions.add(impression);
             }
             return this;
         }
@@ -394,10 +433,55 @@ public final class CommerceEvent {
             return this;
         }
 
+        public Builder products(List<Product> products) {
+            productList = products;
+            return this;
+        }
+
+        public Builder impressions(List<Impression> impressions) {
+            mImpressions = impressions;
+            return this;
+        }
+
+        public Builder promotions(List<Promotion> promotions) {
+            promotionList = promotions;
+            return this;
+        }
     }
 
     public static class Impression {
-        public String where = null;
-        public Product[] products;
+        private String mListName = null;
+        private List<Product> mProducts;
+
+        public Impression(String listName, Product product) {
+            super();
+            mListName = listName;
+            addProduct(product);
+        }
+
+        public String getListName() {
+            return mListName;
+        }
+
+        public List<Product> getProducts() {
+            return mProducts;
+        }
+
+        public Impression addProduct(Product product) {
+            if (mProducts == null) {
+                mProducts = new LinkedList<Product>();
+            }
+            if (product != null) {
+                mProducts.add(product);
+            }
+            return this;
+        }
+
+        public Impression(Impression impression) {
+            mListName = impression.mListName;
+            if (impression.mProducts != null) {
+                mProducts = impression.mProducts;
+            }
+        }
     }
 }
