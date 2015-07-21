@@ -516,7 +516,8 @@ public class ConfigManager implements MessagingConfigCallbacks {
         JSONArray triggerHashes = getTriggerMessageHashes();
 
         //always trigger for PUSH_RECEIVED
-        boolean shouldTrigger = message.getMessageType().equals(Constants.MessageType.PUSH_RECEIVED);
+        boolean shouldTrigger = message.getMessageType().equals(Constants.MessageType.PUSH_RECEIVED)
+                || message.getMessageType().equals(Constants.MessageType.COMMERCE_EVENT);
 
         if (!shouldTrigger && messageMatches != null && messageMatches.length() > 0){
             shouldTrigger = true;
