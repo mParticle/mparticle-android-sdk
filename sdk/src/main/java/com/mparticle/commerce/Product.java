@@ -11,7 +11,14 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-
+/**
+ * A Product represents any good or service that a user may purchase, view, or otherwise interact with in your app.
+ *
+ * The Product class is built to be immutable - use the {@link com.mparticle.commerce.Product.Builder} class to create a Product.
+ *
+ * Product objects are designed to be used with {@link CommerceEvent} and the {@link Cart}.
+ *
+ */
 public final class Product {
 
     private static EqualityComparator mComparator = null;
@@ -27,14 +34,33 @@ public final class Product {
     private String mBrand;
     private String mVariant;
 
+    /**
+     *
+     *
+     * @return Retrieve the Map of custom attributes set on this Product
+     *
+     *
+     * @see com.mparticle.commerce.Product.Builder#customAttributes(Map)
+     */
     public Map<String, String> getCustomAttributes() {
         return mCustomAttributes;
     }
 
+    /**
+     * A simple interface that you can implement in order to customize Product equality comparisons
+     *
+     * @see #setEqualityComparator(EqualityComparator)
+     * @see Cart#remove(Product)
+     */
     public interface EqualityComparator {
         boolean equals(Product product1, Product product2);
     }
 
+    /**
+     * Optionally customize the EqualityComparator
+     *
+     * @param comparator
+     */
     public static void setEqualityComparator(EqualityComparator comparator) {
         mComparator = comparator;
     }
@@ -42,7 +68,7 @@ public final class Product {
     private Product() {
     }
 
-    public Product(Builder builder) {
+    private Product(Builder builder) {
         mName = builder.mName;
         mCategory = builder.mCategory;
         mCouponCode = builder.mCouponCode;
@@ -80,30 +106,59 @@ public final class Product {
         mTimeAdded = System.currentTimeMillis();
     }
 
+    /**
+     *
+     * @return the name description of the Product
+     */
     public String getName() {
         return mName;
     }
 
+    /**
+     *
+     * @return the category description of the Product
+     */
     public String getCategory() {
         return mCategory;
     }
 
+    /**
+     *
+     *
+     * @return the coupon code associated with the Product
+     */
     public String getCouponCode() {
         return mCouponCode;
     }
 
+    /**
+     *
+     * @return the SKU/ID associated with the Product
+     */
     public String getSku() {
         return mSku;
     }
 
+    /**
+     *
+     * @return the position of the product on the page/product impression list
+     */
     public Integer getPosition() {
         return mPosition;
     }
 
+    /**
+     *
+     * @return the unit price of a single Product
+     */
     public double getUnitPrice() {
         return mPrice;
     }
 
+    /**
+     *
+     * @return the quantity of Products
+     */
     public double getQuantity() {
         return mQuantity;
     }
@@ -127,10 +182,19 @@ public final class Product {
         }
     }
 
+    /**
+     *
+     * @return the brand of the Product
+     */
     public String getBrand() {
         return mBrand;
     }
 
+    /**
+     *
+     *
+     * @return the variant or version of the Product
+     */
     public String getVariant() {
         return mVariant;
     }
@@ -234,6 +298,10 @@ public final class Product {
         mQuantity = quantity;
     }
 
+    /**
+     * This class is designed to construct a Product object using the Builder pattern.
+     *
+     */
     public static class Builder {
         private String mName = null;
         private String mCategory;
@@ -250,12 +318,26 @@ public final class Product {
         private Builder() {
         }
 
+        /**
+         * Create a Product.Builder. The parameters of this method are all
+         * required for a valid product
+         *
+         * @param name a description/name for the Product
+         * @param sku a SKU or ID that unique identifies this Product
+         * @param unitPrice the cost of a single Product
+         */
         public Builder(String name, String sku, double unitPrice) {
             mName = name;
             mSku = sku;
             mPrice = unitPrice;
         }
 
+        /**
+         * Create a Product.Builder from an existing Product. This may
+         * be useful if you need to alter or duplicate an existing Product.
+         *
+         * @param product an existing Product object
+         */
         public Builder(Product product) {
             this(product.getName(), product.getSku(), product.getUnitPrice());
             mCategory = product.mCategory;
@@ -272,56 +354,126 @@ public final class Product {
             }
         }
 
+        /**
+         * Set a custom Map of attributes on an object. Use this only
+         * if there is an attribute of a Product that does not correlate to
+         * any of the default attributes.
+         *
+         * @param attributes a Map of custom keys and values
+         * @return returns this Builder object for use in method chaining
+         */
         public Builder customAttributes(Map<String, String> attributes) {
             mCustomAttributes = attributes;
             return this;
         }
 
+        /**
+         * Sets the category associate with the Product
+         *
+         * @param category the Product's category
+         * @return returns this Builder object for use in method chaining
+         */
         public Builder category(String category) {
             mCategory = category;
             return this;
         }
 
+        /**
+         *
+         * Sets the coupon code to associate with this Product
+         *
+         * @param couponCode the Product's coupon code
+         * @return returns this Builder object for use in method chaining
+         */
         public Builder couponCode(String couponCode) {
             mCouponCode = couponCode;
             return this;
         }
 
+        /**
+         * Change unique SKU or ID to associate with this Product
+         *
+         * @param sku the Product's SKU or ID
+         * @return returns this Builder object for use in method chaining
+         */
         public Builder sku(String sku) {
             mSku = sku;
             return this;
         }
 
+        /**
+         * Change the name/description to associate with this Product
+         *
+         * @param name the Product's name
+         * @return returns this Builder object for use in method chaining
+         */
         public Builder name(String name) {
             mName = name;
             return this;
         }
 
+        /**
+         * Sets the position of the product on the page or product impression list
+         *
+         * @param position the Products position
+         * @return returns this Builder object for use in method chaining
+         */
         public Builder position(Integer position) {
             mPosition = position;
             return this;
         }
 
+        /**
+         * Sets the unit price to associate with this Product
+         *
+         * @param price the Product's price
+         * @return returns this Builder object for use in method chaining
+         */
         public Builder unitPrice(double price) {
             mPrice = price;
             return this;
         }
 
+        /**
+         * Sets the quantity to associate with this Product.
+         *
+         * This field with default to 1
+         *
+         * @param quantity the Product's quantity
+         * @return returns this Builder object for use in method chaining
+         */
         public Builder quantity(double quantity) {
             mQuantity = quantity;
             return this;
         }
 
+        /**
+         * Sets the brand to associate with this Product
+         *
+         * @param brand the Product's brand
+         * @return returns this Builder object for use in method chaining
+         */
         public Builder brand(String brand) {
             mBrand = brand;
             return this;
         }
 
+        /**
+         * Sets the variant to associate with this Product
+         *
+         * @param variant the Product's variant
+         * @return returns this Builder object for use in method chaining
+         */
         public Builder variant(String variant) {
             mVariant = variant;
             return this;
         }
 
+        /**
+         * Build the Product object
+         *
+         * @return a Product object to be added to a {@link CommerceEvent} or to the {@link Cart}
+         */
         public Product build() {
             return new Product(this);
         }

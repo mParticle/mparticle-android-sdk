@@ -8,6 +8,7 @@ import com.mparticle.commerce.Promotion;
 import com.mparticle.commerce.TransactionAttributes;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.HashMap;
@@ -166,7 +167,7 @@ public class CommerceEventUtil {
         return events;
     }
 
-    private static void extractPromotionAttributes(Promotion promotion, Map<String, String> attributes) {
+    public static void extractPromotionAttributes(Promotion promotion, Map<String, String> attributes) {
         if (promotion != null) {
             if (!MPUtility.isEmpty(promotion.getId())){
                 attributes.put(Constants.Commerce.ATT_PROMOTION_ID, promotion.getId());
@@ -272,8 +273,6 @@ public class CommerceEventUtil {
                     }
                     productAction.put(Constants.Commerce.PRODUCT_LIST, products);
                 }
-
-
             }
             if (event.getPromotionAction() != null) {
                 JSONObject promotionAction = new JSONObject();
@@ -282,7 +281,7 @@ public class CommerceEventUtil {
                 if (event.getPromotions() != null && event.getPromotions().size() > 0) {
                     JSONArray promotions = new JSONArray();
                     for (int i = 0; i < event.getPromotions().size(); i++) {
-                        promotions.put(event.getPromotions().get(i).toJson());
+                        promotions.put(getPromotionJson(event.getPromotions().get(i)));
                     }
                     promotionAction.put(Constants.Commerce.PROMOTION_LIST, promotions);
                 }
@@ -317,6 +316,27 @@ public class CommerceEventUtil {
         } catch (Exception jse) {
 
         }
+    }
+
+    private static JSONObject getPromotionJson(Promotion promotion) {
+        JSONObject json = new JSONObject();
+        try {
+            if (!MPUtility.isEmpty(promotion.getId())) {
+                json.put("id", promotion.getId());
+            }
+            if (!MPUtility.isEmpty(promotion.getName())) {
+                json.put("nm", promotion.getName());
+            }
+            if (!MPUtility.isEmpty(promotion.getCreative())) {
+                json.put("cr", promotion.getCreative());
+            }
+            if (!MPUtility.isEmpty(promotion.getPosition())) {
+                json.put("ps", promotion.getPosition());
+            }
+        } catch (JSONException jse) {
+
+        }
+        return json;
     }
 
     public static int getEventType(CommerceEvent filteredEvent) {
