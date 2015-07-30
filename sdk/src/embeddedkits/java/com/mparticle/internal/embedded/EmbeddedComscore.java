@@ -23,7 +23,7 @@ import java.util.Map;
  * Embedded implementation of the Comscore SDK, tested against Comscore 2.14.0923.
  * <p/>
  */
-class EmbeddedComscore extends EmbeddedProvider implements MPActivityCallbacks {
+class EmbeddedComscore extends EmbeddedProvider implements MPActivityCallbacks, ClientSideForwarder {
     //Server config constants defined for this provider
     //keys to provide access to the comscore account.
     private static final String CLIENT_ID = "CustomerC2Value";

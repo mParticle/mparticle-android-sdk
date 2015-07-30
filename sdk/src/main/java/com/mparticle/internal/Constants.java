@@ -341,6 +341,7 @@ public class Constants {
         String SCREEN_NAME = "sn";
         String NON_INTERACTION = "ni";
         String CURRENCY = "cu";
+        String ATTRIBUTES = "attrs";
         String PRODUCT_ACTION_OBJECT = "pd";
         String PRODUCT_ACTION = "an";
         String CHECKOUT_STEP = "cs";
@@ -387,6 +388,7 @@ public class Constants {
         String ATT_PROMOTION_POSITION = "Position";
         String ATT_PROMOTION_NAME = "Name";
         String ATT_PROMOTION_CREATIVE = "Creative";
+        String ATT_PRODUCT_TOTAL_AMOUNT = "Total Product Amount";
 
         /**
          * This is only set when required. Otherwise default to null.
@@ -409,6 +411,7 @@ public class Constants {
 
         int ENTITY_PRODUCT = 1;
         int ENTITY_PROMOTION = 2;
+
     }
 
     public interface PrefKeys {

@@ -35,7 +35,7 @@ import java.util.Map;
 /**
  * Embedded version of the AppBoy SDK v 1.7.2
  */
-public class EmbeddedAppboy extends EmbeddedProvider implements MPActivityCallbacks, PushProvider, MessagingConfigCallbacks {
+public class EmbeddedAppboy extends EmbeddedProvider implements MPActivityCallbacks, PushProvider, MessagingConfigCallbacks, ClientSideForwarder, ECommerceForwarder {
     static final String APPBOY_KEY = "apiKey";
     public static final String PUSH_ENABLED = "push_enabled";
     public static final String REGISTER_INAPP = "register_inapp";
@@ -99,6 +99,11 @@ public class EmbeddedAppboy extends EmbeddedProvider implements MPActivityCallba
             }
             Appboy.getInstance(context).logCustomEvent(event.getEventName(), properties);
         }
+    }
+
+    @Override
+    public void logScreen(String screenName, Map<String, String> eventAttributes) throws Exception {
+
     }
 
 

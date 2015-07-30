@@ -46,6 +46,10 @@ public final class Product {
         return mCustomAttributes;
     }
 
+    public double getTotalAmount() {
+        return getUnitPrice() * getQuantity();
+    }
+
     /**
      * A simple interface that you can implement in order to customize Product equality comparisons
      *
@@ -160,6 +164,9 @@ public final class Product {
      * @return the quantity of Products
      */
     public double getQuantity() {
+        if (mQuantity < 1) {
+            return 1;
+        }
         return mQuantity;
     }
 
@@ -273,6 +280,7 @@ public final class Product {
             productJson.put("qt", mQuantity);
 
             productJson.put("act", mTimeAdded);
+            productJson.put("tpa", getTotalAmount());
 
             if (mBrand != null) {
                 productJson.put("br", mBrand);

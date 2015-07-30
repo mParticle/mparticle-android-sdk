@@ -22,20 +22,20 @@ public class CommerceEventUtil {
     private static final String ITEM_NAME = "eCommerce - %s - Item";
     private static final String IMPRESSION_NAME = "eCommerce - %s - Impression";
 
-    public static List<MPEvent> expand(CommerceEvent event){
+    public static List<MPEvent> expand(CommerceEvent event) {
         List<MPEvent> eventList = expandProductAction(event);
         eventList.addAll(expandPromotionAction(event));
         eventList.addAll(expandProductImpression(event));
         return eventList;
     }
 
-    public static List<MPEvent> expandProductAction(CommerceEvent event){
+    public static List<MPEvent> expandProductAction(CommerceEvent event) {
         List<MPEvent> events = new LinkedList<MPEvent>();
         String productAction = event.getProductAction();
-        if (productAction == null){
+        if (productAction == null) {
             return events;
         }
-        if (productAction.equalsIgnoreCase(CommerceEvent.PURCHASE) || productAction.equalsIgnoreCase(CommerceEvent.REFUND)){
+        if (productAction.equalsIgnoreCase(CommerceEvent.PURCHASE) || productAction.equalsIgnoreCase(CommerceEvent.REFUND)) {
             MPEvent.Builder plusOne = new MPEvent.Builder(String.format(PLUSONE_NAME, event.getProductAction()), MParticle.EventType.Transaction);
             //set all product action fields to attributes
             Map<String, String> attributes = new HashMap<String, String>();
@@ -47,8 +47,8 @@ public class CommerceEventUtil {
             events.add(plusOne.info(attributes).build());
         }
         List<Product> products = event.getProducts();
-        if (products!= null){
-            for (int i = 0; i < products.size(); i++){
+        if (products != null) {
+            for (int i = 0; i < products.size(); i++) {
                 MPEvent.Builder itemEvent = new MPEvent.Builder(String.format(ITEM_NAME, productAction), MParticle.EventType.Transaction);
                 Map<String, String> attributes = new HashMap<String, String>();
                 extractProductAttributes(products.get(i), attributes);
@@ -59,11 +59,8 @@ public class CommerceEventUtil {
         return events;
     }
 
-    private static void extractProductAttributes(Product product, Map<String, String> attributes) {
+    public static void extractProductFields(Product product, Map<String, String> attributes) {
         if (product != null) {
-            if (product.getCustomAttributes() != null){
-                attributes.putAll(product.getCustomAttributes());
-            }
             if (!MPUtility.isEmpty(product.getCouponCode())) {
                 attributes.put(Constants.Commerce.ATT_PRODUCT_COUPON_CODE, product.getCouponCode());
             }
@@ -86,9 +83,16 @@ public class CommerceEventUtil {
                 attributes.put(Constants.Commerce.ATT_PRODUCT_POSITION, Integer.toString(product.getPosition()));
             }
             attributes.put(Constants.Commerce.ATT_PRODUCT_PRICE, Double.toString(product.getUnitPrice()));
-
-
             attributes.put(Constants.Commerce.ATT_PRODUCT_QUANTITY, Double.toString(product.getQuantity()));
+            attributes.put(Constants.Commerce.ATT_PRODUCT_TOTAL_AMOUNT, Double.toString(product.getTotalAmount()));
+        }
+    }
+
+    public static void extractProductAttributes(Product product, Map<String, String> attributes) {
+        if (product != null) {
+            if (product.getCustomAttributes() != null) {
+                attributes.putAll(product.getCustomAttributes());
+            }
         }
     }
 
@@ -98,7 +102,7 @@ public class CommerceEventUtil {
         }
     }
 
-    public static void extractActionAttributes(CommerceEvent event, Map<String, String> attributes)  {
+    public static void extractActionAttributes(CommerceEvent event, Map<String, String> attributes) {
         extractTransactionAttributes(event, attributes);
         extractTransactionId(event, attributes);
         String currency = event.getCurrency();
@@ -122,7 +126,7 @@ public class CommerceEventUtil {
     }
 
     public static Map<String, String> extractTransactionAttributes(CommerceEvent event, Map<String, String> attributes) {
-        if (event == null || event.getTransactionAttributes() == null){
+        if (event == null || event.getTransactionAttributes() == null) {
             return attributes;
         }
         TransactionAttributes transactionAttributes = event.getTransactionAttributes();
@@ -146,15 +150,15 @@ public class CommerceEventUtil {
         return attributes;
     }
 
-    public static List<MPEvent> expandPromotionAction(CommerceEvent event){
+    public static List<MPEvent> expandPromotionAction(CommerceEvent event) {
         List<MPEvent> events = new LinkedList<MPEvent>();
         String promotionAction = event.getPromotionAction();
-        if (promotionAction == null){
+        if (promotionAction == null) {
             return events;
         }
         List<Promotion> promotions = event.getPromotions();
-        if (promotions != null){
-            for (int i = 0; i < promotions.size(); i++){
+        if (promotions != null) {
+            for (int i = 0; i < promotions.size(); i++) {
                 MPEvent.Builder itemEvent = new MPEvent.Builder(String.format(ITEM_NAME, promotionAction), MParticle.EventType.Transaction);
                 Map<String, String> attributes = new HashMap<String, String>();
                 if (event.getCustomAttributes() != null) {
@@ -169,25 +173,25 @@ public class CommerceEventUtil {
 
     public static void extractPromotionAttributes(Promotion promotion, Map<String, String> attributes) {
         if (promotion != null) {
-            if (!MPUtility.isEmpty(promotion.getId())){
+            if (!MPUtility.isEmpty(promotion.getId())) {
                 attributes.put(Constants.Commerce.ATT_PROMOTION_ID, promotion.getId());
             }
-            if (!MPUtility.isEmpty(promotion.getPosition())){
+            if (!MPUtility.isEmpty(promotion.getPosition())) {
                 attributes.put(Constants.Commerce.ATT_PROMOTION_POSITION, promotion.getPosition());
             }
-            if (!MPUtility.isEmpty(promotion.getName())){
+            if (!MPUtility.isEmpty(promotion.getName())) {
                 attributes.put(Constants.Commerce.ATT_PROMOTION_NAME, promotion.getName());
             }
-            if (!MPUtility.isEmpty(promotion.getCreative())){
+            if (!MPUtility.isEmpty(promotion.getCreative())) {
                 attributes.put(Constants.Commerce.ATT_PROMOTION_CREATIVE, promotion.getCreative());
             }
         }
     }
 
-    public static List<MPEvent> expandProductImpression(CommerceEvent event){
+    public static List<MPEvent> expandProductImpression(CommerceEvent event) {
         List<CommerceEvent.Impression> impressions = event.getImpressions();
         List<MPEvent> events = new LinkedList<MPEvent>();
-        if (impressions == null){
+        if (impressions == null) {
             return events;
         }
         for (int i = 0; i < impressions.size(); i++) {
@@ -200,6 +204,7 @@ public class CommerceEventUtil {
                         attributes.putAll(event.getCustomAttributes());
                     }
                     extractProductAttributes(products.get(i), attributes);
+                    extractProductFields(products.get(i), attributes);
                     extractImpressionAttributes(impressions.get(i), attributes);
                     events.add(itemEvent.info(attributes).build());
                 }
@@ -228,6 +233,13 @@ public class CommerceEventUtil {
             }
             if (event.getCurrency() != null) {
                 message.put(Constants.Commerce.CURRENCY, event.getCurrency());
+            }
+            if (event.getCustomAttributes() != null) {
+                JSONObject attrs = new JSONObject();
+                for (Map.Entry<String, String> entry : event.getCustomAttributes().entrySet()) {
+                    attrs.put(entry.getKey(), entry.getValue());
+                }
+                message.put(Constants.Commerce.ATTRIBUTES, attrs);
             }
             if (event.getProductAction() != null) {
                 JSONObject productAction = new JSONObject();
@@ -309,7 +321,7 @@ public class CommerceEventUtil {
                 }
             }
             JSONObject cartJsonObject = new JSONObject(MParticle.getInstance().Commerce().cart().toString());
-            if (cartJsonObject.length() > 0){
+            if (cartJsonObject.length() > 0) {
                 message.put("sc", cartJsonObject);
             }
 
@@ -342,33 +354,33 @@ public class CommerceEventUtil {
     public static int getEventType(CommerceEvent filteredEvent) {
         if (!MPUtility.isEmpty(filteredEvent.getProductAction())) {
             String action = filteredEvent.getProductAction();
-            if (action.equalsIgnoreCase(CommerceEvent.ADD_TO_CART)){
+            if (action.equalsIgnoreCase(CommerceEvent.ADD_TO_CART)) {
                 return Constants.Commerce.EVENT_TYPE_ADD_TO_CART;
-            } else if (action.equalsIgnoreCase(CommerceEvent.REMOVE_FROM_CART)){
+            } else if (action.equalsIgnoreCase(CommerceEvent.REMOVE_FROM_CART)) {
                 return Constants.Commerce.EVENT_TYPE_REMOVE_FROM_CART;
-            } else if (action.equalsIgnoreCase(CommerceEvent.CHECKOUT)){
+            } else if (action.equalsIgnoreCase(CommerceEvent.CHECKOUT)) {
                 return Constants.Commerce.EVENT_TYPE_CHECKOUT;
-            } else if (action.equalsIgnoreCase(CommerceEvent.CHECKOUT_OPTION)){
+            } else if (action.equalsIgnoreCase(CommerceEvent.CHECKOUT_OPTION)) {
                 return Constants.Commerce.EVENT_TYPE_CHECKOUT_OPTION;
-            } else if (action.equalsIgnoreCase(CommerceEvent.CLICK)){
+            } else if (action.equalsIgnoreCase(CommerceEvent.CLICK)) {
                 return Constants.Commerce.EVENT_TYPE_CLICK;
-            } else if (action.equalsIgnoreCase(CommerceEvent.DETAIL)){
+            } else if (action.equalsIgnoreCase(CommerceEvent.DETAIL)) {
                 return Constants.Commerce.EVENT_TYPE_VIEW_DETAIL;
-            } else if (action.equalsIgnoreCase(CommerceEvent.PURCHASE)){
+            } else if (action.equalsIgnoreCase(CommerceEvent.PURCHASE)) {
                 return Constants.Commerce.EVENT_TYPE_PURCHASE;
-            } else if (action.equalsIgnoreCase(CommerceEvent.REFUND)){
+            } else if (action.equalsIgnoreCase(CommerceEvent.REFUND)) {
                 return Constants.Commerce.EVENT_TYPE_REFUND;
-            } else if (action.equalsIgnoreCase(CommerceEvent.ADD_TO_WISHLIST)){
+            } else if (action.equalsIgnoreCase(CommerceEvent.ADD_TO_WISHLIST)) {
                 return Constants.Commerce.EVENT_TYPE_ADD_TO_WISHLIST;
-            } else if (action.equalsIgnoreCase(CommerceEvent.REMOVE_FROM_WISHLIST)){
+            } else if (action.equalsIgnoreCase(CommerceEvent.REMOVE_FROM_WISHLIST)) {
                 return Constants.Commerce.EVENT_TYPE_REMOVE_FROM_WISHLIST;
             }
         }
-        if (!MPUtility.isEmpty(filteredEvent.getPromotionAction())){
+        if (!MPUtility.isEmpty(filteredEvent.getPromotionAction())) {
             String action = filteredEvent.getPromotionAction();
-            if (action.equalsIgnoreCase(Promotion.VIEW)){
+            if (action.equalsIgnoreCase(Promotion.VIEW)) {
                 return Constants.Commerce.EVENT_TYPE_PROMOTION_VIEW;
-            } else if (action.equalsIgnoreCase(Promotion.CLICK)){
+            } else if (action.equalsIgnoreCase(Promotion.CLICK)) {
                 return Constants.Commerce.EVENT_TYPE_PROMOTION_CLICK;
             }
         }

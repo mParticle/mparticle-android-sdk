@@ -30,7 +30,7 @@ import java.util.Map;
  * Embedded implementation of the Kahuna SDK
  * <p/>
  */
-class EmbeddedKahuna extends EmbeddedProvider implements MPActivityCallbacks {
+class EmbeddedKahuna extends EmbeddedProvider implements MPActivityCallbacks, ClientSideForwarder {
 
     static KahunaPushReceiver sReceiver;
     boolean initialized = false;

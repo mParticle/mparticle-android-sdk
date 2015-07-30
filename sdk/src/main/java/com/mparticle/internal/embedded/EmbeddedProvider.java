@@ -74,6 +74,7 @@ abstract class EmbeddedProvider {
     LinkedList<Projection> projectionList;
     Projection defaultProjection = null;
     Projection defaultScreenProjection = null;
+    Projection defaultCommerceProjection = null;
 
     public EmbeddedProvider(EmbeddedKitManager ekManager) {
         this.mEkManager = ekManager;
@@ -166,8 +167,10 @@ abstract class EmbeddedProvider {
                 if (projection.isDefault()) {
                     if (projection.getMessageType() == 4) {
                         defaultProjection = projection;
-                    } else {
+                    } else if (projection.getMessageType() == 3) {
                         defaultScreenProjection = projection;
+                    } else {
+                        defaultCommerceProjection = projection;
                     }
                 } else {
                     projectionList.add(projection);
@@ -447,17 +450,11 @@ abstract class EmbeddedProvider {
         }
     }
 
-    public void logEvent(MPEvent event) throws Exception {
-
-    }
 
     public void logTransaction(MPProduct transaction) throws Exception {
 
     }
 
-    void logScreen(String screenName, Map<String, String> eventAttributes) throws Exception {
-
-    }
 
     void setLocation(Location location) {
 
@@ -507,21 +504,42 @@ abstract class EmbeddedProvider {
         this.mRunning = running;
     }
 
-    public List<MPEvent> projectEvents(MPEvent event) {
+    public List<Projection.ProjectionResult> projectEvents(MPEvent event) {
         return projectEvents(event, false);
     }
 
-    public List<MPEvent> projectEvents(MPEvent event, boolean isScreenEvent) {
-        List<MPEvent> events = new LinkedList<MPEvent>();
-
-        MPEventWrapper wrapper = new MPEventWrapper(event);
-        wrapper.setIsScreenEvent(isScreenEvent);
+    public List<Projection.ProjectionResult> projectEvents(CommerceEvent event) {
+        List<Projection.ProjectionResult> events = new LinkedList<Projection.ProjectionResult>();
+        EventWrapper.CommerceEventWrapper wrapper = new EventWrapper.CommerceEventWrapper(event);
         for (int i = 0; i < projectionList.size(); i++) {
             Projection projection = projectionList.get(i);
             if (projection.isMatch(wrapper)) {
-                MPEvent newEvent = projection.project(wrapper);
-                if (newEvent != null) {
-                    events.add(newEvent);
+                List<Projection.ProjectionResult> results = projection.project(wrapper);
+                if (results != null) {
+                    events.addAll(events);
+                }
+            }
+        }
+        if (events.isEmpty()) {
+            if (defaultCommerceProjection != null) {
+                events.addAll(defaultCommerceProjection.project(wrapper));
+            } else {
+                return null;
+            }
+        }
+        return events;
+    }
+
+    public List<Projection.ProjectionResult> projectEvents(MPEvent event, boolean isScreenEvent) {
+        List<Projection.ProjectionResult> events = new LinkedList<Projection.ProjectionResult>();
+
+        EventWrapper.MPEventWrapper wrapper = new EventWrapper.MPEventWrapper(event, isScreenEvent);
+        for (int i = 0; i < projectionList.size(); i++) {
+            Projection projection = projectionList.get(i);
+            if (projection.isMatch(wrapper)) {
+                List<Projection.ProjectionResult> newEvents = projection.project(wrapper);
+                if (newEvents != null) {
+                    events.addAll(newEvents);
                 }
             }
         }
@@ -529,13 +547,13 @@ abstract class EmbeddedProvider {
         if (events.isEmpty()) {
             if (isScreenEvent) {
                 if (defaultScreenProjection != null) {
-                    events.add(defaultScreenProjection.project(wrapper));
+                    events.addAll(defaultScreenProjection.project(wrapper));
                 } else {
                     return null;
                 }
             } else {
                 if (defaultProjection != null) {
-                    events.add(defaultProjection.project(wrapper));
+                    events.addAll(defaultProjection.project(wrapper));
                 } else {
                     return null;
                 }
@@ -545,56 +563,5 @@ abstract class EmbeddedProvider {
         return events;
     }
 
-    public void logEvent(CommerceEvent event) throws Exception {
-    }
 
-    static class MPEventWrapper {
-        private final MPEvent mEvent;
-        private boolean mIsScreenEvent;
-
-        public MPEventWrapper(MPEvent event) {
-            this.mEvent = event;
-        }
-
-        private Map<Integer, String> attributeHashes;
-
-        public Map<Integer, String> getAttributeHashes() {
-            if (attributeHashes == null) {
-                attributeHashes = new HashMap<Integer, String>();
-                for (Map.Entry<String, String> entry : mEvent.getInfo().entrySet()) {
-                    int hash = MPUtility.mpHash(getEventTypeOrdinal() + mEvent.getEventName() + entry.getKey());
-                    attributeHashes.put(hash, entry.getKey());
-                }
-            }
-            return attributeHashes;
-        }
-
-        public MPEvent getEvent() {
-            return mEvent;
-        }
-
-        public void setIsScreenEvent(boolean isScreenEvent) {
-            this.mIsScreenEvent = isScreenEvent;
-        }
-
-        public int getEventTypeOrdinal() {
-            if (mIsScreenEvent) {
-                return 0;
-            } else {
-                return mEvent.getEventType().ordinal();
-            }
-        }
-
-        public int getEventHash() {
-            if (mIsScreenEvent) {
-                return MPUtility.mpHash("0" + mEvent.getEventName());
-            } else {
-                return mEvent.getEventHash();
-            }
-        }
-
-        public int getMessageType() {
-            return mIsScreenEvent ? 3 : 4;
-        }
-    }
 }
