@@ -321,7 +321,9 @@ class EmbeddedKahuna extends EmbeddedProvider implements MPActivityCallbacks, EC
                 for (CommerceEvent.Impression impression : impressions) {
                     List<Product> products = impression.getProducts();
                     if (products != null) {
-                        quantity += products.size();
+                        for (Product product : products) {
+                            quantity += product.getQuantity();
+                        }
                     }
                 }
             }
@@ -334,7 +336,9 @@ class EmbeddedKahuna extends EmbeddedProvider implements MPActivityCallbacks, EC
         } else {
             List<Product> products = event.getProducts();
             if (products != null) {
-                quantity = products.size();
+                for (Product product : products) {
+                    quantity += product.getQuantity();
+                }
             }
         }
         int revenue = 0;
