@@ -162,6 +162,7 @@ public class EmbeddedKitManager implements MPActivityCallbacks {
         }
     }
 
+    @Deprecated
     public void logTransaction(MPEvent productEvent) {
         for (EmbeddedProvider provider : providers.values()) {
             try {

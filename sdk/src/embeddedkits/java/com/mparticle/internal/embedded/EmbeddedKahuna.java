@@ -14,6 +14,11 @@ import com.mparticle.MPEvent;
 import com.mparticle.MPProduct;
 import com.mparticle.MPReceiver;
 import com.mparticle.MParticle;
+import com.mparticle.commerce.CommerceEvent;
+import com.mparticle.commerce.Product;
+import com.mparticle.commerce.Promotion;
+import com.mparticle.commerce.TransactionAttributes;
+import com.mparticle.internal.CommerceEventUtil;
 import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.Constants;
 import com.mparticle.internal.MPActivityCallbacks;
@@ -23,6 +28,7 @@ import org.json.JSONObject;
 
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -30,13 +36,26 @@ import java.util.Map;
  * Embedded implementation of the Kahuna SDK
  * <p/>
  */
-class EmbeddedKahuna extends EmbeddedProvider implements MPActivityCallbacks, ClientSideForwarder {
+class EmbeddedKahuna extends EmbeddedProvider implements MPActivityCallbacks, ECommerceForwarder {
 
     static KahunaPushReceiver sReceiver;
     boolean initialized = false;
     private static final String KEY_TRANSACTION_DATA = "sendTransactionData";
     private static final String KEY_SECRET_KEY = "secretKey";
     private boolean sendTransactionData = false;
+    private static final String KEY_EVENTNAME_ADD_TO_CART = "defaultAddToCartEventName";
+    private static final String KEY_EVENTNAME_REMOVE_FROM_CART = "defaultRemoveFromCartEventName";
+    private static final String KEY_EVENTNAME_CHECKOUT = "defaultCheckoutEventName";
+    private static final String KEY_EVENTNAME_CHECKOUT_OPTION = "defaultCheckoutOptionEventName";
+    private static final String KEY_EVENTNAME_PRODUCT_CLICK = "defaultProductClickName";
+    private static final String KEY_EVENTNAME_VIEW_DETAIL = "defaultViewDetailEventName";
+    private static final String KEY_EVENTNAME_PURCHASE = "defaultPurchaseEventName";
+    private static final String KEY_EVENTNAME_REFUND = "defaultRefundEventName";
+    private static final String KEY_EVENTNAME_PROMOTION_VIEW = "defaultPromotionViewEventName";
+    private static final String KEY_EVENTNAME_PROMOTION_CLICK = "defaultPromotionClickEventName";
+    private static final String KEY_EVENTNAME_ADD_TO_WISHLIST = "defaultAddToWishlistEventName";
+    private static final String KEY_EVENTNAME_REMOVE_FROM_WISHLIST = "defaultRemoveFromWishlistEventName";
+    private static final String KEY_EVENTNAME_IMPRESSION = "defaultImpressionEventName";
 
     public EmbeddedKahuna(EmbeddedKitManager ekManager) {
         super(ekManager);
@@ -73,6 +92,40 @@ class EmbeddedKahuna extends EmbeddedProvider implements MPActivityCallbacks, Cl
         context.registerReceiver(sReceiver, filter, "com.google.android.c2dm.permission.SEND", null);
     }
 
+    private String getEventName(CommerceEvent event) {
+        int eventType = CommerceEventUtil.getEventType(event);
+        switch (eventType) {
+            case Constants.Commerce.EVENT_TYPE_ADD_TO_CART:
+                return properties.get(KEY_EVENTNAME_ADD_TO_CART);
+            case Constants.Commerce.EVENT_TYPE_REMOVE_FROM_CART:
+                return properties.get(KEY_EVENTNAME_REMOVE_FROM_CART);
+            case Constants.Commerce.EVENT_TYPE_CHECKOUT:
+                return properties.get(KEY_EVENTNAME_CHECKOUT);
+            case Constants.Commerce.EVENT_TYPE_CHECKOUT_OPTION:
+                return properties.get(KEY_EVENTNAME_CHECKOUT_OPTION);
+            case Constants.Commerce.EVENT_TYPE_CLICK:
+                return properties.get(KEY_EVENTNAME_PRODUCT_CLICK);
+            case Constants.Commerce.EVENT_TYPE_VIEW_DETAIL:
+                return properties.get(KEY_EVENTNAME_VIEW_DETAIL);
+            case Constants.Commerce.EVENT_TYPE_PURCHASE:
+                return properties.get(KEY_EVENTNAME_PURCHASE);
+            case Constants.Commerce.EVENT_TYPE_REFUND:
+                return properties.get(KEY_EVENTNAME_REFUND);
+            case Constants.Commerce.EVENT_TYPE_PROMOTION_VIEW:
+                return properties.get(KEY_EVENTNAME_PROMOTION_VIEW);
+            case Constants.Commerce.EVENT_TYPE_PROMOTION_CLICK:
+                return properties.get(KEY_EVENTNAME_PROMOTION_CLICK);
+            case Constants.Commerce.EVENT_TYPE_ADD_TO_WISHLIST:
+                return properties.get(KEY_EVENTNAME_ADD_TO_WISHLIST);
+            case Constants.Commerce.EVENT_TYPE_REMOVE_FROM_WISHLIST:
+                return properties.get(KEY_EVENTNAME_REMOVE_FROM_WISHLIST);
+            case Constants.Commerce.EVENT_TYPE_IMPRESSION:
+                return properties.get(KEY_EVENTNAME_IMPRESSION);
+            default:
+                return "Unknown";
+        }
+    }
+
     @Override
     public String getName() {
         return "Kahuna";
@@ -95,7 +148,7 @@ class EmbeddedKahuna extends EmbeddedProvider implements MPActivityCallbacks, Cl
             } else {
                 KahunaAnalytics.trackEvent(event.getEventName());
                 if (eventAttributes != null) {
-                    this.setUserAttributes(eventAttributes);
+                    KahunaAnalytics.setUserAttributes(eventAttributes);
                 }
             }
         }
@@ -103,7 +156,7 @@ class EmbeddedKahuna extends EmbeddedProvider implements MPActivityCallbacks, Cl
 
     @Override
     public void logTransaction(MPProduct transaction) throws Exception {
-        if (sendTransactionData && transaction != null){
+        if (sendTransactionData && transaction != null) {
             Double revenue = transaction.getTotalAmount() * 100;
             KahunaAnalytics.trackEvent("purchase", (int) transaction.getQuantity(), revenue.intValue());
         }
@@ -122,12 +175,12 @@ class EmbeddedKahuna extends EmbeddedProvider implements MPActivityCallbacks, Cl
     @Override
     public void setUserAttributes(JSONObject attributes) {
         Map<String, String> kahunaAttributes = null;
-        if (attributes != null){
+        if (attributes != null) {
             Iterator<String> keys = attributes.keys();
             while (keys.hasNext()) {
                 String key = keys.next();
                 String value = attributes.optString(key, "");
-                if (kahunaAttributes == null){
+                if (kahunaAttributes == null) {
                     kahunaAttributes = new HashMap<String, String>(attributes.length());
                 }
                 kahunaAttributes.put(convertMpKeyToKahuna(key), value);
@@ -138,11 +191,10 @@ class EmbeddedKahuna extends EmbeddedProvider implements MPActivityCallbacks, Cl
         }
     }
 
-    private void setUserAttributes(Map<String, String> attributes){
-        if (attributes != null){
+    private void setUserAttributes(Map<String, String> attributes) {
+        if (attributes != null) {
             HashMap<String, String> kahunaAttributes = new HashMap<String, String>(attributes.size());
-            for (Map.Entry<String, String> entry : attributes.entrySet())
-            {
+            for (Map.Entry<String, String> entry : attributes.entrySet()) {
                 kahunaAttributes.put(convertMpKeyToKahuna(entry.getKey()), entry.getValue());
             }
         }
@@ -168,7 +220,7 @@ class EmbeddedKahuna extends EmbeddedProvider implements MPActivityCallbacks, Cl
     @Override
     public void setUserIdentity(String id, MParticle.IdentityType identityType) {
         String kahunaKey;
-        switch (identityType){
+        switch (identityType) {
             case Facebook:
                 kahunaKey = KahunaUserCredentialKeys.FACEBOOK_KEY;
                 break;
@@ -231,7 +283,6 @@ class EmbeddedKahuna extends EmbeddedProvider implements MPActivityCallbacks, Cl
     }
 
 
-
     @Override
     public void onActivityCreated(Activity activity, int activityCount) {
         update();
@@ -257,5 +308,47 @@ class EmbeddedKahuna extends EmbeddedProvider implements MPActivityCallbacks, Cl
     public void onActivityStarted(Activity activity, int activityCount) {
         update();
         KahunaAnalytics.start();
+    }
+
+    @Override
+    public void logEvent(CommerceEvent event) throws Exception {
+        String eventName = getEventName(event);
+        int quantity = 0;
+        int eventType = CommerceEventUtil.getEventType(event);
+        if (eventType == Constants.Commerce.EVENT_TYPE_IMPRESSION) {
+            List<CommerceEvent.Impression> impressions = event.getImpressions();
+            if (impressions != null) {
+                for (CommerceEvent.Impression impression : impressions) {
+                    List<Product> products = impression.getProducts();
+                    if (products != null) {
+                        quantity += products.size();
+                    }
+                }
+            }
+        } else if (eventType == Constants.Commerce.EVENT_TYPE_PROMOTION_VIEW
+                || eventType == Constants.Commerce.EVENT_TYPE_PROMOTION_CLICK) {
+            List<Promotion> promotions = event.getPromotions();
+            if (promotions != null) {
+                quantity = promotions.size();
+            }
+        } else {
+            List<Product> products = event.getProducts();
+            if (products != null) {
+                quantity = products.size();
+            }
+        }
+        int revenue = 0;
+        TransactionAttributes transactionAttributes = event.getTransactionAttributes();
+        if (transactionAttributes != null) {
+            Double transRevenue = transactionAttributes.getRevenue();
+            if (transRevenue != null) {
+                revenue = (int) (transRevenue.doubleValue() * 100);
+            }
+        }
+        KahunaAnalytics.trackEvent(eventName, quantity, revenue);
+        Map<String, String> eventAttributes = event.getCustomAttributes();
+        if (eventAttributes != null && eventAttributes.size() > 0) {
+            KahunaAnalytics.setUserAttributes(eventAttributes);
+        }
     }
 }

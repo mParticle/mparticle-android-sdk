@@ -450,7 +450,7 @@ abstract class EmbeddedProvider {
         }
     }
 
-
+    @Deprecated
     public void logTransaction(MPProduct transaction) throws Exception {
 
     }
