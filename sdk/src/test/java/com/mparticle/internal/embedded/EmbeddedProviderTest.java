@@ -194,7 +194,6 @@ public class EmbeddedProviderTest {
         event = new CommerceEvent.Builder(CommerceEvent.CHECKOUT, new Product.Builder("name", "sku", 5)
                 .customAttributes(attributes)
                 .brand("cool brand").build())
-                .addPromotion(new Promotion().setId("promo id").setCreative("the creative").setName("promotion name"))
                 .build();
         assertEquals("whatever", event.getProducts().get(0).getCustomAttributes().get("my custom product attribute"));
         assertEquals("cool brand", event.getProducts().get(0).getBrand());
@@ -202,8 +201,6 @@ public class EmbeddedProviderTest {
         filteredEvent = provider.filterCommerceEvent(event);
         assertNull(filteredEvent.getProducts().get(0).getCustomAttributes().get("my custom product attribute"));
         assertNull(filteredEvent.getProducts().get(0).getBrand());
-        assertNull(filteredEvent.getPromotions().get(0).getCreative());
-        assertEquals("promotion name", filteredEvent.getPromotions().get(0).getName());
     }
 
     @Test

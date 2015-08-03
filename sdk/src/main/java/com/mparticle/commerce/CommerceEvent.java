@@ -81,7 +81,39 @@ public final class CommerceEvent {
                     }
                 }
             }
+            if (promotionList != null && promotionList.size() > 0) {
+                if (devMode) {
+                    throw new IllegalStateException("Product CommerceEvent should not contain Promotions.");
+                } else {
+                    ConfigManager.log(MParticle.LogLevel.ERROR, "Product CommerceEvent should not contain Promotions.");
+                }
+            }
+        }else if (mPromotionAction != null ) {
+            if (productList != null && productList.size() > 0) {
+                if (devMode) {
+                    throw new IllegalStateException("Promotion CommerceEvent should not contain Products.");
+                }else {
+                    ConfigManager.log(MParticle.LogLevel.ERROR, "Promotion CommerceEvent should not contain Products.");
+                }
+            }
+
+        }else {
+            if (productList != null && productList.size() > 0) {
+                if (devMode) {
+                    throw new IllegalStateException("Impression CommerceEvent should not contain Products.");
+                }else {
+                    ConfigManager.log(MParticle.LogLevel.ERROR, "Impression CommerceEvent should not contain Products.");
+                }
+            }
+            if (promotionList != null && promotionList.size() > 0) {
+                if (devMode) {
+                    throw new IllegalStateException("Impression CommerceEvent should not contain Promotions.");
+                } else {
+                    ConfigManager.log(MParticle.LogLevel.ERROR, "Impression CommerceEvent should not contain Promotions.");
+                }
+            }
         }
+
 
         if (mTransactionAttributes == null || mTransactionAttributes.getRevenue() == null) {
             double transactionRevenue = 0;
