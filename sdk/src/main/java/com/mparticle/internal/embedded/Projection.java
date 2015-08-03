@@ -60,7 +60,6 @@ public class Projection {
         mID = projectionJson.getInt("id");
         mMappingId = projectionJson.optInt("pmid");
         mModuleMappingId = projectionJson.optInt("pmmid");
-        mOutboundMessageType = projectionJson.optInt("outbound_message_type", 4);
         if (projectionJson.has("match")) {
             JSONObject match = projectionJson.getJSONObject("match");
             mMessageType = match.optInt("message_type");
@@ -104,6 +103,7 @@ public class Projection {
 
         if (projectionJson.has("action")) {
             JSONObject action = projectionJson.getJSONObject("action");
+            mOutboundMessageType = action.optInt("outbound_message_type", 4);
             mProjectedEventName = action.optString("projected_event_name");
             if (action.has("attribute_maps")) {
                 mRequiredAttributeMapList = new LinkedList<AttributeMap>();
@@ -140,6 +140,7 @@ public class Projection {
             mRequiredAttributeMapList = null;
             mStaticAttributeMapList = null;
             mProjectedEventName = null;
+            mOutboundMessageType = 4;
         }
     }
 
@@ -176,14 +177,18 @@ public class Projection {
         if (commerceEvent == null) {
             return null;
         }
-        if (commerceMatchProperty != null) {
+        if (commerceMatchProperty != null && commerceMatchPropertyName != null) {
             if (commerceMatchProperty.equalsIgnoreCase(PROPERTY_LOCATION_EVENT_FIELD)) {
                  if (matchCommerceFields(commerceEvent)) {
                      return commerceEvent;
+                 }else {
+                     return null;
                  }
             } else if (commerceMatchProperty.equalsIgnoreCase(PROPERTY_LOCATION_EVENT_ATTRIBUTE)) {
                  if (matchCommerceAttributes(commerceEvent)) {
                      return commerceEvent;
+                 }else{
+                     return null;
                  }
             } else if (commerceMatchProperty.equalsIgnoreCase(PROPERTY_LOCATION_PRODUCT_FIELD)) {
                 return matchProductFields(commerceEvent);
@@ -267,6 +272,7 @@ public class Projection {
 
     private CommerceEvent matchProductFields(CommerceEvent event) {
         int hash = Integer.parseInt(commerceMatchPropertyName);
+        int type = CommerceEventUtil.getEventType(event);
         List<Product> productList = event.getProducts();
         if (productList == null || productList.size() == 0) {
             return null;
@@ -278,7 +284,7 @@ public class Projection {
             CommerceEventUtil.extractProductFields(product, productFields);
             if (productFields != null) {
                 for (Map.Entry<String, String> entry : productFields.entrySet()) {
-                    int attributeHash = MPUtility.mpHash(CommerceEventUtil.getEventType(event) + entry.getKey());
+                    int attributeHash = MPUtility.mpHash(type + entry.getKey());
                     if (attributeHash == hash) {
                         if (entry.getValue().equalsIgnoreCase(commerceMatchPropertyValue)) {
                             matchedProducts.add(product);
@@ -326,8 +332,11 @@ public class Projection {
     }
 
     private boolean matchCommerceAttributes(CommerceEvent event) {
-        int hash = Integer.parseInt(commerceMatchPropertyName);
         Map<String, String> attributes = event.getCustomAttributes();
+        if (attributes == null || attributes.size() < 1) {
+            return false;
+        }
+        int hash = Integer.parseInt(commerceMatchPropertyName);
         for (Map.Entry<String, String> entry : attributes.entrySet()) {
             int attributeHash = MPUtility.mpHash(CommerceEventUtil.getEventType(event) + entry.getKey());
             if (attributeHash == hash) {
