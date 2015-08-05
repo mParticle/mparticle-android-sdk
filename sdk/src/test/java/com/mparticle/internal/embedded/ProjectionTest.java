@@ -501,7 +501,7 @@ public class ProjectionTest {
     /**
      * Testing:
      *
-     * 1. Converting CommerceEvent to MPEvent
+     * 1. Mapping CommerceEvent to MPEvent
      * 2. Foreach logic - n products should yield n events
      * 3. ProductField, EventField mapping
      * 4. Hash matching
@@ -675,22 +675,33 @@ public class ProjectionTest {
     }
 
     /**
-     * Test projecting from CommerceEvent to CommerceEvent
+     * Test projecting from CommerceEvent to CommerceEvent:
      *
-     * Also testing foreach vs last when going CE->CE
+     * - matching on Hash of EventField (already tested above)
+     * - "last" selector yields a single CommerceEvent with all of the original products, but only attributes of the last Product
+     * - "foreach" selector yields 5 CommerceEvents, each with 1 product and the attributes of that Product
+     * - test mapping/setting of an event name for CommerceEvent
+     * - for all of the above, mapping EventField, EventAttribute, ProductField, and ProductAttributes
+     * - is_required limits resulting CommerceEvents to only those with the matching Products
      *
      * @throws Exception
      */
     @Test
     public void testCommerceEventToCommerceEvent() throws Exception {
-        JSONObject config = new JSONObject("{\"id\":99, \"pmid\":229, \"match\":{\"message_type\":16, \"event_match_type\":\"Hash\", \"event\":\"1569\", \"property\":\"EventField\", \"property_name\":\"-601244443\", \"property_value\":\"5\"}, \"behavior\":{\"max_custom_params\":0, \"selector\":\"last\"}, \"action\":{\"projected_event_name\":\"checkout - place order\", \"attribute_maps\":[{\"projected_attribute_name\":\"Last Place Order Category\", \"match_type\":\"Hash\", \"value\":\"-1167125985\", \"data_type\":\"String\", \"property\":\"ProductField\"} ], \"outbound_message_type\":16 } }");
+        JSONObject config = new JSONObject("{\"id\":99, \"pmid\":229, \"match\":{\"message_type\":16, \"event_match_type\":\"Hash\", \"event\":\"1569\", \"property\":\"EventField\", \"property_name\":\"-601244443\", \"property_value\":\"5\"}, \"behavior\":{\"max_custom_params\":0, \"selector\":\"last\"}, \"action\":{\"projected_event_name\":\"checkout - place order\", \"attribute_maps\":[{\"projected_attribute_name\":\"Last Place Order Category\", \"match_type\":\"Hash\", \"value\":\"-1167125985\", \"data_type\":\"String\", \"property\":\"ProductField\"}, {\"projected_attribute_name\":\"Projected sample custom attribute\", \"match_type\":\"Hash\", \"value\":\"153565474\", \"data_type\":\"String\", \"property\":\"ProductAttribute\"}, {\"projected_attribute_name\":\"Projected list source\", \"match_type\":\"Hash\", \"value\":\"-882952085\", \"data_type\":\"String\", \"property\":\"EventField\"}, {\"projected_attribute_name\":\"Projected sample event attribute\", \"match_type\":\"Hash\", \"value\":\"1957440897\", \"data_type\":\"String\", \"property\":\"EventAttribute\"} ], \"outbound_message_type\":16 } }");
         Projection projection = new Projection(config);
         Product product = new Product.Builder("name", "sku", 0).category("category 0").build();
+        Map<String, String> productAttributes = new HashMap<String, String>();
+        productAttributes.put("sample custom attribute", "sample custom product attribute value");
+        Map<String, String> eventAttributes = new HashMap<String, String>();
+        eventAttributes.put("sample event attribute", "sample custom event value");
         CommerceEvent commerceEvent = new CommerceEvent.Builder(CommerceEvent.CHECKOUT, product)
-                .addProduct(new Product.Builder("name 1", "sku", 0).category("category 1").build())
-                .addProduct(new Product.Builder("name 2", "sku", 0).category("category 2").build())
+                .addProduct(new Product.Builder("name 1", "sku", 0).category("category 1").customAttributes(productAttributes).build())
+                .addProduct(new Product.Builder("name 2", "sku", 0).category("category 2").customAttributes(productAttributes).build())
                 .addProduct(new Product.Builder("name 3", "sku", 0).category("category 3").build())
                 .addProduct(new Product.Builder("name 4", "sku", 0).category("category 4").build())
+                .productListSource("some product list source")
+                .customAttributes(eventAttributes)
                 .checkoutStep(5).build();
         assertTrue(projection.isMatch(new EventWrapper.CommerceEventWrapper(commerceEvent)));
         List<Projection.ProjectionResult> result = projection.project(new EventWrapper.CommerceEventWrapper(commerceEvent));
@@ -701,19 +712,31 @@ public class ProjectionTest {
         assertEquals("checkout - place order", event.getEventName());
         assertEquals(5, event.getProducts().size());
         assertEquals("category 4", event.getCustomAttributes().get("Last Place Order Category"));
+        assertEquals("some product list source", event.getCustomAttributes().get("Projected list source"));
+        assertEquals("sample custom event value", event.getCustomAttributes().get("Projected sample event attribute"));
 
         config.getJSONObject("behavior").put("selector", "foreach");
         result = new Projection(config).project(new EventWrapper.CommerceEventWrapper(commerceEvent));
         assertEquals(5, result.size());
 
-        int i = 0;
-        for (Projection.ProjectionResult projectionResult1 : result) {
+
+        for (int i = 0; i < result.size(); i++) {
+            Projection.ProjectionResult projectionResult1 = result.get(i);
             CommerceEvent event1 = projectionResult1.getCommerceEvent();
             assertEquals("checkout - place order", event1.getEventName());
             assertEquals(1, event1.getProducts().size());
+            assertEquals("some product list source", event1.getCustomAttributes().get("Projected list source"));
+            assertEquals("sample custom event value", event1.getCustomAttributes().get("Projected sample event attribute"));
+            if (i == 1 || i == 2) {
+                assertEquals("sample custom product attribute value", event1.getCustomAttributes().get("Projected sample custom attribute"));
+            }
             assertNotNull(event1);
             assertEquals("category " + i, event1.getCustomAttributes().get("Last Place Order Category"));
-            i++;
         }
+
+        //make the ProductAttribute mapping required, should limit down the results to 2 products
+        config.getJSONObject("action").getJSONArray("attribute_maps").getJSONObject(1).put("is_required", "true");
+        result = new Projection(config).project(new EventWrapper.CommerceEventWrapper(commerceEvent));
+        assertEquals(2, result.size());
     }
 }
