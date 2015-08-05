@@ -9,6 +9,7 @@ import com.mparticle.MPEvent;
 import com.mparticle.MPProduct;
 import com.mparticle.MParticle;
 import com.mparticle.commerce.CommerceEvent;
+import com.mparticle.commerce.Impression;
 import com.mparticle.commerce.Product;
 import com.mparticle.commerce.Promotion;
 import com.mparticle.commerce.TransactionAttributes;
@@ -320,11 +321,11 @@ abstract class EmbeddedProvider {
         boolean removePromotions = !mCommerceEntityFilters.get(Constants.Commerce.ENTITY_PROMOTION, true);
         if (removeProducts) {
             builder.products(new LinkedList<Product>());
-            List<CommerceEvent.Impression> impressionList = filteredEvent.getImpressions();
+            List<Impression> impressionList = filteredEvent.getImpressions();
             if (impressionList != null) {
                 builder.impressions(null);
-                for (CommerceEvent.Impression impression : impressionList) {
-                    builder.addImpression(new CommerceEvent.Impression(impression.getListName(), null));
+                for (Impression impression : impressionList) {
+                    builder.addImpression(new Impression(impression.getListName(), null));
                 }
             }
         }

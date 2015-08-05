@@ -4,7 +4,6 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
@@ -492,13 +491,13 @@ public class MParticle {
             Cart cart = Cart.getInstance(mAppContext);
             if (event.getProductAction() != null){
                 List<Product> productList = event.getProducts();
-                if (event.getProductAction().equalsIgnoreCase(CommerceEvent.ADD_TO_CART)){
+                if (event.getProductAction().equalsIgnoreCase(Product.ADD_TO_CART)){
                     if (productList != null) {
                         for (Product product : productList) {
                             cart.add(product, false);
                         }
                     }
-                }else if (event.getProductAction().equalsIgnoreCase(CommerceEvent.REMOVE_FROM_CART)){
+                }else if (event.getProductAction().equalsIgnoreCase(Product.REMOVE_FROM_CART)){
                     if (productList != null) {
                         for (Product product : productList) {
                             cart.remove(product, false);

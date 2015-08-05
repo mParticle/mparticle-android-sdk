@@ -2,6 +2,7 @@ package com.mparticle.internal.embedded;
 
 import com.mparticle.MParticle;
 import com.mparticle.commerce.CommerceEvent;
+import com.mparticle.commerce.Impression;
 import com.mparticle.commerce.Product;
 import com.mparticle.commerce.Promotion;
 import com.mparticle.commerce.TransactionAttributes;
@@ -113,30 +114,30 @@ public class EmbeddedProviderTest {
         provider.parseConfig(new JSONObject(COMMERCE_FILTERS));
         Map<String, String> attributes = new HashMap<String, String>();
         attributes.put("my custom attribute", "whatever");
-        CommerceEvent event = new CommerceEvent.Builder(CommerceEvent.ADD_TO_CART, new Product.Builder("name", "sku", 2).build()).customAttributes(attributes).build();
+        CommerceEvent event = new CommerceEvent.Builder(Product.ADD_TO_CART, new Product.Builder("name", "sku", 2).build()).customAttributes(attributes).build();
         assertEquals("whatever", event.getCustomAttributes().get("my custom attribute"));
         CommerceEvent filteredEvent = provider.filterCommerceEvent(event);
         assertNull(filteredEvent.getCustomAttributes().get("my custom attribute"));
 
         //make sure we're only doing it for ADD_TO_CART
-        CommerceEvent event2 = new CommerceEvent.Builder(CommerceEvent.PURCHASE, new Product.Builder("name", "sku", 2).build()).customAttributes(attributes).transactionAttributes(new TransactionAttributes().setId("some id")).build();
+        CommerceEvent event2 = new CommerceEvent.Builder(Product.PURCHASE, new Product.Builder("name", "sku", 2).build()).customAttributes(attributes).transactionAttributes(new TransactionAttributes().setId("some id")).build();
 
         assertEquals("whatever", event2.getCustomAttributes().get("my custom attribute"));
         CommerceEvent filteredEvent2 = provider.filterCommerceEvent(event2);
         assertEquals("whatever", filteredEvent2.getCustomAttributes().get("my custom attribute"));
 
-        event = new CommerceEvent.Builder(CommerceEvent.CHECKOUT, new Product.Builder("name", "sku", 2).build()).checkoutOptions("cool options").build();
+        event = new CommerceEvent.Builder(Product.CHECKOUT, new Product.Builder("name", "sku", 2).build()).checkoutOptions("cool options").build();
 
         assertEquals("cool options", event.getCheckoutOptions());
         filteredEvent2 = provider.filterCommerceEvent(event);
         assertNull(filteredEvent2.getCheckoutOptions());
 
-        event = new CommerceEvent.Builder(CommerceEvent.ADD_TO_CART, new Product.Builder("name", "sku", 2).build()).checkoutOptions("cool options").build();
+        event = new CommerceEvent.Builder(Product.ADD_TO_CART, new Product.Builder("name", "sku", 2).build()).checkoutOptions("cool options").build();
         assertEquals("cool options", event.getCheckoutOptions());
         filteredEvent2 = provider.filterCommerceEvent(event);
         assertEquals("cool options", filteredEvent2.getCheckoutOptions());
 
-        event2 = new CommerceEvent.Builder(CommerceEvent.PURCHASE, new Product.Builder("name", "sku", 2).build()).customAttributes(attributes).transactionAttributes(new TransactionAttributes().setId("some id").setAffiliation("cool affiliation")).build();
+        event2 = new CommerceEvent.Builder(Product.PURCHASE, new Product.Builder("name", "sku", 2).build()).customAttributes(attributes).transactionAttributes(new TransactionAttributes().setId("some id").setAffiliation("cool affiliation")).build();
         assertEquals("cool affiliation", event2.getTransactionAttributes().getAffiliation());
         filteredEvent2 = provider.filterCommerceEvent(event2);
         assertNull(filteredEvent2.getTransactionAttributes().getAffiliation());
@@ -146,17 +147,17 @@ public class EmbeddedProviderTest {
     public void testFilterCommerceEntity() throws Exception {
         EmbeddedProvider provider = new FakeProvider(Mockito.mock(EmbeddedKitManager.class));
         provider.parseConfig(new JSONObject(COMMERCE_FILTERS));
-        CommerceEvent.Impression impression = new CommerceEvent.Impression("Cool list name", new Product.Builder("name2", "sku", 2).build());
-        CommerceEvent event = new CommerceEvent.Builder(CommerceEvent.ADD_TO_CART, new Product.Builder("name", "sku", 2).build()).addImpression(impression).build();
-        List<CommerceEvent.Impression> impressionList = event.getImpressions();
-        for (CommerceEvent.Impression imp : impressionList) {
+        Impression impression = new Impression("Cool list name", new Product.Builder("name2", "sku", 2).build());
+        CommerceEvent event = new CommerceEvent.Builder(Product.ADD_TO_CART, new Product.Builder("name", "sku", 2).build()).addImpression(impression).build();
+        List<Impression> impressionList = event.getImpressions();
+        for (Impression imp : impressionList) {
             assertEquals(1, imp.getProducts().size());
         }
         event = provider.filterCommerceEvent(event);
         assertNull(event.getProducts());
-        List<CommerceEvent.Impression> impressionList2 = event.getImpressions();
+        List<Impression> impressionList2 = event.getImpressions();
         assertTrue(impressionList2.size() > 0);
-        for (CommerceEvent.Impression imp : impressionList2) {
+        for (Impression imp : impressionList2) {
             assertEquals(0, imp.getProducts().size());
         }
         JSONObject config = new JSONObject(COMMERCE_FILTERS);
@@ -164,9 +165,9 @@ public class EmbeddedProviderTest {
         config.getJSONObject("hs").getJSONObject("ent").put("2", 0);
         config.getJSONObject("hs").getJSONObject("ent").put("1", 1);
         provider.parseConfig(config);
-        event = new CommerceEvent.Builder(CommerceEvent.ADD_TO_CART, new Product.Builder("name", "sku", 2).build()).addImpression(impression).build();
+        event = new CommerceEvent.Builder(Product.ADD_TO_CART, new Product.Builder("name", "sku", 2).build()).addImpression(impression).build();
         impressionList = event.getImpressions();
-        for (CommerceEvent.Impression imp : impressionList) {
+        for (Impression imp : impressionList) {
             assertEquals(1, imp.getProducts().size());
         }
         assertEquals(1, event.getProducts().size());
@@ -174,7 +175,7 @@ public class EmbeddedProviderTest {
         assertEquals(1, event.getProducts().size());
         impressionList2 = event.getImpressions();
         assertTrue(impressionList2.size() > 0);
-        for (CommerceEvent.Impression imp : impressionList2) {
+        for (Impression imp : impressionList2) {
             assertEquals(1, imp.getProducts().size());
         }
     }
@@ -191,7 +192,7 @@ public class EmbeddedProviderTest {
 
         Map<String, String> attributes = new HashMap<String, String>();
         attributes.put("my custom product attribute", "whatever");
-        event = new CommerceEvent.Builder(CommerceEvent.CHECKOUT, new Product.Builder("name", "sku", 5)
+        event = new CommerceEvent.Builder(Product.CHECKOUT, new Product.Builder("name", "sku", 5)
                 .customAttributes(attributes)
                 .brand("cool brand").build())
                 .build();
@@ -208,9 +209,9 @@ public class EmbeddedProviderTest {
         //CUSTOM ATTRIBUTES
         EmbeddedProvider provider = new FakeProvider(Mockito.mock(EmbeddedKitManager.class));
         provider.parseConfig(new JSONObject(COMMERCE_FILTERS));
-        CommerceEvent event = new CommerceEvent.Builder(CommerceEvent.ADD_TO_CART, new Product.Builder("name", "sku", 2).build()).build();
+        CommerceEvent event = new CommerceEvent.Builder(Product.ADD_TO_CART, new Product.Builder("name", "sku", 2).build()).build();
         assertNotNull(provider.filterCommerceEvent(event));
-        CommerceEvent event2 = new CommerceEvent.Builder(CommerceEvent.REMOVE_FROM_CART, new Product.Builder("name", "sku", 2).build()).build();
+        CommerceEvent event2 = new CommerceEvent.Builder(Product.REMOVE_FROM_CART, new Product.Builder("name", "sku", 2).build()).build();
         assertNull(provider.filterCommerceEvent(event2));
 
     }

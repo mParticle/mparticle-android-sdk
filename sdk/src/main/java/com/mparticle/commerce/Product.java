@@ -21,6 +21,16 @@ import java.util.Map;
  */
 public final class Product {
 
+    public static final String ADD_TO_CART = "add_to_cart";
+    public static final String REMOVE_FROM_CART = "remove_from_cart";
+    public static final String ADD_TO_WISHLIST = "add_to_wishlist";
+    public static final String REMOVE_FROM_WISHLIST = "remove_from_wishlist";
+    public static final String CHECKOUT = "checkout";
+    public static final String CLICK = "click";
+    public static final String DETAIL = "view_detail";
+    public static final String PURCHASE = "purchase";
+    public static final String REFUND = "refund";
+    public static final String CHECKOUT_OPTION = "checkout_option";
     private static EqualityComparator mComparator = null;
     private Map<String, String> mCustomAttributes;
     private String mName = null;

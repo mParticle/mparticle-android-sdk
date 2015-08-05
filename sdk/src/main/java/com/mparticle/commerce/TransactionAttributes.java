@@ -24,7 +24,7 @@ public class TransactionAttributes {
     /**
      * Create a TransactionAttributes object to be associated with a {@link CommerceEvent}.
      *
-     * Note that transaction ID is required for {@link CommerceEvent#PURCHASE} and {@link CommerceEvent#REFUND} events.
+     * Note that transaction ID is required for {@link Product#PURCHASE} and {@link Product#REFUND} events.
      *
      */
     public TransactionAttributes() {
@@ -34,7 +34,7 @@ public class TransactionAttributes {
     /**
      * Create a TransactionAttributes object to be associated with a {@link CommerceEvent}.
      *
-     * Note that transaction ID is required for {@link CommerceEvent#PURCHASE} and {@link CommerceEvent#REFUND} events.
+     * Note that transaction ID is required for {@link Product#PURCHASE} and {@link Product#REFUND} events.
      *
      * @param transactionId a unique ID for this transaction
      */

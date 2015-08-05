@@ -3,6 +3,7 @@ package com.mparticle.internal;
 import com.mparticle.MPEvent;
 import com.mparticle.MParticle;
 import com.mparticle.commerce.CommerceEvent;
+import com.mparticle.commerce.Impression;
 import com.mparticle.commerce.Product;
 import com.mparticle.commerce.Promotion;
 import com.mparticle.commerce.TransactionAttributes;
@@ -35,7 +36,7 @@ public class CommerceEventUtil {
         if (productAction == null) {
             return events;
         }
-        if (productAction.equalsIgnoreCase(CommerceEvent.PURCHASE) || productAction.equalsIgnoreCase(CommerceEvent.REFUND)) {
+        if (productAction.equalsIgnoreCase(Product.PURCHASE) || productAction.equalsIgnoreCase(Product.REFUND)) {
             MPEvent.Builder plusOne = new MPEvent.Builder(String.format(PLUSONE_NAME, event.getProductAction()), MParticle.EventType.Transaction);
             //set all product action fields to attributes
             Map<String, String> attributes = new HashMap<String, String>();
@@ -189,7 +190,7 @@ public class CommerceEventUtil {
     }
 
     public static List<MPEvent> expandProductImpression(CommerceEvent event) {
-        List<CommerceEvent.Impression> impressions = event.getImpressions();
+        List<Impression> impressions = event.getImpressions();
         List<MPEvent> events = new LinkedList<MPEvent>();
         if (impressions == null) {
             return events;
@@ -213,7 +214,7 @@ public class CommerceEventUtil {
         return events;
     }
 
-    private static void extractImpressionAttributes(CommerceEvent.Impression impression, Map<String, String> attributes) {
+    private static void extractImpressionAttributes(Impression impression, Map<String, String> attributes) {
         if (impression != null) {
 
             if (!MPUtility.isEmpty(impression.getListName())) {
@@ -300,7 +301,7 @@ public class CommerceEventUtil {
             }
             if (event.getImpressions() != null && event.getImpressions().size() > 0) {
                 JSONArray impressions = new JSONArray();
-                for (CommerceEvent.Impression impression : event.getImpressions()) {
+                for (Impression impression : event.getImpressions()) {
                     JSONObject impressionJson = new JSONObject();
                     if (impression.getListName() != null) {
                         impressionJson.put(Constants.Commerce.IMPRESSION_LOCATION, impression.getListName());
@@ -354,25 +355,25 @@ public class CommerceEventUtil {
     public static int getEventType(CommerceEvent filteredEvent) {
         if (!MPUtility.isEmpty(filteredEvent.getProductAction())) {
             String action = filteredEvent.getProductAction();
-            if (action.equalsIgnoreCase(CommerceEvent.ADD_TO_CART)) {
+            if (action.equalsIgnoreCase(Product.ADD_TO_CART)) {
                 return Constants.Commerce.EVENT_TYPE_ADD_TO_CART;
-            } else if (action.equalsIgnoreCase(CommerceEvent.REMOVE_FROM_CART)) {
+            } else if (action.equalsIgnoreCase(Product.REMOVE_FROM_CART)) {
                 return Constants.Commerce.EVENT_TYPE_REMOVE_FROM_CART;
-            } else if (action.equalsIgnoreCase(CommerceEvent.CHECKOUT)) {
+            } else if (action.equalsIgnoreCase(Product.CHECKOUT)) {
                 return Constants.Commerce.EVENT_TYPE_CHECKOUT;
-            } else if (action.equalsIgnoreCase(CommerceEvent.CHECKOUT_OPTION)) {
+            } else if (action.equalsIgnoreCase(Product.CHECKOUT_OPTION)) {
                 return Constants.Commerce.EVENT_TYPE_CHECKOUT_OPTION;
-            } else if (action.equalsIgnoreCase(CommerceEvent.CLICK)) {
+            } else if (action.equalsIgnoreCase(Product.CLICK)) {
                 return Constants.Commerce.EVENT_TYPE_CLICK;
-            } else if (action.equalsIgnoreCase(CommerceEvent.DETAIL)) {
+            } else if (action.equalsIgnoreCase(Product.DETAIL)) {
                 return Constants.Commerce.EVENT_TYPE_VIEW_DETAIL;
-            } else if (action.equalsIgnoreCase(CommerceEvent.PURCHASE)) {
+            } else if (action.equalsIgnoreCase(Product.PURCHASE)) {
                 return Constants.Commerce.EVENT_TYPE_PURCHASE;
-            } else if (action.equalsIgnoreCase(CommerceEvent.REFUND)) {
+            } else if (action.equalsIgnoreCase(Product.REFUND)) {
                 return Constants.Commerce.EVENT_TYPE_REFUND;
-            } else if (action.equalsIgnoreCase(CommerceEvent.ADD_TO_WISHLIST)) {
+            } else if (action.equalsIgnoreCase(Product.ADD_TO_WISHLIST)) {
                 return Constants.Commerce.EVENT_TYPE_ADD_TO_WISHLIST;
-            } else if (action.equalsIgnoreCase(CommerceEvent.REMOVE_FROM_WISHLIST)) {
+            } else if (action.equalsIgnoreCase(Product.REMOVE_FROM_WISHLIST)) {
                 return Constants.Commerce.EVENT_TYPE_REMOVE_FROM_WISHLIST;
             }
         }

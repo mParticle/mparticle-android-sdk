@@ -85,9 +85,9 @@ public final class Cart {
     /**
      * Add one or more products to the Cart and log a {@link CommerceEvent}.
      * <p/>
-     * This method will log a {@link CommerceEvent} with the {@link CommerceEvent#ADD_TO_CART} action. Products added here
+     * This method will log a {@link CommerceEvent} with the {@link Product#ADD_TO_CART} action. Products added here
      * will remain in the cart across app restarts, and will be included in future calls to {@link CommerceApi#purchase(TransactionAttributes)}
-     * or {@link CommerceEvent}'s with a product action {@link CommerceEvent#PURCHASE}
+     * or {@link CommerceEvent}'s with a product action {@link Product#PURCHASE}
      * <p/>
      * If the Cart already contains a Product that is considered equal, this method is a no-op.
      *
@@ -102,9 +102,9 @@ public final class Cart {
     /**
      * Add one or more products to the Cart and log a {@link CommerceEvent}.
      * <p/>
-     * This method will log a {@link CommerceEvent} with the {@link CommerceEvent#ADD_TO_CART} action. Products added here
+     * This method will log a {@link CommerceEvent} with the {@link Product#ADD_TO_CART} action. Products added here
      * will remain in the cart across app restarts, and will be included in future calls to {@link CommerceApi#purchase(TransactionAttributes)}
-     * or {@link CommerceEvent}'s with a product action {@link CommerceEvent#PURCHASE}
+     * or {@link CommerceEvent}'s with a product action {@link Product#PURCHASE}
      * <p/>
      * If the Cart already contains a Product that is considered equal, this method is a no-op.
      *
@@ -119,7 +119,7 @@ public final class Cart {
             save();
             if (logEvent) {
                 MParticle.getInstance().logEvent(
-                        new CommerceEvent.Builder(CommerceEvent.ADD_TO_CART, product).build()
+                        new CommerceEvent.Builder(Product.ADD_TO_CART, product).build()
                 );
             }
         }
@@ -129,7 +129,7 @@ public final class Cart {
     /**
      * Remove one or more products from the Cart and log a {@link CommerceEvent}.
      * <p/>
-     * This method will log a {@link CommerceEvent} with the {@link CommerceEvent#REMOVE_FROM_CART} action.
+     * This method will log a {@link CommerceEvent} with the {@link Product#REMOVE_FROM_CART} action.
      * <p/>
      * If the Cart already contains a Product that is considered equal, the Product will be removed. Otherwise, this method is a no-op.
      *
@@ -144,7 +144,7 @@ public final class Cart {
     /**
      * Remove one or more products from the Cart and log a {@link CommerceEvent}.
      * <p/>
-     * This method will log a {@link CommerceEvent} with the {@link CommerceEvent#REMOVE_FROM_CART} action.
+     * This method will log a {@link CommerceEvent} with the {@link Product#REMOVE_FROM_CART} action.
      * <p/>
      * If the Cart already contains a Product that is considered equal, the Product will be removed. Otherwise, this method is a no-op..
      *
@@ -156,7 +156,7 @@ public final class Cart {
         if (product != null && productList.remove(product)) {
             save();
             if (logEvent) {
-                CommerceEvent event = new CommerceEvent.Builder(CommerceEvent.REMOVE_FROM_CART, product).build();
+                CommerceEvent event = new CommerceEvent.Builder(Product.REMOVE_FROM_CART, product).build();
                 MParticle.getInstance().logEvent(event);
             }
         }
@@ -166,7 +166,7 @@ public final class Cart {
     /**
      * Remove a product from the Cart by index and log a {@link CommerceEvent}.
      * <p/>
-     * This method will log a {@link CommerceEvent} with the {@link CommerceEvent#REMOVE_FROM_CART} action.
+     * This method will log a {@link CommerceEvent} with the {@link Product#REMOVE_FROM_CART} action.
      *
      * @param index of the Product to remove
      * @return boolean determining if a product was actually removed.
@@ -177,7 +177,7 @@ public final class Cart {
         if (index >= 0 && productList.size() > index) {
             Product product = productList.remove(index);
             save();
-            CommerceEvent event = new CommerceEvent.Builder(CommerceEvent.REMOVE_FROM_CART, product)
+            CommerceEvent event = new CommerceEvent.Builder(Product.REMOVE_FROM_CART, product)
                     .build();
             MParticle.getInstance().logEvent(event);
         }

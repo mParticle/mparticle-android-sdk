@@ -15,6 +15,7 @@ import com.mparticle.MPProduct;
 import com.mparticle.MPReceiver;
 import com.mparticle.MParticle;
 import com.mparticle.commerce.CommerceEvent;
+import com.mparticle.commerce.Impression;
 import com.mparticle.commerce.Product;
 import com.mparticle.commerce.Promotion;
 import com.mparticle.commerce.TransactionAttributes;
@@ -319,9 +320,9 @@ class EmbeddedKahuna extends EmbeddedProvider implements MPActivityCallbacks, EC
         int quantity = 0;
         int eventType = CommerceEventUtil.getEventType(event);
         if (eventType == Constants.Commerce.EVENT_TYPE_IMPRESSION) {
-            List<CommerceEvent.Impression> impressions = event.getImpressions();
+            List<Impression> impressions = event.getImpressions();
             if (impressions != null) {
-                for (CommerceEvent.Impression impression : impressions) {
+                for (Impression impression : impressions) {
                     List<Product> products = impression.getProducts();
                     if (products != null) {
                         for (Product product : products) {

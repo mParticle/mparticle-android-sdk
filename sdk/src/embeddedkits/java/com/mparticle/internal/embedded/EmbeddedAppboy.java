@@ -110,7 +110,7 @@ public class EmbeddedAppboy extends EmbeddedProvider implements MPActivityCallba
     @Override
     public void logEvent(CommerceEvent event) throws Exception {
         if (!MPUtility.isEmpty(event.getProductAction()) &&
-                event.getProductAction().equalsIgnoreCase(CommerceEvent.PURCHASE)) {
+                event.getProductAction().equalsIgnoreCase(Product.PURCHASE)) {
             List<Product> productList = event.getProducts();
             for (Product product : productList) {
                 logTransaction(event, product);

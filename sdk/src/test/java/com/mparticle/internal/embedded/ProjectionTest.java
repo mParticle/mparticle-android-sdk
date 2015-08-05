@@ -4,6 +4,7 @@ import com.mparticle.MPEvent;
 import com.mparticle.MPProduct;
 import com.mparticle.MParticle;
 import com.mparticle.commerce.CommerceEvent;
+import com.mparticle.commerce.Impression;
 import com.mparticle.commerce.Product;
 import com.mparticle.commerce.Promotion;
 import com.mparticle.commerce.TransactionAttributes;
@@ -514,7 +515,7 @@ public class ProjectionTest {
         Projection projection = new Projection(new JSONObject(config));
         Product.Builder productBuilder = new Product.Builder("product name 0", "product id 0", 1).category("product category 0").quantity(1);
 
-        CommerceEvent.Builder commerceEventBuilder = new CommerceEvent.Builder(CommerceEvent.DETAIL, productBuilder.build()).currency("dollar bills");
+        CommerceEvent.Builder commerceEventBuilder = new CommerceEvent.Builder(Product.DETAIL, productBuilder.build()).currency("dollar bills");
         for (int i = 1; i < 5; i++){
             commerceEventBuilder.addProduct(productBuilder.name("product name " + i).sku("product id " + i).category("product category " + i).quantity(i+1).unitPrice(i+1).build());
         }
@@ -542,57 +543,57 @@ public class ProjectionTest {
     public void testMatchCommerceEventType() throws Exception {
         Product product = new Product.Builder("name", "sku", 0).build();
         JSONObject config = new JSONObject("{\"id\":99, \"pmid\":229, \"match\":{\"message_type\":16, \"event_match_type\":\"Hash\", \"event\":\"1569\", }, \"behavior\":{\"max_custom_params\":0, \"selector\":\"last\"}, \"action\":{\"projected_event_name\":\"checkout - place order\", \"attribute_maps\":[{\"projected_attribute_name\":\"Last Place Order Category\", \"match_type\":\"Hash\", \"value\":\"-1167125985\", \"data_type\":\"String\", \"property\":\"ProductField\"} ], \"outbound_message_type\":16 } }");
-        CommerceEvent event = new CommerceEvent.Builder(CommerceEvent.DETAIL, product).transactionAttributes(new TransactionAttributes().setId("id")).build();
+        CommerceEvent event = new CommerceEvent.Builder(Product.DETAIL, product).transactionAttributes(new TransactionAttributes().setId("id")).build();
         config.getJSONObject("match").put("event",""+MPUtility.mpHash(""+CommerceEventUtil.getEventType(event)));
         Projection projection = new Projection(config);
         assertTrue(projection.isMatch(new EventWrapper.CommerceEventWrapper(event)));
 
-         event = new CommerceEvent.Builder(CommerceEvent.ADD_TO_CART, product).transactionAttributes(new TransactionAttributes().setId("id")).build();
+         event = new CommerceEvent.Builder(Product.ADD_TO_CART, product).transactionAttributes(new TransactionAttributes().setId("id")).build();
         config.getJSONObject("match").put("event",""+MPUtility.mpHash(""+CommerceEventUtil.getEventType(event)));
          projection = new Projection(config);
         assertTrue(projection.isMatch(new EventWrapper.CommerceEventWrapper(event)));
 
-        event = new CommerceEvent.Builder(CommerceEvent.PURCHASE, product).transactionAttributes(new TransactionAttributes().setId("id")).build();
+        event = new CommerceEvent.Builder(Product.PURCHASE, product).transactionAttributes(new TransactionAttributes().setId("id")).build();
         config.getJSONObject("match").put("event",""+MPUtility.mpHash(""+CommerceEventUtil.getEventType(event)));
         projection = new Projection(config);
         assertTrue(projection.isMatch(new EventWrapper.CommerceEventWrapper(event)));
 
-        event = new CommerceEvent.Builder(CommerceEvent.ADD_TO_WISHLIST, product).transactionAttributes(new TransactionAttributes().setId("id")).build();
+        event = new CommerceEvent.Builder(Product.ADD_TO_WISHLIST, product).transactionAttributes(new TransactionAttributes().setId("id")).build();
         config.getJSONObject("match").put("event",""+MPUtility.mpHash(""+CommerceEventUtil.getEventType(event)));
         projection = new Projection(config);
         assertTrue(projection.isMatch(new EventWrapper.CommerceEventWrapper(event)));
 
-        event = new CommerceEvent.Builder(CommerceEvent.CHECKOUT, product).transactionAttributes(new TransactionAttributes().setId("id")).build();
+        event = new CommerceEvent.Builder(Product.CHECKOUT, product).transactionAttributes(new TransactionAttributes().setId("id")).build();
         config.getJSONObject("match").put("event",""+MPUtility.mpHash(""+CommerceEventUtil.getEventType(event)));
         projection = new Projection(config);
         assertTrue(projection.isMatch(new EventWrapper.CommerceEventWrapper(event)));
 
-        event = new CommerceEvent.Builder(CommerceEvent.CHECKOUT_OPTION, product).transactionAttributes(new TransactionAttributes().setId("id")).build();
+        event = new CommerceEvent.Builder(Product.CHECKOUT_OPTION, product).transactionAttributes(new TransactionAttributes().setId("id")).build();
         config.getJSONObject("match").put("event",""+MPUtility.mpHash(""+CommerceEventUtil.getEventType(event)));
         projection = new Projection(config);
         assertTrue(projection.isMatch(new EventWrapper.CommerceEventWrapper(event)));
 
-        event = new CommerceEvent.Builder(CommerceEvent.CLICK, product).transactionAttributes(new TransactionAttributes().setId("id")).build();
+        event = new CommerceEvent.Builder(Product.CLICK, product).transactionAttributes(new TransactionAttributes().setId("id")).build();
         config.getJSONObject("match").put("event",""+MPUtility.mpHash(""+CommerceEventUtil.getEventType(event)));
         projection = new Projection(config);
         assertTrue(projection.isMatch(new EventWrapper.CommerceEventWrapper(event)));
 
-        event = new CommerceEvent.Builder(CommerceEvent.REFUND, product).transactionAttributes(new TransactionAttributes().setId("id")).build();
+        event = new CommerceEvent.Builder(Product.REFUND, product).transactionAttributes(new TransactionAttributes().setId("id")).build();
         config.getJSONObject("match").put("event",""+MPUtility.mpHash(""+CommerceEventUtil.getEventType(event)));
         projection = new Projection(config);
         assertTrue(projection.isMatch(new EventWrapper.CommerceEventWrapper(event)));
 
-        event = new CommerceEvent.Builder(CommerceEvent.REMOVE_FROM_CART, product).transactionAttributes(new TransactionAttributes().setId("id")).build();
+        event = new CommerceEvent.Builder(Product.REMOVE_FROM_CART, product).transactionAttributes(new TransactionAttributes().setId("id")).build();
         config.getJSONObject("match").put("event",""+MPUtility.mpHash(""+CommerceEventUtil.getEventType(event)));
         projection = new Projection(config);
         assertTrue(projection.isMatch(new EventWrapper.CommerceEventWrapper(event)));
 
-        event = new CommerceEvent.Builder(CommerceEvent.REMOVE_FROM_WISHLIST, product).transactionAttributes(new TransactionAttributes().setId("id")).build();
+        event = new CommerceEvent.Builder(Product.REMOVE_FROM_WISHLIST, product).transactionAttributes(new TransactionAttributes().setId("id")).build();
         config.getJSONObject("match").put("event",""+MPUtility.mpHash(""+CommerceEventUtil.getEventType(event)));
         projection = new Projection(config);
         assertTrue(projection.isMatch(new EventWrapper.CommerceEventWrapper(event)));
 
-        event = new CommerceEvent.Builder(new CommerceEvent.Impression("list name", product)).transactionAttributes(new TransactionAttributes().setId("id")).build();
+        event = new CommerceEvent.Builder(new Impression("list name", product)).transactionAttributes(new TransactionAttributes().setId("id")).build();
         config.getJSONObject("match").put("event",""+MPUtility.mpHash(""+CommerceEventUtil.getEventType(event)));
         projection = new Projection(config);
         assertTrue(projection.isMatch(new EventWrapper.CommerceEventWrapper(event)));
@@ -624,9 +625,9 @@ public class ProjectionTest {
         JSONObject config = new JSONObject("{\"id\":99, \"pmid\":229, \"match\":{\"message_type\":16, \"event_match_type\":\"Hash\", \"event\":\"1569\", \"property\":\"EventField\", \"property_name\":\"-601244443\", \"property_value\":\"5\"}, \"behavior\":{\"max_custom_params\":0, \"selector\":\"last\"}, \"action\":{\"projected_event_name\":\"checkout - place order\", \"attribute_maps\":[{\"projected_attribute_name\":\"Last Place Order Category\", \"match_type\":\"Hash\", \"value\":\"-1167125985\", \"data_type\":\"String\", \"property\":\"ProductField\"} ], \"outbound_message_type\":16 } }");
         Projection projection = new Projection(config);
         Product product = new Product.Builder("name", "sku", 0).build();
-        CommerceEvent commerceEvent = new CommerceEvent.Builder(CommerceEvent.CHECKOUT, product).checkoutStep(4).build();
+        CommerceEvent commerceEvent = new CommerceEvent.Builder(Product.CHECKOUT, product).checkoutStep(4).build();
         assertFalse(projection.isMatch(new EventWrapper.CommerceEventWrapper(commerceEvent)));
-        commerceEvent = new CommerceEvent.Builder(CommerceEvent.CHECKOUT, product).checkoutStep(5).build();
+        commerceEvent = new CommerceEvent.Builder(Product.CHECKOUT, product).checkoutStep(5).build();
         assertTrue(projection.isMatch(new EventWrapper.CommerceEventWrapper(commerceEvent)));
 
         config.getJSONObject("match").put("property", "EventAttribute");
@@ -634,13 +635,13 @@ public class ProjectionTest {
         assertFalse(projection.isMatch(new EventWrapper.CommerceEventWrapper(commerceEvent)));
         Map<String, String> attributes = new HashMap<String, String>();
         attributes.put("Checkout Step", "5");
-        commerceEvent = new CommerceEvent.Builder(CommerceEvent.CHECKOUT, product).customAttributes(attributes).build();
+        commerceEvent = new CommerceEvent.Builder(Product.CHECKOUT, product).customAttributes(attributes).build();
         assertTrue(projection.isMatch(new EventWrapper.CommerceEventWrapper(commerceEvent)));
 
         config.getJSONObject("match").put("property", "ProductAttribute");
         projection = new Projection(config);
         assertFalse(projection.isMatch(new EventWrapper.CommerceEventWrapper(commerceEvent)));
-        commerceEvent = new CommerceEvent.Builder(CommerceEvent.CHECKOUT, product).addProduct(new Product.Builder("name 2", "sku", 0).customAttributes(attributes).build()).build();
+        commerceEvent = new CommerceEvent.Builder(Product.CHECKOUT, product).addProduct(new Product.Builder("name 2", "sku", 0).customAttributes(attributes).build()).build();
         EventWrapper.CommerceEventWrapper wrapper = new EventWrapper.CommerceEventWrapper(commerceEvent);
         assertTrue(projection.isMatch(wrapper));
         //only 1 product has the required attribute so there should only be 1 product after the matching step
@@ -652,7 +653,7 @@ public class ProjectionTest {
         config.getJSONObject("match").put("property_value", "some product cat");
         projection = new Projection(config);
         assertFalse(projection.isMatch(new EventWrapper.CommerceEventWrapper(commerceEvent)));
-        commerceEvent = new CommerceEvent.Builder(CommerceEvent.CHECKOUT, product).addProduct(new Product.Builder("name 2", "sku", 0).category("some product cat").build()).build();
+        commerceEvent = new CommerceEvent.Builder(Product.CHECKOUT, product).addProduct(new Product.Builder("name 2", "sku", 0).category("some product cat").build()).build();
         wrapper = new EventWrapper.CommerceEventWrapper(commerceEvent);
         assertTrue(projection.isMatch(wrapper));
         //only 1 product has the required attribute so there should only be 1 product after the matching step
@@ -695,7 +696,7 @@ public class ProjectionTest {
         productAttributes.put("sample custom attribute", "sample custom product attribute value");
         Map<String, String> eventAttributes = new HashMap<String, String>();
         eventAttributes.put("sample event attribute", "sample custom event value");
-        CommerceEvent commerceEvent = new CommerceEvent.Builder(CommerceEvent.CHECKOUT, product)
+        CommerceEvent commerceEvent = new CommerceEvent.Builder(Product.CHECKOUT, product)
                 .addProduct(new Product.Builder("name 1", "sku", 0).category("category 1").customAttributes(productAttributes).build())
                 .addProduct(new Product.Builder("name 2", "sku", 0).category("category 2").customAttributes(productAttributes).build())
                 .addProduct(new Product.Builder("name 3", "sku", 0).category("category 3").build())

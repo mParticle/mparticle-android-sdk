@@ -20,7 +20,7 @@ public class CommerceApi {
     }
 
     /**
-     * Log a {@link CommerceEvent} with the {@link CommerceEvent#CHECKOUT} action, including the Products that are
+     * Log a {@link CommerceEvent} with the {@link Product#CHECKOUT} action, including the Products that are
      * currently in the Cart.
      *
      * You should call {@link Cart#add(Product)} prior to this method.
@@ -30,7 +30,7 @@ public class CommerceApi {
      */
     public synchronized void checkout(int step, String options) {
         List<Product> productList = Cart.getInstance(mContext).products();
-        CommerceEvent event = new CommerceEvent.Builder(CommerceEvent.CHECKOUT, productList.toArray(new Product[productList.size()]))
+        CommerceEvent event = new CommerceEvent.Builder(Product.CHECKOUT, productList.toArray(new Product[productList.size()]))
                 .checkoutStep(step)
                 .checkoutOptions(options)
                 .build();
@@ -38,7 +38,7 @@ public class CommerceApi {
     }
 
     /**
-     * Log a {@link CommerceEvent} with the {@link CommerceEvent#CHECKOUT} action, including the Products that are
+     * Log a {@link CommerceEvent} with the {@link Product#CHECKOUT} action, including the Products that are
      * currently in the Cart.
      *
      * You should call {@link Cart#add(Product)} prior to this method.
@@ -46,13 +46,13 @@ public class CommerceApi {
      */
     public synchronized void checkout() {
         List<Product> productList = Cart.getInstance(mContext).products();
-        CommerceEvent event = new CommerceEvent.Builder(CommerceEvent.CHECKOUT, productList.toArray(new Product[productList.size()]))
+        CommerceEvent event = new CommerceEvent.Builder(Product.CHECKOUT, productList.toArray(new Product[productList.size()]))
                 .build();
         MParticle.getInstance().logEvent(event);
     }
 
     /**
-     * Log a {@link CommerceEvent} with the {@link CommerceEvent#PURCHASE} action for the Products that are
+     * Log a {@link CommerceEvent} with the {@link Product#PURCHASE} action for the Products that are
      * currently in the Cart.
      *
      * By default, this method will *not* clear the cart. You must manually call {@link Cart#clear()}.
@@ -66,7 +66,7 @@ public class CommerceApi {
     }
 
     /**
-     * Log a {@link CommerceEvent} with the {@link CommerceEvent#PURCHASE} action for the Products that are
+     * Log a {@link CommerceEvent} with the {@link Product#PURCHASE} action for the Products that are
      * currently in the Cart.
      *
      * You should call {@link Cart#add(Product)} prior to this method.
@@ -76,7 +76,7 @@ public class CommerceApi {
      */
     public synchronized void purchase(TransactionAttributes attributes, boolean clearCart) {
         List<Product> productList = Cart.getInstance(mContext).products();
-        CommerceEvent event = new CommerceEvent.Builder(CommerceEvent.PURCHASE, productList.toArray(new Product[productList.size()]))
+        CommerceEvent event = new CommerceEvent.Builder(Product.PURCHASE, productList.toArray(new Product[productList.size()]))
                 .transactionAttributes(attributes)
                 .build();
         if (clearCart) {
@@ -86,14 +86,14 @@ public class CommerceApi {
     }
 
     /**
-     * Log a {@link CommerceEvent} with the {@link CommerceEvent#REFUND} action for the Products that are
+     * Log a {@link CommerceEvent} with the {@link Product#REFUND} action for the Products that are
      * currently in the Cart.
      *
      * @param attributes the attributes to associate with this refund. Typically at least the transaction ID is required.
      */
     public void refund(TransactionAttributes attributes, boolean clearCart) {
         List<Product> productList = Cart.getInstance(mContext).products();
-        CommerceEvent event = new CommerceEvent.Builder(CommerceEvent.REFUND, productList.toArray(new Product[productList.size()]))
+        CommerceEvent event = new CommerceEvent.Builder(Product.REFUND, productList.toArray(new Product[productList.size()]))
                 .transactionAttributes(attributes)
                 .build();
         if (clearCart) {
