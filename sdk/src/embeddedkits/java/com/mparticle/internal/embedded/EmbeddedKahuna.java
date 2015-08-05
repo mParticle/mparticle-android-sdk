@@ -312,7 +312,10 @@ class EmbeddedKahuna extends EmbeddedProvider implements MPActivityCallbacks, EC
 
     @Override
     public void logEvent(CommerceEvent event) throws Exception {
-        String eventName = getEventName(event);
+        String eventName = event.getEventName();
+        if (MPUtility.isEmpty(eventName)) {
+            eventName = getEventName(event);
+        }
         int quantity = 0;
         int eventType = CommerceEventUtil.getEventType(event);
         if (eventType == Constants.Commerce.EVENT_TYPE_IMPRESSION) {

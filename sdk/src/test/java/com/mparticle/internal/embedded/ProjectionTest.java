@@ -519,6 +519,7 @@ public class ProjectionTest {
         for (int i = 0; i < 5; i++) {
             MPEvent event = result.get(i).getMPEvent();
             assertNotNull(event);
+            assertEquals("pdp - product view", event.getEventName());
             Map<String, String> attributes = event.getInfo();
             assertEquals("product category " + i, attributes.get("Last Product View Category"));
             assertEquals("dollar bills", attributes.get("Last Product View Currency"));
@@ -690,6 +691,7 @@ public class ProjectionTest {
         Projection.ProjectionResult projectionResult = result.get(0);
         CommerceEvent event = projectionResult.getCommerceEvent();
         assertNotNull(event);
+        assertEquals("checkout - place order", event.getEventName());
         assertEquals(5, event.getProducts().size());
         assertEquals("category 4", event.getCustomAttributes().get("Last Place Order Category"));
 
@@ -700,6 +702,7 @@ public class ProjectionTest {
         int i = 0;
         for (Projection.ProjectionResult projectionResult1 : result) {
             CommerceEvent event1 = projectionResult1.getCommerceEvent();
+            assertEquals("checkout - place order", event1.getEventName());
             assertEquals(1, event1.getProducts().size());
             assertNotNull(event1);
             assertEquals("category " + i, event1.getCustomAttributes().get("Last Place Order Category"));

@@ -25,6 +25,7 @@ public final class CommerceEvent {
     public static final String PURCHASE = "purchase";
     public static final String REFUND = "refund";
     public static final String CHECKOUT_OPTION = "checkout_option";
+    private String mEventName;
     private List<Impression> mImpressions;
     private String mProductAction;
     private String mPromotionAction;
@@ -56,6 +57,7 @@ public final class CommerceEvent {
         mScreen = builder.mScreen;
         mImpressions = builder.mImpressions;
         mNonIteraction = builder.mNonIteraction;
+        mEventName = builder.mEventName;
 
         boolean devMode = MParticle.getInstance().getEnvironment().equals(MParticle.Environment.Development);
 
@@ -295,6 +297,10 @@ public final class CommerceEvent {
         return mCurrency;
     }
 
+    public String getEventName() {
+        return mEventName;
+    }
+
     public static class Builder {
 
         private final String mProductAction;
@@ -311,6 +317,7 @@ public final class CommerceEvent {
         private String mScreen = null;
         private Boolean mNonIteraction;
         private List<Impression> mImpressions;
+        private String mEventName;
 
         private Builder() {
             mProductAction = mPromotionAction = null;
@@ -385,6 +392,7 @@ public final class CommerceEvent {
                     addImpression(new Impression(impression));
                 }
             }
+            mEventName = event.getEventName();
 
         }
 
@@ -477,6 +485,11 @@ public final class CommerceEvent {
 
         public Builder promotions(List<Promotion> promotions) {
             promotionList = promotions;
+            return this;
+        }
+
+        public Builder internalEventName(String eventName) {
+            mEventName = eventName;
             return this;
         }
     }

@@ -540,6 +540,7 @@ public class Projection {
         if (mOutboundMessageType == 16){
             return new ProjectionResult(
                     new CommerceEvent.Builder(eventWrapper.getEvent())
+                            .internalEventName(mProjectedEventName)
                             .customAttributes(mappedAttributes)
                             .build()
             );
