@@ -3,9 +3,13 @@ package com.mparticle.commerce;
 import android.content.Context;
 
 import com.mparticle.MParticle;
+import com.mparticle.internal.ConfigManager;
 
 import java.util.List;
 
+/**
+ * Helper class used to access the shopping Cart and to log CommerceEvents
+ */
 public class CommerceApi {
 
     private CommerceApi(){}
@@ -30,11 +34,16 @@ public class CommerceApi {
      */
     public synchronized void checkout(int step, String options) {
         List<Product> productList = Cart.getInstance(mContext).products();
-        CommerceEvent event = new CommerceEvent.Builder(Product.CHECKOUT, productList.toArray(new Product[productList.size()]))
-                .checkoutStep(step)
-                .checkoutOptions(options)
-                .build();
-        MParticle.getInstance().logEvent(event);
+        if (productList != null && productList.size() > 0) {
+            CommerceEvent event = new CommerceEvent.Builder(Product.CHECKOUT, productList.get(0))
+                    .checkoutStep(step)
+                    .checkoutOptions(options)
+                    .products(productList)
+                    .build();
+            MParticle.getInstance().logEvent(event);
+        } else {
+            ConfigManager.log(MParticle.LogLevel.ERROR, "checkout() called but there are no Products in the Cart, no event was logged.");
+        }
     }
 
     /**
@@ -46,9 +55,14 @@ public class CommerceApi {
      */
     public synchronized void checkout() {
         List<Product> productList = Cart.getInstance(mContext).products();
-        CommerceEvent event = new CommerceEvent.Builder(Product.CHECKOUT, productList.toArray(new Product[productList.size()]))
-                .build();
-        MParticle.getInstance().logEvent(event);
+        if (productList != null && productList.size() > 0) {
+            CommerceEvent event = new CommerceEvent.Builder(Product.CHECKOUT, productList.get(0))
+                    .products(productList)
+                    .build();
+            MParticle.getInstance().logEvent(event);
+        }else {
+            ConfigManager.log(MParticle.LogLevel.ERROR, "checkout() called but there are no Products in the Cart, no event was logged.");
+        }
     }
 
     /**
@@ -76,13 +90,18 @@ public class CommerceApi {
      */
     public synchronized void purchase(TransactionAttributes attributes, boolean clearCart) {
         List<Product> productList = Cart.getInstance(mContext).products();
-        CommerceEvent event = new CommerceEvent.Builder(Product.PURCHASE, productList.toArray(new Product[productList.size()]))
-                .transactionAttributes(attributes)
-                .build();
-        if (clearCart) {
-            Cart.getInstance(mContext).clear();
+        if (productList != null && productList.size() > 0) {
+            CommerceEvent event = new CommerceEvent.Builder(Product.PURCHASE, productList.get(0))
+                    .products(productList)
+                    .transactionAttributes(attributes)
+                    .build();
+            if (clearCart) {
+                Cart.getInstance(mContext).clear();
+            }
+            MParticle.getInstance().logEvent(event);
+        }else {
+            ConfigManager.log(MParticle.LogLevel.ERROR, "refund() called but there are no Products in the Cart, no event was logged.");
         }
-        MParticle.getInstance().logEvent(event);
     }
 
     /**
@@ -93,13 +112,18 @@ public class CommerceApi {
      */
     public void refund(TransactionAttributes attributes, boolean clearCart) {
         List<Product> productList = Cart.getInstance(mContext).products();
-        CommerceEvent event = new CommerceEvent.Builder(Product.REFUND, productList.toArray(new Product[productList.size()]))
-                .transactionAttributes(attributes)
-                .build();
-        if (clearCart) {
-            Cart.getInstance(mContext).clear();
+        if (productList != null && productList.size() > 0) {
+            CommerceEvent event = new CommerceEvent.Builder(Product.REFUND, productList.get(0))
+                    .products(productList)
+                    .transactionAttributes(attributes)
+                    .build();
+            if (clearCart) {
+                Cart.getInstance(mContext).clear();
+            }
+            MParticle.getInstance().logEvent(event);
+        } else {
+            ConfigManager.log(MParticle.LogLevel.ERROR, "refund() called but there are no Products in the Cart, no event was logged.");
         }
-        MParticle.getInstance().logEvent(event);
     }
 
 }

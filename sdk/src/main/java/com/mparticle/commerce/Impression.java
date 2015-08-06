@@ -4,12 +4,19 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
- * Created by sdozor on 8/5/15.
+ * Class representing an impression of one of more {@link Product} objects
+ *
  */
 public class Impression {
     private String mListName = null;
     private List<Product> mProducts;
 
+    /**
+     * Create an Impression object.
+     *
+     * @param listName a string name given to the list where the given Products displayed
+     * @param product a Product to associate with the Impression
+     */
     public Impression(String listName, Product product) {
         super();
         mListName = listName;
@@ -24,6 +31,12 @@ public class Impression {
         return mProducts;
     }
 
+    /**
+     * Add a Product to this Impression
+     *
+     * @param product
+     * @return
+     */
     public Impression addProduct(Product product) {
         if (mProducts == null) {
             mProducts = new LinkedList<Product>();

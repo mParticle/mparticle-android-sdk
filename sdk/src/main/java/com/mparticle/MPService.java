@@ -32,9 +32,9 @@ import java.util.List;
 
 /**
  * {@code IntentService } used internally by the SDK to process incoming broadcast messages in the background. Required for push notification functionality.
- * <p/>
+ * <p></p>
  * This {@code IntentService} must be specified within the {@code <application>} block of your application's {@code AndroidManifest.xml} file:
- * <p/>
+ * <p></p>
  * <pre>
  * {@code
  * <service android:name="com.mparticle.MPService" />}
@@ -73,7 +73,6 @@ public class MPService extends IntentService {
     }
 
     /**
-     * @hide
      *
      */
     public static void runIntentInService(Context context, Intent intent) {
@@ -89,7 +88,6 @@ public class MPService extends IntentService {
     }
 
     /**
-     * @hide
      *
      */
     @Override

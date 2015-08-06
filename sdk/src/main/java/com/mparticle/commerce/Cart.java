@@ -18,18 +18,18 @@ import java.util.List;
 /**
  * The Cart is a utility singleton that abstracts the creation of {@link com.mparticle.commerce.CommerceEvent} objects and maintains
  * a state, containing a list of {@link com.mparticle.commerce.Product} objects.
- * <p/>
+ * <p></p>
  * The Cart will persist state across app-restarts.
- * <p/>
+ * <p></p>
  * You may access the cart via the {@link MParticle#Commerce()} object:
- * <p/>
+ * <p></p>
  * <pre>
  * {@code
  * MParticle.getInstance().Commerce().cart()}
  * </pre>
- * <p/>
+ * <p></p>
  * You can also access the Cart directly:
- * <p/>
+ * <p></p>
  * <pre>
  * {@code
  * Cart.getInstance(context)}
@@ -70,7 +70,7 @@ public final class Cart {
 
     /**
      * Replace the default equality comparator.
-     * <p/>
+     * <p></p>
      * By default, the Cart will only compare Product objects by reference. If you would like to consider all Products that
      * share the same SKU, for example, as the same Product, use this function to set your own comparator.
      *
@@ -84,11 +84,11 @@ public final class Cart {
 
     /**
      * Add one or more products to the Cart and log a {@link CommerceEvent}.
-     * <p/>
+     * <p></p>
      * This method will log a {@link CommerceEvent} with the {@link Product#ADD_TO_CART} action. Products added here
      * will remain in the cart across app restarts, and will be included in future calls to {@link CommerceApi#purchase(TransactionAttributes)}
      * or {@link CommerceEvent}'s with a product action {@link Product#PURCHASE}
-     * <p/>
+     * <p></p>
      * If the Cart already contains a Product that is considered equal, this method is a no-op.
      *
      * @param product the product to add to the Cart
@@ -101,11 +101,11 @@ public final class Cart {
 
     /**
      * Add one or more products to the Cart and log a {@link CommerceEvent}.
-     * <p/>
+     * <p></p>
      * This method will log a {@link CommerceEvent} with the {@link Product#ADD_TO_CART} action. Products added here
      * will remain in the cart across app restarts, and will be included in future calls to {@link CommerceApi#purchase(TransactionAttributes)}
      * or {@link CommerceEvent}'s with a product action {@link Product#PURCHASE}
-     * <p/>
+     * <p></p>
      * If the Cart already contains a Product that is considered equal, this method is a no-op.
      *
      * @param product the product to add to the Cart
@@ -128,9 +128,9 @@ public final class Cart {
 
     /**
      * Remove one or more products from the Cart and log a {@link CommerceEvent}.
-     * <p/>
+     * <p></p>
      * This method will log a {@link CommerceEvent} with the {@link Product#REMOVE_FROM_CART} action.
-     * <p/>
+     * <p></p>
      * If the Cart already contains a Product that is considered equal, the Product will be removed. Otherwise, this method is a no-op.
      *
      * @param product the product objects to remove from the Cart
@@ -143,9 +143,9 @@ public final class Cart {
 
     /**
      * Remove one or more products from the Cart and log a {@link CommerceEvent}.
-     * <p/>
+     * <p></p>
      * This method will log a {@link CommerceEvent} with the {@link Product#REMOVE_FROM_CART} action.
-     * <p/>
+     * <p></p>
      * If the Cart already contains a Product that is considered equal, the Product will be removed. Otherwise, this method is a no-op..
      *
      * @param product the product to remove from the Cart
@@ -165,7 +165,7 @@ public final class Cart {
 
     /**
      * Remove a product from the Cart by index and log a {@link CommerceEvent}.
-     * <p/>
+     * <p></p>
      * This method will log a {@link CommerceEvent} with the {@link Product#REMOVE_FROM_CART} action.
      *
      * @param index of the Product to remove
@@ -264,7 +264,7 @@ public final class Cart {
 
     /**
      * Retrieve the current list of Products in the Cart.
-     * <p/>
+     * <p></p>
      * Note that this returns an {@code UnmodifiableCollection} that will throw an {@code UnsupportedOperationException}
      * if you attempt to add or remove Products.
      *

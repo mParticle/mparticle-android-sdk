@@ -119,9 +119,6 @@ public abstract class AbstractCloudMessage implements Parcelable {
         return mDisplayed;
     }
 
-    /**
-     * @hide
-     */
     public static class InvalidGcmMessageException extends Exception {
         public InvalidGcmMessageException(String detailMessage) {
             super(detailMessage);

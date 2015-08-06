@@ -3,12 +3,12 @@ package com.mparticle.commerce;
 
 /**
  * Class representing an internal promotions within an app, such as banners.
- * <p/>
+ *
  * This class exposes constants to be used in conjection with a {@link CommerceEvent} to track
  * when a Promotion is viewed or tapped.
- * <p/>
+ *
  * Example {@link CommerceEvent} usage:
- * <p/>
+ *
  * <pre>
  *     {@code
  *     Promotion promotion = new Promotion()
@@ -25,13 +25,11 @@ public class Promotion {
     /**
      * The Promotion action constant used to track when a user taps or clicks on a Promotion
      *
-     * @see com.mparticle.commerce.CommerceEvent.Builder#Builder(String, Promotion...)
      */
     public static String CLICK = "click";
     /**
      * The Promotion action constant used to track when a user views a Promotion
      *
-     * @see com.mparticle.commerce.CommerceEvent.Builder#Builder(String, Promotion...)
      */
     public static String VIEW = "view";
 

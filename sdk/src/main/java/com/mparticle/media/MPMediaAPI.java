@@ -20,10 +20,6 @@ public class MPMediaAPI {
         mCallbacks = null;
     }
 
-
-    /**
-     * @hide
-     */
     public MPMediaAPI(Context context, MediaCallbacks callbacks) {
         mContext = context;
         mCallbacks = callbacks;

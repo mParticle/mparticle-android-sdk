@@ -12,7 +12,7 @@ import com.mparticle.MParticle;
  * <p></p>This class need only be used on pre-ICS (API level 14) devices. For pre-ICS, every {@code Activity} in your
  * application <i>must</i> either subclass an mParticle {@code Activity} implementation,
  * or must manually call {@link com.mparticle.MParticle#activityStarted(android.app.Activity)} within {@code onStart()} and
- * {@link com.mparticle.MParticle#activityStopped(android.app.Activity)} within {@code onStop()}.</p>
+ * {@link com.mparticle.MParticle#activityStopped(android.app.Activity)} within {@code onStop()}.<p></p>
  *
  * <p>For ICS and later, screen tracking and application state tracking are handled automatically.</p>
  *

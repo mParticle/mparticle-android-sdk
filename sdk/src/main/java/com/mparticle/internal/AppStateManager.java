@@ -21,7 +21,6 @@ import java.util.concurrent.atomic.AtomicLong;
 
 
 /**
- * @hide
  *
  * This class is responsible for managing sessions, by detecting how many
  *

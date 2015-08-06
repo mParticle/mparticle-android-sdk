@@ -1,8 +1,5 @@
 package com.mparticle.messaging;
 
-/**
- * @hide
- */
 public interface MessagingConfigCallbacks {
     void setPushNotificationIcon(int resId);
 

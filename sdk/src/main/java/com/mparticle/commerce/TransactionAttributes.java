@@ -1,5 +1,9 @@
 package com.mparticle.commerce;
 
+/**
+ * Class encaspulating the parameters of a given Product CommerceEvent
+ *
+ */
 public class TransactionAttributes {
     private String mAffiliation = null;
     private Double mRevenue;

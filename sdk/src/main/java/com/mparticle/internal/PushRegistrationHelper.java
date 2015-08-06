@@ -30,7 +30,6 @@ public class PushRegistrationHelper {
 
     /**
      * Gets the current registration ID for application on GCM service.
-     * <p/>
      * If result is empty, the app needs to register.
      *
      * @return registration ID, or empty string if there is no existing
@@ -114,7 +113,6 @@ public class PushRegistrationHelper {
 
     /**
      * Manually un-register the device token for receiving push notifications from mParticle
-     * <p/>
      */
     public static void clearPushRegistrationId(Context context) {
         SharedPreferences preferences = context.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);

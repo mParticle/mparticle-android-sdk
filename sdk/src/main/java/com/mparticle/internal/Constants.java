@@ -3,7 +3,7 @@ package com.mparticle.internal;
 import com.mparticle.BuildConfig;
 
 /**
- * @serial @exclude
+ *
  */
 public class Constants {
 

@@ -10,7 +10,6 @@ import android.location.Location;
 import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Build;
-import android.provider.Settings;
 import android.util.Log;
 import android.webkit.WebView;
 
@@ -24,7 +23,6 @@ import com.mparticle.internal.Constants;
 import com.mparticle.internal.Constants.MessageKey;
 import com.mparticle.internal.Constants.PrefKeys;
 import com.mparticle.internal.KitKatHelper;
-import com.mparticle.internal.MPLicenseCheckerCallback;
 import com.mparticle.internal.MPLocationListener;
 import com.mparticle.internal.MPUtility;
 import com.mparticle.internal.MParticleJSInterface;
@@ -34,11 +32,6 @@ import com.mparticle.internal.np.MPSSLSocketFactory;
 import com.mparticle.internal.np.MPSocketImplFactory;
 import com.mparticle.internal.np.MPUrlStreamHandlerFactory;
 import com.mparticle.internal.np.MeasuredRequestManager;
-import com.mparticle.licensing.AESObfuscator;
-import com.mparticle.licensing.LicenseChecker;
-import com.mparticle.licensing.LicenseCheckerCallback;
-import com.mparticle.licensing.Policy;
-import com.mparticle.licensing.ServerManagedPolicy;
 import com.mparticle.media.MPMediaAPI;
 import com.mparticle.media.MediaCallbacks;
 import com.mparticle.messaging.CloudAction;
@@ -65,33 +58,33 @@ import javax.net.ssl.HttpsURLConnection;
 
 /**
  * The primary access point to the mParticle SDK. In order to use this class, you must first call {@link #start(android.content.Context)}, which requires
- * configuration via {@link <a href="http://developer.android.com/guide/topics/resources/providing-resources.html">Android Resources</a>}. You can then retrieve a reference
+ * configuration via <code><a href="http://developer.android.com/guide/topics/resources/providing-resources.html">Android Resources</a></code>. You can then retrieve a reference
  * to an instance of this class via {@link #getInstance()}
- * <p/>
+ * <p></p>
  * It's recommended to keep configuration parameters in a single xml file located within your res/values folder. The full list of configuration options is as follows:
- * <p/>
- * <h4>Required parameters</h4>
+ * <p></p>
+ * Required parameters
  * <ul>
- * <li>mp_key - {@link <a href="http://developer.android.com/guide/topics/resources/string-resource.html#String">String</a>} - This is the key used to authenticate with the mParticle SDK server API</li>
- * <li>mp_secret - {@link <a href="http://developer.android.com/guide/topics/resources/string-resource.html#String">String</a>} - This is the secret used to authenticate with the mParticle SDK server API</li>
+ * <li>mp_key - <code><a href="http://developer.android.com/guide/topics/resources/string-resource.html#String">String</a></code> - This is the key used to authenticate with the mParticle SDK server API</li>
+ * <li>mp_secret - <code> <a href="http://developer.android.com/guide/topics/resources/string-resource.html#String">String</a></code> - This is the secret used to authenticate with the mParticle SDK server API</li>
  * </ul>
- * <h4>Required for push notifications</h4>
+ * Required for push notifications
  * <ul>
- * <li> mp_enablePush - {@link <a href="http://developer.android.com/guide/topics/resources/more-resources.html#Bool">Bool</a>} - Enable push registration, notifications, and analytics. <i>Default: false</i></li>
- * <li> mp_pushSenderId - {@link <a href="http://developer.android.com/guide/topics/resources/string-resource.html#String">String</a>} - {@link <a href="http://developer.android.com/google/gcm/gcm.html#senderid">GCM Sender ID</a>}</li>
+ * <li> mp_enablePush - <code><a href="http://developer.android.com/guide/topics/resources/more-resources.html#Bool">Bool</a></code> - Enable push registration, notifications, and analytics. <i>Default: false</i></li>
+ * <li> mp_pushSenderId - <code><a href="http://developer.android.com/guide/topics/resources/string-resource.html#String">String</a></code> - <code><a href="http://developer.android.com/google/gcm/gcm.html#senderid">GCM Sender ID</a></code></li>
  * </ul>
- * <h4>Required for licensing</h4>
+ * Required for licensing
  * <ul>
- * <li> mp_enableLicenseCheck - {@link <a href="http://developer.android.com/guide/topics/resources/more-resources.html#Bool">Bool</a>} - By enabling license check, MParticle will automatically validate that the app was downloaded and/or bought via Google Play, or if it was "pirated" or "side-loaded". <i>Default: false</i></li>
- * <li> mp_appLicenseKey - {@link <a href="http://developer.android.com/guide/topics/resources/string-resource.html#String">String</a>} - The {@link <a href="http://developer.android.com/google/play/licensing/adding-licensing.html#account-key">public key</a>} used by your app to verify the user's license with Google Play.</li>
+ * <li> mp_enableLicenseCheck - <code><a href="http://developer.android.com/guide/topics/resources/more-resources.html#Bool">Bool</a></code> - By enabling license check, MParticle will automatically validate that the app was downloaded and/or bought via Google Play, or if it was "pirated" or "side-loaded". <i>Default: false</i></li>
+ * <li> mp_appLicenseKey - <code><a href="http://developer.android.com/guide/topics/resources/string-resource.html#String">String</a></code> - The <code><a href="http://developer.android.com/google/play/licensing/adding-licensing.html#account-key">public key</a></code> used by your app to verify the user's license with Google Play.</li>
  * </ul>
- * <h4>Optional</h4>
+ * Optional
  * <ul>
- * <li>mp_enableAutoScreenTracking - {@link <a href="http://developer.android.com/guide/topics/resources/more-resources.html#Integer">Integer</a>} - Enable automatic screen view events. Note that *prior to ICS/API level 14*, this functionality requires instrumentation via an mParticle Activity implementation or manually. </li>
- * <li>mp_productionUploadInterval - {@link <a href="http://developer.android.com/guide/topics/resources/more-resources.html#Integer">Integer</a>} - The length of time in seconds to send batches of messages to mParticle. Setting this too low could have an adverse effect on the device battery. <i>Default: 600</i></li>
- * <li>mp_reportUncaughtExceptions - {@link <a href="http://developer.android.com/guide/topics/resources/more-resources.html#Bool">Bool</a>} - By enabling this, the MParticle SDK will automatically log and report any uncaught exceptions, including stack traces. <i>Default: false</i></li>
- * <li>mp_sessionTimeout - {@link <a href="http://developer.android.com/guide/topics/resources/more-resources.html#Integer">Integer</a>} - The length of time (in seconds) that a user session will remain valid while application has been paused and put into the background. <i>Default: 60</i></li>
- * <li>mp_enableNetworkPerformanceMeasurement - {@link <a href="http://developer.android.com/guide/topics/resources/more-resources.html#Bool">Bool</a>} - Enabling this will allow the mParticle SDK to measure network requests made with Apache's HttpClient as well as UrlConnection. <i>Default: false</i></li>
+ * <li>mp_enableAutoScreenTracking - <code> <a href="http://developer.android.com/guide/topics/resources/more-resources.html#Integer">Integer</a></code> - Enable automatic screen view events. Note that *prior to ICS/API level 14*, this functionality requires instrumentation via an mParticle Activity implementation or manually. </li>
+ * <li>mp_productionUploadInterval - <code> <a href="http://developer.android.com/guide/topics/resources/more-resources.html#Integer">Integer</a></code> - The length of time in seconds to send batches of messages to mParticle. Setting this too low could have an adverse effect on the device battery. <i>Default: 600</i></li>
+ * <li>mp_reportUncaughtExceptions - <code> <a href="http://developer.android.com/guide/topics/resources/more-resources.html#Bool">Bool</a></code> - By enabling this, the MParticle SDK will automatically log and report any uncaught exceptions, including stack traces. <i>Default: false</i></li>
+ * <li>mp_sessionTimeout - <code> <a href="http://developer.android.com/guide/topics/resources/more-resources.html#Integer">Integer</a></code> - The length of time (in seconds) that a user session will remain valid while application has been paused and put into the background. <i>Default: 60</i></li>
+ * <li>mp_enableNetworkPerformanceMeasurement - <code> <a href="http://developer.android.com/guide/topics/resources/more-resources.html#Bool">Bool</a></code> - Enabling this will allow the mParticle SDK to measure network requests made with Apache's HttpClient as well as UrlConnection. <i>Default: false</i></li>
  * </ul>
  */
 public class MParticle {
@@ -150,7 +143,7 @@ public class MParticle {
     /**
      * Start the mParticle SDK and begin tracking a user session. This method must be called prior to {@link #getInstance()}.
      * This method requires that your API key and secret are contained in your XML configuration.
-     * <p/>
+     * <p></p>
      * The InstallType parameter is used to determine if this is a new install or an upgrade. In
      * the case where the mParticle SDK is being added to an existing app with existing users, this
      * parameter prevents mParticle from categorizing all users as new users.
@@ -167,7 +160,7 @@ public class MParticle {
     /**
      * Start the mParticle SDK and begin tracking a user session. This method must be called prior to {@link #getInstance()}.
      * This method requires that your API key and secret are contained in your XML configuration.
-     * <p/>
+     * <p></p>
      *
      *
      * @param context     Required reference to a Context object
@@ -177,7 +170,7 @@ public class MParticle {
      * @param environment Force the SDK into either Production or Development mode. See {@link com.mparticle.MParticle.Environment}
      * for implications of each mode. The SDK automatically determines which mode it should be in depending
      * on the signing and the DEBUGGABLE flag of your application's AndroidManifest.xml, so this initializer is not typically needed.
-     * <p/>
+     * <p></p>
      *
      * This initializer can however be useful while you're testing a release-signed version of your application, and you have *not* set the
      * debuggable flag in your AndroidManifest.xml. In this case, you can force the SDK into development mode to prevent sending
@@ -468,9 +461,9 @@ public class MParticle {
     }
 
     /**
+     * Log an event with an {@link MPEvent} object
      *
-     *
-     * @param event
+     * @param event the event object to log
      */
     public void logEvent(MPEvent event){
         if (mConfigManager.isEnabled() && checkEventLimit()) {
@@ -482,9 +475,11 @@ public class MParticle {
     }
 
     /**
+     * Log an e-Commerce related event with a {@link com.mparticle.commerce.CommerceEvent} object
      *
+     * @param event the event to log
      *
-     * @param event
+     * @see CommerceEvent
      */
     public void logEvent(CommerceEvent event) {
         if (mConfigManager.isEnabled() && checkEventLimit()) {
@@ -1209,7 +1204,7 @@ public class MParticle {
 
     /**
      * Remove an identity matching this id
-     * <p/>
+     * <p></p>
      * Note: this will only remove the *first* matching id
      *
      * @param id the id to remove
@@ -1344,39 +1339,6 @@ public class MParticle {
         return mAppStateManager.getSession().checkEventLimit();
     }
 
-
-    /**
-     * Performs a license check to ensure that the application
-     * was downloaded and/or purchased from Google Play and not "pirated" or "side-loaded".
-     * <p/>
-     * Optionally use the licensingCallback to allow or disallow access to features of your application.
-     *
-     * @param encodedPublicKey  GBase64-encoded RSA public key of your application
-     * @param policy            <b>Optional</b> {@link com.mparticle.licensing.Policy}, will default to {@link ServerManagedPolicy}
-     * @param licensingCallback <b>Optional</b> {@link LicenseCheckerCallback} callback for licensing checking
-     */
-    private void performLicenseCheck(String encodedPublicKey, Policy policy, LicenseCheckerCallback licensingCallback) {
-        if (encodedPublicKey == null || encodedPublicKey.length() == 0) {
-            throw new IllegalArgumentException("LicenseKey null or invalid.");
-        }
-
-        if (licensingCallback == null) {
-            ConfigManager.log(MParticle.LogLevel.WARNING, "No licensing callback specified, using MParticle default.");
-        }
-
-        if (policy == null) {
-            ConfigManager.log(MParticle.LogLevel.WARNING, "No policy specified, using default ServerManagedPolicy");
-            String deviceId = Settings.Secure.getString(mAppContext.getContentResolver(), Settings.Secure.ANDROID_ID);
-            policy = new ServerManagedPolicy(mAppContext,
-                    new AESObfuscator(Constants.LICENSE_CHECK_SALT, mAppContext.getPackageName(), deviceId));
-        }
-
-        MPLicenseCheckerCallback licenseCheckerCallback = new MPLicenseCheckerCallback(mPreferences, licensingCallback);
-        LicenseChecker checker = new LicenseChecker(
-                mAppContext, policy, encodedPublicKey);
-        checker.checkAccess(licenseCheckerCallback);
-    }
-
     /**
      * Retrieves the current setting of automatic screen tracking.
      *
@@ -1398,7 +1360,7 @@ public class MParticle {
 
     /**
      * Set the user session timeout interval.
-     * <p/>
+     * <p></p>
      * A session has ended once the application has been in the background for more than this timeout
      *
      * @param sessionTimeout Session timeout in seconds
@@ -1682,7 +1644,7 @@ public class MParticle {
      * Enumeration used to moderate the amount of messages that are printed
      * by the SDK to the console. Note that while the SDK is in the Production,
      * <i>no log messages will be printed</i>.
-     * <p/>
+     * <p></p>
      * The default is WARNING, which means only ERROR and WARNING level messages will appear in the console, viewable by logcat or another utility.
      *
      * @see #setLogLevel(com.mparticle.MParticle.LogLevel)
