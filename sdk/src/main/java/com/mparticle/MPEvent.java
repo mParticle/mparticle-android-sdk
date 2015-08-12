@@ -115,7 +115,7 @@ public class MPEvent {
         if (info != null){
             builder.append("info:\n");
             List<String> sortedKeys = new ArrayList(info.keySet());
-
+            Collections.sort(sortedKeys);
             for (String key : sortedKeys)
             {
                 builder.append(key)

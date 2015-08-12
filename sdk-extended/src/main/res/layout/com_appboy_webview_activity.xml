@@ -10,4 +10,4 @@
     android:id="@+id/com_appboy_webview_activity_webview"
     android:layout_centerVertical="true"
     android:layout_centerHorizontal="true"/>
-</RelativeLayout><!-- From: file:/Users/brianwheeler/appboy_code/android-sdk/build/appboy-android-sdk/android-sdk-ui/res/layout/com_appboy_webview_activity.xml -->
+</RelativeLayout>

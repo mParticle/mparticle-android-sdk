@@ -65,13 +65,15 @@ public class EmbeddedKitManagerTest extends TestCase {
     }
 
     public void testLogEvent() throws Exception {
-        manager.logEvent(null);
         manager.logEvent(new MPEvent.Builder("test name", MParticle.EventType.Location).build());
     }
 
     public void testLogTransaction() throws Exception {
         manager.logTransaction(null);
-        manager.logTransaction(new MPProduct.Builder("name", "sku").build());
+        MPEvent event = new MPEvent.Builder("whatever", MParticle.EventType.Transaction)
+                .info(new MPProduct.Builder("name", "sku").build())
+                .build();
+        manager.logTransaction(event);
     }
 
     public void testLogScreen() throws Exception {

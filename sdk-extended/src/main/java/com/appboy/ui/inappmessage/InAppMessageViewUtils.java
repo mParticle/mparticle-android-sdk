@@ -6,7 +6,7 @@ import android.graphics.PorterDuff;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
-import android.util.Log;
+import com.appboy.support.AppboyLogger;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -15,8 +15,8 @@ import android.widget.TextView;
 
 import com.appboy.Constants;
 import com.appboy.models.MessageButton;
-import com.mparticle.extended.R;
 import com.appboy.ui.support.ViewUtils;
+import com.mparticle.extended.R;
 
 import java.util.List;
 
@@ -35,7 +35,7 @@ public class InAppMessageViewUtils {
         Typeface fontFamily = Typeface.createFromAsset(context.getAssets(), "fontawesome-webfont.ttf");
         textView.setTypeface(fontFamily);
       } catch (Exception e) {
-        Log.e(TAG, "Caught exception setting icon typeface. Not rendering icon.", e);
+        AppboyLogger.e(TAG, "Caught exception setting icon typeface. Not rendering icon.", e);
         return;
       }
       textView.setText(icon);
@@ -57,11 +57,13 @@ public class InAppMessageViewUtils {
       if (messageButtons.size() <= i) {
         buttonViews.get(i).setVisibility(View.GONE);
       } else {
-        Button button = (Button) buttonViews.get(i);
-        MessageButton messageButton = messageButtons.get(i);
-        button.setText(messageButton.getText());
-        setTextViewColor(button, messageButton.getTextColor());
-        setDrawableColor(button.getBackground(), messageButton.getBackgroundColor(), defaultColor);
+        if (buttonViews.get(i) instanceof Button) {
+          Button button = (Button) buttonViews.get(i);
+          MessageButton messageButton = messageButtons.get(i);
+          button.setText(messageButton.getText());
+          setTextViewColor(button, messageButton.getTextColor());
+          setDrawableColor(button.getBackground(), messageButton.getBackgroundColor(), defaultColor);
+        }
       }
     }
   }

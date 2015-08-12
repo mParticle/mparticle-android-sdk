@@ -70,4 +70,3 @@
           android:id="@+id/com_appboy_feed_transparent_full_bounds_container_view"/>
   </RelativeLayout>
 </android.support.v4.widget.SwipeRefreshLayout>
-<!-- From: file:/Users/brianwheeler/appboy_code/android-sdk/build/appboy-android-sdk/android-sdk-ui/res/layout/com_appboy_feed.xml -->

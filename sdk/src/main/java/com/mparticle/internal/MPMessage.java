@@ -2,6 +2,8 @@ package com.mparticle.internal;
 
 import android.location.Location;
 
+import com.mparticle.commerce.CommerceEvent;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -59,6 +61,9 @@ public class MPMessage extends JSONObject{
                 put(Constants.MessageKey.LOCATION, locJSON);
             }
         }
+        if (builder.commerceEvent != null){
+            CommerceEventUtil.addCommerceEventInfo(this, builder.commerceEvent);
+        }
     }
 
     public JSONObject getAttributes(){
@@ -101,6 +106,7 @@ public class MPMessage extends JSONObject{
     public static class Builder {
         private final String mMessageType;
         private final Session mSession;
+        private CommerceEvent commerceEvent = null;
         private long mTimestamp;
         private String mName;
         private JSONObject mAttributes;
@@ -112,6 +118,11 @@ public class MPMessage extends JSONObject{
             mMessageType = messageType;
             mSession = new Session(session);
             mLocation = location;
+        }
+
+        public Builder(CommerceEvent event, Session session, Location location) {
+            this(Constants.MessageType.COMMERCE_EVENT, session, location);
+            commerceEvent = event;
         }
 
         public Builder timestamp(long timestamp){

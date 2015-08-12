@@ -25,6 +25,8 @@ public class FakeProvider extends EmbeddedProvider {
         mScreenAttributeFilters = new MockSparseBooleanArray();
         mUserIdentityFilters = new MockSparseBooleanArray();
         mUserAttributeFilters = new MockSparseBooleanArray();
+        mCommerceAttributeFilters = new MockSparseBooleanArray();
+        mCommerceEntityFilters = new MockSparseBooleanArray();
     }
 
     @Override
@@ -56,6 +58,21 @@ public class FakeProvider extends EmbeddedProvider {
         return map;
     }
     class MockSparseBooleanArray extends SparseBooleanArray {
+        @Override
+        public boolean get(int key) {
+           return get(key, false);
+        }
+
+        @Override
+        public boolean get(int key, boolean valueIfKeyNotFound) {
+            System.out.print("SparseArray getting: " + key);
+            if (map.containsKey(key)) {
+                return map.get(key);
+            }else{
+                return valueIfKeyNotFound;
+            }
+        }
+
         Map<Integer, Boolean> map = new HashMap<Integer, Boolean>();
         @Override
         public void put(int key, boolean value) {

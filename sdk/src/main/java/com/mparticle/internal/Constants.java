@@ -3,7 +3,7 @@ package com.mparticle.internal;
 import com.mparticle.BuildConfig;
 
 /**
- * @serial @exclude
+ *
  */
 public class Constants {
 
@@ -20,6 +20,7 @@ public class Constants {
 
     // preferences persistence
     public static final String PREFS_FILE = "mParticlePrefs";
+    public static final String CART_PREFS_FILE = "mParticlePrefs_cart";
 
     public static final int LIMIT_ATTR_COUNT = 100;
     public static final int LIMIT_ATTR_NAME = 255;
@@ -125,7 +126,6 @@ public class Constants {
         String LOG_ECOMMERCE_REMOVE_FROM_CART = "$RemovedFromCart";
         String LOG_ECOMMERCE_ADD_TO_WISHLIST = "$AddedToWishlist";
         String LOG_ECOMMERCE_REMOVE_FROM_WISHLIST = "$RemovedFromWishlist";
-
     }
 
     public interface MessageType {
@@ -133,6 +133,7 @@ public class Constants {
         String SESSION_END = "se";
         String EVENT = "e";
         String SCREEN_VIEW = "v";
+        String COMMERCE_EVENT = "cm";
         String OPT_OUT = "o";
         String ERROR = "x";
         String PUSH_REGISTRATION = "pr";
@@ -336,6 +337,83 @@ public class Constants {
         String MPID = "mpid";
     }
 
+    public interface Commerce {
+        String SCREEN_NAME = "sn";
+        String NON_INTERACTION = "ni";
+        String CURRENCY = "cu";
+        String ATTRIBUTES = "attrs";
+        String PRODUCT_ACTION_OBJECT = "pd";
+        String PRODUCT_ACTION = "an";
+        String CHECKOUT_STEP = "cs";
+        String CHECKOUT_OPTIONS = "co";
+        String PRODUCT_LIST_NAME = "pal";
+        String PRODUCT_LIST_SOURCE = "pls";
+        String TRANSACTION_ID = "ti";
+        String TRANSACTION_AFFILIATION = "ta";
+        String TRANSACTION_REVENUE = "tr";
+        String TRANSACTION_TAX = "tt";
+        String TRANSACTION_SHIPPING = "ts";
+        String TRANSACTION_COUPON_CODE = "tcc";
+        String PRODUCT_LIST = "pl";
+        String PROMOTION_ACTION_OBJECT = "pm";
+        String PROMOTION_ACTION = "an";
+        String PROMOTION_LIST = "pl";
+        String IMPRESSION_OBJECT = "pi";
+        String IMPRESSION_LOCATION = "pil";
+        String IMPRESSION_PRODUCT_LIST = "pl";
+
+        String ATT_AFFILIATION = "Affiliation";
+
+        String ATT_TRANSACTION_COUPON_CODE = "Coupon Code";
+        String ATT_TOTAL = "Total Amount";
+        String ATT_SHIPPING = "Shipping Amount";
+        String ATT_TAX = "Tax Amount";
+        String ATT_TRANSACTION_ID = "Transaction Id";
+        String ATT_PRODUCT_QUANTITY = "Quantity";
+        String ATT_PRODUCT_POSITION = "Position";
+        String ATT_PRODUCT_VARIANT = "Variant";
+        String ATT_PRODUCT_ID = "Id";
+        String ATT_PRODUCT_NAME = "Name";
+        String ATT_PRODUCT_CATEGORY = "Category";
+        String ATT_PRODUCT_BRAND = "Brand";
+        String ATT_PRODUCT_COUPON_CODE = "Coupon Code";
+        String ATT_PRODUCT_PRICE = "Item Price";
+        String ATT_ACTION_PRODUCT_ACTION_LIST = "Product Action List";
+        String ATT_ACTION_PRODUCT_LIST_SOURCE = "Product List Source";
+        String ATT_ACTION_CHECKOUT_OPTIONS = "Checkout Options";
+        String ATT_ACTION_CHECKOUT_STEP = "Checkout Step";
+        String ATT_ACTION_CURRENCY_CODE = "Currency Code";
+        String ATT_SCREEN_NAME = "Screen Name";
+        String ATT_PROMOTION_ID = "Id";
+        String ATT_PROMOTION_POSITION = "Position";
+        String ATT_PROMOTION_NAME = "Name";
+        String ATT_PROMOTION_CREATIVE = "Creative";
+        String ATT_PRODUCT_TOTAL_AMOUNT = "Total Product Amount";
+
+        /**
+         * This is only set when required. Otherwise default to null.
+         */
+        String DEFAULT_CURRENCY_CODE = "USD";
+
+        int EVENT_TYPE_ADD_TO_CART = 10;
+        int EVENT_TYPE_REMOVE_FROM_CART = 11;
+        int EVENT_TYPE_CHECKOUT = 12;
+        int EVENT_TYPE_CHECKOUT_OPTION = 13;
+        int EVENT_TYPE_CLICK = 14;
+        int EVENT_TYPE_VIEW_DETAIL = 15;
+        int EVENT_TYPE_PURCHASE = 16;
+        int EVENT_TYPE_REFUND = 17;
+        int EVENT_TYPE_PROMOTION_VIEW = 18;
+        int EVENT_TYPE_PROMOTION_CLICK = 19;
+        int EVENT_TYPE_ADD_TO_WISHLIST = 20;
+        int EVENT_TYPE_REMOVE_FROM_WISHLIST = 21;
+        int EVENT_TYPE_IMPRESSION = 22;
+
+        int ENTITY_PRODUCT = 1;
+        int ENTITY_PROMOTION = 2;
+
+    }
+
     public interface PrefKeys {
         // common
         String INSTALL_TIME = "mp::ict";
@@ -380,6 +458,8 @@ public class Constants {
         String LOCATION_PROVIDER = "mp::location:provider";
         String LOCATION_MINTIME = "mp::location:mintime";
         String LOCATION_MINDISTANCE = "mp::location:mindistance";
+
+        String CART = "mp::cart";
     }
 
     public interface MiscStorageKeys {

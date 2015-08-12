@@ -1,7 +1,6 @@
 package com.mparticle;
 
 /**
- * @hide
  *
  * Class specifically for exceptions that occur within the Unity-framework, which
  * the mParticle Unity c# SDK will catch and log.

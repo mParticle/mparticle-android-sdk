@@ -6,6 +6,7 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+
 import com.mparticle.extended.R;
 
 import java.util.ArrayList;

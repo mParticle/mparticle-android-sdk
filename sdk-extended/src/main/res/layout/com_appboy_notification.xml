@@ -67,4 +67,4 @@
               android:text=""
               android:layout_weight="1"/>
   </LinearLayout>
-</FrameLayout><!-- From: file:/Users/brianwheeler/appboy_code/android-sdk/build/appboy-android-sdk/android-sdk-ui/res/layout/com_appboy_notification.xml -->
+</FrameLayout>

@@ -10,9 +10,15 @@ buildscript {
     }
 }
 
+def getDate() {
+    def date = new Date()
+    def formattedDate = date.format('yyyyMMdd')
+    return Integer.parseInt(formattedDate)
+}
+
 repositories {
-    maven { url "http://maven.mparticle.com/" }
     mavenCentral()
+    maven { url "http://maven.mparticle.com/" }
 }
 configurations {
     deployerJars
@@ -22,11 +28,16 @@ android {
     compileSdkVersion 22
     buildToolsVersion "22.0.1"
 
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_7
+        targetCompatibility JavaVersion.VERSION_1_7
+    }
+
     defaultConfig {
         minSdkVersion 9
         targetSdkVersion 22
-        versionCode 1
-        versionName "1.0"
+        versionName sdkversion
+        versionCode getDate()
     }
     buildTypes {
         release {
@@ -67,7 +78,7 @@ uploadArchives {
 
 dependencies {
     deployerJars "org.kuali.maven.wagons:maven-s3-wagon:1.2.1"
-    compile 'com.android.support:support-v4:22.1.0'
-    compile 'com.mparticle:android-sdk:+'
+    compile 'com.android.support:support-v4:22.2.0'
+    compile 'com.mparticle:android-sdk:' + sdkversion
 
 }

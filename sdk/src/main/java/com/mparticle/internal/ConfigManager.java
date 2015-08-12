@@ -3,22 +3,17 @@ package com.mparticle.internal;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Build;
-import android.provider.Settings;
 import android.util.Log;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 
 import com.mparticle.ExceptionHandler;
 import com.mparticle.MParticle;
 import com.mparticle.MParticle.LogLevel;
 import com.mparticle.internal.embedded.EmbeddedKitManager;
-import com.mparticle.licensing.AESObfuscator;
-import com.mparticle.licensing.LicenseChecker;
-import com.mparticle.licensing.ServerManagedPolicy;
 import com.mparticle.messaging.MessagingConfigCallbacks;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.Iterator;
 
@@ -183,25 +178,9 @@ public class ConfigManager implements MessagingConfigCallbacks {
         if (isPushEnabled()) {
             MParticle.getInstance().Messaging().enablePushNotifications(getPushSenderId());
         }
-        if (isLicensingEnabled()) {
-            performLicenseCheck();
-        }
         if (isNetworkPerformanceEnabled()) {
             MParticle.getInstance().setNetworkTrackingEnabled(true);
         }
-    }
-
-    protected void performLicenseCheck() {
-        String deviceId = Settings.Secure.getString(mContext.getContentResolver(), Settings.Secure.ANDROID_ID);
-
-        MPLicenseCheckerCallback licenseCheckerCallback = new MPLicenseCheckerCallback(mPreferences, null);
-
-        LicenseChecker checker = new LicenseChecker(
-                mContext, new ServerManagedPolicy(mContext,
-                new AESObfuscator(Constants.LICENSE_CHECK_SALT, mContext.getPackageName(), deviceId)),
-                getLicenseKey()
-        );
-        checker.checkAccess(licenseCheckerCallback);
     }
 
     public JSONArray getTriggerMessageMatches(){
@@ -516,7 +495,8 @@ public class ConfigManager implements MessagingConfigCallbacks {
         JSONArray triggerHashes = getTriggerMessageHashes();
 
         //always trigger for PUSH_RECEIVED
-        boolean shouldTrigger = message.getMessageType().equals(Constants.MessageType.PUSH_RECEIVED);
+        boolean shouldTrigger = message.getMessageType().equals(Constants.MessageType.PUSH_RECEIVED)
+                || message.getMessageType().equals(Constants.MessageType.COMMERCE_EVENT);
 
         if (!shouldTrigger && messageMatches != null && messageMatches.length() > 0){
             shouldTrigger = true;

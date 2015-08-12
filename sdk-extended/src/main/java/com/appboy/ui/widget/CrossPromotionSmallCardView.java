@@ -8,10 +8,10 @@ import android.widget.TextView;
 
 import com.appboy.Constants;
 import com.appboy.models.cards.CrossPromotionSmallCard;
-import com.mparticle.extended.R;
 import com.appboy.ui.actions.GooglePlayAppDetailsAction;
 import com.appboy.ui.actions.IAction;
 import com.appboy.ui.support.StringUtils;
+import com.mparticle.extended.R;
 
 import java.text.NumberFormat;
 import java.util.Locale;

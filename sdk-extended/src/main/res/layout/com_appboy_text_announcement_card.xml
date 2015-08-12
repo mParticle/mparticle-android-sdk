@@ -32,4 +32,4 @@
       android:layout_marginLeft="10.0dp"
       android:layout_marginRight="10.0dp"
       style="@style/Appboy.Cards.TextAnnouncement.Domain"/>
-</merge><!-- From: file:/Users/brianwheeler/appboy_code/android-sdk/build/appboy-android-sdk/android-sdk-ui/res/layout/com_appboy_text_announcement_card.xml -->
+</merge>

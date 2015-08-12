@@ -6,7 +6,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:1.2.3'
+        classpath 'com.android.tools.build:gradle:1.3.0'
     }
 }
 
@@ -27,6 +27,11 @@ def getDate() {
 android {
     compileSdkVersion 22
     buildToolsVersion "22.0.1"
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_7
+        targetCompatibility JavaVersion.VERSION_1_7
+    }
 
     defaultPublishConfig "embeddedkitsRelease"
 
@@ -104,18 +109,24 @@ android.libraryVariants.all { variant ->
     task "javadoc$name"(type: Javadoc) {
         description = "Generates javadoc for build $name"
         destinationDir = new File('docs', variant.baseName)
-        source = files(variant.javaCompile.source)
-        classpath = files(android.getBootClasspath(), variant.javaCompile.classpath)
-        title = null
+        source = variant.javaCompile.source
+
+        //title = "mParticle Android SDK Reference"
         ext.androidJar =
                 "${android.sdkDirectory}/platforms/${android.compileSdkVersion}/android.jar"
-        List<File> pathList = new ArrayList<File>();
-        pathList.add(new File("docs/doclava-1.0.6.jar"))
-        options.addStringOption('title', 'Android SDK')
-        options.addStringOption('templatedir', 'docs/customization')
-        options.docletpath = pathList
-        options.doclet = "com.google.doclava.Doclava"
+        classpath = files(variant.javaCompile.classpath.files) + files(ext.androidJar)
+    //    List<File> pathList = new ArrayList<File>();
+        //pathList.add(new File("docs/doclava-1.0.6.jar"))
+      //  options.addStringOption('title', 'Android SDK')
+       // options.addStringOption('templatedir', 'docs/customization')
+      //  options.docletpath = pathList
+       // options.doclet = "com.google.doclava.Doclava"
         exclude '**/R.java'
+        options {
+          exclude 'com.mparticle.internal:com.mparticle.internal.embedded'
+            //docEncoding = 'UTF-8'
+
+        }
     }
 }
 
@@ -155,10 +166,10 @@ uploadArchives {
 
 dependencies {
     deployerJars "org.kuali.maven.wagons:maven-s3-wagon:1.2.1"
-    embeddedkitsCompile files('embeddedkits/Kahuna556.jar')
-    embeddedkitsCompile files('embeddedkits/Kochava20150312.jar')
+    embeddedkitsCompile files('embeddedkits/Kahuna571.jar')
+    embeddedkitsCompile files('embeddedkits/Kochava20150511.jar')
     embeddedkitsCompile files('embeddedkits/comscore2140923.jar')
-    embeddedkitsCompile files('embeddedkits/appboysdk172.jar')
+    embeddedkitsCompile files('embeddedkits/appboy182.jar')
     compile 'com.google.android.gms:play-services-gcm:[7.0,)'
     unityCompile project('unityskeleton')
     testCompile 'junit:junit:4.12'

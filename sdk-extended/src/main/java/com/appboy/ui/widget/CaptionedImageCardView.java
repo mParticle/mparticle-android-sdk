@@ -7,9 +7,9 @@ import android.widget.TextView;
 
 import com.appboy.Constants;
 import com.appboy.models.cards.CaptionedImageCard;
-import com.mparticle.extended.R;
 import com.appboy.ui.actions.ActionFactory;
 import com.appboy.ui.actions.IAction;
+import com.mparticle.extended.R;
 
 public class CaptionedImageCardView extends BaseCardView<CaptionedImageCard> {
   private final ImageView mImage;

@@ -5795,17 +5795,17 @@ com.mparticle.MPProduct -> com.mparticle.MPProduct:
     java.lang.String CATEGORY -> CATEGORY
     java.lang.String CURRENCY -> CURRENCY
     java.lang.String TRANSACTION_ID -> TRANSACTION_ID
-    99:99:double getUnitPrice() -> getUnitPrice
-    103:103:double getQuantity() -> getQuantity
-    107:107:java.lang.String getProductCategory() -> getProductCategory
-    111:111:double getTotalAmount() -> getTotalAmount
-    115:115:double getTaxAmount() -> getTaxAmount
-    119:119:double getShippingAmount() -> getShippingAmount
-    123:123:java.lang.String getCurrencyCode() -> getCurrencyCode
-    127:127:java.lang.String getAffiliation() -> getAffiliation
-    131:131:java.lang.String getTransactionId() -> getTransactionId
-    135:135:java.lang.String getProductName() -> getProductName
-    139:139:java.lang.String get(java.lang.Object,java.lang.String) -> get
+    105:105:double getUnitPrice() -> getUnitPrice
+    109:109:double getQuantity() -> getQuantity
+    113:113:java.lang.String getProductCategory() -> getProductCategory
+    117:117:double getTotalAmount() -> getTotalAmount
+    121:121:double getTaxAmount() -> getTaxAmount
+    125:125:double getShippingAmount() -> getShippingAmount
+    129:129:java.lang.String getCurrencyCode() -> getCurrencyCode
+    133:133:java.lang.String getAffiliation() -> getAffiliation
+    137:137:java.lang.String getTransactionId() -> getTransactionId
+    141:141:java.lang.String getProductName() -> getProductName
+    145:145:java.lang.String get(java.lang.Object,java.lang.String) -> get
 com.mparticle.MPProduct$1 -> com.mparticle.MPProduct$1:
 com.mparticle.MPProduct$Builder -> com.mparticle.MPProduct$Builder:
     java.lang.String productName -> productName
@@ -5819,27 +5819,27 @@ com.mparticle.MPProduct$Builder -> com.mparticle.MPProduct$Builder:
     java.lang.String currencyCode -> currencyCode
     java.lang.String affiliation -> affiliation
     java.lang.String transactionId -> transactionId
-    182:183:com.mparticle.MPProduct$Builder unitPrice(double) -> unitPrice
-    193:194:com.mparticle.MPProduct$Builder quantity(int) -> quantity
-    204:205:com.mparticle.MPProduct$Builder productCategory(java.lang.String) -> productCategory
-    215:216:com.mparticle.MPProduct$Builder totalAmount(double) -> totalAmount
-    226:227:com.mparticle.MPProduct$Builder taxAmount(double) -> taxAmount
-    237:238:com.mparticle.MPProduct$Builder shippingAmount(double) -> shippingAmount
-    248:249:com.mparticle.MPProduct$Builder currencyCode(java.lang.String) -> currencyCode
-    259:260:com.mparticle.MPProduct$Builder affiliation(java.lang.String) -> affiliation
-    270:271:com.mparticle.MPProduct$Builder transactionId(java.lang.String) -> transactionId
-    281:281:com.mparticle.MPProduct build() -> build
-    147:147:java.lang.String access$000(com.mparticle.MPProduct$Builder) -> access$000
-    147:147:java.lang.String access$100(com.mparticle.MPProduct$Builder) -> access$100
-    147:147:java.lang.String access$200(com.mparticle.MPProduct$Builder) -> access$200
-    147:147:java.lang.Double access$300(com.mparticle.MPProduct$Builder) -> access$300
-    147:147:java.lang.Integer access$400(com.mparticle.MPProduct$Builder) -> access$400
-    147:147:java.lang.Double access$500(com.mparticle.MPProduct$Builder) -> access$500
-    147:147:java.lang.Double access$600(com.mparticle.MPProduct$Builder) -> access$600
-    147:147:java.lang.Double access$700(com.mparticle.MPProduct$Builder) -> access$700
-    147:147:java.lang.String access$800(com.mparticle.MPProduct$Builder) -> access$800
-    147:147:java.lang.String access$900(com.mparticle.MPProduct$Builder) -> access$900
-    147:147:java.lang.String access$1000(com.mparticle.MPProduct$Builder) -> access$1000
+    188:189:com.mparticle.MPProduct$Builder unitPrice(double) -> unitPrice
+    199:200:com.mparticle.MPProduct$Builder quantity(int) -> quantity
+    210:211:com.mparticle.MPProduct$Builder productCategory(java.lang.String) -> productCategory
+    221:222:com.mparticle.MPProduct$Builder totalAmount(double) -> totalAmount
+    232:233:com.mparticle.MPProduct$Builder taxAmount(double) -> taxAmount
+    243:244:com.mparticle.MPProduct$Builder shippingAmount(double) -> shippingAmount
+    254:255:com.mparticle.MPProduct$Builder currencyCode(java.lang.String) -> currencyCode
+    265:266:com.mparticle.MPProduct$Builder affiliation(java.lang.String) -> affiliation
+    276:277:com.mparticle.MPProduct$Builder transactionId(java.lang.String) -> transactionId
+    287:287:com.mparticle.MPProduct build() -> build
+    153:153:java.lang.String access$000(com.mparticle.MPProduct$Builder) -> access$000
+    153:153:java.lang.String access$100(com.mparticle.MPProduct$Builder) -> access$100
+    153:153:java.lang.String access$200(com.mparticle.MPProduct$Builder) -> access$200
+    153:153:java.lang.Double access$300(com.mparticle.MPProduct$Builder) -> access$300
+    153:153:java.lang.Integer access$400(com.mparticle.MPProduct$Builder) -> access$400
+    153:153:java.lang.Double access$500(com.mparticle.MPProduct$Builder) -> access$500
+    153:153:java.lang.Double access$600(com.mparticle.MPProduct$Builder) -> access$600
+    153:153:java.lang.Double access$700(com.mparticle.MPProduct$Builder) -> access$700
+    153:153:java.lang.String access$800(com.mparticle.MPProduct$Builder) -> access$800
+    153:153:java.lang.String access$900(com.mparticle.MPProduct$Builder) -> access$900
+    153:153:java.lang.String access$1000(com.mparticle.MPProduct$Builder) -> access$1000
 com.mparticle.MPProduct$Event -> com.mparticle.MPProduct$Event:
     com.mparticle.MPProduct$Event VIEW -> VIEW
     com.mparticle.MPProduct$Event ADD_TO_WISHLIST -> ADD_TO_WISHLIST
@@ -5849,9 +5849,9 @@ com.mparticle.MPProduct$Event -> com.mparticle.MPProduct$Event:
     com.mparticle.MPProduct$Event PURCHASE -> PURCHASE
     java.lang.String description -> description
     com.mparticle.MPProduct$Event[] $VALUES -> $VALUES
-    21:21:com.mparticle.MPProduct$Event[] values() -> values
-    21:21:com.mparticle.MPProduct$Event valueOf(java.lang.String) -> valueOf
-    36:36:java.lang.String toString() -> toString
+    27:27:com.mparticle.MPProduct$Event[] values() -> values
+    27:27:com.mparticle.MPProduct$Event valueOf(java.lang.String) -> valueOf
+    42:42:java.lang.String toString() -> toString
 com.mparticle.MPReceiver -> com.mparticle.MPReceiver:
     java.lang.String MPARTICLE_IGNORE -> MPARTICLE_IGNORE
     84:107:void onReceive(android.content.Context,android.content.Intent) -> onReceive
@@ -5903,97 +5903,100 @@ com.mparticle.MParticle -> com.mparticle.MParticle:
     java.lang.String mApiKey -> mApiKey
     com.mparticle.messaging.MPMessagingAPI mMessaging -> mMessaging
     com.mparticle.media.MPMediaAPI mMedia -> mMedia
-    142:143:void start(android.content.Context) -> start
-    159:160:void start(android.content.Context,com.mparticle.MParticle$InstallType) -> start
-    183:187:void start(android.content.Context,com.mparticle.MParticle$InstallType,com.mparticle.MParticle$Environment) -> start
-    198:249:com.mparticle.MParticle getInstance(android.content.Context,com.mparticle.MParticle$InstallType,com.mparticle.MParticle$Environment) -> getInstance
-    259:263:com.mparticle.MParticle getInstance() -> getInstance
-    274:275:void setInstance(com.mparticle.MParticle) -> setInstance
-    287:293:void activityStarted(android.app.Activity) -> activityStarted
-    304:310:void activityStopped(android.app.Activity) -> activityStopped
-    316:320:void beginSession() -> beginSession
-    326:330:void endSession() -> endSession
-    333:333:boolean isSessionActive() -> isSessionActive
-    337:343:void ensureActiveSession() -> ensureActiveSession
-    349:354:void newSession() -> newSession
-    360:361:void upload() -> upload
-    368:371:void setInstallReferrer(java.lang.String) -> setInstallReferrer
-    374:374:java.lang.String getInstallReferrer() -> getInstallReferrer
-    384:385:void logEvent(java.lang.String,com.mparticle.MParticle$EventType) -> logEvent
-    395:396:void logEvent(java.lang.String,com.mparticle.MParticle$EventType,java.lang.String) -> logEvent
-    406:407:void logEvent(java.lang.String,com.mparticle.MParticle$EventType,long) -> logEvent
-    417:418:void logEvent(java.lang.String,com.mparticle.MParticle$EventType,java.util.Map) -> logEvent
-    429:430:void logEvent(java.lang.String,com.mparticle.MParticle$EventType,java.util.Map,java.lang.String) -> logEvent
-    441:442:void logEvent(java.lang.String,com.mparticle.MParticle$EventType,java.util.Map,long) -> logEvent
-    454:461:void logEvent(java.lang.String,com.mparticle.MParticle$EventType,java.util.Map,long,java.lang.String) -> logEvent
-    464:470:void logEvent(com.mparticle.MPEvent) -> logEvent
-    481:491:void logLtvIncrease(java.math.BigDecimal,java.lang.String,java.util.Map) -> logLtvIncrease
-    502:547:void logProductEvent(com.mparticle.MPProduct$Event,com.mparticle.MPProduct) -> logProductEvent
-    556:557:void logTransaction(com.mparticle.MPProduct) -> logTransaction
-    565:566:void logScreen(java.lang.String) -> logScreen
-    575:576:void logScreen(java.lang.String,java.util.Map) -> logScreen
-    584:609:void internalLogScreen(java.lang.String,java.util.Map,java.lang.Boolean) -> internalLogScreen
-    618:631:void leaveBreadcrumb(java.lang.String) -> leaveBreadcrumb
-    639:640:void logError(java.lang.String) -> logError
-    649:664:void logError(java.lang.String,java.util.Map) -> logError
-    667:673:void logNetworkPerformance(java.lang.String,long,java.lang.String,long,long,long,java.lang.String) -> logNetworkPerformance
-    682:733:void initNetworkMonitoring() -> initNetworkMonitoring
-    739:741:void setNetworkTrackingEnabled(boolean) -> setNetworkTrackingEnabled
-    744:767:void setNetworkTrackingEnabled(boolean,boolean) -> setNetworkTrackingEnabled
-    777:778:void excludeUrlFromNetworkPerformanceMeasurement(java.lang.String) -> excludeUrlFromNetworkPerformanceMeasurement
-    788:789:void addNetworkPerformanceQueryOnlyFilter(java.lang.String) -> addNetworkPerformanceQueryOnlyFilter
-    799:800:void resetNetworkPerformanceExclusionsAndFilters() -> resetNetworkPerformanceExclusionsAndFilters
-    808:809:void logException(java.lang.Exception) -> logException
-    818:819:void logException(java.lang.Exception,java.util.Map) -> logException
-    829:841:void logException(java.lang.Exception,java.util.Map,java.lang.String) -> logException
-    854:879:void enableLocationTracking(java.lang.String,long,long) -> enableLocationTracking
-    887:888:void disableLocationTracking() -> disableLocationTracking
-    894:911:void disableLocationTracking(boolean) -> disableLocationTracking
-    919:921:void setLocation(android.location.Location) -> setLocation
-    930:945:void setSessionAttribute(java.lang.String,java.lang.Object) -> setSessionAttribute
-    954:966:void incrementSessionAttribute(java.lang.String,int) -> incrementSessionAttribute
-    975:981:void logout() -> logout
-    990:1006:void setUserAttribute(java.lang.String,java.lang.Object) -> setUserAttribute
-    1015:1026:void incrementUserAttribute(java.lang.String,int) -> incrementUserAttribute
-    1034:1043:void removeUserAttribute(java.lang.String) -> removeUserAttribute
-    1046:1056:void attributeRemoved(java.lang.String) -> attributeRemoved
-    1064:1065:void setUserTag(java.lang.String) -> setUserTag
-    1073:1074:void removeUserTag(java.lang.String) -> removeUserTag
-    1084:1126:void setUserIdentity(java.lang.String,com.mparticle.MParticle$IdentityType) -> setUserIdentity
-    1130:1159:org.json.JSONArray getUserIdentities() -> getUserIdentities
-    1171:1200:void removeUserIdentity(java.lang.String) -> removeUserIdentity
-    1208:1208:java.lang.Boolean getOptOut() -> getOptOut
-    1217:1230:void setOptOut(java.lang.Boolean) -> setOptOut
-    1242:1242:android.net.Uri getSurveyUrl(int) -> getSurveyUrl
-    1255:1256:void setEnvironment(com.mparticle.MParticle$Environment) -> setEnvironment
-    1264:1264:com.mparticle.MParticle$Environment getEnvironment() -> getEnvironment
-    1273:1274:void setUploadInterval(int) -> setUploadInterval
-    1280:1281:void enableUncaughtExceptionLogging() -> enableUncaughtExceptionLogging
-    1287:1288:void disableUncaughtExceptionLogging() -> disableUncaughtExceptionLogging
-    1297:1297:java.lang.Boolean checkEventLimit() -> checkEventLimit
-    1312:1331:void performLicenseCheck(java.lang.String,com.mparticle.licensing.Policy,com.mparticle.licensing.LicenseCheckerCallback) -> performLicenseCheck
-    1340:1340:java.lang.Boolean isAutoTrackingEnabled() -> isAutoTrackingEnabled
-    1349:1349:int getSessionTimeout() -> getSessionTimeout
-    1360:1361:void setSessionTimeout(int) -> setSessionTimeout
-    1364:1367:void getUserSegments(long,java.lang.String,com.mparticle.segmentation.SegmentListener) -> getUserSegments
-    1376:1382:void registerWebView(android.webkit.WebView) -> registerWebView
-    1394:1397:void setLogLevel(com.mparticle.MParticle$LogLevel) -> setLogLevel
-    1405:1408:com.mparticle.messaging.MPMessagingAPI Messaging() -> Messaging
-    1417:1434:com.mparticle.media.MPMediaAPI Media() -> Media
-    1456:1456:boolean isProviderActive(int) -> isProviderActive
-    1460:1461:void saveGcmMessage(com.mparticle.messaging.MPCloudNotificationMessage,java.lang.String) -> saveGcmMessage
-    1464:1465:void saveGcmMessage(com.mparticle.messaging.ProviderCloudMessage,java.lang.String) -> saveGcmMessage
-    1468:1469:void logPushRegistration(java.lang.String) -> logPushRegistration
-    1472:1478:void logNotification(com.mparticle.messaging.MPCloudNotificationMessage,com.mparticle.messaging.CloudAction,boolean,java.lang.String,int) -> logNotification
-    1481:1487:void logNotification(com.mparticle.messaging.ProviderCloudMessage,boolean,java.lang.String) -> logNotification
-    1490:1492:void refreshConfiguration() -> refreshConfiguration
-    1588:1588:org.json.JSONObject getUserAttributes() -> getUserAttributes
-    1659:1666:void logUnhandledError(java.lang.Throwable) -> logUnhandledError
-    93:93:void access$100(com.mparticle.MParticle) -> access$100
+    com.mparticle.commerce.CommerceApi mCommerce -> mCommerce
+    147:148:void start(android.content.Context) -> start
+    164:165:void start(android.content.Context,com.mparticle.MParticle$InstallType) -> start
+    188:192:void start(android.content.Context,com.mparticle.MParticle$InstallType,com.mparticle.MParticle$Environment) -> start
+    203:256:com.mparticle.MParticle getInstance(android.content.Context,com.mparticle.MParticle$InstallType,com.mparticle.MParticle$Environment) -> getInstance
+    266:270:com.mparticle.MParticle getInstance() -> getInstance
+    281:282:void setInstance(com.mparticle.MParticle) -> setInstance
+    294:300:void activityStarted(android.app.Activity) -> activityStarted
+    311:317:void activityStopped(android.app.Activity) -> activityStopped
+    323:327:void beginSession() -> beginSession
+    333:337:void endSession() -> endSession
+    340:340:boolean isSessionActive() -> isSessionActive
+    344:350:void ensureActiveSession() -> ensureActiveSession
+    356:361:void newSession() -> newSession
+    367:368:void upload() -> upload
+    375:378:void setInstallReferrer(java.lang.String) -> setInstallReferrer
+    381:381:java.lang.String getInstallReferrer() -> getInstallReferrer
+    391:392:void logEvent(java.lang.String,com.mparticle.MParticle$EventType) -> logEvent
+    402:403:void logEvent(java.lang.String,com.mparticle.MParticle$EventType,java.lang.String) -> logEvent
+    413:414:void logEvent(java.lang.String,com.mparticle.MParticle$EventType,long) -> logEvent
+    424:425:void logEvent(java.lang.String,com.mparticle.MParticle$EventType,java.util.Map) -> logEvent
+    436:437:void logEvent(java.lang.String,com.mparticle.MParticle$EventType,java.util.Map,java.lang.String) -> logEvent
+    448:449:void logEvent(java.lang.String,com.mparticle.MParticle$EventType,java.util.Map,long) -> logEvent
+    461:468:void logEvent(java.lang.String,com.mparticle.MParticle$EventType,java.util.Map,long,java.lang.String) -> logEvent
+    476:482:void logEvent(com.mparticle.MPEvent) -> logEvent
+    492:515:void logEvent(com.mparticle.commerce.CommerceEvent) -> logEvent
+    526:536:void logLtvIncrease(java.math.BigDecimal,java.lang.String,java.util.Map) -> logLtvIncrease
+    549:594:void logProductEvent(com.mparticle.MPProduct$Event,com.mparticle.MPProduct) -> logProductEvent
+    605:606:void logTransaction(com.mparticle.MPProduct) -> logTransaction
+    614:615:void logScreen(java.lang.String) -> logScreen
+    624:625:void logScreen(java.lang.String,java.util.Map) -> logScreen
+    633:658:void internalLogScreen(java.lang.String,java.util.Map,java.lang.Boolean) -> internalLogScreen
+    667:680:void leaveBreadcrumb(java.lang.String) -> leaveBreadcrumb
+    688:689:void logError(java.lang.String) -> logError
+    698:713:void logError(java.lang.String,java.util.Map) -> logError
+    716:722:void logNetworkPerformance(java.lang.String,long,java.lang.String,long,long,long,java.lang.String) -> logNetworkPerformance
+    731:782:void initNetworkMonitoring() -> initNetworkMonitoring
+    788:790:void setNetworkTrackingEnabled(boolean) -> setNetworkTrackingEnabled
+    793:816:void setNetworkTrackingEnabled(boolean,boolean) -> setNetworkTrackingEnabled
+    826:827:void excludeUrlFromNetworkPerformanceMeasurement(java.lang.String) -> excludeUrlFromNetworkPerformanceMeasurement
+    837:838:void addNetworkPerformanceQueryOnlyFilter(java.lang.String) -> addNetworkPerformanceQueryOnlyFilter
+    848:849:void resetNetworkPerformanceExclusionsAndFilters() -> resetNetworkPerformanceExclusionsAndFilters
+    857:858:void logException(java.lang.Exception) -> logException
+    867:868:void logException(java.lang.Exception,java.util.Map) -> logException
+    878:890:void logException(java.lang.Exception,java.util.Map,java.lang.String) -> logException
+    903:928:void enableLocationTracking(java.lang.String,long,long) -> enableLocationTracking
+    936:937:void disableLocationTracking() -> disableLocationTracking
+    943:960:void disableLocationTracking(boolean) -> disableLocationTracking
+    968:970:void setLocation(android.location.Location) -> setLocation
+    979:994:void setSessionAttribute(java.lang.String,java.lang.Object) -> setSessionAttribute
+    1003:1015:void incrementSessionAttribute(java.lang.String,int) -> incrementSessionAttribute
+    1024:1030:void logout() -> logout
+    1039:1055:void setUserAttribute(java.lang.String,java.lang.Object) -> setUserAttribute
+    1064:1075:void incrementUserAttribute(java.lang.String,int) -> incrementUserAttribute
+    1083:1092:void removeUserAttribute(java.lang.String) -> removeUserAttribute
+    1095:1105:void attributeRemoved(java.lang.String) -> attributeRemoved
+    1113:1114:void setUserTag(java.lang.String) -> setUserTag
+    1122:1123:void removeUserTag(java.lang.String) -> removeUserTag
+    1133:1175:void setUserIdentity(java.lang.String,com.mparticle.MParticle$IdentityType) -> setUserIdentity
+    1179:1208:org.json.JSONArray getUserIdentities() -> getUserIdentities
+    1220:1249:void removeUserIdentity(java.lang.String) -> removeUserIdentity
+    1257:1257:java.lang.Boolean getOptOut() -> getOptOut
+    1266:1279:void setOptOut(java.lang.Boolean) -> setOptOut
+    1291:1291:android.net.Uri getSurveyUrl(int) -> getSurveyUrl
+    1304:1305:void setEnvironment(com.mparticle.MParticle$Environment) -> setEnvironment
+    1313:1313:com.mparticle.MParticle$Environment getEnvironment() -> getEnvironment
+    1322:1323:void setUploadInterval(int) -> setUploadInterval
+    1329:1330:void enableUncaughtExceptionLogging() -> enableUncaughtExceptionLogging
+    1336:1337:void disableUncaughtExceptionLogging() -> disableUncaughtExceptionLogging
+    1346:1346:java.lang.Boolean checkEventLimit() -> checkEventLimit
+    1361:1380:void performLicenseCheck(java.lang.String,com.mparticle.licensing.Policy,com.mparticle.licensing.LicenseCheckerCallback) -> performLicenseCheck
+    1389:1389:java.lang.Boolean isAutoTrackingEnabled() -> isAutoTrackingEnabled
+    1398:1398:int getSessionTimeout() -> getSessionTimeout
+    1409:1410:void setSessionTimeout(int) -> setSessionTimeout
+    1413:1416:void getUserSegments(long,java.lang.String,com.mparticle.segmentation.SegmentListener) -> getUserSegments
+    1425:1431:void registerWebView(android.webkit.WebView) -> registerWebView
+    1443:1446:void setLogLevel(com.mparticle.MParticle$LogLevel) -> setLogLevel
+    1454:1457:com.mparticle.messaging.MPMessagingAPI Messaging() -> Messaging
+    1461:1461:com.mparticle.commerce.CommerceApi Commerce() -> Commerce
+    1470:1487:com.mparticle.media.MPMediaAPI Media() -> Media
+    1509:1509:boolean isProviderActive(int) -> isProviderActive
+    1513:1514:void saveGcmMessage(com.mparticle.messaging.MPCloudNotificationMessage,java.lang.String) -> saveGcmMessage
+    1517:1518:void saveGcmMessage(com.mparticle.messaging.ProviderCloudMessage,java.lang.String) -> saveGcmMessage
+    1521:1522:void logPushRegistration(java.lang.String) -> logPushRegistration
+    1525:1531:void logNotification(com.mparticle.messaging.MPCloudNotificationMessage,com.mparticle.messaging.CloudAction,boolean,java.lang.String,int) -> logNotification
+    1534:1540:void logNotification(com.mparticle.messaging.ProviderCloudMessage,boolean,java.lang.String) -> logNotification
+    1543:1545:void refreshConfiguration() -> refreshConfiguration
+    1641:1641:org.json.JSONObject getUserAttributes() -> getUserAttributes
+    1712:1719:void logUnhandledError(java.lang.Throwable) -> logUnhandledError
+    97:97:void access$100(com.mparticle.MParticle) -> access$100
 com.mparticle.MParticle$1 -> com.mparticle.MParticle$1:
     com.mparticle.MParticle this$0 -> this$0
-    1421:1422:void onAudioPlaying() -> onAudioPlaying
-    1427:1431:void onAudioStopped() -> onAudioStopped
+    1474:1475:void onAudioPlaying() -> onAudioPlaying
+    1480:1484:void onAudioStopped() -> onAudioStopped
 com.mparticle.MParticle$2 -> com.mparticle.MParticle$2:
     int[] $SwitchMap$com$mparticle$MPProduct$Event -> $SwitchMap$com$mparticle$MPProduct$Event
 com.mparticle.MParticle$Environment -> com.mparticle.MParticle$Environment:
@@ -6002,9 +6005,9 @@ com.mparticle.MParticle$Environment -> com.mparticle.MParticle$Environment:
     com.mparticle.MParticle$Environment Production -> Production
     int value -> value
     com.mparticle.MParticle$Environment[] $VALUES -> $VALUES
-    1601:1601:com.mparticle.MParticle$Environment[] values() -> values
-    1601:1601:com.mparticle.MParticle$Environment valueOf(java.lang.String) -> valueOf
-    1622:1622:int getValue() -> getValue
+    1654:1654:com.mparticle.MParticle$Environment[] values() -> values
+    1654:1654:com.mparticle.MParticle$Environment valueOf(java.lang.String) -> valueOf
+    1675:1675:int getValue() -> getValue
 com.mparticle.MParticle$EventType -> com.mparticle.MParticle$EventType:
     com.mparticle.MParticle$EventType Unknown -> Unknown
     com.mparticle.MParticle$EventType Navigation -> Navigation
@@ -6016,9 +6019,9 @@ com.mparticle.MParticle$EventType -> com.mparticle.MParticle$EventType:
     com.mparticle.MParticle$EventType Social -> Social
     com.mparticle.MParticle$EventType Other -> Other
     com.mparticle.MParticle$EventType[] $VALUES -> $VALUES
-    1499:1499:com.mparticle.MParticle$EventType[] values() -> values
-    1499:1499:com.mparticle.MParticle$EventType valueOf(java.lang.String) -> valueOf
-    1503:1503:java.lang.String toString() -> toString
+    1552:1552:com.mparticle.MParticle$EventType[] values() -> values
+    1552:1552:com.mparticle.MParticle$EventType valueOf(java.lang.String) -> valueOf
+    1556:1556:java.lang.String toString() -> toString
 com.mparticle.MParticle$IdentityType -> com.mparticle.MParticle$IdentityType:
     com.mparticle.MParticle$IdentityType Other -> Other
     com.mparticle.MParticle$IdentityType CustomerId -> CustomerId
@@ -6032,27 +6035,27 @@ com.mparticle.MParticle$IdentityType -> com.mparticle.MParticle$IdentityType:
     com.mparticle.MParticle$IdentityType FacebookCustomAudienceId -> FacebookCustomAudienceId
     int value -> value
     com.mparticle.MParticle$IdentityType[] $VALUES -> $VALUES
-    1537:1537:com.mparticle.MParticle$IdentityType[] values() -> values
-    1537:1537:com.mparticle.MParticle$IdentityType valueOf(java.lang.String) -> valueOf
-    1556:1576:com.mparticle.MParticle$IdentityType parseInt(int) -> parseInt
-    1582:1582:int getValue() -> getValue
-    1537:1537:int access$000(com.mparticle.MParticle$IdentityType) -> access$000
+    1590:1590:com.mparticle.MParticle$IdentityType[] values() -> values
+    1590:1590:com.mparticle.MParticle$IdentityType valueOf(java.lang.String) -> valueOf
+    1609:1629:com.mparticle.MParticle$IdentityType parseInt(int) -> parseInt
+    1635:1635:int getValue() -> getValue
+    1590:1590:int access$000(com.mparticle.MParticle$IdentityType) -> access$000
 com.mparticle.MParticle$InstallType -> com.mparticle.MParticle$InstallType:
     com.mparticle.MParticle$InstallType AutoDetect -> AutoDetect
     com.mparticle.MParticle$InstallType KnownInstall -> KnownInstall
     com.mparticle.MParticle$InstallType KnownUpgrade -> KnownUpgrade
     com.mparticle.MParticle$InstallType[] $VALUES -> $VALUES
-    1512:1512:com.mparticle.MParticle$InstallType[] values() -> values
-    1512:1512:com.mparticle.MParticle$InstallType valueOf(java.lang.String) -> valueOf
-    1527:1527:java.lang.String toString() -> toString
+    1565:1565:com.mparticle.MParticle$InstallType[] values() -> values
+    1565:1565:com.mparticle.MParticle$InstallType valueOf(java.lang.String) -> valueOf
+    1580:1580:java.lang.String toString() -> toString
 com.mparticle.MParticle$LogLevel -> com.mparticle.MParticle$LogLevel:
     com.mparticle.MParticle$LogLevel NONE -> NONE
     com.mparticle.MParticle$LogLevel ERROR -> ERROR
     com.mparticle.MParticle$LogLevel WARNING -> WARNING
     com.mparticle.MParticle$LogLevel DEBUG -> DEBUG
     com.mparticle.MParticle$LogLevel[] $VALUES -> $VALUES
-    1639:1639:com.mparticle.MParticle$LogLevel[] values() -> values
-    1639:1639:com.mparticle.MParticle$LogLevel valueOf(java.lang.String) -> valueOf
+    1692:1692:com.mparticle.MParticle$LogLevel[] values() -> values
+    1692:1692:com.mparticle.MParticle$LogLevel valueOf(java.lang.String) -> valueOf
 com.mparticle.MParticle$ServiceProviders -> com.mparticle.MParticle$ServiceProviders:
     int FORESEE_ID -> FORESEE_ID
     int APPBOY -> APPBOY
@@ -6082,6 +6085,239 @@ com.mparticle.activity.MPActivity -> com.mparticle.activity.MPActivity:
 com.mparticle.activity.MPListActivity -> com.mparticle.activity.MPListActivity:
     26:28:void onStart() -> onStart
     32:34:void onStop() -> onStop
+com.mparticle.commerce.Cart -> com.mparticle.commerce.Cart:
+    java.util.List productList -> a
+    android.content.SharedPreferences prefs -> b
+    android.content.Context mContext -> c
+    64:68:com.mparticle.commerce.Cart getInstance(android.content.Context) -> getInstance
+    82:83:void setProductEqualityComparator(com.mparticle.commerce.Product$EqualityComparator) -> setProductEqualityComparator
+    99:99:com.mparticle.commerce.Cart add(com.mparticle.commerce.Product) -> add
+    116:126:com.mparticle.commerce.Cart add(com.mparticle.commerce.Product,boolean) -> add
+    141:141:com.mparticle.commerce.Cart remove(com.mparticle.commerce.Product) -> remove
+    156:163:com.mparticle.commerce.Cart remove(com.mparticle.commerce.Product,boolean) -> remove
+    176:184:boolean remove(int) -> remove
+    194:207:void loadFromString(java.lang.String) -> loadFromString
+    219:231:java.lang.String toString() -> toString
+    240:242:com.mparticle.commerce.Cart clear() -> clear
+    246:248:void save() -> b
+    257:262:com.mparticle.commerce.Product getProduct(java.lang.String) -> getProduct
+    274:274:java.util.List products() -> products
+    38:38:android.content.Context access$000() -> a
+com.mparticle.commerce.Cart$CartLoader -> com.mparticle.commerce.Cart$a:
+    com.mparticle.commerce.Cart INSTANCE -> a
+    45:45:com.mparticle.commerce.Cart access$200() -> a
+com.mparticle.commerce.CommerceApi -> com.mparticle.commerce.CommerceApi:
+    android.content.Context mContext -> a
+    23:23:com.mparticle.commerce.Cart cart() -> cart
+    36:47:void checkout(int,java.lang.String) -> checkout
+    57:66:void checkout() -> checkout
+    79:80:void purchase(com.mparticle.commerce.TransactionAttributes) -> purchase
+    92:105:void purchase(com.mparticle.commerce.TransactionAttributes,boolean) -> purchase
+    114:127:void refund(com.mparticle.commerce.TransactionAttributes,boolean) -> refund
+com.mparticle.commerce.CommerceEvent -> com.mparticle.commerce.CommerceEvent:
+    java.lang.String mEventName -> a
+    java.util.List mImpressions -> b
+    java.lang.String mProductAction -> c
+    java.lang.String mPromotionAction -> d
+    java.util.Map customAttributes -> e
+    java.util.List promotionList -> f
+    java.util.List productList -> g
+    java.lang.Integer mCheckoutStep -> h
+    java.lang.String mCheckoutOptions -> i
+    java.lang.String mProductListName -> j
+    java.lang.String mProductListSource -> k
+    java.lang.String mCurrency -> l
+    com.mparticle.commerce.TransactionAttributes mTransactionAttributes -> m
+    java.lang.String mScreen -> n
+    java.lang.Boolean mNonIteraction -> o
+    170:261:java.lang.String toString() -> toString
+    272:272:java.util.Map getCustomAttributes() -> getCustomAttributes
+    283:283:java.lang.String getScreen() -> getScreen
+    295:295:java.lang.Boolean getNonInteraction() -> getNonInteraction
+    308:308:java.lang.String getProductAction() -> getProductAction
+    317:317:java.lang.Integer getCheckoutStep() -> getCheckoutStep
+    326:326:java.lang.String getCheckoutOptions() -> getCheckoutOptions
+    337:337:java.lang.String getProductListName() -> getProductListName
+    348:348:java.lang.String getProductListSource() -> getProductListSource
+    359:359:com.mparticle.commerce.TransactionAttributes getTransactionAttributes() -> getTransactionAttributes
+    372:375:java.util.List getProducts() -> getProducts
+    388:388:java.lang.String getPromotionAction() -> getPromotionAction
+    401:404:java.util.List getPromotions() -> getPromotions
+    417:420:java.util.List getImpressions() -> getImpressions
+    429:429:java.lang.String getCurrency() -> getCurrency
+    438:438:java.lang.String getEventName() -> getEventName
+    32:32:java.lang.String access$1500(com.mparticle.commerce.CommerceEvent) -> a
+    32:32:java.lang.Boolean access$1600(com.mparticle.commerce.CommerceEvent) -> b
+com.mparticle.commerce.CommerceEvent$Builder -> com.mparticle.commerce.CommerceEvent$Builder:
+    java.lang.String mProductAction -> a
+    java.lang.String mPromotionAction -> b
+    java.util.Map customAttributes -> c
+    java.util.List promotionList -> d
+    java.util.List productList -> e
+    java.lang.Integer mCheckoutStep -> f
+    java.lang.String mCheckoutOptions -> g
+    java.lang.String mProductListName -> h
+    java.lang.String mProductListSource -> i
+    java.lang.String mCurrency -> j
+    com.mparticle.commerce.TransactionAttributes mTransactionAttributes -> k
+    java.lang.String mScreen -> l
+    java.lang.Boolean mNonIteraction -> m
+    java.util.List mImpressions -> n
+    java.lang.String mEventName -> o
+    608:609:com.mparticle.commerce.CommerceEvent$Builder screen(java.lang.String) -> screen
+    621:625:com.mparticle.commerce.CommerceEvent$Builder addProduct(com.mparticle.commerce.Product) -> addProduct
+    637:638:com.mparticle.commerce.CommerceEvent$Builder transactionAttributes(com.mparticle.commerce.TransactionAttributes) -> transactionAttributes
+    648:649:com.mparticle.commerce.CommerceEvent$Builder currency(java.lang.String) -> currency
+    659:660:com.mparticle.commerce.CommerceEvent$Builder nonInteraction(boolean) -> nonInteraction
+    670:671:com.mparticle.commerce.CommerceEvent$Builder customAttributes(java.util.Map) -> customAttributes
+    683:687:com.mparticle.commerce.CommerceEvent$Builder addPromotion(com.mparticle.commerce.Promotion) -> addPromotion
+    697:700:com.mparticle.commerce.CommerceEvent$Builder checkoutStep(java.lang.Integer) -> checkoutStep
+    712:718:com.mparticle.commerce.CommerceEvent$Builder addImpression(com.mparticle.commerce.Impression) -> addImpression
+    729:730:com.mparticle.commerce.CommerceEvent$Builder checkoutOptions(java.lang.String) -> checkoutOptions
+    744:744:com.mparticle.commerce.CommerceEvent build() -> build
+    754:755:com.mparticle.commerce.CommerceEvent$Builder productListName(java.lang.String) -> productListName
+    765:766:com.mparticle.commerce.CommerceEvent$Builder productListSource(java.lang.String) -> productListSource
+    776:777:com.mparticle.commerce.CommerceEvent$Builder products(java.util.List) -> products
+    787:788:com.mparticle.commerce.CommerceEvent$Builder impressions(java.util.List) -> impressions
+    798:799:com.mparticle.commerce.CommerceEvent$Builder promotions(java.util.List) -> promotions
+    807:808:com.mparticle.commerce.CommerceEvent$Builder internalEventName(java.lang.String) -> internalEventName
+    486:486:java.lang.String access$000(com.mparticle.commerce.CommerceEvent$Builder) -> a
+    486:486:java.lang.String access$100(com.mparticle.commerce.CommerceEvent$Builder) -> b
+    486:486:java.util.Map access$200(com.mparticle.commerce.CommerceEvent$Builder) -> c
+    486:486:java.util.List access$300(com.mparticle.commerce.CommerceEvent$Builder) -> d
+    486:486:java.util.List access$400(com.mparticle.commerce.CommerceEvent$Builder) -> e
+    486:486:java.lang.Integer access$500(com.mparticle.commerce.CommerceEvent$Builder) -> f
+    486:486:java.lang.String access$600(com.mparticle.commerce.CommerceEvent$Builder) -> g
+    486:486:java.lang.String access$700(com.mparticle.commerce.CommerceEvent$Builder) -> h
+    486:486:java.lang.String access$800(com.mparticle.commerce.CommerceEvent$Builder) -> i
+    486:486:java.lang.String access$900(com.mparticle.commerce.CommerceEvent$Builder) -> j
+    486:486:com.mparticle.commerce.TransactionAttributes access$1000(com.mparticle.commerce.CommerceEvent$Builder) -> k
+    486:486:java.lang.String access$1100(com.mparticle.commerce.CommerceEvent$Builder) -> l
+    486:486:java.util.List access$1200(com.mparticle.commerce.CommerceEvent$Builder) -> m
+    486:486:java.lang.Boolean access$1300(com.mparticle.commerce.CommerceEvent$Builder) -> n
+    486:486:java.lang.String access$1400(com.mparticle.commerce.CommerceEvent$Builder) -> o
+com.mparticle.commerce.Impression -> com.mparticle.commerce.Impression:
+    java.lang.String mListName -> a
+    java.util.List mProducts -> b
+    28:28:java.lang.String getListName() -> getListName
+    32:32:java.util.List getProducts() -> getProducts
+    42:48:com.mparticle.commerce.Impression addProduct(com.mparticle.commerce.Product) -> addProduct
+com.mparticle.commerce.Product -> com.mparticle.commerce.Product:
+    java.lang.String ADD_TO_CART -> ADD_TO_CART
+    java.lang.String REMOVE_FROM_CART -> REMOVE_FROM_CART
+    java.lang.String ADD_TO_WISHLIST -> ADD_TO_WISHLIST
+    java.lang.String REMOVE_FROM_WISHLIST -> REMOVE_FROM_WISHLIST
+    java.lang.String CHECKOUT -> CHECKOUT
+    java.lang.String CLICK -> CLICK
+    java.lang.String DETAIL -> DETAIL
+    java.lang.String PURCHASE -> PURCHASE
+    java.lang.String REFUND -> REFUND
+    java.lang.String CHECKOUT_OPTION -> CHECKOUT_OPTION
+    com.mparticle.commerce.Product$EqualityComparator mComparator -> a
+    java.util.Map mCustomAttributes -> b
+    java.lang.String mName -> c
+    java.lang.String mCategory -> d
+    java.lang.String mCouponCode -> e
+    java.lang.String mSku -> f
+    double mTimeAdded -> g
+    java.lang.Integer mPosition -> h
+    double mPrice -> i
+    double mQuantity -> j
+    java.lang.String mBrand -> k
+    java.lang.String mVariant -> l
+    56:56:java.util.Map getCustomAttributes() -> getCustomAttributes
+    60:60:double getTotalAmount() -> getTotalAmount
+    79:80:void setEqualityComparator(com.mparticle.commerce.Product$EqualityComparator) -> setEqualityComparator
+    120:121:void updateTimeAdded() -> a
+    128:128:java.lang.String getName() -> getName
+    136:136:java.lang.String getCategory() -> getCategory
+    145:145:java.lang.String getCouponCode() -> getCouponCode
+    153:153:java.lang.String getSku() -> getSku
+    161:161:java.lang.Integer getPosition() -> getPosition
+    169:169:double getUnitPrice() -> getUnitPrice
+    177:180:double getQuantity() -> getQuantity
+    185:198:boolean equals(java.lang.Object) -> equals
+    207:207:java.lang.String getBrand() -> getBrand
+    216:216:java.lang.String getVariant() -> getVariant
+    221:221:java.lang.String toString() -> toString
+    226:231:com.mparticle.commerce.Product fromString(java.lang.String) -> fromString
+    236:266:com.mparticle.commerce.Product fromJson(org.json.JSONObject) -> a
+    271:312:org.json.JSONObject toJson() -> b
+    22:22:java.lang.String access$1000(com.mparticle.commerce.Product) -> a
+    22:22:java.lang.String access$1100(com.mparticle.commerce.Product) -> b
+    22:22:java.lang.Integer access$1200(com.mparticle.commerce.Product) -> c
+    22:22:double access$1300(com.mparticle.commerce.Product) -> d
+    22:22:double access$1400(com.mparticle.commerce.Product) -> e
+    22:22:java.lang.String access$1500(com.mparticle.commerce.Product) -> f
+    22:22:java.lang.String access$1600(com.mparticle.commerce.Product) -> g
+com.mparticle.commerce.Product$Builder -> com.mparticle.commerce.Product$Builder:
+    java.lang.String mName -> a
+    java.lang.String mCategory -> b
+    java.lang.String mCouponCode -> c
+    java.lang.String mSku -> d
+    java.lang.Integer mPosition -> e
+    double mPrice -> f
+    double mQuantity -> g
+    java.lang.String mBrand -> h
+    java.lang.String mVariant -> i
+    java.util.Map mCustomAttributes -> j
+    384:385:com.mparticle.commerce.Product$Builder customAttributes(java.util.Map) -> customAttributes
+    395:396:com.mparticle.commerce.Product$Builder category(java.lang.String) -> category
+    407:408:com.mparticle.commerce.Product$Builder couponCode(java.lang.String) -> couponCode
+    418:419:com.mparticle.commerce.Product$Builder sku(java.lang.String) -> sku
+    429:430:com.mparticle.commerce.Product$Builder name(java.lang.String) -> name
+    440:441:com.mparticle.commerce.Product$Builder position(java.lang.Integer) -> position
+    451:452:com.mparticle.commerce.Product$Builder unitPrice(double) -> unitPrice
+    464:465:com.mparticle.commerce.Product$Builder quantity(double) -> quantity
+    475:476:com.mparticle.commerce.Product$Builder brand(java.lang.String) -> brand
+    486:487:com.mparticle.commerce.Product$Builder variant(java.lang.String) -> variant
+    496:496:com.mparticle.commerce.Product build() -> build
+    323:323:java.lang.String access$000(com.mparticle.commerce.Product$Builder) -> a
+    323:323:java.lang.String access$100(com.mparticle.commerce.Product$Builder) -> b
+    323:323:java.lang.String access$200(com.mparticle.commerce.Product$Builder) -> c
+    323:323:java.lang.String access$300(com.mparticle.commerce.Product$Builder) -> d
+    323:323:java.lang.Integer access$400(com.mparticle.commerce.Product$Builder) -> e
+    323:323:double access$500(com.mparticle.commerce.Product$Builder) -> f
+    323:323:double access$600(com.mparticle.commerce.Product$Builder) -> g
+    323:323:java.lang.String access$700(com.mparticle.commerce.Product$Builder) -> h
+    323:323:java.lang.String access$800(com.mparticle.commerce.Product$Builder) -> i
+    323:323:java.util.Map access$900(com.mparticle.commerce.Product$Builder) -> j
+com.mparticle.commerce.Product$EqualityComparator -> com.mparticle.commerce.Product$EqualityComparator:
+    boolean equals(com.mparticle.commerce.Product,com.mparticle.commerce.Product) -> equals
+com.mparticle.commerce.Promotion -> com.mparticle.commerce.Promotion:
+    java.lang.String CLICK -> CLICK
+    java.lang.String VIEW -> VIEW
+    java.lang.String mCreative -> a
+    java.lang.String mId -> b
+    java.lang.String mName -> c
+    java.lang.String mPosition -> d
+    71:71:java.lang.String getCreative() -> getCreative
+    81:82:com.mparticle.commerce.Promotion setCreative(java.lang.String) -> setCreative
+    91:91:java.lang.String getId() -> getId
+    101:102:com.mparticle.commerce.Promotion setId(java.lang.String) -> setId
+    111:111:java.lang.String getName() -> getName
+    121:122:com.mparticle.commerce.Promotion setName(java.lang.String) -> setName
+    131:131:java.lang.String getPosition() -> getPosition
+    141:142:com.mparticle.commerce.Promotion setPosition(java.lang.String) -> setPosition
+com.mparticle.commerce.TransactionAttributes -> com.mparticle.commerce.TransactionAttributes:
+    java.lang.String mAffiliation -> a
+    java.lang.Double mRevenue -> b
+    java.lang.Double mShipping -> c
+    java.lang.Double mTax -> d
+    java.lang.String mCouponCode -> e
+    java.lang.String mId -> f
+    25:25:java.lang.String getId() -> getId
+    52:53:com.mparticle.commerce.TransactionAttributes setId(java.lang.String) -> setId
+    57:57:java.lang.String getCouponCode() -> getCouponCode
+    61:62:com.mparticle.commerce.TransactionAttributes setCouponCode(java.lang.String) -> setCouponCode
+    66:66:java.lang.Double getTax() -> getTax
+    70:71:com.mparticle.commerce.TransactionAttributes setTax(java.lang.Double) -> setTax
+    75:75:java.lang.Double getShipping() -> getShipping
+    79:80:com.mparticle.commerce.TransactionAttributes setShipping(java.lang.Double) -> setShipping
+    84:84:java.lang.Double getRevenue() -> getRevenue
+    88:89:com.mparticle.commerce.TransactionAttributes setRevenue(java.lang.Double) -> setRevenue
+    93:93:java.lang.String getAffiliation() -> getAffiliation
+    97:98:com.mparticle.commerce.TransactionAttributes setAffiliation(java.lang.String) -> setAffiliation
 com.mparticle.internal.AppConfig -> com.mparticle.internal.a:
     android.content.Context mContext -> l
     java.lang.String mKey -> a
@@ -6149,7 +6385,75 @@ com.mparticle.internal.AppStateManager$1 -> com.mparticle.internal.b$1:
 com.mparticle.internal.AppStateManager$2 -> com.mparticle.internal.b$2:
     com.mparticle.internal.AppStateManager this$0 -> a
     286:294:void run() -> run
-com.mparticle.internal.ConfigManager -> com.mparticle.internal.c:
+com.mparticle.internal.CommerceEventUtil -> com.mparticle.internal.c:
+    java.lang.String mMessageType -> a
+    com.mparticle.internal.Session mSession -> b
+    com.mparticle.commerce.CommerceEvent commerceEvent -> c
+    long mTimestamp -> d
+    java.lang.String mName -> e
+    org.json.JSONObject mAttributes -> f
+    android.location.Location mLocation -> g
+    java.lang.String mDataConnection -> h
+    java.lang.Double mLength -> i
+    java.lang.String sOpenUDID -> j
+    27:30:java.util.List expand(com.mparticle.commerce.CommerceEvent) -> a
+    64:90:void extractProductFields(com.mparticle.commerce.Product,java.util.Map) -> a
+    93:98:void extractProductAttributes(com.mparticle.commerce.Product,java.util.Map) -> b
+    101:104:void extractTransactionId(com.mparticle.commerce.CommerceEvent,java.util.Map) -> c
+    107:127:void extractActionAttributes(com.mparticle.commerce.CommerceEvent,java.util.Map) -> a
+    130:151:java.util.Map extractTransactionAttributes(com.mparticle.commerce.CommerceEvent,java.util.Map) -> b
+    155:172:java.util.List expandPromotionAction(com.mparticle.commerce.CommerceEvent) -> c
+    176:190:void extractPromotionAttributes(com.mparticle.commerce.Promotion,java.util.Map) -> a
+    193:214:java.util.List expandProductImpression(com.mparticle.commerce.CommerceEvent) -> d
+    229:332:void addCommerceEventInfo(com.mparticle.internal.MPMessage,com.mparticle.commerce.CommerceEvent) -> a
+    335:352:org.json.JSONObject getPromotionJson(com.mparticle.commerce.Promotion) -> a
+    356:388:int getEventType(com.mparticle.commerce.CommerceEvent) -> b
+    36:114:org.json.JSONObject collectAppInfo(android.content.Context) -> a
+    124:218:org.json.JSONObject collectDeviceInfo(android.content.Context) -> b
+    15:22:long getAvailableMemory(android.os.StatFs) -> a
+    129:130:com.mparticle.internal.CommerceEventUtil timestamp$1b3aa3fd(long) -> a
+    133:134:com.mparticle.internal.CommerceEventUtil name$1a12ba0d(java.lang.String) -> a
+    137:138:com.mparticle.internal.CommerceEventUtil attributes$1e39ea37(org.json.JSONObject) -> a
+    142:142:com.mparticle.internal.MPMessage build() -> a
+    146:147:com.mparticle.internal.CommerceEventUtil dataConnection$1a12ba0d(java.lang.String) -> b
+    151:152:com.mparticle.internal.CommerceEventUtil length$71db3e4d(java.lang.Double) -> a
+    106:106:java.lang.String access$000$5530b31(com.mparticle.internal.CommerceEventUtil) -> a
+    106:106:long access$100$3698bfe5(com.mparticle.internal.CommerceEventUtil) -> b
+    106:106:com.mparticle.internal.Session access$200$7003a9da(com.mparticle.internal.CommerceEventUtil) -> c
+    106:106:java.lang.String access$300$5530b31(com.mparticle.internal.CommerceEventUtil) -> d
+    106:106:java.lang.Double access$400$2731aef1(com.mparticle.internal.CommerceEventUtil) -> e
+    106:106:org.json.JSONObject access$500$5e4d31a1(com.mparticle.internal.CommerceEventUtil) -> f
+    106:106:org.json.JSONObject access$502$6a578525(com.mparticle.internal.CommerceEventUtil,org.json.JSONObject) -> a
+    106:106:java.lang.String access$600$5530b31(com.mparticle.internal.CommerceEventUtil) -> g
+    106:106:android.location.Location access$700$481b89f3(com.mparticle.internal.CommerceEventUtil) -> h
+    106:106:com.mparticle.commerce.CommerceEvent access$800$3ed34b41(com.mparticle.internal.CommerceEventUtil) -> i
+    61:104:java.lang.String getCpuUsage() -> b
+    129:132:boolean isEmpty(java.lang.CharSequence) -> a
+    157:162:java.lang.String getAppVersionName(android.content.Context) -> c
+    166:174:long getDiskSpace(java.io.File) -> a
+    178:178:long millitime() -> c
+    182:182:java.lang.String getAndroidID(android.content.Context) -> d
+    223:236:long getTotalMemoryPreJB() -> d
+    241:255:java.lang.String getOpenUDID(android.content.Context) -> e
+    264:303:java.lang.String getBuildUUID(android.content.Context) -> f
+    307:314:java.lang.String convertBytesToUUID(byte[],boolean) -> a
+    378:389:java.lang.Object getAccessibleObject(java.lang.reflect.Field,java.lang.Object) -> a
+    393:403:java.lang.reflect.Field getAccessibleField(java.lang.Class,java.lang.Class) -> a
+    407:415:java.lang.reflect.Constructor getConstructor(java.lang.String,java.lang.String[]) -> a
+    435:449:boolean isPhoneRooted() -> e
+    453:464:int mpHash(java.lang.String) -> c
+    480:481:boolean checkPermission(android.content.Context,java.lang.String) -> a
+    500:505:boolean isSupportLibAvailable() -> f
+    510:515:boolean isGcmServicesAvailable() -> g
+    519:530:java.math.BigInteger hashFnv1A(byte[]) -> a
+    534:542:boolean isServiceAvailable(android.content.Context,java.lang.Class) -> a
+    546:569:org.json.JSONObject wrapExtras(android.os.Bundle) -> a
+    574:574:boolean isAppDebuggable(android.content.Context) -> g
+    586:595:org.json.JSONObject enforceAttributeConstraints(java.util.Map) -> a
+    598:598:java.lang.Boolean setCheckedAttribute(org.json.JSONObject,java.lang.String,java.lang.Object,boolean) -> a
+    602:641:java.lang.Boolean setCheckedAttribute(org.json.JSONObject,java.lang.String,java.lang.Object,java.lang.Boolean,boolean) -> a
+    645:652:java.lang.String findCaseInsensitiveKey(org.json.JSONObject,java.lang.String) -> a
+com.mparticle.internal.ConfigManager -> com.mparticle.internal.d:
     android.content.Context mContext -> b
     android.content.SharedPreferences mPreferences -> c
     com.mparticle.internal.embedded.EmbeddedKitManager mEmbeddedKitManager -> d
@@ -6212,66 +6516,12 @@ com.mparticle.internal.ConfigManager -> com.mparticle.internal.c:
     489:494:long getMpid() -> t
     503:504:void setLogLevel(com.mparticle.MParticle$LogLevel) -> a
     507:507:int getCurrentRampValue() -> u
-    515:565:boolean shouldTrigger(com.mparticle.internal.MPMessage) -> a
-    569:572:int getUserBucket() -> v
-com.mparticle.internal.ConfigManager$1 -> com.mparticle.internal.c$1:
+    515:566:boolean shouldTrigger(com.mparticle.internal.MPMessage) -> a
+    570:573:int getUserBucket() -> v
+com.mparticle.internal.ConfigManager$1 -> com.mparticle.internal.d$1:
     int[] $SwitchMap$com$mparticle$MParticle$LogLevel -> a
-com.mparticle.internal.Constants -> com.mparticle.internal.d:
+com.mparticle.internal.Constants -> com.mparticle.internal.e:
     byte[] LICENSE_CHECK_SALT -> a
-com.mparticle.internal.DeviceAttributes -> com.mparticle.internal.e:
-    java.lang.String mMessageType -> a
-    com.mparticle.internal.Session mSession -> b
-    long mTimestamp -> c
-    java.lang.String mName -> d
-    org.json.JSONObject mAttributes -> e
-    android.location.Location mLocation -> f
-    java.lang.String mDataConnection -> g
-    java.lang.Double mLength -> h
-    java.lang.String sOpenUDID -> i
-    36:114:org.json.JSONObject collectAppInfo(android.content.Context) -> a
-    124:218:org.json.JSONObject collectDeviceInfo(android.content.Context) -> b
-    15:22:long getAvailableMemory(android.os.StatFs) -> a
-    118:119:com.mparticle.internal.DeviceAttributes timestamp$1b3aa3fd(long) -> a
-    122:123:com.mparticle.internal.DeviceAttributes name$1a12ba0d(java.lang.String) -> a
-    126:127:com.mparticle.internal.DeviceAttributes attributes$1e39ea37(org.json.JSONObject) -> a
-    131:131:com.mparticle.internal.MPMessage build() -> a
-    135:136:com.mparticle.internal.DeviceAttributes dataConnection$1a12ba0d(java.lang.String) -> b
-    140:141:com.mparticle.internal.DeviceAttributes length$71db3e4d(java.lang.Double) -> a
-    101:101:java.lang.String access$000$5530b31(com.mparticle.internal.DeviceAttributes) -> a
-    101:101:long access$100$3698bfe5(com.mparticle.internal.DeviceAttributes) -> b
-    101:101:com.mparticle.internal.Session access$200$7003a9da(com.mparticle.internal.DeviceAttributes) -> c
-    101:101:java.lang.String access$300$5530b31(com.mparticle.internal.DeviceAttributes) -> d
-    101:101:java.lang.Double access$400$2731aef1(com.mparticle.internal.DeviceAttributes) -> e
-    101:101:org.json.JSONObject access$500$5e4d31a1(com.mparticle.internal.DeviceAttributes) -> f
-    101:101:org.json.JSONObject access$502$6a578525(com.mparticle.internal.DeviceAttributes,org.json.JSONObject) -> a
-    101:101:java.lang.String access$600$5530b31(com.mparticle.internal.DeviceAttributes) -> g
-    101:101:android.location.Location access$700$481b89f3(com.mparticle.internal.DeviceAttributes) -> h
-    61:104:java.lang.String getCpuUsage() -> b
-    129:132:boolean isEmpty(java.lang.CharSequence) -> a
-    157:162:java.lang.String getAppVersionName(android.content.Context) -> c
-    166:174:long getDiskSpace(java.io.File) -> a
-    178:178:long millitime() -> c
-    182:182:java.lang.String getAndroidID(android.content.Context) -> d
-    223:236:long getTotalMemoryPreJB() -> d
-    241:255:java.lang.String getOpenUDID(android.content.Context) -> f
-    264:303:java.lang.String getBuildUUID(android.content.Context) -> g
-    307:314:java.lang.String convertBytesToUUID(byte[],boolean) -> a
-    378:389:java.lang.Object getAccessibleObject(java.lang.reflect.Field,java.lang.Object) -> a
-    393:403:java.lang.reflect.Field getAccessibleField(java.lang.Class,java.lang.Class) -> a
-    407:415:java.lang.reflect.Constructor getConstructor(java.lang.String,java.lang.String[]) -> a
-    435:449:boolean isPhoneRooted() -> g
-    453:464:int mpHash(java.lang.String) -> c
-    480:481:boolean checkPermission(android.content.Context,java.lang.String) -> a
-    500:505:boolean isSupportLibAvailable() -> e
-    510:515:boolean isGcmServicesAvailable() -> f
-    519:530:java.math.BigInteger hashFnv1A(byte[]) -> a
-    534:542:boolean isServiceAvailable(android.content.Context,java.lang.Class) -> a
-    546:569:org.json.JSONObject wrapExtras(android.os.Bundle) -> a
-    574:574:boolean isAppDebuggable(android.content.Context) -> e
-    586:595:org.json.JSONObject enforceAttributeConstraints(java.util.Map) -> a
-    598:598:java.lang.Boolean setCheckedAttribute(org.json.JSONObject,java.lang.String,java.lang.Object,boolean) -> a
-    602:641:java.lang.Boolean setCheckedAttribute(org.json.JSONObject,java.lang.String,java.lang.Object,java.lang.Boolean,boolean) -> a
-    645:652:java.lang.String findCaseInsensitiveKey(org.json.JSONObject,java.lang.String) -> a
 com.mparticle.internal.IMPApiClient -> com.mparticle.internal.f:
     void fetchConfig() -> a
     int sendMessageBatch(java.lang.String) -> a
@@ -6306,8 +6556,8 @@ com.mparticle.internal.MPLocationListener -> com.mparticle.internal.j:
     34:34:void onProviderEnabled(java.lang.String) -> onProviderEnabled
     39:39:void onProviderDisabled(java.lang.String) -> onProviderDisabled
 com.mparticle.internal.MPMessage -> com.mparticle.internal.k:
-    70:74:long getTimestamp() -> a
-    78:81:java.lang.String getSessionId() -> b
+    75:79:long getTimestamp() -> a
+    83:86:java.lang.String getSessionId() -> b
 com.mparticle.internal.MParticleApiClient -> com.mparticle.internal.l:
     java.lang.String SECURE_SERVICE_SCHEME -> a
     java.lang.String API_HOST -> b
@@ -6392,42 +6642,43 @@ com.mparticle.internal.MessageManager -> com.mparticle.internal.q:
     com.mparticle.MParticle$InstallType mInstallType -> n
     android.telephony.TelephonyManager sTelephonyManager -> o
     boolean mFirstRun -> p
-    151:176:org.json.JSONObject getStateInfo() -> a
-    210:255:com.mparticle.internal.MPMessage startSession() -> b
-    268:268:int getCurrentSessionCounter() -> i
-    273:282:void updateSessionEnd(com.mparticle.internal.Session) -> a
-    285:288:void endSession(com.mparticle.internal.Session) -> b
-    291:317:com.mparticle.internal.MPMessage logEvent(com.mparticle.MPEvent,java.lang.String) -> a
-    325:342:com.mparticle.internal.MPMessage logScreen(java.lang.String,org.json.JSONObject,boolean) -> a
-    346:363:com.mparticle.internal.MPMessage logBreadcrumb(java.lang.String) -> a
-    368:376:com.mparticle.internal.MPMessage optOut(long,boolean) -> a
-    381:381:com.mparticle.internal.MPMessage logErrorEvent(java.lang.String,java.lang.Throwable,org.json.JSONObject) -> a
-    386:414:com.mparticle.internal.MPMessage logErrorEvent(java.lang.String,java.lang.Throwable,org.json.JSONObject,boolean) -> a
-    418:437:com.mparticle.internal.MPMessage logNetworkPerformanceEvent(long,java.lang.String,java.lang.String,long,long,long,java.lang.String) -> a
-    442:457:com.mparticle.internal.MPMessage setPushRegistrationId(java.lang.String,boolean) -> a
-    461:473:void setSessionAttributes() -> c
-    479:481:void startUploadLoop() -> d
-    488:490:void setLocation(android.location.Location) -> a
-    498:574:com.mparticle.internal.MPMessage logStateTransition(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,long,long,int) -> a
-    607:625:void logNotification(com.mparticle.messaging.ProviderCloudMessage,java.lang.String) -> a
-    630:662:void logNotification(int,java.lang.String,com.mparticle.messaging.CloudAction,java.lang.String,int) -> a
-    667:677:void logProfileAction(java.lang.String) -> b
-    681:694:com.mparticle.internal.MPMessage createMessageSessionEnd(java.lang.String,long,long,long,org.json.JSONObject) -> a
-    699:699:java.lang.String getApiKey() -> e
-    705:730:void delayedStart() -> f
-    734:736:void endUploadLoop() -> g
-    740:744:void checkForTrigger(com.mparticle.internal.MPMessage) -> a
-    747:748:void refreshConfiguration() -> h
-    755:760:void saveGcmMessage(com.mparticle.messaging.MPCloudNotificationMessage,java.lang.String) -> a
-    763:768:void saveGcmMessage(com.mparticle.messaging.ProviderCloudMessage,java.lang.String) -> b
-    792:805:void setDataConnection(android.net.NetworkInfo) -> a
-    43:43:double access$102(double) -> a
+    152:177:org.json.JSONObject getStateInfo() -> a
+    211:256:com.mparticle.internal.MPMessage startSession() -> b
+    269:269:int getCurrentSessionCounter() -> i
+    274:283:void updateSessionEnd(com.mparticle.internal.Session) -> a
+    286:289:void endSession(com.mparticle.internal.Session) -> b
+    292:318:com.mparticle.internal.MPMessage logEvent(com.mparticle.MPEvent,java.lang.String) -> a
+    322:334:com.mparticle.internal.MPMessage logEvent(com.mparticle.commerce.CommerceEvent) -> a
+    342:359:com.mparticle.internal.MPMessage logScreen(java.lang.String,org.json.JSONObject,boolean) -> a
+    363:380:com.mparticle.internal.MPMessage logBreadcrumb(java.lang.String) -> a
+    385:393:com.mparticle.internal.MPMessage optOut(long,boolean) -> a
+    398:398:com.mparticle.internal.MPMessage logErrorEvent(java.lang.String,java.lang.Throwable,org.json.JSONObject) -> a
+    403:431:com.mparticle.internal.MPMessage logErrorEvent(java.lang.String,java.lang.Throwable,org.json.JSONObject,boolean) -> a
+    435:454:com.mparticle.internal.MPMessage logNetworkPerformanceEvent(long,java.lang.String,java.lang.String,long,long,long,java.lang.String) -> a
+    459:474:com.mparticle.internal.MPMessage setPushRegistrationId(java.lang.String,boolean) -> a
+    478:490:void setSessionAttributes() -> c
+    496:498:void startUploadLoop() -> d
+    505:507:void setLocation(android.location.Location) -> a
+    515:591:com.mparticle.internal.MPMessage logStateTransition(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,long,long,int) -> a
+    624:642:void logNotification(com.mparticle.messaging.ProviderCloudMessage,java.lang.String) -> a
+    647:679:void logNotification(int,java.lang.String,com.mparticle.messaging.CloudAction,java.lang.String,int) -> a
+    684:694:void logProfileAction(java.lang.String) -> b
+    698:711:com.mparticle.internal.MPMessage createMessageSessionEnd(java.lang.String,long,long,long,org.json.JSONObject) -> a
+    716:716:java.lang.String getApiKey() -> e
+    722:747:void delayedStart() -> f
+    751:753:void endUploadLoop() -> g
+    757:761:void checkForTrigger(com.mparticle.internal.MPMessage) -> a
+    764:765:void refreshConfiguration() -> h
+    772:777:void saveGcmMessage(com.mparticle.messaging.MPCloudNotificationMessage,java.lang.String) -> a
+    780:785:void saveGcmMessage(com.mparticle.messaging.ProviderCloudMessage,java.lang.String) -> b
+    809:822:void setDataConnection(android.net.NetworkInfo) -> a
+    44:44:double access$102(double) -> a
 com.mparticle.internal.MessageManager$InfluenceOpenMessage -> com.mparticle.internal.q$a:
     long mTimeStamp -> a
     long mTimeout -> b
 com.mparticle.internal.MessageManager$StatusBroadcastReceiver -> com.mparticle.internal.q$b:
     com.mparticle.internal.MessageManager this$0 -> a
-    774:788:void onReceive(android.content.Context,android.content.Intent) -> onReceive
+    791:805:void onReceive(android.content.Context,android.content.Intent) -> onReceive
 com.mparticle.internal.MessageManagerCallbacks -> com.mparticle.internal.r:
     com.mparticle.internal.MPMessage createMessageSessionEnd(java.lang.String,long,long,long,org.json.JSONObject) -> a
     java.lang.String getApiKey() -> e
@@ -6505,7 +6756,12 @@ com.mparticle.internal.UploadHandler -> com.mparticle.internal.v:
     379:384:void dbInsertUpload(com.mparticle.internal.MessageBatch) -> a
     442:443:void fetchSegments(long,java.lang.String,com.mparticle.segmentation.SegmentListener) -> a
     453:462:org.json.JSONObject getAppInfo() -> b
-com.mparticle.internal.embedded.EmbeddedAdjust -> com.mparticle.internal.embedded.a:
+com.mparticle.internal.embedded.ClientSideForwarder -> com.mparticle.internal.embedded.a:
+    void logEvent(com.mparticle.MPEvent) -> a
+    void logScreen(java.lang.String,java.util.Map) -> a
+com.mparticle.internal.embedded.ECommerceForwarder -> com.mparticle.internal.embedded.b:
+    void logEvent(com.mparticle.commerce.CommerceEvent) -> a
+com.mparticle.internal.embedded.EmbeddedAdjust -> com.mparticle.internal.embedded.c:
     boolean initialized -> g
     java.util.concurrent.atomic.AtomicBoolean hasResumed -> h
     boolean referrerSet -> i
@@ -6517,39 +6773,42 @@ com.mparticle.internal.embedded.EmbeddedAdjust -> com.mparticle.internal.embedde
     94:96:void onActivityPaused(android.app.Activity,int) -> e
     101:101:void onActivityStopped(android.app.Activity,int) -> b
     108:108:void onActivityStarted(android.app.Activity,int) -> a
-com.mparticle.internal.embedded.EmbeddedAppboy -> com.mparticle.internal.embedded.b:
+com.mparticle.internal.embedded.EmbeddedAppboy -> com.mparticle.internal.embedded.d:
     boolean started -> g
     boolean running -> h
     boolean pushEnabled -> i
-    49:49:java.lang.String getName() -> b
-    54:54:boolean isOriginator(java.lang.String) -> a
-    59:75:com.mparticle.internal.embedded.EmbeddedProvider update() -> a
-    81:81:void onActivityCreated(android.app.Activity,int) -> c
-    85:85:boolean isRunning() -> c
-    90:99:void logEvent(com.mparticle.MPEvent) -> a
-    103:106:void removeUserAttribute(java.lang.String) -> b
-    110:118:void setUserIdentity(java.lang.String,com.mparticle.MParticle$IdentityType) -> a
-    122:153:void setUserAttributes(org.json.JSONObject) -> a
-    157:180:void logTransaction(com.mparticle.MPProduct) -> a
-    184:187:void onActivityResumed(android.app.Activity,int) -> d
-    192:192:void onActivityPaused(android.app.Activity,int) -> e
-    196:200:void onActivityStopped(android.app.Activity,int) -> b
-    204:206:void onActivityStarted(android.app.Activity,int) -> a
-    210:214:boolean handleGcmMessage(android.content.Intent) -> a
-    220:220:void setPushNotificationIcon(int) -> setPushNotificationIcon
-    225:225:void setPushNotificationTitle(int) -> setPushNotificationTitle
-    230:230:void setPushSenderId(java.lang.String) -> setPushSenderId
-    235:235:void setPushSoundEnabled(boolean) -> setPushSoundEnabled
-    240:240:void setPushVibrationEnabled(boolean) -> setPushVibrationEnabled
-    244:245:void setPushRegistrationId(java.lang.String) -> setPushRegistrationId
-    35:35:java.util.List projectEvents(com.mparticle.MPEvent,boolean) -> a
-    35:35:java.util.List projectEvents(com.mparticle.MPEvent) -> b
-    35:35:void setRunning(boolean) -> a
-    35:35:boolean shouldSetIdentity(com.mparticle.MParticle$IdentityType) -> a
-    35:35:org.json.JSONObject filterAttributes(android.util.SparseBooleanArray,org.json.JSONObject) -> a
-    35:35:boolean shouldLogScreen(java.lang.String) -> c
-    35:35:boolean disabled() -> d
-com.mparticle.internal.embedded.EmbeddedComscore -> com.mparticle.internal.embedded.c:
+    52:52:java.lang.String getName() -> b
+    57:57:boolean isOriginator(java.lang.String) -> a
+    62:78:com.mparticle.internal.embedded.EmbeddedProvider update() -> a
+    84:84:void onActivityCreated(android.app.Activity,int) -> c
+    88:88:boolean isRunning() -> c
+    93:102:void logEvent(com.mparticle.MPEvent) -> a
+    107:107:void logScreen(java.lang.String,java.util.Map) -> a
+    112:130:void logEvent(com.mparticle.commerce.CommerceEvent) -> a
+    134:137:void removeUserAttribute(java.lang.String) -> b
+    141:149:void setUserIdentity(java.lang.String,com.mparticle.MParticle$IdentityType) -> a
+    153:184:void setUserAttributes(org.json.JSONObject) -> a
+    210:233:void logTransaction(com.mparticle.MPProduct) -> a
+    237:240:void onActivityResumed(android.app.Activity,int) -> d
+    245:245:void onActivityPaused(android.app.Activity,int) -> e
+    249:253:void onActivityStopped(android.app.Activity,int) -> b
+    257:259:void onActivityStarted(android.app.Activity,int) -> a
+    263:267:boolean handleGcmMessage(android.content.Intent) -> a
+    273:273:void setPushNotificationIcon(int) -> setPushNotificationIcon
+    278:278:void setPushNotificationTitle(int) -> setPushNotificationTitle
+    283:283:void setPushSenderId(java.lang.String) -> setPushSenderId
+    288:288:void setPushSoundEnabled(boolean) -> setPushSoundEnabled
+    293:293:void setPushVibrationEnabled(boolean) -> setPushVibrationEnabled
+    297:298:void setPushRegistrationId(java.lang.String) -> setPushRegistrationId
+    38:38:java.util.List projectEvents(com.mparticle.MPEvent,boolean) -> a
+    38:38:java.util.List projectEvents(com.mparticle.commerce.CommerceEvent) -> b
+    38:38:java.util.List projectEvents(com.mparticle.MPEvent) -> b
+    38:38:void setRunning(boolean) -> a
+    38:38:boolean shouldSetIdentity(com.mparticle.MParticle$IdentityType) -> a
+    38:38:org.json.JSONObject filterAttributes(android.util.SparseBooleanArray,org.json.JSONObject) -> a
+    38:38:boolean shouldLogScreen(java.lang.String) -> c
+    38:38:boolean disabled() -> d
+com.mparticle.internal.embedded.EmbeddedComscore -> com.mparticle.internal.embedded.e:
     java.lang.String clientId -> g
     java.lang.String publisherSecret -> h
     java.lang.String autoUpdateMode -> i
@@ -6567,79 +6826,87 @@ com.mparticle.internal.embedded.EmbeddedComscore -> com.mparticle.internal.embed
     187:187:void onActivityCreated(android.app.Activity,int) -> c
     192:192:void onActivityResumed(android.app.Activity,int) -> d
     196:196:void onActivityPaused(android.app.Activity,int) -> e
-com.mparticle.internal.embedded.EmbeddedForesee -> com.mparticle.internal.embedded.d:
+com.mparticle.internal.embedded.EmbeddedForesee -> com.mparticle.internal.embedded.f:
     39:39:java.lang.String getName() -> b
     44:44:boolean isOriginator(java.lang.String) -> a
     49:49:com.mparticle.internal.embedded.EmbeddedProvider update() -> a
     59:113:android.net.Uri getSurveyUrl(org.json.JSONObject) -> b
-com.mparticle.internal.embedded.EmbeddedKahuna -> com.mparticle.internal.embedded.e:
+com.mparticle.internal.embedded.EmbeddedKahuna -> com.mparticle.internal.embedded.g:
     com.kahuna.sdk.KahunaPushReceiver sReceiver -> g
     boolean initialized -> h
     boolean sendTransactionData -> i
-    47:64:com.mparticle.internal.embedded.EmbeddedProvider update() -> a
-    68:74:void registerForPush() -> f
-    78:78:java.lang.String getName() -> b
-    83:83:boolean isOriginator(java.lang.String) -> a
-    88:102:void logEvent(com.mparticle.MPEvent) -> a
-    106:110:void logTransaction(com.mparticle.MPProduct) -> a
-    115:115:void logScreen(java.lang.String,java.util.Map) -> a
-    120:120:void setLocation(android.location.Location) -> a
-    124:139:void setUserAttributes(org.json.JSONObject) -> a
-    142:149:void setUserAttributes(java.util.Map) -> a
-    152:159:java.lang.String convertMpKeyToKahuna(java.lang.String) -> d
-    166:166:void removeUserAttribute(java.lang.String) -> b
-    171:192:void setUserIdentity(java.lang.String,com.mparticle.MParticle$IdentityType) -> a
-    201:216:void handleIntent(android.content.Intent) -> a_
-    230:231:void logout() -> e
-    237:238:void onActivityCreated(android.app.Activity,int) -> c
-    243:243:void onActivityResumed(android.app.Activity,int) -> d
-    248:248:void onActivityPaused(android.app.Activity,int) -> e
-    252:254:void onActivityStopped(android.app.Activity,int) -> b
-    258:260:void onActivityStarted(android.app.Activity,int) -> a
-com.mparticle.internal.embedded.EmbeddedKahuna$1 -> com.mparticle.internal.embedded.e$1:
+    67:84:com.mparticle.internal.embedded.EmbeddedProvider update() -> a
+    88:94:void registerForPush() -> f
+    132:132:java.lang.String getName() -> b
+    137:137:boolean isOriginator(java.lang.String) -> a
+    142:156:void logEvent(com.mparticle.MPEvent) -> a
+    160:164:void logTransaction(com.mparticle.MPProduct) -> a
+    169:169:void logScreen(java.lang.String,java.util.Map) -> a
+    174:174:void setLocation(android.location.Location) -> a
+    178:193:void setUserAttributes(org.json.JSONObject) -> a
+    205:212:java.lang.String convertMpKeyToKahuna(java.lang.String) -> d
+    219:219:void removeUserAttribute(java.lang.String) -> b
+    224:245:void setUserIdentity(java.lang.String,com.mparticle.MParticle$IdentityType) -> a
+    254:269:void handleIntent(android.content.Intent) -> a_
+    283:284:void logout() -> e
+    289:290:void onActivityCreated(android.app.Activity,int) -> c
+    295:295:void onActivityResumed(android.app.Activity,int) -> d
+    300:300:void onActivityPaused(android.app.Activity,int) -> e
+    304:306:void onActivityStopped(android.app.Activity,int) -> b
+    310:312:void onActivityStarted(android.app.Activity,int) -> a
+    316:361:void logEvent(com.mparticle.commerce.CommerceEvent) -> a
+com.mparticle.internal.embedded.EmbeddedKahuna$1 -> com.mparticle.internal.embedded.g$1:
     int[] $SwitchMap$com$mparticle$MParticle$IdentityType -> a
-com.mparticle.internal.embedded.EmbeddedKitFactory -> com.mparticle.internal.embedded.f:
-com.mparticle.internal.embedded.EmbeddedKitManager -> com.mparticle.internal.embedded.g:
+com.mparticle.internal.embedded.EmbeddedKitFactory -> com.mparticle.internal.embedded.h:
+com.mparticle.internal.embedded.EmbeddedKitManager -> com.mparticle.internal.embedded.i:
     com.mparticle.internal.embedded.EmbeddedKitFactory ekFactory -> b
     com.mparticle.internal.ConfigManager mConfigManager -> c
     com.mparticle.internal.AppStateManager mAppStateManager -> d
     java.util.concurrent.ConcurrentHashMap providers -> e
     android.content.Context context -> a
-    43:87:void updateKits(org.json.JSONArray) -> a
-    90:103:void syncUserIdentities(com.mparticle.internal.embedded.EmbeddedProvider) -> a
-    106:124:void logEvent(com.mparticle.MPEvent) -> a
-    127:136:void logTransaction(com.mparticle.MPProduct) -> a
-    139:157:void logScreen(java.lang.String,java.util.Map) -> a
-    160:169:void setLocation(android.location.Location) -> a
-    172:181:void setUserAttributes(org.json.JSONObject) -> a
-    184:193:void removeUserAttribute(java.lang.String) -> a
-    196:205:void setUserIdentity(java.lang.String,com.mparticle.MParticle$IdentityType) -> a
-    208:217:void logout() -> a
-    220:229:void removeUserIdentity(java.lang.String) -> b
-    232:241:void handleIntent(android.content.Intent) -> a
-    244:253:void startSession() -> b
-    256:265:void endSession() -> c
-    269:280:void onActivityCreated(android.app.Activity,int) -> c
-    284:295:void onActivityResumed(android.app.Activity,int) -> d
-    299:310:void onActivityPaused(android.app.Activity,int) -> e
-    314:325:void onActivityStopped(android.app.Activity,int) -> b
-    329:340:void onActivityStarted(android.app.Activity,int) -> a
-    343:348:boolean isEmbeddedKitUri(java.lang.String) -> c
-    352:368:java.lang.String getActiveModuleIds() -> d
-    373:377:android.net.Uri getSurveyUrl(int,org.json.JSONObject) -> a
-    386:386:com.mparticle.internal.ConfigManager getConfigurationManager() -> e
-    390:390:com.mparticle.internal.AppStateManager getAppStateManager() -> f
-    394:395:void setConfigManager(com.mparticle.internal.ConfigManager) -> a
-    398:399:void setAppStateManager(com.mparticle.internal.AppStateManager) -> a
-    402:416:boolean handleGcmMessage(android.content.Intent) -> b
-    420:421:boolean isProviderActive(int) -> a
-com.mparticle.internal.embedded.EmbeddedKochava -> com.mparticle.internal.embedded.h:
-    36:36:com.mparticle.internal.embedded.EmbeddedProvider update() -> a
-    46:46:java.lang.String getName() -> b
-    51:51:boolean isOriginator(java.lang.String) -> a
-    56:56:void setLocation(android.location.Location) -> a
-    65:65:void setUserIdentity(java.lang.String,com.mparticle.MParticle$IdentityType) -> a
-com.mparticle.internal.embedded.EmbeddedProvider -> com.mparticle.internal.embedded.i:
+    45:89:void updateKits(org.json.JSONArray) -> a
+    92:105:void syncUserIdentities(com.mparticle.internal.embedded.EmbeddedProvider) -> a
+    108:126:void logEvent(com.mparticle.MPEvent) -> a
+    129:163:void logCommerceEvent(com.mparticle.commerce.CommerceEvent) -> a
+    167:176:void logTransaction(com.mparticle.MPEvent) -> b
+    179:197:void logScreen(java.lang.String,java.util.Map) -> a
+    200:209:void setLocation(android.location.Location) -> a
+    212:221:void setUserAttributes(org.json.JSONObject) -> a
+    224:233:void removeUserAttribute(java.lang.String) -> a
+    236:245:void setUserIdentity(java.lang.String,com.mparticle.MParticle$IdentityType) -> a
+    248:257:void logout() -> a
+    260:269:void removeUserIdentity(java.lang.String) -> b
+    272:281:void handleIntent(android.content.Intent) -> a
+    284:293:void startSession() -> b
+    296:305:void endSession() -> c
+    309:320:void onActivityCreated(android.app.Activity,int) -> c
+    324:335:void onActivityResumed(android.app.Activity,int) -> d
+    339:350:void onActivityPaused(android.app.Activity,int) -> e
+    354:365:void onActivityStopped(android.app.Activity,int) -> b
+    369:380:void onActivityStarted(android.app.Activity,int) -> a
+    383:388:boolean isEmbeddedKitUri(java.lang.String) -> c
+    392:408:java.lang.String getActiveModuleIds() -> d
+    413:417:android.net.Uri getSurveyUrl(int,org.json.JSONObject) -> a
+    426:426:com.mparticle.internal.ConfigManager getConfigurationManager() -> e
+    430:430:com.mparticle.internal.AppStateManager getAppStateManager() -> f
+    434:435:void setConfigManager(com.mparticle.internal.ConfigManager) -> a
+    438:439:void setAppStateManager(com.mparticle.internal.AppStateManager) -> a
+    442:456:boolean handleGcmMessage(android.content.Intent) -> b
+    460:461:boolean isProviderActive(int) -> a
+com.mparticle.internal.embedded.EmbeddedKochava -> com.mparticle.internal.embedded.j:
+    com.kochava.android.tracker.Feature feature -> g
+    30:35:com.mparticle.internal.embedded.EmbeddedProvider update() -> a
+    40:40:java.lang.String getName() -> b
+    45:45:boolean isOriginator(java.lang.String) -> a
+    50:55:void setLocation(android.location.Location) -> a
+    59:75:void setUserIdentity(java.lang.String,com.mparticle.MParticle$IdentityType) -> a
+    80:81:void onActivityCreated(android.app.Activity,int) -> c
+    85:86:void onActivityResumed(android.app.Activity,int) -> d
+    90:90:void onActivityPaused(android.app.Activity,int) -> e
+    94:95:void onActivityStopped(android.app.Activity,int) -> b
+    99:100:void onActivityStarted(android.app.Activity,int) -> a
+    103:116:void createKochava(android.app.Activity) -> a
+com.mparticle.internal.embedded.EmbeddedProvider -> com.mparticle.internal.embedded.k:
     com.mparticle.internal.embedded.EmbeddedKitManager mEkManager -> a
     java.util.HashMap properties -> b
     android.util.SparseBooleanArray mTypeFilters -> g
@@ -6649,74 +6916,119 @@ com.mparticle.internal.embedded.EmbeddedProvider -> com.mparticle.internal.embed
     android.util.SparseBooleanArray mScreenAttributeFilters -> d
     android.util.SparseBooleanArray mUserIdentityFilters -> j
     android.util.SparseBooleanArray mUserAttributeFilters -> e
-    int lowBracket -> k
-    int highBracket -> l
+    android.util.SparseBooleanArray mCommerceAttributeFilters -> k
+    android.util.SparseBooleanArray mCommerceEntityFilters -> l
+    java.util.Map mCommerceEntityAttributeFilters -> m
+    int lowBracket -> n
+    int highBracket -> o
     android.content.Context context -> f
-    boolean mRunning -> m
-    java.util.LinkedList projectionList -> n
-    com.mparticle.internal.embedded.Projection defaultProjection -> o
-    com.mparticle.internal.embedded.Projection defaultScreenProjection -> p
-    73:145:com.mparticle.internal.embedded.EmbeddedProvider parseConfig(org.json.JSONObject) -> c
-    149:158:android.util.SparseBooleanArray convertToSparseArray(org.json.JSONObject) -> b
-    170:170:boolean disabled() -> d
-    180:181:boolean shouldLogEvent(com.mparticle.MPEvent) -> c
-    185:189:boolean shouldLogScreen(java.lang.String) -> c
-    193:211:java.util.Map filterEventAttributes(com.mparticle.MParticle$EventType,java.lang.String,android.util.SparseBooleanArray,java.util.Map) -> a
+    boolean mRunning -> p
+    java.util.LinkedList projectionList -> q
+    com.mparticle.internal.embedded.Projection defaultProjection -> r
+    com.mparticle.internal.embedded.Projection defaultScreenProjection -> s
+    com.mparticle.internal.embedded.Projection defaultCommerceProjection -> t
+    87:182:com.mparticle.internal.embedded.EmbeddedProvider parseConfig(org.json.JSONObject) -> c
+    186:195:android.util.SparseBooleanArray convertToSparseArray(org.json.JSONObject) -> b
+    207:207:boolean disabled() -> d
+    217:218:boolean shouldLogEvent(com.mparticle.MPEvent) -> c
+    222:230:com.mparticle.commerce.CommerceEvent filterCommerceEvent(com.mparticle.commerce.CommerceEvent) -> c
+    234:311:com.mparticle.commerce.CommerceEvent filterCommerceEntityAttributes(com.mparticle.commerce.CommerceEvent) -> a
+    315:335:com.mparticle.commerce.CommerceEvent filterCommerceEntities(com.mparticle.commerce.CommerceEvent) -> d
+    339:392:com.mparticle.commerce.CommerceEvent filterCommerceEventAttributes(com.mparticle.commerce.CommerceEvent) -> e
+    396:400:boolean shouldLogScreen(java.lang.String) -> c
+    404:422:java.util.Map filterEventAttributes(com.mparticle.MParticle$EventType,java.lang.String,android.util.SparseBooleanArray,java.util.Map) -> a
     java.lang.String getName() -> b
     boolean isOriginator(java.lang.String) -> a
     com.mparticle.internal.embedded.EmbeddedProvider update() -> a
-    222:239:org.json.JSONObject filterAttributes(android.util.SparseBooleanArray,org.json.JSONObject) -> a
-    245:245:void logEvent(com.mparticle.MPEvent) -> a
-    249:249:void logTransaction(com.mparticle.MPProduct) -> a
-    253:253:void logScreen(java.lang.String,java.util.Map) -> a
-    257:257:void setLocation(android.location.Location) -> a
-    261:261:void setUserAttributes(org.json.JSONObject) -> a
-    265:265:void removeUserAttribute(java.lang.String) -> b
-    269:269:void setUserIdentity(java.lang.String,com.mparticle.MParticle$IdentityType) -> a
-    273:273:void logout() -> e
-    281:281:void handleIntent(android.content.Intent) -> a_
-    292:292:boolean isRunning() -> c
-    296:296:boolean shouldSetIdentity(com.mparticle.MParticle$IdentityType) -> a
-    300:301:void setRunning(boolean) -> a
-    304:304:java.util.List projectEvents(com.mparticle.MPEvent) -> b
-    308:338:java.util.List projectEvents(com.mparticle.MPEvent,boolean) -> a
-com.mparticle.internal.embedded.EmbeddedProvider$MPEventWrapper -> com.mparticle.internal.embedded.i$a:
-    com.mparticle.MPEvent mEvent -> a
-    boolean mIsScreenEvent -> b
-    java.util.Map attributeHashes -> c
-    352:359:java.util.Map getAttributeHashes() -> a
-    363:363:com.mparticle.MPEvent getEvent() -> b
-    367:368:void setIsScreenEvent(boolean) -> a
-    379:382:int getEventHash() -> c
-    387:387:int getMessageType() -> d
-com.mparticle.internal.embedded.ISurveyProvider -> com.mparticle.internal.embedded.j:
+    433:450:org.json.JSONObject filterAttributes(android.util.SparseBooleanArray,org.json.JSONObject) -> a
+    457:457:void logTransaction(com.mparticle.MPProduct) -> a
+    462:462:void setLocation(android.location.Location) -> a
+    466:466:void setUserAttributes(org.json.JSONObject) -> a
+    470:470:void removeUserAttribute(java.lang.String) -> b
+    474:474:void setUserIdentity(java.lang.String,com.mparticle.MParticle$IdentityType) -> a
+    478:478:void logout() -> e
+    486:486:void handleIntent(android.content.Intent) -> a_
+    497:497:boolean isRunning() -> c
+    501:501:boolean shouldSetIdentity(com.mparticle.MParticle$IdentityType) -> a
+    505:506:void setRunning(boolean) -> a
+    509:509:java.util.List projectEvents(com.mparticle.MPEvent) -> b
+    513:531:java.util.List projectEvents(com.mparticle.commerce.CommerceEvent) -> b
+    535:564:java.util.List projectEvents(com.mparticle.MPEvent,boolean) -> a
+com.mparticle.internal.embedded.EventWrapper -> com.mparticle.internal.embedded.l:
+    java.util.Map attributeHashes -> a
+    int getMessageType() -> a
+    31:36:java.util.Map getHashes(java.lang.String,java.util.Map) -> a
+    java.util.Map$Entry findAttribute(java.lang.String,int,com.mparticle.commerce.Product,com.mparticle.commerce.Promotion) -> a
+    java.util.Map$Entry findAttribute(java.lang.String,java.lang.String,com.mparticle.commerce.Product,com.mparticle.commerce.Promotion) -> a
+com.mparticle.internal.embedded.EventWrapper$CommerceEventWrapper -> com.mparticle.internal.embedded.l$a:
+    com.mparticle.commerce.CommerceEvent mCommerceEvent -> b
+    java.util.Map eventFieldHashes -> c
+    java.util.HashMap eventFieldAttributes -> d
+    71:71:com.mparticle.commerce.CommerceEvent getEvent() -> b
+    75:76:void setEvent(com.mparticle.commerce.CommerceEvent) -> a
+    79:79:int getMessageType() -> a
+    83:83:int getEventHash() -> c
+    87:142:java.util.Map$Entry findAttribute(java.lang.String,int,com.mparticle.commerce.Product,com.mparticle.commerce.Promotion) -> a
+    147:193:java.util.Map$Entry findAttribute(java.lang.String,java.lang.String,com.mparticle.commerce.Product,com.mparticle.commerce.Promotion) -> a
+com.mparticle.internal.embedded.EventWrapper$MPEventWrapper -> com.mparticle.internal.embedded.l$b:
+    com.mparticle.MPEvent mEvent -> b
+    boolean mScreenEvent -> c
+    225:225:com.mparticle.MPEvent getEvent() -> b
+    229:232:int getEventTypeOrdinal() -> d
+    237:240:int getEventHash() -> c
+    245:248:int getMessageType() -> a
+    253:262:java.util.Map$Entry findAttribute(java.lang.String,java.lang.String,com.mparticle.commerce.Product,com.mparticle.commerce.Promotion) -> a
+    266:272:java.util.Map$Entry findAttribute(java.lang.String,int,com.mparticle.commerce.Product,com.mparticle.commerce.Promotion) -> a
+com.mparticle.internal.embedded.ISurveyProvider -> com.mparticle.internal.embedded.m:
     android.net.Uri getSurveyUrl(org.json.JSONObject) -> b
-com.mparticle.internal.embedded.Projection -> com.mparticle.internal.embedded.k:
+com.mparticle.internal.embedded.Projection -> com.mparticle.internal.embedded.n:
     int mMessageType -> a
-    java.lang.String mMatchType -> b
-    java.lang.String mEventName -> c
-    java.lang.String mAttributeKey -> d
-    java.lang.String mAttributeValue -> e
-    int mMaxCustomParams -> i
-    boolean mAppendUnmappedAsIs -> j
-    boolean mIsDefault -> f
-    java.lang.String mProjectedEventName -> k
-    java.util.List mAttributeProjectionList -> l
-    java.util.List mStaticAttributeProjectionList -> m
-    java.util.List mRequiredAttributeProjectionList -> n
-    int mEventHash -> g
-    com.mparticle.internal.embedded.Projection$AttributeProjection nameFieldProjection -> h
-    153:244:com.mparticle.MPEvent project(com.mparticle.internal.embedded.EmbeddedProvider$MPEventWrapper) -> a
-com.mparticle.internal.embedded.Projection$AttributeProjection -> com.mparticle.internal.embedded.k$a:
+    java.lang.String mMatchType -> c
+    java.lang.String mEventName -> d
+    java.lang.String mAttributeKey -> e
+    java.lang.String mAttributeValue -> f
+    int mMaxCustomParams -> g
+    boolean mAppendUnmappedAsIs -> h
+    boolean mIsDefault -> b
+    java.lang.String mProjectedEventName -> i
+    java.util.List mStaticAttributeMapList -> j
+    java.util.List mRequiredAttributeMapList -> k
+    int mEventHash -> l
+    boolean isSelectorLast -> m
+    com.mparticle.internal.embedded.Projection$AttributeMap nameFieldProjection -> n
+    java.lang.String commerceMatchProperty -> o
+    java.lang.String commerceMatchPropertyName -> p
+    java.lang.String commerceMatchPropertyValue -> q
+    int mOutboundMessageType -> r
+    155:173:boolean isMatch(com.mparticle.internal.embedded.EventWrapper) -> a
+    243:269:com.mparticle.commerce.CommerceEvent matchPromotionFields(com.mparticle.commerce.CommerceEvent) -> a
+    274:301:com.mparticle.commerce.CommerceEvent matchProductFields(com.mparticle.commerce.CommerceEvent) -> b
+    306:330:com.mparticle.commerce.CommerceEvent matchProductAttributes(com.mparticle.commerce.CommerceEvent) -> c
+    335:346:boolean matchCommerceAttributes(com.mparticle.commerce.CommerceEvent) -> d
+    350:388:com.mparticle.internal.embedded.Projection$ProjectionResult projectMPEvent(com.mparticle.MPEvent) -> a
+    391:463:java.util.List project(com.mparticle.internal.embedded.EventWrapper$CommerceEventWrapper) -> a
+    467:477:java.util.List project(com.mparticle.internal.embedded.EventWrapper$MPEventWrapper) -> a
+    482:507:boolean mapAttributes(java.util.List,com.mparticle.internal.embedded.EventWrapper,java.util.Map,java.util.Set,com.mparticle.commerce.Product,com.mparticle.commerce.Promotion) -> a
+    511:548:com.mparticle.internal.embedded.Projection$ProjectionResult projectCommerceEvent(com.mparticle.internal.embedded.EventWrapper$CommerceEventWrapper,com.mparticle.commerce.Product,com.mparticle.commerce.Promotion) -> a
+com.mparticle.internal.embedded.Projection$1 -> com.mparticle.internal.embedded.n$1:
+    123:123:int compare(java.lang.Object,java.lang.Object) -> compare
+com.mparticle.internal.embedded.Projection$AttributeMap -> com.mparticle.internal.embedded.n$a:
     java.lang.String mProjectedAttributeName -> a
     java.lang.String mValue -> b
-    int mDataType -> e
+    int mDataType -> f
     java.lang.String mMatchType -> c
     boolean mIsRequired -> d
-    268:268:boolean equals(java.lang.Object) -> equals
-    273:273:java.lang.String toString() -> toString
-    281:301:boolean matchesDataType(java.lang.String) -> a
-com.mparticle.internal.embedded.PushProvider -> com.mparticle.internal.embedded.l:
+    java.lang.String mLocation -> e
+    579:579:boolean equals(java.lang.Object) -> equals
+    584:584:java.lang.String toString() -> toString
+    592:612:boolean matchesDataType(java.lang.String) -> a
+com.mparticle.internal.embedded.Projection$ProjectionResult -> com.mparticle.internal.embedded.n$b:
+    com.mparticle.MPEvent mEvent -> a
+    com.mparticle.commerce.CommerceEvent mCommerceEvent -> b
+    632:632:com.mparticle.MPEvent getMPEvent() -> a
+    636:636:com.mparticle.commerce.CommerceEvent getCommerceEvent() -> b
+    617:617:com.mparticle.commerce.CommerceEvent access$002(com.mparticle.internal.embedded.Projection$ProjectionResult,com.mparticle.commerce.CommerceEvent) -> a
+com.mparticle.internal.embedded.PushProvider -> com.mparticle.internal.embedded.o:
     boolean handleGcmMessage(android.content.Intent) -> a
 com.mparticle.internal.embedded.adjust.sdk.ActivityHandler -> com.mparticle.internal.embedded.adjust.sdk.ActivityHandler:
     long TIMER_INTERVAL -> TIMER_INTERVAL

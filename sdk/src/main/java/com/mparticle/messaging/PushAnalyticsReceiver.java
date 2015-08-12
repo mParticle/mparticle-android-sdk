@@ -29,9 +29,7 @@ import com.mparticle.MPService;
 public class PushAnalyticsReceiver extends BroadcastReceiver {
     private Context mContext = null;
 
-    /**
-     * @hide
-     */
+
     @Override
     public final void onReceive(Context context, Intent intent) {
         mContext = context;
