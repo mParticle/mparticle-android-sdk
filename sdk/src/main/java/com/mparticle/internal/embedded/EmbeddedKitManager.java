@@ -131,8 +131,7 @@ public class EmbeddedKitManager implements MPActivityCallbacks {
                 if (provider instanceof ClientSideForwarder && !provider.disabled()) {
                     CommerceEvent filteredEvent = provider.filterCommerceEvent(event);
                     if (filteredEvent != null) {
-                        if (provider instanceof ECommerceForwarder
-                                && CommerceEventUtil.getEventType(filteredEvent) != Constants.Commerce.EVENT_TYPE_IMPRESSION) {
+                        if (provider instanceof ECommerceForwarder) {
                             List<Projection.ProjectionResult> projectedEvents = provider.projectEvents(filteredEvent);
                             if (projectedEvents != null && projectedEvents.size() > 0) {
                                 for (int i = 0; i < projectedEvents.size(); i++) {

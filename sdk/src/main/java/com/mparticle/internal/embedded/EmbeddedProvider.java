@@ -510,6 +510,9 @@ abstract class EmbeddedProvider {
     }
 
     public List<Projection.ProjectionResult> projectEvents(CommerceEvent event) {
+        if (CommerceEventUtil.getEventType(event) == Constants.Commerce.EVENT_TYPE_IMPRESSION) {
+            return null;
+        }
         List<Projection.ProjectionResult> events = new LinkedList<Projection.ProjectionResult>();
         EventWrapper.CommerceEventWrapper wrapper = new EventWrapper.CommerceEventWrapper(event);
         for (int i = 0; i < projectionList.size(); i++) {
