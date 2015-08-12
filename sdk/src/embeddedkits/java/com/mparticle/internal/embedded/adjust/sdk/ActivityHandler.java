@@ -149,53 +149,77 @@ public class ActivityHandler extends HandlerThread implements IActivityHandler {
 
     @Override
     public void setEnabled(boolean enabled) {
-        if (enabled == this.enabled) {
-            if (enabled) {
-                logger.debug("Adjust already enabled");
-            } else {
-                logger.debug("Adjust already disabled");
-            }
+        if (!hasChangedState(isEnabled(), enabled,
+                "Adjust already enabled", "Adjust already disabled")) {
             return;
         }
+
         this.enabled = enabled;
-        if (activityState != null) {
+
+        if (activityState == null) {
+            trackSubsessionStart();
+        } else {
             activityState.enabled = enabled;
             writeActivityState();
         }
-        if (enabled) {
-            if (paused()) {
-                logger.info("Package and attribution handler remain paused due to the SDK is offline");
-            } else {
-                logger.info("Resuming package handler and attribution handler to enabled the SDK");
-            }
-            trackSubsessionStart();
-        } else {
-            logger.info("Pausing package handler and attribution handler to disable the SDK");
+
+        updateStatus(!enabled,
+                "Pausing package handler and attribution handler to disable the SDK",
+                "Package and attribution handler remain paused due to the SDK is offline",
+                "Resuming package handler and attribution handler to enabled the SDK");
+    }
+
+    private void updateStatus(boolean pausingState, String pausingMessage,
+                              String remainsPausedMessage, String unPausingMessage)
+    {
+        if (pausingState) {
+            logger.info(pausingMessage);
             trackSubsessionEnd();
+            return;
         }
+
+        if (paused()) {
+            logger.info(remainsPausedMessage);
+        } else {
+            logger.info(unPausingMessage);
+            trackSubsessionStart();
+        }
+    }
+
+    private boolean hasChangedState(boolean previousState, boolean newState,
+                                    String trueMessage, String falseMessage)
+    {
+        if (previousState != newState) {
+            return true;
+        }
+
+        if (previousState) {
+            logger.debug(trueMessage);
+        } else {
+            logger.debug(falseMessage);
+        }
+
+        return false;
     }
 
     @Override
     public void setOfflineMode(boolean offline) {
-        if (offline == this.offline) {
-            if (offline) {
-                logger.debug("Adjust already in offline mode");
-            } else {
-                logger.debug("Adjust already in online mode");
-            }
+        if (!hasChangedState(this.offline, offline,
+                "Adjust already in offline mode",
+                "Adjust already in online mode")) {
             return;
         }
+
         this.offline = offline;
-        if (offline) {
-            logger.info("Pausing package and attribution handler to put in offline mode");
-        } else {
-            if (paused()) {
-                logger.info("Package and attribution handler remain paused because the SDK is disabled");
-            } else {
-                logger.info("Resuming package handler and attribution handler to put in online mode");
-            }
+
+        if (activityState == null) {
+            trackSubsessionStart();
         }
-        updateStatus();
+
+        updateStatus(offline,
+                "Pausing package and attribution handler to put in offline mode",
+                "Package and attribution handler remain paused because the SDK is disabled",
+                "Resuming package handler and attribution handler to put in online mode");
     }
 
     @Override
@@ -483,6 +507,8 @@ public class ActivityHandler extends HandlerThread implements IActivityHandler {
     }
 
     private void checkAttributionState() {
+        if (!checkActivityState(activityState)) { return; }
+
         // if it's a new session
         if (activityState.subsessionCount <= 1) {
             return;
@@ -506,6 +532,7 @@ public class ActivityHandler extends HandlerThread implements IActivityHandler {
     }
 
     private void trackEventInternal(AdjustEvent event) {
+        if (!checkActivityState(activityState)) return;
         if (!isEnabled()) return;
         if (!checkEvent(event)) return;
 
@@ -545,7 +572,7 @@ public class ActivityHandler extends HandlerThread implements IActivityHandler {
             return;
         }
 
-        packageHandler.sendClickPackage(clickPackage);
+        packageHandler.addPackage(clickPackage);
     }
 
     private void readOpenUrlInternal(Uri url, long clickTime) {
@@ -560,7 +587,7 @@ public class ActivityHandler extends HandlerThread implements IActivityHandler {
             return;
         }
 
-        packageHandler.sendClickPackage(clickPackage);
+        packageHandler.addPackage(clickPackage);
     }
 
     private ActivityPackage buildQueryStringClickPackage(String queryString, String source, long clickTime) {
@@ -648,9 +675,6 @@ public class ActivityHandler extends HandlerThread implements IActivityHandler {
     }
 
     private void updateAttributionHandlerStatus() {
-        if (attributionHandler == null) {
-            return;
-        }
         if (paused()) {
             attributionHandler.pauseSending();
         } else {
@@ -659,9 +683,6 @@ public class ActivityHandler extends HandlerThread implements IActivityHandler {
     }
 
     private void updatePackageHandlerStatus() {
-        if (packageHandler == null) {
-            return;
-        }
         if (paused()) {
             packageHandler.pauseSending();
         } else {
@@ -692,6 +713,8 @@ public class ActivityHandler extends HandlerThread implements IActivityHandler {
     }
 
     private boolean updateActivityState(long now) {
+        if (!checkActivityState(activityState)) { return false; }
+
         long lastInterval = now - activityState.lastActivity;
         // ignore late updates
         if (lastInterval > SESSION_INTERVAL) {
@@ -778,6 +801,14 @@ public class ActivityHandler extends HandlerThread implements IActivityHandler {
             return false;
         }
 
+        return true;
+    }
+
+    private boolean checkActivityState(ActivityState activityState) {
+        if (activityState == null) {
+            logger.error("Missing activity state.");
+            return false;
+        }
         return true;
     }
 
