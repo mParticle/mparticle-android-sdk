@@ -48,4 +48,3 @@
       android:layout_marginRight="10.0dp"
       style="@style/Appboy.Cards.CaptionedImage.Domain"/>
 </merge>
-<!-- From: file:/Users/brianwheeler/appboy_code/android-sdk/build/appboy-android-sdk/android-sdk-ui/res/layout/com_appboy_captioned_image_card.xml -->

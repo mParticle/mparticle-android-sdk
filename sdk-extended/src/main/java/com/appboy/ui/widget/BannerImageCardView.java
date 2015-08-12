@@ -1,15 +1,15 @@
 package com.appboy.ui.widget;
 
 import android.content.Context;
-import android.util.Log;
+import com.appboy.support.AppboyLogger;
 import android.view.View;
 import android.widget.ImageView;
-
+import com.appboy.Appboy;
 import com.appboy.Constants;
 import com.appboy.models.cards.BannerImageCard;
-import com.mparticle.extended.R;
 import com.appboy.ui.actions.ActionFactory;
 import com.appboy.ui.actions.IAction;
+import com.mparticle.extended.R;
 
 public class BannerImageCardView  extends BaseCardView<BannerImageCard> {
   private final ImageView mImage;
@@ -57,7 +57,7 @@ public class BannerImageCardView  extends BaseCardView<BannerImageCard> {
         // because Banner Cards don't have read/unread indicators.  They are all images, so there's
         // no free space to put the indicator.
         if (mCardAction != null) {
-          Log.d(TAG, String.format("Logged click for card %s", card.getId()));
+          AppboyLogger.d(TAG, String.format("Logged click for card %s", card.getId()));
           card.logClick();
           mCardAction.execute(mContext);
         }

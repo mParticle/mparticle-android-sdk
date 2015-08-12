@@ -3,4 +3,3 @@
     android:id="@+id/tag"
     android:layout_width="match_parent"
     android:layout_height="0dp"/>
-<!-- From: file:/Users/brianwheeler/appboy_code/android-sdk/build/appboy-android-sdk/android-sdk-ui/res/layout/com_appboy_feed_header.xml -->

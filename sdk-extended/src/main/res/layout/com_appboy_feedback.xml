@@ -63,4 +63,4 @@
           style="@style/Appboy.Feedback.IsBugCheckBox"/>
     </LinearLayout>
   </ScrollView>
-</RelativeLayout><!-- From: file:/Users/brianwheeler/appboy_code/android-sdk/build/appboy-android-sdk/android-sdk-ui/res/layout/com_appboy_feedback.xml -->
+</RelativeLayout>

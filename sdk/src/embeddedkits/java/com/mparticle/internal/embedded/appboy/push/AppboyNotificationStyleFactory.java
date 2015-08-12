@@ -7,9 +7,8 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
 import android.util.DisplayMetrics;
-import android.util.Log;
+import com.appboy.support.AppboyLogger;
 import android.view.WindowManager;
-
 
 import com.appboy.Constants;
 import com.mparticle.internal.embedded.appboy.AppboyImageUtils;
@@ -32,7 +31,7 @@ public class AppboyNotificationStyleFactory {
 
     // Default style is BigTextStyle.
     if (style == null) {
-      Log.d(TAG, "Rendering push notification with BigTextStyle");
+      AppboyLogger.d(TAG, "Rendering push notification with BigTextStyle");
       style = AppboyNotificationStyleFactory.getBigTextNotificationStyle(notificationExtras);
     }
 
@@ -42,7 +41,7 @@ public class AppboyNotificationStyleFactory {
   /**
    * Returns a BigTextStyle notification style initialized with the content, big title, and big summary
    * specified in the notificationExtras and appboyExtras bundles.
-   *
+   * <p/>
    * If summary text exists, it will be shown in the expanded notification view.
    * If a title exists, it will override the default in expanded notification view.
    */
@@ -76,7 +75,7 @@ public class AppboyNotificationStyleFactory {
   /**
    * Returns a BigPictureStyle notification style initialized with the bitmap, big title, and big summary
    * specified in the notificationExtras and appboyExtras bundles.
-   *
+   * <p/>
    * If summary text exists, it will be shown in the expanded notification view.
    * If a title exists, it will override the default in expanded notification view.
    */
@@ -118,36 +117,48 @@ public class AppboyNotificationStyleFactory {
         try {
           imageBitmap = Bitmap.createScaledBitmap(imageBitmap, bigPictureWidthPixels, bigPictureHeightPixels, true);
         } catch (Exception e) {
-          Log.e(TAG, "Failed to scale image bitmap, using original.", e);
+          AppboyLogger.e(TAG, "Failed to scale image bitmap, using original.", e);
         }
       }
       if (imageBitmap == null) {
-        Log.i(TAG, "Bitmap download failed for push notification. No image will be included with the notification.");
+        AppboyLogger.i(TAG, "Bitmap download failed for push notification. No image will be included with the notification.");
         return null;
       }
 
-      String bigSummary = null;
-      String bigTitle = null;
-
-      if (notificationExtras.containsKey(Constants.APPBOY_PUSH_BIG_SUMMARY_TEXT_KEY)) {
-        bigSummary = notificationExtras.getString(Constants.APPBOY_PUSH_BIG_SUMMARY_TEXT_KEY);
-      }
-      if (notificationExtras.containsKey(Constants.APPBOY_PUSH_BIG_TITLE_TEXT_KEY)) {
-        bigTitle = notificationExtras.getString(Constants.APPBOY_PUSH_BIG_TITLE_TEXT_KEY);
-      }
-
       NotificationCompat.BigPictureStyle bigPictureNotificationStyle = new NotificationCompat.BigPictureStyle();
-      if (bigSummary != null) {
-        bigPictureNotificationStyle.setSummaryText(bigSummary);
-      }
-      if (bigTitle != null) {
-        bigPictureNotificationStyle.setBigContentTitle(bigTitle);
-      }
       bigPictureNotificationStyle.bigPicture(imageBitmap);
+      setBigPictureSummaryAndTitle(bigPictureNotificationStyle, notificationExtras);
+
       return bigPictureNotificationStyle;
     } catch (Exception e) {
-      Log.e(TAG, "Failed to create Big Picture Style.", e);
+      AppboyLogger.e(TAG, "Failed to create Big Picture Style.", e);
       return null;
+    }
+  }
+
+  static void setBigPictureSummaryAndTitle(NotificationCompat.BigPictureStyle bigPictureNotificationStyle, Bundle notificationExtras) {
+    String bigSummary = null;
+    String bigTitle = null;
+
+    if (notificationExtras.containsKey(Constants.APPBOY_PUSH_BIG_SUMMARY_TEXT_KEY)) {
+      bigSummary = notificationExtras.getString(Constants.APPBOY_PUSH_BIG_SUMMARY_TEXT_KEY);
+    }
+    if (notificationExtras.containsKey(Constants.APPBOY_PUSH_BIG_TITLE_TEXT_KEY)) {
+      bigTitle = notificationExtras.getString(Constants.APPBOY_PUSH_BIG_TITLE_TEXT_KEY);
+    }
+
+    if (bigSummary != null) {
+      bigPictureNotificationStyle.setSummaryText(bigSummary);
+    }
+    if (bigTitle != null) {
+      bigPictureNotificationStyle.setBigContentTitle(bigTitle);
+    }
+
+    // If summary is null (which we set to the subtext in setSummaryTextIfPresentAndSupported in AppboyNotificationUtils)
+    // and bigSummary is null, set the summary to the message.  Without this, the message would be blank in expanded mode.
+    String summaryText = notificationExtras.getString(Constants.APPBOY_PUSH_SUMMARY_TEXT_KEY);
+    if (summaryText == null && bigSummary == null) {
+      bigPictureNotificationStyle.setSummaryText(notificationExtras.getString(Constants.APPBOY_PUSH_CONTENT_KEY));
     }
   }
 }

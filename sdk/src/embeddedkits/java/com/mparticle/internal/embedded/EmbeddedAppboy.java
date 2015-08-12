@@ -38,7 +38,6 @@ import java.util.Map;
 public class EmbeddedAppboy extends EmbeddedProvider implements MPActivityCallbacks, PushProvider, MessagingConfigCallbacks, ClientSideForwarder, ECommerceForwarder {
     static final String APPBOY_KEY = "apiKey";
     public static final String PUSH_ENABLED = "push_enabled";
-    public static final String REGISTER_INAPP = "register_inapp";
     boolean started = false;
     boolean running = false;
     private boolean pushEnabled;

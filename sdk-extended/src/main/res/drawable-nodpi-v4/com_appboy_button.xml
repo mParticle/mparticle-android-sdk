@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-
-<selector xmlns:android="http://schemas.android.com/apk/res/android">
-  <item android:drawable="@drawable/com_appboy_button_disabled" android:state_enabled="false"/>
-  <item android:drawable="@drawable/com_appboy_button_pressed" android:state_pressed="true"/>
-  <item android:drawable="@drawable/com_appboy_button_normal"/>
-</selector><!-- From: file:/Users/brianwheeler/appboy_code/android-sdk/build/appboy-android-sdk/android-sdk-ui/res/drawable-nodpi/com_appboy_button.xml -->

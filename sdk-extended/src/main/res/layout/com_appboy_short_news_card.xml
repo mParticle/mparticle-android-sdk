@@ -46,4 +46,4 @@
       android:layout_alignLeft="@id/com_appboy_short_news_card_description"
       android:layout_marginRight="10.0dp"
       style="@style/Appboy.Cards.ShortNews.Domain"/>
-</merge><!-- From: file:/Users/brianwheeler/appboy_code/android-sdk/build/appboy-android-sdk/android-sdk-ui/res/layout/com_appboy_short_news_card.xml -->
+</merge>

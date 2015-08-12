@@ -36,10 +36,10 @@ public class AppboyNotificationFactory implements IAppboyNotificationFactory {
    * Opening a notification from the notification center triggers a broadcast message to be sent.
    * The broadcast message action is <host-app-package-name>.intent.APPBOY_NOTIFICATION_OPENED.
    *
-   * Note: Froyo and Gingerbread notifications are limited to one line of content.
+   * Note: Gingerbread notifications are limited to one line of content.
    */
   public Notification createNotification(XmlAppConfigurationProvider appConfigurationProvider,
-                                                Context context, Bundle notificationExtras, Bundle appboyExtras) {
+                                         Context context, Bundle notificationExtras, Bundle appboyExtras) {
 
     // We build up the notification by setting values if they are present in the extras and supported
     // on the device.  The notification building is currently order/combination independent, but
@@ -47,7 +47,7 @@ public class AppboyNotificationFactory implements IAppboyNotificationFactory {
     // we build the notification up in the order that each feature was supported.
 
     NotificationCompat.Builder notificationBuilder =
-      new NotificationCompat.Builder(context).setAutoCancel(true);
+            new NotificationCompat.Builder(context).setAutoCancel(true);
 
     AppboyNotificationUtils.setTitleIfPresent(notificationBuilder, notificationExtras);
     AppboyNotificationUtils.setContentIfPresent(notificationBuilder, notificationExtras);
