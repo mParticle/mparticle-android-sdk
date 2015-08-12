@@ -131,7 +131,7 @@ public final class Cart {
      * <p></p>
      * This method will log a {@link CommerceEvent} with the {@link Product#REMOVE_FROM_CART} action.
      * <p></p>
-     * If the Cart already contains a Product that is considered equal, the Product will be removed. Otherwise, this method is a no-op.
+     * If the Cart already contains a Product that is considered equal, the Product will be removed.
      *
      * @param product the product objects to remove from the Cart
      * @return the Cart object, useful for chaining several commands
@@ -146,7 +146,7 @@ public final class Cart {
      * <p></p>
      * This method will log a {@link CommerceEvent} with the {@link Product#REMOVE_FROM_CART} action.
      * <p></p>
-     * If the Cart already contains a Product that is considered equal, the Product will be removed. Otherwise, this method is a no-op..
+     * If the Cart already contains a Product that is considered equal, the Product will be removed.
      *
      * @param product the product to remove from the Cart
      * @return the Cart object, useful for chaining several commands
@@ -155,10 +155,10 @@ public final class Cart {
     public synchronized Cart remove(Product product, boolean logEvent) {
         if (product != null && productList.remove(product)) {
             save();
-            if (logEvent) {
-                CommerceEvent event = new CommerceEvent.Builder(Product.REMOVE_FROM_CART, product).build();
-                MParticle.getInstance().logEvent(event);
-            }
+        }
+        if (logEvent) {
+            CommerceEvent event = new CommerceEvent.Builder(Product.REMOVE_FROM_CART, product).build();
+            MParticle.getInstance().logEvent(event);
         }
         return this;
     }
