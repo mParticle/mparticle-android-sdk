@@ -21,7 +21,7 @@ public class CommerceEventUtil {
 
     private static final String PLUSONE_NAME = "eCommerce - %s - Total";
     private static final String ITEM_NAME = "eCommerce - %s - Item";
-    private static final String IMPRESSION_NAME = "eCommerce - %s - Impression";
+    private static final String IMPRESSION_NAME = "eCommerce - Impression - Item";
 
     public static List<MPEvent> expand(CommerceEvent event) {
         List<MPEvent> eventList = expandProductAction(event);
