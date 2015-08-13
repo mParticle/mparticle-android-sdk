@@ -166,7 +166,7 @@ uploadArchives {
 
 dependencies {
     deployerJars "org.kuali.maven.wagons:maven-s3-wagon:1.2.1"
-    embeddedkitsCompile files('embeddedkits/Kahuna571.jar')
+    embeddedkitsCompile files('embeddedkits/kahuna571.jar')
     embeddedkitsCompile files('embeddedkits/Kochava20150511.jar')
     embeddedkitsCompile files('embeddedkits/comscore2140923.jar')
     embeddedkitsCompile files('embeddedkits/appboy182.jar')
