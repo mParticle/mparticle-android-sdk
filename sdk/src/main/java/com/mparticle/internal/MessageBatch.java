@@ -62,6 +62,10 @@ public class MessageBatch extends JSONObject {
             }
         }
 
+        if (MParticle.getInstance().ProductBags().getBags().size() > 0) {
+            uploadMessage.put(Constants.MessageKey.PRODUCT_BAGS, new JSONObject(MParticle.getInstance().ProductBags().toString()));
+        }
+
         String userIds = preferences.getString(Constants.PrefKeys.USER_IDENTITIES + apiKey, null);
         if (null != userIds) {
             JSONArray identities = new JSONArray(userIds);

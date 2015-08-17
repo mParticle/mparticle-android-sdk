@@ -1,19 +1,28 @@
 package com.mparticle.internal;
 
 import com.mparticle.MParticle;
+import com.mparticle.commerce.ProductBagApi;
 import com.mparticle.mock.MockContext;
 import com.mparticle.mock.MockSharedPreferences;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.Test;
+import org.mockito.Mockito;
 
 import static org.junit.Assert.*;
 
 public class MessageBatchTest {
 
+
     @Test
     public void testCreate() throws Exception {
+        MParticle mockMp = Mockito.mock(MParticle.class);
+        Mockito.when(mockMp.getEnvironment()).thenReturn(MParticle.Environment.Development);
+        MParticle.setInstance(mockMp);
+        ProductBagApi bags = new ProductBagApi(new MockContext());
+        bags.addProduct("whatever", null);
+        Mockito.when(mockMp.ProductBags()).thenReturn(bags);
         ConfigManager manager = new ConfigManager(new MockContext(), MParticle.Environment.Production);
         MockSharedPreferences sharedPrefs = new MockSharedPreferences();
         boolean sessionHistory = true;
@@ -48,6 +57,9 @@ public class MessageBatchTest {
         assertNotNull(batch.getDouble("stl"));
         assertNotNull(batch.getJSONObject("ai"));
 
+
+        assertNotNull(batch.getJSONObject("pb"));
+
         deviceInfo = batch.getJSONObject("di");
         assertNotNull(deviceInfo);
         assertNotNull(deviceInfo.getBoolean("se"));
@@ -59,6 +71,8 @@ public class MessageBatchTest {
             assertNotNull(batch.getJSONObject("cms"));
         }
 
-
+        bags.removeProductBag("whatever");
+        batch = MessageBatch.create(new MockContext(), new JSONArray(), sessionHistory, new JSONObject(), new JSONObject(), manager, sharedPrefs, new JSONObject());
+        assertFalse(batch.has("pb"));
     }
 }

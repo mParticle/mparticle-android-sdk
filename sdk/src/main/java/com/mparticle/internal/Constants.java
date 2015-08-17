@@ -21,6 +21,7 @@ public class Constants {
     // preferences persistence
     public static final String PREFS_FILE = "mParticlePrefs";
     public static final String CART_PREFS_FILE = "mParticlePrefs_cart";
+    public static final String BAGS_FILE = "mParticlePrefs_productbags";
 
     public static final int LIMIT_ATTR_COUNT = 100;
     public static final int LIMIT_ATTR_NAME = 255;
@@ -183,6 +184,7 @@ public class Constants {
         String USER_ATTRIBUTES = "ua";
         String USER_IDENTITIES = "ui";
         String DELETED_USER_ATTRIBUTES = "uad";
+        String PRODUCT_BAGS = "pb";
         // user identity
         String IDENTITY_NAME = "n";
         String IDENTITY_VALUE = "i";
@@ -460,6 +462,7 @@ public class Constants {
         String LOCATION_MINDISTANCE = "mp::location:mindistance";
 
         String CART = "mp::cart";
+        String PRODUCT_BAGS = "mp::productbags";
     }
 
     public interface MiscStorageKeys {
