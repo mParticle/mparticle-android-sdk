@@ -42,7 +42,7 @@ public class ProductBagApi {
     }
 
     /**
-     * Retrieve an *unmodifiable* list of ProductBag objects. Use this to iterate manually and inspect the current bags associated with the user.
+     * Retrieve an <i>unmodifiable list</i> of Product Bag objects. Use this to iterate manually and inspect the current bags associated with the user.
      *
      * @return returns an <i>unmodifiable list</i> of Product Bags. This list will throw an {@code UnsupportedOperationException} if an attempt is made to modify it.
      */
@@ -52,10 +52,10 @@ public class ProductBagApi {
     }
 
     /**
-     * Add a new Product Bag, and/or a new Product to an existing bag.
+     * Add a new Product Bag or add a new Product to an existing bag.
      *
-     * @param bagName the name of the bag to add or to append to. Required.
-     * @param product the name of the bag to add or to append to. If Product is null, an empty bag will be created.
+     * @param bagName the name of the bag to add or append to. Required.
+     * @param product the name of the bag to add or append to. If the product is null, an empty bag will be created.
      *
      * @return returns true if the product was successfully added.
      */
@@ -83,8 +83,8 @@ public class ProductBagApi {
     /**
      * Find a Product Bag by its name
      *
-     * @param bagName the name of the Product Bag, this is case insensitive.
-     * @return returns the ProductBag, or null if none were found.
+     * @param bagName the name of the Product Bag, case insensitive.
+     * @return returns the Product Bag, or null if none were found.
      */
     public ProductBag findBag(String bagName) {
         if (MPUtility.isEmpty(bagName)) {
@@ -104,9 +104,9 @@ public class ProductBagApi {
      * By default, Product object equality is determined only by object reference. See {@link Product#setEqualityComparator(Product.EqualityComparator)} for how to change this behavior.
      *
      * @param bagName the name of the Product Bag from which to remove, this is case insensitive. Required.
-     * @param product the Product to remove from the Product Bag.
+     * @param product the product to remove from the Product Bag.
      *
-     * @return returns true if the Product was found and removed.
+     * @return returns true if the product was found and removed.
      */
     public boolean removeProduct(String bagName, Product product) {
         if (MPUtility.isEmpty(bagName)) {
@@ -133,9 +133,9 @@ public class ProductBagApi {
     }
 
     /**
-     * Remove all Products from a Product Bag. Note that this will only empty the Bag, rather than remove it.
+     * Remove all products from a Product Bag. Note that this will only empty the bag, rather than remove it.
      *
-     * @param bagName the name of the Bag to clear. Required.
+     * @param bagName the name of the bag to clear. Required.
      * @return returns true if the bag was found and cleared.
      */
     public boolean clearProductBag(String bagName) {
@@ -157,7 +157,7 @@ public class ProductBagApi {
     /**
      * Completely remove a Product Bag.
      *
-     * @param bagName the name of the Bag to remove. Required.
+     * @param bagName the name of the bag to remove. Required.
      * @return returns true if the bag was found and removed.
      */
     public boolean removeProductBag(String bagName) {

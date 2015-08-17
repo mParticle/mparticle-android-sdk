@@ -7,7 +7,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
- * Class representation of a Product Bag. Product Bags consist of name and a list of {@link Product} objects.
+ * Immutable representation of a Product Bag. Product Bags consist of a name and a list of {@link Product} objects.
  *
  * This class cannot and should not be directly instantiated.
  *
@@ -38,9 +38,9 @@ public class ProductBag {
     }
 
     /**
-     * Get the Products contained in this bag.
+     * Get the products contained in this bag.
      *
-     * @return returns an <i>unmodifiable list</i> of Products. The list will throw an {@code UnsupportedOperationException} if an attempt is made to
+     * @return returns an <i>unmodifiable list</i> of products. The list will throw an {@code UnsupportedOperationException} if an attempt is made to
      * modify it.
      */
     public List<Product> getProducts() {

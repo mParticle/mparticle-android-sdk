@@ -1431,7 +1431,7 @@ public class MParticle {
     }
 
     /**
-     * Retrieve the global {@link ProductBagApi} instance. Used associate Product Bags with the user.
+     * Retrieve the global {@link ProductBagApi} instance. Use this API to associate {@link com.mparticle.commerce.ProductBag} objects the user.
      *
      * @return a global ProductBagApi instance
      *
