@@ -17,6 +17,7 @@ import com.mparticle.commerce.Cart;
 import com.mparticle.commerce.CommerceApi;
 import com.mparticle.commerce.CommerceEvent;
 import com.mparticle.commerce.Product;
+import com.mparticle.commerce.ProductBagApi;
 import com.mparticle.internal.AppStateManager;
 import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.Constants;
@@ -125,6 +126,7 @@ public class MParticle {
     private MPMessagingAPI mMessaging;
     private MPMediaAPI mMedia;
     private CommerceApi mCommerce;
+    private ProductBagApi mProductBags;
 
     MParticle() {}
 
@@ -217,6 +219,7 @@ public class MParticle {
                     instance.mApiKey = configManager.getApiKey();
                     instance.mAppStateManager = appStateManager;
                     instance.mCommerce = new CommerceApi(context);
+                    instance.mProductBags = new ProductBagApi(context);
                     instance.mMessageManager = new MessageManager(context, configManager, installType, appStateManager);
                     instance.measuredRequestManager = MeasuredRequestManager.INSTANCE;
                     instance.measuredRequestManager.start(embeddedKitManager);
@@ -1417,8 +1420,25 @@ public class MParticle {
         return mMessaging;
     }
 
+    /**
+     * Retrieve an instance of the {@link CommerceApi} helper class, used to access the {@link Cart} and as a helper class to log {@link CommerceEvent} events
+     * with the {@link Product} objects currently in the Cart.
+     *
+     * @return returns a global CommerceApi instance.
+     */
     public CommerceApi Commerce() {
         return mCommerce;
+    }
+
+    /**
+     * Retrieve the global {@link ProductBagApi} instance. Use this API to associate {@link com.mparticle.commerce.ProductBag} objects the user.
+     *
+     * @return a global ProductBagApi instance
+     *
+     * @see {@link ProductBagApi}
+     */
+    public ProductBagApi ProductBags() {
+        return mProductBags;
     }
 
     /**
