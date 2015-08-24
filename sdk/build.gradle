@@ -73,6 +73,10 @@ android {
 
         }
 
+        comscore {
+
+        }
+
         nokits {
 
         }
@@ -170,6 +174,7 @@ dependencies {
     embeddedkitsCompile files('embeddedkits/Kochava20150511.jar')
     embeddedkitsCompile files('embeddedkits/comscore2140923.jar')
     embeddedkitsCompile files('embeddedkits/appboy182.jar')
+    comscoreCompile files('embeddedkits/comscore2140923.jar')
     compile 'com.google.android.gms:play-services-gcm:[7.0,)'
     unityCompile project('unityskeleton')
     testCompile 'junit:junit:4.12'
