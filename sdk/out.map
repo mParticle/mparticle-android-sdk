@@ -1,3 +1,1129 @@
+com.comscore.analytics.ApplicationState -> com.comscore.analytics.ApplicationState:
+    com.comscore.analytics.ApplicationState INACTIVE -> INACTIVE
+    com.comscore.analytics.ApplicationState BACKGROUND_UX_ACTIVE -> BACKGROUND_UX_ACTIVE
+    com.comscore.analytics.ApplicationState FOREGROUND -> FOREGROUND
+    com.comscore.analytics.ApplicationState[] a -> a
+    com.comscore.analytics.ApplicationState[] values() -> values
+    com.comscore.analytics.ApplicationState valueOf(java.lang.String) -> valueOf
+    void <init>(java.lang.String,int) -> <init>
+    void <clinit>() -> <clinit>
+com.comscore.analytics.Census -> com.comscore.analytics.Census:
+    com.comscore.analytics.Census a -> a
+    java.lang.String b -> b
+    java.lang.Object c -> c
+    void <init>() -> <init>
+    com.comscore.analytics.Census getInstance() -> getInstance
+    void notifyStart(android.content.Context,java.lang.String,java.lang.String) -> notifyStart
+    void <clinit>() -> <clinit>
+com.comscore.analytics.Core -> com.comscore.analytics.Core:
+    com.comscore.utils.OfflineMeasurementsCache a -> a
+    com.comscore.utils.Storage b -> b
+    com.comscore.applications.KeepAliveAlarmReceiver c -> c
+    com.comscore.utils.CacheFlusher d -> d
+    com.comscore.utils.DispatchQueue e -> e
+    com.comscore.utils.task.TaskExecutor f -> f
+    com.comscore.measurement.MeasurementDispatcher g -> g
+    com.comscore.utils.ConnectivityChangeReceiver h -> h
+    java.util.Timer i -> i
+    java.util.Timer j -> j
+    java.util.TimerTask k -> k
+    long l -> l
+    boolean m -> m
+    boolean n -> n
+    boolean o -> o
+    java.util.concurrent.atomic.AtomicInteger p -> p
+    long q -> q
+    java.util.concurrent.atomic.AtomicInteger r -> r
+    long s -> s
+    long t -> t
+    java.lang.String u -> u
+    java.lang.String v -> v
+    boolean w -> w
+    java.lang.String x -> x
+    long y -> y
+    com.comscore.analytics.ApplicationState z -> z
+    java.util.concurrent.atomic.AtomicInteger A -> A
+    java.util.concurrent.atomic.AtomicInteger B -> B
+    java.util.concurrent.atomic.AtomicInteger C -> C
+    long D -> D
+    long E -> E
+    long F -> F
+    long G -> G
+    long H -> H
+    long I -> I
+    long J -> J
+    long K -> K
+    long L -> L
+    com.comscore.analytics.SessionState M -> M
+    long N -> N
+    long O -> O
+    long P -> P
+    int Q -> Q
+    int R -> R
+    int S -> S
+    long T -> T
+    long U -> U
+    long V -> V
+    int W -> W
+    long X -> X
+    long Y -> Y
+    java.util.Timer Z -> Z
+    java.lang.String aa -> aa
+    java.lang.String ab -> ab
+    android.content.Context ac -> ac
+    java.util.HashMap ad -> ad
+    java.util.HashMap ae -> ae
+    boolean af -> af
+    long ag -> ag
+    boolean ah -> ah
+    java.lang.Thread$UncaughtExceptionHandler ai -> ai
+    boolean aj -> aj
+    com.comscore.utils.TransmissionMode ak -> ak
+    com.comscore.utils.TransmissionMode al -> al
+    java.lang.String[] am -> am
+    com.comscore.utils.id.IdHelper an -> an
+    boolean ao -> ao
+    boolean ap -> ap
+    void <init>() -> <init>
+    com.comscore.analytics.Core getInstance() -> getInstance
+    void reset() -> reset
+    void A() -> A
+    void a(java.lang.String,java.lang.String) -> a
+    void a(java.lang.String,java.util.ArrayList) -> a
+    void a() -> a
+    com.comscore.utils.id.IdHelper a(android.content.Context,com.comscore.utils.Storage) -> a
+    com.comscore.utils.Storage b() -> b
+    void a(com.comscore.utils.Storage) -> a
+    com.comscore.utils.DispatchQueue c() -> c
+    com.comscore.utils.task.TaskExecutor d() -> d
+    com.comscore.measurement.MeasurementDispatcher e() -> e
+    com.comscore.applications.KeepAliveAlarmReceiver f() -> f
+    com.comscore.utils.OfflineMeasurementsCache g() -> g
+    com.comscore.utils.CacheFlusher h() -> h
+    com.comscore.utils.ConnectivityChangeReceiver i() -> i
+    void j() -> j
+    void incrementRunsCount() -> incrementRunsCount
+    java.lang.String k() -> k
+    boolean handleColdStart() -> handleColdStart
+    void l() -> l
+    java.lang.String a(java.lang.String,java.util.Properties,boolean) -> a
+    com.comscore.utils.OfflineMeasurementsCache getOfflineCache() -> getOfflineCache
+    com.comscore.utils.ConnectivityChangeReceiver getConnectivityReceiver() -> getConnectivityReceiver
+    android.content.Context m() -> m
+    com.comscore.utils.Storage getStorage() -> getStorage
+    com.comscore.utils.DispatchQueue getQueue() -> getQueue
+    com.comscore.utils.task.TaskExecutor getTaskExecutor() -> getTaskExecutor
+    com.comscore.measurement.MeasurementDispatcher getMeasurementDispatcher() -> getMeasurementDispatcher
+    com.comscore.applications.KeepAliveAlarmReceiver getKeepAliveAlarmReceiver() -> getKeepAliveAlarmReceiver
+    com.comscore.utils.CacheFlusher getCacheFlusher() -> getCacheFlusher
+    void onUxActive() -> onUxActive
+    void onUxInactive() -> onUxInactive
+    void onEnterForeground() -> onEnterForeground
+    void onExitForeground() -> onExitForeground
+    void onUserInteraction() -> onUserInteraction
+    void n() -> n
+    void a(com.comscore.analytics.ApplicationState,com.comscore.analytics.ApplicationState) -> a
+    void a(com.comscore.analytics.ApplicationState) -> a
+    void b(com.comscore.analytics.ApplicationState) -> b
+    void a(com.comscore.analytics.SessionState,com.comscore.analytics.SessionState) -> a
+    void a(com.comscore.analytics.SessionState) -> a
+    void b(com.comscore.analytics.SessionState) -> b
+    void o() -> o
+    boolean p() -> p
+    void q() -> q
+    void r() -> r
+    void s() -> s
+    void a(boolean) -> a
+    void t() -> t
+    void b(boolean) -> b
+    com.comscore.analytics.ApplicationState getApplicationState() -> getApplicationState
+    com.comscore.analytics.SessionState getSessionState() -> getSessionState
+    int getRunsCount() -> getRunsCount
+    long getInstallId() -> getInstallId
+    long getFirstInstallId() -> getFirstInstallId
+    long getColdStartId() -> getColdStartId
+    int getColdStartCount() -> getColdStartCount
+    java.lang.String getCurrentVersion() -> getCurrentVersion
+    java.lang.String getPreviousVersion() -> getPreviousVersion
+    int getForegroundTransitionsCountDelta(boolean) -> getForegroundTransitionsCountDelta
+    long getForegroundTotalTime(boolean) -> getForegroundTotalTime
+    long getForegroundTimeDelta(boolean) -> getForegroundTimeDelta
+    long getBackgroundTotalTime(boolean) -> getBackgroundTotalTime
+    long getBackgroundTimeDelta(boolean) -> getBackgroundTimeDelta
+    long getInactiveTotalTime(boolean) -> getInactiveTotalTime
+    long getInactiveTimeDelta(boolean) -> getInactiveTimeDelta
+    long getApplicationSessionTimeDelta(boolean) -> getApplicationSessionTimeDelta
+    long getActiveUserSessionTimeDelta(boolean) -> getActiveUserSessionTimeDelta
+    long getUserSessionTimeDelta(boolean) -> getUserSessionTimeDelta
+    long getAutoUpdateInterval() -> getAutoUpdateInterval
+    int getApplicationSessionCountDelta(boolean) -> getApplicationSessionCountDelta
+    int getActiveUserSessionCountDelta(boolean) -> getActiveUserSessionCountDelta
+    int getUserSessionCountDelta(boolean) -> getUserSessionCountDelta
+    int getUserInteractionCount(boolean) -> getUserInteractionCount
+    void setAppContext(android.content.Context) -> setAppContext
+    android.content.Context getAppContext() -> getAppContext
+    void setErrorHandlingEnabled(boolean) -> setErrorHandlingEnabled
+    boolean getErrorHandlingEnabled() -> getErrorHandlingEnabled
+    java.lang.String getCurrentActivityName() -> getCurrentActivityName
+    void setCurrentActivityName(java.lang.String) -> setCurrentActivityName
+    void setPixelURL(java.lang.String,boolean) -> setPixelURL
+    void setOfflineURL(java.lang.String) -> setOfflineURL
+    void a(java.lang.String) -> a
+    boolean isKeepAliveEnabled() -> isKeepAliveEnabled
+    void setKeepAliveEnabled(boolean,boolean) -> setKeepAliveEnabled
+    void c(boolean) -> c
+    java.lang.String getPixelURL() -> getPixelURL
+    java.lang.String getCrossPublisherId() -> getCrossPublisherId
+    java.lang.String getVisitorId() -> getVisitorId
+    com.comscore.utils.id.IdHelper getIdHelper() -> getIdHelper
+    void setPublisherSecret(java.lang.String,boolean) -> setPublisherSecret
+    void b(java.lang.String) -> b
+    java.lang.String getSalt() -> getSalt
+    java.lang.String getPublisherSecret() -> getPublisherSecret
+    void setAppName(java.lang.String,boolean) -> setAppName
+    void c(java.lang.String) -> c
+    java.lang.String getAppName() -> getAppName
+    java.lang.String getVersion() -> getVersion
+    long getGenesis() -> getGenesis
+    long getPreviousGenesis() -> getPreviousGenesis
+    java.util.HashMap getLabels() -> getLabels
+    void setLabels(java.util.HashMap,boolean) -> setLabels
+    java.lang.String getLabel(java.lang.String) -> getLabel
+    void setLabel(java.lang.String,java.lang.String,boolean) -> setLabel
+    void b(java.lang.String,java.lang.String) -> b
+    java.util.HashMap getAutoStartLabels() -> getAutoStartLabels
+    void setAutoStartLabels(java.util.HashMap) -> setAutoStartLabels
+    java.lang.String getAutoStartLabel(java.lang.String) -> getAutoStartLabel
+    void setAutoStartLabel(java.lang.String,java.lang.String) -> setAutoStartLabel
+    void d(boolean) -> d
+    java.lang.String getCustomerC2() -> getCustomerC2
+    void setCustomerC2(java.lang.String,boolean) -> setCustomerC2
+    void d(java.lang.String) -> d
+    com.comscore.utils.TransmissionMode getLiveTransmissionMode() -> getLiveTransmissionMode
+    void allowLiveTransmission(com.comscore.utils.TransmissionMode,boolean) -> allowLiveTransmission
+    void a(com.comscore.utils.TransmissionMode) -> a
+    com.comscore.utils.TransmissionMode getOfflineTransmissionMode() -> getOfflineTransmissionMode
+    void allowOfflineTransmission(com.comscore.utils.TransmissionMode,boolean) -> allowOfflineTransmission
+    void b(com.comscore.utils.TransmissionMode) -> b
+    void setSecure(boolean,boolean) -> setSecure
+    void setDebug(boolean) -> setDebug
+    void setAutoStartEnabled(boolean,boolean) -> setAutoStartEnabled
+    boolean isAutoStartEnabled() -> isAutoStartEnabled
+    boolean isSecure() -> isSecure
+    void setCacheMaxMeasurements(int,boolean) -> setCacheMaxMeasurements
+    int getCacheMaxMeasurements() -> getCacheMaxMeasurements
+    void setCacheMaxBatchFiles(int,boolean) -> setCacheMaxBatchFiles
+    int getCacheMaxBatchFiles() -> getCacheMaxBatchFiles
+    void setCacheMaxFlushesInARow(int,boolean) -> setCacheMaxFlushesInARow
+    int getCacheMaxFlushesInARow() -> getCacheMaxFlushesInARow
+    void setCacheMinutesToRetry(int,boolean) -> setCacheMinutesToRetry
+    long getCacheMinutesToRetry() -> getCacheMinutesToRetry
+    void setCacheMeasurementExpiry(int,boolean) -> setCacheMeasurementExpiry
+    long getCacheMeasurementExpiry() -> getCacheMeasurementExpiry
+    long getCacheFlushingInterval() -> getCacheFlushingInterval
+    void setCacheFlushingInterval(long,boolean) -> setCacheFlushingInterval
+    java.lang.String[] getMeasurementLabelOrder() -> getMeasurementLabelOrder
+    void setMeasurementLabelOrder(java.lang.String[],boolean) -> setMeasurementLabelOrder
+    void flush(boolean) -> flush
+    com.comscore.utils.OfflineMeasurementsCache u() -> u
+    void update() -> update
+    void update(boolean) -> update
+    void enableAutoUpdate(int,boolean,boolean) -> enableAutoUpdate
+    void a(int,boolean) -> a
+    void disableAutoUpdate() -> disableAutoUpdate
+    boolean isAutoUpdateEnabled() -> isAutoUpdateEnabled
+    void v() -> v
+    void w() -> w
+    void notify(com.comscore.applications.EventType,java.util.HashMap,boolean) -> notify
+    void a(com.comscore.applications.EventType,java.util.HashMap) -> a
+    void x() -> x
+    void y() -> y
+    com.comscore.measurement.Measurement a(com.comscore.applications.EventType,java.util.HashMap,java.lang.String) -> a
+    boolean z() -> z
+    boolean isEnabled() -> isEnabled
+    void setEnabled(boolean) -> setEnabled
+    boolean a(com.comscore.analytics.Core) -> a
+    void a(com.comscore.analytics.Core,java.lang.String) -> a
+    void b(com.comscore.analytics.Core,java.lang.String) -> b
+    void a(com.comscore.analytics.Core,java.lang.String,java.lang.String) -> a
+    void c(com.comscore.analytics.Core,java.lang.String) -> c
+    void a(com.comscore.analytics.Core,com.comscore.utils.TransmissionMode) -> a
+    void b(com.comscore.analytics.Core,com.comscore.utils.TransmissionMode) -> b
+com.comscore.analytics.Core$UserInteractionTask -> com.comscore.analytics.Core$UserInteractionTask:
+    com.comscore.analytics.Core a -> a
+    void <init>(com.comscore.analytics.Core) -> <init>
+    void run() -> run
+com.comscore.analytics.SessionState -> com.comscore.analytics.SessionState:
+    com.comscore.analytics.SessionState INACTIVE -> INACTIVE
+    com.comscore.analytics.SessionState APPLICATION -> APPLICATION
+    com.comscore.analytics.SessionState USER -> USER
+    com.comscore.analytics.SessionState ACTIVE_USER -> ACTIVE_USER
+    com.comscore.analytics.SessionState[] a -> a
+    com.comscore.analytics.SessionState[] values() -> values
+    com.comscore.analytics.SessionState valueOf(java.lang.String) -> valueOf
+    void <init>(java.lang.String,int) -> <init>
+    void <clinit>() -> <clinit>
+com.comscore.analytics.a -> com.comscore.analytics.a:
+    com.comscore.analytics.Core a -> a
+    void <init>(com.comscore.analytics.Core) -> <init>
+    void run() -> run
+com.comscore.analytics.aa -> com.comscore.analytics.aa:
+    com.comscore.analytics.Core a -> a
+    void <init>(com.comscore.analytics.Core) -> <init>
+    void run() -> run
+com.comscore.analytics.ab -> com.comscore.analytics.ab:
+    com.comscore.analytics.Core a -> a
+    void <init>(com.comscore.analytics.Core) -> <init>
+    void run() -> run
+com.comscore.analytics.ac -> com.comscore.analytics.ac:
+    com.comscore.analytics.ApplicationState a -> a
+    com.comscore.analytics.ApplicationState b -> b
+    com.comscore.analytics.SessionState c -> c
+    com.comscore.analytics.SessionState d -> d
+    com.comscore.analytics.Core e -> e
+    void <init>(com.comscore.analytics.Core,com.comscore.analytics.ApplicationState,com.comscore.analytics.ApplicationState,com.comscore.analytics.SessionState,com.comscore.analytics.SessionState) -> <init>
+    void run() -> run
+com.comscore.analytics.ad -> com.comscore.analytics.ad:
+    com.comscore.analytics.Core a -> a
+    void <init>(com.comscore.analytics.Core) -> <init>
+    void run() -> run
+com.comscore.analytics.ae -> com.comscore.analytics.ae:
+    java.lang.String a -> a
+    com.comscore.analytics.Core b -> b
+    void <init>(com.comscore.analytics.Core,java.lang.String) -> <init>
+    void run() -> run
+com.comscore.analytics.af -> com.comscore.analytics.af:
+    java.lang.String a -> a
+    com.comscore.analytics.Core b -> b
+    void <init>(com.comscore.analytics.Core,java.lang.String) -> <init>
+    void run() -> run
+com.comscore.analytics.b -> com.comscore.analytics.b:
+    boolean a -> a
+    com.comscore.analytics.Core b -> b
+    void <init>(com.comscore.analytics.Core,boolean) -> <init>
+    void run() -> run
+com.comscore.analytics.c -> com.comscore.analytics.c:
+    java.lang.String a -> a
+    com.comscore.analytics.Core b -> b
+    void <init>(com.comscore.analytics.Core,java.lang.String) -> <init>
+    void run() -> run
+com.comscore.analytics.comScore -> com.comscore.analytics.comScore:
+    com.comscore.analytics.Core a -> a
+    void <init>() -> <init>
+    void setAppContext(android.content.Context) -> setAppContext
+    void onUxActive() -> onUxActive
+    void onUxInactive() -> onUxInactive
+    void onEnterForeground() -> onEnterForeground
+    void onExitForeground() -> onExitForeground
+    void onUserInteraction() -> onUserInteraction
+    void update() -> update
+    void enableAutoUpdate() -> enableAutoUpdate
+    void enableAutoUpdate(int) -> enableAutoUpdate
+    void enableAutoUpdate(int,boolean) -> enableAutoUpdate
+    void disableAutoUpdate() -> disableAutoUpdate
+    boolean isAutoUpdateEnabled() -> isAutoUpdateEnabled
+    void start() -> start
+    void start(java.util.HashMap) -> start
+    void view() -> view
+    void view(java.util.HashMap) -> view
+    void hidden() -> hidden
+    void hidden(java.util.HashMap) -> hidden
+    void aggregate(java.util.HashMap) -> aggregate
+    java.lang.String getPixelURL() -> getPixelURL
+    void setPixelURL(java.lang.String) -> setPixelURL
+    void setOfflineURL(java.lang.String) -> setOfflineURL
+    java.lang.String getCustomerC2() -> getCustomerC2
+    void setCustomerC2(java.lang.String) -> setCustomerC2
+    java.lang.String getAppName() -> getAppName
+    void setAppName(java.lang.String) -> setAppName
+    long getGenesis() -> getGenesis
+    java.lang.String getVisitorID() -> getVisitorID
+    com.comscore.utils.TransmissionMode getOfflineTransmissionMode() -> getOfflineTransmissionMode
+    void allowOfflineTransmission(com.comscore.utils.TransmissionMode) -> allowOfflineTransmission
+    com.comscore.utils.TransmissionMode getLiveTransmissionMode() -> getLiveTransmissionMode
+    void allowLiveTransmission(com.comscore.utils.TransmissionMode) -> allowLiveTransmission
+    java.lang.String getPublisherSecret() -> getPublisherSecret
+    void setPublisherSecret(java.lang.String) -> setPublisherSecret
+    void flushCache() -> flushCache
+    void setAutoStartLabel(java.lang.String,java.lang.String) -> setAutoStartLabel
+    java.lang.String getAutoStartLabel(java.lang.String) -> getAutoStartLabel
+    void setAutoStartLabels(java.util.HashMap) -> setAutoStartLabels
+    java.util.HashMap getAutoStartLabels() -> getAutoStartLabels
+    void setLabel(java.lang.String,java.lang.String) -> setLabel
+    java.lang.String getLabel(java.lang.String) -> getLabel
+    void setLabels(java.util.HashMap) -> setLabels
+    java.util.HashMap getLabels() -> getLabels
+    boolean isKeepAliveEnabled() -> isKeepAliveEnabled
+    void setKeepAliveEnabled(boolean) -> setKeepAliveEnabled
+    void setCacheMaxMeasurements(int) -> setCacheMaxMeasurements
+    int getCacheMaxMeasurements() -> getCacheMaxMeasurements
+    void setCacheMaxBatchFiles(int) -> setCacheMaxBatchFiles
+    int getCacheMaxBatchFiles() -> getCacheMaxBatchFiles
+    void setCacheMaxFlushesInARow(int) -> setCacheMaxFlushesInARow
+    int getCacheMaxFlushesInARow() -> getCacheMaxFlushesInARow
+    void setCacheMinutesToRetry(int) -> setCacheMinutesToRetry
+    void waitForTasks() -> waitForTasks
+    long getCacheMinutesToRetry() -> getCacheMinutesToRetry
+    void setCacheMeasurementExpiry(int) -> setCacheMeasurementExpiry
+    long getCacheMeasurementExpiry() -> getCacheMeasurementExpiry
+    long getCacheFlushingInterval() -> getCacheFlushingInterval
+    void setCacheFlushingInterval(long) -> setCacheFlushingInterval
+    void setSecure(boolean) -> setSecure
+    boolean isSecure() -> isSecure
+    com.comscore.analytics.Core getCore() -> getCore
+    void setErrorHandlingEnabled(boolean) -> setErrorHandlingEnabled
+    boolean getErrorHandlingEnabled() -> getErrorHandlingEnabled
+    java.lang.String[] getMeasurementLabelOrder() -> getMeasurementLabelOrder
+    void setMeasurementLabelOrder(java.lang.String[]) -> setMeasurementLabelOrder
+    void setAutoStartEnabled(boolean) -> setAutoStartEnabled
+    boolean isAutoStartEnabled() -> isAutoStartEnabled
+    java.lang.String getVersion() -> getVersion
+    void setDebug(boolean) -> setDebug
+    void setEnabled(boolean) -> setEnabled
+    boolean isEnabled() -> isEnabled
+    void <clinit>() -> <clinit>
+com.comscore.analytics.d -> com.comscore.analytics.d:
+    java.lang.String a -> a
+    com.comscore.analytics.Core b -> b
+    void <init>(com.comscore.analytics.Core,java.lang.String) -> <init>
+    void run() -> run
+com.comscore.analytics.e -> com.comscore.analytics.e:
+    java.util.HashMap a -> a
+    com.comscore.analytics.Core b -> b
+    void <init>(com.comscore.analytics.Core,java.util.HashMap) -> <init>
+    void run() -> run
+com.comscore.analytics.f -> com.comscore.analytics.f:
+    java.lang.String a -> a
+    java.lang.String b -> b
+    com.comscore.analytics.Core c -> c
+    void <init>(com.comscore.analytics.Core,java.lang.String,java.lang.String) -> <init>
+    void run() -> run
+com.comscore.analytics.g -> com.comscore.analytics.g:
+    java.lang.String a -> a
+    com.comscore.analytics.Core b -> b
+    void <init>(com.comscore.analytics.Core,java.lang.String) -> <init>
+    void run() -> run
+com.comscore.analytics.h -> com.comscore.analytics.h:
+    com.comscore.utils.TransmissionMode a -> a
+    com.comscore.analytics.Core b -> b
+    void <init>(com.comscore.analytics.Core,com.comscore.utils.TransmissionMode) -> <init>
+    void run() -> run
+com.comscore.analytics.i -> com.comscore.analytics.i:
+    com.comscore.utils.TransmissionMode a -> a
+    com.comscore.analytics.Core b -> b
+    void <init>(com.comscore.analytics.Core,com.comscore.utils.TransmissionMode) -> <init>
+    void run() -> run
+com.comscore.analytics.j -> com.comscore.analytics.j:
+    boolean a -> a
+    com.comscore.analytics.Core b -> b
+    void <init>(com.comscore.analytics.Core,boolean) -> <init>
+    void run() -> run
+com.comscore.analytics.k -> com.comscore.analytics.k:
+    boolean a -> a
+    com.comscore.analytics.Core b -> b
+    void <init>(com.comscore.analytics.Core,boolean) -> <init>
+    void run() -> run
+com.comscore.analytics.l -> com.comscore.analytics.l:
+    com.comscore.analytics.Core a -> a
+    void <init>(com.comscore.analytics.Core) -> <init>
+    void run() -> run
+com.comscore.analytics.m -> com.comscore.analytics.m:
+    boolean a -> a
+    com.comscore.analytics.Core b -> b
+    void <init>(com.comscore.analytics.Core,boolean) -> <init>
+    void run() -> run
+com.comscore.analytics.n -> com.comscore.analytics.n:
+    int a -> a
+    com.comscore.analytics.Core b -> b
+    void <init>(com.comscore.analytics.Core,int) -> <init>
+    void run() -> run
+com.comscore.analytics.o -> com.comscore.analytics.o:
+    int a -> a
+    com.comscore.analytics.Core b -> b
+    void <init>(com.comscore.analytics.Core,int) -> <init>
+    void run() -> run
+com.comscore.analytics.p -> com.comscore.analytics.p:
+    int a -> a
+    com.comscore.analytics.Core b -> b
+    void <init>(com.comscore.analytics.Core,int) -> <init>
+    void run() -> run
+com.comscore.analytics.q -> com.comscore.analytics.q:
+    int a -> a
+    com.comscore.analytics.Core b -> b
+    void <init>(com.comscore.analytics.Core,int) -> <init>
+    void run() -> run
+com.comscore.analytics.r -> com.comscore.analytics.r:
+    int a -> a
+    com.comscore.analytics.Core b -> b
+    void <init>(com.comscore.analytics.Core,int) -> <init>
+    void run() -> run
+com.comscore.analytics.s -> com.comscore.analytics.s:
+    long a -> a
+    com.comscore.analytics.Core b -> b
+    void <init>(com.comscore.analytics.Core,long) -> <init>
+    void run() -> run
+com.comscore.analytics.t -> com.comscore.analytics.t:
+    java.lang.String[] a -> a
+    com.comscore.analytics.Core b -> b
+    void <init>(com.comscore.analytics.Core,java.lang.String[]) -> <init>
+    void run() -> run
+com.comscore.analytics.u -> com.comscore.analytics.u:
+    com.comscore.analytics.Core a -> a
+    void <init>(com.comscore.analytics.Core) -> <init>
+    void run() -> run
+com.comscore.analytics.v -> com.comscore.analytics.v:
+    int a -> a
+    boolean b -> b
+    com.comscore.analytics.Core c -> c
+    void <init>(com.comscore.analytics.Core,int,boolean) -> <init>
+    void run() -> run
+com.comscore.analytics.w -> com.comscore.analytics.w:
+    com.comscore.analytics.Core a -> a
+    void <init>(com.comscore.analytics.Core) -> <init>
+    void run() -> run
+com.comscore.analytics.x -> com.comscore.analytics.x:
+    com.comscore.analytics.Core a -> a
+    void <init>(com.comscore.analytics.Core) -> <init>
+    void run() -> run
+com.comscore.analytics.y -> com.comscore.analytics.y:
+    com.comscore.applications.EventType a -> a
+    java.util.HashMap b -> b
+    com.comscore.analytics.Core c -> c
+    void <init>(com.comscore.analytics.Core,com.comscore.applications.EventType,java.util.HashMap) -> <init>
+    void run() -> run
+com.comscore.analytics.z -> com.comscore.analytics.z:
+    int[] a -> a
+    int[] b -> b
+    void <clinit>() -> <clinit>
+com.comscore.android.BuildConfig -> com.comscore.android.BuildConfig:
+    boolean DEBUG -> DEBUG
+    void <init>() -> <init>
+com.comscore.android.R -> com.comscore.android.R:
+    void <init>() -> <init>
+com.comscore.android.R$attr -> com.comscore.android.R$attr:
+    void <init>() -> <init>
+com.comscore.android.R$layout -> com.comscore.android.R$layout:
+    int main -> main
+    void <init>() -> <init>
+    void <clinit>() -> <clinit>
+com.comscore.android.R$string -> com.comscore.android.R$string:
+    int app_name -> app_name
+    void <init>() -> <init>
+    void <clinit>() -> <clinit>
+com.comscore.android.id.API4 -> com.comscore.android.id.API4:
+    boolean a -> a
+    boolean b -> b
+    void <init>() -> <init>
+    boolean isPackageInstalledFromGooglePlayStore(android.content.Context) -> isPackageInstalledFromGooglePlayStore
+    void <clinit>() -> <clinit>
+com.comscore.android.id.API9 -> com.comscore.android.id.API9:
+    void <init>() -> <init>
+    java.lang.String getAndroidSerial(android.content.Context) -> getAndroidSerial
+com.comscore.android.id.DeviceId -> com.comscore.android.id.DeviceId:
+    java.lang.String a -> a
+    int b -> b
+    int c -> c
+    void <init>(java.lang.String,int,int) -> <init>
+    void <init>(java.lang.String) -> <init>
+    java.lang.String getId() -> getId
+    int getCommonness() -> getCommonness
+    int getPersistency() -> getPersistency
+    java.lang.String getSuffix() -> getSuffix
+com.comscore.android.id.IdHelperAndroid -> com.comscore.android.id.IdHelperAndroid:
+    java.lang.String NO_ID_AVAILABLE -> NO_ID_AVAILABLE
+    java.lang.String a -> a
+    java.lang.String b -> b
+    boolean c -> c
+    boolean d -> d
+    void <init>() -> <init>
+    boolean isGooglePlayServicesAvailable(android.content.Context) -> isGooglePlayServicesAvailable
+    boolean isAdvertisingIdEnabled(android.content.Context) -> isAdvertisingIdEnabled
+    java.lang.String a(android.content.Context) -> a
+    boolean b(android.content.Context) -> b
+    com.comscore.android.id.DeviceId getAdvertisingDeviceId(android.content.Context) -> getAdvertisingDeviceId
+    java.lang.String c(android.content.Context) -> c
+    java.lang.String d(android.content.Context) -> d
+    java.lang.String e(android.content.Context) -> e
+    com.comscore.android.id.DeviceId getDeviceId(android.content.Context) -> getDeviceId
+    java.lang.String f(android.content.Context) -> f
+    java.lang.String md5(java.lang.String) -> md5
+    void <clinit>() -> <clinit>
+com.comscore.android.id.a -> com.comscore.android.id.a:
+com.comscore.android.id.b -> com.comscore.android.id.b:
+    boolean a -> a
+    java.util.concurrent.LinkedBlockingQueue b -> b
+    void <init>() -> <init>
+    void onServiceConnected(android.content.ComponentName,android.os.IBinder) -> onServiceConnected
+    void onServiceDisconnected(android.content.ComponentName) -> onServiceDisconnected
+    android.os.IBinder getBinder() -> getBinder
+    void <init>(com.comscore.android.id.a) -> <init>
+com.comscore.android.id.c -> com.comscore.android.id.c:
+    android.os.IBinder a -> a
+    void <init>(android.os.IBinder) -> <init>
+    android.os.IBinder asBinder() -> asBinder
+    java.lang.String getId() -> getId
+    boolean isLimitAdTrackingEnabled(boolean) -> isLimitAdTrackingEnabled
+com.comscore.applications.AggregateMeasurement -> com.comscore.applications.AggregateMeasurement:
+    void <init>(com.comscore.analytics.Core,com.comscore.applications.EventType,java.lang.String) -> <init>
+    java.util.List getAggregateLabels() -> getAggregateLabels
+    void aggregateLabels(java.util.List) -> aggregateLabels
+    java.lang.Boolean a(java.lang.String) -> a
+    java.lang.Boolean b(java.lang.String) -> b
+    java.lang.Boolean b(java.lang.String,java.lang.String) -> b
+    java.lang.String c(java.lang.String,java.lang.String) -> c
+    java.util.List c(java.lang.String) -> c
+    void formatLists() -> formatLists
+com.comscore.applications.AppStartMeasurement -> com.comscore.applications.AppStartMeasurement:
+    void <init>(com.comscore.analytics.Core,com.comscore.applications.EventType,java.lang.String,boolean) -> <init>
+com.comscore.applications.ApplicationMeasurement -> com.comscore.applications.ApplicationMeasurement:
+    com.comscore.applications.ApplicationMeasurement newApplicationMeasurement(com.comscore.analytics.Core,com.comscore.applications.EventType,java.util.HashMap,java.lang.String) -> newApplicationMeasurement
+    void <init>(com.comscore.analytics.Core,com.comscore.applications.EventType,java.lang.String) -> <init>
+    void <init>(com.comscore.analytics.Core,com.comscore.applications.EventType,java.lang.String,boolean,boolean,boolean) -> <init>
+    android.graphics.Point a(android.content.Context) -> a
+    com.comscore.metrics.EventType a(com.comscore.applications.EventType) -> a
+com.comscore.applications.EventType -> com.comscore.applications.EventType:
+    com.comscore.applications.EventType START -> START
+    com.comscore.applications.EventType VIEW -> VIEW
+    com.comscore.applications.EventType CLOSE -> CLOSE
+    com.comscore.applications.EventType AGGREGATE -> AGGREGATE
+    com.comscore.applications.EventType HIDDEN -> HIDDEN
+    com.comscore.applications.EventType KEEPALIVE -> KEEPALIVE
+    com.comscore.applications.EventType[] a -> a
+    com.comscore.applications.EventType[] values() -> values
+    com.comscore.applications.EventType valueOf(java.lang.String) -> valueOf
+    void <init>(java.lang.String,int) -> <init>
+    java.lang.String toString() -> toString
+    void <clinit>() -> <clinit>
+com.comscore.applications.KeepAliveAlarmReceiver -> com.comscore.applications.KeepAliveAlarmReceiver:
+    java.lang.String a -> a
+    long b -> b
+    long c -> c
+    long d -> d
+    com.comscore.analytics.Core e -> e
+    boolean f -> f
+    boolean g -> g
+    void <init>(com.comscore.analytics.Core,long) -> <init>
+    void onReceive(android.content.Context,android.content.Intent) -> onReceive
+    void sendKeepAlive() -> sendKeepAlive
+    void reset() -> reset
+    void reset(long) -> reset
+    void processKeepAlive(boolean) -> processKeepAlive
+    long a(com.comscore.utils.Storage) -> a
+    void start(int) -> start
+    void a(android.content.Context) -> a
+    void stop() -> stop
+    void cancel() -> cancel
+    android.app.PendingIntent a() -> a
+com.comscore.instrumentation.InstrumentedActivity -> com.comscore.instrumentation.InstrumentedActivity:
+    void <init>() -> <init>
+    void onCreate(android.os.Bundle) -> onCreate
+    void onResume() -> onResume
+    void onPause() -> onPause
+com.comscore.instrumentation.InstrumentedFragmentActivity -> com.comscore.instrumentation.InstrumentedFragmentActivity:
+    void <init>() -> <init>
+    void onCreate(android.os.Bundle) -> onCreate
+    void onResume() -> onResume
+    void onPause() -> onPause
+com.comscore.instrumentation.InstrumentedMapActivity -> com.comscore.instrumentation.InstrumentedMapActivity:
+    void <init>() -> <init>
+    void onCreate(android.os.Bundle) -> onCreate
+    void onResume() -> onResume
+    void onPause() -> onPause
+    boolean isRouteDisplayed() -> isRouteDisplayed
+com.comscore.instrumentation.InstrumentedTabActivity -> com.comscore.instrumentation.InstrumentedTabActivity:
+    void <init>() -> <init>
+    void onCreate(android.os.Bundle) -> onCreate
+    void onResume() -> onResume
+    void onPause() -> onPause
+com.comscore.measurement.Label -> com.comscore.measurement.Label:
+    java.lang.String name -> name
+    java.lang.String value -> value
+    java.lang.Boolean aggregate -> aggregate
+    void <init>(java.lang.String,java.lang.String,java.lang.Boolean) -> <init>
+    java.lang.String pack() -> pack
+    java.lang.String a(java.lang.String) -> a
+com.comscore.measurement.Measurement -> com.comscore.measurement.Measurement:
+    java.util.HashMap a -> a
+    java.lang.String b -> b
+    long c -> c
+    void <init>(com.comscore.analytics.Core) -> <init>
+    java.lang.Boolean a(java.lang.String,java.lang.String) -> a
+    java.lang.Boolean a(java.lang.String,long) -> a
+    void a(com.comscore.measurement.Label) -> a
+    void a(java.lang.String,java.lang.String,java.lang.Boolean,java.lang.Boolean) -> a
+    void removeLabel(java.lang.String,java.lang.Boolean,java.lang.Boolean) -> removeLabel
+    void a(java.util.HashMap) -> a
+    void a(java.util.HashMap,boolean) -> a
+    void b(java.lang.String,java.lang.String,java.lang.Boolean,java.lang.Boolean) -> b
+    void setLabel(com.comscore.measurement.Label) -> setLabel
+    void setLabel(java.lang.String,java.lang.String,java.lang.Boolean) -> setLabel
+    void setLabel(java.lang.String,java.lang.String) -> setLabel
+    com.comscore.measurement.Label getLabel(java.lang.String) -> getLabel
+    java.lang.Boolean hasLabel(java.lang.String) -> hasLabel
+    java.lang.String retrieveLabelsAsString(java.lang.String[]) -> retrieveLabelsAsString
+    void setPixelURL(java.lang.String) -> setPixelURL
+    java.lang.String getPixelURL() -> getPixelURL
+com.comscore.measurement.MeasurementDispatcher -> com.comscore.measurement.MeasurementDispatcher:
+    com.comscore.analytics.Core a -> a
+    long MILLIS_PER_SECOND -> MILLIS_PER_SECOND
+    long MILLIS_PER_DAY -> MILLIS_PER_DAY
+    java.lang.String DAY_CHECK_OFFSET -> DAY_CHECK_OFFSET
+    java.lang.String DAY_CHECK_COUNTER -> DAY_CHECK_COUNTER
+    com.comscore.applications.AggregateMeasurement h -> h
+    java.util.concurrent.atomic.AtomicLong b -> b
+    java.util.concurrent.atomic.AtomicInteger c -> c
+    java.util.concurrent.atomic.AtomicLong d -> d
+    java.util.concurrent.atomic.AtomicInteger e -> e
+    java.util.concurrent.atomic.AtomicInteger f -> f
+    java.lang.Object g -> g
+    void <init>(com.comscore.analytics.Core) -> <init>
+    boolean sendMeasurmement(com.comscore.measurement.Measurement,boolean) -> sendMeasurmement
+    void b(com.comscore.measurement.Measurement) -> b
+    void a(com.comscore.measurement.Measurement) -> a
+    void loadEventData() -> loadEventData
+    boolean a() -> a
+    void addEventCounter(com.comscore.measurement.Measurement) -> addEventCounter
+    void a(com.comscore.applications.AggregateMeasurement) -> a
+    void addAggregateData(com.comscore.measurement.Measurement) -> addAggregateData
+    void a(com.comscore.measurement.MeasurementDispatcher,com.comscore.measurement.Measurement) -> a
+com.comscore.measurement.PrivilegedLabel -> com.comscore.measurement.PrivilegedLabel:
+    java.lang.Boolean a -> a
+    void <init>(java.lang.String,java.lang.String,java.lang.Boolean) -> <init>
+    java.lang.Boolean getPrivileged() -> getPrivileged
+com.comscore.measurement.a -> com.comscore.measurement.a:
+    com.comscore.measurement.Measurement a -> a
+    com.comscore.measurement.MeasurementDispatcher b -> b
+    void <init>(com.comscore.measurement.MeasurementDispatcher,com.comscore.measurement.Measurement) -> <init>
+    void run() -> run
+com.comscore.metrics.EventType -> com.comscore.metrics.EventType:
+    com.comscore.metrics.EventType VIEW -> VIEW
+    com.comscore.metrics.EventType HIDDEN -> HIDDEN
+    com.comscore.metrics.EventType[] a -> a
+    com.comscore.metrics.EventType[] values() -> values
+    com.comscore.metrics.EventType valueOf(java.lang.String) -> valueOf
+    void <init>(java.lang.String,int) -> <init>
+    java.lang.String toString() -> toString
+    void <clinit>() -> <clinit>
+com.comscore.metrics.Request -> com.comscore.metrics.Request:
+    boolean REDIRECTION_SUPPORTED -> REDIRECTION_SUPPORTED
+    com.comscore.measurement.Measurement c -> c
+    com.comscore.analytics.Core d -> d
+    com.comscore.utils.Storage e -> e
+    java.net.URL a -> a
+    java.net.Proxy b -> b
+    void <init>(com.comscore.analytics.Core,com.comscore.measurement.Measurement) -> <init>
+    java.net.URL process(java.lang.String) -> process
+    java.net.URL process() -> process
+    boolean send() -> send
+    boolean c() -> c
+    void d() -> d
+    boolean a() -> a
+    void e() -> e
+    java.lang.Boolean availableConnection() -> availableConnection
+    java.net.HttpURLConnection a(java.net.URL) -> a
+    boolean b() -> b
+    java.net.URL a(java.net.URL,int,java.lang.String) -> a
+    java.net.Proxy a(java.lang.String) -> a
+    void <clinit>() -> <clinit>
+com.comscore.metrics.a -> com.comscore.metrics.a:
+    int[] a -> a
+    void <clinit>() -> <clinit>
+com.comscore.utils.API13 -> com.comscore.utils.API13:
+    void <init>() -> <init>
+    android.graphics.Point getDisplaySize(android.view.Display) -> getDisplaySize
+com.comscore.utils.API4 -> com.comscore.utils.API4:
+    void <init>() -> <init>
+    boolean isPackageInstalledFromGooglePlayStore(android.content.Context) -> isPackageInstalledFromGooglePlayStore
+com.comscore.utils.API9 -> com.comscore.utils.API9:
+    void <init>() -> <init>
+    java.lang.String getSerial() -> getSerial
+com.comscore.utils.Base64Coder -> com.comscore.utils.Base64Coder:
+    char[] a -> a
+    byte[] b -> b
+    java.lang.String encodeString(java.lang.String) -> encodeString
+    char[] encode(byte[]) -> encode
+    char[] encode(byte[],int) -> encode
+    java.lang.String decodeString(java.lang.String) -> decodeString
+    byte[] decode(java.lang.String) -> decode
+    byte[] decode(char[]) -> decode
+    void <init>() -> <init>
+    void <clinit>() -> <clinit>
+com.comscore.utils.CSLog -> com.comscore.utils.CSLog:
+    void <init>() -> <init>
+    void d(java.lang.Object,java.lang.String) -> d
+    void d(java.lang.Class,java.lang.String) -> d
+    void v(java.lang.Class,java.lang.String) -> v
+    void v(java.lang.Object,java.lang.String) -> v
+    void e(java.lang.Class,java.lang.String) -> e
+    void e(java.lang.Object,java.lang.String) -> e
+    void printStackTrace(java.lang.Exception) -> printStackTrace
+com.comscore.utils.CacheFlusher -> com.comscore.utils.CacheFlusher:
+    com.comscore.analytics.Core a -> a
+    android.os.Handler b -> b
+    boolean c -> c
+    long d -> d
+    void <init>(com.comscore.analytics.Core) -> <init>
+    void start() -> start
+    void a(long) -> a
+    void a() -> a
+    void b() -> b
+    void update() -> update
+    void run() -> run
+    void c() -> c
+    void d() -> d
+    void e() -> e
+    void stop() -> stop
+com.comscore.utils.Connectivity -> com.comscore.utils.Connectivity:
+    org.apache.http.client.HttpClient a -> a
+    void <init>() -> <init>
+    org.apache.http.client.HttpClient getHttpClient() -> getHttpClient
+    java.lang.String getCurrentSSID(android.content.Context) -> getCurrentSSID
+    boolean isConnectedWiFi(android.content.Context) -> isConnectedWiFi
+    boolean isConnectedMobile(android.content.Context) -> isConnectedMobile
+    boolean isConnectEthernet(android.content.Context) -> isConnectEthernet
+    boolean isConnectBluetooth(android.content.Context) -> isConnectBluetooth
+    boolean isEmulator() -> isEmulator
+    boolean isDataConnected(android.content.Context) -> isDataConnected
+    org.apache.http.client.HttpClient a() -> a
+    void <clinit>() -> <clinit>
+com.comscore.utils.ConnectivityChangeReceiver -> com.comscore.utils.ConnectivityChangeReceiver:
+    java.util.Timer e -> e
+    com.comscore.analytics.Core f -> f
+    boolean a -> a
+    boolean b -> b
+    long c -> c
+    java.util.HashSet d -> d
+    void <init>(com.comscore.analytics.Core) -> <init>
+    void onReceive(android.content.Context,android.content.Intent) -> onReceive
+    void start() -> start
+    void stop() -> stop
+    void a() -> a
+    void a(android.content.Context) -> a
+    void a(java.lang.String) -> a
+    void b() -> b
+    void c() -> c
+    void a(boolean) -> a
+    void b(boolean) -> b
+    void a(long) -> a
+    java.lang.String b(android.content.Context) -> b
+    void d() -> d
+com.comscore.utils.Constants -> com.comscore.utils.Constants:
+    boolean DEBUG -> DEBUG
+    int URL_LENGTH_LIMIT -> URL_LENGTH_LIMIT
+    java.lang.String CACHE_FILENAME -> CACHE_FILENAME
+    java.lang.String RESPONSE_MASK -> RESPONSE_MASK
+    int KEEPALIVE_INTERVAL_MS -> KEEPALIVE_INTERVAL_MS
+    int KEEPALIVE_INACCURACY_MS -> KEEPALIVE_INACCURACY_MS
+    int KEEPALIVE_INTERVAL_MS_AFTER_FOREGROUND -> KEEPALIVE_INTERVAL_MS_AFTER_FOREGROUND
+    java.lang.String CENSUS_URL -> CENSUS_URL
+    java.lang.String CENSUS_URL_SECURE -> CENSUS_URL_SECURE
+    long SESSION_INACTIVE_PERIOD -> SESSION_INACTIVE_PERIOD
+    long USER_SESSION_INACTIVE_PERIOD -> USER_SESSION_INACTIVE_PERIOD
+    java.lang.String CACHE_DROPPED_MEASUREMENTS -> CACHE_DROPPED_MEASUREMENTS
+    int CACHE_MAX_SIZE -> CACHE_MAX_SIZE
+    int CACHE_MAX_BATCH_SIZE -> CACHE_MAX_BATCH_SIZE
+    int CACHE_MAX_FLUSHES_INAROW -> CACHE_MAX_FLUSHES_INAROW
+    int CACHE_WAIT_MINUTES -> CACHE_WAIT_MINUTES
+    int CACHE_MIN_SECS_ONLINE -> CACHE_MIN_SECS_ONLINE
+    int CACHE_EXPIRY_DAYS -> CACHE_EXPIRY_DAYS
+    long CACHE_FLUSHING_INTERVAL -> CACHE_FLUSHING_INTERVAL
+    java.lang.String OFFLINE_RECEIVER_URL -> OFFLINE_RECEIVER_URL
+    java.lang.String OFFLINE_RECEIVER_URL_SECURE -> OFFLINE_RECEIVER_URL_SECURE
+    java.lang.String SDK_VERSION -> SDK_VERSION
+    int EVENTS_LIMIT_PER_SECOND -> EVENTS_LIMIT_PER_SECOND
+    int EVENTS_LIMIT_PER_DAY -> EVENTS_LIMIT_PER_DAY
+    java.lang.String PAGE_NAME_LABEL -> PAGE_NAME_LABEL
+    java.lang.String GENERATED_ID_SUFFIX -> GENERATED_ID_SUFFIX
+    java.lang.String ANDROID_ID_SUFFIX -> ANDROID_ID_SUFFIX
+    java.lang.String ANDROID_AD_ID_SUFFIX -> ANDROID_AD_ID_SUFFIX
+    java.lang.String SERIAL_NUMBER_SUFFIX -> SERIAL_NUMBER_SUFFIX
+    byte[] RSA_PUBLIC_KEY -> RSA_PUBLIC_KEY
+    java.lang.String FLAG_INSTRUMENTED_ACTIVITY_IMPLEMENTED -> FLAG_INSTRUMENTED_ACTIVITY_IMPLEMENTED
+    java.lang.String CONNECTIVITY_MOBILE_MARKER -> CONNECTIVITY_MOBILE_MARKER
+    int DEFAULT_AUTOUPDATE_INTERVAL_IN_SECONDS -> DEFAULT_AUTOUPDATE_INTERVAL_IN_SECONDS
+    int MINIMAL_AUTOUPDATE_INTERVAL -> MINIMAL_AUTOUPDATE_INTERVAL
+    java.lang.String LAST_APPLICATION_ACCUMULATION_TIMESTAMP_KEY -> LAST_APPLICATION_ACCUMULATION_TIMESTAMP_KEY
+    java.lang.String LAST_SESSION_ACCUMULATION_TIMESTAMP_KEY -> LAST_SESSION_ACCUMULATION_TIMESTAMP_KEY
+    java.lang.String LAST_APPLICATION_SESSION_TIMESTAMP_KEY -> LAST_APPLICATION_SESSION_TIMESTAMP_KEY
+    java.lang.String LAST_USER_SESSION_TIMESTAMP_KEY -> LAST_USER_SESSION_TIMESTAMP_KEY
+    java.lang.String LAST_ACTIVE_USER_SESSION_TIMESTAMP_KEY -> LAST_ACTIVE_USER_SESSION_TIMESTAMP_KEY
+    java.lang.String FOREGROUND_TRANSITION_COUNT_KEY -> FOREGROUND_TRANSITION_COUNT_KEY
+    java.lang.String TOTAL_FOREGROUND_TIME_KEY -> TOTAL_FOREGROUND_TIME_KEY
+    java.lang.String TOTAL_BACKGROUND_TIME_KEY -> TOTAL_BACKGROUND_TIME_KEY
+    java.lang.String TOTAL_INACTIVE_TIME_KEY -> TOTAL_INACTIVE_TIME_KEY
+    java.lang.String ACCUMULATED_FOREGROUND_TIME_KEY -> ACCUMULATED_FOREGROUND_TIME_KEY
+    java.lang.String ACCUMULATED_BACKGROUND_TIME_KEY -> ACCUMULATED_BACKGROUND_TIME_KEY
+    java.lang.String ACCUMULATED_INACTIVE_TIME_KEY -> ACCUMULATED_INACTIVE_TIME_KEY
+    java.lang.String ACCUMULATED_APPLICATION_SESSION_TIME_KEY -> ACCUMULATED_APPLICATION_SESSION_TIME_KEY
+    java.lang.String ACCUMULATED_ACTIVE_USER_SESSION_TIME_KEY -> ACCUMULATED_ACTIVE_USER_SESSION_TIME_KEY
+    java.lang.String ACCUMULATED_USER_SESSION_TIME_KEY -> ACCUMULATED_USER_SESSION_TIME_KEY
+    java.lang.String ACTIVE_USER_SESSION_COUNT_KEY -> ACTIVE_USER_SESSION_COUNT_KEY
+    java.lang.String LAST_USER_INTERACTION_TIMESTAMP_KEY -> LAST_USER_INTERACTION_TIMESTAMP_KEY
+    java.lang.String USER_INTERACTION_COUNT_KEY -> USER_INTERACTION_COUNT_KEY
+    java.lang.String USER_SESSION_COUNT_KEY -> USER_SESSION_COUNT_KEY
+    java.lang.String APPLICATION_SESSION_COUNT_KEY -> APPLICATION_SESSION_COUNT_KEY
+    java.lang.String GENESIS_KEY -> GENESIS_KEY
+    java.lang.String PREVIOUS_GENESIS_KEY -> PREVIOUS_GENESIS_KEY
+    java.lang.String INSTALL_ID_KEY -> INSTALL_ID_KEY
+    java.lang.String FIRST_INSTALL_ID_KEY -> FIRST_INSTALL_ID_KEY
+    java.lang.String CURRENT_VERSION_KEY -> CURRENT_VERSION_KEY
+    java.lang.String PREVIOUS_VERSION_KEY -> PREVIOUS_VERSION_KEY
+    java.lang.String RUNS_COUNT_KEY -> RUNS_COUNT_KEY
+    java.lang.String COLD_START_COUNT_KEY -> COLD_START_COUNT_KEY
+    java.lang.String VID_KEY -> VID_KEY
+    java.lang.String HAS_GOOGLE_PLAY_STORE_KEY -> HAS_GOOGLE_PLAY_STORE_KEY
+    java.lang.String CROSS_PUBLISHER_ID_KEY -> CROSS_PUBLISHER_ID_KEY
+    java.lang.String MD5_RAW_CROSSPUBLISHER_ID_KEY -> MD5_RAW_CROSSPUBLISHER_ID_KEY
+    java.lang.String LAST_TRANSMISSION_KEY -> LAST_TRANSMISSION_KEY
+    java.lang.String DEFAULT_START_PAGE_NAME -> DEFAULT_START_PAGE_NAME
+    java.lang.String DEFAULT_FOREGROUND_PAGE_NAME -> DEFAULT_FOREGROUND_PAGE_NAME
+    java.lang.String DEFAULT_BACKGROUND_PAGE_NAME -> DEFAULT_BACKGROUND_PAGE_NAME
+    java.lang.String NETWORK_TYPE_LABEL_NAME -> NETWORK_TYPE_LABEL_NAME
+    java.lang.String[] LABELS_ORDER -> LABELS_ORDER
+    void <init>() -> <init>
+    void <clinit>() -> <clinit>
+com.comscore.utils.CustomExceptionHandler -> com.comscore.utils.CustomExceptionHandler:
+    java.lang.Thread$UncaughtExceptionHandler a -> a
+    com.comscore.analytics.Core b -> b
+    void <init>(com.comscore.analytics.Core) -> <init>
+    void uncaughtException(java.lang.Thread,java.lang.Throwable) -> uncaughtException
+    void a(java.lang.Throwable) -> a
+com.comscore.utils.Date -> com.comscore.utils.Date:
+    void <init>() -> <init>
+    long unixTime() -> unixTime
+com.comscore.utils.DispatchQueue -> com.comscore.utils.DispatchQueue:
+    long a -> a
+    int LIVE_TRANSMISSION_MODE -> LIVE_TRANSMISSION_MODE
+    int OFFLINE_TRANSMISSION_MODE -> OFFLINE_TRANSMISSION_MODE
+    int SECURE_MODE -> SECURE_MODE
+    int MEASUREMENT_LABEL_ORDER -> MEASUREMENT_LABEL_ORDER
+    com.comscore.analytics.Core b -> b
+    void <init>(com.comscore.analytics.Core) -> <init>
+    boolean offer(com.comscore.measurement.Measurement) -> offer
+    void enqueue(com.comscore.measurement.Measurement) -> enqueue
+    void stop() -> stop
+    boolean offer(java.lang.Runnable) -> offer
+    void processAggregateData(com.comscore.measurement.Measurement) -> processAggregateData
+    void processEventCounter(com.comscore.measurement.Measurement) -> processEventCounter
+    void enqueueSettingChange(int,java.lang.Object) -> enqueueSettingChange
+    boolean offer(java.lang.Object) -> offer
+com.comscore.utils.FileUtils -> com.comscore.utils.FileUtils:
+    void <init>() -> <init>
+    java.util.ArrayList getFileList(android.content.Context) -> getFileList
+    java.lang.String[] readCachedEvents(android.content.Context,java.lang.String) -> readCachedEvents
+    void writeEvent(com.comscore.analytics.Core,java.lang.String,int,java.lang.String) -> writeEvent
+    boolean deleteFile(com.comscore.analytics.Core,java.lang.String) -> deleteFile
+com.comscore.utils.OfflineMeasurementsCache -> com.comscore.utils.OfflineMeasurementsCache:
+    int b -> b
+    int c -> c
+    int d -> d
+    long e -> e
+    long f -> f
+    java.lang.String g -> g
+    com.comscore.analytics.Core a -> a
+    java.lang.String h -> h
+    java.util.ArrayList i -> i
+    java.lang.String j -> j
+    int k -> k
+    long l -> l
+    long m -> m
+    void <init>(com.comscore.analytics.Core) -> <init>
+    void <init>(com.comscore.analytics.Core,java.lang.String) -> <init>
+    void setCacheMaxMeasurements(int) -> setCacheMaxMeasurements
+    int getCacheMaxMeasurements() -> getCacheMaxMeasurements
+    void setCacheMaxBatchFiles(int) -> setCacheMaxBatchFiles
+    int getCacheMaxBatchFiles() -> getCacheMaxBatchFiles
+    void setCacheMaxPosts(int) -> setCacheMaxPosts
+    int getCacheMaxPosts() -> getCacheMaxPosts
+    void setCacheWaitMinutes(int) -> setCacheWaitMinutes
+    long getCacheWaitMinutes() -> getCacheWaitMinutes
+    void setCacheMeasurementExpiry(int) -> setCacheMeasurementExpiry
+    long getCacheMeasurementExpiry() -> getCacheMeasurementExpiry
+    void saveApplicationMeasurement(com.comscore.applications.EventType,java.util.HashMap) -> saveApplicationMeasurement
+    void saveApplicationMeasurement(com.comscore.applications.EventType,java.util.HashMap,boolean) -> saveApplicationMeasurement
+    void saveEvent(com.comscore.measurement.Measurement) -> saveEvent
+    void saveEvent(com.comscore.measurement.Measurement,boolean) -> saveEvent
+    void saveEvent(java.lang.String) -> saveEvent
+    int getEventCount() -> getEventCount
+    boolean isEmpty() -> isEmpty
+    void clear() -> clear
+    boolean flush() -> flush
+    java.lang.String a() -> a
+    boolean a(java.lang.String,java.lang.String) -> a
+    boolean b() -> b
+    void c() -> c
+    java.lang.Boolean d() -> d
+    void e() -> e
+    void a(java.lang.String) -> a
+    void a(int) -> a
+    java.util.List f() -> f
+    void b(java.lang.String) -> b
+    void a(java.lang.String,boolean) -> a
+    java.lang.String g() -> g
+    java.lang.String h() -> h
+    int c(java.lang.String) -> c
+    java.lang.String[] d(java.lang.String) -> d
+    java.lang.String[] a(java.lang.String[],int,int) -> a
+    long e(java.lang.String) -> e
+    boolean a(long) -> a
+    void setUrl(java.lang.String) -> setUrl
+com.comscore.utils.Permissions -> com.comscore.utils.Permissions:
+    java.lang.String[] a -> a
+    void <init>() -> <init>
+    java.lang.Boolean check(android.content.Context,java.lang.String) -> check
+    void <clinit>() -> <clinit>
+com.comscore.utils.RootDetector -> com.comscore.utils.RootDetector:
+    void <init>() -> <init>
+    boolean isDeviceRooted() -> isDeviceRooted
+    boolean a() -> a
+    boolean b() -> b
+com.comscore.utils.Storage -> com.comscore.utils.Storage:
+    java.lang.String APP_NAME_KEY -> APP_NAME_KEY
+    java.lang.String h -> h
+    long i -> i
+    android.content.SharedPreferences a -> a
+    java.util.HashMap b -> b
+    java.util.HashSet c -> c
+    java.lang.Object d -> d
+    java.lang.Object e -> e
+    long f -> f
+    boolean g -> g
+    java.lang.Runnable j -> j
+    void <init>(android.content.Context) -> <init>
+    void <init>(android.content.Context,java.lang.String) -> <init>
+    void a(android.content.Context,java.lang.String) -> a
+    java.lang.Boolean has(java.lang.String) -> has
+    java.lang.String get(java.lang.String) -> get
+    void set(java.lang.String,java.lang.String) -> set
+    void add(java.lang.String,long) -> add
+    void remove(java.lang.String) -> remove
+    void clear() -> clear
+    void a() -> a
+    void b() -> b
+    void c() -> c
+    void close() -> close
+com.comscore.utils.TransmissionMode -> com.comscore.utils.TransmissionMode:
+    com.comscore.utils.TransmissionMode DEFAULT -> DEFAULT
+    com.comscore.utils.TransmissionMode NEVER -> NEVER
+    com.comscore.utils.TransmissionMode WIFIONLY -> WIFIONLY
+    com.comscore.utils.TransmissionMode PIGGYBACK -> PIGGYBACK
+    com.comscore.utils.TransmissionMode DISABLED -> DISABLED
+    com.comscore.utils.TransmissionMode[] a -> a
+    com.comscore.utils.TransmissionMode[] values() -> values
+    com.comscore.utils.TransmissionMode valueOf(java.lang.String) -> valueOf
+    void <init>(java.lang.String,int) -> <init>
+    void <clinit>() -> <clinit>
+com.comscore.utils.Utils -> com.comscore.utils.Utils:
+    void <init>() -> <init>
+    java.lang.String md5(java.lang.String) -> md5
+    java.lang.String encrypt(java.lang.String) -> encrypt
+    long getLong(java.lang.String) -> getLong
+    long getLong(java.lang.String,long) -> getLong
+    int getInteger(java.lang.String) -> getInteger
+    int getInteger(java.lang.String,int) -> getInteger
+    boolean getBoolean(java.lang.String) -> getBoolean
+    boolean getBoolean(java.lang.String,boolean) -> getBoolean
+    boolean isNotEmpty(java.lang.String) -> isNotEmpty
+    boolean isEmpty(java.lang.String) -> isEmpty
+com.comscore.utils.XMLBuilder -> com.comscore.utils.XMLBuilder:
+    java.lang.StringBuilder a -> a
+    int b -> b
+    int c -> c
+    java.lang.String[] d -> d
+    java.lang.String[] e -> e
+    long f -> f
+    void <init>() -> <init>
+    java.lang.String generateXMLRequestString(java.lang.String[],java.lang.String) -> generateXMLRequestString
+    void a(java.lang.StringBuilder) -> a
+    void a(java.lang.StringBuilder,java.lang.String,java.lang.String) -> a
+    void b(java.lang.StringBuilder,java.lang.String,java.lang.String) -> b
+    void a(java.lang.String,java.lang.String) -> a
+    void a(java.lang.String[],java.lang.StringBuilder) -> a
+    void a(java.lang.String,java.lang.StringBuilder) -> a
+    java.lang.String getLabelFromEvent(java.lang.String,java.lang.String) -> getLabelFromEvent
+    void <clinit>() -> <clinit>
+com.comscore.utils.a -> com.comscore.utils.a:
+    javax.net.ssl.SSLContext a -> a
+    void <init>(java.security.KeyStore) -> <init>
+    java.net.Socket createSocket(java.net.Socket,java.lang.String,int,boolean) -> createSocket
+    java.net.Socket createSocket() -> createSocket
+com.comscore.utils.b -> com.comscore.utils.b:
+    com.comscore.utils.a a -> a
+    void <init>(com.comscore.utils.a) -> <init>
+    void checkClientTrusted(java.security.cert.X509Certificate[],java.lang.String) -> checkClientTrusted
+    void checkServerTrusted(java.security.cert.X509Certificate[],java.lang.String) -> checkServerTrusted
+    java.security.cert.X509Certificate[] getAcceptedIssuers() -> getAcceptedIssuers
+com.comscore.utils.c -> com.comscore.utils.c:
+    com.comscore.utils.ConnectivityChangeReceiver a -> a
+    void <init>(com.comscore.utils.ConnectivityChangeReceiver) -> <init>
+    void run() -> run
+com.comscore.utils.d -> com.comscore.utils.d:
+    void <init>() -> <init>
+    boolean accept(java.io.File,java.lang.String) -> accept
+com.comscore.utils.e -> com.comscore.utils.e:
+    com.comscore.measurement.Measurement a -> a
+    com.comscore.utils.OfflineMeasurementsCache b -> b
+    void <init>(com.comscore.utils.OfflineMeasurementsCache,com.comscore.measurement.Measurement) -> <init>
+    void run() -> run
+com.comscore.utils.f -> com.comscore.utils.f:
+    com.comscore.utils.Storage a -> a
+    void <init>(com.comscore.utils.Storage) -> <init>
+    void run() -> run
+com.comscore.utils.id.IdHelper -> com.comscore.utils.id.IdHelper:
+    java.lang.String a -> a
+    java.lang.String b -> b
+    com.comscore.utils.Storage c -> c
+    android.content.Context d -> d
+    java.lang.String e -> e
+    java.lang.String f -> f
+    java.lang.String g -> g
+    boolean h -> h
+    boolean i -> i
+    boolean j -> j
+    java.lang.Boolean k -> k
+    void <init>(android.content.Context,com.comscore.utils.Storage) -> <init>
+    boolean isIdChanged() -> isIdChanged
+    java.lang.String getCrossPublisherId() -> getCrossPublisherId
+    java.lang.String getVisitorId() -> getVisitorId
+    void setPublisherSecret(java.lang.String) -> setPublisherSecret
+    java.lang.String getPublisherSecret() -> getPublisherSecret
+    boolean isPublisherSecretEmpty() -> isPublisherSecretEmpty
+    void generateIds() -> generateIds
+    void a(java.lang.String,boolean) -> a
+    boolean a(java.lang.String) -> a
+    void a() -> a
+    java.lang.String b(java.lang.String) -> b
+    void b() -> b
+    java.lang.String getAndroidId() -> getAndroidId
+    java.lang.String getMD5AdvertisingId() -> getMD5AdvertisingId
+    boolean c() -> c
+com.comscore.utils.task.CustomThreadPoolExecutor -> com.comscore.utils.task.CustomThreadPoolExecutor:
+    int a -> a
+    void <init>(int,int,long,java.util.concurrent.TimeUnit,java.util.concurrent.BlockingQueue) -> <init>
+    void <init>(int,int,long,java.util.concurrent.TimeUnit,java.util.concurrent.BlockingQueue,java.util.concurrent.ThreadFactory) -> <init>
+    void <init>(int,int,long,java.util.concurrent.TimeUnit,java.util.concurrent.BlockingQueue,java.util.concurrent.RejectedExecutionHandler) -> <init>
+    void <init>(int,int,long,java.util.concurrent.TimeUnit,java.util.concurrent.BlockingQueue,java.util.concurrent.ThreadFactory,java.util.concurrent.RejectedExecutionHandler) -> <init>
+    void execute(java.lang.Runnable) -> execute
+    void afterExecute(java.lang.Runnable,java.lang.Throwable) -> afterExecute
+    void beforeExecute(java.lang.Thread,java.lang.Runnable) -> beforeExecute
+    int getTasksRunning() -> getTasksRunning
+com.comscore.utils.task.TaskExecutor -> com.comscore.utils.task.TaskExecutor:
+    com.comscore.analytics.Core a -> a
+    int b -> b
+    int c -> c
+    long d -> d
+    java.util.concurrent.BlockingQueue e -> e
+    com.comscore.utils.task.CustomThreadPoolExecutor f -> f
+    void <init>(com.comscore.analytics.Core) -> <init>
+    boolean execute(java.lang.Runnable,boolean) -> execute
+    void clear() -> clear
+    void waitForTasks() -> waitForTasks
+    void a(com.comscore.utils.task.CustomThreadPoolExecutor) -> a
+com.comscore.utils.task.a -> com.comscore.utils.task.a:
+    java.lang.Runnable a -> a
+    com.comscore.utils.task.TaskExecutor b -> b
+    void <init>(com.comscore.utils.task.TaskExecutor,java.lang.Runnable) -> <init>
+    void run() -> run
 com.mparticle.BuildConfig -> com.mparticle.BuildConfig:
     boolean DEBUG -> DEBUG
     java.lang.String APPLICATION_ID -> APPLICATION_ID
@@ -426,11 +1552,6 @@ com.mparticle.activity.MPListActivity -> com.mparticle.activity.MPListActivity:
     23:23:void <init>() -> <init>
     26:28:void onStart() -> onStart
     32:34:void onStop() -> onStop
-com.mparticle.activity.MPUnityNativeActivity -> com.mparticle.activity.MPUnityNativeActivity:
-    11:11:void <init>() -> <init>
-    15:17:void onCreate(android.os.Bundle) -> onCreate
-    21:23:void onStart() -> onStart
-    27:29:void onStop() -> onStop
 com.mparticle.commerce.Cart -> com.mparticle.commerce.Cart:
     java.util.List productList -> a
     android.content.SharedPreferences prefs -> b
@@ -814,7 +1935,7 @@ com.mparticle.internal.AppStateManager$2 -> com.mparticle.internal.b$2:
     282:282:void <init>(com.mparticle.internal.AppStateManager) -> <init>
     285:293:void run() -> run
     1063:1063:boolean com.mparticle.internal.Session.isTimedOut(int):63:63 -> run
-    1063:1063:void run():286 -> run
+    1063:1063:void run():288 -> run
 com.mparticle.internal.CommerceEventUtil -> com.mparticle.internal.c:
     java.lang.String mMessageType -> a
     com.mparticle.internal.Session mSession -> b
@@ -949,7 +2070,7 @@ com.mparticle.internal.ConfigManager -> com.mparticle.internal.d:
     307:308:void log(com.mparticle.MParticle$LogLevel,java.lang.String[]) -> a
     311:342:void log(com.mparticle.MParticle$LogLevel,java.lang.Throwable,java.lang.String[]) -> a
     2268:2268:com.mparticle.MParticle$Environment getEnvironment():268:268 -> a
-    2268:2268:void log(com.mparticle.MParticle$LogLevel,java.lang.Throwable,java.lang.String[]):311 -> a
+    2268:2268:void log(com.mparticle.MParticle$LogLevel,java.lang.Throwable,java.lang.String[]):312 -> a
     353:356:void setPushSoundEnabled(boolean) -> setPushSoundEnabled
     359:362:void setPushVibrationEnabled(boolean) -> setPushVibrationEnabled
     366:368:void setPushRegistrationId(java.lang.String) -> setPushRegistrationId
@@ -964,10 +2085,10 @@ com.mparticle.internal.ConfigManager -> com.mparticle.internal.d:
     412:420:org.json.JSONArray getPushKeys(android.content.Context) -> a
     2408:2408:android.content.SharedPreferences getPreferences(android.content.Context):408:408 -> a
     2408:2408:org.json.JSONArray getPushKeys(android.content.Context):413 -> a
-    424:424:int getPushTitle(android.content.Context) -> b
+    424:425:int getPushTitle(android.content.Context) -> b
     3408:3408:android.content.SharedPreferences getPreferences(android.content.Context):408:408 -> b
     3408:3408:int getPushTitle(android.content.Context):424 -> b
-    429:429:int getPushIcon(android.content.Context) -> c
+    429:430:int getPushIcon(android.content.Context) -> c
     4408:4408:android.content.SharedPreferences getPreferences(android.content.Context):408:408 -> c
     4408:4408:int getPushIcon(android.content.Context):429 -> c
     434:437:int getBreadcrumbLimit() -> o
@@ -989,7 +2110,7 @@ com.mparticle.internal.ConfigManager -> com.mparticle.internal.d:
     6091:6091:java.lang.String com.mparticle.internal.MPMessage.getMessageType():91:91 -> a
     6091:6091:boolean shouldTrigger(com.mparticle.internal.MPMessage):498 -> a
     7091:7091:java.lang.String com.mparticle.internal.MPMessage.getMessageType():91:91 -> a
-    7091:7091:boolean shouldTrigger(com.mparticle.internal.MPMessage):498 -> a
+    7091:7091:boolean shouldTrigger(com.mparticle.internal.MPMessage):499 -> a
     7095:7095:int com.mparticle.internal.MPMessage.getTypeNameHash():95:95 -> a
     7095:7095:boolean shouldTrigger(com.mparticle.internal.MPMessage):536 -> a
     7099:7099:java.lang.String com.mparticle.internal.MPMessage.getType():99:99 -> a
@@ -1095,8 +2216,8 @@ com.mparticle.internal.MParticleApiClient -> com.mparticle.internal.j:
     4514:4529:void parseMparticleJson(org.json.JSONObject):433 -> a
     472:475:void checkThrottleTime() -> f
     493:510:java.lang.String getSupportedKitString() -> g
-    5016:5016:java.util.ArrayList com.mparticle.internal.embedded.EmbeddedKitFactory.getSupportedKits():16:16 -> g
-    5016:5016:java.lang.String getSupportedKitString():494 -> g
+    5029:5032:java.util.ArrayList com.mparticle.internal.embedded.EmbeddedKitFactory.getSupportedKits():29:32 -> g
+    5029:5032:java.lang.String getSupportedKitString():494 -> g
     532:577:org.json.JSONObject getCookies() -> d
     71:90:void <clinit>() -> <clinit>
 com.mparticle.internal.MParticleApiClient$MPConfigException -> com.mparticle.internal.j$a:
@@ -1209,8 +2330,8 @@ com.mparticle.internal.MessageManager -> com.mparticle.internal.o:
     5248:5248:com.mparticle.internal.MPMessage startSession():236 -> b
     6248:6248:java.lang.String com.mparticle.internal.ConfigManager.getApiKey():248:248 -> b
     6248:6248:com.mparticle.internal.MPMessage startSession():238 -> b
-    7203:7203:com.mparticle.internal.MPMessage createFirstRunMessage():203:203 -> b
-    7203:7203:com.mparticle.internal.MPMessage startSession():240 -> b
+    7203:7206:com.mparticle.internal.MPMessage createFirstRunMessage():203:206 -> b
+    7203:7206:com.mparticle.internal.MPMessage startSession():240 -> b
     7261:7266:void incrementSessionCounter():261:266 -> b
     7261:7266:com.mparticle.internal.MPMessage startSession():252 -> b
     269:269:int getCurrentSessionCounter() -> i
@@ -1360,9 +2481,9 @@ com.mparticle.internal.UploadHandler -> com.mparticle.internal.t:
     131:171:void handleMessage(android.os.Message) -> handleMessage
     2177:2184:void com.mparticle.internal.ConfigManager.delayedStart():177:184 -> handleMessage
     2177:2184:void handleMessage(android.os.Message):139 -> handleMessage
-    2288:2288:boolean com.mparticle.internal.ConfigManager.isPushEnabled():288:288 -> handleMessage
-    2288:2288:void com.mparticle.internal.ConfigManager.delayedStart():178 -> handleMessage
-    2288:2288:void handleMessage(android.os.Message):139 -> handleMessage
+    2288:2289:boolean com.mparticle.internal.ConfigManager.isPushEnabled():288:289 -> handleMessage
+    2288:2289:void com.mparticle.internal.ConfigManager.delayedStart():178 -> handleMessage
+    2288:2289:void handleMessage(android.os.Message):139 -> handleMessage
     3180:3214:void prepareMessageUploads():180:214 -> handleMessage
     3180:3214:void handleMessage(android.os.Message):146 -> handleMessage
     3407:3417:void dbMarkAsUploadedMessage(int):407:417 -> handleMessage
@@ -1378,7 +2499,7 @@ com.mparticle.internal.UploadHandler -> com.mparticle.internal.t:
     5426:5427:boolean upload(boolean):290 -> a
     322:331:com.mparticle.internal.MessageBatch createUploadMessage(org.json.JSONArray,boolean) -> a
     5446:5449:org.json.JSONObject getDeviceInfo():446:449 -> a
-    5446:5449:com.mparticle.internal.MessageBatch createUploadMessage(org.json.JSONArray,boolean):322 -> a
+    5446:5449:com.mparticle.internal.MessageBatch createUploadMessage(org.json.JSONArray,boolean):326 -> a
     6339:6370:void addGCMHistory(com.mparticle.internal.MessageBatch):339:370 -> a
     6339:6370:com.mparticle.internal.MessageBatch createUploadMessage(org.json.JSONArray,boolean):330 -> a
     379:384:void dbInsertUpload(com.mparticle.internal.MessageBatch) -> a
@@ -1387,22 +2508,56 @@ com.mparticle.internal.UploadHandler -> com.mparticle.internal.t:
     7039:7040:void fetchSegments(long,java.lang.String,com.mparticle.segmentation.SegmentListener):442 -> a
     453:462:org.json.JSONObject getAppInfo() -> b
 com.mparticle.internal.embedded.ClientSideForwarder -> com.mparticle.internal.embedded.a:
+    void logEvent(com.mparticle.MPEvent) -> a
+    void logScreen(java.lang.String,java.util.Map) -> a
 com.mparticle.internal.embedded.ECommerceForwarder -> com.mparticle.internal.embedded.b:
-com.mparticle.internal.embedded.EmbeddedKitFactory -> com.mparticle.internal.embedded.c:
-    8:8:void <init>() -> <init>
-com.mparticle.internal.embedded.EmbeddedKitManager -> com.mparticle.internal.embedded.d:
-    com.mparticle.internal.embedded.EmbeddedKitFactory ekFactory -> a
-    com.mparticle.internal.ConfigManager mConfigManager -> b
-    java.util.concurrent.ConcurrentHashMap providers -> c
-    android.content.Context context -> d
+com.mparticle.internal.embedded.EmbeddedComscore -> com.mparticle.internal.embedded.c:
+    java.lang.String clientId -> i
+    java.lang.String publisherSecret -> j
+    java.lang.String autoUpdateMode -> k
+    int autoUpdateInterval -> l
+    boolean isEnterprise -> m
+    43:51:void <init>(com.mparticle.internal.embedded.EmbeddedKitManager) -> <init>
+    55:76:void logEvent(com.mparticle.MPEvent) -> a
+    80:83:void logScreen(java.lang.String,java.util.Map) -> a
+    87:113:void setUserAttributes(org.json.JSONObject) -> a
+    117:120:void setUserIdentity(java.lang.String,com.mparticle.MParticle$IdentityType) -> a
+    124:157:com.mparticle.internal.embedded.EmbeddedProvider update() -> a
+    1171:1171:boolean needsRestart():171:171 -> a
+    1171:1171:com.mparticle.internal.embedded.EmbeddedProvider update():124 -> a
+    162:162:java.lang.String getName() -> b
+    167:167:boolean isOriginator(java.lang.String) -> a
+    176:177:void onActivityStopped(android.app.Activity,int) -> b
+    181:182:void onActivityStarted(android.app.Activity,int) -> a
+    187:187:void onActivityCreated(android.app.Activity,int) -> c
+    192:192:void onActivityResumed(android.app.Activity,int) -> d
+    196:196:void onActivityPaused(android.app.Activity,int) -> e
+com.mparticle.internal.embedded.EmbeddedForesee -> com.mparticle.internal.embedded.d:
+    34:35:void <init>(com.mparticle.internal.embedded.EmbeddedKitManager) -> <init>
+    39:39:java.lang.String getName() -> b
+    44:44:boolean isOriginator(java.lang.String) -> a
+    49:49:com.mparticle.internal.embedded.EmbeddedProvider update() -> a
+    59:113:android.net.Uri getSurveyUrl(org.json.JSONObject) -> b
+com.mparticle.internal.embedded.EmbeddedKitFactory -> com.mparticle.internal.embedded.e:
+    12:12:void <init>() -> <init>
+com.mparticle.internal.embedded.EmbeddedKitManager -> com.mparticle.internal.embedded.f:
+    com.mparticle.internal.embedded.EmbeddedKitFactory ekFactory -> b
+    com.mparticle.internal.ConfigManager mConfigManager -> c
+    java.util.concurrent.ConcurrentHashMap providers -> d
+    android.content.Context context -> a
     34:41:void <init>(android.content.Context) -> <init>
     45:89:void updateKits(org.json.JSONArray) -> a
+    1036:1041:boolean com.mparticle.internal.embedded.EmbeddedKitFactory.isSupported(int):36:41 -> a
+    1036:1041:void updateKits(org.json.JSONArray):54 -> a
+    2017:2024:com.mparticle.internal.embedded.EmbeddedProvider com.mparticle.internal.embedded.EmbeddedKitFactory.createInstance(int,com.mparticle.internal.embedded.EmbeddedKitManager):17:24 -> a
+    2017:2024:void updateKits(org.json.JSONArray):57 -> a
+    92:105:void syncUserIdentities(com.mparticle.internal.embedded.EmbeddedProvider) -> a
     108:126:void logEvent(com.mparticle.MPEvent) -> a
-    1509:1509:java.util.List com.mparticle.internal.embedded.EmbeddedProvider.projectEvents(com.mparticle.MPEvent):509:509 -> a
-    1509:1509:void logEvent(com.mparticle.MPEvent):113 -> a
+    2509:2509:java.util.List com.mparticle.internal.embedded.EmbeddedProvider.projectEvents(com.mparticle.MPEvent):509:509 -> a
+    2509:2509:void logEvent(com.mparticle.MPEvent):113 -> a
     129:162:void logCommerceEvent(com.mparticle.commerce.CommerceEvent) -> a
-    1513:1534:java.util.List com.mparticle.internal.embedded.EmbeddedProvider.projectEvents(com.mparticle.commerce.CommerceEvent):513:534 -> a
-    1513:1534:void logCommerceEvent(com.mparticle.commerce.CommerceEvent):135 -> a
+    2513:2534:java.util.List com.mparticle.internal.embedded.EmbeddedProvider.projectEvents(com.mparticle.commerce.CommerceEvent):513:534 -> a
+    2513:2534:void logCommerceEvent(com.mparticle.commerce.CommerceEvent):135 -> a
     166:175:void logTransaction(com.mparticle.MPEvent) -> b
     178:196:void logScreen(java.lang.String,java.util.Map) -> a
     199:208:void setLocation(android.location.Location) -> a
@@ -1421,58 +2576,72 @@ com.mparticle.internal.embedded.EmbeddedKitManager -> com.mparticle.internal.emb
     368:379:void onActivityStarted(android.app.Activity,int) -> a
     382:387:boolean isEmbeddedKitUri(java.lang.String) -> c
     391:407:java.lang.String getActiveModuleIds() -> d
-    2497:2497:boolean com.mparticle.internal.embedded.EmbeddedProvider.isRunning():497:497 -> d
-    2497:2497:java.lang.String getActiveModuleIds():400 -> d
     412:416:android.net.Uri getSurveyUrl(int,org.json.JSONObject) -> a
     425:425:com.mparticle.internal.ConfigManager getConfigurationManager() -> e
     433:434:void setConfigManager(com.mparticle.internal.ConfigManager) -> a
     441:455:boolean handleGcmMessage(android.content.Intent) -> b
     459:460:boolean isProviderActive(int) -> a
-    3497:3497:boolean com.mparticle.internal.embedded.EmbeddedProvider.isRunning():497:497 -> a
-    3497:3497:boolean isProviderActive(int):460 -> a
-com.mparticle.internal.embedded.EmbeddedProvider -> com.mparticle.internal.embedded.e:
-    com.mparticle.internal.embedded.EmbeddedKitManager mEkManager -> f
-    android.util.SparseBooleanArray mTypeFilters -> g
-    android.util.SparseBooleanArray mNameFilters -> h
-    android.util.SparseBooleanArray mAttributeFilters -> a
-    android.util.SparseBooleanArray mScreenNameFilters -> i
-    android.util.SparseBooleanArray mScreenAttributeFilters -> b
-    android.util.SparseBooleanArray mUserIdentityFilters -> j
-    android.util.SparseBooleanArray mUserAttributeFilters -> c
-    android.util.SparseBooleanArray mCommerceAttributeFilters -> k
-    android.util.SparseBooleanArray mCommerceEntityFilters -> l
-    int lowBracket -> m
-    int highBracket -> n
-    java.util.LinkedList projectionList -> d
-    com.mparticle.internal.embedded.Projection defaultProjection -> o
-    com.mparticle.internal.embedded.Projection defaultScreenProjection -> p
-    com.mparticle.internal.embedded.Projection defaultCommerceProjection -> e
-    207:207:boolean disabled() -> a
-    1212:1213:boolean passesBracketing():212:213 -> a
-    1212:1213:boolean disabled():207 -> a
-    2199:2203:boolean shouldHonorOptOut():199:203 -> a
-    2199:2203:boolean disabled():207 -> a
-    217:218:boolean shouldLogEvent(com.mparticle.MPEvent) -> a
+com.mparticle.internal.embedded.EmbeddedProvider -> com.mparticle.internal.embedded.g:
+    com.mparticle.internal.embedded.EmbeddedKitManager mEkManager -> a
+    java.util.HashMap properties -> b
+    android.util.SparseBooleanArray mTypeFilters -> i
+    android.util.SparseBooleanArray mNameFilters -> j
+    android.util.SparseBooleanArray mAttributeFilters -> c
+    android.util.SparseBooleanArray mScreenNameFilters -> k
+    android.util.SparseBooleanArray mScreenAttributeFilters -> d
+    android.util.SparseBooleanArray mUserIdentityFilters -> l
+    android.util.SparseBooleanArray mUserAttributeFilters -> e
+    android.util.SparseBooleanArray mCommerceAttributeFilters -> m
+    android.util.SparseBooleanArray mCommerceEntityFilters -> n
+    java.util.Map mCommerceEntityAttributeFilters -> o
+    int lowBracket -> p
+    int highBracket -> q
+    android.content.Context context -> f
+    boolean mRunning -> r
+    java.util.LinkedList projectionList -> g
+    com.mparticle.internal.embedded.Projection defaultProjection -> s
+    com.mparticle.internal.embedded.Projection defaultScreenProjection -> t
+    com.mparticle.internal.embedded.Projection defaultCommerceProjection -> h
+    59:83:void <init>(com.mparticle.internal.embedded.EmbeddedKitManager) -> <init>
+    1421:1421:android.content.Context com.mparticle.internal.embedded.EmbeddedKitManager.getContext():421:421 -> <init>
+    1421:1421:void <init>(com.mparticle.internal.embedded.EmbeddedKitManager):82 -> <init>
+    87:182:com.mparticle.internal.embedded.EmbeddedProvider parseConfig(org.json.JSONObject) -> c
+    2148:2148:boolean com.mparticle.internal.embedded.Projection.isDefault():148:148 -> c
+    2148:2148:com.mparticle.internal.embedded.EmbeddedProvider parseConfig(org.json.JSONObject):168 -> c
+    2557:2557:int com.mparticle.internal.embedded.Projection.getMessageType():557:557 -> c
+    2557:2557:com.mparticle.internal.embedded.EmbeddedProvider parseConfig(org.json.JSONObject):169 -> c
+    3557:3557:int com.mparticle.internal.embedded.Projection.getMessageType():557:557 -> c
+    3557:3557:com.mparticle.internal.embedded.EmbeddedProvider parseConfig(org.json.JSONObject):171 -> c
+    186:195:android.util.SparseBooleanArray convertToSparseArray(org.json.JSONObject) -> b
+    207:208:boolean disabled() -> c
+    4212:4213:boolean passesBracketing():212:213 -> c
+    4212:4213:boolean disabled():207 -> c
+    5199:5203:boolean shouldHonorOptOut():199:203 -> c
+    5199:5203:boolean disabled():208 -> c
+    217:218:boolean shouldLogEvent(com.mparticle.MPEvent) -> b
     222:230:com.mparticle.commerce.CommerceEvent filterCommerceEvent(com.mparticle.commerce.CommerceEvent) -> a
-    2234:2311:com.mparticle.commerce.CommerceEvent filterCommerceEntityAttributes(com.mparticle.commerce.CommerceEvent):234:311 -> a
-    2234:2311:com.mparticle.commerce.CommerceEvent filterCommerceEvent(com.mparticle.commerce.CommerceEvent):228 -> a
-    315:335:com.mparticle.commerce.CommerceEvent filterCommerceEntities(com.mparticle.commerce.CommerceEvent) -> b
-    339:392:com.mparticle.commerce.CommerceEvent filterCommerceEventAttributes(com.mparticle.commerce.CommerceEvent) -> c
-    396:400:boolean shouldLogScreen(java.lang.String) -> a
+    234:311:com.mparticle.commerce.CommerceEvent filterCommerceEntityAttributes(com.mparticle.commerce.CommerceEvent) -> b
+    315:335:com.mparticle.commerce.CommerceEvent filterCommerceEntities(com.mparticle.commerce.CommerceEvent) -> c
+    339:392:com.mparticle.commerce.CommerceEvent filterCommerceEventAttributes(com.mparticle.commerce.CommerceEvent) -> d
+    396:400:boolean shouldLogScreen(java.lang.String) -> b
     404:422:java.util.Map filterEventAttributes(com.mparticle.MParticle$EventType,java.lang.String,android.util.SparseBooleanArray,java.util.Map) -> a
     java.lang.String getName() -> b
-    boolean isOriginator$552c4dfd() -> c
+    boolean isOriginator(java.lang.String) -> a
+    com.mparticle.internal.embedded.EmbeddedProvider update() -> a
     433:450:org.json.JSONObject filterAttributes(android.util.SparseBooleanArray,org.json.JSONObject) -> a
+    466:466:void setUserAttributes(org.json.JSONObject) -> a
+    474:474:void setUserIdentity(java.lang.String,com.mparticle.MParticle$IdentityType) -> a
+    497:497:boolean isRunning() -> d
     501:501:boolean shouldSetIdentity(com.mparticle.MParticle$IdentityType) -> a
     538:567:java.util.List projectEvents(com.mparticle.MPEvent,boolean) -> a
-com.mparticle.internal.embedded.EventWrapper -> com.mparticle.internal.embedded.f:
+com.mparticle.internal.embedded.EventWrapper -> com.mparticle.internal.embedded.h:
     java.util.Map attributeHashes -> a
     17:197:void <init>() -> <init>
     int getMessageType() -> a
     31:36:java.util.Map getHashes(java.lang.String,java.util.Map) -> a
     java.util.Map$Entry findAttribute(java.lang.String,int,com.mparticle.commerce.Product,com.mparticle.commerce.Promotion) -> a
     java.util.Map$Entry findAttribute(java.lang.String,java.lang.String,com.mparticle.commerce.Product,com.mparticle.commerce.Promotion) -> a
-com.mparticle.internal.embedded.EventWrapper$CommerceEventWrapper -> com.mparticle.internal.embedded.f$a:
+com.mparticle.internal.embedded.EventWrapper$CommerceEventWrapper -> com.mparticle.internal.embedded.h$a:
     com.mparticle.commerce.CommerceEvent mCommerceEvent -> b
     java.util.Map eventFieldHashes -> c
     java.util.HashMap eventFieldAttributes -> d
@@ -1518,7 +2687,7 @@ com.mparticle.internal.embedded.EventWrapper$CommerceEventWrapper -> com.mpartic
     12071:12071:java.util.Map$Entry findAttribute(java.lang.String,java.lang.String,com.mparticle.commerce.Product,com.mparticle.commerce.Promotion):157 -> a
     13071:13071:com.mparticle.commerce.CommerceEvent getEvent():71:71 -> a
     13071:13071:java.util.Map$Entry findAttribute(java.lang.String,java.lang.String,com.mparticle.commerce.Product,com.mparticle.commerce.Promotion):158 -> a
-com.mparticle.internal.embedded.EventWrapper$MPEventWrapper -> com.mparticle.internal.embedded.f$b:
+com.mparticle.internal.embedded.EventWrapper$MPEventWrapper -> com.mparticle.internal.embedded.h$b:
     com.mparticle.MPEvent mEvent -> b
     boolean mScreenEvent -> c
     202:203:void <init>(com.mparticle.MPEvent) -> <init>
@@ -1535,9 +2704,9 @@ com.mparticle.internal.embedded.EventWrapper$MPEventWrapper -> com.mparticle.int
     266:272:java.util.Map$Entry findAttribute(java.lang.String,int,com.mparticle.commerce.Product,com.mparticle.commerce.Promotion) -> a
     3211:3221:java.util.Map getAttributeHashes():211:221 -> a
     3211:3221:java.util.Map$Entry findAttribute(java.lang.String,int,com.mparticle.commerce.Product,com.mparticle.commerce.Promotion):267 -> a
-com.mparticle.internal.embedded.ISurveyProvider -> com.mparticle.internal.embedded.g:
-    android.net.Uri getSurveyUrl$43346760() -> a
-com.mparticle.internal.embedded.Projection -> com.mparticle.internal.embedded.h:
+com.mparticle.internal.embedded.ISurveyProvider -> com.mparticle.internal.embedded.i:
+    android.net.Uri getSurveyUrl(org.json.JSONObject) -> b
+com.mparticle.internal.embedded.Projection -> com.mparticle.internal.embedded.j:
     int mMessageType -> a
     java.lang.String mMatchType -> c
     java.lang.String mEventName -> d
@@ -1556,6 +2725,7 @@ com.mparticle.internal.embedded.Projection -> com.mparticle.internal.embedded.h:
     java.lang.String commerceMatchPropertyName -> p
     java.lang.String commerceMatchPropertyValue -> q
     int mOutboundMessageType -> r
+    48:145:void <init>(org.json.JSONObject) -> <init>
     155:173:boolean isMatch(com.mparticle.internal.embedded.EventWrapper) -> a
     1207:1224:boolean matchAppEvent(com.mparticle.internal.embedded.EventWrapper$MPEventWrapper):207:224 -> a
     1207:1224:boolean isMatch(com.mparticle.internal.embedded.EventWrapper):163 -> a
@@ -1572,18 +2742,24 @@ com.mparticle.internal.embedded.Projection -> com.mparticle.internal.embedded.h:
     391:463:java.util.List project(com.mparticle.internal.embedded.EventWrapper$CommerceEventWrapper) -> a
     467:477:java.util.List project(com.mparticle.internal.embedded.EventWrapper$MPEventWrapper) -> a
     482:507:boolean mapAttributes(java.util.List,com.mparticle.internal.embedded.EventWrapper,java.util.Map,java.util.Set,com.mparticle.commerce.Product,com.mparticle.commerce.Promotion) -> a
-    511:548:com.mparticle.internal.embedded.Projection$ProjectionResult projectCommerceEvent(com.mparticle.internal.embedded.EventWrapper$CommerceEventWrapper,com.mparticle.commerce.Product,com.mparticle.commerce.Promotion) -> a
-com.mparticle.internal.embedded.Projection$AttributeMap -> com.mparticle.internal.embedded.h$a:
+    511:551:com.mparticle.internal.embedded.Projection$ProjectionResult projectCommerceEvent(com.mparticle.internal.embedded.EventWrapper$CommerceEventWrapper,com.mparticle.commerce.Product,com.mparticle.commerce.Promotion) -> a
+com.mparticle.internal.embedded.Projection$1 -> com.mparticle.internal.embedded.j$1:
+    123:123:void <init>(com.mparticle.internal.embedded.Projection) -> <init>
+    123:123:int compare(java.lang.Object,java.lang.Object) -> compare
+    1126:1131:int compare(com.mparticle.internal.embedded.Projection$AttributeMap,com.mparticle.internal.embedded.Projection$AttributeMap):126:131 -> compare
+    1126:1131:int compare(java.lang.Object,java.lang.Object):123 -> compare
+com.mparticle.internal.embedded.Projection$AttributeMap -> com.mparticle.internal.embedded.j$a:
     java.lang.String mProjectedAttributeName -> a
     java.lang.String mValue -> b
     int mDataType -> f
     java.lang.String mMatchType -> c
     boolean mIsRequired -> d
     java.lang.String mLocation -> e
+    568:575:void <init>(org.json.JSONObject) -> <init>
     579:579:boolean equals(java.lang.Object) -> equals
     584:584:java.lang.String toString() -> toString
     592:612:boolean matchesDataType(java.lang.String) -> a
-com.mparticle.internal.embedded.Projection$ProjectionResult -> com.mparticle.internal.embedded.h$b:
+com.mparticle.internal.embedded.Projection$ProjectionResult -> com.mparticle.internal.embedded.j$b:
     com.mparticle.MPEvent mEvent -> a
     com.mparticle.commerce.CommerceEvent mCommerceEvent -> b
     621:624:void <init>(com.mparticle.MPEvent) -> <init>
@@ -1591,7 +2767,7 @@ com.mparticle.internal.embedded.Projection$ProjectionResult -> com.mparticle.int
     632:632:com.mparticle.MPEvent getMPEvent() -> a
     636:636:com.mparticle.commerce.CommerceEvent getCommerceEvent() -> b
     617:617:com.mparticle.commerce.CommerceEvent access$002(com.mparticle.internal.embedded.Projection$ProjectionResult,com.mparticle.commerce.CommerceEvent) -> a
-com.mparticle.internal.embedded.PushProvider -> com.mparticle.internal.embedded.i:
+com.mparticle.internal.embedded.PushProvider -> com.mparticle.internal.embedded.k:
     boolean handleGcmMessage$14d1abca() -> a
 com.mparticle.internal.np.MPAbstractStreamHandler -> com.mparticle.internal.np.MPAbstractStreamHandler:
     java.lang.String[] proxyOverloadSignature -> proxyOverloadSignature
@@ -1929,7 +3105,7 @@ com.mparticle.internal.np.MeasuredRequest -> com.mparticle.internal.np.MeasuredR
     127:132:void log() -> log
     138:149:int findEndOfHeaders(byte[]) -> findEndOfHeaders
     153:208:void parseInputStreamBytes(byte[],int,int) -> parseInputStreamBytes
-    211:214:boolean readyForLogging() -> readyForLogging
+    211:216:boolean readyForLogging() -> readyForLogging
     221:237:void reset() -> reset
     240:291:void parseOutputStreamBytes(byte[],int,int) -> parseOutputStreamBytes
     294:294:boolean isRequestParsed() -> isRequestParsed
@@ -1959,7 +3135,7 @@ com.mparticle.internal.np.MeasuredRequestManager -> com.mparticle.internal.np.Me
     17:45:void <init>(java.lang.String,int) -> <init>
     31:34:void addRequest(com.mparticle.internal.np.MeasuredRequest) -> addRequest
     37:38:void start(com.mparticle.internal.embedded.EmbeddedKitManager) -> start
-    41:41:boolean shouldProcessUrl(java.lang.String) -> shouldProcessUrl
+    41:42:boolean shouldProcessUrl(java.lang.String) -> shouldProcessUrl
     102:103:void addExcludedUrl(java.lang.String) -> addExcludedUrl
     106:107:void addQueryStringFilter(java.lang.String) -> addQueryStringFilter
     110:112:void resetFilters() -> resetFilters
@@ -2165,7 +3341,7 @@ com.mparticle.segmentation.Segment -> com.mparticle.segmentation.Segment:
     37:37:int getId() -> getId
     46:46:java.lang.String getName() -> getName
     55:58:java.lang.String[] getEndpoints() -> getEndpoints
-    69:69:java.lang.String toString() -> toString
+    69:71:java.lang.String toString() -> toString
 com.mparticle.segmentation.SegmentListener -> com.mparticle.segmentation.SegmentListener:
     void onSegmentsRetrieved(com.mparticle.segmentation.SegmentMembership) -> onSegmentsRetrieved
 com.mparticle.segmentation.SegmentMembership -> com.mparticle.segmentation.SegmentMembership:
