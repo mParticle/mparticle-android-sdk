@@ -9,6 +9,8 @@ import com.kochava.android.tracker.ReferralCapture;
 import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.Constants;
 
+import io.branch.referral.InstallListener;
+
 /**
  * <code>BroadcastReceiver</code> required to capture attribution data via the Google Play install referrer broadcast.
  *
@@ -61,6 +63,12 @@ public class ReferrerReceiver extends BroadcastReceiver {
             }catch (Exception e){
                 ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to pass referrer to Kochava SDK: " + e.getMessage());
             }
+            try {
+                new InstallListener().onReceive(context, intent);
+            }catch (Exception e){
+                ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to pass referrer to Branch Metrics SDK: " + e.getMessage());
+            }
+
         }
     }
 }

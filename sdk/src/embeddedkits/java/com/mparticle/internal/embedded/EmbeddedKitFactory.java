@@ -16,6 +16,7 @@ public class EmbeddedKitFactory {
     final static int KOCHAVA = MParticle.ServiceProviders.KOCHAVA;
     final static int COMSCORE = MParticle.ServiceProviders.COMSCORE;
     final static int KAHUNA = MParticle.ServiceProviders.KAHUNA;
+    final static int BRANCH_METRICS = MParticle.ServiceProviders.BRANCH_METRICS;
 
     EmbeddedProvider createInstance(int id, EmbeddedKitManager ekManager) throws JSONException, ClassNotFoundException{
         switch (id){
@@ -31,6 +32,8 @@ public class EmbeddedKitFactory {
                 return new EmbeddedAdjust(ekManager);
             case APPBOY:
                 return new EmbeddedAppboy(ekManager);
+            case BRANCH_METRICS:
+                return new EmbeddedBranchMetrics(ekManager);
             default:
                 return null;
         }
@@ -44,11 +47,13 @@ public class EmbeddedKitFactory {
         supportedKitIds.add(KAHUNA);
         supportedKitIds.add(FORESEE);
         supportedKitIds.add(ADJUST);
+        supportedKitIds.add(BRANCH_METRICS);
         return supportedKitIds;
     }
 
     public boolean isSupported(int kitModuleId) {
         switch (kitModuleId){
+            case BRANCH_METRICS:
             case KOCHAVA:
             case COMSCORE:
             case KAHUNA:

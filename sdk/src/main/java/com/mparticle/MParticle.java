@@ -1710,6 +1710,7 @@ public class MParticle {
         int KOCHAVA = 37;
         int COMSCORE = 39;
         int KAHUNA = 56;
+        int BRANCH_METRICS = 80;
         String BROADCAST_ACTIVE = "MPARTICLE_SERVICE_PROVIDER_ACTIVE_";
         String BROADCAST_DISABLED = "MPARTICLE_SERVICE_PROVIDER_DISABLED_";
     }
