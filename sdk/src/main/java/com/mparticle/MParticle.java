@@ -29,6 +29,7 @@ import com.mparticle.internal.MPUtility;
 import com.mparticle.internal.MParticleJSInterface;
 import com.mparticle.internal.MessageManager;
 import com.mparticle.internal.embedded.EmbeddedKitManager;
+import com.mparticle.internal.embedded.ReportingManager;
 import com.mparticle.internal.np.MPSSLSocketFactory;
 import com.mparticle.internal.np.MPSocketImplFactory;
 import com.mparticle.internal.np.MPUrlStreamHandlerFactory;
@@ -223,6 +224,7 @@ public class MParticle {
                     instance.mMessageManager = new MessageManager(context, configManager, installType, appStateManager);
                     instance.measuredRequestManager = MeasuredRequestManager.INSTANCE;
                     instance.measuredRequestManager.start(embeddedKitManager);
+                    embeddedKitManager.setReportingManager((ReportingManager) instance.mMessageManager);
                     instance.mEmbeddedKitManager = embeddedKitManager;
                     instance.mPreferences = context.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
 

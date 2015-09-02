@@ -8,6 +8,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 
+import com.mparticle.BuildConfig;
 import com.mparticle.MParticle;
 import com.mparticle.internal.Constants.MessageKey;
 import com.mparticle.internal.Constants.MessageType;
@@ -22,6 +23,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.List;
 import java.util.UUID;
 
 /* package-private */ class MessageHandler extends Handler {
@@ -39,6 +41,8 @@ import java.util.UUID;
     public static final int STORE_GCM_MESSAGE = 6;
     public static final int MARK_INFLUENCE_OPEN_GCM = 7;
     public static final int CLEAR_PROVIDER_GCM = 8;
+    public static final int STORE_REPORTING_MESSAGE_LIST = 9;
+
     private final MessageManagerCallbacks mMessageManagerCallbacks;
 
     public MessageHandler(Looper looper, MessageManagerCallbacks messageManager, SQLiteOpenHelper dbHelper) {
@@ -202,6 +206,15 @@ import java.util.UUID;
                     ConfigManager.log(MParticle.LogLevel.ERROR, e, "Error while clearing provider GCM messages: ", e.toString());
                 }
                 break;
+            case STORE_REPORTING_MESSAGE_LIST:
+                try{
+                    List<ReportingMessage> reportingMessages = (List<ReportingMessage>)msg.obj;
+                    dbInsertReportingMessages(reportingMessages);
+                }catch (Exception e) {
+                    if (BuildConfig.MP_DEBUG) {
+                        ConfigManager.log(MParticle.LogLevel.ERROR, e, "Error while inserting reporting messages: ", e.toString());
+                    }
+                }
         }
     }
 
@@ -420,6 +433,28 @@ import java.util.UUID;
         contentValues.put(SessionTable.END_TIME, message.getLong(MessageKey.TIMESTAMP));
         contentValues.put(SessionTable.SESSION_FOREGROUND_LENGTH, 0);
         db.insert(SessionTable.TABLE_NAME, null, contentValues);
+    }
+
+    private void dbInsertReportingMessages(List<ReportingMessage> messages) throws JSONException {
+        try {
+            db.beginTransaction();
+            for (int i = 0; i < messages.size(); i++) {
+                ReportingMessage message = messages.get(i);
+                ContentValues values = new ContentValues();
+                values.put(MParticleDatabase.ReportingTable.CREATED_AT, message.getTimestamp());
+                values.put(MParticleDatabase.ReportingTable.MODULE_ID, message.getModuleId());
+                values.put(MParticleDatabase.ReportingTable.MESSAGE, message.toJson().toString());
+                db.insert(MParticleDatabase.ReportingTable.TABLE_NAME, null, values);
+            }
+
+            db.setTransactionSuccessful();
+        }catch (Exception e) {
+            if (BuildConfig.MP_DEBUG) {
+                ConfigManager.log(MParticle.LogLevel.ERROR, "Error inserting reporting message: " + e.toString());
+            }
+        }finally {
+            db.endTransaction();
+        }
     }
 
     private void dbInsertMessage(MPMessage message) throws JSONException {

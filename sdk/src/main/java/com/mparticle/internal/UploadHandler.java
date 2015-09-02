@@ -177,27 +177,40 @@ public class UploadHandler extends Handler {
      * - mark the messages as having been uploaded.
      */
     private void prepareMessageUploads() {
-        Cursor readyMessagesCursor = null;
+        Cursor readyMessagesCursor = null, reportingMessageCursor = null;
         try {
             db.beginTransaction();
             readyMessagesCursor = MParticleDatabase.getMessagesForUpload(db);
-            if (readyMessagesCursor.getCount() > 0) {
-
+            reportingMessageCursor = MParticleDatabase.getReportingMessagesForUpload(db);
+            if (readyMessagesCursor.getCount() > 0 || reportingMessageCursor.getCount() > 0) {
                 mApiClient.fetchConfig();
                 int messageIdIndex = readyMessagesCursor.getColumnIndex(MessageTable._ID);
                 int messageIndex = readyMessagesCursor.getColumnIndex(MessageTable.MESSAGE);
-                while (!readyMessagesCursor.isAfterLast()) {
+                int reportingMessageIndex = reportingMessageCursor.getColumnIndex(MParticleDatabase.ReportingTable.MESSAGE);
+                int reportingIdMessageIndex = reportingMessageCursor.getColumnIndex(MParticleDatabase.ReportingTable._ID);
+                while (!readyMessagesCursor.isAfterLast() || !reportingMessageCursor.isAfterLast()) {
                     int highestMessageId = 0;
-
+                    int highestReportingMessageId = 0;
                     JSONArray messagesArray = new JSONArray();
                     while (messagesArray.length() <= Constants.BATCH_LIMIT && readyMessagesCursor.moveToNext()) {
                         JSONObject msgObject = new JSONObject(readyMessagesCursor.getString(messageIndex));
                         messagesArray.put(msgObject);
                         highestMessageId = readyMessagesCursor.getInt(messageIdIndex);
                     }
-                    MessageBatch uploadMessage = createUploadMessage(messagesArray, false);
+                    JSONArray reportingMessagesArray = new JSONArray();
+                    while (reportingMessagesArray.length() <= Constants.BATCH_LIMIT && reportingMessageCursor.moveToNext()) {
+                        JSONObject msgObject = new JSONObject(reportingMessageCursor.getString(reportingMessageIndex));
+                        reportingMessagesArray.put(msgObject);
+                        highestReportingMessageId = reportingMessageCursor.getInt(reportingIdMessageIndex);
+                    }
+                    MessageBatch uploadMessage = createUploadMessage(messagesArray, reportingMessagesArray, false);
                     dbInsertUpload(uploadMessage);
-                    dbMarkAsUploadedMessage(highestMessageId);
+                    if (highestMessageId > 0) {
+                        dbMarkAsUploadedMessage(highestMessageId);
+                    }
+                    if (highestReportingMessageId > 0) {
+                        dbMarkAsUploadedReportingMessage(highestReportingMessageId);
+                    }
                 }
                 db.setTransactionSuccessful();
             }
@@ -237,7 +250,7 @@ public class UploadHandler extends Handler {
                         messagesArray.put(message);
                     }
                     if (!sameSession || readyMessagesCursor.isLast()) {
-                        MessageBatch uploadMessage = createUploadMessage(messagesArray, true);
+                        MessageBatch uploadMessage = createUploadMessage(messagesArray, null, true);
                         if (uploadMessage != null) {
                             dbInsertUpload(uploadMessage);
                             dbDeleteProcessedMessages(lastSessionId);
@@ -318,9 +331,10 @@ public class UploadHandler extends Handler {
     /**
      * Method that is responsible for building an upload message to be sent over the wire.
      */
-    MessageBatch createUploadMessage(JSONArray messagesArray, boolean history) throws JSONException {
+    MessageBatch createUploadMessage(JSONArray messagesArray, JSONArray reportingMessagesArray, boolean history) throws JSONException {
         MessageBatch batchMessage = MessageBatch.create(mContext,
                 messagesArray,
+                reportingMessagesArray,
                 history,
                 getAppInfo(),
                 getDeviceInfo(),
@@ -414,6 +428,17 @@ public class UploadHandler extends Handler {
         ContentValues contentValues = new ContentValues();
         contentValues.put(MessageTable.STATUS, Status.UPLOADED);
         int rowsupdated = db.update(MessageTable.TABLE_NAME, contentValues, whereClause, whereArgs);
+    }
+
+    /**
+     * Delete reporting messages after they've been included in an upload message.
+     *
+     */
+    void dbMarkAsUploadedReportingMessage(int lastMessageId) {
+        String messageId = Long.toString(lastMessageId);
+        String[] whereArgs = new String[]{messageId};
+        String whereClause = "_id<=?";
+        int rowsdeleted = db.delete(MParticleDatabase.ReportingTable.TABLE_NAME, whereClause, whereArgs);
     }
 
     /**
