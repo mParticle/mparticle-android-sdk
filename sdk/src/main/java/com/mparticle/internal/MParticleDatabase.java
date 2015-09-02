@@ -82,6 +82,17 @@ import android.provider.BaseColumns;
                 prepareOrderBy);
     }
 
+    static Cursor getReportingMessagesForUpload(SQLiteDatabase database){
+        return database.query(
+                ReportingTable.TABLE_NAME,
+                null,
+                null,
+                null,
+                null,
+                null,
+                ReportingTable._ID + " asc");
+    }
+
     private static final int DB_VERSION = 3;
     public static final String DB_NAME = "mparticle.db";
 
@@ -220,6 +231,21 @@ import android.provider.BaseColumns;
                     GcmMessageTable.DISPLAYED_AT + " INTEGER NOT NULL" +
                     ");";
 
+    interface ReportingTable extends BaseColumns {
+        String CREATED_AT = "report_time";
+        String MODULE_ID = "module_id";
+        String TABLE_NAME = "reporting";
+        String MESSAGE = "message";
+    }
+
+    public static final String CREATE_REPORTING_DDL =
+            "CREATE TABLE IF NOT EXISTS " + ReportingTable.TABLE_NAME + " (" + BaseColumns._ID +
+                    " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                    ReportingTable.MODULE_ID + " INTEGER NOT NULL, " +
+                    ReportingTable.MESSAGE + " TEXT NOT NULL, " +
+                    ReportingTable.CREATED_AT + " INTEGER NOT NULL" +
+                    ");";
+
     MParticleDatabase(Context context) {
         super(context, DB_NAME, null, DB_VERSION);
     }
@@ -232,6 +258,7 @@ import android.provider.BaseColumns;
         db.execSQL(CREATE_COMMANDS_DDL);
         db.execSQL(CREATE_BREADCRUMBS_DDL);
         db.execSQL(CREATE_GCM_MSG_DDL);
+        db.execSQL(CREATE_REPORTING_DDL);
     }
 
     @Override
@@ -243,6 +270,7 @@ import android.provider.BaseColumns;
         db.execSQL(CREATE_COMMANDS_DDL);
         db.execSQL(CREATE_BREADCRUMBS_DDL);
         db.execSQL(CREATE_GCM_MSG_DDL);
+        db.execSQL(CREATE_REPORTING_DDL);
     }
 
 
