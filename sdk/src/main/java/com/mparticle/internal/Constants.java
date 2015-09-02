@@ -274,6 +274,7 @@ public class Constants {
         // uploading
         String MESSAGES = "msgs";
         String HISTORY = "sh";
+        String REPORTING = "fsr";
         String URL = "u";
         String METHOD = "m";
         String POST = "d";
@@ -410,6 +411,21 @@ public class Constants {
         int EVENT_TYPE_ADD_TO_WISHLIST = 20;
         int EVENT_TYPE_REMOVE_FROM_WISHLIST = 21;
         int EVENT_TYPE_IMPRESSION = 22;
+
+        String EVENT_TYPE_STRING_ADD_TO_CART = "ProductAddToCart";
+        String EVENT_TYPE_STRING_REMOVE_FROM_CART = "ProductRemoveFromCart";
+        String EVENT_TYPE_STRING_CHECKOUT = "ProductCheckout";
+        String EVENT_TYPE_STRING_CHECKOUT_OPTION = "ProductCheckoutOption";
+        String EVENT_TYPE_STRING_CLICK = "ProductClick";
+        String EVENT_TYPE_STRING_VIEW_DETAIL = "ProductViewDetail";
+        String EVENT_TYPE_STRING_PURCHASE = "ProductPurchase";
+        String EVENT_TYPE_STRING_REFUND = "ProductRefund";
+        String EVENT_TYPE_STRING_PROMOTION_VIEW = "PromotionView";
+        String EVENT_TYPE_STRING_PROMOTION_CLICK = "PromotionClick";
+        String EVENT_TYPE_STRING_ADD_TO_WISHLIST = "ProductAddToWishlist";
+        String EVENT_TYPE_STRING_REMOVE_FROM_WISHLIST = "ProductRemoveFromWishlist";
+        String EVENT_TYPE_STRING_IMPRESSION = "ProductImpression";
+        String EVENT_TYPE_STRING_UNKNOWN = "Unknown";
 
         int ENTITY_PRODUCT = 1;
         int ENTITY_PROMOTION = 2;

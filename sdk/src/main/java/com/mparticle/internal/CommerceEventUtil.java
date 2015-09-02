@@ -352,6 +352,40 @@ public class CommerceEventUtil {
         return json;
     }
 
+    public static String getEventTypeString(CommerceEvent filteredEvent) {
+        int eventType = getEventType(filteredEvent);
+        switch (eventType) {
+            case Constants.Commerce.EVENT_TYPE_ADD_TO_CART:
+                return Constants.Commerce.EVENT_TYPE_STRING_ADD_TO_CART;
+            case Constants.Commerce.EVENT_TYPE_REMOVE_FROM_CART:
+                return Constants.Commerce.EVENT_TYPE_STRING_REMOVE_FROM_CART;
+            case Constants.Commerce.EVENT_TYPE_CHECKOUT:
+                return Constants.Commerce.EVENT_TYPE_STRING_CHECKOUT;
+            case Constants.Commerce.EVENT_TYPE_CHECKOUT_OPTION:
+                return Constants.Commerce.EVENT_TYPE_STRING_CHECKOUT_OPTION;
+            case Constants.Commerce.EVENT_TYPE_CLICK:
+                return Constants.Commerce.EVENT_TYPE_STRING_CLICK;
+            case Constants.Commerce.EVENT_TYPE_VIEW_DETAIL:
+                return Constants.Commerce.EVENT_TYPE_STRING_VIEW_DETAIL;
+            case Constants.Commerce.EVENT_TYPE_PURCHASE:
+                return Constants.Commerce.EVENT_TYPE_STRING_PURCHASE;
+            case Constants.Commerce.EVENT_TYPE_REFUND:
+                return Constants.Commerce.EVENT_TYPE_STRING_REFUND;
+            case Constants.Commerce.EVENT_TYPE_ADD_TO_WISHLIST:
+                return Constants.Commerce.EVENT_TYPE_STRING_ADD_TO_WISHLIST;
+            case Constants.Commerce.EVENT_TYPE_REMOVE_FROM_WISHLIST:
+                return Constants.Commerce.EVENT_TYPE_STRING_REMOVE_FROM_WISHLIST;
+            case Constants.Commerce.EVENT_TYPE_PROMOTION_VIEW:
+                return Constants.Commerce.EVENT_TYPE_STRING_PROMOTION_VIEW;
+            case Constants.Commerce.EVENT_TYPE_PROMOTION_CLICK:
+                return Constants.Commerce.EVENT_TYPE_STRING_PROMOTION_CLICK;
+            case Constants.Commerce.EVENT_TYPE_IMPRESSION:
+                return Constants.Commerce.EVENT_TYPE_STRING_IMPRESSION;
+
+        }
+        return Constants.Commerce.EVENT_TYPE_STRING_UNKNOWN;
+    }
+
     public static int getEventType(CommerceEvent filteredEvent) {
         if (!MPUtility.isEmpty(filteredEvent.getProductAction())) {
             String action = filteredEvent.getProductAction();

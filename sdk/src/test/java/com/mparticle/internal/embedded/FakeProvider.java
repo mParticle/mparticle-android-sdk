@@ -17,7 +17,7 @@ import java.util.Map;
  */
 public class FakeProvider extends EmbeddedProvider {
     public FakeProvider(EmbeddedKitManager ekManager) {
-        super(ekManager);
+        super(0, ekManager);
         mTypeFilters = new MockSparseBooleanArray();
         mNameFilters = new MockSparseBooleanArray();
         mAttributeFilters = new MockSparseBooleanArray();

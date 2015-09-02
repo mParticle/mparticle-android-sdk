@@ -385,7 +385,7 @@ public class Projection {
             }
         }
         builder.info(newAttributes);
-        return new ProjectionResult(builder.build());
+        return new ProjectionResult(builder.build(), mID);
     }
     public List<ProjectionResult> project(EventWrapper.CommerceEventWrapper commerceEventWrapper) {
         List<ProjectionResult> projectionResults = new LinkedList<ProjectionResult>();
@@ -542,13 +542,15 @@ public class Projection {
                     new CommerceEvent.Builder(eventWrapper.getEvent())
                             .internalEventName(mProjectedEventName)
                             .customAttributes(mappedAttributes)
-                            .build()
+                            .build(),
+                    mID
             );
         }else {
             return new ProjectionResult(
                     new MPEvent.Builder(mProjectedEventName, MParticle.EventType.Transaction)
                             .info(mappedAttributes)
-                            .build()
+                            .build(),
+                    mID
             );
         }
     }
@@ -614,18 +616,25 @@ public class Projection {
         }
     }
 
-    static class ProjectionResult {
+    public static class ProjectionResult {
         private final MPEvent mEvent;
+        private final int mProjectionId;
         private CommerceEvent mCommerceEvent;
 
-        public ProjectionResult(MPEvent event) {
+        public ProjectionResult(MPEvent event, int projectionId) {
             mEvent = event;
             mCommerceEvent = null;
+            mProjectionId = projectionId;
         }
 
-        public ProjectionResult(CommerceEvent commerceEvent) {
+        public ProjectionResult(CommerceEvent commerceEvent, int projectionId) {
             mCommerceEvent = commerceEvent;
             mEvent = null;
+            mProjectionId = projectionId;
+        }
+
+        public int getProjectionId() {
+            return mProjectionId;
         }
 
         public MPEvent getMPEvent() {
