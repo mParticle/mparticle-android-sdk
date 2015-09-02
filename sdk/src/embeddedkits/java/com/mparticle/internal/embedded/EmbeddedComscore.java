@@ -1,16 +1,12 @@
 package com.mparticle.internal.embedded;
 
 import android.app.Activity;
-import android.content.Context;
-import android.content.Intent;
-import android.location.Location;
 
 import com.comscore.analytics.comScore;
 import com.mparticle.MPEvent;
 import com.mparticle.MPProduct;
 import com.mparticle.MParticle;
 import com.mparticle.internal.MPActivityCallbacks;
-import com.mparticle.internal.ReportingMessage;
 
 import org.json.JSONException;
 import org.json.JSONObject;

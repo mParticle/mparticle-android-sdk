@@ -6,7 +6,6 @@ import android.location.Location;
 import android.util.SparseBooleanArray;
 
 import com.mparticle.MPEvent;
-import com.mparticle.MPProduct;
 import com.mparticle.MParticle;
 import com.mparticle.commerce.CommerceEvent;
 import com.mparticle.commerce.Impression;
@@ -17,7 +16,6 @@ import com.mparticle.internal.CommerceEventUtil;
 import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.Constants;
 import com.mparticle.internal.MPUtility;
-import com.mparticle.internal.ReportingMessage;
 
 import org.json.JSONArray;
 import org.json.JSONException;

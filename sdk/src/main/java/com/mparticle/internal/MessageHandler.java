@@ -16,6 +16,7 @@ import com.mparticle.internal.Constants.Status;
 import com.mparticle.internal.MParticleDatabase.BreadcrumbTable;
 import com.mparticle.internal.MParticleDatabase.MessageTable;
 import com.mparticle.internal.MParticleDatabase.SessionTable;
+import com.mparticle.internal.embedded.ReportingMessage;
 import com.mparticle.messaging.AbstractCloudMessage;
 import com.mparticle.messaging.MPCloudNotificationMessage;
 

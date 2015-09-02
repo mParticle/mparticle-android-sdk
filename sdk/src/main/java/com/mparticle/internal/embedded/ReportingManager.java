@@ -1,7 +1,5 @@
 package com.mparticle.internal.embedded;
 
-import com.mparticle.internal.ReportingMessage;
-
 import java.util.List;
 
 /**

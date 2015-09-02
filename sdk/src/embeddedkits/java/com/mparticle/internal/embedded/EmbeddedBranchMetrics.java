@@ -1,36 +1,14 @@
 package com.mparticle.internal.embedded;
 
 import android.app.Activity;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.location.Location;
 
-import com.kahuna.sdk.KahunaAnalytics;
-import com.kahuna.sdk.KahunaPushReceiver;
-import com.kahuna.sdk.KahunaPushService;
-import com.kahuna.sdk.KahunaUserAttributesKeys;
-import com.kahuna.sdk.KahunaUserCredentialKeys;
 import com.mparticle.MPEvent;
 import com.mparticle.MPProduct;
-import com.mparticle.MPReceiver;
 import com.mparticle.MParticle;
-import com.mparticle.commerce.CommerceEvent;
-import com.mparticle.commerce.Impression;
-import com.mparticle.commerce.Product;
-import com.mparticle.commerce.Promotion;
-import com.mparticle.commerce.TransactionAttributes;
-import com.mparticle.internal.CommerceEventUtil;
-import com.mparticle.internal.ConfigManager;
-import com.mparticle.internal.Constants;
 import com.mparticle.internal.MPActivityCallbacks;
-import com.mparticle.internal.MPUtility;
-import com.mparticle.internal.ReportingMessage;
-import com.mparticle.internal.embedded.adjust.sdk.Adjust;
 
 import org.json.JSONObject;
 
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;

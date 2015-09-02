@@ -24,6 +24,7 @@ import com.mparticle.commerce.CommerceEvent;
 import com.mparticle.internal.Constants.MessageKey;
 import com.mparticle.internal.Constants.MessageType;
 import com.mparticle.internal.embedded.ReportingManager;
+import com.mparticle.internal.embedded.ReportingMessage;
 import com.mparticle.messaging.CloudAction;
 import com.mparticle.messaging.MPCloudNotificationMessage;
 import com.mparticle.messaging.ProviderCloudMessage;

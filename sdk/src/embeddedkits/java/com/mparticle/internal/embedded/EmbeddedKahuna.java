@@ -24,7 +24,6 @@ import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.Constants;
 import com.mparticle.internal.MPActivityCallbacks;
 import com.mparticle.internal.MPUtility;
-import com.mparticle.internal.ReportingMessage;
 
 import org.json.JSONObject;
 

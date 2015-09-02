@@ -19,7 +19,6 @@ import com.mparticle.internal.Constants;
 import com.mparticle.internal.MPActivityCallbacks;
 import com.mparticle.internal.MPUtility;
 import com.mparticle.internal.PushRegistrationHelper;
-import com.mparticle.internal.ReportingMessage;
 import com.mparticle.internal.embedded.appboy.AppboyGcmReceiver;
 import com.mparticle.internal.embedded.appboy.push.AppboyNotificationUtils;
 import com.mparticle.messaging.MessagingConfigCallbacks;

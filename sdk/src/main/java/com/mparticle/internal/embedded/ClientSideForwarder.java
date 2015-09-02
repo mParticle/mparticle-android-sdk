@@ -2,7 +2,6 @@ package com.mparticle.internal.embedded;
 
 import com.mparticle.MPEvent;
 import com.mparticle.MPProduct;
-import com.mparticle.internal.ReportingMessage;
 
 import java.util.List;
 import java.util.Map;

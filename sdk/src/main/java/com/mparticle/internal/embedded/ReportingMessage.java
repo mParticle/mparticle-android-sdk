@@ -1,4 +1,4 @@
-package com.mparticle.internal;
+package com.mparticle.internal.embedded;
 
 
 import android.content.Intent;
@@ -6,8 +6,9 @@ import android.content.Intent;
 import com.mparticle.MPEvent;
 import com.mparticle.MPProduct;
 import com.mparticle.commerce.CommerceEvent;
-import com.mparticle.internal.embedded.EmbeddedProvider;
-import com.mparticle.internal.embedded.Projection;
+import com.mparticle.internal.CommerceEventUtil;
+import com.mparticle.internal.Constants;
+import com.mparticle.internal.MPUtility;
 
 import org.json.JSONArray;
 import org.json.JSONException;

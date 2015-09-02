@@ -1,8 +1,6 @@
 package com.mparticle.internal.embedded;
 
-import com.mparticle.MPProduct;
 import com.mparticle.commerce.CommerceEvent;
-import com.mparticle.internal.ReportingMessage;
 
 import java.util.List;
 

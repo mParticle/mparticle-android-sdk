@@ -5,20 +5,16 @@ import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
 import android.net.Uri;
-import android.os.Message;
 
 import com.mparticle.MPEvent;
 import com.mparticle.MPProduct;
 import com.mparticle.MParticle;
-import com.mparticle.R;
 import com.mparticle.commerce.CommerceEvent;
 import com.mparticle.internal.AppStateManager;
 import com.mparticle.internal.CommerceEventUtil;
 import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.Constants;
 import com.mparticle.internal.MPActivityCallbacks;
-import com.mparticle.internal.MessageManager;
-import com.mparticle.internal.ReportingMessage;
 
 import org.json.JSONArray;
 import org.json.JSONException;
