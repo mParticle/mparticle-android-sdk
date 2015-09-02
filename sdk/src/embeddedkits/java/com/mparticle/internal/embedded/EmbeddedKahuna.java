@@ -24,11 +24,13 @@ import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.Constants;
 import com.mparticle.internal.MPActivityCallbacks;
 import com.mparticle.internal.MPUtility;
+import com.mparticle.internal.ReportingMessage;
 
 import org.json.JSONObject;
 
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -58,8 +60,8 @@ class EmbeddedKahuna extends EmbeddedProvider implements MPActivityCallbacks, EC
     private static final String KEY_EVENTNAME_REMOVE_FROM_WISHLIST = "defaultRemoveFromWishlistEventName";
     private static final String KEY_EVENTNAME_IMPRESSION = "defaultImpressionEventName";
 
-    public EmbeddedKahuna(EmbeddedKitManager ekManager) {
-        super(ekManager);
+    public EmbeddedKahuna(int id, EmbeddedKitManager ekManager) {
+        super(id, ekManager);
     }
 
     @Override
@@ -138,34 +140,50 @@ class EmbeddedKahuna extends EmbeddedProvider implements MPActivityCallbacks, EC
     }
 
     @Override
-    public void logEvent(MPEvent event) throws Exception {
+    public List<ReportingMessage> logEvent(MPEvent event) throws Exception {
         if (!MPUtility.isEmpty(event.getEventName())) {
+            List<ReportingMessage> messages = new LinkedList<ReportingMessage>();
             Map<String, String> eventAttributes = event.getInfo();
             if (sendTransactionData && eventAttributes != null && eventAttributes.containsKey(Constants.MessageKey.RESERVED_KEY_LTV)) {
                 Double amount = Double.parseDouble(eventAttributes.get(Constants.MessageKey.RESERVED_KEY_LTV)) * 100;
                 KahunaAnalytics.trackEvent("purchase", 1, amount.intValue());
-                if (eventAttributes != null)
+                if (eventAttributes != null) {
                     this.setUserAttributes(eventAttributes);
+                }
+                messages.add(ReportingMessage.fromEvent(this,
+                        new MPEvent.Builder(event).eventName("purchase").build())
+                );
+                return messages;
             } else {
                 KahunaAnalytics.trackEvent(event.getEventName());
                 if (eventAttributes != null) {
                     KahunaAnalytics.setUserAttributes(eventAttributes);
                 }
+                messages.add(ReportingMessage.fromEvent(this, event)
+                );
+                return messages;
             }
         }
+        return null;
     }
 
     @Override
-    public void logTransaction(MPProduct transaction) throws Exception {
+    public List<ReportingMessage> logTransaction(MPProduct transaction) throws Exception {
         if (sendTransactionData && transaction != null) {
             Double revenue = transaction.getTotalAmount() * 100;
             KahunaAnalytics.trackEvent("purchase", (int) transaction.getQuantity(), revenue.intValue());
+            List<ReportingMessage> messages = new LinkedList<ReportingMessage>();
+            messages.add(ReportingMessage.fromTransaction(this, transaction)
+                    .setEventName("purchase")
+            );
+            return messages;
         }
+        return null;
     }
 
     @Override
-    public void logScreen(String screenName, Map<String, String> eventAttributes) throws Exception {
-
+    public List<ReportingMessage> logScreen(String screenName, Map<String, String> eventAttributes) throws Exception {
+        return null;
     }
 
     @Override
@@ -250,22 +268,25 @@ class EmbeddedKahuna extends EmbeddedProvider implements MPActivityCallbacks, EC
     }
 
     @Override
-    public void handleIntent(Intent intent) {
+    public List<ReportingMessage> handleIntent(Intent intent) {
+        List<ReportingMessage> messageList = new LinkedList<ReportingMessage>();
         String action = intent.getAction();
-
         if (action.equals("com.google.android.c2dm.intent.REGISTRATION")) {
             if (EmbeddedKahuna.sReceiver == null) {
                 registerForPush();
                 intent.putExtra(MPReceiver.MPARTICLE_IGNORE, true);
                 context.sendBroadcast(intent);
+                messageList.add(ReportingMessage.fromPushRegistrationMessage(this, intent));
             }
         } else if (action.equals("com.google.android.c2dm.intent.RECEIVE")) {
             if (EmbeddedKahuna.sReceiver == null) {
                 registerForPush();
                 intent.putExtra(MPReceiver.MPARTICLE_IGNORE, true);
                 context.sendBroadcast(intent);
+                messageList.add(ReportingMessage.fromPushMessage(this, intent));
             }
         }
+        return messageList;
     }
 
     @Override
@@ -279,10 +300,12 @@ class EmbeddedKahuna extends EmbeddedProvider implements MPActivityCallbacks, EC
     }
 
     @Override
-    public void logout() {
+    List<ReportingMessage> logout() {
         KahunaAnalytics.logout();
+        List<ReportingMessage> messageList = new LinkedList<ReportingMessage>();
+        messageList.add(ReportingMessage.logoutMessage(this));
+        return messageList;
     }
-
 
     @Override
     public void onActivityCreated(Activity activity, int activityCount) {
@@ -312,7 +335,7 @@ class EmbeddedKahuna extends EmbeddedProvider implements MPActivityCallbacks, EC
     }
 
     @Override
-    public void logEvent(CommerceEvent event) throws Exception {
+    public List<ReportingMessage> logEvent(CommerceEvent event) throws Exception {
         String eventName = event.getEventName();
         if (MPUtility.isEmpty(eventName)) {
             eventName = getEventName(event);
@@ -358,5 +381,8 @@ class EmbeddedKahuna extends EmbeddedProvider implements MPActivityCallbacks, EC
         if (eventAttributes != null && eventAttributes.size() > 0) {
             KahunaAnalytics.setUserAttributes(eventAttributes);
         }
+        List<ReportingMessage> messages = new LinkedList<ReportingMessage>();
+        messages.add(ReportingMessage.fromEvent(this, event).setEventName(eventName).setAttributes(eventAttributes));
+        return messages;
     }
 }

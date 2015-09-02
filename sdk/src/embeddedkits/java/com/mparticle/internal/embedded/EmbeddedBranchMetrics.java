@@ -24,12 +24,14 @@ import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.Constants;
 import com.mparticle.internal.MPActivityCallbacks;
 import com.mparticle.internal.MPUtility;
+import com.mparticle.internal.ReportingMessage;
 import com.mparticle.internal.embedded.adjust.sdk.Adjust;
 
 import org.json.JSONObject;
 
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -44,8 +46,8 @@ class EmbeddedBranchMetrics extends EmbeddedProvider implements MPActivityCallba
 
     private String BRANCH_APP_KEY = "branchKey";
 
-    public EmbeddedBranchMetrics(EmbeddedKitManager ekManager) {
-        super(ekManager);
+    public EmbeddedBranchMetrics(int id, EmbeddedKitManager ekManager) {
+        super(id, ekManager);
         setRunning(false);
     }
 
@@ -71,7 +73,7 @@ class EmbeddedBranchMetrics extends EmbeddedProvider implements MPActivityCallba
 
 
     @Override
-    public void logEvent(MPEvent event) throws Exception {
+    public List<ReportingMessage> logEvent(MPEvent event) throws Exception {
         Map<String, String> attributes = event.getInfo();
         JSONObject jsonAttributes = null;
         if (attributes != null && attributes.size() > 0) {
@@ -80,16 +82,22 @@ class EmbeddedBranchMetrics extends EmbeddedProvider implements MPActivityCallba
             }
         }
         getBranch().userCompletedAction(event.getEventName(), jsonAttributes);
-
+        List<ReportingMessage> messages = new LinkedList<ReportingMessage>();
+        messages.add(ReportingMessage.fromEvent(this, event));
+        return messages;
     }
 
     @Override
-    public void logScreen(String screenName, Map<String, String> eventAttributes) throws Exception {
-        logEvent(
-                new MPEvent.Builder("Viewed " + screenName, MParticle.EventType.Other)
-                        .info(eventAttributes)
-                        .build()
-        );
+    public List<ReportingMessage> logScreen(String screenName, Map<String, String> eventAttributes) throws Exception {
+        MPEvent event = new MPEvent.Builder("Viewed " + screenName, MParticle.EventType.Other)
+                .info(eventAttributes)
+                .build();
+        return logEvent(event);
+    }
+
+    @Override
+    public List<ReportingMessage> logTransaction(MPProduct transaction) throws Exception {
+        return null;
     }
 
     @Override
@@ -130,7 +138,10 @@ class EmbeddedBranchMetrics extends EmbeddedProvider implements MPActivityCallba
     }
 
     @Override
-    void logout() {
+    List<ReportingMessage> logout() {
         getBranch().logout();
+        List<ReportingMessage> messageList = new LinkedList<ReportingMessage>();
+        messageList.add(ReportingMessage.logoutMessage(this));
+        return messageList;
     }
 }

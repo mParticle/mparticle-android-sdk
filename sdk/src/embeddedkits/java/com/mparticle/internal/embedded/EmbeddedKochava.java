@@ -21,8 +21,8 @@ class EmbeddedKochava extends EmbeddedProvider implements MPActivityCallbacks {
     private static final String HOST = "kochava.com";
     private Feature feature;
 
-    EmbeddedKochava(EmbeddedKitManager context) {
-        super(context);
+    EmbeddedKochava(int moduleId, EmbeddedKitManager context) {
+        super(moduleId, context);
     }
 
     @Override

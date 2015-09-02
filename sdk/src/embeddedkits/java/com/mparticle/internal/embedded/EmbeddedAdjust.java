@@ -24,8 +24,8 @@ class EmbeddedAdjust extends EmbeddedProvider implements MPActivityCallbacks {
     //check once per run to make sure we've set the referrer.
     private boolean referrerSet = false;
 
-    EmbeddedAdjust(EmbeddedKitManager ekManager) {
-        super(ekManager);
+    EmbeddedAdjust(int id, EmbeddedKitManager ekManager) {
+        super(id, ekManager);
         setRunning(false);
     }
 

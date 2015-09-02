@@ -19,6 +19,7 @@ import com.mparticle.internal.Constants;
 import com.mparticle.internal.MPActivityCallbacks;
 import com.mparticle.internal.MPUtility;
 import com.mparticle.internal.PushRegistrationHelper;
+import com.mparticle.internal.ReportingMessage;
 import com.mparticle.internal.embedded.appboy.AppboyGcmReceiver;
 import com.mparticle.internal.embedded.appboy.push.AppboyNotificationUtils;
 import com.mparticle.messaging.MessagingConfigCallbacks;
@@ -28,6 +29,7 @@ import org.json.JSONObject;
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -42,8 +44,8 @@ public class EmbeddedAppboy extends EmbeddedProvider implements MPActivityCallba
     boolean running = false;
     private boolean pushEnabled;
 
-    public EmbeddedAppboy(EmbeddedKitManager ekManager) {
-        super(ekManager);
+    public EmbeddedAppboy(int id, EmbeddedKitManager ekManager) {
+        super(id, ekManager);
     }
 
     @Override
@@ -88,7 +90,7 @@ public class EmbeddedAppboy extends EmbeddedProvider implements MPActivityCallba
     }
 
     @Override
-    public void logEvent(MPEvent event) throws Exception {
+    public List<ReportingMessage> logEvent(MPEvent event) throws Exception {
         if (event.getInfo() == null) {
             Appboy.getInstance(context).logCustomEvent(event.getEventName());
         } else {
@@ -98,34 +100,42 @@ public class EmbeddedAppboy extends EmbeddedProvider implements MPActivityCallba
             }
             Appboy.getInstance(context).logCustomEvent(event.getEventName(), properties);
         }
+        List<ReportingMessage> messages = new LinkedList<ReportingMessage>();
+        messages.add(ReportingMessage.fromEvent(this, event));
+        return messages;
     }
 
     @Override
-    public void logScreen(String screenName, Map<String, String> eventAttributes) throws Exception {
-
+    public List<ReportingMessage> logScreen(String screenName, Map<String, String> eventAttributes) throws Exception {
+        return null;
     }
 
 
     @Override
-    public void logEvent(CommerceEvent event) throws Exception {
+    public List<ReportingMessage> logEvent(CommerceEvent event) throws Exception {
+        List<ReportingMessage> messages = new LinkedList<ReportingMessage>();
         if (!MPUtility.isEmpty(event.getProductAction()) &&
-                event.getProductAction().equalsIgnoreCase(Product.PURCHASE)) {
+                event.getProductAction().equalsIgnoreCase(Product.PURCHASE) &&
+                event.getProducts().size() > 0) {
             List<Product> productList = event.getProducts();
             for (Product product : productList) {
                 logTransaction(event, product);
             }
-            return;
+            messages.add(ReportingMessage.fromEvent(this, event));
+            return messages;
         }
         List<MPEvent> eventList = CommerceEventUtil.expand(event);
         if (eventList != null) {
             for (int i = 0; i < eventList.size(); i++) {
                 try {
                     logEvent(eventList.get(i));
+                    messages.add(ReportingMessage.fromEvent(this, event));
                 } catch (Exception e) {
                     ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to call logEvent for embedded provider: " + getName() + ": " + e.getMessage());
                 }
             }
         }
+        return messages;
     }
 
     @Override
@@ -205,7 +215,7 @@ public class EmbeddedAppboy extends EmbeddedProvider implements MPActivityCallba
     }
 
     @Override
-    public void logTransaction(MPProduct product) throws Exception {
+    public List<ReportingMessage> logTransaction(MPProduct product) throws Exception {
         AppboyProperties purchaseProperties = new AppboyProperties();
         for (Map.Entry<String, String> entry : product.entrySet()) {
             String key = entry.getKey();
@@ -229,6 +239,9 @@ public class EmbeddedAppboy extends EmbeddedProvider implements MPActivityCallba
                 (int) product.getQuantity(),
                 purchaseProperties
         );
+        List<ReportingMessage> messages = new LinkedList<ReportingMessage>();
+        messages.add(ReportingMessage.fromTransaction(this, product));
+        return messages;
     }
 
     @Override
@@ -258,12 +271,14 @@ public class EmbeddedAppboy extends EmbeddedProvider implements MPActivityCallba
     }
 
     @Override
-    public boolean handleGcmMessage(Intent intent) {
+    public List<ReportingMessage> handleGcmMessage(Intent intent) {
         if (AppboyNotificationUtils.isAppboyPushMessage(intent)) {
             new AppboyGcmReceiver().onReceive(context, intent);
-            return true;
+            List<ReportingMessage> messages = new LinkedList<ReportingMessage>();
+            messages.add(ReportingMessage.fromPushMessage(this, intent));
+            return messages;
         }
-        return false;
+        return null;
     }
 
     @Override

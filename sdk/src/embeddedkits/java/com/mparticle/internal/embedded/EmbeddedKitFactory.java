@@ -21,19 +21,19 @@ public class EmbeddedKitFactory {
     EmbeddedProvider createInstance(int id, EmbeddedKitManager ekManager) throws JSONException, ClassNotFoundException{
         switch (id){
             case KOCHAVA:
-                return new EmbeddedKochava(ekManager);
+                return new EmbeddedKochava(id, ekManager);
             case COMSCORE:
-                return new EmbeddedComscore(ekManager);
+                return new EmbeddedComscore(id, ekManager);
             case KAHUNA:
-                return new EmbeddedKahuna(ekManager);
+                return new EmbeddedKahuna(id, ekManager);
             case FORESEE:
-                return new EmbeddedForesee(ekManager);
+                return new EmbeddedForesee(id, ekManager);
             case ADJUST:
-                return new EmbeddedAdjust(ekManager);
+                return new EmbeddedAdjust(id, ekManager);
             case APPBOY:
-                return new EmbeddedAppboy(ekManager);
+                return new EmbeddedAppboy(id, ekManager);
             case BRANCH_METRICS:
-                return new EmbeddedBranchMetrics(ekManager);
+                return new EmbeddedBranchMetrics(id, ekManager);
             default:
                 return null;
         }
