@@ -16,7 +16,6 @@ import com.mparticle.commerce.Product;
 import com.mparticle.internal.CommerceEventUtil;
 import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.Constants;
-import com.mparticle.internal.MPActivityCallbacks;
 import com.mparticle.internal.MPUtility;
 import com.mparticle.internal.PushRegistrationHelper;
 import com.mparticle.internal.embedded.appboy.AppboyGcmReceiver;
@@ -36,7 +35,7 @@ import java.util.Map;
 /**
  * Embedded version of the AppBoy SDK v 1.7.2
  */
-public class EmbeddedAppboy extends EmbeddedProvider implements MPActivityCallbacks, PushProvider, MessagingConfigCallbacks, ClientSideForwarder, ECommerceForwarder {
+public class EmbeddedAppboy extends EmbeddedProvider implements ActivityLifecycleForwarder, PushProvider, MessagingConfigCallbacks, ClientSideForwarder, ECommerceForwarder {
     static final String APPBOY_KEY = "apiKey";
     public static final String PUSH_ENABLED = "push_enabled";
     boolean started = false;
@@ -79,8 +78,8 @@ public class EmbeddedAppboy extends EmbeddedProvider implements MPActivityCallba
     }
 
     @Override
-    public void onActivityCreated(Activity activity, int activityCount) {
-
+    public List<ReportingMessage> onActivityCreated(Activity activity, int activityCount) {
+        return null;
     }
 
     @Override
@@ -244,29 +243,46 @@ public class EmbeddedAppboy extends EmbeddedProvider implements MPActivityCallba
     }
 
     @Override
-    public void onActivityResumed(Activity activity, int activityCount) {
+    public List<ReportingMessage> onActivityResumed(Activity activity, int activityCount) {
         if (!started) {
             onActivityStarted(activity, activityCount);
+            List<ReportingMessage> messageList = new LinkedList<ReportingMessage>();
+            messageList.add(
+                    new ReportingMessage(this, Constants.MessageType.APP_STATE_TRANSITION, System.currentTimeMillis(), null)
+            );
+            return messageList;
         }
+        return null;
     }
 
     @Override
-    public void onActivityPaused(Activity activity, int activityCount) {
-
+    public List<ReportingMessage> onActivityPaused(Activity activity, int activityCount) {
+        return null;
     }
 
     @Override
-    public void onActivityStopped(Activity activity, int activityCount) {
+    public List<ReportingMessage> onActivityStopped(Activity activity, int activityCount) {
         if (started) {
             Appboy.getInstance(activity).closeSession(activity);
             started = false;
+            List<ReportingMessage> messageList = new LinkedList<ReportingMessage>();
+            messageList.add(
+                    new ReportingMessage(this, Constants.MessageType.APP_STATE_TRANSITION, System.currentTimeMillis(), null)
+            );
+            return messageList;
         }
+        return null;
     }
 
     @Override
-    public void onActivityStarted(Activity activity, int activityCount) {
+    public List<ReportingMessage> onActivityStarted(Activity activity, int activityCount) {
         started = true;
         Appboy.getInstance(activity).openSession(activity);
+        List<ReportingMessage> messageList = new LinkedList<ReportingMessage>();
+        messageList.add(
+                new ReportingMessage(this, Constants.MessageType.APP_STATE_TRANSITION, System.currentTimeMillis(), null)
+        );
+        return messageList;
     }
 
     @Override

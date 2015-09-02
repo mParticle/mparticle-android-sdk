@@ -5,12 +5,12 @@ import android.location.Location;
 
 import com.kochava.android.tracker.Feature;
 import com.mparticle.MParticle;
-import com.mparticle.internal.MPActivityCallbacks;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
-class EmbeddedKochava extends EmbeddedProvider implements MPActivityCallbacks {
+class EmbeddedKochava extends EmbeddedProvider implements ActivityLifecycleForwarder {
     private static final String APP_ID = "appId";
     private static final String USE_CUSTOMER_ID = "useCustomerId";
     private static final String INCLUDE_ALL_IDS = "passAllOtherIdentities";
@@ -76,27 +76,32 @@ class EmbeddedKochava extends EmbeddedProvider implements MPActivityCallbacks {
 
 
     @Override
-    public void onActivityCreated(Activity activity, int activityCount) {
+    public List<ReportingMessage> onActivityCreated(Activity activity, int activityCount) {
         createKochava(activity);
+        return null;
     }
 
     @Override
-    public void onActivityResumed(Activity activity, int activityCount) {
+    public List<ReportingMessage> onActivityResumed(Activity activity, int activityCount) {
         createKochava(activity);
+        return null;
     }
 
     @Override
-    public void onActivityPaused(Activity activity, int activityCount) {
+    public List<ReportingMessage> onActivityPaused(Activity activity, int activityCount) {
+        return null;
     }
 
     @Override
-    public void onActivityStopped(Activity activity, int activityCount) {
+    public List<ReportingMessage> onActivityStopped(Activity activity, int activityCount) {
         feature = null;
+        return null;
     }
 
     @Override
-    public void onActivityStarted(Activity activity, int activityCount) {
+    public List<ReportingMessage> onActivityStarted(Activity activity, int activityCount) {
         createKochava(activity);
+        return null;
     }
 
     private void createKochava(Activity activity) {
@@ -112,6 +117,7 @@ class EmbeddedKochava extends EmbeddedProvider implements MPActivityCallbacks {
             datamap.put(Feature.INPUTITEMS.DEBUG_ON, Boolean.parseBoolean(properties.get(ENABLE_LOGGING)));
             datamap.put(Feature.INPUTITEMS.REQUEST_ATTRIBUTION, Boolean.parseBoolean(properties.get(RETRIEVE_ATT_DATA)));
             feature = new Feature(activity, datamap);
+
         }
     }
 }

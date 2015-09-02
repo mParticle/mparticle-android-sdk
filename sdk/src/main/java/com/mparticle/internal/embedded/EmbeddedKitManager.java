@@ -395,10 +395,11 @@ public class EmbeddedKitManager implements MPActivityCallbacks {
     @Override
     public void onActivityCreated(Activity activity, int activityCount) {
         for (EmbeddedProvider provider : providers.values()) {
-            if (provider instanceof MPActivityCallbacks) {
+            if (provider instanceof ActivityLifecycleForwarder) {
                 try {
                     if (!provider.disabled()) {
-                        ((MPActivityCallbacks) provider).onActivityCreated(activity, activityCount);
+                        List<ReportingMessage> reportingMessages = ((ActivityLifecycleForwarder) provider).onActivityCreated(activity, activityCount);
+                        mReportingManager.logAll(reportingMessages);
                     }
                 } catch (Exception e) {
                     ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to call onCreate for embedded provider: " + provider.getName() + ": " + e.getMessage());
@@ -410,10 +411,11 @@ public class EmbeddedKitManager implements MPActivityCallbacks {
     @Override
     public void onActivityResumed(Activity activity, int currentCount) {
         for (EmbeddedProvider provider : providers.values()) {
-            if (provider instanceof MPActivityCallbacks) {
+            if (provider instanceof ActivityLifecycleForwarder) {
                 try {
                     if (!provider.disabled()) {
-                        ((MPActivityCallbacks) provider).onActivityResumed(activity, currentCount);
+                        List<ReportingMessage> reportingMessages = ((ActivityLifecycleForwarder) provider).onActivityResumed(activity, currentCount);
+                        mReportingManager.logAll(reportingMessages);
                     }
                 } catch (Exception e) {
                     ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to call onResume for embedded provider: " + provider.getName() + ": " + e.getMessage());
@@ -425,10 +427,11 @@ public class EmbeddedKitManager implements MPActivityCallbacks {
     @Override
     public void onActivityPaused(Activity activity, int activityCount) {
         for (EmbeddedProvider provider : providers.values()) {
-            if (provider instanceof MPActivityCallbacks) {
+            if (provider instanceof ActivityLifecycleForwarder) {
                 try {
                     if (!provider.disabled()) {
-                        ((MPActivityCallbacks) provider).onActivityPaused(activity, activityCount);
+                        List<ReportingMessage> reportingMessages = ((ActivityLifecycleForwarder) provider).onActivityPaused(activity, activityCount);
+                        mReportingManager.logAll(reportingMessages);
                     }
                 } catch (Exception e) {
                     ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to call onResume for embedded provider: " + provider.getName() + ": " + e.getMessage());
@@ -440,10 +443,11 @@ public class EmbeddedKitManager implements MPActivityCallbacks {
     @Override
     public void onActivityStopped(Activity activity, int currentCount) {
         for (EmbeddedProvider provider : providers.values()) {
-            if (provider instanceof MPActivityCallbacks) {
+            if (provider instanceof ActivityLifecycleForwarder) {
                 try {
                     if (!provider.disabled()) {
-                        ((MPActivityCallbacks) provider).onActivityStopped(activity, currentCount);
+                        List<ReportingMessage> reportingMessages = ((ActivityLifecycleForwarder) provider).onActivityStopped(activity, currentCount);
+                        mReportingManager.logAll(reportingMessages);
                     }
                 } catch (Exception e) {
                     ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to call onResume for embedded provider: " + provider.getName() + ": " + e.getMessage());
@@ -455,10 +459,11 @@ public class EmbeddedKitManager implements MPActivityCallbacks {
     @Override
     public void onActivityStarted(Activity activity, int currentCount) {
         for (EmbeddedProvider provider : providers.values()) {
-            if (provider instanceof MPActivityCallbacks) {
+            if (provider instanceof ActivityLifecycleForwarder) {
                 try {
                     if (!provider.disabled()) {
-                        ((MPActivityCallbacks) provider).onActivityStarted(activity, currentCount);
+                        List<ReportingMessage> reportingMessages = ((ActivityLifecycleForwarder) provider).onActivityStarted(activity, currentCount);
+                        mReportingManager.logAll(reportingMessages);
                     }
                 } catch (Exception e) {
                     ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to call onResume for embedded provider: " + provider.getName() + ": " + e.getMessage());
@@ -526,8 +531,8 @@ public class EmbeddedKitManager implements MPActivityCallbacks {
         this.mAppStateManager = appStateManager;
     }
 
-    public void setReportingManager(ReportingManager messageManager) {
-
+    public void setReportingManager(ReportingManager reportingManager) {
+        mReportingManager = reportingManager;
     }
 
     public boolean handleGcmMessage(Intent intent) {

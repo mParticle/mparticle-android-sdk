@@ -6,7 +6,7 @@ import com.comscore.analytics.comScore;
 import com.mparticle.MPEvent;
 import com.mparticle.MPProduct;
 import com.mparticle.MParticle;
-import com.mparticle.internal.MPActivityCallbacks;
+import com.mparticle.internal.Constants;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -22,7 +22,7 @@ import java.util.Map;
  * Embedded implementation of the Comscore SDK, tested against Comscore 2.14.0923.
  * <p/>
  */
-class EmbeddedComscore extends EmbeddedProvider implements MPActivityCallbacks, ClientSideForwarder {
+class EmbeddedComscore extends EmbeddedProvider implements ActivityLifecycleForwarder, ClientSideForwarder {
     //Server config constants defined for this provider
     //keys to provide access to the comscore account.
     private static final String CLIENT_ID = "CustomerC2Value";
@@ -184,27 +184,38 @@ class EmbeddedComscore extends EmbeddedProvider implements MPActivityCallbacks, 
     }
 
     @Override
-    public void onActivityStopped(Activity activity, int currentCount) {
+    public List<ReportingMessage> onActivityStopped(Activity activity, int currentCount) {
         comScore.onExitForeground();
+        List<ReportingMessage> messageList = new LinkedList<ReportingMessage>();
+        messageList.add(
+                new ReportingMessage(this, Constants.MessageType.APP_STATE_TRANSITION, System.currentTimeMillis(), null)
+        );
+        return messageList;
     }
 
     @Override
-    public void onActivityStarted(Activity activity, int currentCount) {
+    public List<ReportingMessage> onActivityStarted(Activity activity, int currentCount) {
         comScore.onEnterForeground();
+        List<ReportingMessage> messageList = new LinkedList<ReportingMessage>();
+        messageList.add(
+                new ReportingMessage(this, Constants.MessageType.APP_STATE_TRANSITION, System.currentTimeMillis(), null)
+        );
+        return messageList;
     }
 
     @Override
-    public void onActivityCreated(Activity activity, int activityCount) {
-
+    public List<ReportingMessage> onActivityCreated(Activity activity, int activityCount) {
+        return null;
     }
 
     @Override
-    public void onActivityResumed(Activity activity, int currentCount) {
-
+    public List<ReportingMessage> onActivityResumed(Activity activity, int currentCount) {
+        return null;
     }
 
     @Override
-    public void onActivityPaused(Activity activity, int activityCount) {
+    public List<ReportingMessage> onActivityPaused(Activity activity, int activityCount) {
+        return null;
     }
 
 

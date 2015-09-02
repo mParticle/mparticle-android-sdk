@@ -5,7 +5,7 @@ import android.app.Activity;
 import com.mparticle.MPEvent;
 import com.mparticle.MPProduct;
 import com.mparticle.MParticle;
-import com.mparticle.internal.MPActivityCallbacks;
+import com.mparticle.internal.Constants;
 
 import org.json.JSONObject;
 
@@ -20,9 +20,11 @@ import io.branch.referral.Branch;
  * Embedded implementation of the Branch Metrics SDK
  * <p/>
  */
-class EmbeddedBranchMetrics extends EmbeddedProvider implements MPActivityCallbacks, ClientSideForwarder {
+class EmbeddedBranchMetrics extends EmbeddedProvider implements ActivityLifecycleForwarder, ClientSideForwarder {
 
     private String BRANCH_APP_KEY = "branchKey";
+    private final String FORWARD_SCREEN_VIEWS = "forwardScreenViews";
+    private boolean mSendScreenEvents;
 
     public EmbeddedBranchMetrics(int id, EmbeddedKitManager ekManager) {
         super(id, ekManager);
@@ -46,6 +48,8 @@ class EmbeddedBranchMetrics extends EmbeddedProvider implements MPActivityCallba
                setRunning(getBranch().initSession());
            }
         }
+        String sendScreenEvents = properties.get(FORWARD_SCREEN_VIEWS);
+        mSendScreenEvents = sendScreenEvents != null && sendScreenEvents.equalsIgnoreCase("true");
         return this;
     }
 
@@ -55,6 +59,7 @@ class EmbeddedBranchMetrics extends EmbeddedProvider implements MPActivityCallba
         Map<String, String> attributes = event.getInfo();
         JSONObject jsonAttributes = null;
         if (attributes != null && attributes.size() > 0) {
+            jsonAttributes = new JSONObject();
             for (Map.Entry<String, String> entry : attributes.entrySet()) {
                 jsonAttributes.put(entry.getKey(), entry.getValue());
             }
@@ -67,10 +72,14 @@ class EmbeddedBranchMetrics extends EmbeddedProvider implements MPActivityCallba
 
     @Override
     public List<ReportingMessage> logScreen(String screenName, Map<String, String> eventAttributes) throws Exception {
-        MPEvent event = new MPEvent.Builder("Viewed " + screenName, MParticle.EventType.Other)
-                .info(eventAttributes)
-                .build();
-        return logEvent(event);
+        if (mSendScreenEvents){
+            MPEvent event = new MPEvent.Builder("Viewed " + screenName, MParticle.EventType.Other)
+                    .info(eventAttributes)
+                    .build();
+            return logEvent(event);
+        }else {
+            return null;
+        }
     }
 
     @Override
@@ -79,19 +88,24 @@ class EmbeddedBranchMetrics extends EmbeddedProvider implements MPActivityCallba
     }
 
     @Override
-    public void onActivityCreated(Activity activity, int activityCount) {
-
+    public List<ReportingMessage> onActivityCreated(Activity activity, int activityCount) {
+        return null;
     }
 
     @Override
-    public void onActivityResumed(Activity activity, int activityCount) {
+    public List<ReportingMessage> onActivityResumed(Activity activity, int activityCount) {
         //there's no hurt in calling this here just in case the EK is init'd too late for onStart
         setRunning(getBranch().initSession());
+        List<ReportingMessage> messageList = new LinkedList<ReportingMessage>();
+        messageList.add(
+                new ReportingMessage(this, Constants.MessageType.APP_STATE_TRANSITION, System.currentTimeMillis(), null)
+        );
+        return messageList;
     }
 
     @Override
-    public void onActivityPaused(Activity activity, int activityCount) {
-
+    public List<ReportingMessage> onActivityPaused(Activity activity, int activityCount) {
+        return null;
     }
 
     private Branch getBranch() {
@@ -99,13 +113,28 @@ class EmbeddedBranchMetrics extends EmbeddedProvider implements MPActivityCallba
     }
 
     @Override
-    public void onActivityStopped(Activity activity, int activityCount) {
+    public List<ReportingMessage> onActivityStopped(Activity activity, int activityCount) {
         getBranch().closeSession();
+        List<ReportingMessage> messageList = new LinkedList<ReportingMessage>();
+        messageList.add(
+                new ReportingMessage(this, Constants.MessageType.APP_STATE_TRANSITION, System.currentTimeMillis(), null)
+        );
+        return messageList;
     }
 
     @Override
-    public void onActivityStarted(Activity activity, int activityCount) {
-        setRunning(getBranch().initSession());
+    public List<ReportingMessage> onActivityStarted(Activity activity, int activityCount) {
+        if (getBranch().initSession()) {
+            setRunning(true);
+            List<ReportingMessage> messageList = new LinkedList<ReportingMessage>();
+            messageList.add(
+                    new ReportingMessage(this, Constants.MessageType.APP_STATE_TRANSITION, System.currentTimeMillis(), null)
+            );
+            return messageList;
+        }else {
+            setRunning(false);
+            return null;
+        }
     }
 
     @Override

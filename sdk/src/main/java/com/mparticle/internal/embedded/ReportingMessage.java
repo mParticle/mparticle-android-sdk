@@ -130,12 +130,13 @@ public class ReportingMessage {
             }
             jsonObject.put("attrs", attributeJson);
         }
-        if (!MPUtility.isEmpty(eventType)) {
-            jsonObject.put("et", eventType);
-        }
+
         if (messageType.equals(Constants.MessageType.EVENT)) {
             if (!MPUtility.isEmpty(eventName)) {
                 jsonObject.put("n", eventName);
+            }
+            if (!MPUtility.isEmpty(eventType)) {
+                jsonObject.put("et", eventType);
             }
         } else if (messageType.equals(Constants.MessageType.SCREEN_VIEW)) {
             if (!MPUtility.isEmpty(screenName)) {

@@ -22,7 +22,6 @@ import com.mparticle.commerce.TransactionAttributes;
 import com.mparticle.internal.CommerceEventUtil;
 import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.Constants;
-import com.mparticle.internal.MPActivityCallbacks;
 import com.mparticle.internal.MPUtility;
 
 import org.json.JSONObject;
@@ -38,7 +37,7 @@ import java.util.Map;
  * Embedded implementation of the Kahuna SDK
  * <p/>
  */
-class EmbeddedKahuna extends EmbeddedProvider implements MPActivityCallbacks, ECommerceForwarder, ClientSideForwarder {
+class EmbeddedKahuna extends EmbeddedProvider implements ActivityLifecycleForwarder, ECommerceForwarder, ClientSideForwarder {
 
     static KahunaPushReceiver sReceiver;
     boolean initialized = false;
@@ -307,30 +306,41 @@ class EmbeddedKahuna extends EmbeddedProvider implements MPActivityCallbacks, EC
     }
 
     @Override
-    public void onActivityCreated(Activity activity, int activityCount) {
+    public List<ReportingMessage> onActivityCreated(Activity activity, int activityCount) {
         update();
+        return null;
     }
 
     @Override
-    public void onActivityResumed(Activity activity, int activityCount) {
-
+    public List<ReportingMessage> onActivityResumed(Activity activity, int activityCount) {
+        return null;
     }
 
     @Override
-    public void onActivityPaused(Activity activity, int activityCount) {
-
+    public List<ReportingMessage> onActivityPaused(Activity activity, int activityCount) {
+        return null;
     }
 
     @Override
-    public void onActivityStopped(Activity activity, int activityCount) {
+    public List<ReportingMessage> onActivityStopped(Activity activity, int activityCount) {
         update();
         KahunaAnalytics.stop();
+        List<ReportingMessage> messageList = new LinkedList<ReportingMessage>();
+        messageList.add(
+                new ReportingMessage(this, Constants.MessageType.APP_STATE_TRANSITION, System.currentTimeMillis(), null)
+        );
+        return messageList;
     }
 
     @Override
-    public void onActivityStarted(Activity activity, int activityCount) {
+    public List<ReportingMessage> onActivityStarted(Activity activity, int activityCount) {
         update();
         KahunaAnalytics.start();
+        List<ReportingMessage> messageList = new LinkedList<ReportingMessage>();
+        messageList.add(
+                new ReportingMessage(this, Constants.MessageType.APP_STATE_TRANSITION, System.currentTimeMillis(), null)
+        );
+        return messageList;
     }
 
     @Override

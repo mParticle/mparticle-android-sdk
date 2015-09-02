@@ -3,11 +3,13 @@ package com.mparticle.internal.embedded;
 import android.app.Activity;
 
 import com.mparticle.MParticle;
-import com.mparticle.internal.MPActivityCallbacks;
+import com.mparticle.internal.Constants;
 import com.mparticle.internal.embedded.adjust.sdk.Adjust;
 import com.mparticle.internal.embedded.adjust.sdk.AdjustConfig;
 import com.mparticle.internal.embedded.adjust.sdk.LogLevel;
 
+import java.util.LinkedList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -15,7 +17,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * Embedded implementation of the Adjust SDK 4.0.6
  * <p/>
  */
-class EmbeddedAdjust extends EmbeddedProvider implements MPActivityCallbacks {
+class EmbeddedAdjust extends EmbeddedProvider implements ActivityLifecycleForwarder {
 
     private static final String APP_TOKEN = "appToken";
     private static final String HOST = "app.adjust.io";
@@ -77,33 +79,46 @@ class EmbeddedAdjust extends EmbeddedProvider implements MPActivityCallbacks {
     }
 
     @Override
-    public void onActivityCreated(Activity activity, int activityCount) {
-
+    public List<ReportingMessage> onActivityCreated(Activity activity, int activityCount) {
+        return null;
     }
 
     @Override
-    public void onActivityResumed(Activity activity, int currentCount) {
+    public List<ReportingMessage> onActivityResumed(Activity activity, int currentCount) {
         if (!hasResumed.get()) {
             Adjust.onResume();
             hasResumed.set(true);
+            List<ReportingMessage> messageList = new LinkedList<ReportingMessage>();
+            messageList.add(
+                new ReportingMessage(this, Constants.MessageType.APP_STATE_TRANSITION, System.currentTimeMillis(), null)
+            );
+            return messageList;
         }
+        return null;
     }
 
     @Override
-    public void onActivityPaused(Activity activity, int activityCount) {
+    public List<ReportingMessage> onActivityPaused(Activity activity, int activityCount) {
         Adjust.onPause();
         hasResumed.set(false);
+        List<ReportingMessage> messageList = new LinkedList<ReportingMessage>();
+        messageList.add(
+                new ReportingMessage(this, Constants.MessageType.APP_STATE_TRANSITION, System.currentTimeMillis(), null)
+        );
+        return messageList;
     }
 
     @Override
-    public void onActivityStopped(Activity activity, int activityCount) {
-
+    public List<ReportingMessage> onActivityStopped(Activity activity, int activityCount) {
+        return null;
     }
 
-
-
     @Override
-    public void onActivityStarted(Activity activity, int activityCount) {
-
+    public List<ReportingMessage> onActivityStarted(Activity activity, int activityCount) {
+        List<ReportingMessage> messageList = new LinkedList<ReportingMessage>();
+        messageList.add(
+                new ReportingMessage(this, Constants.MessageType.APP_STATE_TRANSITION, System.currentTimeMillis(), null)
+        );
+        return messageList;
     }
 }

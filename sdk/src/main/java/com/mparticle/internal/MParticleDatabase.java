@@ -93,7 +93,7 @@ import android.provider.BaseColumns;
                 ReportingTable._ID + " asc");
     }
 
-    private static final int DB_VERSION = 3;
+    private static final int DB_VERSION = 4;
     public static final String DB_NAME = "mparticle.db";
 
     interface BreadcrumbTable {
