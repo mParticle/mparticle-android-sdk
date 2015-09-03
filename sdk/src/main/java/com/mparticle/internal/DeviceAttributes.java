@@ -11,6 +11,7 @@ import android.telephony.TelephonyManager;
 import android.util.DisplayMetrics;
 import android.view.WindowManager;
 
+import com.mparticle.MParticle;
 import com.mparticle.internal.Constants.MessageKey;
 import com.mparticle.internal.Constants.PrefKeys;
 
@@ -192,21 +193,28 @@ import java.util.TimeZone;
             attributes.put(MessageKey.DEVICE_ANID, MPUtility.getAndroidID(appContext));
             attributes.put(MessageKey.DEVICE_OPEN_UDID, MPUtility.getOpenUDID(appContext));
 
-            Class AdvertisingIdClient = Class
-                    .forName("com.google.android.gms.ads.identifier.AdvertisingIdClient");
-            Method getAdvertisingInfo = AdvertisingIdClient.getMethod("getAdvertisingIdInfo",
-                    Context.class);
-            Object advertisingInfo = getAdvertisingInfo.invoke(null, appContext);
-            Method isLimitAdTrackingEnabled = advertisingInfo.getClass().getMethod(
-                    "isLimitAdTrackingEnabled");
-            Boolean limitAdTrackingEnabled = (Boolean) isLimitAdTrackingEnabled
-                    .invoke(advertisingInfo);
+            try {
+                Class AdvertisingIdClient = Class
+                        .forName("com.google.android.gms.ads.identifier.AdvertisingIdClient");
+                Method getAdvertisingInfo = AdvertisingIdClient.getMethod("getAdvertisingIdInfo",
+                        Context.class);
+                Object advertisingInfo = getAdvertisingInfo.invoke(null, appContext);
+                Method isLimitAdTrackingEnabled = advertisingInfo.getClass().getMethod(
+                        "isLimitAdTrackingEnabled");
+                Boolean limitAdTrackingEnabled = (Boolean) isLimitAdTrackingEnabled
+                        .invoke(advertisingInfo);
 
-            attributes.put(MessageKey.LIMIT_AD_TRACKING, limitAdTrackingEnabled);
-            if (!limitAdTrackingEnabled) {
-                Method getId = advertisingInfo.getClass().getMethod("getId");
-                String advertisingId = (String) getId.invoke(advertisingInfo);
-                attributes.put(MessageKey.GOOGLE_ADV_ID, advertisingId);
+                attributes.put(MessageKey.LIMIT_AD_TRACKING, limitAdTrackingEnabled);
+                if (!limitAdTrackingEnabled) {
+                    Method getId = advertisingInfo.getClass().getMethod("getId");
+                    String advertisingId = (String) getId.invoke(advertisingInfo);
+                    attributes.put(MessageKey.GOOGLE_ADV_ID, advertisingId);
+                    ConfigManager.log(MParticle.LogLevel.DEBUG, "Successfully collected Google Play Advertising ID.");
+                } else {
+                    ConfigManager.log(MParticle.LogLevel.DEBUG, "Google Play Advertising ID available but ad tracking is disabled on this device.");
+                }
+            }catch (ClassNotFoundException cnfe) {
+                ConfigManager.log(MParticle.LogLevel.DEBUG, "Failed to collect Google Play Advertising ID, be sure to add Google Play services or com.google.android.gms:play-services-ads to your app's dependencies.");
             }
 
 
