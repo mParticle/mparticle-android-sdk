@@ -569,4 +569,8 @@ public abstract class EmbeddedProvider {
     public int getModuleId() {
         return moduleId;
     }
+
+    public List<ReportingMessage> setOptOut(boolean optOutStatus) {
+        return null;
+    }
 }

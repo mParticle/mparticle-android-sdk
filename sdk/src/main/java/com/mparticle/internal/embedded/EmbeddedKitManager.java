@@ -555,4 +555,17 @@ public class EmbeddedKitManager implements MPActivityCallbacks {
         EmbeddedProvider provider = providers.get(serviceProviderId);
         return provider != null && !provider.disabled() && provider.isRunning();
     }
+
+    public void setOptOut(boolean optOutStatus) {
+        for (EmbeddedProvider provider : providers.values()) {
+            try {
+                if (!provider.disabled()) {
+                    List<ReportingMessage> messages = provider.setOptOut(optOutStatus);
+                    mReportingManager.logAll(messages);
+                }
+            } catch (Exception e) {
+                ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to call setOptOut for embedded provider: " + provider.getName() + ": " + e.getMessage());
+            }
+        }
+    }
 }

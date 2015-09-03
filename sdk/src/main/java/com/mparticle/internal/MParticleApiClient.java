@@ -108,7 +108,6 @@ public class MParticleApiClient implements IMPApiClient {
      */
     private static final long THROTTLE = 1000*60*60*2;
     private boolean alreadyWarned;
-    private String mActiveModuleIds;
 
     public MParticleApiClient(ConfigManager configManager, SharedPreferences sharedPreferences, Context context) throws MalformedURLException {
         mContext = context;
@@ -202,10 +201,6 @@ public class MParticleApiClient implements IMPApiClient {
             return true;
         }
         return false;
-    }
-
-    public void setActiveModuleIds(String activeModuleIds) {
-        mActiveModuleIds = activeModuleIds;
     }
 
     public int sendMessageBatch(String message) throws IOException, MPThrottleException, MPRampException {

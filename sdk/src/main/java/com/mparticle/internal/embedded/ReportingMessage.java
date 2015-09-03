@@ -27,6 +27,7 @@ public class ReportingMessage {
     private LinkedList<ProjectionReport> projectionReports;
     private String screenName;
     private boolean devMode;
+    private boolean optOut;
 
     public ReportingMessage(EmbeddedProvider provider, String messageType, double timestamp, Map<String, String> attributes) {
         this.moduleId = provider.getModuleId();
@@ -144,6 +145,8 @@ public class ReportingMessage {
             }
         } else if (messageType.equals(Constants.MessageType.PUSH_REGISTRATION)) {
             jsonObject.put("pr", true);
+        } else if (messageType.equals(Constants.MessageType.OPT_OUT)) {
+            jsonObject.put("s", optOut);
         }
 
         return jsonObject;
@@ -155,6 +158,11 @@ public class ReportingMessage {
 
     public int getModuleId() {
         return moduleId;
+    }
+
+    public ReportingMessage setOptOut(boolean optOut) {
+        this.optOut = optOut;
+        return this;
     }
 
     public static class ProjectionReport {

@@ -1261,18 +1261,21 @@ public class MParticle {
      * @param optOutStatus set to <code>true</code> to opt out of event tracking
      */
     public void setOptOut(Boolean optOutStatus) {
-        if (optOutStatus != mConfigManager.getOptedOut()) {
-            if (!optOutStatus) {
-                ensureActiveSession();
-            }
-            mMessageManager.optOut(System.currentTimeMillis(), optOutStatus);
-            if (optOutStatus && isSessionActive()) {
-                endSession();
-            }
+        if (optOutStatus != null) {
+            if (optOutStatus != mConfigManager.getOptedOut()) {
+                if (!optOutStatus) {
+                    ensureActiveSession();
+                }
+                mMessageManager.optOut(System.currentTimeMillis(), optOutStatus);
+                if (optOutStatus && isSessionActive()) {
+                    endSession();
+                }
 
-            mConfigManager.setOptOut(optOutStatus);
+                mConfigManager.setOptOut(optOutStatus);
 
-            ConfigManager.log(LogLevel.DEBUG, "Set opt-out: " + optOutStatus);
+                ConfigManager.log(LogLevel.DEBUG, "Set opt-out: " + optOutStatus);
+            }
+            mEmbeddedKitManager.setOptOut(optOutStatus);
         }
     }
 

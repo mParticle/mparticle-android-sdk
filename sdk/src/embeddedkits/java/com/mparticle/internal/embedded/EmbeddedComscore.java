@@ -76,7 +76,7 @@ class EmbeddedComscore extends EmbeddedProvider implements ActivityLifecycleForw
         }
         messages.add(
                 ReportingMessage.fromEvent(this,
-                    new MPEvent.Builder(event).info(comscoreLabels).build()
+                        new MPEvent.Builder(event).info(comscoreLabels).build()
                 )
         );
         return messages;
@@ -218,5 +218,15 @@ class EmbeddedComscore extends EmbeddedProvider implements ActivityLifecycleForw
         return null;
     }
 
+    @Override
+    public List<ReportingMessage> setOptOut(boolean optOutStatus) {
+        comScore.setEnabled(!optOutStatus);
+        List<ReportingMessage> messageList = new LinkedList<ReportingMessage>();
+        messageList.add(
+                new ReportingMessage(this, Constants.MessageType.OPT_OUT, System.currentTimeMillis(), null)
+                        .setOptOut(optOutStatus)
+        );
+        return messageList;
+    }
 
 }

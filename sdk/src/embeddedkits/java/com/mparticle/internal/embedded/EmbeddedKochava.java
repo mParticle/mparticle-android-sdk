@@ -5,8 +5,10 @@ import android.location.Location;
 
 import com.kochava.android.tracker.Feature;
 import com.mparticle.MParticle;
+import com.mparticle.internal.Constants;
 
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -118,6 +120,21 @@ class EmbeddedKochava extends EmbeddedProvider implements ActivityLifecycleForwa
             datamap.put(Feature.INPUTITEMS.REQUEST_ATTRIBUTION, Boolean.parseBoolean(properties.get(RETRIEVE_ATT_DATA)));
             feature = new Feature(activity, datamap);
 
+        }
+    }
+
+    @Override
+    public List<ReportingMessage> setOptOut(boolean optOutStatus) {
+        if (feature != null) {
+            feature.setAppLimitTracking(optOutStatus);
+            List<ReportingMessage> messageList = new LinkedList<ReportingMessage>();
+            messageList.add(
+                    new ReportingMessage(this, Constants.MessageType.OPT_OUT, System.currentTimeMillis(), null)
+                            .setOptOut(optOutStatus)
+            );
+            return messageList;
+        }else {
+            return null;
         }
     }
 }
