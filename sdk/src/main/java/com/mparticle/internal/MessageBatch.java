@@ -18,7 +18,7 @@ public class MessageBatch extends JSONObject {
         super();
     }
 
-    public static MessageBatch create(Context context, JSONArray messagesArray, boolean history, JSONObject appInfo, JSONObject deviceInfo, ConfigManager configManager, SharedPreferences preferences, JSONObject cookies) throws JSONException {
+    public static MessageBatch create(Context context, JSONArray messagesArray, JSONArray reportingMessagesArray, boolean history, JSONObject appInfo, JSONObject deviceInfo, ConfigManager configManager, SharedPreferences preferences, JSONObject cookies) throws JSONException {
         MessageBatch uploadMessage = new MessageBatch();
 
         uploadMessage.put(Constants.MessageKey.TYPE, Constants.MessageType.REQUEST_HEADER);
@@ -85,6 +85,9 @@ public class MessageBatch extends JSONObject {
         }
 
         uploadMessage.put(history ? Constants.MessageKey.HISTORY : Constants.MessageKey.MESSAGES, messagesArray);
+        if (reportingMessagesArray != null && reportingMessagesArray.length() > 0) {
+            uploadMessage.put(Constants.MessageKey.REPORTING, reportingMessagesArray);
+        }
         uploadMessage.put(Constants.MessageKey.COOKIES, cookies);
         uploadMessage.put(Constants.MessageKey.PROVIDER_PERSISTENCE, configManager.getProviderPersistence());
 

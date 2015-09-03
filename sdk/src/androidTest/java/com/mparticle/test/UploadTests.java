@@ -53,7 +53,7 @@ public class UploadTests extends AndroidTestCase {
             MPMessage message = new MPMessage.Builder("type", "id", null).build();
             JSONArray array = new JSONArray();
             array.put(message);
-            JSONObject batch = MessageBatch.create(getContext(), array, false, new JSONObject(), new JSONObject(), MParticle.getInstance().internal().getConfigurationManager(), TestUtils.getSharedPrefs(getContext()), null);
+            JSONObject batch = MessageBatch.create(getContext(), array, reportingMessagesArray, false, new JSONObject(), new JSONObject(), MParticle.getInstance().internal().getConfigurationManager(), TestUtils.getSharedPrefs(getContext()), null);
             assertNotNull(batch);
             assertNotNull(batch.get(Constants.MessageKey.TYPE));
             assertNotNull(batch.get(Constants.MessageKey.ID));

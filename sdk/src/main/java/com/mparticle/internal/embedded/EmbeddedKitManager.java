@@ -22,6 +22,7 @@ import org.json.JSONObject;
 
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -31,6 +32,7 @@ public class EmbeddedKitManager implements MPActivityCallbacks {
     EmbeddedKitFactory ekFactory;
     private ConfigManager mConfigManager;
     private AppStateManager mAppStateManager;
+    private ReportingManager mReportingManager;
     ConcurrentHashMap<Integer, EmbeddedProvider> providers = new ConcurrentHashMap<Integer, EmbeddedProvider>(0);
 
     Context context;
@@ -108,16 +110,41 @@ public class EmbeddedKitManager implements MPActivityCallbacks {
         for (EmbeddedProvider provider : providers.values()) {
             try {
                 if (provider instanceof ClientSideForwarder && !provider.disabled() && provider.shouldLogEvent(event)) {
-                    MPEvent providerEvent = new MPEvent(event);
-                    providerEvent.setInfo(provider.filterEventAttributes(providerEvent.getEventType(), providerEvent.getEventName(), provider.mAttributeFilters, providerEvent.getInfo()));
-                    List<Projection.ProjectionResult> projectedEvents = provider.projectEvents(providerEvent);
+                    MPEvent eventCopy = new MPEvent(event);
+                    eventCopy.setInfo(
+                            provider.filterEventAttributes(eventCopy, provider.mAttributeFilters)
+                    );
+                    List<Projection.ProjectionResult> projectedEvents = provider.projectEvents(eventCopy);
+                    List<ReportingMessage> reportingMessages = new LinkedList<ReportingMessage>();
                     if (projectedEvents == null) {
-                        ((ClientSideForwarder) provider).logEvent(providerEvent);
+                        List<ReportingMessage> messages = ((ClientSideForwarder) provider).logEvent(eventCopy);
+                        if (messages != null && messages.size() > 0) {
+                            reportingMessages.addAll(messages);
+                        }
                     } else {
+                        ReportingMessage masterMessage = ReportingMessage.fromEvent(provider, eventCopy);
+                        boolean forwarded = false;
                         for (int i = 0; i < projectedEvents.size(); i++) {
-                            ((ClientSideForwarder) provider).logEvent(projectedEvents.get(i).getMPEvent());
+                            List<ReportingMessage> messages = ((ClientSideForwarder) provider).logEvent(projectedEvents.get(i).getMPEvent());
+                            if (messages != null && messages.size() > 0) {
+                                forwarded = true;
+                                for (ReportingMessage message : messages) {
+                                    ReportingMessage.ProjectionReport report = new ReportingMessage.ProjectionReport(
+                                            projectedEvents.get(i).getProjectionId(),
+                                            Constants.MessageType.EVENT,
+                                            message.getEventName(),
+                                            message.getEventTypeString()
+                                    );
+                                    masterMessage.addProjectionReport(report);
+                                }
+
+                            }
+                        }
+                        if (forwarded) {
+                            reportingMessages.add(masterMessage);
                         }
                     }
+                    mReportingManager.logAll(reportingMessages);
                 }
             } catch (Exception e) {
                 ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to call logEvent for embedded provider: " + provider.getName() + ": " + e.getMessage());
@@ -134,23 +161,55 @@ public class EmbeddedKitManager implements MPActivityCallbacks {
                         if (provider instanceof ECommerceForwarder) {
                             List<Projection.ProjectionResult> projectedEvents = provider.projectEvents(filteredEvent);
                             if (projectedEvents != null && projectedEvents.size() > 0) {
+                                ReportingMessage masterMessage = ReportingMessage.fromEvent(provider, filteredEvent);
+                                boolean forwarded = false;
                                 for (int i = 0; i < projectedEvents.size(); i++) {
                                     Projection.ProjectionResult result = projectedEvents.get(i);
+                                    List<ReportingMessage> report = null;
+                                    String messageType = null;
                                     if (result.getMPEvent() != null) {
-                                        ((ECommerceForwarder) provider).logEvent(projectedEvents.get(i).getMPEvent());
+                                        report = ((ECommerceForwarder) provider).logEvent(projectedEvents.get(i).getMPEvent());
+                                        messageType = Constants.MessageType.EVENT;
                                     } else {
-                                        ((ECommerceForwarder) provider).logEvent(projectedEvents.get(i).getCommerceEvent());
+                                        report =((ECommerceForwarder) provider).logEvent(projectedEvents.get(i).getCommerceEvent());
+                                        messageType = Constants.MessageType.COMMERCE_EVENT;
+                                    }
+                                    if (report != null && report.size() > 0) {
+                                        forwarded = true;
+                                        for (ReportingMessage message : report) {
+                                            masterMessage.addProjectionReport(
+                                                    new ReportingMessage.ProjectionReport(projectedEvents.get(i).getProjectionId(),
+                                                            messageType,
+                                                            message.getEventName(),
+                                                            message.getEventTypeString())
+                                            );
+                                        }
                                     }
                                 }
+                                if (forwarded) {
+                                    mReportingManager.log(masterMessage);
+                                }
                             } else {
-                                ((ECommerceForwarder) provider).logEvent(filteredEvent);
+                                List<ReportingMessage> reporting = ((ECommerceForwarder) provider).logEvent(filteredEvent);
+                                if (reporting != null && reporting.size() > 0) {
+                                    mReportingManager.log(
+                                            ReportingMessage.fromEvent(provider, filteredEvent)
+                                    );
+                                }
                             }
                         } else {
                             List<MPEvent> events = CommerceEventUtil.expand(filteredEvent);
+                            boolean forwarded = false;
                             if (events != null) {
                                 for (int i = 0; i < events.size(); i++) {
-                                    ((ClientSideForwarder) provider).logEvent(events.get(i));
+                                    List<ReportingMessage> reporting = ((ClientSideForwarder) provider).logEvent(events.get(i));
+                                    forwarded = forwarded || (reporting != null && reporting.size() > 0);
                                 }
+                            }
+                            if (forwarded) {
+                                mReportingManager.log(
+                                        ReportingMessage.fromEvent(provider, filteredEvent)
+                                );
                             }
                         }
                     }
@@ -165,8 +224,9 @@ public class EmbeddedKitManager implements MPActivityCallbacks {
     public void logTransaction(MPEvent productEvent) {
         for (EmbeddedProvider provider : providers.values()) {
             try {
-                if (!provider.disabled()) {
-                    provider.logTransaction((MPProduct) productEvent.getInfo());
+                if (provider instanceof ClientSideForwarder && !provider.disabled()) {
+                    List<ReportingMessage> report = ((ClientSideForwarder) provider).logTransaction((MPProduct) productEvent.getInfo());
+                    mReportingManager.logAll(report);
                 }
             } catch (Exception e) {
                 ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to call logTransaction for embedded provider: " + provider.getName() + ": " + e.getMessage());
@@ -182,10 +242,37 @@ public class EmbeddedKitManager implements MPActivityCallbacks {
                     syntheticScreenEvent.setInfo(provider.filterEventAttributes(null, screenName, provider.mScreenAttributeFilters, eventAttributes));
                     List<Projection.ProjectionResult> projectedEvents = provider.projectEvents(syntheticScreenEvent, true);
                     if (projectedEvents == null) {
-                        ((ClientSideForwarder) provider).logScreen(screenName, syntheticScreenEvent.getInfo());
+                        List<ReportingMessage> report = ((ClientSideForwarder) provider).logScreen(screenName, syntheticScreenEvent.getInfo());
+                        if (report != null && report.size() > 0) {
+                            for (ReportingMessage message : report) {
+                                message.setMessageType(Constants.MessageType.SCREEN_VIEW);
+                                message.setScreenName(screenName);
+                            }
+                        }
+                        mReportingManager.logAll(report);
                     } else {
+                        ReportingMessage masterMessage = new ReportingMessage(provider,
+                                Constants.MessageType.SCREEN_VIEW,
+                                System.currentTimeMillis(),
+                                syntheticScreenEvent.getInfo());
+                        boolean forwarded = false;
                         for (int i = 0; i < projectedEvents.size(); i++) {
-                            ((ClientSideForwarder) provider).logEvent(projectedEvents.get(i).getMPEvent());
+                            List<ReportingMessage> report = ((ClientSideForwarder) provider).logEvent(projectedEvents.get(i).getMPEvent());
+                            if (report != null && report.size() > 0) {
+                                forwarded = true;
+                                for (ReportingMessage message : report) {
+                                    ReportingMessage.ProjectionReport projectionReport = new ReportingMessage.ProjectionReport(
+                                            projectedEvents.get(i).getProjectionId(),
+                                            Constants.MessageType.EVENT,
+                                            message.getEventName(),
+                                            message.getEventTypeString()
+                                    );
+                                    masterMessage.addProjectionReport(projectionReport);
+                                }
+                            }
+                        }
+                        if (forwarded) {
+                            mReportingManager.log(masterMessage);
                         }
                     }
                 }
@@ -247,7 +334,8 @@ public class EmbeddedKitManager implements MPActivityCallbacks {
         for (EmbeddedProvider provider : providers.values()) {
             try {
                 if (!provider.disabled()) {
-                    provider.logout();
+                    List<ReportingMessage> report = provider.logout();
+                    mReportingManager.logAll(report);
                 }
             } catch (Exception e) {
                 ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to call logout for embedded provider: " + provider.getName() + ": " + e.getMessage());
@@ -271,7 +359,8 @@ public class EmbeddedKitManager implements MPActivityCallbacks {
         for (EmbeddedProvider provider : providers.values()) {
             try {
                 if (!provider.disabled()) {
-                    provider.handleIntent(intent);
+                    List<ReportingMessage> report = provider.handleIntent(intent);
+                    mReportingManager.logAll(report);
                 }
             } catch (Exception e) {
                 ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to call handleIntent for embedded provider: " + provider.getName() + ": " + e.getMessage());
@@ -306,10 +395,11 @@ public class EmbeddedKitManager implements MPActivityCallbacks {
     @Override
     public void onActivityCreated(Activity activity, int activityCount) {
         for (EmbeddedProvider provider : providers.values()) {
-            if (provider instanceof MPActivityCallbacks) {
+            if (provider instanceof ActivityLifecycleForwarder) {
                 try {
                     if (!provider.disabled()) {
-                        ((MPActivityCallbacks) provider).onActivityCreated(activity, activityCount);
+                        List<ReportingMessage> reportingMessages = ((ActivityLifecycleForwarder) provider).onActivityCreated(activity, activityCount);
+                        mReportingManager.logAll(reportingMessages);
                     }
                 } catch (Exception e) {
                     ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to call onCreate for embedded provider: " + provider.getName() + ": " + e.getMessage());
@@ -321,10 +411,11 @@ public class EmbeddedKitManager implements MPActivityCallbacks {
     @Override
     public void onActivityResumed(Activity activity, int currentCount) {
         for (EmbeddedProvider provider : providers.values()) {
-            if (provider instanceof MPActivityCallbacks) {
+            if (provider instanceof ActivityLifecycleForwarder) {
                 try {
                     if (!provider.disabled()) {
-                        ((MPActivityCallbacks) provider).onActivityResumed(activity, currentCount);
+                        List<ReportingMessage> reportingMessages = ((ActivityLifecycleForwarder) provider).onActivityResumed(activity, currentCount);
+                        mReportingManager.logAll(reportingMessages);
                     }
                 } catch (Exception e) {
                     ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to call onResume for embedded provider: " + provider.getName() + ": " + e.getMessage());
@@ -336,10 +427,11 @@ public class EmbeddedKitManager implements MPActivityCallbacks {
     @Override
     public void onActivityPaused(Activity activity, int activityCount) {
         for (EmbeddedProvider provider : providers.values()) {
-            if (provider instanceof MPActivityCallbacks) {
+            if (provider instanceof ActivityLifecycleForwarder) {
                 try {
                     if (!provider.disabled()) {
-                        ((MPActivityCallbacks) provider).onActivityPaused(activity, activityCount);
+                        List<ReportingMessage> reportingMessages = ((ActivityLifecycleForwarder) provider).onActivityPaused(activity, activityCount);
+                        mReportingManager.logAll(reportingMessages);
                     }
                 } catch (Exception e) {
                     ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to call onResume for embedded provider: " + provider.getName() + ": " + e.getMessage());
@@ -351,10 +443,11 @@ public class EmbeddedKitManager implements MPActivityCallbacks {
     @Override
     public void onActivityStopped(Activity activity, int currentCount) {
         for (EmbeddedProvider provider : providers.values()) {
-            if (provider instanceof MPActivityCallbacks) {
+            if (provider instanceof ActivityLifecycleForwarder) {
                 try {
                     if (!provider.disabled()) {
-                        ((MPActivityCallbacks) provider).onActivityStopped(activity, currentCount);
+                        List<ReportingMessage> reportingMessages = ((ActivityLifecycleForwarder) provider).onActivityStopped(activity, currentCount);
+                        mReportingManager.logAll(reportingMessages);
                     }
                 } catch (Exception e) {
                     ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to call onResume for embedded provider: " + provider.getName() + ": " + e.getMessage());
@@ -366,10 +459,11 @@ public class EmbeddedKitManager implements MPActivityCallbacks {
     @Override
     public void onActivityStarted(Activity activity, int currentCount) {
         for (EmbeddedProvider provider : providers.values()) {
-            if (provider instanceof MPActivityCallbacks) {
+            if (provider instanceof ActivityLifecycleForwarder) {
                 try {
                     if (!provider.disabled()) {
-                        ((MPActivityCallbacks) provider).onActivityStarted(activity, currentCount);
+                        List<ReportingMessage> reportingMessages = ((ActivityLifecycleForwarder) provider).onActivityStarted(activity, currentCount);
+                        mReportingManager.logAll(reportingMessages);
                     }
                 } catch (Exception e) {
                     ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to call onResume for embedded provider: " + provider.getName() + ": " + e.getMessage());
@@ -437,15 +531,17 @@ public class EmbeddedKitManager implements MPActivityCallbacks {
         this.mAppStateManager = appStateManager;
     }
 
+    public void setReportingManager(ReportingManager reportingManager) {
+        mReportingManager = reportingManager;
+    }
+
     public boolean handleGcmMessage(Intent intent) {
         for (EmbeddedProvider provider : providers.values()) {
             if (provider instanceof PushProvider) {
                 try {
                     if (!provider.disabled()) {
-                        boolean handled = ((PushProvider) provider).handleGcmMessage(intent);
-                        if (handled) {
-                            return true;
-                        }
+                        List<ReportingMessage> messages = ((PushProvider) provider).handleGcmMessage(intent);
+                        mReportingManager.logAll(messages);
                     }
                 } catch (Exception e) {
                     ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to call handleGcmMessage for embedded provider: " + provider.getName() + ": " + e.getMessage());
@@ -458,5 +554,18 @@ public class EmbeddedKitManager implements MPActivityCallbacks {
     public boolean isProviderActive(int serviceProviderId) {
         EmbeddedProvider provider = providers.get(serviceProviderId);
         return provider != null && !provider.disabled() && provider.isRunning();
+    }
+
+    public void setOptOut(boolean optOutStatus) {
+        for (EmbeddedProvider provider : providers.values()) {
+            try {
+                if (!provider.disabled()) {
+                    List<ReportingMessage> messages = provider.setOptOut(optOutStatus);
+                    mReportingManager.logAll(messages);
+                }
+            } catch (Exception e) {
+                ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to call setOptOut for embedded provider: " + provider.getName() + ": " + e.getMessage());
+            }
+        }
     }
 }

@@ -16,21 +16,24 @@ public class EmbeddedKitFactory {
     final static int KOCHAVA = MParticle.ServiceProviders.KOCHAVA;
     final static int COMSCORE = MParticle.ServiceProviders.COMSCORE;
     final static int KAHUNA = MParticle.ServiceProviders.KAHUNA;
+    final static int BRANCH_METRICS = MParticle.ServiceProviders.BRANCH_METRICS;
 
     EmbeddedProvider createInstance(int id, EmbeddedKitManager ekManager) throws JSONException, ClassNotFoundException{
         switch (id){
             case KOCHAVA:
-                return new EmbeddedKochava(ekManager);
+                return new EmbeddedKochava(id, ekManager);
             case COMSCORE:
-                return new EmbeddedComscore(ekManager);
+                return new EmbeddedComscore(id, ekManager);
             case KAHUNA:
-                return new EmbeddedKahuna(ekManager);
+                return new EmbeddedKahuna(id, ekManager);
             case FORESEE:
-                return new EmbeddedForesee(ekManager);
+                return new EmbeddedForesee(id, ekManager);
             case ADJUST:
-                return new EmbeddedAdjust(ekManager);
+                return new EmbeddedAdjust(id, ekManager);
             case APPBOY:
-                return new EmbeddedAppboy(ekManager);
+                return new EmbeddedAppboy(id, ekManager);
+            case BRANCH_METRICS:
+                return new EmbeddedBranchMetrics(id, ekManager);
             default:
                 return null;
         }
@@ -44,11 +47,13 @@ public class EmbeddedKitFactory {
         supportedKitIds.add(KAHUNA);
         supportedKitIds.add(FORESEE);
         supportedKitIds.add(ADJUST);
+        supportedKitIds.add(BRANCH_METRICS);
         return supportedKitIds;
     }
 
     public boolean isSupported(int kitModuleId) {
         switch (kitModuleId){
+            case BRANCH_METRICS:
             case KOCHAVA:
             case COMSCORE:
             case KAHUNA:

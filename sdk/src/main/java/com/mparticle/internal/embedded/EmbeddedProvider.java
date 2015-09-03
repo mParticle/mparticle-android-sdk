@@ -6,7 +6,6 @@ import android.location.Location;
 import android.util.SparseBooleanArray;
 
 import com.mparticle.MPEvent;
-import com.mparticle.MPProduct;
 import com.mparticle.MParticle;
 import com.mparticle.commerce.CommerceEvent;
 import com.mparticle.commerce.Impression;
@@ -32,7 +31,7 @@ import java.util.Map;
  * Base EmbeddedProvider - all EKs subclass this. The primary function is to parse the common EK configuration structures
  * such as filters.
  */
-abstract class EmbeddedProvider {
+public abstract class EmbeddedProvider {
 
     final static String KEY_ID = "id";
     private final static String KEY_PROPERTIES = "as";
@@ -76,10 +75,12 @@ abstract class EmbeddedProvider {
     Projection defaultProjection = null;
     Projection defaultScreenProjection = null;
     Projection defaultCommerceProjection = null;
+    private final int moduleId;
 
-    public EmbeddedProvider(EmbeddedKitManager ekManager) {
+    public EmbeddedProvider(int moduleId, EmbeddedKitManager ekManager) {
         this.mEkManager = ekManager;
         this.context = ekManager.getContext();
+        this.moduleId = moduleId;
     }
 
     protected EmbeddedProvider parseConfig(JSONObject json) throws JSONException {
@@ -400,9 +401,12 @@ abstract class EmbeddedProvider {
         return true;
     }
 
+    protected Map<String, String> filterEventAttributes(MPEvent event, SparseBooleanArray filter) {
+        return filterEventAttributes(event.getEventType(), event.getEventName(), filter, event.getInfo());
+    }
+
     protected Map<String, String> filterEventAttributes(MParticle.EventType eventType, String eventName, SparseBooleanArray filter, Map<String, String> eventAttributes) {
         if (eventAttributes != null && eventAttributes.size() > 0 && filter != null && filter.size() > 0) {
-
             String eventTypeStr = "0";
             if (eventType != null) {
                 eventTypeStr = eventType.ordinal() + "";
@@ -451,12 +455,6 @@ abstract class EmbeddedProvider {
         }
     }
 
-    @Deprecated
-    public void logTransaction(MPProduct transaction) throws Exception {
-
-    }
-
-
     void setLocation(Location location) {
 
     }
@@ -473,16 +471,16 @@ abstract class EmbeddedProvider {
 
     }
 
-    void logout() {
-
+    List<ReportingMessage> logout() {
+        return null;
     }
 
     void removeUserIdentity(String id) {
 
     }
 
-    void handleIntent(Intent intent) {
-
+    List<ReportingMessage> handleIntent(Intent intent) {
+        return null;
     }
 
     void startSession() {
@@ -568,4 +566,11 @@ abstract class EmbeddedProvider {
     }
 
 
+    public int getModuleId() {
+        return moduleId;
+    }
+
+    public List<ReportingMessage> setOptOut(boolean optOutStatus) {
+        return null;
+    }
 }

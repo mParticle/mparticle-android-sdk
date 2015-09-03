@@ -29,6 +29,7 @@ import com.mparticle.internal.MPUtility;
 import com.mparticle.internal.MParticleJSInterface;
 import com.mparticle.internal.MessageManager;
 import com.mparticle.internal.embedded.EmbeddedKitManager;
+import com.mparticle.internal.embedded.ReportingManager;
 import com.mparticle.internal.np.MPSSLSocketFactory;
 import com.mparticle.internal.np.MPSocketImplFactory;
 import com.mparticle.internal.np.MPUrlStreamHandlerFactory;
@@ -223,6 +224,7 @@ public class MParticle {
                     instance.mMessageManager = new MessageManager(context, configManager, installType, appStateManager);
                     instance.measuredRequestManager = MeasuredRequestManager.INSTANCE;
                     instance.measuredRequestManager.start(embeddedKitManager);
+                    embeddedKitManager.setReportingManager((ReportingManager) instance.mMessageManager);
                     instance.mEmbeddedKitManager = embeddedKitManager;
                     instance.mPreferences = context.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
 
@@ -1259,18 +1261,21 @@ public class MParticle {
      * @param optOutStatus set to <code>true</code> to opt out of event tracking
      */
     public void setOptOut(Boolean optOutStatus) {
-        if (optOutStatus != mConfigManager.getOptedOut()) {
-            if (!optOutStatus) {
-                ensureActiveSession();
-            }
-            mMessageManager.optOut(System.currentTimeMillis(), optOutStatus);
-            if (optOutStatus && isSessionActive()) {
-                endSession();
-            }
+        if (optOutStatus != null) {
+            if (optOutStatus != mConfigManager.getOptedOut()) {
+                if (!optOutStatus) {
+                    ensureActiveSession();
+                }
+                mMessageManager.optOut(System.currentTimeMillis(), optOutStatus);
+                if (optOutStatus && isSessionActive()) {
+                    endSession();
+                }
 
-            mConfigManager.setOptOut(optOutStatus);
+                mConfigManager.setOptOut(optOutStatus);
 
-            ConfigManager.log(LogLevel.DEBUG, "Set opt-out: " + optOutStatus);
+                ConfigManager.log(LogLevel.DEBUG, "Set opt-out: " + optOutStatus);
+            }
+            mEmbeddedKitManager.setOptOut(optOutStatus);
         }
     }
 
@@ -1710,6 +1715,7 @@ public class MParticle {
         int KOCHAVA = 37;
         int COMSCORE = 39;
         int KAHUNA = 56;
+        int BRANCH_METRICS = 80;
         String BROADCAST_ACTIVE = "MPARTICLE_SERVICE_PROVIDER_ACTIVE_";
         String BROADCAST_DISABLED = "MPARTICLE_SERVICE_PROVIDER_DISABLED_";
     }

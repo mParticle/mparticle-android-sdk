@@ -23,6 +23,8 @@ import com.mparticle.MParticle;
 import com.mparticle.commerce.CommerceEvent;
 import com.mparticle.internal.Constants.MessageKey;
 import com.mparticle.internal.Constants.MessageType;
+import com.mparticle.internal.embedded.ReportingManager;
+import com.mparticle.internal.embedded.ReportingMessage;
 import com.mparticle.messaging.CloudAction;
 import com.mparticle.messaging.MPCloudNotificationMessage;
 import com.mparticle.messaging.ProviderCloudMessage;
@@ -33,6 +35,8 @@ import org.json.JSONObject;
 import java.io.File;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -41,7 +45,7 @@ import java.util.Map;
  * queue which is then processed in a background thread for further processing and database storage.
  *
  */
-public class MessageManager implements MessageManagerCallbacks {
+public class MessageManager implements MessageManagerCallbacks, ReportingManager {
 
     private static Context mContext = null;
     private static SharedPreferences mPreferences = null;
@@ -392,6 +396,10 @@ public class MessageManager implements MessageManagerCallbacks {
             ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to create mParticle opt out message");
             return null;
         }
+    }
+
+    public ReportingMessage logReportingMessage() {
+        return null;
     }
 
     public MPMessage logErrorEvent(String errorMessage, Throwable t, JSONObject attributes) {
@@ -782,6 +790,27 @@ public class MessageManager implements MessageManagerCallbacks {
         data.putString(MParticleDatabase.GcmMessageTable.APPSTATE, appState);
         message.setData(data);
         mMessageHandler.sendMessage(message);
+    }
+
+    @Override
+    public void log(ReportingMessage reportingMessage) {
+        if (reportingMessage != null) {
+            List<ReportingMessage> reportingMessageList = new ArrayList<ReportingMessage>(1);
+            reportingMessageList.add(reportingMessage);
+            logAll(reportingMessageList);
+        }
+    }
+
+    @Override
+    public void logAll(List<ReportingMessage> messageList) {
+        if (messageList != null && messageList.size() > 0) {
+            boolean development = ConfigManager.getEnvironment().equals(MParticle.Environment.Development);
+            for (int i = 0; i < messageList.size(); i++) {
+                messageList.get(i).setDevMode(development);
+            }
+            Message message = mMessageHandler.obtainMessage(MessageHandler.STORE_REPORTING_MESSAGE_LIST, messageList);
+            mMessageHandler.sendMessage(message);
+        }
     }
 
     private class StatusBroadcastReceiver extends BroadcastReceiver {

@@ -16,9 +16,9 @@ public class EmbeddedKitFactory {
     EmbeddedProvider createInstance(int id, EmbeddedKitManager ekManager) throws JSONException, ClassNotFoundException{
         switch (id){
             case COMSCORE:
-                return new EmbeddedComscore(ekManager);
+                return new EmbeddedComscore(id, ekManager);
             case FORESEE:
-                return new EmbeddedForesee(ekManager);
+                return new EmbeddedForesee(id, ekManager);
 
             default:
                 return null;
