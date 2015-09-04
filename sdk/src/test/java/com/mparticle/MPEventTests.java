@@ -4,6 +4,10 @@ package com.mparticle;
 
 import org.junit.Test;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertTrue;
 import static junit.framework.Assert.fail;
@@ -47,5 +51,32 @@ public class MPEventTests  {
         }
         eventBuilder.endTime();
         assertTrue(eventBuilder.build().getLength() >= 1000);
+    }
+
+    @Test
+    public void testCopyConstructor () {
+        //test the most basic event - there was a bug when there were no attributes.
+        MPEvent event = new MPEvent.Builder("test name", MParticle.EventType.Other).build();
+        MPEvent copiedEvent = new MPEvent(event);
+        assertEquals(event.getEventName(), copiedEvent.getEventName());
+        assertEquals(event.getEventType(), copiedEvent.getEventType());
+
+        Map<String, String> attributes = new HashMap<String, String>();
+        attributes.put("key 1", "value 1");
+        attributes.put("key 2", "value 2");
+
+        event = new MPEvent.Builder("another name", MParticle.EventType.Social)
+                .category("category")
+                .duration(12345)
+                .info(attributes)
+                .build();
+
+        copiedEvent = new MPEvent(event);
+        assertEquals("another name", copiedEvent.getEventName());
+        assertEquals(MParticle.EventType.Social, copiedEvent.getEventType());
+        assertEquals("category", copiedEvent.getCategory());
+        assertEquals("value 1", copiedEvent.getInfo().get("key 1"));
+        assertEquals("value 2", copiedEvent.getInfo().get("key 2"));
+
     }
 }

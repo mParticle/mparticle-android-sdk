@@ -84,9 +84,13 @@ public class MPEvent {
     public MPEvent(MPEvent mpEvent) {
         eventType = mpEvent.eventType;
         eventName = mpEvent.eventName;
-        Map<String, String> shallowCopy = new HashMap<String, String>();
-        shallowCopy.putAll(mpEvent.info);
-        info = shallowCopy;
+        if (mpEvent.info != null) {
+            Map<String, String> shallowCopy = new HashMap<String, String>();
+            shallowCopy.putAll(mpEvent.info);
+            info = shallowCopy;
+        }else {
+            info = null;
+        }
         category = mpEvent.category;
         duration = mpEvent.duration;
         endTime = mpEvent.endTime;
