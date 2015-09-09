@@ -213,7 +213,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
     public MPMessage startSession() {
         try {
             MPMessage message = new MPMessage.Builder(MessageType.SESSION_START, mAppStateManager.getSession(), mLocation)
-                    .timestamp(System.currentTimeMillis())
+                    .timestamp(mAppStateManager.getSession().mSessionStartTime)
                     .build();
 
             SharedPreferences.Editor editor = mPreferences.edit();
