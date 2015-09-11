@@ -225,7 +225,7 @@ import java.util.concurrent.atomic.AtomicLong;
         }
     }
 
-    private void ensureActiveSession() {
+    public void ensureActiveSession() {
         Session session = getSession();
         session.mLastEventTime = System.currentTimeMillis();
         if (!session.isActive()) {
@@ -238,7 +238,6 @@ import java.util.concurrent.atomic.AtomicLong;
     void logStateTransition(String transitionType, String currentActivity, long previousForegroundTime, long suspendedTime, String dataString, String launchParameters, String launchPackage, int interruptions) {
         if (mConfigManager.isEnabled()) {
             ensureActiveSession();
-
             mMessageManager.logStateTransition(transitionType,
                     currentActivity,
                     dataString,
@@ -265,6 +264,7 @@ import java.util.concurrent.atomic.AtomicLong;
         mEmbeddedKitManager.startSession();
         mMessageManager.startUploadLoop();
         enableLocationTracking();
+        checkSessionTimeout();
     }
 
     private void enableLocationTracking(){
