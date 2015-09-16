@@ -7,6 +7,7 @@ import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.Constants;
 import com.mparticle.internal.MPUtility;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -14,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -34,6 +36,7 @@ public class MPEvent {
     private Map<String, String> info;
     private Double duration = null, startTime = null, endTime = null;
     private int eventHash;
+    private Map<String, List<String>> customFlags;
 
     private MPEvent(){}
     private MPEvent(Builder builder){
@@ -70,6 +73,9 @@ public class MPEvent {
         if (builder.startTime != null){
             startTime = builder.startTime;
         }
+        if (builder.customFlags != null) {
+            customFlags = builder.customFlags;
+        }
     }
 
     @Override
@@ -95,6 +101,7 @@ public class MPEvent {
         duration = mpEvent.duration;
         endTime = mpEvent.endTime;
         startTime = mpEvent.startTime;
+        customFlags = mpEvent.customFlags;
     }
 
     @Override
@@ -127,6 +134,10 @@ public class MPEvent {
                 .append(info.get(key))
                 .append("\n");
             }
+        }
+        if (customFlags != null) {
+            builder.append("custom flags:\n");
+            builder.append(customFlags.toString());
         }
         return builder.toString();
     }
@@ -165,6 +176,10 @@ public class MPEvent {
         return null;
     }
 
+    public Map<String,List<String>> getCustomFlags() {
+        return customFlags;
+    }
+
     /**
      * Class used to build an {@link com.mparticle.MPEvent} object.
      *
@@ -176,7 +191,7 @@ public class MPEvent {
         private String category;
         private Map<String, String> info;
         private Double duration = null, startTime = null, endTime = null;
-
+        private Map<String, List<String>> customFlags = null;
 
         private Builder(){}
 
@@ -202,6 +217,7 @@ public class MPEvent {
             this.duration = event.duration;
             this.startTime = event.startTime;
             this.endTime = event.endTime;
+            this.customFlags = event.getCustomFlags();
         }
 
         /**
@@ -229,6 +245,17 @@ public class MPEvent {
             if (eventType != null) {
                 this.eventType = eventType;
             }
+            return this;
+        }
+
+        public Builder addCustomFlag(String key, String value) {
+            if (customFlags == null) {
+                customFlags = new HashMap<String, List<String>>();
+            }
+            if (!customFlags.containsKey(key)) {
+                customFlags.put(key, new LinkedList<String>());
+            }
+            customFlags.get(key).add(value);
             return this;
         }
 
@@ -357,6 +384,21 @@ public class MPEvent {
                     }
                     builder.info = info;
                 }
+                if (json.has(EVENT_CUSTOM_FLAGS)) {
+                    JSONObject flags = json.getJSONObject(EVENT_CUSTOM_FLAGS);
+                    Map<String, List<String>> cFlags = new HashMap<String, List<String>>();
+                    Iterator<String> keys = flags.keys();
+
+                    while( keys.hasNext() ){
+                        String key = keys.next();
+                        JSONArray values = flags.getJSONArray(key);
+                        cFlags.put(key, new LinkedList<String>());
+                        for (int i = 0; i < values.length(); i++) {
+                            cFlags.get(key).add(values.getString(i));
+                        }
+                    }
+                    builder.customFlags = cFlags;
+                }
 
                 return builder;
             }catch (Exception e){
@@ -366,6 +408,7 @@ public class MPEvent {
         }
 
         private final static String EVENT_TYPE = "eventType";
+        private final static String EVENT_CUSTOM_FLAGS = "customFlags";
         private final static String EVENT_NAME = "eventName";
         private final static String EVENT_CATEGORY = "category";
         private final static String EVENT_DURATION = "duration";
@@ -404,6 +447,15 @@ public class MPEvent {
                 }
                 if (endTime != null){
                     jsonObject.put(EVENT_END_TIME, endTime);
+                }
+                if (customFlags != null) {
+                    JSONObject flagsObject = new JSONObject();
+                    for (Map.Entry<String, List<String>> entry : customFlags.entrySet()) {
+                        List<String> values = entry.getValue();
+                        JSONArray valueArray = new JSONArray(values);
+                        flagsObject.put(entry.getKey(), valueArray);
+                    }
+                    jsonObject.put(EVENT_CUSTOM_FLAGS, flagsObject);
                 }
                 return jsonObject.toString();
             }catch (JSONException jse){

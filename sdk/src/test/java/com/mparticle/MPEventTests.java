@@ -5,6 +5,7 @@ package com.mparticle;
 import org.junit.Test;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static junit.framework.Assert.assertEquals;
@@ -69,6 +70,9 @@ public class MPEventTests  {
                 .category("category")
                 .duration(12345)
                 .info(attributes)
+                .addCustomFlag("cool flag key", "flag 1 value 1")
+                .addCustomFlag("cool flag key", "flag 1 value 2")
+                .addCustomFlag("cool flag key 2", "flag 2 value 1")
                 .build();
 
         copiedEvent = new MPEvent(event);
@@ -77,6 +81,12 @@ public class MPEventTests  {
         assertEquals("category", copiedEvent.getCategory());
         assertEquals("value 1", copiedEvent.getInfo().get("key 1"));
         assertEquals("value 2", copiedEvent.getInfo().get("key 2"));
+        Map<String, List<String>> flags = copiedEvent.getCustomFlags();
+        assertEquals(flags.get("cool flag key").size(), 2);
+        assertEquals(flags.get("cool flag key 2").size(), 1);
+        assertEquals(flags.get("cool flag key").get(0), "flag 1 value 1");
+        assertEquals(flags.get("cool flag key").get(1), "flag 1 value 2");
+        assertEquals(flags.get("cool flag key 2").get(0), "flag 2 value 1");
 
     }
 }
