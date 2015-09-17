@@ -6562,22 +6562,24 @@ com.mparticle.MPEvent -> com.mparticle.MPEvent:
     java.lang.Double startTime -> startTime
     java.lang.Double endTime -> endTime
     int eventHash -> eventHash
-    35:38:void <init>() -> <init>
-    35:73:void <init>(com.mparticle.MPEvent$Builder) -> <init>
-    77:77:boolean equals(java.lang.Object) -> equals
-    81:82:void setInfo(java.util.Map) -> setInfo
-    35:94:void <init>(com.mparticle.MPEvent) -> <init>
-    98:127:java.lang.String toString() -> toString
-    131:131:java.lang.String getEventName() -> getEventName
-    135:138:int getEventHash() -> getEventHash
-    142:142:java.lang.String getCategory() -> getCategory
-    146:146:java.util.Map getInfo() -> getInfo
-    150:150:com.mparticle.MParticle$EventType getEventType() -> getEventType
-    154:161:java.lang.Double getLength() -> getLength
-    30:30:java.lang.Double access$700(com.mparticle.MPEvent) -> access$700
-    30:30:java.lang.Double access$800(com.mparticle.MPEvent) -> access$800
-    30:30:java.lang.Double access$900(com.mparticle.MPEvent) -> access$900
-    30:30:void <init>(com.mparticle.MPEvent$Builder,com.mparticle.MPEvent$1) -> <init>
+    java.util.Map customFlags -> customFlags
+    37:41:void <init>() -> <init>
+    37:79:void <init>(com.mparticle.MPEvent$Builder) -> <init>
+    83:83:boolean equals(java.lang.Object) -> equals
+    87:88:void setInfo(java.util.Map) -> setInfo
+    37:105:void <init>(com.mparticle.MPEvent) -> <init>
+    109:142:java.lang.String toString() -> toString
+    146:146:java.lang.String getEventName() -> getEventName
+    150:153:int getEventHash() -> getEventHash
+    157:157:java.lang.String getCategory() -> getCategory
+    161:161:java.util.Map getInfo() -> getInfo
+    165:165:com.mparticle.MParticle$EventType getEventType() -> getEventType
+    169:176:java.lang.Double getLength() -> getLength
+    189:189:java.util.Map getCustomFlags() -> getCustomFlags
+    32:32:java.lang.Double access$800(com.mparticle.MPEvent) -> access$800
+    32:32:java.lang.Double access$900(com.mparticle.MPEvent) -> access$900
+    32:32:java.lang.Double access$1000(com.mparticle.MPEvent) -> access$1000
+    32:32:void <init>(com.mparticle.MPEvent$Builder,com.mparticle.MPEvent$1) -> <init>
 com.mparticle.MPEvent$1 -> com.mparticle.MPEvent$1:
 com.mparticle.MPEvent$Builder -> com.mparticle.MPEvent$Builder:
     com.mparticle.MParticle$EventType eventType -> eventType
@@ -6587,35 +6589,39 @@ com.mparticle.MPEvent$Builder -> com.mparticle.MPEvent$Builder:
     java.lang.Double duration -> duration
     java.lang.Double startTime -> startTime
     java.lang.Double endTime -> endTime
+    java.util.Map customFlags -> customFlags
     java.lang.String EVENT_TYPE -> EVENT_TYPE
+    java.lang.String EVENT_CUSTOM_FLAGS -> EVENT_CUSTOM_FLAGS
     java.lang.String EVENT_NAME -> EVENT_NAME
     java.lang.String EVENT_CATEGORY -> EVENT_CATEGORY
     java.lang.String EVENT_DURATION -> EVENT_DURATION
     java.lang.String EVENT_INFO -> EVENT_INFO
     java.lang.String EVENT_START_TIME -> EVENT_START_TIME
     java.lang.String EVENT_END_TIME -> EVENT_END_TIME
-    174:177:void <init>() -> <init>
-    174:191:void <init>(java.lang.String,com.mparticle.MParticle$EventType) -> <init>
-    174:201:void <init>(com.mparticle.MPEvent) -> <init>
-    210:213:com.mparticle.MPEvent$Builder eventName(java.lang.String) -> eventName
-    225:228:com.mparticle.MPEvent$Builder eventType(com.mparticle.MParticle$EventType) -> eventType
-    239:240:com.mparticle.MPEvent$Builder category(java.lang.String) -> category
-    252:253:com.mparticle.MPEvent$Builder duration(double) -> duration
-    263:264:com.mparticle.MPEvent$Builder info(java.util.Map) -> info
-    278:279:com.mparticle.MPEvent$Builder startTime(double) -> startTime
-    290:290:com.mparticle.MPEvent$Builder startTime() -> startTime
-    301:301:com.mparticle.MPEvent$Builder endTime() -> endTime
-    316:317:com.mparticle.MPEvent$Builder endTime(double) -> endTime
-    321:321:com.mparticle.MPEvent build() -> build
-    331:360:com.mparticle.MPEvent$Builder parseString(java.lang.String) -> parseString
-    381:408:java.lang.String toString() -> toString
-    169:169:com.mparticle.MParticle$EventType access$000(com.mparticle.MPEvent$Builder) -> access$000
-    169:169:java.lang.String access$100(com.mparticle.MPEvent$Builder) -> access$100
-    169:169:java.util.Map access$200(com.mparticle.MPEvent$Builder) -> access$200
-    169:169:java.lang.String access$300(com.mparticle.MPEvent$Builder) -> access$300
-    169:169:java.lang.Double access$400(com.mparticle.MPEvent$Builder) -> access$400
-    169:169:java.lang.Double access$500(com.mparticle.MPEvent$Builder) -> access$500
-    169:169:java.lang.Double access$600(com.mparticle.MPEvent$Builder) -> access$600
+    202:205:void <init>() -> <init>
+    202:219:void <init>(java.lang.String,com.mparticle.MParticle$EventType) -> <init>
+    202:236:void <init>(com.mparticle.MPEvent) -> <init>
+    245:248:com.mparticle.MPEvent$Builder eventName(java.lang.String) -> eventName
+    260:263:com.mparticle.MPEvent$Builder eventType(com.mparticle.MParticle$EventType) -> eventType
+    275:282:com.mparticle.MPEvent$Builder addCustomFlag(java.lang.String,java.lang.String) -> addCustomFlag
+    293:294:com.mparticle.MPEvent$Builder category(java.lang.String) -> category
+    306:307:com.mparticle.MPEvent$Builder duration(double) -> duration
+    317:318:com.mparticle.MPEvent$Builder info(java.util.Map) -> info
+    332:333:com.mparticle.MPEvent$Builder startTime(double) -> startTime
+    344:344:com.mparticle.MPEvent$Builder startTime() -> startTime
+    355:355:com.mparticle.MPEvent$Builder endTime() -> endTime
+    368:369:com.mparticle.MPEvent$Builder endTime(double) -> endTime
+    381:381:com.mparticle.MPEvent build() -> build
+    391:435:com.mparticle.MPEvent$Builder parseString(java.lang.String) -> parseString
+    457:493:java.lang.String toString() -> toString
+    197:197:com.mparticle.MParticle$EventType access$000(com.mparticle.MPEvent$Builder) -> access$000
+    197:197:java.lang.String access$100(com.mparticle.MPEvent$Builder) -> access$100
+    197:197:java.util.Map access$200(com.mparticle.MPEvent$Builder) -> access$200
+    197:197:java.lang.String access$300(com.mparticle.MPEvent$Builder) -> access$300
+    197:197:java.lang.Double access$400(com.mparticle.MPEvent$Builder) -> access$400
+    197:197:java.lang.Double access$500(com.mparticle.MPEvent$Builder) -> access$500
+    197:197:java.lang.Double access$600(com.mparticle.MPEvent$Builder) -> access$600
+    197:197:java.util.Map access$700(com.mparticle.MPEvent$Builder) -> access$700
 com.mparticle.MPProduct -> com.mparticle.MPProduct:
     java.lang.String NAME -> NAME
     java.lang.String SKU -> SKU
@@ -6764,118 +6770,114 @@ com.mparticle.MParticle -> com.mparticle.MParticle:
     160:161:void start(android.content.Context,com.mparticle.MParticle$InstallType) -> start
     184:188:void start(android.content.Context,com.mparticle.MParticle$InstallType,com.mparticle.MParticle$Environment) -> start
     199:254:com.mparticle.MParticle getInstance(android.content.Context,com.mparticle.MParticle$InstallType,com.mparticle.MParticle$Environment) -> getInstance
-    1776:1777:void com.mparticle.internal.MessageManager.initConfigDelayed():776:777 -> getInstance
-    1776:1777:com.mparticle.MParticle getInstance(android.content.Context,com.mparticle.MParticle$InstallType,com.mparticle.MParticle$Environment):249 -> getInstance
+    1788:1789:void com.mparticle.internal.MessageManager.initConfigDelayed():788:789 -> getInstance
+    1788:1789:com.mparticle.MParticle getInstance(android.content.Context,com.mparticle.MParticle$InstallType,com.mparticle.MParticle$Environment):249 -> getInstance
     264:268:com.mparticle.MParticle getInstance() -> getInstance
     279:280:void setInstance(com.mparticle.MParticle) -> setInstance
     292:298:void activityStarted(android.app.Activity) -> activityStarted
     309:315:void activityStopped(android.app.Activity) -> activityStopped
-    321:325:void beginSession() -> beginSession
-    331:335:void endSession() -> endSession
-    338:338:boolean isSessionActive() -> isSessionActive
-    342:348:void ensureActiveSession() -> ensureActiveSession
-    354:359:void newSession() -> newSession
-    365:366:void upload() -> upload
-    2509:2510:void com.mparticle.internal.MessageManager.doUpload():509:510 -> upload
-    2509:2510:void upload():365 -> upload
-    373:376:void setInstallReferrer(java.lang.String) -> setInstallReferrer
-    379:379:java.lang.String getInstallReferrer() -> getInstallReferrer
-    389:390:void logEvent(java.lang.String,com.mparticle.MParticle$EventType) -> logEvent
-    400:401:void logEvent(java.lang.String,com.mparticle.MParticle$EventType,java.lang.String) -> logEvent
-    411:412:void logEvent(java.lang.String,com.mparticle.MParticle$EventType,long) -> logEvent
-    422:423:void logEvent(java.lang.String,com.mparticle.MParticle$EventType,java.util.Map) -> logEvent
-    434:435:void logEvent(java.lang.String,com.mparticle.MParticle$EventType,java.util.Map,java.lang.String) -> logEvent
-    446:447:void logEvent(java.lang.String,com.mparticle.MParticle$EventType,java.util.Map,long) -> logEvent
-    459:466:void logEvent(java.lang.String,com.mparticle.MParticle$EventType,java.util.Map,long,java.lang.String) -> logEvent
-    474:480:void logEvent(com.mparticle.MPEvent) -> logEvent
-    490:513:void logEvent(com.mparticle.commerce.CommerceEvent) -> logEvent
-    524:534:void logLtvIncrease(java.math.BigDecimal,java.lang.String,java.util.Map) -> logLtvIncrease
-    547:592:void logProductEvent(com.mparticle.MPProduct$Event,com.mparticle.MPProduct) -> logProductEvent
-    603:604:void logTransaction(com.mparticle.MPProduct) -> logTransaction
-    612:613:void logScreen(java.lang.String) -> logScreen
-    622:623:void logScreen(java.lang.String,java.util.Map) -> logScreen
-    631:656:void internalLogScreen(java.lang.String,java.util.Map,java.lang.Boolean) -> internalLogScreen
-    665:678:void leaveBreadcrumb(java.lang.String) -> leaveBreadcrumb
-    686:687:void logError(java.lang.String) -> logError
-    696:711:void logError(java.lang.String,java.util.Map) -> logError
-    714:720:void logNetworkPerformance(java.lang.String,long,java.lang.String,long,long,long,java.lang.String) -> logNetworkPerformance
-    729:780:void initNetworkMonitoring() -> initNetworkMonitoring
-    786:788:void setNetworkTrackingEnabled(boolean) -> setNetworkTrackingEnabled
-    791:814:void setNetworkTrackingEnabled(boolean,boolean) -> setNetworkTrackingEnabled
-    824:825:void excludeUrlFromNetworkPerformanceMeasurement(java.lang.String) -> excludeUrlFromNetworkPerformanceMeasurement
-    835:836:void addNetworkPerformanceQueryOnlyFilter(java.lang.String) -> addNetworkPerformanceQueryOnlyFilter
-    846:847:void resetNetworkPerformanceExclusionsAndFilters() -> resetNetworkPerformanceExclusionsAndFilters
-    855:856:void logException(java.lang.Exception) -> logException
-    865:866:void logException(java.lang.Exception,java.util.Map) -> logException
-    876:888:void logException(java.lang.Exception,java.util.Map,java.lang.String) -> logException
-    901:926:void enableLocationTracking(java.lang.String,long,long) -> enableLocationTracking
-    934:935:void disableLocationTracking() -> disableLocationTracking
-    941:958:void disableLocationTracking(boolean) -> disableLocationTracking
-    966:968:void setLocation(android.location.Location) -> setLocation
-    977:992:void setSessionAttribute(java.lang.String,java.lang.Object) -> setSessionAttribute
-    1001:1013:void incrementSessionAttribute(java.lang.String,int) -> incrementSessionAttribute
-    1022:1028:void logout() -> logout
-    1037:1053:void setUserAttribute(java.lang.String,java.lang.Object) -> setUserAttribute
-    1062:1073:void incrementUserAttribute(java.lang.String,int) -> incrementUserAttribute
-    1081:1090:void removeUserAttribute(java.lang.String) -> removeUserAttribute
-    1093:1103:void attributeRemoved(java.lang.String) -> attributeRemoved
-    1111:1112:void setUserTag(java.lang.String) -> setUserTag
-    1120:1121:void removeUserTag(java.lang.String) -> removeUserTag
-    1131:1173:void setUserIdentity(java.lang.String,com.mparticle.MParticle$IdentityType) -> setUserIdentity
-    1177:1206:org.json.JSONArray getUserIdentities() -> getUserIdentities
-    1218:1247:void removeUserIdentity(java.lang.String) -> removeUserIdentity
+    321:325:void endSession() -> endSession
+    328:328:boolean isSessionActive() -> isSessionActive
+    335:336:void upload() -> upload
+    2521:2522:void com.mparticle.internal.MessageManager.doUpload():521:522 -> upload
+    2521:2522:void upload():335 -> upload
+    343:346:void setInstallReferrer(java.lang.String) -> setInstallReferrer
+    349:349:java.lang.String getInstallReferrer() -> getInstallReferrer
+    359:360:void logEvent(java.lang.String,com.mparticle.MParticle$EventType) -> logEvent
+    370:371:void logEvent(java.lang.String,com.mparticle.MParticle$EventType,java.lang.String) -> logEvent
+    381:382:void logEvent(java.lang.String,com.mparticle.MParticle$EventType,long) -> logEvent
+    392:393:void logEvent(java.lang.String,com.mparticle.MParticle$EventType,java.util.Map) -> logEvent
+    404:405:void logEvent(java.lang.String,com.mparticle.MParticle$EventType,java.util.Map,java.lang.String) -> logEvent
+    416:417:void logEvent(java.lang.String,com.mparticle.MParticle$EventType,java.util.Map,long) -> logEvent
+    429:436:void logEvent(java.lang.String,com.mparticle.MParticle$EventType,java.util.Map,long,java.lang.String) -> logEvent
+    444:450:void logEvent(com.mparticle.MPEvent) -> logEvent
+    460:483:void logEvent(com.mparticle.commerce.CommerceEvent) -> logEvent
+    494:504:void logLtvIncrease(java.math.BigDecimal,java.lang.String,java.util.Map) -> logLtvIncrease
+    517:562:void logProductEvent(com.mparticle.MPProduct$Event,com.mparticle.MPProduct) -> logProductEvent
+    573:574:void logTransaction(com.mparticle.MPProduct) -> logTransaction
+    582:583:void logScreen(java.lang.String) -> logScreen
+    592:593:void logScreen(java.lang.String,java.util.Map) -> logScreen
+    601:626:void internalLogScreen(java.lang.String,java.util.Map,java.lang.Boolean) -> internalLogScreen
+    635:648:void leaveBreadcrumb(java.lang.String) -> leaveBreadcrumb
+    656:657:void logError(java.lang.String) -> logError
+    666:681:void logError(java.lang.String,java.util.Map) -> logError
+    684:690:void logNetworkPerformance(java.lang.String,long,java.lang.String,long,long,long,java.lang.String) -> logNetworkPerformance
+    699:750:void initNetworkMonitoring() -> initNetworkMonitoring
+    756:758:void setNetworkTrackingEnabled(boolean) -> setNetworkTrackingEnabled
+    761:784:void setNetworkTrackingEnabled(boolean,boolean) -> setNetworkTrackingEnabled
+    794:795:void excludeUrlFromNetworkPerformanceMeasurement(java.lang.String) -> excludeUrlFromNetworkPerformanceMeasurement
+    805:806:void addNetworkPerformanceQueryOnlyFilter(java.lang.String) -> addNetworkPerformanceQueryOnlyFilter
+    816:817:void resetNetworkPerformanceExclusionsAndFilters() -> resetNetworkPerformanceExclusionsAndFilters
+    825:826:void logException(java.lang.Exception) -> logException
+    835:836:void logException(java.lang.Exception,java.util.Map) -> logException
+    846:858:void logException(java.lang.Exception,java.util.Map,java.lang.String) -> logException
+    871:896:void enableLocationTracking(java.lang.String,long,long) -> enableLocationTracking
+    904:905:void disableLocationTracking() -> disableLocationTracking
+    911:928:void disableLocationTracking(boolean) -> disableLocationTracking
+    936:938:void setLocation(android.location.Location) -> setLocation
+    947:962:void setSessionAttribute(java.lang.String,java.lang.Object) -> setSessionAttribute
+    971:983:void incrementSessionAttribute(java.lang.String,int) -> incrementSessionAttribute
+    992:998:void logout() -> logout
+    1007:1023:void setUserAttribute(java.lang.String,java.lang.Object) -> setUserAttribute
+    1032:1043:void incrementUserAttribute(java.lang.String,int) -> incrementUserAttribute
+    1051:1060:void removeUserAttribute(java.lang.String) -> removeUserAttribute
+    1063:1073:void attributeRemoved(java.lang.String) -> attributeRemoved
+    1081:1082:void setUserTag(java.lang.String) -> setUserTag
+    1090:1091:void removeUserTag(java.lang.String) -> removeUserTag
+    1101:1143:void setUserIdentity(java.lang.String,com.mparticle.MParticle$IdentityType) -> setUserIdentity
+    1147:1176:org.json.JSONArray getUserIdentities() -> getUserIdentities
+    1188:1217:void removeUserIdentity(java.lang.String) -> removeUserIdentity
     3015:3018:void com.mparticle.internal.KitKatHelper.remove(org.json.JSONArray,int):15:18 -> removeUserIdentity
-    3015:3018:void removeUserIdentity(java.lang.String):1230 -> removeUserIdentity
-    1255:1255:java.lang.Boolean getOptOut() -> getOptOut
-    1264:1280:void setOptOut(java.lang.Boolean) -> setOptOut
-    1292:1292:android.net.Uri getSurveyUrl(int) -> getSurveyUrl
-    1305:1306:void setEnvironment(com.mparticle.MParticle$Environment) -> setEnvironment
-    1314:1314:com.mparticle.MParticle$Environment getEnvironment() -> getEnvironment
-    1323:1324:void setUploadInterval(int) -> setUploadInterval
-    1330:1331:void enableUncaughtExceptionLogging() -> enableUncaughtExceptionLogging
-    1337:1338:void disableUncaughtExceptionLogging() -> disableUncaughtExceptionLogging
-    1347:1347:java.lang.Boolean checkEventLimit() -> checkEventLimit
+    3015:3018:void removeUserIdentity(java.lang.String):1200 -> removeUserIdentity
+    1225:1225:java.lang.Boolean getOptOut() -> getOptOut
+    1234:1250:void setOptOut(java.lang.Boolean) -> setOptOut
+    1262:1262:android.net.Uri getSurveyUrl(int) -> getSurveyUrl
+    1275:1276:void setEnvironment(com.mparticle.MParticle$Environment) -> setEnvironment
+    1284:1284:com.mparticle.MParticle$Environment getEnvironment() -> getEnvironment
+    1293:1294:void setUploadInterval(int) -> setUploadInterval
+    1300:1301:void enableUncaughtExceptionLogging() -> enableUncaughtExceptionLogging
+    1307:1308:void disableUncaughtExceptionLogging() -> disableUncaughtExceptionLogging
+    1317:1317:java.lang.Boolean checkEventLimit() -> checkEventLimit
     3053:3058:java.lang.Boolean com.mparticle.internal.Session.checkEventLimit():53:58 -> checkEventLimit
-    3053:3058:java.lang.Boolean checkEventLimit():1347 -> checkEventLimit
-    1357:1357:java.lang.Boolean isAutoTrackingEnabled() -> isAutoTrackingEnabled
-    1366:1366:int getSessionTimeout() -> getSessionTimeout
-    1377:1378:void setSessionTimeout(int) -> setSessionTimeout
-    1381:1384:void getUserSegments(long,java.lang.String,com.mparticle.segmentation.SegmentListener) -> getUserSegments
-    1393:1399:void registerWebView(android.webkit.WebView) -> registerWebView
-    1411:1414:void setLogLevel(com.mparticle.MParticle$LogLevel) -> setLogLevel
-    1422:1425:com.mparticle.messaging.MPMessagingAPI Messaging() -> Messaging
-    1435:1435:com.mparticle.commerce.CommerceApi Commerce() -> Commerce
-    1446:1446:com.mparticle.commerce.ProductBagApi ProductBags() -> ProductBags
-    1455:1472:com.mparticle.media.MPMediaAPI Media() -> Media
-    1494:1494:boolean isProviderActive(int) -> isProviderActive
-    1498:1499:void saveGcmMessage(com.mparticle.messaging.MPCloudNotificationMessage,java.lang.String) -> saveGcmMessage
-    1502:1503:void saveGcmMessage(com.mparticle.messaging.ProviderCloudMessage,java.lang.String) -> saveGcmMessage
-    1506:1507:void logPushRegistration(java.lang.String) -> logPushRegistration
-    1510:1516:void logNotification(com.mparticle.messaging.MPCloudNotificationMessage,com.mparticle.messaging.CloudAction,boolean,java.lang.String,int) -> logNotification
-    1519:1525:void logNotification(com.mparticle.messaging.ProviderCloudMessage,boolean,java.lang.String) -> logNotification
-    1528:1530:void refreshConfiguration() -> refreshConfiguration
-    1626:1626:org.json.JSONObject getUserAttributes() -> getUserAttributes
-    1697:1704:void logUnhandledError(java.lang.Throwable) -> logUnhandledError
-    92:92:void access$100(com.mparticle.MParticle) -> access$100
+    3053:3058:java.lang.Boolean checkEventLimit():1317 -> checkEventLimit
+    1327:1327:java.lang.Boolean isAutoTrackingEnabled() -> isAutoTrackingEnabled
+    1336:1336:int getSessionTimeout() -> getSessionTimeout
+    1347:1348:void setSessionTimeout(int) -> setSessionTimeout
+    1351:1354:void getUserSegments(long,java.lang.String,com.mparticle.segmentation.SegmentListener) -> getUserSegments
+    1363:1369:void registerWebView(android.webkit.WebView) -> registerWebView
+    1381:1384:void setLogLevel(com.mparticle.MParticle$LogLevel) -> setLogLevel
+    1392:1395:com.mparticle.messaging.MPMessagingAPI Messaging() -> Messaging
+    1405:1405:com.mparticle.commerce.CommerceApi Commerce() -> Commerce
+    1416:1416:com.mparticle.commerce.ProductBagApi ProductBags() -> ProductBags
+    1425:1442:com.mparticle.media.MPMediaAPI Media() -> Media
+    1464:1464:boolean isProviderActive(int) -> isProviderActive
+    1468:1469:void saveGcmMessage(com.mparticle.messaging.MPCloudNotificationMessage,java.lang.String) -> saveGcmMessage
+    1472:1473:void saveGcmMessage(com.mparticle.messaging.ProviderCloudMessage,java.lang.String) -> saveGcmMessage
+    1476:1478:void logPushRegistration(java.lang.String) -> logPushRegistration
+    1481:1487:void logNotification(com.mparticle.messaging.MPCloudNotificationMessage,com.mparticle.messaging.CloudAction,boolean,java.lang.String,int) -> logNotification
+    1490:1496:void logNotification(com.mparticle.messaging.ProviderCloudMessage,boolean,java.lang.String) -> logNotification
+    1499:1501:void refreshConfiguration() -> refreshConfiguration
+    1597:1597:org.json.JSONObject getUserAttributes() -> getUserAttributes
+    1668:1675:void logUnhandledError(java.lang.Throwable) -> logUnhandledError
 com.mparticle.MParticle$1 -> com.mparticle.MParticle$1:
     com.mparticle.MParticle this$0 -> this$0
-    1456:1456:void <init>(com.mparticle.MParticle) -> <init>
-    1459:1460:void onAudioPlaying() -> onAudioPlaying
-    1465:1469:void onAudioStopped() -> onAudioStopped
+    1426:1426:void <init>(com.mparticle.MParticle) -> <init>
+    1429:1430:void onAudioPlaying() -> onAudioPlaying
+    1435:1439:void onAudioStopped() -> onAudioStopped
 com.mparticle.MParticle$2 -> com.mparticle.MParticle$2:
     int[] $SwitchMap$com$mparticle$MPProduct$Event -> $SwitchMap$com$mparticle$MPProduct$Event
-    560:560:void <clinit>() -> <clinit>
+    530:530:void <clinit>() -> <clinit>
 com.mparticle.MParticle$Environment -> com.mparticle.MParticle$Environment:
     com.mparticle.MParticle$Environment AutoDetect -> AutoDetect
     com.mparticle.MParticle$Environment Development -> Development
     com.mparticle.MParticle$Environment Production -> Production
     int value -> value
     com.mparticle.MParticle$Environment[] $VALUES -> $VALUES
-    1639:1639:com.mparticle.MParticle$Environment[] values() -> values
-    1639:1639:com.mparticle.MParticle$Environment valueOf(java.lang.String) -> valueOf
-    1660:1660:int getValue() -> getValue
-    1663:1665:void <init>(java.lang.String,int,int) -> <init>
-    1639:1656:void <clinit>() -> <clinit>
+    1610:1610:com.mparticle.MParticle$Environment[] values() -> values
+    1610:1610:com.mparticle.MParticle$Environment valueOf(java.lang.String) -> valueOf
+    1631:1631:int getValue() -> getValue
+    1634:1636:void <init>(java.lang.String,int,int) -> <init>
+    1610:1627:void <clinit>() -> <clinit>
 com.mparticle.MParticle$EventType -> com.mparticle.MParticle$EventType:
     com.mparticle.MParticle$EventType Unknown -> Unknown
     com.mparticle.MParticle$EventType Navigation -> Navigation
@@ -6887,11 +6889,11 @@ com.mparticle.MParticle$EventType -> com.mparticle.MParticle$EventType:
     com.mparticle.MParticle$EventType Social -> Social
     com.mparticle.MParticle$EventType Other -> Other
     com.mparticle.MParticle$EventType[] $VALUES -> $VALUES
-    1537:1537:com.mparticle.MParticle$EventType[] values() -> values
-    1537:1537:com.mparticle.MParticle$EventType valueOf(java.lang.String) -> valueOf
-    1537:1537:void <init>(java.lang.String,int) -> <init>
-    1541:1541:java.lang.String toString() -> toString
-    1537:1538:void <clinit>() -> <clinit>
+    1508:1508:com.mparticle.MParticle$EventType[] values() -> values
+    1508:1508:com.mparticle.MParticle$EventType valueOf(java.lang.String) -> valueOf
+    1508:1508:void <init>(java.lang.String,int) -> <init>
+    1512:1512:java.lang.String toString() -> toString
+    1508:1509:void <clinit>() -> <clinit>
 com.mparticle.MParticle$IdentityType -> com.mparticle.MParticle$IdentityType:
     com.mparticle.MParticle$IdentityType Other -> Other
     com.mparticle.MParticle$IdentityType CustomerId -> CustomerId
@@ -6905,33 +6907,33 @@ com.mparticle.MParticle$IdentityType -> com.mparticle.MParticle$IdentityType:
     com.mparticle.MParticle$IdentityType FacebookCustomAudienceId -> FacebookCustomAudienceId
     int value -> value
     com.mparticle.MParticle$IdentityType[] $VALUES -> $VALUES
-    1575:1575:com.mparticle.MParticle$IdentityType[] values() -> values
-    1575:1575:com.mparticle.MParticle$IdentityType valueOf(java.lang.String) -> valueOf
-    1589:1591:void <init>(java.lang.String,int,int) -> <init>
-    1594:1614:com.mparticle.MParticle$IdentityType parseInt(int) -> parseInt
-    1620:1620:int getValue() -> getValue
-    1575:1575:int access$000(com.mparticle.MParticle$IdentityType) -> access$000
-    1575:1585:void <clinit>() -> <clinit>
+    1546:1546:com.mparticle.MParticle$IdentityType[] values() -> values
+    1546:1546:com.mparticle.MParticle$IdentityType valueOf(java.lang.String) -> valueOf
+    1560:1562:void <init>(java.lang.String,int,int) -> <init>
+    1565:1585:com.mparticle.MParticle$IdentityType parseInt(int) -> parseInt
+    1591:1591:int getValue() -> getValue
+    1546:1546:int access$000(com.mparticle.MParticle$IdentityType) -> access$000
+    1546:1556:void <clinit>() -> <clinit>
 com.mparticle.MParticle$InstallType -> com.mparticle.MParticle$InstallType:
     com.mparticle.MParticle$InstallType AutoDetect -> AutoDetect
     com.mparticle.MParticle$InstallType KnownInstall -> KnownInstall
     com.mparticle.MParticle$InstallType KnownUpgrade -> KnownUpgrade
     com.mparticle.MParticle$InstallType[] $VALUES -> $VALUES
-    1550:1550:com.mparticle.MParticle$InstallType[] values() -> values
-    1550:1550:com.mparticle.MParticle$InstallType valueOf(java.lang.String) -> valueOf
-    1550:1550:void <init>(java.lang.String,int) -> <init>
-    1565:1565:java.lang.String toString() -> toString
-    1550:1562:void <clinit>() -> <clinit>
+    1521:1521:com.mparticle.MParticle$InstallType[] values() -> values
+    1521:1521:com.mparticle.MParticle$InstallType valueOf(java.lang.String) -> valueOf
+    1521:1521:void <init>(java.lang.String,int) -> <init>
+    1536:1536:java.lang.String toString() -> toString
+    1521:1533:void <clinit>() -> <clinit>
 com.mparticle.MParticle$LogLevel -> com.mparticle.MParticle$LogLevel:
     com.mparticle.MParticle$LogLevel NONE -> NONE
     com.mparticle.MParticle$LogLevel ERROR -> ERROR
     com.mparticle.MParticle$LogLevel WARNING -> WARNING
     com.mparticle.MParticle$LogLevel DEBUG -> DEBUG
     com.mparticle.MParticle$LogLevel[] $VALUES -> $VALUES
-    1677:1677:com.mparticle.MParticle$LogLevel[] values() -> values
-    1677:1677:com.mparticle.MParticle$LogLevel valueOf(java.lang.String) -> valueOf
-    1677:1677:void <init>(java.lang.String,int) -> <init>
-    1677:1693:void <clinit>() -> <clinit>
+    1648:1648:com.mparticle.MParticle$LogLevel[] values() -> values
+    1648:1648:com.mparticle.MParticle$LogLevel valueOf(java.lang.String) -> valueOf
+    1648:1648:void <init>(java.lang.String,int) -> <init>
+    1648:1664:void <clinit>() -> <clinit>
 com.mparticle.MParticle$ServiceProviders -> com.mparticle.MParticle$ServiceProviders:
     int FORESEE_ID -> FORESEE_ID
     int APPBOY -> APPBOY
@@ -7309,33 +7311,33 @@ com.mparticle.internal.AppStateManager -> com.mparticle.internal.b:
     199:226:void onActivityStopped$3ef636dc(android.app.Activity) -> b
     2329:2329:java.lang.String getActivityName(android.app.Activity):329:329 -> b
     2329:2329:void onActivityStopped$3ef636dc(android.app.Activity):218 -> b
-    239:252:void logStateTransition(java.lang.String,java.lang.String,long,long,java.lang.String,java.lang.String,java.lang.String,int) -> a
-    3229:3236:void ensureActiveSession():229:236 -> a
-    3229:3236:void logStateTransition(java.lang.String,java.lang.String,long,long,java.lang.String,java.lang.String,java.lang.String,int):240 -> a
-    3337:3337:com.mparticle.internal.Session getSession():337:337 -> a
-    3337:3337:void ensureActiveSession():229 -> a
-    3337:3337:void logStateTransition(java.lang.String,java.lang.String,long,long,java.lang.String,java.lang.String,java.lang.String,int):240 -> a
-    4262:4268:void newSession():262:268 -> a
-    4262:4268:void ensureActiveSession():232 -> a
-    4262:4268:void logStateTransition(java.lang.String,java.lang.String,long,long,java.lang.String,java.lang.String,java.lang.String,int):240 -> a
+    229:236:void ensureActiveSession() -> a
+    2337:2337:com.mparticle.internal.Session getSession():337:337 -> a
+    2337:2337:void ensureActiveSession():229 -> a
+    3261:3268:void newSession():261:268 -> a
+    3261:3268:void ensureActiveSession():232 -> a
+    3358:3360:void startSession():358:360 -> a
+    3358:3360:void newSession():261 -> a
+    3358:3360:void ensureActiveSession():232 -> a
+    3516:3518:void com.mparticle.internal.MessageManager.startUploadLoop():516:518 -> a
+    3516:3518:void newSession():265 -> a
+    3516:3518:void ensureActiveSession():232 -> a
     4337:4337:com.mparticle.internal.Session getSession():337:337 -> a
     4337:4337:void ensureActiveSession():234 -> a
-    4337:4337:void logStateTransition(java.lang.String,java.lang.String,long,long,java.lang.String,java.lang.String,java.lang.String,int):240 -> a
-    255:256:void logStateTransition(java.lang.String,java.lang.String) -> a
+    239:251:void logStateTransition(java.lang.String,java.lang.String,long,long,java.lang.String,java.lang.String,java.lang.String,int) -> a
+    254:255:void logStateTransition(java.lang.String,java.lang.String) -> a
     271:279:void enableLocationTracking() -> m
+    282:295:void checkSessionTimeout() -> n
     299:300:void onActivityCreated$3ef636dc(android.app.Activity) -> c
     304:305:void onActivityResumed$3ef636dc(android.app.Activity) -> d
     309:310:void onActivityPaused$3ef636dc(android.app.Activity) -> e
-    325:325:boolean isBackgrounded() -> a
-    333:333:java.lang.String getCurrentActivity() -> b
-    337:337:com.mparticle.internal.Session getSession() -> c
-    341:346:void endSession() -> d
-    4349:4355:void disableLocationTracking():349:355 -> d
-    4349:4355:void endSession():344 -> d
-    358:360:void startSession() -> e
+    325:325:boolean isBackgrounded() -> b
+    333:333:java.lang.String getCurrentActivity() -> c
+    337:337:com.mparticle.internal.Session getSession() -> d
+    341:346:void endSession() -> e
+    4349:4355:void disableLocationTracking():349:355 -> e
+    4349:4355:void endSession():344 -> e
     28:28:void access$000(com.mparticle.internal.AppStateManager) -> a
-    5282:5295:void checkSessionTimeout():282:295 -> a
-    5282:5295:void access$000(com.mparticle.internal.AppStateManager):28 -> a
     28:28:void access$100(com.mparticle.internal.AppStateManager) -> b
     5313:5317:void logBackgrounded():313:317 -> b
     5313:5317:void access$100(com.mparticle.internal.AppStateManager):28 -> b
@@ -7705,102 +7707,101 @@ com.mparticle.internal.MessageManager -> com.mparticle.internal.m:
     com.mparticle.MParticle$InstallType mInstallType -> n
     android.telephony.TelephonyManager sTelephonyManager -> o
     boolean mFirstRun -> p
-    53:120:void <init>() -> <init>
-    53:146:void <init>(android.content.Context,com.mparticle.internal.ConfigManager,com.mparticle.MParticle$InstallType,com.mparticle.internal.AppStateManager) -> <init>
-    156:181:org.json.JSONObject getStateInfo() -> a
+    54:121:void <init>() -> <init>
+    54:147:void <init>(android.content.Context,com.mparticle.internal.ConfigManager,com.mparticle.MParticle$InstallType,com.mparticle.internal.AppStateManager) -> <init>
+    157:182:org.json.JSONObject getStateInfo() -> a
     1108:1111:long com.mparticle.internal.MPUtility.getAvailableMemory(android.content.Context):108:111 -> a
-    1108:1111:org.json.JSONObject getStateInfo():158 -> a
-    1185:1192:long getTotalMemory():185:192 -> a
-    1185:1192:org.json.JSONObject getStateInfo():159 -> a
+    1108:1111:org.json.JSONObject getStateInfo():159 -> a
+    1186:1193:long getTotalMemory():186:193 -> a
+    1186:1193:org.json.JSONObject getStateInfo():160 -> a
     1207:1210:long com.mparticle.internal.MPUtility.getTotalMemory(android.content.Context):207:210 -> a
-    1207:1210:long getTotalMemory():187 -> a
-    1207:1210:org.json.JSONObject getStateInfo():159 -> a
+    1207:1210:long getTotalMemory():188 -> a
+    1207:1210:org.json.JSONObject getStateInfo():160 -> a
     1216:1219:long com.mparticle.internal.MPUtility.getTotalMemoryJB(android.content.Context):216:219 -> a
     1216:1219:long com.mparticle.internal.MPUtility.getTotalMemory(android.content.Context):208 -> a
-    1216:1219:long getTotalMemory():187 -> a
-    1216:1219:org.json.JSONObject getStateInfo():159 -> a
+    1216:1219:long getTotalMemory():188 -> a
+    1216:1219:org.json.JSONObject getStateInfo():160 -> a
     2146:2147:long com.mparticle.internal.MPUtility.getAvailableInternalDisk():146:147 -> a
-    2146:2147:org.json.JSONObject getStateInfo():162 -> a
+    2146:2147:org.json.JSONObject getStateInfo():163 -> a
     2151:2152:long com.mparticle.internal.MPUtility.getAvailableExternalDisk():151:152 -> a
-    2151:2152:org.json.JSONObject getStateInfo():163 -> a
+    2151:2152:org.json.JSONObject getStateInfo():164 -> a
     3136:3141:java.lang.String com.mparticle.internal.MPUtility.getGpsEnabled(android.content.Context):136:141 -> a
-    3136:3141:org.json.JSONObject getStateInfo():170 -> a
+    3136:3141:org.json.JSONObject getStateInfo():171 -> a
     3190:3203:int com.mparticle.internal.MPUtility.getOrientation(android.content.Context):190:203 -> a
-    3190:3203:org.json.JSONObject getStateInfo():175 -> a
+    3190:3203:org.json.JSONObject getStateInfo():176 -> a
     4115:4118:boolean com.mparticle.internal.MPUtility.isSystemMemoryLow(android.content.Context):115:118 -> a
-    4115:4118:org.json.JSONObject getStateInfo():178 -> a
-    4196:4203:long getSystemMemoryThreshold():196:203 -> a
-    4196:4203:org.json.JSONObject getStateInfo():179 -> a
+    4115:4118:org.json.JSONObject getStateInfo():179 -> a
+    4197:4204:long getSystemMemoryThreshold():197:204 -> a
+    4197:4204:org.json.JSONObject getStateInfo():180 -> a
     5122:5125:long com.mparticle.internal.MPUtility.getSystemMemoryThreshold(android.content.Context):122:125 -> a
-    5122:5125:long getSystemMemoryThreshold():198 -> a
-    5122:5125:org.json.JSONObject getStateInfo():179 -> a
-    5149:5152:android.telephony.TelephonyManager getTelephonyManager():149:152 -> a
-    5149:5152:org.json.JSONObject getStateInfo():180 -> a
-    215:260:com.mparticle.internal.MPMessage startSession() -> b
+    5122:5125:long getSystemMemoryThreshold():199 -> a
+    5122:5125:org.json.JSONObject getStateInfo():180 -> a
+    5150:5153:android.telephony.TelephonyManager getTelephonyManager():150:153 -> a
+    5150:5153:org.json.JSONObject getStateInfo():181 -> a
+    216:261:com.mparticle.internal.MPMessage startSession() -> b
     5248:5248:java.lang.String com.mparticle.internal.ConfigManager.getApiKey():248:248 -> b
-    5248:5248:com.mparticle.internal.MPMessage startSession():240 -> b
+    5248:5248:com.mparticle.internal.MPMessage startSession():241 -> b
     6248:6248:java.lang.String com.mparticle.internal.ConfigManager.getApiKey():248:248 -> b
-    6248:6248:com.mparticle.internal.MPMessage startSession():242 -> b
-    7207:7210:com.mparticle.internal.MPMessage createFirstRunMessage():207:210 -> b
-    7207:7210:com.mparticle.internal.MPMessage startSession():244 -> b
-    7265:7270:void incrementSessionCounter():265:270 -> b
-    7265:7270:com.mparticle.internal.MPMessage startSession():256 -> b
-    273:273:int getCurrentSessionCounter() -> i
-    278:287:void updateSessionEnd(com.mparticle.internal.Session) -> a
-    290:293:void endSession(com.mparticle.internal.Session) -> b
-    296:322:com.mparticle.internal.MPMessage logEvent(com.mparticle.MPEvent,java.lang.String) -> a
-    326:338:com.mparticle.internal.MPMessage logEvent(com.mparticle.commerce.CommerceEvent) -> a
-    346:363:com.mparticle.internal.MPMessage logScreen(java.lang.String,org.json.JSONObject,boolean) -> a
-    367:384:com.mparticle.internal.MPMessage logBreadcrumb(java.lang.String) -> a
-    389:397:com.mparticle.internal.MPMessage optOut(long,boolean) -> a
-    406:406:com.mparticle.internal.MPMessage logErrorEvent(java.lang.String,java.lang.Throwable,org.json.JSONObject) -> a
-    411:439:com.mparticle.internal.MPMessage logErrorEvent(java.lang.String,java.lang.Throwable,org.json.JSONObject,boolean) -> a
-    443:462:com.mparticle.internal.MPMessage logNetworkPerformanceEvent(long,java.lang.String,java.lang.String,long,long,long,java.lang.String) -> a
-    467:482:com.mparticle.internal.MPMessage setPushRegistrationId(java.lang.String,boolean) -> a
-    486:498:void setSessionAttributes() -> c
-    504:506:void startUploadLoop() -> d
-    513:515:void setLocation(android.location.Location) -> a
-    523:599:com.mparticle.internal.MPMessage logStateTransition(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,long,long,int) -> a
-    7606:7627:boolean autoDetectInstall():606:627 -> a
-    7606:7627:com.mparticle.internal.MPMessage logStateTransition(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,long,long,int):580 -> a
-    632:650:void logNotification(com.mparticle.messaging.ProviderCloudMessage,java.lang.String) -> a
-    655:687:void logNotification(int,java.lang.String,com.mparticle.messaging.CloudAction,java.lang.String,int) -> a
-    692:702:void logProfileAction(java.lang.String) -> b
-    706:719:com.mparticle.internal.MPMessage createMessageSessionEnd(java.lang.String,long,long,long,org.json.JSONObject) -> a
-    8342:8343:void resetEventCounter():342:343 -> a
-    8342:8343:com.mparticle.internal.MPMessage createMessageSessionEnd(java.lang.String,long,long,long,org.json.JSONObject):707 -> a
-    724:724:java.lang.String getApiKey() -> e
-    9248:9248:java.lang.String com.mparticle.internal.ConfigManager.getApiKey():248:248 -> e
-    9248:9248:java.lang.String getApiKey():724 -> e
-    730:755:void delayedStart() -> f
-    759:761:void endUploadLoop() -> g
-    765:769:void checkForTrigger(com.mparticle.internal.MPMessage) -> a
-    772:773:void refreshConfiguration() -> h
-    780:785:void saveGcmMessage(com.mparticle.messaging.MPCloudNotificationMessage,java.lang.String) -> a
-    788:793:void saveGcmMessage(com.mparticle.messaging.ProviderCloudMessage,java.lang.String) -> b
-    797:802:void log(com.mparticle.internal.embedded.ReportingMessage) -> a
-    806:814:void logAll(java.util.List) -> a
-    838:851:void setDataConnection(android.net.NetworkInfo) -> a
+    6248:6248:com.mparticle.internal.MPMessage startSession():243 -> b
+    7208:7211:com.mparticle.internal.MPMessage createFirstRunMessage():208:211 -> b
+    7208:7211:com.mparticle.internal.MPMessage startSession():245 -> b
+    7266:7271:void incrementSessionCounter():266:271 -> b
+    7266:7271:com.mparticle.internal.MPMessage startSession():257 -> b
+    274:274:int getCurrentSessionCounter() -> h
+    279:288:void updateSessionEnd(com.mparticle.internal.Session) -> a
+    291:294:void endSession(com.mparticle.internal.Session) -> b
+    297:334:com.mparticle.internal.MPMessage logEvent(com.mparticle.MPEvent,java.lang.String) -> a
+    338:350:com.mparticle.internal.MPMessage logEvent(com.mparticle.commerce.CommerceEvent) -> a
+    358:375:com.mparticle.internal.MPMessage logScreen(java.lang.String,org.json.JSONObject,boolean) -> a
+    379:396:com.mparticle.internal.MPMessage logBreadcrumb(java.lang.String) -> a
+    401:409:com.mparticle.internal.MPMessage optOut(long,boolean) -> a
+    418:418:com.mparticle.internal.MPMessage logErrorEvent(java.lang.String,java.lang.Throwable,org.json.JSONObject) -> a
+    423:451:com.mparticle.internal.MPMessage logErrorEvent(java.lang.String,java.lang.Throwable,org.json.JSONObject,boolean) -> a
+    455:474:com.mparticle.internal.MPMessage logNetworkPerformanceEvent(long,java.lang.String,java.lang.String,long,long,long,java.lang.String) -> a
+    479:494:com.mparticle.internal.MPMessage setPushRegistrationId(java.lang.String,boolean) -> a
+    498:510:void setSessionAttributes() -> c
+    525:527:void setLocation(android.location.Location) -> a
+    535:611:com.mparticle.internal.MPMessage logStateTransition(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,long,long,int) -> a
+    7618:7639:boolean autoDetectInstall():618:639 -> a
+    7618:7639:com.mparticle.internal.MPMessage logStateTransition(java.lang.String,java.lang.String,java.lang.String,java.lang.String,java.lang.String,long,long,int):592 -> a
+    644:662:void logNotification(com.mparticle.messaging.ProviderCloudMessage,java.lang.String) -> a
+    667:699:void logNotification(int,java.lang.String,com.mparticle.messaging.CloudAction,java.lang.String,int) -> a
+    704:714:void logProfileAction(java.lang.String) -> b
+    718:731:com.mparticle.internal.MPMessage createMessageSessionEnd(java.lang.String,long,long,long,org.json.JSONObject) -> a
+    8354:8355:void resetEventCounter():354:355 -> a
+    8354:8355:com.mparticle.internal.MPMessage createMessageSessionEnd(java.lang.String,long,long,long,org.json.JSONObject):719 -> a
+    736:736:java.lang.String getApiKey() -> d
+    9248:9248:java.lang.String com.mparticle.internal.ConfigManager.getApiKey():248:248 -> d
+    9248:9248:java.lang.String getApiKey():736 -> d
+    742:767:void delayedStart() -> e
+    771:773:void endUploadLoop() -> f
+    777:781:void checkForTrigger(com.mparticle.internal.MPMessage) -> a
+    784:785:void refreshConfiguration() -> g
+    792:797:void saveGcmMessage(com.mparticle.messaging.MPCloudNotificationMessage,java.lang.String) -> a
+    800:805:void saveGcmMessage(com.mparticle.messaging.ProviderCloudMessage,java.lang.String) -> b
+    809:814:void log(com.mparticle.internal.embedded.ReportingMessage) -> a
+    818:826:void logAll(java.util.List) -> a
+    850:863:void setDataConnection(android.net.NetworkInfo) -> a
     9463:9464:void com.mparticle.internal.UploadHandler.setConnected(boolean):463:464 -> a
-    9463:9464:void setDataConnection(android.net.NetworkInfo):844 -> a
+    9463:9464:void setDataConnection(android.net.NetworkInfo):856 -> a
     10463:10464:void com.mparticle.internal.UploadHandler.setConnected(boolean):463:464 -> a
-    10463:10464:void setDataConnection(android.net.NetworkInfo):847 -> a
-    48:48:double access$102(double) -> a
-    50:104:void <clinit>() -> <clinit>
+    10463:10464:void setDataConnection(android.net.NetworkInfo):859 -> a
+    49:49:double access$102(double) -> a
+    51:105:void <clinit>() -> <clinit>
 com.mparticle.internal.MessageManager$InfluenceOpenMessage -> com.mparticle.internal.m$a:
     long mTimeStamp -> a
     long mTimeout -> b
-    857:860:void <init>(com.mparticle.internal.MessageManager,long,long) -> <init>
+    869:872:void <init>(com.mparticle.internal.MessageManager,long,long) -> <init>
 com.mparticle.internal.MessageManager$StatusBroadcastReceiver -> com.mparticle.internal.m$b:
     com.mparticle.internal.MessageManager this$0 -> a
-    816:816:void <init>(com.mparticle.internal.MessageManager) -> <init>
-    820:834:void onReceive(android.content.Context,android.content.Intent) -> onReceive
-    816:816:void <init>(com.mparticle.internal.MessageManager,byte) -> <init>
+    828:828:void <init>(com.mparticle.internal.MessageManager) -> <init>
+    832:846:void onReceive(android.content.Context,android.content.Intent) -> onReceive
+    828:828:void <init>(com.mparticle.internal.MessageManager,byte) -> <init>
 com.mparticle.internal.MessageManagerCallbacks -> com.mparticle.internal.n:
     com.mparticle.internal.MPMessage createMessageSessionEnd(java.lang.String,long,long,long,org.json.JSONObject) -> a
-    java.lang.String getApiKey() -> e
-    void delayedStart() -> f
-    void endUploadLoop() -> g
+    java.lang.String getApiKey() -> d
+    void delayedStart() -> e
+    void endUploadLoop() -> f
     void checkForTrigger(com.mparticle.internal.MPMessage) -> a
     void logNotification(int,java.lang.String,com.mparticle.messaging.CloudAction,java.lang.String,int) -> a
 com.mparticle.internal.PushRegistrationHelper -> com.mparticle.internal.PushRegistrationHelper:
