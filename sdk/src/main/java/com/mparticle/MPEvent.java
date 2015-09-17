@@ -7,6 +7,7 @@ import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.Constants;
 import com.mparticle.internal.MPUtility;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -14,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -34,6 +36,7 @@ public class MPEvent {
     private Map<String, String> info;
     private Double duration = null, startTime = null, endTime = null;
     private int eventHash;
+    private Map<String, List<String>> customFlags;
 
     private MPEvent(){}
     private MPEvent(Builder builder){
@@ -70,6 +73,9 @@ public class MPEvent {
         if (builder.startTime != null){
             startTime = builder.startTime;
         }
+        if (builder.customFlags != null) {
+            customFlags = builder.customFlags;
+        }
     }
 
     @Override
@@ -84,13 +90,18 @@ public class MPEvent {
     public MPEvent(MPEvent mpEvent) {
         eventType = mpEvent.eventType;
         eventName = mpEvent.eventName;
-        Map<String, String> shallowCopy = new HashMap<String, String>();
-        shallowCopy.putAll(mpEvent.info);
-        info = shallowCopy;
+        if (mpEvent.info != null) {
+            Map<String, String> shallowCopy = new HashMap<String, String>();
+            shallowCopy.putAll(mpEvent.info);
+            info = shallowCopy;
+        }else {
+            info = null;
+        }
         category = mpEvent.category;
         duration = mpEvent.duration;
         endTime = mpEvent.endTime;
         startTime = mpEvent.startTime;
+        customFlags = mpEvent.customFlags;
     }
 
     @Override
@@ -123,6 +134,10 @@ public class MPEvent {
                 .append(info.get(key))
                 .append("\n");
             }
+        }
+        if (customFlags != null) {
+            builder.append("custom flags:\n");
+            builder.append(customFlags.toString());
         }
         return builder.toString();
     }
@@ -162,6 +177,19 @@ public class MPEvent {
     }
 
     /**
+     * Retrieve the custom flags set on this event. Custom Flags are used to send data or trigger behavior
+     * to individual 3rd party services that you have enabled for your app. By default, flags are not forwarded
+     * to any providers.
+     *
+     * @see com.mparticle.MPEvent.Builder#addCustomFlag(String, String)
+     *
+     * @return returns the map of custom flags, or null if none are set
+     */
+    public Map<String,List<String>> getCustomFlags() {
+        return customFlags;
+    }
+
+    /**
      * Class used to build an {@link com.mparticle.MPEvent} object.
      *
      * @see com.mparticle.MParticle#logEvent(MPEvent)
@@ -172,7 +200,7 @@ public class MPEvent {
         private String category;
         private Map<String, String> info;
         private Double duration = null, startTime = null, endTime = null;
-
+        private Map<String, List<String>> customFlags = null;
 
         private Builder(){}
 
@@ -190,6 +218,12 @@ public class MPEvent {
             this.eventType = eventType;
         }
 
+        /**
+         * Use this to convert an existing MPEvent to a Builder, useful in modifying
+         * and duplicating events.
+         *
+         * @param event
+         */
         public Builder(MPEvent event) {
             this.eventName = event.getEventName();
             this.eventType = event.getEventType();
@@ -198,13 +232,14 @@ public class MPEvent {
             this.duration = event.duration;
             this.startTime = event.startTime;
             this.endTime = event.endTime;
+            this.customFlags = event.getCustomFlags();
         }
 
         /**
          * the name of the event to be tracked, required not null.
          *
          * @param eventName
-         * @return
+         * @return returns this builder for easy method chaining
          */
         public Builder eventName(String eventName){
             if (eventName != null) {
@@ -217,7 +252,7 @@ public class MPEvent {
          * the type of the event to be tracked
          *
          * @param eventType
-         * @return
+         * @return returns this builder for easy method chaining
          *
          * @see com.mparticle.MParticle.EventType
          */
@@ -229,11 +264,30 @@ public class MPEvent {
         }
 
         /**
+         * Add a custom flag to this event. Flag keys can have multiple values - if the provided flag key already has an associated
+         * value, the value will be appended.
+         *
+         * @param key (required) a flag key, retrieve this from the mParticle docs or solution team for your intended services(s)
+         * @param value (required) a flag value to be send to the service indicated by the flag key
+         * @return returns this builder for easy method chaining
+         */
+        public Builder addCustomFlag(String key, String value) {
+            if (customFlags == null) {
+                customFlags = new HashMap<String, List<String>>();
+            }
+            if (!customFlags.containsKey(key)) {
+                customFlags.put(key, new LinkedList<String>());
+            }
+            customFlags.get(key).add(value);
+            return this;
+        }
+
+        /**
          *
          * The Google Analytics category with which to associate this event
          *
          * @param category
-         * @return
+         * @return returns this builder for easy method chaining
          */
         public Builder category(String category){
             this.category = category;
@@ -246,7 +300,7 @@ public class MPEvent {
          * This will override {@link #startTime(double)} and {@link #endTime(double)}.
          *
          * @param durationMillis
-         * @return
+         * @return returns this builder for easy method chaining
          */
         public Builder duration(double durationMillis){
             this.duration = durationMillis;
@@ -257,7 +311,7 @@ public class MPEvent {
          * Data attributes to associate with the event
          *
          * @param info
-         * @return
+         * @return returns this builder for easy method chaining
          */
         public Builder info(Map<String, String> info){
             this.info = info;
@@ -272,7 +326,7 @@ public class MPEvent {
          * Also, you can use {@link #startTime()} and {@link #endTime()}, rather than setting the time manually.
          *
          * @param startTimeMillis
-         * @return
+         * @return returns this builder for easy method chaining
          */
         private Builder startTime(double startTimeMillis){
             this.startTime = startTimeMillis;
@@ -284,7 +338,7 @@ public class MPEvent {
          *
          * Note that by using {@link #duration(double)}, this value will be ignored.
          *
-         * @return
+         * @return returns this builder for easy method chaining
          */
         public Builder startTime(){
             return startTime(System.currentTimeMillis());
@@ -295,7 +349,7 @@ public class MPEvent {
          *
          * Note that by using {@link #duration(double)}, this value will be ignored.
          *
-         * @return
+         * @return returns this builder for easy method chaining
          */
         public Builder endTime(){
             return endTime(System.currentTimeMillis());
@@ -305,18 +359,24 @@ public class MPEvent {
          *
          * Manually set the time when this event ended - should be epoch time milliseconds.
          *
-         *
-         *
          * Note that by using {@link #duration(double)}, this value will be ignored.
          *
          * @param endTimeMillis
-         * @return
+         * @return returns this builder for easy method chaining
          */
         private Builder endTime(double endTimeMillis){
             this.endTime = endTimeMillis;
             return this;
         }
 
+        /**
+         * Create the MPEvent. In development mode this method will throw an IllegalStateException if this
+         * MPEvent is invalid.
+         *
+         * @return returns the MPEvent object to be logged
+         *
+         * @see MParticle#logEvent(MPEvent)
+         */
         public MPEvent build(){
             return new MPEvent(this);
         }
@@ -325,7 +385,7 @@ public class MPEvent {
          * Use this method to deserialize the result of {@link #toString()}. This can be used to persist an event object across app sessions.
          *
          * @param builderString a string originally acquired by calling {@link #toString()}
-         * @return
+         * @return returns this builder for easy method chaining
          */
         public static Builder parseString(String builderString){
             Builder builder = null;
@@ -353,6 +413,21 @@ public class MPEvent {
                     }
                     builder.info = info;
                 }
+                if (json.has(EVENT_CUSTOM_FLAGS)) {
+                    JSONObject flags = json.getJSONObject(EVENT_CUSTOM_FLAGS);
+                    Map<String, List<String>> cFlags = new HashMap<String, List<String>>();
+                    Iterator<String> keys = flags.keys();
+
+                    while( keys.hasNext() ){
+                        String key = keys.next();
+                        JSONArray values = flags.getJSONArray(key);
+                        cFlags.put(key, new LinkedList<String>());
+                        for (int i = 0; i < values.length(); i++) {
+                            cFlags.get(key).add(values.getString(i));
+                        }
+                    }
+                    builder.customFlags = cFlags;
+                }
 
                 return builder;
             }catch (Exception e){
@@ -362,6 +437,7 @@ public class MPEvent {
         }
 
         private final static String EVENT_TYPE = "eventType";
+        private final static String EVENT_CUSTOM_FLAGS = "customFlags";
         private final static String EVENT_NAME = "eventName";
         private final static String EVENT_CATEGORY = "category";
         private final static String EVENT_DURATION = "duration";
@@ -400,6 +476,15 @@ public class MPEvent {
                 }
                 if (endTime != null){
                     jsonObject.put(EVENT_END_TIME, endTime);
+                }
+                if (customFlags != null) {
+                    JSONObject flagsObject = new JSONObject();
+                    for (Map.Entry<String, List<String>> entry : customFlags.entrySet()) {
+                        List<String> values = entry.getValue();
+                        JSONArray valueArray = new JSONArray(values);
+                        flagsObject.put(entry.getKey(), valueArray);
+                    }
+                    jsonObject.put(EVENT_CUSTOM_FLAGS, flagsObject);
                 }
                 return jsonObject.toString();
             }catch (JSONException jse){

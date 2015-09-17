@@ -29,6 +29,7 @@ import com.mparticle.messaging.CloudAction;
 import com.mparticle.messaging.MPCloudNotificationMessage;
 import com.mparticle.messaging.ProviderCloudMessage;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -213,7 +214,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
     public MPMessage startSession() {
         try {
             MPMessage message = new MPMessage.Builder(MessageType.SESSION_START, mAppStateManager.getSession(), mLocation)
-                    .timestamp(System.currentTimeMillis())
+                    .timestamp(mAppStateManager.getSession().mSessionStartTime)
                     .build();
 
             SharedPreferences.Editor editor = mPreferences.edit();
@@ -304,6 +305,17 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
                         .build();
                 message.put(MessageKey.EVENT_TYPE, event.getEventType());
                 message.put(MessageKey.EVENT_START_TIME, message.getTimestamp());
+
+                Map<String, List<String>> customFlags = event.getCustomFlags();
+                if (customFlags != null) {
+                    JSONObject flagsObject = new JSONObject();
+                    for (Map.Entry<String, List<String>> entry : customFlags.entrySet()) {
+                        List<String> values = entry.getValue();
+                        JSONArray valueArray = new JSONArray(values);
+                        flagsObject.put(entry.getKey(), valueArray);
+                    }
+                    message.put(MessageKey.EVENT_FLAGS, flagsObject);
+                }
 
                 if (currentActivity != null) {
                     message.put(MessageKey.CURRENT_ACTIVITY, currentActivity);

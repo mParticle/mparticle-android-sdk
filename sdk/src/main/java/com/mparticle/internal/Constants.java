@@ -338,6 +338,7 @@ public class Constants {
         String STATE_INFO_NETWORK_TYPE = "ant";
         
         String MPID = "mpid";
+        String EVENT_FLAGS = "flags";
     }
 
     public interface Commerce {

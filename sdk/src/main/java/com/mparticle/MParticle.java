@@ -291,7 +291,7 @@ public class MParticle {
     public void activityStarted(Activity activity) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
             if (mConfigManager.isEnabled()) {
-                ensureActiveSession();
+                mAppStateManager.ensureActiveSession();
                 mAppStateManager.onActivityStarted(activity, 0);
             }
         }
@@ -308,19 +308,9 @@ public class MParticle {
     public void activityStopped(Activity activity) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
             if (mConfigManager.isEnabled()) {
-                ensureActiveSession();
+                mAppStateManager.ensureActiveSession();
                 mAppStateManager.onActivityStopped(activity, 0);
             }
-        }
-    }
-
-    /**
-     * Explicitly begin tracking a new session. Usually not necessary unless {@link #endSession()} is also explicitly used.
-     */
-    private void beginSession() {
-        if (mConfigManager.isEnabled()) {
-            endSession();
-            newSession();
         }
     }
 
@@ -336,26 +326,6 @@ public class MParticle {
 
     boolean isSessionActive() {
         return mAppStateManager.getSession().isActive();
-    }
-
-    private void ensureActiveSession() {
-        mAppStateManager.getSession().mLastEventTime = System.currentTimeMillis();
-        if (!isSessionActive()) {
-            newSession();
-        }else{
-            mMessageManager.updateSessionEnd(mAppStateManager.getSession());
-        }
-    }
-
-    /**
-     * Creates a new session and generates the start-session message.
-     */
-    private void newSession() {
-        mAppStateManager.startSession();
-        mMessageManager.startSession();
-        ConfigManager.log(LogLevel.DEBUG, "Started new session");
-        mEmbeddedKitManager.startSession();
-        mMessageManager.startUploadLoop();
     }
 
     /**
@@ -472,7 +442,7 @@ public class MParticle {
      */
     public void logEvent(MPEvent event){
         if (mConfigManager.isEnabled() && checkEventLimit()) {
-            ensureActiveSession();
+            mAppStateManager.ensureActiveSession();
             mMessageManager.logEvent(event, mAppStateManager.getCurrentActivity());
             ConfigManager.log(LogLevel.DEBUG, "Logged event - \n", event.toString());
             mEmbeddedKitManager.logEvent(event);
@@ -505,7 +475,7 @@ public class MParticle {
                     }
                 }
             }
-            ensureActiveSession();
+            mAppStateManager.ensureActiveSession();
             mMessageManager.logEvent(event);
             ConfigManager.log(LogLevel.DEBUG, "Logged commerce event - \n", event.toString());
             mEmbeddedKitManager.logCommerceEvent(event);
@@ -579,7 +549,7 @@ public class MParticle {
                 break;
         }
 
-        ensureActiveSession();
+        mAppStateManager.ensureActiveSession();
         MPEvent productEvent = new MPEvent.Builder(event.toString(), EventType.Transaction).info(product).build();
         if (checkEventLimit()) {
             mMessageManager.logEvent(productEvent, mAppStateManager.getCurrentActivity());
@@ -637,7 +607,7 @@ public class MParticle {
             return;
         }
         if (checkEventLimit()) {
-            ensureActiveSession();
+            mAppStateManager.ensureActiveSession();
             JSONObject eventDataJSON = MPUtility.enforceAttributeConstraints(eventData);
             if (mConfigManager.isEnabled()) {
                 mMessageManager.logScreen(screenName, eventDataJSON, started);
@@ -671,7 +641,7 @@ public class MParticle {
                 ConfigManager.log(LogLevel.ERROR, "The breadcrumb name was too long. Discarding event.");
                 return;
             }
-            ensureActiveSession();
+            mAppStateManager.ensureActiveSession();
             mMessageManager.logBreadcrumb(breadcrumb);
             ConfigManager.log(LogLevel.DEBUG, "Logged breadcrumb: " + breadcrumb);
         }
@@ -698,7 +668,7 @@ public class MParticle {
                 ConfigManager.log(LogLevel.ERROR, "message is required for logErrorEvent");
                 return;
             }
-            ensureActiveSession();
+            mAppStateManager.ensureActiveSession();
             if (checkEventLimit()) {
                 JSONObject eventDataJSON = MPUtility.enforceAttributeConstraints(eventData);
                 mMessageManager.logErrorEvent(message, null, eventDataJSON);
@@ -712,7 +682,7 @@ public class MParticle {
 
     public void logNetworkPerformance(String url, long startTime, String method, long length, long bytesSent, long bytesReceived, String requestString) {
         if (mConfigManager.isEnabled()) {
-            ensureActiveSession();
+            mAppStateManager.ensureActiveSession();
             if (checkEventLimit()) {
                 mMessageManager.logNetworkPerformanceEvent(startTime, method, url, length, bytesSent, bytesReceived, requestString);
             }
@@ -874,7 +844,7 @@ public class MParticle {
      */
     public void logException(Exception exception, Map<String, String> eventData, String message) {
         if (mConfigManager.isEnabled()) {
-            ensureActiveSession();
+            mAppStateManager.ensureActiveSession();
             if (checkEventLimit()) {
                 JSONObject eventDataJSON = MPUtility.enforceAttributeConstraints(eventData);
                 mMessageManager.logErrorEvent(message, exception, eventDataJSON);
@@ -982,7 +952,7 @@ public class MParticle {
             value = value.toString();
         }
         if (mConfigManager.isEnabled()) {
-            ensureActiveSession();
+            mAppStateManager.ensureActiveSession();
             ConfigManager.log(LogLevel.DEBUG, "Set session attribute: " + key + "=" + value);
 
             if (MPUtility.setCheckedAttribute(mAppStateManager.getSession().mSessionAttributes, key, value, true, false)) {
@@ -1003,7 +973,7 @@ public class MParticle {
             return;
         }
         if (mConfigManager.isEnabled()) {
-            ensureActiveSession();
+            mAppStateManager.ensureActiveSession();
             ConfigManager.log(LogLevel.DEBUG, "Incrementing session attribute: " + key + "=" + value);
 
             if (MPUtility.setCheckedAttribute(mAppStateManager.getSession().mSessionAttributes, key, value, true, true)) {
@@ -1020,7 +990,7 @@ public class MParticle {
      */
     public void logout() {
         if (mConfigManager.isEnabled()) {
-            ensureActiveSession();
+            mAppStateManager.ensureActiveSession();
             ConfigManager.log(LogLevel.DEBUG, "Logging out.");
             mMessageManager.logProfileAction(Constants.ProfileActions.LOGOUT);
         }
@@ -1264,7 +1234,7 @@ public class MParticle {
         if (optOutStatus != null) {
             if (optOutStatus != mConfigManager.getOptedOut()) {
                 if (!optOutStatus) {
-                    ensureActiveSession();
+                    mAppStateManager.ensureActiveSession();
                 }
                 mMessageManager.optOut(System.currentTimeMillis(), optOutStatus);
                 if (optOutStatus && isSessionActive()) {
@@ -1456,7 +1426,7 @@ public class MParticle {
             mMedia = new MPMediaAPI(mAppContext, new MediaCallbacks() {
                 @Override
                 public void onAudioPlaying() {
-                    ensureActiveSession();
+                    mAppStateManager.ensureActiveSession();
                 }
 
                 @Override
@@ -1503,13 +1473,14 @@ public class MParticle {
     }
 
     public void logPushRegistration(String registrationId) {
+        mAppStateManager.ensureActiveSession();
         mMessageManager.setPushRegistrationId(registrationId, true);
     }
 
     void logNotification(MPCloudNotificationMessage cloudMessage, CloudAction action, boolean startSession, String appState, int behavior) {
         if (mConfigManager.isEnabled()) {
             if (startSession){
-                ensureActiveSession();
+                mAppStateManager.ensureActiveSession();
             }
             mMessageManager.logNotification(cloudMessage.getId(), cloudMessage.getRedactedJsonPayload().toString(), action, appState, behavior);
         }
@@ -1518,7 +1489,7 @@ public class MParticle {
     void logNotification(ProviderCloudMessage cloudMessage, boolean startSession, String appState) {
         if (mConfigManager.isEnabled()) {
             if (startSession){
-                ensureActiveSession();
+                mAppStateManager.ensureActiveSession();
             }
             mMessageManager.logNotification(cloudMessage, appState);
         }

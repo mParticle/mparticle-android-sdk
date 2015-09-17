@@ -9,6 +9,7 @@ import com.mparticle.MParticle;
 import com.mparticle.mock.MockContext;
 import com.mparticle.mock.MockSharedPreferences;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
@@ -176,7 +177,8 @@ public class MessageManagerTest {
         manager.logEvent(null, null);
         Map<String, String> info = new HashMap<String, String>(1);
         info.put("test key", "test value");
-        MPEvent event = new MPEvent.Builder("test event name", MParticle.EventType.Location).duration(100).info(info).build();
+        MPEvent event = new MPEvent.Builder("test event name", MParticle.EventType.Location).duration(100).addCustomFlag("flag 1", "value 1")
+                .addCustomFlag("flag 1", "value 2").addCustomFlag("flag 2", "value 3").info(info).build();
         MPMessage message = manager.logEvent(event, "test screen name");
         assertNotNull(message);
         assertEquals(Constants.MessageType.EVENT, message.getMessageType());
@@ -193,6 +195,14 @@ public class MessageManagerTest {
         for (int i = 0; i < 100; i++){
             manager.logEvent(event, "test screen name");
         }
+        JSONObject flags = message.getJSONObject("flags");
+        JSONArray flag1 = flags.getJSONArray("flag 1");
+        assertEquals(flag1.length(), 2);
+        assertEquals(flag1.get(0), "value 1");
+        assertEquals(flag1.get(1), "value 2");
+        JSONArray flag2 = flags.getJSONArray("flag 2");
+        assertEquals(flag2.length(), 1);
+        assertEquals(flag2.get(0), "value 3");
         assertEquals(101, context.getSharedPreferences("name", 0).getInt(Constants.PrefKeys.EVENT_COUNTER, -1));
         Mockito.verify(messageHandler, Mockito.times(101)).sendMessage(Mockito.any(Message.class));
     }
