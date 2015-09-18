@@ -1,4 +1,10 @@
+apply from: rootProject.file('kits/kits.gradle')
+
+repositories {
+    maven { url "http://appboy.github.io/appboy-android-sdk/sdk" }
+}
+
 dependencies {
     compile 'com.android.support:support-v4:22.2.0'
-    provided ("com.facebook.fresco:fresco:0.6.1")
+    compile 'com.appboy:android-sdk-ui:1.9.+'
 }
