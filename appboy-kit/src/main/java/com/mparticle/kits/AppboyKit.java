@@ -1,4 +1,4 @@
-package com.mparticle.embedded;
+package com.mparticle.kits;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -35,7 +35,7 @@ import java.util.Map;
 /**
  * Embedded version of the AppBoy SDK v 1.7.2
  */
-public class AppboyKit extends EmbeddedProvider implements ActivityLifecycleForwarder, PushProvider, MessagingConfigCallbacks, ClientSideForwarder, ECommerceForwarder {
+public class AppboyKit extends AbstractKit implements ActivityLifecycleForwarder, PushProvider, MessagingConfigCallbacks, ClientSideForwarder, ECommerceForwarder {
     static final String APPBOY_KEY = "apiKey";
     public static final String PUSH_ENABLED = "push_enabled";
     boolean started = false;
@@ -53,7 +53,7 @@ public class AppboyKit extends EmbeddedProvider implements ActivityLifecycleForw
     }
 
     @Override
-    protected EmbeddedProvider update() {
+    protected AbstractKit update() {
         String key = properties.get(APPBOY_KEY);
         if (!running && !TextUtils.isEmpty(key)) {
             Appboy.configure(context, key);
@@ -125,7 +125,7 @@ public class AppboyKit extends EmbeddedProvider implements ActivityLifecycleForw
                     logEvent(eventList.get(i));
                     messages.add(ReportingMessage.fromEvent(this, event));
                 } catch (Exception e) {
-                    ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to call logEvent for embedded provider: " + getName() + ": " + e.getMessage());
+                    ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to call logCustomEvent to Appboy kit: " + e.toString());
                 }
             }
         }

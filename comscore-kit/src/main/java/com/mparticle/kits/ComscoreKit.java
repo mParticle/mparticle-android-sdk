@@ -1,4 +1,4 @@
-package com.mparticle.embedded;
+package com.mparticle.kits;
 
 import android.app.Activity;
 
@@ -21,7 +21,7 @@ import java.util.Map;
  * Embedded implementation of the Comscore SDK, tested against Comscore 2.14.0923.
  * <p/>
  */
-public class ComscoreKit extends EmbeddedProvider implements ActivityLifecycleForwarder, ClientSideForwarder {
+public class ComscoreKit extends AbstractKit implements ActivityLifecycleForwarder, ClientSideForwarder {
     //Server config constants defined for this provider
     //keys to provide access to the comscore account.
     private static final String CLIENT_ID = "CustomerC2Value";
@@ -126,7 +126,7 @@ public class ComscoreKit extends EmbeddedProvider implements ActivityLifecycleFo
     }
 
     @Override
-    protected EmbeddedProvider update() {
+    protected AbstractKit update() {
         if (needsRestart()){
             clientId = properties.get(CLIENT_ID);
             comScore.setCustomerC2(clientId);

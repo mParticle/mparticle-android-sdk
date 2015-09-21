@@ -1,4 +1,4 @@
-package com.mparticle.embedded;
+package com.mparticle.kits;
 
 import android.app.Activity;
 
@@ -16,7 +16,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * Embedded implementation of the Adjust SDK 4.0.6
  * <p/>
  */
-public class AdjustKit extends EmbeddedProvider implements ActivityLifecycleForwarder {
+public class AdjustKit extends AbstractKit implements ActivityLifecycleForwarder {
 
     private static final String APP_TOKEN = "appToken";
     private static final String HOST = "app.adjust.io";
@@ -50,7 +50,7 @@ public class AdjustKit extends EmbeddedProvider implements ActivityLifecycleForw
     }
 
     @Override
-    protected EmbeddedProvider update() {
+    protected AbstractKit update() {
         initAdjust();
 
         if (!referrerSet) {

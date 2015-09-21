@@ -1,4 +1,4 @@
-package com.mparticle.embedded;
+package com.mparticle.kits;
 
 import android.app.Activity;
 import android.content.Context;
@@ -39,7 +39,7 @@ import java.util.Map;
  * Embedded implementation of the Kahuna SDK
  * <p/>
  */
-public class KahunaKit extends EmbeddedProvider implements ActivityLifecycleForwarder, ECommerceForwarder, ClientSideForwarder {
+public class KahunaKit extends AbstractKit implements ActivityLifecycleForwarder, ECommerceForwarder, ClientSideForwarder {
 
     static KahunaPushReceiver sReceiver;
     boolean initialized = false;
@@ -61,7 +61,7 @@ public class KahunaKit extends EmbeddedProvider implements ActivityLifecycleForw
     private static final String KEY_EVENTNAME_IMPRESSION = "defaultImpressionEventName";
 
     @Override
-    protected EmbeddedProvider update() {
+    protected AbstractKit update() {
         if (!initialized) {
             KahunaAnalytics.setDebugMode(MParticle.getInstance().getEnvironment() == MParticle.Environment.Development);
             if (mEkManager.getConfigurationManager().isPushEnabled()) {

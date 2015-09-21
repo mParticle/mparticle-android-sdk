@@ -1,4 +1,4 @@
-package com.mparticle.embedded;
+package com.mparticle.kits;
 
 import android.app.Activity;
 
@@ -19,7 +19,7 @@ import io.branch.referral.Branch;
  * Embedded implementation of the Branch Metrics SDK
  * <p/>
  */
-public class BranchMetricsKit extends EmbeddedProvider implements ActivityLifecycleForwarder, ClientSideForwarder {
+public class BranchMetricsKit extends AbstractKit implements ActivityLifecycleForwarder, ClientSideForwarder {
 
     private String BRANCH_APP_KEY = "branchKey";
     private final String FORWARD_SCREEN_VIEWS = "forwardScreenViews";
@@ -36,7 +36,7 @@ public class BranchMetricsKit extends EmbeddedProvider implements ActivityLifecy
     }
 
     @Override
-    protected EmbeddedProvider update() {
+    protected AbstractKit update() {
         if (!isBackgrounded()) {
            if (!isRunning()) {
                setRunning(getBranch().initSession());

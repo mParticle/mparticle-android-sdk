@@ -1,4 +1,4 @@
-package com.mparticle.embedded;
+package com.mparticle.kits;
 
 import android.app.Activity;
 import android.location.Location;
@@ -11,7 +11,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-public class KochavaKit extends EmbeddedProvider implements ActivityLifecycleForwarder {
+public class KochavaKit extends AbstractKit implements ActivityLifecycleForwarder {
     private static final String APP_ID = "appId";
     private static final String USE_CUSTOMER_ID = "useCustomerId";
     private static final String INCLUDE_ALL_IDS = "passAllOtherIdentities";
@@ -23,7 +23,7 @@ public class KochavaKit extends EmbeddedProvider implements ActivityLifecycleFor
     private Feature feature;
 
     @Override
-    protected EmbeddedProvider update() {
+    protected AbstractKit update() {
         if (feature != null) {
             feature.setAppLimitTracking(Boolean.parseBoolean(properties.get(LIMIT_ADD_TRACKING)));
             Feature.setErrorDebug(Boolean.parseBoolean(properties.get(ENABLE_LOGGING)));
