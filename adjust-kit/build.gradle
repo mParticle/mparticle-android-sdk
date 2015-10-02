@@ -1,4 +1,4 @@
-apply from: rootProject.file('kits/kits.gradle')
+apply from: rootProject.file('android-sdk/kits/kits.gradle')
 
 dependencies {
     compile 'com.adjust.sdk:adjust-android:4.1.2'

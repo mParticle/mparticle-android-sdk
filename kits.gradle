@@ -50,10 +50,16 @@ uploadArchives{
     }
 }
 
+repositories {
+    mavenLocal()
+    mavenCentral()
+    maven { url "http://maven.mparticle.com/" }
+}
+
 dependencies {
     deployerJars "org.kuali.maven.wagons:maven-s3-wagon:1.2.1"
   //  compile 'com.mparticle:android-sdk:4.0.0'
-    compile project(':sdk')
+    compile project(':android-sdk:sdk')
     compile fileTree(dir: 'libs', include: ['*.jar'])
 }
 

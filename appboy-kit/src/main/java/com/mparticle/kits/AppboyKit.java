@@ -239,6 +239,11 @@ public class AppboyKit extends AbstractKit implements ActivityLifecycleForwarder
     }
 
     @Override
+    public List<ReportingMessage> logLtvIncrease(BigDecimal valueIncreased, String eventName, Map<String, String> contextInfo) {
+        return null;
+    }
+
+    @Override
     public List<ReportingMessage> onActivityResumed(Activity activity, int activityCount) {
         if (!started) {
             onActivityStarted(activity, activityCount);

@@ -28,6 +28,7 @@ import com.mparticle.internal.CommerceEventUtil;
 
 import org.json.JSONObject;
 
+import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -184,6 +185,20 @@ public class KahunaKit extends AbstractKit implements ActivityLifecycleForwarder
             List<ReportingMessage> messages = new LinkedList<ReportingMessage>();
             messages.add(ReportingMessage.fromTransaction(this, transaction)
                     .setEventName("purchase")
+            );
+            return messages;
+        }
+        return null;
+    }
+
+    @Override
+    public List<ReportingMessage> logLtvIncrease(BigDecimal valueIncreased, String eventName, Map<String, String> contextInfo) {
+        if (sendTransactionData) {
+            Double revenue = valueIncreased.doubleValue() * 100;
+            KahunaAnalytics.trackEvent(eventName, 1, revenue.intValue());
+            List<ReportingMessage> messages = new LinkedList<ReportingMessage>();
+            messages.add(
+                    new ReportingMessage(this, ReportingMessage.MessageType.EVENT, System.currentTimeMillis(), contextInfo)
             );
             return messages;
         }

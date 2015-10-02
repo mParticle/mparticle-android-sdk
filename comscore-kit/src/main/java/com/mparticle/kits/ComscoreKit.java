@@ -10,6 +10,7 @@ import com.mparticle.MParticle;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -85,6 +86,11 @@ public class ComscoreKit extends AbstractKit implements ActivityLifecycleForward
 
     @Override
     public List<ReportingMessage> logTransaction(MPProduct transaction) throws Exception {
+        return null;
+    }
+
+    @Override
+    public List<ReportingMessage> logLtvIncrease(BigDecimal valueIncreased, String eventName, Map<String, String> contextInfo) {
         return null;
     }
 

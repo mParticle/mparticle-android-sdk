@@ -8,6 +8,7 @@ import com.mparticle.MParticle;
 
 import org.json.JSONObject;
 
+import java.math.BigDecimal;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -77,6 +78,11 @@ public class BranchMetricsKit extends AbstractKit implements ActivityLifecycleFo
 
     @Override
     public List<ReportingMessage> logTransaction(MPProduct transaction) throws Exception {
+        return null;
+    }
+
+    @Override
+    public List<ReportingMessage> logLtvIncrease(BigDecimal valueIncreased, String eventName, Map<String, String> contextInfo) {
         return null;
     }
 
