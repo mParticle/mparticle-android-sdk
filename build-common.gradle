@@ -1,0 +1,87 @@
+apply plugin: 'com.android.library'
+apply plugin: 'maven'
+apply plugin: 'signing'
+
+def target_maven_repo
+
+configurations {
+    deployerJars
+}
+
+android {
+    compileSdkVersion 21
+    buildToolsVersion "23.0.1"
+
+    defaultConfig {
+        minSdkVersion 9
+        targetSdkVersion 21
+        versionCode = Integer.parseInt(new Date().format('yyyyMMdd'))
+        versionName mp_sdk_version
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+        }
+    }
+}
+
+repositories {
+    jcenter()
+}
+
+dependencies {
+    deployerJars "org.kuali.maven.wagons:maven-s3-wagon:1.2.1"
+    compile 'com.mparticle:android-core:' + mp_sdk_version
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+}
+
+uploadArchives{
+    repositories {
+        mavenDeployer {
+
+            if (target_maven_repo == 's3') {
+                configuration = configurations.deployerJars
+                repository(url: 's3://maven.mparticle.com')
+            } else if(target_maven_repo == 'sonatype') {
+                beforeDeployment {
+                    MavenDeployment deployment -> signing.signPom(deployment)
+                }
+                repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+                    authentication(userName: sonatypeUsername, password: sonatypePassword)
+                }
+            } else {
+                repository(url: 'file://' + new File(System.getProperty('user.home'), '.m2/repository').absolutePath)
+            }
+
+            pom.project {
+                version = mp_sdk_version
+                artifactId = project.kitArtifactId
+                groupId = 'com.mparticle'
+                packaging 'aar'
+                description project.kitDescription
+                url 'https://github.com/mparticle/mparticle-sdk-android'
+
+                licenses {
+                    license {
+                        name 'The Apache Software License, Version 2.0'
+                        url 'http://www.apache.org/license/LICENSE-2.0.txt'
+                    }
+                }
+
+                scm {
+                    url 'http://github.com/mparticle/mparticle-android-sdk'
+                    connection 'scm:git:http://github.com/mparticle/mparticle-android-sdk'
+                    developerConnection 'scm:git:git@github.com:mparticle/mparticle-android-sdk.git'
+                }
+
+                developers {
+                    developer {
+                        id 'mParticle'
+                        name 'mParticle Inc.'
+                        email 'dev@mparticle.com'
+                    }
+                }
+            }
+        }
+    }
+}

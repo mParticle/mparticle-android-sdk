@@ -1,0 +1,18 @@
+apply from: '../build-common.gradle'
+
+repositories {
+    mavenLocal()
+}
+
+dependencies {
+    compile (
+        'com.mparticle:android-adjust-kit:' + mp_sdk_version,
+        'com.mparticle:android-appboy-kit:' + mp_sdk_version,
+        'com.mparticle:android-branch-kit:' + mp_sdk_version,
+        'com.mparticle:android-comscore-kit:' + mp_sdk_version,
+        'com.mparticle:android-flurry-kit:' + mp_sdk_version,
+        'com.mparticle:android-kahuna-kit:' + mp_sdk_version,
+        'com.mparticle:android-kochava-kit:' + mp_sdk_version,
+        'com.mparticle:android-localytics-kit:' + mp_sdk_version
+    )
+}
