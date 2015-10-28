@@ -38,9 +38,7 @@ public class BranchMetricsKit extends AbstractKit implements ActivityLifecycleFo
     @Override
     protected AbstractKit update() {
         if (!isBackgrounded()) {
-           if (!isRunning()) {
-               setRunning(getBranch().initSession());
-           }
+            getBranch().initSession();
         }
         String sendScreenEvents = properties.get(FORWARD_SCREEN_VIEWS);
         mSendScreenEvents = sendScreenEvents != null && sendScreenEvents.equalsIgnoreCase("true");
@@ -87,13 +85,7 @@ public class BranchMetricsKit extends AbstractKit implements ActivityLifecycleFo
 
     @Override
     public List<ReportingMessage> onActivityResumed(Activity activity, int activityCount) {
-        //there's no hurt in calling this here just in case the EK is init'd too late for onStart
-        setRunning(getBranch().initSession());
-        List<ReportingMessage> messageList = new LinkedList<ReportingMessage>();
-        messageList.add(
-                new ReportingMessage(this, ReportingMessage.MessageType.APP_STATE_TRANSITION, System.currentTimeMillis(), null)
-        );
-        return messageList;
+        return null;
     }
 
     @Override
@@ -117,17 +109,12 @@ public class BranchMetricsKit extends AbstractKit implements ActivityLifecycleFo
 
     @Override
     public List<ReportingMessage> onActivityStarted(Activity activity, int activityCount) {
-        if (getBranch().initSession()) {
-            setRunning(true);
-            List<ReportingMessage> messageList = new LinkedList<ReportingMessage>();
-            messageList.add(
-                    new ReportingMessage(this, ReportingMessage.MessageType.APP_STATE_TRANSITION, System.currentTimeMillis(), null)
-            );
-            return messageList;
-        }else {
-            setRunning(false);
-            return null;
-        }
+        getBranch().initSession(activity);
+        List<ReportingMessage> messageList = new LinkedList<ReportingMessage>();
+        messageList.add(
+                new ReportingMessage(this, ReportingMessage.MessageType.APP_STATE_TRANSITION, System.currentTimeMillis(), null)
+        );
+        return messageList;
     }
 
     @Override
