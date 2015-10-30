@@ -37,9 +37,7 @@ public class BranchMetricsKit extends AbstractKit implements ActivityLifecycleFo
 
     @Override
     protected AbstractKit update() {
-        if (!isBackgrounded()) {
-            getBranch().initSession();
-        }
+        getBranch().initSession();
         String sendScreenEvents = properties.get(FORWARD_SCREEN_VIEWS);
         mSendScreenEvents = sendScreenEvents != null && sendScreenEvents.equalsIgnoreCase("true");
         return this;
