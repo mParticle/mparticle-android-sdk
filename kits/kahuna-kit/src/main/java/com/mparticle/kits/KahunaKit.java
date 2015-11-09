@@ -19,9 +19,7 @@ import com.mparticle.MPEvent;
 import com.mparticle.MPReceiver;
 import com.mparticle.MParticle;
 import com.mparticle.commerce.CommerceEvent;
-import com.mparticle.commerce.Impression;
 import com.mparticle.commerce.Product;
-import com.mparticle.commerce.Promotion;
 import com.mparticle.commerce.TransactionAttributes;
 import com.mparticle.internal.CommerceEventUtil;
 
@@ -360,43 +358,29 @@ public class KahunaKit extends AbstractKit implements ActivityLifecycleForwarder
         if (TextUtils.isEmpty(eventName)) {
             eventName = getEventName(event);
         }
-        int quantity = 0;
+
         int eventType = CommerceEventUtil.getEventType(event);
-        if (eventType == Constants.Commerce.EVENT_TYPE_IMPRESSION) {
-            List<Impression> impressions = event.getImpressions();
-            if (impressions != null) {
-                for (Impression impression : impressions) {
-                    List<Product> products = impression.getProducts();
-                    if (products != null) {
-                        for (Product product : products) {
-                            quantity += product.getQuantity();
-                        }
-                    }
-                }
-            }
-        } else if (eventType == Constants.Commerce.EVENT_TYPE_PROMOTION_VIEW
-                || eventType == Constants.Commerce.EVENT_TYPE_PROMOTION_CLICK) {
-            List<Promotion> promotions = event.getPromotions();
-            if (promotions != null) {
-                quantity = promotions.size();
-            }
-        } else {
+        if (eventType == Constants.Commerce.EVENT_TYPE_PURCHASE) {
+            int quantity = 0;
+            int revenue = 0;
             List<Product> products = event.getProducts();
             if (products != null) {
                 for (Product product : products) {
                     quantity += product.getQuantity();
                 }
             }
-        }
-        int revenue = 0;
-        TransactionAttributes transactionAttributes = event.getTransactionAttributes();
-        if (transactionAttributes != null) {
-            Double transRevenue = transactionAttributes.getRevenue();
-            if (transRevenue != null) {
-                revenue = (int) (transRevenue.doubleValue() * 100);
+            TransactionAttributes transactionAttributes = event.getTransactionAttributes();
+            if (transactionAttributes != null) {
+                Double transRevenue = transactionAttributes.getRevenue();
+                if (transRevenue != null) {
+                    revenue = (int) (transRevenue.doubleValue() * 100);
+                }
             }
+            KahunaAnalytics.trackEvent(eventName, quantity, revenue);
+        } else {
+            KahunaAnalytics.trackEvent(eventName);
         }
-        KahunaAnalytics.trackEvent(eventName, quantity, revenue);
+
         Map<String, String> eventAttributes = event.getCustomAttributes();
         if (eventAttributes != null && eventAttributes.size() > 0) {
             KahunaAnalytics.setUserAttributes(eventAttributes);
