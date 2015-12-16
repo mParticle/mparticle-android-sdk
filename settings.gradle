@@ -7,6 +7,7 @@ include (
     ':kits:appboy-kit',
     ':kits:localytics-kit',
     ':kits:flurry-kit',
+    ':kits:wootric-kit',
     ':kits:all-kits',
     ':sdk'
 )
