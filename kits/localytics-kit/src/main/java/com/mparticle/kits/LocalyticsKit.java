@@ -1,9 +1,11 @@
 package com.mparticle.kits;
 
+import android.app.Activity;
 import android.location.Location;
 import android.text.TextUtils;
 
 import com.localytics.android.Localytics;
+import com.localytics.android.LocalyticsActivityLifecycleCallbacks;
 import com.mparticle.MPEvent;
 import com.mparticle.MParticle;
 import com.mparticle.commerce.CommerceEvent;
@@ -23,16 +25,20 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-public class LocalyticsKit extends AbstractKit implements ClientSideForwarder, ECommerceForwarder {
+public class LocalyticsKit extends AbstractKit implements ClientSideForwarder, ECommerceForwarder, ActivityLifecycleForwarder {
     private static final String API_KEY = "appKey";
     private static final String CUSTOM_DIMENSIONS = "customDimensions";
     private static final String RAW_LTV = "trackClvAsRawValue";
     private JSONArray customDimensionJson = null;
     private boolean trackAsRawLtv = false;
+    private LocalyticsActivityLifecycleCallbacks callbacks;
 
     @Override
     protected AbstractKit update() {
-        Localytics.integrate(context, properties.get(API_KEY));
+        if (callbacks == null) {
+            callbacks = new LocalyticsActivityLifecycleCallbacks(context, properties.get(API_KEY));
+        }
+
         try {
             customDimensionJson = new JSONArray(properties.get(CUSTOM_DIMENSIONS));
         } catch (JSONException jse) {
@@ -173,5 +179,45 @@ public class LocalyticsKit extends AbstractKit implements ClientSideForwarder, E
             }
         }
         return messages;
+    }
+
+    @Override
+    public List<ReportingMessage> onActivityCreated(Activity activity, int i) {
+        if (callbacks != null) {
+            callbacks.onActivityCreated(activity, null);
+        }
+        return null;
+    }
+
+    @Override
+    public List<ReportingMessage> onActivityResumed(Activity activity, int i) {
+        if (callbacks != null) {
+            callbacks.onActivityResumed(activity);
+        }
+        return null;
+    }
+
+    @Override
+    public List<ReportingMessage> onActivityPaused(Activity activity, int i) {
+        if (callbacks != null) {
+            callbacks.onActivityPaused(activity);
+        }
+        return null;
+    }
+
+    @Override
+    public List<ReportingMessage> onActivityStopped(Activity activity, int i) {
+        if (callbacks != null) {
+            callbacks.onActivityStopped(activity);
+        }
+        return null;
+    }
+
+    @Override
+    public List<ReportingMessage> onActivityStarted(Activity activity, int i) {
+        if (callbacks != null) {
+            callbacks.onActivityStarted(activity);
+        }
+        return null;
     }
 }
