@@ -1,6 +1,4 @@
-apply plugin: 'com.android.library'
 apply plugin: 'maven'
-apply plugin: 'signing'
 
 def target_maven_repo
 
@@ -8,31 +6,8 @@ configurations {
     deployerJars
 }
 
-android {
-    compileSdkVersion 21
-    buildToolsVersion "23.0.1"
-
-    defaultConfig {
-        minSdkVersion 9
-        targetSdkVersion 21
-        versionCode = Integer.parseInt(new Date().format('yyyyMMdd'))
-        versionName mp_sdk_version
-    }
-    buildTypes {
-        release {
-            minifyEnabled false
-        }
-    }
-}
-
-repositories {
-    jcenter()
-}
-
 dependencies {
     deployerJars "org.kuali.maven.wagons:maven-s3-wagon:1.2.1"
-    compile 'com.mparticle:android-core:' + mp_sdk_version
-    compile fileTree(dir: 'libs', include: ['*.jar'])
 }
 
 uploadArchives{
@@ -55,10 +30,10 @@ uploadArchives{
 
             pom.project {
                 version = mp_sdk_version
-                artifactId = project.kitArtifactId
+                artifactId = project.artifactId
                 groupId = 'com.mparticle'
                 packaging 'aar'
-                description project.kitDescription
+                description project.artifactDescription
                 url 'https://github.com/mparticle/mparticle-sdk-android'
 
                 licenses {

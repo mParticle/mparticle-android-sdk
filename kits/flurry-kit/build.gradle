@@ -1,1 +1,2 @@
-apply from: '../../build-common.gradle'
+apply from: '../../kit-common.gradle'
+apply from: '../../maven.gradle'

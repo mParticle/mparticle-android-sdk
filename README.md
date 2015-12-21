@@ -151,3 +151,4 @@ Just by initializing the SDK you'll be set up to track user installs, engagement
 ## License
 
 [Apache License 2.0](http://www.apache.org/licenses/LICENSE-2.0)
+

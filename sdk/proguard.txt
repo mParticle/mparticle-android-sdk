@@ -1,0 +1,147 @@
+# To enable ProGuard in your project, edit project.properties
+# to define the proguard.config property as described in that file.
+#
+# Add project specific ProGuard rules here.
+# By default, the flags in this file are appended to flags specified
+# in ${sdk.dir}/tools/proguard/proguard-android.txt
+# You can edit the include path and order by changing the ProGuard
+# include property in project.properties.
+#
+# For more details, see
+#   http://developer.android.com/guide/developing/tools/proguard.html
+
+# Add any project specific keep options here:
+
+# If your project uses WebView with JS, uncomment the following
+# and specify the fully qualified class name to the JavaScript interface
+# class:
+#-keepclassmembers class fqcn.of.javascript.interface.for.webview {
+#   public *;
+#}
+-optimizations !code/allocation/variable
+
+-keepparameternames
+-renamesourcefileattribute SourceFile
+-keepattributes Exceptions,InnerClasses,Signature,Deprecated,
+                SourceFile,LineNumberTable,*Annotation*,EnclosingMethod
+
+-keep class com.mparticle.MPEvent { *; }
+-keep class com.mparticle.Constants { *; }
+-keep class com.mparticle.Constants* { *; }
+-keep class com.mparticle.MParticle { *; }
+-keep class com.mparticle.MParticle$* { *; }
+-keep class com.mparticle.MPProduct { *; }
+-keep class com.mparticle.MPProduct$* { *; }
+-keep class com.mparticle.MPEvent$* { *; }
+-keep class com.mparticle.BuildConfig { *; }
+-keep class com.mparticle.MPReceiver { *; }
+-keep class com.mparticle.MPService { *; }
+-keep class com.mparticle.internal.ConfigManager { *; }
+-keep class com.mparticle.internal.PushRegistrationHelper { *; }
+-keep class com.mparticle.MPUnityException { *; }
+-keep class com.mparticle.ReferrerReceiver { *; }
+-keep class com.mparticle.internal.CommerceEventUtil { *; }
+-keep class com.mparticle.embedded.EmbeddedForesee { *; }
+
+
+-keep public class com.mparticle.activity.* {
+    *;
+}
+
+-keep public class com.mparticle.licensing.* {
+    *;
+}
+
+-keep public class com.mparticle.messaging.* {
+     *;
+}
+
+-keep public class com.mparticle.segmentation.* {
+    *;
+}
+
+-keep public class com.mparticle.media.* {
+    *;
+}
+
+-keep public class com.mparticle.commerce.* {
+    *;
+}
+
+-keep public class com.mparticle.embedded.* {
+    *;
+}
+
+-keep public class com.mparticle.kits.* {
+    *;
+}
+
+
+-keepclassmembernames class * {
+    java.lang.Class class$(java.lang.String);
+    java.lang.Class class$(java.lang.String, boolean);
+}
+
+-keepclasseswithmembernames class * {
+    native <methods>;
+}
+
+-keepclassmembers enum * {
+    public static **[] values();
+    public static ** valueOf(java.lang.String);
+}
+
+-keepclassmembers class * implements java.io.Serializable {
+    static final long serialVersionUID;
+    private static final java.io.ObjectStreamField[] serialPersistentFields;
+    private void writeObject(java.io.ObjectOutputStream);
+    private void readObject(java.io.ObjectInputStream);
+    java.lang.Object writeReplace();
+    java.lang.Object readResolve();
+}
+
+-keep class * extends java.util.ListResourceBundle {
+    protected Object[][] getContents();
+}
+
+# Keep SafeParcelable value, needed for reflection. This is required to support backwards
+# compatibility of some classes.
+-keep public class com.google.android.gms.common.internal.safeparcel.SafeParcelable {
+    public static final *** NULL;
+}
+
+# Keep the names of classes/members we need for client functionality.
+-keepnames @com.google.android.gms.common.annotation.KeepName class *
+-keepclassmembernames class * {
+    @com.google.android.gms.common.annotation.KeepName *;
+}
+
+# Needed for Parcelable/SafeParcelable Creators to not get stripped
+-keepnames class * implements android.os.Parcelable {
+    public static final ** CREATOR;
+}
+
+-dontwarn com.google.android.gms.**
+-keep class com.unity3d.** { *; }
+-dontwarn com.unity3d.**
+
+-keep class org.fmod.** { *; }
+-dontwarn org.fmod.**
+
+-keep class com.mparticle.internal.PushRegistrationHelper
+-keep class com.mparticle.internal.np.** { *; }
+
+-keep class com.kochava.** { *; }
+-keep class com.mobileapptracker.** { *; }
+-keep class com.kahuna.** { *; }
+-keep class com.mparticle.internal.embedded.adjust.sdk.** { *; }
+
+-keep class com.comscore.** { *; }
+-dontwarn com.comscore.**
+-dontwarn com.amazon.device.messaging.**
+-dontwarn bo.app.**
+-keep class bo.app.** { *; }
+-keep class com.appboy.** { *; }
+-keep class com.mparticle.internal.embedded.appboy.** { *; }
+
+

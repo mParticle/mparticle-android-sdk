@@ -1,18 +1,61 @@
-apply from: '../build-common.gradle'
+apply plugin: 'com.android.library'
+apply from: '../maven.gradle'
 
-repositories {
-    mavenLocal()
+android {
+    compileSdkVersion 23
+    buildToolsVersion "23.0.2"
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_7
+        targetCompatibility JavaVersion.VERSION_1_7
+    }
+
+    String url = "\"\"";
+    String configurationUrl = "\"\"";
+    try {
+        Properties properties = new Properties()
+        properties.load(project.rootProject.file('local.properties').newDataInputStream())
+        if (properties.stringPropertyNames().contains('mp.url')) {
+            url = properties.getProperty('mp.url')
+        }
+        if (properties.stringPropertyNames().contains('mp.configurl')) {
+            configurationUrl = properties.getProperty('mp.configurl')
+        }
+    }catch (Exception e){
+
+    }
+
+    defaultConfig {
+        minSdkVersion 9
+        targetSdkVersion 21
+        versionName mp_sdk_version
+        versionCode Integer.parseInt(new Date().format('yyyyMMdd'))
+
+        buildConfigField "String", "MP_URL", url
+        buildConfigField "String", "MP_CONFIG_URL", configurationUrl
+        buildConfigField "Boolean", "MP_DEBUG", "false"
+    }
+
+    buildTypes {
+        debug {
+            minifyEnabled false
+            buildConfigField "Boolean", "MP_DEBUG", "true"
+        }
+        release {
+            minifyEnabled true
+            proguardFile 'proguard.txt'
+            //buildConfigField "Boolean", "MP_DEBUG", "true"
+        }
+    }
+
 }
 
 dependencies {
-    compile (
-        'com.mparticle:android-adjust-kit:' + mp_sdk_version,
-        'com.mparticle:android-appboy-kit:' + mp_sdk_version,
-        'com.mparticle:android-branch-kit:' + mp_sdk_version,
-        'com.mparticle:android-comscore-kit:' + mp_sdk_version,
-        'com.mparticle:android-flurry-kit:' + mp_sdk_version,
-        'com.mparticle:android-kahuna-kit:' + mp_sdk_version,
-        'com.mparticle:android-kochava-kit:' + mp_sdk_version,
-        'com.mparticle:android-localytics-kit:' + mp_sdk_version
-    )
+    provided 'com.google.android.gms:play-services-gcm:[7.0,)'
+    testCompile 'junit:junit:4.12'
+    testCompile  files('libs/java-json.jar')
+    testCompile "org.mockito:mockito-core:1.+"
+    testCompile "org.powermock:powermock-module-junit4:1.6.2"
+    testCompile "org.powermock:powermock-api-mockito:1.6.2"
+    testCompile "org.powermock:powermock-core:1.6.2"
 }

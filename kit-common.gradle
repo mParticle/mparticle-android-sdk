@@ -1,0 +1,29 @@
+apply plugin: 'com.android.library'
+
+android {
+    compileSdkVersion 23
+    buildToolsVersion "23.0.2"
+}
+
+android {
+    defaultConfig {
+        minSdkVersion 9
+        targetSdkVersion 21
+        versionCode = Integer.parseInt(new Date().format('yyyyMMdd'))
+        versionName mp_sdk_version
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+        }
+    }
+}
+
+dependencies {
+    compile ('com.mparticle:android-core:' + mp_sdk_version)
+    // uncomment if you're looking to build/debug the SDK locally
+    // compile project(':sdk')
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+}
+
+
