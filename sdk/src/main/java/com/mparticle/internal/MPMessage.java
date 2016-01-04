@@ -4,8 +4,12 @@ import android.location.Location;
 
 import com.mparticle.commerce.CommerceEvent;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.util.List;
+import java.util.Map;
 
 public class MPMessage extends JSONObject{
 
@@ -30,6 +34,16 @@ public class MPMessage extends JSONObject{
 
         if (builder.mName != null) {
             put(Constants.MessageKey.NAME, builder.mName);
+        }
+
+        if (builder.mCustomFlags != null) {
+            JSONObject flagsObject = new JSONObject();
+            for (Map.Entry<String, List<String>> entry : builder.mCustomFlags.entrySet()) {
+                List<String> values = entry.getValue();
+                JSONArray valueArray = new JSONArray(values);
+                flagsObject.put(entry.getKey(), valueArray);
+            }
+            put(Constants.MessageKey.EVENT_FLAGS, flagsObject);
         }
 
         if (builder.mLength != null){
@@ -113,6 +127,7 @@ public class MPMessage extends JSONObject{
         private Location mLocation;
         private String mDataConnection;
         private Double mLength = null;
+        private Map<String, List<String>> mCustomFlags;
 
         public Builder(String messageType, Session session, Location location){
             mMessageType = messageType;
@@ -149,6 +164,11 @@ public class MPMessage extends JSONObject{
 
         public Builder length(Double length) {
             mLength = length;
+            return this;
+        }
+
+        public Builder flags(Map<String, List<String>> customFlags) {
+            mCustomFlags = customFlags;
             return this;
         }
     }

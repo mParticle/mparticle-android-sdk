@@ -301,21 +301,12 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
                         .name(event.getEventName())
                         .timestamp(mAppStateManager.getSession().mLastEventTime)
                         .length(event.getLength())
+                        .flags(event.getCustomFlags())
                         .attributes(MPUtility.enforceAttributeConstraints(event.getInfo()))
                         .build();
                 message.put(MessageKey.EVENT_TYPE, event.getEventType());
                 message.put(MessageKey.EVENT_START_TIME, message.getTimestamp());
 
-                Map<String, List<String>> customFlags = event.getCustomFlags();
-                if (customFlags != null) {
-                    JSONObject flagsObject = new JSONObject();
-                    for (Map.Entry<String, List<String>> entry : customFlags.entrySet()) {
-                        List<String> values = entry.getValue();
-                        JSONArray valueArray = new JSONArray(values);
-                        flagsObject.put(entry.getKey(), valueArray);
-                    }
-                    message.put(MessageKey.EVENT_FLAGS, flagsObject);
-                }
 
                 if (currentActivity != null) {
                     message.put(MessageKey.CURRENT_ACTIVITY, currentActivity);
@@ -354,13 +345,14 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
         mPreferences.edit().putInt(Constants.PrefKeys.EVENT_COUNTER, 0).apply();
     }
 
-    public MPMessage logScreen(String screenName, JSONObject attributes, boolean started) {
-        if (screenName != null) {
+    public MPMessage logScreen(MPEvent event, boolean started) {
+        if (event != null && event.getEventName() != null) {
             try {
                 MPMessage message = new MPMessage.Builder(MessageType.SCREEN_VIEW, mAppStateManager.getSession(), mLocation)
                         .timestamp(mAppStateManager.getSession().mLastEventTime)
-                        .name(screenName)
-                        .attributes(attributes)
+                        .name(event.getEventName())
+                        .flags(event.getCustomFlags())
+                        .attributes(MPUtility.enforceAttributeConstraints(event.getInfo()))
                         .build();
 
                 message.put(MessageKey.EVENT_START_TIME, mAppStateManager.getSession().mLastEventTime);

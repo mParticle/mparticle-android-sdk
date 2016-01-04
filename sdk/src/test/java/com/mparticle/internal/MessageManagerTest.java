@@ -209,23 +209,32 @@ public class MessageManagerTest {
 
     @Test
     public void testLogScreen() throws Exception {
-        manager.logScreen("screen name", null, true);
-        manager.logScreen(null, null, true);
+        manager.logScreen(new MPEvent.Builder("screen name").build(), true);
+        manager.logScreen(null, true);
         appStateManager.getSession().start();
-        JSONObject info = new JSONObject();
+        Map<String, String> info = new HashMap<>();
         info.put("test key", "test value");
-        MPMessage message = manager.logScreen("screen name", info, true);
+        MPMessage message = manager.logScreen(new MPEvent.Builder("screen name").addCustomFlag("flag 1", "value 1")
+                .addCustomFlag("flag 1", "value 2").addCustomFlag("flag 2", "value 3").info(info).build(), true);
         assertNotNull(message);
         assertEquals(Constants.MessageType.SCREEN_VIEW, message.getMessageType());
         assertEquals(appStateManager.getSession().mSessionID, message.getSessionId());
         assertEquals(message.getDouble(Constants.MessageKey.EVENT_DURATION), 0, 2);
         assertEquals(message.getString(Constants.MessageKey.SCREEN_STARTED), "activity_started");
         assertEquals(message.getLong(Constants.MessageKey.EVENT_START_TIME), appStateManager.getSession().mLastEventTime);
+        JSONObject flags = message.getJSONObject("flags");
+        JSONArray flag1 = flags.getJSONArray("flag 1");
+        assertEquals(flag1.length(), 2);
+        assertEquals(flag1.get(0), "value 1");
+        assertEquals(flag1.get(1), "value 2");
+        JSONArray flag2 = flags.getJSONArray("flag 2");
+        assertEquals(flag2.length(), 1);
+        assertEquals(flag2.get(0), "value 3");
         JSONObject attrs = message.getJSONObject(Constants.MessageKey.ATTRIBUTES);
         assertNotNull(attrs);
         assertEquals("test value", attrs.getString("test key"));
         assertEquals("screen name", message.getName());
-        message = manager.logScreen("screen name 2", info, false);
+        message = manager.logScreen(new MPEvent.Builder("screen name 2").info(info).build(), false);
         assertEquals(message.getString(Constants.MessageKey.SCREEN_STARTED), "activity_stopped");
         Mockito.verify(messageHandler, Mockito.times(3)).sendMessage(Mockito.any(Message.class));
     }

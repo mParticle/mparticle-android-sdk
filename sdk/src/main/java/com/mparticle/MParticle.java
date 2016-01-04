@@ -38,21 +38,14 @@ import com.mparticle.messaging.MPMessagingAPI;
 import com.mparticle.messaging.ProviderCloudMessage;
 import com.mparticle.segmentation.SegmentListener;
 
-import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.math.BigDecimal;
-import java.net.Socket;
-import java.net.SocketImpl;
-import java.net.SocketImplFactory;
-import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import javax.net.ssl.HttpsURLConnection;
 
 /**
  * The primary access point to the mParticle SDK. In order to use this class, you must first call {@link #start(android.content.Context)}, which requires
@@ -507,38 +500,36 @@ public class MParticle {
      * @param eventData  a Map of data attributes to associate with this screen view
      */
     public void logScreen(String screenName, Map<String, String> eventData) {
-        internalLogScreen(screenName, eventData, true);
+        logScreen(new MPEvent.Builder(screenName).info(eventData).build());
     }
 
+
     /**
-     * Internal logScreen - do not use.
+     * Logs a screen view event
      *
-     * @param started true if we're navigating to a screen (onStart), false if we're leaving a screen (onStop)
+     * @param screenEvent an event object, the name of the event will be used as the screen name
      */
-     public void internalLogScreen(String screenName, Map<String, String> eventData, Boolean started) {
-        if (MPUtility.isEmpty(screenName)) {
+    public void logScreen(MPEvent screenEvent) {
+        if (MPUtility.isEmpty(screenEvent.getEventName())) {
             ConfigManager.log(LogLevel.ERROR, "screenName is required for logScreen");
             return;
         }
-        if (screenName.length() > Constants.LIMIT_NAME) {
+        if (screenEvent.getEventName().length() > Constants.LIMIT_NAME) {
             ConfigManager.log(LogLevel.ERROR, "The screen name was too long. Discarding event.");
             return;
         }
         if (checkEventLimit()) {
             mAppStateManager.ensureActiveSession();
-            JSONObject eventDataJSON = MPUtility.enforceAttributeConstraints(eventData);
             if (mConfigManager.isEnabled()) {
-                mMessageManager.logScreen(screenName, eventDataJSON, started);
+                mMessageManager.logScreen(screenEvent, screenEvent.getNavigationDirection());
 
-                if (null == eventDataJSON) {
-                    ConfigManager.log(LogLevel.DEBUG, "Logged screen: ", screenName);
-                } else {
-                    ConfigManager.log(LogLevel.DEBUG, "Logged screen: ", screenName, " with data ", eventDataJSON.toString());
+                if (null == screenEvent.getInfo()) {
+                    ConfigManager.log(LogLevel.DEBUG, "Logged screen: ", screenEvent.toString());
                 }
 
             }
-            if (started) {
-                mKitManager.logScreen(screenName, eventData);
+            if (screenEvent.getNavigationDirection()) {
+                mKitManager.logScreen(screenEvent.getEventName(), screenEvent.getInfo());
             }
         }
     }

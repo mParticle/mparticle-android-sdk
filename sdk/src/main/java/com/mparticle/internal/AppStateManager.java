@@ -11,6 +11,7 @@ import android.os.Handler;
 import android.os.SystemClock;
 
 import com.mparticle.BuildConfig;
+import com.mparticle.MPEvent;
 import com.mparticle.MParticle;
 import com.mparticle.kits.KitManager;
 
@@ -160,7 +161,7 @@ import java.util.concurrent.atomic.AtomicLong;
             mActivities.getAndIncrement();
 
             if (MParticle.getInstance().isAutoTrackingEnabled()) {
-                MParticle.getInstance().internalLogScreen(mCurrentActivity, null, true);
+                MParticle.getInstance().logScreen(mCurrentActivity);
             }
             mKitManager.onActivityStarted(activity, mActivities.get());
         }catch (Exception e){
@@ -215,7 +216,11 @@ import java.util.concurrent.atomic.AtomicLong;
                 }, ACTIVITY_DELAY);
             }
             if (MParticle.getInstance().isAutoTrackingEnabled()) {
-                MParticle.getInstance().internalLogScreen(AppStateManager.getActivityName(activity), null, false);
+                MParticle.getInstance().logScreen(
+                        new MPEvent.Builder(AppStateManager.getActivityName(activity))
+                                .internalNavigationDirection(false)
+                                .build()
+                );
             }
             mKitManager.onActivityStopped(activity, mActivities.get());
         }catch (Exception e){

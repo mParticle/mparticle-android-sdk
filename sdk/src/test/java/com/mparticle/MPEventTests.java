@@ -25,6 +25,15 @@ public class MPEventTests  {
     }
 
     @Test
+    public void testScreenBuilder(){
+        MPEvent event = new MPEvent.Builder("test name").category("test category").duration(1234).build();
+        assertTrue(event.getEventName().equals("test name"));
+        assertTrue(event.getEventType().equals(MParticle.EventType.Other));
+        assertTrue(event.getCategory().equals("test category"));
+        assertTrue(event.getLength() == 1234);
+    }
+
+    @Test
     public void testSerialization(){
         String eventString = new MPEvent.Builder("test name", MParticle.EventType.Navigation).category("test category").duration(1234).toString();
         MPEvent event = MPEvent.Builder.parseString(eventString).build();

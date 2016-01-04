@@ -37,6 +37,7 @@ public class MPEvent {
     private Double duration = null, startTime = null, endTime = null;
     private int eventHash;
     private Map<String, List<String>> customFlags;
+    private boolean entering;
 
     private MPEvent(){}
     private MPEvent(Builder builder){
@@ -55,6 +56,7 @@ public class MPEvent {
             eventName = builder.eventName;
         }
 
+        entering = builder.entering;
         info = builder.info;
 
         if (builder.category != null){
@@ -102,6 +104,7 @@ public class MPEvent {
         endTime = mpEvent.endTime;
         startTime = mpEvent.startTime;
         customFlags = mpEvent.customFlags;
+        entering = mpEvent.entering;
     }
 
     @Override
@@ -189,6 +192,10 @@ public class MPEvent {
         return customFlags;
     }
 
+    boolean getNavigationDirection() {
+        return entering;
+    }
+
     /**
      * Class used to build an {@link com.mparticle.MPEvent} object.
      *
@@ -201,6 +208,7 @@ public class MPEvent {
         private Map<String, String> info;
         private Double duration = null, startTime = null, endTime = null;
         private Map<String, List<String>> customFlags = null;
+        private boolean entering = true;
 
         private Builder(){}
 
@@ -219,6 +227,20 @@ public class MPEvent {
         }
 
         /**
+         * Starting point of the builder with two required parameters. The rest of the fields
+         * of this class are optional. Once the desired fields have been set, use {@link #build()} to
+         * create the {@link com.mparticle.MPEvent} object.
+         *
+         *
+         * @param eventName the name of the event to be tracked (required)
+         */
+        public Builder(String eventName){
+            this.eventName = eventName;
+            this.eventType = MParticle.EventType.Other;
+        }
+
+
+        /**
          * Use this to convert an existing MPEvent to a Builder, useful in modifying
          * and duplicating events.
          *
@@ -233,6 +255,7 @@ public class MPEvent {
             this.startTime = event.startTime;
             this.endTime = event.endTime;
             this.customFlags = event.getCustomFlags();
+            this.entering = event.entering;
         }
 
         /**
@@ -366,6 +389,19 @@ public class MPEvent {
          */
         private Builder endTime(double endTimeMillis){
             this.endTime = endTimeMillis;
+            return this;
+        }
+
+        /**
+         *
+         * Beta API, subject to change. Used internally to signify if a user is entering or exiting a screen
+         *
+         *
+         * @param entering True if a user is navigating to a screen, False when navigating away
+         * @return returns this builder for easy method chaining
+         */
+        public Builder internalNavigationDirection(boolean entering){
+            this.entering = entering;
             return this;
         }
 
