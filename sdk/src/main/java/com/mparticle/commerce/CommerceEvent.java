@@ -52,7 +52,9 @@ public final class CommerceEvent {
         mPromotionAction = builder.mPromotionAction;
         customAttributes = builder.customAttributes;
         promotionList = builder.promotionList;
-        productList = builder.productList;
+        if (builder.productList != null) {
+            productList = new LinkedList<>(builder.productList);
+        }
         mCheckoutStep = builder.mCheckoutStep;
         mCheckoutOptions = builder.mCheckoutOptions;
         mProductListName = builder.mProductListName;
@@ -403,6 +405,11 @@ public final class CommerceEvent {
             return null;
         }
         return Collections.unmodifiableList(promotionList);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        return o != null && o.toString().equals(toString());
     }
 
     /**

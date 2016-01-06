@@ -37,7 +37,7 @@ public final class Product {
     private String mCategory;
     private String mCouponCode;
     private String mSku;
-    private double mTimeAdded;
+    private long mTimeAdded;
     private Integer mPosition;
     private double mPrice;
     private double mQuantity;
@@ -240,7 +240,7 @@ public final class Product {
                 builder.position(jsonObject.optInt("ps", 0));
             }
             if (jsonObject.has("qt")) {
-                builder.quantity(jsonObject.optInt("qt", 1));
+                builder.quantity(jsonObject.optDouble("qt", 1));
             }
             builder.brand(jsonObject.optString("br", null));
             builder.variant(jsonObject.optString("va", null));
@@ -258,7 +258,7 @@ public final class Product {
                 }
             }
             Product product = builder.build();
-            product.mTimeAdded = jsonObject.optDouble("act", 0);
+            product.mTimeAdded = jsonObject.optLong("act", 0);
             return product;
         } catch (JSONException jse) {
 

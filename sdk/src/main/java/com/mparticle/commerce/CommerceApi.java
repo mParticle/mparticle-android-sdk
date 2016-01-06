@@ -100,7 +100,7 @@ public class CommerceApi {
             }
             MParticle.getInstance().logEvent(event);
         }else {
-            ConfigManager.log(MParticle.LogLevel.ERROR, "refund() called but there are no Products in the Cart, no event was logged.");
+            ConfigManager.log(MParticle.LogLevel.ERROR, "purchase() called but there are no Products in the Cart, no event was logged.");
         }
     }
 

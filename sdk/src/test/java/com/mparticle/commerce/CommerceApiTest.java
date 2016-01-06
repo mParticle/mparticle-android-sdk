@@ -15,10 +15,11 @@ public class CommerceApiTest {
 
     private static Cart cart;
     private static CommerceApi commerceApi;
+    private static MParticle mockMp;
 
     @BeforeClass
     public static void setupAll() {
-        MParticle mockMp = Mockito.mock(MParticle.class);
+        mockMp = Mockito.mock(MParticle.class);
         Mockito.when(mockMp.getEnvironment()).thenReturn(MParticle.Environment.Development);
         MParticle.setInstance(mockMp);
         commerceApi = new CommerceApi(new MockContext());
@@ -62,6 +63,28 @@ public class CommerceApiTest {
         assertEquals(2, cart.products().size());
         commerceApi.purchase(new TransactionAttributes("trans id"), true);
         assertEquals(0, cart.products().size());
+    }
+
+    @Test
+    public void testClearingCartWithPurchase() throws Exception {
+        mockMp = Mockito.mock(MParticle.class);
+        Mockito.when(mockMp.getEnvironment()).thenReturn(MParticle.Environment.Development);
+        MParticle.setInstance(mockMp);
+        commerceApi = new CommerceApi(new MockContext());
+        cart = Cart.getInstance(new MockContext());
+
+        Product product = new Product.Builder("name 1", "sku", 5).build();
+        Product product2 = new Product.Builder("name 2", "sku", 2).build();
+        cart.add(product, false).add(product2, false);
+        TransactionAttributes attributes = new TransactionAttributes("some id");
+        CommerceEvent event = new CommerceEvent.Builder(Product.PURCHASE, cart.products().get(0))
+                .products( cart.products())
+                .transactionAttributes(attributes)
+                .build();
+        commerceApi.purchase(attributes, true);
+        Mockito.verify(mockMp, Mockito.atLeastOnce()).logEvent(event);
+        assertEquals(2, event.getProducts().size());
+
     }
 
     @Test
