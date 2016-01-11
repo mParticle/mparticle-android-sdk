@@ -14,21 +14,11 @@ The SDK is composed of the Core library and a series of "kit" libraries that dep
 
 ### Gradle Setup
 
-##### 1. Add our maven repo to your repositories
+mParticle deploys all artifacts to Maven Central - determine the correct artifact(s) to include in your project from the following options:
 
-```groovy
-repositories {
-    maven { url "http://maven.mparticle.com/" } 
-    ...
-}
-```
-##### 2. Add dependencies
-
-There are a few approaches to incorporating the SDK:
-
-- Include *only* the Core library (`com.mparticle:android-core`). This means that you'll only be using *server-based* integrations.
-- Pick the Kits (`com.mparticle:android-XXX-kit`) that you'd like to use, and include only those. A Kit will only be instantiated if you configure it in the mParticle services dashboard.
-- Include all the Kits with the `com.mparticle:android-sdk` artifact.
+**Option 1:** Include *only* the Core library (`com.mparticle:android-core`). This means that you'll only be using *server-based* integrations.  
+**Option 2:** Pick the Kits (`com.mparticle:android-XXX-kit`) that you'd like to use, and include only those. A Kit will only be instantiated if you configure it in the mParticle services dashboard.  
+**Option 3:** Include all the Kits with the `com.mparticle:android-sdk` artifact.  
 
 ```groovy
 dependencies {
