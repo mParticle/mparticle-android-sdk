@@ -1,0 +1,5 @@
+apply from: '../../build-common.gradle'
+
+dependencies {
+    compile 'com.wootric:wootric-sdk-android:2.1.8'
+}
