@@ -3,9 +3,7 @@ package com.mparticle.kits;
 import android.app.Activity;
 
 import com.mparticle.MParticle;
-import com.mparticle.kits.AbstractKit;
-import com.mparticle.kits.ActivityLifecycleForwarder;
-import com.mparticle.kits.ReportingMessage;
+import com.mparticle.internal.ConfigManager;
 import com.wootric.androidsdk.Wootric;
 
 import org.json.JSONException;
@@ -13,19 +11,32 @@ import org.json.JSONObject;
 
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 
-public class WootricKit extends AbstractKit implements ActivityLifecycleForwarder {
+public class WootricKit extends AbstractKit {
     private static final String WOOTRIC_HOST = "wootric.com";
-
     private static final String CLIENT_ID = "clientId";
     private static final String CLIENT_SECRET = "clientSecret";
     private static final String ACCOUNT_TOKEN = "accountToken";
 
     String endUserEmail;
+    String endUserCustomerId;
     HashMap<String, String> endUserProperties;
 
     Wootric wootric;
+
+    @Override
+    public Wootric getInstance(Activity activity) {
+        wootric = Wootric.init(
+                activity,
+                properties.get(CLIENT_ID),
+                properties.get(CLIENT_SECRET),
+                properties.get(ACCOUNT_TOKEN));
+
+        wootric.setProperties(endUserProperties);
+        setWootricIdentity(wootric);
+
+        return wootric;
+    }
 
     @Override
     public String getName() {
@@ -46,46 +57,26 @@ public class WootricKit extends AbstractKit implements ActivityLifecycleForwarde
     public void setUserIdentity(String id, MParticle.IdentityType identityType) {
         if(MParticle.IdentityType.Email.equals(identityType)) {
             endUserEmail = id;
+        }else if (MParticle.IdentityType.CustomerId.equals(identityType)) {
+            endUserCustomerId = id;
         }
+        if (wootric != null) {
+            setWootricIdentity(wootric);
+        }
+    }
+
+    private void setWootricIdentity(Wootric wootric) {
+        boolean endUserEmailSet = (endUserEmail != null && !endUserEmail.isEmpty());
+        String endUserIdentifier = endUserEmailSet ? endUserEmail : endUserCustomerId;
+        wootric.setEndUserEmail(endUserIdentifier);
     }
 
     @Override
     void setUserAttributes(JSONObject mUserAttributes) {
         prepareEndUserProperties(mUserAttributes);
-    }
-
-    @Override
-    public List<ReportingMessage> onActivityCreated(Activity activity, int i) {
-        wootric = Wootric.init(
-                activity,
-                properties.get(CLIENT_ID),
-                properties.get(CLIENT_SECRET),
-                properties.get(ACCOUNT_TOKEN));
-
-        wootric.setProperties(endUserProperties);
-        wootric.setEndUserEmail(endUserEmail);
-
-        return null;
-    }
-
-    @Override
-    public List<ReportingMessage> onActivityResumed(Activity activity, int i) {
-        return null;
-    }
-
-    @Override
-    public List<ReportingMessage> onActivityPaused(Activity activity, int i) {
-        return null;
-    }
-
-    @Override
-    public List<ReportingMessage> onActivityStopped(Activity activity, int i) {
-        return null;
-    }
-
-    @Override
-    public List<ReportingMessage> onActivityStarted(Activity activity, int i) {
-        return null;
+        if (wootric != null) {
+            wootric.setProperties(endUserProperties);
+        }
     }
 
     private void prepareEndUserProperties(JSONObject propertiesJson) {
@@ -103,7 +94,7 @@ public class WootricKit extends AbstractKit implements ActivityLifecycleForwarde
                 String value = propertiesJson.getString(key);
                 endUserProperties.put(key, value);
             } catch (JSONException e) {
-                e.printStackTrace();
+                ConfigManager.log(MParticle.LogLevel.DEBUG, e.toString());
             }
         }
     }
