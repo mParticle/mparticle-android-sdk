@@ -64,6 +64,11 @@ public class AdjustKit extends AbstractKit implements ActivityLifecycleForwarder
     }
 
     @Override
+    public Object getInstance(Activity activity) {
+        return Adjust.getDefaultInstance();
+    }
+
+    @Override
     public String getName() {
         return "Adjust";
     }

@@ -1312,6 +1312,17 @@ public class MParticle {
         return mKitManager.isProviderActive(serviceProviderId);
     }
 
+    /**
+     * Retrieve the underlying object for the given Kit Id for direct calls.
+     *
+     * @param serviceProviderId
+     * @param activity optional - some Kits require an Activity
+     * @return
+     */
+    public Object getKitInstance(int serviceProviderId, Activity activity) {
+        return mKitManager.getKitInstance(serviceProviderId, activity);
+    }
+
     void saveGcmMessage(MPCloudNotificationMessage cloudMessage, String appState) {
         mMessageManager.saveGcmMessage(cloudMessage, appState);
     }

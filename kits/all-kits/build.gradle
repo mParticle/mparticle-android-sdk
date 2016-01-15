@@ -1,6 +1,12 @@
 apply from: '../../kit-common.gradle'
 apply from: '../../maven.gradle'
 
+android {
+    defaultConfig {
+        minSdkVersion 14
+    }
+}
+
 dependencies {
     compile ('com.mparticle:android-adjust-kit:' + mp_sdk_version)
     compile ('com.mparticle:android-appboy-kit:' + mp_sdk_version)
@@ -10,4 +16,5 @@ dependencies {
     compile ('com.mparticle:android-kahuna-kit:' + mp_sdk_version)
     compile ('com.mparticle:android-kochava-kit:' + mp_sdk_version)
     compile ('com.mparticle:android-localytics-kit:' + mp_sdk_version)
+    compile ('com.mparticle:android-wootric-kit:' + mp_sdk_version)
 }

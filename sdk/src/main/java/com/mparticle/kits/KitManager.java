@@ -560,6 +560,11 @@ public class KitManager implements MPActivityCallbacks {
         return provider != null && !provider.disabled() && provider.isRunning();
     }
 
+    public Object getKitInstance(int kitId, Activity activity) {
+        AbstractKit kit = providers.get(kitId);
+        return kit == null ? null : kit.getInstance(activity);
+    }
+
     public void setOptOut(boolean optOutStatus) {
         for (AbstractKit provider : providers.values()) {
             try {

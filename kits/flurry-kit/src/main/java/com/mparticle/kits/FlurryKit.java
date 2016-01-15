@@ -42,6 +42,11 @@ public class FlurryKit extends AbstractKit implements  ClientSideForwarder, Acti
     }
 
     @Override
+    public Object getInstance(Activity activity) {
+        return null;
+    }
+
+    @Override
     public String getName() {
         return "Flurry";
     }

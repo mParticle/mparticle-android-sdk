@@ -26,6 +26,11 @@ public class BranchMetricsKit extends AbstractKit implements ActivityLifecycleFo
     private boolean mSendScreenEvents;
 
     @Override
+    public Object getInstance(Activity activity) {
+        return getBranch();
+    }
+
+    @Override
     public String getName() {
         return "Branch Metrics";
     }

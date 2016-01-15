@@ -1,5 +1,6 @@
 package com.mparticle.kits;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
@@ -181,6 +182,8 @@ public abstract class AbstractKit {
 
         return this;
     }
+
+    public abstract Object getInstance(Activity activity);
 
     public static BigInteger hashFnv1a(byte[] bytes) {
         return MPUtility.hashFnv1A(bytes);

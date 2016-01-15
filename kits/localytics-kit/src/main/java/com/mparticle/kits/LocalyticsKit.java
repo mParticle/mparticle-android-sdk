@@ -49,6 +49,11 @@ public class LocalyticsKit extends AbstractKit implements ClientSideForwarder, E
     }
 
     @Override
+    public Object getInstance(Activity activity) {
+        return null;
+    }
+
+    @Override
     public String getName() {
         return "Localytics";
     }

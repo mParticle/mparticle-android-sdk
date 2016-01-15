@@ -22,6 +22,7 @@ public class KitFactory {
     final static int BRANCH_METRICS = MParticle.ServiceProviders.BRANCH_METRICS;
     final static int LOCALYTICS = MParticle.ServiceProviders.LOCALYTICS;
     final static int FLURRY = MParticle.ServiceProviders.FLURRY;
+    final static int WOOTRIC = MParticle.ServiceProviders.WOOTRIC;
     private Map<Integer, AbstractKit> supportedKits = new HashMap<Integer, AbstractKit>();
     private ArrayList<Integer> supportedKitIds = new ArrayList<Integer>();
 
@@ -59,6 +60,9 @@ public class KitFactory {
         }
         if (loadKit(ekManager, FLURRY, "com.mparticle.kits.FlurryKit")) {
             ConfigManager.log(MParticle.LogLevel.DEBUG, "Flurry Kit detected.");
+        }
+        if (loadKit(ekManager, WOOTRIC, "com.mparticle.kits.WootricKit")) {
+            ConfigManager.log(MParticle.LogLevel.DEBUG, "Wootric Kit detected.");
         }
     }
 

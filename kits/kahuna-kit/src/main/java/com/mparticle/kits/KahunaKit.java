@@ -142,6 +142,11 @@ public class KahunaKit extends AbstractKit implements ActivityLifecycleForwarder
     }
 
     @Override
+    public Object getInstance(Activity activity) {
+        return Kahuna.getInstance();
+    }
+
+    @Override
     public String getName() {
         return "Kahuna";
     }

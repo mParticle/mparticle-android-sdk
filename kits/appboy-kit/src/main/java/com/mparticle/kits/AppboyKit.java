@@ -42,6 +42,11 @@ public class AppboyKit extends AbstractKit implements ActivityLifecycleForwarder
     private boolean pushEnabled;
 
     @Override
+    public Object getInstance(Activity activity) {
+        return Appboy.getInstance(activity);
+    }
+
+    @Override
     public String getName() {
         return "Appboy";
     }

@@ -20,9 +20,9 @@ android {
 }
 
 dependencies {
-    compile ('com.mparticle:android-core:' + mp_sdk_version)
+  //  compile ('com.mparticle:android-core:' + mp_sdk_version)
     // uncomment if you're looking to build/debug the SDK locally
-    // compile project(':sdk')
+     compile project(':sdk')
     compile fileTree(dir: 'libs', include: ['*.jar'])
 }
 

@@ -164,6 +164,11 @@ public class ComscoreKit extends AbstractKit implements ActivityLifecycleForward
     }
 
     @Override
+    public Object getInstance(Activity activity) {
+        return null;
+    }
+
+    @Override
     public String getName() {
         return "Comscore";
     }

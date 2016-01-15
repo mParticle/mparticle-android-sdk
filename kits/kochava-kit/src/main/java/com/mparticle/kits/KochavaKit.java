@@ -33,6 +33,11 @@ public class KochavaKit extends AbstractKit implements ActivityLifecycleForwarde
     }
 
     @Override
+    public Object getInstance(Activity activity) {
+        return feature;
+    }
+
+    @Override
     public String getName() {
         return "Kochava";
     }
