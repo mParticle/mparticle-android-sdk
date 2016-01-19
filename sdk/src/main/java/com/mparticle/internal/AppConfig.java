@@ -52,7 +52,7 @@ class AppConfig {
     private static MParticle.Environment mEnvironment = MParticle.Environment.Production;
     public static MParticle.LogLevel logLevel = MParticle.LogLevel.NONE;
 
-    public AppConfig(Context context, MParticle.Environment environment, SharedPreferences preferences) {
+    public AppConfig(Context context, MParticle.Environment environment, SharedPreferences preferences, String apiKey, String apiSecret) {
         mContext = context;
         if (environment == null || environment == MParticle.Environment.AutoDetect){
             if (MPUtility.isAppDebuggable(context)){
@@ -66,18 +66,26 @@ class AppConfig {
         if (MPUtility.isAppDebuggable(context)){
             logLevel = MParticle.LogLevel.DEBUG;
         }
-        mKey = getString(PREFKEY_API_KEY, mKey);
-        if (mKey == null &&
-                (mKey = preferences.getString(Constants.PrefKeys.API_KEY, mKey)) == null) {
-            Log.e(Constants.LOG_TAG, String.format("Configuration issue: Missing required key: %s", PREFKEY_API_KEY));
-            throw new IllegalArgumentException("Configuration issue: Missing API key.");
+        if (!MPUtility.isEmpty(apiKey)) {
+            mKey = apiKey;
+        }else {
+            mKey = getString(PREFKEY_API_KEY, mKey);
+            if (mKey == null &&
+                    (mKey = preferences.getString(Constants.PrefKeys.API_KEY, mKey)) == null) {
+                Log.e(Constants.LOG_TAG, "Configuration issue: No API key passed to start() or configured as mp_key in resources!");
+            }
+            mKey = "";
         }
 
-        mSecret = getString(PREFKEY_API_SECRET, mSecret);
-        if (mSecret == null &&
-                (mSecret = preferences.getString(Constants.PrefKeys.API_SECRET, mSecret)) == null) {
-            Log.e(Constants.LOG_TAG, String.format("Configuration issue: Missing required key: %s", PREFKEY_API_SECRET));
-            throw new IllegalArgumentException("Configuration issue: Missing API secret.");
+        if (!MPUtility.isEmpty(apiSecret)) {
+            mSecret = apiSecret;
+        }else {
+            mSecret = getString(PREFKEY_API_SECRET, mSecret);
+            if (mSecret == null &&
+                    (mSecret = preferences.getString(Constants.PrefKeys.API_SECRET, mSecret)) == null) {
+                Log.e(Constants.LOG_TAG, "Configuration issue: No API secret passed to start() or configured as mp_secret in resources!");
+            }
+            mSecret = "";
         }
         preferences.edit()
                 .putString(Constants.PrefKeys.API_KEY, mKey)

@@ -28,7 +28,7 @@ public class ConfigManagerTest {
     @Before
     public void setUp() throws Exception {
         context = new com.mparticle.mock.MockContext();
-        manager = new ConfigManager(context, MParticle.Environment.Production);
+        manager = new ConfigManager(context, MParticle.Environment.Production, "some api key", "some api secret");
         ekManager = new KitManager(new com.mparticle.mock.MockContext());
         manager.setKitManager(ekManager);
 

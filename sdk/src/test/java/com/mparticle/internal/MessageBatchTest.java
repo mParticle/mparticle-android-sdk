@@ -23,7 +23,7 @@ public class MessageBatchTest {
         ProductBagApi bags = new ProductBagApi(new MockContext());
         bags.addProduct("whatever", null);
         Mockito.when(mockMp.ProductBags()).thenReturn(bags);
-        ConfigManager manager = new ConfigManager(new MockContext(), MParticle.Environment.Production);
+        ConfigManager manager = new ConfigManager(new MockContext(), MParticle.Environment.Production, "some api key", "some api secret");
         MockSharedPreferences sharedPrefs = new MockSharedPreferences();
         boolean sessionHistory = true;
         MessageBatch batch = MessageBatch.create(new MockContext(), new JSONArray(), new JSONArray(), sessionHistory, new JSONObject(), new JSONObject(), manager, sharedPrefs, new JSONObject());

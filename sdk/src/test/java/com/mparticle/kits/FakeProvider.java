@@ -1,5 +1,6 @@
 package com.mparticle.kits;
 
+import android.app.Activity;
 import android.util.SparseBooleanArray;
 
 import com.mparticle.MParticle;
@@ -40,6 +41,11 @@ public class FakeProvider extends AbstractKit {
 
     @Override
     protected AbstractKit update() {
+        return null;
+    }
+
+    @Override
+    public Object getInstance(Activity activity) {
         return null;
     }
 

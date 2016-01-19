@@ -66,10 +66,10 @@ public class ConfigManager implements MessagingConfigCallbacks {
 
     }
 
-    public ConfigManager(Context context, MParticle.Environment environment) {
+    public ConfigManager(Context context, MParticle.Environment environment, String apiKey, String apiSecret) {
         mContext = context.getApplicationContext();
         mPreferences = mContext.getSharedPreferences(PREFERENCES_FILE, Context.MODE_PRIVATE);
-        sLocalPrefs = new AppConfig(mContext, environment, mPreferences);
+        sLocalPrefs = new AppConfig(mContext, environment, mPreferences, apiKey, apiSecret);
     }
 
     public void setKitManager(KitManager manager){
@@ -539,4 +539,5 @@ public class ConfigManager implements MessagingConfigCallbacks {
         }
         return mUserBucket;
     }
+
 }

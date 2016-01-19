@@ -129,6 +129,20 @@ public class MParticle {
     /**
      * Start the mParticle SDK and begin tracking a user session. This method must be called prior to {@link #getInstance()}.
      * This method requires that your API key and secret are contained in your XML configuration.
+     *
+     * @param context Required reference to a Context object
+     * @param apiKey Your application's mParticle key retrieved from app.mparticle.com/apps
+     * @param apiSecret Your application's mParticle secret retrieved from app.mparticle.com/apps
+     *
+     */
+
+    public static void start(Context context, String apiKey, String apiSecret) {
+        start(context, InstallType.AutoDetect, apiKey, apiSecret);
+    }
+
+    /**
+     * Start the mParticle SDK and begin tracking a user session. This method must be called prior to {@link #getInstance()}.
+     * This method requires that your API key and secret are contained in your XML configuration.
      * <p></p>
      * The InstallType parameter is used to determine if this is a new install or an upgrade. In
      * the case where the mParticle SDK is being added to an existing app with existing users, this
@@ -141,6 +155,26 @@ public class MParticle {
 
     public static void start(Context context, InstallType installType) {
         start(context, installType, Environment.AutoDetect);
+    }
+
+    /**
+     * Start the mParticle SDK and begin tracking a user session. This method must be called prior to {@link #getInstance()}.
+     * This method requires that your API key and secret are contained in your XML configuration.
+     * <p></p>
+     * The InstallType parameter is used to determine if this is a new install or an upgrade. In
+     * the case where the mParticle SDK is being added to an existing app with existing users, this
+     * parameter prevents mParticle from categorizing all users as new users.
+     *
+     * @param context       Required reference to a Context object
+     * @param installType   Specify whether this is a new install or an upgrade, or let mParticle detect
+     * @param apiKey        Your application's mParticle key retrieved from app.mparticle.com/apps
+     * @param apiSecret     Your application's mParticle secret retrieved from app.mparticle.com/apps
+     *
+     * @see com.mparticle.MParticle.InstallType
+     */
+
+    public static void start(Context context, InstallType installType, String apiKey, String apiSecret) {
+        start(context, installType, Environment.AutoDetect, apiKey, apiSecret);
     }
 
     /**
@@ -167,7 +201,29 @@ public class MParticle {
         if (context == null) {
             throw new IllegalArgumentException("mParticle failed to start: context is required.");
         }
-        MParticle.getInstance(context.getApplicationContext(), installType, environment);
+        MParticle.getInstance(context.getApplicationContext(), installType, environment, null, null);
+    }
+
+    /**
+     * Start the mParticle SDK and begin tracking a user session. This method must be called prior to {@link #getInstance()}.
+     * This method requires that your API key and secret are contained in your XML configuration.
+     * <p></p>
+     *
+     * @param context       Required reference to a Context object
+     * @param installType   The InstallType parameter is used to determine if this is a new install or an upgrade. In
+     * the case where the mParticle SDK is being added to an existing app with existing users, this
+     * parameter prevents mParticle from categorizing all users as new users.
+     * @param environment   Force the SDK into either Production or Development mode. See {@link com.mparticle.MParticle.Environment}
+     * for implications of each mode. The SDK automatically determines which mode it should be in depending
+     * on the signing and the DEBUGGABLE flag of your application's AndroidManifest.xml, so this initializer is not typically needed.
+     * @param apiKey Your application's mParticle key retrieved from app.mparticle.com/apps
+     * @param apiSecret Your application's mParticle secret retrieved from app.mparticle.com/apps
+     */
+    public static void start(Context context, InstallType installType, Environment environment, String apiKey, String apiSecret){
+        if (context == null) {
+            throw new IllegalArgumentException("mParticle failed to start: context is required.");
+        }
+        MParticle.getInstance(context.getApplicationContext(), installType, environment, apiKey, apiSecret);
     }
 
     /**
@@ -177,8 +233,11 @@ public class MParticle {
      *
      * @param context the Activity that is creating the instance
      * @return An instance of the mParticle SDK configured with your API key
+     * @param apiKey Your application's mParticle key retrieved from app.mparticle.com/apps
+     * @param apiSecret Your application's mParticle secret retrieved from app.mparticle.com/apps
+     *
      */
-    private static MParticle getInstance(Context context, InstallType installType, Environment environment) {
+    private static MParticle getInstance(Context context, InstallType installType, Environment environment, String apiKey, String apiSecret) {
         if (instance == null) {
             synchronized (MParticle.class) {
                 if (instance == null) {
@@ -187,7 +246,8 @@ public class MParticle {
                         Log.e(Constants.LOG_TAG, "mParticle requires android.permission.INTERNET permission");
                     }
 
-                    ConfigManager configManager = new ConfigManager(context, environment);
+                    ConfigManager configManager = new ConfigManager(context, environment, apiKey, apiSecret);
+
                     KitManager kitManager = new KitManager(context);
                     AppStateManager appStateManager = new AppStateManager(context);
 
@@ -246,7 +306,7 @@ public class MParticle {
             Log.e(Constants.LOG_TAG, "Failed to get MParticle instance, getInstance() called prior to start().");
             return null;
         }
-        return getInstance(null, null, null);
+        return getInstance(null, null, null, null, null);
     }
 
     /**
