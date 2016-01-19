@@ -1,6 +1,12 @@
 apply from: '../../kit-common.gradle'
 apply from: '../../maven.gradle'
 
+android {
+    defaultConfig {
+        minSdkVersion 14
+    }
+}
+
 dependencies {
     compile 'com.wootric:wootric-sdk-android:2.3.0'
 }
