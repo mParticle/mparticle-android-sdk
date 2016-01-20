@@ -1,5 +1,5 @@
-apply from: '../../kit-common.gradle'
-apply from: '../../maven.gradle'
+apply from: '../../scripts/kit-common.gradle'
+apply from: '../../scripts/maven.gradle'
 
 android {
     defaultConfig {

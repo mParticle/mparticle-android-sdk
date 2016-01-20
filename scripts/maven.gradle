@@ -1,6 +1,5 @@
 apply plugin: 'maven'
-
-def target_maven_repo
+apply plugin: 'signing'
 
 configurations {
     deployerJars
@@ -10,6 +9,17 @@ dependencies {
     deployerJars "org.kuali.maven.wagons:maven-s3-wagon:1.2.1"
 }
 
+allprojects {
+    ext."signing.keyId" = System.getenv("mavenSigningKeyId")
+    ext."signing.secretKeyRingFile" = System.getenv("mavenSigningKeyRingFile")
+    ext."signing.password" = System.getenv("mavenSigningKeyPassword")
+}
+
+signing {
+    required { gradle.taskGraph.hasTask("uploadArchives") }
+    sign configurations.archives
+}
+
 uploadArchives{
     repositories {
         mavenDeployer {
@@ -17,22 +27,25 @@ uploadArchives{
             if (target_maven_repo == 's3') {
                 configuration = configurations.deployerJars
                 repository(url: 's3://maven.mparticle.com')
-            } else if(target_maven_repo == 'sonatype') {
+            } else if (target_maven_repo == 'sonatype') {
+
                 beforeDeployment {
                     MavenDeployment deployment -> signing.signPom(deployment)
                 }
                 repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
-                    authentication(userName: sonatypeUsername, password: sonatypePassword)
+                    authentication(userName: System.getenv('sonatypeUsername'), password: System.getenv('sonatypePassword'))
                 }
             } else {
                 repository(url: 'file://' + new File(System.getProperty('user.home'), '.m2/repository').absolutePath)
             }
+            
 
             pom.project {
                 version = mp_sdk_version
                 artifactId = project.artifactId
                 groupId = 'com.mparticle'
                 packaging 'aar'
+                name project.artifactDescription
                 description project.artifactDescription
                 url 'https://github.com/mparticle/mparticle-sdk-android'
 
