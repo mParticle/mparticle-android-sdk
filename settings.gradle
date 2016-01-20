@@ -1,13 +1,3 @@
-include (
-    ':kits:kahuna-kit',
-    ':kits:adjust-kit',
-    ':kits:comscore-kit',
-    ':kits:kochava-kit',
-    ':kits:branch-kit',
-    ':kits:appboy-kit',
-    ':kits:localytics-kit',
-    ':kits:flurry-kit',
-    ':kits:wootric-kit',
-    ':kits:all-kits',
-    ':sdk'
-)
+apply from: 'scripts/settings-kits.gradle'
+apply from: 'scripts/settings-allkits.gradle'
+apply from: 'scripts/settings-core.gradle'
