@@ -58,6 +58,7 @@ Here's the full list of currently supported kits:
 - `com.mparticle:android-kahuna-kit:4.+`
 - `com.mparticle:android-kochava-kit:4.+`
 - `com.mparticle:android-localytics-kit:4.+`
+- `com.mparticle:android-wootric-kit:4.+`
 
 ## Proguard
 
@@ -95,6 +96,12 @@ Proguard is a minification/optimization/obfuscation tool that's extremely useful
 -keep class com.localytics.android.** { *; }
 -keepattributes JavascriptInterface
 
+# Wootric Kit
+-keep class com.wootric.** { *; }
+-keep class retrofit.** { *; }
+-keepclassmembernames interface * {
+    @retrofit.http.* <methods>;
+}
 ```
 
 ## Show me the code
