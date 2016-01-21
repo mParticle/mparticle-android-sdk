@@ -14,6 +14,8 @@ The SDK is composed of the Core library and a series of "kit" libraries that dep
 
 ### Gradle Setup
 
+[![Maven Central Status](https://maven-badges.herokuapp.com/maven-central/com.mparticle/android-core/badge.svg?style=flat-square)](https://search.maven.org/#search%7Cga%7C1%7Cmparticle)
+
 mParticle deploys all artifacts to Maven Central - determine the correct artifact(s) to include in your project from the following options:
 
 **Option 1:** Include *only* the Core library (`com.mparticle:android-core`). This means that you'll only be using *server-based* integrations.  
