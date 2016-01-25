@@ -30,18 +30,15 @@
 -keep class com.mparticle.Constants* { *; }
 -keep class com.mparticle.MParticle { *; }
 -keep class com.mparticle.MParticle$* { *; }
--keep class com.mparticle.MPProduct { *; }
--keep class com.mparticle.MPProduct$* { *; }
 -keep class com.mparticle.MPEvent$* { *; }
 -keep class com.mparticle.BuildConfig { *; }
 -keep class com.mparticle.MPReceiver { *; }
 -keep class com.mparticle.MPService { *; }
 -keep class com.mparticle.internal.ConfigManager { *; }
 -keep class com.mparticle.internal.PushRegistrationHelper { *; }
--keep class com.mparticle.MPUnityException { *; }
 -keep class com.mparticle.ReferrerReceiver { *; }
 -keep class com.mparticle.internal.CommerceEventUtil { *; }
--keep class com.mparticle.embedded.EmbeddedForesee { *; }
+-keep class com.mparticle.kits.ForeseeKit { *; }
 
 
 -keep public class com.mparticle.activity.* {
@@ -65,7 +62,7 @@
 }
 
 -keep public class com.mparticle.commerce.* {
-    *;
+    public protected *;
 }
 
 -keep public class com.mparticle.embedded.* {
@@ -101,7 +98,7 @@
 }
 
 -keep class * extends java.util.ListResourceBundle {
-    protected Object[][] getContents();
+    protected java.lang.Object[][] getContents();
 }
 
 # Keep SafeParcelable value, needed for reflection. This is required to support backwards
@@ -122,26 +119,28 @@
 }
 
 -dontwarn com.google.android.gms.**
--keep class com.unity3d.** { *; }
--dontwarn com.unity3d.**
+-keep class * extends java.util.ListResourceBundle {
+    protected java.lang.Object[][] getContents();
+}
+
+-keep public class com.google.android.gms.common.internal.safeparcel.SafeParcelable {
+    public static final *** NULL;
+}
+
+-keepnames @com.google.android.gms.common.annotation.KeepName class *
+-keepclassmembernames class * {
+    @com.google.android.gms.common.annotation.KeepName *;
+}
+
+-keepnames class * implements android.os.Parcelable {
+    public static final ** CREATOR;
+}
+
 
 -keep class org.fmod.** { *; }
 -dontwarn org.fmod.**
 
 -keep class com.mparticle.internal.PushRegistrationHelper
--keep class com.mparticle.internal.np.** { *; }
 
--keep class com.kochava.** { *; }
--keep class com.mobileapptracker.** { *; }
--keep class com.kahuna.** { *; }
--keep class com.mparticle.internal.embedded.adjust.sdk.** { *; }
-
--keep class com.comscore.** { *; }
--dontwarn com.comscore.**
--dontwarn com.amazon.device.messaging.**
--dontwarn bo.app.**
--keep class bo.app.** { *; }
--keep class com.appboy.** { *; }
--keep class com.mparticle.internal.embedded.appboy.** { *; }
 
 

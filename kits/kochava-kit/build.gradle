@@ -1,2 +1,6 @@
+ext {
+    kitDescription = 'Kochava Kit for the mParticle SDK'
+}
+
 apply from: '../../scripts/kit-common.gradle'
 apply from: '../../scripts/maven.gradle'

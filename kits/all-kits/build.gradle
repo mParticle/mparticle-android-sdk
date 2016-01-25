@@ -1,3 +1,7 @@
+ext {
+    kitDescription = 'Catch-all dependency pulling in all mParticle Kits.'
+}
+
 apply from: '../../scripts/kit-common.gradle'
 apply from: '../../scripts/maven.gradle'
 
@@ -8,13 +12,7 @@ android {
 }
 
 dependencies {
-    compile ('com.mparticle:android-adjust-kit:' + mp_sdk_version)
-    compile ('com.mparticle:android-appboy-kit:' + mp_sdk_version)
-    compile ('com.mparticle:android-branch-kit:' + mp_sdk_version)
-    compile ('com.mparticle:android-comscore-kit:' + mp_sdk_version)
-    compile ('com.mparticle:android-flurry-kit:' + mp_sdk_version)
-    compile ('com.mparticle:android-kahuna-kit:' + mp_sdk_version)
-    compile ('com.mparticle:android-kochava-kit:' + mp_sdk_version)
-    compile ('com.mparticle:android-localytics-kit:' + mp_sdk_version)
-    compile ('com.mparticle:android-wootric-kit:' + mp_sdk_version)
+    project(':kits').getChildProjects().findAll { it.getValue() != project}.each {
+        proj -> compile proj.getValue()
+    }
 }

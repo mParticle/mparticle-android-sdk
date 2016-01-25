@@ -1,4 +1,0 @@
-rootProject.projectDir = new File(settingsDir, "..")
-include (
-    ':kits:all-kits'
-)

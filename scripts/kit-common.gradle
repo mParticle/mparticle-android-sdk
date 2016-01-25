@@ -5,10 +5,11 @@ android {
     buildToolsVersion "23.0.2"
 }
 
+
 android {
     defaultConfig {
         versionCode = Integer.parseInt(new Date().format('yyyyMMdd'))
-        versionName mp_sdk_version
+        versionName project.version
         minSdkVersion 9
         targetSdkVersion 23
     }
@@ -20,9 +21,7 @@ android {
 }
 
 dependencies {
-    compile ('com.mparticle:android-core:' + mp_sdk_version)
-    // uncomment if you're looking to build/debug the SDK locally
-    //compile project(':sdk')
+    compile project(':android-core')
     compile fileTree(dir: 'libs', include: ['*.jar'])
 }
 

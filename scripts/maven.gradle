@@ -19,6 +19,10 @@ signing {
     required { gradle.taskGraph.hasTask("uploadArchives") }
     sign configurations.archives
 }
+def target_maven_repo
+if (!project.hasProperty('target_maven_repo')) {
+    target_maven_repo = 'local'
+}
 
 uploadArchives{
     repositories {
@@ -28,7 +32,6 @@ uploadArchives{
                 configuration = configurations.deployerJars
                 repository(url: 's3://maven.mparticle.com')
             } else if (target_maven_repo == 'sonatype') {
-
                 beforeDeployment {
                     MavenDeployment deployment -> signing.signPom(deployment)
                 }
@@ -41,12 +44,11 @@ uploadArchives{
             
 
             pom.project {
-                version = mp_sdk_version
-                artifactId = project.artifactId
-                groupId = 'com.mparticle'
+                version project.version
+                artifactId project.name
                 packaging 'aar'
-                name project.artifactDescription
-                description project.artifactDescription
+                name project.ext.kitDescription
+                description project.ext.kitDescription
                 url 'https://github.com/mparticle/mparticle-sdk-android'
 
                 licenses {
