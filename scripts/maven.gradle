@@ -19,9 +19,10 @@ signing {
     required { gradle.taskGraph.hasTask("uploadArchives") }
     sign configurations.archives
 }
+
 def target_maven_repo
-if (!project.hasProperty('target_maven_repo')) {
-    target_maven_repo = 'local'
+if (project.hasProperty('target_maven_repo')) {
+    target_maven_repo = project.property('target_maven_repo')
 }
 
 uploadArchives{
@@ -41,7 +42,6 @@ uploadArchives{
             } else {
                 repository(url: 'file://' + new File(System.getProperty('user.home'), '.m2/repository').absolutePath)
             }
-            
 
             pom.project {
                 version project.version

@@ -73,8 +73,8 @@ class AppConfig {
             if (mKey == null &&
                     (mKey = preferences.getString(Constants.PrefKeys.API_KEY, mKey)) == null) {
                 Log.e(Constants.LOG_TAG, "Configuration issue: No API key passed to start() or configured as mp_key in resources!");
+                mSecret = "";
             }
-            mKey = "";
         }
 
         if (!MPUtility.isEmpty(apiSecret)) {
@@ -84,8 +84,9 @@ class AppConfig {
             if (mSecret == null &&
                     (mSecret = preferences.getString(Constants.PrefKeys.API_SECRET, mSecret)) == null) {
                 Log.e(Constants.LOG_TAG, "Configuration issue: No API secret passed to start() or configured as mp_secret in resources!");
+                mSecret = "";
             }
-            mSecret = "";
+
         }
         preferences.edit()
                 .putString(Constants.PrefKeys.API_KEY, mKey)
