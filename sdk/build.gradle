@@ -47,7 +47,8 @@ android {
         }
         release {
             minifyEnabled true
-            proguardFile 'proguard.txt'
+            proguardFile 'proguard.pro'
+            consumerProguardFiles 'consumer-proguard.pro'
             //buildConfigField "Boolean", "MP_DEBUG", "true"
         }
     }
