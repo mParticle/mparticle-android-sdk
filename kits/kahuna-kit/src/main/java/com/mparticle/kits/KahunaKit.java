@@ -18,7 +18,6 @@ import com.kahuna.sdk.KahunaUserAttributesKeys;
 import com.kahuna.sdk.IKahunaUserCredentials;
 import com.kahuna.sdk.KahunaUserCredentials;
 import com.mparticle.BuildConfig;
-import com.mparticle.Constants;
 import com.mparticle.MPEvent;
 import com.mparticle.MPReceiver;
 import com.mparticle.MParticle;

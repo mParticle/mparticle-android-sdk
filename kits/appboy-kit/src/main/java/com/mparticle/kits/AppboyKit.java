@@ -10,7 +10,6 @@ import com.appboy.AppboyUser;
 import com.appboy.enums.Gender;
 import com.appboy.models.outgoing.AppboyProperties;
 import com.appboy.push.AppboyNotificationUtils;
-import com.mparticle.Constants;
 import com.mparticle.MPEvent;
 import com.mparticle.MParticle;
 import com.mparticle.MParticle.UserAttributes;

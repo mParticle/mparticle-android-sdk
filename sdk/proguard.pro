@@ -9,8 +9,8 @@
 
 -keep class com.mparticle.MPEvent { *; }
 -keep class com.mparticle.MPEvent$* { *; }
--keep class com.mparticle.Constants { *; }
--keep class com.mparticle.Constants* { *; }
+-keep class com.mparticle.kits.Constants { *; }
+-keep class com.mparticle.kits.Constants* { *; }
 -keep class com.mparticle.MParticle { *; }
 -keep class com.mparticle.MParticle$* { *; }
 -keep class com.mparticle.BuildConfig { *; }

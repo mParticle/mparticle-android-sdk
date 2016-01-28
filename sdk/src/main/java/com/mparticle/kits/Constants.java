@@ -1,4 +1,4 @@
-package com.mparticle;
+package com.mparticle.kits;
 
 public class Constants {
     public interface Commerce {
