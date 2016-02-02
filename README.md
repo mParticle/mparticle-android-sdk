@@ -4,13 +4,13 @@
 
 Hello! This is the public repo of the mParticle Android SDK. Right now, it contains the "kit" implementations and maintains a dependency on the mParticle Core library. 
 
-We originally built the [mParticle platform](www.mparticle.com) to help simplify the approach to SDKs and improve app performance. We've found that having a bunch of SDKs in an app bloats its size and is no-good for your users' battery. So, we built client-side APIs for you to collect all of your data, and a server platform that lets you send your data where you want it to go.
+We originally built the [mParticle platform](https://www.mparticle.com) to help simplify the approach to SDKs and improve app performance. We've found that having a bunch of SDKs in an app bloats its size and is no-good for your users' battery. So, we built client-side APIs for you to collect all of your data, and a server platform that lets you send your data where you want it to go.
 
-From that original goal the platform has grown to support 50+ services and SDKs, including developer tools, analytics, attribution, messaging, and advertising services. mParticle is designed to serve as the connector between all of these services - check out [our site](www.mparticle.com), or hit us at dev@mparticle.com to learn more.
+From that original goal the platform has grown to support 50+ services and SDKs, including developer tools, analytics, attribution, messaging, and advertising services. mParticle is designed to serve as the connector between all of these services - check out [our site](https://www.mparticle.com), or hit us at dev@mparticle.com to learn more.
 
 ## Get the SDK
 
-The SDK is composed of the Core library and a series of "kit" libraries that depend on Core. Though most of mParticle's integrations are on the server-side, some of these services need to be integrated on the client side - and that's where *kits* come in. The Core SDK takes care of initializing the kits depending on what you've configured in [your app's dashboard](http://app.mparticle.com), so you just have to decide which kits you *may* use prior to submission to Google Play. You can easily include all of the kits, none of the kits, or individual kits - the choice is yours.
+The SDK is composed of the Core library and a series of "kit" libraries that depend on Core. Though most of mParticle's integrations are on the server-side, some of these services need to be integrated on the client side - and that's where *kits* come in. The Core SDK takes care of initializing the kits depending on what you've configured in [your app's dashboard](https://app.mparticle.com), so you just have to decide which kits you *may* use prior to submission to Google Play. You can easily include all of the kits, none of the kits, or individual kits - the choice is yours.
 
 ### Gradle Setup
 
