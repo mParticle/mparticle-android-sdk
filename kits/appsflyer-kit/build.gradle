@@ -1,0 +1,12 @@
+ext {
+    kitDescription = 'AppsFlyer Kit for the mParticle SDK'
+}
+
+apply from: '../../scripts/kit-common.gradle'
+apply from: '../../scripts/maven.gradle'
+
+dependencies {
+    //Appsflyer has a library in Maven Central that
+    //would be better to use in the future.
+    //compile 'com.appsflyer:AppsflyerLib:4.3.3'
+}

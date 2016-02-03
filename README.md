@@ -53,6 +53,7 @@ dependencies {
 Here's the full list of currently supported kits:
 
 - `com.mparticle:android-adjust-kit:4.+`
+- `com.mparticle:android-appsflyer-kit:4.+`
 - `com.mparticle:android-appboy-kit:4.+`
 - `com.mparticle:android-branch-kit:4.+`
 - `com.mparticle:android-comscore-kit:4.+`

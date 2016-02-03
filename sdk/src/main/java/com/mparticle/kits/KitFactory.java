@@ -25,6 +25,8 @@ public class KitFactory {
     final static int WOOTRIC = MParticle.ServiceProviders.WOOTRIC;
     final static int CRITTERCISM = MParticle.ServiceProviders.CRITTERCISM;
     final static int TUNE = MParticle.ServiceProviders.TUNE;
+    final static int APPSFLYER = MParticle.ServiceProviders.APPSFLYER;
+
     private Map<Integer, AbstractKit> supportedKits = new HashMap<Integer, AbstractKit>();
     private ArrayList<Integer> supportedKitIds = new ArrayList<Integer>();
 
@@ -71,6 +73,9 @@ public class KitFactory {
         }
         if (loadKit(ekManager, TUNE, "com.mparticle.kits.TuneKit")) {
             ConfigManager.log(MParticle.LogLevel.DEBUG, "Tune Kit detected.");
+        }
+        if (loadKit(ekManager, APPSFLYER, "com.mparticle.kits.AppsFlyerKit")) {
+            ConfigManager.log(MParticle.LogLevel.DEBUG, "AppsFlyer Kit detected.");
         }
     }
 
