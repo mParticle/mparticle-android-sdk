@@ -27,6 +27,7 @@ public class KitFactory {
     final static int TUNE = MParticle.ServiceProviders.TUNE;
     final static int APPSFLYER = MParticle.ServiceProviders.APPSFLYER;
     final static int APPTENTIVE = MParticle.ServiceProviders.APPTENTIVE;
+
     private Map<Integer, AbstractKit> supportedKits = new HashMap<Integer, AbstractKit>();
     private ArrayList<Integer> supportedKitIds = new ArrayList<Integer>();
 
