@@ -581,8 +581,7 @@ public class KitManager implements MPActivityCallbacks, DeepLinkListener {
     private static boolean setInstallReferrer(Context context, Intent intent, String className) {
         try {
             Class clazz = Class.forName(className);
-            Constructor<BroadcastReceiver> constructor = clazz.getDeclaredConstructor();
-            constructor.setAccessible(true);
+            Constructor<BroadcastReceiver> constructor = clazz.getConstructor();
             BroadcastReceiver receiver = constructor.newInstance();
             receiver.onReceive(context, intent);
             return true;
@@ -606,6 +605,9 @@ public class KitManager implements MPActivityCallbacks, DeepLinkListener {
         }
         if (setInstallReferrer(context, intent, "com.flurry.android.InstallReceiver")) {
             ConfigManager.log(MParticle.LogLevel.DEBUG, "Sent referral info to Flurry SDK");
+        }
+        if (setInstallReferrer(context, intent, "com.mparticle.kits.AppsFlyerReceiver")) {
+            ConfigManager.log(MParticle.LogLevel.DEBUG, "Sent referral info to Appsflyer SDK");
         }
     }
 
