@@ -23,6 +23,7 @@ public class KitFactory {
     final static int LOCALYTICS = MParticle.ServiceProviders.LOCALYTICS;
     final static int FLURRY = MParticle.ServiceProviders.FLURRY;
     final static int WOOTRIC = MParticle.ServiceProviders.WOOTRIC;
+    final static int CRITTERCISM = MParticle.ServiceProviders.CRITTERCISM;
     private Map<Integer, AbstractKit> supportedKits = new HashMap<Integer, AbstractKit>();
     private ArrayList<Integer> supportedKitIds = new ArrayList<Integer>();
 
@@ -63,6 +64,9 @@ public class KitFactory {
         }
         if (loadKit(ekManager, WOOTRIC, "com.mparticle.kits.WootricKit")) {
             ConfigManager.log(MParticle.LogLevel.DEBUG, "Wootric Kit detected.");
+        }
+        if (loadKit(ekManager, CRITTERCISM, "com.mparticle.kits.CrittercismKit")) {
+            ConfigManager.log(MParticle.LogLevel.DEBUG, "Crittercism Kit detected.");
         }
     }
 

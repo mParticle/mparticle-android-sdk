@@ -590,4 +590,20 @@ public abstract class AbstractKit {
         this.kitId = id;
         return this;
     }
+
+    public List<ReportingMessage> leaveBreadcrumb(String breadcrumb) {
+        return null;
+    }
+
+    public List<ReportingMessage> logError(String message, Map<String, String> eventData) {
+        return null;
+    }
+
+    public List<ReportingMessage> logException(Exception exception, Map<String, String> eventData, String message) {
+        return null;
+    }
+
+    public List<ReportingMessage> logNetworkPerformance(String url, long startTime, String method, long length, long bytesSent, long bytesReceived, String requestString, int responseCode) {
+        return null;
+    }
 }

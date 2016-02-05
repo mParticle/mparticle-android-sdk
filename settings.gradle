@@ -12,7 +12,8 @@ include (
         ':kits:appboy-kit',
         ':kits:localytics-kit',
         ':kits:flurry-kit',
-        ':kits:wootric-kit'
+        ':kits:wootric-kit',
+        ':kits:crittercism-kit'
 )
 project(':kits').getChildren().each {
     proj -> proj.name = 'android-' + proj.name

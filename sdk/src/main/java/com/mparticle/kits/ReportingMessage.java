@@ -27,7 +27,7 @@ public class ReportingMessage {
     private String screenName;
     private boolean devMode;
     private boolean optOut;
-
+    private String exceptionClassName;
 
 
     public ReportingMessage(AbstractKit provider, String messageType, double timestamp, Map<String, String> attributes) {
@@ -145,6 +145,8 @@ public class ReportingMessage {
             jsonObject.put("pr", true);
         } else if (messageType.equals(Constants.MessageType.OPT_OUT)) {
             jsonObject.put("s", optOut);
+        } else if (messageType.equals(Constants.MessageType.ERROR)) {
+            jsonObject.put("c", exceptionClassName);
         }
 
         return jsonObject;
@@ -161,6 +163,10 @@ public class ReportingMessage {
     public ReportingMessage setOptOut(boolean optOut) {
         this.optOut = optOut;
         return this;
+    }
+
+    public void setExceptionClassName(String exceptionClassName) {
+        this.exceptionClassName = exceptionClassName;
     }
 
     public interface MessageType {

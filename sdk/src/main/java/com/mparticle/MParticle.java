@@ -613,6 +613,7 @@ public class MParticle {
             mAppStateManager.ensureActiveSession();
             mMessageManager.logBreadcrumb(breadcrumb);
             ConfigManager.log(LogLevel.DEBUG, "Logged breadcrumb: " + breadcrumb);
+            mKitManager.leaveBreadcrumb(breadcrumb);
         }
     }
 
@@ -646,15 +647,17 @@ public class MParticle {
                                 " with data: " + (eventDataJSON == null ? "<none>" : eventDataJSON.toString())
                 );
             }
+            mKitManager.logError(message, eventData);
         }
     }
 
-    public void logNetworkPerformance(String url, long startTime, String method, long length, long bytesSent, long bytesReceived, String requestString) {
+    public void logNetworkPerformance(String url, long startTime, String method, long length, long bytesSent, long bytesReceived, String requestString, int responseCode) {
         if (mConfigManager.isEnabled()) {
             mAppStateManager.ensureActiveSession();
             if (checkEventLimit()) {
                 mMessageManager.logNetworkPerformanceEvent(startTime, method, url, length, bytesSent, bytesReceived, requestString);
             }
+            mKitManager.logNetworkPerformance(url, startTime, method, length, bytesSent, bytesReceived, requestString, responseCode);
         }
     }
 
@@ -738,6 +741,7 @@ public class MParticle {
                                 " with exception: " + (exception == null ? "<none>" : exception.getMessage())
                 );
             }
+            mKitManager.logException(exception, eventData, message);
         }
     }
 
@@ -1612,6 +1616,7 @@ public class MParticle {
         int BRANCH_METRICS = 80;
         int FLURRY = 83;
         int LOCALYTICS = 84;
+        int CRITTERCISM = 86;
         int WOOTRIC = 90;
         String BROADCAST_ACTIVE = "MPARTICLE_SERVICE_PROVIDER_ACTIVE_";
         String BROADCAST_DISABLED = "MPARTICLE_SERVICE_PROVIDER_DISABLED_";

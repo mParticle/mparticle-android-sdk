@@ -613,4 +613,55 @@ public class KitManager implements MPActivityCallbacks {
         return ekFactory.getSupportedKits();
     }
 
+    public void leaveBreadcrumb(String breadcrumb) {
+        for (AbstractKit provider : providers.values()) {
+            try {
+                if (!provider.disabled()) {
+                    List<ReportingMessage> report = provider.leaveBreadcrumb(breadcrumb);
+                    mReportingManager.logAll(report);
+                }
+            } catch (Exception e) {
+                ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to call leaveBreadcrumb for kit: " + provider.getName() + ": " + e.getMessage());
+            }
+        }
+    }
+
+    public void logError(String message, Map<String, String> eventData) {
+        for (AbstractKit provider : providers.values()) {
+            try {
+                if (!provider.disabled()) {
+                    List<ReportingMessage> report = provider.logError(message, eventData);
+                    mReportingManager.logAll(report);
+                }
+            } catch (Exception e) {
+                ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to call logError for kit: " + provider.getName() + ": " + e.getMessage());
+            }
+        }
+    }
+
+    public void logException(Exception exception, Map<String, String> eventData, String message) {
+        for (AbstractKit provider : providers.values()) {
+            try {
+                if (!provider.disabled()) {
+                    List<ReportingMessage> report = provider.logException(exception, eventData, message);
+                    mReportingManager.logAll(report);
+                }
+            } catch (Exception e) {
+                ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to call logException for kit: " + provider.getName() + ": " + e.getMessage());
+            }
+        }
+    }
+
+    public void logNetworkPerformance(String url, long startTime, String method, long length, long bytesSent, long bytesReceived, String requestString, int responseCode) {
+        for (AbstractKit provider : providers.values()) {
+            try {
+                if (!provider.disabled()) {
+                    List<ReportingMessage> report = provider.logNetworkPerformance(url, startTime, method, length, bytesSent, bytesReceived, requestString, responseCode);
+                    mReportingManager.logAll(report);
+                }
+            } catch (Exception e) {
+                ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to call logNetworkPerformance for kit: " + provider.getName() + ": " + e.getMessage());
+            }
+        }
+    }
 }
