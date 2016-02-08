@@ -1,4 +1,4 @@
-<img src="https://www.mparticle.com/assets/img/logo.svg" width="280">
+<img src="http://static.mparticle.com/sdk/logo.svg" width="280">
 
 ## Android SDK
 
