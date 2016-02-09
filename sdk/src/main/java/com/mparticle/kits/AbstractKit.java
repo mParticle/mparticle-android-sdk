@@ -36,9 +36,13 @@ import java.util.Map;
 public abstract class AbstractKit {
 
     final static String KEY_ID = "id";
+    private final static String KEY_ATTRIBUTE_VALUE_FILTERING = "avf";
     private final static String KEY_PROPERTIES = "as";
     private final static String KEY_FILTERS = "hs";
     private final static String KEY_BRACKETING = "bk";
+    private final static String KEY_ATTRIBUTE_VALUE_FILTERING_SHOULD_INCLUDE_MATCHES = "i";
+    private final static String KEY_ATTRIBUTE_VALUE_FILTERING_ATTRIBUTE= "a";
+    private final static String KEY_ATTRIBUTE_VALUE_FILTERING_VALUE= "v";
     private final static String KEY_EVENT_TYPES_FILTER = "et";
     private final static String KEY_EVENT_NAMES_FILTER = "ec";
     private final static String KEY_EVENT_ATTRIBUTES_FILTER = "ea";
@@ -49,7 +53,7 @@ public abstract class AbstractKit {
     private final static String KEY_BRACKETING_LOW = "lo";
     private final static String KEY_BRACKETING_HIGH = "hi";
     private final static String KEY_COMMERCE_ATTRIBUTE_FILTER = "cea";
-    private final static String KEY_COMMERCE_ENTITY_FILERS = "ent";
+    private final static String KEY_COMMERCE_ENTITY_FILTERS = "ent";
     private final static String KEY_COMMERCE_ENTITY_ATTRIBUTE_FILTERS = "afa";
 
     //If set to true, our sdk honor user's optout wish. If false, we still collect data on opt-ed out users, but only for reporting
@@ -57,6 +61,10 @@ public abstract class AbstractKit {
     private static final String KEY_PROJECTIONS = "pr";
     protected KitManager mEkManager;
 
+    protected boolean avfIsActive = false;
+    protected boolean avfShouldIncludeMatches = false;
+    protected int avfHashedAttribute = 0;
+    protected int avfHashedValue = 0;
     protected HashMap<String, String> properties = new HashMap<String, String>(0);
     protected SparseBooleanArray mTypeFilters = new SparseBooleanArray(0);
     protected SparseBooleanArray mNameFilters = new SparseBooleanArray(0);
@@ -85,6 +93,18 @@ public abstract class AbstractKit {
 
     protected AbstractKit parseConfig(JSONObject json) throws JSONException {
 
+        if (json.has(KEY_ATTRIBUTE_VALUE_FILTERING)) {
+            avfIsActive = true;
+            try {
+                JSONObject avfJson = json.getJSONObject(KEY_ATTRIBUTE_VALUE_FILTERING);
+                avfShouldIncludeMatches = avfJson.getBoolean(KEY_ATTRIBUTE_VALUE_FILTERING_SHOULD_INCLUDE_MATCHES);
+                avfHashedAttribute = avfJson.getInt(KEY_ATTRIBUTE_VALUE_FILTERING_ATTRIBUTE);
+                avfHashedValue = avfJson.getInt(KEY_ATTRIBUTE_VALUE_FILTERING_VALUE);
+            } catch (JSONException jse) {
+                ConfigManager.log(MParticle.LogLevel.ERROR, "Issue when parsing attribute value filtering configuration: " + jse.getMessage());
+                avfIsActive = false;
+            }
+        }
         if (json.has(KEY_PROPERTIES)) {
             JSONObject propJson = json.getJSONObject(KEY_PROPERTIES);
             for (Iterator<String> iterator = propJson.keys(); iterator.hasNext(); ) {
@@ -134,8 +154,8 @@ public abstract class AbstractKit {
             } else {
                 mCommerceAttributeFilters.clear();
             }
-            if (filterJson.has(KEY_COMMERCE_ENTITY_FILERS)) {
-                mCommerceEntityFilters = convertToSparseArray(filterJson.getJSONObject(KEY_COMMERCE_ENTITY_FILERS));
+            if (filterJson.has(KEY_COMMERCE_ENTITY_FILTERS)) {
+                mCommerceEntityFilters = convertToSparseArray(filterJson.getJSONObject(KEY_COMMERCE_ENTITY_FILTERS));
             } else {
                 mCommerceEntityFilters.clear();
             }
@@ -220,12 +240,43 @@ public abstract class AbstractKit {
         return userBucket >= lowBracket && userBucket < highBracket;
     }
 
+    protected boolean shouldIncludeFromAttributeValueFiltering(Map<String, String> attributes) {
+        boolean shouldInclude = true;
+        if (avfIsActive) {
+            boolean isMatch = false;
+            if (attributes != null) {
+                Iterator<Map.Entry<String, String>> attIterator = attributes.entrySet().iterator();
+                while (attIterator.hasNext()) {
+                    Map.Entry<String, String> entry = attIterator.next();
+                    String key = entry.getKey();
+                    int keyHash = MPUtility.mpHash(key);
+                    if (keyHash == avfHashedAttribute) {
+                        String value = entry.getValue();
+                        int valueHash = MPUtility.mpHash(value);
+                        if (valueHash == avfHashedValue) {
+                            isMatch = true;
+                        }
+                        break;
+                    }
+                }
+            }
+            shouldInclude = avfShouldIncludeMatches ? isMatch : !isMatch;
+        }
+        return shouldInclude;
+    }
+
     protected boolean shouldLogEvent(MPEvent event) {
+        if (!shouldIncludeFromAttributeValueFiltering(event.getInfo())) {
+            return false;
+        }
         int typeHash = MPUtility.mpHash(event.getEventType().ordinal() + "");
         return mTypeFilters.get(typeHash, true) && mNameFilters.get(event.getEventHash(), true);
     }
 
     protected CommerceEvent filterCommerceEvent(CommerceEvent event) {
+        if (!shouldIncludeFromAttributeValueFiltering(event.getCustomAttributes())) {
+            return null;
+        }
         if (mTypeFilters != null &&
                 !mTypeFilters.get(MPUtility.mpHash(CommerceEventUtil.getEventType(event) + ""), true)) {
             return null;
