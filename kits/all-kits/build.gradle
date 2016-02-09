@@ -9,6 +9,11 @@ android {
     defaultConfig {
         minSdkVersion 14
     }
+    buildTypes {
+        release {
+            consumerProguardFiles.clear()
+        }
+    }
 }
 
 dependencies {
