@@ -8,14 +8,17 @@ import android.os.Message;
 import com.mparticle.mock.MockConfigManager;
 import com.mparticle.mock.MockContext;
 
+import org.hamcrest.Matcher;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.AdditionalMatchers;
 import org.mockito.Mockito;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 
 public class UploadHandlerTest {
@@ -82,6 +85,18 @@ public class UploadHandlerTest {
             assertFalse(handler.shouldDelete(i));
         }
 
+    }
+
+    @Test
+    public void testRampSampling() throws Exception {
+        handler.handleMessage(null);
+        MParticleApiClient apiClient = Mockito.mock(MParticleApiClient.class);
+        MParticleApiClient.MPRampException rampException = new MParticleApiClient.MPRampException();
+        Mockito.when(apiClient.sendMessageBatch(Mockito.anyString())).thenThrow(rampException);
+        handler.setApiClient(apiClient);
+        handler.uploadMessage(522, "");
+        String[] params = {"522"};
+        Mockito.verify(mockDatabase, Mockito.times(1)).delete(Mockito.anyString(), Mockito.anyString(), AdditionalMatchers.aryEq(params));
     }
 
     @Test

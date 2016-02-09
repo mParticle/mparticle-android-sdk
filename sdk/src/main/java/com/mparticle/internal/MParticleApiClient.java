@@ -457,7 +457,7 @@ public class MParticleApiClient implements IMPApiClient {
         }
     }
 
-    public final class MPRampException extends Exception {
+    public static final class MPRampException extends Exception {
         public MPRampException() {
             super("This device is being sampled.");
         }

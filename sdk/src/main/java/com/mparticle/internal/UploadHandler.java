@@ -23,6 +23,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.net.MalformedURLException;
 
 import javax.net.ssl.SSLHandshakeException;
@@ -164,7 +165,7 @@ public class UploadHandler extends Handler {
 
         }catch (Exception e){
             if (BuildConfig.MP_DEBUG){
-                ConfigManager.log(MParticle.LogLevel.DEBUG, "UploadHandler Exception while handling message: " + msg.what + "\n" + e.toString());
+                ConfigManager.log(MParticle.LogLevel.DEBUG, "UploadHandler Exception while handling message");
             }
         }
     }
@@ -298,16 +299,8 @@ public class UploadHandler extends Handler {
                         processingSessionEnd = true;
                     }
                 }
-
-                int responseCode = mApiClient.sendMessageBatch(message);
-
-                if (shouldDelete(responseCode)) {
-                    deleteUpload(id);
-                } else {
-                    ConfigManager.log(MParticle.LogLevel.WARNING, "Upload failed and will be retried.");
-                }
+                uploadMessage(id, message);
             }
-        } catch (MParticleApiClient.MPRampException e){
         } catch (MParticleApiClient.MPThrottleException e) {
         } catch (SSLHandshakeException ssle){
             ConfigManager.log(MParticle.LogLevel.DEBUG, "SSL handshake failed while preparing uploads - possible MITM attack detected.");
@@ -322,11 +315,28 @@ public class UploadHandler extends Handler {
         return processingSessionEnd;
     }
 
+    void uploadMessage(int id, String message) throws IOException, MParticleApiClient.MPThrottleException {
+        int responseCode = -1;
+        boolean sampling = false;
+        try {
+            responseCode = mApiClient.sendMessageBatch(message);
+        }catch (MParticleApiClient.MPRampException e) {
+            sampling = true;
+            ConfigManager.log(MParticle.LogLevel.DEBUG, "This device is being sampled.");
+        }
+
+        if (sampling || shouldDelete(responseCode)) {
+            deleteUpload(id);
+        } else {
+            ConfigManager.log(MParticle.LogLevel.WARNING, "Upload failed and will be retried.");
+        }
+    }
+
     /**
      * Delete messages if they're accepted (202), or 4xx, which means we're sending bad data.
      */
     boolean shouldDelete(int statusCode) {
-        return statusCode != MParticleApiClient.HTTP_TOO_MANY_REQUESTS && (202== statusCode ||
+        return statusCode != MParticleApiClient.HTTP_TOO_MANY_REQUESTS && (202 == statusCode ||
                 (statusCode >= 400 && statusCode < 500));
     }
 
