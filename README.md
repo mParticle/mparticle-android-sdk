@@ -56,6 +56,7 @@ Here's the full list of currently supported kits:
 - `com.mparticle:android-appboy-kit:4.+`
 - `com.mparticle:android-branch-kit:4.+`
 - `com.mparticle:android-comscore-kit:4.+`
+- `com.mparticle:android-crittercism-kit:4.+`
 - `com.mparticle:android-flurry-kit:4.+`
 - `com.mparticle:android-kahuna-kit:4.+`
 - `com.mparticle:android-kochava-kit:4.+`
