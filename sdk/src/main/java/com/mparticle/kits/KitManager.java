@@ -30,7 +30,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class KitManager implements MPActivityCallbacks {
+public class KitManager implements MPActivityCallbacks, DeeplinkListener {
     KitFactory ekFactory;
     private ConfigManager mConfigManager;
     private AppStateManager mAppStateManager;
@@ -662,6 +662,26 @@ public class KitManager implements MPActivityCallbacks {
             } catch (Exception e) {
                 ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to call logNetworkPerformance for kit: " + provider.getName() + ": " + e.getMessage());
             }
+        }
+    }
+
+    public void checkForDeeplink() {
+        for (AbstractKit provider : providers.values()) {
+            try {
+                if (!provider.disabled()) {
+                    provider.checkForDeeplinks();
+                }
+            } catch (Exception e) {
+                ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to call checkForDeeplink for kit: " + provider.getName() + ": " + e.getMessage());
+            }
+        }
+    }
+
+    @Override
+    public void onResult(DeeplinkResult result, DeeplinkError error) {
+        DeeplinkListener listener = MParticle.getInstance().getDeepLinkListener();
+        if (listener != null) {
+            listener.onResult(result, error);
         }
     }
 }

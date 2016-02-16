@@ -657,4 +657,8 @@ public abstract class AbstractKit {
     public List<ReportingMessage> logNetworkPerformance(String url, long startTime, String method, long length, long bytesSent, long bytesReceived, String requestString, int responseCode) {
         return null;
     }
+
+    public void checkForDeeplinks() {
+
+    }
 }

@@ -28,6 +28,7 @@ import com.mparticle.internal.MPLocationListener;
 import com.mparticle.internal.MPUtility;
 import com.mparticle.internal.MParticleJSInterface;
 import com.mparticle.internal.MessageManager;
+import com.mparticle.kits.DeeplinkListener;
 import com.mparticle.kits.KitManager;
 import com.mparticle.kits.ReportingManager;
 import com.mparticle.media.MPMediaAPI;
@@ -111,6 +112,7 @@ public class MParticle {
     private MPMediaAPI mMedia;
     private CommerceApi mCommerce;
     private ProductBagApi mProductBags;
+    private volatile DeeplinkListener mDeeplinkListener;
 
     MParticle() {}
 
@@ -670,6 +672,8 @@ public class MParticle {
 
 
 
+
+
     /**
      * Exclude the given URL substring from network measurement tracking. This method may be called repeatedly to add
      * multiple excluded URLs.
@@ -722,6 +726,24 @@ public class MParticle {
         logException(exception, eventData, null);
     }
 
+    public void checkForDeeplink(DeeplinkListener deeplinkListener) {
+        setDeepLinkListener(deeplinkListener);
+        checkForDeeplink();
+    }
+
+    public void checkForDeeplink() {
+        if (mDeeplinkListener != null) {
+            mKitManager.checkForDeeplink();
+        }
+    }
+
+    public void setDeepLinkListener(DeeplinkListener deeplinkListener) {
+        mDeeplinkListener = deeplinkListener;
+    }
+
+    public DeeplinkListener getDeepLinkListener() {
+        return mDeeplinkListener;
+    }
     /**
      * Logs an Exception
      *
