@@ -30,7 +30,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class KitManager implements MPActivityCallbacks, DeeplinkListener {
+public class KitManager implements MPActivityCallbacks, DeepLinkListener {
     KitFactory ekFactory;
     private ConfigManager mConfigManager;
     private AppStateManager mAppStateManager;
@@ -665,11 +665,11 @@ public class KitManager implements MPActivityCallbacks, DeeplinkListener {
         }
     }
 
-    public void checkForDeeplink() {
+    public void checkForDeepLink() {
         for (AbstractKit provider : providers.values()) {
             try {
                 if (!provider.disabled()) {
-                    provider.checkForDeeplinks();
+                    provider.checkForDeepLink();
                 }
             } catch (Exception e) {
                 ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to call checkForDeeplink for kit: " + provider.getName() + ": " + e.getMessage());
@@ -678,10 +678,20 @@ public class KitManager implements MPActivityCallbacks, DeeplinkListener {
     }
 
     @Override
-    public void onResult(DeeplinkResult result, DeeplinkError error) {
-        DeeplinkListener listener = MParticle.getInstance().getDeepLinkListener();
-        if (listener != null) {
-            listener.onResult(result, error);
+    public void onResult(DeepLinkResult result) {
+        DeepLinkListener listener = MParticle.getInstance().getDeepLinkListener();
+        if (listener != null && result != null) {
+            ConfigManager.log(MParticle.LogLevel.DEBUG, "Deep link result returned: \n" + result.toString());
+            listener.onResult(result);
+        }
+    }
+
+    @Override
+    public void onError(DeepLinkError error) {
+        DeepLinkListener listener = MParticle.getInstance().getDeepLinkListener();
+        if (listener != null && error != null) {
+            ConfigManager.log(MParticle.LogLevel.DEBUG, "Deep link error returned: \n" + error.toString());
+            listener.onError(error);
         }
     }
 }

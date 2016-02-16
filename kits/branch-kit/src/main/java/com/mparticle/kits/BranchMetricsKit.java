@@ -137,22 +137,23 @@ public class BranchMetricsKit extends AbstractKit implements ActivityLifecycleFo
     }
 
     @Override
-    public void checkForDeeplinks() {
-        getBranch().initSession(this);
+    public void checkForDeepLink() {
+        Branch.getAutoInstance(context).initSession(this);
     }
 
     @Override
-    public void onInitFinished(JSONObject jsonObject, BranchError branchError) {
-        DeeplinkResult result = null;
-        DeeplinkError error = null;
-        if (jsonObject != null) {
-            result = new DeeplinkResult();
-            result.setParameters(jsonObject);
+    public void onInitFinished(JSONObject jsonResult, BranchError branchError) {
+        if (jsonResult != null) {
+            DeepLinkResult result = new DeepLinkResult()
+                    .setParameters(jsonResult)
+                    .setServiceProviderId(this.getKitId());
+            mEkManager.onResult(result);
         }
         if (branchError != null) {
-            error = new DeeplinkError();
-            error.setMessage(branchError.toString());
+            DeepLinkError error = new DeepLinkError()
+                    .setMessage(branchError.toString())
+                    .setServiceProviderId(this.getKitId());
+            mEkManager.onError(error);
         }
-        mEkManager.onResult(result, error);
     }
 }

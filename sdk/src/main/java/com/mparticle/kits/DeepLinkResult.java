@@ -2,31 +2,51 @@ package com.mparticle.kits;
 
 import org.json.JSONObject;
 
-public class DeeplinkResult {
+/**
+ * Class representing the result of a deep link query to an integration partner.
+ */
+public class DeepLinkResult {
     private JSONObject parameters;
     private int serviceProviderId;
     private String linkUrl = null;
 
-    void setParameters(JSONObject parameters) {
+    DeepLinkResult setParameters(JSONObject parameters) {
         this.parameters = parameters;
+        return this;
     }
 
-    public JSONObject getParameter() {
+    /**
+     * Parameters of a deep link. Use these parameters to programmatically route your users
+     * and customize your interface.
+     *
+     * @return returns a JSONObject, may be null if the integration does not support deep link parameters.
+     */
+    public JSONObject getParameters() {
         return parameters;
     }
 
-    void setLink(String linkUrl) {
+
+    DeepLinkResult setLink(String linkUrl) {
         this.linkUrl = linkUrl;
+        return this;
     }
 
-    public String getLinkUrl() {
+    public String getLink() {
         return this.linkUrl;
     }
 
-    void setServiceProviderId(int id) {
+    DeepLinkResult setServiceProviderId(int id) {
         serviceProviderId = id;
+        return this;
     }
 
+    /**
+     * Get the service provider or integration id associated with this result.
+     *
+     * @see com.mparticle.MParticle.ServiceProviders
+     *
+     * @return the id of the associated integration
+     */
     public int getServiceProviderId() {
         return serviceProviderId;
     }

@@ -163,9 +163,13 @@ public class UploadHandler extends Handler {
                     break;
             }
 
-        }catch (Exception e){
+        } catch (Exception e){
             if (BuildConfig.MP_DEBUG){
                 ConfigManager.log(MParticle.LogLevel.DEBUG, "UploadHandler Exception while handling message");
+            }
+        } catch (VerifyError ve) {
+            if (BuildConfig.MP_DEBUG){
+                ConfigManager.log(MParticle.LogLevel.DEBUG, "UploadHandler VerifyError while handling message");
             }
         }
     }

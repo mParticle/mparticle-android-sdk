@@ -62,6 +62,7 @@ Here's the full list of currently supported kits:
 - `com.mparticle:android-kochava-kit:4.+`
 - `com.mparticle:android-localytics-kit:4.+`
 - `com.mparticle:android-wootric-kit:4.+`
+- `com.mparticle:android-tune-kit:4.+`
 
 ## Proguard
 

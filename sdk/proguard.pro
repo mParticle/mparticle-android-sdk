@@ -17,6 +17,8 @@
 -keep class com.mparticle.MPReceiver { *; }
 -keep class com.mparticle.MPService { *; }
 -keep class com.mparticle.internal.ConfigManager { *; }
+-keep class com.mparticle.internal.MPUtility { *; }
+-keep class com.mparticle.internal.MPUtility$* { *; }
 -keep class com.mparticle.internal.PushRegistrationHelper { *; }
 -keep class com.mparticle.ReferrerReceiver { *; }
 -keep class com.mparticle.internal.CommerceEventUtil { *; }

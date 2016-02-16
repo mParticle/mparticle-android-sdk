@@ -28,7 +28,7 @@ import com.mparticle.internal.MPLocationListener;
 import com.mparticle.internal.MPUtility;
 import com.mparticle.internal.MParticleJSInterface;
 import com.mparticle.internal.MessageManager;
-import com.mparticle.kits.DeeplinkListener;
+import com.mparticle.kits.DeepLinkListener;
 import com.mparticle.kits.KitManager;
 import com.mparticle.kits.ReportingManager;
 import com.mparticle.media.MPMediaAPI;
@@ -112,7 +112,7 @@ public class MParticle {
     private MPMediaAPI mMedia;
     private CommerceApi mCommerce;
     private ProductBagApi mProductBags;
-    private volatile DeeplinkListener mDeeplinkListener;
+    private volatile DeepLinkListener mDeepLinkListener;
 
     MParticle() {}
 
@@ -726,23 +726,40 @@ public class MParticle {
         logException(exception, eventData, null);
     }
 
-    public void checkForDeeplink(DeeplinkListener deeplinkListener) {
-        setDeepLinkListener(deeplinkListener);
-        checkForDeeplink();
+    /**
+     * Query Kits to determine if this user installed and/or opened the app by way
+     * of a deeplink.
+     *
+     * @param deepLinkListener Your deep link listener implementation. Use this to react to the result of the deep link query.
+     */
+    public void checkForDeepLink(DeepLinkListener deepLinkListener) {
+        setDeepLinkListener(deepLinkListener);
+        checkForDeepLink();
     }
 
-    public void checkForDeeplink() {
-        if (mDeeplinkListener != null) {
-            mKitManager.checkForDeeplink();
+    private void checkForDeepLink() {
+        if (mDeepLinkListener != null) {
+            mKitManager.checkForDeepLink();
         }
     }
 
-    public void setDeepLinkListener(DeeplinkListener deeplinkListener) {
-        mDeeplinkListener = deeplinkListener;
+    /**
+     * Set the deep link listener. Call this to set the listener to null once you
+     * have finished querying for deep links.
+     *
+     * @param deepLinkListener
+     */
+    public void setDeepLinkListener(DeepLinkListener deepLinkListener) {
+        mDeepLinkListener = deepLinkListener;
     }
 
-    public DeeplinkListener getDeepLinkListener() {
-        return mDeeplinkListener;
+    /**
+     * Retrieve the current deeplink listener
+     *
+     * @return
+     */
+    public DeepLinkListener getDeepLinkListener() {
+        return mDeepLinkListener;
     }
     /**
      * Logs an Exception
@@ -1640,6 +1657,7 @@ public class MParticle {
         int LOCALYTICS = 84;
         int CRITTERCISM = 86;
         int WOOTRIC = 90;
+        int TUNE = 32;
         String BROADCAST_ACTIVE = "MPARTICLE_SERVICE_PROVIDER_ACTIVE_";
         String BROADCAST_DISABLED = "MPARTICLE_SERVICE_PROVIDER_DISABLED_";
     }

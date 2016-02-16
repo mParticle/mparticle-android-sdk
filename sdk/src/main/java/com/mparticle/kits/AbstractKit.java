@@ -658,7 +658,7 @@ public abstract class AbstractKit {
         return null;
     }
 
-    public void checkForDeeplinks() {
+    public void checkForDeepLink() {
 
     }
 }
