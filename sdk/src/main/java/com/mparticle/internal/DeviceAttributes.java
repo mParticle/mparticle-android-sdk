@@ -122,7 +122,7 @@ import java.util.TimeZone;
      * @return a JSONObject of device-specific attributes
      */
     public static JSONObject collectDeviceInfo(Context appContext) {
-        JSONObject attributes = new JSONObject();
+        final JSONObject attributes = new JSONObject();
 
         try {
             // device/OS attributes
@@ -193,29 +193,26 @@ import java.util.TimeZone;
             attributes.put(MessageKey.DEVICE_ANID, MPUtility.getAndroidID(appContext));
             attributes.put(MessageKey.DEVICE_OPEN_UDID, MPUtility.getOpenUDID(appContext));
 
-            try {
-                Class AdvertisingIdClient = Class
-                        .forName("com.google.android.gms.ads.identifier.AdvertisingIdClient");
-                Method getAdvertisingInfo = AdvertisingIdClient.getMethod("getAdvertisingIdInfo",
-                        Context.class);
-                Object advertisingInfo = getAdvertisingInfo.invoke(null, appContext);
-                Method isLimitAdTrackingEnabled = advertisingInfo.getClass().getMethod(
-                        "isLimitAdTrackingEnabled");
-                Boolean limitAdTrackingEnabled = (Boolean) isLimitAdTrackingEnabled
-                        .invoke(advertisingInfo);
+            MPUtility.getGoogleAdIdInfo(appContext, new MPUtility.GoogleAdIdListener() {
+                @Override
+                public void onGoogleIdInfoRetrieved(String googleAdId, Boolean limitAdTrackingEnabled) {
+                    if (limitAdTrackingEnabled == null) {
+                        ConfigManager.log(MParticle.LogLevel.DEBUG, "Failed to collect Google Play Advertising ID, be sure to add Google Play services or com.google.android.gms:play-services-ads to your app's dependencies.");
+                    }else {
+                        try {
+                            attributes.put(MessageKey.LIMIT_AD_TRACKING, limitAdTrackingEnabled);
+                            if (limitAdTrackingEnabled) {
+                                ConfigManager.log(MParticle.LogLevel.DEBUG, "Google Play Advertising ID available but ad tracking is disabled on this device.");
+                            } else {
+                                attributes.put(MessageKey.GOOGLE_ADV_ID, googleAdId);
+                                ConfigManager.log(MParticle.LogLevel.DEBUG, "Successfully collected Google Play Advertising ID.");
+                            }
+                        }catch (JSONException jse) {
 
-                attributes.put(MessageKey.LIMIT_AD_TRACKING, limitAdTrackingEnabled);
-                if (!limitAdTrackingEnabled) {
-                    Method getId = advertisingInfo.getClass().getMethod("getId");
-                    String advertisingId = (String) getId.invoke(advertisingInfo);
-                    attributes.put(MessageKey.GOOGLE_ADV_ID, advertisingId);
-                    ConfigManager.log(MParticle.LogLevel.DEBUG, "Successfully collected Google Play Advertising ID.");
-                } else {
-                    ConfigManager.log(MParticle.LogLevel.DEBUG, "Google Play Advertising ID available but ad tracking is disabled on this device.");
+                        }
+                    }
                 }
-            }catch (ClassNotFoundException cnfe) {
-                ConfigManager.log(MParticle.LogLevel.DEBUG, "Failed to collect Google Play Advertising ID, be sure to add Google Play services or com.google.android.gms:play-services-ads to your app's dependencies.");
-            }
+            });
 
 
         } catch (Exception e) {

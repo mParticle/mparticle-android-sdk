@@ -35,6 +35,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.util.ArrayList;
@@ -130,6 +132,29 @@ public class MPUtility {
             return true;
         else
             return false;
+    }
+
+    public static void getGoogleAdIdInfo(Context context, GoogleAdIdListener adIdListener) {
+        if (adIdListener != null) {
+            try {
+                Class AdvertisingIdClient = Class
+                        .forName("com.google.android.gms.ads.identifier.AdvertisingIdClient");
+                Method getAdvertisingInfo = AdvertisingIdClient.getMethod("getAdvertisingIdInfo",
+                        Context.class);
+                Object advertisingInfo = getAdvertisingInfo.invoke(null, context);
+                Method isLimitAdTrackingEnabled = advertisingInfo.getClass().getMethod(
+                        "isLimitAdTrackingEnabled");
+                Boolean limitAdTrackingEnabled = (Boolean) isLimitAdTrackingEnabled
+                        .invoke(advertisingInfo);
+                String advertisingId = null;
+                if (!limitAdTrackingEnabled) {
+                    Method getId = advertisingInfo.getClass().getMethod("getId");
+                    advertisingId = (String) getId.invoke(advertisingInfo);
+                }
+                adIdListener.onGoogleIdInfoRetrieved(advertisingId, limitAdTrackingEnabled);
+            } catch (Exception cnfe) {
+            }
+        }
     }
 
     public static String getGpsEnabled(Context context) {
@@ -660,5 +685,9 @@ public class MPUtility {
                 return id;
             }
         }
+    }
+
+    public interface GoogleAdIdListener {
+        void onGoogleIdInfoRetrieved(String googleAdId, Boolean limitAdTrackingEnabled);
     }
 }
