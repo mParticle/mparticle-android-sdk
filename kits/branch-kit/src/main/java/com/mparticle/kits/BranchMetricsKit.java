@@ -13,13 +13,14 @@ import java.util.List;
 import java.util.Map;
 
 import io.branch.referral.Branch;
+import io.branch.referral.BranchError;
 
 /**
  * <p/>
  * Embedded implementation of the Branch Metrics SDK
  * <p/>
  */
-public class BranchMetricsKit extends AbstractKit implements ActivityLifecycleForwarder, ClientSideForwarder {
+public class BranchMetricsKit extends AbstractKit implements ActivityLifecycleForwarder, ClientSideForwarder, Branch.BranchReferralInitListener {
 
     private String BRANCH_APP_KEY = "branchKey";
     private final String FORWARD_SCREEN_VIEWS = "forwardScreenViews";
@@ -133,5 +134,25 @@ public class BranchMetricsKit extends AbstractKit implements ActivityLifecycleFo
         List<ReportingMessage> messageList = new LinkedList<ReportingMessage>();
         messageList.add(ReportingMessage.logoutMessage(this));
         return messageList;
+    }
+
+    @Override
+    public void checkForDeeplinks() {
+        getBranch().initSession(this);
+    }
+
+    @Override
+    public void onInitFinished(JSONObject jsonObject, BranchError branchError) {
+        DeeplinkResult result = null;
+        DeeplinkError error = null;
+        if (jsonObject != null) {
+            result = new DeeplinkResult();
+            result.setParameters(jsonObject);
+        }
+        if (branchError != null) {
+            error = new DeeplinkError();
+            error.setMessage(branchError.toString());
+        }
+        mEkManager.onResult(result, error);
     }
 }
