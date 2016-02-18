@@ -28,9 +28,9 @@ import java.util.concurrent.TimeoutException;
 class SegmentRetriever {
 
     private final SegmentDatabase mAudienceDB;
-    private final IMPApiClient mApiClient;
+    private final MParticleApiClient mApiClient;
 
-    SegmentRetriever(SegmentDatabase audienceDB, IMPApiClient apiClient) {
+    SegmentRetriever(SegmentDatabase audienceDB, MParticleApiClient apiClient) {
         mAudienceDB = audienceDB;
         mApiClient = apiClient;
     }

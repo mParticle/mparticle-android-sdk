@@ -60,7 +60,6 @@ task coreSdkJavadocs(type: Javadoc) {
         source += 'build/generated/source/buildConfig/release/'
         classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
         title = 'mParticle Android SDK API Reference'
-
         failOnError false
         exclude {
             String filePath = it.toString()

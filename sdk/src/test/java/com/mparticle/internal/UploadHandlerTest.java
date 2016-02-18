@@ -8,7 +8,6 @@ import android.os.Message;
 import com.mparticle.mock.MockConfigManager;
 import com.mparticle.mock.MockContext;
 
-import org.hamcrest.Matcher;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
@@ -90,8 +89,8 @@ public class UploadHandlerTest {
     @Test
     public void testRampSampling() throws Exception {
         handler.handleMessage(null);
-        MParticleApiClient apiClient = Mockito.mock(MParticleApiClient.class);
-        MParticleApiClient.MPRampException rampException = new MParticleApiClient.MPRampException();
+        MParticleApiClientImpl apiClient = Mockito.mock(MParticleApiClientImpl.class);
+        MParticleApiClientImpl.MPRampException rampException = new MParticleApiClientImpl.MPRampException();
         Mockito.when(apiClient.sendMessageBatch(Mockito.anyString())).thenThrow(rampException);
         handler.setApiClient(apiClient);
         handler.uploadMessage(522, "");

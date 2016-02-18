@@ -74,7 +74,7 @@ public class UploadHandler extends Handler {
     /**
      * API client interface reference, useful for the unit test suite project.
      */
-    private IMPApiClient mApiClient;
+    private MParticleApiClient mApiClient;
 
     /**
      * Boolean used to determine if we're currently connected to the network. If we're not connected to the network,
@@ -102,7 +102,7 @@ public class UploadHandler extends Handler {
         mPreferences = mContext.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
         mDbHelper = database;
         try {
-            setApiClient(new MParticleApiClient(configManager, mPreferences, context));
+            setApiClient(new MParticleApiClientImpl(configManager, mPreferences, context));
         } catch (MalformedURLException e) {
             //this should never happen - the URLs are created by constants.
         }
@@ -119,7 +119,7 @@ public class UploadHandler extends Handler {
         mPreferences = mContext.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
         mDbHelper = database;
         try {
-            setApiClient(new MParticleApiClient(configManager, mPreferences, context));
+            setApiClient(new MParticleApiClientImpl(configManager, mPreferences, context));
         } catch (MalformedURLException e) {
             //this should never happen - the URLs are created by constants.
         }
@@ -301,7 +301,7 @@ public class UploadHandler extends Handler {
                 }
                 uploadMessage(id, message);
             }
-        } catch (MParticleApiClient.MPThrottleException e) {
+        } catch (MParticleApiClientImpl.MPThrottleException e) {
         } catch (SSLHandshakeException ssle){
             ConfigManager.log(MParticle.LogLevel.DEBUG, "SSL handshake failed while preparing uploads - possible MITM attack detected.");
         } catch (Exception e){
@@ -315,12 +315,12 @@ public class UploadHandler extends Handler {
         return processingSessionEnd;
     }
 
-    void uploadMessage(int id, String message) throws IOException, MParticleApiClient.MPThrottleException {
+    void uploadMessage(int id, String message) throws IOException, MParticleApiClientImpl.MPThrottleException {
         int responseCode = -1;
         boolean sampling = false;
         try {
             responseCode = mApiClient.sendMessageBatch(message);
-        }catch (MParticleApiClient.MPRampException e) {
+        }catch (MParticleApiClientImpl.MPRampException e) {
             sampling = true;
             ConfigManager.log(MParticle.LogLevel.DEBUG, "This device is being sampled.");
         }
@@ -336,7 +336,7 @@ public class UploadHandler extends Handler {
      * Delete messages if they're accepted (202), or 4xx, which means we're sending bad data.
      */
     boolean shouldDelete(int statusCode) {
-        return statusCode != MParticleApiClient.HTTP_TOO_MANY_REQUESTS && (202 == statusCode ||
+        return statusCode != MParticleApiClientImpl.HTTP_TOO_MANY_REQUESTS && (202 == statusCode ||
                 (statusCode >= 400 && statusCode < 500));
     }
 
@@ -467,7 +467,7 @@ public class UploadHandler extends Handler {
     /**
      * Used by the test suite for mocking
      */
-    void setApiClient(IMPApiClient apiClient) {
+    void setApiClient(MParticleApiClient apiClient) {
         mApiClient = apiClient;
     }
 
