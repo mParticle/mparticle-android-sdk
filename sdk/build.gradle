@@ -55,6 +55,21 @@ android {
 
 }
 
+task coreSdkJavadocs(type: Javadoc) {
+        source = android.sourceSets.main.java.srcDirs
+        source += 'build/generated/source/buildConfig/release/'
+        classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+        title = 'mParticle Android SDK API Reference'
+
+        failOnError false
+        exclude {
+            String filePath = it.toString()
+            filePath.contains('/com/mparticle/internal/') ||
+                    filePath.contains('/com/mparticle/kits/')
+        }
+        getOptions().setNoTimestamp(true)
+}
+
 dependencies {
     provided 'com.google.android.gms:play-services-gcm:[7.0,)'
     provided 'com.google.android.gms:play-services-ads:[7.0,)'
