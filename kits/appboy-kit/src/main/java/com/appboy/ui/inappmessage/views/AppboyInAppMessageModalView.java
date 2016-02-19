@@ -40,6 +40,14 @@ public class AppboyInAppMessageModalView extends AppboyInAppMessageImmersiveBase
     }
   }
 
+  public void setModalFrameColor(Integer color) {
+    InAppMessageViewUtils.setModalFrameColor(getModalFrameView(), color);
+  }
+
+  public View getModalFrameView() {
+    return findViewById(R.id.com_appboy_inappmessage_modal_frame);
+  }
+
   @Override
   public void setMessageBackgroundColor(int color) {
     InAppMessageViewUtils.setViewBackgroundColorFilter(findViewById(R.id.com_appboy_inappmessage_modal),
@@ -90,7 +98,7 @@ public class AppboyInAppMessageModalView extends AppboyInAppMessageImmersiveBase
 
   @Override
   public Drawable getMessageBackgroundObject() {
-    return findViewById(R.id.com_appboy_inappmessage_modal).getBackground();
+    return getMessageClickableView().getBackground();
   }
 
   @Override
