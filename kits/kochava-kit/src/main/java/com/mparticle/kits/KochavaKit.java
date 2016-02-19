@@ -113,7 +113,7 @@ public class KochavaKit extends AbstractKit implements ActivityLifecycleForwarde
             if (properties.containsKey(CURRENCY)) {
                 datamap.put(Feature.INPUTITEMS.CURRENCY, properties.get(CURRENCY));
             } else {
-                datamap.put(Feature.INPUTITEMS.CURRENCY, Feature.CURRENCIES.USD);
+                datamap.put(Feature.INPUTITEMS.CURRENCY, "USD");
             }
             datamap.put(Feature.INPUTITEMS.APP_LIMIT_TRACKING, properties.get(LIMIT_ADD_TRACKING));
             datamap.put(Feature.INPUTITEMS.DEBUG_ON, Boolean.parseBoolean(properties.get(ENABLE_LOGGING)));
