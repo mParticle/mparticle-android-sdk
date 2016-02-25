@@ -26,12 +26,12 @@ public class Promotion {
      * The Promotion action constant used to track when a user taps or clicks on a Promotion
      *
      */
-    public static String CLICK = "click";
+    public static final String CLICK = "click";
     /**
      * The Promotion action constant used to track when a user views a Promotion
      *
      */
-    public static String VIEW = "view";
+    public static final String VIEW = "view";
 
     private String mCreative = null;
     private String mId = null;
