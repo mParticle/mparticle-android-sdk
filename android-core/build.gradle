@@ -1,0 +1,85 @@
+ext {
+    kitDescription = 'Core mParticle SDK supporting only server-side integrations.'
+}
+
+apply plugin: 'com.android.library'
+apply from: '../scripts/maven.gradle'
+
+android {
+    compileSdkVersion 23
+    buildToolsVersion "23.0.2"
+
+
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_7
+        targetCompatibility JavaVersion.VERSION_1_7
+    }
+
+    String url = "\"\"";
+    String configurationUrl = "\"\"";
+    try {
+        Properties properties = new Properties()
+        properties.load(project.rootProject.file('local.properties').newDataInputStream())
+        if (properties.stringPropertyNames().contains('mp.url')) {
+            url = properties.getProperty('mp.url')
+        }
+        if (properties.stringPropertyNames().contains('mp.configurl')) {
+            configurationUrl = properties.getProperty('mp.configurl')
+        }
+    }catch (Exception e){
+
+    }
+
+    defaultConfig {
+        minSdkVersion 9
+        targetSdkVersion 23
+        versionName project.version
+        versionCode Integer.parseInt(new Date().format('yyyyMMdd'))
+
+        buildConfigField "String", "MP_URL", url
+        buildConfigField "String", "MP_CONFIG_URL", configurationUrl
+        buildConfigField "Boolean", "MP_DEBUG", "false"
+    }
+
+    buildTypes {
+        debug {
+            minifyEnabled false
+            buildConfigField "Boolean", "MP_DEBUG", "true"
+        }
+        release {
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'),
+                    'proguard.pro'
+
+            consumerProguardFiles 'consumer-proguard.pro'
+            //buildConfigField "Boolean", "MP_DEBUG", "true"
+        }
+    }
+
+}
+
+task coreSdkJavadocs(type: Javadoc) {
+        source = android.sourceSets.main.java.srcDirs
+        source += 'build/generated/source/buildConfig/release/'
+        classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+        title = 'mParticle Android SDK API Reference'
+        failOnError false
+        exclude {
+            String filePath = it.toString()
+            filePath.contains('/com/mparticle/internal/') ||
+                    filePath.contains('/com/mparticle/kits/')
+        }
+        getOptions().setNoTimestamp(true)
+}
+
+dependencies {
+    provided 'com.google.android.gms:play-services-gcm:[7.0,)'
+    provided 'com.google.android.gms:play-services-ads:[7.0,)'
+    testCompile 'junit:junit:4.12'
+    testCompile  files('libs/java-json.jar')
+    testCompile "org.mockito:mockito-core:1.+"
+    testCompile "org.powermock:powermock-module-junit4:1.6.2"
+    testCompile "org.powermock:powermock-api-mockito:1.6.2"
+    testCompile "org.powermock:powermock-core:1.6.2"
+}

@@ -1,7 +1,9 @@
 package com.mparticle.kits;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.os.Bundle;
 import android.text.TextUtils;
 
 import com.appboy.Appboy;
@@ -20,29 +22,23 @@ import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.PushRegistrationHelper;
 import com.mparticle.messaging.MessagingConfigCallbacks;
 
-import org.json.JSONObject;
-
 import java.math.BigDecimal;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 
 /**
- * Embedded version of the AppBoy SDK v 1.7.2
+ * Embedded version of the AppBoy SDK v 1.12.0
  */
-public class AppboyKit extends AbstractKit implements ActivityLifecycleForwarder, PushProvider, MessagingConfigCallbacks, ClientSideForwarder, ECommerceForwarder {
+public class AppboyKit extends KitIntegration implements KitIntegration.PushListener, KitIntegration.EventListener, KitIntegration.CommerceListener, KitIntegration.AttributeListener, KitIntegration.ActivityListener {
     static final String APPBOY_KEY = "apiKey";
-    public static final String PUSH_ENABLED = "push_enabled";
-    boolean started = false;
-    boolean running = false;
-    private boolean pushEnabled;
 
     @Override
-    public Object getInstance(Activity activity) {
-        return Appboy.getInstance(activity);
+    public Object getInstance() {
+        return Appboy.getInstance(getContext());
     }
 
     @Override
@@ -51,51 +47,42 @@ public class AppboyKit extends AbstractKit implements ActivityLifecycleForwarder
     }
 
     @Override
-    public boolean isOriginator(String uri) {
-        return false;
-    }
-
-    @Override
-    protected AbstractKit update() {
-        String key = properties.get(APPBOY_KEY);
-        if (!running && !TextUtils.isEmpty(key)) {
-            Appboy.configure(context, key);
-            running = true;
-        }
-        if (running) {
-            pushEnabled = Boolean.parseBoolean(properties.get(PUSH_ENABLED));
-            if (pushEnabled) {
-                String regId = PushRegistrationHelper.getRegistrationId(context);
-                if (TextUtils.isEmpty(regId)) {
-                    PushRegistrationHelper.enablePushNotifications(context, mEkManager.getConfigurationManager().getPushSenderId(), this);
-                } else {
-                    setPushRegistrationId(regId);
-                }
-            }
-        }
-        return this;
-    }
-
-    @Override
-    public List<ReportingMessage> onActivityCreated(Activity activity, int activityCount) {
+    protected List<ReportingMessage> onKitCreate(Map<String, String> settings, Context context) {
+        String key = getSettings().get(APPBOY_KEY);
+        Appboy.configure(getContext(), key);
         return null;
     }
 
     @Override
-    public boolean isRunning() {
-        return running;
+    public List<ReportingMessage> setOptOut(boolean optedOut) {
+        return null;
     }
 
     @Override
-    public List<ReportingMessage> logEvent(MPEvent event) throws Exception {
+    public List<ReportingMessage> leaveBreadcrumb(String breadcrumb) {
+        return null;
+    }
+
+    @Override
+    public List<ReportingMessage> logError(String message, Map<String, String> errorAttributes) {
+        return null;
+    }
+
+    @Override
+    public List<ReportingMessage> logException(Exception exception, Map<String, String> exceptionAttributes, String message) {
+        return null;
+    }
+
+    @Override
+    public List<ReportingMessage> logEvent(MPEvent event) {
         if (event.getInfo() == null) {
-            Appboy.getInstance(context).logCustomEvent(event.getEventName());
+            Appboy.getInstance(getContext()).logCustomEvent(event.getEventName());
         } else {
             AppboyProperties properties = new AppboyProperties();
             for (Map.Entry<String, String> entry : event.getInfo().entrySet()) {
                 properties.addProperty(entry.getKey(), entry.getValue());
             }
-            Appboy.getInstance(context).logCustomEvent(event.getEventName(), properties);
+            Appboy.getInstance(getContext()).logCustomEvent(event.getEventName(), properties);
         }
         List<ReportingMessage> messages = new LinkedList<ReportingMessage>();
         messages.add(ReportingMessage.fromEvent(this, event));
@@ -103,13 +90,18 @@ public class AppboyKit extends AbstractKit implements ActivityLifecycleForwarder
     }
 
     @Override
-    public List<ReportingMessage> logScreen(String screenName, Map<String, String> eventAttributes) throws Exception {
+    public List<ReportingMessage> logScreen(String screenName, Map<String, String> eventAttributes) {
         return null;
     }
 
 
     @Override
-    public List<ReportingMessage> logEvent(CommerceEvent event) throws Exception {
+    public List<ReportingMessage> logLtvIncrease(BigDecimal valueIncreased, BigDecimal valueTotal, String eventName, Map<String, String> contextInfo) {
+        return null;
+    }
+
+    @Override
+    public List<ReportingMessage> logEvent(CommerceEvent event) {
         List<ReportingMessage> messages = new LinkedList<ReportingMessage>();
         if (!TextUtils.isEmpty(event.getProductAction()) &&
                 event.getProductAction().equalsIgnoreCase(Product.PURCHASE) &&
@@ -136,18 +128,37 @@ public class AppboyKit extends AbstractKit implements ActivityLifecycleForwarder
     }
 
     @Override
-    void removeUserAttribute(String key) {
-        Appboy.getInstance(context).getCurrentUser().unsetCustomUserAttribute(
-                key
-        );
+    public boolean isCommerceSupported() {
+        return true;
     }
 
     @Override
-    void setUserIdentity(String id, MParticle.IdentityType identityType) {
-        AppboyUser user = Appboy.getInstance(context).getCurrentUser();
+    public void removeUserAttribute(String key) {
+        AppboyUser user = Appboy.getInstance(getContext()).getCurrentUser();
+
+        if (UserAttributes.CITY.equals(key)) {
+            user.setHomeCity(null);
+        } else if (UserAttributes.COUNTRY.equals(key)) {
+            user.setCountry(null);
+        } else if (UserAttributes.FIRSTNAME.equals(key)) {
+            user.setFirstName(null);
+        } else if (UserAttributes.GENDER.equals(key)) {
+            user.setGender(null);
+        } else if (UserAttributes.LASTNAME.equals(key)) {
+            user.setLastName(null);
+        } else if (UserAttributes.MOBILE_NUMBER.equals(key)) {
+            user.setPhoneNumber(null);
+        } else {
+            user.unsetCustomUserAttribute(KitUtils.sanitizeAttributeKey(key));
+        }
+    }
+
+    @Override
+    public void setUserIdentity(MParticle.IdentityType identityType, String id) {
+        AppboyUser user = Appboy.getInstance(getContext()).getCurrentUser();
         if (MParticle.IdentityType.CustomerId.equals(identityType)) {
             if (user == null || (user.getUserId() != null && !user.getUserId().equals(id))) {
-                Appboy.getInstance(context).changeUser(id);
+                Appboy.getInstance(getContext()).changeUser(id);
             }
         } else if (MParticle.IdentityType.Email.equals(identityType)) {
             user.setEmail(id);
@@ -155,39 +166,39 @@ public class AppboyKit extends AbstractKit implements ActivityLifecycleForwarder
     }
 
     @Override
-    void setUserAttributes(JSONObject attributes) {
-        AppboyUser user = Appboy.getInstance(context).getCurrentUser();
+    public void removeUserIdentity(MParticle.IdentityType identityType) {
+        //appboy recommends never un-setting identities, until there's a new identity to set.
+    }
 
-        if (attributes != null) {
-            Iterator<String> keys = attributes.keys();
-            while (keys.hasNext()) {
-                String key = keys.next();
-                String value = attributes.optString(key, "");
-                if (UserAttributes.CITY.equals(key)) {
-                    user.setHomeCity(value);
-                } else if (UserAttributes.COUNTRY.equals(key)) {
-                    user.setCountry(value);
-                } else if (UserAttributes.FIRSTNAME.equals(key)) {
-                    user.setFirstName(value);
-                } else if (UserAttributes.GENDER.equals(key)) {
-                    if (value.contains("fe")) {
-                        user.setGender(Gender.FEMALE);
-                    } else {
-                        user.setGender(Gender.MALE);
-                    }
-                } else if (UserAttributes.LASTNAME.equals(key)) {
-                    user.setLastName(value);
-                } else if (UserAttributes.MOBILE_NUMBER.equals(key)) {
-                    user.setPhoneNumber(value);
-                } else {
-                    if (key.startsWith("$")) {
-                        key = key.substring(1);
-                    }
-                    user.setCustomUserAttribute(key, value);
-                }
+    @Override
+    public List<ReportingMessage> logout() {
+        return null;
+    }
+
+    @Override
+    public void setUserAttribute(String key, String value) {
+        AppboyUser user = Appboy.getInstance(getContext()).getCurrentUser();
+        if (UserAttributes.CITY.equals(key)) {
+            user.setHomeCity(value);
+        } else if (UserAttributes.COUNTRY.equals(key)) {
+            user.setCountry(value);
+        } else if (UserAttributes.FIRSTNAME.equals(key)) {
+            user.setFirstName(value);
+        } else if (UserAttributes.GENDER.equals(key)) {
+            if (value.contains("fe")) {
+                user.setGender(Gender.FEMALE);
+            } else {
+                user.setGender(Gender.MALE);
             }
+        } else if (UserAttributes.LASTNAME.equals(key)) {
+            user.setLastName(value);
+        } else if (UserAttributes.MOBILE_NUMBER.equals(key)) {
+            user.setPhoneNumber(value);
+        } else {
+            user.setCustomUserAttribute(KitUtils.sanitizeAttributeKey(key), value);
         }
     }
+
 
     private void logTransaction(CommerceEvent event, Product product) {
         AppboyProperties purchaseProperties = new AppboyProperties();
@@ -202,7 +213,7 @@ public class AppboyKit extends AbstractKit implements ActivityLifecycleForwarder
         for (Map.Entry<String, String> entry : eventAttributes.entrySet()) {
             purchaseProperties.addProperty(entry.getKey(), entry.getValue());
         }
-        Appboy.getInstance(context).logPurchase(
+        Appboy.getInstance(getContext()).logPurchase(
                 product.getSku(),
                 currency,
                 new BigDecimal(product.getUnitPrice()),
@@ -212,46 +223,18 @@ public class AppboyKit extends AbstractKit implements ActivityLifecycleForwarder
     }
 
     @Override
-    public List<ReportingMessage> logLtvIncrease(BigDecimal valueIncreased, String eventName, Map<String, String> contextInfo) {
+    public List<ReportingMessage> onActivityResumed(Activity activity) {
+       return null;
+    }
+
+    @Override
+    public List<ReportingMessage> onActivityPaused(Activity activity) {
         return null;
     }
 
     @Override
-    public List<ReportingMessage> onActivityResumed(Activity activity, int activityCount) {
-        if (!started) {
-            onActivityStarted(activity, activityCount);
-            List<ReportingMessage> messageList = new LinkedList<ReportingMessage>();
-            messageList.add(
-                    new ReportingMessage(this, ReportingMessage.MessageType.APP_STATE_TRANSITION, System.currentTimeMillis(), null)
-            );
-            return messageList;
-        }
-        return null;
-    }
-
-    @Override
-    public List<ReportingMessage> onActivityPaused(Activity activity, int activityCount) {
-        return null;
-    }
-
-    @Override
-    public List<ReportingMessage> onActivityStopped(Activity activity, int activityCount) {
-        if (started) {
-            Appboy.getInstance(activity).closeSession(activity);
-            started = false;
-            List<ReportingMessage> messageList = new LinkedList<ReportingMessage>();
-            messageList.add(
-                    new ReportingMessage(this, ReportingMessage.MessageType.APP_STATE_TRANSITION, System.currentTimeMillis(), null)
-            );
-            return messageList;
-        }
-        return null;
-    }
-
-    @Override
-    public List<ReportingMessage> onActivityStarted(Activity activity, int activityCount) {
-        started = true;
-        Appboy.getInstance(activity).openSession(activity);
+    public List<ReportingMessage> onActivityStopped(Activity activity) {
+        Appboy.getInstance(activity).closeSession(activity);
         List<ReportingMessage> messageList = new LinkedList<ReportingMessage>();
         messageList.add(
                 new ReportingMessage(this, ReportingMessage.MessageType.APP_STATE_TRANSITION, System.currentTimeMillis(), null)
@@ -260,47 +243,47 @@ public class AppboyKit extends AbstractKit implements ActivityLifecycleForwarder
     }
 
     @Override
-    public List<ReportingMessage> handleGcmMessage(Intent intent) {
-        if (AppboyNotificationUtils.isAppboyPushMessage(intent)) {
-            new AppboyGcmReceiver().onReceive(context, intent);
-            List<ReportingMessage> messages = new LinkedList<ReportingMessage>();
-            messages.add(ReportingMessage.fromPushMessage(this, intent));
-            return messages;
-        }
+    public List<ReportingMessage> onActivitySaveInstanceState(Activity activity, Bundle outState) {
         return null;
     }
 
     @Override
-    public void setPushNotificationIcon(int resId) {
-
+    public List<ReportingMessage> onActivityDestroyed(Activity activity) {
+        return null;
     }
 
     @Override
-    public void setPushNotificationTitle(int resId) {
-
+    public List<ReportingMessage> onActivityCreated(Activity activity, Bundle savedInstanceState) {
+        return null;
     }
 
     @Override
-    public void setPushSenderId(String senderId) {
-
-    }
-
-    @Override
-    public void setPushSoundEnabled(boolean enabled) {
-
-    }
-
-    @Override
-    public void setPushVibrationEnabled(boolean enabled) {
-
-    }
-
-    @Override
-    public void setPushRegistrationId(String registrationId) {
-        Appboy.getInstance(context).registerAppboyGcmMessages(registrationId);
+    public List<ReportingMessage> onActivityStarted(Activity activity) {
+        Appboy.getInstance(activity).openSession(activity);
+        List<ReportingMessage> messageList = new LinkedList<ReportingMessage>();
+        messageList.add(
+                new ReportingMessage(this, ReportingMessage.MessageType.APP_STATE_TRANSITION, System.currentTimeMillis(), null)
+        );
+        return messageList;
     }
 
     public Appboy getAppboy() {
-        return Appboy.getInstance(context);
+        return Appboy.getInstance(getContext());
+    }
+
+    @Override
+    public boolean willHandleMessage(Set<String> keyset) {
+        return keyset.contains(com.appboy.Constants.APPBOY_PUSH_APPBOY_KEY);
+    }
+
+    @Override
+    public void onMessageReceived(Context context, Intent pushIntent) {
+        new AppboyGcmReceiver().onReceive(getContext(), pushIntent);
+    }
+
+    @Override
+    public boolean onPushRegistration(String token, String senderId) {
+        Appboy.getInstance(getContext()).registerAppboyGcmMessages(token);
+        return true;
     }
 }

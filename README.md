@@ -59,6 +59,7 @@ Here's the full list of currently supported kits:
 - `com.mparticle:android-comscore-kit:4.+`
 - `com.mparticle:android-crittercism-kit:4.+`
 - `com.mparticle:android-flurry-kit:4.+`
+- `com.mparticle:android-foresee-kit:4.+`
 - `com.mparticle:android-kahuna-kit:4.+`
 - `com.mparticle:android-kochava-kit:4.+`
 - `com.mparticle:android-localytics-kit:4.+`
@@ -114,8 +115,8 @@ Proguard is a minification/optimization/obfuscation tool that's extremely useful
 OK OK, slow down. Grab your mParticle key and secret from [your app's dashboard](https://app.mparticle.com/apps) and add them as `string` resources in your app:
 
 ```xml
-<!-- ex. src/main/res/values/mparticle.xml -->
 <?xml version="1.0" encoding="utf-8" ?>
+<!-- ex. src/main/res/values/mparticle.xml -->
 <resources>
     <string name="mp_key">APP KEY</string>
     <string name="mp_secret">APP SECRET</string>

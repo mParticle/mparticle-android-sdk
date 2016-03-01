@@ -1,19 +1,17 @@
 package com.mparticle.kits;
 
 import android.app.Activity;
+import android.content.Context;
 
 import com.mparticle.MParticle;
-import com.mparticle.internal.ConfigManager;
 import com.wootric.androidsdk.Wootric;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
+import java.lang.ref.WeakReference;
 import java.util.HashMap;
-import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
-public class WootricKit extends AbstractKit {
-    private static final String WOOTRIC_HOST = "wootric.com";
+public class WootricKit extends KitIntegration implements KitIntegration.AttributeListener {
     private static final String CLIENT_ID = "clientId";
     private static final String CLIENT_SECRET = "clientSecret";
     private static final String ACCOUNT_TOKEN = "accountToken";
@@ -25,15 +23,21 @@ public class WootricKit extends AbstractKit {
     Wootric wootric;
 
     @Override
-    public Wootric getInstance(Activity activity) {
-        wootric = Wootric.init(
-                activity,
-                properties.get(CLIENT_ID),
-                properties.get(CLIENT_SECRET),
-                properties.get(ACCOUNT_TOKEN));
+    public Wootric getInstance() {
+        WeakReference<Activity> activityWeakReference = getCurrentActivity();
+        if (activityWeakReference != null) {
+            Activity activity = activityWeakReference.get();
+            if (activity != null) {
+                wootric = Wootric.init(
+                        activity,
+                        getSettings().get(CLIENT_ID),
+                        getSettings().get(CLIENT_SECRET),
+                        getSettings().get(ACCOUNT_TOKEN));
 
-        wootric.setProperties(endUserProperties);
-        setWootricIdentity(wootric);
+                wootric.setProperties(endUserProperties);
+                setWootricIdentity(wootric);
+            }
+        }
 
         return wootric;
     }
@@ -44,17 +48,18 @@ public class WootricKit extends AbstractKit {
     }
 
     @Override
-    public boolean isOriginator(String uri) {
-        return uri != null && uri.toLowerCase().contains(WOOTRIC_HOST);
+    protected List<ReportingMessage> onKitCreate(Map<String, String> settings, Context context) {
+        getInstance();
+        return null;
     }
 
     @Override
-    protected AbstractKit update() {
-        return this;
+    public List<ReportingMessage> setOptOut(boolean optedOut) {
+        return null;
     }
 
     @Override
-    public void setUserIdentity(String id, MParticle.IdentityType identityType) {
+    public void setUserIdentity(MParticle.IdentityType identityType, String id) {
         if(MParticle.IdentityType.Email.equals(identityType)) {
             endUserEmail = id;
         }else if (MParticle.IdentityType.CustomerId.equals(identityType)) {
@@ -65,6 +70,23 @@ public class WootricKit extends AbstractKit {
         }
     }
 
+    @Override
+    public void removeUserIdentity(MParticle.IdentityType identityType) {
+        if(MParticle.IdentityType.Email.equals(identityType)) {
+            endUserEmail = null;
+        }else if (MParticle.IdentityType.CustomerId.equals(identityType)) {
+            endUserCustomerId = null;
+        }
+        if (wootric != null) {
+            setWootricIdentity(wootric);
+        }
+    }
+
+    @Override
+    public List<ReportingMessage> logout() {
+        return null;
+    }
+
     private void setWootricIdentity(Wootric wootric) {
         boolean endUserEmailSet = (endUserEmail != null && !endUserEmail.isEmpty());
         String endUserIdentifier = endUserEmailSet ? endUserEmail : endUserCustomerId;
@@ -72,30 +94,24 @@ public class WootricKit extends AbstractKit {
     }
 
     @Override
-    void setUserAttributes(JSONObject mUserAttributes) {
-        prepareEndUserProperties(mUserAttributes);
+    public void setUserAttribute(String key, String value) {
+        prepareEndUserProperties(key, value);
         if (wootric != null) {
             wootric.setProperties(endUserProperties);
         }
     }
 
-    private void prepareEndUserProperties(JSONObject propertiesJson) {
+    @Override
+    public void removeUserAttribute(String key) {
+        if (wootric != null && endUserProperties != null && endUserProperties.remove(KitUtils.sanitizeAttributeKey(key)) != null) {
+            wootric.setProperties(endUserProperties);
+        }
+    }
+
+    private void prepareEndUserProperties(String key, String value) {
         if(endUserProperties == null) {
             endUserProperties = new HashMap<>();
-        } else {
-            endUserProperties.clear();
         }
-
-        Iterator<String> iterator = propertiesJson.keys();
-        while(iterator.hasNext()) {
-            String key = iterator.next();
-
-            try {
-                String value = propertiesJson.getString(key);
-                endUserProperties.put(key, value);
-            } catch (JSONException e) {
-                ConfigManager.log(MParticle.LogLevel.DEBUG, e.toString());
-            }
-        }
+        endUserProperties.put(KitUtils.sanitizeAttributeKey(key), value);
     }
 }

@@ -1,0 +1,48 @@
+ext {
+    kitDescription = 'mParticle Kit library for extending the Core mParticle SDK.'
+}
+
+apply plugin: 'com.android.library'
+apply from: '../scripts/maven.gradle'
+
+android {
+    compileSdkVersion 23
+    buildToolsVersion "23.0.2"
+
+    defaultConfig {
+        minSdkVersion 9
+        targetSdkVersion 23
+        versionCode 1
+        versionName "1.0"
+    }
+    buildTypes {
+        debug {
+            testCoverageEnabled true
+        }
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+
+task kitSdkJavadocs(type: Javadoc) {
+    source = android.sourceSets.main.java.srcDirs
+    source += 'build/generated/source/buildConfig/release/'
+    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+    title = 'mParticle Android Kit API Reference'
+    failOnError false
+    exclude {
+        String filePath = it.toString()
+        filePath.contains('/com/mparticle/internal/') ||
+                filePath.contains('/com/mparticle/kits/mappings/')
+    }
+    getOptions().setNoTimestamp(true)
+}
+
+dependencies {
+    compile project(':android-core')
+    testCompile 'junit:junit:4.12'
+    testCompile 'org.mockito:mockito-core:1.+'
+    testCompile  files('libs/java-json.jar')
+}

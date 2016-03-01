@@ -2,6 +2,7 @@ package com.mparticle.kits;
 
 import android.app.Activity;
 import android.app.Application;
+import android.content.Context;
 import android.text.TextUtils;
 
 import com.appsflyer.AFInAppEventParameterName;
@@ -9,6 +10,9 @@ import com.appsflyer.AFInAppEventType;
 import com.appsflyer.AppsFlyerConversionListener;
 import com.appsflyer.AppsFlyerLib;
 import com.appsflyer.AppsFlyerProperties;
+import com.mparticle.DeepLinkError;
+import com.mparticle.DeepLinkListener;
+import com.mparticle.DeepLinkResult;
 import com.mparticle.MPEvent;
 import com.mparticle.MParticle;
 import com.mparticle.commerce.CommerceEvent;
@@ -18,6 +22,7 @@ import com.mparticle.internal.ConfigManager;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+
 
 import java.math.BigDecimal;
 import java.util.HashMap;
@@ -29,13 +34,13 @@ import java.util.Map;
 /**
  * Embedded version of the AppsFlyer SDK v 4.3.3
  */
-public class AppsFlyerKit extends AbstractKit implements ECommerceForwarder, AppsFlyerConversionListener {
+public class AppsFlyerKit extends KitIntegration implements KitIntegration.EventListener, KitIntegration.AttributeListener, KitIntegration.CommerceListener, AppsFlyerConversionListener {
 
     private static final String DEV_KEY = "devKey";
 
     @Override
-    public Object getInstance(Activity activity) {
-        return null;
+    public Object getInstance() {
+        return AppsFlyerLib.getInstance();
     }
 
     @Override
@@ -44,19 +49,44 @@ public class AppsFlyerKit extends AbstractKit implements ECommerceForwarder, App
     }
 
     @Override
-    public boolean isOriginator(String uri) {
-        return false;
-    }
-
-    @Override
-    protected AbstractKit update() {
-        AppsFlyerLib.getInstance().startTracking((Application) context.getApplicationContext(), properties.get(DEV_KEY));
+    protected List<ReportingMessage> onKitCreate(Map<String, String> setting, Context context) {
+        AppsFlyerLib.getInstance().startTracking((Application) context.getApplicationContext(), getSettings().get(DEV_KEY));
         AppsFlyerLib.getInstance().setDebugLog(MParticle.getInstance().getEnvironment() == MParticle.Environment.Development);
-        return this;
+        return null;
     }
 
     @Override
-    public List<ReportingMessage> logEvent(CommerceEvent event) throws Exception {
+    public boolean isCommerceSupported() {
+        return true;
+    }
+
+    @Override
+    public List<ReportingMessage> leaveBreadcrumb(String breadcrumb) {
+        return null;
+    }
+
+    @Override
+    public List<ReportingMessage> logError(String message, Map<String, String> eventData) {
+        return null;
+    }
+
+    @Override
+    public List<ReportingMessage> logException(Exception exception, Map<String, String> eventData, String message) {
+        return null;
+    }
+
+    @Override
+    public List<ReportingMessage> logNetworkPerformance(String url, long startTime, String method, long length, long bytesSent, long bytesReceived, String requestString, int responseCode) {
+        return null;
+    }
+
+    @Override
+    public List<ReportingMessage> logLtvIncrease(BigDecimal valueIncreased, BigDecimal valueTotal, String eventName, Map<String, String> contextInfo) {
+        return null;
+    }
+
+    @Override
+    public List<ReportingMessage> logEvent(CommerceEvent event) {
         List<ReportingMessage> messages = new LinkedList<ReportingMessage>();
 
         if (event.getProductAction().equals(Product.ADD_TO_CART)
@@ -84,7 +114,7 @@ public class AppsFlyerKit extends AbstractKit implements ECommerceForwarder, App
                         if (!TextUtils.isEmpty(product.getCategory())) {
                             productEventValues.put(AFInAppEventParameterName.CONTENT_TYPE, product.getCategory());
                         }
-                        AppsFlyerLib.getInstance().trackEvent(context, eventName, productEventValues);
+                        AppsFlyerLib.getInstance().trackEvent(getContext(), eventName, productEventValues);
                         messages.add(ReportingMessage.fromEvent(this, event));
                     }
                 }
@@ -101,7 +131,7 @@ public class AppsFlyerKit extends AbstractKit implements ECommerceForwarder, App
                     String paramName = event.getProductAction().equals(Product.PURCHASE) ? AFInAppEventParameterName.REVENUE : AFInAppEventParameterName.PRICE;
                     eventValues.put(paramName, event.getTransactionAttributes().getRevenue());
                 }
-                AppsFlyerLib.getInstance().trackEvent(context, eventName, eventValues);
+                AppsFlyerLib.getInstance().trackEvent(getContext(), eventName, eventValues);
                 messages.add(ReportingMessage.fromEvent(this, event));
             }
         } else {
@@ -122,26 +152,22 @@ public class AppsFlyerKit extends AbstractKit implements ECommerceForwarder, App
     }
 
     @Override
-    public List<ReportingMessage> logEvent(MPEvent event) throws Exception {
-        AppsFlyerLib.getInstance().trackEvent(context, event.getEventName(), new HashMap<String, Object>(event.getInfo()));
+    public List<ReportingMessage> logEvent(MPEvent event) {
+        AppsFlyerLib.getInstance().trackEvent(getContext(), event.getEventName(), new HashMap<String, Object>(event.getInfo()));
         List<ReportingMessage> messages = new LinkedList<ReportingMessage>();
         messages.add(ReportingMessage.fromEvent(this, event));
         return messages;
     }
 
     @Override
-    public List<ReportingMessage> logScreen(String screenName, Map<String, String> eventAttributes) throws Exception {
+    public List<ReportingMessage> logScreen(String screenName, Map<String, String> eventAttributes) {
         return null;
     }
 
-    @Override
-    public List<ReportingMessage> logLtvIncrease(BigDecimal valueIncreased, String eventName, Map<String, String> contextInfo) {
-        return null;
-    }
 
     @Override
     public void checkForDeepLink() {
-        AppsFlyerLib.getInstance().registerConversionListener(context, this);
+        AppsFlyerLib.getInstance().registerConversionListener(getContext(), this);
     }
 
     @Override
@@ -157,12 +183,36 @@ public class AppsFlyerKit extends AbstractKit implements ECommerceForwarder, App
 
 
     @Override
-    void setUserIdentity(String id, MParticle.IdentityType identityType) {
+    public void setUserAttribute(String attributeKey, String attributeValue) {
+
+    }
+
+    @Override
+    public void removeUserAttribute(String key) {
+
+    }
+
+    @Override
+    public void removeUserIdentity(MParticle.IdentityType identityType) {
         if (MParticle.IdentityType.CustomerId.equals(identityType)) {
-            AppsFlyerLib.getInstance().setCustomerUserId(id);
+            AppsFlyerLib.getInstance().setCustomerUserId("");
         } else if (MParticle.IdentityType.Email.equals(identityType)) {
-            AppsFlyerLib.getInstance().setUserEmails(AppsFlyerProperties.EmailsCryptType.NONE, id);
+            AppsFlyerLib.getInstance().setUserEmails(AppsFlyerProperties.EmailsCryptType.NONE, "");
         }
+    }
+
+    @Override
+    public void setUserIdentity(MParticle.IdentityType identityType, String identity) {
+        if (MParticle.IdentityType.CustomerId.equals(identityType)) {
+            AppsFlyerLib.getInstance().setCustomerUserId(identity);
+        } else if (MParticle.IdentityType.Email.equals(identityType)) {
+            AppsFlyerLib.getInstance().setUserEmails(AppsFlyerProperties.EmailsCryptType.NONE, identity);
+        }
+    }
+
+    @Override
+    public List<ReportingMessage> logout() {
+        return null;
     }
 
     @Override
@@ -177,8 +227,8 @@ public class AppsFlyerKit extends AbstractKit implements ECommerceForwarder, App
             }
             DeepLinkResult result = new DeepLinkResult()
                     .setParameters(jsonResult)
-                    .setServiceProviderId(this.getKitId());
-            mEkManager.onResult(result);
+                    .setServiceProviderId(getConfiguration().getKitId());
+            ((DeepLinkListener)getKitManager()).onResult(result);
         }
     }
 
@@ -187,8 +237,8 @@ public class AppsFlyerKit extends AbstractKit implements ECommerceForwarder, App
         if (!TextUtils.isEmpty(s)) {
             DeepLinkError error = new DeepLinkError()
                     .setMessage(s)
-                    .setServiceProviderId(this.getKitId());
-            mEkManager.onError(error);
+                    .setServiceProviderId(getConfiguration().getKitId());
+            ((DeepLinkListener)getKitManager()).onError(error);
         }
     }
 

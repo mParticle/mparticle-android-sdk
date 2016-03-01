@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -26,24 +27,20 @@ import com.mparticle.commerce.Product;
 import com.mparticle.commerce.TransactionAttributes;
 import com.mparticle.internal.CommerceEventUtil;
 
-import org.json.JSONObject;
-
 import java.math.BigDecimal;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * <p/>
  * Embedded implementation of the Kahuna SDK
  * <p/>
  */
-public class KahunaKit extends AbstractKit implements ActivityLifecycleForwarder, ECommerceForwarder, ClientSideForwarder {
+public class KahunaKit extends KitIntegration implements KitIntegration.CommerceListener, KitIntegration.EventListener, KitIntegration.AttributeListener, KitIntegration.PushListener, KitIntegration.ActivityListener {
 
-    static KahunaPushReceiver sReceiver;
-    boolean initialized = false;
     private static final String KEY_TRANSACTION_DATA = "sendTransactionData";
     private static final String KEY_SECRET_KEY = "secretKey";
     private static final String MPARTICLE_WRAPPER_KEY = "mparticle";
@@ -61,29 +58,7 @@ public class KahunaKit extends AbstractKit implements ActivityLifecycleForwarder
     private static final String KEY_EVENTNAME_ADD_TO_WISHLIST = "defaultAddToWishlistEventName";
     private static final String KEY_EVENTNAME_REMOVE_FROM_WISHLIST = "defaultRemoveFromWishlistEventName";
     private static final String KEY_EVENTNAME_IMPRESSION = "defaultImpressionEventName";
-
-    @Override
-    protected AbstractKit update() {
-        if (!initialized) {
-            Kahuna.getInstance().setDebugMode(MParticle.getInstance().getEnvironment() == MParticle.Environment.Development);
-            if (mEkManager.getConfigurationManager().isPushEnabled()) {
-                // registerForPush(context);
-                Kahuna.getInstance().onAppCreate(context, properties.get(KEY_SECRET_KEY), mEkManager.getConfigurationManager().getPushSenderId());
-                Kahuna.getInstance().disableKahunaGenerateNotifications();
-            } else {
-                Kahuna.getInstance().onAppCreate(context, properties.get(KEY_SECRET_KEY), null);
-            }
-            Kahuna.getInstance().setHybridSDKVersion(MPARTICLE_WRAPPER_KEY, BuildConfig.VERSION_NAME);
-
-            initialized = true;
-            if (!isServiceAvailable(context, KahunaPushService.class)) {
-                Log.e("mParticle SDK", "The Kahuna SDK is enabled for this application, but you have not added <service android:name=\"com.kahuna.sdk.KahunaPushService\" /> to the <application> section in your application's AndroidManifest.xml");
-            }
-        }
-        sendTransactionData = properties.containsKey(KEY_TRANSACTION_DATA) && Boolean.parseBoolean(properties.get(KEY_TRANSACTION_DATA));
-        return this;
-    }
-
+    private HashMap<String, String> kahunaAttributes;
 
     public static boolean isServiceAvailable(Context context, Class<?> service) {
         final PackageManager packageManager = context.getPackageManager();
@@ -97,51 +72,42 @@ public class KahunaKit extends AbstractKit implements ActivityLifecycleForwarder
         return false;
     }
 
-    public void registerForPush() {
-        sReceiver = new KahunaPushReceiver();
-        IntentFilter filter = new IntentFilter();
-        filter.addAction("com.google.android.c2dm.intent.REGISTRATION");
-        filter.addAction("com.google.android.c2dm.intent.RECEIVE");
-        filter.addCategory(context.getPackageName());
-        context.registerReceiver(sReceiver, filter, "com.google.android.c2dm.permission.SEND", null);
-    }
-
     private String getEventName(CommerceEvent event) {
         int eventType = CommerceEventUtil.getEventType(event);
         switch (eventType) {
             case Constants.Commerce.EVENT_TYPE_ADD_TO_CART:
-                return properties.get(KEY_EVENTNAME_ADD_TO_CART);
+                return getSettings().get(KEY_EVENTNAME_ADD_TO_CART);
             case Constants.Commerce.EVENT_TYPE_REMOVE_FROM_CART:
-                return properties.get(KEY_EVENTNAME_REMOVE_FROM_CART);
+                return getSettings().get(KEY_EVENTNAME_REMOVE_FROM_CART);
             case Constants.Commerce.EVENT_TYPE_CHECKOUT:
-                return properties.get(KEY_EVENTNAME_CHECKOUT);
+                return getSettings().get(KEY_EVENTNAME_CHECKOUT);
             case Constants.Commerce.EVENT_TYPE_CHECKOUT_OPTION:
-                return properties.get(KEY_EVENTNAME_CHECKOUT_OPTION);
+                return getSettings().get(KEY_EVENTNAME_CHECKOUT_OPTION);
             case Constants.Commerce.EVENT_TYPE_CLICK:
-                return properties.get(KEY_EVENTNAME_PRODUCT_CLICK);
+                return getSettings().get(KEY_EVENTNAME_PRODUCT_CLICK);
             case Constants.Commerce.EVENT_TYPE_VIEW_DETAIL:
-                return properties.get(KEY_EVENTNAME_VIEW_DETAIL);
+                return getSettings().get(KEY_EVENTNAME_VIEW_DETAIL);
             case Constants.Commerce.EVENT_TYPE_PURCHASE:
-                return properties.get(KEY_EVENTNAME_PURCHASE);
+                return getSettings().get(KEY_EVENTNAME_PURCHASE);
             case Constants.Commerce.EVENT_TYPE_REFUND:
-                return properties.get(KEY_EVENTNAME_REFUND);
+                return getSettings().get(KEY_EVENTNAME_REFUND);
             case Constants.Commerce.EVENT_TYPE_PROMOTION_VIEW:
-                return properties.get(KEY_EVENTNAME_PROMOTION_VIEW);
+                return getSettings().get(KEY_EVENTNAME_PROMOTION_VIEW);
             case Constants.Commerce.EVENT_TYPE_PROMOTION_CLICK:
-                return properties.get(KEY_EVENTNAME_PROMOTION_CLICK);
+                return getSettings().get(KEY_EVENTNAME_PROMOTION_CLICK);
             case Constants.Commerce.EVENT_TYPE_ADD_TO_WISHLIST:
-                return properties.get(KEY_EVENTNAME_ADD_TO_WISHLIST);
+                return getSettings().get(KEY_EVENTNAME_ADD_TO_WISHLIST);
             case Constants.Commerce.EVENT_TYPE_REMOVE_FROM_WISHLIST:
-                return properties.get(KEY_EVENTNAME_REMOVE_FROM_WISHLIST);
+                return getSettings().get(KEY_EVENTNAME_REMOVE_FROM_WISHLIST);
             case Constants.Commerce.EVENT_TYPE_IMPRESSION:
-                return properties.get(KEY_EVENTNAME_IMPRESSION);
+                return getSettings().get(KEY_EVENTNAME_IMPRESSION);
             default:
                 return "Unknown";
         }
     }
 
     @Override
-    public Object getInstance(Activity activity) {
+    public Object getInstance() {
         return Kahuna.getInstance();
     }
 
@@ -151,12 +117,46 @@ public class KahunaKit extends AbstractKit implements ActivityLifecycleForwarder
     }
 
     @Override
-    public boolean isOriginator(String uri) {
-        return uri != null && uri.contains("tap-nexus.appspot.com");
+    protected List<ReportingMessage> onKitCreate(Map<String, String> settings, Context context) {
+        Kahuna.getInstance().setDebugMode(MParticle.getInstance().getEnvironment() == MParticle.Environment.Development);
+        if (getKitManager().getConfigurationManager().isPushEnabled()) {
+            Kahuna.getInstance().onAppCreate(getContext(), getSettings().get(KEY_SECRET_KEY), getKitManager().getConfigurationManager().getPushSenderId());
+            Kahuna.getInstance().disableKahunaGenerateNotifications();
+        } else {
+            Kahuna.getInstance().onAppCreate(getContext(), getSettings().get(KEY_SECRET_KEY), null);
+        }
+        Kahuna.getInstance().setHybridSDKVersion(MPARTICLE_WRAPPER_KEY, BuildConfig.VERSION_NAME);
+
+        if (!isServiceAvailable(getContext(), KahunaPushService.class)) {
+            Log.e("mParticle SDK", "The Kahuna SDK is enabled for this application, but you have not added <service android:name=\"com.kahuna.sdk.KahunaPushService\" /> to the <application> section in your application's AndroidManifest.xml");
+        }
+
+        sendTransactionData = getSettings().containsKey(KEY_TRANSACTION_DATA) && Boolean.parseBoolean(getSettings().get(KEY_TRANSACTION_DATA));
+        return null;
     }
 
     @Override
-    public List<ReportingMessage> logEvent(MPEvent event) throws Exception {
+    public List<ReportingMessage> setOptOut(boolean optedOut) {
+        return null;
+    }
+
+    @Override
+    public List<ReportingMessage> leaveBreadcrumb(String breadcrumb) {
+        return null;
+    }
+
+    @Override
+    public List<ReportingMessage> logError(String message, Map<String, String> errorAttributes) {
+        return null;
+    }
+
+    @Override
+    public List<ReportingMessage> logException(Exception exception, Map<String, String> exceptionAttributes, String message) {
+        return null;
+    }
+
+    @Override
+    public List<ReportingMessage> logEvent(MPEvent event) {
         if (!TextUtils.isEmpty(event.getEventName())) {
             List<ReportingMessage> messages = new LinkedList<ReportingMessage>();
             Map<String, String> eventAttributes = event.getInfo();
@@ -183,7 +183,7 @@ public class KahunaKit extends AbstractKit implements ActivityLifecycleForwarder
     }
 
     @Override
-    public List<ReportingMessage> logLtvIncrease(BigDecimal valueIncreased, String eventName, Map<String, String> contextInfo) {
+    public List<ReportingMessage> logLtvIncrease(BigDecimal valueIncreased, BigDecimal totalValue, String eventName, Map<String, String> contextInfo) {
         if (sendTransactionData) {
             Double revenue = valueIncreased.doubleValue() * 100;
             trackKahunaEvent(eventName, 1, revenue.intValue(), null);
@@ -197,41 +197,19 @@ public class KahunaKit extends AbstractKit implements ActivityLifecycleForwarder
     }
 
     @Override
-    public List<ReportingMessage> logScreen(String screenName, Map<String, String> eventAttributes) throws Exception {
+    public List<ReportingMessage> logScreen(String screenName, Map<String, String> eventAttributes) {
         return null;
     }
 
     @Override
-    public void setLocation(Location location) {
-
-    }
-
-    @Override
-    public void setUserAttributes(JSONObject attributes) {
-        Map<String, String> kahunaAttributes = null;
-        if (attributes != null) {
-            Iterator<String> keys = attributes.keys();
-            while (keys.hasNext()) {
-                String key = keys.next();
-                String value = attributes.optString(key, "");
-                if (kahunaAttributes == null) {
-                    kahunaAttributes = new HashMap<String, String>(attributes.length());
-                }
-                kahunaAttributes.put(convertMpKeyToKahuna(key), value);
-            }
+    public void setUserAttribute(String key, String value) {
+        if (kahunaAttributes == null) {
+            kahunaAttributes = new HashMap<String, String>();
         }
-        if (kahunaAttributes != null) {
-            Kahuna.getInstance().setUserAttributes(kahunaAttributes);
-        }
-    }
+        kahunaAttributes.put(convertMpKeyToKahuna(key), value);
 
-    private void setUserAttributes(Map<String, String> attributes) {
-        if (attributes != null) {
-            HashMap<String, String> kahunaAttributes = new HashMap<String, String>(attributes.size());
-            for (Map.Entry<String, String> entry : attributes.entrySet()) {
-                kahunaAttributes.put(convertMpKeyToKahuna(entry.getKey()), entry.getValue());
-            }
-        }
+        Kahuna.getInstance().setUserAttributes(kahunaAttributes);
+
     }
 
     private static String convertMpKeyToKahuna(String key) {
@@ -242,17 +220,19 @@ public class KahunaKit extends AbstractKit implements ActivityLifecycleForwarder
         } else if (key.equals(MParticle.UserAttributes.GENDER)) {
             return KahunaUserAttributesKeys.GENDER_KEY;
         } else {
-            return key;
+            return KitUtils.sanitizeAttributeKey(key);
         }
     }
 
     @Override
     public void removeUserAttribute(String key) {
-
+        if (kahunaAttributes != null && kahunaAttributes.remove(convertMpKeyToKahuna(key)) != null) {
+            Kahuna.getInstance().setUserAttributes(kahunaAttributes);
+        }
     }
 
     @Override
-    public void setUserIdentity(String id, MParticle.IdentityType identityType) {
+    public void setUserIdentity(MParticle.IdentityType identityType, String identity) {
         String kahunaKey;
         switch (identityType) {
             case Facebook:
@@ -287,7 +267,7 @@ public class KahunaKit extends AbstractKit implements ActivityLifecycleForwarder
 
         }
         IKahunaUserCredentials newCreds = Kahuna.getInstance().getUserCredentials();
-        newCreds.add(kahunaKey, id);
+        newCreds.add(kahunaKey, identity);
         try {
             Kahuna.getInstance().login(newCreds);
         } catch (EmptyCredentialsException e) {
@@ -296,44 +276,12 @@ public class KahunaKit extends AbstractKit implements ActivityLifecycleForwarder
     }
 
     @Override
-    public void removeUserIdentity(String id) {
+    public void removeUserIdentity(MParticle.IdentityType id) {
 
     }
 
     @Override
-    public List<ReportingMessage> handleIntent(Intent intent) {
-        List<ReportingMessage> messageList = new LinkedList<ReportingMessage>();
-        String action = intent.getAction();
-        if (action.equals("com.google.android.c2dm.intent.REGISTRATION")) {
-            if (KahunaKit.sReceiver == null) {
-                registerForPush();
-                intent.putExtra(MPReceiver.MPARTICLE_IGNORE, true);
-                context.sendBroadcast(intent);
-                messageList.add(ReportingMessage.fromPushRegistrationMessage(this, intent));
-            }
-        } else if (action.equals("com.google.android.c2dm.intent.RECEIVE")) {
-            if (KahunaKit.sReceiver == null) {
-                registerForPush();
-                intent.putExtra(MPReceiver.MPARTICLE_IGNORE, true);
-                context.sendBroadcast(intent);
-                messageList.add(ReportingMessage.fromPushMessage(this, intent));
-            }
-        }
-        return messageList;
-    }
-
-    @Override
-    public void startSession() {
-
-    }
-
-    @Override
-    public void endSession() {
-
-    }
-
-    @Override
-    List<ReportingMessage> logout() {
+    public List<ReportingMessage> logout() {
         Kahuna.getInstance().logout();
         List<ReportingMessage> messageList = new LinkedList<ReportingMessage>();
         messageList.add(ReportingMessage.logoutMessage(this));
@@ -341,24 +289,12 @@ public class KahunaKit extends AbstractKit implements ActivityLifecycleForwarder
     }
 
     @Override
-    public List<ReportingMessage> onActivityCreated(Activity activity, int activityCount) {
-        update();
+    public List<ReportingMessage> onActivityCreated(Activity activity, Bundle savedInstanceState) {
         return null;
     }
 
     @Override
-    public List<ReportingMessage> onActivityResumed(Activity activity, int activityCount) {
-        return null;
-    }
-
-    @Override
-    public List<ReportingMessage> onActivityPaused(Activity activity, int activityCount) {
-        return null;
-    }
-
-    @Override
-    public List<ReportingMessage> onActivityStopped(Activity activity, int activityCount) {
-        update();
+    public List<ReportingMessage> onActivityStopped(Activity activity) {
         Kahuna.getInstance().stop();
         List<ReportingMessage> messageList = new LinkedList<ReportingMessage>();
         messageList.add(
@@ -368,8 +304,17 @@ public class KahunaKit extends AbstractKit implements ActivityLifecycleForwarder
     }
 
     @Override
-    public List<ReportingMessage> onActivityStarted(Activity activity, int activityCount) {
-        update();
+    public List<ReportingMessage> onActivitySaveInstanceState(Activity activity, Bundle outState) {
+        return null;
+    }
+
+    @Override
+    public List<ReportingMessage> onActivityDestroyed(Activity activity) {
+        return null;
+    }
+
+    @Override
+    public List<ReportingMessage> onActivityStarted(Activity activity) {
         Kahuna.getInstance().start();
         List<ReportingMessage> messageList = new LinkedList<ReportingMessage>();
         messageList.add(
@@ -379,7 +324,17 @@ public class KahunaKit extends AbstractKit implements ActivityLifecycleForwarder
     }
 
     @Override
-    public List<ReportingMessage> logEvent(CommerceEvent event) throws Exception {
+    public List<ReportingMessage> onActivityResumed(Activity activity) {
+        return null;
+    }
+
+    @Override
+    public List<ReportingMessage> onActivityPaused(Activity activity) {
+        return null;
+    }
+
+    @Override
+    public List<ReportingMessage> logEvent(CommerceEvent event) {
         String eventName = event.getEventName();
         if (TextUtils.isEmpty(eventName)) {
             eventName = getEventName(event);
@@ -414,6 +369,11 @@ public class KahunaKit extends AbstractKit implements ActivityLifecycleForwarder
         return messages;
     }
 
+    @Override
+    public boolean isCommerceSupported() {
+        return false;
+    }
+
     private void trackKahunaEvent(String name, Integer count, Integer value, Map<String, String> eventAttributes) {
         EventBuilder eb = new EventBuilder(name);
         if(eventAttributes != null && eventAttributes.size() > 0) {
@@ -425,5 +385,24 @@ public class KahunaKit extends AbstractKit implements ActivityLifecycleForwarder
             eb.setPurchaseData(count.intValue(), value.intValue());
         }
         Kahuna.getInstance().track(eb.build());
+    }
+
+    @Override
+    public boolean willHandleMessage(Set<String> keyset) {
+        return false;
+    }
+
+    @Override
+    public void onMessageReceived(Context context, Intent pushIntent) {
+        new KahunaPushReceiver().onReceive(context, pushIntent);
+    }
+
+    @Override
+    public boolean onPushRegistration(String token, String senderId) {
+        Intent intent = new Intent("com.google.android.c2dm.intent.REGISTRATION");
+        Bundle extras = new Bundle();
+        extras.putString("registration_id", token);
+        new KahunaPushReceiver().onReceive(getContext(), intent);
+        return true;
     }
 }

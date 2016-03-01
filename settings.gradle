@@ -1,9 +1,6 @@
-include (
-        ':sdk'
-)
-project(':sdk').name = 'android-core'
+include ':android-core'
 
-include (
+include(':android-kit-base',
         ':kits:kahuna-kit',
         ':kits:adjust-kit',
         ':kits:comscore-kit',
@@ -16,14 +13,16 @@ include (
         ':kits:crittercism-kit',
         ':kits:tune-kit',
         ':kits:appsflyer-kit',
-        ':kits:apptentive-kit'
+        ':kits:apptentive-kit',
         ':kits:appsflyer-kit',
+        ':kits:foresee-kit'
 )
+
 project(':kits').getChildren().each {
     proj -> proj.name = 'android-' + proj.name
 }
 
-include (
+include(
         ':kits:all-kits'
 )
 project(':kits:all-kits').name = 'android-sdk'

@@ -1,6 +1,7 @@
 package com.mparticle.kits;
 
 import android.app.Activity;
+import android.content.Context;
 
 import com.crittercism.app.Crittercism;
 import com.crittercism.app.CrittercismConfig;
@@ -11,6 +12,7 @@ import com.mparticle.commerce.Product;
 import com.mparticle.internal.CommerceEventUtil;
 import com.mparticle.internal.ConfigManager;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.math.BigDecimal;
@@ -24,15 +26,11 @@ import java.util.Map;
 /**
  * Crittercism Kit for version 5.5.x of the Crittercism SDK.
  */
-public class CrittercismKit extends AbstractKit implements ECommerceForwarder, ClientSideForwarder{
+public class CrittercismKit extends KitIntegration implements KitIntegration.CommerceListener, KitIntegration.EventListener, KitIntegration.AttributeListener {
 
     private static final String APP_ID = "appid";
     private static final String SERVICE_MONITORING = "service_monitoring_enabled";
-
-    @Override
-    public Object getInstance(Activity activity) {
-        return null;
-    }
+    private JSONObject mUserAttributes;
 
     @Override
     public String getName() {
@@ -40,21 +38,17 @@ public class CrittercismKit extends AbstractKit implements ECommerceForwarder, C
     }
 
     @Override
-    public boolean isOriginator(String uri) {
-        return uri.contains("crittercism") ||
-                uri.contains("crit-ci.com") ||
-                uri.contains("crit-staging.com");
-    }
-
-    @Override
-    protected AbstractKit update() {
+    protected List<ReportingMessage> onKitCreate(Map<String, String> settings, Context context) {
+        if (mUserAttributes == null) {
+            mUserAttributes = new JSONObject();
+        }
         if (MParticle.getInstance().getEnvironment() == MParticle.Environment.Development) {
             Crittercism.setLoggingLevel(Crittercism.LoggingLevel.Info);
         }
         CrittercismConfig config = new CrittercismConfig();
-        config.setServiceMonitoringEnabled(Boolean.parseBoolean(properties.get(SERVICE_MONITORING)));
-        Crittercism.initialize(context, properties.get(APP_ID), config);
-        return this;
+        config.setServiceMonitoringEnabled(Boolean.parseBoolean(getSettings().get(SERVICE_MONITORING)));
+        Crittercism.initialize(getContext(), getSettings().get(APP_ID), config);
+        return null;
     }
 
     @Override
@@ -66,7 +60,17 @@ public class CrittercismKit extends AbstractKit implements ECommerceForwarder, C
     }
 
     @Override
-    public List<ReportingMessage> logEvent(CommerceEvent event) throws Exception {
+    public List<ReportingMessage> logError(String message, Map<String, String> errorAttributes) {
+        return null;
+    }
+
+    @Override
+    public List<ReportingMessage> logLtvIncrease(BigDecimal valueIncreased, BigDecimal valueTotal, String eventName, Map<String, String> contextInfo) {
+        return null;
+    }
+
+    @Override
+    public List<ReportingMessage> logEvent(CommerceEvent event) {
         if (event.getProductAction().equals(Product.PURCHASE) || event.getProductAction().equals(Product.REFUND)) {
             Crittercism.beginTransaction(event.getProductAction());
             Crittercism.setTransactionValue(event.getProductAction(), (int) (event.getTransactionAttributes().getRevenue() * 100));
@@ -87,14 +91,42 @@ public class CrittercismKit extends AbstractKit implements ECommerceForwarder, C
     }
 
     @Override
-    void setUserIdentity(String id, MParticle.IdentityType identityType) {
+    public boolean isCommerceSupported() {
+        return false;
+    }
+
+    @Override
+    public void setUserIdentity(MParticle.IdentityType identityType, String identity) {
         if (MParticle.IdentityType.CustomerId.equals(identityType)) {
-            Crittercism.setUsername(id);
+            Crittercism.setUsername(identity);
         }
     }
 
     @Override
-    void setUserAttributes(JSONObject mUserAttributes) {
+    public void removeUserIdentity(MParticle.IdentityType identityType) {
+        if (MParticle.IdentityType.CustomerId.equals(identityType)) {
+            Crittercism.setUsername("");
+        }
+    }
+
+    @Override
+    public List<ReportingMessage> logout() {
+        return null;
+    }
+
+    @Override
+    public void setUserAttribute(String key, String value) {
+        try {
+            mUserAttributes.put(KitUtils.sanitizeAttributeKey(key), value);
+        } catch (JSONException e) {
+
+        }
+        Crittercism.setMetadata(mUserAttributes);
+    }
+
+    @Override
+    public void removeUserAttribute(String key) {
+        mUserAttributes.remove(KitUtils.sanitizeAttributeKey(key));
         Crittercism.setMetadata(mUserAttributes);
     }
 
@@ -105,20 +137,15 @@ public class CrittercismKit extends AbstractKit implements ECommerceForwarder, C
     }
 
     @Override
-    public List<ReportingMessage> logEvent(MPEvent event) throws Exception {
+    public List<ReportingMessage> logEvent(MPEvent event) {
         Crittercism.leaveBreadcrumb(event.getEventName());
         return Arrays.asList(ReportingMessage.fromEvent(this, event));
     }
 
     @Override
-    public List<ReportingMessage> logScreen(String screenName, Map<String, String> eventAttributes) throws Exception {
+    public List<ReportingMessage> logScreen(String screenName, Map<String, String> eventAttributes) {
         Crittercism.leaveBreadcrumb(screenName);
         return Arrays.asList(new ReportingMessage(this, ReportingMessage.MessageType.SCREEN_VIEW, System.currentTimeMillis(), null).setScreenName(screenName));
-    }
-
-    @Override
-    public List<ReportingMessage> logLtvIncrease(BigDecimal valueIncreased, String eventName, Map<String, String> contextInfo) {
-        return null;
     }
 
     @Override

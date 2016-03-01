@@ -1,6 +1,6 @@
 package com.mparticle.kits;
 
-import android.app.Activity;
+import android.content.Context;
 import android.location.Location;
 
 import com.kochava.android.tracker.Feature;
@@ -11,7 +11,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-public class KochavaKit extends AbstractKit implements ActivityLifecycleForwarder {
+public class KochavaKit extends KitIntegration implements KitIntegration.AttributeListener {
+
     private static final String APP_ID = "appId";
     private static final String USE_CUSTOMER_ID = "useCustomerId";
     private static final String INCLUDE_ALL_IDS = "passAllOtherIdentities";
@@ -19,21 +20,10 @@ public class KochavaKit extends AbstractKit implements ActivityLifecycleForwarde
     private static final String RETRIEVE_ATT_DATA = "retrieveAttributionData";
     private static final String ENABLE_LOGGING = "enableLogging";
     private static final String CURRENCY = "currency";
-    private static final String HOST = "kochava.com";
     private Feature feature;
 
     @Override
-    protected AbstractKit update() {
-        if (feature != null) {
-            feature.setAppLimitTracking(Boolean.parseBoolean(properties.get(LIMIT_ADD_TRACKING)));
-            Feature.setErrorDebug(Boolean.parseBoolean(properties.get(ENABLE_LOGGING)));
-        }
-
-        return this;
-    }
-
-    @Override
-    public Object getInstance(Activity activity) {
+    public Object getInstance() {
         return feature;
     }
 
@@ -43,8 +33,13 @@ public class KochavaKit extends AbstractKit implements ActivityLifecycleForwarde
     }
 
     @Override
-    public boolean isOriginator(String uri) {
-        return uri != null && uri.toLowerCase().contains(HOST);
+    protected List<ReportingMessage> onKitCreate(Map<String, String> settings, Context context) {
+        createKochava();
+        if (feature != null) {
+            feature.setAppLimitTracking(Boolean.parseBoolean(getSettings().get(LIMIT_ADD_TRACKING)));
+            Feature.setErrorDebug(Boolean.parseBoolean(getSettings().get(ENABLE_LOGGING)));
+        }
+        return null;
     }
 
     @Override
@@ -57,17 +52,27 @@ public class KochavaKit extends AbstractKit implements ActivityLifecycleForwarde
     }
 
     @Override
-    public void setUserIdentity(String id, MParticle.IdentityType identityType) {
+    public void setUserAttribute(String attributeKey, String attributeValue) {
+
+    }
+
+    @Override
+    public void removeUserAttribute(String key) {
+
+    }
+
+    @Override
+    public void setUserIdentity(MParticle.IdentityType identityType, String id) {
         if (feature != null) {
             if (identityType == MParticle.IdentityType.CustomerId) {
-                if (!properties.containsKey(USE_CUSTOMER_ID) ||
-                        Boolean.parseBoolean(properties.get(USE_CUSTOMER_ID))) {
+                if (!getSettings().containsKey(USE_CUSTOMER_ID) ||
+                        Boolean.parseBoolean(getSettings().get(USE_CUSTOMER_ID))) {
                     Map<String, String> map = new HashMap<String, String>(1);
                     map.put(identityType.name(), id);
                     feature.linkIdentity(map);
                 }
             } else {
-                if (Boolean.parseBoolean(properties.get(INCLUDE_ALL_IDS))) {
+                if (Boolean.parseBoolean(getSettings().get(INCLUDE_ALL_IDS))) {
                     Map<String, String> map = new HashMap<String, String>(1);
                     map.put(identityType.name(), id);
                     feature.linkIdentity(map);
@@ -76,49 +81,29 @@ public class KochavaKit extends AbstractKit implements ActivityLifecycleForwarde
         }
     }
 
-
     @Override
-    public List<ReportingMessage> onActivityCreated(Activity activity, int activityCount) {
-        createKochava(activity);
-        return null;
+    public void removeUserIdentity(MParticle.IdentityType identityType) {
+
     }
 
     @Override
-    public List<ReportingMessage> onActivityResumed(Activity activity, int activityCount) {
-        createKochava(activity);
+    public List<ReportingMessage> logout() {
         return null;
     }
 
-    @Override
-    public List<ReportingMessage> onActivityPaused(Activity activity, int activityCount) {
-        return null;
-    }
-
-    @Override
-    public List<ReportingMessage> onActivityStopped(Activity activity, int activityCount) {
-        feature = null;
-        return null;
-    }
-
-    @Override
-    public List<ReportingMessage> onActivityStarted(Activity activity, int activityCount) {
-        createKochava(activity);
-        return null;
-    }
-
-    private void createKochava(Activity activity) {
+    private void createKochava() {
         if (feature == null) {
             HashMap<String, Object> datamap = new HashMap<String, Object>();
-            datamap.put(Feature.INPUTITEMS.KOCHAVA_APP_ID, properties.get(APP_ID));
-            if (properties.containsKey(CURRENCY)) {
-                datamap.put(Feature.INPUTITEMS.CURRENCY, properties.get(CURRENCY));
+            datamap.put(Feature.INPUTITEMS.KOCHAVA_APP_ID, getSettings().get(APP_ID));
+            if (getSettings().containsKey(CURRENCY)) {
+                datamap.put(Feature.INPUTITEMS.CURRENCY, getSettings().get(CURRENCY));
             } else {
                 datamap.put(Feature.INPUTITEMS.CURRENCY, "USD");
             }
-            datamap.put(Feature.INPUTITEMS.APP_LIMIT_TRACKING, properties.get(LIMIT_ADD_TRACKING));
-            datamap.put(Feature.INPUTITEMS.DEBUG_ON, Boolean.parseBoolean(properties.get(ENABLE_LOGGING)));
-            datamap.put(Feature.INPUTITEMS.REQUEST_ATTRIBUTION, Boolean.parseBoolean(properties.get(RETRIEVE_ATT_DATA)));
-            feature = new Feature(activity, datamap);
+            datamap.put(Feature.INPUTITEMS.APP_LIMIT_TRACKING, getSettings().get(LIMIT_ADD_TRACKING));
+            datamap.put(Feature.INPUTITEMS.DEBUG_ON, Boolean.parseBoolean(getSettings().get(ENABLE_LOGGING)));
+            datamap.put(Feature.INPUTITEMS.REQUEST_ATTRIBUTION, Boolean.parseBoolean(getSettings().get(RETRIEVE_ATT_DATA)));
+            feature = new Feature(getContext(), datamap);
 
         }
     }

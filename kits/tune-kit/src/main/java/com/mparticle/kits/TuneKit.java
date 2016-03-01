@@ -1,13 +1,19 @@
 package com.mparticle.kits;
 
 import android.app.Activity;
+import android.content.Context;
 import android.text.TextUtils;
 
+import com.mparticle.DeepLinkError;
+import com.mparticle.DeepLinkListener;
+import com.mparticle.DeepLinkResult;
 import com.mparticle.kits.mobileapptracker.MATDeeplinkListener;
 import com.mparticle.kits.mobileapptracker.MATDeferredDplinkr;
 import com.mparticle.kits.mobileapptracker.MATUrlRequester;
 import com.mparticle.kits.mobileapptracker.MATUtils;
 
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -15,7 +21,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * does not actually wrap the full Tune SDK - only a small subset of classes required to query the Tune server
  * for deep links that match the given user.
  */
-public class TuneKit extends AbstractKit implements MATDeeplinkListener {
+public class TuneKit extends KitIntegration implements MATDeeplinkListener {
 
     private static final String SETTING_ADVERTISER_ID = "advertiserId";
     private static final String SETTING_CONVERSION_KEY = "conversionKey";
@@ -27,33 +33,28 @@ public class TuneKit extends AbstractKit implements MATDeeplinkListener {
     private AtomicBoolean listenerWaiting = new AtomicBoolean(false);
 
     @Override
-    public Object getInstance(Activity activity) {
-        return null;
-    }
-
-    @Override
     public String getName() {
         return "Tune";
     }
 
     @Override
-    public boolean isOriginator(String uri) {
-        return uri.contains("mobileapptracking.com");
-    }
-
-    @Override
-    protected AbstractKit update() {
-        if (MATUtils.firstInstall(context)) {
-            settingAdvertiserId = properties.get(SETTING_ADVERTISER_ID);
-            settingConversionKey = properties.get(SETTING_CONVERSION_KEY);
-            packageName = properties.get(SETTING_PACKAGE_NAME_OVERRIDE);
+    protected List<ReportingMessage> onKitCreate(Map<String, String> settings, Context context) {
+        if (MATUtils.firstInstall(getContext())) {
+            settingAdvertiserId = getSettings().get(SETTING_ADVERTISER_ID);
+            settingConversionKey = getSettings().get(SETTING_CONVERSION_KEY);
+            packageName = getSettings().get(SETTING_PACKAGE_NAME_OVERRIDE);
             if (TextUtils.isEmpty(packageName)) {
-                packageName = context.getPackageName();
+                packageName = getContext().getPackageName();
             }
             deepLinker = MATDeferredDplinkr.initialize(settingAdvertiserId, settingConversionKey, packageName);
             deepLinker.setListener(this);
         }
-        return this;
+        return null;
+    }
+
+    @Override
+    public List<ReportingMessage> setOptOut(boolean optedOut) {
+        return null;
     }
 
     public void setUserAgent(String userAgent) {
@@ -70,9 +71,9 @@ public class TuneKit extends AbstractKit implements MATDeeplinkListener {
         if (deepLinker != null) {
             listenerWaiting.set(true);
             if (deepLinker.getUserAgent() == null) {
-                MATUtils.calculateUserAgent(context, this);
+                MATUtils.calculateUserAgent(getContext(), this);
             } else {
-                deepLinker.checkForDeferredDeeplink(context, new MATUrlRequester());
+                deepLinker.checkForDeferredDeeplink(getContext(), new MATUrlRequester());
             }
         }
     }
@@ -82,8 +83,8 @@ public class TuneKit extends AbstractKit implements MATDeeplinkListener {
         listenerWaiting.set(false);
         DeepLinkResult result = new DeepLinkResult()
                 .setLink(deeplink)
-                .setServiceProviderId(this.getKitId());
-        mEkManager.onResult(result);
+                .setServiceProviderId(getConfiguration().getKitId());
+        ((DeepLinkListener)getKitManager()).onResult(result);
     }
 
     @Override
@@ -91,7 +92,7 @@ public class TuneKit extends AbstractKit implements MATDeeplinkListener {
         listenerWaiting.set(false);
         DeepLinkError deepLinkError = new DeepLinkError()
                 .setMessage(error)
-                .setServiceProviderId(this.getKitId());
-        mEkManager.onError(deepLinkError);
+                .setServiceProviderId(getConfiguration().getKitId());
+        ((DeepLinkListener)getKitManager()).onError(deepLinkError);
     }
 }

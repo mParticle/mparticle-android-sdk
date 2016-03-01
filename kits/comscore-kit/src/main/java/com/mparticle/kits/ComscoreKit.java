@@ -1,17 +1,15 @@
 package com.mparticle.kits;
 
 import android.app.Activity;
+import android.content.Context;
+import android.os.Bundle;
 
 import com.comscore.analytics.comScore;
 import com.mparticle.MPEvent;
 import com.mparticle.MParticle;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.math.BigDecimal;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -21,7 +19,7 @@ import java.util.Map;
  * Embedded implementation of the Comscore SDK, tested against Comscore 2.14.0923.
  * <p/>
  */
-public class ComscoreKit extends AbstractKit implements ActivityLifecycleForwarder, ClientSideForwarder {
+public class ComscoreKit extends KitIntegration implements KitIntegration.EventListener, KitIntegration.AttributeListener, KitIntegration.ActivityListener {
     //Server config constants defined for this provider
     //keys to provide access to the comscore account.
     private static final String CLIENT_ID = "CustomerC2Value";
@@ -39,9 +37,22 @@ public class ComscoreKit extends AbstractKit implements ActivityLifecycleForward
     private String publisherSecret;
     private String autoUpdateMode;
     private int autoUpdateInterval = 60;
-
-    private static final String HOST = "scorecardresearch.com";
     private boolean isEnterprise;
+
+    @Override
+    public List<ReportingMessage> leaveBreadcrumb(String breadcrumb) {
+        return null;
+    }
+
+    @Override
+    public List<ReportingMessage> logError(String message, Map<String, String> errorAttributes) {
+        return null;
+    }
+
+    @Override
+    public List<ReportingMessage> logException(Exception exception, Map<String, String> exceptionAttributes, String message) {
+        return null;
+    }
 
     @Override
     public List<ReportingMessage> logEvent(MPEvent event) {
@@ -77,72 +88,70 @@ public class ComscoreKit extends AbstractKit implements ActivityLifecycleForward
     }
 
     @Override
-    public List<ReportingMessage>  logScreen(String screenName, Map<String, String> eventAttributes) throws Exception {
+    public List<ReportingMessage>  logScreen(String screenName, Map<String, String> eventAttributes) {
         return logEvent(
-                new MPEvent.Builder(screenName, MParticle.EventType.Navigation).info(eventAttributes).build()
+                new MPEvent.Builder(screenName, MParticle.EventType.Navigation)
+                        .info(eventAttributes)
+                        .build()
         );
     }
 
     @Override
-    public List<ReportingMessage> logLtvIncrease(BigDecimal valueIncreased, String eventName, Map<String, String> contextInfo) {
-        return null;
-    }
-
-    @Override
-    public void setUserAttributes(JSONObject userAttributes) {
-        if (isEnterprise && userAttributes != null){
-            HashMap<String, String> comScoreAttributes = new HashMap<String, String>();
-            Iterator<String> keysItr = userAttributes.keys();
-            while(keysItr.hasNext()) {
-                String key = keysItr.next();
-                Object value = userAttributes.opt(key);
-                if (value != null){
-                    try {
-                        comScoreAttributes.put(key, userAttributes.getString(key));
-                    }catch (JSONException jse){
-                        try {
-                            comScoreAttributes.put(key, Double.toString(userAttributes.getDouble(key)));
-                        }catch (JSONException jse2){
-                            try {
-                                comScoreAttributes.put(key, Boolean.toString(userAttributes.getBoolean(key)));
-                            }catch (JSONException jse3){
-
-                            }
-                        }
-                    }
-                }else{
-                    comScoreAttributes.put(key, "");
-                }
-            }
-            comScore.setLabels(comScoreAttributes);
+    public void setUserAttribute(String key, String value) {
+        if (isEnterprise){
+            comScore.setLabel(KitUtils.sanitizeAttributeKey(key), value);
         }
     }
 
     @Override
-    public void setUserIdentity(String id, MParticle.IdentityType identityType) {
+    public void removeUserAttribute(String key) {
+        if (isEnterprise){
+            comScore.getLabels().remove(KitUtils.sanitizeAttributeKey(key));
+        }
+    }
+
+    @Override
+    public void removeUserIdentity(MParticle.IdentityType identityType) {
+        if (isEnterprise){
+            comScore.getLabels().remove(identityType.toString());
+        }
+    }
+
+    @Override
+    public List<ReportingMessage> logout() {
+        return null;
+    }
+
+    @Override
+    public void setUserIdentity(MParticle.IdentityType identityType, String id) {
         if (isEnterprise){
             comScore.setLabel(identityType.toString(), id);
         }
     }
 
     @Override
-    protected AbstractKit update() {
+    public String getName() {
+        return "Comscore";
+    }
+
+    @Override
+    protected List<ReportingMessage> onKitCreate(Map<String, String> settings, Context context) {
         if (needsRestart()){
-            clientId = properties.get(CLIENT_ID);
+            clientId = getSettings().get(CLIENT_ID);
             comScore.setCustomerC2(clientId);
-            publisherSecret = properties.get(PUBLISHER_SECRET);
+            publisherSecret = getSettings().get(PUBLISHER_SECRET);
             comScore.setPublisherSecret(publisherSecret);
         }
 
         int tempUpdateInterval = 60;
         try {
-            tempUpdateInterval = Integer.parseInt(properties.get(AUTOUPDATE_INTERVAL));
+            tempUpdateInterval = Integer.parseInt(getSettings().get(AUTOUPDATE_INTERVAL));
         }catch (NumberFormatException nfe){
 
         }
-        if (!properties.get(AUTOUPDATE_MODE_KEY).equals(autoUpdateMode) || tempUpdateInterval != autoUpdateInterval){
+        if (!getSettings().get(AUTOUPDATE_MODE_KEY).equals(autoUpdateMode) || tempUpdateInterval != autoUpdateInterval){
             autoUpdateInterval = tempUpdateInterval;
-            autoUpdateMode = properties.get(AUTOUPDATE_MODE_KEY);
+            autoUpdateMode = getSettings().get(AUTOUPDATE_MODE_KEY);
             if (AUTOUPDATE_MODE_FOREBACK.equals(autoUpdateMode)){
                 comScore.enableAutoUpdate(autoUpdateInterval, false);
             }else if (AUTOUPDATE_MODE_FOREONLY.equals(autoUpdateMode)){
@@ -152,38 +161,23 @@ public class ComscoreKit extends AbstractKit implements ActivityLifecycleForward
             }
         }
 
-        boolean useHttps = Boolean.parseBoolean(properties.get(USE_HTTPS));
+        boolean useHttps = Boolean.parseBoolean(getSettings().get(USE_HTTPS));
         comScore.setSecure(useHttps);
-        comScore.setDebug(mEkManager.getConfigurationManager().getEnvironment() == MParticle.Environment.Development);
-        isEnterprise = "enterprise".equals(properties.get(PRODUCT));
-        String appName = properties.get(APPNAME);
+        comScore.setDebug(getKitManager().getConfigurationManager().getEnvironment() == MParticle.Environment.Development);
+        isEnterprise = "enterprise".equals(getSettings().get(PRODUCT));
+        String appName = getSettings().get(APPNAME);
         if (appName != null){
             comScore.setAppName(appName);
         }
-        return this;
-    }
-
-    @Override
-    public Object getInstance(Activity activity) {
         return null;
     }
 
-    @Override
-    public String getName() {
-        return "Comscore";
-    }
-
-    @Override
-    public boolean isOriginator(String uri) {
-        return uri != null && uri.toLowerCase().contains(HOST);
-    }
-
     private boolean needsRestart() {
-        return !properties.get(CLIENT_ID).equals(clientId) || !properties.get(PUBLISHER_SECRET).equals(publisherSecret);
+        return !getSettings().get(CLIENT_ID).equals(clientId) || !getSettings().get(PUBLISHER_SECRET).equals(publisherSecret);
     }
 
     @Override
-    public List<ReportingMessage> onActivityStopped(Activity activity, int currentCount) {
+    public List<ReportingMessage> onActivityStopped(Activity activity) {
         comScore.onExitForeground();
         List<ReportingMessage> messageList = new LinkedList<ReportingMessage>();
         messageList.add(
@@ -193,7 +187,22 @@ public class ComscoreKit extends AbstractKit implements ActivityLifecycleForward
     }
 
     @Override
-    public List<ReportingMessage> onActivityStarted(Activity activity, int currentCount) {
+    public List<ReportingMessage> onActivitySaveInstanceState(Activity activity, Bundle outState) {
+        return null;
+    }
+
+    @Override
+    public List<ReportingMessage> onActivityDestroyed(Activity activity) {
+        return null;
+    }
+
+    @Override
+    public List<ReportingMessage> onActivityCreated(Activity activity, Bundle savedInstanceState) {
+        return null;
+    }
+
+    @Override
+    public List<ReportingMessage> onActivityStarted(Activity activity) {
         comScore.onEnterForeground();
         List<ReportingMessage> messageList = new LinkedList<ReportingMessage>();
         messageList.add(
@@ -203,17 +212,12 @@ public class ComscoreKit extends AbstractKit implements ActivityLifecycleForward
     }
 
     @Override
-    public List<ReportingMessage> onActivityCreated(Activity activity, int activityCount) {
+    public List<ReportingMessage> onActivityResumed(Activity activity) {
         return null;
     }
 
     @Override
-    public List<ReportingMessage> onActivityResumed(Activity activity, int currentCount) {
-        return null;
-    }
-
-    @Override
-    public List<ReportingMessage> onActivityPaused(Activity activity, int activityCount) {
+    public List<ReportingMessage> onActivityPaused(Activity activity) {
         return null;
     }
 

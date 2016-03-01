@@ -5,7 +5,6 @@ android {
     buildToolsVersion "23.0.2"
 }
 
-
 android {
     defaultConfig {
         versionCode = Integer.parseInt(new Date().format('yyyyMMdd'))
@@ -22,7 +21,7 @@ android {
 }
 
 dependencies {
-    compile project(':android-core')
+    compile project(':android-kit-base')
     compile fileTree(dir: 'libs', include: ['*.jar'])
 }
 
