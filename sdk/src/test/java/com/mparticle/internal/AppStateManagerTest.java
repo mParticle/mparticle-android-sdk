@@ -58,6 +58,28 @@ public class AppStateManagerTest {
         manager.onActivityStarted(activity, 0);
     }
 
+    /**
+     * This tests what happens if we're started in something other than the launch Activity
+     *
+     * @throws Exception
+     */
+    @Test
+    public void testSecondActivityStart() throws Exception {
+        manager.onActivityStopped(activity, 0);
+        Thread.sleep(1000);
+        assertEquals(true, manager.isBackgrounded());
+        manager.onActivityStarted(activity, 0);
+        Activity activity2 = Mockito.mock(Activity.class);
+        Activity activity3 = Mockito.mock(Activity.class);
+        manager.onActivityStopped(activity2, 0);
+        manager.onActivityStopped(activity3, 0);
+        Thread.sleep(1000);
+        assertEquals(false, manager.isBackgrounded());
+        manager.onActivityStopped(activity, 0);
+        Thread.sleep(1000);
+        assertEquals(true, manager.isBackgrounded());
+    }
+
     @Test
     public void testOnActivityStopped() throws Exception {
         manager.onActivityStarted(activity, 0);

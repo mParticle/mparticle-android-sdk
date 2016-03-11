@@ -17,6 +17,7 @@ import com.mparticle.kits.KitManager;
 
 import org.json.JSONObject;
 
+import java.lang.ref.WeakReference;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -33,6 +34,7 @@ import java.util.concurrent.atomic.AtomicLong;
     private final SharedPreferences mPreferences;
     private KitManager mKitManager;
     private Session mCurrentSession = new Session();
+    private WeakReference<Activity> currentActivity;
 
     private String mCurrentActivity;
     /**
@@ -158,6 +160,11 @@ import java.util.concurrent.atomic.AtomicLong;
                 mLastForegroundTime = getTime();
             }
 
+            if (currentActivity != null) {
+                currentActivity.clear();
+                currentActivity = null;
+            }
+            currentActivity = new WeakReference<Activity>(activity);
             mActivities.getAndIncrement();
 
             if (MParticle.getInstance().isAutoTrackingEnabled()) {
@@ -199,8 +206,11 @@ import java.util.concurrent.atomic.AtomicLong;
         try {
             mPreferences.edit().putBoolean(Constants.PrefKeys.CRASHED_IN_FOREGROUND, false).apply();
             mLastStoppedTime = new AtomicLong(getTime());
-
-            if (mActivities.decrementAndGet() < 1) {
+            if (currentActivity != null && activity == currentActivity.get()) {
+                currentActivity.clear();
+                currentActivity = null;
+            }
+            if (currentActivity == null) {
                 delayedBackgroundCheckHandler.postDelayed(new Runnable() {
                     @Override
                     public void run() {
@@ -327,7 +337,7 @@ import java.util.concurrent.atomic.AtomicLong;
     }
 
     public boolean isBackgrounded() {
-        return !mInitialized || (mActivities.get() < 1 && (getTime() - mLastStoppedTime.get() >= ACTIVITY_DELAY));
+        return !mInitialized || (currentActivity == null && (getTime() - mLastStoppedTime.get() >= ACTIVITY_DELAY));
     }
 
     private static String getActivityName(Activity activity) {
