@@ -33,11 +33,15 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.math.BigInteger;
+import java.net.HttpURLConnection;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -50,6 +54,9 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.jar.JarFile;
 
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
+
 /**
  * Mixin utility class responsible for generating all sorts of device information, mostly
  * used by the DeviceInfo and AppInfo dictionaries within batch messages.
@@ -58,6 +65,7 @@ public class MPUtility {
 
     static final String NO_BLUETOOTH = "none";
     private static String sOpenUDID;
+    private static final char[] HEX_CHARS = "0123456789abcdef".toCharArray();
 
     public static String getCpuUsage() {
         String str1 = "unknown";
@@ -185,6 +193,41 @@ public class MPUtility {
             // ignore missing data
         }
         return "unknown";
+    }
+
+    public static String hmacSha256Encode(String key, String data) throws NoSuchAlgorithmException,
+            InvalidKeyException, UnsupportedEncodingException {
+        Mac sha256_HMAC = Mac.getInstance("HmacSHA256");
+        SecretKeySpec secret_key = new SecretKeySpec(key.getBytes("utf-8"), "HmacSHA256");
+        sha256_HMAC.init(secret_key);
+        return asHex(sha256_HMAC.doFinal(data.getBytes("utf-8")));
+    }
+
+    private static String asHex(byte[] buf) {
+        char[] chars = new char[2 * buf.length];
+        for (int i = 0; i < buf.length; ++i) {
+            chars[2 * i] = HEX_CHARS[(buf[i] & 0xF0) >>> 4];
+            chars[2 * i + 1] = HEX_CHARS[buf[i] & 0x0F];
+        }
+        return new String(chars);
+    }
+
+    public static JSONObject getJsonResponse(HttpURLConnection connection) {
+        try {
+            StringBuilder responseBuilder = new StringBuilder();
+            BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+            String line;
+            while ((line = in.readLine()) != null) {
+                responseBuilder.append(line + '\n');
+            }
+            in.close();
+            return new JSONObject(responseBuilder.toString());
+        } catch (IOException ex) {
+
+        } catch (JSONException jse) {
+
+        }
+        return null;
     }
 
     public static long getDiskSpace(File path){

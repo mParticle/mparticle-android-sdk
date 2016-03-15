@@ -14,11 +14,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -40,8 +38,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.zip.GZIPOutputStream;
 
-import javax.crypto.Mac;
-import javax.crypto.spec.SecretKeySpec;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
@@ -85,7 +81,7 @@ public class MParticleApiClientImpl implements MParticleApiClient {
     private static final String CONSUMER_INFO = "ci";
 
 
-    private static final char[] HEX_CHARS = "0123456789abcdef".toCharArray();
+
     private final ConfigManager mConfigManager;
     private final String mApiSecret;
     private URL mConfigUrl;
@@ -94,7 +90,7 @@ public class MParticleApiClientImpl implements MParticleApiClient {
     private final SharedPreferences mPreferences;
     private final String mApiKey;
     private final Context mContext;
-    private Integer mDeviceRampNumber = null;
+    Integer mDeviceRampNumber = null;
     private static String mSupportedKits;
     private SSLSocketFactory socketFactory;
     private String etag = null;
@@ -114,6 +110,17 @@ public class MParticleApiClientImpl implements MParticleApiClient {
         mPreferences = sharedPreferences;
         mApiKey = configManager.getApiKey();
         mUserAgent = "mParticle Android SDK/" + Constants.MPARTICLE_VERSION;
+    }
+
+    /**
+     * Only used for unit testing.
+     */
+    void setConfigUrl(URL configUrl) {
+        mConfigUrl = configUrl;
+    }
+
+    static void setSupportedKitString(String supportedKitString) {
+        mSupportedKits = supportedKitString;
     }
 
     public void fetchConfig() throws IOException, MPThrottleException, MPConfigException {
@@ -147,7 +154,7 @@ public class MParticleApiClientImpl implements MParticleApiClient {
             makeUrlRequest(connection, true);
 
             if (connection.getResponseCode() >= 200 && connection.getResponseCode() < 300) {
-                JSONObject response = getJsonResponse(connection);
+                JSONObject response = MPUtility.getJsonResponse(connection);
                 parseMparticleJson(response);
                 mConfigManager.updateConfig(response);
                 etag = connection.getHeaderField("ETag");
@@ -182,7 +189,7 @@ public class MParticleApiClientImpl implements MParticleApiClient {
             if (connection.getResponseCode() == HttpURLConnection.HTTP_FORBIDDEN){
                 ConfigManager.log(MParticle.LogLevel.ERROR, "Segment call forbidden: is Segmentation enabled for your account?");
             }
-            response =  getJsonResponse(connection);
+            response =  MPUtility.getJsonResponse(connection);
             parseMparticleJson(response);
 
         }catch (Exception e){
@@ -242,7 +249,7 @@ public class MParticleApiClientImpl implements MParticleApiClient {
         makeUrlRequest(connection, true);
         int responseCode = connection.getResponseCode();
         if (responseCode >= 200 && responseCode < 300) {
-            JSONObject response = getJsonResponse(connection);
+            JSONObject response = MPUtility.getJsonResponse(connection);
             parseMparticleJson(response);
         }
         return connection.getResponseCode();
@@ -285,7 +292,7 @@ public class MParticleApiClientImpl implements MParticleApiClient {
                 hashString.append(message);
             }
             request.setRequestProperty("Date", dateHeader);
-            request.setRequestProperty(HEADER_SIGNATURE, hmacSha256Encode(mApiSecret, hashString.toString()));
+            request.setRequestProperty(HEADER_SIGNATURE, MPUtility.hmacSha256Encode(mApiSecret, hashString.toString()));
         } catch (InvalidKeyException e) {
             ConfigManager.log(MParticle.LogLevel.ERROR, "Error signing message.");
         } catch (NoSuchAlgorithmException e) {
@@ -294,25 +301,6 @@ public class MParticleApiClientImpl implements MParticleApiClient {
             ConfigManager.log(MParticle.LogLevel.ERROR, "Error signing message.");
         }
     }
-
-    private static String hmacSha256Encode(String key, String data) throws NoSuchAlgorithmException,
-            InvalidKeyException, UnsupportedEncodingException {
-        Mac sha256_HMAC = Mac.getInstance("HmacSHA256");
-        SecretKeySpec secret_key = new SecretKeySpec(key.getBytes("utf-8"), "HmacSHA256");
-        sha256_HMAC.init(secret_key);
-        return asHex(sha256_HMAC.doFinal(data.getBytes("utf-8")));
-    }
-
-    private static String asHex(byte[] buf) {
-        char[] chars = new char[2 * buf.length];
-        for (int i = 0; i < buf.length; ++i) {
-            chars[2 * i] = HEX_CHARS[(buf[i] & 0xF0) >>> 4];
-            chars[2 * i + 1] = HEX_CHARS[buf[i] & 0x0F];
-        }
-        return new String(chars);
-    }
-
-
 
     private static Certificate generateCertificate(CertificateFactory certificateFactory, String encodedCertificate) throws IOException, CertificateException {
         Certificate certificate = null;
@@ -371,23 +359,7 @@ public class MParticleApiClientImpl implements MParticleApiClient {
         }
         return connection;
     }
-    static JSONObject getJsonResponse(HttpURLConnection connection) {
-        try {
-            StringBuilder responseBuilder = new StringBuilder();
-            BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-            String line;
-            while ((line = in.readLine()) != null) {
-                responseBuilder.append(line + '\n');
-            }
-            in.close();
-            return new JSONObject(responseBuilder.toString());
-        } catch (IOException ex) {
 
-        } catch (JSONException jse) {
-
-        }
-        return null;
-    }
 
     public void parseMparticleJson(JSONObject jsonResponse){
         try {
@@ -414,7 +386,15 @@ public class MParticleApiClientImpl implements MParticleApiClient {
 
     private void setNextAllowedRequestTime() {
         long nextTime = System.currentTimeMillis() + THROTTLE;
-        mPreferences.edit().putLong(Constants.PrefKeys.NEXT_REQUEST_TIME, nextTime).apply();
+        setNextRequestTime(nextTime);
+    }
+
+    long getNextRequestTime() {
+        return mPreferences.getLong(Constants.PrefKeys.NEXT_REQUEST_TIME, 0);
+    }
+
+    void setNextRequestTime(long timeMillis) {
+        mPreferences.edit().putLong(Constants.PrefKeys.NEXT_REQUEST_TIME, timeMillis).apply();
     }
 
     public final class MPThrottleException extends Exception {
@@ -435,8 +415,8 @@ public class MParticleApiClientImpl implements MParticleApiClient {
         }
     }
 
-    private void checkThrottleTime() throws MPThrottleException {
-        if (System.currentTimeMillis() < mPreferences.getLong(Constants.PrefKeys.NEXT_REQUEST_TIME, 0)){
+    void checkThrottleTime() throws MPThrottleException {
+        if (System.currentTimeMillis() < getNextRequestTime()){
             throw new MPThrottleException();
         }
     }
