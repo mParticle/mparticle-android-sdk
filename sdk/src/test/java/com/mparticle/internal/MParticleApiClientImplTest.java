@@ -82,4 +82,120 @@ public class MParticleApiClientImplTest {
         assertNotNull(e);
     }
 
+    @Test
+    @PrepareForTest({URL.class, MParticleApiClientImpl.class, MPUtility.class})
+    public void testIsThrottled() throws Exception {
+        setup();
+        PowerMockito.mockStatic(MPUtility.class);
+        Mockito.when(MPUtility.hmacSha256Encode(Mockito.anyString(), Mockito.anyString())).thenReturn("encoded");
+        assertFalse(client.isThrottled());
+        client.setNextRequestTime(System.currentTimeMillis() + 1000);
+        assertTrue(client.isThrottled());
+    }
+
+    @Test
+    @PrepareForTest({URL.class, MParticleApiClientImpl.class, MPUtility.class})
+    public void testCheckThrottleTime() throws Exception {
+        setup();
+
+        client.checkThrottleTime();
+        client.setNextRequestTime(System.currentTimeMillis() + 1000);
+        Exception e = null;
+        try {
+            client.checkThrottleTime();
+        } catch (MParticleApiClientImpl.MPThrottleException cfe) {
+            e = cfe;
+        }
+        assertNotNull(e);
+    }
+
+    @Test
+    @PrepareForTest({URL.class, MParticleApiClientImpl.class, MPUtility.class})
+    public void testMessageBatchWhileThrottled() throws Exception {
+        setup();
+        PowerMockito.mockStatic(MPUtility.class);
+        Mockito.when(MPUtility.hmacSha256Encode(Mockito.anyString(), Mockito.anyString())).thenReturn("encoded");
+        client.sendMessageBatch("");
+        client.setNextRequestTime(System.currentTimeMillis() + 1000);
+        Exception e = null;
+        try {
+            client.sendMessageBatch("");
+        } catch (MParticleApiClientImpl.MPThrottleException cfe) {
+            e = cfe;
+        }
+        assertNotNull(e);
+    }
+
+    @Test
+    @PrepareForTest({URL.class, MParticleApiClientImpl.class, MPUtility.class})
+    public void testConfigRequestWhileThrottled() throws Exception {
+        setup();
+        PowerMockito.mockStatic(MPUtility.class);
+        client.setNextRequestTime(System.currentTimeMillis() + 1000);
+        Mockito.when(mockConnection.getResponseCode()).thenReturn(200);
+        JSONObject response = new JSONObject();
+        response.put("test", "value");
+        Mockito.when(MPUtility.getJsonResponse(mockConnection)).thenReturn(response);
+        ArgumentCaptor<JSONObject> captor = ArgumentCaptor.forClass(JSONObject.class);
+        client.fetchConfig();
+        Mockito.verify(configManager).updateConfig(captor.capture());
+        assertEquals(response, captor.getValue());
+    }
+
+    @Test
+    @PrepareForTest({URL.class, MParticleApiClientImpl.class})
+    public void testSetNextAllowedRequestTime() throws Exception {
+        setup();
+
+        assertEquals(0, client.getNextRequestTime());
+        client.setNextAllowedRequestTime(null);
+        assertTrue(client.getNextRequestTime() <= client.DEFAULT_THROTTLE_MILLIS + System.currentTimeMillis());
+        assertTrue(client.getNextRequestTime() > System.currentTimeMillis() + client.DEFAULT_THROTTLE_MILLIS - 10);
+
+
+        Mockito.when(mockConnection.getHeaderField(Mockito.anyString())).thenReturn(null);
+        client.setNextRequestTime(0);
+        assertEquals(0, client.getNextRequestTime());
+        client.setNextAllowedRequestTime(mockConnection);
+        assertTrue(client.getNextRequestTime() <= client.DEFAULT_THROTTLE_MILLIS + System.currentTimeMillis());
+        assertTrue(client.getNextRequestTime() > client.DEFAULT_THROTTLE_MILLIS + System.currentTimeMillis() - 10);
+
+        Mockito.when(mockConnection.getHeaderField("Retry-After")).thenReturn("");
+        client.setNextRequestTime(0);
+        assertEquals(0, client.getNextRequestTime());
+        client.setNextAllowedRequestTime(mockConnection);
+        assertTrue(client.getNextRequestTime() <= client.DEFAULT_THROTTLE_MILLIS + System.currentTimeMillis());
+        assertTrue(client.getNextRequestTime() > client.DEFAULT_THROTTLE_MILLIS + System.currentTimeMillis() - 10);
+
+        Mockito.when(mockConnection.getHeaderField("Retry-After")).thenReturn("-1000");
+        client.setNextRequestTime(0);
+        assertEquals(0, client.getNextRequestTime());
+        client.setNextAllowedRequestTime(mockConnection);
+        assertTrue(client.getNextRequestTime() <= client.DEFAULT_THROTTLE_MILLIS + System.currentTimeMillis());
+        assertTrue(client.getNextRequestTime() > client.DEFAULT_THROTTLE_MILLIS + System.currentTimeMillis() - 10);
+
+        Mockito.when(mockConnection.getHeaderField("Retry-After")).thenReturn("60");
+        client.setNextRequestTime(0);
+        assertEquals(0, client.getNextRequestTime());
+        client.setNextAllowedRequestTime(mockConnection);
+        assertTrue(client.getNextRequestTime() <= 60 * 1000 + System.currentTimeMillis());
+        assertTrue(client.getNextRequestTime() > 60 * 1000 + System.currentTimeMillis() - 10);
+
+        Mockito.when(mockConnection.getHeaderField("Retry-After")).thenReturn("");
+        Mockito.when(mockConnection.getHeaderField("retry-after")).thenReturn("100");
+        client.setNextRequestTime(0);
+        assertEquals(0, client.getNextRequestTime());
+        client.setNextAllowedRequestTime(mockConnection);
+        assertTrue(client.getNextRequestTime() <= 100 * 1000 + System.currentTimeMillis());
+        assertTrue(client.getNextRequestTime() > 100 * 1000 + System.currentTimeMillis() - 10);
+
+        Mockito.when(mockConnection.getHeaderField("Retry-After")).thenReturn(Integer.toString(60 * 60 * 25));
+        client.setNextRequestTime(0);
+        assertEquals(0, client.getNextRequestTime());
+        client.setNextAllowedRequestTime(mockConnection);
+        assertTrue(client.getNextRequestTime() <= client.MAX_THROTTLE_MILLIS + System.currentTimeMillis());
+        assertTrue(client.getNextRequestTime() > client.MAX_THROTTLE_MILLIS + System.currentTimeMillis() - 10);
+
+    }
+
 }

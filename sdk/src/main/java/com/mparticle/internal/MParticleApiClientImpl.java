@@ -100,7 +100,8 @@ public class MParticleApiClientImpl implements MParticleApiClient {
      * Default throttle time - in the worst case scenario if the server is busy, the soonest
      * the SDK will attempt to contact the server again will be after this 2 hour window.
      */
-    private static final long THROTTLE = 1000*60*60*2;
+    static final long DEFAULT_THROTTLE_MILLIS = 1000*60*60*2;
+    static final long MAX_THROTTLE_MILLIS = 1000*60*60*24;
     private boolean alreadyWarned;
 
     public MParticleApiClientImpl(ConfigManager configManager, SharedPreferences sharedPreferences, Context context) throws MalformedURLException {
@@ -123,9 +124,8 @@ public class MParticleApiClientImpl implements MParticleApiClient {
         mSupportedKits = supportedKitString;
     }
 
-    public void fetchConfig() throws IOException, MPThrottleException, MPConfigException {
+    public void fetchConfig() throws IOException, MPConfigException {
         try {
-            checkThrottleTime();
             if (mConfigUrl == null){
                 Uri uri = new Uri.Builder()
                         .scheme(SECURE_SERVICE_SCHEME)
@@ -283,11 +283,11 @@ public class MParticleApiClientImpl implements MParticleApiClient {
             String dateHeader = format.format(new Date());
             String path = request.getURL().getFile();
             StringBuilder hashString = new StringBuilder()
-                                            .append(method)
-                                            .append("\n")
-                                            .append(dateHeader)
-                                            .append("\n")
-                                            .append(path);
+                    .append(method)
+                    .append("\n")
+                    .append(dateHeader)
+                    .append("\n")
+                    .append(path);
             if (message != null) {
                 hashString.append(message);
             }
@@ -354,7 +354,7 @@ public class MParticleApiClientImpl implements MParticleApiClient {
                 ConfigManager.log(MParticle.LogLevel.ERROR, "Bad API request - is the correct API key and secret configured?");
             }
             if ((statusCode == 503 || statusCode == HTTP_TOO_MANY_REQUESTS) && !BuildConfig.MP_DEBUG) {
-                setNextAllowedRequestTime();
+                setNextAllowedRequestTime(connection);
             }
         }
         return connection;
@@ -384,8 +384,26 @@ public class MParticleApiClientImpl implements MParticleApiClient {
         }
     }
 
-    private void setNextAllowedRequestTime() {
-        long nextTime = System.currentTimeMillis() + THROTTLE;
+    void setNextAllowedRequestTime(HttpURLConnection connection) {
+        long throttle = DEFAULT_THROTTLE_MILLIS;
+        if (connection != null) {
+            //most HttpUrlConnectionImpl's are case insensitive, but the interface
+            //doesn't actually restrict it so let's be safe and check.
+            String retryAfter = connection.getHeaderField("Retry-After");
+            if (MPUtility.isEmpty(retryAfter)) {
+                retryAfter = connection.getHeaderField("retry-after");
+            }
+            try {
+                long parsedThrottle = Long.parseLong(retryAfter) * 1000;
+                if (parsedThrottle > 0) {
+                    throttle = Math.min(parsedThrottle, MAX_THROTTLE_MILLIS);
+                }
+            } catch (NumberFormatException nfe) {
+                ConfigManager.log(MParticle.LogLevel.DEBUG, "Unable to parse retry-after header, using default.");
+            }
+        }
+
+        long nextTime = System.currentTimeMillis() + throttle;
         setNextRequestTime(nextTime);
     }
 

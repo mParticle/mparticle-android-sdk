@@ -580,8 +580,6 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
                             upgrade = true;
                         } else if (mInstallType == MParticle.InstallType.KnownInstall) {
                             upgrade = false;
-                        } else {
-                            upgrade = !autoDetectInstall();
                         }
                     }
 
@@ -601,34 +599,6 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
             }
         }
         return null;
-    }
-
-    boolean autoDetectInstall() {
-        //heuristic 1: look for install referrer
-        //this code assumes we've already checked if
-        //we've seen this version code before, otherwise it's useless
-        if (mPreferences.contains(Constants.PrefKeys.INSTALL_REFERRER)){
-            return true;
-        }
-        //heuristic 2: look for other persisted preferences
-        File prefsdir = new File(mContext.getApplicationInfo().dataDir, "shared_prefs");
-        if(prefsdir.exists() && prefsdir.isDirectory()) {
-            String[] list = prefsdir.list();
-            for (String item : list) {
-                if (item.contains(".xml") && !item.contains(Constants.PREFS_FILE)) {
-                    //remove .xml from the file name
-                    String preffile = item.substring(0, item.length() - 4);
-
-                    SharedPreferences sp2 = mContext.getSharedPreferences(preffile, Context.MODE_PRIVATE);
-                    Map map = sp2.getAll();
-
-                    if (!map.isEmpty()) {
-                        return false;
-                    }
-                }
-            }
-        }
-        return true;
     }
 
     public void logNotification(ProviderCloudMessage cloudMessage, String appState) {

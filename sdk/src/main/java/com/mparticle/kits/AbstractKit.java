@@ -109,7 +109,9 @@ public abstract class AbstractKit {
             JSONObject propJson = json.getJSONObject(KEY_PROPERTIES);
             for (Iterator<String> iterator = propJson.keys(); iterator.hasNext(); ) {
                 String key = iterator.next();
-                properties.put(key, propJson.optString(key));
+                if (!propJson.isNull(key)) {
+                    properties.put(key, propJson.optString(key));
+                }
             }
         }
         if (json.has(KEY_FILTERS)) {
