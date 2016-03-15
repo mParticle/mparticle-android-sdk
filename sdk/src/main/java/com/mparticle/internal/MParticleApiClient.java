@@ -9,7 +9,7 @@ import java.io.IOException;
  */
 public interface MParticleApiClient {
 
-    void fetchConfig()  throws IOException, MParticleApiClientImpl.MPThrottleException, MParticleApiClientImpl.MPConfigException;
+    void fetchConfig()  throws IOException, MParticleApiClientImpl.MPConfigException;
     int sendMessageBatch(String message) throws IOException, MParticleApiClientImpl.MPThrottleException, MParticleApiClientImpl.MPRampException;
     JSONObject fetchAudiences();
     boolean isThrottled();
