@@ -26,7 +26,7 @@ public class KitFactory {
     final static int CRITTERCISM = MParticle.ServiceProviders.CRITTERCISM;
     final static int TUNE = MParticle.ServiceProviders.TUNE;
     final static int APPSFLYER = MParticle.ServiceProviders.APPSFLYER;
-
+    final static int APPTENTIVE = MParticle.ServiceProviders.APPTENTIVE;
     private Map<Integer, AbstractKit> supportedKits = new HashMap<Integer, AbstractKit>();
     private ArrayList<Integer> supportedKitIds = new ArrayList<Integer>();
 
@@ -76,6 +76,9 @@ public class KitFactory {
         }
         if (loadKit(ekManager, APPSFLYER, "com.mparticle.kits.AppsFlyerKit")) {
             ConfigManager.log(MParticle.LogLevel.DEBUG, "AppsFlyer Kit detected.");
+        }
+        if (loadKit(ekManager, APPTENTIVE, "com.mparticle.kits.Apptentive")) {
+            ConfigManager.log(MParticle.LogLevel.DEBUG, "Apptentive Kit detected.");
         }
     }
 

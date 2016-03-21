@@ -1,0 +1,16 @@
+ext {
+    kitDescription = 'Apptentive Kit for the mParticle SDK'
+}
+
+apply from: '../../scripts/kit-common.gradle'
+apply from: '../../scripts/maven.gradle'
+
+android {
+    defaultConfig {
+        minSdkVersion 14
+    }
+}
+
+dependencies {
+    compile 'com.apptentive:apptentive-android:3.0.0'
+}

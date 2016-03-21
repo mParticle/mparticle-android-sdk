@@ -1659,6 +1659,7 @@ public class MParticle {
         int WOOTRIC = 90;
         int TUNE = 32;
         int APPSFLYER = 92;
+        int APPTENTIVE = 97;
         String BROADCAST_ACTIVE = "MPARTICLE_SERVICE_PROVIDER_ACTIVE_";
         String BROADCAST_DISABLED = "MPARTICLE_SERVICE_PROVIDER_DISABLED_";
     }
