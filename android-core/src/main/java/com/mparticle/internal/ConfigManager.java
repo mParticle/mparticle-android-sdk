@@ -16,25 +16,20 @@ import org.json.JSONObject;
 
 import java.util.Iterator;
 
-public class ConfigManager implements MessagingConfigCallbacks {
+public class ConfigManager {
     public static final String CONFIG_JSON = "json";
     private static final String KEY_TRIGGER_ITEMS = "tri";
     private static final String KEY_MESSAGE_MATCHES = "mm";
-    private static final String KEY_TRIGGER_ITEM_TYPES = "dts";
     private static final String KEY_TRIGGER_ITEM_HASHES = "evts";
     private static final String KEY_INFLUENCE_OPEN = "pio";
     static final String KEY_OPT_OUT = "oo";
     public static final String KEY_UNHANDLED_EXCEPTIONS = "cue";
     public static final String KEY_PUSH_MESSAGES = "pmk";
-    public static final String KEY_NETWORK_PERFORMANCE = "cnp";
     public static final String KEY_EMBEDDED_KITS = "eks";
     static final String KEY_UPLOAD_INTERVAL = "uitl";
     static final String KEY_SESSION_TIMEOUT = "stl";
     public static final String VALUE_APP_DEFINED = "appdefined";
     public static final String VALUE_CUE_CATCH = "forcecatch";
-    public static final String VALUE_CUE_IGNORE = "forceignore";
-    public static final String VALUE_CNP_CAPTURE = "forcetrue";
-    public static final String VALUE_CNP_NO_CAPTURE = "forcefalse";
     private static final String PREFERENCES_FILE = "mp_preferences";
     static final String KEY_RAMP = "rp";
 
@@ -50,7 +45,6 @@ public class ConfigManager implements MessagingConfigCallbacks {
 
     private boolean mSendOoEvents;
     private JSONObject mProviderPersistence;
-    private String mNetworkPerformance = "";
 
     private int mRampValue = -1;
     private int mUserBucket = -1;
@@ -113,8 +107,6 @@ public class ConfigManager implements MessagingConfigCallbacks {
             sPushKeys = responseJSON.getJSONArray(KEY_PUSH_MESSAGES);
             editor.putString(KEY_PUSH_MESSAGES, sPushKeys.toString());
         }
-
-        mNetworkPerformance = responseJSON.optString(KEY_NETWORK_PERFORMANCE, VALUE_APP_DEFINED);
 
         mRampValue = responseJSON.optInt(KEY_RAMP, -1);
 
@@ -199,13 +191,6 @@ public class ConfigManager implements MessagingConfigCallbacks {
             enableUncaughtExceptionLogging(false);
         } else {
             disableUncaughtExceptionLogging(false);
-        }
-        if (!VALUE_APP_DEFINED.equals(mNetworkPerformance)){
-            if (VALUE_CNP_CAPTURE.equals(mNetworkPerformance)){
-                MParticle.getInstance().setNetworkTrackingEnabled(true);
-            }else if (VALUE_CNP_NO_CAPTURE.equals(mNetworkPerformance)){
-                MParticle.getInstance().setNetworkTrackingEnabled(false);
-            }
         }
     }
 
@@ -362,12 +347,6 @@ public class ConfigManager implements MessagingConfigCallbacks {
         mPreferences.edit()
             .putBoolean(Constants.PrefKeys.PUSH_ENABLE_VIBRATION, pushVibrationEnabled)
             .apply();
-    }
-
-    @Override
-    public void setPushRegistrationId(String registrationId) {
-        PushRegistrationHelper.storeRegistrationId(mContext, registrationId);
-        MParticle.getInstance().logPushRegistration(registrationId);
     }
 
     public boolean isEnabled(){

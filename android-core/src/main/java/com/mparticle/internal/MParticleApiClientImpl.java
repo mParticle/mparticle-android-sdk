@@ -141,7 +141,12 @@ public class MParticleApiClientImpl implements MParticleApiClient {
             connection.setConnectTimeout(2000);
             connection.setReadTimeout(10000);
             connection.setRequestProperty(HEADER_ENVIRONMENT, Integer.toString(mConfigManager.getEnvironment().getValue()));
-            connection.setRequestProperty(HEADER_KITS, getSupportedKitString());
+
+            String supportedKits = getSupportedKitString();
+            if (!MPUtility.isEmpty(supportedKits)) {
+                connection.setRequestProperty(HEADER_KITS, supportedKits);
+            }
+
             connection.setRequestProperty("User-Agent", mUserAgent);
             if (etag != null){
                 connection.setRequestProperty("If-None-Match", etag);
@@ -224,8 +229,15 @@ public class MParticleApiClientImpl implements MParticleApiClient {
         connection.setRequestProperty("Content-Type", "application/json");
         connection.setRequestProperty("Content-Encoding", "gzip");
         connection.setRequestProperty("User-Agent", mUserAgent);
-        connection.setRequestProperty(HEADER_KITS, mConfigManager.getActiveModuleIds());
-        connection.setRequestProperty(HEADER_BUNDLED_KITS, getSupportedKitString());
+
+        String activeKits = mConfigManager.getActiveModuleIds();
+        if (!MPUtility.isEmpty(activeKits)) {
+            connection.setRequestProperty(HEADER_KITS, activeKits);
+        }
+        String supportedKits = getSupportedKitString();
+        if (!MPUtility.isEmpty(supportedKits)) {
+            connection.setRequestProperty(HEADER_BUNDLED_KITS, supportedKits);
+        }
 
         addMessageSignature(connection, message);
 

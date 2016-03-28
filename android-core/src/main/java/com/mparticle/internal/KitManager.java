@@ -88,7 +88,7 @@ public class KitManager {
         return false;
     }
 
-    public boolean onPushRegistration(String token, String senderId) {
+    public boolean onPushRegistration(String instanceId, String senderId) {
         return false;
     }
 

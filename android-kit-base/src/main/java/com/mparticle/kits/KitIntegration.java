@@ -332,10 +332,10 @@ public abstract class KitIntegration {
          * push messages. This method will be call on app startup and repetitively to aggressively
          * sync tokens as they're updated.
          *
-         * @param token    the device GCM token
-         * @param senderId the senderid affiliated with the GCM token
+         * @param instanceId the device instance ID registered with the GCM scope
+         * @param senderId the senderid with permissions for this instanceId
          * @return true if the push registration was processed.
          */
-        boolean onPushRegistration(String token, String senderId);
+        boolean onPushRegistration(String instanceId, String senderId);
     }
 }

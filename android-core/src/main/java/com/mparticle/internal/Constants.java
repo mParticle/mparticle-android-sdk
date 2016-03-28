@@ -436,7 +436,8 @@ public class Constants {
     public interface PrefKeys {
         // common
         String INSTALL_TIME = "mp::ict";
-        String PUSH_REGISTRATION_ID = "mp::push_reg_id";
+        String PUSH_REGISTRATION_INSTANCE_ID = "mp::push_reg_id";
+        String PUSH_REGISTRATION_SENDER_ID = "mp::push_reg_sender_id";
         String INSTALL_REFERRER = "mp::install_referrer";
         String OPEN_UDID = "mp::openudid";
         String DEVICE_RAMP_UDID = "mp::rampudid";

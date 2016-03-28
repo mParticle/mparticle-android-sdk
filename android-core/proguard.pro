@@ -4,10 +4,10 @@
 
 -keepparameternames
 -renamesourcefileattribute SourceFile
--keepattributes Exceptions,InnerClasses,Signature,Deprecated,
-                SourceFile,LineNumberTable,*Annotation*,EnclosingMethod
+-keepattributes Exceptions,InnerClasses,Signature,Deprecated,SourceFile,LineNumberTable,*Annotation*,EnclosingMethod
 
 -keep class com.mparticle.MPEvent { *; }
+-keep class com.mparticle.messaging.InstanceIdService { *; }
 -keep class com.mparticle.MPEvent$* { *; }
 -keep class com.mparticle.kits.Constants { *; }
 -keep class com.mparticle.kits.Constants* { *; }
@@ -27,6 +27,7 @@
 -keep class com.mparticle.internal.MPUtility { *; }
 -keep class com.mparticle.internal.MPUtility$* { *; }
 -keep class com.mparticle.internal.PushRegistrationHelper { *; }
+-keep class com.mparticle.internal.PushRegistrationHelper* { *; }
 -keep class com.mparticle.ReferrerReceiver { *; }
 -keep class com.mparticle.internal.CommerceEventUtil { *; }
 -keep class com.mparticle.kits.ForeseeKit { *; }

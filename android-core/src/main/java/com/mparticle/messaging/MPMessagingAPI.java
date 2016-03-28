@@ -15,7 +15,6 @@ import com.mparticle.internal.PushRegistrationHelper;
  *
  */
 public class MPMessagingAPI {
-    private final MessagingConfigCallbacks mMessagingConfigCallbacks;
     private final Context mContext;
 
     public static final String CLOUD_MESSAGE_EXTRA = "mp-push-message";
@@ -37,17 +36,15 @@ public class MPMessagingAPI {
     public static final String BROADCAST_NOTIFICATION_TAPPED = "com.mparticle.push.TAP";
 
     private MPMessagingAPI(){
-        mMessagingConfigCallbacks = null;
         mContext = null;
     }
 
     /**
      *
      */
-    public MPMessagingAPI(Context context, MessagingConfigCallbacks listener) {
+    public MPMessagingAPI(Context context) {
         super();
         mContext = context;
-        mMessagingConfigCallbacks = listener;
     }
 
     /**
@@ -58,7 +55,7 @@ public class MPMessagingAPI {
      * @param resId the resource id of a drawable
      */
     public void setPushNotificationIcon(int resId) {
-        mMessagingConfigCallbacks.setPushNotificationIcon(resId);
+
     }
 
     /**
@@ -69,7 +66,6 @@ public class MPMessagingAPI {
      * @param resId the resource id of a string
      */
     public void setPushNotificationTitle(int resId) {
-        mMessagingConfigCallbacks.setPushNotificationTitle(resId);
     }
 
     /**
@@ -78,15 +74,14 @@ public class MPMessagingAPI {
      * @param senderId the SENDER_ID for the application
      */
     public void enablePushNotifications(String senderId) {
-        if (!MPUtility.isGcmServicesAvailable()) {
-            ConfigManager.log(MParticle.LogLevel.ERROR, "GoogleCloudMessaging library not found - you must add Google Play Services 3.1 or later to your application.");
+        if (!MPUtility.isInstanceIdAvailable()) {
+            ConfigManager.log(MParticle.LogLevel.ERROR, "Push is enabled but Google Cloud Messaging library not found - you must add com.google.android.gms:play-services-gcm:7.5 or later to your application.");
         }else if (!MPUtility.isServiceAvailable(mContext, MPService.class)){
             ConfigManager.log(MParticle.LogLevel.ERROR, "Push is enabled but you have not added <service android:name=\"com.mparticle.MPService\" /> to the <application> section of your AndroidManifest.xml");
         }else if (!MPUtility.checkPermission(mContext, "com.google.android.c2dm.permission.RECEIVE")){
             ConfigManager.log(MParticle.LogLevel.ERROR, "Attempted to enable push notifications without required permission: ", "\"com.google.android.c2dm.permission.RECEIVE\"");
         }else {
-            mMessagingConfigCallbacks.setPushSenderId(senderId);
-            PushRegistrationHelper.enablePushNotifications(mContext, senderId, mMessagingConfigCallbacks);
+            PushRegistrationHelper.requestInstanceId(mContext, senderId);
         }
     }
 
@@ -104,7 +99,6 @@ public class MPMessagingAPI {
      * @param enabled
      */
     public void setNotificationSoundEnabled(Boolean enabled) {
-        mMessagingConfigCallbacks.setPushSoundEnabled(enabled);
     }
 
     /**
@@ -114,6 +108,5 @@ public class MPMessagingAPI {
      * @param enabled
      */
     public void setNotificationVibrationEnabled(Boolean enabled) {
-        mMessagingConfigCallbacks.setPushVibrationEnabled(enabled);
     }
 }

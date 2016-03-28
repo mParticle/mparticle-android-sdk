@@ -10,7 +10,6 @@ import android.location.Location;
 import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Build;
-import android.support.annotation.Nullable;
 import android.util.Log;
 import android.webkit.WebView;
 
@@ -726,47 +725,6 @@ public class MParticle {
     }
 
     /**
-     * Enable or disable measuring network performance.
-     */
-    public void setNetworkTrackingEnabled(boolean enabled) {
-
-    }
-
-
-    /**
-     * Exclude the given URL substring from network measurement tracking. This method may be called repeatedly to add
-     * multiple excluded URLs.
-     *
-     * @param url
-     * @see #resetNetworkPerformanceExclusionsAndFilters()
-     */
-    public void excludeUrlFromNetworkPerformanceMeasurement(String url) {
-
-    }
-
-    /**
-     * Specify a filter for query strings that should be logged. Call this method repeatedly to specify
-     * multiple query string filters. By default, query strings will be removed from all measured URLs.
-     *
-     * @param filter
-     * @see #resetNetworkPerformanceExclusionsAndFilters()
-     */
-    public void addNetworkPerformanceQueryOnlyFilter(String filter) {
-
-    }
-
-    /**
-     * Remove all previously excluded URLs and allowed query filters. After this, all URLs will be
-     * measured, and all query strings will be redacted when logging measurements.
-     *
-     * @see #excludeUrlFromNetworkPerformanceMeasurement(String)
-     * @see #addNetworkPerformanceQueryOnlyFilter(String)
-     */
-    public void resetNetworkPerformanceExclusionsAndFilters() {
-
-    }
-
-    /**
      * Logs an Exception
      *
      * @param exception an Exception
@@ -1103,7 +1061,7 @@ public class MParticle {
 
             mKitManager.setUserIdentity(id, identityType);
 
-            JSONArray userIdentities = getUserIdentities();
+            JSONArray userIdentities = getUserIdentityJson();
 
             try {
                 int index = -1;
@@ -1137,8 +1095,7 @@ public class MParticle {
         }
     }
 
-
-    public JSONArray getUserIdentities(){
+    private JSONArray getUserIdentityJson(){
         if (mUserIdentities == null){
             String userIds = mPreferences.getString(PrefKeys.USER_IDENTITIES + mApiKey, null);
 
@@ -1168,7 +1125,28 @@ public class MParticle {
                 //swallow this
             }
         }
+
         return mUserIdentities;
+
+    }
+
+    public Map<IdentityType, String> getUserIdentities(){
+        JSONArray identities = getUserIdentityJson();
+        Map<IdentityType, String> identityTypeStringMap = new HashMap<IdentityType, String>(identities.length());
+
+        for (int i = 0; i < identities.length(); i++) {
+            try {
+                JSONObject identity = identities.getJSONObject(i);
+                identityTypeStringMap.put(
+                        IdentityType.parseInt(identity.getInt(MessageKey.IDENTITY_NAME)),
+                        identity.getString(MessageKey.IDENTITY_VALUE)
+                );
+            }catch (JSONException jse) {
+
+            }
+        }
+
+        return identityTypeStringMap;
 
     }
 
@@ -1180,7 +1158,7 @@ public class MParticle {
      * @param id the id to remove
      */
     public void removeUserIdentity(String id) {
-        JSONArray userIdentities = getUserIdentities();
+        JSONArray userIdentities = getUserIdentityJson();
         if (id != null && id.length() > 0) {
             try {
                 int indexToRemove = -1;
@@ -1395,7 +1373,7 @@ public class MParticle {
      */
     public MPMessagingAPI Messaging() {
         if (mMessaging == null){
-            mMessaging = new MPMessagingAPI(mAppContext, mConfigManager);
+            mMessaging = new MPMessagingAPI(mAppContext);
         }
         return mMessaging;
     }
@@ -1511,9 +1489,10 @@ public class MParticle {
         mMessageManager.saveGcmMessage(cloudMessage, appState);
     }
 
-    public void logPushRegistration(String registrationId) {
+    public void logPushRegistration(String instanceId, String senderId) {
         mAppStateManager.ensureActiveSession();
-        mMessageManager.setPushRegistrationId(registrationId, true);
+        mMessageManager.setPushRegistrationId(instanceId, true);
+        mKitManager.onPushRegistration(instanceId, senderId);
     }
 
     void logNotification(MPCloudNotificationMessage cloudMessage, CloudAction action, boolean startSession, String appState, int behavior) {

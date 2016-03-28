@@ -37,8 +37,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class KitManagerImpl extends KitManager implements DeepLinkListener {
     KitIntegrationFactory mKitIntegrationFactory;
-    private static final String IDENTITY_NAME = "n";
-    private static final String IDENTITY_VALUE = "i";
     private static final String RESERVED_KEY_LTV = "$Amount";
 
     private static final String METHOD_NAME = "$MethodName";
@@ -62,7 +60,7 @@ public class KitManagerImpl extends KitManager implements DeepLinkListener {
 
     @Override
     public void updateKits(JSONArray kitConfigs) {
-        String pushToken = PushRegistrationHelper.getRegistrationId(getContext());
+        PushRegistrationHelper.PushRegistration pushRegistration = PushRegistrationHelper.getLatestPushRegistration(getContext());
         HashSet<Integer> activeIds = new HashSet<Integer>();
         int currentId = 0;
         if (kitConfigs != null) {
@@ -87,8 +85,11 @@ public class KitManagerImpl extends KitManager implements DeepLinkListener {
                             syncUserIdentities((KitIntegration.AttributeListener) provider, provider.getConfiguration());
                         }
 
-                        if (!MPUtility.isEmpty(pushToken) && provider instanceof KitIntegration.PushListener) {
-                            ((KitIntegration.PushListener) provider).onPushRegistration(pushToken, "unknown");
+                        if (pushRegistration != null && !MPUtility.isEmpty(pushRegistration.instanceId) && provider instanceof KitIntegration.PushListener) {
+                            if (((KitIntegration.PushListener) provider).onPushRegistration(pushRegistration.instanceId, pushRegistration.senderId)) {
+                                ReportingMessage message = ReportingMessage.fromPushRegistrationMessage(provider);
+                                getReportingManager().log(message);
+                            }
                         }
 
                     }
@@ -351,9 +352,10 @@ public class KitManagerImpl extends KitManager implements DeepLinkListener {
             if (provider instanceof KitIntegration.PushListener) {
                 try {
                     if (!provider.isDisabled()) {
-                        ((KitIntegration.PushListener) provider).onPushRegistration(token, senderId);
-                        ReportingMessage message = ReportingMessage.fromPushRegistrationMessage(provider);
-                        getReportingManager().log(message);
+                        if (((KitIntegration.PushListener) provider).onPushRegistration(token, senderId)) {
+                            ReportingMessage message = ReportingMessage.fromPushRegistrationMessage(provider);
+                            getReportingManager().log(message);
+                        }
                         return true;
                     }
                 } catch (Exception e) {
@@ -378,18 +380,11 @@ public class KitManagerImpl extends KitManager implements DeepLinkListener {
     }
 
     private void syncUserIdentities(KitIntegration.AttributeListener attributeListener, KitConfiguration configuration) {
-        JSONArray identities = getMpInstance().getUserIdentities();
+        Map<MParticle.IdentityType, String> identities = getMpInstance().getUserIdentities();
         if (identities != null) {
-            for (int i = 0; i < identities.length(); i++) {
-                try {
-                    JSONObject identity = identities.getJSONObject(i);
-                    MParticle.IdentityType type = MParticle.IdentityType.parseInt(identity.getInt(IDENTITY_NAME));
-                    if (configuration.shouldSetIdentity(type)) {
-                        String id = identity.getString(IDENTITY_VALUE);
-                        attributeListener.setUserIdentity(type, id);
-                    }
-                } catch (JSONException jse) {
-                    //swallow
+            for (Map.Entry<MParticle.IdentityType, String> entry : identities.entrySet()){
+                if (configuration.shouldSetIdentity(entry.getKey())) {
+                    attributeListener.setUserIdentity(entry.getKey(), entry.getValue());
                 }
             }
         }

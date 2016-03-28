@@ -18,7 +18,6 @@ import android.os.Process;
 import android.telephony.TelephonyManager;
 
 import com.mparticle.MPEvent;
-import com.mparticle.MPUnityException;
 import com.mparticle.MParticle;
 import com.mparticle.commerce.CommerceEvent;
 import com.mparticle.internal.Constants.MessageKey;
@@ -27,7 +26,6 @@ import com.mparticle.messaging.CloudAction;
 import com.mparticle.messaging.MPCloudNotificationMessage;
 import com.mparticle.messaging.ProviderCloudMessage;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -399,10 +397,6 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
         }
     }
 
-    public ReportingMessage logReportingMessage() {
-        return null;
-    }
-
     public MPMessage logErrorEvent(String errorMessage, Throwable t, JSONObject attributes) {
         return logErrorEvent(errorMessage, t, attributes, true);
     }
@@ -416,15 +410,10 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
             if (t != null) {
                 message.put(MessageKey.ERROR_MESSAGE, t.getMessage());
                 message.put(MessageKey.ERROR_SEVERITY, caught ? "error" : "fatal");
-                if (t instanceof MPUnityException){
-                    message.put(MessageKey.ERROR_CLASS, t.getMessage());
-                    message.put(MessageKey.ERROR_STACK_TRACE, ((MPUnityException)t).getManualStackTrace());
-                }else {
-                    message.put(MessageKey.ERROR_CLASS, t.getClass().getCanonicalName());
-                    StringWriter stringWriter = new StringWriter();
-                    t.printStackTrace(new PrintWriter(stringWriter));
-                    message.put(MessageKey.ERROR_STACK_TRACE, stringWriter.toString());
-                }
+                message.put(MessageKey.ERROR_CLASS, t.getClass().getCanonicalName());
+                StringWriter stringWriter = new StringWriter();
+                t.printStackTrace(new PrintWriter(stringWriter));
+                message.put(MessageKey.ERROR_STACK_TRACE, stringWriter.toString());
                 message.put(MessageKey.ERROR_UNCAUGHT, String.valueOf(caught));
                 message.put(MessageKey.ERROR_SESSION_COUNT, getCurrentSessionCounter());
                 mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
@@ -608,9 +597,9 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
             message.put(MessageKey.PAYLOAD, cloudMessage.getRedactedJsonPayload().toString());
             message.put(MessageKey.PUSH_TYPE, Constants.Push.MESSAGE_TYPE_RECEIVED);
 
-            String regId = PushRegistrationHelper.getRegistrationId(mContext);
-            if ((regId != null) && (regId.length() > 0)) {
-                message.put(MessageKey.PUSH_TOKEN, regId);
+            PushRegistrationHelper.PushRegistration registration = PushRegistrationHelper.getLatestPushRegistration(mContext);
+            if ((registration != null) && (registration.instanceId != null) && (registration.instanceId.length() > 0)) {
+                message.put(MessageKey.PUSH_TOKEN, registration.instanceId);
             }
             message.put(MessageKey.APP_STATE, appState);
             mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
@@ -644,9 +633,9 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
                 message.put(MessageKey.PUSH_ACTION_NAME, title);
             }
 
-            String regId = PushRegistrationHelper.getRegistrationId(mContext);
-            if ((regId != null) && (regId.length() > 0)) {
-                message.put(MessageKey.PUSH_TOKEN, regId);
+            PushRegistrationHelper.PushRegistration registration = PushRegistrationHelper.getLatestPushRegistration(mContext);
+            if ((registration != null) && (registration.instanceId != null) && (registration.instanceId.length() > 0)) {
+                message.put(MessageKey.PUSH_TOKEN, registration.instanceId);
             }
             message.put(MessageKey.APP_STATE, appState);
             mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));

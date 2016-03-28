@@ -97,8 +97,7 @@ public class MPService extends IntentService {
             String action = intent.getAction();
             Log.i("MPService", "Handling action: " + action);
             if (action.equals("com.google.android.c2dm.intent.REGISTRATION")) {
-                MParticle.start(getApplicationContext());
-               // MParticle.getInstance().getKitManager().handleIntent(intent);
+                //Android will an Intent with this action, but we don't care - we capture the ID synchronously.
             } else if (action.equals("com.google.android.c2dm.intent.RECEIVE")) {
                 generateCloudMessage(intent);
             } else if (action.startsWith(INTERNAL_NOTIFICATION_TAP)) {
@@ -124,7 +123,6 @@ public class MPService extends IntentService {
 
     private void showNotification(final AbstractCloudMessage message) {
         if (!message.getDisplayed()) {
-            MParticle.getInstance().setNetworkTrackingEnabled(false);
             (new AsyncTask<AbstractCloudMessage, Void, Notification>() {
                 @Override
                 protected Notification doInBackground(AbstractCloudMessage... params) {
@@ -185,7 +183,7 @@ public class MPService extends IntentService {
         if (!processSilentPush(getApplicationContext(), intent.getExtras())){
             try {
                 MParticle.start(this);
-                boolean handled = false;
+                boolean handled = MParticle.getInstance().getKitManager().onMessageReceived(getApplicationContext(), intent);
                 AbstractCloudMessage cloudMessage = AbstractCloudMessage.createMessage(intent, ConfigManager.getPushKeys(this));
                 cloudMessage.setDisplayed(handled);
                 String appState = getAppState();

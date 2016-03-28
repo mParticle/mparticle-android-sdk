@@ -446,9 +446,9 @@ public class MPUtility {
         return false;
     }
 
-    public static boolean isGcmServicesAvailable() {
+    public static boolean isInstanceIdAvailable() {
         try {
-            Class.forName("com.google.android.gms.gcm.GoogleCloudMessaging");
+            Class.forName("com.google.android.gms.iid.InstanceID");
             return true;
         } catch (Exception cnfe) {
 

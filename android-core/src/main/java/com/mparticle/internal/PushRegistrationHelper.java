@@ -5,18 +5,13 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.Build;
+import android.os.Looper;
 
-import com.google.android.gms.gcm.GoogleCloudMessaging;
+import com.google.android.gms.iid.InstanceID;
 import com.mparticle.MParticle;
-import com.mparticle.messaging.MessagingConfigCallbacks;
-
-import java.io.IOException;
 
 public class PushRegistrationHelper {
 
-    /**
-     * @return Application's version code from the {@code PackageManager}.
-     */
     private static int getAppVersion(Context context) {
         try {
             PackageInfo packageInfo = context.getPackageManager()
@@ -28,19 +23,13 @@ public class PushRegistrationHelper {
         }
     }
 
-    /**
-     * Gets the current registration ID for application on GCM service.
-     * If result is empty, the app needs to register.
-     *
-     * @return registration ID, or empty string if there is no existing
-     * registration ID.
-     */
-    public static String getRegistrationId(Context context) {
+    public static PushRegistration getLatestPushRegistration(Context context) {
         SharedPreferences preferences = context.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
-        String registrationId = preferences.getString(Constants.PrefKeys.PUSH_REGISTRATION_ID, "");
+        String registrationId = preferences.getString(Constants.PrefKeys.PUSH_REGISTRATION_INSTANCE_ID, "");
         if (MPUtility.isEmpty(registrationId)) {
             return null;
         }
+        String senderId = preferences.getString(Constants.PrefKeys.PUSH_REGISTRATION_SENDER_ID, "");
         // Check if app was updated; if so, it must clear the registration ID
         // since the existing regID is not guaranteed to work with the new
         // app version.
@@ -48,45 +37,57 @@ public class PushRegistrationHelper {
         int currentVersion = getAppVersion(context);
         int osVersion = preferences.getInt(Constants.PrefKeys.PROPERTY_OS_VERSION, Integer.MIN_VALUE);
         if (registeredVersion != currentVersion || osVersion != Build.VERSION.SDK_INT) {
-            ConfigManager.log(MParticle.LogLevel.DEBUG, "App or OS version changed, clearing push reg ID.");
+            ConfigManager.log(MParticle.LogLevel.DEBUG, "App or OS version changed, clearing instance ID.");
             return null;
         }
-        return registrationId;
+        PushRegistration registration = new PushRegistration();
+        registration.instanceId = registrationId;
+        registration.senderId = senderId;
+        return registration;
     }
 
-    /**
-     * Register the application for GCM notifications
-     *
-     * @param senderId the SENDER_ID for the application
-     * @param mMessagingConfigCallbacks
-     */
-    public static void enablePushNotifications(final Context context, final String senderId, final MessagingConfigCallbacks mMessagingConfigCallbacks) {
-        if (getRegistrationId(context) == null && MPUtility.isSupportLibAvailable() && MPUtility.isGcmServicesAvailable()) {
-            new Thread(new Runnable() {
+    public static void requestInstanceId(Context context) {
+        requestInstanceId(context, MParticle.getInstance().getConfigManager().getPushSenderId());
+    }
+
+    public static class PushRegistration {
+        public String senderId;
+        public String instanceId;
+    }
+
+    public static void requestInstanceId(final Context context, final String senderId) {
+        if (getLatestPushRegistration(context) == null && MPUtility.isInstanceIdAvailable()) {
+            final Runnable instanceRunnable = new Runnable() {
                 @Override
                 public void run() {
                     try {
-                        String registrationId =  GoogleCloudMessaging.getInstance(context).register(senderId);
-                        mMessagingConfigCallbacks.setPushRegistrationId(registrationId);
+                        String instanceId =  InstanceID.getInstance(context).getToken(senderId, "GCM");
+                        MParticle.getInstance().logPushRegistration(senderId, instanceId);
+                        PushRegistration registration = new PushRegistration();
+                        registration.instanceId = instanceId;
+                        registration.senderId = senderId;
+                        setInstanceId(context, registration);
                     } catch (Exception ex) {
-                        ConfigManager.log(MParticle.LogLevel.ERROR, "Error registering for GCM: ", ex.getMessage());
+                        ConfigManager.log(MParticle.LogLevel.ERROR, "Error registering for GCM Instance ID: ", ex.getMessage());
                     }
                 }
-            }).start();
+            };
+            if (Looper.getMainLooper() == Looper.myLooper()) {
+                new Thread(instanceRunnable).start();
+            }else{
+                instanceRunnable.run();
+            }
+
         }
     }
 
-    /**
-     * Stores the registration ID and app versionCode in the application's6
-     * {@code SharedPreferences}.
-     *
-     * @param regId   registration ID
-     */
-    public static void storeRegistrationId(Context context, String regId) {
+
+    public static void setInstanceId(Context context, PushRegistration registration) {
         int appVersion = getAppVersion(context);
         SharedPreferences preferences = context.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = preferences.edit();
-        editor.putString(Constants.PrefKeys.PUSH_REGISTRATION_ID, regId);
+        editor.putString(Constants.PrefKeys.PUSH_REGISTRATION_INSTANCE_ID, registration.instanceId);
+        editor.putString(Constants.PrefKeys.PUSH_REGISTRATION_SENDER_ID, registration.senderId);
         editor.putInt(Constants.PrefKeys.PROPERTY_APP_VERSION, appVersion);
         editor.putInt(Constants.PrefKeys.PROPERTY_OS_VERSION, Build.VERSION.SDK_INT);
         editor.apply();
@@ -96,16 +97,11 @@ public class PushRegistrationHelper {
      * Unregister the device from GCM notifications
      */
     public static void disablePushNotifications(final Context context) {
-        if (MPUtility.isGcmServicesAvailable()) {
+        if (MPUtility.isInstanceIdAvailable()) {
             new Thread(new Runnable() {
                 @Override
                 public void run() {
-                    try {
-                        GoogleCloudMessaging.getInstance(context).unregister();
-                        PushRegistrationHelper.clearPushRegistrationId(context);
-                    } catch (IOException ex) {
-                        ConfigManager.log(MParticle.LogLevel.ERROR, "Error unregistering for GCM", ex.getMessage());
-                    }
+                    PushRegistrationHelper.clearInstanceId(context);
                 }
             }).start();
         }
@@ -114,10 +110,11 @@ public class PushRegistrationHelper {
     /**
      * Manually un-register the device token for receiving push notifications from mParticle
      */
-    public static void clearPushRegistrationId(Context context) {
+    public static void clearInstanceId(Context context) {
         SharedPreferences preferences = context.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
         preferences.edit()
-                .remove(Constants.PrefKeys.PUSH_REGISTRATION_ID)
+                .remove(Constants.PrefKeys.PUSH_REGISTRATION_INSTANCE_ID)
+                .remove(Constants.PrefKeys.PUSH_REGISTRATION_SENDER_ID)
                 .putBoolean(Constants.PrefKeys.PUSH_ENABLED, false)
                 .apply();
     }
