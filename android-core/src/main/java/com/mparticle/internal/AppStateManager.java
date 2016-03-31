@@ -32,7 +32,6 @@ import java.util.concurrent.atomic.AtomicLong;
     private ConfigManager mConfigManager;
     Context mContext;
     private final SharedPreferences mPreferences;
-    private KitManager mKitManager;
     private Session mCurrentSession = new Session();
     private WeakReference<Activity> mCurrentActivityReference = null;
 
@@ -104,10 +103,6 @@ import java.util.concurrent.atomic.AtomicLong;
         }
     }
 
-    public void setKitManager(KitManager manager){
-        mKitManager = manager;
-    }
-
     public void setConfigManager(ConfigManager manager){
         mConfigManager = manager;
     }
@@ -170,7 +165,7 @@ import java.util.concurrent.atomic.AtomicLong;
                 MParticle.getInstance().logScreen(mCurrentActivityName);
             }
 
-            mKitManager.onActivityStarted(activity);
+            MParticle.getInstance().getKitManager().onActivityStarted(activity);
         }catch (Exception e){
             if (BuildConfig.MP_DEBUG) {
                 ConfigManager.log(MParticle.LogLevel.ERROR, "Failed while trying to track activity start: " + e.getMessage());
@@ -231,7 +226,7 @@ import java.util.concurrent.atomic.AtomicLong;
                                 .build()
                 );
             }
-            mKitManager.onActivityStopped(activity);
+            MParticle.getInstance().getKitManager().onActivityStopped(activity);
         }catch (Exception e){
             if (BuildConfig.MP_DEBUG) {
                 ConfigManager.log(MParticle.LogLevel.ERROR, "Failed while trying to track activity stop: " + e.getMessage());
@@ -308,15 +303,15 @@ import java.util.concurrent.atomic.AtomicLong;
     }
 
     public void onActivityCreated(Activity activity, Bundle savedInstanceState){
-        mKitManager.onActivityCreated(activity, savedInstanceState);
+        MParticle.getInstance().getKitManager().onActivityCreated(activity, savedInstanceState);
     }
 
     public void onActivityResumed(Activity activity){
-        mKitManager.onActivityResumed(activity);
+        MParticle.getInstance().getKitManager().onActivityResumed(activity);
     }
 
     public void onActivityPaused(Activity activity) {
-        mKitManager.onActivityPaused(activity);
+        MParticle.getInstance().getKitManager().onActivityPaused(activity);
     }
 
     private void logBackgrounded(){
@@ -369,11 +364,11 @@ import java.util.concurrent.atomic.AtomicLong;
     }
 
     public void onActivitySaveInstanceState(Activity activity, Bundle outState) {
-        mKitManager.onActivitySaveInstanceState(activity, outState);
+        MParticle.getInstance().getKitManager().onActivitySaveInstanceState(activity, outState);
     }
 
     public void onActivityDestroyed(Activity activity) {
-        mKitManager.onActivityDestroyed(activity);
+        MParticle.getInstance().getKitManager().onActivityDestroyed(activity);
     }
 
     public WeakReference<Activity> getCurrentActivity() {

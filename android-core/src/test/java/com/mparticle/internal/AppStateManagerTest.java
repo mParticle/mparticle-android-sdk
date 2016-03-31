@@ -29,12 +29,10 @@ public class AppStateManagerTest {
     @Before
     public void setup(){
         MockContext context = new MockContext();
-
         mockContext = (MockApplication) context.getApplicationContext();
         manager = new AppStateManager(mockContext, true);
         prefs = (MockSharedPreferences) mockContext.getSharedPreferences(null, 0);
         manager.setConfigManager(Mockito.mock(ConfigManager.class));
-        manager.setKitManager(Mockito.mock(KitManager.class));
         manager.setMessageManager(Mockito.mock(MessageManager.class));
         MParticle.setInstance(Mockito.mock(MParticle.class));
         manager.delayedBackgroundCheckHandler = Mockito.mock(Handler.class);

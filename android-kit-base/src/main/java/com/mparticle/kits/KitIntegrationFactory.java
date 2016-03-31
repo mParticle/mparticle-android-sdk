@@ -42,7 +42,7 @@ public class KitIntegrationFactory {
         return kits;
     }
 
-    public KitIntegration createInstance(KitManager manager, KitConfiguration configuration) throws JSONException, ClassNotFoundException{
+    public KitIntegration createInstance(KitManagerImpl manager, KitConfiguration configuration) throws JSONException, ClassNotFoundException{
         KitIntegration kit = createInstance(manager, configuration.getKitId());
         if (kit != null) {
             kit.setConfiguration(configuration);
@@ -50,10 +50,10 @@ public class KitIntegrationFactory {
         return kit;
     }
 
-    public KitIntegration createInstance(KitManager manager, int moduleId) throws JSONException, ClassNotFoundException{
+    public KitIntegration createInstance(KitManagerImpl manager, int moduleId) throws JSONException, ClassNotFoundException{
         if (supportedKits != null) {
             try {
-                Constructor<KitIntegration> constructor = supportedKits.get(moduleId).getDeclaredConstructor();
+                Constructor<KitIntegration> constructor = supportedKits.get(moduleId).getConstructor();
                 constructor.setAccessible(true);
                 return constructor.newInstance()
                         .setKitManager(manager);
@@ -95,6 +95,9 @@ public class KitIntegrationFactory {
      * @return
      */
     public Set<Integer> getSupportedKits() {
+        if (supportedKits == null) {
+            return null;
+        }
         return supportedKits.keySet();
     }
 

@@ -12,172 +12,72 @@ import com.mparticle.MParticle;
 import com.mparticle.commerce.CommerceEvent;
 
 import org.json.JSONArray;
-import org.json.JSONObject;
 
 import java.lang.ref.WeakReference;
 import java.util.Map;
 import java.util.Set;
 
-public class KitManager {
-    private Context mContext;
-    private AppStateManager mAppStateManager;
-    private ConfigManager mConfigManager;
-    private MParticle mParticle;
-    private ReportingManager mReportingManager;
+public interface KitManager {
 
-    public final KitManager setMpInstance(MParticle mParticle) {
-        this.mParticle = mParticle;
-        return this;
-    }
+    WeakReference<Activity> getCurrentActivity();
 
-    public MParticle getMpInstance() {
-        return this.mParticle;
-    }
+    void logEvent(MPEvent event);
 
-    public void logEvent(MPEvent event) {
-    }
+    void logCommerceEvent(CommerceEvent event);
 
-    public void logCommerceEvent(CommerceEvent event) {
-    }
+    void logScreen(MPEvent screenEvent);
 
-    public void logScreen(String eventName, Map<String, String> info) {
-    }
+    void leaveBreadcrumb(String breadcrumb);
 
-    public void leaveBreadcrumb(String breadcrumb) {
-    }
+    void logError(String message, Map<String, String> eventData);
 
-    public void logError(String message, Map<String, String> eventData) {
-    }
+    void logNetworkPerformance(String url, long startTime, String method, long length, long bytesSent, long bytesReceived, String requestString, int responseCode);
 
-    public void logNetworkPerformance(String url, long startTime, String method, long length, long bytesSent, long bytesReceived, String requestString, int responseCode) {
-    }
+    void checkForDeepLink();
 
-    public void checkForDeepLink() {
-    }
+    void logException(Exception exception, Map<String, String> eventData, String message);
 
-    public void logException(Exception exception, Map<String, String> eventData, String message) {
-    }
+    void setLocation(Location location);
 
-    public void setLocation(Location location) {
-    }
+    void logout();
 
-    public void logout() {
-    }
+    void setUserAttribute(String key, String value);
 
-    public void setUserAttribute(String key, String value) {
-    }
+    void removeUserAttribute(String key);
 
-    public void removeUserAttribute(String key) {
-    }
+    void setUserIdentity(String id, MParticle.IdentityType identityType);
 
-    public void setUserIdentity(String id, MParticle.IdentityType identityType) {
-    }
+    void removeUserIdentity(MParticle.IdentityType id);
 
-    public void removeUserIdentity(MParticle.IdentityType id) {
-    }
+    void setOptOut(boolean optOutStatus);
 
-    public void setOptOut(boolean optOutStatus) {
+    Uri getSurveyUrl(int serviceProviderId, Map<String, String> mUserAttributes);
 
-    }
+    boolean onMessageReceived(Context context, Intent intent);
 
-    public Uri getSurveyUrl(int serviceProviderId, Map<String, String> mUserAttributes) {
-        return null;
-    }
+    boolean onPushRegistration(String instanceId, String senderId);
 
-    public boolean onMessageReceived(Context context, Intent intent) {
-        return false;
-    }
+    boolean isKitActive(int kitId);
 
-    public boolean onPushRegistration(String instanceId, String senderId) {
-        return false;
-    }
+    Object getKitInstance(int kitId);
 
-    public boolean isKitActive(int kitId) {
-        return false;
-    }
+    Set<Integer> getSupportedKits();
 
-    public Object getKitInstance(int kitId) {
-        return null;
-    }
+    void updateKits(JSONArray jsonArray);
 
-    public Set<Integer> getSupportedKits() {
-        return null;
-    }
+    String getActiveModuleIds();
 
-    public void updateKits(JSONArray jsonArray) {
-    }
+    void onActivityCreated(Activity activity, Bundle savedInstanceState);
 
-    public String getActiveModuleIds() {
-        return null;
-    }
+    void onActivityStarted(Activity activity);
 
-    public void onActivityCreated(Activity activity, Bundle savedInstanceState) {
-    }
+    void onActivityResumed(Activity activity);
 
-    public void onActivityStarted(Activity activity) {
-    }
+    void onActivityPaused(Activity activity);
 
-    public void onActivityResumed(Activity activity) {
-    }
+    void onActivityStopped(Activity activity);
 
-    public void onActivityPaused(Activity activity) {
-    }
+    void onActivitySaveInstanceState(Activity activity, Bundle outState);
 
-    public void onActivityStopped(Activity activity) {
-    }
-
-    public void onActivitySaveInstanceState(Activity activity, Bundle outState) {
-    }
-
-    public void onActivityDestroyed(Activity activity) {
-    }
-
-    public void setInstallReferrer(Context context, Intent intent) {
-
-    }
-
-    public final void setReportingManager(ReportingManager reportingManager) {
-        mReportingManager = reportingManager;
-    }
-
-    public final ReportingManager getReportingManager() {
-        return mReportingManager;
-    }
-
-    public final void setAppStateManager(AppStateManager appStateManager) {
-        mAppStateManager = appStateManager;
-    }
-
-    public final void setConfigurationManager(ConfigManager configManager) {
-        mConfigManager = configManager;
-    }
-
-    public final Context getContext() {
-        return mContext;
-    }
-
-    public final KitManager setContext(Context context) {
-        mContext = context;
-        return this;
-    }
-
-    public boolean isBackgrounded() {
-        return false;
-    }
-
-    public int getUserBucket() {
-        return getConfigurationManager().getUserBucket();
-    }
-
-    public ConfigManager getConfigurationManager() {
-        return mConfigManager;
-    }
-
-    public boolean isOptedOut() {
-        return !mConfigManager.isEnabled();
-    }
-
-    public WeakReference<Activity> getCurrentActivity() {
-        return mAppStateManager.getCurrentActivity();
-    }
+    void onActivityDestroyed(Activity activity);
 }

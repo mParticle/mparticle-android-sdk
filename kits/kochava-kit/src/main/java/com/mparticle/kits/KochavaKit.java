@@ -1,9 +1,11 @@
 package com.mparticle.kits;
 
 import android.content.Context;
+import android.content.Intent;
 import android.location.Location;
 
 import com.kochava.android.tracker.Feature;
+import com.kochava.android.tracker.ReferralCapture;
 import com.mparticle.MParticle;
 
 import java.util.HashMap;
@@ -59,6 +61,11 @@ public class KochavaKit extends KitIntegration implements KitIntegration.Attribu
     @Override
     public void removeUserAttribute(String key) {
 
+    }
+
+    @Override
+    public void setInstallReferrer(Intent intent) {
+        new ReferralCapture().onReceive(getContext(), intent);
     }
 
     @Override

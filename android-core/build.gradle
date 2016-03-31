@@ -31,12 +31,19 @@ android {
 
     }
 
+    def gitHash = "git rev-parse --short HEAD".execute().text.trim()
+
+    if (gitHash == null || gitHash.length() == 0) {
+        gitHash = System.getenv("MP_GIT_SHA").substring(0, 7)
+    }
+
     defaultConfig {
         minSdkVersion 9
         targetSdkVersion 23
         versionName project.version
         versionCode Integer.parseInt(new Date().format('yyyyMMdd'))
 
+        buildConfigField "String", "GIT_SHA", "\"$gitHash\""
         buildConfigField "String", "MP_URL", url
         buildConfigField "String", "MP_CONFIG_URL", configurationUrl
         buildConfigField "Boolean", "MP_DEBUG", "false"

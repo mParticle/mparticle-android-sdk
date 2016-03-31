@@ -4,10 +4,12 @@ package com.mparticle.kits;
 import android.app.Activity;
 import android.location.Location;
 import android.net.Uri;
+import android.os.Looper;
 
-import com.mparticle.internal.ConfigManager;
 import com.mparticle.MPEvent;
 import com.mparticle.MParticle;
+import com.mparticle.internal.ConfigManager;
+import com.mparticle.internal.KitFrameworkWrapper;
 import com.mparticle.mock.MockContext;
 import com.mparticle.mock.MockKitConfiguration;
 import com.mparticle.mock.MockKitIntegrationFactory;
@@ -17,8 +19,11 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -27,26 +32,34 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static junit.framework.Assert.*;
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertNotNull;
+import static junit.framework.Assert.assertNull;
+import static junit.framework.Assert.assertTrue;
 
+@RunWith(PowerMockRunner.class)
 public class KitManagerTest  {
 
     private KitManagerImpl manager;
 
     @Before
     public void setUp() throws Exception {
-        manager = new MockKitManagerImpl();
-        manager.setContext(new MockContext());
+        manager = new MockKitManagerImpl(new MockContext(), null, null, null);
         assertNotNull(manager.providers);
         MockKitIntegrationFactory mockKitFactory = new MockKitIntegrationFactory();
         manager.setKitFactory(mockKitFactory);
         MParticle mockMp = Mockito.mock(MParticle.class);
-        manager.setMpInstance(mockMp);
+        Mockito.when(mockMp.getKitManager()).thenReturn(Mockito.mock(KitFrameworkWrapper.class));
         MParticle.setInstance(mockMp);
     }
 
     @Test
+    @PrepareForTest({Looper.class})
     public void testUpdateKits() throws Exception {
+        PowerMockito.mockStatic(Looper.class);
+        Looper looper = PowerMockito.mock(Looper.class);
+        Mockito.when(Looper.myLooper()).thenReturn(looper);
+        Mockito.when(Looper.getMainLooper()).thenReturn(looper);
         JSONObject configJson = new JSONObject(TestConstants.SAMPLE_EK_CONFIG);
         manager.updateKits(null);
         assertNotNull(manager.providers);
@@ -74,9 +87,8 @@ public class KitManagerTest  {
 
     @Test
     public void testLogScreen() throws Exception {
-        manager.logScreen(null, null);
-        manager.logScreen("name", null);
-        manager.logScreen("name", new Hashtable<String, String>());
+        manager.logScreen(null);
+        manager.logScreen(new MPEvent.Builder("name").build());
     }
 
     @Test
@@ -117,7 +129,12 @@ public class KitManagerTest  {
     }
 
     @Test
+    @PrepareForTest({Looper.class})
     public void testGetActiveModuleIds() throws Exception {
+        PowerMockito.mockStatic(Looper.class);
+        Looper looper = PowerMockito.mock(Looper.class);
+        Mockito.when(Looper.myLooper()).thenReturn(looper);
+        Mockito.when(Looper.getMainLooper()).thenReturn(looper);
         JSONObject configJson = new JSONObject(TestConstants.SAMPLE_EK_CONFIG);
         JSONArray array = configJson.optJSONArray(ConfigManager.KEY_EMBEDDED_KITS);
         manager.updateKits(array);
@@ -132,7 +149,12 @@ public class KitManagerTest  {
     }
 
     @Test
+    @PrepareForTest({Looper.class})
     public void testGetSurveyUrl() throws Exception {
+        PowerMockito.mockStatic(Looper.class);
+        Looper looper = PowerMockito.mock(Looper.class);
+        Mockito.when(Looper.myLooper()).thenReturn(looper);
+        Mockito.when(Looper.getMainLooper()).thenReturn(looper);
         JSONObject configJson = new JSONObject(TestConstants.SAMPLE_EK_CONFIG);
         JSONArray array = configJson.optJSONArray(ConfigManager.KEY_EMBEDDED_KITS);
         manager.updateKits(array);

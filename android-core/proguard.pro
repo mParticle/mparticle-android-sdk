@@ -21,9 +21,10 @@
 -keep class com.mparticle.DeepLinkResult { *; }
 -keep class com.mparticle.internal.AppStateManager { *; }
 -keep class com.mparticle.internal.KitManager { *; }
+-keep class com.mparticle.internal.KitFrameworkWrapper { *; }
 -keep class com.mparticle.internal.ConfigManager { *; }
 -keep class com.mparticle.internal.ReportingManager { *; }
--keep class com.mparticle.internal.ReportingMessage { *; }
+-keep class com.mparticle.internal.JsonReportingMessage { *; }
 -keep class com.mparticle.internal.MPUtility { *; }
 -keep class com.mparticle.internal.MPUtility$* { *; }
 -keep class com.mparticle.internal.PushRegistrationHelper { *; }

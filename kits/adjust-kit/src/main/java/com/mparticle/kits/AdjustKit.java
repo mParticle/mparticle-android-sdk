@@ -2,10 +2,12 @@ package com.mparticle.kits;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 
 import com.adjust.sdk.Adjust;
 import com.adjust.sdk.AdjustConfig;
+import com.adjust.sdk.AdjustReferrerReceiver;
 import com.adjust.sdk.LogLevel;
 import com.mparticle.MParticle;
 
@@ -61,6 +63,11 @@ public class AdjustKit extends KitIntegration implements KitIntegration.Activity
     protected List<ReportingMessage> onKitCreate(Map<String, String> settings, Context context) {
         initAdjust();
         return null;
+    }
+
+    @Override
+    public void setInstallReferrer(Intent intent) {
+        new AdjustReferrerReceiver().onReceive(getContext(), intent);
     }
 
     @Override

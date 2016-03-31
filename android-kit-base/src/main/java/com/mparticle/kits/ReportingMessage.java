@@ -6,6 +6,7 @@ import android.content.Intent;
 import com.mparticle.MPEvent;
 import com.mparticle.commerce.CommerceEvent;
 import com.mparticle.internal.CommerceEventUtil;
+import com.mparticle.internal.JsonReportingMessage;
 import com.mparticle.internal.MPUtility;
 import com.mparticle.kits.mappings.CustomMapping;
 
@@ -16,7 +17,7 @@ import org.json.JSONObject;
 import java.util.LinkedList;
 import java.util.Map;
 
-public class ReportingMessage implements com.mparticle.internal.ReportingMessage {
+public class ReportingMessage implements JsonReportingMessage {
     private final int moduleId;
     private String messageType;
     private final long timestamp;

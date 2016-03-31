@@ -10,6 +10,7 @@ import android.text.TextUtils;
 import com.localytics.android.Localytics;
 import com.localytics.android.LocalyticsActivityLifecycleCallbacks;
 import com.localytics.android.PushReceiver;
+import com.localytics.android.ReferralReceiver;
 import com.mparticle.MPEvent;
 import com.mparticle.MParticle;
 import com.mparticle.commerce.CommerceEvent;
@@ -59,6 +60,11 @@ public class LocalyticsKit extends KitIntegration implements KitIntegration.Even
     @Override
     public void setLocation(Location location) {
         Localytics.setLocation(location);
+    }
+
+    @Override
+    public void setInstallReferrer(Intent intent) {
+        new ReferralReceiver().onReceive(getContext(), intent);
     }
 
     @Override
@@ -211,17 +217,12 @@ public class LocalyticsKit extends KitIntegration implements KitIntegration.Even
     }
 
     @Override
-    public boolean isCommerceSupported() {
-        return true;
-    }
-
-    @Override
-    public boolean willHandleMessage(Set<String> keyset) {
+    public boolean willHandlePushMessage(Set<String> keyset) {
         return keyset.contains("ll");
     }
 
     @Override
-    public void onMessageReceived(Context context, Intent extras) {
+    public void onPushMessageReceived(Context context, Intent extras) {
         new PushReceiver().onReceive(context, extras);
     }
 

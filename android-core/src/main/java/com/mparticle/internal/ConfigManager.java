@@ -38,7 +38,6 @@ public class ConfigManager {
 
     static SharedPreferences mPreferences;
 
-    private KitManager mKitManager;
     AppConfig sLocalPrefs;
     private static JSONArray sPushKeys;
     private String mLogUnhandledExceptions = VALUE_APP_DEFINED;
@@ -65,23 +64,20 @@ public class ConfigManager {
         sLocalPrefs = new AppConfig(mContext, environment, mPreferences, apiKey, apiSecret);
     }
 
-    public void setKitManager(KitManager manager){
-        mKitManager = manager;
-    }
-
     /**
      * The is called on startup. The only thing that's completely necessary is that we fire up kits.
      */
-    public void restore(){
+    public JSONArray getLatestKitConfiguration(){
         String oldConfig = mPreferences.getString(CONFIG_JSON, null);
         if (!MPUtility.isEmpty(oldConfig)){
             try{
                 JSONObject oldConfigJson = new JSONObject(oldConfig);
-                mKitManager.updateKits(oldConfigJson.optJSONArray(KEY_EMBEDDED_KITS));
+                return oldConfigJson.optJSONArray(KEY_EMBEDDED_KITS);
             }catch (Exception jse){
 
             }
         }
+        return null;
     }
 
     void saveConfigJson(JSONObject json){
@@ -151,19 +147,12 @@ public class ConfigManager {
         editor.apply();
         applyConfig();
 
-        if (mKitManager != null) {
-            mKitManager.updateKits(responseJSON.optJSONArray(KEY_EMBEDDED_KITS));
-        }
-
+        MParticle.getInstance().getKitManager().updateKits(responseJSON.optJSONArray(KEY_EMBEDDED_KITS));
     }
 
     @Nullable
     public String getActiveModuleIds(){
-        if (mKitManager != null) {
-            return mKitManager.getActiveModuleIds();
-        }else {
-            return null;
-        }
+        return MParticle.getInstance().getKitManager().getActiveModuleIds();
     }
 
     /**

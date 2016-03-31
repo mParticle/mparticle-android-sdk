@@ -2,7 +2,7 @@ package com.mparticle.internal;
 
 import org.json.JSONObject;
 
-public interface ReportingMessage {
+public interface JsonReportingMessage {
     void setDevMode(boolean development);
 
     long getTimestamp();

@@ -3,6 +3,7 @@ package com.mparticle.kits;
 import android.app.Activity;
 import android.app.Application;
 import android.content.Context;
+import android.content.Intent;
 import android.text.TextUtils;
 
 import com.appsflyer.AFInAppEventParameterName;
@@ -53,11 +54,6 @@ public class AppsFlyerKit extends KitIntegration implements KitIntegration.Event
         AppsFlyerLib.getInstance().startTracking((Application) context.getApplicationContext(), getSettings().get(DEV_KEY));
         AppsFlyerLib.getInstance().setDebugLog(MParticle.getInstance().getEnvironment() == MParticle.Environment.Development);
         return null;
-    }
-
-    @Override
-    public boolean isCommerceSupported() {
-        return true;
     }
 
     @Override
@@ -250,5 +246,10 @@ public class AppsFlyerKit extends KitIntegration implements KitIntegration.Event
     @Override
     public void onAttributionFailure(String s) {
         onInstallConversionFailure(s);
+    }
+
+    @Override
+    public void setInstallReferrer(Intent intent) {
+        AppsFlyerLib.getInstance().onReceive(getContext(), intent);
     }
 }

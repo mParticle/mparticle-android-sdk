@@ -9,7 +9,7 @@ buildscript {
 
 allprojects {
     group = 'com.mparticle'
-    version = '4.4.8'
+    version = '5.0.0'
     repositories {
         mavenLocal()
         jcenter()

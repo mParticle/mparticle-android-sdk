@@ -39,6 +39,16 @@ public class CrittercismKit extends KitIntegration implements KitIntegration.Com
 
     @Override
     protected List<ReportingMessage> onKitCreate(Map<String, String> settings, Context context) {
+        onCreate();
+        return null;
+    }
+
+    /**
+     * Crittercism checks the stack trace for "onCreate" || "onResume" and will print a warning if not found.
+     *
+     * This method is a hack to prevent that warning from showing up in logcat.
+     */
+    private void onCreate() {
         if (mUserAttributes == null) {
             mUserAttributes = new JSONObject();
         }
@@ -47,8 +57,8 @@ public class CrittercismKit extends KitIntegration implements KitIntegration.Com
         }
         CrittercismConfig config = new CrittercismConfig();
         config.setServiceMonitoringEnabled(Boolean.parseBoolean(getSettings().get(SERVICE_MONITORING)));
+
         Crittercism.initialize(getContext(), getSettings().get(APP_ID), config);
-        return null;
     }
 
     @Override
@@ -88,11 +98,6 @@ public class CrittercismKit extends KitIntegration implements KitIntegration.Com
         List<ReportingMessage> messages = new LinkedList<ReportingMessage>();
         messages.add(ReportingMessage.fromEvent(this, event));
         return messages;
-    }
-
-    @Override
-    public boolean isCommerceSupported() {
-        return false;
     }
 
     @Override

@@ -3,24 +3,21 @@ package com.mparticle.kits;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.pm.PackageManager;
-import android.location.Location;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
 
 import com.kahuna.sdk.EmptyCredentialsException;
 import com.kahuna.sdk.EventBuilder;
+import com.kahuna.sdk.IKahunaUserCredentials;
 import com.kahuna.sdk.Kahuna;
 import com.kahuna.sdk.KahunaPushReceiver;
 import com.kahuna.sdk.KahunaPushService;
 import com.kahuna.sdk.KahunaUserAttributesKeys;
-import com.kahuna.sdk.IKahunaUserCredentials;
 import com.kahuna.sdk.KahunaUserCredentials;
 import com.mparticle.BuildConfig;
 import com.mparticle.MPEvent;
-import com.mparticle.MPReceiver;
 import com.mparticle.MParticle;
 import com.mparticle.commerce.CommerceEvent;
 import com.mparticle.commerce.Product;
@@ -119,8 +116,8 @@ public class KahunaKit extends KitIntegration implements KitIntegration.Commerce
     @Override
     protected List<ReportingMessage> onKitCreate(Map<String, String> settings, Context context) {
         Kahuna.getInstance().setDebugMode(MParticle.getInstance().getEnvironment() == MParticle.Environment.Development);
-        if (getKitManager().getConfigurationManager().isPushEnabled()) {
-            Kahuna.getInstance().onAppCreate(getContext(), getSettings().get(KEY_SECRET_KEY), getKitManager().getConfigurationManager().getPushSenderId());
+        if (MParticle.getInstance().getConfigManager().isPushEnabled()) {
+            Kahuna.getInstance().onAppCreate(getContext(), getSettings().get(KEY_SECRET_KEY), MParticle.getInstance().getConfigManager().getPushSenderId());
             Kahuna.getInstance().disableKahunaGenerateNotifications();
         } else {
             Kahuna.getInstance().onAppCreate(getContext(), getSettings().get(KEY_SECRET_KEY), null);
@@ -369,11 +366,6 @@ public class KahunaKit extends KitIntegration implements KitIntegration.Commerce
         return messages;
     }
 
-    @Override
-    public boolean isCommerceSupported() {
-        return false;
-    }
-
     private void trackKahunaEvent(String name, Integer count, Integer value, Map<String, String> eventAttributes) {
         EventBuilder eb = new EventBuilder(name);
         if(eventAttributes != null && eventAttributes.size() > 0) {
@@ -388,12 +380,12 @@ public class KahunaKit extends KitIntegration implements KitIntegration.Commerce
     }
 
     @Override
-    public boolean willHandleMessage(Set<String> keyset) {
-        return false;
+    public boolean willHandlePushMessage(Set<String> keyset) {
+        return keyset.contains("alert") && keyset.contains("k");
     }
 
     @Override
-    public void onMessageReceived(Context context, Intent pushIntent) {
+    public void onPushMessageReceived(Context context, Intent pushIntent) {
         new KahunaPushReceiver().onReceive(context, pushIntent);
     }
 

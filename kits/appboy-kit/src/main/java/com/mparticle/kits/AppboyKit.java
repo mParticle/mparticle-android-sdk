@@ -128,11 +128,6 @@ public class AppboyKit extends KitIntegration implements KitIntegration.PushList
     }
 
     @Override
-    public boolean isCommerceSupported() {
-        return true;
-    }
-
-    @Override
     public void removeUserAttribute(String key) {
         AppboyUser user = Appboy.getInstance(getContext()).getCurrentUser();
 
@@ -272,12 +267,12 @@ public class AppboyKit extends KitIntegration implements KitIntegration.PushList
     }
 
     @Override
-    public boolean willHandleMessage(Set<String> keyset) {
+    public boolean willHandlePushMessage(Set<String> keyset) {
         return keyset.contains(com.appboy.Constants.APPBOY_PUSH_APPBOY_KEY);
     }
 
     @Override
-    public void onMessageReceived(Context context, Intent pushIntent) {
+    public void onPushMessageReceived(Context context, Intent pushIntent) {
         new AppboyGcmReceiver().onReceive(getContext(), pushIntent);
     }
 

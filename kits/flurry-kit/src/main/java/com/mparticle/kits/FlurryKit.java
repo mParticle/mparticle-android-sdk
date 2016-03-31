@@ -2,12 +2,14 @@ package com.mparticle.kits;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
 
 import com.flurry.android.Constants;
 import com.flurry.android.FlurryAgent;
+import com.flurry.android.FlurryInstallReceiver;
 import com.mparticle.MPEvent;
 import com.mparticle.MParticle;
 
@@ -43,6 +45,11 @@ public class FlurryKit extends KitIntegration implements KitIntegration.Attribut
         FlurryAgent.setCaptureUncaughtExceptions(Boolean.parseBoolean(getSettings().get(CAPTURE_EXCEPTIONS)));
         FlurryAgent.init(getContext(), getSettings().get(API_KEY));
         return null;
+    }
+
+    @Override
+    public void setInstallReferrer(Intent intent) {
+        new FlurryInstallReceiver().onReceive(getContext(), intent);
     }
 
     @Override

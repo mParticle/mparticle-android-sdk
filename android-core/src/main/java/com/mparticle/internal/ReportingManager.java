@@ -4,6 +4,6 @@ import java.util.List;
 
 
 public interface ReportingManager {
-    void log(ReportingMessage message);
-    void logAll(List<? extends ReportingMessage> messageList);
+    void log(JsonReportingMessage message);
+    void logAll(List<? extends JsonReportingMessage> messageList);
 }

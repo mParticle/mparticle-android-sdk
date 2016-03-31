@@ -10,7 +10,6 @@ import android.os.Bundle;
 import com.mparticle.MPEvent;
 import com.mparticle.MParticle;
 import com.mparticle.commerce.CommerceEvent;
-import com.mparticle.internal.KitManager;
 
 import java.lang.ref.WeakReference;
 import java.math.BigDecimal;
@@ -23,7 +22,7 @@ import java.util.Set;
  */
 public abstract class KitIntegration {
 
-    private KitManager kitManager;
+    private KitManagerImpl kitManager;
     private KitConfiguration mKitConfiguration;
 
     /**
@@ -86,7 +85,7 @@ public abstract class KitIntegration {
 
     public boolean isDisabled() {
         return !getConfiguration().passesBracketing(kitManager.getUserBucket()) ||
-                (getConfiguration().shouldHonorOptOut() && !kitManager.isOptedOut());
+                (getConfiguration().shouldHonorOptOut() && kitManager.isOptedOut());
 
     }
 
@@ -149,16 +148,27 @@ public abstract class KitIntegration {
      */
     public abstract List<ReportingMessage> setOptOut(boolean optedOut);
 
-    protected final KitManager getKitManager() {
+    protected final KitManagerImpl getKitManager() {
         return this.kitManager;
     }
 
-    public final KitIntegration setKitManager(KitManager kitManager) {
+    public final KitIntegration setKitManager(KitManagerImpl kitManager) {
         this.kitManager = kitManager;
         return this;
     }
 
     public void checkForDeepLink() {
+    }
+
+    /**
+     * Implement this method to receive com.android.vending.INSTALL_REFERRER Intents that
+     * have been captured by the mParticle SDK. Developers/users of the SDK may also call setInstallReferrer
+     * at any time after an install has occurred.
+     *
+     * @param intent an intent with the INSTALL_REFERRER action
+     */
+    public void setInstallReferrer(Intent intent) {
+
     }
 
     /**
@@ -234,18 +244,6 @@ public abstract class KitIntegration {
          * @return Kits should return a List of ReportingMessages indicating that the CommerceEvent was processed one or more times, or null if it was not processed
          */
         List<ReportingMessage> logEvent(CommerceEvent event);
-
-        /**
-         * If your Kit supports the notion of eCommerce events, the mParticle
-         * SDK will send the Kit CommerceEvents via the {@link #logEvent(CommerceEvent)} method
-         * in this interface.
-         * <p/>
-         * If your Kit does not support eCommerce, the mParticle SDK will transform CommerceEvents
-         * into one or more MPEvents and pass the result into {@link EventListener#logEvent(MPEvent)}
-         *
-         * @return true if eCommerce/revenue events are supported.
-         */
-        boolean isCommerceSupported();
     }
 
     /**
@@ -316,16 +314,16 @@ public abstract class KitIntegration {
          * @param keyset the keyset of the Bundle that was received within a push-received Intent
          * @return true if this push should be handled by the given Kit
          */
-        boolean willHandleMessage(Set<String> keyset);
+        boolean willHandlePushMessage(Set<String> keyset);
 
         /**
-         * If a Kit returns true from {@link #willHandleMessage(Set)}, this method will be called immediately after.
+         * If a Kit returns true from {@link #willHandlePushMessage(Set)}, this method will be called immediately after.
          * Kits should implement this method to show or otherwise react to a received push message.
          *
          * @param context
          * @param pushIntent
          */
-        void onMessageReceived(Context context, Intent pushIntent);
+        void onPushMessageReceived(Context context, Intent pushIntent);
 
         /**
          * This method will be called when the mParticle SDK successfully registers to receive

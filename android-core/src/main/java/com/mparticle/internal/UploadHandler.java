@@ -24,6 +24,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.lang.reflect.Constructor;
 import java.net.MalformedURLException;
 
 import javax.net.ssl.SSLHandshakeException;
@@ -112,6 +113,8 @@ public class UploadHandler extends Handler {
     public UploadHandler(Context context, Looper looper, ConfigManager configManager, MParticleDatabase database, AppStateManager appStateManager) {
         super(looper);
         mConfigManager = configManager;
+
+
         mContext = context;
         mApiKey = mConfigManager.getApiKey();
         mAppStateManager = appStateManager;
@@ -133,6 +136,7 @@ public class UploadHandler extends Handler {
             }
             switch (msg.what) {
                 case UPDATE_CONFIG:
+                    MParticle.getInstance().getKitManager().loadKitLibrary();
                     mApiClient.fetchConfig();
                     break;
                 case INIT_CONFIG:
@@ -165,11 +169,11 @@ public class UploadHandler extends Handler {
 
         } catch (Exception e){
             if (BuildConfig.MP_DEBUG){
-                ConfigManager.log(MParticle.LogLevel.DEBUG, "UploadHandler Exception while handling message");
+                ConfigManager.log(MParticle.LogLevel.DEBUG, "UploadHandler Exception while handling message: " + e.toString());
             }
         } catch (VerifyError ve) {
             if (BuildConfig.MP_DEBUG){
-                ConfigManager.log(MParticle.LogLevel.DEBUG, "UploadHandler VerifyError while handling message");
+                ConfigManager.log(MParticle.LogLevel.DEBUG, "UploadHandler VerifyError while handling message" + ve.toString());
             }
         }
     }

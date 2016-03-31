@@ -4,7 +4,6 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.location.Location;
 import android.location.LocationManager;
@@ -24,7 +23,7 @@ import com.mparticle.internal.Constants;
 import com.mparticle.internal.Constants.MessageKey;
 import com.mparticle.internal.Constants.PrefKeys;
 import com.mparticle.internal.KitKatHelper;
-import com.mparticle.internal.KitManager;
+import com.mparticle.internal.KitFrameworkWrapper;
 import com.mparticle.internal.MPLocationListener;
 import com.mparticle.internal.MPUtility;
 import com.mparticle.internal.MParticleJSInterface;
@@ -41,7 +40,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.lang.reflect.Constructor;
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -76,21 +74,20 @@ import java.util.Map;
  * <li>mp_productionUploadInterval - <code> <a href="http://developer.android.com/guide/topics/resources/more-resources.html#Integer">Integer</a></code> - The length of time in seconds to send batches of messages to mParticle. Setting this too low could have an adverse effect on the device battery. <i>Default: 600</i></li>
  * <li>mp_reportUncaughtExceptions - <code> <a href="http://developer.android.com/guide/topics/resources/more-resources.html#Bool">Bool</a></code> - By enabling this, the MParticle SDK will automatically log and report any uncaught exceptions, including stack traces. <i>Default: false</i></li>
  * <li>mp_sessionTimeout - <code> <a href="http://developer.android.com/guide/topics/resources/more-resources.html#Integer">Integer</a></code> - The length of time (in seconds) that a user session will remain valid while application has been paused and put into the background. <i>Default: 60</i></li>
- * <li>mp_enableNetworkPerformanceMeasurement - <code> <a href="http://developer.android.com/guide/topics/resources/more-resources.html#Bool">Bool</a></code> - Enabling this will allow the mParticle SDK to measure network requests made with Apache's HttpClient as well as UrlConnection. <i>Default: false</i></li>
  * </ul>
  */
 public class MParticle {
-
     /**
      * The ConfigManager is tasked with incorporating server-based, run-time, and XML configuration,
      * and surfacing the result/winner.
      */
     private ConfigManager mConfigManager;
+
     /**
      * Used to delegate messages, events, user actions, etc on to embedded kits.
      */
 
-    private KitManager mKitManager;
+    private KitFrameworkWrapper mKitManager;
     /**
      * The state manager is primarily concerned with Activity lifecycle and app visibility in order to manage sessions,
      * automatically log screen views, and pass lifecycle information on top embedded kits.
@@ -98,8 +95,6 @@ public class MParticle {
     AppStateManager mAppStateManager;
 
     private JSONArray mUserIdentities = new JSONArray();
-
-
     private JSONObject mUserAttributes = new JSONObject();
 
     private MessageManager mMessageManager;
@@ -107,7 +102,6 @@ public class MParticle {
     private SharedPreferences mPreferences;
     private MPLocationListener mLocationListener;
     private Context mAppContext;
-    private String mApiKey;
 
     private MPMessagingAPI mMessaging;
     private MPMediaAPI mMedia;
@@ -116,8 +110,7 @@ public class MParticle {
     private volatile DeepLinkListener mDeepLinkListener;
     private static volatile boolean androidIdDisabled;
 
-    MParticle() {
-    }
+    MParticle() { }
 
 
     /**
@@ -231,24 +224,7 @@ public class MParticle {
         MParticle.getInstance(context.getApplicationContext(), installType, environment, apiKey, apiSecret);
     }
 
-    static KitManager loadKitManager(MParticle mParticle) {
-        try {
-            Class clazz = Class.forName("com.mparticle.kits.KitManagerImpl");
 
-            Constructor<KitManager> constructor = clazz.getDeclaredConstructor();
-            constructor.setAccessible(true);
-            KitManager kitManager = constructor.newInstance()
-                    .setMpInstance(mParticle)
-                    .setContext(mParticle.mAppContext);
-
-            return kitManager;
-        } catch (Exception e) {
-            if (BuildConfig.MP_DEBUG) {
-                ConfigManager.log(MParticle.LogLevel.DEBUG, "No Kit Manager detected.");
-            }
-        }
-        return new KitManager();
-    }
 
     /**
      * Initialize or return a thread-safe instance of the mParticle SDK, specifying the API credentials to use. If this
@@ -270,35 +246,25 @@ public class MParticle {
                     }
 
                     ConfigManager configManager = new ConfigManager(context, environment, apiKey, apiSecret);
-
-
                     AppStateManager appStateManager = new AppStateManager(context);
                     appStateManager.setConfigManager(configManager);
 
                     instance = new MParticle();
                     instance.mAppContext = context;
                     instance.mConfigManager = configManager;
-                    instance.mApiKey = configManager.getApiKey();
                     instance.mAppStateManager = appStateManager;
                     instance.mCommerce = new CommerceApi(context);
                     instance.mProductBags = new ProductBagApi(context);
                     instance.mMessageManager = new MessageManager(context, configManager, installType, appStateManager);
-                    instance.mKitManager = loadKitManager(instance);
-                    configManager.setKitManager(instance.mKitManager);
-                    appStateManager.setKitManager(instance.mKitManager);
-                    instance.mKitManager.setReportingManager(instance.mMessageManager);
-                    instance.mKitManager.setAppStateManager(instance.mAppStateManager);
-                    instance.mKitManager.setConfigurationManager(instance.mConfigManager);
                     instance.mPreferences = context.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
+                    instance.mKitManager = new KitFrameworkWrapper(context, instance.mMessageManager, configManager, appStateManager);
 
-                    String userAttrs = instance.mPreferences.getString(PrefKeys.USER_ATTRS + instance.mApiKey, null);
+                    String userAttrs = instance.mPreferences.getString(PrefKeys.USER_ATTRS + instance.getConfigManager().getApiKey(), null);
                     try {
                         instance.mUserAttributes = new JSONObject(userAttrs);
                     } catch (Exception e) {
                         instance.mUserAttributes = new JSONObject();
                     }
-
-                    configManager.restore();
 
                     instance.mMessageManager.refreshConfiguration();
 
@@ -316,7 +282,7 @@ public class MParticle {
         return instance;
     }
 
-    public KitManager getKitManager() {
+    public KitFrameworkWrapper getKitManager() {
         return mKitManager;
     }
 
@@ -442,9 +408,7 @@ public class MParticle {
      * automatically retrieved upon installation from Google Play.
      */
     public void setInstallReferrer(String referrer) {
-        Intent fakeReferralIntent = new Intent("com.android.vending.INSTALL_REFERRER");
-        fakeReferralIntent.putExtra(Constants.REFERRER, referrer);
-        ReferrerReceiver.setInstallReferrer(mAppContext, fakeReferralIntent);
+        ReferrerReceiver.setInstallReferrer(mAppContext, referrer);
     }
 
     public String getInstallReferrer() {
@@ -622,7 +586,7 @@ public class MParticle {
      * @param eventData  a Map of data attributes to associate with this screen view
      */
     public void logScreen(String screenName, Map<String, String> eventData) {
-        logScreen(new MPEvent.Builder(screenName).info(eventData).build());
+        logScreen(new MPEvent.Builder(screenName).info(eventData).build().setScreenEvent(true));
     }
 
 
@@ -632,6 +596,7 @@ public class MParticle {
      * @param screenEvent an event object, the name of the event will be used as the screen name
      */
     public void logScreen(MPEvent screenEvent) {
+        screenEvent.setScreenEvent(true);
         if (MPUtility.isEmpty(screenEvent.getEventName())) {
             ConfigManager.log(LogLevel.ERROR, "screenName is required for logScreen");
             return;
@@ -651,7 +616,7 @@ public class MParticle {
 
             }
             if (screenEvent.getNavigationDirection()) {
-                mKitManager.logScreen(screenEvent.getEventName(), screenEvent.getInfo());
+                mKitManager.logScreen(screenEvent);
             }
         }
     }
@@ -964,7 +929,7 @@ public class MParticle {
         }
 
         if (MPUtility.setCheckedAttribute(mUserAttributes, key, value, false, true)) {
-            mPreferences.edit().putString(PrefKeys.USER_ATTRS + mApiKey, mUserAttributes.toString()).apply();
+            mPreferences.edit().putString(PrefKeys.USER_ATTRS + getConfigManager().getApiKey(), mUserAttributes.toString()).apply();
             if (value != null) {
                 mKitManager.setUserAttribute(key, (String)value);
             }
@@ -986,7 +951,7 @@ public class MParticle {
         ConfigManager.log(LogLevel.DEBUG, "Incrementing user attribute: " + key + " with value " + value);
 
         if (MPUtility.setCheckedAttribute(mUserAttributes, key, value, true, true)) {
-            mPreferences.edit().putString(PrefKeys.USER_ATTRS + mApiKey, mUserAttributes.toString()).apply();
+            mPreferences.edit().putString(PrefKeys.USER_ATTRS + getConfigManager().getApiKey(), mUserAttributes.toString()).apply();
             try {
                 mKitManager.setUserAttribute(key, mUserAttributes.getString(key));
             } catch (JSONException e) {
@@ -1006,14 +971,14 @@ public class MParticle {
         }
         if (mUserAttributes.has(key) || mUserAttributes.has(MPUtility.findCaseInsensitiveKey(mUserAttributes, key))) {
             mUserAttributes.remove(key);
-            mPreferences.edit().putString(PrefKeys.USER_ATTRS + mApiKey, mUserAttributes.toString()).apply();
+            mPreferences.edit().putString(PrefKeys.USER_ATTRS + getConfigManager().getApiKey(), mUserAttributes.toString()).apply();
             attributeRemoved(key);
             mKitManager.removeUserAttribute(key);
         }
     }
 
     private void attributeRemoved(String key) {
-        String serializedJsonArray = mPreferences.getString(PrefKeys.DELETED_USER_ATTRS + mApiKey, null);
+        String serializedJsonArray = mPreferences.getString(PrefKeys.DELETED_USER_ATTRS + getConfigManager().getApiKey(), null);
         JSONArray deletedAtributes;
         try {
             deletedAtributes = new JSONArray(serializedJsonArray);
@@ -1022,7 +987,7 @@ public class MParticle {
         }
         deletedAtributes.put(key);
 
-        mPreferences.edit().putString(PrefKeys.DELETED_USER_ATTRS + mApiKey, deletedAtributes.toString()).apply();
+        mPreferences.edit().putString(PrefKeys.DELETED_USER_ATTRS + getConfigManager().getApiKey(), deletedAtributes.toString()).apply();
     }
 
     /**
@@ -1091,13 +1056,13 @@ public class MParticle {
                 return;
             }
 
-            mPreferences.edit().putString(PrefKeys.USER_IDENTITIES + mApiKey, userIdentities.toString()).apply();
+            mPreferences.edit().putString(PrefKeys.USER_IDENTITIES + getConfigManager().getApiKey(), userIdentities.toString()).apply();
         }
     }
 
     private JSONArray getUserIdentityJson(){
         if (mUserIdentities == null){
-            String userIds = mPreferences.getString(PrefKeys.USER_IDENTITIES + mApiKey, null);
+            String userIds = mPreferences.getString(PrefKeys.USER_IDENTITIES + getConfigManager().getApiKey(), null);
 
             Boolean changeMade = false;
             try {
@@ -1119,7 +1084,7 @@ public class MParticle {
                     }
                 }
                 if (changeMade) {
-                    mPreferences.edit().putString(PrefKeys.USER_IDENTITIES + mApiKey, mUserIdentities.toString()).apply();
+                    mPreferences.edit().putString(PrefKeys.USER_IDENTITIES + getConfigManager().getApiKey(), mUserIdentities.toString()).apply();
                 }
             } catch (JSONException jse) {
                 //swallow this
@@ -1186,7 +1151,7 @@ public class MParticle {
                             }
                         }
                     }
-                    mPreferences.edit().putString(PrefKeys.USER_IDENTITIES + mApiKey, userIdentities.toString()).apply();
+                    mPreferences.edit().putString(PrefKeys.USER_IDENTITIES + getConfigManager().getApiKey(), userIdentities.toString()).apply();
                     if (identityType != null) {
                         getKitManager().removeUserIdentity(identityType);
                     }

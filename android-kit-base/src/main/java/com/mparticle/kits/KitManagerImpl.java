@@ -1,31 +1,35 @@
 package com.mparticle.kits;
 
 import android.app.Activity;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 
 import com.mparticle.DeepLinkError;
 import com.mparticle.DeepLinkListener;
 import com.mparticle.DeepLinkResult;
 import com.mparticle.MPEvent;
 import com.mparticle.MParticle;
+import com.mparticle.ReferrerReceiver;
 import com.mparticle.commerce.CommerceEvent;
+import com.mparticle.internal.AppStateManager;
 import com.mparticle.internal.CommerceEventUtil;
 import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.KitManager;
 import com.mparticle.internal.MPUtility;
 import com.mparticle.internal.PushRegistrationHelper;
+import com.mparticle.internal.ReportingManager;
 import com.mparticle.kits.mappings.CustomMapping;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.lang.reflect.Constructor;
+import java.lang.ref.WeakReference;
 import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -35,15 +39,24 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class KitManagerImpl extends KitManager implements DeepLinkListener {
+public class KitManagerImpl implements KitManager, DeepLinkListener {
+    private final ReportingManager mReportingManager;
+    private final AppStateManager mAppStateManager;
+    private final ConfigManager mConfigManager;
     KitIntegrationFactory mKitIntegrationFactory;
-    private static final String RESERVED_KEY_LTV = "$Amount";
 
+    private static final String RESERVED_KEY_LTV = "$Amount";
     private static final String METHOD_NAME = "$MethodName";
     private static final String LOG_LTV = "LogLTVIncrease";
-    ConcurrentHashMap<Integer, KitIntegration> providers = new ConcurrentHashMap<Integer, KitIntegration>(0);
 
-    public KitManagerImpl() {
+    ConcurrentHashMap<Integer, KitIntegration> providers = new ConcurrentHashMap<Integer, KitIntegration>(0);
+    private final Context mContext;
+
+    public KitManagerImpl(Context context, ReportingManager reportingManager, ConfigManager configManager, AppStateManager appStateManager) {
+        mContext = context;
+        mReportingManager = reportingManager;
+        mConfigManager = configManager;
+        mAppStateManager = appStateManager;
         mKitIntegrationFactory = new KitIntegrationFactory();
     }
 
@@ -59,62 +72,108 @@ public class KitManagerImpl extends KitManager implements DeepLinkListener {
     }
 
     @Override
-    public void updateKits(JSONArray kitConfigs) {
-        PushRegistrationHelper.PushRegistration pushRegistration = PushRegistrationHelper.getLatestPushRegistration(getContext());
-        HashSet<Integer> activeIds = new HashSet<Integer>();
-        int currentId = 0;
-        if (kitConfigs != null) {
-            for (int i = 0; i < kitConfigs.length(); i++) {
-                try {
-                    JSONObject current = kitConfigs.getJSONObject(i);
-                    currentId = current.getInt(KitConfiguration.KEY_ID);
-                    activeIds.add(currentId);
-                    if (!providers.containsKey(currentId) && mKitIntegrationFactory.isSupported(currentId)) {
-                        KitConfiguration configuration = createKitConfiguration(current);
-                        KitIntegration provider = mKitIntegrationFactory.createInstance(this, configuration);
-                        providers.put(currentId, provider);
-                        if (provider.isDisabled()) {
-                            continue;
-                        }
-                        provider.onKitCreate(configuration.getSettings(), getContext());
-                        Intent intent = new Intent(MParticle.ServiceProviders.BROADCAST_ACTIVE + currentId);
-                        getContext().sendBroadcast(intent);
+    public void updateKits(final JSONArray kitConfigs) {
+        Runnable runnable = new UpdateKitRunnable(kitConfigs);
+        if (Looper.getMainLooper() != Looper.myLooper()) {
+            new Handler(Looper.getMainLooper()).post(runnable);
+        }else{
+            runnable.run();
+        }
+    }
 
-                        if (provider instanceof KitIntegration.AttributeListener) {
-                            syncUserAttributes((KitIntegration.AttributeListener) provider, provider.getConfiguration());
-                            syncUserIdentities((KitIntegration.AttributeListener) provider, provider.getConfiguration());
-                        }
+    private ReportingManager getReportingManager() {
+        return mReportingManager;
+    }
 
-                        if (pushRegistration != null && !MPUtility.isEmpty(pushRegistration.instanceId) && provider instanceof KitIntegration.PushListener) {
-                            if (((KitIntegration.PushListener) provider).onPushRegistration(pushRegistration.instanceId, pushRegistration.senderId)) {
-                                ReportingMessage message = ReportingMessage.fromPushRegistrationMessage(provider);
-                                getReportingManager().log(message);
+    public boolean isBackgrounded() {
+        return mAppStateManager.isBackgrounded();
+    }
+
+    public int getUserBucket() {
+        return mConfigManager.getUserBucket();
+    }
+
+    public boolean isOptedOut() {
+        return !mConfigManager.isEnabled();
+    }
+
+    class UpdateKitRunnable implements Runnable {
+
+        private final JSONArray kitConfigs;
+
+        public UpdateKitRunnable(JSONArray kitConfigs) {
+            super();
+            this.kitConfigs = kitConfigs;
+        }
+
+        @Override
+        public void run() {
+            PushRegistrationHelper.PushRegistration pushRegistration = PushRegistrationHelper.getLatestPushRegistration(getContext());
+            Intent mockInstallReferrer = ReferrerReceiver.getMockInstallReferrerIntent(MParticle.getInstance().getInstallReferrer());
+            int currentId = 0;
+            HashSet<Integer> activeIds = new HashSet<Integer>();
+            if (kitConfigs != null) {
+                for (int i = 0; i < kitConfigs.length(); i++) {
+                    try {
+                        JSONObject current = kitConfigs.getJSONObject(i);
+                        currentId = current.getInt(KitConfiguration.KEY_ID);
+                        activeIds.add(currentId);
+                        if (mKitIntegrationFactory.isSupported(currentId)) {
+                            KitConfiguration configuration = createKitConfiguration(current);
+                            if (providers.containsKey(currentId)) {
+                                providers.get(currentId).setConfiguration(configuration);
+                            }else {
+                                KitIntegration provider = mKitIntegrationFactory.createInstance(KitManagerImpl.this, configuration);
+                                providers.put(currentId, provider);
+                                if (provider.isDisabled()) {
+                                    continue;
+                                }
+                                provider.onKitCreate(configuration.getSettings(), getContext());
+                                Intent intent = new Intent(MParticle.ServiceProviders.BROADCAST_ACTIVE + currentId);
+                                getContext().sendBroadcast(intent);
+                                ConfigManager.log(MParticle.LogLevel.DEBUG, "Kit initialized: " + provider.getName());
+                                if (provider instanceof KitIntegration.AttributeListener) {
+                                    syncUserAttributes((KitIntegration.AttributeListener) provider, provider.getConfiguration());
+                                    syncUserIdentities((KitIntegration.AttributeListener) provider, provider.getConfiguration());
+                                }
+
+                                if (mockInstallReferrer != null) {
+                                    provider.setInstallReferrer(mockInstallReferrer);
+                                }
+
+                                if (pushRegistration != null && !MPUtility.isEmpty(pushRegistration.instanceId) && provider instanceof KitIntegration.PushListener) {
+                                    if (((KitIntegration.PushListener) provider).onPushRegistration(pushRegistration.instanceId, pushRegistration.senderId)) {
+                                        ReportingMessage message = ReportingMessage.fromPushRegistrationMessage(provider);
+                                        getReportingManager().log(message);
+                                    }
+                                }
                             }
+
+
                         }
-
+                    } catch (JSONException jse) {
+                        ConfigManager.log(MParticle.LogLevel.ERROR, "Exception while parsing configuration for id " + currentId + ": " + jse.getMessage());
+                    } catch (Exception e) {
+                        ConfigManager.log(MParticle.LogLevel.ERROR, "Exception while starting kit id " + currentId + ": " + e.getMessage());
                     }
-                } catch (JSONException jse) {
-                    ConfigManager.log(MParticle.LogLevel.ERROR, "Exception while parsing configuration for id " + currentId + ": " + jse.getMessage());
-                } catch (Exception e) {
-                    ConfigManager.log(MParticle.LogLevel.ERROR, "Exception while starting kit id " + currentId + ": " + e.getMessage());
                 }
             }
-        }
 
-        Iterator<Integer> ids = providers.keySet().iterator();
-        while (ids.hasNext()) {
-            Integer id = ids.next();
-            if (!activeIds.contains(id)) {
-                KitIntegration integration = providers.get(id);
-                if (integration != null) {
-                    integration.onKitDestroy();
+            Iterator<Integer> ids = providers.keySet().iterator();
+            while (ids.hasNext()) {
+                Integer id = ids.next();
+                if (!activeIds.contains(id)) {
+                    KitIntegration integration = providers.get(id);
+                    if (integration != null) {
+                        integration.onKitDestroy();
+                    }
+                    ids.remove();
+                    Intent intent = new Intent(MParticle.ServiceProviders.BROADCAST_DISABLED + id);
+                    getContext().sendBroadcast(intent);
                 }
-                ids.remove();
-                Intent intent = new Intent(MParticle.ServiceProviders.BROADCAST_DISABLED + id);
-                getContext().sendBroadcast(intent);
             }
+            MParticle.getInstance().getKitManager().replayAndDisableQueue();
         }
-
     }
 
     @Override
@@ -206,41 +265,6 @@ public class KitManagerImpl extends KitManager implements DeepLinkListener {
         }
     }
 
-    private static boolean setInstallReferrer(Context context, Intent intent, String className) {
-        try {
-            Class clazz = Class.forName(className);
-            Constructor<BroadcastReceiver> constructor = clazz.getDeclaredConstructor();
-            constructor.setAccessible(true);
-            BroadcastReceiver receiver = constructor.newInstance();
-            receiver.onReceive(context, intent);
-            return true;
-        }catch (Exception e) {
-        }
-        return false;
-    }
-
-    @Override
-    public void setInstallReferrer(Context context, Intent intent) {
-        if (setInstallReferrer(context, intent, "com.adjust.sdk.AdjustReferrerReceiver")) {
-            ConfigManager.log(MParticle.LogLevel.DEBUG, "Sent referral info to Adjust SDK");
-        }
-        if (setInstallReferrer(context, intent, "com.kochava.android.tracker.ReferralCapture")) {
-            ConfigManager.log(MParticle.LogLevel.DEBUG, "Sent referral info to Kochava SDK");
-        }
-        if (setInstallReferrer(context, intent, "io.branch.referral.InstallListener")) {
-            ConfigManager.log(MParticle.LogLevel.DEBUG, "Sent referral info to Branch SDK");
-        }
-        if (setInstallReferrer(context, intent, "com.localytics.android.ReferralReceiver")) {
-            ConfigManager.log(MParticle.LogLevel.DEBUG, "Sent referral info to Localytics SDK");
-        }
-        if (setInstallReferrer(context, intent, "com.flurry.android.InstallReceiver")) {
-            ConfigManager.log(MParticle.LogLevel.DEBUG, "Sent referral info to Flurry SDK");
-        }
-        if (setInstallReferrer(context, intent, "com.mparticle.kits.AppsFlyerReceiver")) {
-            ConfigManager.log(MParticle.LogLevel.DEBUG, "Sent referral info to Appsflyer SDK");
-        }
-    }
-
     @Override
     public Set<Integer> getSupportedKits() {
         return mKitIntegrationFactory.getSupportedKits();
@@ -254,10 +278,10 @@ public class KitManagerImpl extends KitManager implements DeepLinkListener {
     public void logCommerceEvent(CommerceEvent event) {
         for (KitIntegration provider : providers.values()) {
             try {
-                if (provider instanceof KitIntegration.CommerceListener && !provider.isDisabled()) {
+                if (!provider.isDisabled()) {
                     CommerceEvent filteredEvent = provider.getConfiguration().filterCommerceEvent(event);
                     if (filteredEvent != null) {
-                        if (((KitIntegration.CommerceListener)provider).isCommerceSupported()) {
+                        if (provider instanceof KitIntegration.CommerceListener) {
                             List<CustomMapping.ProjectionResult> projectedEvents = CustomMapping.projectEvents(
                                     filteredEvent,
                                     provider.getConfiguration().getCustomMappingList(),
@@ -332,14 +356,14 @@ public class KitManagerImpl extends KitManager implements DeepLinkListener {
         for (KitIntegration provider : providers.values()) {
             if (provider instanceof KitIntegration.PushListener) {
                 try {
-                    if (!provider.isDisabled() && ((KitIntegration.PushListener) provider).willHandleMessage(intent.getExtras().keySet())) {
-                        ((KitIntegration.PushListener) provider).onMessageReceived(context, intent);
+                    if (!provider.isDisabled() && ((KitIntegration.PushListener) provider).willHandlePushMessage(intent.getExtras().keySet())) {
+                        ((KitIntegration.PushListener) provider).onPushMessageReceived(context, intent);
                         ReportingMessage message = ReportingMessage.fromPushMessage(provider, intent);
                         getReportingManager().log(message);
                         return true;
                     }
                 } catch (Exception e) {
-                    ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to call onMessageReceived for kit: " + provider.getName() + ": " + e.getMessage());
+                    ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to call onPushMessageReceived for kit: " + provider.getName() + ": " + e.getMessage());
                 }
             }
         }
@@ -380,7 +404,7 @@ public class KitManagerImpl extends KitManager implements DeepLinkListener {
     }
 
     private void syncUserIdentities(KitIntegration.AttributeListener attributeListener, KitConfiguration configuration) {
-        Map<MParticle.IdentityType, String> identities = getMpInstance().getUserIdentities();
+        Map<MParticle.IdentityType, String> identities = MParticle.getInstance().getUserIdentities();
         if (identities != null) {
             for (Map.Entry<MParticle.IdentityType, String> entry : identities.entrySet()){
                 if (configuration.shouldSetIdentity(entry.getKey())) {
@@ -462,6 +486,15 @@ public class KitManagerImpl extends KitManager implements DeepLinkListener {
     //================================================================================
     // KitIntegration.EventListener forwarding
     //================================================================================
+
+    public Context getContext() {
+        return this.mContext;
+    }
+
+    @Override
+    public WeakReference<Activity> getCurrentActivity() {
+        return null;
+    }
 
     @Override
     public void logEvent(MPEvent event) {
@@ -568,26 +601,26 @@ public class KitManagerImpl extends KitManager implements DeepLinkListener {
     }
 
     @Override
-    public void logScreen(String screenName, Map<String, String> eventAttributes) {
+    public void logScreen(MPEvent screenEvent) {
         for (KitIntegration provider : providers.values()) {
             try {
-                if (provider instanceof KitIntegration.EventListener && !provider.isDisabled() && provider.getConfiguration().shouldLogScreen(screenName)) {
-                    MPEvent syntheticScreenEvent = new MPEvent.Builder(screenName, MParticle.EventType.Navigation)
-                            .info(provider.getConfiguration().filterScreenAttributes(null, screenName, eventAttributes))
+                if (provider instanceof KitIntegration.EventListener && !provider.isDisabled() && provider.getConfiguration().shouldLogScreen(screenEvent.getEventName())) {
+                    MPEvent filteredEvent = new MPEvent.Builder(screenEvent)
+                            .info(provider.getConfiguration().filterScreenAttributes(null, screenEvent.getEventName(), screenEvent.getInfo()))
                             .build();
 
                     List<CustomMapping.ProjectionResult> projectedEvents = CustomMapping.projectEvents(
-                            syntheticScreenEvent,
+                            filteredEvent,
                             true,
                             provider.getConfiguration().getCustomMappingList(),
                             provider.getConfiguration().getDefaultEventProjection(),
                             provider.getConfiguration().getDefaultScreenCustomMapping());
                     if (projectedEvents == null) {
-                        List<ReportingMessage> report = ((KitIntegration.EventListener) provider).logScreen(screenName, syntheticScreenEvent.getInfo());
+                        List<ReportingMessage> report = ((KitIntegration.EventListener) provider).logScreen(filteredEvent.getEventName(), filteredEvent.getInfo());
                         if (report != null && report.size() > 0) {
                             for (ReportingMessage message : report) {
                                 message.setMessageType(ReportingMessage.MessageType.SCREEN_VIEW);
-                                message.setScreenName(screenName);
+                                message.setScreenName(filteredEvent.getEventName());
                             }
                         }
                         getReportingManager().logAll(report);
@@ -595,7 +628,7 @@ public class KitManagerImpl extends KitManager implements DeepLinkListener {
                         ReportingMessage masterMessage = new ReportingMessage(provider,
                                 ReportingMessage.MessageType.SCREEN_VIEW,
                                 System.currentTimeMillis(),
-                                syntheticScreenEvent.getInfo());
+                                filteredEvent.getInfo());
                         boolean forwarded = false;
                         for (int i = 0; i < projectedEvents.size(); i++) {
                             List<ReportingMessage> report = ((KitIntegration.EventListener) provider).logEvent(projectedEvents.get(i).getMPEvent());

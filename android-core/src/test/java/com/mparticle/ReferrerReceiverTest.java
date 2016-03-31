@@ -46,8 +46,8 @@ public class ReferrerReceiverTest {
         Mockito.when(intent2.getStringExtra("referrer")).thenReturn("test referrer 2");
         receiver.setInstallReferrer(context, intent2);
         assertEquals("test referrer", context.getSharedPreferences(null, 0).getString(Constants.PrefKeys.INSTALL_REFERRER, null));
-        receiver.setInstallReferrer(null, null);
-        receiver.setInstallReferrer(context, null);
+        receiver.setInstallReferrer(null, "");
+        receiver.setInstallReferrer(context, "");
         receiver.setInstallReferrer(null, intent);
     }
 }

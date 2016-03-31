@@ -7,6 +7,8 @@ import android.content.SharedPreferences;
 
 import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.Constants;
+import com.mparticle.internal.KitManager;
+import com.mparticle.internal.MPUtility;
 
 
 /**
@@ -48,10 +50,24 @@ public class ReferrerReceiver extends BroadcastReceiver {
             return;
         }
         if ("com.android.vending.INSTALL_REFERRER".equals(intent.getAction())) {
-            String referrer = intent.getStringExtra(Constants.REFERRER);
+           setInstallReferrer(context, intent.getStringExtra(Constants.REFERRER));
+        }
+    }
+
+    static void setInstallReferrer(Context context, String referrer) {
+        if (context != null) {
             SharedPreferences preferences = context.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
             preferences.edit().putString(Constants.PrefKeys.INSTALL_REFERRER, referrer).apply();
-            MParticle.loadKitManager(null).setInstallReferrer(context, intent);
+        }
+    }
+
+    public static Intent getMockInstallReferrerIntent(String referrer) {
+        if (!MPUtility.isEmpty(referrer)) {
+            Intent fakeReferralIntent = new Intent("com.android.vending.INSTALL_REFERRER");
+            fakeReferralIntent.putExtra(com.mparticle.internal.Constants.REFERRER, referrer);
+            return fakeReferralIntent;
+        } else {
+            return null;
         }
     }
 }

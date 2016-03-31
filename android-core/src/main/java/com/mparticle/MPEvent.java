@@ -37,7 +37,8 @@ public class MPEvent {
     private Double duration = null, startTime = null, endTime = null;
     private int eventHash;
     private Map<String, List<String>> customFlags;
-    private boolean entering;
+    private boolean entering = true;
+    private boolean screenEvent;
 
     private MPEvent(){}
     private MPEvent(Builder builder){
@@ -78,6 +79,7 @@ public class MPEvent {
         if (builder.customFlags != null) {
             customFlags = builder.customFlags;
         }
+        screenEvent = builder.screenEvent;
     }
 
     @Override
@@ -105,6 +107,7 @@ public class MPEvent {
         startTime = mpEvent.startTime;
         customFlags = mpEvent.customFlags;
         entering = mpEvent.entering;
+        screenEvent = mpEvent.screenEvent;
     }
 
     @Override
@@ -147,6 +150,15 @@ public class MPEvent {
 
     public String getEventName() {
         return eventName;
+    }
+
+    public boolean isScreenEvent() {
+        return screenEvent;
+    }
+
+    MPEvent setScreenEvent(boolean screenEvent) {
+        this.screenEvent = screenEvent;
+        return this;
     }
 
     public int getEventHash() {
@@ -202,6 +214,7 @@ public class MPEvent {
      * @see com.mparticle.MParticle#logEvent(MPEvent)
      */
     public static class Builder {
+        private boolean screenEvent;
         private MParticle.EventType eventType;
         private String eventName;
         private String category;
@@ -256,6 +269,7 @@ public class MPEvent {
             this.endTime = event.endTime;
             this.customFlags = event.getCustomFlags();
             this.entering = event.entering;
+            this.screenEvent = event.screenEvent;
         }
 
         /**

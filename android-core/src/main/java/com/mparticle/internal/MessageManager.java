@@ -753,16 +753,16 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
     }
 
     @Override
-    public void log(ReportingMessage reportingMessage) {
+    public void log(JsonReportingMessage reportingMessage) {
         if (reportingMessage != null) {
-            List<ReportingMessage> reportingMessageList = new ArrayList<ReportingMessage>(1);
+            List<JsonReportingMessage> reportingMessageList = new ArrayList<JsonReportingMessage>(1);
             reportingMessageList.add(reportingMessage);
             logAll(reportingMessageList);
         }
     }
 
     @Override
-    public void logAll(List<? extends ReportingMessage> messageList) {
+    public void logAll(List<? extends JsonReportingMessage> messageList) {
         if (messageList != null && messageList.size() > 0) {
             boolean development = ConfigManager.getEnvironment().equals(MParticle.Environment.Development);
             for (int i = 0; i < messageList.size(); i++) {

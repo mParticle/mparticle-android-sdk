@@ -208,7 +208,7 @@ import java.util.UUID;
                 break;
             case STORE_REPORTING_MESSAGE_LIST:
                 try{
-                    List<ReportingMessage> reportingMessages = (List<ReportingMessage>)msg.obj;
+                    List<JsonReportingMessage> reportingMessages = (List<JsonReportingMessage>)msg.obj;
                     dbInsertReportingMessages(reportingMessages);
                 }catch (Exception e) {
                     if (BuildConfig.MP_DEBUG) {
@@ -435,11 +435,11 @@ import java.util.UUID;
         db.insert(SessionTable.TABLE_NAME, null, contentValues);
     }
 
-    private void dbInsertReportingMessages(List<ReportingMessage> messages) throws JSONException {
+    private void dbInsertReportingMessages(List<JsonReportingMessage> messages) throws JSONException {
         try {
             db.beginTransaction();
             for (int i = 0; i < messages.size(); i++) {
-                ReportingMessage message = messages.get(i);
+                JsonReportingMessage message = messages.get(i);
                 ContentValues values = new ContentValues();
                 values.put(MParticleDatabase.ReportingTable.CREATED_AT, message.getTimestamp());
                 values.put(MParticleDatabase.ReportingTable.MODULE_ID, message.getModuleId());

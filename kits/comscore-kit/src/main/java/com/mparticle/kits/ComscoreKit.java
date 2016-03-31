@@ -163,7 +163,7 @@ public class ComscoreKit extends KitIntegration implements KitIntegration.EventL
 
         boolean useHttps = Boolean.parseBoolean(getSettings().get(USE_HTTPS));
         comScore.setSecure(useHttps);
-        comScore.setDebug(getKitManager().getConfigurationManager().getEnvironment() == MParticle.Environment.Development);
+        comScore.setDebug(MParticle.getInstance().getEnvironment() == MParticle.Environment.Development);
         isEnterprise = "enterprise".equals(getSettings().get(PRODUCT));
         String appName = getSettings().get(APPNAME);
         if (appName != null){

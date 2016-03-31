@@ -2,6 +2,7 @@ package com.mparticle.kits;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 
 import com.mparticle.DeepLinkError;
@@ -20,6 +21,7 @@ import java.util.Map;
 
 import io.branch.referral.Branch;
 import io.branch.referral.BranchError;
+import io.branch.referral.InstallListener;
 
 /**
  * <p/>
@@ -68,6 +70,11 @@ public class BranchMetricsKit extends KitIntegration implements KitIntegration.E
     @Override
     public List<ReportingMessage> logException(Exception exception, Map<String, String> exceptionAttributes, String message) {
         return null;
+    }
+
+    @Override
+    public void setInstallReferrer(Intent intent) {
+        new InstallListener().onReceive(getContext(), intent);
     }
 
     @Override
