@@ -537,9 +537,11 @@ public class MPUtility {
     }
 
     public static boolean isBluetoothEnabled(Context context) {
-        BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-        if (mBluetoothAdapter != null && checkPermission(context, Manifest.permission.BLUETOOTH)) {
-            return mBluetoothAdapter.isEnabled();
+        if (checkPermission(context, Manifest.permission.BLUETOOTH)) {
+            BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+            if (mBluetoothAdapter != null) {
+                return mBluetoothAdapter.isEnabled();
+            }
         }
         return false;
     }
