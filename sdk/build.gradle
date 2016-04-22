@@ -47,7 +47,9 @@ android {
         }
         release {
             minifyEnabled true
-            proguardFile 'proguard.pro'
+            proguardFiles getDefaultProguardFile('proguard-android.txt'),
+                    'proguard.pro'
+
             consumerProguardFiles 'consumer-proguard.pro'
             //buildConfigField "Boolean", "MP_DEBUG", "true"
         }
