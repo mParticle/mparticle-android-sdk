@@ -942,7 +942,7 @@ public class MParticle {
             ConfigManager.log(LogLevel.DEBUG, "Set user attribute: " + key);
         }
 
-        if (MPUtility.setCheckedAttribute(mUserAttributes, key, value, false)) {
+        if (MPUtility.setCheckedAttribute(mUserAttributes, key, value, false, true)) {
             mPreferences.edit().putString(PrefKeys.USER_ATTRS + mApiKey, mUserAttributes.toString()).apply();
             mKitManager.setUserAttributes(mUserAttributes);
         }
@@ -962,7 +962,7 @@ public class MParticle {
         }
         ConfigManager.log(LogLevel.DEBUG, "Incrementing user attribute: " + key + " with value " + value);
 
-        if (MPUtility.setCheckedAttribute(mUserAttributes, key, value, true)) {
+        if (MPUtility.setCheckedAttribute(mUserAttributes, key, value, true, true)) {
             mPreferences.edit().putString(PrefKeys.USER_ATTRS + mApiKey, mUserAttributes.toString()).apply();
             mKitManager.setUserAttributes(mUserAttributes);
         }

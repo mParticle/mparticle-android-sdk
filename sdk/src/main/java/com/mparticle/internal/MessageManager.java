@@ -330,7 +330,6 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
             try {
                 MPMessage message = new MPMessage.Builder(event, mAppStateManager.getSession(), mLocation)
                         .timestamp(mAppStateManager.getSession().mLastEventTime)
-                        .attributes(MPUtility.enforceAttributeConstraints(event.getCustomAttributes()))
                         .build();
                 mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
                 return message;

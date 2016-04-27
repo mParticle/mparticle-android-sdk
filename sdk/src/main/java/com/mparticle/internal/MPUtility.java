@@ -660,15 +660,15 @@ public class MPUtility {
         for (Map.Entry<String, String> entry : attributes.entrySet()) {
             String key = entry.getKey();
             String value = entry.getValue();
-            setCheckedAttribute(checkedAttributes, key, value, false);
+            setCheckedAttribute(checkedAttributes, key, value, false, false);
         }
         return checkedAttributes;
     }
-    public static Boolean setCheckedAttribute(JSONObject attributes, String key, Object value, boolean increment) {
-        return setCheckedAttribute(attributes, key, value, false, increment);
+    public static Boolean setCheckedAttribute(JSONObject attributes, String key, Object value, boolean increment, boolean userAttribute) {
+        return setCheckedAttribute(attributes, key, value, false, increment, userAttribute);
     }
 
-    public static Boolean setCheckedAttribute(JSONObject attributes, String key, Object value, Boolean caseInsensitive, boolean increment) {
+    public static Boolean setCheckedAttribute(JSONObject attributes, String key, Object value, Boolean caseInsensitive, boolean increment, boolean userAttribute) {
         if (null == attributes || null == key) {
             return false;
         }
@@ -681,9 +681,12 @@ public class MPUtility {
                 ConfigManager.log(LogLevel.ERROR, "Attribute count exceeds limit. Discarding attribute: " + key);
                 return false;
             }
-            if (null != value && value.toString().length() > Constants.LIMIT_ATTR_VALUE) {
-                ConfigManager.log(LogLevel.ERROR, "Attribute value length exceeds limit. Discarding attribute: " + key);
-                return false;
+            if (value != null) {
+                String stringValue = value.toString();
+                if ((userAttribute && stringValue.length() > Constants.LIMIT_USER_ATTR_VALUE) || (!userAttribute && stringValue.length() > Constants.LIMIT_ATTR_VALUE) ){
+                    ConfigManager.log(LogLevel.ERROR, "Attribute value length exceeds limit. Discarding attribute: " + key);
+                    return false;
+                }
             }
             if (key.length() > Constants.LIMIT_ATTR_NAME) {
                 ConfigManager.log(LogLevel.ERROR, "Attribute name length exceeds limit. Discarding attribute: " + key);

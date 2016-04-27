@@ -83,8 +83,7 @@ public class KitFactory {
         try {
             Class clazz = Class.forName(className);
             try {
-                Constructor<AbstractKit> constructor = clazz.getDeclaredConstructor();
-                constructor.setAccessible(true);
+                Constructor<AbstractKit> constructor = clazz.getConstructor();
                 AbstractKit kit = constructor.newInstance()
                         .setKitManager(ekManager)
                         .setId(kitId);

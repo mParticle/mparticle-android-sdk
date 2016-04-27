@@ -24,8 +24,9 @@ public class Constants {
     public static final String BAGS_FILE = "mParticlePrefs_productbags";
 
     public static final int LIMIT_ATTR_COUNT = 100;
-    public static final int LIMIT_ATTR_NAME = 255;
-    public static final int LIMIT_ATTR_VALUE = 255;
+    public static final int LIMIT_ATTR_NAME = 256;
+    public static final int LIMIT_ATTR_VALUE = 256;
+    public static final int LIMIT_USER_ATTR_VALUE = 4096;
     public static final int LIMIT_NAME = 255;
     public static final byte[] LICENSE_CHECK_SALT = new byte[]{
             -46, 65, 30, -128, -103, -57, 74, 10, 51, 88, -95, -45, -43, -117, -36, 99, -11, 32, -64,
