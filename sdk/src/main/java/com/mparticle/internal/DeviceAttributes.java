@@ -21,11 +21,12 @@ import org.json.JSONObject;
 import java.lang.reflect.Method;
 import java.util.Locale;
 import java.util.TimeZone;
+import java.util.UUID;
 
 /* package-private */class DeviceAttributes {
 
     //re-use this whenever an attribute can't be determined
-    private static final String UNKNOWN = "unknown";
+    static final String UNKNOWN = "unknown";
 
     /**
      * Generates a collection of application attributes.  This will be lazy-loaded, and only ever called once per app run.
@@ -42,15 +43,17 @@ import java.util.TimeZone;
             PackageManager packageManager = appContext.getPackageManager();
             String packageName = appContext.getPackageName();
             attributes.put(MessageKey.APP_PACKAGE_NAME, packageName);
+            String versionCode = UNKNOWN;
             try {
                 PackageInfo pInfo = appContext.getPackageManager().getPackageInfo(packageName, 0);
-                attributes.put(MessageKey.APP_VERSION_CODE, Integer.toString(pInfo.versionCode));
-            } catch (PackageManager.NameNotFoundException nnfe) {
-                attributes.put(MessageKey.APP_VERSION_CODE, UNKNOWN);
-            }
+                versionCode = Integer.toString(pInfo.versionCode);
+                attributes.put(MessageKey.APP_VERSION, pInfo.versionName);
+            } catch (PackageManager.NameNotFoundException nnfe) { }
+
+            attributes.put(MessageKey.APP_VERSION_CODE, versionCode);
 
             String installerPackageName = packageManager.getInstallerPackageName(packageName);
-            if (null != installerPackageName) {
+            if (installerPackageName != null) {
                 attributes.put(MessageKey.APP_INSTALLER_NAME, installerPackageName);
             }
             try {
@@ -59,15 +62,8 @@ import java.util.TimeZone;
             } catch (PackageManager.NameNotFoundException e) {
                 // ignore missing data
             }
-            try {
-                PackageInfo pInfo = packageManager.getPackageInfo(packageName, 0);
-                attributes.put(MessageKey.APP_VERSION, pInfo.versionName);
-            } catch (PackageManager.NameNotFoundException e) {
-                // ignore missing data
-            }
 
-
-            attributes.put(MessageKey.BUILD_ID, MPUtility.getBuildUUID(appContext));
+            attributes.put(MessageKey.BUILD_ID, MPUtility.getBuildUUID(versionCode));
             attributes.put(MessageKey.APP_DEBUG_SIGNING, MPUtility.isAppDebuggable(appContext));
             attributes.put(MessageKey.APP_PIRATED, preferences.getBoolean(PrefKeys.PIRATED, false));
 
@@ -88,6 +84,7 @@ import java.util.TimeZone;
                 int persistedVersion = preferences.getInt(PrefKeys.COUNTER_VERSION, -1);
                 int countSinceUpgrade = preferences.getInt(PrefKeys.TOTAL_SINCE_UPGRADE, 0);
                 long upgradeDate = preferences.getLong(PrefKeys.UPGRADE_DATE, now);
+
                 if (persistedVersion < 0 || persistedVersion != pInfo.versionCode){
                     countSinceUpgrade = 0;
                     upgradeDate = now;

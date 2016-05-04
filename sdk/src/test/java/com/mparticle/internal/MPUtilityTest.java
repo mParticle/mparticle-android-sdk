@@ -3,6 +3,8 @@ package com.mparticle.internal;
 import org.json.JSONObject;
 import org.junit.Test;
 
+import java.util.UUID;
+
 import static org.junit.Assert.*;
 
 public class MPUtilityTest {
@@ -34,6 +36,12 @@ public class MPUtilityTest {
 
     }
 
+    @Test
+    public void testGetBuildUUID() {
+        UUID.fromString(MPUtility.getBuildUUID(null));
+        assertTrue("UUIDs should have been the same", MPUtility.getBuildUUID("12345678").equals(MPUtility.getBuildUUID("12345678")));
+        assertFalse("UUIDs should have been different", MPUtility.getBuildUUID("1234567").equals(MPUtility.getBuildUUID("12345678")));
+    }
 
     @Test
     public void testSetValueThatsTooLong() throws Exception {

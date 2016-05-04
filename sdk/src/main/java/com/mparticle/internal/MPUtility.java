@@ -328,47 +328,11 @@ public class MPUtility {
         return new BigInteger(64, localSecureRandom).toString(16);
     }
 
-    static String getBuildUUID(Context context) {
-        TreeMap localTreeMap = new TreeMap();
-        Object localObject1;
-        Object localObject2;
-        Object localObject3;
-        Object localObject4;
-        try {
-            String str = context.getApplicationInfo().sourceDir;
-            JarFile localJarFile = new JarFile(str);
-            localObject1 = localJarFile.getManifest();
-            localJarFile.close();
-            localObject2 = ((java.util.jar.Manifest) localObject1).getEntries();
-            localObject3 = new java.util.jar.Attributes.Name("SHA1-Digest");
-            localObject4 = ((Map) localObject2).entrySet().iterator();
-            while (((Iterator) localObject4).hasNext()) {
-                Map.Entry localEntry = (Map.Entry) ((Iterator) localObject4).next();
-                java.util.jar.Attributes localAttributes = (java.util.jar.Attributes) localEntry.getValue();
-                if (localAttributes.containsKey(localObject3)) {
-                    localTreeMap.put(localEntry.getKey(), localAttributes.getValue("SHA1-Digest"));
-                }
-            }
-        } catch (Exception localException) {
+    static String getBuildUUID(String versionCode) {
+        if (versionCode == null) {
+            versionCode = DeviceAttributes.UNKNOWN;
         }
-        String sBuildUUID;
-        if (localTreeMap.size() == 0) {
-            sBuildUUID = UUID.randomUUID().toString();
-        } else {
-            byte[] arrayOfByte = new byte[16];
-            int i = 0;
-            localObject1 = localTreeMap.entrySet().iterator();
-            while (((Iterator) localObject1).hasNext()) {
-                localObject2 = (Map.Entry) ((Iterator) localObject1).next();
-                localObject3 = android.util.Base64.decode((String) ((Map.Entry) localObject2).getValue(), 0);
-                for (int m : (byte[]) localObject3) {
-                    arrayOfByte[i] = ((byte) (arrayOfByte[i] ^ m));
-                    i = (i + 1) % 16;
-                }
-            }
-            sBuildUUID = convertBytesToUUID(arrayOfByte, false);
-        }
-        return sBuildUUID;
+        return UUID.nameUUIDFromBytes(versionCode.getBytes()).toString();
     }
 
     private static String convertBytesToUUID(byte[] paramArrayOfByte, boolean paramBoolean) {
