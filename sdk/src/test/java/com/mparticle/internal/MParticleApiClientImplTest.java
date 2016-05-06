@@ -1,5 +1,7 @@
 package com.mparticle.internal;
 
+import android.content.SharedPreferences;
+
 import com.mparticle.mock.MockContext;
 import com.mparticle.mock.MockSharedPreferences;
 
@@ -12,6 +14,7 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
+import java.math.BigInteger;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
@@ -49,6 +52,22 @@ public class MParticleApiClientImplTest {
         client.setConfigUrl(mockUrl);
     }
 
+
+    @Test
+    public void testRampNumber() throws Exception {
+        MockContext context = new MockContext();
+        SharedPreferences sharedPreferences = new MockSharedPreferences();
+        context.setSharedPreferences(sharedPreferences);
+
+        int test = MPUtility.hashFnv1A(MPUtility.getRampUdid(context).getBytes())
+                .mod(BigInteger.valueOf(100))
+                .intValue();
+        assertTrue(test > 0 && test < 100);
+        int test2 = MPUtility.hashFnv1A(MPUtility.getRampUdid(context).getBytes())
+                .mod(BigInteger.valueOf(100))
+                .intValue();
+        assertTrue(test == test2);
+    }
 
     @Test
     @PrepareForTest({URL.class, MParticleApiClientImpl.class, MPUtility.class})

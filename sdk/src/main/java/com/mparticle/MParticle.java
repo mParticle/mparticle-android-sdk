@@ -113,6 +113,7 @@ public class MParticle {
     private CommerceApi mCommerce;
     private ProductBagApi mProductBags;
     private volatile DeepLinkListener mDeepLinkListener;
+    private static volatile boolean androidIdDisabled;
 
     MParticle() {}
 
@@ -322,6 +323,34 @@ public class MParticle {
         MParticle.instance = instance;
     }
 
+    /**
+     * Query the status of Android ID collection.
+     *
+     * By default, the SDK will collect <a href="http://developer.android.com/reference/android/provider/Settings.Secure.html#ANDROID_ID">Android Id</a> for the purpose
+     * of anonymous analytics. If you're not using an mParticle integration that consumes Android ID, the value will be sent to the mParticle
+     * servers and then immediately discarded. Use this API if you would like to additionally disable it from being collected entirely.
+     *
+     *
+     * @return true if Android ID collection is disabled. (false by default)
+
+     * @see MParticle#setAndroidIdDisabled(boolean)
+     */
+    public static boolean isAndroidIdDisabled() {
+        return androidIdDisabled;
+    }
+
+    /**
+     * Disable Android ID collection. This *must* be called before {@link MParticle#start(Context)}.
+     *
+     * By default, the SDK will collect <a href="http://developer.android.com/reference/android/provider/Settings.Secure.html#ANDROID_ID">Android Id</a> for the purpose
+     * of anonymous analytics. If you're not using an mParticle integration that consumes Android ID, the value will be sent to the mParticle
+     * servers and then immediately discarded. Use this API if you would like to additionally disable it from being collected entirely.
+     *
+     * @param disable true to disable collection (false by default)
+     */
+    public static void setAndroidIdDisabled(boolean disable) {
+        androidIdDisabled = disable;
+    }
 
     /**
      * Track that an Activity has started. Should only be called within the onStart method of your Activities,

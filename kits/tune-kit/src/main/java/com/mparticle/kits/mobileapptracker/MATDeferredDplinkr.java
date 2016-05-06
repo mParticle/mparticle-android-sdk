@@ -3,6 +3,7 @@ package com.mparticle.kits.mobileapptracker;
 import android.content.Context;
 import android.provider.Settings;
 
+import com.mparticle.MParticle;
 import com.mparticle.internal.MPUtility;
 
 public class MATDeferredDplinkr {
@@ -116,8 +117,10 @@ public class MATDeferredDplinkr {
                                 dplinkr.googleAdvertisingId = googleAdId;
                                 dplinkr.isLATEnabled = limitAdTrackingEnabled ? 1 : 0;
                             }else {
-                                dplinkr.setAndroidId(Settings.Secure.getString(context.getContentResolver(),
-                                        Settings.Secure.ANDROID_ID));
+                                if (!MParticle.isAndroidIdDisabled()) {
+                                    dplinkr.setAndroidId(Settings.Secure.getString(context.getContentResolver(),
+                                            Settings.Secure.ANDROID_ID));
+                                }
                             }
                         }
                     });
@@ -125,7 +128,7 @@ public class MATDeferredDplinkr {
                 // If no device identifiers collected, return
                 if (dplinkr.googleAdvertisingId == null && dplinkr.androidId == null) {
                     if (listener != null) {
-                        listener.didFailDeeplink("No device identifiers collected");
+                        listener.didFailDeeplink("No device identifiers were able to be collected.");
                     }
                 }
                 

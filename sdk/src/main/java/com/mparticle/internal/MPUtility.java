@@ -246,8 +246,8 @@ public class MPUtility {
         return TimeUnit.MILLISECONDS.convert(System.nanoTime(), TimeUnit.NANOSECONDS);
     }
 
-    public static synchronized String getAndroidID(Context paramContext) {
-        return Settings.Secure.getString(paramContext.getContentResolver(), "android_id");
+    public static String getAndroidID(Context context) {
+        return Settings.Secure.getString(context.getContentResolver(), "android_id");
     }
 
     public static String getTimeZone() {
@@ -305,7 +305,7 @@ public class MPUtility {
         }
     }
 
-    public static synchronized String getOpenUDID(Context context) {
+    public static String getOpenUDID(Context context) {
         if (sOpenUDID == null) {
             SharedPreferences sharedPrefs = context.getSharedPreferences(
                     Constants.PREFS_FILE, Context.MODE_PRIVATE);
@@ -323,6 +323,19 @@ public class MPUtility {
         return sOpenUDID;
     }
 
+    public static String getRampUdid(Context context) {
+        SharedPreferences sharedPrefs = context.getSharedPreferences(
+                    Constants.PREFS_FILE, Context.MODE_PRIVATE);
+        String rampUdid = sharedPrefs.getString(Constants.PrefKeys.DEVICE_RAMP_UDID, null);
+        if (rampUdid == null) {
+            rampUdid = getGeneratedUdid();
+            SharedPreferences.Editor editor = sharedPrefs.edit();
+            editor.putString(Constants.PrefKeys.DEVICE_RAMP_UDID, rampUdid);
+            editor.apply();
+        }
+        return rampUdid;
+    }
+
     static String getGeneratedUdid() {
         SecureRandom localSecureRandom = new SecureRandom();
         return new BigInteger(64, localSecureRandom).toString(16);
@@ -335,116 +348,10 @@ public class MPUtility {
         return UUID.nameUUIDFromBytes(versionCode.getBytes()).toString();
     }
 
-    private static String convertBytesToUUID(byte[] paramArrayOfByte, boolean paramBoolean) {
-        String str = "";
-        for (int i = 0; i < 16; i++) {
-            str = str + String.format("%02x", new Object[]{Byte.valueOf(paramArrayOfByte[i])});
-            if ((paramBoolean) && ((i == 3) || (i == 5) || (i == 7) || (i == 9))) {
-                str = str + '-';
-            }
-        }
-        return str;
-    }
-
-    public static boolean jsonObjsAreEqual(JSONObject js1, JSONObject js2) throws JSONException {
-        if (js1 == null || js2 == null) {
-            return (js1 == js2);
-        }
-
-        List<String> l1 = new ArrayList<String>();
-        JSONArray a1 = js1.names();
-        for (int i = 0; i < a1.length(); i++) {
-            l1.add(a1.getString(i));
-        }
-
-        Collections.sort(l1);
-        List<String> l2 = new ArrayList<String>();
-        JSONArray a2 = js2.names();
-        for (int i = 0; i < a2.length(); i++) {
-            l2.add(a2.getString(i));
-        }
-        Collections.sort(l2);
-        if (!l1.equals(l2)) {
-            Log.d(Constants.LOG_TAG, "Difference detected: ECHO " + l1.toString() + " is different than: " + l2.toString());
-            return false;
-        }
-        for (String key : l1) {
-            Object val1 = js1.get(key);
-            Object val2 = js2.get(key);
-            if (val1 instanceof JSONObject) {
-                if (!(val2 instanceof JSONObject)) {
-                    Log.d(Constants.LOG_TAG, "Difference detected while inspecting key: " + key);
-                    return false;
-                }
-                if (!jsonObjsAreEqual((JSONObject) val1, (JSONObject) val2)) {
-                    Log.d(Constants.LOG_TAG, "Difference detected while inspecting key: " + key);
-                    return false;
-                }
-            }
-
-            if (val1 == null) {
-                if (val2 != null) {
-                    Log.d(Constants.LOG_TAG, "Difference detected while inspecting key, value: " + key + ", " + val2);
-                    return false;
-
-                }
-            } else if (!val1.equals(val2)) {
-                if (val2 == null) {
-                    Log.d(Constants.LOG_TAG, "Difference detected while inspecting value: " + val1);
-                } else {
-                    Log.d(Constants.LOG_TAG, "Difference detected while inspecting value: " + val1 + ", does not match :" + val2);
-                }
-                return false;
-            }
-        }
-        return true;
-    }
-
     public static boolean isTablet(Context context) {
         return (context.getResources().getConfiguration().screenLayout
                 & Configuration.SCREENLAYOUT_SIZE_MASK)
                 >= Configuration.SCREENLAYOUT_SIZE_LARGE;
-    }
-
-    public static Object getAccessibleObject(Field paramField, Object paramObject) {
-        Object localObject = null;
-        if (paramField == null)
-            return null;
-        if (paramField != null) {
-            paramField.setAccessible(true);
-            try {
-                localObject = paramField.get(paramObject);
-            } catch (Exception e) {
-
-            }
-        }
-        return localObject;
-    }
-
-    public static Field getAccessibleField(Class paramClass1, Class paramClass2) {
-        Field[] paramfields = paramClass1.getDeclaredFields();
-        Field localField = null;
-        for (int i = 0; i < paramfields.length; i++)
-            if (paramClass2.isAssignableFrom(paramfields[i].getType())) {
-                // if (localField != null)
-                //throw new MPException(cd.l);
-                localField = paramfields[i];
-            }
-
-        localField.setAccessible(true);
-        return localField;
-    }
-
-    public static Constructor getConstructor(String classStr, String[] params) throws ClassNotFoundException {
-        Constructor<?>[] constructors = Class.forName(classStr).getDeclaredConstructors();
-        for (int i = 0; i < constructors.length; i++) {
-            Class[] classes = constructors[i].getParameterTypes();
-            for (int j = 0; j < classes.length; j++) {
-                if ((!classes[j].getName().equals(params[j]) ? 0 : classes.length != params.length ? 0 : 1) != 0)
-                    return constructors[i];
-            }
-        }
-        return null;
     }
 
     public static boolean hasNfc(Context context) {

@@ -440,6 +440,7 @@ public class Constants {
         String PUSH_REGISTRATION_ID = "mp::push_reg_id";
         String INSTALL_REFERRER = "mp::install_referrer";
         String OPEN_UDID = "mp::openudid";
+        String DEVICE_RAMP_UDID = "mp::rampudid";
         // app-key specific (append appKey to the key)
         String OPTOUT = "mp::optout::";
         String USER_ATTRS = "mp::user_attrs::";

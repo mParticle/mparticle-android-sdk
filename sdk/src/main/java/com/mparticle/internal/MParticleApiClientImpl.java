@@ -441,9 +441,7 @@ public class MParticleApiClientImpl implements MParticleApiClient {
 
     private void checkRampValue() throws MPRampException {
         if (mDeviceRampNumber == null){
-            mDeviceRampNumber = MPUtility.hashFnv1A(
-                    Settings.Secure.getString(mContext.getContentResolver(),
-                            Settings.Secure.ANDROID_ID).getBytes())
+            mDeviceRampNumber = MPUtility.hashFnv1A(MPUtility.getRampUdid(mContext).getBytes())
                     .mod(BigInteger.valueOf(100))
                     .intValue();
         }

@@ -112,6 +112,15 @@ import java.util.UUID;
         return attributes;
     }
 
+    public static void addAndroidId(JSONObject attributes, Context context) throws JSONException {
+        if (!MParticle.isAndroidIdDisabled()) {
+            String androidId = MPUtility.getAndroidID(context);
+            attributes.put(MessageKey.DEVICE_ID, androidId);
+            attributes.put(MessageKey.DEVICE_ANID, androidId);
+            attributes.put(MessageKey.DEVICE_OPEN_UDID, MPUtility.getOpenUDID(context));
+        }
+    }
+
     /**
      * Generates a collection of device attributes. This will be lazy-loaded, and only ever called once per app run.
      *
@@ -135,8 +144,8 @@ import java.util.UUID;
             attributes.put(MessageKey.RELEASE_VERSION, Build.VERSION.RELEASE);
 
             // device ID
-            attributes.put(MessageKey.DEVICE_ID, Settings.Secure.getString(appContext.getContentResolver(),
-                    Settings.Secure.ANDROID_ID));
+            addAndroidId(attributes, appContext);
+
             attributes.put(MessageKey.DEVICE_BLUETOOTH_ENABLED, MPUtility.isBluetoothEnabled(appContext));
             attributes.put(MessageKey.DEVICE_BLUETOOTH_VERSION, MPUtility.getBluetoothVersion(appContext));
             attributes.put(MessageKey.DEVICE_SUPPORTS_NFC, MPUtility.hasNfc(appContext));
@@ -187,8 +196,8 @@ import java.util.UUID;
 
             }
             attributes.put(MessageKey.DEVICE_IS_TABLET, MPUtility.isTablet(appContext));
-            attributes.put(MessageKey.DEVICE_ANID, MPUtility.getAndroidID(appContext));
-            attributes.put(MessageKey.DEVICE_OPEN_UDID, MPUtility.getOpenUDID(appContext));
+
+
 
             MPUtility.getGoogleAdIdInfo(appContext, new MPUtility.GoogleAdIdListener() {
                 @Override
