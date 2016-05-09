@@ -55,6 +55,7 @@ public class DeviceAttributesTest {
 
         MParticle.setAndroidIdDisabled(true);
         JSONObject newAttributes = new JSONObject();
+        DeviceAttributes.addAndroidId(attributes, context);
         assertTrue(newAttributes.length() == 0);
     }
 
