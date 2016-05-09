@@ -3,9 +3,6 @@ apply plugin: 'com.android.library'
 android {
     compileSdkVersion 23
     buildToolsVersion "23.0.2"
-}
-
-android {
     defaultConfig {
         versionCode = Integer.parseInt(new Date().format('yyyyMMdd'))
         versionName project.version

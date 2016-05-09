@@ -1,0 +1,25 @@
+apply plugin: 'groovy'
+
+ext {
+    kitDescription = 'mParticle Gradle Plugin for creating mParticle kits'
+}
+
+apply from: '../scripts/maven.gradle'
+
+dependencies {
+    compile gradleApi()
+    compile localGroovy()
+    compile 'com.android.tools.build:gradle:1.5.0'
+}
+
+compileJava {
+    sourceCompatibility JavaVersion.VERSION_1_7.toString()
+    targetCompatibility JavaVersion.VERSION_1_7.toString()
+}
+
+dependencies {
+    testCompile 'junit:junit:4.12'
+}
+
+group = 'com.mparticle'
+version = '1.0.0'
