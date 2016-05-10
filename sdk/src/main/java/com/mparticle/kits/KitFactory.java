@@ -77,7 +77,7 @@ public class KitFactory {
         if (loadKit(ekManager, APPSFLYER, "com.mparticle.kits.AppsFlyerKit")) {
             ConfigManager.log(MParticle.LogLevel.DEBUG, "AppsFlyer Kit detected.");
         }
-        if (loadKit(ekManager, APPTENTIVE, "com.mparticle.kits.Apptentive")) {
+        if (loadKit(ekManager, APPTENTIVE, "com.mparticle.kits.ApptentiveKit")) {
             ConfigManager.log(MParticle.LogLevel.DEBUG, "Apptentive Kit detected.");
         }
     }
