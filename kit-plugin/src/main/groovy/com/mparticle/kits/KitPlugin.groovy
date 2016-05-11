@@ -12,16 +12,16 @@ class KitPlugin implements Plugin<Project> {
         //formerly in kit-common.gradle
         target.apply(plugin: 'com.android.library')
         target.group = 'com.mparticle'
-        target.version = '4.5.0'
+        target.buildscript.repositories.add(target.repositories.mavenLocal())
+        target.repositories.add(target.repositories.mavenLocal())
         target.buildscript.repositories.add(target.repositories.mavenCentral())
         target.repositories.add(target.repositories.mavenCentral())
-        target.dependencies.add('compile', 'com.mparticle:android-kit-base:4.5.0')
+        target.dependencies.add('compile', 'com.mparticle:android-kit-base:+')
         target.extensions.create("mparticle", MParticlePluginExtension)
         LibraryExtension androidLib = target.android
         androidLib.compileSdkVersion(23)
         androidLib.buildToolsVersion('23.0.2')
         androidLib.defaultConfig.versionCode = Integer.parseInt(new Date().format('yyyyMMdd'))
-        androidLib.defaultConfig.versionName '4.5.0'
         androidLib.defaultConfig.minSdkVersion 9
         androidLib.defaultConfig.targetSdkVersion 23
         androidLib.buildTypes.release.minifyEnabled false
@@ -65,12 +65,11 @@ class KitPlugin implements Plugin<Project> {
                     }
 
                     pom.project {
-                        def artId = 'android-' + target.name + '-kit'
-                        artifactId artId
+                        artifactId target.name
                         packaging 'aar'
-                        name artId
+                        name target.name
                         if (target.mparticle.kitDescription == null) {
-                            description artId + ' for the mParticle SDK. Add this kit if you\'d like to use ' + Character.toUpperCase(target.name.charAt(0)) + target.name.substring(1) + '.'
+                            description target.name + ' for the mParticle SDK'
                         } else {
                             description target.mparticle.kitDescription
                         }

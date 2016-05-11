@@ -12,14 +12,26 @@ dependencies {
     compile 'com.android.tools.build:gradle:1.5.0'
 }
 
-compileJava {
-    sourceCompatibility JavaVersion.VERSION_1_7.toString()
-    targetCompatibility JavaVersion.VERSION_1_7.toString()
+compileGroovy {
+    sourceCompatibility = '1.7'
+    targetCompatibility = '1.7'
 }
 
 dependencies {
     testCompile 'junit:junit:4.12'
 }
 
-group = 'com.mparticle'
-version = '1.0.0'
+task pluginJavadocsJar(type: Jar, dependsOn: groovydoc) {
+    classifier = 'javadoc'
+    from groovydoc.destinationDir
+}
+
+task pluginSourcesJar(type: Jar) {
+    classifier = 'sources'
+    from sourceSets.main.allJava
+}
+
+artifacts {
+    archives pluginJavadocsJar
+    archives pluginSourcesJar
+}
