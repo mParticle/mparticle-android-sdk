@@ -41,7 +41,7 @@ public class LocalyticsKit extends AbstractKit implements ClientSideForwarder, E
 
         try {
             customDimensionJson = new JSONArray(properties.get(CUSTOM_DIMENSIONS));
-        } catch (JSONException jse) {
+        } catch (Exception jse) {
 
         }
         trackAsRawLtv = Boolean.parseBoolean(properties.get(RAW_LTV));
