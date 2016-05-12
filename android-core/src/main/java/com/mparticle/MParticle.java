@@ -1672,18 +1672,18 @@ public class MParticle {
      * @see #getSurveyUrl(int)
      */
     public interface ServiceProviders {
-        int FORESEE_ID = 64;
         int APPBOY = 28;
-        int ADJUST = 68;
+        int TUNE = 32;
         int KOCHAVA = 37;
         int COMSCORE = 39;
         int KAHUNA = 56;
+        int FORESEE_ID = 64;
+        int ADJUST = 68;
         int BRANCH_METRICS = 80;
         int FLURRY = 83;
         int LOCALYTICS = 84;
         int CRITTERCISM = 86;
         int WOOTRIC = 90;
-        int TUNE = 32;
         int APPSFLYER = 92;
         int APPTENTIVE = 97;
         String BROADCAST_ACTIVE = "MPARTICLE_SERVICE_PROVIDER_ACTIVE_";

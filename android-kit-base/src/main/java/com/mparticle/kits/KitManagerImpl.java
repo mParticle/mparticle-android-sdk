@@ -356,7 +356,7 @@ public class KitManagerImpl implements KitManager, DeepLinkListener {
         for (KitIntegration provider : providers.values()) {
             if (provider instanceof KitIntegration.PushListener) {
                 try {
-                    if (!provider.isDisabled() && ((KitIntegration.PushListener) provider).willHandlePushMessage(intent.getExtras().keySet())) {
+                    if (!provider.isDisabled() && ((KitIntegration.PushListener) provider).willHandlePushMessage(intent)) {
                         ((KitIntegration.PushListener) provider).onPushMessageReceived(context, intent);
                         ReportingMessage message = ReportingMessage.fromPushMessage(provider, intent);
                         getReportingManager().log(message);

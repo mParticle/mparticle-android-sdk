@@ -311,13 +311,13 @@ public abstract class KitIntegration {
          * SDK. Typically, a given push service will include a predefined key within the payload of a
          * push message that uniquely identifies the push by company.
          *
-         * @param keyset the keyset of the Bundle that was received within a push-received Intent
+         * @param intent the Intent object from the push-received broadcast
          * @return true if this push should be handled by the given Kit
          */
-        boolean willHandlePushMessage(Set<String> keyset);
+        boolean willHandlePushMessage(Intent intent);
 
         /**
-         * If a Kit returns true from {@link #willHandlePushMessage(Set)}, this method will be called immediately after.
+         * If a Kit returns true from {@link #willHandlePushMessage(Intent)}, this method will be called immediately after.
          * Kits should implement this method to show or otherwise react to a received push message.
          *
          * @param context
