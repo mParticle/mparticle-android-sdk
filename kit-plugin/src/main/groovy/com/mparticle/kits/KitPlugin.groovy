@@ -16,7 +16,7 @@ class KitPlugin implements Plugin<Project> {
         target.repositories.add(target.repositories.mavenLocal())
         target.buildscript.repositories.add(target.repositories.mavenCentral())
         target.repositories.add(target.repositories.mavenCentral())
-        target.dependencies.add('compile', 'com.mparticle:android-kit-base:+')
+        target.dependencies.add('compile', 'com.mparticle:android-kit-base:'+target.version)
         target.extensions.create("mparticle", MParticlePluginExtension)
         LibraryExtension androidLib = target.android
         androidLib.compileSdkVersion(23)
