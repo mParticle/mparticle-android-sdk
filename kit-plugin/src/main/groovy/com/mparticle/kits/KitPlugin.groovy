@@ -41,7 +41,8 @@ class KitPlugin implements Plugin<Project> {
             target.extensions.add('signing.password', password)
 
             SigningExtension signing = new SigningExtension(target)
-            signing.required = { gradle.taskGraph.hasTask("uploadArchives") }
+            signing.required = { target.gradle.taskGraph.hasTask("uploadArchives") }
+            signing.sign target.configurations.archives
         }
 
         def target_maven_repo = 'local'
@@ -55,7 +56,7 @@ class KitPlugin implements Plugin<Project> {
                 mavenDeployer {
                     if (target_maven_repo == 'sonatype') {
                         beforeDeployment {
-                            MavenDeployment deployment -> signing.signPom(deployment)
+                            MavenDeployment deployment -> target.signing.signPom(deployment)
                         }
                         repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
                             authentication(userName: System.getenv('sonatypeUsername'), password: System.getenv('sonatypePassword'))
