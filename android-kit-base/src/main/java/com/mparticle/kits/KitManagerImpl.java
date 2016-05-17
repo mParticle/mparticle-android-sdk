@@ -493,7 +493,7 @@ public class KitManagerImpl implements KitManager, DeepLinkListener {
 
     @Override
     public WeakReference<Activity> getCurrentActivity() {
-        return null;
+        return mAppStateManager.getCurrentActivity();
     }
 
     @Override

@@ -31,6 +31,7 @@ public class KitFrameworkWrapper implements KitManager {
     private boolean shouldCheckForDeepLink = false;
     private Queue queuedEvents;
     private boolean queueEvents = true;
+    private boolean registerForPush = false;
 
     public KitFrameworkWrapper(Context context, ReportingManager reportingManager, ConfigManager configManager, AppStateManager appStateManager) {
         this.mContext = context;
@@ -71,11 +72,32 @@ public class KitFrameworkWrapper implements KitManager {
     }
 
     private void replayEvents() {
+        if (mKitManager == null) {
+            return;
+        }
+
+        WeakReference<Activity> activityWeakReference = getCurrentActivity();
+        if (activityWeakReference != null) {
+            Activity activity = activityWeakReference.get();
+            if (activity != null) {
+                mKitManager.onActivityCreated(activity, null);
+                mKitManager.onActivityStarted(activity);
+                mKitManager.onActivityResumed(activity);
+            }
+        }
+
+        if (registerForPush) {
+            PushRegistrationHelper.PushRegistration registration = PushRegistrationHelper.getLatestPushRegistration(mContext);
+            if (registration != null) {
+                mKitManager.onPushRegistration(registration.instanceId, registration.senderId);
+            }
+        }
+
         if (shouldCheckForDeepLink) {
             mKitManager.checkForDeepLink();
         }
 
-        if (queuedEvents == null || queuedEvents.size() == 0 || mKitManager == null) {
+        if (queuedEvents == null || queuedEvents.size() == 0) {
             return;
         }
 
@@ -245,8 +267,10 @@ public class KitFrameworkWrapper implements KitManager {
 
     @Override
     public boolean onPushRegistration(String instanceId, String senderId) {
-        if (mKitManager != null) {
+        if (!queueEvents && mKitManager != null) {
             mKitManager.onPushRegistration(instanceId, senderId);
+        }else {
+            registerForPush = true;
         }
         return false;
     }
@@ -293,42 +317,42 @@ public class KitFrameworkWrapper implements KitManager {
     @Override
     public void onActivityCreated(Activity activity, Bundle savedInstanceState) {
         if (mKitManager != null) {
-            mKitManager.onActivityDestroyed(activity);
+            mKitManager.onActivityCreated(activity, savedInstanceState);
         }
     }
 
     @Override
     public void onActivityStarted(Activity activity) {
         if (mKitManager != null) {
-            mKitManager.onActivityDestroyed(activity);
+            mKitManager.onActivityStarted(activity);
         }
     }
 
     @Override
     public void onActivityResumed(Activity activity) {
         if (mKitManager != null) {
-            mKitManager.onActivityDestroyed(activity);
+            mKitManager.onActivityResumed(activity);
         }
     }
 
     @Override
     public void onActivityPaused(Activity activity) {
         if (mKitManager != null) {
-            mKitManager.onActivityDestroyed(activity);
+            mKitManager.onActivityPaused(activity);
         }
     }
 
     @Override
     public void onActivityStopped(Activity activity) {
         if (mKitManager != null) {
-            mKitManager.onActivityDestroyed(activity);
+            mKitManager.onActivityStopped(activity);
         }
     }
 
     @Override
     public void onActivitySaveInstanceState(Activity activity, Bundle outState) {
         if (mKitManager != null) {
-            mKitManager.onActivityDestroyed(activity);
+            mKitManager.onActivitySaveInstanceState(activity, outState);
         }
     }
 
