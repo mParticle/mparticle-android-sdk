@@ -22,9 +22,6 @@
 [submodule "kits/branch-kit"]
 	path = kits/branch-kit
 	url = git@github.com:mParticle/mparticle-android-integration-branch.git
-[submodule "kits/appsflyer-kit"]
-	path = kits/appsflyer-kit
-	url = git@github.com:mParticle/mparticle-android-integration-appsflyer.git
 [submodule "kits/appboy-kit"]
 	path = kits/appboy-kit
 	url = git@github.com:mParticle/mparticle-android-integration-appboy.git
@@ -37,3 +34,6 @@
 [submodule "kits/apptentive-kit"]
 	path = kits/apptentive-kit
 	url = git@github.com:mParticle/mparticle-android-integration-apptentive.git
+[submodule "kits/appsflyer-kit"]
+	path = kits/appsflyer-kit
+	url = git@github.com:mParticle/mparticle-android-integration-appsflyer.git
