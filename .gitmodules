@@ -28,12 +28,9 @@
 [submodule "kits/adjust-kit"]
 	path = kits/adjust-kit
 	url = git@github.com:mParticle/mparticle-android-integration-adjust.git
-[submodule "kits/tune-kit"]
-	path = kits/tune-kit
-	url = git@github.com:mParticle/mparticle-android-integration-tune.git
-[submodule "kits/apptentive-kit"]
-	path = kits/apptentive-kit
-	url = git@github.com:mParticle/mparticle-android-integration-apptentive.git
 [submodule "kits/appsflyer-kit"]
 	path = kits/appsflyer-kit
 	url = git@github.com:mParticle/mparticle-android-integration-appsflyer.git
+[submodule "kits/tune-kit"]
+	path = kits/tune-kit
+	url = git@github.com:mParticle/mparticle-android-integration-tune.git
