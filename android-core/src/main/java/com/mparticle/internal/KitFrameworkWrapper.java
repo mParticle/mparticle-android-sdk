@@ -76,16 +76,6 @@ public class KitFrameworkWrapper implements KitManager {
             return;
         }
 
-        WeakReference<Activity> activityWeakReference = getCurrentActivity();
-        if (activityWeakReference != null) {
-            Activity activity = activityWeakReference.get();
-            if (activity != null) {
-                mKitManager.onActivityCreated(activity, null);
-                mKitManager.onActivityStarted(activity);
-                mKitManager.onActivityResumed(activity);
-            }
-        }
-
         if (registerForPush) {
             PushRegistrationHelper.PushRegistration registration = PushRegistrationHelper.getLatestPushRegistration(mContext);
             if (registration != null) {

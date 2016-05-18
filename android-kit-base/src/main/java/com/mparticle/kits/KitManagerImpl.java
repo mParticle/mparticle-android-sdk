@@ -129,8 +129,29 @@ public class KitManagerImpl implements KitManager, DeepLinkListener {
                                     continue;
                                 }
                                 provider.onKitCreate(configuration.getSettings(), getContext());
+
+                                if (provider instanceof KitIntegration.ActivityListener) {
+                                    WeakReference<Activity> activityWeakReference = getCurrentActivity();
+                                    if (activityWeakReference != null) {
+                                        Activity activity = activityWeakReference.get();
+                                        if (activity != null) {
+                                            KitIntegration.ActivityListener listener = (KitIntegration.ActivityListener)provider;
+                                            getReportingManager().logAll(
+                                                    listener.onActivityCreated(activity, null)
+                                            );
+                                            getReportingManager().logAll(
+                                                    listener.onActivityStarted(activity)
+                                            );
+                                            getReportingManager().logAll(
+                                                    listener.onActivityResumed(activity)
+                                            );
+                                        }
+                                    }
+                                }
+
                                 Intent intent = new Intent(MParticle.ServiceProviders.BROADCAST_ACTIVE + currentId);
                                 getContext().sendBroadcast(intent);
+
                                 ConfigManager.log(MParticle.LogLevel.DEBUG, "Kit initialized: " + provider.getName());
                                 if (provider instanceof KitIntegration.AttributeListener) {
                                     syncUserAttributes((KitIntegration.AttributeListener) provider, provider.getConfiguration());
