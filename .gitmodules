@@ -34,3 +34,6 @@
 [submodule "kits/tune-kit"]
     path = kits/tune-kit
     url = git@github.com:mParticle-integrations/mparticle-android-integration-tune.git
+[submodule "kits/apptentive-kit"]
+	path = kits/apptentive-kit
+	url = git@github.com:mparticle-integrations/mparticle-android-integration-apptentive.git
