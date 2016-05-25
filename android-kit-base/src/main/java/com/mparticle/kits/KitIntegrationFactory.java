@@ -40,6 +40,7 @@ public class KitIntegrationFactory {
         kits.put(MParticle.ServiceProviders.CRITTERCISM,      "com.mparticle.kits.CrittercismKit");
         kits.put(MParticle.ServiceProviders.TUNE,             "com.mparticle.kits.TuneKit");
         kits.put(MParticle.ServiceProviders.APPSFLYER,        "com.mparticle.kits.AppsFlyerKit");
+        kits.put(MParticle.ServiceProviders.APPTENTIVE,       "com.mparticle.kits.ApptentiveKit");
         return kits;
     }
 
