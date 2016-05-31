@@ -17,6 +17,8 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import java.math.BigInteger;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.List;
+import java.util.Locale;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -52,6 +54,32 @@ public class MParticleApiClientImplTest {
         client.setConfigUrl(mockUrl);
     }
 
+    @Test
+    @PrepareForTest({URL.class, MParticleApiClientImpl.class, MPUtility.class})
+    public void testAddMessageSignature() throws Exception {
+        setup();
+
+        PowerMockito.mockStatic(MPUtility.class);
+        Mockito.when(MPUtility.hmacSha256Encode(Mockito.anyString(), Mockito.anyString())).thenReturn("encoded");
+        ArgumentCaptor<String> headerCapture = ArgumentCaptor.forClass(String.class);
+        ArgumentCaptor<String> headerValueCapture = ArgumentCaptor.forClass(String.class);
+        client.addMessageSignature(mockConnection, "this is a sample batch");
+        Mockito.verify(mockConnection, Mockito.times(2)).setRequestProperty(headerCapture.capture(), headerValueCapture.capture());
+        List<String> headerKeys = headerCapture.getAllValues();
+        List<String> headerValues = headerValueCapture.getAllValues();
+
+        int dateIndex = headerKeys.indexOf("Date");
+        assertTrue(headerKeys.toString(), dateIndex >= 0);
+        String dateValue = headerValues.get(dateIndex);
+        assertNotNull(dateValue);
+        assertTrue(dateValue.length() > 0);
+
+        int signatureIndex = headerKeys.indexOf("x-mp-signature");
+        assertTrue(headerValues.toString(), signatureIndex >= 0);
+        String signatureValue = headerValues.get(signatureIndex);
+        assertNotNull(signatureValue);
+        assertTrue(signatureValue.length() > 0);
+    }
 
     @Test
     public void testRampNumber() throws Exception {

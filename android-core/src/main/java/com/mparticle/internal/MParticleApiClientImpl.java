@@ -36,6 +36,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.zip.GZIPOutputStream;
 
@@ -289,10 +290,10 @@ public class MParticleApiClientImpl implements MParticleApiClient {
         }
     }
 
-    private void addMessageSignature(HttpURLConnection request, String message) {
+    void addMessageSignature(HttpURLConnection request, String message) {
         try {
             String method = request.getRequestMethod();
-            SimpleDateFormat format = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz");
+            SimpleDateFormat format = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz", Locale.US);
             String dateHeader = format.format(new Date());
             String path = request.getURL().getFile();
             StringBuilder hashString = new StringBuilder()
