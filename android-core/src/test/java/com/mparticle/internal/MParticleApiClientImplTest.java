@@ -18,7 +18,6 @@ import java.math.BigInteger;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.List;
-import java.util.Locale;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -162,7 +161,13 @@ public class MParticleApiClientImplTest {
         setup();
         PowerMockito.mockStatic(MPUtility.class);
         Mockito.when(MPUtility.hmacSha256Encode(Mockito.anyString(), Mockito.anyString())).thenReturn("encoded");
-        client.sendMessageBatch("");
+        try {
+            client.sendMessageBatch("");
+        }catch (Exception e) {
+            if (e instanceof MParticleApiClientImpl.MPThrottleException) {
+                throw e;
+            }
+        }
         client.setNextRequestTime(System.currentTimeMillis() + 1000);
         Exception e = null;
         try {

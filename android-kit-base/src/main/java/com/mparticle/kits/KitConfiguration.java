@@ -453,7 +453,7 @@ public class KitConfiguration {
             }
             if (attributes.getRevenue() != null &&
                     !mCommerceAttributeFilters.get(MPUtility.mpHash(eventType + Constants.Commerce.ATT_TOTAL), true)) {
-                attributes.setRevenue(null);
+                attributes.setRevenue(0.0);
             }
             if (attributes.getId() != null &&
                     !mCommerceAttributeFilters.get(MPUtility.mpHash(eventType + Constants.Commerce.ATT_TRANSACTION_ID), true)) {

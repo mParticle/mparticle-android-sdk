@@ -26,12 +26,12 @@ public class KitFrameworkWrapper implements KitManager {
     private final ConfigManager mConfigManager;
     private final ReportingManager mReportingManager;
     private KitManager mKitManager;
-    private volatile boolean loadAttempted;
+    private volatile boolean frameworkLoadAttempted = false;
+    private volatile boolean kitsLoaded = false;
 
-    private boolean shouldCheckForDeepLink = false;
-    private Queue queuedEvents;
-    private boolean queueEvents = true;
-    private boolean registerForPush = false;
+    private Queue eventQueue;
+    private volatile boolean registerForPush = false;
+    private volatile boolean shouldCheckForDeepLink = false;
 
     public KitFrameworkWrapper(Context context, ReportingManager reportingManager, ConfigManager configManager, AppStateManager appStateManager) {
         this.mContext = context;
@@ -41,13 +41,12 @@ public class KitFrameworkWrapper implements KitManager {
     }
 
     public void loadKitLibrary() {
-        if (!loadAttempted) {
+        if (!frameworkLoadAttempted) {
             ConfigManager.log(MParticle.LogLevel.DEBUG, "Loading Kit Framework.");
-            loadAttempted = true;
+            frameworkLoadAttempted = true;
             try {
                 Class clazz = Class.forName("com.mparticle.kits.KitManagerImpl");
                 Constructor<KitFrameworkWrapper> constructor = clazz.getConstructor(Context.class, ReportingManager.class, ConfigManager.class, AppStateManager.class);
-                constructor.setAccessible(true);
                 mKitManager = constructor.newInstance(mContext, mReportingManager, mConfigManager, mAppStateManager);
                 JSONArray configuration = mConfigManager.getLatestKitConfiguration();
                 ConfigManager.log(MParticle.LogLevel.DEBUG, "Kit Framework loaded.");
@@ -62,16 +61,35 @@ public class KitFrameworkWrapper implements KitManager {
         }
     }
 
-    private void disableQueuing() {
-        queueEvents = false;
-        if (queuedEvents != null) {
-            queuedEvents.clear();
-            queuedEvents = null;
+    boolean getFrameworkLoadAttempted() {
+        return frameworkLoadAttempted;
+    }
+
+    Queue getEventQueue() {
+        return eventQueue;
+    }
+
+    void setKitManager(KitManager manager) {
+        mKitManager = manager;
+    }
+    boolean getKitsLoaded() {
+        return kitsLoaded;
+    }
+
+    void setKitsLoaded(boolean kitsLoaded) {
+        this.kitsLoaded = kitsLoaded;
+    }
+
+    void disableQueuing() {
+        setKitsLoaded(true);
+        if (eventQueue != null) {
+            eventQueue.clear();
+            eventQueue = null;
             ConfigManager.log(MParticle.LogLevel.DEBUG, "Kit initialization complete. Disabling event queueing.");
         }
     }
 
-    private void replayEvents() {
+    void replayEvents() {
         if (mKitManager == null) {
             return;
         }
@@ -87,12 +105,12 @@ public class KitFrameworkWrapper implements KitManager {
             mKitManager.checkForDeepLink();
         }
 
-        if (queuedEvents == null || queuedEvents.size() == 0) {
+        if (eventQueue == null || eventQueue.size() == 0) {
             return;
         }
 
         ConfigManager.log(MParticle.LogLevel.DEBUG, "Replaying events after receiving first kit configuration.");
-        for (Object event : queuedEvents) {
+        for (Object event : eventQueue) {
             if (event instanceof MPEvent) {
                 MPEvent mpEvent = (MPEvent) event;
                 if (mpEvent.isScreenEvent()) {
@@ -107,23 +125,24 @@ public class KitFrameworkWrapper implements KitManager {
     }
 
     public void replayAndDisableQueue() {
+        setKitsLoaded(true);
         replayEvents();
         disableQueuing();
     }
 
-    private boolean queueEvent(Object event) {
-        if (!queueEvents) {
+    boolean queueEvent(Object event) {
+        if (getKitsLoaded()) {
             return false;
         }
 
-        if (queuedEvents == null) {
-            queuedEvents = new ConcurrentLinkedQueue<Object>();
+        if (eventQueue == null) {
+            eventQueue = new ConcurrentLinkedQueue<Object>();
         }
         //it's an edge case to even need this, so 10
         //should be enough.
-        if (queuedEvents.size() <= 10) {
+        if (eventQueue.size() < 10) {
             ConfigManager.log(MParticle.LogLevel.DEBUG, "Queuing Kit event while waiting for initial configuration.");
-            queuedEvents.add(event);
+            eventQueue.add(event);
         }
         return true;
     }
@@ -149,7 +168,7 @@ public class KitFrameworkWrapper implements KitManager {
     @Override
     public void logScreen(MPEvent screenEvent) {
         if (!queueEvent(screenEvent) && mKitManager != null) {
-            mKitManager.logEvent(screenEvent);
+            mKitManager.logScreen(screenEvent);
         }
     }
 
@@ -176,11 +195,15 @@ public class KitFrameworkWrapper implements KitManager {
 
     @Override
     public void checkForDeepLink() {
-        if (mKitManager != null) {
+        if (mKitManager != null && getKitsLoaded()) {
             mKitManager.checkForDeepLink();
         } else {
             shouldCheckForDeepLink = true;
         }
+    }
+
+    boolean getShouldCheckForDeepLink() {
+        return shouldCheckForDeepLink;
     }
 
     @Override
@@ -257,7 +280,7 @@ public class KitFrameworkWrapper implements KitManager {
 
     @Override
     public boolean onPushRegistration(String instanceId, String senderId) {
-        if (!queueEvents && mKitManager != null) {
+        if (getKitsLoaded() && mKitManager != null) {
             mKitManager.onPushRegistration(instanceId, senderId);
         }else {
             registerForPush = true;
