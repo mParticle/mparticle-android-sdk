@@ -9,12 +9,14 @@ import android.os.Bundle;
 
 import com.mparticle.MPEvent;
 import com.mparticle.MParticle;
+import com.mparticle.UserAttributeListener;
 import com.mparticle.commerce.CommerceEvent;
 
 import org.json.JSONArray;
 
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Constructor;
+import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
@@ -235,6 +237,13 @@ public class KitFrameworkWrapper implements KitManager {
     }
 
     @Override
+    public void setUserAttributeList(String key, List<String> value) {
+        if (mKitManager != null) {
+            mKitManager.setUserAttributeList(key, value);
+        }
+    }
+
+    @Override
     public void removeUserAttribute(String key) {
         if (mKitManager != null) {
             mKitManager.removeUserAttribute(key);
@@ -263,9 +272,9 @@ public class KitFrameworkWrapper implements KitManager {
     }
 
     @Override
-    public Uri getSurveyUrl(int kitId, Map<String, String> userAttributes) {
+    public Uri getSurveyUrl(int kitId, Map<String, String> userAttributes, Map<String, List<String>> userAttributeLists) {
         if (mKitManager != null) {
-            return mKitManager.getSurveyUrl(kitId, userAttributes);
+            return mKitManager.getSurveyUrl(kitId, userAttributes, userAttributeLists);
         }
         return null;
     }

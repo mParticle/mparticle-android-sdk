@@ -1,10 +1,19 @@
 package com.mparticle.internal;
 
+import android.content.ContentValues;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.provider.BaseColumns;
+
+import com.mparticle.MParticle;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.Iterator;
 
 /**
  * Class that generates/provides and interface to the mParticle database
@@ -16,6 +25,7 @@ import android.provider.BaseColumns;
  *
  */
 /* package-private */class MParticleDatabase extends SQLiteOpenHelper {
+    private final Context mContext;
 
     /**
      * The following get*Query methods were once static fields, but in order to save on app startup time, they're
@@ -93,8 +103,25 @@ import android.provider.BaseColumns;
                 ReportingTable._ID + " asc");
     }
 
-    private static final int DB_VERSION = 4;
+    private static final int DB_VERSION = 5;
     public static final String DB_NAME = "mparticle.db";
+
+    interface UserAttributesTable {
+        String TABLE_NAME = "attributes";
+        String ATTRIBUTE_KEY = "attribute_key";
+        String ATTRIBUTE_VALUE = "attribute_value";
+        String IS_LIST = "is_list";
+        String CREATED_AT = "created_time";
+    }
+
+    private static final String CREATE_USER_ATTRIBUTES_DDL =
+            "CREATE TABLE IF NOT EXISTS " + UserAttributesTable.TABLE_NAME + " (" + BaseColumns._ID +
+                    " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                    UserAttributesTable.ATTRIBUTE_KEY + " COLLATE NOCASE NOT NULL, " +
+                    UserAttributesTable.ATTRIBUTE_VALUE + " TEXT, " +
+                    UserAttributesTable.IS_LIST + " INTEGER NOT NULL, " +
+                    UserAttributesTable.CREATED_AT + " INTEGER NOT NULL " +
+                    ");";
 
     interface BreadcrumbTable {
         String TABLE_NAME = "breadcrumbs";
@@ -248,6 +275,7 @@ import android.provider.BaseColumns;
 
     MParticleDatabase(Context context) {
         super(context, DB_NAME, null, DB_VERSION);
+        mContext = context;
     }
 
     @Override
@@ -259,11 +287,11 @@ import android.provider.BaseColumns;
         db.execSQL(CREATE_BREADCRUMBS_DDL);
         db.execSQL(CREATE_GCM_MSG_DDL);
         db.execSQL(CREATE_REPORTING_DDL);
+        db.execSQL(CREATE_USER_ATTRIBUTES_DDL);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        //so far upgrades have only been additive, so just make sure we've got all the tables.
         db.execSQL(CREATE_SESSIONS_DDL);
         db.execSQL(CREATE_MESSAGES_DDL);
         db.execSQL(CREATE_UPLOADS_DDL);
@@ -271,7 +299,39 @@ import android.provider.BaseColumns;
         db.execSQL(CREATE_BREADCRUMBS_DDL);
         db.execSQL(CREATE_GCM_MSG_DDL);
         db.execSQL(CREATE_REPORTING_DDL);
+        db.execSQL(CREATE_USER_ATTRIBUTES_DDL);
+        upgradeUserAttributes(db);
     }
 
+    private void upgradeUserAttributes(SQLiteDatabase db) {
+        SharedPreferences sharedPreferences = mContext.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
+        String userAttrs = sharedPreferences.getString(Constants.PrefKeys.DEPRECATED_USER_ATTRS + MParticle.getInstance().getConfigManager().getApiKey(), null);
+        try {
+            JSONObject userAttributes = new JSONObject(userAttrs);
+            Iterator<String> iter = userAttributes.keys();
+            ContentValues values;
+            double time = System.currentTimeMillis();
+            while (iter.hasNext()) {
+                String key = iter.next();
+                try {
+                    Object value = userAttributes.get(key);
+                    String stringValue = null;
+                    if (value != null) {
+                        stringValue = value.toString();
+                    }
+                    values = new ContentValues();
+                    values.put(UserAttributesTable.ATTRIBUTE_KEY, key);
+                    values.put(UserAttributesTable.ATTRIBUTE_VALUE, stringValue);
+                    values.put(UserAttributesTable.IS_LIST, false);
+                    values.put(UserAttributesTable.CREATED_AT, time);
+                    db.insert(UserAttributesTable.TABLE_NAME, null, values);
+                } catch (JSONException e) {
+                }
+            }
 
+        } catch (Exception e) {
+        } finally {
+            sharedPreferences.edit().remove(Constants.PrefKeys.DEPRECATED_USER_ATTRS + MParticle.getInstance().getConfigManager().getApiKey()).apply();
+        }
+    }
 }

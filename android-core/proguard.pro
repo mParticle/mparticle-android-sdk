@@ -107,6 +107,7 @@
 -keep class com.mparticle.ReferrerReceiver { *; }
 -keep class com.mparticle.internal.CommerceEventUtil { *; }
 -keep class com.mparticle.kits.ForeseeKit { *; }
+-keep class com.mparticle.UserAttributeListener { *; }
 
 
 -keep public class com.mparticle.activity.* {

@@ -27,12 +27,9 @@ public class Constants {
     public static final int LIMIT_ATTR_NAME = 256;
     public static final int LIMIT_ATTR_VALUE = 256;
     public static final int LIMIT_USER_ATTR_VALUE = 4096;
-    public static final int LIMIT_NAME = 255;
-    public static final byte[] LICENSE_CHECK_SALT = new byte[]{
-            -46, 65, 30, -128, -103, -57, 74, 10, 51, 88, -95, -45, -43, -117, -36, 99, -11, 32, -64,
-            89
-    };
-
+    public static final int LIMIT_EVENT_NAME = 256;
+    public static final int LIMIT_USER_ATTR_LIST_LENGTH = 1000;
+    public static final int LIMIT_USER_ATTR_LIST_ITEM_LENGTH = 512;
 
     public final static String GODADDY_INTERMEDIATE_CRT = "-----BEGIN CERTIFICATE-----\n" +
             "MIIE0DCCA7igAwIBAgIBBzANBgkqhkiG9w0BAQsFADCBgzELMAkGA1UEBhMCVVMx\n" +
@@ -443,7 +440,7 @@ public class Constants {
         String DEVICE_RAMP_UDID = "mp::rampudid";
         // app-key specific (append appKey to the key)
         String OPTOUT = "mp::optout::";
-        String USER_ATTRS = "mp::user_attrs::";
+        String DEPRECATED_USER_ATTRS = "mp::user_attrs::";
         String DELETED_USER_ATTRS = "mp::deleted_user_attrs::";
         String USER_IDENTITIES = "mp::user_ids::";
         String FIRSTRUN = "mp::firstrun::";

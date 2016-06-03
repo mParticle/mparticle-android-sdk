@@ -395,8 +395,23 @@ public class KitConfiguration {
     public static final Map<String, String> filterAttributes(SparseBooleanArray attributeFilters, Map<String, String> attributes) {
         if (attributes != null && attributeFilters != null && attributeFilters.size() > 0
                 && attributes.size() > 0) {
-            Map<String, String> newAttributes = new HashMap<>(attributes.size());
+            Map<String, String> newAttributes = new HashMap<String, String>(attributes.size());
             for (Map.Entry<String, String> attribute : attributes.entrySet()) {
+                if (!shouldRemoveAttribute(attributeFilters, attribute.getKey())) {
+                    newAttributes.put(attribute.getKey(), attribute.getValue());
+                }
+            }
+            return newAttributes;
+        } else {
+            return attributes;
+        }
+    }
+
+    public static final Map<String, List<String>> filterAttributeLists(SparseBooleanArray attributeFilters, Map<String, List<String>> attributes) {
+        if (attributes != null && attributeFilters != null && attributeFilters.size() > 0
+                && attributes.size() > 0) {
+            Map<String, List<String>> newAttributes = new HashMap<String, List<String>>(attributes.size());
+            for (Map.Entry<String, List<String>> attribute : attributes.entrySet()) {
                 if (!shouldRemoveAttribute(attributeFilters, attribute.getKey())) {
                     newAttributes.put(attribute.getKey(), attribute.getValue());
                 }

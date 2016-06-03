@@ -15,6 +15,7 @@ import com.mparticle.DeepLinkResult;
 import com.mparticle.MPEvent;
 import com.mparticle.MParticle;
 import com.mparticle.ReferrerReceiver;
+import com.mparticle.UserAttributeListener;
 import com.mparticle.commerce.CommerceEvent;
 import com.mparticle.internal.AppStateManager;
 import com.mparticle.internal.CommerceEventUtil;
@@ -39,7 +40,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class KitManagerImpl implements KitManager, DeepLinkListener {
+
+public class KitManagerImpl implements KitManager, DeepLinkListener, UserAttributeListener {
     private final ReportingManager mReportingManager;
     private final AppStateManager mAppStateManager;
     private final ConfigManager mConfigManager;
@@ -96,6 +98,8 @@ public class KitManagerImpl implements KitManager, DeepLinkListener {
     public boolean isOptedOut() {
         return !mConfigManager.isEnabled();
     }
+
+
 
     class UpdateKitRunnable implements Runnable {
 
@@ -154,7 +158,6 @@ public class KitManagerImpl implements KitManager, DeepLinkListener {
 
                                 ConfigManager.log(MParticle.LogLevel.DEBUG, "Kit initialized: " + provider.getName());
                                 if (provider instanceof KitIntegration.AttributeListener) {
-                                    syncUserAttributes((KitIntegration.AttributeListener) provider, provider.getConfiguration());
                                     syncUserIdentities((KitIntegration.AttributeListener) provider, provider.getConfiguration());
                                 }
 
@@ -194,6 +197,8 @@ public class KitManagerImpl implements KitManager, DeepLinkListener {
                 }
             }
             MParticle.getInstance().getKitManager().replayAndDisableQueue();
+            //sync user attributes
+            MParticle.getInstance().getAllUserAttributes(KitManagerImpl.this);
         }
     }
 
@@ -263,10 +268,11 @@ public class KitManagerImpl implements KitManager, DeepLinkListener {
     }
 
     @Override
-    public Uri getSurveyUrl(int serviceId, Map<String, String> userAttributes) {
+    public Uri getSurveyUrl(int serviceId, Map<String, String> userAttributes, Map<String, List<String>> userAttributeLists) {
         KitIntegration provider = providers.get(serviceId);
         if (provider != null){
-            return provider.getSurveyUrl(provider.getConfiguration().filterAttributes(provider.getConfiguration().getUserAttributeFilters(), userAttributes));
+            return provider.getSurveyUrl(provider.getConfiguration().filterAttributes(provider.getConfiguration().getUserAttributeFilters(), userAttributes),
+                                        provider.getConfiguration().filterAttributeLists(provider.getConfiguration().getUserAttributeFilters(), userAttributeLists));
         } else {
             return null;
         }
@@ -414,13 +420,26 @@ public class KitManagerImpl implements KitManager, DeepLinkListener {
     //================================================================================
     // KitIntegration.AttributeListener forwarding
     //================================================================================
-
-    private void syncUserAttributes(KitIntegration.AttributeListener attributeListener, KitConfiguration configuration) {
-        Map<String, String> userAttributes = MParticle.getInstance().getUserAttributes();
-        Map<String, String> filteredAttributes = KitConfiguration.filterAttributes(configuration.getUserAttributeFilters(),
-                userAttributes);
-        for (Map.Entry<String, String> entry : filteredAttributes.entrySet()) {
-            attributeListener.setUserAttribute(entry.getKey(), entry.getValue());
+    @Override
+    public void onUserAttributesReceived(Map<String, String> userAttributes, Map<String, List<String>> userAttributeLists) {
+        for (KitIntegration provider : providers.values()) {
+            try {
+                if (provider instanceof KitIntegration.AttributeListener && !provider.isDisabled()) {
+                    Map<String, String> filteredAttributeSingles = KitConfiguration.filterAttributes(provider.getConfiguration().getUserAttributeFilters(),
+                            userAttributes);
+                    Map<String, List<String>> filteredAttributeLists = KitConfiguration.filterAttributeLists(provider.getConfiguration().getUserAttributeFilters(),
+                            userAttributeLists);
+                    if (!((KitIntegration.AttributeListener) provider).supportsAttributeLists()){
+                        for (Map.Entry<String, List<String>> entry : userAttributeLists.entrySet()) {
+                            filteredAttributeSingles.put(entry.getKey(), KitUtils.join(entry.getValue()));
+                        }
+                        filteredAttributeLists.clear();
+                    }
+                    ((KitIntegration.AttributeListener)provider).setAllUserAttributes(filteredAttributeSingles, filteredAttributeLists);
+                }
+            } catch (Exception e) {
+                ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to call setUserAttributes for kit: " + provider.getName() + ": " + e.getMessage());
+            }
         }
     }
 
@@ -439,15 +458,41 @@ public class KitManagerImpl implements KitManager, DeepLinkListener {
     public void setUserAttribute(String attributeKey, String attributeValue) {
         for (KitIntegration provider : providers.values()) {
             try {
-                if (provider instanceof KitIntegration.AttributeListener && !provider.isDisabled() &&
-                        !KitConfiguration.shouldRemoveAttribute(provider.getConfiguration().getUserAttributeFilters(),
-                                attributeKey)) {
-
-                    ((KitIntegration.AttributeListener)provider).setUserAttribute(attributeKey, attributeValue);
-                }
+                setUserAttribute(provider, attributeKey, attributeValue);
             } catch (Exception e) {
                 ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to call setUserAttributes for kit: " + provider.getName() + ": " + e.getMessage());
             }
+        }
+    }
+
+    @Override
+    public void setUserAttributeList(String attributeKey, List<String> valuesList) {
+        for (KitIntegration provider : providers.values()) {
+            try {
+                setUserAttribute(provider, attributeKey, valuesList);
+            } catch (Exception e) {
+                ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to call setUserAttributes for kit: " + provider.getName() + ": " + e.getMessage());
+            }
+        }
+    }
+
+    private void setUserAttribute(KitIntegration provider, String attributeKey, List<String> valueList) {
+        if (provider instanceof KitIntegration.AttributeListener && !provider.isDisabled() &&
+                !KitConfiguration.shouldRemoveAttribute(provider.getConfiguration().getUserAttributeFilters(),
+                        attributeKey)) {
+            if (((KitIntegration.AttributeListener)provider).supportsAttributeLists()) {
+                ((KitIntegration.AttributeListener) provider).setUserAttributeList(attributeKey, valueList);
+            } else {
+                ((KitIntegration.AttributeListener)provider).setUserAttribute(attributeKey, KitUtils.join(valueList));
+            }
+        }
+    }
+
+    private void setUserAttribute(KitIntegration provider, String attributeKey, String attributeValue) {
+        if (provider instanceof KitIntegration.AttributeListener && !provider.isDisabled() &&
+                !KitConfiguration.shouldRemoveAttribute(provider.getConfiguration().getUserAttributeFilters(),
+                        attributeKey)) {
+            ((KitIntegration.AttributeListener)provider).setUserAttribute(attributeKey, attributeValue);
         }
     }
 

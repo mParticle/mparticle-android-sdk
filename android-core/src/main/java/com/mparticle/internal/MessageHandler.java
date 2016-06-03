@@ -14,6 +14,7 @@ import com.mparticle.internal.Constants.MessageKey;
 import com.mparticle.internal.Constants.MessageType;
 import com.mparticle.internal.Constants.Status;
 import com.mparticle.internal.MParticleDatabase.BreadcrumbTable;
+import com.mparticle.internal.MParticleDatabase.UserAttributesTable;
 import com.mparticle.internal.MParticleDatabase.MessageTable;
 import com.mparticle.internal.MParticleDatabase.SessionTable;
 import com.mparticle.messaging.AbstractCloudMessage;
@@ -23,7 +24,11 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.UUID;
 
 /* package-private */ class MessageHandler extends Handler {
@@ -42,6 +47,9 @@ import java.util.UUID;
     public static final int MARK_INFLUENCE_OPEN_GCM = 7;
     public static final int CLEAR_PROVIDER_GCM = 8;
     public static final int STORE_REPORTING_MESSAGE_LIST = 9;
+    public static final int REMOVE_USER_ATTRIBUTE = 10;
+    public static final int SET_USER_ATTRIBUTE = 11;
+    public static final int INCREMENT_USER_ATTRIBUTE = 12;
 
     private final MessageManagerCallbacks mMessageManagerCallbacks;
 
@@ -51,15 +59,22 @@ import java.util.UUID;
         mDbHelper = dbHelper;
     }
 
-    @Override
-    public void handleMessage(Message msg) {
+
+    private boolean prepareDatabase() {
         if (db == null){
             try {
                 db = mDbHelper.getWritableDatabase();
             }catch (Exception e){
                 //if we failed to create the database, there's not much we can do, so just bail out.
-                return;
+                return false;
             }
+        }
+        return true;
+    }
+    @Override
+    public void handleMessage(Message msg) {
+        if (!prepareDatabase()){
+            return;
         }
         mMessageManagerCallbacks.delayedStart();
         switch (msg.what) {
@@ -215,6 +230,64 @@ import java.util.UUID;
                         ConfigManager.log(MParticle.LogLevel.ERROR, e, "Error while inserting reporting messages: ", e.toString());
                     }
                 }
+                break;
+            case REMOVE_USER_ATTRIBUTE:
+                try {
+                    removeUserAttribute((String)msg.obj, mMessageManagerCallbacks);
+                }catch (Exception e) {
+                    ConfigManager.log(MParticle.LogLevel.ERROR, e, "Error while removing user attribute: ", e.toString());
+                }
+                break;
+            case SET_USER_ATTRIBUTE:
+                try {
+                    setUserAttribute((MessageManager.UserAttributeResponse) msg.obj);
+                } catch (Exception e) {
+                    ConfigManager.log(MParticle.LogLevel.ERROR, e, "Error while setting user attribute: ", e.toString());
+                }
+                break;
+            case INCREMENT_USER_ATTRIBUTE:
+                try {
+                    incrementUserAttribute((String)msg.obj, msg.arg1);
+                } catch (Exception e) {
+                    ConfigManager.log(MParticle.LogLevel.ERROR, e, "Error while incrementing user attribute: ", e.toString());
+                }
+        }
+    }
+
+    private void incrementUserAttribute(String key, int incrementValue) {
+        TreeMap<String, String> userAttributes = getUserAttributeSingles();
+
+        if (!userAttributes.containsKey(key)) {
+            TreeMap<String, List<String>> userAttributeList = getUserAttributeLists();
+            if (userAttributeList.containsKey(key)) {
+                ConfigManager.log(MParticle.LogLevel.ERROR, "Error while attempting to increment user attribute - existing attribute is a list, which can't be incremented.");
+                return;
+            }
+        }
+        String newValue = null;
+        String currentValue = userAttributes.get(key);
+        if (currentValue == null) {
+            newValue = Integer.toString(incrementValue);
+        } else {
+            try {
+                newValue = Integer.toString(Integer.parseInt(currentValue) + incrementValue);
+            }catch (NumberFormatException nfe) {
+                ConfigManager.log(MParticle.LogLevel.ERROR, "Error while attempting to increment user attribute - existing attribute is not a number.");
+                return;
+            }
+        }
+        MessageManager.UserAttributeResponse wrapper = new MessageManager.UserAttributeResponse();
+        wrapper.attributeSingles = new HashMap<String, String>(1);
+        wrapper.attributeSingles.put(key, newValue);
+        setUserAttribute(wrapper);
+        MParticle.getInstance().getKitManager().setUserAttribute(key, newValue);
+    }
+
+    private void removeUserAttribute(String attributeKey, MessageManagerCallbacks callbacks) {
+        String[] deleteWhereArgs = {attributeKey};
+        int deleted = db.delete(UserAttributesTable.TABLE_NAME, UserAttributesTable.ATTRIBUTE_KEY + " = ?", deleteWhereArgs);
+        if (callbacks != null && deleted > 0) {
+            callbacks.attributeRemoved(attributeKey);
         }
     }
 
@@ -500,5 +573,106 @@ import java.util.UUID;
         }
         String[] whereArgs = {sessionId};
         db.update(SessionTable.TABLE_NAME, sessionValues, SessionTable.SESSION_ID + "=?", whereArgs);
+    }
+
+
+    public TreeMap<String,String> getUserAttributeSingles() {
+        if (!prepareDatabase()){
+            return null;
+        }
+        TreeMap<String, String> attributes = new TreeMap<String, String>(String.CASE_INSENSITIVE_ORDER);
+        Cursor cursor = null;
+        try {
+            String[] args =  {"1"};
+
+            cursor = db.query(UserAttributesTable.TABLE_NAME, null, UserAttributesTable.IS_LIST + " != ?", args, null, null, UserAttributesTable.ATTRIBUTE_KEY + ", "+ MParticleDatabase.UserAttributesTable.CREATED_AT +" desc");
+            int keyIndex = cursor.getColumnIndex(UserAttributesTable.ATTRIBUTE_KEY);
+            int valueIndex = cursor.getColumnIndex(UserAttributesTable.ATTRIBUTE_VALUE);
+            while (cursor.moveToNext()) {
+                attributes.put(cursor.getString(keyIndex), cursor.getString(valueIndex));
+            }
+        }catch (Exception e) {
+            ConfigManager.log(MParticle.LogLevel.ERROR, e, "Error while querying user attributes: ", e.toString());
+        } finally {
+            if (cursor != null && !cursor.isClosed()) {
+                cursor.close();
+            }
+        }
+        return attributes;
+    }
+
+    public TreeMap<String,List<String>> getUserAttributeLists() {
+        if (!prepareDatabase()){
+            return null;
+        }
+        TreeMap<String, List<String>> attributes = new TreeMap<String, List<String>>(String.CASE_INSENSITIVE_ORDER);
+        Cursor cursor = null;
+        try {
+            String[] args =  {"1"};
+            cursor = db.query(UserAttributesTable.TABLE_NAME, null, UserAttributesTable.IS_LIST + " = ?", args, null, null, UserAttributesTable.ATTRIBUTE_KEY + ", "+ MParticleDatabase.UserAttributesTable.CREATED_AT +" desc");
+            int keyIndex = cursor.getColumnIndex(UserAttributesTable.ATTRIBUTE_KEY);
+            int valueIndex = cursor.getColumnIndex(UserAttributesTable.ATTRIBUTE_VALUE);
+            String previousKey = null;
+            List<String> currentList = null;
+            while (cursor.moveToNext()) {
+                String currentKey = cursor.getString(keyIndex);
+                if (!currentKey.equals(previousKey)){
+                    previousKey = currentKey;
+                    currentList = new ArrayList<String>();
+                    attributes.put(currentKey, currentList);
+                }
+                attributes.get(currentKey).add(cursor.getString(valueIndex));
+            }
+        }catch (Exception e) {
+            ConfigManager.log(MParticle.LogLevel.ERROR, e, "Error while querying user attribute lists: ", e.toString());
+        } finally {
+            if (cursor != null && !cursor.isClosed()) {
+                cursor.close();
+            }
+        }
+        return attributes;
+    }
+
+    public void setUserAttribute(MessageManager.UserAttributeResponse userAttributes) {
+        if (!prepareDatabase()){
+            return;
+        }
+        db.beginTransaction();
+        try {
+            long time = System.currentTimeMillis();
+            if (userAttributes.attributeLists != null) {
+                for (Map.Entry<String, List<String>> entry : userAttributes.attributeLists.entrySet()) {
+                    String key = entry.getKey();
+                    List<String> attributeValues = entry.getValue();
+                    removeUserAttribute(key, null);
+                    ContentValues values = new ContentValues();
+                    for (String attributeValue : attributeValues) {
+                        values.put(UserAttributesTable.ATTRIBUTE_KEY, key);
+                        values.put(UserAttributesTable.ATTRIBUTE_VALUE, attributeValue);
+                        values.put(UserAttributesTable.IS_LIST, true);
+                        values.put(UserAttributesTable.CREATED_AT, time);
+                        db.insert(UserAttributesTable.TABLE_NAME, null, values);
+                    }
+                }
+            }
+            if (userAttributes.attributeSingles != null) {
+                for (Map.Entry<String, String> entry : userAttributes.attributeSingles.entrySet()) {
+                    String key = entry.getKey();
+                    String attributeValue = entry.getValue();
+                    removeUserAttribute(key, null);
+                    ContentValues values = new ContentValues();
+                    values.put(UserAttributesTable.ATTRIBUTE_KEY, key);
+                    values.put(UserAttributesTable.ATTRIBUTE_VALUE, attributeValue);
+                    values.put(UserAttributesTable.IS_LIST, false);
+                    values.put(UserAttributesTable.CREATED_AT, time);
+                    db.insert(UserAttributesTable.TABLE_NAME, null, values);
+                }
+            }
+            db.setTransactionSuccessful();
+        }catch (Exception e){
+            ConfigManager.log(MParticle.LogLevel.ERROR, e, "Error while adding user attributes: ", e.toString());
+        } finally {
+            db.endTransaction();
+        }
     }
 }

@@ -164,10 +164,10 @@ public class KitManagerTest  {
         KitConfiguration mockConfig = new MockKitConfiguration().parseConfiguration(config);
         Mockito.when(mockForesee.getConfiguration()).thenReturn(mockConfig);
         Uri uri = Mockito.mock(Uri.class);
-        Mockito.when(mockForesee.getSurveyUrl(Mockito.any(Map.class))).thenReturn(uri);
+        Mockito.when(mockForesee.getSurveyUrl(Mockito.any(Map.class), Mockito.any(Map.class))).thenReturn(uri);
         manager.providers.put(MParticle.ServiceProviders.FORESEE_ID, (KitIntegration) mockForesee);
-        assertNull(manager.getSurveyUrl(56, new HashMap<String, String>()));
-        assertTrue(manager.getSurveyUrl(MParticle.ServiceProviders.FORESEE_ID, new HashMap<String, String>()) == uri);
+        assertNull(manager.getSurveyUrl(56, new HashMap<String, String>(), new HashMap<String, List<String>>()));
+        assertTrue(manager.getSurveyUrl(MParticle.ServiceProviders.FORESEE_ID, new HashMap<String, String>(), new HashMap<String, List<String>>()) == uri);
     }
 
     @Test

@@ -14,6 +14,7 @@ import com.mparticle.commerce.CommerceEvent;
 import org.json.JSONArray;
 
 import java.lang.ref.WeakReference;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -84,6 +85,11 @@ public class MockKitManager implements KitManager {
     }
 
     @Override
+    public void setUserAttributeList(String key, List<String> value) {
+
+    }
+
+    @Override
     public void removeUserAttribute(String key) {
 
     }
@@ -104,7 +110,7 @@ public class MockKitManager implements KitManager {
     }
 
     @Override
-    public Uri getSurveyUrl(int serviceProviderId, Map<String, String> mUserAttributes) {
+    public Uri getSurveyUrl(int serviceProviderId, Map<String, String> userAttributes, Map<String, List<String>> userAttributeLists) {
         return null;
     }
 

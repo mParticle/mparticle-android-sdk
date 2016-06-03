@@ -2,13 +2,11 @@ package com.mparticle.internal;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.mparticle.ExceptionHandler;
 import com.mparticle.MParticle;
 import com.mparticle.MParticle.LogLevel;
-import com.mparticle.messaging.MessagingConfigCallbacks;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -150,7 +148,6 @@ public class ConfigManager {
         MParticle.getInstance().getKitManager().updateKits(responseJSON.optJSONArray(KEY_EMBEDDED_KITS));
     }
 
-    @Nullable
     public String getActiveModuleIds(){
         return MParticle.getInstance().getKitManager().getActiveModuleIds();
     }

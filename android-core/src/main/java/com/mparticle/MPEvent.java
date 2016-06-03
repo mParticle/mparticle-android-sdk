@@ -51,8 +51,8 @@ public class MPEvent {
         if (builder.eventName == null){
             ConfigManager.log(MParticle.LogLevel.ERROR, "MPEvent created with no event name!");
         }else{
-            if (builder.eventName.length() > Constants.LIMIT_NAME){
-                ConfigManager.log(MParticle.LogLevel.ERROR, "MPEvent created with too long of a name, the limit is: " + Constants.LIMIT_NAME);
+            if (builder.eventName.length() > Constants.LIMIT_EVENT_NAME){
+                ConfigManager.log(MParticle.LogLevel.ERROR, "MPEvent created with too long of a name, the limit is: " + Constants.LIMIT_EVENT_NAME);
             }
             eventName = builder.eventName;
         }

@@ -36,6 +36,12 @@ public class MockKitConfiguration extends KitConfiguration {
         return new MockKitConfiguration().parseConfiguration(json);
     }
 
+    public static KitConfiguration createKitConfiguration() throws JSONException{
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("id", 42);
+        return new MockKitConfiguration().parseConfiguration(jsonObject);
+    }
+
     @Override
     protected SparseBooleanArray convertToSparseArray(JSONObject json) {
         SparseBooleanArray map = new MockSparseBooleanArray();

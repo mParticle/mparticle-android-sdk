@@ -14,6 +14,7 @@ import com.mparticle.commerce.CommerceEvent;
 import org.json.JSONArray;
 
 import java.lang.ref.WeakReference;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -43,6 +44,8 @@ public interface KitManager {
 
     void setUserAttribute(String key, String value);
 
+    void setUserAttributeList(String key, List<String> value);
+
     void removeUserAttribute(String key);
 
     void setUserIdentity(String id, MParticle.IdentityType identityType);
@@ -51,7 +54,7 @@ public interface KitManager {
 
     void setOptOut(boolean optOutStatus);
 
-    Uri getSurveyUrl(int serviceProviderId, Map<String, String> mUserAttributes);
+    Uri getSurveyUrl(int serviceProviderId, Map<String, String> userAttributes, Map<String, List<String>> userAttributeLists);
 
     boolean onMessageReceived(Context context, Intent intent);
 

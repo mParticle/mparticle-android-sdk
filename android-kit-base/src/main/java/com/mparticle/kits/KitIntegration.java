@@ -138,7 +138,7 @@ public abstract class KitIntegration {
         return null;
     }
 
-    Uri getSurveyUrl(Map<String, String> userAttributes) {
+    Uri getSurveyUrl(Map<String, String> userAttributes, Map<String, List<String>> userAttributeLists) {
         return null;
     }
 
@@ -201,6 +201,20 @@ public abstract class KitIntegration {
     public interface AttributeListener {
 
         void setUserAttribute(String attributeKey, String attributeValue);
+
+        void setUserAttributeList(String attributeKey, List<String> attributeValueList);
+
+        /**
+         * Indicate to the mParticle Kit framework if this AttributeListener supports attribute-values as lists.
+         *
+         * If an AttributeListener returns false, the setUserAttributeList method will never be called. Instead, setUserAttribute
+         * will be called with the attribute-value lists combined as a csv.
+         *
+         * @return true if this AttributeListener supports attribute values as lists.
+         */
+        boolean supportsAttributeLists();
+
+        void setAllUserAttributes(Map<String, String> userAttributes, Map<String, List<String>> userAttributeLists);
 
         void removeUserAttribute(String key);
 

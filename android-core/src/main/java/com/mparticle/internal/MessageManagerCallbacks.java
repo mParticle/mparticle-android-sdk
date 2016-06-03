@@ -12,4 +12,5 @@ interface MessageManagerCallbacks {
     void endUploadLoop();
     void checkForTrigger(MPMessage message);
     void logNotification(int contentId, String payload, CloudAction action, String appState, int behavior);
+    void attributeRemoved(String key);
 }

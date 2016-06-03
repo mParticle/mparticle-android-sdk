@@ -10,15 +10,18 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.AsyncTask;
 import android.os.BatteryManager;
 import android.os.Bundle;
 import android.os.HandlerThread;
+import android.os.Looper;
 import android.os.Message;
 import android.os.Process;
 import android.telephony.TelephonyManager;
 
 import com.mparticle.MPEvent;
 import com.mparticle.MParticle;
+import com.mparticle.UserAttributeListener;
 import com.mparticle.commerce.CommerceEvent;
 import com.mparticle.internal.Constants.MessageKey;
 import com.mparticle.internal.Constants.MessageType;
@@ -26,6 +29,7 @@ import com.mparticle.messaging.CloudAction;
 import com.mparticle.messaging.MPCloudNotificationMessage;
 import com.mparticle.messaging.ProviderCloudMessage;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -33,6 +37,7 @@ import java.io.File;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -771,6 +776,122 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
             Message message = mMessageHandler.obtainMessage(MessageHandler.STORE_REPORTING_MESSAGE_LIST, messageList);
             mMessageHandler.sendMessage(message);
         }
+    }
+
+    public Map<String, Object> getAllUserAttributes(final UserAttributeListener listener) {
+        Map<String, Object> allUserAttributes = new HashMap<String, Object>();
+        if (listener == null || Looper.getMainLooper() != Looper.myLooper()) {
+            Map<String, String> userAttributes = mMessageHandler.getUserAttributeSingles();
+            Map<String, List<String>> userAttributeLists = mMessageHandler.getUserAttributeLists();
+            if (listener != null) {
+                listener.onUserAttributesReceived(userAttributes, userAttributeLists);
+            }
+            if (userAttributes != null) {
+                allUserAttributes.putAll(userAttributes);
+            }
+            if (userAttributeLists != null) {
+                allUserAttributes.putAll(userAttributeLists);
+            }
+            return allUserAttributes;
+        }else {
+            new AsyncTask<Void, Void, UserAttributeResponse>() {
+                @Override
+                protected UserAttributeResponse doInBackground(Void... params) {
+                    return getUserAttributes();
+                }
+
+                @Override
+                protected void onPostExecute(UserAttributeResponse attributes) {
+                    if (listener != null) {
+                        listener.onUserAttributesReceived(attributes.attributeSingles, attributes.attributeLists);
+                    }
+                }
+            }.execute();
+            return null;
+        }
+    }
+
+    public Map<String, String> getUserAttributes(final UserAttributeListener listener) {
+        if (listener == null || Looper.getMainLooper() != Looper.myLooper()) {
+            Map<String, String> userAttributes = mMessageHandler.getUserAttributeSingles();
+
+            if (listener != null) {
+                Map<String, List<String>> userAttributeLists = mMessageHandler.getUserAttributeLists();
+                listener.onUserAttributesReceived(userAttributes, userAttributeLists);
+            }
+            return userAttributes;
+        }else {
+            new AsyncTask<Void, Void, UserAttributeResponse>() {
+                @Override
+                protected UserAttributeResponse doInBackground(Void... params) {
+                    return getUserAttributes();
+                }
+
+                @Override
+                protected void onPostExecute(UserAttributeResponse attributes) {
+                    if (listener != null) {
+                        listener.onUserAttributesReceived(attributes.attributeSingles, attributes.attributeLists);
+                    }
+                }
+            }.execute();
+            return null;
+        }
+    }
+
+    public Map<String, List<String>> getUserAttributeLists() {
+        return mMessageHandler.getUserAttributeLists();
+    }
+
+    public void removeUserAttribute(String key) {
+        Message message = mMessageHandler.obtainMessage(MessageHandler.REMOVE_USER_ATTRIBUTE, key);
+        mMessageHandler.sendMessage(message);
+    }
+
+    @Override
+    public void attributeRemoved(String key) {
+        String serializedJsonArray = mPreferences.getString(Constants.PrefKeys.DELETED_USER_ATTRS + mConfigManager.getApiKey(), null);
+        JSONArray deletedAtributes;
+        try {
+            deletedAtributes = new JSONArray(serializedJsonArray);
+        } catch (Exception jse) {
+            deletedAtributes = new JSONArray();
+        }
+        deletedAtributes.put(key);
+
+        mPreferences.edit().putString(Constants.PrefKeys.DELETED_USER_ATTRS + mConfigManager.getApiKey(), deletedAtributes.toString()).apply();
+    }
+
+    public void setUserAttribute(String key, Object value) {
+        UserAttributeResponse container = new UserAttributeResponse();
+        if (value instanceof List) {
+            container.attributeLists = new HashMap<String, List<String>>();
+            container.attributeLists.put(key, (List<String>) value);
+        }else {
+            container.attributeSingles = new HashMap<String, String>();
+            container.attributeSingles.put(key, (String) value);
+        }
+        Message message = mMessageHandler.obtainMessage(MessageHandler.SET_USER_ATTRIBUTE, container);
+        mMessageHandler.sendMessage(message);
+    }
+
+    public void incrementUserAttribute(String key, int value) {
+        UserAttributeResponse container = new UserAttributeResponse();
+
+        Message message = mMessageHandler.obtainMessage(MessageHandler.INCREMENT_USER_ATTRIBUTE, key);
+        message.arg1 = value;
+        mMessageHandler.sendMessage(message);
+    }
+
+    static class UserAttributeResponse {
+        Map<String, String> attributeSingles;
+        Map<String, List<String>> attributeLists;
+    }
+
+    private UserAttributeResponse getUserAttributes() {
+        UserAttributeResponse response = new UserAttributeResponse();
+        response.attributeSingles = mMessageHandler.getUserAttributeSingles();
+        response.attributeLists = mMessageHandler.getUserAttributeLists();
+        return response;
     }
 
     private class StatusBroadcastReceiver extends BroadcastReceiver {

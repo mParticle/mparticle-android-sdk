@@ -18,7 +18,7 @@ public class MessageBatch extends JSONObject {
         super();
     }
 
-    public static MessageBatch create(Context context, JSONArray messagesArray, JSONArray reportingMessagesArray, boolean history, JSONObject appInfo, JSONObject deviceInfo, ConfigManager configManager, SharedPreferences preferences, JSONObject cookies) throws JSONException {
+    public static MessageBatch create(Context context, JSONArray messagesArray, JSONArray reportingMessagesArray, boolean history, JSONObject appInfo, JSONObject deviceInfo, ConfigManager configManager, SharedPreferences preferences, JSONObject cookies, JSONObject userAttributes) throws JSONException {
         MessageBatch uploadMessage = new MessageBatch();
 
         uploadMessage.put(Constants.MessageKey.TYPE, Constants.MessageType.REQUEST_HEADER);
@@ -49,15 +49,15 @@ public class MessageBatch extends JSONObject {
 
         uploadMessage.put(Constants.MessageKey.LTV, MParticle.getInstance().Commerce().getCurrentUserLtv());
         String apiKey = configManager.getApiKey();
-        String userAttrs = preferences.getString(Constants.PrefKeys.USER_ATTRS + apiKey, null);
-        if (null != userAttrs) {
-            uploadMessage.put(Constants.MessageKey.USER_ATTRIBUTES, new JSONObject(userAttrs));
+
+        if (userAttributes != null) {
+            uploadMessage.put(Constants.MessageKey.USER_ATTRIBUTES, userAttributes);
         }
 
         if (history) {
             String deletedAttr = preferences.getString(Constants.PrefKeys.DELETED_USER_ATTRS + apiKey, null);
-            if (null != deletedAttr) {
-                uploadMessage.put(Constants.MessageKey.DELETED_USER_ATTRIBUTES, new JSONArray(userAttrs));
+            if (deletedAttr != null) {
+                uploadMessage.put(Constants.MessageKey.DELETED_USER_ATTRIBUTES, new JSONArray(deletedAttr));
                 preferences.edit().remove(Constants.PrefKeys.DELETED_USER_ATTRS + apiKey).apply();
             }
         }

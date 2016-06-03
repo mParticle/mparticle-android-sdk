@@ -1,9 +1,14 @@
 package com.mparticle.kits;
 
 
+import android.content.Context;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+
 import com.mparticle.internal.MPUtility;
 
 import java.math.BigInteger;
+import java.util.List;
 
 /**
  * Mixin/Utility class for use in Kit implementations.
@@ -38,5 +43,51 @@ public final class KitUtils {
      */
     public static BigInteger hashFnv1a(byte[] bytes) {
         return MPUtility.hashFnv1A(bytes);
+    }
+
+    /**
+     * Combine the given list into a single string separated by a comma.
+     *
+     * @param list
+     * @return
+     */
+    public static String join(List<String> list) {
+        return join(list, ",");
+    }
+
+    /**
+     * Combine the given list into a single string separated by the given delimiter.
+     *
+     * @param list
+     * @param delimiter
+     * @return
+     */
+    public static String join(List<String> list, String delimiter) {
+        if (list == null) {
+            return null;
+        }
+        if (delimiter == null) {
+            return null;
+        }
+        StringBuilder builder = new StringBuilder();
+        for (String item : list) {
+            builder.append(item).append(delimiter);
+        }
+        if (builder.length() > 0) {
+            return builder.substring(0, builder.length() - delimiter.length());
+        }
+        return builder.toString();
+    }
+
+    public static boolean isServiceAvailable(Context context, Class<?> service) {
+        final PackageManager packageManager = context.getPackageManager();
+        final Intent intent = new Intent(context, service);
+        List resolveInfo =
+                packageManager.queryIntentServices(intent,
+                        PackageManager.MATCH_DEFAULT_ONLY);
+        if (resolveInfo.size() > 0) {
+            return true;
+        }
+        return false;
     }
 }

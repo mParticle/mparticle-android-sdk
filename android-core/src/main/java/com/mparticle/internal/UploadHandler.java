@@ -26,6 +26,8 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.net.MalformedURLException;
+import java.util.List;
+import java.util.Map;
 
 import javax.net.ssl.SSLHandshakeException;
 
@@ -196,6 +198,7 @@ public class UploadHandler extends Handler {
                 int messageIndex = readyMessagesCursor.getColumnIndex(MessageTable.MESSAGE);
                 int reportingMessageIndex = reportingMessageCursor.getColumnIndex(MParticleDatabase.ReportingTable.MESSAGE);
                 int reportingIdMessageIndex = reportingMessageCursor.getColumnIndex(MParticleDatabase.ReportingTable._ID);
+                JSONObject userAttributesJson = getAllUserAttributes();
                 while (!readyMessagesCursor.isAfterLast() || !reportingMessageCursor.isAfterLast()) {
                     int highestMessageId = 0;
                     int highestReportingMessageId = 0;
@@ -211,7 +214,7 @@ public class UploadHandler extends Handler {
                         reportingMessagesArray.put(msgObject);
                         highestReportingMessageId = reportingMessageCursor.getInt(reportingIdMessageIndex);
                     }
-                    MessageBatch uploadMessage = createUploadMessage(messagesArray, reportingMessagesArray, false);
+                    MessageBatch uploadMessage = createUploadMessage(messagesArray, reportingMessagesArray, false, userAttributesJson);
                     dbInsertUpload(uploadMessage);
                     if (highestMessageId > 0) {
                         dbMarkAsUploadedMessage(highestMessageId);
@@ -237,6 +240,37 @@ public class UploadHandler extends Handler {
         }
     }
 
+    static JSONObject getAllUserAttributes()  {
+        Map<String, Object> attributes = MParticle.getInstance().getAllUserAttributes();
+        JSONObject jsonAttributes = new JSONObject();
+        for (Map.Entry<String, Object> entry : attributes.entrySet()) {
+            Object value = entry.getValue();
+            if (entry.getValue() instanceof List) {
+                List<String> attributeList = (List<String>)value;
+                JSONArray jsonArray = new JSONArray();
+                for (String attribute : attributeList) {
+                    jsonArray.put(attribute);
+                }
+                try {
+                    jsonAttributes.put(entry.getKey(), jsonArray);
+                } catch (JSONException e) {
+
+                }
+            }else {
+                try {
+                    Object entryValue = entry.getValue();
+                    if (entryValue == null) {
+                        entryValue = JSONObject.NULL;
+                    }
+                    jsonAttributes.put(entry.getKey(), entryValue);
+                } catch (JSONException e) {
+
+                }
+            }
+        }
+        return jsonAttributes;
+    }
+
     /**
      * - Query all messages that have been uploaded that are not for the current session
      * - Group each message by session and create a JSON session-history message, insert as an upload
@@ -253,6 +287,7 @@ public class UploadHandler extends Handler {
                 int messageIndex = readyMessagesCursor.getColumnIndex(MessageTable.MESSAGE);
                 JSONArray messagesArray = new JSONArray();
                 String lastSessionId = null;
+                JSONObject attributes = getAllUserAttributes();
                 while (readyMessagesCursor.moveToNext()) {
                     String currentSessionId = readyMessagesCursor.getString(sessionIndex);
                     MPMessage message = new MPMessage(readyMessagesCursor.getString(messageIndex));
@@ -261,7 +296,7 @@ public class UploadHandler extends Handler {
                         messagesArray.put(message);
                     }
                     if (!sameSession || readyMessagesCursor.isLast()) {
-                        MessageBatch uploadMessage = createUploadMessage(messagesArray, null, true);
+                        MessageBatch uploadMessage = createUploadMessage(messagesArray, null, true, attributes);
                         if (uploadMessage != null) {
                             dbInsertUpload(uploadMessage);
                             dbDeleteProcessedMessages(lastSessionId);
@@ -351,7 +386,7 @@ public class UploadHandler extends Handler {
     /**
      * Method that is responsible for building an upload message to be sent over the wire.
      */
-    MessageBatch createUploadMessage(JSONArray messagesArray, JSONArray reportingMessagesArray, boolean history) throws JSONException {
+    MessageBatch createUploadMessage(JSONArray messagesArray, JSONArray reportingMessagesArray, boolean history, JSONObject userAttributes) throws JSONException {
         MessageBatch batchMessage = MessageBatch.create(mContext,
                 messagesArray,
                 reportingMessagesArray,
@@ -360,7 +395,7 @@ public class UploadHandler extends Handler {
                 getDeviceInfo(),
                 mConfigManager,
                 mPreferences,
-                mApiClient.getCookies());
+                mApiClient.getCookies(), userAttributes);
         addGCMHistory(batchMessage);
         return batchMessage;
     }

@@ -41,8 +41,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -95,7 +95,6 @@ public class MParticle {
     AppStateManager mAppStateManager;
 
     private JSONArray mUserIdentities = new JSONArray();
-    private JSONObject mUserAttributes = new JSONObject();
 
     private MessageManager mMessageManager;
     private static volatile MParticle instance;
@@ -258,14 +257,6 @@ public class MParticle {
                     instance.mMessageManager = new MessageManager(context, configManager, installType, appStateManager);
                     instance.mPreferences = context.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
                     instance.mKitManager = new KitFrameworkWrapper(context, instance.mMessageManager, configManager, appStateManager);
-
-                    String userAttrs = instance.mPreferences.getString(PrefKeys.USER_ATTRS + instance.getConfigManager().getApiKey(), null);
-                    try {
-                        instance.mUserAttributes = new JSONObject(userAttrs);
-                    } catch (Exception e) {
-                        instance.mUserAttributes = new JSONObject();
-                    }
-
                     instance.mMessageManager.refreshConfiguration();
 
                     if (configManager.getLogUnhandledExceptions()) {
@@ -601,7 +592,7 @@ public class MParticle {
             ConfigManager.log(LogLevel.ERROR, "screenName is required for logScreen");
             return;
         }
-        if (screenEvent.getEventName().length() > Constants.LIMIT_NAME) {
+        if (screenEvent.getEventName().length() > Constants.LIMIT_EVENT_NAME) {
             ConfigManager.log(LogLevel.ERROR, "The screen name was too long. Discarding event.");
             return;
         }
@@ -633,7 +624,7 @@ public class MParticle {
                 ConfigManager.log(LogLevel.ERROR, "breadcrumb is required for leaveBreadcrumb");
                 return;
             }
-            if (breadcrumb.length() > Constants.LIMIT_NAME) {
+            if (breadcrumb.length() > Constants.LIMIT_EVENT_NAME) {
                 ConfigManager.log(LogLevel.ERROR, "The breadcrumb name was too long. Discarding event.");
                 return;
             }
@@ -911,83 +902,98 @@ public class MParticle {
     }
 
     /**
-     * Set a single <i>user</i> attribute. The attribute will combined with any existing user attributes.
+     * Set a single <i>user</i> attribute. The attribute will be combined with any existing user attributes.
      *
      * @param key   the attribute key
      * @param value the attribute value. This value will be converted to its String representation as dictated by its <code>toString()</code> method.
      */
-    public void setUserAttribute(String key, Object value) {
+    public boolean setUserAttribute(String key, Object value) {
         if (key == null){
-            ConfigManager.log(LogLevel.WARNING, "setUserAttribute called with null key. Ignoring...");
-            return;
+            ConfigManager.log(LogLevel.WARNING, "setUserAttribute called with null key. This is a no-op.");
+            return false;
         }
-        if (value != null) {
-            value = value.toString();
-            ConfigManager.log(LogLevel.DEBUG, "Set user attribute: " + key + " with value " + value);
-        } else {
-            ConfigManager.log(LogLevel.DEBUG, "Set user attribute: " + key);
+        if (key.length() > Constants.LIMIT_ATTR_NAME) {
+            ConfigManager.log(LogLevel.WARNING, "User attribute keys cannot be longer than " + Constants.LIMIT_ATTR_NAME + " characters, attribute not set: " + key);
+            return false;
         }
 
-        if (MPUtility.setCheckedAttribute(mUserAttributes, key, value, false, true)) {
-            mPreferences.edit().putString(PrefKeys.USER_ATTRS + getConfigManager().getApiKey(), mUserAttributes.toString()).apply();
-            if (value != null) {
-                mKitManager.setUserAttribute(key, (String)value);
+        if (value != null && value instanceof List) {
+            List<String> values = (List<String>)value;
+            if (values.size() > Constants.LIMIT_USER_ATTR_LIST_LENGTH) {
+                ConfigManager.log(LogLevel.WARNING, "setUserAttribute called with list longer than "+Constants.LIMIT_USER_ATTR_LIST_LENGTH+" elements, list not set.");
+                return false;
             }
+            List<String> clonedList = new ArrayList<String>();
+            try {
+                for (int i = 0; i < values.size(); i++) {
+                    if (values.get(i).length() > Constants.LIMIT_USER_ATTR_LIST_ITEM_LENGTH) {
+                        ConfigManager.log(LogLevel.WARNING, "setUserAttribute called with list containing element longer than " + Constants.LIMIT_USER_ATTR_LIST_ITEM_LENGTH + " characters, dropping element from list.");
+                    } else {
+                        clonedList.add(values.get(i));
+                    }
+                }
+                ConfigManager.log(LogLevel.DEBUG, "Set user attribute list: " + key + " with values: " + values.toString());
+                mMessageManager.setUserAttribute(key, clonedList);
+                mKitManager.setUserAttributeList(key, clonedList);
+            }catch (Exception e) {
+                ConfigManager.log(LogLevel.DEBUG, "Error while setting attribute list: " + e.toString());
+                return false;
+            }
+        }else {
+            String stringValue = null;
+            if (value != null) {
+                stringValue = value.toString();
+                if (stringValue.length() > Constants.LIMIT_USER_ATTR_VALUE) {
+                    ConfigManager.log(LogLevel.WARNING, "setUserAttribute called with string-value longer than " + Constants.LIMIT_USER_ATTR_VALUE + " characters. Attribute not set.");
+                    return false;
+                }
+                ConfigManager.log(LogLevel.DEBUG, "Set user attribute: " + key + " with value: " + stringValue);
+            } else {
+                ConfigManager.log(LogLevel.DEBUG, "Set user tag: " + key);
+            }
+            mMessageManager.setUserAttribute(key, stringValue);
+            mKitManager.setUserAttribute(key, stringValue);
         }
+        return true;
+    }
 
+    public boolean setUserAttributeList(String key, List<String> attributeList) {
+        return setUserAttribute(key, attributeList);
     }
 
     /**
      * Increment a single <i>user</i> attribute. If the attribute does not already exist, a new one will be created.
      *
+     * If the value of the attribute cannot be parsed as an integer, this method is a no-op.
+     *
      * @param key   the attribute key
      * @param value the attribute value
      */
-    public void incrementUserAttribute(String key, int value) {
+    public boolean incrementUserAttribute(String key, int value) {
         if (key == null){
             ConfigManager.log(LogLevel.WARNING, "incrementUserAttribute called with null key. Ignoring...");
-            return;
+            return false;
         }
         ConfigManager.log(LogLevel.DEBUG, "Incrementing user attribute: " + key + " with value " + value);
-
-        if (MPUtility.setCheckedAttribute(mUserAttributes, key, value, true, true)) {
-            mPreferences.edit().putString(PrefKeys.USER_ATTRS + getConfigManager().getApiKey(), mUserAttributes.toString()).apply();
-            try {
-                mKitManager.setUserAttribute(key, mUserAttributes.getString(key));
-            } catch (JSONException e) {
-            }
-        }
-
+        mMessageManager.incrementUserAttribute(key, value);
+        return true;
     }
 
     /**
-     * Remove a <i>user</i> attribute
+     * Remove a <i>user</i> attribute - this applies both to lists and single-value attributes
      *
      * @param key the key of the attribute
      */
-    public void removeUserAttribute(String key) {
+    public boolean removeUserAttribute(String key) {
         if (key != null) {
             ConfigManager.log(LogLevel.DEBUG, "Removing user attribute: " + key);
+        }else {
+            return false;
         }
-        if (mUserAttributes.has(key) || mUserAttributes.has(MPUtility.findCaseInsensitiveKey(mUserAttributes, key))) {
-            mUserAttributes.remove(key);
-            mPreferences.edit().putString(PrefKeys.USER_ATTRS + getConfigManager().getApiKey(), mUserAttributes.toString()).apply();
-            attributeRemoved(key);
-            mKitManager.removeUserAttribute(key);
-        }
-    }
 
-    private void attributeRemoved(String key) {
-        String serializedJsonArray = mPreferences.getString(PrefKeys.DELETED_USER_ATTRS + getConfigManager().getApiKey(), null);
-        JSONArray deletedAtributes;
-        try {
-            deletedAtributes = new JSONArray(serializedJsonArray);
-        } catch (Exception jse) {
-            deletedAtributes = new JSONArray();
-        }
-        deletedAtributes.put(key);
-
-        mPreferences.edit().putString(PrefKeys.DELETED_USER_ATTRS + getConfigManager().getApiKey(), deletedAtributes.toString()).apply();
+        mMessageManager.removeUserAttribute(key);
+        mKitManager.removeUserAttribute(key);
+        return true;
     }
 
     /**
@@ -995,19 +1001,18 @@ public class MParticle {
      *
      * @param tag a tag assigned to a user
      */
-    public void setUserTag(String tag) {
-        setUserAttribute(tag, null);
+    public boolean setUserTag(String tag) {
+        return setUserAttribute(tag, null);
     }
 
     /**
-     * Remove a user tag.
+     * Remove a user tag. This is the same as calling {@link MParticle#removeUserAttribute(String)}.
      *
      * @param tag a tag that was previously added
      */
-    public void removeUserTag(String tag) {
-        removeUserAttribute(tag);
+    public boolean removeUserTag(String tag) {
+        return removeUserAttribute(tag);
     }
-
 
     /**
      * Set the current user's identity
@@ -1201,13 +1206,13 @@ public class MParticle {
      * Retrieve a URL to be loaded within a {@link WebView} to show the user a survey
      * or feedback form.
      *
-     * @param serviceProviderId The ID of the desired survey/feedback service.
+     * @param kitId The ID of the desired survey/feedback service.
      * @return a fully-formed URI, or null if no URL exists for the given ID.
      *
      * @see MParticle.ServiceProviders
      */
-    public Uri getSurveyUrl(int serviceProviderId) {
-        return mKitManager.getSurveyUrl(serviceProviderId, getUserAttributes());
+    public Uri getSurveyUrl(final int kitId) {
+        return mKitManager.getSurveyUrl(kitId, getUserAttributes(), getUserAttributeLists());
     }
 
     /**
@@ -1577,18 +1582,20 @@ public class MParticle {
     }
 
     public Map<String, String> getUserAttributes() {
-        Map<String, String> attributeMap = new HashMap<String, String>(mUserAttributes.length());
-
-        Iterator<String> keys = mUserAttributes.keys();
-
-        while( keys.hasNext() ) {
-            String key = (String)keys.next();
-            attributeMap.put(key, mUserAttributes.optString(key));
-        }
-
-        return attributeMap;
+        return mMessageManager.getUserAttributes(null);
     }
 
+    public Map<String, List<String>> getUserAttributeLists() {
+        return mMessageManager.getUserAttributeLists();
+    }
+
+    public Map<String, Object> getAllUserAttributes() {
+        return mMessageManager.getAllUserAttributes(null);
+    }
+
+    public void getAllUserAttributes(UserAttributeListener listener) {
+        mMessageManager.getAllUserAttributes(listener);
+    }
     /**
      * The Environment in which the SDK and hosting app are running. The SDK
      * automatically detects the Environment based on the <code>DEBUGGABLE</code> flag of your application. The <code>DEBUGGABLE</code>  flag of your
