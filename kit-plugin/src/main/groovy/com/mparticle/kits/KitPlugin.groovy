@@ -84,8 +84,8 @@ class KitPlugin implements Plugin<Project> {
                         }
 
                         scm {
-                            url 'http://github.com/mparticle/mparticle-android-sdk'
-                            connection 'scm:git:http://github.com/mparticle/mparticle-android-sdk'
+                            url 'https://github.com/mparticle/mparticle-android-sdk'
+                            connection 'scm:git:https://github.com/mparticle/mparticle-android-sdk'
                             developerConnection 'scm:git:git@github.com:mparticle/mparticle-android-sdk.git'
                         }
 
