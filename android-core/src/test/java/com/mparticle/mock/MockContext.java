@@ -37,6 +37,11 @@ public class MockContext extends android.test.mock.MockContext {
     }
 
     @Override
+    public int checkCallingOrSelfPermission(String permission) {
+        return PackageManager.PERMISSION_GRANTED;
+    }
+
+    @Override
     public SharedPreferences getSharedPreferences(String name, int mode) {
         return sharedPreferences;
     }

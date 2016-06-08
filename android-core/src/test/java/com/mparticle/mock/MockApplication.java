@@ -35,6 +35,11 @@ public class MockApplication extends android.test.mock.MockApplication {
     }
 
     @Override
+    public int checkCallingOrSelfPermission(String permission) {
+        return mContext.checkCallingOrSelfPermission(permission);
+    }
+
+    @Override
     public Object getSystemService(String name) {
         return mContext.getSystemService(name);
     }

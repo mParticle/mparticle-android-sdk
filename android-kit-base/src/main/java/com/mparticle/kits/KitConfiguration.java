@@ -424,7 +424,7 @@ public class KitConfiguration {
 
     public static final boolean shouldRemoveAttribute(SparseBooleanArray attributeFilters, String key) {
         int hash = MPUtility.mpHash(key);
-        return attributeFilters.get(hash, true);
+        return attributeFilters.get(hash, false);
     }
 
     private CommerceEvent filterCommerceEventAttributes(CommerceEvent filteredEvent) {

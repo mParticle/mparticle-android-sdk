@@ -81,13 +81,13 @@ public class MParticle {
      * The ConfigManager is tasked with incorporating server-based, run-time, and XML configuration,
      * and surfacing the result/winner.
      */
-    private ConfigManager mConfigManager;
+    protected ConfigManager mConfigManager;
 
     /**
      * Used to delegate messages, events, user actions, etc on to embedded kits.
      */
 
-    private KitFrameworkWrapper mKitManager;
+    protected KitFrameworkWrapper mKitManager;
     /**
      * The state manager is primarily concerned with Activity lifecycle and app visibility in order to manage sessions,
      * automatically log screen views, and pass lifecycle information on top embedded kits.
@@ -96,17 +96,17 @@ public class MParticle {
 
     private JSONArray mUserIdentities = new JSONArray();
 
-    private MessageManager mMessageManager;
+    protected MessageManager mMessageManager;
     private static volatile MParticle instance;
-    private SharedPreferences mPreferences;
-    private MPLocationListener mLocationListener;
+    protected SharedPreferences mPreferences;
+    protected MPLocationListener mLocationListener;
     private Context mAppContext;
 
-    private MPMessagingAPI mMessaging;
-    private MPMediaAPI mMedia;
-    private CommerceApi mCommerce;
-    private ProductBagApi mProductBags;
-    private volatile DeepLinkListener mDeepLinkListener;
+    protected MPMessagingAPI mMessaging;
+    protected MPMediaAPI mMedia;
+    protected CommerceApi mCommerce;
+    protected ProductBagApi mProductBags;
+    protected volatile DeepLinkListener mDeepLinkListener;
     private static volatile boolean androidIdDisabled;
 
     MParticle() { }
@@ -908,7 +908,7 @@ public class MParticle {
      * @param value the attribute value. This value will be converted to its String representation as dictated by its <code>toString()</code> method.
      */
     public boolean setUserAttribute(String key, Object value) {
-        if (key == null){
+        if (MPUtility.isEmpty(key)){
             ConfigManager.log(LogLevel.WARNING, "setUserAttribute called with null key. This is a no-op.");
             return false;
         }
@@ -918,7 +918,7 @@ public class MParticle {
         }
 
         if (value != null && value instanceof List) {
-            List<String> values = (List<String>)value;
+            List<Object> values = (List<Object>)value;
             if (values.size() > Constants.LIMIT_USER_ATTR_LIST_LENGTH) {
                 ConfigManager.log(LogLevel.WARNING, "setUserAttribute called with list longer than "+Constants.LIMIT_USER_ATTR_LIST_LENGTH+" elements, list not set.");
                 return false;
@@ -926,10 +926,11 @@ public class MParticle {
             List<String> clonedList = new ArrayList<String>();
             try {
                 for (int i = 0; i < values.size(); i++) {
-                    if (values.get(i).length() > Constants.LIMIT_USER_ATTR_LIST_ITEM_LENGTH) {
-                        ConfigManager.log(LogLevel.WARNING, "setUserAttribute called with list containing element longer than " + Constants.LIMIT_USER_ATTR_LIST_ITEM_LENGTH + " characters, dropping element from list.");
+                    if (values.get(i).toString().length() > Constants.LIMIT_USER_ATTR_LIST_ITEM_LENGTH) {
+                        ConfigManager.log(LogLevel.WARNING, "setUserAttribute called with list containing element longer than " + Constants.LIMIT_USER_ATTR_LIST_ITEM_LENGTH + " characters, dropping entire list.");
+                        return false;
                     } else {
-                        clonedList.add(values.get(i));
+                        clonedList.add(values.get(i).toString());
                     }
                 }
                 ConfigManager.log(LogLevel.DEBUG, "Set user attribute list: " + key + " with values: " + values.toString());
@@ -957,7 +958,17 @@ public class MParticle {
         return true;
     }
 
+    /**
+     *
+     * @param key
+     * @param attributeList
+     * @return
+     */
     public boolean setUserAttributeList(String key, List<String> attributeList) {
+        if (attributeList == null) {
+            ConfigManager.log(LogLevel.WARNING, "setUserAttributeList called with null list, this is a no-op.");
+            return false;
+        }
         return setUserAttribute(key, attributeList);
     }
 
@@ -985,12 +996,12 @@ public class MParticle {
      * @param key the key of the attribute
      */
     public boolean removeUserAttribute(String key) {
-        if (key != null) {
-            ConfigManager.log(LogLevel.DEBUG, "Removing user attribute: " + key);
-        }else {
+        if (MPUtility.isEmpty(key)) {
+            ConfigManager.log(LogLevel.DEBUG, "removeUserAttribute called with empty key.");
             return false;
         }
 
+        ConfigManager.log(LogLevel.DEBUG, "Removing user attribute: " + key);
         mMessageManager.removeUserAttribute(key);
         mKitManager.removeUserAttribute(key);
         return true;
