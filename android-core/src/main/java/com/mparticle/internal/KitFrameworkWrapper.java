@@ -29,17 +29,19 @@ public class KitFrameworkWrapper implements KitManager {
     private final ReportingManager mReportingManager;
     private KitManager mKitManager;
     private volatile boolean frameworkLoadAttempted = false;
-    private volatile boolean kitsLoaded = false;
+    private static volatile boolean kitsLoaded = false;
 
     private Queue eventQueue;
     private volatile boolean registerForPush = false;
     private volatile boolean shouldCheckForDeepLink = false;
+    private static KitsLoadedListener kitsLoadedListener;
 
     public KitFrameworkWrapper(Context context, ReportingManager reportingManager, ConfigManager configManager, AppStateManager appStateManager) {
         this.mContext = context;
         this.mReportingManager = reportingManager;
         this.mConfigManager = configManager;
         this.mAppStateManager = appStateManager;
+        kitsLoaded = false;
     }
 
     public void loadKitLibrary() {
@@ -74,12 +76,24 @@ public class KitFrameworkWrapper implements KitManager {
     void setKitManager(KitManager manager) {
         mKitManager = manager;
     }
-    boolean getKitsLoaded() {
+    public static boolean getKitsLoaded() {
         return kitsLoaded;
+    }
+
+    public static void setKitsLoadedListener(KitsLoadedListener listener) {
+        if (kitsLoaded) {
+            listener.onKitsLoaded();
+        } else {
+            kitsLoadedListener = listener;
+        }
     }
 
     void setKitsLoaded(boolean kitsLoaded) {
         this.kitsLoaded = kitsLoaded;
+        if (kitsLoadedListener != null) {
+            kitsLoadedListener.onKitsLoaded();
+            kitsLoadedListener = null;
+        }
     }
 
     void disableQueuing() {
@@ -124,6 +138,7 @@ public class KitFrameworkWrapper implements KitManager {
                 mKitManager.logCommerceEvent((CommerceEvent) event);
             }
         }
+
     }
 
     public void replayAndDisableQueue() {

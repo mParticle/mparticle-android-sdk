@@ -21,6 +21,8 @@ import android.util.Log;
 import com.mparticle.internal.AppStateManager;
 import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.Constants;
+import com.mparticle.internal.KitFrameworkWrapper;
+import com.mparticle.internal.KitsLoadedListener;
 import com.mparticle.internal.MPUtility;
 import com.mparticle.messaging.AbstractCloudMessage;
 import com.mparticle.messaging.CloudAction;
@@ -179,26 +181,38 @@ public class MPService extends IntentService {
         return appState;
     }
 
-    private void generateCloudMessage(Intent intent) {
+    private void generateCloudMessage(final Intent intent) {
         if (!processSilentPush(getApplicationContext(), intent.getExtras())){
             try {
-                MParticle.start(this);
-                MParticle.getInstance().getKitManager().loadKitLibrary();
-                boolean handled = MParticle.getInstance().getKitManager().onMessageReceived(getApplicationContext(), intent);
-                AbstractCloudMessage cloudMessage = AbstractCloudMessage.createMessage(intent, ConfigManager.getPushKeys(this));
-                cloudMessage.setDisplayed(handled);
-                String appState = getAppState();
-                if (cloudMessage instanceof MPCloudNotificationMessage){
-                    MParticle.getInstance().saveGcmMessage(((MPCloudNotificationMessage)cloudMessage), appState);
-                    if (((MPCloudNotificationMessage)cloudMessage).isDelayed()){
-                        MParticle.getInstance().logNotification((MPCloudNotificationMessage)cloudMessage, null, false, appState, AbstractCloudMessage.FLAG_RECEIVED);
-                        scheduleFutureNotification((MPCloudNotificationMessage) cloudMessage);
-                        return;
+
+                KitsLoadedListener kitsLoadedListener = new KitsLoadedListener() {
+                    @Override
+                    public void onKitsLoaded() {
+                        try{
+                            MParticle.getInstance().getKitManager().loadKitLibrary();
+                            boolean handled = MParticle.getInstance().getKitManager().onMessageReceived(getApplicationContext(), intent);
+                            AbstractCloudMessage cloudMessage = AbstractCloudMessage.createMessage(intent, ConfigManager.getPushKeys(MPService.this));
+                            cloudMessage.setDisplayed(handled);
+                            String appState = getAppState();
+                            if (cloudMessage instanceof MPCloudNotificationMessage){
+                                MParticle.getInstance().saveGcmMessage(((MPCloudNotificationMessage)cloudMessage), appState);
+                                if (((MPCloudNotificationMessage)cloudMessage).isDelayed()){
+                                    MParticle.getInstance().logNotification((MPCloudNotificationMessage)cloudMessage, null, false, appState, AbstractCloudMessage.FLAG_RECEIVED);
+                                    scheduleFutureNotification((MPCloudNotificationMessage) cloudMessage);
+                                    return;
+                                }
+                            }else if (cloudMessage instanceof ProviderCloudMessage){
+                                MParticle.getInstance().saveGcmMessage(((ProviderCloudMessage)cloudMessage), appState);
+                            }
+                            broadcastNotificationReceived(cloudMessage);
+                        }catch (Exception e){
+                            Log.w(TAG, "GCM parsing error: " + e.toString());
+                        }
                     }
-                }else if (cloudMessage instanceof ProviderCloudMessage){
-                    MParticle.getInstance().saveGcmMessage(((ProviderCloudMessage)cloudMessage), appState);
-                }
-                broadcastNotificationReceived(cloudMessage);
+                };
+                KitFrameworkWrapper.setKitsLoadedListener(kitsLoadedListener);
+                MParticle.start(this);
+
             }catch (Exception e){
                 Log.w(TAG, "GCM parsing error: " + e.toString());
             }
