@@ -102,7 +102,6 @@ public class MPReceiver extends BroadcastReceiver {
             } else {
                 MPService.runIntentInService(context, intent);
             }
-            setResult(Activity.RESULT_OK, null, null);
         }
     }
 
