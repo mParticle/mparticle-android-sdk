@@ -37,3 +37,6 @@
 [submodule "kits/apptentive-kit"]
 	path = kits/apptentive-kit
 	url = git@github.com:mparticle-integrations/mparticle-android-integration-apptentive.git
+[submodule "kits/button-kit"]
+	path = kits/button-kit
+	url = git@github.com:mparticle-integrations/mparticle-android-integration-button.git
