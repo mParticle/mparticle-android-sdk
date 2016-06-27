@@ -42,11 +42,6 @@ import java.util.concurrent.atomic.AtomicLong;
      */
     public static boolean mInitialized;
 
-    /**
-     * Keep track of how many active activities there are to determine if the app is in the foreground/visible
-     * to the user.
-     */
-    AtomicInteger mActivities = new AtomicInteger(0);
     AtomicLong mLastStoppedTime;
     /**
      * it can take some time between when an activity stops and when a new one (or the same one on a configuration change/rotation)
@@ -76,13 +71,7 @@ import java.util.concurrent.atomic.AtomicLong;
      * that change while the app is running.
      */
     private long mLastForegroundTime;
-    /**
-     * Various fields required to log along with state-transition messages to associate
-     * outside apps/packages with user activity.
-     */
-    private String previousSessionPackage;
-    private String previousSessionParameters;
-    private String previousSessionUri;
+
     boolean mUnitTesting = false;
     private MessageManager mMessageManager;
 
@@ -119,13 +108,35 @@ import java.util.concurrent.atomic.AtomicLong;
         }
     }
 
-    public void onActivityStarted(Activity activity) {
+    public void onActivityResumed(Activity activity) {
         try {
             mCurrentActivityName = AppStateManager.getActivityName(activity);
 
             int interruptions = mInterruptionCount.get();
             if (!mInitialized || !getSession().isActive()) {
-                gatherSourceInfo(activity);
+                mInterruptionCount = new AtomicInteger(0);
+            }
+            String previousSessionPackage = null;
+            String previousSessionUri = null;
+            String previousSessionParameters = null;
+            if (activity != null){
+                ComponentName callingApplication = activity.getCallingActivity();
+                if (callingApplication != null) {
+                    previousSessionPackage = callingApplication.getPackageName();
+                }
+                if(activity.getIntent() != null) {
+                    previousSessionUri = activity.getIntent().getDataString();
+
+                    if (activity.getIntent().getExtras() != null && activity.getIntent().getExtras().getBundle(Constants.External.APPLINK_KEY) != null) {
+                        JSONObject parameters = new JSONObject();
+                        try {
+                            parameters.put(Constants.External.APPLINK_KEY, MPUtility.wrapExtras(activity.getIntent().getExtras().getBundle(Constants.External.APPLINK_KEY)));
+                        } catch (Exception e) {
+
+                        }
+                        previousSessionParameters = parameters.toString();
+                    }
+                }
             }
 
             mCurrentSession.updateBackgroundTime(mLastStoppedTime, getTime());
@@ -159,44 +170,20 @@ import java.util.concurrent.atomic.AtomicLong;
                 mCurrentActivityReference = null;
             }
             mCurrentActivityReference = new WeakReference<Activity>(activity);
-            mActivities.getAndIncrement();
 
             if (MParticle.getInstance().isAutoTrackingEnabled()) {
                 MParticle.getInstance().logScreen(mCurrentActivityName);
             }
 
-            MParticle.getInstance().getKitManager().onActivityStarted(activity);
+            MParticle.getInstance().getKitManager().onActivityResumed(activity);
         }catch (Exception e){
             if (BuildConfig.MP_DEBUG) {
-                ConfigManager.log(MParticle.LogLevel.ERROR, "Failed while trying to track activity start: " + e.getMessage());
+                ConfigManager.log(MParticle.LogLevel.ERROR, "Failed while trying to track activity resume: " + e.getMessage());
             }
         }
     }
 
-    private void gatherSourceInfo(Activity activity) {
-        mInterruptionCount = new AtomicInteger(0);
-        if (activity != null){
-            ComponentName callingApplication = activity.getCallingActivity();
-            if (callingApplication != null) {
-                previousSessionPackage = callingApplication.getPackageName();
-            }
-            if(activity.getIntent() != null) {
-                previousSessionUri = activity.getIntent().getDataString();
-
-                if (activity.getIntent().getExtras() != null && activity.getIntent().getExtras().getBundle(Constants.External.APPLINK_KEY) != null) {
-                    JSONObject parameters = new JSONObject();
-                    try {
-                        parameters.put(Constants.External.APPLINK_KEY, MPUtility.wrapExtras(activity.getIntent().getExtras().getBundle(Constants.External.APPLINK_KEY)));
-                    } catch (Exception e) {
-
-                    }
-                    previousSessionParameters = parameters.toString();
-                }
-            }
-        }
-    }
-
-    public void onActivityStopped(Activity activity) {
+    public void onActivityPaused(Activity activity) {
         try {
             mPreferences.edit().putBoolean(Constants.PrefKeys.CRASHED_IN_FOREGROUND, false).apply();
             mLastStoppedTime = new AtomicLong(getTime());
@@ -204,21 +191,21 @@ import java.util.concurrent.atomic.AtomicLong;
                 mCurrentActivityReference.clear();
                 mCurrentActivityReference = null;
             }
-            if (mCurrentActivityReference == null) {
-                delayedBackgroundCheckHandler.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            if (isBackgrounded()) {
-                                checkSessionTimeout();
-                                logBackgrounded();
-                            }
-                        }catch (Exception e){
 
+            delayedBackgroundCheckHandler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        if (isBackgrounded()) {
+                            checkSessionTimeout();
+                            logBackgrounded();
                         }
+                    }catch (Exception e){
+
                     }
-                }, ACTIVITY_DELAY);
-            }
+                }
+            }, ACTIVITY_DELAY);
+
             if (MParticle.getInstance().isAutoTrackingEnabled()) {
                 MParticle.getInstance().logScreen(
                         new MPEvent.Builder(AppStateManager.getActivityName(activity))
@@ -226,10 +213,10 @@ import java.util.concurrent.atomic.AtomicLong;
                                 .build()
                 );
             }
-            MParticle.getInstance().getKitManager().onActivityStopped(activity);
+            MParticle.getInstance().getKitManager().onActivityPaused(activity);
         }catch (Exception e){
             if (BuildConfig.MP_DEBUG) {
-                ConfigManager.log(MParticle.LogLevel.ERROR, "Failed while trying to track activity stop: " + e.getMessage());
+                ConfigManager.log(MParticle.LogLevel.ERROR, "Failed while trying to track activity pause: " + e.getMessage());
             }
         }
     }
@@ -306,12 +293,12 @@ import java.util.concurrent.atomic.AtomicLong;
         MParticle.getInstance().getKitManager().onActivityCreated(activity, savedInstanceState);
     }
 
-    public void onActivityResumed(Activity activity){
-        MParticle.getInstance().getKitManager().onActivityResumed(activity);
+    public void onActivityStarted(Activity activity){
+        MParticle.getInstance().getKitManager().onActivityStarted(activity);
     }
 
-    public void onActivityPaused(Activity activity) {
-        MParticle.getInstance().getKitManager().onActivityPaused(activity);
+    public void onActivityStopped(Activity activity) {
+        MParticle.getInstance().getKitManager().onActivityStopped(activity);
     }
 
     private void logBackgrounded(){
