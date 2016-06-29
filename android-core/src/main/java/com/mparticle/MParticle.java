@@ -1727,6 +1727,7 @@ public class MParticle {
         int APPSFLYER = 92;
         int APPTENTIVE = 97;
         int BUTTON = 1022;
+        int LEANPLUM = 98;
         String BROADCAST_ACTIVE = "MPARTICLE_SERVICE_PROVIDER_ACTIVE_";
         String BROADCAST_DISABLED = "MPARTICLE_SERVICE_PROVIDER_DISABLED_";
     }

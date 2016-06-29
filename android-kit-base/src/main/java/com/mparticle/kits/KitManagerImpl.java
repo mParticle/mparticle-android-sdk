@@ -595,8 +595,8 @@ public class KitManagerImpl implements KitManager, DeepLinkListener, UserAttribu
                                 && eventCopy.getInfo().containsKey(METHOD_NAME)
                                 && eventCopy.getInfo().get(METHOD_NAME).equals(LOG_LTV)){
                             messages = ((KitIntegration.CommerceListener) provider).logLtvIncrease(
-                                    MParticle.getInstance().Commerce().getCurrentUserLtv(),
                                     new BigDecimal(eventCopy.getInfo().get(RESERVED_KEY_LTV)),
+                                    MParticle.getInstance().Commerce().getCurrentUserLtv(),
                                     eventCopy.getEventName(),
                                     eventCopy.getInfo());
                         }else {

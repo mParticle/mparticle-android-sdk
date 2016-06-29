@@ -43,3 +43,6 @@
 [submodule "kits/urbanairship-kit"]
 	path = kits/urbanairship-kit
 	url = git@github.com:mparticle-integrations/mparticle-android-integration-urbanairship.git
+[submodule "kits/leanplum-kit"]
+	path = kits/leanplum-kit
+	url = git@github.com:mparticle-integrations/mparticle-android-integration-leanplum.git
