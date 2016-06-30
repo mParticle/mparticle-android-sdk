@@ -283,8 +283,8 @@ public class KitManagerImpl implements KitManager, DeepLinkListener, UserAttribu
     public Uri getSurveyUrl(int serviceId, Map<String, String> userAttributes, Map<String, List<String>> userAttributeLists) {
         KitIntegration provider = providers.get(serviceId);
         if (provider != null){
-            return provider.getSurveyUrl(provider.getConfiguration().filterAttributes(provider.getConfiguration().getUserAttributeFilters(), userAttributes),
-                                        provider.getConfiguration().filterAttributeLists(provider.getConfiguration().getUserAttributeFilters(), userAttributeLists));
+            return provider.getSurveyUrl((Map<String, String>)provider.getConfiguration().filterAttributes(provider.getConfiguration().getUserAttributeFilters(), userAttributes),
+                    (Map<String, List<String>>)provider.getConfiguration().filterAttributes(provider.getConfiguration().getUserAttributeFilters(), userAttributeLists));
         } else {
             return null;
         }
@@ -437,9 +437,9 @@ public class KitManagerImpl implements KitManager, DeepLinkListener, UserAttribu
         for (KitIntegration provider : providers.values()) {
             try {
                 if (provider instanceof KitIntegration.AttributeListener && !provider.isDisabled()) {
-                    Map<String, String> filteredAttributeSingles = KitConfiguration.filterAttributes(provider.getConfiguration().getUserAttributeFilters(),
+                    Map<String, String> filteredAttributeSingles = (Map<String, String>)KitConfiguration.filterAttributes(provider.getConfiguration().getUserAttributeFilters(),
                             userAttributes);
-                    Map<String, List<String>> filteredAttributeLists = KitConfiguration.filterAttributeLists(provider.getConfiguration().getUserAttributeFilters(),
+                    Map<String, List<String>> filteredAttributeLists = (Map<String, List<String>>)KitConfiguration.filterAttributes(provider.getConfiguration().getUserAttributeFilters(),
                             userAttributeLists);
                     if (!((KitIntegration.AttributeListener) provider).supportsAttributeLists()){
                         for (Map.Entry<String, List<String>> entry : userAttributeLists.entrySet()) {

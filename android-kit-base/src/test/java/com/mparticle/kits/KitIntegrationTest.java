@@ -5,7 +5,7 @@ import com.mparticle.MParticle;
 import org.junit.BeforeClass;
 import org.mockito.Mockito;
 
-public class AbstractKitTest {
+public class KitIntegrationTest {
 
     @BeforeClass
     public static void setupAll() {
