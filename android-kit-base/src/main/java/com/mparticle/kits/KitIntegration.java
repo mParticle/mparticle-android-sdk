@@ -14,6 +14,7 @@ import com.mparticle.commerce.CommerceEvent;
 
 import java.lang.ref.WeakReference;
 import java.math.BigDecimal;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -88,6 +89,51 @@ public abstract class KitIntegration {
         return !getConfiguration().passesBracketing(kitManager.getUserBucket()) ||
                 (getConfiguration().shouldHonorOptOut() && kitManager.isOptedOut());
 
+    }
+
+    /**
+     * Retrieve filtered user identities. User this method to retrieve user identities at any time.
+     * To ensure that filtering is respected, kits must use this method rather than the public API.
+     *
+     * @return a Map of identity-types and identity-values
+     */
+    public final Map<MParticle.IdentityType, String> getUserIdentities() {
+       Map<MParticle.IdentityType, String> identities = MParticle.getInstance().getUserIdentities();
+       Map<MParticle.IdentityType, String> filteredIdentities = new HashMap<MParticle.IdentityType, String>(identities.size());
+       for (Map.Entry<MParticle.IdentityType, String> entry : identities.entrySet()) {
+           if (getConfiguration().shouldSetIdentity(entry.getKey())) {
+               filteredIdentities.put(entry.getKey(), entry.getValue());
+           }
+       }
+       return identities;
+    }
+
+    /**
+     * Retrieve filtered user attributes. Use this method to retrieve user attributes at any time.
+     * To ensure that filtering is respected, kits must use this method rather than the public API.
+     *
+     * If the KitIntegration implements the {@link AttributeListener} interface and returns true
+     * for {@link AttributeListener#supportsAttributeLists()}, this method will pass back all attributes
+     * as they are (as String values or as List&lt;String&gt; values). Otherwise, this method will comma-separate
+     * the List values and return back all String values.
+     *
+     * @return a Map of attributes according to the logic above.
+     */
+    public final Map<String, Object> getAllUserAttributes() {
+        Map<String, Object> attributes = (Map<String, Object>) KitConfiguration.filterAttributes(
+                getConfiguration().getUserAttributeFilters(),
+                MParticle.getInstance().getAllUserAttributes()
+        );
+        if ((this instanceof AttributeListener) && ((AttributeListener)this).supportsAttributeLists()) {
+            return attributes;
+        }else {
+            for (Map.Entry<String, Object> entry : attributes.entrySet()) {
+                if (entry.getValue() instanceof List) {
+                    attributes.put(entry.getKey(), KitUtils.join((List)entry.getValue()));
+                }
+            }
+            return attributes;
+        }
     }
 
     /**
