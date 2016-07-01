@@ -127,7 +127,7 @@ Proguard is a minification/optimization/obfuscation tool that's extremely useful
 Just by initializing the SDK you'll be set up to track user installs, engagement, and much more. Check out our doc site to learn how to add specific event tracking to your app.
 
 * [SDK Documentation](http://docs.mparticle.com/#sdk-documentation)
-* [Javadocs](http://docs.mparticle.com/includes/javadocs)
+* [Javadocs](http://docs.mparticle.com/includes/javadocs/index.html)
 
 ## License
 
