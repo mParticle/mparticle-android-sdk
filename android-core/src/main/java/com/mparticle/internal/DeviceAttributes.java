@@ -198,29 +198,6 @@ import java.util.UUID;
             attributes.put(MessageKey.DEVICE_IS_TABLET, MPUtility.isTablet(appContext));
 
 
-
-            MPUtility.getGoogleAdIdInfo(appContext, new MPUtility.GoogleAdIdListener() {
-                @Override
-                public void onGoogleIdInfoRetrieved(String googleAdId, Boolean limitAdTrackingEnabled) {
-                    if (limitAdTrackingEnabled == null) {
-                        ConfigManager.log(MParticle.LogLevel.DEBUG, "Failed to collect Google Play Advertising ID, be sure to add Google Play services or com.google.android.gms:play-services-ads to your app's dependencies.");
-                    }else {
-                        try {
-                            attributes.put(MessageKey.LIMIT_AD_TRACKING, limitAdTrackingEnabled);
-                            if (limitAdTrackingEnabled) {
-                                ConfigManager.log(MParticle.LogLevel.DEBUG, "Google Play Advertising ID available but ad tracking is disabled on this device.");
-                            } else {
-                                attributes.put(MessageKey.GOOGLE_ADV_ID, googleAdId);
-                                ConfigManager.log(MParticle.LogLevel.DEBUG, "Successfully collected Google Play Advertising ID.");
-                            }
-                        }catch (JSONException jse) {
-
-                        }
-                    }
-                }
-            });
-
-
         } catch (Exception e) {
             //believe it or not, difference devices can be missing build.prop fields, or have otherwise
             //strange version/builds of Android that cause unpredictable behavior

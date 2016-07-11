@@ -14,7 +14,11 @@ import org.mockito.Mockito;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 public class ConfigManagerTest {
     com.mparticle.mock.MockContext context;
@@ -72,6 +76,19 @@ public class ConfigManagerTest {
     public void testGetActiveModuleIds() throws Exception {
         Mockito.when(kitManager.getActiveModuleIds()).thenReturn("this is a test");
         assertEquals("this is a test", manager.getActiveModuleIds());
+    }
+
+    @Test
+    public void testRestrictAAIDBasedOnLAT() throws Exception {
+        ConfigManager testManager = new ConfigManager(context, MParticle.Environment.Production, "some api key", "some api secret");
+        assertTrue(testManager.getRestrictAAIDBasedOnLAT());
+        JSONObject config = new JSONObject();
+        config.put("rdlat", "false");
+        testManager.updateConfig(config);
+        assertFalse(testManager.getRestrictAAIDBasedOnLAT());
+        config.put("rdlat", "true");
+        testManager.updateConfig(config);
+        assertTrue(testManager.getRestrictAAIDBasedOnLAT());
     }
 
     @Test
@@ -298,5 +315,62 @@ public class ConfigManagerTest {
     public void testGetUserBucket() throws Exception {
         int bucket = manager.getUserBucket();
         assertTrue(bucket >= 0 && bucket <= 100);
+    }
+
+    @Test
+    public void testRestrictLatNoConfig() throws Exception {
+        assertTrue(manager.getRestrictAAIDBasedOnLAT());
+    }
+
+    @Test
+    public void testRestrictLatFromConfig() throws Exception {
+        assertTrue(manager.getRestrictAAIDBasedOnLAT());
+        JSONObject config = new JSONObject();
+        config.put("rdlat", false);
+        manager.updateConfig(config);
+        assertFalse(manager.getRestrictAAIDBasedOnLAT());
+    }
+
+    @Test
+    public void testRestrictLatTrueToFalse() throws Exception {
+        assertTrue(manager.getRestrictAAIDBasedOnLAT());
+        JSONObject config = new JSONObject();
+        config.put("rdlat", false);
+        manager.updateConfig(config);
+        assertFalse(manager.getRestrictAAIDBasedOnLAT());
+
+    }
+
+    @Test
+    public void testRestrictLatFalseToTrue() throws Exception {
+        assertTrue(manager.getRestrictAAIDBasedOnLAT());
+        JSONObject config = new JSONObject();
+        config.put("rdlat", false);
+        manager.updateConfig(config);
+        config.put("rdlat", "true");
+        manager.updateConfig(config);
+        assertTrue(manager.getRestrictAAIDBasedOnLAT());
+    }
+
+    @Test
+    public void testRestrictLatFalseToNoConfig() throws Exception {
+        assertTrue(manager.getRestrictAAIDBasedOnLAT());
+        JSONObject config = new JSONObject();
+        config.put("rdlat", false);
+        manager.updateConfig(config);
+        config.remove("rdlat");
+        manager.updateConfig(config);
+        assertTrue(manager.getRestrictAAIDBasedOnLAT());
+    }
+
+    @Test
+    public void testRestrictLatTrueToNoConfig() throws Exception {
+        assertTrue(manager.getRestrictAAIDBasedOnLAT());
+        JSONObject config = new JSONObject();
+        config.put("rdlat", true);
+        manager.updateConfig(config);
+        config.remove("rdlat");
+        manager.updateConfig(config);
+        assertTrue(manager.getRestrictAAIDBasedOnLAT());
     }
 }

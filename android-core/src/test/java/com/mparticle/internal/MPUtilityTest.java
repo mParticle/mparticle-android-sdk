@@ -1,18 +1,13 @@
 package com.mparticle.internal;
 
-
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
-
+import com.mparticle.mock.MockContext;
 import org.json.JSONObject;
 import org.junit.Test;
 import org.mockito.Mockito;
-
 import java.util.UUID;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class MPUtilityTest {
 
@@ -75,7 +70,11 @@ public class MPUtilityTest {
         MPUtility.setCheckedAttribute(attributes, "mykey", valueThatsTooLong, false, true);
 
         assertFalse(attributes.has("mykey"));
+    }
 
+    @Test
+    public void getGoogleAdIdInfoWithoutPlayServicesAvailable() throws Exception{
+        assertNull(MPUtility.getGoogleAdIdInfo(new MockContext()));
     }
 
     @Test

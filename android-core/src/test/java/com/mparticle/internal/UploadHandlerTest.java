@@ -2,27 +2,36 @@ package com.mparticle.internal;
 
 
 
+import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Message;
 
-import com.mparticle.mock.MockConfigManager;
 import com.mparticle.mock.MockContext;
 
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.AdditionalMatchers;
 import org.mockito.Mockito;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 
+import java.util.UUID;
+
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
-
+@RunWith(PowerMockRunner.class)
 public class UploadHandlerTest {
     UploadHandler handler;
     private SQLiteDatabase mockDatabase;
+    private ConfigManager mConfigManager;
 
     @Before
     public void setUp() throws Exception {
@@ -30,7 +39,8 @@ public class UploadHandlerTest {
         mockDatabase = Mockito.mock(SQLiteDatabase.class);
         Mockito.when(db.getWritableDatabase()).thenReturn(mockDatabase);
         AppStateManager stateManager = Mockito.mock(AppStateManager.class);
-        handler = new UploadHandler(new MockContext(), new MockConfigManager(), db, stateManager);
+        mConfigManager = Mockito.mock(ConfigManager.class);
+        handler = new UploadHandler(new MockContext(), mConfigManager, db, stateManager);
     }
 
     @Test
@@ -110,4 +120,51 @@ public class UploadHandlerTest {
         assertNotNull(attributes);
     }
 
+    @Test
+    @PrepareForTest({MPUtility.class})
+    public void testGetAAIDAllDefaults() throws Exception {
+        final String AAID = UUID.randomUUID().toString();
+        Mockito.when(mConfigManager.getRestrictAAIDBasedOnLAT()).thenReturn(true);
+        PowerMockito.mockStatic(MPUtility.class);
+        Mockito.when(MPUtility.getGoogleAdIdInfo(Mockito.any(Context.class))).thenReturn(new MPUtility.AndroidAdIdInfo(AAID, false));
+        JSONObject attributes = handler.getAppInfo();
+        assertFalse(attributes.getBoolean("lat"));
+        assertEquals(AAID, attributes.getString("gaid"));
+    }
+
+    @Test
+    @PrepareForTest({MPUtility.class})
+    public void testGetAAIDLATTrueRestrictTrue() throws Exception {
+        final String AAID = UUID.randomUUID().toString();
+        Mockito.when(mConfigManager.getRestrictAAIDBasedOnLAT()).thenReturn(true);
+        PowerMockito.mockStatic(MPUtility.class);
+        Mockito.when(MPUtility.getGoogleAdIdInfo(Mockito.any(Context.class))).thenReturn(new MPUtility.AndroidAdIdInfo(AAID, true));
+        JSONObject attributes = handler.getAppInfo();
+        assertTrue(attributes.getBoolean("lat"));
+        assertFalse(attributes.has("gaid"));
+    }
+
+    @Test
+    @PrepareForTest({MPUtility.class})
+    public void testGetAAIDLATTrueRestrictFalse() throws Exception {
+        final String AAID = UUID.randomUUID().toString();
+        Mockito.when(mConfigManager.getRestrictAAIDBasedOnLAT()).thenReturn(false);
+        PowerMockito.mockStatic(MPUtility.class);
+        Mockito.when(MPUtility.getGoogleAdIdInfo(Mockito.any(Context.class))).thenReturn(new MPUtility.AndroidAdIdInfo(AAID, true));
+        JSONObject attributes = handler.getAppInfo();
+        assertTrue(attributes.getBoolean("lat"));
+        assertEquals(AAID, attributes.getString("gaid"));
+    }
+
+    @Test
+    @PrepareForTest({MPUtility.class})
+    public void testGetAAIDLATFalseRestrictLatFalse() throws Exception {
+        final String AAID = UUID.randomUUID().toString();
+        Mockito.when(mConfigManager.getRestrictAAIDBasedOnLAT()).thenReturn(false);
+        PowerMockito.mockStatic(MPUtility.class);
+        Mockito.when(MPUtility.getGoogleAdIdInfo(Mockito.any(Context.class))).thenReturn(new MPUtility.AndroidAdIdInfo(AAID, false));
+        JSONObject attributes = handler.getAppInfo();
+        assertFalse(attributes.getBoolean("lat"));
+        assertEquals(AAID, attributes.getString("gaid"));
+    }
 }

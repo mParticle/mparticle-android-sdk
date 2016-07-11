@@ -133,26 +133,33 @@ public class MPUtility {
             return false;
     }
 
-    public static void getGoogleAdIdInfo(Context context, GoogleAdIdListener adIdListener) {
-        if (adIdListener != null) {
-            try {
-                Class AdvertisingIdClient = Class
-                        .forName("com.google.android.gms.ads.identifier.AdvertisingIdClient");
-                Method getAdvertisingInfo = AdvertisingIdClient.getMethod("getAdvertisingIdInfo",
-                        Context.class);
-                Object advertisingInfo = getAdvertisingInfo.invoke(null, context);
-                Method isLimitAdTrackingEnabled = advertisingInfo.getClass().getMethod(
-                        "isLimitAdTrackingEnabled");
-                Boolean limitAdTrackingEnabled = (Boolean) isLimitAdTrackingEnabled
-                        .invoke(advertisingInfo);
-                String advertisingId = null;
-                if (!limitAdTrackingEnabled) {
-                    Method getId = advertisingInfo.getClass().getMethod("getId");
-                    advertisingId = (String) getId.invoke(advertisingInfo);
-                }
-                adIdListener.onGoogleIdInfoRetrieved(advertisingId, limitAdTrackingEnabled);
-            } catch (Exception cnfe) {
-            }
+    public static AndroidAdIdInfo getGoogleAdIdInfo(Context context) {
+        try {
+            Class AdvertisingIdClient = Class
+                    .forName("com.google.android.gms.ads.identifier.AdvertisingIdClient");
+            Method getAdvertisingInfo = AdvertisingIdClient.getMethod("getAdvertisingIdInfo",
+                    Context.class);
+            Object advertisingInfo = getAdvertisingInfo.invoke(null, context);
+            Method isLimitAdTrackingEnabled = advertisingInfo.getClass().getMethod(
+                    "isLimitAdTrackingEnabled");
+            Boolean limitAdTrackingEnabled = (Boolean) isLimitAdTrackingEnabled
+                    .invoke(advertisingInfo);
+            Method getId = advertisingInfo.getClass().getMethod("getId");
+            String advertisingId = (String) getId.invoke(advertisingInfo);
+            return new AndroidAdIdInfo(advertisingId, limitAdTrackingEnabled);
+        } catch (Exception cnfe) {
+
+        }
+        return null;
+    }
+
+    public static class AndroidAdIdInfo {
+        public final String id;
+        public final boolean isLimitAdTrackingEnabled;
+
+        public AndroidAdIdInfo(String id, boolean isLimitAdTrackingEnabled) {
+            this.id = id;
+            this.isLimitAdTrackingEnabled = isLimitAdTrackingEnabled;
         }
     }
 
@@ -595,9 +602,5 @@ public class MPUtility {
                 return id;
             }
         }
-    }
-
-    public interface GoogleAdIdListener {
-        void onGoogleIdInfoRetrieved(String googleAdId, Boolean limitAdTrackingEnabled);
     }
 }
