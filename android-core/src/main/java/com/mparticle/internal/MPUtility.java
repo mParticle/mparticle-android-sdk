@@ -503,7 +503,7 @@ public class MPUtility {
     }
 
     public static boolean isAppDebuggable(Context context){
-        return ( 0 != ( context.getApplicationInfo().flags &= ApplicationInfo.FLAG_DEBUGGABLE ) );
+        return ( 0 != ( context.getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE ) );
     }
 
     /**

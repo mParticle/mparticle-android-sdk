@@ -1,11 +1,18 @@
 package com.mparticle.internal;
 
+
+import android.content.Context;
+import android.content.pm.ApplicationInfo;
+
 import org.json.JSONObject;
 import org.junit.Test;
+import org.mockito.Mockito;
 
 import java.util.UUID;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 public class MPUtilityTest {
 
@@ -69,5 +76,33 @@ public class MPUtilityTest {
 
         assertFalse(attributes.has("mykey"));
 
+    }
+
+    @Test
+    public void testIsAppDebuggableTrue() throws Exception {
+        Context context = Mockito.mock(Context.class);
+        ApplicationInfo applicationInfo = Mockito.mock(ApplicationInfo.class);
+        applicationInfo.flags = ApplicationInfo.FLAG_DEBUGGABLE;
+        Mockito.when(context.getApplicationInfo()).thenReturn(applicationInfo);
+        assertTrue(MPUtility.isAppDebuggable(context));
+    }
+
+    @Test
+    public void testIsAppDebuggableFalse() throws Exception {
+        Context context = Mockito.mock(Context.class);
+        ApplicationInfo applicationInfo = Mockito.mock(ApplicationInfo.class);
+        applicationInfo.flags = 0;
+        Mockito.when(context.getApplicationInfo()).thenReturn(applicationInfo);
+        assertFalse(MPUtility.isAppDebuggable(context));
+    }
+
+    @Test
+    public void testIsAppDebuggableDoesNotModify() throws Exception {
+        Context context = Mockito.mock(Context.class);
+        ApplicationInfo applicationInfo = new ApplicationInfo();
+        applicationInfo.flags = 5;
+        Mockito.when(context.getApplicationInfo()).thenReturn(applicationInfo);
+        MPUtility.isAppDebuggable(context);
+        assertEquals(5, applicationInfo.flags);
     }
 }
