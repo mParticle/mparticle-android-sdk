@@ -62,7 +62,7 @@ public class PushRegistrationHelper {
                 public void run() {
                     try {
                         String instanceId =  InstanceID.getInstance(context).getToken(senderId, "GCM");
-                        MParticle.getInstance().logPushRegistration(senderId, instanceId);
+                        MParticle.getInstance().logPushRegistration(instanceId, senderId);
                         PushRegistration registration = new PushRegistration();
                         registration.instanceId = instanceId;
                         registration.senderId = senderId;
