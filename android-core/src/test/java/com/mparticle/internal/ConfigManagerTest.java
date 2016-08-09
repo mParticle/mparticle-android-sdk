@@ -12,7 +12,9 @@ import org.junit.Test;
 import org.mockito.Mockito;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -32,7 +34,7 @@ public class ConfigManagerTest {
     public void setUp() throws Exception {
         context = new com.mparticle.mock.MockContext();
         manager = new ConfigManager(context, MParticle.Environment.Production, "some api key", "some api secret");
-        mockMp= Mockito.mock(MParticle.class);
+        mockMp = Mockito.mock(MParticle.class);
         MParticle.setInstance(mockMp);
         kitManager = Mockito.mock(KitFrameworkWrapper.class);
         Mockito.when(mockMp.getKitManager()).thenReturn(kitManager);
@@ -42,7 +44,7 @@ public class ConfigManagerTest {
     @Test
     public void testSaveConfigJson() throws Exception {
         manager.saveConfigJson(null);
-        JSONObject json  = new JSONObject();
+        JSONObject json = new JSONObject();
         json.put("test", "value");
         manager.saveConfigJson(json);
         JSONObject object = new JSONObject(manager.mPreferences.getString(ConfigManager.CONFIG_JSON, null));
@@ -127,9 +129,8 @@ public class ConfigManagerTest {
 
     @Test
     public void testGetInfluenceOpenTimeoutMillis() throws Exception {
-        assertEquals(30*60*1000, manager.getInfluenceOpenTimeoutMillis());
+        assertEquals(30 * 60 * 1000, manager.getInfluenceOpenTimeoutMillis());
     }
-
 
 
     @Test
@@ -162,7 +163,7 @@ public class ConfigManagerTest {
         assertEquals((1000 * manager.sLocalPrefs.uploadInterval), manager.getUploadInterval());
         object.put(ConfigManager.KEY_UPLOAD_INTERVAL, 110);
         manager.updateConfig(object);
-        assertEquals(1000*110, manager.getUploadInterval());
+        assertEquals(1000 * 110, manager.getUploadInterval());
     }
 
     @Test
@@ -240,7 +241,7 @@ public class ConfigManagerTest {
         JSONArray pushKeys = ConfigManager.getPushKeys(context);
         String[] keys = {"mp_message", "com.urbanairship.push.ALERT", "alert", "a", "message"};
         List<String> list = Arrays.asList(keys);
-        for (int i = 0; i < pushKeys.length(); i++){
+        for (int i = 0; i < pushKeys.length(); i++) {
             assertTrue(list.contains(pushKeys.getString(i)));
         }
     }
@@ -286,7 +287,7 @@ public class ConfigManagerTest {
     @Test
     public void testGetTriggerMessageHashes() throws Exception {
         JSONArray hashes = manager.getTriggerMessageHashes();
-        for (int i = 0; i < hashes.length(); i++){
+        for (int i = 0; i < hashes.length(); i++) {
             int hash = hashes.getInt(i);
             assertTrue(hash == 1217787541 || hash == 2 || hash == 3);
         }
@@ -372,5 +373,70 @@ public class ConfigManagerTest {
         config.remove("rdlat");
         manager.updateConfig(config);
         assertTrue(manager.getRestrictAAIDBasedOnLAT());
+    }
+
+    static String ATTRIBUTES = "mp::integrationattributes";
+
+    @Test
+    public void testSetNullIntegrationAttributes() throws Exception {
+        assertFalse(manager.mPreferences.contains(ATTRIBUTES));
+        manager.setIntegrationAttributes(1, null);
+        assertFalse(manager.mPreferences.contains(ATTRIBUTES));
+        manager.mPreferences.edit().putString(ATTRIBUTES, "{\"1\":{\"test-key\":\"test-value\"}}").apply();
+        assertTrue(manager.mPreferences.contains(ATTRIBUTES));
+        manager.setIntegrationAttributes(1, null);
+        assertFalse(manager.mPreferences.contains(ATTRIBUTES));
+    }
+
+    @Test
+    public void testSetEmptyIntegrationAttributes() throws Exception {
+        assertFalse(manager.mPreferences.contains(ATTRIBUTES));
+        Map<String, String> attributes = new HashMap<>();
+        manager.setIntegrationAttributes(1, attributes);
+        assertFalse(manager.mPreferences.contains(ATTRIBUTES));
+        manager.mPreferences.edit().putString(ATTRIBUTES, "{\"1\":{\"test-key\":\"test-value\"}}").apply();
+        assertTrue(manager.mPreferences.contains(ATTRIBUTES));
+        manager.setIntegrationAttributes(1, attributes);
+        assertFalse(manager.mPreferences.contains(ATTRIBUTES));
+    }
+
+    @Test
+    public void testSetNonEmptyIntegrationAttributes() throws Exception {
+        assertFalse(manager.mPreferences.contains(ATTRIBUTES));
+        Map<String, String> attributes = new HashMap<>();
+        attributes.put("test-key", "value 2");
+        manager.setIntegrationAttributes(1, attributes);
+        attributes.put("test-key", "value 3");
+        manager.setIntegrationAttributes(12, attributes);
+        assertEquals("{\"1\":{\"test-key\":\"value 2\"},\"12\":{\"test-key\":\"value 3\"}}", manager.mPreferences.getString(ATTRIBUTES, null));
+    }
+
+    @Test
+    public void testGetKitIntegrationAttributes() throws Exception {
+        assertFalse(manager.mPreferences.contains(ATTRIBUTES));
+        assertEquals(0, manager.getIntegrationAttributes(1).size());
+        manager.mPreferences.edit().putString(ATTRIBUTES, "{\"1\":{\"test-key\":\"value 2\"},\"12\":{\"test-key\":\"value 3\"}}").apply();
+        Map<String, String> attributes = manager.getIntegrationAttributes(1);
+        assertEquals(1, attributes.size());
+        assertEquals("value 2", attributes.get("test-key"));
+        attributes = manager.getIntegrationAttributes(12);
+        assertEquals(1, attributes.size());
+        assertEquals("value 3", attributes.get("test-key"));
+        manager.mPreferences.edit().remove(ATTRIBUTES).apply();
+        assertEquals(0, manager.getIntegrationAttributes(1).size());
+        assertEquals(0, manager.getIntegrationAttributes(12).size());
+    }
+
+    @Test
+    public void testGetAllIntegrationAttributes() throws Exception {
+        assertFalse(manager.mPreferences.contains(ATTRIBUTES));
+        assertNull( manager.getIntegrationAttributes());
+        manager.mPreferences.edit().putString(ATTRIBUTES, "{\"1\":{\"test-key\":\"value 2\"},\"12\":{\"test-key\":\"value 3\"}}").apply();
+        JSONObject attributes = manager.getIntegrationAttributes();
+        assertEquals(2, attributes.length());
+        assertEquals("value 2", attributes.getJSONObject("1").get("test-key"));
+        assertEquals("value 3", attributes.getJSONObject("12").get("test-key"));
+        manager.mPreferences.edit().remove(ATTRIBUTES).apply();
+        assertNull( manager.getIntegrationAttributes());
     }
 }

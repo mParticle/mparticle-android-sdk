@@ -12,7 +12,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 
 public class ConfigManager {
     public static final String CONFIG_JSON = "json";
@@ -526,4 +528,66 @@ public class ConfigManager {
         return mUserBucket;
     }
 
+    public void setIntegrationAttributes(int kitId, Map<String, String> newAttributes) {
+        try {
+            JSONObject newJsonAttributes = null;
+            if (newAttributes != null && !newAttributes.isEmpty()) {
+                newJsonAttributes = new JSONObject();
+                for (Map.Entry<String, String> entry : newAttributes.entrySet()) {
+                    newJsonAttributes.put(entry.getKey(), entry.getValue());
+                }
+            }
+            JSONObject currentJsonAttributes = getIntegrationAttributes();
+            if (currentJsonAttributes == null) {
+                currentJsonAttributes = new JSONObject();
+            }
+            currentJsonAttributes.put(Integer.toString(kitId), newJsonAttributes);
+            if (currentJsonAttributes.length() > 0) {
+                mPreferences.edit()
+                        .putString(Constants.PrefKeys.INTEGRATION_ATTRIBUTES, currentJsonAttributes.toString())
+                        .apply();
+            } else {
+                mPreferences.edit()
+                        .remove(Constants.PrefKeys.INTEGRATION_ATTRIBUTES)
+                        .apply();
+            }
+        }catch (JSONException jse) {
+
+        }
+    }
+
+    public Map<String, String> getIntegrationAttributes(int kitId) {
+        Map<String, String> integrationAttributes = new HashMap<String, String>();
+        JSONObject jsonAttributes = getIntegrationAttributes();
+        if (jsonAttributes != null) {
+            JSONObject kitAttributes = jsonAttributes.optJSONObject(Integer.toString(kitId));
+            if (kitAttributes != null) {
+                try {
+                    Iterator<String> keys = kitAttributes.keys();
+                    while (keys.hasNext()) {
+                        String key = keys.next();
+                        if (kitAttributes.get(key) instanceof String) {
+                            integrationAttributes.put(key, kitAttributes.getString(key));
+                        }
+                    }
+                } catch (JSONException e) {
+
+                }
+            }
+        }
+        return integrationAttributes;
+    }
+
+    public JSONObject getIntegrationAttributes() {
+        JSONObject jsonAttributes = null;
+        String allAttributes = mPreferences.getString(Constants.PrefKeys.INTEGRATION_ATTRIBUTES, null);
+        if (allAttributes != null) {
+            try {
+                jsonAttributes = new JSONObject(allAttributes);
+            } catch (JSONException e) {
+
+            }
+        }
+        return jsonAttributes;
+    }
 }

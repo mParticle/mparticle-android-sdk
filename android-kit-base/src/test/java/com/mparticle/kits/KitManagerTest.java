@@ -44,7 +44,7 @@ public class KitManagerTest  {
 
     @Before
     public void setUp() throws Exception {
-        manager = new MockKitManagerImpl(new MockContext(), null, null, null);
+        manager = new MockKitManagerImpl(new MockContext(), null, Mockito.mock(ConfigManager.class), null);
         assertNotNull(manager.providers);
         MockKitIntegrationFactory mockKitFactory = new MockKitIntegrationFactory();
         manager.setKitFactory(mockKitFactory);

@@ -15,7 +15,6 @@ import java.lang.ref.WeakReference;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Base Kit implementation - all Kits must subclass this.
@@ -158,6 +157,33 @@ public abstract class KitIntegration {
     }
 
     public void checkForDeepLink() {
+    }
+
+    /**
+     * Set integration attributes. Integration attributes are designed to facilitate communication between a kit
+     * and its respective server integration. They will be persisted across application exits and launches.
+     *
+     * @param integrationAttributes
+     */
+    protected final void setIntegrationAttributes(Map<String, String> integrationAttributes) {
+        getKitManager().setIntegrationAttributes(this, integrationAttributes);
+    }
+
+    /**
+     * Get integration attributes. Integration attributes are designed to facilitate communication between a kit
+     * and its respective server integration. They will be persisted across application exits and launches.
+     *
+     * @return
+     */
+    protected final Map<String, String> getIntegrationAttributes() {
+        return getKitManager().getIntegrationAttributes(this);
+    }
+
+    /**
+     * Remove all integration attributes set for this integration.
+     */
+    protected final void clearIntegrationAttributes() {
+        getKitManager().clearIntegrationAttributes(this);
     }
 
     /**

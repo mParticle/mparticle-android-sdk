@@ -99,7 +99,17 @@ public class KitManagerImpl implements KitManager, DeepLinkListener, UserAttribu
         return !mConfigManager.isEnabled();
     }
 
+    void setIntegrationAttributes(KitIntegration kitIntegration, Map<String, String> integrationAttributes) {
+        mConfigManager.setIntegrationAttributes(kitIntegration.getConfiguration().getKitId(), integrationAttributes);
+    }
 
+    Map<String, String> getIntegrationAttributes(KitIntegration kitIntegration) {
+        return mConfigManager.getIntegrationAttributes(kitIntegration.getConfiguration().getKitId());
+    }
+
+    void clearIntegrationAttributes(KitIntegration kitIntegration) {
+        setIntegrationAttributes(kitIntegration, null);
+    }
 
     class UpdateKitRunnable implements Runnable {
 
@@ -189,6 +199,7 @@ public class KitManagerImpl implements KitManager, DeepLinkListener, UserAttribu
                 if (!activeIds.contains(id)) {
                     KitIntegration integration = providers.get(id);
                     if (integration != null) {
+                        clearIntegrationAttributes(integration);
                         integration.onKitDestroy();
                     }
                     ids.remove();

@@ -337,6 +337,7 @@ public class Constants {
         
         String MPID = "mpid";
         String EVENT_FLAGS = "flags";
+        String INTEGRATION_ATTRIBUTES = "ia";
     }
 
     public interface Commerce {
@@ -479,6 +480,7 @@ public class Constants {
 
         String CART = "mp::cart";
         String PRODUCT_BAGS = "mp::productbags";
+        String INTEGRATION_ATTRIBUTES = "mp::integrationattributes";
     }
 
     public interface MiscStorageKeys {
