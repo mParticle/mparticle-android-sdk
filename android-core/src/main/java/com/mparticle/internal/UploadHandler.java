@@ -335,21 +335,25 @@ public class UploadHandler extends Handler {
             int messageIndex = readyUploadsCursor.getColumnIndex(UploadTable.MESSAGE);
             while (readyUploadsCursor.moveToNext()) {
                 int id = readyUploadsCursor.getInt(messageIdIndex);
-                String message = readyUploadsCursor.getString(messageIndex);
-                if (!history) {
-                    // if message is the MessageType.SESSION_END, then remember so the session history can be triggered
-                    if (!processingSessionEnd && message.contains(containsClause)) {
-                        processingSessionEnd = true;
+                if (history && !mConfigManager.getIncludeSessionHistory()){
+                    deleteUpload(id);
+                } else {
+                    String message = readyUploadsCursor.getString(messageIndex);
+                    if (!history) {
+                        // if message is the MessageType.SESSION_END, then remember so the session history can be triggered
+                        if (!processingSessionEnd && message.contains(containsClause)) {
+                            processingSessionEnd = true;
+                        }
                     }
+                    uploadMessage(id, message);
                 }
-                uploadMessage(id, message);
             }
         } catch (MParticleApiClientImpl.MPThrottleException e) {
         } catch (SSLHandshakeException ssle){
             ConfigManager.log(MParticle.LogLevel.DEBUG, "SSL handshake failed while preparing uploads - possible MITM attack detected.");
         } catch (Exception e){
             ConfigManager.log(MParticle.LogLevel.ERROR, "Error processing batch uploads in mParticle DB");
-        }finally {
+        } finally {
             if (readyUploadsCursor != null && !readyUploadsCursor.isClosed()){
                 readyUploadsCursor.close();
             }

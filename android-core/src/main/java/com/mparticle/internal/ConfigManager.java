@@ -32,6 +32,7 @@ public class ConfigManager {
     public static final String VALUE_APP_DEFINED = "appdefined";
     public static final String VALUE_CUE_CATCH = "forcecatch";
     private static final String PREFERENCES_FILE = "mp_preferences";
+    private static final String KEY_INCLUDE_SESSION_HISTORY = "inhd";
     static final String KEY_RAMP = "rp";
 
     private static final int DEVMODE_UPLOAD_INTERVAL_MILLISECONDS = 10 * 1000;
@@ -54,6 +55,7 @@ public class ConfigManager {
     private long mInfluenceOpenTimeout = 3600 * 1000;
     private JSONArray mTriggerMessageMatches, mTriggerMessageHashes = null;
     private ExceptionHandler mExHandler;
+    private boolean mIncludeSessionHistory = true;
 
     private ConfigManager(){
 
@@ -146,6 +148,7 @@ public class ConfigManager {
         }
 
         mRestrictAAIDfromLAT = responseJSON.optBoolean(KEY_AAID_LAT, true);
+        mIncludeSessionHistory = responseJSON.optBoolean(KEY_INCLUDE_SESSION_HISTORY, true);
 
         editor.apply();
         applyConfig();
@@ -155,6 +158,10 @@ public class ConfigManager {
 
     public String getActiveModuleIds(){
         return MParticle.getInstance().getKitManager().getActiveModuleIds();
+    }
+
+    public boolean getIncludeSessionHistory() {
+        return mIncludeSessionHistory;
     }
 
     /**

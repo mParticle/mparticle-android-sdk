@@ -430,13 +430,33 @@ public class ConfigManagerTest {
     @Test
     public void testGetAllIntegrationAttributes() throws Exception {
         assertFalse(manager.mPreferences.contains(ATTRIBUTES));
-        assertNull( manager.getIntegrationAttributes());
+        assertNull(manager.getIntegrationAttributes());
         manager.mPreferences.edit().putString(ATTRIBUTES, "{\"1\":{\"test-key\":\"value 2\"},\"12\":{\"test-key\":\"value 3\"}}").apply();
         JSONObject attributes = manager.getIntegrationAttributes();
         assertEquals(2, attributes.length());
         assertEquals("value 2", attributes.getJSONObject("1").get("test-key"));
         assertEquals("value 3", attributes.getJSONObject("12").get("test-key"));
         manager.mPreferences.edit().remove(ATTRIBUTES).apply();
-        assertNull( manager.getIntegrationAttributes());
+        assertNull(manager.getIntegrationAttributes());
+    }
+
+    @Test
+    public void testDefaultIncludeSessionHistory() throws Exception {
+        assertTrue(manager.getIncludeSessionHistory());
+    }
+
+    @Test
+    public void testIncludeSessionHistoryUpdateFromServer() throws Exception {
+        assertTrue(manager.getIncludeSessionHistory());
+        JSONObject config = new JSONObject();
+        config.put("inhd", false);
+        manager.updateConfig(config);
+        assertFalse(manager.getIncludeSessionHistory());
+        config.put("inhd", true);
+        manager.updateConfig(config);
+        assertTrue(manager.getIncludeSessionHistory());
+        config.put("inhd", "false");
+        manager.updateConfig(config);
+        assertFalse(manager.getIncludeSessionHistory());
     }
 }
