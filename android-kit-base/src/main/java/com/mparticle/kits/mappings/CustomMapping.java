@@ -13,6 +13,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -31,62 +32,42 @@ public class CustomMapping {
     final int mID;
     final int mMappingId;
     final int mModuleMappingId;
-    final int mMessageType;
-    final String mMatchType;
-    final String mEventName;
-    final String mAttributeKey;
-    final String mAttributeValue;
     final int mMaxCustomParams;
     final boolean mAppendUnmappedAsIs;
     final boolean mIsDefault;
     final String mProjectedEventName;
-    //final List<AttributeProjection> mAttributeProjectionList;
     final List<AttributeMap> mStaticAttributeMapList;
     final List<AttributeMap> mRequiredAttributeMapList;
-    final int mEventHash;
     private final boolean isSelectorLast;
-    AttributeMap nameFieldProjection = null;
-    String commerceMatchProperty = null;
-    String commerceMatchPropertyName = null;
-    String commerceMatchPropertyValue = null;
     final int mOutboundMessageType;
+    private List<CustomMappingMatch> matchList = null;
     public final static String PROPERTY_LOCATION_EVENT_FIELD = "EventField";
     public final static String PROPERTY_LOCATION_EVENT_ATTRIBUTE = "EventAttribute";
     public final static String PROPERTY_LOCATION_PRODUCT_FIELD = "ProductField";
     public final static String PROPERTY_LOCATION_PRODUCT_ATTRIBUTE = "ProductAttribute";
     public final static String PROPERTY_LOCATION_PROMOTION_FIELD = "PromotionField";
 
+    public List<CustomMappingMatch> getMatchList() {
+        return matchList;
+    }
+
     public CustomMapping(JSONObject projectionJson) throws JSONException {
         mID = projectionJson.getInt("id");
         mMappingId = projectionJson.optInt("pmid");
         mModuleMappingId = projectionJson.optInt("pmmid");
-        if (projectionJson.has("match")) {
-            JSONObject match = projectionJson.getJSONObject("match");
-            mMessageType = match.optInt("message_type");
-            mMatchType = match.optString("event_match_type", "String");
-            commerceMatchProperty = match.optString("property", PROPERTY_LOCATION_EVENT_ATTRIBUTE);
-            commerceMatchPropertyName = match.optString("property_name", null);
-            commerceMatchPropertyValue = match.optString("property_value", null);
 
-            if (mMatchType.startsWith(MATCH_TYPE_HASH)) {
-                mEventHash = Integer.parseInt(match.optString("event"));
-                mAttributeKey = null;
-                mAttributeValue = null;
-                mEventName = null;
-            } else {
-                mEventHash = 0;
-                mEventName = match.optString("event");
-                mAttributeKey = match.optString("attribute_key");
-                mAttributeValue = match.optString("attribute_value");
+        if (projectionJson.has("matches")) {
+            JSONArray matchJson = projectionJson.getJSONArray("matches");
+            matchList = new ArrayList<CustomMappingMatch>(matchJson.length());
+            for (int i = 0; i < matchJson.length(); i++) {
+                CustomMappingMatch match = new CustomMappingMatch(matchJson.getJSONObject(i));
+                matchList.add(match);
             }
-
         } else {
-            mEventHash = 0;
-            mMessageType = -1;
-            mMatchType = "String";
-            mEventName = null;
-            mAttributeKey = null;
-            mAttributeValue = null;
+            matchList = new ArrayList<CustomMappingMatch>(1);
+            CustomMappingMatch match = new CustomMappingMatch(null);
+            matchList.add(match);
+
         }
         if (projectionJson.has("behavior")) {
             JSONObject behaviors = projectionJson.getJSONObject("behavior");
@@ -114,8 +95,6 @@ public class CustomMapping {
                     AttributeMap attProjection = new AttributeMap(attributeMapList.getJSONObject(i));
                     if (attProjection.mMatchType.startsWith(MATCH_TYPE_STATIC)) {
                         mStaticAttributeMapList.add(attProjection);
-                    } else if (attProjection.mMatchType.startsWith(MATCH_TYPE_FIELD)) {
-                        nameFieldProjection = attProjection;
                     } else {
                         mRequiredAttributeMapList.add(attProjection);
                     }
@@ -148,204 +127,6 @@ public class CustomMapping {
         return mIsDefault;
     }
 
-    /**
-     * This is an optimization - check the basic stuff to see if we have a match before actually trying to do the projection
-     */
-    public boolean isMatch(EventWrapper eventWrapper) {
-        if (eventWrapper.getMessageType() != mMessageType) {
-            return false;
-        }
-
-        if (mIsDefault) {
-            return true;
-        }
-        if (eventWrapper instanceof EventWrapper.MPEventWrapper) {
-            if (matchAppEvent((EventWrapper.MPEventWrapper)eventWrapper)) {
-                return true;
-            }
-        }else{
-            CommerceEvent commerceEvent = matchCommerceEvent((EventWrapper.CommerceEventWrapper)eventWrapper);
-            if (commerceEvent != null) {
-                ((EventWrapper.CommerceEventWrapper) eventWrapper).setEvent(commerceEvent);
-                return true;
-            }
-        }
-        return false;
-    }
-    private CommerceEvent matchCommerceEvent(EventWrapper.CommerceEventWrapper eventWrapper) {
-        CommerceEvent commerceEvent = eventWrapper.getEvent();
-        if (commerceEvent == null) {
-            return null;
-        }
-        if (commerceMatchProperty != null && commerceMatchPropertyName != null) {
-            if (commerceMatchProperty.equalsIgnoreCase(PROPERTY_LOCATION_EVENT_FIELD)) {
-                 if (matchCommerceFields(commerceEvent)) {
-                     return commerceEvent;
-                 }else {
-                     return null;
-                 }
-            } else if (commerceMatchProperty.equalsIgnoreCase(PROPERTY_LOCATION_EVENT_ATTRIBUTE)) {
-                 if (matchCommerceAttributes(commerceEvent)) {
-                     return commerceEvent;
-                 }else{
-                     return null;
-                 }
-            } else if (commerceMatchProperty.equalsIgnoreCase(PROPERTY_LOCATION_PRODUCT_FIELD)) {
-                return matchProductFields(commerceEvent);
-            } else if (commerceMatchProperty.equalsIgnoreCase(PROPERTY_LOCATION_PRODUCT_ATTRIBUTE)) {
-                return matchProductAttributes(commerceEvent);
-            } else if (commerceMatchProperty.equalsIgnoreCase(PROPERTY_LOCATION_PROMOTION_FIELD)) {
-                return matchPromotionFields(commerceEvent);
-            }
-        }
-        if (mMatchType.startsWith(MATCH_TYPE_HASH) && eventWrapper.getEventHash() == mEventHash) {
-            return commerceEvent;
-        }
-        return null;
-    }
-    private boolean matchAppEvent(EventWrapper.MPEventWrapper eventWrapper) {
-        MPEvent event = eventWrapper.getEvent();
-        if (event == null) {
-            return false;
-        }
-        if (nameFieldProjection != null && nameFieldProjection.mIsRequired) {
-            if (!nameFieldProjection.matchesDataType(event.getEventName())) {
-                return false;
-            }
-        }
-        if (mMatchType.startsWith(MATCH_TYPE_HASH) && eventWrapper.getEventHash() == mEventHash) {
-            return true;
-        }else if (mMatchType.startsWith(MATCH_TYPE_STRING) &&
-                event.getEventName().equalsIgnoreCase(mEventName) &&
-                event.getInfo() != null &&
-                mAttributeValue.equalsIgnoreCase(event.getInfo().get(mAttributeKey))) {
-            return true;
-        }else {
-            return false;
-        }
-    }
-
-    private boolean matchCommerceFields(CommerceEvent event) {
-        int hash = Integer.parseInt(commerceMatchPropertyName);
-        Map<String, String> fields = new HashMap<String, String>();
-        CommerceEventUtil.extractActionAttributes(event, fields);
-        for (Map.Entry<String, String> entry : fields.entrySet()) {
-            int fieldHash = MPUtility.mpHash(CommerceEventUtil.getEventType(event) + entry.getKey());
-            if (fieldHash == hash) {
-                return entry.getValue().equalsIgnoreCase(commerceMatchPropertyValue);
-            }
-
-        }
-        return false;
-    }
-
-    private CommerceEvent matchPromotionFields(CommerceEvent event) {
-        int hash = Integer.parseInt(commerceMatchPropertyName);
-        List<Promotion> promotionList = event.getPromotions();
-        if (promotionList == null || promotionList.size() == 0) {
-            return null;
-        }
-        List<Promotion> matchedPromotions = new LinkedList<Promotion>();
-        Map<String, String> promotionFields = new HashMap<String, String>();
-        for (Promotion promotion : promotionList) {
-            promotionFields.clear();
-            CommerceEventUtil.extractPromotionAttributes(promotion, promotionFields);
-            if (promotionFields != null) {
-                for (Map.Entry<String, String> entry : promotionFields.entrySet()) {
-                    int attributeHash = MPUtility.mpHash(CommerceEventUtil.getEventType(event) + entry.getKey());
-                    if (attributeHash == hash) {
-                        if (entry.getValue().equalsIgnoreCase(commerceMatchPropertyValue)) {
-                            matchedPromotions.add(promotion);
-                        }
-                    }
-                }
-            }
-        }
-        if (matchedPromotions.size() == 0) {
-            return null;
-        } else if (matchedPromotions.size() != promotionList.size()) {
-            return new CommerceEvent.Builder(event).promotions(matchedPromotions).build();
-        } else {
-            return event;
-        }
-    }
-
-    private CommerceEvent matchProductFields(CommerceEvent event) {
-        int hash = Integer.parseInt(commerceMatchPropertyName);
-        int type = CommerceEventUtil.getEventType(event);
-        List<Product> productList = event.getProducts();
-        if (productList == null || productList.size() == 0) {
-            return null;
-        }
-        List<Product> matchedProducts = new LinkedList<Product>();
-        Map<String, String> productFields = new HashMap<String, String>();
-        for (Product product : productList) {
-            productFields.clear();
-            CommerceEventUtil.extractProductFields(product, productFields);
-            if (productFields != null) {
-                for (Map.Entry<String, String> entry : productFields.entrySet()) {
-                    int attributeHash = MPUtility.mpHash(type + entry.getKey());
-                    if (attributeHash == hash) {
-                        if (entry.getValue().equalsIgnoreCase(commerceMatchPropertyValue)) {
-                            matchedProducts.add(product);
-                        }
-                    }
-                }
-            }
-        }
-        if (matchedProducts.size() == 0) {
-            return null;
-        } else if (matchedProducts.size() != productList.size()) {
-            return new CommerceEvent.Builder(event).products(matchedProducts).build();
-        } else {
-            return event;
-        }
-    }
-
-    private CommerceEvent matchProductAttributes(CommerceEvent event) {
-        int hash = Integer.parseInt(commerceMatchPropertyName);
-        List<Product> productList = event.getProducts();
-        if (productList == null || productList.size() == 0) {
-            return null;
-        }
-        List<Product> matchedProducts = new LinkedList<Product>();
-        for (Product product : productList) {
-            Map<String, String> attributes = product.getCustomAttributes();
-            if (attributes != null) {
-                for (Map.Entry<String, String> entry : attributes.entrySet()) {
-                    int attributeHash = MPUtility.mpHash(CommerceEventUtil.getEventType(event) + entry.getKey());
-                    if (attributeHash == hash) {
-                        if (entry.getValue().equalsIgnoreCase(commerceMatchPropertyValue)) {
-                            matchedProducts.add(product);
-                        }
-                    }
-                }
-            }
-        }
-        if (matchedProducts.size() == 0) {
-            return null;
-        } else if (matchedProducts.size() != productList.size()) {
-            return new CommerceEvent.Builder(event).products(matchedProducts).build();
-        } else {
-            return event;
-        }
-    }
-
-    private boolean matchCommerceAttributes(CommerceEvent event) {
-        Map<String, String> attributes = event.getCustomAttributes();
-        if (attributes == null || attributes.size() < 1) {
-            return false;
-        }
-        int hash = Integer.parseInt(commerceMatchPropertyName);
-        for (Map.Entry<String, String> entry : attributes.entrySet()) {
-            int attributeHash = MPUtility.mpHash(CommerceEventUtil.getEventType(event) + entry.getKey());
-            if (attributeHash == hash) {
-                return entry.getValue().equalsIgnoreCase(commerceMatchPropertyValue);
-            }
-        }
-        return false;
-    }
-
     private ProjectionResult projectMPEvent(MPEvent event) {
         EventWrapper.MPEventWrapper eventWrapper = new EventWrapper.MPEventWrapper(event);
         String eventName = MPUtility.isEmpty(mProjectedEventName) ? event.getEventName() : mProjectedEventName;
@@ -364,9 +145,6 @@ public class CustomMapping {
                 newAttributes.put(attProjection.mProjectedAttributeName, attProjection.mValue);
                 usedAttributes.add(attProjection.mValue);
             }
-        }
-        if (nameFieldProjection != null) {
-            newAttributes.put(nameFieldProjection.mProjectedAttributeName, event.getEventName());
         }
         if (mAppendUnmappedAsIs && mMaxCustomParams > 0 && newAttributes.size() < mMaxCustomParams) {
             Map<String, String> originalAttributes;
@@ -487,6 +265,9 @@ public class CustomMapping {
                     entry = eventWrapper.findAttribute(attProjection.mLocation, attProjection.mValue, product, promotion);
                 } else if (attProjection.mMatchType.startsWith(MATCH_TYPE_HASH)) {
                     entry = eventWrapper.findAttribute(attProjection.mLocation, Integer.parseInt(attProjection.mValue), product, promotion);
+                } else if (attProjection.mMatchType.startsWith(MATCH_TYPE_FIELD) && eventWrapper.getEvent() instanceof MPEvent) {
+                    //match_type field is a special case for mapping the event name to an attribute, only supported by MPEvent
+                    entry = new AbstractMap.SimpleEntry<String, String>(attProjection.mProjectedAttributeName, ((MPEvent)eventWrapper.getEvent()).getEventName());
                 }
                 if (entry == null || !attProjection.matchesDataType(entry.getValue())) {
                     if (attProjection.mIsRequired) {
@@ -555,8 +336,13 @@ public class CustomMapping {
         }
     }
 
+    /**
+     * All CustomMappingMatches for a given CustomMapping must have the same message type,
+     * and a CustomMapping is guaranteed to have at least 1 match.
+     * Due to this - just return the message type of the first CustomMappingMatch.
+     */
     public int getMessageType() {
-        return mMessageType;
+        return matchList.get(0).mMessageType;
     }
 
     static class AttributeMap {
@@ -602,7 +388,7 @@ public class CustomMapping {
                         return false;
                     }
                 case 3:
-                    return Boolean.parseBoolean(value) || "false".equalsIgnoreCase(value);
+                    return "true".equalsIgnoreCase(value) || "false".equalsIgnoreCase(value);
                 case 4:
                     try {
                         Double.parseDouble(value);
@@ -643,6 +429,18 @@ public class CustomMapping {
             }
         }
         return events;
+    }
+
+    boolean isMatch(EventWrapper wrapper) {
+        if (mIsDefault) {
+            return true;
+        }
+        for (CustomMappingMatch match : matchList) {
+            if (!match.isMatch(wrapper)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     public static List<CustomMapping.ProjectionResult> projectEvents(MPEvent event, boolean isScreenEvent, List<CustomMapping> customMappingList, CustomMapping defaultCustomMapping, CustomMapping defaultScreenCustomMapping) {

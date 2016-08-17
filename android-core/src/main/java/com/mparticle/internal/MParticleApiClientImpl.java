@@ -70,7 +70,7 @@ public class MParticleApiClientImpl implements MParticleApiClient {
     private static final String CONFIG_HOST = MPUtility.isEmpty(BuildConfig.MP_CONFIG_URL) ? "config2.mparticle.com" : BuildConfig.MP_CONFIG_URL;
 
     private static final String SERVICE_VERSION_1 = "/v1";
-    private static final String SERVICE_VERSION_3 = "/v3";
+    private static final String SERVICE_VERSION_4 = "/v4";
     static final int HTTP_TOO_MANY_REQUESTS = 429;
 
     /**
@@ -132,7 +132,7 @@ public class MParticleApiClientImpl implements MParticleApiClient {
                 Uri uri = new Uri.Builder()
                         .scheme(SECURE_SERVICE_SCHEME)
                         .authority(CONFIG_HOST)
-                        .path(SERVICE_VERSION_3 + "/" + mApiKey + "/config")
+                        .path(SERVICE_VERSION_4 + "/" + mApiKey + "/config")
                         .appendQueryParameter("av", MPUtility.getAppVersionName(mContext))
                         .appendQueryParameter("sv", Constants.MPARTICLE_VERSION)
                         .build();
