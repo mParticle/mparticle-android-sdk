@@ -79,6 +79,13 @@ public final class KitUtils {
         return builder.toString();
     }
 
+    /**
+     * Check if the given Service class is present in the hosting app's AndroidManifest.
+     *
+     * @param context
+     * @param service
+     * @return
+     */
     public static boolean isServiceAvailable(Context context, Class<?> service) {
         final PackageManager packageManager = context.getPackageManager();
         final Intent intent = new Intent(context, service);

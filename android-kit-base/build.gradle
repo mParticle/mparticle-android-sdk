@@ -32,10 +32,10 @@ task kitSdkJavadocs(type: Javadoc) {
     classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
     title = 'mParticle Android Kit API Reference'
     failOnError false
-    exclude {
+    include {
         String filePath = it.toString()
-        filePath.contains('/com/mparticle/internal/') ||
-                filePath.contains('/com/mparticle/kits/mappings/')
+        filePath.contains('KitIntegration.java') ||
+                filePath.contains('KitUtils')
     }
     getOptions().setNoTimestamp(true)
 }

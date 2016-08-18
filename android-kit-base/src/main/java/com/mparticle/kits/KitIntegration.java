@@ -259,6 +259,9 @@ public abstract class KitIntegration {
 
     }
 
+    /**
+     * Kits should implement this interface in order to listen for eCommerce events
+     */
     public interface CommerceListener {
 
         /**
