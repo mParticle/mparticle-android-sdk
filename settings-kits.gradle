@@ -12,7 +12,8 @@ include (
         ':kits:tune-kit',
         ':kits:appsflyer-kit',
         ':kits:apptentive-kit',
-        ':kits:button-kit'
+        ':kits:button-kit',
+        ':kits:urbanairship-kit'
 )
 project(':kits').getChildren().each {
     proj -> proj.name = 'android-' + proj.name

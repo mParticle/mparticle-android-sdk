@@ -40,3 +40,6 @@
 [submodule "kits/button-kit"]
 	path = kits/button-kit
 	url = git@github.com:mparticle-integrations/mparticle-android-integration-button.git
+[submodule "kits/urbanairship-kit"]
+	path = kits/urbanairship-kit
+	url = git@github.com:mparticle-integrations/mparticle-android-integration-urbanairship.git

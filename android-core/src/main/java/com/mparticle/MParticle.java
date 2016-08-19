@@ -1711,6 +1711,7 @@ public class MParticle {
      * @see #getSurveyUrl(int)
      */
     public interface ServiceProviders {
+        int URBAN_AIRSHIP = 25;
         int APPBOY = 28;
         int TUNE = 32;
         int KOCHAVA = 37;
