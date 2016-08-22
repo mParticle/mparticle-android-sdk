@@ -183,7 +183,7 @@ public class ConfigManager {
      */
     public void delayedStart(){
         sLocalPrefs.delayedInit();
-        if (isPushEnabled()) {
+        if (isPushEnabled() && PushRegistrationHelper.getLatestPushRegistration(mContext) == null) {
             MParticle.getInstance().Messaging().enablePushNotifications(getPushSenderId());
         }
     }

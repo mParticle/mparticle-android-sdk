@@ -28,6 +28,7 @@ import com.mparticle.internal.MPLocationListener;
 import com.mparticle.internal.MPUtility;
 import com.mparticle.internal.MParticleJSInterface;
 import com.mparticle.internal.MessageManager;
+import com.mparticle.internal.PushRegistrationHelper;
 import com.mparticle.media.MPMediaAPI;
 import com.mparticle.media.MediaCallbacks;
 import com.mparticle.messaging.CloudAction;
@@ -1472,6 +1473,10 @@ public class MParticle {
 
     public void logPushRegistration(String instanceId, String senderId) {
         mAppStateManager.ensureActiveSession();
+        PushRegistrationHelper.PushRegistration registration = new PushRegistrationHelper.PushRegistration();
+        registration.instanceId = instanceId;
+        registration.senderId = senderId;
+        PushRegistrationHelper.setInstanceId(mAppContext, registration);
         mMessageManager.setPushRegistrationId(instanceId, true);
         mKitManager.onPushRegistration(instanceId, senderId);
     }

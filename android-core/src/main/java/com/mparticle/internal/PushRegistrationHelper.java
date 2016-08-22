@@ -63,10 +63,6 @@ public class PushRegistrationHelper {
                     try {
                         String instanceId =  InstanceID.getInstance(context).getToken(senderId, "GCM");
                         MParticle.getInstance().logPushRegistration(instanceId, senderId);
-                        PushRegistration registration = new PushRegistration();
-                        registration.instanceId = instanceId;
-                        registration.senderId = senderId;
-                        setInstanceId(context, registration);
                     } catch (Exception ex) {
                         ConfigManager.log(MParticle.LogLevel.ERROR, "Error registering for GCM Instance ID: ", ex.getMessage());
                     }
