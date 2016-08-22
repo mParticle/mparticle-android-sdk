@@ -19,11 +19,11 @@ class KitPlugin implements Plugin<Project> {
         target.dependencies.add('compile', 'com.mparticle:android-kit-base:'+target.version)
         target.extensions.create("mparticle", MParticlePluginExtension)
         LibraryExtension androidLib = target.android
-        androidLib.compileSdkVersion(23)
-        androidLib.buildToolsVersion('23.0.2')
+        androidLib.compileSdkVersion(24)
+        androidLib.buildToolsVersion('24.0.1')
         androidLib.defaultConfig.versionCode = Integer.parseInt(new Date().format('yyyyMMdd'))
         androidLib.defaultConfig.minSdkVersion 9
-        androidLib.defaultConfig.targetSdkVersion 23
+        androidLib.defaultConfig.targetSdkVersion 24
         androidLib.buildTypes.release.minifyEnabled false
         androidLib.buildTypes.release.consumerProguardFiles 'consumer-proguard.pro'
 
