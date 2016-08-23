@@ -109,6 +109,7 @@ public class MParticle {
     protected ProductBagApi mProductBags;
     protected volatile DeepLinkListener mDeepLinkListener;
     private static volatile boolean androidIdDisabled;
+    private static volatile boolean devicePerformanceMetricsDisabled;
 
     MParticle() { }
 
@@ -339,6 +340,21 @@ public class MParticle {
     public static void setAndroidIdDisabled(boolean disable) {
         androidIdDisabled = disable;
     }
+
+
+    /**
+     * Disable CPU and memory usage collection.
+     *
+     * @param disable
+     */
+    public static void setDevicePerformanceMetricsDisabled(boolean disable) {
+        devicePerformanceMetricsDisabled = disable;
+    }
+
+    public static boolean isDevicePerformanceMetricsDisabled() {
+        return devicePerformanceMetricsDisabled;
+    }
+
 
     /**
      * Track that an Activity has started. Should only be called within the onStart method of your Activities,

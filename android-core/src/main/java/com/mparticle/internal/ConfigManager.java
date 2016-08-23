@@ -33,6 +33,7 @@ public class ConfigManager {
     public static final String VALUE_CUE_CATCH = "forcecatch";
     private static final String PREFERENCES_FILE = "mp_preferences";
     private static final String KEY_INCLUDE_SESSION_HISTORY = "inhd";
+    private static final String KEY_DEVICE_PERFORMANCE_METRICS_DISABLED = "dpmd";
     static final String KEY_RAMP = "rp";
 
     private static final int DEVMODE_UPLOAD_INTERVAL_MILLISECONDS = 10 * 1000;
@@ -149,6 +150,11 @@ public class ConfigManager {
 
         mRestrictAAIDfromLAT = responseJSON.optBoolean(KEY_AAID_LAT, true);
         mIncludeSessionHistory = responseJSON.optBoolean(KEY_INCLUDE_SESSION_HISTORY, true);
+        if (responseJSON.has(KEY_DEVICE_PERFORMANCE_METRICS_DISABLED)) {
+            MParticle.setDevicePerformanceMetricsDisabled(
+                    responseJSON.optBoolean(KEY_DEVICE_PERFORMANCE_METRICS_DISABLED, false)
+            );
+        }
 
         editor.apply();
         applyConfig();

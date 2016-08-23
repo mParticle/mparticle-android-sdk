@@ -156,18 +156,19 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
 
     public static JSONObject getStateInfo() throws JSONException {
         JSONObject infoJson = new JSONObject();
-        infoJson.put(MessageKey.STATE_INFO_CPU, MPUtility.getCpuUsage());
+        if (!MParticle.isDevicePerformanceMetricsDisabled()) {
+            infoJson.put(MessageKey.STATE_INFO_CPU, MPUtility.getCpuUsage());
+            infoJson.put(MessageKey.STATE_INFO_AVAILABLE_DISK, MPUtility.getAvailableInternalDisk());
+            infoJson.put(MessageKey.STATE_INFO_AVAILABLE_EXT_DISK, MPUtility.getAvailableExternalDisk());
+            final Runtime rt = Runtime.getRuntime();
+            infoJson.put(MessageKey.STATE_INFO_APP_MEMORY_USAGE, rt.totalMemory());
+            infoJson.put(MessageKey.STATE_INFO_APP_MEMORY_AVAIL, rt.freeMemory());
+            infoJson.put(MessageKey.STATE_INFO_APP_MEMORY_MAX, rt.maxMemory());
+        }
         infoJson.put(MessageKey.STATE_INFO_AVAILABLE_MEMORY, MPUtility.getAvailableMemory(mContext));
         infoJson.put(MessageKey.STATE_INFO_TOTAL_MEMORY, getTotalMemory());
         infoJson.put(MessageKey.STATE_INFO_BATTERY_LVL, sBatteryLevel);
         infoJson.put(MessageKey.STATE_INFO_TIME_SINCE_START, MPUtility.millitime() - sStartTime);
-        infoJson.put(MessageKey.STATE_INFO_AVAILABLE_DISK, MPUtility.getAvailableInternalDisk());
-        infoJson.put(MessageKey.STATE_INFO_AVAILABLE_EXT_DISK, MPUtility.getAvailableExternalDisk());
-
-        final Runtime rt = Runtime.getRuntime();
-        infoJson.put(MessageKey.STATE_INFO_APP_MEMORY_USAGE, rt.totalMemory());
-        infoJson.put(MessageKey.STATE_INFO_APP_MEMORY_AVAIL, rt.freeMemory());
-        infoJson.put(MessageKey.STATE_INFO_APP_MEMORY_MAX, rt.maxMemory());
 
         String gps = MPUtility.getGpsEnabled(mContext);
         if (gps != null){
