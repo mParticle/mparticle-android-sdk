@@ -1,5 +1,5 @@
 apply plugin: 'maven'
-apply plugin: 'signing'
+
 
 configurations {
     deployerJars
@@ -15,14 +15,19 @@ allprojects {
     ext."signing.password" = System.getenv("mavenSigningKeyPassword")
 }
 
-signing {
-    required { gradle.taskGraph.hasTask("uploadArchives") }
-    sign configurations.archives
-}
+
 
 def target_maven_repo
 if (project.hasProperty('target_maven_repo')) {
     target_maven_repo = project.property('target_maven_repo')
+}
+
+if (target_maven_repo == 'sonatype') {
+    apply plugin: 'signing'
+    signing {
+        required { gradle.taskGraph.hasTask("uploadArchives") }
+        sign configurations.archives
+    }
 }
 
 uploadArchives{
