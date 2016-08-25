@@ -9,6 +9,8 @@ import com.mparticle.internal.MPUtility;
 
 import java.math.BigInteger;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 
 /**
  * Mixin/Utility class for use in Kit implementations.
@@ -96,5 +98,38 @@ public final class KitUtils {
             return true;
         }
         return false;
+    }
+
+    /**
+     * Parse a boolean setting value from mParticle's server configuration. mParticle
+     * will return "True" and "False" (rather than "true") which trips up Boolean.valueOf
+     * so this provides a consistent way for kits to handle such settings.
+     *
+     * @param settings the Map of settings given to a kit.
+     * @param key the key of the setting to parse
+     * @param defaultValue the default value if the setting is not found
+     * @return the parsed boolean value of the setting.
+     */
+    public static boolean parseBooleanSetting(Map<String, String> settings, String key, boolean defaultValue) {
+        if (settings != null && settings.containsKey(key)) {
+            String value = settings.get(key);
+            if (value != null && value.length() > 0) {
+                return Boolean.valueOf(value.toLowerCase(Locale.US));
+            }
+        }
+        return defaultValue;
+    }
+
+    /**
+     * Parse a boolean setting value from mParticle's server configuration. mParticle
+     * will return "True" and "False" (rather than "true") which trips up Boolean.valueOf
+     * so this provides a consistent way for kits to handle such settings.
+     *
+     * @param settings the Map of settings given to a kit.
+     * @param key the key of the setting to parse
+     * @return the parsed boolean value of the setting, or false if the setting is not found.
+     */
+    public static boolean parseBooleanSetting(Map<String, String> settings, String key) {
+       return parseBooleanSetting(settings, key, false);
     }
 }
