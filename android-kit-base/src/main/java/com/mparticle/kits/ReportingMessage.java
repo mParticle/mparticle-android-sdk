@@ -143,11 +143,15 @@ public class ReportingMessage implements JsonReportingMessage {
                     jsonObject.put("n", screenName);
                 }
             } else if (messageType.equals(MessageType.PUSH_REGISTRATION)) {
-                jsonObject.put("pr", true);
+                jsonObject.put("r", true);
             } else if (messageType.equals(MessageType.OPT_OUT)) {
                 jsonObject.put("s", optOut);
             } else if (messageType.equals(MessageType.ERROR)) {
                 jsonObject.put("c", exceptionClassName);
+            } else if (messageType.equals(MessageType.COMMERCE_EVENT)) {
+                if (!MPUtility.isEmpty(eventType)) {
+                    jsonObject.put("et", eventType);
+                }
             }
         }catch (JSONException jse){
 
