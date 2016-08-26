@@ -74,6 +74,7 @@ public class MPMessagingAPI {
      * @param senderId the SENDER_ID for the application
      */
     public void enablePushNotifications(String senderId) {
+        MParticle.getInstance().getConfigManager().setPushSenderId(senderId);
         if (!MPUtility.isInstanceIdAvailable()) {
             ConfigManager.log(MParticle.LogLevel.ERROR, "Push is enabled but Google Cloud Messaging library not found - you must add com.google.android.gms:play-services-gcm:7.5 or later to your application.");
         }else if (!MPUtility.isServiceAvailable(mContext, MPService.class)){
