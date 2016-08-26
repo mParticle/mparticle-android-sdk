@@ -9,7 +9,6 @@ import com.mparticle.commerce.Impression;
 import com.mparticle.commerce.Product;
 import com.mparticle.commerce.Promotion;
 import com.mparticle.commerce.TransactionAttributes;
-import com.mparticle.internal.CommerceEventUtil;
 import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.MPUtility;
 import com.mparticle.kits.mappings.CustomMapping;
@@ -225,10 +224,10 @@ public class KitConfiguration {
                 while (attIterator.hasNext()) {
                     Map.Entry<String, String> entry = attIterator.next();
                     String key = entry.getKey();
-                    int keyHash = MPUtility.mpHash(key);
+                    int keyHash = KitUtils.hashForFiltering(key);
                     if (keyHash == avfHashedAttribute) {
                         String value = entry.getValue();
-                        int valueHash = MPUtility.mpHash(value);
+                        int valueHash = KitUtils.hashForFiltering(value);
                         if (valueHash == avfHashedValue) {
                             isMatch = true;
                         }
@@ -246,7 +245,7 @@ public class KitConfiguration {
             return null;
         }
         if (mTypeFilters != null &&
-                !mTypeFilters.get(MPUtility.mpHash(CommerceEventUtil.getEventType(event) + ""), true)) {
+                !mTypeFilters.get(KitUtils.hashForFiltering(CommerceEventUtils.getEventType(event) + ""), true)) {
             return null;
         }
         CommerceEvent filteredEvent = new CommerceEvent.Builder(event).build();
@@ -274,33 +273,33 @@ public class KitConfiguration {
                             if (product.getCustomAttributes() != null && product.getCustomAttributes().size() > 0) {
                                 HashMap<String, String> filteredCustomAttributes = new HashMap<String, String>(product.getCustomAttributes().size());
                                 for (Map.Entry<String, String> customAttribute : product.getCustomAttributes().entrySet()) {
-                                    if (filters.get(MPUtility.mpHash(customAttribute.getKey()), true)) {
+                                    if (filters.get(KitUtils.hashForFiltering(customAttribute.getKey()), true)) {
                                         filteredCustomAttributes.put(customAttribute.getKey(), customAttribute.getValue());
                                     }
                                 }
                                 productBuilder.customAttributes(filteredCustomAttributes);
                             }
-                            if (!MPUtility.isEmpty(product.getCouponCode()) && filters.get(MPUtility.mpHash(Constants.Commerce.ATT_PRODUCT_COUPON_CODE), true)) {
+                            if (!MPUtility.isEmpty(product.getCouponCode()) && filters.get(KitUtils.hashForFiltering(CommerceEventUtils.Constants.ATT_PRODUCT_COUPON_CODE), true)) {
                                 productBuilder.couponCode(product.getCouponCode());
                             } else {
                                 productBuilder.couponCode(null);
                             }
-                            if (product.getPosition() != null && filters.get(MPUtility.mpHash(Constants.Commerce.ATT_PRODUCT_POSITION), true)) {
+                            if (product.getPosition() != null && filters.get(KitUtils.hashForFiltering(CommerceEventUtils.Constants.ATT_PRODUCT_POSITION), true)) {
                                 productBuilder.position(product.getPosition());
                             } else {
                                 productBuilder.position(null);
                             }
-                            if (!MPUtility.isEmpty(product.getVariant()) && filters.get(MPUtility.mpHash(Constants.Commerce.ATT_PRODUCT_VARIANT), true)) {
+                            if (!MPUtility.isEmpty(product.getVariant()) && filters.get(KitUtils.hashForFiltering(CommerceEventUtils.Constants.ATT_PRODUCT_VARIANT), true)) {
                                 productBuilder.variant(product.getVariant());
                             } else {
                                 productBuilder.variant(null);
                             }
-                            if (!MPUtility.isEmpty(product.getCategory()) && filters.get(MPUtility.mpHash(Constants.Commerce.ATT_PRODUCT_CATEGORY), true)) {
+                            if (!MPUtility.isEmpty(product.getCategory()) && filters.get(KitUtils.hashForFiltering(CommerceEventUtils.Constants.ATT_PRODUCT_CATEGORY), true)) {
                                 productBuilder.category(product.getCategory());
                             } else {
                                 productBuilder.category(null);
                             }
-                            if (!MPUtility.isEmpty(product.getBrand()) && filters.get(MPUtility.mpHash(Constants.Commerce.ATT_PRODUCT_BRAND), true)) {
+                            if (!MPUtility.isEmpty(product.getBrand()) && filters.get(KitUtils.hashForFiltering(CommerceEventUtils.Constants.ATT_PRODUCT_BRAND), true)) {
                                 productBuilder.brand(product.getBrand());
                             } else {
                                 productBuilder.brand(null);
@@ -315,16 +314,16 @@ public class KitConfiguration {
                         List<Promotion> filteredPromotions = new LinkedList<Promotion>();
                         for (Promotion promotion : filteredEvent.getPromotions()) {
                             Promotion filteredPromotion = new Promotion();
-                            if (!MPUtility.isEmpty(promotion.getId()) && filters.get(MPUtility.mpHash(Constants.Commerce.ATT_PROMOTION_ID), true)) {
+                            if (!MPUtility.isEmpty(promotion.getId()) && filters.get(KitUtils.hashForFiltering(CommerceEventUtils.Constants.ATT_PROMOTION_ID), true)) {
                                 filteredPromotion.setId(promotion.getId());
                             }
-                            if (!MPUtility.isEmpty(promotion.getCreative()) && filters.get(MPUtility.mpHash(Constants.Commerce.ATT_PROMOTION_CREATIVE), true)) {
+                            if (!MPUtility.isEmpty(promotion.getCreative()) && filters.get(KitUtils.hashForFiltering(CommerceEventUtils.Constants.ATT_PROMOTION_CREATIVE), true)) {
                                 filteredPromotion.setCreative(promotion.getCreative());
                             }
-                            if (!MPUtility.isEmpty(promotion.getName()) && filters.get(MPUtility.mpHash(Constants.Commerce.ATT_PROMOTION_NAME), true)) {
+                            if (!MPUtility.isEmpty(promotion.getName()) && filters.get(KitUtils.hashForFiltering(CommerceEventUtils.Constants.ATT_PROMOTION_NAME), true)) {
                                 filteredPromotion.setName(promotion.getName());
                             }
-                            if (!MPUtility.isEmpty(promotion.getPosition()) && filters.get(MPUtility.mpHash(Constants.Commerce.ATT_PROMOTION_POSITION), true)) {
+                            if (!MPUtility.isEmpty(promotion.getPosition()) && filters.get(KitUtils.hashForFiltering(CommerceEventUtils.Constants.ATT_PROMOTION_POSITION), true)) {
                                 filteredPromotion.setPosition(promotion.getPosition());
                             }
                             filteredPromotions.add(filteredPromotion);
@@ -357,7 +356,7 @@ public class KitConfiguration {
             while (attIterator.hasNext()) {
                 Map.Entry<String, String> entry = attIterator.next();
                 String key = entry.getKey();
-                int hash = MPUtility.mpHash(eventTypeStr + eventName + key);
+                int hash = KitUtils.hashForFiltering(eventTypeStr + eventName + key);
                 if (filter.get(hash, true)) {
                     newAttributes.put(key, entry.getValue());
                 }
@@ -423,12 +422,12 @@ public class KitConfiguration {
     }
 
     public static final boolean shouldRemoveAttribute(SparseBooleanArray attributeFilters, String key) {
-        int hash = MPUtility.mpHash(key);
+        int hash = KitUtils.hashForFiltering(key);
         return attributeFilters.get(hash, false);
     }
 
     private CommerceEvent filterCommerceEventAttributes(CommerceEvent filteredEvent) {
-        String eventType = Integer.toString(CommerceEventUtil.getEventType(filteredEvent));
+        String eventType = Integer.toString(CommerceEventUtils.getEventType(filteredEvent));
         if (mCommerceAttributeFilters == null || mCommerceAttributeFilters.size() == 0) {
             return filteredEvent;
         }
@@ -437,7 +436,7 @@ public class KitConfiguration {
         if (customAttributes != null) {
             Map<String, String> filteredCustomAttributes = new HashMap<String, String>(customAttributes.size());
             for (Map.Entry<String, String> entry : customAttributes.entrySet()) {
-                if (mCommerceAttributeFilters.get(MPUtility.mpHash(eventType + entry.getKey()), true)) {
+                if (mCommerceAttributeFilters.get(KitUtils.hashForFiltering(eventType + entry.getKey()), true)) {
                     filteredCustomAttributes.put(entry.getKey(), entry.getValue());
                 }
             }
@@ -445,37 +444,37 @@ public class KitConfiguration {
         }
 
         if (filteredEvent.getCheckoutStep() != null &&
-                !mCommerceAttributeFilters.get(MPUtility.mpHash(eventType + Constants.Commerce.ATT_ACTION_CHECKOUT_STEP), true)) {
+                !mCommerceAttributeFilters.get(KitUtils.hashForFiltering(eventType + CommerceEventUtils.Constants.ATT_ACTION_CHECKOUT_STEP), true)) {
             builder.checkoutStep(null);
         }
         if (filteredEvent.getCheckoutOptions() != null &&
-                !mCommerceAttributeFilters.get(MPUtility.mpHash(eventType + Constants.Commerce.ATT_ACTION_CHECKOUT_OPTIONS), true)) {
+                !mCommerceAttributeFilters.get(KitUtils.hashForFiltering(eventType + CommerceEventUtils.Constants.ATT_ACTION_CHECKOUT_OPTIONS), true)) {
             builder.checkoutOptions(null);
         }
         TransactionAttributes attributes = filteredEvent.getTransactionAttributes();
         if (attributes != null) {
             if (attributes.getCouponCode() != null &&
-                    !mCommerceAttributeFilters.get(MPUtility.mpHash(eventType + Constants.Commerce.ATT_TRANSACTION_COUPON_CODE), true)) {
+                    !mCommerceAttributeFilters.get(KitUtils.hashForFiltering(eventType + CommerceEventUtils.Constants.ATT_TRANSACTION_COUPON_CODE), true)) {
                 attributes.setCouponCode(null);
             }
             if (attributes.getShipping() != null &&
-                    !mCommerceAttributeFilters.get(MPUtility.mpHash(eventType + Constants.Commerce.ATT_SHIPPING), true)) {
+                    !mCommerceAttributeFilters.get(KitUtils.hashForFiltering(eventType + CommerceEventUtils.Constants.ATT_SHIPPING), true)) {
                 attributes.setShipping(null);
             }
             if (attributes.getTax() != null &&
-                    !mCommerceAttributeFilters.get(MPUtility.mpHash(eventType + Constants.Commerce.ATT_TAX), true)) {
+                    !mCommerceAttributeFilters.get(KitUtils.hashForFiltering(eventType + CommerceEventUtils.Constants.ATT_TAX), true)) {
                 attributes.setTax(null);
             }
             if (attributes.getRevenue() != null &&
-                    !mCommerceAttributeFilters.get(MPUtility.mpHash(eventType + Constants.Commerce.ATT_TOTAL), true)) {
+                    !mCommerceAttributeFilters.get(KitUtils.hashForFiltering(eventType + CommerceEventUtils.Constants.ATT_TOTAL), true)) {
                 attributes.setRevenue(0.0);
             }
             if (attributes.getId() != null &&
-                    !mCommerceAttributeFilters.get(MPUtility.mpHash(eventType + Constants.Commerce.ATT_TRANSACTION_ID), true)) {
+                    !mCommerceAttributeFilters.get(KitUtils.hashForFiltering(eventType + CommerceEventUtils.Constants.ATT_TRANSACTION_ID), true)) {
                 attributes.setId(null);
             }
             if (attributes.getAffiliation() != null &&
-                    !mCommerceAttributeFilters.get(MPUtility.mpHash(eventType + Constants.Commerce.ATT_AFFILIATION), true)) {
+                    !mCommerceAttributeFilters.get(KitUtils.hashForFiltering(eventType + CommerceEventUtils.Constants.ATT_AFFILIATION), true)) {
                 attributes.setAffiliation(null);
             }
             builder.transactionAttributes(attributes);
@@ -485,7 +484,7 @@ public class KitConfiguration {
     }
 
     public boolean shouldLogScreen(String screenName) {
-        int nameHash = MPUtility.mpHash("0" + screenName);
+        int nameHash = KitUtils.hashForFiltering("0" + screenName);
         if (mScreenNameFilters.size() > 0 && !mScreenNameFilters.get(nameHash, true)) {
             return false;
         }
@@ -497,7 +496,7 @@ public class KitConfiguration {
         if (!shouldIncludeFromAttributeValueFiltering(event.getInfo())) {
             return false;
         }
-        int typeHash = MPUtility.mpHash(event.getEventType().ordinal() + "");
+        int typeHash = KitUtils.hashForFiltering(event.getEventType().ordinal() + "");
         return mTypeFilters.get(typeHash, true) && mNameFilters.get(event.getEventHash(), true);
     }
 

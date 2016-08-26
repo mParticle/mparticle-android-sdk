@@ -18,7 +18,6 @@ import com.mparticle.ReferrerReceiver;
 import com.mparticle.UserAttributeListener;
 import com.mparticle.commerce.CommerceEvent;
 import com.mparticle.internal.AppStateManager;
-import com.mparticle.internal.CommerceEventUtil;
 import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.KitManager;
 import com.mparticle.internal.MPUtility;
@@ -136,6 +135,7 @@ public class KitManagerImpl implements KitManager, DeepLinkListener, UserAttribu
                             KitConfiguration configuration = createKitConfiguration(current);
                             if (providers.containsKey(currentId)) {
                                 providers.get(currentId).setConfiguration(configuration);
+                                providers.get(currentId).onSettingsUpdated(configuration.getSettings());
                             }else {
                                 KitIntegration provider = mKitIntegrationFactory.createInstance(KitManagerImpl.this, configuration);
                                 providers.put(currentId, provider);
@@ -363,7 +363,7 @@ public class KitManagerImpl implements KitManager, DeepLinkListener, UserAttribu
                                 }
                             }
                         } else {
-                            List<MPEvent> events = CommerceEventUtil.expand(filteredEvent);
+                            List<MPEvent> events = CommerceEventUtils.expand(filteredEvent);
                             boolean forwarded = false;
                             if (events != null) {
                                 for (int i = 0; i < events.size(); i++) {

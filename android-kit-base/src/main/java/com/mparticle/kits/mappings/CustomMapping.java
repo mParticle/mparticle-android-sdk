@@ -5,9 +5,8 @@ import com.mparticle.MParticle;
 import com.mparticle.commerce.CommerceEvent;
 import com.mparticle.commerce.Product;
 import com.mparticle.commerce.Promotion;
-import com.mparticle.internal.CommerceEventUtil;
+import com.mparticle.kits.CommerceEventUtils;
 import com.mparticle.internal.MPUtility;
-import com.mparticle.kits.Constants;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -168,11 +167,11 @@ public class CustomMapping {
     public List<ProjectionResult> project(EventWrapper.CommerceEventWrapper commerceEventWrapper) {
         List<ProjectionResult> projectionResults = new LinkedList<ProjectionResult>();
         CommerceEvent commerceEvent = commerceEventWrapper.getEvent();
-        int eventType = CommerceEventUtil.getEventType(commerceEvent);
+        int eventType = CommerceEventUtils.getEventType(commerceEvent);
         //TODO Impression projections are not supported for now
-        if (eventType == Constants.Commerce.EVENT_TYPE_IMPRESSION) {
+        if (eventType == CommerceEventUtils.Constants.EVENT_TYPE_IMPRESSION) {
             return null;
-        }else if (eventType == Constants.Commerce.EVENT_TYPE_PROMOTION_CLICK || eventType == Constants.Commerce.EVENT_TYPE_PROMOTION_VIEW) {
+        }else if (eventType == CommerceEventUtils.Constants.EVENT_TYPE_PROMOTION_CLICK || eventType == CommerceEventUtils.Constants.EVENT_TYPE_PROMOTION_VIEW) {
             List<Promotion> promotions = commerceEvent.getPromotions();
             if (promotions == null || promotions.size() == 0){
                 ProjectionResult projectionResult = projectCommerceEvent(commerceEventWrapper, null, null);
@@ -407,7 +406,7 @@ public class CustomMapping {
     }
 
     public static List<CustomMapping.ProjectionResult> projectEvents(CommerceEvent event, List<CustomMapping> customMappingList, CustomMapping defaultCommerceCustomMapping) {
-        if (CommerceEventUtil.getEventType(event) == Constants.Commerce.EVENT_TYPE_IMPRESSION) {
+        if (CommerceEventUtils.getEventType(event) == CommerceEventUtils.Constants.EVENT_TYPE_IMPRESSION) {
             return null;
         }
         List<CustomMapping.ProjectionResult> events = new LinkedList<CustomMapping.ProjectionResult>();

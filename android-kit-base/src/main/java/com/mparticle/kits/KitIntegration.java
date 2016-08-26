@@ -198,6 +198,15 @@ public abstract class KitIntegration {
     }
 
     /**
+     * Implement this method to listen for when settings are updated while the kit is already active.
+     *
+     * @param settings
+     */
+    public void onSettingsUpdated(Map<String, String> settings) {
+
+    }
+
+    /**
      * Kits should implement this interface when they require Activity callbacks for any reason.
      * <p/>
      * The mParticle SDK will automatically call every method of this interface in API > 14 devices. Otherwise only

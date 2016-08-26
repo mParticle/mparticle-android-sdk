@@ -7,9 +7,10 @@ import com.mparticle.commerce.Impression;
 import com.mparticle.commerce.Product;
 import com.mparticle.commerce.Promotion;
 import com.mparticle.commerce.TransactionAttributes;
-import com.mparticle.internal.CommerceEventUtil;
+import com.mparticle.kits.CommerceEventUtils;
 import com.mparticle.internal.MPUtility;
 import com.mparticle.kits.KitConfiguration;
+import com.mparticle.kits.KitUtils;
 import com.mparticle.mock.MockKitConfiguration;
 
 import org.json.JSONArray;
@@ -254,11 +255,11 @@ public class CustomMappingTest {
 
         //make sure the attribute hashes work as intended
         Map<Integer, String> hashes = wrapper.getAttributeHashes();
-        String key = hashes.get(MPUtility.mpHash(event.getEventType().ordinal() + event.getEventName() + "key 1"));
+        String key = hashes.get(KitUtils.hashForFiltering(event.getEventType().ordinal() + event.getEventName() + "key 1"));
         assertEquals(info.get(key), "value 1");
 
         //make sure event hash is generated correctly
-        assertEquals(MPUtility.mpHash(event.getEventType().ordinal() + event.getEventName()),wrapper.getEventHash());
+        assertEquals(KitUtils.hashForFiltering(event.getEventType().ordinal() + event.getEventName()),wrapper.getEventHash());
 
         assertEquals(4, wrapper.getMessageType());
         assertEquals(event.getEventType().ordinal(), wrapper.getEventTypeOrdinal());
@@ -277,11 +278,11 @@ public class CustomMappingTest {
         //make sure the attribute hashes work as intended
         Map<Integer, String> hashes = wrapper.getAttributeHashes();
         //event type be 0 for screen views
-        String key = hashes.get(MPUtility.mpHash(0 + event.getEventName() + "key 1"));
+        String key = hashes.get(KitUtils.hashForFiltering(0 + event.getEventName() + "key 1"));
         assertEquals(info.get(key), "value 1");
 
         //make sure event hash is generated correctly
-        assertEquals(MPUtility.mpHash(0 + event.getEventName()),wrapper.getEventHash());
+        assertEquals(KitUtils.hashForFiltering(0 + event.getEventName()),wrapper.getEventHash());
 
         assertEquals(3, wrapper.getMessageType());
         assertEquals(0, wrapper.getEventTypeOrdinal());
@@ -453,67 +454,67 @@ public class CustomMappingTest {
         Product product = new Product.Builder("name", "sku", 0).build();
         JSONObject config = new JSONObject("{\"id\":99, \"pmid\":229, \"matches\":[{\"message_type\":16, \"event_match_type\":\"Hash\", \"event\":\"1569\", }], \"behavior\":{\"max_custom_params\":0, \"selector\":\"last\"}, \"action\":{\"projected_event_name\":\"checkout - place order\", \"attribute_maps\":[{\"projected_attribute_name\":\"Last Place Order Category\", \"match_type\":\"Hash\", \"value\":\"-1167125985\", \"data_type\":\"String\", \"property\":\"ProductField\"} ], \"outbound_message_type\":16 } }");
         CommerceEvent event = new CommerceEvent.Builder(Product.DETAIL, product).transactionAttributes(new TransactionAttributes().setId("id")).build();
-        config.getJSONArray("matches").getJSONObject(0).put("event",""+MPUtility.mpHash(""+CommerceEventUtil.getEventType(event)));
+        config.getJSONArray("matches").getJSONObject(0).put("event",""+KitUtils.hashForFiltering(""+ CommerceEventUtils.getEventType(event)));
         CustomMapping customMapping = new CustomMapping(config);
         assertTrue(customMapping.isMatch(new EventWrapper.CommerceEventWrapper(event)));
 
          event = new CommerceEvent.Builder(Product.ADD_TO_CART, product).transactionAttributes(new TransactionAttributes().setId("id")).build();
-        config.getJSONArray("matches").getJSONObject(0).put("event",""+MPUtility.mpHash(""+CommerceEventUtil.getEventType(event)));
+        config.getJSONArray("matches").getJSONObject(0).put("event",""+KitUtils.hashForFiltering(""+ CommerceEventUtils.getEventType(event)));
          customMapping = new CustomMapping(config);
         assertTrue(customMapping.isMatch(new EventWrapper.CommerceEventWrapper(event)));
 
         event = new CommerceEvent.Builder(Product.PURCHASE, product).transactionAttributes(new TransactionAttributes().setId("id")).build();
-        config.getJSONArray("matches").getJSONObject(0).put("event",""+MPUtility.mpHash(""+CommerceEventUtil.getEventType(event)));
+        config.getJSONArray("matches").getJSONObject(0).put("event",""+KitUtils.hashForFiltering(""+ CommerceEventUtils.getEventType(event)));
         customMapping = new CustomMapping(config);
         assertTrue(customMapping.isMatch(new EventWrapper.CommerceEventWrapper(event)));
 
         event = new CommerceEvent.Builder(Product.ADD_TO_WISHLIST, product).transactionAttributes(new TransactionAttributes().setId("id")).build();
-        config.getJSONArray("matches").getJSONObject(0).put("event",""+MPUtility.mpHash(""+CommerceEventUtil.getEventType(event)));
+        config.getJSONArray("matches").getJSONObject(0).put("event",""+KitUtils.hashForFiltering(""+ CommerceEventUtils.getEventType(event)));
         customMapping = new CustomMapping(config);
         assertTrue(customMapping.isMatch(new EventWrapper.CommerceEventWrapper(event)));
 
         event = new CommerceEvent.Builder(Product.CHECKOUT, product).transactionAttributes(new TransactionAttributes().setId("id")).build();
-        config.getJSONArray("matches").getJSONObject(0).put("event",""+MPUtility.mpHash(""+CommerceEventUtil.getEventType(event)));
+        config.getJSONArray("matches").getJSONObject(0).put("event",""+KitUtils.hashForFiltering(""+ CommerceEventUtils.getEventType(event)));
         customMapping = new CustomMapping(config);
         assertTrue(customMapping.isMatch(new EventWrapper.CommerceEventWrapper(event)));
 
         event = new CommerceEvent.Builder(Product.CHECKOUT_OPTION, product).transactionAttributes(new TransactionAttributes().setId("id")).build();
-        config.getJSONArray("matches").getJSONObject(0).put("event",""+MPUtility.mpHash(""+CommerceEventUtil.getEventType(event)));
+        config.getJSONArray("matches").getJSONObject(0).put("event",""+KitUtils.hashForFiltering(""+ CommerceEventUtils.getEventType(event)));
         customMapping = new CustomMapping(config);
         assertTrue(customMapping.isMatch(new EventWrapper.CommerceEventWrapper(event)));
 
         event = new CommerceEvent.Builder(Product.CLICK, product).transactionAttributes(new TransactionAttributes().setId("id")).build();
-        config.getJSONArray("matches").getJSONObject(0).put("event",""+MPUtility.mpHash(""+CommerceEventUtil.getEventType(event)));
+        config.getJSONArray("matches").getJSONObject(0).put("event",""+KitUtils.hashForFiltering(""+ CommerceEventUtils.getEventType(event)));
         customMapping = new CustomMapping(config);
         assertTrue(customMapping.isMatch(new EventWrapper.CommerceEventWrapper(event)));
 
         event = new CommerceEvent.Builder(Product.REFUND, product).transactionAttributes(new TransactionAttributes().setId("id")).build();
-        config.getJSONArray("matches").getJSONObject(0).put("event",""+MPUtility.mpHash(""+CommerceEventUtil.getEventType(event)));
+        config.getJSONArray("matches").getJSONObject(0).put("event",""+KitUtils.hashForFiltering(""+ CommerceEventUtils.getEventType(event)));
         customMapping = new CustomMapping(config);
         assertTrue(customMapping.isMatch(new EventWrapper.CommerceEventWrapper(event)));
 
         event = new CommerceEvent.Builder(Product.REMOVE_FROM_CART, product).transactionAttributes(new TransactionAttributes().setId("id")).build();
-        config.getJSONArray("matches").getJSONObject(0).put("event",""+MPUtility.mpHash(""+CommerceEventUtil.getEventType(event)));
+        config.getJSONArray("matches").getJSONObject(0).put("event",""+KitUtils.hashForFiltering(""+ CommerceEventUtils.getEventType(event)));
         customMapping = new CustomMapping(config);
         assertTrue(customMapping.isMatch(new EventWrapper.CommerceEventWrapper(event)));
 
         event = new CommerceEvent.Builder(Product.REMOVE_FROM_WISHLIST, product).transactionAttributes(new TransactionAttributes().setId("id")).build();
-        config.getJSONArray("matches").getJSONObject(0).put("event",""+MPUtility.mpHash(""+CommerceEventUtil.getEventType(event)));
+        config.getJSONArray("matches").getJSONObject(0).put("event",""+KitUtils.hashForFiltering(""+ CommerceEventUtils.getEventType(event)));
         customMapping = new CustomMapping(config);
         assertTrue(customMapping.isMatch(new EventWrapper.CommerceEventWrapper(event)));
 
         event = new CommerceEvent.Builder(new Impression("list name", product)).transactionAttributes(new TransactionAttributes().setId("id")).build();
-        config.getJSONArray("matches").getJSONObject(0).put("event",""+MPUtility.mpHash(""+CommerceEventUtil.getEventType(event)));
+        config.getJSONArray("matches").getJSONObject(0).put("event",""+KitUtils.hashForFiltering(""+ CommerceEventUtils.getEventType(event)));
         customMapping = new CustomMapping(config);
         assertTrue(customMapping.isMatch(new EventWrapper.CommerceEventWrapper(event)));
 
         event = new CommerceEvent.Builder(Promotion.VIEW, new Promotion().setId("id")).transactionAttributes(new TransactionAttributes().setId("id")).build();
-        config.getJSONArray("matches").getJSONObject(0).put("event",""+MPUtility.mpHash(""+CommerceEventUtil.getEventType(event)));
+        config.getJSONArray("matches").getJSONObject(0).put("event",""+KitUtils.hashForFiltering(""+ CommerceEventUtils.getEventType(event)));
         customMapping = new CustomMapping(config);
         assertTrue(customMapping.isMatch(new EventWrapper.CommerceEventWrapper(event)));
 
         event = new CommerceEvent.Builder(Promotion.CLICK, new Promotion().setId("id")).transactionAttributes(new TransactionAttributes().setId("id")).build();
-        config.getJSONArray("matches").getJSONObject(0).put("event",""+MPUtility.mpHash(""+CommerceEventUtil.getEventType(event)));
+        config.getJSONArray("matches").getJSONObject(0).put("event",""+KitUtils.hashForFiltering(""+ CommerceEventUtils.getEventType(event)));
         customMapping = new CustomMapping(config);
         assertTrue(customMapping.isMatch(new EventWrapper.CommerceEventWrapper(event)));
     }

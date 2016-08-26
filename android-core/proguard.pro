@@ -84,8 +84,6 @@
 -keep class com.mparticle.MPEvent { *; }
 -keep class com.mparticle.messaging.InstanceIdService { *; }
 -keep class com.mparticle.MPEvent$* { *; }
--keep class com.mparticle.kits.Constants { *; }
--keep class com.mparticle.kits.Constants* { *; }
 -keep, includedescriptorclasses class com.mparticle.MParticle { *; }
 -keep class com.mparticle.MParticle$* { *; }
 -keep class com.mparticle.BuildConfig { *; }
@@ -105,7 +103,6 @@
 -keep class com.mparticle.internal.PushRegistrationHelper { *; }
 -keep class com.mparticle.internal.PushRegistrationHelper* { *; }
 -keep class com.mparticle.ReferrerReceiver { *; }
--keep class com.mparticle.internal.CommerceEventUtil { *; }
 -keep class com.mparticle.kits.ForeseeKit { *; }
 -keep class com.mparticle.UserAttributeListener { *; }
 

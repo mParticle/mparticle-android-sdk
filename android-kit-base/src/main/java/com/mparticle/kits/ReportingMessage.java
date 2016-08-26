@@ -5,7 +5,6 @@ import android.content.Intent;
 
 import com.mparticle.MPEvent;
 import com.mparticle.commerce.CommerceEvent;
-import com.mparticle.internal.CommerceEventUtil;
 import com.mparticle.internal.JsonReportingMessage;
 import com.mparticle.internal.MPUtility;
 import com.mparticle.kits.mappings.CustomMapping;
@@ -96,7 +95,7 @@ public class ReportingMessage implements JsonReportingMessage {
 
     public static ReportingMessage fromEvent(KitIntegration provider, CommerceEvent commerceEvent) {
         ReportingMessage message = new ReportingMessage(provider, MessageType.COMMERCE_EVENT, System.currentTimeMillis(), commerceEvent.getCustomAttributes());
-        message.eventType = CommerceEventUtil.getEventTypeString(commerceEvent);
+        message.eventType = CommerceEventUtils.getEventTypeString(commerceEvent);
         return message;
     }
 
@@ -219,7 +218,7 @@ public class ReportingMessage implements JsonReportingMessage {
                     projectionId,
                     MessageType.EVENT,
                     event.getEventName(),
-                    CommerceEventUtil.getEventTypeString(event));
+                    CommerceEventUtils.getEventTypeString(event));
         }
 
         public static ProjectionReport fromProjectionResult(CustomMapping.ProjectionResult result) {

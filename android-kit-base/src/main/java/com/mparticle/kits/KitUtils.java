@@ -48,6 +48,30 @@ public final class KitUtils {
     }
 
     /**
+     * Simple bit-shifting hash for use with filtering. mParticle's backend uses this same hash
+     * to compute hashes of events and their attributes, and will include those hashes with
+     * configuration settings for kits.
+     *
+     * @param input
+     * @return return int hash
+     */
+    public static int hashForFiltering(String input) {
+        return MPUtility.mpHash(input);
+    }
+
+
+    /**
+     * Determine if the given CharSequence is null or 0-length. This is the same
+     * implementation as android.text.TextUtils, but is provided here due since
+     * TextUtils is not available while unit testing.
+     *
+     * @param str
+     * @return true if the given value is null or 0-length
+     */
+    public static boolean isEmpty(CharSequence str) {
+        return MPUtility.isEmpty(str);
+    }
+    /**
      * Combine the given list into a single string separated by a comma.
      *
      * @param list
