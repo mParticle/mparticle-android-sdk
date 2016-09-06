@@ -233,7 +233,7 @@ import java.util.UUID;
                 break;
             case REMOVE_USER_ATTRIBUTE:
                 try {
-                    removeUserAttribute((String)msg.obj, mMessageManagerCallbacks);
+                    removeUserAttribute((MessageManager.UserAttributeRemoval)msg.obj, mMessageManagerCallbacks);
                 }catch (Exception e) {
                     ConfigManager.log(MParticle.LogLevel.ERROR, e, "Error while removing user attribute: ", e.toString());
                 }
@@ -283,11 +283,21 @@ import java.util.UUID;
         MParticle.getInstance().getKitManager().setUserAttribute(key, newValue);
     }
 
-    private void removeUserAttribute(String attributeKey, MessageManagerCallbacks callbacks) {
-        String[] deleteWhereArgs = {attributeKey};
-        int deleted = db.delete(UserAttributesTable.TABLE_NAME, UserAttributesTable.ATTRIBUTE_KEY + " = ?", deleteWhereArgs);
-        if (callbacks != null && deleted > 0) {
-            callbacks.attributeRemoved(attributeKey);
+    private void removeUserAttribute(MessageManager.UserAttributeRemoval container, MessageManagerCallbacks callbacks) {
+        Map<String, Object> currentValues = MParticle.getInstance().getAllUserAttributes();
+        String[] deleteWhereArgs = {container.key};
+        try {
+            db.beginTransaction();
+            int deleted = db.delete(UserAttributesTable.TABLE_NAME, UserAttributesTable.ATTRIBUTE_KEY + " = ?", deleteWhereArgs);
+            if (callbacks != null && deleted > 0) {
+                callbacks.attributeRemoved(container.key);
+                callbacks.logUserAttributeChangeMessage(container.key, null, currentValues.get(container.key), true, false, container.time);
+            }
+            db.setTransactionSuccessful();
+        }catch (Exception e) {
+
+        } finally {
+            db.endTransaction();
         }
     }
 
@@ -633,10 +643,12 @@ import java.util.UUID;
         return attributes;
     }
 
+
     public void setUserAttribute(MessageManager.UserAttributeResponse userAttributes) {
         if (!prepareDatabase()){
             return;
         }
+        Map<String, Object> currentValues = MParticle.getInstance().getAllUserAttributes();
         db.beginTransaction();
         try {
             long time = System.currentTimeMillis();
@@ -644,7 +656,9 @@ import java.util.UUID;
                 for (Map.Entry<String, List<String>> entry : userAttributes.attributeLists.entrySet()) {
                     String key = entry.getKey();
                     List<String> attributeValues = entry.getValue();
-                    removeUserAttribute(key, null);
+                    String[] deleteWhereArgs = {key};
+                    int deleted = db.delete(UserAttributesTable.TABLE_NAME, UserAttributesTable.ATTRIBUTE_KEY + " = ?", deleteWhereArgs);
+                    boolean isNewAttribute = deleted == 0;
                     ContentValues values = new ContentValues();
                     for (String attributeValue : attributeValues) {
                         values.put(UserAttributesTable.ATTRIBUTE_KEY, key);
@@ -653,19 +667,23 @@ import java.util.UUID;
                         values.put(UserAttributesTable.CREATED_AT, time);
                         db.insert(UserAttributesTable.TABLE_NAME, null, values);
                     }
+                    mMessageManagerCallbacks.logUserAttributeChangeMessage(key, attributeValues, currentValues.get(key), false, isNewAttribute, userAttributes.time);
                 }
             }
             if (userAttributes.attributeSingles != null) {
                 for (Map.Entry<String, String> entry : userAttributes.attributeSingles.entrySet()) {
                     String key = entry.getKey();
                     String attributeValue = entry.getValue();
-                    removeUserAttribute(key, null);
+                    String[] deleteWhereArgs = {key};
+                    int deleted = db.delete(UserAttributesTable.TABLE_NAME, UserAttributesTable.ATTRIBUTE_KEY + " = ?", deleteWhereArgs);
+                    boolean isNewAttribute = deleted == 0;
                     ContentValues values = new ContentValues();
                     values.put(UserAttributesTable.ATTRIBUTE_KEY, key);
                     values.put(UserAttributesTable.ATTRIBUTE_VALUE, attributeValue);
                     values.put(UserAttributesTable.IS_LIST, false);
                     values.put(UserAttributesTable.CREATED_AT, time);
                     db.insert(UserAttributesTable.TABLE_NAME, null, values);
+                    mMessageManagerCallbacks.logUserAttributeChangeMessage(key, attributeValue, currentValues.get(key), false, isNewAttribute, userAttributes.time);
                 }
             }
             db.setTransactionSuccessful();

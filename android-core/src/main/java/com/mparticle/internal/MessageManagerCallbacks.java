@@ -13,4 +13,5 @@ interface MessageManagerCallbacks {
     void checkForTrigger(MPMessage message);
     void logNotification(int contentId, String payload, CloudAction action, String appState, int behavior);
     void attributeRemoved(String key);
+    MPMessage logUserAttributeChangeMessage(String userAttributeKey, Object newValue, Object oldValue, boolean deleted, boolean isNewAttribute, long time);
 }

@@ -22,7 +22,9 @@ import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -413,67 +415,87 @@ public class MessageManagerTest {
     }
 
     @Test
-    public void testLogNotification() throws Exception {
+    public void testLogUserAttributeChange() throws Exception {
+        MPMessage message = manager.logUserAttributeChangeMessage("this is a key", "this is the new value", "this is the old value", false, false, 0);
+        assertEquals("this is a key", message.getString("n"));
+        assertEquals("this is the new value", message.getString("nv"));
+        assertEquals("this is the old value", message.getString("ov"));
+        assertEquals(false, message.getBoolean("d"));
+        assertEquals(false, message.getBoolean("na"));
 
+        List<String> newValue = new ArrayList<>();
+        newValue.add("this is a new value");
+        newValue.add("this is another new value");
+
+        List<String> oldValue = new ArrayList<>();
+        oldValue.add("this is an old value");
+        oldValue.add("this is another old value");
+
+        message = manager.logUserAttributeChangeMessage("this is a key", newValue, oldValue, false, true, 0);
+        assertEquals("this is a key", message.getString("n"));
+        assertEquals(2, message.getJSONArray("nv").length());
+        assertEquals(2, message.getJSONArray("ov").length());
+        assertEquals("this is an old value", message.getJSONArray("ov").get(0));
+        assertEquals("this is a new value", message.getJSONArray("nv").get(0));
+        assertEquals(false, message.getBoolean("d"));
+        assertEquals(true, message.getBoolean("na"));
     }
 
     @Test
-    public void testLogNotification1() throws Exception {
-
+    public void testLogUserAttributeChangeNewAttribute() throws Exception {
+        MPMessage message = manager.logUserAttributeChangeMessage("this is a key", "this is the new value", null, false, false, 0);
+        assertEquals("this is a key", message.getString("n"));
+        assertEquals("this is the new value", message.getString("nv"));
+        assertEquals(JSONObject.NULL, message.get("ov"));
+        assertEquals(false, message.getBoolean("d"));
     }
 
     @Test
-    public void testLogProfileAction() throws Exception {
-
+    public void testLogUserAttributeChangeNewTag() throws Exception {
+        MPMessage message = manager.logUserAttributeChangeMessage("this is a key", null, null, false, false, 0);
+        assertEquals("this is a key", message.getString("n"));
+        assertEquals(JSONObject.NULL, message.get("ov"));
+        assertEquals(JSONObject.NULL, message.get("nv"));
+        assertEquals(false, message.getBoolean("d"));
     }
 
     @Test
-    public void testCreateMessageSessionEnd() throws Exception {
-
+    public void testLogUserAttributeChangeTagToAttribute() throws Exception {
+        MPMessage message = manager.logUserAttributeChangeMessage("this is a key", "this is the new value", null, false, false, 0);
+        assertEquals("this is a key", message.getString("n"));
+        assertEquals(JSONObject.NULL, message.get("ov"));
+        assertEquals("this is the new value", message.get("nv"));
+        assertEquals(false, message.getBoolean("d"));
     }
 
     @Test
-    public void testGetApiKey() throws Exception {
-
+    public void testLogUserAttributeChangeStringToList() throws Exception {
+        List<String> newValue = new ArrayList<>();
+        newValue.add("this is a new value");
+        newValue.add("this is another new value");
+        MPMessage message = manager.logUserAttributeChangeMessage("this is a key", newValue, "this is the old value", false, false, 0);
+        assertEquals("this is a key", message.getString("n"));
+        assertEquals(2, message.getJSONArray("nv").length());
+        assertEquals("this is a new value", message.getJSONArray("nv").get(0));
+        assertEquals("this is the old value", message.get("ov"));
+        assertEquals(false, message.getBoolean("d"));
     }
 
     @Test
-    public void testDelayedStart() throws Exception {
-
+    public void testLogUserAttributeChangeRemoveTag() throws Exception {
+        MPMessage message = manager.logUserAttributeChangeMessage("this is a key", null, null, true, false, 0);
+        assertEquals("this is a key", message.getString("n"));
+        assertEquals(JSONObject.NULL, message.get("ov"));
+        assertEquals(JSONObject.NULL, message.get("nv"));
+        assertEquals(true, message.getBoolean("d"));
     }
 
     @Test
-    public void testEndUploadLoop() throws Exception {
-
-    }
-
-    @Test
-    public void testCheckForTrigger() throws Exception {
-
-    }
-
-    @Test
-    public void testRefreshConfiguration() throws Exception {
-
-    }
-
-    @Test
-    public void testInitConfigDelayed() throws Exception {
-
-    }
-
-    @Test
-    public void testSaveGcmMessage() throws Exception {
-
-    }
-
-    @Test
-    public void testSaveGcmMessage1() throws Exception {
-
-    }
-
-    @Test
-    public void testSetDataConnection() throws Exception {
-
+    public void testLogUserAttributeChangeRemoveAttribute() throws Exception {
+        MPMessage message = manager.logUserAttributeChangeMessage("this is a key", null, "this is the old value", true, false, 0);
+        assertEquals("this is a key", message.getString("n"));
+        assertEquals("this is the old value", message.get("ov"));
+        assertEquals(JSONObject.NULL, message.get("nv"));
+        assertEquals(true, message.getBoolean("d"));
     }
 }

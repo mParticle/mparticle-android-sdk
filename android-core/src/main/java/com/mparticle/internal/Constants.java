@@ -143,6 +143,7 @@ public class Constants {
         String BREADCRUMB = "bc";
         String NETWORK_PERFORMNACE = "npe";
         String PROFILE = "pro";
+        String USER_ATTRIBUTE_CHANGE = "uac";
     }
 
     public interface MessageKey {
@@ -338,6 +339,10 @@ public class Constants {
         String MPID = "mpid";
         String EVENT_FLAGS = "flags";
         String INTEGRATION_ATTRIBUTES = "ia";
+        String NEW_ATTRIBUTE_VALUE = "nv";
+        String OLD_ATTRIBUTE_VALUE = "ov";
+        String ATTRIBUTE_DELETED = "d";
+        String IS_NEW_ATTRIBUTE = "na";
     }
 
     public interface Commerce {

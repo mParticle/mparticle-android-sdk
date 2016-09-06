@@ -33,7 +33,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.File;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
@@ -452,7 +451,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
                 mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
                 return message;
             } catch (JSONException e) {
-                ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to create mParticle error message");
+                ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to create mParticle network performance message");
             }
         }
         return null;
@@ -684,6 +683,47 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
         message.put(MessageKey.STATE_INFO_KEY, MessageManager.getStateInfo());
         return message;
     }
+    
+    public MPMessage logUserAttributeChangeMessage(String userAttributeKey, Object newValue, Object oldValue, boolean deleted, boolean isNewAttribute, long time) {
+        try {
+            MPMessage message = new MPMessage.Builder(MessageType.USER_ATTRIBUTE_CHANGE, mAppStateManager.getSession(), mLocation)
+                    .timestamp(time)
+                    .build();
+            message.put(MessageKey.NAME, userAttributeKey);
+
+            if (newValue == null || deleted) {
+                newValue = JSONObject.NULL;
+            } else if (newValue instanceof List) {
+                JSONArray newValueArray = new JSONArray();
+                for (int i = 0; i < ((List) newValue).size(); i++) {
+                    String value = (String)((List) newValue).get(i);
+                    newValueArray.put(value);
+                }
+                newValue = newValueArray;
+            }
+            message.put(MessageKey.NEW_ATTRIBUTE_VALUE, newValue);
+
+            if (oldValue == null) {
+                oldValue = JSONObject.NULL;
+            } else if (oldValue instanceof List) {
+                JSONArray oldValueArray = new JSONArray();
+                for (int i = 0; i < ((List) oldValue).size(); i++) {
+                    String value = (String)((List) oldValue).get(i);
+                    oldValueArray.put(value);
+                }
+                oldValue = oldValueArray;
+            }
+            message.put(MessageKey.OLD_ATTRIBUTE_VALUE, oldValue);
+
+            message.put(MessageKey.ATTRIBUTE_DELETED, deleted);
+            message.put(MessageKey.IS_NEW_ATTRIBUTE, isNewAttribute);
+            mMessageHandler.handleMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
+            return message;
+        } catch (JSONException e) {
+            ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to create mParticle user-attribute-change message");
+        }
+        return null;
+    }
 
     @Override
     public String getApiKey() {
@@ -844,7 +884,10 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
     }
 
     public void removeUserAttribute(String key) {
-        Message message = mMessageHandler.obtainMessage(MessageHandler.REMOVE_USER_ATTRIBUTE, key);
+        UserAttributeRemoval container = new UserAttributeRemoval();
+        container.key = key;
+        container.time = System.currentTimeMillis();
+        Message message = mMessageHandler.obtainMessage(MessageHandler.REMOVE_USER_ATTRIBUTE, container);
         mMessageHandler.sendMessage(message);
     }
 
@@ -864,6 +907,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
 
     public void setUserAttribute(String key, Object value) {
         UserAttributeResponse container = new UserAttributeResponse();
+        container.time = System.currentTimeMillis();
         if (value instanceof List) {
             container.attributeLists = new HashMap<String, List<String>>();
             container.attributeLists.put(key, (List<String>) value);
@@ -872,12 +916,11 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
             container.attributeSingles.put(key, (String) value);
         }
         Message message = mMessageHandler.obtainMessage(MessageHandler.SET_USER_ATTRIBUTE, container);
+
         mMessageHandler.sendMessage(message);
     }
 
     public void incrementUserAttribute(String key, int value) {
-        UserAttributeResponse container = new UserAttributeResponse();
-
         Message message = mMessageHandler.obtainMessage(MessageHandler.INCREMENT_USER_ATTRIBUTE, key);
         message.arg1 = value;
         mMessageHandler.sendMessage(message);
@@ -886,6 +929,12 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
     static class UserAttributeResponse {
         Map<String, String> attributeSingles;
         Map<String, List<String>> attributeLists;
+        long time;
+    }
+
+    static class UserAttributeRemoval {
+        String key;
+        long time;
     }
 
     private UserAttributeResponse getUserAttributes() {
