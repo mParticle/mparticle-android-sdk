@@ -534,39 +534,46 @@ public class UploadHandler extends Handler {
     }
 
     JSONObject getDeviceInfo(){
+        boolean firstUpload = false;
         if (deviceInfo == null){
+            firstUpload = true;
             deviceInfo = DeviceAttributes.collectDeviceInfo(mContext);
+        }
+        //the following are collected at the time of batch creation as they may change
+        deviceInfo.remove(MessageKey.LIMIT_AD_TRACKING);
+        deviceInfo.remove(MessageKey.GOOGLE_ADV_ID);
+        MPUtility.AndroidAdIdInfo adIdInfo = MPUtility.getGoogleAdIdInfo(mContext);
+        String message = "Failed to collect Google Play Advertising ID, be sure to add Google Play services or com.google.android.gms:play-services-ads to your app's dependencies.";
+        if (adIdInfo != null) {
+            try {
+                deviceInfo.put(MessageKey.LIMIT_AD_TRACKING, adIdInfo.isLimitAdTrackingEnabled);
+                if (adIdInfo.isLimitAdTrackingEnabled && mConfigManager.getRestrictAAIDBasedOnLAT()) {
+                    message = "Google Play Advertising ID available but ad tracking is disabled on this device.";
+                } else {
+                    deviceInfo.put(MessageKey.GOOGLE_ADV_ID, adIdInfo.id);
+                    message = "Successfully collected Google Play Advertising ID.";
+                }
+            }catch (JSONException jse) {
+                ConfigManager.log(MParticle.LogLevel.DEBUG, "Failed while building device-info object: ", jse.toString());
+            }
+        }
+        if (firstUpload) {
+            ConfigManager.log(MParticle.LogLevel.DEBUG, message);
         }
         return deviceInfo;
     }
 
     JSONObject getAppInfo() {
         //keep the appInfo object in memory as its values will not change
-        boolean firstUpload = false;
+
         if (appInfo == null) {
-            firstUpload = true;
             appInfo = DeviceAttributes.collectAppInfo(mContext);
         }
         //the following are collected at the time of batch creation as they may change
         try {
             appInfo.put(MessageKey.ENVIRONMENT, mConfigManager.getEnvironment().getValue());
             appInfo.put(MessageKey.INSTALL_REFERRER, mPreferences.getString(PrefKeys.INSTALL_REFERRER, null));
-            appInfo.remove(MessageKey.LIMIT_AD_TRACKING);
-            appInfo.remove(MessageKey.GOOGLE_ADV_ID);
-            MPUtility.AndroidAdIdInfo adIdInfo = MPUtility.getGoogleAdIdInfo(mContext);
-            String message = "Failed to collect Google Play Advertising ID, be sure to add Google Play services or com.google.android.gms:play-services-ads to your app's dependencies.";
-            if (adIdInfo != null) {
-                appInfo.put(MessageKey.LIMIT_AD_TRACKING, adIdInfo.isLimitAdTrackingEnabled);
-                if (adIdInfo.isLimitAdTrackingEnabled && mConfigManager.getRestrictAAIDBasedOnLAT()) {
-                    message = "Google Play Advertising ID available but ad tracking is disabled on this device.";
-                } else {
-                    appInfo.put(MessageKey.GOOGLE_ADV_ID, adIdInfo.id);
-                    message = "Successfully collected Google Play Advertising ID.";
-                }
-            }
-            if (firstUpload) {
-                ConfigManager.log(MParticle.LogLevel.DEBUG, message);
-            }
+
         } catch (JSONException e) {
             ConfigManager.log(MParticle.LogLevel.DEBUG, "Failed while building app-info object: ", e.toString());
         }
