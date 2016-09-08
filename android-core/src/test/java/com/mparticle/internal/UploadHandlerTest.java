@@ -41,7 +41,7 @@ public class UploadHandlerTest {
         Mockito.when(db.getWritableDatabase()).thenReturn(mockDatabase);
         AppStateManager stateManager = Mockito.mock(AppStateManager.class);
         mConfigManager = Mockito.mock(ConfigManager.class);
-        handler = new UploadHandler(new MockContext(), mConfigManager, db, stateManager);
+        handler = new UploadHandler(new MockContext(), mConfigManager, db, stateManager, Mockito.mock(MessageManager.class));
     }
 
     @Test

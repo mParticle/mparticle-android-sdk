@@ -23,6 +23,7 @@ import android.view.WindowManager;
 import com.mparticle.MParticle;
 import com.mparticle.MParticle.LogLevel;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 

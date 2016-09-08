@@ -37,9 +37,11 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * This class is primarily responsible for generating MPMessage objects, and then adding them to a
@@ -140,7 +142,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
         mAppStateManager.setMessageManager(this);
         MParticleDatabase database = new MParticleDatabase(appContext);
         mMessageHandler = new MessageHandler(sMessageHandlerThread.getLooper(), this, database);
-        mUploadHandler = new UploadHandler(appContext, sUploadHandlerThread.getLooper(), configManager, database, appStateManager);
+        mUploadHandler = new UploadHandler(appContext, sUploadHandlerThread.getLooper(), configManager, database, appStateManager, this);
         mPreferences = appContext.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
         mInstallType = installType;
 
@@ -683,7 +685,35 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
         message.put(MessageKey.STATE_INFO_KEY, MessageManager.getStateInfo());
         return message;
     }
-    
+
+    public MPMessage logUserIdentityChangeMessage(JSONObject newIdentity, JSONObject oldIdentity, JSONArray userIdentities) {
+        try {
+            MPMessage message = new MPMessage.Builder(MessageType.USER_IDENTITY_CHANGE, mAppStateManager.getSession(), mLocation)
+                    .timestamp(System.currentTimeMillis())
+                    .build();
+            if (newIdentity != null) {
+                message.put(MessageKey.NEW_USER_IDENTITY, newIdentity);
+            } else {
+                message.put(MessageKey.NEW_USER_IDENTITY, JSONObject.NULL);
+            }
+            if (oldIdentity != null) {
+                message.put(MessageKey.OLD_USER_IDENTITY, oldIdentity);
+            } else {
+                message.put(MessageKey.OLD_USER_IDENTITY, JSONObject.NULL);
+            }
+            message.put(MessageKey.USER_IDENTITIES, userIdentities);
+            mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
+
+            return message;
+        } catch (JSONException e) {
+            ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to create mParticle user-identity-change message");
+        } finally {
+            saveUserIdentityJson(userIdentities);
+        }
+
+        return null;
+    }
+
     public MPMessage logUserAttributeChangeMessage(String userAttributeKey, Object newValue, Object oldValue, boolean deleted, boolean isNewAttribute, long time) {
         try {
             MPMessage message = new MPMessage.Builder(MessageType.USER_ATTRIBUTE_CHANGE, mAppStateManager.getSession(), mLocation)
@@ -935,6 +965,76 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
     static class UserAttributeRemoval {
         String key;
         long time;
+    }
+
+    public void saveUserIdentityJson(JSONArray userIdentities) {
+        mPreferences.edit().putString(Constants.PrefKeys.USER_IDENTITIES + mConfigManager.getApiKey(), userIdentities.toString()).apply();
+    }
+
+    public JSONArray getUserIdentityJson(){
+        JSONArray userIdentities = null;
+        String userIds = mPreferences.getString(Constants.PrefKeys.USER_IDENTITIES + mConfigManager.getApiKey(), null);
+
+        try {
+            userIdentities = new JSONArray(userIds);
+            boolean changeMade = fixUpUserIdentities(userIdentities);
+            if (changeMade) {
+                saveUserIdentityJson(userIdentities);
+            }
+        } catch (Exception e) {
+            userIdentities = new JSONArray();
+        }
+        return userIdentities;
+    }
+
+    JSONArray markIdentitiesAsSeen(JSONArray uploadedIdentities) {
+        try {
+
+            JSONArray currentIdentities = getUserIdentityJson();
+            if (currentIdentities.length() == 0) {
+                return null;
+            }
+            uploadedIdentities = new JSONArray(uploadedIdentities.toString());
+            Set<Integer> identityTypes = new HashSet<Integer>();
+            for (int i = 0; i < uploadedIdentities.length(); i++) {
+                if (uploadedIdentities.getJSONObject(i).optBoolean(MessageKey.IDENTITY_FIRST_SEEN)) {
+                    identityTypes.add(uploadedIdentities.getJSONObject(i).getInt(MessageKey.IDENTITY_NAME));
+                }
+            }
+            if (identityTypes.size() > 0) {
+                for (int i = 0; i < currentIdentities.length(); i++) {
+                    int identity = currentIdentities.getJSONObject(i).getInt(MessageKey.IDENTITY_NAME);
+                    if (identityTypes.contains(identity)) {
+                        currentIdentities.getJSONObject(i).put(MessageKey.IDENTITY_FIRST_SEEN, false);
+                    }
+                }
+                return currentIdentities;
+            }
+        } catch (JSONException jse) {
+
+        }
+        return null;
+    }
+
+    private static boolean fixUpUserIdentities(JSONArray identities) {
+        boolean changeMade = false;
+        try {
+            for (int i = 0; i < identities.length(); i++) {
+                JSONObject identity = identities.getJSONObject(i);
+                if (!identity.has(MessageKey.IDENTITY_DATE_FIRST_SEEN)) {
+                    identity.put(MessageKey.IDENTITY_DATE_FIRST_SEEN, 0);
+                    changeMade = true;
+                }
+                if (!identity.has(MessageKey.IDENTITY_FIRST_SEEN)) {
+                    identity.put(MessageKey.IDENTITY_FIRST_SEEN, true);
+                    changeMade = true;
+                }
+            }
+
+        } catch (JSONException jse) {
+
+        }
+        return changeMade;
     }
 
     private UserAttributeResponse getUserAttributes() {

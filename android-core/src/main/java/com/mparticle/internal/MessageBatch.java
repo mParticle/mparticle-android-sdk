@@ -3,6 +3,7 @@ package com.mparticle.internal;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import com.mparticle.BuildConfig;
 import com.mparticle.MParticle;
 
 import org.json.JSONArray;
@@ -18,9 +19,12 @@ public class MessageBatch extends JSONObject {
         super();
     }
 
-    public static MessageBatch create(Context context, JSONArray messagesArray, JSONArray reportingMessagesArray, boolean history, JSONObject appInfo, JSONObject deviceInfo, ConfigManager configManager, SharedPreferences preferences, JSONObject cookies, JSONObject userAttributes) throws JSONException {
+    public static MessageBatch create(Context context, JSONArray messagesArray, JSONArray reportingMessagesArray, boolean history, JSONObject appInfo, JSONObject deviceInfo, ConfigManager configManager, SharedPreferences preferences, JSONObject cookies, JSONObject userAttributes, JSONArray userIdentities) throws JSONException {
         MessageBatch uploadMessage = new MessageBatch();
 
+        if (BuildConfig.MP_DEBUG) {
+            uploadMessage.put(Constants.MessageKey.ECHO, true);
+        }
         uploadMessage.put(Constants.MessageKey.TYPE, Constants.MessageType.REQUEST_HEADER);
         uploadMessage.put(Constants.MessageKey.ID, UUID.randomUUID().toString());
         uploadMessage.put(Constants.MessageKey.TIMESTAMP, System.currentTimeMillis());
@@ -66,23 +70,7 @@ public class MessageBatch extends JSONObject {
             uploadMessage.put(Constants.MessageKey.PRODUCT_BAGS, new JSONObject(MParticle.getInstance().ProductBags().toString()));
         }
 
-        String userIds = preferences.getString(Constants.PrefKeys.USER_IDENTITIES + apiKey, null);
-        if (null != userIds) {
-            JSONArray identities = new JSONArray(userIds);
-            boolean changeMade = false;
-            for (int i = 0; i < identities.length(); i++) {
-                if (identities.getJSONObject(i).getBoolean(Constants.MessageKey.IDENTITY_FIRST_SEEN)){
-                    identities.getJSONObject(i).put(Constants.MessageKey.IDENTITY_FIRST_SEEN, false);
-                    changeMade = true;
-                }
-            }
-            if (changeMade) {
-                uploadMessage.put(Constants.MessageKey.USER_IDENTITIES, new JSONArray(userIds));
-                preferences.edit().putString(Constants.PrefKeys.USER_IDENTITIES + apiKey, identities.toString()).apply();
-            }else{
-                uploadMessage.put(Constants.MessageKey.USER_IDENTITIES, identities);
-            }
-        }
+        uploadMessage.put(Constants.MessageKey.USER_IDENTITIES, userIdentities);
 
         uploadMessage.put(history ? Constants.MessageKey.HISTORY : Constants.MessageKey.MESSAGES, messagesArray);
         if (reportingMessagesArray != null && reportingMessagesArray.length() > 0) {

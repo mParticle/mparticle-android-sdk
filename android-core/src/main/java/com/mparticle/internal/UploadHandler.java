@@ -39,6 +39,7 @@ public class UploadHandler extends Handler {
     private final Context mContext;
     private final MParticleDatabase mDbHelper;
     private final AppStateManager mAppStateManager;
+    private final MessageManager mMessageManager;
     private ConfigManager mConfigManager;
     /**
      * Message used to trigger the primary upload logic - will upload all non-history batches that are ready to go.
@@ -96,7 +97,7 @@ public class UploadHandler extends Handler {
      *
      * Only used for unit testing
      */
-    UploadHandler(Context context, ConfigManager configManager, MParticleDatabase database, AppStateManager appStateManager) {
+    UploadHandler(Context context, ConfigManager configManager, MParticleDatabase database, AppStateManager appStateManager, MessageManager messageManager) {
         mConfigManager = configManager;
         mContext = context;
         mApiKey = mConfigManager.getApiKey();
@@ -104,6 +105,7 @@ public class UploadHandler extends Handler {
         audienceDB = new SegmentDatabase(mContext);
         mPreferences = mContext.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
         mDbHelper = database;
+        mMessageManager = messageManager;
         try {
             setApiClient(new MParticleApiClientImpl(configManager, mPreferences, context));
         } catch (MalformedURLException e) {
@@ -112,17 +114,16 @@ public class UploadHandler extends Handler {
     }
 
 
-    public UploadHandler(Context context, Looper looper, ConfigManager configManager, MParticleDatabase database, AppStateManager appStateManager) {
+    public UploadHandler(Context context, Looper looper, ConfigManager configManager, MParticleDatabase database, AppStateManager appStateManager, MessageManager messageManager) {
         super(looper);
         mConfigManager = configManager;
-
-
         mContext = context;
         mApiKey = mConfigManager.getApiKey();
         mAppStateManager = appStateManager;
         audienceDB = new SegmentDatabase(mContext);
         mPreferences = mContext.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
         mDbHelper = database;
+        mMessageManager = messageManager;
         try {
             setApiClient(new MParticleApiClientImpl(configManager, mPreferences, context));
         } catch (MalformedURLException e) {
@@ -391,6 +392,11 @@ public class UploadHandler extends Handler {
      * Method that is responsible for building an upload message to be sent over the wire.
      */
     MessageBatch createUploadMessage(JSONArray messagesArray, JSONArray reportingMessagesArray, boolean history, JSONObject userAttributes) throws JSONException {
+        JSONArray identities = findIdentityState(messagesArray);
+        JSONArray seenIdentities = mMessageManager.markIdentitiesAsSeen(identities);
+        if (seenIdentities != null) {
+            mMessageManager.saveUserIdentityJson(seenIdentities);
+        }
         MessageBatch batchMessage = MessageBatch.create(mContext,
                 messagesArray,
                 reportingMessagesArray,
@@ -399,9 +405,32 @@ public class UploadHandler extends Handler {
                 getDeviceInfo(),
                 mConfigManager,
                 mPreferences,
-                mApiClient.getCookies(), userAttributes);
+                mApiClient.getCookies(), userAttributes, identities);
         addGCMHistory(batchMessage);
         return batchMessage;
+    }
+
+    private JSONArray findIdentityState(JSONArray messages) {
+        JSONArray identities = null;
+        if (messages != null) {
+            for (int i = 0; i < messages.length(); i++) {
+                try {
+                    if (messages.getJSONObject(i).get(Constants.MessageKey.TYPE).equals(MessageType.USER_IDENTITY_CHANGE)) {
+                        identities = messages.getJSONObject(i).getJSONArray(MessageKey.USER_IDENTITIES);
+                        messages.getJSONObject(i).remove(MessageKey.USER_IDENTITIES);
+                    }
+                }catch (JSONException jse) {
+
+                }catch (NullPointerException npe) {
+
+                }
+            }
+        }
+        if (identities == null) {
+            return mMessageManager.getUserIdentityJson();
+        } else {
+            return identities;
+        }
     }
 
     /**

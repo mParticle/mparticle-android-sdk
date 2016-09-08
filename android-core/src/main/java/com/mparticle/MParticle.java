@@ -95,14 +95,11 @@ public class MParticle {
      */
     AppStateManager mAppStateManager;
 
-    private JSONArray mUserIdentities = new JSONArray();
-
     protected MessageManager mMessageManager;
     private static volatile MParticle instance;
     protected SharedPreferences mPreferences;
     protected MPLocationListener mLocationListener;
     private Context mAppContext;
-
     protected MPMessagingAPI mMessaging;
     protected MPMediaAPI mMedia;
     protected CommerceApi mCommerce;
@@ -1048,88 +1045,83 @@ public class MParticle {
      * @param id
      * @param identityType
      */
-    public void setUserIdentity(String id, IdentityType identityType) {
-        if (id != null && id.length() > 0) {
-            ConfigManager.log(LogLevel.DEBUG, "Setting user identity: " + id);
+    public synchronized void setUserIdentity(String id, IdentityType identityType) {
+        if (identityType != null) {
+            if (id == null) {
+                ConfigManager.log(LogLevel.DEBUG, "Removing User Identity type: " + identityType.name());
+            } else {
+                ConfigManager.log(LogLevel.DEBUG, "Setting User Identity: " + id);
+            }
 
-            if (null != id && id.length() > Constants.LIMIT_ATTR_VALUE) {
-                ConfigManager.log(LogLevel.WARNING, "Id value length exceeds limit. Discarding id: " + id);
+            if (!MPUtility.isEmpty(id) && id.length() > Constants.LIMIT_ATTR_VALUE) {
+                ConfigManager.log(LogLevel.WARNING, "User Identity value length exceeds limit. Will not set id: " + id);
                 return;
             }
 
-            mKitManager.setUserIdentity(id, identityType);
-
-            JSONArray userIdentities = getUserIdentityJson();
-
+            JSONArray userIdentities = mMessageManager.getUserIdentityJson();
+            JSONObject oldIdentity = null;
             try {
                 int index = -1;
                 for (int i = 0; i < userIdentities.length(); i++) {
-                    if (userIdentities.getJSONObject(i).get(MessageKey.IDENTITY_NAME).equals(identityType.value)) {
+                    if (identityType.value == userIdentities.getJSONObject(i).optInt(MessageKey.IDENTITY_NAME)) {
+                        oldIdentity = userIdentities.getJSONObject(i);
                         index = i;
                         break;
                     }
                 }
 
-                JSONObject newObject = new JSONObject();
-                newObject.put(MessageKey.IDENTITY_NAME, identityType.value);
-                newObject.put(MessageKey.IDENTITY_VALUE, id);
-
-                if (index >= 0) {
-                    newObject.put(MessageKey.IDENTITY_DATE_FIRST_SEEN, userIdentities.getJSONObject(index).optLong(MessageKey.IDENTITY_DATE_FIRST_SEEN, System.currentTimeMillis()));
-                    newObject.put(MessageKey.IDENTITY_FIRST_SEEN, false);
-                    userIdentities.put(index, newObject);
-                } else {
-                    newObject.put(MessageKey.IDENTITY_DATE_FIRST_SEEN, System.currentTimeMillis());
-                    newObject.put(MessageKey.IDENTITY_FIRST_SEEN, true);
-                    userIdentities.put(newObject);
+                if (id == null && oldIdentity == null) {
+                    ConfigManager.log(LogLevel.DEBUG, "Attempted to remove ID type that didn't exist: " + identityType.name());
                 }
 
+                JSONObject newObject = null;
+                if (id != null) {
+                    newObject = new JSONObject();
+                    newObject.put(MessageKey.IDENTITY_NAME, identityType.value);
+                    newObject.put(MessageKey.IDENTITY_VALUE, id);
+                    if (oldIdentity != null) {
+                        newObject.put(MessageKey.IDENTITY_DATE_FIRST_SEEN, oldIdentity.optLong(MessageKey.IDENTITY_DATE_FIRST_SEEN, System.currentTimeMillis()));
+                        newObject.put(MessageKey.IDENTITY_FIRST_SEEN, false);
+                        userIdentities.put(index, newObject);
+                    } else {
+                        newObject.put(MessageKey.IDENTITY_DATE_FIRST_SEEN, System.currentTimeMillis());
+                        newObject.put(MessageKey.IDENTITY_FIRST_SEEN, true);
+                        userIdentities.put(newObject);
+                    }
+                } else {
+
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                        KitKatHelper.remove(userIdentities, index);
+                    } else {
+                        JSONArray newIdentities = new JSONArray();
+                        for (int i = 0; i < userIdentities.length(); i++) {
+                            if (i != index) {
+                                newIdentities.put(userIdentities.get(i));
+                            }
+                        }
+                        userIdentities = newIdentities;
+                    }
+                }
+                mMessageManager.logUserIdentityChangeMessage(newObject, oldIdentity, userIdentities);
+
+                if (id == null) {
+                    getKitManager().removeUserIdentity(identityType);
+                } else {
+                    getKitManager().setUserIdentity(id, identityType);
+                }
             } catch (JSONException e) {
                 ConfigManager.log(LogLevel.ERROR, "Error setting identity: " + id);
                 return;
             }
 
-            mPreferences.edit().putString(PrefKeys.USER_IDENTITIES + getConfigManager().getApiKey(), userIdentities.toString()).apply();
+
         }
     }
 
-    private JSONArray getUserIdentityJson(){
-        if (mUserIdentities == null){
-            String userIds = mPreferences.getString(PrefKeys.USER_IDENTITIES + getConfigManager().getApiKey(), null);
 
-            Boolean changeMade = false;
-            try {
-                mUserIdentities = new JSONArray(userIds);
-            } catch (JSONException e) {
-                mUserIdentities = new JSONArray();
-            }
-            try {
-
-                for (int i = 0; i < mUserIdentities.length(); i++) {
-                    JSONObject identity = mUserIdentities.getJSONObject(i);
-                    if (!identity.has(MessageKey.IDENTITY_DATE_FIRST_SEEN)) {
-                        identity.put(MessageKey.IDENTITY_DATE_FIRST_SEEN, 0);
-                        changeMade = true;
-                    }
-                    if (!identity.has(MessageKey.IDENTITY_FIRST_SEEN)) {
-                        identity.put(MessageKey.IDENTITY_FIRST_SEEN, true);
-                        changeMade = true;
-                    }
-                }
-                if (changeMade) {
-                    mPreferences.edit().putString(PrefKeys.USER_IDENTITIES + getConfigManager().getApiKey(), mUserIdentities.toString()).apply();
-                }
-            } catch (JSONException jse) {
-                //swallow this
-            }
-        }
-
-        return mUserIdentities;
-
-    }
 
     public Map<IdentityType, String> getUserIdentities(){
-        JSONArray identities = getUserIdentityJson();
+        JSONArray identities = mMessageManager.getUserIdentityJson();
         Map<IdentityType, String> identityTypeStringMap = new HashMap<IdentityType, String>(identities.length());
 
         for (int i = 0; i < identities.length(); i++) {
@@ -1139,13 +1131,12 @@ public class MParticle {
                         IdentityType.parseInt(identity.getInt(MessageKey.IDENTITY_NAME)),
                         identity.getString(MessageKey.IDENTITY_VALUE)
                 );
-            }catch (JSONException jse) {
+            } catch (JSONException jse) {
 
             }
         }
 
         return identityTypeStringMap;
-
     }
 
     /**
@@ -1155,45 +1146,27 @@ public class MParticle {
      *
      * @param id the id to remove
      */
-    public void removeUserIdentity(String id) {
-        JSONArray userIdentities = getUserIdentityJson();
+    public synchronized void removeUserIdentity(String id) {
+        JSONArray userIdentities = mMessageManager.getUserIdentityJson();
         if (id != null && id.length() > 0) {
             try {
-                int indexToRemove = -1;
                 IdentityType identityType = null;
                 for (int i = 0; i < userIdentities.length(); i++) {
-                    if (userIdentities.getJSONObject(i).getString(MessageKey.IDENTITY_VALUE).equals(id)) {
-                        indexToRemove = i;
+                    if (id.equals(userIdentities.getJSONObject(i).getString(MessageKey.IDENTITY_VALUE))) {
                         try {
-                            identityType = IdentityType.valueOf(userIdentities.getJSONObject(i).getString(MessageKey.IDENTITY_NAME));
-                        }catch (Exception e) {
+                            identityType = IdentityType.parseInt(userIdentities.getJSONObject(i).getInt(MessageKey.IDENTITY_NAME));
+                        } catch (Exception e) {
 
                         }
                         break;
                     }
                 }
-                if (indexToRemove >= 0) {
-
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-                        KitKatHelper.remove(userIdentities, indexToRemove);
-                    } else {
-                        JSONArray newIdentities = new JSONArray();
-                        for (int i = 0; i < userIdentities.length(); i++) {
-                            if (i != indexToRemove) {
-                                newIdentities.put(userIdentities.get(i));
-                            }
-                        }
-                    }
-                    mPreferences.edit().putString(PrefKeys.USER_IDENTITIES + getConfigManager().getApiKey(), userIdentities.toString()).apply();
-                    if (identityType != null) {
-                        getKitManager().removeUserIdentity(identityType);
-                    }
-
+                if (identityType != null) {
+                    setUserIdentity(null, identityType);
                 }
             } catch (JSONException jse) {
                 ConfigManager.log(MParticle.LogLevel.WARNING, "Error removing identity: " + id);
             }
-
         }
     }
 

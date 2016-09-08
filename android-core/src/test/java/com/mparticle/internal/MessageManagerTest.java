@@ -49,6 +49,7 @@ public class MessageManagerTest {
     public void setup() throws Exception {
         context = new MockContext();
         configManager = Mockito.mock(ConfigManager.class);
+        Mockito.when(configManager.getApiKey()).thenReturn("123456789");
         appStateManager = new AppStateManager(context, true);
         messageHandler = Mockito.mock(MessageHandler.class);
         uploadHandler = Mockito.mock(UploadHandler.class);
@@ -497,5 +498,101 @@ public class MessageManagerTest {
         assertEquals("this is the old value", message.get("ov"));
         assertEquals(JSONObject.NULL, message.get("nv"));
         assertEquals(true, message.getBoolean("d"));
+    }
+
+    @Test
+    public void testLogUserIdentityChangeMessage() throws Exception {
+        JSONObject oldIdentity = new JSONObject();
+        JSONObject newIdentity = new JSONObject();
+        JSONArray identities = new JSONArray();
+        MPMessage message = manager.logUserIdentityChangeMessage(newIdentity, oldIdentity, identities);
+        assertEquals(message.get("oi"), oldIdentity);
+        assertEquals(message.get("ni"), newIdentity);
+        assertEquals(message.get("ui"), identities);
+    }
+
+    @Test
+    public void testLogUserIdentityChangeMessageNewIdentity() throws Exception {
+        JSONObject newIdentity = new JSONObject();
+        JSONArray identities = new JSONArray();
+        MPMessage message = manager.logUserIdentityChangeMessage(newIdentity, null, identities);
+        assertEquals(message.get("oi"), JSONObject.NULL);
+        assertEquals(message.get("ni"), newIdentity);
+        assertEquals(message.get("ui"), identities);
+    }
+
+    @Test
+    public void testLogUserIdentityChangeMessageRemoveIdentity() throws Exception {
+        JSONObject oldIdentity = new JSONObject();
+        JSONArray identities = new JSONArray();
+        MPMessage message = manager.logUserIdentityChangeMessage(null, oldIdentity, identities);
+        assertEquals(message.get("ni"), JSONObject.NULL);
+        assertEquals(message.get("oi"), oldIdentity);
+        assertEquals(message.get("ui"), identities);
+    }
+
+    @Test
+    public void testSaveUserIdentityJson() throws Exception {
+        manager.saveUserIdentityJson(new JSONArray());
+        assertEquals(0, manager.getUserIdentityJson().length());
+        JSONObject identity = new JSONObject("{ \"n\": 7, \"i\": \"email value 1\", \"dfs\": 1473869816521, \"f\": true }");
+        JSONArray identities = new JSONArray();
+        identities.put(identity);
+        manager.saveUserIdentityJson(identities);
+        assertEquals(1, manager.getUserIdentityJson().length());
+        assertEquals(1473869816521L, manager.getUserIdentityJson().getJSONObject(0).getLong("dfs"));
+    }
+
+    @Test
+    public void testGetUserIdentityJsonFixup() throws Exception {
+        manager.saveUserIdentityJson(new JSONArray());
+        JSONObject identity = new JSONObject("{ \"n\": 7, \"i\": \"email value 1\" }");
+        JSONArray identities = new JSONArray();
+        identities.put(identity);
+        manager.saveUserIdentityJson(identities);
+        assertEquals(1, manager.getUserIdentityJson().length());
+        assertEquals(0, manager.getUserIdentityJson().getJSONObject(0).getLong("dfs"));
+    }
+
+    @Test
+    public void testMarkIdentitiesAsSeen() throws Exception {
+        JSONArray identities = new JSONArray();
+        identities.put(new JSONObject("{ \"n\": 1, \"i\": \" value 1\", \"dfs\": 1473869816521, \"f\": true }"));
+        identities.put(new JSONObject("{ \"n\": 2, \"i\": \" value 2\", \"dfs\": 1473869816521, \"f\": true }"));
+        identities.put(new JSONObject("{ \"n\": 3, \"i\": \" value 3\", \"dfs\": 1473869816521, \"f\": true }"));
+        identities.put(new JSONObject("{ \"n\": 4, \"i\": \" value 4\", \"dfs\": 1473869816521, \"f\": true }"));
+        manager.saveUserIdentityJson(identities);
+        assertNull(manager.markIdentitiesAsSeen(new JSONArray()));
+        JSONArray seenIdentities = manager.markIdentitiesAsSeen(identities);
+        assertNotEquals(seenIdentities, identities);
+        for (int i = 0; i < seenIdentities.length(); i++) {
+            assertFalse(seenIdentities.getJSONObject(i).getBoolean("f"));
+        }
+
+        identities = new JSONArray();
+        identities.put(new JSONObject("{ \"n\": 1, \"i\": \" value 1\", \"dfs\": 1473869816521, \"f\": true }"));
+        identities.put(new JSONObject("{ \"n\": 2, \"i\": \" value 2\", \"dfs\": 1473869816521, \"f\": true }"));
+        identities.put(new JSONObject("{ \"n\": 3, \"i\": \" value 3\", \"dfs\": 1473869816521, \"f\": true }"));
+        identities.put(new JSONObject("{ \"n\": 4, \"i\": \" value 4\", \"dfs\": 1473869816521, \"f\": false }"));
+
+        manager.saveUserIdentityJson(identities);
+        assertNotNull(manager.getUserIdentityJson());
+        assertEquals(4, manager.getUserIdentityJson().length());
+        JSONArray newIdentities = new JSONArray();
+        newIdentities.put(new JSONObject("{ \"n\": 1, \"i\": \" value 1\", \"dfs\": 1473869816521, \"f\": true }"));
+        JSONArray updatedIdentities = manager.markIdentitiesAsSeen(newIdentities);
+        assertEquals(4, updatedIdentities.length());
+        for (int i = 0; i< updatedIdentities.length(); i++) {
+            int identity = updatedIdentities.getJSONObject(i).getInt("n");
+            switch (identity) {
+                case 1:
+                case 4:
+                    assertFalse(updatedIdentities.getJSONObject(i).getBoolean("f"));
+                    break;
+                default:
+                    assertTrue(updatedIdentities.getJSONObject(i).getBoolean("f"));
+            }
+        }
+
     }
 }

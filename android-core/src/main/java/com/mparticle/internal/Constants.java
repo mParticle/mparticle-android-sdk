@@ -144,6 +144,7 @@ public class Constants {
         String NETWORK_PERFORMNACE = "npe";
         String PROFILE = "pro";
         String USER_ATTRIBUTE_CHANGE = "uac";
+        String USER_IDENTITY_CHANGE = "uic";
     }
 
     public interface MessageKey {
@@ -343,6 +344,9 @@ public class Constants {
         String OLD_ATTRIBUTE_VALUE = "ov";
         String ATTRIBUTE_DELETED = "d";
         String IS_NEW_ATTRIBUTE = "na";
+        String NEW_USER_IDENTITY = "ni";
+        String OLD_USER_IDENTITY = "oi";
+        String ECHO = "echo";
     }
 
     public interface Commerce {
