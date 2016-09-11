@@ -201,6 +201,7 @@ public class KitManagerImpl implements KitManager, DeepLinkListener, UserAttribu
                     if (integration != null) {
                         clearIntegrationAttributes(integration);
                         integration.onKitDestroy();
+                        integration.onKitCleanup();
                     }
                     ids.remove();
                     Intent intent = new Intent(MParticle.ServiceProviders.BROADCAST_DISABLED + id);

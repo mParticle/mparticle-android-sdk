@@ -3,6 +3,7 @@ package com.mparticle.kits;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
@@ -21,6 +22,7 @@ import java.util.Map;
  */
 public abstract class KitIntegration {
 
+    private static final String KIT_PREFERENCES_FILE = "mp::kit::";
     private KitManagerImpl kitManager;
     private KitConfiguration mKitConfiguration;
 
@@ -107,11 +109,35 @@ public abstract class KitIntegration {
     protected abstract List<ReportingMessage> onKitCreate(Map<String, String> settings, Context context);
 
     /**
-     * This method will be called when an integration has been disabled. Ideally, any unncessesary memory should
+     * This method will be called when an integration has been disabled. Ideally, any unnecessary memory should
      * be cleaned up when this method is called. After this method is called, mParticle will no longer delegate events
-     * to the kit, and on subsquent application startups, the Kit will not be initialized at all.
+     * to the kit, and on subsequent application startups, the Kit will not be initialized at all.
      */
     protected void onKitDestroy() {
+    }
+
+    /**
+     * Called by the KitManager when this kit is to be removed.
+     */
+    final void onKitCleanup() {
+        try {
+            Map allValues = getKitPreferences().getAll();
+            if (allValues != null && allValues.size() > 0) {
+                getKitPreferences().edit().clear().apply();
+            }
+        }catch (NullPointerException npe) {
+
+        }
+    }
+
+    /**
+     * Get the SharedPreferences file for this Kit. Kits should use this rather than their own file, as the mParticle SDK
+     * will automatically remove this file if the kit is removed from the app.
+     *
+     * @return
+     */
+    protected final SharedPreferences getKitPreferences() {
+        return this.getContext().getSharedPreferences(KIT_PREFERENCES_FILE + getConfiguration().getKitId(), Context.MODE_PRIVATE);
     }
 
     /**
