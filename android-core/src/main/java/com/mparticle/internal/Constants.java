@@ -486,6 +486,8 @@ public class Constants {
         String CART = "mp::cart";
         String PRODUCT_BAGS = "mp::productbags";
         String INTEGRATION_ATTRIBUTES = "mp::integrationattributes";
+        String ETAG = "mp::etag";
+        String IF_MODIFIED = "mp::ifmodified";
     }
 
     public interface MiscStorageKeys {

@@ -95,8 +95,6 @@ public class MParticleApiClientImpl implements MParticleApiClient {
     Integer mDeviceRampNumber = null;
     private static String mSupportedKits;
     private SSLSocketFactory socketFactory;
-    private String etag = null;
-    private String modified = null;
     private JSONObject mCurrentCookies;
     /**
      * Default throttle time - in the worst case scenario if the server is busy, the soonest
@@ -149,9 +147,11 @@ public class MParticleApiClientImpl implements MParticleApiClient {
             }
 
             connection.setRequestProperty("User-Agent", mUserAgent);
+            String etag = mPreferences.getString(Constants.PrefKeys.ETAG, null);
             if (etag != null){
                 connection.setRequestProperty("If-None-Match", etag);
             }
+            String modified = mPreferences.getString(Constants.PrefKeys.IF_MODIFIED, null);
             if (modified != null){
                 connection.setRequestProperty("If-Modified-Since", modified);
             }
@@ -164,8 +164,16 @@ public class MParticleApiClientImpl implements MParticleApiClient {
                 JSONObject response = MPUtility.getJsonResponse(connection);
                 parseMparticleJson(response);
                 mConfigManager.updateConfig(response);
-                etag = connection.getHeaderField("ETag");
-                modified = connection.getHeaderField("Last-Modified");
+                String newEtag = connection.getHeaderField("ETag");
+                String newModified = connection.getHeaderField("Last-Modified");
+                SharedPreferences.Editor editor = mPreferences.edit();
+                if (!MPUtility.isEmpty(newEtag)) {
+                    editor.putString(Constants.PrefKeys.ETAG, newEtag);
+                }
+                if (!MPUtility.isEmpty(newModified)) {
+                    editor.putString(Constants.PrefKeys.IF_MODIFIED, newModified);
+                }
+                editor.apply();
             }else if (connection.getResponseCode() >= 400) {
                 throw new MPConfigException();
             }
