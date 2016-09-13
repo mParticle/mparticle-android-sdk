@@ -1699,6 +1699,7 @@ public class MParticle {
         int WOOTRIC = 90;
         int APPSFLYER = 92;
         int APPTENTIVE = 97;
+        int APPTIMIZE = 105;
         int BUTTON = 1022;
         int LEANPLUM = 98;
         String BROADCAST_ACTIVE = "MPARTICLE_SERVICE_PROVIDER_ACTIVE_";

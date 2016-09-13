@@ -49,3 +49,6 @@
 [submodule "kits/foresee-kit"]
 	path = kits/foresee-kit
 	url = git@github.com:mparticle-integrations/mparticle-android-integration-foresee.git
+[submodule "kits/apptimize-kit"]
+	path = kits/apptimize-kit
+	url = git@github.com:mparticle-integrations/mparticle-android-integration-apptimize.git
