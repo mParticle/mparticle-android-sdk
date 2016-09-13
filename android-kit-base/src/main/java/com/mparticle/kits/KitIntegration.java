@@ -105,8 +105,10 @@ public abstract class KitIntegration {
      *
      * @param settings the settings that have been configured in mParticle UI. Use this to extract your API key, etc
      * @param context  an Application Context object
+     *
+     * @throws IllegalArgumentException if the kit is unable to start based on the provided settings.
      */
-    protected abstract List<ReportingMessage> onKitCreate(Map<String, String> settings, Context context);
+    protected abstract List<ReportingMessage> onKitCreate(Map<String, String> settings, Context context) throws IllegalArgumentException;
 
     /**
      * This method will be called when an integration has been disabled. Ideally, any unnecessary memory should
