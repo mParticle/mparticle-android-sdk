@@ -211,7 +211,7 @@ public abstract class KitIntegration {
         return null;
     }
 
-    Uri getSurveyUrl(Map<String, String> userAttributes, Map<String, List<String>> userAttributeLists) {
+    public Uri getSurveyUrl(Map<String, String> userAttributes, Map<String, List<String>> userAttributeLists) {
         return null;
     }
 

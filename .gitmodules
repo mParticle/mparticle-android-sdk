@@ -46,3 +46,6 @@
 [submodule "kits/leanplum-kit"]
 	path = kits/leanplum-kit
 	url = git@github.com:mparticle-integrations/mparticle-android-integration-leanplum.git
+[submodule "kits/foresee-kit"]
+	path = kits/foresee-kit
+	url = git@github.com:mparticle-integrations/mparticle-android-integration-foresee.git

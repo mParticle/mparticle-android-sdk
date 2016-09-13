@@ -14,7 +14,8 @@ include (
         ':kits:apptentive-kit',
         ':kits:button-kit',
         ':kits:urbanairship-kit',
-        ':kits:leanplum-kit'
+        ':kits:leanplum-kit',
+        ':kits:foresee-kit'
 )
 project(':kits').getChildren().each {
     proj -> proj.name = 'android-' + proj.name
