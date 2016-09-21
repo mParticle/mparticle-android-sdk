@@ -446,22 +446,31 @@ import java.util.UUID;
     };
 
     private void appendBreadcrumbs(JSONObject message) throws JSONException {
-        Cursor breadcrumbCursor = db.query(BreadcrumbTable.TABLE_NAME,
-                breadcrumbColumns,
-                null,
-                null,
-                null,
-                null,
-                BreadcrumbTable.CREATED_AT + " desc limit " + ConfigManager.getBreadcrumbLimit());
+        Cursor breadcrumbCursor = null;
+        try {
+            breadcrumbCursor = db.query(BreadcrumbTable.TABLE_NAME,
+                    breadcrumbColumns,
+                    null,
+                    null,
+                    null,
+                    null,
+                    BreadcrumbTable.CREATED_AT + " desc limit " + ConfigManager.getBreadcrumbLimit());
 
-        if (breadcrumbCursor.getCount() > 0){
-            JSONArray breadcrumbs = new JSONArray();
-            int breadcrumbIndex = breadcrumbCursor.getColumnIndex(BreadcrumbTable.MESSAGE);
-            while (breadcrumbCursor.moveToNext()){
-                JSONObject breadcrumbObject = new JSONObject(breadcrumbCursor.getString(breadcrumbIndex));
-                breadcrumbs.put(breadcrumbObject);
+            if (breadcrumbCursor.getCount() > 0) {
+                JSONArray breadcrumbs = new JSONArray();
+                int breadcrumbIndex = breadcrumbCursor.getColumnIndex(BreadcrumbTable.MESSAGE);
+                while (breadcrumbCursor.moveToNext()) {
+                    JSONObject breadcrumbObject = new JSONObject(breadcrumbCursor.getString(breadcrumbIndex));
+                    breadcrumbs.put(breadcrumbObject);
+                }
+                message.put(MessageType.BREADCRUMB, breadcrumbs);
             }
-            message.put(MessageType.BREADCRUMB, breadcrumbs);
+        }catch (Exception e) {
+            ConfigManager.log(MParticle.LogLevel.DEBUG, "Error while appending breadcrumbs: " + e.toString());
+        } finally {
+            if (breadcrumbCursor != null && !breadcrumbCursor.isClosed()) {
+                breadcrumbCursor.close();
+            }
         }
     }
 
