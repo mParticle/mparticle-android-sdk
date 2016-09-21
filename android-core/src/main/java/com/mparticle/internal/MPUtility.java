@@ -39,6 +39,7 @@ import java.net.HttpURLConnection;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -152,6 +153,10 @@ public class MPUtility {
 
         }
         return null;
+    }
+
+    public static boolean isInDaylightSavings() {
+        return Boolean.valueOf(TimeZone.getDefault().inDaylightTime(new Date()));
     }
 
     public static class AndroidAdIdInfo {

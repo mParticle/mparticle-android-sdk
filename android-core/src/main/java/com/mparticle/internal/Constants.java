@@ -347,6 +347,7 @@ public class Constants {
         String NEW_USER_IDENTITY = "ni";
         String OLD_USER_IDENTITY = "oi";
         String ECHO = "echo";
+        String DEVICE_IS_IN_DST = "idst";
     }
 
     public interface Commerce {

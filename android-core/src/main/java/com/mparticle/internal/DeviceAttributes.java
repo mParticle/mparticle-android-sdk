@@ -196,6 +196,7 @@ import java.util.UUID;
 
             }
             attributes.put(MessageKey.DEVICE_IS_TABLET, MPUtility.isTablet(appContext));
+            attributes.put(MessageKey.DEVICE_IS_IN_DST, MPUtility.isInDaylightSavings());
 
 
         } catch (Exception e) {
