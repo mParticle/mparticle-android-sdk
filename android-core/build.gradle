@@ -82,7 +82,6 @@ dependencies {
     provided 'com.google.android.gms:play-services-ads:[7.0,)'
     testCompile 'junit:junit:4.12'
     testCompile  files('libs/java-json.jar')
-    testCompile "org.mockito:mockito-core:1.+"
     testCompile "org.powermock:powermock-module-junit4:1.6.2"
     testCompile "org.powermock:powermock-api-mockito:1.6.2"
     testCompile "org.powermock:powermock-core:1.6.2"
