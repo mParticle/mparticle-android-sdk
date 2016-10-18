@@ -841,8 +841,10 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
     public void logAll(List<? extends JsonReportingMessage> messageList) {
         if (messageList != null && messageList.size() > 0) {
             boolean development = ConfigManager.getEnvironment().equals(MParticle.Environment.Development);
+            String sessionId = mAppStateManager.getSession().mSessionID;
             for (int i = 0; i < messageList.size(); i++) {
                 messageList.get(i).setDevMode(development);
+                messageList.get(i).setSessionId(sessionId);
             }
             Message message = mMessageHandler.obtainMessage(MessageHandler.STORE_REPORTING_MESSAGE_LIST, messageList);
             mMessageHandler.sendMessage(message);

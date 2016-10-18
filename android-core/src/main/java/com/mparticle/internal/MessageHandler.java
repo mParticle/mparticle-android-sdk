@@ -541,6 +541,7 @@ import java.util.UUID;
                 values.put(MParticleDatabase.ReportingTable.CREATED_AT, message.getTimestamp());
                 values.put(MParticleDatabase.ReportingTable.MODULE_ID, message.getModuleId());
                 values.put(MParticleDatabase.ReportingTable.MESSAGE, message.toJson().toString());
+                values.put(MParticleDatabase.ReportingTable.SESSION_ID, message.getSessionId());
                 db.insert(MParticleDatabase.ReportingTable.TABLE_NAME, null, values);
             }
 

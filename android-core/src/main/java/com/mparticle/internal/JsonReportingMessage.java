@@ -10,4 +10,8 @@ public interface JsonReportingMessage {
     int getModuleId();
 
     JSONObject toJson();
+
+    String getSessionId();
+
+    void setSessionId(String sessionId);
 }

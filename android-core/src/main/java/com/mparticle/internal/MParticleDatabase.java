@@ -273,6 +273,7 @@ import java.util.Iterator;
         String MODULE_ID = "module_id";
         String TABLE_NAME = "reporting";
         String MESSAGE = "message";
+        String SESSION_ID = "session_id";
     }
 
     public static final String CREATE_REPORTING_DDL =
@@ -280,8 +281,12 @@ import java.util.Iterator;
                     " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                     ReportingTable.MODULE_ID + " INTEGER NOT NULL, " +
                     ReportingTable.MESSAGE + " TEXT NOT NULL, " +
+                    ReportingTable.SESSION_ID + " STRING NOT NULL, " +
                     ReportingTable.CREATED_AT + " INTEGER NOT NULL" +
                     ");";
+
+    private static final String REPORTING_ADD_SESSION_ID_COLUMN = "ALTER TABLE " + ReportingTable.TABLE_NAME +
+            " ADD COLUMN" + ReportingTable.SESSION_ID + " STRING";
 
     MParticleDatabase(Context context) {
         super(context, DB_NAME, null, DB_VERSION);
@@ -315,12 +320,17 @@ import java.util.Iterator;
         }
         if (oldVersion < 6) {
             upgradeSessionTable(db);
+            upgradeReportingTable(db);
         }
     }
 
     private void upgradeSessionTable(SQLiteDatabase db) {
         db.execSQL(SESSION_ADD_APP_INFO_COLUMN);
         db.execSQL(SESSION_ADD_DEVICE_INFO_COLUMN);
+    }
+
+    private void upgradeReportingTable(SQLiteDatabase db) {
+        db.execSQL(REPORTING_ADD_SESSION_ID_COLUMN);
     }
 
     private void upgradeUserAttributes(SQLiteDatabase db) {

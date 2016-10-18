@@ -28,6 +28,7 @@ public class ReportingMessage implements JsonReportingMessage {
     private boolean devMode;
     private boolean optOut;
     private String exceptionClassName;
+    private String mSessionId;
 
 
     public ReportingMessage(KitIntegration provider, String messageType, long timestamp, Map<String, String> attributes) {
@@ -157,6 +158,16 @@ public class ReportingMessage implements JsonReportingMessage {
 
         }
         return jsonObject;
+    }
+
+    @Override
+    public String getSessionId() {
+        return mSessionId;
+    }
+
+    @Override
+    public void setSessionId(String sessionId) {
+        this.mSessionId = sessionId;
     }
 
     public long getTimestamp() {
