@@ -1,6 +1,7 @@
 package com.mparticle.internal;
 
 import android.content.ContentValues;
+import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
@@ -34,6 +35,7 @@ import java.util.UUID;
 /* package-private */ class MessageHandler extends Handler {
 
     private final SQLiteOpenHelper mDbHelper;
+    private final Context mContext;
 
     private SQLiteDatabase db;
 
@@ -53,10 +55,11 @@ import java.util.UUID;
 
     private final MessageManagerCallbacks mMessageManagerCallbacks;
 
-    public MessageHandler(Looper looper, MessageManagerCallbacks messageManager, SQLiteOpenHelper dbHelper) {
+    public MessageHandler(Looper looper, MessageManagerCallbacks messageManager, SQLiteOpenHelper dbHelper, Context context) {
         super(looper);
         mMessageManagerCallbacks = messageManager;
         mDbHelper = dbHelper;
+        mContext = context;
     }
 
 
@@ -524,6 +527,8 @@ import java.util.UUID;
         contentValues.put(SessionTable.START_TIME, message.getLong(MessageKey.TIMESTAMP));
         contentValues.put(SessionTable.END_TIME, message.getLong(MessageKey.TIMESTAMP));
         contentValues.put(SessionTable.SESSION_FOREGROUND_LENGTH, 0);
+        contentValues.put(SessionTable.APP_INFO, DeviceAttributes.collectAppInfo(mContext).toString());
+        contentValues.put(SessionTable.DEVICE_INFO, DeviceAttributes.collectDeviceInfo(mContext).toString());
         db.insert(SessionTable.TABLE_NAME, null, contentValues);
     }
 

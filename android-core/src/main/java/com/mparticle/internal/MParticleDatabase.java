@@ -103,8 +103,9 @@ import java.util.Iterator;
                 ReportingTable._ID + " asc");
     }
 
-    private static final int DB_VERSION = 5;
+    private static final int DB_VERSION = 6;
     public static final String DB_NAME = "mparticle.db";
+
 
     interface UserAttributesTable {
         String TABLE_NAME = "attributes";
@@ -151,6 +152,8 @@ import java.util.Iterator;
         String SESSION_FOREGROUND_LENGTH = "session_length";
         String ATTRIBUTES = "attributes";
         String CF_UUID = "cfuuid";
+        String APP_INFO = "app_info";
+        String DEVICE_INFO = "device_info";
     }
 
     private static final String CREATE_SESSIONS_DDL =
@@ -162,9 +165,16 @@ import java.util.Iterator;
                     SessionTable.END_TIME + " INTEGER NOT NULL," +
                     SessionTable.SESSION_FOREGROUND_LENGTH + " INTEGER NOT NULL," +
                     SessionTable.ATTRIBUTES + " TEXT, " +
-                    SessionTable.CF_UUID + " TEXT" +
+                    SessionTable.CF_UUID + " TEXT," +
+                    SessionTable.APP_INFO + " TEXT, " +
+                    SessionTable.DEVICE_INFO + " TEXT" +
                     ");";
 
+    private static final String SESSION_ADD_DEVICE_INFO_COLUMN = "ALTER TABLE " + SessionTable.TABLE_NAME +
+            " ADD COLUMN " + SessionTable.DEVICE_INFO + " TEXT";
+
+    private static final String SESSION_ADD_APP_INFO_COLUMN = "ALTER TABLE " + SessionTable.TABLE_NAME +
+            " ADD COLUMN " + SessionTable.APP_INFO + " TEXT";
 
     interface MessageTable extends BaseColumns{
         String TABLE_NAME = "messages";
@@ -300,7 +310,17 @@ import java.util.Iterator;
         db.execSQL(CREATE_GCM_MSG_DDL);
         db.execSQL(CREATE_REPORTING_DDL);
         db.execSQL(CREATE_USER_ATTRIBUTES_DDL);
-        upgradeUserAttributes(db);
+        if (oldVersion < 5) {
+            upgradeUserAttributes(db);
+        }
+        if (oldVersion < 6) {
+            upgradeSessionTable(db);
+        }
+    }
+
+    private void upgradeSessionTable(SQLiteDatabase db) {
+        db.execSQL(SESSION_ADD_APP_INFO_COLUMN);
+        db.execSQL(SESSION_ADD_DEVICE_INFO_COLUMN);
     }
 
     private void upgradeUserAttributes(SQLiteDatabase db) {

@@ -141,7 +141,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
         mAppStateManager = appStateManager;
         mAppStateManager.setMessageManager(this);
         MParticleDatabase database = new MParticleDatabase(appContext);
-        mMessageHandler = new MessageHandler(sMessageHandlerThread.getLooper(), this, database);
+        mMessageHandler = new MessageHandler(sMessageHandlerThread.getLooper(), this, database, appContext);
         mUploadHandler = new UploadHandler(appContext, sUploadHandlerThread.getLooper(), configManager, database, appStateManager, this);
         mPreferences = appContext.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
         mInstallType = installType;
