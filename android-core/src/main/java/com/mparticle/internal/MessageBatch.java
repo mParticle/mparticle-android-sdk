@@ -1,6 +1,5 @@
 package com.mparticle.internal;
 
-import android.content.Context;
 import android.content.SharedPreferences;
 
 import com.mparticle.BuildConfig;
@@ -10,18 +9,16 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.math.BigDecimal;
 import java.util.UUID;
 
 public class MessageBatch extends JSONObject {
 
-    public MessageBatch() {
+    private MessageBatch() {
         super();
     }
 
-    public static MessageBatch create(Context context, JSONArray messagesArray, JSONArray reportingMessagesArray, boolean history, JSONObject appInfo, JSONObject deviceInfo, ConfigManager configManager, SharedPreferences preferences, JSONObject cookies, JSONObject userAttributes, JSONArray userIdentities) throws JSONException {
+    public static MessageBatch create(boolean history, ConfigManager configManager, SharedPreferences preferences, JSONObject cookies) throws JSONException {
         MessageBatch uploadMessage = new MessageBatch();
-
         if (BuildConfig.MP_DEBUG) {
             uploadMessage.put(Constants.MessageKey.ECHO, true);
         }
@@ -33,30 +30,10 @@ public class MessageBatch extends JSONObject {
         uploadMessage.put(Constants.MessageKey.CONFIG_UPLOAD_INTERVAL, configManager.getUploadInterval()/1000);
         uploadMessage.put(Constants.MessageKey.CONFIG_SESSION_TIMEOUT, configManager.getSessionTimeout()/1000);
         uploadMessage.put(Constants.MessageKey.MPID, configManager.getMpid());
-
-        uploadMessage.put(Constants.MessageKey.APP_INFO, appInfo);
-        // if there is notification key then include it
-        PushRegistrationHelper.PushRegistration registration = PushRegistrationHelper.getLatestPushRegistration(context);
-        if (registration != null && !MPUtility.isEmpty(registration.instanceId)) {
-            deviceInfo.put(Constants.MessageKey.PUSH_TOKEN, registration.instanceId);
-            deviceInfo.put(Constants.MessageKey.PUSH_TOKEN_TYPE, Constants.GOOGLE_GCM);
-        } else {
-            deviceInfo.remove(Constants.MessageKey.PUSH_TOKEN);
-            deviceInfo.remove(Constants.MessageKey.PUSH_TOKEN_TYPE);
-        }
-
-        deviceInfo.put(Constants.MessageKey.PUSH_SOUND_ENABLED, configManager.isPushSoundEnabled());
-        deviceInfo.put(Constants.MessageKey.PUSH_VIBRATION_ENABLED, configManager.isPushVibrationEnabled());
-
-        uploadMessage.put(Constants.MessageKey.DEVICE_INFO, deviceInfo);
         uploadMessage.put(Constants.MessageKey.SANDBOX, configManager.getEnvironment().equals(MParticle.Environment.Development));
 
         uploadMessage.put(Constants.MessageKey.LTV, MParticle.getInstance().Commerce().getCurrentUserLtv());
         String apiKey = configManager.getApiKey();
-
-        if (userAttributes != null) {
-            uploadMessage.put(Constants.MessageKey.USER_ATTRIBUTES, userAttributes);
-        }
 
         if (history) {
             String deletedAttr = preferences.getString(Constants.PrefKeys.DELETED_USER_ATTRS + apiKey, null);
@@ -70,16 +47,104 @@ public class MessageBatch extends JSONObject {
             uploadMessage.put(Constants.MessageKey.PRODUCT_BAGS, new JSONObject(MParticle.getInstance().ProductBags().toString()));
         }
 
-        uploadMessage.put(Constants.MessageKey.USER_IDENTITIES, userIdentities);
-
-        uploadMessage.put(history ? Constants.MessageKey.HISTORY : Constants.MessageKey.MESSAGES, messagesArray);
-        if (reportingMessagesArray != null && reportingMessagesArray.length() > 0) {
-            uploadMessage.put(Constants.MessageKey.REPORTING, reportingMessagesArray);
-        }
         uploadMessage.put(Constants.MessageKey.COOKIES, cookies);
         uploadMessage.put(Constants.MessageKey.PROVIDER_PERSISTENCE, configManager.getProviderPersistence());
         uploadMessage.put(Constants.MessageKey.INTEGRATION_ATTRIBUTES, configManager.getIntegrationAttributes());
 
         return uploadMessage;
+    }
+
+    public void addSessionHistoryMessage(JSONObject message) {
+        try {
+            if (!has(Constants.MessageKey.HISTORY)) {
+                put(Constants.MessageKey.HISTORY, new JSONArray());
+            }
+            getJSONArray(Constants.MessageKey.HISTORY).put(message);
+        } catch (JSONException e) {
+        }
+    }
+
+    public void addMessage(JSONObject message) {
+        try {
+            if (!has(Constants.MessageKey.MESSAGES)) {
+                put(Constants.MessageKey.MESSAGES, new JSONArray());
+            }
+            getJSONArray(Constants.MessageKey.MESSAGES).put(message);
+        } catch (JSONException e) {
+        }
+    }
+
+    public void addReportingMessage(JSONObject reportingMessage) {
+        try {
+            if (!has(Constants.MessageKey.REPORTING)) {
+                put(Constants.MessageKey.REPORTING, new JSONArray());
+            }
+            getJSONArray(Constants.MessageKey.REPORTING).put(reportingMessage);
+        } catch (JSONException e) {
+        }
+    }
+
+    public void setAppInfo(JSONObject appInfo) {
+        try {
+            put(Constants.MessageKey.APP_INFO, appInfo);
+        } catch (JSONException e) {
+
+        }
+    }
+
+    public void setDeviceInfo(JSONObject deviceInfo) {
+        try {
+            put(Constants.MessageKey.DEVICE_INFO, deviceInfo);
+        } catch (JSONException e) {
+
+        }
+    }
+
+    public JSONObject getAppInfo() {
+        try {
+            return getJSONObject(Constants.MessageKey.APP_INFO);
+        } catch (JSONException e) {
+            return null;
+        }
+    }
+
+    public JSONObject getDeviceInfo() {
+        try {
+            return getJSONObject(Constants.MessageKey.DEVICE_INFO);
+        } catch (JSONException e) {
+            return null;
+        }
+    }
+
+    public JSONArray getSessionHistoryMessages() {
+        try {
+            return getJSONArray(Constants.MessageKey.HISTORY);
+        } catch (JSONException e) {
+            return null;
+        }
+    }
+
+    public JSONArray getMessages() {
+        try {
+            return getJSONArray(Constants.MessageKey.MESSAGES);
+        } catch (JSONException e) {
+            return null;
+        }
+    }
+
+    public void setIdentities(JSONArray identities) {
+        try {
+            put(Constants.MessageKey.USER_IDENTITIES, identities);
+        } catch (JSONException e) {
+
+        }
+    }
+
+    public void setUserAttributes(JSONObject userAttributes) {
+        try {
+            put(Constants.MessageKey.USER_ATTRIBUTES, userAttributes);
+        } catch (JSONException e) {
+
+        }
     }
 }

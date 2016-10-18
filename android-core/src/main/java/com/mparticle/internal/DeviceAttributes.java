@@ -27,14 +27,19 @@ import java.util.UUID;
 
     //re-use this whenever an attribute can't be determined
     static final String UNKNOWN = "unknown";
+    private JSONObject deviceInfo;
+    private JSONObject appInfo;
+    private boolean firstCollection = true;
 
     /**
-     * Generates a collection of application attributes.  This will be lazy-loaded, and only ever called once per app run.
+     * Generates a collection of application attributes that will not change during an app's process.
+     *
+     * This contains logic that MUST only be called once per app run.
      *
      * @param appContext the application context
      * @return a JSONObject of application-specific attributes
      */
-    public static JSONObject collectAppInfo(Context appContext) {
+    JSONObject getStaticApplicationInfo(Context appContext) {
         JSONObject attributes = new JSONObject();
         SharedPreferences preferences = appContext.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = preferences.edit();
@@ -100,10 +105,13 @@ import java.util.UUID;
                 // ignore missing data
             }
 
+            attributes.put(MessageKey.ENVIRONMENT, MParticle.getInstance().getConfigManager().getEnvironment().getValue());
+            attributes.put(MessageKey.INSTALL_REFERRER, preferences.getString(Constants.PrefKeys.INSTALL_REFERRER, null));
+
             boolean install = preferences.getBoolean(PrefKeys.FIRST_RUN_INSTALL, true);
             attributes.put(MessageKey.FIRST_SEEN_INSTALL, install);
-
-        } catch (JSONException e) {
+            editor.putBoolean(PrefKeys.FIRST_RUN_INSTALL, false);
+        } catch (Exception e) {
             // again difference devices can do terrible things, make sure that we don't bail out completely
             // and return at least what we've built so far.
         } finally {
@@ -112,7 +120,7 @@ import java.util.UUID;
         return attributes;
     }
 
-    public static void addAndroidId(JSONObject attributes, Context context) throws JSONException {
+    static void addAndroidId(JSONObject attributes, Context context) throws JSONException {
         if (!MParticle.isAndroidIdDisabled()) {
             String androidId = MPUtility.getAndroidID(context);
             attributes.put(MessageKey.DEVICE_ID, androidId);
@@ -122,12 +130,14 @@ import java.util.UUID;
     }
 
     /**
-     * Generates a collection of device attributes. This will be lazy-loaded, and only ever called once per app run.
+     * Generates a collection of device attributes that will not change during an app's process.
+     *
+     * This contains logic that MUST only be called once per app run.
      *
      * @param appContext the application context
      * @return a JSONObject of device-specific attributes
      */
-    public static JSONObject collectDeviceInfo(Context appContext) {
+    JSONObject getStaticDeviceInfo(Context appContext) {
         final JSONObject attributes = new JSONObject();
 
         try {
@@ -150,8 +160,6 @@ import java.util.UUID;
             attributes.put(MessageKey.DEVICE_BLUETOOTH_VERSION, MPUtility.getBluetoothVersion(appContext));
             attributes.put(MessageKey.DEVICE_SUPPORTS_NFC, MPUtility.hasNfc(appContext));
             attributes.put(MessageKey.DEVICE_SUPPORTS_TELEPHONY, MPUtility.hasTelephony(appContext));
-
-
 
             JSONObject rootedObject = new JSONObject();
             rootedObject.put(MessageKey.DEVICE_ROOTED_CYDIA, MPUtility.isPhoneRooted());
@@ -198,12 +206,66 @@ import java.util.UUID;
             attributes.put(MessageKey.DEVICE_IS_TABLET, MPUtility.isTablet(appContext));
             attributes.put(MessageKey.DEVICE_IS_IN_DST, MPUtility.isInDaylightSavings());
 
-
         } catch (Exception e) {
             //believe it or not, difference devices can be missing build.prop fields, or have otherwise
             //strange version/builds of Android that cause unpredictable behavior
         }
 
         return attributes;
+    }
+
+    /**
+     * For the following fields we always want the latest values
+     */
+    void updateDeviceInfo(Context context, JSONObject deviceInfo) {
+        deviceInfo.remove(MessageKey.LIMIT_AD_TRACKING);
+        deviceInfo.remove(MessageKey.GOOGLE_ADV_ID);
+        MPUtility.AndroidAdIdInfo adIdInfo = MPUtility.getGoogleAdIdInfo(context);
+        String message = "Failed to collect Google Play Advertising ID, be sure to add Google Play services or com.google.android.gms:play-services-ads to your app's dependencies.";
+        if (adIdInfo != null) {
+            try {
+                deviceInfo.put(MessageKey.LIMIT_AD_TRACKING, adIdInfo.isLimitAdTrackingEnabled);
+                if (adIdInfo.isLimitAdTrackingEnabled && MParticle.getInstance().getConfigManager().getRestrictAAIDBasedOnLAT()) {
+                    message = "Google Play Advertising ID available but ad tracking is disabled on this device.";
+                } else {
+                    deviceInfo.put(MessageKey.GOOGLE_ADV_ID, adIdInfo.id);
+                    message = "Successfully collected Google Play Advertising ID.";
+                }
+            }catch (JSONException jse) {
+                ConfigManager.log(MParticle.LogLevel.DEBUG, "Failed while building device-info object: ", jse.toString());
+            }
+        }
+        if (firstCollection) {
+            ConfigManager.log(MParticle.LogLevel.DEBUG, message);
+            firstCollection = false;
+        }
+
+        try {
+            PushRegistrationHelper.PushRegistration registration = PushRegistrationHelper.getLatestPushRegistration(context);
+            if (registration != null && !MPUtility.isEmpty(registration.instanceId)) {
+                deviceInfo.put(Constants.MessageKey.PUSH_TOKEN, registration.instanceId);
+                deviceInfo.put(Constants.MessageKey.PUSH_TOKEN_TYPE, Constants.GOOGLE_GCM);
+            }
+
+            deviceInfo.put(Constants.MessageKey.PUSH_SOUND_ENABLED, MParticle.getInstance().getConfigManager().isPushSoundEnabled());
+            deviceInfo.put(Constants.MessageKey.PUSH_VIBRATION_ENABLED, MParticle.getInstance().getConfigManager().isPushVibrationEnabled());
+        }catch (JSONException jse) {
+            ConfigManager.log(MParticle.LogLevel.DEBUG, "Failed while building device-info object: ", jse.toString());
+        }
+    }
+
+    JSONObject getDeviceInfo(Context context){
+        if (deviceInfo == null){
+            deviceInfo = getStaticDeviceInfo(context);
+        }
+        updateDeviceInfo(context, deviceInfo);
+        return deviceInfo;
+    }
+
+    JSONObject getAppInfo(Context context) {
+        if (appInfo == null) {
+            appInfo = getStaticApplicationInfo(context);
+        }
+        return appInfo;
     }
 }

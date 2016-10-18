@@ -3,6 +3,7 @@ package com.mparticle.internal;
 import android.content.Context;
 
 import com.mparticle.MParticle;
+import com.mparticle.MockMParticle;
 import com.mparticle.mock.MockContext;
 import com.mparticle.mock.MockSharedPreferences;
 
@@ -23,7 +24,10 @@ public class DeviceAttributesTest {
 
     @Test
     public void testCollectAppInfo() throws Exception {
-        JSONObject appInfo = DeviceAttributes.collectAppInfo(new MockContext());
+        MParticle.setInstance(new MockMParticle());
+        MockContext context = new MockContext();
+        context.getSharedPreferences(null, 0).edit().putString(Constants.PrefKeys.INSTALL_REFERRER, "install referrer").apply();
+        JSONObject appInfo = new DeviceAttributes().getAppInfo(context);
         assertTrue(appInfo.getString("apn").equals("com.mparticle.test"));
         assertTrue(appInfo.getString("abn").equals("42"));
         assertTrue(appInfo.getString("ain").equals("com.mparticle.test.installer"));
@@ -37,7 +41,9 @@ public class DeviceAttributesTest {
         assertNotNull(appInfo.getLong("lud"));
         assertNotNull(appInfo.getInt("lcu"));
         assertNotNull(appInfo.getLong("ud"));
-        assertNotNull(appInfo.getBoolean("fi"));
+        assertNotNull(appInfo.getInt("env"));
+        assertEquals("install referrer", appInfo.getString("ir"));
+        assertEquals(true, appInfo.getBoolean("fi"));
     }
 
     @Test
@@ -65,10 +71,10 @@ public class DeviceAttributesTest {
         MockSharedPreferences prefs = (MockSharedPreferences) context.getSharedPreferences(null, 0);
         long now = 10012;
         prefs.putLong("mp::ict", now).commit();
-        JSONObject appInfo = DeviceAttributes.collectAppInfo(context);
+        JSONObject appInfo = new DeviceAttributes().getAppInfo(context);
         assertEquals(now, appInfo.getLong("ict"));
 
-        JSONObject appInfo2 = DeviceAttributes.collectAppInfo(context);
+        JSONObject appInfo2 = new DeviceAttributes().getAppInfo(context);
         assertEquals(now, appInfo2.getLong("ict"));
     }
 
@@ -78,7 +84,7 @@ public class DeviceAttributesTest {
         JSONObject appInfo = null;
         int launchCount = 20;
         for (int i = 0; i < 20; i++) {
-            appInfo = DeviceAttributes.collectAppInfo(context);
+            appInfo = new DeviceAttributes().getAppInfo(context);
         }
 
         assertEquals(launchCount, appInfo.getInt("lc"));

@@ -52,6 +52,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
 
     private static Context mContext = null;
     private static SharedPreferences mPreferences = null;
+    private final DeviceAttributes mDeviceAttributes;
     private AppStateManager mAppStateManager;
     private ConfigManager mConfigManager = null;
 
@@ -120,12 +121,14 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
      */
     public MessageManager() {
         super();
+        mDeviceAttributes = new DeviceAttributes();
     }
 
     /**
      * Used solely for unit testing
      */
     public MessageManager(Context appContext, ConfigManager configManager, MParticle.InstallType installType, AppStateManager appStateManager, MessageHandler messageHandler, UploadHandler uploadHandler) {
+        mDeviceAttributes = new DeviceAttributes();
         mContext = appContext.getApplicationContext();
         mConfigManager = configManager;
         mAppStateManager = appStateManager;
@@ -133,9 +136,11 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
         mUploadHandler = uploadHandler;
         mPreferences = appContext.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
         mInstallType = installType;
+
     }
 
     public MessageManager(Context appContext, ConfigManager configManager, MParticle.InstallType installType, AppStateManager appStateManager) {
+        mDeviceAttributes = new DeviceAttributes();
         mContext = appContext.getApplicationContext();
         mConfigManager = configManager;
         mAppStateManager = appStateManager;
@@ -145,7 +150,6 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
         mUploadHandler = new UploadHandler(appContext, sUploadHandlerThread.getLooper(), configManager, database, appStateManager, this);
         mPreferences = appContext.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
         mInstallType = installType;
-
     }
 
     private static TelephonyManager getTelephonyManager() {
@@ -703,7 +707,10 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
             }
             message.put(MessageKey.USER_IDENTITIES, userIdentities);
             mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
-
+            JSONArray seenIdentities = markIdentitiesAsSeen(userIdentities);
+            if (seenIdentities != null) {
+                saveUserIdentityJson(seenIdentities);
+            }
             return message;
         } catch (JSONException e) {
             ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to create mParticle user-identity-change message");
@@ -747,6 +754,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
 
             message.put(MessageKey.ATTRIBUTE_DELETED, deleted);
             message.put(MessageKey.IS_NEW_ATTRIBUTE, isNewAttribute);
+            message.put(MessageKey.USER_ATTRIBUTES, UploadHandler.getAllUserAttributes());
             mMessageHandler.handleMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
             return message;
         } catch (JSONException e) {
@@ -958,6 +966,10 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
         mMessageHandler.sendMessage(message);
     }
 
+    public synchronized DeviceAttributes getDeviceAttributes() {
+        return mDeviceAttributes;
+    }
+
     static class UserAttributeResponse {
         Map<String, String> attributeSingles;
         Map<String, List<String>> attributeLists;
@@ -1092,4 +1104,6 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
             mTimeout = influenceOpenTimeoutMillis;
         }
     }
+
+
 }

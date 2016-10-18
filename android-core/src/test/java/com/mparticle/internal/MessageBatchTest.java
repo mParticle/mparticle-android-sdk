@@ -32,7 +32,7 @@ public class MessageBatchTest {
         ConfigManager manager = new ConfigManager(new MockContext(), MParticle.Environment.Production, "some api key", "some api secret");
         MockSharedPreferences sharedPrefs = new MockSharedPreferences();
         boolean sessionHistory = true;
-        MessageBatch batch = MessageBatch.create(new MockContext(), new JSONArray(), new JSONArray(), sessionHistory, new JSONObject(), new JSONObject(), manager, sharedPrefs, new JSONObject(), new JSONObject(), new JSONArray());
+        MessageBatch batch = MessageBatch.create( sessionHistory, manager, sharedPrefs,new JSONObject());
         assertNotNull(batch.getString("dt"));
         assertNotNull(batch.getString("id"));
         assertNotNull(batch.getDouble("ct"));
@@ -40,20 +40,13 @@ public class MessageBatchTest {
         assertNotNull(batch.getBoolean("oo"));
         assertNotNull(batch.getDouble("uitl"));
         assertNotNull(batch.getDouble("stl"));
-        assertNotNull(batch.getJSONObject("ai"));
-
-        JSONObject deviceInfo = batch.getJSONObject("di");
-        assertNotNull(deviceInfo);
-        assertNotNull(deviceInfo.getBoolean("se"));
-        assertNotNull(deviceInfo.getBoolean("ve"));
         assertNotNull(batch.get("ltv"));
-        assertNotNull(batch.getJSONArray("sh")); //history batch
         assertNotNull(batch.getJSONObject("ck"));
         if (manager.getProviderPersistence() != null) {
             assertNotNull(batch.getJSONObject("cms"));
         }
         sessionHistory = false;
-        batch = MessageBatch.create(new MockContext(), new JSONArray(), new JSONArray(), sessionHistory, new JSONObject(), new JSONObject(), manager, sharedPrefs, new JSONObject(), new JSONObject(), new JSONArray());
+        batch = MessageBatch.create( sessionHistory, manager, sharedPrefs,new JSONObject());
         assertNotNull(batch.getString("dt"));
         assertNotNull(batch.getString("id"));
         assertNotNull(batch.getDouble("ct"));
@@ -61,24 +54,15 @@ public class MessageBatchTest {
         assertNotNull(batch.getBoolean("oo"));
         assertNotNull(batch.getDouble("uitl"));
         assertNotNull(batch.getDouble("stl"));
-        assertNotNull(batch.getJSONObject("ai"));
-
-
         assertNotNull(batch.getJSONObject("pb"));
-
-        deviceInfo = batch.getJSONObject("di");
-        assertNotNull(deviceInfo);
-        assertNotNull(deviceInfo.getBoolean("se"));
-        assertNotNull(deviceInfo.getBoolean("ve"));
         assertNotNull(batch.get("ltv"));
-        assertNotNull(batch.getJSONArray("msgs")); //history batch
         assertNotNull(batch.getJSONObject("ck"));
         if (manager.getProviderPersistence() != null) {
             assertNotNull(batch.getJSONObject("cms"));
         }
 
         bags.removeProductBag("whatever");
-        batch = MessageBatch.create(new MockContext(), new JSONArray(), new JSONArray(), sessionHistory, new JSONObject(), new JSONObject(), manager, sharedPrefs, new JSONObject(), new JSONObject(), new JSONArray());
+        batch = MessageBatch.create( sessionHistory, manager, sharedPrefs,new JSONObject());
         assertFalse(batch.has("pb"));
     }
 }

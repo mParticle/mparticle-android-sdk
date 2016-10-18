@@ -6,6 +6,7 @@ import android.os.Message;
 
 import com.mparticle.MPEvent;
 import com.mparticle.MParticle;
+import com.mparticle.MockMParticle;
 import com.mparticle.mock.MockContext;
 import com.mparticle.mock.MockSharedPreferences;
 
@@ -47,6 +48,7 @@ public class MessageManagerTest {
 
     @Before
     public void setup() throws Exception {
+        MParticle.setInstance(new MockMParticle());
         context = new MockContext();
         configManager = Mockito.mock(ConfigManager.class);
         Mockito.when(configManager.getApiKey()).thenReturn("123456789");

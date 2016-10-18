@@ -59,8 +59,8 @@ import java.util.Iterator;
         return database.delete(MParticleDatabase.GcmMessageTable.TABLE_NAME, gcmDeleteWhere, deleteWhereArgs);
     }
 
-    private static String[] prepareSelection = new String[]{"_id", MessageTable.MESSAGE, MessageTable.CREATED_AT, MessageTable.STATUS, MessageTable.SESSION_ID};
-    private static String prepareOrderBy = MessageTable.CREATED_AT + ", " + MessageTable.SESSION_ID + " , _id asc";
+    private final static String[] prepareSelection = new String[]{"_id", MessageTable.MESSAGE, MessageTable.CREATED_AT, MessageTable.STATUS, MessageTable.SESSION_ID};
+    private final static String prepareOrderBy =  MessageTable.SESSION_ID + ", " + MessageTable._ID + " asc";
 
     private static String sessionHistorySelection = String.format(
             "(%s = %d) and (%s != ?)",
@@ -80,6 +80,10 @@ import java.util.Iterator;
                 prepareOrderBy);
     }
     private static String[] readyMessages = new String[]{Integer.toString(Constants.Status.UPLOADED)};
+
+    public static Cursor getSessions(SQLiteDatabase db) {
+        return db.query(SessionTable.TABLE_NAME, null, null, null, null, null, null);
+    }
 
     static Cursor getMessagesForUpload(SQLiteDatabase database){
         return database.query(
@@ -286,7 +290,7 @@ import java.util.Iterator;
                     ");";
 
     private static final String REPORTING_ADD_SESSION_ID_COLUMN = "ALTER TABLE " + ReportingTable.TABLE_NAME +
-            " ADD COLUMN" + ReportingTable.SESSION_ID + " STRING";
+            " ADD COLUMN " + ReportingTable.SESSION_ID + " STRING";
 
     MParticleDatabase(Context context) {
         super(context, DB_NAME, null, DB_VERSION);

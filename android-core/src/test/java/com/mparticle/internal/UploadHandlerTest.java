@@ -7,6 +7,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Message;
 
+import com.mparticle.MParticle;
 import com.mparticle.mock.MockContext;
 
 import org.json.JSONObject;
@@ -14,6 +15,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.AdditionalMatchers;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
@@ -37,10 +39,12 @@ public class UploadHandlerTest {
     @Before
     public void setUp() throws Exception {
         MParticleDatabase db = Mockito.mock(MParticleDatabase.class);
+        MParticle.setInstance(Mockito.mock(MParticle.class));
         mockDatabase = Mockito.mock(SQLiteDatabase.class);
         Mockito.when(db.getWritableDatabase()).thenReturn(mockDatabase);
         AppStateManager stateManager = Mockito.mock(AppStateManager.class);
         mConfigManager = Mockito.mock(ConfigManager.class);
+        Mockito.when(MParticle.getInstance().getConfigManager()).thenReturn(mConfigManager);
         handler = new UploadHandler(new MockContext(), mConfigManager, db, stateManager, Mockito.mock(MessageManager.class));
     }
 
@@ -111,13 +115,13 @@ public class UploadHandlerTest {
 
     @Test
     public void testGetDeviceInfo() throws Exception {
-        JSONObject attributes = handler.getDeviceInfo();
+        JSONObject attributes = new DeviceAttributes().getDeviceInfo(new MockContext());
         assertNotNull(attributes);
     }
 
     @Test
     public void testGetAppInfo() throws Exception {
-        JSONObject attributes = handler.getAppInfo();
+        JSONObject attributes = new DeviceAttributes().getDeviceInfo(new MockContext());
         assertNotNull(attributes);
     }
 
@@ -128,7 +132,7 @@ public class UploadHandlerTest {
         Mockito.when(mConfigManager.getRestrictAAIDBasedOnLAT()).thenReturn(true);
         PowerMockito.mockStatic(MPUtility.class);
         Mockito.when(MPUtility.getGoogleAdIdInfo(Mockito.any(Context.class))).thenReturn(new MPUtility.AndroidAdIdInfo(AAID, false));
-        JSONObject attributes = handler.getDeviceInfo();
+        JSONObject attributes = new DeviceAttributes().getDeviceInfo(new MockContext());
         assertFalse(attributes.getBoolean("lat"));
         assertEquals(AAID, attributes.getString("gaid"));
     }
@@ -140,7 +144,7 @@ public class UploadHandlerTest {
         Mockito.when(mConfigManager.getRestrictAAIDBasedOnLAT()).thenReturn(true);
         PowerMockito.mockStatic(MPUtility.class);
         Mockito.when(MPUtility.getGoogleAdIdInfo(Mockito.any(Context.class))).thenReturn(new MPUtility.AndroidAdIdInfo(AAID, true));
-        JSONObject attributes = handler.getDeviceInfo();
+        JSONObject attributes = new DeviceAttributes().getDeviceInfo(new MockContext());
         assertTrue(attributes.getBoolean("lat"));
         assertFalse(attributes.has("gaid"));
     }
@@ -152,7 +156,7 @@ public class UploadHandlerTest {
         Mockito.when(mConfigManager.getRestrictAAIDBasedOnLAT()).thenReturn(false);
         PowerMockito.mockStatic(MPUtility.class);
         Mockito.when(MPUtility.getGoogleAdIdInfo(Mockito.any(Context.class))).thenReturn(new MPUtility.AndroidAdIdInfo(AAID, true));
-        JSONObject attributes = handler.getDeviceInfo();
+        JSONObject attributes = new DeviceAttributes().getDeviceInfo(new MockContext());
         assertTrue(attributes.getBoolean("lat"));
         assertEquals(AAID, attributes.getString("gaid"));
     }
@@ -164,7 +168,7 @@ public class UploadHandlerTest {
         Mockito.when(mConfigManager.getRestrictAAIDBasedOnLAT()).thenReturn(false);
         PowerMockito.mockStatic(MPUtility.class);
         Mockito.when(MPUtility.getGoogleAdIdInfo(Mockito.any(Context.class))).thenReturn(new MPUtility.AndroidAdIdInfo(AAID, false));
-        JSONObject attributes = handler.getDeviceInfo();
+        JSONObject attributes = new DeviceAttributes().getDeviceInfo(new MockContext());
         assertFalse(attributes.getBoolean("lat"));
         assertEquals(AAID, attributes.getString("gaid"));
     }

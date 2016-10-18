@@ -160,9 +160,6 @@ import java.util.UUID;
                         }catch (JSONException jse){
                             ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to create mParticle session end message");
                         }
-
-                        // delete the processed session record
-                        db.delete(SessionTable.TABLE_NAME, SessionTable.SESSION_ID + "=?", new String[]{sessionId});
                     } else {
                         ConfigManager.log(MParticle.LogLevel.ERROR, "Error creating session end, no entry for sessionId in mParticle DB");
                     }
@@ -527,8 +524,8 @@ import java.util.UUID;
         contentValues.put(SessionTable.START_TIME, message.getLong(MessageKey.TIMESTAMP));
         contentValues.put(SessionTable.END_TIME, message.getLong(MessageKey.TIMESTAMP));
         contentValues.put(SessionTable.SESSION_FOREGROUND_LENGTH, 0);
-        contentValues.put(SessionTable.APP_INFO, DeviceAttributes.collectAppInfo(mContext).toString());
-        contentValues.put(SessionTable.DEVICE_INFO, DeviceAttributes.collectDeviceInfo(mContext).toString());
+        contentValues.put(SessionTable.APP_INFO, mMessageManagerCallbacks.getDeviceAttributes().getAppInfo(mContext).toString());
+        contentValues.put(SessionTable.DEVICE_INFO, mMessageManagerCallbacks.getDeviceAttributes().getDeviceInfo(mContext).toString());
         db.insert(SessionTable.TABLE_NAME, null, contentValues);
     }
 
@@ -544,7 +541,6 @@ import java.util.UUID;
                 values.put(MParticleDatabase.ReportingTable.SESSION_ID, message.getSessionId());
                 db.insert(MParticleDatabase.ReportingTable.TABLE_NAME, null, values);
             }
-
             db.setTransactionSuccessful();
         }catch (Exception e) {
             if (BuildConfig.MP_DEBUG) {
