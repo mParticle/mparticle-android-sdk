@@ -585,14 +585,15 @@ public class UploadHandler extends Handler {
     }
 
     public void setConnected(boolean connected){
-        isNetworkConnected = connected;
+
         try {
-            if (isNetworkConnected && mConfigManager.isPushEnabled() && PushRegistrationHelper.getLatestPushRegistration(mContext) == null) {
+            if (!isNetworkConnected && connected && mConfigManager.isPushEnabled() && PushRegistrationHelper.getLatestPushRegistration(mContext) == null) {
                 MParticle.getInstance().Messaging().enablePushNotifications(mConfigManager.getPushSenderId());
             }
         }catch (Exception e) {
 
         }
+        isNetworkConnected = connected;
     }
 
     public void fetchSegments(long timeout, String endpointId, SegmentListener listener) {
