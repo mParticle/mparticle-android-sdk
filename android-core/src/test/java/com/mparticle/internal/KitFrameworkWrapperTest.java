@@ -15,6 +15,7 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -51,10 +52,14 @@ public class KitFrameworkWrapperTest {
         MPEvent event = new MPEvent.Builder("example").build();
 
         wrapper.logEvent(event);
+        wrapper.setUserAttribute("a key", "a value");
         assertEquals(event, wrapper.getEventQueue().peek());
+        assertEquals("a key", wrapper.getAttributeQueue().peek().key);
+        assertEquals("a value", wrapper.getAttributeQueue().peek().value);
         wrapper.disableQueuing();
         assertTrue(wrapper.getKitsLoaded());
         assertNull(wrapper.getEventQueue());
+        assertNull(wrapper.getAttributeQueue());
     }
 
     @Test
@@ -105,6 +110,7 @@ public class KitFrameworkWrapperTest {
         Mockito.when(screenEvent.isScreenEvent()).thenReturn(true);
         wrapper.logEvent(event);
         wrapper.logEvent(screenEvent);
+        wrapper.setUserAttribute("a key", "a value");
         wrapper.logCommerceEvent(commerceEvent);
         Mockito.verify(
                 mockKitManager, Mockito.times(0)
@@ -115,6 +121,9 @@ public class KitFrameworkWrapperTest {
         Mockito.verify(
                 mockKitManager, Mockito.times(0)
         ).logCommerceEvent(Mockito.any(CommerceEvent.class));
+        Mockito.verify(
+                mockKitManager, Mockito.times(0)
+        ).setUserAttribute(Mockito.anyString(), Mockito.anyString());
 
         wrapper.replayEvents();
 
@@ -127,9 +136,9 @@ public class KitFrameworkWrapperTest {
         Mockito.verify(
                 mockKitManager, Mockito.times(1)
         ).logCommerceEvent(Mockito.any(CommerceEvent.class));
-
-
-
+        Mockito.verify(
+                mockKitManager, Mockito.times(1)
+        ).setUserAttribute(Mockito.eq("a key"), Mockito.eq("a value"));
     }
 
     @Test
@@ -141,6 +150,62 @@ public class KitFrameworkWrapperTest {
         wrapper.setKitsLoaded(false);
         wrapper.replayAndDisableQueue();
         assertTrue(wrapper.getKitsLoaded());
+    }
+
+    @Test
+    public void testQueueStringAttribute() throws Exception {
+        KitFrameworkWrapper wrapper = new KitFrameworkWrapper(Mockito.mock(Context.class),
+                Mockito.mock(ReportingManager.class),
+                Mockito.mock(ConfigManager.class),
+                Mockito.mock(AppStateManager.class));
+        assertNull(wrapper.getAttributeQueue());
+        wrapper.setKitsLoaded(false);
+        wrapper.queueAttribute("a key", "a value");
+        assertEquals(wrapper.getAttributeQueue().peek().key, "a key");
+        assertEquals(wrapper.getAttributeQueue().peek().value, "a value");
+        assertFalse(wrapper.getAttributeQueue().peek().removal);
+    }
+
+    @Test
+    public void testQueueNullAttribute() throws Exception {
+        KitFrameworkWrapper wrapper = new KitFrameworkWrapper(Mockito.mock(Context.class),
+                Mockito.mock(ReportingManager.class),
+                Mockito.mock(ConfigManager.class),
+                Mockito.mock(AppStateManager.class));
+        assertNull(wrapper.getAttributeQueue());
+        wrapper.setKitsLoaded(false);
+        wrapper.queueAttribute("a key", null);
+        assertEquals(wrapper.getAttributeQueue().peek().key, "a key");
+        assertNull(wrapper.getAttributeQueue().peek().value);
+        assertFalse(wrapper.getAttributeQueue().peek().removal);
+    }
+
+    @Test
+    public void testQueueListAttribute() throws Exception {
+        KitFrameworkWrapper wrapper = new KitFrameworkWrapper(Mockito.mock(Context.class),
+                Mockito.mock(ReportingManager.class),
+                Mockito.mock(ConfigManager.class),
+                Mockito.mock(AppStateManager.class));
+        assertNull(wrapper.getAttributeQueue());
+        wrapper.setKitsLoaded(false);
+        wrapper.queueAttribute("a key", new ArrayList<String>());
+        assertEquals(wrapper.getAttributeQueue().peek().key, "a key");
+        assertEquals(wrapper.getAttributeQueue().peek().value, new ArrayList<String>());
+        assertFalse(wrapper.getAttributeQueue().peek().removal);
+    }
+
+    @Test
+    public void testQueueAttributeRemoval() throws Exception {
+        KitFrameworkWrapper wrapper = new KitFrameworkWrapper(Mockito.mock(Context.class),
+                Mockito.mock(ReportingManager.class),
+                Mockito.mock(ConfigManager.class),
+                Mockito.mock(AppStateManager.class));
+        assertNull(wrapper.getAttributeQueue());
+        wrapper.setKitsLoaded(false);
+        wrapper.queueAttribute("a key");
+        assertEquals(wrapper.getAttributeQueue().peek().key, "a key");
+        assertEquals(wrapper.getAttributeQueue().peek().value, null);
+        assertTrue(wrapper.getAttributeQueue().peek().removal);
     }
 
     @Test
@@ -159,6 +224,36 @@ public class KitFrameworkWrapperTest {
             wrapper.queueEvent(event);
         }
         assertEquals(10, wrapper.getEventQueue().size());
+    }
+
+    @Test
+    public void testSetUserAttribute() throws Exception {
+        KitFrameworkWrapper wrapper = new KitFrameworkWrapper(Mockito.mock(Context.class),
+                Mockito.mock(ReportingManager.class),
+                Mockito.mock(ConfigManager.class),
+                Mockito.mock(AppStateManager.class));
+        assertNull(wrapper.getAttributeQueue());
+        wrapper.setKitsLoaded(false);
+
+        wrapper.setUserAttribute("a key", "a value");
+        assertEquals(wrapper.getAttributeQueue().peek().key, "a key");
+        assertEquals(wrapper.getAttributeQueue().peek().value, "a value");
+
+        wrapper.setKitsLoaded(true);
+        wrapper.setUserAttribute("a key", "a value");
+
+        KitManager mockKitManager = Mockito.mock(KitManager.class);
+        wrapper.setKitManager(mockKitManager);
+
+        Mockito.verify(
+                mockKitManager, Mockito.times(0)
+        ).setUserAttribute(Mockito.anyString(), Mockito.anyString());
+
+        wrapper.setUserAttribute("a key", "a value");
+
+        Mockito.verify(
+                mockKitManager, Mockito.times(1)
+        ).setUserAttribute(Mockito.eq("a key"), Mockito.eq("a value"));
     }
 
     @Test

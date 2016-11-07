@@ -9,7 +9,6 @@ import android.os.Bundle;
 
 import com.mparticle.MPEvent;
 import com.mparticle.MParticle;
-import com.mparticle.UserAttributeListener;
 import com.mparticle.commerce.CommerceEvent;
 
 import org.json.JSONArray;
@@ -32,6 +31,7 @@ public class KitFrameworkWrapper implements KitManager {
     private static volatile boolean kitsLoaded = false;
 
     private Queue eventQueue;
+    private Queue<AttributeChange> attributeQueue;
     private volatile boolean registerForPush = false;
     private volatile boolean shouldCheckForDeepLink = false;
     private static KitsLoadedListener kitsLoadedListener;
@@ -73,6 +73,10 @@ public class KitFrameworkWrapper implements KitManager {
         return eventQueue;
     }
 
+    Queue<AttributeChange> getAttributeQueue() {
+        return attributeQueue;
+    }
+
     void setKitManager(KitManager manager) {
         mKitManager = manager;
     }
@@ -96,12 +100,17 @@ public class KitFrameworkWrapper implements KitManager {
         }
     }
 
-    void disableQueuing() {
+    synchronized void disableQueuing() {
         setKitsLoaded(true);
         if (eventQueue != null) {
             eventQueue.clear();
             eventQueue = null;
             ConfigManager.log(MParticle.LogLevel.DEBUG, "Kit initialization complete. Disabling event queueing.");
+        }
+
+        if (attributeQueue != null) {
+            attributeQueue.clear();
+            attributeQueue = null;
         }
     }
 
@@ -121,33 +130,45 @@ public class KitFrameworkWrapper implements KitManager {
             mKitManager.checkForDeepLink();
         }
 
-        if (eventQueue == null || eventQueue.size() == 0) {
-            return;
-        }
-
-        ConfigManager.log(MParticle.LogLevel.DEBUG, "Replaying events after receiving first kit configuration.");
-        for (Object event : eventQueue) {
-            if (event instanceof MPEvent) {
-                MPEvent mpEvent = (MPEvent) event;
-                if (mpEvent.isScreenEvent()) {
-                    mKitManager.logScreen(mpEvent);
-                } else {
-                    mKitManager.logEvent(mpEvent);
+        if (eventQueue != null && eventQueue.size() > 0) {
+            ConfigManager.log(MParticle.LogLevel.DEBUG, "Replaying events after receiving first kit configuration.");
+            for (Object event : eventQueue) {
+                if (event instanceof MPEvent) {
+                    MPEvent mpEvent = (MPEvent) event;
+                    if (mpEvent.isScreenEvent()) {
+                        mKitManager.logScreen(mpEvent);
+                    } else {
+                        mKitManager.logEvent(mpEvent);
+                    }
+                } else if (event instanceof CommerceEvent) {
+                    mKitManager.logCommerceEvent((CommerceEvent) event);
                 }
-            } else if (event instanceof CommerceEvent) {
-                mKitManager.logCommerceEvent((CommerceEvent) event);
             }
         }
 
+        if (attributeQueue != null && attributeQueue.size() > 0) {
+            ConfigManager.log(MParticle.LogLevel.DEBUG, "Replaying user attributes after receiving first kit configuration.");
+            for (AttributeChange attributeChange : attributeQueue) {
+                if (attributeChange.removal) {
+                    mKitManager.removeUserAttribute(attributeChange.key);
+                } else if (attributeChange.value == null){
+                    mKitManager.setUserAttribute(attributeChange.key, null);
+                } else if (attributeChange.value instanceof String) {
+                    mKitManager.setUserAttribute(attributeChange.key, (String) attributeChange.value);
+                } else if (attributeChange.value instanceof List) {
+                    mKitManager.setUserAttributeList(attributeChange.key, (List<String>) attributeChange.value);
+                }
+            }
+        }
     }
 
-    public void replayAndDisableQueue() {
+    synchronized public void replayAndDisableQueue() {
         setKitsLoaded(true);
         replayEvents();
         disableQueuing();
     }
 
-    boolean queueEvent(Object event) {
+    synchronized boolean queueEvent(Object event) {
         if (getKitsLoaded()) {
             return false;
         }
@@ -162,6 +183,43 @@ public class KitFrameworkWrapper implements KitManager {
             eventQueue.add(event);
         }
         return true;
+    }
+
+    boolean queueAttribute(String key, Object value) {
+        return queueAttribute(new AttributeChange(key, value));
+    }
+
+    boolean queueAttribute(String key) {
+        return queueAttribute(new AttributeChange(key));
+    }
+
+    synchronized boolean queueAttribute(AttributeChange change) {
+        if (getKitsLoaded()) {
+            return false;
+        }
+
+        if (attributeQueue == null) {
+            attributeQueue = new ConcurrentLinkedQueue<AttributeChange>();
+        }
+        attributeQueue.add(change);
+        return true;
+    }
+
+    static class AttributeChange {
+        final String key;
+        final Object value;
+        final boolean removal;
+        AttributeChange(String key, Object value) {
+            this.key = key;
+            this.value = value;
+            this.removal = false;
+        }
+
+        AttributeChange(String key) {
+            this.key = key;
+            this.value = null;
+            this.removal = true;
+        }
     }
 
     public WeakReference<Activity> getCurrentActivity() {
@@ -246,21 +304,21 @@ public class KitFrameworkWrapper implements KitManager {
 
     @Override
     public void setUserAttribute(String key, String value) {
-        if (mKitManager != null) {
+        if (!queueAttribute(key, value) && mKitManager != null) {
             mKitManager.setUserAttribute(key, value);
         }
     }
 
     @Override
     public void setUserAttributeList(String key, List<String> value) {
-        if (mKitManager != null) {
+        if (!queueAttribute(key, value) && mKitManager != null) {
             mKitManager.setUserAttributeList(key, value);
         }
     }
 
     @Override
     public void removeUserAttribute(String key) {
-        if (mKitManager != null) {
+        if (!queueAttribute(key) && mKitManager != null) {
             mKitManager.removeUserAttribute(key);
         }
     }
