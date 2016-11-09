@@ -363,7 +363,7 @@ public class KitManagerImpl implements KitManager, DeepLinkListener, UserAttribu
                                     );
                                 }
                             }
-                        } else {
+                        } else if (provider instanceof KitIntegration.EventListener){
                             List<MPEvent> events = CommerceEventUtils.expand(filteredEvent);
                             boolean forwarded = false;
                             if (events != null) {
