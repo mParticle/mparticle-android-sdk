@@ -52,3 +52,6 @@
 [submodule "kits/apptimize-kit"]
 	path = kits/apptimize-kit
 	url = git@github.com:mparticle-integrations/mparticle-android-integration-apptimize.git
+[submodule "kits/revealmobile-kit"]
+	path = kits/revealmobile-kit
+	url = git@github.com:mparticle-integrations/mparticle-android-integration-revealmobile.git
