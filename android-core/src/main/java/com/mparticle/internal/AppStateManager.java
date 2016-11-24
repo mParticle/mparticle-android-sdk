@@ -6,6 +6,7 @@ import android.app.Application;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -74,6 +75,8 @@ import java.util.concurrent.atomic.AtomicLong;
 
     boolean mUnitTesting = false;
     private MessageManager mMessageManager;
+    private Uri mLaunchUri;
+    private String mLaunchAction;
 
     public AppStateManager(Context context, boolean unitTesting){
         mUnitTesting = unitTesting;
@@ -90,6 +93,14 @@ import java.util.concurrent.atomic.AtomicLong;
         if (apiVersion >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
             setupLifecycleCallbacks();
         }
+    }
+
+    public String getLaunchAction() {
+        return mLaunchAction;
+    }
+
+    public Uri getLaunchUri() {
+        return mLaunchUri;
     }
 
     public void setConfigManager(ConfigManager manager){
@@ -126,7 +137,12 @@ import java.util.concurrent.atomic.AtomicLong;
                 }
                 if(activity.getIntent() != null) {
                     previousSessionUri = activity.getIntent().getDataString();
-
+                    if (mLaunchUri == null) {
+                        mLaunchUri = activity.getIntent().getData();
+                    }
+                    if (mLaunchAction == null) {
+                        mLaunchAction = activity.getIntent().getAction();
+                    }
                     if (activity.getIntent().getExtras() != null && activity.getIntent().getExtras().getBundle(Constants.External.APPLINK_KEY) != null) {
                         JSONObject parameters = new JSONObject();
                         try {
