@@ -872,7 +872,7 @@ public class MParticle {
             mAppStateManager.ensureActiveSession();
             ConfigManager.log(LogLevel.DEBUG, "Set session attribute: " + key + "=" + value);
 
-            if (MPUtility.setCheckedAttribute(mAppStateManager.getSession().mSessionAttributes, key, value, true, false)) {
+            if (MPUtility.setCheckedAttribute(mAppStateManager.getSession().mSessionAttributes, key, value, false, false)) {
                 mMessageManager.setSessionAttributes();
             }
         }
