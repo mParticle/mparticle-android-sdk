@@ -111,8 +111,8 @@ public class KitIntegrationTest {
         };
         KitConfiguration configuration = Mockito.mock(KitConfiguration.class);
         MockSparseBooleanArray mockArray = new MockSparseBooleanArray();
-        mockArray.put(MPUtility.mpHash("key 4"), true);
-        mockArray.put(MPUtility.mpHash("key 3"), true);
+        mockArray.put(MPUtility.mpHash("key 4"), false);
+        mockArray.put(MPUtility.mpHash("key 3"), false);
         Mockito.when(configuration.getUserAttributeFilters()).thenReturn(mockArray);
         integration.setConfiguration(configuration);
 
@@ -159,8 +159,8 @@ public class KitIntegrationTest {
         KitIntegration integration = new AttributeListenerIntegration();
         KitConfiguration configuration = Mockito.mock(KitConfiguration.class);
         MockSparseBooleanArray mockArray = new MockSparseBooleanArray();
-        mockArray.put(MPUtility.mpHash("key 4"), true);
-        mockArray.put(MPUtility.mpHash("key 3"), true);
+        mockArray.put(MPUtility.mpHash("key 4"), false);
+        mockArray.put(MPUtility.mpHash("key 3"), false);
         Mockito.when(configuration.getUserAttributeFilters()).thenReturn(mockArray);
         integration.setConfiguration(configuration);
 

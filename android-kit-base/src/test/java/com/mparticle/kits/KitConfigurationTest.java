@@ -266,93 +266,12 @@ public class KitConfigurationTest {
         assertTrue(result);
     }
 
-    @Test
-    public void testFilterCommerceEvent() throws Exception {
-
-    }
 
     @Test
-    public void testFilterEventAttributes() throws Exception {
-
-    }
-
-    @Test
-    public void testFilterScreenAttributes() throws Exception {
-
-    }
-
-    @Test
-    public void testFilterEventAttributes1() throws Exception {
-
-    }
-
-    @Test
-    public void testFilterAttributes() throws Exception {
-
-    }
-
-    @Test
-    public void testShouldLogScreen() throws Exception {
-
-    }
-
-    @Test
-    public void testShouldLogEvent() throws Exception {
-
-    }
-
-    @Test
-    public void testPassesBracketing() throws Exception {
-
-    }
-
-    @Test
-    public void testGetProjectionList() throws Exception {
-
-    }
-
-    @Test
-    public void testGetDefaultEventProjection() throws Exception {
-
-    }
-
-    @Test
-    public void testGetDefaultCommerceProjection() throws Exception {
-
-    }
-
-    @Test
-    public void testGetDefaultScreenProjection() throws Exception {
-
-    }
-
-    @Test
-    public void testGetKitId() throws Exception {
-
-    }
-
-    @Test
-    public void testGetUserIdentityFilters() throws Exception {
-
-    }
-
-    @Test
-    public void testGetSettings() throws Exception {
-
-    }
-
-    @Test
-    public void testShouldHonorOptOut() throws Exception {
-
-    }
-
-    @Test
-    public void testShouldSetIdentity() throws Exception {
-
-    }
-
-    @Test
-    public void testGetUserAttributeFilters() throws Exception {
-
+    public void testUserAttributeFiltering() throws Exception {
+        KitConfiguration configuration = MockKitConfiguration.createKitConfiguration(new JSONObject(" {\"id\":56, \"as\":{\"secretKey\":\"testappkey\", \"eventList\":\"[\\\"test1\\\",\\\"test2\\\",\\\"test3\\\"]\", \"sendTransactionData\":\"True\", \"eventAttributeList\":null }, \"hs\":{\"ua\":{\"-430909305\":0, \"1510554026\":1, \"341203229\":0, \"96511\":0, \"3373707\":0, \"1193085\":0, \"635848677\":0, \"-564885382\":0, \"1168987\":0, \"102865796\":0, \"3552215\":0, \"3648196\":0, \"-892481550\":0, \"405645589\":0, \"405645588\":0, \"405645591\":0, \"405645590\":0, \"405645592\":0, \"3492908\":0 } }, }"));
+        assertFalse(configuration.shouldForwardAttribute(configuration.getUserAttributeFilters(), "test key in config as false"));
+        assertTrue(configuration.shouldForwardAttribute(configuration.getUserAttributeFilters(), "test key in config as true"));
+        assertTrue(configuration.shouldForwardAttribute(configuration.getUserAttributeFilters(), "test key not in config"));
     }
 }

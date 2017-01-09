@@ -490,7 +490,7 @@ public class KitManagerImpl implements KitManager, DeepLinkListener, UserAttribu
 
     private void setUserAttribute(KitIntegration provider, String attributeKey, List<String> valueList) {
         if (provider instanceof KitIntegration.AttributeListener && !provider.isDisabled() &&
-                !KitConfiguration.shouldRemoveAttribute(provider.getConfiguration().getUserAttributeFilters(),
+                KitConfiguration.shouldForwardAttribute(provider.getConfiguration().getUserAttributeFilters(),
                         attributeKey)) {
             if (((KitIntegration.AttributeListener)provider).supportsAttributeLists()) {
                 ((KitIntegration.AttributeListener) provider).setUserAttributeList(attributeKey, valueList);
@@ -502,7 +502,7 @@ public class KitManagerImpl implements KitManager, DeepLinkListener, UserAttribu
 
     private void setUserAttribute(KitIntegration provider, String attributeKey, String attributeValue) {
         if (provider instanceof KitIntegration.AttributeListener && !provider.isDisabled() &&
-                !KitConfiguration.shouldRemoveAttribute(provider.getConfiguration().getUserAttributeFilters(),
+                KitConfiguration.shouldForwardAttribute(provider.getConfiguration().getUserAttributeFilters(),
                         attributeKey)) {
             ((KitIntegration.AttributeListener)provider).setUserAttribute(attributeKey, attributeValue);
         }

@@ -396,7 +396,7 @@ public class KitConfiguration {
                 && attributes.size() > 0) {
             Map newAttributes = new HashMap(attributes.size());
             for (Map.Entry<String, ?> attribute : attributes.entrySet()) {
-                if (!shouldRemoveAttribute(attributeFilters, attribute.getKey())) {
+                if (shouldForwardAttribute(attributeFilters, attribute.getKey())) {
                     newAttributes.put(attribute.getKey(), attribute.getValue());
                 }
             }
@@ -406,9 +406,9 @@ public class KitConfiguration {
         }
     }
 
-    public static final boolean shouldRemoveAttribute(SparseBooleanArray attributeFilters, String key) {
+    public static final boolean shouldForwardAttribute(SparseBooleanArray attributeFilters, String key) {
         int hash = KitUtils.hashForFiltering(key);
-        return attributeFilters.get(hash, false);
+        return attributeFilters.get(hash, true);
     }
 
     private CommerceEvent filterCommerceEventAttributes(CommerceEvent filteredEvent) {
