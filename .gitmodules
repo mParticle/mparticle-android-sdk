@@ -55,3 +55,6 @@
 [submodule "kits/revealmobile-kit"]
 	path = kits/revealmobile-kit
 	url = git@github.com:mparticle-integrations/mparticle-android-integration-revealmobile.git
+[submodule "kits/radar-kit"]
+	path = kits/radar-kit
+	url = git@github.com:mparticle-integrations/mparticle-android-integration-radar.git

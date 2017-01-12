@@ -46,6 +46,7 @@ public class KitIntegrationFactory {
         kits.put(MParticle.ServiceProviders.LEANPLUM,         "com.mparticle.kits.LeanplumKit");
         kits.put(MParticle.ServiceProviders.APPTIMIZE,        "com.mparticle.kits.ApptimizeKit");
         kits.put(MParticle.ServiceProviders.REVEAL_MOBILE,    "com.mparticle.kits.RevealMobileKit");
+        kits.put(MParticle.ServiceProviders.RADAR,            "com.mparticle.kits.RadarKit");
         return kits;
     }
 

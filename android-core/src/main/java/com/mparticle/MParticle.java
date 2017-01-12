@@ -1703,6 +1703,7 @@ public class MParticle {
         int BUTTON = 1022;
         int LEANPLUM = 98;
         int REVEAL_MOBILE = 112;
+        int RADAR = 117;
         String BROADCAST_ACTIVE = "MPARTICLE_SERVICE_PROVIDER_ACTIVE_";
         String BROADCAST_DISABLED = "MPARTICLE_SERVICE_PROVIDER_DISABLED_";
     }
