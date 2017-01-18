@@ -83,4 +83,8 @@ public interface KitManager {
     void onActivitySaveInstanceState(Activity activity, Bundle outState);
 
     void onActivityDestroyed(Activity activity);
+
+    void onSessionEnd();
+
+    void onSessionStart();
 }

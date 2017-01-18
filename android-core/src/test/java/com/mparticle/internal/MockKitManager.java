@@ -184,4 +184,14 @@ public class MockKitManager implements KitManager {
 
     }
 
+    @Override
+    public void onSessionEnd() {
+        
+    }
+
+    @Override
+    public void onSessionStart() {
+
+    }
+
 }

@@ -304,6 +304,28 @@ public abstract class KitIntegration {
     }
 
     /**
+     * Kit should implement this interface to listen for mParticle session-start and session-end messages.
+     *
+     */
+    public interface SessionListener {
+        /**
+         * mParticle will start a new session when:
+         *  1. The app is brought to the foreground, and there isn't already an active session.
+         *  2. Any event (ie custom events, screen events, user attributes, etc) is logged by the hosting app
+         *
+         * @return
+         */
+        List<ReportingMessage> onSessionStart();
+
+        /**
+         * mParticle will end a session when the app is sent to the background, after the session timeout (defaulted to 60s)
+         *
+         * @return
+         */
+        List<ReportingMessage> onSessionEnd();
+    }
+
+    /**
      * Kits should implement this interface when their underlying service has the notion
      * of a user with attributes.
      */

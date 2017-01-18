@@ -119,6 +119,8 @@ public class KitFrameworkWrapper implements KitManager {
             return;
         }
 
+        mKitManager.onSessionStart();
+
         if (registerForPush) {
             PushRegistrationHelper.PushRegistration registration = PushRegistrationHelper.getLatestPushRegistration(mContext);
             if (registration != null) {
@@ -455,6 +457,20 @@ public class KitFrameworkWrapper implements KitManager {
     public void onActivityDestroyed(Activity activity) {
         if (mKitManager != null) {
             mKitManager.onActivityDestroyed(activity);
+        }
+    }
+
+    @Override
+    public void onSessionEnd() {
+        if (mKitManager != null) {
+            mKitManager.onSessionEnd();
+        }
+    }
+
+    @Override
+    public void onSessionStart() {
+        if (mKitManager != null) {
+            mKitManager.onSessionStart();
         }
     }
 }

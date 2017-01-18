@@ -836,6 +836,34 @@ public class KitManagerImpl implements KitManager, DeepLinkListener, UserAttribu
         }
     }
 
+    @Override
+    public void onSessionEnd() {
+        for (KitIntegration provider : providers.values()) {
+            try {
+                if (provider instanceof KitIntegration.SessionListener && !provider.isDisabled()) {
+                    List<ReportingMessage> reportingMessages = ((KitIntegration.SessionListener)provider).onSessionEnd();
+                    getReportingManager().logAll(reportingMessages);
+                }
+            } catch (Exception e) {
+                ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to call onSessionEnd for kit: " + provider.getName() + ": " + e.getMessage());
+            }
+        }
+    }
+
+    @Override
+    public void onSessionStart() {
+        for (KitIntegration provider : providers.values()) {
+            try {
+                if (provider instanceof KitIntegration.SessionListener && !provider.isDisabled()) {
+                    List<ReportingMessage> reportingMessages = ((KitIntegration.SessionListener)provider).onSessionStart();
+                    getReportingManager().logAll(reportingMessages);
+                }
+            } catch (Exception e) {
+                ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to call onSessionStart for kit: " + provider.getName() + ": " + e.getMessage());
+            }
+        }
+    }
+
     //================================================================================
     // DeepLinkListener forwarding
     //================================================================================

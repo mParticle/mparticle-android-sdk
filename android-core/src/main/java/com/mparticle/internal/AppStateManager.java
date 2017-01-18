@@ -350,6 +350,7 @@ import java.util.concurrent.atomic.AtomicLong;
         mMessageManager.endSession(mCurrentSession);
         disableLocationTracking();
         mCurrentSession = new Session();
+        MParticle.getInstance().getKitManager().onSessionEnd();
     }
 
     private void disableLocationTracking() {
@@ -364,6 +365,7 @@ import java.util.concurrent.atomic.AtomicLong;
     public void startSession() {
         mCurrentSession = new Session().start();
         enableLocationTracking();
+        MParticle.getInstance().getKitManager().onSessionStart();
     }
 
     public void onActivitySaveInstanceState(Activity activity, Bundle outState) {
