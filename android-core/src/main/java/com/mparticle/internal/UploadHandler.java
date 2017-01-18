@@ -403,9 +403,15 @@ public class UploadHandler extends Handler {
         boolean sampling = false;
         try {
             responseCode = mApiClient.sendMessageBatch(message);
-        }catch (MParticleApiClientImpl.MPRampException e) {
+        } catch (MParticleApiClientImpl.MPRampException e) {
             sampling = true;
             ConfigManager.log(MParticle.LogLevel.DEBUG, "This device is being sampled.");
+        } catch (AssertionError e) {
+            //some devices do not have MD5, and therefore cannot process SSL certificates,
+            //and will throw an AssertionError containing an NoSuchAlgorithmException
+            //there's not much to do in that case except catch the error and discard the data.
+            ConfigManager.log(MParticle.LogLevel.ERROR, "API request failed " + e.toString());
+            sampling = true;
         }
 
         if (sampling || shouldDelete(responseCode)) {

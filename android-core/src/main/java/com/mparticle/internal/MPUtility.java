@@ -349,7 +349,12 @@ public class MPUtility {
         if (versionCode == null) {
             versionCode = DeviceAttributes.UNKNOWN;
         }
-        return UUID.nameUUIDFromBytes(versionCode.getBytes()).toString();
+        try {
+            return UUID.nameUUIDFromBytes(versionCode.getBytes()).toString();
+        }catch (AssertionError e) {
+            //some devices do not have MD5 and will throw a NoSuchAlgorithmException
+            return DeviceAttributes.UNKNOWN;
+        }
     }
 
     public static boolean isTablet(Context context) {

@@ -181,6 +181,10 @@ public class MParticleApiClientImpl implements MParticleApiClient {
             ConfigManager.log(MParticle.LogLevel.ERROR, "Error constructing config service URL");
         } catch (JSONException e) {
             ConfigManager.log(MParticle.LogLevel.ERROR, "Config request failed to process response message JSON");
+        } catch (AssertionError e) {
+            //some devices do not have MD5, and therefore cannot process SSL certificates
+            //there's not much to do in that case except catch the error
+            ConfigManager.log(MParticle.LogLevel.ERROR, "Config request failed " + e.toString());
         }
     }
 
