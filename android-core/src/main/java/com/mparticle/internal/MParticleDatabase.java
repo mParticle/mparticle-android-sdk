@@ -79,6 +79,20 @@ import java.util.Iterator;
                 null,
                 prepareOrderBy);
     }
+
+    static int deleteOldMessages(SQLiteDatabase database, String currentSessionId){
+        String[] selectionArgs = new String[]{currentSessionId};
+        return database.delete(
+                MessageTable.TABLE_NAME,
+                sessionHistorySelection,
+                selectionArgs);
+    }
+
+    static int deleteOldSessions(SQLiteDatabase database, String currentSessionId){
+        String[] selectionArgs = new String[]{currentSessionId};
+        return database.delete(SessionTable.TABLE_NAME, SessionTable.SESSION_ID + "!=?", selectionArgs);
+    }
+
     private static String[] readyMessages = new String[]{Integer.toString(Constants.Status.UPLOADED)};
 
     public static Cursor getSessions(SQLiteDatabase db) {

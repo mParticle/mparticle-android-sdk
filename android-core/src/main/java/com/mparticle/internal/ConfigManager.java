@@ -66,6 +66,19 @@ public class ConfigManager {
         mContext = context.getApplicationContext();
         mPreferences = mContext.getSharedPreferences(PREFERENCES_FILE, Context.MODE_PRIVATE);
         sLocalPrefs = new AppConfig(mContext, environment, mPreferences, apiKey, apiSecret);
+        restoreOldConfig();
+    }
+
+    private void restoreOldConfig() {
+        String oldConfig = mPreferences.getString(CONFIG_JSON, null);
+        if (!MPUtility.isEmpty(oldConfig)){
+            try{
+                JSONObject oldConfigJson = new JSONObject(oldConfig);
+                updateConfig(oldConfigJson, false);
+            }catch (Exception jse){
+
+            }
+        }
     }
 
     /**
@@ -93,9 +106,9 @@ public class ConfigManager {
     public synchronized void updateConfig(JSONObject responseJSON) throws JSONException {
         updateConfig(responseJSON, true);
     }
-    public synchronized void updateConfig(JSONObject responseJSON, boolean persistJson) throws JSONException {
+    public synchronized void updateConfig(JSONObject responseJSON, boolean newConfig) throws JSONException {
         SharedPreferences.Editor editor = mPreferences.edit();
-        if (persistJson) {
+        if (newConfig) {
             saveConfigJson(responseJSON);
         }
 
@@ -103,7 +116,7 @@ public class ConfigManager {
             mLogUnhandledExceptions = responseJSON.getString(KEY_UNHANDLED_EXCEPTIONS);
         }
 
-        if (responseJSON.has(KEY_PUSH_MESSAGES)) {
+        if (responseJSON.has(KEY_PUSH_MESSAGES) && newConfig) {
             sPushKeys = responseJSON.getJSONArray(KEY_PUSH_MESSAGES);
             editor.putString(KEY_PUSH_MESSAGES, sPushKeys.toString());
         }
@@ -158,8 +171,9 @@ public class ConfigManager {
 
         editor.apply();
         applyConfig();
-
-        MParticle.getInstance().getKitManager().updateKits(responseJSON.optJSONArray(KEY_EMBEDDED_KITS));
+        if (newConfig) {
+            MParticle.getInstance().getKitManager().updateKits(responseJSON.optJSONArray(KEY_EMBEDDED_KITS));
+        }
     }
 
     public String getActiveModuleIds(){

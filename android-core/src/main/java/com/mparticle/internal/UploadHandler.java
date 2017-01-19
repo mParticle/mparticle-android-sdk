@@ -187,9 +187,16 @@ public class UploadHandler extends Handler {
     private void prepareMessageUploads(boolean history) {
         Cursor readyMessagesCursor = null, reportingMessageCursor = null, sessionCursor = null;
         String currentSessionId = mAppStateManager.getSession().mSessionID;
+        final boolean sessionHistoryEnabled = MParticle.getInstance().getConfigManager().getIncludeSessionHistory();
         try {
             db.beginTransaction();
             if (history){
+                if (!sessionHistoryEnabled) {
+                    MParticleDatabase.deleteOldMessages(db, currentSessionId);
+                    MParticleDatabase.deleteOldSessions(db, currentSessionId);
+                    db.setTransactionSuccessful();
+                    return;
+                }
                 readyMessagesCursor = MParticleDatabase.getSessionHistory(db, currentSessionId);
             }else {
                 readyMessagesCursor = MParticleDatabase.getMessagesForUpload(db);
@@ -211,11 +218,12 @@ public class UploadHandler extends Handler {
                     JSONObject msgObject = new JSONObject(readyMessagesCursor.getString(messageIndex));
 
                     if (history) {
+
                         uploadMessage.addSessionHistoryMessage(msgObject);
                         dbDeleteMessage(messageId);
                     } else {
                         uploadMessage.addMessage(msgObject);
-                        if (Constants.NO_SESSION_ID.equals(sessionId) || !MParticle.getInstance().getConfigManager().getIncludeSessionHistory()) {
+                        if (Constants.NO_SESSION_ID.equals(sessionId) || !sessionHistoryEnabled) {
                             //if this is a session-less message, or if session history is disabled, just delete it
                             dbDeleteMessage(messageId);
                         } else {
@@ -271,8 +279,6 @@ public class UploadHandler extends Handler {
                     }
                 }
 
-
-
                 for (Map.Entry<String, MessageBatch> entry : uploadMessageMap.entrySet()) {
                     MessageBatch uploadMessage = entry.getValue();
                     if (uploadMessage != null) {
@@ -294,7 +300,7 @@ public class UploadHandler extends Handler {
                         //if this was to process session history, or
                         //if we're never going to process history AND
                         //this batch contains a previous session, then delete the session
-                        if (history || (!MParticle.getInstance().getConfigManager().getIncludeSessionHistory() && !sessionId.equals(currentSessionId))) {
+                        if (history || (!sessionHistoryEnabled && !sessionId.equals(currentSessionId))) {
                             db.delete(MParticleDatabase.SessionTable.TABLE_NAME, MParticleDatabase.SessionTable.SESSION_ID + "=?", new String[]{sessionId});
                         }
                     }
@@ -367,11 +373,12 @@ public class UploadHandler extends Handler {
             if (readyUploadsCursor.getCount() > 0) {
                 mApiClient.fetchConfig();
             }
+            final boolean includeSessionHistory = mConfigManager.getIncludeSessionHistory();
             while (readyUploadsCursor.moveToNext()) {
                 int id = readyUploadsCursor.getInt(messageIdIndex);
                 //this case actually shouldn't be needed anymore except for upgrade scenarios.
                 //as of version 4.9.0, upload batches for session history shouldn't even be created.
-                if (history && !mConfigManager.getIncludeSessionHistory()){
+                if (history && !includeSessionHistory){
                     deleteUpload(id);
                 } else {
                     String message = readyUploadsCursor.getString(messageIndex);
