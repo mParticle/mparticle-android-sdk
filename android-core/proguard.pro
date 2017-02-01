@@ -105,7 +105,7 @@
 -keep class com.mparticle.ReferrerReceiver { *; }
 -keep class com.mparticle.kits.ForeseeKit { *; }
 -keep class com.mparticle.UserAttributeListener { *; }
-
+-keep class com.mparticle.internal.MParticleJSInterface { *; }
 
 -keep public class com.mparticle.activity.* {
     *;
