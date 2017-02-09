@@ -190,8 +190,8 @@ public class MPService extends IntentService {
                     public void onKitsLoaded() {
                         try{
                             MParticle.getInstance().getKitManager().loadKitLibrary();
-                            boolean handled = MParticle.getInstance().getKitManager().onMessageReceived(getApplicationContext(), intent);
                             AbstractCloudMessage cloudMessage = AbstractCloudMessage.createMessage(intent, ConfigManager.getPushKeys(MPService.this));
+                            boolean handled = MParticle.getInstance().getKitManager().onMessageReceived(getApplicationContext(), intent);
                             cloudMessage.setDisplayed(handled);
                             String appState = getAppState();
                             if (cloudMessage instanceof MPCloudNotificationMessage){

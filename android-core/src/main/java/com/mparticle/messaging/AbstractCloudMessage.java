@@ -43,7 +43,9 @@ public abstract class AbstractCloudMessage implements Parcelable {
     }
 
     public AbstractCloudMessage(Bundle extras){
-        mExtras = extras;
+        if (extras != null) {
+            mExtras = new Bundle(extras);
+        }
     }
 
     protected abstract CloudAction getDefaultAction();
@@ -67,11 +69,7 @@ public abstract class AbstractCloudMessage implements Parcelable {
     }
 
     public static AbstractCloudMessage createMessage(Intent intent, JSONArray keys) throws InvalidGcmMessageException {
-        if (MPCloudNotificationMessage.isValid(intent.getExtras())){
-            return new MPCloudNotificationMessage(intent.getExtras());
-        }else{
-            return new ProviderCloudMessage(intent.getExtras(), keys);
-        }
+        return new ProviderCloudMessage(intent.getExtras(), keys);
     }
 
     @Override
