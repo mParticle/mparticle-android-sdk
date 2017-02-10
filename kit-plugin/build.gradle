@@ -9,7 +9,7 @@ apply from: '../scripts/maven.gradle'
 dependencies {
     compile gradleApi()
     compile localGroovy()
-    compile 'com.android.tools.build:gradle:1.5.0'
+    compile 'com.android.tools.build:gradle:2.2.3'
 }
 
 compileGroovy {
