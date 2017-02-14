@@ -15,8 +15,6 @@ allprojects {
     ext."signing.password" = System.getenv("mavenSigningKeyPassword")
 }
 
-
-
 def target_maven_repo
 if (project.hasProperty('target_maven_repo')) {
     target_maven_repo = project.property('target_maven_repo')

@@ -66,7 +66,7 @@ Kit | Maven Artifact
 The Google Play Services Ads framework is necessary to collect the Android Advertisting ID. AAID collection is required by all attribution and audience integrations, and many other integrations. Include the `-ads` artifact, a subset of [Google Play Services](https://developers.google.com/android/guides/setup):
 
 ```groovy
-    compile 'com.google.android.gms:play-services-ads:9.0.0'
+    compile 'com.google.android.gms:play-services-ads:10.0.0'
 ```
 
 ##### Google Cloud Messaging
@@ -74,7 +74,7 @@ The Google Play Services Ads framework is necessary to collect the Android Adver
 mParticle supports several marketing automation and push messaging integrations. These require that mParticle register for an instance id (formely known as a push registration token) using the Google Play Services Cloud Messaging framework. Include the `-gcm` artifact, a subset of [Google Play Services](https://developers.google.com/android/guides/setup):
 
 ```groovy
-    compile 'com.google.android.gms:play-services-gcm:9.0.0'
+    compile 'com.google.android.gms:play-services-gcm:10.0.0'
 ```
 
 ### Install Referrer
