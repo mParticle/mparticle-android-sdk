@@ -77,9 +77,12 @@ mParticle supports several marketing automation and push messaging integrations.
     compile 'com.google.android.gms:play-services-gcm:9.0.0'
 ```
 
-### Install Referrer
+### Google Play Install Referrer
 
-In order for attribution, deep linking, and many other integrations to work properly, add the mParticle `ReferrerReceiver` to your manifest file within the `<application>` tag:
+#### Single Receiver
+
+In order for attribution, deep linking, and many other integrations to work properly, add the mParticle `ReferrerReceiver` to your manifest file within the `<application>` tag. The mParticle SDK
+will collect any campaign referral information and automatically forward it to kits (such as AppsFlyer, Kochava, and Adjust) and server-side integrations.
 
 ```xml
 <receiver android:name="com.mparticle.ReferrerReceiver" android:exported="true">
@@ -89,7 +92,23 @@ In order for attribution, deep linking, and many other integrations to work prop
 </receiver>
 ```
 
-## Show me the code
+#### Multiple Receivers
+
+Google Play will only deliver the `INSTALL_REFERRER` Intent to a single `BroadcastReceiver` - you **cannot** have multiple in your manifest. If you already have your own receiver, or otherwise have multiple receivers that require
+referral data, you must expose your own `BroadcastReceiver` in your manifest and then forward the received Intent to mParticle:
+
+```java
+public class ExampleReceiver extends BroadcastReceiver {
+    @Override
+    public void onReceive(Context context, Intent intent) {
+        //process the Intent/send to other receivers as desired, and
+        //send the Context and Intent into mParticle's BroadcastReceiver
+        new com.mparticle.ReferrerReceiver().onReceive(context, intent);
+    }
+}
+```
+
+## Initialize the SDK
 
 Grab your mParticle key and secret from [your app's dashboard](https://app.mparticle.com/apps) and add them as `string` resources in your app:
 
@@ -102,8 +121,6 @@ Grab your mParticle key and secret from [your app's dashboard](https://app.mpart
 </resources>
 ```
 > You can also pass your key/secret programmatically in the method below.
-
-#### Initialize the SDK
 
 Call `start` from the `onCreate` method of your app's `Application` class. It's crucial that the SDK be started here for proper session management. If you don't already have an `Application` class, create it and then specify its fully-qualified name in the `<application>` tag of your app's `AndroidManifest.xml`.
 
