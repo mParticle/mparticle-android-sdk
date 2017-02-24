@@ -82,7 +82,7 @@ public class MPUtilityTest {
 
     @Test
     public void getGoogleAdIdInfoWithoutPlayServicesAvailable() throws Exception{
-        assertNull(MPUtility.getGoogleAdIdInfo(new MockContext()));
+        assertNull(MPUtility.getAdIdInfo(new MockContext()));
     }
 
     @Test

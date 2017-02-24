@@ -4,6 +4,7 @@ import android.Manifest;
 import android.annotation.TargetApi;
 import android.app.ActivityManager;
 import android.bluetooth.BluetoothAdapter;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -114,7 +115,28 @@ public class MPUtility {
         return collection == null || collection.size() == 0;
     }
 
-    public static AndroidAdIdInfo getGoogleAdIdInfo(Context context) {
+    @TargetApi(Build.VERSION_CODES.ECLAIR)
+    public static AdIdInfo getAdIdInfo(Context context) {
+        String packageName = context.getPackageName();
+        PackageManager packageManager = context.getPackageManager();
+        String installerName = packageManager.getInstallerPackageName(packageName);
+        if ((installerName != null && installerName.contains("com.amazon.venezia")) ||
+                "Amazon".equals(android.os.Build.MANUFACTURER)) {
+            AdIdInfo infoId = getAmazonAdIdInfo(context);
+            if (infoId == null) {
+                return getGoogleAdIdInfo(context);
+            }
+            return infoId;
+        } else {
+            AdIdInfo infoId = getGoogleAdIdInfo(context);
+            if (infoId == null) {
+                return getAmazonAdIdInfo(context);
+            }
+            return infoId;
+        }
+    }
+
+    private static AdIdInfo getGoogleAdIdInfo(Context context) {
         try {
             Class AdvertisingIdClient = Class
                     .forName("com.google.android.gms.ads.identifier.AdvertisingIdClient");
@@ -127,8 +149,26 @@ public class MPUtility {
                     .invoke(advertisingInfo);
             Method getId = advertisingInfo.getClass().getMethod("getId");
             String advertisingId = (String) getId.invoke(advertisingInfo);
-            return new AndroidAdIdInfo(advertisingId, limitAdTrackingEnabled);
+            return new AdIdInfo(advertisingId, limitAdTrackingEnabled, AdIdInfo.Advertiser.GOOGLE);
         } catch (Exception cnfe) {
+
+        }
+        return null;
+    }
+
+    private static AdIdInfo getAmazonAdIdInfo(Context context) {
+        // https://developer.amazon.com/public/solutions/platforms/fire-os/docs/fire-os-advertising-id
+        // https://forums.developer.amazon.com/articles/18194/using-the-advertising-id-in-your-app.html
+        String advertisingID = "";
+        boolean limitAdTracking;
+        try {
+            ContentResolver cr = context.getContentResolver();
+            limitAdTracking = (Settings.Secure.getInt(cr, "limit_ad_tracking", 0) == 0) ? false : true;
+            advertisingID = Settings.Secure.getString(cr, "advertising_id");
+            if (advertisingID != null) {
+                return new AdIdInfo(advertisingID, limitAdTracking, AdIdInfo.Advertiser.AMAZON);
+            }
+        } catch (Exception ex) {
 
         }
         return null;
@@ -142,13 +182,26 @@ public class MPUtility {
         return field == field1 || (field != null && field.equals(field1));
     }
 
-    public static class AndroidAdIdInfo {
+    public static class AdIdInfo {
+        public enum Advertiser {
+            AMAZON("Amazon"),
+            GOOGLE("Google Play Store");
+
+            public String descriptiveName;
+
+            Advertiser(String name) {
+                this.descriptiveName = name;
+            }
+        }
+
         public final String id;
         public final boolean isLimitAdTrackingEnabled;
+        public final Advertiser advertiser;
 
-        public AndroidAdIdInfo(String id, boolean isLimitAdTrackingEnabled) {
+        public AdIdInfo(String id, boolean isLimitAdTrackingEnabled, Advertiser advertiser) {
             this.id = id;
             this.isLimitAdTrackingEnabled = isLimitAdTrackingEnabled;
+            this.advertiser = advertiser;
         }
     }
 
@@ -279,6 +332,7 @@ public class MPUtility {
         return TimeUnit.MILLISECONDS.convert(System.nanoTime(), TimeUnit.NANOSECONDS);
     }
 
+    @TargetApi(Build.VERSION_CODES.CUPCAKE)
     public static String getAndroidID(Context context) {
         return Settings.Secure.getString(context.getContentResolver(), "android_id");
     }

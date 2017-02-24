@@ -237,6 +237,7 @@ public class Constants {
         String DEVICE_SUPPORTS_NFC = "dsnfc";
         String DEVICE_BLUETOOTH_ENABLED = "dbe";
         String DEVICE_BLUETOOTH_VERSION = "dbv";
+        String AMAZON_ADV_ID = "faid";
         String GOOGLE_ADV_ID = "gaid";
         String LIMIT_AD_TRACKING = "lat";
         String DEVICE_IMEI = "imei";

@@ -275,10 +275,10 @@ public class MParticleIdentityClientImplTest extends BaseCleanStartedEachTest {
 
     private void checkStaticsAndRemove(JSONObject knowIdentites) throws JSONException {
         if (knowIdentites.has(ANDROID_AAID)) {
-            assertEquals(MPUtility.getGoogleAdIdInfo(mContext).id, knowIdentites.getString(ANDROID_AAID));
+            assertEquals(MPUtility.getAdIdInfo(mContext).id, knowIdentites.getString(ANDROID_AAID));
             knowIdentites.remove(ANDROID_AAID);
         } else {
-            assertTrue(MPUtility.getGoogleAdIdInfo(mContext) == null || MPUtility.isEmpty(MPUtility.getGoogleAdIdInfo(mContext).id));
+            assertTrue(MPUtility.getAdIdInfo(mContext) == null || MPUtility.isEmpty(MPUtility.getAdIdInfo(mContext).id));
         }
         if (knowIdentites.has(ANDROID_UUID)) {
             assertEquals(MPUtility.getAndroidID(mContext), knowIdentites.getString(ANDROID_UUID));

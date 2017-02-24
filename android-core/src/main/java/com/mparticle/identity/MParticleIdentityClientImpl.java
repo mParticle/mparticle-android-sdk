@@ -45,6 +45,7 @@ import java.util.UUID;
     static final String REQUEST_TIMESTAMP_MS = "request_timestamp_ms";
 
     static final String ANDROID_AAID = "android_aaid";
+    static final String FIRE_AID = "fire_aid";
     static final String PUSH_TOKEN = "push_token";
     static final String ANDROID_UUID = "android_uuid";
     static final String DEVICE_APPLICATION_STAMP = "device_application_stamp";
@@ -148,9 +149,16 @@ import java.util.UUID;
         JSONObject jsonObject = getBaseJson();
 
         JSONObject identitiesJson = new JSONObject();
-        MPUtility.AndroidAdIdInfo adIdInfo = MPUtility.getGoogleAdIdInfo(mContext);
+        MPUtility.AdIdInfo adIdInfo = MPUtility.getAdIdInfo(mContext);
         if (adIdInfo != null) {
-            identitiesJson.put(ANDROID_AAID, adIdInfo.id);
+            switch (adIdInfo.advertiser) {
+                case AMAZON:
+                    identitiesJson.put(FIRE_AID, adIdInfo.id);
+                    break;
+                case GOOGLE:
+                    identitiesJson.put(ANDROID_AAID, adIdInfo.id);
+                    break;
+            }
         }
         String pushToken = mConfigManager.getPushInstanceId();
         if (!MPUtility.isEmpty(pushToken)) {

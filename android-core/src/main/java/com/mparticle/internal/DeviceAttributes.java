@@ -242,16 +242,23 @@ public class DeviceAttributes {
     public void updateDeviceInfo(Context context, JSONObject deviceInfo) {
         deviceInfo.remove(MessageKey.LIMIT_AD_TRACKING);
         deviceInfo.remove(MessageKey.GOOGLE_ADV_ID);
-        MPUtility.AndroidAdIdInfo adIdInfo = MPUtility.getGoogleAdIdInfo(context);
-        String message = "Failed to collect Google Play Advertising ID, be sure to add Google Play services or com.google.android.gms:play-services-ads to your app's dependencies.";
+        MPUtility.AdIdInfo adIdInfo = MPUtility.getAdIdInfo(context);
+        String message = "Failed to collect Advertising ID, be sure to add Google Play services (com.google.android.gms:play-services-ads) or Amazon Ads (com.amazon.android:mobile-ads) to your app's dependencies.";
         if (adIdInfo != null) {
             try {
                 deviceInfo.put(MessageKey.LIMIT_AD_TRACKING, adIdInfo.isLimitAdTrackingEnabled);
                 if (adIdInfo.isLimitAdTrackingEnabled && MParticle.getInstance().Internal().getConfigManager().getRestrictAAIDBasedOnLAT()) {
-                    message = "Google Play Advertising ID available but ad tracking is disabled on this device.";
+                    message = adIdInfo.advertiser.descriptiveName + " Advertising ID available but ad tracking is disabled on this device.";
                 } else {
-                    deviceInfo.put(MessageKey.GOOGLE_ADV_ID, adIdInfo.id);
-                    message = "Successfully collected Google Play Advertising ID.";
+                    switch (adIdInfo.advertiser) {
+                        case AMAZON:
+                            deviceInfo.put(MessageKey.AMAZON_ADV_ID, adIdInfo.id);
+                            break;
+                        case GOOGLE:
+                            deviceInfo.put(MessageKey.GOOGLE_ADV_ID, adIdInfo.id);
+                            break;
+                    }
+                    message = "Successfully collected " + adIdInfo.advertiser.descriptiveName + " Advertising ID.";
                 }
             }catch (JSONException jse) {
                 Logger.debug("Failed while building device-customAttributes object: ", jse.toString());

@@ -419,7 +419,7 @@ public class  AppStateManager {
 
     private void checkGoogleAdIdChanged() {
         String previousGoogleAdId = mConfigManager.getPreviousGoogleAdId();
-        MPUtility.AndroidAdIdInfo adIdInfo =  MPUtility.getGoogleAdIdInfo(mContext);
+        MPUtility.AdIdInfo adIdInfo =  MPUtility.getAdIdInfo(mContext);
         String currentGoogleAdId = adIdInfo == null ? null : adIdInfo.id;
         if (currentGoogleAdId != null && !currentGoogleAdId.equals(previousGoogleAdId)) {
             MParticleUser user = MParticle.getInstance().Identity().getCurrentUser();

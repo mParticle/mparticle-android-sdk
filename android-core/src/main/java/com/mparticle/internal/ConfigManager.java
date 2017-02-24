@@ -1012,7 +1012,7 @@ public class ConfigManager {
     }
 
     public String getPreviousGoogleAdId() {
-        MPUtility.AndroidAdIdInfo adInfo = MPUtility.getGoogleAdIdInfo(mContext);
+        MPUtility.AdIdInfo adInfo = MPUtility.getAdIdInfo(mContext);
         String currentAdId = null;
         if (adInfo != null) {
             currentAdId = adInfo.id;
@@ -1021,7 +1021,7 @@ public class ConfigManager {
     }
 
     public void setPreviousGoogleAdId() {
-        MPUtility.AndroidAdIdInfo adInfo = MPUtility.getGoogleAdIdInfo(mContext);
+        MPUtility.AdIdInfo adInfo = MPUtility.getAdIdInfo(mContext);
         String currentAdId = null;
         if (adInfo != null) {
             currentAdId = adInfo.id;

@@ -143,10 +143,10 @@ public class UploadHandlerTest {
         final String AAID = UUID.randomUUID().toString();
         Mockito.when(mConfigManager.getRestrictAAIDBasedOnLAT()).thenReturn(true);
         PowerMockito.mockStatic(MPUtility.class);
-        Mockito.when(MPUtility.getGoogleAdIdInfo(Mockito.any(Context.class))).thenReturn(new MPUtility.AndroidAdIdInfo(AAID, false));
+        Mockito.when(MPUtility.getAdIdInfo(Mockito.any(Context.class))).thenReturn(new MPUtility.AdIdInfo(AAID, false, MPUtility.AdIdInfo.Advertiser.AMAZON));
         JSONObject attributes = new DeviceAttributes().getDeviceInfo(new MockContext());
         assertFalse(attributes.getBoolean("lat"));
-        assertEquals(AAID, attributes.getString("gaid"));
+        assertEquals(AAID, attributes.getString("faid"));
     }
 
     @Test
@@ -155,7 +155,7 @@ public class UploadHandlerTest {
         final String AAID = UUID.randomUUID().toString();
         Mockito.when(mConfigManager.getRestrictAAIDBasedOnLAT()).thenReturn(true);
         PowerMockito.mockStatic(MPUtility.class);
-        Mockito.when(MPUtility.getGoogleAdIdInfo(Mockito.any(Context.class))).thenReturn(new MPUtility.AndroidAdIdInfo(AAID, true));
+        Mockito.when(MPUtility.getAdIdInfo(Mockito.any(Context.class))).thenReturn(new MPUtility.AdIdInfo(AAID, true, MPUtility.AdIdInfo.Advertiser.GOOGLE));
         JSONObject attributes = new DeviceAttributes().getDeviceInfo(new MockContext());
         assertTrue(attributes.getBoolean("lat"));
         assertFalse(attributes.has("gaid"));
@@ -167,10 +167,10 @@ public class UploadHandlerTest {
         final String AAID = UUID.randomUUID().toString();
         Mockito.when(mConfigManager.getRestrictAAIDBasedOnLAT()).thenReturn(false);
         PowerMockito.mockStatic(MPUtility.class);
-        Mockito.when(MPUtility.getGoogleAdIdInfo(Mockito.any(Context.class))).thenReturn(new MPUtility.AndroidAdIdInfo(AAID, true));
+        Mockito.when(MPUtility.getAdIdInfo(Mockito.any(Context.class))).thenReturn(new MPUtility.AdIdInfo(AAID, true, MPUtility.AdIdInfo.Advertiser.AMAZON));
         JSONObject attributes = new DeviceAttributes().getDeviceInfo(new MockContext());
         assertTrue(attributes.getBoolean("lat"));
-        assertEquals(AAID, attributes.getString("gaid"));
+        assertEquals(AAID, attributes.getString("faid"));
     }
 
     @Test
@@ -179,7 +179,7 @@ public class UploadHandlerTest {
         final String AAID = UUID.randomUUID().toString();
         Mockito.when(mConfigManager.getRestrictAAIDBasedOnLAT()).thenReturn(false);
         PowerMockito.mockStatic(MPUtility.class);
-        Mockito.when(MPUtility.getGoogleAdIdInfo(Mockito.any(Context.class))).thenReturn(new MPUtility.AndroidAdIdInfo(AAID, false));
+        Mockito.when(MPUtility.getAdIdInfo(Mockito.any(Context.class))).thenReturn(new MPUtility.AdIdInfo(AAID, false, MPUtility.AdIdInfo.Advertiser.GOOGLE));
         JSONObject attributes = new DeviceAttributes().getDeviceInfo(new MockContext());
         assertFalse(attributes.getBoolean("lat"));
         assertEquals(AAID, attributes.getString("gaid"));
