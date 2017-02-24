@@ -93,6 +93,7 @@
 -keep class com.mparticle.DeepLinkListener { *; }
 -keep class com.mparticle.DeepLinkResult { *; }
 -keep, includedescriptorclasses class com.mparticle.internal.AppStateManager { *; }
+-keep class com.mparticle.internal.ApplicationContextWrapper { *; }
 -keep class com.mparticle.internal.KitManager { *; }
 -keep class com.mparticle.internal.KitFrameworkWrapper { *; }
 -keep class com.mparticle.internal.ConfigManager { *; }

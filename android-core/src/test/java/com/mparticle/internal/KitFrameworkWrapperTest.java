@@ -29,7 +29,8 @@ public class KitFrameworkWrapperTest {
         KitFrameworkWrapper wrapper = new KitFrameworkWrapper(Mockito.mock(Context.class),
                 Mockito.mock(ReportingManager.class),
                 Mockito.mock(ConfigManager.class),
-                Mockito.mock(AppStateManager.class));
+                Mockito.mock(AppStateManager.class),
+                true);
 
         assertFalse(wrapper.getKitsLoaded());
         assertFalse(wrapper.getFrameworkLoadAttempted());
@@ -46,7 +47,8 @@ public class KitFrameworkWrapperTest {
         KitFrameworkWrapper wrapper = new KitFrameworkWrapper(Mockito.mock(Context.class),
                 Mockito.mock(ReportingManager.class),
                 Mockito.mock(ConfigManager.class),
-                Mockito.mock(AppStateManager.class));
+                Mockito.mock(AppStateManager.class),
+                true);
         assertFalse(wrapper.getKitsLoaded());
         wrapper.setKitsLoaded(false);
         MPEvent event = new MPEvent.Builder("example").build();
@@ -68,7 +70,8 @@ public class KitFrameworkWrapperTest {
         KitFrameworkWrapper wrapper = new KitFrameworkWrapper(Mockito.mock(Context.class),
                 Mockito.mock(ReportingManager.class),
                 Mockito.mock(ConfigManager.class),
-                Mockito.mock(AppStateManager.class));
+                Mockito.mock(AppStateManager.class),
+                true);
         wrapper.replayEvents();
         KitManager mockKitManager = Mockito.mock(KitManager.class);
         wrapper.setKitManager(mockKitManager);
@@ -146,7 +149,8 @@ public class KitFrameworkWrapperTest {
         KitFrameworkWrapper wrapper = new KitFrameworkWrapper(Mockito.mock(Context.class),
                 Mockito.mock(ReportingManager.class),
                 Mockito.mock(ConfigManager.class),
-                Mockito.mock(AppStateManager.class));
+                Mockito.mock(AppStateManager.class),
+                true);
         wrapper.setKitsLoaded(false);
         wrapper.replayAndDisableQueue();
         assertTrue(wrapper.getKitsLoaded());
@@ -157,7 +161,8 @@ public class KitFrameworkWrapperTest {
         KitFrameworkWrapper wrapper = new KitFrameworkWrapper(Mockito.mock(Context.class),
                 Mockito.mock(ReportingManager.class),
                 Mockito.mock(ConfigManager.class),
-                Mockito.mock(AppStateManager.class));
+                Mockito.mock(AppStateManager.class),
+                true);
         assertNull(wrapper.getAttributeQueue());
         wrapper.setKitsLoaded(false);
         wrapper.queueAttribute("a key", "a value");
@@ -171,7 +176,8 @@ public class KitFrameworkWrapperTest {
         KitFrameworkWrapper wrapper = new KitFrameworkWrapper(Mockito.mock(Context.class),
                 Mockito.mock(ReportingManager.class),
                 Mockito.mock(ConfigManager.class),
-                Mockito.mock(AppStateManager.class));
+                Mockito.mock(AppStateManager.class),
+                true);
         assertNull(wrapper.getAttributeQueue());
         wrapper.setKitsLoaded(false);
         wrapper.queueAttribute("a key", null);
@@ -185,7 +191,8 @@ public class KitFrameworkWrapperTest {
         KitFrameworkWrapper wrapper = new KitFrameworkWrapper(Mockito.mock(Context.class),
                 Mockito.mock(ReportingManager.class),
                 Mockito.mock(ConfigManager.class),
-                Mockito.mock(AppStateManager.class));
+                Mockito.mock(AppStateManager.class),
+                true);
         assertNull(wrapper.getAttributeQueue());
         wrapper.setKitsLoaded(false);
         wrapper.queueAttribute("a key", new ArrayList<String>());
@@ -199,7 +206,8 @@ public class KitFrameworkWrapperTest {
         KitFrameworkWrapper wrapper = new KitFrameworkWrapper(Mockito.mock(Context.class),
                 Mockito.mock(ReportingManager.class),
                 Mockito.mock(ConfigManager.class),
-                Mockito.mock(AppStateManager.class));
+                Mockito.mock(AppStateManager.class),
+                true);
         assertNull(wrapper.getAttributeQueue());
         wrapper.setKitsLoaded(false);
         wrapper.queueAttribute("a key");
@@ -213,7 +221,8 @@ public class KitFrameworkWrapperTest {
         KitFrameworkWrapper wrapper = new KitFrameworkWrapper(Mockito.mock(Context.class),
                 Mockito.mock(ReportingManager.class),
                 Mockito.mock(ConfigManager.class),
-                Mockito.mock(AppStateManager.class));
+                Mockito.mock(AppStateManager.class),
+                true);
         assertNull(wrapper.getEventQueue());
         wrapper.setKitsLoaded(false);
         MPEvent event = Mockito.mock(MPEvent.class);
@@ -231,7 +240,8 @@ public class KitFrameworkWrapperTest {
         KitFrameworkWrapper wrapper = new KitFrameworkWrapper(Mockito.mock(Context.class),
                 Mockito.mock(ReportingManager.class),
                 Mockito.mock(ConfigManager.class),
-                Mockito.mock(AppStateManager.class));
+                Mockito.mock(AppStateManager.class),
+                true);
         assertNull(wrapper.getAttributeQueue());
         wrapper.setKitsLoaded(false);
 
@@ -261,7 +271,8 @@ public class KitFrameworkWrapperTest {
         KitFrameworkWrapper wrapper = new KitFrameworkWrapper(Mockito.mock(Context.class),
                 Mockito.mock(ReportingManager.class),
                 Mockito.mock(ConfigManager.class),
-                Mockito.mock(AppStateManager.class));
+                Mockito.mock(AppStateManager.class),
+                true);
         assertNull(wrapper.getEventQueue());
         wrapper.setKitsLoaded(false);
         MPEvent event = Mockito.mock(MPEvent.class);
@@ -297,7 +308,8 @@ public class KitFrameworkWrapperTest {
         KitFrameworkWrapper wrapper = new KitFrameworkWrapper(Mockito.mock(Context.class),
                 Mockito.mock(ReportingManager.class),
                 Mockito.mock(ConfigManager.class),
-                Mockito.mock(AppStateManager.class));
+                Mockito.mock(AppStateManager.class),
+                true);
         assertNull(wrapper.getEventQueue());
         wrapper.setKitsLoaded(false);
         CommerceEvent event = Mockito.mock(CommerceEvent.class);
@@ -332,7 +344,8 @@ public class KitFrameworkWrapperTest {
         KitFrameworkWrapper wrapper = new KitFrameworkWrapper(Mockito.mock(Context.class),
                 Mockito.mock(ReportingManager.class),
                 Mockito.mock(ConfigManager.class),
-                Mockito.mock(AppStateManager.class));
+                Mockito.mock(AppStateManager.class),
+                true);
         assertNull(wrapper.getEventQueue());
         wrapper.setKitsLoaded(false);
         MPEvent event = Mockito.mock(MPEvent.class);
@@ -368,7 +381,8 @@ public class KitFrameworkWrapperTest {
         KitFrameworkWrapper wrapper = new KitFrameworkWrapper(Mockito.mock(Context.class),
                 Mockito.mock(ReportingManager.class),
                 Mockito.mock(ConfigManager.class),
-                Mockito.mock(AppStateManager.class));
+                Mockito.mock(AppStateManager.class),
+                true);
         assertFalse(wrapper.getShouldCheckForDeepLink());
         wrapper.setKitsLoaded(false);
         wrapper.checkForDeepLink();
@@ -394,7 +408,8 @@ public class KitFrameworkWrapperTest {
         KitFrameworkWrapper wrapper = new KitFrameworkWrapper(Mockito.mock(Context.class),
                 Mockito.mock(ReportingManager.class),
                 Mockito.mock(ConfigManager.class),
-                Mockito.mock(AppStateManager.class));
+                Mockito.mock(AppStateManager.class),
+                true);
         assertFalse(wrapper.isKitActive(0));
 
         KitManager mockKitManager = Mockito.mock(KitManager.class);
@@ -413,7 +428,8 @@ public class KitFrameworkWrapperTest {
         KitFrameworkWrapper wrapper = new KitFrameworkWrapper(Mockito.mock(Context.class),
                 Mockito.mock(ReportingManager.class),
                 Mockito.mock(ConfigManager.class),
-                Mockito.mock(AppStateManager.class));
+                Mockito.mock(AppStateManager.class),
+                true);
         assertNull(wrapper.getSupportedKits());
 
         KitManager mockKitManager = Mockito.mock(KitManager.class);

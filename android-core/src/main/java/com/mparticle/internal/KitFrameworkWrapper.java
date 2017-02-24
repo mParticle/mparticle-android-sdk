@@ -1,6 +1,7 @@
 package com.mparticle.internal;
 
 import android.app.Activity;
+import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
@@ -37,7 +38,11 @@ public class KitFrameworkWrapper implements KitManager {
     private static KitsLoadedListener kitsLoadedListener;
 
     public KitFrameworkWrapper(Context context, ReportingManager reportingManager, ConfigManager configManager, AppStateManager appStateManager) {
-        this.mContext = context;
+        this(context, reportingManager, configManager, appStateManager, false);
+    }
+
+    public KitFrameworkWrapper(Context context, ReportingManager reportingManager, ConfigManager configManager, AppStateManager appStateManager, boolean testing) {
+        this.mContext = testing ? context : new KitContext(context);
         this.mReportingManager = reportingManager;
         this.mConfigManager = configManager;
         this.mAppStateManager = appStateManager;
