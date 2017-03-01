@@ -1,7 +1,5 @@
 package com.mparticle.internal;
 
-import com.mparticle.MParticle;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -54,7 +52,7 @@ public class Session {
             mEventCount++;
             return true;
         } else {
-            ConfigManager.log(MParticle.LogLevel.WARNING, "The event limit has been exceeded for this session.");
+            Logger.warning("The event limit has been exceeded for this session.");
             return false;
         }
     }

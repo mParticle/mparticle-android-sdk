@@ -2,8 +2,7 @@ package com.mparticle.mock;
 
 import android.util.SparseBooleanArray;
 
-import com.mparticle.MParticle;
-import com.mparticle.internal.ConfigManager;
+import com.mparticle.internal.Logger;
 import com.mparticle.kits.KitConfiguration;
 
 import org.json.JSONException;
@@ -50,7 +49,7 @@ public class MockKitConfiguration extends KitConfiguration {
                 String key = iterator.next();
                 map.put(Integer.parseInt(key), json.getInt(key) == 1);
             }catch (JSONException jse){
-                ConfigManager.log(MParticle.LogLevel.ERROR, "Issue while parsing kit configuration: " + jse.getMessage());
+                Logger.error("Issue while parsing kit configuration: " + jse.getMessage());
             }
         }
         return map;

@@ -270,12 +270,6 @@ public class ConfigManagerTest {
     }
 
     @Test
-    public void testSetLogLevel() throws Exception {
-        manager.setLogLevel(MParticle.LogLevel.ERROR);
-        assertEquals(manager.sLocalPrefs.logLevel, MParticle.LogLevel.ERROR);
-    }
-
-    @Test
     public void testGetCurrentRampValue() throws Exception {
         assertEquals(-1, manager.getCurrentRampValue());
         JSONObject object = new JSONObject(sampleConfig);

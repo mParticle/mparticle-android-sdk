@@ -1,8 +1,7 @@
 package com.mparticle.messaging;
 
 import com.google.android.gms.iid.InstanceIDListenerService;
-import com.mparticle.MParticle;
-import com.mparticle.internal.ConfigManager;
+import com.mparticle.internal.Logger;
 import com.mparticle.internal.PushRegistrationHelper;
 
 /**
@@ -17,7 +16,7 @@ public class InstanceIdService extends InstanceIDListenerService {
         try {
             PushRegistrationHelper.requestInstanceId(getApplicationContext());
         }catch (Exception e) {
-            ConfigManager.log(MParticle.LogLevel.ERROR, "Error refreshing Instance ID: " + e.getMessage());
+            Logger.error("Error refreshing Instance ID: " + e.getMessage());
         }
     }
 }

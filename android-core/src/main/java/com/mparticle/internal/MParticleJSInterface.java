@@ -126,7 +126,7 @@ public class MParticleJSInterface {
                 case JS_MSG_TYPE_COMMERCE:
                     CommerceEvent commerceEvent = toCommerceEvent(event);
                     if (commerceEvent == null) {
-                        ConfigManager.log(MParticle.LogLevel.WARNING, "CommerceEvent empty, or unparseable");
+                        Logger.warning("CommerceEvent empty, or unparseable");
                         break;
                     }
                     MParticle.getInstance().logEvent(commerceEvent);
@@ -139,7 +139,7 @@ public class MParticleJSInterface {
             }
 
         } catch (JSONException jse) {
-            ConfigManager.log(MParticle.LogLevel.WARNING, String.format(errorMsg, jse.getMessage()));
+            Logger.warning(String.format(errorMsg, jse.getMessage()));
         }
     }
 
@@ -149,7 +149,7 @@ public class MParticleJSInterface {
             JSONObject attribute = new JSONObject(json);
             MParticle.getInstance().setUserTag(attribute.getString("key"));
         }catch (JSONException jse){
-            ConfigManager.log(MParticle.LogLevel.WARNING, String.format(errorMsg, jse.getMessage()));
+            Logger.warning(String.format(errorMsg, jse.getMessage()));
         }
     }
 
@@ -159,7 +159,7 @@ public class MParticleJSInterface {
             JSONObject attribute = new JSONObject(json);
             MParticle.getInstance().removeUserTag(attribute.getString("key"));
         }catch (JSONException jse){
-            ConfigManager.log(MParticle.LogLevel.WARNING, String.format(errorMsg, jse.getMessage()));
+            Logger.warning(String.format(errorMsg, jse.getMessage()));
         }
     }
 
@@ -169,7 +169,7 @@ public class MParticleJSInterface {
             JSONObject attribute = new JSONObject(json);
             MParticle.getInstance().setUserAttribute(attribute.getString("key"), String.valueOf(attribute.get("value")));
         } catch (JSONException jse) {
-            ConfigManager.log(MParticle.LogLevel.WARNING, String.format(errorMsg, jse.getMessage()));
+            Logger.warning(String.format(errorMsg, jse.getMessage()));
         }
     }
 
@@ -179,7 +179,7 @@ public class MParticleJSInterface {
             JSONObject attribute = new JSONObject(json);
             MParticle.getInstance().removeUserAttribute(attribute.getString("key"));
         }catch (JSONException jse){
-            ConfigManager.log(MParticle.LogLevel.WARNING, String.format(errorMsg, jse.getMessage()));
+            Logger.warning(String.format(errorMsg, jse.getMessage()));
         }
     }
 
@@ -189,7 +189,7 @@ public class MParticleJSInterface {
             JSONObject attribute = new JSONObject(json);
             MParticle.getInstance().setSessionAttribute(attribute.getString("key"), attribute.getString("value"));
         } catch (JSONException jse) {
-            ConfigManager.log(MParticle.LogLevel.WARNING, String.format(errorMsg, jse.getMessage()));
+            Logger.warning(String.format(errorMsg, jse.getMessage()));
         }
     }
 
@@ -199,7 +199,7 @@ public class MParticleJSInterface {
             JSONObject attribute = new JSONObject(json);
             MParticle.getInstance().setUserIdentity(attribute.getString("Identity"), MParticle.IdentityType.parseInt(attribute.getInt("Type")));
         } catch (JSONException jse) {
-            ConfigManager.log(MParticle.LogLevel.WARNING, String.format(errorMsg, jse.getMessage()));
+            Logger.warning(String.format(errorMsg, jse.getMessage()));
         }
     }
 
@@ -209,7 +209,7 @@ public class MParticleJSInterface {
             JSONObject attribute = new JSONObject(json);
             MParticle.getInstance().removeUserIdentity(attribute.getString("key"));
         }catch (JSONException jse){
-            ConfigManager.log(MParticle.LogLevel.WARNING, String.format(errorMsg, jse.getMessage()));
+            Logger.warning(String.format(errorMsg, jse.getMessage()));
         }
     }
 
@@ -221,10 +221,10 @@ public class MParticleJSInterface {
             if (product != null) {
                 MParticle.getInstance().ProductBags().addProduct(productBagName, product);
             } else {
-                ConfigManager.log(MParticle.LogLevel.WARNING, String.format(errorMsg, "unable to convert String to Product: " + json));
+                Logger.warning(String.format(errorMsg, "unable to convert String to Product: " + json));
             }
         } catch (JSONException jse) {
-            ConfigManager.log(MParticle.LogLevel.WARNING, String.format(errorMsg, jse.getMessage()));
+            Logger.warning(String.format(errorMsg, jse.getMessage()));
         }
     }
 
@@ -236,10 +236,10 @@ public class MParticleJSInterface {
             if (product != null) {
                 return MParticle.getInstance().ProductBags().removeProduct(productBagName, product);
             } else {
-                ConfigManager.log(MParticle.LogLevel.WARNING, String.format(errorMsg, "unable to convert String to Product: " + json));
+                Logger.warning(String.format(errorMsg, "unable to convert String to Product: " + json));
             }
         } catch (JSONException jse) {
-            ConfigManager.log(MParticle.LogLevel.WARNING, String.format(errorMsg, jse.getMessage()));
+            Logger.warning(String.format(errorMsg, jse.getMessage()));
         }
         return false;
     }
@@ -257,10 +257,10 @@ public class MParticleJSInterface {
             if (product != null) {
                 MParticle.getInstance().Commerce().cart().add(product);
             } else {
-                ConfigManager.log(MParticle.LogLevel.WARNING, String.format(errorMsg, "unable to convert String to Product: " + json));
+                Logger.warning(String.format(errorMsg, "unable to convert String to Product: " + json));
             }
         } catch (JSONException jse) {
-            ConfigManager.log(MParticle.LogLevel.WARNING, String.format(errorMsg, jse.getMessage()));
+            Logger.warning(String.format(errorMsg, jse.getMessage()));
         }
     }
 
@@ -272,10 +272,10 @@ public class MParticleJSInterface {
             if (product != null) {
                 MParticle.getInstance().Commerce().cart().remove(product);
             } else {
-                ConfigManager.log(MParticle.LogLevel.WARNING, String.format(errorMsg, "unable to convert String to Product: " + json));
+                Logger.warning(String.format(errorMsg, "unable to convert String to Product: " + json));
             }
         } catch (JSONException jse) {
-            ConfigManager.log(MParticle.LogLevel.WARNING, String.format(errorMsg, jse.getMessage()));
+            Logger.warning(String.format(errorMsg, jse.getMessage()));
         }
     }
 
@@ -301,7 +301,7 @@ public class MParticleJSInterface {
             }
             MParticle.getInstance().setUserAttributeList(key, attributes);
         } catch (JSONException jse) {
-            ConfigManager.log(MParticle.LogLevel.WARNING, String.format(errorMsg, jse.getMessage()));
+            Logger.warning(String.format(errorMsg, jse.getMessage()));
         }
     }
 
@@ -327,7 +327,7 @@ public class MParticleJSInterface {
                 jsonObject.put("value", jsonArray1.toString());
                 jsonArray.put(jsonObject);
             } catch (JSONException jse) {
-                ConfigManager.log(MParticle.LogLevel.WARNING, jse.getMessage());
+                Logger.warning(jse.getMessage());
             }
         }
         return jsonArray.toString();
@@ -344,7 +344,7 @@ public class MParticleJSInterface {
                 jsonObject.put("value", entry.getValue().toString());
                 jsonArray.put(jsonObject);
             } catch (JSONException jse) {
-                ConfigManager.log(MParticle.LogLevel.WARNING, jse.getMessage());
+                Logger.warning(jse.getMessage());
             }
         }
         return jsonArray.toString();
@@ -361,7 +361,7 @@ public class MParticleJSInterface {
                 try {
                     parsedAttributes.put(key, attributes.getString(key));
                 } catch (JSONException e) {
-                    ConfigManager.log(MParticle.LogLevel.WARNING, "Could not parse event attribute value");
+                    Logger.warning("Could not parse event attribute value");
                 }
             }
 

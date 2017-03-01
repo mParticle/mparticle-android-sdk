@@ -107,6 +107,7 @@
 -keep class com.mparticle.kits.ForeseeKit { *; }
 -keep class com.mparticle.UserAttributeListener { *; }
 -keep class com.mparticle.internal.MParticleJSInterface { *; }
+-keep class com.mparticle.internal.Logger { *; }
 
 -keep public class com.mparticle.activity.* {
     *;

@@ -12,7 +12,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.SystemClock;
 
-import com.mparticle.BuildConfig;
 import com.mparticle.MPEvent;
 import com.mparticle.MParticle;
 
@@ -177,7 +176,7 @@ import java.util.concurrent.atomic.AtomicLong;
                         previousSessionParameters,
                         previousSessionPackage,
                         interruptions);
-                ConfigManager.log(MParticle.LogLevel.DEBUG, "App foregrounded.");
+                Logger.debug("App foregrounded.");
                 mLastForegroundTime = getTime();
             }
 
@@ -193,9 +192,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
             MParticle.getInstance().getKitManager().onActivityResumed(activity);
         }catch (Exception e){
-            if (BuildConfig.MP_DEBUG) {
-                ConfigManager.log(MParticle.LogLevel.ERROR, "Failed while trying to track activity resume: " + e.getMessage());
-            }
+                Logger.verbose("Failed while trying to track activity resume: " + e.getMessage());
         }
     }
 
@@ -230,10 +227,8 @@ import java.util.concurrent.atomic.AtomicLong;
                 );
             }
             MParticle.getInstance().getKitManager().onActivityPaused(activity);
-        }catch (Exception e){
-            if (BuildConfig.MP_DEBUG) {
-                ConfigManager.log(MParticle.LogLevel.ERROR, "Failed while trying to track activity pause: " + e.getMessage());
-            }
+        }catch (Exception e) {
+            Logger.verbose("Failed while trying to track activity pause: " + e.getMessage());
         }
     }
 
@@ -272,7 +267,7 @@ import java.util.concurrent.atomic.AtomicLong;
     private void newSession() {
         startSession();
         mMessageManager.startSession();
-        ConfigManager.log(MParticle.LogLevel.DEBUG, "Started new session");
+        Logger.debug("Started new session");
         mMessageManager.startUploadLoop();
         enableLocationTracking();
         checkSessionTimeout();
@@ -298,7 +293,7 @@ import java.util.concurrent.atomic.AtomicLong;
                         isBackgrounded()
                         && session.isTimedOut(mConfigManager.getSessionTimeout())
                         && !MParticle.getInstance().Media().getAudioPlaying()) {
-                    ConfigManager.log(MParticle.LogLevel.DEBUG, "Session timed out");
+                    Logger.debug("Session timed out");
                     endSession();
                 }
             }
@@ -320,7 +315,7 @@ import java.util.concurrent.atomic.AtomicLong;
     private void logBackgrounded(){
         logStateTransition(Constants.StateTransitionType.STATE_TRANS_BG, mCurrentActivityName);
         mCurrentActivityName = null;
-        ConfigManager.log(MParticle.LogLevel.DEBUG, "App backgrounded.");
+        Logger.debug("App backgrounded.");
         mInterruptionCount.incrementAndGet();
     }
 
@@ -346,7 +341,7 @@ import java.util.concurrent.atomic.AtomicLong;
     }
 
     public void endSession() {
-        ConfigManager.log(MParticle.LogLevel.DEBUG, "Ended session");
+        Logger.debug("Ended session");
         mMessageManager.endSession(mCurrentSession);
         disableLocationTracking();
         mCurrentSession = new Session();

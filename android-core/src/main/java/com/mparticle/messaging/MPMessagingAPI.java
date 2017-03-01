@@ -4,7 +4,7 @@ import android.content.Context;
 
 import com.mparticle.MPService;
 import com.mparticle.MParticle;
-import com.mparticle.internal.ConfigManager;
+import com.mparticle.internal.Logger;
 import com.mparticle.internal.MPUtility;
 import com.mparticle.internal.PushRegistrationHelper;
 
@@ -76,11 +76,11 @@ public class MPMessagingAPI {
     public void enablePushNotifications(String senderId) {
         MParticle.getInstance().getConfigManager().setPushSenderId(senderId);
         if (!MPUtility.isInstanceIdAvailable()) {
-            ConfigManager.log(MParticle.LogLevel.ERROR, "Push is enabled but Google Cloud Messaging library not found - you must add com.google.android.gms:play-services-gcm:7.5 or later to your application.");
+            Logger.error("Push is enabled but Google Cloud Messaging library not found - you must add com.google.android.gms:play-services-gcm:7.5 or later to your application.");
         }else if (!MPUtility.isServiceAvailable(mContext, MPService.class)){
-            ConfigManager.log(MParticle.LogLevel.ERROR, "Push is enabled but you have not added <service android:name=\"com.mparticle.MPService\" /> to the <application> section of your AndroidManifest.xml");
+            Logger.error("Push is enabled but you have not added <service android:name=\"com.mparticle.MPService\" /> to the <application> section of your AndroidManifest.xml");
         }else if (!MPUtility.checkPermission(mContext, "com.google.android.c2dm.permission.RECEIVE")){
-            ConfigManager.log(MParticle.LogLevel.ERROR, "Attempted to enable push notifications without required permission: ", "\"com.google.android.c2dm.permission.RECEIVE\"");
+            Logger.error("Attempted to enable push notifications without required permission: ", "\"com.google.android.c2dm.permission.RECEIVE\"");
         }else {
             PushRegistrationHelper.requestInstanceId(mContext, senderId);
         }

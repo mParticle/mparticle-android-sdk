@@ -2,7 +2,7 @@ package com.mparticle.commerce;
 
 
 import com.mparticle.MParticle;
-import com.mparticle.internal.ConfigManager;
+import com.mparticle.internal.Logger;
 import com.mparticle.internal.MPUtility;
 
 import org.json.JSONArray;
@@ -78,7 +78,7 @@ public final class CommerceEvent {
             if (devMode) {
                 throw new IllegalStateException("CommerceEvent must be created with either a product action. promotion action, or an impression");
             } else {
-                ConfigManager.log(MParticle.LogLevel.ERROR, "CommerceEvent must be created with either a product action, promotion action, or an impression");
+                Logger.error("CommerceEvent must be created with either a product action, promotion action, or an impression");
             }
         }
 
@@ -90,7 +90,7 @@ public final class CommerceEvent {
                     if (devMode) {
                         throw new IllegalStateException(message);
                     } else {
-                        ConfigManager.log(MParticle.LogLevel.ERROR, message);
+                        Logger.error(message);
                     }
                 }
             }
@@ -98,7 +98,7 @@ public final class CommerceEvent {
                 if (devMode) {
                     throw new IllegalStateException("Product CommerceEvent should not contain Promotions.");
                 } else {
-                    ConfigManager.log(MParticle.LogLevel.ERROR, "Product CommerceEvent should not contain Promotions.");
+                    Logger.error("Product CommerceEvent should not contain Promotions.");
                 }
             }
             if (!mProductAction.equals(Product.ADD_TO_CART)
@@ -111,33 +111,33 @@ public final class CommerceEvent {
                     && !mProductAction.equals(Product.REFUND)
                     && !mProductAction.equals(Product.REMOVE_FROM_CART)
                     && !mProductAction.equals(Product.REMOVE_FROM_WISHLIST)) {
-                ConfigManager.log(MParticle.LogLevel.ERROR, "CommerceEvent created with unrecognized Product action: " + mProductAction);
+                Logger.error("CommerceEvent created with unrecognized Product action: " + mProductAction);
             }
         }else if (mPromotionAction != null ) {
             if (productList != null && productList.size() > 0) {
                 if (devMode) {
                     throw new IllegalStateException("Promotion CommerceEvent should not contain Products.");
                 }else {
-                    ConfigManager.log(MParticle.LogLevel.ERROR, "Promotion CommerceEvent should not contain Products.");
+                    Logger.error("Promotion CommerceEvent should not contain Products.");
                 }
             }
             if (!mPromotionAction.equals(Promotion.VIEW)
                     && !mPromotionAction.equals(Promotion.CLICK)) {
-                ConfigManager.log(MParticle.LogLevel.ERROR, "CommerceEvent created with unrecognized Promotion action: " + mProductAction);
+                Logger.error("CommerceEvent created with unrecognized Promotion action: " + mProductAction);
             }
         }else {
             if (productList != null && productList.size() > 0) {
                 if (devMode) {
                     throw new IllegalStateException("Impression CommerceEvent should not contain Products.");
                 }else {
-                    ConfigManager.log(MParticle.LogLevel.ERROR, "Impression CommerceEvent should not contain Products.");
+                    Logger.error("Impression CommerceEvent should not contain Products.");
                 }
             }
             if (promotionList != null && promotionList.size() > 0) {
                 if (devMode) {
                     throw new IllegalStateException("Impression CommerceEvent should not contain Promotions.");
                 } else {
-                    ConfigManager.log(MParticle.LogLevel.ERROR, "Impression CommerceEvent should not contain Promotions.");
+                    Logger.error("Impression CommerceEvent should not contain Promotions.");
                 }
             }
         }

@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Build;
-import android.provider.Settings;
 
 import com.mparticle.BuildConfig;
 import com.mparticle.MParticle;
@@ -35,7 +34,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import java.util.zip.GZIPOutputStream;
@@ -104,13 +102,16 @@ public class MParticleApiClientImpl implements MParticleApiClient {
     static final long MAX_THROTTLE_MILLIS = 1000*60*60*24;
     private boolean alreadyWarned;
 
-    public MParticleApiClientImpl(ConfigManager configManager, SharedPreferences sharedPreferences, Context context) throws MalformedURLException {
+    public MParticleApiClientImpl(ConfigManager configManager, SharedPreferences sharedPreferences, Context context) throws MalformedURLException, MPNoConfigException {
         mContext = context;
         mConfigManager = configManager;
         mApiSecret = configManager.getApiSecret();
         mPreferences = sharedPreferences;
         mApiKey = configManager.getApiKey();
         mUserAgent = "mParticle Android SDK/" + Constants.MPARTICLE_VERSION;
+        if (MPUtility.isEmpty(mApiKey) || MPUtility.isEmpty(mApiSecret)) {
+            throw new MPNoConfigException();
+        }
     }
 
     /**
@@ -158,11 +159,20 @@ public class MParticleApiClientImpl implements MParticleApiClient {
 
             addMessageSignature(connection, null);
 
+            Logger.verbose("Config request attempt:\n" +
+                    "URL- " + mConfigUrl.toString());
+
             makeUrlRequest(connection, true);
 
             if (connection.getResponseCode() >= 200 && connection.getResponseCode() < 300) {
                 JSONObject response = MPUtility.getJsonResponse(connection);
                 parseMparticleJson(response);
+
+                Logger.verbose("Config result: \n " +
+                        connection.getResponseCode() + ": " +
+                        connection.getResponseMessage() +"\n" +
+                        "response:\n" + response.toString());
+
                 mConfigManager.updateConfig(response);
                 String newEtag = connection.getHeaderField("ETag");
                 String newModified = connection.getHeaderField("Last-Modified");
@@ -174,17 +184,21 @@ public class MParticleApiClientImpl implements MParticleApiClient {
                     editor.putString(Constants.PrefKeys.IF_MODIFIED, newModified);
                 }
                 editor.apply();
-            }else if (connection.getResponseCode() >= 400) {
+            }else if (connection.getResponseCode() == 400) {
                 throw new MPConfigException();
+            } else if (connection.getResponseCode() == 304) {
+                Logger.verbose("Config request deferred, configuration already up-to-date");
+            } else {
+                Logger.error("Config request failed- " + connection.getResponseCode() + ": " + connection.getResponseMessage());
             }
         } catch (MalformedURLException e) {
-            ConfigManager.log(MParticle.LogLevel.ERROR, "Error constructing config service URL");
+            Logger.error("Error constructing config service URL");
         } catch (JSONException e) {
-            ConfigManager.log(MParticle.LogLevel.ERROR, "Config request failed to process response message JSON");
+            Logger.error("Config request failed to process response message JSON");
         } catch (AssertionError e) {
             //some devices do not have MD5, and therefore cannot process SSL certificates
             //there's not much to do in that case except catch the error
-            ConfigManager.log(MParticle.LogLevel.ERROR, "Config request failed " + e.toString());
+            Logger.error("Config request failed " + e.toString());
         }
     }
 
@@ -196,7 +210,7 @@ public class MParticleApiClientImpl implements MParticleApiClient {
 
         JSONObject response = null;
         try {
-            ConfigManager.log(MParticle.LogLevel.DEBUG, "Starting Segment Network request");
+            Logger.debug("Starting Segment Network request");
             HttpURLConnection connection = (HttpURLConnection) getAudienceUrl().openConnection();
             connection.setConnectTimeout(2000);
             connection.setReadTimeout(10000);
@@ -205,13 +219,13 @@ public class MParticleApiClientImpl implements MParticleApiClient {
             addMessageSignature(connection, null);
             makeUrlRequest(connection, true);
             if (connection.getResponseCode() == HttpURLConnection.HTTP_FORBIDDEN){
-                ConfigManager.log(MParticle.LogLevel.ERROR, "Segment call forbidden: is Segmentation enabled for your account?");
+                Logger.error("Segment call forbidden: is Segmentation enabled for your account?");
             }
             response =  MPUtility.getJsonResponse(connection);
             parseMparticleJson(response);
 
         }catch (Exception e){
-            ConfigManager.log(MParticle.LogLevel.ERROR, "Segment call failed: " + e.getMessage());
+            Logger.error("Segment call failed: " + e.getMessage());
         }
         return response;
     }
@@ -253,9 +267,7 @@ public class MParticleApiClientImpl implements MParticleApiClient {
 
         addMessageSignature(connection, message);
 
-        if (BuildConfig.MP_DEBUG) {
-            logUpload(message);
-        }
+        logUpload(message);
 
         if (!BuildConfig.MP_DEBUG && Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH && connection instanceof HttpsURLConnection) {
             try {
@@ -272,10 +284,24 @@ public class MParticleApiClientImpl implements MParticleApiClient {
         }
 
         makeUrlRequest(connection, true);
+
+        Logger.verbose("Upload request attempt:\n" +
+                "URL- " + mEventUrl.toString());
+
+        Logger.verbose(message);
+
         int responseCode = connection.getResponseCode();
+
         if (responseCode >= 200 && responseCode < 300) {
             JSONObject response = MPUtility.getJsonResponse(connection);
+
+            Logger.verbose("Upload result response: \n" +
+                    connection.getResponseCode() + ": " +
+                        connection.getResponseMessage() + "\n" +
+                        "response:\n" + response.toString());
             parseMparticleJson(response);
+        } else {
+            Logger.error("Upload request failed- " + connection.getResponseCode() + ": " + connection.getResponseMessage());
         }
         return connection.getResponseCode();
     }
@@ -285,15 +311,15 @@ public class MParticleApiClientImpl implements MParticleApiClient {
             JSONObject messageJson = new JSONObject(message);
             if (messageJson.has(Constants.MessageKey.MESSAGES)) {
                 JSONArray messages = messageJson.getJSONArray(Constants.MessageKey.MESSAGES);
-                ConfigManager.log(MParticle.LogLevel.DEBUG, "Uploading message batch...");
+                Logger.verbose("Uploading message batch...");
                 for (int i = 0; i < messages.length(); i++) {
-                    ConfigManager.log(MParticle.LogLevel.DEBUG, "Message type: " + ((JSONObject) messages.get(i)).getString(Constants.MessageKey.TYPE));
+                    Logger.verbose("Message type: " + ((JSONObject) messages.get(i)).getString(Constants.MessageKey.TYPE));
                 }
             } else if (messageJson.has(Constants.MessageKey.HISTORY)) {
                 JSONArray messages = messageJson.getJSONArray(Constants.MessageKey.HISTORY);
-                ConfigManager.log(MParticle.LogLevel.DEBUG, "Uploading session history batch...");
+                Logger.verbose("Uploading session history batch...");
                 for (int i = 0; i < messages.length(); i++) {
-                    ConfigManager.log(MParticle.LogLevel.DEBUG, "Message type: " + ((JSONObject) messages.get(i)).getString(Constants.MessageKey.TYPE) + " SID: " + ((JSONObject) messages.get(i)).optString(Constants.MessageKey.SESSION_ID));
+                    Logger.verbose("Message type: " + ((JSONObject) messages.get(i)).getString(Constants.MessageKey.TYPE) + " SID: " + ((JSONObject) messages.get(i)).optString(Constants.MessageKey.SESSION_ID));
                 }
             }
         } catch (JSONException jse) {
@@ -319,11 +345,11 @@ public class MParticleApiClientImpl implements MParticleApiClient {
             request.setRequestProperty("Date", dateHeader);
             request.setRequestProperty(HEADER_SIGNATURE, MPUtility.hmacSha256Encode(mApiSecret, hashString.toString()));
         } catch (InvalidKeyException e) {
-            ConfigManager.log(MParticle.LogLevel.ERROR, "Error signing message.");
+            Logger.error("Error signing message.");
         } catch (NoSuchAlgorithmException e) {
-            ConfigManager.log(MParticle.LogLevel.ERROR, "Error signing message.");
+            Logger.error("Error signing message.");
         } catch (UnsupportedEncodingException e){
-            ConfigManager.log(MParticle.LogLevel.ERROR, "Error signing message.");
+            Logger.error("Error signing message.");
         }
     }
 
@@ -376,7 +402,7 @@ public class MParticleApiClientImpl implements MParticleApiClient {
             int statusCode = connection.getResponseCode();
             if (statusCode == 400 && !alreadyWarned) {
                 alreadyWarned = true;
-                ConfigManager.log(MParticle.LogLevel.ERROR, "Bad API request - is the correct API key and secret configured?");
+                Logger.error("Bad API request - is the correct API key and secret configured?");
             }
             if ((statusCode == 503 || statusCode == HTTP_TOO_MANY_REQUESTS) && !BuildConfig.MP_DEBUG) {
                 setNextAllowedRequestTime(connection);
@@ -424,7 +450,7 @@ public class MParticleApiClientImpl implements MParticleApiClient {
                     throttle = Math.min(parsedThrottle, MAX_THROTTLE_MILLIS);
                 }
             } catch (NumberFormatException nfe) {
-                ConfigManager.log(MParticle.LogLevel.DEBUG, "Unable to parse retry-after header, using default.");
+                Logger.debug("Unable to parse retry-after header, using default.");
             }
         }
 
@@ -456,6 +482,10 @@ public class MParticleApiClientImpl implements MParticleApiClient {
         public MPRampException() {
             super("This device is being sampled.");
         }
+    }
+
+    public static final class MPNoConfigException extends Exception {
+        public MPNoConfigException() {super("No API key and/or API secret"); }
     }
 
     void checkThrottleTime() throws MPThrottleException {

@@ -111,31 +111,31 @@ public class ApplicationContextWrapper extends Application {
                                 if (recordedActivity == currentActivity) {
                                     switch (lifeCycleEvent.methodType) {
                                         case ON_CREATED:
-                                            ConfigManager.log(MParticle.LogLevel.DEBUG,"Forward OnCreate");
+                                            Logger.debug("Forwarding OnCreate");
                                             callback.onActivityCreated(recordedActivity, lifeCycleEvent.bundle);
                                             break;
                                         case ON_STARTED:
-                                            ConfigManager.log(MParticle.LogLevel.DEBUG,"Forward OnStart");
+                                            Logger.debug("Forwarding OnStart");
                                             callback.onActivityStarted(recordedActivity);
                                             break;
                                         case ON_RESUMED:
-                                            ConfigManager.log(MParticle.LogLevel.DEBUG,"Forward OnResume");
+                                            Logger.debug("Forwarding OnResume");
                                             callback.onActivityResumed(recordedActivity);
                                             break;
                                         case ON_PAUSED:
-                                            ConfigManager.log(MParticle.LogLevel.DEBUG,"Forward OnPause");
+                                            Logger.debug("Forwarding OnPause");
                                             callback.onActivityPaused(recordedActivity);
                                             break;
                                         case ON_SAVE_INSTANCE_STATE:
-                                            ConfigManager.log(MParticle.LogLevel.DEBUG,"Forward OnSaveInstance");
+                                            Logger.debug("Forwarding OnSaveInstance");
                                             callback.onActivitySaveInstanceState(recordedActivity, lifeCycleEvent.bundle);
                                             break;
                                         case ON_STOPPED:
-                                            ConfigManager.log(MParticle.LogLevel.DEBUG,"Forward OnStop");
+                                            Logger.debug("Forwarding OnStop");
                                             callback.onActivityStopped(recordedActivity);
                                             break;
                                         case ON_DESTROYED:
-                                            ConfigManager.log(MParticle.LogLevel.DEBUG,"Forward OnDestroy");
+                                            Logger.debug("Forwarding OnDestroy");
                                             callback.onActivityDestroyed(recordedActivity);
                                             break;
                                     }

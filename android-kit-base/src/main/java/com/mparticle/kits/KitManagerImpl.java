@@ -20,6 +20,7 @@ import com.mparticle.commerce.CommerceEvent;
 import com.mparticle.internal.AppStateManager;
 import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.KitManager;
+import com.mparticle.internal.Logger;
 import com.mparticle.internal.MPUtility;
 import com.mparticle.internal.PushRegistrationHelper;
 import com.mparticle.internal.ReportingManager;
@@ -143,7 +144,7 @@ public class KitManagerImpl implements KitManager, DeepLinkListener, UserAttribu
                                     continue;
                                 }
                                 provider.onKitCreate(configuration.getSettings(), getContext());
-
+                                Logger.debug("OnKitCreate called: " + provider.getName());
                                 if (provider instanceof KitIntegration.ActivityListener) {
                                     WeakReference<Activity> activityWeakReference = getCurrentActivity();
                                     if (activityWeakReference != null) {
@@ -166,7 +167,6 @@ public class KitManagerImpl implements KitManager, DeepLinkListener, UserAttribu
                                 Intent intent = new Intent(MParticle.ServiceProviders.BROADCAST_ACTIVE + currentId);
                                 getContext().sendBroadcast(intent);
 
-                                ConfigManager.log(MParticle.LogLevel.DEBUG, "Kit initialized: " + provider.getName());
                                 if (provider instanceof KitIntegration.AttributeListener) {
                                     syncUserIdentities((KitIntegration.AttributeListener) provider, provider.getConfiguration());
                                 }
@@ -186,9 +186,9 @@ public class KitManagerImpl implements KitManager, DeepLinkListener, UserAttribu
 
                         }
                     } catch (JSONException jse) {
-                        ConfigManager.log(MParticle.LogLevel.ERROR, "Exception while parsing configuration for id " + currentId + ": " + jse.getMessage());
+                        Logger.error("Exception while parsing configuration for id " + currentId + ": " + jse.getMessage());
                     } catch (Exception e) {
-                        ConfigManager.log(MParticle.LogLevel.ERROR, "Exception while starting kit id " + currentId + ": " + e.getMessage());
+                        Logger.error("Exception while starting kit id " + currentId + ": " + e.getMessage());
                     }
                 }
             }
@@ -260,7 +260,7 @@ public class KitManagerImpl implements KitManager, DeepLinkListener, UserAttribu
                     provider.setLocation(location);
                 }
             } catch (Exception e) {
-                ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to call setLocation for kit: " + provider.getName() + ": " + e.getMessage());
+                Logger.warning("Failed to call setLocation for kit: " + provider.getName() + ": " + e.getMessage());
             }
         }
     }
@@ -274,7 +274,7 @@ public class KitManagerImpl implements KitManager, DeepLinkListener, UserAttribu
                     getReportingManager().logAll(report);
                 }
             } catch (Exception e) {
-                ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to call logNetworkPerformance for kit: " + provider.getName() + ": " + e.getMessage());
+                Logger.warning("Failed to call logNetworkPerformance for kit: " + provider.getName() + ": " + e.getMessage());
             }
         }
     }
@@ -299,7 +299,7 @@ public class KitManagerImpl implements KitManager, DeepLinkListener, UserAttribu
                     getReportingManager().logAll(messages);
                 }
             } catch (Exception e) {
-                ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to call setOptOut for kit: " + provider.getName() + ": " + e.getMessage());
+                Logger.warning("Failed to call setOptOut for kit: " + provider.getName() + ": " + e.getMessage());
             }
         }
     }
@@ -381,7 +381,7 @@ public class KitManagerImpl implements KitManager, DeepLinkListener, UserAttribu
                     }
                 }
             } catch (Exception e) {
-                ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to call logCommerceEvent for kit: " + provider.getName() + ": " + e.getMessage());
+                Logger.warning("Failed to call logCommerceEvent for kit: " + provider.getName() + ": " + e.getMessage());
             }
         }
     }
@@ -402,7 +402,7 @@ public class KitManagerImpl implements KitManager, DeepLinkListener, UserAttribu
                         return true;
                     }
                 } catch (Exception e) {
-                    ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to call onPushMessageReceived for kit: " + provider.getName() + ": " + e.getMessage());
+                    Logger.warning("Failed to call onPushMessageReceived for kit: " + provider.getName() + ": " + e.getMessage());
                 }
             }
         }
@@ -422,7 +422,7 @@ public class KitManagerImpl implements KitManager, DeepLinkListener, UserAttribu
                         return true;
                     }
                 } catch (Exception e) {
-                    ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to call onPushRegistration for kit: " + provider.getName() + ": " + e.getMessage());
+                    Logger.warning("Failed to call onPushRegistration for kit: " + provider.getName() + ": " + e.getMessage());
                 }
             }
         }
@@ -450,7 +450,7 @@ public class KitManagerImpl implements KitManager, DeepLinkListener, UserAttribu
                     ((KitIntegration.AttributeListener)provider).setAllUserAttributes(filteredAttributeSingles, filteredAttributeLists);
                 }
             } catch (Exception e) {
-                ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to call setUserAttributes for kit: " + provider.getName() + ": " + e.getMessage());
+                Logger.warning("Failed to call setUserAttributes for kit: " + provider.getName() + ": " + e.getMessage());
             }
         }
     }
@@ -472,7 +472,7 @@ public class KitManagerImpl implements KitManager, DeepLinkListener, UserAttribu
             try {
                 setUserAttribute(provider, attributeKey, attributeValue);
             } catch (Exception e) {
-                ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to call setUserAttributes for kit: " + provider.getName() + ": " + e.getMessage());
+                Logger.warning("Failed to call setUserAttributes for kit: " + provider.getName() + ": " + e.getMessage());
             }
         }
     }
@@ -483,7 +483,7 @@ public class KitManagerImpl implements KitManager, DeepLinkListener, UserAttribu
             try {
                 setUserAttribute(provider, attributeKey, valuesList);
             } catch (Exception e) {
-                ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to call setUserAttributes for kit: " + provider.getName() + ": " + e.getMessage());
+                Logger.warning("Failed to call setUserAttributes for kit: " + provider.getName() + ": " + e.getMessage());
             }
         }
     }
@@ -516,7 +516,7 @@ public class KitManagerImpl implements KitManager, DeepLinkListener, UserAttribu
                     ((KitIntegration.AttributeListener)provider).removeUserAttribute(key);
                 }
             } catch (Exception e) {
-                ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to call removeUserAttribute for kit: " + provider.getName() + ": " + e.getMessage());
+                Logger.warning("Failed to call removeUserAttribute for kit: " + provider.getName() + ": " + e.getMessage());
             }
         }
     }
@@ -529,7 +529,7 @@ public class KitManagerImpl implements KitManager, DeepLinkListener, UserAttribu
                     ((KitIntegration.AttributeListener)provider).setUserIdentity(identityType, id);
                 }
             } catch (Exception e) {
-                ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to call setUserIdentity for kit: " + provider.getName() + ": " + e.getMessage());
+                Logger.warning("Failed to call setUserIdentity for kit: " + provider.getName() + ": " + e.getMessage());
             }
         }
     }
@@ -542,7 +542,7 @@ public class KitManagerImpl implements KitManager, DeepLinkListener, UserAttribu
                     ((KitIntegration.AttributeListener)provider).removeUserIdentity(identityType);
                 }
             } catch (Exception e) {
-                ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to call removeUserIdentity for kit: " + provider.getName() + ": " + e.getMessage());
+                Logger.warning("Failed to call removeUserIdentity for kit: " + provider.getName() + ": " + e.getMessage());
             }
         }
     }
@@ -556,7 +556,7 @@ public class KitManagerImpl implements KitManager, DeepLinkListener, UserAttribu
                     getReportingManager().logAll(report);
                 }
             } catch (Exception e) {
-                ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to call logout for kit: " + provider.getName() + ": " + e.getMessage());
+                Logger.warning("Failed to call logout for kit: " + provider.getName() + ": " + e.getMessage());
             }
         }
     }
@@ -631,7 +631,7 @@ public class KitManagerImpl implements KitManager, DeepLinkListener, UserAttribu
                     getReportingManager().logAll(reportingMessages);
                 }
             } catch (Exception e) {
-                ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to call logEvent for kit: " + provider.getName() + ": " + e.getMessage());
+                Logger.warning("Failed to call logEvent for kit: " + provider.getName() + ": " + e.getMessage());
             }
         }
     }
@@ -645,7 +645,7 @@ public class KitManagerImpl implements KitManager, DeepLinkListener, UserAttribu
                     getReportingManager().logAll(report);
                 }
             } catch (Exception e) {
-                ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to call leaveBreadcrumb for kit: " + provider.getName() + ": " + e.getMessage());
+                Logger.warning("Failed to call leaveBreadcrumb for kit: " + provider.getName() + ": " + e.getMessage());
             }
         }
     }
@@ -659,7 +659,7 @@ public class KitManagerImpl implements KitManager, DeepLinkListener, UserAttribu
                     getReportingManager().logAll(report);
                 }
             } catch (Exception e) {
-                ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to call logError for kit: " + provider.getName() + ": " + e.getMessage());
+                Logger.warning("Failed to call logError for kit: " + provider.getName() + ": " + e.getMessage());
             }
         }
     }
@@ -673,7 +673,7 @@ public class KitManagerImpl implements KitManager, DeepLinkListener, UserAttribu
                     getReportingManager().logAll(report);
                 }
             } catch (Exception e) {
-                ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to call logException for kit: " + provider.getName() + ": " + e.getMessage());
+                Logger.warning("Failed to call logException for kit: " + provider.getName() + ": " + e.getMessage());
             }
         }
     }
@@ -729,7 +729,7 @@ public class KitManagerImpl implements KitManager, DeepLinkListener, UserAttribu
                     }
                 }
             } catch (Exception e) {
-                ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to call logScreen for kit: " + provider.getName() + ": " + e.getMessage());
+                Logger.warning("Failed to call logScreen for kit: " + provider.getName() + ": " + e.getMessage());
             }
         }
     }
@@ -747,7 +747,7 @@ public class KitManagerImpl implements KitManager, DeepLinkListener, UserAttribu
                     getReportingManager().logAll(reportingMessages);
                 }
             } catch (Exception e) {
-                ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to call onActivityCreated for kit: " + provider.getName() + ": " + e.getMessage());
+                Logger.warning("Failed to call onActivityCreated for kit: " + provider.getName() + ": " + e.getMessage());
             }
         }
     }
@@ -761,7 +761,7 @@ public class KitManagerImpl implements KitManager, DeepLinkListener, UserAttribu
                     getReportingManager().logAll(reportingMessages);
                 }
             } catch (Exception e) {
-                ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to call onActivityStarted for kit: " + provider.getName() + ": " + e.getMessage());
+                Logger.warning("Failed to call onActivityStarted for kit: " + provider.getName() + ": " + e.getMessage());
             }
         }
     }
@@ -775,7 +775,7 @@ public class KitManagerImpl implements KitManager, DeepLinkListener, UserAttribu
                     getReportingManager().logAll(reportingMessages);
                 }
             } catch (Exception e) {
-                ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to call onActivityResumed for kit: " + provider.getName() + ": " + e.getMessage());
+                Logger.warning("Failed to call onActivityResumed for kit: " + provider.getName() + ": " + e.getMessage());
             }
         }
     }
@@ -789,7 +789,7 @@ public class KitManagerImpl implements KitManager, DeepLinkListener, UserAttribu
                     getReportingManager().logAll(reportingMessages);
                 }
             } catch (Exception e) {
-                ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to call onResume for kit: " + provider.getName() + ": " + e.getMessage());
+                Logger.warning("Failed to call onResume for kit: " + provider.getName() + ": " + e.getMessage());
             }
         }
     }
@@ -803,7 +803,7 @@ public class KitManagerImpl implements KitManager, DeepLinkListener, UserAttribu
                     getReportingManager().logAll(reportingMessages);
                 }
             } catch (Exception e) {
-                ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to call onActivityStopped for kit: " + provider.getName() + ": " + e.getMessage());
+                Logger.warning("Failed to call onActivityStopped for kit: " + provider.getName() + ": " + e.getMessage());
             }
         }
     }
@@ -817,7 +817,7 @@ public class KitManagerImpl implements KitManager, DeepLinkListener, UserAttribu
                     getReportingManager().logAll(reportingMessages);
                 }
             } catch (Exception e) {
-                ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to call onActivitySaveInstanceState for kit: " + provider.getName() + ": " + e.getMessage());
+                Logger.warning("Failed to call onActivitySaveInstanceState for kit: " + provider.getName() + ": " + e.getMessage());
             }
         }
     }
@@ -831,7 +831,7 @@ public class KitManagerImpl implements KitManager, DeepLinkListener, UserAttribu
                     getReportingManager().logAll(reportingMessages);
                 }
             } catch (Exception e) {
-                ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to call onActivityDestroyed for kit: " + provider.getName() + ": " + e.getMessage());
+                Logger.warning("Failed to call onActivityDestroyed for kit: " + provider.getName() + ": " + e.getMessage());
             }
         }
     }
@@ -845,7 +845,7 @@ public class KitManagerImpl implements KitManager, DeepLinkListener, UserAttribu
                     getReportingManager().logAll(reportingMessages);
                 }
             } catch (Exception e) {
-                ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to call onSessionEnd for kit: " + provider.getName() + ": " + e.getMessage());
+                Logger.warning("Failed to call onSessionEnd for kit: " + provider.getName() + ": " + e.getMessage());
             }
         }
     }
@@ -859,7 +859,7 @@ public class KitManagerImpl implements KitManager, DeepLinkListener, UserAttribu
                     getReportingManager().logAll(reportingMessages);
                 }
             } catch (Exception e) {
-                ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to call onSessionStart for kit: " + provider.getName() + ": " + e.getMessage());
+                Logger.warning("Failed to call onSessionStart for kit: " + provider.getName() + ": " + e.getMessage());
             }
         }
     }
@@ -876,7 +876,7 @@ public class KitManagerImpl implements KitManager, DeepLinkListener, UserAttribu
                     provider.checkForDeepLink();
                 }
             } catch (Exception e) {
-                ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to call checkForDeeplink for kit: " + provider.getName() + ": " + e.getMessage());
+                Logger.warning("Failed to call checkForDeeplink for kit: " + provider.getName() + ": " + e.getMessage());
             }
         }
     }
@@ -885,7 +885,7 @@ public class KitManagerImpl implements KitManager, DeepLinkListener, UserAttribu
     public void onResult(DeepLinkResult result) {
         DeepLinkListener listener = MParticle.getInstance().getDeepLinkListener();
         if (listener != null && result != null) {
-            ConfigManager.log(MParticle.LogLevel.DEBUG, "Deep link result returned: \n" + result.toString());
+            Logger.debug("Deep link result returned: \n" + result.toString());
             listener.onResult(result);
         }
     }
@@ -894,7 +894,7 @@ public class KitManagerImpl implements KitManager, DeepLinkListener, UserAttribu
     public void onError(DeepLinkError error) {
         DeepLinkListener listener = MParticle.getInstance().getDeepLinkListener();
         if (listener != null && error != null) {
-            ConfigManager.log(MParticle.LogLevel.DEBUG, "Deep link error returned: \n" + error.toString());
+            Logger.debug("Deep link error returned: \n" + error.toString());
             listener.onError(error);
         }
     }

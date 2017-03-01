@@ -2,12 +2,9 @@ package com.mparticle.internal;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.util.Log;
 
 import com.mparticle.MParticle;
-import com.mparticle.internal.ConfigManager;
-import com.mparticle.internal.Constants;
-import com.mparticle.internal.MPUtility;
+import com.mparticle.MParticle.LogLevel;
 
 /**
  * This class is primarily responsible for parsing and representing XML/resource-based configuration.
@@ -50,7 +47,6 @@ class AppConfig {
     public boolean autoTrackingEnabled = DEFAULT_ENABLE_AUTO_TRACKING;
     public int audienceTimeout = 100;
     private static MParticle.Environment mEnvironment = MParticle.Environment.Production;
-    public static MParticle.LogLevel logLevel = MParticle.LogLevel.NONE;
 
     public AppConfig(Context context, MParticle.Environment environment, SharedPreferences preferences, String apiKey, String apiSecret) {
         mContext = context;
@@ -63,16 +59,13 @@ class AppConfig {
         }else{
             mEnvironment = environment;
         }
-        if (MPUtility.isAppDebuggable(context)){
-            logLevel = MParticle.LogLevel.DEBUG;
-        }
         if (!MPUtility.isEmpty(apiKey)) {
             mKey = apiKey;
         }else {
             mKey = getString(PREFKEY_API_KEY, mKey);
             if (mKey == null &&
                     (mKey = preferences.getString(Constants.PrefKeys.API_KEY, mKey)) == null) {
-                Log.e(Constants.LOG_TAG, "Configuration issue: No API key passed to start() or configured as mp_key in resources!");
+                Logger.error( "Configuration issue: No API key passed to start() or configured as mp_key in resources!");
                 mSecret = "";
             }
         }
@@ -83,7 +76,7 @@ class AppConfig {
             mSecret = getString(PREFKEY_API_SECRET, mSecret);
             if (mSecret == null &&
                     (mSecret = preferences.getString(Constants.PrefKeys.API_SECRET, mSecret)) == null) {
-                Log.e(Constants.LOG_TAG, "Configuration issue: No API secret passed to start() or configured as mp_secret in resources!");
+                Logger.error("Configuration issue: No API secret passed to start() or configured as mp_secret in resources!");
                 mSecret = "";
             }
 
@@ -98,14 +91,11 @@ class AppConfig {
         String mode = getString(PREFKEY_FORCE_ENVIRONMENT, null);
         if (mode != null) {
             if (mode.toLowerCase().contains("dev")) {
-                ConfigManager.log(MParticle.LogLevel.WARNING, "Forcing SDK into development mode based on configuration XML key: " + PREFKEY_FORCE_ENVIRONMENT + " and value: " + mode);
+                Logger.warning("Forcing SDK into development mode based on configuration XML key: " + PREFKEY_FORCE_ENVIRONMENT + " and value: " + mode);
                 mEnvironment = MParticle.Environment.Development;
             } else if (mode.toLowerCase().contains("prod")) {
-                ConfigManager.log(MParticle.LogLevel.WARNING, "Forcing SDK into production mode based on configuration XML key: " + PREFKEY_FORCE_ENVIRONMENT + " and value: " + mode);
+                Logger.warning("Forcing SDK into production mode based on configuration XML key: " + PREFKEY_FORCE_ENVIRONMENT + " and value: " + mode);
                 mEnvironment = MParticle.Environment.Production;
-            }
-            if (mEnvironment == MParticle.Environment.Development){
-                logLevel = MParticle.LogLevel.DEBUG;
             }
         }
         autoTrackingEnabled = getBoolean(PREFKEY_AUTOTRACKING, DEFAULT_ENABLE_AUTO_TRACKING);
@@ -118,7 +108,7 @@ class AppConfig {
         if (isPushEnabled){
             pushSenderId = getString(PREFKEY_PUSH_SENDER_ID, null);
             if (pushSenderId == null){
-                ConfigManager.log(MParticle.LogLevel.ERROR, "Configuration issue: Push is enabled but no sender id is specified.");
+                Logger.error("Configuration issue: Push is enabled but no sender id is specified.");
             }
         }
 
@@ -126,7 +116,7 @@ class AppConfig {
         if (isLicensingEnabled){
             licenseKey = getString(PREFKEY_APP_LICENSE_KEY, "");
             if (licenseKey == null){
-                ConfigManager.log(MParticle.LogLevel.ERROR, "Configuration issue: Licensing enabled but no license key specified.");
+                Logger.error("Configuration issue: Licensing enabled but no license key specified.");
             }
         }
     }
@@ -139,7 +129,7 @@ class AppConfig {
         int id = getResourceId(key, "string");
         if (id == 0) {
             if (defaultString != null) {
-                ConfigManager.log(MParticle.LogLevel.DEBUG, String.format("Configuration: No string resource for: %s, using default: %s", key, defaultString));
+                Logger.debug(String.format("Configuration: No string resource for: %s, using default: %s", key, defaultString));
             }
             return defaultString;
         }
@@ -153,7 +143,7 @@ class AppConfig {
     public boolean getBoolean(String key, boolean defaultValue) {
         int id = getResourceId(key, "bool");
         if (id == 0) {
-            ConfigManager.log(MParticle.LogLevel.DEBUG, String.format("Configuration: No string resource for: %s, using default: %b", key, defaultValue));
+            Logger.debug(String.format("Configuration: No string resource for: %s, using default: %b", key, defaultValue));
             return defaultValue;
         }
         try {
@@ -166,7 +156,7 @@ class AppConfig {
     public int getInteger(String key, int defaultValue) {
         int id = getResourceId(key, "integer");
         if (id == 0) {
-            ConfigManager.log(MParticle.LogLevel.DEBUG, String.format("Configuration: No string resource for: %s, using default: %d", key, defaultValue));
+            Logger.debug(String.format("Configuration: No string resource for: %s, using default: %d", key, defaultValue));
             return defaultValue;
         }
         try {

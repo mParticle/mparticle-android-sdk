@@ -2,7 +2,6 @@ package com.mparticle.internal;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.util.Log;
 
 import com.mparticle.ExceptionHandler;
 import com.mparticle.MParticle;
@@ -321,44 +320,6 @@ public class ConfigManager {
                 .apply();
     }
 
-    public static void log(LogLevel priority, String... messages) {
-        log(priority, null, messages);
-    }
-
-    public static void log(LogLevel priority, Throwable error, String... messages){
-        if (messages != null && AppConfig.logLevel.ordinal() >= priority.ordinal() &&
-                getEnvironment().equals(MParticle.Environment.Development)) {
-            StringBuilder logMessage = new StringBuilder();
-            for (String m : messages){
-                logMessage.append(m);
-            }
-            switch (priority){
-                case ERROR:
-                    if (error != null){
-                        Log.e(Constants.LOG_TAG, logMessage.toString(), error);
-                    }else{
-                        Log.e(Constants.LOG_TAG, logMessage.toString());
-                    }
-                    break;
-                case WARNING:
-                    if (error != null){
-                        Log.w(Constants.LOG_TAG, logMessage.toString(), error);
-                    }else{
-                        Log.w(Constants.LOG_TAG, logMessage.toString());
-                    }
-
-                    break;
-                case DEBUG:
-                    if (error != null){
-                        Log.v(Constants.LOG_TAG, logMessage.toString(), error);
-                    }else{
-                        Log.v(Constants.LOG_TAG, logMessage.toString());
-                    }
-                    break;
-            }
-        }
-    }
-
     public String getLicenseKey() {
         return sLocalPrefs.licenseKey;
     }
@@ -481,10 +442,6 @@ public class ConfigManager {
         return sLocalPrefs.audienceTimeout;
     }
 
-    public void setLogLevel(LogLevel level) {
-        sLocalPrefs.logLevel = level;
-    }
-
     public int getCurrentRampValue() {
         return mRampValue;
     }
@@ -497,9 +454,9 @@ public class ConfigManager {
         JSONArray messageMatches = getTriggerMessageMatches();
         JSONArray triggerHashes = getTriggerMessageHashes();
 
-        //always trigger for PUSH_RECEIVED
         boolean shouldTrigger = message.getMessageType().equals(Constants.MessageType.PUSH_RECEIVED)
-                || message.getMessageType().equals(Constants.MessageType.COMMERCE_EVENT);
+                || message.getMessageType().equals(Constants.MessageType.COMMERCE_EVENT)
+                || message.getMessageType().equals(Constants.MessageType.APP_STATE_TRANSITION);
 
         if (!shouldTrigger && messageMatches != null && messageMatches.length() > 0){
             shouldTrigger = true;

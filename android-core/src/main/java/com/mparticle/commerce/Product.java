@@ -1,7 +1,7 @@
 package com.mparticle.commerce;
 
 import com.mparticle.MParticle;
-import com.mparticle.internal.ConfigManager;
+import com.mparticle.internal.Logger;
 import com.mparticle.internal.MPUtility;
 
 import org.json.JSONException;
@@ -103,7 +103,7 @@ public final class Product {
                 throw new IllegalArgumentException(message);
             } else {
                 mName = "Unknown";
-                ConfigManager.log(MParticle.LogLevel.ERROR, message);
+                Logger.error(message);
             }
         } else if (MPUtility.isEmpty(mSku)) {
             String message = "Product sku is required.";
@@ -111,7 +111,7 @@ public final class Product {
                 throw new IllegalArgumentException(message);
             } else {
                 mSku = "Unknown";
-                ConfigManager.log(MParticle.LogLevel.ERROR, message);
+                Logger.error(message);
             }
         }
     }

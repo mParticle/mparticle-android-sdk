@@ -9,7 +9,7 @@ import com.mparticle.commerce.Impression;
 import com.mparticle.commerce.Product;
 import com.mparticle.commerce.Promotion;
 import com.mparticle.commerce.TransactionAttributes;
-import com.mparticle.internal.ConfigManager;
+import com.mparticle.internal.Logger;
 import com.mparticle.internal.MPUtility;
 import com.mparticle.kits.mappings.CustomMapping;
 
@@ -112,7 +112,7 @@ public class KitConfiguration {
                 avfHashedAttribute = avfJson.getInt(KEY_ATTRIBUTE_VALUE_FILTERING_ATTRIBUTE);
                 avfHashedValue = avfJson.getInt(KEY_ATTRIBUTE_VALUE_FILTERING_VALUE);
             } catch (JSONException jse) {
-                ConfigManager.log(MParticle.LogLevel.ERROR, "Issue when parsing attribute value filtering configuration: " + jse.getMessage());
+                Logger.error("Issue when parsing attribute value filtering configuration: " + jse.getMessage());
                 avfIsActive = false;
             }
         }
@@ -496,7 +496,7 @@ public class KitConfiguration {
                 String key = iterator.next();
                 map.put(Integer.parseInt(key), json.getInt(key) == 1);
             } catch (JSONException jse) {
-                ConfigManager.log(MParticle.LogLevel.ERROR, "Issue while parsing kit configuration: " + jse.getMessage());
+                Logger.error("Issue while parsing kit configuration: " + jse.getMessage());
             }
         }
         return map;

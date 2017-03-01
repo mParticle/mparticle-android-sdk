@@ -16,14 +16,13 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.PowerManager;
-import android.util.Log;
 
 import com.mparticle.internal.AppStateManager;
 import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.Constants;
 import com.mparticle.internal.KitFrameworkWrapper;
 import com.mparticle.internal.KitsLoadedListener;
-import com.mparticle.internal.MPUtility;
+import com.mparticle.internal.Logger;
 import com.mparticle.messaging.AbstractCloudMessage;
 import com.mparticle.messaging.CloudAction;
 import com.mparticle.messaging.MPCloudNotificationMessage;
@@ -97,7 +96,7 @@ public class MPService extends IntentService {
         boolean release = true;
         try {
             String action = intent.getAction();
-            Log.i("MPService", "Handling action: " + action);
+            Logger.info("MPService", "Handling action: " + action);
             if (action.equals("com.google.android.c2dm.intent.REGISTRATION")) {
                 //Android will an Intent with this action, but we don't care - we capture the ID synchronously.
             } else if (action.equals("com.google.android.c2dm.intent.RECEIVE")) {
@@ -206,7 +205,7 @@ public class MPService extends IntentService {
                             }
                             broadcastNotificationReceived(cloudMessage);
                         }catch (Exception e){
-                            Log.w(TAG, "GCM parsing error: " + e.toString());
+                            Logger.warning(TAG, "GCM parsing error: " + e.toString());
                         }
                     }
                 };
@@ -214,7 +213,7 @@ public class MPService extends IntentService {
                 MParticle.start(this);
 
             }catch (Exception e){
-                Log.w(TAG, "GCM parsing error: " + e.toString());
+               Logger.warning(TAG, "GCM parsing error: " + e.toString());
             }
         }
     }

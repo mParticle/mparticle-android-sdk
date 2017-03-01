@@ -24,6 +24,7 @@ import com.mparticle.internal.Constants.MessageKey;
 import com.mparticle.internal.Constants.PrefKeys;
 import com.mparticle.internal.KitKatHelper;
 import com.mparticle.internal.KitFrameworkWrapper;
+import com.mparticle.internal.Logger;
 import com.mparticle.internal.MPLocationListener;
 import com.mparticle.internal.MPUtility;
 import com.mparticle.internal.MParticleJSInterface;
@@ -242,7 +243,7 @@ public class MParticle {
                     Context originalContext = context;
                     context = context.getApplicationContext();
                     if (!MPUtility.checkPermission(context, Manifest.permission.INTERNET)) {
-                        Log.e(Constants.LOG_TAG, "mParticle requires android.permission.INTERNET permission");
+                        Logger.error("mParticle requires android.permission.INTERNET permission");
                     }
 
                     ConfigManager configManager = new ConfigManager(context, environment, apiKey, apiSecret);
@@ -300,7 +301,7 @@ public class MParticle {
      */
     public static MParticle getInstance() {
         if (instance == null) {
-            Log.e(Constants.LOG_TAG, "Failed to get MParticle instance, getInstance() called prior to start().");
+            Logger.error("Failed to get MParticle instance, getInstance() called prior to start().");
             return null;
         }
         return getInstance(null, null, null, null, null);
@@ -523,7 +524,7 @@ public class MParticle {
         if (mConfigManager.isEnabled() && checkEventLimit()) {
             mAppStateManager.ensureActiveSession();
             mMessageManager.logEvent(event, mAppStateManager.getCurrentActivityName());
-            ConfigManager.log(LogLevel.DEBUG, "Logged event - \n", event.toString());
+            Logger.debug("Logged event - \n", event.toString());
             mKitManager.logEvent(event);
 
         }
@@ -557,7 +558,7 @@ public class MParticle {
             }
             mAppStateManager.ensureActiveSession();
             mMessageManager.logEvent(event);
-            ConfigManager.log(LogLevel.DEBUG, "Logged commerce event - \n", event.toString());
+            Logger.debug("Logged commerce event - \n", event.toString());
             mKitManager.logCommerceEvent(event);
         }
     }
@@ -572,7 +573,7 @@ public class MParticle {
      */
     public void logLtvIncrease(BigDecimal valueIncreased, String eventName, Map<String, String> contextInfo) {
         if (valueIncreased == null) {
-            ConfigManager.log(LogLevel.ERROR, "ValueIncreased must not be null.");
+            Logger.error( "ValueIncreased must not be null.");
             return;
         }
         if (contextInfo == null) {
@@ -611,11 +612,11 @@ public class MParticle {
     public void logScreen(MPEvent screenEvent) {
         screenEvent.setScreenEvent(true);
         if (MPUtility.isEmpty(screenEvent.getEventName())) {
-            ConfigManager.log(LogLevel.ERROR, "screenName is required for logScreen");
+            Logger.error( "screenName is required for logScreen");
             return;
         }
         if (screenEvent.getEventName().length() > Constants.LIMIT_EVENT_NAME) {
-            ConfigManager.log(LogLevel.ERROR, "The screen name was too long. Discarding event.");
+            Logger.error( "The screen name was too long. Discarding event.");
             return;
         }
         if (checkEventLimit()) {
@@ -624,7 +625,7 @@ public class MParticle {
                 mMessageManager.logScreen(screenEvent, screenEvent.getNavigationDirection());
 
                 if (null == screenEvent.getInfo()) {
-                    ConfigManager.log(LogLevel.DEBUG, "Logged screen: ", screenEvent.toString());
+                    Logger.debug("Logged screen: ", screenEvent.toString());
                 }
 
             }
@@ -643,16 +644,16 @@ public class MParticle {
     public void leaveBreadcrumb(String breadcrumb) {
         if (mConfigManager.isEnabled()) {
             if (MPUtility.isEmpty(breadcrumb)) {
-                ConfigManager.log(LogLevel.ERROR, "breadcrumb is required for leaveBreadcrumb");
+                Logger.error( "breadcrumb is required for leaveBreadcrumb");
                 return;
             }
             if (breadcrumb.length() > Constants.LIMIT_EVENT_NAME) {
-                ConfigManager.log(LogLevel.ERROR, "The breadcrumb name was too long. Discarding event.");
+                Logger.error( "The breadcrumb name was too long. Discarding event.");
                 return;
             }
             mAppStateManager.ensureActiveSession();
             mMessageManager.logBreadcrumb(breadcrumb);
-            ConfigManager.log(LogLevel.DEBUG, "Logged breadcrumb: " + breadcrumb);
+            Logger.debug("Logged breadcrumb: " + breadcrumb);
             mKitManager.leaveBreadcrumb(breadcrumb);
         }
     }
@@ -675,15 +676,14 @@ public class MParticle {
     public void logError(String message, Map<String, String> errorAttributes) {
         if (mConfigManager.isEnabled()) {
             if (MPUtility.isEmpty(message)) {
-                ConfigManager.log(LogLevel.ERROR, "message is required for logErrorEvent");
+                Logger.error( "message is required for logErrorEvent");
                 return;
             }
             mAppStateManager.ensureActiveSession();
             if (checkEventLimit()) {
                 JSONObject eventDataJSON = MPUtility.enforceAttributeConstraints(errorAttributes);
                 mMessageManager.logErrorEvent(message, null, eventDataJSON);
-                ConfigManager.log(LogLevel.DEBUG,
-                        "Logged error with message: " + (message == null ? "<none>" : message) +
+                Logger.debug("Logged error with message: " + (message == null ? "<none>" : message) +
                                 " with data: " + (eventDataJSON == null ? "<none>" : eventDataJSON.toString())
                 );
             }
@@ -770,7 +770,7 @@ public class MParticle {
             if (checkEventLimit()) {
                 JSONObject eventDataJSON = MPUtility.enforceAttributeConstraints(eventData);
                 mMessageManager.logErrorEvent(message, exception, eventDataJSON);
-                ConfigManager.log(LogLevel.DEBUG,
+                Logger.debug(
                         "Logged exception with message: " + (message == null ? "<none>" : message) +
                                 " with data: " + (eventDataJSON == null ? "<none>" : eventDataJSON.toString()) +
                                 " with exception: " + (exception == null ? "<none>" : exception.getMessage())
@@ -794,7 +794,7 @@ public class MParticle {
             try {
                 LocationManager locationManager = (LocationManager) mAppContext.getSystemService(Context.LOCATION_SERVICE);
                 if (!locationManager.isProviderEnabled(provider)) {
-                    ConfigManager.log(LogLevel.ERROR, "That requested location provider is not available");
+                    Logger.error( "That requested location provider is not available");
                     return;
                 }
 
@@ -818,7 +818,7 @@ public class MParticle {
                         .apply();
 
             } catch (SecurityException e) {
-                ConfigManager.log(LogLevel.ERROR, "The app must require the appropriate permissions to track location using this provider");
+                Logger.error( "The app must require the appropriate permissions to track location using this provider");
             }
         }
     }
@@ -881,7 +881,7 @@ public class MParticle {
      */
     public void setSessionAttribute(String key, Object value) {
         if (key == null){
-            ConfigManager.log(LogLevel.WARNING, "setSessionAttribute called with null key. Ignoring...");
+            Logger.warning("setSessionAttribute called with null key. Ignoring...");
             return;
         }
         if (value != null){
@@ -889,7 +889,7 @@ public class MParticle {
         }
         if (mConfigManager.isEnabled()) {
             mAppStateManager.ensureActiveSession();
-            ConfigManager.log(LogLevel.DEBUG, "Set session attribute: " + key + "=" + value);
+            Logger.debug("Set session attribute: " + key + "=" + value);
 
             if (MPUtility.setCheckedAttribute(mAppStateManager.getSession().mSessionAttributes, key, value, false, false)) {
                 mMessageManager.setSessionAttributes();
@@ -905,12 +905,12 @@ public class MParticle {
      */
     public void incrementSessionAttribute(String key, int value) {
         if (key == null){
-            ConfigManager.log(LogLevel.WARNING, "incrementSessionAttribute called with null key. Ignoring...");
+            Logger.warning("incrementSessionAttribute called with null key. Ignoring...");
             return;
         }
         if (mConfigManager.isEnabled()) {
             mAppStateManager.ensureActiveSession();
-            ConfigManager.log(LogLevel.DEBUG, "Incrementing session attribute: " + key + "=" + value);
+            Logger.debug("Incrementing session attribute: " + key + "=" + value);
 
             if (MPUtility.setCheckedAttribute(mAppStateManager.getSession().mSessionAttributes, key, value, true, true)) {
                 mMessageManager.setSessionAttributes();
@@ -927,7 +927,7 @@ public class MParticle {
     public void logout() {
         if (mConfigManager.isEnabled()) {
             mAppStateManager.ensureActiveSession();
-            ConfigManager.log(LogLevel.DEBUG, "Logging out.");
+            Logger.debug("Logging out.");
             mMessageManager.logProfileAction(Constants.ProfileActions.LOGOUT);
         }
         mKitManager.logout();
@@ -944,35 +944,35 @@ public class MParticle {
         if (mConfigManager.isEnabled() && checkEventLimit()) {
             mAppStateManager.ensureActiveSession();
             if (MPUtility.isEmpty(key)) {
-                ConfigManager.log(LogLevel.WARNING, "setUserAttribute called with null key. This is a no-op.");
+                Logger.warning("setUserAttribute called with null key. This is a no-op.");
                 return false;
             }
             if (key.length() > Constants.LIMIT_ATTR_NAME) {
-                ConfigManager.log(LogLevel.WARNING, "User attribute keys cannot be longer than " + Constants.LIMIT_ATTR_NAME + " characters, attribute not set: " + key);
+                Logger.warning("User attribute keys cannot be longer than " + Constants.LIMIT_ATTR_NAME + " characters, attribute not set: " + key);
                 return false;
             }
 
             if (value != null && value instanceof List) {
                 List<Object> values = (List<Object>) value;
                 if (values.size() > Constants.LIMIT_USER_ATTR_LIST_LENGTH) {
-                    ConfigManager.log(LogLevel.WARNING, "setUserAttribute called with list longer than " + Constants.LIMIT_USER_ATTR_LIST_LENGTH + " elements, list not set.");
+                    Logger.warning("setUserAttribute called with list longer than " + Constants.LIMIT_USER_ATTR_LIST_LENGTH + " elements, list not set.");
                     return false;
                 }
                 List<String> clonedList = new ArrayList<String>();
                 try {
                     for (int i = 0; i < values.size(); i++) {
                         if (values.get(i).toString().length() > Constants.LIMIT_USER_ATTR_LIST_ITEM_LENGTH) {
-                            ConfigManager.log(LogLevel.WARNING, "setUserAttribute called with list containing element longer than " + Constants.LIMIT_USER_ATTR_LIST_ITEM_LENGTH + " characters, dropping entire list.");
+                            Logger.warning("setUserAttribute called with list containing element longer than " + Constants.LIMIT_USER_ATTR_LIST_ITEM_LENGTH + " characters, dropping entire list.");
                             return false;
                         } else {
                             clonedList.add(values.get(i).toString());
                         }
                     }
-                    ConfigManager.log(LogLevel.DEBUG, "Set user attribute list: " + key + " with values: " + values.toString());
+                    Logger.warning("Set user attribute list: " + key + " with values: " + values.toString());
                     mMessageManager.setUserAttribute(key, clonedList);
                     mKitManager.setUserAttributeList(key, clonedList);
                 } catch (Exception e) {
-                    ConfigManager.log(LogLevel.DEBUG, "Error while setting attribute list: " + e.toString());
+                    Logger.warning("Error while setting attribute list: " + e.toString());
                     return false;
                 }
             } else {
@@ -980,12 +980,12 @@ public class MParticle {
                 if (value != null) {
                     stringValue = value.toString();
                     if (stringValue.length() > Constants.LIMIT_USER_ATTR_VALUE) {
-                        ConfigManager.log(LogLevel.WARNING, "setUserAttribute called with string-value longer than " + Constants.LIMIT_USER_ATTR_VALUE + " characters. Attribute not set.");
+                        Logger.warning("setUserAttribute called with string-value longer than " + Constants.LIMIT_USER_ATTR_VALUE + " characters. Attribute not set.");
                         return false;
                     }
-                    ConfigManager.log(LogLevel.DEBUG, "Set user attribute: " + key + " with value: " + stringValue);
+                    Logger.debug("Set user attribute: " + key + " with value: " + stringValue);
                 } else {
-                    ConfigManager.log(LogLevel.DEBUG, "Set user tag: " + key);
+                    Logger.debug("Set user tag: " + key);
                 }
                 mMessageManager.setUserAttribute(key, stringValue);
                 mKitManager.setUserAttribute(key, stringValue);
@@ -1003,7 +1003,7 @@ public class MParticle {
      */
     public boolean setUserAttributeList(String key, List<String> attributeList) {
         if (attributeList == null) {
-            ConfigManager.log(LogLevel.WARNING, "setUserAttributeList called with null list, this is a no-op.");
+            Logger.warning("setUserAttributeList called with null list, this is a no-op.");
             return false;
         }
         return setUserAttribute(key, attributeList);
@@ -1019,10 +1019,10 @@ public class MParticle {
      */
     public boolean incrementUserAttribute(String key, int value) {
         if (key == null){
-            ConfigManager.log(LogLevel.WARNING, "incrementUserAttribute called with null key. Ignoring...");
+            Logger.warning("incrementUserAttribute called with null key. Ignoring...");
             return false;
         }
-        ConfigManager.log(LogLevel.DEBUG, "Incrementing user attribute: " + key + " with value " + value);
+        Logger.debug("Incrementing user attribute: " + key + " with value " + value);
         mMessageManager.incrementUserAttribute(key, value);
         return true;
     }
@@ -1034,11 +1034,11 @@ public class MParticle {
      */
     public boolean removeUserAttribute(String key) {
         if (MPUtility.isEmpty(key)) {
-            ConfigManager.log(LogLevel.DEBUG, "removeUserAttribute called with empty key.");
+            Logger.debug("removeUserAttribute called with empty key.");
             return false;
         }
 
-        ConfigManager.log(LogLevel.DEBUG, "Removing user attribute: " + key);
+        Logger.debug("Removing user attribute: " + key);
         mMessageManager.removeUserAttribute(key);
         mKitManager.removeUserAttribute(key);
         return true;
@@ -1071,13 +1071,13 @@ public class MParticle {
     public synchronized void setUserIdentity(String id, IdentityType identityType) {
         if (identityType != null) {
             if (id == null) {
-                ConfigManager.log(LogLevel.DEBUG, "Removing User Identity type: " + identityType.name());
+                Logger.debug("Removing User Identity type: " + identityType.name());
             } else {
-                ConfigManager.log(LogLevel.DEBUG, "Setting User Identity: " + id);
+                Logger.debug("Setting User Identity: " + id);
             }
 
             if (!MPUtility.isEmpty(id) && id.length() > Constants.LIMIT_ATTR_VALUE) {
-                ConfigManager.log(LogLevel.WARNING, "User Identity value length exceeds limit. Will not set id: " + id);
+                Logger.warning("User Identity value length exceeds limit. Will not set id: " + id);
                 return;
             }
 
@@ -1092,6 +1092,7 @@ public class MParticle {
                         break;
                     }
                 }
+
 
                 boolean idChanged = true;
 
@@ -1112,7 +1113,7 @@ public class MParticle {
                     }
                 } else {
                     if (oldIdentity == null || index < 0) {
-                        ConfigManager.log(LogLevel.DEBUG, "Attempted to remove ID type that didn't exist: " + identityType.name());
+                        Logger.debug("Attempted to remove ID type that didn't exist: " + identityType.name());
                         return;
                     }
 
@@ -1138,11 +1139,9 @@ public class MParticle {
                     getKitManager().setUserIdentity(id, identityType);
                 }
             } catch (JSONException e) {
-                ConfigManager.log(LogLevel.ERROR, "Error setting identity: " + id);
+                Logger.error( "Error setting identity: " + id);
                 return;
             }
-
-
         }
     }
 
@@ -1193,7 +1192,7 @@ public class MParticle {
                     setUserIdentity(null, identityType);
                 }
             } catch (JSONException jse) {
-                ConfigManager.log(MParticle.LogLevel.WARNING, "Error removing identity: " + id);
+                Logger.warning("Error removing identity: " + id);
             }
         }
     }
@@ -1225,7 +1224,7 @@ public class MParticle {
 
                 mConfigManager.setOptOut(optOutStatus);
 
-                ConfigManager.log(LogLevel.DEBUG, "Set opt-out: " + optOutStatus);
+                Logger.debug("Set opt-out: " + optOutStatus);
             }
             mKitManager.setOptOut(optOutStatus);
         }
@@ -1254,7 +1253,7 @@ public class MParticle {
      */
     @Deprecated
     public void setEnvironment(Environment environment) {
-        Log.w(Constants.LOG_TAG, "setEnvironment is deprecated and is a no-op. Use start() or XML configuration if you must customize environment.");
+        Logger.warning("setEnvironment is deprecated and is a no-op. Use start() or XML configuration if you must customize environment.");
     }
 
     /**
@@ -1351,17 +1350,18 @@ public class MParticle {
     }
 
     /**
-     * The log level is used to moderate the amount of messages that are printed
-     * by the SDK to the console. Note that while the SDK is in the Production,
-     * <i>no log messages will be printed</i>.
+     * Set the minimum log level before the SDK is initialized. The log level
+     * is used to moderate the amount of messages that are printed by the SDK
+     * to the console. Note that while the SDK is in the Production,
+     * <i>log messages at or above this level will be printed</i>.
      *
      * @see MParticle.LogLevel
      *
      * @param level
      */
-    public void setLogLevel(LogLevel level) {
+    public static void setLogLevel(LogLevel level) {
         if (level != null) {
-            mConfigManager.setLogLevel(level);
+            Logger.setMinLogLevel(level, true);
         }
     }
 
@@ -1517,7 +1517,7 @@ public class MParticle {
     }
 
     void refreshConfiguration() {
-        ConfigManager.log(LogLevel.DEBUG, "Refreshing configuration...");
+        Logger.debug("Refreshing configuration...");
         mMessageManager.refreshConfiguration();
     }
 
@@ -1681,19 +1681,32 @@ public class MParticle {
         /**
          * Disable logging completely.
          */
-        NONE,
+        NONE(Integer.MAX_VALUE),
         /**
          * Used for critical issues with the SDK or its configuration.
          */
-        ERROR,
+        ERROR(Log.ERROR),
         /**
          * (default) Used to warn developers of potentially unintended consequences of their use of the SDK.
          */
-        WARNING,
+        WARNING(Log.WARN),
         /**
          * Used to communicate the internal state and processes of the SDK.
          */
-        DEBUG
+        DEBUG(Log.DEBUG),
+        /*
+         * Used to relay fine-grained issues with the usage of the SDK
+         */
+        VERBOSE(Log.VERBOSE),
+        /*
+         * Used to communicate
+         */
+        INFO(Log.INFO);
+
+        public int logLevel;
+        LogLevel(int logLevel) {
+            this.logLevel = logLevel;
+        }
     }
 
     void logUnhandledError(Throwable t) {

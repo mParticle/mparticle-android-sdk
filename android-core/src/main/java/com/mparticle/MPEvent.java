@@ -1,10 +1,8 @@
 package com.mparticle;
 
 
-import android.util.Log;
-
-import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.Constants;
+import com.mparticle.internal.Logger;
 import com.mparticle.internal.MPUtility;
 
 import org.json.JSONArray;
@@ -43,16 +41,16 @@ public class MPEvent {
     private MPEvent(){}
     private MPEvent(Builder builder){
         if (builder.eventType == null){
-            ConfigManager.log(MParticle.LogLevel.ERROR, "MPEvent created with no event type!");
+            Logger.error("MPEvent created with no event type!");
         }else{
             eventType = builder.eventType;
         }
 
         if (builder.eventName == null){
-            ConfigManager.log(MParticle.LogLevel.ERROR, "MPEvent created with no event name!");
+            Logger.error("MPEvent created with no event name!");
         }else{
             if (builder.eventName.length() > Constants.LIMIT_EVENT_NAME){
-                ConfigManager.log(MParticle.LogLevel.ERROR, "MPEvent created with too long of a name, the limit is: " + Constants.LIMIT_EVENT_NAME);
+                Logger.error("MPEvent created with too long of a name, the limit is: " + Constants.LIMIT_EVENT_NAME);
             }
             eventName = builder.eventName;
         }
@@ -481,7 +479,7 @@ public class MPEvent {
 
                 return builder;
             }catch (Exception e){
-                Log.w(Constants.LOG_TAG, "Failed to deserialize MPEvent.Builder: " + e.toString());
+                Logger.warning("Failed to deserialize MPEvent.Builder: " + e.toString());
                 return builder;
             }
         }
@@ -538,7 +536,7 @@ public class MPEvent {
                 }
                 return jsonObject.toString();
             }catch (JSONException jse){
-                Log.w(Constants.LOG_TAG, "Failed to serialize MPEvent.Builder: " + jse.toString());
+                Logger.warning("Failed to serialize MPEvent.Builder: " + jse.toString());
             }
             return super.toString();
         }

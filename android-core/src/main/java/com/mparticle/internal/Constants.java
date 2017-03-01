@@ -7,7 +7,7 @@ import com.mparticle.BuildConfig;
  */
 public class Constants {
 
-    public final static String LOG_TAG = "mParticle SDK";
+    public final static String LOG_TAG = "mParticle";
 
     public static final String MPARTICLE_VERSION = BuildConfig.VERSION_NAME;
 

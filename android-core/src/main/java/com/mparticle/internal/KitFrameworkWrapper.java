@@ -51,20 +51,20 @@ public class KitFrameworkWrapper implements KitManager {
 
     public void loadKitLibrary() {
         if (!frameworkLoadAttempted) {
-            ConfigManager.log(MParticle.LogLevel.DEBUG, "Loading Kit Framework.");
+            Logger.debug("Loading Kit Framework.");
             frameworkLoadAttempted = true;
             try {
                 Class clazz = Class.forName("com.mparticle.kits.KitManagerImpl");
                 Constructor<KitFrameworkWrapper> constructor = clazz.getConstructor(Context.class, ReportingManager.class, ConfigManager.class, AppStateManager.class);
                 mKitManager = constructor.newInstance(mContext, mReportingManager, mConfigManager, mAppStateManager);
                 JSONArray configuration = mConfigManager.getLatestKitConfiguration();
-                ConfigManager.log(MParticle.LogLevel.DEBUG, "Kit Framework loaded.");
+                Logger.debug("Kit Framework loaded.");
                 if (configuration != null) {
-                    ConfigManager.log(MParticle.LogLevel.DEBUG, "Restoring previous Kit configuration.");
+                    Logger.debug("Restoring previous Kit configuration.");
                     updateKits(configuration);
                 }
             } catch (Exception e) {
-                ConfigManager.log(MParticle.LogLevel.DEBUG, "No Kit Framework detected.");
+                Logger.debug("No Kit Framework detected.");
                 disableQueuing();
             }
         }
@@ -110,7 +110,7 @@ public class KitFrameworkWrapper implements KitManager {
         if (eventQueue != null) {
             eventQueue.clear();
             eventQueue = null;
-            ConfigManager.log(MParticle.LogLevel.DEBUG, "Kit initialization complete. Disabling event queueing.");
+            Logger.debug("Kit initialization complete. Disabling event queueing.");
         }
 
         if (attributeQueue != null) {
@@ -138,7 +138,7 @@ public class KitFrameworkWrapper implements KitManager {
         }
 
         if (eventQueue != null && eventQueue.size() > 0) {
-            ConfigManager.log(MParticle.LogLevel.DEBUG, "Replaying events after receiving first kit configuration.");
+            Logger.debug("Replaying events after receiving first kit configuration.");
             for (Object event : eventQueue) {
                 if (event instanceof MPEvent) {
                     MPEvent mpEvent = (MPEvent) event;
@@ -154,7 +154,7 @@ public class KitFrameworkWrapper implements KitManager {
         }
 
         if (attributeQueue != null && attributeQueue.size() > 0) {
-            ConfigManager.log(MParticle.LogLevel.DEBUG, "Replaying user attributes after receiving first kit configuration.");
+            Logger.debug("Replaying user attributes after receiving first kit configuration.");
             for (AttributeChange attributeChange : attributeQueue) {
                 if (attributeChange.removal) {
                     mKitManager.removeUserAttribute(attributeChange.key);
@@ -186,7 +186,7 @@ public class KitFrameworkWrapper implements KitManager {
         //it's an edge case to even need this, so 10
         //should be enough.
         if (eventQueue.size() < 10) {
-            ConfigManager.log(MParticle.LogLevel.DEBUG, "Queuing Kit event while waiting for initial configuration.");
+            Logger.debug("Queuing Kit event while waiting for initial configuration.");
             eventQueue.add(event);
         }
         return true;

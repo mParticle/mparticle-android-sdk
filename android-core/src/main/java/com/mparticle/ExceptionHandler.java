@@ -1,12 +1,9 @@
 package com.mparticle;
 
-import android.util.Log;
-
-import com.mparticle.MParticle;
 import com.mparticle.internal.Constants;
+import com.mparticle.internal.Logger;
 
 import java.lang.Thread.UncaughtExceptionHandler;
-import java.lang.ref.WeakReference;
 
 /**
  * Class used to capture and log uncaught exceptions.
@@ -31,7 +28,7 @@ import java.lang.ref.WeakReference;
                 mOriginalUncaughtExceptionHandler.uncaughtException(thread, ex);
             }
         } catch (Exception t) {
-            Log.e(TAG, "Failed to log error event for uncaught exception", t);
+            Logger.error(t, "Failed to log error event for uncaught exception");
             // we tried. don't make things worse.
         }
     }

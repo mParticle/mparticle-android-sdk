@@ -6,7 +6,6 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.Build;
-import android.provider.Settings;
 import android.telephony.TelephonyManager;
 import android.util.DisplayMetrics;
 import android.view.WindowManager;
@@ -18,10 +17,8 @@ import com.mparticle.internal.Constants.PrefKeys;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.lang.reflect.Method;
 import java.util.Locale;
 import java.util.TimeZone;
-import java.util.UUID;
 
 /* package-private */class DeviceAttributes {
 
@@ -232,11 +229,11 @@ import java.util.UUID;
                     message = "Successfully collected Google Play Advertising ID.";
                 }
             }catch (JSONException jse) {
-                ConfigManager.log(MParticle.LogLevel.DEBUG, "Failed while building device-info object: ", jse.toString());
+                Logger.debug("Failed while building device-info object: ", jse.toString());
             }
         }
         if (firstCollection) {
-            ConfigManager.log(MParticle.LogLevel.DEBUG, message);
+            Logger.debug(message);
             firstCollection = false;
         }
 
@@ -250,7 +247,7 @@ import java.util.UUID;
             deviceInfo.put(Constants.MessageKey.PUSH_SOUND_ENABLED, MParticle.getInstance().getConfigManager().isPushSoundEnabled());
             deviceInfo.put(Constants.MessageKey.PUSH_VIBRATION_ENABLED, MParticle.getInstance().getConfigManager().isPushVibrationEnabled());
         }catch (JSONException jse) {
-            ConfigManager.log(MParticle.LogLevel.DEBUG, "Failed while building device-info object: ", jse.toString());
+            Logger.debug("Failed while building device-info object: ", jse.toString());
         }
     }
 

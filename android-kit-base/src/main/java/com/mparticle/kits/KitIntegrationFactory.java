@@ -1,9 +1,7 @@
 package com.mparticle.kits;
 
-import com.mparticle.BuildConfig;
 import com.mparticle.MParticle;
-import com.mparticle.internal.ConfigManager;
-import com.mparticle.internal.KitManager;
+import com.mparticle.internal.Logger;
 
 import org.json.JSONException;
 
@@ -66,7 +64,7 @@ public class KitIntegrationFactory {
                 return constructor.newInstance()
                         .setKitManager(manager);
             } catch (Exception e) {
-                ConfigManager.log(MParticle.LogLevel.DEBUG, e, "Failed to create Kit with ID: " + moduleId);
+                Logger.debug(e, "Failed to create Kit with ID: " + moduleId);
             }
         }
         return null;
@@ -81,7 +79,7 @@ public class KitIntegrationFactory {
                     supportedKits = new HashMap<Integer, Class>();
                 }
                 supportedKits.put(entry.getKey(), kitClass);
-                ConfigManager.log(MParticle.LogLevel.DEBUG, entry.getValue().substring(entry.getValue().lastIndexOf(".") + 1) + " detected.");
+                Logger.debug(entry.getValue().substring(entry.getValue().lastIndexOf(".") + 1) + " detected.");
             }
         }
     }
@@ -90,9 +88,7 @@ public class KitIntegrationFactory {
         try {
             return Class.forName(className);
         } catch (Exception e) {
-            if (BuildConfig.MP_DEBUG) {
-                ConfigManager.log(MParticle.LogLevel.DEBUG, "Kit not bundled: ", className);
-            }
+            Logger.verbose("Kit not bundled: ", className);
         }
         return null;
     }

@@ -21,9 +21,7 @@ import android.view.Display;
 import android.view.WindowManager;
 
 import com.mparticle.MParticle;
-import com.mparticle.MParticle.LogLevel;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -489,6 +487,10 @@ public class MPUtility {
         return ( 0 != ( context.getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE ) );
     }
 
+    public static boolean isDevEnv() {
+        return ConfigManager.getEnvironment().equals(MParticle.Environment.Development);
+    }
+
     /**
      * This method makes sure the constraints on event attributes are enforced. A JSONObject version
      * of the attributes is return with data that exceeds the limits removed. NOTE: Non-string
@@ -523,18 +525,18 @@ public class MPUtility {
             }
 
             if (Constants.LIMIT_ATTR_COUNT == attributes.length() && !attributes.has(key)) {
-                ConfigManager.log(LogLevel.ERROR, "Attribute count exceeds limit. Discarding attribute: " + key);
+                Logger.error( "Attribute count exceeds limit. Discarding attribute: " + key);
                 return false;
             }
             if (value != null) {
                 String stringValue = value.toString();
                 if ((userAttribute && stringValue.length() > Constants.LIMIT_USER_ATTR_VALUE) || (!userAttribute && stringValue.length() > Constants.LIMIT_ATTR_VALUE) ){
-                    ConfigManager.log(LogLevel.ERROR, "Attribute value length exceeds limit. Discarding attribute: " + key);
+                    Logger.error( "Attribute value length exceeds limit. Discarding attribute: " + key);
                     return false;
                 }
             }
             if (key.length() > Constants.LIMIT_ATTR_NAME) {
-                ConfigManager.log(LogLevel.ERROR, "Attribute name length exceeds limit. Discarding attribute: " + key);
+                Logger.error( "Attribute name length exceeds limit. Discarding attribute: " + key);
                 return false;
             }
             if (value == null) {
@@ -547,13 +549,13 @@ public class MPUtility {
             }
             attributes.put(key, value);
         } catch (JSONException e) {
-            ConfigManager.log(LogLevel.ERROR, "JSON error processing attributes. Discarding attribute: " + key);
+            Logger.error( "JSON error processing attributes. Discarding attribute: " + key);
             return false;
         } catch (NumberFormatException nfe){
-            ConfigManager.log(LogLevel.ERROR, "Attempted to increment a key that could not be parsed as an integer: " + key);
+            Logger.error( "Attempted to increment a key that could not be parsed as an integer: " + key);
             return false;
         } catch (Exception e){
-            ConfigManager.log(LogLevel.ERROR, "Failed to add attribute: " + e.getMessage());
+            Logger.error( "Failed to add attribute: " + e.getMessage());
             return false;
         }
         return true;

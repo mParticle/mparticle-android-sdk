@@ -9,7 +9,6 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 
-import com.mparticle.BuildConfig;
 import com.mparticle.MParticle;
 import com.mparticle.internal.Constants.MessageKey;
 import com.mparticle.internal.Constants.MessageType;
@@ -111,7 +110,7 @@ import java.util.UUID;
                     mMessageManagerCallbacks.checkForTrigger(message);
 
                 } catch (Exception e) {
-                    ConfigManager.log(MParticle.LogLevel.ERROR, e, "Error saving message to mParticle DB.");
+                    Logger.error(e, "Error saving message to mParticle DB.");
                 }
                 break;
             case UPDATE_SESSION_ATTRIBUTES:
@@ -121,7 +120,7 @@ import java.util.UUID;
                     String attributes = sessionAttributes.getString(MessageKey.ATTRIBUTES);
                     dbUpdateSessionAttributes(sessionId, attributes);
                 } catch (Exception e) {
-                    ConfigManager.log(MParticle.LogLevel.ERROR, e, "Error updating session attributes in mParticle DB.");
+                    Logger.error(e, "Error updating session attributes in mParticle DB.");
                 }
                 break;
             case UPDATE_SESSION_END:
@@ -129,7 +128,7 @@ import java.util.UUID;
                     Session session = (Session) msg.obj;
                     dbUpdateSessionEndTime(session.mSessionID, session.mLastEventTime, session.getForegroundTime());
                 } catch (Exception e) {
-                    ConfigManager.log(MParticle.LogLevel.ERROR, e, "Error updating session end time in mParticle DB");
+                    Logger.error(e, "Error updating session end time in mParticle DB");
                 }
                 break;
             case CREATE_SESSION_END_MESSAGE:
@@ -158,10 +157,10 @@ import java.util.UUID;
                             // insert the record into messages with duration
                             dbInsertMessage(endMessage);
                         }catch (JSONException jse){
-                            ConfigManager.log(MParticle.LogLevel.WARNING, "Failed to create mParticle session end message");
+                            Logger.warning("Failed to create mParticle session end message");
                         }
                     } else {
-                        ConfigManager.log(MParticle.LogLevel.ERROR, "Error creating session end, no entry for sessionId in mParticle DB");
+                        Logger.error("Error creating session end, no entry for sessionId in mParticle DB");
                     }
                     selectCursor.close();
                     //1 means this came from ending the session
@@ -169,7 +168,7 @@ import java.util.UUID;
                         mMessageManagerCallbacks.endUploadLoop();
                     }
                 } catch (Exception e) {
-                    ConfigManager.log(MParticle.LogLevel.ERROR, e, "Error creating session end message in mParticle DB");
+                    Logger.error(e, "Error creating session end message in mParticle DB");
                 }finally {
 
                 }
@@ -189,8 +188,10 @@ import java.util.UUID;
                         sendMessage(obtainMessage(MessageHandler.CREATE_SESSION_END_MESSAGE, 0, 0, sessionId));
                     }
                     selectCursor.close();
+                } catch (MParticleApiClientImpl.MPNoConfigException ex) {
+                    Logger.error("Unable to process initialization, API key and or API Secret is missing");
                 } catch (Exception e) {
-                    ConfigManager.log(MParticle.LogLevel.ERROR, e, "Error processing initialization in mParticle DB");
+                    Logger.error(e, "Error processing initialization in mParticle DB");
                 }
                 break;
             case STORE_BREADCRUMB:
@@ -199,7 +200,7 @@ import java.util.UUID;
                     message.put(Constants.MessageKey.ID, UUID.randomUUID().toString());
                     dbInsertBreadcrumb(message);
                 } catch (Exception e) {
-                    ConfigManager.log(MParticle.LogLevel.ERROR, e, "Error saving breadcrumb to mParticle DB");
+                    Logger.error(e, "Error saving breadcrumb to mParticle DB");
                 }
                 break;
             case STORE_GCM_MESSAGE:
@@ -207,7 +208,7 @@ import java.util.UUID;
                     AbstractCloudMessage message = (AbstractCloudMessage) msg.obj;
                     dbInsertGcmMessage(message, msg.getData().getString(MParticleDatabase.GcmMessageTable.APPSTATE));
                 } catch (Exception e) {
-                    ConfigManager.log(MParticle.LogLevel.ERROR, e, "Error saving GCM message to mParticle DB", e.toString());
+                    Logger.error(e, "Error saving GCM message to mParticle DB", e.toString());
                 }
                 break;
             case MARK_INFLUENCE_OPEN_GCM:
@@ -218,7 +219,7 @@ import java.util.UUID;
                 try {
                     clearOldProviderGcm();
                 }catch (Exception e){
-                    ConfigManager.log(MParticle.LogLevel.ERROR, e, "Error while clearing provider GCM messages: ", e.toString());
+                    Logger.error(e, "Error while clearing provider GCM messages: ", e.toString());
                 }
                 break;
             case STORE_REPORTING_MESSAGE_LIST:
@@ -226,30 +227,28 @@ import java.util.UUID;
                     List<JsonReportingMessage> reportingMessages = (List<JsonReportingMessage>)msg.obj;
                     dbInsertReportingMessages(reportingMessages);
                 }catch (Exception e) {
-                    if (BuildConfig.MP_DEBUG) {
-                        ConfigManager.log(MParticle.LogLevel.ERROR, e, "Error while inserting reporting messages: ", e.toString());
-                    }
+                    Logger.verbose(e, "Error while inserting reporting messages: ", e.toString());
                 }
                 break;
             case REMOVE_USER_ATTRIBUTE:
                 try {
                     removeUserAttribute((MessageManager.UserAttributeRemoval)msg.obj, mMessageManagerCallbacks);
                 }catch (Exception e) {
-                    ConfigManager.log(MParticle.LogLevel.ERROR, e, "Error while removing user attribute: ", e.toString());
+                    Logger.error(e, "Error while removing user attribute: ", e.toString());
                 }
                 break;
             case SET_USER_ATTRIBUTE:
                 try {
                     setUserAttribute((MessageManager.UserAttributeResponse) msg.obj);
                 } catch (Exception e) {
-                    ConfigManager.log(MParticle.LogLevel.ERROR, e, "Error while setting user attribute: ", e.toString());
+                    Logger.error(e, "Error while setting user attribute: ", e.toString());
                 }
                 break;
             case INCREMENT_USER_ATTRIBUTE:
                 try {
                     incrementUserAttribute((String)msg.obj, msg.arg1);
                 } catch (Exception e) {
-                    ConfigManager.log(MParticle.LogLevel.ERROR, e, "Error while incrementing user attribute: ", e.toString());
+                    Logger.error(e, "Error while incrementing user attribute: ", e.toString());
                 }
         }
     }
@@ -260,7 +259,7 @@ import java.util.UUID;
         if (!userAttributes.containsKey(key)) {
             TreeMap<String, List<String>> userAttributeList = getUserAttributeLists();
             if (userAttributeList.containsKey(key)) {
-                ConfigManager.log(MParticle.LogLevel.ERROR, "Error while attempting to increment user attribute - existing attribute is a list, which can't be incremented.");
+                Logger.error("Error while attempting to increment user attribute - existing attribute is a list, which can't be incremented.");
                 return;
             }
         }
@@ -272,7 +271,7 @@ import java.util.UUID;
             try {
                 newValue = Integer.toString(Integer.parseInt(currentValue) + incrementValue);
             }catch (NumberFormatException nfe) {
-                ConfigManager.log(MParticle.LogLevel.ERROR, "Error while attempting to increment user attribute - existing attribute is not a number.");
+                Logger.error("Error while attempting to increment user attribute - existing attribute is not a number.");
                 return;
             }
         }
@@ -311,7 +310,7 @@ import java.util.UUID;
         boolean shouldInsert = true;
         int newBehavior = message.optInt(MessageKey.PUSH_BEHAVIOR);
         try {
-            ConfigManager.log(MParticle.LogLevel.DEBUG, "Validating GCM behaviors...");
+            Logger.debug("Validating GCM behaviors...");
             String[] args = {Integer.toString(message.getInt(MParticleDatabase.GcmMessageTable.CONTENT_ID))};
             gcmCursor = db.query(MParticleDatabase.GcmMessageTable.TABLE_NAME,
                     null,
@@ -354,7 +353,7 @@ import java.util.UUID;
                     }
                     int updated = db.update(MParticleDatabase.GcmMessageTable.TABLE_NAME, values, MParticleDatabase.GcmMessageTable.CONTENT_ID + " =?", args);
                     if (updated > 0) {
-                        ConfigManager.log(MParticle.LogLevel.DEBUG, "Updated GCM with content ID: " + message.getInt(MParticleDatabase.GcmMessageTable.CONTENT_ID) + " and behavior(s): " + getBehaviorString(newBehavior));
+                        Logger.debug("Updated GCM with content ID: " + message.getInt(MParticleDatabase.GcmMessageTable.CONTENT_ID) + " and behavior(s): " + getBehaviorString(newBehavior));
                     }
                 }else{
                     shouldInsert = false;
@@ -362,7 +361,7 @@ import java.util.UUID;
 
             }
         } catch (Exception e) {
-            ConfigManager.log(MParticle.LogLevel.DEBUG, e, "Failed to update GCM message.");
+            Logger.debug(e, "Failed to update GCM message.");
         }finally {
             if (gcmCursor != null && !gcmCursor.isClosed()){
                 gcmCursor.close();
@@ -409,7 +408,7 @@ import java.util.UUID;
                 );
             }
         }catch (Exception e){
-            ConfigManager.log(MParticle.LogLevel.ERROR, e, "Error logging influence-open message to mParticle DB ", e.toString());
+            Logger.error(e, "Error logging influence-open message to mParticle DB ", e.toString());
         }finally {
             if (gcmCursor != null && !gcmCursor.isClosed()){
                 gcmCursor.close();
@@ -432,7 +431,7 @@ import java.util.UUID;
                 message.put(MessageKey.PAYLOAD, payload);
             }
         }catch (Exception e){
-            ConfigManager.log(MParticle.LogLevel.DEBUG, "Failed to append latest push notification payload: " + e.toString());
+            Logger.debug("Failed to append latest push notification payload: " + e.toString());
         }finally {
             if (pushCursor != null && !pushCursor.isClosed()){
                 pushCursor.close();
@@ -466,7 +465,7 @@ import java.util.UUID;
                 message.put(MessageType.BREADCRUMB, breadcrumbs);
             }
         }catch (Exception e) {
-            ConfigManager.log(MParticle.LogLevel.DEBUG, "Error while appending breadcrumbs: " + e.toString());
+            Logger.debug("Error while appending breadcrumbs: " + e.toString());
         } finally {
             if (breadcrumbCursor != null && !breadcrumbCursor.isClosed()) {
                 breadcrumbCursor.close();
@@ -477,21 +476,25 @@ import java.util.UUID;
     private static final String[] idColumns = {"_id"};
 
     private void dbInsertBreadcrumb(MPMessage message) throws JSONException {
-        ContentValues contentValues = new ContentValues();
-        contentValues.put(MParticleDatabase.BreadcrumbTable.API_KEY, mMessageManagerCallbacks.getApiKey());
-        contentValues.put(MParticleDatabase.BreadcrumbTable.CREATED_AT, message.getLong(MessageKey.TIMESTAMP));
-        contentValues.put(MParticleDatabase.BreadcrumbTable.SESSION_ID, message.getSessionId());
-        contentValues.put(MParticleDatabase.BreadcrumbTable.MESSAGE, message.toString());
+        try {
+            ContentValues contentValues = new ContentValues();
+            contentValues.put(MParticleDatabase.BreadcrumbTable.API_KEY, mMessageManagerCallbacks.getApiKey());
+            contentValues.put(MParticleDatabase.BreadcrumbTable.CREATED_AT, message.getLong(MessageKey.TIMESTAMP));
+            contentValues.put(MParticleDatabase.BreadcrumbTable.SESSION_ID, message.getSessionId());
+            contentValues.put(MParticleDatabase.BreadcrumbTable.MESSAGE, message.toString());
 
 
-        db.insert(BreadcrumbTable.TABLE_NAME, null, contentValues);
-        Cursor cursor = db.query(BreadcrumbTable.TABLE_NAME, idColumns, null, null, null, null, " _id desc limit 1");
-        if (cursor.moveToFirst()){
-            int maxId = cursor.getInt(0);
-            if (maxId > ConfigManager.getBreadcrumbLimit()){
-                String[] limit = {Integer.toString(maxId - ConfigManager.getBreadcrumbLimit())};
-                db.delete(BreadcrumbTable.TABLE_NAME, " _id < ?", limit);
+            db.insert(BreadcrumbTable.TABLE_NAME, null, contentValues);
+            Cursor cursor = db.query(BreadcrumbTable.TABLE_NAME, idColumns, null, null, null, null, " _id desc limit 1");
+            if (cursor.moveToFirst()) {
+                int maxId = cursor.getInt(0);
+                if (maxId > ConfigManager.getBreadcrumbLimit()) {
+                    String[] limit = {Integer.toString(maxId - ConfigManager.getBreadcrumbLimit())};
+                    db.delete(BreadcrumbTable.TABLE_NAME, " _id < ?", limit);
+                }
             }
+        } catch (MParticleApiClientImpl.MPNoConfigException ex) {
+            Logger.error("Unable to process uploads, API key and/or API Secret are missing");
         }
     }
 
@@ -518,15 +521,19 @@ import java.util.UUID;
     }
 
     private void dbInsertSession(MPMessage message) throws JSONException {
-        ContentValues contentValues = new ContentValues();
-        contentValues.put(SessionTable.API_KEY, mMessageManagerCallbacks.getApiKey());
-        contentValues.put(SessionTable.SESSION_ID, message.getSessionId());
-        contentValues.put(SessionTable.START_TIME, message.getLong(MessageKey.TIMESTAMP));
-        contentValues.put(SessionTable.END_TIME, message.getLong(MessageKey.TIMESTAMP));
-        contentValues.put(SessionTable.SESSION_FOREGROUND_LENGTH, 0);
-        contentValues.put(SessionTable.APP_INFO, mMessageManagerCallbacks.getDeviceAttributes().getAppInfo(mContext).toString());
-        contentValues.put(SessionTable.DEVICE_INFO, mMessageManagerCallbacks.getDeviceAttributes().getDeviceInfo(mContext).toString());
-        db.insert(SessionTable.TABLE_NAME, null, contentValues);
+        try {
+            ContentValues contentValues = new ContentValues();
+            contentValues.put(SessionTable.API_KEY, mMessageManagerCallbacks.getApiKey());
+            contentValues.put(SessionTable.SESSION_ID, message.getSessionId());
+            contentValues.put(SessionTable.START_TIME, message.getLong(MessageKey.TIMESTAMP));
+            contentValues.put(SessionTable.END_TIME, message.getLong(MessageKey.TIMESTAMP));
+            contentValues.put(SessionTable.SESSION_FOREGROUND_LENGTH, 0);
+            contentValues.put(SessionTable.APP_INFO, mMessageManagerCallbacks.getDeviceAttributes().getAppInfo(mContext).toString());
+            contentValues.put(SessionTable.DEVICE_INFO, mMessageManagerCallbacks.getDeviceAttributes().getDeviceInfo(mContext).toString());
+            db.insert(SessionTable.TABLE_NAME, null, contentValues);
+        } catch (MParticleApiClientImpl.MPNoConfigException ex) {
+            Logger.error("Unable to process uploads, API key and/or API Secret are missing");
+        }
     }
 
     private void dbInsertReportingMessages(List<JsonReportingMessage> messages) throws JSONException {
@@ -543,17 +550,21 @@ import java.util.UUID;
             }
             db.setTransactionSuccessful();
         }catch (Exception e) {
-            if (BuildConfig.MP_DEBUG) {
-                ConfigManager.log(MParticle.LogLevel.ERROR, "Error inserting reporting message: " + e.toString());
-            }
-        }finally {
+            Logger.verbose("Error inserting reporting message: " + e.toString());
+        } finally {
             db.endTransaction();
         }
     }
 
     private void dbInsertMessage(MPMessage message) throws JSONException {
+
         ContentValues contentValues = new ContentValues();
-        contentValues.put(MessageTable.API_KEY, mMessageManagerCallbacks.getApiKey());
+        try {
+            contentValues.put(MessageTable.API_KEY, mMessageManagerCallbacks.getApiKey());
+        } catch (MParticleApiClientImpl.MPNoConfigException e) {
+            Logger.error("Unable to process uploads, API key and/or API Secret are missing");
+            return;
+        }
         contentValues.put(MessageTable.CREATED_AT, message.getLong(MessageKey.TIMESTAMP));
         String sessionID = message.getSessionId();
         contentValues.put(MessageTable.SESSION_ID, sessionID);
@@ -562,7 +573,7 @@ import java.util.UUID;
         }
         String messageString = message.toString();
         if (messageString.length() > Constants.LIMIT_MAX_MESSAGE_SIZE) {
-            ConfigManager.log(MParticle.LogLevel.ERROR, "Message logged of size "+ messageString.length() + " that exceeds maximum safe size of " + Constants.LIMIT_MAX_MESSAGE_SIZE + " bytes.");
+            Logger.error("Message logged of size "+ messageString.length() + " that exceeds maximum safe size of " + Constants.LIMIT_MAX_MESSAGE_SIZE + " bytes.");
             return;
         }
         contentValues.put(MessageTable.MESSAGE, messageString);
@@ -618,7 +629,7 @@ import java.util.UUID;
                 attributes.put(cursor.getString(keyIndex), cursor.getString(valueIndex));
             }
         }catch (Exception e) {
-            ConfigManager.log(MParticle.LogLevel.ERROR, e, "Error while querying user attributes: ", e.toString());
+            Logger.error(e, "Error while querying user attributes: ", e.toString());
         } finally {
             if (cursor != null && !cursor.isClosed()) {
                 cursor.close();
@@ -650,7 +661,7 @@ import java.util.UUID;
                 attributes.get(currentKey).add(cursor.getString(valueIndex));
             }
         }catch (Exception e) {
-            ConfigManager.log(MParticle.LogLevel.ERROR, e, "Error while querying user attribute lists: ", e.toString());
+            Logger.error(e, "Error while querying user attribute lists: ", e.toString());
         } finally {
             if (cursor != null && !cursor.isClosed()) {
                 cursor.close();
@@ -713,7 +724,7 @@ import java.util.UUID;
             }
             db.setTransactionSuccessful();
         }catch (Exception e){
-            ConfigManager.log(MParticle.LogLevel.ERROR, e, "Error while adding user attributes: ", e.toString());
+            Logger.error(e, "Error while adding user attributes: ", e.toString());
         } finally {
             db.endTransaction();
         }

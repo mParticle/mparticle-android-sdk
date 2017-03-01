@@ -4,8 +4,8 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 import com.mparticle.MParticle;
-import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.Constants;
+import com.mparticle.internal.Logger;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -45,7 +45,7 @@ public class CommerceApi {
                     .build();
             MParticle.getInstance().logEvent(event);
         } else {
-            ConfigManager.log(MParticle.LogLevel.ERROR, "checkout() called but there are no Products in the Cart, no event was logged.");
+            Logger.error("checkout() called but there are no Products in the Cart, no event was logged.");
         }
     }
 
@@ -64,7 +64,7 @@ public class CommerceApi {
                     .build();
             MParticle.getInstance().logEvent(event);
         }else {
-            ConfigManager.log(MParticle.LogLevel.ERROR, "checkout() called but there are no Products in the Cart, no event was logged.");
+            Logger.error("checkout() called but there are no Products in the Cart, no event was logged.");
         }
     }
 
@@ -103,7 +103,7 @@ public class CommerceApi {
             }
             MParticle.getInstance().logEvent(event);
         }else {
-            ConfigManager.log(MParticle.LogLevel.ERROR, "purchase() called but there are no Products in the Cart, no event was logged.");
+            Logger.error("purchase() called but there are no Products in the Cart, no event was logged.");
         }
     }
 
@@ -125,7 +125,7 @@ public class CommerceApi {
             }
             MParticle.getInstance().logEvent(event);
         } else {
-            ConfigManager.log(MParticle.LogLevel.ERROR, "refund() called but there are no Products in the Cart, no event was logged.");
+            Logger.error("refund() called but there are no Products in the Cart, no event was logged.");
         }
     }
 

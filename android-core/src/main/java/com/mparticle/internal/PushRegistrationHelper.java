@@ -37,7 +37,7 @@ public class PushRegistrationHelper {
         int currentVersion = getAppVersion(context);
         int osVersion = preferences.getInt(Constants.PrefKeys.PROPERTY_OS_VERSION, Integer.MIN_VALUE);
         if (registeredVersion != currentVersion || osVersion != Build.VERSION.SDK_INT) {
-            ConfigManager.log(MParticle.LogLevel.DEBUG, "App or OS version changed, clearing instance ID.");
+            Logger.debug("App or OS version changed, clearing instance ID.");
             return null;
         }
         PushRegistration registration = new PushRegistration();
@@ -64,7 +64,7 @@ public class PushRegistrationHelper {
                         String instanceId =  InstanceID.getInstance(context).getToken(senderId, "GCM");
                         MParticle.getInstance().logPushRegistration(instanceId, senderId);
                     } catch (Exception ex) {
-                        ConfigManager.log(MParticle.LogLevel.ERROR, "Error registering for GCM Instance ID: ", ex.getMessage());
+                        Logger.error("Error registering for GCM Instance ID: ", ex.getMessage());
                     }
                 }
             };

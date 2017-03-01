@@ -7,7 +7,7 @@ import org.json.JSONObject;
 
 interface MessageManagerCallbacks {
     MPMessage createMessageSessionEnd(String sessionId, long start, long end, long foregroundLength, JSONObject sessionAttributes) throws JSONException;
-    String getApiKey();
+    String getApiKey() throws MParticleApiClientImpl.MPNoConfigException;
     void delayedStart();
     void endUploadLoop();
     void checkForTrigger(MPMessage message);

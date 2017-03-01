@@ -10,11 +10,9 @@ import android.os.Looper;
 import android.os.Message;
 import android.util.Log;
 
-import com.mparticle.BuildConfig;
 import com.mparticle.MParticle;
 import com.mparticle.internal.Constants.MessageKey;
 import com.mparticle.internal.Constants.MessageType;
-import com.mparticle.internal.Constants.PrefKeys;
 import com.mparticle.internal.Constants.Status;
 import com.mparticle.internal.MParticleDatabase.MessageTable;
 import com.mparticle.internal.MParticleDatabase.UploadTable;
@@ -25,7 +23,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.lang.reflect.Constructor;
 import java.net.MalformedURLException;
 import java.util.HashMap;
 import java.util.List;
@@ -105,6 +102,8 @@ public class UploadHandler extends Handler {
             setApiClient(new MParticleApiClientImpl(configManager, mPreferences, context));
         } catch (MalformedURLException e) {
             //this should never happen - the URLs are created by constants.
+        } catch (MParticleApiClientImpl.MPNoConfigException e) {
+            Logger.error("Unable to process uploads, API key and/or API Secret are missing");
         }
     }
 
@@ -123,6 +122,8 @@ public class UploadHandler extends Handler {
             setApiClient(new MParticleApiClientImpl(configManager, mPreferences, context));
         } catch (MalformedURLException e) {
             //this should never happen - the URLs are created by constants.
+        } catch (MParticleApiClientImpl.MPNoConfigException e) {
+            Logger.error("Unable to process uploads, API key and/or API Secret are missing");
         }
     }
 
@@ -165,14 +166,12 @@ public class UploadHandler extends Handler {
                     break;
             }
 
+        } catch (MParticleApiClientImpl.MPConfigException e) {
+            Logger.error("Bad API request - is the correct API key and secret configured?");
         } catch (Exception e){
-            if (BuildConfig.MP_DEBUG){
-                ConfigManager.log(MParticle.LogLevel.DEBUG, "UploadHandler Exception while handling message: " + e.toString());
-            }
+            Logger.verbose("UploadHandler Exception while handling message: " + e.toString());
         } catch (VerifyError ve) {
-            if (BuildConfig.MP_DEBUG){
-                ConfigManager.log(MParticle.LogLevel.DEBUG, "UploadHandler VerifyError while handling message" + ve.toString());
-            }
+            Logger.verbose("UploadHandler VerifyError while handling message" + ve.toString());
         }
     }
 
@@ -323,9 +322,7 @@ public class UploadHandler extends Handler {
             }
             db.setTransactionSuccessful();
         } catch (Exception e){
-            if (BuildConfig.MP_DEBUG) {
-                ConfigManager.log(MParticle.LogLevel.DEBUG, "Error preparing batch upload in mParticle DB: " + e.getMessage());
-            }
+            Logger.verbose("Error preparing batch upload in mParticle DB: " + e.getMessage());
         } finally {
             if (readyMessagesCursor != null && !readyMessagesCursor.isClosed()){
                 readyMessagesCursor.close();
@@ -409,9 +406,11 @@ public class UploadHandler extends Handler {
             }
         } catch (MParticleApiClientImpl.MPThrottleException e) {
         } catch (SSLHandshakeException ssle){
-            ConfigManager.log(MParticle.LogLevel.DEBUG, "SSL handshake failed while preparing uploads - possible MITM attack detected.");
+            Logger.debug("SSL handshake failed while preparing uploads - possible MITM attack detected.");
+        } catch (MParticleApiClientImpl.MPConfigException e) {
+            Logger.error("Bad API request - is the correct API key and secret configured?");
         } catch (Exception e){
-            ConfigManager.log(MParticle.LogLevel.ERROR, "Error processing batch uploads in mParticle DB");
+            Logger.error(e, "Error processing batch uploads in mParticle DB");
         } finally {
             if (readyUploadsCursor != null && !readyUploadsCursor.isClosed()){
                 readyUploadsCursor.close();
@@ -428,19 +427,19 @@ public class UploadHandler extends Handler {
             responseCode = mApiClient.sendMessageBatch(message);
         } catch (MParticleApiClientImpl.MPRampException e) {
             sampling = true;
-            ConfigManager.log(MParticle.LogLevel.DEBUG, "This device is being sampled.");
+            Logger.debug("This device is being sampled.");
         } catch (AssertionError e) {
             //some devices do not have MD5, and therefore cannot process SSL certificates,
             //and will throw an AssertionError containing an NoSuchAlgorithmException
             //there's not much to do in that case except catch the error and discard the data.
-            ConfigManager.log(MParticle.LogLevel.ERROR, "API request failed " + e.toString());
+            Logger.error("API request failed " + e.toString());
             sampling = true;
         }
 
         if (sampling || shouldDelete(responseCode)) {
             deleteUpload(id);
         } else {
-            ConfigManager.log(MParticle.LogLevel.WARNING, "Upload failed and will be retried.");
+            Logger.warning("Upload failed and will be retried.");
         }
     }
 
@@ -547,7 +546,7 @@ public class UploadHandler extends Handler {
                 uploadMessage.put(Constants.MessageKey.PUSH_CAMPAIGN_HISTORY, historyObject);
             }
         }catch (Exception e){
-            ConfigManager.log(MParticle.LogLevel.WARNING, e, "Error while building GCM campaign history");
+            Logger.warning(e, "Error while building GCM campaign history");
         }finally {
             if (gcmHistory != null && !gcmHistory.isClosed()){
                 gcmHistory.close();

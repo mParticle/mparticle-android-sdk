@@ -3,9 +3,8 @@ package com.mparticle.commerce;
 import android.content.Context;
 import android.content.SharedPreferences;
 
-import com.mparticle.MParticle;
-import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.Constants;
+import com.mparticle.internal.Logger;
 import com.mparticle.internal.MPUtility;
 
 import org.json.JSONArray;
@@ -61,11 +60,11 @@ public class ProductBagApi {
      */
     public boolean addProduct(String bagName, Product product) {
         if (MPUtility.isEmpty(bagName)) {
-            ConfigManager.log(MParticle.LogLevel.ERROR, "Bag name must not be null or empty when calling ProductBags.addProduct()");
+            Logger.error("Bag name must not be null or empty when calling ProductBags.addProduct()");
             return false;
         }
         if (product == null) {
-            ConfigManager.log(MParticle.LogLevel.WARNING, "Null Product instance passed to ProductBags.addProduct(), creating empty bag.");
+            Logger.warning("Null Product instance passed to ProductBags.addProduct(), creating empty bag.");
         }
         restoreBags();
         ProductBag bag = findBag(bagName);
@@ -110,21 +109,21 @@ public class ProductBagApi {
      */
     public boolean removeProduct(String bagName, Product product) {
         if (MPUtility.isEmpty(bagName)) {
-            ConfigManager.log(MParticle.LogLevel.ERROR, "Bag name must not be null or empty when calling ProductBags.removeProduct()");
+            Logger.error("Bag name must not be null or empty when calling ProductBags.removeProduct()");
             return false;
         }
         if (product == null) {
-            ConfigManager.log(MParticle.LogLevel.ERROR, "Null Product instance passed to ProductBags.removeProduct()");
+            Logger.error("Null Product instance passed to ProductBags.removeProduct()");
             return false;
         }
         restoreBags();
         ProductBag bag = findBag(bagName);
         if (bag == null) {
-            ConfigManager.log(MParticle.LogLevel.ERROR, "Could not find Product Bag: " + bagName + " while trying to remove Product.");
+            Logger.error("Could not find Product Bag: " + bagName + " while trying to remove Product.");
             return false;
         }
         if (!bag.products.remove(product)) {
-            ConfigManager.log(MParticle.LogLevel.ERROR, "Failed to remove Product:\n" + product.toString() + "\n" + "from Product Bag: " + bagName + " - see Product.setEqualityComparator.");
+            Logger.error("Failed to remove Product:\n" + product.toString() + "\n" + "from Product Bag: " + bagName + " - see Product.setEqualityComparator.");
             return false;
         } else {
             save();
@@ -140,7 +139,7 @@ public class ProductBagApi {
      */
     public boolean clearProductBag(String bagName) {
         if (MPUtility.isEmpty(bagName)) {
-            ConfigManager.log(MParticle.LogLevel.ERROR, "Bag name should not be null or empty when calling ProductBags.clearProductBag()");
+            Logger.error("Bag name should not be null or empty when calling ProductBags.clearProductBag()");
             return false;
         }
         restoreBags();
@@ -162,7 +161,7 @@ public class ProductBagApi {
      */
     public boolean removeProductBag(String bagName) {
         if (MPUtility.isEmpty(bagName)) {
-            ConfigManager.log(MParticle.LogLevel.ERROR, "Bag name should not be null or empty when calling ProductBags.removeProductBag()");
+            Logger.error("Bag name should not be null or empty when calling ProductBags.removeProductBag()");
             return false;
         }
         restoreBags();

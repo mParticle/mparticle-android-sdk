@@ -6,7 +6,6 @@ import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
 import android.util.SparseArray;
 
-import com.mparticle.MParticle;
 import com.mparticle.segmentation.Segment;
 import com.mparticle.segmentation.SegmentListener;
 import com.mparticle.segmentation.SegmentMembership;
@@ -151,7 +150,7 @@ class SegmentRetriever {
             }
             success = true;
         }catch (Exception e){
-            ConfigManager.log(MParticle.LogLevel.DEBUG, "Failed to insert audiences: " + e.getMessage());
+            Logger.debug("Failed to insert audiences: " + e.getMessage());
         }finally {
             if (success){
                 db.setTransactionSuccessful();
