@@ -420,7 +420,12 @@ public class MPUtility {
         if (checkPermission(context, Manifest.permission.BLUETOOTH)) {
             BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
             if (mBluetoothAdapter != null) {
-                return mBluetoothAdapter.isEnabled();
+                try {
+                    //noinspection MissingPermission
+                    return mBluetoothAdapter.isEnabled();
+                }catch (SecurityException se) {
+
+                }
             }
         }
         return false;

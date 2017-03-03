@@ -790,13 +790,19 @@ public class MParticle {
                     return;
                 }
 
-                if (null == mLocationListener) {
-                    mLocationListener = new MPLocationListener(this);
-                } else {
-                    // clear the location listener, so it can be added again
-                    locationManager.removeUpdates(mLocationListener);
+                try {
+                    if (null == mLocationListener) {
+                        mLocationListener = new MPLocationListener(this);
+                    } else {
+                        // clear the location listener, so it can be added again
+                        //noinspection MissingPermission
+                        locationManager.removeUpdates(mLocationListener);
+                    }
+                    //noinspection MissingPermission
+                    locationManager.requestLocationUpdates(provider, minTime, minDistance, mLocationListener);
+                }catch (SecurityException se) {
+
                 }
-                locationManager.requestLocationUpdates(provider, minTime, minDistance, mLocationListener);
                 SharedPreferences.Editor editor = mPreferences.edit();
                 editor.putString(PrefKeys.LOCATION_PROVIDER, provider)
                         .putLong(PrefKeys.LOCATION_MINTIME, minTime)
@@ -827,7 +833,12 @@ public class MParticle {
 
                 if (MPUtility.checkPermission(mAppContext, Manifest.permission.ACCESS_FINE_LOCATION) ||
                         MPUtility.checkPermission(mAppContext, Manifest.permission.ACCESS_COARSE_LOCATION)) {
-                    locationManager.removeUpdates(mLocationListener);
+                    try {
+                        //noinspection MissingPermission
+                        locationManager.removeUpdates(mLocationListener);
+                    }catch (SecurityException se) {
+
+                    }
                 }
                 mLocationListener = null;
                 if (userTriggered){
