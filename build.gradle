@@ -9,7 +9,10 @@ buildscript {
 
 allprojects {
     group = 'com.mparticle'
-    version = '4.10.7'
+    version = '4.10.7-SNAPSHOT'
+    if (project.hasProperty('isRelease') && project.isRelease) {
+        version = version.toString().replace("-SNAPSHOT", "")
+    }
     repositories {
         mavenLocal()
         jcenter()

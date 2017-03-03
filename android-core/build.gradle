@@ -38,7 +38,7 @@ android {
     defaultConfig {
         minSdkVersion 9
         targetSdkVersion 25
-        versionName project.version
+        versionName project.version.toString().replace("-SNAPSHOT", "")
         versionCode Integer.parseInt(new Date().format('yyyyMMdd'))
 
         buildConfigField "String", "GIT_SHA", "\"$gitHash\""
