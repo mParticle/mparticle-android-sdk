@@ -1,7 +1,10 @@
 package com.mparticle;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 
 import java.util.ArrayList;
@@ -10,6 +13,7 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -144,6 +148,118 @@ public class MParticleTest {
         assertTrue(mp.incrementUserAttribute("test", 3));
         Mockito.verify(mp.mMessageManager, Mockito.times(1)).incrementUserAttribute("test", 3);
     }
+
+    @Test
+    public void testRemoveUserIdentityWhenNoneExist() throws Exception {
+        MParticle.setInstance(new MockMParticle());
+        MParticle.start(new com.mparticle.mock.MockContext());
+        MParticle mp = MParticle.getInstance();
+        JSONArray identities = new JSONArray();
+        Mockito.when(mp.mMessageManager.getUserIdentityJson()).thenReturn(identities);
+        mp.setUserIdentity(null, MParticle.IdentityType.Alias);
+        Mockito.verify(mp.mMessageManager,
+                Mockito.times(0)).
+                logUserIdentityChangeMessage(
+                        Mockito.any(JSONObject.class),
+                        Mockito.any(JSONObject.class),
+                        Mockito.any(JSONArray.class)
+                );
+        Mockito.verify(mp.mKitManager, Mockito.times(0)).removeUserIdentity(Mockito.any(MParticle.IdentityType.class));
+
+    }
+
+    @Test
+    public void testRemoveUserIdentity() throws Exception {
+        MParticle.setInstance(new MockMParticle());
+        MParticle.start(new com.mparticle.mock.MockContext());
+        MParticle mp = MParticle.getInstance();
+        JSONArray identities = new JSONArray();
+        identities.put(new JSONObject("{ \"n\": 7, \"i\": \"email value 1\", \"dfs\": 1473869816521, \"f\": true }"));
+        Mockito.when(mp.mMessageManager.getUserIdentityJson()).thenReturn(identities);
+        mp.setUserIdentity(null, MParticle.IdentityType.Email);
+        ArgumentCaptor<JSONObject> argument2 = ArgumentCaptor.forClass(JSONObject.class);
+        ArgumentCaptor<JSONArray> argument3 = ArgumentCaptor.forClass(JSONArray.class);
+        Mockito.verify(mp.mMessageManager,
+                Mockito.times(1)).
+                logUserIdentityChangeMessage(
+                        Mockito.isNull(JSONObject.class),
+                        argument2.capture(),
+                        argument3.capture()
+                );
+        JSONObject oldIdentity = argument2.getValue();
+        assertEquals(oldIdentity.get("i"), "email value 1");
+        assertEquals(oldIdentity.get("n"), 7);
+        assertEquals(oldIdentity.getDouble("dfs"), 1473869816521d, 100);
+        assertEquals(oldIdentity.get("f"), true);
+        Mockito.verify(mp.mKitManager, Mockito.times(1)).removeUserIdentity(MParticle.IdentityType.Email);
+        JSONArray allIdentities = argument3.getValue();
+        assertEquals(0, allIdentities.length());
+    }
+
+    @Test
+    public void testAddUserIdentity() throws Exception {
+        MParticle.setInstance(new MockMParticle());
+        MParticle.start(new com.mparticle.mock.MockContext());
+        MParticle mp = MParticle.getInstance();
+        JSONArray identities = new JSONArray();
+        identities.put(new JSONObject("{ \"n\": 7, \"i\": \"email value 1\", \"dfs\": 1473869816521, \"f\": true }"));
+        Mockito.when(mp.mMessageManager.getUserIdentityJson()).thenReturn(identities);
+        mp.setUserIdentity("alias test", MParticle.IdentityType.Alias);
+        ArgumentCaptor<JSONObject> argument2 = ArgumentCaptor.forClass(JSONObject.class);
+        ArgumentCaptor<JSONArray> argument3 = ArgumentCaptor.forClass(JSONArray.class);
+        Mockito.verify(mp.mMessageManager,
+                Mockito.times(1)).
+                logUserIdentityChangeMessage(
+                        argument2.capture(),
+                        Mockito.isNull(JSONObject.class),
+                        argument3.capture()
+                );
+        JSONObject oldIdentity = argument2.getValue();
+        assertEquals(oldIdentity.get("i"), "alias test");
+        assertEquals(oldIdentity.get("n"), MParticle.IdentityType.Alias.getValue());
+        assertEquals(oldIdentity.getDouble("dfs"), System.currentTimeMillis(), 1000);
+        assertEquals(oldIdentity.get("f"), true);
+        Mockito.verify(mp.mKitManager, Mockito.times(1)).setUserIdentity(Mockito.eq("alias test"), Mockito.eq(MParticle.IdentityType.Alias));
+
+        JSONArray allIdentities = argument3.getValue();
+        assertEquals(2, allIdentities.length());
+
+    }
+
+    @Test
+    public void testChangeUserIdentity() throws Exception {
+        MParticle.setInstance(new MockMParticle());
+        MParticle.start(new com.mparticle.mock.MockContext());
+        MParticle mp = MParticle.getInstance();
+        JSONArray identities = new JSONArray();
+        identities.put(new JSONObject("{ \"n\": 7, \"i\": \"email value 1\", \"dfs\": 1473869816521, \"f\": true }"));
+        Mockito.when(mp.mMessageManager.getUserIdentityJson()).thenReturn(identities);
+        mp.setUserIdentity("email value 2", MParticle.IdentityType.Email);
+        ArgumentCaptor<JSONObject> argument1 = ArgumentCaptor.forClass(JSONObject.class);
+        ArgumentCaptor<JSONObject> argument2 = ArgumentCaptor.forClass(JSONObject.class);
+        ArgumentCaptor<JSONArray> argument3 = ArgumentCaptor.forClass(JSONArray.class);
+        Mockito.verify(mp.mMessageManager,
+                Mockito.times(1)).
+                logUserIdentityChangeMessage(
+                        argument1.capture(),
+                        argument2.capture(),
+                        argument3.capture()
+                );
+        JSONObject oldIdentity = argument2.getValue();
+        assertEquals(oldIdentity.get("i"), "email value 1");
+        assertEquals(oldIdentity.get("n"), 7);
+        assertEquals(oldIdentity.getDouble("dfs"), 1473869816521d, 100);
+        assertEquals(oldIdentity.get("f"), true);
+        JSONObject newIdentity = argument1.getValue();
+        assertEquals(newIdentity.get("i"), "email value 2");
+        assertEquals(newIdentity.get("n"), 7);
+        assertEquals(newIdentity.getDouble("dfs"), 1473869816521d, 100);
+        assertEquals(newIdentity.get("f"), false);
+        Mockito.verify(mp.mKitManager, Mockito.times(1)).setUserIdentity(Mockito.eq("email value 2"), Mockito.eq(MParticle.IdentityType.Email));
+        JSONArray allIdentities = argument3.getValue();
+        assertEquals(1, allIdentities.length());
+    }
+
 
     @Test
     public void testRemoveUserAttribute() throws Exception {

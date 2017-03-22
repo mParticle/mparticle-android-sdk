@@ -1070,9 +1070,7 @@ public class MParticle {
                     }
                 }
 
-                if (id == null && oldIdentity == null) {
-                    ConfigManager.log(LogLevel.DEBUG, "Attempted to remove ID type that didn't exist: " + identityType.name());
-                }
+
 
                 JSONObject newObject = null;
                 if (id != null) {
@@ -1089,6 +1087,10 @@ public class MParticle {
                         userIdentities.put(newObject);
                     }
                 } else {
+                    if (oldIdentity == null || index < 0) {
+                        ConfigManager.log(LogLevel.DEBUG, "Attempted to remove ID type that didn't exist: " + identityType.name());
+                        return;
+                    }
 
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
                         KitKatHelper.remove(userIdentities, index);
