@@ -674,6 +674,49 @@ public class CustomMappingTest {
         assertEquals(2, result.size());
     }
 
+    /**
+     * Tests if a custom mapping is properly applied to a ComerceEvent
+     * @throws Exception
+     */
+    @Test
+    public void testCommerceCustomMapping() throws Exception {
+        String cmEventName = "test_content_view";
+        String cmQuantityName = "test_quantity";
+        String cmProductName = "test_content_quantity";
+        String cmCurrencyName = "test_currency";
+        String cmStaticCurrency = "USD";
+        Map<String, String> customAttributes = new HashMap<>();
+        customAttributes.put("customAttribute1", "value1");
+        customAttributes.put("customAttribute2", "value2");
+        String name = "product_1";
+        String sku = "sku_12345";
+        float quantity = 3;
+        KitConfiguration kitConfiguration = MockKitConfiguration.createKitConfiguration(new JSONObject("{ \"id\":92, \"as\":{ \"devKey\":\"HXpL4jHPTkUzwmcrJJFV9k\", \"appleAppId\":null }, \"hs\":{ }, \"pr\":[ { \"id\":166, \"behavior\":{ \"append_unmapped_as_is\":true, \"is_default\":true }, \"action\":{ \"projected_event_name\":\"\", \"attribute_maps\":[ ], \"outbound_message_type\":4 }, \"matches\":[ { \"message_type\":4, \"event_match_type\":\"\", \"event\":\"\" } ] }, { \"id\":157, \"pmid\":540, \"behavior\":{ \"append_unmapped_as_is\":true }, \"action\":{ \"projected_event_name\":\"" + cmEventName + "\", \"attribute_maps\":[ { \"projected_attribute_name\":\"" + cmProductName + "\", \"match_type\":\"Hash\", \"value\":\"1455148719\", \"data_type\":\"String\", \"property\":\"ProductField\" }, { \"projected_attribute_name\":\"" + cmQuantityName +  "\", \"match_type\":\"Hash\", \"value\":\"1817448224\", \"data_type\":\"Float\", \"property\":\"ProductField\" }, { \"projected_attribute_name\":\"" + cmCurrencyName + "\", \"match_type\":\"Static\", \"value\":\"" + cmStaticCurrency + "\", \"data_type\":\"String\" } ], \"outbound_message_type\":4 }, \"matches\":[ { \"message_type\":16, \"event_match_type\":\"Hash\", \"event\":\"1572\" } ] } ] }"));
+        Product product = new Product.Builder(name, sku, quantity)
+                .build();
+        CommerceEvent commerceEvent = new CommerceEvent.Builder(Product.DETAIL, product)
+                .customAttributes(customAttributes)
+                .build();
+        List<CustomMapping.ProjectionResult> results = CustomMapping.projectEvents(commerceEvent, kitConfiguration.getCustomMappingList(), null);
+        Map<String, String> expectedInfo = new HashMap<>();
+        expectedInfo.put(cmQuantityName, String.valueOf(quantity));
+        expectedInfo.put(cmProductName, name);
+        expectedInfo.put(cmCurrencyName, cmStaticCurrency);
+        expectedInfo.putAll(customAttributes);
+        MPEvent expectedMappedEvent = new MPEvent.Builder(cmEventName)
+                .info(expectedInfo)
+                .build();
+        assertEquals(1, results.size());
+        MPEvent result = results.get(0).getMPEvent();
+        assertEquals(expectedMappedEvent.getEventName(), result.getEventName());
+        assertEquals(expectedMappedEvent.getInfo().keySet().size(), result.getInfo().size());
+        for (String key: expectedMappedEvent.getInfo().keySet()) {
+            String val = result.getInfo().get(key);
+            assertTrue(val != null);
+            assertEquals(expectedMappedEvent.getInfo().get(key), val);
+        }
+    }
+
     @Test
     public void testSingleBasicMatch() throws Exception {
         JSONObject config = new JSONObject("{ \"id\":144, \"pmmid\":24, \"behavior\":{ \"append_unmapped_as_is\":true }, \"action\":{ \"projected_event_name\":\"new_premium_subscriber\", \"attribute_maps\":[ ], \"outbound_message_type\":4 }, \"matches\":[ { \"message_type\":4, \"event_match_type\":\"String\", \"event\":\"subscription_success\", \"attribute_key\":\"plan\", \"attribute_values\":[ \"premium\" ] } ] }");

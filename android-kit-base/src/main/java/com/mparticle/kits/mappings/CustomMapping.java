@@ -416,7 +416,7 @@ public class CustomMapping {
             if (customMapping.isMatch(wrapper)) {
                 List<CustomMapping.ProjectionResult> results = customMapping.project(wrapper);
                 if (results != null) {
-                    events.addAll(events);
+                    events.addAll(results);
                 }
             }
         }
