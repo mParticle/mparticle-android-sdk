@@ -67,7 +67,6 @@ public class MessageManagerTest {
     public void testGetStateInfo() throws Exception {
         PowerMockito.mockStatic(MPUtility.class, Answers.RETURNS_MOCKS.get());
         JSONObject stateInfo = manager.getStateInfo();
-        assertNotNull(stateInfo.getString(Constants.MessageKey.STATE_INFO_CPU));
         assertNotNull(stateInfo.getLong(Constants.MessageKey.STATE_INFO_AVAILABLE_MEMORY));
         assertNotNull(stateInfo.getLong(Constants.MessageKey.STATE_INFO_TOTAL_MEMORY));
         assertNotNull(stateInfo.getDouble(Constants.MessageKey.STATE_INFO_BATTERY_LVL));

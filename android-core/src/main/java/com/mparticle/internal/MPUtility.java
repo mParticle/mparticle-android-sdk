@@ -60,53 +60,6 @@ public class MPUtility {
     private static String sOpenUDID;
     private static final char[] HEX_CHARS = "0123456789abcdef".toCharArray();
 
-    public static String getCpuUsage() {
-        String str1 = "unknown";
-        String str2 = String.valueOf(android.os.Process.myPid());
-        java.lang.Process process = null;
-        BufferedReader bufferedReader = null;
-        String str3 = null;
-        try {
-            String[] command = {"top", "-d", "1", "-n", "1"};
-            process = new ProcessBuilder().command(command).redirectErrorStream(true).start();
-            bufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-            while ((str3 = bufferedReader.readLine()) != null)
-                if (str3.contains(str2)) {
-                    String[] arrayOfString = str3.split(" ");
-                    if (arrayOfString != null) {
-                        for (int i = 0; i < arrayOfString.length; i++) {
-                            if ((arrayOfString[i] != null) && (arrayOfString[i].contains("%"))) {
-                                str1 = arrayOfString[i];
-                                str1 = str1.substring(0, str1.length() - 1);
-                                return str1;
-                            }
-                        }
-                    }
-                }
-        } catch (IOException localIOException2) {
-            ConfigManager.log(MParticle.LogLevel.WARNING, "Error computing CPU usage");
-        } finally {
-            try {
-                if (bufferedReader != null) {
-                    bufferedReader.close();
-                }
-                if (process != null) {
-                    try {
-                        // use exitValue() to determine if process is still running.
-                        process.exitValue();
-
-                    } catch (IllegalThreadStateException e) {
-                        // process is still running, kill it.
-                        process.destroy();
-                    }
-                }
-            } catch (IOException localIOException4) {
-                ConfigManager.log(MParticle.LogLevel.WARNING, "Error computing CPU usage");
-            }
-        }
-        return str1;
-    }
-
     public static long getAvailableMemory(Context context) {
         ActivityManager.MemoryInfo mi = new ActivityManager.MemoryInfo();
         ActivityManager activityManager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);

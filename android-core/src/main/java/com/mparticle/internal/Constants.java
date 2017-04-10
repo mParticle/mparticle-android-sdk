@@ -239,7 +239,6 @@ public class Constants {
 
         // state info
         String STATE_INFO_KEY = "cs";
-        String STATE_INFO_CPU = "cpu";
         String STATE_INFO_AVAILABLE_MEMORY = "sma";
         String STATE_INFO_TOTAL_MEMORY = "tsm";
         String STATE_INFO_BATTERY_LVL = "bl";

@@ -162,7 +162,6 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
     public static JSONObject getStateInfo() throws JSONException {
         JSONObject infoJson = new JSONObject();
         if (!MParticle.isDevicePerformanceMetricsDisabled()) {
-            infoJson.put(MessageKey.STATE_INFO_CPU, MPUtility.getCpuUsage());
             infoJson.put(MessageKey.STATE_INFO_AVAILABLE_DISK, MPUtility.getAvailableInternalDisk());
             infoJson.put(MessageKey.STATE_INFO_AVAILABLE_EXT_DISK, MPUtility.getAvailableExternalDisk());
             final Runtime rt = Runtime.getRuntime();
