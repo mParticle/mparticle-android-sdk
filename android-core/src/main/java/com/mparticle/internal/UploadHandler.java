@@ -8,6 +8,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.util.Log;
 
 import com.mparticle.BuildConfig;
 import com.mparticle.MParticle;
@@ -190,123 +191,121 @@ public class UploadHandler extends Handler {
         final boolean sessionHistoryEnabled = MParticle.getInstance().getConfigManager().getIncludeSessionHistory();
         try {
             db.beginTransaction();
-            if (history){
-                if (!sessionHistoryEnabled) {
-                    MParticleDatabase.deleteOldMessages(db, currentSessionId);
-                    MParticleDatabase.deleteOldSessions(db, currentSessionId);
-                    db.setTransactionSuccessful();
-                    return;
-                }
+            if (history && !sessionHistoryEnabled){
+                MParticleDatabase.deleteOldMessages(db, currentSessionId);
+                MParticleDatabase.deleteOldSessions(db, currentSessionId);
+                db.setTransactionSuccessful();
+                return;
+            } else if (history) {
                 readyMessagesCursor = MParticleDatabase.getSessionHistory(db, currentSessionId);
-            }else {
+            } else {
                 readyMessagesCursor = MParticleDatabase.getMessagesForUpload(db);
             }
-            if (readyMessagesCursor.getCount() > 0) {
-                int messageIdIndex = readyMessagesCursor.getColumnIndex(MessageTable._ID);
-                int messageIndex = readyMessagesCursor.getColumnIndex(MessageTable.MESSAGE);
-                int sessionIdIndex = readyMessagesCursor.getColumnIndex(MessageTable.SESSION_ID);
-
-                HashMap<String, MessageBatch> uploadMessageMap = new HashMap<String, MessageBatch>(2);
-                while (readyMessagesCursor.moveToNext()) {
-                    String sessionId = readyMessagesCursor.getString(sessionIdIndex);
-                    int messageId = readyMessagesCursor.getInt(messageIdIndex);
-                    MessageBatch uploadMessage = uploadMessageMap.get(sessionId);
-                    if (uploadMessage == null) {
-                        uploadMessage = createUploadMessage(false);
-                        uploadMessageMap.put(sessionId, uploadMessage);
-                    }
-                    JSONObject msgObject = new JSONObject(readyMessagesCursor.getString(messageIndex));
-
-                    if (history) {
-
-                        uploadMessage.addSessionHistoryMessage(msgObject);
-                        dbDeleteMessage(messageId);
-                    } else {
-                        uploadMessage.addMessage(msgObject);
-                        if (Constants.NO_SESSION_ID.equals(sessionId) || !sessionHistoryEnabled) {
-                            //if this is a session-less message, or if session history is disabled, just delete it
-                            dbDeleteMessage(messageId);
-                        } else {
-                            //mark the message as uploaded, so next time around it'll be included in session history
-                            dbMarkMessageAsUploaded(messageId);
-                        }
-                    }
-                }
-
-                if (!history) {
-                    reportingMessageCursor = MParticleDatabase.getReportingMessagesForUpload(db);
-                    int reportingMessageIdIndex = reportingMessageCursor.getColumnIndex(MParticleDatabase.ReportingTable._ID);
-                    while (reportingMessageCursor.moveToNext()) {
-                        JSONObject msgObject = new JSONObject(
-                                reportingMessageCursor.getString(
-                                        reportingMessageCursor.getColumnIndex(MParticleDatabase.ReportingTable.MESSAGE)
-                                )
-                        );
-                        String sessionId = reportingMessageCursor.getString(
-                                reportingMessageCursor.getColumnIndex(MParticleDatabase.ReportingTable.SESSION_ID)
-                        );
-                        int reportingMessageId = reportingMessageCursor.getInt(reportingMessageIdIndex);
-                        MessageBatch batch = uploadMessageMap.get(sessionId);
-                        if (batch == null) {
-                            //if there's no matching session id then just use an arbitrary batch object
-                            batch = uploadMessageMap.values().iterator().next();
-                        }
-                        if (batch != null) {
-                            batch.addReportingMessage(msgObject);
-                        }
-                        dbMarkAsUploadedReportingMessage(reportingMessageId);
-                    }
-                }
-
-                sessionCursor = MParticleDatabase.getSessions(db);
-                while(sessionCursor.moveToNext()) {
-                    String sessionId = sessionCursor.getString(sessionCursor.getColumnIndex(MParticleDatabase.SessionTable.SESSION_ID));
-                    MessageBatch batch = uploadMessageMap.get(sessionId);
-                    if (batch != null) {
-                        try {
-                            String appInfo = sessionCursor.getString(sessionCursor.getColumnIndex(MParticleDatabase.SessionTable.APP_INFO));
-                            JSONObject appInfoJson = new JSONObject(appInfo);
-                            batch.setAppInfo(appInfoJson);
-                            String deviceInfo = sessionCursor.getString(sessionCursor.getColumnIndex(MParticleDatabase.SessionTable.DEVICE_INFO));
-                            JSONObject deviceInfoJson = new JSONObject(deviceInfo);
-                            mMessageManager.getDeviceAttributes().updateDeviceInfo(mContext, deviceInfoJson);
-                            batch.setDeviceInfo(deviceInfoJson);
-
-
-                        }catch (Exception e) {
-
-                        }
-                    }
-                }
-
-                for (Map.Entry<String, MessageBatch> entry : uploadMessageMap.entrySet()) {
-                    MessageBatch uploadMessage = entry.getValue();
-                    if (uploadMessage != null) {
-                        String sessionId = entry.getKey();
-                        //for upgrade scenarios, there may be no device or app info associated with the session, so create it now.
-                        if (uploadMessage.getAppInfo() == null) {
-                            uploadMessage.setAppInfo(mMessageManager.getDeviceAttributes().getAppInfo(mContext));
-                        }
-                        if (uploadMessage.getDeviceInfo() == null || sessionId.equals(currentSessionId)) {
-                            uploadMessage.setDeviceInfo(mMessageManager.getDeviceAttributes().getDeviceInfo(mContext));
-                        }
-                        JSONArray messages = history ? uploadMessage.getSessionHistoryMessages() : uploadMessage.getMessages();
-                        JSONArray identities = findIdentityState(messages);
-                        uploadMessage.setIdentities(identities);
-
-                        JSONObject userAttributes = findUserAttributeState(messages);
-                        uploadMessage.setUserAttributes(userAttributes);
-                        dbInsertUpload(uploadMessage);
-                        //if this was to process session history, or
-                        //if we're never going to process history AND
-                        //this batch contains a previous session, then delete the session
-                        if (history || (!sessionHistoryEnabled && !sessionId.equals(currentSessionId))) {
-                            db.delete(MParticleDatabase.SessionTable.TABLE_NAME, MParticleDatabase.SessionTable.SESSION_ID + "=?", new String[]{sessionId});
-                        }
-                    }
-                }
-                db.setTransactionSuccessful();
+            if (readyMessagesCursor.getCount() <= 0) {
+                return;
             }
+            int messageIdIndex = readyMessagesCursor.getColumnIndex(MessageTable._ID);
+            int messageIndex = readyMessagesCursor.getColumnIndex(MessageTable.MESSAGE);
+            int sessionIdIndex = readyMessagesCursor.getColumnIndex(MessageTable.SESSION_ID);
+            HashMap<String, MessageBatch> uploadMessagesBySession = new HashMap<String, MessageBatch>(2);
+            int highestMessageId = 0;
+            while (readyMessagesCursor.moveToNext()) {
+                String sessionId = readyMessagesCursor.getString(sessionIdIndex);
+                int messageId = readyMessagesCursor.getInt(messageIdIndex);
+                highestMessageId = messageId;
+                MessageBatch uploadMessage = uploadMessagesBySession.get(sessionId);
+                if (uploadMessage == null) {
+                    uploadMessage = createUploadMessage(history);
+                    uploadMessagesBySession.put(sessionId, uploadMessage);
+                }
+                JSONObject msgObject = new JSONObject(readyMessagesCursor.getString(messageIndex));
+
+                if (history) {
+                    uploadMessage.addSessionHistoryMessage(msgObject);
+                } else {
+                    uploadMessage.addMessage(msgObject);
+                }
+            }
+
+            if (!sessionHistoryEnabled || history) {
+                //if this is a session-less message, or if session history is disabled, just delete it
+                int deleted = dbDeleteMessages(highestMessageId);
+            } else {
+                //else mark the message as uploaded, so next time around it'll be included in session history
+                dbMarkMessagesAsUploaded(highestMessageId);
+            }
+
+            //add reporting information for this session
+            if (!history) {
+                reportingMessageCursor = MParticleDatabase.getReportingMessagesForUpload(db);
+                int reportingMessageIdIndex = reportingMessageCursor.getColumnIndex(MParticleDatabase.ReportingTable._ID);
+                while (reportingMessageCursor.moveToNext()) {
+                    JSONObject msgObject = new JSONObject(
+                            reportingMessageCursor.getString(
+                                    reportingMessageCursor.getColumnIndex(MParticleDatabase.ReportingTable.MESSAGE)
+                            )
+                    );
+                    String sessionId = reportingMessageCursor.getString(
+                            reportingMessageCursor.getColumnIndex(MParticleDatabase.ReportingTable.SESSION_ID)
+                    );
+                    int reportingMessageId = reportingMessageCursor.getInt(reportingMessageIdIndex);
+                    MessageBatch batch = uploadMessagesBySession.get(sessionId);
+                    if (batch == null) {
+                        //if there's no matching session id then just use the first batch object
+                        batch = uploadMessagesBySession.values().iterator().next();
+                    }
+                    if (batch != null) {
+                        batch.addReportingMessage(msgObject);
+                    }
+                    dbMarkAsUploadedReportingMessage(reportingMessageId);
+                }
+            }
+
+            sessionCursor = MParticleDatabase.getSessions(db);
+            while(sessionCursor.moveToNext()) {
+                String sessionId = sessionCursor.getString(sessionCursor.getColumnIndex(MParticleDatabase.SessionTable.SESSION_ID));
+                MessageBatch batch = uploadMessagesBySession.get(sessionId);
+                if (batch != null) {
+                    try {
+                        String appInfo = sessionCursor.getString(sessionCursor.getColumnIndex(MParticleDatabase.SessionTable.APP_INFO));
+                        JSONObject appInfoJson = new JSONObject(appInfo);
+                        batch.setAppInfo(appInfoJson);
+                        String deviceInfo = sessionCursor.getString(sessionCursor.getColumnIndex(MParticleDatabase.SessionTable.DEVICE_INFO));
+                        JSONObject deviceInfoJson = new JSONObject(deviceInfo);
+                        mMessageManager.getDeviceAttributes().updateDeviceInfo(mContext, deviceInfoJson);
+                        batch.setDeviceInfo(deviceInfoJson);
+                    }catch (Exception e) {
+
+                    }
+                }
+            }
+
+            for (Map.Entry<String, MessageBatch> session : uploadMessagesBySession.entrySet()) {
+                MessageBatch uploadMessage = session.getValue();
+                if (uploadMessage != null) {
+                    String sessionId = session.getKey();
+                    //for upgrade scenarios, there may be no device or app info associated with the session, so create it now.
+                    if (uploadMessage.getAppInfo() == null) {
+                        uploadMessage.setAppInfo(mMessageManager.getDeviceAttributes().getAppInfo(mContext));
+                    }
+                    if (uploadMessage.getDeviceInfo() == null || sessionId.equals(currentSessionId)) {
+                        uploadMessage.setDeviceInfo(mMessageManager.getDeviceAttributes().getDeviceInfo(mContext));
+                    }
+                    JSONArray messages = history ? uploadMessage.getSessionHistoryMessages() : uploadMessage.getMessages();
+                    JSONArray identities = findIdentityState(messages);
+                    uploadMessage.setIdentities(identities);
+                    JSONObject userAttributes = findUserAttributeState(messages);
+                    uploadMessage.setUserAttributes(userAttributes);
+                    dbInsertUpload(uploadMessage);
+                    //if this was to process session history, or
+                    //if we're never going to process history AND
+                    //this batch contains a previous session, then delete the session
+                    if (history || (!sessionHistoryEnabled && !sessionId.equals(currentSessionId))) {
+                        db.delete(MParticleDatabase.SessionTable.TABLE_NAME, MParticleDatabase.SessionTable.SESSION_ID + "=?", new String[]{sessionId});
+                    }
+                }
+            }
+            db.setTransactionSuccessful();
         } catch (Exception e){
             if (BuildConfig.MP_DEBUG) {
                 ConfigManager.log(MParticle.LogLevel.DEBUG, "Error preparing batch upload in mParticle DB: " + e.getMessage());
@@ -556,16 +555,16 @@ public class UploadHandler extends Handler {
     /**
      * Delete a message that has been uploaded in session history
      */
-    int dbDeleteMessage(int messageId) {
+    int dbDeleteMessages(int messageId) {
         String[] whereArgs = new String[]{Integer.toString(messageId)};
-        return db.delete(MessageTable.TABLE_NAME, MessageTable._ID + " = ?", whereArgs);
+        return db.delete(MessageTable.TABLE_NAME, MessageTable._ID + " <= ?", whereArgs);
     }
 
-    void dbMarkMessageAsUploaded(int messageId) {
+    void dbMarkMessagesAsUploaded(int messageId) {
         String[] whereArgs = new String[]{Integer.toString(messageId)};
         ContentValues contentValues = new ContentValues();
         contentValues.put(MessageTable.STATUS, Status.UPLOADED);
-        int rowsupdated = db.update(MessageTable.TABLE_NAME, contentValues, MessageTable._ID + " = ?", whereArgs);
+        int rowsupdated = db.update(MessageTable.TABLE_NAME, contentValues, MessageTable._ID + " <= ?", whereArgs);
     }
 
     /**
