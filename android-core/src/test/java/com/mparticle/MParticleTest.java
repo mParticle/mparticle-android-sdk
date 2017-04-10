@@ -1,5 +1,9 @@
 package com.mparticle;
 
+import com.mparticle.internal.AppStateManager;
+import com.mparticle.internal.ConfigManager;
+import com.mparticle.internal.Session;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.Test;
@@ -47,6 +51,12 @@ public class MParticleTest {
         MParticle.setInstance(new MockMParticle());
         MParticle.start(new com.mparticle.mock.MockContext());
         MParticle mp = MParticle.getInstance();
+        mp.mConfigManager = Mockito.mock(ConfigManager.class);
+        mp.mAppStateManager = Mockito.mock(AppStateManager.class);
+        Session mockSession = Mockito.mock(Session.class);
+        Mockito.when(mockSession.checkEventLimit()).thenReturn(true);
+        Mockito.when(mp.mAppStateManager.getSession()).thenReturn(mockSession);
+        Mockito.when(mp.mConfigManager.isEnabled()).thenReturn(true);
         assertFalse(mp.setUserAttribute(null, "test"));
         assertFalse(mp.setUserAttribute(null, null));
         assertFalse(mp.setUserAttribute(new String(new char[257]), null));
@@ -99,6 +109,12 @@ public class MParticleTest {
         MParticle.setInstance(new MockMParticle());
         MParticle.start(new com.mparticle.mock.MockContext());
         MParticle mp = MParticle.getInstance();
+        mp.mConfigManager = Mockito.mock(ConfigManager.class);
+        mp.mAppStateManager = Mockito.mock(AppStateManager.class);
+        Session mockSession = Mockito.mock(Session.class);
+        Mockito.when(mockSession.checkEventLimit()).thenReturn(true);
+        Mockito.when(mp.mAppStateManager.getSession()).thenReturn(mockSession);
+        Mockito.when(mp.mConfigManager.isEnabled()).thenReturn(true);
         assertFalse(mp.setUserAttributeList(null, null));
         assertFalse(mp.setUserAttributeList(new String(new char[257]), null));
 
@@ -278,6 +294,12 @@ public class MParticleTest {
         MParticle.setInstance(new MockMParticle());
         MParticle.start(new com.mparticle.mock.MockContext());
         MParticle mp = MParticle.getInstance();
+        mp.mConfigManager = Mockito.mock(ConfigManager.class);
+        mp.mAppStateManager = Mockito.mock(AppStateManager.class);
+        Session mockSession = Mockito.mock(Session.class);
+        Mockito.when(mockSession.checkEventLimit()).thenReturn(true);
+        Mockito.when(mp.mAppStateManager.getSession()).thenReturn(mockSession);
+        Mockito.when(mp.mConfigManager.isEnabled()).thenReturn(true);
         assertFalse(mp.setUserTag(null));
         assertFalse(mp.setUserTag(""));
         assertTrue(mp.setUserTag("blah"));
@@ -289,6 +311,7 @@ public class MParticleTest {
         MParticle.setInstance(new MockMParticle());
         MParticle.start(new com.mparticle.mock.MockContext());
         MParticle mp = MParticle.getInstance();
+
         assertFalse(mp.removeUserTag(null));
         assertFalse(mp.removeUserTag(""));
         assertTrue(mp.removeUserTag("test"));

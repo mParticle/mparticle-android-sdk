@@ -660,13 +660,18 @@ import java.util.UUID;
             return;
         }
         Map<String, Object> currentValues = MParticle.getInstance().getAllUserAttributes();
-        db.beginTransaction();
+
         try {
+            db.beginTransaction();
             long time = System.currentTimeMillis();
             if (userAttributes.attributeLists != null) {
                 for (Map.Entry<String, List<String>> entry : userAttributes.attributeLists.entrySet()) {
                     String key = entry.getKey();
                     List<String> attributeValues = entry.getValue();
+                    Object oldValue = currentValues.get(key);
+                    if (oldValue != null && oldValue instanceof List && ((List) oldValue).containsAll(attributeValues)) {
+                        continue;
+                    }
                     String[] deleteWhereArgs = {key};
                     int deleted = db.delete(UserAttributesTable.TABLE_NAME, UserAttributesTable.ATTRIBUTE_KEY + " = ?", deleteWhereArgs);
                     boolean isNewAttribute = deleted == 0;
@@ -678,13 +683,17 @@ import java.util.UUID;
                         values.put(UserAttributesTable.CREATED_AT, time);
                         db.insert(UserAttributesTable.TABLE_NAME, null, values);
                     }
-                    mMessageManagerCallbacks.logUserAttributeChangeMessage(key, attributeValues, currentValues.get(key), false, isNewAttribute, userAttributes.time);
+                    mMessageManagerCallbacks.logUserAttributeChangeMessage(key, attributeValues, oldValue, false, isNewAttribute, userAttributes.time);
                 }
             }
             if (userAttributes.attributeSingles != null) {
                 for (Map.Entry<String, String> entry : userAttributes.attributeSingles.entrySet()) {
                     String key = entry.getKey();
                     String attributeValue = entry.getValue();
+                    Object oldValue = currentValues.get(key);
+                    if (oldValue != null && oldValue instanceof String && ((String) oldValue).equalsIgnoreCase(attributeValue)) {
+                        continue;
+                    }
                     String[] deleteWhereArgs = {key};
                     int deleted = db.delete(UserAttributesTable.TABLE_NAME, UserAttributesTable.ATTRIBUTE_KEY + " = ?", deleteWhereArgs);
                     boolean isNewAttribute = deleted == 0;
@@ -694,7 +703,7 @@ import java.util.UUID;
                     values.put(UserAttributesTable.IS_LIST, false);
                     values.put(UserAttributesTable.CREATED_AT, time);
                     db.insert(UserAttributesTable.TABLE_NAME, null, values);
-                    mMessageManagerCallbacks.logUserAttributeChangeMessage(key, attributeValue, currentValues.get(key), false, isNewAttribute, userAttributes.time);
+                    mMessageManagerCallbacks.logUserAttributeChangeMessage(key, attributeValue, oldValue, false, isNewAttribute, userAttributes.time);
                 }
             }
             db.setTransactionSuccessful();
