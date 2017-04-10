@@ -933,54 +933,58 @@ public class MParticle {
      * @param value the attribute value. This value will be converted to its String representation as dictated by its <code>toString()</code> method.
      */
     public boolean setUserAttribute(String key, Object value) {
-        if (MPUtility.isEmpty(key)){
-            ConfigManager.log(LogLevel.WARNING, "setUserAttribute called with null key. This is a no-op.");
-            return false;
-        }
-        if (key.length() > Constants.LIMIT_ATTR_NAME) {
-            ConfigManager.log(LogLevel.WARNING, "User attribute keys cannot be longer than " + Constants.LIMIT_ATTR_NAME + " characters, attribute not set: " + key);
-            return false;
-        }
+        if (mConfigManager.isEnabled() && checkEventLimit()) {
+            mAppStateManager.ensureActiveSession();
+            if (MPUtility.isEmpty(key)) {
+                ConfigManager.log(LogLevel.WARNING, "setUserAttribute called with null key. This is a no-op.");
+                return false;
+            }
+            if (key.length() > Constants.LIMIT_ATTR_NAME) {
+                ConfigManager.log(LogLevel.WARNING, "User attribute keys cannot be longer than " + Constants.LIMIT_ATTR_NAME + " characters, attribute not set: " + key);
+                return false;
+            }
 
-        if (value != null && value instanceof List) {
-            List<Object> values = (List<Object>)value;
-            if (values.size() > Constants.LIMIT_USER_ATTR_LIST_LENGTH) {
-                ConfigManager.log(LogLevel.WARNING, "setUserAttribute called with list longer than "+Constants.LIMIT_USER_ATTR_LIST_LENGTH+" elements, list not set.");
-                return false;
-            }
-            List<String> clonedList = new ArrayList<String>();
-            try {
-                for (int i = 0; i < values.size(); i++) {
-                    if (values.get(i).toString().length() > Constants.LIMIT_USER_ATTR_LIST_ITEM_LENGTH) {
-                        ConfigManager.log(LogLevel.WARNING, "setUserAttribute called with list containing element longer than " + Constants.LIMIT_USER_ATTR_LIST_ITEM_LENGTH + " characters, dropping entire list.");
-                        return false;
-                    } else {
-                        clonedList.add(values.get(i).toString());
-                    }
-                }
-                ConfigManager.log(LogLevel.DEBUG, "Set user attribute list: " + key + " with values: " + values.toString());
-                mMessageManager.setUserAttribute(key, clonedList);
-                mKitManager.setUserAttributeList(key, clonedList);
-            }catch (Exception e) {
-                ConfigManager.log(LogLevel.DEBUG, "Error while setting attribute list: " + e.toString());
-                return false;
-            }
-        }else {
-            String stringValue = null;
-            if (value != null) {
-                stringValue = value.toString();
-                if (stringValue.length() > Constants.LIMIT_USER_ATTR_VALUE) {
-                    ConfigManager.log(LogLevel.WARNING, "setUserAttribute called with string-value longer than " + Constants.LIMIT_USER_ATTR_VALUE + " characters. Attribute not set.");
+            if (value != null && value instanceof List) {
+                List<Object> values = (List<Object>) value;
+                if (values.size() > Constants.LIMIT_USER_ATTR_LIST_LENGTH) {
+                    ConfigManager.log(LogLevel.WARNING, "setUserAttribute called with list longer than " + Constants.LIMIT_USER_ATTR_LIST_LENGTH + " elements, list not set.");
                     return false;
                 }
-                ConfigManager.log(LogLevel.DEBUG, "Set user attribute: " + key + " with value: " + stringValue);
+                List<String> clonedList = new ArrayList<String>();
+                try {
+                    for (int i = 0; i < values.size(); i++) {
+                        if (values.get(i).toString().length() > Constants.LIMIT_USER_ATTR_LIST_ITEM_LENGTH) {
+                            ConfigManager.log(LogLevel.WARNING, "setUserAttribute called with list containing element longer than " + Constants.LIMIT_USER_ATTR_LIST_ITEM_LENGTH + " characters, dropping entire list.");
+                            return false;
+                        } else {
+                            clonedList.add(values.get(i).toString());
+                        }
+                    }
+                    ConfigManager.log(LogLevel.DEBUG, "Set user attribute list: " + key + " with values: " + values.toString());
+                    mMessageManager.setUserAttribute(key, clonedList);
+                    mKitManager.setUserAttributeList(key, clonedList);
+                } catch (Exception e) {
+                    ConfigManager.log(LogLevel.DEBUG, "Error while setting attribute list: " + e.toString());
+                    return false;
+                }
             } else {
-                ConfigManager.log(LogLevel.DEBUG, "Set user tag: " + key);
+                String stringValue = null;
+                if (value != null) {
+                    stringValue = value.toString();
+                    if (stringValue.length() > Constants.LIMIT_USER_ATTR_VALUE) {
+                        ConfigManager.log(LogLevel.WARNING, "setUserAttribute called with string-value longer than " + Constants.LIMIT_USER_ATTR_VALUE + " characters. Attribute not set.");
+                        return false;
+                    }
+                    ConfigManager.log(LogLevel.DEBUG, "Set user attribute: " + key + " with value: " + stringValue);
+                } else {
+                    ConfigManager.log(LogLevel.DEBUG, "Set user tag: " + key);
+                }
+                mMessageManager.setUserAttribute(key, stringValue);
+                mKitManager.setUserAttribute(key, stringValue);
             }
-            mMessageManager.setUserAttribute(key, stringValue);
-            mKitManager.setUserAttribute(key, stringValue);
+            return true;
         }
-        return true;
+        return false;
     }
 
     /**
