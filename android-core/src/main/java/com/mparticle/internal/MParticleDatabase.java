@@ -60,7 +60,7 @@ import java.util.Iterator;
     }
 
     private final static String[] prepareSelection = new String[]{"_id", MessageTable.MESSAGE, MessageTable.CREATED_AT, MessageTable.STATUS, MessageTable.SESSION_ID};
-    private final static String prepareOrderBy =  MessageTable.SESSION_ID + ", " + MessageTable._ID + " asc";
+    private final static String prepareOrderBy =  MessageTable._ID + " asc";
 
     private static String sessionHistorySelection = String.format(
             "(%s = %d) and (%s != ?)",
@@ -77,7 +77,7 @@ import java.util.Iterator;
                 selectionArgs,
                 null,
                 null,
-                prepareOrderBy);
+                prepareOrderBy, "100");
     }
 
     static int deleteOldMessages(SQLiteDatabase database, String currentSessionId){
@@ -103,11 +103,11 @@ import java.util.Iterator;
         return database.query(
                 MessageTable.TABLE_NAME,
                 null,
-                MessageTable.STATUS + " != ?",
+                MessageTable.STATUS + " != ? and " + MessageTable.CREATED_AT + " < " + System.currentTimeMillis(),
                 readyMessages,
                 null,
                 null,
-                prepareOrderBy);
+                prepareOrderBy, "100");
     }
 
     static Cursor getReportingMessagesForUpload(SQLiteDatabase database){
