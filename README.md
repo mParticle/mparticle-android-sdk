@@ -6,7 +6,7 @@
 
 Hello! This is the public repo of the mParticle Android SDK. mParticle's mission is straightforward: make it really easy to use all of the great services in the app ecosystem. Our SDKs and platform are designed to be your abstraction layer and data hub, and we do the work of integrating with each individual app service so you don't have to.
 
-The platform has grown to support 80+ partners in the ecosystem, including developer tools, analytics, attribution, marketing automation, and advertising services. We also have a powerful audience engine that sits atop our platform to let you action on all of your data - [learn more here](https://www.mparticle.com)!
+The platform has grown to support 100+ partners in the ecosystem, including developer tools, analytics, attribution, marketing automation, and advertising services. We also have a powerful audience engine that sits atop our platform to let you action on all of your data - [learn more here](https://www.mparticle.com)!
 
 ### Core SDK
 
@@ -16,7 +16,7 @@ You can grab the Core SDK via Maven Central. Please reference the badge above an
 
 ```groovy
 dependencies {
-    compile 'com.mparticle:android-core:4.11.3'
+    compile 'com.mparticle:android-core:4.11.4'
 }
 ```
 
@@ -27,8 +27,8 @@ Several integrations require additional client-side add-on libraries called "kit
 ```groovy
 dependencies {
     compile (
-        'com.mparticle:android-example-kit:4.11.3',
-        'com.mparticle:android-another-kit:4.11.3',
+        'com.mparticle:android-example-kit:4.11.4',
+        'com.mparticle:android-another-kit:4.11.4',
     )
 }
 ```
