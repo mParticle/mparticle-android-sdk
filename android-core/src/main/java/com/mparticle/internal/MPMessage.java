@@ -148,6 +148,13 @@ public class MPMessage extends JSONObject{
                     }
                     productAction.put(Constants.Commerce.PRODUCT_LIST, products);
                 }
+                JSONObject cartJsonObject = new JSONObject(MParticle.getInstance().Commerce().cart().toString());
+                if (cartJsonObject.length() > 0) {
+                    message.put("sc", cartJsonObject);
+                }
+                if (event.getProductAction().equals(Product.PURCHASE)) {
+                    MParticle.getInstance().Commerce().cart().clear();
+                }
             }
             if (event.getPromotionAction() != null) {
                 JSONObject promotionAction = new JSONObject();
@@ -183,10 +190,8 @@ public class MPMessage extends JSONObject{
                     message.put(Constants.Commerce.IMPRESSION_OBJECT, impressions);
                 }
             }
-            JSONObject cartJsonObject = new JSONObject(MParticle.getInstance().Commerce().cart().toString());
-            if (cartJsonObject.length() > 0) {
-                message.put("sc", cartJsonObject);
-            }
+
+
 
         } catch (Exception jse) {
 

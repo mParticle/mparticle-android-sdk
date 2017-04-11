@@ -40,6 +40,8 @@ public final class Cart {
     private final List<Product> productList;
     private final SharedPreferences prefs;
     private static Context mContext;
+    public final static int DEFAULT_MAXIMUM_PRODUCT_COUNT = 30;
+    private static int MAXIMUM_PRODUCT_COUNT = DEFAULT_MAXIMUM_PRODUCT_COUNT;
 
     //lazy-loaded singleton via the initialization-on-demand holder pattern
     private static class CartLoader {
@@ -51,6 +53,16 @@ public final class Cart {
         productList = new LinkedList<Product>();
         String cart = prefs.getString(Constants.PrefKeys.CART, null);
         loadFromString(cart);
+    }
+
+    /**
+     * Set the maximum product count to hold in the cart. On memory constrained devices/apps,
+     * this value can be lowered to avoid possible memory exceptions.
+     *
+     * @param maximum
+     */
+    public static void setMaximumProductCount(final int maximum) {
+        MAXIMUM_PRODUCT_COUNT = maximum;
     }
 
     /**
@@ -113,7 +125,7 @@ public final class Cart {
      * @see #setProductEqualityComparator(Product.EqualityComparator)
      */
     public synchronized Cart add(Product product, boolean logEvent) {
-        if (product != null && !productList.contains(product)) {
+        if (product != null && productList.size() < MAXIMUM_PRODUCT_COUNT && !productList.contains(product)) {
             product.updateTimeAdded();
             productList.add(product);
             save();
@@ -196,7 +208,7 @@ public final class Cart {
                 JSONObject cartJsonObject = new JSONObject(cartJson);
                 JSONArray products = cartJsonObject.getJSONArray("pl");
                 clear();
-                for (int i = 0; i < products.length(); i++) {
+                for (int i = 0; i < products.length() && i < MAXIMUM_PRODUCT_COUNT; i++) {
                     productList.add(Product.fromJson(products.getJSONObject(i)));
                 }
                 save();
