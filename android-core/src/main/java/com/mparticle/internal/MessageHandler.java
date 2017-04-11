@@ -560,7 +560,12 @@ import java.util.UUID;
         if (Constants.NO_SESSION_ID.equals(sessionID)){
             message.remove(Constants.MessageKey.SESSION_ID);
         }
-        contentValues.put(MessageTable.MESSAGE, message.toString());
+        String messageString = message.toString();
+        if (messageString.length() > Constants.LIMIT_MAX_MESSAGE_SIZE) {
+            ConfigManager.log(MParticle.LogLevel.ERROR, "Message logged of size "+ messageString.length() + " that exceeds maximum safe size of " + Constants.LIMIT_MAX_MESSAGE_SIZE + " bytes.");
+            return;
+        }
+        contentValues.put(MessageTable.MESSAGE, messageString);
 
         if (message.getString(MessageKey.TYPE) == MessageType.FIRST_RUN) {
             // Force the first run message to be parsed immediately

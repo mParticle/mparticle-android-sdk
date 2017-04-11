@@ -13,6 +13,8 @@ import java.util.UUID;
 
 public class MessageBatch extends JSONObject {
 
+    private long messageLengthBytes;
+
     private MessageBatch() {
         super();
     }
@@ -146,5 +148,13 @@ public class MessageBatch extends JSONObject {
         } catch (JSONException e) {
 
         }
+    }
+
+    public long getMessageLengthBytes() {
+        return messageLengthBytes;
+    }
+
+    public void incrementMessageLengthBytes(long bytes) {
+        messageLengthBytes = messageLengthBytes + bytes;
     }
 }

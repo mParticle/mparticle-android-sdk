@@ -81,6 +81,13 @@ public class MPUtility {
         return mi.threshold;
     }
 
+    public static long getRemainingHeapInBytes() {
+        final Runtime runtime = Runtime.getRuntime();
+        final long usedMemBytes=(runtime.totalMemory() - runtime.freeMemory());
+        final long maxHeapSizeInBytes=runtime.maxMemory();
+        return maxHeapSizeInBytes - usedMemBytes;
+    }
+
     public static boolean isEmpty(CharSequence str) {
         if (str == null || str.length() == 0)
             return true;

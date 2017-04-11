@@ -185,18 +185,25 @@ public class UploadHandler extends Handler {
      * - persist all of the resulting upload batch objects
      * - mark the messages as having been uploaded.
      */
-    private void prepareMessageUploads(boolean history) {
+    private void prepareMessageUploads(boolean history) throws Exception {
         Cursor readyMessagesCursor = null, reportingMessageCursor = null, sessionCursor = null;
         String currentSessionId = mAppStateManager.getSession().mSessionID;
+        long remainingHeap = MPUtility.getRemainingHeapInBytes();
+        if (remainingHeap < Constants.LIMIT_MAX_UPLOAD_SIZE) {
+            throw new Exception("Low remaining heap space, deferring uploads.");
+        }
         final boolean sessionHistoryEnabled = MParticle.getInstance().getConfigManager().getIncludeSessionHistory();
         try {
+            MParticleDatabase.cleanupMessages(db);
             db.beginTransaction();
             if (history && !sessionHistoryEnabled){
                 MParticleDatabase.deleteOldMessages(db, currentSessionId);
                 MParticleDatabase.deleteOldSessions(db, currentSessionId);
                 db.setTransactionSuccessful();
                 return;
-            } else if (history) {
+            }
+
+            if (history) {
                 readyMessagesCursor = MParticleDatabase.getSessionHistory(db, currentSessionId);
             } else {
                 readyMessagesCursor = MParticleDatabase.getMessagesForUpload(db);
@@ -208,31 +215,40 @@ public class UploadHandler extends Handler {
             int messageIndex = readyMessagesCursor.getColumnIndex(MessageTable.MESSAGE);
             int sessionIdIndex = readyMessagesCursor.getColumnIndex(MessageTable.SESSION_ID);
             HashMap<String, MessageBatch> uploadMessagesBySession = new HashMap<String, MessageBatch>(2);
-            int highestMessageId = 0;
+            int highestUploadedMessageId = 0;
             while (readyMessagesCursor.moveToNext()) {
                 String sessionId = readyMessagesCursor.getString(sessionIdIndex);
                 int messageId = readyMessagesCursor.getInt(messageIdIndex);
-                highestMessageId = messageId;
                 MessageBatch uploadMessage = uploadMessagesBySession.get(sessionId);
                 if (uploadMessage == null) {
                     uploadMessage = createUploadMessage(history);
                     uploadMessagesBySession.put(sessionId, uploadMessage);
                 }
-                JSONObject msgObject = new JSONObject(readyMessagesCursor.getString(messageIndex));
+                String message = readyMessagesCursor.getString(messageIndex);
+                int messageLength = message.length();
+                JSONObject msgObject = new JSONObject(message);
+                if (messageLength + uploadMessage.getMessageLengthBytes() > Constants.LIMIT_MAX_UPLOAD_SIZE) {
+                    break;
+                }
 
                 if (history) {
                     uploadMessage.addSessionHistoryMessage(msgObject);
                 } else {
                     uploadMessage.addMessage(msgObject);
                 }
+                uploadMessage.incrementMessageLengthBytes(messageLength);
+                highestUploadedMessageId = messageId;
+            }
+            if (readyMessagesCursor != null && !readyMessagesCursor.isClosed()){
+                readyMessagesCursor.close();
             }
 
             if (!sessionHistoryEnabled || history) {
                 //if this is a session-less message, or if session history is disabled, just delete it
-                int deleted = dbDeleteMessages(highestMessageId);
+                int deleted = dbDeleteMessages(highestUploadedMessageId);
             } else {
-                //else mark the message as uploaded, so next time around it'll be included in session history
-                dbMarkMessagesAsUploaded(highestMessageId);
+                //else mark the messages as uploaded, so next time around it'll be included in session history
+                dbMarkMessagesAsUploaded(highestUploadedMessageId);
             }
 
             //add reporting information for this session
@@ -362,6 +378,7 @@ public class UploadHandler extends Handler {
      * This method is responsible for looking for batches that are ready to be uploaded, and uploading them.
      */
     boolean upload(boolean history) {
+        MParticleDatabase.cleanupUploadMessages(db);
         boolean processingSessionEnd = false;
         Cursor readyUploadsCursor = null;
         try {
@@ -475,7 +492,7 @@ public class UploadHandler extends Handler {
     }
 
     /**
-     * Look for the last UAC message to find the end-state of user identities
+     * Look for the last UAC message to find the end-state of user attributes
      */
     private JSONObject findUserAttributeState(JSONArray messages) {
         JSONObject userAttributes = null;

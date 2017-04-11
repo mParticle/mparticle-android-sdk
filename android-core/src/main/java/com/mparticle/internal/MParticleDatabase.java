@@ -125,6 +125,14 @@ import java.util.Iterator;
     public static final String DB_NAME = "mparticle.db";
 
 
+    public static int cleanupMessages(SQLiteDatabase database) {
+        return database.delete(MessageTable.TABLE_NAME, "length(" + MessageTable.MESSAGE + ") > " + Constants.LIMIT_MAX_MESSAGE_SIZE, null);
+    }
+
+    public static int cleanupUploadMessages(SQLiteDatabase database) {
+        return database.delete(UploadTable.TABLE_NAME, "length(" + UploadTable.MESSAGE + ") > " + Constants.LIMIT_MAX_UPLOAD_SIZE, null);
+    }
+
     interface UserAttributesTable {
         String TABLE_NAME = "attributes";
         String ATTRIBUTE_KEY = "attribute_key";

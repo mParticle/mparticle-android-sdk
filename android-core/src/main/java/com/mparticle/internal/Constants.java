@@ -30,6 +30,8 @@ public class Constants {
     public static final int LIMIT_EVENT_NAME = 256;
     public static final int LIMIT_USER_ATTR_LIST_LENGTH = 1000;
     public static final int LIMIT_USER_ATTR_LIST_ITEM_LENGTH = 512;
+    public static final int LIMIT_MAX_MESSAGE_SIZE = 100 * 1024;
+    public static final int LIMIT_MAX_UPLOAD_SIZE = 2 * LIMIT_MAX_MESSAGE_SIZE;
 
     public final static String GODADDY_INTERMEDIATE_CRT = "-----BEGIN CERTIFICATE-----\n" +
             "MIIE0DCCA7igAwIBAgIBBzANBgkqhkiG9w0BAQsFADCBgzELMAkGA1UEBhMCVVMx\n" +
