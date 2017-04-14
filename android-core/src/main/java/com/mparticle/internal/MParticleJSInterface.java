@@ -5,12 +5,20 @@ import android.webkit.JavascriptInterface;
 
 import com.mparticle.MParticle;
 import com.mparticle.MParticle.EventType;
+import com.mparticle.commerce.CommerceEvent;
+import com.mparticle.commerce.Impression;
+import com.mparticle.commerce.Product;
+import com.mparticle.commerce.Promotion;
+import com.mparticle.commerce.TransactionAttributes;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -36,8 +44,45 @@ public class MParticleJSInterface {
     private static final int JS_MSG_TYPE_PE = 4;
     private static final int JS_MSG_TYPE_CR = 5;
     private static final int JS_MSG_TYPE_OO = 6;
+    private static final int JS_MSG_TYPE_COMMERCE = 16;
 
     private static final String errorMsg = "Error processing JSON data from Webview: %s";
+
+    private static final String EVENT_NAME = "EventName";
+    private static final String CURRENCY_CODE = "CurrencyCode";
+    private static final String CHECKOUT_STEP = "CheckoutStep";
+    private static final String CHECKOUT_OPTIONS = "CheckoutOptions";
+    private static final String PRODUCT_ACTION = "ProductAction";
+    private static final String PRODUCT_LIST = "ProductList";
+    private static final String PRODUCT_ACTION_TYPE = "ProductActionType";
+    private static final String PROMOTION_ACTION = "PromotionAction";
+    private static final String PROMOTION_LIST = "PromotionList";
+    private static final String PROMOTION_ACTION_TYPE = "PromotionActionType";
+    private static final String PRODUCT_IMPRESSIONS = "ProductImpressions";
+
+    private static final String AFFILIATION = "Affiliation";
+    private static final String TOTAL_AMOUNT = "TotalAmount";
+    private static final String SHIPPING_AMOUNT = "ShippingAmount";
+    private static final String TAX_AMOUNT = "TaxAmount";
+    private static final String TRANSACTION_ID = "TransactionId";
+
+    private static final String NAME = "Name";
+    private static final String SKU = "Sku";
+    private static final String PRICE = "Price";
+    private static final String QUANTITY = "Quantity";
+    private static final String BRAND = "Brand";
+    private static final String VARIANT = "Variant";
+    private static final String CATEGORY = "Category";
+    private static final String POSITION = "Position";
+    private static final String COUPON_CODE = "CouponCode";
+    private static final String ATTRIBUTES = "Attributes";
+
+    private static final String PROMOTION_ID = "Id";
+    private static final String PROMOTION_NAME = "Name";
+    private static final String PROMOTION_CREATIVE = "Creative";
+    private static final String PROMOTION_POSITION = "Position";
+
+    private static final String PRODUCT_IMPRESSION_NAME = "ProductImpressionList";
 
     public MParticleJSInterface() {
 
@@ -68,6 +113,14 @@ public class MParticleJSInterface {
                     break;
                 case JS_MSG_TYPE_CR:
                     MParticle.getInstance().logError(name, eventAttributes);
+                    break;
+                case JS_MSG_TYPE_COMMERCE:
+                    CommerceEvent commerceEvent = toCommerceEvent(event);
+                    if (commerceEvent == null) {
+                        ConfigManager.log(MParticle.LogLevel.WARNING, "CommerceEvent empty, or unparseable");
+                        break;
+                    }
+                    MParticle.getInstance().logEvent(commerceEvent);
                     break;
                 case JS_MSG_TYPE_SE:
                 case JS_MSG_TYPE_SS:
@@ -151,6 +204,143 @@ public class MParticleJSInterface {
         }
     }
 
+    @JavascriptInterface
+    public void addToProductBag(String productBagName, String json){
+        try {
+            JSONObject attribute = new JSONObject(json);
+            Product product = toProduct(attribute);
+            if (product != null) {
+                MParticle.getInstance().ProductBags().addProduct(productBagName, product);
+            } else {
+                ConfigManager.log(MParticle.LogLevel.WARNING, String.format(errorMsg, "unable to convert String to Product: " + json));
+            }
+        } catch (JSONException jse) {
+            ConfigManager.log(MParticle.LogLevel.WARNING, String.format(errorMsg, jse.getMessage()));
+        }
+    }
+
+    @JavascriptInterface
+    public boolean removeFromProductBag(String productBagName, String json) {
+        try {
+            JSONObject attribute = new JSONObject(json);
+            Product product = toProduct(attribute);
+            if (product != null) {
+                return MParticle.getInstance().ProductBags().removeProduct(productBagName, product);
+            } else {
+                ConfigManager.log(MParticle.LogLevel.WARNING, String.format(errorMsg, "unable to convert String to Product: " + json));
+            }
+        } catch (JSONException jse) {
+            ConfigManager.log(MParticle.LogLevel.WARNING, String.format(errorMsg, jse.getMessage()));
+        }
+        return false;
+    }
+
+    @JavascriptInterface
+    public void clearProductBag(String productBagName) {
+        MParticle.getInstance().ProductBags().clearProductBag(productBagName);
+    }
+
+    @JavascriptInterface
+    public void addToCart(String json) {
+        try {
+            JSONObject attribute = new JSONObject(json);
+            Product product = toProduct(attribute);
+            if (product != null) {
+                MParticle.getInstance().Commerce().cart().add(product);
+            } else {
+                ConfigManager.log(MParticle.LogLevel.WARNING, String.format(errorMsg, "unable to convert String to Product: " + json));
+            }
+        } catch (JSONException jse) {
+            ConfigManager.log(MParticle.LogLevel.WARNING, String.format(errorMsg, jse.getMessage()));
+        }
+    }
+
+    @JavascriptInterface
+    public void removeFromCart(String json) {
+        try {
+            JSONObject attribute = new JSONObject(json);
+            Product product = toProduct(attribute);
+            if (product != null) {
+                MParticle.getInstance().Commerce().cart().remove(product);
+            } else {
+                ConfigManager.log(MParticle.LogLevel.WARNING, String.format(errorMsg, "unable to convert String to Product: " + json));
+            }
+        } catch (JSONException jse) {
+            ConfigManager.log(MParticle.LogLevel.WARNING, String.format(errorMsg, jse.getMessage()));
+        }
+    }
+
+    @JavascriptInterface
+    public void clearCart() {
+        MParticle.getInstance().Commerce().cart().clear();
+    }
+
+    @JavascriptInterface
+    public void logOut() {
+        MParticle.getInstance().logout();
+    }
+
+    @JavascriptInterface
+    public void setUserAttributeList(String json) {
+        try {
+            JSONObject jsonObject = new JSONObject(json);
+            String key = jsonObject.getString("key");
+            JSONArray value = jsonObject.getJSONArray("value");
+            List<String> attributes = new ArrayList<String>();
+            for (int i = 0; i < value.length(); i++) {
+                attributes.add(value.getString(i));
+            }
+            MParticle.getInstance().setUserAttributeList(key, attributes);
+        } catch (JSONException jse) {
+            ConfigManager.log(MParticle.LogLevel.WARNING, String.format(errorMsg, jse.getMessage()));
+        }
+    }
+
+    @JavascriptInterface
+    public void removeAllUserAttributes() {
+        for (String userAttribute: MParticle.getInstance().getAllUserAttributes().keySet()) {
+            MParticle.getInstance().removeUserAttribute(userAttribute);
+        }
+    }
+
+    @JavascriptInterface
+    public String getUserAttributesLists() {
+        Map<String, List<String>> attributeMap = MParticle.getInstance().getUserAttributeLists();
+        JSONArray jsonArray = new JSONArray();
+        for (Map.Entry<String, List<String>> entry: attributeMap.entrySet()) {
+            try {
+                JSONObject jsonObject = new JSONObject();
+                jsonObject.put("key", entry.getKey());
+                JSONArray jsonArray1 = new JSONArray();
+                for (String attribute: entry.getValue()) {
+                    jsonArray1.put(attribute);
+                }
+                jsonObject.put("value", jsonArray1.toString());
+                jsonArray.put(jsonObject);
+            } catch (JSONException jse) {
+                ConfigManager.log(MParticle.LogLevel.WARNING, jse.getMessage());
+            }
+        }
+        return jsonArray.toString();
+    }
+
+    @JavascriptInterface
+    public String getAllUserAttributes() {
+        Map<String, Object> attributeMap = MParticle.getInstance().getAllUserAttributes();
+        JSONArray jsonArray = new JSONArray();
+        for (Map.Entry<String, Object> entry: attributeMap.entrySet()) {
+            try {
+                JSONObject jsonObject = new JSONObject();
+                jsonObject.put("key", entry.getKey());
+                jsonObject.put("value", entry.getValue().toString());
+                jsonArray.put(jsonObject);
+            } catch (JSONException jse) {
+                ConfigManager.log(MParticle.LogLevel.WARNING, jse.getMessage());
+            }
+        }
+        return jsonArray.toString();
+    }
+
     private static Map<String, String> convertToMap(JSONObject attributes) {
         if (null != attributes) {
             Iterator keys = attributes.keys();
@@ -191,5 +381,177 @@ public class MParticleJSInterface {
             default:
                 return EventType.Other;
         }
+    }
+
+    protected CommerceEvent toCommerceEvent(JSONObject jsonObject) {
+        CommerceEvent.Builder builder = null;
+
+        //try to instantiate CommerceEvent with a Product and add Products
+        JSONObject productActionObj = jsonObject.optJSONObject(PRODUCT_ACTION);
+        if (productActionObj != null) {
+            String productAction = productActionObj.optString(PRODUCT_ACTION_TYPE);
+            JSONArray productArray = productActionObj.optJSONArray(PRODUCT_LIST);
+            if (productAction != null && productArray != null) {
+                for (int i = 0; i < productArray.length(); i++) {
+                    Product product = toProduct(productArray.optJSONObject(i));
+                        if (builder == null) {
+                            builder = new CommerceEvent.Builder(productAction, product);
+                        } else {
+                            builder.addProduct(product);
+                        }
+                }
+                if (builder == null) {
+                    builder = new CommerceEvent.Builder(productAction, (Product)null);
+                }
+                TransactionAttributes transactionAttributes = getTransactionAttributes(productActionObj);
+                if (transactionAttributes != null) {
+                    builder.transactionAttributes(transactionAttributes);
+                }
+                builder.checkoutStep(productActionObj.optInt(CHECKOUT_STEP));
+                builder.checkoutOptions(productActionObj.optString(CHECKOUT_OPTIONS));
+            }
+        }
+
+        //try and instantiate CommerceEvent with a Promotion or add Promotions
+        JSONObject promotionActionObj = jsonObject.optJSONObject(PROMOTION_ACTION);
+        if (promotionActionObj != null) {
+            String promotionAction = promotionActionObj.optString(PROMOTION_ACTION_TYPE);
+            JSONArray promotionArray = promotionActionObj.optJSONArray(PROMOTION_LIST);
+            if (promotionAction != null && promotionArray != null) {
+                for (int i = 0; i < promotionArray.length(); i++) {
+                    Promotion promotion = toPromotion(promotionArray.optJSONObject(i));
+                        if (builder == null) {
+                            builder = new CommerceEvent.Builder(promotionAction, promotion);
+                        } else {
+                            builder.addPromotion(promotion);
+                        }
+                }
+                if (builder == null) {
+                    builder = new CommerceEvent.Builder(promotionAction, (Promotion)null);
+                }
+            }
+        }
+
+        //try and instantiate CommerceEvent with an Impression or add Impressions
+        JSONArray impressionList = jsonObject.optJSONArray(PRODUCT_IMPRESSIONS);
+        if (impressionList != null) {
+            for (int i = 0; i < impressionList.length(); i++) {
+                Impression impression = toImpression(impressionList.optJSONObject(i));
+                if (impression != null) {
+                    if (builder == null) {
+                        builder = new CommerceEvent.Builder(impression);
+                    } else {
+                        builder.addImpression(impression);
+                    }
+                }
+            }
+        }
+        if (builder == null) {
+            return null;
+        }
+        Map<String, String> customAttributes = getCustomAttributes(jsonObject);
+        if (customAttributes != null) {
+            builder.customAttributes(customAttributes);
+        }
+        builder.currency(jsonObject.optString(CURRENCY_CODE, null));
+        builder.internalEventName(jsonObject.optString(EVENT_NAME));
+        return builder.build();
+    }
+    
+    private TransactionAttributes getTransactionAttributes(JSONObject jsonObject) {
+        TransactionAttributes attributes = null;
+        if (jsonObject != null &&
+                (jsonObject.has(TRANSACTION_ID) ||
+                jsonObject.has(AFFILIATION) ||
+                jsonObject.has(COUPON_CODE) ||
+                jsonObject.has(TOTAL_AMOUNT) ||
+                jsonObject.has(TAX_AMOUNT) ||
+                jsonObject.has(SHIPPING_AMOUNT))) {
+            attributes = new TransactionAttributes();
+            attributes
+                    .setId(jsonObject.optString(TRANSACTION_ID, attributes.getId()))
+                    .setAffiliation(jsonObject.optString(AFFILIATION, attributes.getAffiliation()))
+                    .setCouponCode(jsonObject.optString(COUPON_CODE, attributes.getCouponCode()))
+                    .setRevenue(jsonObject.optDouble(TOTAL_AMOUNT))
+                    .setTax(jsonObject.optDouble(TAX_AMOUNT))
+                    .setShipping(jsonObject.optDouble(SHIPPING_AMOUNT));
+        }
+        return attributes;
+    }
+
+    private Product toProduct(JSONObject jsonObject) {
+        if (jsonObject == null) { return null; }
+        try {
+            Product.Builder builder = new Product.Builder(jsonObject.getString(NAME), jsonObject.optString(SKU, null), jsonObject.optDouble(PRICE, 0));
+            builder.category(jsonObject.optString(CATEGORY, null));
+            builder.couponCode(jsonObject.optString(COUPON_CODE, null));
+            if (jsonObject.has(POSITION)) {
+                builder.position(jsonObject.optInt(POSITION, 0));
+            }
+            if (jsonObject.has(QUANTITY)) {
+                builder.quantity(jsonObject.optDouble(QUANTITY, 1));
+            }
+            builder.brand(jsonObject.optString(BRAND, null));
+            builder.variant(jsonObject.optString(VARIANT, null));
+            Map<String, String> customAttributes = getCustomAttributes(jsonObject);
+            if (customAttributes != null) {
+                builder.customAttributes(customAttributes);
+            }
+            return builder.build();
+        }
+        catch (JSONException ignore) {
+            return null;
+        }
+    }
+
+    private Map<String, String> getCustomAttributes(JSONObject jsonObject) {
+        JSONObject attributesJson = jsonObject.optJSONObject(ATTRIBUTES);
+        if (attributesJson != null) {
+            if (attributesJson.length() > 0) {
+                Map<String, String> customAttributes = new HashMap<String, String>();
+                Iterator<String> keys = attributesJson.keys();
+
+                while (keys.hasNext()) {
+                    String key = keys.next();
+                    customAttributes.put(key, attributesJson.optString(key));
+                }
+                return customAttributes;
+            }
+        }
+        return null;
+    }
+
+    private Impression toImpression(JSONObject jsonObject) {
+        Impression impression = null;
+        if (jsonObject == null) { return impression; }
+        if (jsonObject.has(PRODUCT_IMPRESSION_NAME)) {
+            JSONArray jsonArray = jsonObject.optJSONArray(PRODUCT_LIST);
+            if (jsonArray != null) {
+                for (int i = 0; i < jsonArray.length(); i++) {
+                    Product product = toProduct(jsonArray.optJSONObject(i));
+                    String impressionName = jsonObject.optString(PRODUCT_IMPRESSION_NAME, null);
+                    if (product != null) {
+                        if (impression == null) {
+                            if (!MPUtility.isEmpty(impressionName))
+                                impression = new Impression(impressionName, product);
+                        } else {
+                            impression.addProduct(product);
+                        }
+                    }
+                }
+            }
+        }
+        return impression;
+    }
+    
+    private Promotion toPromotion(JSONObject jsonObject) {
+        if (jsonObject == null) {
+            return null;
+        }
+        return new Promotion()
+                .setName(jsonObject.optString(PROMOTION_NAME))
+                .setCreative(jsonObject.optString(PROMOTION_CREATIVE))
+                .setId(jsonObject.optString(PROMOTION_ID))
+                .setPosition(jsonObject.optString(PROMOTION_POSITION));
     }
 }

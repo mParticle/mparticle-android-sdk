@@ -1,5 +1,6 @@
 package com.mparticle.commerce;
 
+
 /**
  * Class encaspulating the parameters of a given Product CommerceEvent
  *

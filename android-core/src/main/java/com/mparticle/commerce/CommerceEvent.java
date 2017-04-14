@@ -51,9 +51,13 @@ public final class CommerceEvent {
         mProductAction = builder.mProductAction;
         mPromotionAction = builder.mPromotionAction;
         customAttributes = builder.customAttributes;
+        if (builder.promotionList != null) {
+            builder.promotionList.removeAll(Collections.singleton(null));
+        }
         promotionList = builder.promotionList;
         if (builder.productList != null) {
-            productList = new LinkedList<>(builder.productList);
+            productList = new LinkedList<Product>(builder.productList);
+            productList.removeAll(Collections.singleton(null));
         }
         mCheckoutStep = builder.mCheckoutStep;
         mCheckoutOptions = builder.mCheckoutOptions;
