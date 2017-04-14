@@ -8,7 +8,10 @@ import android.os.Build;
 import android.os.Looper;
 
 import com.google.android.gms.iid.InstanceID;
+import com.google.firebase.iid.FirebaseInstanceId;
 import com.mparticle.MParticle;
+
+import static com.mparticle.internal.MPUtility.getAvailableInstanceId;
 
 public class PushRegistrationHelper {
 
@@ -61,8 +64,18 @@ public class PushRegistrationHelper {
                 @Override
                 public void run() {
                     try {
-                        String instanceId =  InstanceID.getInstance(context).getToken(senderId, "GCM");
-                        MParticle.getInstance().logPushRegistration(instanceId, senderId);
+                        String instanceId = null;
+                        switch (getAvailableInstanceId()) {
+                            case GCM:
+                                instanceId =  InstanceID.getInstance(context).getToken(senderId, "GCM");
+                                break;
+                            case FCM:
+                                instanceId = FirebaseInstanceId.getInstance().getToken();
+                                break;
+                        }
+                        if (!MPUtility.isEmpty(instanceId)) {
+                            MParticle.getInstance().logPushRegistration(instanceId, senderId);
+                        }
                     } catch (Exception ex) {
                         Logger.error("Error registering for GCM Instance ID: ", ex.getMessage());
                     }

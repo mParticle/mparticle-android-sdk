@@ -76,7 +76,7 @@ public class MPMessagingAPI {
     public void enablePushNotifications(String senderId) {
         MParticle.getInstance().getConfigManager().setPushSenderId(senderId);
         if (!MPUtility.isInstanceIdAvailable()) {
-            Logger.error("Push is enabled but Google Cloud Messaging library not found - you must add com.google.android.gms:play-services-gcm:7.5 or later to your application.");
+            Logger.error("Push is enabled but Google Cloud Messaging or Firebase Cloud Messaging library not found - you must add com.google.android.gms:play-services-gcm:7.5 or later, or com.google.firebase:firebase-messaging:7.5 or later to your application.");
         }else if (!MPUtility.isServiceAvailable(mContext, MPService.class)){
             Logger.error("Push is enabled but you have not added <service android:name=\"com.mparticle.MPService\" /> to the <application> section of your AndroidManifest.xml");
         }else if (!MPUtility.checkPermission(mContext, "com.google.android.c2dm.permission.RECEIVE")){

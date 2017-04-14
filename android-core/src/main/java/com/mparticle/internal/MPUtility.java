@@ -418,15 +418,39 @@ public class MPUtility {
         return false;
     }
 
+    public enum MessagingService {FCM, GCM, NONE}
+
+    public static MessagingService getAvailableInstanceId() {
+        if (isFCMInstanceIdAvailable()) {
+            return MessagingService.FCM;
+        } else if (isGCMInstanceIdAvailable()) {
+            return MessagingService.GCM;
+        } else {
+            return MessagingService.NONE;
+        }
+    }
+
     public static boolean isInstanceIdAvailable() {
+        return isFCMInstanceIdAvailable() || isGCMInstanceIdAvailable();
+    }
+
+    private static boolean isGCMInstanceIdAvailable() {
         try {
             Class.forName("com.google.android.gms.iid.InstanceID");
             return true;
-        } catch (Exception cnfe) {
-
-        }
+        } catch (Exception ignore) { }
         return false;
     }
+
+    private static boolean isFCMInstanceIdAvailable() {
+        try {
+            Class.forName("com.google.firebase.iid.FirebaseInstanceIdService");
+            return true;
+        }
+        catch (Exception ignore) { }
+        return false;
+    }
+
 
     public static BigInteger hashFnv1A(byte[] data) {
         final BigInteger INIT64 = new BigInteger("cbf29ce484222325", 16);

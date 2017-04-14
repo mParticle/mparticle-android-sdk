@@ -80,6 +80,7 @@ task coreSdkJavadocs(type: Javadoc) {
 dependencies {
     provided 'com.google.android.gms:play-services-gcm:[7.0,)'
     provided 'com.google.android.gms:play-services-ads:[7.0,)'
+    provided 'com.google.firebase:firebase-messaging:[7.0,)'
     testCompile 'junit:junit:4.12'
     testCompile  files('libs/java-json.jar')
     testCompile "org.powermock:powermock-module-junit4:1.6.2"
