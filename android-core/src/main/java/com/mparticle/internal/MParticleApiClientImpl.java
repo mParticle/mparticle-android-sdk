@@ -200,7 +200,6 @@ public class MParticleApiClientImpl implements MParticleApiClient {
             HttpURLConnection connection = (HttpURLConnection) getAudienceUrl().openConnection();
             connection.setConnectTimeout(2000);
             connection.setReadTimeout(10000);
-            connection.setRequestProperty("Accept-Encoding", "gzip");
             connection.setRequestProperty("User-Agent", mUserAgent);
 
             addMessageSignature(connection, null);
