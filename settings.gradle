@@ -1,5 +1,6 @@
 include ':android-core',
         ':android-kit-base',
-        ':kit-plugin'
+        ':kit-plugin',
+        ':custom-lint-rules'
 
 project(':kit-plugin').name = 'android-kit-plugin'

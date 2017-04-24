@@ -1,0 +1,44 @@
+ext {
+    kitDescription = 'Lint for Core mParticle SDK.'
+}
+
+//apply plugin: 'com.android.library'
+apply from: '../scripts/maven.gradle'
+apply plugin: 'java'
+
+repositories {
+    jcenter()
+    maven {
+        url  "http://dl.bintray.com/android/android-tools"
+    }
+}
+
+dependencies {
+    compile 'com.android.tools.lint:lint-api:25.3.0'
+    compile 'com.android.tools.lint:lint-checks:25.3.0'
+    compile 'org.codehaus.groovy:groovy-all:2.1.2'
+    testCompile 'junit:junit:4.11'
+    testCompile 'com.android.tools.lint:lint:25.3.0'
+    testCompile 'com.android.tools.lint:lint-tests:25.3.0'
+    testCompile 'com.android.tools:testutils:25.3.0'
+    testCompile 'org.easytesting:fest-assert-core:2.0M10'
+
+}
+
+jar {
+    archiveName 'lint.jar'
+    manifest {
+        attributes 'Manifest-Version': 1.0
+        attributes 'Lint-Registry': 'com.mparticle.lints.MyIssueRegistry'
+    }
+}
+
+configurations {
+    lintChecks
+}
+
+dependencies {
+    lintChecks files(jar)
+}
+
+defaultTasks 'assemble'
