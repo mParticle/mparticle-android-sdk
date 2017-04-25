@@ -85,7 +85,16 @@ public class MParticleJSInterface {
     private static final String PRODUCT_IMPRESSION_NAME = "ProductImpressionList";
 
     public MParticleJSInterface() {
-
+        Product.setEqualityComparator(new Product.EqualityComparator() {
+            @Override
+            public boolean equals(Product product1, Product product2) {
+                if (product1.getSku() == null) {
+                    return product2.getSku() == null;
+                } else {
+                    return product1.getSku().equals(product2.getSku());
+                }
+            }
+        });
     }
 
     @JavascriptInterface
@@ -158,7 +167,7 @@ public class MParticleJSInterface {
     public void setUserAttribute(String json){
         try {
             JSONObject attribute = new JSONObject(json);
-            MParticle.getInstance().setUserAttribute(attribute.getString("key"), attribute.getString("value"));
+            MParticle.getInstance().setUserAttribute(attribute.getString("key"), String.valueOf(attribute.get("value")));
         } catch (JSONException jse) {
             ConfigManager.log(MParticle.LogLevel.WARNING, String.format(errorMsg, jse.getMessage()));
         }
@@ -288,7 +297,7 @@ public class MParticleJSInterface {
             JSONArray value = jsonObject.getJSONArray("value");
             List<String> attributes = new ArrayList<String>();
             for (int i = 0; i < value.length(); i++) {
-                attributes.add(value.getString(i));
+                attributes.add(String.valueOf(value.get(i)));
             }
             MParticle.getInstance().setUserAttributeList(key, attributes);
         } catch (JSONException jse) {
@@ -479,7 +488,7 @@ public class MParticleJSInterface {
         return attributes;
     }
 
-    private Product toProduct(JSONObject jsonObject) {
+    Product toProduct(JSONObject jsonObject) {
         if (jsonObject == null) { return null; }
         try {
             Product.Builder builder = new Product.Builder(jsonObject.getString(NAME), jsonObject.optString(SKU, null), jsonObject.optDouble(PRICE, 0));
