@@ -8,7 +8,6 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 
 import java.util.ArrayList;
@@ -239,7 +238,22 @@ public class MParticleTest {
 
         JSONArray allIdentities = argument3.getValue();
         assertEquals(2, allIdentities.length());
+    }
 
+    /**
+     * this tests that when you add a call setUserIdentity, with a user name and id that already exists,
+     * we will not log it
+     */
+    @Test
+    public void testAddExistingUserIdentity() throws Exception {
+        MParticle.setInstance(new MockMParticle());
+        MParticle.start(new com.mparticle.mock.MockContext());
+        MParticle mp = MParticle.getInstance();
+        JSONArray identities = new JSONArray();
+        identities.put(new JSONObject("{ \"n\": 8, \"i\": \"alias test\", \"dfs\": 1473869816521, \"f\": true }"));
+        Mockito.when(mp.mMessageManager.getUserIdentityJson()).thenReturn(identities);
+        Mockito.when(mp.mMessageManager.logUserIdentityChangeMessage(Mockito.any(JSONObject.class), Mockito.any(JSONObject.class), Mockito.any(JSONArray.class))).thenThrow(new AssertionError("Should not log redundent User Identity"));
+        mp.setUserIdentity("alias test", MParticle.IdentityType.Alias);
     }
 
     @Test

@@ -1085,7 +1085,7 @@ public class MParticle {
                     }
                 }
 
-
+                boolean idChanged = true;
 
                 JSONObject newObject = null;
                 if (id != null) {
@@ -1093,6 +1093,7 @@ public class MParticle {
                     newObject.put(MessageKey.IDENTITY_NAME, identityType.value);
                     newObject.put(MessageKey.IDENTITY_VALUE, id);
                     if (oldIdentity != null) {
+                        idChanged = !id.equals(oldIdentity.optString(MessageKey.IDENTITY_VALUE));
                         newObject.put(MessageKey.IDENTITY_DATE_FIRST_SEEN, oldIdentity.optLong(MessageKey.IDENTITY_DATE_FIRST_SEEN, System.currentTimeMillis()));
                         newObject.put(MessageKey.IDENTITY_FIRST_SEEN, false);
                         userIdentities.put(index, newObject);
@@ -1119,7 +1120,9 @@ public class MParticle {
                         userIdentities = newIdentities;
                     }
                 }
-                mMessageManager.logUserIdentityChangeMessage(newObject, oldIdentity, userIdentities);
+                if (idChanged) {
+                    mMessageManager.logUserIdentityChangeMessage(newObject, oldIdentity, userIdentities);
+                }
 
                 if (id == null) {
                     getKitManager().removeUserIdentity(identityType);
