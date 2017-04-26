@@ -216,37 +216,37 @@ public class ApplicationContextWrapper extends Application {
 
         @Override
         public void onActivityCreated(Activity activity, Bundle savedInstanceState) {
-            getRecordedLifecycleList().add(new LifeCycleEvent(MethodType.ON_CREATED, new WeakReference<>(activity), savedInstanceState));
+            getRecordedLifecycleList().add(new LifeCycleEvent(MethodType.ON_CREATED, new WeakReference<Activity>(activity), savedInstanceState));
         }
 
         @Override
         public void onActivityStarted(Activity activity) {
-            getRecordedLifecycleList().add(new LifeCycleEvent(MethodType.ON_STARTED, new WeakReference<>(activity)));
+            getRecordedLifecycleList().add(new LifeCycleEvent(MethodType.ON_STARTED, new WeakReference<Activity>(activity)));
         }
 
         @Override
         public void onActivityResumed(Activity activity) {
-            getRecordedLifecycleList().add(new LifeCycleEvent(MethodType.ON_RESUMED, new WeakReference<>(activity)));
+            getRecordedLifecycleList().add(new LifeCycleEvent(MethodType.ON_RESUMED, new WeakReference<Activity>(activity)));
         }
 
         @Override
         public void onActivityPaused(Activity activity) {
-            getRecordedLifecycleList().add(new LifeCycleEvent(MethodType.ON_PAUSED, new WeakReference<>(activity)));
+            getRecordedLifecycleList().add(new LifeCycleEvent(MethodType.ON_PAUSED, new WeakReference<Activity>(activity)));
         }
 
         @Override
         public void onActivityStopped(Activity activity) {
-            getRecordedLifecycleList().add(new LifeCycleEvent(MethodType.ON_STOPPED, new WeakReference<>(activity)));
+            getRecordedLifecycleList().add(new LifeCycleEvent(MethodType.ON_STOPPED, new WeakReference<Activity>(activity)));
         }
 
         @Override
         public void onActivitySaveInstanceState(Activity activity, Bundle outState) {
-            getRecordedLifecycleList().add(new LifeCycleEvent(MethodType.ON_SAVE_INSTANCE_STATE, new WeakReference<>(activity), outState));
+            getRecordedLifecycleList().add(new LifeCycleEvent(MethodType.ON_SAVE_INSTANCE_STATE, new WeakReference<Activity>(activity), outState));
         }
 
         @Override
         public void onActivityDestroyed(Activity activity) {
-            getRecordedLifecycleList().add(new LifeCycleEvent(MethodType.ON_DESTROYED, new WeakReference<>(activity)));
+            getRecordedLifecycleList().add(new LifeCycleEvent(MethodType.ON_DESTROYED, new WeakReference<Activity>(activity)));
         }
 
         private List<LifeCycleEvent> getRecordedLifecycleList() {
@@ -260,7 +260,7 @@ public class ApplicationContextWrapper extends Application {
         private LinkedList<LifeCycleEvent> getRecordedLifecycleListCopy() {
             LinkedList<LifeCycleEvent> list;
             synchronized (lifeCycleEvents) {
-                list = new LinkedList<>(lifeCycleEvents);
+                list = new LinkedList<LifeCycleEvent>(lifeCycleEvents);
             }
             return list;
         }

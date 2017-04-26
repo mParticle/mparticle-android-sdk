@@ -3,7 +3,6 @@ package com.mparticle.internal;
 import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Intent;
-import android.os.Bundle;
 import android.os.Handler;
 
 import com.mparticle.MParticle;
@@ -11,7 +10,6 @@ import com.mparticle.mock.MockApplication;
 import com.mparticle.mock.MockContext;
 import com.mparticle.mock.MockSharedPreferences;
 
-import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;

@@ -216,7 +216,7 @@ public class MessageManagerTest {
         manager.logScreen(new MPEvent.Builder("screen name").build(), true);
         manager.logScreen(null, true);
         appStateManager.getSession().start();
-        Map<String, String> info = new HashMap<>();
+        Map<String, String> info = new HashMap<String, String>();
         info.put("test key", "test value");
         MPMessage message = manager.logScreen(new MPEvent.Builder("screen name").addCustomFlag("flag 1", "value 1")
                 .addCustomFlag("flag 1", "value 2").addCustomFlag("flag 2", "value 3").info(info).build(), true);
@@ -425,11 +425,11 @@ public class MessageManagerTest {
         assertEquals(false, message.getBoolean("d"));
         assertEquals(false, message.getBoolean("na"));
 
-        List<String> newValue = new ArrayList<>();
+        List<String> newValue = new ArrayList<String>();
         newValue.add("this is a new value");
         newValue.add("this is another new value");
 
-        List<String> oldValue = new ArrayList<>();
+        List<String> oldValue = new ArrayList<String>();
         oldValue.add("this is an old value");
         oldValue.add("this is another old value");
 
@@ -472,7 +472,7 @@ public class MessageManagerTest {
 
     @Test
     public void testLogUserAttributeChangeStringToList() throws Exception {
-        List<String> newValue = new ArrayList<>();
+        List<String> newValue = new ArrayList<String>();
         newValue.add("this is a new value");
         newValue.add("this is another new value");
         MPMessage message = manager.logUserAttributeChangeMessage("this is a key", newValue, "this is the old value", false, false, 0);

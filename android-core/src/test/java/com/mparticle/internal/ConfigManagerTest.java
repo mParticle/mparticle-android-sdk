@@ -391,7 +391,7 @@ public class ConfigManagerTest {
     @Test
     public void testSetEmptyIntegrationAttributes() throws Exception {
         assertFalse(manager.mPreferences.contains(ATTRIBUTES));
-        Map<String, String> attributes = new HashMap<>();
+        Map<String, String> attributes = new HashMap<String, String>();
         manager.setIntegrationAttributes(1, attributes);
         assertFalse(manager.mPreferences.contains(ATTRIBUTES));
         manager.mPreferences.edit().putString(ATTRIBUTES, "{\"1\":{\"test-key\":\"test-value\"}}").apply();
@@ -403,7 +403,7 @@ public class ConfigManagerTest {
     @Test
     public void testSetNonEmptyIntegrationAttributes() throws Exception {
         assertFalse(manager.mPreferences.contains(ATTRIBUTES));
-        Map<String, String> attributes = new HashMap<>();
+        Map<String, String> attributes = new HashMap<String, String>();
         attributes.put("test-key", "value 2");
         manager.setIntegrationAttributes(1, attributes);
         attributes.put("test-key", "value 3");

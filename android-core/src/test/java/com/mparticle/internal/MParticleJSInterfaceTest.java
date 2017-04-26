@@ -70,7 +70,7 @@ public class MParticleJSInterfaceTest extends MParticleJSInterface {
         mProduct1 = new Product.Builder("iPhone", "12345", 400)
                 .quantity(1)
                 .build();
-        Map<String, String> customAttributes = new TreeMap<>();
+        Map<String, String> customAttributes = new TreeMap<String, String>();
         customAttributes.put("customkey", "customvalue");
         mProduct2 = new Product.Builder("Android", "98765", 600)
                 .quantity(4)

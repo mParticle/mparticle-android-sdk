@@ -10,8 +10,8 @@ android {
     buildToolsVersion "25.0.2"
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_7
-        targetCompatibility JavaVersion.VERSION_1_7
+        sourceCompatibility JavaVersion.VERSION_1_6
+        targetCompatibility JavaVersion.VERSION_1_6
     }
 
     String url = "\"\"";
@@ -37,7 +37,7 @@ android {
 
     defaultConfig {
         minSdkVersion 9
-        targetSdkVersion 25
+        targetSdkVersion 14
         versionName project.version.toString().replace("-SNAPSHOT", "")
         versionCode Integer.parseInt(new Date().format('yyyyMMdd'))
 
