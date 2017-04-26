@@ -197,7 +197,7 @@ public class MParticle {
         if (context == null) {
             throw new IllegalArgumentException("mParticle failed to start: context is required.");
         }
-        MParticle.getInstance(context.getApplicationContext(), installType, environment, null, null);
+        MParticle.getInstance(context, installType, environment, null, null);
     }
 
     /**
@@ -219,7 +219,7 @@ public class MParticle {
         if (context == null) {
             throw new IllegalArgumentException("mParticle failed to start: context is required.");
         }
-        MParticle.getInstance(context.getApplicationContext(), installType, environment, apiKey, apiSecret);
+        MParticle.getInstance(context, installType, environment, apiKey, apiSecret);
     }
 
 
@@ -239,6 +239,8 @@ public class MParticle {
         if (instance == null) {
             synchronized (MParticle.class) {
                 if (instance == null) {
+                    Context originalContext = context;
+                    context = context.getApplicationContext();
                     if (!MPUtility.checkPermission(context, Manifest.permission.INTERNET)) {
                         Log.e(Constants.LOG_TAG, "mParticle requires android.permission.INTERNET permission");
                     }
@@ -266,6 +268,12 @@ public class MParticle {
                     //queue up a delayed init and let the start() call return ASAP.
                     instance.mMessageManager.initConfigDelayed();
                     appStateManager.init(Build.VERSION.SDK_INT);
+                    //We ask to be initialized in Application#onCreate, but
+                    //if the Context is an Activity, we know we weren't, so try
+                    //to salvage session management via simulating onActivityResume.
+                    if (originalContext instanceof Activity) {
+                        instance.mAppStateManager.onActivityResumed((Activity) originalContext);
+                    }
                 }
             }
         }
