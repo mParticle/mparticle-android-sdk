@@ -61,3 +61,6 @@
 [submodule "kits/iterable-kit"]
 	path = kits/iterable-kit
 	url = git@github.com:mparticle-integrations/mparticle-android-integration-iterable.git
+[submodule "kits/skyhook-kit"]
+	path = kits/skyhook-kit
+	url = git@github.com:mparticle-integrations/mparticle-android-integration-skyhook.git
