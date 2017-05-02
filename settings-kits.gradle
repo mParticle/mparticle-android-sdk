@@ -18,7 +18,8 @@ include (
         ':kits:foresee-kit',
         ':kits:apptimize-kit',
         ':kits:revealmobile-kit',
-        ':kits:radar-kit'
+        ':kits:radar-kit',
+        ':kits:iterable-kit'
 )
 project(':kits').getChildren().each {
     proj -> proj.name = 'android-' + proj.name
