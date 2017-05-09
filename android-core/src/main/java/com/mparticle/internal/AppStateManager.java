@@ -155,18 +155,10 @@ import java.util.concurrent.atomic.AtomicLong;
             }
 
             mCurrentSession.updateBackgroundTime(mLastStoppedTime, getTime());
+            mLastForegroundTime = getTime();
 
             if (!mInitialized) {
-                mInitialized = true;
-                 logStateTransition(Constants.StateTransitionType.STATE_TRANS_INIT,
-                         mCurrentActivityName,
-                        0,
-                        0,
-                        previousSessionUri,
-                        previousSessionParameters,
-                        previousSessionPackage,
-                        0);
-                mLastForegroundTime = getTime();
+                initialize(mCurrentActivityName, previousSessionUri, previousSessionParameters, previousSessionPackage);
             } else if (isBackgrounded() && mLastStoppedTime.get() > 0) {
                 logStateTransition(Constants.StateTransitionType.STATE_TRANS_FORE,
                         mCurrentActivityName,
@@ -177,7 +169,6 @@ import java.util.concurrent.atomic.AtomicLong;
                         previousSessionPackage,
                         interruptions);
                 Logger.debug("App foregrounded.");
-                mLastForegroundTime = getTime();
             }
 
             if (mCurrentActivityReference != null) {
@@ -233,6 +224,9 @@ import java.util.concurrent.atomic.AtomicLong;
     }
 
     public void ensureActiveSession() {
+        if (!mInitialized) {
+            initialize(null, null, null, null);
+        }
         Session session = getSession();
         session.mLastEventTime = System.currentTimeMillis();
         if (!session.isActive()) {
@@ -298,6 +292,18 @@ import java.util.concurrent.atomic.AtomicLong;
                 }
             }
         }, mConfigManager.getSessionTimeout());
+    }
+
+    private void initialize(String currentActivityName, String previousSessionUri, String previousSessionParameters, String previousSessionPackage) {
+        mInitialized = true;
+        logStateTransition(Constants.StateTransitionType.STATE_TRANS_INIT,
+                currentActivityName,
+                0,
+                0,
+                previousSessionUri,
+                previousSessionParameters,
+                previousSessionPackage,
+                0);
     }
 
     public void onActivityCreated(Activity activity, Bundle savedInstanceState){
