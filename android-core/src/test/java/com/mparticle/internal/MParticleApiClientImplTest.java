@@ -22,6 +22,7 @@ import java.util.List;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 @RunWith(PowerMockRunner.class)
@@ -127,6 +128,37 @@ public class MParticleApiClientImplTest {
         }
         assertNotNull(e);
     }
+
+    @Test
+    @PrepareForTest({URL.class, MParticleApiClientImpl.class, MPUtility.class})
+    public void testConfigDelay() throws Exception {
+        setup();
+        PowerMockito.mockStatic(MPUtility.class);
+        Mockito.when(MPUtility.hmacSha256Encode(Mockito.anyString(), Mockito.anyString())).thenReturn("encoded");
+        Mockito.when(mockConnection.getResponseCode()).thenReturn(400);
+        Exception e = null;
+        try {
+            client.fetchConfig();
+        } catch (MParticleApiClientImpl.MPConfigException cfe) {
+            e = cfe;
+        }
+        assertNotNull(e);
+        e = null;
+        try {
+            client.fetchConfig();
+        } catch (MParticleApiClientImpl.MPConfigException cfe) {
+            e = cfe;
+        }
+        assertNull(e);
+        e = null;
+        try {
+            client.fetchConfig(true);
+        } catch (MParticleApiClientImpl.MPConfigException cfe) {
+            e = cfe;
+        }
+        assertNotNull(e);
+    }
+
 
     @Test
     @PrepareForTest({URL.class, MParticleApiClientImpl.class, MPUtility.class})

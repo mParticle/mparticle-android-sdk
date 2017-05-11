@@ -100,6 +100,11 @@ public class MParticleApiClientImpl implements MParticleApiClient {
      */
     static final long DEFAULT_THROTTLE_MILLIS = 1000*60*60*2;
     static final long MAX_THROTTLE_MILLIS = 1000*60*60*24;
+    /**
+     * Minimum time between passive Config requests, 10 minutes
+     */
+    private static final int MIN_CONFIG_REQUEST_INTERVAL = 10*60*1000;
+    private long mConfigLastFetched = -1;
     private boolean alreadyWarned;
 
     public MParticleApiClientImpl(ConfigManager configManager, SharedPreferences sharedPreferences, Context context) throws MalformedURLException, MPNoConfigException {
@@ -125,7 +130,27 @@ public class MParticleApiClientImpl implements MParticleApiClient {
         mSupportedKits = supportedKitString;
     }
 
+
+    @Override
     public void fetchConfig() throws IOException, MPConfigException {
+        fetchConfig(false);
+    }
+
+    /**
+     * Fetches a remote configuration. Minimum time constraint based on MIN_CONFIG_REQUEST_INTERVAL
+     * if not forced, configuration request will not take place if minimum time has not elapsed
+     * @param force: if true, minimum elpsed time criteria will be ignored, and configuration
+     *             request will take place regardless of elapsed time
+     */
+    public void fetchConfig(boolean force) throws IOException, MPConfigException {
+        if (!force) {
+            if (System.currentTimeMillis() - mConfigLastFetched > MIN_CONFIG_REQUEST_INTERVAL) {
+                mConfigLastFetched = System.currentTimeMillis();
+            } else {
+                Logger.verbose("Config request deferred, not enough time has elapsed since last request");
+                return;
+            }
+        }
         try {
             if (mConfigUrl == null){
                 Uri uri = new Uri.Builder()
