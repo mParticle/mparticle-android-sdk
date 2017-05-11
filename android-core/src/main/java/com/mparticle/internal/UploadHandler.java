@@ -123,7 +123,7 @@ public class UploadHandler extends Handler {
             switch (msg.what) {
                 case UPDATE_CONFIG:
                     MParticle.getInstance().getKitManager().loadKitLibrary();
-                    mApiClient.fetchConfig();
+                    mApiClient.fetchConfig(true);
                     break;
                 case INIT_CONFIG:
                     mConfigManager.delayedStart();
