@@ -23,7 +23,14 @@ import java.lang.Thread.UncaughtExceptionHandler;
     public void uncaughtException(Thread thread, Throwable ex) {
         try {
             MParticle.getInstance().logUnhandledError(ex);
+        } catch (Exception t) {
+            Logger.error(t, "Failed to log error event for uncaught exception");
+            // we tried. don't make things worse.
+        }
 
+        //starting in O, if the default UncaughtExceptionHandler does not get called, the application
+        //will not exit when an uncaught exception is thrown.
+        try {
             if (mOriginalUncaughtExceptionHandler != null) {
                 mOriginalUncaughtExceptionHandler.uncaughtException(thread, ex);
             }
