@@ -60,7 +60,14 @@ class KitPlugin implements Plugin<Project> {
                         beforeDeployment {
                             MavenDeployment deployment -> target.signing.signPom(deployment)
                         }
-                        repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+                        repository(url: 'https://oss.sonatype.org/service/local/staging/deploy/maven2/') {
+                            authentication(userName: System.getenv('sonatypeUsername'), password: System.getenv('sonatypePassword'))
+                        }
+                    } else if (target_maven_repo == 'sonatype-snapshot') {
+                        beforeDeployment {
+                            MavenDeployment deployment -> target.signing.signPom(deployment)
+                        }
+                        repository(url: 'https://oss.sonatype.org/content/repositories/snapshots/') {
                             authentication(userName: System.getenv('sonatypeUsername'), password: System.getenv('sonatypePassword'))
                         }
                     } else {

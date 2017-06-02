@@ -1,14 +1,5 @@
 apply plugin: 'maven'
 
-
-configurations {
-    deployerJars
-}
-
-dependencies {
-    deployerJars "org.kuali.maven.wagons:maven-s3-wagon:1.2.1"
-}
-
 allprojects {
     ext."signing.keyId" = System.getenv("mavenSigningKeyId")
     ext."signing.secretKeyRingFile" = System.getenv("mavenSigningKeyRingFile")
@@ -20,7 +11,7 @@ if (project.hasProperty('target_maven_repo')) {
     target_maven_repo = project.property('target_maven_repo')
 }
 
-if (target_maven_repo == 'sonatype') {
+if (target_maven_repo in ['sonatype', 'sonatype-snapshot']) {
     apply plugin: 'signing'
     signing {
         required { gradle.taskGraph.hasTask("uploadArchives") }
@@ -31,15 +22,18 @@ if (target_maven_repo == 'sonatype') {
 uploadArchives{
     repositories {
         mavenDeployer {
-
-            if (target_maven_repo == 's3') {
-                configuration = configurations.deployerJars
-                repository(url: 's3://maven.mparticle.com')
-            } else if (target_maven_repo == 'sonatype') {
+            if (target_maven_repo == 'sonatype') {
                 beforeDeployment {
                     MavenDeployment deployment -> signing.signPom(deployment)
                 }
-                repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+                repository(url: 'https://oss.sonatype.org/service/local/staging/deploy/maven2/') {
+                    authentication(userName: System.getenv('sonatypeUsername'), password: System.getenv('sonatypePassword'))
+                }
+            } else if (target_maven_repo == 'sonatype-snapshot') {
+                beforeDeployment {
+                    MavenDeployment deployment -> signing.signPom(deployment)
+                }
+                repository(url: 'https://oss.sonatype.org/content/repositories/snapshots/') {
                     authentication(userName: System.getenv('sonatypeUsername'), password: System.getenv('sonatypePassword'))
                 }
             } else {
