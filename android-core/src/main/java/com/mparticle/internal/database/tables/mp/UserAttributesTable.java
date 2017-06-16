@@ -1,5 +1,6 @@
 package com.mparticle.internal.database.tables.mp;
 
+import android.content.Context;
 import android.provider.BaseColumns;
 
 public class UserAttributesTable {
@@ -10,6 +11,7 @@ public class UserAttributesTable {
         String ATTRIBUTE_VALUE = "attribute_value";
         String IS_LIST = "is_list";
         String CREATED_AT = "created_time";
+        String MP_ID = "mp_id";
     }
 
     static final String CREATE_USER_ATTRIBUTES_DDL =
@@ -18,6 +20,11 @@ public class UserAttributesTable {
                     UserAttributesTableColumns.ATTRIBUTE_KEY + " COLLATE NOCASE NOT NULL, " +
                     UserAttributesTableColumns.ATTRIBUTE_VALUE + " TEXT, " +
                     UserAttributesTableColumns.IS_LIST + " INTEGER NOT NULL, " +
-                    UserAttributesTableColumns.CREATED_AT + " INTEGER NOT NULL " +
+                    UserAttributesTableColumns.CREATED_AT + " INTEGER NOT NULL, " +
+                    UserAttributesTableColumns.MP_ID + " INTEGER" +
                     ");";
+
+    static String getAddMpIdColumnString(String defaultValue) {
+        return MParticleDatabaseHelper.addIntegerColumnString(UserAttributesTableColumns.TABLE_NAME, UserAttributesTableColumns.MP_ID, defaultValue);
+    }
 }

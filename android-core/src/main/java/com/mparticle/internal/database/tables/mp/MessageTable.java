@@ -1,5 +1,6 @@
 package com.mparticle.internal.database.tables.mp;
 
+import android.content.Context;
 import android.provider.BaseColumns;
 
 public class MessageTable {
@@ -12,6 +13,10 @@ public class MessageTable {
         String CREATED_AT = "message_time";
         String MESSAGE_TYPE = "message_type";
         String CF_UUID = "cfuuid";
+    }
+
+    static String getAddMpIdColumnString(String defaultValue) {
+        return MParticleDatabaseHelper.addIntegerColumnString(MessageTable.MessageTableColumns.TABLE_NAME, MessageTable.MessageTableColumns.MP_ID, defaultValue);
     }
 
     static final String CREATE_MESSAGES_DDL =

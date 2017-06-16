@@ -90,4 +90,5 @@ public class ReportingService extends ReportingTable {
             return reportingMessageId;
         }
     }
+
 }
