@@ -2,13 +2,12 @@ package com.mparticle.internal;
 
 import android.util.Log;
 
-import com.mparticle.MParticle;
 import com.mparticle.MParticle.LogLevel;
 
 
 public class Logger {
-    private static LogLevel minLogLevel = LogLevel.DEBUG;
-    private static boolean explicitlySet = false;
+    private static LogLevel sMinLogLevel = LogLevel.DEBUG;
+    private static boolean sExplicitlySet = false;
 
     public static void setMinLogLevel(LogLevel minLogLevel) {
         setMinLogLevel(minLogLevel, false);
@@ -16,17 +15,17 @@ public class Logger {
 
     public static void setMinLogLevel(LogLevel minLogLevel, boolean explicit) {
         if (explicit) {
-            explicitlySet = true;
+            sExplicitlySet = true;
         } else {
-            if (explicitlySet) {
+            if (sExplicitlySet) {
                 return;
             }
         }
-        Logger.minLogLevel = minLogLevel;
+        Logger.sMinLogLevel = minLogLevel;
     }
 
     public static LogLevel getMinLogLevel() {
-        return minLogLevel;
+        return sMinLogLevel;
     }
 
     public static void verbose(String... messages) {
@@ -119,7 +118,7 @@ public class Logger {
     }
 
     private static boolean isLoggable(int logLevel) {
-        boolean isAPILoggable = logLevel >= Logger.minLogLevel.logLevel;
+        boolean isAPILoggable = logLevel >= Logger.sMinLogLevel.logLevel;
         boolean isADBLoggable;
 
         //this block will catch the exception that is thrown during testing

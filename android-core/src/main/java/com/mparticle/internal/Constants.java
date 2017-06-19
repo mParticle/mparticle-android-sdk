@@ -453,8 +453,7 @@ public class Constants {
         // app-key specific (append appKey to the key)
         String OPTOUT = "mp::optout::";
         String DEPRECATED_USER_ATTRS = "mp::user_attrs::";
-        String DELETED_USER_ATTRS = "mp::deleted_user_attrs::";
-        String USER_IDENTITIES = "mp::user_ids::";
+
         String FIRSTRUN = "mp::firstrun::";
         String INITUPGRADE = "mp::initupgrade";
         String PROPERTY_APP_VERSION = "mp::appversion";
@@ -466,22 +465,12 @@ public class Constants {
         String PUSH_ENABLE_VIBRATION = "mp::push::vibration";
         String PUSH_ICON = "mp::push::icon";
         String PUSH_TITLE = "mp::push::title";
-        String SESSION_COUNTER = "mp::breadcrumbs::sessioncount";
-        String BREADCRUMB_LIMIT = "mp::breadcrumbs::limit";
-        String TOTAL_SINCE_UPGRADE = "mp::launch_since_upgrade";
         String UPGRADE_DATE = "mp::upgrade_date";
         String COUNTER_VERSION = "mp::version::counter";
-        String LAST_USE = "mp::lastusedate";
-        String TOTAL_RUNS = "mp::totalruns";
-        String Cookies = "mp::cookies";
         String Mpid = "mp::mpid";
         String CRASHED_IN_FOREGROUND = "mp::crashed_in_foreground";
-        String LTV = "mp::ltv";
-        String PREVIOUS_SESSION_FOREGROUND = "mp::time_in_fg";
         String NEXT_REQUEST_TIME = "mp::next_valid_request_time";
         String EVENT_COUNTER = "mp::events::counter";
-        String PREVIOUS_SESSION_ID = "mp::session::previous_id";
-        String PREVIOUS_SESSION_START = "mp::session::previous_start";
         String API_KEY = "mp::config::apikey";
         String API_SECRET = "mp::config::apisecret";
         String FIRST_RUN_INSTALL = "mp::firstrun::install";

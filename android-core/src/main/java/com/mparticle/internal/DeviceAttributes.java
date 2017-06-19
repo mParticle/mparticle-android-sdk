@@ -75,18 +75,18 @@ public class DeviceAttributes {
             if (!preferences.contains(PrefKeys.INSTALL_TIME)) {
                 editor.putLong(PrefKeys.INSTALL_TIME, now);
             }
-
-            int totalRuns = preferences.getInt(PrefKeys.TOTAL_RUNS, 0) + 1;
-            editor.putInt(PrefKeys.TOTAL_RUNS, totalRuns);
+            UserConfig userConfig = ConfigManager.getUserConfig(appContext);
+            int totalRuns = userConfig.getTotalRuns(0) + 1;
+            userConfig.setTotalRuns(totalRuns);
             attributes.put(MessageKey.LAUNCH_COUNT, totalRuns);
 
-            long useDate = preferences.getLong(PrefKeys.LAST_USE, 0);
+            long useDate = userConfig.getLastUseDate(0);
             attributes.put(MessageKey.LAST_USE_DATE, useDate);
-            editor.putLong(PrefKeys.LAST_USE, now);
+            userConfig.setLastUseDate(now);
             try {
                 PackageInfo pInfo = packageManager.getPackageInfo(packageName, 0);
                 int persistedVersion = preferences.getInt(PrefKeys.COUNTER_VERSION, -1);
-                int countSinceUpgrade = preferences.getInt(PrefKeys.TOTAL_SINCE_UPGRADE, 0);
+                int countSinceUpgrade = userConfig.getLaunchesSinceUpgrade();
                 long upgradeDate = preferences.getLong(PrefKeys.UPGRADE_DATE, now);
 
                 if (persistedVersion < 0 || persistedVersion != pInfo.versionCode){
@@ -96,7 +96,7 @@ public class DeviceAttributes {
                     editor.putLong(PrefKeys.UPGRADE_DATE, upgradeDate);
                 }
                 countSinceUpgrade += 1;
-                editor.putInt(PrefKeys.TOTAL_SINCE_UPGRADE, countSinceUpgrade);
+                userConfig.setLaunchesSinceUpgrade(countSinceUpgrade);
 
                 attributes.put(MessageKey.LAUNCH_COUNT_SINCE_UPGRADE, countSinceUpgrade);
                 attributes.put(MessageKey.UPGRADE_DATE, upgradeDate);

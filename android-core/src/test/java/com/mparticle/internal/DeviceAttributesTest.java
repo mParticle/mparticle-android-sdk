@@ -8,6 +8,7 @@ import com.mparticle.mock.MockContext;
 import com.mparticle.mock.MockSharedPreferences;
 
 import org.json.JSONObject;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -15,13 +16,11 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
-import java.net.URL;
-
 import static org.junit.Assert.*;
 
 @RunWith(PowerMockRunner.class)
 public class DeviceAttributesTest {
-
+    
     @Test
     public void testCollectAppInfo() throws Exception {
         MParticle.setInstance(new MockMParticle());

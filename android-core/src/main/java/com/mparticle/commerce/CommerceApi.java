@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 import com.mparticle.MParticle;
+import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.Constants;
 import com.mparticle.internal.Logger;
 
@@ -132,7 +133,7 @@ public class CommerceApi {
     public BigDecimal getCurrentUserLtv() {
         SharedPreferences preferences = mContext.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
         try {
-            return new BigDecimal(preferences.getString(Constants.PrefKeys.LTV, "0"));
+            return new BigDecimal(ConfigManager.getUserConfig(mContext).getLtv());
         }catch (NumberFormatException nfe) {
 
         }

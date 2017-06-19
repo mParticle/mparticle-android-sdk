@@ -105,8 +105,8 @@ public class MParticle {
     protected CommerceApi mCommerce;
     protected ProductBagApi mProductBags;
     protected volatile DeepLinkListener mDeepLinkListener;
-    private static volatile boolean androidIdDisabled;
-    private static volatile boolean devicePerformanceMetricsDisabled;
+    private static volatile boolean sAndroidIdDisabled;
+    private static volatile boolean sDevicePerformanceMetricsDisabled;
 
     MParticle() { }
 
@@ -240,7 +240,7 @@ public class MParticle {
      * @see MParticle#setAndroidIdDisabled(boolean)
      */
     public static boolean isAndroidIdDisabled() {
-        return androidIdDisabled;
+        return sAndroidIdDisabled;
     }
 
     /**
@@ -253,7 +253,7 @@ public class MParticle {
      * @param disable true to disable collection (false by default)
      */
     public static void setAndroidIdDisabled(boolean disable) {
-        androidIdDisabled = disable;
+        sAndroidIdDisabled = disable;
     }
 
 
@@ -263,11 +263,11 @@ public class MParticle {
      * @param disable
      */
     public static void setDevicePerformanceMetricsDisabled(boolean disable) {
-        devicePerformanceMetricsDisabled = disable;
+        sDevicePerformanceMetricsDisabled = disable;
     }
 
     public static boolean isDevicePerformanceMetricsDisabled() {
-        return devicePerformanceMetricsDisabled;
+        return sDevicePerformanceMetricsDisabled;
     }
 
 

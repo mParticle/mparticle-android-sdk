@@ -49,8 +49,8 @@ import java.util.Map;
  *
  */
 public class MessageManager implements MessageManagerCallbacks, ReportingManager {
-    private static Context mContext = null;
-    private static SharedPreferences mPreferences = null;
+    private static Context sContext = null;
+    private static SharedPreferences sPreferences = null;
     private final DeviceAttributes mDeviceAttributes;
     private AppStateManager mAppStateManager;
     private ConfigManager mConfigManager = null;
@@ -127,34 +127,35 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
     /**
      * Used solely for unit testing
      */
-    public MessageManager(Context appContext, ConfigManager configManager, MParticle.InstallType installType, AppStateManager appStateManager, MessageHandler messageHandler, UploadHandler uploadHandler) {
+    public MessageManager(Context appContext, ConfigManager configManager, MParticle.InstallType installType, AppStateManager appStateManager, MParticleDBManager dbManager, MessageHandler messageHandler, UploadHandler uploadHandler) {
         mDeviceAttributes = new DeviceAttributes();
-        mContext = appContext.getApplicationContext();
+        sContext = appContext.getApplicationContext();
         mConfigManager = configManager;
         mAppStateManager = appStateManager;
+        mMParticleDBManager = dbManager;
         mMessageHandler = messageHandler;
         mUploadHandler = uploadHandler;
-        mPreferences = appContext.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
+        sPreferences = appContext.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
         mInstallType = installType;
 
     }
 
     public MessageManager(Context appContext, ConfigManager configManager, MParticle.InstallType installType, AppStateManager appStateManager) {
         mDeviceAttributes = new DeviceAttributes();
-        mContext = appContext.getApplicationContext();
+        sContext = appContext.getApplicationContext();
         mConfigManager = configManager;
         mAppStateManager = appStateManager;
         mAppStateManager.setMessageManager(this);
         mMParticleDBManager = new MParticleDBManager(appContext, DatabaseTables.getInstance(appContext));
         mMessageHandler = new MessageHandler(sMessageHandlerThread.getLooper(), this, appContext);
         mUploadHandler = new UploadHandler(appContext, sUploadHandlerThread.getLooper(), configManager, appStateManager, this);
-        mPreferences = appContext.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
+        sPreferences = appContext.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
         mInstallType = installType;
     }
 
     private static TelephonyManager getTelephonyManager() {
         if (sTelephonyManager == null) {
-            sTelephonyManager = (TelephonyManager) mContext.getSystemService(Context.TELEPHONY_SERVICE);
+            sTelephonyManager = (TelephonyManager) sContext.getSystemService(Context.TELEPHONY_SERVICE);
         }
         return sTelephonyManager;
     }
@@ -169,30 +170,30 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
             infoJson.put(MessageKey.STATE_INFO_APP_MEMORY_AVAIL, rt.freeMemory());
             infoJson.put(MessageKey.STATE_INFO_APP_MEMORY_MAX, rt.maxMemory());
         }
-        infoJson.put(MessageKey.STATE_INFO_AVAILABLE_MEMORY, MPUtility.getAvailableMemory(mContext));
+        infoJson.put(MessageKey.STATE_INFO_AVAILABLE_MEMORY, MPUtility.getAvailableMemory(sContext));
         infoJson.put(MessageKey.STATE_INFO_TOTAL_MEMORY, getTotalMemory());
         infoJson.put(MessageKey.STATE_INFO_BATTERY_LVL, sBatteryLevel);
         infoJson.put(MessageKey.STATE_INFO_TIME_SINCE_START, MPUtility.millitime() - sStartTime);
 
-        String gps = MPUtility.getGpsEnabled(mContext);
+        String gps = MPUtility.getGpsEnabled(sContext);
         if (gps != null){
             infoJson.put(MessageKey.STATE_INFO_GPS,Boolean.parseBoolean(gps));
         }
         infoJson.put(MessageKey.STATE_INFO_DATA_CONNECTION, sActiveNetworkName);
-        int orientation = MPUtility.getOrientation(mContext);
+        int orientation = MPUtility.getOrientation(sContext);
         infoJson.put(MessageKey.STATE_INFO_ORIENTATION, orientation);
         infoJson.put(MessageKey.STATE_INFO_BAR_ORIENTATION, orientation);
-        infoJson.put(MessageKey.STATE_INFO_MEMORY_LOW, MPUtility.isSystemMemoryLow(mContext));
+        infoJson.put(MessageKey.STATE_INFO_MEMORY_LOW, MPUtility.isSystemMemoryLow(sContext));
         infoJson.put(MessageKey.STATE_INFO_MEMORY_THRESHOLD, getSystemMemoryThreshold());
         infoJson.put(MessageKey.STATE_INFO_NETWORK_TYPE, getTelephonyManager().getNetworkType());
         return infoJson;
     }
 
     public static long getTotalMemory() {
-        long total = mPreferences.getLong(Constants.MiscStorageKeys.TOTAL_MEMORY, -1);
+        long total = sPreferences.getLong(Constants.MiscStorageKeys.TOTAL_MEMORY, -1);
         if (total < 0) {
-            total = MPUtility.getTotalMemory(mContext);
-            SharedPreferences.Editor edit = mPreferences.edit();
+            total = MPUtility.getTotalMemory(sContext);
+            SharedPreferences.Editor edit = sPreferences.edit();
             edit.putLong(Constants.MiscStorageKeys.TOTAL_MEMORY, total);
             edit.apply();
         }
@@ -200,10 +201,10 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
     }
 
     public static long getSystemMemoryThreshold() {
-        long threshold = mPreferences.getLong(Constants.MiscStorageKeys.MEMORY_THRESHOLD, -1);
+        long threshold = sPreferences.getLong(Constants.MiscStorageKeys.MEMORY_THRESHOLD, -1);
         if (threshold < 0) {
-            threshold = MPUtility.getSystemMemoryThreshold(mContext);
-            SharedPreferences.Editor edit = mPreferences.edit();
+            threshold = MPUtility.getSystemMemoryThreshold(sContext);
+            SharedPreferences.Editor edit = sPreferences.edit();
             edit.putLong(Constants.MiscStorageKeys.MEMORY_THRESHOLD, threshold);
             edit.apply();
         }
@@ -223,20 +224,20 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
                     .timestamp(mAppStateManager.getSession().mSessionStartTime)
                     .build();
 
-            SharedPreferences.Editor editor = mPreferences.edit();
-            long timeInFg = mPreferences.getLong(Constants.PrefKeys.PREVIOUS_SESSION_FOREGROUND, 0);
+            SharedPreferences.Editor editor = sPreferences.edit();
+            long timeInFg = mConfigManager.getUserConfig().getTimeInForeground();
             if (timeInFg > 0) {
                 message.put(MessageKey.PREVIOUS_SESSION_LENGTH, timeInFg / 1000);
-                editor.remove(Constants.PrefKeys.PREVIOUS_SESSION_FOREGROUND);
+                mConfigManager.getUserConfig().clearPreviousTimeInForeground();
             }
-            String prevSessionId = mPreferences.getString(Constants.PrefKeys.PREVIOUS_SESSION_ID, "");
-            editor.putString(Constants.PrefKeys.PREVIOUS_SESSION_ID, mAppStateManager.getSession().mSessionID);
+            String prevSessionId = mConfigManager.getUserConfig().getPreviousSessionId();
+            mConfigManager.getUserConfig().setPreviousSessionId(mAppStateManager.getSession().mSessionID);
             if (!MPUtility.isEmpty(prevSessionId)) {
                 message.put(MessageKey.PREVIOUS_SESSION_ID, prevSessionId);
             }
 
-            long prevSessionStart = mPreferences.getLong(Constants.PrefKeys.PREVIOUS_SESSION_START, -1);
-            editor.putLong(Constants.PrefKeys.PREVIOUS_SESSION_START, mAppStateManager.getSession().mSessionStartTime);
+            long prevSessionStart = mConfigManager.getUserConfig().getPreviousSessionStart(-1);
+            mConfigManager.getUserConfig().setPreviousSessionStart(mAppStateManager.getSession().mSessionStartTime);
 
             if (prevSessionStart > 0) {
                 message.put(MessageKey.PREVIOUS_SESSION_START, prevSessionStart);
@@ -244,9 +245,9 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
 
             editor.apply();
 
-            mFirstRun = !mPreferences.contains(Constants.PrefKeys.FIRSTRUN + mConfigManager.getApiKey());
+            mFirstRun = !sPreferences.contains(Constants.PrefKeys.FIRSTRUN + mConfigManager.getApiKey());
             if (mFirstRun) {
-                mPreferences.edit().putBoolean(Constants.PrefKeys.FIRSTRUN + mConfigManager.getApiKey(), false).apply();
+                sPreferences.edit().putBoolean(Constants.PrefKeys.FIRSTRUN + mConfigManager.getApiKey(), false).apply();
                 try {
                     JSONObject firstRunMessage = createFirstRunMessage();
                     mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, firstRunMessage));
@@ -260,7 +261,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
 
             mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
 
-            incrementSessionCounter();
+            mConfigManager.getUserConfig().incrementSessionCounter();
             return message;
         } catch (JSONException e) {
             Logger.warning("Failed to create mParticle start session message");
@@ -268,24 +269,9 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
         }
     }
 
-    void incrementSessionCounter() {
-        int nextCount = getCurrentSessionCounter() + 1;
-        if (nextCount >= (Integer.MAX_VALUE / 100)){
-            nextCount = 0;
-        }
-        mPreferences.edit().putInt(Constants.PrefKeys.SESSION_COUNTER, nextCount).apply();
-    }
-
-    int getCurrentSessionCounter(){
-        return mPreferences.getInt(Constants.PrefKeys.SESSION_COUNTER, 0);
-    }
-
     public void updateSessionEnd(Session session) {
         try {
-            SharedPreferences.Editor editor = mPreferences.edit();
-            editor.putLong(Constants.PrefKeys.PREVIOUS_SESSION_FOREGROUND, session.getForegroundTime());
-            editor.apply();
-
+            mConfigManager.getUserConfig().setPreviousSessionForeground(session.getForegroundTime());
             mMessageHandler
                     .sendMessage(mMessageHandler.obtainMessage(MessageHandler.UPDATE_SESSION_END, session));
         } catch (Exception e) {
@@ -319,9 +305,9 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
                     message.put(MessageKey.CURRENT_ACTIVITY, currentActivity);
                 }
 
-                int count = mPreferences.getInt(Constants.PrefKeys.EVENT_COUNTER, 0);
+                int count = sPreferences.getInt(Constants.PrefKeys.EVENT_COUNTER, 0);
                 message.put(MessageKey.EVENT_COUNTER, count);
-                mPreferences.edit().putInt(Constants.PrefKeys.EVENT_COUNTER, ++count).apply();
+                sPreferences.edit().putInt(Constants.PrefKeys.EVENT_COUNTER, ++count).apply();
 
                 mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
                 return message;
@@ -377,7 +363,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
                         .build();
 
                 message.put(MessageKey.EVENT_START_TIME, mAppStateManager.getSession().mLastEventTime);
-                message.put(MessageKey.BREADCRUMB_SESSION_COUNTER, getCurrentSessionCounter());
+                message.put(MessageKey.BREADCRUMB_SESSION_COUNTER, mConfigManager.getUserConfig().getCurrentSessionCounter());
                 message.put(MessageKey.BREADCRUMB_LABEL, breadcrumb);
                 mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
                 mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_BREADCRUMB, message));
@@ -422,7 +408,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
                 t.printStackTrace(new PrintWriter(stringWriter));
                 message.put(MessageKey.ERROR_STACK_TRACE, stringWriter.toString());
                 message.put(MessageKey.ERROR_UNCAUGHT, String.valueOf(caught));
-                message.put(MessageKey.ERROR_SESSION_COUNT, getCurrentSessionCounter());
+                message.put(MessageKey.ERROR_SESSION_COUNT, mConfigManager.getUserConfig().getCurrentSessionCounter());
                 mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
             } else if (errorMessage != null) {
                 message.put(MessageKey.ERROR_SEVERITY, "error");
@@ -528,11 +514,11 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
                     message.put(MessageKey.CURRENT_ACTIVITY, currentActivity);
                 }
 
-                boolean crashedInForeground = mPreferences.getBoolean(Constants.PrefKeys.CRASHED_IN_FOREGROUND, false);
+                boolean crashedInForeground = sPreferences.getBoolean(Constants.PrefKeys.CRASHED_IN_FOREGROUND, false);
 
                 if (stateTransInit.equals(Constants.StateTransitionType.STATE_TRANS_INIT) ||
                         stateTransInit.equals(Constants.StateTransitionType.STATE_TRANS_FORE)) {
-                    mPreferences.edit().putBoolean(Constants.PrefKeys.CRASHED_IN_FOREGROUND, true).apply();
+                    sPreferences.edit().putBoolean(Constants.PrefKeys.CRASHED_IN_FOREGROUND, true).apply();
                     message.put(MessageKey.ST_LAUNCH_REFERRER, launchUri);
                     message.put(MessageKey.ST_LAUNCH_PARAMS, launchExtras);
                     message.put(MessageKey.ST_LAUNCH_SOURCE_PACKAGE, launchSourcePackage);
@@ -550,7 +536,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
                 }
 
                 if (stateTransInit.equals(Constants.StateTransitionType.STATE_TRANS_INIT)) {
-                    SharedPreferences.Editor editor = mPreferences.edit();
+                    SharedPreferences.Editor editor = sPreferences.edit();
 
                     if (!mFirstRun) {
                         message.put(MessageKey.APP_INIT_CRASHED, crashedInForeground);
@@ -559,13 +545,13 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
 
                     int versionCode = 0;
                     try {
-                        PackageInfo pInfo = mContext.getPackageManager().getPackageInfo(mContext.getPackageName(), 0);
+                        PackageInfo pInfo = sContext.getPackageManager().getPackageInfo(sContext.getPackageName(), 0);
                         versionCode = pInfo.versionCode;
                     } catch (PackageManager.NameNotFoundException nnfe) {
 
                     }
                     //if we've seen this device before, and the versionCode is different, then we know it's an upgrade
-                    boolean upgrade = (versionCode != mPreferences.getInt(Constants.PrefKeys.INITUPGRADE, versionCode));
+                    boolean upgrade = (versionCode != sPreferences.getInt(Constants.PrefKeys.INITUPGRADE, versionCode));
                     editor.putInt(Constants.PrefKeys.INITUPGRADE, versionCode).apply();
 
                     if (!upgrade) {
@@ -581,7 +567,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
                 }
 
                 if (stateTransInit.equals(Constants.StateTransitionType.STATE_TRANS_BG)) {
-                    mPreferences.edit().putBoolean(Constants.PrefKeys.CRASHED_IN_FOREGROUND, false).apply();
+                    sPreferences.edit().putBoolean(Constants.PrefKeys.CRASHED_IN_FOREGROUND, false).apply();
                     mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.CLEAR_PROVIDER_GCM, message.getTimestamp()));
                 }
 
@@ -604,7 +590,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
             message.put(MessageKey.PAYLOAD, cloudMessage.getRedactedJsonPayload().toString());
             message.put(MessageKey.PUSH_TYPE, Constants.Push.MESSAGE_TYPE_RECEIVED);
 
-            PushRegistrationHelper.PushRegistration registration = PushRegistrationHelper.getLatestPushRegistration(mContext);
+            PushRegistrationHelper.PushRegistration registration = PushRegistrationHelper.getLatestPushRegistration(sContext);
             if ((registration != null) && (registration.instanceId != null) && (registration.instanceId.length() > 0)) {
                 message.put(MessageKey.PUSH_TOKEN, registration.instanceId);
             }
@@ -640,7 +626,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
                 message.put(MessageKey.PUSH_ACTION_NAME, title);
             }
 
-            PushRegistrationHelper.PushRegistration registration = PushRegistrationHelper.getLatestPushRegistration(mContext);
+            PushRegistrationHelper.PushRegistration registration = PushRegistrationHelper.getLatestPushRegistration(sContext);
             if ((registration != null) && (registration.instanceId != null) && (registration.instanceId.length() > 0)) {
                 message.put(MessageKey.PUSH_TOKEN, registration.instanceId);
             }
@@ -756,7 +742,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
             if (sStatusBroadcastReceiver == null) {
 
                 //get the previous Intent otherwise the first few messages will have 0 for battery level
-                Intent batteryIntent = mContext.getApplicationContext().registerReceiver(null,
+                Intent batteryIntent = sContext.getApplicationContext().registerReceiver(null,
                         new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
                 int level = batteryIntent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
                 int scale = batteryIntent.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
@@ -765,15 +751,15 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
                 sStatusBroadcastReceiver = new StatusBroadcastReceiver();
                 // NOTE: if permissions are not correct all messages will be tagged as 'offline'
                 IntentFilter filter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
-                if (MPUtility.checkPermission(mContext, android.Manifest.permission.ACCESS_NETWORK_STATE)) {
+                if (MPUtility.checkPermission(sContext, android.Manifest.permission.ACCESS_NETWORK_STATE)) {
                     //same as with battery, get current connection so we don't have to wait for the next change
-                    ConnectivityManager connectivyManager = (ConnectivityManager) mContext
+                    ConnectivityManager connectivyManager = (ConnectivityManager) sContext
                             .getSystemService(Context.CONNECTIVITY_SERVICE);
                     NetworkInfo activeNetwork = connectivyManager.getActiveNetworkInfo();
                     setDataConnection(activeNetwork);
                     filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
                 }
-                mContext.registerReceiver(sStatusBroadcastReceiver, filter);
+                sContext.registerReceiver(sStatusBroadcastReceiver, filter);
             }
         }catch (Exception e){
             //this can sometimes fail due to wonky-device reasons.
@@ -876,7 +862,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
 
     @Override
     public void attributeRemoved(String key) {
-        String serializedJsonArray = mPreferences.getString(Constants.PrefKeys.DELETED_USER_ATTRS + mConfigManager.getApiKey(), null);
+        String serializedJsonArray = mConfigManager.getUserConfig().getDeletedUserAttributes();
         JSONArray deletedAtributes;
         try {
             deletedAtributes = new JSONArray(serializedJsonArray);
@@ -884,8 +870,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
             deletedAtributes = new JSONArray();
         }
         deletedAtributes.put(key);
-
-        mPreferences.edit().putString(Constants.PrefKeys.DELETED_USER_ATTRS + mConfigManager.getApiKey(), deletedAtributes.toString()).apply();
+        mConfigManager.getUserConfig().setDeletedUserAttributes(deletedAtributes.toString());
     }
 
     public void setUserAttribute(String key, Object value, long mpId) {

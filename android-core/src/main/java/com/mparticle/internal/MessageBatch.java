@@ -38,10 +38,10 @@ public class MessageBatch extends JSONObject {
         String apiKey = configManager.getApiKey();
 
         if (history) {
-            String deletedAttr = preferences.getString(Constants.PrefKeys.DELETED_USER_ATTRS + apiKey, null);
+            String deletedAttr = configManager.getUserConfig().getDeletedUserAttributes();
             if (deletedAttr != null) {
                 uploadMessage.put(Constants.MessageKey.DELETED_USER_ATTRIBUTES, new JSONArray(deletedAttr));
-                preferences.edit().remove(Constants.PrefKeys.DELETED_USER_ATTRS + apiKey).apply();
+                configManager.getUserConfig().deleteDeletedUserAttributes();
             }
         }
 

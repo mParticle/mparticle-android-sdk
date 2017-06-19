@@ -91,8 +91,8 @@ public class MParticleApiClientImpl implements MParticleApiClient {
     private final String mApiKey;
     private final Context mContext;
     Integer mDeviceRampNumber = null;
-    private static String mSupportedKits;
-    private SSLSocketFactory socketFactory;
+    private static String sSupportedKits;
+    private SSLSocketFactory mSocketFactory;
     private JSONObject mCurrentCookies;
     /**
      * Default throttle time - in the worst case scenario if the server is busy, the soonest
@@ -122,7 +122,7 @@ public class MParticleApiClientImpl implements MParticleApiClient {
     }
 
     static void setSupportedKitString(String supportedKitString) {
-        mSupportedKits = supportedKitString;
+        sSupportedKits = supportedKitString;
     }
 
     public void fetchConfig() throws IOException, MPConfigException {
@@ -368,7 +368,7 @@ public class MParticleApiClientImpl implements MParticleApiClient {
      * Custom socket factory used for certificate pinning.
      */
     private SSLSocketFactory getSocketFactory() throws Exception{
-        if (socketFactory == null){
+        if (mSocketFactory == null){
             String keyStoreType = KeyStore.getDefaultType();
             KeyStore keyStore = KeyStore.getInstance(keyStoreType);
             keyStore.load(null, null);
@@ -384,9 +384,9 @@ public class MParticleApiClientImpl implements MParticleApiClient {
 
             SSLContext context = SSLContext.getInstance("TLS");
             context.init(null, tmf.getTrustManagers(), null);
-            socketFactory = context.getSocketFactory();
+            mSocketFactory = context.getSocketFactory();
         }
-        return socketFactory;
+        return mSocketFactory;
     }
 
     public HttpURLConnection makeUrlRequest(HttpURLConnection connection, boolean mParticle) throws IOException{
@@ -425,9 +425,9 @@ public class MParticleApiClientImpl implements MParticleApiClient {
             }
             if (jsonResponse.has(LTV)) {
                 BigDecimal serverLtv = new BigDecimal(jsonResponse.getString(LTV));
-                BigDecimal mostRecentClientLtc = new BigDecimal(mPreferences.getString(Constants.PrefKeys.LTV, "0"));
+                BigDecimal mostRecentClientLtc = new BigDecimal(mConfigManager.getUserConfig().getLtv());
                 BigDecimal sum = serverLtv.add(mostRecentClientLtc);
-                mPreferences.edit().putString(Constants.PrefKeys.LTV, sum.toPlainString()).apply();
+                mConfigManager.getUserConfig().setLtv(sum.toPlainString());
             }
 
         } catch (JSONException jse) {
@@ -508,7 +508,7 @@ public class MParticleApiClientImpl implements MParticleApiClient {
     }
 
     private String getSupportedKitString(){
-        if (mSupportedKits == null) {
+        if (sSupportedKits == null) {
             Set<Integer> supportedKitIds = MParticle.getInstance().getKitManager().getSupportedKits();
             if (supportedKitIds != null && supportedKitIds.size() > 0) {
                 StringBuilder buffer = new StringBuilder(supportedKitIds.size() * 3);
@@ -520,12 +520,12 @@ public class MParticleApiClientImpl implements MParticleApiClient {
                         buffer.append(",");
                     }
                 }
-                mSupportedKits = buffer.toString();
+                sSupportedKits = buffer.toString();
             } else {
-                mSupportedKits = "";
+                sSupportedKits = "";
             }
         }
-        return mSupportedKits;
+        return sSupportedKits;
     }
 
     public void setCookies(JSONObject serverCookies) {
@@ -539,7 +539,7 @@ public class MParticleApiClientImpl implements MParticleApiClient {
                     localCookies.put(key, serverCookies.getJSONObject(key));
                 }
                 mCurrentCookies = localCookies;
-                mPreferences.edit().putString(Constants.PrefKeys.Cookies, mCurrentCookies.toString()).apply();
+                mConfigManager.getUserConfig().setCookies(mCurrentCookies.toString());
             } catch (JSONException jse) {
 
             }
@@ -548,12 +548,12 @@ public class MParticleApiClientImpl implements MParticleApiClient {
 
     public JSONObject getCookies()  {
         if (mCurrentCookies == null){
-            String currentCookies = mPreferences.getString(Constants.PrefKeys.Cookies, null);
-            if (MPUtility.isEmpty(currentCookies)){
+            String currentCookies = mConfigManager.getUserConfig().getCookies();
+            if (MPUtility.isEmpty(currentCookies)) {
                 mCurrentCookies = new JSONObject();
-                mPreferences.edit().putString(Constants.PrefKeys.Cookies, mCurrentCookies.toString()).apply();
+                mConfigManager.getUserConfig().setCookies(mCurrentCookies.toString());
                 return mCurrentCookies;
-            }else {
+            } else {
                 try {
                     mCurrentCookies = new JSONObject(currentCookies);
                 } catch (JSONException e) {
@@ -588,7 +588,7 @@ public class MParticleApiClientImpl implements MParticleApiClient {
                 mCurrentCookies.remove(key);
             }
             if (keysToRemove.size() > 0) {
-                mPreferences.edit().putString(Constants.PrefKeys.Cookies, mCurrentCookies.toString()).apply();
+                mConfigManager.getUserConfig().setCookies(mCurrentCookies.toString());
             }
             return mCurrentCookies;
         }else{

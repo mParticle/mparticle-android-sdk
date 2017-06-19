@@ -2,10 +2,11 @@ package com.mparticle.internal;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.os.Handler;
+import android.os.Looper;
 
 import com.mparticle.ExceptionHandler;
 import com.mparticle.MParticle;
-import com.mparticle.MParticle.LogLevel;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -21,6 +22,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 
 public class ConfigManager {
     public static final String CONFIG_JSON = "json";
@@ -37,7 +39,7 @@ public class ConfigManager {
     public static final String KEY_AAID_LAT = "rdlat";
     public static final String VALUE_APP_DEFINED = "appdefined";
     public static final String VALUE_CUE_CATCH = "forcecatch";
-    private static final String PREFERENCES_FILE = "mp_preferences";
+    static final String PREFERENCES_FILE = "mp_preferences";
     private static final String KEY_INCLUDE_SESSION_HISTORY = "inhd";
     private static final String KEY_DEVICE_PERFORMANCE_METRICS_DISABLED = "dpmd";
     static final String KEY_RAMP = "rp";
@@ -45,10 +47,12 @@ public class ConfigManager {
     private static final int DEVMODE_UPLOAD_INTERVAL_MILLISECONDS = 10 * 1000;
     private Context mContext;
 
-    static SharedPreferences mPreferences;
+    static SharedPreferences sPreferences;
 
-    AppConfig sLocalPrefs;
+    AppConfig mLocalPrefs;
+
     private static JSONArray sPushKeys;
+    private static TimedCache<UserConfig> sUserConfigHolder;
     private String mLogUnhandledExceptions = VALUE_APP_DEFINED;
 
     private boolean mSendOoEvents;
@@ -65,24 +69,25 @@ public class ConfigManager {
     private boolean mIncludeSessionHistory = true;
     private JSONObject mCurrentCookies;
 
-    private ConfigManager(){
+    private ConfigManager() {
 
     }
 
     public ConfigManager(Context context, MParticle.Environment environment, String apiKey, String apiSecret) {
         mContext = context.getApplicationContext();
-        mPreferences = mContext.getSharedPreferences(PREFERENCES_FILE, Context.MODE_PRIVATE);
-        sLocalPrefs = new AppConfig(mContext, environment, mPreferences, apiKey, apiSecret);
+        sPreferences = mContext.getSharedPreferences(PREFERENCES_FILE, Context.MODE_PRIVATE);
+        mLocalPrefs = new AppConfig(mContext, environment, sPreferences, apiKey, apiSecret);
+        sUserConfigHolder = new UserConfigHolder(mContext, getMpid());
         restoreOldConfig();
     }
 
     private void restoreOldConfig() {
-        String oldConfig = mPreferences.getString(CONFIG_JSON, null);
-        if (!MPUtility.isEmpty(oldConfig)){
-            try{
+        String oldConfig = sPreferences.getString(CONFIG_JSON, null);
+        if (!MPUtility.isEmpty(oldConfig)) {
+            try {
                 JSONObject oldConfigJson = new JSONObject(oldConfig);
                 updateConfig(oldConfigJson, false);
-            }catch (Exception jse){
+            } catch (Exception jse) {
 
             }
         }
@@ -91,30 +96,53 @@ public class ConfigManager {
     /**
      * The is called on startup. The only thing that's completely necessary is that we fire up kits.
      */
-    public JSONArray getLatestKitConfiguration(){
-        String oldConfig = mPreferences.getString(CONFIG_JSON, null);
-        if (!MPUtility.isEmpty(oldConfig)){
-            try{
+    public JSONArray getLatestKitConfiguration() {
+        String oldConfig = sPreferences.getString(CONFIG_JSON, null);
+        if (!MPUtility.isEmpty(oldConfig)) {
+            try {
                 JSONObject oldConfigJson = new JSONObject(oldConfig);
                 return oldConfigJson.optJSONArray(KEY_EMBEDDED_KITS);
-            }catch (Exception jse){
+            } catch (Exception jse) {
 
             }
         }
         return null;
     }
 
-    void saveConfigJson(JSONObject json){
+    UserConfig getUserConfig() {
+        return sUserConfigHolder.getCurrentInstance();
+    }
+
+    UserConfig getUserConfig(long mpId) {
+        return sUserConfigHolder.getInstance(mpId);
+    }
+
+    public static UserConfig getUserConfig(Context context) {
+        if (sUserConfigHolder == null) {
+            sUserConfigHolder = new UserConfigHolder(context, getMpid(context));
+        }
+        return sUserConfigHolder.getCurrentInstance();
+    }
+
+    private static UserConfig getUserConfig(Context context, long mpid) {
+        if (sUserConfigHolder == null) {
+            sUserConfigHolder = new UserConfigHolder(context, getMpid(context));
+        }
+        return sUserConfigHolder.getInstance(mpid);
+    }
+
+    void saveConfigJson(JSONObject json) {
         if (json != null) {
-            mPreferences.edit().putString(CONFIG_JSON, json.toString()).apply();
+            sPreferences.edit().putString(CONFIG_JSON, json.toString()).apply();
         }
     }
 
     public synchronized void updateConfig(JSONObject responseJSON) throws JSONException {
         updateConfig(responseJSON, true);
     }
+
     public synchronized void updateConfig(JSONObject responseJSON, boolean newConfig) throws JSONException {
-        SharedPreferences.Editor editor = mPreferences.edit();
+        SharedPreferences.Editor editor = sPreferences.edit();
         if (newConfig) {
             saveConfigJson(responseJSON);
         }
@@ -130,15 +158,15 @@ public class ConfigManager {
 
         mRampValue = responseJSON.optInt(KEY_RAMP, -1);
 
-        if (responseJSON.has(KEY_OPT_OUT)){
+        if (responseJSON.has(KEY_OPT_OUT)) {
             mSendOoEvents = responseJSON.getBoolean(KEY_OPT_OUT);
-        }else{
+        } else {
             mSendOoEvents = false;
         }
 
         if (responseJSON.has(ProviderPersistence.KEY_PERSISTENCE)) {
             setProviderPersistence(new ProviderPersistence(responseJSON, mContext));
-        }else{
+        } else {
             setProviderPersistence(null);
         }
 
@@ -147,24 +175,24 @@ public class ConfigManager {
 
         mTriggerMessageMatches = null;
         mTriggerMessageHashes = null;
-        if (responseJSON.has(KEY_TRIGGER_ITEMS)){
+        if (responseJSON.has(KEY_TRIGGER_ITEMS)) {
             try {
                 JSONObject items = responseJSON.getJSONObject(KEY_TRIGGER_ITEMS);
-                if (items.has(KEY_MESSAGE_MATCHES)){
+                if (items.has(KEY_MESSAGE_MATCHES)) {
                     mTriggerMessageMatches = items.getJSONArray(KEY_MESSAGE_MATCHES);
                 }
-                if (items.has(KEY_TRIGGER_ITEM_HASHES)){
+                if (items.has(KEY_TRIGGER_ITEM_HASHES)) {
                     mTriggerMessageHashes = items.getJSONArray(KEY_TRIGGER_ITEM_HASHES);
                 }
-            }catch (JSONException jse){
+            } catch (JSONException jse) {
 
             }
 
         }
 
-        if (responseJSON.has(KEY_INFLUENCE_OPEN)){
+        if (responseJSON.has(KEY_INFLUENCE_OPEN)) {
             mInfluenceOpenTimeout = responseJSON.getLong(KEY_INFLUENCE_OPEN) * 60 * 1000;
-        }else{
+        } else {
             mInfluenceOpenTimeout = 30 * 60 * 1000;
         }
 
@@ -183,7 +211,7 @@ public class ConfigManager {
         }
     }
 
-    public String getActiveModuleIds(){
+    public String getActiveModuleIds() {
         return MParticle.getInstance().getKitManager().getActiveModuleIds();
     }
 
@@ -206,20 +234,19 @@ public class ConfigManager {
     /**
      * When the Config manager starts up, we don't want to enable everything immediately to save on app-load time.
      * This method will be called from a background thread after startup is already complete.
-
      */
-    public void delayedStart(){
-        sLocalPrefs.delayedInit();
+    public void delayedStart() {
+        mLocalPrefs.delayedInit();
         if (isPushEnabled() && PushRegistrationHelper.getLatestPushRegistration(mContext) == null) {
             MParticle.getInstance().Messaging().enablePushNotifications(getPushSenderId());
         }
     }
 
-    public JSONArray getTriggerMessageMatches(){
+    public JSONArray getTriggerMessageMatches() {
         return mTriggerMessageMatches;
     }
 
-    public long getInfluenceOpenTimeoutMillis(){
+    public long getInfluenceOpenTimeoutMillis() {
         return mInfluenceOpenTimeout;
     }
 
@@ -259,32 +286,32 @@ public class ConfigManager {
 
     public boolean getLogUnhandledExceptions() {
         if (mLogUnhandledExceptions.equals(VALUE_APP_DEFINED)) {
-            return sLocalPrefs.reportUncaughtExceptions;
+            return mLocalPrefs.reportUncaughtExceptions;
         } else {
             return mLogUnhandledExceptions.equals(VALUE_CUE_CATCH);
         }
     }
 
-    public void setLogUnhandledExceptions(boolean log){
-        sLocalPrefs.reportUncaughtExceptions = log;
+    public void setLogUnhandledExceptions(boolean log) {
+        mLocalPrefs.reportUncaughtExceptions = log;
     }
 
     public String getApiKey() {
-        return sLocalPrefs.mKey;
+        return mLocalPrefs.mKey;
     }
 
     public String getApiSecret() {
-        return sLocalPrefs.mSecret;
+        return mLocalPrefs.mSecret;
     }
 
     public long getUploadInterval() {
         if (getEnvironment().equals(MParticle.Environment.Development)) {
             return DEVMODE_UPLOAD_INTERVAL_MILLISECONDS;
         } else {
-            if (mUploadInterval > 0){
+            if (mUploadInterval > 0) {
                 return 1000 * mUploadInterval;
-            }else {
-                return (1000 * sLocalPrefs.uploadInterval);
+            } else {
+                return (1000 * mLocalPrefs.uploadInterval);
             }
         }
     }
@@ -294,103 +321,104 @@ public class ConfigManager {
     }
 
     public void setUploadInterval(int uploadInterval) {
-        sLocalPrefs.uploadInterval = uploadInterval;
+        mLocalPrefs.uploadInterval = uploadInterval;
     }
 
     public int getSessionTimeout() {
-        if (mSessionTimeoutInterval > 0){
+        if (mSessionTimeoutInterval > 0) {
             return mSessionTimeoutInterval * 1000;
-        }else{
-            return sLocalPrefs.sessionTimeout * 1000;
+        } else {
+            return mLocalPrefs.sessionTimeout * 1000;
         }
     }
 
     public void setSessionTimeout(int sessionTimeout) {
-        sLocalPrefs.sessionTimeout = sessionTimeout;
+        mLocalPrefs.sessionTimeout = sessionTimeout;
     }
 
     public boolean isPushEnabled() {
-        return sLocalPrefs.isPushEnabled ||
-                (mPreferences.getBoolean(Constants.PrefKeys.PUSH_ENABLED, false) && getPushSenderId() != null);
+        return mLocalPrefs.isPushEnabled ||
+                (sPreferences.getBoolean(Constants.PrefKeys.PUSH_ENABLED, false) && getPushSenderId() != null);
     }
 
     public String getPushSenderId() {
-        String senderId = sLocalPrefs.getPushSenderId();
+        String senderId = mLocalPrefs.getPushSenderId();
         if (!MPUtility.isEmpty(senderId))
             return senderId;
-        else return mPreferences.getString(Constants.PrefKeys.PUSH_SENDER_ID, null);
+        else return sPreferences.getString(Constants.PrefKeys.PUSH_SENDER_ID, null);
     }
 
-    public void setPushSenderId(String senderId){
-        mPreferences.edit()
+    public void setPushSenderId(String senderId) {
+        sPreferences.edit()
                 .putString(Constants.PrefKeys.PUSH_SENDER_ID, senderId)
                 .putBoolean(Constants.PrefKeys.PUSH_ENABLED, true)
                 .apply();
     }
 
     public String getLicenseKey() {
-        return sLocalPrefs.licenseKey;
+        return mLocalPrefs.licenseKey;
     }
 
     public boolean isLicensingEnabled() {
-        return sLocalPrefs.licenseKey != null && sLocalPrefs.isLicensingEnabled;
+        return mLocalPrefs.licenseKey != null && mLocalPrefs.isLicensingEnabled;
     }
 
     public void setPushSoundEnabled(boolean pushSoundEnabled) {
-        mPreferences.edit()
-            .putBoolean(Constants.PrefKeys.PUSH_ENABLE_SOUND, pushSoundEnabled)
-            .apply();
+        sPreferences.edit()
+                .putBoolean(Constants.PrefKeys.PUSH_ENABLE_SOUND, pushSoundEnabled)
+                .apply();
     }
 
     public void setPushVibrationEnabled(boolean pushVibrationEnabled) {
-        mPreferences.edit()
-            .putBoolean(Constants.PrefKeys.PUSH_ENABLE_VIBRATION, pushVibrationEnabled)
-            .apply();
+        sPreferences.edit()
+                .putBoolean(Constants.PrefKeys.PUSH_ENABLE_VIBRATION, pushVibrationEnabled)
+                .apply();
     }
 
-    public boolean isEnabled(){
+    public boolean isEnabled() {
         boolean optedOut = this.getOptedOut();
         return !optedOut || mSendOoEvents;
     }
 
-    public void setOptOut(boolean optOut){
-        mPreferences
+    public void setOptOut(boolean optOut) {
+        sPreferences
                 .edit().putBoolean(Constants.PrefKeys.OPTOUT, optOut).apply();
     }
 
-    public boolean getOptedOut(){
-        return mPreferences.getBoolean(Constants.PrefKeys.OPTOUT, false);
+    public boolean getOptedOut() {
+        return sPreferences.getBoolean(Constants.PrefKeys.OPTOUT, false);
     }
 
     public boolean isAutoTrackingEnabled() {
-        return sLocalPrefs.autoTrackingEnabled;
+        return mLocalPrefs.autoTrackingEnabled;
     }
 
     public boolean isPushSoundEnabled() {
-        return mPreferences.getBoolean(Constants.PrefKeys.PUSH_ENABLE_SOUND, AppConfig.DEFAULT_ENABLE_PUSH_SOUND);
+        return sPreferences.getBoolean(Constants.PrefKeys.PUSH_ENABLE_SOUND, AppConfig.DEFAULT_ENABLE_PUSH_SOUND);
     }
+
     public boolean isPushVibrationEnabled() {
-        return mPreferences.getBoolean(Constants.PrefKeys.PUSH_ENABLE_VIBRATION, AppConfig.DEFAULT_ENABLE_PUSH_VIBRATION);
+        return sPreferences.getBoolean(Constants.PrefKeys.PUSH_ENABLE_VIBRATION, AppConfig.DEFAULT_ENABLE_PUSH_VIBRATION);
     }
 
     public void setPushNotificationIcon(int pushNotificationIcon) {
-        mPreferences.edit()
+        sPreferences.edit()
                 .putInt(Constants.PrefKeys.PUSH_ICON, pushNotificationIcon)
                 .apply();
     }
 
     public void setPushNotificationTitle(int pushNotificationTitle) {
-        mPreferences.edit()
+        sPreferences.edit()
                 .putInt(Constants.PrefKeys.PUSH_TITLE, pushNotificationTitle)
                 .apply();
     }
 
-    private static SharedPreferences getPreferences(Context context){
+    private static SharedPreferences getPreferences(Context context) {
         return context.getSharedPreferences(PREFERENCES_FILE, Context.MODE_PRIVATE);
     }
 
-    public static JSONArray getPushKeys(Context context){
-        if (sPushKeys == null){
+    public static JSONArray getPushKeys(Context context) {
+        if (sPushKeys == null) {
             String arrayString = getPreferences(context).getString(KEY_PUSH_MESSAGES, null);
             try {
                 sPushKeys = new JSONArray(arrayString);
@@ -412,19 +440,22 @@ public class ConfigManager {
     }
 
     public static int getBreadcrumbLimit() {
-        if (mPreferences != null){
-            return mPreferences.getInt(Constants.PrefKeys.BREADCRUMB_LIMIT, AppConfig.DEFAULT_BREADCRUMB_LIMIT);
-        }
-        return AppConfig.DEFAULT_BREADCRUMB_LIMIT;
+        return sUserConfigHolder.getCurrentInstance().getBreadcrumbLimit();
     }
 
-    public void setBreadcrumbLimit(int newLimit){
-        mPreferences.edit()
-                .putInt(Constants.PrefKeys.BREADCRUMB_LIMIT, newLimit)
-                .apply();
+    public static int getBreadcrumbLimit(long mpId) {
+        return sUserConfigHolder.getInstance(mpId).getBreadcrumbLimit();
     }
 
-    private synchronized void setProviderPersistence(JSONObject persistence){
+    public void setBreadcrumbLimit(int newLimit) {
+        setBreadcrumbLimit(newLimit, getMpid());
+    }
+
+    public void setBreadcrumbLimit(int newLimit, long mpId) {
+        sUserConfigHolder.getInstance(mpId).setBreadcrumbLimit(newLimit);
+    }
+
+    private synchronized void setProviderPersistence(JSONObject persistence) {
         mProviderPersistence = persistence;
     }
 
@@ -433,21 +464,29 @@ public class ConfigManager {
     }
 
     public void setMpid(long mpid) {
-        mPreferences.edit().putLong(Constants.PrefKeys.Mpid, mpid).apply();
+        sPreferences.edit().putLong(Constants.PrefKeys.Mpid, mpid).apply();
+        sUserConfigHolder.setCurrent(mpid);
     }
 
     public long getMpid() {
-        if (mPreferences.contains(Constants.PrefKeys.Mpid)){
-            return mPreferences.getLong(Constants.PrefKeys.Mpid, 0);
-        }else{
+        if (sPreferences.contains(Constants.PrefKeys.Mpid)) {
+            return sPreferences.getLong(Constants.PrefKeys.Mpid, 0);
+        } else {
             long mpid = MPUtility.generateMpid();
-            mPreferences.edit().putLong(Constants.PrefKeys.Mpid, mpid).apply();
+            sPreferences.edit().putLong(Constants.PrefKeys.Mpid, mpid).apply();
             return mpid;
         }
     }
 
+    public static long getMpid(Context context) {
+        if (sPreferences == null) {
+            sPreferences = context.getSharedPreferences(PREFERENCES_FILE, Context.MODE_PRIVATE);
+        }
+        return sPreferences.getLong(Constants.PrefKeys.Mpid, 0);
+    }
+
     public int getAudienceTimeout() {
-        return sLocalPrefs.audienceTimeout;
+        return mLocalPrefs.audienceTimeout;
     }
 
     public int getCurrentRampValue() {
@@ -466,26 +505,26 @@ public class ConfigManager {
                 || message.getMessageType().equals(Constants.MessageType.COMMERCE_EVENT)
                 || message.getMessageType().equals(Constants.MessageType.APP_STATE_TRANSITION);
 
-        if (!shouldTrigger && messageMatches != null && messageMatches.length() > 0){
+        if (!shouldTrigger && messageMatches != null && messageMatches.length() > 0) {
             shouldTrigger = true;
             int i = 0;
-            while (shouldTrigger && i < messageMatches.length()){
+            while (shouldTrigger && i < messageMatches.length()) {
                 try {
                     JSONObject messageMatch = messageMatches.getJSONObject(i);
                     Iterator<?> keys = messageMatch.keys();
-                    while(shouldTrigger && keys.hasNext() ){
-                        String key = (String)keys.next();
+                    while (shouldTrigger && keys.hasNext()) {
+                        String key = (String) keys.next();
                         shouldTrigger = message.has(key);
-                        if (shouldTrigger){
+                        if (shouldTrigger) {
                             try {
                                 shouldTrigger = messageMatch.getString(key).equalsIgnoreCase(message.getString(key));
-                            }catch (JSONException stringex){
+                            } catch (JSONException stringex) {
                                 try {
                                     shouldTrigger = message.getBoolean(key) == messageMatch.getBoolean(key);
-                                }catch (JSONException boolex){
-                                    try{
+                                } catch (JSONException boolex) {
+                                    try {
                                         shouldTrigger = message.getDouble(key) == messageMatch.getDouble(key);
-                                    }catch (JSONException doubleex){
+                                    } catch (JSONException doubleex) {
                                         shouldTrigger = false;
                                     }
                                 }
@@ -498,14 +537,14 @@ public class ConfigManager {
                 i++;
             }
         }
-        if (!shouldTrigger && triggerHashes != null){
-            for (int i = 0; i < triggerHashes.length(); i++){
+        if (!shouldTrigger && triggerHashes != null) {
+            for (int i = 0; i < triggerHashes.length(); i++) {
                 try {
                     if (triggerHashes.getInt(i) == message.getTypeNameHash()) {
                         shouldTrigger = true;
                         break;
                     }
-                }catch (JSONException jse){
+                } catch (JSONException jse) {
 
                 }
             }
@@ -514,8 +553,8 @@ public class ConfigManager {
     }
 
     public int getUserBucket() {
-        if (mUserBucket < 0){
-            mUserBucket = (int)(Math.abs(getMpid() >> 8) % 100);
+        if (mUserBucket < 0) {
+            mUserBucket = (int) (Math.abs(getMpid() >> 8) % 100);
         }
         return mUserBucket;
     }
@@ -535,15 +574,15 @@ public class ConfigManager {
             }
             currentJsonAttributes.put(Integer.toString(kitId), newJsonAttributes);
             if (currentJsonAttributes.length() > 0) {
-                mPreferences.edit()
+                sPreferences.edit()
                         .putString(Constants.PrefKeys.INTEGRATION_ATTRIBUTES, currentJsonAttributes.toString())
                         .apply();
             } else {
-                mPreferences.edit()
+                sPreferences.edit()
                         .remove(Constants.PrefKeys.INTEGRATION_ATTRIBUTES)
                         .apply();
             }
-        }catch (JSONException jse) {
+        } catch (JSONException jse) {
 
         }
     }
@@ -572,7 +611,7 @@ public class ConfigManager {
 
     public JSONObject getIntegrationAttributes() {
         JSONObject jsonAttributes = null;
-        String allAttributes = mPreferences.getString(Constants.PrefKeys.INTEGRATION_ATTRIBUTES, null);
+        String allAttributes = sPreferences.getString(Constants.PrefKeys.INTEGRATION_ATTRIBUTES, null);
         if (allAttributes != null) {
             try {
                 jsonAttributes = new JSONObject(allAttributes);
@@ -584,14 +623,18 @@ public class ConfigManager {
     }
 
     public JSONArray getUserIdentityJson() {
+        return getUserIdentityJson(getMpid());
+    }
+
+    public JSONArray getUserIdentityJson(long mpId) {
         JSONArray userIdentities = null;
-        String userIds = mPreferences.getString(Constants.PrefKeys.USER_IDENTITIES + getApiKey(), null);
+        String userIds = sUserConfigHolder.getInstance(mpId).getUserIdentities();
 
         try {
             userIdentities = new JSONArray(userIds);
             boolean changeMade = fixUpUserIdentities(userIdentities);
             if (changeMade) {
-                saveUserIdentityJson(userIdentities);
+                saveUserIdentityJson(userIdentities, mpId);
             }
         } catch (Exception e) {
             userIdentities = new JSONArray();
@@ -600,7 +643,11 @@ public class ConfigManager {
     }
 
     public void saveUserIdentityJson(JSONArray userIdentities) {
-        mPreferences.edit().putString(Constants.PrefKeys.USER_IDENTITIES + getApiKey(), userIdentities.toString()).apply();
+        saveUserIdentityJson(userIdentities, getMpid());
+    }
+
+    public void saveUserIdentityJson(JSONArray userIdentities, long mpId) {
+        sUserConfigHolder.getInstance(mpId).setUserIdentities(userIdentities.toString());
     }
 
     private static boolean fixUpUserIdentities(JSONArray identities) {
@@ -625,12 +672,12 @@ public class ConfigManager {
     }
 
 
-    public JSONObject getCookies() {
+    public JSONObject getCookies(long mpId) {
         if (mCurrentCookies == null) {
-            String currentCookies = mPreferences.getString(Constants.PrefKeys.Cookies, null);
+            String currentCookies = sUserConfigHolder.getInstance(mpId).getCookies();
             if (MPUtility.isEmpty(currentCookies)) {
                 mCurrentCookies = new JSONObject();
-                mPreferences.edit().putString(Constants.PrefKeys.Cookies, mCurrentCookies.toString()).apply();
+                sUserConfigHolder.getInstance(mpId).setCookies(mCurrentCookies.toString());
                 return mCurrentCookies;
             } else {
                 try {
@@ -667,7 +714,7 @@ public class ConfigManager {
                 mCurrentCookies.remove(key);
             }
             if (keysToRemove.size() > 0) {
-                mPreferences.edit().putString(Constants.PrefKeys.Cookies, mCurrentCookies.toString()).apply();
+                sUserConfigHolder.getInstance(mpId).setCookies(mCurrentCookies.toString());
             }
             return mCurrentCookies;
         } else {
@@ -676,9 +723,13 @@ public class ConfigManager {
     }
 
     JSONArray markIdentitiesAsSeen(JSONArray uploadedIdentities) {
+        return markIdentitiesAsSeen(uploadedIdentities, getMpid());
+    }
+
+    JSONArray markIdentitiesAsSeen(JSONArray uploadedIdentities, long mpId) {
         try {
 
-            JSONArray currentIdentities = getUserIdentityJson();
+            JSONArray currentIdentities = getUserIdentityJson(mpId);
             if (currentIdentities.length() == 0) {
                 return null;
             }
@@ -702,5 +753,75 @@ public class ConfigManager {
 
         }
         return null;
+    }
+
+    static class UserConfigHolder extends TimedCache<UserConfig> {
+        private Context mContext;
+
+        public UserConfigHolder(Context context, long currentMpId) {
+            super(new Handler(Looper.getMainLooper()), 2000);
+            this.mContext = context;
+            setCurrent(currentMpId);
+        }
+
+        @Override
+        UserConfig retrieve(Long id) {
+            return UserConfig.getUserConfig(mContext, id);
+        }
+    }
+
+    abstract static class TimedCache<T> {
+        private Handler mHandler;
+        private long mDelay;
+        Map<Long, T> cache = new TreeMap<Long, T>();
+        Map<Long, Runnable> cancelRunnables = new TreeMap<Long, Runnable>();
+
+        long current = 0;
+
+        TimedCache(Handler handler, long delay) {
+            this.mHandler = handler;
+            this.mDelay = delay;
+        }
+
+        void setCurrent(long id) {
+            current = id;
+        }
+
+        T getCurrentInstance() {
+            return getInstance(current);
+        }
+
+        T getInstance(final Long id) {
+            T t = cache.get(id);
+
+            if (t == null) {
+                cache.put(id, t = retrieve(id));
+            } else {
+                if (cancelRunnables.containsKey(id)) {
+                    mHandler.removeCallbacks(cancelRunnables.get(id));
+                }
+            }
+            if (id != current) {
+                Runnable runnable = new Runnable() {
+                    @Override
+                    public void run() {
+                        cache.remove(id);
+                        cancelRunnables.remove(id);
+                    }
+                };
+                cancelRunnables.put(id, runnable);
+                mHandler.postDelayed(runnable, mDelay);
+            }
+            return t;
+        }
+
+        /**
+         * for testing only
+         */
+        boolean isCached(long id) {
+            return cache.containsKey(id);
+        }
+
+        abstract T retrieve(Long id);
     }
 }

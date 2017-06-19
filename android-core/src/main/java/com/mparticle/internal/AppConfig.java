@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 import com.mparticle.MParticle;
-import com.mparticle.MParticle.LogLevel;
 
 /**
  * This class is primarily responsible for parsing and representing XML/resource-based configuration.
@@ -30,7 +29,6 @@ class AppConfig {
     public static final boolean DEFAULT_ENABLE_AUTO_TRACKING = false;
     public static final boolean DEFAULT_ENABLE_PUSH_SOUND = false;
     public static final boolean DEFAULT_ENABLE_PUSH_VIBRATION = false;
-    public static final int DEFAULT_BREADCRUMB_LIMIT = 50;
 
     private final Context mContext;
 
@@ -46,18 +44,18 @@ class AppConfig {
     public boolean isLicensingEnabled = DEFAULT_ENABLE_LICENSING;
     public boolean autoTrackingEnabled = DEFAULT_ENABLE_AUTO_TRACKING;
     public int audienceTimeout = 100;
-    private static MParticle.Environment mEnvironment = MParticle.Environment.Production;
+    private static MParticle.Environment sEnvironment = MParticle.Environment.Production;
 
     public AppConfig(Context context, MParticle.Environment environment, SharedPreferences preferences, String apiKey, String apiSecret) {
         mContext = context;
         if (environment == null || environment == MParticle.Environment.AutoDetect){
             if (MPUtility.isAppDebuggable(context)){
-               mEnvironment = MParticle.Environment.Development;
+               sEnvironment = MParticle.Environment.Development;
             }else{
-               mEnvironment = MParticle.Environment.Production;
+               sEnvironment = MParticle.Environment.Production;
             }
         }else{
-            mEnvironment = environment;
+            sEnvironment = environment;
         }
         if (!MPUtility.isEmpty(apiKey)) {
             mKey = apiKey;
@@ -92,10 +90,10 @@ class AppConfig {
         if (mode != null) {
             if (mode.toLowerCase().contains("dev")) {
                 Logger.warning("Forcing SDK into development mode based on configuration XML key: " + PREFKEY_FORCE_ENVIRONMENT + " and value: " + mode);
-                mEnvironment = MParticle.Environment.Development;
+                sEnvironment = MParticle.Environment.Development;
             } else if (mode.toLowerCase().contains("prod")) {
                 Logger.warning("Forcing SDK into production mode based on configuration XML key: " + PREFKEY_FORCE_ENVIRONMENT + " and value: " + mode);
-                mEnvironment = MParticle.Environment.Production;
+                sEnvironment = MParticle.Environment.Production;
             }
         }
         autoTrackingEnabled = getBoolean(PREFKEY_AUTOTRACKING, DEFAULT_ENABLE_AUTO_TRACKING);
@@ -167,7 +165,7 @@ class AppConfig {
     }
 
     public static MParticle.Environment getEnvironment() {
-        return mEnvironment;
+        return sEnvironment;
     }
 
     public String getPushSenderId() {

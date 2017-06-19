@@ -40,7 +40,7 @@ public class BreadcrumbService extends BreadcrumbTable {
                 " _id asc");
         if (cursor.moveToFirst()) {
             int minId = cursor.getInt(0);
-            if (cursor.getCount() > ConfigManager.getBreadcrumbLimit()) {
+            if (cursor.getCount() > ConfigManager.getBreadcrumbLimit(mpid)) {
                 String[] limit = {String.valueOf(minId)};
                 return db.delete(BreadcrumbTableColumns.TABLE_NAME, " _id = ?", limit);
             }
@@ -85,7 +85,7 @@ public class BreadcrumbService extends BreadcrumbTable {
                     new String[]{String.valueOf(mpid)},
                     null,
                     null,
-                    BreadcrumbTableColumns.CREATED_AT + " desc limit " + ConfigManager.getBreadcrumbLimit());
+                    BreadcrumbTableColumns.CREATED_AT + " desc limit " + ConfigManager.getBreadcrumbLimit(mpid));
 
             if (breadcrumbCursor.getCount() > 0) {
                 JSONArray breadcrumbs = new JSONArray();

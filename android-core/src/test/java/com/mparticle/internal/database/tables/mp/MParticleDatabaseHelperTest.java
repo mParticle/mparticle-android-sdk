@@ -12,6 +12,6 @@ public class MParticleDatabaseHelperTest {
         assertTrue(example.equals(MParticleDatabaseHelper.addIntegerColumnString("table_name", "column_name", "123")));
         assertTrue(example.equals(MParticleDatabaseHelper.addColumnString("table_name", "column_name", "INTEGER")));
         example = example + " DEFAULT abcd";
-        assertTrue(example.equals(MParticleDatabaseHelper.addColumnString("table_name", "column_name", "STRING", "abcd")));
+        assertTrue(example.equals(MParticleDatabaseHelper.addColumnString("table_name", "column_name", "INTEGER", "abcd")));
     }
 }

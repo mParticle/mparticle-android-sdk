@@ -12,7 +12,7 @@ public final class MParticleUser {
     private Map<MParticle.IdentityType, String> userIdentities;
     public Map<String, Object> getUserAttributes() {
         return userAttributes;
-    }\
+    }
 
     public long getId() {
         throw new UnsupportedOperationException("Not implemented yet...");

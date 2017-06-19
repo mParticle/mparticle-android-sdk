@@ -7,6 +7,7 @@ import android.os.Message;
 import com.mparticle.MPEvent;
 import com.mparticle.MParticle;
 import com.mparticle.MockMParticle;
+import com.mparticle.internal.database.services.MParticleDBManager;
 import com.mparticle.mock.MockContext;
 import com.mparticle.mock.MockSharedPreferences;
 
@@ -27,6 +28,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.atomic.AtomicLong;
 
 import static org.junit.Assert.assertEquals;
@@ -52,12 +54,14 @@ public class MessageManagerTest {
         context = new MockContext();
         configManager = Mockito.mock(ConfigManager.class);
         Mockito.when(configManager.getApiKey()).thenReturn("123456789");
+        Mockito.when(configManager.getUserConfig()).thenReturn(UserConfig.getUserConfig(context, new Random().nextInt()));
         appStateManager = new AppStateManager(context, true);
         messageHandler = Mockito.mock(MessageHandler.class);
         uploadHandler = Mockito.mock(UploadHandler.class);
         manager = new MessageManager(context,
                 configManager,
                 MParticle.InstallType.AutoDetect, appStateManager,
+                Mockito.mock(MParticleDBManager.class),
                 messageHandler,
                 uploadHandler);
     }
@@ -128,10 +132,10 @@ public class MessageManagerTest {
         assertFalse(sessionStart.has(Constants.MessageKey.PREVIOUS_SESSION_LENGTH));
         assertNull(sessionStart.optString(Constants.MessageKey.PREVIOUS_SESSION_ID, null));
         assertFalse(sessionStart.has(Constants.MessageKey.PREVIOUS_SESSION_START));
-        assertEquals(appStateManager.getSession().mSessionID, prefs.getString(Constants.PrefKeys.PREVIOUS_SESSION_ID, null));
+        assertEquals(appStateManager.getSession().mSessionID, configManager.getUserConfig().getPreviousSessionId(null));
         assertFalse(prefs.getBoolean(Constants.PrefKeys.FIRSTRUN + configManager.getApiKey(), true));
-        prefs.putLong(Constants.PrefKeys.PREVIOUS_SESSION_FOREGROUND, 42000);
-        prefs.putLong(Constants.PrefKeys.PREVIOUS_SESSION_START, 24000);
+        configManager.getUserConfig().setPreviousSessionForeground(42000);
+        configManager.getUserConfig().setPreviousSessionStart(24000);
         prefs.commit();
         sessionStart = manager.startSession();
         assertNotNull(sessionStart);
@@ -143,12 +147,12 @@ public class MessageManagerTest {
 
     @Test
     public void testIncrementSessionCounter(){
-        int count = context.getSharedPreferences(null, 0).getInt(Constants.PrefKeys.SESSION_COUNTER, -5);
+        int count = configManager.getUserConfig().getCurrentSessionCounter(-5);
         assertEquals(-5, count);
         for (int i = 0; i < 10; i++){
-            manager.incrementSessionCounter();
+            configManager.getUserConfig().incrementSessionCounter();
         }
-        count = context.getSharedPreferences(null, 0).getInt(Constants.PrefKeys.SESSION_COUNTER, -5);
+        count = configManager.getUserConfig().getCurrentSessionCounter(-5);
         assertEquals(10, count);
     }
 
@@ -163,7 +167,7 @@ public class MessageManagerTest {
         session.mLastEventTime = currentTime;
         manager.updateSessionEnd(session);
         Mockito.verify(messageHandler, Mockito.times(1)).sendMessage(Mockito.any(Message.class));
-        long time = context.getSharedPreferences(null, 0).getLong(Constants.PrefKeys.PREVIOUS_SESSION_FOREGROUND, -1);
+        long time = configManager.getUserConfig().getTimeInForeground(-1);
         assertEquals(5000, time);
     }
 
@@ -253,7 +257,7 @@ public class MessageManagerTest {
         assertEquals(appStateManager.getSession().mLastEventTime, message.getTimestamp());
         assertEquals(appStateManager.getSession().mSessionID, message.getSessionId());
         assertEquals(message.getLong(Constants.MessageKey.EVENT_START_TIME), appStateManager.getSession().mLastEventTime);
-        assertEquals(message.getInt(Constants.MessageKey.BREADCRUMB_SESSION_COUNTER), manager.getCurrentSessionCounter());
+        assertEquals(message.getInt(Constants.MessageKey.BREADCRUMB_SESSION_COUNTER), configManager.getUserConfig().getCurrentSessionCounter());
         assertEquals(message.getString(Constants.MessageKey.BREADCRUMB_LABEL), "test crumb");
         Mockito.verify(messageHandler, Mockito.times(2)).sendMessage(Mockito.any(Message.class));
     }
@@ -294,7 +298,7 @@ public class MessageManagerTest {
         StringWriter stringWriter = new StringWriter();
         t.printStackTrace(new PrintWriter(stringWriter));
         assertEquals(message.getString(Constants.MessageKey.ERROR_STACK_TRACE), stringWriter.toString());
-        assertEquals(message.getInt(Constants.MessageKey.ERROR_SESSION_COUNT), manager.getCurrentSessionCounter());
+        assertEquals(message.getInt(Constants.MessageKey.ERROR_SESSION_COUNT), configManager.getUserConfig().getCurrentSessionCounter());
         Mockito.verify(messageHandler, Mockito.times(3)).sendMessage(Mockito.any(Message.class));
 
         message = manager.logErrorEvent(errorMessage, t, attrs, false);
@@ -307,7 +311,7 @@ public class MessageManagerTest {
         stringWriter = new StringWriter();
         t.printStackTrace(new PrintWriter(stringWriter));
         assertEquals(message.getString(Constants.MessageKey.ERROR_STACK_TRACE), stringWriter.toString());
-        assertEquals(message.getInt(Constants.MessageKey.ERROR_SESSION_COUNT), manager.getCurrentSessionCounter());
+        assertEquals(message.getInt(Constants.MessageKey.ERROR_SESSION_COUNT), configManager.getUserConfig().getCurrentSessionCounter());
         Mockito.verify(messageHandler, Mockito.times(4)).sendMessage(Mockito.any(Message.class));
 
         message = manager.logErrorEvent(errorMessage, t, attrs);
@@ -320,7 +324,7 @@ public class MessageManagerTest {
         stringWriter = new StringWriter();
         t.printStackTrace(new PrintWriter(stringWriter));
         assertEquals(message.getString(Constants.MessageKey.ERROR_STACK_TRACE), stringWriter.toString());
-        assertEquals(message.getInt(Constants.MessageKey.ERROR_SESSION_COUNT), manager.getCurrentSessionCounter());
+        assertEquals(message.getInt(Constants.MessageKey.ERROR_SESSION_COUNT), configManager.getUserConfig().getCurrentSessionCounter());
         Mockito.verify(messageHandler, Mockito.times(5)).sendMessage(Mockito.any(Message.class));
     }
 

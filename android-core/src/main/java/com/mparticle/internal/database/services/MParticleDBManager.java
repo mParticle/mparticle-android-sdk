@@ -178,7 +178,7 @@ public class MParticleDBManager extends BaseDBManager {
         for (MessageService.ReadyMessage readyMessage : readyMessages) {
             MessageBatch uploadMessage = uploadMessagesBySession.get(readyMessage.getSessionId());
             if (uploadMessage == null) {
-                uploadMessage = createUploadMessage(configManager, true);
+                uploadMessage = createUploadMessage(configManager, true, mpId);
                 uploadMessagesBySession.put(readyMessage.getSessionId(), uploadMessage);
             }
             int messageLength = readyMessage.getMessage().length();
@@ -234,7 +234,7 @@ public class MParticleDBManager extends BaseDBManager {
         for (MessageService.ReadyMessage readyMessage: readyMessages) {
             MessageBatch uploadMessage = uploadMessagesBySession.get(readyMessage.getSessionId());
             if (uploadMessage == null) {
-                uploadMessage = createUploadMessage(configManager, false);
+                uploadMessage = createUploadMessage(configManager, false, mpId);
                 uploadMessagesBySession.put(readyMessage.getSessionId(), uploadMessage);
             }
             int messageLength = readyMessage.getMessage().length();
@@ -363,12 +363,12 @@ public class MParticleDBManager extends BaseDBManager {
     /**
      * Method that is responsible for building an upload message to be sent over the wire.
     **/
-    private MessageBatch createUploadMessage(ConfigManager configManager, boolean history) throws JSONException {
+    private MessageBatch createUploadMessage(ConfigManager configManager, boolean history, long mpId) throws JSONException {
         MessageBatch batchMessage = MessageBatch.create(
                 history,
                 configManager,
                 mPreferences,
-                configManager.getCookies());
+                configManager.getCookies(mpId));
         addGCMHistory(batchMessage);
         return batchMessage;
     }

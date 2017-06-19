@@ -30,7 +30,7 @@ import javax.net.ssl.SSLHandshakeException;
 public class UploadHandler extends Handler {
 
     private final Context mContext;
-    private MParticleDBManager mParticleDBManager;
+    MParticleDBManager mParticleDBManager;
     private final AppStateManager mAppStateManager;
     private final MessageManager mMessageManager;
     private ConfigManager mConfigManager;

@@ -9,6 +9,7 @@ import com.mparticle.MParticle;
 import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.Constants;
 import com.mparticle.internal.MPUtility;
+import com.mparticle.internal.UserConfig;
 import com.mparticle.internal.database.services.SQLiteOpenHelperWrapper;
 
 import org.json.JSONException;
@@ -54,6 +55,7 @@ public class MParticleDatabaseHelper implements SQLiteOpenHelperWrapper {
         }
         if (oldVersion < 7 ) {
             upgradeMpId(db);
+            UserConfig.setNeedsToMigrate(mContext, true);
         }
     }
 

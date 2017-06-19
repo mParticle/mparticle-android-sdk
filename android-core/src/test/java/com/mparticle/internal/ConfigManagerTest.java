@@ -48,7 +48,7 @@ public class ConfigManagerTest {
         JSONObject json = new JSONObject();
         json.put("test", "value");
         manager.saveConfigJson(json);
-        JSONObject object = new JSONObject(manager.mPreferences.getString(ConfigManager.CONFIG_JSON, null));
+        JSONObject object = new JSONObject(manager.sPreferences.getString(ConfigManager.CONFIG_JSON, null));
         assertNotNull(object);
     }
 
@@ -63,7 +63,7 @@ public class ConfigManagerTest {
     public void testUpdateConfig() throws Exception {
         assertEquals(5, ConfigManager.getPushKeys(context).length());
         manager.updateConfig(new JSONObject());
-        JSONObject object = new JSONObject(manager.mPreferences.getString(ConfigManager.CONFIG_JSON, null));
+        JSONObject object = new JSONObject(manager.sPreferences.getString(ConfigManager.CONFIG_JSON, null));
         assertTrue(!object.keys().hasNext());
     }
 
@@ -71,7 +71,7 @@ public class ConfigManagerTest {
     public void testUpdateConfigWithBoolean() throws Exception {
         manager.updateConfig(new JSONObject(sampleConfig));
         manager.updateConfig(new JSONObject(), false);
-        JSONObject object = new JSONObject(manager.mPreferences.getString(ConfigManager.CONFIG_JSON, null));
+        JSONObject object = new JSONObject(manager.sPreferences.getString(ConfigManager.CONFIG_JSON, null));
         assertTrue(object.keys().hasNext());
     }
 
@@ -149,19 +149,19 @@ public class ConfigManagerTest {
 
     @Test
     public void testGetApiKey() throws Exception {
-        assertEquals(manager.sLocalPrefs.mKey, manager.getApiKey());
+        assertEquals(manager.mLocalPrefs.mKey, manager.getApiKey());
     }
 
     @Test
     public void testGetApiSecret() throws Exception {
-        assertEquals(manager.sLocalPrefs.mSecret, manager.getApiSecret());
+        assertEquals(manager.mLocalPrefs.mSecret, manager.getApiSecret());
     }
 
     @Test
     public void testUploadInterval() throws Exception {
         JSONObject object = new JSONObject(sampleConfig);
 
-        assertEquals((1000 * manager.sLocalPrefs.uploadInterval), manager.getUploadInterval());
+        assertEquals((1000 * manager.mLocalPrefs.uploadInterval), manager.getUploadInterval());
         object.put(ConfigManager.KEY_UPLOAD_INTERVAL, 110);
         manager.updateConfig(object);
         assertEquals(1000 * 110, manager.getUploadInterval());
@@ -175,7 +175,7 @@ public class ConfigManagerTest {
 
     @Test
     public void testSessionTimeout() throws Exception {
-        assertEquals(manager.sLocalPrefs.sessionTimeout * 1000, manager.getSessionTimeout());
+        assertEquals(manager.mLocalPrefs.sessionTimeout * 1000, manager.getSessionTimeout());
         JSONObject object = new JSONObject(sampleConfig);
         object.put(ConfigManager.KEY_SESSION_TIMEOUT, 123);
         manager.updateConfig(object);
@@ -220,7 +220,7 @@ public class ConfigManagerTest {
 
     @Test
     public void testIsAutoTrackingEnabled() throws Exception {
-        assertEquals(manager.sLocalPrefs.autoTrackingEnabled, manager.isAutoTrackingEnabled());
+        assertEquals(manager.mLocalPrefs.autoTrackingEnabled, manager.isAutoTrackingEnabled());
     }
 
     @Test
@@ -249,7 +249,7 @@ public class ConfigManagerTest {
 
     @Test
     public void testGetBreadcrumbLimit() throws Exception {
-        assertEquals(AppConfig.DEFAULT_BREADCRUMB_LIMIT, manager.getBreadcrumbLimit());
+        assertEquals(UserConfig.DEFAULT_BREADCRUMB_LIMIT, manager.getBreadcrumbLimit());
     }
 
     @Test
@@ -267,7 +267,7 @@ public class ConfigManagerTest {
 
     @Test
     public void testGetAudienceTimeout() throws Exception {
-        assertEquals(manager.sLocalPrefs.audienceTimeout, manager.getAudienceTimeout());
+        assertEquals(manager.mLocalPrefs.audienceTimeout, manager.getAudienceTimeout());
     }
 
     @Test
@@ -299,6 +299,8 @@ public class ConfigManagerTest {
     @Test
     public void testGetMpid() throws Exception {
         SharedPreferences prefs = context.getSharedPreferences(null, 0);
+        //since getMpId() is called in the ConfigManager constructor, reset it here
+        prefs.edit().remove(Constants.PrefKeys.Mpid).apply();
         long mpid = prefs.getLong(Constants.PrefKeys.Mpid, 0);
         assertTrue(mpid == 0);
         mpid = manager.getMpid();
@@ -374,64 +376,64 @@ public class ConfigManagerTest {
 
     @Test
     public void testSetNullIntegrationAttributes() throws Exception {
-        assertFalse(manager.mPreferences.contains(ATTRIBUTES));
+        assertFalse(manager.sPreferences.contains(ATTRIBUTES));
         manager.setIntegrationAttributes(1, null);
-        assertFalse(manager.mPreferences.contains(ATTRIBUTES));
-        manager.mPreferences.edit().putString(ATTRIBUTES, "{\"1\":{\"test-key\":\"test-value\"}}").apply();
-        assertTrue(manager.mPreferences.contains(ATTRIBUTES));
+        assertFalse(manager.sPreferences.contains(ATTRIBUTES));
+        manager.sPreferences.edit().putString(ATTRIBUTES, "{\"1\":{\"test-key\":\"test-value\"}}").apply();
+        assertTrue(manager.sPreferences.contains(ATTRIBUTES));
         manager.setIntegrationAttributes(1, null);
-        assertFalse(manager.mPreferences.contains(ATTRIBUTES));
+        assertFalse(manager.sPreferences.contains(ATTRIBUTES));
     }
 
     @Test
     public void testSetEmptyIntegrationAttributes() throws Exception {
-        assertFalse(manager.mPreferences.contains(ATTRIBUTES));
+        assertFalse(manager.sPreferences.contains(ATTRIBUTES));
         Map<String, String> attributes = new HashMap<String, String>();
         manager.setIntegrationAttributes(1, attributes);
-        assertFalse(manager.mPreferences.contains(ATTRIBUTES));
-        manager.mPreferences.edit().putString(ATTRIBUTES, "{\"1\":{\"test-key\":\"test-value\"}}").apply();
-        assertTrue(manager.mPreferences.contains(ATTRIBUTES));
+        assertFalse(manager.sPreferences.contains(ATTRIBUTES));
+        manager.sPreferences.edit().putString(ATTRIBUTES, "{\"1\":{\"test-key\":\"test-value\"}}").apply();
+        assertTrue(manager.sPreferences.contains(ATTRIBUTES));
         manager.setIntegrationAttributes(1, attributes);
-        assertFalse(manager.mPreferences.contains(ATTRIBUTES));
+        assertFalse(manager.sPreferences.contains(ATTRIBUTES));
     }
 
     @Test
     public void testSetNonEmptyIntegrationAttributes() throws Exception {
-        assertFalse(manager.mPreferences.contains(ATTRIBUTES));
+        assertFalse(manager.sPreferences.contains(ATTRIBUTES));
         Map<String, String> attributes = new HashMap<String, String>();
         attributes.put("test-key", "value 2");
         manager.setIntegrationAttributes(1, attributes);
         attributes.put("test-key", "value 3");
         manager.setIntegrationAttributes(12, attributes);
-        assertEquals("{\"1\":{\"test-key\":\"value 2\"},\"12\":{\"test-key\":\"value 3\"}}", manager.mPreferences.getString(ATTRIBUTES, null));
+        assertEquals("{\"1\":{\"test-key\":\"value 2\"},\"12\":{\"test-key\":\"value 3\"}}", manager.sPreferences.getString(ATTRIBUTES, null));
     }
 
     @Test
     public void testGetKitIntegrationAttributes() throws Exception {
-        assertFalse(manager.mPreferences.contains(ATTRIBUTES));
+        assertFalse(manager.sPreferences.contains(ATTRIBUTES));
         assertEquals(0, manager.getIntegrationAttributes(1).size());
-        manager.mPreferences.edit().putString(ATTRIBUTES, "{\"1\":{\"test-key\":\"value 2\"},\"12\":{\"test-key\":\"value 3\"}}").apply();
+        manager.sPreferences.edit().putString(ATTRIBUTES, "{\"1\":{\"test-key\":\"value 2\"},\"12\":{\"test-key\":\"value 3\"}}").apply();
         Map<String, String> attributes = manager.getIntegrationAttributes(1);
         assertEquals(1, attributes.size());
         assertEquals("value 2", attributes.get("test-key"));
         attributes = manager.getIntegrationAttributes(12);
         assertEquals(1, attributes.size());
         assertEquals("value 3", attributes.get("test-key"));
-        manager.mPreferences.edit().remove(ATTRIBUTES).apply();
+        manager.sPreferences.edit().remove(ATTRIBUTES).apply();
         assertEquals(0, manager.getIntegrationAttributes(1).size());
         assertEquals(0, manager.getIntegrationAttributes(12).size());
     }
 
     @Test
     public void testGetAllIntegrationAttributes() throws Exception {
-        assertFalse(manager.mPreferences.contains(ATTRIBUTES));
+        assertFalse(manager.sPreferences.contains(ATTRIBUTES));
         assertNull(manager.getIntegrationAttributes());
-        manager.mPreferences.edit().putString(ATTRIBUTES, "{\"1\":{\"test-key\":\"value 2\"},\"12\":{\"test-key\":\"value 3\"}}").apply();
+        manager.sPreferences.edit().putString(ATTRIBUTES, "{\"1\":{\"test-key\":\"value 2\"},\"12\":{\"test-key\":\"value 3\"}}").apply();
         JSONObject attributes = manager.getIntegrationAttributes();
         assertEquals(2, attributes.length());
         assertEquals("value 2", attributes.getJSONObject("1").get("test-key"));
         assertEquals("value 3", attributes.getJSONObject("12").get("test-key"));
-        manager.mPreferences.edit().remove(ATTRIBUTES).apply();
+        manager.sPreferences.edit().remove(ATTRIBUTES).apply();
         assertNull(manager.getIntegrationAttributes());
     }
 

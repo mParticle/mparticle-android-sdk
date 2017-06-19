@@ -8,6 +8,8 @@ import android.database.sqlite.SQLiteDatabase;
 import android.os.Message;
 
 import com.mparticle.MParticle;
+import com.mparticle.internal.database.services.MParticleDBManager;
+import com.mparticle.internal.dto.ReadyUpload;
 import com.mparticle.mock.MockContext;
 
 import org.json.JSONObject;
@@ -23,6 +25,8 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
@@ -42,6 +46,7 @@ public class UploadHandlerTest {
         mConfigManager = Mockito.mock(ConfigManager.class);
         Mockito.when(MParticle.getInstance().getConfigManager()).thenReturn(mConfigManager);
         handler = new UploadHandler(new MockContext(), mConfigManager, stateManager, Mockito.mock(MessageManager.class));
+        handler.mParticleDBManager = Mockito.mock(MParticleDBManager.class);
     }
 
     @Test
@@ -103,6 +108,7 @@ public class UploadHandlerTest {
         MParticleApiClientImpl apiClient = Mockito.mock(MParticleApiClientImpl.class);
         MParticleApiClientImpl.MPRampException rampException = new MParticleApiClientImpl.MPRampException();
         Mockito.when(apiClient.sendMessageBatch(Mockito.anyString())).thenThrow(rampException);
+        Mockito.when(handler.mParticleDBManager.deleteUpload(Mockito.anyInt())).thenReturn(1);
         handler.setApiClient(apiClient);
         handler.uploadMessage(522, "");
         String[] params = {"522"};
@@ -188,11 +194,7 @@ public class UploadHandlerTest {
     public void testUploadSessionHistory() throws Exception {
         handler.handleMessage(null);
         Cursor mockCursor = Mockito.mock(Cursor.class);
-        Mockito.when(mockCursor.moveToNext()).thenReturn(true, false);
-        Mockito.when(mockCursor.getInt(Mockito.anyInt())).thenReturn(123);
-        Mockito.when(mockCursor.getString(Mockito.anyInt())).thenReturn("cool message batch!");
-//        Mockito.when(mockDatabase.query(MParticleDatabase.UploadTable.TABLE_NAME, handler.uploadColumns,
-//                null, null, null, null, MParticleDatabase.UploadTable.CREATED_AT)).thenReturn(mockCursor);
+        Mockito.when(handler.mParticleDBManager.getReadyUploads()).thenReturn(new ArrayList<ReadyUpload>(){{add(new ReadyUpload(123, "cool message batch!"));}});
         MParticleApiClient mockApiClient = Mockito.mock(MParticleApiClient.class);
         handler.setApiClient(mockApiClient);
         Mockito.when(mConfigManager.getIncludeSessionHistory()).thenReturn(true);
