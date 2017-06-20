@@ -65,13 +65,13 @@ public class MParticleTest {
 
         String legalString = new String(new char[256]);
         assertTrue(mp.setUserAttribute(legalString, null));
-        Mockito.verify(mp.mMessageManager, Mockito.times(1)).setUserAttribute(legalString, null);
+        Mockito.verify(mp.mMessageManager, Mockito.times(1)).setUserAttribute(legalString, null, 1);
 
         List<Integer> integerList = new LinkedList<Integer>();
         integerList.add(203948);
         assertTrue(mp.setUserAttribute("test2", integerList));
 
-        Mockito.verify(mp.mMessageManager, Mockito.times(2)).setUserAttribute(stringCaptor.capture(), listCaptor.capture());
+        Mockito.verify(mp.mMessageManager, Mockito.times(2)).setUserAttribute(stringCaptor.capture(), listCaptor.capture(), 1);
         assertTrue(stringCaptor.getValue().equals("test2"));
         List capturedStringList = listCaptor.getValue();
         assertTrue(capturedStringList.size() == 1);
@@ -82,7 +82,7 @@ public class MParticleTest {
         }
         assertTrue(mp.setUserAttribute("test3", longStringList));
 
-        Mockito.verify(mp.mMessageManager, Mockito.times(3)).setUserAttribute(stringCaptor.capture(), listCaptor.capture());
+        Mockito.verify(mp.mMessageManager, Mockito.times(3)).setUserAttribute(stringCaptor.capture(), listCaptor.capture(), 1);
         assertTrue(stringCaptor.getValue().equals("test3"));
         capturedStringList = listCaptor.getValue();
         assertTrue(capturedStringList.equals(longStringList));
@@ -127,7 +127,7 @@ public class MParticleTest {
         integerList.add(203948);
         assertTrue(mp.setUserAttribute("test2", integerList));
 
-        Mockito.verify(mp.mMessageManager, Mockito.times(1)).setUserAttribute(stringCaptor.capture(), listCaptor.capture());
+        Mockito.verify(mp.mMessageManager, Mockito.times(1)).setUserAttribute(stringCaptor.capture(), listCaptor.capture(), 1);
         assertTrue(stringCaptor.getValue().equals("test2"));
         List capturedStringList = listCaptor.getValue();
         assertTrue(capturedStringList.size() == 1);
@@ -138,7 +138,7 @@ public class MParticleTest {
         }
         assertTrue(mp.setUserAttributeList("test3", longStringList));
 
-        Mockito.verify(mp.mMessageManager, Mockito.times(2)).setUserAttribute(stringCaptor.capture(), listCaptor.capture());
+        Mockito.verify(mp.mMessageManager, Mockito.times(2)).setUserAttribute(stringCaptor.capture(), listCaptor.capture(), 1);
         assertTrue(stringCaptor.getValue().equals("test3"));
         capturedStringList = listCaptor.getValue();
         assertTrue(capturedStringList.equals(longStringList));
@@ -161,7 +161,7 @@ public class MParticleTest {
         assertFalse(mp.incrementUserAttribute(null, 3));
 
         assertTrue(mp.incrementUserAttribute("test", 3));
-        Mockito.verify(mp.mMessageManager, Mockito.times(1)).incrementUserAttribute("test", 3);
+        Mockito.verify(mp.mMessageManager, Mockito.times(1)).incrementUserAttribute("test", 3, 1);
     }
 
     @Test
@@ -299,7 +299,7 @@ public class MParticleTest {
         assertFalse(mp.removeUserAttribute(null));
         assertFalse(mp.removeUserAttribute(""));
         assertTrue(mp.removeUserAttribute("test"));
-        Mockito.verify(mp.mMessageManager, Mockito.times(1)).removeUserAttribute("test");
+        Mockito.verify(mp.mMessageManager, Mockito.times(1)).removeUserAttribute("test", 1);
         Mockito.verify(mp.mKitManager, Mockito.times(1)).removeUserAttribute("test");
     }
 
@@ -317,7 +317,7 @@ public class MParticleTest {
         assertFalse(mp.setUserTag(null));
         assertFalse(mp.setUserTag(""));
         assertTrue(mp.setUserTag("blah"));
-        Mockito.verify(mp.mMessageManager, Mockito.times(1)).setUserAttribute("blah", null);
+        Mockito.verify(mp.mMessageManager, Mockito.times(1)).setUserAttribute("blah", null, 1);
     }
 
     @Test
@@ -329,7 +329,7 @@ public class MParticleTest {
         assertFalse(mp.removeUserTag(null));
         assertFalse(mp.removeUserTag(""));
         assertTrue(mp.removeUserTag("test"));
-        Mockito.verify(mp.mMessageManager, Mockito.times(1)).removeUserAttribute("test");
+        Mockito.verify(mp.mMessageManager, Mockito.times(1)).removeUserAttribute("test", 1);
         Mockito.verify(mp.mKitManager, Mockito.times(1)).removeUserAttribute("test");
     }
 

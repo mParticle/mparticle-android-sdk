@@ -23,6 +23,7 @@ import org.json.JSONObject;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.TreeMap;
 import java.util.UUID;
 
@@ -76,7 +77,7 @@ import java.util.UUID;
                     if (MessageType.SESSION_START.equals(messageType)) {
                         dbInsertSession(message);
                     }else{
-                        mMParticleDBManager.dbUpdateSessionEndTime(message.getSessionId(), message.getLong(MessageKey.TIMESTAMP), 0);
+                        mMParticleDBManager.updateSessionEndTime(message.getSessionId(), message.getLong(MessageKey.TIMESTAMP), 0);
                         message.put(Constants.MessageKey.ID, UUID.randomUUID().toString());
                     }
                     if (MessageType.ERROR.equals(messageType)){
@@ -108,7 +109,7 @@ import java.util.UUID;
                     JSONObject sessionAttributes = (JSONObject) msg.obj;
                     String sessionId = sessionAttributes.getString(MessageKey.SESSION_ID);
                     String attributes = sessionAttributes.getString(MessageKey.ATTRIBUTES);
-                    mMParticleDBManager.dbUpdateSessionAttributes(sessionId, attributes);
+                    mMParticleDBManager.updateSessionAttributes(sessionId, attributes);
                 } catch (Exception e) {
                     Logger.error(e, "Error updating session attributes in mParticle DB.");
                 }
@@ -116,17 +117,17 @@ import java.util.UUID;
             case UPDATE_SESSION_END:
                 try {
                     Session session = (Session) msg.obj;
-                    mMParticleDBManager.dbUpdateSessionEndTime(session.mSessionID, session.mLastEventTime, session.getForegroundTime());
+                    mMParticleDBManager.updateSessionEndTime(session.mSessionID, session.mLastEventTime, session.getForegroundTime());
                 } catch (Exception e) {
                     Logger.error(e, "Error updating session end time in mParticle DB");
                 }
                 break;
             case CREATE_SESSION_END_MESSAGE:
                 try {
-                    String sessionId = (String) msg.obj;
+                    Map.Entry<String, Long> entry = (Map.Entry<String, Long>) msg.obj;
                     MPMessage endMessage = null;
                    try {
-                       endMessage = mMParticleDBManager.getSessionForSessionEndMessage(sessionId, ((MessageManager)mMessageManagerCallbacks).getLocation());
+                       endMessage = mMParticleDBManager.getSessionForSessionEndMessage(entry.getKey(), ((MessageManager)mMessageManagerCallbacks).getLocation(), entry.getValue());
                    }catch (JSONException jse){
                        Logger.warning("Failed to create mParticle session end message");
                    }
@@ -157,7 +158,8 @@ import java.util.UUID;
                     // find left-over sessions that exist during startup and end them
                     List<String> sessionIds = mMParticleDBManager.getOrphanSessionIds(mMessageManagerCallbacks.getApiKey());
                     for (String sessionId: sessionIds) {
-                        sendMessage(obtainMessage(MessageHandler.CREATE_SESSION_END_MESSAGE, 0, 0, sessionId));
+                        Map.Entry<String, Long> entry = new HashMap.SimpleEntry<String, Long>(sessionId, (Long)msg.obj);
+                        sendMessage(obtainMessage(MessageHandler.CREATE_SESSION_END_MESSAGE, 0, 0, entry));
                     }
                 } catch (MParticleApiClientImpl.MPNoConfigException ex) {
                     Logger.error("Unable to process initialization, API key and or API Secret is missing");
@@ -170,7 +172,7 @@ import java.util.UUID;
                     MPMessage message = (MPMessage) msg.obj;
                     message.put(Constants.MessageKey.ID, UUID.randomUUID().toString());
                     try {
-                        mMParticleDBManager.dbInsertBreadcrumb(message, mMessageManagerCallbacks.getApiKey());
+                        mMParticleDBManager.insertBreadcrumb(message, mMessageManagerCallbacks.getApiKey());
                     } catch (MParticleApiClientImpl.MPNoConfigException ex) {
                         Logger.error("Unable to process uploads, API key and/or API Secret are missing");
                     }
@@ -203,7 +205,7 @@ import java.util.UUID;
             case STORE_REPORTING_MESSAGE_LIST:
                 try{
                     List<JsonReportingMessage> reportingMessages = (List<JsonReportingMessage>)msg.obj;
-                    mMParticleDBManager.dbInsertReportingMessages(reportingMessages);
+                    mMParticleDBManager.insertReportingMessages(reportingMessages);
                 }catch (Exception e) {
                     Logger.verbose(e, "Error while inserting reporting messages: ", e.toString());
                 }
@@ -227,18 +229,19 @@ import java.util.UUID;
                 break;
             case INCREMENT_USER_ATTRIBUTE:
                 try {
-                    incrementUserAttribute((String)msg.obj, msg.arg1);
+                    Map.Entry<String, Long> obj = (Map.Entry<String, Long>)msg.obj;
+                    incrementUserAttribute(obj.getKey(), msg.arg1, obj.getValue());
                 } catch (Exception e) {
                     Logger.error(e, "Error while incrementing user attribute: ", e.toString());
                 }
         }
     }
 
-    private void incrementUserAttribute(String key, int incrementValue) {
-        TreeMap<String, String> userAttributes = mMParticleDBManager.getUserAttributeSingles();
+    private void incrementUserAttribute(String key, int incrementValue, long mpId) {
+        TreeMap<String, String> userAttributes = mMParticleDBManager.getUserAttributeSingles(mpId);
 
         if (!userAttributes.containsKey(key)) {
-            TreeMap<String, List<String>> userAttributeList = mMParticleDBManager.getUserAttributeLists();
+            TreeMap<String, List<String>> userAttributeList = mMParticleDBManager.getUserAttributeLists(mpId);
             if (userAttributeList.containsKey(key)) {
                 Logger.error("Error while attempting to increment user attribute - existing attribute is a list, which can't be incremented.");
                 return;
@@ -259,6 +262,7 @@ import java.util.UUID;
         UserAttributeResponse wrapper = new UserAttributeResponse();
         wrapper.attributeSingles = new HashMap<String, String>(1);
         wrapper.attributeSingles.put(key, newValue);
+        wrapper.mpId = mpId;
         List<AttributionChangeDTO> attributionChangeDTOs = mMParticleDBManager.setUserAttribute(wrapper);
         for (AttributionChangeDTO attributeChangeDTO: attributionChangeDTOs) {
             logUserAttributeChanged(attributeChangeDTO);
@@ -350,11 +354,6 @@ import java.util.UUID;
         }
     }
 
-
-    private void dbUpdateMessageStatus(String sessionId, long status) {
-        mMParticleDBManager.updateMessageStatus(sessionId, status);
-    }
-
     private void logUserAttributeChanged(AttributionChangeDTO attributionChangeDTO) {
         mMessageManagerCallbacks.logUserAttributeChangeMessage(
                 attributionChangeDTO.getKey(),
@@ -362,7 +361,8 @@ import java.util.UUID;
                 attributionChangeDTO.getOldValue(),
                 attributionChangeDTO.isDeleted(),
                 attributionChangeDTO.isNewAttribute(),
-                attributionChangeDTO.getTime());
+                attributionChangeDTO.getTime(),
+                attributionChangeDTO.getMpId());
     }
 
 }

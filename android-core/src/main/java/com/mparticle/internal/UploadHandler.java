@@ -131,22 +131,24 @@ public class UploadHandler extends Handler {
                 case UPLOAD_MESSAGES:
                 case UPLOAD_TRIGGER_MESSAGES:
                     long uploadInterval = mConfigManager.getUploadInterval();
+                    long mpid = (Long)msg.obj;
                     if (isNetworkConnected && !mApiClient.isThrottled()) {
                         if (uploadInterval > 0 || msg.arg1 == 1) {
-                            prepareMessageUploads(false);
+                            prepareMessageUploads(false, mpid);
                             boolean needsHistory = upload(false);
                             if (needsHistory) {
-                                this.sendEmptyMessage(UPLOAD_HISTORY);
+                                this.sendMessage(obtainMessage(UPLOAD_HISTORY, mConfigManager.getMpid()));
                             }
                         }
                     }
                     if (mAppStateManager.getSession().isActive() && uploadInterval > 0 && msg.arg1 == 0) {
-                        this.sendEmptyMessageDelayed(UPLOAD_MESSAGES, uploadInterval);
+                        this.sendMessageDelayed(obtainMessage(UPLOAD_MESSAGES, mConfigManager.getMpid()), uploadInterval);
                     }
                     break;
                 case UPLOAD_HISTORY:
-                    removeMessages(UPLOAD_HISTORY);
-                    prepareMessageUploads(true);
+                    mpid = (Long)msg.obj;
+                    removeMessages(UPLOAD_HISTORY, mpid);
+                    prepareMessageUploads(true, mpid);
                     if (isNetworkConnected) {
                         upload(true);
                     }
@@ -170,7 +172,7 @@ public class UploadHandler extends Handler {
      * - persist all of the resulting upload batch objects
      * - mark the messages as having been uploaded.
      */
-    private void prepareMessageUploads(boolean history) throws Exception {
+    private void prepareMessageUploads(boolean history, long mpId) throws Exception {
         String currentSessionId = mAppStateManager.getSession().mSessionID;
         long remainingHeap = MPUtility.getRemainingHeapInBytes();
         if (remainingHeap < Constants.LIMIT_MAX_UPLOAD_SIZE) {
@@ -178,16 +180,16 @@ public class UploadHandler extends Handler {
         }
         final boolean sessionHistoryEnabled = MParticle.getInstance().getConfigManager().getIncludeSessionHistory();
         try {
-            mParticleDBManager.cleanupMessages();
+            mParticleDBManager.cleanupMessages(mpId);
             if (history && !sessionHistoryEnabled) {
-                mParticleDBManager.deleteMessagesAndSessions(currentSessionId);
+                mParticleDBManager.deleteMessagesAndSessions(currentSessionId, mpId);
                 return;
             }
 
             if (history) {
-                mParticleDBManager.createSessionHistoryUploadMessage(mConfigManager, mMessageManager.getDeviceAttributes(), currentSessionId);
+                mParticleDBManager.createSessionHistoryUploadMessage(mConfigManager, mMessageManager.getDeviceAttributes(), currentSessionId, mpId);
             } else {
-                mParticleDBManager.createMessagesForUploadMessage(mConfigManager, mMessageManager.getDeviceAttributes(), currentSessionId, sessionHistoryEnabled);
+                mParticleDBManager.createMessagesForUploadMessage(mConfigManager, mMessageManager.getDeviceAttributes(), currentSessionId, sessionHistoryEnabled, mpId);
             }
         } catch (Exception e) {
             Logger.verbose("Error preparing batch upload in mParticle DB: " + e.getMessage());
@@ -263,7 +265,6 @@ public class UploadHandler extends Handler {
     }
 
     /**
-<<<<<<< HEAD
      * Method that is responsible for building an upload message to be sent over the wire.
      */
     MessageBatch createUploadMessage(boolean history) throws JSONException {

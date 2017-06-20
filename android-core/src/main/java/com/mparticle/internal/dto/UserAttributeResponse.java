@@ -7,4 +7,5 @@ public class UserAttributeResponse {
     public Map<String, String> attributeSingles;
     public Map<String, List<String>> attributeLists;
     public long time;
+    public long mpId;
 }

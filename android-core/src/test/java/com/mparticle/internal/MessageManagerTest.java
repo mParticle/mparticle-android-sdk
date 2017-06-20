@@ -138,7 +138,7 @@ public class MessageManagerTest {
         assertEquals(Constants.MessageType.SESSION_START, sessionStart.getMessageType());
         assertEquals(42, sessionStart.getLong(Constants.MessageKey.PREVIOUS_SESSION_LENGTH));
         assertEquals(24000, sessionStart.getLong(Constants.MessageKey.PREVIOUS_SESSION_START));
-        Mockito.verify(messageHandler, Mockito.times(1)).sendEmptyMessage(MessageHandler.END_ORPHAN_SESSIONS);
+        Mockito.verify(messageHandler, Mockito.times(1)).sendMessage(messageHandler.obtainMessage(MessageHandler.END_ORPHAN_SESSIONS, 1));
     }
 
     @Test
@@ -418,7 +418,7 @@ public class MessageManagerTest {
 
     @Test
     public void testLogUserAttributeChange() throws Exception {
-        MPMessage message = manager.logUserAttributeChangeMessage("this is a key", "this is the new value", "this is the old value", false, false, 0);
+        MPMessage message = manager.logUserAttributeChangeMessage("this is a key", "this is the new value", "this is the old value", false, false, 0, 1);
         assertEquals("this is a key", message.getString("n"));
         assertEquals("this is the new value", message.getString("nv"));
         assertEquals("this is the old value", message.getString("ov"));
@@ -433,7 +433,7 @@ public class MessageManagerTest {
         oldValue.add("this is an old value");
         oldValue.add("this is another old value");
 
-        message = manager.logUserAttributeChangeMessage("this is a key", newValue, oldValue, false, true, 0);
+        message = manager.logUserAttributeChangeMessage("this is a key", newValue, oldValue, false, true, 0, 1);
         assertEquals("this is a key", message.getString("n"));
         assertEquals(2, message.getJSONArray("nv").length());
         assertEquals(2, message.getJSONArray("ov").length());
@@ -445,7 +445,7 @@ public class MessageManagerTest {
 
     @Test
     public void testLogUserAttributeChangeNewAttribute() throws Exception {
-        MPMessage message = manager.logUserAttributeChangeMessage("this is a key", "this is the new value", null, false, false, 0);
+        MPMessage message = manager.logUserAttributeChangeMessage("this is a key", "this is the new value", null, false, false, 0, 1);
         assertEquals("this is a key", message.getString("n"));
         assertEquals("this is the new value", message.getString("nv"));
         assertEquals(JSONObject.NULL, message.get("ov"));
@@ -454,7 +454,7 @@ public class MessageManagerTest {
 
     @Test
     public void testLogUserAttributeChangeNewTag() throws Exception {
-        MPMessage message = manager.logUserAttributeChangeMessage("this is a key", null, null, false, false, 0);
+        MPMessage message = manager.logUserAttributeChangeMessage("this is a key", null, null, false, false, 0, 1);
         assertEquals("this is a key", message.getString("n"));
         assertEquals(JSONObject.NULL, message.get("ov"));
         assertEquals(JSONObject.NULL, message.get("nv"));
@@ -463,7 +463,7 @@ public class MessageManagerTest {
 
     @Test
     public void testLogUserAttributeChangeTagToAttribute() throws Exception {
-        MPMessage message = manager.logUserAttributeChangeMessage("this is a key", "this is the new value", null, false, false, 0);
+        MPMessage message = manager.logUserAttributeChangeMessage("this is a key", "this is the new value", null, false, false, 0, 1);
         assertEquals("this is a key", message.getString("n"));
         assertEquals(JSONObject.NULL, message.get("ov"));
         assertEquals("this is the new value", message.get("nv"));
@@ -475,7 +475,7 @@ public class MessageManagerTest {
         List<String> newValue = new ArrayList<String>();
         newValue.add("this is a new value");
         newValue.add("this is another new value");
-        MPMessage message = manager.logUserAttributeChangeMessage("this is a key", newValue, "this is the old value", false, false, 0);
+        MPMessage message = manager.logUserAttributeChangeMessage("this is a key", newValue, "this is the old value", false, false, 0, 1);
         assertEquals("this is a key", message.getString("n"));
         assertEquals(2, message.getJSONArray("nv").length());
         assertEquals("this is a new value", message.getJSONArray("nv").get(0));
@@ -485,7 +485,7 @@ public class MessageManagerTest {
 
     @Test
     public void testLogUserAttributeChangeRemoveTag() throws Exception {
-        MPMessage message = manager.logUserAttributeChangeMessage("this is a key", null, null, true, false, 0);
+        MPMessage message = manager.logUserAttributeChangeMessage("this is a key", null, null, true, false, 0, 1);
         assertEquals("this is a key", message.getString("n"));
         assertEquals(JSONObject.NULL, message.get("ov"));
         assertEquals(JSONObject.NULL, message.get("nv"));
@@ -494,7 +494,7 @@ public class MessageManagerTest {
 
     @Test
     public void testLogUserAttributeChangeRemoveAttribute() throws Exception {
-        MPMessage message = manager.logUserAttributeChangeMessage("this is a key", null, "this is the old value", true, false, 0);
+        MPMessage message = manager.logUserAttributeChangeMessage("this is a key", null, "this is the old value", true, false, 0, 1);
         assertEquals("this is a key", message.getString("n"));
         assertEquals("this is the old value", message.get("ov"));
         assertEquals(JSONObject.NULL, message.get("nv"));

@@ -7,14 +7,16 @@ public class AttributionChangeDTO {
     private boolean deleted;
     private boolean isNewAttribute;
     private long time;
+    private long mpId;
 
-    public AttributionChangeDTO(String key, Object newValue, Object oldValue, boolean deleted, boolean isNewAttribute, long time) {
+    public AttributionChangeDTO(String key, Object newValue, Object oldValue, boolean deleted, boolean isNewAttribute, long time, long mpId) {
         this.key = key;
         this.newValue = newValue;
         this.oldValue = oldValue;
         this.deleted = deleted;
         this.isNewAttribute = isNewAttribute;
         this.time = time;
+        this.mpId = mpId;
     }
 
     public String getKey() {
@@ -39,5 +41,9 @@ public class AttributionChangeDTO {
 
     public long getTime() {
         return time;
+    }
+
+    public long getMpId() {
+        return mpId;
     }
 }

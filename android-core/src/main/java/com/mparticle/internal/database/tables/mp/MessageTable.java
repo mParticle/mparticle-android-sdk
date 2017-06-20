@@ -13,6 +13,7 @@ public class MessageTable {
         String CREATED_AT = "message_time";
         String MESSAGE_TYPE = "message_type";
         String CF_UUID = "cfuuid";
+        String MP_ID = "mpid";
     }
 
     static String getAddMpIdColumnString(String defaultValue) {
@@ -28,7 +29,8 @@ public class MessageTable {
                     MessageTableColumns.STATUS + " INTEGER, " +
                     MessageTableColumns.CREATED_AT + " INTEGER NOT NULL, " +
                     MessageTableColumns.MESSAGE_TYPE + " TEXT, " +
-                    MessageTableColumns.CF_UUID + " TEXT" +
+                    MessageTableColumns.CF_UUID + " TEXT, " +
+                    MessageTableColumns.MP_ID + " INTEGER" +
                     ");";
 
 }

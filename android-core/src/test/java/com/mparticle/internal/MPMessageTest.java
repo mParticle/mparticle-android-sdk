@@ -18,7 +18,7 @@ public class MPMessageTest {
     public void testEventLength() throws Exception {
         MPEvent event = new MPEvent.Builder("test name", MParticle.EventType.Navigation).build();
         Session session = new Session();
-        MPMessage message = new MPMessage.Builder(Constants.MessageType.EVENT, session, null)
+        MPMessage message = new MPMessage.Builder(Constants.MessageType.EVENT, session, null, 1)
                 .name(event.getEventName())
                 .timestamp(1235)
                 .length(event.getLength())
@@ -31,7 +31,7 @@ public class MPMessageTest {
         Map<String, String> info = new HashMap<String, String>(1);
         info.put("EventLength", "321");
         MPEvent event2 = new MPEvent.Builder("test name", MParticle.EventType.Navigation).duration(123).info(info).build();
-        MPMessage message2 = new MPMessage.Builder(Constants.MessageType.EVENT, session, null)
+        MPMessage message2 = new MPMessage.Builder(Constants.MessageType.EVENT, session, null, 1)
                 .name(event2.getEventName())
                 .timestamp(1235)
                 .length(event2.getLength())
@@ -41,7 +41,7 @@ public class MPMessageTest {
         assertEquals(message2.getAttributes().getString("EventLength"), "321");
 
         MPEvent event3 = new MPEvent.Builder("test name", MParticle.EventType.Navigation).duration(123).build();
-        MPMessage message3 = new MPMessage.Builder(Constants.MessageType.EVENT, session, null)
+        MPMessage message3 = new MPMessage.Builder(Constants.MessageType.EVENT, session, null, 1)
                 .name(event3.getEventName())
                 .timestamp(1235)
                 .length(event3.getLength())

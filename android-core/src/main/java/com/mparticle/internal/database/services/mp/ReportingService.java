@@ -15,8 +15,9 @@ import java.util.List;
 
 public class ReportingService extends ReportingTable {
 
-    public static void insertReportingMessage(SQLiteDatabase db, JsonReportingMessage message) {
+    public static void insertReportingMessage(SQLiteDatabase db, JsonReportingMessage message, long mpId) {
         ContentValues values = new ContentValues();
+        values.put(ReportingTableColumns.MP_ID, mpId);
         values.put(ReportingTableColumns.CREATED_AT, message.getTimestamp());
         values.put(ReportingTableColumns.MODULE_ID, message.getModuleId());
         values.put(ReportingTableColumns.MESSAGE, message.toJson().toString());
@@ -24,15 +25,15 @@ public class ReportingService extends ReportingTable {
         db.insert(ReportingTableColumns.TABLE_NAME, null, values);
     }
 
-    public static List<ReportingMessage> getReportingMessagesForUpload(SQLiteDatabase database) throws JSONException {
+    public static List<ReportingMessage> getReportingMessagesForUpload(SQLiteDatabase database, long mpId) throws JSONException {
         List<ReportingMessage> reportingMessages = new ArrayList<ReportingMessage>();
         Cursor reportingMessageCursor = null;
         try {
             reportingMessageCursor = database.query(
                     ReportingTableColumns.TABLE_NAME,
                     null,
-                    null,
-                    null,
+                    ReportingTableColumns.MP_ID + " = ?",
+                    new String[]{String.valueOf(mpId)},
                     null,
                     null,
                     ReportingTableColumns._ID + " asc");
@@ -60,9 +61,8 @@ public class ReportingService extends ReportingTable {
     /**
      * Delete reporting messages after they've been included in an upload message.
      */
-    public static void dbMarkAsUploadedReportingMessage(SQLiteDatabase database, int lastMessageId) {
-        String messageId = Long.toString(lastMessageId);
-        String[] whereArgs = new String[]{messageId};
+    public static void deleteReportingMessage(SQLiteDatabase database, int messageId) {
+        String[] whereArgs = new String[]{Long.toString(messageId)};
         String whereClause = "_id =?";
         database.delete(ReportingTableColumns.TABLE_NAME, whereClause, whereArgs);
     }

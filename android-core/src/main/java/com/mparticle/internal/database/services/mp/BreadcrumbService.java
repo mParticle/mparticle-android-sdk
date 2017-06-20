@@ -18,8 +18,9 @@ public class BreadcrumbService extends BreadcrumbTable {
 
     private static final String[] idColumns = {"_id"};
 
-    public static void dbInsertBreadcrumb(SQLiteDatabase db, MPMessage message, String apiKey) throws JSONException {
+    public static int insertBreadcrumb(SQLiteDatabase db, MPMessage message, String apiKey, Long mpid) throws JSONException {
         ContentValues contentValues = new ContentValues();
+        contentValues.put(BreadcrumbTableColumns.MP_ID, mpid);
         contentValues.put(BreadcrumbTableColumns.API_KEY, apiKey);
         contentValues.put(BreadcrumbTableColumns.CREATED_AT, message.getLong(Constants.MessageKey.TIMESTAMP));
         contentValues.put(BreadcrumbTableColumns.SESSION_ID, message.getSessionId());
@@ -27,14 +28,21 @@ public class BreadcrumbService extends BreadcrumbTable {
 
 
         db.insert(BreadcrumbTableColumns.TABLE_NAME, null, contentValues);
-        Cursor cursor = db.query(BreadcrumbTableColumns.TABLE_NAME, idColumns, null, null, null, null, " _id desc limit 1");
+        Cursor cursor = db.query(BreadcrumbTableColumns.TABLE_NAME,
+                idColumns,
+                BreadcrumbTableColumns.MP_ID + " = ?",
+                new String[]{String.valueOf(mpid)},
+                null,
+                null,
+                " _id asc");
         if (cursor.moveToFirst()) {
-            int maxId = cursor.getInt(0);
-            if (maxId > ConfigManager.getBreadcrumbLimit()) {
-                String[] limit = {Integer.toString(maxId - ConfigManager.getBreadcrumbLimit())};
-                db.delete(BreadcrumbTableColumns.TABLE_NAME, " _id < ?", limit);
+            int minId = cursor.getInt(0);
+            if (cursor.getCount() > ConfigManager.getBreadcrumbLimit()) {
+                String[] limit = {String.valueOf(minId)};
+                return db.delete(BreadcrumbTableColumns.TABLE_NAME, " _id = ?", limit);
             }
         }
+        return -1;
     }
 
     private static final String[] breadcrumbColumns = {
@@ -42,13 +50,36 @@ public class BreadcrumbService extends BreadcrumbTable {
             BreadcrumbTableColumns.MESSAGE
     };
 
-    public static void appendBreadcrumbs(SQLiteDatabase db, JSONObject message) throws JSONException {
+    /**
+     * for testing only
+     */
+    static int getBreadcrumbCount(SQLiteDatabase db, Long mpid) {
+        Cursor rawIds = null;
+
+        try {
+            rawIds = db.query(BreadcrumbTableColumns.TABLE_NAME,
+                    null,
+                    BreadcrumbTableColumns.MP_ID + " = ? ",
+                    new String[]{String.valueOf(mpid)},
+                    null,
+                    null,
+                    null);
+            return rawIds.getCount();
+        }
+        finally {
+            if (rawIds != null && !rawIds.isClosed()) {
+                rawIds.close();
+            }
+        }
+    }
+
+    public static JSONArray getBreadcrumbs(SQLiteDatabase db, Long mpid) throws JSONException {
         Cursor breadcrumbCursor = null;
         try {
             breadcrumbCursor = db.query(BreadcrumbTableColumns.TABLE_NAME,
                     breadcrumbColumns,
-                    null,
-                    null,
+                    BreadcrumbTableColumns.MP_ID + " = ? ",
+                    new String[]{String.valueOf(mpid)},
                     null,
                     null,
                     BreadcrumbTableColumns.CREATED_AT + " desc limit " + ConfigManager.getBreadcrumbLimit());
@@ -60,8 +91,9 @@ public class BreadcrumbService extends BreadcrumbTable {
                     JSONObject breadcrumbObject = new JSONObject(breadcrumbCursor.getString(breadcrumbIndex));
                     breadcrumbs.put(breadcrumbObject);
                 }
-                message.put(Constants.MessageType.BREADCRUMB, breadcrumbs);
+                return breadcrumbs;
             }
+
         } catch (Exception e) {
             Logger.debug("Error while appending breadcrumbs: " + e.toString());
         } finally {
@@ -69,5 +101,6 @@ public class BreadcrumbService extends BreadcrumbTable {
                 breadcrumbCursor.close();
             }
         }
+        return new JSONArray();
     }
 }

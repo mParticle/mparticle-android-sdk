@@ -17,14 +17,12 @@ import java.util.List;
 import java.util.Map;
 
 public class MPMessage extends JSONObject{
+    private long mpId;
 
     private MPMessage(){}
 
-    public MPMessage(String json) throws JSONException {
-        super(json);
-    }
-
     private MPMessage(Builder builder) throws JSONException{
+        mpId = builder.mMPId;
         put(Constants.MessageKey.TYPE, builder.mMessageType);
         put(Constants.MessageKey.TIMESTAMP, builder.mTimestamp);
         if (Constants.MessageType.SESSION_START == builder.mMessageType) {
@@ -85,7 +83,7 @@ public class MPMessage extends JSONObject{
         }
     }
 
-    public static void addCommerceEventInfo(MPMessage message, CommerceEvent event) {
+    private static void addCommerceEventInfo(MPMessage message, CommerceEvent event) {
         try {
 
             if (event.getScreen() != null) {
@@ -257,6 +255,10 @@ public class MPMessage extends JSONObject{
         return optString(Constants.MessageKey.NAME);
     }
 
+    public long getMpId() {
+        return mpId;
+    }
+
     public static class Builder {
         private final String mMessageType;
         private final Session mSession;
@@ -268,15 +270,17 @@ public class MPMessage extends JSONObject{
         private String mDataConnection;
         private Double mLength = null;
         private Map<String, List<String>> mCustomFlags;
+        private long mMPId;
 
-        public Builder(String messageType, Session session, Location location){
+        public Builder(String messageType, Session session, Location location, long mpId){
             mMessageType = messageType;
             mSession = new Session(session);
             mLocation = location;
+            mMPId = mpId;
         }
 
-        public Builder(CommerceEvent event, Session session, Location location) {
-            this(Constants.MessageType.COMMERCE_EVENT, session, location);
+        public Builder(CommerceEvent event, Session session, Location location, long mpId) {
+            this(Constants.MessageType.COMMERCE_EVENT, session, location, mpId);
             commerceEvent = event;
         }
 

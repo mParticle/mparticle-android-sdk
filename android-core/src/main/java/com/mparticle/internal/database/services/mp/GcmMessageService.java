@@ -17,21 +17,21 @@ import java.util.List;
 
 public class GcmMessageService extends GcmMessageTable {
     private static String[] gcmColumns = {GcmMessageTableColumns.CONTENT_ID, GcmMessageTableColumns.CAMPAIGN_ID, GcmMessageTableColumns.EXPIRATION, GcmMessageTableColumns.DISPLAYED_AT};
-    private static String gcmDeleteWhere = GcmMessageTableColumns.EXPIRATION + " < ? and " + GcmMessageTableColumns.DISPLAYED_AT + " > 0";
+    private static String gcmDeleteWhere = GcmMessageTableColumns.EXPIRATION + " < ? and " + GcmMessageTableColumns.DISPLAYED_AT + " > 0 and " + GcmMessageTableColumns.MP_ID + " = ? ";
 
-    public static int deleteExpiredGcmMessages(SQLiteDatabase database) {
-        String[] deleteWhereArgs = {Long.toString(System.currentTimeMillis())};
+    public static int deleteExpiredGcmMessages(SQLiteDatabase database, long mpId) {
+        String[] deleteWhereArgs = {Long.toString(System.currentTimeMillis()), String.valueOf(mpId)};
         return database.delete(GcmMessageTableColumns.TABLE_NAME, gcmDeleteWhere, deleteWhereArgs);
     }
 
-    public static List<GcmHistory> getGcmHistory(SQLiteDatabase database) {
+    public static List<GcmHistory> getGcmHistory(SQLiteDatabase database, long mpId) {
         Cursor gcmHistory = null;
         List<GcmHistory> histories = new ArrayList<GcmHistory>();
         try {
             gcmHistory = database.query(GcmMessageTableColumns.TABLE_NAME,
                     gcmColumns,
-                    null,
-                    null,
+                    GcmMessageTableColumns.MP_ID + " = ? ",
+                    new String[]{String.valueOf(mpId)},
                     null,
                     null,
                     GcmMessageTableColumns.EXPIRATION + " desc");
@@ -54,12 +54,12 @@ public class GcmMessageService extends GcmMessageTable {
         return histories;
     }
 
-    public static void clearOldProviderGcm(SQLiteDatabase db) {
-        String[] deleteWhereArgs = {Integer.toString(GcmMessageTableColumns.PROVIDER_CONTENT_ID)};
+    public static void clearOldProviderGcm(SQLiteDatabase db, long mpId) {
+        String[] deleteWhereArgs = {Integer.toString(GcmMessageTableColumns.PROVIDER_CONTENT_ID), String.valueOf(mpId)};
         db.delete(GcmMessageTableColumns.TABLE_NAME, GcmMessageTableColumns.CONTENT_ID + " = ?", deleteWhereArgs);
     }
 
-    public static void insertGcmMessage(SQLiteDatabase db, AbstractCloudMessage message, String appState) {
+    public static void insertGcmMessage(SQLiteDatabase db, AbstractCloudMessage message, String appState, long mpId) {
         ContentValues contentValues = new ContentValues();
         if (message instanceof MPCloudNotificationMessage) {
             contentValues.put(GcmMessageTableColumns.CONTENT_ID, ((MPCloudNotificationMessage) message).getContentId());
@@ -75,25 +75,26 @@ public class GcmMessageService extends GcmMessageTable {
         contentValues.put(GcmMessageTableColumns.PAYLOAD, message.getRedactedJsonPayload().toString());
         contentValues.put(GcmMessageTableColumns.BEHAVIOR, 0);
         contentValues.put(GcmMessageTableColumns.CREATED_AT, System.currentTimeMillis());
-
+        contentValues.put(GcmMessageTableColumns.MP_ID, String.valueOf(mpId));
         contentValues.put(GcmMessageTableColumns.APPSTATE, appState);
 
         db.replace(GcmMessageTableColumns.TABLE_NAME, null, contentValues);
     }
 
-    public static List<GcmMessageDTO> logInfluenceOpenGcmMessages(SQLiteDatabase db, MessageManager.InfluenceOpenMessage message) {
+    public static List<GcmMessageDTO> logInfluenceOpenGcmMessages(SQLiteDatabase db, MessageManager.InfluenceOpenMessage message, long mpId) {
         Cursor gcmCursor = null;
         List<GcmMessageDTO> gcmMessages = new ArrayList<GcmMessageDTO>();
         try {
 
             gcmCursor = db.query(GcmMessageTableColumns.TABLE_NAME,
-                    null, GcmMessageTableColumns.CONTENT_ID + " != " + GcmMessageTableColumns.PROVIDER_CONTENT_ID + " and " +
+                    null,
+                    GcmMessageTableColumns.CONTENT_ID + " != " + GcmMessageTableColumns.PROVIDER_CONTENT_ID + " and " +
                             GcmMessageTableColumns.DISPLAYED_AT +
                             " > 0 and " +
                             GcmMessageTableColumns.DISPLAYED_AT +
                             " > " + (message.mTimeStamp - message.mTimeout) +
-                            " and ((" + GcmMessageTableColumns.BEHAVIOR + " & " + AbstractCloudMessage.FLAG_INFLUENCE_OPEN + "" + ") != " + AbstractCloudMessage.FLAG_INFLUENCE_OPEN + ")",
-                    null,
+                            " and ((" + GcmMessageTableColumns.BEHAVIOR + " & " + AbstractCloudMessage.FLAG_INFLUENCE_OPEN + "" + ") != " + AbstractCloudMessage.FLAG_INFLUENCE_OPEN + ") and " + GcmMessageTableColumns.MP_ID + " = ?",
+                    new String[]{String.valueOf(mpId)},
                     null,
                     null,
                     null);
@@ -113,14 +114,14 @@ public class GcmMessageService extends GcmMessageTable {
         return gcmMessages;
     }
 
-    public static int getCurrentBehaviors(SQLiteDatabase db, String contentId) {
+    public static int getCurrentBehaviors(SQLiteDatabase db, String contentId, long mpId) {
         Cursor gcmCursor = null;
         int currentBehaviors = -1;
         try {
-            String[] args = {contentId};
+            String[] args = {contentId, String.valueOf(mpId)};
             gcmCursor = db.query(GcmMessageTableColumns.TABLE_NAME,
                     null,
-                    GcmMessageTableColumns.CONTENT_ID + " =?",
+                    GcmMessageTableColumns.CONTENT_ID + " = ? and " + GcmMessageTableColumns.MP_ID + " = ?",
                     args,
                     null,
                     null,
@@ -136,6 +137,10 @@ public class GcmMessageService extends GcmMessageTable {
         return currentBehaviors;
     }
 
+    /**
+     * TODO
+     * check if this one needs to be stored by queried by MPID, or is contentId a unique identifier..it seems like it is unique
+     */
     public static int updateGcmBehavior(SQLiteDatabase db, int newBehavior, long timestamp, String contentId) {
         ContentValues values = new ContentValues();
         String[] args = {contentId};
@@ -147,14 +152,14 @@ public class GcmMessageService extends GcmMessageTable {
         return db.update(GcmMessageTableColumns.TABLE_NAME, values, GcmMessageTableColumns.CONTENT_ID + " =?", args);
     }
 
-    public static String getPayload(SQLiteDatabase db) {
+    public static String getPayload(SQLiteDatabase db, long mpId) {
         Cursor pushCursor = null;
         String payload = null;
         try {
             pushCursor = db.query(GcmMessageTableColumns.TABLE_NAME,
                     null,
-                    GcmMessageTableColumns.DISPLAYED_AT + " > 0",
-                    null,
+                    GcmMessageTableColumns.DISPLAYED_AT + " > 0 and " + GcmMessageTableColumns.MP_ID,
+                    new String[]{String.valueOf(mpId)},
                     null,
                     null,
                     GcmMessageTableColumns.DISPLAYED_AT + " desc limit 1");

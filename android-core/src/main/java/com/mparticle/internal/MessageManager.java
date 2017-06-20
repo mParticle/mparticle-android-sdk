@@ -211,7 +211,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
     }
 
     public MPMessage createFirstRunMessage() throws JSONException {
-        return new MPMessage.Builder(MessageType.FIRST_RUN, mAppStateManager.getSession(), mLocation)
+        return new MPMessage.Builder(MessageType.FIRST_RUN, mAppStateManager.getSession(), mLocation, mConfigManager.getMpid())
                 .timestamp(mAppStateManager.getSession().mSessionStartTime)
                 .dataConnection(sActiveNetworkName)
                 .build();
@@ -219,7 +219,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
 
     public MPMessage startSession() {
         try {
-            MPMessage message = new MPMessage.Builder(MessageType.SESSION_START, mAppStateManager.getSession(), mLocation)
+            MPMessage message = new MPMessage.Builder(MessageType.SESSION_START, mAppStateManager.getSession(), mLocation, mConfigManager.getMpid())
                     .timestamp(mAppStateManager.getSession().mSessionStartTime)
                     .build();
 
@@ -254,7 +254,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
                     Logger.warning("Failed to create First Run Message");
                 }
             }else{
-                mMessageHandler.sendEmptyMessage(MessageHandler.END_ORPHAN_SESSIONS);
+                mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.END_ORPHAN_SESSIONS, mConfigManager.getMpid()));
             }
 
 
@@ -295,15 +295,16 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
 
     public void endSession(Session session) {
         updateSessionEnd(session);
+        Map.Entry<String, Long> entry = new HashMap.SimpleEntry<String, Long>(session.mSessionID, mConfigManager.getMpid());
         mMessageHandler
-                .sendMessage(mMessageHandler.obtainMessage(MessageHandler.CREATE_SESSION_END_MESSAGE, 1, 1, session.mSessionID));
+                .sendMessage(mMessageHandler.obtainMessage(MessageHandler.CREATE_SESSION_END_MESSAGE, 1, 1, entry));
     }
 
     public MPMessage logEvent(MPEvent event, String currentActivity) {
         if (event != null) {
             try {
 
-                MPMessage message = new MPMessage.Builder(MessageType.EVENT, mAppStateManager.getSession(), mLocation)
+                MPMessage message = new MPMessage.Builder(MessageType.EVENT, mAppStateManager.getSession(), mLocation, mConfigManager.getMpid())
                         .name(event.getEventName())
                         .timestamp(mAppStateManager.getSession().mLastEventTime)
                         .length(event.getLength())
@@ -334,7 +335,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
     public MPMessage logEvent(CommerceEvent event) {
         if (event != null) {
             try {
-                MPMessage message = new MPMessage.Builder(event, mAppStateManager.getSession(), mLocation)
+                MPMessage message = new MPMessage.Builder(event, mAppStateManager.getSession(), mLocation, mConfigManager.getMpid())
                         .timestamp(mAppStateManager.getSession().mLastEventTime)
                         .build();
                 mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
@@ -349,7 +350,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
     public MPMessage logScreen(MPEvent event, boolean started) {
         if (event != null && event.getEventName() != null) {
             try {
-                MPMessage message = new MPMessage.Builder(MessageType.SCREEN_VIEW, mAppStateManager.getSession(), mLocation)
+                MPMessage message = new MPMessage.Builder(MessageType.SCREEN_VIEW, mAppStateManager.getSession(), mLocation, mConfigManager.getMpid())
                         .timestamp(mAppStateManager.getSession().mLastEventTime)
                         .name(event.getEventName())
                         .flags(event.getCustomFlags())
@@ -371,7 +372,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
     public MPMessage logBreadcrumb(String breadcrumb) {
         if (breadcrumb != null) {
             try {
-                MPMessage message = new MPMessage.Builder(MessageType.BREADCRUMB, mAppStateManager.getSession(), mLocation)
+                MPMessage message = new MPMessage.Builder(MessageType.BREADCRUMB, mAppStateManager.getSession(), mLocation, mConfigManager.getMpid())
                         .timestamp(mAppStateManager.getSession().mLastEventTime)
                         .build();
 
@@ -391,7 +392,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
 
     public MPMessage optOut(long time, boolean optOutStatus) {
         try {
-            MPMessage message = new MPMessage.Builder(MessageType.OPT_OUT, mAppStateManager.getSession(), mLocation)
+            MPMessage message = new MPMessage.Builder(MessageType.OPT_OUT, mAppStateManager.getSession(), mLocation, mConfigManager.getMpid())
                     .timestamp(time)
                     .build();
             message.put(MessageKey.OPT_OUT_STATUS, optOutStatus);
@@ -409,7 +410,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
 
     public MPMessage logErrorEvent(String errorMessage, Throwable t, JSONObject attributes, boolean caught) {
         try {
-            MPMessage message = new MPMessage.Builder(MessageType.ERROR, mAppStateManager.getSession(), mLocation)
+            MPMessage message = new MPMessage.Builder(MessageType.ERROR, mAppStateManager.getSession(), mLocation, mConfigManager.getMpid())
                     .timestamp(mAppStateManager.getSession().mLastEventTime)
                     .attributes(attributes)
                     .build();
@@ -438,7 +439,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
     public MPMessage logNetworkPerformanceEvent(long time, String method, String url, long length, long bytesSent, long bytesReceived, String requestString) {
         if (!MPUtility.isEmpty(url) && !MPUtility.isEmpty(method)) {
             try {
-                MPMessage message = new MPMessage.Builder(MessageType.NETWORK_PERFORMNACE, mAppStateManager.getSession(), mLocation)
+                MPMessage message = new MPMessage.Builder(MessageType.NETWORK_PERFORMNACE, mAppStateManager.getSession(), mLocation, mConfigManager.getMpid())
                         .timestamp(time)
                         .build();
                 message.put(MessageKey.NPE_METHOD, method);
@@ -462,7 +463,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
     public MPMessage setPushRegistrationId(String token, boolean registeringFlag) {
         if (!MPUtility.isEmpty(token)) {
             try {
-                MPMessage message = new MPMessage.Builder(MessageType.PUSH_REGISTRATION, mAppStateManager.getSession(), mLocation)
+                MPMessage message = new MPMessage.Builder(MessageType.PUSH_REGISTRATION, mAppStateManager.getSession(), mLocation, mConfigManager.getMpid())
                         .timestamp(System.currentTimeMillis())
                         .build();
                 message.put(MessageKey.PUSH_TOKEN, token);
@@ -497,12 +498,12 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
      * We will attempt to upload by default every 10 minutes until the session times out.
      */
     public void startUploadLoop() {
-        mUploadHandler.removeMessages(UploadHandler.UPLOAD_MESSAGES);
-        mUploadHandler.sendEmptyMessageDelayed(UploadHandler.UPLOAD_MESSAGES, Constants.INITIAL_UPLOAD_DELAY);
+        mUploadHandler.removeMessages(UploadHandler.UPLOAD_MESSAGES, mConfigManager.getMpid());
+        mUploadHandler.sendMessageDelayed(mUploadHandler.obtainMessage(UploadHandler.UPLOAD_MESSAGES, mConfigManager.getMpid()), Constants.INITIAL_UPLOAD_DELAY);
     }
 
     public void doUpload() {
-        mUploadHandler.sendMessage(mUploadHandler.obtainMessage(UploadHandler.UPLOAD_MESSAGES, 1, 0));
+        mUploadHandler.sendMessage(mUploadHandler.obtainMessage(UploadHandler.UPLOAD_MESSAGES, 1, 0, mConfigManager.getMpid()));
     }
 
     public void setLocation(Location location) {
@@ -518,7 +519,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
                                    String launchUri, String launchExtras, String launchSourcePackage, long previousForegroundTime, long suspendedTime, int interruptions) {
         if (!MPUtility.isEmpty(stateTransInit)) {
             try {
-                MPMessage message = new MPMessage.Builder(MessageType.APP_STATE_TRANSITION, mAppStateManager.getSession(), mLocation)
+                MPMessage message = new MPMessage.Builder(MessageType.APP_STATE_TRANSITION, mAppStateManager.getSession(), mLocation, mConfigManager.getMpid())
                         .timestamp(System.currentTimeMillis())
                         .build();
 
@@ -595,7 +596,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
 
     public void logNotification(ProviderCloudMessage cloudMessage, String appState) {
         try{
-            MPMessage message = new MPMessage.Builder(MessageType.PUSH_RECEIVED, mAppStateManager.getSession(), mLocation)
+            MPMessage message = new MPMessage.Builder(MessageType.PUSH_RECEIVED, mAppStateManager.getSession(), mLocation, mConfigManager.getMpid())
                     .timestamp(System.currentTimeMillis())
                     .name("gcm")
                     .build();
@@ -618,7 +619,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
     @Override
     public void logNotification(int contentId, String payload, CloudAction action, String appState, int newBehavior) {
         try{
-            MPMessage message = new MPMessage.Builder(MessageType.PUSH_RECEIVED, mAppStateManager.getSession(), mLocation)
+            MPMessage message = new MPMessage.Builder(MessageType.PUSH_RECEIVED, mAppStateManager.getSession(), mLocation, mConfigManager.getMpid())
                     .timestamp(System.currentTimeMillis())
                     .name("gcm")
                     .build();
@@ -655,7 +656,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
     public void logProfileAction(String action) {
         try {
 
-            MPMessage message = new MPMessage.Builder(MessageType.PROFILE, mAppStateManager.getSession(), mLocation)
+            MPMessage message = new MPMessage.Builder(MessageType.PROFILE, mAppStateManager.getSession(), mLocation, mConfigManager.getMpid())
                     .timestamp(System.currentTimeMillis())
                     .build();
 
@@ -669,7 +670,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
 
     public MPMessage logUserIdentityChangeMessage(JSONObject newIdentity, JSONObject oldIdentity, JSONArray userIdentities) {
         try {
-            MPMessage message = new MPMessage.Builder(MessageType.USER_IDENTITY_CHANGE, mAppStateManager.getSession(), mLocation)
+            MPMessage message = new MPMessage.Builder(MessageType.USER_IDENTITY_CHANGE, mAppStateManager.getSession(), mLocation, mConfigManager.getMpid())
                     .timestamp(System.currentTimeMillis())
                     .build();
             if (newIdentity != null) {
@@ -698,9 +699,9 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
         return null;
     }
 
-    public MPMessage logUserAttributeChangeMessage(String userAttributeKey, Object newValue, Object oldValue, boolean deleted, boolean isNewAttribute, long time) {
+    public MPMessage logUserAttributeChangeMessage(String userAttributeKey, Object newValue, Object oldValue, boolean deleted, boolean isNewAttribute, long time, long mpId) {
         try {
-            MPMessage message = new MPMessage.Builder(MessageType.USER_ATTRIBUTE_CHANGE, mAppStateManager.getSession(), mLocation)
+            MPMessage message = new MPMessage.Builder(MessageType.USER_ATTRIBUTE_CHANGE, mAppStateManager.getSession(), mLocation, mConfigManager.getMpid())
                     .timestamp(time)
                     .build();
             message.put(MessageKey.NAME, userAttributeKey);
@@ -731,10 +732,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
 
             message.put(MessageKey.ATTRIBUTE_DELETED, deleted);
             message.put(MessageKey.IS_NEW_ATTRIBUTE, isNewAttribute);
-            //TODO
-            //check if this call is supposed to be to the private method "getAllUserAttributes()" in
-            // MParticleDBManager...
-            message.put(MessageKey.USER_ATTRIBUTES, mMParticleDBManager.getAllUserAttributes());
+            message.put(MessageKey.USER_ATTRIBUTES, mMParticleDBManager.getAllUserAttributes(mpId));
             mMessageHandler.handleMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
             return message;
         } catch (JSONException e) {
@@ -784,15 +782,15 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
 
     @Override
     public void endUploadLoop() {
-        mUploadHandler.removeMessages(UploadHandler.UPLOAD_MESSAGES);
+        mUploadHandler.removeMessages(UploadHandler.UPLOAD_MESSAGES, mConfigManager.getMpid());
         MParticle.getInstance().upload();
     }
 
     @Override
     public void checkForTrigger(MPMessage message) {
         if (mConfigManager.shouldTrigger(message)){
-            mUploadHandler.removeMessages(UploadHandler.UPLOAD_TRIGGER_MESSAGES);
-            mUploadHandler.sendMessageDelayed(mUploadHandler.obtainMessage(UploadHandler.UPLOAD_TRIGGER_MESSAGES, 1, 0), Constants.TRIGGER_MESSAGE_DELAY);
+            mUploadHandler.removeMessages(UploadHandler.UPLOAD_TRIGGER_MESSAGES, mConfigManager.getMpid());
+            mUploadHandler.sendMessageDelayed(mUploadHandler.obtainMessage(UploadHandler.UPLOAD_TRIGGER_MESSAGES, 1, 0, mConfigManager.getMpid()), Constants.TRIGGER_MESSAGE_DELAY);
         }
     }
 
@@ -843,22 +841,35 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
         }
     }
 
-    public Map<String, Object> getAllUserAttributes(final UserAttributeListener listener) {
-        return mMParticleDBManager.getAllUserAttributes(listener);
+    public Map<String, Object> getAllUserAttributes(UserAttributeListener listener) {
+        return getAllUserAttributes(listener, mConfigManager.getMpid());
+    }
+
+    public Map<String, Object> getAllUserAttributes(final UserAttributeListener listener, long mpId) {
+        return mMParticleDBManager.getAllUserAttributes(listener, mpId);
     }
 
     public Map<String, String> getUserAttributes(final UserAttributeListener listener) {
-        return mMParticleDBManager.getUserAttributes(listener);
+        return getUserAttributes(listener, mConfigManager.getMpid());
+    }
+
+    public Map<String, String> getUserAttributes(final UserAttributeListener listener, long mpId) {
+        return mMParticleDBManager.getUserAttributes(listener, mpId);
     }
 
     public Map<String, List<String>> getUserAttributeLists() {
-        return mMParticleDBManager.getUserAttributeLists();
+        return getUserAttributeLists(mConfigManager.getMpid());
     }
 
-    public void removeUserAttribute(String key) {
+    public Map<String, List<String>> getUserAttributeLists(long mpId) {
+        return mMParticleDBManager.getUserAttributeLists(mpId);
+    }
+
+    public void removeUserAttribute(String key, long mpId) {
         UserAttributeRemoval container = new UserAttributeRemoval();
         container.key = key;
         container.time = System.currentTimeMillis();
+        container.mpId = mpId;
         Message message = mMessageHandler.obtainMessage(MessageHandler.REMOVE_USER_ATTRIBUTE, container);
         mMessageHandler.sendMessage(message);
     }
@@ -877,9 +888,10 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
         mPreferences.edit().putString(Constants.PrefKeys.DELETED_USER_ATTRS + mConfigManager.getApiKey(), deletedAtributes.toString()).apply();
     }
 
-    public void setUserAttribute(String key, Object value) {
+    public void setUserAttribute(String key, Object value, long mpId) {
         UserAttributeResponse container = new UserAttributeResponse();
         container.time = System.currentTimeMillis();
+        container.mpId = mpId;
         if (value instanceof List) {
             container.attributeLists = new HashMap<String, List<String>>();
             container.attributeLists.put(key, (List<String>) value);
@@ -892,8 +904,9 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
         mMessageHandler.sendMessage(message);
     }
 
-    public void incrementUserAttribute(String key, int value) {
-        Message message = mMessageHandler.obtainMessage(MessageHandler.INCREMENT_USER_ATTRIBUTE, key);
+    public void incrementUserAttribute(String key, int value, long mpId) {
+        Map.Entry<String, Long> entry = new HashMap.SimpleEntry<String, Long>(key, mpId);
+        Message message = mMessageHandler.obtainMessage(MessageHandler.INCREMENT_USER_ATTRIBUTE, entry);
         message.arg1 = value;
         mMessageHandler.sendMessage(message);
     }
@@ -906,10 +919,10 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
         return mConfigManager.getUserIdentityJson();
     }
 
-    private UserAttributeResponse getUserAttributes() {
+    private UserAttributeResponse getUserAttributes(long mpId) {
         UserAttributeResponse response = new UserAttributeResponse();
-        response.attributeSingles = mMParticleDBManager.getUserAttributeSingles();
-        response.attributeLists = mMParticleDBManager.getUserAttributeLists();
+        response.attributeSingles = mMParticleDBManager.getUserAttributeSingles(mpId);
+        response.attributeLists = mMParticleDBManager.getUserAttributeLists(mpId);
         return response;
     }
 

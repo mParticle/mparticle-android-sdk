@@ -290,9 +290,9 @@ public class ConfigManagerTest {
 
     @Test
     public void testShouldTrigger() throws Exception {
-        MPMessage message = new MPMessage.Builder(Constants.MessageType.COMMERCE_EVENT, new Session(), null).build();
+        MPMessage message = new MPMessage.Builder(Constants.MessageType.COMMERCE_EVENT, new Session(), null, 1).build();
         assertTrue(manager.shouldTrigger(message));
-        message = new MPMessage.Builder(Constants.MessageType.PUSH_RECEIVED, new Session(), null).build();
+        message = new MPMessage.Builder(Constants.MessageType.PUSH_RECEIVED, new Session(), null, 1).build();
         assertTrue(manager.shouldTrigger(message));
     }
 

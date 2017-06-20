@@ -12,13 +12,10 @@ import java.util.List;
 import java.util.TreeMap;
 
 public class UserAttributesService extends UserAttributesTable {
-    public static int deleteAttributes(SQLiteDatabase database, String containerKey) {
-        String[] deleteWhereArgs = {containerKey};
-        return database.delete(UserAttributesTableColumns.TABLE_NAME, UserAttributesTableColumns.ATTRIBUTE_KEY + " = ?", deleteWhereArgs);
-    }
 
-    public static void insertAttribute(SQLiteDatabase db, String key, String attributeValue, long time, boolean isList) {
+    public static void insertAttribute(SQLiteDatabase db, String key, String attributeValue, long time, boolean isList, long mpId) {
         ContentValues values = new ContentValues();
+        values.put(UserAttributesTableColumns.MP_ID, mpId);
         values.put(UserAttributesTableColumns.ATTRIBUTE_KEY, key);
         values.put(UserAttributesTableColumns.ATTRIBUTE_VALUE, attributeValue);
         values.put(UserAttributesTableColumns.IS_LIST, isList);
@@ -26,18 +23,18 @@ public class UserAttributesService extends UserAttributesTable {
         db.insert(UserAttributesTableColumns.TABLE_NAME, null, values);
     }
 
-    public static int deleteOldAttributes(SQLiteDatabase db, String key) {
-        String[] deleteWhereArgs = {key};
-        return db.delete(UserAttributesTableColumns.TABLE_NAME, UserAttributesTableColumns.ATTRIBUTE_KEY + " = ?", deleteWhereArgs);
+    public static int deleteAttributes(SQLiteDatabase db, String key, long mpId) {
+        String[] deleteWhereArgs = {key, String.valueOf(mpId)};
+        return db.delete(UserAttributesTableColumns.TABLE_NAME, UserAttributesTableColumns.ATTRIBUTE_KEY + " = ? and " + UserAttributesTableColumns.MP_ID + " = ?", deleteWhereArgs);
     }
 
-    public static TreeMap<String, String> getUserAttributesSingles(SQLiteDatabase db) {
+    public static TreeMap<String, String> getUserAttributesSingles(SQLiteDatabase db, long mpId) {
         TreeMap<String, String> attributes = new TreeMap<String, String>(String.CASE_INSENSITIVE_ORDER);
         Cursor cursor = null;
         try {
-            String[] args =  {"1"};
+            String[] args =  {"1", String.valueOf(mpId)};
 
-            cursor = db.query(UserAttributesTableColumns.TABLE_NAME, null, UserAttributesTableColumns.IS_LIST + " != ?", args, null, null, UserAttributesTableColumns.ATTRIBUTE_KEY + ", "+ UserAttributesTableColumns.CREATED_AT +" desc");
+            cursor = db.query(UserAttributesTableColumns.TABLE_NAME, null, UserAttributesTableColumns.IS_LIST + " != ? and " + UserAttributesTableColumns.MP_ID + " = ?", args, null, null, UserAttributesTableColumns.ATTRIBUTE_KEY + ", "+ UserAttributesTableColumns.CREATED_AT +" desc");
             int keyIndex = cursor.getColumnIndex(UserAttributesTableColumns.ATTRIBUTE_KEY);
             int valueIndex = cursor.getColumnIndex(UserAttributesTableColumns.ATTRIBUTE_VALUE);
             while (cursor.moveToNext()) {
@@ -53,12 +50,12 @@ public class UserAttributesService extends UserAttributesTable {
         return attributes;
     }
 
-    public static TreeMap<String, List<String>> getUserAttributesLists(SQLiteDatabase db) {
+    public static TreeMap<String, List<String>> getUserAttributesLists(SQLiteDatabase db, long mpId) {
         TreeMap<String, List<String>> attributes = new TreeMap<String, List<String>>(String.CASE_INSENSITIVE_ORDER);
         Cursor cursor = null;
         try {
-            String[] args =  {"1"};
-            cursor = db.query(UserAttributesTableColumns.TABLE_NAME, null, UserAttributesTableColumns.IS_LIST + " = ?", args, null, null, UserAttributesTableColumns.ATTRIBUTE_KEY + ", "+ UserAttributesTableColumns.CREATED_AT +" desc");
+            String[] args =  {"1", String.valueOf(mpId)};
+            cursor = db.query(UserAttributesTableColumns.TABLE_NAME, null, UserAttributesTableColumns.IS_LIST + " = ? and " + UserAttributesTableColumns.MP_ID + " = ?", args, null, null, UserAttributesTableColumns.ATTRIBUTE_KEY + ", "+ UserAttributesTableColumns.CREATED_AT +" desc");
             int keyIndex = cursor.getColumnIndex(UserAttributesTableColumns.ATTRIBUTE_KEY);
             int valueIndex = cursor.getColumnIndex(UserAttributesTableColumns.ATTRIBUTE_VALUE);
             String previousKey = null;
