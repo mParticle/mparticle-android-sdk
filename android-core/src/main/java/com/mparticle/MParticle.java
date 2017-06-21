@@ -9,6 +9,7 @@ import android.location.Location;
 import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Build;
+import android.support.annotation.NonNull;
 import android.util.Log;
 import android.webkit.WebView;
 
@@ -17,12 +18,13 @@ import com.mparticle.commerce.CommerceApi;
 import com.mparticle.commerce.CommerceEvent;
 import com.mparticle.commerce.Product;
 import com.mparticle.commerce.ProductBagApi;
+import com.mparticle.identity.IdentityApi;
+import com.mparticle.identity.IdentityApiRequest;
 import com.mparticle.internal.AppStateManager;
 import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.Constants;
 import com.mparticle.internal.Constants.MessageKey;
 import com.mparticle.internal.Constants.PrefKeys;
-import com.mparticle.internal.KitKatHelper;
 import com.mparticle.internal.KitFrameworkWrapper;
 import com.mparticle.internal.Logger;
 import com.mparticle.internal.MPLocationListener;
@@ -38,18 +40,15 @@ import com.mparticle.messaging.MPMessagingAPI;
 import com.mparticle.messaging.ProviderCloudMessage;
 import com.mparticle.segmentation.SegmentListener;
 
-import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 /**
- * The primary access point to the mParticle SDK. In order to use this class, you must first call {@link #start(Context)}, which requires
+ * The primary access point to the mParticle SDK. In order to use this class, you must first call {@link #start(Context, MParticleOptions)}, which requires
  * configuration via <code><a href="http://developer.android.com/guide/topics/resources/providing-resources.html">Android Resources</a></code>. You can then retrieve a reference
  * to an instance of this class via {@link #getInstance()}
  * <p></p>
@@ -114,116 +113,26 @@ public class MParticle {
 
     /**
      * Start the mParticle SDK and begin tracking a user session. This method must be called prior to {@link #getInstance()}.
-     * This method requires that your API key and secret are contained in your XML configuration.
      *
      * @param context Required reference to a Context object
      */
 
     public static void start(Context context) {
-        start(context, InstallType.AutoDetect);
+        start(context, MParticleOptions.builder().build());
     }
 
     /**
      * Start the mParticle SDK and begin tracking a user session. This method must be called prior to {@link #getInstance()}.
-     * This method requires that your API key and secret are contained in your XML configuration.
      *
      * @param context Required reference to a Context object
-     * @param apiKey Your application's mParticle key retrieved from app.mparticle.com/apps
-     * @param apiSecret Your application's mParticle secret retrieved from app.mparticle.com/apps
-     *
+     * @param options Required to initialize the SDK properly
      */
-
-    public static void start(Context context, String apiKey, String apiSecret) {
-        start(context, InstallType.AutoDetect, apiKey, apiSecret);
-    }
-
-    /**
-     * Start the mParticle SDK and begin tracking a user session. This method must be called prior to {@link #getInstance()}.
-     * This method requires that your API key and secret are contained in your XML configuration.
-     * <p></p>
-     * The InstallType parameter is used to determine if this is a new install or an upgrade. In
-     * the case where the mParticle SDK is being added to an existing app with existing users, this
-     * parameter prevents mParticle from categorizing all users as new users.
-     *
-     * @param context     Required reference to a Context object
-     * @param installType Specify whether this is a new install or an upgrade, or let mParticle detect
-     * @see MParticle.InstallType
-     */
-
-    public static void start(Context context, InstallType installType) {
-        start(context, installType, Environment.AutoDetect);
-    }
-
-    /**
-     * Start the mParticle SDK and begin tracking a user session. This method must be called prior to {@link #getInstance()}.
-     * This method requires that your API key and secret are contained in your XML configuration.
-     * <p></p>
-     * The InstallType parameter is used to determine if this is a new install or an upgrade. In
-     * the case where the mParticle SDK is being added to an existing app with existing users, this
-     * parameter prevents mParticle from categorizing all users as new users.
-     *
-     * @param context       Required reference to a Context object
-     * @param installType   Specify whether this is a new install or an upgrade, or let mParticle detect
-     * @param apiKey        Your application's mParticle key retrieved from app.mparticle.com/apps
-     * @param apiSecret     Your application's mParticle secret retrieved from app.mparticle.com/apps
-     *
-     * @see MParticle.InstallType
-     */
-
-    public static void start(Context context, InstallType installType, String apiKey, String apiSecret) {
-        start(context, installType, Environment.AutoDetect, apiKey, apiSecret);
-    }
-
-    /**
-     * Start the mParticle SDK and begin tracking a user session. This method must be called prior to {@link #getInstance()}.
-     * This method requires that your API key and secret are contained in your XML configuration.
-     * <p></p>
-     *
-     *
-     * @param context     Required reference to a Context object
-     * @param installType The InstallType parameter is used to determine if this is a new install or an upgrade. In
-     * the case where the mParticle SDK is being added to an existing app with existing users, this
-     * parameter prevents mParticle from categorizing all users as new users.
-     * @param environment Force the SDK into either Production or Development mode. See {@link MParticle.Environment}
-     * for implications of each mode. The SDK automatically determines which mode it should be in depending
-     * on the signing and the DEBUGGABLE flag of your application's AndroidManifest.xml, so this initializer is not typically needed.
-     * <p></p>
-     *
-     * This initializer can however be useful while you're testing a release-signed version of your application, and you have *not* set the
-     * debuggable flag in your AndroidManifest.xml. In this case, you can force the SDK into development mode to prevent sending
-     * your test usage/data as production data. It's crucial, however, that prior to submission to Google Play that you ensure
-     * you are no longer forcing development mode.
-     */
-    public static void start(Context context, InstallType installType, Environment environment) {
+    public static void start(Context context, @NonNull MParticleOptions options) {
         if (context == null) {
             throw new IllegalArgumentException("mParticle failed to start: context is required.");
         }
-        MParticle.getInstance(context, installType, environment, null, null);
+        MParticle.getInstance(context, options.getInstallType(), options.getEnvironment(), options.getApiKey(), options.getApiSecret());
     }
-
-    /**
-     * Start the mParticle SDK and begin tracking a user session. This method must be called prior to {@link #getInstance()}.
-     * This method requires that your API key and secret are contained in your XML configuration.
-     * <p></p>
-     *
-     * @param context       Required reference to a Context object
-     * @param installType   The InstallType parameter is used to determine if this is a new install or an upgrade. In
-     * the case where the mParticle SDK is being added to an existing app with existing users, this
-     * parameter prevents mParticle from categorizing all users as new users.
-     * @param environment   Force the SDK into either Production or Development mode. See {@link MParticle.Environment}
-     * for implications of each mode. The SDK automatically determines which mode it should be in depending
-     * on the signing and the DEBUGGABLE flag of your application's AndroidManifest.xml, so this initializer is not typically needed.
-     * @param apiKey Your application's mParticle key retrieved from app.mparticle.com/apps
-     * @param apiSecret Your application's mParticle secret retrieved from app.mparticle.com/apps
-     */
-    public static void start(Context context, InstallType installType, Environment environment, String apiKey, String apiSecret) {
-        if (context == null) {
-            throw new IllegalArgumentException("mParticle failed to start: context is required.");
-        }
-        MParticle.getInstance(context, installType, environment, apiKey, apiSecret);
-    }
-
-
 
     /**
      * Initialize or return a thread-safe instance of the mParticle SDK, specifying the API credentials to use. If this
@@ -294,7 +203,7 @@ public class MParticle {
     }
 
     /**
-     * Retrieve an instance of the MParticle class. {@link #start(Context)} must
+     * Retrieve an instance of the MParticle class. {@link #start(Context, MParticleOptions)} must
      * be called prior to this.
      *
      * @return An instance of the mParticle SDK configured with your API key
@@ -335,7 +244,7 @@ public class MParticle {
     }
 
     /**
-     * Disable Android ID collection. This *must* be called before {@link MParticle#start(Context)}.
+     * Disable Android ID collection. This *must* be called before {@link MParticle#start(Context, MParticleOptions)}.
      *
      * By default, the SDK will collect <a href="http://developer.android.com/reference/android/provider/Settings.Secure.html#ANDROID_ID">Android Id</a> for the purpose
      * of anonymous analytics. If you're not using an mParticle integration that consumes Android ID, the value will be sent to the mParticle
@@ -939,285 +848,6 @@ public class MParticle {
     }
 
     /**
-     * Signal to the mParticle platform that the current user has logged out. As of 1.6.x of
-     * the SDK, this function is only used as a signaling mechanism to server providers
-     * that support an explicit logout. As of 1.6.x, after calling this method, all user attributes
-     * and identities will stay the same.
-     */
-    public void logout() {
-        if (mConfigManager.isEnabled()) {
-            mAppStateManager.ensureActiveSession();
-            Logger.debug("Logging out.");
-            mMessageManager.logProfileAction(Constants.ProfileActions.LOGOUT);
-        }
-        mKitManager.logout();
-
-    }
-
-    /**
-     * Set a single <i>user</i> attribute. The attribute will be combined with any existing user attributes.
-     *
-     * @param key   the attribute key
-     * @param value the attribute value. This value will be converted to its String representation as dictated by its <code>toString()</code> method.
-     */
-    public boolean setUserAttribute(String key, Object value) {
-        if (mConfigManager.isEnabled() && checkEventLimit()) {
-            mAppStateManager.ensureActiveSession();
-            if (MPUtility.isEmpty(key)) {
-                Logger.warning("setUserAttribute called with null key. This is a no-op.");
-                return false;
-            }
-            if (key.length() > Constants.LIMIT_ATTR_NAME) {
-                Logger.warning("User attribute keys cannot be longer than " + Constants.LIMIT_ATTR_NAME + " characters, attribute not set: " + key);
-                return false;
-            }
-
-            if (value != null && value instanceof List) {
-                List<Object> values = (List<Object>) value;
-                if (values.size() > Constants.LIMIT_USER_ATTR_LIST_LENGTH) {
-                    Logger.warning("setUserAttribute called with list longer than " + Constants.LIMIT_USER_ATTR_LIST_LENGTH + " elements, list not set.");
-                    return false;
-                }
-                List<String> clonedList = new ArrayList<String>();
-                try {
-                    for (int i = 0; i < values.size(); i++) {
-                        if (values.get(i).toString().length() > Constants.LIMIT_USER_ATTR_LIST_ITEM_LENGTH) {
-                            Logger.warning("setUserAttribute called with list containing element longer than " + Constants.LIMIT_USER_ATTR_LIST_ITEM_LENGTH + " characters, dropping entire list.");
-                            return false;
-                        } else {
-                            clonedList.add(values.get(i).toString());
-                        }
-                    }
-                    Logger.warning("Set user attribute list: " + key + " with values: " + values.toString());
-                    mMessageManager.setUserAttribute(key, clonedList);
-                    mKitManager.setUserAttributeList(key, clonedList);
-                } catch (Exception e) {
-                    Logger.warning("Error while setting attribute list: " + e.toString());
-                    return false;
-                }
-            } else {
-                String stringValue = null;
-                if (value != null) {
-                    stringValue = value.toString();
-                    if (stringValue.length() > Constants.LIMIT_USER_ATTR_VALUE) {
-                        Logger.warning("setUserAttribute called with string-value longer than " + Constants.LIMIT_USER_ATTR_VALUE + " characters. Attribute not set.");
-                        return false;
-                    }
-                    Logger.debug("Set user attribute: " + key + " with value: " + stringValue);
-                } else {
-                    Logger.debug("Set user tag: " + key);
-                }
-                mMessageManager.setUserAttribute(key, stringValue);
-                mKitManager.setUserAttribute(key, stringValue);
-            }
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     *
-     * @param key
-     * @param attributeList
-     * @return
-     */
-    public boolean setUserAttributeList(String key, List<String> attributeList) {
-        if (attributeList == null) {
-            Logger.warning("setUserAttributeList called with null list, this is a no-op.");
-            return false;
-        }
-        return setUserAttribute(key, attributeList);
-    }
-
-    /**
-     * Increment a single <i>user</i> attribute. If the attribute does not already exist, a new one will be created.
-     *
-     * If the value of the attribute cannot be parsed as an integer, this method is a no-op.
-     *
-     * @param key   the attribute key
-     * @param value the attribute value
-     */
-    public boolean incrementUserAttribute(String key, int value) {
-        if (key == null){
-            Logger.warning("incrementUserAttribute called with null key. Ignoring...");
-            return false;
-        }
-        Logger.debug("Incrementing user attribute: " + key + " with value " + value);
-        mMessageManager.incrementUserAttribute(key, value);
-        return true;
-    }
-
-    /**
-     * Remove a <i>user</i> attribute - this applies both to lists and single-value attributes
-     *
-     * @param key the key of the attribute
-     */
-    public boolean removeUserAttribute(String key) {
-        if (MPUtility.isEmpty(key)) {
-            Logger.debug("removeUserAttribute called with empty key.");
-            return false;
-        }
-
-        Logger.debug("Removing user attribute: " + key);
-        mMessageManager.removeUserAttribute(key);
-        mKitManager.removeUserAttribute(key);
-        return true;
-    }
-
-    /**
-     * Set a single user tag, it will be combined with any existing tags.
-     *
-     * @param tag a tag assigned to a user
-     */
-    public boolean setUserTag(String tag) {
-        return setUserAttribute(tag, null);
-    }
-
-    /**
-     * Remove a user tag. This is the same as calling {@link MParticle#removeUserAttribute(String)}.
-     *
-     * @param tag a tag that was previously added
-     */
-    public boolean removeUserTag(String tag) {
-        return removeUserAttribute(tag);
-    }
-
-    /**
-     * Set the current user's identity
-     *
-     * @param id
-     * @param identityType
-     */
-    public synchronized void setUserIdentity(String id, IdentityType identityType) {
-        if (identityType != null) {
-            if (id == null) {
-                Logger.debug("Removing User Identity type: " + identityType.name());
-            } else {
-                Logger.debug("Setting User Identity: " + id);
-            }
-
-            if (!MPUtility.isEmpty(id) && id.length() > Constants.LIMIT_ATTR_VALUE) {
-                Logger.warning("User Identity value length exceeds limit. Will not set id: " + id);
-                return;
-            }
-
-            JSONArray userIdentities = mMessageManager.getUserIdentityJson();
-            JSONObject oldIdentity = null;
-            try {
-                int index = -1;
-                for (int i = 0; i < userIdentities.length(); i++) {
-                    if (identityType.value == userIdentities.getJSONObject(i).optInt(MessageKey.IDENTITY_NAME)) {
-                        oldIdentity = userIdentities.getJSONObject(i);
-                        index = i;
-                        break;
-                    }
-                }
-
-
-                boolean idChanged = true;
-
-                JSONObject newObject = null;
-                if (id != null) {
-                    newObject = new JSONObject();
-                    newObject.put(MessageKey.IDENTITY_NAME, identityType.value);
-                    newObject.put(MessageKey.IDENTITY_VALUE, id);
-                    if (oldIdentity != null) {
-                        idChanged = !id.equals(oldIdentity.optString(MessageKey.IDENTITY_VALUE));
-                        newObject.put(MessageKey.IDENTITY_DATE_FIRST_SEEN, oldIdentity.optLong(MessageKey.IDENTITY_DATE_FIRST_SEEN, System.currentTimeMillis()));
-                        newObject.put(MessageKey.IDENTITY_FIRST_SEEN, false);
-                        userIdentities.put(index, newObject);
-                    } else {
-                        newObject.put(MessageKey.IDENTITY_DATE_FIRST_SEEN, System.currentTimeMillis());
-                        newObject.put(MessageKey.IDENTITY_FIRST_SEEN, true);
-                        userIdentities.put(newObject);
-                    }
-                } else {
-                    if (oldIdentity == null || index < 0) {
-                        Logger.debug("Attempted to remove ID type that didn't exist: " + identityType.name());
-                        return;
-                    }
-
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-                        KitKatHelper.remove(userIdentities, index);
-                    } else {
-                        JSONArray newIdentities = new JSONArray();
-                        for (int i = 0; i < userIdentities.length(); i++) {
-                            if (i != index) {
-                                newIdentities.put(userIdentities.get(i));
-                            }
-                        }
-                        userIdentities = newIdentities;
-                    }
-                }
-                if (idChanged) {
-                    mMessageManager.logUserIdentityChangeMessage(newObject, oldIdentity, userIdentities);
-                }
-
-                if (id == null) {
-                    getKitManager().removeUserIdentity(identityType);
-                } else {
-                    getKitManager().setUserIdentity(id, identityType);
-                }
-            } catch (JSONException e) {
-                Logger.error( "Error setting identity: " + id);
-                return;
-            }
-        }
-    }
-
-
-
-    public Map<IdentityType, String> getUserIdentities(){
-        JSONArray identities = mMessageManager.getUserIdentityJson();
-        Map<IdentityType, String> identityTypeStringMap = new HashMap<IdentityType, String>(identities.length());
-
-        for (int i = 0; i < identities.length(); i++) {
-            try {
-                JSONObject identity = identities.getJSONObject(i);
-                identityTypeStringMap.put(
-                        IdentityType.parseInt(identity.getInt(MessageKey.IDENTITY_NAME)),
-                        identity.getString(MessageKey.IDENTITY_VALUE)
-                );
-            } catch (JSONException jse) {
-
-            }
-        }
-
-        return identityTypeStringMap;
-    }
-
-    /**
-     * Remove an identity matching this id
-     * <p></p>
-     * Note: this will only remove the *first* matching id
-     *
-     * @param id the id to remove
-     */
-    public synchronized void removeUserIdentity(String id) {
-        JSONArray userIdentities = mMessageManager.getUserIdentityJson();
-        if (id != null && id.length() > 0) {
-            try {
-                IdentityType identityType = null;
-                for (int i = 0; i < userIdentities.length(); i++) {
-                    if (id.equals(userIdentities.getJSONObject(i).getString(MessageKey.IDENTITY_VALUE))) {
-                        try {
-                            identityType = IdentityType.parseInt(userIdentities.getJSONObject(i).getInt(MessageKey.IDENTITY_NAME));
-                        } catch (Exception e) {
-
-                        }
-                        break;
-                    }
-                }
-                if (identityType != null) {
-                    setUserIdentity(null, identityType);
-                }
-            } catch (JSONException jse) {
-                Logger.warning("Error removing identity: " + id);
-            }
-        }
-    }
-
-    /**
      * Get the current opt-out status for the application.
      *
      * @return the opt-out status
@@ -1260,20 +890,8 @@ public class MParticle {
      * @see MParticle.ServiceProviders
      */
     public Uri getSurveyUrl(final int kitId) {
-        return mKitManager.getSurveyUrl(kitId, getUserAttributes(), getUserAttributeLists());
-    }
-
-    /**
-     *
-     * This method is deprecated. Use <code>start()</code> or XML configuration if you need to customize the environment.
-     *
-     * @see #start(Context, MParticle.InstallType, MParticle.Environment)
-     *
-     * @param environment
-     */
-    @Deprecated
-    public void setEnvironment(Environment environment) {
-        Logger.warning("setEnvironment is deprecated and is a no-op. Use start() or XML configuration if you must customize environment.");
+        //TODO
+        return mKitManager.getSurveyUrl(kitId, null, null);
     }
 
     /**
@@ -1541,6 +1159,11 @@ public class MParticle {
         mMessageManager.refreshConfiguration();
     }
 
+    public IdentityApi Identity() {
+        //TODO
+        return null;
+    }
+
     /**
      * Event type to use when logging events.
      *
@@ -1557,7 +1180,7 @@ public class MParticle {
     /**
      * To be used when initializing MParticle
      *
-     * @see #start(Context, MParticle.InstallType)
+     * @see MParticleOptions
      */
     public enum InstallType {
         /**
@@ -1581,7 +1204,7 @@ public class MParticle {
     /**
      * Identity type to use when setting the user identity.
      *
-     * @see #setUserIdentity(String, MParticle.IdentityType)
+     * @see IdentityApiRequest
      */
 
     public enum IdentityType {
@@ -1634,28 +1257,13 @@ public class MParticle {
 
     }
 
-    public Map<String, String> getUserAttributes() {
-        return mMessageManager.getUserAttributes(null);
-    }
-
-    public Map<String, List<String>> getUserAttributeLists() {
-        return mMessageManager.getUserAttributeLists();
-    }
-
-    public Map<String, Object> getAllUserAttributes() {
-        return mMessageManager.getAllUserAttributes(null);
-    }
-
-    public void getAllUserAttributes(UserAttributeListener listener) {
-        mMessageManager.getAllUserAttributes(listener);
-    }
     /**
      * The Environment in which the SDK and hosting app are running. The SDK
      * automatically detects the Environment based on the <code>DEBUGGABLE</code> flag of your application. The <code>DEBUGGABLE</code>  flag of your
      * application will be <code>TRUE</code> when signing with a debug certificate during development, or if you have explicitly set your
      * application to debug within your AndroidManifest.xml.
      *
-     * @see MParticle#start(Context, InstallType, Environment)
+     * @see MParticle#start(Context, MParticleOptions)
      * to override this behavior.
      *
      */
@@ -1776,7 +1384,7 @@ public class MParticle {
      * that support, for example, specifying a gender of a user. The mParticle platform will look for these constants within the user attributes that
      * you have set for a given user, and forward any attributes to the services that support them.
      *
-     * @see #setUserAttribute(String, Object)
+     * @see com.mparticle.identity.MParticleUser
      */
     public interface UserAttributes {
         /**
