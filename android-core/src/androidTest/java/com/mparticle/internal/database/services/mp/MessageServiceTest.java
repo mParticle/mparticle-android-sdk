@@ -65,7 +65,6 @@ public class MessageServiceTest extends BaseMPServiceTest {
         numUpdated = MessageService.markMessagesAsUploaded(database, max, 1);
         assertEquals(numUpdated, 210);
         assertEquals(MessageService.getSessionHistory(database, "", 1).size(), 100);
-
     }
 
     @Test
@@ -83,7 +82,6 @@ public class MessageServiceTest extends BaseMPServiceTest {
 
         MessageService.deleteOldMessages(database, newSession, 1);
         assertEquals(MessageService.getSessionHistory(database, newSession, 1).size(), 0);
-
     }
 
     @Test
@@ -120,7 +118,6 @@ public class MessageServiceTest extends BaseMPServiceTest {
         Session session = new Session();
         session.mSessionID = sessionId;
         return new MPMessage.Builder("test", session, new Location("New York City"), 1).build();
-
     }
 
     private int getMaxId(List<MessageService.ReadyMessage> messages) {

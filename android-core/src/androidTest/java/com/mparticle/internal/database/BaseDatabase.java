@@ -1,4 +1,4 @@
-package com.mparticle.internal.database.tables.mp;
+package com.mparticle.internal.database;
 
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
@@ -10,12 +10,15 @@ import com.mparticle.internal.database.services.SQLiteOpenHelperWrapper;
 import java.util.concurrent.CountDownLatch;
 
 public class BaseDatabase extends SQLiteOpenHelper {
-    static String DB_NAME = "atest_dateabsdase";
     SQLiteOpenHelperWrapper helper;
     CountDownLatch timer;
 
-    BaseDatabase(SQLiteOpenHelperWrapper helper, CountDownLatch timer, int version) {
-        super(InstrumentationRegistry.getTargetContext(), DB_NAME, null, version);
+    public BaseDatabase(SQLiteOpenHelperWrapper helper, String databaseName) {
+        this(helper, databaseName, new CountDownLatch(1), 1);
+    }
+
+    public BaseDatabase(SQLiteOpenHelperWrapper helper, String databaseName, CountDownLatch timer, int version) {
+        super(InstrumentationRegistry.getTargetContext(), databaseName, null, version);
         this.helper = helper;
         this.timer = timer;
     }

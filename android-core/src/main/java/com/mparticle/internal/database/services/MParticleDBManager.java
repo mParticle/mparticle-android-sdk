@@ -16,6 +16,7 @@ import com.mparticle.internal.DeviceAttributes;
 import com.mparticle.internal.JsonReportingMessage;
 import com.mparticle.internal.Logger;
 import com.mparticle.internal.MPMessage;
+import com.mparticle.internal.MPUtility;
 import com.mparticle.internal.MessageBatch;
 import com.mparticle.internal.MessageManager;
 import com.mparticle.internal.MessageManagerCallbacks;
@@ -75,9 +76,9 @@ public class MParticleDBManager extends BaseDBManager {
     }
 
     public void appendBreadcrumbs(MPMessage message) throws JSONException {
-        JSONArray jsonArray = BreadcrumbService.getBreadcrumbs(getMParticleDatabase(), getMpid());
-        if (jsonArray != null && jsonArray.length() > 0) {
-            message.put(Constants.MessageType.BREADCRUMB, jsonArray);
+        JSONArray breadcrumbs = BreadcrumbService.getBreadcrumbs(getMParticleDatabase(), getMpid());
+        if (!MPUtility.isEmpty(breadcrumbs)) {
+            message.put(Constants.MessageType.BREADCRUMB, breadcrumbs);
         }
     }
 

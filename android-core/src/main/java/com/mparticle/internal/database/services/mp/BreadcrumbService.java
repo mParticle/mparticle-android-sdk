@@ -19,6 +19,9 @@ public class BreadcrumbService extends BreadcrumbTable {
     private static final String[] idColumns = {"_id"};
 
     public static int insertBreadcrumb(SQLiteDatabase db, MPMessage message, String apiKey, Long mpid) throws JSONException {
+        if (message == null) {
+            return -1;
+        }
         ContentValues contentValues = new ContentValues();
         contentValues.put(BreadcrumbTableColumns.MP_ID, mpid);
         contentValues.put(BreadcrumbTableColumns.API_KEY, apiKey);

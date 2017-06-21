@@ -1,8 +1,6 @@
 package com.mparticle.internal.database.tables.mp;
 
-import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteOpenHelper;
 import android.provider.BaseColumns;
 
 import com.mparticle.internal.database.services.SQLiteOpenHelperWrapper;

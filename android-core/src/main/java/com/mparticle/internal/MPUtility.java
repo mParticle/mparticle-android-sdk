@@ -22,6 +22,7 @@ import android.view.WindowManager;
 
 import com.mparticle.MParticle;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -91,6 +92,10 @@ public class MPUtility {
             return true;
         else
             return false;
+    }
+
+    public static boolean isEmpty(JSONArray jsonArray) {
+        return jsonArray == null || jsonArray.length() == 0;
     }
 
     public static AndroidAdIdInfo getGoogleAdIdInfo(Context context) {
