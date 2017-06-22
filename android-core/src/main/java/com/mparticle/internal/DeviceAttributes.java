@@ -20,13 +20,15 @@ import org.json.JSONObject;
 import java.util.Locale;
 import java.util.TimeZone;
 
-/* package-private */class DeviceAttributes {
+public class DeviceAttributes {
 
     //re-use this whenever an attribute can't be determined
     static final String UNKNOWN = "unknown";
     private JSONObject deviceInfo;
     private JSONObject appInfo;
     private boolean firstCollection = true;
+
+    /** package-private **/ DeviceAttributes() {}
 
     /**
      * Generates a collection of application attributes that will not change during an app's process.
@@ -36,7 +38,7 @@ import java.util.TimeZone;
      * @param appContext the application context
      * @return a JSONObject of application-specific attributes
      */
-    JSONObject getStaticApplicationInfo(Context appContext) {
+    public JSONObject getStaticApplicationInfo(Context appContext) {
         JSONObject attributes = new JSONObject();
         SharedPreferences preferences = appContext.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = preferences.edit();
@@ -117,7 +119,7 @@ import java.util.TimeZone;
         return attributes;
     }
 
-    static void addAndroidId(JSONObject attributes, Context context) throws JSONException {
+    public static void addAndroidId(JSONObject attributes, Context context) throws JSONException {
         if (!MParticle.isAndroidIdDisabled()) {
             String androidId = MPUtility.getAndroidID(context);
             attributes.put(MessageKey.DEVICE_ID, androidId);
@@ -214,7 +216,7 @@ import java.util.TimeZone;
     /**
      * For the following fields we always want the latest values
      */
-    void updateDeviceInfo(Context context, JSONObject deviceInfo) {
+    public void updateDeviceInfo(Context context, JSONObject deviceInfo) {
         deviceInfo.remove(MessageKey.LIMIT_AD_TRACKING);
         deviceInfo.remove(MessageKey.GOOGLE_ADV_ID);
         MPUtility.AndroidAdIdInfo adIdInfo = MPUtility.getGoogleAdIdInfo(context);
@@ -251,7 +253,7 @@ import java.util.TimeZone;
         }
     }
 
-    JSONObject getDeviceInfo(Context context){
+    public JSONObject getDeviceInfo(Context context){
         if (deviceInfo == null){
             deviceInfo = getStaticDeviceInfo(context);
         }
@@ -259,7 +261,7 @@ import java.util.TimeZone;
         return deviceInfo;
     }
 
-    JSONObject getAppInfo(Context context) {
+    public JSONObject getAppInfo(Context context) {
         if (appInfo == null) {
             appInfo = getStaticApplicationInfo(context);
         }

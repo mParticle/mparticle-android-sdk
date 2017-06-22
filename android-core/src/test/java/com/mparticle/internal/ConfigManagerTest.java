@@ -18,6 +18,7 @@ import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -452,5 +453,70 @@ public class ConfigManagerTest {
         config.put("inhd", "false");
         manager.updateConfig(config);
         assertFalse(manager.getIncludeSessionHistory());
+    }
+
+    @Test
+    public void testSaveUserIdentityJson() throws Exception {
+        manager.saveUserIdentityJson(new JSONArray());
+        assertEquals(0, manager.getUserIdentityJson().length());
+        JSONObject identity = new JSONObject("{ \"n\": 7, \"i\": \"email value 1\", \"dfs\": 1473869816521, \"f\": true }");
+        JSONArray identities = new JSONArray();
+        identities.put(identity);
+        manager.saveUserIdentityJson(identities);
+        assertEquals(1, manager.getUserIdentityJson().length());
+        assertEquals(1473869816521L, manager.getUserIdentityJson().getJSONObject(0).getLong("dfs"));
+    }
+
+    @Test
+    public void testGetUserIdentityJsonFixup() throws Exception {
+        manager.saveUserIdentityJson(new JSONArray());
+        JSONObject identity = new JSONObject("{ \"n\": 7, \"i\": \"email value 1\" }");
+        JSONArray identities = new JSONArray();
+        identities.put(identity);
+        manager.saveUserIdentityJson(identities);
+        assertEquals(1, manager.getUserIdentityJson().length());
+        assertEquals(0, manager.getUserIdentityJson().getJSONObject(0).getLong("dfs"));
+    }
+
+    @Test
+    public void testMarkIdentitiesAsSeen() throws Exception {
+        JSONArray identities = new JSONArray();
+        identities.put(new JSONObject("{ \"n\": 1, \"i\": \" value 1\", \"dfs\": 1473869816521, \"f\": true }"));
+        identities.put(new JSONObject("{ \"n\": 2, \"i\": \" value 2\", \"dfs\": 1473869816521, \"f\": true }"));
+        identities.put(new JSONObject("{ \"n\": 3, \"i\": \" value 3\", \"dfs\": 1473869816521, \"f\": true }"));
+        identities.put(new JSONObject("{ \"n\": 4, \"i\": \" value 4\", \"dfs\": 1473869816521, \"f\": true }"));
+        manager.saveUserIdentityJson(identities);
+        assertNull(manager.markIdentitiesAsSeen(new JSONArray()));
+        JSONArray seenIdentities = manager.markIdentitiesAsSeen(identities);
+        assertNotEquals(seenIdentities, identities);
+        for (int i = 0; i < seenIdentities.length(); i++) {
+            assertFalse(seenIdentities.getJSONObject(i).getBoolean("f"));
+        }
+
+        identities = new JSONArray();
+        identities.put(new JSONObject("{ \"n\": 1, \"i\": \" value 1\", \"dfs\": 1473869816521, \"f\": true }"));
+        identities.put(new JSONObject("{ \"n\": 2, \"i\": \" value 2\", \"dfs\": 1473869816521, \"f\": true }"));
+        identities.put(new JSONObject("{ \"n\": 3, \"i\": \" value 3\", \"dfs\": 1473869816521, \"f\": true }"));
+        identities.put(new JSONObject("{ \"n\": 4, \"i\": \" value 4\", \"dfs\": 1473869816521, \"f\": false }"));
+
+        manager.saveUserIdentityJson(identities);
+        assertNotNull(manager.getUserIdentityJson());
+        assertEquals(4, manager.getUserIdentityJson().length());
+        JSONArray newIdentities = new JSONArray();
+        newIdentities.put(new JSONObject("{ \"n\": 1, \"i\": \" value 1\", \"dfs\": 1473869816521, \"f\": true }"));
+        JSONArray updatedIdentities = manager.markIdentitiesAsSeen(newIdentities);
+        assertEquals(4, updatedIdentities.length());
+        for (int i = 0; i< updatedIdentities.length(); i++) {
+            int identity = updatedIdentities.getJSONObject(i).getInt("n");
+            switch (identity) {
+                case 1:
+                case 4:
+                    assertFalse(updatedIdentities.getJSONObject(i).getBoolean("f"));
+                    break;
+                default:
+                    assertTrue(updatedIdentities.getJSONObject(i).getBoolean("f"));
+            }
+        }
+
     }
 }

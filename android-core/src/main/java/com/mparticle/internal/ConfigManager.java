@@ -11,9 +11,16 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 
 public class ConfigManager {
     public static final String CONFIG_JSON = "json";
@@ -56,6 +63,7 @@ public class ConfigManager {
     private JSONArray mTriggerMessageMatches, mTriggerMessageHashes = null;
     private ExceptionHandler mExHandler;
     private boolean mIncludeSessionHistory = true;
+    private JSONObject mCurrentCookies;
 
     private ConfigManager(){
 
@@ -573,5 +581,126 @@ public class ConfigManager {
             }
         }
         return jsonAttributes;
+    }
+
+    public JSONArray getUserIdentityJson() {
+        JSONArray userIdentities = null;
+        String userIds = mPreferences.getString(Constants.PrefKeys.USER_IDENTITIES + getApiKey(), null);
+
+        try {
+            userIdentities = new JSONArray(userIds);
+            boolean changeMade = fixUpUserIdentities(userIdentities);
+            if (changeMade) {
+                saveUserIdentityJson(userIdentities);
+            }
+        } catch (Exception e) {
+            userIdentities = new JSONArray();
+        }
+        return userIdentities;
+    }
+
+    public void saveUserIdentityJson(JSONArray userIdentities) {
+        mPreferences.edit().putString(Constants.PrefKeys.USER_IDENTITIES + getApiKey(), userIdentities.toString()).apply();
+    }
+
+    private static boolean fixUpUserIdentities(JSONArray identities) {
+        boolean changeMade = false;
+        try {
+            for (int i = 0; i < identities.length(); i++) {
+                JSONObject identity = identities.getJSONObject(i);
+                if (!identity.has(Constants.MessageKey.IDENTITY_DATE_FIRST_SEEN)) {
+                    identity.put(Constants.MessageKey.IDENTITY_DATE_FIRST_SEEN, 0);
+                    changeMade = true;
+                }
+                if (!identity.has(Constants.MessageKey.IDENTITY_FIRST_SEEN)) {
+                    identity.put(Constants.MessageKey.IDENTITY_FIRST_SEEN, true);
+                    changeMade = true;
+                }
+            }
+
+        } catch (JSONException jse) {
+
+        }
+        return changeMade;
+    }
+
+
+    public JSONObject getCookies() {
+        if (mCurrentCookies == null) {
+            String currentCookies = mPreferences.getString(Constants.PrefKeys.Cookies, null);
+            if (MPUtility.isEmpty(currentCookies)) {
+                mCurrentCookies = new JSONObject();
+                mPreferences.edit().putString(Constants.PrefKeys.Cookies, mCurrentCookies.toString()).apply();
+                return mCurrentCookies;
+            } else {
+                try {
+                    mCurrentCookies = new JSONObject(currentCookies);
+                } catch (JSONException e) {
+                    mCurrentCookies = new JSONObject();
+                }
+            }
+            Calendar nowCalendar = Calendar.getInstance();
+            nowCalendar.set(Calendar.YEAR, 1990);
+            Date oldDate = nowCalendar.getTime();
+            SimpleDateFormat parser = new SimpleDateFormat("yyyy");
+            Iterator<?> keys = mCurrentCookies.keys();
+            ArrayList<String> keysToRemove = new ArrayList<String>();
+            while (keys.hasNext()) {
+                try {
+                    String key = (String) keys.next();
+                    if (mCurrentCookies.get(key) instanceof JSONObject) {
+                        String expiration = ((JSONObject) mCurrentCookies.get(key)).getString("e");
+                        try {
+                            Date date = parser.parse(expiration);
+                            if (date.before(oldDate)) {
+                                keysToRemove.add(key);
+                            }
+                        } catch (ParseException dpe) {
+
+                        }
+                    }
+                } catch (JSONException jse) {
+
+                }
+            }
+            for (String key : keysToRemove) {
+                mCurrentCookies.remove(key);
+            }
+            if (keysToRemove.size() > 0) {
+                mPreferences.edit().putString(Constants.PrefKeys.Cookies, mCurrentCookies.toString()).apply();
+            }
+            return mCurrentCookies;
+        } else {
+            return mCurrentCookies;
+        }
+    }
+
+    JSONArray markIdentitiesAsSeen(JSONArray uploadedIdentities) {
+        try {
+
+            JSONArray currentIdentities = getUserIdentityJson();
+            if (currentIdentities.length() == 0) {
+                return null;
+            }
+            uploadedIdentities = new JSONArray(uploadedIdentities.toString());
+            Set<Integer> identityTypes = new HashSet<Integer>();
+            for (int i = 0; i < uploadedIdentities.length(); i++) {
+                if (uploadedIdentities.getJSONObject(i).optBoolean(Constants.MessageKey.IDENTITY_FIRST_SEEN)) {
+                    identityTypes.add(uploadedIdentities.getJSONObject(i).getInt(Constants.MessageKey.IDENTITY_NAME));
+                }
+            }
+            if (identityTypes.size() > 0) {
+                for (int i = 0; i < currentIdentities.length(); i++) {
+                    int identity = currentIdentities.getJSONObject(i).getInt(Constants.MessageKey.IDENTITY_NAME);
+                    if (identityTypes.contains(identity)) {
+                        currentIdentities.getJSONObject(i).put(Constants.MessageKey.IDENTITY_FIRST_SEEN, false);
+                    }
+                }
+                return currentIdentities;
+            }
+        } catch (JSONException jse) {
+
+        }
+        return null;
     }
 }

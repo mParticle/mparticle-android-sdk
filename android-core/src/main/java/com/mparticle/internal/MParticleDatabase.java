@@ -41,24 +41,6 @@ import java.util.Iterator;
                 MessageTable.SESSION_ID);
     }
 
-    private static String[] gcmColumns = {MParticleDatabase.GcmMessageTable.CONTENT_ID, MParticleDatabase.GcmMessageTable.CAMPAIGN_ID, MParticleDatabase.GcmMessageTable.EXPIRATION, MParticleDatabase.GcmMessageTable.DISPLAYED_AT};
-    private static String gcmDeleteWhere = MParticleDatabase.GcmMessageTable.EXPIRATION + " < ? and " + MParticleDatabase.GcmMessageTable.DISPLAYED_AT + " > 0";
-
-    static Cursor getGcmHistory(SQLiteDatabase database){
-        return database.query(GcmMessageTable.TABLE_NAME,
-                gcmColumns,
-                null,
-                null,
-                null,
-                null,
-                GcmMessageTable.EXPIRATION + " desc");
-    }
-
-    static int deleteExpiredGcmMessages(SQLiteDatabase database){
-        String[] deleteWhereArgs = {Long.toString(System.currentTimeMillis())};
-        return database.delete(MParticleDatabase.GcmMessageTable.TABLE_NAME, gcmDeleteWhere, deleteWhereArgs);
-    }
-
     private final static String[] prepareSelection = new String[]{"_id", MessageTable.MESSAGE, MessageTable.CREATED_AT, MessageTable.STATUS, MessageTable.SESSION_ID};
     private final static String prepareOrderBy =  MessageTable._ID + " asc";
 
@@ -129,10 +111,6 @@ import java.util.Iterator;
         return database.delete(MessageTable.TABLE_NAME, "length(" + MessageTable.MESSAGE + ") > " + Constants.LIMIT_MAX_MESSAGE_SIZE, null);
     }
 
-    public static int cleanupUploadMessages(SQLiteDatabase database) {
-        return database.delete(UploadTable.TABLE_NAME, "length(" + UploadTable.MESSAGE + ") > " + Constants.LIMIT_MAX_UPLOAD_SIZE, null);
-    }
-
     interface UserAttributesTable {
         String TABLE_NAME = "attributes";
         String ATTRIBUTE_KEY = "attribute_key";
@@ -150,24 +128,13 @@ import java.util.Iterator;
                     UserAttributesTable.CREATED_AT + " INTEGER NOT NULL " +
                     ");";
 
-    interface BreadcrumbTable {
         String TABLE_NAME = "breadcrumbs";
         String SESSION_ID = "session_id";
         String API_KEY = "api_key";
         String MESSAGE = "message";
         String CREATED_AT = "breadcrumb_time";
         String CF_UUID = "cfuuid";
-    }
-
-    private static final String CREATE_BREADCRUMBS_DDL =
-            "CREATE TABLE IF NOT EXISTS " + BreadcrumbTable.TABLE_NAME + " (" + BaseColumns._ID +
-                    " INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                    BreadcrumbTable.SESSION_ID + " STRING NOT NULL, " +
-                    BreadcrumbTable.API_KEY + " STRING NOT NULL, " +
-                    BreadcrumbTable.MESSAGE + " TEXT, " +
-                    BreadcrumbTable.CREATED_AT + " INTEGER NOT NULL, " +
-                    BreadcrumbTable.CF_UUID + " TEXT" +
-                    ");";
+    
 
     interface SessionTable {
         String TABLE_NAME = "sessions";
@@ -269,31 +236,6 @@ import java.util.Iterator;
                     CommandTable.CF_UUID + " TEXT" +
                     ");";
 
-    interface GcmMessageTable {
-        String CONTENT_ID = "content_id";
-        String CAMPAIGN_ID = "campaign_id";
-        String TABLE_NAME = "gcm_messages";
-        String PAYLOAD = "payload";
-        String CREATED_AT = "message_time";
-        String DISPLAYED_AT = "displayed_time";
-        String EXPIRATION = "expiration";
-        String BEHAVIOR = "behavior";
-        String APPSTATE = "appstate";
-        int PROVIDER_CONTENT_ID = -1;
-    }
-
-    private static final String CREATE_GCM_MSG_DDL =
-            "CREATE TABLE IF NOT EXISTS " + GcmMessageTable.TABLE_NAME + " (" + GcmMessageTable.CONTENT_ID +
-                    " INTEGER PRIMARY KEY, " +
-                    GcmMessageTable.PAYLOAD + " TEXT NOT NULL, " +
-                    GcmMessageTable.APPSTATE + " TEXT NOT NULL, " +
-                    GcmMessageTable.CREATED_AT + " INTEGER NOT NULL, " +
-                    GcmMessageTable.EXPIRATION + " INTEGER NOT NULL, " +
-                    GcmMessageTable.BEHAVIOR + " INTEGER NOT NULL," +
-                    GcmMessageTable.CAMPAIGN_ID + " TEXT NOT NULL, " +
-                    GcmMessageTable.DISPLAYED_AT + " INTEGER NOT NULL" +
-                    ");";
-
     interface ReportingTable extends BaseColumns {
         String CREATED_AT = "report_time";
         String MODULE_ID = "module_id";
@@ -325,9 +267,6 @@ import java.util.Iterator;
         db.execSQL(CREATE_MESSAGES_DDL);
         db.execSQL(CREATE_UPLOADS_DDL);
         db.execSQL(CREATE_COMMANDS_DDL);
-        db.execSQL(CREATE_BREADCRUMBS_DDL);
-        db.execSQL(CREATE_GCM_MSG_DDL);
-        db.execSQL(CREATE_REPORTING_DDL);
         db.execSQL(CREATE_USER_ATTRIBUTES_DDL);
     }
 
@@ -337,16 +276,9 @@ import java.util.Iterator;
         db.execSQL(CREATE_MESSAGES_DDL);
         db.execSQL(CREATE_UPLOADS_DDL);
         db.execSQL(CREATE_COMMANDS_DDL);
-        db.execSQL(CREATE_BREADCRUMBS_DDL);
-        db.execSQL(CREATE_GCM_MSG_DDL);
-        db.execSQL(CREATE_REPORTING_DDL);
         db.execSQL(CREATE_USER_ATTRIBUTES_DDL);
-        if (oldVersion < 5) {
-            upgradeUserAttributes(db);
-        }
         if (oldVersion < 6) {
             upgradeSessionTable(db);
-            upgradeReportingTable(db);
         }
     }
 
@@ -359,35 +291,4 @@ import java.util.Iterator;
         db.execSQL(REPORTING_ADD_SESSION_ID_COLUMN);
     }
 
-    private void upgradeUserAttributes(SQLiteDatabase db) {
-        SharedPreferences sharedPreferences = mContext.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
-        String userAttrs = sharedPreferences.getString(Constants.PrefKeys.DEPRECATED_USER_ATTRS + MParticle.getInstance().getConfigManager().getApiKey(), null);
-        try {
-            JSONObject userAttributes = new JSONObject(userAttrs);
-            Iterator<String> iter = userAttributes.keys();
-            ContentValues values;
-            double time = System.currentTimeMillis();
-            while (iter.hasNext()) {
-                String key = iter.next();
-                try {
-                    Object value = userAttributes.get(key);
-                    String stringValue = null;
-                    if (value != null) {
-                        stringValue = value.toString();
-                    }
-                    values = new ContentValues();
-                    values.put(UserAttributesTable.ATTRIBUTE_KEY, key);
-                    values.put(UserAttributesTable.ATTRIBUTE_VALUE, stringValue);
-                    values.put(UserAttributesTable.IS_LIST, false);
-                    values.put(UserAttributesTable.CREATED_AT, time);
-                    db.insert(UserAttributesTable.TABLE_NAME, null, values);
-                } catch (JSONException e) {
-                }
-            }
-
-        } catch (Exception e) {
-        } finally {
-            sharedPreferences.edit().remove(Constants.PrefKeys.DEPRECATED_USER_ATTRS + MParticle.getInstance().getConfigManager().getApiKey()).apply();
-        }
-    }
 }

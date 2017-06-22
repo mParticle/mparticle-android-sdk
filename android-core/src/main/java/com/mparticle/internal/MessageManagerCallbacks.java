@@ -5,8 +5,7 @@ import com.mparticle.messaging.CloudAction;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-interface MessageManagerCallbacks {
-    MPMessage createMessageSessionEnd(String sessionId, long start, long end, long foregroundLength, JSONObject sessionAttributes) throws JSONException;
+public interface MessageManagerCallbacks {
     String getApiKey() throws MParticleApiClientImpl.MPNoConfigException;
     void delayedStart();
     void endUploadLoop();

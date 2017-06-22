@@ -69,7 +69,7 @@ public class MParticleApiClientImpl implements MParticleApiClient {
 
     private static final String SERVICE_VERSION_1 = "/v1";
     private static final String SERVICE_VERSION_4 = "/v4";
-    static final int HTTP_TOO_MANY_REQUESTS = 429;
+    public static final int HTTP_TOO_MANY_REQUESTS = 429;
 
     /**
      * Crucial LTV value key used to sync LTV between the SDK and the SDK server whenever LTV has changed.

@@ -10,11 +10,9 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.os.AsyncTask;
 import android.os.BatteryManager;
 import android.os.Bundle;
 import android.os.HandlerThread;
-import android.os.Looper;
 import android.os.Message;
 import android.os.Process;
 import android.telephony.TelephonyManager;
@@ -25,6 +23,10 @@ import com.mparticle.UserAttributeListener;
 import com.mparticle.commerce.CommerceEvent;
 import com.mparticle.internal.Constants.MessageKey;
 import com.mparticle.internal.Constants.MessageType;
+import com.mparticle.internal.database.services.MParticleDBManager;
+import com.mparticle.internal.database.tables.mp.GcmMessageTable;
+import com.mparticle.internal.dto.UserAttributeRemoval;
+import com.mparticle.internal.dto.UserAttributeResponse;
 import com.mparticle.messaging.CloudAction;
 import com.mparticle.messaging.MPCloudNotificationMessage;
 import com.mparticle.messaging.ProviderCloudMessage;
@@ -37,11 +39,9 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * This class is primarily responsible for generating MPMessage objects, and then adding them to a
@@ -49,12 +49,12 @@ import java.util.Set;
  *
  */
 public class MessageManager implements MessageManagerCallbacks, ReportingManager {
-
     private static Context mContext = null;
     private static SharedPreferences mPreferences = null;
     private final DeviceAttributes mDeviceAttributes;
     private AppStateManager mAppStateManager;
     private ConfigManager mConfigManager = null;
+    private MParticleDBManager mMParticleDBManager;
 
 
     /**
@@ -145,9 +145,9 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
         mConfigManager = configManager;
         mAppStateManager = appStateManager;
         mAppStateManager.setMessageManager(this);
-        MParticleDatabase database = new MParticleDatabase(appContext);
-        mMessageHandler = new MessageHandler(sMessageHandlerThread.getLooper(), this, database, appContext);
-        mUploadHandler = new UploadHandler(appContext, sUploadHandlerThread.getLooper(), configManager, database, appStateManager, this);
+        mMParticleDBManager = new MParticleDBManager(appContext, DatabaseTables.getInstance(appContext));
+        mMessageHandler = new MessageHandler(sMessageHandlerThread.getLooper(), this, appContext);
+        mUploadHandler = new UploadHandler(appContext, sUploadHandlerThread.getLooper(), configManager, appStateManager, this);
         mPreferences = appContext.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
         mInstallType = installType;
     }
@@ -344,10 +344,6 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
             }
         }
         return null;
-    }
-
-    static void resetEventCounter(){
-        mPreferences.edit().putInt(Constants.PrefKeys.EVENT_COUNTER, 0).apply();
     }
 
     public MPMessage logScreen(MPEvent event, boolean started) {
@@ -629,7 +625,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
 
             message.put(MessageKey.PAYLOAD, payload);
             message.put(MessageKey.PUSH_BEHAVIOR, newBehavior);
-            message.put(MParticleDatabase.GcmMessageTable.CONTENT_ID, contentId);
+            message.put(GcmMessageTable.CONTENT_ID, contentId);
 
             if (action == null || action.getActionIdInt() == contentId){
                 message.put(MessageKey.PUSH_TYPE, Constants.Push.MESSAGE_TYPE_RECEIVED);
@@ -671,24 +667,6 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
         }
     }
 
-    @Override
-    public MPMessage createMessageSessionEnd(String sessionId, long start, long end, long foregroundLength, JSONObject sessionAttributes) throws JSONException{
-        int eventCounter = mPreferences.getInt(Constants.PrefKeys.EVENT_COUNTER, 0);
-        resetEventCounter();
-        Session session = new Session();
-        session.mSessionID = sessionId;
-        session.mSessionStartTime = start;
-        MPMessage message = new MPMessage.Builder(MessageType.SESSION_END, session, mLocation)
-                .timestamp(end)
-                .attributes(sessionAttributes)
-                .build();
-        message.put(MessageKey.EVENT_COUNTER, eventCounter);
-        message.put(MessageKey.SESSION_LENGTH, foregroundLength);
-        message.put(MessageKey.SESSION_LENGTH_TOTAL, (end - start));
-        message.put(MessageKey.STATE_INFO_KEY, MessageManager.getStateInfo());
-        return message;
-    }
-
     public MPMessage logUserIdentityChangeMessage(JSONObject newIdentity, JSONObject oldIdentity, JSONArray userIdentities) {
         try {
             MPMessage message = new MPMessage.Builder(MessageType.USER_IDENTITY_CHANGE, mAppStateManager.getSession(), mLocation)
@@ -706,15 +684,15 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
             }
             message.put(MessageKey.USER_IDENTITIES, userIdentities);
             mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
-            JSONArray seenIdentities = markIdentitiesAsSeen(userIdentities);
+            JSONArray seenIdentities = mConfigManager.markIdentitiesAsSeen(userIdentities);
             if (seenIdentities != null) {
-                saveUserIdentityJson(seenIdentities);
+                mConfigManager.saveUserIdentityJson(seenIdentities);
             }
             return message;
         } catch (JSONException e) {
             Logger.warning("Failed to create mParticle user-identity-change message");
         } finally {
-            saveUserIdentityJson(userIdentities);
+            mConfigManager.saveUserIdentityJson(userIdentities);
         }
 
         return null;
@@ -753,7 +731,10 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
 
             message.put(MessageKey.ATTRIBUTE_DELETED, deleted);
             message.put(MessageKey.IS_NEW_ATTRIBUTE, isNewAttribute);
-            message.put(MessageKey.USER_ATTRIBUTES, UploadHandler.getAllUserAttributes());
+            //TODO
+            //check if this call is supposed to be to the private method "getAllUserAttributes()" in
+            // MParticleDBManager...
+            message.put(MessageKey.USER_ATTRIBUTES, mMParticleDBManager.getAllUserAttributes());
             mMessageHandler.handleMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
             return message;
         } catch (JSONException e) {
@@ -826,7 +807,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
     public void saveGcmMessage(MPCloudNotificationMessage cloudMessage, String appState) {
         Message message = mMessageHandler.obtainMessage(MessageHandler.STORE_GCM_MESSAGE, cloudMessage);
         Bundle data = new Bundle();
-        data.putString(MParticleDatabase.GcmMessageTable.APPSTATE, appState);
+        data.putString(GcmMessageTable.APPSTATE, appState);
         message.setData(data);
         mMessageHandler.sendMessage(message);
     }
@@ -834,7 +815,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
     public void saveGcmMessage(ProviderCloudMessage cloudMessage, String appState) {
         Message message = mMessageHandler.obtainMessage(MessageHandler.STORE_GCM_MESSAGE, cloudMessage);
         Bundle data = new Bundle();
-        data.putString(MParticleDatabase.GcmMessageTable.APPSTATE, appState);
+        data.putString(GcmMessageTable.APPSTATE, appState);
         message.setData(data);
         mMessageHandler.sendMessage(message);
     }
@@ -863,67 +844,15 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
     }
 
     public Map<String, Object> getAllUserAttributes(final UserAttributeListener listener) {
-        Map<String, Object> allUserAttributes = new HashMap<String, Object>();
-        if (listener == null || Looper.getMainLooper() != Looper.myLooper()) {
-            Map<String, String> userAttributes = mMessageHandler.getUserAttributeSingles();
-            Map<String, List<String>> userAttributeLists = mMessageHandler.getUserAttributeLists();
-            if (listener != null) {
-                listener.onUserAttributesReceived(userAttributes, userAttributeLists);
-            }
-            if (userAttributes != null) {
-                allUserAttributes.putAll(userAttributes);
-            }
-            if (userAttributeLists != null) {
-                allUserAttributes.putAll(userAttributeLists);
-            }
-            return allUserAttributes;
-        }else {
-            new AsyncTask<Void, Void, UserAttributeResponse>() {
-                @Override
-                protected UserAttributeResponse doInBackground(Void... params) {
-                    return getUserAttributes();
-                }
-
-                @Override
-                protected void onPostExecute(UserAttributeResponse attributes) {
-                    if (listener != null) {
-                        listener.onUserAttributesReceived(attributes.attributeSingles, attributes.attributeLists);
-                    }
-                }
-            }.execute();
-            return null;
-        }
+        return mMParticleDBManager.getAllUserAttributes(listener);
     }
 
     public Map<String, String> getUserAttributes(final UserAttributeListener listener) {
-        if (listener == null || Looper.getMainLooper() != Looper.myLooper()) {
-            Map<String, String> userAttributes = mMessageHandler.getUserAttributeSingles();
-
-            if (listener != null) {
-                Map<String, List<String>> userAttributeLists = mMessageHandler.getUserAttributeLists();
-                listener.onUserAttributesReceived(userAttributes, userAttributeLists);
-            }
-            return userAttributes;
-        }else {
-            new AsyncTask<Void, Void, UserAttributeResponse>() {
-                @Override
-                protected UserAttributeResponse doInBackground(Void... params) {
-                    return getUserAttributes();
-                }
-
-                @Override
-                protected void onPostExecute(UserAttributeResponse attributes) {
-                    if (listener != null) {
-                        listener.onUserAttributesReceived(attributes.attributeSingles, attributes.attributeLists);
-                    }
-                }
-            }.execute();
-            return null;
-        }
+        return mMParticleDBManager.getUserAttributes(listener);
     }
 
     public Map<String, List<String>> getUserAttributeLists() {
-        return mMessageHandler.getUserAttributeLists();
+        return mMParticleDBManager.getUserAttributeLists();
     }
 
     public void removeUserAttribute(String key) {
@@ -973,91 +902,14 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
         return mDeviceAttributes;
     }
 
-    static class UserAttributeResponse {
-        Map<String, String> attributeSingles;
-        Map<String, List<String>> attributeLists;
-        long time;
-    }
-
-    static class UserAttributeRemoval {
-        String key;
-        long time;
-    }
-
-    public void saveUserIdentityJson(JSONArray userIdentities) {
-        mPreferences.edit().putString(Constants.PrefKeys.USER_IDENTITIES + mConfigManager.getApiKey(), userIdentities.toString()).apply();
-    }
-
     public JSONArray getUserIdentityJson(){
-        JSONArray userIdentities = null;
-        String userIds = mPreferences.getString(Constants.PrefKeys.USER_IDENTITIES + mConfigManager.getApiKey(), null);
-
-        try {
-            userIdentities = new JSONArray(userIds);
-            boolean changeMade = fixUpUserIdentities(userIdentities);
-            if (changeMade) {
-                saveUserIdentityJson(userIdentities);
-            }
-        } catch (Exception e) {
-            userIdentities = new JSONArray();
-        }
-        return userIdentities;
-    }
-
-    JSONArray markIdentitiesAsSeen(JSONArray uploadedIdentities) {
-        try {
-
-            JSONArray currentIdentities = getUserIdentityJson();
-            if (currentIdentities.length() == 0) {
-                return null;
-            }
-            uploadedIdentities = new JSONArray(uploadedIdentities.toString());
-            Set<Integer> identityTypes = new HashSet<Integer>();
-            for (int i = 0; i < uploadedIdentities.length(); i++) {
-                if (uploadedIdentities.getJSONObject(i).optBoolean(MessageKey.IDENTITY_FIRST_SEEN)) {
-                    identityTypes.add(uploadedIdentities.getJSONObject(i).getInt(MessageKey.IDENTITY_NAME));
-                }
-            }
-            if (identityTypes.size() > 0) {
-                for (int i = 0; i < currentIdentities.length(); i++) {
-                    int identity = currentIdentities.getJSONObject(i).getInt(MessageKey.IDENTITY_NAME);
-                    if (identityTypes.contains(identity)) {
-                        currentIdentities.getJSONObject(i).put(MessageKey.IDENTITY_FIRST_SEEN, false);
-                    }
-                }
-                return currentIdentities;
-            }
-        } catch (JSONException jse) {
-
-        }
-        return null;
-    }
-
-    private static boolean fixUpUserIdentities(JSONArray identities) {
-        boolean changeMade = false;
-        try {
-            for (int i = 0; i < identities.length(); i++) {
-                JSONObject identity = identities.getJSONObject(i);
-                if (!identity.has(MessageKey.IDENTITY_DATE_FIRST_SEEN)) {
-                    identity.put(MessageKey.IDENTITY_DATE_FIRST_SEEN, 0);
-                    changeMade = true;
-                }
-                if (!identity.has(MessageKey.IDENTITY_FIRST_SEEN)) {
-                    identity.put(MessageKey.IDENTITY_FIRST_SEEN, true);
-                    changeMade = true;
-                }
-            }
-
-        } catch (JSONException jse) {
-
-        }
-        return changeMade;
+        return mConfigManager.getUserIdentityJson();
     }
 
     private UserAttributeResponse getUserAttributes() {
         UserAttributeResponse response = new UserAttributeResponse();
-        response.attributeSingles = mMessageHandler.getUserAttributeSingles();
-        response.attributeLists = mMessageHandler.getUserAttributeLists();
+        response.attributeSingles = mMParticleDBManager.getUserAttributeSingles();
+        response.attributeLists = mMParticleDBManager.getUserAttributeLists();
         return response;
     }
 
