@@ -7,6 +7,7 @@ import android.os.Looper;
 
 import com.mparticle.ExceptionHandler;
 import com.mparticle.MParticle;
+import com.mparticle.internal.database.services.MParticleDBManager;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -462,6 +463,9 @@ public class ConfigManager {
     }
 
     public void setMpid(long mpid) {
+        if (getMpid() != mpid && mpIdChangeListener != null) {
+            mpIdChangeListener.onMpIdChanged(mpid);
+        }
         sPreferences.edit().putLong(Constants.PrefKeys.Mpid, mpid).apply();
         sUserConfigHolder.setCurrent(mpid);
     }
@@ -472,6 +476,9 @@ public class ConfigManager {
         } else {
             long mpid = MPUtility.generateMpid();
             sPreferences.edit().putLong(Constants.PrefKeys.Mpid, mpid).apply();
+            if (mpIdChangeListener  != null) {
+                mpIdChangeListener.onMpIdChanged(mpid);
+            }
             return mpid;
         }
     }
@@ -481,6 +488,12 @@ public class ConfigManager {
             sPreferences = context.getSharedPreferences(PREFERENCES_FILE, Context.MODE_PRIVATE);
         }
         return sPreferences.getLong(Constants.PrefKeys.Mpid, 0);
+    }
+
+    private static MParticleDBManager.MpIdChangeListener mpIdChangeListener;
+
+    public static void setMpIdChangeListener(MParticleDBManager.MpIdChangeListener listener) {
+        mpIdChangeListener = listener;
     }
 
     public int getAudienceTimeout() {

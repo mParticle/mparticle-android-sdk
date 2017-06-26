@@ -7,6 +7,8 @@ import android.os.Build;
 
 import com.mparticle.BuildConfig;
 import com.mparticle.MParticle;
+import com.mparticle.identity.IdentityApiRequest;
+import com.mparticle.identity.MParticleUser;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -594,5 +596,25 @@ public class MParticleApiClientImpl implements MParticleApiClient {
         }else{
             return mCurrentCookies;
         }
+    }
+
+    @Override
+    public MParticleUser login(IdentityApiRequest request) {
+        throw new UnsupportedOperationException("Not yet implemented");
+    }
+
+    @Override
+    public MParticleUser logout(IdentityApiRequest request) {
+        throw new UnsupportedOperationException("Not yet implemented");
+    }
+
+    @Override
+    public MParticleUser modify(IdentityApiRequest request) {
+        throw new UnsupportedOperationException("Not yet implemented");
+    }
+
+    @Override
+    public MParticleUser identify(IdentityApiRequest request) {
+        throw new UnsupportedOperationException("Not yet implemented");
     }
 }

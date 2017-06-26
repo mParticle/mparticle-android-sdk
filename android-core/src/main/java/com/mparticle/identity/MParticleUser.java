@@ -66,4 +66,8 @@ public final class MParticleUser {
     public void getSegments(long timeout, String endpointId, SegmentListener listener) {
         mUserDelegate.getSegments(timeout, endpointId, listener);
     }
+
+    MParticleUser setUserDelegate(MParticleUserDelegate mParticleUserDelegate) {
+        throw new UnsupportedOperationException("Not implemented yet...");
+    }
 }

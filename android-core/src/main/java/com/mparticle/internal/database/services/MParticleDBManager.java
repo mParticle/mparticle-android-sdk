@@ -9,6 +9,8 @@ import android.os.AsyncTask;
 import android.os.Looper;
 
 import com.mparticle.UserAttributeListener;
+import com.mparticle.identity.IdentityStateListener;
+import com.mparticle.identity.MParticleUser;
 import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.Constants;
 import com.mparticle.internal.DatabaseTables;
@@ -40,9 +42,12 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.UUID;
 
@@ -52,6 +57,7 @@ public class MParticleDBManager extends BaseDBManager {
     public MParticleDBManager(Context context, DatabaseTables databaseTables) {
         super(context, databaseTables);
         mPreferences = context.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
+        ConfigManager.setMpIdChangeListener(new MpIdChangeListener());
     }
 
     private long getMpid() {
@@ -706,5 +712,62 @@ public class MParticleDBManager extends BaseDBManager {
         response.attributeSingles = getUserAttributeSingles(mpId);
         response.attributeLists = getUserAttributeLists(mpId);
         return response;
+    }
+
+
+    /**
+     *
+     *
+     *
+     * MParticleUser Service Methods
+     *
+     *
+     *
+     */
+
+    static Set<IdentityStateListener> idStateListeners = new HashSet<IdentityStateListener>();
+
+    public MParticleUser getCurrentUser() {
+        return getUser(ConfigManager.getMpid(mContext));
+    }
+
+    public MParticleUser getUser(long mpId) {
+        throw new UnsupportedOperationException("not yet implemented");
+    }
+
+    public void storeUser(MParticleUser user) {
+        if (user == null) {
+            return;
+        }
+        if (user.getId() == ConfigManager.getMpid(mContext)) {
+            triggerUserChangedCallbacks(user);
+        }
+        throw new UnsupportedOperationException("Storing user in service not yet implemented");
+    }
+
+    public void setIdentityStateListener(IdentityStateListener listener) {
+        if (listener != null) {
+            idStateListeners.add(listener);
+        }
+    }
+
+    /**
+    *   IdentityStateListener callbacks are triggered on the following conditions:
+    *       - MPID changes, if MParticleUser exists with that mpId
+    *       - MParticleUser is stored, which matches mpId
+    **/
+    private void triggerUserChangedCallbacks(MParticleUser user) {
+        idStateListeners.removeAll(Collections.singleton(null));
+        for (IdentityStateListener identityStateListener: idStateListeners) {
+            identityStateListener.onUserIdentified(user);
+        }
+    }
+
+    public class MpIdChangeListener {
+        private MpIdChangeListener(){}
+
+        public void onMpIdChanged(long mpId) {
+            triggerUserChangedCallbacks(getUser(mpId));
+        }
     }
 }
