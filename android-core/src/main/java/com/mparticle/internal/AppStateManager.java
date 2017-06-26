@@ -27,7 +27,7 @@ import java.util.concurrent.atomic.AtomicLong;
  * This class is responsible for managing sessions, by detecting how many
  *
  */
- public class AppStateManager {
+ public class  AppStateManager {
 
     private ConfigManager mConfigManager;
     Context mContext;

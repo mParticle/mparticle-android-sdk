@@ -278,32 +278,6 @@ public class UploadHandler extends Handler {
     }
 
     /**
-     * Look for the last UIC message to find the end-state of user identities
-     */
-    private JSONArray findIdentityState(JSONArray messages) {
-        JSONArray identities = null;
-        if (messages != null) {
-            for (int i = 0; i < messages.length(); i++) {
-                try {
-                    if (messages.getJSONObject(i).get(Constants.MessageKey.TYPE).equals(MessageType.USER_IDENTITY_CHANGE)) {
-                        identities = messages.getJSONObject(i).getJSONArray(MessageKey.USER_IDENTITIES);
-                        messages.getJSONObject(i).remove(MessageKey.USER_IDENTITIES);
-                    }
-                }catch (JSONException jse) {
-
-                }catch (NullPointerException npe) {
-
-                }
-            }
-        }
-        if (identities == null) {
-            return mMessageManager.getUserIdentityJson();
-        } else {
-            return identities;
-        }
-    }
-
-    /**
      * If the customer is using our GCM solution, query and append all of the history used for attribution.
      *
      */

@@ -651,10 +651,10 @@ public class MParticleDBManager extends BaseDBManager {
                     if (oldValue != null && oldValue instanceof List && ((List) oldValue).containsAll(attributeValues)) {
                         continue;
                     }
-                    int deleted = UserAttributesService.deleteAttributes(db, key, getMpid());
+                    int deleted = UserAttributesService.deleteAttributes(db, key, userAttribute.mpId);
                     boolean isNewAttribute = deleted == 0;
                     for (String attributeValue : attributeValues) {
-                        UserAttributesService.insertAttribute(db, key, attributeValue, time, true, getMpid());
+                        UserAttributesService.insertAttribute(db, key, attributeValue, time, true, userAttribute.mpId);
                     }
                     attributionChangeDTOs.add(new AttributionChangeDTO(key, attributeValues, oldValue, false, isNewAttribute, userAttribute.time, userAttribute.mpId));
                 }
@@ -667,7 +667,7 @@ public class MParticleDBManager extends BaseDBManager {
                     if (oldValue != null && oldValue instanceof String && ((String) oldValue).equalsIgnoreCase(attributeValue)) {
                         continue;
                     }
-                    int deleted = UserAttributesService.deleteAttributes(db, key, getMpid());
+                    int deleted = UserAttributesService.deleteAttributes(db, key, userAttribute.mpId);
                     boolean isNewAttribute = deleted == 0;
                     UserAttributesService.insertAttribute(db, key, attributeValue, time, false, getMpid());
                     attributionChangeDTOs.add(new AttributionChangeDTO(key, attributeValue, oldValue, false, isNewAttribute, userAttribute.time, userAttribute.mpId));
@@ -688,7 +688,7 @@ public class MParticleDBManager extends BaseDBManager {
         SQLiteDatabase db = getMParticleDatabase();
         try {
             db.beginTransaction();
-            int deleted = UserAttributesService.deleteAttributes(db, container.key, getMpid());
+            int deleted = UserAttributesService.deleteAttributes(db, container.key, container.mpId);
             if (callbacks != null && deleted > 0) {
                 callbacks.attributeRemoved(container.key);
                 callbacks.logUserAttributeChangeMessage(container.key, null, currentValues.get(container.key), true, false, container.time, container.mpId);

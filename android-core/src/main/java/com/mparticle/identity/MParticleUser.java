@@ -8,49 +8,62 @@ import java.util.Map;
 
 public final class MParticleUser {
 
-    private Map<String, Object> userAttributes;
-    private Map<MParticle.IdentityType, String> userIdentities;
-    public Map<String, Object> getUserAttributes() {
-        return userAttributes;
+    private long mMpId;
+
+
+
+    MParticleUserDelegate mUserDelegate;
+
+    MParticleUser(long mpId, MParticleUserDelegate userDelegate) {
+        mMpId = mpId;
+        mUserDelegate = userDelegate;
     }
 
     public long getId() {
-        throw new UnsupportedOperationException("Not implemented yet...");
+        return mMpId;
+    }
+
+    public Map<String, Object> getUserAttributes() {
+        return mUserDelegate.getUserAttributes(getId());
     }
 
     void setUserAttributes(Map<String, Object> userAttributes) {
-        this.userAttributes = userAttributes;
+        for(Map.Entry<String, Object> entry: userAttributes.entrySet()) {
+            setUserAttribute(entry.getKey(), entry.getValue());
+        }
     }
 
     public Map<MParticle.IdentityType, String> getUserIdentities() {
-        return userIdentities;
+        return mUserDelegate.getUserIdentities(getId());
     }
 
     void setUserIdentities(Map<MParticle.IdentityType, String> userIdentities) {
-        this.userIdentities = userIdentities;
+        for(Map.Entry<MParticle.IdentityType, String> entry: userIdentities.entrySet()) {
+            mUserDelegate.setUserIdentity(entry.getValue(), entry.getKey(), getId());
+        }
     }
 
     public boolean setUserAttribute(String key, Object value) {
-        throw new UnsupportedOperationException("Not implemented yet...");
+        return mUserDelegate.setUserAttribute(key, value, getId());
     }
 
     public boolean setUserAttributeList(String key, Object value) {
-        throw new UnsupportedOperationException("Not implemented yet...");
+        return mUserDelegate.setUserAttributeList(key, value, getId());
     }
 
-    public boolean incrementUserAttribute(String key, Object value) {
-        throw new UnsupportedOperationException("Not implemented yet...");
+    public boolean incrementUserAttribute(String key, int value) {
+        return mUserDelegate.incrementUserAttribute(key, value, getId());
     }
 
     public boolean removeUserAttribute(String key) {
-        throw new UnsupportedOperationException("Not implemented yet...");
+        return mUserDelegate.removeUserAttribute(key, getId());
     }
 
     public boolean setUserTag(String tag) {
-        throw new UnsupportedOperationException("Not implemented yet...");
+        return setUserAttribute(tag, null);
     }
 
     public void getSegments(long timeout, String endpointId, SegmentListener listener) {
-
+        mUserDelegate.getSegments(timeout, endpointId, listener);
     }
 }

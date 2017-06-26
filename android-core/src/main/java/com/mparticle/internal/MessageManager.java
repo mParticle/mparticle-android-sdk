@@ -663,10 +663,10 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
             Logger.warning("Failed to create mParticle log event message");
         }
     }
-    
-    public MPMessage logUserIdentityChangeMessage(JSONObject newIdentity, JSONObject oldIdentity, JSONArray userIdentities) {
+
+    public MPMessage logUserIdentityChangeMessage(JSONObject newIdentity, JSONObject oldIdentity, JSONArray userIdentities, long mpId) {
         try {
-            MPMessage message = new MPMessage.Builder(MessageType.USER_IDENTITY_CHANGE, mAppStateManager.getSession(), mLocation, mConfigManager.getMpid())
+            MPMessage message = new MPMessage.Builder(MessageType.USER_IDENTITY_CHANGE, mAppStateManager.getSession(), mLocation, mpId)
                     .timestamp(System.currentTimeMillis())
                     .build();
             if (newIdentity != null) {
@@ -683,13 +683,13 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
             mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
             JSONArray seenIdentities = mConfigManager.markIdentitiesAsSeen(userIdentities);
             if (seenIdentities != null) {
-                mConfigManager.saveUserIdentityJson(seenIdentities);
+                mConfigManager.saveUserIdentityJson(seenIdentities, mpId);
             }
             return message;
         } catch (JSONException e) {
             Logger.warning("Failed to create mParticle user-identity-change message");
         } finally {
-            mConfigManager.saveUserIdentityJson(userIdentities);
+            mConfigManager.saveUserIdentityJson(userIdentities, mpId);
         }
 
         return null;
@@ -697,7 +697,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
 
     public MPMessage logUserAttributeChangeMessage(String userAttributeKey, Object newValue, Object oldValue, boolean deleted, boolean isNewAttribute, long time, long mpId) {
         try {
-            MPMessage message = new MPMessage.Builder(MessageType.USER_ATTRIBUTE_CHANGE, mAppStateManager.getSession(), mLocation, mConfigManager.getMpid())
+            MPMessage message = new MPMessage.Builder(MessageType.USER_ATTRIBUTE_CHANGE, mAppStateManager.getSession(), mLocation, mpId)
                     .timestamp(time)
                     .build();
             message.put(MessageKey.NAME, userAttributeKey);
@@ -910,8 +910,8 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
         return mDeviceAttributes;
     }
 
-    public JSONArray getUserIdentityJson(){
-        return mConfigManager.getUserIdentityJson();
+    public JSONArray getUserIdentityJson(long mpId){
+        return mConfigManager.getUserIdentityJson(mpId);
     }
 
     private UserAttributeResponse getUserAttributes(long mpId) {
