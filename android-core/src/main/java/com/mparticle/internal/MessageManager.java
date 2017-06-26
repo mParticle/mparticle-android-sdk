@@ -51,6 +51,7 @@ import java.util.Map;
 public class MessageManager implements MessageManagerCallbacks, ReportingManager {
     private static Context sContext = null;
     private static SharedPreferences sPreferences = null;
+    static volatile boolean devicePerformanceMetricsDisabled;
     private final DeviceAttributes mDeviceAttributes;
     private AppStateManager mAppStateManager;
     private ConfigManager mConfigManager = null;
@@ -140,7 +141,8 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
 
     }
 
-    public MessageManager(Context appContext, ConfigManager configManager, MParticle.InstallType installType, AppStateManager appStateManager) {
+    public MessageManager(Context appContext, ConfigManager configManager, MParticle.InstallType installType, AppStateManager appStateManager, boolean devicePerformanceMetricsDisabled) {
+        this.devicePerformanceMetricsDisabled = devicePerformanceMetricsDisabled;
         mDeviceAttributes = new DeviceAttributes();
         sContext = appContext.getApplicationContext();
         mConfigManager = configManager;
@@ -160,9 +162,17 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
         return sTelephonyManager;
     }
 
+    public boolean isDevicePerformanceMetricsDisabled() {
+        return devicePerformanceMetricsDisabled;
+    }
+
+    public void setDevicePerformanceMetricsDisabled(boolean disabled) {
+        devicePerformanceMetricsDisabled = disabled;
+    }
+
     public static JSONObject getStateInfo() throws JSONException {
         JSONObject infoJson = new JSONObject();
-        if (!MParticle.isDevicePerformanceMetricsDisabled()) {
+        if (!devicePerformanceMetricsDisabled) {
             infoJson.put(MessageKey.STATE_INFO_AVAILABLE_DISK, MPUtility.getAvailableInternalDisk());
             infoJson.put(MessageKey.STATE_INFO_AVAILABLE_EXT_DISK, MPUtility.getAvailableExternalDisk());
             final Runtime rt = Runtime.getRuntime();
@@ -653,7 +663,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
             Logger.warning("Failed to create mParticle log event message");
         }
     }
-
+    
     public MPMessage logUserIdentityChangeMessage(JSONObject newIdentity, JSONObject oldIdentity, JSONArray userIdentities) {
         try {
             MPMessage message = new MPMessage.Builder(MessageType.USER_IDENTITY_CHANGE, mAppStateManager.getSession(), mLocation, mConfigManager.getMpid())

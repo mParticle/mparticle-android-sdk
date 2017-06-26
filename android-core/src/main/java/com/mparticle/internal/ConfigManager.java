@@ -199,9 +199,7 @@ public class ConfigManager {
         mRestrictAAIDfromLAT = responseJSON.optBoolean(KEY_AAID_LAT, true);
         mIncludeSessionHistory = responseJSON.optBoolean(KEY_INCLUDE_SESSION_HISTORY, true);
         if (responseJSON.has(KEY_DEVICE_PERFORMANCE_METRICS_DISABLED)) {
-            MParticle.setDevicePerformanceMetricsDisabled(
-                    responseJSON.optBoolean(KEY_DEVICE_PERFORMANCE_METRICS_DISABLED, false)
-            );
+            MessageManager.devicePerformanceMetricsDisabled = responseJSON.optBoolean(KEY_DEVICE_PERFORMANCE_METRICS_DISABLED, false);
         }
 
         editor.apply();

@@ -3,6 +3,7 @@ package com.mparticle.identity;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import com.mparticle.MParticle;
 import com.mparticle.MParticleTask;
 
 public final class IdentityApi {
@@ -37,6 +38,10 @@ public final class IdentityApi {
     }
 
     public MParticleTask<Void> modify(@NonNull IdentityApiRequest updateRequest) {
+        throw new UnsupportedOperationException("Not implemented yet...");
+    }
+
+    public MParticleTask<IdentityApiResult> identify(IdentityApiRequest identifyRequest) {
         throw new UnsupportedOperationException("Not implemented yet...");
     }
 }

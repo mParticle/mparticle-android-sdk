@@ -9,8 +9,6 @@ import com.mparticle.MParticle;
  * This class is primarily responsible for parsing and representing XML/resource-based configuration.
  */
 class AppConfig {
-    public static final String PREFKEY_API_KEY = "mp_key";
-    public static final String PREFKEY_API_SECRET = "mp_secret";
     public static final String PREFKEY_EXCEPTIONS = "mp_reportUncaughtExceptions";
     public static final String PREFKEY_SESSION_TIMEOUT = "mp_sessionTimeout";
     public static final String PREFKEY_PROD_UPLOAD_INTERVAL = "mp_productionUploadInterval";
@@ -57,28 +55,8 @@ class AppConfig {
         }else{
             sEnvironment = environment;
         }
-        if (!MPUtility.isEmpty(apiKey)) {
-            mKey = apiKey;
-        }else {
-            mKey = getString(PREFKEY_API_KEY, mKey);
-            if (mKey == null &&
-                    (mKey = preferences.getString(Constants.PrefKeys.API_KEY, mKey)) == null) {
-                Logger.error( "Configuration issue: No API key passed to start() or configured as mp_key in resources!");
-                mSecret = "";
-            }
-        }
-
-        if (!MPUtility.isEmpty(apiSecret)) {
-            mSecret = apiSecret;
-        }else {
-            mSecret = getString(PREFKEY_API_SECRET, mSecret);
-            if (mSecret == null &&
-                    (mSecret = preferences.getString(Constants.PrefKeys.API_SECRET, mSecret)) == null) {
-                Logger.error("Configuration issue: No API secret passed to start() or configured as mp_secret in resources!");
-                mSecret = "";
-            }
-
-        }
+        mKey = apiKey;
+        mSecret = apiSecret;
         preferences.edit()
                 .putString(Constants.PrefKeys.API_KEY, mKey)
                 .putString(Constants.PrefKeys.API_SECRET, mSecret)

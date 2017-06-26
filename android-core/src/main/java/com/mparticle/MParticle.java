@@ -105,6 +105,7 @@ public class MParticle {
     protected CommerceApi mCommerce;
     protected ProductBagApi mProductBags;
     protected volatile DeepLinkListener mDeepLinkListener;
+    private IdentityApi mIdentityApi;
     private static volatile boolean sAndroidIdDisabled;
     private static volatile boolean sDevicePerformanceMetricsDisabled;
 
@@ -117,8 +118,10 @@ public class MParticle {
      * @param context Required reference to a Context object
      */
 
-    public static void start(Context context) {
-        start(context, MParticleOptions.builder().build());
+    public static void start(Context context, String apiKey, String apiSecret) {
+        start(context, MParticleOptions.builder(context)
+                .credentials(apiKey, apiSecret)
+                .build());
     }
 
     /**
@@ -131,7 +134,7 @@ public class MParticle {
         if (context == null) {
             throw new IllegalArgumentException("mParticle failed to start: context is required.");
         }
-        MParticle.getInstance(context, options.getInstallType(), options.getEnvironment(), options.getApiKey(), options.getApiSecret());
+        MParticle.getInstance(context, options);
     }
 
     /**
@@ -141,21 +144,24 @@ public class MParticle {
      *
      * @param context the Activity that is creating the instance
      * @return An instance of the mParticle SDK configured with your API key
-     * @param apiKey Your application's mParticle key retrieved from app.mparticle.com/apps
-     * @param apiSecret Your application's mParticle secret retrieved from app.mparticle.com/apps
-     *
      */
-    private static MParticle getInstance(Context context, InstallType installType, Environment environment, String apiKey, String apiSecret) {
+    private static MParticle getInstance(Context context, MParticleOptions options) {
         if (instance == null) {
             synchronized (MParticle.class) {
                 if (instance == null) {
+                    sDevicePerformanceMetricsDisabled = options.isDevicePerformanceMetricsDisabled();
+                    sAndroidIdDisabled = options.isAndroidIdDisabled();
+                    setLogLevel(options.getLogLevel());
+
                     Context originalContext = context;
                     context = context.getApplicationContext();
                     if (!MPUtility.checkPermission(context, Manifest.permission.INTERNET)) {
                         Logger.error("mParticle requires android.permission.INTERNET permission");
                     }
 
-                    ConfigManager configManager = new ConfigManager(context, environment, apiKey, apiSecret);
+                    ConfigManager configManager = new ConfigManager(context, options.getEnvironment(), options.getApiKey(), options.getApiSecret());
+                    configManager.setUploadInterval(options.getUploadInterval());
+                    configManager.setSessionTimeout(options.getSessionTimeout());
                     AppStateManager appStateManager = new AppStateManager(context);
                     appStateManager.setConfigManager(configManager);
 
@@ -163,9 +169,16 @@ public class MParticle {
                     instance.mAppContext = context;
                     instance.mConfigManager = configManager;
                     instance.mAppStateManager = appStateManager;
+                    instance.mIdentityApi = new IdentityApi();
+                    instance.mIdentityApi.identify(options.getInitialIdentity());
+                    if (options.isUncaughtExceptionLoggingEnabled()) {
+                        instance.enableUncaughtExceptionLogging();
+                    } else {
+                        instance.disableUncaughtExceptionLogging();
+                    }
                     instance.mCommerce = new CommerceApi(context);
                     instance.mProductBags = new ProductBagApi(context);
-                    instance.mMessageManager = new MessageManager(context, configManager, installType, appStateManager);
+                    instance.mMessageManager = new MessageManager(context, configManager, options.getInstallType(), appStateManager, sDevicePerformanceMetricsDisabled);
                     instance.mPreferences = context.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
                     instance.mKitManager = new KitFrameworkWrapper(context, instance.mMessageManager, configManager, appStateManager);
                     instance.mMessageManager.refreshConfiguration();
@@ -213,7 +226,7 @@ public class MParticle {
             Logger.error("Failed to get MParticle instance, getInstance() called prior to start().");
             return null;
         }
-        return getInstance(null, null, null, null, null);
+        return getInstance(null, null);
     }
 
     /**
@@ -237,37 +250,14 @@ public class MParticle {
      *
      * @return true if Android ID collection is disabled. (false by default)
 
-     * @see MParticle#setAndroidIdDisabled(boolean)
+     * @see MParticleOptions.Builder#setAndroidIdDisabled(boolean)
      */
     public static boolean isAndroidIdDisabled() {
         return sAndroidIdDisabled;
     }
 
-    /**
-     * Disable Android ID collection. This *must* be called before {@link MParticle#start(Context, MParticleOptions)}.
-     *
-     * By default, the SDK will collect <a href="http://developer.android.com/reference/android/provider/Settings.Secure.html#ANDROID_ID">Android Id</a> for the purpose
-     * of anonymous analytics. If you're not using an mParticle integration that consumes Android ID, the value will be sent to the mParticle
-     * servers and then immediately discarded. Use this API if you would like to additionally disable it from being collected entirely.
-     *
-     * @param disable true to disable collection (false by default)
-     */
-    public static void setAndroidIdDisabled(boolean disable) {
-        sAndroidIdDisabled = disable;
-    }
-
-
-    /**
-     * Disable CPU and memory usage collection.
-     *
-     * @param disable
-     */
-    public static void setDevicePerformanceMetricsDisabled(boolean disable) {
-        sDevicePerformanceMetricsDisabled = disable;
-    }
-
-    public static boolean isDevicePerformanceMetricsDisabled() {
-        return sDevicePerformanceMetricsDisabled;
+    public boolean isDevicePerformanceMetricsDisabled() {
+        return mMessageManager.isDevicePerformanceMetricsDisabled();
     }
 
 
@@ -904,15 +894,6 @@ public class MParticle {
     }
 
     /**
-     * Set the upload interval period to control how frequently uploads occur.
-     *
-     * @param uploadInterval the number of seconds between uploads
-     */
-    public void setUploadInterval(int uploadInterval) {
-        mConfigManager.setUploadInterval(uploadInterval);
-    }
-
-    /**
      * Enable mParticle exception handling to automatically log events on uncaught exceptions
      */
     public void enableUncaughtExceptionLogging() {
@@ -953,17 +934,6 @@ public class MParticle {
      */
     public int getSessionTimeout() {
         return mConfigManager.getSessionTimeout() / 1000;
-    }
-
-    /**
-     * Set the user session timeout interval.
-     * <p></p>
-     * A session has ended once the application has been in the background for more than this timeout
-     *
-     * @param sessionTimeout Session timeout in seconds
-     */
-    public void setSessionTimeout(int sessionTimeout) {
-        mConfigManager.setSessionTimeout(sessionTimeout);
     }
 
     public void getUserSegments(long timeout, String endpointId, SegmentListener listener) {
@@ -1160,8 +1130,7 @@ public class MParticle {
     }
 
     public IdentityApi Identity() {
-        //TODO
-        return null;
+        return mIdentityApi;
     }
 
     /**
@@ -1282,7 +1251,7 @@ public class MParticle {
          * Production mode. In this mode, all data from the SDK will be treated as production data, and will be forwarded to all configured
          * integrations for your application. The SDK will honor the configured upload interval.
          *
-         * @see #setUploadInterval(int)
+         * @see MParticleOptions.Builder().setUploadInterval(int)
          */
         Production(2);
         private final int value;
