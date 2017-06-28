@@ -10,6 +10,9 @@ import com.mparticle.commerce.Impression;
 import com.mparticle.commerce.Product;
 import com.mparticle.commerce.Promotion;
 import com.mparticle.commerce.TransactionAttributes;
+import com.mparticle.identity.IdentityApiRequest;
+import com.mparticle.identity.IdentityStateListener;
+import com.mparticle.identity.MParticleUser;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -84,6 +87,11 @@ public class MParticleJSInterface {
 
     private static final String PRODUCT_IMPRESSION_NAME = "ProductImpressionList";
 
+    private static final String USER_IDENTITIES = "UserIdentities";
+    private static final String USER_IDENTITY = "UserIdentity";
+    private static final String IDENTITY = "Identity";
+    private static final String TYPE = "Type";
+
     public MParticleJSInterface() {
         Product.setEqualityComparator(new Product.EqualityComparator() {
             @Override
@@ -95,6 +103,66 @@ public class MParticleJSInterface {
                 }
             }
         });
+    }
+
+    @JavascriptInterface
+    public String getCurrentMpId() {
+        MParticleUser user = MParticle.getInstance().Identity().getCurrentUser();
+        if (user != null) {
+            return String.valueOf(user.getId());
+        } else {
+            return String.valueOf(0);
+        }
+    }
+
+    @JavascriptInterface
+    public void login() {
+        MParticle.getInstance().Identity().login();
+    }
+
+    @JavascriptInterface
+    public void login(String json) {
+        IdentityApiRequest request = null;
+        try {
+            JSONObject jsonObject = new JSONObject(json);
+            request = getIdentityApiRequest(jsonObject);
+        }
+        catch (JSONException jse) {
+            Logger.warning(String.format(errorMsg, jse.getMessage()));
+        }
+        MParticle.getInstance().Identity().login(request);
+    }
+
+    @JavascriptInterface
+    public void logOut() {
+        MParticle.getInstance().Identity().logout();
+    }
+
+
+    @JavascriptInterface
+    public void logOut(String json) {
+        IdentityApiRequest request = null;
+        try {
+            JSONObject jsonObject = new JSONObject(json);
+            request = getIdentityApiRequest(jsonObject);
+        }
+        catch (JSONException jse) {
+            Logger.warning(String.format(errorMsg, jse.getMessage()));
+        }
+        MParticle.getInstance().Identity().logout(request);
+    }
+
+    @JavascriptInterface
+    public void modify(String json) {
+        IdentityApiRequest request = null;
+        try {
+            JSONObject jsonObject = new JSONObject(json);
+            request = getIdentityApiRequest(jsonObject);
+        }
+        catch (JSONException jse) {
+            Logger.warning(String.format(errorMsg, jse.getMessage()));
+        }
+        MParticle.getInstance().Identity().modify(request);
     }
 
     @JavascriptInterface
@@ -144,11 +212,17 @@ public class MParticleJSInterface {
     }
 
     @JavascriptInterface
-    public void setUserTag(String json){
-        try{
-            JSONObject attribute = new JSONObject(json);
-            MParticle.getInstance().setUserTag(attribute.getString("key"));
-        }catch (JSONException jse){
+    public void setUserTag(String json) {
+        try {
+            final JSONObject attribute = new JSONObject(json);
+            final String key = attribute.getString("key");
+            MParticle.getInstance().Identity().addIdentityStateListener(new SingleUserIdentificationCallback() {
+                @Override
+                public void onUserFound(MParticleUser user) {
+                    user.setUserTag(key);
+                }
+            });
+        } catch (JSONException jse) {
             Logger.warning(String.format(errorMsg, jse.getMessage()));
         }
     }
@@ -157,7 +231,13 @@ public class MParticleJSInterface {
     public void removeUserTag(String json){
         try{
             JSONObject attribute = new JSONObject(json);
-            MParticle.getInstance().removeUserTag(attribute.getString("key"));
+            final String key = attribute.getString("key");
+            MParticle.getInstance().Identity().addIdentityStateListener(new SingleUserIdentificationCallback() {
+                @Override
+                public void onUserFound(MParticleUser user) {
+                    user.removeUserAttribute(key);
+                }
+            });
         }catch (JSONException jse){
             Logger.warning(String.format(errorMsg, jse.getMessage()));
         }
@@ -167,7 +247,14 @@ public class MParticleJSInterface {
     public void setUserAttribute(String json){
         try {
             JSONObject attribute = new JSONObject(json);
-            MParticle.getInstance().setUserAttribute(attribute.getString("key"), String.valueOf(attribute.get("value")));
+            final String key = attribute.getString("key");
+            final Object value = attribute.get("value");
+            MParticle.getInstance().Identity().addIdentityStateListener(new SingleUserIdentificationCallback() {
+                @Override
+                public void onUserFound(MParticleUser user) {
+                    user.setUserAttribute(key, String.valueOf(value));
+                }
+            });
         } catch (JSONException jse) {
             Logger.warning(String.format(errorMsg, jse.getMessage()));
         }
@@ -177,7 +264,13 @@ public class MParticleJSInterface {
     public void removeUserAttribute(String json){
         try{
             JSONObject attribute = new JSONObject(json);
-            MParticle.getInstance().removeUserAttribute(attribute.getString("key"));
+            final String key = attribute.getString("key");
+            MParticle.getInstance().Identity().addIdentityStateListener(new SingleUserIdentificationCallback() {
+                @Override
+                void onUserFound(MParticleUser user) {
+                    user.removeUserAttribute(key);
+                }
+            });
         }catch (JSONException jse){
             Logger.warning(String.format(errorMsg, jse.getMessage()));
         }
@@ -195,22 +288,12 @@ public class MParticleJSInterface {
 
     @JavascriptInterface
     public void setUserIdentity(String json){
-        try {
-            JSONObject attribute = new JSONObject(json);
-            MParticle.getInstance().setUserIdentity(attribute.getString("Identity"), MParticle.IdentityType.parseInt(attribute.getInt("Type")));
-        } catch (JSONException jse) {
-            Logger.warning(String.format(errorMsg, jse.getMessage()));
-        }
+        //do nothing
     }
 
     @JavascriptInterface
     public void removeUserIdentity(String json){
-        try{
-            JSONObject attribute = new JSONObject(json);
-            MParticle.getInstance().removeUserIdentity(attribute.getString("key"));
-        }catch (JSONException jse){
-            Logger.warning(String.format(errorMsg, jse.getMessage()));
-        }
+       // do nothing
     }
 
     @JavascriptInterface
@@ -285,21 +368,22 @@ public class MParticleJSInterface {
     }
 
     @JavascriptInterface
-    public void logOut() {
-        MParticle.getInstance().logout();
-    }
-
-    @JavascriptInterface
     public void setUserAttributeList(String json) {
         try {
             JSONObject jsonObject = new JSONObject(json);
-            String key = jsonObject.getString("key");
+            final String key = jsonObject.getString("key");
             JSONArray value = jsonObject.getJSONArray("value");
-            List<String> attributes = new ArrayList<String>();
+            final List<String> attributes = new ArrayList<String>();
             for (int i = 0; i < value.length(); i++) {
                 attributes.add(String.valueOf(value.get(i)));
             }
-            MParticle.getInstance().setUserAttributeList(key, attributes);
+            MParticle.getInstance().Identity().addIdentityStateListener(new SingleUserIdentificationCallback() {
+                        @Override
+                        void onUserFound(MParticleUser user) {
+                            user.setUserAttributeList(key, attributes);
+                        }
+                    }
+            );
         } catch (JSONException jse) {
             Logger.warning(String.format(errorMsg, jse.getMessage()));
         }
@@ -307,21 +391,38 @@ public class MParticleJSInterface {
 
     @JavascriptInterface
     public void removeAllUserAttributes() {
-        for (String userAttribute: MParticle.getInstance().getAllUserAttributes().keySet()) {
-            MParticle.getInstance().removeUserAttribute(userAttribute);
-        }
+            MParticle.getInstance().Identity().addIdentityStateListener(new SingleUserIdentificationCallback() {
+                @Override
+                void onUserFound(MParticleUser user) {
+                    for (final String userAttribute : user.getUserAttributes().keySet()) {
+                        user.removeUserAttribute(userAttribute);
+                    }
+                }
+            });
     }
 
     @JavascriptInterface
     public String getUserAttributesLists() {
-        Map<String, List<String>> attributeMap = MParticle.getInstance().getUserAttributeLists();
+        final Map<String, List> attributeMap = new HashMap<String, List>();
+        //TODO
+        //we need to implement an Asynchronous version of this method once we get a callback scheme in
+        //place across platforms
+        MParticleUser user = MParticle.getInstance().Identity().getCurrentUser();
+        if (user == null) {
+            return new JSONObject().toString();
+        }
+        for (Map.Entry<String, Object> entry: user.getUserAttributes().entrySet()) {
+            if (entry.getValue() instanceof List) {
+                attributeMap.put(entry.getKey(), (List)entry.getValue());
+            }
+        }
         JSONArray jsonArray = new JSONArray();
-        for (Map.Entry<String, List<String>> entry: attributeMap.entrySet()) {
+        for (Map.Entry<String, List> entry: attributeMap.entrySet()) {
             try {
                 JSONObject jsonObject = new JSONObject();
                 jsonObject.put("key", entry.getKey());
                 JSONArray jsonArray1 = new JSONArray();
-                for (String attribute: entry.getValue()) {
+                for (Object attribute: entry.getValue()) {
                     jsonArray1.put(attribute);
                 }
                 jsonObject.put("value", jsonArray1.toString());
@@ -335,7 +436,10 @@ public class MParticleJSInterface {
 
     @JavascriptInterface
     public String getAllUserAttributes() {
-        Map<String, Object> attributeMap = MParticle.getInstance().getAllUserAttributes();
+        //TODO
+        //we need to implement an Asynchronous version of this method once we get a callback scheme in
+        //place across platforms
+        Map<String, Object> attributeMap = MParticle.getInstance().Identity().getCurrentUser().getUserAttributes();
         JSONArray jsonArray = new JSONArray();
         for (Map.Entry<String, Object> entry: attributeMap.entrySet()) {
             try {
@@ -562,5 +666,67 @@ public class MParticleJSInterface {
                 .setCreative(jsonObject.optString(PROMOTION_CREATIVE))
                 .setId(jsonObject.optString(PROMOTION_ID))
                 .setPosition(jsonObject.optString(PROMOTION_POSITION));
+    }
+
+    private IdentityApiRequest getIdentityApiRequest(JSONObject jsonObject) {
+        JSONArray identitiesArray = jsonObject.optJSONArray(USER_IDENTITIES);
+
+        Map<MParticle.IdentityType, String> identities = new HashMap<MParticle.IdentityType, String>();
+        if (identitiesArray != null) {
+            for (int i = 0; i < identitiesArray.length(); i++) {
+                try {
+                    JSONObject object = identitiesArray.getJSONObject(i);
+                    identities.put(getIdentityType(object), object.getString(IDENTITY));
+                }
+                catch (JSONException jse){
+                    Logger.warning(String.format(errorMsg, jse.getMessage()));
+                }
+            }
+        }
+        IdentityApiRequest.Builder builder = new IdentityApiRequest.Builder()
+                .userIdentities(identities);
+
+        if (jsonObject.has(TYPE) && jsonObject.has(IDENTITY)) {
+            MParticle.IdentityType type = getIdentityType(jsonObject);
+            String value = jsonObject.optString(IDENTITY);
+            if (type != null && !MPUtility.isEmpty(value)) {
+                builder.userIdentity(type, value);
+            }
+        }
+        return builder.build();
+    }
+
+    private MParticle.IdentityType getIdentityType(JSONObject object) {
+        MParticle.IdentityType identityType = null;
+        String previousErrorMessage = null;
+
+        try {
+            identityType = MParticle.IdentityType.parseInt(object.getInt(TYPE));
+        }
+        catch (JSONException jse) {
+            previousErrorMessage = jse.getMessage();
+        }
+        if (identityType != null) {
+            return identityType;
+        }
+        try {
+            identityType = MParticle.IdentityType.valueOf(object.getString(TYPE));
+        }
+        catch (JSONException jse) {
+            Logger.warning(String.format(errorMsg, (jse.getMessage() + (!MPUtility.isEmpty(previousErrorMessage) ? "\n" + previousErrorMessage : ""))));
+        }
+        return identityType;
+    }
+
+    abstract class SingleUserIdentificationCallback implements IdentityStateListener {
+
+        @Override
+        public void onUserIdentified(MParticleUser user) {
+            MParticle.getInstance().Identity().removeIdentityStateListener(this);
+            onUserFound(user);
+        }
+
+        abstract void onUserFound(MParticleUser user);
+
     }
 }
