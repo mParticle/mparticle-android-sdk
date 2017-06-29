@@ -20,6 +20,7 @@ import com.mparticle.commerce.Product;
 import com.mparticle.commerce.ProductBagApi;
 import com.mparticle.identity.IdentityApi;
 import com.mparticle.identity.IdentityApiRequest;
+import com.mparticle.identity.MParticleUser;
 import com.mparticle.internal.AppStateManager;
 import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.Constants;
@@ -118,10 +119,8 @@ public class MParticle {
      * @param context Required reference to a Context object
      */
 
-    public static void start(Context context, String apiKey, String apiSecret) {
-        start(context, MParticleOptions.builder(context)
-                .credentials(apiKey, apiSecret)
-                .build());
+    public static void start(Context context) {
+        start(context, MParticleOptions.builder(context).build());
     }
 
     /**
@@ -169,8 +168,6 @@ public class MParticle {
                     instance.mAppContext = context;
                     instance.mConfigManager = configManager;
                     instance.mAppStateManager = appStateManager;
-                    instance.mIdentityApi = new IdentityApi();
-                    instance.mIdentityApi.identify(options.getInitialIdentity());
                     if (options.isUncaughtExceptionLoggingEnabled()) {
                         instance.enableUncaughtExceptionLogging();
                     } else {
@@ -182,6 +179,18 @@ public class MParticle {
                     instance.mPreferences = context.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
                     instance.mKitManager = new KitFrameworkWrapper(context, instance.mMessageManager, configManager, appStateManager);
                     instance.mMessageManager.refreshConfiguration();
+
+                    instance.mIdentityApi = IdentityApi.getInstance(context, instance.mMessageManager, instance.mConfigManager);
+                    if (options.getInitialIdentity() != null) {
+                        instance.mIdentityApi.identify(options.getInitialIdentity());
+                    } else {
+                        MParticleUser currentUser = instance.mIdentityApi.getCurrentUser();
+                        if (currentUser != null) {
+                            instance.mIdentityApi.identify(IdentityApiRequest.withUser(currentUser).build());
+                        } else {
+                            instance.mIdentityApi.identify(IdentityApiRequest.withEmptyUser().build());
+                        }
+                    }
 
                     if (configManager.getLogUnhandledExceptions()) {
                         instance.enableUncaughtExceptionLogging();
@@ -1216,7 +1225,6 @@ public class MParticle {
                     return FacebookCustomAudienceId;
                 default:
                     return Other;
-
             }
         }
 

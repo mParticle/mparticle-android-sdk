@@ -214,7 +214,7 @@ public class MParticleDBManager extends BaseDBManager {
                     uploadMessage.setDeviceInfo(deviceAttributes.getDeviceInfo(mContext));
                 }
                 JSONArray messages = uploadMessage.getSessionHistoryMessages();
-                JSONArray identities = findIdentityState(configManager, messages);
+                JSONArray identities = findIdentityState(configManager, messages, mpId);
                 uploadMessage.setIdentities(identities);
                 JSONObject userAttributes = findUserAttributeState(messages, mpId);
                 uploadMessage.setUserAttributes(userAttributes);
@@ -290,7 +290,7 @@ public class MParticleDBManager extends BaseDBManager {
                     uploadMessage.setDeviceInfo(deviceAttributes.getDeviceInfo(mContext));
                 }
                 JSONArray messages = uploadMessage.getMessages();
-                JSONArray identities = findIdentityState(configManager, messages);
+                JSONArray identities = findIdentityState(configManager, messages, mpId);
                 uploadMessage.setIdentities(identities);
                 JSONObject userAttributes = findUserAttributeState(messages, mpId);
                 uploadMessage.setUserAttributes(userAttributes);
@@ -334,7 +334,7 @@ public class MParticleDBManager extends BaseDBManager {
             }
         }
         if (userAttributes == null) {
-            return getAllUserAttributes(mpId);
+            return getAllUserAttributesJson(mpId);
         } else {
             return userAttributes;
         }
@@ -343,7 +343,7 @@ public class MParticleDBManager extends BaseDBManager {
     /**
      * Look for the last UIC message to find the end-state of user identities
      */
-    private JSONArray findIdentityState(ConfigManager configManager, JSONArray messages) {
+    private JSONArray findIdentityState(ConfigManager configManager, JSONArray messages, long mpId) {
         JSONArray identities = null;
         if (messages != null) {
             for (int i = 0; i < messages.length(); i++) {
@@ -360,7 +360,7 @@ public class MParticleDBManager extends BaseDBManager {
             }
         }
         if (identities == null) {
-            return configManager.getUserIdentityJson();
+            return configManager.getUserIdentityJson(mpId);
         } else {
             return identities;
         }
@@ -547,7 +547,7 @@ public class MParticleDBManager extends BaseDBManager {
     }
 
 
-    public JSONObject getAllUserAttributes(long mpId)  {
+    public JSONObject getAllUserAttributesJson(long mpId)  {
         Map<String, Object> attributes = getAllUserAttributes(null, mpId);
         JSONObject jsonAttributes = new JSONObject();
         for (Map.Entry<String, Object> entry : attributes.entrySet()) {
@@ -576,6 +576,10 @@ public class MParticleDBManager extends BaseDBManager {
             }
         }
         return jsonAttributes;
+    }
+
+    public Map<String, Object> getAllUserAttributes(long mpId) {
+        return getAllUserAttributes(null, mpId);
     }
 
     public Map<String, Object> getAllUserAttributes(final UserAttributeListener listener, final long mpId) {

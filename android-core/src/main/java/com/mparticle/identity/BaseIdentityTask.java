@@ -32,7 +32,7 @@ public abstract class BaseIdentityTask<T> extends MParticleTask<T> {
     void setSuccessful(Object object) {
         isCompleted = true;
         isSuccessful = true;
-        T result = buildResult(object);
+        result = buildResult(object);
 
         for (TaskSuccessListener<? super T> listener: successListeners) {
             listener.onSuccess(this.result);

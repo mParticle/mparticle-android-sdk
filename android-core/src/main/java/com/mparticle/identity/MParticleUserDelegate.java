@@ -12,6 +12,7 @@ import com.mparticle.internal.KitManager;
 import com.mparticle.internal.Logger;
 import com.mparticle.internal.MPUtility;
 import com.mparticle.internal.MessageManager;
+import com.mparticle.internal.dto.MParticleUserDTO;
 import com.mparticle.segmentation.SegmentListener;
 
 import org.json.JSONArray;
@@ -23,7 +24,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/** package-private **/ class MParticleUserDelegate {
+/** package-private **/class MParticleUserDelegate {
 
     private AppStateManager mAppStateManager;
     private ConfigManager mConfigManager;
@@ -42,22 +43,7 @@ import java.util.Map;
     }
 
     public Map<MParticle.IdentityType, String> getUserIdentities(long mpId){
-        JSONArray identities = mMessageManager.getUserIdentityJson(mpId);
-        Map<MParticle.IdentityType, String> identityTypeStringMap = new HashMap<MParticle.IdentityType, String>(identities.length());
-
-        for (int i = 0; i < identities.length(); i++) {
-            try {
-                JSONObject identity = identities.getJSONObject(i);
-                identityTypeStringMap.put(
-                        MParticle.IdentityType.parseInt(identity.getInt(MessageKey.IDENTITY_NAME)),
-                        identity.getString(MessageKey.IDENTITY_VALUE)
-                );
-            } catch (JSONException jse) {
-
-            }
-        }
-
-        return identityTypeStringMap;
+        return mMessageManager.getUserIdentities(mpId);
     }
 
     public void setUserIdentity(String id, MParticle.IdentityType identityType, long mpId) {
@@ -224,6 +210,19 @@ import java.util.Map;
     public void getSegments(long timeout, String endpointId, SegmentListener listener) {
         if (mMessageManager != null && mMessageManager.mUploadHandler != null) {
             mMessageManager.mUploadHandler.fetchSegments(timeout, endpointId, listener);
+        }
+    }
+
+    void setUser(MParticleUserDTO mParticleUserDTO) {
+        if (!MPUtility.isEmpty(mParticleUserDTO.getIdentities())) {
+            for (Map.Entry<MParticle.IdentityType, String> entry: mParticleUserDTO.getIdentities().entrySet()) {
+                setUserIdentity(entry.getValue(), entry.getKey(), mParticleUserDTO.getMpId());
+            }
+        }
+        if (!MPUtility.isEmpty(mParticleUserDTO.getUserAttributes())) {
+            for (Map.Entry<String, Object> entry: mParticleUserDTO.getUserAttributes().entrySet()) {
+                setUserAttribute(entry.getKey(), entry.getValue(), mParticleUserDTO.getMpId());
+            }
         }
     }
 }

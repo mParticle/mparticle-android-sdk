@@ -3,14 +3,28 @@ package com.mparticle.identity;
 import com.mparticle.MParticle;
 import com.mparticle.internal.Logger;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.HashMap;
 import java.util.Map;
 
 public final class IdentityApiRequest {
-    private Map<MParticle.IdentityType, String> userIdentities;
+    private Map<MParticle.IdentityType, String> userIdentities = new HashMap<MParticle.IdentityType, String>();
+    private boolean isCopyUserAttributes = false;
+    private Long mpId;
 
     private IdentityApiRequest(IdentityApiRequest.Builder builder) {
-        this.userIdentities = builder.userIdentities;
+        if (builder.userIdentities != null){
+            this.userIdentities = builder.userIdentities;
+        }
+        if (builder.isCopyUserAttributes != null) {
+            this.isCopyUserAttributes = builder.isCopyUserAttributes;
+        }
+        if (builder.mpId != null) {
+            this.mpId = builder.mpId;
+        }
     }
 
     public static Builder withEmptyUser() {
@@ -21,11 +35,26 @@ public final class IdentityApiRequest {
         return new IdentityApiRequest.Builder(currentUser);
     }
 
+    public boolean shouldCopyUserAttributes() {
+        return isCopyUserAttributes;
+    }
+
+    public Long getMpId() {
+        return mpId;
+    }
+
+    public Map<MParticle.IdentityType, String> getUserIdentities() {
+        return userIdentities;
+    }
+
     public static class Builder {
         private Map<MParticle.IdentityType, String> userIdentities = new HashMap<MParticle.IdentityType, String>();
+        private Boolean isCopyUserAttributes = null;
+        private Long mpId = null;
 
         public Builder(MParticleUser currentUser) {
             userIdentities = currentUser.getUserIdentities();
+            mpId = currentUser.getId();
         }
 
         public Builder() {
@@ -60,7 +89,8 @@ public final class IdentityApiRequest {
         }
 
         public Builder copyUserAttributes(boolean copyUserAttributes) {
-            return null;
+            this.isCopyUserAttributes = copyUserAttributes;
+            return this;
         }
     }
 }

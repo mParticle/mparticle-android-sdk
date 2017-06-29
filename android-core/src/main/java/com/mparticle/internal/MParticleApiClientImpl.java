@@ -49,7 +49,7 @@ import javax.net.ssl.TrustManagerFactory;
  * Class responsible for all network communication to the mParticle SDK server.
  *
  */
-public class MParticleApiClientImpl implements MParticleApiClient {
+public class MParticleApiClientImpl extends MParticleBaseClientImpl implements MParticleApiClient {
 
     /**
      * Signature header used for authentication with the client key/secret
@@ -71,7 +71,6 @@ public class MParticleApiClientImpl implements MParticleApiClient {
 
     private static final String SERVICE_VERSION_1 = "/v1";
     private static final String SERVICE_VERSION_4 = "/v4";
-    public static final int HTTP_TOO_MANY_REQUESTS = 429;
 
     /**
      * Crucial LTV value key used to sync LTV between the SDK and the SDK server whenever LTV has changed.
@@ -94,17 +93,10 @@ public class MParticleApiClientImpl implements MParticleApiClient {
     private final Context mContext;
     Integer mDeviceRampNumber = null;
     private static String sSupportedKits;
-    private SSLSocketFactory mSocketFactory;
     private JSONObject mCurrentCookies;
-    /**
-     * Default throttle time - in the worst case scenario if the server is busy, the soonest
-     * the SDK will attempt to contact the server again will be after this 2 hour window.
-     */
-    static final long DEFAULT_THROTTLE_MILLIS = 1000*60*60*2;
-    static final long MAX_THROTTLE_MILLIS = 1000*60*60*24;
-    private boolean alreadyWarned;
 
     public MParticleApiClientImpl(ConfigManager configManager, SharedPreferences sharedPreferences, Context context) throws MalformedURLException, MPNoConfigException {
+        super(sharedPreferences);
         mContext = context;
         mConfigManager = configManager;
         mApiSecret = configManager.getApiSecret();
@@ -331,21 +323,8 @@ public class MParticleApiClientImpl implements MParticleApiClient {
 
     void addMessageSignature(HttpURLConnection request, String message) {
         try {
-            String method = request.getRequestMethod();
-            SimpleDateFormat format = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz", Locale.US);
-            String dateHeader = format.format(new Date());
-            String path = request.getURL().getFile();
-            StringBuilder hashString = new StringBuilder()
-                    .append(method)
-                    .append("\n")
-                    .append(dateHeader)
-                    .append("\n")
-                    .append(path);
-            if (message != null) {
-                hashString.append(message);
-            }
-            request.setRequestProperty("Date", dateHeader);
-            request.setRequestProperty(HEADER_SIGNATURE, MPUtility.hmacSha256Encode(mApiSecret, hashString.toString()));
+            request.setRequestProperty("Date", getHeaderDateString());
+            request.setRequestProperty(HEADER_SIGNATURE, getHeaderHashString(request, message, mApiSecret));
         } catch (InvalidKeyException e) {
             Logger.error("Error signing message.");
         } catch (NoSuchAlgorithmException e) {
@@ -354,65 +333,6 @@ public class MParticleApiClientImpl implements MParticleApiClient {
             Logger.error("Error signing message.");
         }
     }
-
-    private static Certificate generateCertificate(CertificateFactory certificateFactory, String encodedCertificate) throws IOException, CertificateException {
-        Certificate certificate = null;
-        InputStream inputStream = new ByteArrayInputStream( encodedCertificate.getBytes() );
-        try {
-            certificate = certificateFactory.generateCertificate(inputStream);
-        }finally {
-            inputStream.close();
-        }
-        return certificate;
-    }
-
-    /**
-     * Custom socket factory used for certificate pinning.
-     */
-    private SSLSocketFactory getSocketFactory() throws Exception{
-        if (mSocketFactory == null){
-            String keyStoreType = KeyStore.getDefaultType();
-            KeyStore keyStore = KeyStore.getInstance(keyStoreType);
-            keyStore.load(null, null);
-
-            CertificateFactory cf = CertificateFactory.getInstance("X.509");
-            keyStore.setCertificateEntry("intca", generateCertificate(cf, Constants.GODADDY_INTERMEDIATE_CRT));
-            keyStore.setCertificateEntry("rootca", generateCertificate(cf, Constants.GODADDY_ROOT_CRT));
-            keyStore.setCertificateEntry("fiddlerroot", generateCertificate(cf, Constants.FIDDLER_ROOT_CRT));
-
-            String tmfAlgorithm = TrustManagerFactory.getDefaultAlgorithm();
-            TrustManagerFactory tmf = TrustManagerFactory.getInstance(tmfAlgorithm);
-            tmf.init(keyStore);
-
-            SSLContext context = SSLContext.getInstance("TLS");
-            context.init(null, tmf.getTrustManagers(), null);
-            mSocketFactory = context.getSocketFactory();
-        }
-        return mSocketFactory;
-    }
-
-    public HttpURLConnection makeUrlRequest(HttpURLConnection connection, boolean mParticle) throws IOException{
-        //gingerbread seems to dislike pinning w/ godaddy. Being that GB is near-dead anyway, just disable pinning for it.
-        if (!BuildConfig.MP_DEBUG && mParticle && Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH && connection instanceof HttpsURLConnection) {
-            try {
-                ((HttpsURLConnection) connection).setSSLSocketFactory(getSocketFactory());
-            }catch (Exception e){
-
-            }
-        }
-        if (mParticle) {
-            int statusCode = connection.getResponseCode();
-            if (statusCode == 400 && !alreadyWarned) {
-                alreadyWarned = true;
-                Logger.error("Bad API request - is the correct API key and secret configured?");
-            }
-            if ((statusCode == 503 || statusCode == HTTP_TOO_MANY_REQUESTS) && !BuildConfig.MP_DEBUG) {
-                setNextAllowedRequestTime(connection);
-            }
-        }
-        return connection;
-    }
-
 
     public void parseMparticleJson(JSONObject jsonResponse){
         try {
@@ -435,37 +355,6 @@ public class MParticleApiClientImpl implements MParticleApiClient {
         } catch (JSONException jse) {
 
         }
-    }
-
-    void setNextAllowedRequestTime(HttpURLConnection connection) {
-        long throttle = DEFAULT_THROTTLE_MILLIS;
-        if (connection != null) {
-            //most HttpUrlConnectionImpl's are case insensitive, but the interface
-            //doesn't actually restrict it so let's be safe and check.
-            String retryAfter = connection.getHeaderField("Retry-After");
-            if (MPUtility.isEmpty(retryAfter)) {
-                retryAfter = connection.getHeaderField("retry-after");
-            }
-            try {
-                long parsedThrottle = Long.parseLong(retryAfter) * 1000;
-                if (parsedThrottle > 0) {
-                    throttle = Math.min(parsedThrottle, MAX_THROTTLE_MILLIS);
-                }
-            } catch (NumberFormatException nfe) {
-                Logger.debug("Unable to parse retry-after header, using default.");
-            }
-        }
-
-        long nextTime = System.currentTimeMillis() + throttle;
-        setNextRequestTime(nextTime);
-    }
-
-    long getNextRequestTime() {
-        return mPreferences.getLong(Constants.PrefKeys.NEXT_REQUEST_TIME, 0);
-    }
-
-    void setNextRequestTime(long timeMillis) {
-        mPreferences.edit().putLong(Constants.PrefKeys.NEXT_REQUEST_TIME, timeMillis).apply();
     }
 
     public final class MPThrottleException extends Exception {
@@ -596,25 +485,5 @@ public class MParticleApiClientImpl implements MParticleApiClient {
         }else{
             return mCurrentCookies;
         }
-    }
-
-    @Override
-    public MParticleUser login(IdentityApiRequest request) {
-        throw new UnsupportedOperationException("Not yet implemented");
-    }
-
-    @Override
-    public MParticleUser logout(IdentityApiRequest request) {
-        throw new UnsupportedOperationException("Not yet implemented");
-    }
-
-    @Override
-    public MParticleUser modify(IdentityApiRequest request) {
-        throw new UnsupportedOperationException("Not yet implemented");
-    }
-
-    @Override
-    public MParticleUser identify(IdentityApiRequest request) {
-        throw new UnsupportedOperationException("Not yet implemented");
     }
 }

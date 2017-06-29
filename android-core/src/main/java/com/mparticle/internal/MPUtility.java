@@ -38,6 +38,7 @@ import java.net.HttpURLConnection;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -96,6 +97,10 @@ public class MPUtility {
 
     public static boolean isEmpty(JSONArray jsonArray) {
         return jsonArray == null || jsonArray.length() == 0;
+    }
+
+    public static boolean isEmpty(Map map) {
+        return map == null || map.size() == 0;
     }
 
     public static AndroidAdIdInfo getGoogleAdIdInfo(Context context) {

@@ -459,6 +459,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
     public MPMessage setPushRegistrationId(String token, boolean registeringFlag) {
         if (!MPUtility.isEmpty(token)) {
             try {
+                mConfigManager.setPushToken(token);
                 MPMessage message = new MPMessage.Builder(MessageType.PUSH_REGISTRATION, mAppStateManager.getSession(), mLocation, mConfigManager.getMpid())
                         .timestamp(System.currentTimeMillis())
                         .build();
@@ -728,7 +729,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
 
             message.put(MessageKey.ATTRIBUTE_DELETED, deleted);
             message.put(MessageKey.IS_NEW_ATTRIBUTE, isNewAttribute);
-            message.put(MessageKey.USER_ATTRIBUTES, mMParticleDBManager.getAllUserAttributes(mpId));
+            message.put(MessageKey.USER_ATTRIBUTES, mMParticleDBManager.getAllUserAttributesJson(mpId));
             mMessageHandler.handleMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
             return message;
         } catch (JSONException e) {
@@ -910,6 +911,10 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
         return mDeviceAttributes;
     }
 
+    public Map<MParticle.IdentityType, String> getUserIdentities(long mpId) {
+        return mConfigManager.getUserIdentities(mpId);
+    }
+
     public JSONArray getUserIdentityJson(long mpId){
         return mConfigManager.getUserIdentityJson(mpId);
     }
@@ -956,6 +961,10 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
         }
 
 
+    }
+
+    public MParticleDBManager getMParticleDBManager() {
+        return mMParticleDBManager;
     }
 
     public class InfluenceOpenMessage {

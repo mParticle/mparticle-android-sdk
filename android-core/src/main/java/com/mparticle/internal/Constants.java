@@ -483,6 +483,8 @@ public class Constants {
         String INTEGRATION_ATTRIBUTES = "mp::integrationattributes";
         String ETAG = "mp::etag";
         String IF_MODIFIED = "mp::ifmodified";
+        String IDENTITY_API_CONTEXT = "mp::identity::api::context";
+        String PUSH_TOKEN = "mp::pushtoken";
     }
 
     public interface MiscStorageKeys {

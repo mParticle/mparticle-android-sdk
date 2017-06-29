@@ -633,6 +633,25 @@ public class ConfigManager {
         return jsonAttributes;
     }
 
+    public Map<MParticle.IdentityType, String> getUserIdentities(long mpId) {
+        JSONArray userIdentitiesJson = getUserIdentityJson(mpId);
+        Map<MParticle.IdentityType, String> identityTypeStringMap = new HashMap<MParticle.IdentityType, String>(userIdentitiesJson.length());
+
+        for (int i = 0; i < userIdentitiesJson.length(); i++) {
+            try {
+                JSONObject identity = userIdentitiesJson.getJSONObject(i);
+                identityTypeStringMap.put(
+                        MParticle.IdentityType.parseInt(identity.getInt(Constants.MessageKey.IDENTITY_NAME)),
+                        identity.getString(Constants.MessageKey.IDENTITY_VALUE)
+                );
+            } catch (JSONException jse) {
+
+            }
+        }
+
+        return identityTypeStringMap;
+    }
+
     public JSONArray getUserIdentityJson() {
         return getUserIdentityJson(getMpid());
     }
@@ -764,6 +783,22 @@ public class ConfigManager {
 
         }
         return null;
+    }
+
+    public String getIdentityApiContext() {
+        return sPreferences.getString(Constants.PrefKeys.IDENTITY_API_CONTEXT, null);
+    }
+
+    public void setIdentityApiContext(String context) {
+        sPreferences.edit().putString(Constants.PrefKeys.IDENTITY_API_CONTEXT, context).apply();
+    }
+
+    public String getPushToken() {
+        return sPreferences.getString(Constants.PrefKeys.PUSH_TOKEN, null);
+    }
+
+    public void setPushToken(String token) {
+        sPreferences.edit().putString(Constants.PrefKeys.PUSH_TOKEN, token).apply();
     }
 
     static class UserConfigHolder extends TimedCache<UserConfig> {

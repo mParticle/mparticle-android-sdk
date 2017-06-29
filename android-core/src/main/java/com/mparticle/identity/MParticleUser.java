@@ -9,9 +9,6 @@ import java.util.Map;
 public final class MParticleUser {
 
     private long mMpId;
-
-
-
     MParticleUserDelegate mUserDelegate;
 
     MParticleUser(long mpId, MParticleUserDelegate userDelegate) {
