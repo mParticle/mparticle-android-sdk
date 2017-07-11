@@ -98,7 +98,7 @@ public abstract class KitIntegration {
      * @return a Map of identity-types and identity-values
      */
     public final Map<MParticle.IdentityType, String> getUserIdentities() {
-       Map<MParticle.IdentityType, String> identities = MParticle.getInstance().getUserIdentities();
+       Map<MParticle.IdentityType, String> identities = MParticle.getInstance().Identity().getCurrentUser().getUserIdentities();
        Map<MParticle.IdentityType, String> filteredIdentities = new HashMap<MParticle.IdentityType, String>(identities.size());
        for (Map.Entry<MParticle.IdentityType, String> entry : identities.entrySet()) {
            if (getConfiguration().shouldSetIdentity(entry.getKey())) {
@@ -122,7 +122,7 @@ public abstract class KitIntegration {
     public final Map<String, Object> getAllUserAttributes() {
         Map<String, Object> attributes = (Map<String, Object>) KitConfiguration.filterAttributes(
                 getConfiguration().getUserAttributeFilters(),
-                MParticle.getInstance().getAllUserAttributes()
+                MParticle.getInstance().Identity().getCurrentUser().getUserAttributes()
         );
         if ((this instanceof AttributeListener) && ((AttributeListener)this).supportsAttributeLists()) {
             return attributes;

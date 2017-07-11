@@ -33,25 +33,25 @@ public class DatabaseTables {
     }
 
     class MParticleDatabase extends AbstractDatabase {
-        private Context context;
 
         public MParticleDatabase(Context context) {
             super(context, MParticleDatabaseHelper.DB_NAME, null, MParticleDatabaseHelper.DB_VERSION);
-            this.context = context;
         }
 
 
         @Override
         SQLiteOpenHelperWrapper getSQLiteOpenHelperWrapper() {
-            return new MParticleDatabaseHelper(context);
+            return new MParticleDatabaseHelper(mContext);
         }
     }
 
     abstract class AbstractDatabase extends SQLiteOpenHelper {
+        protected Context mContext;
         SQLiteOpenHelperWrapper sqLiteOpenHelperWrapper;
 
         public AbstractDatabase(Context context, String name, SQLiteDatabase.CursorFactory factory, int version) {
             super(context, name, factory, version);
+            mContext = context;
             this.sqLiteOpenHelperWrapper = getSQLiteOpenHelperWrapper();
         }
 

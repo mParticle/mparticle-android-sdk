@@ -7,6 +7,9 @@ import android.os.Looper;
 
 import com.mparticle.ExceptionHandler;
 import com.mparticle.MParticle;
+import com.mparticle.identity.IdentityApi;
+import com.mparticle.identity.IdentityStateListener;
+import com.mparticle.identity.MParticleUser;
 import com.mparticle.internal.database.services.MParticleDBManager;
 
 import org.json.JSONArray;
@@ -17,6 +20,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -53,7 +57,7 @@ public class ConfigManager {
     AppConfig mLocalPrefs;
 
     private static JSONArray sPushKeys;
-    private static TimedCache<UserConfig> sUserConfigHolder;
+    private static UserConfig sUserConfig;
     private String mLogUnhandledExceptions = VALUE_APP_DEFINED;
 
     private boolean mSendOoEvents;
@@ -78,7 +82,7 @@ public class ConfigManager {
         mContext = context.getApplicationContext();
         sPreferences = mContext.getSharedPreferences(PREFERENCES_FILE, Context.MODE_PRIVATE);
         mLocalPrefs = new AppConfig(mContext, environment, sPreferences, apiKey, apiSecret);
-        sUserConfigHolder = new UserConfigHolder(mContext, getMpid());
+        sUserConfig = UserConfig.getUserConfig(mContext, getMpid());
         restoreOldConfig();
     }
 
@@ -111,25 +115,39 @@ public class ConfigManager {
     }
 
     UserConfig getUserConfig() {
-        return sUserConfigHolder.getCurrentInstance();
+        return sUserConfig;
     }
 
     UserConfig getUserConfig(long mpId) {
-        return sUserConfigHolder.getInstance(mpId);
+        if (sUserConfig == null || sUserConfig.getMpid() != mpId) {
+            sUserConfig = UserConfig.getUserConfig(mContext, mpId);
+        }
+        return sUserConfig;
     }
 
     public static UserConfig getUserConfig(Context context) {
-        if (sUserConfigHolder == null) {
-            sUserConfigHolder = new UserConfigHolder(context, getMpid(context));
+        if (sUserConfig == null) {
+            sUserConfig = UserConfig.getUserConfig(context, getMpid(context));
         }
-        return sUserConfigHolder.getCurrentInstance();
+        return sUserConfig;
     }
 
     private static UserConfig getUserConfig(Context context, long mpid) {
-        if (sUserConfigHolder == null) {
-            sUserConfigHolder = new UserConfigHolder(context, getMpid(context));
+        if (sUserConfig == null || sUserConfig.getMpid() != mpid) {
+            sUserConfig = UserConfig.getUserConfig(context, mpid);
         }
-        return sUserConfigHolder.getInstance(mpid);
+        return sUserConfig;
+    }
+
+    public static void deleteUserConfig(Context context, long mpid) {
+        if (sUserConfig != null && sUserConfig.getMpid() == mpid) {
+            sUserConfig = null;
+        }
+        UserConfig.deleteUserConfig(context, mpid);
+    }
+
+    public void deleteUserConfig(long mpId) {
+        deleteUserConfig(mContext, mpId);
     }
 
     void saveConfigJson(JSONObject json) {
@@ -438,12 +456,16 @@ public class ConfigManager {
                 .getInt(Constants.PrefKeys.PUSH_ICON, 0);
     }
 
-    public static int getBreadcrumbLimit() {
-        return sUserConfigHolder.getCurrentInstance().getBreadcrumbLimit();
+    public static int getBreadcrumbLimit(Context context) {
+        return getUserConfig(context).getBreadcrumbLimit();
     }
 
-    public static int getBreadcrumbLimit(long mpId) {
-        return sUserConfigHolder.getInstance(mpId).getBreadcrumbLimit();
+    public static int getBreadcrumbLimit(Context context, long mpId) {
+        return getUserConfig(context, mpId).getBreadcrumbLimit();
+    }
+
+    public static String getCurrentUserLtv(Context context) {
+        return getUserConfig(context).getLtv();
     }
 
     public void setBreadcrumbLimit(int newLimit) {
@@ -451,7 +473,11 @@ public class ConfigManager {
     }
 
     public void setBreadcrumbLimit(int newLimit, long mpId) {
-        sUserConfigHolder.getInstance(mpId).setBreadcrumbLimit(newLimit);
+        getUserConfig(mpId).setBreadcrumbLimit(newLimit);
+    }
+
+    public static void setNeedsToMigrate(Context context, boolean needsToMigrate) {
+        UserConfig.setNeedsToMigrate(context, needsToMigrate);
     }
 
     private synchronized void setProviderPersistence(JSONObject persistence) {
@@ -462,25 +488,39 @@ public class ConfigManager {
         return mProviderPersistence;
     }
 
-    public void setMpid(long mpid) {
-        if (getMpid() != mpid && mpIdChangeListener != null) {
+    /**
+     *
+     * use this to set the MPID, without triggering any listeners
+     *
+     */
+    public void setMpidSilently(long mpId) {
+        setMpid(mpId, true);
+    }
+
+    public void setMpid(long mpId) {
+        setMpid(mpId, false);
+    }
+
+    private void setMpid(long mpid, boolean silently) {
+        if (!silently && getMpid() != mpid && mpIdChangeListener != null) {
             mpIdChangeListener.onMpIdChanged(mpid);
         }
         sPreferences.edit().putLong(Constants.PrefKeys.Mpid, mpid).apply();
-        sUserConfigHolder.setCurrent(mpid);
+        if (sUserConfig == null || sUserConfig.getMpid() != mpid) {
+            sUserConfig = UserConfig.getUserConfig(mContext, mpid);
+        }
+    }
+
+    //for testing
+    static void clearMpid(Context context) {
+        if (sPreferences == null) {
+            sPreferences = context.getSharedPreferences(PREFERENCES_FILE, Context.MODE_PRIVATE);
+        }
+        sPreferences.edit().remove(Constants.PrefKeys.Mpid).apply();
     }
 
     public long getMpid() {
-        if (sPreferences.contains(Constants.PrefKeys.Mpid)) {
-            return sPreferences.getLong(Constants.PrefKeys.Mpid, 0);
-        } else {
-            long mpid = MPUtility.generateMpid();
-            sPreferences.edit().putLong(Constants.PrefKeys.Mpid, mpid).apply();
-            if (mpIdChangeListener  != null) {
-                mpIdChangeListener.onMpIdChanged(mpid);
-            }
-            return mpid;
-        }
+        return sPreferences.getLong(Constants.PrefKeys.Mpid, Constants.TEMPORARY_MPID);
     }
 
     public static long getMpid(Context context) {
@@ -490,9 +530,15 @@ public class ConfigManager {
         return sPreferences.getLong(Constants.PrefKeys.Mpid, 0);
     }
 
-    private static MParticleDBManager.MpIdChangeListener mpIdChangeListener;
+    public void mergeUserConfigs(long subjectMpId, long targetMpId) {
+        UserConfig subjectUserConfig = getUserConfig(subjectMpId);
+        UserConfig targetUserConfig = getUserConfig(targetMpId);
+        targetUserConfig.merge(subjectUserConfig);
+    }
 
-    public static void setMpIdChangeListener(MParticleDBManager.MpIdChangeListener listener) {
+    private static IdentityApi.MpIdChangeListener mpIdChangeListener;
+
+    public static void setMpIdChangeListener(IdentityApi.MpIdChangeListener listener) {
         mpIdChangeListener = listener;
     }
 
@@ -658,7 +704,7 @@ public class ConfigManager {
 
     public JSONArray getUserIdentityJson(long mpId) {
         JSONArray userIdentities = null;
-        String userIds = sUserConfigHolder.getInstance(mpId).getUserIdentities();
+        String userIds = getUserConfig(mpId).getUserIdentities();
 
         try {
             userIdentities = new JSONArray(userIds);
@@ -677,7 +723,7 @@ public class ConfigManager {
     }
 
     public void saveUserIdentityJson(JSONArray userIdentities, long mpId) {
-        sUserConfigHolder.getInstance(mpId).setUserIdentities(userIdentities.toString());
+        getUserConfig(mpId).setUserIdentities(userIdentities.toString());
     }
 
     private static boolean fixUpUserIdentities(JSONArray identities) {
@@ -704,10 +750,10 @@ public class ConfigManager {
 
     public JSONObject getCookies(long mpId) {
         if (mCurrentCookies == null) {
-            String currentCookies = sUserConfigHolder.getInstance(mpId).getCookies();
+            String currentCookies = getUserConfig(mpId).getCookies();
             if (MPUtility.isEmpty(currentCookies)) {
                 mCurrentCookies = new JSONObject();
-                sUserConfigHolder.getInstance(mpId).setCookies(mCurrentCookies.toString());
+                getUserConfig(mpId).setCookies(mCurrentCookies.toString());
                 return mCurrentCookies;
             } else {
                 try {
@@ -744,7 +790,7 @@ public class ConfigManager {
                 mCurrentCookies.remove(key);
             }
             if (keysToRemove.size() > 0) {
-                sUserConfigHolder.getInstance(mpId).setCookies(mCurrentCookies.toString());
+                getUserConfig(mpId).setCookies(mCurrentCookies.toString());
             }
             return mCurrentCookies;
         } else {
@@ -799,75 +845,5 @@ public class ConfigManager {
 
     public void setPushToken(String token) {
         sPreferences.edit().putString(Constants.PrefKeys.PUSH_TOKEN, token).apply();
-    }
-
-    static class UserConfigHolder extends TimedCache<UserConfig> {
-        private Context mContext;
-
-        public UserConfigHolder(Context context, long currentMpId) {
-            super(new Handler(Looper.getMainLooper()), 2000);
-            this.mContext = context;
-            setCurrent(currentMpId);
-        }
-
-        @Override
-        UserConfig retrieve(Long id) {
-            return UserConfig.getUserConfig(mContext, id);
-        }
-    }
-
-    abstract static class TimedCache<T> {
-        private Handler mHandler;
-        private long mDelay;
-        Map<Long, T> cache = new TreeMap<Long, T>();
-        Map<Long, Runnable> cancelRunnables = new TreeMap<Long, Runnable>();
-
-        long current = 0;
-
-        TimedCache(Handler handler, long delay) {
-            this.mHandler = handler;
-            this.mDelay = delay;
-        }
-
-        void setCurrent(long id) {
-            current = id;
-        }
-
-        T getCurrentInstance() {
-            return getInstance(current);
-        }
-
-        T getInstance(final Long id) {
-            T t = cache.get(id);
-
-            if (t == null) {
-                cache.put(id, t = retrieve(id));
-            } else {
-                if (cancelRunnables.containsKey(id)) {
-                    mHandler.removeCallbacks(cancelRunnables.get(id));
-                }
-            }
-            if (id != current) {
-                Runnable runnable = new Runnable() {
-                    @Override
-                    public void run() {
-                        cache.remove(id);
-                        cancelRunnables.remove(id);
-                    }
-                };
-                cancelRunnables.put(id, runnable);
-                mHandler.postDelayed(runnable, mDelay);
-            }
-            return t;
-        }
-
-        /**
-         * for testing only
-         */
-        boolean isCached(long id) {
-            return cache.containsKey(id);
-        }
-
-        abstract T retrieve(Long id);
     }
 }

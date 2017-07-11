@@ -1,9 +1,13 @@
 package com.mparticle.internal.database.tables.mp;
 
-import android.content.Context;
 import android.provider.BaseColumns;
 
-public class SessionTable {
+public class SessionTable extends MpIdDependentTable {
+
+    @Override
+    public String getTableName() {
+        return SessionTableColumns.TABLE_NAME;
+    }
 
     public interface SessionTableColumns {
         String TABLE_NAME = "sessions";
@@ -16,7 +20,7 @@ public class SessionTable {
         String CF_UUID = "cfuuid";
         String APP_INFO = "app_info";
         String DEVICE_INFO = "device_info";
-        String MP_ID = "mp_id";
+        String MP_ID = MpIdDependentTable.MP_ID;
     }
 
     static final String SESSION_ADD_DEVICE_INFO_COLUMN = "ALTER TABLE " + SessionTableColumns.TABLE_NAME +

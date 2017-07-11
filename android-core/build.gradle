@@ -15,12 +15,16 @@ android {
     }
 
     String url = "\"\"";
+    String identityUrl = "\"\""
     String configurationUrl = "\"\"";
     try {
         Properties properties = new Properties()
         properties.load(project.rootProject.file('local.properties').newDataInputStream())
         if (properties.stringPropertyNames().contains('mp.url')) {
             url = properties.getProperty('mp.url')
+        }
+        if (properties.stringPropertyNames().contains('mp.identityurl')) {
+            identityUrl = properties.getProperty('mp.identityurl');
         }
         if (properties.stringPropertyNames().contains('mp.configurl')) {
             configurationUrl = properties.getProperty('mp.configurl')
@@ -43,6 +47,7 @@ android {
 
         buildConfigField "String", "GIT_SHA", "\"$gitHash\""
         buildConfigField "String", "MP_URL", url
+        buildConfigField "String", "MP_IDENTITY_URL", identityUrl
         buildConfigField "String", "MP_CONFIG_URL", configurationUrl
         buildConfigField "Boolean", "MP_DEBUG", "false"
 

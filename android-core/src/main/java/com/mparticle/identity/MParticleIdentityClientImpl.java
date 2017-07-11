@@ -23,9 +23,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -36,8 +33,8 @@ import static com.mparticle.MParticle.IdentityType.*;
     private Context mContext;
     private ConfigManager mConfigManager;
 
-    private static final String SECURE_SERVICE_SCHEME = MPUtility.isEmpty(BuildConfig.MP_URL) ? "https" : "http";
-    private static final String API_HOST = MPUtility.isEmpty(BuildConfig.MP_URL) ? "identity.mparticle.com" : BuildConfig.MP_URL;
+    private static final String SECURE_SERVICE_SCHEME = MPUtility.isEmpty(BuildConfig.MP_IDENTITY_URL) ? "https" : "http";
+    private static final String API_HOST = MPUtility.isEmpty(BuildConfig.MP_IDENTITY_URL) ? "identity.mparticle.com" : BuildConfig.MP_IDENTITY_URL;
     private static final String SERVICE_VERSION_1 = "/v1";
 
     public MParticleIdentityClientImpl(ConfigManager configManager, Context context) {
@@ -49,7 +46,7 @@ import static com.mparticle.MParticle.IdentityType.*;
     public MParticleUserDTO login(IdentityApiRequest request) throws JSONException, IOException {
         JSONObject jsonObject = getStateJson(request);
         HttpURLConnection connection = getPostConnection("/login", jsonObject.toString());
-        makeUrlRequest(connection, false);
+        makeUrlRequest(connection, jsonObject.toString(), false);
         int responseCode = connection.getResponseCode();
         JSONObject response = MPUtility.getJsonResponse(connection);
         if (responseCode == 202) {
@@ -62,7 +59,7 @@ import static com.mparticle.MParticle.IdentityType.*;
     public MParticleUserDTO logout(IdentityApiRequest request) throws JSONException, IOException {
         JSONObject jsonObject = getStateJson(request);
         HttpURLConnection connection = getPostConnection("/logout", jsonObject.toString());
-        makeUrlRequest(connection, false);
+        makeUrlRequest(connection, jsonObject.toString(), false);
         int responseCode = connection.getResponseCode();
         JSONObject response = MPUtility.getJsonResponse(connection);
         if (responseCode == 202) {
@@ -75,7 +72,7 @@ import static com.mparticle.MParticle.IdentityType.*;
     public MParticleUserDTO identify(IdentityApiRequest request) throws JSONException, IOException {
         JSONObject jsonObject = getStateJson(request);
         HttpURLConnection connection = getPostConnection("/identify", jsonObject.toString());
-        makeUrlRequest(connection, false);
+        makeUrlRequest(connection, jsonObject.toString(), false);
         int responseCode = connection.getResponseCode();
         JSONObject response = MPUtility.getJsonResponse(connection);
         if (responseCode == 202) {
@@ -88,13 +85,17 @@ import static com.mparticle.MParticle.IdentityType.*;
     public Boolean modify(IdentityApiRequest request) throws JSONException, IOException {
         JSONObject jsonObject = getChangeJson(request);
         HttpURLConnection connection = getPostConnection(request.getMpId(), "/modify", jsonObject.toString());
-        makeUrlRequest(connection, false);
+        makeUrlRequest(connection, jsonObject.toString(), false);
         int responseCode = connection.getResponseCode();
         if (responseCode == 202) {
             return true;
         } else {
             return false;
         }
+    }
+
+    static void setListener(BaseNetworkListener listener) {
+        mListener = listener;
     }
 
     private JSONObject getBaseJson() throws JSONException {
@@ -188,7 +189,7 @@ import static com.mparticle.MParticle.IdentityType.*;
         //if the mpid did not change as a result of the request OR the request has shouldCopyUserAttributes == true,
         //keep the same userAttributes
         if (mpId == request.getMpId() || request.shouldCopyUserAttributes()) {
-            Map<String, Object> userAttributes = new MParticleDBManager(mContext, DatabaseTables.getInstance(mContext)).getAllUserAttributes(request.getMpId());
+            Map<String, Object> userAttributes = new MParticleDBManager(mContext, DatabaseTables.getInstance(mContext)).getUserAttributes(request.getMpId());
             return new MParticleUserDTO(mpId, identityTypeMap, userAttributes);
         } else {
             return new MParticleUserDTO(mpId, identityTypeMap);

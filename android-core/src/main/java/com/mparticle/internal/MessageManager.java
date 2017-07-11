@@ -72,7 +72,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
     /**
      * These are the handlers which manage the queues and threads mentioned above.
      */
-    private MessageHandler mMessageHandler;
+    MessageHandler mMessageHandler;
     public UploadHandler mUploadHandler;
     /**
      * Ideally these threads would not be started in a static initializer
@@ -235,7 +235,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
                     .build();
 
             SharedPreferences.Editor editor = sPreferences.edit();
-            long timeInFg = mConfigManager.getUserConfig().getTimeInForeground();
+            long timeInFg = mConfigManager.getUserConfig().getPreviousSessionForegound();
             if (timeInFg > 0) {
                 message.put(MessageKey.PREVIOUS_SESSION_LENGTH, timeInFg / 1000);
                 mConfigManager.getUserConfig().clearPreviousTimeInForeground();
@@ -682,7 +682,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
             }
             message.put(MessageKey.USER_IDENTITIES, userIdentities);
             mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
-            JSONArray seenIdentities = mConfigManager.markIdentitiesAsSeen(userIdentities);
+            JSONArray seenIdentities = mConfigManager.markIdentitiesAsSeen(userIdentities, mpId);
             if (seenIdentities != null) {
                 mConfigManager.saveUserIdentityJson(seenIdentities, mpId);
             }
@@ -838,28 +838,8 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
         }
     }
 
-    public Map<String, Object> getAllUserAttributes(UserAttributeListener listener) {
-        return getAllUserAttributes(listener, mConfigManager.getMpid());
-    }
-
-    public Map<String, Object> getAllUserAttributes(final UserAttributeListener listener, long mpId) {
-        return mMParticleDBManager.getAllUserAttributes(listener, mpId);
-    }
-
-    public Map<String, String> getUserAttributes(final UserAttributeListener listener) {
-        return getUserAttributes(listener, mConfigManager.getMpid());
-    }
-
-    public Map<String, String> getUserAttributes(final UserAttributeListener listener, long mpId) {
+    public Map<String, Object> getUserAttributes(final UserAttributeListener listener, long mpId) {
         return mMParticleDBManager.getUserAttributes(listener, mpId);
-    }
-
-    public Map<String, List<String>> getUserAttributeLists() {
-        return getUserAttributeLists(mConfigManager.getMpid());
-    }
-
-    public Map<String, List<String>> getUserAttributeLists(long mpId) {
-        return mMParticleDBManager.getUserAttributeLists(mpId);
     }
 
     public void removeUserAttribute(String key, long mpId) {
@@ -872,8 +852,8 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
     }
 
     @Override
-    public void attributeRemoved(String key) {
-        String serializedJsonArray = mConfigManager.getUserConfig().getDeletedUserAttributes();
+    public void attributeRemoved(String key, long mpId) {
+        String serializedJsonArray = mConfigManager.getUserConfig(mpId).getDeletedUserAttributes();
         JSONArray deletedAtributes;
         try {
             deletedAtributes = new JSONArray(serializedJsonArray);
@@ -881,10 +861,18 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
             deletedAtributes = new JSONArray();
         }
         deletedAtributes.put(key);
-        mConfigManager.getUserConfig().setDeletedUserAttributes(deletedAtributes.toString());
+        mConfigManager.getUserConfig(mpId).setDeletedUserAttributes(deletedAtributes.toString());
     }
 
     public void setUserAttribute(String key, Object value, long mpId) {
+        setUserAttribute(key, value, mpId, false);
+    }
+
+    /**
+     * this should almost always be called with "synchronously" == false, do so unless you are
+     * really sure you really need to.
+     */
+    public void setUserAttribute(String key, Object value, long mpId, boolean synchronously) {
         UserAttributeResponse container = new UserAttributeResponse();
         container.time = System.currentTimeMillis();
         container.mpId = mpId;
@@ -895,9 +883,12 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
             container.attributeSingles = new HashMap<String, String>();
             container.attributeSingles.put(key, (String) value);
         }
-        Message message = mMessageHandler.obtainMessage(MessageHandler.SET_USER_ATTRIBUTE, container);
-
-        mMessageHandler.sendMessage(message);
+        if (synchronously) {
+            mMessageHandler.setUserAttributes(container);
+        } else {
+            Message message = mMessageHandler.obtainMessage(MessageHandler.SET_USER_ATTRIBUTE, container);
+            mMessageHandler.sendMessage(message);
+        }
     }
 
     public void incrementUserAttribute(String key, int value, long mpId) {

@@ -3,6 +3,7 @@ package com.mparticle.internal;
 import android.content.Context;
 
 import com.mparticle.MParticle;
+import com.mparticle.MParticleOptions;
 import com.mparticle.MockMParticle;
 import com.mparticle.mock.MockContext;
 import com.mparticle.mock.MockSharedPreferences;
@@ -46,25 +47,6 @@ public class DeviceAttributesTest {
     }
 
     @Test
-    @PrepareForTest({MPUtility.class})
-    public void testAndroidIDCollection() throws Exception {
-        PowerMockito.mockStatic(MPUtility.class);
-        Context context = new MockContext();
-        Mockito.when(MPUtility.getAndroidID(context)).thenReturn("the-android-id");
-        Mockito.when(MPUtility.getOpenUDID(context)).thenReturn("the-open-android-id");
-        JSONObject attributes = new JSONObject();
-        DeviceAttributes.addAndroidId(attributes, context);
-        assertEquals(attributes.getString(Constants.MessageKey.DEVICE_ANID),"the-android-id");
-        assertTrue(attributes.getString(Constants.MessageKey.DEVICE_OPEN_UDID).length() > 0);
-        assertEquals(attributes.getString(Constants.MessageKey.DEVICE_ID),"the-android-id");
-
-        MParticle.setAndroidIdDisabled(true);
-        JSONObject newAttributes = new JSONObject();
-        DeviceAttributes.addAndroidId(attributes, context);
-        assertTrue(newAttributes.length() == 0);
-    }
-
-    @Test
     public void testAppInfoInstallTime() throws Exception {
         MockContext context = new MockContext();
         MockSharedPreferences prefs = (MockSharedPreferences) context.getSharedPreferences(null, 0);
@@ -80,6 +62,8 @@ public class DeviceAttributesTest {
     @Test
     public void testAppInfoLaunchCount() throws Exception {
         Context context = new MockContext();
+        // clear out the stored data for the current user, so we don't get any launches from previous tests
+        ConfigManager.deleteUserConfig(context, ConfigManager.getMpid(context));
         JSONObject appInfo = null;
         int launchCount = 20;
         for (int i = 0; i < 20; i++) {

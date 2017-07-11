@@ -158,7 +158,7 @@ public class GcmMessageService extends GcmMessageTable {
         try {
             pushCursor = db.query(GcmMessageTableColumns.TABLE_NAME,
                     null,
-                    GcmMessageTableColumns.DISPLAYED_AT + " > 0 and " + GcmMessageTableColumns.MP_ID,
+                    GcmMessageTableColumns.DISPLAYED_AT + " > 0 and " + GcmMessageTableColumns.MP_ID + " = ?",
                     new String[]{String.valueOf(mpId)},
                     null,
                     null,

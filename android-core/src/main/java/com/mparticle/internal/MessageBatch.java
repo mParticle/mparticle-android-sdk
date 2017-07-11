@@ -19,7 +19,7 @@ public class MessageBatch extends JSONObject {
         super();
     }
 
-    public static MessageBatch create(boolean history, ConfigManager configManager, SharedPreferences preferences, JSONObject cookies) throws JSONException {
+    public static MessageBatch create(boolean history, ConfigManager configManager, SharedPreferences preferences, JSONObject cookies, long mpId) throws JSONException {
         MessageBatch uploadMessage = new MessageBatch();
         if (BuildConfig.MP_DEBUG) {
             uploadMessage.put(Constants.MessageKey.ECHO, true);
@@ -38,7 +38,7 @@ public class MessageBatch extends JSONObject {
         String apiKey = configManager.getApiKey();
 
         if (history) {
-            String deletedAttr = configManager.getUserConfig().getDeletedUserAttributes();
+            String deletedAttr = configManager.getUserConfig(mpId).getDeletedUserAttributes();
             if (deletedAttr != null) {
                 uploadMessage.put(Constants.MessageKey.DELETED_USER_ATTRIBUTES, new JSONArray(deletedAttr));
                 configManager.getUserConfig().deleteDeletedUserAttributes();

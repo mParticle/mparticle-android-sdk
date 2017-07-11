@@ -6,7 +6,8 @@ import com.mparticle.MParticle.LogLevel;
 
 
 public class Logger {
-    private static LogLevel sMinLogLevel = LogLevel.DEBUG;
+    public static final LogLevel DEFAULT_MIN_LOG_LEVEL = LogLevel.DEBUG;
+    private static LogLevel sMinLogLevel = DEFAULT_MIN_LOG_LEVEL;
     private static boolean sExplicitlySet = false;
 
     public static void setMinLogLevel(LogLevel minLogLevel) {

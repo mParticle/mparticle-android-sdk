@@ -1,10 +1,13 @@
 package com.mparticle.internal.database.tables.mp;
 
-import android.content.Context;
-
-public class GcmMessageTable {
+public class GcmMessageTable extends MpIdDependentTable {
     public static final String APPSTATE = GcmMessageTableColumns.APPSTATE;
     public static final String CONTENT_ID = GcmMessageTableColumns.CONTENT_ID;
+
+    @Override
+    public String getTableName() {
+        return GcmMessageTableColumns.TABLE_NAME;
+    }
 
     protected interface GcmMessageTableColumns {
         String CONTENT_ID = "content_id";
@@ -16,7 +19,7 @@ public class GcmMessageTable {
         String EXPIRATION = "expiration";
         String BEHAVIOR = "behavior";
         String APPSTATE = "appstate";
-        String MP_ID = "mp_id";
+        String MP_ID = MpIdDependentTable.MP_ID;
         int PROVIDER_CONTENT_ID = -1;
     }
 

@@ -1,9 +1,13 @@
 package com.mparticle.internal.database.tables.mp;
 
-import android.content.Context;
 import android.provider.BaseColumns;
 
-public class ReportingTable {
+public class ReportingTable extends MpIdDependentTable {
+
+    @Override
+    public String getTableName() {
+        return ReportingTableColumns.TABLE_NAME;
+    }
 
     protected interface ReportingTableColumns extends BaseColumns {
         String CREATED_AT = "report_time";
@@ -11,7 +15,7 @@ public class ReportingTable {
         String TABLE_NAME = "reporting";
         String MESSAGE = "message";
         String SESSION_ID = "session_id";
-        String MP_ID = "mp_id";
+        String MP_ID = MpIdDependentTable.MP_ID;
     }
 
     static final String CREATE_REPORTING_DDL =

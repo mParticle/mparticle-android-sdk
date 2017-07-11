@@ -219,10 +219,7 @@ import java.util.UUID;
                 break;
             case SET_USER_ATTRIBUTE:
                 try {
-                    List<AttributionChangeDTO> attributionChangeDTOs = mMParticleDBManager.setUserAttribute((UserAttributeResponse) msg.obj);
-                    for (AttributionChangeDTO attributionChangeDTO: attributionChangeDTOs) {
-                        logUserAttributeChanged(attributionChangeDTO);
-                    }
+                    setUserAttributes((UserAttributeResponse)msg.obj);
                 } catch (Exception e) {
                     Logger.error(e, "Error while setting user attribute: ", e.toString());
                 }
@@ -234,6 +231,13 @@ import java.util.UUID;
                 } catch (Exception e) {
                     Logger.error(e, "Error while incrementing user attribute: ", e.toString());
                 }
+        }
+    }
+
+    void setUserAttributes(UserAttributeResponse response) {
+        List<AttributionChangeDTO> attributionChangeDTOs = mMParticleDBManager.setUserAttribute(response);
+        for (AttributionChangeDTO attributionChangeDTO: attributionChangeDTOs) {
+            logUserAttributeChanged(attributionChangeDTO);
         }
     }
 

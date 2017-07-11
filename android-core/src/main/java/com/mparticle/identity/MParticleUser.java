@@ -2,18 +2,22 @@ package com.mparticle.identity;
 
 
 import com.mparticle.MParticle;
+import com.mparticle.UserAttributeListener;
 import com.mparticle.segmentation.SegmentListener;
 
 import java.util.Map;
 
 public final class MParticleUser {
-
     private long mMpId;
     MParticleUserDelegate mUserDelegate;
 
-    MParticleUser(long mpId, MParticleUserDelegate userDelegate) {
-        mMpId = mpId;
-        mUserDelegate = userDelegate;
+    private MParticleUser(long mpId, MParticleUserDelegate userDelegate) {
+        this.mMpId = mpId;
+        this.mUserDelegate = userDelegate;
+    }
+
+    static MParticleUser getInstance(long mpId, MParticleUserDelegate userDelegate) {
+        return new MParticleUser(mpId, userDelegate);
     }
 
     public long getId() {
@@ -22,6 +26,10 @@ public final class MParticleUser {
 
     public Map<String, Object> getUserAttributes() {
         return mUserDelegate.getUserAttributes(getId());
+    }
+
+    public Map<String, Object> getUserAttributes(final UserAttributeListener listener) {
+        return mUserDelegate.getUserAttributes(listener, getId());
     }
 
     void setUserAttributes(Map<String, Object> userAttributes) {
@@ -38,6 +46,10 @@ public final class MParticleUser {
         for(Map.Entry<MParticle.IdentityType, String> entry: userIdentities.entrySet()) {
             mUserDelegate.setUserIdentity(entry.getValue(), entry.getKey(), getId());
         }
+    }
+
+    void setUserIdentity(MParticle.IdentityType identity, String value) {
+        mUserDelegate.setUserIdentity(value, identity, getId());
     }
 
     public boolean setUserAttribute(String key, Object value) {
@@ -65,6 +77,7 @@ public final class MParticleUser {
     }
 
     MParticleUser setUserDelegate(MParticleUserDelegate mParticleUserDelegate) {
-        throw new UnsupportedOperationException("Not implemented yet...");
+        mUserDelegate = mParticleUserDelegate;
+        return this;
     }
 }

@@ -1,9 +1,13 @@
 package com.mparticle.internal.database.tables.mp;
 
-import android.content.Context;
 import android.provider.BaseColumns;
 
-public class UserAttributesTable {
+public class UserAttributesTable extends MpIdDependentTable {
+
+    @Override
+    public String getTableName() {
+        return UserAttributesTableColumns.TABLE_NAME;
+    }
 
     protected interface UserAttributesTableColumns {
         String TABLE_NAME = "attributes";
@@ -11,7 +15,7 @@ public class UserAttributesTable {
         String ATTRIBUTE_VALUE = "attribute_value";
         String IS_LIST = "is_list";
         String CREATED_AT = "created_time";
-        String MP_ID = "mp_id";
+        String MP_ID = MpIdDependentTable.MP_ID;
     }
 
     static final String CREATE_USER_ATTRIBUTES_DDL =

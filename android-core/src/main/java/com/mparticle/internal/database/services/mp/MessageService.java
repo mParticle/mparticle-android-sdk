@@ -7,13 +7,11 @@ import android.database.sqlite.SQLiteDatabase;
 import com.mparticle.internal.Constants;
 import com.mparticle.internal.Logger;
 import com.mparticle.internal.MPMessage;
-import com.mparticle.internal.MessageBatch;
 import com.mparticle.internal.database.tables.mp.MessageTable;
 
 import org.json.JSONException;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 public class MessageService extends MessageTable {

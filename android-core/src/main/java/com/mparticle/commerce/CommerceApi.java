@@ -133,7 +133,7 @@ public class CommerceApi {
     public BigDecimal getCurrentUserLtv() {
         SharedPreferences preferences = mContext.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
         try {
-            return new BigDecimal(ConfigManager.getUserConfig(mContext).getLtv());
+            return new BigDecimal(ConfigManager.getCurrentUserLtv(mContext));
         }catch (NumberFormatException nfe) {
 
         }

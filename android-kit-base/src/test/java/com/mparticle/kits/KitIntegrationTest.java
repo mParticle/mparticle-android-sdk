@@ -6,6 +6,7 @@ import android.util.SparseBooleanArray;
 
 import com.mparticle.MParticle;
 import com.mparticle.internal.MPUtility;
+import com.mparticle.mock.MockMParticle;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -20,7 +21,7 @@ public class KitIntegrationTest {
 
     @Test
     public void testGetAllUserAttributesWithoutLists() throws Exception {
-        MParticle.setInstance(Mockito.mock(MParticle.class));
+        MParticle.setInstance(new MockMParticle());
         KitIntegration integration = new KitIntegration() {
             @Override
             public String getName() {
@@ -46,7 +47,7 @@ public class KitIntegrationTest {
         list.add("value 3");
         attributes.put("key 2", list);
 
-        Mockito.when(MParticle.getInstance().getAllUserAttributes()).thenReturn(attributes);
+        Mockito.when(MParticle.getInstance().Identity().getCurrentUser().getUserAttributes()).thenReturn(attributes);
         Map<String, Object> filteredAttributes = integration.getAllUserAttributes();
         Assert.assertEquals("value 1", filteredAttributes.get("key 1"));
         Assert.assertEquals("value 2,value 3", filteredAttributes.get("key 2"));
@@ -92,7 +93,7 @@ public class KitIntegrationTest {
 
     @Test
     public void testGetAllUserAttributesWithoutListsWithFilters() throws Exception {
-        MParticle.setInstance(Mockito.mock(MParticle.class));
+        MParticle.setInstance(new MockMParticle());
         KitIntegration integration = new KitIntegration() {
             @Override
             public String getName() {
@@ -124,7 +125,7 @@ public class KitIntegrationTest {
         list.add("value 3");
         attributes.put("key 2", list);
         attributes.put("key 3", list);
-        Mockito.when(MParticle.getInstance().getAllUserAttributes()).thenReturn(attributes);
+        Mockito.when(MParticle.getInstance().Identity().getCurrentUser().getUserAttributes()).thenReturn(attributes);
         Map<String, Object> filteredAttributes = integration.getAllUserAttributes();
         Assert.assertEquals("value 1", filteredAttributes.get("key 1"));
         Assert.assertEquals("value 2,value 3", filteredAttributes.get("key 2"));
@@ -136,7 +137,7 @@ public class KitIntegrationTest {
 
     @Test
     public void testGetAllUserAttributesWithLists() throws Exception {
-        MParticle.setInstance(Mockito.mock(MParticle.class));
+        MParticle.setInstance(new MockMParticle());
         KitIntegration integration = new AttributeListenerIntegration();
         integration.setConfiguration(Mockito.mock(KitConfiguration.class));
 
@@ -147,7 +148,7 @@ public class KitIntegrationTest {
         list.add("value 3");
         attributes.put("key 2", list);
 
-        Mockito.when(MParticle.getInstance().getAllUserAttributes()).thenReturn(attributes);
+        Mockito.when(MParticle.getInstance().Identity().getCurrentUser().getUserAttributes()).thenReturn(attributes);
         Map<String, Object> filteredAttributes = integration.getAllUserAttributes();
         Assert.assertEquals("value 1", filteredAttributes.get("key 1"));
         Assert.assertEquals(list, filteredAttributes.get("key 2"));
@@ -155,7 +156,7 @@ public class KitIntegrationTest {
 
     @Test
     public void testGetAllUserAttributesWithListsAndFilters() throws Exception {
-        MParticle.setInstance(Mockito.mock(MParticle.class));
+        MParticle.setInstance(new MockMParticle());
         KitIntegration integration = new AttributeListenerIntegration();
         KitConfiguration configuration = Mockito.mock(KitConfiguration.class);
         MockSparseBooleanArray mockArray = new MockSparseBooleanArray();
@@ -172,7 +173,7 @@ public class KitIntegrationTest {
         list.add("value 3");
         attributes.put("key 2", list);
         attributes.put("key 3", list);
-        Mockito.when(MParticle.getInstance().getAllUserAttributes()).thenReturn(attributes);
+        Mockito.when(MParticle.getInstance().Identity().getCurrentUser().getUserAttributes()).thenReturn(attributes);
         Map<String, Object> filteredAttributes = integration.getAllUserAttributes();
         Assert.assertEquals("value 1", filteredAttributes.get("key 1"));
         Assert.assertEquals(list, filteredAttributes.get("key 2"));

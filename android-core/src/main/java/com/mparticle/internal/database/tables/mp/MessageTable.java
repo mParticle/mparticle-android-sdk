@@ -1,9 +1,14 @@
 package com.mparticle.internal.database.tables.mp;
 
-import android.content.Context;
 import android.provider.BaseColumns;
 
-public class MessageTable {
+public class MessageTable extends MpIdDependentTable {
+
+    @Override
+    public String getTableName() {
+        return MessageTableColumns.TABLE_NAME;
+    }
+
     protected interface MessageTableColumns extends BaseColumns {
         String TABLE_NAME = "messages";
         String SESSION_ID = "session_id";
@@ -13,7 +18,7 @@ public class MessageTable {
         String CREATED_AT = "message_time";
         String MESSAGE_TYPE = "message_type";
         String CF_UUID = "cfuuid";
-        String MP_ID = "mpid";
+        String MP_ID = MpIdDependentTable.MP_ID;
     }
 
     static String getAddMpIdColumnString(String defaultValue) {

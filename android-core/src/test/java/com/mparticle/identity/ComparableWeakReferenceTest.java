@@ -1,8 +1,5 @@
 package com.mparticle.identity;
 
-import com.mparticle.commerce.ComparableWeakReference;
-import com.mparticle.identity.ComparableWeakReference;
-
 import org.junit.Test;
 
 import java.lang.ref.WeakReference;
@@ -34,7 +31,7 @@ public class ComparableWeakReferenceTest {
         Object obj2 = new Object();
         Object obj3 = new Object();
 
-        HashSet<ComparableWeakReference<Object>> set = new HashSet<>();
+        HashSet<ComparableWeakReference<Object>> set = new HashSet<ComparableWeakReference<Object>>();
         set.add(new ComparableWeakReference<Object>(obj1));
         set.add(new ComparableWeakReference<Object>(obj2));
         set.add(new ComparableWeakReference<Object>(obj3));

@@ -5,11 +5,15 @@ import android.os.Build;
 
 import com.mparticle.BuildConfig;
 
+import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
+import java.net.URL;
 import java.security.InvalidKeyException;
 import java.security.KeyStore;
 import java.security.NoSuchAlgorithmException;
@@ -18,7 +22,10 @@ import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.zip.GZIPOutputStream;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
@@ -30,6 +37,7 @@ public class MParticleBaseClientImpl {
     private SSLSocketFactory mSocketFactory;
     private boolean alreadyWarned;
     private SharedPreferences mPreferences;
+    protected static NetworkListener mListener = BaseNetworkListener.Empty();
 
     /**
      * Default throttle time - in the worst case scenario if the server is busy, the soonest
@@ -43,27 +51,53 @@ public class MParticleBaseClientImpl {
     }
 
     protected HttpURLConnection makeUrlRequest(HttpURLConnection connection) throws IOException {
-        return makeUrlRequest(connection, true);
+        return makeUrlRequest(connection, null);
+    }
+
+    protected HttpURLConnection makeUrlRequest(HttpURLConnection connection, String payload) throws IOException {
+        return makeUrlRequest(connection, payload, true);
     }
 
     protected HttpURLConnection makeUrlRequest(HttpURLConnection connection, boolean mParticle) throws IOException {
-        //gingerbread seems to dislike pinning w/ godaddy. Being that GB is near-dead anyway, just disable pinning for it.
-        if (!BuildConfig.MP_DEBUG && mParticle && Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH && connection instanceof HttpsURLConnection) {
-            try {
-                ((HttpsURLConnection) connection).setSSLSocketFactory(getSocketFactory());
-            }catch (Exception e){
+        return makeUrlRequest(connection, null, mParticle);
+    }
 
+    protected HttpURLConnection makeUrlRequest(HttpURLConnection connection, String payload, boolean mParticle) throws IOException {
+        try {
+            mListener.onSend(connection, payload);
+            if (payload != null) {
+                String messageString = payload.toString();
+                GZIPOutputStream zos = new GZIPOutputStream(new BufferedOutputStream(connection.getOutputStream()));
+                try {
+                    zos.write(messageString.getBytes());
+                } finally {
+                    zos.close();
+                }
             }
+
+            //gingerbread seems to dislike pinning w/ godaddy. Being that GB is near-dead anyway, just disable pinning for it.
+            if (!BuildConfig.MP_DEBUG && mParticle && Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH && connection instanceof HttpsURLConnection) {
+                try {
+                    ((HttpsURLConnection) connection).setSSLSocketFactory(getSocketFactory());
+                } catch (Exception e) {
+
+                }
+            }
+            if (mParticle) {
+                int statusCode = connection.getResponseCode();
+                if (statusCode == 400 && !alreadyWarned) {
+                    alreadyWarned = true;
+                    Logger.error("Bad API request - is the correct API key and secret configured?");
+                }
+                if ((statusCode == 503 || statusCode == HTTP_TOO_MANY_REQUESTS) && !BuildConfig.MP_DEBUG) {
+                    setNextAllowedRequestTime(connection);
+                }
+            }
+            mListener.onReceive(connection);
         }
-        if (mParticle) {
-            int statusCode = connection.getResponseCode();
-            if (statusCode == 400 && !alreadyWarned) {
-                alreadyWarned = true;
-                Logger.error("Bad API request - is the correct API key and secret configured?");
-            }
-            if ((statusCode == 503 || statusCode == HTTP_TOO_MANY_REQUESTS) && !BuildConfig.MP_DEBUG) {
-                setNextAllowedRequestTime(connection);
-            }
+        catch (IOException ex) {
+            mListener.onException(ex);
+            throw ex;
         }
         return connection;
     }
@@ -156,4 +190,55 @@ public class MParticleBaseClientImpl {
         return MPUtility.hmacSha256Encode(apiSecret, hashString.toString());
     }
 
+    public interface NetworkListener {
+        void onSend(HttpURLConnection connection, String content);
+        void onReceive(HttpURLConnection connection);
+        void onException(Exception ex);
+    }
+
+    public abstract static class BaseNetworkListener implements NetworkListener {
+        public void onSend(HttpURLConnection connection, String content) {
+            networkSend(connection.getURL(), connection.getRequestProperties(), content);
+        }
+
+        public void onReceive(HttpURLConnection connection) {
+            StringBuilder responseBuilder = new StringBuilder();
+            int responseCode = -1;
+            try {
+                BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+                String line;
+                while ((line = in.readLine()) != null) {
+                    responseBuilder.append(line + '\n');
+                }
+                in.close();
+                responseCode = connection.getResponseCode();
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+            networkReceive(responseCode, responseBuilder.toString());
+        }
+
+        private static NetworkListener Empty() {
+            return new NetworkListener() {
+                @Override
+                public void onSend(HttpURLConnection connection, String content) {
+                    //do nothing
+                }
+
+                @Override
+                public void onReceive(HttpURLConnection connection) {
+                    //do nothing
+                }
+
+                @Override
+                public void onException(Exception ex) {
+                    //do nothing
+                }
+            };
+        }
+
+        protected abstract void networkSend(URL url, Map<String, List<String>> headers, String payload);
+        protected abstract void networkReceive(int responseCode, String payload);
+        public abstract void onException(Exception ex);
+    }
 }

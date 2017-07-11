@@ -3,12 +3,13 @@ package com.mparticle.internal.dto;
 import com.mparticle.MParticle;
 import com.mparticle.identity.MParticleUser;
 
+import java.util.HashMap;
 import java.util.Map;
 
 public class MParticleUserDTO {
     private long mpId;
     private Map<MParticle.IdentityType, String> identities;
-    private Map<String, Object> userAttributes;
+    private Map<String, Object> userAttributes = new HashMap<String, Object>();
 
     private MParticleUserDTO() {}
 
@@ -24,6 +25,10 @@ public class MParticleUserDTO {
 
     public boolean hasError() {
         return false;
+    }
+
+    public Error getError() {
+        return null;
     }
 
     public long getMpId() {
@@ -45,7 +50,7 @@ public class MParticleUserDTO {
             this.error = error;
         }
 
-        public String getError() {
+        public String getErrorString() {
             return error;
         }
 
@@ -54,5 +59,9 @@ public class MParticleUserDTO {
             return true;
         }
 
+        @Override
+        public Error getError() {
+            return this;
+        }
     }
 }

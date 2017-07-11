@@ -9,8 +9,6 @@ import android.os.AsyncTask;
 import android.os.Looper;
 
 import com.mparticle.UserAttributeListener;
-import com.mparticle.identity.IdentityStateListener;
-import com.mparticle.identity.MParticleUser;
 import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.Constants;
 import com.mparticle.internal.DatabaseTables;
@@ -42,12 +40,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.TreeMap;
 import java.util.UUID;
 
@@ -57,7 +52,6 @@ public class MParticleDBManager extends BaseDBManager {
     public MParticleDBManager(Context context, DatabaseTables databaseTables) {
         super(context, databaseTables);
         mPreferences = context.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
-        ConfigManager.setMpIdChangeListener(new MpIdChangeListener());
     }
 
     private long getMpid() {
@@ -66,6 +60,19 @@ public class MParticleDBManager extends BaseDBManager {
 
     public boolean isAvailable() {
         return getMParticleDatabase() != null;
+    }
+
+    public void updateMpId(long oldMpId, long newMpId) {
+        SQLiteDatabase db = getMParticleDatabase();
+        db.beginTransaction();
+        new BreadcrumbService().updateMpId(db, oldMpId, newMpId);
+        new GcmMessageService().updateMpId(db, oldMpId, newMpId);
+        new MessageService().updateMpId(db, oldMpId, newMpId);
+        new ReportingService().updateMpId(db, oldMpId, newMpId);
+        new SessionService().updateMpId(db, oldMpId, newMpId);
+        new UserAttributesService().updateMpId(db, oldMpId, newMpId);
+        db.setTransactionSuccessful();
+        db.endTransaction();
     }
 
     /**
@@ -78,11 +85,11 @@ public class MParticleDBManager extends BaseDBManager {
 
 
     public void insertBreadcrumb(MPMessage message, String apiKey) throws JSONException {
-        BreadcrumbService.insertBreadcrumb(getMParticleDatabase(), message, apiKey, getMpid());
+        BreadcrumbService.insertBreadcrumb(getMParticleDatabase(), mContext, message, apiKey, getMpid());
     }
 
     public void appendBreadcrumbs(MPMessage message) throws JSONException {
-        JSONArray breadcrumbs = BreadcrumbService.getBreadcrumbs(getMParticleDatabase(), getMpid());
+        JSONArray breadcrumbs = BreadcrumbService.getBreadcrumbs(getMParticleDatabase(), mContext, getMpid());
         if (!MPUtility.isEmpty(breadcrumbs)) {
             message.put(Constants.MessageType.BREADCRUMB, breadcrumbs);
         }
@@ -225,6 +232,7 @@ public class MParticleDBManager extends BaseDBManager {
                 SessionService.deleteSessions(db, currentSessionId, mpId);
             }
         }
+        db.setTransactionSuccessful();
     }
 
     public void createMessagesForUploadMessage(ConfigManager configManager, DeviceAttributes deviceAttributes, String currentSessionId, boolean sessionHistoryEnabled, long mpId) throws JSONException {
@@ -303,7 +311,7 @@ public class MParticleDBManager extends BaseDBManager {
                 }
             }
         }
-
+        db.setTransactionSuccessful();
     }
 
     public void deleteMessagesAndSessions(String currentSessionId, long mpId) {
@@ -374,7 +382,8 @@ public class MParticleDBManager extends BaseDBManager {
                 history,
                 configManager,
                 mPreferences,
-                configManager.getCookies(mpId));
+                configManager.getCookies(mpId),
+                mpId);
         addGCMHistory(batchMessage);
         return batchMessage;
     }
@@ -548,7 +557,7 @@ public class MParticleDBManager extends BaseDBManager {
 
 
     public JSONObject getAllUserAttributesJson(long mpId)  {
-        Map<String, Object> attributes = getAllUserAttributes(null, mpId);
+        Map<String, Object> attributes = getUserAttributes(null, mpId);
         JSONObject jsonAttributes = new JSONObject();
         for (Map.Entry<String, Object> entry : attributes.entrySet()) {
             Object value = entry.getValue();
@@ -578,11 +587,11 @@ public class MParticleDBManager extends BaseDBManager {
         return jsonAttributes;
     }
 
-    public Map<String, Object> getAllUserAttributes(long mpId) {
-        return getAllUserAttributes(null, mpId);
+    public Map<String, Object> getUserAttributes(long mpId) {
+        return getUserAttributes(null, mpId);
     }
 
-    public Map<String, Object> getAllUserAttributes(final UserAttributeListener listener, final long mpId) {
+    public Map<String, Object> getUserAttributes(final UserAttributeListener listener, final long mpId) {
         Map<String, Object> allUserAttributes = new HashMap<String, Object>();
         if (listener == null || Looper.getMainLooper() != Looper.myLooper()) {
             Map<String, String> userAttributes = getUserAttributeSingles(mpId);
@@ -601,7 +610,10 @@ public class MParticleDBManager extends BaseDBManager {
             new AsyncTask<Void, Void, UserAttributeResponse>() {
                 @Override
                 protected UserAttributeResponse doInBackground(Void... params) {
-                    return getUserAttributes(mpId);
+                    UserAttributeResponse response = new UserAttributeResponse();
+                    response.attributeSingles = getUserAttributeSingles(mpId);
+                    response.attributeLists = getUserAttributeLists(mpId);
+                    return response;
                 }
 
                 @Override
@@ -614,41 +626,13 @@ public class MParticleDBManager extends BaseDBManager {
             return null;
         }
     }
-
-    public Map<String, String> getUserAttributes(final UserAttributeListener listener, final long mpId) {
-        if (listener == null || Looper.getMainLooper() != Looper.myLooper()) {
-            Map<String, String> userAttributes = getUserAttributeSingles(mpId);
-
-            if (listener != null) {
-                Map<String, List<String>> userAttributeLists = getUserAttributeLists(mpId);
-                listener.onUserAttributesReceived(userAttributes, userAttributeLists);
-            }
-            return userAttributes;
-        }else {
-            new AsyncTask<Void, Void, UserAttributeResponse>() {
-                @Override
-                protected UserAttributeResponse doInBackground(Void... params) {
-                    return getUserAttributes(mpId);
-                }
-
-                @Override
-                protected void onPostExecute(UserAttributeResponse attributes) {
-                    if (listener != null) {
-                        listener.onUserAttributesReceived(attributes.attributeSingles, attributes.attributeLists);
-                    }
-                }
-            }.execute();
-            return null;
-        }
-    }
-
 
     public List<AttributionChangeDTO> setUserAttribute(UserAttributeResponse userAttribute) {
         List<AttributionChangeDTO> attributionChangeDTOs = new ArrayList<AttributionChangeDTO>();
         if (getMParticleDatabase() == null){
             return attributionChangeDTOs;
         }
-        Map<String, Object> currentValues = getAllUserAttributes(null, userAttribute.mpId);
+        Map<String, Object> currentValues = getUserAttributes(null, userAttribute.mpId);
         SQLiteDatabase db = getMParticleDatabase();
         try {
             db.beginTransaction();
@@ -679,7 +663,7 @@ public class MParticleDBManager extends BaseDBManager {
                     }
                     int deleted = UserAttributesService.deleteAttributes(db, key, userAttribute.mpId);
                     boolean isNewAttribute = deleted == 0;
-                    UserAttributesService.insertAttribute(db, key, attributeValue, time, false, getMpid());
+                    UserAttributesService.insertAttribute(db, key, attributeValue, time, false, userAttribute.mpId);
                     attributionChangeDTOs.add(new AttributionChangeDTO(key, attributeValue, oldValue, false, isNewAttribute, userAttribute.time, userAttribute.mpId));
                 }
             }
@@ -694,13 +678,13 @@ public class MParticleDBManager extends BaseDBManager {
 
 
     public void removeUserAttribute(UserAttributeRemoval container, MessageManagerCallbacks callbacks) {
-        Map<String, Object> currentValues = getAllUserAttributes(null, container.mpId);
+        Map<String, Object> currentValues = getUserAttributes(null, container.mpId);
         SQLiteDatabase db = getMParticleDatabase();
         try {
             db.beginTransaction();
             int deleted = UserAttributesService.deleteAttributes(db, container.key, container.mpId);
             if (callbacks != null && deleted > 0) {
-                callbacks.attributeRemoved(container.key);
+                callbacks.attributeRemoved(container.key, container.mpId);
                 callbacks.logUserAttributeChangeMessage(container.key, null, currentValues.get(container.key), true, false, container.time, container.mpId);
             }
             db.setTransactionSuccessful();
@@ -708,70 +692,6 @@ public class MParticleDBManager extends BaseDBManager {
 
         } finally {
             db.endTransaction();
-        }
-    }
-
-    private UserAttributeResponse getUserAttributes(long mpId) {
-        UserAttributeResponse response = new UserAttributeResponse();
-        response.attributeSingles = getUserAttributeSingles(mpId);
-        response.attributeLists = getUserAttributeLists(mpId);
-        return response;
-    }
-
-
-    /**
-     *
-     *
-     *
-     * MParticleUser Service Methods
-     *
-     *
-     *
-     */
-
-    static Set<IdentityStateListener> idStateListeners = new HashSet<IdentityStateListener>();
-
-    public MParticleUser getCurrentUser() {
-        return getUser(ConfigManager.getMpid(mContext));
-    }
-
-    public MParticleUser getUser(long mpId) {
-        throw new UnsupportedOperationException("not yet implemented");
-    }
-
-    public void storeUser(MParticleUser user) {
-        if (user == null) {
-            return;
-        }
-        if (user.getId() == ConfigManager.getMpid(mContext)) {
-            triggerUserChangedCallbacks(user);
-        }
-        throw new UnsupportedOperationException("Storing user in service not yet implemented");
-    }
-
-    public void setIdentityStateListener(IdentityStateListener listener) {
-        if (listener != null) {
-            idStateListeners.add(listener);
-        }
-    }
-
-    /**
-    *   IdentityStateListener callbacks are triggered on the following conditions:
-    *       - MPID changes, if MParticleUser exists with that mpId
-    *       - MParticleUser is stored, which matches mpId
-    **/
-    private void triggerUserChangedCallbacks(MParticleUser user) {
-        idStateListeners.removeAll(Collections.singleton(null));
-        for (IdentityStateListener identityStateListener: idStateListeners) {
-            identityStateListener.onUserIdentified(user);
-        }
-    }
-
-    public class MpIdChangeListener {
-        private MpIdChangeListener(){}
-
-        public void onMpIdChanged(long mpId) {
-            triggerUserChangedCallbacks(getUser(mpId));
         }
     }
 }

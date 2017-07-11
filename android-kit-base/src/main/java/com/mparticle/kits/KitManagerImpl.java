@@ -210,7 +210,7 @@ public class KitManagerImpl implements KitManager, DeepLinkListener, UserAttribu
             }
             MParticle.getInstance().getKitManager().replayAndDisableQueue();
             //sync user attributes
-            MParticle.getInstance().getAllUserAttributes(KitManagerImpl.this);
+            MParticle.getInstance().Identity().getCurrentUser().getUserAttributes(KitManagerImpl.this);
         }
     }
 
@@ -456,7 +456,7 @@ public class KitManagerImpl implements KitManager, DeepLinkListener, UserAttribu
     }
 
     private void syncUserIdentities(KitIntegration.AttributeListener attributeListener, KitConfiguration configuration) {
-        Map<MParticle.IdentityType, String> identities = MParticle.getInstance().getUserIdentities();
+        Map<MParticle.IdentityType, String> identities = MParticle.getInstance().Identity().getCurrentUser().getUserIdentities();
         if (identities != null) {
             for (Map.Entry<MParticle.IdentityType, String> entry : identities.entrySet()){
                 if (configuration.shouldSetIdentity(entry.getKey())) {

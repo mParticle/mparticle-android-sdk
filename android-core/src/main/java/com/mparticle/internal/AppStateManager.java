@@ -10,6 +10,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.SystemClock;
 
 import com.mparticle.MPEvent;
@@ -196,7 +197,7 @@ import java.util.concurrent.atomic.AtomicLong;
                 mCurrentActivityReference = null;
             }
 
-            delayedBackgroundCheckHandler.postDelayed(new Runnable() {
+            delayedBackgroundCheckHandler.post(new Runnable() {
                 @Override
                 public void run() {
                     try {
@@ -205,10 +206,10 @@ import java.util.concurrent.atomic.AtomicLong;
                             logBackgrounded();
                         }
                     }catch (Exception e){
-
+                        e.printStackTrace();
                     }
                 }
-            }, ACTIVITY_DELAY);
+            });//, ACTIVITY_DELAY);
 
             if (MParticle.getInstance().isAutoTrackingEnabled()) {
                 MParticle.getInstance().logScreen(

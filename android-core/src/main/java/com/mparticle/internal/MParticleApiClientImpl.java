@@ -240,7 +240,6 @@ public class MParticleApiClientImpl extends MParticleBaseClientImpl implements M
         if (mEventUrl == null){
             mEventUrl = new URL(SECURE_SERVICE_SCHEME, API_HOST, SERVICE_VERSION_1 + "/" + mApiKey + "/events");
         }
-        byte[] messageBytes = message.getBytes();
         HttpURLConnection connection = (HttpURLConnection) mEventUrl.openConnection();
         connection.setConnectTimeout(2000);
         connection.setReadTimeout(10000);
@@ -270,14 +269,7 @@ public class MParticleApiClientImpl extends MParticleBaseClientImpl implements M
             }
         }
 
-        GZIPOutputStream zos = new GZIPOutputStream(new BufferedOutputStream(connection.getOutputStream()));
-        try {
-            zos.write(messageBytes);
-        } finally {
-            zos.close();
-        }
-
-        makeUrlRequest(connection, true);
+        makeUrlRequest(connection, message, true);
 
         Logger.verbose("Upload request attempt:\n" +
                 "URL- " + mEventUrl.toString());

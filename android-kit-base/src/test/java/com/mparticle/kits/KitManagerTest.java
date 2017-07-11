@@ -14,6 +14,7 @@ import com.mparticle.mock.MockContext;
 import com.mparticle.mock.MockKitConfiguration;
 import com.mparticle.mock.MockKitIntegrationFactory;
 import com.mparticle.mock.MockKitManagerImpl;
+import com.mparticle.mock.MockMParticle;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -48,8 +49,8 @@ public class KitManagerTest  {
         assertNotNull(manager.providers);
         MockKitIntegrationFactory mockKitFactory = new MockKitIntegrationFactory();
         manager.setKitFactory(mockKitFactory);
-        MParticle mockMp = Mockito.mock(MParticle.class);
-        Mockito.when(mockMp.getKitManager()).thenReturn(Mockito.mock(KitFrameworkWrapper.class));
+        MParticle mockMp = new MockMParticle();
+        //Mockito.when(mockMp.getKitManager()).thenReturn(Mockito.mock(KitFrameworkWrapper.class));
         MParticle.setInstance(mockMp);
     }
 

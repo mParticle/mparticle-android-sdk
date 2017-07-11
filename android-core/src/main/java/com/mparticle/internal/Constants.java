@@ -9,6 +9,8 @@ public class Constants {
 
     public final static String LOG_TAG = "mParticle";
 
+    public final static Long TEMPORARY_MPID = 0L;
+
     public static final String MPARTICLE_VERSION = BuildConfig.VERSION_NAME;
 
     // maximum number of events per session

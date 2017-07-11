@@ -8,13 +8,14 @@ import org.json.JSONArray;
 import org.json.JSONException;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
 import static com.mparticle.internal.ConfigManager.PREFERENCES_FILE;
 
-public class UserConfig {
+class UserConfig {
     private static final String USER_CONFIG_COLLECTION = "mp::user_config_collection";
 
     private String SESSION_COUNTER = "mp::breadcrumbs::sessioncount";
@@ -47,8 +48,15 @@ public class UserConfig {
         return userConfigs;
     }
 
+    static void deleteAllUserConfigs(Context context) {
+        for (UserConfig userConfig: getAllUsers(context)) {
+            deleteUserConfig(context, userConfig.getMpid());
+        }
+        setMpIds(context, new HashSet<Long>());
+
+    }
+
     static void deleteUserConfig(Context context, long mpId) {
-        SharedPreferences preferences = getMParticleSharedPrefs(context);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             context.deleteSharedPreferences(getFileName(mpId));
         } else {
@@ -74,7 +82,7 @@ public class UserConfig {
     }
 
 
-    public long getMpid() {
+    long getMpid() {
         return mpId;
     }
 
@@ -91,6 +99,10 @@ public class UserConfig {
         mPreferences.edit().putInt(SESSION_COUNTER, sessionCounter).apply();
     }
 
+    private boolean hasCurrentSessionCounter() {
+        return mPreferences.contains(SESSION_COUNTER);
+    }
+
     void incrementSessionCounter() {
         int nextCount = getCurrentSessionCounter() + 1;
         if (nextCount >= (Integer.MAX_VALUE / 100)){
@@ -105,7 +117,7 @@ public class UserConfig {
     }
 
     void deleteDeletedUserAttributes() {
-        mPreferences.edit().remove(DELETED_USER_ATTRS).apply();
+        mPreferences.edit().putString(DELETED_USER_ATTRS, null).apply();
     }
 
     void setDeletedUserAttributes(String deletedUserAttributes) {
@@ -117,6 +129,10 @@ public class UserConfig {
         return this;
     }
 
+    private boolean hasDeletedUserAttributes() {
+        return mPreferences.contains(DELETED_USER_ATTRS);
+    }
+
     int getBreadcrumbLimit() {
         if (mPreferences != null){
             return mPreferences.getInt(BREADCRUMB_LIMIT, DEFAULT_BREADCRUMB_LIMIT);
@@ -126,6 +142,10 @@ public class UserConfig {
 
     void setBreadcrumbLimit(int newLimit) {
         mPreferences.edit().putInt(BREADCRUMB_LIMIT, newLimit).apply();
+    }
+
+    private boolean hasBreadcrumbLimit() {
+        return mPreferences.contains(BREADCRUMB_LIMIT);
     }
 
     long getLastUseDate() {
@@ -140,20 +160,28 @@ public class UserConfig {
         mPreferences.edit().putLong(LAST_USE, lastUseDate).apply();
     }
 
-    long getTimeInForeground() {
-        return getTimeInForeground(0);
+    private boolean hasLastUserDate() {
+        return mPreferences.contains(LAST_USE);
     }
 
-    long getTimeInForeground(long defaultValue) {
+    long getPreviousSessionForegound() {
+        return getPreviousSessionForegound(-1);
+    }
+
+    long getPreviousSessionForegound(long defaultValue) {
         return mPreferences.getLong(PREVIOUS_SESSION_FOREGROUND, defaultValue);
     }
 
     void clearPreviousTimeInForeground() {
-        mPreferences.edit().remove(PREVIOUS_SESSION_FOREGROUND).apply();
+        mPreferences.edit().putLong(PREVIOUS_SESSION_FOREGROUND, -1).apply();
     }
 
     void setPreviousSessionForeground(long previousTimeInForeground) {
         mPreferences.edit().putLong(PREVIOUS_SESSION_FOREGROUND, previousTimeInForeground).apply();
+    }
+
+    private boolean hasPreviousSessionForegound() {
+        return mPreferences.contains(PREVIOUS_SESSION_FOREGROUND);
     }
 
     String getPreviousSessionId() {
@@ -173,6 +201,10 @@ public class UserConfig {
         return this;
     }
 
+    private boolean hasPreviousSessionId() {
+        return mPreferences.contains(PREVIOUS_SESSION_ID);
+    }
+
     long getPreviousSessionStart(long defaultValue) {
         return mPreferences.getLong(PREVIOUS_SESSION_START, defaultValue);
     }
@@ -181,12 +213,20 @@ public class UserConfig {
         mPreferences.edit().putLong(PREVIOUS_SESSION_START, previousSessionStart).apply();
     }
 
-    public String getLtv() {
+    private boolean hasPreviousSessionStart() {
+        return mPreferences.contains(PREVIOUS_SESSION_START);
+    }
+
+    String getLtv() {
         return mPreferences.getString(LTV, "0");
     }
 
     void setLtv(String ltv) {
         mPreferences.edit().putString(LTV, ltv).apply();
+    }
+
+    private boolean hasLtv() {
+        return mPreferences.contains(LTV);
     }
 
     int getTotalRuns(int defaultValue) {
@@ -197,6 +237,10 @@ public class UserConfig {
         mPreferences.edit().putInt(TOTAL_RUNS, totalRuns).apply();
     }
 
+    private boolean hasTotalRuns() {
+        return mPreferences.contains(TOTAL_RUNS);
+    }
+
     String getCookies() {
         return mPreferences.getString(COOKIES, "");
     }
@@ -205,12 +249,20 @@ public class UserConfig {
         mPreferences.edit().putString(COOKIES, cookies).apply();
     }
 
+    private boolean hasCookies() {
+        return mPreferences.contains(COOKIES);
+    }
+
     int getLaunchesSinceUpgrade() {
         return mPreferences.getInt(TOTAL_SINCE_UPGRADE, 0);
     }
 
     void setLaunchesSinceUpgrade(int launchesSinceUpgrade) {
-        mPreferences.edit().putInt(TOTAL_SINCE_UPGRADE, launchesSinceUpgrade);
+        mPreferences.edit().putInt(TOTAL_SINCE_UPGRADE, launchesSinceUpgrade).apply();
+    }
+
+    private boolean hasLaunchesSinceUpgrade() {
+        return mPreferences.contains(TOTAL_SINCE_UPGRADE);
     }
 
     String getUserIdentities() {
@@ -221,13 +273,18 @@ public class UserConfig {
         mPreferences.edit().putString(USER_IDENTITIES, userIdentities).apply();
     }
 
-    /**
-     * used to migrate SharedPreferences from old interface, in which all the values in UserConfig where
-     * kept application-wide, to the current interface, which stores the values by MPID. The migration
-     * process will associate all current values coverd by UserConfig to the current MPID, which should
-     * be passed into the parameter "currentMpId"
-     *
-     **/
+    private boolean hasUserIdentities() {
+        return mPreferences.contains(USER_IDENTITIES);
+    }
+
+    void updateMpId(long newMpId) {
+        Set<Long> mpIds = getMpIdSet(mContext);
+        mpIds.remove(mpId);
+        mpIds.add(newMpId);
+        mpId = newMpId;
+        setMpIds(mpIds);
+    }
+
     private SharedPreferences getPreferenceFile(long mpId) {
         Set<Long> mpIds = getMpIdSet(mContext);
         mpIds.add(mpId);
@@ -251,11 +308,15 @@ public class UserConfig {
     }
 
     private void setMpIds(Set<Long> mpIds) {
+        setMpIds(mContext, mpIds);
+    }
+
+    private static void setMpIds(Context context, Set<Long> mpIds) {
         JSONArray jsonArray = new JSONArray();
         for (Long mpId: mpIds) {
             jsonArray.put(mpId);
         }
-        getMParticleSharedPrefs(mContext).edit().putString(USER_CONFIG_COLLECTION, jsonArray.toString());
+        getMParticleSharedPrefs(context).edit().putString(USER_CONFIG_COLLECTION, jsonArray.toString()).apply();
     }
 
     static private String getFileName(long mpId) {
@@ -266,6 +327,59 @@ public class UserConfig {
         return context.getSharedPreferences(PREFERENCES_FILE, Context.MODE_PRIVATE);
     }
 
+    /**
+     * Used to take any values set in the paramter UserConfig, and apply them to this UserConfig
+     *
+     * If we have a temporary UserConfig object, and the user sets a number of fields on it, we can
+     * use this method to apply those fields to this new UserConfig, by passing the temporary UserConfig
+     * object here
+     */
+    void merge(UserConfig userConfig) {
+        if (userConfig.hasDeletedUserAttributes()) {
+            setDeletedUserAttributes(userConfig.getDeletedUserAttributes());
+        }
+        if (userConfig.hasCurrentSessionCounter()) {
+            setCurrentSessionCounter(userConfig.getCurrentSessionCounter());
+        }
+        if (userConfig.hasBreadcrumbLimit()) {
+            setBreadcrumbLimit(userConfig.getBreadcrumbLimit());
+        }
+        if (userConfig.hasLastUserDate()) {
+            setLastUseDate(userConfig.getLastUseDate());
+        }
+        if (userConfig.hasPreviousSessionForegound()) {
+            setPreviousSessionForeground(userConfig.getPreviousSessionForegound());
+        }
+        if (userConfig.hasPreviousSessionId()) {
+            setPreviousSessionId(userConfig.getPreviousSessionId());
+        }
+        if (userConfig.hasPreviousSessionStart()) {
+            setPreviousSessionStart(userConfig.getPreviousSessionStart(0));
+        }
+        if (userConfig.hasLtv()) {
+            setLtv(userConfig.getLtv());
+        }
+        if (userConfig.hasTotalRuns()) {
+            setTotalRuns(userConfig.getTotalRuns(0));
+        }
+        if (userConfig.hasCookies()) {
+            setCookies(userConfig.getCookies());
+        }
+        if (userConfig.hasLaunchesSinceUpgrade()) {
+            setLaunchesSinceUpgrade(userConfig.getLaunchesSinceUpgrade());
+        }
+        if (userConfig.hasUserIdentities()) {
+            setUserIdentities(userConfig.getUserIdentities());
+        }
+    }
+
+    /**
+     * used to migrate SharedPreferences from old interface, in which all the values in UserConfig where
+     * kept application-wide, to the current interface, which stores the values by MPID. The migration
+     * process will associate all current values coverd by UserConfig to the current MPID, which should
+     * be passed into the parameter "currentMpId"
+     *
+     **/
 
     private static class SharedPreferencesMigrator {
         private static final String NEEDS_TO_MIGRATE_TO_MPID_DEPENDENT = "mp::needs_to_migrate_to_mpid_dependent";

@@ -1,11 +1,13 @@
 package com.mparticle.internal.database.tables.mp;
 
-import android.content.Context;
 import android.provider.BaseColumns;
 
-import com.mparticle.internal.ConfigManager;
+public class BreadcrumbTable extends MpIdDependentTable {
 
-public class BreadcrumbTable {
+    @Override
+    public String getTableName() {
+        return BreadcrumbTableColumns.TABLE_NAME;
+    }
 
     protected interface BreadcrumbTableColumns {
         String TABLE_NAME = "breadcrumbs";
@@ -14,7 +16,7 @@ public class BreadcrumbTable {
         String MESSAGE = "message";
         String CREATED_AT = "breadcrumb_time";
         String CF_UUID = "cfuuid";
-        String MP_ID = "mp_id";
+        String MP_ID = MpIdDependentTable.MP_ID;
     }
 
     static String getAddMpIdColumnString(String defaultValue) {

@@ -132,6 +132,12 @@ public class UploadHandler extends Handler {
                 case UPLOAD_TRIGGER_MESSAGES:
                     long uploadInterval = mConfigManager.getUploadInterval();
                     long mpid = (Long)msg.obj;
+                    // records which have a temporary MPID should not be operated upon. a temporary MPID
+                    // signifies that we are waiting for an Identity API call to return, which will
+                    // update the MPID
+                    if (mpid == Constants.TEMPORARY_MPID) {
+                        return;
+                    }
                     if (isNetworkConnected && !mApiClient.isThrottled()) {
                         if (uploadInterval > 0 || msg.arg1 == 1) {
                             prepareMessageUploads(false, mpid);
@@ -147,6 +153,12 @@ public class UploadHandler extends Handler {
                     break;
                 case UPLOAD_HISTORY:
                     mpid = (Long)msg.obj;
+                    // records which have a temporary MPID should not be operated upon. a temporary MPID
+                    // signifies that we are waiting for an Identity API call to return, which will
+                    // update the MPID
+                    if (mpid == Constants.TEMPORARY_MPID) {
+                        return;
+                    }
                     removeMessages(UPLOAD_HISTORY, mpid);
                     prepareMessageUploads(true, mpid);
                     if (isNetworkConnected) {
@@ -173,6 +185,12 @@ public class UploadHandler extends Handler {
      * - mark the messages as having been uploaded.
      */
     private void prepareMessageUploads(boolean history, long mpId) throws Exception {
+        // records which have a temporary MPID should not be operated upon. a temporary MPID
+        // signifies that we are waiting for an Identity API call to return, which will
+        // update the MPID
+        if (mpId == Constants.TEMPORARY_MPID) {
+            return;
+        }
         String currentSessionId = mAppStateManager.getSession().mSessionID;
         long remainingHeap = MPUtility.getRemainingHeapInBytes();
         if (remainingHeap < Constants.LIMIT_MAX_UPLOAD_SIZE) {
@@ -262,35 +280,6 @@ public class UploadHandler extends Handler {
     public boolean shouldDelete(int statusCode) {
         return statusCode != MParticleApiClientImpl.HTTP_TOO_MANY_REQUESTS && (202 == statusCode ||
                 (statusCode >= 400 && statusCode < 500));
-    }
-
-    /**
-     * Method that is responsible for building an upload message to be sent over the wire.
-     */
-    MessageBatch createUploadMessage(boolean history) throws JSONException {
-        MessageBatch batchMessage = MessageBatch.create(
-                history,
-                mConfigManager,
-                mPreferences,
-                mApiClient.getCookies());
-        addGCMHistory(batchMessage);
-        return batchMessage;
-    }
-
-    /**
-     * If the customer is using our GCM solution, query and append all of the history used for attribution.
-     *
-     */
-    void addGCMHistory(MessageBatch uploadMessage) {
-        try {
-            mParticleDBManager.deleteExpiredGcmMessages();
-            JSONObject historyObject = mParticleDBManager.getGcmHistory();
-            if (historyObject != null) {
-                uploadMessage.put(Constants.MessageKey.PUSH_CAMPAIGN_HISTORY, historyObject);
-            }
-        } catch (Exception e) {
-            Logger.warning(e, "Error while building GCM campaign history");
-        }
     }
 
     /*

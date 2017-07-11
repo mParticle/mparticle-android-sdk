@@ -1,4 +1,4 @@
-package com.mparticle.identity;
+package com.mparticle;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -6,6 +6,7 @@ import android.support.annotation.Nullable;
 import com.mparticle.MParticleTask;
 import com.mparticle.TaskFailureListener;
 import com.mparticle.TaskSuccessListener;
+import com.mparticle.internal.dto.MParticleUserDTO;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -19,8 +20,11 @@ public abstract class BaseIdentityTask<T> extends MParticleTask<T> {
     Set<TaskSuccessListener<? super T>> successListeners = new HashSet<TaskSuccessListener<? super T>>();
     Set<TaskFailureListener> failureListeners = new HashSet<TaskFailureListener>();
 
+    public void setFailed(MParticleUserDTO.Error error) {
+        setFailed(new Exception(error.getErrorString()));
+    }
 
-    void setFailed(Exception exception) {
+    public void setFailed(Exception exception) {
         isCompleted = true;
         isSuccessful = false;
         mException = exception;
@@ -29,7 +33,7 @@ public abstract class BaseIdentityTask<T> extends MParticleTask<T> {
         }
     }
 
-    void setSuccessful(Object object) {
+    public void setSuccessful(Object object) {
         isCompleted = true;
         isSuccessful = true;
         result = buildResult(object);
@@ -39,7 +43,7 @@ public abstract class BaseIdentityTask<T> extends MParticleTask<T> {
         }
     }
 
-    abstract T buildResult(Object o);
+    public abstract T buildResult(Object o);
 
     @Override
     public boolean isComplete() {

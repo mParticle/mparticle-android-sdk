@@ -3,6 +3,7 @@ package com.mparticle.identity;
 import android.os.Build;
 
 import com.mparticle.MParticle;
+import com.mparticle.UserAttributeListener;
 import com.mparticle.internal.AppStateManager;
 import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.Constants;
@@ -20,7 +21,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -31,22 +31,30 @@ import java.util.Map;
     private MessageManager mMessageManager;
     private KitManager mKitManager;
 
-    MParticleUserDelegate(MessageManager messageManager) {
-        mAppStateManager = MParticle.getInstance().getAppStateManager();
-        mConfigManager = MParticle.getInstance().getConfigManager();
+    MParticleUserDelegate(AppStateManager appStateManager, ConfigManager configManager, MessageManager messageManager, KitManager kitManager) {
+        mAppStateManager = appStateManager;
+        mConfigManager = configManager;
         mMessageManager = messageManager;
-        mKitManager = MParticle.getInstance().getKitManager();
+        mKitManager = kitManager;
     }
 
     public Map<String, Object> getUserAttributes(long mpId) {
-        return mMessageManager.getAllUserAttributes(null, mpId);
+        mpId = verifyMpId(mpId);
+        return mMessageManager.getUserAttributes(null, mpId);
+    }
+
+    public Map<String, Object> getUserAttributes(final UserAttributeListener listener, long mpId) {
+        mpId = verifyMpId(mpId);
+        return mMessageManager.getUserAttributes(listener, mpId);
     }
 
     public Map<MParticle.IdentityType, String> getUserIdentities(long mpId){
+        mpId = verifyMpId(mpId);
         return mMessageManager.getUserIdentities(mpId);
     }
 
-    public void setUserIdentity(String id, MParticle.IdentityType identityType, long mpId) {
+    public boolean setUserIdentity(String id, MParticle.IdentityType identityType, long mpId) {
+        mpId = verifyMpId(mpId);
         if (identityType != null) {
             if (id == null) {
                 Logger.debug("Removing User Identity type: " + identityType.name());
@@ -56,7 +64,7 @@ import java.util.Map;
 
             if (!MPUtility.isEmpty(id) && id.length() > Constants.LIMIT_ATTR_VALUE) {
                 Logger.warning("User Identity value length exceeds limit. Will not set id: " + id);
-                return;
+                return false;
             }
 
             JSONArray userIdentities = mMessageManager.getUserIdentityJson(mpId);
@@ -92,7 +100,7 @@ import java.util.Map;
                 } else {
                     if (oldIdentity == null || index < 0) {
                         Logger.debug("Attempted to remove ID type that didn't exist: " + identityType.name());
-                        return;
+                        return false;
                     }
 
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
@@ -116,14 +124,26 @@ import java.util.Map;
                 } else {
                     mKitManager.setUserIdentity(id, identityType);
                 }
+                return true;
             } catch (JSONException e) {
                 Logger.error("Error setting identity: " + id);
-                return;
             }
         }
+        return false;
     }
 
     public boolean setUserAttribute(String key, Object value, long userMpId) {
+        return setUserAttribute(key, value, userMpId, false);
+    }
+
+    /**
+     * setUserAttributes is an asynchronous method, and should normally be run as such. In certain
+     * cases, like when an IdentityApiRequest has copyUserAttributes set to true, we need to set the
+     * user attributes on the new user synchronously, and only then should we use this flag
+     *
+     */
+    boolean setUserAttribute(String key, Object value, long userMpId, boolean synchronously) {
+        userMpId = verifyMpId(userMpId);
         if (mConfigManager.isEnabled() && mAppStateManager.getSession().checkEventLimit()) {
             MParticle.getInstance().getAppStateManager().ensureActiveSession();
             if (MPUtility.isEmpty(key)) {
@@ -152,7 +172,7 @@ import java.util.Map;
                         }
                     }
                     Logger.warning("Set user attribute list: " + key + " with values: " + values.toString());
-                    mMessageManager.setUserAttribute(key, clonedList, userMpId);
+                    mMessageManager.setUserAttribute(key, clonedList, userMpId, synchronously);
                     mKitManager.setUserAttributeList(key, clonedList);
                 } catch (Exception e) {
                     Logger.warning("Error while setting attribute list: " + e.toString());
@@ -170,7 +190,7 @@ import java.util.Map;
                 } else {
                     Logger.debug("Set user tag: " + key);
                 }
-                mMessageManager.setUserAttribute(key, stringValue, userMpId);
+                mMessageManager.setUserAttribute(key, stringValue, userMpId, synchronously);
                 mKitManager.setUserAttribute(key, stringValue);
             }
             return true;
@@ -179,6 +199,7 @@ import java.util.Map;
     }
 
     public boolean setUserAttributeList(String key, Object value, long userMpId) {
+        userMpId = verifyMpId(userMpId);
         if (value == null) {
             Logger.warning("setUserAttributeList called with null list, this is a no-op.");
             return false;
@@ -187,6 +208,7 @@ import java.util.Map;
     }
 
     public boolean incrementUserAttribute(String key, int value, long userMpId) {
+        userMpId = verifyMpId(userMpId);
         if (key == null) {
             Logger.warning("incrementUserAttribute called with null key. Ignoring...");
             return false;
@@ -197,6 +219,7 @@ import java.util.Map;
     }
 
     public boolean removeUserAttribute(String key, long userMpId) {
+        userMpId = verifyMpId(userMpId);
         if (MPUtility.isEmpty(key)) {
             Logger.debug("removeUserAttribute called with empty key.");
             return false;
@@ -213,16 +236,88 @@ import java.util.Map;
         }
     }
 
-    void setUser(MParticleUserDTO mParticleUserDTO) {
+    boolean setUser(MParticleUserDTO mParticleUserDTO) {
+        return setUser(mParticleUserDTO, true);
+    }
+
+    boolean setUser(MParticleUserDTO mParticleUserDTO, boolean userChanged) {
         if (!MPUtility.isEmpty(mParticleUserDTO.getIdentities())) {
             for (Map.Entry<MParticle.IdentityType, String> entry: mParticleUserDTO.getIdentities().entrySet()) {
-                setUserIdentity(entry.getValue(), entry.getKey(), mParticleUserDTO.getMpId());
+                if (!setUserIdentity(entry.getValue(), entry.getKey(), mParticleUserDTO.getMpId())) {
+                    return false;
+                }
             }
         }
-        if (!MPUtility.isEmpty(mParticleUserDTO.getUserAttributes())) {
+        if (!MPUtility.isEmpty(mParticleUserDTO.getUserAttributes()) && userChanged) {
             for (Map.Entry<String, Object> entry: mParticleUserDTO.getUserAttributes().entrySet()) {
-                setUserAttribute(entry.getKey(), entry.getValue(), mParticleUserDTO.getMpId());
+                if (!setUserAttribute(entry.getKey(), entry.getValue(), mParticleUserDTO.getMpId(), true)) {
+                    return false;
+                }
             }
         }
+        return true;
+    }
+
+
+    private Long mpIdInFlux = null;
+
+    /**
+     * To be used while a request, which might change the user's MPID is in progress. Since externally,
+     * from the client's POV, the MPID hasn't changed yet, they will still be making requests with a
+     * potentially dated MPID. This method will change the internal MPID to a placeholder, so that
+     * when the real MPID returns, if it has changed, we can go back and changed the events we recorded
+     * since the request that changed the MPID was initiated
+     */
+    void useTemporaryMpId(long mpId) {
+        mpIdInFlux = mpId;
+        mConfigManager.setMpidSilently(Constants.TEMPORARY_MPID);
+    }
+
+
+    /**
+     * This will tell us if the current MPID in configManager is a temporary MPID, or if there is simply
+     * no current MPID, as the case would be on startup
+     * @return
+     */
+    boolean hasMpIdInFlux() {
+        return mpIdInFlux != null && mpIdInFlux != Constants.TEMPORARY_MPID;
+    }
+
+    long getMpIdInFlux() {
+        return mpIdInFlux != null ? mpIdInFlux : Constants.TEMPORARY_MPID;
+    }
+
+    /**
+     * to be used to rectify the use of the placeholder MPID, which occured while request which might
+     * change the MPID was in progress. The parameter "mpid" can either be the previous MPID or a new MPID,
+     * either way, everything stored under the placeholder MPID will be migrated.
+     */
+
+    void migrateTemporaryToMpId(long mpId) {
+        //check if there was a previous MPID before the temporary one got put in place, and if it was the same MPID
+        boolean mpIdChanged = (mpIdInFlux == null || mpIdInFlux != mpId);
+        // if the mpid remains equal to the temporary_mpid, as the case could be when a network request fails
+        // or on startup, then there is not reason to do anything
+        if (mpId == Constants.TEMPORARY_MPID) {
+            return;
+        }
+        mConfigManager.mergeUserConfigs(Constants.TEMPORARY_MPID, mpId);
+        mMessageManager.getMParticleDBManager().updateMpId(Constants.TEMPORARY_MPID, mpId);
+        if (mpIdChanged) {
+            mConfigManager.setMpid(mpId);
+        } else {
+            //if we are got the same MPID back after an IdentityAPI call, we should set it silently
+            mConfigManager.setMpidSilently(mpId);
+        }
+        mConfigManager.deleteUserConfig(Constants.TEMPORARY_MPID);
+        mpIdInFlux = null;
+
+    }
+
+    private long verifyMpId(long mpiD) {
+        if (mpIdInFlux != null && mpIdInFlux == mpiD) {
+            return Constants.TEMPORARY_MPID;
+        }
+        return mpiD;
     }
 }

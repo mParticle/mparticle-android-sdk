@@ -12,7 +12,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 public class BaseTableTest {
-    private static final String DB_NAME = "test_database";
+    public static final String DB_NAME = "test_database";
     CountDownLatch timer = new CountDownLatch(1);
 
     @BeforeClass
@@ -22,10 +22,10 @@ public class BaseTableTest {
 
     protected void runTest(SQLiteOpenHelperWrapper helper) throws InterruptedException {
         InstrumentationRegistry.getTargetContext().deleteDatabase(DB_NAME);
-        SQLiteDatabase baseDatabase = new BaseDatabase(helper, DB_NAME, timer, 1).getWritableDatabase();
+        SQLiteDatabase baseDatabase = new BaseDatabase(helper, DB_NAME, timer, 6).getWritableDatabase();
         timer.await(5, TimeUnit.SECONDS);
-        baseDatabase = new BaseDatabase(helper, DB_NAME, timer, 2).getWritableDatabase();
+        baseDatabase = new BaseDatabase(helper, DB_NAME, timer, MParticleDatabaseHelper.DB_VERSION).getWritableDatabase();
         timer.await(5, TimeUnit.SECONDS);
-
+        InstrumentationRegistry.getTargetContext().deleteDatabase(DB_NAME);
     }
 }

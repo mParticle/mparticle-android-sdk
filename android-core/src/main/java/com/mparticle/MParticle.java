@@ -94,7 +94,7 @@ public class MParticle {
      * The state manager is primarily concerned with Activity lifecycle and app visibility in order to manage sessions,
      * automatically log screen views, and pass lifecycle information on top embedded kits.
      */
-    AppStateManager mAppStateManager;
+    protected AppStateManager mAppStateManager;
 
     protected MessageManager mMessageManager;
     private static volatile MParticle instance;
@@ -106,11 +106,11 @@ public class MParticle {
     protected CommerceApi mCommerce;
     protected ProductBagApi mProductBags;
     protected volatile DeepLinkListener mDeepLinkListener;
-    private IdentityApi mIdentityApi;
+    protected IdentityApi mIdentityApi;
     private static volatile boolean sAndroidIdDisabled;
     private static volatile boolean sDevicePerformanceMetricsDisabled;
 
-    MParticle() { }
+    protected MParticle() { }
 
 
     /**
@@ -120,20 +120,16 @@ public class MParticle {
      */
 
     public static void start(Context context) {
-        start(context, MParticleOptions.builder(context).build());
+        start(MParticleOptions.builder(context).build());
     }
 
     /**
      * Start the mParticle SDK and begin tracking a user session. This method must be called prior to {@link #getInstance()}.
      *
-     * @param context Required reference to a Context object
      * @param options Required to initialize the SDK properly
      */
-    public static void start(Context context, @NonNull MParticleOptions options) {
-        if (context == null) {
-            throw new IllegalArgumentException("mParticle failed to start: context is required.");
-        }
-        MParticle.getInstance(context, options);
+    public static void start(@NonNull MParticleOptions options) {
+        MParticle.getInstance(options.getContext(), options);
     }
 
     /**
@@ -180,7 +176,7 @@ public class MParticle {
                     instance.mKitManager = new KitFrameworkWrapper(context, instance.mMessageManager, configManager, appStateManager);
                     instance.mMessageManager.refreshConfiguration();
 
-                    instance.mIdentityApi = IdentityApi.getInstance(context, instance.mMessageManager, instance.mConfigManager);
+                    instance.mIdentityApi = IdentityApi.getInstance(context, instance.mAppStateManager, instance.mMessageManager, instance.mConfigManager, instance.mKitManager);
                     if (options.getInitialIdentity() != null) {
                         instance.mIdentityApi.identify(options.getInitialIdentity());
                     } else {

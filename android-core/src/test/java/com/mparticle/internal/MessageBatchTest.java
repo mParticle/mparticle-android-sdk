@@ -32,7 +32,7 @@ public class MessageBatchTest {
         ConfigManager manager = new ConfigManager(new MockContext(), MParticle.Environment.Production, "some api key", "some api secret");
         MockSharedPreferences sharedPrefs = new MockSharedPreferences();
         boolean sessionHistory = true;
-        MessageBatch batch = MessageBatch.create( sessionHistory, manager, sharedPrefs,new JSONObject());
+        MessageBatch batch = MessageBatch.create( sessionHistory, manager, sharedPrefs,new JSONObject(), manager.getMpid());
         assertNotNull(batch.getString("dt"));
         assertNotNull(batch.getString("id"));
         assertNotNull(batch.getDouble("ct"));
@@ -46,7 +46,7 @@ public class MessageBatchTest {
             assertNotNull(batch.getJSONObject("cms"));
         }
         sessionHistory = false;
-        batch = MessageBatch.create( sessionHistory, manager, sharedPrefs,new JSONObject());
+        batch = MessageBatch.create( sessionHistory, manager, sharedPrefs,new JSONObject(), manager.getMpid());
         assertNotNull(batch.getString("dt"));
         assertNotNull(batch.getString("id"));
         assertNotNull(batch.getDouble("ct"));
@@ -62,7 +62,7 @@ public class MessageBatchTest {
         }
 
         bags.removeProductBag("whatever");
-        batch = MessageBatch.create( sessionHistory, manager, sharedPrefs,new JSONObject());
+        batch = MessageBatch.create( sessionHistory, manager, sharedPrefs,new JSONObject(), manager.getMpid());
         assertFalse(batch.has("pb"));
     }
 }

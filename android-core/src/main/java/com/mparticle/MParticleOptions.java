@@ -3,20 +3,15 @@ package com.mparticle;
 import android.content.Context;
 import android.support.annotation.NonNull;
 
-import com.mparticle.identity.IdentityApi;
 import com.mparticle.identity.IdentityApiRequest;
-import com.mparticle.internal.ConfigManager;
-import com.mparticle.internal.Constants;
 import com.mparticle.internal.Logger;
 import com.mparticle.internal.MPUtility;
 
-import java.util.HashMap;
-import java.util.HashSet;
-
-class MParticleOptions {
+public class MParticleOptions {
     private static final String PREFKEY_API_KEY = "mp_key";
     private static final String PREFKEY_API_SECRET = "mp_secret";
 
+    private Context mContext;
     private MParticle.InstallType installType = MParticle.InstallType.AutoDetect;
     private MParticle.Environment environment;
     private String apiKey;
@@ -32,6 +27,7 @@ class MParticleOptions {
     private MParticleOptions(){}
 
     public MParticleOptions(Builder builder) {
+        this.mContext = builder.mContext;
         if (builder.apiKey != null) {
             this.apiKey = builder.apiKey;
         }
@@ -54,10 +50,18 @@ class MParticleOptions {
             this.androidIdDisabled = builder.androidIdDisabled;
         }
         if (builder.uploadInterval != null) {
-            this.uploadInterval = builder.uploadInterval;
+            if (builder.uploadInterval <= 0) {
+                Logger.warning("Upload Interval must be a positive number, disregarding value");
+            } else {
+                this.uploadInterval = builder.uploadInterval;
+            }
         }
         if (builder.sessionTimeout != null) {
-            this.sessionTimeout = builder.sessionTimeout;
+            if (builder.sessionTimeout <= 0) {
+                Logger.warning("Session Timeout must be a positive number, disregarding value");
+            } else {
+                this.sessionTimeout = builder.sessionTimeout;
+            }
         }
         if (builder.unCaughtExceptionLogging != null) {
             this.unCaughtExceptionLogging = builder.unCaughtExceptionLogging;
@@ -69,6 +73,10 @@ class MParticleOptions {
 
     public static MParticleOptions.Builder builder(Context context) {
         return new Builder(context);
+    }
+
+    Context getContext() {
+        return mContext;
     }
 
     public MParticle.InstallType getInstallType() {
@@ -213,6 +221,9 @@ class MParticleOptions {
         public MParticleOptions build() {
             boolean devMode = MParticle.Environment.Development.equals(environment) || MPUtility.isAppDebuggable(mContext);
             String message;
+            if (mContext == null) {
+                throw new IllegalArgumentException("mParticle failed to start: context is required.");
+            }
             if (MPUtility.isEmpty(apiKey)) {
                     apiKey = getString(PREFKEY_API_KEY);
                 if (MPUtility.isEmpty(apiKey)) {

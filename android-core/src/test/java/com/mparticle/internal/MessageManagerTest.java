@@ -48,6 +48,8 @@ public class MessageManagerTest {
     private MessageHandler messageHandler;
     private UploadHandler uploadHandler;
 
+    private long defaultId = 1L;
+
     @Before
     public void setup() throws Exception {
         MParticle.setInstance(new MockMParticle());
@@ -55,6 +57,8 @@ public class MessageManagerTest {
         configManager = Mockito.mock(ConfigManager.class);
         Mockito.when(configManager.getApiKey()).thenReturn("123456789");
         Mockito.when(configManager.getUserConfig()).thenReturn(UserConfig.getUserConfig(context, new Random().nextInt()));
+        Mockito.when(MParticle.getInstance().getConfigManager().getMpid()).thenReturn(defaultId);
+        Mockito.when(configManager.getMpid()).thenReturn(defaultId);
         appStateManager = new AppStateManager(context, true);
         messageHandler = Mockito.mock(MessageHandler.class);
         uploadHandler = Mockito.mock(UploadHandler.class);
@@ -142,7 +146,7 @@ public class MessageManagerTest {
         assertEquals(Constants.MessageType.SESSION_START, sessionStart.getMessageType());
         assertEquals(42, sessionStart.getLong(Constants.MessageKey.PREVIOUS_SESSION_LENGTH));
         assertEquals(24000, sessionStart.getLong(Constants.MessageKey.PREVIOUS_SESSION_START));
-        Mockito.verify(messageHandler, Mockito.times(1)).sendMessage(messageHandler.obtainMessage(MessageHandler.END_ORPHAN_SESSIONS, 1));
+        Mockito.verify(messageHandler, Mockito.times(1)).sendMessage(messageHandler.obtainMessage(MessageHandler.END_ORPHAN_SESSIONS, configManager.getMpid()));
     }
 
     @Test
@@ -167,7 +171,7 @@ public class MessageManagerTest {
         session.mLastEventTime = currentTime;
         manager.updateSessionEnd(session);
         Mockito.verify(messageHandler, Mockito.times(1)).sendMessage(Mockito.any(Message.class));
-        long time = configManager.getUserConfig().getTimeInForeground(-1);
+        long time = configManager.getUserConfig().getPreviousSessionForegound(-1);
         assertEquals(5000, time);
     }
 
@@ -373,8 +377,8 @@ public class MessageManagerTest {
     @Test
     public void testStartUploadLoop() throws Exception {
         manager.startUploadLoop();
-        Mockito.verify(uploadHandler, Mockito.times(1)).removeMessages(UploadHandler.UPLOAD_MESSAGES);
-        Mockito.verify(uploadHandler, Mockito.times(1)).sendEmptyMessageDelayed(UploadHandler.UPLOAD_MESSAGES, Constants.INITIAL_UPLOAD_DELAY);
+        Mockito.verify(uploadHandler, Mockito.times(1)).removeMessages(UploadHandler.UPLOAD_MESSAGES, configManager.getMpid());
+        Mockito.verify(uploadHandler, Mockito.times(1)).sendMessageDelayed(uploadHandler.obtainMessage(UploadHandler.UPLOAD_MESSAGES, configManager.getMpid()), Constants.INITIAL_UPLOAD_DELAY);
     }
 
     @Test
@@ -510,7 +514,7 @@ public class MessageManagerTest {
         JSONObject oldIdentity = new JSONObject();
         JSONObject newIdentity = new JSONObject();
         JSONArray identities = new JSONArray();
-        MPMessage message = manager.logUserIdentityChangeMessage(newIdentity, oldIdentity, identities);
+        MPMessage message = manager.logUserIdentityChangeMessage(newIdentity, oldIdentity, identities, defaultId);
         assertEquals(message.get("oi"), oldIdentity);
         assertEquals(message.get("ni"), newIdentity);
         assertEquals(message.get("ui"), identities);
@@ -520,7 +524,7 @@ public class MessageManagerTest {
     public void testLogUserIdentityChangeMessageNewIdentity() throws Exception {
         JSONObject newIdentity = new JSONObject();
         JSONArray identities = new JSONArray();
-        MPMessage message = manager.logUserIdentityChangeMessage(newIdentity, null, identities);
+        MPMessage message = manager.logUserIdentityChangeMessage(newIdentity, null, identities, defaultId);
         assertEquals(message.get("oi"), JSONObject.NULL);
         assertEquals(message.get("ni"), newIdentity);
         assertEquals(message.get("ui"), identities);
@@ -530,7 +534,7 @@ public class MessageManagerTest {
     public void testLogUserIdentityChangeMessageRemoveIdentity() throws Exception {
         JSONObject oldIdentity = new JSONObject();
         JSONArray identities = new JSONArray();
-        MPMessage message = manager.logUserIdentityChangeMessage(null, oldIdentity, identities);
+        MPMessage message = manager.logUserIdentityChangeMessage(null, oldIdentity, identities, defaultId);
         assertEquals(message.get("ni"), JSONObject.NULL);
         assertEquals(message.get("oi"), oldIdentity);
         assertEquals(message.get("ui"), identities);

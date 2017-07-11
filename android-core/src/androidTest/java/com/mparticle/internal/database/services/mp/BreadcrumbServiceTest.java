@@ -1,6 +1,8 @@
 package com.mparticle.internal.database.services.mp;
 
+import android.content.Context;
 import android.location.Location;
+import android.support.test.InstrumentationRegistry;
 
 import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.Constants;
@@ -9,6 +11,7 @@ import com.mparticle.internal.Session;
 import com.mparticle.internal.database.tables.mp.BreadcrumbTable;
 
 import org.json.JSONException;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -22,11 +25,13 @@ import static junit.framework.Assert.assertTrue;
 public class BreadcrumbServiceTest extends BaseMPServiceTest {
     private static MPMessage message;
     private static int breadCrumbLimit;
+    private static Context context;
 
-    @BeforeClass
-    public static void setUp() throws JSONException {
+    @Before
+    public void preConditions() throws JSONException {
         message = new MPMessage.Builder("test", new Session(), new Location("New York City"), 1).build();
-        breadCrumbLimit = ConfigManager.getBreadcrumbLimit();
+        context = InstrumentationRegistry.getContext();
+        breadCrumbLimit = ConfigManager.getBreadcrumbLimit(context);
     }
 
     /**
@@ -39,36 +44,36 @@ public class BreadcrumbServiceTest extends BaseMPServiceTest {
         clearDatabase();
 
         for (int i = 0; i < breadCrumbLimit + 10; i++) {
-            BreadcrumbService.insertBreadcrumb(database, message, "k", null);
+            BreadcrumbService.insertBreadcrumb(database, context, message, "k", null);
         }
         assertEquals(BreadcrumbService.getBreadcrumbCount(database, null), 0);
 
         for (int i = 0; i < breadCrumbLimit + 10; i++) {
-            BreadcrumbService.insertBreadcrumb(database, message, null, 10L);
+            BreadcrumbService.insertBreadcrumb(database, context, message, null, 10L);
         }
 
         assertEquals(BreadcrumbService.getBreadcrumbCount(database, 10L), 0);
 
         for (int i = 0; i < breadCrumbLimit + 10; i++) {
-            BreadcrumbService.insertBreadcrumb(database, null, "k", 10L);
+            BreadcrumbService.insertBreadcrumb(database, context, null, "k", 10L);
         }
 
         assertEquals(BreadcrumbService.getBreadcrumbCount(database, 10L), 0);
 
         for (int i = 0; i < 10; i++) {
-            BreadcrumbService.insertBreadcrumb(database, message, "k", 10L);
+            BreadcrumbService.insertBreadcrumb(database, context, message, "k", 10L);
         }
 
         assertEquals(BreadcrumbService.getBreadcrumbCount(database, 10L), 10);
 
         for (int i = 0; i < breadCrumbLimit + 10; i++) {
-            BreadcrumbService.insertBreadcrumb(database, message, null, 10L);
+            BreadcrumbService.insertBreadcrumb(database, context, message, null, 10L);
         }
 
         assertEquals(BreadcrumbService.getBreadcrumbCount(database, 10L), 10);
 
         for (int i = 0; i < breadCrumbLimit + 10; i++) {
-            BreadcrumbService.insertBreadcrumb(database, null, "k", 10L);
+            BreadcrumbService.insertBreadcrumb(database, context, null, "k", 10L);
         }
 
         assertEquals(BreadcrumbService.getBreadcrumbCount(database, 10L), 10);
@@ -89,18 +94,18 @@ public class BreadcrumbServiceTest extends BaseMPServiceTest {
 
         int expectedCount = breadCrumbLimit;
         for (int i = 0; i < expectedCount; i++) {
-            BreadcrumbService.insertBreadcrumb(database, message, "apiKey", 1L);
+            BreadcrumbService.insertBreadcrumb(database, context, message, "apiKey", 1L);
         }
-        assertEquals(BreadcrumbService.getBreadcrumbs(database, 1L).length(), expectedCount);
-        assertEquals(BreadcrumbService.getBreadcrumbs(database, 2L).length(), 0);
+        assertEquals(BreadcrumbService.getBreadcrumbs(database, context, 1L).length(), expectedCount);
+        assertEquals(BreadcrumbService.getBreadcrumbs(database, context, 2L).length(), 0);
 
         for (int i = 0; i < expectedCount -1; i++) {
-            BreadcrumbService.insertBreadcrumb(database, message, "apiKey", 2L);
+            BreadcrumbService.insertBreadcrumb(database, context, message, "apiKey", 2L);
         }
 
-        assertEquals(BreadcrumbService.getBreadcrumbs(database, 1L).length(), expectedCount);
-        assertEquals(BreadcrumbService.getBreadcrumbs(database, 2L).length(), expectedCount - 1);
-        assertEquals(BreadcrumbService.getBreadcrumbs(database, 3L).length(), 0);
+        assertEquals(BreadcrumbService.getBreadcrumbs(database, context, 1L).length(), expectedCount);
+        assertEquals(BreadcrumbService.getBreadcrumbs(database, context, 2L).length(), expectedCount - 1);
+        assertEquals(BreadcrumbService.getBreadcrumbs(database, context, 3L).length(), 0);
     }
 
     /**
@@ -128,22 +133,22 @@ public class BreadcrumbServiceTest extends BaseMPServiceTest {
 
     @Test
     public void testBreadcrumbLimit() throws JSONException {
-        int breadCrumbLimit = ConfigManager.getBreadcrumbLimit();
+        clearDatabase();
         List<Integer> deleted = new ArrayList<Integer>();
 
         for (int i = 0; i < breadCrumbLimit + 10; i++) {
-            deleted.add(BreadcrumbService.insertBreadcrumb(database, message, "apiKey", 10L));
+            deleted.add(BreadcrumbService.insertBreadcrumb(database, context, message, "apiKey", 10L));
         }
 
         // make sure that 10 (number attempted to be inserted above the breadcrumb limit) entries have been deleted
         deleted.removeAll(Collections.singleton(new Integer(-1)));
         assertEquals(deleted.size(), 10);
 
-        assertEquals(BreadcrumbService.getBreadcrumbs(database, 10L).length(), breadCrumbLimit);
+        assertEquals(BreadcrumbService.getBreadcrumbs(database, context, 10L).length(), breadCrumbLimit);
 
         for (int i = 0; i < breadCrumbLimit + 10; i++) {
-            BreadcrumbService.insertBreadcrumb(database, message, "apiKey", 20L);
-            BreadcrumbService.insertBreadcrumb(database, message, "apiKey", 10L);
+            BreadcrumbService.insertBreadcrumb(database, context, message, "apiKey", 20L);
+            BreadcrumbService.insertBreadcrumb(database, context, message, "apiKey", 10L);
         }
 
         assertEquals(BreadcrumbService.getBreadcrumbCount(database, 10L), breadCrumbLimit);

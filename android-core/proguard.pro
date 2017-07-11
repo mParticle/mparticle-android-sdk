@@ -89,9 +89,14 @@
 -keep class com.mparticle.BuildConfig { *; }
 -keep class com.mparticle.MPReceiver { *; }
 -keep class com.mparticle.MPService { *; }
+-keep class com.mparticle.MParticleOptions { *;}
+-keep class com.mparticle.MParticleOptions$* { *; }
 -keep class com.mparticle.DeepLinkError { *; }
 -keep class com.mparticle.DeepLinkListener { *; }
 -keep class com.mparticle.DeepLinkResult { *; }
+-keep class com.mparticle.TaskSuccessListener { *; }
+-keep class com.mparticle.TaskFailureListener { *; }
+-keep, includedescriptorclasses class com.mparticle.MParticleTask { *; }
 -keep, includedescriptorclasses class com.mparticle.internal.AppStateManager { *; }
 -keep class com.mparticle.internal.ApplicationContextWrapper { *; }
 -keep class com.mparticle.internal.KitManager { *; }
@@ -108,6 +113,13 @@
 -keep class com.mparticle.UserAttributeListener { *; }
 -keep class com.mparticle.internal.MParticleJSInterface { *; }
 -keep class com.mparticle.internal.Logger { *; }
+-keep, includedescriptorclasses class com.mparticle.identity.IdentityApi { *; }
+-keep, includedescriptorclasses class com.mparticle.identity.IdentityApiRequest { *; }
+-keep, includedescriptorclasses class com.mparticle.identity.IdentityApiRequest$* { *; }
+-keep, includedescriptorclasses class com.mparticle.identity.IdentityApiResult { *; }
+-keep, includedescriptorclasses class com.mparticle.identity.MParticleUser { *; }
+-keep, includedescriptorclasses class com.mparticle.identity.IdentityStateListener { *; }
+-keep, includedescriptorclasses public class com.mparticle.identity.* { *; }
 
 -keep public class com.mparticle.activity.* {
     *;

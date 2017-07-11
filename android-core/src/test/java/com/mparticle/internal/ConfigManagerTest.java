@@ -249,13 +249,13 @@ public class ConfigManagerTest {
 
     @Test
     public void testGetBreadcrumbLimit() throws Exception {
-        assertEquals(UserConfig.DEFAULT_BREADCRUMB_LIMIT, manager.getBreadcrumbLimit());
+        assertEquals(UserConfig.DEFAULT_BREADCRUMB_LIMIT, manager.getBreadcrumbLimit(context));
     }
 
     @Test
     public void testSetBreadcrumbLimit() throws Exception {
         manager.setBreadcrumbLimit(4343);
-        assertEquals(4343, manager.getBreadcrumbLimit());
+        assertEquals(4343, manager.getBreadcrumbLimit(context));
     }
 
     @Test
@@ -305,7 +305,9 @@ public class ConfigManagerTest {
         assertTrue(mpid == 0);
         mpid = manager.getMpid();
         long storedMpid = prefs.getLong(Constants.PrefKeys.Mpid, 0);
-        assertTrue(mpid != 0);
+        //Changed this from != 0, since as of IdentityAPI changes, we do not want to generate MPIDs
+        //client side
+        assertTrue(mpid == 0);
         assertTrue(storedMpid == mpid);
     }
 
