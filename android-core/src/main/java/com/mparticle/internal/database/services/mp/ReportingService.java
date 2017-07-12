@@ -4,6 +4,7 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
+import com.mparticle.internal.Constants;
 import com.mparticle.internal.JsonReportingMessage;
 import com.mparticle.internal.database.tables.mp.ReportingTable;
 
@@ -25,15 +26,23 @@ public class ReportingService extends ReportingTable {
         db.insert(ReportingTableColumns.TABLE_NAME, null, values);
     }
 
-    public static List<ReportingMessage> getReportingMessagesForUpload(SQLiteDatabase database, long mpId) throws JSONException {
+    /**
+     * will return all ReportingMessages, except for those with MP_ID == Constants.TEMPORARY_MPID,
+     * useful in non-testing context;
+     */
+    public static List<ReportingMessage> getReportingMessagesForUpload(SQLiteDatabase database) throws JSONException {
+        return getReportingMessagesForUpload(database, false, Constants.TEMPORARY_MPID);
+    }
+
+    static List<ReportingMessage> getReportingMessagesForUpload(SQLiteDatabase database, boolean include, long mpid) throws JSONException {
         List<ReportingMessage> reportingMessages = new ArrayList<ReportingMessage>();
         Cursor reportingMessageCursor = null;
         try {
             reportingMessageCursor = database.query(
                     ReportingTableColumns.TABLE_NAME,
                     null,
-                    ReportingTableColumns.MP_ID + " = ?",
-                    new String[]{String.valueOf(mpId)},
+                    ReportingTableColumns.MP_ID + (include ? " = ?" : " != ?"),
+                    new String[]{String.valueOf(mpid)},
                     null,
                     null,
                     ReportingTableColumns._ID + " asc");
@@ -48,7 +57,8 @@ public class ReportingService extends ReportingTable {
                         reportingMessageCursor.getColumnIndex(ReportingTableColumns.SESSION_ID)
                 );
                 int reportingMessageId = reportingMessageCursor.getInt(reportingMessageIdIndex);
-                reportingMessages.add(new ReportingMessage(msgObject, sessionId, reportingMessageId));
+                long reportingMessageMpid = reportingMessageCursor.getLong(reportingMessageCursor.getColumnIndex(ReportingTableColumns.MP_ID));
+                reportingMessages.add(new ReportingMessage(msgObject, sessionId, reportingMessageId, reportingMessageMpid));
             }
         } finally {
             if (reportingMessageCursor != null && !reportingMessageCursor.isClosed()) {
@@ -68,14 +78,20 @@ public class ReportingService extends ReportingTable {
     }
 
     public static class ReportingMessage {
+        private long mpid;
         private JSONObject msgObject;
         private String sessionId;
         private int reportingMessageId;
 
-        private ReportingMessage(JSONObject msgObject, String sessionId, int reportingMessageId) {
+        private ReportingMessage(JSONObject msgObject, String sessionId, int reportingMessageId, long mpid) {
             this.msgObject = msgObject;
             this.sessionId = sessionId;
             this.reportingMessageId = reportingMessageId;
+            this.mpid = mpid;
+        }
+
+        public Long getMpid() {
+            return mpid;
         }
 
         public JSONObject getMsgObject() {
@@ -90,5 +106,4 @@ public class ReportingService extends ReportingTable {
             return reportingMessageId;
         }
     }
-
 }

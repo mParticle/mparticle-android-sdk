@@ -7,6 +7,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.mparticle.MParticle;
+import com.mparticle.internal.Constants;
 import com.mparticle.internal.JsonReportingMessage;
 
 import java.util.ArrayList;
@@ -32,7 +33,8 @@ public class ReportingServiceTest extends BaseMPServiceTest {
          for (JsonReportingMessage reportingMessage: reportingMessages) {
              ReportingService.insertReportingMessage(database, reportingMessage, 2L);
          }
-         assertEquals(ReportingService.getReportingMessagesForUpload(database, 2L).size(), 20);
+         assertEquals(ReportingService.getReportingMessagesForUpload(database, true, 2L).size(), 20);
+         assertEquals(ReportingService.getReportingMessagesForUpload(database).size(), 20);
      }
 
      @Test
@@ -40,15 +42,26 @@ public class ReportingServiceTest extends BaseMPServiceTest {
          for (JsonReportingMessage reportingMessage: getNReportingMessages(20, "123")) {
              ReportingService.insertReportingMessage(database, reportingMessage, 2L);
          }
-         assertEquals(ReportingService.getReportingMessagesForUpload(database, 2L).size(), 20);
-         assertEquals(ReportingService.getReportingMessagesForUpload(database, 3L).size(), 0);
-         assertEquals(ReportingService.getReportingMessagesForUpload(database, 4L).size(), 0);
+         assertEquals(ReportingService.getReportingMessagesForUpload(database, true, 2L).size(), 20);
+         assertEquals(ReportingService.getReportingMessagesForUpload(database, true, 3L).size(), 0);
+         assertEquals(ReportingService.getReportingMessagesForUpload(database, true, 4L).size(), 0);
+         assertEquals(ReportingService.getReportingMessagesForUpload(database).size(), 20);
          for (JsonReportingMessage reportingMessage: getNReportingMessages(30, "123")) {
              ReportingService.insertReportingMessage(database, reportingMessage, 3L);
          }
-         assertEquals(ReportingService.getReportingMessagesForUpload(database, 2L).size(), 20);
-         assertEquals(ReportingService.getReportingMessagesForUpload(database, 3L).size(), 30);
-         assertEquals(ReportingService.getReportingMessagesForUpload(database, 4L).size(), 0);
+         assertEquals(ReportingService.getReportingMessagesForUpload(database, true, 2L).size(), 20);
+         assertEquals(ReportingService.getReportingMessagesForUpload(database, true, 3L).size(), 30);
+         assertEquals(ReportingService.getReportingMessagesForUpload(database, false, 4L).size(), 50);
+         assertEquals(ReportingService.getReportingMessagesForUpload(database, true, 4L).size(), 0);
+         assertEquals(ReportingService.getReportingMessagesForUpload(database).size(), 50);
+         for (JsonReportingMessage reportingMessage: getNReportingMessages(30, "123")) {
+             ReportingService.insertReportingMessage(database, reportingMessage, Constants.TEMPORARY_MPID);
+         }
+         assertEquals(ReportingService.getReportingMessagesForUpload(database, true, 2L).size(), 20);
+         assertEquals(ReportingService.getReportingMessagesForUpload(database, true, 3L).size(), 30);
+         assertEquals(ReportingService.getReportingMessagesForUpload(database, true, Constants.TEMPORARY_MPID).size(), 30);
+         assertEquals(ReportingService.getReportingMessagesForUpload(database, false, 4L).size(), 80);
+         assertEquals(ReportingService.getReportingMessagesForUpload(database).size(), 50);
      }
 
      @Test
@@ -59,8 +72,8 @@ public class ReportingServiceTest extends BaseMPServiceTest {
          for (JsonReportingMessage reportingMessage: getNReportingMessages(10)) {
              ReportingService.insertReportingMessage(database, reportingMessage, 3L);
          }
-         List<ReportingService.ReportingMessage> messagesFor2 = ReportingService.getReportingMessagesForUpload(database, 2L);
-         List<ReportingService.ReportingMessage> messagesFor3 = ReportingService.getReportingMessagesForUpload(database, 3L);
+         List<ReportingService.ReportingMessage> messagesFor2 = ReportingService.getReportingMessagesForUpload(database, true, 2L);
+         List<ReportingService.ReportingMessage> messagesFor3 = ReportingService.getReportingMessagesForUpload(database, true, 3L);
          assertEquals(messagesFor2.size(), 20);
          assertEquals(messagesFor3.size(), 10);
 
@@ -68,8 +81,8 @@ public class ReportingServiceTest extends BaseMPServiceTest {
              ReportingService.deleteReportingMessage(database, messagesFor2.get(i).getReportingMessageId());
          }
 
-         messagesFor2 = ReportingService.getReportingMessagesForUpload(database, 2L);
-         messagesFor3 = ReportingService.getReportingMessagesForUpload(database, 3L);
+         messagesFor2 = ReportingService.getReportingMessagesForUpload(database, true, 2L);
+         messagesFor3 = ReportingService.getReportingMessagesForUpload(database, true, 3L);
          assertEquals(messagesFor2.size(), 15);
          assertEquals(messagesFor3.size(), 10);
 
@@ -77,8 +90,8 @@ public class ReportingServiceTest extends BaseMPServiceTest {
              ReportingService.deleteReportingMessage(database, messagesFor3.get(i).getReportingMessageId());
          }
 
-         messagesFor2 = ReportingService.getReportingMessagesForUpload(database, 2L);
-         messagesFor3 = ReportingService.getReportingMessagesForUpload(database, 3L);
+         messagesFor2 = ReportingService.getReportingMessagesForUpload(database, true, 2L);
+         messagesFor3 = ReportingService.getReportingMessagesForUpload(database, true, 3L);
          assertEquals(messagesFor2.size(), 15);
          assertEquals(messagesFor3.size(), 0);
      }
@@ -90,7 +103,7 @@ public class ReportingServiceTest extends BaseMPServiceTest {
          for (JsonReportingMessage reportingMessage: jsonReportingMessages) {
              ReportingService.insertReportingMessage(database, reportingMessage, 1L);
          }
-         List<ReportingService.ReportingMessage> reportingMessages = ReportingService.getReportingMessagesForUpload(database, 1L);
+         List<ReportingService.ReportingMessage> reportingMessages = ReportingService.getReportingMessagesForUpload(database, true, 1L);
          Collections.sort(reportingMessages, new Comparator<ReportingService.ReportingMessage>() {
              @Override
              public int compare(ReportingService.ReportingMessage o1, ReportingService.ReportingMessage o2) {

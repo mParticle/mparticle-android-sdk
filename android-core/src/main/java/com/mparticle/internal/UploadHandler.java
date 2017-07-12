@@ -131,36 +131,22 @@ public class UploadHandler extends Handler {
                 case UPLOAD_MESSAGES:
                 case UPLOAD_TRIGGER_MESSAGES:
                     long uploadInterval = mConfigManager.getUploadInterval();
-                    long mpid = (Long)msg.obj;
-                    // records which have a temporary MPID should not be operated upon. a temporary MPID
-                    // signifies that we are waiting for an Identity API call to return, which will
-                    // update the MPID
-                    if (mpid == Constants.TEMPORARY_MPID) {
-                        return;
-                    }
                     if (isNetworkConnected && !mApiClient.isThrottled()) {
                         if (uploadInterval > 0 || msg.arg1 == 1) {
-                            prepareMessageUploads(false, mpid);
+                            prepareMessageUploads(false);
                             boolean needsHistory = upload(false);
                             if (needsHistory) {
-                                this.sendMessage(obtainMessage(UPLOAD_HISTORY, mConfigManager.getMpid()));
+                                this.sendEmptyMessage(UPLOAD_HISTORY);
                             }
                         }
                     }
                     if (mAppStateManager.getSession().isActive() && uploadInterval > 0 && msg.arg1 == 0) {
-                        this.sendMessageDelayed(obtainMessage(UPLOAD_MESSAGES, mConfigManager.getMpid()), uploadInterval);
+                        this.sendEmptyMessageDelayed(UPLOAD_MESSAGES, uploadInterval);
                     }
                     break;
                 case UPLOAD_HISTORY:
-                    mpid = (Long)msg.obj;
-                    // records which have a temporary MPID should not be operated upon. a temporary MPID
-                    // signifies that we are waiting for an Identity API call to return, which will
-                    // update the MPID
-                    if (mpid == Constants.TEMPORARY_MPID) {
-                        return;
-                    }
-                    removeMessages(UPLOAD_HISTORY, mpid);
-                    prepareMessageUploads(true, mpid);
+                    removeMessages(UPLOAD_HISTORY);
+                    prepareMessageUploads(true);
                     if (isNetworkConnected) {
                         upload(true);
                     }
@@ -184,13 +170,7 @@ public class UploadHandler extends Handler {
      * - persist all of the resulting upload batch objects
      * - mark the messages as having been uploaded.
      */
-    private void prepareMessageUploads(boolean history, long mpId) throws Exception {
-        // records which have a temporary MPID should not be operated upon. a temporary MPID
-        // signifies that we are waiting for an Identity API call to return, which will
-        // update the MPID
-        if (mpId == Constants.TEMPORARY_MPID) {
-            return;
-        }
+    private void prepareMessageUploads(boolean history) throws Exception {
         String currentSessionId = mAppStateManager.getSession().mSessionID;
         long remainingHeap = MPUtility.getRemainingHeapInBytes();
         if (remainingHeap < Constants.LIMIT_MAX_UPLOAD_SIZE) {
@@ -198,16 +178,16 @@ public class UploadHandler extends Handler {
         }
         final boolean sessionHistoryEnabled = MParticle.getInstance().getConfigManager().getIncludeSessionHistory();
         try {
-            mParticleDBManager.cleanupMessages(mpId);
+            mParticleDBManager.cleanupMessages();
             if (history && !sessionHistoryEnabled) {
-                mParticleDBManager.deleteMessagesAndSessions(currentSessionId, mpId);
+                mParticleDBManager.deleteMessagesAndSessions(currentSessionId);
                 return;
             }
 
             if (history) {
-                mParticleDBManager.createSessionHistoryUploadMessage(mConfigManager, mMessageManager.getDeviceAttributes(), currentSessionId, mpId);
+                mParticleDBManager.createSessionHistoryUploadMessage(mConfigManager, mMessageManager.getDeviceAttributes(), currentSessionId);
             } else {
-                mParticleDBManager.createMessagesForUploadMessage(mConfigManager, mMessageManager.getDeviceAttributes(), currentSessionId, sessionHistoryEnabled, mpId);
+                mParticleDBManager.createMessagesForUploadMessage(mConfigManager, mMessageManager.getDeviceAttributes(), currentSessionId, sessionHistoryEnabled);
             }
         } catch (Exception e) {
             Logger.verbose("Error preparing batch upload in mParticle DB: " + e.getMessage());

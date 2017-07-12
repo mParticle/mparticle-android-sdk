@@ -16,25 +16,34 @@ import java.util.List;
 
 public class MessageService extends MessageTable {
 
-    private final static String[] prepareSelection = new String[]{"_id", MessageTableColumns.MESSAGE, MessageTableColumns.CREATED_AT, MessageTableColumns.STATUS, MessageTableColumns.SESSION_ID};
+    private final static String[] prepareSelection = new String[]{"_id", MessageTableColumns.MESSAGE, MessageTableColumns.CREATED_AT, MessageTableColumns.STATUS, MessageTableColumns.SESSION_ID, MessageTableColumns.MP_ID};
     private final static String prepareOrderBy =  MessageTableColumns._ID + " asc";
 
-    private static String sessionHistorySelection = String.format(
-            "(%s = %d) and (%s != ?) and (%s = ?)",
-            MessageTableColumns.STATUS,
-            Constants.Status.UPLOADED,
-            MessageTableColumns.SESSION_ID,
-            MessageTableColumns.MP_ID);
+    private static String getSessionHistorySelection(boolean includesMpid) {
+        return String.format(
+                "(%s = %d) and (%s != ?) and (%s " + (includesMpid ? " = ?" : "!= ?") + ")",
+                MessageTableColumns.STATUS,
+                Constants.Status.UPLOADED,
+                MessageTableColumns.SESSION_ID,
+                MessageTableColumns.MP_ID);
+    }
 
-    public static List<ReadyMessage> getSessionHistory(SQLiteDatabase database, String currentSessionId, long mpId){
-        String[] selectionArgs = new String[]{currentSessionId, String.valueOf(mpId)};
+    public MessageService() {
+    }
+
+    public static List<ReadyMessage> getSessionHistory(SQLiteDatabase database, String currentSessionId) {
+        return getSessionHistory(database, currentSessionId, false, Constants.TEMPORARY_MPID);
+    }
+
+    static List<ReadyMessage> getSessionHistory(SQLiteDatabase database, String currentSessionId, boolean includes, long mpid){
+        String[] selectionArgs = new String[]{currentSessionId, String.valueOf(mpid)};
         Cursor readyMessagesCursor = null;
         List<ReadyMessage> readyMessages = new ArrayList<ReadyMessage>();
         try {
             readyMessagesCursor = database.query(
                     MessageTableColumns.TABLE_NAME,
                     prepareSelection,
-                    sessionHistorySelection,
+                    getSessionHistorySelection(includes),
                     selectionArgs,
                     null,
                     null,
@@ -42,11 +51,12 @@ public class MessageService extends MessageTable {
             int messageIdIndex = readyMessagesCursor.getColumnIndex(MessageTableColumns._ID);
             int messageIndex = readyMessagesCursor.getColumnIndex(MessageTableColumns.MESSAGE);
             int sessionIdIndex = readyMessagesCursor.getColumnIndex(MessageTableColumns.SESSION_ID);
+            long messageMpid = readyMessagesCursor.getColumnIndex(MessageTableColumns.MP_ID);
             while (readyMessagesCursor.moveToNext()) {
                 String sessionId = readyMessagesCursor.getString(sessionIdIndex);
                 int messageId = readyMessagesCursor.getInt(messageIdIndex);
                 String message = readyMessagesCursor.getString(messageIndex);
-                readyMessages.add(new ReadyMessage(sessionId, messageId, message));
+                readyMessages.add(new ReadyMessage(messageMpid, sessionId, messageId, message));
             }
         }
         finally {
@@ -57,34 +67,43 @@ public class MessageService extends MessageTable {
         return readyMessages;
     }
 
-    public static int deleteOldMessages(SQLiteDatabase database, String currentSessionId, long mpId){
-        String[] selectionArgs = new String[]{currentSessionId, String.valueOf(mpId)};
+    public static int deleteOldMessages(SQLiteDatabase database, String currentSessionId){
+        String[] selectionArgs = new String[]{currentSessionId, String.valueOf(Constants.TEMPORARY_MPID)};
         return database.delete(
                 MessageTableColumns.TABLE_NAME,
-                sessionHistorySelection,
+                getSessionHistorySelection(false),
                 selectionArgs);
     }
 
-    public static List<ReadyMessage> getMessagesForUpload(SQLiteDatabase database, long mpId){
+    /**
+     * will return all Messages for upload, except for those with MP_ID == Constants.TEMPORARY_MPID,
+     * useful in non-testing context;
+     */
+    public static List<ReadyMessage> getMessagesForUpload(SQLiteDatabase database) {
+        return getMessagesForUpload(database, false, Constants.TEMPORARY_MPID);
+    }
+
+    static List<ReadyMessage> getMessagesForUpload(SQLiteDatabase database, boolean includes, long mpid){
         Cursor readyMessagesCursor = null;
         List<ReadyMessage> readyMessages = new ArrayList<ReadyMessage>();
         try {
             readyMessagesCursor = database.query(
                     MessageTableColumns.TABLE_NAME,
                     null,
-                    MessageTableColumns.STATUS + " != ? and " + MessageTableColumns.CREATED_AT + " < " + System.currentTimeMillis() + " and " + MessageTableColumns.MP_ID + " = ?",
-                    new String[]{Integer.toString(Constants.Status.UPLOADED), String.valueOf(mpId)},
+                    MessageTableColumns.STATUS + " != ? and " + MessageTableColumns.CREATED_AT + " < " + System.currentTimeMillis() + " and " + MessageTableColumns.MP_ID + (includes ? " = ?" : " != ?"),
+                    new String[]{Integer.toString(Constants.Status.UPLOADED), String.valueOf(mpid)},
                     null,
                     null,
                     prepareOrderBy, "100");
             int messageIdIndex = readyMessagesCursor.getColumnIndex(MessageTableColumns._ID);
             int messageIndex = readyMessagesCursor.getColumnIndex(MessageTableColumns.MESSAGE);
             int sessionIdIndex = readyMessagesCursor.getColumnIndex(MessageTableColumns.SESSION_ID);
+            int messageMpid = readyMessagesCursor.getColumnIndex(MessageTableColumns.MP_ID);
             while (readyMessagesCursor.moveToNext()) {
                 String sessionId = readyMessagesCursor.getString(sessionIdIndex);
                 int messageId = readyMessagesCursor.getInt(messageIdIndex);
                 String message = readyMessagesCursor.getString(messageIndex);
-                readyMessages.add(new ReadyMessage(sessionId, messageId, message));
+                readyMessages.add(new ReadyMessage(messageMpid, sessionId, messageId, message));
             }
         }
         finally {
@@ -95,8 +114,8 @@ public class MessageService extends MessageTable {
         return readyMessages;
     }
 
-    public static int cleanupMessages(SQLiteDatabase database, long mpId) {
-        return database.delete(MessageTableColumns.TABLE_NAME, "length(" + MessageTableColumns.MESSAGE + ") > " + Constants.LIMIT_MAX_MESSAGE_SIZE + " and " + MessageTableColumns.MP_ID + " = ?", new String[]{String.valueOf(mpId)});
+    public static int cleanupMessages(SQLiteDatabase database) {
+        return database.delete(MessageTableColumns.TABLE_NAME, "length(" + MessageTableColumns.MESSAGE + ") > " + Constants.LIMIT_MAX_MESSAGE_SIZE, null);
     }
 
 
@@ -113,19 +132,19 @@ public class MessageService extends MessageTable {
                 MessageTableColumns.SESSION_ID);
     }
 
-    public static int markMessagesAsUploaded(SQLiteDatabase database, int messageId, long mpId) {
-        String[] whereArgs = new String[]{Integer.toString(messageId), String.valueOf(mpId)};
+    public static int markMessagesAsUploaded(SQLiteDatabase database, int messageId) {
+        String[] whereArgs = new String[]{Integer.toString(messageId), String.valueOf(Constants.TEMPORARY_MPID)};
         ContentValues contentValues = new ContentValues();
         contentValues.put(MessageTableColumns.STATUS, Constants.Status.UPLOADED);
-        return database.update(MessageTableColumns.TABLE_NAME, contentValues, MessageTableColumns._ID + " <= ? and " + MessageTableColumns.MP_ID + " = ? ", whereArgs);
+        return database.update(MessageTableColumns.TABLE_NAME, contentValues, MessageTableColumns._ID + " <= ? and " + MessageTableColumns.MP_ID + " != ? ", whereArgs);
     }
 
     /**
      * Delete a message that has been uploaded in session history
      */
-    public static int deleteMessages(SQLiteDatabase database, int messageId, long mpId) {
-        String[] whereArgs = new String[]{Integer.toString(messageId), String.valueOf(mpId)};
-        return database.delete(MessageTableColumns.TABLE_NAME, MessageTableColumns._ID + " <= ? and " + MessageTableColumns.MP_ID + " = ?", whereArgs);
+    public static int deleteMessages(SQLiteDatabase database, int messageId) {
+        String[] whereArgs = new String[]{Integer.toString(messageId), String.valueOf(Constants.TEMPORARY_MPID)};
+        return database.delete(MessageTableColumns.TABLE_NAME, MessageTableColumns._ID + " <= ? and " + MessageTableColumns.MP_ID + " != ?", whereArgs);
     }
 
     public static void insertMessage(SQLiteDatabase db, String apiKey, MPMessage message, long mpId) throws JSONException {
@@ -156,14 +175,20 @@ public class MessageService extends MessageTable {
     }
 
     public static class ReadyMessage {
+        private long mpid;
         private String sessionId;
         private int messageId;
         private String message;
 
-        private ReadyMessage(String sessionId, int messageId, String message) {
+        private ReadyMessage(long mpid, String sessionId, int messageId, String message) {
+            this.mpid = mpid;
             this.sessionId = sessionId;
             this.messageId = messageId;
             this.message = message;
+        }
+
+        public long getMpid() {
+            return mpid;
         }
 
         public String getSessionId() {

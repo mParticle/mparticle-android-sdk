@@ -780,7 +780,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
 
     @Override
     public void endUploadLoop() {
-        mUploadHandler.removeMessages(UploadHandler.UPLOAD_MESSAGES, mConfigManager.getMpid());
+        mUploadHandler.removeMessages(UploadHandler.UPLOAD_MESSAGES);
         MParticle.getInstance().upload();
     }
 

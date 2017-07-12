@@ -9,17 +9,18 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.UUID;
 
 public class MessageBatch extends JSONObject {
-
     private long messageLengthBytes;
 
     private MessageBatch() {
         super();
     }
 
-    public static MessageBatch create(boolean history, ConfigManager configManager, SharedPreferences preferences, JSONObject cookies, long mpId) throws JSONException {
+    public static MessageBatch create(boolean history, ConfigManager configManager, JSONObject cookies, long mpId) throws JSONException {
         MessageBatch uploadMessage = new MessageBatch();
         if (BuildConfig.MP_DEBUG) {
             uploadMessage.put(Constants.MessageKey.ECHO, true);
@@ -31,11 +32,10 @@ public class MessageBatch extends JSONObject {
         uploadMessage.put(Constants.MessageKey.OPT_OUT_HEADER, configManager.getOptedOut());
         uploadMessage.put(Constants.MessageKey.CONFIG_UPLOAD_INTERVAL, configManager.getUploadInterval()/1000);
         uploadMessage.put(Constants.MessageKey.CONFIG_SESSION_TIMEOUT, configManager.getSessionTimeout()/1000);
-        uploadMessage.put(Constants.MessageKey.MPID, configManager.getMpid());
+        uploadMessage.put(Constants.MessageKey.MPID, mpId);
         uploadMessage.put(Constants.MessageKey.SANDBOX, configManager.getEnvironment().equals(MParticle.Environment.Development));
 
         uploadMessage.put(Constants.MessageKey.LTV, MParticle.getInstance().Commerce().getCurrentUserLtv());
-        String apiKey = configManager.getApiKey();
 
         if (history) {
             String deletedAttr = configManager.getUserConfig(mpId).getDeletedUserAttributes();
@@ -52,7 +52,6 @@ public class MessageBatch extends JSONObject {
         uploadMessage.put(Constants.MessageKey.COOKIES, cookies);
         uploadMessage.put(Constants.MessageKey.PROVIDER_PERSISTENCE, configManager.getProviderPersistence());
         uploadMessage.put(Constants.MessageKey.INTEGRATION_ATTRIBUTES, configManager.getIntegrationAttributes());
-
         return uploadMessage;
     }
 

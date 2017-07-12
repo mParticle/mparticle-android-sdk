@@ -15,17 +15,24 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class SessionService extends SessionTable {
     public static String[] readyMessages = new String[]{Integer.toString(Constants.Status.UPLOADED)};
 
-    public static int deleteSessions(SQLiteDatabase database, String currentSessionId, long mpId){
-        String[] selectionArgs = new String[]{currentSessionId, String.valueOf(mpId)};
-        return database.delete(SessionTableColumns.TABLE_NAME, SessionTableColumns.SESSION_ID + "!=? and " + SessionTableColumns.MP_ID + " = ?", selectionArgs);
+    public static int deleteSessions(SQLiteDatabase database, String currentSessionId){
+        String[] selectionArgs = new String[]{currentSessionId, String.valueOf(Constants.TEMPORARY_MPID)};
+        return database.delete(SessionTableColumns.TABLE_NAME, SessionTableColumns.SESSION_ID + "!=? and " + SessionTableColumns.MP_ID + " != ?", selectionArgs);
     }
 
-    public static Cursor getSessions(SQLiteDatabase db, long mpId) {
-        return db.query(SessionTableColumns.TABLE_NAME, null, SessionTableColumns.MP_ID + " = ?", new String[]{String.valueOf(mpId)}, null, null, null);
+    public static Cursor getSessions(SQLiteDatabase db) {
+        return db.query(SessionTableColumns.TABLE_NAME,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null);
     }
 
     public static void updateSessionEndTime(SQLiteDatabase db, String sessionId, long endTime, long sessionLength) {
@@ -91,26 +98,29 @@ public class SessionService extends SessionTable {
         db.insert(SessionTableColumns.TABLE_NAME, null, contentValues);
     }
 
-    public static List<JSONObject> processSessions(SQLiteDatabase database, HashMap<String, MessageBatch> uploadMessagesBySession, long mpId) {
+    public static List<JSONObject> processSessions(SQLiteDatabase database, HashMap<String, Map<Long, MessageBatch>> uploadMessagesBySession) {
         Cursor sessionCursor = null;
         List<JSONObject> deviceInfos = new ArrayList<JSONObject>();
         try {
-            sessionCursor = SessionService.getSessions(database, mpId);
+            sessionCursor = SessionService.getSessions(database);
             while (sessionCursor.moveToNext()) {
                 String sessionId = sessionCursor.getString(sessionCursor.getColumnIndex(SessionTableColumns.SESSION_ID));
-                MessageBatch batch = uploadMessagesBySession.get(sessionId);
-                if (batch != null) {
+                Map<Long, MessageBatch> batchMap = uploadMessagesBySession.get(sessionId);
+                if (batchMap != null) {
                     try {
                         String appInfo = sessionCursor.getString(sessionCursor.getColumnIndex(SessionTableColumns.APP_INFO));
                         JSONObject appInfoJson = new JSONObject(appInfo);
-                        batch.setAppInfo(appInfoJson);
                         String deviceInfo = sessionCursor.getString(sessionCursor.getColumnIndex(SessionTableColumns.DEVICE_INFO));
                         JSONObject deviceInfoJson = new JSONObject(deviceInfo);
                         deviceInfos.add(deviceInfoJson);
-                        batch.setDeviceInfo(deviceInfoJson);
+                        for (MessageBatch batch: batchMap.values()) {
+                            batch.setAppInfo(appInfoJson);
+                            batch.setDeviceInfo(deviceInfoJson);
+                        }
                     } catch (Exception e) {
 
                     }
+
                 }
             }
         }
