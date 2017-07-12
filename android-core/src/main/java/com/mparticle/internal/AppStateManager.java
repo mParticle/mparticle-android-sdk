@@ -15,6 +15,7 @@ import android.os.SystemClock;
 
 import com.mparticle.MPEvent;
 import com.mparticle.MParticle;
+import com.mparticle.identity.IdentityApi;
 
 import org.json.JSONObject;
 
@@ -83,6 +84,14 @@ import java.util.concurrent.atomic.AtomicLong;
         mContext = context.getApplicationContext();
         mLastStoppedTime = new AtomicLong(getTime());
         mPreferences = context.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
+        ConfigManager.addMpIdChangeListener(new IdentityApi.MpIdChangeListener() {
+            @Override
+            public void onMpIdChanged(long mpid) {
+                if (mCurrentSession != null) {
+                    mCurrentSession.addMpid(mpid);
+                }
+            }
+        });
     }
 
     public AppStateManager(Context context) {
@@ -365,7 +374,7 @@ import java.util.concurrent.atomic.AtomicLong;
     }
 
     public void startSession() {
-        mCurrentSession = new Session().start();
+        mCurrentSession = new Session().start(mContext);
         enableLocationTracking();
         MParticle.getInstance().getKitManager().onSessionStart();
     }

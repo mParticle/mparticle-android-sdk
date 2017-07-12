@@ -16,6 +16,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.lang.ref.WeakReference;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -502,8 +503,8 @@ public class ConfigManager {
     }
 
     private void setMpid(long mpid, boolean silently) {
-        if (!silently && getMpid() != mpid && mpIdChangeListener != null) {
-            mpIdChangeListener.onMpIdChanged(mpid);
+        if (!silently && getMpid() != mpid && mpIdChangeListeners != null) {
+            triggerMpidChangeListenerCallbacks(mpid);
         }
         sPreferences.edit().putLong(Constants.PrefKeys.Mpid, mpid).apply();
         if (sUserConfig == null || sUserConfig.getMpid() != mpid) {
@@ -534,12 +535,6 @@ public class ConfigManager {
         UserConfig subjectUserConfig = getUserConfig(subjectMpId);
         UserConfig targetUserConfig = getUserConfig(targetMpId);
         targetUserConfig.merge(subjectUserConfig);
-    }
-
-    private static IdentityApi.MpIdChangeListener mpIdChangeListener;
-
-    public static void setMpIdChangeListener(IdentityApi.MpIdChangeListener listener) {
-        mpIdChangeListener = listener;
     }
 
     public int getAudienceTimeout() {
@@ -845,5 +840,20 @@ public class ConfigManager {
 
     public void setPushToken(String token) {
         sPreferences.edit().putString(Constants.PrefKeys.PUSH_TOKEN, token).apply();
+    }
+
+    private static Set<WeakReference<IdentityApi.MpIdChangeListener>> mpIdChangeListeners = new HashSet<WeakReference<IdentityApi.MpIdChangeListener>>();
+
+    public static void addMpIdChangeListener(IdentityApi.MpIdChangeListener listener) {
+        mpIdChangeListeners.add(new ComparableWeakReference(listener));
+    }
+
+    private void triggerMpidChangeListenerCallbacks(long mpid) {
+        mpIdChangeListeners.removeAll(Collections.singleton(new ComparableWeakReference<IdentityApi.MpIdChangeListener>(null)));
+        for (WeakReference<IdentityApi.MpIdChangeListener> listenerRef: mpIdChangeListeners) {
+            if (listenerRef.get() != null) {
+                listenerRef.get().onMpIdChanged(mpid);
+            }
+        }
     }
 }

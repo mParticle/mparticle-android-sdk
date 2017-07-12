@@ -11,6 +11,7 @@ import com.mparticle.MParticleTask;
 import com.mparticle.TaskSuccessListener;
 import com.mparticle.internal.AccessUtils;
 import com.mparticle.utils.AndroidUtils;
+import com.mparticle.utils.TestingUtils;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -151,7 +152,7 @@ public class MockIdentityApiTest {
             }
         });
 
-        checkAllBool(checked, 1, 10);
+        TestingUtils.checkAllBool(checked, 1, 10);
 
 
     }
@@ -241,7 +242,7 @@ public class MockIdentityApiTest {
             }
         });
 
-        checkAllBool(called, 1, 10);
+        TestingUtils.checkAllBool(called, 1, 10);
     }
 
     @Test
@@ -346,7 +347,7 @@ public class MockIdentityApiTest {
 
         lock.await(delayBetweenCalls, TimeUnit.SECONDS);
 
-        checkAllBool(called, 1, 10);
+        TestingUtils.checkAllBool(called, 1, 10);
     }
 
     @Test
@@ -451,7 +452,7 @@ public class MockIdentityApiTest {
         request = IdentityApiRequest.withUser(MParticleUser.getInstance(mpid3, MParticle.getInstance().Identity().mUserDelegate)).build();
         MParticle.getInstance().Identity().identify(request);
 
-        checkAllBool(called, 1, 10);
+        TestingUtils.checkAllBool(called, 1, 10);
     }
 
 
@@ -467,32 +468,6 @@ public class MockIdentityApiTest {
 
     private void setIdentityApiClient(MParticleIdentityClient client) {
         MParticle.getInstance().Identity().setApiClient(client);
-    }
-
-    private void checkAllBool(boolean[] array, int everySeconds, int forSeconds) {
-        for (int i = 0; i < forSeconds; i++) {
-            if (i % everySeconds == 0) {
-                boolean allTrue = true;
-                for (Boolean bool: array) {
-                    if (!bool) {
-                        allTrue = false;
-                    }
-                }
-                if (allTrue) {
-                    return;
-                }
-            }
-            try {
-                lock.await(1, TimeUnit.SECONDS);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-        for (int i = 0; i < array.length; i++) {
-            if (!array[i]) {
-                fail("failed to satify condition index: " + i);
-            }
-        }
     }
 
     class IdentityApiClient implements MParticleIdentityClient {

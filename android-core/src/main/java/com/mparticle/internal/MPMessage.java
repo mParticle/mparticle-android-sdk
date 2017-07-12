@@ -15,6 +15,7 @@ import org.json.JSONObject;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class MPMessage extends JSONObject{
     private long mpId;
@@ -22,7 +23,7 @@ public class MPMessage extends JSONObject{
     private MPMessage(){}
 
     private MPMessage(Builder builder) throws JSONException{
-        mpId = builder.mMPId;
+        mpId = builder.mpid;
         put(Constants.MessageKey.TYPE, builder.mMessageType);
         put(Constants.MessageKey.TIMESTAMP, builder.mTimestamp);
         if (Constants.MessageType.SESSION_START == builder.mMessageType) {
@@ -270,13 +271,13 @@ public class MPMessage extends JSONObject{
         private String mDataConnection;
         private Double mLength = null;
         private Map<String, List<String>> mCustomFlags;
-        private long mMPId;
+        private long mpid;
 
         public Builder(String messageType, Session session, Location location, long mpId){
             mMessageType = messageType;
             mSession = new Session(session);
             mLocation = location;
-            mMPId = mpId;
+            mpid = mpId;
         }
 
         public Builder(CommerceEvent event, Session session, Location location, long mpId) {

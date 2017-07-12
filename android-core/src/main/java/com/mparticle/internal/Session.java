@@ -1,8 +1,12 @@
 package com.mparticle.internal;
 
+import android.content.Context;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -13,7 +17,7 @@ public class Session {
     public long mLastEventTime = 0;
     private long mTimeInBackground = 0;
     public JSONObject mSessionAttributes = new JSONObject();
-
+    private Set<Long> mpids = new TreeSet<Long>();
 
     public Session() {
         super();
@@ -38,12 +42,13 @@ public class Session {
         return mSessionStartTime > 0 && !Constants.NO_SESSION_ID.equals(mSessionID);
     }
 
-    public Session start() {
+    public Session start(Context context) {
         mLastEventTime = mSessionStartTime = System.currentTimeMillis();
         mSessionID = UUID.randomUUID().toString();
         mSessionAttributes = new JSONObject();
         mEventCount = 0;
         mTimeInBackground = 0;
+        addMpid(ConfigManager.getMpid(context));
         return this;
     }
 
@@ -80,5 +85,15 @@ public class Session {
     public void updateBackgroundTime(AtomicLong lastStoppedTime, long currentTime) {
         long time = lastStoppedTime.get();
         mTimeInBackground += (currentTime - time);
+    }
+
+    public void addMpid(long newMpid) {
+        if (newMpid != Constants.TEMPORARY_MPID) {
+            mpids.add(newMpid);
+        }
+    }
+
+    public Set<Long> getMpids() {
+        return mpids;
     }
 }

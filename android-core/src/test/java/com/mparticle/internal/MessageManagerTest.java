@@ -119,7 +119,7 @@ public class MessageManagerTest {
 
     @Test
     public void testCreateFirstRunMessage() throws Exception {
-        appStateManager.getSession().start();
+        appStateManager.getSession().start(context);
         MPMessage firstRun = manager.createFirstRunMessage();
         assertEquals(Constants.MessageType.FIRST_RUN, firstRun.getMessageType());
         assertEquals(firstRun.getSessionId(), appStateManager.getSession().mSessionID);
@@ -163,7 +163,7 @@ public class MessageManagerTest {
     @Test
     public void testUpdateSessionEnd() throws Exception {
         manager.updateSessionEnd(null);
-        Session session = new Session().start();
+        Session session = new Session().start(context);
         long currentTime = System.currentTimeMillis();
         session.mSessionStartTime = currentTime - 10000;
         AtomicLong stoppedTime = new AtomicLong(currentTime - 5000);
@@ -177,14 +177,14 @@ public class MessageManagerTest {
 
     @Test
     public void testEndSession() throws Exception {
-        Session session = appStateManager.getSession().start();
+        Session session = appStateManager.getSession().start(context);
         assertNotEquals(Constants.NO_SESSION_ID, session.mSessionID);
         manager.endSession(session);
     }
 
     @Test
     public void testLogEvent() throws Exception {
-        appStateManager.getSession().start();
+        appStateManager.getSession().start(context);
         manager.logEvent(null, "test screen name");
         manager.logEvent(null, null);
         Map<String, String> info = new HashMap<String, String>(1);
@@ -223,7 +223,7 @@ public class MessageManagerTest {
     public void testLogScreen() throws Exception {
         manager.logScreen(new MPEvent.Builder("screen name").build(), true);
         manager.logScreen(null, true);
-        appStateManager.getSession().start();
+        appStateManager.getSession().start(context);
         Map<String, String> info = new HashMap<String, String>();
         info.put("test key", "test value");
         MPMessage message = manager.logScreen(new MPEvent.Builder("screen name").addCustomFlag("flag 1", "value 1")
@@ -253,7 +253,7 @@ public class MessageManagerTest {
 
     @Test
     public void testLogBreadcrumb() throws Exception {
-        appStateManager.getSession().start();
+        appStateManager.getSession().start(context);
         manager.logBreadcrumb(null);
         MPMessage message = manager.logBreadcrumb("test crumb");
         assertNotNull(message);
@@ -268,7 +268,7 @@ public class MessageManagerTest {
 
     @Test
     public void testOptOut() throws Exception {
-        appStateManager.getSession().start();
+        appStateManager.getSession().start(context);
         long optOutTime = System.currentTimeMillis();
         MPMessage message = manager.optOut(optOutTime, true);
         assertNotNull(message);
@@ -282,7 +282,7 @@ public class MessageManagerTest {
 
     @Test
     public void testLogErrorEvent() throws Exception {
-        appStateManager.getSession().start();
+        appStateManager.getSession().start(context);
         String errorMessage = "message";
         Throwable t = new Throwable("test");
         JSONObject attrs = new JSONObject();
@@ -334,7 +334,7 @@ public class MessageManagerTest {
 
     @Test
     public void testLogNetworkPerformanceEvent() throws Exception {
-        appStateManager.getSession().start();
+        appStateManager.getSession().start(context);
         MPMessage message = manager.logNetworkPerformanceEvent(0, null, null, 0, 0, 0, null);
         assertNull(message);
         message = manager.logNetworkPerformanceEvent(1, "GET", "someurl", 12, 123, 1234, "request string");
@@ -352,7 +352,7 @@ public class MessageManagerTest {
 
     @Test
     public void testSetPushRegistrationId() throws Exception {
-        appStateManager.getSession().start();
+        appStateManager.getSession().start(context);
         MPMessage message = manager.setPushRegistrationId(null, true);
         assertNull(message);
         message = manager.setPushRegistrationId("", true);
@@ -396,7 +396,7 @@ public class MessageManagerTest {
 
     @Test
     public void testLogStateTransition() throws Exception {
-        appStateManager.getSession().start();
+        appStateManager.getSession().start(context);
         manager.mInstallType = MParticle.InstallType.KnownInstall;
         MPMessage message = manager.logStateTransition(null, null, null, null, null, 0, 0, 0);
         assertNull(message);

@@ -8,6 +8,7 @@ import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Looper;
 
+import com.mparticle.MParticle;
 import com.mparticle.UserAttributeListener;
 import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.Constants;
@@ -43,6 +44,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.UUID;
 
@@ -167,6 +169,19 @@ public class MParticleDBManager extends BaseDBManager {
 
     public void insertMessage(String apiKey, MPMessage message) throws JSONException {
         MessageService.insertMessage(getMParticleDatabase(), apiKey, message, message.getMpId());
+        if (sMessageListener != null) {
+            sMessageListener.onMessageStored(message);
+        }
+    }
+
+    private static MessageListener sMessageListener;
+
+    static void setMessageListener(MessageListener messageListener){
+        sMessageListener = messageListener;
+    }
+
+    public interface MessageListener {
+        void onMessageStored(MPMessage message);
     }
 
     /**
@@ -433,7 +448,7 @@ public class MParticleDBManager extends BaseDBManager {
         SessionService.updateSessionAttributes(getMParticleDatabase(), sessionId, attributes);
     }
 
-    public MPMessage getSessionForSessionEndMessage(String sessionId, Location location, long mpId) throws JSONException {
+    public MPMessage getSessionForSessionEndMessage(String sessionId, Location location, Set<Long> mpIds) throws JSONException {
         Cursor selectCursor = null;
         try {
             selectCursor = SessionService.getSessionForSessionEndMessage(getMParticleDatabase(), sessionId);
@@ -450,7 +465,7 @@ public class MParticleDBManager extends BaseDBManager {
 
                 // create a session-end message
                 endMessage = createMessageSessionEnd(sessionId, start, end, foregroundLength,
-                        sessionAttributes, location, mpId);
+                        sessionAttributes, location, mpIds);
                 endMessage.put(Constants.MessageKey.ID, UUID.randomUUID().toString());
             }
             return endMessage;
@@ -462,13 +477,22 @@ public class MParticleDBManager extends BaseDBManager {
         }
     }
 
-    private MPMessage createMessageSessionEnd(String sessionId, long start, long end, long foregroundLength, JSONObject sessionAttributes, Location location, long mpId) throws JSONException{
+    MPMessage createMessageSessionEnd(String sessionId, long start, long end, long foregroundLength, JSONObject sessionAttributes, Location location, Set<Long> mpIds) throws JSONException{
         int eventCounter = mPreferences.getInt(Constants.PrefKeys.EVENT_COUNTER, 0);
         resetEventCounter();
         Session session = new Session();
         session.mSessionID = sessionId;
         session.mSessionStartTime = start;
-        MPMessage message = new MPMessage.Builder(Constants.MessageType.SESSION_END, session, location, mpId)
+        JSONArray spanningMpids = new JSONArray();
+        long storageMpid = Constants.TEMPORARY_MPID;
+        for (Long mpid: mpIds) {
+            //we do not need to associate a SessionEnd message with any particular MPID, as long as it is not == Constants.TEMPORARY_MPID
+            if (mpid != Constants.TEMPORARY_MPID) {
+                storageMpid = mpid;
+            }
+            spanningMpids.put(mpid);
+        }
+        MPMessage message = new MPMessage.Builder(Constants.MessageType.SESSION_END, session, location, storageMpid)
                 .timestamp(end)
                 .attributes(sessionAttributes)
                 .build();
@@ -476,6 +500,7 @@ public class MParticleDBManager extends BaseDBManager {
         message.put(Constants.MessageKey.SESSION_LENGTH, foregroundLength);
         message.put(Constants.MessageKey.SESSION_LENGTH_TOTAL, (end - start));
         message.put(Constants.MessageKey.STATE_INFO_KEY, MessageManager.getStateInfo());
+        message.put(Constants.MessageKey.SESSION_SPANNING_MPIDS, spanningMpids);
         return message;
     }
 

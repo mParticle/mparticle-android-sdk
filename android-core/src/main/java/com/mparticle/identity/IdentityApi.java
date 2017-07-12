@@ -11,6 +11,7 @@ import com.mparticle.MParticle;
 import com.mparticle.MParticleTask;
 
 import com.mparticle.internal.AppStateManager;
+import com.mparticle.internal.ComparableWeakReference;
 import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.Constants;
 import com.mparticle.internal.DatabaseTables;
@@ -50,7 +51,7 @@ public final class IdentityApi {
         this.mUserDelegate = new MParticleUserDelegate(appStateManager, configManager, messageManager, kitManager, new MParticleDBManager(context, DatabaseTables.getInstance(context)));
         this.mConfigManager = configManager;
         this.mMessageManager = messageManager;
-        configManager.setMpIdChangeListener(new IdentityStateListenerManager());
+        configManager.addMpIdChangeListener(new IdentityStateListenerManager());
         this.mMParticleApiClient = new MParticleIdentityClientImpl(configManager, context);
     }
 
@@ -61,7 +62,7 @@ public final class IdentityApi {
         this.mUserDelegate = new MParticleUserDelegate(appStateManager, configManager, messageManager, kitManager, new MParticleDBManager(context, DatabaseTables.getInstance(context)));
         this.mConfigManager = configManager;
         this.mMessageManager = messageManager;
-        configManager.setMpIdChangeListener(new IdentityStateListenerManager());
+        configManager.addMpIdChangeListener(new IdentityStateListenerManager());
         this.mMParticleApiClient = new MParticleIdentityClientImpl(configManager, context);
     }
 

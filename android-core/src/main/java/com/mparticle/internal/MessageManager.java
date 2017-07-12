@@ -42,6 +42,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * This class is primarily responsible for generating MPMessage objects, and then adding them to a
@@ -291,7 +292,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
 
     public void endSession(Session session) {
         updateSessionEnd(session);
-        Map.Entry<String, Long> entry = new HashMap.SimpleEntry<String, Long>(session.mSessionID, mConfigManager.getMpid());
+        Map.Entry<String, Set<Long>> entry = new HashMap.SimpleEntry<String, Set<Long>>(session.mSessionID, session.getMpids());
         mMessageHandler
                 .sendMessage(mMessageHandler.obtainMessage(MessageHandler.CREATE_SESSION_END_MESSAGE, 1, 1, entry));
     }

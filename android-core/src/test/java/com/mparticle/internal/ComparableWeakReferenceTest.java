@@ -1,4 +1,6 @@
-package com.mparticle.identity;
+package com.mparticle.internal;
+
+import com.mparticle.internal.ComparableWeakReference;
 
 import org.junit.Test;
 

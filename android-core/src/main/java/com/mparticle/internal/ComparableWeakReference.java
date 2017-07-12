@@ -1,8 +1,8 @@
-package com.mparticle.identity;
+package com.mparticle.internal;
 
 import java.lang.ref.WeakReference;
 
-class ComparableWeakReference<T> extends WeakReference<T> {
+public class ComparableWeakReference<T> extends WeakReference<T> {
 
     public ComparableWeakReference(T referent) {
         super(referent);

@@ -24,6 +24,7 @@ import org.json.JSONObject;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.UUID;
 
@@ -124,7 +125,7 @@ import java.util.UUID;
                 break;
             case CREATE_SESSION_END_MESSAGE:
                 try {
-                    Map.Entry<String, Long> entry = (Map.Entry<String, Long>) msg.obj;
+                    Map.Entry<String, Set<Long>> entry = (Map.Entry<String, Set<Long>>) msg.obj;
                     MPMessage endMessage = null;
                    try {
                        endMessage = mMParticleDBManager.getSessionForSessionEndMessage(entry.getKey(), ((MessageManager)mMessageManagerCallbacks).getLocation(), entry.getValue());

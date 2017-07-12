@@ -6,6 +6,7 @@ import android.os.Message;
 
 import com.mparticle.MParticle;
 import com.mparticle.MParticleTest;
+import com.mparticle.internal.database.services.MParticleDBManager;
 
 public class AccessUtils {
 

@@ -4,9 +4,11 @@ import android.app.Application;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.pm.ApplicationInfo;
+import android.database.sqlite.SQLiteOpenHelper;
 import android.support.test.InstrumentationRegistry;
 
 import com.mparticle.internal.ApplicationContextWrapper;
+import com.mparticle.internal.database.BaseDatabase;
 import com.mparticle.internal.database.tables.mp.MParticleDatabaseHelper;
 
 public class AndroidUtils {

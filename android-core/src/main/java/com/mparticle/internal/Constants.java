@@ -166,6 +166,7 @@ public class Constants {
         String OPT_OUT_HEADER = "oo";
         String PREVIOUS_SESSION_LENGTH = "psl";
         String LTV = "ltv";
+        String SESSION_SPANNING_MPIDS = "smpids";
         /**
          * mParticle cookies are a simplified form of real-cookies. The SDK server is stateless, so we need
          * a mechanism for server-state persistence.
