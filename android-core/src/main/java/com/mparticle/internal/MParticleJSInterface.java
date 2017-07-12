@@ -134,13 +134,13 @@ public class MParticleJSInterface {
     }
 
     @JavascriptInterface
-    public void logOut() {
+    public void logout() {
         MParticle.getInstance().Identity().logout();
     }
 
 
     @JavascriptInterface
-    public void logOut(String json) {
+    public void logout(String json) {
         IdentityApiRequest request = null;
         try {
             JSONObject jsonObject = new JSONObject(json);
