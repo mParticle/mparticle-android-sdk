@@ -13,7 +13,7 @@ import com.mparticle.internal.KitManager;
 import com.mparticle.internal.Logger;
 import com.mparticle.internal.MPUtility;
 import com.mparticle.internal.MessageManager;
-import com.mparticle.internal.dto.MParticleUserDTO;
+import com.mparticle.internal.database.services.MParticleDBManager;
 import com.mparticle.segmentation.SegmentListener;
 
 import org.json.JSONArray;
@@ -25,17 +25,18 @@ import java.util.List;
 import java.util.Map;
 
 /** package-private **/class MParticleUserDelegate {
-
+    private MParticleDBManager mMParticleDBManager;
     private AppStateManager mAppStateManager;
     private ConfigManager mConfigManager;
     private MessageManager mMessageManager;
     private KitManager mKitManager;
 
-    MParticleUserDelegate(AppStateManager appStateManager, ConfigManager configManager, MessageManager messageManager, KitManager kitManager) {
+    MParticleUserDelegate(AppStateManager appStateManager, ConfigManager configManager, MessageManager messageManager, KitManager kitManager, MParticleDBManager dbManager) {
         mAppStateManager = appStateManager;
         mConfigManager = configManager;
         mMessageManager = messageManager;
         mKitManager = kitManager;
+        mMParticleDBManager = dbManager;
     }
 
     public Map<String, Object> getUserAttributes(long mpId) {
@@ -236,21 +237,10 @@ import java.util.Map;
         }
     }
 
-    boolean setUser(MParticleUserDTO mParticleUserDTO) {
-        return setUser(mParticleUserDTO, true);
-    }
-
-    boolean setUser(MParticleUserDTO mParticleUserDTO, boolean userChanged) {
-        if (!MPUtility.isEmpty(mParticleUserDTO.getIdentities())) {
-            for (Map.Entry<MParticle.IdentityType, String> entry: mParticleUserDTO.getIdentities().entrySet()) {
-                if (!setUserIdentity(entry.getValue(), entry.getKey(), mParticleUserDTO.getMpId())) {
-                    return false;
-                }
-            }
-        }
-        if (!MPUtility.isEmpty(mParticleUserDTO.getUserAttributes()) && userChanged) {
-            for (Map.Entry<String, Object> entry: mParticleUserDTO.getUserAttributes().entrySet()) {
-                if (!setUserAttribute(entry.getKey(), entry.getValue(), mParticleUserDTO.getMpId(), true)) {
+    boolean setUser(long previousMpid, long newMpid, boolean shouldCopyAttributes) {
+        if (shouldCopyAttributes) {
+            for (Map.Entry<String, Object> entry: mMParticleDBManager.getUserAttributes(previousMpid).entrySet()) {
+                if (!setUserAttribute(entry.getKey(), entry.getValue(), newMpid, true)) {
                     return false;
                 }
             }

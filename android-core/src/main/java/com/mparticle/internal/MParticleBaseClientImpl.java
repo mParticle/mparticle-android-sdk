@@ -58,13 +58,14 @@ public class MParticleBaseClientImpl {
         return makeUrlRequest(connection, payload, true);
     }
 
-    protected HttpURLConnection makeUrlRequest(HttpURLConnection connection, boolean mParticle) throws IOException {
-        return makeUrlRequest(connection, null, mParticle);
+    protected HttpURLConnection makeUrlRequest(HttpURLConnection connection, boolean identity) throws IOException {
+        return makeUrlRequest(connection, null, identity);
     }
 
-    protected HttpURLConnection makeUrlRequest(HttpURLConnection connection, String payload, boolean mParticle) throws IOException {
+    protected HttpURLConnection makeUrlRequest(HttpURLConnection connection, String payload, boolean identity) throws IOException {
         try {
             mListener.onSend(connection, payload);
+
             if (payload != null) {
                 String messageString = payload.toString();
                 GZIPOutputStream zos = new GZIPOutputStream(new BufferedOutputStream(connection.getOutputStream()));
@@ -76,14 +77,15 @@ public class MParticleBaseClientImpl {
             }
 
             //gingerbread seems to dislike pinning w/ godaddy. Being that GB is near-dead anyway, just disable pinning for it.
-            if (!BuildConfig.MP_DEBUG && mParticle && Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH && connection instanceof HttpsURLConnection) {
+            if (!BuildConfig.MP_DEBUG && Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH && connection instanceof HttpsURLConnection) {
                 try {
                     ((HttpsURLConnection) connection).setSSLSocketFactory(getSocketFactory());
                 } catch (Exception e) {
 
                 }
             }
-            if (mParticle) {
+            
+            if (!identity) {
                 int statusCode = connection.getResponseCode();
                 if (statusCode == 400 && !alreadyWarned) {
                     alreadyWarned = true;
@@ -175,13 +177,13 @@ public class MParticleBaseClientImpl {
         return format.format(new Date());
     }
 
-    protected String getHeaderHashString(HttpURLConnection request, String message, String apiSecret) throws NoSuchAlgorithmException, InvalidKeyException, UnsupportedEncodingException {
+    protected String getHeaderHashString(HttpURLConnection request, String date, String message, String apiSecret) throws NoSuchAlgorithmException, InvalidKeyException, UnsupportedEncodingException {
         String method = request.getRequestMethod();
         String path = request.getURL().getFile();
         StringBuilder hashString = new StringBuilder()
                 .append(method)
                 .append("\n")
-                .append(getHeaderDateString())
+                .append(date)
                 .append("\n")
                 .append(path);
         if (message != null) {

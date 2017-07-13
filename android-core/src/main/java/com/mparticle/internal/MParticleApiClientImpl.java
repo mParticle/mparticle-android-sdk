@@ -315,8 +315,9 @@ public class MParticleApiClientImpl extends MParticleBaseClientImpl implements M
 
     void addMessageSignature(HttpURLConnection request, String message) {
         try {
-            request.setRequestProperty("Date", getHeaderDateString());
-            request.setRequestProperty(HEADER_SIGNATURE, getHeaderHashString(request, message, mApiSecret));
+            String date = getHeaderDateString();
+            request.setRequestProperty("Date", date);
+            request.setRequestProperty(HEADER_SIGNATURE, getHeaderHashString(request, date, message, mApiSecret));
         } catch (InvalidKeyException e) {
             Logger.error("Error signing message.");
         } catch (NoSuchAlgorithmException e) {

@@ -10,8 +10,6 @@ import com.mparticle.MParticleOptions;
 import com.mparticle.MParticleTask;
 import com.mparticle.TaskSuccessListener;
 import com.mparticle.internal.AccessUtils;
-import com.mparticle.internal.ConfigManager;
-import com.mparticle.internal.dto.MParticleUserDTO;
 import com.mparticle.utils.AndroidUtils;
 
 import org.json.JSONException;
@@ -22,7 +20,6 @@ import org.junit.Test;
 
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.CountDownLatch;
@@ -81,8 +78,8 @@ public class MockIdentityApiTest {
         userAttributes.put("number2", "HelloWorld");
         userAttributes.put("third", 123);
 
-        final MParticleUserDTO user1 = new MParticleUserDTO(mpid1, identities);
-        final MParticleUserDTO user2 = new MParticleUserDTO(mpid2, identities2, userAttributes);
+        final IdentityHttpResponse user1 = new IdentityHttpResponse(mpid1, identities);
+        final IdentityHttpResponse user2 = new IdentityHttpResponse(mpid2, identities2, userAttributes);
 
         MParticleOptions options = MParticleOptions
                 .builder(mContext)
@@ -93,7 +90,7 @@ public class MockIdentityApiTest {
 
         setIdentityApiClient(new IdentityApiClient() {
             @Override
-            public MParticleUserDTO identify(IdentityApiRequest request) throws Exception {
+            public IdentityHttpResponse identify(IdentityApiRequest request) throws Exception {
                 lock.await(serverDelay, TimeUnit.SECONDS);
                 if (request.getMpId().equals(mpid1)) {
                     return user1;
@@ -159,7 +156,7 @@ public class MockIdentityApiTest {
 
     }
 
-    private void assertMParticleUserEquals(MParticleUser dto1, MParticleUserDTO dto2, boolean shouldCopyUserAttributes) {
+    private void assertMParticleUserEquals(MParticleUser dto1, IdentityHttpResponse dto2, boolean shouldCopyUserAttributes) {
         assertEquals(dto1.getId(), dto2.getMpId());
         if (shouldCopyUserAttributes) {
             if (dto1.getUserAttributes() != null) {
@@ -209,12 +206,12 @@ public class MockIdentityApiTest {
 
         setIdentityApiClient(new IdentityApiClient() {
             @Override
-            public MParticleUserDTO identify(IdentityApiRequest request) throws Exception {
+            public IdentityHttpResponse identify(IdentityApiRequest request) throws Exception {
                 if (request.getMpId().equals(mpid1)) {
-                    return new MParticleUserDTO(mpid1, new HashMap<MParticle.IdentityType, String>());
+                    return new IdentityHttpResponse(mpid1, new HashMap<MParticle.IdentityType, String>());
                 }
                 if (request.getMpId().equals(mpid2)) {
-                    return new MParticleUserDTO(mpid2, new HashMap<MParticle.IdentityType, String>());
+                    return new IdentityHttpResponse(mpid2, new HashMap<MParticle.IdentityType, String>());
                 }
                 return null;
             }
@@ -291,16 +288,16 @@ public class MockIdentityApiTest {
 
         setIdentityApiClient(new IdentityApiClient() {
             @Override
-            public MParticleUserDTO identify(IdentityApiRequest request) throws Exception {
+            public IdentityHttpResponse identify(IdentityApiRequest request) throws Exception {
                 lock.await(serverDelay, TimeUnit.MILLISECONDS);
                 if (request.getMpId().equals(mpid1)) {
-                    return new MParticleUserDTO(mpid1, new HashMap<MParticle.IdentityType, String>());
+                    return new IdentityHttpResponse(mpid1, new HashMap<MParticle.IdentityType, String>());
                 }
                 if (request.getMpId().equals(mpid2)) {
-                    return new MParticleUserDTO(mpid2, new HashMap<MParticle.IdentityType, String>());
+                    return new IdentityHttpResponse(mpid2, new HashMap<MParticle.IdentityType, String>());
                 }
                 if (request.getMpId().equals(mpid3)) {
-                    return new MParticleUserDTO(mpid3, new HashMap<MParticle.IdentityType, String>());
+                    return new IdentityHttpResponse(mpid3, new HashMap<MParticle.IdentityType, String>());
                 }
                 return null;
             }
@@ -394,16 +391,16 @@ public class MockIdentityApiTest {
 
         setIdentityApiClient(new IdentityApiClient() {
             @Override
-            public MParticleUserDTO identify(IdentityApiRequest request) throws Exception {
+            public IdentityHttpResponse identify(IdentityApiRequest request) throws Exception {
                 lock.await(serverDelay, TimeUnit.MILLISECONDS);
                 if (request.getMpId().equals(mpid1)) {
-                    return new MParticleUserDTO(mpid1, new HashMap<MParticle.IdentityType, String>());
+                    return new IdentityHttpResponse(mpid1, new HashMap<MParticle.IdentityType, String>());
                 }
                 if (request.getMpId().equals(mpid2)) {
-                    return new MParticleUserDTO(mpid2, new HashMap<MParticle.IdentityType, String>());
+                    return new IdentityHttpResponse(mpid2, new HashMap<MParticle.IdentityType, String>());
                 }
                 if (request.getMpId().equals(mpid3)) {
-                    return new MParticleUserDTO(mpid3, new HashMap<MParticle.IdentityType, String>());
+                    return new IdentityHttpResponse(mpid3, new HashMap<MParticle.IdentityType, String>());
                 }
                 return null;
             }
@@ -501,17 +498,17 @@ public class MockIdentityApiTest {
     class IdentityApiClient implements MParticleIdentityClient {
 
         @Override
-        public MParticleUserDTO login(IdentityApiRequest request) throws Exception {
+        public IdentityHttpResponse login(IdentityApiRequest request) throws Exception {
             return null;
         }
 
         @Override
-        public MParticleUserDTO logout(IdentityApiRequest request) throws Exception {
+        public IdentityHttpResponse logout(IdentityApiRequest request) throws Exception {
             return null;
         }
 
         @Override
-        public MParticleUserDTO identify(IdentityApiRequest request) throws Exception {
+        public IdentityHttpResponse identify(IdentityApiRequest request) throws Exception {
             return null;
         }
 

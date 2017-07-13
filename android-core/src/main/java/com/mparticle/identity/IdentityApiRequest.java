@@ -13,7 +13,6 @@ import java.util.Map;
 public final class IdentityApiRequest {
     private Map<MParticle.IdentityType, String> userIdentities = new HashMap<MParticle.IdentityType, String>();
     private boolean isCopyUserAttributes = false;
-    private Long mpId;
 
     private IdentityApiRequest(IdentityApiRequest.Builder builder) {
         if (builder.userIdentities != null){
@@ -21,9 +20,6 @@ public final class IdentityApiRequest {
         }
         if (builder.isCopyUserAttributes != null) {
             this.isCopyUserAttributes = builder.isCopyUserAttributes;
-        }
-        if (builder.mpId != null) {
-            this.mpId = builder.mpId;
         }
     }
 
@@ -39,10 +35,6 @@ public final class IdentityApiRequest {
         return isCopyUserAttributes;
     }
 
-    public Long getMpId() {
-        return mpId;
-    }
-
     public Map<MParticle.IdentityType, String> getUserIdentities() {
         return userIdentities;
     }
@@ -50,11 +42,9 @@ public final class IdentityApiRequest {
     public static class Builder {
         private Map<MParticle.IdentityType, String> userIdentities = new HashMap<MParticle.IdentityType, String>();
         private Boolean isCopyUserAttributes = null;
-        private Long mpId = null;
 
         public Builder(MParticleUser currentUser) {
             userIdentities = currentUser.getUserIdentities();
-            mpId = currentUser.getId();
         }
 
         public Builder() {

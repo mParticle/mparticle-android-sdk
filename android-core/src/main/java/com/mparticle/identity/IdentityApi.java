@@ -12,9 +12,10 @@ import com.mparticle.MParticleTask;
 import com.mparticle.internal.AppStateManager;
 import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.Constants;
+import com.mparticle.internal.DatabaseTables;
 import com.mparticle.internal.KitManager;
 import com.mparticle.internal.MessageManager;
-import com.mparticle.internal.dto.MParticleUserDTO;
+import com.mparticle.internal.database.services.MParticleDBManager;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -44,7 +45,7 @@ public final class IdentityApi {
     public IdentityApi(Context context, AppStateManager appStateManager, MessageManager messageManager, ConfigManager configManager, KitManager kitManager) {
         this.mBackgroundHandler = messageManager.mUploadHandler;
         this.mMainHandler = new Handler(Looper.myLooper());
-        this.mUserDelegate = new MParticleUserDelegate(appStateManager, configManager, messageManager, kitManager);
+        this.mUserDelegate = new MParticleUserDelegate(appStateManager, configManager, messageManager, kitManager, new MParticleDBManager(context, DatabaseTables.getInstance(context)));
         this.mConfigManager = configManager;
         this.mMessageManager = messageManager;
         configManager.setMpIdChangeListener(new IdentityStateListenerManager());
@@ -55,7 +56,7 @@ public final class IdentityApi {
     public IdentityApi(Context context, AppStateManager appStateManager, MessageManager messageManager, ConfigManager configManager, KitManager kitManager, Looper looper) {
         this.mBackgroundHandler = messageManager.mUploadHandler;
         this.mMainHandler = new Handler(looper);
-        this.mUserDelegate = new MParticleUserDelegate(appStateManager, configManager, messageManager, kitManager);
+        this.mUserDelegate = new MParticleUserDelegate(appStateManager, configManager, messageManager, kitManager, new MParticleDBManager(context, DatabaseTables.getInstance(context)));
         this.mConfigManager = configManager;
         this.mMessageManager = messageManager;
         configManager.setMpIdChangeListener(new IdentityStateListenerManager());
@@ -103,7 +104,7 @@ public final class IdentityApi {
         synchronized (lock) {
             return makeIdentityRequest(logoutRequest, new IdentityNetworkRequestRunnable() {
                 @Override
-                public MParticleUserDTO request(IdentityApiRequest request) throws Exception {
+                public IdentityHttpResponse request(IdentityApiRequest request) throws Exception {
                     return mMParticleApiClient.logout(request);
                 }
             });
@@ -118,7 +119,7 @@ public final class IdentityApi {
         synchronized (lock) {
             return makeIdentityRequest(loginRequest, new IdentityNetworkRequestRunnable() {
                 @Override
-                public MParticleUserDTO request(IdentityApiRequest request) throws Exception {
+                public IdentityHttpResponse request(IdentityApiRequest request) throws Exception {
                     return mMParticleApiClient.login(request);
                 }
             });
@@ -129,7 +130,7 @@ public final class IdentityApi {
         synchronized (lock) {
             return makeIdentityRequest(identifyRequest, new IdentityNetworkRequestRunnable() {
                 @Override
-                public MParticleUserDTO request(IdentityApiRequest request) throws Exception {
+                public IdentityHttpResponse request(IdentityApiRequest request) throws Exception {
                     return mMParticleApiClient.identify(request);
                 }
             });
@@ -169,23 +170,20 @@ public final class IdentityApi {
             @Override
             public void run() {
                 try {
-                    final MParticleUserDTO result = networkRequest.request(identityApiRequest);
-//                    mMainHandler.post(new Runnable() {
-//                        @Override
-//                        public void run() {
-                            if (result.hasError()) {
-                                // If the requst has an error, set the MPID back
-                                mUserDelegate.migrateTemporaryToMpId(startingMpid);
-                                task.setFailed(result.getError());
-                            } else {
-                                // when the request succeeds, set new MPID
-                                boolean userChanged = result.getMpId() != startingMpid;
-                                mUserDelegate.setUser(result, userChanged);
-                                mUserDelegate.migrateTemporaryToMpId(result.getMpId());
-                                task.setSuccessful(result.getMpId());
-                            }
-//                        }
-//                    });
+                    final IdentityHttpResponse result = networkRequest.request(identityApiRequest);
+
+                    if (result.hasError()) {
+                        // If the requst has an error, set the MPID back
+                        mUserDelegate.migrateTemporaryToMpId(startingMpid);
+                        task.setFailed(result.getError());
+                    } else {
+                        long newMpid = result.getMpId();
+                        if ( startingMpid != newMpid) {
+                            mUserDelegate.setUser(startingMpid, newMpid, identityApiRequest.shouldCopyUserAttributes());
+                        }
+                        mUserDelegate.migrateTemporaryToMpId(newMpid);
+                        task.setSuccessful(newMpid);
+                    }
                 } catch (Exception ex) {
                     // If we get an exception, set the MPID back
                     mUserDelegate.migrateTemporaryToMpId(startingMpid);
@@ -214,7 +212,7 @@ public final class IdentityApi {
     }
 
     interface IdentityNetworkRequestRunnable {
-        MParticleUserDTO request(IdentityApiRequest request) throws Exception;
+        IdentityHttpResponse request(IdentityApiRequest request) throws Exception;
     }
 
     public interface MpIdChangeListener {

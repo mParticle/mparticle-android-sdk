@@ -3,14 +3,10 @@ package com.mparticle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-import com.mparticle.MParticleTask;
-import com.mparticle.TaskFailureListener;
-import com.mparticle.TaskSuccessListener;
-import com.mparticle.internal.dto.MParticleUserDTO;
+import com.mparticle.identity.IdentityHttpResponse;
 
 import java.util.HashSet;
 import java.util.Set;
-import java.util.TreeSet;
 
 public abstract class BaseIdentityTask<T> extends MParticleTask<T> {
     boolean isCompleted;
@@ -20,7 +16,7 @@ public abstract class BaseIdentityTask<T> extends MParticleTask<T> {
     Set<TaskSuccessListener<? super T>> successListeners = new HashSet<TaskSuccessListener<? super T>>();
     Set<TaskFailureListener> failureListeners = new HashSet<TaskFailureListener>();
 
-    public void setFailed(MParticleUserDTO.Error error) {
+    public void setFailed(IdentityHttpResponse.Error error) {
         setFailed(new Exception(error.getErrorString()));
     }
 

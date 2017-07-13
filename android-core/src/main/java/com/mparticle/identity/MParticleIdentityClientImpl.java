@@ -6,12 +6,9 @@ import com.mparticle.BuildConfig;
 import com.mparticle.MParticle;
 import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.Constants;
-import com.mparticle.internal.DatabaseTables;
 import com.mparticle.internal.Logger;
 import com.mparticle.internal.MPUtility;
 import com.mparticle.internal.MParticleBaseClientImpl;
-import com.mparticle.internal.database.services.MParticleDBManager;
-import com.mparticle.internal.dto.MParticleUserDTO;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -27,13 +24,21 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-import static com.mparticle.MParticle.IdentityType.*;
+import static com.mparticle.MParticle.IdentityType.CustomerId;
+import static com.mparticle.MParticle.IdentityType.Email;
+import static com.mparticle.MParticle.IdentityType.Facebook;
+import static com.mparticle.MParticle.IdentityType.FacebookCustomAudienceId;
+import static com.mparticle.MParticle.IdentityType.Google;
+import static com.mparticle.MParticle.IdentityType.Microsoft;
+import static com.mparticle.MParticle.IdentityType.Other;
+import static com.mparticle.MParticle.IdentityType.Twitter;
+import static com.mparticle.MParticle.IdentityType.Yahoo;
 
 /** package-private **/ class MParticleIdentityClientImpl extends MParticleBaseClientImpl implements MParticleIdentityClient {
     private Context mContext;
     private ConfigManager mConfigManager;
 
-    private static final String SECURE_SERVICE_SCHEME = MPUtility.isEmpty(BuildConfig.MP_IDENTITY_URL) ? "https" : "http";
+    private static final String SECURE_SERVICE_SCHEME = "https";
     private static final String API_HOST = MPUtility.isEmpty(BuildConfig.MP_IDENTITY_URL) ? "identity.mparticle.com" : BuildConfig.MP_IDENTITY_URL;
     private static final String SERVICE_VERSION_1 = "/v1";
 
@@ -43,51 +48,51 @@ import static com.mparticle.MParticle.IdentityType.*;
         this.mConfigManager = configManager;
     }
 
-    public MParticleUserDTO login(IdentityApiRequest request) throws JSONException, IOException {
+    public IdentityHttpResponse login(IdentityApiRequest request) throws JSONException, IOException {
         JSONObject jsonObject = getStateJson(request);
         HttpURLConnection connection = getPostConnection("/login", jsonObject.toString());
         makeUrlRequest(connection, jsonObject.toString(), false);
         int responseCode = connection.getResponseCode();
         JSONObject response = MPUtility.getJsonResponse(connection);
-        if (responseCode == 202) {
-            return getUser(response, request);
+        if (responseCode == 200) {
+            return parseIdentityResponse(response);
         } else {
-            return getError(response);
+            return parseIdentityErrorResponse(response);
         }
     }
 
-    public MParticleUserDTO logout(IdentityApiRequest request) throws JSONException, IOException {
+    public IdentityHttpResponse logout(IdentityApiRequest request) throws JSONException, IOException {
         JSONObject jsonObject = getStateJson(request);
         HttpURLConnection connection = getPostConnection("/logout", jsonObject.toString());
         makeUrlRequest(connection, jsonObject.toString(), false);
         int responseCode = connection.getResponseCode();
         JSONObject response = MPUtility.getJsonResponse(connection);
-        if (responseCode == 202) {
-            return getUser(response, request);
+        if (responseCode == 200) {
+            return parseIdentityResponse(response);
         } else {
-            return getError(response);
+            return parseIdentityErrorResponse(response);
         }
     }
 
-    public MParticleUserDTO identify(IdentityApiRequest request) throws JSONException, IOException {
+    public IdentityHttpResponse identify(IdentityApiRequest request) throws JSONException, IOException {
         JSONObject jsonObject = getStateJson(request);
         HttpURLConnection connection = getPostConnection("/identify", jsonObject.toString());
         makeUrlRequest(connection, jsonObject.toString(), false);
         int responseCode = connection.getResponseCode();
         JSONObject response = MPUtility.getJsonResponse(connection);
-        if (responseCode == 202) {
-            return getUser(response, request);
+        if (responseCode == 200) {
+            return parseIdentityResponse(response);
         } else {
-            return getError(response);
+            return parseIdentityErrorResponse(response);
         }
     }
 
     public Boolean modify(IdentityApiRequest request) throws JSONException, IOException {
         JSONObject jsonObject = getChangeJson(request);
-        HttpURLConnection connection = getPostConnection(request.getMpId(), "/modify", jsonObject.toString());
+        HttpURLConnection connection = getPostConnection(mConfigManager.getMpid(), "/modify", jsonObject.toString());
         makeUrlRequest(connection, jsonObject.toString(), false);
         int responseCode = connection.getResponseCode();
-        if (responseCode == 202) {
+        if (responseCode == 200) {
             return true;
         } else {
             return false;
@@ -147,7 +152,7 @@ import static com.mparticle.MParticle.IdentityType.*;
         }
         jsonObject.put("known_identities", identitiesJson);
 
-        Long mpId = request.getMpId();
+        Long mpId = mConfigManager.getMpid();
         if (mpId != null && mpId != 0) {
             jsonObject.put("previous_mpid", mpId);
         }
@@ -157,7 +162,7 @@ import static com.mparticle.MParticle.IdentityType.*;
     private JSONObject getChangeJson(IdentityApiRequest request) throws JSONException {
         JSONObject jsonObject = getBaseJson();
         JSONArray changesJson = new JSONArray();
-        Map<MParticle.IdentityType, String> oldIdentities = mConfigManager.getUserIdentities(request.getMpId());
+        Map<MParticle.IdentityType, String> oldIdentities = mConfigManager.getUserIdentities(mConfigManager.getMpid());
         Map<MParticle.IdentityType, String> newIdentities = request.getUserIdentities();
 
         Set<MParticle.IdentityType> identityTypes = oldIdentities.keySet();
@@ -179,24 +184,19 @@ import static com.mparticle.MParticle.IdentityType.*;
         return jsonObject;
     }
 
-    private MParticleUserDTO getUser(JSONObject jsonObject, IdentityApiRequest request) throws JSONException {
-        String context = jsonObject.optString("context");
-        if (!MPUtility.isEmpty(context)) {
-            mConfigManager.setIdentityApiContext(context);
-        }
-        long mpId = jsonObject.getLong("mpid");
-        Map<MParticle.IdentityType, String> identityTypeMap = request.getUserIdentities();
-        //if the mpid did not change as a result of the request OR the request has shouldCopyUserAttributes == true,
-        //keep the same userAttributes
-        if (mpId == request.getMpId() || request.shouldCopyUserAttributes()) {
-            Map<String, Object> userAttributes = new MParticleDBManager(mContext, DatabaseTables.getInstance(mContext)).getUserAttributes(request.getMpId());
-            return new MParticleUserDTO(mpId, identityTypeMap, userAttributes);
-        } else {
-            return new MParticleUserDTO(mpId, identityTypeMap);
+    private IdentityHttpResponse parseIdentityResponse(JSONObject jsonObject) {
+        try {
+            IdentityHttpResponse httpResponse = new IdentityHttpResponse(jsonObject);
+            if (!MPUtility.isEmpty(httpResponse.getContext())) {
+                mConfigManager.setIdentityApiContext(httpResponse.getContext());
+            }
+            return httpResponse;
+        } catch (JSONException e) {
+            return new IdentityHttpResponse.Error(e.getMessage());
         }
     }
 
-    private MParticleUserDTO getError(JSONObject jsonObject) {
+    private IdentityHttpResponse parseIdentityErrorResponse(JSONObject jsonObject) {
         JSONArray errorsArray = null;
         StringBuilder builder = new StringBuilder();
         try {
@@ -209,14 +209,14 @@ import static com.mparticle.MParticle.IdentityType.*;
                         builder.append(": ");
                         builder.append(object.getString("message"));
                         builder.append("/n");
+                    } catch (JSONException ignore) {
                     }
-                    catch (JSONException ignore) {}
                 }
             }
         } catch (JSONException ignore) {
-                builder.append("could not parse errors");
+            builder.append("could not parse errors");
         }
-        return new MParticleUserDTO.Error(builder.toString());
+        return new IdentityHttpResponse.Error(builder.toString());
     }
 
     private HttpURLConnection getPostConnection(Long mpId, String endpoint, String message) throws IOException {
@@ -231,10 +231,13 @@ import static com.mparticle.MParticle.IdentityType.*;
         connection.setReadTimeout(10000);
         connection.setRequestMethod("POST");
         connection.setDoOutput(true);
+        connection.setRequestProperty("Content-Encoding", "gzip");
         connection.setRequestProperty("x-mp-key", getApiKey());
-        connection.setRequestProperty("x-mp-date", getHeaderDateString());
+        connection.setRequestProperty("Content-Type", "application/json");
+        String date = getHeaderDateString();
+        connection.setRequestProperty("Date", date);
         try {
-            connection.setRequestProperty("x-mp-signature", getHeaderHashString(connection, message, getApiSecret()));
+            connection.setRequestProperty("x-mp-signature", getHeaderHashString(connection, date, message, getApiSecret()));
         } catch (NoSuchAlgorithmException e) {
             Logger.error("Error signing message.");
         } catch (InvalidKeyException e) {
