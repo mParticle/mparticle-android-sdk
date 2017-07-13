@@ -13,6 +13,7 @@ import java.util.Map;
 public final class IdentityApiRequest {
     private Map<MParticle.IdentityType, String> userIdentities = new HashMap<MParticle.IdentityType, String>();
     private boolean isCopyUserAttributes = false;
+    long currentMpid;
 
     private IdentityApiRequest(IdentityApiRequest.Builder builder) {
         if (builder.userIdentities != null){

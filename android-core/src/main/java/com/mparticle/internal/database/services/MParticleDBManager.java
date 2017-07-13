@@ -180,7 +180,9 @@ public class MParticleDBManager extends BaseDBManager {
     public void createSessionHistoryUploadMessage(ConfigManager configManager, DeviceAttributes deviceAttributes, String currentSessionId, long mpId) throws JSONException {
         SQLiteDatabase db = getMParticleDatabase();
         db.beginTransaction();
-        List<MessageService.ReadyMessage> readyMessages = MessageService.getSessionHistory(db, currentSessionId, mpId);
+
+        try {
+            List<MessageService.ReadyMessage> readyMessages = MessageService.getSessionHistory(db, currentSessionId, mpId);
         if (readyMessages.size() <= 0) {
             db.setTransactionSuccessful();
             return;
@@ -205,8 +207,8 @@ public class MParticleDBManager extends BaseDBManager {
         }
         MessageService.deleteMessages(db, highestUploadedMessageId, mpId);
         List<JSONObject> deviceInfos = SessionService.processSessions(db, uploadMessagesBySession, mpId);
-        for (JSONObject deviceInfo: deviceInfos) {
-            deviceAttributes.updateDeviceInfo(mContext ,deviceInfo);
+        for (JSONObject deviceInfo : deviceInfos) {
+            deviceAttributes.updateDeviceInfo(mContext, deviceInfo);
         }
 
         for (Map.Entry<String, MessageBatch> session : uploadMessagesBySession.entrySet()) {
@@ -233,85 +235,94 @@ public class MParticleDBManager extends BaseDBManager {
             }
         }
         db.setTransactionSuccessful();
+        }
+        finally {
+            db.endTransaction();
+        }
     }
 
     public void createMessagesForUploadMessage(ConfigManager configManager, DeviceAttributes deviceAttributes, String currentSessionId, boolean sessionHistoryEnabled, long mpId) throws JSONException {
         SQLiteDatabase db = getMParticleDatabase();
         db.beginTransaction();
-        List<MessageService.ReadyMessage> readyMessages = MessageService.getMessagesForUpload(db, mpId);
-        if (readyMessages.size() <= 0) {
+        try {
+            List<MessageService.ReadyMessage> readyMessages = MessageService.getMessagesForUpload(db, mpId);
+            if (readyMessages.size() <= 0) {
+                db.setTransactionSuccessful();
+                return;
+            }
+            HashMap<String, MessageBatch> uploadMessagesBySession = new HashMap<String, MessageBatch>(2);
+            int highestUploadedMessageId = 0;
+            for (MessageService.ReadyMessage readyMessage : readyMessages) {
+                MessageBatch uploadMessage = uploadMessagesBySession.get(readyMessage.getSessionId());
+                if (uploadMessage == null) {
+                    uploadMessage = createUploadMessage(configManager, false, mpId);
+                    uploadMessagesBySession.put(readyMessage.getSessionId(), uploadMessage);
+                }
+                int messageLength = readyMessage.getMessage().length();
+                JSONObject msgObject = new JSONObject(readyMessage.getMessage());
+                if (messageLength + uploadMessage.getMessageLengthBytes() > Constants.LIMIT_MAX_UPLOAD_SIZE) {
+                    break;
+                }
+                uploadMessage.addMessage(msgObject);
+                uploadMessage.incrementMessageLengthBytes(messageLength);
+                highestUploadedMessageId = readyMessage.getMessageId();
+            }
+            if (sessionHistoryEnabled) {
+                //else mark the messages as uploaded, so next time around it'll be included in session history
+                MessageService.markMessagesAsUploaded(db, highestUploadedMessageId, mpId);
+            } else {
+                //if this is a session-less message, or if session history is disabled, just delete it
+                MessageService.deleteMessages(db, highestUploadedMessageId, mpId);
+            }
+
+            List<ReportingService.ReportingMessage> reportingMessages = ReportingService.getReportingMessagesForUpload(db, mpId);
+            for (ReportingService.ReportingMessage reportingMessage : reportingMessages) {
+                MessageBatch batch = uploadMessagesBySession.get(reportingMessage.getSessionId());
+                if (batch == null) {
+                    //if there's no matching session id then just use the first batch object
+                    batch = uploadMessagesBySession.values().iterator().next();
+                }
+                if (batch != null) {
+                    batch.addReportingMessage(reportingMessage.getMsgObject());
+                }
+                ReportingService.deleteReportingMessage(db, reportingMessage.getReportingMessageId());
+            }
+            List<JSONObject> deviceInfos = SessionService.processSessions(db, uploadMessagesBySession, mpId);
+            for (JSONObject deviceInfo : deviceInfos) {
+                deviceAttributes.updateDeviceInfo(mContext, deviceInfo);
+            }
+
+
+            for (Map.Entry<String, MessageBatch> session : uploadMessagesBySession.entrySet()) {
+                MessageBatch uploadMessage = session.getValue();
+                if (uploadMessage != null) {
+                    String sessionId = session.getKey();
+                    //for upgrade scenarios, there may be no device or app info associated with the session, so create it now.
+                    if (uploadMessage.getAppInfo() == null) {
+                        uploadMessage.setAppInfo(deviceAttributes.getAppInfo(mContext));
+                    }
+                    if (uploadMessage.getDeviceInfo() == null || sessionId.equals(currentSessionId)) {
+                        uploadMessage.setDeviceInfo(deviceAttributes.getDeviceInfo(mContext));
+                    }
+                    JSONArray messages = uploadMessage.getMessages();
+                    JSONArray identities = findIdentityState(configManager, messages, mpId);
+                    uploadMessage.setIdentities(identities);
+                    JSONObject userAttributes = findUserAttributeState(messages, mpId);
+                    uploadMessage.setUserAttributes(userAttributes);
+                    UploadService.insertUpload(getMParticleDatabase(), uploadMessage, configManager.getApiKey());
+                    //if this was to process session history, or
+                    //if we're never going to process history AND
+                    //this batch contains a previous session, then delete the session
+                    if (!sessionHistoryEnabled && !sessionId.equals(currentSessionId)) {
+                        SessionService.deleteSessions(db, sessionId, mpId);
+                    }
+                }
+            }
             db.setTransactionSuccessful();
-            return;
         }
-        HashMap<String, MessageBatch> uploadMessagesBySession = new HashMap<String, MessageBatch>(2);
-        int highestUploadedMessageId = 0;
-        for (MessageService.ReadyMessage readyMessage: readyMessages) {
-            MessageBatch uploadMessage = uploadMessagesBySession.get(readyMessage.getSessionId());
-            if (uploadMessage == null) {
-                uploadMessage = createUploadMessage(configManager, false, mpId);
-                uploadMessagesBySession.put(readyMessage.getSessionId(), uploadMessage);
-            }
-            int messageLength = readyMessage.getMessage().length();
-            JSONObject msgObject = new JSONObject(readyMessage.getMessage());
-            if (messageLength + uploadMessage.getMessageLengthBytes() > Constants.LIMIT_MAX_UPLOAD_SIZE) {
-                break;
-            }
-            uploadMessage.addMessage(msgObject);
-            uploadMessage.incrementMessageLengthBytes(messageLength);
-            highestUploadedMessageId = readyMessage.getMessageId();
+        finally {
+            db.endTransaction();
         }
-        if (sessionHistoryEnabled) {
-            //else mark the messages as uploaded, so next time around it'll be included in session history
-            MessageService.markMessagesAsUploaded(db, highestUploadedMessageId, mpId);
-        } else {
-            //if this is a session-less message, or if session history is disabled, just delete it
-            MessageService.deleteMessages(db, highestUploadedMessageId, mpId);
-        }
-
-        List<ReportingService.ReportingMessage> reportingMessages = ReportingService.getReportingMessagesForUpload(db, mpId);
-        for (ReportingService.ReportingMessage reportingMessage: reportingMessages) {
-            MessageBatch batch = uploadMessagesBySession.get(reportingMessage.getSessionId());
-            if (batch == null) {
-                //if there's no matching session id then just use the first batch object
-                batch = uploadMessagesBySession.values().iterator().next();
-            }
-            if (batch != null) {
-                batch.addReportingMessage(reportingMessage.getMsgObject());
-            }
-            ReportingService.deleteReportingMessage(db, reportingMessage.getReportingMessageId());
-        }
-        List<JSONObject> deviceInfos = SessionService.processSessions(db, uploadMessagesBySession, mpId);
-        for (JSONObject deviceInfo: deviceInfos) {
-            deviceAttributes.updateDeviceInfo(mContext, deviceInfo);
-        }
-
-
-        for (Map.Entry<String, MessageBatch> session : uploadMessagesBySession.entrySet()) {
-            MessageBatch uploadMessage = session.getValue();
-            if (uploadMessage != null) {
-                String sessionId = session.getKey();
-                //for upgrade scenarios, there may be no device or app info associated with the session, so create it now.
-                if (uploadMessage.getAppInfo() == null) {
-                    uploadMessage.setAppInfo(deviceAttributes.getAppInfo(mContext));
-                }
-                if (uploadMessage.getDeviceInfo() == null || sessionId.equals(currentSessionId)) {
-                    uploadMessage.setDeviceInfo(deviceAttributes.getDeviceInfo(mContext));
-                }
-                JSONArray messages = uploadMessage.getMessages();
-                JSONArray identities = findIdentityState(configManager, messages, mpId);
-                uploadMessage.setIdentities(identities);
-                JSONObject userAttributes = findUserAttributeState(messages, mpId);
-                uploadMessage.setUserAttributes(userAttributes);
-                UploadService.insertUpload(getMParticleDatabase(), uploadMessage, configManager.getApiKey());
-                //if this was to process session history, or
-                //if we're never going to process history AND
-                //this batch contains a previous session, then delete the session
-                if (!sessionHistoryEnabled && !sessionId.equals(currentSessionId)) {
-                    SessionService.deleteSessions(db, sessionId, mpId);
-                }
-            }
-        }
-        db.setTransactionSuccessful();
     }
 
     public void deleteMessagesAndSessions(String currentSessionId, long mpId) {

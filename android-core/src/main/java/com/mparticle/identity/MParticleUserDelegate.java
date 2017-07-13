@@ -40,17 +40,14 @@ import java.util.Map;
     }
 
     public Map<String, Object> getUserAttributes(long mpId) {
-        mpId = verifyMpId(mpId);
         return mMessageManager.getUserAttributes(null, mpId);
     }
 
     public Map<String, Object> getUserAttributes(final UserAttributeListener listener, long mpId) {
-        mpId = verifyMpId(mpId);
         return mMessageManager.getUserAttributes(listener, mpId);
     }
 
     public Map<MParticle.IdentityType, String> getUserIdentities(long mpId){
-        mpId = verifyMpId(mpId);
         return mMessageManager.getUserIdentities(mpId);
     }
 

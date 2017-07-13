@@ -167,6 +167,7 @@ public final class IdentityApi {
     private BaseIdentityTask makeIdentityRequest(final IdentityApiRequest identityApiRequest, final IdentityNetworkRequestRunnable networkRequest) {
         final BaseIdentityTask task = new IdentityApiResultTask();
         final long startingMpid = mConfigManager.getMpid();
+        identityApiRequest.currentMpid = mConfigManager.getMpid();
         mUserDelegate.useTemporaryMpId(startingMpid);
         mBackgroundHandler.post(new Runnable() {
             @Override
@@ -180,6 +181,7 @@ public final class IdentityApi {
                         task.setFailed(result.getError());
                     } else {
                         long newMpid = result.getMpId();
+                        mUserDelegate.migrateTemporaryToMpId(newMpid);
                         if (startingMpid != newMpid) {
                             mUserDelegate.setUser(startingMpid, newMpid, identityApiRequest.shouldCopyUserAttributes());
                         }
@@ -188,7 +190,6 @@ public final class IdentityApi {
                                 mUserDelegate.setUserIdentity(entry.getValue(), entry.getKey(), newMpid);
                             }
                         }
-                        mUserDelegate.migrateTemporaryToMpId(newMpid);
                         task.setSuccessful(newMpid);
                     }
                 } catch (Exception ex) {
