@@ -7,6 +7,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import com.mparticle.BaseIdentityTask;
+import com.mparticle.MParticle;
 import com.mparticle.MParticleTask;
 
 import com.mparticle.internal.AppStateManager;
@@ -21,6 +22,7 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public final class IdentityApi {
@@ -178,8 +180,13 @@ public final class IdentityApi {
                         task.setFailed(result.getError());
                     } else {
                         long newMpid = result.getMpId();
-                        if ( startingMpid != newMpid) {
+                        if (startingMpid != newMpid) {
                             mUserDelegate.setUser(startingMpid, newMpid, identityApiRequest.shouldCopyUserAttributes());
+                        }
+                        if (identityApiRequest.getUserIdentities() != null) {
+                            for (Map.Entry<MParticle.IdentityType, String> entry : identityApiRequest.getUserIdentities().entrySet()) {
+                                mUserDelegate.setUserIdentity(entry.getValue(), entry.getKey(), newMpid);
+                            }
                         }
                         mUserDelegate.migrateTemporaryToMpId(newMpid);
                         task.setSuccessful(newMpid);
@@ -223,17 +230,24 @@ public final class IdentityApi {
 
         @Override
         public void onMpIdChanged(long mpid) {
-            MParticleUser user = MParticleUser.getInstance(mpid, mUserDelegate);
-            List<WeakReference<IdentityStateListener>> toRemove = new ArrayList<WeakReference<IdentityStateListener>>();
-            for (WeakReference<IdentityStateListener> listenerRef : identityStateListeners) {
-                IdentityStateListener listener = listenerRef.get();
-                if (listener != null) {
-                    listener.onUserIdentified(user);
-                } else {
-                    toRemove.add(listenerRef);
+            final MParticleUser user = MParticleUser.getInstance(mpid, mUserDelegate);
+            new Handler(Looper.getMainLooper()).post(new Runnable() {
+
+                @Override
+                public void run() {
+                    List<WeakReference<IdentityStateListener>> toRemove = new ArrayList<WeakReference<IdentityStateListener>>();
+                    for (WeakReference<IdentityStateListener> listenerRef : identityStateListeners) {
+                        IdentityStateListener listener = listenerRef.get();
+                        if (listener != null) {
+                            listener.onUserIdentified(user);
+                        } else {
+                            toRemove.add(listenerRef);
+                        }
+                    }
+                    identityStateListeners.removeAll(toRemove);
                 }
-            }
-            identityStateListeners.removeAll(toRemove);
+            });
+
         }
     }
 }

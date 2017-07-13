@@ -1,5 +1,7 @@
 package com.mparticle;
 
+import android.os.Handler;
+import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
@@ -20,13 +22,18 @@ public abstract class BaseIdentityTask<T> extends MParticleTask<T> {
         setFailed(new Exception(error.getErrorString()));
     }
 
-    public void setFailed(Exception exception) {
+    public void setFailed(final Exception exception) {
         isCompleted = true;
         isSuccessful = false;
         mException = exception;
-        for(TaskFailureListener listener: failureListeners) {
-            listener.onFailure(exception);
-        }
+        new Handler(Looper.getMainLooper()).post(new Runnable() {
+            @Override
+            public void run() {
+                for(TaskFailureListener listener: failureListeners) {
+                    listener.onFailure(exception);
+                }
+            }
+        });
     }
 
     public void setSuccessful(Object object) {
@@ -34,9 +41,15 @@ public abstract class BaseIdentityTask<T> extends MParticleTask<T> {
         isSuccessful = true;
         result = buildResult(object);
 
-        for (TaskSuccessListener<? super T> listener: successListeners) {
-            listener.onSuccess(this.result);
-        }
+
+        new Handler(Looper.getMainLooper()).post(new Runnable() {
+            @Override
+            public void run() {
+                for (TaskSuccessListener<? super T> listener: successListeners) {
+                    listener.onSuccess(result);
+                }
+            }
+        });
     }
 
     public abstract T buildResult(Object o);
