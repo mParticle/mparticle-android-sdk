@@ -20,6 +20,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -93,6 +94,8 @@ import static com.mparticle.MParticle.IdentityType.Yahoo;
         makeUrlRequest(connection, jsonObject.toString(), false);
         int responseCode = connection.getResponseCode();
         if (responseCode == 200) {
+            JSONObject response = MPUtility.getJsonResponse(connection);
+            parseIdentityResponse(response);
             return true;
         } else {
             return false;
@@ -165,7 +168,7 @@ import static com.mparticle.MParticle.IdentityType.Yahoo;
         Map<MParticle.IdentityType, String> oldIdentities = mConfigManager.getUserIdentities(request.currentMpid);
         Map<MParticle.IdentityType, String> newIdentities = request.getUserIdentities();
 
-        Set<MParticle.IdentityType> identityTypes = oldIdentities.keySet();
+        Set<MParticle.IdentityType> identityTypes = new HashSet<MParticle.IdentityType>(oldIdentities.keySet());
         identityTypes.addAll(newIdentities.keySet());
 
         for (MParticle.IdentityType identityType: identityTypes) {
@@ -174,10 +177,12 @@ import static com.mparticle.MParticle.IdentityType.Yahoo;
                 JSONObject changeJson = new JSONObject();
                 String newValue = newIdentities.get(identityType);
                 String oldValue = oldIdentities.get(identityType);
-                changeJson.put("new_value", newValue == null ? "null" : newValue);
-                changeJson.put("old_value", oldValue == null ? "null" : oldValue);
-                changeJson.put("identity_type", idTypeString);
-                changesJson.put(changeJson);
+                if (newValue != oldValue && (newValue == null || !newValue.equals(oldValue))) {
+                    changeJson.put("new_value", newValue == null ? "null" : newValue);
+                    changeJson.put("old_value", oldValue == null ? "null" : oldValue);
+                    changeJson.put("identity_type", idTypeString);
+                    changesJson.put(changeJson);
+                }
             }
         }
         jsonObject.put("identity_changes", changesJson);

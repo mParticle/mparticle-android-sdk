@@ -271,11 +271,17 @@ public class MParticleDBManager extends BaseDBManager {
         HashMap<String, Map<Long, MessageBatch>> uploadMessagesBySessionMpid = new HashMap<String, Map<Long, MessageBatch>>(2);
         int highestUploadedMessageId = -1;
         for (MessageService.ReadyMessage readyMessage : readyMessages) {
-            MessageBatch uploadMessage = uploadMessagesBySessionMpid.get(readyMessage.getSessionId()).get(readyMessage.getMpid());
+            MessageBatch uploadMessage = null;
+            Map<Long, MessageBatch> sessionMessageBatch = uploadMessagesBySessionMpid.get(readyMessage.getSessionId());
+            if (sessionMessageBatch != null) {
+                uploadMessage = sessionMessageBatch.get(readyMessage.getMpid());
+            }
             if (uploadMessage == null) {
                 uploadMessage = createUploadMessage(configManager, true, readyMessage.getMpid());
                 if (uploadMessagesBySessionMpid.get(readyMessage.getSessionId()) == null) {
-                    uploadMessagesBySessionMpid.put(readyMessage.getSessionId(), new HashMap<Long, MessageBatch>()).put(readyMessage.getMpid(), uploadMessage);
+                    Map<Long, MessageBatch> messageBatchMap = new HashMap<Long, MessageBatch>();
+                    messageBatchMap.put(readyMessage.getMpid(), uploadMessage);
+                    uploadMessagesBySessionMpid.put(readyMessage.getSessionId(), messageBatchMap);
                 } else {
                     uploadMessagesBySessionMpid.get(readyMessage.getSessionId()).put(readyMessage.getMpid(), uploadMessage);
                 }

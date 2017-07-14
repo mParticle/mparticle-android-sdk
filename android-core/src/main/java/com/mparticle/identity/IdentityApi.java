@@ -9,7 +9,6 @@ import android.support.annotation.Nullable;
 import com.mparticle.BaseIdentityTask;
 import com.mparticle.MParticle;
 import com.mparticle.MParticleTask;
-
 import com.mparticle.internal.AppStateManager;
 import com.mparticle.internal.ComparableWeakReference;
 import com.mparticle.internal.ConfigManager;
@@ -150,11 +149,17 @@ public final class IdentityApi {
                 return null;
             }
         };
+        updateRequest.currentMpid = mConfigManager.getMpid();
         mBackgroundHandler.post(new Runnable() {
             @Override
             public void run() {
                 try {
                     task.setSuccessful(mMParticleApiClient.modify(updateRequest));
+                    if (updateRequest.getUserIdentities() != null) {
+                        for (Map.Entry<MParticle.IdentityType, String> entry : updateRequest.getUserIdentities().entrySet()) {
+                            mUserDelegate.setUserIdentity(entry.getValue(), entry.getKey(), updateRequest.currentMpid);
+                        }
+                    }
                 }
                 catch (Exception ex) {
                     task.setFailed(ex);
