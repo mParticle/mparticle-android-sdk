@@ -21,6 +21,7 @@ import com.mparticle.messaging.AbstractCloudMessage;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -159,7 +160,7 @@ import java.util.UUID;
                     // find left-over sessions that exist during startup and end them
                     List<String> sessionIds = mMParticleDBManager.getOrphanSessionIds(mMessageManagerCallbacks.getApiKey());
                     for (String sessionId: sessionIds) {
-                        Map.Entry<String, Long> entry = new HashMap.SimpleEntry<String, Long>(sessionId, (Long)msg.obj);
+                        Map.Entry<String, Set<Long>> entry = new HashMap.SimpleEntry<String, Set<Long>>(sessionId, Collections.singleton((Long)msg.obj));
                         sendMessage(obtainMessage(MessageHandler.CREATE_SESSION_END_MESSAGE, 0, 0, entry));
                     }
                 } catch (MParticleApiClientImpl.MPNoConfigException ex) {
