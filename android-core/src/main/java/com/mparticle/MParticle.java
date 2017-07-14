@@ -180,12 +180,7 @@ public class MParticle {
                     if (options.getInitialIdentity() != null) {
                         instance.mIdentityApi.identify(options.getInitialIdentity());
                     } else {
-                        MParticleUser currentUser = instance.mIdentityApi.getCurrentUser();
-                        if (currentUser != null) {
-                            instance.mIdentityApi.identify(IdentityApiRequest.withUser(currentUser).build());
-                        } else {
-                            instance.mIdentityApi.identify(IdentityApiRequest.withEmptyUser().build());
-                        }
+                        instance.identify();
                     }
 
                     if (configManager.getLogUnhandledExceptions()) {
@@ -221,7 +216,7 @@ public class MParticle {
     }
 
     /**
-     * Retrieve an instance of the MParticle class. {@link #start(Context, MParticleOptions)} must
+     * Retrieve an instance of the MParticle class. {@link #start(MParticleOptions)} must
      * be called prior to this.
      *
      * @return An instance of the mParticle SDK configured with your API key
@@ -1109,6 +1104,7 @@ public class MParticle {
         PushRegistrationHelper.setInstanceId(mAppContext, registration);
         mMessageManager.setPushRegistrationId(instanceId, true);
         mKitManager.onPushRegistration(instanceId, senderId);
+        identify();
     }
 
     void logNotification(MPCloudNotificationMessage cloudMessage, CloudAction action, boolean startSession, String appState, int behavior) {
@@ -1132,6 +1128,15 @@ public class MParticle {
     void refreshConfiguration() {
         Logger.debug("Refreshing configuration...");
         mMessageManager.refreshConfiguration();
+    }
+
+    private void identify() {
+        MParticleUser currentUser = Identity().getCurrentUser();
+        if (currentUser != null) {
+            instance.mIdentityApi.identify(IdentityApiRequest.withUser(currentUser).build());
+        } else {
+            instance.mIdentityApi.identify(IdentityApiRequest.withEmptyUser().build());
+        }
     }
 
     public IdentityApi Identity() {
@@ -1236,7 +1241,7 @@ public class MParticle {
      * application will be <code>TRUE</code> when signing with a debug certificate during development, or if you have explicitly set your
      * application to debug within your AndroidManifest.xml.
      *
-     * @see MParticle#start(Context, MParticleOptions)
+     * @see MParticle#start(MParticleOptions)
      * to override this behavior.
      *
      */
