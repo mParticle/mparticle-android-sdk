@@ -51,6 +51,7 @@ import static com.mparticle.MParticle.IdentityType.Yahoo;
 
     public IdentityHttpResponse login(IdentityApiRequest request) throws JSONException, IOException {
         JSONObject jsonObject = getStateJson(request);
+        Logger.verbose("Identity login request: \n" + jsonObject.toString(4));
         HttpURLConnection connection = getPostConnection("/login", jsonObject.toString());
         makeUrlRequest(connection, jsonObject.toString(), false);
         int responseCode = connection.getResponseCode();
@@ -64,6 +65,7 @@ import static com.mparticle.MParticle.IdentityType.Yahoo;
 
     public IdentityHttpResponse logout(IdentityApiRequest request) throws JSONException, IOException {
         JSONObject jsonObject = getStateJson(request);
+        Logger.verbose("Identity logout request: \n" + jsonObject.toString(4));
         HttpURLConnection connection = getPostConnection("/logout", jsonObject.toString());
         makeUrlRequest(connection, jsonObject.toString(), false);
         int responseCode = connection.getResponseCode();
@@ -77,6 +79,7 @@ import static com.mparticle.MParticle.IdentityType.Yahoo;
 
     public IdentityHttpResponse identify(IdentityApiRequest request) throws JSONException, IOException {
         JSONObject jsonObject = getStateJson(request);
+        Logger.verbose("Identity identify request: \n" + jsonObject.toString(4));
         HttpURLConnection connection = getPostConnection("/identify", jsonObject.toString());
         makeUrlRequest(connection, jsonObject.toString(), false);
         int responseCode = connection.getResponseCode();
@@ -90,12 +93,12 @@ import static com.mparticle.MParticle.IdentityType.Yahoo;
 
     public Boolean modify(IdentityApiRequest request) throws JSONException, IOException {
         JSONObject jsonObject = getChangeJson(request);
+        Logger.verbose("Identity modify request: \n" + jsonObject.toString(4));
         HttpURLConnection connection = getPostConnection(mConfigManager.getMpid(), "/modify", jsonObject.toString());
         makeUrlRequest(connection, jsonObject.toString(), false);
         int responseCode = connection.getResponseCode();
+        Logger.verbose("Identity modify response: " + responseCode);
         if (responseCode == 200) {
-            JSONObject response = MPUtility.getJsonResponse(connection);
-            parseIdentityResponse(response);
             return true;
         } else {
             return false;
@@ -156,7 +159,7 @@ import static com.mparticle.MParticle.IdentityType.Yahoo;
         jsonObject.put("known_identities", identitiesJson);
 
         Long mpId = mConfigManager.getMpid();
-        if (mpId != null && mpId != 0) {
+        if (mpId != null && mpId != Constants.TEMPORARY_MPID) {
             jsonObject.put("previous_mpid", mpId);
         }
         return jsonObject;
@@ -195,6 +198,7 @@ import static com.mparticle.MParticle.IdentityType.Yahoo;
             if (!MPUtility.isEmpty(httpResponse.getContext())) {
                 mConfigManager.setIdentityApiContext(httpResponse.getContext());
             }
+            Logger.verbose("Identity Result: 200\n MPID = " + jsonObject.toString(4));
             return httpResponse;
         } catch (JSONException e) {
             return new IdentityHttpResponse.Error(e.getMessage());
@@ -221,7 +225,9 @@ import static com.mparticle.MParticle.IdentityType.Yahoo;
         } catch (JSONException ignore) {
             builder.append("could not parse errors");
         }
-        return new IdentityHttpResponse.Error(builder.toString());
+        String errors = builder.toString();
+        Logger.verbose("Identity request failed: " + errors);
+        return new IdentityHttpResponse.Error(errors);
     }
 
     private HttpURLConnection getPostConnection(Long mpId, String endpoint, String message) throws IOException {
