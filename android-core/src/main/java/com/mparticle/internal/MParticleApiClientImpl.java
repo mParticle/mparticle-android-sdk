@@ -331,12 +331,7 @@ public class MParticleApiClientImpl extends MParticleBaseClientImpl implements M
         try {
             if (jsonResponse.has(CONSUMER_INFO)) {
                 JSONObject consumerInfo = jsonResponse.getJSONObject(CONSUMER_INFO);
-                if (consumerInfo.has(Constants.MessageKey.MPID)) {
-                    mConfigManager.setMpid(consumerInfo.getLong(Constants.MessageKey.MPID));
-                }
-
                 setCookies(consumerInfo.optJSONObject(Constants.MessageKey.COOKIES));
-
             }
             if (jsonResponse.has(LTV)) {
                 BigDecimal serverLtv = new BigDecimal(jsonResponse.getString(LTV));
