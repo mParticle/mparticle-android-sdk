@@ -181,8 +181,8 @@ import static com.mparticle.MParticle.IdentityType.Yahoo;
                 String newValue = newIdentities.get(identityType);
                 String oldValue = oldIdentities.get(identityType);
                 if (newValue != oldValue && (newValue == null || !newValue.equals(oldValue))) {
-                    changeJson.put("new_value", newValue == null ? "null" : newValue);
-                    changeJson.put("old_value", oldValue == null ? "null" : oldValue);
+                    changeJson.put("new_value", newValue == null ? JSONObject.NULL : newValue);
+                    changeJson.put("old_value", oldValue == null ? JSONObject.NULL : oldValue);
                     changeJson.put("identity_type", idTypeString);
                     changesJson.put(changeJson);
                 }

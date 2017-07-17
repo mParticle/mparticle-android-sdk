@@ -487,7 +487,7 @@ public class ConfigManager {
         if (getMpid() != mpid && mpIdChangeListeners != null) {
             triggerMpidChangeListenerCallbacks(mpid);
         }
-        sPreferences.edit().putLong(Constants.PrefKeys.Mpid, mpid).apply();
+        sPreferences.edit().putLong(Constants.PrefKeys.MPID, mpid).apply();
         if (sUserConfig == null || sUserConfig.getMpid() != mpid) {
             sUserConfig = UserConfig.getUserConfig(mContext, mpid);
         }
@@ -498,7 +498,7 @@ public class ConfigManager {
         if (sPreferences == null) {
             sPreferences = context.getSharedPreferences(PREFERENCES_FILE, Context.MODE_PRIVATE);
         }
-        sPreferences.edit().remove(Constants.PrefKeys.Mpid).apply();
+        sPreferences.edit().remove(Constants.PrefKeys.MPID).apply();
     }
 
     public long getMpid() {
@@ -509,7 +509,7 @@ public class ConfigManager {
         if (allowTemporary && sInProgress) {
             return Constants.TEMPORARY_MPID;
         } else {
-            return sPreferences.getLong(Constants.PrefKeys.Mpid, Constants.TEMPORARY_MPID);
+            return sPreferences.getLong(Constants.PrefKeys.MPID, Constants.TEMPORARY_MPID);
         }
     }
 
@@ -524,7 +524,7 @@ public class ConfigManager {
         if (allowTemporary && sInProgress) {
             return Constants.TEMPORARY_MPID;
         } else {
-            return sPreferences.getLong(Constants.PrefKeys.Mpid, Constants.TEMPORARY_MPID);
+            return sPreferences.getLong(Constants.PrefKeys.MPID, Constants.TEMPORARY_MPID);
         }
     }
 

@@ -98,11 +98,12 @@ public class MessageService extends MessageTable {
             int messageIdIndex = readyMessagesCursor.getColumnIndex(MessageTableColumns._ID);
             int messageIndex = readyMessagesCursor.getColumnIndex(MessageTableColumns.MESSAGE);
             int sessionIdIndex = readyMessagesCursor.getColumnIndex(MessageTableColumns.SESSION_ID);
-            int messageMpid = readyMessagesCursor.getColumnIndex(MessageTableColumns.MP_ID);
+            int messageMpidIndex = readyMessagesCursor.getColumnIndex(MessageTableColumns.MP_ID);
             while (readyMessagesCursor.moveToNext()) {
                 String sessionId = readyMessagesCursor.getString(sessionIdIndex);
                 int messageId = readyMessagesCursor.getInt(messageIdIndex);
                 String message = readyMessagesCursor.getString(messageIndex);
+                long messageMpid = readyMessagesCursor.getLong(messageMpidIndex);
                 readyMessages.add(new ReadyMessage(messageMpid, sessionId, messageId, message));
             }
         }

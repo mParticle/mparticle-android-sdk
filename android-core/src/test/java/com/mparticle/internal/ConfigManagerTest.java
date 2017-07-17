@@ -300,11 +300,11 @@ public class ConfigManagerTest {
     public void testGetMpid() throws Exception {
         SharedPreferences prefs = context.getSharedPreferences(null, 0);
         //since getMpId() is called in the ConfigManager constructor, reset it here
-        prefs.edit().remove(Constants.PrefKeys.Mpid).apply();
-        long mpid = prefs.getLong(Constants.PrefKeys.Mpid, 0);
+        prefs.edit().remove(Constants.PrefKeys.MPID).apply();
+        long mpid = prefs.getLong(Constants.PrefKeys.MPID, 0);
         assertTrue(mpid == 0);
         mpid = manager.getMpid();
-        long storedMpid = prefs.getLong(Constants.PrefKeys.Mpid, 0);
+        long storedMpid = prefs.getLong(Constants.PrefKeys.MPID, 0);
         //Changed this from != 0, since as of IdentityAPI changes, we do not want to generate MPIDs
         //client side
         assertTrue(mpid == 0);

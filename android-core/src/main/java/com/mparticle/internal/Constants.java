@@ -470,7 +470,7 @@ public class Constants {
         String PUSH_TITLE = "mp::push::title";
         String UPGRADE_DATE = "mp::upgrade_date";
         String COUNTER_VERSION = "mp::version::counter";
-        String Mpid = "mp::mpid";
+        String MPID = "mp::mpid::identity";
         String CRASHED_IN_FOREGROUND = "mp::crashed_in_foreground";
         String NEXT_REQUEST_TIME = "mp::next_valid_request_time";
         String EVENT_COUNTER = "mp::events::counter";

@@ -77,6 +77,7 @@ class UserConfig {
         this.mpId = mpId;
         this.mPreferences = getPreferenceFile(mpId);
         if (SharedPreferencesMigrator.needsToMigrate(context)) {
+            SharedPreferencesMigrator.setNeedsToMigrate(context, false);
             new SharedPreferencesMigrator(context).migrate(this);
         }
     }
@@ -414,49 +415,54 @@ class UserConfig {
         }
 
         void migrate(UserConfig userConfig) {
-            SharedPreferences.Editor editor = userConfig.mPreferences.edit();
-            userConfig
-                    .setDeletedUserAttributes(editor, getDeletedUserAttributes())
-                    .setPreviousSessionId(editor, getPreviousSessionId());
-            String ltv = getLtv();
-            if (ltv != null) {
-                userConfig.setLtv(ltv);
+            try {
+                SharedPreferences.Editor editor = userConfig.mPreferences.edit();
+                userConfig
+                        .setDeletedUserAttributes(editor, getDeletedUserAttributes())
+                        .setPreviousSessionId(editor, getPreviousSessionId());
+                String ltv = getLtv();
+                if (ltv != null) {
+                    userConfig.setLtv(ltv);
+                }
+                long lastUseDate = getLastUseDate();
+                if (lastUseDate != 0) {
+                    userConfig.setLastUseDate(getLastUseDate());
+                }
+                int currentSessionCounter = getCurrentSessionCounter();
+                if (currentSessionCounter != 0) {
+                    userConfig.setCurrentSessionCounter(getCurrentSessionCounter());
+                }
+                int breadcrumbLimit = getBreadcrumbLimit();
+                if (breadcrumbLimit != 0) {
+                    userConfig.setBreadcrumbLimit(breadcrumbLimit);
+                }
+                long previousTimeInForeground = getPreviousTimeInForeground();
+                if (previousTimeInForeground != 0) {
+                    userConfig.setPreviousSessionForeground(previousTimeInForeground);
+                }
+                long previousSessionStart = getPreviousSessionStart();
+                if (previousSessionStart != 0) {
+                    userConfig.setPreviousSessionStart(previousSessionStart);
+                }
+                int totalRuns = getTotalRuns();
+                if (totalRuns != 0) {
+                    userConfig.setTotalRuns(totalRuns);
+                }
+                String cookies = getCookies();
+                if (cookies != null) {
+                    userConfig.setCookies(cookies);
+                }
+                int launchesSinceUpgrade = getLaunchesSinceUpgrade();
+                if (launchesSinceUpgrade != 0) {
+                    userConfig.setLaunchesSinceUpgrade(launchesSinceUpgrade);
+                }
+                String userIdentities = getUserIdentites();
+                if (userIdentities != null) {
+                    userConfig.setUserIdentities(userIdentities);
+                }
             }
-            long lastUseDate = getLastUseDate();
-            if (lastUseDate != 0) {
-                userConfig.setLastUseDate(getLastUseDate());
-            }
-            int currentSessionCounter = getCurrentSessionCounter();
-            if (currentSessionCounter != 0) {
-                userConfig.setCurrentSessionCounter(getCurrentSessionCounter());
-            }
-            int breadcrumbLimit = getBreadcrumbLimit();
-            if (breadcrumbLimit != 0) {
-                userConfig.setBreadcrumbLimit(breadcrumbLimit);
-            }
-            long previousTimeInForeground = getPreviousTimeInForeground();
-            if (previousTimeInForeground != 0) {
-                userConfig.setPreviousSessionForeground(previousTimeInForeground);
-            }
-            long previousSessionStart = getPreviousSessionStart();
-            if (previousSessionStart != 0) {
-                userConfig.setPreviousSessionStart(previousSessionStart);
-            }
-            int totalRuns = getTotalRuns();
-            if (totalRuns != 0) {
-                userConfig.setTotalRuns(totalRuns);
-            }
-            String cookies = getCookies();
-            if (cookies != null) {
-                userConfig.setCookies(cookies);
-            }
-            int launchesSinceUpgrade = getLaunchesSinceUpgrade();
-            if (launchesSinceUpgrade != 0) {
-                userConfig.setLaunchesSinceUpgrade(launchesSinceUpgrade);
-            }
-            String userIdentities = getUserIdentites();
-            if (userIdentities != null) {
-                userConfig.setUserIdentities(userIdentities);
+            catch (Exception ex) {
+                //do nothing
             }
         }
 

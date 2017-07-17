@@ -18,7 +18,7 @@ import java.util.Iterator;
 
 public class MParticleDatabaseHelper implements SQLiteOpenHelperWrapper {
     private final Context mContext;
-    public static final int DB_VERSION = 6;
+    public static final int DB_VERSION = 7;
     public static final String DB_NAME = "mparticle.db";
 
     public MParticleDatabaseHelper(Context context) {
