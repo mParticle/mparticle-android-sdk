@@ -30,6 +30,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Method;
@@ -191,7 +192,14 @@ public class MPUtility {
     public static JSONObject getJsonResponse(HttpURLConnection connection) {
         try {
             StringBuilder responseBuilder = new StringBuilder();
-            BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+            InputStream is;
+            try {
+                is = connection.getInputStream();
+            }
+            catch (IOException ex) {
+                is = connection.getErrorStream();
+            }
+            BufferedReader in = new BufferedReader(new InputStreamReader(is));
             String line;
             while ((line = in.readLine()) != null) {
                 responseBuilder.append(line + '\n');

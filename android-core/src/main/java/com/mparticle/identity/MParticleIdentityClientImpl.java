@@ -101,6 +101,8 @@ import static com.mparticle.MParticle.IdentityType.Yahoo;
         if (responseCode == 200) {
             return true;
         } else {
+            JSONObject response = MPUtility.getJsonResponse(connection);
+            parseIdentityErrorResponse(response);
             return false;
         }
     }
@@ -217,7 +219,7 @@ import static com.mparticle.MParticle.IdentityType.Yahoo;
                         builder.append(object.getString("code"));
                         builder.append(": ");
                         builder.append(object.getString("message"));
-                        builder.append("/n");
+                        builder.append("\n");
                     } catch (JSONException ignore) {
                     }
                 }
