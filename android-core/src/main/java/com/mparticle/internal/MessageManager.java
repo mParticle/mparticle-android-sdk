@@ -24,6 +24,7 @@ import com.mparticle.commerce.CommerceEvent;
 import com.mparticle.internal.Constants.MessageKey;
 import com.mparticle.internal.Constants.MessageType;
 import com.mparticle.internal.database.services.MParticleDBManager;
+import com.mparticle.internal.database.services.mp.ReportingService;
 import com.mparticle.internal.database.tables.mp.GcmMessageTable;
 import com.mparticle.internal.dto.UserAttributeRemoval;
 import com.mparticle.internal.dto.UserAttributeResponse;
@@ -834,7 +835,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
                 messageList.get(i).setDevMode(development);
                 messageList.get(i).setSessionId(sessionId);
             }
-            Message message = mMessageHandler.obtainMessage(MessageHandler.STORE_REPORTING_MESSAGE_LIST, messageList);
+            Message message = mMessageHandler.obtainMessage(MessageHandler.STORE_REPORTING_MESSAGE_LIST, new ReportingMpidMessage(messageList, mConfigManager.getMpid()));
             mMessageHandler.sendMessage(message);
         }
     }
@@ -969,5 +970,13 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
         }
     }
 
+    public static class ReportingMpidMessage {
+        long mpid;
+        List<? extends JsonReportingMessage> reportingMessages;
 
+        public ReportingMpidMessage(List<? extends JsonReportingMessage> reportingMessages, long mpid) {
+            this.mpid = mpid;
+            this.reportingMessages = reportingMessages;
+        }
+    }
 }

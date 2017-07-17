@@ -52,7 +52,6 @@ import java.util.Map;
     }
 
     public boolean setUserIdentity(String id, MParticle.IdentityType identityType, long mpId) {
-        mpId = verifyMpId(mpId);
         if (identityType != null) {
             if (id == null) {
                 Logger.debug("Removing User Identity type: " + identityType.name());
@@ -141,7 +140,6 @@ import java.util.Map;
      *
      */
     boolean setUserAttribute(String key, Object value, long userMpId, boolean synchronously) {
-        userMpId = verifyMpId(userMpId);
         if (mConfigManager.isEnabled() && mAppStateManager.getSession().checkEventLimit()) {
             MParticle.getInstance().getAppStateManager().ensureActiveSession();
             if (MPUtility.isEmpty(key)) {
@@ -197,7 +195,6 @@ import java.util.Map;
     }
 
     public boolean setUserAttributeList(String key, Object value, long userMpId) {
-        userMpId = verifyMpId(userMpId);
         if (value == null) {
             Logger.warning("setUserAttributeList called with null list, this is a no-op.");
             return false;
@@ -206,7 +203,6 @@ import java.util.Map;
     }
 
     public boolean incrementUserAttribute(String key, int value, long userMpId) {
-        userMpId = verifyMpId(userMpId);
         if (key == null) {
             Logger.warning("incrementUserAttribute called with null key. Ignoring...");
             return false;
@@ -217,7 +213,6 @@ import java.util.Map;
     }
 
     public boolean removeUserAttribute(String key, long userMpId) {
-        userMpId = verifyMpId(userMpId);
         if (MPUtility.isEmpty(key)) {
             Logger.debug("removeUserAttribute called with empty key.");
             return false;
@@ -246,34 +241,6 @@ import java.util.Map;
     }
 
 
-    private Long mpIdInFlux = null;
-
-    /**
-     * To be used while a request, which might change the user's MPID is in progress. Since externally,
-     * from the client's POV, the MPID hasn't changed yet, they will still be making requests with a
-     * potentially dated MPID. This method will change the internal MPID to a placeholder, so that
-     * when the real MPID returns, if it has changed, we can go back and changed the events we recorded
-     * since the request that changed the MPID was initiated
-     */
-    void useTemporaryMpId(long mpId) {
-        mpIdInFlux = mpId;
-        mConfigManager.setMpidSilently(Constants.TEMPORARY_MPID);
-    }
-
-
-    /**
-     * This will tell us if the current MPID in configManager is a temporary MPID, or if there is simply
-     * no current MPID, as the case would be on startup
-     * @return
-     */
-    boolean hasMpIdInFlux() {
-        return mpIdInFlux != null && mpIdInFlux != Constants.TEMPORARY_MPID;
-    }
-
-    long getMpIdInFlux() {
-        return mpIdInFlux != null ? mpIdInFlux : Constants.TEMPORARY_MPID;
-    }
-
     /**
      * to be used to rectify the use of the placeholder MPID, which occured while request which might
      * change the MPID was in progress. The parameter "mpid" can either be the previous MPID or a new MPID,
@@ -281,8 +248,6 @@ import java.util.Map;
      */
 
     void migrateTemporaryToMpId(long mpId) {
-        //check if there was a previous MPID before the temporary one got put in place, and if it was the same MPID
-        boolean mpIdChanged = (mpIdInFlux == null || mpIdInFlux != mpId);
         // if the mpid remains equal to the temporary_mpid, as the case could be when a network request fails
         // or on startup, then there is not reason to do anything
         if (mpId == Constants.TEMPORARY_MPID) {
@@ -290,21 +255,8 @@ import java.util.Map;
         }
         mConfigManager.mergeUserConfigs(Constants.TEMPORARY_MPID, mpId);
         mMessageManager.getMParticleDBManager().updateMpId(Constants.TEMPORARY_MPID, mpId);
-        if (mpIdChanged) {
-            mConfigManager.setMpid(mpId);
-        } else {
-            //if we are got the same MPID back after an IdentityAPI call, we should set it silently
-            mConfigManager.setMpidSilently(mpId);
-        }
+        mConfigManager.setMpid(mpId);
         mConfigManager.deleteUserConfig(Constants.TEMPORARY_MPID);
-        mpIdInFlux = null;
 
-    }
-
-    private long verifyMpId(long mpiD) {
-        if (mpIdInFlux != null && mpIdInFlux == mpiD) {
-            return Constants.TEMPORARY_MPID;
-        }
-        return mpiD;
     }
 }

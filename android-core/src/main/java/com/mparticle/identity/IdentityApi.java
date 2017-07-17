@@ -26,7 +26,7 @@ import java.util.Map;
 import java.util.Set;
 
 public final class IdentityApi {
-    private Handler mBackgroundHandler, mMainHandler;
+    private Handler mBackgroundHandler;
     ConfigManager mConfigManager;
     MessageManager mMessageManager;
 
@@ -46,33 +46,16 @@ public final class IdentityApi {
 
     public IdentityApi(Context context, AppStateManager appStateManager, MessageManager messageManager, ConfigManager configManager, KitManager kitManager) {
         this.mBackgroundHandler = messageManager.mUploadHandler;
-        this.mMainHandler = new Handler(Looper.myLooper());
         this.mUserDelegate = new MParticleUserDelegate(appStateManager, configManager, messageManager, kitManager, new MParticleDBManager(context, DatabaseTables.getInstance(context)));
         this.mConfigManager = configManager;
         this.mMessageManager = messageManager;
         configManager.addMpIdChangeListener(new IdentityStateListenerManager());
         this.mMParticleApiClient = new MParticleIdentityClientImpl(configManager, context);
     }
-
-    //for testing only
-    public IdentityApi(Context context, AppStateManager appStateManager, MessageManager messageManager, ConfigManager configManager, KitManager kitManager, Looper looper) {
-        this.mBackgroundHandler = messageManager.mUploadHandler;
-        this.mMainHandler = new Handler(looper);
-        this.mUserDelegate = new MParticleUserDelegate(appStateManager, configManager, messageManager, kitManager, new MParticleDBManager(context, DatabaseTables.getInstance(context)));
-        this.mConfigManager = configManager;
-        this.mMessageManager = messageManager;
-        configManager.addMpIdChangeListener(new IdentityStateListenerManager());
-        this.mMParticleApiClient = new MParticleIdentityClientImpl(configManager, context);
-    }
-
 
     /**
-     * returns the current MParticleUser. There are times, while requests which might change the MPID
-     * are in progress, that the MPID is "in flux" signifying that the MPID might have already changed
-     * based on the information in the request, but we are not yet aware of the new MPID, since the
-     * request has not returned. In this case, the internal MPID, provided by the ConfigManager, will
-     * be a temporary placeholder value, but the MParticleUser returned by this method, will reflect
-     * the current MParticleUser, before the MPID became "in flux"
+     * return the current MPID, even if an Identity request, which might cause the MPID to change, is
+     * currently in progress
      */
     public MParticleUser getCurrentUser() {
         long mpid = mConfigManager.getMpid();
@@ -80,11 +63,7 @@ public final class IdentityApi {
         // temporary MPID as a placeholder because a request is in progress, or if it is because we
         // just do not have a current MPID
         if (Constants.TEMPORARY_MPID == mpid) {
-            if (mUserDelegate.hasMpIdInFlux()) {
-                return MParticleUser.getInstance(mUserDelegate.getMpIdInFlux(), mUserDelegate);
-            } else {
-                return null;
-            }
+            return null;
         } else {
             return MParticleUser.getInstance(mpid, mUserDelegate);
         }
@@ -149,7 +128,6 @@ public final class IdentityApi {
                 return null;
             }
         };
-        updateRequest.currentMpid = mConfigManager.getMpid();
         mBackgroundHandler.post(new Runnable() {
             @Override
             public void run() {
@@ -157,7 +135,7 @@ public final class IdentityApi {
                     task.setSuccessful(mMParticleApiClient.modify(updateRequest));
                     if (updateRequest.getUserIdentities() != null) {
                         for (Map.Entry<MParticle.IdentityType, String> entry : updateRequest.getUserIdentities().entrySet()) {
-                            mUserDelegate.setUserIdentity(entry.getValue(), entry.getKey(), updateRequest.currentMpid);
+                            mUserDelegate.setUserIdentity(entry.getValue(), entry.getKey(), mConfigManager.getMpid());
                         }
                     }
                 }
@@ -173,8 +151,7 @@ public final class IdentityApi {
     private BaseIdentityTask makeIdentityRequest(final IdentityApiRequest identityApiRequest, final IdentityNetworkRequestRunnable networkRequest) {
         final BaseIdentityTask task = new IdentityApiResultTask();
         final long startingMpid = mConfigManager.getMpid();
-        identityApiRequest.currentMpid = mConfigManager.getMpid();
-        mUserDelegate.useTemporaryMpId(startingMpid);
+        mConfigManager.setIdentityRequestInProgress(true);
         mBackgroundHandler.post(new Runnable() {
             @Override
             public void run() {
@@ -183,10 +160,12 @@ public final class IdentityApi {
 
                     if (result.hasError()) {
                         // If the requst has an error, set the MPID back
+                        mConfigManager.setIdentityRequestInProgress(false);
                         mUserDelegate.migrateTemporaryToMpId(startingMpid);
                         task.setFailed(result.getError());
                     } else {
                         long newMpid = result.getMpId();
+                        mConfigManager.setIdentityRequestInProgress(false);
                         mUserDelegate.migrateTemporaryToMpId(newMpid);
                         if (startingMpid != newMpid) {
                             mUserDelegate.setUser(startingMpid, newMpid, identityApiRequest.shouldCopyUserAttributes());
@@ -200,6 +179,7 @@ public final class IdentityApi {
                     }
                 } catch (Exception ex) {
                     // If we get an exception, set the MPID back
+                    mConfigManager.setIdentityRequestInProgress(false);
                     mUserDelegate.migrateTemporaryToMpId(startingMpid);
                     task.setFailed(ex);
                 }

@@ -2,15 +2,10 @@ package com.mparticle.internal;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.os.Handler;
-import android.os.Looper;
 
 import com.mparticle.ExceptionHandler;
 import com.mparticle.MParticle;
 import com.mparticle.identity.IdentityApi;
-import com.mparticle.identity.IdentityStateListener;
-import com.mparticle.identity.MParticleUser;
-import com.mparticle.internal.database.services.MParticleDBManager;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -28,7 +23,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeMap;
 
 public class ConfigManager {
     public static final String CONFIG_JSON = "json";
@@ -489,21 +483,8 @@ public class ConfigManager {
         return mProviderPersistence;
     }
 
-    /**
-     *
-     * use this to set the MPID, without triggering any listeners
-     *
-     */
-    public void setMpidSilently(long mpId) {
-        setMpid(mpId, true);
-    }
-
-    public void setMpid(long mpId) {
-        setMpid(mpId, false);
-    }
-
-    private void setMpid(long mpid, boolean silently) {
-        if (!silently && getMpid() != mpid && mpIdChangeListeners != null) {
+    public void setMpid(long mpid) {
+        if (getMpid() != mpid && mpIdChangeListeners != null) {
             triggerMpidChangeListenerCallbacks(mpid);
         }
         sPreferences.edit().putLong(Constants.PrefKeys.Mpid, mpid).apply();
@@ -521,14 +502,35 @@ public class ConfigManager {
     }
 
     public long getMpid() {
-        return sPreferences.getLong(Constants.PrefKeys.Mpid, Constants.TEMPORARY_MPID);
+        return getMpid(false);
+    }
+
+    public long getMpid(boolean allowTemporary) {
+        if (allowTemporary && sInProgress) {
+            return Constants.TEMPORARY_MPID;
+        } else {
+            return sPreferences.getLong(Constants.PrefKeys.Mpid, Constants.TEMPORARY_MPID);
+        }
     }
 
     public static long getMpid(Context context) {
+        return getMpid(context, false);
+    }
+
+    public static long getMpid(Context context, boolean allowTemporary) {
         if (sPreferences == null) {
             sPreferences = context.getSharedPreferences(PREFERENCES_FILE, Context.MODE_PRIVATE);
         }
-        return sPreferences.getLong(Constants.PrefKeys.Mpid, 0);
+        if (allowTemporary && sInProgress) {
+            return Constants.TEMPORARY_MPID;
+        } else {
+            return sPreferences.getLong(Constants.PrefKeys.Mpid, Constants.TEMPORARY_MPID);
+        }
+    }
+
+    private static boolean sInProgress;
+    public static void setIdentityRequestInProgress(boolean inProgress) {
+        sInProgress = inProgress;
     }
 
     public void mergeUserConfigs(long subjectMpId, long targetMpId) {
@@ -849,6 +851,9 @@ public class ConfigManager {
     }
 
     private void triggerMpidChangeListenerCallbacks(long mpid) {
+        if (MPUtility.isEmpty(mpIdChangeListeners)) {
+            return;
+        }
         mpIdChangeListeners.removeAll(Collections.singleton(new ComparableWeakReference<IdentityApi.MpIdChangeListener>(null)));
         for (WeakReference<IdentityApi.MpIdChangeListener> listenerRef: mpIdChangeListeners) {
             if (listenerRef.get() != null) {

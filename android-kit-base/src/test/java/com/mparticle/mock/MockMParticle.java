@@ -29,7 +29,7 @@ public class MockMParticle extends MParticle {
         mMedia = Mockito.mock(MPMediaAPI.class);
         mCommerce = Mockito.mock(CommerceApi.class);
         mProductBags = Mockito.mock(ProductBagApi.class);
-        mIdentityApi = new IdentityApi(new MockContext(), mAppStateManager, mMessageManager, mConfigManager, mKitManager, Mockito.mock(Looper.class));
+        mIdentityApi = new IdentityApi(new MockContext(), mAppStateManager, mMessageManager, mConfigManager, mKitManager);
         mPreferences = new MockSharedPreferences();
     }
 }

@@ -206,8 +206,8 @@ import java.util.UUID;
                 break;
             case STORE_REPORTING_MESSAGE_LIST:
                 try{
-                    List<JsonReportingMessage> reportingMessages = (List<JsonReportingMessage>)msg.obj;
-                    mMParticleDBManager.insertReportingMessages(reportingMessages);
+                    MessageManager.ReportingMpidMessage reportingMessages = (MessageManager.ReportingMpidMessage)msg.obj;
+                    mMParticleDBManager.insertReportingMessages((List<JsonReportingMessage>)reportingMessages.reportingMessages, reportingMessages.mpid);
                 }catch (Exception e) {
                     Logger.verbose(e, "Error while inserting reporting messages: ", e.toString());
                 }

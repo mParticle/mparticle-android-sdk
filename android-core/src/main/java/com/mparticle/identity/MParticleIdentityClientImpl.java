@@ -90,7 +90,7 @@ import static com.mparticle.MParticle.IdentityType.Yahoo;
 
     public Boolean modify(IdentityApiRequest request) throws JSONException, IOException {
         JSONObject jsonObject = getChangeJson(request);
-        HttpURLConnection connection = getPostConnection(request.currentMpid, "/modify", jsonObject.toString());
+        HttpURLConnection connection = getPostConnection(mConfigManager.getMpid(), "/modify", jsonObject.toString());
         makeUrlRequest(connection, jsonObject.toString(), false);
         int responseCode = connection.getResponseCode();
         if (responseCode == 200) {
@@ -155,7 +155,7 @@ import static com.mparticle.MParticle.IdentityType.Yahoo;
         }
         jsonObject.put("known_identities", identitiesJson);
 
-        Long mpId = request.currentMpid;
+        Long mpId = mConfigManager.getMpid();
         if (mpId != null && mpId != 0) {
             jsonObject.put("previous_mpid", mpId);
         }
@@ -165,7 +165,7 @@ import static com.mparticle.MParticle.IdentityType.Yahoo;
     private JSONObject getChangeJson(IdentityApiRequest request) throws JSONException {
         JSONObject jsonObject = getBaseJson();
         JSONArray changesJson = new JSONArray();
-        Map<MParticle.IdentityType, String> oldIdentities = mConfigManager.getUserIdentities(request.currentMpid);
+        Map<MParticle.IdentityType, String> oldIdentities = mConfigManager.getUserIdentities(mConfigManager.getMpid());
         Map<MParticle.IdentityType, String> newIdentities = request.getUserIdentities();
 
         Set<MParticle.IdentityType> identityTypes = new HashSet<MParticle.IdentityType>(oldIdentities.keySet());

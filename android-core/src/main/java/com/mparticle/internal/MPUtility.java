@@ -103,6 +103,10 @@ public class MPUtility {
         return map == null || map.size() == 0;
     }
 
+    public static boolean isEmpty(Collection collection) {
+        return collection == null || collection.size() == 0;
+    }
+
     public static AndroidAdIdInfo getGoogleAdIdInfo(Context context) {
         try {
             Class AdvertisingIdClient = Class

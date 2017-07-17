@@ -530,12 +530,12 @@ public class MParticleDBManager extends BaseDBManager {
      *
      */
 
-    public void insertReportingMessages(List<JsonReportingMessage> reportingMessages) {
+    public void insertReportingMessages(List<JsonReportingMessage> reportingMessages, long mpId) {
         SQLiteDatabase db = getMParticleDatabase();
         try {
             db.beginTransaction();
             for (int i = 0; i < reportingMessages.size(); i++) {
-                ReportingService.insertReportingMessage(db, reportingMessages.get(i), getMpid());
+                ReportingService.insertReportingMessage(db, reportingMessages.get(i), mpId);
             }
             db.setTransactionSuccessful();
         } catch (Exception e) {
