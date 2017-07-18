@@ -15,6 +15,7 @@ import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.Constants;
 import com.mparticle.internal.DatabaseTables;
 import com.mparticle.internal.KitManager;
+import com.mparticle.internal.Logger;
 import com.mparticle.internal.MessageManager;
 import com.mparticle.internal.database.services.MParticleDBManager;
 
@@ -222,16 +223,20 @@ public final class IdentityApi {
 
                 @Override
                 public void run() {
-                    List<WeakReference<IdentityStateListener>> toRemove = new ArrayList<WeakReference<IdentityStateListener>>();
-                    for (WeakReference<IdentityStateListener> listenerRef : identityStateListeners) {
-                        IdentityStateListener listener = listenerRef.get();
-                        if (listener != null) {
-                            listener.onUserIdentified(user);
-                        } else {
-                            toRemove.add(listenerRef);
+                    try {
+                        List<WeakReference<IdentityStateListener>> toRemove = new ArrayList<WeakReference<IdentityStateListener>>();
+                        for (WeakReference<IdentityStateListener> listenerRef : new HashSet<WeakReference<IdentityStateListener>>(identityStateListeners)) {
+                            IdentityStateListener listener = listenerRef.get();
+                            if (listener != null) {
+                                listener.onUserIdentified(user);
+                            } else {
+                                toRemove.add(listenerRef);
+                            }
                         }
+                        identityStateListeners.removeAll(toRemove);
+                    }catch (Exception e) {
+                        Logger.error(e.toString());
                     }
-                    identityStateListeners.removeAll(toRemove);
                 }
             });
 
