@@ -206,7 +206,7 @@ import java.util.concurrent.atomic.AtomicLong;
                 mCurrentActivityReference = null;
             }
 
-            delayedBackgroundCheckHandler.post(new Runnable() {
+            delayedBackgroundCheckHandler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
                     try {
@@ -218,7 +218,7 @@ import java.util.concurrent.atomic.AtomicLong;
                         e.printStackTrace();
                     }
                 }
-            });//, ACTIVITY_DELAY);
+            }, ACTIVITY_DELAY);
 
             if (MParticle.getInstance().isAutoTrackingEnabled()) {
                 MParticle.getInstance().logScreen(
