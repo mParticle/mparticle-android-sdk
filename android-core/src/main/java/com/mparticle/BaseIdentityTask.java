@@ -5,54 +5,46 @@ import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import com.mparticle.identity.IdentityApiResult;
 import com.mparticle.identity.IdentityHttpResponse;
+import com.mparticle.identity.MParticleUser;
 
 import java.util.HashSet;
 import java.util.Set;
 
-public abstract class BaseIdentityTask<T> extends MParticleTask<T> {
+public final class BaseIdentityTask extends MParticleTask<IdentityApiResult> {
     boolean isCompleted;
     boolean isSuccessful;
-    Exception mException;
-    T result;
-    Set<TaskSuccessListener<? super T>> successListeners = new HashSet<TaskSuccessListener<? super T>>();
+    IdentityApiResult result;
+    Set<TaskSuccessListener> successListeners = new HashSet<TaskSuccessListener>();
     Set<TaskFailureListener> failureListeners = new HashSet<TaskFailureListener>();
 
-    public void setFailed(IdentityHttpResponse.Error error) {
-        setFailed(new Exception(error.getErrorString()));
-    }
-
-    public void setFailed(final Exception exception) {
+    public void setFailed(final IdentityHttpResponse errorResponse) {
         isCompleted = true;
         isSuccessful = false;
-        mException = exception;
         new Handler(Looper.getMainLooper()).post(new Runnable() {
             @Override
             public void run() {
                 for(TaskFailureListener listener: failureListeners) {
-                    listener.onFailure(exception);
+                    listener.onFailure(errorResponse);
                 }
             }
         });
     }
 
-    public void setSuccessful(Object object) {
+    public void setSuccessful(final IdentityApiResult result) {
         isCompleted = true;
         isSuccessful = true;
-        result = buildResult(object);
-
-
+        this.result = result;
         new Handler(Looper.getMainLooper()).post(new Runnable() {
             @Override
             public void run() {
-                for (TaskSuccessListener<? super T> listener: successListeners) {
+                for (TaskSuccessListener listener: successListeners) {
                     listener.onSuccess(result);
                 }
             }
         });
     }
-
-    public abstract T buildResult(Object o);
 
     @Override
     public boolean isComplete() {
@@ -65,19 +57,13 @@ public abstract class BaseIdentityTask<T> extends MParticleTask<T> {
     }
 
     @Override
-    public T getResult() {
+    public IdentityApiResult getResult() {
         return result;
-    }
-
-    @Nullable
-    @Override
-    public Exception getException() {
-        return mException;
     }
 
     @NonNull
     @Override
-    public MParticleTask<T> addSuccessListener(@NonNull TaskSuccessListener<? super T> listener) {
+    public MParticleTask addSuccessListener(@NonNull TaskSuccessListener listener) {
         if (listener != null) {
             successListeners.add(listener);
         }
@@ -86,7 +72,7 @@ public abstract class BaseIdentityTask<T> extends MParticleTask<T> {
 
     @NonNull
     @Override
-    public MParticleTask<T> addFailureListener(@NonNull TaskFailureListener listener) {
+    public MParticleTask addFailureListener(@NonNull TaskFailureListener listener) {
         if (listener != null) {
             failureListeners.add(listener);
         }

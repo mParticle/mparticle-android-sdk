@@ -10,23 +10,25 @@ import com.mparticle.BaseIdentityTask;
 import com.mparticle.MParticle;
 import com.mparticle.MParticleTask;
 import com.mparticle.internal.AppStateManager;
-import com.mparticle.internal.ComparableWeakReference;
 import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.Constants;
 import com.mparticle.internal.DatabaseTables;
 import com.mparticle.internal.KitManager;
 import com.mparticle.internal.Logger;
+import com.mparticle.internal.MPUtility;
 import com.mparticle.internal.MessageManager;
 import com.mparticle.internal.database.services.MParticleDBManager;
 
-import java.lang.ref.WeakReference;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 public final class IdentityApi {
+    public static int UNKNOWN_ERROR = -1;
+    public static int THROTTLE_ERROR = 429;
+    public static int BAD_REQUEST = 400;
+    public static int SERVER_ERROR = 500;
+
     private Handler mBackgroundHandler;
     ConfigManager mConfigManager;
     MessageManager mMessageManager;
@@ -34,7 +36,7 @@ public final class IdentityApi {
     MParticleUserDelegate mUserDelegate;
     MParticleIdentityClient mMParticleApiClient;
 
-    private Set<WeakReference<IdentityStateListener>> identityStateListeners = new HashSet<WeakReference<IdentityStateListener>>();
+    private Set<IdentityStateListener> identityStateListeners = new HashSet<IdentityStateListener>();
     private Object lock = new Object();
     private static IdentityApi instance;
 
@@ -60,9 +62,6 @@ public final class IdentityApi {
      */
     public MParticleUser getCurrentUser() {
         long mpid = mConfigManager.getMpid();
-        // if the internal MPID is temporary, we need to check if that is because we are using the
-        // temporary MPID as a placeholder because a request is in progress, or if it is because we
-        // just do not have a current MPID
         if (Constants.TEMPORARY_MPID == mpid) {
             return null;
         } else {
@@ -71,11 +70,11 @@ public final class IdentityApi {
     }
 
     public void addIdentityStateListener(IdentityStateListener listener) {
-        identityStateListeners.add(new ComparableWeakReference<IdentityStateListener>(listener));
+        identityStateListeners.add(listener);
     }
 
     public void removeIdentityStateListener(IdentityStateListener listener) {
-        identityStateListeners.remove(new ComparableWeakReference<IdentityStateListener>(listener));
+        identityStateListeners.remove(listener);
     }
 
     public MParticleTask<IdentityApiResult> logout() {
@@ -119,29 +118,29 @@ public final class IdentityApi {
         }
     }
 
-    public synchronized MParticleTask<Void> modify(@NonNull final IdentityApiRequest updateRequest) {
+    public synchronized BaseIdentityTask modify(@NonNull final IdentityApiRequest updateRequest) {
         if (updateRequest == null) {
             throw new IllegalArgumentException("modify() requires a valid IdentityApiRequest");
         }
-        final BaseIdentityTask<Void> task = new BaseIdentityTask<Void>() {
-            @Override
-            public Void buildResult(Object o) {
-                return null;
-            }
-        };
+        final BaseIdentityTask task = new BaseIdentityTask();
         mBackgroundHandler.post(new Runnable() {
             @Override
             public void run() {
                 try {
-                    task.setSuccessful(mMParticleApiClient.modify(updateRequest));
-                    if (updateRequest.getUserIdentities() != null) {
-                        for (Map.Entry<MParticle.IdentityType, String> entry : updateRequest.getUserIdentities().entrySet()) {
-                            mUserDelegate.setUserIdentity(entry.getValue(), entry.getKey(), mConfigManager.getMpid());
+                    final IdentityHttpResponse result = mMParticleApiClient.modify(updateRequest);
+                    if (!result.isSuccessful()) {
+                        task.setFailed(result);
+                    } else {
+                        task.setSuccessful(new IdentityApiResult(getCurrentUser()));
+                        if (updateRequest.getUserIdentities() != null) {
+                            for (Map.Entry<MParticle.IdentityType, String> entry : updateRequest.getUserIdentities().entrySet()) {
+                                mUserDelegate.setUserIdentity(entry.getValue(), entry.getKey(), mConfigManager.getMpid());
+                            }
                         }
                     }
                 }
                 catch (Exception ex) {
-                    task.setFailed(ex);
+                    task.setFailed(new IdentityHttpResponse(IdentityApi.UNKNOWN_ERROR, ex.toString()));
                 }
             }
         });
@@ -150,56 +149,41 @@ public final class IdentityApi {
 
 
     private BaseIdentityTask makeIdentityRequest(final IdentityApiRequest identityApiRequest, final IdentityNetworkRequestRunnable networkRequest) {
-        final BaseIdentityTask task = new IdentityApiResultTask();
+        final BaseIdentityTask task = new BaseIdentityTask();
         final long startingMpid = mConfigManager.getMpid();
-        mConfigManager.setIdentityRequestInProgress(true);
+        ConfigManager.setIdentityRequestInProgress(true);
         mBackgroundHandler.post(new Runnable() {
             @Override
             public void run() {
                 try {
                     final IdentityHttpResponse result = networkRequest.request(identityApiRequest);
 
-                    if (result.hasError()) {
-                        // If the requst has an error, set the MPID back
-                        mConfigManager.setIdentityRequestInProgress(false);
-                        mUserDelegate.migrateTemporaryToMpId(startingMpid);
-                        task.setFailed(result.getError());
+                    if (!result.isSuccessful()) {
+                        ConfigManager.setIdentityRequestInProgress(false);
+                        task.setFailed(result);
                     } else {
                         long newMpid = result.getMpId();
-                        mConfigManager.setIdentityRequestInProgress(false);
-                        mUserDelegate.migrateTemporaryToMpId(newMpid);
+                        ConfigManager.setIdentityRequestInProgress(false);
+                        mUserDelegate.changeUser(newMpid);
                         if (startingMpid != newMpid) {
                             mUserDelegate.setUser(startingMpid, newMpid, identityApiRequest.shouldCopyUserAttributes());
                         }
                         if (identityApiRequest.getUserIdentities() != null) {
                             for (Map.Entry<MParticle.IdentityType, String> entry : identityApiRequest.getUserIdentities().entrySet()) {
-                                mUserDelegate.setUserIdentity(entry.getValue(), entry.getKey(), newMpid);
+                                if (!MPUtility.isEmpty(entry.getValue())) {
+                                    mUserDelegate.setUserIdentity(entry.getValue(), entry.getKey(), newMpid);
+                                }
                             }
                         }
-                        task.setSuccessful(newMpid);
+                        task.setSuccessful(new IdentityApiResult(getCurrentUser()));
                     }
                 } catch (Exception ex) {
-                    // If we get an exception, set the MPID back
-                    mConfigManager.setIdentityRequestInProgress(false);
-                    mUserDelegate.migrateTemporaryToMpId(startingMpid);
-                    task.setFailed(ex);
+                    ConfigManager.setIdentityRequestInProgress(false);
+                    task.setFailed(new IdentityHttpResponse(IdentityApi.UNKNOWN_ERROR, ex.toString()));
                 }
             }
         });
         return task;
-    }
-
-    class IdentityApiResultTask extends BaseIdentityTask<IdentityApiResult> {
-
-            @Override
-            public IdentityApiResult buildResult(final Object o) {
-                return new IdentityApiResult() {
-                    @Override
-                    public MParticleUser getUser() {
-                        return MParticleUser.getInstance((Long)o, mUserDelegate);
-                    }
-                };
-            }
     }
 
     void setApiClient(MParticleIdentityClient client) {
@@ -219,27 +203,23 @@ public final class IdentityApi {
         @Override
         public void onMpIdChanged(long mpid) {
             final MParticleUser user = MParticleUser.getInstance(mpid, mUserDelegate);
-            new Handler(Looper.getMainLooper()).post(new Runnable() {
+            if (identityStateListeners != null && identityStateListeners.size() > 0) {
+                new Handler(Looper.getMainLooper()).post(new Runnable() {
 
-                @Override
-                public void run() {
-                    try {
-                        List<WeakReference<IdentityStateListener>> toRemove = new ArrayList<WeakReference<IdentityStateListener>>();
-                        for (WeakReference<IdentityStateListener> listenerRef : new HashSet<WeakReference<IdentityStateListener>>(identityStateListeners)) {
-                            IdentityStateListener listener = listenerRef.get();
-                            if (listener != null) {
-                                listener.onUserIdentified(user);
-                            } else {
-                                toRemove.add(listenerRef);
+                    @Override
+                    public void run() {
+                        try {
+                            for (IdentityStateListener listener : new HashSet<IdentityStateListener>(identityStateListeners)) {
+                                if (listener != null) {
+                                    listener.onUserIdentified(user);
+                                }
                             }
+                        } catch (Exception e) {
+                            Logger.error(e.toString());
                         }
-                        identityStateListeners.removeAll(toRemove);
-                    }catch (Exception e) {
-                        Logger.error(e.toString());
                     }
-                }
-            });
-
+                });
+            }
         }
     }
 }

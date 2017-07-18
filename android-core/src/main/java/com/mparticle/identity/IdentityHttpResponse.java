@@ -1,25 +1,61 @@
 package com.mparticle.identity;
 
+import com.mparticle.internal.MPUtility;
+
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class IdentityHttpResponse {
+    private ArrayList<Error> errors = new ArrayList<Error>();
     private long mpId;
     private String context;
+    private int httpCode;
 
     private IdentityHttpResponse() {}
 
-    public IdentityHttpResponse(JSONObject jsonObject) throws JSONException {
-        this.mpId = jsonObject.getLong("mpid");
-        this.context = jsonObject.optString("context");
+    public IdentityHttpResponse(int code, String errorString) {
+        this.httpCode = code;
+        this.errors.add(new Error("UNKNOWN", errorString));
     }
 
-    public boolean hasError() {
-        return false;
+    public IdentityHttpResponse(int httpCode, JSONObject jsonObject) throws JSONException {
+        this.httpCode = httpCode;
+        if (jsonObject != null) {
+            if (jsonObject.has("mpid")) {
+                this.mpId = jsonObject.getLong("mpid");
+                this.context = jsonObject.optString("context");
+            } else if (jsonObject.has("errors")) {
+                JSONArray errorsArray = jsonObject.optJSONArray("errors");
+                if (!MPUtility.isEmpty(errorsArray)) {
+                    for (int i = 0; i < errorsArray.length(); i++) {
+                        try {
+                            JSONObject object = errorsArray.getJSONObject(i);
+                            String code = object.optString("code");
+                            String message = object.optString("message");
+                            this.errors.add(new Error(code, message));
+                        } catch (JSONException ignore) {
+                        }
+                    }
+                }
+            } else {
+                String code = jsonObject.optString("code");
+                String message = jsonObject.optString("message");
+                this.errors.add(new Error(code, message));
+            }
+        }
+
     }
 
-    public Error getError() {
-        return null;
+    public boolean isSuccessful() {
+        return httpCode == 200;
+    }
+
+    public List<Error> getErrors() {
+        return errors;
     }
 
     public long getMpId() {
@@ -30,25 +66,34 @@ public class IdentityHttpResponse {
         return context;
     }
 
-    public static class Error extends IdentityHttpResponse {
-        private String error;
+    public int getHttpCode() {
+        return httpCode;
+    }
 
-        public Error(String error) {
-            this.error = error;
-        }
+    public static class Error {
+        public final String message;
+        public final String code;
 
-        public String getErrorString() {
-            return error;
+        public Error(String errorCode, String message) {
+            this.code = errorCode;
+            this.message = message;
         }
+    }
 
-        @Override
-        public boolean hasError() {
-            return true;
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("Identity Response:\n");
+        builder.append("Identity Response Code: " + httpCode + "\n");
+        if (isSuccessful()) {
+            builder.append("MPID: " + mpId + "\n");
+            builder.append("Context: " + context + "\n");
+        } else {
+            for (Error error : errors) {
+                builder.append("Code: " + error.code + "\n");
+                builder.append("Message: " + error.message + "\n");
+            }
         }
-
-        @Override
-        public Error getError() {
-            return this;
-        }
+        return builder.toString();
     }
 }

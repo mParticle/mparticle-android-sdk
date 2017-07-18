@@ -51,60 +51,42 @@ import static com.mparticle.MParticle.IdentityType.Yahoo;
 
     public IdentityHttpResponse login(IdentityApiRequest request) throws JSONException, IOException {
         JSONObject jsonObject = getStateJson(request);
-        Logger.verbose("Identity login request: \n" + jsonObject.toString(4));
+        Logger.verbose("Identity login request: " + jsonObject.toString());
         HttpURLConnection connection = getPostConnection("/login", jsonObject.toString());
         makeUrlRequest(connection, jsonObject.toString(), false);
         int responseCode = connection.getResponseCode();
         JSONObject response = MPUtility.getJsonResponse(connection);
-        if (responseCode == 200) {
-            return parseIdentityResponse(response);
-        } else {
-            return parseIdentityErrorResponse(response);
-        }
+        return parseIdentityResponse(responseCode, response);
     }
 
     public IdentityHttpResponse logout(IdentityApiRequest request) throws JSONException, IOException {
         JSONObject jsonObject = getStateJson(request);
-        Logger.verbose("Identity logout request: \n" + jsonObject.toString(4));
+        Logger.verbose("Identity logout request: \n" + jsonObject.toString());
         HttpURLConnection connection = getPostConnection("/logout", jsonObject.toString());
         makeUrlRequest(connection, jsonObject.toString(), false);
         int responseCode = connection.getResponseCode();
         JSONObject response = MPUtility.getJsonResponse(connection);
-        if (responseCode == 200) {
-            return parseIdentityResponse(response);
-        } else {
-            return parseIdentityErrorResponse(response);
-        }
+        return parseIdentityResponse(responseCode, response);
     }
 
     public IdentityHttpResponse identify(IdentityApiRequest request) throws JSONException, IOException {
         JSONObject jsonObject = getStateJson(request);
-        Logger.verbose("Identity identify request: \n" + jsonObject.toString(4));
+        Logger.verbose("Identity identify request: \n" + jsonObject.toString());
         HttpURLConnection connection = getPostConnection("/identify", jsonObject.toString());
         makeUrlRequest(connection, jsonObject.toString(), false);
         int responseCode = connection.getResponseCode();
         JSONObject response = MPUtility.getJsonResponse(connection);
-        if (responseCode == 200) {
-            return parseIdentityResponse(response);
-        } else {
-            return parseIdentityErrorResponse(response);
-        }
+        return parseIdentityResponse(responseCode, response);
     }
 
-    public Boolean modify(IdentityApiRequest request) throws JSONException, IOException {
+    public IdentityHttpResponse modify(IdentityApiRequest request) throws JSONException, IOException {
         JSONObject jsonObject = getChangeJson(request);
-        Logger.verbose("Identity modify request: \n" + jsonObject.toString(4));
+        Logger.verbose("Identity modify request: \n" + jsonObject.toString());
         HttpURLConnection connection = getPostConnection(mConfigManager.getMpid(), "/modify", jsonObject.toString());
         makeUrlRequest(connection, jsonObject.toString(), false);
         int responseCode = connection.getResponseCode();
-        Logger.verbose("Identity modify response: " + responseCode);
-        if (responseCode == 200) {
-            return true;
-        } else {
-            JSONObject response = MPUtility.getJsonResponse(connection);
-            parseIdentityErrorResponse(response);
-            return false;
-        }
+        JSONObject response = MPUtility.getJsonResponse(connection);
+        return parseIdentityResponse(responseCode, response);
     }
 
     static void setListener(BaseNetworkListener listener) {
@@ -194,42 +176,20 @@ import static com.mparticle.MParticle.IdentityType.Yahoo;
         return jsonObject;
     }
 
-    private IdentityHttpResponse parseIdentityResponse(JSONObject jsonObject) {
+    private IdentityHttpResponse parseIdentityResponse(int httpCode, JSONObject jsonObject) {
         try {
-            IdentityHttpResponse httpResponse = new IdentityHttpResponse(jsonObject);
+            Logger.verbose("Identity response code: " + httpCode);
+            if (jsonObject != null) {
+                Logger.verbose("Identity result: " + jsonObject.toString());
+            }
+            IdentityHttpResponse httpResponse = new IdentityHttpResponse(httpCode, jsonObject);
             if (!MPUtility.isEmpty(httpResponse.getContext())) {
                 mConfigManager.setIdentityApiContext(httpResponse.getContext());
             }
-            Logger.verbose("Identity Result: 200\n MPID = " + jsonObject.toString(4));
             return httpResponse;
         } catch (JSONException e) {
-            return new IdentityHttpResponse.Error(e.getMessage());
+            return new IdentityHttpResponse(httpCode, e.getMessage());
         }
-    }
-
-    private IdentityHttpResponse parseIdentityErrorResponse(JSONObject jsonObject) {
-        JSONArray errorsArray = null;
-        StringBuilder builder = new StringBuilder();
-        try {
-            errorsArray = jsonObject.getJSONArray("errors");
-            if (!MPUtility.isEmpty(errorsArray)) {
-                for (int i = 0; i < errorsArray.length(); i++) {
-                    try {
-                        JSONObject object = errorsArray.getJSONObject(i);
-                        builder.append(object.getString("code"));
-                        builder.append(": ");
-                        builder.append(object.getString("message"));
-                        builder.append("\n");
-                    } catch (JSONException ignore) {
-                    }
-                }
-            }
-        } catch (JSONException ignore) {
-            builder.append("could not parse errors");
-        }
-        String errors = builder.toString();
-        Logger.verbose("Identity request failed: " + errors);
-        return new IdentityHttpResponse.Error(errors);
     }
 
     private HttpURLConnection getPostConnection(Long mpId, String endpoint, String message) throws IOException {

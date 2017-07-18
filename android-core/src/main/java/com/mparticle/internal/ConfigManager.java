@@ -856,20 +856,19 @@ public class ConfigManager {
         sPreferences.edit().putString(Constants.PrefKeys.PUSH_TOKEN, token).apply();
     }
 
-    private static Set<WeakReference<IdentityApi.MpIdChangeListener>> mpIdChangeListeners = new HashSet<WeakReference<IdentityApi.MpIdChangeListener>>();
+    private static Set<IdentityApi.MpIdChangeListener> mpIdChangeListeners = new HashSet<IdentityApi.MpIdChangeListener>();
 
     public static void addMpIdChangeListener(IdentityApi.MpIdChangeListener listener) {
-        mpIdChangeListeners.add(new ComparableWeakReference(listener));
+        mpIdChangeListeners.add(listener);
     }
 
     private void triggerMpidChangeListenerCallbacks(long mpid) {
         if (MPUtility.isEmpty(mpIdChangeListeners)) {
             return;
         }
-        mpIdChangeListeners.removeAll(Collections.singleton(new ComparableWeakReference<IdentityApi.MpIdChangeListener>(null)));
-        for (WeakReference<IdentityApi.MpIdChangeListener> listenerRef: mpIdChangeListeners) {
-            if (listenerRef.get() != null) {
-                listenerRef.get().onMpIdChanged(mpid);
+        for (IdentityApi.MpIdChangeListener listenerRef: mpIdChangeListeners) {
+            if (listenerRef != null) {
+                listenerRef.onMpIdChanged(mpid);
             }
         }
     }

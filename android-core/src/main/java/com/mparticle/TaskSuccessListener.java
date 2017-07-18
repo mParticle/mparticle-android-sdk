@@ -1,5 +1,7 @@
 package com.mparticle;
 
-public interface TaskSuccessListener<TResult> {
-    void onSuccess(TResult result);
+import com.mparticle.identity.IdentityApiResult;
+
+public interface TaskSuccessListener {
+    void onSuccess(IdentityApiResult result);
 }

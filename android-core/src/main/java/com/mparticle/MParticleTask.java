@@ -3,6 +3,9 @@ package com.mparticle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import com.mparticle.identity.IdentityApiResult;
+import com.mparticle.identity.IdentityHttpResponse;
+
 
 public abstract class MParticleTask<MParticleTaskResult> {
     public MParticleTask() {
@@ -14,11 +17,8 @@ public abstract class MParticleTask<MParticleTaskResult> {
 
     public abstract MParticleTaskResult getResult();
 
-    @Nullable
-    public abstract Exception getException();
-
     @NonNull
-    public abstract MParticleTask<MParticleTaskResult> addSuccessListener(@NonNull TaskSuccessListener<? super MParticleTaskResult> listener);
+    public abstract MParticleTask<MParticleTaskResult> addSuccessListener(@NonNull TaskSuccessListener listener);
 
     @NonNull
     public abstract MParticleTask<MParticleTaskResult> addFailureListener(@NonNull TaskFailureListener listener);
