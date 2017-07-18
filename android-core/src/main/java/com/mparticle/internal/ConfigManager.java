@@ -856,6 +856,24 @@ public class ConfigManager {
         sPreferences.edit().putString(Constants.PrefKeys.PUSH_TOKEN, token).apply();
     }
 
+    public String getPreviousGoogleAdId() {
+        MPUtility.AndroidAdIdInfo adInfo = MPUtility.getGoogleAdIdInfo(mContext);
+        String currentAdId = null;
+        if (adInfo != null) {
+            currentAdId = adInfo.id;
+        }
+        return sPreferences.getString(Constants.PrefKeys.PREVIOUS_ANDROID_ID, currentAdId);
+    }
+
+    public void setPreviousGoogleAdId() {
+        MPUtility.AndroidAdIdInfo adInfo = MPUtility.getGoogleAdIdInfo(mContext);
+        String currentAdId = null;
+        if (adInfo != null) {
+            currentAdId = adInfo.id;
+        }
+        sPreferences.edit().putString(Constants.PrefKeys.PREVIOUS_ANDROID_ID, currentAdId).apply();
+    }
+
     private static Set<IdentityApi.MpIdChangeListener> mpIdChangeListeners = new HashSet<IdentityApi.MpIdChangeListener>();
 
     public static void addMpIdChangeListener(IdentityApi.MpIdChangeListener listener) {

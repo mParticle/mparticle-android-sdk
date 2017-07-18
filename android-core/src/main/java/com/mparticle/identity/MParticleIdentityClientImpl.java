@@ -176,6 +176,18 @@ import static com.mparticle.MParticle.IdentityType.Yahoo;
                 }
             }
         }
+        for (Map.Entry<String, String> otherIdentities: request.getOtherNewIdentities().entrySet()) {
+            String identityType = otherIdentities.getKey();
+            String newValue = otherIdentities.getValue();
+            String oldValue = request.getOtherOldIdentities().get(identityType);
+            JSONObject changeJson = new JSONObject();
+            if (newValue != oldValue && (newValue == null || !newValue.equals(oldValue))) {
+                changeJson.put("new_value", newValue == null ? JSONObject.NULL : newValue);
+                changeJson.put("old_value", oldValue == null ? JSONObject.NULL : oldValue);
+                changeJson.put("identity_type", identityType);
+                changesJson.put(changeJson);
+            }
+        }
         jsonObject.put("identity_changes", changesJson);
         return jsonObject;
     }

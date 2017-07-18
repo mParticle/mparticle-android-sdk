@@ -490,6 +490,7 @@ public class Constants {
         String IDENTITY_API_CONTEXT = "mp::identity::api::context";
         String PUSH_TOKEN = "mp::pushtoken";
         String DEVICE_APPLICATION_STAMP = "mp::device-app-stamp";
+        String PREVIOUS_ANDROID_ID = "mp::previous::android::id";
     }
 
     public interface MiscStorageKeys {

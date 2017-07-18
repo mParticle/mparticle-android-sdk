@@ -12,6 +12,8 @@ import java.util.Map;
 
 public final class IdentityApiRequest {
     private Map<MParticle.IdentityType, String> userIdentities = new HashMap<MParticle.IdentityType, String>();
+    private Map<String, String> otherOldIdentities = new HashMap<String, String>();
+    private Map<String, String> otherNewIdentities = new HashMap<String, String>();
     private boolean isCopyUserAttributes = false;
 
     private IdentityApiRequest(IdentityApiRequest.Builder builder) {
@@ -20,6 +22,10 @@ public final class IdentityApiRequest {
         }
         if (builder.isCopyUserAttributes != null) {
             this.isCopyUserAttributes = builder.isCopyUserAttributes;
+        }
+        if (builder.otherOldIdentities.size() == builder.otherNewIdentities.size()) {
+            this.otherNewIdentities = builder.otherNewIdentities;
+            this.otherOldIdentities = builder.otherOldIdentities;
         }
     }
 
@@ -39,8 +45,18 @@ public final class IdentityApiRequest {
         return userIdentities;
     }
 
+    protected Map<String, String> getOtherOldIdentities() {
+        return otherOldIdentities;
+    }
+
+    protected Map<String, String> getOtherNewIdentities() {
+        return otherNewIdentities;
+    }
+
     public static class Builder {
         private Map<MParticle.IdentityType, String> userIdentities = new HashMap<MParticle.IdentityType, String>();
+        private Map<String, String> otherOldIdentities = new HashMap<String, String>();
+        private Map<String, String> otherNewIdentities = new HashMap<String, String>();
         private Boolean isCopyUserAttributes = null;
 
         public Builder(MParticleUser currentUser) {
@@ -57,6 +73,18 @@ public final class IdentityApiRequest {
 
         public Builder customerId(String customerId) {
             return userIdentity(MParticle.IdentityType.CustomerId, customerId);
+        }
+
+        protected Builder pushToken(String newPushToken, String oldPushToken) {
+            otherOldIdentities.put("push_token", oldPushToken);
+            otherNewIdentities.put("push_token", newPushToken);
+            return this;
+        }
+
+        protected Builder googleAdId(String newGoogleAdId, String oldGoogleAdId) {
+            otherOldIdentities.put("android_aaid", oldGoogleAdId);
+            otherNewIdentities.put("android_aaid", newGoogleAdId);
+            return this;
         }
 
         public Builder userIdentity(MParticle.IdentityType identityType, String identityValue) {

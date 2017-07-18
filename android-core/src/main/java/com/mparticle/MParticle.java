@@ -49,7 +49,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * The primary access point to the mParticle SDK. In order to use this class, you must first call {@link #start(Context, MParticleOptions)}, which requires
+ * The primary access point to the mParticle SDK. In order to use this class, you must first call {@link #start(MParticleOptions)}, which requires
  * configuration via <code><a href="http://developer.android.com/guide/topics/resources/providing-resources.html">Android Resources</a></code>. You can then retrieve a reference
  * to an instance of this class via {@link #getInstance()}
  * <p></p>
@@ -1102,10 +1102,21 @@ public class MParticle {
         registration.instanceId = instanceId;
         registration.senderId = senderId;
         PushRegistrationHelper.setInstanceId(mAppContext, registration);
+        String oldInstanceId = mConfigManager.getPushToken();
         mMessageManager.setPushRegistrationId(instanceId, true);
         mKitManager.onPushRegistration(instanceId, senderId);
-        identify();
+        MParticleUser user = MParticle.getInstance().Identity().getCurrentUser();
+        Builder builder;
+        if (user != null) {
+            builder = new Builder(user);
+        } else {
+            builder = new Builder();
+        }
+        Identity().modify(builder
+                .pushToken(instanceId, oldInstanceId)
+                .build());
     }
+
 
     void logNotification(MPCloudNotificationMessage cloudMessage, CloudAction action, boolean startSession, String appState, int behavior) {
         if (mConfigManager.isEnabled()) {
@@ -1322,6 +1333,20 @@ public class MParticle {
             mAppStateManager.logStateTransition(Constants.StateTransitionType.STATE_TRANS_EXIT, mAppStateManager.getCurrentActivityName());
             mAppStateManager.getSession().mLastEventTime = System.currentTimeMillis();
             mAppStateManager.endSession();
+        }
+    }
+
+    class Builder extends IdentityApiRequest.Builder {
+        Builder(MParticleUser user) {
+            super(user);
+        }
+        Builder() {
+            super();
+        }
+
+        @Override
+        protected IdentityApiRequest.Builder pushToken(String newPushToken, String oldPushToken) {
+            return super.pushToken(newPushToken, oldPushToken);
         }
     }
 

@@ -10,12 +10,13 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Looper;
 import android.os.SystemClock;
 
 import com.mparticle.MPEvent;
 import com.mparticle.MParticle;
 import com.mparticle.identity.IdentityApi;
+import com.mparticle.identity.IdentityApiRequest;
+import com.mparticle.identity.MParticleUser;
 
 import org.json.JSONObject;
 
@@ -170,6 +171,7 @@ import java.util.concurrent.atomic.AtomicLong;
             if (!mInitialized) {
                 initialize(mCurrentActivityName, previousSessionUri, previousSessionParameters, previousSessionPackage);
             } else if (isBackgrounded() && mLastStoppedTime.get() > 0) {
+                checkGoogleAdIdChanged();
                 logStateTransition(Constants.StateTransitionType.STATE_TRANS_FORE,
                         mCurrentActivityName,
                         mLastStoppedTime.get() - mLastForegroundTime,
@@ -213,6 +215,7 @@ import java.util.concurrent.atomic.AtomicLong;
                         if (isBackgrounded()) {
                             checkSessionTimeout();
                             logBackgrounded();
+                            mConfigManager.setPreviousGoogleAdId();
                         }
                     }catch (Exception e){
                         e.printStackTrace();
@@ -389,5 +392,37 @@ import java.util.concurrent.atomic.AtomicLong;
 
     public WeakReference<Activity> getCurrentActivity() {
         return mCurrentActivityReference;
+    }
+
+    private void checkGoogleAdIdChanged() {
+        String previousGoogleAdId = mConfigManager.getPreviousGoogleAdId();
+        MPUtility.AndroidAdIdInfo adIdInfo =  MPUtility.getGoogleAdIdInfo(mContext);
+        String currentGoogleAdId = adIdInfo == null ? null : adIdInfo.id;
+        if (currentGoogleAdId != null && !currentGoogleAdId.equals(previousGoogleAdId)) {
+            MParticleUser user = MParticle.getInstance().Identity().getCurrentUser();
+            Builder builder;
+            if (user != null) {
+                builder = new Builder(user);
+            } else {
+                builder = new Builder();
+            }
+            MParticle.getInstance().Identity().modify(builder
+                    .googleAdId(currentGoogleAdId, previousGoogleAdId)
+                    .build());
+        }
+    }
+
+    class Builder extends IdentityApiRequest.Builder {
+        Builder(MParticleUser user) {
+            super(user);
+        }
+        Builder() {
+            super();
+        }
+
+        @Override
+        protected IdentityApiRequest.Builder googleAdId(String newGoogleAdId, String oldGoogleAdId) {
+            return super.googleAdId(newGoogleAdId, oldGoogleAdId);
+        }
     }
 }
