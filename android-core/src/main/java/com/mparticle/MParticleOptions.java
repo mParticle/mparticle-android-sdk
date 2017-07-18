@@ -40,8 +40,8 @@ public class MParticleOptions {
         if (builder.environment != null) {
             this.environment = builder.environment;
         }
-        if (builder.initialIdentities != null) {
-            this.initialIdenties = builder.initialIdentities;
+        if (builder.identifyRequest != null) {
+            this.initialIdenties = builder.identifyRequest;
         }
         if (builder.devicePerformanceMetricsDisabled != null) {
             this.devicePerformanceMetricsDisabled = builder.devicePerformanceMetricsDisabled;
@@ -129,7 +129,7 @@ public class MParticleOptions {
         private String apiSecret;
         private MParticle.InstallType installType;
         private MParticle.Environment environment;
-        private IdentityApiRequest initialIdentities;
+        private IdentityApiRequest identifyRequest;
         private Boolean devicePerformanceMetricsDisabled = null;
         private Boolean androidIdDisabled = null;
         private Integer uploadInterval = null;
@@ -157,8 +157,8 @@ public class MParticleOptions {
             return this;
         }
 
-        public Builder userIdentities(@NonNull IdentityApiRequest initialIdentities) {
-            this.initialIdentities = initialIdentities;
+        public Builder identifyRequest(@NonNull IdentityApiRequest identifyRequest) {
+            this.identifyRequest = identifyRequest;
             return this;
         }
 
