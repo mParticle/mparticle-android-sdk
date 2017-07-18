@@ -1,7 +1,5 @@
 package com.mparticle.internal;
 
-import android.content.SharedPreferences;
-
 import com.mparticle.BuildConfig;
 import com.mparticle.MParticle;
 
@@ -9,8 +7,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.Set;
-import java.util.TreeSet;
 import java.util.UUID;
 
 public class MessageBatch extends JSONObject {
@@ -34,7 +30,7 @@ public class MessageBatch extends JSONObject {
         uploadMessage.put(Constants.MessageKey.CONFIG_SESSION_TIMEOUT, configManager.getSessionTimeout()/1000);
         uploadMessage.put(Constants.MessageKey.MPID, mpId);
         uploadMessage.put(Constants.MessageKey.SANDBOX, configManager.getEnvironment().equals(MParticle.Environment.Development));
-
+        uploadMessage.put(Constants.MessageKey.DEVICE_APPLICATION_STAMP, configManager.getDeviceApplicationStamp());
         uploadMessage.put(Constants.MessageKey.LTV, MParticle.getInstance().Commerce().getCurrentUserLtv());
 
         if (history) {

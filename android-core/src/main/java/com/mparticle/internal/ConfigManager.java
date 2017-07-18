@@ -2,6 +2,7 @@ package com.mparticle.internal;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.net.UrlQuerySanitizer;
 
 import com.mparticle.ExceptionHandler;
 import com.mparticle.MParticle;
@@ -23,6 +24,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 public class ConfigManager {
     public static final String CONFIG_JSON = "json";
@@ -744,6 +746,16 @@ public class ConfigManager {
         return changeMade;
     }
 
+    public String getDeviceApplicationStamp() {
+        String das = sPreferences.getString(Constants.PrefKeys.DEVICE_APPLICATION_STAMP, null);
+        if (MPUtility.isEmpty(das)) {
+            das = UUID.randomUUID().toString();
+            sPreferences.edit()
+                    .putString(Constants.PrefKeys.DEVICE_APPLICATION_STAMP, das)
+                    .apply();
+        }
+        return das;
+    }
 
     public JSONObject getCookies(long mpId) {
         if (mCurrentCookies == null) {

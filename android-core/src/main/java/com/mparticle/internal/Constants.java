@@ -352,6 +352,7 @@ public class Constants {
         String OLD_USER_IDENTITY = "oi";
         String ECHO = "echo";
         String DEVICE_IS_IN_DST = "idst";
+        String DEVICE_APPLICATION_STAMP = "das";
     }
 
     public interface Commerce {
@@ -488,6 +489,7 @@ public class Constants {
         String IF_MODIFIED = "mp::ifmodified";
         String IDENTITY_API_CONTEXT = "mp::identity::api::context";
         String PUSH_TOKEN = "mp::pushtoken";
+        String DEVICE_APPLICATION_STAMP = "mp::device-app-stamp";
     }
 
     public interface MiscStorageKeys {

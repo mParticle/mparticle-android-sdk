@@ -2,16 +2,19 @@ package com.mparticle.internal;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.net.UrlQuerySanitizer;
 import android.os.Build;
 
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.UUID;
 
 import static com.mparticle.internal.ConfigManager.PREFERENCES_FILE;
 
@@ -448,10 +451,27 @@ class UserConfig {
                 if (totalRuns != 0) {
                     userConfig.setTotalRuns(totalRuns);
                 }
+                //migrate both cookies and device application stamp
                 String cookies = getCookies();
+                String das = null;
                 if (cookies != null) {
+                    try {
+                        JSONObject jsonCookies = new JSONObject(cookies);
+                        String dasParseString = jsonCookies.getJSONObject("uid").getString("c");
+                        UrlQuerySanitizer sanitizer = new UrlQuerySanitizer(dasParseString);
+                        das = sanitizer.getValue("g");
+                    }catch (Exception e) {
+
+                    }
                     userConfig.setCookies(cookies);
                 }
+                if (MPUtility.isEmpty(das)) {
+                    das = UUID.randomUUID().toString();
+                }
+                configManagerSharedPreferences
+                        .edit()
+                        .putString(Constants.PrefKeys.DEVICE_APPLICATION_STAMP, das)
+                        .apply();
                 int launchesSinceUpgrade = getLaunchesSinceUpgrade();
                 if (launchesSinceUpgrade != 0) {
                     userConfig.setLaunchesSinceUpgrade(launchesSinceUpgrade);
@@ -517,14 +537,6 @@ class UserConfig {
             return messageManagerSharedPreferences.getInt(LegacySharedPreferencesKeys.TOTAL_RUNS, 0);
         }
 
-
-        /**
-         * //TODO
-         *
-         * IDK about this one. It appears that previously, the cookies were being stored in two seperate
-         * SharedPreferences files, one that was accessed by the MParticleAPIImpl, and the other, by the ConfigManager
-         * @return
-         */
         String getCookies() {
             return configManagerSharedPreferences.getString(LegacySharedPreferencesKeys.COOKIES, null);
         }
