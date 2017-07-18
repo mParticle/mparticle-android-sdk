@@ -61,7 +61,12 @@ public class MParticleDBManager extends BaseDBManager {
     }
 
     public boolean isAvailable() {
-        return getMParticleDatabase() != null;
+        try {
+            return getMParticleDatabase() != null;
+        }catch (Exception e) {
+            Logger.verbose(e.toString());
+            return false;
+        }
     }
 
     public void updateMpId(long oldMpId, long newMpId) {

@@ -63,10 +63,14 @@ import java.util.UUID;
     }
     @Override
     public void handleMessage(Message msg) {
-        if (!databaseAvailable()){
-            return;
+        try {
+            if (!databaseAvailable()) {
+                return;
+            }
+            mMessageManagerCallbacks.delayedStart();
+        }catch (Exception e) {
+            Logger.verbose(e.toString());
         }
-        mMessageManagerCallbacks.delayedStart();
         switch (msg.what) {
             case STORE_MESSAGE:
                 try {
