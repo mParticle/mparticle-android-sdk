@@ -55,8 +55,8 @@ public class GcmMessageService extends GcmMessageTable {
     }
 
     public static void clearOldProviderGcm(SQLiteDatabase db, long mpId) {
-        String[] deleteWhereArgs = {Integer.toString(GcmMessageTableColumns.PROVIDER_CONTENT_ID), String.valueOf(mpId)};
-        db.delete(GcmMessageTableColumns.TABLE_NAME, GcmMessageTableColumns.CONTENT_ID + " = ?", deleteWhereArgs);
+        String[] deleteWhereArgs = {String.valueOf(mpId)};
+        db.delete(GcmMessageTableColumns.TABLE_NAME, GcmMessageTableColumns.MP_ID + " = ?", deleteWhereArgs);
     }
 
     public static void insertGcmMessage(SQLiteDatabase db, AbstractCloudMessage message, String appState, long mpId) {
