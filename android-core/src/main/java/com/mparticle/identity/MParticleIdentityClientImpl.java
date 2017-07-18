@@ -132,6 +132,10 @@ import static com.mparticle.MParticle.IdentityType.Yahoo;
         if (!MPUtility.isEmpty(androidId)) {
             identitiesJson.put("android_uuid", androidId);
         }
+        String das = mConfigManager.getDeviceApplicationStamp();
+        if (!MPUtility.isEmpty(das)) {
+            identitiesJson.put("device_application_stamp", das);
+        }
         if (!MPUtility.isEmpty(request.getUserIdentities())) {
             for (Map.Entry<MParticle.IdentityType, String> entry : request.getUserIdentities().entrySet()) {
                 String idTypeString = getStringValue(entry.getKey());
