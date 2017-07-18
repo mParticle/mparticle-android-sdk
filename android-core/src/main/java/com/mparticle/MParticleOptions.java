@@ -3,6 +3,7 @@ package com.mparticle;
 import android.content.Context;
 import android.support.annotation.NonNull;
 
+import com.mparticle.identity.BaseIdentityTask;
 import com.mparticle.identity.IdentityApiRequest;
 import com.mparticle.internal.Logger;
 import com.mparticle.internal.MPUtility;
@@ -10,13 +11,14 @@ import com.mparticle.internal.MPUtility;
 public class MParticleOptions {
     private static final String PREFKEY_API_KEY = "mp_key";
     private static final String PREFKEY_API_SECRET = "mp_secret";
+    private BaseIdentityTask identityTask;
 
     private Context mContext;
     private MParticle.InstallType installType = MParticle.InstallType.AutoDetect;
     private MParticle.Environment environment;
     private String apiKey;
     private String apiSecret;
-    private IdentityApiRequest initialIdenties;
+    private IdentityApiRequest identifyRequest;
     private Boolean devicePerformanceMetricsDisabled = false;
     private Boolean androidIdDisabled = false;
     private Integer uploadInterval = 600;  //seconds
@@ -41,7 +43,10 @@ public class MParticleOptions {
             this.environment = builder.environment;
         }
         if (builder.identifyRequest != null) {
-            this.initialIdenties = builder.identifyRequest;
+            this.identifyRequest = builder.identifyRequest;
+        }
+        if (builder.identityTask != null) {
+            this.identityTask = builder.identityTask;
         }
         if (builder.devicePerformanceMetricsDisabled != null) {
             this.devicePerformanceMetricsDisabled = builder.devicePerformanceMetricsDisabled;
@@ -95,8 +100,8 @@ public class MParticleOptions {
         return apiSecret;
     }
 
-    public IdentityApiRequest getInitialIdentity() {
-        return initialIdenties;
+    public IdentityApiRequest getIdentifyRequest() {
+        return identifyRequest;
     }
 
     public Boolean isDevicePerformanceMetricsDisabled() {
@@ -123,6 +128,10 @@ public class MParticleOptions {
         return logLevel;
     }
 
+    public BaseIdentityTask getIdentityTask() {
+        return identityTask;
+    }
+
     public static class Builder {
         private Context mContext;
         private String apiKey;
@@ -136,6 +145,7 @@ public class MParticleOptions {
         private Integer sessionTimeout = null;
         private Boolean unCaughtExceptionLogging = null;
         private MParticle.LogLevel logLevel = null;
+        private BaseIdentityTask identityTask;
 
         private Builder(Context context) {
             this.mContext = context;
@@ -157,8 +167,13 @@ public class MParticleOptions {
             return this;
         }
 
-        public Builder identifyRequest(@NonNull IdentityApiRequest identifyRequest) {
+        public Builder identify(@NonNull IdentityApiRequest identifyRequest) {
             this.identifyRequest = identifyRequest;
+            return this;
+        }
+
+        public Builder identifyTask(@NonNull BaseIdentityTask task) {
+            this.identityTask = task;
             return this;
         }
 

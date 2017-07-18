@@ -94,8 +94,8 @@
 -keep class com.mparticle.DeepLinkError { *; }
 -keep class com.mparticle.DeepLinkListener { *; }
 -keep class com.mparticle.DeepLinkResult { *; }
--keep class com.mparticle.TaskSuccessListener { *; }
--keep class com.mparticle.TaskFailureListener { *; }
+-keep class com.mparticle.identity.TaskSuccessListener { *; }
+-keep class com.mparticle.identity.TaskFailureListener { *; }
 -keep, includedescriptorclasses class com.mparticle.MParticleTask { *; }
 -keep, includedescriptorclasses class com.mparticle.internal.AppStateManager { *; }
 -keep class com.mparticle.internal.ApplicationContextWrapper { *; }

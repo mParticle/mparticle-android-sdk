@@ -246,7 +246,6 @@ import java.util.Map;
      * change the MPID was in progress. The parameter "mpid" can either be the previous MPID or a new MPID,
      * either way, everything stored under the placeholder MPID will be migrated.
      */
-
     void changeUser(long mpId) {
         // if the mpid remains equal to the temporary_mpid, as the case could be when a network request fails
         // or on startup, then there is not reason to do anything

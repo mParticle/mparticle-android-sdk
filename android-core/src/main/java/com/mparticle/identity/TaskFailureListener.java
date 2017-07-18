@@ -1,6 +1,4 @@
-package com.mparticle;
-
-import com.mparticle.identity.IdentityHttpResponse;
+package com.mparticle.identity;
 
 public interface TaskFailureListener {
     void onFailure(IdentityHttpResponse result);

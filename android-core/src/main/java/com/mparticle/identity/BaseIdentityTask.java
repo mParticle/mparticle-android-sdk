@@ -1,13 +1,10 @@
-package com.mparticle;
+package com.mparticle.identity;
 
 import android.os.Handler;
 import android.os.Looper;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 
-import com.mparticle.identity.IdentityApiResult;
-import com.mparticle.identity.IdentityHttpResponse;
-import com.mparticle.identity.MParticleUser;
+import com.mparticle.MParticleTask;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -63,7 +60,7 @@ public final class BaseIdentityTask extends MParticleTask<IdentityApiResult> {
 
     @NonNull
     @Override
-    public MParticleTask addSuccessListener(@NonNull TaskSuccessListener listener) {
+    public BaseIdentityTask addSuccessListener(@NonNull TaskSuccessListener listener) {
         if (listener != null) {
             successListeners.add(listener);
         }
@@ -72,7 +69,7 @@ public final class BaseIdentityTask extends MParticleTask<IdentityApiResult> {
 
     @NonNull
     @Override
-    public MParticleTask addFailureListener(@NonNull TaskFailureListener listener) {
+    public BaseIdentityTask addFailureListener(@NonNull TaskFailureListener listener) {
         if (listener != null) {
             failureListeners.add(listener);
         }

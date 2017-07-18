@@ -20,7 +20,11 @@ import com.mparticle.commerce.Product;
 import com.mparticle.commerce.ProductBagApi;
 import com.mparticle.identity.IdentityApi;
 import com.mparticle.identity.IdentityApiRequest;
+import com.mparticle.identity.IdentityApiResult;
+import com.mparticle.identity.IdentityHttpResponse;
 import com.mparticle.identity.MParticleUser;
+import com.mparticle.identity.TaskFailureListener;
+import com.mparticle.identity.TaskSuccessListener;
 import com.mparticle.internal.AppStateManager;
 import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.Constants;
@@ -177,11 +181,9 @@ public class MParticle {
                     instance.mMessageManager.refreshConfiguration();
 
                     instance.mIdentityApi = IdentityApi.getInstance(context, instance.mAppStateManager, instance.mMessageManager, instance.mConfigManager, instance.mKitManager);
-                    if (options.getInitialIdentity() != null) {
-                        instance.mIdentityApi.identify(options.getInitialIdentity());
-                    } else {
-                        instance.identify();
-                    }
+
+                    instance.identify(options);
+
 
                     if (configManager.getLogUnhandledExceptions()) {
                         instance.enableUncaughtExceptionLogging();
@@ -1105,6 +1107,7 @@ public class MParticle {
         String oldInstanceId = mConfigManager.getPushToken();
         mMessageManager.setPushRegistrationId(instanceId, true);
         mKitManager.onPushRegistration(instanceId, senderId);
+
         MParticleUser user = MParticle.getInstance().Identity().getCurrentUser();
         Builder builder;
         if (user != null) {
@@ -1141,12 +1144,30 @@ public class MParticle {
         mMessageManager.refreshConfiguration();
     }
 
-    private void identify() {
-        MParticleUser currentUser = Identity().getCurrentUser();
-        if (currentUser != null) {
-            instance.mIdentityApi.identify(IdentityApiRequest.withUser(currentUser).build());
-        } else {
-            instance.mIdentityApi.identify(IdentityApiRequest.withEmptyUser().build());
+    private void identify(final MParticleOptions options) {
+        IdentityApiRequest request = options.getIdentifyRequest();
+        if (request == null) {
+            MParticleUser currentUser = Identity().getCurrentUser();
+            if (currentUser != null) {
+                request = IdentityApiRequest.withUser(currentUser).build();
+            } else {
+                request = IdentityApiRequest.withEmptyUser().build();
+            }
+        }
+        MParticleTask<IdentityApiResult> task = instance.mIdentityApi.identify(request);
+        if (options.getIdentityTask() != null) {
+            task.addFailureListener(new TaskFailureListener() {
+               @Override
+               public void onFailure(IdentityHttpResponse result) {
+                   options.getIdentityTask().setFailed(result);
+               }
+            });
+            task.addSuccessListener(new TaskSuccessListener() {
+                @Override
+                public void onSuccess(IdentityApiResult result) {
+                    options.getIdentityTask().setSuccessful(result);
+                }
+            });
         }
     }
 

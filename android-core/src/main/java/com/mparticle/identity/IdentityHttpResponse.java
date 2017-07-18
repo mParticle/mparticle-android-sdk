@@ -9,7 +9,7 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
-public class IdentityHttpResponse {
+public final class IdentityHttpResponse {
     private ArrayList<Error> errors = new ArrayList<Error>();
     private long mpId;
     private String context;

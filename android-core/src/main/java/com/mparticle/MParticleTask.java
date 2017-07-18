@@ -1,10 +1,9 @@
 package com.mparticle;
 
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 
-import com.mparticle.identity.IdentityApiResult;
-import com.mparticle.identity.IdentityHttpResponse;
+import com.mparticle.identity.TaskFailureListener;
+import com.mparticle.identity.TaskSuccessListener;
 
 
 public abstract class MParticleTask<MParticleTaskResult> {

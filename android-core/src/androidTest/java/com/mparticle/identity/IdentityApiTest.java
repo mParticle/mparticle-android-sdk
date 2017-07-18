@@ -66,7 +66,7 @@ public class IdentityApiTest {
                 .build();
         MParticleOptions options = MParticleOptions.builder(mContext)
                 .credentials("key", "value")
-                .identifyRequest(request)
+                .identify(request)
                 .build();
         MParticle.start(options);
         lock.await(5, TimeUnit.SECONDS);
