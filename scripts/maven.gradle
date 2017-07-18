@@ -6,6 +6,14 @@ allprojects {
     ext."signing.password" = System.getenv("mavenSigningKeyPassword")
 }
 
+configurations {
+    deployerJars
+}
+
+dependencies {
+    deployerJars "org.kuali.maven.wagons:maven-s3-wagon:1.2.1"
+}
+
 def target_maven_repo
 if (project.hasProperty('target_maven_repo')) {
     target_maven_repo = project.property('target_maven_repo')
@@ -18,6 +26,8 @@ if (target_maven_repo in ['sonatype', 'sonatype-snapshot']) {
         sign configurations.archives
     }
 }
+
+
 
 uploadArchives{
     repositories {
@@ -36,6 +46,9 @@ uploadArchives{
                 repository(url: 'https://oss.sonatype.org/content/repositories/snapshots/') {
                     authentication(userName: System.getenv('sonatypeUsername'), password: System.getenv('sonatypePassword'))
                 }
+            } else if (target_maven_repo == 's3') {
+                configuration = configurations.deployerJars
+                repository(url: 's3://maven.mparticle.com')
             } else {
                 repository(url: 'file://' + new File(System.getProperty('user.home'), '.m2/repository').absolutePath)
             }
