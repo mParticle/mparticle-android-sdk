@@ -69,7 +69,7 @@ public class MParticleApiClientImpl extends MParticleBaseClientImpl implements M
     private static final String API_HOST = MPUtility.isEmpty(BuildConfig.MP_URL) ? "nativesdks.mparticle.com" : BuildConfig.MP_URL;
     private static final String CONFIG_HOST = MPUtility.isEmpty(BuildConfig.MP_CONFIG_URL) ? "config2.mparticle.com" : BuildConfig.MP_CONFIG_URL;
 
-    private static final String SERVICE_VERSION_1 = "/v1";
+    private static final String SERVICE_VERSION_1 = "/v2";
     private static final String SERVICE_VERSION_4 = "/v4";
 
     /**
