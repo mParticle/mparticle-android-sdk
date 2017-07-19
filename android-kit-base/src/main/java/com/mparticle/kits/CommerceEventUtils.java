@@ -52,6 +52,7 @@ public final class CommerceEventUtils {
             for (int i = 0; i < products.size(); i++) {
                 MPEvent.Builder itemEvent = new MPEvent.Builder(String.format(ITEM_NAME, productAction), MParticle.EventType.Transaction);
                 Map<String, String> attributes = new HashMap<String, String>();
+                extractProductFields(products.get(i), attributes);
                 extractProductAttributes(products.get(i), attributes);
                 extractTransactionId(event, attributes);
                 events.add(itemEvent.info(attributes).build());
