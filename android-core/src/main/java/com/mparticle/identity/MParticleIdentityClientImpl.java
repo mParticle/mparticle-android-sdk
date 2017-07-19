@@ -116,9 +116,7 @@ import static com.mparticle.MParticle.IdentityType.Yahoo;
 
     private JSONObject getStateJson(IdentityApiRequest request) throws JSONException {
         JSONObject jsonObject = getBaseJson();
-        if (request == null) {
-            return jsonObject;
-        }
+
         JSONObject identitiesJson = new JSONObject();
         MPUtility.AndroidAdIdInfo adIdInfo = MPUtility.getGoogleAdIdInfo(mContext);
         if (adIdInfo != null) {
@@ -136,11 +134,13 @@ import static com.mparticle.MParticle.IdentityType.Yahoo;
         if (!MPUtility.isEmpty(das)) {
             identitiesJson.put("device_application_stamp", das);
         }
-        if (!MPUtility.isEmpty(request.getUserIdentities())) {
-            for (Map.Entry<MParticle.IdentityType, String> entry : request.getUserIdentities().entrySet()) {
-                String idTypeString = getStringValue(entry.getKey());
-                if (!MPUtility.isEmpty(idTypeString)) {
-                    identitiesJson.put(idTypeString, entry.getValue());
+        if (request != null) {
+            if (!MPUtility.isEmpty(request.getUserIdentities())) {
+                for (Map.Entry<MParticle.IdentityType, String> entry : request.getUserIdentities().entrySet()) {
+                    String idTypeString = getStringValue(entry.getKey());
+                    if (!MPUtility.isEmpty(idTypeString)) {
+                        identitiesJson.put(idTypeString, entry.getValue());
+                    }
                 }
             }
         }
