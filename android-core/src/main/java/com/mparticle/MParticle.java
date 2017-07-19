@@ -436,7 +436,10 @@ public class MParticle {
      * @param eventType the type of the event to be tracked
      */
     public void logEvent(String eventName, EventType eventType) {
-        logEvent(eventName, eventType, null, 0, null);
+        logEvent(
+                new MPEvent.Builder(eventName, eventType)
+                        .build()
+        );
     }
 
     /**
@@ -447,7 +450,11 @@ public class MParticle {
      * @param category  the Google Analytics category with which to associate this event
      */
     public void logEvent(String eventName, EventType eventType, String category) {
-        logEvent(eventName, eventType, null, 0, category);
+        logEvent(
+                new MPEvent.Builder(eventName, eventType)
+                        .category(category)
+                        .build()
+        );
     }
 
     /**
@@ -458,7 +465,11 @@ public class MParticle {
      * @param eventLength the duration of the event in milliseconds
      */
     public void logEvent(String eventName, EventType eventType, long eventLength) {
-        logEvent(eventName, eventType, null, eventLength);
+        logEvent(
+                new MPEvent.Builder(eventName, eventType)
+                        .duration(eventLength)
+                        .build()
+        );
     }
 
     /**
@@ -469,7 +480,11 @@ public class MParticle {
      * @param eventInfo a Map of data attributes
      */
     public void logEvent(String eventName, EventType eventType, Map<String, String> eventInfo) {
-        logEvent(eventName, eventType, eventInfo, 0);
+        logEvent(
+                new MPEvent.Builder(eventName, eventType)
+                        .info(eventInfo)
+                        .build()
+        );
     }
 
     /**
@@ -481,7 +496,12 @@ public class MParticle {
      * @param category  the Google Analytics category with which to associate this event
      */
     public void logEvent(String eventName, EventType eventType, Map<String, String> eventInfo, String category) {
-        logEvent(eventName, eventType, eventInfo, 0, category);
+        logEvent(
+                new MPEvent.Builder(eventName, eventType)
+                        .info(eventInfo)
+                        .category(category)
+                        .build()
+        );
     }
 
     /**
