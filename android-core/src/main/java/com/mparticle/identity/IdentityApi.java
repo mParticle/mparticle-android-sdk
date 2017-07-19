@@ -28,6 +28,7 @@ public final class IdentityApi {
     public static int BAD_REQUEST = 400;
     public static int SERVER_ERROR = 500;
 
+    private Context mContext;
     private Handler mBackgroundHandler;
     ConfigManager mConfigManager;
     MessageManager mMessageManager;
@@ -47,6 +48,7 @@ public final class IdentityApi {
     }
 
     public IdentityApi(Context context, AppStateManager appStateManager, MessageManager messageManager, ConfigManager configManager, KitManager kitManager) {
+        this.mContext = context;
         this.mBackgroundHandler = messageManager.mUploadHandler;
         this.mUserDelegate = new MParticleUserDelegate(appStateManager, configManager, messageManager, kitManager, new MParticleDBManager(context, DatabaseTables.getInstance(context)));
         this.mConfigManager = configManager;
@@ -118,31 +120,39 @@ public final class IdentityApi {
     }
 
     public synchronized BaseIdentityTask modify(@NonNull final IdentityApiRequest updateRequest) {
-        if (updateRequest == null) {
-            throw new IllegalArgumentException("modify() requires a valid IdentityApiRequest");
-        }
+        boolean devMode = MPUtility.isDevEnv() || MPUtility.isAppDebuggable(mContext);
         final BaseIdentityTask task = new BaseIdentityTask();
-        mBackgroundHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    final IdentityHttpResponse result = mMParticleApiClient.modify(updateRequest);
-                    if (!result.isSuccessful()) {
-                        task.setFailed(result);
-                    } else {
-                        task.setSuccessful(new IdentityApiResult(getCurrentUser()));
-                        if (updateRequest.getUserIdentities() != null) {
-                            for (Map.Entry<MParticle.IdentityType, String> entry : updateRequest.getUserIdentities().entrySet()) {
-                                mUserDelegate.setUserIdentity(entry.getValue(), entry.getKey(), mConfigManager.getMpid());
+
+        if (updateRequest == null) {
+            String message = "modify() requires a valid IdentityApiRequest";
+            if (devMode) {
+                throw new IllegalArgumentException(message);
+            } else {
+                Logger.error(message);
+            }
+            task.setFailed(new IdentityHttpResponse(IdentityApi.UNKNOWN_ERROR, message));
+        } else {
+            mBackgroundHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        final IdentityHttpResponse result = mMParticleApiClient.modify(updateRequest);
+                        if (!result.isSuccessful()) {
+                            task.setFailed(result);
+                        } else {
+                            task.setSuccessful(new IdentityApiResult(getCurrentUser()));
+                            if (updateRequest.getUserIdentities() != null) {
+                                for (Map.Entry<MParticle.IdentityType, String> entry : updateRequest.getUserIdentities().entrySet()) {
+                                    mUserDelegate.setUserIdentity(entry.getValue(), entry.getKey(), mConfigManager.getMpid());
+                                }
                             }
                         }
+                    } catch (Exception ex) {
+                        task.setFailed(new IdentityHttpResponse(IdentityApi.UNKNOWN_ERROR, ex.toString()));
                     }
                 }
-                catch (Exception ex) {
-                    task.setFailed(new IdentityHttpResponse(IdentityApi.UNKNOWN_ERROR, ex.toString()));
-                }
-            }
-        });
+            });
+        }
         return task;
     }
 
