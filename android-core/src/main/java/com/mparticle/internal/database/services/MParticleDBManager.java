@@ -92,11 +92,11 @@ public class MParticleDBManager extends BaseDBManager {
 
 
     public void insertBreadcrumb(MPMessage message, String apiKey) throws JSONException {
-        BreadcrumbService.insertBreadcrumb(getMParticleDatabase(), mContext, message, apiKey, getMpid());
+        BreadcrumbService.insertBreadcrumb(getMParticleDatabase(), mContext, message, apiKey, message.getMpId());
     }
 
     public void appendBreadcrumbs(MPMessage message) throws JSONException {
-        JSONArray breadcrumbs = BreadcrumbService.getBreadcrumbs(getMParticleDatabase(), mContext, getMpid());
+        JSONArray breadcrumbs = BreadcrumbService.getBreadcrumbs(getMParticleDatabase(), mContext, message.getMpId());
         if (!MPUtility.isEmpty(breadcrumbs)) {
             message.put(Constants.MessageType.BREADCRUMB, breadcrumbs);
         }
@@ -515,15 +515,15 @@ public class MParticleDBManager extends BaseDBManager {
     }
 
 
-    public List<String> getOrphanSessionIds(String apiKey) {
-        return SessionService.getOrphanSessionIds(getMParticleDatabase(), apiKey, getMpid());
+    public List<String> getOrphanSessionIds(String apiKey, long mpid) {
+        return SessionService.getOrphanSessionIds(getMParticleDatabase(), apiKey, mpid);
     }
 
 
     public void insertSession(MPMessage message, String apiKey, JSONObject appInfo, JSONObject deviceInfo) throws JSONException {
         String appInfoString = appInfo.toString();
         String deviceInfoString = deviceInfo.toString();
-        SessionService.insertSession(getMParticleDatabase(), message, apiKey, appInfoString, deviceInfoString, getMpid());
+        SessionService.insertSession(getMParticleDatabase(), message, apiKey, appInfoString, deviceInfoString, message.getMpId());
     }
 
 

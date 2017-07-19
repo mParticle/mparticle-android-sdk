@@ -162,9 +162,10 @@ import java.util.UUID;
             case END_ORPHAN_SESSIONS:
                 try {
                     // find left-over sessions that exist during startup and end them
-                    List<String> sessionIds = mMParticleDBManager.getOrphanSessionIds(mMessageManagerCallbacks.getApiKey());
+                    Long mpid = (Long)msg.obj;
+                    List<String> sessionIds = mMParticleDBManager.getOrphanSessionIds(mMessageManagerCallbacks.getApiKey(), mpid);
                     for (String sessionId: sessionIds) {
-                        Map.Entry<String, Set<Long>> entry = new HashMap.SimpleEntry<String, Set<Long>>(sessionId, Collections.singleton((Long)msg.obj));
+                        Map.Entry<String, Set<Long>> entry = new HashMap.SimpleEntry<String, Set<Long>>(sessionId, Collections.singleton(mpid));
                         sendMessage(obtainMessage(MessageHandler.CREATE_SESSION_END_MESSAGE, 0, 0, entry));
                     }
                 } catch (MParticleApiClientImpl.MPNoConfigException ex) {

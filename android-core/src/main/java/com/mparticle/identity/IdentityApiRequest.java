@@ -60,7 +60,9 @@ public final class IdentityApiRequest {
         private Boolean isCopyUserAttributes = null;
 
         public Builder(MParticleUser currentUser) {
-            userIdentities = currentUser.getUserIdentities();
+            if (currentUser != null) {
+                userIdentities = currentUser.getUserIdentities();
+            }
         }
 
         public Builder() {
