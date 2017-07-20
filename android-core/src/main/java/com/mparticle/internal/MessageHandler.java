@@ -163,7 +163,7 @@ import java.util.UUID;
                 try {
                     // find left-over sessions that exist during startup and end them
                     Long mpid = (Long)msg.obj;
-                    List<String> sessionIds = mMParticleDBManager.getOrphanSessionIds(mMessageManagerCallbacks.getApiKey(), mpid);
+                    List<String> sessionIds = mMParticleDBManager.getOrphanSessionIds(mMessageManagerCallbacks.getApiKey());
                     for (String sessionId: sessionIds) {
                         Map.Entry<String, Set<Long>> entry = new HashMap.SimpleEntry<String, Set<Long>>(sessionId, Collections.singleton(mpid));
                         sendMessage(obtainMessage(MessageHandler.CREATE_SESSION_END_MESSAGE, 0, 0, entry));

@@ -21,8 +21,8 @@ public class SessionService extends SessionTable {
     public static String[] readyMessages = new String[]{Integer.toString(Constants.Status.UPLOADED)};
 
     public static int deleteSessions(SQLiteDatabase database, String currentSessionId){
-        String[] selectionArgs = new String[]{currentSessionId, String.valueOf(Constants.TEMPORARY_MPID)};
-        return database.delete(SessionTableColumns.TABLE_NAME, SessionTableColumns.SESSION_ID + "!=? and " + SessionTableColumns.MP_ID + " != ?", selectionArgs);
+        String[] selectionArgs = new String[]{currentSessionId};
+        return database.delete(SessionTableColumns.TABLE_NAME, SessionTableColumns.SESSION_ID + "!=? ", selectionArgs);
     }
 
     public static Cursor getSessions(SQLiteDatabase db) {
@@ -62,14 +62,14 @@ public class SessionService extends SessionTable {
         return selectCursor;
     }
 
-    public static List<String> getOrphanSessionIds(SQLiteDatabase db, String apiKey, long mpId) {
+    public static List<String> getOrphanSessionIds(SQLiteDatabase db, String apiKey) {
         List<String> sessionIds = new ArrayList<String>();
-        String[] selectionArgs = new String[]{apiKey, String.valueOf(mpId)};
+        String[] selectionArgs = new String[]{apiKey};
         String[] sessionColumns = new String[]{SessionTableColumns.SESSION_ID};
         Cursor selectCursor = null;
         try {
             selectCursor = db.query(SessionTableColumns.TABLE_NAME, sessionColumns,
-                    SessionTableColumns.API_KEY + "= ? and " + SessionTableColumns.MP_ID + " = ?",
+                    SessionTableColumns.API_KEY + "= ? ",
                     selectionArgs, null, null, null);
             // NOTE: there should be at most one orphan per api key - but
             // process any that are found

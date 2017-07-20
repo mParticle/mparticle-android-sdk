@@ -494,9 +494,9 @@ public class MParticleDBManager extends BaseDBManager {
         for (Long mpid: mpIds) {
             //we do not need to associate a SessionEnd message with any particular MPID, as long as it is not == Constants.TEMPORARY_MPID
             if (mpid != Constants.TEMPORARY_MPID) {
+                spanningMpids.put(mpid);
                 storageMpid = mpid;
             }
-            spanningMpids.put(mpid);
         }
         MPMessage message = new MPMessage.Builder(Constants.MessageType.SESSION_END, session, location, storageMpid)
                 .timestamp(end)
@@ -515,8 +515,8 @@ public class MParticleDBManager extends BaseDBManager {
     }
 
 
-    public List<String> getOrphanSessionIds(String apiKey, long mpid) {
-        return SessionService.getOrphanSessionIds(getMParticleDatabase(), apiKey, mpid);
+    public List<String> getOrphanSessionIds(String apiKey) {
+        return SessionService.getOrphanSessionIds(getMParticleDatabase(), apiKey);
     }
 
 
