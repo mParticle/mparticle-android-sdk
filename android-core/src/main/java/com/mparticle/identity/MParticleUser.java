@@ -32,10 +32,13 @@ public final class MParticleUser {
         return mUserDelegate.getUserAttributes(listener, getId());
     }
 
-    void setUserAttributes(Map<String, Object> userAttributes) {
+    boolean setUserAttributes(Map<String, Object> userAttributes) {
         for(Map.Entry<String, Object> entry: userAttributes.entrySet()) {
-            setUserAttribute(entry.getKey(), entry.getValue());
+            if (!setUserAttribute(entry.getKey(), entry.getValue())) {
+                return false;
+            }
         }
+        return true;
     }
 
     public Map<MParticle.IdentityType, String> getUserIdentities() {

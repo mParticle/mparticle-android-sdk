@@ -229,33 +229,38 @@ import java.util.Map;
         }
     }
 
-    boolean setUser(long previousMpid, long newMpid, boolean shouldCopyAttributes) {
-        if (shouldCopyAttributes) {
-            for (Map.Entry<String, Object> entry: mMParticleDBManager.getUserAttributes(previousMpid).entrySet()) {
-                if (!setUserAttribute(entry.getKey(), entry.getValue(), newMpid, true)) {
-                    return false;
-                }
-            }
-        }
-        return true;
-    }
-
 
     /**
      * to be used to rectify the use of the placeholder MPID, which occured while request which might
      * change the MPID was in progress. The parameter "mpid" can either be the previous MPID or a new MPID,
      * either way, everything stored under the placeholder MPID will be migrated.
      */
-    void changeUser(long mpId) {
+    boolean setUser(long previousMpid, long newMpid, Map<MParticle.IdentityType, String> identities, boolean shouldCopyAttributes) {
+        boolean success = true;
+        if (shouldCopyAttributes && previousMpid != newMpid) {
+            for (Map.Entry<String, Object> entry: mMParticleDBManager.getUserAttributes(previousMpid).entrySet()) {
+                if (!setUserAttribute(entry.getKey(), entry.getValue(), newMpid, true)) {
+                    success = false;
+                }
+            }
+        }
+        if (identities != null) {
+            for (Map.Entry<MParticle.IdentityType, String> entry : identities.entrySet()) {
+                if (!MPUtility.isEmpty(entry.getValue())) {
+                    setUserIdentity(entry.getValue(), entry.getKey(), newMpid);
+                }
+            }
+        }
         // if the mpid remains equal to the temporary_mpid, as the case could be when a network request fails
         // or on startup, then there is not reason to do anything
-        if (mpId == Constants.TEMPORARY_MPID) {
-            return;
+        if (newMpid == Constants.TEMPORARY_MPID) {
+            return false;
         }
-        mConfigManager.mergeUserConfigs(Constants.TEMPORARY_MPID, mpId);
-        mMessageManager.getMParticleDBManager().updateMpId(Constants.TEMPORARY_MPID, mpId);
-        mConfigManager.setMpid(mpId);
+        mConfigManager.mergeUserConfigs(Constants.TEMPORARY_MPID, newMpid);
+        mMessageManager.getMParticleDBManager().updateMpId(Constants.TEMPORARY_MPID, newMpid);
         mConfigManager.deleteUserConfig(Constants.TEMPORARY_MPID);
+        mConfigManager.setMpid(newMpid);
+        return success;
 
     }
 }

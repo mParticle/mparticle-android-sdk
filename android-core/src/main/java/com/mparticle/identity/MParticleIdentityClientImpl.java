@@ -39,6 +39,35 @@ import static com.mparticle.MParticle.IdentityType.Yahoo;
     private Context mContext;
     private ConfigManager mConfigManager;
 
+    static final String LOGIN_PATH = "/login";
+    static final String LOGOUT_PATH = "/logout";
+    static final String IDENTIFY_PATH = "/identify";
+    static final String MODIFY_PATH = "/modify";
+
+    static final String PLATFORM = "platform";
+    static final String SDK_VENDOR = "sdk_vendor";
+    static final String SDK_VERSION = "sdk_version";
+    static final String CLIENT_SDK = "client_sdk";
+    static final String CONTEXT = "context";
+    static final String ENVIRONMENT = "environment";
+    static final String REQUEST_TIMESTAMP_MS = "request_timestamp_ms";
+    static final String REQUEST_ID = "request_id";
+
+    static final String ANDROID_AAID = "android_aaid";
+    static final String PUSH_TOKEN = "push_token";
+    static final String ANDROID_UUID = "android_uuid";
+    static final String DEVICE_APPLICATION_STAMP = "device_application_stamp";
+    static final String KNOWN_IDENTITIES = "known_identities";
+    static final String PREVIOUS_MPID = "previous_mpid";
+
+    static final String NEW_VALUE = "new_value";
+    static final String OLD_VALUE = "old_value";
+    static final String IDENTITY_TYPE = "identity_type";
+    static final String IDENTITY_CHANGES = "identity_changes";
+
+    static final String X_MP_KEY = "x-mp-key";
+    static final String X_MP_SIGNATURE = "x-mp-signature";
+
     private static final String SECURE_SERVICE_SCHEME = "https";
     private static final String API_HOST = MPUtility.isEmpty(BuildConfig.MP_IDENTITY_URL) ? "identity.mparticle.com" : BuildConfig.MP_IDENTITY_URL;
     private static final String SERVICE_VERSION_1 = "/v1";
@@ -52,8 +81,8 @@ import static com.mparticle.MParticle.IdentityType.Yahoo;
     public IdentityHttpResponse login(IdentityApiRequest request) throws JSONException, IOException {
         JSONObject jsonObject = getStateJson(request);
         Logger.verbose("Identity login request: " + jsonObject.toString());
-        HttpURLConnection connection = getPostConnection("/login", jsonObject.toString());
-        makeUrlRequest(connection, jsonObject.toString(), false);
+        HttpURLConnection connection = getPostConnection(LOGIN_PATH, jsonObject.toString());
+        connection = makeUrlRequest(connection, jsonObject.toString(), false);
         int responseCode = connection.getResponseCode();
         JSONObject response = MPUtility.getJsonResponse(connection);
         return parseIdentityResponse(responseCode, response);
@@ -62,8 +91,8 @@ import static com.mparticle.MParticle.IdentityType.Yahoo;
     public IdentityHttpResponse logout(IdentityApiRequest request) throws JSONException, IOException {
         JSONObject jsonObject = getStateJson(request);
         Logger.verbose("Identity logout request: \n" + jsonObject.toString());
-        HttpURLConnection connection = getPostConnection("/logout", jsonObject.toString());
-        makeUrlRequest(connection, jsonObject.toString(), false);
+        HttpURLConnection connection = getPostConnection(LOGOUT_PATH, jsonObject.toString());
+        connection = makeUrlRequest(connection, jsonObject.toString(), false);
         int responseCode = connection.getResponseCode();
         JSONObject response = MPUtility.getJsonResponse(connection);
         return parseIdentityResponse(responseCode, response);
@@ -72,8 +101,8 @@ import static com.mparticle.MParticle.IdentityType.Yahoo;
     public IdentityHttpResponse identify(IdentityApiRequest request) throws JSONException, IOException {
         JSONObject jsonObject = getStateJson(request);
         Logger.verbose("Identity identify request: \n" + jsonObject.toString());
-        HttpURLConnection connection = getPostConnection("/identify", jsonObject.toString());
-        makeUrlRequest(connection, jsonObject.toString(), false);
+        HttpURLConnection connection = getPostConnection(IDENTIFY_PATH, jsonObject.toString());
+        connection = makeUrlRequest(connection, jsonObject.toString(), false);
         int responseCode = connection.getResponseCode();
         JSONObject response = MPUtility.getJsonResponse(connection);
         return parseIdentityResponse(responseCode, response);
@@ -82,8 +111,8 @@ import static com.mparticle.MParticle.IdentityType.Yahoo;
     public IdentityHttpResponse modify(IdentityApiRequest request) throws JSONException, IOException {
         JSONObject jsonObject = getChangeJson(request);
         Logger.verbose("Identity modify request: \n" + jsonObject.toString());
-        HttpURLConnection connection = getPostConnection(mConfigManager.getMpid(), "/modify", jsonObject.toString());
-        makeUrlRequest(connection, jsonObject.toString(), false);
+        HttpURLConnection connection = getPostConnection(mConfigManager.getMpid(), MODIFY_PATH, jsonObject.toString());
+        connection = makeUrlRequest(connection, jsonObject.toString(), false);
         int responseCode = connection.getResponseCode();
         JSONObject response = MPUtility.getJsonResponse(connection);
         return parseIdentityResponse(responseCode, response);
@@ -95,22 +124,22 @@ import static com.mparticle.MParticle.IdentityType.Yahoo;
 
     private JSONObject getBaseJson() throws JSONException {
         JSONObject clientSdkObject = new JSONObject();
-        clientSdkObject.put("platform", "android");
-        clientSdkObject.put("sdk_vendor", "mparticle");
-        clientSdkObject.put("sdk_version", BuildConfig.VERSION_NAME);
+        clientSdkObject.put(PLATFORM, "android");
+        clientSdkObject.put(SDK_VENDOR, "mparticle");
+        clientSdkObject.put(SDK_VERSION, BuildConfig.VERSION_NAME);
 
         JSONObject jsonObject = new JSONObject();
-        jsonObject.put("client_sdk", clientSdkObject);
+        jsonObject.put(CLIENT_SDK, clientSdkObject);
         String context = mConfigManager.getIdentityApiContext();
         if (context != null) {
-            jsonObject.put("context", context);
+            jsonObject.put(CONTEXT, context);
         }
         String environment = getStringValue(mConfigManager.getEnvironment());
         if (!MPUtility.isEmpty(environment)) {
-            jsonObject.put("environment", environment);
+            jsonObject.put(ENVIRONMENT, environment);
         }
-        jsonObject.put("request_timestamp_ms", System.currentTimeMillis());
-        jsonObject.put("request_id", UUID.randomUUID().toString());
+        jsonObject.put(REQUEST_TIMESTAMP_MS, System.currentTimeMillis());
+        jsonObject.put(REQUEST_ID, UUID.randomUUID().toString());
         return jsonObject;
     }
 
@@ -120,19 +149,19 @@ import static com.mparticle.MParticle.IdentityType.Yahoo;
         JSONObject identitiesJson = new JSONObject();
         MPUtility.AndroidAdIdInfo adIdInfo = MPUtility.getGoogleAdIdInfo(mContext);
         if (adIdInfo != null) {
-            identitiesJson.put("android_aaid", adIdInfo.id);
+            identitiesJson.put(ANDROID_AAID, adIdInfo.id);
         }
         String pushToken = mConfigManager.getPushToken();
         if (!MPUtility.isEmpty(pushToken)) {
-            identitiesJson.put("push_token", pushToken);
+            identitiesJson.put(PUSH_TOKEN, pushToken);
         }
         String androidId = MPUtility.getAndroidID(mContext);
         if (!MPUtility.isEmpty(androidId)) {
-            identitiesJson.put("android_uuid", androidId);
+            identitiesJson.put(ANDROID_UUID, androidId);
         }
         String das = mConfigManager.getDeviceApplicationStamp();
         if (!MPUtility.isEmpty(das)) {
-            identitiesJson.put("device_application_stamp", das);
+            identitiesJson.put(DEVICE_APPLICATION_STAMP, das);
         }
         if (request != null) {
             if (!MPUtility.isEmpty(request.getUserIdentities())) {
@@ -144,11 +173,11 @@ import static com.mparticle.MParticle.IdentityType.Yahoo;
                 }
             }
         }
-        jsonObject.put("known_identities", identitiesJson);
+        jsonObject.put(KNOWN_IDENTITIES, identitiesJson);
 
         Long mpId = mConfigManager.getMpid();
         if (mpId != null && mpId != Constants.TEMPORARY_MPID) {
-            jsonObject.put("previous_mpid", String.valueOf(mpId));
+            jsonObject.put(PREVIOUS_MPID, mpId);
         }
         return jsonObject;
     }
@@ -169,9 +198,9 @@ import static com.mparticle.MParticle.IdentityType.Yahoo;
                 String newValue = newIdentities.get(identityType);
                 String oldValue = oldIdentities.get(identityType);
                 if (newValue != oldValue && (newValue == null || !newValue.equals(oldValue))) {
-                    changeJson.put("new_value", newValue == null ? JSONObject.NULL : newValue);
-                    changeJson.put("old_value", oldValue == null ? JSONObject.NULL : oldValue);
-                    changeJson.put("identity_type", idTypeString);
+                    changeJson.put(NEW_VALUE, newValue == null ? JSONObject.NULL : newValue);
+                    changeJson.put(OLD_VALUE, oldValue == null ? JSONObject.NULL : oldValue);
+                    changeJson.put(IDENTITY_TYPE, idTypeString);
                     changesJson.put(changeJson);
                 }
             }
@@ -182,13 +211,13 @@ import static com.mparticle.MParticle.IdentityType.Yahoo;
             String oldValue = request.getOtherOldIdentities().get(identityType);
             JSONObject changeJson = new JSONObject();
             if (newValue != oldValue && (newValue == null || !newValue.equals(oldValue))) {
-                changeJson.put("new_value", newValue == null ? JSONObject.NULL : newValue);
-                changeJson.put("old_value", oldValue == null ? JSONObject.NULL : oldValue);
-                changeJson.put("identity_type", identityType);
+                changeJson.put(NEW_VALUE, newValue == null ? JSONObject.NULL : newValue);
+                changeJson.put(OLD_VALUE, oldValue == null ? JSONObject.NULL : oldValue);
+                changeJson.put(IDENTITY_TYPE, identityType);
                 changesJson.put(changeJson);
             }
         }
-        jsonObject.put("identity_changes", changesJson);
+        jsonObject.put(IDENTITY_CHANGES, changesJson);
         return jsonObject;
     }
 
@@ -221,12 +250,12 @@ import static com.mparticle.MParticle.IdentityType.Yahoo;
         connection.setRequestMethod("POST");
         connection.setDoOutput(true);
         connection.setRequestProperty("Content-Encoding", "gzip");
-        connection.setRequestProperty("x-mp-key", getApiKey());
+        connection.setRequestProperty(X_MP_KEY, getApiKey());
         connection.setRequestProperty("Content-Type", "application/json");
         String date = getHeaderDateString();
         connection.setRequestProperty("Date", date);
         try {
-            connection.setRequestProperty("x-mp-signature", getHeaderHashString(connection, date, message, getApiSecret()));
+            connection.setRequestProperty(X_MP_SIGNATURE, getHeaderHashString(connection, date, message, getApiSecret()));
         } catch (NoSuchAlgorithmException e) {
             Logger.error("Error signing message.");
         } catch (InvalidKeyException e) {
@@ -269,7 +298,7 @@ import static com.mparticle.MParticle.IdentityType.Yahoo;
         return mConfigManager.getApiSecret();
     }
 
-    private String getStringValue(MParticle.IdentityType identityType) {
+    String getStringValue(MParticle.IdentityType identityType) {
         switch (identityType) {
             case Other:
                 return "other";
@@ -294,7 +323,7 @@ import static com.mparticle.MParticle.IdentityType.Yahoo;
         }
     }
 
-    private MParticle.IdentityType getIdentityType(String idTypeString) {
+    MParticle.IdentityType getIdentityType(String idTypeString) {
         if (idTypeString.equals("other")) {
             return Other;
         } else if (idTypeString.equals("customerid")) {

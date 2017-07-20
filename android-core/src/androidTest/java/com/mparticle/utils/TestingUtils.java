@@ -5,13 +5,14 @@ import java.util.concurrent.TimeUnit;
 
 import static junit.framework.Assert.fail;
 
+/**
+ * Utility methods for validating tests, mostly control-flow type stuff
+ */
 public class TestingUtils {
 
-    private static CountDownLatch lock = new CountDownLatch(1);
-
-    public static void checkAllBool(boolean[] array, int everySeconds, int forSeconds) {
-        for (int i = 0; i < forSeconds; i++) {
-            if (i % everySeconds == 0) {
+    public static void checkAllBool(boolean[] array, int everyNDeciseconds, int forDeciseconds) {
+        for (int i = 0; i < forDeciseconds + 2; i++) {
+            if (i % everyNDeciseconds == 0) {
                 boolean allTrue = true;
                 for (Boolean bool: array) {
                     if (!bool) {
@@ -19,19 +20,24 @@ public class TestingUtils {
                     }
                 }
                 if (allTrue) {
+                    //pause(1);
                     return;
                 }
             }
-            try {
-                lock.await(1, TimeUnit.SECONDS);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+                pause(everyNDeciseconds);
         }
         for (int i = 0; i < array.length; i++) {
             if (!array[i]) {
                 fail("failed to satify condition index: " + i);
             }
+        }
+    }
+
+    private static void pause(int seconds) {
+        try {
+            Thread.sleep(seconds * 100);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
     }
 }

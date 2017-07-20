@@ -5,14 +5,11 @@ import android.location.Location;
 import android.support.test.InstrumentationRegistry;
 
 import com.mparticle.internal.ConfigManager;
-import com.mparticle.internal.Constants;
 import com.mparticle.internal.MPMessage;
 import com.mparticle.internal.Session;
-import com.mparticle.internal.database.tables.mp.BreadcrumbTable;
 
 import org.json.JSONException;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -27,8 +24,9 @@ public class BreadcrumbServiceTest extends BaseMPServiceTest {
     private static int breadCrumbLimit;
     private static Context context;
 
-    @Before
-    public void preConditions() throws JSONException {
+    @Override
+    public void before() throws Exception {
+        super.before();
         message = new MPMessage.Builder("test", new Session(), new Location("New York City"), 1).build();
         context = InstrumentationRegistry.getContext();
         breadCrumbLimit = ConfigManager.getBreadcrumbLimit(context);
@@ -41,8 +39,6 @@ public class BreadcrumbServiceTest extends BaseMPServiceTest {
      */
     @Test
     public void testNullValues() throws Exception {
-        clearDatabase();
-
         for (int i = 0; i < breadCrumbLimit + 10; i++) {
             BreadcrumbService.insertBreadcrumb(database, context, message, "k", null);
         }
@@ -90,7 +86,6 @@ public class BreadcrumbServiceTest extends BaseMPServiceTest {
          * this test won't work if you can't store breadcrumbs
          */
         assertTrue(breadCrumbLimit >= 2);
-        clearDatabase();
 
         int expectedCount = breadCrumbLimit;
         for (int i = 0; i < expectedCount; i++) {
@@ -133,7 +128,6 @@ public class BreadcrumbServiceTest extends BaseMPServiceTest {
 
     @Test
     public void testBreadcrumbLimit() throws JSONException {
-        clearDatabase();
         List<Integer> deleted = new ArrayList<Integer>();
 
         for (int i = 0; i < breadCrumbLimit + 10; i++) {

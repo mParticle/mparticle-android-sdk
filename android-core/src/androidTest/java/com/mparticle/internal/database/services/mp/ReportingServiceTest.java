@@ -22,12 +22,8 @@ import static junit.framework.Assert.fail;
 
 public class ReportingServiceTest extends BaseMPServiceTest {
 
-    @Before
-    public void setUp() {
-        clearDatabase();
-    }
 
-     @Test
+    @Test
     public void testInsertReportingMessage() throws JSONException {
          List<JsonReportingMessage> reportingMessages = getNReportingMessages(20, "123");
          for (JsonReportingMessage reportingMessage: reportingMessages) {

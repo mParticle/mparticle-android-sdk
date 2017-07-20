@@ -18,7 +18,7 @@ public class BaseDatabase extends SQLiteOpenHelper {
     }
 
     public BaseDatabase(SQLiteOpenHelperWrapper helper, String databaseName, CountDownLatch timer, int version) {
-        super(InstrumentationRegistry.getTargetContext(), databaseName, null, version);
+        super(InstrumentationRegistry.getContext(), databaseName, null, version);
         this.helper = helper;
         this.timer = timer;
     }

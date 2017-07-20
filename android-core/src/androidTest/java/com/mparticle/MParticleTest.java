@@ -5,6 +5,7 @@ import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 
 import com.mparticle.internal.MessageManager;
+import com.mparticle.utils.MParticleUtils;
 
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -20,30 +21,30 @@ public class MParticleTest {
 
     @BeforeClass
     public static void setup() {
-        Looper.prepare();
+        if (Looper.myLooper() == null) {
+            Looper.prepare();
+        }
+        MParticleUtils.clear();
     }
 
     @Before
     public void preConditions() {
         MParticle.setInstance(null);
-        MParticle.start(InstrumentationRegistry.getContext());
+        MParticleOptions options = MParticleOptions.builder(InstrumentationRegistry.getContext())
+                .credentials("key", "secret")
+                .build();
+        MParticle.start(options);
         assertNotNull(MParticle.getInstance());
     }
 
     @Test
     public void testAndroidIdDisabled() throws Exception {
-        assertFalse(MParticle.isAndroidIdDisabled());
-
+        MParticle.setInstance(null);
         MParticleOptions options = MParticleOptions.builder(InstrumentationRegistry.getContext())
                 .setAndroidIdDisabled(true)
                 .credentials("key", "secret")
                 .build();
-        try {
-            MParticle.start(options);
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-        }
+        MParticle.start(options);
         assertTrue(MParticle.isAndroidIdDisabled());
         MParticle.setInstance(null);
         options = MParticleOptions.builder(InstrumentationRegistry.getContext())
@@ -56,6 +57,7 @@ public class MParticleTest {
 
     @Test
     public void testEnsureSessionActive() {
+        MParticle.getInstance().mAppStateManager.ensureActiveSession();
         ensureSessionActive();
     }
 
@@ -66,9 +68,10 @@ public class MParticleTest {
 
     @Test
     public void testSessionEndsOnOptOut() {
-        ensureSessionActive();
+        MParticle.getInstance().mAppStateManager.ensureActiveSession();
+        assertTrue(MParticle.getInstance().mAppStateManager.getSession().isActive());
         MParticle.getInstance().setOptOut(true);
-        assertFalse(MParticle.getInstance().isSessionActive());
+        assertFalse(MParticle.getInstance().mAppStateManager.getSession().isActive());
     }
 
     private void ensureSessionActive() {

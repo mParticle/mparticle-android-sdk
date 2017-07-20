@@ -21,9 +21,14 @@ import static junit.framework.Assert.assertEquals;
 public class MessageServiceTest extends BaseMPServiceTest {
     Long mpid1, mpid2;
 
-    @Before
-    public void cleardb() {
-        clearDatabase();
+    @Override
+    protected void beforeClass() throws Exception {
+
+    }
+
+    @Override
+    protected void before() throws Exception {
+        super.before();
         mpid1 = new Random().nextLong();
         mpid2 = new Random().nextLong();
     }

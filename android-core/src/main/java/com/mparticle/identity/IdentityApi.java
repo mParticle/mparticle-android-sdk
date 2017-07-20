@@ -15,12 +15,14 @@ import com.mparticle.internal.DatabaseTables;
 import com.mparticle.internal.KitManager;
 import com.mparticle.internal.Logger;
 import com.mparticle.internal.MPUtility;
+import com.mparticle.internal.MParticleApiClient;
 import com.mparticle.internal.MessageManager;
 import com.mparticle.internal.database.services.MParticleDBManager;
 
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.WeakHashMap;
 
 public final class IdentityApi {
     public static int UNKNOWN_ERROR = -1;
@@ -34,18 +36,13 @@ public final class IdentityApi {
     MessageManager mMessageManager;
 
     MParticleUserDelegate mUserDelegate;
-    MParticleIdentityClient mMParticleApiClient;
+    private static MParticleIdentityClient sApiClient;
+    private static boolean sTestAlreadySet = false;
 
     private Set<IdentityStateListener> identityStateListeners = new HashSet<IdentityStateListener>();
-    private Object lock = new Object();
-    private static IdentityApi instance;
+    private static Object lock = new Object();
 
-    public static IdentityApi getInstance(Context context, AppStateManager appStateManager, MessageManager messageManager, ConfigManager configManager, KitManager kitManager) {
-        if (instance == null) {
-            instance = new IdentityApi(context, appStateManager, messageManager, configManager, kitManager);
-        }
-        return instance;
-    }
+    IdentityApi() {}
 
     public IdentityApi(Context context, AppStateManager appStateManager, MessageManager messageManager, ConfigManager configManager, KitManager kitManager) {
         this.mContext = context;
@@ -54,7 +51,11 @@ public final class IdentityApi {
         this.mConfigManager = configManager;
         this.mMessageManager = messageManager;
         configManager.addMpIdChangeListener(new IdentityStateListenerManager());
-        this.mMParticleApiClient = new MParticleIdentityClientImpl(configManager, context);
+        if (sTestAlreadySet) {
+            sTestAlreadySet = false;
+        } else {
+            setApiClient(new MParticleIdentityClientImpl(configManager, context), false);
+        }
     }
 
     /**
@@ -87,7 +88,7 @@ public final class IdentityApi {
             return makeIdentityRequest(logoutRequest, new IdentityNetworkRequestRunnable() {
                 @Override
                 public IdentityHttpResponse request(IdentityApiRequest request) throws Exception {
-                    return mMParticleApiClient.logout(request);
+                    return getApiClient().logout(request);
                 }
             });
         }
@@ -102,7 +103,7 @@ public final class IdentityApi {
             return makeIdentityRequest(loginRequest, new IdentityNetworkRequestRunnable() {
                 @Override
                 public IdentityHttpResponse request(IdentityApiRequest request) throws Exception {
-                    return mMParticleApiClient.login(request);
+                    return getApiClient().login(request);
                 }
             });
         }
@@ -113,7 +114,7 @@ public final class IdentityApi {
             return makeIdentityRequest(identifyRequest, new IdentityNetworkRequestRunnable() {
                 @Override
                 public IdentityHttpResponse request(IdentityApiRequest request) throws Exception {
-                    return mMParticleApiClient.identify(request);
+                    return getApiClient().identify(request);
                 }
             });
         }
@@ -136,7 +137,7 @@ public final class IdentityApi {
                 @Override
                 public void run() {
                     try {
-                        final IdentityHttpResponse result = mMParticleApiClient.modify(updateRequest);
+                        final IdentityHttpResponse result = getApiClient().modify(updateRequest);
                         if (!result.isSuccessful()) {
                             task.setFailed(result);
                         } else {
@@ -177,17 +178,7 @@ public final class IdentityApi {
                     } else {
                         long newMpid = result.getMpId();
                         ConfigManager.setIdentityRequestInProgress(false);
-                        mUserDelegate.changeUser(newMpid);
-                        if (startingMpid != newMpid) {
-                            mUserDelegate.setUser(startingMpid, newMpid, identityApiRequest.shouldCopyUserAttributes());
-                        }
-                        if (identityApiRequest.getUserIdentities() != null) {
-                            for (Map.Entry<MParticle.IdentityType, String> entry : identityApiRequest.getUserIdentities().entrySet()) {
-                                if (!MPUtility.isEmpty(entry.getValue())) {
-                                    mUserDelegate.setUserIdentity(entry.getValue(), entry.getKey(), newMpid);
-                                }
-                            }
-                        }
+                        mUserDelegate.setUser(startingMpid, newMpid, identityApiRequest.getUserIdentities(), identityApiRequest.shouldCopyUserAttributes());
                         task.setSuccessful(new IdentityApiResult(getCurrentUser()));
                     }
                 } catch (Exception ex) {
@@ -199,8 +190,19 @@ public final class IdentityApi {
         return task;
     }
 
-    void setApiClient(MParticleIdentityClient client) {
-        this.mMParticleApiClient = client;
+    MParticleIdentityClient getApiClient() {
+        if (sApiClient == null) {
+            sApiClient = new MParticleIdentityClientImpl(mConfigManager, mContext);
+        }
+        return sApiClient;
+    }
+
+    /**
+     * @param overrideNextInstance - retain this client for the next instance to be constructed, testing method
+     */
+    static void setApiClient(MParticleIdentityClient client, boolean overrideNextInstance) {
+        sTestAlreadySet = overrideNextInstance;
+        sApiClient = client;
     }
 
     interface IdentityNetworkRequestRunnable {

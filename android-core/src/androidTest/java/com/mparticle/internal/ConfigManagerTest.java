@@ -26,7 +26,9 @@ public class ConfigManagerTest {
 
     @BeforeClass
     public static void setupClass() {
-        Looper.prepare();
+        if (Looper.myLooper() == null) {
+            Looper.prepare();
+        }
     }
 
     @Before
@@ -57,9 +59,9 @@ public class ConfigManagerTest {
      */
     @Test
     public void testUserConfigMigrateEmptyTarget() throws Exception {
-        long newMpid = new Random().nextInt();
+        final long newMpid = new Random().nextInt();
 
-        ConfigManager configManager = instance.getConfigManager();
+        final ConfigManager configManager = instance.getConfigManager();
         assertTrue(configManager.getMpid() == Constants.TEMPORARY_MPID);
         assertNotNull(configManager.getUserConfig());
         assertTrue((configManager.getUserConfig().getMpid()) == 0);
@@ -73,7 +75,19 @@ public class ConfigManagerTest {
         }
 
         configManager.setMpid(newMpid);
-        configManager.mergeUserConfigs(0, newMpid);
+
+        //this is a HACK..since we are using apply instead of commit, for some reason the writes
+        //to SharedPreferences are not being applied, unless we allow time to for them to write.
+        //this shouldn't be a problem, since they are all on the same process, and SharedPreferences
+        //is a singleton across a process, but it is. Seems to not work only on some versions of Android,
+        //so maybe it is related to different implementations of SharedPreferences.Editor;
+        AccessUtils.getUploadHandler().post(new Runnable() {
+            @Override
+            public void run() {
+                configManager.mergeUserConfigs(0, newMpid);
+            }
+        });
+        Thread.sleep(2000);
         assertTrue(configManager.getMpid() == newMpid);
         assertMatchesProfile1(configManager.getUserConfig());
     }

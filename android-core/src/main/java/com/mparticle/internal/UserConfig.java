@@ -59,12 +59,13 @@ class UserConfig {
 
     }
 
-    static void deleteUserConfig(Context context, long mpId) {
+    static boolean deleteUserConfig(Context context, long mpId) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             context.deleteSharedPreferences(getFileName(mpId));
         } else {
             context.getSharedPreferences(getFileName(mpId), Context.MODE_PRIVATE).edit().clear().apply();
         }
+        return removeMpId(context, mpId);
     }
 
     static UserConfig getUserConfig(Context context, long mpid) {
@@ -125,12 +126,7 @@ class UserConfig {
     }
 
     void setDeletedUserAttributes(String deletedUserAttributes) {
-        setDeletedUserAttributes(mPreferences.edit(), deletedUserAttributes);
-    }
-
-    private UserConfig setDeletedUserAttributes(SharedPreferences.Editor editor, String deletedUserAttributes) {
-        editor.putString(DELETED_USER_ATTRS, deletedUserAttributes).apply();
-        return this;
+        mPreferences.edit().putString(DELETED_USER_ATTRS, deletedUserAttributes).apply();
     }
 
     private boolean hasDeletedUserAttributes() {
@@ -197,12 +193,7 @@ class UserConfig {
     }
 
     void setPreviousSessionId(String previousSessionId) {
-        setPreviousSessionId(mPreferences.edit(), previousSessionId);
-    }
-
-    private UserConfig setPreviousSessionId(SharedPreferences.Editor editor, String previousSessionId) {
-        editor.putString(PREVIOUS_SESSION_ID, previousSessionId).apply();
-        return this;
+        mPreferences.edit().putString(PREVIOUS_SESSION_ID, previousSessionId).apply();
     }
 
     private boolean hasPreviousSessionId() {
@@ -281,19 +272,18 @@ class UserConfig {
         return mPreferences.contains(USER_IDENTITIES);
     }
 
-    void updateMpId(long newMpId) {
-        Set<Long> mpIds = getMpIdSet(mContext);
-        mpIds.remove(mpId);
-        mpIds.add(newMpId);
-        mpId = newMpId;
-        setMpIds(mpIds);
-    }
-
     private SharedPreferences getPreferenceFile(long mpId) {
         Set<Long> mpIds = getMpIdSet(mContext);
         mpIds.add(mpId);
         setMpIds(mpIds);
         return mContext.getSharedPreferences(getFileName(mpId), Context.MODE_PRIVATE);
+    }
+
+    private static boolean removeMpId(Context context, long mpid) {
+        Set<Long> mpids = getMpIdSet(context);
+        boolean removed = mpids.remove(mpid);
+        setMpIds(context, mpids);
+        return removed;
     }
 
     private static Set<Long> getMpIdSet(Context context) {
@@ -419,10 +409,8 @@ class UserConfig {
 
         void migrate(UserConfig userConfig) {
             try {
-                SharedPreferences.Editor editor = userConfig.mPreferences.edit();
-                userConfig
-                        .setDeletedUserAttributes(editor, getDeletedUserAttributes())
-                        .setPreviousSessionId(editor, getPreviousSessionId());
+                userConfig.setDeletedUserAttributes(getDeletedUserAttributes());
+                userConfig.setPreviousSessionId(getPreviousSessionId());
                 String ltv = getLtv();
                 if (ltv != null) {
                     userConfig.setLtv(ltv);

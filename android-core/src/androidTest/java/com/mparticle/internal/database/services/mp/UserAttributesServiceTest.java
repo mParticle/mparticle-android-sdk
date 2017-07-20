@@ -10,12 +10,6 @@ import java.util.Random;
 import static junit.framework.Assert.assertEquals;
 
 public class UserAttributesServiceTest extends BaseMPServiceTest {
-
-    @Before
-    public void setUp() {
-        clearDatabase();
-    }
-
     @Test
     public void testStoreByMpid() {
         for (int i = 0; i < 20; i++) {

@@ -111,8 +111,8 @@ public class MParticle {
     protected ProductBagApi mProductBags;
     protected volatile DeepLinkListener mDeepLinkListener;
     protected IdentityApi mIdentityApi;
-    private static volatile boolean sAndroidIdDisabled;
-    private static volatile boolean sDevicePerformanceMetricsDisabled;
+    static volatile boolean sAndroidIdDisabled;
+    static volatile boolean sDevicePerformanceMetricsDisabled;
 
     protected MParticle() { }
 
@@ -180,7 +180,7 @@ public class MParticle {
                     instance.mKitManager = new KitFrameworkWrapper(context, instance.mMessageManager, configManager, appStateManager);
                     instance.mMessageManager.refreshConfiguration();
 
-                    instance.mIdentityApi = IdentityApi.getInstance(context, instance.mAppStateManager, instance.mMessageManager, instance.mConfigManager, instance.mKitManager);
+                    instance.mIdentityApi = new IdentityApi(context, instance.mAppStateManager, instance.mMessageManager, instance.mConfigManager, instance.mKitManager);
 
                     instance.identify(options);
 

@@ -20,8 +20,11 @@ public class DatabaseTables {
         return instance;
     }
 
-    private DatabaseTables(Context context) {
+    static void setInstance(DatabaseTables tables) {
+        instance = tables;
+    }
 
+    private DatabaseTables(Context context) {
         mMParticleDatabase = new MParticleDatabase(context);
     }
 

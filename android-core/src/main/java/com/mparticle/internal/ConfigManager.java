@@ -3,6 +3,7 @@ package com.mparticle.internal;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.net.UrlQuerySanitizer;
+import android.os.Build;
 
 import com.mparticle.ExceptionHandler;
 import com.mparticle.MParticle;
@@ -68,7 +69,7 @@ public class ConfigManager {
     private long mInfluenceOpenTimeout = 3600 * 1000;
     private JSONArray mTriggerMessageMatches, mTriggerMessageHashes = null;
     private ExceptionHandler mExHandler;
-    private boolean mIncludeSessionHistory = true;
+    private boolean mIncludeSessionHistory = false;
     private JSONObject mCurrentCookies;
 
     private ConfigManager() {
@@ -145,6 +146,18 @@ public class ConfigManager {
 
     public void deleteUserConfig(long mpId) {
         deleteUserConfig(mContext, mpId);
+    }
+
+    static void deleteConfigManager(Context context) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            context.deleteSharedPreferences(PREFERENCES_FILE);
+            sPreferences = context.getSharedPreferences(PREFERENCES_FILE, Context.MODE_PRIVATE);
+        } else {
+            if (sPreferences == null) {
+                sPreferences = context.getSharedPreferences(PREFERENCES_FILE, Context.MODE_PRIVATE);
+            }
+            sPreferences.edit().clear().commit();
+        }
     }
 
     void saveConfigJson(JSONObject json) {

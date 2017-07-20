@@ -8,9 +8,13 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.support.test.InstrumentationRegistry;
 
 import com.mparticle.internal.ApplicationContextWrapper;
+import com.mparticle.internal.DatabaseTables;
 import com.mparticle.internal.database.BaseDatabase;
 import com.mparticle.internal.database.tables.mp.MParticleDatabaseHelper;
 
+/**
+ * Utility methods for maniulating the Android sdk state for testing purposes
+ */
 public class AndroidUtils {
 
     private static AndroidUtils sInstance;
@@ -23,10 +27,6 @@ public class AndroidUtils {
     }
 
     private AndroidUtils() {}
-
-    public void deleteDatabase() {
-        InstrumentationRegistry.getTargetContext().deleteDatabase(MParticleDatabaseHelper.DB_NAME);
-    }
 
     public Context getProductionContext(final Context context) {
         return new ContextWrapper(context) {

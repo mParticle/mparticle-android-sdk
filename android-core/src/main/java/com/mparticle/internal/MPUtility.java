@@ -199,6 +199,9 @@ public class MPUtility {
             catch (IOException ex) {
                 is = connection.getErrorStream();
             }
+            if (is == null) {
+                return null;
+            }
             BufferedReader in = new BufferedReader(new InputStreamReader(is));
             String line;
             while ((line = in.readLine()) != null) {

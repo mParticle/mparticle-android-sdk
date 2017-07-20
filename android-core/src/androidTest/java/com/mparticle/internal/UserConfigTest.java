@@ -1,14 +1,12 @@
 package com.mparticle.internal;
 
 import android.content.Context;
-import android.os.Looper;
 import android.support.test.InstrumentationRegistry;
 
+import com.mparticle.BaseCleanStartedEachTest;
 import com.mparticle.MParticle;
-import com.mparticle.MParticleOptions;
+import com.mparticle.utils.RandomUtils;
 
-import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.util.HashSet;
@@ -17,48 +15,36 @@ import java.util.Set;
 
 import static junit.framework.Assert.assertEquals;
 
-public class UserConfigTest {
+public class UserConfigTest extends BaseCleanStartedEachTest {
 
     MParticle instance;
     Context mContext;
 
-    @BeforeClass
-    public static void setupClass() {
-        Looper.prepare();
+    @Override
+    protected void beforeClass() throws Exception {
     }
 
-    @Before
-    public void setup() {
+    @Override
+    protected void before() throws Exception {
         mContext = InstrumentationRegistry.getContext();
-        MParticle.setInstance(null);
-        ConfigManager.clearMpid(mContext);
-        MParticleOptions options = MParticleOptions.builder(mContext)
-                .credentials("key", "value")
-                .build();
-        MParticle.start(options);
         instance = MParticle.getInstance();
-
-        for (UserConfig userConfig : UserConfig.getAllUsers(mContext)) {
-            UserConfig.deleteUserConfig(mContext, userConfig.getMpid());
-        }
-        assertEquals(UserConfig.getAllUsers(mContext).size(), 0);
     }
 
     @Test
     public void testMigrate() {
         //test this a number of times, since it will be different everytime
-        for (int i = 0; i < 200; i++) {
+        for (int i = 0; i < 50; i++) {
             testRandomMigration();
         }
     }
 
     private void testRandomMigration() {
-        int numberFieldsChanged = Math.abs(new Random().nextInt() % 12);
+        int numberFieldsChanged = RandomUtils.getInstance().randomInt(0, 11);
         Set<Integer> indexsToSetProfile1Field = new HashSet<Integer>();
 
         //select between 0 and 11 fields that should be set in the subjectUserConfig
         for (int  i = 0; i < numberFieldsChanged; i++) {
-            int random = Math.abs(new Random().nextInt() % 11);
+            int random = RandomUtils.getInstance().randomInt(0,10);
             if (indexsToSetProfile1Field.contains(random)) {
                 i--;
                 continue;

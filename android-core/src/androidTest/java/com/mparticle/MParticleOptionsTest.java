@@ -27,7 +27,9 @@ public class MParticleOptionsTest {
 
     @BeforeClass
     public static void preConditions() {
-        Looper.prepare();
+        if (Looper.myLooper() == null) {
+            Looper.prepare();
+        }
     }
 
     @Before

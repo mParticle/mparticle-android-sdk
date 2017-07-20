@@ -15,7 +15,9 @@ public class MParticleDBManagerTest {
 
     @BeforeClass
     public static void setup() {
-        Looper.prepare();
+        if (Looper.myLooper() == null) {
+            Looper.prepare();
+        }
     }
 
     @BeforeClass

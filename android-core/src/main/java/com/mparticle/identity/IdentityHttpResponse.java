@@ -17,6 +17,13 @@ public final class IdentityHttpResponse {
 
     private IdentityHttpResponse() {}
 
+    IdentityHttpResponse(int code, long mpid, String context, ArrayList<Error> errors) {
+        this.httpCode = code;
+        this.mpId = mpid;
+        this.context = context;
+        this.errors = errors;
+    }
+
     public IdentityHttpResponse(int code, String errorString) {
         this.httpCode = code;
         this.errors.add(new Error("UNKNOWN", errorString));
