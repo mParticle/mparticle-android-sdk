@@ -1,10 +1,19 @@
 package com.mparticle.commerce;
 
+import com.mparticle.MParticle;
+import com.mparticle.MockMParticle;
+
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
 
 public class ProductBagTest {
+
+    @BeforeClass
+    public static void setup() {
+        MParticle.setInstance(new MockMParticle());
+    }
 
     @Test
     public void testGetName() throws Exception {
