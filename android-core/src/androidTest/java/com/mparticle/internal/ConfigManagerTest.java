@@ -43,7 +43,7 @@ public class ConfigManagerTest {
         instance = MParticle.getInstance();
 
         for(UserConfig userConfig: UserConfig.getAllUsers(mContext)) {
-            UserConfig.deleteUserConfig(mContext, userConfig.getMpid());
+            assertTrue(UserConfig.deleteUserConfig(mContext, userConfig.getMpid()));
         }
         assertEquals(UserConfig.getAllUsers(mContext).size(), 0);
 
