@@ -199,4 +199,13 @@ public class MockKitManager implements KitManager {
 
     }
 
+    @Override
+    public void onApplicationForeground() {
+        
+    }
+
+    @Override
+    public void onApplicationBackground() {
+
+    }
 }

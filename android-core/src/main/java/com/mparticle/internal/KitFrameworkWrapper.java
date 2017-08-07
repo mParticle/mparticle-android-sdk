@@ -85,6 +85,7 @@ public class KitFrameworkWrapper implements KitManager {
     void setKitManager(KitManager manager) {
         mKitManager = manager;
     }
+
     public static boolean getKitsLoaded() {
         return kitsLoaded;
     }
@@ -158,7 +159,7 @@ public class KitFrameworkWrapper implements KitManager {
             for (AttributeChange attributeChange : attributeQueue) {
                 if (attributeChange.removal) {
                     mKitManager.removeUserAttribute(attributeChange.key);
-                } else if (attributeChange.value == null){
+                } else if (attributeChange.value == null) {
                     mKitManager.setUserAttribute(attributeChange.key, null);
                 } else if (attributeChange.value instanceof String) {
                     mKitManager.setUserAttribute(attributeChange.key, (String) attributeChange.value);
@@ -216,6 +217,7 @@ public class KitFrameworkWrapper implements KitManager {
         final String key;
         final Object value;
         final boolean removal;
+
         AttributeChange(String key, Object value) {
             this.key = key;
             this.value = value;
@@ -371,7 +373,7 @@ public class KitFrameworkWrapper implements KitManager {
     public boolean onPushRegistration(String instanceId, String senderId) {
         if (getKitsLoaded() && mKitManager != null) {
             mKitManager.onPushRegistration(instanceId, senderId);
-        }else {
+        } else {
             registerForPush = true;
         }
         return false;
@@ -483,6 +485,20 @@ public class KitFrameworkWrapper implements KitManager {
     public void installReferrerUpdated() {
         if (mKitManager != null) {
             mKitManager.installReferrerUpdated();
+        }
+    }
+
+    @Override
+    public void onApplicationForeground() {
+        if (mKitManager != null) {
+            mKitManager.onApplicationForeground();
+        }
+    }
+
+    @Override
+    public void onApplicationBackground() {
+        if (mKitManager != null) {
+            mKitManager.onApplicationBackground();
         }
     }
 }

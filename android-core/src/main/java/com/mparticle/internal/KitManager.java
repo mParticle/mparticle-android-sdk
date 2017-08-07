@@ -89,4 +89,8 @@ public interface KitManager {
     void onSessionStart();
 
     void installReferrerUpdated();
+
+    void onApplicationForeground();
+
+    void onApplicationBackground();
 }

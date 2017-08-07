@@ -864,6 +864,32 @@ public class KitManagerImpl implements KitManager, DeepLinkListener, UserAttribu
         }
     }
 
+    @Override
+    public void onApplicationForeground() {
+        for (KitIntegration provider : providers.values()) {
+            try {
+                if (provider instanceof KitIntegration.ApplicationStateListener) {
+                    ((KitIntegration.ApplicationStateListener)provider).onApplicationForeground();
+                }
+            } catch (Exception e) {
+                Logger.warning("Failed to call onApplicationForeground for kit: " + provider.getName() + ": " + e.getMessage());
+            }
+        }
+    }
+
+    @Override
+    public void onApplicationBackground() {
+        for (KitIntegration provider : providers.values()) {
+            try {
+                if (provider instanceof KitIntegration.ApplicationStateListener) {
+                    ((KitIntegration.ApplicationStateListener)provider).onApplicationBackground();
+                }
+            } catch (Exception e) {
+                Logger.warning("Failed to call onApplicationBackground for kit: " + provider.getName() + ": " + e.getMessage());
+            }
+        }
+    }
+
     //================================================================================
     // DeepLinkListener forwarding
     //================================================================================

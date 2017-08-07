@@ -67,3 +67,6 @@
 [submodule "kits/singular-kit"]
 	path = kits/singular-kit
 	url = git@github.com:mparticle-integrations/mparticle-android-integration-singular.git
+[submodule "kits/adobe-kit"]
+	path = kits/adobe-kit
+	url = git@github.com:mparticle-integrations/mparticle-android-integration-adobe.git

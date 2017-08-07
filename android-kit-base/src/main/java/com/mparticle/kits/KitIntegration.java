@@ -484,4 +484,18 @@ public abstract class KitIntegration {
          */
         boolean onPushRegistration(String instanceId, String senderId);
     }
+
+    public interface ApplicationStateListener {
+
+        /**
+         * Application has entered the foreground
+         */
+        void onApplicationForeground();
+
+        /**
+         * Application has been sent to the background or terminated
+         */
+        void onApplicationBackground();
+
+    }
 }
