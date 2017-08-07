@@ -166,7 +166,6 @@ import java.util.concurrent.atomic.AtomicLong;
             }
 
             mCurrentSession.updateBackgroundTime(mLastStoppedTime, getTime());
-            mLastForegroundTime = getTime();
 
             if (!mInitialized) {
                 initialize(mCurrentActivityName, previousSessionUri, previousSessionParameters, previousSessionPackage);
@@ -182,6 +181,7 @@ import java.util.concurrent.atomic.AtomicLong;
                         interruptions);
                 Logger.debug("App foregrounded.");
             }
+            mLastForegroundTime = getTime();
 
             if (mCurrentActivityReference != null) {
                 mCurrentActivityReference.clear();
