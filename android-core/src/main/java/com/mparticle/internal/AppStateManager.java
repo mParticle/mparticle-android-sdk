@@ -179,6 +179,7 @@ import java.util.concurrent.atomic.AtomicLong;
                         previousSessionParameters,
                         previousSessionPackage,
                         interruptions);
+                MParticle.getInstance().getKitManager().onApplicationForeground();
                 Logger.debug("App foregrounded.");
             }
             mLastForegroundTime = getTime();
@@ -333,6 +334,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
     private void logBackgrounded(){
         logStateTransition(Constants.StateTransitionType.STATE_TRANS_BG, mCurrentActivityName);
+        MParticle.getInstance().getKitManager().onApplicationBackground();
         mCurrentActivityName = null;
         Logger.debug("App backgrounded.");
         mInterruptionCount.incrementAndGet();
