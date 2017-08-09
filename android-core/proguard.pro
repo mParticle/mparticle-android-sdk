@@ -108,6 +108,7 @@
 -keep class com.mparticle.UserAttributeListener { *; }
 -keep class com.mparticle.internal.MParticleJSInterface { *; }
 -keep class com.mparticle.internal.Logger { *; }
+-keep class com.mparticle.internal.BackgroundTaskHandler { *; }
 
 -keep public class com.mparticle.activity.* {
     *;

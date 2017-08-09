@@ -1107,8 +1107,10 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
             sActiveNetworkName = "offline";
             mUploadHandler.setConnected(false);
         }
+    }
 
-
+    public BackgroundTaskHandler getTaskHandler() {
+        return mUploadHandler;
     }
 
     public class InfluenceOpenMessage {

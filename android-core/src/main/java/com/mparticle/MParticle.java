@@ -258,7 +258,7 @@ public class MParticle {
                     instance.mProductBags = new ProductBagApi(context);
                     instance.mMessageManager = new MessageManager(context, configManager, installType, appStateManager);
                     instance.mPreferences = context.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
-                    instance.mKitManager = new KitFrameworkWrapper(context, instance.mMessageManager, configManager, appStateManager);
+                    instance.mKitManager = new KitFrameworkWrapper(context, instance.mMessageManager, configManager, appStateManager, instance.mMessageManager.getTaskHandler());
                     instance.mMessageManager.refreshConfiguration();
 
                     if (configManager.getLogUnhandledExceptions()) {

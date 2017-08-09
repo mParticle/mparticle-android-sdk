@@ -281,6 +281,13 @@ public abstract class KitIntegration {
     }
 
     /**
+     * Queues and groupd network requests on the MParticle Core network handler
+     */
+    public void executeNetworkRequest(Runnable runnable) {
+        getKitManager().executeNetworkRequest(runnable);
+    }
+
+    /**
      * Kits should implement this interface when they require Activity callbacks for any reason.
      * <p/>
      * The mParticle SDK will automatically call every method of this interface in API > 14 devices. Otherwise only

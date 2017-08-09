@@ -454,9 +454,14 @@ public class ConfigManager {
         JSONArray messageMatches = getTriggerMessageMatches();
         JSONArray triggerHashes = getTriggerMessageHashes();
 
+        boolean isBackgroundAst = false;
+        try {
+            isBackgroundAst = (message.getMessageType().equals(Constants.MessageType.APP_STATE_TRANSITION) && message.get(Constants.MessageKey.STATE_TRANSITION_TYPE).equals(Constants.StateTransitionType.STATE_TRANS_BG));
+        }
+        catch (JSONException ex) {}
         boolean shouldTrigger = message.getMessageType().equals(Constants.MessageType.PUSH_RECEIVED)
                 || message.getMessageType().equals(Constants.MessageType.COMMERCE_EVENT)
-                || message.getMessageType().equals(Constants.MessageType.APP_STATE_TRANSITION);
+                || isBackgroundAst;
 
         if (!shouldTrigger && messageMatches != null && messageMatches.length() > 0){
             shouldTrigger = true;
