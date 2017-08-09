@@ -102,7 +102,7 @@ class KitPlugin implements Plugin<Project> {
                             developer {
                                 id 'mParticle'
                                 name 'mParticle Inc.'
-                                email 'dev@mparticle.com'
+                                email 'developers@mparticle.com'
                             }
                         }
                     }
