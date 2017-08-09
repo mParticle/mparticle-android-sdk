@@ -1,7 +1,6 @@
 package com.mparticle.internal;
 
 import android.app.Activity;
-import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
@@ -27,6 +26,7 @@ public class KitFrameworkWrapper implements KitManager {
     private final AppStateManager mAppStateManager;
     private final ConfigManager mConfigManager;
     private final ReportingManager mReportingManager;
+    private final BackgroundTaskHandler mBackgroundTaskHandler;
     private KitManager mKitManager;
     private volatile boolean frameworkLoadAttempted = false;
     private static volatile boolean kitsLoaded = false;
@@ -37,15 +37,16 @@ public class KitFrameworkWrapper implements KitManager {
     private volatile boolean shouldCheckForDeepLink = false;
     private static KitsLoadedListener kitsLoadedListener;
 
-    public KitFrameworkWrapper(Context context, ReportingManager reportingManager, ConfigManager configManager, AppStateManager appStateManager) {
-        this(context, reportingManager, configManager, appStateManager, false);
+    public KitFrameworkWrapper(Context context, ReportingManager reportingManager, ConfigManager configManager, AppStateManager appStateManager, BackgroundTaskHandler backgroundTaskHandler) {
+        this(context, reportingManager, configManager, appStateManager, backgroundTaskHandler, false);
     }
 
-    public KitFrameworkWrapper(Context context, ReportingManager reportingManager, ConfigManager configManager, AppStateManager appStateManager, boolean testing) {
+    public KitFrameworkWrapper(Context context, ReportingManager reportingManager, ConfigManager configManager, AppStateManager appStateManager, BackgroundTaskHandler backgroundTaskHandler, boolean testing) {
         this.mContext = testing ? context : new KitContext(context);
         this.mReportingManager = reportingManager;
         this.mConfigManager = configManager;
         this.mAppStateManager = appStateManager;
+        this.mBackgroundTaskHandler = backgroundTaskHandler;
         kitsLoaded = false;
     }
 
@@ -55,8 +56,8 @@ public class KitFrameworkWrapper implements KitManager {
             frameworkLoadAttempted = true;
             try {
                 Class clazz = Class.forName("com.mparticle.kits.KitManagerImpl");
-                Constructor<KitFrameworkWrapper> constructor = clazz.getConstructor(Context.class, ReportingManager.class, ConfigManager.class, AppStateManager.class);
-                mKitManager = constructor.newInstance(mContext, mReportingManager, mConfigManager, mAppStateManager);
+                Constructor<KitFrameworkWrapper> constructor = clazz.getConstructor(Context.class, ReportingManager.class, ConfigManager.class, AppStateManager.class, BackgroundTaskHandler.class);
+                mKitManager = constructor.newInstance(mContext, mReportingManager, mConfigManager, mAppStateManager, mBackgroundTaskHandler);
                 JSONArray configuration = mConfigManager.getLatestKitConfiguration();
                 Logger.debug("Kit Framework loaded.");
                 if (configuration != null) {

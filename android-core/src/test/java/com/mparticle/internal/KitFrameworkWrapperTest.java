@@ -4,17 +4,14 @@ import android.content.Context;
 
 import com.mparticle.MPEvent;
 import com.mparticle.commerce.CommerceEvent;
-import com.mparticle.messaging.PushAnalyticsReceiver;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
@@ -24,12 +21,20 @@ import static org.junit.Assert.*;
 @RunWith(PowerMockRunner.class)
 public class KitFrameworkWrapperTest {
 
+    private BackgroundTaskHandler mockBackgroundTaskHandler = new BackgroundTaskHandler() {
+        @Override
+        public void executeNetworkRequest(Runnable runnable) {
+
+        }
+    };
+
     @Test
     public void testLoadKitLibrary() throws Exception {
         KitFrameworkWrapper wrapper = new KitFrameworkWrapper(Mockito.mock(Context.class),
                 Mockito.mock(ReportingManager.class),
                 Mockito.mock(ConfigManager.class),
                 Mockito.mock(AppStateManager.class),
+                mockBackgroundTaskHandler,
                 true);
 
         assertFalse(wrapper.getKitsLoaded());
@@ -48,7 +53,8 @@ public class KitFrameworkWrapperTest {
                 Mockito.mock(ReportingManager.class),
                 Mockito.mock(ConfigManager.class),
                 Mockito.mock(AppStateManager.class),
-                true);
+                mockBackgroundTaskHandler,
+        true);
         assertFalse(wrapper.getKitsLoaded());
         wrapper.setKitsLoaded(false);
         MPEvent event = new MPEvent.Builder("example").build();
@@ -71,6 +77,7 @@ public class KitFrameworkWrapperTest {
                 Mockito.mock(ReportingManager.class),
                 Mockito.mock(ConfigManager.class),
                 Mockito.mock(AppStateManager.class),
+                mockBackgroundTaskHandler,
                 true);
         wrapper.replayEvents();
         KitManager mockKitManager = Mockito.mock(KitManager.class);
@@ -150,6 +157,7 @@ public class KitFrameworkWrapperTest {
                 Mockito.mock(ReportingManager.class),
                 Mockito.mock(ConfigManager.class),
                 Mockito.mock(AppStateManager.class),
+                mockBackgroundTaskHandler,
                 true);
         wrapper.setKitsLoaded(false);
         wrapper.replayAndDisableQueue();
@@ -162,6 +170,7 @@ public class KitFrameworkWrapperTest {
                 Mockito.mock(ReportingManager.class),
                 Mockito.mock(ConfigManager.class),
                 Mockito.mock(AppStateManager.class),
+                mockBackgroundTaskHandler,
                 true);
         assertNull(wrapper.getAttributeQueue());
         wrapper.setKitsLoaded(false);
@@ -177,6 +186,7 @@ public class KitFrameworkWrapperTest {
                 Mockito.mock(ReportingManager.class),
                 Mockito.mock(ConfigManager.class),
                 Mockito.mock(AppStateManager.class),
+                mockBackgroundTaskHandler,
                 true);
         assertNull(wrapper.getAttributeQueue());
         wrapper.setKitsLoaded(false);
@@ -192,6 +202,7 @@ public class KitFrameworkWrapperTest {
                 Mockito.mock(ReportingManager.class),
                 Mockito.mock(ConfigManager.class),
                 Mockito.mock(AppStateManager.class),
+                mockBackgroundTaskHandler,
                 true);
         assertNull(wrapper.getAttributeQueue());
         wrapper.setKitsLoaded(false);
@@ -207,6 +218,7 @@ public class KitFrameworkWrapperTest {
                 Mockito.mock(ReportingManager.class),
                 Mockito.mock(ConfigManager.class),
                 Mockito.mock(AppStateManager.class),
+                mockBackgroundTaskHandler,
                 true);
         assertNull(wrapper.getAttributeQueue());
         wrapper.setKitsLoaded(false);
@@ -222,6 +234,7 @@ public class KitFrameworkWrapperTest {
                 Mockito.mock(ReportingManager.class),
                 Mockito.mock(ConfigManager.class),
                 Mockito.mock(AppStateManager.class),
+                mockBackgroundTaskHandler,
                 true);
         assertNull(wrapper.getEventQueue());
         wrapper.setKitsLoaded(false);
@@ -241,6 +254,7 @@ public class KitFrameworkWrapperTest {
                 Mockito.mock(ReportingManager.class),
                 Mockito.mock(ConfigManager.class),
                 Mockito.mock(AppStateManager.class),
+                mockBackgroundTaskHandler,
                 true);
         assertNull(wrapper.getAttributeQueue());
         wrapper.setKitsLoaded(false);
@@ -272,6 +286,7 @@ public class KitFrameworkWrapperTest {
                 Mockito.mock(ReportingManager.class),
                 Mockito.mock(ConfigManager.class),
                 Mockito.mock(AppStateManager.class),
+                mockBackgroundTaskHandler,
                 true);
         assertNull(wrapper.getEventQueue());
         wrapper.setKitsLoaded(false);
@@ -309,6 +324,7 @@ public class KitFrameworkWrapperTest {
                 Mockito.mock(ReportingManager.class),
                 Mockito.mock(ConfigManager.class),
                 Mockito.mock(AppStateManager.class),
+                mockBackgroundTaskHandler,
                 true);
         assertNull(wrapper.getEventQueue());
         wrapper.setKitsLoaded(false);
@@ -345,6 +361,7 @@ public class KitFrameworkWrapperTest {
                 Mockito.mock(ReportingManager.class),
                 Mockito.mock(ConfigManager.class),
                 Mockito.mock(AppStateManager.class),
+                mockBackgroundTaskHandler,
                 true);
         assertNull(wrapper.getEventQueue());
         wrapper.setKitsLoaded(false);
@@ -382,6 +399,7 @@ public class KitFrameworkWrapperTest {
                 Mockito.mock(ReportingManager.class),
                 Mockito.mock(ConfigManager.class),
                 Mockito.mock(AppStateManager.class),
+                mockBackgroundTaskHandler,
                 true);
         assertFalse(wrapper.getShouldCheckForDeepLink());
         wrapper.setKitsLoaded(false);
@@ -409,6 +427,7 @@ public class KitFrameworkWrapperTest {
                 Mockito.mock(ReportingManager.class),
                 Mockito.mock(ConfigManager.class),
                 Mockito.mock(AppStateManager.class),
+                mockBackgroundTaskHandler,
                 true);
         assertFalse(wrapper.isKitActive(0));
 
@@ -429,6 +448,7 @@ public class KitFrameworkWrapperTest {
                 Mockito.mock(ReportingManager.class),
                 Mockito.mock(ConfigManager.class),
                 Mockito.mock(AppStateManager.class),
+                mockBackgroundTaskHandler,
                 true);
         assertNull(wrapper.getSupportedKits());
 

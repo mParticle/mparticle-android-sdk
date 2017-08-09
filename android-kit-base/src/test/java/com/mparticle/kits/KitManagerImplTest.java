@@ -3,6 +3,7 @@ package com.mparticle.kits;
 import com.mparticle.internal.AppStateManager;
 import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.ReportingManager;
+import com.mparticle.internal.BackgroundTaskHandler;
 import com.mparticle.mock.MockContext;
 import com.mparticle.mock.MockKitConfiguration;
 
@@ -15,6 +16,13 @@ import java.util.List;
 import java.util.Map;
 
 public class KitManagerImplTest {
+    BackgroundTaskHandler mockBackgroundTaskHandler = new BackgroundTaskHandler(){
+
+        @Override
+        public void executeNetworkRequest(Runnable runnable) {
+            //do nothing
+        }
+    };
 
     @Test
     public void testOnUserAttributesReceived() throws Exception {
@@ -22,7 +30,9 @@ public class KitManagerImplTest {
                 new MockContext(),
                 Mockito.mock(ReportingManager.class),
                 Mockito.mock(ConfigManager.class),
-                Mockito.mock(AppStateManager.class));
+                Mockito.mock(AppStateManager.class),
+                mockBackgroundTaskHandler
+                );
         KitIntegration integration = Mockito.mock(
                 KitIntegration.class,
                 Mockito.withSettings().extraInterfaces(KitIntegration.AttributeListener.class)
@@ -64,7 +74,8 @@ public class KitManagerImplTest {
                 new MockContext(),
                 Mockito.mock(ReportingManager.class),
                 Mockito.mock(ConfigManager.class),
-                Mockito.mock(AppStateManager.class));
+                Mockito.mock(AppStateManager.class),
+                mockBackgroundTaskHandler);
         KitIntegration integration = Mockito.mock(
                 KitIntegration.class,
                 Mockito.withSettings().extraInterfaces(KitIntegration.AttributeListener.class)

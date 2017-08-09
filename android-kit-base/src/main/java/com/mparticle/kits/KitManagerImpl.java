@@ -24,6 +24,7 @@ import com.mparticle.internal.Logger;
 import com.mparticle.internal.MPUtility;
 import com.mparticle.internal.PushRegistrationHelper;
 import com.mparticle.internal.ReportingManager;
+import com.mparticle.internal.BackgroundTaskHandler;
 import com.mparticle.kits.mappings.CustomMapping;
 
 import org.json.JSONArray;
@@ -45,6 +46,7 @@ public class KitManagerImpl implements KitManager, DeepLinkListener, UserAttribu
     private final ReportingManager mReportingManager;
     private final AppStateManager mAppStateManager;
     private final ConfigManager mConfigManager;
+    private final BackgroundTaskHandler mBackgroundTaskHandler;
     KitIntegrationFactory mKitIntegrationFactory;
 
     private static final String RESERVED_KEY_LTV = "$Amount";
@@ -54,11 +56,12 @@ public class KitManagerImpl implements KitManager, DeepLinkListener, UserAttribu
     ConcurrentHashMap<Integer, KitIntegration> providers = new ConcurrentHashMap<Integer, KitIntegration>(0);
     private final Context mContext;
 
-    public KitManagerImpl(Context context, ReportingManager reportingManager, ConfigManager configManager, AppStateManager appStateManager) {
+    public KitManagerImpl(Context context, ReportingManager reportingManager, ConfigManager configManager, AppStateManager appStateManager, BackgroundTaskHandler backgroundTaskHandler) {
         mContext = context;
         mReportingManager = reportingManager;
         mConfigManager = configManager;
         mAppStateManager = appStateManager;
+        mBackgroundTaskHandler = backgroundTaskHandler;
         mKitIntegrationFactory = new KitIntegrationFactory();
     }
 
@@ -938,6 +941,10 @@ public class KitManagerImpl implements KitManager, DeepLinkListener, UserAttribu
                 Logger.warning("Failed to update Install Referrer for kit: " + provider.getName() + ": " + e.getMessage());
             }
         }
+    }
+
+    public void executeNetworkRequest(Runnable runnable) {
+        mBackgroundTaskHandler.executeNetworkRequest(runnable);
     }
 
 }

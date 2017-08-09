@@ -177,7 +177,7 @@ public class MParticle {
                     instance.mProductBags = new ProductBagApi(context);
                     instance.mMessageManager = new MessageManager(context, configManager, options.getInstallType(), appStateManager, sDevicePerformanceMetricsDisabled);
                     instance.mPreferences = context.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
-                    instance.mKitManager = new KitFrameworkWrapper(context, instance.mMessageManager, configManager, appStateManager);
+                    instance.mKitManager = new KitFrameworkWrapper(context, instance.mMessageManager, configManager, appStateManager, instance.mMessageManager.getTaskHandler());
                     instance.mMessageManager.refreshConfiguration();
 
                     instance.mIdentityApi = new IdentityApi(context, instance.mAppStateManager, instance.mMessageManager, instance.mConfigManager, instance.mKitManager);

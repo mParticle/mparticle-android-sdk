@@ -27,7 +27,7 @@ import javax.net.ssl.SSLHandshakeException;
 /**
  * Primary queue handler which is responsible for querying, packaging, and uploading data.
  */
-public class UploadHandler extends Handler {
+public class UploadHandler extends Handler implements BackgroundTaskHandler {
 
     private final Context mContext;
     MParticleDBManager mParticleDBManager;
@@ -183,7 +183,6 @@ public class UploadHandler extends Handler {
                 mParticleDBManager.deleteMessagesAndSessions(currentSessionId);
                 return;
             }
-
             if (history) {
                 mParticleDBManager.createSessionHistoryUploadMessage(mConfigManager, mMessageManager.getDeviceAttributes(), currentSessionId);
             } else {
@@ -283,5 +282,10 @@ public class UploadHandler extends Handler {
 
     public void fetchSegments(long timeout, String endpointId, SegmentListener listener) {
         new SegmentRetriever(audienceDB, mApiClient).fetchSegments(timeout, endpointId, listener);
+    }
+
+    @Override
+    public void executeNetworkRequest(Runnable runnable) {
+        post(runnable);
     }
 }
