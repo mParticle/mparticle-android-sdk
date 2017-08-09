@@ -1399,6 +1399,7 @@ public class MParticle {
         int RADAR = 117;
         int ITERABLE = 1003;
         int SKYHOOK = 121;
+        int SINGULAR = 119;
         String BROADCAST_ACTIVE = "MPARTICLE_SERVICE_PROVIDER_ACTIVE_";
         String BROADCAST_DISABLED = "MPARTICLE_SERVICE_PROVIDER_DISABLED_";
     }
