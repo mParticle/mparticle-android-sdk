@@ -157,10 +157,14 @@ public final class IdentityApi {
     }
 
 
-    private BaseIdentityTask makeIdentityRequest(final IdentityApiRequest identityApiRequest, final IdentityNetworkRequestRunnable networkRequest) {
+    private BaseIdentityTask makeIdentityRequest(IdentityApiRequest request, final IdentityNetworkRequestRunnable networkRequest) {
+        if (request == null) {
+            request = IdentityApiRequest.withEmptyUser().build();
+        }
         final BaseIdentityTask task = new BaseIdentityTask();
         final long startingMpid = mConfigManager.getMpid();
         ConfigManager.setIdentityRequestInProgress(true);
+        final IdentityApiRequest identityApiRequest = request;
         mBackgroundHandler.post(new Runnable() {
             @Override
             public void run() {
