@@ -28,7 +28,7 @@ public class MessageBatch extends JSONObject {
         uploadMessage.put(Constants.MessageKey.OPT_OUT_HEADER, configManager.getOptedOut());
         uploadMessage.put(Constants.MessageKey.CONFIG_UPLOAD_INTERVAL, configManager.getUploadInterval()/1000);
         uploadMessage.put(Constants.MessageKey.CONFIG_SESSION_TIMEOUT, configManager.getSessionTimeout()/1000);
-        uploadMessage.put(Constants.MessageKey.MPID, mpId);
+        uploadMessage.put(Constants.MessageKey.MPID, String.valueOf(mpId));
         uploadMessage.put(Constants.MessageKey.SANDBOX, configManager.getEnvironment().equals(MParticle.Environment.Development));
         uploadMessage.put(Constants.MessageKey.DEVICE_APPLICATION_STAMP, configManager.getDeviceApplicationStamp());
         uploadMessage.put(Constants.MessageKey.LTV, MParticle.getInstance().Commerce().getCurrentUserLtv());

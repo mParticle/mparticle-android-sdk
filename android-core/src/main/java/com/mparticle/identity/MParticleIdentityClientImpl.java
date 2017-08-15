@@ -148,7 +148,7 @@ import static com.mparticle.MParticle.IdentityType.Yahoo;
 
         Long mpId = mConfigManager.getMpid();
         if (mpId != null && mpId != Constants.TEMPORARY_MPID) {
-            jsonObject.put("previous_mpid", mpId);
+            jsonObject.put("previous_mpid", String.valueOf(mpId));
         }
         return jsonObject;
     }

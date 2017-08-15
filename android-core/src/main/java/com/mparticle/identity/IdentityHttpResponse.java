@@ -26,7 +26,7 @@ public final class IdentityHttpResponse {
         this.httpCode = httpCode;
         if (jsonObject != null) {
             if (jsonObject.has("mpid")) {
-                this.mpId = jsonObject.getLong("mpid");
+                this.mpId = Long.valueOf(jsonObject.getString("mpid"));
                 this.context = jsonObject.optString("context");
             } else if (jsonObject.has("errors")) {
                 JSONArray errorsArray = jsonObject.optJSONArray("errors");
