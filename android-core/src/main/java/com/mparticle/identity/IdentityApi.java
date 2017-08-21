@@ -84,14 +84,12 @@ public final class IdentityApi {
     }
 
     public MParticleTask<IdentityApiResult> logout(final IdentityApiRequest logoutRequest) {
-        synchronized (lock) {
-            return makeIdentityRequest(logoutRequest, new IdentityNetworkRequestRunnable() {
-                @Override
-                public IdentityHttpResponse request(IdentityApiRequest request) throws Exception {
-                    return getApiClient().logout(request);
-                }
-            });
-        }
+        return makeIdentityRequest(logoutRequest, new IdentityNetworkRequestRunnable() {
+            @Override
+            public IdentityHttpResponse request(IdentityApiRequest request) throws Exception {
+                return getApiClient().logout(request);
+            }
+        });
     }
 
     public MParticleTask<IdentityApiResult> login() {
@@ -99,28 +97,24 @@ public final class IdentityApi {
     }
 
     public MParticleTask<IdentityApiResult> login(@Nullable final IdentityApiRequest loginRequest) {
-        synchronized (lock) {
-            return makeIdentityRequest(loginRequest, new IdentityNetworkRequestRunnable() {
-                @Override
-                public IdentityHttpResponse request(IdentityApiRequest request) throws Exception {
-                    return getApiClient().login(request);
-                }
-            });
-        }
+        return makeIdentityRequest(loginRequest, new IdentityNetworkRequestRunnable() {
+            @Override
+            public IdentityHttpResponse request(IdentityApiRequest request) throws Exception {
+                return getApiClient().login(request);
+            }
+        });
     }
 
-    public synchronized MParticleTask<IdentityApiResult> identify(final IdentityApiRequest identifyRequest) {
-        synchronized (lock) {
-            return makeIdentityRequest(identifyRequest, new IdentityNetworkRequestRunnable() {
-                @Override
-                public IdentityHttpResponse request(IdentityApiRequest request) throws Exception {
-                    return getApiClient().identify(request);
-                }
-            });
-        }
+    public MParticleTask<IdentityApiResult> identify(final IdentityApiRequest identifyRequest) {
+        return makeIdentityRequest(identifyRequest, new IdentityNetworkRequestRunnable() {
+            @Override
+            public IdentityHttpResponse request(IdentityApiRequest request) throws Exception {
+                return getApiClient().identify(request);
+            }
+        });
     }
 
-    public synchronized BaseIdentityTask modify(@NonNull final IdentityApiRequest updateRequest) {
+    public BaseIdentityTask modify(@NonNull final IdentityApiRequest updateRequest) {
         boolean devMode = MPUtility.isDevEnv() || MPUtility.isAppDebuggable(mContext);
         final BaseIdentityTask task = new BaseIdentityTask();
 
@@ -169,21 +163,23 @@ public final class IdentityApi {
         mBackgroundHandler.post(new Runnable() {
             @Override
             public void run() {
-                try {
-                    final IdentityHttpResponse result = networkRequest.request(identityApiRequest);
+                synchronized (lock) {
+                    try {
+                        final IdentityHttpResponse result = networkRequest.request(identityApiRequest);
 
-                    if (!result.isSuccessful()) {
+                        if (!result.isSuccessful()) {
+                            ConfigManager.setIdentityRequestInProgress(false);
+                            task.setFailed(result);
+                        } else {
+                            long newMpid = result.getMpId();
+                            ConfigManager.setIdentityRequestInProgress(false);
+                            mUserDelegate.setUser(startingMpid, newMpid, identityApiRequest.getUserIdentities(), identityApiRequest.shouldCopyUserAttributes());
+                            task.setSuccessful(new IdentityApiResult(getCurrentUser()));
+                        }
+                    } catch (Exception ex) {
                         ConfigManager.setIdentityRequestInProgress(false);
-                        task.setFailed(result);
-                    } else {
-                        long newMpid = result.getMpId();
-                        ConfigManager.setIdentityRequestInProgress(false);
-                        mUserDelegate.setUser(startingMpid, newMpid, identityApiRequest.getUserIdentities(), identityApiRequest.shouldCopyUserAttributes());
-                        task.setSuccessful(new IdentityApiResult(getCurrentUser()));
+                        task.setFailed(new IdentityHttpResponse(IdentityApi.UNKNOWN_ERROR, ex.toString()));
                     }
-                } catch (Exception ex) {
-                    ConfigManager.setIdentityRequestInProgress(false);
-                    task.setFailed(new IdentityHttpResponse(IdentityApi.UNKNOWN_ERROR, ex.toString()));
                 }
             }
         });
