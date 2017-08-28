@@ -31,19 +31,19 @@ import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertTrue;
 import static junit.framework.Assert.fail;
 
-public class MParticleOptionsTest {
+public class MParticleOptionsTest extends BaseTest {
     Context mContext;
     Context mProductionContext;
 
-    @BeforeClass
-    public static void preConditions() {
+    @Override
+    public void beforeClass() {
         if (Looper.myLooper() == null) {
             Looper.prepare();
         }
     }
 
-    @Before
-    public void setup() {
+    @Override
+    public void before() {
         mContext = InstrumentationRegistry.getContext();
         mProductionContext = AndroidUtils.getInstance().getProductionContext(mContext);
         MParticle.setInstance(null);

@@ -9,4 +9,5 @@ public interface MessageManagerCallbacks {
     void attributeRemoved(String key, long mpId);
     MPMessage logUserAttributeChangeMessage(String userAttributeKey, Object newValue, Object oldValue, boolean deleted, boolean isNewAttribute, long time, long mpId);
     DeviceAttributes getDeviceAttributes();
+    void messagesClearedForUpload();
 }

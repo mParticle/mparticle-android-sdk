@@ -10,12 +10,6 @@ import com.mparticle.MParticle;
 import com.mparticle.internal.database.services.MParticleDBManager;
 import com.mparticle.internal.dto.ReadyUpload;
 import com.mparticle.segmentation.SegmentListener;
-import com.mparticle.internal.Constants.MessageKey;
-import com.mparticle.internal.Constants.MessageType;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -23,6 +17,8 @@ import java.util.List;
 
 
 import javax.net.ssl.SSLHandshakeException;
+
+import static com.mparticle.internal.networking.NetworkConnection.HTTP_TOO_MANY_REQUESTS;
 
 /**
  * Primary queue handler which is responsible for querying, packaging, and uploading data.
@@ -66,7 +62,7 @@ public class UploadHandler extends Handler implements BackgroundTaskHandler {
     /**
      * API client interface reference, useful for the unit test suite project.
      */
-    private MParticleApiClient mApiClient;
+    MParticleApiClient mApiClient;
 
     /**
      * Boolean used to determine if we're currently connected to the network. If we're not connected to the network,
@@ -257,7 +253,7 @@ public class UploadHandler extends Handler implements BackgroundTaskHandler {
     }
 
     public boolean shouldDelete(int statusCode) {
-        return statusCode != MParticleApiClientImpl.HTTP_TOO_MANY_REQUESTS && (202 == statusCode ||
+        return statusCode != HTTP_TOO_MANY_REQUESTS && (202 == statusCode ||
                 (statusCode >= 400 && statusCode < 500));
     }
 

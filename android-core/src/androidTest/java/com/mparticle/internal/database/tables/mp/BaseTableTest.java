@@ -19,6 +19,7 @@ public class BaseTableTest extends BaseCleanInstallEachTest {
     }
 
     protected void runTest(SQLiteOpenHelperWrapper helper, int oldVersion) throws InterruptedException {
+        InstrumentationRegistry.getTargetContext().deleteDatabase(DB_NAME);
         SQLiteDatabase baseDatabase = new BaseDatabase(helper, DB_NAME, timer, oldVersion).getWritableDatabase();
         timer.await(5, TimeUnit.SECONDS);
         baseDatabase = new BaseDatabase(helper, DB_NAME, timer, MParticleDatabaseHelper.DB_VERSION).getWritableDatabase();

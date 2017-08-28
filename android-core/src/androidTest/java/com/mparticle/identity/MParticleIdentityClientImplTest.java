@@ -1,35 +1,24 @@
 package com.mparticle.identity;
 
 import android.content.Context;
-import android.os.Looper;
 import android.support.test.InstrumentationRegistry;
 
-import com.mparticle.BaseCleanInstallEachTest;
 import com.mparticle.BaseCleanStartedEachTest;
 import com.mparticle.MParticle;
-import com.mparticle.MParticleOptions;
-import com.mparticle.identity.AccessUtils.IdentityApiClient;
 import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.MPUtility;
-import com.mparticle.internal.MParticleBaseClientImpl;
 import com.mparticle.utils.RandomUtils;
 import com.mparticle.utils.TestingUtils;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.HttpURLConnection;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
-import java.util.Set;
-import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 
 import static com.mparticle.identity.MParticleIdentityClientImpl.ANDROID_AAID;
@@ -89,6 +78,7 @@ public class MParticleIdentityClientImplTest extends BaseCleanStartedEachTest {
                             assertEquals(value, identity.getValue());
                         }
                         checked[finalI] = true;
+                        setApiClient(null);
                         lock.countDown();
                     }
                 }
@@ -208,6 +198,7 @@ public class MParticleIdentityClientImplTest extends BaseCleanStartedEachTest {
                                 }
                             }
                             checked[finalI] = true;
+                            setApiClient(null);
                         }
                 }
             });
@@ -222,7 +213,7 @@ public class MParticleIdentityClientImplTest extends BaseCleanStartedEachTest {
     private void setApiClient(final MockIdentityApiClient identityClient) {
         mApiClient = new MParticleIdentityClientImpl(mConfigManager, mContext) {
             @Override
-            protected HttpURLConnection makeUrlRequest(final HttpURLConnection connection, String payload, boolean identity) throws IOException {
+            public HttpURLConnection makeUrlRequest(final HttpURLConnection connection, String payload, boolean identity) throws IOException {
                 try {
                     identityClient.makeUrlRequest(connection, payload, identity);
                 } catch (JSONException e) {
@@ -232,14 +223,10 @@ public class MParticleIdentityClientImplTest extends BaseCleanStartedEachTest {
                 return new HttpURLConnection(null) {
 
                     @Override
-                    public void connect() throws IOException {
-
-                    }
+                    public void connect() throws IOException {}
 
                     @Override
-                    public void disconnect() {
-
-                    }
+                    public void disconnect() {}
 
                     @Override
                     public boolean usingProxy() {
@@ -253,7 +240,7 @@ public class MParticleIdentityClientImplTest extends BaseCleanStartedEachTest {
                 };
             }
         };
-        MParticle.getInstance().Identity().setApiClient(mApiClient, true);
+        MParticle.getInstance().Identity().setApiClient(mApiClient);
     }
 
     private void checkStaticsAndRemove(JSONObject knowIdentites) throws JSONException {
@@ -278,10 +265,6 @@ public class MParticleIdentityClientImplTest extends BaseCleanStartedEachTest {
         assertTrue(knowIdentites.has(DEVICE_APPLICATION_STAMP));
         assertEquals(mConfigManager.getDeviceApplicationStamp(), knowIdentites.get(DEVICE_APPLICATION_STAMP));
         knowIdentites.remove(DEVICE_APPLICATION_STAMP);
-    }
-
-    private void setListener(MParticleBaseClientImpl.BaseNetworkListener listener) {
-        MParticleIdentityClientImpl.setListener(listener);
     }
 
     interface MockIdentityApiClient {

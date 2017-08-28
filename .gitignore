@@ -35,3 +35,6 @@ local.properties
 # Gradle
 build
 .gradle
+
+#test results
+/testResults

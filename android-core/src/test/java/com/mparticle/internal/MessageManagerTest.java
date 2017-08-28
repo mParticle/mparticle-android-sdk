@@ -404,7 +404,7 @@ public class MessageManagerTest {
     @Test
     public void testDoUpload() throws Exception {
         manager.doUpload();
-        Mockito.verify(uploadHandler, Mockito.times(1)).sendMessage(Mockito.any(Message.class));
+        Mockito.verify(messageHandler, Mockito.times(1)).sendMessage(Mockito.any(Message.class));
     }
 
     @Test

@@ -233,6 +233,26 @@ public class MPUtility {
         return availableSpace;
     }
 
+    public static String getErrorMessage(HttpURLConnection connection) {
+        InputStream is = connection.getErrorStream();
+        if (is == null) {
+            return null;
+        }
+        StringBuilder responseBuilder = new StringBuilder();
+        BufferedReader in = new BufferedReader(new InputStreamReader(is));
+        String line;
+        try {
+            while ((line = in.readLine()) != null) {
+                responseBuilder.append(line + '\n');
+            }
+            in.close();
+            return responseBuilder.toString();
+        }
+        catch (Exception e) {
+            return e.getMessage();
+        }
+    }
+
     public static long millitime(){
         return TimeUnit.MILLISECONDS.convert(System.nanoTime(), TimeUnit.NANOSECONDS);
     }

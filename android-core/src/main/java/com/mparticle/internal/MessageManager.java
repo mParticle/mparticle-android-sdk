@@ -514,8 +514,14 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
     }
 
     public void doUpload() {
+        mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.CLEAR_MESSAGES_FOR_UPLOAD));
+    }
+
+    @Override
+    public void messagesClearedForUpload() {
         mUploadHandler.sendMessage(mUploadHandler.obtainMessage(UploadHandler.UPLOAD_MESSAGES, 1, 0, mConfigManager.getMpid()));
     }
+
 
     public void setLocation(Location location) {
         mLocation = location;

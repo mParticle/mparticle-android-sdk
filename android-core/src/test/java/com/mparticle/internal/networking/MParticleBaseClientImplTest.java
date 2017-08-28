@@ -1,8 +1,11 @@
-package com.mparticle.internal;
+package com.mparticle.internal.networking;
 
 import android.support.annotation.NonNull;
 import android.test.mock.MockContext;
 
+import com.mparticle.internal.ConfigManager;
+import com.mparticle.internal.MParticleApiClientImpl;
+import com.mparticle.internal.networking.MParticleBaseClientImpl;
 import com.mparticle.mock.MockSharedPreferences;
 
 import org.junit.Test;
@@ -13,33 +16,33 @@ import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.io.BufferedOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.util.zip.GZIPOutputStream;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLSocketFactory;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static junit.framework.Assert.assertFalse;
+import static junit.framework.Assert.assertTrue;
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest(GZIPOutputStream.class)
+
 public class MParticleBaseClientImplTest {
+
     @Test
-    public void makeUrlRequest() throws Exception {
+    public void testPinningCertificates() throws Exception {
         ConfigManager mockConfigManager = Mockito.mock(ConfigManager.class);
         Mockito.when(mockConfigManager.getApiKey()).thenReturn("foo");
         Mockito.when(mockConfigManager.getApiSecret()).thenReturn("bar");
         final boolean[] writeCalled = {false};
         final boolean[] getSocketFactoruCalled = {false};
-        final MParticleBaseClientImpl client = new MParticleApiClientImpl(mockConfigManager, new MockSharedPreferences(), new MockContext()) {
+        final BaseNetworkConnection client = new NetworkConnection(new MockSharedPreferences()) {
             @Override
             protected SSLSocketFactory getSocketFactory() throws Exception {
                 getSocketFactoruCalled[0] = true;
                 assertFalse(writeCalled[0]);
                 return Mockito.mock(SSLSocketFactory.class);
             }
-
             @Override
             boolean isDebug() {
                 return false;

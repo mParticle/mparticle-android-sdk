@@ -33,9 +33,9 @@ public class RandomUtils {
         Map<MParticle.IdentityType, String> randomIdentities = new HashMap<MParticle.IdentityType, String>();
 
         int identityTypeLength = MParticle.IdentityType.values().length;
-        int numIdentities = randomInt(0, identityTypeLength);
-        Set<Integer> identityIndecis = randomIntSet(0, identityTypeLength, numIdentities);
-        for (Integer identityIndex: identityIndecis) {
+        int numIdentities = randomInt(1, identityTypeLength);
+        Set<Integer> identityIndices = randomIntSet(0, identityTypeLength, numIdentities);
+        for (Integer identityIndex: identityIndices) {
             randomIdentities.put(MParticle.IdentityType.values()[identityIndex], getAlphaNumericString(randomInt(1, 55)));
         }
         randomIdentities.remove(MParticle.IdentityType.Alias);
@@ -79,6 +79,12 @@ public class RandomUtils {
 
     private String getAlphNumeric() {
         return sAlpha + sNumbers;
+    }
+
+    public long randomLong(long from, long to) {
+        long random = Math.abs(new Random().nextLong());
+        long range = random % (to - from);
+        return range + from;
     }
 
     @Test

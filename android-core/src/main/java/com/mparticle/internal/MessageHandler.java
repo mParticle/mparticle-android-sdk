@@ -4,6 +4,7 @@ import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.util.Log;
 
 import com.mparticle.MParticle;
 import com.mparticle.internal.Constants.MessageKey;
@@ -41,6 +42,7 @@ import java.util.UUID;
     public static final int SET_USER_ATTRIBUTE = 11;
     public static final int INCREMENT_USER_ATTRIBUTE = 12;
     public static final int INSTALL_REFERRER_UPDATED = 13;
+    public static final int CLEAR_MESSAGES_FOR_UPLOAD = 14;
 
     private final MessageManagerCallbacks mMessageManagerCallbacks;
 
@@ -207,6 +209,9 @@ import java.util.UUID;
                 } catch (Exception e) {
                     Logger.error(e, "Error while incrementing user attribute: ", e.toString());
                 }
+                break;
+            case CLEAR_MESSAGES_FOR_UPLOAD:
+                mMessageManagerCallbacks.messagesClearedForUpload();
         }
     }
 

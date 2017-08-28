@@ -9,6 +9,8 @@ android {
     compileSdkVersion 26
     buildToolsVersion "26.0.2"
 
+    testBuildType "instrumented"
+
     defaultConfig {
         minSdkVersion 9
         targetSdkVersion 26
@@ -18,6 +20,7 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
+        instrumented{}
     }
 }
 

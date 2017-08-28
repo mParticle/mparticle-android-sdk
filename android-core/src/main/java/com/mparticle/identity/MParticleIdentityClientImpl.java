@@ -1,6 +1,7 @@
 package com.mparticle.identity;
 
 import android.content.Context;
+import android.net.Uri;
 
 import com.mparticle.BuildConfig;
 import com.mparticle.MParticle;
@@ -8,7 +9,7 @@ import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.Constants;
 import com.mparticle.internal.Logger;
 import com.mparticle.internal.MPUtility;
-import com.mparticle.internal.MParticleBaseClientImpl;
+import com.mparticle.internal.networking.MParticleBaseClientImpl;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -58,7 +59,7 @@ import java.util.UUID;
     static final String X_MP_KEY = "x-mp-key";
     static final String X_MP_SIGNATURE = "x-mp-signature";
 
-    private static final String SECURE_SERVICE_SCHEME = "https";
+
     private static final String API_HOST = MPUtility.isEmpty(BuildConfig.MP_IDENTITY_URL) ? "identity.mparticle.com" : BuildConfig.MP_IDENTITY_URL;
     private static final String SERVICE_VERSION_1 = "/v1";
 
@@ -106,10 +107,6 @@ import java.util.UUID;
         int responseCode = connection.getResponseCode();
         JSONObject response = MPUtility.getJsonResponse(connection);
         return parseIdentityResponse(responseCode, response);
-    }
-
-    static void setListener(BaseNetworkListener listener) {
-        mListener = listener;
     }
 
     private JSONObject getBaseJson() throws JSONException {
@@ -277,7 +274,12 @@ import java.util.UUID;
             stringBuilder.append("/");
         }
         stringBuilder.append(endpoint);
-        return new URL(SECURE_SERVICE_SCHEME, API_HOST, stringBuilder.toString());
+        Uri uri = new Uri.Builder()
+                .scheme(getProtocol())
+                .encodedAuthority(API_HOST)
+                .path(stringBuilder.toString())
+                .build();
+        return new URL(uri.toString());
     }
 
     private String getApiKey() {
@@ -362,5 +364,10 @@ import java.util.UUID;
             default:
                 return "";
         }
+    }
+
+    @Override
+    protected void overrideProtocol(String value) {
+        super.overrideProtocol(value);
     }
 }

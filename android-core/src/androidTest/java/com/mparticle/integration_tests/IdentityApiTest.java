@@ -1,20 +1,27 @@
-package com.mparticle.identity;
+package com.mparticle.integration_tests;
 
 import android.os.Handler;
 
 import com.mparticle.BaseCleanStartedEachTest;
 import com.mparticle.MParticle;
 import com.mparticle.MParticleTask;
-import com.mparticle.identity.AccessUtils.IdentityApiClient;
+import com.mparticle.identity.AccessUtils;
+import com.mparticle.identity.IdentityApiRequest;
+import com.mparticle.identity.IdentityApiResult;
+import com.mparticle.identity.IdentityStateListener;
+import com.mparticle.identity.MParticleUser;
+import com.mparticle.identity.TaskSuccessListener;
+import com.mparticle.identity.UserAliasHandler;
 import com.mparticle.internal.ConfigManager;
 import com.mparticle.utils.MParticleUtils;
+import com.mparticle.utils.RandomUtils;
+import com.mparticle.utils.StreamAssert;
 import com.mparticle.utils.TestingUtils;
-import com.mparticle.mock.MockContext;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Test;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -41,6 +48,7 @@ public class IdentityApiTest extends BaseCleanStartedEachTest {
         mpid1 = new Random().nextLong();
         mpid2 = new Random().nextLong();
         mpid3 = new Random().nextLong();
+
     }
 
     /**
@@ -64,19 +72,9 @@ public class IdentityApiTest extends BaseCleanStartedEachTest {
         userAttributes.put("number2", "HelloWorld");
         userAttributes.put("third", 123);
 
-        AccessUtils.setIdentityApiClient(new IdentityApiClient() {
-            @Override
-            public IdentityHttpResponse login(IdentityApiRequest request) throws Exception {
-                if (mConfigManager.getMpid() == mStartingMpid) {
-                    return getIdentityHttpResponse(mpid1);
-                }
-
-                if (mConfigManager.getMpid() == mpid1) {
-                    return getIdentityHttpResponse(mpid2);
-                }
-                return null;
-            }
-        }, true);
+        mServer
+                .addConditionalLoginResponse(mStartingMpid, mpid1)
+                .addConditionalLoginResponse(mpid1, mpid2);
 
         final boolean[] checked = new boolean[4];
 
@@ -84,6 +82,11 @@ public class IdentityApiTest extends BaseCleanStartedEachTest {
             @Override
             public void onUserIdentified(MParticleUser user) {
                 if (user.getId() == mpid1) {
+                    try {
+                        MParticleUtils.awaitSetUserAttribute();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
                     assertMParticleUserEquals(user, mpid1, identities, null);
                     checked[0] = true;
                 }
@@ -108,7 +111,10 @@ public class IdentityApiTest extends BaseCleanStartedEachTest {
             public void onSuccess(IdentityApiResult identityApiResult) {
                 assertMParticleUserEquals(identityApiResult.getUser(), mpid1, identities, null);
                 checked[2] = true;
-                assertTrue(identityApiResult.getUser().setUserAttributes(userAttributes));
+                for (Map.Entry<String, Object> entry: userAttributes.entrySet()) {
+                    MParticle.getInstance().Identity().getCurrentUser().setUserAttribute(entry.getKey(), entry.getValue());
+                }
+//                assertTrue(identityApiResult.getUser().setUserAttributes());
                 try {
                     MParticleUtils.awaitSetUserAttribute();
                 } catch (InterruptedException e) {
@@ -145,6 +151,9 @@ public class IdentityApiTest extends BaseCleanStartedEachTest {
      */
     @Test
     public void testIdentityChangedListenerAdd() throws Exception {
+        mServer
+                .addConditionalIdentityResponse(mStartingMpid, mpid1)
+                .addConditionalIdentityResponse(mpid1, mpid2);
 
         final boolean[] called = new boolean[2];
         Arrays.fill(called, false);
@@ -160,19 +169,6 @@ public class IdentityApiTest extends BaseCleanStartedEachTest {
                 }
             }
         });
-
-        AccessUtils.setIdentityApiClient(new IdentityApiClient() {
-            @Override
-            public IdentityHttpResponse identify(IdentityApiRequest request) throws Exception {
-                if (mConfigManager.getMpid() == mStartingMpid) {
-                    return getIdentityHttpResponse(mpid1);
-                }
-                if (mConfigManager.getMpid() == mpid1) {
-                    return getIdentityHttpResponse(mpid2);
-                }
-                return null;
-            }
-        }, true);
 
         IdentityApiRequest request = IdentityApiRequest.withEmptyUser().build();
         MParticleTask<IdentityApiResult> result = MParticle.getInstance().Identity().identify(request);
@@ -202,6 +198,11 @@ public class IdentityApiTest extends BaseCleanStartedEachTest {
 
     @Test
     public void testAddMultipleIdentityStateListeners() throws Exception {
+        mServer
+                .addConditionalIdentityResponse(mStartingMpid, mpid1)
+                .addConditionalIdentityResponse(mpid1, mpid2)
+                .addConditionalIdentityResponse(mpid2, mpid3);
+
         final boolean[] called = new boolean[9];
         Arrays.fill(called, false);
 
@@ -235,23 +236,7 @@ public class IdentityApiTest extends BaseCleanStartedEachTest {
             }
         });
 
-        AccessUtils.setIdentityApiClient(new IdentityApiClient() {
-            @Override
-            public IdentityHttpResponse identify(IdentityApiRequest request) throws Exception {
-                if (mConfigManager.getMpid() == mStartingMpid) {
-                    return getIdentityHttpResponse(mpid1);
-                }
-                if (mConfigManager.getMpid() == mpid1) {
-                    return getIdentityHttpResponse(mpid2);
-                }
-                if (mConfigManager.getMpid() == mpid2) {
-                    return getIdentityHttpResponse(mpid3);
-                }
-                return null;
-            }
-        }, true);
-
-        IdentityApiRequest request = IdentityApiRequest.withUser(MParticleUser.getInstance(new MockContext(), mpid1, MParticle.getInstance().Identity().mUserDelegate)).build();
+        IdentityApiRequest request = IdentityApiRequest.withUser(AccessUtils.getUserInstance(mContext, mpid1)).build();
         MParticleTask<IdentityApiResult> result = MParticle.getInstance().Identity().identify(request);
 
         result.addSuccessListener(new TaskSuccessListener() {
@@ -264,8 +249,7 @@ public class IdentityApiTest extends BaseCleanStartedEachTest {
 
         MParticleUtils.awaitUploadRunnables();
 
-
-        request = IdentityApiRequest.withUser(MParticleUser.getInstance(new MockContext(), mpid2, MParticle.getInstance().Identity().mUserDelegate)).build();
+        request = IdentityApiRequest.withUser(AccessUtils.getUserInstance(mContext, mpid2)).build();
         result = MParticle.getInstance().Identity().identify(request);
 
         result.addSuccessListener(new TaskSuccessListener() {
@@ -280,8 +264,7 @@ public class IdentityApiTest extends BaseCleanStartedEachTest {
 
         MParticleUtils.awaitUploadRunnables();
 
-
-        request = IdentityApiRequest.withUser(MParticleUser.getInstance(new MockContext(), mpid3, MParticle.getInstance().Identity().mUserDelegate)).build();
+        request = IdentityApiRequest.withUser(AccessUtils.getUserInstance(mContext, mpid3)).build();
         result = MParticle.getInstance().Identity().identify(request);
 
         MParticle.getInstance().Identity().addIdentityStateListener(new IdentityStateListener() {
@@ -300,6 +283,11 @@ public class IdentityApiTest extends BaseCleanStartedEachTest {
 
     @Test
     public void testRemoveIdentityStateListeners() throws Exception {
+        mServer
+                .addConditionalIdentityResponse(mStartingMpid, mpid1)
+                .addConditionalIdentityResponse(mpid1, mpid2)
+                .addConditionalIdentityResponse(mpid2, mpid3);
+
         final boolean[] called = new boolean[5];
         Arrays.fill(called, false);
 
@@ -331,24 +319,7 @@ public class IdentityApiTest extends BaseCleanStartedEachTest {
         MParticle.getInstance().Identity().addIdentityStateListener(identityStateListener);
         MParticle.getInstance().Identity().addIdentityStateListener(identityStateListener2);
 
-        AccessUtils.setIdentityApiClient(new IdentityApiClient() {
-            @Override
-            public IdentityHttpResponse identify(IdentityApiRequest request) throws Exception {
-                if (mConfigManager.getMpid() == mStartingMpid) {
-                    return getIdentityHttpResponse(mpid1);
-                }
-                if (mConfigManager.getMpid() == mpid1) {
-                    return getIdentityHttpResponse(mpid2);
-                }
-                if (mConfigManager.getMpid() == mpid2) {
-                    return getIdentityHttpResponse(mpid3);
-                }
-                return null;
-            }
-        }, true);
-
-
-        IdentityApiRequest request = IdentityApiRequest.withUser(MParticleUser.getInstance(new MockContext(), mpid1, MParticle.getInstance().Identity().mUserDelegate)).build();
+        IdentityApiRequest request = IdentityApiRequest.withUser(AccessUtils.getUserInstance(mContext, mpid1)).build();
         MParticleTask<IdentityApiResult> result = MParticle.getInstance().Identity().identify(request);
 
         //test that change actually took place
@@ -365,7 +336,7 @@ public class IdentityApiTest extends BaseCleanStartedEachTest {
 
         MParticle.getInstance().Identity().removeIdentityStateListener(identityStateListener2);
 
-        request = IdentityApiRequest.withUser(MParticleUser.getInstance(new MockContext(), mpid2, MParticle.getInstance().Identity().mUserDelegate)).build();
+        request = IdentityApiRequest.withUser(AccessUtils.getUserInstance(mContext, mpid2)).build();
         result = MParticle.getInstance().Identity().identify(request);
 
         //test that change actually took place
@@ -391,7 +362,7 @@ public class IdentityApiTest extends BaseCleanStartedEachTest {
         });
 
 
-        request = IdentityApiRequest.withUser(MParticleUser.getInstance(new MockContext(), mpid3, MParticle.getInstance().Identity().mUserDelegate)).build();
+        request = IdentityApiRequest.withUser(AccessUtils.getUserInstance(mContext, mpid3)).build();
         MParticle.getInstance().Identity().identify(request);
 
         MParticleUtils.awaitUploadRunnables();
@@ -410,10 +381,6 @@ public class IdentityApiTest extends BaseCleanStartedEachTest {
 
     }
 
-    private static IdentityHttpResponse getIdentityHttpResponse(long mpid) {
-        return new IdentityHttpResponse(200, mpid, "context", new ArrayList<IdentityHttpResponse.Error>());
-    }
-
     private void assertMParticleUserEquals(MParticleUser dto1, Long mpid, Map<MParticle.IdentityType, String> identityTypes, Map<String, Object> userAttributes) {
         assertTrue(dto1.getId() == mpid);
         if (userAttributes != null) {
@@ -430,6 +397,47 @@ public class IdentityApiTest extends BaseCleanStartedEachTest {
         for (Map.Entry<MParticle.IdentityType, String> entry : dto1.getUserIdentities().entrySet()) {
             assertEquals(entry.getValue(), identityTypes.get(entry.getKey()));
         }
+    }
+
+    @Test
+    public void testUserAliasHanderConcurrentCalls() {
+        final boolean[] called = new boolean[2];
+
+        MParticle.getInstance().getConfigManager().setMpid(mpid1);
+
+        mServer
+                .addConditionalIdentityResponse(mpid1, mpid2, 2000)
+                .addConditionalLoginResponse(mpid2, mpid3);
+
+        MParticle.getInstance()
+                .Identity()
+                .identify(
+                        IdentityApiRequest
+                                .withEmptyUser()
+                                .userAliasHandler(new UserAliasHandler() {
+                                    @Override
+                                    public void onUserAlias(MParticleUser previousUser, MParticleUser newUser) {
+                                        assertEquals(previousUser.getId(), mpid1);
+                                        assertEquals(newUser.getId(), mpid2);
+                                        called[0] = true;
+                                    }
+                                }).build());
+        MParticle.getInstance()
+                .Identity()
+                .login(
+                        IdentityApiRequest
+                                .withUser(MParticle.getInstance().Identity().getCurrentUser())
+                                .userAliasHandler(new UserAliasHandler() {
+                                    @Override
+                                    public void onUserAlias(MParticleUser previousUser, MParticleUser newUser) {
+                                        assertEquals(previousUser.getId(), mpid2);
+                                        assertEquals(newUser.getId(), mpid3);
+                                        called[1] = true;
+                                    }
+                                })
+                                .build());
+
+        TestingUtils.checkAllBool(called, 10, 5);
     }
 }
 

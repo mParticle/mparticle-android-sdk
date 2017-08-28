@@ -20,7 +20,6 @@ import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertTrue;
 
-
 public class MParticleTest extends BaseCleanStartedEachTest {
 
     @Override
@@ -152,12 +151,8 @@ public class MParticleTest extends BaseCleanStartedEachTest {
 
     private void ensureSessionActive() {
         if (!MParticle.getInstance().isSessionActive()) {
-            MParticle.getInstance().logEvent(new MPEvent.Builder("Thing started", MParticle.EventType.Other).build());
+            MParticle.getInstance().logEvent(MParticleUtils.getInstance().getRandomMPEventSimple());
             assertTrue(MParticle.getInstance().isSessionActive());
         }
-    }
-
-    public static MessageManager getMessageManager() {
-        return MParticle.getInstance().mMessageManager;
     }
 }

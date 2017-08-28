@@ -15,14 +15,12 @@ import com.mparticle.internal.DatabaseTables;
 import com.mparticle.internal.KitManager;
 import com.mparticle.internal.Logger;
 import com.mparticle.internal.MPUtility;
-import com.mparticle.internal.MParticleApiClient;
 import com.mparticle.internal.MessageManager;
 import com.mparticle.internal.database.services.MParticleDBManager;
 
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.WeakHashMap;
 
 /**
  * Helper class that is used to access Identity endpoints to manage User's Attributes and Identities
@@ -39,8 +37,7 @@ public class IdentityApi {
     MessageManager mMessageManager;
 
     MParticleUserDelegate mUserDelegate;
-    private static MParticleIdentityClient sApiClient;
-    private static boolean sTestAlreadySet = false;
+    private MParticleIdentityClient mApiClient;
 
     private Set<IdentityStateListener> identityStateListeners = new HashSet<IdentityStateListener>();
     private static Object lock = new Object();
@@ -54,11 +51,7 @@ public class IdentityApi {
         this.mConfigManager = configManager;
         this.mMessageManager = messageManager;
         configManager.addMpIdChangeListener(new IdentityStateListenerManager());
-        if (sTestAlreadySet) {
-            sTestAlreadySet = false;
-        } else {
-            setApiClient(new MParticleIdentityClientImpl(configManager, context), false);
-        }
+        setApiClient(new MParticleIdentityClientImpl(configManager, context));
     }
 
     /**
@@ -262,18 +255,17 @@ public class IdentityApi {
     }
 
     MParticleIdentityClient getApiClient() {
-        if (sApiClient == null) {
-            sApiClient = new MParticleIdentityClientImpl(mConfigManager, mContext);
+        if (mApiClient == null) {
+            mApiClient = new MParticleIdentityClientImpl(mConfigManager, mContext);
         }
-        return sApiClient;
+        return mApiClient;
     }
 
     /**
-     * @param overrideNextInstance - retain this client for the next instance to be constructed, testing method
+     * this should only be used for testing
      */
-    static void setApiClient(MParticleIdentityClient client, boolean overrideNextInstance) {
-        sTestAlreadySet = overrideNextInstance;
-        sApiClient = client;
+    void setApiClient(MParticleIdentityClient client) {
+        mApiClient = client;
     }
 
     interface IdentityNetworkRequestRunnable {

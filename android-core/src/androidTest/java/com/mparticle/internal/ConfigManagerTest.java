@@ -4,6 +4,7 @@ import android.content.Context;
 import android.os.Looper;
 import android.support.test.InstrumentationRegistry;
 
+import com.mparticle.BaseTest;
 import com.mparticle.MParticle;
 import com.mparticle.MParticleOptions;
 
@@ -20,19 +21,19 @@ import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertTrue;
 
-public class ConfigManagerTest {
+public class ConfigManagerTest extends BaseTest {
     MParticle instance;
     Context mContext;
 
-    @BeforeClass
-    public static void setupClass() {
+    @Override
+    public void beforeClass() {
         if (Looper.myLooper() == null) {
             Looper.prepare();
         }
     }
 
-    @Before
-    public void setup() {
+    @Override
+    public void before() {
         mContext = InstrumentationRegistry.getContext();
         MParticle.setInstance(null);
         ConfigManager.clearMpid(mContext);

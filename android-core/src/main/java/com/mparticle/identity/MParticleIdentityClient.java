@@ -1,6 +1,8 @@
 package com.mparticle.identity;
 
-public interface MParticleIdentityClient {
+import com.mparticle.internal.networking.MParticleBaseClient;
+
+public interface MParticleIdentityClient extends MParticleBaseClient{
     IdentityHttpResponse login(IdentityApiRequest request) throws Exception;
     IdentityHttpResponse logout(IdentityApiRequest request) throws Exception;
     IdentityHttpResponse identify(IdentityApiRequest request) throws Exception;
