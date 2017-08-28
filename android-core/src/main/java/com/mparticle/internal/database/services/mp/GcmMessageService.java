@@ -8,7 +8,7 @@ import com.mparticle.internal.Logger;
 import com.mparticle.internal.MessageManager;
 import com.mparticle.internal.database.tables.mp.GcmMessageTable;
 
-import com.mparticle.internal.dto.GcmMessageDTO;
+import com.mparticle.internal.dto.GcmMessage;
 import com.mparticle.messaging.AbstractCloudMessage;
 import com.mparticle.messaging.MPCloudNotificationMessage;
 
@@ -81,9 +81,9 @@ public class GcmMessageService extends GcmMessageTable {
         db.replace(GcmMessageTableColumns.TABLE_NAME, null, contentValues);
     }
 
-    public static List<GcmMessageDTO> logInfluenceOpenGcmMessages(SQLiteDatabase db, MessageManager.InfluenceOpenMessage message, long mpId) {
+    public static List<GcmMessage> logInfluenceOpenGcmMessages(SQLiteDatabase db, MessageManager.InfluenceOpenMessage message, long mpId) {
         Cursor gcmCursor = null;
-        List<GcmMessageDTO> gcmMessages = new ArrayList<GcmMessageDTO>();
+        List<GcmMessage> gcmMessages = new ArrayList<GcmMessage>();
         try {
 
             gcmCursor = db.query(GcmMessageTableColumns.TABLE_NAME,
@@ -99,7 +99,7 @@ public class GcmMessageService extends GcmMessageTable {
                     null,
                     null);
             while (gcmCursor.moveToNext()) {
-                new GcmMessageDTO(gcmCursor.getInt(gcmCursor.getColumnIndex(GcmMessageTableColumns.CONTENT_ID)),
+                new GcmMessage(gcmCursor.getInt(gcmCursor.getColumnIndex(GcmMessageTableColumns.CONTENT_ID)),
                         gcmCursor.getString(gcmCursor.getColumnIndex(GcmMessageTableColumns.PAYLOAD)),
                         gcmCursor.getString(gcmCursor.getColumnIndex(GcmMessageTableColumns.APPSTATE)),
                         AbstractCloudMessage.FLAG_INFLUENCE_OPEN);

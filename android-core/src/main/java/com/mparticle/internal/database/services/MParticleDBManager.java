@@ -8,7 +8,6 @@ import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Looper;
 
-import com.mparticle.MParticle;
 import com.mparticle.UserAttributeListener;
 import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.Constants;
@@ -29,8 +28,8 @@ import com.mparticle.internal.database.services.mp.ReportingService;
 import com.mparticle.internal.database.services.mp.SessionService;
 import com.mparticle.internal.database.services.mp.UploadService;
 import com.mparticle.internal.database.services.mp.UserAttributesService;
-import com.mparticle.internal.dto.AttributionChangeDTO;
-import com.mparticle.internal.dto.GcmMessageDTO;
+import com.mparticle.internal.dto.AttributionChange;
+import com.mparticle.internal.dto.GcmMessage;
 import com.mparticle.internal.dto.ReadyUpload;
 import com.mparticle.internal.dto.UserAttributeRemoval;
 import com.mparticle.internal.dto.UserAttributeResponse;
@@ -124,7 +123,7 @@ public class MParticleDBManager extends BaseDBManager {
     }
 
 
-    public List<GcmMessageDTO> logInfluenceOpenGcmMessages(MessageManager.InfluenceOpenMessage message) {
+    public List<GcmMessage> logInfluenceOpenGcmMessages(MessageManager.InfluenceOpenMessage message) {
         return GcmMessageService.logInfluenceOpenGcmMessages(getMParticleDatabase(), message, getMpid());
     }
 
@@ -669,10 +668,10 @@ public class MParticleDBManager extends BaseDBManager {
         }
     }
 
-    public List<AttributionChangeDTO> setUserAttribute(UserAttributeResponse userAttribute) {
-        List<AttributionChangeDTO> attributionChangeDTOs = new ArrayList<AttributionChangeDTO>();
+    public List<AttributionChange> setUserAttribute(UserAttributeResponse userAttribute) {
+        List<AttributionChange> attributionChanges = new ArrayList<AttributionChange>();
         if (getMParticleDatabase() == null){
-            return attributionChangeDTOs;
+            return attributionChanges;
         }
         Map<String, Object> currentValues = getUserAttributes(null, userAttribute.mpId);
         SQLiteDatabase db = getMParticleDatabase();
@@ -692,7 +691,7 @@ public class MParticleDBManager extends BaseDBManager {
                     for (String attributeValue : attributeValues) {
                         UserAttributesService.insertAttribute(db, key, attributeValue, time, true, userAttribute.mpId);
                     }
-                    attributionChangeDTOs.add(new AttributionChangeDTO(key, attributeValues, oldValue, false, isNewAttribute, userAttribute.time, userAttribute.mpId));
+                    attributionChanges.add(new AttributionChange(key, attributeValues, oldValue, false, isNewAttribute, userAttribute.time, userAttribute.mpId));
                 }
             }
             if (userAttribute.attributeSingles != null) {
@@ -706,7 +705,7 @@ public class MParticleDBManager extends BaseDBManager {
                     int deleted = UserAttributesService.deleteAttributes(db, key, userAttribute.mpId);
                     boolean isNewAttribute = deleted == 0;
                     UserAttributesService.insertAttribute(db, key, attributeValue, time, false, userAttribute.mpId);
-                    attributionChangeDTOs.add(new AttributionChangeDTO(key, attributeValue, oldValue, false, isNewAttribute, userAttribute.time, userAttribute.mpId));
+                    attributionChanges.add(new AttributionChange(key, attributeValue, oldValue, false, isNewAttribute, userAttribute.time, userAttribute.mpId));
                 }
             }
             db.setTransactionSuccessful();
@@ -715,7 +714,7 @@ public class MParticleDBManager extends BaseDBManager {
         } finally {
             db.endTransaction();
         }
-        return attributionChangeDTOs;
+        return attributionChanges;
     }
 
 

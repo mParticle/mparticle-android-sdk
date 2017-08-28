@@ -2,7 +2,6 @@ package com.mparticle.internal;
 
 import android.content.Context;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteOpenHelper;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -12,8 +11,8 @@ import com.mparticle.internal.Constants.MessageKey;
 import com.mparticle.internal.Constants.MessageType;
 import com.mparticle.internal.database.services.MParticleDBManager;
 import com.mparticle.internal.database.tables.mp.GcmMessageTable;
-import com.mparticle.internal.dto.AttributionChangeDTO;
-import com.mparticle.internal.dto.GcmMessageDTO;
+import com.mparticle.internal.dto.AttributionChange;
+import com.mparticle.internal.dto.GcmMessage;
 import com.mparticle.internal.dto.UserAttributeRemoval;
 import com.mparticle.internal.dto.UserAttributeResponse;
 import com.mparticle.messaging.AbstractCloudMessage;
@@ -197,9 +196,9 @@ import java.util.UUID;
                 break;
             case MARK_INFLUENCE_OPEN_GCM:
                 MessageManager.InfluenceOpenMessage message = (MessageManager.InfluenceOpenMessage) msg.obj;
-                List<GcmMessageDTO> gcmMessageDTOs = mMParticleDBManager.logInfluenceOpenGcmMessages(message);
-                for (GcmMessageDTO gcmMessageDTO: gcmMessageDTOs) {
-                    mMessageManagerCallbacks.logNotification(gcmMessageDTO.getId(), gcmMessageDTO.getPayload(), null, gcmMessageDTO.getAppState(), AbstractCloudMessage.FLAG_INFLUENCE_OPEN);
+                List<GcmMessage> gcmMessages = mMParticleDBManager.logInfluenceOpenGcmMessages(message);
+                for (GcmMessage gcmMessage : gcmMessages) {
+                    mMessageManagerCallbacks.logNotification(gcmMessage.getId(), gcmMessage.getPayload(), null, gcmMessage.getAppState(), AbstractCloudMessage.FLAG_INFLUENCE_OPEN);
                 }
                 break;
             case CLEAR_PROVIDER_GCM:
@@ -242,9 +241,9 @@ import java.util.UUID;
     }
 
     void setUserAttributes(UserAttributeResponse response) {
-        List<AttributionChangeDTO> attributionChangeDTOs = mMParticleDBManager.setUserAttribute(response);
-        for (AttributionChangeDTO attributionChangeDTO: attributionChangeDTOs) {
-            logUserAttributeChanged(attributionChangeDTO);
+        List<AttributionChange> attributionChanges = mMParticleDBManager.setUserAttribute(response);
+        for (AttributionChange attributionChange : attributionChanges) {
+            logUserAttributeChanged(attributionChange);
         }
     }
 
@@ -274,9 +273,9 @@ import java.util.UUID;
         wrapper.attributeSingles = new HashMap<String, String>(1);
         wrapper.attributeSingles.put(key, newValue);
         wrapper.mpId = mpId;
-        List<AttributionChangeDTO> attributionChangeDTOs = mMParticleDBManager.setUserAttribute(wrapper);
-        for (AttributionChangeDTO attributeChangeDTO: attributionChangeDTOs) {
-            logUserAttributeChanged(attributeChangeDTO);
+        List<AttributionChange> attributionChanges = mMParticleDBManager.setUserAttribute(wrapper);
+        for (AttributionChange attributeChange: attributionChanges) {
+            logUserAttributeChanged(attributeChange);
         }
         MParticle.getInstance().getKitManager().setUserAttribute(key, newValue);
     }
@@ -365,15 +364,15 @@ import java.util.UUID;
         }
     }
 
-    private void logUserAttributeChanged(AttributionChangeDTO attributionChangeDTO) {
+    private void logUserAttributeChanged(AttributionChange attributionChange) {
         mMessageManagerCallbacks.logUserAttributeChangeMessage(
-                attributionChangeDTO.getKey(),
-                attributionChangeDTO.getNewValue(),
-                attributionChangeDTO.getOldValue(),
-                attributionChangeDTO.isDeleted(),
-                attributionChangeDTO.isNewAttribute(),
-                attributionChangeDTO.getTime(),
-                attributionChangeDTO.getMpId());
+                attributionChange.getKey(),
+                attributionChange.getNewValue(),
+                attributionChange.getOldValue(),
+                attributionChange.isDeleted(),
+                attributionChange.isNewAttribute(),
+                attributionChange.getTime(),
+                attributionChange.getMpId());
     }
 
 }

@@ -1,6 +1,6 @@
 package com.mparticle.internal.dto;
 
-public class AttributionChangeDTO {
+public class AttributionChange {
     private String key;
     private Object newValue;
     private Object oldValue;
@@ -9,7 +9,7 @@ public class AttributionChangeDTO {
     private long time;
     private long mpId;
 
-    public AttributionChangeDTO(String key, Object newValue, Object oldValue, boolean deleted, boolean isNewAttribute, long time, long mpId) {
+    public AttributionChange(String key, Object newValue, Object oldValue, boolean deleted, boolean isNewAttribute, long time, long mpId) {
         this.key = key;
         this.newValue = newValue;
         this.oldValue = oldValue;

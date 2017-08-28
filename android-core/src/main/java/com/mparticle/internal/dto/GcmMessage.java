@@ -2,13 +2,13 @@ package com.mparticle.internal.dto;
 
 import com.mparticle.messaging.AbstractCloudMessage;
 
-public class GcmMessageDTO {
+public class GcmMessage {
     private int id;
     private String payload;
     private String appState;
     private int cloudMessage;
 
-    public GcmMessageDTO(int id, String payload, String appState, int cloudMessage) {
+    public GcmMessage(int id, String payload, String appState, int cloudMessage) {
         this.id = id;
         this.payload = payload;
         this.appState = appState;
