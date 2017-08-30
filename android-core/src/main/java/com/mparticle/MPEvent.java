@@ -56,7 +56,7 @@ public class MPEvent {
         }
 
         entering = builder.entering;
-        info = builder.info;
+        setInfo(builder.info);
 
         if (builder.category != null){
             category = builder.category;
@@ -75,7 +75,7 @@ public class MPEvent {
             startTime = builder.startTime;
         }
         if (builder.customFlags != null) {
-            customFlags = builder.customFlags;
+            setCustomFlags(builder.customFlags);
         }
         screenEvent = builder.screenEvent;
     }
@@ -86,6 +86,10 @@ public class MPEvent {
     }
 
     public void setInfo(Map<String, String> info){
+        if (info != null && info.containsKey(null)) {
+            Logger.warning(String.format("disregarding \"MPEvent.customFlag\" value of \"%s\". Key was found to be null", info.get(null)));
+            info.remove(null);
+        }
         this.info = info;
     }
 
@@ -95,15 +99,15 @@ public class MPEvent {
         if (mpEvent.info != null) {
             Map<String, String> shallowCopy = new HashMap<String, String>();
             shallowCopy.putAll(mpEvent.info);
-            info = shallowCopy;
+            setInfo(shallowCopy);
         }else {
-            info = null;
+            setInfo(null);
         }
         category = mpEvent.category;
         duration = mpEvent.duration;
         endTime = mpEvent.endTime;
         startTime = mpEvent.startTime;
-        customFlags = mpEvent.customFlags;
+        setCustomFlags(mpEvent.customFlags);
         entering = mpEvent.entering;
         screenEvent = mpEvent.screenEvent;
     }
@@ -204,6 +208,14 @@ public class MPEvent {
 
     boolean getNavigationDirection() {
         return entering;
+    }
+
+    private void setCustomFlags(Map<String, List<String>> flags) {
+        if (flags != null && flags.containsKey(null)) {
+            Logger.warning(String.format("disregarding \"MPEvent.customFlag\" value of %s. Key was found to be null", new JSONArray(flags.get(null))));
+            flags.remove(null);
+        }
+        customFlags = flags;
     }
 
     /**
