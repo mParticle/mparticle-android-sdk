@@ -365,6 +365,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
     public void startSession() {
         mCurrentSession = new Session().start();
+        mLastStoppedTime = new AtomicLong(getTime());
         enableLocationTracking();
         MParticle.getInstance().getKitManager().onSessionStart();
     }
