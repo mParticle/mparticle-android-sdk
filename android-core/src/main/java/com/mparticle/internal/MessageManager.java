@@ -298,6 +298,18 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
                 .sendMessage(mMessageHandler.obtainMessage(MessageHandler.CREATE_SESSION_END_MESSAGE, 1, 1, entry));
     }
 
+    // check if a session has been started, if it has, then it means that the InstallReferrer was received
+    // after the current session was started, is out of date, and needs to be updated. If the current
+    // session has been started, disregard.
+    public void installReferrerUpdated() {
+        String sessionId = mAppStateManager.getSession().mSessionID;
+        if (mAppStateManager.getSession().isActive()) {
+            Message message = mMessageHandler.obtainMessage(MessageHandler.INSTALL_REFERRER_UPDATED, sessionId);
+            mMessageHandler.sendMessage(message);
+        }
+    }
+
+
     public MPMessage logEvent(MPEvent event, String currentActivity) {
         if (event != null) {
             try {

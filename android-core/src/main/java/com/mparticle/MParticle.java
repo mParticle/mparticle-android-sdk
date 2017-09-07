@@ -1357,6 +1357,11 @@ public class MParticle {
         }
     }
 
+    void installReferrerUpdated() {
+        mMessageManager.installReferrerUpdated();
+        mKitManager.installReferrerUpdated();
+    }
+
     class Builder extends IdentityApiRequest.Builder {
         Builder(MParticleUser user) {
             super(user);

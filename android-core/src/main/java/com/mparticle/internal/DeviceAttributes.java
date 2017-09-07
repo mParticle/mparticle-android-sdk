@@ -119,6 +119,16 @@ public class DeviceAttributes {
         return attributes;
     }
 
+    void updateInstallReferrer(Context context, JSONObject attributes) {
+        SharedPreferences preferences = context.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
+        try {
+            attributes.put(MessageKey.INSTALL_REFERRER, preferences.getString(Constants.PrefKeys.INSTALL_REFERRER, null));
+        }
+        catch (JSONException ignored) {
+            // this, hopefully, should never fail
+        }
+    }
+
     public static void addAndroidId(JSONObject attributes, Context context) throws JSONException {
         if (!MParticle.isAndroidIdDisabled()) {
             String androidId = MPUtility.getAndroidID(context);
@@ -262,8 +272,14 @@ public class DeviceAttributes {
     }
 
     public JSONObject getAppInfo(Context context) {
+        return getAppInfo(context, false);
+    }
+
+    JSONObject getAppInfo(Context context, boolean forceUpdateInstallReferrer) {
         if (appInfo == null) {
             appInfo = getStaticApplicationInfo(context);
+        } else if (forceUpdateInstallReferrer) {
+            updateInstallReferrer(context, appInfo);
         }
         return appInfo;
     }

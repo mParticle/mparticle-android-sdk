@@ -5,6 +5,7 @@ import android.content.Intent;
 import com.mparticle.internal.Constants;
 import com.mparticle.mock.MockContext;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
@@ -12,6 +13,11 @@ import static org.junit.Assert.*;
 
 
 public class ReferrerReceiverTest {
+
+    @Before
+    public void setup() {
+        MParticle.setInstance(new MockMParticle());
+    }
 
     @Test
     public void testOnReceive() throws Exception {

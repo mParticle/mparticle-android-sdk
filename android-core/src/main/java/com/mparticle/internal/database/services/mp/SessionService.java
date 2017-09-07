@@ -17,16 +17,20 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.mparticle.internal.Constants.MessageKey.SESSION_ID;
+import static com.mparticle.internal.database.tables.mp.SessionTable.SessionTableColumns.APP_INFO;
+import static com.mparticle.internal.database.tables.mp.SessionTable.SessionTableColumns.TABLE_NAME;
+
 public class SessionService extends SessionTable {
     public static String[] readyMessages = new String[]{Integer.toString(Constants.Status.UPLOADED)};
 
     public static int deleteSessions(SQLiteDatabase database, String currentSessionId){
         String[] selectionArgs = new String[]{currentSessionId};
-        return database.delete(SessionTableColumns.TABLE_NAME, SessionTableColumns.SESSION_ID + "!=? ", selectionArgs);
+        return database.delete(TABLE_NAME, SessionTableColumns.SESSION_ID + "!=? ", selectionArgs);
     }
 
     public static Cursor getSessions(SQLiteDatabase db) {
-        return db.query(SessionTableColumns.TABLE_NAME,
+        return db.query(TABLE_NAME,
                 null,
                 null,
                 null,
@@ -42,14 +46,14 @@ public class SessionService extends SessionTable {
             sessionValues.put(SessionTableColumns.SESSION_FOREGROUND_LENGTH, sessionLength);
         }
         String[] whereArgs = {sessionId};
-        db.update(SessionTableColumns.TABLE_NAME, sessionValues, SessionTableColumns.SESSION_ID + "=?", whereArgs);
+        db.update(TABLE_NAME, sessionValues, SessionTableColumns.SESSION_ID + "=?", whereArgs);
     }
 
     public static void updateSessionAttributes(SQLiteDatabase db, String sessionId, String attributes) {
         ContentValues sessionValues = new ContentValues();
         sessionValues.put(SessionTableColumns.ATTRIBUTES, attributes);
         String[] whereArgs = {sessionId};
-        db.update(SessionTableColumns.TABLE_NAME, sessionValues, SessionTableColumns.SESSION_ID + "=?", whereArgs);
+        db.update(TABLE_NAME, sessionValues, SessionTableColumns.SESSION_ID + "=?", whereArgs);
     }
 
 
@@ -57,7 +61,7 @@ public class SessionService extends SessionTable {
         String[] selectionArgs = new String[]{sessionId};
         String[] sessionColumns = new String[]{SessionTableColumns.START_TIME, SessionTableColumns.END_TIME,
                 SessionTableColumns.SESSION_FOREGROUND_LENGTH, SessionTableColumns.ATTRIBUTES};
-        Cursor selectCursor = db.query(SessionTableColumns.TABLE_NAME, sessionColumns, SessionTableColumns.SESSION_ID + "=?",
+        Cursor selectCursor = db.query(TABLE_NAME, sessionColumns, SessionTableColumns.SESSION_ID + "=?",
                 selectionArgs, null, null, null);
         return selectCursor;
     }
@@ -68,7 +72,7 @@ public class SessionService extends SessionTable {
         String[] sessionColumns = new String[]{SessionTableColumns.SESSION_ID};
         Cursor selectCursor = null;
         try {
-            selectCursor = db.query(SessionTableColumns.TABLE_NAME, sessionColumns,
+            selectCursor = db.query(TABLE_NAME, sessionColumns,
                     SessionTableColumns.API_KEY + "= ? ",
                     selectionArgs, null, null, null);
             // NOTE: there should be at most one orphan per api key - but
@@ -93,9 +97,9 @@ public class SessionService extends SessionTable {
         contentValues.put(SessionTableColumns.START_TIME, message.getLong(Constants.MessageKey.TIMESTAMP));
         contentValues.put(SessionTableColumns.END_TIME, message.getLong(Constants.MessageKey.TIMESTAMP));
         contentValues.put(SessionTableColumns.SESSION_FOREGROUND_LENGTH, 0);
-        contentValues.put(SessionTableColumns.APP_INFO, appInfo);
+        contentValues.put(APP_INFO, appInfo);
         contentValues.put(SessionTableColumns.DEVICE_INFO, deviceInfo);
-        db.insert(SessionTableColumns.TABLE_NAME, null, contentValues);
+        db.insert(TABLE_NAME, null, contentValues);
     }
 
     public static List<JSONObject> processSessions(SQLiteDatabase database, HashMap<String, Map<Long, MessageBatch>> uploadMessagesBySession) {
@@ -108,7 +112,7 @@ public class SessionService extends SessionTable {
                 Map<Long, MessageBatch> batchMap = uploadMessagesBySession.get(sessionId);
                 if (batchMap != null) {
                     try {
-                        String appInfo = sessionCursor.getString(sessionCursor.getColumnIndex(SessionTableColumns.APP_INFO));
+                        String appInfo = sessionCursor.getString(sessionCursor.getColumnIndex(APP_INFO));
                         JSONObject appInfoJson = new JSONObject(appInfo);
                         String deviceInfo = sessionCursor.getString(sessionCursor.getColumnIndex(SessionTableColumns.DEVICE_INFO));
                         JSONObject deviceInfoJson = new JSONObject(deviceInfo);
@@ -130,5 +134,12 @@ public class SessionService extends SessionTable {
             }
         }
         return deviceInfos;
+    }
+
+    public static void updateSessionInstallReferrer(SQLiteDatabase db, JSONObject appInfo, String sessionId) {
+        ContentValues contentValues = new ContentValues();
+                contentValues.put(APP_INFO, appInfo.toString());
+                String[] whereArgs = {sessionId};
+                db.update(TABLE_NAME, contentValues, SESSION_ID + "=?", whereArgs);
     }
 }

@@ -899,4 +899,19 @@ public class KitManagerImpl implements KitManager, DeepLinkListener, UserAttribu
         }
     }
 
+    @Override
+    public void installReferrerUpdated() {
+        Intent mockIntent = ReferrerReceiver.getMockInstallReferrerIntent(MParticle.getInstance().getInstallReferrer());
+        for (KitIntegration provider: providers.values()) {
+            try {
+                if (!provider.isDisabled()) {
+                    provider.setInstallReferrer(mockIntent);
+                }
+            }
+            catch (Exception e) {
+                Logger.warning("Failed to update Install Referrer for kit: " + provider.getName() + ": " + e.getMessage());
+            }
+        }
+    }
+
 }

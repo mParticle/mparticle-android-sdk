@@ -47,6 +47,7 @@ import java.util.UUID;
     public static final int REMOVE_USER_ATTRIBUTE = 10;
     public static final int SET_USER_ATTRIBUTE = 11;
     public static final int INCREMENT_USER_ATTRIBUTE = 12;
+    public static final int INSTALL_REFERRER_UPDATED = 13;
 
     private final MessageManagerCallbacks mMessageManagerCallbacks;
 
@@ -102,12 +103,14 @@ import java.util.UUID;
                         Logger.error("Unable to process uploads, API key and/or API Secret are missing");
                         return;
                     }
-
                     mMessageManagerCallbacks.checkForTrigger(message);
 
                 } catch (Exception e) {
                     Logger.error(e, "Error saving message to mParticle DB.");
                 }
+                break;
+            case INSTALL_REFERRER_UPDATED:
+                mMParticleDBManager.updateSessionInstallReferrer((String)msg.obj, mMessageManagerCallbacks.getDeviceAttributes().getAppInfo(mContext, true));
                 break;
             case UPDATE_SESSION_ATTRIBUTES:
                 try {

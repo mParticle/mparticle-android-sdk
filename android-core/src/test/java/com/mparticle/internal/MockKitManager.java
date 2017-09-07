@@ -194,4 +194,9 @@ public class MockKitManager implements KitManager {
 
     }
 
+    @Override
+    public void installReferrerUpdated() {
+
+    }
+
 }

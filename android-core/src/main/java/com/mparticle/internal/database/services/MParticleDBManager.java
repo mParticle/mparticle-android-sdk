@@ -184,6 +184,10 @@ public class MParticleDBManager extends BaseDBManager {
         sMessageListener = messageListener;
     }
 
+    public void updateSessionInstallReferrer(String sessionId, JSONObject appInfo) {
+        SessionService.updateSessionInstallReferrer(getMParticleDatabase(), appInfo, sessionId);
+    }
+
     public interface MessageListener {
         void onMessageStored(MPMessage message);
     }
