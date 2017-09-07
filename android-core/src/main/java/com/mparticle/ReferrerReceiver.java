@@ -58,6 +58,10 @@ public class ReferrerReceiver extends BroadcastReceiver {
             SharedPreferences preferences = context.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
             preferences.edit().putString(Constants.PrefKeys.INSTALL_REFERRER, referrer).apply();
         }
+        MParticle instance = MParticle.getInstance();
+        if (instance != null) {
+            instance.installReferrerUpdated();
+        }
     }
 
     public static Intent getMockInstallReferrerIntent(String referrer) {

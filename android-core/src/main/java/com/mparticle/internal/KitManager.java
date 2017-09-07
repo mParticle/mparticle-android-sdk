@@ -87,4 +87,6 @@ public interface KitManager {
     void onSessionEnd();
 
     void onSessionStart();
+
+    void installReferrerUpdated();
 }

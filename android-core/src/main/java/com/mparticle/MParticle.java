@@ -1739,6 +1739,11 @@ public class MParticle {
         }
     }
 
+    void installReferrerUpdated() {
+        mMessageManager.installReferrerUpdated();
+        mKitManager.installReferrerUpdated();
+    }
+
     /**
      * This interface defines constants that can be used to interact with specific 3rd-party services.
      *

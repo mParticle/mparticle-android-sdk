@@ -43,6 +43,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
+
 /**
  * This class is primarily responsible for generating MPMessage objects, and then adding them to a
  * queue which is then processed in a background thread for further processing and database storage.
@@ -298,6 +299,18 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
         mMessageHandler
                 .sendMessage(mMessageHandler.obtainMessage(MessageHandler.CREATE_SESSION_END_MESSAGE, 1, 1, session.mSessionID));
     }
+
+    // check if a session has been started, if it has, then it means that the InstallReferrer was received
+    // after the current session was started, is out of date, and needs to be updated. If the current
+    // session has been started, disregard.
+    public void installReferrerUpdated() {
+        String sessionId = mAppStateManager.getSession().mSessionID;
+        if (mAppStateManager.getSession().isActive()) {
+            Message message = mMessageHandler.obtainMessage(MessageHandler.INSTALL_REFERRER_UPDATED, sessionId);
+            mMessageHandler.sendMessage(message);
+        }
+    }
+
 
     public MPMessage logEvent(MPEvent event, String currentActivity) {
         if (event != null) {

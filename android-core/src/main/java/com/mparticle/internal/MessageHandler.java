@@ -51,6 +51,7 @@ import java.util.UUID;
     public static final int REMOVE_USER_ATTRIBUTE = 10;
     public static final int SET_USER_ATTRIBUTE = 11;
     public static final int INCREMENT_USER_ATTRIBUTE = 12;
+    public static final int INSTALL_REFERRER_UPDATED = 13;
 
     private final MessageManagerCallbacks mMessageManagerCallbacks;
 
@@ -106,12 +107,14 @@ import java.util.UUID;
                         return;
                     }
                     dbInsertMessage(message);
-
                     mMessageManagerCallbacks.checkForTrigger(message);
 
                 } catch (Exception e) {
                     Logger.error(e, "Error saving message to mParticle DB.");
                 }
+                break;
+            case INSTALL_REFERRER_UPDATED:
+                dbUpdateSessionInstallReferrer((String)msg.obj);
                 break;
             case UPDATE_SESSION_ATTRIBUTES:
                 try {
@@ -602,6 +605,13 @@ import java.util.UUID;
         db.update(SessionTable.TABLE_NAME, sessionValues, SessionTable.SESSION_ID + "=?", whereArgs);
     }
 
+    private void dbUpdateSessionInstallReferrer(String sessionId) {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(SessionTable.APP_INFO, mMessageManagerCallbacks.getDeviceAttributes().getAppInfo(mContext, true).toString());
+        String[] whereArgs = {sessionId};
+        db.update(SessionTable.TABLE_NAME, contentValues, SessionTable.SESSION_ID + "=?", whereArgs);
+    }
+
     private void dbUpdateSessionEndTime(String sessionId, long endTime, long sessionLength) {
         ContentValues sessionValues = new ContentValues();
         sessionValues.put(SessionTable.END_TIME, endTime);
@@ -611,7 +621,6 @@ import java.util.UUID;
         String[] whereArgs = {sessionId};
         db.update(SessionTable.TABLE_NAME, sessionValues, SessionTable.SESSION_ID + "=?", whereArgs);
     }
-
 
     public TreeMap<String,String> getUserAttributeSingles() {
         if (!prepareDatabase()){

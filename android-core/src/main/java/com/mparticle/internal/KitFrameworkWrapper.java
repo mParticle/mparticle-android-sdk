@@ -478,4 +478,11 @@ public class KitFrameworkWrapper implements KitManager {
             mKitManager.onSessionStart();
         }
     }
+
+    @Override
+    public void installReferrerUpdated() {
+        if (mKitManager != null) {
+            mKitManager.installReferrerUpdated();
+        }
+    }
 }
