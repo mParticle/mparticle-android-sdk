@@ -51,11 +51,11 @@ public final class CommerceEvent {
         mProductAction = builder.mProductAction;
         mPromotionAction = builder.mPromotionAction;
         customAttributes = builder.customAttributes;
-        if (builder.promotionList != null) {
+        if (!MPUtility.isEmpty(builder.promotionList)) {
             builder.promotionList.removeAll(Collections.singleton(null));
         }
         promotionList = builder.promotionList;
-        if (builder.productList != null) {
+        if (!MPUtility.isEmpty(builder.productList)) {
             productList = new LinkedList<Product>(builder.productList);
             productList.removeAll(Collections.singleton(null));
         }

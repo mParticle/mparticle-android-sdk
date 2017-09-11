@@ -37,6 +37,7 @@ import java.net.HttpURLConnection;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -91,6 +92,10 @@ public class MPUtility {
             return true;
         else
             return false;
+    }
+
+    public static boolean isEmpty(Collection collection) {
+        return collection == null || collection.isEmpty();
     }
 
     public static AndroidAdIdInfo getGoogleAdIdInfo(Context context) {
