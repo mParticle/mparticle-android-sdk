@@ -16,7 +16,7 @@ You can grab the Core SDK via Maven Central. Please reference the badge above an
 
 ```groovy
 dependencies {
-    compile 'com.mparticle:android-core:4.16.3'
+    compile 'com.mparticle:android-core:4.16.4'
 }
 ```
 
@@ -27,8 +27,8 @@ Several integrations require additional client-side add-on libraries called "kit
 ```groovy
 dependencies {
     compile (
-        'com.mparticle:android-example-kit:4.16.3',
-        'com.mparticle:android-another-kit:4.16.3'
+        'com.mparticle:android-example-kit:4.16.4',
+        'com.mparticle:android-another-kit:4.16.4'
     )
 }
 ```
@@ -55,6 +55,7 @@ Kit | Maven Artifact
 [Localytics](https://github.com/mparticle-integrations/mparticle-android-integration-localytics)        |  [`android-localytics-kit`](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.mparticle%22%20AND%20a%3A%22android-localytics-kit%22)
 [Radar](https://github.com/mparticle-integrations/mparticle-android-integration-radar)    |  [`android-radar-kit`](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.mparticle%22%20AND%20a%3A%22android-radar-kit%22)
 [Reveal Mobile](https://github.com/mparticle-integrations/mparticle-android-integration-revealmobile)       |  [`android-revealmobile-kit`](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.mparticle%22%20AND%20a%3A%22android-revealmobile-kit%22)
+[Roko Mobi](https://github.com/mparticle-integrations/mparticle-android-integration-rokomobi)              |  [`android-skyhook-kit`](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.mparticle%22%20AND%20a%3A%22android-rokomobi-kit%22)
 [Tune](https://github.com/mparticle-integrations/mparticle-android-integration-tune)                    |  [`android-tune-kit`](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.mparticle%22%20AND%20a%3A%22android-tune-kit%22)
 [Urban Airship](https://github.com/mparticle-integrations/mparticle-android-integration-urbanairship)                    |  [`android-urbanairship-kit`](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.mparticle%22%20AND%20a%3A%22android-urbanairship-kit%22)
 [Wootric](https://github.com/mparticle-integrations/mparticle-android-integration-wootric)              |  [`android-wootric-kit`](http://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.mparticle%22%20AND%20a%3A%22android-wootric-kit%22)
