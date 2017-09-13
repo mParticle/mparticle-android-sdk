@@ -55,44 +55,6 @@ public class ConfigManagerTest {
     }
 
     /**
-     * This tests that a UserConfig can be migrated from an existing MPID, to a new MPID
-     */
-    @Test
-    public void testUserConfigMigrateEmptyTarget() throws Exception {
-        final long newMpid = new Random().nextInt();
-
-        final ConfigManager configManager = instance.getConfigManager();
-        assertTrue(configManager.getMpid() == Constants.TEMPORARY_MPID);
-        assertNotNull(configManager.getUserConfig());
-        assertTrue((configManager.getUserConfig().getMpid()) == 0);
-
-        setProfile1(instance.getConfigManager().getUserConfig());
-        assertMatchesProfile1(instance.getConfigManager().getUserConfig());
-
-        //make sure the new MPID doesn't have an existing UserConfig SharedPreferences file
-        for (UserConfig existingUserConfig: UserConfig.getAllUsers(mContext)) {
-            assertFalse(existingUserConfig.getMpid() == newMpid);
-        }
-
-        configManager.setMpid(newMpid);
-
-        //this is a HACK..since we are using apply instead of commit, for some reason the writes
-        //to SharedPreferences are not being applied, unless we allow time to for them to write.
-        //this shouldn't be a problem, since they are all on the same process, and SharedPreferences
-        //is a singleton across a process, but it is. Seems to not work only on some versions of Android,
-        //so maybe it is related to different implementations of SharedPreferences.Editor;
-        AccessUtils.getUploadHandler().post(new Runnable() {
-            @Override
-            public void run() {
-                configManager.mergeUserConfigs(0, newMpid);
-            }
-        });
-        Thread.sleep(2000);
-        assertTrue(configManager.getMpid() == newMpid);
-        assertMatchesProfile1(configManager.getUserConfig());
-    }
-
-    /**
      * This tests that a UserConfig can be migrated to an existing UserConfig, and it will only
      * override fields that have been set by the User
      */
@@ -120,31 +82,6 @@ public class ConfigManagerTest {
         configManager.mergeUserConfigs(oldMpid, newMpid);
         assertTrue(configManager.getUserConfig().getMpid() == newMpid);
         assertMatchesProfile3(configManager.getUserConfig());
-    }
-
-    @Test
-    public void testUserConfigMigrateEmptySubject() throws Exception {
-        ConfigManager configManager = instance.getConfigManager();
-
-        //test that no fields were set in the subject UserConfig
-        long oldMpid = new Random().nextLong();
-        long newMpid = new Random().nextLong();
-
-        configManager.setMpid(newMpid);
-        assertTrue(configManager.getUserConfig().getMpid() == newMpid);
-        setProfile1(configManager.getUserConfig());
-
-        //make sure this UserConfig does not exist
-        for (UserConfig userConfig : UserConfig.getAllUsers(mContext)) {
-            assertFalse(userConfig.getMpid() == oldMpid);
-        }
-        configManager.setMpid(oldMpid);
-        assertTrue(configManager.getUserConfig().getMpid() == oldMpid);
-
-        configManager.setMpid(newMpid);
-        configManager.mergeUserConfigs(oldMpid, newMpid);
-        assertTrue(configManager.getUserConfig().getMpid() == newMpid);
-        assertMatchesProfile1(configManager.getUserConfig());
     }
 
     static int breadcrumbLimit;

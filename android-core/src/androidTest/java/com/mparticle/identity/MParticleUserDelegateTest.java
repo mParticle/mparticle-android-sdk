@@ -63,15 +63,15 @@ public class MParticleUserDelegateTest extends BaseCleanStartedEachTest {
 
         MParticleUtils.awaitStoreMessage();
 
-        Map<Long, Map<MParticle.IdentityType, String>> storedUsersTemp = new HashMap<Long, Map<MParticle.IdentityType, String >>();
+        Map<Long, Map<MParticle.IdentityType, String>> storedUsersTemp = new HashMap<Long, Map<MParticle.IdentityType, String>>();
 
-        for (Map.Entry<Long, Map<MParticle.IdentityType, String>> user: attributes.entrySet()) {
+        for (Map.Entry<Long, Map<MParticle.IdentityType, String>> user : attributes.entrySet()) {
             Map<MParticle.IdentityType, String> storedUserAttributes = mUserDelegate.getUserIdentities(user.getKey());
             storedUsersTemp.put(user.getKey(), storedUserAttributes);
-            for (Map.Entry<MParticle.IdentityType, String> pairs: user.getValue().entrySet()) {
+            for (Map.Entry<MParticle.IdentityType, String> pairs : user.getValue().entrySet()) {
                 Object currentAttribute = storedUserAttributes.get(pairs.getKey());
                 if (currentAttribute == null) {
-                    Log.e("Stuff","more stuff");
+                    Log.e("Stuff", "more stuff");
                 }
                 assertEquals(storedUserAttributes.get(pairs.getKey()), pairs.getValue());
             }
@@ -81,45 +81,42 @@ public class MParticleUserDelegateTest extends BaseCleanStartedEachTest {
     @Test
     public void testInsertRetrieveDeleteUserAttributes() throws Exception {
         // create and store
-        for (int h = 0; h < 10; h++) {
-            Map<Long, Map<String, String>> attributes = new HashMap<Long, Map<String, String>>();
-            for (int i = 0; i < mRandom.randomInt(1, 10); i++) {
-                Long mpid = new Random().nextLong();
-                Map<String, String> pairs = new HashMap<String, String>();
-                attributes.put(mpid, pairs);
-                for (int j = 0; j < mRandom.randomInt(1, 20); j++) {
-                    String key = mRandom.getAlphaNumericString(mRandom.randomInt(1, 255)).toUpperCase();
-                    String value = mRandom.getAlphaNumericString(mRandom.randomInt(1, 255));
-                    assertTrue(mUserDelegate.setUserAttribute(key, value, mpid, false));
-                    pairs.put(key, value);
-                }
+        Map<Long, Map<String, String>> attributes = new HashMap<Long, Map<String, String>>();
+        for (int i = 0; i < mRandom.randomInt(1, 10); i++) {
+            Long mpid = new Random().nextLong();
+            Map<String, String> pairs = new HashMap<String, String>();
+            attributes.put(mpid, pairs);
+            for (int j = 0; j < mRandom.randomInt(1, 20); j++) {
+                String key = mRandom.getAlphaNumericString(mRandom.randomInt(1, 255)).toUpperCase();
+                String value = mRandom.getAlphaNumericString(mRandom.randomInt(1, 255));
+                assertTrue(mUserDelegate.setUserAttribute(key, value, mpid, false));
+                pairs.put(key, value);
             }
+        }
 
-            MParticleUtils.awaitSetUserAttribute();
+        MParticleUtils.awaitSetUserAttribute();
 
-            // retrieve and compare
-            for (Map.Entry<Long, Map<String, String>> user : attributes.entrySet()) {
-                Map<String, Object> storedUserAttributes = mUserDelegate.getUserAttributes(user.getKey());
-                for (Map.Entry<String, String> pairs : user.getValue().entrySet()) {
-                    assertEquals(storedUserAttributes.get(pairs.getKey()).toString(), pairs.getValue());
-                }
+        // retrieve and compare
+        for (Map.Entry<Long, Map<String, String>> user : attributes.entrySet()) {
+            Map<String, Object> storedUserAttributes = mUserDelegate.getUserAttributes(user.getKey());
+            for (Map.Entry<String, String> pairs : user.getValue().entrySet()) {
+                assertEquals(storedUserAttributes.get(pairs.getKey()).toString(), pairs.getValue());
             }
+        }
 
-            // delete
-            for (Map.Entry<Long, Map<String, String>> userAttributes : attributes.entrySet()) {
-                for (Map.Entry<String, String> attribute : userAttributes.getValue().entrySet()) {
-                    assertTrue(mUserDelegate.removeUserAttribute(attribute.getKey(), userAttributes.getKey()));
-                }
+        // delete
+        for (Map.Entry<Long, Map<String, String>> userAttributes : attributes.entrySet()) {
+            for (Map.Entry<String, String> attribute : userAttributes.getValue().entrySet()) {
+                assertTrue(mUserDelegate.removeUserAttribute(attribute.getKey(), userAttributes.getKey()));
             }
+        }
 
-            MParticleUtils.awaitRemoveUserAttribute();
-
-
-            for (Map.Entry<Long, Map<String, String>> userAttributes : attributes.entrySet()) {
-                Map<String, Object> storedUserAttributes = mUserDelegate.getUserAttributes(userAttributes.getKey());
-                for (Map.Entry<String, String> attribute : userAttributes.getValue().entrySet()) {
-                    assertNull(storedUserAttributes.get(attribute.getKey()));
-                }
+        MParticleUtils.awaitRemoveUserAttribute();
+        
+        for (Map.Entry<Long, Map<String, String>> userAttributes : attributes.entrySet()) {
+            Map<String, Object> storedUserAttributes = mUserDelegate.getUserAttributes(userAttributes.getKey());
+            for (Map.Entry<String, String> attribute : userAttributes.getValue().entrySet()) {
+                assertNull(storedUserAttributes.get(attribute.getKey()));
             }
         }
     }
