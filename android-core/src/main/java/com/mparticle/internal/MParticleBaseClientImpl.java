@@ -63,25 +63,28 @@ public class MParticleBaseClientImpl {
     }
 
     protected HttpURLConnection makeUrlRequest(HttpURLConnection connection, String payload, boolean identity) throws IOException {
+        return makeUrlRequest(connection, payload, identity, new GZIPOutputStream(new BufferedOutputStream(connection.getOutputStream())));
+    }
+
+    HttpURLConnection makeUrlRequest(HttpURLConnection connection, String payload, boolean identity, GZIPOutputStream zos) throws IOException {
         try {
             mListener.onSend(connection, payload);
 
-            if (payload != null) {
-                String messageString = payload.toString();
-                GZIPOutputStream zos = new GZIPOutputStream(new BufferedOutputStream(connection.getOutputStream()));
-                try {
-                    zos.write(messageString.getBytes());
-                } finally {
-                    zos.close();
-                }
-            }
-
             //gingerbread seems to dislike pinning w/ godaddy. Being that GB is near-dead anyway, just disable pinning for it.
-            if (!BuildConfig.MP_DEBUG && Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH && connection instanceof HttpsURLConnection) {
+            if (!isDebug() && isPostGingerBread() && connection instanceof HttpsURLConnection) {
                 try {
                     ((HttpsURLConnection) connection).setSSLSocketFactory(getSocketFactory());
                 } catch (Exception e) {
 
+                }
+            }
+
+            if (payload != null) {
+                String messageString = payload.toString();
+                try {
+                    zos.write(messageString.getBytes());
+                } finally {
+                    zos.close();
                 }
             }
             
@@ -102,6 +105,14 @@ public class MParticleBaseClientImpl {
             throw ex;
         }
         return connection;
+    }
+
+    boolean isDebug() {
+        return BuildConfig.MP_DEBUG;
+    }
+
+    boolean isPostGingerBread() {
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH;
     }
 
     /**
