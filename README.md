@@ -16,7 +16,7 @@ You can grab the Core SDK via Maven Central. Please reference the badge above an
 
 ```groovy
 dependencies {
-    compile 'com.mparticle:android-core:5.0.2'
+    compile 'com.mparticle:android-core:5.0.3'
 }
 ```
 
