@@ -9,7 +9,7 @@ buildscript {
 
 allprojects {
     group = 'com.mparticle'
-    version = '4.16.4-SNAPSHOT'
+    version = '4.16.5-SNAPSHOT'
     if (project.hasProperty('isRelease') && project.isRelease) {
         version = version.toString().replace("-SNAPSHOT", "")
     }
