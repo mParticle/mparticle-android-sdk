@@ -1406,6 +1406,7 @@ public class MParticle {
         int SKYHOOK = 121;
         int SINGULAR = 119;
         int ADOBE = 124;
+        int INSTABOT = 123;
         String BROADCAST_ACTIVE = "MPARTICLE_SERVICE_PROVIDER_ACTIVE_";
         String BROADCAST_DISABLED = "MPARTICLE_SERVICE_PROVIDER_DISABLED_";
     }
