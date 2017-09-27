@@ -22,7 +22,8 @@ include (
         ':kits:iterable-kit',
         ':kits:skyhook-kit',
         ':kits:singular-kit',
-        ':kits:adobe-kit'
+        ':kits:adobe-kit',
+        ':kits:instabot-kit'
 )
 project(':kits').getChildren().each {
     proj -> proj.name = 'android-' + proj.name
