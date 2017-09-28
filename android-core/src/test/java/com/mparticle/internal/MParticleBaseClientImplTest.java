@@ -49,24 +49,27 @@ public class MParticleBaseClientImplTest {
             boolean isPostGingerBread() {
                 return true;
             }
-        };
-
-        GZIPOutputStream mockStream = new GZIPOutputStream(Mockito.mock(BufferedOutputStream.class)) {
-            @Override
-            public void close() throws IOException {
-                //do nothing
-            }
 
             @Override
-            public void write(@NonNull byte[] b) throws IOException {
-                writeCalled[0] = true;
-                assertTrue(getSocketFactoruCalled[0]);
+            protected GZIPOutputStream getOutputStream(HttpURLConnection connection) throws IOException {
+                return new GZIPOutputStream(Mockito.mock(BufferedOutputStream.class)) {
+                    @Override
+                    public void close() throws IOException {
+                        //do nothing
+                    }
 
+                    @Override
+                    public void write(@NonNull byte[] b) throws IOException {
+                        writeCalled[0] = true;
+                        assertTrue(getSocketFactoruCalled[0]);
+
+                    }
+                };
             }
         };
 
         HttpURLConnection mockConnection = Mockito.mock(HttpsURLConnection.class);
-        client.makeUrlRequest(mockConnection, "message" , true, mockStream);
+        client.makeUrlRequest(mockConnection, "message" , true);
         assertTrue(getSocketFactoruCalled[0]);
         assertTrue(writeCalled[0]);
     }

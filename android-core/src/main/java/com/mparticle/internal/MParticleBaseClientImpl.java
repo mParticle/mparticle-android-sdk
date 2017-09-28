@@ -11,6 +11,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -63,10 +64,6 @@ public class MParticleBaseClientImpl {
     }
 
     protected HttpURLConnection makeUrlRequest(HttpURLConnection connection, String payload, boolean identity) throws IOException {
-        return makeUrlRequest(connection, payload, identity, new GZIPOutputStream(new BufferedOutputStream(connection.getOutputStream())));
-    }
-
-    HttpURLConnection makeUrlRequest(HttpURLConnection connection, String payload, boolean identity, GZIPOutputStream zos) throws IOException {
         try {
             mListener.onSend(connection, payload);
 
@@ -80,6 +77,7 @@ public class MParticleBaseClientImpl {
             }
 
             if (payload != null) {
+                GZIPOutputStream zos = getOutputStream(connection);
                 String messageString = payload.toString();
                 try {
                     zos.write(messageString.getBytes());
@@ -113,6 +111,10 @@ public class MParticleBaseClientImpl {
 
     boolean isPostGingerBread() {
         return Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH;
+    }
+
+    protected GZIPOutputStream getOutputStream(HttpURLConnection connection) throws IOException {
+        return new GZIPOutputStream(new BufferedOutputStream(connection.getOutputStream()));
     }
 
     /**
