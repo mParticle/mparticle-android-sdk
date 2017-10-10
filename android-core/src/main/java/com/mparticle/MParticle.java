@@ -4,6 +4,7 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.location.Location;
 import android.location.LocationManager;
@@ -32,6 +33,7 @@ import com.mparticle.internal.MessageManager;
 import com.mparticle.internal.PushRegistrationHelper;
 import com.mparticle.media.MPMediaAPI;
 import com.mparticle.media.MediaCallbacks;
+import com.mparticle.messaging.AbstractCloudMessage;
 import com.mparticle.messaging.CloudAction;
 import com.mparticle.messaging.MPCloudNotificationMessage;
 import com.mparticle.messaging.MPMessagingAPI;
@@ -1397,6 +1399,18 @@ public class MParticle {
         return mMessaging;
     }
 
+    static String getAppState() {
+        String appState = AppStateManager.APP_STATE_NOTRUNNING;
+        if (AppStateManager.mInitialized) {
+            if (MParticle.getInstance().mAppStateManager.isBackgrounded()) {
+                appState = AppStateManager.APP_STATE_BACKGROUND;
+            } else {
+                appState = AppStateManager.APP_STATE_FOREGROUND;
+            }
+        }
+        return appState;
+    }
+
     /**
      * Retrieve an instance of the {@link CommerceApi} helper class, used to access the {@link Cart} and as a helper class to log {@link CommerceEvent} events
      * with the {@link Product} objects currently in the Cart.
@@ -1518,7 +1532,22 @@ public class MParticle {
         mKitManager.onPushRegistration(instanceId, senderId);
     }
 
-    void logNotification(MPCloudNotificationMessage cloudMessage, CloudAction action, boolean startSession, String appState, int behavior) {
+    /**
+     * Logs a Push Notification displayed to the User
+     * @param intent
+     */
+    public void logNotification(Intent intent) {
+        if (mConfigManager.isEnabled()) {
+            try {
+                ProviderCloudMessage message = AbstractCloudMessage.createMessage(intent, ConfigManager.getPushKeys(mAppContext));
+                mMessageManager.logNotification(message, getAppState());
+            } catch (AbstractCloudMessage.InvalidGcmMessageException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    void logNotification(AbstractCloudMessage cloudMessage, CloudAction action, boolean startSession, String appState, int behavior) {
         if (mConfigManager.isEnabled()) {
             if (startSession){
                 mAppStateManager.ensureActiveSession();
@@ -1533,6 +1562,19 @@ public class MParticle {
                 mAppStateManager.ensureActiveSession();
             }
             mMessageManager.logNotification(cloudMessage, appState);
+        }
+    }
+
+    /**
+     * Logs a Push Notification has been tapped or opened
+     * @param intent
+     */
+    public void logNotificationOpened(Intent intent) {
+        try {
+            logNotification(AbstractCloudMessage.createMessage(intent, ConfigManager.getPushKeys(mAppContext)),
+                    null, true, MParticle.getAppState(), AbstractCloudMessage.FLAG_READ | AbstractCloudMessage.FLAG_DIRECT_OPEN);
+        } catch (AbstractCloudMessage.InvalidGcmMessageException e) {
+            e.printStackTrace();
         }
     }
 

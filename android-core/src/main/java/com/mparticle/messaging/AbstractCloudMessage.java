@@ -68,7 +68,7 @@ public abstract class AbstractCloudMessage implements Parcelable {
         return mExtras;
     }
 
-    public static AbstractCloudMessage createMessage(Intent intent, JSONArray keys) throws InvalidGcmMessageException {
+    public static ProviderCloudMessage createMessage(Intent intent, JSONArray keys) throws InvalidGcmMessageException {
         return new ProviderCloudMessage(intent.getExtras(), keys);
     }
 

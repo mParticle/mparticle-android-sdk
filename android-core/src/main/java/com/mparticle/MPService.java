@@ -123,7 +123,7 @@ public class MPService extends IntentService {
     }
 
     private void showNotification(final AbstractCloudMessage message) {
-        if (!message.getDisplayed()) {
+        if (!message.getDisplayed() && ConfigManager.isDisplayPushNotifications(this)) {
             (new AsyncTask<AbstractCloudMessage, Void, Notification>() {
                 @Override
                 protected Notification doInBackground(AbstractCloudMessage... params) {
@@ -147,7 +147,7 @@ public class MPService extends IntentService {
                 }
             }).execute(message);
         }
-        String appState = getAppState();
+        String appState = MParticle.getAppState();
         if (message instanceof ProviderCloudMessage) {
             MParticle.getInstance().logNotification((ProviderCloudMessage) message, false, appState);
         } else if (message instanceof MPCloudNotificationMessage) {
@@ -168,18 +168,6 @@ public class MPService extends IntentService {
         }
     }
 
-    private String getAppState(){
-        String appState = AppStateManager.APP_STATE_NOTRUNNING;
-        if (AppStateManager.mInitialized) {
-            if (MParticle.getInstance().mAppStateManager.isBackgrounded()) {
-                appState = AppStateManager.APP_STATE_BACKGROUND;
-            } else {
-                appState = AppStateManager.APP_STATE_FOREGROUND;
-            }
-        }
-        return appState;
-    }
-
     private void generateCloudMessage(final Intent intent) {
         if (!processSilentPush(getApplicationContext(), intent.getExtras())){
             try {
@@ -192,7 +180,7 @@ public class MPService extends IntentService {
                             AbstractCloudMessage cloudMessage = AbstractCloudMessage.createMessage(intent, ConfigManager.getPushKeys(MPService.this));
                             boolean handled = MParticle.getInstance().getKitManager().onMessageReceived(getApplicationContext(), intent);
                             cloudMessage.setDisplayed(handled);
-                            String appState = getAppState();
+                            String appState = MParticle.getAppState();
                             if (cloudMessage instanceof MPCloudNotificationMessage){
                                 MParticle.getInstance().saveGcmMessage(((MPCloudNotificationMessage)cloudMessage), appState);
                                 if (((MPCloudNotificationMessage)cloudMessage).isDelayed()){
@@ -200,7 +188,7 @@ public class MPService extends IntentService {
                                     scheduleFutureNotification((MPCloudNotificationMessage) cloudMessage);
                                     return;
                                 }
-                            }else if (cloudMessage instanceof ProviderCloudMessage){
+                            } else if (cloudMessage instanceof ProviderCloudMessage){
                                 MParticle.getInstance().saveGcmMessage(((ProviderCloudMessage)cloudMessage), appState);
                             }
                             broadcastNotificationReceived(cloudMessage);
@@ -276,7 +264,7 @@ public class MPService extends IntentService {
         MParticle.start(getApplicationContext());
         if (message instanceof MPCloudNotificationMessage) {
             MParticle.getInstance().logNotification((MPCloudNotificationMessage) message,
-                    action, true, getAppState(), AbstractCloudMessage.FLAG_READ | AbstractCloudMessage.FLAG_DIRECT_OPEN);
+                    action, true, MParticle.getAppState(), AbstractCloudMessage.FLAG_READ | AbstractCloudMessage.FLAG_DIRECT_OPEN);
         }
 
         Intent broadcast = new Intent(MPMessagingAPI.BROADCAST_NOTIFICATION_TAPPED);

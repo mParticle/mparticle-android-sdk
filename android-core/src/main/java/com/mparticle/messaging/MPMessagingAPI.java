@@ -110,4 +110,8 @@ public class MPMessagingAPI {
      */
     public void setNotificationVibrationEnabled(Boolean enabled) {
     }
+
+    public void displayPushNotificationByDefault(Boolean enabled) {
+        MParticle.getInstance().getConfigManager().setDisplayPushNotifications(enabled);
+    }
 }

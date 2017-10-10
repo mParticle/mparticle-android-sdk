@@ -494,6 +494,7 @@ public class Constants {
         String INTEGRATION_ATTRIBUTES = "mp::integrationattributes";
         String ETAG = "mp::etag";
         String IF_MODIFIED = "mp::ifmodified";
+        String DISPLAY_PUSH_NOTIFICATIONS = "mp::displaypushnotifications";
     }
 
     public interface MiscStorageKeys {

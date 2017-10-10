@@ -63,7 +63,7 @@ public class ConfigManager {
 
     public ConfigManager(Context context, MParticle.Environment environment, String apiKey, String apiSecret) {
         mContext = context.getApplicationContext();
-        mPreferences = mContext.getSharedPreferences(PREFERENCES_FILE, Context.MODE_PRIVATE);
+        mPreferences = getSharedPreferences();
         sLocalPrefs = new AppConfig(mContext, environment, mPreferences, apiKey, apiSecret);
         restoreOldConfig();
     }
@@ -377,6 +377,16 @@ public class ConfigManager {
                 .apply();
     }
 
+    public void setDisplayPushNotifications(Boolean display) {
+        mPreferences.edit()
+                .putBoolean(Constants.PrefKeys.DISPLAY_PUSH_NOTIFICATIONS, display)
+                .apply();
+    }
+
+    public static Boolean isDisplayPushNotifications(Context context) {
+        return getPreferences(context).getBoolean(Constants.PrefKeys.DISPLAY_PUSH_NOTIFICATIONS, false);
+    }
+
     private static SharedPreferences getPreferences(Context context){
         return context.getSharedPreferences(PREFERENCES_FILE, Context.MODE_PRIVATE);
     }
@@ -578,5 +588,9 @@ public class ConfigManager {
             }
         }
         return jsonAttributes;
+    }
+
+    private SharedPreferences getSharedPreferences() {
+        return mContext.getSharedPreferences(PREFERENCES_FILE, Context.MODE_PRIVATE);
     }
 }
