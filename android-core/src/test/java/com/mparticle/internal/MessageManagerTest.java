@@ -420,7 +420,7 @@ public class MessageManagerTest {
         assertEquals(message.getLong(Constants.MessageKey.ST_INTERRUPTIONS), 123);
         assertEquals(message.getBoolean(Constants.MessageKey.APP_INIT_UPGRADE), false);
         assertEquals(message.getBoolean(Constants.MessageKey.APP_INIT_FIRST_RUN), true);
-        Mockito.verify(messageHandler, Mockito.times(2)).sendMessage(Mockito.any(Message.class));
+        Mockito.verify(messageHandler, Mockito.times(1)).sendMessage(Mockito.any(Message.class));
 
     }
 

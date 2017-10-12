@@ -69,6 +69,12 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
         mAppStateManager = appStateManager;
         mBackgroundTaskHandler = backgroundTaskHandler;
         mKitIntegrationFactory = new KitIntegrationFactory();
+        MParticle.getInstance().Identity().addIdentityStateListener(new IdentityStateListener() {
+            @Override
+            public void onUserIdentified(MParticleUser user) {
+                user.getUserAttributes(KitManagerImpl.this);
+            }
+        });
     }
 
     /**
@@ -218,13 +224,6 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
                 }
             }
             MParticle.getInstance().getKitManager().replayAndDisableQueue();
-            //sync user attributes
-            MParticle.getInstance().Identity().addIdentityStateListener(new IdentityStateListener() {
-                @Override
-                public void onUserIdentified(MParticleUser user) {
-                    user.getUserAttributes(KitManagerImpl.this);
-                }
-            });
         }
     }
 
@@ -470,11 +469,13 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
     }
 
     private void syncUserIdentities(KitIntegration.AttributeListener attributeListener, KitConfiguration configuration) {
-        Map<MParticle.IdentityType, String> identities = MParticle.getInstance().Identity().getCurrentUser().getUserIdentities();
-        if (identities != null) {
-            for (Map.Entry<MParticle.IdentityType, String> entry : identities.entrySet()){
-                if (configuration.shouldSetIdentity(entry.getKey())) {
-                    attributeListener.setUserIdentity(entry.getKey(), entry.getValue());
+        if (MParticle.getInstance().Identity().getCurrentUser() != null) {
+            Map<MParticle.IdentityType, String> identities = MParticle.getInstance().Identity().getCurrentUser().getUserIdentities();
+            if (identities != null) {
+                for (Map.Entry<MParticle.IdentityType, String> entry : identities.entrySet()) {
+                    if (configuration.shouldSetIdentity(entry.getKey())) {
+                        attributeListener.setUserIdentity(entry.getKey(), entry.getValue());
+                    }
                 }
             }
         }

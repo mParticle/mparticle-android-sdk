@@ -1,5 +1,7 @@
 package com.mparticle.kits;
 
+import com.mparticle.MParticle;
+import com.mparticle.mock.MockMParticle;
 import com.mparticle.internal.AppStateManager;
 import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.ReportingManager;
@@ -26,6 +28,7 @@ public class KitManagerImplTest {
 
     @Test
     public void testOnUserAttributesReceived() throws Exception {
+        MParticle.setInstance(new MockMParticle());
         KitManagerImpl manager  = new KitManagerImpl(
                 new MockContext(),
                 Mockito.mock(ReportingManager.class),

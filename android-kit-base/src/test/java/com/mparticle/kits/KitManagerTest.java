@@ -8,6 +8,7 @@ import android.os.Looper;
 
 import com.mparticle.MPEvent;
 import com.mparticle.MParticle;
+import com.mparticle.identity.IdentityApi;
 import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.KitFrameworkWrapper;
 import com.mparticle.mock.MockContext;
@@ -45,13 +46,13 @@ public class KitManagerTest  {
 
     @Before
     public void setUp() throws Exception {
+        MParticle mockMp = new MockMParticle();
+        MParticle.setInstance(mockMp);
+
         manager = new MockKitManagerImpl(new MockContext(), null, Mockito.mock(ConfigManager.class), null);
         assertNotNull(manager.providers);
         MockKitIntegrationFactory mockKitFactory = new MockKitIntegrationFactory();
         manager.setKitFactory(mockKitFactory);
-        MParticle mockMp = new MockMParticle();
-        //Mockito.when(mockMp.getKitManager()).thenReturn(Mockito.mock(KitFrameworkWrapper.class));
-        MParticle.setInstance(mockMp);
     }
 
     @Test
