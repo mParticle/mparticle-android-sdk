@@ -6,8 +6,8 @@ apply plugin: 'com.android.library'
 apply from: '../scripts/maven.gradle'
 
 android {
-    compileSdkVersion 25
-    buildToolsVersion "25.0.2"
+    compileSdkVersion 26
+    buildToolsVersion "26.0.1"
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_6
@@ -81,6 +81,7 @@ dependencies {
     provided 'com.google.android.gms:play-services-gcm:[7.0,)'
     provided 'com.google.android.gms:play-services-ads:[7.0,)'
     provided 'com.google.firebase:firebase-messaging:[7.0,)'
+    provided 'com.android.support:support-v4:[26.0, )'
     testCompile 'junit:junit:4.12'
     testCompile  files('libs/java-json.jar')
     testCompile "org.powermock:powermock-module-junit4:1.6.2"

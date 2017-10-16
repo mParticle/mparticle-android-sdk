@@ -14,6 +14,8 @@ import org.json.JSONObject;
 
 import java.util.Set;
 
+import static com.mparticle.MPServiceUtil.NOTIFICATION_CHANNEL;
+
 /**
  * Representation of a GCM/push sent by a 3rd party such as Urban Airship or Mixpanel.
  */
@@ -94,14 +96,18 @@ public class ProviderCloudMessage extends AbstractCloudMessage {
 
     @Override
     public Notification buildNotification(Context context) {
-
-        Notification notification = new NotificationCompat.Builder(context)
-                .setContentIntent(getLoopbackIntent(context, this, getDefaultAction()))
+        NotificationCompat.Builder builder;
+        if (oreoNotificationCompatAvailable()) {
+            builder = new NotificationCompat.Builder(context, NOTIFICATION_CHANNEL);
+        } else {
+            builder = new NotificationCompat.Builder(context);
+        }
+        Notification notification = builder.setContentIntent(getLoopbackIntent(context, this, getDefaultAction()))
                 .setSmallIcon(AbstractCloudMessage.getFallbackIcon(context))
                 .setTicker(mPrimaryText)
                 .setContentTitle(AbstractCloudMessage.getFallbackTitle(context))
-                .setContentText(mPrimaryText).build();
-
+                .setContentText(mPrimaryText)
+                .build();
         notification.flags |= Notification.FLAG_AUTO_CANCEL;
         return notification;
     }

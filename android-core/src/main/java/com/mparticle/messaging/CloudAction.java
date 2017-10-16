@@ -8,6 +8,7 @@ import android.os.Parcelable;
 import android.text.TextUtils;
 
 import com.mparticle.MPService;
+import com.mparticle.MPServiceUtil;
 import com.mparticle.internal.MPUtility;
 
 import java.util.UUID;
@@ -70,7 +71,7 @@ public class CloudAction implements Parcelable {
         PendingIntent activityIntent = null;
         if (mActionActivity != null){
             try {
-                Intent intent = new Intent(MPService.INTERNAL_NOTIFICATION_TAP);
+                Intent intent = new Intent(MPServiceUtil.INTERNAL_NOTIFICATION_TAP);
                 intent.setClass(context, Class.forName(mActionActivity));
                 intent.putExtra(MPMessagingAPI.CLOUD_MESSAGE_EXTRA, message);
                 intent.putExtra(MPMessagingAPI.CLOUD_ACTION_EXTRA, action);

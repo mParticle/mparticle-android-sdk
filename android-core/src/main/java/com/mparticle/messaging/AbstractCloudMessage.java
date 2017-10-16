@@ -10,8 +10,10 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.v4.app.NotificationCompat;
 
 import com.mparticle.MPService;
+import com.mparticle.MPServiceUtil;
 import com.mparticle.internal.ConfigManager;
 
 import org.json.JSONArray;
@@ -91,7 +93,7 @@ public abstract class AbstractCloudMessage implements Parcelable {
     public abstract JSONObject getRedactedJsonPayload();
 
     protected static PendingIntent getLoopbackIntent(Context context, AbstractCloudMessage message, CloudAction action){
-        Intent intent = new Intent(MPService.INTERNAL_NOTIFICATION_TAP + action.getActionIdentifier());
+        Intent intent = new Intent(MPServiceUtil.INTERNAL_NOTIFICATION_TAP + action.getActionIdentifier());
         intent.setClass(context, MPService.class);
         intent.putExtra(MPMessagingAPI.CLOUD_MESSAGE_EXTRA, message);
         intent.putExtra(MPMessagingAPI.CLOUD_ACTION_EXTRA, action);
@@ -164,5 +166,15 @@ public abstract class AbstractCloudMessage implements Parcelable {
             }
         }
         return smallIcon;
+    }
+
+    boolean oreoNotificationCompatAvailable() {
+        try {
+            NotificationCompat.Builder.class.getMethod("setChannelId", String.class);
+            return true;
+        }
+        catch (NoSuchMethodException ignore) {
+            return false;
+        }
     }
 }

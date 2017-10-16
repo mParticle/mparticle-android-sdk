@@ -23,6 +23,8 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
+import static com.mparticle.MPServiceUtil.NOTIFICATION_CHANNEL;
+
 /**
  * The class representation of a GCM/push sent by mParticle. Allows for very granular customization
  * based on a series of key/value pairs in the GCM data payload.
@@ -390,7 +392,12 @@ public class MPCloudNotificationMessage extends AbstractCloudMessage {
     }
 
     public Notification buildNotification(Context context) {
-        NotificationCompat.Builder notification = new NotificationCompat.Builder(context);
+        NotificationCompat.Builder notification;
+        if (oreoNotificationCompatAvailable()) {
+            notification = new NotificationCompat.Builder(context, NOTIFICATION_CHANNEL);
+        } else {
+            notification = new NotificationCompat.Builder(context);
+        }
         notification.setSmallIcon(getSmallIconResourceId(context));
         notification.setContentTitle(getContentTitle(context));
         String text = getPrimaryMessage(context);
