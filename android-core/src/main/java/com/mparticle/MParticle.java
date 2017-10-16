@@ -109,10 +109,11 @@ public class MParticle {
     protected MPMediaAPI mMedia;
     protected CommerceApi mCommerce;
     protected ProductBagApi mProductBags;
-    protected volatile DeepLinkListener mDeepLinkListener;
+    protected volatile AttributionListener mAttributionListener;
     protected IdentityApi mIdentityApi;
     static volatile boolean sAndroidIdDisabled;
     static volatile boolean sDevicePerformanceMetricsDisabled;
+
 
     protected MParticle() { }
 
@@ -187,6 +188,10 @@ public class MParticle {
 
                     if (configManager.getLogUnhandledExceptions()) {
                         instance.enableUncaughtExceptionLogging();
+                    }
+
+                    if (options.getAttributionListener() != null) {
+                        instance.mAttributionListener = options.getAttributionListener();
                     }
 
                     //there are a number of settings that don't need to be enabled right away
@@ -643,41 +648,22 @@ public class MParticle {
         logException(exception, eventData, null);
     }
 
-    /**
-     * Query Kits to determine if this user installed and/or opened the app by way
-     * of a deeplink.
-     *
-     * @param deepLinkListener Your deep link listener implementation. Use this to react to the result of the deep link query.
-     */
-    public void checkForDeepLink(DeepLinkListener deepLinkListener) {
-        setDeepLinkListener(deepLinkListener);
-        checkForDeepLink();
-    }
-
-    private void checkForDeepLink() {
-        if (mDeepLinkListener != null) {
-            mKitManager.checkForDeepLink();
-        }
+    public void removeAttributionListener() {
+        mAttributionListener = null;
     }
 
     /**
-     * Set the deep link listener. Call this to set the listener to null once you
-     * have finished querying for deep links.
+     * Retrieve the current attribution listener
      *
-     * @param deepLinkListener
      */
-    public void setDeepLinkListener(DeepLinkListener deepLinkListener) {
-        mDeepLinkListener = deepLinkListener;
+    public AttributionListener getAttributionListener() {
+        return mAttributionListener;
     }
 
-    /**
-     * Retrieve the current deeplink listener
-     *
-     * @return
-     */
-    public DeepLinkListener getDeepLinkListener() {
-        return mDeepLinkListener;
+    public Map<Integer, AttributionResult> getAttributionResults() {
+        return mKitManager.getAttributionResults();
     }
+
 
     /**
      * Logs an Exception
@@ -1176,7 +1162,7 @@ public class MParticle {
     public IdentityApi Identity() {
         return mIdentityApi;
     }
-
+    
     /**
      * Event type to use when logging events.
      *

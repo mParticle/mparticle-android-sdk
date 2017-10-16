@@ -200,4 +200,9 @@ public class MParticleTest {
         Mockito.verify(mp.mMessageManager, Mockito.times(1)).getUserAttributes(null, 1L);
     }
 
+    @Test
+    public void testAttributeListener() throws Exception {
+        MParticle.setInstance(new MockMParticle());
+    }
+
 }

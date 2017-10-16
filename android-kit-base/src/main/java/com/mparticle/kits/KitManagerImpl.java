@@ -9,22 +9,22 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 
-import com.mparticle.DeepLinkError;
-import com.mparticle.DeepLinkListener;
-import com.mparticle.DeepLinkResult;
+import com.mparticle.AttributionError;
+import com.mparticle.AttributionListener;
+import com.mparticle.AttributionResult;
 import com.mparticle.MPEvent;
 import com.mparticle.MParticle;
 import com.mparticle.ReferrerReceiver;
 import com.mparticle.UserAttributeListener;
 import com.mparticle.commerce.CommerceEvent;
 import com.mparticle.internal.AppStateManager;
+import com.mparticle.internal.BackgroundTaskHandler;
 import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.KitManager;
 import com.mparticle.internal.Logger;
 import com.mparticle.internal.MPUtility;
 import com.mparticle.internal.PushRegistrationHelper;
 import com.mparticle.internal.ReportingManager;
-import com.mparticle.internal.BackgroundTaskHandler;
 import com.mparticle.kits.mappings.CustomMapping;
 
 import org.json.JSONArray;
@@ -39,10 +39,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 
 
-public class KitManagerImpl implements KitManager, DeepLinkListener, UserAttributeListener {
+public class KitManagerImpl implements KitManager, AttributionListener, UserAttributeListener {
     private final ReportingManager mReportingManager;
     private final AppStateManager mAppStateManager;
     private final ConfigManager mConfigManager;
@@ -52,6 +53,9 @@ public class KitManagerImpl implements KitManager, DeepLinkListener, UserAttribu
     private static final String RESERVED_KEY_LTV = "$Amount";
     private static final String METHOD_NAME = "$MethodName";
     private static final String LOG_LTV = "LogLTVIncrease";
+
+    private Map<Integer, AttributionResult> mAttributionResultsMap = new TreeMap<>();
+
 
     ConcurrentHashMap<Integer, KitIntegration> providers = new ConcurrentHashMap<Integer, KitIntegration>(0);
     private final Context mContext;
@@ -893,37 +897,30 @@ public class KitManagerImpl implements KitManager, DeepLinkListener, UserAttribu
         }
     }
 
-    //================================================================================
-    // DeepLinkListener forwarding
-    //================================================================================
-
     @Override
-    public void checkForDeepLink() {
-        for (KitIntegration provider : providers.values()) {
-            try {
-                if (!provider.isDisabled()) {
-                    provider.checkForDeepLink();
-                }
-            } catch (Exception e) {
-                Logger.warning("Failed to call checkForDeeplink for kit: " + provider.getName() + ": " + e.getMessage());
-            }
-        }
+    public Map<Integer, AttributionResult> getAttributionResults() {
+        return mAttributionResultsMap;
     }
 
+    //================================================================================
+    // AttributionListener forwarding
+    //================================================================================
+
     @Override
-    public void onResult(DeepLinkResult result) {
-        DeepLinkListener listener = MParticle.getInstance().getDeepLinkListener();
+    public void onResult(AttributionResult result) {
+        mAttributionResultsMap.put(result.getServiceProviderId(), result);
+        AttributionListener listener = MParticle.getInstance().getAttributionListener();
         if (listener != null && result != null) {
-            Logger.debug("Deep link result returned: \n" + result.toString());
+            Logger.debug("Attribution result returned: \n" + result.toString());
             listener.onResult(result);
         }
     }
 
     @Override
-    public void onError(DeepLinkError error) {
-        DeepLinkListener listener = MParticle.getInstance().getDeepLinkListener();
+    public void onError(AttributionError error) {
+        AttributionListener listener = MParticle.getInstance().getAttributionListener();
         if (listener != null && error != null) {
-            Logger.debug("Deep link error returned: \n" + error.toString());
+            Logger.debug("Attribution error returned: \n" + error.toString());
             listener.onError(error);
         }
     }

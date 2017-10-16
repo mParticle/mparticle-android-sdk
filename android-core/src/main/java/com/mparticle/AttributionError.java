@@ -1,18 +1,18 @@
 package com.mparticle;
 
 /**
- * Class representing the result of a deep link query to an integration partner.
+ * Class representing the result of an attribution query to an integration partner.
  */
-public class DeepLinkError {
+public class AttributionError {
     private String message;
     private int serviceProviderId;
 
-    public DeepLinkError setMessage(String message) {
+    public AttributionError setMessage(String message) {
         this.message = message;
         return this;
     }
 
-    public DeepLinkError setServiceProviderId(int id) {
+    public AttributionError setServiceProviderId(int id) {
         serviceProviderId = id;
         return this;
     }
@@ -34,7 +34,7 @@ public class DeepLinkError {
 
     @Override
     public String toString() {
-        StringBuilder builder = new StringBuilder("Deep Link Error:\n");
+        StringBuilder builder = new StringBuilder("Attribution Error:\n");
         boolean empty = true;
         if (serviceProviderId > 0) {
             builder.append("Service provider ID:\n").append(serviceProviderId).append("\n");

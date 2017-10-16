@@ -1,14 +1,10 @@
 package com.mparticle;
 
-import android.app.Application;
 import android.content.Context;
-import android.content.ContextWrapper;
-import android.content.pm.ApplicationInfo;
 import android.os.Looper;
 import android.support.test.InstrumentationRegistry;
 
 import com.mparticle.internal.AccessUtils;
-import com.mparticle.internal.ApplicationContextWrapper;
 import com.mparticle.internal.Logger;
 import com.mparticle.internal.MPUtility;
 import com.mparticle.utils.AndroidUtils;
@@ -349,6 +345,41 @@ public class MParticleOptionsTest {
         MParticle.start(options);
         assertEquals(MParticle.getInstance().getConfigManager().getUploadInterval(), 600000);
         MParticle.setInstance(null);
+    }
+
+    @Test
+    public void testAttributionListener() throws Exception {
+        MParticleOptions options = MParticleOptions.builder(mContext)
+                .credentials("key", "secret")
+                .build();
+        MParticle.start(options);
+        assertNull(MParticle.getInstance().getAttributionListener());
+        MParticle.setInstance(null);
+
+        options = MParticleOptions.builder(mContext)
+                .credentials("key", "secret")
+                .setAttributionListener(new AttributionListener() {
+                    @Override
+                    public void onResult(AttributionResult result) {
+
+                    }
+
+                    @Override
+                    public void onError(AttributionError error) {
+
+                    }
+                })
+                .build();
+        MParticle.start(options);
+        assertNotNull(MParticle.getInstance().getAttributionListener());
+        MParticle.setInstance(null);
+
+        options = MParticleOptions.builder(mContext)
+                .credentials("key", "secret")
+                .setAttributionListener(null)
+                .build();
+        MParticle.start(options);
+        assertNull(MParticle.getInstance().getAttributionListener());
     }
 
 }

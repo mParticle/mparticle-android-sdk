@@ -91,9 +91,9 @@
 -keep class com.mparticle.MPService { *; }
 -keep class com.mparticle.MParticleOptions { *;}
 -keep class com.mparticle.MParticleOptions$* { *; }
--keep class com.mparticle.DeepLinkError { *; }
--keep class com.mparticle.DeepLinkListener { *; }
--keep class com.mparticle.DeepLinkResult { *; }
+-keep class com.mparticle.AttributionError { *; }
+-keep class com.mparticle.AttributionListener { *; }
+-keep class com.mparticle.AttributionResult { *; }
 -keep class com.mparticle.identity.TaskSuccessListener { *; }
 -keep class com.mparticle.identity.TaskFailureListener { *; }
 -keep, includedescriptorclasses class com.mparticle.MParticleTask { *; }

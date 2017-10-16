@@ -3,30 +3,30 @@ package com.mparticle;
 import org.json.JSONObject;
 
 /**
- * Class representing the result of a deep link query to an integration partner.
+ * Class representing the result of an attribution query to an integration partner.
  */
-public class DeepLinkResult {
+public class AttributionResult {
     private JSONObject parameters;
     private int serviceProviderId;
     private String linkUrl = null;
 
-    public DeepLinkResult setParameters(JSONObject parameters) {
+    public AttributionResult setParameters(JSONObject parameters) {
         this.parameters = parameters;
         return this;
     }
 
     /**
-     * Parameters of a deep link. Use these parameters to programmatically route your users
+     * Parameters of an attribution. Use these parameters to programmatically route your users
      * and customize your interface.
      *
-     * @return returns a JSONObject, may be null if the integration does not support deep link parameters.
+     * @return returns a JSONObject, may be null if the integration does not support attribution parameters.
      */
     public JSONObject getParameters() {
         return parameters;
     }
 
 
-    public DeepLinkResult setLink(String linkUrl) {
+    public AttributionResult setLink(String linkUrl) {
         this.linkUrl = linkUrl;
         return this;
     }
@@ -35,7 +35,7 @@ public class DeepLinkResult {
         return this.linkUrl;
     }
 
-    public DeepLinkResult setServiceProviderId(int id) {
+    public AttributionResult setServiceProviderId(int id) {
         serviceProviderId = id;
         return this;
     }
@@ -53,7 +53,7 @@ public class DeepLinkResult {
 
     @Override
     public String toString() {
-        StringBuilder builder = new StringBuilder("Deep Link Result:\n");
+        StringBuilder builder = new StringBuilder("Attribution Result:\n");
         boolean empty = true;
         if (serviceProviderId > 0) {
             builder.append("Service provider ID:\n").append(serviceProviderId).append("\n");

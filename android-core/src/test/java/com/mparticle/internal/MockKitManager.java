@@ -7,6 +7,7 @@ import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
 
+import com.mparticle.AttributionResult;
 import com.mparticle.MPEvent;
 import com.mparticle.MParticle;
 import com.mparticle.commerce.CommerceEvent;
@@ -17,6 +18,7 @@ import java.lang.ref.WeakReference;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 
 public class MockKitManager implements KitManager {
     public MockKitManager(Context context) {
@@ -56,11 +58,6 @@ public class MockKitManager implements KitManager {
 
     @Override
     public void logNetworkPerformance(String url, long startTime, String method, long length, long bytesSent, long bytesReceived, String requestString, int responseCode) {
-
-    }
-
-    @Override
-    public void checkForDeepLink() {
 
     }
 
@@ -207,5 +204,10 @@ public class MockKitManager implements KitManager {
     @Override
     public void onApplicationBackground() {
 
+    }
+
+    @Override
+    public Map<Integer, AttributionResult> getAttributionResults() {
+        return new TreeMap<Integer, AttributionResult>();
     }
 }

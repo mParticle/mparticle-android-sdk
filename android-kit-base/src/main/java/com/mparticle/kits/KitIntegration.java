@@ -230,9 +230,6 @@ public abstract class KitIntegration {
         return this;
     }
 
-    public void checkForDeepLink() {
-    }
-
     /**
      * Set integration attributes. Integration attributes are designed to facilitate communication between a kit
      * and its respective server integration. They will be persisted across application exits and launches.

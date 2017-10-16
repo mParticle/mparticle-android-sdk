@@ -24,7 +24,8 @@ public class MParticleOptions {
     private Integer uploadInterval = 600;  //seconds
     private Integer sessionTimeout = 60; //seconds
     private Boolean unCaughtExceptionLogging = false;
-    private MParticle.LogLevel logLevel = MParticle.LogLevel.DEBUG;;
+    private MParticle.LogLevel logLevel = MParticle.LogLevel.DEBUG;
+    private AttributionListener attributionListener;
 
     private MParticleOptions(){}
 
@@ -73,6 +74,9 @@ public class MParticleOptions {
         }
         if (builder.logLevel != null) {
             this.logLevel = builder.logLevel;
+        }
+        if (builder.attributionListener != null) {
+            this.attributionListener = builder.attributionListener;
         }
     }
 
@@ -132,6 +136,10 @@ public class MParticleOptions {
         return identityTask;
     }
 
+    public AttributionListener getAttributionListener() {
+        return attributionListener;
+    }
+
     public static class Builder {
         private Context mContext;
         private String apiKey;
@@ -146,6 +154,7 @@ public class MParticleOptions {
         private Boolean unCaughtExceptionLogging = null;
         private MParticle.LogLevel logLevel = null;
         private BaseIdentityTask identityTask;
+        private AttributionListener attributionListener;
 
         private Builder(Context context) {
             this.mContext = context;
@@ -232,6 +241,10 @@ public class MParticleOptions {
             return this;
         }
 
+        public Builder setAttributionListener(AttributionListener attributionListener){
+            this.attributionListener = attributionListener;
+            return this;
+        }
 
         public MParticleOptions build() {
             boolean devMode = MParticle.Environment.Development.equals(environment) || MPUtility.isAppDebuggable(mContext);

@@ -102,16 +102,7 @@ public class KitFrameworkWrapperTest {
                 mockKitManager, Mockito.times(1)
         ).onPushRegistration(Mockito.anyString(), Mockito.anyString());
 
-        Mockito.verify(
-                mockKitManager, Mockito.times(0)
-        ).checkForDeepLink();
-
-        wrapper.checkForDeepLink();
         wrapper.replayEvents();
-
-        Mockito.verify(
-                mockKitManager, Mockito.times(1)
-        ).checkForDeepLink();
 
         wrapper.setKitsLoaded(false);
         MPEvent event = new MPEvent.Builder("example").build();
@@ -391,34 +382,6 @@ public class KitFrameworkWrapperTest {
         Mockito.verify(
                 mockKitManager, Mockito.times(1)
         ).logScreen(Mockito.any(MPEvent.class));
-    }
-
-    @Test
-    public void testCheckForDeepLink() throws Exception {
-        KitFrameworkWrapper wrapper = new KitFrameworkWrapper(Mockito.mock(Context.class),
-                Mockito.mock(ReportingManager.class),
-                Mockito.mock(ConfigManager.class),
-                Mockito.mock(AppStateManager.class),
-                mockBackgroundTaskHandler,
-                true);
-        assertFalse(wrapper.getShouldCheckForDeepLink());
-        wrapper.setKitsLoaded(false);
-        wrapper.checkForDeepLink();
-        assertTrue(wrapper.getShouldCheckForDeepLink());
-        KitManager mockKitManager = Mockito.mock(KitManager.class);
-        wrapper.setKitManager(mockKitManager);
-        wrapper.checkForDeepLink();
-        Mockito.verify(
-                mockKitManager, Mockito.times(0)
-        ).checkForDeepLink();
-
-        wrapper.setKitsLoaded(true);
-
-        wrapper.checkForDeepLink();
-        Mockito.verify(
-                mockKitManager, Mockito.times(1)
-        ).checkForDeepLink();
-
     }
 
     @Test

@@ -7,6 +7,7 @@ import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
 
+import com.mparticle.AttributionResult;
 import com.mparticle.MPEvent;
 import com.mparticle.MParticle;
 import com.mparticle.commerce.CommerceEvent;
@@ -33,8 +34,6 @@ public interface KitManager {
     void logError(String message, Map<String, String> eventData);
 
     void logNetworkPerformance(String url, long startTime, String method, long length, long bytesSent, long bytesReceived, String requestString, int responseCode);
-
-    void checkForDeepLink();
 
     void logException(Exception exception, Map<String, String> eventData, String message);
 
@@ -93,4 +92,6 @@ public interface KitManager {
     void onApplicationForeground();
 
     void onApplicationBackground();
+
+    Map<Integer, AttributionResult> getAttributionResults();
 }

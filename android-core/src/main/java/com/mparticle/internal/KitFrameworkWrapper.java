@@ -7,6 +7,7 @@ import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
 
+import com.mparticle.AttributionResult;
 import com.mparticle.MPEvent;
 import com.mparticle.MParticle;
 import com.mparticle.commerce.CommerceEvent;
@@ -19,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class KitFrameworkWrapper implements KitManager {
@@ -34,7 +36,6 @@ public class KitFrameworkWrapper implements KitManager {
     private Queue eventQueue;
     private Queue<AttributeChange> attributeQueue;
     private volatile boolean registerForPush = false;
-    private volatile boolean shouldCheckForDeepLink = false;
     private static KitsLoadedListener kitsLoadedListener;
 
     public KitFrameworkWrapper(Context context, ReportingManager reportingManager, ConfigManager configManager, AppStateManager appStateManager, BackgroundTaskHandler backgroundTaskHandler) {
@@ -133,10 +134,6 @@ public class KitFrameworkWrapper implements KitManager {
             if (registration != null) {
                 mKitManager.onPushRegistration(registration.instanceId, registration.senderId);
             }
-        }
-
-        if (shouldCheckForDeepLink) {
-            mKitManager.checkForDeepLink();
         }
 
         if (eventQueue != null && eventQueue.size() > 0) {
@@ -276,19 +273,6 @@ public class KitFrameworkWrapper implements KitManager {
         if (mKitManager != null) {
             mKitManager.logNetworkPerformance(url, startTime, method, length, bytesSent, bytesReceived, requestString, responseCode);
         }
-    }
-
-    @Override
-    public void checkForDeepLink() {
-        if (mKitManager != null && getKitsLoaded()) {
-            mKitManager.checkForDeepLink();
-        } else {
-            shouldCheckForDeepLink = true;
-        }
-    }
-
-    boolean getShouldCheckForDeepLink() {
-        return shouldCheckForDeepLink;
     }
 
     @Override
@@ -501,5 +485,13 @@ public class KitFrameworkWrapper implements KitManager {
         if (mKitManager != null) {
             mKitManager.onApplicationBackground();
         }
+    }
+
+    @Override
+    public Map<Integer, AttributionResult> getAttributionResults() {
+        if (mKitManager != null) {
+            return mKitManager.getAttributionResults();
+        }
+        return new TreeMap<Integer, AttributionResult>();
     }
 }

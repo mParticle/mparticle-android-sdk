@@ -1,12 +1,22 @@
 package com.mparticle.commerce;
 
+import com.mparticle.MParticle;
+import com.mparticle.MockMParticle;
+
 import org.json.JSONObject;
+import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
 
 
 public class ProductTest {
+
+    @Before
+    public void before() {
+        MParticle.setInstance(new MockMParticle());
+    }
+
     @Test
     public void testEqualityComparator() {
         Product.setEqualityComparator(new Product.EqualityComparator() {
