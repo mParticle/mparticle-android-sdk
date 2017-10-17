@@ -1,27 +1,36 @@
 package com.mparticle.identity;
 
 
+import android.content.Context;
+
 import com.mparticle.MParticle;
 import com.mparticle.UserAttributeListener;
+import com.mparticle.commerce.Cart;
 import com.mparticle.segmentation.SegmentListener;
 
 import java.util.Map;
 
-public final class MParticleUser {
+public class MParticleUser {
     private long mMpId;
     MParticleUserDelegate mUserDelegate;
+    Cart cart;
 
-    private MParticleUser(long mpId, MParticleUserDelegate userDelegate) {
+    private MParticleUser(Context context, long mpId, MParticleUserDelegate userDelegate) {
         this.mMpId = mpId;
         this.mUserDelegate = userDelegate;
+        this.cart = new Cart(context, mMpId);
     }
 
-    static MParticleUser getInstance(long mpId, MParticleUserDelegate userDelegate) {
-        return new MParticleUser(mpId, userDelegate);
+    static MParticleUser getInstance(Context context, long mpId, MParticleUserDelegate userDelegate) {
+        return new MParticleUser(context, mpId, userDelegate);
     }
 
     public long getId() {
         return mMpId;
+    }
+
+    public Cart getCart() {
+        return cart;
     }
 
     public Map<String, Object> getUserAttributes() {

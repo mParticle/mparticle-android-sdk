@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 import com.mparticle.MParticle;
+import com.mparticle.identity.MParticleUser;
 import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.Constants;
 import com.mparticle.internal.Logger;
@@ -23,8 +24,13 @@ public class CommerceApi {
         mContext = context;
     }
 
-    public Cart cart() {
-        return Cart.getInstance(mContext);
+    private Cart cart() {
+        MParticleUser user = MParticle.getInstance().Identity().getCurrentUser();
+        if (user != null) {
+            return user.getCart();
+        } else {
+            return null;
+        }
     }
 
     /**
@@ -37,7 +43,12 @@ public class CommerceApi {
      * @param options a label to associate with the checkout event
      */
     public synchronized void checkout(int step, String options) {
-        List<Product> productList = Cart.getInstance(mContext).products();
+        Cart cart = cart();
+        if (cart == null) {
+            Logger.error("Unable to log checkout event - no mParticle user identified.");
+            return;
+        }
+        List<Product> productList = cart.products();
         if (productList != null && productList.size() > 0) {
             CommerceEvent event = new CommerceEvent.Builder(Product.CHECKOUT, productList.get(0))
                     .checkoutStep(step)
@@ -58,7 +69,12 @@ public class CommerceApi {
      *
      */
     public synchronized void checkout() {
-        List<Product> productList = Cart.getInstance(mContext).products();
+        Cart cart = cart();
+        if (cart == null) {
+            Logger.error("Unable to log checkout event - no mParticle user identified.");
+            return;
+        }
+        List<Product> productList = cart.products();
         if (productList != null && productList.size() > 0) {
             CommerceEvent event = new CommerceEvent.Builder(Product.CHECKOUT, productList.get(0))
                     .products(productList)
@@ -93,14 +109,19 @@ public class CommerceApi {
      * @param clearCart boolean determining if the cart should remove its contents after the purchase
      */
     public synchronized void purchase(TransactionAttributes attributes, boolean clearCart) {
-        List<Product> productList = Cart.getInstance(mContext).products();
+        Cart cart = cart();
+        if (cart == null) {
+            Logger.error("Unable to log purchase event - no mParticle user identified.");
+            return;
+        }
+        List<Product> productList = cart.products();
         if (productList != null && productList.size() > 0) {
             CommerceEvent event = new CommerceEvent.Builder(Product.PURCHASE, productList.get(0))
                     .products(productList)
                     .transactionAttributes(attributes)
                     .build();
             if (clearCart) {
-                Cart.getInstance(mContext).clear();
+                cart.clear();
             }
             MParticle.getInstance().logEvent(event);
         }else {
@@ -115,14 +136,19 @@ public class CommerceApi {
      * @param attributes the attributes to associate with this refund. Typically at least the transaction ID is required.
      */
     public void refund(TransactionAttributes attributes, boolean clearCart) {
-        List<Product> productList = Cart.getInstance(mContext).products();
+        Cart cart = cart();
+        if (cart == null) {
+            Logger.error("Unable to log refund event - no mParticle user identified.");
+            return;
+        }
+        List<Product> productList = cart.products();
         if (productList != null && productList.size() > 0) {
             CommerceEvent event = new CommerceEvent.Builder(Product.REFUND, productList.get(0))
                     .products(productList)
                     .transactionAttributes(attributes)
                     .build();
             if (clearCart) {
-                Cart.getInstance(mContext).clear();
+                cart.clear();
             }
             MParticle.getInstance().logEvent(event);
         } else {

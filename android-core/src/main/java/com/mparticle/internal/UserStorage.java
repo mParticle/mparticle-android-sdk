@@ -18,7 +18,7 @@ import java.util.UUID;
 
 import static com.mparticle.internal.ConfigManager.PREFERENCES_FILE;
 
-class UserConfig {
+public class UserStorage {
     private static final String USER_CONFIG_COLLECTION = "mp::user_config_collection";
 
     private String SESSION_COUNTER = "mp::breadcrumbs::sessioncount";
@@ -33,34 +33,25 @@ class UserConfig {
     private String COOKIES = "mp::cookies";
     private String TOTAL_SINCE_UPGRADE = "mp::launch_since_upgrade";
     private String USER_IDENTITIES = "mp::user_ids::";
-
+    private String CART = "mp::cart::";
 
     static final int DEFAULT_BREADCRUMB_LIMIT = 50;
-
 
     private long mpId;
     private SharedPreferences mPreferences;
     private Context mContext;
 
-    static List<UserConfig> getAllUsers(Context context) {
+    static List<UserStorage> getAllUsers(Context context) {
         Set<Long> userMpIds = getMpIdSet(context);
-        List<UserConfig> userConfigs = new ArrayList<UserConfig>();
+        List<UserStorage> userStorages = new ArrayList<UserStorage>();
         for (Long mdId: userMpIds) {
-            userConfigs.add(new UserConfig(context, Long.valueOf(mdId)));
+            userStorages.add(new UserStorage(context, Long.valueOf(mdId)));
         }
-        return userConfigs;
-    }
-
-    static void deleteAllUserConfigs(Context context) {
-        for (UserConfig userConfig: getAllUsers(context)) {
-            deleteUserConfig(context, userConfig.getMpid());
-        }
-        setMpIds(context, new HashSet<Long>());
-
+        return userStorages;
     }
 
     static boolean deleteUserConfig(Context context, long mpId) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+        if (Build.VERSION.SDK_INT >= 24) {
             context.deleteSharedPreferences(getFileName(mpId));
         } else {
             context.getSharedPreferences(getFileName(mpId), Context.MODE_PRIVATE).edit().clear().apply();
@@ -68,15 +59,15 @@ class UserConfig {
         return removeMpId(context, mpId);
     }
 
-    static UserConfig getUserConfig(Context context, long mpid) {
-        return new UserConfig(context, mpid);
+    static UserStorage create(Context context, long mpid) {
+        return new UserStorage(context, mpid);
     }
 
     public static void setNeedsToMigrate(Context context, boolean needsToMigrate) {
         SharedPreferencesMigrator.setNeedsToMigrate(context, needsToMigrate);
     }
 
-    private UserConfig(Context context, long mpId) {
+    private UserStorage(Context context, long mpId) {
         this.mContext = context;
         this.mpId = mpId;
         this.mPreferences = getPreferenceFile(mpId);
@@ -86,11 +77,21 @@ class UserConfig {
         }
     }
 
+    public String getSerializedCart() {
+        return mPreferences.getString(CART, null);
+    }
+
+    public void setSerializedCart(String serializedCart) {
+        mPreferences.edit().putString(CART, serializedCart).apply();
+    }
+
+    private boolean hasCart() {
+        return mPreferences.contains(CART);
+    }
 
     long getMpid() {
         return mpId;
     }
-
 
     int getCurrentSessionCounter(){
         return getCurrentSessionCounter(0);
@@ -322,61 +323,65 @@ class UserConfig {
     }
 
     /**
-     * Used to take any values set in the paramter UserConfig, and apply them to this UserConfig
+     * Used to take any values set in the parameter UserConfig, and apply them to this UserConfig
      *
      * If we have a temporary UserConfig object, and the user sets a number of fields on it, we can
      * use this method to apply those fields to this new UserConfig, by passing the temporary UserConfig
      * object here
      */
-    void merge(UserConfig userConfig) {
-        if (userConfig.hasDeletedUserAttributes()) {
-            setDeletedUserAttributes(userConfig.getDeletedUserAttributes());
+    void merge(UserStorage userStorage) {
+        if (userStorage.hasDeletedUserAttributes()) {
+            setDeletedUserAttributes(userStorage.getDeletedUserAttributes());
         }
-        if (userConfig.hasCurrentSessionCounter()) {
-            setCurrentSessionCounter(userConfig.getCurrentSessionCounter());
+        if (userStorage.hasCurrentSessionCounter()) {
+            setCurrentSessionCounter(userStorage.getCurrentSessionCounter());
         }
-        if (userConfig.hasBreadcrumbLimit()) {
-            setBreadcrumbLimit(userConfig.getBreadcrumbLimit());
+        if (userStorage.hasBreadcrumbLimit()) {
+            setBreadcrumbLimit(userStorage.getBreadcrumbLimit());
         }
-        if (userConfig.hasLastUserDate()) {
-            setLastUseDate(userConfig.getLastUseDate());
+        if (userStorage.hasLastUserDate()) {
+            setLastUseDate(userStorage.getLastUseDate());
         }
-        if (userConfig.hasPreviousSessionForegound()) {
-            setPreviousSessionForeground(userConfig.getPreviousSessionForegound());
+        if (userStorage.hasPreviousSessionForegound()) {
+            setPreviousSessionForeground(userStorage.getPreviousSessionForegound());
         }
-        if (userConfig.hasPreviousSessionId()) {
-            setPreviousSessionId(userConfig.getPreviousSessionId());
+        if (userStorage.hasPreviousSessionId()) {
+            setPreviousSessionId(userStorage.getPreviousSessionId());
         }
-        if (userConfig.hasPreviousSessionStart()) {
-            setPreviousSessionStart(userConfig.getPreviousSessionStart(0));
+        if (userStorage.hasPreviousSessionStart()) {
+            setPreviousSessionStart(userStorage.getPreviousSessionStart(0));
         }
-        if (userConfig.hasLtv()) {
-            setLtv(userConfig.getLtv());
+        if (userStorage.hasLtv()) {
+            setLtv(userStorage.getLtv());
         }
-        if (userConfig.hasTotalRuns()) {
-            setTotalRuns(userConfig.getTotalRuns(0));
+        if (userStorage.hasTotalRuns()) {
+            setTotalRuns(userStorage.getTotalRuns(0));
         }
-        if (userConfig.hasCookies()) {
-            setCookies(userConfig.getCookies());
+        if (userStorage.hasCookies()) {
+            setCookies(userStorage.getCookies());
         }
-        if (userConfig.hasLaunchesSinceUpgrade()) {
-            setLaunchesSinceUpgrade(userConfig.getLaunchesSinceUpgrade());
+        if (userStorage.hasLaunchesSinceUpgrade()) {
+            setLaunchesSinceUpgrade(userStorage.getLaunchesSinceUpgrade());
         }
-        if (userConfig.hasUserIdentities()) {
-            setUserIdentities(userConfig.getUserIdentities());
+        if (userStorage.hasUserIdentities()) {
+            setUserIdentities(userStorage.getUserIdentities());
+        }
+        if (userStorage.hasCart()) {
+            setSerializedCart(userStorage.getSerializedCart());
         }
     }
 
     /**
-     * used to migrate SharedPreferences from old interface, in which all the values in UserConfig where
+     * Migrate SharedPreferences from old interface, in which all the values in UserStorage were
      * kept application-wide, to the current interface, which stores the values by MPID. The migration
-     * process will associate all current values coverd by UserConfig to the current MPID, which should
+     * process will associate all current values covered by UserStorage to the current MPID, which should
      * be passed into the parameter "currentMpId"
      *
      **/
 
     private static class SharedPreferencesMigrator {
         private static final String NEEDS_TO_MIGRATE_TO_MPID_DEPENDENT = "mp::needs_to_migrate_to_mpid_dependent";
+        private final SharedPreferences cartSharedPreferences;
         private SharedPreferences messageManagerSharedPreferences;
         private SharedPreferences configManagerSharedPreferences;
         private String apiKey;
@@ -399,46 +404,55 @@ class UserConfig {
             String COOKIES = "mp::cookies";
             String TOTAL_SINCE_UPGRADE = "mp::launch_since_upgrade";
             String USER_IDENTITIES = "mp::user_ids::";
+            String CART = "mp::cart";
+            String CART_PREFS_FILE = "mParticlePrefs_cart";
         }
 
         SharedPreferencesMigrator(Context context) {
+            cartSharedPreferences = context.getSharedPreferences(LegacySharedPreferencesKeys.CART_PREFS_FILE, Context.MODE_PRIVATE);
             messageManagerSharedPreferences = context.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
             configManagerSharedPreferences = context.getSharedPreferences(PREFERENCES_FILE, Context.MODE_PRIVATE);
             this.apiKey = new AppConfig(context, null, configManagerSharedPreferences, null, null).mKey;
         }
 
-        void migrate(UserConfig userConfig) {
+        void migrate(UserStorage userStorage) {
             try {
-                userConfig.setDeletedUserAttributes(getDeletedUserAttributes());
-                userConfig.setPreviousSessionId(getPreviousSessionId());
+                userStorage.setDeletedUserAttributes(getDeletedUserAttributes());
+                userStorage.setPreviousSessionId(getPreviousSessionId());
                 String ltv = getLtv();
                 if (ltv != null) {
-                    userConfig.setLtv(ltv);
+                    userStorage.setLtv(ltv);
                 }
                 long lastUseDate = getLastUseDate();
                 if (lastUseDate != 0) {
-                    userConfig.setLastUseDate(getLastUseDate());
+                    userStorage.setLastUseDate(getLastUseDate());
                 }
                 int currentSessionCounter = getCurrentSessionCounter();
                 if (currentSessionCounter != 0) {
-                    userConfig.setCurrentSessionCounter(getCurrentSessionCounter());
+                    userStorage.setCurrentSessionCounter(getCurrentSessionCounter());
                 }
                 int breadcrumbLimit = getBreadcrumbLimit();
                 if (breadcrumbLimit != 0) {
-                    userConfig.setBreadcrumbLimit(breadcrumbLimit);
+                    userStorage.setBreadcrumbLimit(breadcrumbLimit);
                 }
                 long previousTimeInForeground = getPreviousTimeInForeground();
                 if (previousTimeInForeground != 0) {
-                    userConfig.setPreviousSessionForeground(previousTimeInForeground);
+                    userStorage.setPreviousSessionForeground(previousTimeInForeground);
                 }
                 long previousSessionStart = getPreviousSessionStart();
                 if (previousSessionStart != 0) {
-                    userConfig.setPreviousSessionStart(previousSessionStart);
+                    userStorage.setPreviousSessionStart(previousSessionStart);
                 }
                 int totalRuns = getTotalRuns();
                 if (totalRuns != 0) {
-                    userConfig.setTotalRuns(totalRuns);
+                    userStorage.setTotalRuns(totalRuns);
                 }
+
+                String previousCart = getCart();
+                if (previousCart != null) {
+                    userStorage.setSerializedCart(previousCart);
+                }
+                cartSharedPreferences.edit().clear().apply();
                 //migrate both cookies and device application stamp
                 String cookies = getCookies();
                 String das = null;
@@ -451,7 +465,7 @@ class UserConfig {
                     }catch (Exception e) {
 
                     }
-                    userConfig.setCookies(cookies);
+                    userStorage.setCookies(cookies);
                 }
                 if (MPUtility.isEmpty(das)) {
                     das = UUID.randomUUID().toString();
@@ -462,11 +476,11 @@ class UserConfig {
                         .apply();
                 int launchesSinceUpgrade = getLaunchesSinceUpgrade();
                 if (launchesSinceUpgrade != 0) {
-                    userConfig.setLaunchesSinceUpgrade(launchesSinceUpgrade);
+                    userStorage.setLaunchesSinceUpgrade(launchesSinceUpgrade);
                 }
                 String userIdentities = getUserIdentites();
                 if (userIdentities != null) {
-                    userConfig.setUserIdentities(userIdentities);
+                    userStorage.setUserIdentities(userIdentities);
                 }
             }
             catch (Exception ex) {
@@ -487,7 +501,6 @@ class UserConfig {
         static void setNeedsToMigrate(Context context, boolean needsToMigrate) {
             getMParticleSharedPrefs(context).edit().putBoolean(NEEDS_TO_MIGRATE_TO_MPID_DEPENDENT, needsToMigrate).apply();
         }
-
 
         int getCurrentSessionCounter() {
             return messageManagerSharedPreferences.getInt(LegacySharedPreferencesKeys.SESSION_COUNTER, 0);
@@ -515,6 +528,10 @@ class UserConfig {
 
         long getPreviousSessionStart() {
             return messageManagerSharedPreferences.getLong(LegacySharedPreferencesKeys.PREVIOUS_SESSION_START, 0);
+        }
+
+        String getCart() {
+            return cartSharedPreferences.getString(LegacySharedPreferencesKeys.CART, null);
         }
 
         String getLtv() {

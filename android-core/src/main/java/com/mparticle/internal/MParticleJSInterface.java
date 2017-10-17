@@ -338,7 +338,12 @@ public class MParticleJSInterface {
             JSONObject attribute = new JSONObject(json);
             Product product = toProduct(attribute);
             if (product != null) {
-                MParticle.getInstance().Commerce().cart().add(product);
+                MParticleUser user = MParticle.getInstance().Identity().getCurrentUser();
+                if (user != null) {
+                    user.getCart().add(product);
+                } else {
+                    Logger.warning("Unable to add product to cart - no mParticle user identified.");
+                }
             } else {
                 Logger.warning(String.format(errorMsg, "unable to convert String to Product: " + json));
             }
@@ -353,7 +358,12 @@ public class MParticleJSInterface {
             JSONObject attribute = new JSONObject(json);
             Product product = toProduct(attribute);
             if (product != null) {
-                MParticle.getInstance().Commerce().cart().remove(product);
+                MParticleUser user = MParticle.getInstance().Identity().getCurrentUser();
+                if (user != null) {
+                    user.getCart().remove(product);
+                } else {
+                    Logger.warning("Unable to remove product from cart - no mParticle user identified.");
+                }
             } else {
                 Logger.warning(String.format(errorMsg, "unable to convert String to Product: " + json));
             }
@@ -364,7 +374,12 @@ public class MParticleJSInterface {
 
     @JavascriptInterface
     public void clearCart() {
-        MParticle.getInstance().Commerce().cart().clear();
+        MParticleUser user = MParticle.getInstance().Identity().getCurrentUser();
+        if (user != null) {
+            user.getCart().clear();
+        } else {
+            Logger.warning("Unable to clear cart - no mParticle user identified.");
+        }
     }
 
     @JavascriptInterface

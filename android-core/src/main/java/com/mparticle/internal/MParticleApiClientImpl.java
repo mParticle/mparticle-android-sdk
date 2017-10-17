@@ -3,21 +3,15 @@ package com.mparticle.internal;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.net.Uri;
-import android.os.Build;
 
 import com.mparticle.BuildConfig;
 import com.mparticle.MParticle;
-import com.mparticle.identity.IdentityApiRequest;
-import com.mparticle.identity.MParticleUser;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.BufferedOutputStream;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -25,25 +19,14 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.InvalidKeyException;
-import java.security.KeyStore;
 import java.security.NoSuchAlgorithmException;
-import java.security.cert.Certificate;
-import java.security.cert.CertificateException;
-import java.security.cert.CertificateFactory;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Iterator;
-import java.util.Locale;
 import java.util.Set;
-import java.util.zip.GZIPOutputStream;
-
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSocketFactory;
-import javax.net.ssl.TrustManagerFactory;
 
 /**
  * Class responsible for all network communication to the mParticle SDK server.
@@ -361,9 +344,9 @@ public class MParticleApiClientImpl extends MParticleBaseClientImpl implements M
             }
             if (jsonResponse.has(LTV)) {
                 BigDecimal serverLtv = new BigDecimal(jsonResponse.getString(LTV));
-                BigDecimal mostRecentClientLtc = new BigDecimal(mConfigManager.getUserConfig().getLtv());
+                BigDecimal mostRecentClientLtc = new BigDecimal(mConfigManager.getUserStorage().getLtv());
                 BigDecimal sum = serverLtv.add(mostRecentClientLtc);
-                mConfigManager.getUserConfig().setLtv(sum.toPlainString());
+                mConfigManager.getUserStorage().setLtv(sum.toPlainString());
             }
 
         } catch (JSONException jse) {
@@ -444,7 +427,7 @@ public class MParticleApiClientImpl extends MParticleBaseClientImpl implements M
                     localCookies.put(key, serverCookies.getJSONObject(key));
                 }
                 mCurrentCookies = localCookies;
-                mConfigManager.getUserConfig().setCookies(mCurrentCookies.toString());
+                mConfigManager.getUserStorage().setCookies(mCurrentCookies.toString());
             } catch (JSONException jse) {
 
             }
@@ -453,10 +436,10 @@ public class MParticleApiClientImpl extends MParticleBaseClientImpl implements M
 
     public JSONObject getCookies()  {
         if (mCurrentCookies == null){
-            String currentCookies = mConfigManager.getUserConfig().getCookies();
+            String currentCookies = mConfigManager.getUserStorage().getCookies();
             if (MPUtility.isEmpty(currentCookies)) {
                 mCurrentCookies = new JSONObject();
-                mConfigManager.getUserConfig().setCookies(mCurrentCookies.toString());
+                mConfigManager.getUserStorage().setCookies(mCurrentCookies.toString());
                 return mCurrentCookies;
             } else {
                 try {
@@ -493,7 +476,7 @@ public class MParticleApiClientImpl extends MParticleBaseClientImpl implements M
                 mCurrentCookies.remove(key);
             }
             if (keysToRemove.size() > 0) {
-                mConfigManager.getUserConfig().setCookies(mCurrentCookies.toString());
+                mConfigManager.getUserStorage().setCookies(mCurrentCookies.toString());
             }
             return mCurrentCookies;
         }else{

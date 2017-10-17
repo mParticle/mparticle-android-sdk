@@ -20,11 +20,11 @@ import android.telephony.TelephonyManager;
 import com.mparticle.MPEvent;
 import com.mparticle.MParticle;
 import com.mparticle.UserAttributeListener;
+import com.mparticle.commerce.Cart;
 import com.mparticle.commerce.CommerceEvent;
 import com.mparticle.internal.Constants.MessageKey;
 import com.mparticle.internal.Constants.MessageType;
 import com.mparticle.internal.database.services.MParticleDBManager;
-import com.mparticle.internal.database.services.mp.ReportingService;
 import com.mparticle.internal.database.tables.mp.GcmMessageTable;
 import com.mparticle.internal.dto.UserAttributeRemoval;
 import com.mparticle.internal.dto.UserAttributeResponse;
@@ -237,19 +237,19 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
                     .build();
 
             SharedPreferences.Editor editor = sPreferences.edit();
-            long timeInFg = mConfigManager.getUserConfig().getPreviousSessionForegound();
+            long timeInFg = mConfigManager.getUserStorage().getPreviousSessionForegound();
             if (timeInFg > 0) {
                 message.put(MessageKey.PREVIOUS_SESSION_LENGTH, timeInFg / 1000);
-                mConfigManager.getUserConfig().clearPreviousTimeInForeground();
+                mConfigManager.getUserStorage().clearPreviousTimeInForeground();
             }
-            String prevSessionId = mConfigManager.getUserConfig().getPreviousSessionId();
-            mConfigManager.getUserConfig().setPreviousSessionId(mAppStateManager.getSession().mSessionID);
+            String prevSessionId = mConfigManager.getUserStorage().getPreviousSessionId();
+            mConfigManager.getUserStorage().setPreviousSessionId(mAppStateManager.getSession().mSessionID);
             if (!MPUtility.isEmpty(prevSessionId)) {
                 message.put(MessageKey.PREVIOUS_SESSION_ID, prevSessionId);
             }
 
-            long prevSessionStart = mConfigManager.getUserConfig().getPreviousSessionStart(-1);
-            mConfigManager.getUserConfig().setPreviousSessionStart(mAppStateManager.getSession().mSessionStartTime);
+            long prevSessionStart = mConfigManager.getUserStorage().getPreviousSessionStart(-1);
+            mConfigManager.getUserStorage().setPreviousSessionStart(mAppStateManager.getSession().mSessionStartTime);
 
             if (prevSessionStart > 0) {
                 message.put(MessageKey.PREVIOUS_SESSION_START, prevSessionStart);
@@ -273,7 +273,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
 
             mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
 
-            mConfigManager.getUserConfig().incrementSessionCounter();
+            mConfigManager.getUserStorage().incrementSessionCounter();
             return message;
         } catch (JSONException e) {
             Logger.warning("Failed to create mParticle start session message");
@@ -283,7 +283,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
 
     public void updateSessionEnd(Session session) {
         try {
-            mConfigManager.getUserConfig().setPreviousSessionForeground(session.getForegroundTime());
+            mConfigManager.getUserStorage().setPreviousSessionForeground(session.getForegroundTime());
             mMessageHandler
                     .sendMessage(mMessageHandler.obtainMessage(MessageHandler.UPDATE_SESSION_END, session));
         } catch (Exception e) {
@@ -345,7 +345,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
     public MPMessage logEvent(CommerceEvent event) {
         if (event != null) {
             try {
-                MPMessage message = new MPMessage.Builder(event, mAppStateManager.getSession(), mLocation, mConfigManager.getMpid())
+                MPMessage message = new MPMessage.Builder(event, mAppStateManager.getSession(), mLocation, mConfigManager.getMpid(), MParticle.getInstance().Identity().getCurrentUser().getCart())
                         .timestamp(mAppStateManager.getSession().mLastEventTime)
                         .build();
                 mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
@@ -387,7 +387,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
                         .build();
 
                 message.put(MessageKey.EVENT_START_TIME, mAppStateManager.getSession().mLastEventTime);
-                message.put(MessageKey.BREADCRUMB_SESSION_COUNTER, mConfigManager.getUserConfig().getCurrentSessionCounter());
+                message.put(MessageKey.BREADCRUMB_SESSION_COUNTER, mConfigManager.getUserStorage().getCurrentSessionCounter());
                 message.put(MessageKey.BREADCRUMB_LABEL, breadcrumb);
                 mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
                 mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_BREADCRUMB, message));
@@ -432,7 +432,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
                 t.printStackTrace(new PrintWriter(stringWriter));
                 message.put(MessageKey.ERROR_STACK_TRACE, stringWriter.toString());
                 message.put(MessageKey.ERROR_UNCAUGHT, String.valueOf(caught));
-                message.put(MessageKey.ERROR_SESSION_COUNT, mConfigManager.getUserConfig().getCurrentSessionCounter());
+                message.put(MessageKey.ERROR_SESSION_COUNT, mConfigManager.getUserStorage().getCurrentSessionCounter());
                 mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
             } else if (errorMessage != null) {
                 message.put(MessageKey.ERROR_SEVERITY, "error");
@@ -867,7 +867,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
 
     @Override
     public void attributeRemoved(String key, long mpId) {
-        String serializedJsonArray = mConfigManager.getUserConfig(mpId).getDeletedUserAttributes();
+        String serializedJsonArray = mConfigManager.getUserStorage(mpId).getDeletedUserAttributes();
         JSONArray deletedAtributes;
         try {
             deletedAtributes = new JSONArray(serializedJsonArray);
@@ -875,7 +875,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
             deletedAtributes = new JSONArray();
         }
         deletedAtributes.put(key);
-        mConfigManager.getUserConfig(mpId).setDeletedUserAttributes(deletedAtributes.toString());
+        mConfigManager.getUserStorage(mpId).setDeletedUserAttributes(deletedAtributes.toString());
     }
 
     public void setUserAttribute(String key, Object value, long mpId) {

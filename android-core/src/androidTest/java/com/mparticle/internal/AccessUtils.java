@@ -1,13 +1,9 @@
 package com.mparticle.internal;
 
 import android.content.Context;
-import android.os.Handler;
-import android.os.Message;
 import android.support.test.InstrumentationRegistry;
 
 import com.mparticle.MParticle;
-import com.mparticle.MParticleTest;
-import com.mparticle.internal.database.services.MParticleDBManager;
 import com.mparticle.internal.database.tables.mp.MParticleDatabaseHelper;
 
 public class AccessUtils {
@@ -22,10 +18,6 @@ public class AccessUtils {
 
     public static MParticle.InstallType getInstallType(MessageManager messageManager) {
         return messageManager.mInstallType;
-    }
-
-    public static void deleteAllUserConfigs(Context context) {
-        UserConfig.deleteAllUserConfigs(context);
     }
 
     public static void deleteConfigManager(Context context) {

@@ -3,18 +3,13 @@ package com.mparticle.internal;
 import android.content.Context;
 
 import com.mparticle.MParticle;
-import com.mparticle.MParticleOptions;
 import com.mparticle.MockMParticle;
 import com.mparticle.mock.MockContext;
 import com.mparticle.mock.MockSharedPreferences;
 
 import org.json.JSONObject;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mockito;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 import static org.junit.Assert.*;
@@ -63,7 +58,7 @@ public class DeviceAttributesTest {
     public void testAppInfoLaunchCount() throws Exception {
         Context context = new MockContext();
         // clear out the stored data for the current user, so we don't get any launches from previous tests
-        ConfigManager.deleteUserConfig(context, ConfigManager.getMpid(context));
+        ConfigManager.deleteUserStorage(context, ConfigManager.getMpid(context));
         JSONObject appInfo = null;
         int launchCount = 20;
         for (int i = 0; i < 20; i++) {

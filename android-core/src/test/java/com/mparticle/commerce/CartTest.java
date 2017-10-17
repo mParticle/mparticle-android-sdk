@@ -23,13 +23,13 @@ public class CartTest {
         MParticle mockMp = Mockito.mock(MParticle.class);
         Mockito.when(mockMp.getEnvironment()).thenReturn(MParticle.Environment.Development);
         MParticle.setInstance(mockMp);
-        cart = Cart.getInstance(new MockContext());
+        cart = new Cart(new MockContext(), 1);
     }
 
     @Before
     public void setupEachTest() {
         cart.clear();
-        Cart.setProductEqualityComparator(null);
+        Product.setEqualityComparator(null);
     }
 
     @Test
@@ -40,7 +40,7 @@ public class CartTest {
         assertEquals(1, cart.products().size());
         cart.remove(product2);
         assertEquals(1, cart.products().size());
-        Cart.setProductEqualityComparator(new Product.EqualityComparator() {
+        Product.setEqualityComparator(new Product.EqualityComparator() {
             @Override
             public boolean equals(Product product1, Product product2) {
                 return product1.getName().equalsIgnoreCase(product2.getName());
@@ -66,7 +66,7 @@ public class CartTest {
     @Test
     public void testRemoveWithProduct() throws Exception {
         testAdd();
-        Cart.setProductEqualityComparator(new Product.EqualityComparator() {
+        Product.setEqualityComparator(new Product.EqualityComparator() {
             @Override
             public boolean equals(Product product1, Product product2) {
                 return product1.getName().equalsIgnoreCase(product2.getName());

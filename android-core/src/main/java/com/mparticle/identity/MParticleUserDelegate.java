@@ -231,7 +231,7 @@ import java.util.Map;
 
 
     /**
-     * to be used to rectify the use of the placeholder MPID, which occured while request which might
+     * to be used to rectify the use of the placeholder MPID, which occurred while request which might
      * change the MPID was in progress. The parameter "mpid" can either be the previous MPID or a new MPID,
      * either way, everything stored under the placeholder MPID will be migrated.
      */
@@ -258,7 +258,7 @@ import java.util.Map;
         }
         mConfigManager.mergeUserConfigs(Constants.TEMPORARY_MPID, newMpid);
         mMessageManager.getMParticleDBManager().updateMpId(Constants.TEMPORARY_MPID, newMpid);
-        mConfigManager.deleteUserConfig(Constants.TEMPORARY_MPID);
+        mConfigManager.deleteUserStorage(Constants.TEMPORARY_MPID);
         mConfigManager.setMpid(newMpid);
         return success;
 

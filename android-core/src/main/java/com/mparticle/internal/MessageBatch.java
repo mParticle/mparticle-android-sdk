@@ -34,10 +34,10 @@ public class MessageBatch extends JSONObject {
         uploadMessage.put(Constants.MessageKey.LTV, MParticle.getInstance().Commerce().getCurrentUserLtv());
 
         if (history) {
-            String deletedAttr = configManager.getUserConfig(mpId).getDeletedUserAttributes();
+            String deletedAttr = configManager.getUserStorage(mpId).getDeletedUserAttributes();
             if (deletedAttr != null) {
                 uploadMessage.put(Constants.MessageKey.DELETED_USER_ATTRIBUTES, new JSONArray(deletedAttr));
-                configManager.getUserConfig().deleteDeletedUserAttributes();
+                configManager.getUserStorage().deleteDeletedUserAttributes();
             }
         }
 

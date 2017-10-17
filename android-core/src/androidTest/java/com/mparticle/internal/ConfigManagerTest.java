@@ -42,10 +42,10 @@ public class ConfigManagerTest {
         MParticle.start(options);
         instance = MParticle.getInstance();
 
-        for(UserConfig userConfig: UserConfig.getAllUsers(mContext)) {
-            assertTrue(UserConfig.deleteUserConfig(mContext, userConfig.getMpid()));
+        for(UserStorage userStorage : UserStorage.getAllUsers(mContext)) {
+            assertTrue(UserStorage.deleteUserConfig(mContext, userStorage.getMpid()));
         }
-        assertEquals(UserConfig.getAllUsers(mContext).size(), 0);
+        assertEquals(UserStorage.getAllUsers(mContext).size(), 0);
 
         refreshProfile1();
         refreshProfile2();
@@ -69,19 +69,19 @@ public class ConfigManagerTest {
 
         //test that every field was set in the subject UserConfig
         configManager.setMpid(newMpid);
-        assertTrue(configManager.getUserConfig().getMpid() == newMpid);
-        setProfile2(configManager.getUserConfig());
-        assertMatchesProfile2(configManager.getUserConfig());
+        assertTrue(configManager.getUserStorage().getMpid() == newMpid);
+        setProfile2(configManager.getUserStorage());
+        assertMatchesProfile2(configManager.getUserStorage());
 
         configManager.setMpid(oldMpid);
-        assertTrue(configManager.getUserConfig().getMpid() == oldMpid);
-        setProfile3(configManager.getUserConfig());
-        assertMatchesProfile3(configManager.getUserConfig());
+        assertTrue(configManager.getUserStorage().getMpid() == oldMpid);
+        setProfile3(configManager.getUserStorage());
+        assertMatchesProfile3(configManager.getUserStorage());
 
         configManager.setMpid(newMpid);
         configManager.mergeUserConfigs(oldMpid, newMpid);
-        assertTrue(configManager.getUserConfig().getMpid() == newMpid);
-        assertMatchesProfile3(configManager.getUserConfig());
+        assertTrue(configManager.getUserStorage().getMpid() == newMpid);
+        assertMatchesProfile3(configManager.getUserStorage());
     }
 
     static int breadcrumbLimit;
@@ -110,31 +110,31 @@ public class ConfigManagerTest {
         userIdentities = UUID.randomUUID().toString();
     }
     
-    void setProfile1(UserConfig userConfig) {
-        userConfig.setBreadcrumbLimit(breadcrumbLimit);
-        userConfig.setDeletedUserAttributes(deletedUserAttributes);
-        userConfig.setLastUseDate(lastUseDate);
-        userConfig.setPreviousSessionForeground(previousForeground);
-        userConfig.setPreviousSessionId(previousSessionId);
-        userConfig.setPreviousSessionStart(previousStart);
-        userConfig.setLtv(ltv);
-        userConfig.setTotalRuns(totalRuns);
-        userConfig.setCookies(cookies);
-        userConfig.setLaunchesSinceUpgrade(launchesSinceUpgrade);
-        userConfig.setUserIdentities(userIdentities);
+    void setProfile1(UserStorage userStorage) {
+        userStorage.setBreadcrumbLimit(breadcrumbLimit);
+        userStorage.setDeletedUserAttributes(deletedUserAttributes);
+        userStorage.setLastUseDate(lastUseDate);
+        userStorage.setPreviousSessionForeground(previousForeground);
+        userStorage.setPreviousSessionId(previousSessionId);
+        userStorage.setPreviousSessionStart(previousStart);
+        userStorage.setLtv(ltv);
+        userStorage.setTotalRuns(totalRuns);
+        userStorage.setCookies(cookies);
+        userStorage.setLaunchesSinceUpgrade(launchesSinceUpgrade);
+        userStorage.setUserIdentities(userIdentities);
     }
 
-    void assertMatchesProfile1(UserConfig userConfig) {
-        assertEquals(userConfig.getBreadcrumbLimit(), breadcrumbLimit);
-        assertEquals(userConfig.getDeletedUserAttributes(), deletedUserAttributes);
-        assertEquals(userConfig.getLastUseDate(), lastUseDate);
-        assertEquals(userConfig.getPreviousSessionId(), previousSessionId);
-        assertEquals(userConfig.getPreviousSessionStart(-1), previousStart);
-        assertEquals(userConfig.getLtv(), ltv);
-        assertEquals(userConfig.getTotalRuns(-1), totalRuns);
-        assertEquals(userConfig.getCookies(), cookies);
-        assertEquals(userConfig.getLaunchesSinceUpgrade(), launchesSinceUpgrade);
-        assertEquals(userConfig.getUserIdentities(), userIdentities);
+    void assertMatchesProfile1(UserStorage userStorage) {
+        assertEquals(userStorage.getBreadcrumbLimit(), breadcrumbLimit);
+        assertEquals(userStorage.getDeletedUserAttributes(), deletedUserAttributes);
+        assertEquals(userStorage.getLastUseDate(), lastUseDate);
+        assertEquals(userStorage.getPreviousSessionId(), previousSessionId);
+        assertEquals(userStorage.getPreviousSessionStart(-1), previousStart);
+        assertEquals(userStorage.getLtv(), ltv);
+        assertEquals(userStorage.getTotalRuns(-1), totalRuns);
+        assertEquals(userStorage.getCookies(), cookies);
+        assertEquals(userStorage.getLaunchesSinceUpgrade(), launchesSinceUpgrade);
+        assertEquals(userStorage.getUserIdentities(), userIdentities);
     }
 
     static int breadcrumbLimit2;
@@ -163,31 +163,31 @@ public class ConfigManagerTest {
         userIdentities2 = UUID.randomUUID().toString();
     }
 
-    static void setProfile2(UserConfig userConfig) {
-        userConfig.setBreadcrumbLimit(breadcrumbLimit2);
-        userConfig.setDeletedUserAttributes(deletedUserAttributes2);
-        userConfig.setLastUseDate(lastUseDate2);
-        userConfig.setPreviousSessionForeground(previousForeground2);
-        userConfig.setPreviousSessionId(previousSessionId2);
-        userConfig.setPreviousSessionStart(previousStart2);
-        userConfig.setLtv(ltv2);
-        userConfig.setTotalRuns(totalRuns2);
-        userConfig.setCookies(cookies2);
-        userConfig.setLaunchesSinceUpgrade(launchesSinceUpgrade2);
-        userConfig.setUserIdentities(userIdentities2);
+    static void setProfile2(UserStorage userStorage) {
+        userStorage.setBreadcrumbLimit(breadcrumbLimit2);
+        userStorage.setDeletedUserAttributes(deletedUserAttributes2);
+        userStorage.setLastUseDate(lastUseDate2);
+        userStorage.setPreviousSessionForeground(previousForeground2);
+        userStorage.setPreviousSessionId(previousSessionId2);
+        userStorage.setPreviousSessionStart(previousStart2);
+        userStorage.setLtv(ltv2);
+        userStorage.setTotalRuns(totalRuns2);
+        userStorage.setCookies(cookies2);
+        userStorage.setLaunchesSinceUpgrade(launchesSinceUpgrade2);
+        userStorage.setUserIdentities(userIdentities2);
     }
 
-    static void assertMatchesProfile2(UserConfig userConfig) {
-        assertEquals(userConfig.getBreadcrumbLimit(), breadcrumbLimit2);
-        assertEquals(userConfig.getDeletedUserAttributes(), deletedUserAttributes2);
-        assertEquals(userConfig.getLastUseDate(), lastUseDate2);
-        assertEquals(userConfig.getPreviousSessionId(), previousSessionId2);
-        assertEquals(userConfig.getPreviousSessionStart(-1), previousStart2);
-        assertEquals(userConfig.getLtv(), ltv2);
-        assertEquals(userConfig.getTotalRuns(-1), totalRuns2);
-        assertEquals(userConfig.getCookies(), cookies2);
-        assertEquals(userConfig.getLaunchesSinceUpgrade(), launchesSinceUpgrade2);
-        assertEquals(userConfig.getUserIdentities(), userIdentities2);
+    static void assertMatchesProfile2(UserStorage userStorage) {
+        assertEquals(userStorage.getBreadcrumbLimit(), breadcrumbLimit2);
+        assertEquals(userStorage.getDeletedUserAttributes(), deletedUserAttributes2);
+        assertEquals(userStorage.getLastUseDate(), lastUseDate2);
+        assertEquals(userStorage.getPreviousSessionId(), previousSessionId2);
+        assertEquals(userStorage.getPreviousSessionStart(-1), previousStart2);
+        assertEquals(userStorage.getLtv(), ltv2);
+        assertEquals(userStorage.getTotalRuns(-1), totalRuns2);
+        assertEquals(userStorage.getCookies(), cookies2);
+        assertEquals(userStorage.getLaunchesSinceUpgrade(), launchesSinceUpgrade2);
+        assertEquals(userStorage.getUserIdentities(), userIdentities2);
     }
 
     int breadcrumbLimit3;
@@ -216,30 +216,30 @@ public class ConfigManagerTest {
         userIdentities3 = UUID.randomUUID().toString();
     }
 
-    void setProfile3(UserConfig userConfig) {
-        userConfig.setBreadcrumbLimit(breadcrumbLimit3);
-        userConfig.setDeletedUserAttributes(deletedUserAttributes3);
-        userConfig.setLastUseDate(lastUseDate3);
-        userConfig.setPreviousSessionForeground(previousForeground3);
-        userConfig.setPreviousSessionId(previousSessionId3);
-        userConfig.setPreviousSessionStart(previousStart3);
-        userConfig.setLtv(ltv3);
-        userConfig.setTotalRuns(totalRuns3);
-        userConfig.setCookies(cookies3);
-        userConfig.setLaunchesSinceUpgrade(launchesSinceUpgrade3);
-        userConfig.setUserIdentities(userIdentities3);
+    void setProfile3(UserStorage userStorage) {
+        userStorage.setBreadcrumbLimit(breadcrumbLimit3);
+        userStorage.setDeletedUserAttributes(deletedUserAttributes3);
+        userStorage.setLastUseDate(lastUseDate3);
+        userStorage.setPreviousSessionForeground(previousForeground3);
+        userStorage.setPreviousSessionId(previousSessionId3);
+        userStorage.setPreviousSessionStart(previousStart3);
+        userStorage.setLtv(ltv3);
+        userStorage.setTotalRuns(totalRuns3);
+        userStorage.setCookies(cookies3);
+        userStorage.setLaunchesSinceUpgrade(launchesSinceUpgrade3);
+        userStorage.setUserIdentities(userIdentities3);
     }
 
-    private void assertMatchesProfile3(UserConfig userConfig) {
-        assertEquals(userConfig.getBreadcrumbLimit(), breadcrumbLimit3);
-        assertEquals(userConfig.getDeletedUserAttributes(), deletedUserAttributes3);
-        assertEquals(userConfig.getLastUseDate(), lastUseDate3);
-        assertEquals(userConfig.getPreviousSessionId(), previousSessionId3);
-        assertEquals(userConfig.getPreviousSessionStart(-1), previousStart3);
-        assertEquals(userConfig.getLtv(), ltv3);
-        assertEquals(userConfig.getTotalRuns(-1), totalRuns3);
-        assertEquals(userConfig.getCookies(), cookies3);
-        assertEquals(userConfig.getLaunchesSinceUpgrade(), launchesSinceUpgrade3);
-        assertEquals(userConfig.getUserIdentities(), userIdentities3);
+    private void assertMatchesProfile3(UserStorage userStorage) {
+        assertEquals(userStorage.getBreadcrumbLimit(), breadcrumbLimit3);
+        assertEquals(userStorage.getDeletedUserAttributes(), deletedUserAttributes3);
+        assertEquals(userStorage.getLastUseDate(), lastUseDate3);
+        assertEquals(userStorage.getPreviousSessionId(), previousSessionId3);
+        assertEquals(userStorage.getPreviousSessionStart(-1), previousStart3);
+        assertEquals(userStorage.getLtv(), ltv3);
+        assertEquals(userStorage.getTotalRuns(-1), totalRuns3);
+        assertEquals(userStorage.getCookies(), cookies3);
+        assertEquals(userStorage.getLaunchesSinceUpgrade(), launchesSinceUpgrade3);
+        assertEquals(userStorage.getUserIdentities(), userIdentities3);
     }
 }

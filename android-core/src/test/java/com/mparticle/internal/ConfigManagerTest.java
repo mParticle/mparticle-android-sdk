@@ -249,7 +249,7 @@ public class ConfigManagerTest {
 
     @Test
     public void testGetBreadcrumbLimit() throws Exception {
-        assertEquals(UserConfig.DEFAULT_BREADCRUMB_LIMIT, manager.getBreadcrumbLimit(context));
+        assertEquals(UserStorage.DEFAULT_BREADCRUMB_LIMIT, manager.getBreadcrumbLimit(context));
     }
 
     @Test

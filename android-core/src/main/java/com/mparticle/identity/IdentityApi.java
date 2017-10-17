@@ -24,7 +24,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.WeakHashMap;
 
-public final class IdentityApi {
+public class IdentityApi {
     public static int UNKNOWN_ERROR = -1;
     public static int THROTTLE_ERROR = 429;
     public static int BAD_REQUEST = 400;
@@ -67,7 +67,7 @@ public final class IdentityApi {
         if (Constants.TEMPORARY_MPID == mpid) {
             return null;
         } else {
-            return MParticleUser.getInstance(mpid, mUserDelegate);
+            return MParticleUser.getInstance(mContext, mpid, mUserDelegate);
         }
     }
 
@@ -213,7 +213,7 @@ public final class IdentityApi {
 
         @Override
         public void onMpIdChanged(long mpid) {
-            final MParticleUser user = MParticleUser.getInstance(mpid, mUserDelegate);
+            final MParticleUser user = MParticleUser.getInstance(mContext, mpid, mUserDelegate);
             if (identityStateListeners != null && identityStateListeners.size() > 0) {
                 new Handler(Looper.getMainLooper()).post(new Runnable() {
 

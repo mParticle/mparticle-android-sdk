@@ -3,6 +3,7 @@ package com.mparticle.internal;
 import android.location.Location;
 
 import com.mparticle.MParticle;
+import com.mparticle.commerce.Cart;
 import com.mparticle.commerce.CommerceEvent;
 import com.mparticle.commerce.Impression;
 import com.mparticle.commerce.Product;
@@ -80,11 +81,11 @@ public class MPMessage extends JSONObject{
             }
         }
         if (builder.commerceEvent != null){
-            addCommerceEventInfo(this, builder.commerceEvent);
+            addCommerceEventInfo(this, builder.commerceEvent, builder.mCart);
         }
     }
 
-    private static void addCommerceEventInfo(MPMessage message, CommerceEvent event) {
+    private static void addCommerceEventInfo(MPMessage message, CommerceEvent event, Cart cart) {
         try {
 
             if (event.getScreen() != null) {
@@ -148,13 +149,17 @@ public class MPMessage extends JSONObject{
                     productAction.put(Constants.Commerce.PRODUCT_LIST, products);
                 }
                 if (event.getProductAction().equals(Product.PURCHASE)) {
-                    MParticle.getInstance().Commerce().cart().clear();
-                }
-                JSONObject cartJsonObject = new JSONObject(MParticle.getInstance().Commerce().cart().toString());
-                if (cartJsonObject.length() > 0) {
-                    message.put("sc", cartJsonObject);
-                }
+                    if (cart != null) {
+                        cart.clear();
+                    }
 
+                }
+                if (cart != null) {
+                    JSONObject cartJsonObject = new JSONObject(cart.toString());
+                    if (cartJsonObject.length() > 0) {
+                        message.put("sc", cartJsonObject);
+                    }
+                }
             }
             if (event.getPromotionAction() != null) {
                 JSONObject promotionAction = new JSONObject();
@@ -272,6 +277,7 @@ public class MPMessage extends JSONObject{
         private Double mLength = null;
         private Map<String, List<String>> mCustomFlags;
         private long mpid;
+        private Cart mCart;
 
         public Builder(String messageType, Session session, Location location, long mpId){
             mMessageType = messageType;
@@ -280,9 +286,10 @@ public class MPMessage extends JSONObject{
             mpid = mpId;
         }
 
-        public Builder(CommerceEvent event, Session session, Location location, long mpId) {
+        public Builder(CommerceEvent event, Session session, Location location, long mpId, Cart cart) {
             this(Constants.MessageType.COMMERCE_EVENT, session, location, mpId);
             commerceEvent = event;
+            mCart = cart;
         }
 
         public Builder timestamp(long timestamp){
@@ -295,6 +302,11 @@ public class MPMessage extends JSONObject{
         }
         public Builder attributes(JSONObject attributes){
             mAttributes = attributes;
+            return this;
+        }
+
+        public Builder cart(Cart cart){
+            mCart = cart;
             return this;
         }
 

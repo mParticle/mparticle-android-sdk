@@ -1,6 +1,8 @@
 package com.mparticle.commerce;
 
 import com.mparticle.MParticle;
+import com.mparticle.identity.IdentityApi;
+import com.mparticle.identity.MParticleUser;
 import com.mparticle.mock.MockContext;
 
 import org.junit.Before;
@@ -16,20 +18,28 @@ public class CommerceApiTest {
     private static Cart cart;
     private static CommerceApi commerceApi;
     private static MParticle mockMp;
+    private static IdentityApi mockIdentity;
+    private static MParticleUser mockCurrentUser;
 
     @BeforeClass
     public static void setupAll() {
         mockMp = Mockito.mock(MParticle.class);
+        cart = new Cart(new MockContext(), 2);
+        mockCurrentUser = Mockito.mock(MParticleUser.class);
+        mockIdentity = Mockito.mock(IdentityApi.class);
+        Mockito.when(mockCurrentUser.getCart()).thenReturn(cart);
+        Mockito.when(mockIdentity.getCurrentUser()).thenReturn(mockCurrentUser);
+        Mockito.when(mockMp.Identity()).thenReturn(mockIdentity);
         Mockito.when(mockMp.getEnvironment()).thenReturn(MParticle.Environment.Development);
         MParticle.setInstance(mockMp);
+
         commerceApi = new CommerceApi(new MockContext());
-        cart = Cart.getInstance(new MockContext());
     }
 
     @Before
     public void setupEachTest() {
         cart.clear();
-        Cart.setProductEqualityComparator(null);
+        Product.setEqualityComparator(null);
     }
     @Test
     public void testCheckout() throws Exception {
@@ -37,7 +47,6 @@ public class CommerceApiTest {
         commerceApi.checkout(-1, null);
         commerceApi.checkout(0, "");
     }
-
 
     @Test
     public void testPurchase() throws Exception {
@@ -67,11 +76,6 @@ public class CommerceApiTest {
 
     @Test
     public void testClearingCartWithPurchase() throws Exception {
-        mockMp = Mockito.mock(MParticle.class);
-        Mockito.when(mockMp.getEnvironment()).thenReturn(MParticle.Environment.Development);
-        MParticle.setInstance(mockMp);
-        commerceApi = new CommerceApi(new MockContext());
-        cart = Cart.getInstance(new MockContext());
 
         Product product = new Product.Builder("name 1", "sku", 5).build();
         Product product2 = new Product.Builder("name 2", "sku", 2).build();

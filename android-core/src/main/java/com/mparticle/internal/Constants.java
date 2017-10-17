@@ -22,7 +22,6 @@ public class Constants {
 
     // preferences persistence
     public static final String PREFS_FILE = "mParticlePrefs";
-    public static final String CART_PREFS_FILE = "mParticlePrefs_cart";
     public static final String BAGS_FILE = "mParticlePrefs_productbags";
 
     public static final int LIMIT_ATTR_COUNT = 100;
@@ -481,8 +480,6 @@ public class Constants {
         String LOCATION_PROVIDER = "mp::location:provider";
         String LOCATION_MINTIME = "mp::location:mintime";
         String LOCATION_MINDISTANCE = "mp::location:mindistance";
-
-        String CART = "mp::cart";
         String PRODUCT_BAGS = "mp::productbags";
         String INTEGRATION_ATTRIBUTES = "mp::integrationattributes";
         String ETAG = "mp::etag";

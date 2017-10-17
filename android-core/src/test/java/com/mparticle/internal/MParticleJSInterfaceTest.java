@@ -11,6 +11,8 @@ import com.mparticle.commerce.ProductBag;
 import com.mparticle.commerce.ProductBagApi;
 import com.mparticle.commerce.Promotion;
 import com.mparticle.commerce.TransactionAttributes;
+import com.mparticle.identity.IdentityApi;
+import com.mparticle.identity.MParticleUser;
 import com.mparticle.mock.MockContext;
 
 import org.json.JSONException;
@@ -58,15 +60,22 @@ public class MParticleJSInterfaceTest extends MParticleJSInterface {
 
     @Before
     public void setup() throws Exception {
-        MParticle.setInstance(Mockito.mock(MParticle.class));
+        MParticle mockMp = Mockito.mock(MParticle.class);
+        cart = new Cart(new MockContext(), 2);
+        MParticleUser mockCurrentUser = Mockito.mock(MParticleUser.class);
+        IdentityApi mockIdentity = Mockito.mock(IdentityApi.class);
+        Mockito.when(mockCurrentUser.getCart()).thenReturn(cart);
+        Mockito.when(mockIdentity.getCurrentUser()).thenReturn(mockCurrentUser);
+        Mockito.when(mockMp.Identity()).thenReturn(mockIdentity);
+        Mockito.when(mockMp.getEnvironment()).thenReturn(MParticle.Environment.Development);
+        MParticle.setInstance(mockMp);
         productBagApi = new ProductBagApi(new MockContext());
-        cart = Cart.getInstance(new MockContext());
         jsInterfaceInstance = new MParticleJSInterface();
 
         Mockito.when(MParticle.getInstance().getEnvironment()).thenReturn(MParticle.Environment.Development);
         Mockito.when(MParticle.getInstance().ProductBags()).thenReturn(productBagApi);
         Mockito.when(MParticle.getInstance().Commerce()).thenReturn(Mockito.mock(CommerceApi.class));
-        Mockito.when(MParticle.getInstance().Commerce().cart()).thenReturn(cart);
+
         mProduct1 = new Product.Builder("iPhone", "12345", 400)
                 .quantity(1)
                 .build();

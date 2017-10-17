@@ -460,19 +460,20 @@ public class MParticle {
      */
     public void logEvent(CommerceEvent event) {
         if (mConfigManager.isEnabled() && checkEventLimit()) {
-            Cart cart = Cart.getInstance(mAppContext);
-            if (event.getProductAction() != null) {
-                List<Product> productList = event.getProducts();
-                if (event.getProductAction().equalsIgnoreCase(Product.ADD_TO_CART)) {
+            MParticleUser user = MParticle.getInstance().Identity().getCurrentUser();
+            if (user != null) {
+                Cart cart = user.getCart();
+                if (event.getProductAction() != null) {
+                    List<Product> productList = event.getProducts();
                     if (productList != null) {
-                        for (Product product : productList) {
-                            cart.add(product, false);
-                        }
-                    }
-                } else if (event.getProductAction().equalsIgnoreCase(Product.REMOVE_FROM_CART)) {
-                    if (productList != null) {
-                        for (Product product : productList) {
-                            cart.remove(product, false);
+                        if (event.getProductAction().equalsIgnoreCase(Product.ADD_TO_CART)) {
+                            for (Product product : productList) {
+                                cart.add(product, false);
+                            }
+                        } else if (event.getProductAction().equalsIgnoreCase(Product.REMOVE_FROM_CART)) {
+                            for (Product product : productList) {
+                                cart.remove(product, false);
+                            }
                         }
                     }
                 }
@@ -481,7 +482,7 @@ public class MParticle {
             mMessageManager.logEvent(event);
             Logger.debug("Logged commerce event - \n", event.toString());
             mKitManager.logCommerceEvent(event);
-        }
+        }   
     }
 
     /**

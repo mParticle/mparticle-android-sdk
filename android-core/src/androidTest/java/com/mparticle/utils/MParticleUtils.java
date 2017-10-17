@@ -49,7 +49,6 @@ public class MParticleUtils {
     public static void clear() {
         MParticle.setInstance(null);
         AccessUtils.deleteDatabase();
-        AccessUtils.deleteAllUserConfigs(InstrumentationRegistry.getContext());
         AccessUtils.deleteConfigManager(InstrumentationRegistry.getContext());
     }
 

@@ -2,7 +2,6 @@ package com.mparticle.internal;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.net.UrlQuerySanitizer;
 import android.os.Build;
 
 import com.mparticle.ExceptionHandler;
@@ -13,12 +12,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.lang.ref.WeakReference;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -55,7 +52,7 @@ public class ConfigManager {
     AppConfig mLocalPrefs;
 
     private static JSONArray sPushKeys;
-    private static UserConfig sUserConfig;
+    private static UserStorage sUserStorage;
     private String mLogUnhandledExceptions = VALUE_APP_DEFINED;
 
     private boolean mSendOoEvents;
@@ -80,7 +77,7 @@ public class ConfigManager {
         mContext = context.getApplicationContext();
         sPreferences = mContext.getSharedPreferences(PREFERENCES_FILE, Context.MODE_PRIVATE);
         mLocalPrefs = new AppConfig(mContext, environment, sPreferences, apiKey, apiSecret);
-        sUserConfig = UserConfig.getUserConfig(mContext, getMpid());
+        sUserStorage = UserStorage.create(mContext, getMpid());
         restoreOldConfig();
     }
 
@@ -112,40 +109,40 @@ public class ConfigManager {
         return null;
     }
 
-    UserConfig getUserConfig() {
-        return sUserConfig;
+    UserStorage getUserStorage() {
+        return sUserStorage;
     }
 
-    UserConfig getUserConfig(long mpId) {
-        if (sUserConfig == null || sUserConfig.getMpid() != mpId) {
-            sUserConfig = UserConfig.getUserConfig(mContext, mpId);
+    UserStorage getUserStorage(long mpId) {
+        if (sUserStorage == null || sUserStorage.getMpid() != mpId) {
+            sUserStorage = UserStorage.create(mContext, mpId);
         }
-        return sUserConfig;
+        return sUserStorage;
     }
 
-    public static UserConfig getUserConfig(Context context) {
-        if (sUserConfig == null) {
-            sUserConfig = UserConfig.getUserConfig(context, getMpid(context));
+    public static UserStorage getUserStorage(Context context) {
+        if (sUserStorage == null) {
+            sUserStorage = UserStorage.create(context, getMpid(context));
         }
-        return sUserConfig;
+        return sUserStorage;
     }
 
-    private static UserConfig getUserConfig(Context context, long mpid) {
-        if (sUserConfig == null || sUserConfig.getMpid() != mpid) {
-            sUserConfig = UserConfig.getUserConfig(context, mpid);
+    public static UserStorage getUserStorage(Context context, long mpid) {
+        if (sUserStorage == null || sUserStorage.getMpid() != mpid) {
+            sUserStorage = UserStorage.create(context, mpid);
         }
-        return sUserConfig;
+        return sUserStorage;
     }
 
-    public static void deleteUserConfig(Context context, long mpid) {
-        if (sUserConfig != null && sUserConfig.getMpid() == mpid) {
-            sUserConfig = null;
+    public static void deleteUserStorage(Context context, long mpid) {
+        if (sUserStorage != null && sUserStorage.getMpid() == mpid) {
+            sUserStorage = null;
         }
-        UserConfig.deleteUserConfig(context, mpid);
+        UserStorage.deleteUserConfig(context, mpid);
     }
 
-    public void deleteUserConfig(long mpId) {
-        deleteUserConfig(mContext, mpId);
+    public void deleteUserStorage(long mpId) {
+        deleteUserStorage(mContext, mpId);
     }
 
     static void deleteConfigManager(Context context) {
@@ -467,15 +464,15 @@ public class ConfigManager {
     }
 
     public static int getBreadcrumbLimit(Context context) {
-        return getUserConfig(context).getBreadcrumbLimit();
+        return getUserStorage(context).getBreadcrumbLimit();
     }
 
     public static int getBreadcrumbLimit(Context context, long mpId) {
-        return getUserConfig(context, mpId).getBreadcrumbLimit();
+        return getUserStorage(context, mpId).getBreadcrumbLimit();
     }
 
     public static String getCurrentUserLtv(Context context) {
-        return getUserConfig(context).getLtv();
+        return getUserStorage(context).getLtv();
     }
 
     public void setBreadcrumbLimit(int newLimit) {
@@ -483,11 +480,11 @@ public class ConfigManager {
     }
 
     public void setBreadcrumbLimit(int newLimit, long mpId) {
-        getUserConfig(mpId).setBreadcrumbLimit(newLimit);
+        getUserStorage(mpId).setBreadcrumbLimit(newLimit);
     }
 
     public static void setNeedsToMigrate(Context context, boolean needsToMigrate) {
-        UserConfig.setNeedsToMigrate(context, needsToMigrate);
+        UserStorage.setNeedsToMigrate(context, needsToMigrate);
     }
 
     private synchronized void setProviderPersistence(JSONObject persistence) {
@@ -503,8 +500,8 @@ public class ConfigManager {
             triggerMpidChangeListenerCallbacks(mpid);
         }
         sPreferences.edit().putLong(Constants.PrefKeys.MPID, mpid).apply();
-        if (sUserConfig == null || sUserConfig.getMpid() != mpid) {
-            sUserConfig = UserConfig.getUserConfig(mContext, mpid);
+        if (sUserStorage == null || sUserStorage.getMpid() != mpid) {
+            sUserStorage = UserStorage.create(mContext, mpid);
         }
     }
 
@@ -549,9 +546,9 @@ public class ConfigManager {
     }
 
     public void mergeUserConfigs(long subjectMpId, long targetMpId) {
-        UserConfig subjectUserConfig = getUserConfig(subjectMpId);
-        UserConfig targetUserConfig = getUserConfig(targetMpId);
-        targetUserConfig.merge(subjectUserConfig);
+        UserStorage subjectUserStorage = getUserStorage(subjectMpId);
+        UserStorage targetUserStorage = getUserStorage(targetMpId);
+        targetUserStorage.merge(subjectUserStorage);
     }
 
     public int getAudienceTimeout() {
@@ -721,7 +718,7 @@ public class ConfigManager {
 
     public JSONArray getUserIdentityJson(long mpId) {
         JSONArray userIdentities = null;
-        String userIds = getUserConfig(mpId).getUserIdentities();
+        String userIds = getUserStorage(mpId).getUserIdentities();
 
         try {
             userIdentities = new JSONArray(userIds);
@@ -740,7 +737,7 @@ public class ConfigManager {
     }
 
     public void saveUserIdentityJson(JSONArray userIdentities, long mpId) {
-        getUserConfig(mpId).setUserIdentities(userIdentities.toString());
+        getUserStorage(mpId).setUserIdentities(userIdentities.toString());
     }
 
     private static boolean fixUpUserIdentities(JSONArray identities) {
@@ -777,10 +774,10 @@ public class ConfigManager {
 
     public JSONObject getCookies(long mpId) {
         if (mCurrentCookies == null) {
-            String currentCookies = getUserConfig(mpId).getCookies();
+            String currentCookies = getUserStorage(mpId).getCookies();
             if (MPUtility.isEmpty(currentCookies)) {
                 mCurrentCookies = new JSONObject();
-                getUserConfig(mpId).setCookies(mCurrentCookies.toString());
+                getUserStorage(mpId).setCookies(mCurrentCookies.toString());
                 return mCurrentCookies;
             } else {
                 try {
@@ -817,7 +814,7 @@ public class ConfigManager {
                 mCurrentCookies.remove(key);
             }
             if (keysToRemove.size() > 0) {
-                getUserConfig(mpId).setCookies(mCurrentCookies.toString());
+                getUserStorage(mpId).setCookies(mCurrentCookies.toString());
             }
             return mCurrentCookies;
         } else {
