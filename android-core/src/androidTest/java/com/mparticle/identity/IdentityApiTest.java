@@ -115,7 +115,12 @@ public class IdentityApiTest extends BaseCleanStartedEachTest {
                     e.printStackTrace();
                 }
 
-                IdentityApiRequest request1 = IdentityApiRequest.withEmptyUser().userIdentities(identities2).copyUserAttributes(true).build();
+                IdentityApiRequest request1 = IdentityApiRequest.withEmptyUser().userIdentities(identities2).userAliasHandler(new UserAliasHandler() {
+                    @Override
+                    public void onUserAlias(MParticleUser previousUser, MParticleUser newUser) {
+                        newUser.setUserAttributes(previousUser.getUserAttributes());
+                    }
+                }).build();
                 MParticleTask<IdentityApiResult> result1 = MParticle.getInstance().Identity().login(request1);
 
                 //test that change actually took place
@@ -130,8 +135,6 @@ public class IdentityApiTest extends BaseCleanStartedEachTest {
         });
 
         TestingUtils.checkAllBool(checked, 1, 20);
-
-
     }
 
 
@@ -407,7 +410,7 @@ public class IdentityApiTest extends BaseCleanStartedEachTest {
 
     }
 
-    private IdentityHttpResponse getIdentityHttpResponse(long mpid) {
+    private static IdentityHttpResponse getIdentityHttpResponse(long mpid) {
         return new IdentityHttpResponse(200, mpid, "context", new ArrayList<IdentityHttpResponse.Error>());
     }
 

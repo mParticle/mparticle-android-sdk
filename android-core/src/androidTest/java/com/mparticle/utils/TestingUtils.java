@@ -1,8 +1,5 @@
 package com.mparticle.utils;
 
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-
 import static junit.framework.Assert.fail;
 
 /**
@@ -14,17 +11,16 @@ public class TestingUtils {
         for (int i = 0; i < forDeciseconds + 2; i++) {
             if (i % everyNDeciseconds == 0) {
                 boolean allTrue = true;
-                for (Boolean bool: array) {
+                for (Boolean bool : array) {
                     if (!bool) {
                         allTrue = false;
                     }
                 }
                 if (allTrue) {
-                    //pause(1);
                     return;
                 }
             }
-                pause(everyNDeciseconds);
+            pause(everyNDeciseconds);
         }
         for (int i = 0; i < array.length; i++) {
             if (!array[i]) {

@@ -1172,6 +1172,7 @@ public class MParticle {
         }
     }
 
+    @NonNull
     public IdentityApi Identity() {
         return mIdentityApi;
     }

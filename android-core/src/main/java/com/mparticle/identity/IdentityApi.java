@@ -173,7 +173,7 @@ public class IdentityApi {
                         } else {
                             long newMpid = result.getMpId();
                             ConfigManager.setIdentityRequestInProgress(false);
-                            mUserDelegate.setUser(startingMpid, newMpid, identityApiRequest.getUserIdentities(), identityApiRequest.shouldCopyUserAttributes());
+                            mUserDelegate.setUser(mContext, startingMpid, newMpid, identityApiRequest.getUserIdentities(), identityApiRequest.getUserAliasHandler());
                             task.setSuccessful(new IdentityApiResult(getCurrentUser()));
                         }
                     } catch (Exception ex) {

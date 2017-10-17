@@ -98,20 +98,18 @@ dependencies {
     provided 'com.google.android.gms:play-services-gcm:[7.0,)'
     provided 'com.google.android.gms:play-services-ads:[7.0,)'
     provided 'com.google.firebase:firebase-messaging:[7.0,)'
-   // testCompile 'junit:junit:4.12'
-    testCompile  files('libs/java-json.jar')
 
+    testCompile  files('libs/java-json.jar')
     testCompile "org.powermock:powermock-module-junit4:1.6.2"
     testCompile "org.powermock:powermock-api-mockito:1.6.2"
     testCompile "org.powermock:powermock-core:1.6.2"
-    androidTestCompile('org.mockito:mockito-core:1+'){
-        exclude group: 'junit' exclude group: 'org.hamcrest', module: 'hamcrest-core'
-    }
 
     androidTestCompile 'com.android.support:support-annotations:24.0.0'
     androidTestCompile 'com.android.support.test:runner:0.5'
     androidTestCompile 'com.android.support.test:rules:0.5'
-   // androidTestCompile 'junit:junit:4.12'
+    androidTestCompile('org.mockito:mockito-core:1+'){
+        exclude group: 'junit' exclude group: 'org.hamcrest', module: 'hamcrest-core'
+    }
 }
 
 configurations {

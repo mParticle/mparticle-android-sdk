@@ -11,17 +11,17 @@ import java.util.HashMap;
 import java.util.Map;
 
 public final class IdentityApiRequest {
+    private UserAliasHandler userAliasHandler = null;
     private Map<MParticle.IdentityType, String> userIdentities = new HashMap<MParticle.IdentityType, String>();
     private Map<String, String> otherOldIdentities = new HashMap<String, String>();
     private Map<String, String> otherNewIdentities = new HashMap<String, String>();
-    private boolean isCopyUserAttributes = false;
 
     private IdentityApiRequest(IdentityApiRequest.Builder builder) {
         if (builder.userIdentities != null){
             this.userIdentities = builder.userIdentities;
         }
-        if (builder.isCopyUserAttributes != null) {
-            this.isCopyUserAttributes = builder.isCopyUserAttributes;
+        if (builder.userAliasHandler != null) {
+            this.userAliasHandler = builder.userAliasHandler;
         }
         if (builder.otherOldIdentities.size() == builder.otherNewIdentities.size()) {
             this.otherNewIdentities = builder.otherNewIdentities;
@@ -37,10 +37,6 @@ public final class IdentityApiRequest {
         return new IdentityApiRequest.Builder(currentUser);
     }
 
-    public boolean shouldCopyUserAttributes() {
-        return isCopyUserAttributes;
-    }
-
     public Map<MParticle.IdentityType, String> getUserIdentities() {
         return userIdentities;
     }
@@ -53,11 +49,15 @@ public final class IdentityApiRequest {
         return otherNewIdentities;
     }
 
+    public UserAliasHandler getUserAliasHandler() {
+        return userAliasHandler;
+    }
+
     public static class Builder {
         private Map<MParticle.IdentityType, String> userIdentities = new HashMap<MParticle.IdentityType, String>();
         private Map<String, String> otherOldIdentities = new HashMap<String, String>();
         private Map<String, String> otherNewIdentities = new HashMap<String, String>();
-        private Boolean isCopyUserAttributes = null;
+        private UserAliasHandler userAliasHandler;
 
         public Builder(MParticleUser currentUser) {
             if (currentUser != null) {
@@ -108,8 +108,8 @@ public final class IdentityApiRequest {
             return new IdentityApiRequest(this);
         }
 
-        public Builder copyUserAttributes(boolean copyUserAttributes) {
-            this.isCopyUserAttributes = copyUserAttributes;
+        public Builder userAliasHandler(UserAliasHandler userAliasHandler) {
+            this.userAliasHandler = userAliasHandler;
             return this;
         }
     }

@@ -1,5 +1,6 @@
 package com.mparticle.identity;
 
+import android.content.Context;
 import android.os.Build;
 
 import com.mparticle.MParticle;
@@ -229,21 +230,7 @@ import java.util.Map;
         }
     }
 
-
-    /**
-     * to be used to rectify the use of the placeholder MPID, which occurred while request which might
-     * change the MPID was in progress. The parameter "mpid" can either be the previous MPID or a new MPID,
-     * either way, everything stored under the placeholder MPID will be migrated.
-     */
-    boolean setUser(long previousMpid, long newMpid, Map<MParticle.IdentityType, String> identities, boolean shouldCopyAttributes) {
-        boolean success = true;
-        if (shouldCopyAttributes && previousMpid != newMpid) {
-            for (Map.Entry<String, Object> entry: mMParticleDBManager.getUserAttributes(previousMpid).entrySet()) {
-                if (!setUserAttribute(entry.getKey(), entry.getValue(), newMpid, true)) {
-                    success = false;
-                }
-            }
-        }
+    boolean setUser(Context context, long previousMpid, long newMpid, Map<MParticle.IdentityType, String> identities, UserAliasHandler userAliasHandler) {
         if (identities != null) {
             for (Map.Entry<MParticle.IdentityType, String> entry : identities.entrySet()) {
                 if (!MPUtility.isEmpty(entry.getValue())) {
@@ -252,15 +239,26 @@ import java.util.Map;
             }
         }
         // if the mpid remains equal to the temporary_mpid, as the case could be when a network request fails
-        // or on startup, then there is not reason to do anything
+        // or on startup, then there is no reason to do anything
         if (newMpid == Constants.TEMPORARY_MPID) {
             return false;
         }
         mConfigManager.mergeUserConfigs(Constants.TEMPORARY_MPID, newMpid);
         mMessageManager.getMParticleDBManager().updateMpId(Constants.TEMPORARY_MPID, newMpid);
         mConfigManager.deleteUserStorage(Constants.TEMPORARY_MPID);
+
+        if (userAliasHandler != null && previousMpid != newMpid) {
+            try {
+                userAliasHandler.onUserAlias(
+                        MParticleUser.getInstance(context, previousMpid, this),
+                        MParticleUser.getInstance(context, newMpid, this)
+                );
+            }catch (Exception e) {
+                Logger.error("Error while executing UserAliasHandler: " + e.toString());
+            }
+        }
         mConfigManager.setMpid(newMpid);
-        return success;
+        return true;
 
     }
 }
