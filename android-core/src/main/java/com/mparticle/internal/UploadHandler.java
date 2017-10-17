@@ -456,8 +456,7 @@ public class UploadHandler extends Handler implements BackgroundTaskHandler {
         MessageBatch batchMessage = MessageBatch.create(
                 history,
                 mConfigManager,
-                mPreferences,
-                mApiClient.getCookies());
+                mPreferences);
         addGCMHistory(batchMessage);
         return batchMessage;
     }

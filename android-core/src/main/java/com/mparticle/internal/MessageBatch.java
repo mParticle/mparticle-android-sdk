@@ -19,7 +19,7 @@ public class MessageBatch extends JSONObject {
         super();
     }
 
-    public static MessageBatch create(boolean history, ConfigManager configManager, SharedPreferences preferences, JSONObject cookies) throws JSONException {
+    public static MessageBatch create(boolean history, ConfigManager configManager, SharedPreferences preferences) throws JSONException {
         MessageBatch uploadMessage = new MessageBatch();
         if (BuildConfig.MP_DEBUG) {
             uploadMessage.put(Constants.MessageKey.ECHO, true);
@@ -33,7 +33,6 @@ public class MessageBatch extends JSONObject {
         uploadMessage.put(Constants.MessageKey.CONFIG_SESSION_TIMEOUT, configManager.getSessionTimeout()/1000);
         uploadMessage.put(Constants.MessageKey.MPID, configManager.getMpid());
         uploadMessage.put(Constants.MessageKey.SANDBOX, configManager.getEnvironment().equals(MParticle.Environment.Development));
-
         uploadMessage.put(Constants.MessageKey.LTV, MParticle.getInstance().Commerce().getCurrentUserLtv());
         String apiKey = configManager.getApiKey();
 
@@ -49,7 +48,6 @@ public class MessageBatch extends JSONObject {
             uploadMessage.put(Constants.MessageKey.PRODUCT_BAGS, new JSONObject(MParticle.getInstance().ProductBags().toString()));
         }
 
-        uploadMessage.put(Constants.MessageKey.COOKIES, cookies);
         uploadMessage.put(Constants.MessageKey.PROVIDER_PERSISTENCE, configManager.getProviderPersistence());
         uploadMessage.put(Constants.MessageKey.INTEGRATION_ATTRIBUTES, configManager.getIntegrationAttributes());
 

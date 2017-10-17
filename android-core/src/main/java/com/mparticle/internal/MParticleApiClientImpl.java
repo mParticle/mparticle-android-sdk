@@ -271,6 +271,19 @@ public class MParticleApiClientImpl implements MParticleApiClient {
         if (mEventUrl == null){
             mEventUrl = new URL(SECURE_SERVICE_SCHEME, API_HOST, SERVICE_VERSION_1 + "/" + mApiKey + "/events");
         }
+
+        try {
+            JSONObject messageJson = new JSONObject(message);
+            JSONObject cookies = getCookies();
+            if (cookies != null && cookies.length() > 0) {
+                messageJson.put(Constants.MessageKey.COOKIES, cookies);
+                message = messageJson.toString();
+            }
+            logUpload(messageJson);
+        } catch (JSONException e) {
+            //ignore
+        }
+
         byte[] messageBytes = message.getBytes();
         HttpURLConnection connection = (HttpURLConnection) mEventUrl.openConnection();
         connection.setConnectTimeout(2000);
@@ -291,8 +304,6 @@ public class MParticleApiClientImpl implements MParticleApiClient {
         }
 
         addMessageSignature(connection, message);
-
-        logUpload(message);
 
         if (!BuildConfig.MP_DEBUG && Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH && connection instanceof HttpsURLConnection) {
             try {
@@ -331,9 +342,9 @@ public class MParticleApiClientImpl implements MParticleApiClient {
         return connection.getResponseCode();
     }
 
-    private void logUpload(String message) {
+    private void logUpload(JSONObject messageJson) {
         try {
-            JSONObject messageJson = new JSONObject(message);
+
             if (messageJson.has(Constants.MessageKey.MESSAGES)) {
                 JSONArray messages = messageJson.getJSONArray(Constants.MessageKey.MESSAGES);
                 Logger.verbose("Uploading message batch...");
@@ -444,9 +455,7 @@ public class MParticleApiClientImpl implements MParticleApiClient {
                 if (consumerInfo.has(Constants.MessageKey.MPID)) {
                     mConfigManager.setMpid(consumerInfo.getLong(Constants.MessageKey.MPID));
                 }
-
                 setCookies(consumerInfo.optJSONObject(Constants.MessageKey.COOKIES));
-
             }
             if (jsonResponse.has(LTV)) {
                 BigDecimal serverLtv = new BigDecimal(jsonResponse.getString(LTV));
@@ -454,6 +463,7 @@ public class MParticleApiClientImpl implements MParticleApiClient {
                 BigDecimal sum = serverLtv.add(mostRecentClientLtc);
                 mPreferences.edit().putString(Constants.PrefKeys.LTV, sum.toPlainString()).apply();
             }
+
 
         } catch (JSONException jse) {
 

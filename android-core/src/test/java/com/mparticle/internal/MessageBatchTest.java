@@ -32,7 +32,7 @@ public class MessageBatchTest {
         ConfigManager manager = new ConfigManager(new MockContext(), MParticle.Environment.Production, "some api key", "some api secret");
         MockSharedPreferences sharedPrefs = new MockSharedPreferences();
         boolean sessionHistory = true;
-        MessageBatch batch = MessageBatch.create( sessionHistory, manager, sharedPrefs,new JSONObject());
+        MessageBatch batch = MessageBatch.create( sessionHistory, manager, sharedPrefs);
         assertNotNull(batch.getString("dt"));
         assertNotNull(batch.getString("id"));
         assertNotNull(batch.getDouble("ct"));
@@ -41,12 +41,12 @@ public class MessageBatchTest {
         assertNotNull(batch.getDouble("uitl"));
         assertNotNull(batch.getDouble("stl"));
         assertNotNull(batch.get("ltv"));
-        assertNotNull(batch.getJSONObject("ck"));
+        assertFalse(batch.has("ck"));
         if (manager.getProviderPersistence() != null) {
             assertNotNull(batch.getJSONObject("cms"));
         }
         sessionHistory = false;
-        batch = MessageBatch.create( sessionHistory, manager, sharedPrefs,new JSONObject());
+        batch = MessageBatch.create( sessionHistory, manager, sharedPrefs);
         assertNotNull(batch.getString("dt"));
         assertNotNull(batch.getString("id"));
         assertNotNull(batch.getDouble("ct"));
@@ -56,13 +56,13 @@ public class MessageBatchTest {
         assertNotNull(batch.getDouble("stl"));
         assertNotNull(batch.getJSONObject("pb"));
         assertNotNull(batch.get("ltv"));
-        assertNotNull(batch.getJSONObject("ck"));
+        assertFalse(batch.has("ck"));
         if (manager.getProviderPersistence() != null) {
             assertNotNull(batch.getJSONObject("cms"));
         }
 
         bags.removeProductBag("whatever");
-        batch = MessageBatch.create( sessionHistory, manager, sharedPrefs,new JSONObject());
+        batch = MessageBatch.create( sessionHistory, manager, sharedPrefs);
         assertFalse(batch.has("pb"));
     }
 }
