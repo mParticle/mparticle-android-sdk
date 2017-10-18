@@ -216,12 +216,16 @@ public class MParticleJSInterface {
         try {
             final JSONObject attribute = new JSONObject(json);
             final String key = attribute.getString("key");
-            MParticle.getInstance().Identity().addIdentityStateListener(new SingleUserIdentificationCallback() {
-                @Override
-                public void onUserFound(MParticleUser user) {
-                    user.setUserTag(key);
-                }
-            });
+            if (MParticle.getInstance().Identity().getCurrentUser() != null) {
+                MParticle.getInstance().Identity().getCurrentUser().setUserTag(key);
+            } else {
+                MParticle.getInstance().Identity().addIdentityStateListener(new SingleUserIdentificationCallback() {
+                    @Override
+                    public void onUserFound(MParticleUser user) {
+                        user.setUserTag(key);
+                    }
+                });
+            }
         } catch (JSONException jse) {
             Logger.warning(String.format(errorMsg, jse.getMessage()));
         }
@@ -232,12 +236,16 @@ public class MParticleJSInterface {
         try{
             JSONObject attribute = new JSONObject(json);
             final String key = attribute.getString("key");
-            MParticle.getInstance().Identity().addIdentityStateListener(new SingleUserIdentificationCallback() {
-                @Override
-                public void onUserFound(MParticleUser user) {
-                    user.removeUserAttribute(key);
-                }
-            });
+            if (MParticle.getInstance().Identity().getCurrentUser() != null) {
+                MParticle.getInstance().Identity().getCurrentUser().removeUserAttribute(key);
+            } else {
+                MParticle.getInstance().Identity().addIdentityStateListener(new SingleUserIdentificationCallback() {
+                    @Override
+                    public void onUserFound(MParticleUser user) {
+                        user.removeUserAttribute(key);
+                    }
+                });
+            }
         }catch (JSONException jse){
             Logger.warning(String.format(errorMsg, jse.getMessage()));
         }
@@ -249,12 +257,16 @@ public class MParticleJSInterface {
             JSONObject attribute = new JSONObject(json);
             final String key = attribute.getString("key");
             final Object value = attribute.get("value");
-            MParticle.getInstance().Identity().addIdentityStateListener(new SingleUserIdentificationCallback() {
-                @Override
-                public void onUserFound(MParticleUser user) {
-                    user.setUserAttribute(key, String.valueOf(value));
-                }
-            });
+            if (MParticle.getInstance().Identity().getCurrentUser() != null) {
+                MParticle.getInstance().Identity().getCurrentUser().setUserAttribute(key, String.valueOf(value));
+            } else {
+                MParticle.getInstance().Identity().addIdentityStateListener(new SingleUserIdentificationCallback() {
+                    @Override
+                    public void onUserFound(MParticleUser user) {
+                        user.setUserAttribute(key, String.valueOf(value));
+                    }
+                });
+            }
         } catch (JSONException jse) {
             Logger.warning(String.format(errorMsg, jse.getMessage()));
         }
@@ -265,12 +277,16 @@ public class MParticleJSInterface {
         try{
             JSONObject attribute = new JSONObject(json);
             final String key = attribute.getString("key");
-            MParticle.getInstance().Identity().addIdentityStateListener(new SingleUserIdentificationCallback() {
-                @Override
-                void onUserFound(MParticleUser user) {
-                    user.removeUserAttribute(key);
-                }
-            });
+            if (MParticle.getInstance().Identity().getCurrentUser() != null) {
+                MParticle.getInstance().Identity().getCurrentUser().removeUserAttribute(key);
+            } else {
+                MParticle.getInstance().Identity().addIdentityStateListener(new SingleUserIdentificationCallback() {
+                    @Override
+                    public void onUserFound(MParticleUser user) {
+                        user.removeUserAttribute(key);
+                    }
+                });
+            }
         }catch (JSONException jse){
             Logger.warning(String.format(errorMsg, jse.getMessage()));
         }
@@ -392,13 +408,16 @@ public class MParticleJSInterface {
             for (int i = 0; i < value.length(); i++) {
                 attributes.add(String.valueOf(value.get(i)));
             }
-            MParticle.getInstance().Identity().addIdentityStateListener(new SingleUserIdentificationCallback() {
-                        @Override
-                        void onUserFound(MParticleUser user) {
-                            user.setUserAttributeList(key, attributes);
-                        }
+            if (MParticle.getInstance().Identity().getCurrentUser() != null) {
+                MParticle.getInstance().Identity().getCurrentUser().setUserAttributeList(key, attributes);
+            } else {
+                MParticle.getInstance().Identity().addIdentityStateListener(new SingleUserIdentificationCallback() {
+                    @Override
+                    public void onUserFound(MParticleUser user) {
+                        user.setUserAttributeList(key, attributes);
                     }
-            );
+                });
+            }
         } catch (JSONException jse) {
             Logger.warning(String.format(errorMsg, jse.getMessage()));
         }
@@ -406,14 +425,21 @@ public class MParticleJSInterface {
 
     @JavascriptInterface
     public void removeAllUserAttributes() {
+        if (MParticle.getInstance().Identity().getCurrentUser() != null) {
+            MParticleUser user = MParticle.getInstance().Identity().getCurrentUser();
+            for (final String userAttribute : user.getUserAttributes().keySet()) {
+                user.removeUserAttribute(userAttribute);
+            }
+        } else {
             MParticle.getInstance().Identity().addIdentityStateListener(new SingleUserIdentificationCallback() {
                 @Override
-                void onUserFound(MParticleUser user) {
+                public void onUserFound(MParticleUser user) {
                     for (final String userAttribute : user.getUserAttributes().keySet()) {
                         user.removeUserAttribute(userAttribute);
                     }
                 }
             });
+        }
     }
 
     @JavascriptInterface
