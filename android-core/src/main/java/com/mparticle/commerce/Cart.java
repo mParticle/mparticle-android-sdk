@@ -210,6 +210,37 @@ public final class Cart {
     }
 
     /**
+     * Add one or more products to the Cart and optionally log a {@link CommerceEvent}.
+     * <p></p>
+     * This method will log a {@link CommerceEvent} with the {@link Product#ADD_TO_CART} action based on the logEvent parameter. Products added here
+     * will remain in the cart across app restarts, and will be included in future calls to {@link Cart#purchase(TransactionAttributes)}
+     * or {@link CommerceEvent}'s with a product action {@link Product#PURCHASE}
+     * <p></p>
+     *
+     * @param newProducts the products to add to the Cart
+     * @return the Cart object, useful for chaining several commands
+     *
+     */
+    public synchronized Cart addAll(List<Product> newProducts, boolean logEvent) {
+        if (newProducts != null && newProducts.size() > 0 && productList.size() < MAXIMUM_PRODUCT_COUNT) {
+            for (Product product : newProducts) {
+                if (product != null && !productList.contains(product)){
+                    product.updateTimeAdded();
+                    productList.add(product);
+                    save();
+
+                }
+            }
+            if (logEvent) {
+                MParticle.getInstance().logEvent(
+                        new CommerceEvent.Builder(Product.ADD_TO_CART, newProducts.get(0)).products(newProducts).build()
+                );
+            }
+        }
+        return this;
+    }
+
+    /**
      * Add one or more products to the Cart and log a {@link CommerceEvent}.
      * <p></p>
      * This method will log a {@link CommerceEvent} with the {@link Product#ADD_TO_CART} action. Products added here
