@@ -1,6 +1,5 @@
 package com.mparticle;
 
-import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -8,12 +7,9 @@ import android.content.SharedPreferences;
 import android.os.Handler;
 import android.os.Looper;
 
-
-import com.mparticle.messaging.AbstractCloudMessage;
-import com.mparticle.messaging.CloudAction;
-
 import com.mparticle.internal.Constants;
 import com.mparticle.messaging.MPMessagingAPI;
+import com.mparticle.messaging.ProviderCloudMessage;
 
 
 /**
@@ -87,20 +83,19 @@ public class MPReceiver extends BroadcastReceiver {
                 SharedPreferences preferences = context.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
                 preferences.edit().putString(Constants.PrefKeys.INSTALL_REFERRER, referrer).apply();
             } else if (MPMessagingAPI.BROADCAST_NOTIFICATION_TAPPED.equalsIgnoreCase(intent.getAction())){
-                AbstractCloudMessage message = intent.getParcelableExtra(MPMessagingAPI.CLOUD_MESSAGE_EXTRA);
-                CloudAction action = intent.getParcelableExtra(MPMessagingAPI.CLOUD_ACTION_EXTRA);
-                if (!onNotificationTapped(message, action)){
-                    MPService.runIntentInService(context, intent);
+                ProviderCloudMessage message = intent.getParcelableExtra(MPMessagingAPI.CLOUD_MESSAGE_EXTRA);
+                if (!onNotificationTapped(message)){
+                    MPServiceUtil.runIntentInService(context, intent);
                 }
                 return;
             } else if (MPMessagingAPI.BROADCAST_NOTIFICATION_RECEIVED.equalsIgnoreCase(intent.getAction())){
-                AbstractCloudMessage message = intent.getParcelableExtra(MPMessagingAPI.CLOUD_MESSAGE_EXTRA);
+                ProviderCloudMessage message = intent.getParcelableExtra(MPMessagingAPI.CLOUD_MESSAGE_EXTRA);
                 if (!onNotificationReceived(message)){
-                    MPService.runIntentInService(context, intent);
+                    MPServiceUtil.runIntentInService(context, intent);
                 }
                 return;
             } else {
-                MPService.runIntentInService(context, intent);
+                MPServiceUtil.runIntentInService(context, intent);
             }
         }
     }
@@ -110,23 +105,20 @@ public class MPReceiver extends BroadcastReceiver {
     /**
      * Override this method to listen for when a notification has been received.
      *
-     *
-     * @param message The message that was received. Depending on the push provider, could be either a {@link com.mparticle.messaging.MPCloudNotificationMessage} or a {@link com.mparticle.messaging.ProviderCloudMessage}
+     * @param message The message that was received.
      * @return True if you would like to handle this notification, False if you would like the mParticle to generate and show a {@link android.app.Notification}.
      */
-    protected boolean onNotificationReceived(AbstractCloudMessage message){
+    protected boolean onNotificationReceived(ProviderCloudMessage message){
         return false;
     }
 
     /**
      * Override this method to listen for when a notification has been tapped or acted on.
      *
-     *
-     * @param message The message that was tapped. Depending on the push provider, could be either a {@link com.mparticle.messaging.MPCloudNotificationMessage} or a {@link com.mparticle.messaging.ProviderCloudMessage}
-     * @param action The action that the user acted on.
+     * @param message The message that was tapped.
      * @return True if you would like to consume this tap/action, False if the mParticle SDK should attempt to handle it.
      */
-    protected boolean onNotificationTapped(AbstractCloudMessage message, CloudAction action){
+    protected boolean onNotificationTapped(ProviderCloudMessage message){
         return false;
     }
 

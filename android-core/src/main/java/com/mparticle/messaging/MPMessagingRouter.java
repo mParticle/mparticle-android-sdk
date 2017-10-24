@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 
 import com.mparticle.MPService;
+import com.mparticle.MPServiceUtil;
 
 public class MPMessagingRouter {
     /**
@@ -18,19 +19,17 @@ public class MPMessagingRouter {
      */
     public static boolean onReceive(Context context, Intent intent, PushAnalyticsReceiverCallback callback) {
         if (MPMessagingAPI.BROADCAST_NOTIFICATION_TAPPED.equalsIgnoreCase(intent.getAction())) {
-            AbstractCloudMessage message = intent.getParcelableExtra(MPMessagingAPI.CLOUD_MESSAGE_EXTRA);
-            CloudAction action = intent.getParcelableExtra(MPMessagingAPI.CLOUD_ACTION_EXTRA);
-            if (!callback.onNotificationTapped(message, action)) {
+            ProviderCloudMessage message = intent.getParcelableExtra(MPMessagingAPI.CLOUD_MESSAGE_EXTRA);
+            if (!callback.onNotificationTapped(message)) {
                 intent.putExtra(MPMessagingAPI.CLOUD_MESSAGE_EXTRA, message);
-                intent.putExtra(MPMessagingAPI.CLOUD_ACTION_EXTRA, action);
-                MPService.runIntentInService(context, intent);
+                MPServiceUtil.runIntentInService(context, intent);
             }
             return true;
         } else if (MPMessagingAPI.BROADCAST_NOTIFICATION_RECEIVED.equalsIgnoreCase(intent.getAction())) {
-            AbstractCloudMessage message = intent.getParcelableExtra(MPMessagingAPI.CLOUD_MESSAGE_EXTRA);
+            ProviderCloudMessage message = intent.getParcelableExtra(MPMessagingAPI.CLOUD_MESSAGE_EXTRA);
             if (!callback.onNotificationReceived(message)) {
                 intent.putExtra(MPMessagingAPI.CLOUD_MESSAGE_EXTRA, message);
-                MPService.runIntentInService(context, intent);
+                MPServiceUtil.runIntentInService(context, intent);
             }
             return true;
         }

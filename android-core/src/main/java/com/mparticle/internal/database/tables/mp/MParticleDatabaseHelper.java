@@ -18,7 +18,7 @@ import java.util.Iterator;
 
 public class MParticleDatabaseHelper implements SQLiteOpenHelperWrapper {
     private final Context mContext;
-    public static final int DB_VERSION = 7;
+    public static final int DB_VERSION = 8;
     public static final String DB_NAME = "mparticle.db";
 
     public MParticleDatabaseHelper(Context context) {
@@ -31,7 +31,6 @@ public class MParticleDatabaseHelper implements SQLiteOpenHelperWrapper {
         db.execSQL(MessageTable.CREATE_MESSAGES_DDL);
         db.execSQL(UploadTable.CREATE_UPLOADS_DDL);
         db.execSQL(BreadcrumbTable.CREATE_BREADCRUMBS_DDL);
-        db.execSQL(GcmMessageTable.CREATE_GCM_MSG_DDL);
         db.execSQL(ReportingTable.CREATE_REPORTING_DDL);
         db.execSQL(UserAttributesTable.CREATE_USER_ATTRIBUTES_DDL);
     }
@@ -42,7 +41,6 @@ public class MParticleDatabaseHelper implements SQLiteOpenHelperWrapper {
         db.execSQL(MessageTable.CREATE_MESSAGES_DDL);
         db.execSQL(UploadTable.CREATE_UPLOADS_DDL);
         db.execSQL(BreadcrumbTable.CREATE_BREADCRUMBS_DDL);
-        db.execSQL(GcmMessageTable.CREATE_GCM_MSG_DDL);
         db.execSQL(ReportingTable.CREATE_REPORTING_DDL);
         db.execSQL(UserAttributesTable.CREATE_USER_ATTRIBUTES_DDL);
         if (oldVersion < 5) {
@@ -55,6 +53,9 @@ public class MParticleDatabaseHelper implements SQLiteOpenHelperWrapper {
         if (oldVersion < 7 ) {
             upgradeMpId(db);
             ConfigManager.setNeedsToMigrate(mContext, true);
+        }
+        if (oldVersion < 8) {
+            removeGcmTable(db);
         }
     }
 
@@ -71,7 +72,6 @@ public class MParticleDatabaseHelper implements SQLiteOpenHelperWrapper {
         String currentMpId = String.valueOf(ConfigManager.getMpid(mContext));
         db.execSQL(ReportingTable.getAddMpIdColumnString(currentMpId));
         db.execSQL(SessionTable.getAddMpIdColumnString(currentMpId));
-        db.execSQL(GcmMessageTable.getAddMpIdColumnString(currentMpId));
         db.execSQL(UserAttributesTable.getAddMpIdColumnString(currentMpId));
         db.execSQL(BreadcrumbTable.getAddMpIdColumnString(currentMpId));
         db.execSQL(MessageTable.getAddMpIdColumnString(currentMpId));
@@ -106,6 +106,15 @@ public class MParticleDatabaseHelper implements SQLiteOpenHelperWrapper {
         } catch (Exception e) {
         } finally {
             sharedPreferences.edit().remove(Constants.PrefKeys.DEPRECATED_USER_ATTRS + MParticle.getInstance().getConfigManager().getApiKey()).apply();
+        }
+    }
+
+    private void removeGcmTable(SQLiteDatabase db) {
+        try {
+            db.execSQL("DROP TABLE IF EXISTS gcm_messages");
+        }
+        catch (Exception e) {
+            e.printStackTrace();
         }
     }
 

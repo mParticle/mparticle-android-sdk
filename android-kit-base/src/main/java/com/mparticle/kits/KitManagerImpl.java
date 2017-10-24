@@ -17,6 +17,8 @@ import com.mparticle.MParticle;
 import com.mparticle.ReferrerReceiver;
 import com.mparticle.UserAttributeListener;
 import com.mparticle.commerce.CommerceEvent;
+import com.mparticle.identity.IdentityStateListener;
+import com.mparticle.identity.MParticleUser;
 import com.mparticle.internal.AppStateManager;
 import com.mparticle.internal.BackgroundTaskHandler;
 import com.mparticle.internal.ConfigManager;
@@ -217,7 +219,12 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
             }
             MParticle.getInstance().getKitManager().replayAndDisableQueue();
             //sync user attributes
-            MParticle.getInstance().Identity().getCurrentUser().getUserAttributes(KitManagerImpl.this);
+            MParticle.getInstance().Identity().addIdentityStateListener(new IdentityStateListener() {
+                @Override
+                public void onUserIdentified(MParticleUser user) {
+                    user.getUserAttributes(KitManagerImpl.this);
+                }
+            });
         }
     }
 

@@ -18,7 +18,6 @@ public class MPMessagingAPI {
     private final Context mContext;
 
     public static final String CLOUD_MESSAGE_EXTRA = "mp-push-message";
-    public static final String CLOUD_ACTION_EXTRA = "mp-push-action";
 
     /**
      * Listen for this broadcast (as an Intent action) to detect when the device received a push.
@@ -48,27 +47,6 @@ public class MPMessagingAPI {
     }
 
     /**
-     * Set the resource ID of the icon to be shown in the notification bar when a notification is received.
-     *
-     * By default, the app launcher icon will be shown.
-     *
-     * @param resId the resource id of a drawable
-     */
-    public void setPushNotificationIcon(int resId) {
-
-    }
-
-    /**
-     * Set the resource ID of the title to be shown in the notification bar when a notification is received
-     *
-     * By default, the title of the application will be shown.
-     *
-     * @param resId the resource id of a string
-     */
-    public void setPushNotificationTitle(int resId) {
-    }
-
-    /**
      * Register the application for GCM notifications
      *
      * @param senderId the SENDER_ID for the application
@@ -93,21 +71,7 @@ public class MPMessagingAPI {
         PushRegistrationHelper.disablePushNotifications(mContext);
     }
 
-    /**
-     * Enable the default notification sound for push notifications. This is a user preference that will be persisted across
-     * application sessions.
-     *
-     * @param enabled
-     */
-    public void setNotificationSoundEnabled(Boolean enabled) {
-    }
-
-    /**
-     * Enable the default notification vibration for push notifications. This is a user preference that will be persisted across
-     * application sessions.
-     *
-     * @param enabled
-     */
-    public void setNotificationVibrationEnabled(Boolean enabled) {
+    public void displayPushNotificationByDefault(Boolean enabled) {
+        MParticle.getInstance().getConfigManager().setDisplayPushNotifications(enabled);
     }
 }

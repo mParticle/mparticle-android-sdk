@@ -55,6 +55,12 @@ class AppConfig {
         }else{
             sEnvironment = environment;
         }
+        if (apiKey == null) {
+            apiKey = preferences.getString(Constants.PrefKeys.API_KEY, "");
+        }
+        if (apiSecret == null) {
+            apiSecret = preferences.getString(Constants.PrefKeys.API_SECRET, "");
+        }
         mKey = apiKey;
         mSecret = apiSecret;
         preferences.edit()

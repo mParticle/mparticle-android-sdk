@@ -1,7 +1,6 @@
 package com.mparticle.internal;
 
 import android.content.Context;
-import android.database.Cursor;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -10,12 +9,9 @@ import com.mparticle.MParticle;
 import com.mparticle.internal.Constants.MessageKey;
 import com.mparticle.internal.Constants.MessageType;
 import com.mparticle.internal.database.services.MParticleDBManager;
-import com.mparticle.internal.database.tables.mp.GcmMessageTable;
 import com.mparticle.internal.dto.AttributionChange;
-import com.mparticle.internal.dto.GcmMessage;
 import com.mparticle.internal.dto.UserAttributeRemoval;
 import com.mparticle.internal.dto.UserAttributeResponse;
-import com.mparticle.messaging.AbstractCloudMessage;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -40,9 +36,6 @@ import java.util.UUID;
     public static final int CREATE_SESSION_END_MESSAGE = 3;
     public static final int END_ORPHAN_SESSIONS = 4;
     public static final int STORE_BREADCRUMB = 5;
-    public static final int STORE_GCM_MESSAGE = 6;
-    public static final int MARK_INFLUENCE_OPEN_GCM = 7;
-    public static final int CLEAR_PROVIDER_GCM = 8;
     public static final int STORE_REPORTING_MESSAGE_LIST = 9;
     public static final int REMOVE_USER_ATTRIBUTE = 10;
     public static final int SET_USER_ATTRIBUTE = 11;
@@ -88,14 +81,6 @@ import java.util.UUID;
                     }
                     if (MessageType.ERROR.equals(messageType)){
                         mMParticleDBManager.appendBreadcrumbs(message);
-                    }
-                    if (MessageType.APP_STATE_TRANSITION.equals(messageType)){
-                        appendLatestPushNotification(message);
-                    }
-                    if (MessageType.PUSH_RECEIVED.equals(messageType) &&
-                            message.has(MessageKey.PUSH_BEHAVIOR) &&
-                            !validateBehaviorFlags(message)){
-                        return;
                     }
                     try {
                         mMParticleDBManager.insertMessage(mMessageManagerCallbacks.getApiKey(), message);
@@ -189,28 +174,6 @@ import java.util.UUID;
                     Logger.error(e, "Error saving breadcrumb to mParticle DB");
                 }
                 break;
-            case STORE_GCM_MESSAGE:
-                try {
-                    AbstractCloudMessage message = (AbstractCloudMessage) msg.obj;
-                    mMParticleDBManager.insertGcmMessage(message, msg.getData().getString(GcmMessageTable.APPSTATE));
-                } catch (Exception e) {
-                    Logger.error(e, "Error saving GCM message to mParticle DB", e.toString());
-                }
-                break;
-            case MARK_INFLUENCE_OPEN_GCM:
-                MessageManager.InfluenceOpenMessage message = (MessageManager.InfluenceOpenMessage) msg.obj;
-                List<GcmMessage> gcmMessages = mMParticleDBManager.logInfluenceOpenGcmMessages(message);
-                for (GcmMessage gcmMessage : gcmMessages) {
-                    mMessageManagerCallbacks.logNotification(gcmMessage.getId(), gcmMessage.getPayload(), null, gcmMessage.getAppState(), AbstractCloudMessage.FLAG_INFLUENCE_OPEN);
-                }
-                break;
-            case CLEAR_PROVIDER_GCM:
-                try {
-                    mMParticleDBManager.clearOldProviderGcm();
-                }catch (Exception e){
-                    Logger.error(e, "Error while clearing provider GCM messages: ", e.toString());
-                }
-                break;
             case STORE_REPORTING_MESSAGE_LIST:
                 try{
                     MessageManager.ReportingMpidMessage reportingMessages = (MessageManager.ReportingMpidMessage)msg.obj;
@@ -281,81 +244,6 @@ import java.util.UUID;
             logUserAttributeChanged(attributeChange);
         }
         MParticle.getInstance().getKitManager().setUserAttribute(key, newValue);
-    }
-
-    private boolean validateBehaviorFlags(MPMessage message) {
-        Cursor gcmCursor = null;
-        boolean shouldInsert = true;
-        int newBehavior = message.optInt(MessageKey.PUSH_BEHAVIOR);
-        try {
-            Logger.debug("Validating GCM behaviors...");
-            long timestamp = 0;
-            String contentId = Integer.toString(message.getInt(GcmMessageTable.CONTENT_ID));
-            int currentBehaviors = mMParticleDBManager.getCurrentBehaviors(contentId);
-            if (currentBehaviors >= 0) {
-
-                //if we're trying to log a direct open, but the push has already been marked influence open, remove direct open from the new behavior
-                if (((newBehavior & AbstractCloudMessage.FLAG_DIRECT_OPEN) == AbstractCloudMessage.FLAG_DIRECT_OPEN) &&
-                        ((currentBehaviors & AbstractCloudMessage.FLAG_INFLUENCE_OPEN) == AbstractCloudMessage.FLAG_INFLUENCE_OPEN)) {
-                    return false;
-                }//if we're trying to log an influence open, but the push has already been marked direct open, remove influence open from the new behavior
-                else if (((newBehavior & AbstractCloudMessage.FLAG_INFLUENCE_OPEN) == AbstractCloudMessage.FLAG_INFLUENCE_OPEN) &&
-                        ((currentBehaviors & AbstractCloudMessage.FLAG_DIRECT_OPEN) == AbstractCloudMessage.FLAG_DIRECT_OPEN)) {
-                    return false;
-                }
-                if ((currentBehaviors & AbstractCloudMessage.FLAG_RECEIVED) == AbstractCloudMessage.FLAG_RECEIVED ){
-                    newBehavior &= ~AbstractCloudMessage.FLAG_RECEIVED;
-                }
-                if ((currentBehaviors & AbstractCloudMessage.FLAG_DISPLAYED) == AbstractCloudMessage.FLAG_DISPLAYED ){
-                    newBehavior &= ~AbstractCloudMessage.FLAG_DISPLAYED;
-                }
-
-                if ((newBehavior & AbstractCloudMessage.FLAG_DISPLAYED) == AbstractCloudMessage.FLAG_DISPLAYED){
-                    timestamp = message.getTimestamp();
-                }
-                message.put(MessageKey.PUSH_BEHAVIOR, newBehavior);
-
-                if (newBehavior != currentBehaviors) {
-                    int updated = mMParticleDBManager.updateGcmBehavior(newBehavior, timestamp, contentId);
-                    if (updated > 0) {
-                        Logger.debug("Updated GCM with content ID: " + message.getInt(GcmMessageTable.CONTENT_ID) + " and behavior(s): " + getBehaviorString(newBehavior));
-                    }
-                }else{
-                    shouldInsert = false;
-                }
-
-            }
-        } catch (Exception e) {
-            Logger.debug(e, "Failed to update GCM message.");
-        }finally {
-            if (gcmCursor != null && !gcmCursor.isClosed()){
-                gcmCursor.close();
-            }
-        }
-        return shouldInsert;
-    }
-
-    private String getBehaviorString(int newBehavior){
-        String behavior = "";
-        if ((newBehavior & AbstractCloudMessage.FLAG_DIRECT_OPEN) == AbstractCloudMessage.FLAG_DIRECT_OPEN){
-            behavior += "direct-open, ";
-        }else if ((newBehavior & AbstractCloudMessage.FLAG_INFLUENCE_OPEN) == AbstractCloudMessage.FLAG_INFLUENCE_OPEN){
-            behavior += "influence-open, ";
-        }else if ((newBehavior & AbstractCloudMessage.FLAG_RECEIVED) == AbstractCloudMessage.FLAG_RECEIVED){
-            behavior += "received, ";
-        }else if ((newBehavior & AbstractCloudMessage.FLAG_DISPLAYED) == AbstractCloudMessage.FLAG_DISPLAYED){
-            behavior += "displayed, ";
-        }
-        return behavior;
-    }
-
-    private void appendLatestPushNotification(MPMessage message) {
-        String payload = mMParticleDBManager.getPayload();
-        try {
-            message.put(MessageKey.PAYLOAD, payload);
-        } catch (Exception e) {
-            Logger.debug("Failed to append latest push notification payload: " + e.toString());
-        }
     }
 
     private void dbInsertSession(MPMessage message) throws JSONException {

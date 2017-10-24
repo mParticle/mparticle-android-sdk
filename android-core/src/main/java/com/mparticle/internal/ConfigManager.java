@@ -73,9 +73,13 @@ public class ConfigManager {
 
     }
 
+    public ConfigManager(Context context) {
+        this(context, null, null, null);
+    }
+
     public ConfigManager(Context context, MParticle.Environment environment, String apiKey, String apiSecret) {
         mContext = context.getApplicationContext();
-        sPreferences = mContext.getSharedPreferences(PREFERENCES_FILE, Context.MODE_PRIVATE);
+        sPreferences = getPreferences(mContext);
         mLocalPrefs = new AppConfig(mContext, environment, sPreferences, apiKey, apiSecret);
         sUserStorage = UserStorage.create(mContext, getMpid());
         restoreOldConfig();
@@ -437,7 +441,17 @@ public class ConfigManager {
                 .apply();
     }
 
-    private static SharedPreferences getPreferences(Context context) {
+    public void setDisplayPushNotifications(Boolean display) {
+        sPreferences.edit()
+                .putBoolean(Constants.PrefKeys.DISPLAY_PUSH_NOTIFICATIONS, display)
+                .apply();
+    }
+
+    public static Boolean isDisplayPushNotifications(Context context) {
+        return getPreferences(context).getBoolean(Constants.PrefKeys.DISPLAY_PUSH_NOTIFICATIONS, false);
+    }
+
+    private static SharedPreferences getPreferences(Context context){
         return context.getSharedPreferences(PREFERENCES_FILE, Context.MODE_PRIVATE);
     }
 

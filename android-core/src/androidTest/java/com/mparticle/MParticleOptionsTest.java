@@ -1,10 +1,12 @@
 package com.mparticle;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Looper;
 import android.support.test.InstrumentationRegistry;
 
 import com.mparticle.internal.AccessUtils;
+import com.mparticle.internal.Constants;
 import com.mparticle.internal.Logger;
 import com.mparticle.internal.MPUtility;
 import com.mparticle.utils.AndroidUtils;
@@ -39,6 +41,7 @@ public class MParticleOptionsTest {
     @Test
     public void testCrashOnNoCredentials() throws Exception {
         boolean thrown = false;
+        clearStoredPreferences();
         try {
             MParticleOptions.builder(mContext).build();
         }
@@ -47,6 +50,7 @@ public class MParticleOptionsTest {
         }
         assertTrue(thrown);
 
+        clearStoredPreferences();
         thrown = false;
         try {
             MParticleOptions.builder(mContext)
@@ -58,6 +62,7 @@ public class MParticleOptionsTest {
         }
         assertTrue(thrown);
 
+        clearStoredPreferences();
         thrown = false;
         try {
             MParticleOptions.builder(mContext)
@@ -69,6 +74,7 @@ public class MParticleOptionsTest {
         }
         assertTrue(thrown);
 
+        clearStoredPreferences();
         thrown = false;
         try {
             MParticleOptions.builder(mContext)
@@ -80,6 +86,13 @@ public class MParticleOptionsTest {
         }
         assertTrue(thrown);
 
+        setStoredPreference("key", "secret");
+        try {
+            MParticleOptions.builder(mContext).build();
+        }
+        catch (IllegalArgumentException ex) {
+            fail("MParticleOptions should build without credentials if there are stored credentials");
+        }
 
         try {
             MParticleOptions.builder(mProductionContext).build();
@@ -95,6 +108,26 @@ public class MParticleOptionsTest {
         catch (IllegalArgumentException ex) {
             fail("MParticleOptions should build without credentials in a Production environment");
         }
+    }
+
+    private void clearStoredPreferences() {
+        getCredentialsPreferences()
+                .edit()
+                .remove(Constants.PrefKeys.API_KEY)
+                .remove(Constants.PrefKeys.API_SECRET)
+                .commit();
+    }
+
+    private void setStoredPreference(String apiKey, String apiSecret) {
+        getCredentialsPreferences()
+                .edit()
+                .putString(Constants.PrefKeys.API_KEY, apiKey)
+                .putString(Constants.PrefKeys.API_SECRET, apiSecret)
+                .commit();
+    }
+
+    private SharedPreferences getCredentialsPreferences() {
+        return mContext.getSharedPreferences("mp_preferences", Context.MODE_PRIVATE);
     }
 
     @Test

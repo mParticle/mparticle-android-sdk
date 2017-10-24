@@ -20,8 +20,8 @@ import android.content.Intent;
  *      </intent-filter>
  *  </receiver> }</pre>
  *
- * @see #onNotificationReceived(AbstractCloudMessage)
- * @see #onNotificationTapped(AbstractCloudMessage, CloudAction)
+ * @see #onNotificationReceived(ProviderCloudMessage)
+ * @see #onNotificationTapped(ProviderCloudMessage)
  *
  */
 public class PushAnalyticsReceiver extends BroadcastReceiver implements PushAnalyticsReceiverCallback {
@@ -32,12 +32,12 @@ public class PushAnalyticsReceiver extends BroadcastReceiver implements PushAnal
     }
 
     @Override
-    public boolean onNotificationReceived(AbstractCloudMessage message) {
+    public boolean onNotificationReceived(ProviderCloudMessage message) {
         return false;
     }
 
     @Override
-    public boolean onNotificationTapped(AbstractCloudMessage message, CloudAction action) {
+    public boolean onNotificationTapped(ProviderCloudMessage message) {
         return false;
     }
 }

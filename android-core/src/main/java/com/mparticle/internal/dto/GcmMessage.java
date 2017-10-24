@@ -1,7 +1,5 @@
 package com.mparticle.internal.dto;
 
-import com.mparticle.messaging.AbstractCloudMessage;
-
 public class GcmMessage {
     private int id;
     private String payload;

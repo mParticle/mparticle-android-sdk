@@ -11,7 +11,6 @@ import android.location.Location;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.BatteryManager;
-import android.os.Bundle;
 import android.os.HandlerThread;
 import android.os.Message;
 import android.os.Process;
@@ -20,16 +19,12 @@ import android.telephony.TelephonyManager;
 import com.mparticle.MPEvent;
 import com.mparticle.MParticle;
 import com.mparticle.UserAttributeListener;
-import com.mparticle.commerce.Cart;
 import com.mparticle.commerce.CommerceEvent;
 import com.mparticle.internal.Constants.MessageKey;
 import com.mparticle.internal.Constants.MessageType;
 import com.mparticle.internal.database.services.MParticleDBManager;
-import com.mparticle.internal.database.tables.mp.GcmMessageTable;
 import com.mparticle.internal.dto.UserAttributeRemoval;
 import com.mparticle.internal.dto.UserAttributeResponse;
-import com.mparticle.messaging.CloudAction;
-import com.mparticle.messaging.MPCloudNotificationMessage;
 import com.mparticle.messaging.ProviderCloudMessage;
 
 import org.json.JSONArray;
@@ -556,8 +551,6 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
                     if (interruptions >= 0) {
                         message.put(MessageKey.ST_INTERRUPTIONS, interruptions);
                     }
-                    InfluenceOpenMessage influenceOpenMessage = new InfluenceOpenMessage(message.getTimestamp(), mConfigManager.getInfluenceOpenTimeoutMillis());
-                    mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.MARK_INFLUENCE_OPEN_GCM, influenceOpenMessage));
                 }
 
                 if (stateTransInit.equals(Constants.StateTransitionType.STATE_TRANS_INIT)) {
@@ -593,7 +586,6 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
 
                 if (stateTransInit.equals(Constants.StateTransitionType.STATE_TRANS_BG)) {
                     sPreferences.edit().putBoolean(Constants.PrefKeys.CRASHED_IN_FOREGROUND, false).apply();
-                    mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.CLEAR_PROVIDER_GCM, message.getTimestamp()));
                 }
 
                 mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
@@ -628,7 +620,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
     }
 
     @Override
-    public void logNotification(int contentId, String payload, CloudAction action, String appState, int newBehavior) {
+    public void logNotification(int contentId, String payload, String appState, int newBehavior) {
         try{
             MPMessage message = new MPMessage.Builder(MessageType.PUSH_RECEIVED, mAppStateManager.getSession(), mLocation, mConfigManager.getMpid())
                     .timestamp(System.currentTimeMillis())
@@ -637,19 +629,8 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
 
             message.put(MessageKey.PAYLOAD, payload);
             message.put(MessageKey.PUSH_BEHAVIOR, newBehavior);
-            message.put(GcmMessageTable.CONTENT_ID, contentId);
-
-            if (action == null || action.getActionIdInt() == contentId){
-                message.put(MessageKey.PUSH_TYPE, Constants.Push.MESSAGE_TYPE_RECEIVED);
-            }else{
-                message.put(MessageKey.PUSH_TYPE, Constants.Push.MESSAGE_TYPE_ACTION);
-                message.put(MessageKey.PUSH_ACTION_TAKEN, action.getActionIdentifier());
-                String title = action.getTitle();
-                if (MPUtility.isEmpty(title)){
-                    title = action.getActionIdentifier();
-                }
-                message.put(MessageKey.PUSH_ACTION_NAME, title);
-            }
+            message.put(MessageKey.CONTENT_ID, contentId);
+            message.put(MessageKey.PUSH_TYPE, Constants.Push.MESSAGE_TYPE_RECEIVED);
 
             PushRegistrationHelper.PushRegistration registration = PushRegistrationHelper.getLatestPushRegistration(sContext);
             if ((registration != null) && (registration.instanceId != null) && (registration.instanceId.length() > 0)) {
@@ -811,22 +792,6 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
 
     public void initConfigDelayed() {
         mUploadHandler.sendEmptyMessageDelayed(UploadHandler.INIT_CONFIG, 20 * 1000);
-    }
-
-    public void saveGcmMessage(MPCloudNotificationMessage cloudMessage, String appState) {
-        Message message = mMessageHandler.obtainMessage(MessageHandler.STORE_GCM_MESSAGE, cloudMessage);
-        Bundle data = new Bundle();
-        data.putString(GcmMessageTable.APPSTATE, appState);
-        message.setData(data);
-        mMessageHandler.sendMessage(message);
-    }
-
-    public void saveGcmMessage(ProviderCloudMessage cloudMessage, String appState) {
-        Message message = mMessageHandler.obtainMessage(MessageHandler.STORE_GCM_MESSAGE, cloudMessage);
-        Bundle data = new Bundle();
-        data.putString(GcmMessageTable.APPSTATE, appState);
-        message.setData(data);
-        mMessageHandler.sendMessage(message);
     }
 
     @Override

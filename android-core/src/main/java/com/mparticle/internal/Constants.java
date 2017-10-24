@@ -299,6 +299,7 @@ public class Constants {
         String PUSH_BEHAVIOR = "bhv";
         String PUSH_ACTION_TAKEN = "aid";
         String PUSH_ACTION_NAME = "an";
+        String CONTENT_ID = "content_id";
 
 
         String ST_LAUNCH_REFERRER = "lr";
@@ -488,6 +489,7 @@ public class Constants {
         String PUSH_TOKEN = "mp::pushtoken";
         String DEVICE_APPLICATION_STAMP = "mp::device-app-stamp";
         String PREVIOUS_ANDROID_ID = "mp::previous::android::id";
+        String DISPLAY_PUSH_NOTIFICATIONS = "mp::displaypushnotifications";
     }
 
     public interface MiscStorageKeys {

@@ -5,6 +5,7 @@ import android.support.annotation.NonNull;
 
 import com.mparticle.identity.BaseIdentityTask;
 import com.mparticle.identity.IdentityApiRequest;
+import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.Logger;
 import com.mparticle.internal.MPUtility;
 
@@ -155,6 +156,7 @@ public class MParticleOptions {
         private MParticle.LogLevel logLevel = null;
         private BaseIdentityTask identityTask;
         private AttributionListener attributionListener;
+        private ConfigManager mConfigManager;
 
         private Builder(Context context) {
             this.mContext = context;
@@ -253,27 +255,33 @@ public class MParticleOptions {
                 throw new IllegalArgumentException("mParticle failed to start: context is required.");
             }
             if (MPUtility.isEmpty(apiKey)) {
-                    apiKey = getString(PREFKEY_API_KEY);
+                apiKey = getString(PREFKEY_API_KEY);
                 if (MPUtility.isEmpty(apiKey)) {
+                    apiKey = getConfigManager().getApiKey();
+                    if (MPUtility.isEmpty(apiKey)) {
                         message = "Configuration issue: No API key passed to start() or configured as mp_key in resources!";
-                        if(devMode) {
+                        if (devMode) {
                             throw new IllegalArgumentException(message);
                         } else {
                             Logger.error(message);
                         }
                     }
                 }
+            }
             if (MPUtility.isEmpty(apiSecret)) {
-                    apiSecret = getString(PREFKEY_API_SECRET);
+                apiSecret = getString(PREFKEY_API_SECRET);
+                if (MPUtility.isEmpty(apiSecret)) {
+                    apiSecret = getConfigManager().getApiSecret();
                     if (MPUtility.isEmpty(apiSecret)) {
                         message = "Configuration issue: No API secret passed to start() or configured as mp_secret in resources!";
-                        if(devMode) {
+                        if (devMode) {
                             throw new IllegalArgumentException(message);
                         } else {
                             Logger.error(message);
                         }
                     }
                 }
+            }
             return new MParticleOptions(this);
         }
 
@@ -287,6 +295,13 @@ public class MParticleOptions {
             }catch (android.content.res.Resources.NotFoundException nfe){
                 return null;
             }
+        }
+
+        private ConfigManager getConfigManager() {
+            if (mConfigManager == null) {
+                mConfigManager = new ConfigManager(mContext);
+            }
+            return mConfigManager;
         }
     }
 

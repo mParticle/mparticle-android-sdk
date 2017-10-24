@@ -1,12 +1,21 @@
 package com.mparticle.messaging;
 
 import android.app.Notification;
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.res.Resources;
+import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.v4.app.NotificationCompat;
+
+import com.mparticle.MPService;
+import com.mparticle.MPServiceUtil;
+import com.mparticle.internal.ConfigManager;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -14,25 +23,41 @@ import org.json.JSONObject;
 
 import java.util.Set;
 
+import static com.mparticle.MPServiceUtil.NOTIFICATION_CHANNEL;
+
 /**
  * Representation of a GCM/push sent by a 3rd party such as Urban Airship or Mixpanel.
  */
-public class ProviderCloudMessage extends AbstractCloudMessage {
+public class ProviderCloudMessage implements Parcelable {
+    public static final int FLAG_RECEIVED = 1;
+    public static final int FLAG_DIRECT_OPEN = 1 << 1;
+    public static final int FLAG_READ = 1 << 2;
+    public static final int FLAG_INFLUENCE_OPEN = 1 << 3;
+    public static final int FLAG_DISPLAYED = 1 << 4;
+
     private final String mPrimaryText;
+    private long mActualDeliveryTime = 0;
+    protected Bundle mExtras;
+    private boolean mDisplayed;
+
 
     public ProviderCloudMessage(Bundle extras, JSONArray pushKeys) {
-        super(extras);
+        if (extras != null) {
+            mExtras = new Bundle(extras);
+        }
         mPrimaryText = findProviderMessage(pushKeys);
     }
 
     public ProviderCloudMessage(Parcel pc) {
-        super(pc);
+        mExtras = pc.readBundle();
+        mActualDeliveryTime = pc.readLong();
+        mDisplayed = pc.readInt() == 1;
         mPrimaryText = pc.readString();
     }
 
-    @Override
-    protected CloudAction getDefaultAction() {
-        return new CloudAction(Integer.toString(getId()), null, mPrimaryText, null);
+    public Notification buildNotification(Context context, long time) {
+        setActualDeliveryTime(time);
+        return buildNotification(context);
     }
 
     @Override
@@ -42,7 +67,9 @@ public class ProviderCloudMessage extends AbstractCloudMessage {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        super.writeToParcel(dest, flags);
+        dest.writeBundle(mExtras);
+        dest.writeLong(mActualDeliveryTime);
+        dest.writeInt(mDisplayed ? 1 : 0);
         dest.writeString(mPrimaryText);
     }
 
@@ -60,12 +87,10 @@ public class ProviderCloudMessage extends AbstractCloudMessage {
     };
 
 
-    @Override
     public int getId() {
         return mPrimaryText.hashCode();
     }
 
-    @Override
     public String getPrimaryMessage(Context context) {
         return mPrimaryText;
     }
@@ -75,7 +100,6 @@ public class ProviderCloudMessage extends AbstractCloudMessage {
      *
      * @return
      */
-    @Override
     public JSONObject getRedactedJsonPayload() {
         JSONObject json = new JSONObject();
         Set<String> keys = mExtras.keySet();
@@ -83,27 +107,121 @@ public class ProviderCloudMessage extends AbstractCloudMessage {
             try {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
                     json.put(key, JSONObject.wrap(mExtras.get(key)));
-                }else{
+                } else {
                     json.put(key, mExtras.get(key));
                 }
-            } catch(JSONException e) {
+            } catch (JSONException e) {
             }
         }
         return json;
     }
 
-    @Override
     public Notification buildNotification(Context context) {
-
-        Notification notification = new NotificationCompat.Builder(context)
-                .setContentIntent(getLoopbackIntent(context, this, getDefaultAction()))
-                .setSmallIcon(AbstractCloudMessage.getFallbackIcon(context))
+        NotificationCompat.Builder builder;
+        if (oreoNotificationCompatAvailable()) {
+            builder = new NotificationCompat.Builder(context, NOTIFICATION_CHANNEL);
+        } else {
+            builder = new NotificationCompat.Builder(context);
+        }
+        Notification notification = builder.setContentIntent(getLoopbackIntent(context, this, String.valueOf(getId())))
+                .setSmallIcon(getFallbackIcon(context))
                 .setTicker(mPrimaryText)
-                .setContentTitle(AbstractCloudMessage.getFallbackTitle(context))
-                .setContentText(mPrimaryText).build();
-
+                .setContentTitle(getFallbackTitle(context))
+                .setContentText(mPrimaryText)
+                .build();
         notification.flags |= Notification.FLAG_AUTO_CANCEL;
         return notification;
+    }
+
+    public static ProviderCloudMessage createMessage(Intent intent, JSONArray keys) throws InvalidGcmMessageException {
+        return new ProviderCloudMessage(intent.getExtras(), keys);
+    }
+
+
+    protected static PendingIntent getLoopbackIntent(Context context, ProviderCloudMessage message, String id) {
+        Intent intent = new Intent(MPServiceUtil.INTERNAL_NOTIFICATION_TAP);
+        intent.setClass(context, MPService.class);
+        intent.putExtra(MPMessagingAPI.CLOUD_MESSAGE_EXTRA, message);
+
+        return PendingIntent.getService(context, id.hashCode(), intent, PendingIntent.FLAG_UPDATE_CURRENT);
+    }
+
+    public static class InvalidGcmMessageException extends Exception {
+        public InvalidGcmMessageException(String detailMessage) {
+            super(detailMessage);
+        }
+    }
+
+    protected static String getFallbackTitle(Context context) {
+        String fallbackTitle = null;
+        int titleResId = ConfigManager.getPushTitle(context);
+        if (titleResId > 0) {
+            try {
+                fallbackTitle = context.getString(titleResId);
+            } catch (Resources.NotFoundException e) {
+
+            }
+        } else {
+            try {
+                int stringId = context.getApplicationInfo().labelRes;
+                fallbackTitle = context.getResources().getString(stringId);
+            } catch (Resources.NotFoundException ex) {
+
+            }
+        }
+        return fallbackTitle;
+    }
+
+    protected static int getFallbackIcon(Context context) {
+        int smallIcon = ConfigManager.getPushIcon(context);
+        try {
+            Drawable draw = context.getResources().getDrawable(smallIcon);
+        } catch (Resources.NotFoundException nfe) {
+            smallIcon = 0;
+        }
+
+        if (smallIcon == 0) {
+            try {
+                smallIcon = context.getPackageManager().getApplicationInfo(context.getPackageName(), 0).icon;
+            } catch (PackageManager.NameNotFoundException e) {
+                // use the ic_dialog_alert icon if the app's can not be found
+            }
+            if (0 == smallIcon) {
+                smallIcon = context.getResources().getIdentifier("ic_dialog_alert", "drawable", "android");
+            }
+        }
+        return smallIcon;
+    }
+
+    public boolean shouldDisplay() {
+        return true;
+    }
+
+    public long getActualDeliveryTime() {
+        return mActualDeliveryTime;
+    }
+
+    public void setActualDeliveryTime(long time) {
+        mActualDeliveryTime = time;
+    }
+
+    public void setDisplayed(boolean displayed) {
+        mDisplayed = displayed;
+    }
+
+    public boolean getDisplayed() {
+        return mDisplayed;
+    }
+
+    public Intent getDefaultOpenIntent(Context context, ProviderCloudMessage message) {
+        PackageManager pm = context.getPackageManager();
+        Intent intent = pm.getLaunchIntentForPackage(context.getPackageName());
+        intent.putExtra(MPMessagingAPI.CLOUD_MESSAGE_EXTRA, message);
+        return intent;
+    }
+
+    public Bundle getExtras() {
+        return mExtras;
     }
 
     /**
@@ -112,20 +230,29 @@ public class ProviderCloudMessage extends AbstractCloudMessage {
      * @param possibleKeys
      * @return
      */
-    private String findProviderMessage(JSONArray possibleKeys){
+    private String findProviderMessage(JSONArray possibleKeys) {
         if (possibleKeys != null) {
-            for (int i = 0; i < possibleKeys.length(); i++){
+            for (int i = 0; i < possibleKeys.length(); i++) {
                 try {
                     String message = mExtras.getString(possibleKeys.getString(i));
                     if (message != null && message.length() > 0) {
                         mExtras.remove(possibleKeys.getString(i));
                         return message;
                     }
-                }catch (JSONException jse){
+                } catch (JSONException jse) {
 
                 }
             }
         }
         return "";
+    }
+
+    private boolean oreoNotificationCompatAvailable() {
+        try {
+            NotificationCompat.Builder.class.getMethod("setChannelId", String.class);
+            return true;
+        } catch (NoSuchMethodException ignore) {
+            return false;
+        }
     }
 }

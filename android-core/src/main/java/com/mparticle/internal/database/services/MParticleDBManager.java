@@ -22,18 +22,15 @@ import com.mparticle.internal.MessageManager;
 import com.mparticle.internal.MessageManagerCallbacks;
 import com.mparticle.internal.Session;
 import com.mparticle.internal.database.services.mp.BreadcrumbService;
-import com.mparticle.internal.database.services.mp.GcmMessageService;
 import com.mparticle.internal.database.services.mp.MessageService;
 import com.mparticle.internal.database.services.mp.ReportingService;
 import com.mparticle.internal.database.services.mp.SessionService;
 import com.mparticle.internal.database.services.mp.UploadService;
 import com.mparticle.internal.database.services.mp.UserAttributesService;
 import com.mparticle.internal.dto.AttributionChange;
-import com.mparticle.internal.dto.GcmMessage;
 import com.mparticle.internal.dto.ReadyUpload;
 import com.mparticle.internal.dto.UserAttributeRemoval;
 import com.mparticle.internal.dto.UserAttributeResponse;
-import com.mparticle.messaging.AbstractCloudMessage;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -72,7 +69,6 @@ public class MParticleDBManager extends BaseDBManager {
         SQLiteDatabase db = getMParticleDatabase();
         db.beginTransaction();
         new BreadcrumbService().updateMpId(db, oldMpId, newMpId);
-        new GcmMessageService().updateMpId(db, oldMpId, newMpId);
         new MessageService().updateMpId(db, oldMpId, newMpId);
         new ReportingService().updateMpId(db, oldMpId, newMpId);
         new SessionService().updateMpId(db, oldMpId, newMpId);
@@ -100,64 +96,6 @@ public class MParticleDBManager extends BaseDBManager {
             message.put(Constants.MessageType.BREADCRUMB, breadcrumbs);
         }
     }
-
-
-    /**
-     *
-     *
-     * GCM Message Methods
-     *
-     *
-     */
-
-    public void insertGcmMessage(AbstractCloudMessage message, String appState) throws JSONException {
-        GcmMessageService.insertGcmMessage(getMParticleDatabase(), message, appState, getMpid());
-    }
-
-    public int updateGcmBehavior(int newBehavior, long timestamp, String contentId) {
-        return GcmMessageService.updateGcmBehavior(getMParticleDatabase(), newBehavior, timestamp, contentId);
-    }
-
-    public String getPayload() {
-        return GcmMessageService.getPayload(getMParticleDatabase(), getMpid());
-    }
-
-
-    public List<GcmMessage> logInfluenceOpenGcmMessages(MessageManager.InfluenceOpenMessage message) {
-        return GcmMessageService.logInfluenceOpenGcmMessages(getMParticleDatabase(), message, getMpid());
-    }
-
-
-    public void deleteExpiredGcmMessages() {
-        GcmMessageService.deleteExpiredGcmMessages(getMParticleDatabase(), getMpid());
-    }
-
-    public JSONObject getGcmHistory(long mpid) throws JSONException {
-        List<GcmMessageService.GcmHistory> gcmHistories = GcmMessageService.getGcmHistory(getMParticleDatabase(), mpid);
-        JSONObject historyObject = new JSONObject();
-        for (GcmMessageService.GcmHistory gcmHistory : gcmHistories) {
-            JSONObject campaignObject = historyObject.optJSONObject(gcmHistory.getCampaignIdString());
-            //only append the latest pushes
-            if (campaignObject == null) {
-                campaignObject = new JSONObject();
-                campaignObject.put(Constants.MessageKey.PUSH_CONTENT_ID, gcmHistory.getContentId());
-                campaignObject.put(Constants.MessageKey.PUSH_CAMPAIGN_HISTORY_TIMESTAMP, gcmHistory.getDisplayDate());
-                historyObject.put(gcmHistory.getCampaignIdString(), campaignObject);
-            }
-        }
-        return historyObject;
-    }
-
-    public void clearOldProviderGcm() {
-        GcmMessageService.clearOldProviderGcm(getMParticleDatabase(), getMpid());
-    }
-
-
-    public int getCurrentBehaviors(String contentId) {
-        return GcmMessageService.getCurrentBehaviors(getMParticleDatabase(), contentId, getMpid());
-    }
-
-
 
     /**
      *
@@ -417,27 +355,8 @@ public class MParticleDBManager extends BaseDBManager {
                 configManager,
                 configManager.getCookies(mpid),
                 mpid);
-        addGCMHistory(batchMessage, mpid);
         return batchMessage;
     }
-
-    /**
-     * If the customer is using our GCM solution, query and append all of the history used for attribution.
-     *
-     */
-    void addGCMHistory(MessageBatch uploadMessage, long mpid) {
-        try {
-            deleteExpiredGcmMessages();
-            JSONObject historyObject = getGcmHistory(mpid);
-            if (historyObject != null) {
-                uploadMessage.put(Constants.MessageKey.PUSH_CAMPAIGN_HISTORY, historyObject);
-            }
-        } catch (Exception e) {
-            Logger.warning(e, "Error while building GCM campaign history");
-        }
-    }
-
-
 
 
     /**
