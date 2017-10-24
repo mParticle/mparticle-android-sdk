@@ -2,6 +2,7 @@ package com.mparticle.kits
 import com.android.build.gradle.LibraryExtension
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.maven.MavenDeployment
 import org.gradle.api.tasks.Upload
 import org.gradle.plugins.signing.SigningExtension
@@ -14,11 +15,13 @@ class KitPlugin implements Plugin<Project> {
         target.group = 'com.mparticle'
         target.buildscript.repositories.add(target.repositories.mavenLocal())
         target.repositories.add(target.repositories.mavenLocal())
+        target.configurations.create('deployerJars')
         target.buildscript.repositories.add(target.repositories.jcenter())
         target.repositories.add(target.repositories.jcenter())
         target.dependencies.add('compile', 'com.mparticle:android-kit-base:'+target.version)
         target.dependencies.add('testCompile', 'junit:junit:4.12')
         target.dependencies.add('testCompile', 'org.mockito:mockito-core:1.10.19')
+        target.dependencies.add('deployerJars', 'org.kuali.maven.wagons:maven-s3-wagon:1.2.1')
         target.extensions.create("mparticle", MParticlePluginExtension)
         LibraryExtension androidLib = target.android
         androidLib.compileSdkVersion(25)
@@ -70,6 +73,9 @@ class KitPlugin implements Plugin<Project> {
                         repository(url: 'https://oss.sonatype.org/content/repositories/snapshots/') {
                             authentication(userName: System.getenv('sonatypeUsername'), password: System.getenv('sonatypePassword'))
                         }
+                    } else if (target_maven_repo == 's3') {
+                        configuration = target.configurations.deployerJars
+                        repository(url: 's3://maven.mparticle.com')
                     } else {
                         repository(url: 'file://' + new File(System.getProperty('user.home'), '.m2/repository').absolutePath)
                     }
