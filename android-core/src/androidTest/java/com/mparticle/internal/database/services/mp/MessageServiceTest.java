@@ -21,10 +21,6 @@ import static junit.framework.Assert.assertEquals;
 public class MessageServiceTest extends BaseMPServiceTest {
     Long mpid1, mpid2;
 
-    @Override
-    protected void beforeClass() throws Exception {
-
-    }
 
     @Override
     protected void before() throws Exception {
@@ -165,21 +161,6 @@ public class MessageServiceTest extends BaseMPServiceTest {
             MessageService.insertMessage(database, "apiKey", getMpMessage(), 1);
         }
         assertEquals(MessageService.getMessagesForUpload(database).size(), 20);
-    }
-
-    @Test
-    public void testUpdateMessageStatus() {
-
-    }
-
-    private MPMessage getMpMessage() throws JSONException {
-        return getMpMessage(UUID.randomUUID().toString());
-    }
-
-    private MPMessage getMpMessage(String sessionId) throws JSONException {
-        Session session = new Session();
-        session.mSessionID = sessionId;
-        return new MPMessage.Builder("test", session, new Location("New York City"), 1).build();
     }
 
     private int getMaxId(List<MessageService.ReadyMessage> messages) {

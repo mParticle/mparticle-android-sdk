@@ -7,6 +7,8 @@ import android.support.test.runner.AndroidJUnit4;
 import com.mparticle.internal.MessageManager;
 import com.mparticle.utils.MParticleUtils;
 
+import junit.framework.Assert;
+
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -72,6 +74,12 @@ public class MParticleTest {
         assertTrue(MParticle.getInstance().mAppStateManager.getSession().isActive());
         MParticle.getInstance().setOptOut(true);
         assertFalse(MParticle.getInstance().mAppStateManager.getSession().isActive());
+    }
+
+    @Test
+    public void testSetInstallReferrer() {
+        MParticle.getInstance().setInstallReferrer("foo install referrer");
+        Assert.assertEquals("foo install referrer", MParticle.getInstance().getInstallReferrer());
     }
 
     private void ensureSessionActive() {

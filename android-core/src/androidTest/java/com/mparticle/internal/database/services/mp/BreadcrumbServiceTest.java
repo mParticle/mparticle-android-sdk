@@ -103,29 +103,6 @@ public class BreadcrumbServiceTest extends BaseMPServiceTest {
         assertEquals(BreadcrumbService.getBreadcrumbs(database, context, 3L).length(), 0);
     }
 
-    /**
-     * test that the logic to migrate existing database data to the new MPID depended schema is working
-     * @throws Exception
-     */
-
-    @Test
-    public void testMigrationToMpIdSpecific() throws Exception {
-        //TODO
-        //still need to implement the logic in the actual code
-    }
-
-    /**
-     * there will be some cases, when we get data coming in that is MPID dependent, but we have not
-     * received a return on the Identify() call yet, so we will need to be able to store data in a sort
-     * of "real MPID pending" state, then switch it all to the correct MPID when we get it
-     * @throws Exception
-     */
-    @Test
-    public void testUpdateMpIdOnIdentification() throws Exception {
-        //TODO
-        //still need to actually hash out this logic and use case, and implement in the actual code
-    }
-
     @Test
     public void testBreadcrumbLimit() throws JSONException {
         List<Integer> deleted = new ArrayList<Integer>();
