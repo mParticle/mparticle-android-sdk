@@ -17,7 +17,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.mparticle.internal.Constants.MessageKey.SESSION_ID;
 import static com.mparticle.internal.database.tables.mp.SessionTable.SessionTableColumns.APP_INFO;
 import static com.mparticle.internal.database.tables.mp.SessionTable.SessionTableColumns.TABLE_NAME;
 
@@ -140,6 +139,6 @@ public class SessionService extends SessionTable {
         ContentValues contentValues = new ContentValues();
                 contentValues.put(APP_INFO, appInfo.toString());
                 String[] whereArgs = {sessionId};
-                db.update(TABLE_NAME, contentValues, SESSION_ID + "=?", whereArgs);
+                db.update(TABLE_NAME, contentValues, SessionTableColumns.SESSION_ID + "=?", whereArgs);
     }
 }

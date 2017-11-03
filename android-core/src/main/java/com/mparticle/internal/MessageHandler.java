@@ -95,7 +95,11 @@ import java.util.UUID;
                 }
                 break;
             case INSTALL_REFERRER_UPDATED:
-                mMParticleDBManager.updateSessionInstallReferrer((String)msg.obj, mMessageManagerCallbacks.getDeviceAttributes().getAppInfo(mContext, true));
+                try {
+                    mMParticleDBManager.updateSessionInstallReferrer((String) msg.obj, mMessageManagerCallbacks.getDeviceAttributes().getAppInfo(mContext, true));
+                }catch (Exception e) {
+                    Logger.error(e, "Error updating session attributes in mParticle DB.");
+                }
                 break;
             case UPDATE_SESSION_ATTRIBUTES:
                 try {
