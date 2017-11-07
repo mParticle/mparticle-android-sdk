@@ -39,6 +39,7 @@ public class KitIntegrationFactory {
         kits.put(MParticle.ServiceProviders.TUNE,             "com.mparticle.kits.TuneKit");
         kits.put(MParticle.ServiceProviders.APPSFLYER,        "com.mparticle.kits.AppsFlyerKit");
         kits.put(MParticle.ServiceProviders.APPTENTIVE,       "com.mparticle.kits.ApptentiveKit");
+        kits.put(MParticle.ServiceProviders.CARNIVAL,         "com.mparticle.kits.CarnivalKit");
         kits.put(MParticle.ServiceProviders.BUTTON,           "com.mparticle.kits.ButtonKit");
         kits.put(MParticle.ServiceProviders.URBAN_AIRSHIP,    "com.mparticle.kits.UrbanAirshipKit");
         kits.put(MParticle.ServiceProviders.LEANPLUM,         "com.mparticle.kits.LeanplumKit");

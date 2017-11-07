@@ -1807,6 +1807,7 @@ public class MParticle {
         int WOOTRIC = 90;
         int APPSFLYER = 92;
         int APPTENTIVE = 97;
+        int CARNIVAL = 99;
         int APPTIMIZE = 105;
         int BUTTON = 1022;
         int LEANPLUM = 98;
