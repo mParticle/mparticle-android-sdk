@@ -2,6 +2,10 @@ package com.mparticle.internal;
 
 import com.mparticle.MPEvent;
 import com.mparticle.MParticle;
+import com.mparticle.MockMParticle;
+import com.mparticle.commerce.Cart;
+import com.mparticle.commerce.CommerceEvent;
+import com.mparticle.commerce.Product;
 
 import org.junit.Test;
 
@@ -50,5 +54,16 @@ public class MPMessageTest {
 
         assertEquals(message3.getAttributes().getString("EventLength"), "123");
 
+    }
+
+    @Test
+    public void testNullCartOnCommerceEvent() throws Exception {
+        MParticle.setInstance(new MockMParticle());
+        CommerceEvent event = new CommerceEvent.Builder(Product.ADD_TO_CART, new Product.Builder("foo", "bar", 10).build()).build();
+        Cart cart = null;
+        MPMessage message = new MPMessage.Builder(event, new Session(), null, 0, cart)
+                .timestamp(12345)
+                .build();
+        assertNotNull(message);
     }
 }

@@ -7,7 +7,12 @@ import android.os.Message;
 import com.mparticle.MPEvent;
 import com.mparticle.MParticle;
 import com.mparticle.MockMParticle;
+import com.mparticle.commerce.CommerceEvent;
+import com.mparticle.commerce.Product;
+import com.mparticle.identity.IdentityApi;
+import com.mparticle.identity.MParticleUser;
 import com.mparticle.internal.database.services.MParticleDBManager;
+import com.mparticle.mock.MockConfigManager;
 import com.mparticle.mock.MockContext;
 import com.mparticle.mock.MockSharedPreferences;
 
@@ -217,6 +222,23 @@ public class MessageManagerTest {
         assertEquals(flag2.get(0), "value 3");
         assertEquals(101, context.getSharedPreferences("name", 0).getInt(Constants.PrefKeys.EVENT_COUNTER, -1));
         Mockito.verify(messageHandler, Mockito.times(101)).sendMessage(Mockito.any(Message.class));
+    }
+
+    @Test
+    public void testLogCommerceEventWithNullUser() throws Exception {
+        MParticle mparticle = Mockito.mock(MParticle.class);
+        Mockito.when(mparticle.getAppStateManager()).thenReturn(Mockito.mock(AppStateManager.class));
+        IdentityApi mockIdentity = Mockito.mock(IdentityApi.class);
+        Mockito.when(mparticle.Identity()).thenReturn(mockIdentity);
+
+        MParticle.setInstance(mparticle);
+
+        CommerceEvent event = new CommerceEvent.Builder(Product.ADD_TO_CART, new Product.Builder("foo", "bar", 10).build()).build();
+        MPMessage message = manager.logEvent(event);
+        assertNotNull(message);
+
+        //Mockito defaults to an Answer of 1
+        assertEquals(1L, message.getMpId());
     }
 
     @Test

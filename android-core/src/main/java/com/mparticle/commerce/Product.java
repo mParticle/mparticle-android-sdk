@@ -95,7 +95,7 @@ public final class Product {
         mCustomAttributes = builder.mCustomAttributes;
         updateTimeAdded();
 
-        boolean devMode = MParticle.getInstance().getEnvironment().equals(MParticle.Environment.Development);
+        boolean devMode = MParticle.Environment.Development.equals(MParticle.getInstance().getEnvironment());
 
         if (MPUtility.isEmpty(mName)) {
             String message = "Product name is required.";

@@ -1,6 +1,7 @@
 package com.mparticle.internal;
 
 import android.location.Location;
+import android.support.annotation.Nullable;
 
 import com.mparticle.MParticle;
 import com.mparticle.commerce.Cart;
@@ -85,7 +86,7 @@ public class MPMessage extends JSONObject{
         }
     }
 
-    private static void addCommerceEventInfo(MPMessage message, CommerceEvent event, Cart cart) {
+    private static void addCommerceEventInfo(MPMessage message, CommerceEvent event, @Nullable Cart cart) {
         try {
 
             if (event.getScreen() != null) {

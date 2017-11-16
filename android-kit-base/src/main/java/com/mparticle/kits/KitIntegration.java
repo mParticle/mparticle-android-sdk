@@ -11,6 +11,7 @@ import android.os.Bundle;
 import com.mparticle.MPEvent;
 import com.mparticle.MParticle;
 import com.mparticle.commerce.CommerceEvent;
+import com.mparticle.identity.MParticleUser;
 
 import java.lang.ref.WeakReference;
 import java.math.BigDecimal;
@@ -98,14 +99,19 @@ public abstract class KitIntegration {
      * @return a Map of identity-types and identity-values
      */
     public final Map<MParticle.IdentityType, String> getUserIdentities() {
-       Map<MParticle.IdentityType, String> identities = MParticle.getInstance().Identity().getCurrentUser().getUserIdentities();
-       Map<MParticle.IdentityType, String> filteredIdentities = new HashMap<MParticle.IdentityType, String>(identities.size());
-       for (Map.Entry<MParticle.IdentityType, String> entry : identities.entrySet()) {
-           if (getConfiguration().shouldSetIdentity(entry.getKey())) {
-               filteredIdentities.put(entry.getKey(), entry.getValue());
+       MParticleUser user = MParticle.getInstance().Identity().getCurrentUser();
+       if (user == null) {
+           return new HashMap<MParticle.IdentityType, String>();
+       } else {
+           Map<MParticle.IdentityType, String> identities = user.getUserIdentities();
+           Map<MParticle.IdentityType, String> filteredIdentities = new HashMap<MParticle.IdentityType, String>(identities.size());
+           for (Map.Entry<MParticle.IdentityType, String> entry : identities.entrySet()) {
+               if (getConfiguration().shouldSetIdentity(entry.getKey())) {
+                   filteredIdentities.put(entry.getKey(), entry.getValue());
+               }
            }
+           return identities;
        }
-       return identities;
     }
 
     /**
@@ -120,9 +126,13 @@ public abstract class KitIntegration {
      * @return a Map of attributes according to the logic above.
      */
     public final Map<String, Object> getAllUserAttributes() {
+        MParticleUser user = MParticle.getInstance().Identity().getCurrentUser();
+        if (user == null) {
+            return new HashMap<String, Object>();
+        }
         Map<String, Object> attributes = (Map<String, Object>) KitConfiguration.filterAttributes(
                 getConfiguration().getUserAttributeFilters(),
-                MParticle.getInstance().Identity().getCurrentUser().getUserAttributes()
+                user.getUserAttributes()
         );
         if ((this instanceof AttributeListener) && ((AttributeListener)this).supportsAttributeLists()) {
             return attributes;

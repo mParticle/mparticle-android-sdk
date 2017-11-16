@@ -469,8 +469,9 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
     }
 
     private void syncUserIdentities(KitIntegration.AttributeListener attributeListener, KitConfiguration configuration) {
-        if (MParticle.getInstance().Identity().getCurrentUser() != null) {
-            Map<MParticle.IdentityType, String> identities = MParticle.getInstance().Identity().getCurrentUser().getUserIdentities();
+        MParticleUser user = MParticle.getInstance().Identity().getCurrentUser();
+        if (user != null) {
+            Map<MParticle.IdentityType, String> identities = user.getUserIdentities();
             if (identities != null) {
                 for (Map.Entry<MParticle.IdentityType, String> entry : identities.entrySet()) {
                     if (configuration.shouldSetIdentity(entry.getKey())) {

@@ -70,7 +70,7 @@ public final class CommerceEvent {
         mNonIteraction = builder.mNonIteraction;
         mEventName = builder.mEventName;
 
-        boolean devMode = MParticle.getInstance().getEnvironment().equals(MParticle.Environment.Development);
+        boolean devMode = MParticle.Environment.Development.equals(MParticle.getInstance().getEnvironment());
 
         if (MPUtility.isEmpty(mProductAction)
                 && MPUtility.isEmpty(mPromotionAction)

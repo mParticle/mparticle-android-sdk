@@ -62,6 +62,7 @@ public class IdentityApi {
      * return the current MPID, even if an Identity request, which might cause the MPID to change, is
      * currently in progress
      */
+    @Nullable
     public MParticleUser getCurrentUser() {
         long mpid = mConfigManager.getMpid();
         if (Constants.TEMPORARY_MPID == mpid) {

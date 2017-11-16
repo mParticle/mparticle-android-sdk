@@ -19,7 +19,9 @@ import android.telephony.TelephonyManager;
 import com.mparticle.MPEvent;
 import com.mparticle.MParticle;
 import com.mparticle.UserAttributeListener;
+import com.mparticle.commerce.Cart;
 import com.mparticle.commerce.CommerceEvent;
+import com.mparticle.identity.MParticleUser;
 import com.mparticle.internal.Constants.MessageKey;
 import com.mparticle.internal.Constants.MessageType;
 import com.mparticle.internal.database.services.MParticleDBManager;
@@ -340,7 +342,12 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
     public MPMessage logEvent(CommerceEvent event) {
         if (event != null) {
             try {
-                MPMessage message = new MPMessage.Builder(event, mAppStateManager.getSession(), mLocation, mConfigManager.getMpid(), MParticle.getInstance().Identity().getCurrentUser().getCart())
+                MParticleUser user = MParticle.getInstance().Identity().getCurrentUser();
+                Cart cart = null;
+                if (user != null) {
+                    cart = user.getCart();
+                }
+                MPMessage message = new MPMessage.Builder(event, mAppStateManager.getSession(), mLocation, mConfigManager.getMpid(), cart)
                         .timestamp(mAppStateManager.getSession().mLastEventTime)
                         .build();
                 mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
