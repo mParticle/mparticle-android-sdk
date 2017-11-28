@@ -6,8 +6,8 @@ apply plugin: 'com.android.library'
 apply from: '../scripts/maven.gradle'
 
 android {
-    compileSdkVersion 26
-    buildToolsVersion "26.0.1"
+    compileSdkVersion 27
+    buildToolsVersion "27.0.1"
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_6
