@@ -459,6 +459,7 @@ public class Constants {
         String DEPRECATED_USER_ATTRS = "mp::user_attrs::";
 
         String FIRSTRUN = "mp::firstrun::";
+        String FIRSTRUN_AST = "mp::firstrun::ast";
         String INITUPGRADE = "mp::initupgrade";
         String PROPERTY_APP_VERSION = "mp::appversion";
         String PROPERTY_OS_VERSION = "mp::osversion";

@@ -114,7 +114,6 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
      * Batches/messages need to communicate the current telephony status when available.
      */
     private static TelephonyManager sTelephonyManager;
-    private boolean mFirstRun = true;
 
     /**
      * Used solely for unit testing
@@ -138,6 +137,10 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
         sPreferences = appContext.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
         mInstallType = installType;
 
+        // this is to account for backwards compatibility. At the time of this change, isFirstRunForMessage()
+        // is used for both the first run message and the first run boolean in the AST, but we would like
+        // to track them separately.
+        setFirstRunForAST(isFirstRunForMessage());
     }
 
     public MessageManager(Context appContext, ConfigManager configManager, MParticle.InstallType installType, AppStateManager appStateManager, boolean devicePerformanceMetricsDisabled) {
@@ -254,9 +257,8 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
 
             editor.apply();
 
-            mFirstRun = !sPreferences.contains(Constants.PrefKeys.FIRSTRUN + mConfigManager.getApiKey());
-            if (mFirstRun) {
-                sPreferences.edit().putBoolean(Constants.PrefKeys.FIRSTRUN + mConfigManager.getApiKey(), false).apply();
+            if (isFirstRunForMessage()) {
+                setIsFirstRunForMessage();
                 try {
                     JSONObject firstRunMessage = createFirstRunMessage();
                     mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, firstRunMessage));
@@ -563,7 +565,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
                 if (stateTransInit.equals(Constants.StateTransitionType.STATE_TRANS_INIT)) {
                     SharedPreferences.Editor editor = sPreferences.edit();
 
-                    if (!mFirstRun) {
+                    if (!isFirstRunForAST()) {
                         message.put(MessageKey.APP_INIT_CRASHED, crashedInForeground);
                     }
 
@@ -587,7 +589,10 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
                         }
                     }
 
-                    message.put(MessageKey.APP_INIT_FIRST_RUN, mFirstRun);
+                    message.put(MessageKey.APP_INIT_FIRST_RUN, isFirstRunForAST());
+                    if (isFirstRunForAST()) {
+                        setFirstRunForAST(false);
+                    }
                     message.put(MessageKey.APP_INIT_UPGRADE, upgrade);
                 }
 
@@ -766,9 +771,9 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
                 IntentFilter filter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
                 if (MPUtility.checkPermission(sContext, android.Manifest.permission.ACCESS_NETWORK_STATE)) {
                     //same as with battery, get current connection so we don't have to wait for the next change
-                    ConnectivityManager connectivyManager = (ConnectivityManager) sContext
+                    ConnectivityManager connectivityManager = (ConnectivityManager) sContext
                             .getSystemService(Context.CONNECTIVITY_SERVICE);
-                    NetworkInfo activeNetwork = connectivyManager.getActiveNetworkInfo();
+                    NetworkInfo activeNetwork = connectivityManager.getActiveNetworkInfo();
                     setDataConnection(activeNetwork);
                     filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
                 }
@@ -903,14 +908,30 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
         return response;
     }
 
+    private boolean isFirstRunForMessage() {
+        return !sPreferences.contains(Constants.PrefKeys.FIRSTRUN + mConfigManager.getApiKey());
+    }
+
+    private void setIsFirstRunForMessage() {
+        sPreferences.edit().putBoolean(Constants.PrefKeys.FIRSTRUN + mConfigManager.getApiKey(), false).apply();
+    }
+
+    private boolean isFirstRunForAST() {
+        return sPreferences.getBoolean(Constants.PrefKeys.FIRSTRUN_AST + mConfigManager.getApiKey(), true);
+    }
+
+    private void setFirstRunForAST(boolean firstRun) {
+        sPreferences.edit().putBoolean(Constants.PrefKeys.FIRSTRUN_AST + mConfigManager.getApiKey(), firstRun).apply();
+    }
+
     private class StatusBroadcastReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context appContext, Intent intent) {
             try {
                 if (ConnectivityManager.CONNECTIVITY_ACTION.equals(intent.getAction())) {
-                    ConnectivityManager connectivyManager = (ConnectivityManager) appContext
+                    ConnectivityManager connectivityManager = (ConnectivityManager) appContext
                             .getSystemService(Context.CONNECTIVITY_SERVICE);
-                    NetworkInfo activeNetwork = connectivyManager.getActiveNetworkInfo();
+                    NetworkInfo activeNetwork = connectivityManager.getActiveNetworkInfo();
                     MessageManager.this.setDataConnection(activeNetwork);
                 } else if (Intent.ACTION_BATTERY_CHANGED.equals(intent.getAction())) {
                     int level = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
