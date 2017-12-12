@@ -129,6 +129,9 @@ public class Logger {
         catch (UnsatisfiedLinkError ex) {
             return false;
         }
+        catch (RuntimeException ignored) {
+            return false;
+        }
         return isADBLoggable || (isAPILoggable && MPUtility.isDevEnv());
     }
 }

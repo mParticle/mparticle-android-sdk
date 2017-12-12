@@ -7,7 +7,7 @@ apply from: '../scripts/maven.gradle'
 
 android {
     compileSdkVersion 26
-    buildToolsVersion "26.0.1"
+    buildToolsVersion "26.0.2"
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_6
@@ -51,7 +51,7 @@ android {
 
     defaultConfig {
         minSdkVersion 9
-        targetSdkVersion 14
+        targetSdkVersion 26
         versionName project.version.toString().replace("-SNAPSHOT", "")
         versionCode Integer.parseInt(new Date().format('yyyyMMdd'))
 
@@ -95,20 +95,21 @@ task coreSdkJavadocs(type: Javadoc) {
 }
 
 dependencies {
-    provided 'com.google.android.gms:play-services-gcm:[7.0,)'
-    provided 'com.google.android.gms:play-services-ads:[7.0,)'
-    provided 'com.google.firebase:firebase-messaging:[7.0,)'
-    provided 'com.android.support:support-v4:[26.0, )'
-    testCompile 'junit:junit:4.12'
-    testCompile  files('libs/java-json.jar')
-    testCompile "org.powermock:powermock-module-junit4:1.6.2"
-    testCompile "org.powermock:powermock-api-mockito:1.6.2"
-    testCompile "org.powermock:powermock-core:1.6.2"
+    compileOnly 'com.google.android.gms:play-services-gcm:[7.0,)'
+    compileOnly 'com.google.android.gms:play-services-ads:[7.0,)'
+    compileOnly 'com.google.firebase:firebase-messaging:[7.0,)'
+    compileOnly 'com.android.support:support-v4:[26.0, )'
+    testImplementation 'junit:junit:4.12'
+    testImplementation  files('libs/java-json.jar')
+    testImplementation 'org.powermock:powermock-module-junit4:1.6.2'
+    testImplementation 'org.powermock:powermock-api-mockito:1.6.2'
+    testImplementation 'org.powermock:powermock-core:1.6.2'
+    testImplementation 'com.android.support:support-v4:26.0+'
 
-    androidTestCompile 'com.android.support:support-annotations:24.0.0'
-    androidTestCompile 'com.android.support.test:runner:0.5'
-    androidTestCompile 'com.android.support.test:rules:0.5'
-    androidTestCompile('org.mockito:mockito-core:1+'){
+    androidTestImplementation 'com.android.support:support-annotations:24.0.0'
+    androidTestImplementation 'com.android.support.test:runner:0.5'
+    androidTestImplementation 'com.android.support.test:rules:0.5'
+    androidTestImplementation('org.mockito:mockito-core:1+'){
         exclude group: 'junit' exclude group: 'org.hamcrest', module: 'hamcrest-core'
     }
 }
