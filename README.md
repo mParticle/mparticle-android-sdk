@@ -16,7 +16,7 @@ You can grab the Core SDK via Maven Central. Please reference the badge above an
 
 ```groovy
 dependencies {
-    compile 'com.mparticle:android-core:5.0.7'
+    implementation 'com.mparticle:android-core:5.0.8'
 }
 ```
 
@@ -26,9 +26,9 @@ Several integrations require additional client-side add-on libraries called "kit
 
 ```groovy
 dependencies {
-    compile (
-        'com.mparticle:android-example-kit:5.0.7',
-        'com.mparticle:android-another-kit:5.0.7'
+    implementation (
+        'com.mparticle:android-example-kit:5.0.8',
+        'com.mparticle:android-another-kit:5.0.8'
     )
 }
 ```
@@ -69,15 +69,15 @@ Kit | Maven Artifact
 The Google Play Services Ads framework is necessary to collect the Android Advertisting ID. AAID collection is required by all attribution and audience integrations, and many other integrations. Include the `-ads` artifact, a subset of [Google Play Services](https://developers.google.com/android/guides/setup):
 
 ```groovy
-    compile 'com.google.android.gms:play-services-ads:9.0.0'
+    implementation 'com.google.android.gms:play-services-ads:11.6.2'
 ```
 
-##### Google Cloud Messaging
+##### Firebase Cloud Messaging
 
-mParticle supports several marketing automation and push messaging integrations. These require that mParticle register for an instance id (formely known as a push registration token) using the Google Play Services Cloud Messaging framework. Include the `-gcm` artifact, a subset of [Google Play Services](https://developers.google.com/android/guides/setup):
+mParticle supports several marketing automation and push messaging integrations. These require that mParticle register for an instance id using the Firebase Cloud Messaging framework:
 
 ```groovy
-    compile 'com.google.android.gms:play-services-gcm:9.0.0'
+    implementation 'com.google.firebase:firebase-messaging:11.6.2'
 ```
 
 ### Google Play Install Referrer
@@ -113,19 +113,9 @@ public class ExampleReceiver extends BroadcastReceiver {
 
 ## Initialize the SDK
 
-Grab your mParticle key and secret from [your app's dashboard](https://app.mparticle.com/apps) and add them as `string` resources in your app:
+1. Grab your mParticle key and secret from [your workspace's dashboard](https://app.mparticle.com/apps) and construct an `MParticleOptions` object.
 
-```xml
-<?xml version="1.0" encoding="utf-8" ?>
-<!-- ex. src/main/res/values/mparticle.xml -->
-<resources>
-    <string name="mp_key">APP KEY</string>
-    <string name="mp_secret">APP SECRET</string>
-</resources>
-```
-> You can also pass your key/secret programmatically in the method below.
-
-Call `start` from the `onCreate` method of your app's `Application` class. It's crucial that the SDK be started here for proper session management. If you don't already have an `Application` class, create it and then specify its fully-qualified name in the `<application>` tag of your app's `AndroidManifest.xml`.
+2. Call `start` from the `onCreate` method of your app's `Application` class. It's crucial that the SDK be started here for proper session management. If you don't already have an `Application` class, create it and then specify its fully-qualified name in the `<application>` tag of your app's `AndroidManifest.xml`.
 
 ```java
 package com.example.myapp;
@@ -137,7 +127,18 @@ public class MyApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        MParticle.start(this);
+        MParticleOptions options = MParticleOptions.builder(this)
+            .credentials("REPLACE ME WITH KEY","REPLACE ME WITH SECRET")
+            .setLogLevel(MParticle.LogLevel.VERBOSE)
+            .identify(identifyRequest)
+            .identifyTask(
+                new BaseIdentityTask()
+                        .addFailureListener(this)
+                        .addSuccessListener(this)
+                    )
+            .build();
+
+        MParticle.start(options);
     }
 }
 ```
