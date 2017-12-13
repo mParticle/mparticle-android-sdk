@@ -38,7 +38,7 @@ public class MParticleTest {
         Mockito.when(mp.mConfigManager.isEnabled()).thenReturn(true);
         Mockito.when(mp.mConfigManager.getMpid()).thenReturn(1L);
         MParticle.setInstance(mp);
-        MParticle.start(new com.mparticle.mock.MockContext());
+        MParticle.start(MParticleOptions.builder(new com.mparticle.mock.MockContext()).build());
         assertFalse(mp.Identity().getCurrentUser().setUserAttribute(null, "test"));
         assertFalse(mp.Identity().getCurrentUser().setUserAttribute(null, null));
         assertFalse(mp.Identity().getCurrentUser().setUserAttribute(new String(new char[257]), null));
@@ -97,7 +97,7 @@ public class MParticleTest {
         Mockito.when(mp.mConfigManager.isEnabled()).thenReturn(true);
         Mockito.when(mp.mConfigManager.getMpid()).thenReturn(2L);
         MParticle.setInstance(mp);
-        MParticle.start(new com.mparticle.mock.MockContext());
+        MParticle.start(MParticleOptions.builder(new com.mparticle.mock.MockContext()).build());
         assertFalse(mp.Identity().getCurrentUser().setUserAttributeList(null, null));
         assertFalse(mp.Identity().getCurrentUser().setUserAttributeList(new String(new char[257]), null));
 
@@ -144,7 +144,7 @@ public class MParticleTest {
     @Test
     public void testIncrementUserAttribute() throws Exception {
         MParticle.setInstance(new MockMParticle());
-        MParticle.start(new com.mparticle.mock.MockContext());
+        MParticle.start(MParticleOptions.builder(new com.mparticle.mock.MockContext()).build());
         MParticle mp = MParticle.getInstance();
         Mockito.when(mp.mConfigManager.getMpid()).thenReturn(12L);
         assertFalse(mp.Identity().getCurrentUser().incrementUserAttribute(null, 3));
@@ -172,7 +172,7 @@ public class MParticleTest {
     @Test
     public void testGetUserAttributes() throws Exception {
         MParticle.setInstance(new MockMParticle());
-        MParticle.start(new com.mparticle.mock.MockContext());
+        MParticle.start(MParticleOptions.builder(new com.mparticle.mock.MockContext()).build());
         MParticle mp = MParticle.getInstance();
         Mockito.when(mp.mConfigManager.getMpid()).thenReturn(1L);
         mp.Identity().getCurrentUser().getUserAttributes();
@@ -182,7 +182,7 @@ public class MParticleTest {
     @Test
     public void testGetUserAttributeLists() throws Exception {
         MParticle.setInstance(new MockMParticle());
-        MParticle.start(new com.mparticle.mock.MockContext());
+        MParticle.start(MParticleOptions.builder(new com.mparticle.mock.MockContext()).build());
         MParticle mp = MParticle.getInstance();
         Mockito.when(mp.mConfigManager.getMpid()).thenReturn(1L);
         mp.Identity().getCurrentUser().getUserAttributes();
@@ -192,7 +192,7 @@ public class MParticleTest {
     @Test
     public void testGetAllUserAttributes() throws Exception {
         MParticle.setInstance(new MockMParticle());
-        MParticle.start(new com.mparticle.mock.MockContext());
+        MParticle.start(MParticleOptions.builder(new com.mparticle.mock.MockContext()).build());
         MParticle mp = MParticle.getInstance();
         Mockito.when(mp.mConfigManager.getMpid()).thenReturn(1L);
 

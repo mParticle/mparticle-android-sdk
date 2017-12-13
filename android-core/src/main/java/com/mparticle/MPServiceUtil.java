@@ -164,7 +164,7 @@ public class MPServiceUtil {
                 }
             };
             KitFrameworkWrapper.setKitsLoadedListener(kitsLoadedListener);
-            MParticle.start(mContext);
+            MParticle.start(MParticleOptions.builder(mContext).build());
 
         } catch (Exception e) {
             Logger.warning("GCM parsing error: " + e.toString());
@@ -191,7 +191,7 @@ public class MPServiceUtil {
                 (NotificationManager) mContext.getSystemService(NOTIFICATION_SERVICE);
         manager.cancel(message.getId());
 
-        MParticle.start(mContext.getApplicationContext());
+        MParticle.start(MParticleOptions.builder(mContext.getApplicationContext()).build());
         Intent broadcast = new Intent(MPMessagingAPI.BROADCAST_NOTIFICATION_TAPPED);
         broadcast.putExtra(MPMessagingAPI.CLOUD_MESSAGE_EXTRA, message);
 

@@ -113,19 +113,7 @@ public class MParticle {
     static volatile boolean sAndroidIdDisabled;
     static volatile boolean sDevicePerformanceMetricsDisabled;
 
-
     protected MParticle() { }
-
-
-    /**
-     * Start the mParticle SDK and begin tracking a user session. This method must be called prior to {@link #getInstance()}.
-     *
-     * @param context Required reference to a Context object
-     */
-
-    public static void start(Context context) {
-        start(MParticleOptions.builder(context).build());
-    }
 
     /**
      * Start the mParticle SDK and begin tracking a user session. This method must be called prior to {@link #getInstance()}.
