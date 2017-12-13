@@ -16,7 +16,7 @@ You can grab the Core SDK via Maven Central. Please reference the badge above an
 
 ```groovy
 dependencies {
-    compile 'com.mparticle:android-core:4.16.12'
+    compile 'com.mparticle:android-core:4.17.0'
 }
 ```
 
@@ -27,8 +27,8 @@ Several integrations require additional client-side add-on libraries called "kit
 ```groovy
 dependencies {
     compile (
-        'com.mparticle:android-example-kit:4.16.12',
-        'com.mparticle:android-another-kit:4.16.12'
+        'com.mparticle:android-example-kit:4.17.0',
+        'com.mparticle:android-another-kit:4.17.0'
     )
 }
 ```
@@ -71,15 +71,15 @@ Kit | Maven Artifact
 The Google Play Services Ads framework is necessary to collect the Android Advertisting ID. AAID collection is required by all attribution and audience integrations, and many other integrations. Include the `-ads` artifact, a subset of [Google Play Services](https://developers.google.com/android/guides/setup):
 
 ```groovy
-    compile 'com.google.android.gms:play-services-ads:9.0.0'
+implementation 'com.google.android.gms:play-services-ads:11.6.2'
 ```
 
 ##### Google Cloud Messaging
 
-mParticle supports several marketing automation and push messaging integrations. These require that mParticle register for an instance id (formely known as a push registration token) using the Google Play Services Cloud Messaging framework. Include the `-gcm` artifact, a subset of [Google Play Services](https://developers.google.com/android/guides/setup):
+mParticle supports several marketing automation and push messaging integrations. These require that mParticle register for an Instance Id using the Firebase Cloud Messaging framework:
 
 ```groovy
-    compile 'com.google.android.gms:play-services-gcm:9.0.0'
+implementation 'com.google.firebase:firebase-messaging:11.6.2'
 ```
 
 ### Google Play Install Referrer
