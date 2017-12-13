@@ -79,9 +79,7 @@ public class MPReceiver extends BroadcastReceiver {
     public final void onReceive(Context context, Intent intent) {
         if (!MPARTICLE_IGNORE.equals(intent.getAction()) && !intent.getBooleanExtra(MPARTICLE_IGNORE, false)) {
             if ("com.android.vending.INSTALL_REFERRER".equals(intent.getAction())) {
-                String referrer = intent.getStringExtra("referrer");
-                SharedPreferences preferences = context.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
-                preferences.edit().putString(Constants.PrefKeys.INSTALL_REFERRER, referrer).apply();
+                ReferrerReceiver.setInstallReferrer(context, intent);
             } else if (MPMessagingAPI.BROADCAST_NOTIFICATION_TAPPED.equalsIgnoreCase(intent.getAction())){
                 ProviderCloudMessage message = intent.getParcelableExtra(MPMessagingAPI.CLOUD_MESSAGE_EXTRA);
                 if (!onNotificationTapped(message)){

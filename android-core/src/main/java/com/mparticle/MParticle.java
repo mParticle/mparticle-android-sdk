@@ -205,6 +205,18 @@ public class MParticle {
                         PushRegistrationHelper.PushRegistration pushRegistration = options.getPushRegistration();
                         instance.logPushRegistration(pushRegistration.instanceId, pushRegistration.senderId);
                     }
+                    InstallReferrerHelper.fetchInstallReferrer(context, new InstallReferrerHelper.InstallReferrerCallback() {
+                        @Override
+                        public void onReceived(String installReferrer) {
+                            InstallReferrerHelper.setInstallReferrer(instance.mAppContext, installReferrer);
+                        }
+
+                        @Override
+                        public void onFailed() {
+                            //do nothing, it very may well be the case that the InstallReferrer API
+                            //is not available, and the user will have to rely upon the ReferrerReceiver
+                        }
+                    });
                 }
             }
         }
@@ -258,7 +270,7 @@ public class MParticle {
      *
      * @return true if Android ID collection is disabled. (false by default)
 
-     * @see MParticleOptions.Builder#setAndroidIdDisabled(boolean)
+     * @see MParticleOptions.Builder#androidIdDisabled(boolean)
      */
     public static boolean isAndroidIdDisabled() {
         return sAndroidIdDisabled;
@@ -329,11 +341,11 @@ public class MParticle {
      * automatically retrieved upon installation from Google Play.
      */
     public void setInstallReferrer(String referrer) {
-        ReferrerReceiver.setInstallReferrer(mAppContext, referrer);
+        InstallReferrerHelper.setInstallReferrer(mAppContext, referrer);
     }
 
     public String getInstallReferrer() {
-        return mPreferences.getString(PrefKeys.INSTALL_REFERRER, null);
+        return InstallReferrerHelper.getInstallReferrer(mAppContext);
     }
 
     /**

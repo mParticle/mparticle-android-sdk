@@ -476,6 +476,13 @@ public class MPUtility {
         return false;
     }
 
+    public static boolean isInstallRefApiAvailable() {
+        try {
+            Class.forName("com.android.installreferrer.api.InstallReferrerStateListener");
+            return true;
+        } catch (Exception ignored) {}
+        return false;
+    }
 
     public static BigInteger hashFnv1A(byte[] data) {
         final BigInteger INIT64 = new BigInteger("cbf29ce484222325", 16);

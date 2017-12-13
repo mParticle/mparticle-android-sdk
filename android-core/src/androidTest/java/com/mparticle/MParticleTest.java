@@ -3,8 +3,10 @@ package com.mparticle;
 import android.os.Looper;
 import android.support.test.InstrumentationRegistry;
 
+import com.mparticle.internal.KitFrameworkWrapper;
 import com.mparticle.internal.MessageManager;
 import com.mparticle.utils.MParticleUtils;
+import com.mparticle.utils.RandomUtils;
 
 import junit.framework.Assert;
 
@@ -12,29 +14,23 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import java.util.Arrays;
+
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertTrue;
 
 
-public class MParticleTest {
+public class MParticleTest extends BaseCleanStartedEachTest {
 
-    @BeforeClass
-    public static void setup() {
-        if (Looper.myLooper() == null) {
-            Looper.prepare();
-        }
-        MParticleUtils.clear();
+    @Override
+    protected void beforeClass() throws Exception {
+
     }
 
-    @Before
-    public void preConditions() {
-        MParticle.setInstance(null);
-        MParticleOptions options = MParticleOptions.builder(InstrumentationRegistry.getContext())
-                .credentials("key", "secret")
-                .build();
-        MParticle.start(options);
-        assertNotNull(MParticle.getInstance());
+    @Override
+    protected void before() throws Exception {
+
     }
 
     @Test
@@ -80,6 +76,80 @@ public class MParticleTest {
         Assert.assertEquals("foo install referrer", MParticle.getInstance().getInstallReferrer());
     }
 
+    @Test
+    public void testInstallReferrerUpdate() {
+        String randomName = RandomUtils.getInstance().getAlphaNumericString(RandomUtils.getInstance().randomInt(4, 64));
+        MParticle.getInstance().setInstallReferrer(randomName);
+        assertTrue(MParticle.getInstance().getInstallReferrer().equals(randomName));
+    }
+
+    /**
+     * These tests are to make sure that we are not missing any instances of the InstallReferrer
+     * being set at any of the entry points, without the corresponding installReferrerUpdated() calls
+     * being made
+     * @throws Exception
+     */
+    @Test
+    public void testCalledUpdateInstallReferrer() throws Exception {
+        final boolean[] called = new boolean[2];
+        MParticle.getInstance().mMessageManager = new MessageManager(){
+            @Override
+            public void installReferrerUpdated() {
+                called[0] = true;
+            }
+        };
+
+        MParticle.getInstance().mKitManager = new KitFrameworkWrapper(mContext, null,null, null, null, true) {
+            @Override
+            public void installReferrerUpdated() {
+                called[1] = true;
+            }
+        };
+
+        //test when the InstallReferrer is set directly on the InstallReferrerHelper
+        String installReferrer = RandomUtils.getInstance().getAlphaNumericString(10);
+        InstallReferrerHelper.setInstallReferrer(mContext, installReferrer);
+
+        assertTrue(called[0]);
+        assertTrue(called[1]);
+
+        Arrays.fill(called, false);
+
+        //test when it is set through the MParticle object in the public API
+        installReferrer = RandomUtils.getInstance().getAlphaNumericString(10);
+        MParticle.getInstance().setInstallReferrer(installReferrer);
+
+        assertTrue(called[0]);
+        assertTrue(called[1]);
+
+        Arrays.fill(called, false);
+
+        //test when it is received via the ReferrerReceiver Receiver
+        installReferrer = RandomUtils.getInstance().getAlphaNumericString(10);
+        ReferrerReceiver.setInstallReferrer(mContext, ReferrerReceiver.getMockInstallReferrerIntent(installReferrer));
+
+        assertTrue(called[0]);
+        assertTrue(called[1]);
+
+        Arrays.fill(called, false);
+
+        //test when it is received through the MPReceiver Receiver
+        installReferrer = RandomUtils.getInstance().getAlphaNumericString(10);
+        new MPReceiver().onReceive(mContext, ReferrerReceiver.getMockInstallReferrerIntent(installReferrer));
+
+        assertTrue(called[1]);
+        assertTrue(called[0]);
+
+        Arrays.fill(called, false);
+
+        //just a sanity check, if Context is null, it should not set mark the InstallReferrer as updated
+        installReferrer = RandomUtils.getInstance().getAlphaNumericString(10);
+        InstallReferrerHelper.setInstallReferrer(null, installReferrer);
+
+        org.junit.Assert.assertFalse(called[0]);
+        org.junit.Assert.assertFalse(called[1]);
+    }
+
     private void ensureSessionActive() {
         if (!MParticle.getInstance().isSessionActive()) {
             MParticle.getInstance().logEvent("Thing started", MParticle.EventType.Other);
@@ -90,5 +160,4 @@ public class MParticleTest {
     public static MessageManager getMessageManager() {
         return MParticle.getInstance().mMessageManager;
     }
-
 }

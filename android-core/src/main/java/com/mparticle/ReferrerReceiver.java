@@ -3,7 +3,6 @@ package com.mparticle;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 
 import com.mparticle.internal.Constants;
 import com.mparticle.internal.Logger;
@@ -34,33 +33,24 @@ import com.mparticle.internal.MPUtility;
  *
  */
 public class ReferrerReceiver extends BroadcastReceiver {
+    
     @Override
-    public final void onReceive(Context context, Intent intent) {
-       ReferrerReceiver.setInstallReferrer(context, intent);
+    public final void onReceive(final Context context, final Intent intent) {
+        setInstallReferrer(context, intent);
     }
 
-    static void setInstallReferrer(Context context, Intent intent){
-        if (context == null){
+    static void setInstallReferrer(Context context, Intent intent) {
+        if (context == null) {
             Logger.error("ReferrerReceiver Context can not be null");
             return;
         }
-        if (intent == null){
+        if (intent == null) {
             Logger.error("ReferrerReceiver intent can not be null");
             return;
         }
         if ("com.android.vending.INSTALL_REFERRER".equals(intent.getAction())) {
-           setInstallReferrer(context, intent.getStringExtra(Constants.REFERRER));
-        }
-    }
-
-    static void setInstallReferrer(Context context, String referrer) {
-        if (context != null) {
-            SharedPreferences preferences = context.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
-            preferences.edit().putString(Constants.PrefKeys.INSTALL_REFERRER, referrer).apply();
-        }
-        MParticle instance = MParticle.getInstance();
-        if (instance != null) {
-            instance.installReferrerUpdated();
+            String installReferrer = intent.getStringExtra(Constants.REFERRER);
+            InstallReferrerHelper.setInstallReferrer(context, installReferrer);
         }
     }
 
@@ -73,4 +63,5 @@ public class ReferrerReceiver extends BroadcastReceiver {
             return null;
         }
     }
+
 }

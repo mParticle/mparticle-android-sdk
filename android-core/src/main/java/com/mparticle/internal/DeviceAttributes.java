@@ -258,7 +258,7 @@ public class DeviceAttributes {
 
             deviceInfo.put(Constants.MessageKey.PUSH_SOUND_ENABLED, MParticle.getInstance().getConfigManager().isPushSoundEnabled());
             deviceInfo.put(Constants.MessageKey.PUSH_VIBRATION_ENABLED, MParticle.getInstance().getConfigManager().isPushVibrationEnabled());
-        }catch (JSONException jse) {
+        } catch (JSONException jse) {
             Logger.debug("Failed while building device-info object: ", jse.toString());
         }
     }
@@ -278,6 +278,7 @@ public class DeviceAttributes {
     JSONObject getAppInfo(Context context, boolean forceUpdateInstallReferrer) {
         if (appInfo == null) {
             appInfo = getStaticApplicationInfo(context);
+            updateInstallReferrer(context, appInfo);
         } else if (forceUpdateInstallReferrer) {
             updateInstallReferrer(context, appInfo);
         }

@@ -99,13 +99,14 @@ dependencies {
     compileOnly 'com.google.android.gms:play-services-ads:[7.0,)'
     compileOnly 'com.google.firebase:firebase-messaging:[7.0,)'
     compileOnly 'com.android.support:support-v4:[26.0, )'
+    compileOnly 'com.android.installreferrer:installreferrer:[1.0, )'
     testImplementation 'junit:junit:4.12'
     testImplementation  files('libs/java-json.jar')
     testImplementation 'org.powermock:powermock-module-junit4:1.6.2'
     testImplementation 'org.powermock:powermock-api-mockito:1.6.2'
     testImplementation 'org.powermock:powermock-core:1.6.2'
     testImplementation 'com.android.support:support-v4:26.0+'
-
+    androidTestImplementation 'com.android.installreferrer:installreferrer:1.0'
     androidTestImplementation 'com.android.support:support-annotations:24.0.0'
     androidTestImplementation 'com.android.support.test:runner:1.0.1'
     androidTestImplementation 'com.android.support.test:rules:1.0.1'
