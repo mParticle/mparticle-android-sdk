@@ -4,20 +4,32 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Looper;
 import android.support.test.InstrumentationRegistry;
+import android.support.test.rule.GrantPermissionRule;
+import android.webkit.WebView;
 
 import com.mparticle.internal.AccessUtils;
 import com.mparticle.internal.Constants;
 import com.mparticle.internal.Logger;
 import com.mparticle.internal.MPUtility;
 import com.mparticle.utils.AndroidUtils;
+import com.mparticle.utils.TestingUtils;
 
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Rule;
 import org.junit.Test;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.UUID;
 
-import static junit.framework.Assert.*;
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertFalse;
+import static junit.framework.Assert.assertNotNull;
+import static junit.framework.Assert.assertNull;
+import static junit.framework.Assert.assertTrue;
+import static junit.framework.Assert.fail;
 
 public class MParticleOptionsTest {
     Context mContext;
@@ -147,7 +159,7 @@ public class MParticleOptionsTest {
         assertFalse(MParticle.isAndroidIdDisabled());
 
         MParticleOptions options = MParticleOptions.builder(InstrumentationRegistry.getContext())
-                .setAndroidIdDisabled(true)
+                .androidIdDisabled(true)
                 .credentials("key", "secret")
                 .build();
         try {
@@ -159,7 +171,7 @@ public class MParticleOptionsTest {
         assertTrue(MParticle.isAndroidIdDisabled());
         MParticle.setInstance(null);
         options = MParticleOptions.builder(InstrumentationRegistry.getContext())
-                .setAndroidIdDisabled(false)
+                .androidIdDisabled(false)
                 .credentials("key", "secret")
                 .build();
         MParticle.start(options);
@@ -177,7 +189,7 @@ public class MParticleOptionsTest {
 
         options = MParticleOptions.builder(InstrumentationRegistry.getContext())
                 .credentials("key", "secret")
-                .setDevicePerformanceMetricsDisabled(false)
+                .devicePerformanceMetricsDisabled(false)
                 .build();
         MParticle.start(options);
         assertFalse(MParticle.getInstance().isDevicePerformanceMetricsDisabled());
@@ -185,7 +197,7 @@ public class MParticleOptionsTest {
 
         options = MParticleOptions.builder(InstrumentationRegistry.getContext())
                 .credentials("key", "secret")
-                .setDevicePerformanceMetricsDisabled(true)
+                .devicePerformanceMetricsDisabled(true)
                 .build();
         MParticle.start(options);
         assertTrue(MParticle.getInstance().isDevicePerformanceMetricsDisabled());
@@ -204,7 +216,7 @@ public class MParticleOptionsTest {
 
         options = MParticleOptions.builder(mProductionContext)
                 .credentials("key", "secret")
-                .setLogLevel(MParticle.LogLevel.VERBOSE)
+                .logLevel(MParticle.LogLevel.VERBOSE)
                 .build();
         MParticle.setInstance(null);
         MParticle.start(options);
@@ -212,7 +224,7 @@ public class MParticleOptionsTest {
 
         options = MParticleOptions.builder(mProductionContext)
                 .credentials("key", "secret")
-                .setLogLevel(MParticle.LogLevel.ERROR)
+                .logLevel(MParticle.LogLevel.ERROR)
                 .build();
         MParticle.setInstance(null);
         MParticle.start(options);
@@ -297,7 +309,7 @@ public class MParticleOptionsTest {
 
         options = MParticleOptions.builder(mProductionContext)
                 .credentials("key", "secret")
-                .setSessionTimeout(-123)
+                .sessionTimeout(-123)
                 .build();
         MParticle.start(options);
         assertEquals(MParticle.getInstance().getConfigManager().getSessionTimeout(), 60000);
@@ -305,7 +317,7 @@ public class MParticleOptionsTest {
 
         options = MParticleOptions.builder(mProductionContext)
                 .credentials("key", "secret")
-                .setSessionTimeout(123)
+                .sessionTimeout(123)
                 .build();
         MParticle.start(options);
         assertEquals(MParticle.getInstance().getConfigManager().getSessionTimeout(), 123000);
@@ -365,7 +377,7 @@ public class MParticleOptionsTest {
 
         options = MParticleOptions.builder(mProductionContext)
                 .credentials("key", "secret")
-                .setUploadInterval(123)
+                .uploadInterval(123)
                 .build();
         MParticle.start(options);
         assertEquals(MParticle.getInstance().getConfigManager().getUploadInterval(), 123000);
@@ -373,7 +385,7 @@ public class MParticleOptionsTest {
 
         options = MParticleOptions.builder(mProductionContext)
                 .credentials("key", "secret")
-                .setUploadInterval(-123)
+                .uploadInterval(-123)
                 .build();
         MParticle.start(options);
         assertEquals(MParticle.getInstance().getConfigManager().getUploadInterval(), 600000);
@@ -391,7 +403,7 @@ public class MParticleOptionsTest {
 
         options = MParticleOptions.builder(mContext)
                 .credentials("key", "secret")
-                .setAttributionListener(new AttributionListener() {
+                .attributionListener(new AttributionListener() {
                     @Override
                     public void onResult(AttributionResult result) {
 
@@ -409,10 +421,41 @@ public class MParticleOptionsTest {
 
         options = MParticleOptions.builder(mContext)
                 .credentials("key", "secret")
-                .setAttributionListener(null)
+                .attributionListener(null)
                 .build();
         MParticle.start(options);
         assertNull(MParticle.getInstance().getAttributionListener());
+    }
+
+    @Rule
+    public GrantPermissionRule mRuntimePermissionRule = GrantPermissionRule.grant(android.Manifest.permission.ACCESS_FINE_LOCATION);
+
+    @Test
+    public void testLocationTracking() {
+        MParticleOptions options = MParticleOptions.builder(mContext)
+                .credentials("key", "secret")
+                .locationTrackingDisabled()
+                .build();
+        MParticle.start(options);
+        assertFalse(MParticle.getInstance().isLocationTrackingEnabled());
+
+        MParticle.setInstance(null);
+        assertNull(MParticle.getInstance());
+
+
+        options = MParticleOptions.builder(mContext)
+                .locationTrackingEnabled("passive", 100, 20)
+                .build();
+        MParticle.start(options);
+        assertTrue(MParticle.getInstance().isLocationTrackingEnabled());
+
+        MParticle.setInstance(null);
+        assertNull(MParticle.getInstance());
+
+        options = MParticleOptions.builder(mContext)
+                .build();
+        MParticle.start(options);
+        assertFalse(MParticle.getInstance().isLocationTrackingEnabled());
     }
 
 }

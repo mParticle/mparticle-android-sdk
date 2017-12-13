@@ -83,9 +83,7 @@ public class KitFrameworkWrapperTest {
         KitManager mockKitManager = Mockito.mock(KitManager.class);
         wrapper.setKitManager(mockKitManager);
         PowerMockito.mockStatic(PushRegistrationHelper.class);
-        PushRegistrationHelper.PushRegistration registration = new PushRegistrationHelper.PushRegistration();
-        registration.instanceId = "instance id";
-        registration.senderId = "1234545";
+        PushRegistrationHelper.PushRegistration registration = new PushRegistrationHelper.PushRegistration("instance id", "1234545");
         Mockito.when(
                 PushRegistrationHelper.getLatestPushRegistration(Mockito.any(Context.class))
         ).thenReturn(registration);

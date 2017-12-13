@@ -31,7 +31,7 @@ public class DeviceAttributesTests extends BaseCleanInstallEachTest {
         assertEquals(attributes.getString(Constants.MessageKey.DEVICE_ID),androidId);
 
         MParticleOptions options = MParticleOptions.builder(context)
-                .setAndroidIdDisabled(true)
+                .androidIdDisabled(true)
                 .credentials("key", "secret")
                 .build();
         MParticle.start(options);

@@ -43,10 +43,7 @@ public class PushRegistrationHelper {
             Logger.debug("App or OS version changed, clearing instance ID.");
             return null;
         }
-        PushRegistration registration = new PushRegistration();
-        registration.instanceId = registrationId;
-        registration.senderId = senderId;
-        return registration;
+        return new PushRegistration(registrationId, senderId);
     }
 
     public static void requestInstanceId(Context context) {
@@ -56,6 +53,11 @@ public class PushRegistrationHelper {
     public static class PushRegistration {
         public String senderId;
         public String instanceId;
+
+        public PushRegistration(String instanceId, String senderId) {
+            this.instanceId = instanceId;
+            this.senderId = senderId;
+        }
     }
 
     public static void requestInstanceId(final Context context, final String senderId) {

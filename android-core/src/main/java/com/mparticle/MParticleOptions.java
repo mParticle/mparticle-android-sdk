@@ -2,84 +2,97 @@ package com.mparticle;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
+import android.webkit.WebView;
 
 import com.mparticle.identity.BaseIdentityTask;
 import com.mparticle.identity.IdentityApiRequest;
 import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.Logger;
 import com.mparticle.internal.MPUtility;
+import com.mparticle.internal.PushRegistrationHelper;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class MParticleOptions {
     private static final String PREFKEY_API_KEY = "mp_key";
     private static final String PREFKEY_API_SECRET = "mp_secret";
-    private BaseIdentityTask identityTask;
+    private BaseIdentityTask mIdentityTask;
 
     private Context mContext;
-    private MParticle.InstallType installType = MParticle.InstallType.AutoDetect;
-    private MParticle.Environment environment;
-    private String apiKey;
-    private String apiSecret;
-    private IdentityApiRequest identifyRequest;
-    private Boolean devicePerformanceMetricsDisabled = false;
-    private Boolean androidIdDisabled = false;
-    private Integer uploadInterval = 600;  //seconds
-    private Integer sessionTimeout = 60; //seconds
-    private Boolean unCaughtExceptionLogging = false;
-    private MParticle.LogLevel logLevel = MParticle.LogLevel.DEBUG;
-    private AttributionListener attributionListener;
+    private MParticle.InstallType mInstallType = MParticle.InstallType.AutoDetect;
+    private MParticle.Environment mEnvironment;
+    private String mApiKey;
+    private String mApiSecret;
+    private IdentityApiRequest mIdentifyRequest;
+    private Boolean mDevicePerformanceMetricsDisabled = false;
+    private Boolean mAndroidIdDisabled = false;
+    private Integer mUploadInterval = 600;  //seconds
+    private Integer mSessionTimeout = 60; //seconds
+    private Boolean mUnCaughtExceptionLogging = false;
+    private MParticle.LogLevel mLogLevel = MParticle.LogLevel.DEBUG;
+    private AttributionListener mAttributionListener;
+    private LocationTracking mLocationTracking;
+    private PushRegistrationHelper.PushRegistration mPushRegistration;
 
     private MParticleOptions(){}
 
     public MParticleOptions(Builder builder) {
-        this.mContext = builder.mContext;
+        this.mContext = builder.context;
         if (builder.apiKey != null) {
-            this.apiKey = builder.apiKey;
+            this.mApiKey = builder.apiKey;
         }
         if (builder.apiSecret != null) {
-            this.apiSecret = builder.apiSecret;
+            this.mApiSecret = builder.apiSecret;
         }
         if (builder.installType != null) {
-            this.installType = builder.installType;
+            this.mInstallType = builder.installType;
         }
         if (builder.environment != null) {
-            this.environment = builder.environment;
+            this.mEnvironment = builder.environment;
         }
         if (builder.identifyRequest != null) {
-            this.identifyRequest = builder.identifyRequest;
+            this.mIdentifyRequest = builder.identifyRequest;
         }
         if (builder.identityTask != null) {
-            this.identityTask = builder.identityTask;
+            this.mIdentityTask = builder.identityTask;
         }
         if (builder.devicePerformanceMetricsDisabled != null) {
-            this.devicePerformanceMetricsDisabled = builder.devicePerformanceMetricsDisabled;
+            this.mDevicePerformanceMetricsDisabled = builder.devicePerformanceMetricsDisabled;
         }
         if (builder.androidIdDisabled != null) {
-            this.androidIdDisabled = builder.androidIdDisabled;
+            this.mAndroidIdDisabled = builder.androidIdDisabled;
         }
         if (builder.uploadInterval != null) {
             if (builder.uploadInterval <= 0) {
                 Logger.warning("Upload Interval must be a positive number, disregarding value");
             } else {
-                this.uploadInterval = builder.uploadInterval;
+                this.mUploadInterval = builder.uploadInterval;
             }
         }
         if (builder.sessionTimeout != null) {
             if (builder.sessionTimeout <= 0) {
                 Logger.warning("Session Timeout must be a positive number, disregarding value");
             } else {
-                this.sessionTimeout = builder.sessionTimeout;
+                this.mSessionTimeout = builder.sessionTimeout;
             }
         }
         if (builder.unCaughtExceptionLogging != null) {
-            this.unCaughtExceptionLogging = builder.unCaughtExceptionLogging;
+            this.mUnCaughtExceptionLogging = builder.unCaughtExceptionLogging;
         }
         if (builder.logLevel != null) {
-            this.logLevel = builder.logLevel;
+            this.mLogLevel = builder.logLevel;
         }
         if (builder.attributionListener != null) {
-            this.attributionListener = builder.attributionListener;
+            this.mAttributionListener = builder.attributionListener;
         }
-    }
+        if (builder.locationTracking != null) {
+            this.mLocationTracking = builder.locationTracking;
+        }
+        if (builder.pushRegistration != null) {
+            this.mPushRegistration = builder.pushRegistration;
+        }
+     }
 
     public static MParticleOptions.Builder builder(Context context) {
         return new Builder(context);
@@ -90,59 +103,75 @@ public class MParticleOptions {
     }
 
     public MParticle.InstallType getInstallType() {
-        return installType;
+        return mInstallType;
     }
 
     public MParticle.Environment getEnvironment() {
-        return environment;
+        return mEnvironment;
     }
 
     public String getApiKey() {
-        return apiKey;
+        return mApiKey;
     }
 
     public String getApiSecret() {
-        return apiSecret;
+        return mApiSecret;
     }
 
     public IdentityApiRequest getIdentifyRequest() {
-        return identifyRequest;
+        return mIdentifyRequest;
     }
 
     public Boolean isDevicePerformanceMetricsDisabled() {
-        return devicePerformanceMetricsDisabled;
+        return mDevicePerformanceMetricsDisabled;
     }
 
     public Boolean isAndroidIdDisabled() {
-        return androidIdDisabled;
+        return mAndroidIdDisabled;
     }
 
     public Integer getUploadInterval() {
-        return uploadInterval;
+        return mUploadInterval;
     }
 
     public Integer getSessionTimeout() {
-        return sessionTimeout;
+        return mSessionTimeout;
     }
 
     public Boolean isUncaughtExceptionLoggingEnabled() {
-        return unCaughtExceptionLogging;
+        return mUnCaughtExceptionLogging;
     }
 
     public MParticle.LogLevel getLogLevel() {
-        return logLevel;
+        return mLogLevel;
     }
 
     public BaseIdentityTask getIdentityTask() {
-        return identityTask;
+        return mIdentityTask;
     }
 
     public AttributionListener getAttributionListener() {
-        return attributionListener;
+        return mAttributionListener;
+    }
+
+    public boolean hasLocationTracking() {
+        return mLocationTracking != null;
+    }
+
+    public LocationTracking getLocationTracking() {
+        return mLocationTracking;
+    }
+
+    public boolean hasPushRegistration() {
+        return mPushRegistration != null;
+    }
+
+    public PushRegistrationHelper.PushRegistration getPushRegistration() {
+        return mPushRegistration;
     }
 
     public static class Builder {
-        private Context mContext;
+        private Context context;
         private String apiKey;
         private String apiSecret;
         private MParticle.InstallType installType;
@@ -156,10 +185,12 @@ public class MParticleOptions {
         private MParticle.LogLevel logLevel = null;
         private BaseIdentityTask identityTask;
         private AttributionListener attributionListener;
-        private ConfigManager mConfigManager;
+        private ConfigManager configManager;
+        private LocationTracking locationTracking;
+        private PushRegistrationHelper.PushRegistration pushRegistration;
 
         private Builder(Context context) {
-            this.mContext = context;
+            this.context = context;
         }
 
         public Builder credentials(@NonNull String apiKey, @NonNull String apiSecret) {
@@ -193,7 +224,7 @@ public class MParticleOptions {
          *
          * @param disabled
          */
-        public Builder setDevicePerformanceMetricsDisabled(boolean disabled) {
+        public Builder devicePerformanceMetricsDisabled(boolean disabled) {
             this.devicePerformanceMetricsDisabled = disabled;
             return this;
         }
@@ -206,7 +237,7 @@ public class MParticleOptions {
          *
          * @param disabled true to disable collection (false by default)
          */
-        public Builder setAndroidIdDisabled(boolean disabled) {
+        public Builder androidIdDisabled(boolean disabled) {
             this.androidIdDisabled = disabled;
             return this;
         }
@@ -216,7 +247,7 @@ public class MParticleOptions {
          *
          * @param uploadInterval the number of seconds between uploads
          */
-        public Builder setUploadInterval(int uploadInterval) {
+        public Builder uploadInterval(int uploadInterval) {
             this.uploadInterval = uploadInterval;
             return this;
         }
@@ -228,7 +259,7 @@ public class MParticleOptions {
          *
          * @param sessionTimeout Session timeout in seconds
          */
-        public Builder setSessionTimeout(int sessionTimeout) {
+        public Builder sessionTimeout(int sessionTimeout) {
             this.sessionTimeout = sessionTimeout;
             return this;
         }
@@ -238,20 +269,35 @@ public class MParticleOptions {
             return this;
         }
 
-        public Builder setLogLevel(MParticle.LogLevel logLevel) {
+        public Builder logLevel(MParticle.LogLevel logLevel) {
             this.logLevel = logLevel;
             return this;
         }
 
-        public Builder setAttributionListener(AttributionListener attributionListener){
+        public Builder attributionListener(AttributionListener attributionListener){
             this.attributionListener = attributionListener;
             return this;
         }
 
+        public Builder locationTrackingDisabled() {
+            this.locationTracking = new LocationTracking(false);
+            return this;
+        }
+
+        public Builder locationTrackingEnabled(String provider, long minTime, long minDistance) {
+            this.locationTracking = new LocationTracking(provider, minTime, minDistance);
+            return this;
+        }
+
+        public Builder pushRegistration(String instanceId, String senderId) {
+            this.pushRegistration = new PushRegistrationHelper.PushRegistration(instanceId, senderId);
+            return this;
+        }
+
         public MParticleOptions build() {
-            boolean devMode = MParticle.Environment.Development.equals(environment) || MPUtility.isAppDebuggable(mContext);
+            boolean devMode = MParticle.Environment.Development.equals(environment) || MPUtility.isAppDebuggable(context);
             String message;
-            if (mContext == null) {
+            if (context == null) {
                 throw new IllegalArgumentException("mParticle failed to start: context is required.");
             }
             if (MPUtility.isEmpty(apiKey)) {
@@ -286,23 +332,39 @@ public class MParticleOptions {
         }
 
         private String getString(String key) {
-            int id =  this.mContext.getResources().getIdentifier(key, "string", this.mContext.getPackageName());
+            int id =  this.context.getResources().getIdentifier(key, "string", this.context.getPackageName());
             if (id == 0) {
                 return null;
             }
             try {
-                return this.mContext.getResources().getString(id);
+                return this.context.getResources().getString(id);
             }catch (android.content.res.Resources.NotFoundException nfe){
                 return null;
             }
         }
 
         private ConfigManager getConfigManager() {
-            if (mConfigManager == null) {
-                mConfigManager = new ConfigManager(mContext);
+            if (configManager == null) {
+                configManager = new ConfigManager(context);
             }
-            return mConfigManager;
+            return configManager;
         }
     }
 
+    static class LocationTracking {
+        boolean enabled = true;
+        String provider;
+        long minTime;
+        long minDistance;
+
+        protected LocationTracking(boolean enabled) {
+            this.enabled = enabled;
+        }
+
+        protected LocationTracking(String provider, long minTime, long minDistance) {
+            this.provider = provider;
+            this.minTime = minTime;
+            this.minDistance = minDistance;
+        }
+    }
 }

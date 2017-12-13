@@ -41,14 +41,14 @@ public class MParticleTest {
     public void testAndroidIdDisabled() throws Exception {
         MParticle.setInstance(null);
         MParticleOptions options = MParticleOptions.builder(InstrumentationRegistry.getContext())
-                .setAndroidIdDisabled(true)
+                .androidIdDisabled(true)
                 .credentials("key", "secret")
                 .build();
         MParticle.start(options);
         assertTrue(MParticle.isAndroidIdDisabled());
         MParticle.setInstance(null);
         options = MParticleOptions.builder(InstrumentationRegistry.getContext())
-                .setAndroidIdDisabled(false)
+                .androidIdDisabled(false)
                 .credentials("key", "secret")
                 .build();
         MParticle.start(options);

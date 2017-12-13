@@ -112,6 +112,8 @@ public class MParticle {
     protected IdentityApi mIdentityApi;
     static volatile boolean sAndroidIdDisabled;
     static volatile boolean sDevicePerformanceMetricsDisabled;
+    protected boolean locationTrackingEnabled = false;
+
 
     protected MParticle() { }
 
@@ -171,6 +173,14 @@ public class MParticle {
                     instance.mIdentityApi = new IdentityApi(context, instance.mAppStateManager, instance.mMessageManager, instance.mConfigManager, instance.mKitManager);
 
                     instance.identify(options);
+                    if (options.hasLocationTracking()) {
+                        MParticleOptions.LocationTracking locationTracking = options.getLocationTracking();
+                        if (locationTracking.enabled) {
+                            instance.enableLocationTracking(locationTracking.provider, locationTracking.minTime, locationTracking.minDistance);
+                        } else {
+                            instance.disableLocationTracking();
+                        }
+                    }
 
 
                     if (configManager.getLogUnhandledExceptions()) {
@@ -190,6 +200,10 @@ public class MParticle {
                     //to salvage session management via simulating onActivityResume.
                     if (originalContext instanceof Activity) {
                         instance.mAppStateManager.onActivityResumed((Activity) originalContext);
+                    }
+                    if (options.hasPushRegistration()) {
+                        PushRegistrationHelper.PushRegistration pushRegistration = options.getPushRegistration();
+                        instance.logPushRegistration(pushRegistration.instanceId, pushRegistration.senderId);
                     }
                 }
             }
@@ -684,6 +698,7 @@ public class MParticle {
      * @param minTime     the minimum time (in milliseconds) to trigger an update
      * @param minDistance the minimum distance (in meters) to trigger an update
      */
+    @SuppressLint("MissingPermission")
     public void enableLocationTracking(String provider, long minTime, long minDistance) {
         if (mConfigManager.isEnabled()) {
             try {
@@ -703,6 +718,7 @@ public class MParticle {
                     }
                     //noinspection MissingPermission
                     locationManager.requestLocationUpdates(provider, minTime, minDistance, mLocationListener);
+                    locationTrackingEnabled = true;
                 }catch (SecurityException se) {
 
                 }
@@ -718,18 +734,11 @@ public class MParticle {
         }
     }
 
-
     /**
      * Disables any mParticle location tracking that had been started
      */
+    @SuppressLint("MissingPermission")
     public void disableLocationTracking() {
-        disableLocationTracking(true);
-    }
-
-    /**
-     * Disables any mParticle location tracking that had been started
-     */
-    private void disableLocationTracking(boolean userTriggered) {
         if (mLocationListener != null) {
             try {
                 LocationManager locationManager = (LocationManager) mAppContext.getSystemService(Context.LOCATION_SERVICE);
@@ -739,22 +748,29 @@ public class MParticle {
                     try {
                         //noinspection MissingPermission
                         locationManager.removeUpdates(mLocationListener);
-                    }catch (SecurityException se) {
+                        locationTrackingEnabled = false;
+                    } catch (SecurityException se) {
 
                     }
                 }
                 mLocationListener = null;
-                if (userTriggered){
-                    SharedPreferences.Editor editor = mPreferences.edit();
-                    editor.remove(PrefKeys.LOCATION_PROVIDER)
-                            .remove(PrefKeys.LOCATION_MINTIME)
-                            .remove(PrefKeys.LOCATION_MINDISTANCE)
-                            .apply();
-                }
-            }catch (Exception e){
+                SharedPreferences.Editor editor = mPreferences.edit();
+                editor.remove(PrefKeys.LOCATION_PROVIDER)
+                        .remove(PrefKeys.LOCATION_MINTIME)
+                        .remove(PrefKeys.LOCATION_MINDISTANCE)
+                        .apply();
+            } catch (Exception e) {
 
             }
         }
+    }
+
+    /**
+     * Retrieves the current setting of location tracking
+     *
+     */
+    public boolean isLocationTrackingEnabled() {
+        return locationTrackingEnabled;
     }
 
     /**
@@ -1078,9 +1094,7 @@ public class MParticle {
 
     public void logPushRegistration(String instanceId, String senderId) {
         mAppStateManager.ensureActiveSession();
-        PushRegistrationHelper.PushRegistration registration = new PushRegistrationHelper.PushRegistration();
-        registration.instanceId = instanceId;
-        registration.senderId = senderId;
+        PushRegistrationHelper.PushRegistration registration = new PushRegistrationHelper.PushRegistration(instanceId, senderId);
         PushRegistrationHelper.setInstanceId(mAppContext, registration);
         String oldInstanceId = mConfigManager.getPushToken();
         mMessageManager.setPushRegistrationId(instanceId, true);
