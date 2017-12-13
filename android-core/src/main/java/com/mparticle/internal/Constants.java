@@ -456,6 +456,7 @@ public class Constants {
         String DELETED_USER_ATTRS = "mp::deleted_user_attrs::";
         String USER_IDENTITIES = "mp::user_ids::";
         String FIRSTRUN = "mp::firstrun::";
+        String FIRSTRUN_AST = "mp::firstrun::ast";
         String INITUPGRADE = "mp::initupgrade";
         String PROPERTY_APP_VERSION = "mp::appversion";
         String PROPERTY_OS_VERSION = "mp::osversion";
