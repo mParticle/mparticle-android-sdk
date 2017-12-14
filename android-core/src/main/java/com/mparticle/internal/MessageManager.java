@@ -154,6 +154,11 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
         mUploadHandler = new UploadHandler(appContext, sUploadHandlerThread.getLooper(), configManager, database, appStateManager, this);
         mPreferences = appContext.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
         mInstallType = installType;
+
+        // this is to account for backwards compatibility. At the time of this change, isFirstRunForMessage()
+        // is used for both the first run message and the first run boolean in the AST, but we would like
+        // to track them separately.
+        setFirstRunForAST(isFirstRunForMessage());
     }
 
     private static TelephonyManager getTelephonyManager() {
