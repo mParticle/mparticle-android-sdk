@@ -14,7 +14,6 @@ import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.fail;
 
 public abstract class BaseCleanStartedEachTest extends BaseAbstractTest {
-    protected static Context mContext;
     protected static Long mStartingMpid;
 
     @Override
@@ -25,8 +24,6 @@ public abstract class BaseCleanStartedEachTest extends BaseAbstractTest {
     @Override
     public void beforeBase() {
         MParticleUtils.clear();
-
-        mContext = InstrumentationRegistry.getContext();
         mStartingMpid = new Random().nextLong();
         final CountDownLatch latch = new CountDownLatch(1);
         MParticle.setInstance(null);

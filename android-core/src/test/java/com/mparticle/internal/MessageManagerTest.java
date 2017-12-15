@@ -10,9 +10,7 @@ import com.mparticle.MockMParticle;
 import com.mparticle.commerce.CommerceEvent;
 import com.mparticle.commerce.Product;
 import com.mparticle.identity.IdentityApi;
-import com.mparticle.identity.MParticleUser;
 import com.mparticle.internal.database.services.MParticleDBManager;
-import com.mparticle.mock.MockConfigManager;
 import com.mparticle.mock.MockContext;
 import com.mparticle.mock.MockSharedPreferences;
 
@@ -142,7 +140,7 @@ public class MessageManagerTest {
         assertNull(sessionStart.optString(Constants.MessageKey.PREVIOUS_SESSION_ID, null));
         assertFalse(sessionStart.has(Constants.MessageKey.PREVIOUS_SESSION_START));
         assertEquals(appStateManager.getSession().mSessionID, configManager.getUserStorage().getPreviousSessionId(null));
-        assertFalse(prefs.getBoolean(Constants.PrefKeys.FIRSTRUN + configManager.getApiKey(), true));
+        assertFalse(prefs.getBoolean(Constants.PrefKeys.FIRSTRUN_MESSAGE + configManager.getApiKey(), true));
         configManager.getUserStorage().setPreviousSessionForeground(42000);
         configManager.getUserStorage().setPreviousSessionStart(24000);
         prefs.commit();

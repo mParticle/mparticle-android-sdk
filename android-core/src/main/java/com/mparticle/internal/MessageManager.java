@@ -1,5 +1,6 @@
 package com.mparticle.internal;
 
+import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -136,11 +137,6 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
         mUploadHandler = uploadHandler;
         sPreferences = appContext.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
         mInstallType = installType;
-
-        // this is to account for backwards compatibility. At the time of this change, isFirstRunForMessage()
-        // is used for both the first run message and the first run boolean in the AST, but we would like
-        // to track them separately.
-        setFirstRunForAST(isFirstRunForMessage());
     }
 
     public MessageManager(Context appContext, ConfigManager configManager, MParticle.InstallType installType, AppStateManager appStateManager, boolean devicePerformanceMetricsDisabled) {
@@ -155,11 +151,6 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
         mUploadHandler = new UploadHandler(appContext, sUploadHandlerThread.getLooper(), configManager, appStateManager, this);
         sPreferences = appContext.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
         mInstallType = installType;
-
-        // this is to account for backwards compatibility. At the time of this change, isFirstRunForMessage()
-        // is used for both the first run message and the first run boolean in the AST, but we would like
-        // to track them separately.
-        setFirstRunForAST(isFirstRunForMessage());
     }
 
     private static TelephonyManager getTelephonyManager() {
@@ -263,7 +254,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
             editor.apply();
 
             if (isFirstRunForMessage()) {
-                setIsFirstRunForMessage();
+                setFirstRunForMessage(false);
                 try {
                     JSONObject firstRunMessage = createFirstRunMessage();
                     mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, firstRunMessage));
@@ -759,6 +750,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
         return apiKey;
     }
 
+    @SuppressLint("MissingPermission")
     @Override
     public void delayedStart() {
         try {
@@ -913,22 +905,35 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
         return response;
     }
 
-    private boolean isFirstRunForMessage() {
-        return !sPreferences.contains(Constants.PrefKeys.FIRSTRUN + mConfigManager.getApiKey());
+    //this return valuable is significant if it is false. That means that a legacy SDK has on record
+    // that this is not the first run for this instance of the application
+    boolean isFirstRunForMessageLegacy() {
+        return sPreferences.getBoolean(Constants.PrefKeys.FIRSTRUN_OBSELETE + mConfigManager.getApiKey(), true);
     }
 
-    private void setIsFirstRunForMessage() {
-        sPreferences.edit().putBoolean(Constants.PrefKeys.FIRSTRUN + mConfigManager.getApiKey(), false).apply();
+    boolean isFirstRunForMessage() {
+        return sPreferences.getBoolean(Constants.PrefKeys.FIRSTRUN_MESSAGE + mConfigManager.getApiKey(), true) && isFirstRunForMessageLegacy();
     }
 
-    private boolean isFirstRunForAST() {
-        return sPreferences.getBoolean(Constants.PrefKeys.FIRSTRUN_AST + mConfigManager.getApiKey(), true);
+    void setFirstRunForMessage(boolean firstRun) {
+        sPreferences.edit()
+                .putBoolean(Constants.PrefKeys.FIRSTRUN_MESSAGE + mConfigManager.getApiKey(), firstRun)
+                .remove(Constants.PrefKeys.FIRSTRUN_OBSELETE + mConfigManager.getApiKey())
+                .apply();
     }
 
-    private void setFirstRunForAST(boolean firstRun) {
-        sPreferences.edit().putBoolean(Constants.PrefKeys.FIRSTRUN_AST + mConfigManager.getApiKey(), firstRun).apply();
+    boolean isFirstRunForAST() {
+        return sPreferences.getBoolean(Constants.PrefKeys.FIRSTRUN_AST + mConfigManager.getApiKey(), true) && isFirstRunForMessageLegacy();
     }
 
+    void setFirstRunForAST(boolean firstRun) {
+        sPreferences.edit()
+                .putBoolean(Constants.PrefKeys.FIRSTRUN_AST + mConfigManager.getApiKey(), firstRun)
+                .remove(Constants.PrefKeys.FIRSTRUN_OBSELETE + mConfigManager.getApiKey())
+                .apply();
+    }
+
+    @SuppressLint("MissingPermission")
     private class StatusBroadcastReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context appContext, Intent intent) {

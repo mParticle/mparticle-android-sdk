@@ -1,6 +1,8 @@
 package com.mparticle;
 
+import android.content.Context;
 import android.os.Looper;
+import android.support.test.InstrumentationRegistry;
 
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -8,6 +10,7 @@ import org.junit.BeforeClass;
 import static junit.framework.Assert.fail;
 
 public abstract class BaseAbstractTest {
+    protected static Context mContext;
 
     private static boolean beforeClassCalled = false;
 
@@ -25,6 +28,7 @@ public abstract class BaseAbstractTest {
             beforeClassBase();
             beforeClass();
         }
+        mContext = InstrumentationRegistry.getContext();
         beforeBase();
         before();
     }

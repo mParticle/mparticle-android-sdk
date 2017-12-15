@@ -458,7 +458,8 @@ public class Constants {
         String OPTOUT = "mp::optout::";
         String DEPRECATED_USER_ATTRS = "mp::user_attrs::";
 
-        String FIRSTRUN = "mp::firstrun::";
+        String FIRSTRUN_OBSELETE = "mp::firstrun::";
+        String FIRSTRUN_MESSAGE = "mp::firstrun::message";
         String FIRSTRUN_AST = "mp::firstrun::ast";
         String INITUPGRADE = "mp::initupgrade";
         String PROPERTY_APP_VERSION = "mp::appversion";
