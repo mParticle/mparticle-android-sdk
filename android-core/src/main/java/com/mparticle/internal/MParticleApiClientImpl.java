@@ -176,7 +176,7 @@ public class MParticleApiClientImpl extends MParticleBaseClientImpl implements M
 
             if (connection.getResponseCode() >= 200 && connection.getResponseCode() < 300) {
                 JSONObject response = MPUtility.getJsonResponse(connection);
-                parseMparticleJson(response);
+                parseCookies(response);
 
                 Logger.verbose("Config result: \n " +
                         connection.getResponseCode() + ": " +
@@ -232,7 +232,7 @@ public class MParticleApiClientImpl extends MParticleBaseClientImpl implements M
                 Logger.error("Segment call forbidden: is Segmentation enabled for your account?");
             }
             response =  MPUtility.getJsonResponse(connection);
-            parseMparticleJson(response);
+            parseCookies(response);
 
         }catch (Exception e){
             Logger.error("Segment call failed: " + e.getMessage());
@@ -294,7 +294,7 @@ public class MParticleApiClientImpl extends MParticleBaseClientImpl implements M
                     connection.getResponseCode() + ": " +
                         connection.getResponseMessage() + "\n" +
                         "response:\n" + response.toString());
-            parseMparticleJson(response);
+            parseCookies(response);
         } else {
             Logger.error("Upload request failed- " + connection.getResponseCode() + ": " + connection.getResponseMessage());
         }
@@ -336,22 +336,13 @@ public class MParticleApiClientImpl extends MParticleBaseClientImpl implements M
         }
     }
 
-    public void parseMparticleJson(JSONObject jsonResponse){
+    private void parseCookies(JSONObject jsonResponse) {
         try {
             if (jsonResponse.has(CONSUMER_INFO)) {
                 JSONObject consumerInfo = jsonResponse.getJSONObject(CONSUMER_INFO);
                 setCookies(consumerInfo.optJSONObject(Constants.MessageKey.COOKIES));
             }
-            if (jsonResponse.has(LTV)) {
-                BigDecimal serverLtv = new BigDecimal(jsonResponse.getString(LTV));
-                BigDecimal mostRecentClientLtc = new BigDecimal(mConfigManager.getUserStorage().getLtv());
-                BigDecimal sum = serverLtv.add(mostRecentClientLtc);
-                mConfigManager.getUserStorage().setLtv(sum.toPlainString());
-            }
-
-        } catch (JSONException jse) {
-
-        }
+        } catch (JSONException ignored) {}
     }
 
     public final class MPThrottleException extends Exception {
