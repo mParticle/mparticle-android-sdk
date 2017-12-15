@@ -129,7 +129,7 @@ public class MessageManagerTest {
         assertNull(sessionStart.optString(Constants.MessageKey.PREVIOUS_SESSION_ID, null));
         assertFalse(sessionStart.has(Constants.MessageKey.PREVIOUS_SESSION_START));
         assertEquals(appStateManager.getSession().mSessionID, prefs.getString(Constants.PrefKeys.PREVIOUS_SESSION_ID, null));
-        assertFalse(prefs.getBoolean(Constants.PrefKeys.FIRSTRUN + configManager.getApiKey(), true));
+        assertFalse(prefs.getBoolean(Constants.PrefKeys.FIRSTRUN_MESSAGE + configManager.getApiKey(), true));
         prefs.putLong(Constants.PrefKeys.PREVIOUS_SESSION_FOREGROUND, 42000);
         prefs.putLong(Constants.PrefKeys.PREVIOUS_SESSION_START, 24000);
         prefs.commit();
