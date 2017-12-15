@@ -59,13 +59,13 @@ public final class IdentityApiRequest {
         private Map<String, String> otherNewIdentities = new HashMap<String, String>();
         private UserAliasHandler userAliasHandler;
 
-        public Builder(MParticleUser currentUser) {
+        protected Builder(MParticleUser currentUser) {
             if (currentUser != null) {
                 userIdentities = currentUser.getUserIdentities();
             }
         }
 
-        public Builder() {
+        protected Builder() {
 
         }
 

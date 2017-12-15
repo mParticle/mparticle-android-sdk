@@ -724,7 +724,7 @@ public class MParticleJSInterface {
                 }
             }
         }
-        IdentityApiRequest.Builder builder = new IdentityApiRequest.Builder()
+        IdentityApiRequest.Builder builder = IdentityApiRequest.withEmptyUser()
                 .userIdentities(identities);
 
         if (jsonObject.has(TYPE) && jsonObject.has(IDENTITY)) {

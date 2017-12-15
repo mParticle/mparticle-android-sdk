@@ -2,7 +2,6 @@ package com.mparticle;
 
 import android.os.Looper;
 import android.support.test.InstrumentationRegistry;
-import android.support.test.runner.AndroidJUnit4;
 
 import com.mparticle.internal.MessageManager;
 import com.mparticle.utils.MParticleUtils;
@@ -12,7 +11,6 @@ import junit.framework.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNotNull;

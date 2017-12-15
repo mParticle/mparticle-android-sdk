@@ -37,7 +37,7 @@ public class MParticleOptionsInitialIdentityTest extends BaseCleanStartedEachTes
             final boolean[] checked = new boolean[1];
             final Map<MParticle.IdentityType, String> identities = mRandomUtils.getRandomUserIdentities();
 
-            IdentityApiRequest request = new IdentityApiRequest.Builder()
+            IdentityApiRequest request = IdentityApiRequest.withEmptyUser()
                     .userIdentities(identities)
                     .build();
             MParticleOptions options = MParticleOptions.builder(mContext)
