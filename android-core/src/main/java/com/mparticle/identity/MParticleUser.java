@@ -41,7 +41,7 @@ public class MParticleUser {
         return mUserDelegate.getUserAttributes(listener, getId());
     }
 
-    boolean setUserAttributes(Map<String, Object> userAttributes) {
+    public boolean setUserAttributes(Map<String, Object> userAttributes) {
         for(Map.Entry<String, Object> entry: userAttributes.entrySet()) {
             if (!setUserAttribute(entry.getKey(), entry.getValue())) {
                 return false;

@@ -1,5 +1,5 @@
 package com.mparticle.identity;
 
-interface UserAliasHandler {
+public interface UserAliasHandler {
     void onUserAlias(MParticleUser previousUser, MParticleUser newUser);
 }
