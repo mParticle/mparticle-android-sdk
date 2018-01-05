@@ -1260,7 +1260,10 @@ public class MParticle {
         Yahoo(6),
         Email(7),
         Alias(8),
-        FacebookCustomAudienceId(9);
+        FacebookCustomAudienceId(9),
+        Other2(10),
+        Other3(11),
+        Other4(12);
 
         private final int value;
 
@@ -1288,6 +1291,12 @@ public class MParticle {
                     return Alias;
                 case 9:
                     return FacebookCustomAudienceId;
+                case 10:
+                    return Other2;
+                case 11:
+                    return Other3;
+                case 12:
+                    return Other4;
                 default:
                     return Other;
             }

@@ -25,16 +25,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-import static com.mparticle.MParticle.IdentityType.CustomerId;
-import static com.mparticle.MParticle.IdentityType.Email;
-import static com.mparticle.MParticle.IdentityType.Facebook;
-import static com.mparticle.MParticle.IdentityType.FacebookCustomAudienceId;
-import static com.mparticle.MParticle.IdentityType.Google;
-import static com.mparticle.MParticle.IdentityType.Microsoft;
-import static com.mparticle.MParticle.IdentityType.Other;
-import static com.mparticle.MParticle.IdentityType.Twitter;
-import static com.mparticle.MParticle.IdentityType.Yahoo;
-
 /** package-private **/ class MParticleIdentityClientImpl extends MParticleBaseClientImpl implements MParticleIdentityClient {
     private Context mContext;
     private ConfigManager mConfigManager;
@@ -298,10 +288,16 @@ import static com.mparticle.MParticle.IdentityType.Yahoo;
         return mConfigManager.getApiSecret();
     }
 
-    String getStringValue(MParticle.IdentityType identityType) {
+    static String getStringValue(MParticle.IdentityType identityType) {
         switch (identityType) {
             case Other:
                 return "other";
+            case Other2:
+                return "other2";
+            case Other3:
+                return "other3";
+            case Other4:
+                return "other4";
             case CustomerId:
                 return "customerid";
             case Facebook:
@@ -314,6 +310,8 @@ import static com.mparticle.MParticle.IdentityType.Yahoo;
                 return "microsoft";
             case Yahoo:
                 return "yahoo";
+            case Alias:
+                return "alias";
             case Email:
                 return "email";
             case FacebookCustomAudienceId:
@@ -323,25 +321,33 @@ import static com.mparticle.MParticle.IdentityType.Yahoo;
         }
     }
 
-    MParticle.IdentityType getIdentityType(String idTypeString) {
+    static MParticle.IdentityType getIdentityType(String idTypeString) {
         if (idTypeString.equals("other")) {
-            return Other;
+            return MParticle.IdentityType.Other;
+        } else if (idTypeString.equals("other2")) {
+            return MParticle.IdentityType.Other2;
+        } else if (idTypeString.equals("other3")) {
+            return MParticle.IdentityType.Other3;
+        } else if (idTypeString.equals("other4")) {
+            return MParticle.IdentityType.Other4;
         } else if (idTypeString.equals("customerid")) {
-            return CustomerId;
+            return MParticle.IdentityType.CustomerId;
         } else if (idTypeString.equals("facebook")) {
-            return Facebook;
+            return MParticle.IdentityType.Facebook;
         } else if (idTypeString.equals("twitter")) {
-            return Twitter;
+            return MParticle.IdentityType.Twitter;
         } else if (idTypeString.equals("google")) {
-            return Google;
+            return MParticle.IdentityType.Google;
         } else if (idTypeString.equals("microsoft")) {
-            return Microsoft;
+            return MParticle.IdentityType.Microsoft;
         } else if (idTypeString.equals("yahoo")) {
-            return Yahoo;
+            return MParticle.IdentityType.Yahoo;
         } else if (idTypeString.equals("email")) {
-            return Email;
+            return MParticle.IdentityType.Email;
         } else if (idTypeString.equals("facebookcustomaudienceid")) {
-            return FacebookCustomAudienceId;
+            return MParticle.IdentityType.FacebookCustomAudienceId;
+        } else if (idTypeString.equals("alias")) {
+            return MParticle.IdentityType.Alias;
         } else {
             return null;
         }
