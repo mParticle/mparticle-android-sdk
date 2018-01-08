@@ -263,7 +263,7 @@ import java.util.concurrent.atomic.AtomicLong;
         startSession();
         mMessageManager.startSession();
         Logger.debug("Started new session");
-        mMessageManager.startUploadLoop();
+        mMessageManager.startUploadLoop(mConfigManager.getUploadInterval(), Constants.INITIAL_UPLOAD_DELAY_MILLIS);
         enableLocationTracking();
         checkSessionTimeout();
     }

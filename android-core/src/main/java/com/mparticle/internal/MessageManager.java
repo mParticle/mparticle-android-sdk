@@ -511,13 +511,13 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
     /**
      * We will attempt to upload by default every 10 minutes until the session times out.
      */
-    public void startUploadLoop() {
+    public void startUploadLoop(long intervalMillis, long delayMillis) {
         mUploadHandler.removeMessages(UploadHandler.UPLOAD_MESSAGES);
-        mUploadHandler.sendEmptyMessageDelayed(UploadHandler.UPLOAD_MESSAGES, Constants.INITIAL_UPLOAD_DELAY);
+        mUploadHandler.sendMessageDelayed(mUploadHandler.obtainMessage(UploadHandler.UPLOAD_MESSAGES, (int)intervalMillis, 0), delayMillis);
     }
 
     public void doUpload() {
-        mUploadHandler.sendMessage(mUploadHandler.obtainMessage(UploadHandler.UPLOAD_MESSAGES, 1, 0));
+        mUploadHandler.sendEmptyMessage(UploadHandler.UPLOAD_MESSAGES);
     }
 
     public void setLocation(Location location) {

@@ -43,6 +43,7 @@ public class UploadHandler extends Handler implements BackgroundTaskHandler {
      * Message used to trigger the primary upload logic - will upload all non-history batches that are ready to go.
      */
     public static final int UPLOAD_MESSAGES = 1;
+
     /**
      * Message that triggers much of the same logic as above, but is specifically for session-history. Typically the SDK will upload all messages
      * in a given batch that are ready for upload. But, some service-providers such as Flurry need to be sent all of the session information at once
@@ -142,18 +143,17 @@ public class UploadHandler extends Handler implements BackgroundTaskHandler {
                     break;
                 case UPLOAD_MESSAGES:
                 case UPLOAD_TRIGGER_MESSAGES:
-                    long uploadInterval = mConfigManager.getUploadInterval();
+                    int uploadInterval = msg.arg1;
                     if (isNetworkConnected && !mApiClient.isThrottled()) {
-                        if (uploadInterval > 0 || msg.arg1 == 1) {
-                            prepareMessageUploads(false);
-                            boolean needsHistory = upload(false);
-                            if (needsHistory) {
-                                this.sendEmptyMessage(UPLOAD_HISTORY);
-                            }
+                        prepareMessageUploads(false);
+                        boolean needsHistory = upload(false);
+                        if (needsHistory) {
+                            this.sendEmptyMessage(UPLOAD_HISTORY);
                         }
                     }
-                    if (mAppStateManager.getSession().isActive() && uploadInterval > 0 && msg.arg1 == 0) {
-                        this.sendEmptyMessageDelayed(UPLOAD_MESSAGES, uploadInterval);
+
+                    if (uploadInterval > 0 && mAppStateManager.getSession().isActive()) {
+                        this.sendMessageDelayed(obtainMessage(UploadHandler.UPLOAD_MESSAGES, uploadInterval, 0), uploadInterval);
                     }
                     break;
                 case UPLOAD_HISTORY:

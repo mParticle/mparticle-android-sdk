@@ -16,7 +16,7 @@ public class Constants {
     // maximum messages to be sent in a single non-session history batch
     public static final int BATCH_LIMIT = 50;
     // delay (millis) before processing uploads to allow app to get started
-    public static final long INITIAL_UPLOAD_DELAY = 10 * 1000;
+    public static final long INITIAL_UPLOAD_DELAY_MILLIS = 10 * 1000;
 
     // preferences persistence
     public static final String PREFS_FILE = "mParticlePrefs";

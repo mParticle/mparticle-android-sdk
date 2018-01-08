@@ -16,6 +16,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Answers;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Matchers;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -368,15 +370,14 @@ public class MessageManagerTest {
 
     @Test
     public void testStartUploadLoop() throws Exception {
-        manager.startUploadLoop();
+        manager.startUploadLoop(5, 10);
         Mockito.verify(uploadHandler, Mockito.times(1)).removeMessages(UploadHandler.UPLOAD_MESSAGES);
-        Mockito.verify(uploadHandler, Mockito.times(1)).sendEmptyMessageDelayed(UploadHandler.UPLOAD_MESSAGES, Constants.INITIAL_UPLOAD_DELAY);
     }
 
     @Test
     public void testDoUpload() throws Exception {
         manager.doUpload();
-        Mockito.verify(uploadHandler, Mockito.times(1)).sendMessage(Mockito.any(Message.class));
+        Mockito.verify(uploadHandler, Mockito.times(1)).sendEmptyMessage(UploadHandler.UPLOAD_MESSAGES);
     }
 
     @Test

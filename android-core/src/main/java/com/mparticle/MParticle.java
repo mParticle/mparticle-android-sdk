@@ -1294,6 +1294,7 @@ public class MParticle {
      */
     public void setUploadInterval(int uploadInterval) {
         mConfigManager.setUploadInterval(uploadInterval);
+        mMessageManager.startUploadLoop(mConfigManager.getUploadInterval(), 0);
     }
 
     /**
