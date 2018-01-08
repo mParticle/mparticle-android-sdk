@@ -18,7 +18,6 @@ import com.mparticle.commerce.Cart;
 import com.mparticle.commerce.CommerceApi;
 import com.mparticle.commerce.CommerceEvent;
 import com.mparticle.commerce.Product;
-import com.mparticle.commerce.ProductBagApi;
 import com.mparticle.identity.IdentityApi;
 import com.mparticle.identity.IdentityApiRequest;
 import com.mparticle.identity.IdentityApiResult;
@@ -107,7 +106,6 @@ public class MParticle {
     protected MPMessagingAPI mMessaging;
     protected MPMediaAPI mMedia;
     protected CommerceApi mCommerce;
-    protected ProductBagApi mProductBags;
     protected volatile AttributionListener mAttributionListener;
     protected IdentityApi mIdentityApi;
     static volatile boolean sAndroidIdDisabled;
@@ -164,7 +162,6 @@ public class MParticle {
                         instance.disableUncaughtExceptionLogging();
                     }
                     instance.mCommerce = new CommerceApi(context);
-                    instance.mProductBags = new ProductBagApi(context);
                     instance.mMessageManager = new MessageManager(context, configManager, options.getInstallType(), appStateManager, sDevicePerformanceMetricsDisabled);
                     instance.mPreferences = context.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
                     instance.mKitManager = new KitFrameworkWrapper(context, instance.mMessageManager, configManager, appStateManager, instance.mMessageManager.getTaskHandler());
@@ -1009,17 +1006,6 @@ public class MParticle {
      */
     public CommerceApi Commerce() {
         return mCommerce;
-    }
-
-    /**
-     * Retrieve the global {@link ProductBagApi} instance. Use this API to associate {@link com.mparticle.commerce.ProductBag} objects the user.
-     *
-     * @return a global ProductBagApi instance
-     *
-     * @see ProductBagApi
-     */
-    public ProductBagApi ProductBags() {
-        return mProductBags;
     }
 
     /**

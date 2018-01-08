@@ -41,10 +41,6 @@ public class MessageBatch extends JSONObject {
             }
         }
 
-        if (MParticle.getInstance().ProductBags().getBags().size() > 0) {
-            uploadMessage.put(Constants.MessageKey.PRODUCT_BAGS, new JSONObject(MParticle.getInstance().ProductBags().toString()));
-        }
-
         uploadMessage.put(Constants.MessageKey.COOKIES, cookies);
         uploadMessage.put(Constants.MessageKey.PROVIDER_PERSISTENCE, configManager.getProviderPersistence());
         uploadMessage.put(Constants.MessageKey.INTEGRATION_ATTRIBUTES, configManager.getIntegrationAttributes());

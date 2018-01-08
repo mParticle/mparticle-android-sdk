@@ -1,9 +1,6 @@
 package com.mparticle;
 
-import android.os.Looper;
-
 import com.mparticle.commerce.CommerceApi;
-import com.mparticle.commerce.ProductBagApi;
 import com.mparticle.identity.IdentityApi;
 import com.mparticle.internal.AppStateManager;
 import com.mparticle.internal.ConfigManager;
@@ -25,7 +22,6 @@ public class MockMParticle extends MParticle {
         mMessaging = Mockito.mock(MPMessagingAPI.class);
         mMedia = Mockito.mock(MPMediaAPI.class);
         mCommerce = Mockito.mock(CommerceApi.class);
-        mProductBags = Mockito.mock(ProductBagApi.class);
         mIdentityApi = new IdentityApi(new MockContext(), mAppStateManager, mMessageManager, mConfigManager, mKitManager);
     }
 

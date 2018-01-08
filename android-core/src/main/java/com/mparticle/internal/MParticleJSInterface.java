@@ -313,42 +313,6 @@ public class MParticleJSInterface {
     }
 
     @JavascriptInterface
-    public void addToProductBag(String productBagName, String json){
-        try {
-            JSONObject attribute = new JSONObject(json);
-            Product product = toProduct(attribute);
-            if (product != null) {
-                MParticle.getInstance().ProductBags().addProduct(productBagName, product);
-            } else {
-                Logger.warning(String.format(errorMsg, "unable to convert String to Product: " + json));
-            }
-        } catch (JSONException jse) {
-            Logger.warning(String.format(errorMsg, jse.getMessage()));
-        }
-    }
-
-    @JavascriptInterface
-    public boolean removeFromProductBag(String productBagName, String json) {
-        try {
-            JSONObject attribute = new JSONObject(json);
-            Product product = toProduct(attribute);
-            if (product != null) {
-                return MParticle.getInstance().ProductBags().removeProduct(productBagName, product);
-            } else {
-                Logger.warning(String.format(errorMsg, "unable to convert String to Product: " + json));
-            }
-        } catch (JSONException jse) {
-            Logger.warning(String.format(errorMsg, jse.getMessage()));
-        }
-        return false;
-    }
-
-    @JavascriptInterface
-    public void clearProductBag(String productBagName) {
-        MParticle.getInstance().ProductBags().clearProductBag(productBagName);
-    }
-
-    @JavascriptInterface
     public void addToCart(String json) {
         try {
             JSONObject attribute = new JSONObject(json);
