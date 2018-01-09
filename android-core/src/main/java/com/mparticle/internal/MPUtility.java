@@ -20,6 +20,7 @@ import android.provider.Settings;
 import android.view.Display;
 import android.view.WindowManager;
 
+import com.google.android.instantapps.InstantApps;
 import com.mparticle.MParticle;
 
 import org.json.JSONArray;
@@ -152,14 +153,14 @@ public class MPUtility {
         }
     }
 
-    public static long getAvailableInternalDisk() {
+    public static long getAvailableInternalDisk(Context context) {
         File path = Environment.getDataDirectory();
-        return getDiskSpace(path);
+        return getDiskSpace(context, path);
     }
 
-    public static long getAvailableExternalDisk() {
+    public static long getAvailableExternalDisk(Context context) {
         File path = Environment.getExternalStorageDirectory();
-        return getDiskSpace(path);
+        return getDiskSpace(context, path);
     }
 
     public static String getAppVersionName(Context context) {
@@ -217,7 +218,10 @@ public class MPUtility {
         return null;
     }
 
-    public static long getDiskSpace(File path){
+    public static long getDiskSpace(Context context, File path){
+        if (MPUtility.isInstantApp(context)) {
+            return 0L;
+        }
         long availableSpace = -1L;
         StatFs stat = new StatFs(path.getPath());
         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.JELLY_BEAN_MR1) {
@@ -636,5 +640,33 @@ public class MPUtility {
                 return id;
             }
         }
+    }
+
+    public static boolean isInstantApp(final Context context) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            return context.getPackageManager().isInstantApp();
+        }
+        try {
+            Class.forName("com.google.android.instantapps.InstantApps");
+            return new SyncRunnable<Boolean>() {
+                @Override
+                public Boolean run() {
+                    return InstantApps.isInstantApp(context);
+                }
+            }.run();
+        }
+        catch (ClassNotFoundException ignored) {
+            try {
+                Class.forName("com.google.android.instantapps.supervisor.InstantAppsRuntime");
+                return true;
+            }
+            catch (ClassNotFoundException a) {
+                return false;
+            }
+        }
+    }
+
+    private interface SyncRunnable<T> {
+        T run();
     }
 }

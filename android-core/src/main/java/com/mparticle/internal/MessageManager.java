@@ -171,8 +171,8 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
     public static JSONObject getStateInfo() throws JSONException {
         JSONObject infoJson = new JSONObject();
         if (!devicePerformanceMetricsDisabled) {
-            infoJson.put(MessageKey.STATE_INFO_AVAILABLE_DISK, MPUtility.getAvailableInternalDisk());
-            infoJson.put(MessageKey.STATE_INFO_AVAILABLE_EXT_DISK, MPUtility.getAvailableExternalDisk());
+            infoJson.put(MessageKey.STATE_INFO_AVAILABLE_DISK, MPUtility.getAvailableInternalDisk(sContext));
+            infoJson.put(MessageKey.STATE_INFO_AVAILABLE_EXT_DISK, MPUtility.getAvailableExternalDisk(sContext));
             final Runtime rt = Runtime.getRuntime();
             infoJson.put(MessageKey.STATE_INFO_APP_MEMORY_USAGE, rt.totalMemory());
             infoJson.put(MessageKey.STATE_INFO_APP_MEMORY_AVAIL, rt.freeMemory());
