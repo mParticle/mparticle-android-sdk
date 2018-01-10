@@ -158,7 +158,6 @@ public class IdentityApi {
             request = IdentityApiRequest.withEmptyUser().build();
         }
         final BaseIdentityTask task = new BaseIdentityTask();
-        final long startingMpid = mConfigManager.getMpid();
         ConfigManager.setIdentityRequestInProgress(true);
         final IdentityApiRequest identityApiRequest = request;
         mBackgroundHandler.post(new Runnable() {
@@ -166,6 +165,7 @@ public class IdentityApi {
             public void run() {
                 synchronized (lock) {
                     try {
+                        long startingMpid = mConfigManager.getMpid();
                         final IdentityHttpResponse result = networkRequest.request(identityApiRequest);
 
                         if (!result.isSuccessful()) {
