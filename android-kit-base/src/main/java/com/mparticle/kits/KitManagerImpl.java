@@ -612,7 +612,7 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
                                 && eventCopy.getInfo().get(METHOD_NAME).equals(LOG_LTV)){
                             messages = ((KitIntegration.CommerceListener) provider).logLtvIncrease(
                                     new BigDecimal(eventCopy.getInfo().get(RESERVED_KEY_LTV)),
-                                    MParticle.getInstance().Commerce().getCurrentUserLtv(),
+                                    new BigDecimal(eventCopy.getInfo().get(RESERVED_KEY_LTV)),
                                     eventCopy.getEventName(),
                                     eventCopy.getInfo());
                         }else {

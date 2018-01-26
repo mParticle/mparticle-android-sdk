@@ -122,10 +122,6 @@
 -keep, includedescriptorclasses public class com.mparticle.identity.* { *; }
 -keep class com.mparticle.internal.BackgroundTaskHandler { *; }
 
--keep public class com.mparticle.activity.* {
-    *;
-}
-
 -keep public class com.mparticle.messaging.* {
      *;
 }

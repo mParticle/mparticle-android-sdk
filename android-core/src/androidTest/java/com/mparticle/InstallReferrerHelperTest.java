@@ -5,6 +5,7 @@ import com.mparticle.utils.TestingUtils;
 
 import org.junit.Test;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -21,10 +22,6 @@ public class InstallReferrerHelperTest extends BaseCleanStartedEachTest {
 
     }
 
-    /**
-     * in the test case, when the InstallReferrerAPI is not available, the fetchInstallReferrer should
-     * fail synchronously
-     */
     @Test
     public void testFetchInstallReferrer() throws Exception {
         final boolean[] finished = {false};
@@ -33,7 +30,7 @@ public class InstallReferrerHelperTest extends BaseCleanStartedEachTest {
         InstallReferrerHelper.fetchInstallReferrer(mContext, new InstallReferrerHelper.InstallReferrerCallback() {
                     @Override
                     public void onReceived(String installReferrer) {
-                        assertNull(installReferrer);
+                        assertEquals("utm_source=google-play&utm_medium=organic", installReferrer);
                         fail();
                         finished[0] = true;
                     }

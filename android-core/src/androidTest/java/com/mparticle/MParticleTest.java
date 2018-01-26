@@ -152,7 +152,7 @@ public class MParticleTest extends BaseCleanStartedEachTest {
 
     private void ensureSessionActive() {
         if (!MParticle.getInstance().isSessionActive()) {
-            MParticle.getInstance().logEvent("Thing started", MParticle.EventType.Other);
+            MParticle.getInstance().logEvent(new MPEvent.Builder("Thing started", MParticle.EventType.Other).build());
             assertTrue(MParticle.getInstance().isSessionActive());
         }
     }

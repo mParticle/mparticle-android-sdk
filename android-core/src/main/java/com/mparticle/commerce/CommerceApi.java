@@ -155,14 +155,4 @@ public class CommerceApi {
             Logger.error("refund() called but there are no Products in the Cart, no event was logged.");
         }
     }
-
-    public BigDecimal getCurrentUserLtv() {
-        SharedPreferences preferences = mContext.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
-        try {
-            return new BigDecimal(ConfigManager.getCurrentUserLtv(mContext));
-        }catch (NumberFormatException nfe) {
-
-        }
-        return new BigDecimal(0);
-    }
 }

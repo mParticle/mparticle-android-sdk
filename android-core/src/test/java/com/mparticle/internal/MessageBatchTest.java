@@ -21,7 +21,6 @@ public class MessageBatchTest {
         MParticle mockMp = Mockito.mock(MParticle.class);
         Mockito.when(mockMp.getEnvironment()).thenReturn(MParticle.Environment.Development);
         CommerceApi mockCommerce = Mockito.mock(CommerceApi.class);
-        Mockito.when(mockCommerce.getCurrentUserLtv()).thenReturn(new BigDecimal(0));
         Mockito.when(mockMp.Commerce()).thenReturn(mockCommerce);
         MParticle.setInstance(mockMp);
         ConfigManager manager = new ConfigManager(new MockContext(), MParticle.Environment.Production, "some api key", "some api secret");
@@ -35,7 +34,6 @@ public class MessageBatchTest {
         assertNotNull(batch.getBoolean("oo"));
         assertNotNull(batch.getDouble("uitl"));
         assertNotNull(batch.getDouble("stl"));
-        assertNotNull(batch.get("ltv"));
         assertNotNull(batch.getJSONObject("ck"));
         if (manager.getProviderPersistence() != null) {
             assertNotNull(batch.getJSONObject("cms"));
@@ -49,7 +47,6 @@ public class MessageBatchTest {
         assertNotNull(batch.getBoolean("oo"));
         assertNotNull(batch.getDouble("uitl"));
         assertNotNull(batch.getDouble("stl"));
-        assertNotNull(batch.get("ltv"));
         assertNotNull(batch.getJSONObject("ck"));
         if (manager.getProviderPersistence() != null) {
             assertNotNull(batch.getJSONObject("cms"));

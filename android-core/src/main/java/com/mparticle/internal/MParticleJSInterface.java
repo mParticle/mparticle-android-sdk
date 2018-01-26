@@ -3,6 +3,7 @@ package com.mparticle.internal;
 
 import android.webkit.JavascriptInterface;
 
+import com.mparticle.MPEvent;
 import com.mparticle.MParticle;
 import com.mparticle.MParticle.EventType;
 import com.mparticle.commerce.CommerceEvent;
@@ -177,9 +178,9 @@ public class MParticleJSInterface {
             int messageType = event.getInt(JS_KEY_EVENT_DATATYPE);
             switch (messageType){
                 case JS_MSG_TYPE_PE:
-                    MParticle.getInstance().logEvent(name,
-                            eventType,
-                            eventAttributes);
+                    MParticle.getInstance().logEvent(new MPEvent.Builder(name,
+                            eventType).info(
+                            eventAttributes).build());
                     break;
                 case JS_MSG_TYPE_PV:
                     MParticle.getInstance().logScreen(name,
