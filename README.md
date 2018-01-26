@@ -80,12 +80,30 @@ mParticle supports several marketing automation and push messaging integrations.
     implementation 'com.google.firebase:firebase-messaging:11.6.2'
 ```
 
-### Google Play Install Referrer
+## Google Play Install Referrer
+
+In order for attribution, deep linking, and many other integrations to work properly, the mParticle SDK collects the Google Play Install referrer string, which tracks the original link that brought the user to Google Play.
+
+There are two different ways to collect this value - you only need to implement one.
+
+### 1. Play Install Referrer Library
+
+Google now supports a [library that surface the referrer string](https://developer.android.com/google/play/installreferrer/library.html):
+
+Simply add this dependency to your app and the mParticle SDK will detect it:
+
+```groovy
+implementation 'com.android.installreferrer:installreferrer:1.0'
+```
+
+### 2. Broadcast Receivers
+
+Alternatively, you can add the mParticle `ReferrerReceiver` to your manifest file within the `<application>` tag. The mParticle SDK
+will collect any campaign referral information and automatically forward it to kits (such as AppsFlyer, Kochava, and Adjust) and server-side integrations.
 
 #### Single Receiver
 
-In order for attribution, deep linking, and many other integrations to work properly, add the mParticle `ReferrerReceiver` to your manifest file within the `<application>` tag. The mParticle SDK
-will collect any campaign referral information and automatically forward it to kits (such as AppsFlyer, Kochava, and Adjust) and server-side integrations.
+If you have no other `BroadcastReceiver` that listens for the `INSTALL_REFERRER` intent, you can just add the mParticle receiver:
 
 ```xml
 <receiver android:name="com.mparticle.ReferrerReceiver" android:exported="true">
