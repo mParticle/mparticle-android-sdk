@@ -218,7 +218,11 @@ public class MPUtility {
     }
 
     public static String getTimeZone() {
-        return TimeZone.getDefault().getDisplayName(false, 0);
+        try {
+            //Some Android 8 devices crash here for no clear reason
+            return TimeZone.getDefault().getDisplayName(false, 0);
+        } catch (Exception ignored){ }
+            return null;
     }
 
     public static int getOrientation(Context context) {
