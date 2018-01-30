@@ -114,6 +114,27 @@ public class MParticle {
 
 
     protected MParticle() { }
+    
+    private MParticle(MParticleOptions options) {
+        ConfigManager configManager = new ConfigManager(options.getContext(), options.getEnvironment(), options.getApiKey(), options.getApiSecret());
+        configManager.setUploadInterval(options.getUploadInterval());
+        configManager.setSessionTimeout(options.getSessionTimeout());
+        AppStateManager appStateManager = new AppStateManager(options.getContext());
+        appStateManager.setConfigManager(configManager);
+        
+        
+        mAppContext = options.getContext();
+        mConfigManager = configManager;
+        mAppStateManager = appStateManager;
+        if (options.isUncaughtExceptionLoggingEnabled()) {
+            enableUncaughtExceptionLogging();
+        } else {
+            disableUncaughtExceptionLogging();
+        }
+        mCommerce = new CommerceApi(options.getContext());
+        mMessageManager = new MessageManager(options.getContext(), configManager, options.getInstallType(), appStateManager, sDevicePerformanceMetricsDisabled);
+        mPreferences = options.getContext().getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
+    }
 
     /**
      * Start the mParticle SDK and begin tracking a user session. This method must be called prior to {@link #getInstance()}.
@@ -146,29 +167,10 @@ public class MParticle {
                         Logger.error("mParticle requires android.permission.INTERNET permission");
                     }
 
-                    ConfigManager configManager = new ConfigManager(context, options.getEnvironment(), options.getApiKey(), options.getApiSecret());
-                    configManager.setUploadInterval(options.getUploadInterval());
-                    configManager.setSessionTimeout(options.getSessionTimeout());
-                    AppStateManager appStateManager = new AppStateManager(context);
-                    appStateManager.setConfigManager(configManager);
-
-                    instance = new MParticle();
-                    instance.mAppContext = context;
-                    instance.mConfigManager = configManager;
-                    instance.mAppStateManager = appStateManager;
-                    if (options.isUncaughtExceptionLoggingEnabled()) {
-                        instance.enableUncaughtExceptionLogging();
-                    } else {
-                        instance.disableUncaughtExceptionLogging();
-                    }
-                    instance.mCommerce = new CommerceApi(context);
-                    instance.mMessageManager = new MessageManager(context, configManager, options.getInstallType(), appStateManager, sDevicePerformanceMetricsDisabled);
-                    instance.mPreferences = context.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
-                    instance.mKitManager = new KitFrameworkWrapper(context, instance.mMessageManager, configManager, appStateManager, instance.mMessageManager.getTaskHandler());
+                    instance = new MParticle(options);
+                    instance.mKitManager = new KitFrameworkWrapper(options.getContext(), instance.mMessageManager, instance.getConfigManager(), instance.getAppStateManager(), instance.mMessageManager.getTaskHandler());
+                    instance.mIdentityApi = new IdentityApi(options.getContext(), instance.mAppStateManager, instance.mMessageManager, instance.mConfigManager, instance.mKitManager);
                     instance.mMessageManager.refreshConfiguration();
-
-                    instance.mIdentityApi = new IdentityApi(context, instance.mAppStateManager, instance.mMessageManager, instance.mConfigManager, instance.mKitManager);
-
                     instance.identify(options);
                     if (options.hasLocationTracking()) {
                         MParticleOptions.LocationTracking locationTracking = options.getLocationTracking();
@@ -179,8 +181,7 @@ public class MParticle {
                         }
                     }
 
-
-                    if (configManager.getLogUnhandledExceptions()) {
+                    if (instance.getConfigManager().getLogUnhandledExceptions()) {
                         instance.enableUncaughtExceptionLogging();
                     }
 
@@ -191,7 +192,7 @@ public class MParticle {
                     //there are a number of settings that don't need to be enabled right away
                     //queue up a delayed init and let the start() call return ASAP.
                     instance.mMessageManager.initConfigDelayed();
-                    appStateManager.init(Build.VERSION.SDK_INT);
+                    instance.mAppStateManager.init(Build.VERSION.SDK_INT);
                     //We ask to be initialized in Application#onCreate, but
                     //if the Context is an Activity, we know we weren't, so try
                     //to salvage session management via simulating onActivityResume.
@@ -205,7 +206,9 @@ public class MParticle {
                     InstallReferrerHelper.fetchInstallReferrer(context, new InstallReferrerHelper.InstallReferrerCallback() {
                         @Override
                         public void onReceived(String installReferrer) {
-                            InstallReferrerHelper.setInstallReferrer(instance.mAppContext, installReferrer);
+                            if (MParticle.getInstance() != null) {
+                                InstallReferrerHelper.setInstallReferrer(MParticle.getInstance().mAppContext, installReferrer);
+                            }
                         }
 
                         @Override
