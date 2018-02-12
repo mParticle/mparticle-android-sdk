@@ -6,6 +6,7 @@ import android.webkit.WebView;
 
 import com.mparticle.identity.BaseIdentityTask;
 import com.mparticle.identity.IdentityApiRequest;
+import com.mparticle.identity.IdentityStateListener;
 import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.Logger;
 import com.mparticle.internal.MPUtility;
@@ -14,6 +15,9 @@ import com.mparticle.internal.PushRegistrationHelper;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * class used for passing optional settings to the SDK when it is started
+ */
 public class MParticleOptions {
     private static final String PREFKEY_API_KEY = "mp_key";
     private static final String PREFKEY_API_SECRET = "mp_secret";
@@ -35,7 +39,8 @@ public class MParticleOptions {
     private LocationTracking mLocationTracking;
     private PushRegistrationHelper.PushRegistration mPushRegistration;
 
-    private MParticleOptions(){}
+    private MParticleOptions() {
+    }
 
     public MParticleOptions(Builder builder) {
         this.mContext = builder.context;
@@ -92,8 +97,12 @@ public class MParticleOptions {
         if (builder.pushRegistration != null) {
             this.mPushRegistration = builder.pushRegistration;
         }
-     }
+    }
 
+    /**
+     * @param context
+     * @return
+     */
     public static MParticleOptions.Builder builder(Context context) {
         return new Builder(context);
     }
@@ -102,34 +111,66 @@ public class MParticleOptions {
         return mContext;
     }
 
+    /**
+     * query the InstallType
+     */
     public MParticle.InstallType getInstallType() {
         return mInstallType;
     }
 
+    /**
+     * query the Environment
+     * @return
+     */
     public MParticle.Environment getEnvironment() {
         return mEnvironment;
     }
 
+    /**
+     * query the Api Key
+     * @return
+     */
     public String getApiKey() {
         return mApiKey;
     }
 
+    /**
+     * query the Api Secret
+     * @return
+     */
     public String getApiSecret() {
         return mApiSecret;
     }
 
+    /**
+     * query the Identify Request
+     * @return
+     */
     public IdentityApiRequest getIdentifyRequest() {
         return mIdentifyRequest;
     }
 
+    /**
+     * query whether device performance metrics are enabled or disabled
+     * @return true if the are disabled, false if they are enabled
+     */
     public Boolean isDevicePerformanceMetricsDisabled() {
         return mDevicePerformanceMetricsDisabled;
     }
 
+    /**
+     * query whether Android Id collection is enabled or disabled
+     * @return true if collection is disabled, false if it is enabled
+     */
     public Boolean isAndroidIdDisabled() {
         return mAndroidIdDisabled;
     }
 
+    /**
+     * query the uploadInterval
+     * @return the upload interval, in seconds
+     * @return the upload interval, in seconds
+     */
     public Integer getUploadInterval() {
         return mUploadInterval;
     }
@@ -193,27 +234,75 @@ public class MParticleOptions {
             this.context = context;
         }
 
+        /**
+         * register an Api Key and Secret to be used for the SDK. This is a required field, and your
+         * app will not function properly if you do not provide a valid Key and Secret
+         * @param apiKey the Api Key
+         * @param apiSecret the Api Secret
+         *
+         * @return the instance of the builder, for chaining calls
+         */
         public Builder credentials(@NonNull String apiKey, @NonNull String apiSecret) {
             this.apiKey = apiKey;
             this.apiSecret = apiSecret;
             return this;
         }
 
+        /**
+         * indicate a known {@link com.mparticle.MParticle.InstallType}. If this method is not used,
+         * a default type of MParticle.InstallType.AutoDetect will be used
+         *
+         * @param installType
+         *
+         * @return the instance of the builder, for chaining calls
+         *
+         * @see com.mparticle.MParticle.InstallType
+         */
         public Builder installType(@NonNull MParticle.InstallType installType) {
             this.installType = installType;
             return this;
         }
 
+        /**
+         * indicate a known {@link com.mparticle.MParticle.Environment} the Application will be running in. If this method is not used.
+         * a default Environment of MParticle.Environment.AutoDetect will be used
+         * @param environment
+         * @return
+         */
         public Builder environment(@NonNull MParticle.Environment environment) {
             this.environment = environment;
             return this;
         }
 
+        /**
+         * register an IdentityApiRequest which will be passed to an {@link com.mparticle.identity.IdentityApi#identify(IdentityApiRequest)}
+         * request when the SDK starts in order to interact with the results of this call, without registering
+         * a global listener in {@link com.mparticle.identity.IdentityApi#addIdentityStateListener(IdentityStateListener)}, register
+         * a BaseIdentityTask with {@link #identifyTask(BaseIdentityTask)}. If this method is not called,
+         * an Identify request using the most recent current user will be used, or if this is a first-run,
+         * and empty request will be used
+         *
+         * @param identifyRequest
+         *
+         * @return the instance of the builder, for chaining calls
+         *
+         * @see IdentityApiRequest
+         */
         public Builder identify(@NonNull IdentityApiRequest identifyRequest) {
             this.identifyRequest = identifyRequest;
             return this;
         }
 
+        /**
+         * register an BaseIdentityTask, which can be used to interact with the asynchronous results
+         * of an {@link #identify(IdentityApiRequest)} request
+         *
+         * @param task
+         *
+         * @return the instance of the builder, for chaining calls
+         *
+         * @see BaseIdentityTask
+         */
         public Builder identifyTask(@NonNull BaseIdentityTask task) {
             this.identityTask = task;
             return this;
@@ -223,6 +312,8 @@ public class MParticleOptions {
          * Disable CPU and memory usage collection.
          *
          * @param disabled
+         *
+         * @return the instance of the builder, for chaining calls
          */
         public Builder devicePerformanceMetricsDisabled(boolean disabled) {
             this.devicePerformanceMetricsDisabled = disabled;
@@ -230,12 +321,13 @@ public class MParticleOptions {
         }
 
         /**
-         *
          * By default, the SDK will collect <a href="http://developer.android.com/reference/android/provider/Settings.Secure.html#ANDROID_ID">Android Id</a> for the purpose
          * of anonymous analytics. If you're not using an mParticle integration that consumes Android ID, the value will be sent to the mParticle
          * servers and then immediately discarded. Use this API if you would like to additionally disable it from being collected entirely.
          *
          * @param disabled true to disable collection (false by default)
+         *
+         * @return the instance of the builder, for chaining calls
          */
         public Builder androidIdDisabled(boolean disabled) {
             this.androidIdDisabled = disabled;
@@ -246,6 +338,8 @@ public class MParticleOptions {
          * Set the upload interval period to control how frequently uploads occur.
          *
          * @param uploadInterval the number of seconds between uploads
+         *
+         * @return the instance of the builder, for chaining calls
          */
         public Builder uploadInterval(int uploadInterval) {
             this.uploadInterval = uploadInterval;
@@ -258,42 +352,96 @@ public class MParticleOptions {
          * A session has ended once the application has been in the background for more than this timeout
          *
          * @param sessionTimeout Session timeout in seconds
+         *
+         * @return the instance of the builder, for chaining calls
          */
         public Builder sessionTimeout(int sessionTimeout) {
             this.sessionTimeout = sessionTimeout;
             return this;
         }
 
+        /**
+         * Enable or disable mParticle exception handling to automatically log events on uncaught exceptions
+         *
+         * @return the instance of the builder, for chaining calls
+         */
         public Builder enableUncaughtExceptionLogging(boolean enable) {
             this.unCaughtExceptionLogging = enable;
             return this;
         }
 
+        /**
+         * Set the minimum log level for the SDK. The log level
+         * is used to moderate the amount of messages that are printed by the SDK
+         * to the console. Note that while the SDK is in the Production,
+         * <i>log messages at or above this level will be printed</i>.
+         *
+         * @param logLevel the preferred level of logging
+         *
+         * @return the instance of the builder, for chaining calls
+         *
+         * @see MParticle.LogLevel
+         */
         public Builder logLevel(MParticle.LogLevel logLevel) {
             this.logLevel = logLevel;
             return this;
         }
 
-        public Builder attributionListener(AttributionListener attributionListener){
+        /**
+         * Register a callback for when an attribution is received
+         * @param attributionListener an instance of the AttributionListener callback
+         *
+         * @return the instance of the builder, for chaining calls
+         *
+         * @see AttributionListener
+         */
+        public Builder attributionListener(AttributionListener attributionListener) {
             this.attributionListener = attributionListener;
             return this;
         }
 
+        /**
+         * disables Location tracking
+         *
+         * @return the instance of the builder, for chaining calls
+         */
         public Builder locationTrackingDisabled() {
             this.locationTracking = new LocationTracking(false);
             return this;
         }
 
+        /**
+         * Enables location tracking given a provider and update frequency criteria. The provider must
+         * be available and the correct permissions must have been requested within your application's manifest XML file.
+         *
+         * @param provider    the provider key
+         * @param minTime     the minimum time (in milliseconds) to trigger an update
+         * @param minDistance the minimum distance (in meters) to trigger an update
+         *
+         * @return the instance of the builder, for chaining calls
+         */
         public Builder locationTrackingEnabled(String provider, long minTime, long minDistance) {
             this.locationTracking = new LocationTracking(provider, minTime, minDistance);
             return this;
         }
 
+        /**
+         * Manually log a push registration
+         * @param instanceId the Instance Id of the push token
+         * @param senderId the Sender Id of the push token
+         *
+         * @return the instance of the builder, for chaining calls
+         */
         public Builder pushRegistration(String instanceId, String senderId) {
             this.pushRegistration = new PushRegistrationHelper.PushRegistration(instanceId, senderId);
             return this;
         }
 
+        /**
+         * Builds this Builder into an MParticleOptions object which can be used to start the SDK
+         *
+         * @return MParticleOptions instance
+         */
         public MParticleOptions build() {
             boolean devMode = MParticle.Environment.Development.equals(environment) || MPUtility.isAppDebuggable(context);
             String message;
@@ -332,13 +480,13 @@ public class MParticleOptions {
         }
 
         private String getString(String key) {
-            int id =  this.context.getResources().getIdentifier(key, "string", this.context.getPackageName());
+            int id = this.context.getResources().getIdentifier(key, "string", this.context.getPackageName());
             if (id == 0) {
                 return null;
             }
             try {
                 return this.context.getResources().getString(id);
-            }catch (android.content.res.Resources.NotFoundException nfe){
+            } catch (android.content.res.Resources.NotFoundException nfe) {
                 return null;
             }
         }

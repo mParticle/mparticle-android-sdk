@@ -24,6 +24,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.WeakHashMap;
 
+/**
+ * Helper class that is used to access Identity endpoints to manage User's Attributes and Identities
+ */
 public class IdentityApi {
     public static int UNKNOWN_ERROR = -1;
     public static int THROTTLE_ERROR = 429;
@@ -61,6 +64,8 @@ public class IdentityApi {
     /**
      * return the current MPID, even if an Identity request, which might cause the MPID to change, is
      * currently in progress
+     *
+     * @see IdentityStateListener
      */
     @Nullable
     public MParticleUser getCurrentUser() {
@@ -72,18 +77,49 @@ public class IdentityApi {
         }
     }
 
+    /**
+     * adds a global listener for any changes in Identity State. This will give you a callback when
+     * a user is identified
+     * @param listener callback for Identity State changes
+     *
+     * @see IdentityStateListener
+     */
     public void addIdentityStateListener(IdentityStateListener listener) {
         identityStateListeners.add(listener);
     }
 
+    /**
+     * removes an instance of a global listener by reference
+     * @param listener callback for Identity State changes
+     *
+     * @see IdentityStateListener
+     */
     public void removeIdentityStateListener(IdentityStateListener listener) {
         identityStateListeners.remove(listener);
     }
 
+    /**
+     * calls the Identity Logout endpoint with an empty IdentityApiRequest
+     *
+     * @return an MParticleTask<IdentityApiResult> to handle the Asynchronous results
+     *
+     * @see MParticleTask and
+     * @see IdentityApiResult
+     */
     public MParticleTask<IdentityApiResult> logout() {
         return logout(null);
     }
 
+    /**
+     * @see IdentityApiRequest
+     *
+     * calls the Identity Logout endpoint
+     *
+     * @return an MParticleTask<IdentityApiResult> to handle the Asynchronous results
+     *
+     * @see MParticleTask and
+     * @see IdentityApiResult
+     */
     public MParticleTask<IdentityApiResult> logout(final IdentityApiRequest logoutRequest) {
         return makeIdentityRequest(logoutRequest, new IdentityNetworkRequestRunnable() {
             @Override
@@ -93,10 +129,28 @@ public class IdentityApi {
         });
     }
 
+    /**
+     * calls the Identity Login endpoint with an empty IdentityApiRequest
+     *
+     * @return an MParticleTask<IdentityApiResult> to handle the Asynchronous results
+     *
+     * @see MParticleTask and
+     * @see IdentityApiResult
+     */
     public MParticleTask<IdentityApiResult> login() {
         return login(null);
     }
 
+    /**
+     * @see IdentityApiRequest
+     *
+     * calls the Identity Login endpoint
+     *
+     * @return an MParticleTask<IdentityApiResult> to handle the Asynchronous results
+     *
+     * @see MParticleTask and
+     * @see IdentityApiResult
+     */
     public MParticleTask<IdentityApiResult> login(@Nullable final IdentityApiRequest loginRequest) {
         return makeIdentityRequest(loginRequest, new IdentityNetworkRequestRunnable() {
             @Override
@@ -106,6 +160,16 @@ public class IdentityApi {
         });
     }
 
+    /**
+     * @see IdentityApiRequest
+     *
+     * calls the Identity Identify endpoint
+     *
+     * @return an MParticleTask<IdentityApiResult> to handle the Asynchronous results
+     *
+     * @see MParticleTask and
+     * @see IdentityApiResult
+     */
     public MParticleTask<IdentityApiResult> identify(final IdentityApiRequest identifyRequest) {
         return makeIdentityRequest(identifyRequest, new IdentityNetworkRequestRunnable() {
             @Override
@@ -115,6 +179,16 @@ public class IdentityApi {
         });
     }
 
+    /**
+     * @see IdentityApiRequest
+     *
+     * calls the Identity Modify endpoint. This should be used in place of the pre-version-5
+     * MParticle.setUserAttribute() and MParticle.setUserIdentity() methods
+     *
+     * @return an MParticleTask<IdentityApiResult> to handle the Asynchronous results
+     *
+     * @see BaseIdentityTask
+     */
     public BaseIdentityTask modify(@NonNull final IdentityApiRequest updateRequest) {
         boolean devMode = MPUtility.isDevEnv() || MPUtility.isAppDebuggable(mContext);
         final BaseIdentityTask task = new BaseIdentityTask();

@@ -51,34 +51,9 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * The primary access point to the mParticle SDK. In order to use this class, you must first call {@link #start(MParticleOptions)}, which requires
- * configuration via <code><a href="http://developer.android.com/guide/topics/resources/providing-resources.html">Android Resources</a></code>. You can then retrieve a reference
+ * The primary access point to the mParticle SDK. In order to use this class, you must first call {@link #start(MParticleOptions)}. You can then retrieve a reference
  * to an instance of this class via {@link #getInstance()}
- * <p></p>
- * It's recommended to keep configuration parameters in a single xml file located within your res/values folder. The full list of configuration options is as follows:
- * <p></p>
- * Required parameters
- * <ul>
- * <li>mp_key - <code><a href="http://developer.android.com/guide/topics/resources/string-resource.html#String">String</a></code> - This is the key used to authenticate with the mParticle SDK server API</li>
- * <li>mp_secret - <code> <a href="http://developer.android.com/guide/topics/resources/string-resource.html#String">String</a></code> - This is the secret used to authenticate with the mParticle SDK server API</li>
- * </ul>
- * Required for push notifications
- * <ul>
- * <li> mp_enablePush - <code><a href="http://developer.android.com/guide/topics/resources/more-resources.html#Bool">Bool</a></code> - Enable push registration, notifications, and analytics. <i>Default: false</i></li>
- * <li> mp_pushSenderId - <code><a href="http://developer.android.com/guide/topics/resources/string-resource.html#String">String</a></code> - <code><a href="http://developer.android.com/google/gcm/gcm.html#senderid">GCM Sender ID</a></code></li>
- * </ul>
- * Required for licensing
- * <ul>
- * <li> mp_enableLicenseCheck - <code><a href="http://developer.android.com/guide/topics/resources/more-resources.html#Bool">Bool</a></code> - By enabling license check, MParticle will automatically validate that the app was downloaded and/or bought via Google Play, or if it was "pirated" or "side-loaded". <i>Default: false</i></li>
- * <li> mp_appLicenseKey - <code><a href="http://developer.android.com/guide/topics/resources/string-resource.html#String">String</a></code> - The <code><a href="http://developer.android.com/google/play/licensing/adding-licensing.html#account-key">public key</a></code> used by your app to verify the user's license with Google Play.</li>
- * </ul>
- * Optional
- * <ul>
- * <li>mp_enableAutoScreenTracking - <code> <a href="http://developer.android.com/guide/topics/resources/more-resources.html#Integer">Integer</a></code> - Enable automatic screen view events. Note that *prior to ICS/API level 14*, this functionality requires instrumentation via an mParticle Activity implementation or manually. </li>
- * <li>mp_productionUploadInterval - <code> <a href="http://developer.android.com/guide/topics/resources/more-resources.html#Integer">Integer</a></code> - The length of time in seconds to send batches of messages to mParticle. Setting this too low could have an adverse effect on the device battery. <i>Default: 600</i></li>
- * <li>mp_reportUncaughtExceptions - <code> <a href="http://developer.android.com/guide/topics/resources/more-resources.html#Bool">Bool</a></code> - By enabling this, the MParticle SDK will automatically log and report any uncaught exceptions, including stack traces. <i>Default: false</i></li>
- * <li>mp_sessionTimeout - <code> <a href="http://developer.android.com/guide/topics/resources/more-resources.html#Integer">Integer</a></code> - The length of time (in seconds) that a user session will remain valid while application has been paused and put into the background. <i>Default: 60</i></li>
- * </ul>
+ *
  */
 public class MParticle {
     /**
@@ -276,6 +251,11 @@ public class MParticle {
         return sAndroidIdDisabled;
     }
 
+    /**
+     * Query whether device performance metrics are disabled
+     *
+     * @return true if Device Performance Metrics are disabled
+     */
     public boolean isDevicePerformanceMetricsDisabled() {
         return mMessageManager.isDevicePerformanceMetricsDisabled();
     }
@@ -309,6 +289,11 @@ public class MParticle {
         InstallReferrerHelper.setInstallReferrer(mAppContext, referrer);
     }
 
+    /**
+     * Retrieve the current install referrer, if it has been set
+     *
+     * @return The current Install Referrer
+     */
     public String getInstallReferrer() {
         return InstallReferrerHelper.getInstallReferrer(mAppContext);
     }
@@ -524,6 +509,9 @@ public class MParticle {
         logException(exception, eventData, null);
     }
 
+    /**
+     * Clears the current Attribution Listener
+     */
     public void removeAttributionListener() {
         mAttributionListener = null;
     }
@@ -536,6 +524,11 @@ public class MParticle {
         return mAttributionListener;
     }
 
+    /**
+     * Queries the attribution results
+     *
+     * @return the current attribution results
+     */
     public Map<Integer, AttributionResult> getAttributionResults() {
         return mKitManager.getAttributionResults();
     }
