@@ -7,7 +7,7 @@ import com.mparticle.BaseCleanStartedEachTest;
 import com.mparticle.MParticle;
 import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.MPUtility;
-import com.mparticle.utils.RandomUtils;
+import com.mparticle.mock.utils.RandomUtils;
 import com.mparticle.utils.TestingUtils;
 
 import org.json.JSONArray;

@@ -568,6 +568,22 @@ public class MPUtility {
         }
     }
 
+    public static JSONObject mapToJson(Map<String, String> map) {
+        if (map == null) {
+            return null;
+        }
+        JSONObject attrs = new JSONObject();
+        for (Map.Entry<String, String> entry : map.entrySet()) {
+            try {
+                attrs.put(entry.getKey(), entry.getValue());
+            }
+            catch (JSONException ignore) {
+
+            }
+        }
+        return attrs;
+    }
+
     public static boolean isAppDebuggable(Context context){
         return ( 0 != ( context.getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE ) );
     }

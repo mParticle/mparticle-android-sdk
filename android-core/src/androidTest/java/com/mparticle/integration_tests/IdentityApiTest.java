@@ -14,7 +14,7 @@ import com.mparticle.identity.TaskSuccessListener;
 import com.mparticle.identity.UserAliasHandler;
 import com.mparticle.internal.ConfigManager;
 import com.mparticle.utils.MParticleUtils;
-import com.mparticle.utils.RandomUtils;
+import com.mparticle.mock.utils.RandomUtils;
 import com.mparticle.utils.StreamAssert;
 import com.mparticle.utils.TestingUtils;
 

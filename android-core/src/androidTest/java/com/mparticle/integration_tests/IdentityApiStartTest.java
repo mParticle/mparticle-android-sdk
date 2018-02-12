@@ -13,7 +13,7 @@ import com.mparticle.identity.AccessUtils;
 import com.mparticle.identity.IdentityApiRequest;
 import com.mparticle.identity.IdentityHttpResponse;
 import com.mparticle.internal.ConfigManager;
-import com.mparticle.utils.RandomUtils;
+import com.mparticle.mock.utils.RandomUtils;
 import com.mparticle.utils.TestingUtils;
 
 import org.json.JSONObject;

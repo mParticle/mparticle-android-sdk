@@ -1,92 +1,30 @@
-package com.mparticle.internal;
+package com.mparticle.internal.networking;
 
 import android.location.Location;
 import android.support.annotation.Nullable;
 
-import com.mparticle.MParticle;
 import com.mparticle.commerce.Cart;
 import com.mparticle.commerce.CommerceEvent;
 import com.mparticle.commerce.Impression;
 import com.mparticle.commerce.Product;
 import com.mparticle.commerce.Promotion;
 import com.mparticle.commerce.TransactionAttributes;
+import com.mparticle.internal.Constants;
+import com.mparticle.internal.MPUtility;
+import com.mparticle.internal.Session;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+public class MPCommerceMessage extends BaseMPMessage {
 
-public class MPMessage extends JSONObject{
-    private long mpId;
-
-    private MPMessage(){}
-
-    private MPMessage(Builder builder) throws JSONException{
-        mpId = builder.mpid;
-        put(Constants.MessageKey.TYPE, builder.mMessageType);
-        put(Constants.MessageKey.TIMESTAMP, builder.mTimestamp);
-        if (Constants.MessageType.SESSION_START == builder.mMessageType) {
-            put(Constants.MessageKey.ID, builder.mSession.mSessionID);
-        } else {
-            put(Constants.MessageKey.SESSION_ID, builder.mSession.mSessionID);
-
-            if (builder.mSession.mSessionStartTime > 0) {
-                put(Constants.MessageKey.SESSION_START_TIMESTAMP, builder.mSession.mSessionStartTime);
-            }
-        }
-
-        if (builder.mName != null) {
-            put(Constants.MessageKey.NAME, builder.mName);
-        }
-
-        if (builder.mCustomFlags != null) {
-            JSONObject flagsObject = new JSONObject();
-            for (Map.Entry<String, List<String>> entry : builder.mCustomFlags.entrySet()) {
-                List<String> values = entry.getValue();
-                JSONArray valueArray = new JSONArray(values);
-                flagsObject.put(entry.getKey(), valueArray);
-            }
-            put(Constants.MessageKey.EVENT_FLAGS, flagsObject);
-        }
-
-        if (builder.mLength != null){
-            put(Constants.MessageKey.EVENT_DURATION, builder.mLength);
-            if (builder.mAttributes == null){
-                builder.mAttributes = new JSONObject();
-            }
-            if (!builder.mAttributes.has("EventLength")) {
-                //can't be longer than max int milliseconds
-                builder.mAttributes.put("EventLength", Integer.toString(builder.mLength.intValue()));
-            }
-        }
-
-        if (builder.mAttributes != null) {
-            put(Constants.MessageKey.ATTRIBUTES, builder.mAttributes);
-        }
-
-        if (builder.mDataConnection != null) {
-            put(Constants.MessageKey.STATE_INFO_DATA_CONNECTION, builder.mDataConnection);
-        }
-
-        if (!(Constants.MessageType.ERROR.equals(builder.mMessageType) &&
-                !(Constants.MessageType.OPT_OUT.equals(builder.mMessageType)))) {
-            if (builder.mLocation != null) {
-                JSONObject locJSON = new JSONObject();
-                locJSON.put(Constants.MessageKey.LATITUDE, builder.mLocation .getLatitude());
-                locJSON.put(Constants.MessageKey.LONGITUDE, builder.mLocation .getLongitude());
-                locJSON.put(Constants.MessageKey.ACCURACY, builder.mLocation .getAccuracy());
-                put(Constants.MessageKey.LOCATION, locJSON);
-            }
-        }
-        if (builder.commerceEvent != null){
-            addCommerceEventInfo(this, builder.commerceEvent, builder.mCart);
-        }
+    protected MPCommerceMessage(Builder builder) throws JSONException {
+        super(builder);
+        addCommerceEventInfo(this, builder.commerceEvent, builder.cart);
     }
 
-    private static void addCommerceEventInfo(MPMessage message, CommerceEvent event, @Nullable Cart cart) {
+    private static void addCommerceEventInfo(BaseMPMessage message, CommerceEvent event, @Nullable Cart cart) {
         try {
 
             if (event.getScreen() != null) {
@@ -99,11 +37,7 @@ public class MPMessage extends JSONObject{
                 message.put(Constants.Commerce.CURRENCY, event.getCurrency());
             }
             if (event.getCustomAttributes() != null) {
-                JSONObject attrs = new JSONObject();
-                for (Map.Entry<String, String> entry : event.getCustomAttributes().entrySet()) {
-                    attrs.put(entry.getKey(), entry.getValue());
-                }
-                message.put(Constants.Commerce.ATTRIBUTES, attrs);
+                message.put(Constants.Commerce.ATTRIBUTES, MPUtility.mapToJson(event.getCustomAttributes()));
             }
             if (event.getProductAction() != null) {
                 JSONObject productAction = new JSONObject();
@@ -198,7 +132,6 @@ public class MPMessage extends JSONObject{
             }
 
 
-
         } catch (Exception jse) {
 
         }
@@ -225,109 +158,19 @@ public class MPMessage extends JSONObject{
         return json;
     }
 
-    public JSONObject getAttributes(){
-        return optJSONObject(Constants.MessageKey.ATTRIBUTES);
-    }
+    public static class Builder extends BaseMPMessageBuilder {
+        private CommerceEvent commerceEvent;
+        private Cart cart;
 
-    public long getTimestamp(){
-        try {
-            return getLong(Constants.MessageKey.TIMESTAMP);
-        }catch (JSONException jse){
-
-        }
-        return 0;
-    }
-
-    public String getSessionId() {
-        if (Constants.MessageType.SESSION_START.equals(getMessageType())) {
-            return optString(Constants.MessageKey.ID, Constants.NO_SESSION_ID);
-        } else {
-            return optString(Constants.MessageKey.SESSION_ID, Constants.NO_SESSION_ID);
-        }
-    }
-
-    public String getMessageType() {
-        return optString(Constants.MessageKey.TYPE);
-    }
-
-    public int getTypeNameHash() {
-        return MPUtility.mpHash(getType() + getName());
-    }
-
-    public String getType() {
-        return optString(Constants.MessageKey.TYPE);
-    }
-
-    public String getName() {
-        return optString(Constants.MessageKey.NAME);
-    }
-
-    public long getMpId() {
-        return mpId;
-    }
-
-    public static class Builder {
-        private final String mMessageType;
-        private final Session mSession;
-        private CommerceEvent commerceEvent = null;
-        private long mTimestamp;
-        private String mName;
-        private JSONObject mAttributes;
-        private Location mLocation;
-        private String mDataConnection;
-        private Double mLength = null;
-        private Map<String, List<String>> mCustomFlags;
-        private long mpid;
-        private Cart mCart;
-
-        public Builder(String messageType, Session session, Location location, long mpId){
-            mMessageType = messageType;
-            mSession = new Session(session);
-            mLocation = location;
-            mpid = mpId;
+        public Builder(CommerceEvent commerceEvent, Session session, Location location, long mpId, Cart cart) {
+            super(Constants.MessageType.COMMERCE_EVENT, session, location, mpId);
+            this.commerceEvent = commerceEvent;
+            this.cart = cart;
         }
 
-        public Builder(CommerceEvent event, Session session, Location location, long mpId, Cart cart) {
-            this(Constants.MessageType.COMMERCE_EVENT, session, location, mpId);
-            commerceEvent = event;
-            mCart = cart;
-        }
-
-        public Builder timestamp(long timestamp){
-            mTimestamp = timestamp;
-            return this;
-        }
-        public Builder name(String name){
-            mName = name;
-            return this;
-        }
-        public Builder attributes(JSONObject attributes){
-            mAttributes = attributes;
-            return this;
-        }
-
-        public Builder cart(Cart cart){
-            mCart = cart;
-            return this;
-        }
-
-        public MPMessage build() throws JSONException {
-            return new MPMessage(this);
-        }
-
-        public Builder dataConnection(String dataConnection) {
-            mDataConnection = dataConnection;
-            return this;
-        }
-
-        public Builder length(Double length) {
-            mLength = length;
-            return this;
-        }
-
-        public Builder flags(Map<String, List<String>> customFlags) {
-            mCustomFlags = customFlags;
-            return this;
+        @Override
+        public BaseMPMessage build() throws JSONException {
+            return new MPCommerceMessage(this);
         }
     }
 }

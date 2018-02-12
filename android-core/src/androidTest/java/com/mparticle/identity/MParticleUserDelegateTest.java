@@ -1,30 +1,19 @@
 package com.mparticle.identity;
 
 import android.content.Context;
-import android.os.Looper;
 import android.support.test.InstrumentationRegistry;
 import android.util.Log;
 
 import com.mparticle.BaseCleanStartedEachTest;
 import com.mparticle.MParticle;
-import com.mparticle.MParticleOptions;
-import com.mparticle.internal.AccessUtils;
-import com.mparticle.internal.Logger;
-import com.mparticle.internal.MessageManager;
-import com.mparticle.internal.database.services.MParticleDBManager;
-import com.mparticle.internal.database.tables.mp.MParticleDatabaseHelper;
 import com.mparticle.utils.MParticleUtils;
-import com.mparticle.utils.RandomUtils;
+import com.mparticle.mock.utils.RandomUtils;
 
-import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNull;
@@ -54,7 +43,7 @@ public class MParticleUserDelegateTest extends BaseCleanStartedEachTest {
             Map<MParticle.IdentityType, String> pairs = new HashMap<MParticle.IdentityType, String>();
             attributes.put(mpid, pairs);
             for (int j = 0; j < mRandom.randomInt(1, 10); j++) {
-                MParticle.IdentityType identityType = MParticle.IdentityType.parseInt(mRandom.randomInt(0, 9));
+                MParticle.IdentityType identityType = MParticle.IdentityType.parseInt(mRandom.randomInt(0, MParticle.IdentityType.values().length));
                 String value = mRandom.getAlphaNumericString(mRandom.randomInt(1, 255));
                 assertTrue(mUserDelegate.setUserIdentity(value, identityType, mpid));
                 pairs.put(identityType, value);

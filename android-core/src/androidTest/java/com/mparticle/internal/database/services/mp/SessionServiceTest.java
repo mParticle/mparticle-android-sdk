@@ -2,23 +2,16 @@ package com.mparticle.internal.database.services.mp;
 
 import android.content.Context;
 import android.database.Cursor;
-import android.location.Location;
 import android.support.test.InstrumentationRegistry;
 
-import com.mparticle.internal.ConfigManager;
-import com.mparticle.internal.MPMessage;
-import com.mparticle.internal.Session;
+import com.mparticle.internal.networking.BaseMPMessage;
 import com.mparticle.internal.database.tables.mp.SessionTable;
 
 import junit.framework.Assert;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Test;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import java.util.UUID;
 
 import static junit.framework.Assert.assertEquals;
@@ -39,7 +32,7 @@ public class SessionServiceTest extends BaseMPServiceTest {
         JSONObject fooObject = new JSONObject();
         String sessionId = UUID.randomUUID().toString();
         fooObject.put("foo", "bar");
-        MPMessage mpMessage = getMpMessage(sessionId);
+        BaseMPMessage mpMessage = getMpMessage(sessionId);
         SessionService.insertSession(database, mpMessage, "foo-app-key", fooObject.toString(), fooObject.toString(), 1);
         fooObject = new JSONObject();
         String randomId = UUID.randomUUID().toString();

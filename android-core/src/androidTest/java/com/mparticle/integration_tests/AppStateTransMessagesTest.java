@@ -12,7 +12,7 @@ import com.mparticle.internal.MParticleApiClientImpl;
 import com.mparticle.utils.AndroidUtils;
 import com.mparticle.utils.AssertTrue;
 import com.mparticle.utils.MParticleUtils;
-import com.mparticle.utils.RandomUtils;
+import com.mparticle.mock.utils.RandomUtils;
 import com.mparticle.utils.StreamAssert;
 
 import org.json.JSONArray;

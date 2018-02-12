@@ -1,17 +1,14 @@
 package com.mparticle;
 
-import android.os.Looper;
 import android.support.test.InstrumentationRegistry;
 
 import com.mparticle.internal.KitFrameworkWrapper;
 import com.mparticle.internal.MessageManager;
+import com.mparticle.mock.utils.RandomUtils;
 import com.mparticle.utils.MParticleUtils;
-import com.mparticle.utils.RandomUtils;
 
 import junit.framework.Assert;
 
-import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.util.Arrays;

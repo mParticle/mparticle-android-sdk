@@ -4,6 +4,7 @@ package com.mparticle.internal;
 import android.content.SharedPreferences;
 
 import com.mparticle.MParticle;
+import com.mparticle.internal.networking.BaseMPMessage;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -290,9 +291,9 @@ public class ConfigManagerTest {
 
     @Test
     public void testShouldTrigger() throws Exception {
-        MPMessage message = new MPMessage.Builder(Constants.MessageType.COMMERCE_EVENT, new Session(), null, 1).build();
+        BaseMPMessage message = new BaseMPMessage.Builder(Constants.MessageType.COMMERCE_EVENT, new Session(), null, 1).build();
         assertTrue(manager.shouldTrigger(message));
-        message = new MPMessage.Builder(Constants.MessageType.PUSH_RECEIVED, new Session(), null, 1).build();
+        message = new BaseMPMessage.Builder(Constants.MessageType.PUSH_RECEIVED, new Session(), null, 1).build();
         assertTrue(manager.shouldTrigger(message));
     }
 

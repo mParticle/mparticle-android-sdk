@@ -6,7 +6,7 @@ import android.database.sqlite.SQLiteDatabase;
 
 import com.mparticle.internal.Constants;
 import com.mparticle.internal.Logger;
-import com.mparticle.internal.MPMessage;
+import com.mparticle.internal.networking.BaseMPMessage;
 import com.mparticle.internal.database.tables.mp.MessageTable;
 
 import org.json.JSONException;
@@ -148,7 +148,7 @@ public class MessageService extends MessageTable {
         return database.delete(MessageTableColumns.TABLE_NAME, MessageTableColumns._ID + " <= ? and " + MessageTableColumns.MP_ID + " != ?", whereArgs);
     }
 
-    public static void insertMessage(SQLiteDatabase db, String apiKey, MPMessage message, long mpId) throws JSONException {
+    public static void insertMessage(SQLiteDatabase db, String apiKey, BaseMPMessage message, long mpId) throws JSONException {
         ContentValues contentValues = new ContentValues();
         contentValues.put(MessageTableColumns.API_KEY, apiKey);
         contentValues.put(MessageTableColumns.CREATED_AT, message.getLong(Constants.MessageKey.TIMESTAMP));

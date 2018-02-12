@@ -10,7 +10,7 @@ import com.mparticle.internal.Constants;
 import com.mparticle.internal.MPUtility;
 import com.mparticle.internal.MParticleApiClientImpl;
 import com.mparticle.utils.MParticleUtils;
-import com.mparticle.utils.RandomUtils;
+import com.mparticle.mock.utils.RandomUtils;
 
 import org.json.JSONArray;
 import org.json.JSONException;

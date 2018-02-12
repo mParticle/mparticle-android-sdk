@@ -5,7 +5,7 @@ import android.support.test.InstrumentationRegistry;
 
 import com.mparticle.BaseCleanStartedEachTest;
 import com.mparticle.MParticle;
-import com.mparticle.utils.RandomUtils;
+import com.mparticle.mock.utils.RandomUtils;
 
 import org.junit.Test;
 

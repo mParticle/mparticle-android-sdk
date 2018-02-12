@@ -1,15 +1,12 @@
 package com.mparticle.internal.database.services.mp;
 
 import android.location.Location;
-import android.os.Message;
-import android.util.Log;
 
 import com.mparticle.internal.Constants;
-import com.mparticle.internal.MPMessage;
+import com.mparticle.internal.networking.BaseMPMessage;
 import com.mparticle.internal.Session;
 
 import org.json.JSONException;
-import org.junit.Before;
 import org.junit.Test;
 
 import java.util.List;
@@ -153,7 +150,7 @@ public class MessageServiceTest extends BaseMPServiceTest {
         for (int i = 0; i < Constants.LIMIT_MAX_MESSAGE_SIZE; i++) {
             builder.append("ab");
         }
-        MPMessage message = new MPMessage.Builder(builder.toString(), new Session(), new Location("New York City"), 1).build();
+        BaseMPMessage message = new BaseMPMessage.Builder(builder.toString(), new Session(), new Location("New York City"), 1).build();
         MessageService.insertMessage(database, "apiKey", message, 1);
 
         assertEquals(MessageService.getMessagesForUpload(database).size(), 10);

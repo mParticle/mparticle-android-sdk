@@ -5,7 +5,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
 import com.mparticle.internal.Constants;
-import com.mparticle.internal.MPMessage;
+import com.mparticle.internal.networking.BaseMPMessage;
 import com.mparticle.internal.MessageBatch;
 import com.mparticle.internal.database.tables.mp.SessionTable;
 
@@ -88,7 +88,7 @@ public class SessionService extends SessionTable {
         }
     }
 
-    public static void insertSession(SQLiteDatabase db, MPMessage message, String apiKey, String appInfo, String deviceInfo, long mpId) throws JSONException {
+    public static void insertSession(SQLiteDatabase db, BaseMPMessage message, String apiKey, String appInfo, String deviceInfo, long mpId) throws JSONException {
         ContentValues contentValues = new ContentValues();
         contentValues.put(SessionTableColumns.MP_ID, mpId);
         contentValues.put(SessionTableColumns.API_KEY, apiKey);

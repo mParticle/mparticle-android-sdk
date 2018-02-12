@@ -8,7 +8,7 @@ import android.database.sqlite.SQLiteDatabase;
 import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.Constants;
 import com.mparticle.internal.Logger;
-import com.mparticle.internal.MPMessage;
+import com.mparticle.internal.networking.BaseMPMessage;
 import com.mparticle.internal.database.tables.mp.BreadcrumbTable;
 
 import org.json.JSONArray;
@@ -19,7 +19,7 @@ public class BreadcrumbService extends BreadcrumbTable {
 
     private static final String[] idColumns = {"_id"};
 
-    public static int insertBreadcrumb(SQLiteDatabase db, Context context, MPMessage message, String apiKey, Long mpid) throws JSONException {
+    public static int insertBreadcrumb(SQLiteDatabase db, Context context, BaseMPMessage message, String apiKey, Long mpid) throws JSONException {
         if (message == null) {
             return -1;
         }

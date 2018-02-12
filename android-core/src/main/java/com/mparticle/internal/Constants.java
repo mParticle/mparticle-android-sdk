@@ -147,6 +147,7 @@ public class Constants {
         String PROFILE = "pro";
         String USER_ATTRIBUTE_CHANGE = "uac";
         String USER_IDENTITY_CHANGE = "uic";
+        String CONSENT_EVENT = "co";
     }
 
     public interface MessageKey {
@@ -339,7 +340,8 @@ public class Constants {
         String PUSH_CAMPAIGN_HISTORY = "pch";
         String PUSH_CAMPAIGN_HISTORY_TIMESTAMP = "ts";
         String STATE_INFO_NETWORK_TYPE = "ant";
-        
+
+        //identity
         String MPID = "mpid";
         String EVENT_FLAGS = "flags";
         String INTEGRATION_ATTRIBUTES = "ia";
@@ -352,6 +354,21 @@ public class Constants {
         String ECHO = "echo";
         String DEVICE_IS_IN_DST = "idst";
         String DEVICE_APPLICATION_STAMP = "das";
+
+
+        interface Consent {
+            //consent events
+            String TYPE = "co";
+            String CONSENTED = "cnd";
+            String HARDWARE_ID = "chid";
+            String REGULATION = "crg";
+            String DOCUMENT = "cdo";
+            String LOCATION = "clc";
+            String CATEGORY = "cca";
+            String PURPOSE = "cpu";
+            String ATTRIBUTES = "attrs";
+        }
+
     }
 
     public interface Commerce {

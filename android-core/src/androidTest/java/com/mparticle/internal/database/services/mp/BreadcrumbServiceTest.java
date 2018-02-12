@@ -5,11 +5,10 @@ import android.location.Location;
 import android.support.test.InstrumentationRegistry;
 
 import com.mparticle.internal.ConfigManager;
-import com.mparticle.internal.MPMessage;
+import com.mparticle.internal.networking.BaseMPMessage;
 import com.mparticle.internal.Session;
 
 import org.json.JSONException;
-import org.junit.Before;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -20,14 +19,14 @@ import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertTrue;
 
 public class BreadcrumbServiceTest extends BaseMPServiceTest {
-    private static MPMessage message;
+    private static BaseMPMessage message;
     private static int breadCrumbLimit;
     private static Context context;
 
     @Override
     public void before() throws Exception {
         super.before();
-        message = new MPMessage.Builder("test", new Session(), new Location("New York City"), 1).build();
+        message = new BaseMPMessage.Builder("test", new Session(), new Location("New York City"), 1).build();
         context = InstrumentationRegistry.getContext();
         breadCrumbLimit = ConfigManager.getBreadcrumbLimit(context);
     }

@@ -121,6 +121,10 @@
 -keep, includedescriptorclasses class com.mparticle.identity.IdentityStateListener { *; }
 -keep, includedescriptorclasses public class com.mparticle.identity.* { *; }
 -keep class com.mparticle.internal.BackgroundTaskHandler { *; }
+-keep class com.mparticle.ConsentEvent { *; }
+-keep class com.mparticle.ConsentEvent$Builder { *; }
+-keep, includedescriptorclasses class com.mparticle.ConsentEvent$Builder { *; }
+
 
 -keep public class com.mparticle.messaging.* {
      *;

@@ -1,12 +1,13 @@
 package com.mparticle.integration_tests;
 
+import com.mparticle.AccessUtils;
 import com.mparticle.BaseCleanStartedEachTest;
+import com.mparticle.ConsentEvent;
 import com.mparticle.MParticle;
+import com.mparticle.mock.utils.RandomUtils;
 import com.mparticle.utils.MParticleUtils;
 
 import org.junit.Test;
-
-import java.util.Random;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.matchingJsonPath;
@@ -27,6 +28,13 @@ public class MParticleApiOutgoingTest extends BaseCleanStartedEachTest {
         MParticle.getInstance().logEvent(MParticleUtils.getInstance().getRandomMPEventSimple());
         MParticle.getInstance().upload();
         mServer.waitForVerify(postRequestedFor(urlPathMatching("/v([0-9]*)/([0-9a-zA-Z]*)/events")), 10000);
+    }
+
+    @Test
+    public void testConsentUpload() throws Exception {
+        AccessUtils.logEvent(RandomUtils.getInstance().getRandomMPConsentEvent());
+        MParticle.getInstance().upload();
+        mServer.waitForVerify(postRequestedFor(urlPathMatching("/v([0-9]*)/([0-9a-zA-Z]*)/events")), 20000);
     }
 
     @Override

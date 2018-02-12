@@ -3,9 +3,16 @@ package com.mparticle.internal;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import com.mparticle.mock.MockContext;
+import com.mparticle.mock.utils.RandomUtils;
+
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Test;
 import org.mockito.Mockito;
+
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.UUID;
 import static org.junit.Assert.*;
 
@@ -103,5 +110,45 @@ public class MPUtilityTest {
         Mockito.when(context.getApplicationInfo()).thenReturn(applicationInfo);
         MPUtility.isAppDebuggable(context);
         assertEquals(5, applicationInfo.flags);
+    }
+
+    @Test
+    public void testMapToJson() throws Exception {
+        assertNull(MPUtility.mapToJson(null));
+        for (int i = 0; i < 10; i++) {
+            Map<String, String> testMap = new HashMap<String, String>();
+            JSONObject testJson = new JSONObject();
+            for (int j = 0; j < 10; j++) {
+                String key = RandomUtils.getInstance().getAlphaNumericString(10);
+                String value = RandomUtils.getInstance().getAlphaNumericString(18);
+                testMap.put(key, value);
+                testJson.put(key, value);
+            }
+            assertUnorderedJsonEqual(testJson, MPUtility.mapToJson(testMap));
+        }
+    }
+
+    private void assertUnorderedJsonEqual(JSONObject object1, JSONObject object2) {
+        if (object1 == object2) {
+            return;
+        }
+        assertEquals(object1.length(), object2.length());
+        Iterator<String> keys = object1.keys();
+        while (keys.hasNext()) {
+            String key = keys.next();
+            try {
+                Object obj1Val = object1.get(key);
+                Object obj2Val = object2.get(key);
+                //dealing with nested JSONObjects, not going to deal with nested JSONArray's
+                if (obj1Val instanceof JSONObject && obj2Val instanceof JSONObject) {
+                    assertUnorderedJsonEqual((JSONObject)obj1Val, (JSONObject)obj2Val);
+                } else {
+                    assertEquals(obj1Val, obj2Val);
+                }
+            }
+            catch (JSONException jse) {
+                fail(jse.getMessage());
+            }
+        }
     }
 }

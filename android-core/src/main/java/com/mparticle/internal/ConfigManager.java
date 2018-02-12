@@ -7,6 +7,7 @@ import android.os.Build;
 import com.mparticle.ExceptionHandler;
 import com.mparticle.MParticle;
 import com.mparticle.identity.IdentityApi;
+import com.mparticle.internal.networking.BaseMPMessage;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -577,7 +578,7 @@ public class ConfigManager {
         return mTriggerMessageHashes;
     }
 
-    public boolean shouldTrigger(MPMessage message) {
+    public boolean shouldTrigger(BaseMPMessage message) {
         JSONArray messageMatches = getTriggerMessageMatches();
         JSONArray triggerHashes = getTriggerMessageHashes();
 

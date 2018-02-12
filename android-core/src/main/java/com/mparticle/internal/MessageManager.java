@@ -17,6 +17,7 @@ import android.os.Message;
 import android.os.Process;
 import android.telephony.TelephonyManager;
 
+import com.mparticle.ConsentEvent;
 import com.mparticle.MPEvent;
 import com.mparticle.MParticle;
 import com.mparticle.UserAttributeListener;
@@ -28,6 +29,10 @@ import com.mparticle.internal.Constants.MessageType;
 import com.mparticle.internal.database.services.MParticleDBManager;
 import com.mparticle.internal.dto.UserAttributeRemoval;
 import com.mparticle.internal.dto.UserAttributeResponse;
+import com.mparticle.internal.networking.BaseMPMessage;
+import com.mparticle.internal.networking.MPCommerceMessage;
+import com.mparticle.internal.networking.MPConsentEventMessage;
+import com.mparticle.internal.networking.MPEventMessage;
 import com.mparticle.messaging.ProviderCloudMessage;
 
 import org.json.JSONArray;
@@ -44,7 +49,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * This class is primarily responsible for generating MPMessage objects, and then adding them to a
+ * This class is primarily responsible for generating BaseMPMessage objects, and then adding them to a
  * queue which is then processed in a background thread for further processing and database storage.
  *
  */
@@ -219,16 +224,16 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
         return threshold;
     }
 
-    public MPMessage createFirstRunMessage() throws JSONException {
-        return new MPMessage.Builder(MessageType.FIRST_RUN, mAppStateManager.getSession(), mLocation, mConfigManager.getMpid())
+    public BaseMPMessage createFirstRunMessage() throws JSONException {
+        return new BaseMPMessage.Builder(MessageType.FIRST_RUN, mAppStateManager.getSession(), mLocation, mConfigManager.getMpid())
                 .timestamp(mAppStateManager.getSession().mSessionStartTime)
                 .dataConnection(sActiveNetworkName)
                 .build();
     }
 
-    public MPMessage startSession() {
+    public BaseMPMessage startSession() {
         try {
-            MPMessage message = new MPMessage.Builder(MessageType.SESSION_START, mAppStateManager.getSession(), mLocation, mConfigManager.getMpid())
+            BaseMPMessage message = new BaseMPMessage.Builder(MessageType.SESSION_START, mAppStateManager.getSession(), mLocation, mConfigManager.getMpid())
                     .timestamp(mAppStateManager.getSession().mSessionStartTime)
                     .build();
 
@@ -305,11 +310,11 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
     }
 
 
-    public MPMessage logEvent(MPEvent event, String currentActivity) {
+    public BaseMPMessage logEvent(MPEvent event, String currentActivity) {
         if (event != null) {
             try {
 
-                MPMessage message = new MPMessage.Builder(MessageType.EVENT, mAppStateManager.getSession(), mLocation, mConfigManager.getMpid())
+                BaseMPMessage message = new MPEventMessage.Builder(MessageType.EVENT, mAppStateManager.getSession(), mLocation, mConfigManager.getMpid())
                         .name(event.getEventName())
                         .timestamp(mAppStateManager.getSession().mLastEventTime)
                         .length(event.getLength())
@@ -337,7 +342,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
         return null;
     }
 
-    public MPMessage logEvent(CommerceEvent event) {
+    public BaseMPMessage logEvent(CommerceEvent event) {
         if (event != null) {
             try {
                 MParticleUser user = MParticle.getInstance().Identity().getCurrentUser();
@@ -345,7 +350,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
                 if (user != null) {
                     cart = user.getCart();
                 }
-                MPMessage message = new MPMessage.Builder(event, mAppStateManager.getSession(), mLocation, mConfigManager.getMpid(), cart)
+                BaseMPMessage message = new MPCommerceMessage.Builder(event, mAppStateManager.getSession(), mLocation, mConfigManager.getMpid(), cart)
                         .timestamp(mAppStateManager.getSession().mLastEventTime)
                         .build();
                 mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
@@ -357,10 +362,10 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
         return null;
     }
 
-    public MPMessage logScreen(MPEvent event, boolean started) {
+    public BaseMPMessage logScreen(MPEvent event, boolean started) {
         if (event != null && event.getEventName() != null) {
             try {
-                MPMessage message = new MPMessage.Builder(MessageType.SCREEN_VIEW, mAppStateManager.getSession(), mLocation, mConfigManager.getMpid())
+                BaseMPMessage message = new BaseMPMessage.Builder(MessageType.SCREEN_VIEW, mAppStateManager.getSession(), mLocation, mConfigManager.getMpid())
                         .timestamp(mAppStateManager.getSession().mLastEventTime)
                         .name(event.getEventName())
                         .flags(event.getCustomFlags())
@@ -379,10 +384,10 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
         return null;
     }
 
-    public MPMessage logBreadcrumb(String breadcrumb) {
+    public BaseMPMessage logBreadcrumb(String breadcrumb) {
         if (breadcrumb != null) {
             try {
-                MPMessage message = new MPMessage.Builder(MessageType.BREADCRUMB, mAppStateManager.getSession(), mLocation, mConfigManager.getMpid())
+                BaseMPMessage message = new BaseMPMessage.Builder(MessageType.BREADCRUMB, mAppStateManager.getSession(), mLocation, mConfigManager.getMpid())
                         .timestamp(mAppStateManager.getSession().mLastEventTime)
                         .build();
 
@@ -400,9 +405,24 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
         return null;
     }
 
-    public MPMessage optOut(long time, boolean optOutStatus) {
+    public BaseMPMessage logConsentEvent(ConsentEvent consentEvent) {
+        if (consentEvent != null) {
+            try {
+                BaseMPMessage message = new MPConsentEventMessage.Builder(consentEvent, mAppStateManager.getSession(), mLocation, mConfigManager.getMpid())
+                        .build();
+                mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
+                return message;
+            }
+            catch (JSONException jse) {
+                Logger.warning("Failed to create mParticle consent message");
+            }
+        }
+        return null;
+    }
+
+    public BaseMPMessage optOut(long time, boolean optOutStatus) {
         try {
-            MPMessage message = new MPMessage.Builder(MessageType.OPT_OUT, mAppStateManager.getSession(), mLocation, mConfigManager.getMpid())
+            BaseMPMessage message = new BaseMPMessage.Builder(MessageType.OPT_OUT, mAppStateManager.getSession(), mLocation, mConfigManager.getMpid())
                     .timestamp(time)
                     .build();
             message.put(MessageKey.OPT_OUT_STATUS, optOutStatus);
@@ -414,13 +434,13 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
         }
     }
 
-    public MPMessage logErrorEvent(String errorMessage, Throwable t, JSONObject attributes) {
+    public BaseMPMessage logErrorEvent(String errorMessage, Throwable t, JSONObject attributes) {
         return logErrorEvent(errorMessage, t, attributes, true);
     }
 
-    public MPMessage logErrorEvent(String errorMessage, Throwable t, JSONObject attributes, boolean caught) {
+    public BaseMPMessage logErrorEvent(String errorMessage, Throwable t, JSONObject attributes, boolean caught) {
         try {
-            MPMessage message = new MPMessage.Builder(MessageType.ERROR, mAppStateManager.getSession(), mLocation, mConfigManager.getMpid())
+            BaseMPMessage message = new BaseMPMessage.Builder(MessageType.ERROR, mAppStateManager.getSession(), mLocation, mConfigManager.getMpid())
                     .timestamp(mAppStateManager.getSession().mLastEventTime)
                     .attributes(attributes)
                     .build();
@@ -446,10 +466,10 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
         return null;
     }
 
-    public MPMessage logNetworkPerformanceEvent(long time, String method, String url, long length, long bytesSent, long bytesReceived, String requestString) {
+    public BaseMPMessage logNetworkPerformanceEvent(long time, String method, String url, long length, long bytesSent, long bytesReceived, String requestString) {
         if (!MPUtility.isEmpty(url) && !MPUtility.isEmpty(method)) {
             try {
-                MPMessage message = new MPMessage.Builder(MessageType.NETWORK_PERFORMNACE, mAppStateManager.getSession(), mLocation, mConfigManager.getMpid())
+                BaseMPMessage message = new BaseMPMessage.Builder(MessageType.NETWORK_PERFORMNACE, mAppStateManager.getSession(), mLocation, mConfigManager.getMpid())
                         .timestamp(time)
                         .build();
                 message.put(MessageKey.NPE_METHOD, method);
@@ -470,11 +490,11 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
     }
 
 
-    public MPMessage setPushRegistrationId(String token, boolean registeringFlag) {
+    public BaseMPMessage setPushRegistrationId(String token, boolean registeringFlag) {
         if (!MPUtility.isEmpty(token)) {
             try {
                 mConfigManager.setPushToken(token);
-                MPMessage message = new MPMessage.Builder(MessageType.PUSH_REGISTRATION, mAppStateManager.getSession(), mLocation, mConfigManager.getMpid())
+                BaseMPMessage message = new BaseMPMessage.Builder(MessageType.PUSH_REGISTRATION, mAppStateManager.getSession(), mLocation, mConfigManager.getMpid())
                         .timestamp(System.currentTimeMillis())
                         .build();
                 message.put(MessageKey.PUSH_TOKEN, token);
@@ -532,11 +552,11 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
         return mLocation;
     }
 
-    public MPMessage logStateTransition(String stateTransInit, String currentActivity,
-                                   String launchUri, String launchExtras, String launchSourcePackage, long previousForegroundTime, long suspendedTime, int interruptions) {
+    public BaseMPMessage logStateTransition(String stateTransInit, String currentActivity,
+                                            String launchUri, String launchExtras, String launchSourcePackage, long previousForegroundTime, long suspendedTime, int interruptions) {
         if (!MPUtility.isEmpty(stateTransInit)) {
             try {
-                MPMessage message = new MPMessage.Builder(MessageType.APP_STATE_TRANSITION, mAppStateManager.getSession(), mLocation, mConfigManager.getMpid())
+                BaseMPMessage message = new BaseMPMessage.Builder(MessageType.APP_STATE_TRANSITION, mAppStateManager.getSession(), mLocation, mConfigManager.getMpid())
                         .timestamp(System.currentTimeMillis())
                         .build();
 
@@ -613,7 +633,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
 
     public void logNotification(ProviderCloudMessage cloudMessage, String appState) {
         try{
-            MPMessage message = new MPMessage.Builder(MessageType.PUSH_RECEIVED, mAppStateManager.getSession(), mLocation, mConfigManager.getMpid())
+            BaseMPMessage message = new BaseMPMessage.Builder(MessageType.PUSH_RECEIVED, mAppStateManager.getSession(), mLocation, mConfigManager.getMpid())
                     .timestamp(System.currentTimeMillis())
                     .name("gcm")
                     .build();
@@ -636,7 +656,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
     @Override
     public void logNotification(int contentId, String payload, String appState, int newBehavior) {
         try{
-            MPMessage message = new MPMessage.Builder(MessageType.PUSH_RECEIVED, mAppStateManager.getSession(), mLocation, mConfigManager.getMpid())
+            BaseMPMessage message = new BaseMPMessage.Builder(MessageType.PUSH_RECEIVED, mAppStateManager.getSession(), mLocation, mConfigManager.getMpid())
                     .timestamp(System.currentTimeMillis())
                     .name("gcm")
                     .build();
@@ -662,7 +682,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
     public void logProfileAction(String action) {
         try {
 
-            MPMessage message = new MPMessage.Builder(MessageType.PROFILE, mAppStateManager.getSession(), mLocation, mConfigManager.getMpid())
+            BaseMPMessage message = new BaseMPMessage.Builder(MessageType.PROFILE, mAppStateManager.getSession(), mLocation, mConfigManager.getMpid())
                     .timestamp(System.currentTimeMillis())
                     .build();
 
@@ -674,9 +694,9 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
         }
     }
 
-    public MPMessage logUserIdentityChangeMessage(JSONObject newIdentity, JSONObject oldIdentity, JSONArray userIdentities, long mpId) {
+    public BaseMPMessage logUserIdentityChangeMessage(JSONObject newIdentity, JSONObject oldIdentity, JSONArray userIdentities, long mpId) {
         try {
-            MPMessage message = new MPMessage.Builder(MessageType.USER_IDENTITY_CHANGE, mAppStateManager.getSession(), mLocation, mpId)
+            BaseMPMessage message = new BaseMPMessage.Builder(MessageType.USER_IDENTITY_CHANGE, mAppStateManager.getSession(), mLocation, mpId)
                     .timestamp(System.currentTimeMillis())
                     .build();
             if (newIdentity != null) {
@@ -705,9 +725,9 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
         return null;
     }
 
-    public MPMessage logUserAttributeChangeMessage(String userAttributeKey, Object newValue, Object oldValue, boolean deleted, boolean isNewAttribute, long time, long mpId) {
+    public BaseMPMessage logUserAttributeChangeMessage(String userAttributeKey, Object newValue, Object oldValue, boolean deleted, boolean isNewAttribute, long time, long mpId) {
         try {
-            MPMessage message = new MPMessage.Builder(MessageType.USER_ATTRIBUTE_CHANGE, mAppStateManager.getSession(), mLocation, mpId)
+            BaseMPMessage message = new BaseMPMessage.Builder(MessageType.USER_ATTRIBUTE_CHANGE, mAppStateManager.getSession(), mLocation, mpId)
                     .timestamp(time)
                     .build();
             message.put(MessageKey.NAME, userAttributeKey);
@@ -794,7 +814,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
     }
 
     @Override
-    public void checkForTrigger(MPMessage message) {
+    public void checkForTrigger(BaseMPMessage message) {
         if (mConfigManager.shouldTrigger(message)){
             mUploadHandler.removeMessages(UploadHandler.UPLOAD_TRIGGER_MESSAGES, mConfigManager.getMpid());
             mUploadHandler.sendMessageDelayed(mUploadHandler.obtainMessage(UploadHandler.UPLOAD_TRIGGER_MESSAGES, 1, 0, mConfigManager.getMpid()), Constants.TRIGGER_MESSAGE_DELAY);

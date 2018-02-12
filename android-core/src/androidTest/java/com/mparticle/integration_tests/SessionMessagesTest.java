@@ -13,7 +13,7 @@ import com.mparticle.internal.Session;
 import com.mparticle.utils.AssertObject;
 import com.mparticle.utils.AssertTrue;
 import com.mparticle.utils.MParticleUtils;
-import com.mparticle.utils.RandomUtils;
+import com.mparticle.mock.utils.RandomUtils;
 import com.mparticle.utils.StreamAssert;
 
 import junit.framework.Assert;

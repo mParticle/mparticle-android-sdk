@@ -11,6 +11,7 @@ import com.mparticle.internal.AccessUtils;
 import com.mparticle.internal.Constants;
 import com.mparticle.internal.Logger;
 import com.mparticle.internal.MParticleApiClientImpl;
+import com.mparticle.mock.utils.RandomUtils;
 
 import java.net.MalformedURLException;
 import java.util.HashMap;

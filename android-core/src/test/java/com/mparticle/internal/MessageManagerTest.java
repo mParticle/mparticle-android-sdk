@@ -4,6 +4,7 @@ import android.content.SharedPreferences;
 import android.location.Location;
 import android.os.Message;
 
+import com.mparticle.ConsentEvent;
 import com.mparticle.MPEvent;
 import com.mparticle.MParticle;
 import com.mparticle.MockMParticle;
@@ -11,8 +12,11 @@ import com.mparticle.commerce.CommerceEvent;
 import com.mparticle.commerce.Product;
 import com.mparticle.identity.IdentityApi;
 import com.mparticle.internal.database.services.MParticleDBManager;
+import com.mparticle.internal.networking.BaseMPMessage;
+import com.mparticle.internal.networking.MPConsentEventMessage;
 import com.mparticle.mock.MockContext;
 import com.mparticle.mock.MockSharedPreferences;
+import com.mparticle.mock.utils.RandomUtils;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -34,6 +38,8 @@ import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicLong;
 
+import static com.mparticle.internal.Constants.MessageKey.Consent;
+import static com.mparticle.internal.Constants.MessageKey.TIMESTAMP;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
@@ -123,7 +129,7 @@ public class MessageManagerTest {
     @Test
     public void testCreateFirstRunMessage() throws Exception {
         appStateManager.getSession().start(context);
-        MPMessage firstRun = manager.createFirstRunMessage();
+        BaseMPMessage firstRun = manager.createFirstRunMessage();
         assertEquals(Constants.MessageType.FIRST_RUN, firstRun.getMessageType());
         assertEquals(firstRun.getSessionId(), appStateManager.getSession().mSessionID);
         assertEquals(appStateManager.getSession().mSessionStartTime, firstRun.getTimestamp());
@@ -132,7 +138,7 @@ public class MessageManagerTest {
     @Test
     public void testStartSession() throws Exception {
         MockSharedPreferences prefs = (MockSharedPreferences) context.getSharedPreferences(null, 0);
-        MPMessage sessionStart = manager.startSession();
+        BaseMPMessage sessionStart = manager.startSession();
         Mockito.verify(messageHandler, Mockito.times(2)).sendMessage(Mockito.any(Message.class));
         assertNotNull(sessionStart);
         assertEquals(Constants.MessageType.SESSION_START, sessionStart.getMessageType());
@@ -194,7 +200,7 @@ public class MessageManagerTest {
         info.put("test key", "test value");
         MPEvent event = new MPEvent.Builder("test event name", MParticle.EventType.Location).duration(100).addCustomFlag("flag 1", "value 1")
                 .addCustomFlag("flag 1", "value 2").addCustomFlag("flag 2", "value 3").info(info).build();
-        MPMessage message = manager.logEvent(event, "test screen name");
+        BaseMPMessage message = manager.logEvent(event, "test screen name");
         assertNotNull(message);
         assertEquals(Constants.MessageType.EVENT, message.getMessageType());
         assertEquals(appStateManager.getSession().mSessionID, message.getSessionId());
@@ -232,7 +238,7 @@ public class MessageManagerTest {
         MParticle.setInstance(mparticle);
 
         CommerceEvent event = new CommerceEvent.Builder(Product.ADD_TO_CART, new Product.Builder("foo", "bar", 10).build()).build();
-        MPMessage message = manager.logEvent(event);
+        BaseMPMessage message = manager.logEvent(event);
         assertNotNull(message);
 
         //Mockito defaults to an Answer of 1
@@ -246,7 +252,7 @@ public class MessageManagerTest {
         appStateManager.getSession().start(context);
         Map<String, String> info = new HashMap<String, String>();
         info.put("test key", "test value");
-        MPMessage message = manager.logScreen(new MPEvent.Builder("screen name").addCustomFlag("flag 1", "value 1")
+        BaseMPMessage message = manager.logScreen(new MPEvent.Builder("screen name").addCustomFlag("flag 1", "value 1")
                 .addCustomFlag("flag 1", "value 2").addCustomFlag("flag 2", "value 3").info(info).build(), true);
         assertNotNull(message);
         assertEquals(Constants.MessageType.SCREEN_VIEW, message.getMessageType());
@@ -275,7 +281,7 @@ public class MessageManagerTest {
     public void testLogBreadcrumb() throws Exception {
         appStateManager.getSession().start(context);
         manager.logBreadcrumb(null);
-        MPMessage message = manager.logBreadcrumb("test crumb");
+        BaseMPMessage message = manager.logBreadcrumb("test crumb");
         assertNotNull(message);
         assertEquals(Constants.MessageType.BREADCRUMB, message.getMessageType());
         assertEquals(appStateManager.getSession().mLastEventTime, message.getTimestamp());
@@ -290,13 +296,13 @@ public class MessageManagerTest {
     public void testOptOut() throws Exception {
         appStateManager.getSession().start(context);
         long optOutTime = System.currentTimeMillis();
-        MPMessage message = manager.optOut(optOutTime, true);
+        BaseMPMessage message = manager.optOut(optOutTime, true);
         assertNotNull(message);
         assertEquals(Constants.MessageType.OPT_OUT, message.getMessageType());
         assertTrue(message.getBoolean(Constants.MessageKey.OPT_OUT_STATUS));
-        assertEquals(message.getLong(Constants.MessageKey.TIMESTAMP), optOutTime);
+        assertEquals(message.getLong(TIMESTAMP), optOutTime);
         Mockito.verify(messageHandler, Mockito.times(1)).sendMessage(Mockito.any(Message.class));
-        MPMessage message2 = manager.optOut(optOutTime, false);
+        BaseMPMessage message2 = manager.optOut(optOutTime, false);
         assertFalse(message2.getBoolean(Constants.MessageKey.OPT_OUT_STATUS));
     }
 
@@ -312,7 +318,7 @@ public class MessageManagerTest {
         manager.logErrorEvent(null, null, null, true);
         manager.logErrorEvent(errorMessage, null, null, true);
         manager.logErrorEvent(null, t, null, true);
-        MPMessage message = manager.logErrorEvent(errorMessage, t, attrs, true);
+        BaseMPMessage message = manager.logErrorEvent(errorMessage, t, attrs, true);
         assertNotNull(message);
         assertEquals(Constants.MessageType.ERROR, message.getMessageType());
         assertEquals(appStateManager.getSession().mLastEventTime, message.getTimestamp());
@@ -355,7 +361,7 @@ public class MessageManagerTest {
     @Test
     public void testLogNetworkPerformanceEvent() throws Exception {
         appStateManager.getSession().start(context);
-        MPMessage message = manager.logNetworkPerformanceEvent(0, null, null, 0, 0, 0, null);
+        BaseMPMessage message = manager.logNetworkPerformanceEvent(0, null, null, 0, 0, 0, null);
         assertNull(message);
         message = manager.logNetworkPerformanceEvent(1, "GET", "someurl", 12, 123, 1234, "request string");
         assertNotNull(message);
@@ -366,14 +372,14 @@ public class MessageManagerTest {
         assertEquals(message.getLong(Constants.MessageKey.NPE_SENT), 123);
         assertEquals(message.getLong(Constants.MessageKey.NPE_REC), 1234);
         assertEquals(message.getString(Constants.MessageKey.NPE_POST_DATA), "request string");
-        assertEquals(message.getLong(Constants.MessageKey.TIMESTAMP), 1);
+        assertEquals(message.getLong(TIMESTAMP), 1);
         Mockito.verify(messageHandler, Mockito.times(1)).sendMessage(Mockito.any(Message.class));
     }
 
     @Test
     public void testSetPushRegistrationId() throws Exception {
         appStateManager.getSession().start(context);
-        MPMessage message = manager.setPushRegistrationId(null, true);
+        BaseMPMessage message = manager.setPushRegistrationId(null, true);
         assertNull(message);
         message = manager.setPushRegistrationId("", true);
         assertNull(message);
@@ -418,7 +424,7 @@ public class MessageManagerTest {
     public void testLogStateTransition() throws Exception {
         appStateManager.getSession().start(context);
         manager.mInstallType = MParticle.InstallType.KnownInstall;
-        MPMessage message = manager.logStateTransition(null, null, null, null, null, 0, 0, 0);
+        BaseMPMessage message = manager.logStateTransition(null, null, null, null, null, 0, 0, 0);
         assertNull(message);
         message = manager.logStateTransition("", null, null, null, null, 0, 0, 0);
         assertNull(message);
@@ -446,7 +452,7 @@ public class MessageManagerTest {
 
     @Test
     public void testLogUserAttributeChange() throws Exception {
-        MPMessage message = manager.logUserAttributeChangeMessage("this is a key", "this is the new value", "this is the old value", false, false, 0, 1);
+        BaseMPMessage message = manager.logUserAttributeChangeMessage("this is a key", "this is the new value", "this is the old value", false, false, 0, 1);
         assertEquals("this is a key", message.getString("n"));
         assertEquals("this is the new value", message.getString("nv"));
         assertEquals("this is the old value", message.getString("ov"));
@@ -473,7 +479,7 @@ public class MessageManagerTest {
 
     @Test
     public void testLogUserAttributeChangeNewAttribute() throws Exception {
-        MPMessage message = manager.logUserAttributeChangeMessage("this is a key", "this is the new value", null, false, false, 0, 1);
+        BaseMPMessage message = manager.logUserAttributeChangeMessage("this is a key", "this is the new value", null, false, false, 0, 1);
         assertEquals("this is a key", message.getString("n"));
         assertEquals("this is the new value", message.getString("nv"));
         assertEquals(JSONObject.NULL, message.get("ov"));
@@ -482,7 +488,7 @@ public class MessageManagerTest {
 
     @Test
     public void testLogUserAttributeChangeNewTag() throws Exception {
-        MPMessage message = manager.logUserAttributeChangeMessage("this is a key", null, null, false, false, 0, 1);
+        BaseMPMessage message = manager.logUserAttributeChangeMessage("this is a key", null, null, false, false, 0, 1);
         assertEquals("this is a key", message.getString("n"));
         assertEquals(JSONObject.NULL, message.get("ov"));
         assertEquals(JSONObject.NULL, message.get("nv"));
@@ -491,7 +497,7 @@ public class MessageManagerTest {
 
     @Test
     public void testLogUserAttributeChangeTagToAttribute() throws Exception {
-        MPMessage message = manager.logUserAttributeChangeMessage("this is a key", "this is the new value", null, false, false, 0, 1);
+        BaseMPMessage message = manager.logUserAttributeChangeMessage("this is a key", "this is the new value", null, false, false, 0, 1);
         assertEquals("this is a key", message.getString("n"));
         assertEquals(JSONObject.NULL, message.get("ov"));
         assertEquals("this is the new value", message.get("nv"));
@@ -503,7 +509,7 @@ public class MessageManagerTest {
         List<String> newValue = new ArrayList<String>();
         newValue.add("this is a new value");
         newValue.add("this is another new value");
-        MPMessage message = manager.logUserAttributeChangeMessage("this is a key", newValue, "this is the old value", false, false, 0, 1);
+        BaseMPMessage message = manager.logUserAttributeChangeMessage("this is a key", newValue, "this is the old value", false, false, 0, 1);
         assertEquals("this is a key", message.getString("n"));
         assertEquals(2, message.getJSONArray("nv").length());
         assertEquals("this is a new value", message.getJSONArray("nv").get(0));
@@ -513,7 +519,7 @@ public class MessageManagerTest {
 
     @Test
     public void testLogUserAttributeChangeRemoveTag() throws Exception {
-        MPMessage message = manager.logUserAttributeChangeMessage("this is a key", null, null, true, false, 0, 1);
+        BaseMPMessage message = manager.logUserAttributeChangeMessage("this is a key", null, null, true, false, 0, 1);
         assertEquals("this is a key", message.getString("n"));
         assertEquals(JSONObject.NULL, message.get("ov"));
         assertEquals(JSONObject.NULL, message.get("nv"));
@@ -522,7 +528,7 @@ public class MessageManagerTest {
 
     @Test
     public void testLogUserAttributeChangeRemoveAttribute() throws Exception {
-        MPMessage message = manager.logUserAttributeChangeMessage("this is a key", null, "this is the old value", true, false, 0, 1);
+        BaseMPMessage message = manager.logUserAttributeChangeMessage("this is a key", null, "this is the old value", true, false, 0, 1);
         assertEquals("this is a key", message.getString("n"));
         assertEquals("this is the old value", message.get("ov"));
         assertEquals(JSONObject.NULL, message.get("nv"));
@@ -534,7 +540,7 @@ public class MessageManagerTest {
         JSONObject oldIdentity = new JSONObject();
         JSONObject newIdentity = new JSONObject();
         JSONArray identities = new JSONArray();
-        MPMessage message = manager.logUserIdentityChangeMessage(newIdentity, oldIdentity, identities, defaultId);
+        BaseMPMessage message = manager.logUserIdentityChangeMessage(newIdentity, oldIdentity, identities, defaultId);
         assertEquals(message.get("oi"), oldIdentity);
         assertEquals(message.get("ni"), newIdentity);
         assertEquals(message.get("ui"), identities);
@@ -544,7 +550,7 @@ public class MessageManagerTest {
     public void testLogUserIdentityChangeMessageNewIdentity() throws Exception {
         JSONObject newIdentity = new JSONObject();
         JSONArray identities = new JSONArray();
-        MPMessage message = manager.logUserIdentityChangeMessage(newIdentity, null, identities, defaultId);
+        BaseMPMessage message = manager.logUserIdentityChangeMessage(newIdentity, null, identities, defaultId);
         assertEquals(message.get("oi"), JSONObject.NULL);
         assertEquals(message.get("ni"), newIdentity);
         assertEquals(message.get("ui"), identities);
@@ -554,9 +560,59 @@ public class MessageManagerTest {
     public void testLogUserIdentityChangeMessageRemoveIdentity() throws Exception {
         JSONObject oldIdentity = new JSONObject();
         JSONArray identities = new JSONArray();
-        MPMessage message = manager.logUserIdentityChangeMessage(null, oldIdentity, identities, defaultId);
+        BaseMPMessage message = manager.logUserIdentityChangeMessage(null, oldIdentity, identities, defaultId);
         assertEquals(message.get("ni"), JSONObject.NULL);
         assertEquals(message.get("oi"), oldIdentity);
         assertEquals(message.get("ui"), identities);
     }
+
+    @Test
+    public void testLogConsentEvent() throws Exception {
+        MPConsentEventMessageAccessor accessor = new MPConsentEventMessageAccessor();
+        List<ConsentEvent> consentEvents = new ArrayList<ConsentEvent>();
+        for (int i = 0; i < 100; i++) {
+            consentEvents.add(RandomUtils.getInstance().getRandomMPConsentEvent());
+        }
+        for (ConsentEvent consentEvent: consentEvents) {
+            BaseMPMessage json = manager.logConsentEvent(consentEvent);
+            if (json.has(TIMESTAMP)) {
+                assertEquals(json.getLong(TIMESTAMP), consentEvent.getTimestamp().longValue());
+            } else {
+                assertEquals(consentEvent.getTimestamp(), 0, 1);
+            }
+            try {
+                assertEquals(json.optString(Consent.REGULATION, null), accessor.getRegulationString(consentEvent.getRegulation()));
+                assertEquals(json.optString(Consent.DOCUMENT, null), consentEvent.getDocument());
+                assertEquals(json.optString(Consent.LOCATION, null), consentEvent.getConsentLocation());
+                assertEquals(json.optString(Consent.HARDWARE_ID, null), consentEvent.getHardwareId());
+                assertEquals(json.optString(Consent.PURPOSE, null), consentEvent.getPurpose());
+                assertEquals(json.optString(Consent.CONSENTED, null), String.valueOf(consentEvent.hasConsent()));
+                assertEquals(json.optString(Consent.CATEGORY, null), accessor.getConsentCategoryString(consentEvent.getConsentCategory()));
+            }
+            catch (NullPointerException npe) {
+                npe.printStackTrace();
+            }
+            catch (AssertionError ape) {
+                ape.printStackTrace();
+            }
+        }
+    }
+
+    class MPConsentEventMessageAccessor extends MPConsentEventMessage {
+
+        private MPConsentEventMessageAccessor() {
+            super();
+        }
+
+        @Override
+        protected String getConsentCategoryString(ConsentEvent.ConsentCategory consentCategory) {
+            return super.getConsentCategoryString(consentCategory);
+        }
+
+        @Override
+        protected String getRegulationString(ConsentEvent.Regulation regulation) {
+            return super.getRegulationString(regulation);
+        }
+    }
+
 }
