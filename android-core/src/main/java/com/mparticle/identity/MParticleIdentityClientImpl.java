@@ -102,7 +102,7 @@ import java.util.UUID;
     public IdentityHttpResponse modify(IdentityApiRequest request) throws JSONException, IOException {
         JSONObject jsonObject = getChangeJson(request);
         Logger.verbose("Identity modify request: \n" + jsonObject.toString());
-        HttpURLConnection connection = getPostConnection(mConfigManager.getMpid(), MODIFY_PATH, jsonObject.toString());
+        HttpURLConnection connection = getPostConnection(request.mpid, MODIFY_PATH, jsonObject.toString());
         connection = makeUrlRequest(connection, jsonObject.toString(), false);
         int responseCode = connection.getResponseCode();
         JSONObject response = MPUtility.getJsonResponse(connection);
@@ -170,10 +170,16 @@ import java.util.UUID;
     }
 
     private JSONObject getChangeJson(IdentityApiRequest request) throws JSONException {
+        if (request.mpid == null) {
+            request.mpid = mConfigManager.getMpid();
+        }
         JSONObject jsonObject = getBaseJson();
         JSONArray changesJson = new JSONArray();
-        Map<MParticle.IdentityType, String> oldIdentities = mConfigManager.getUserIdentities(mConfigManager.getMpid());
         Map<MParticle.IdentityType, String> newIdentities = request.getUserIdentities();
+        Map<MParticle.IdentityType, String> oldIdentities = request.getOldIdentities();
+        if (oldIdentities == null) {
+            oldIdentities = mConfigManager.getUserIdentities(request.mpid);
+        }
 
         Set<MParticle.IdentityType> identityTypes = new HashSet<MParticle.IdentityType>(oldIdentities.keySet());
         identityTypes.addAll(newIdentities.keySet());

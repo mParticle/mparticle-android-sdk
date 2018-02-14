@@ -1,6 +1,7 @@
 package com.mparticle.identity;
 
 import com.mparticle.MParticle;
+import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.Logger;
 
 import org.json.JSONArray;
@@ -25,8 +26,11 @@ import java.util.Map;
 public final class IdentityApiRequest {
     private UserAliasHandler userAliasHandler = null;
     private Map<MParticle.IdentityType, String> userIdentities = new HashMap<MParticle.IdentityType, String>();
+    // for /modify requests
+    private Map<MParticle.IdentityType, String> oldUserIdentities = new HashMap<MParticle.IdentityType, String>();
     private Map<String, String> otherOldIdentities = new HashMap<String, String>();
     private Map<String, String> otherNewIdentities = new HashMap<String, String>();
+    Long mpid;
 
     private IdentityApiRequest(IdentityApiRequest.Builder builder) {
         if (builder.userIdentities != null){
@@ -38,6 +42,15 @@ public final class IdentityApiRequest {
         if (builder.otherOldIdentities.size() == builder.otherNewIdentities.size()) {
             this.otherNewIdentities = builder.otherNewIdentities;
             this.otherOldIdentities = builder.otherOldIdentities;
+        }
+        if (MParticle.getInstance() != null) {
+            ConfigManager configManager = MParticle.getInstance().getConfigManager();
+            if (builder.mpid != null) {
+                oldUserIdentities = configManager.getUserIdentities(builder.mpid);
+                mpid = builder.mpid;
+            } else {
+                oldUserIdentities = configManager.getUserIdentities(configManager.getMpid());
+            }
         }
     }
 
@@ -69,6 +82,10 @@ public final class IdentityApiRequest {
         return userIdentities;
     }
 
+    public Map<MParticle.IdentityType, String> getOldIdentities() {
+        return oldUserIdentities;
+    }
+
     protected Map<String, String> getOtherOldIdentities() {
         return otherOldIdentities;
     }
@@ -85,6 +102,7 @@ public final class IdentityApiRequest {
      * a class used for constructing IdentityApiRequest
      */
     public static class Builder {
+        private Long mpid;
         private Map<MParticle.IdentityType, String> userIdentities = new HashMap<MParticle.IdentityType, String>();
         private Map<String, String> otherOldIdentities = new HashMap<String, String>();
         private Map<String, String> otherNewIdentities = new HashMap<String, String>();
@@ -93,6 +111,7 @@ public final class IdentityApiRequest {
         protected Builder(MParticleUser currentUser) {
             if (currentUser != null) {
                 userIdentities = currentUser.getUserIdentities();
+                mpid = currentUser.getId();
             }
         }
 

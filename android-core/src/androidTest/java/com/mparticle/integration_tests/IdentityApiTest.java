@@ -16,6 +16,7 @@ import com.mparticle.identity.UserAliasHandler;
 import com.mparticle.internal.ConfigManager;
 import com.mparticle.mock.utils.RandomUtils;
 import com.mparticle.utils.MParticleUtils;
+import com.mparticle.utils.Server;
 import com.mparticle.utils.TestingUtils;
 
 import org.json.JSONException;
@@ -27,6 +28,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
+import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertNull;
@@ -489,6 +491,42 @@ public class IdentityApiTest extends BaseCleanStartedEachTest {
         assertNull(identity.getUser(RandomUtils.getInstance().randomLong(Long.MIN_VALUE, Long.MAX_VALUE)));
         assertNull(identity.getUser(RandomUtils.getInstance().randomLong(Long.MIN_VALUE, Long.MAX_VALUE)));
         assertNull(identity.getUser(RandomUtils.getInstance().randomLong(Long.MIN_VALUE, Long.MAX_VALUE)));
+    }
+
+    /**
+     * this simulates the scenerio in which you make a modify() call, but the current MParticleUser
+     * changes between the time you build the request and the time you make the call
+     */
+    @Test
+    public void testModifyConcurrentCalls() throws Exception {
+        assertEquals(mStartingMpid, MParticle.getInstance().Identity().getCurrentUser().getId(), 0);
+
+        Map<MParticle.IdentityType, String> userIdentities = RandomUtils.getInstance().getRandomUserIdentities();
+        for (MParticle.IdentityType identity: userIdentities.keySet()) {
+            AccessUtils.setUserIdentity(userIdentities.get(identity), identity, mStartingMpid);
+        }
+        IdentityApiRequest request = IdentityApiRequest.withUser(MParticle.getInstance().Identity().getCurrentUser()).build();
+
+        MParticle.getInstance().Identity().modify(request);
+        //change the mpid;
+        //behind the scenes, this call will take place before the (above) modfy request goes out, since
+        //the modify request will be passed to a background thread before it is executed
+        MParticle.getInstance().getConfigManager().setMpid(mpid2);
+
+
+        mServer.waitForVerify(urlPathMatching(String.format("/v([0-9]*)/%s/modify", mStartingMpid)), new Server.JSONMatch() {
+            @Override
+            public boolean isMatch(JSONObject jsonObject) {
+                if (jsonObject.has("identity_changes")) {
+                    try {
+                        return jsonObject.getJSONArray("identity_changes").length() == 0;
+                    } catch (JSONException jse) {
+                        jse.toString();
+                    }
+                }
+                return false;
+            }
+        }, 20000);
     }
 }
 

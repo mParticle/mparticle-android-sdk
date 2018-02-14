@@ -6,6 +6,8 @@ import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.client.VerificationException;
 import com.github.tomakehurst.wiremock.common.Notifier;
 import com.github.tomakehurst.wiremock.matching.RequestPatternBuilder;
+import com.github.tomakehurst.wiremock.matching.UrlPathPattern;
+import com.github.tomakehurst.wiremock.stubbing.ServeEvent;
 import com.mparticle.MParticle;
 import com.mparticle.internal.ConfigManager;
 
@@ -14,12 +16,16 @@ import org.json.JSONObject;
 import org.junit.Rule;
 import org.junit.rules.ExpectedException;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.client.WireMock.matchingJsonPath;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
+import static junit.framework.Assert.fail;
 
 public class Server {
     private WireMockServer mWireMockServer;
@@ -202,11 +208,6 @@ public class Server {
             }
             verify(request, true);
         }
-
-    }
-
-    public ReceivedRequests getRequests() {
-        return new ReceivedRequests(mWireMockServer.getAllServeEvents());
     }
 
     private boolean verify(RequestPatternBuilder request, boolean throwException) throws  VerificationException {
@@ -220,5 +221,59 @@ public class Server {
             }
             return false;
         }
+    }
+
+    public void waitForVerify(UrlPathPattern pattern, JSONMatch jsonMatch, long millis) {
+        long endTime = System.currentTimeMillis() + millis;
+        if (verify(pattern, jsonMatch, millis == 0)) {
+            return;
+        } else {
+            while (endTime > System.currentTimeMillis()) {
+                if (verify(pattern, jsonMatch, false)) {
+                    return;
+                }
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                Log.e("Try","l");
+            }
+            verify(pattern, jsonMatch, true);
+        }
+    }
+
+    private boolean verify(UrlPathPattern pattern, JSONMatch jsonMatch, boolean throwException) {
+        List<ServeEvent> misses = new ArrayList<ServeEvent>();
+        for (ServeEvent event: mWireMockServer.getAllServeEvents()) {
+            if (pattern.match(event.getRequest().getUrl()).getDistance() < 1) {
+                try {
+                    if (jsonMatch.isMatch(new JSONObject(event.getRequest().getBodyAsString()))) {
+                        return true;
+                    } else if (throwException) {
+                        misses.add(event);
+                    }
+                }
+                catch (JSONException ignore) {
+
+                }
+            }
+        }
+        if (throwException) {
+            StringBuilder builder = new StringBuilder();
+            for(ServeEvent event: misses) {
+                builder.append(event.getRequest().getBodyAsString() + ",\n");
+            }
+            fail("No matching Requests found. Matching URLs found that did not match JSON: " + misses.size() + ": " + builder.toString());
+        }
+        return false;
+    }
+
+    public ReceivedRequests getRequests() {
+        return new ReceivedRequests(mWireMockServer.getAllServeEvents());
+    }
+
+    public interface JSONMatch {
+        boolean isMatch(JSONObject jsonObject);
     }
 }
