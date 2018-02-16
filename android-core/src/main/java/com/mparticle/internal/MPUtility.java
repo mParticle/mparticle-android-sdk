@@ -40,6 +40,7 @@ import java.net.HttpURLConnection;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
@@ -688,6 +689,22 @@ public class MPUtility {
                 return false;
             }
         }
+    }
+
+    public static boolean containsNullKey(Map map) {
+        try {
+            return map.containsKey(null);
+        } catch (RuntimeException ignore) {
+            //At this point we should be able to conclude that the implementation of the map does
+            //not allow for null keys, if you get an exception when you check for a null key, but
+            //there is no guarantee in the Map documentation, so we still have to check by hand
+            for (Map.Entry entry : new ArrayList<Map.Entry>(map.entrySet())) {
+                if (entry.getKey() == null) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     private interface SyncRunnable<T> {
