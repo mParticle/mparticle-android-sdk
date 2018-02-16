@@ -86,7 +86,7 @@ public class MPEvent {
     }
 
     public void setInfo(Map<String, String> info){
-        if (info != null && info.containsKey(null)) {
+        if (info != null && MPUtility.containsNullKey(info)) {
             Logger.warning(String.format("disregarding \"MPEvent.customFlag\" value of \"%s\". Key was found to be null", info.get(null)));
             info.remove(null);
         }
@@ -211,7 +211,7 @@ public class MPEvent {
     }
 
     private void setCustomFlags(Map<String, List<String>> flags) {
-        if (flags != null && flags.containsKey(null)) {
+        if (flags != null && MPUtility.containsNullKey(flags)) {
             Logger.warning(String.format("disregarding \"MPEvent.customFlag\" value of %s. Key was found to be null", new JSONArray(flags.get(null))));
             flags.remove(null);
         }

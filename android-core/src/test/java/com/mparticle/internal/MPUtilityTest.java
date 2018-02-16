@@ -6,7 +6,16 @@ import com.mparticle.mock.MockContext;
 import org.json.JSONObject;
 import org.junit.Test;
 import org.mockito.Mockito;
+
+import java.util.HashMap;
+import java.util.Hashtable;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.UUID;
+
+import static junit.framework.Assert.assertFalse;
+import static junit.framework.Assert.assertTrue;
 import static org.junit.Assert.*;
 
 public class MPUtilityTest {
@@ -103,5 +112,26 @@ public class MPUtilityTest {
         Mockito.when(context.getApplicationInfo()).thenReturn(applicationInfo);
         MPUtility.isAppDebuggable(context);
         assertEquals(5, applicationInfo.flags);
+    }
+
+    @Test
+    public void testNullMapKey() throws Exception {
+        Map map = new HashMap();
+        map.put("key1", "val1");
+        map.put("key2", "val2");
+        assertFalse(MPUtility.containsNullKey(map));
+        map.put(null, "val3");
+        assertTrue(MPUtility.containsNullKey(map));
+
+        map = new Hashtable();
+        map.put("key1", "val1");
+        map.put("key2", "val2");
+        assertFalse(MPUtility.containsNullKey(map));
+
+        map = new TreeMap(map);
+        assertFalse(MPUtility.containsNullKey(map));
+
+        map = new LinkedHashMap(map);
+        assertFalse(MPUtility.containsNullKey(map));
     }
 }
