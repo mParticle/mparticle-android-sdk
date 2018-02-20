@@ -10,6 +10,8 @@ import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.Logger;
 import com.mparticle.internal.MPUtility;
 import com.mparticle.internal.PushRegistrationHelper;
+import com.mparticle.networking.NetworkOptions;
+import com.mparticle.networking.NetworkOptionsManager;
 
 /**
  * class used for passing optional settings to the SDK when it is started
@@ -35,6 +37,7 @@ public class MParticleOptions {
     private LocationTracking mLocationTracking;
     private PushRegistrationHelper.PushRegistration mPushRegistration;
     private Integer mIdentityConnectionTimeout = ConfigManager.DEFAULT_CONNECTION_TIMEOUT_SECONDS;
+    private NetworkOptions mNetworkOptions;
 
     private MParticleOptions() {
     }
@@ -99,6 +102,7 @@ public class MParticleOptions {
         } else if (builder.identityConnectionTimeout != null) {
             Logger.warning(String.format("Connection Timeout milliseconds must be a positive number, greater than %s second. Defaulting to %s seconds", String.valueOf(ConfigManager.MINIMUM_CONNECTION_TIMEOUT_SECONDS), String.valueOf(ConfigManager.DEFAULT_CONNECTION_TIMEOUT_SECONDS)));
         }
+        this.mNetworkOptions = NetworkOptionsManager.validateAndResolve(builder.networkOptions);
     }
 
     /**
@@ -217,6 +221,10 @@ public class MParticleOptions {
         return mIdentityConnectionTimeout;
     }
 
+    public NetworkOptions getNetworkOptions() {
+        return mNetworkOptions;
+    }
+
     public static class Builder {
         private Context context;
         private String apiKey;
@@ -236,6 +244,7 @@ public class MParticleOptions {
         private LocationTracking locationTracking;
         private PushRegistrationHelper.PushRegistration pushRegistration;
         private Integer identityConnectionTimeout = null;
+        private NetworkOptions networkOptions;
 
         private Builder(Context context) {
             this.context = context;
@@ -455,6 +464,11 @@ public class MParticleOptions {
          */
         public Builder identityConnectionTimeout(int identityConnectionTimeout) {
             this.identityConnectionTimeout = identityConnectionTimeout;
+            return this;
+        }
+
+        public Builder networkOptions(NetworkOptions networkOptions) {
+            this.networkOptions = networkOptions;
             return this;
         }
 

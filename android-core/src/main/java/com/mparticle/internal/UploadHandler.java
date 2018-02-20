@@ -18,7 +18,7 @@ import java.util.List;
 
 import javax.net.ssl.SSLHandshakeException;
 
-import static com.mparticle.internal.networking.NetworkConnection.HTTP_TOO_MANY_REQUESTS;
+import static com.mparticle.networking.NetworkConnection.HTTP_TOO_MANY_REQUESTS;
 
 /**
  * Primary queue handler which is responsible for querying, packaging, and uploading data.

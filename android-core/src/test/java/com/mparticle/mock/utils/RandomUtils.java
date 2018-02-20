@@ -61,6 +61,10 @@ public class RandomUtils {
         return attributes;
     }
 
+    public String getAlphaNumericString(int lengthLowerBound, int lengthUpperBound) {
+        return getAlphaNumericString(randomInt(24, 256));
+    }
+
     public String getAlphaNumericString(int length) {
         String characters = getAlphNumeric();
         StringBuilder builder = new StringBuilder();

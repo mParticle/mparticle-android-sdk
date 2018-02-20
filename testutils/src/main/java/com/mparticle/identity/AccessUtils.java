@@ -3,8 +3,8 @@ package com.mparticle.identity;
 import android.content.Context;
 
 import com.mparticle.MParticle;
-import com.mparticle.internal.networking.BaseNetworkConnection;
-import com.mparticle.internal.networking.MParticleBaseClientImpl;
+import com.mparticle.networking.BaseNetworkConnection;
+import com.mparticle.networking.MParticleBaseClientImpl;
 
 import java.util.HashMap;
 import java.util.Map;

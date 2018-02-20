@@ -19,6 +19,7 @@ import org.json.JSONArray;
 
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Constructor;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
@@ -575,7 +576,7 @@ public class KitFrameworkWrapper implements KitManager {
             mKitManager.onModifyCompleted(user, request);
         }
     }
-
+    
     @Override
     public void onConsentStateUpdated(ConsentState oldState, ConsentState newState, long mpid) {
         if (mKitManager != null) {

@@ -1,7 +1,6 @@
 package com.mparticle.identity;
 
 import android.content.Context;
-import android.net.Uri;
 
 import com.mparticle.BuildConfig;
 import com.mparticle.MParticle;
@@ -9,7 +8,7 @@ import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.Constants;
 import com.mparticle.internal.Logger;
 import com.mparticle.internal.MPUtility;
-import com.mparticle.internal.networking.MParticleBaseClientImpl;
+import com.mparticle.networking.MParticleBaseClientImpl;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -59,12 +58,10 @@ import java.util.UUID;
     static final String X_MP_KEY = "x-mp-key";
     static final String X_MP_SIGNATURE = "x-mp-signature";
 
-
-    private static final String API_HOST = MPUtility.isEmpty(BuildConfig.MP_IDENTITY_URL) ? "identity.mparticle.com" : BuildConfig.MP_IDENTITY_URL;
     private static final String SERVICE_VERSION_1 = "/v1";
 
-    public MParticleIdentityClientImpl(ConfigManager configManager, Context context) {
-        super(context.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE));
+    public MParticleIdentityClientImpl(Context context, ConfigManager configManager) {
+        super(context, configManager);
         this.mContext = context;
         this.mConfigManager = configManager;
     }
@@ -73,7 +70,7 @@ import java.util.UUID;
         JSONObject jsonObject = getStateJson(request);
         Logger.verbose("Identity login request: " + jsonObject.toString());
         HttpURLConnection connection = getPostConnection(LOGIN_PATH, jsonObject.toString());
-        connection = makeUrlRequest(connection, jsonObject.toString(), false);
+        connection = makeUrlRequest(Endpoint.IDENTITY, connection, jsonObject.toString(), false);
         int responseCode = connection.getResponseCode();
         JSONObject response = MPUtility.getJsonResponse(connection);
         return parseIdentityResponse(responseCode, response);
@@ -83,7 +80,7 @@ import java.util.UUID;
         JSONObject jsonObject = getStateJson(request);
         Logger.verbose("Identity logout request: \n" + jsonObject.toString());
         HttpURLConnection connection = getPostConnection(LOGOUT_PATH, jsonObject.toString());
-        connection = makeUrlRequest(connection, jsonObject.toString(), false);
+        connection = makeUrlRequest(Endpoint.IDENTITY, connection, jsonObject.toString(), false);
         int responseCode = connection.getResponseCode();
         JSONObject response = MPUtility.getJsonResponse(connection);
         return parseIdentityResponse(responseCode, response);
@@ -93,7 +90,7 @@ import java.util.UUID;
         JSONObject jsonObject = getStateJson(request);
         Logger.verbose("Identity identify request: \n" + jsonObject.toString());
         HttpURLConnection connection = getPostConnection(IDENTIFY_PATH, jsonObject.toString());
-        connection = makeUrlRequest(connection, jsonObject.toString(), false);
+        connection = makeUrlRequest(Endpoint.IDENTITY, connection, jsonObject.toString(), false);
         int responseCode = connection.getResponseCode();
         JSONObject response = MPUtility.getJsonResponse(connection);
         return parseIdentityResponse(responseCode, response);
@@ -103,7 +100,7 @@ import java.util.UUID;
         JSONObject jsonObject = getChangeJson(request);
         Logger.verbose("Identity modify request: \n" + jsonObject.toString());
         HttpURLConnection connection = getPostConnection(request.mpid, MODIFY_PATH, jsonObject.toString());
-        connection = makeUrlRequest(connection, jsonObject.toString(), false);
+        connection = makeUrlRequest(Endpoint.IDENTITY, connection, jsonObject.toString(), false);
         int responseCode = connection.getResponseCode();
         JSONObject response = MPUtility.getJsonResponse(connection);
         return parseIdentityResponse(responseCode, response);
@@ -274,18 +271,14 @@ import java.util.UUID;
     }
 
     private URL getUrl(String endpoint) throws MalformedURLException {
+
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append(SERVICE_VERSION_1);
         if (endpoint.indexOf("/") != 0) {
             stringBuilder.append("/");
         }
         stringBuilder.append(endpoint);
-        Uri uri = new Uri.Builder()
-                .scheme(getScheme())
-                .encodedAuthority(API_HOST)
-                .path(stringBuilder.toString())
-                .build();
-        return new URL(uri.toString());
+        return getUrl(Endpoint.IDENTITY, stringBuilder.toString());
     }
 
     private String getApiKey() {

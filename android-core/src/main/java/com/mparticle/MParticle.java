@@ -11,6 +11,7 @@ import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Build;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.util.Log;
 import android.webkit.WebView;
 
@@ -32,6 +33,7 @@ import com.mparticle.internal.Constants.MessageKey;
 import com.mparticle.internal.Constants.PrefKeys;
 import com.mparticle.internal.KitFrameworkWrapper;
 import com.mparticle.internal.Logger;
+import com.mparticle.internal.KitManager;
 import com.mparticle.internal.MPLocationListener;
 import com.mparticle.internal.MPUtility;
 import com.mparticle.internal.MParticleJSInterface;
@@ -95,6 +97,7 @@ public class MParticle {
         configManager.setUploadInterval(options.getUploadInterval());
         configManager.setSessionTimeout(options.getSessionTimeout());
         configManager.setIdentityConnectionTimeout(options.getConnectionTimeout());
+        configManager.setNetworkOptions(options.getNetworkOptions());
         AppStateManager appStateManager = new AppStateManager(options.getContext());
         appStateManager.setConfigManager(configManager);
         
@@ -940,11 +943,13 @@ public class MParticle {
     }
 
     /**
-     * Retrieve the underlying object for the given Kit Id for direct calls.
+     * Retrieve the underlying object for the given Kit Id for direct calls. Results will be null if
+     * kit is not active, or if the application just started, and the kit has not yet been initialized
      *
      * @param kitId
-     * @return
+     * @return The Kit object, may be null if kit is not available
      */
+    @Nullable
     public Object getKitInstance(int kitId) {
         return mKitManager.getKitInstance(kitId);
     }

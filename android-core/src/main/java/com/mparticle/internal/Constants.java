@@ -501,6 +501,7 @@ public class Constants {
         String PREVIOUS_ANDROID_ID = "mp::previous::android::id";
         String DISPLAY_PUSH_NOTIFICATIONS = "mp::displaypushnotifications";
         String IDENTITY_CONNECTION_TIMEOUT = "mp::connection:timeout:identity";
+        String NETWORK_OPTIONS = "mp::network:options";
     }
 
     public interface MiscStorageKeys {

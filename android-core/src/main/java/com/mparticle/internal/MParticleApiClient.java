@@ -1,8 +1,6 @@
 package com.mparticle.internal;
 
-import com.mparticle.identity.IdentityApiRequest;
-import com.mparticle.identity.MParticleUser;
-import com.mparticle.internal.networking.MParticleBaseClient;
+import com.mparticle.networking.MParticleBaseClient;
 
 import org.json.JSONObject;
 

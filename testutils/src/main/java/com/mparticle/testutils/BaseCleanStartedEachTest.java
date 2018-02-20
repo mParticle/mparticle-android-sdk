@@ -1,5 +1,7 @@
 package com.mparticle.testutils;
 
+import android.support.annotation.CallSuper;
+
 import com.mparticle.MParticle;
 import com.mparticle.MParticleOptions;
 import com.mparticle.identity.BaseIdentityTask;
@@ -38,25 +40,33 @@ public abstract class BaseCleanStartedEachTest extends BaseAbstractTest {
         mServer.setupHappyIdentify(mStartingMpid);
         MParticle.setInstance(null);
         final CountDownLatch latch = new CountDownLatch(1);
-        MParticleOptions options = MParticleOptions
+        MParticleOptions.Builder builder = MParticleOptions
                 .builder(mContext)
                 .credentials("key", "value")
                 .identify(IdentityApiRequest.withEmptyUser().build())
-                .identifyTask(new BaseIdentityTask().addSuccessListener(new TaskSuccessListener() {
-                    @Override
-                    public void onSuccess(IdentityApiResult result) {
-                        latch.countDown();
-                    }
-                })
-                .addFailureListener(new TaskFailureListener() {
-                    @Override
-                    public void onFailure(IdentityHttpResponse result) {
-                        latch.countDown();
-                    }
-                }))
-                .build();
+                .identifyTask(new BaseIdentityTask()
+                        .addSuccessListener(new TaskSuccessListener() {
+                            @Override
+                            public void onSuccess(IdentityApiResult result) {
+                                latch.countDown();
+                            }
+                        })
+                        .addFailureListener(new TaskFailureListener() {
+                            @Override
+                            public void onFailure(IdentityHttpResponse result) {
+                                latch.countDown();
+                            }
+                        }))
+                .environment(MParticle.Environment.Production);
+        MParticleOptions options = transformMParticleOptions(builder).build();
         MParticle.start(options);
         AppStateManager.mInitialized = false;
         latch.await();
+    }
+
+    //Override this if you need to do something simple like add or remove a network options before.
+    //Just don't mess with the "identitfyTask" that will break things
+    protected MParticleOptions.Builder transformMParticleOptions(MParticleOptions.Builder builder) {
+        return builder;
     }
 }

@@ -124,6 +124,11 @@
 -keep, includedescriptorclasses public class com.mparticle.consent.* { *; }
 -keep, includedescriptorclasses class com.mparticle.consent.ConsentState { *; }
 -keep, includedescriptorclasses class com.mparticle.consent.GDPRConsent { *; }
+-keep, includedescriptorclasses class com.mparticle.networking.NetworkOptions { *;}
+-keep, includedescriptorclasses class com.mparticle.networking.NetworkOptions$Builder { *; }
+-keep, includedescriptorclasses class com.mparticle.networking.DomainMapping { *; }
+-keep, includedescriptorclasses class com.mparticle.networking.DomainMapping$Builder { *; }
+-keep, includedescriptorclasses class com.mparticle.networking.Certificate { *; }
 
 -keep public class com.mparticle.messaging.* {
      *;

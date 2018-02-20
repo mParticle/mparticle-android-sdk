@@ -1,10 +1,8 @@
-package com.mparticle.internal.networking;
+package com.mparticle.networking;
 
 import android.support.annotation.NonNull;
 
 import com.mparticle.internal.ConfigManager;
-import com.mparticle.internal.MParticleApiClientImpl;
-import com.mparticle.internal.networking.MParticleBaseClientImpl;
 import com.mparticle.mock.MockSharedPreferences;
 
 import org.junit.Test;
@@ -31,9 +29,9 @@ public class MParticleBaseClientImplTest {
         Mockito.when(mockConfigManager.getApiSecret()).thenReturn("bar");
         final boolean[] writeCalled = {false};
         final boolean[] getSocketFactoruCalled = {false};
-        final BaseNetworkConnection client = new NetworkConnection(new MockSharedPreferences()) {
+        final BaseNetworkConnection client = new NetworkConnection(mockConfigManager, new MockSharedPreferences()) {
             @Override
-            protected SSLSocketFactory getSocketFactory() throws Exception {
+            protected SSLSocketFactory getSocketFactory(MParticleBaseClientImpl.Endpoint endpoint) throws Exception {
                 getSocketFactoruCalled[0] = true;
                 assertFalse(writeCalled[0]);
                 return Mockito.mock(SSLSocketFactory.class);
@@ -63,7 +61,7 @@ public class MParticleBaseClientImplTest {
         };
 
         HttpURLConnection mockConnection = Mockito.mock(HttpsURLConnection.class);
-        client.makeUrlRequest(mockConnection, "message" , true);
+        client.makeUrlRequest(null, mockConnection, "message" , true);
         assertTrue(getSocketFactoruCalled[0]);
         assertTrue(writeCalled[0]);
     }

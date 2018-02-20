@@ -1,12 +1,13 @@
-package com.mparticle.internal.networking;
+package com.mparticle.networking;
 
 import android.content.SharedPreferences;
+import android.net.Network;
 import android.os.Build;
 
 import com.mparticle.BuildConfig;
-import com.mparticle.internal.Constants;
+import com.mparticle.MParticle;
+import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.Logger;
-import com.mparticle.internal.MPUtility;
 
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
@@ -28,6 +29,7 @@ import javax.net.ssl.TrustManagerFactory;
 public class NetworkConnection extends BaseNetworkConnection {
     public static final int HTTP_TOO_MANY_REQUESTS = 429;
 
+    private ConfigManager mConfigManager;
     private SSLSocketFactory mSocketFactory;
     private boolean alreadyWarned;
 
@@ -38,18 +40,19 @@ public class NetworkConnection extends BaseNetworkConnection {
     static final long DEFAULT_THROTTLE_MILLIS = 1000*60*60*2;
     static final long MAX_THROTTLE_MILLIS = 1000*60*60*24;
 
-    NetworkConnection(SharedPreferences sharedPreferences) {
+    NetworkConnection(ConfigManager configManager, SharedPreferences sharedPreferences) {
         super(sharedPreferences);
+        this.mConfigManager = configManager;
     }
 
     @Override
-    public HttpURLConnection makeUrlRequest(HttpURLConnection connection, String payload, boolean identity) throws IOException {
+    public HttpURLConnection makeUrlRequest(MParticleBaseClientImpl.Endpoint endpoint, HttpURLConnection connection, String payload, boolean identity) throws IOException {
         try {
 
             //gingerbread seems to dislike pinning w/ godaddy. Being that GB is near-dead anyway, just disable pinning for it.
-            if (isPostGingerBread() && connection instanceof HttpsURLConnection) {
+            if (isPostGingerBread() && connection instanceof HttpsURLConnection && !shouldDisablePinning()) {
                 try {
-                    ((HttpsURLConnection) connection).setSSLSocketFactory(getSocketFactory());
+                    ((HttpsURLConnection) connection).setSSLSocketFactory(getSocketFactory(endpoint));
                 } catch (Exception e) {
 
                 }
@@ -92,17 +95,18 @@ public class NetworkConnection extends BaseNetworkConnection {
     /**
      * Custom socket factory used for certificate pinning.
      */
-    protected SSLSocketFactory getSocketFactory() throws Exception{
+    protected SSLSocketFactory getSocketFactory(MParticleBaseClientImpl.Endpoint endpoint) throws Exception{
         if (mSocketFactory == null){
             String keyStoreType = KeyStore.getDefaultType();
             KeyStore keyStore = KeyStore.getInstance(keyStoreType);
             keyStore.load(null, null);
 
             CertificateFactory cf = CertificateFactory.getInstance("X.509");
-            keyStore.setCertificateEntry("intca", generateCertificate(cf, Constants.GODADDY_INTERMEDIATE_CRT));
-            keyStore.setCertificateEntry("rootca", generateCertificate(cf, Constants.GODADDY_ROOT_CRT));
-            keyStore.setCertificateEntry("fiddlerroot", generateCertificate(cf, Constants.FIDDLER_ROOT_CRT));
-
+            NetworkOptions networkOptions = mConfigManager.getNetworkOptions();
+            DomainMapping domainMapping = networkOptions.getDomain(endpoint);
+            for (com.mparticle.networking.Certificate certificate: domainMapping != null ? domainMapping.getCertificates() : NetworkOptionsManager.getDefaultCertificates()) {
+                keyStore.setCertificateEntry(certificate.getAlias(), generateCertificate(cf, certificate.getCertificate()));
+            }
             String tmfAlgorithm = TrustManagerFactory.getDefaultAlgorithm();
             TrustManagerFactory tmf = TrustManagerFactory.getInstance(tmfAlgorithm);
             tmf.init(keyStore);
@@ -124,6 +128,11 @@ public class NetworkConnection extends BaseNetworkConnection {
             inputStream.close();
         }
         return certificate;
+    }
+
+    private boolean shouldDisablePinning() {
+        NetworkOptions networkOptions = mConfigManager.getNetworkOptions();
+        return ConfigManager.getEnvironment() == MParticle.Environment.Development && networkOptions.pinningDisabledInDevelopment;
     }
 
 

@@ -53,7 +53,7 @@ public class IdentityApi {
         this.mMessageManager = messageManager;
         this.mKitManager = kitManager;
         configManager.addMpIdChangeListener(new IdentityStateListenerManager());
-        setApiClient(new MParticleIdentityClientImpl(configManager, context));
+        setApiClient(new MParticleIdentityClientImpl(context, configManager));
     }
 
     /**
@@ -300,7 +300,7 @@ public class IdentityApi {
 
     MParticleIdentityClient getApiClient() {
         if (mApiClient == null) {
-            mApiClient = new MParticleIdentityClientImpl(mConfigManager, mContext);
+            mApiClient = new MParticleIdentityClientImpl(mContext, mConfigManager);
         }
         return mApiClient;
     }

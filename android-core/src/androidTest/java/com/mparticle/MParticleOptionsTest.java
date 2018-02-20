@@ -514,4 +514,12 @@ public class MParticleOptionsTest extends BaseAbstractTest {
         assertEquals(MParticle.getInstance().getConfigManager().getConnectionTimeout(), ConfigManager.DEFAULT_CONNECTION_TIMEOUT_SECONDS * 1000);
     }
 
+    @Test
+    public void testNetworkOptions() {
+        MParticleOptions options = MParticleOptions.builder(mProductionContext)
+                .credentials("key", "secret")
+                .build();
+        assertTrue(com.mparticle.networking.AccessUtils.equals(options.getNetworkOptions(), com.mparticle.networking.AccessUtils.getDefaultNetworkOptions()));
+    }
+
 }

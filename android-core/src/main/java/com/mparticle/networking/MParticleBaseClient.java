@@ -1,4 +1,4 @@
-package com.mparticle.internal.networking;
+package com.mparticle.networking;
 
 public interface MParticleBaseClient {
     BaseNetworkConnection getRequestHandler();

@@ -9,6 +9,7 @@ import com.mparticle.MParticle;
 import com.mparticle.consent.ConsentState;
 import com.mparticle.identity.IdentityApi;
 import com.mparticle.internal.networking.BaseMPMessage;
+import com.mparticle.networking.NetworkOptions;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -955,5 +956,27 @@ public class ConfigManager {
             serializedConsent = state.toString();
         }
         getUserStorage(mpid).setSerializedConsentState(serializedConsent);
+    }
+
+    NetworkOptions mNetworkOptions;
+    public NetworkOptions getNetworkOptions() {
+        return getNetworkOptions(false);
+    }
+
+    public synchronized NetworkOptions getNetworkOptions(boolean force) {
+        if (mNetworkOptions == null || force) {
+            String serializedOptions = sPreferences.getString(Constants.PrefKeys.NETWORK_OPTIONS, "");
+            return mNetworkOptions = NetworkOptions.withNetworkOptions(serializedOptions);
+        }
+        return mNetworkOptions;
+    }
+
+    public synchronized void setNetworkOptions(NetworkOptions networkOptions) {
+        mNetworkOptions = networkOptions;
+        String serializedOptions = "";
+        if (networkOptions != null) {
+            serializedOptions = networkOptions.toString();
+        }
+        sPreferences.edit().putString(Constants.PrefKeys.NETWORK_OPTIONS, serializedOptions).apply();
     }
 }

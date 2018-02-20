@@ -2,11 +2,9 @@ package com.mparticle.internal;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.net.Uri;
 
-import com.mparticle.BuildConfig;
 import com.mparticle.MParticle;
-import com.mparticle.internal.networking.MParticleBaseClientImpl;
+import com.mparticle.networking.MParticleBaseClientImpl;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -47,11 +45,6 @@ public class MParticleApiClientImpl extends MParticleBaseClientImpl implements M
     private static final String HEADER_KITS = "x-mp-kits";
     private static final String HEADER_BUNDLED_KITS = "x-mp-bundled-kits";
 
-    private static final String API_HOST = MPUtility.isEmpty(BuildConfig.MP_URL) ? "nativesdks.mparticle.com" : BuildConfig.MP_URL;
-    private static final String CONFIG_HOST = MPUtility.isEmpty(BuildConfig.MP_CONFIG_URL) ? "config2.mparticle.com" : BuildConfig.MP_CONFIG_URL;
-    private static final String SERVICE_VERSION_1 = "/v2";
-    private static final String SERVICE_VERSION_4 = "/v4";
-
     /**
      * Wrapper around cookies, MPID, and other server-response info that requires parsing.
      */
@@ -83,7 +76,7 @@ public class MParticleApiClientImpl extends MParticleBaseClientImpl implements M
     private boolean alreadyWarned;
 
     public MParticleApiClientImpl(ConfigManager configManager, SharedPreferences sharedPreferences, Context context) throws MalformedURLException, MPNoConfigException {
-        super(sharedPreferences);
+        super(context, configManager);
         mContext = context;
         mConfigManager = configManager;
         mApiSecret = configManager.getApiSecret();
@@ -129,14 +122,7 @@ public class MParticleApiClientImpl extends MParticleBaseClientImpl implements M
         }
         try {
             if (mConfigUrl == null){
-                Uri uri = new Uri.Builder()
-                        .scheme(getScheme())
-                        .encodedAuthority(CONFIG_HOST)
-                        .path(SERVICE_VERSION_4 + "/" + mApiKey + "/config")
-                        .appendQueryParameter("av", MPUtility.getAppVersionName(mContext))
-                        .appendQueryParameter("sv", Constants.MPARTICLE_VERSION)
-                        .build();
-                mConfigUrl = new URL(uri.toString());
+                mConfigUrl = getUrl(Endpoint.CONFIG);
             }
             HttpURLConnection connection = (HttpURLConnection) mConfigUrl.openConnection();
             connection.setConnectTimeout(mConfigManager.getConnectionTimeout());
@@ -163,7 +149,7 @@ public class MParticleApiClientImpl extends MParticleBaseClientImpl implements M
             Logger.verbose("Config request attempt:\n" +
                     "URL- " + mConfigUrl.toString());
 
-            makeUrlRequest(connection, true);
+            makeUrlRequest(Endpoint.CONFIG, connection, true);
 
             if (connection.getResponseCode() >= 200 && connection.getResponseCode() < 300) {
                 JSONObject response = MPUtility.getJsonResponse(connection);
@@ -203,27 +189,18 @@ public class MParticleApiClientImpl extends MParticleBaseClientImpl implements M
         }
     }
 
-    private URL getAudienceUrl() throws MalformedURLException {
-        Uri uri = new Uri.Builder()
-                .scheme(getScheme())
-                .encodedAuthority(API_HOST)
-                .path(SERVICE_VERSION_1 + "/" + mApiKey + "/audience?mpID=" + mConfigManager.getMpid())
-                .build();
-        return new URL(uri.toString());
-    }
-
     public JSONObject fetchAudiences()  {
 
         JSONObject response = null;
         try {
             Logger.debug("Starting Segment Network request");
-            HttpURLConnection connection = (HttpURLConnection) getAudienceUrl().openConnection();
+            HttpURLConnection connection = (HttpURLConnection) getUrl(Endpoint.AUDIENCE).openConnection();
             connection.setConnectTimeout(mConfigManager.getConnectionTimeout());
             connection.setReadTimeout(mConfigManager.getConnectionTimeout());
             connection.setRequestProperty("User-Agent", mUserAgent);
 
             addMessageSignature(connection, null);
-            makeUrlRequest(connection, true);
+            makeUrlRequest(Endpoint.AUDIENCE, connection, true);
             if (connection.getResponseCode() == HttpURLConnection.HTTP_FORBIDDEN){
                 Logger.error("Segment call forbidden: is Segmentation enabled for your account?");
             }
@@ -250,12 +227,7 @@ public class MParticleApiClientImpl extends MParticleBaseClientImpl implements M
         checkThrottleTime();
         checkRampValue();
         if (mEventUrl == null){
-            Uri uri = new Uri.Builder()
-                    .scheme(getScheme())
-                    .encodedAuthority(API_HOST)
-                    .path(SERVICE_VERSION_1 + "/" + mApiKey + "/events")
-                    .build();
-            mEventUrl = new URL(uri.toString());
+            mEventUrl = getUrl(Endpoint.EVENTS);
         }
         HttpURLConnection connection = (HttpURLConnection) mEventUrl.openConnection();
         connection.setConnectTimeout(mConfigManager.getConnectionTimeout());
@@ -279,7 +251,7 @@ public class MParticleApiClientImpl extends MParticleBaseClientImpl implements M
 
         logUpload(message);
 
-        makeUrlRequest(connection, message, true);
+        makeUrlRequest(Endpoint.EVENTS, connection, message, true);
 
         Logger.verbose("Upload request attempt:\n" +
                 "URL- " + mEventUrl.toString());
