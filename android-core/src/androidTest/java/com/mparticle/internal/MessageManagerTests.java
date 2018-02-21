@@ -9,6 +9,7 @@ import com.mparticle.MParticle;
 import com.mparticle.MParticleOptions;
 import com.mparticle.internal.database.tables.mp.SessionTable;
 import com.mparticle.internal.networking.BaseMPMessage;
+import com.mparticle.testutils.MParticleUtils;
 import com.mparticle.testutils.mock.MockContext;
 
 import junit.framework.Assert;
@@ -95,7 +96,7 @@ public class MessageManagerTests extends BaseCleanInstallEachTest {
         Session session = new Session();
         session.start(new MockContext());
         getMessageManager().startSession(session);
-        Thread.sleep(500);
+        MParticleUtils.awaitStoreMessage();
         BaseMPMessage message = getMessageManager().getMParticleDBManager().getSessionForSessionEndMessage(session.mSessionID, null, session.getMpids());
         Assert.assertNotNull(message);
         getMessageManager().getMParticleDBManager().updateSessionStatus(session.mSessionID, SessionTable.SessionTableColumns.STATUS);

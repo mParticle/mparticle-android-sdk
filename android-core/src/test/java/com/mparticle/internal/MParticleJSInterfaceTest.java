@@ -10,9 +10,12 @@ import com.mparticle.commerce.Product;
 import com.mparticle.commerce.Promotion;
 import com.mparticle.commerce.TransactionAttributes;
 import com.mparticle.identity.IdentityApi;
+import com.mparticle.identity.IdentityApiRequest;
 import com.mparticle.identity.MParticleUser;
 import com.mparticle.mock.MockContext;
+import com.mparticle.mock.utils.RandomUtils;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Before;
@@ -58,6 +61,7 @@ public class MParticleJSInterfaceTest extends MParticleJSInterface {
     @Before
     public void setup() throws Exception {
         MParticle mockMp = Mockito.mock(MParticle.class);
+        Mockito.when(mockMp.getConfigManager()).thenReturn(new ConfigManager(new MockContext()));
         cart = new Cart(new MockContext(), 2);
         MParticleUser mockCurrentUser = Mockito.mock(MParticleUser.class);
         IdentityApi mockIdentity = Mockito.mock(IdentityApi.class);
@@ -276,6 +280,58 @@ public class MParticleJSInterfaceTest extends MParticleJSInterface {
         product2Json.put("Sku", "00000");
         product2 = toProduct(product2Json);
         assertFalse(isEqual(product2, mProduct2));
+    }
+
+    @Test
+    public void testLogin() throws Exception {
+        Map<MParticle.IdentityType, String> identities = RandomUtils.getInstance().getRandomUserIdentities();
+        JSONArray identityArray = new JSONArray();
+        for (Map.Entry<MParticle.IdentityType, String> entry: identities.entrySet()) {
+            identityArray.put(new JSONObject()
+                    .put(TYPE, entry.getKey().name())
+                    .put(IDENTITY, entry.getValue()));
+        }
+        JSONObject jsonObject = new JSONObject()
+                .put(USER_IDENTITIES, identityArray);
+        login(jsonObject.toString());
+        Mockito.verify(MParticle.getInstance().Identity(), Mockito.times(1)).login(Mockito.any(IdentityApiRequest.class));
+    }
+
+    @Test
+    public void testLogout() throws Exception {
+        Map<MParticle.IdentityType, String> identities = RandomUtils.getInstance().getRandomUserIdentities();
+        JSONArray identityArray = new JSONArray();
+        for (Map.Entry<MParticle.IdentityType, String> entry: identities.entrySet()) {
+            identityArray.put(new JSONObject()
+                    .put(TYPE, entry.getKey().name())
+                    .put(IDENTITY, entry.getValue()));
+        }
+        JSONObject jsonObject = new JSONObject()
+                .put(USER_IDENTITIES, identityArray);
+        logout(jsonObject.toString());
+        Mockito.verify(MParticle.getInstance().Identity(), Mockito.times(1)).logout(Mockito.any(IdentityApiRequest.class));
+    }
+
+    @Test
+    public void testModify() throws Exception {
+        Map<MParticle.IdentityType, String> identities = RandomUtils.getInstance().getRandomUserIdentities();
+        JSONArray identityArray = new JSONArray();
+        for (Map.Entry<MParticle.IdentityType, String> entry: identities.entrySet()) {
+            identityArray.put(new JSONObject()
+                    .put(TYPE, entry.getKey().name())
+                    .put(IDENTITY, entry.getValue()));
+        }
+        JSONObject jsonObject = new JSONObject()
+                .put(USER_IDENTITIES, identityArray);
+        modify(jsonObject.toString());
+        Mockito.verify(MParticle.getInstance().Identity(), Mockito.times(1)).modify(Mockito.any(IdentityApiRequest.class));
+    }
+
+    @Test
+    public void testParsing() throws Exception {
+        String val = "{\"UserIdentities\":[{\"Type\":1,\"Identity\":\"123\"},{\"Type\":7,\"Identity\":\"test@gmail.com\"}]}";
+        IdentityApiRequest request = getIdentityApiRequest(new JSONObject(val));
+        request.getUserIdentities().toString();
     }
 
     public boolean isEqual(Product product1, Product product2) {

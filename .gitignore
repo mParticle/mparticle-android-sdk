@@ -38,3 +38,4 @@ build
 
 #test results
 /testResults
+/android-core/src/androidTest/res/raw/mp_js_sdk.txt

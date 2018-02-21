@@ -59,4 +59,8 @@ public class AccessUtils {
         }
         user.setUserIdentities(nullUserIdentities);
     }
+
+    public static String getIdentityTypeString(MParticle.IdentityType identityType) {
+        return MParticleIdentityClientImpl.getStringValue(identityType);
+    }
 }

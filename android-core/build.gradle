@@ -137,3 +137,4 @@ project.afterEvaluate {
     def compileLintTask = project.tasks.find { it.name == 'compileLint' }
     compileLintTask.dependsOn(copyLintJar)
 }
+

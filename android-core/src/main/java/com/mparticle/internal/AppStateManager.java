@@ -324,15 +324,21 @@ import java.util.concurrent.atomic.AtomicLong;
     }
 
     public void onActivityCreated(Activity activity, Bundle savedInstanceState){
-        MParticle.getInstance().getKitManager().onActivityCreated(activity, savedInstanceState);
+        if (MParticle.getInstance() != null) {
+            MParticle.getInstance().getKitManager().onActivityCreated(activity, savedInstanceState);
+        }
     }
 
     public void onActivityStarted(Activity activity){
-        MParticle.getInstance().getKitManager().onActivityStarted(activity);
+        if (MParticle.getInstance() != null) {
+            MParticle.getInstance().getKitManager().onActivityStarted(activity);
+        }
     }
 
     public void onActivityStopped(Activity activity) {
-        MParticle.getInstance().getKitManager().onActivityStopped(activity);
+        if (MParticle.getInstance() != null) {
+            MParticle.getInstance().getKitManager().onActivityStopped(activity);
+        }
     }
 
     private void logBackgrounded(){
@@ -389,11 +395,15 @@ import java.util.concurrent.atomic.AtomicLong;
     }
 
     public void onActivitySaveInstanceState(Activity activity, Bundle outState) {
-        MParticle.getInstance().getKitManager().onActivitySaveInstanceState(activity, outState);
+        if (MParticle.getInstance() != null) {
+            MParticle.getInstance().getKitManager().onActivitySaveInstanceState(activity, outState);
+        }
     }
 
     public void onActivityDestroyed(Activity activity) {
-        MParticle.getInstance().getKitManager().onActivityDestroyed(activity);
+        if (MParticle.getInstance() != null) {
+            MParticle.getInstance().getKitManager().onActivityDestroyed(activity);
+        }
     }
 
     public WeakReference<Activity> getCurrentActivity() {

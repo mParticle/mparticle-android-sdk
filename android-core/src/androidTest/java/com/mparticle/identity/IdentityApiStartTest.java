@@ -1,11 +1,9 @@
 package com.mparticle.identity;
 
 import com.github.tomakehurst.wiremock.verification.LoggedRequest;
-import com.mparticle.testutils.BaseCleanInstallEachTest;
 import com.mparticle.MParticle;
 import com.mparticle.MParticleOptions;
-import com.mparticle.identity.AccessUtils;
-import com.mparticle.identity.IdentityApiRequest;
+import com.mparticle.testutils.BaseCleanInstallEachTest;
 import com.mparticle.testutils.RandomUtils;
 
 import org.json.JSONObject;

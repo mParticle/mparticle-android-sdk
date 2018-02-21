@@ -108,6 +108,7 @@ public class Server {
         mWireMockServer.stubFor(post(urlPathMatching("/v([0-9]*)/identify"))
                 .willReturn(aResponse()
                         .withStatus(200)
+                        .withHeader("Access-Control-Allow-Origin", "*")
                 ));
         return this;
     }
@@ -121,6 +122,7 @@ public class Server {
                 .willReturn(aResponse()
                         .withStatus(200)
                         .withFixedDelay(delay)
+                        .withHeader("Access-Control-Allow-Origin", "*")
                         .withBody(getIdentityResponse(mpid))
                 ));
         return this;
@@ -131,6 +133,7 @@ public class Server {
                 .willReturn(aResponse()
                         .withStatus(200)
                         .withBody(getIdentityResponse(mpid))
+                        .withHeader("Access-Control-Allow-Origin", "*")
                 ));
         return this;
     }
@@ -140,6 +143,7 @@ public class Server {
                 .willReturn(aResponse()
                         .withStatus(200)
                         .withBody(getIdentityResponse(mpid))
+                        .withHeader("Access-Control-Allow-Origin", "*")
                 ));
         return this;
     }
@@ -148,6 +152,7 @@ public class Server {
         mWireMockServer.stubFor(post(urlPathMatching("/v([0-9]*)/([0-9]*)/modify"))
                 .willReturn(aResponse()
                         .withStatus(200)
+                        .withHeader("Access-Control-Allow-Origin", "*")
                 ));
         return this;
     }

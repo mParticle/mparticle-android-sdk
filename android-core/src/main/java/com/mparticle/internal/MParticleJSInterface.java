@@ -36,19 +36,19 @@ public class MParticleJSInterface {
     public static final String INTERFACE_NAME = "mParticleAndroid";
 
     //the following keys are sent from the JS library as a part of each event
-    private static final String JS_KEY_EVENT_NAME = "EventName";
-    private static final String JS_KEY_EVENT_CATEGORY = "EventCategory";
-    private static final String JS_KEY_EVENT_ATTRIBUTES = "EventAttributes";
-    private static final String JS_KEY_EVENT_DATATYPE = "EventDataType";
-    private static final String JS_KEY_OPTOUT = "OptOut";
+    protected static final String JS_KEY_EVENT_NAME = "EventName";
+    protected static final String JS_KEY_EVENT_CATEGORY = "EventCategory";
+    protected static final String JS_KEY_EVENT_ATTRIBUTES = "EventAttributes";
+    protected static final String JS_KEY_EVENT_DATATYPE = "EventDataType";
+    protected static final String JS_KEY_OPTOUT = "OptOut";
 
-    private static final int JS_MSG_TYPE_SS = 1;
-    private static final  int JS_MSG_TYPE_SE = 2;
-    private static final int JS_MSG_TYPE_PV = 3;
-    private static final int JS_MSG_TYPE_PE = 4;
-    private static final int JS_MSG_TYPE_CR = 5;
-    private static final int JS_MSG_TYPE_OO = 6;
-    private static final int JS_MSG_TYPE_COMMERCE = 16;
+    protected static final int JS_MSG_TYPE_SS = 1;
+    protected static final  int JS_MSG_TYPE_SE = 2;
+    protected static final int JS_MSG_TYPE_PV = 3;
+    protected static final int JS_MSG_TYPE_PE = 4;
+    protected static final int JS_MSG_TYPE_CR = 5;
+    protected static final int JS_MSG_TYPE_OO = 6;
+    protected static final int JS_MSG_TYPE_COMMERCE = 16;
 
     private static final String errorMsg = "Error processing JSON data from Webview: %s";
 
@@ -88,10 +88,10 @@ public class MParticleJSInterface {
 
     private static final String PRODUCT_IMPRESSION_NAME = "ProductImpressionList";
 
-    private static final String USER_IDENTITIES = "UserIdentities";
-    private static final String USER_IDENTITY = "UserIdentity";
-    private static final String IDENTITY = "Identity";
-    private static final String TYPE = "Type";
+    protected static final String USER_IDENTITIES = "UserIdentities";
+    protected static final String USER_IDENTITY = "UserIdentity";
+    protected static final String IDENTITY = "Identity";
+    protected static final String TYPE = "Type";
 
     public MParticleJSInterface() {
         Product.setEqualityComparator(new Product.EqualityComparator() {
@@ -460,7 +460,7 @@ public class MParticleJSInterface {
         return jsonArray.toString();
     }
 
-    private static Map<String, String> convertToMap(JSONObject attributes) {
+    protected static Map<String, String> convertToMap(JSONObject attributes) {
         if (null != attributes) {
             Iterator keys = attributes.keys();
 
@@ -674,7 +674,7 @@ public class MParticleJSInterface {
                 .setPosition(jsonObject.optString(PROMOTION_POSITION));
     }
 
-    private IdentityApiRequest getIdentityApiRequest(JSONObject jsonObject) {
+    protected IdentityApiRequest getIdentityApiRequest(JSONObject jsonObject) {
         JSONArray identitiesArray = jsonObject.optJSONArray(USER_IDENTITIES);
 
         Map<MParticle.IdentityType, String> identities = new HashMap<MParticle.IdentityType, String>();
