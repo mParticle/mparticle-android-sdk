@@ -174,14 +174,8 @@ public class MPServiceUtil {
     private void broadcastNotificationReceived(ProviderCloudMessage message) {
         Intent intent = new Intent(MPMessagingAPI.BROADCAST_NOTIFICATION_RECEIVED);
         intent.putExtra(MPMessagingAPI.CLOUD_MESSAGE_EXTRA, message);
-        intent.addCategory(mContext.getPackageName());
-
-        List<ResolveInfo> result = mContext.getPackageManager().queryBroadcastReceivers(intent, 0);
-        if (result != null && result.size() > 0) {
-            LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
-        } else {
-            onHandleIntent(intent);
-        }
+        LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
+        onHandleIntent(intent);
     }
 
     private void handleNotificationTapInternal(Intent intent) {
@@ -194,13 +188,8 @@ public class MPServiceUtil {
         MParticle.start(MParticleOptions.builder(mContext.getApplicationContext()).build());
         Intent broadcast = new Intent(MPMessagingAPI.BROADCAST_NOTIFICATION_TAPPED);
         broadcast.putExtra(MPMessagingAPI.CLOUD_MESSAGE_EXTRA, message);
-
-        List<ResolveInfo> result = mContext.getPackageManager().queryBroadcastReceivers(broadcast, 0);
-        if (result != null && result.size() > 0) {
-            LocalBroadcastManager.getInstance(mContext).sendBroadcast(broadcast);
-        } else {
-            onHandleIntent(broadcast);
-        }
+        LocalBroadcastManager.getInstance(mContext).sendBroadcast(broadcast);
+        onHandleIntent(broadcast);
     }
 
     @RequiresApi(api = 26)

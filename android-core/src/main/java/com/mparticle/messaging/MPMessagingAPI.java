@@ -1,6 +1,8 @@
 package com.mparticle.messaging;
 
 import android.content.Context;
+import android.content.IntentFilter;
+import android.support.v4.content.LocalBroadcastManager;
 
 import com.mparticle.MPService;
 import com.mparticle.MParticle;
@@ -73,5 +75,31 @@ public class MPMessagingAPI {
 
     public void displayPushNotificationByDefault(Boolean enabled) {
         MParticle.getInstance().getConfigManager().setDisplayPushNotifications(enabled);
+    }
+
+    /**
+     * Register a custom implementation of PushAnalyticsReceiver, which will provide callbacks when
+     * push messages are received
+     * @param receiver the implementation of PushAnalyticsReceiver to be registered
+     *
+     * @see PushAnalyticsReceiver
+     */
+    public void registerPushAnalyticsReceiver(PushAnalyticsReceiver receiver) {
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(BROADCAST_NOTIFICATION_RECEIVED);
+        intentFilter.addAction(BROADCAST_NOTIFICATION_TAPPED);
+        LocalBroadcastManager.getInstance(mContext).registerReceiver(receiver, intentFilter);
+    }
+
+    /**
+     * Unregister you custom implementation of PushAnalyticsReceiver. If the receiver is not found
+     * to have been registered, nothing will happen.
+     *
+     * @param receiver the previously registered implementation of PushAnalyticsReceiver to be unregistered
+     *
+     * @see PushAnalyticsReceiver
+     */
+    public void unregisterPushAnalyticsReceiver(PushAnalyticsReceiver receiver) {
+        LocalBroadcastManager.getInstance(mContext).unregisterReceiver(receiver);
     }
 }
