@@ -31,6 +31,12 @@ public class AccessUtils {
         MParticle.getInstance().Identity().mUserDelegate.setUserIdentity(value, identityType, mpid);
     }
 
+    public static void setUserIdentities(Map<MParticle.IdentityType, String> userIdentities, long mpid) {
+        for (Map.Entry<MParticle.IdentityType, String> entry: userIdentities.entrySet()) {
+            MParticle.getInstance().Identity().mUserDelegate.setUserIdentity(entry.getValue(), entry.getKey(), mpid);
+        }
+    }
+
     public static MParticleUser getUserInstance(Context context, long mpid) {
         return MParticleUser.getInstance(context, mpid, MParticle.getInstance().Identity().mUserDelegate);
     }

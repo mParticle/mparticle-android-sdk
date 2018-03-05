@@ -555,6 +555,10 @@ public class ConfigManager {
         }
     }
 
+    public boolean mpidExists(long mpid) {
+        return UserStorage.getMpIdSet(mContext).contains(mpid);
+    }
+
     private static boolean sInProgress;
     public static void setIdentityRequestInProgress(boolean inProgress) {
         sInProgress = inProgress;

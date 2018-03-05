@@ -55,8 +55,8 @@ public class IdentityApi {
     }
 
     /**
-     * return the current MPID, even if an Identity request, which might cause the MPID to change, is
-     * currently in progress
+     * return the MParticleUser with the current MPID, even if an Identity request,
+     * which might cause the MPID to change, is currently in progress
      *
      * @see IdentityStateListener
      */
@@ -67,6 +67,21 @@ public class IdentityApi {
             return null;
         } else {
             return MParticleUser.getInstance(mContext, mpid, mUserDelegate);
+        }
+    }
+
+    /**
+     * return the MParticleUser with the specified MPID, if it exists. If an MParticleUser with the
+     * specified MPID does not exist, or the specifid MPID is 0, this will return null
+     *
+     * @param mpid the desired MParticleUser's MPID
+     */
+    @Nullable
+    public MParticleUser getUser(Long mpid) {
+            if (mConfigManager.mpidExists(mpid)) {
+                return MParticleUser.getInstance(mContext, mpid, mUserDelegate);
+            } else {
+            return null;
         }
     }
 

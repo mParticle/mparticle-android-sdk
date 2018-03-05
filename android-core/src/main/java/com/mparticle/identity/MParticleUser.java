@@ -76,12 +76,13 @@ public class MParticleUser {
      * @return whether the attributes where successfully set
      */
     public boolean setUserAttributes(Map<String, Object> userAttributes) {
+        boolean success = true;
         for(Map.Entry<String, Object> entry: userAttributes.entrySet()) {
             if (!setUserAttribute(entry.getKey(), entry.getValue())) {
-                return false;
+                success = false;
             }
         }
-        return true;
+        return success;
     }
 
     /**

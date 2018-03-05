@@ -287,7 +287,7 @@ public class UserStorage {
         return removed;
     }
 
-    private static Set<Long> getMpIdSet(Context context) {
+    static Set<Long> getMpIdSet(Context context) {
         JSONArray userConfigs = new JSONArray();
         try {
             userConfigs = new JSONArray(getMParticleSharedPrefs(context).getString(USER_CONFIG_COLLECTION, new JSONArray().toString()));

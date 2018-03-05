@@ -48,12 +48,12 @@ public class RandomUtils {
         for (int i = 0; i < count; i++) {
             String key = "";
             String value = "";
-            if (randomInt(0, 5) % 1 == 0) {
+            if (randomInt(0, 5) == 0) {
                 key = null;
             } else {
                 key = getAlphaNumericString(20);
             }
-            if (randomInt(0, 5) % 1 == 0) {
+            if (randomInt(0, 5) == 0) {
                 value = null;
             } else {
                 value = getAlphaNumericString(20);

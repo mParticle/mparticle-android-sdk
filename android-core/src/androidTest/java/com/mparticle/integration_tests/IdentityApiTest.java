@@ -6,6 +6,7 @@ import com.mparticle.BaseCleanStartedEachTest;
 import com.mparticle.MParticle;
 import com.mparticle.MParticleTask;
 import com.mparticle.identity.AccessUtils;
+import com.mparticle.identity.IdentityApi;
 import com.mparticle.identity.IdentityApiRequest;
 import com.mparticle.identity.IdentityApiResult;
 import com.mparticle.identity.IdentityStateListener;
@@ -13,9 +14,8 @@ import com.mparticle.identity.MParticleUser;
 import com.mparticle.identity.TaskSuccessListener;
 import com.mparticle.identity.UserAliasHandler;
 import com.mparticle.internal.ConfigManager;
-import com.mparticle.utils.MParticleUtils;
 import com.mparticle.mock.utils.RandomUtils;
-import com.mparticle.utils.StreamAssert;
+import com.mparticle.utils.MParticleUtils;
 import com.mparticle.utils.TestingUtils;
 
 import org.json.JSONException;
@@ -28,6 +28,8 @@ import java.util.Map;
 import java.util.Random;
 
 import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertNotNull;
+import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertTrue;
 import static junit.framework.Assert.fail;
 
@@ -387,7 +389,11 @@ public class IdentityApiTest extends BaseCleanStartedEachTest {
             if (dto1.getUserAttributes() != null) {
                 assertEquals(dto1.getUserAttributes().size(), userAttributes.size());
                 for (Map.Entry<String, Object> entry : dto1.getUserAttributes().entrySet()) {
-                    assertEquals(entry.getValue().toString(), userAttributes.get(entry.getKey()).toString());
+                    if (entry.getValue() == null) {
+                        assertNull(userAttributes.get(entry.getKey()));
+                    } else {
+                        assertEquals(entry.getValue().toString(), userAttributes.get(entry.getKey()).toString());
+                    }
                 }
             }
         } else {
@@ -438,6 +444,51 @@ public class IdentityApiTest extends BaseCleanStartedEachTest {
                                 .build());
 
         TestingUtils.checkAllBool(called, 10, 5);
+    }
+
+    @Test
+    public void testGetUser() throws Exception {
+        IdentityApi identity = MParticle.getInstance().Identity();
+        assertNotNull(identity.getCurrentUser());
+        MParticle.getInstance().getConfigManager().setMpid(mpid1);
+        assertEquals(identity.getCurrentUser().getId(), mpid1);
+        Map<String, Object> mpid1UserAttributes = new HashMap<String, Object>(RandomUtils.getInstance().getRandomAttributes(10));
+        Map<MParticle.IdentityType, String> mpid1UserIdentites = RandomUtils.getInstance().getRandomUserIdentities();
+        identity.getCurrentUser().setUserAttributes(mpid1UserAttributes);
+        AccessUtils.setUserIdentities(mpid1UserIdentites, identity.getCurrentUser().getId());
+
+        MParticle.getInstance().getConfigManager().setMpid(mpid2);
+        Map<String, Object> mpid2UserAttributes = new HashMap<String, Object>(RandomUtils.getInstance().getRandomAttributes(10));
+        Map<MParticle.IdentityType, String> mpid2UserIdentites = RandomUtils.getInstance().getRandomUserIdentities();
+        identity.getCurrentUser().setUserAttributes(mpid2UserAttributes);
+        AccessUtils.setUserIdentities(mpid2UserIdentites, identity.getCurrentUser().getId());
+
+        MParticle.getInstance().getConfigManager().setMpid(mpid3);
+        Map<String, Object> mpid3UserAttributes = new HashMap<String, Object>(RandomUtils.getInstance().getRandomAttributes(10));
+        Map<MParticle.IdentityType, String> mpid3UserIdentities = RandomUtils.getInstance().getRandomUserIdentities();
+        identity.getCurrentUser().setUserAttributes(mpid3UserAttributes);
+
+        AccessUtils.setUserIdentities(mpid3UserIdentities, identity.getCurrentUser().getId());
+
+        mpid1UserAttributes.remove(null);
+        mpid2UserAttributes.remove(null);
+        mpid3UserAttributes.remove(null);
+
+        MParticleUtils.awaitSetUserAttribute();
+
+        //should return null for mpid = 0
+        assertNull(identity.getUser(0L));
+
+        //should return an MParticleUser with the correct mpid, userIdentities, and userAttributes for
+        //previously seen users
+        assertMParticleUserEquals(identity.getUser(mpid1), mpid1, mpid1UserIdentites, mpid1UserAttributes);
+        assertMParticleUserEquals(identity.getUser(mpid2), mpid2, mpid2UserIdentites, mpid2UserAttributes);
+        assertMParticleUserEquals(identity.getUser(mpid3), mpid3, mpid3UserIdentities, mpid3UserAttributes);
+
+        //should return null for unseen mpid's
+        assertNull(identity.getUser(RandomUtils.getInstance().randomLong(Long.MIN_VALUE, Long.MAX_VALUE)));
+        assertNull(identity.getUser(RandomUtils.getInstance().randomLong(Long.MIN_VALUE, Long.MAX_VALUE)));
+        assertNull(identity.getUser(RandomUtils.getInstance().randomLong(Long.MIN_VALUE, Long.MAX_VALUE)));
     }
 }
 
