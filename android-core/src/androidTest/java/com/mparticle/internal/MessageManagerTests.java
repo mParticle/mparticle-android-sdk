@@ -3,8 +3,15 @@ package com.mparticle.internal;
 import android.content.Context;
 import android.content.SharedPreferences;
 
-import com.mparticle.*;
 import com.mparticle.AccessUtils;
+import com.mparticle.BaseCleanInstallEachTest;
+import com.mparticle.MParticle;
+import com.mparticle.MParticleOptions;
+import com.mparticle.internal.database.tables.mp.SessionTable;
+import com.mparticle.internal.networking.BaseMPMessage;
+import com.mparticle.mock.MockContext;
+
+import junit.framework.Assert;
 
 import org.junit.Test;
 
@@ -88,6 +95,22 @@ public class MessageManagerTests extends BaseCleanInstallEachTest {
         assertFalse(getMessageManager().isFirstRunForMessage());
         assertFalse(getMessageManager().isFirstRunForAST());
 
+    }
+
+    @Test
+    public void testDuplicateSessionEnds() throws Exception {
+        MParticle.start(MParticleOptions.builder(mContext)
+                .credentials("key", "secret")
+                .build());
+        Session session = new Session();
+        session.start(new MockContext());
+        getMessageManager().startSession(session);
+        Thread.sleep(500);
+        BaseMPMessage message = getMessageManager().getMParticleDBManager().getSessionForSessionEndMessage(session.mSessionID, null, session.getMpids());
+        Assert.assertNotNull(message);
+        getMessageManager().getMParticleDBManager().updateSessionStatus(session.mSessionID, SessionTable.SessionTableColumns.STATUS);
+        message = getMessageManager().getMParticleDBManager().getSessionForSessionEndMessage(session.mSessionID, null , session.getMpids());
+        Assert.assertNull(message);
     }
 
     @Test

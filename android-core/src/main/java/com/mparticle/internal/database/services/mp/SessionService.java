@@ -55,12 +55,18 @@ public class SessionService extends SessionTable {
         db.update(TABLE_NAME, sessionValues, SessionTableColumns.SESSION_ID + "=?", whereArgs);
     }
 
+    public static void updateSessionStatus(SQLiteDatabase db, String sessionId, String status) {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(SessionTableColumns.STATUS, status);
+        String[] whereArgs = {sessionId};
+        db.update(SessionTableColumns.TABLE_NAME, contentValues, SessionTableColumns.SESSION_ID + "=?", whereArgs);
+    }
 
     public static Cursor getSessionForSessionEndMessage(SQLiteDatabase db, String sessionId) throws JSONException {
         String[] selectionArgs = new String[]{sessionId};
         String[] sessionColumns = new String[]{SessionTableColumns.START_TIME, SessionTableColumns.END_TIME,
                 SessionTableColumns.SESSION_FOREGROUND_LENGTH, SessionTableColumns.ATTRIBUTES};
-        Cursor selectCursor = db.query(TABLE_NAME, sessionColumns, SessionTableColumns.SESSION_ID + "=?",
+        Cursor selectCursor = db.query(TABLE_NAME, sessionColumns, SessionTableColumns.SESSION_ID + "=? and " + SessionTableColumns.STATUS + " IS NULL",
                 selectionArgs, null, null, null);
         return selectCursor;
     }
@@ -72,7 +78,7 @@ public class SessionService extends SessionTable {
         Cursor selectCursor = null;
         try {
             selectCursor = db.query(TABLE_NAME, sessionColumns,
-                    SessionTableColumns.API_KEY + "= ? ",
+                    SessionTableColumns.API_KEY + "= ? and " + SessionTableColumns.STATUS + " IS NULL",
                     selectionArgs, null, null, null);
             // NOTE: there should be at most one orphan per api key - but
             // process any that are found

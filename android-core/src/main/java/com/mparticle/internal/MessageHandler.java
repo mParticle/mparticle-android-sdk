@@ -9,6 +9,7 @@ import com.mparticle.MParticle;
 import com.mparticle.internal.Constants.MessageKey;
 import com.mparticle.internal.Constants.MessageType;
 import com.mparticle.internal.database.services.MParticleDBManager;
+import com.mparticle.internal.database.tables.mp.SessionTable;
 import com.mparticle.internal.dto.AttributionChange;
 import com.mparticle.internal.dto.UserAttributeRemoval;
 import com.mparticle.internal.dto.UserAttributeResponse;
@@ -125,15 +126,17 @@ import java.util.UUID;
                 try {
                     Map.Entry<String, Set<Long>> entry = (Map.Entry<String, Set<Long>>) msg.obj;
                     BaseMPMessage endMessage = null;
+                    String sessionId = entry.getKey();
                    try {
-                       endMessage = mMParticleDBManager.getSessionForSessionEndMessage(entry.getKey(), ((MessageManager)mMessageManagerCallbacks).getLocation(), entry.getValue());
+                       endMessage = mMParticleDBManager.getSessionForSessionEndMessage(sessionId, ((MessageManager)mMessageManagerCallbacks).getLocation(), entry.getValue());
                    }catch (JSONException jse){
                        Logger.warning("Failed to create mParticle session end message");
                    }
                    if (endMessage != null) {
-                            // insert the record into messages with duration
                        try {
+                           Logger.verbose("Creating session end message for session ID: " + sessionId);
                            mMParticleDBManager.insertMessage(mMessageManagerCallbacks.getApiKey(), endMessage);
+                           mMParticleDBManager.updateSessionStatus(sessionId, SessionTable.SessionStatus.CLOSED);
                        } catch (MParticleApiClientImpl.MPNoConfigException e) {
                            Logger.error("Unable to process uploads, API key and/or API Secret are missing");
                            return;
@@ -154,6 +157,7 @@ import java.util.UUID;
                 break;
             case END_ORPHAN_SESSIONS:
                 try {
+                    Logger.verbose("Ending orphaned sessions.");
                     // find left-over sessions that exist during startup and end them
                     Long mpid = (Long)msg.obj;
                     List<String> sessionIds = mMParticleDBManager.getOrphanSessionIds(mMessageManagerCallbacks.getApiKey());

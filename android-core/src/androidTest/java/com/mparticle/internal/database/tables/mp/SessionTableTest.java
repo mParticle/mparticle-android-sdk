@@ -17,7 +17,7 @@ public class SessionTableTest extends BaseTableTest {
                     SessionTable.SessionTableColumns.END_TIME + " INTEGER NOT NULL," +
                     SessionTable.SessionTableColumns.SESSION_FOREGROUND_LENGTH + " INTEGER NOT NULL," +
                     SessionTable.SessionTableColumns.ATTRIBUTES + " TEXT, " +
-                    SessionTable.SessionTableColumns.CF_UUID + " TEXT," +
+                    SessionTable.SessionTableColumns.STATUS + " TEXT," +
                     SessionTable.SessionTableColumns.APP_INFO + " TEXT, " +
                     SessionTable.SessionTableColumns.DEVICE_INFO + " TEXT" +
                     ");";

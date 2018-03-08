@@ -17,10 +17,24 @@ public class SessionTable extends MpIdDependentTable {
         String END_TIME = "end_time";
         String SESSION_FOREGROUND_LENGTH = "session_length";
         String ATTRIBUTES = "attributes";
-        String CF_UUID = "cfuuid";
+        /**
+         * This column, previously unused as CFUUID, has been re-purposed for STATUS
+         * to avoid a schema change.
+         */
+        String STATUS = "cfuuid";
         String APP_INFO = "app_info";
         String DEVICE_INFO = "device_info";
         String MP_ID = MpIdDependentTable.MP_ID;
+    }
+
+    /**
+     * SessionStatus is used to determine if we've "closed" a session by
+     * logging a session-end event. Sessions are kept in the database after
+     * this, due to requiring device and application information at the time
+     * of batch creation.
+     **/
+    public interface SessionStatus {
+        String CLOSED = "1";
     }
 
     static final String SESSION_ADD_DEVICE_INFO_COLUMN = "ALTER TABLE " + SessionTableColumns.TABLE_NAME +
@@ -42,7 +56,7 @@ public class SessionTable extends MpIdDependentTable {
                     SessionTableColumns.END_TIME + " INTEGER NOT NULL," +
                     SessionTableColumns.SESSION_FOREGROUND_LENGTH + " INTEGER NOT NULL," +
                     SessionTableColumns.ATTRIBUTES + " TEXT, " +
-                    SessionTableColumns.CF_UUID + " TEXT," +
+                    SessionTableColumns.STATUS + " TEXT," +
                     SessionTableColumns.APP_INFO + " TEXT, " +
                     SessionTableColumns.DEVICE_INFO + " TEXT, " +
                     SessionTableColumns.MP_ID + " INTEGER" +

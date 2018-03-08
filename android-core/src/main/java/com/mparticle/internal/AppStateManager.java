@@ -274,7 +274,7 @@ import java.util.concurrent.atomic.AtomicLong;
      */
     private void newSession() {
         startSession();
-        mMessageManager.startSession();
+        mMessageManager.startSession(mCurrentSession);
         Logger.debug("Started new session");
         mMessageManager.startUploadLoop();
         enableLocationTracking();

@@ -138,7 +138,7 @@ public class MessageManagerTest {
     @Test
     public void testStartSession() throws Exception {
         MockSharedPreferences prefs = (MockSharedPreferences) context.getSharedPreferences(null, 0);
-        BaseMPMessage sessionStart = manager.startSession();
+        BaseMPMessage sessionStart = manager.startSession(appStateManager.getSession());
         Mockito.verify(messageHandler, Mockito.times(2)).sendMessage(Mockito.any(Message.class));
         assertNotNull(sessionStart);
         assertEquals(Constants.MessageType.SESSION_START, sessionStart.getMessageType());
@@ -150,7 +150,7 @@ public class MessageManagerTest {
         configManager.getUserStorage().setPreviousSessionForeground(42000);
         configManager.getUserStorage().setPreviousSessionStart(24000);
         prefs.commit();
-        sessionStart = manager.startSession();
+        sessionStart = manager.startSession(appStateManager.getSession());
         assertNotNull(sessionStart);
         assertEquals(Constants.MessageType.SESSION_START, sessionStart.getMessageType());
         assertEquals(42, sessionStart.getLong(Constants.MessageKey.PREVIOUS_SESSION_LENGTH));

@@ -231,9 +231,9 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
                 .build();
     }
 
-    public BaseMPMessage startSession() {
+    public BaseMPMessage startSession(Session session) {
         try {
-            BaseMPMessage message = new BaseMPMessage.Builder(MessageType.SESSION_START, mAppStateManager.getSession(), mLocation, mConfigManager.getMpid())
+            BaseMPMessage message = new BaseMPMessage.Builder(MessageType.SESSION_START, session, mLocation, mConfigManager.getMpid())
                     .timestamp(mAppStateManager.getSession().mSessionStartTime)
                     .build();
 
@@ -244,13 +244,13 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
                 mConfigManager.getUserStorage().clearPreviousTimeInForeground();
             }
             String prevSessionId = mConfigManager.getUserStorage().getPreviousSessionId();
-            mConfigManager.getUserStorage().setPreviousSessionId(mAppStateManager.getSession().mSessionID);
+            mConfigManager.getUserStorage().setPreviousSessionId(session.mSessionID);
             if (!MPUtility.isEmpty(prevSessionId)) {
                 message.put(MessageKey.PREVIOUS_SESSION_ID, prevSessionId);
             }
 
             long prevSessionStart = mConfigManager.getUserStorage().getPreviousSessionStart(-1);
-            mConfigManager.getUserStorage().setPreviousSessionStart(mAppStateManager.getSession().mSessionStartTime);
+            mConfigManager.getUserStorage().setPreviousSessionStart(session.mSessionStartTime);
 
             if (prevSessionStart > 0) {
                 message.put(MessageKey.PREVIOUS_SESSION_START, prevSessionStart);

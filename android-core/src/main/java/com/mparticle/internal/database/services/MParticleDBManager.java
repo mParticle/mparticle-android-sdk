@@ -358,22 +358,16 @@ public class MParticleDBManager extends BaseDBManager {
         return batchMessage;
     }
 
-
-    /**
-     *
-     *
-     * Session Service Methods
-     *
-     *
-     */
-
-
     public void updateSessionEndTime(String sessionId, long endTime, long sessionLength) {
         SessionService.updateSessionEndTime(getMParticleDatabase(), sessionId, endTime, sessionLength);
     }
 
     public void updateSessionAttributes(String sessionId, String attributes) {
         SessionService.updateSessionAttributes(getMParticleDatabase(), sessionId, attributes);
+    }
+
+    public void updateSessionStatus(String sessionId, String status) {
+        SessionService.updateSessionStatus(getMParticleDatabase(), sessionId, status);
     }
 
     public BaseMPMessage getSessionForSessionEndMessage(String sessionId, Location location, Set<Long> mpIds) throws JSONException {
