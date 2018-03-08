@@ -177,7 +177,9 @@ import java.util.Iterator;
         String END_TIME = "end_time";
         String SESSION_FOREGROUND_LENGTH = "session_length";
         String ATTRIBUTES = "attributes";
-        String CF_UUID = "cfuuid";
+        //this column, previously unused as cfuuid, has been re-purposed for status
+        //to avoid a schema change.
+        String STATUS = "cfuuid";
         String APP_INFO = "app_info";
         String DEVICE_INFO = "device_info";
     }
@@ -191,7 +193,7 @@ import java.util.Iterator;
                     SessionTable.END_TIME + " INTEGER NOT NULL," +
                     SessionTable.SESSION_FOREGROUND_LENGTH + " INTEGER NOT NULL," +
                     SessionTable.ATTRIBUTES + " TEXT, " +
-                    SessionTable.CF_UUID + " TEXT," +
+                    SessionTable.STATUS + " TEXT," +
                     SessionTable.APP_INFO + " TEXT, " +
                     SessionTable.DEVICE_INFO + " TEXT" +
                     ");";

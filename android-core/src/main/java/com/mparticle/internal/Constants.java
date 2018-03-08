@@ -510,6 +510,16 @@ public class Constants {
         int UPLOADED = 3;
     }
 
+    /**
+     * SessionStatus is used to determine if we've "closed" a session by
+     * logging a session-end event. Sessions are kept in the database after
+     * this, due to requiring device and application information at the time
+     * of batch creation.
+     */
+    public interface SessionStatus {
+        String CLOSED = "1";
+    }
+
     public interface StateTransitionType {
         String STATE_TRANS_INIT = "app_init";
         String STATE_TRANS_EXIT = "app_exit";

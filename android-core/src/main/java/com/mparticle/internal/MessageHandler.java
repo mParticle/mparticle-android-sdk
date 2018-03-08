@@ -138,9 +138,10 @@ import java.util.UUID;
                 try {
                     String sessionId = (String) msg.obj;
                     String[] selectionArgs = new String[]{sessionId};
+                    Logger.verbose("Creating session end message for session ID: " + sessionId);
                     String[] sessionColumns = new String[]{SessionTable.START_TIME, SessionTable.END_TIME,
                             SessionTable.SESSION_FOREGROUND_LENGTH, SessionTable.ATTRIBUTES};
-                    Cursor selectCursor = db.query(SessionTable.TABLE_NAME, sessionColumns, SessionTable.SESSION_ID + "=?",
+                    Cursor selectCursor = db.query(SessionTable.TABLE_NAME, sessionColumns, SessionTable.SESSION_ID + "=? and " + SessionTable.STATUS + " IS NULL",
                             selectionArgs, null, null, null);
                     if (selectCursor.moveToFirst()) {
                         long start = selectCursor.getLong(0);
@@ -166,6 +167,7 @@ import java.util.UUID;
                         Logger.error("Error creating session end, no entry for sessionId in mParticle DB");
                     }
                     selectCursor.close();
+                    dbUpdateSessionStatus(sessionId, Constants.SessionStatus.CLOSED);
                     //1 means this came from ending the session
                     if (msg.arg1 == 1){
                         mMessageManagerCallbacks.endUploadLoop();
@@ -178,11 +180,12 @@ import java.util.UUID;
                 break;
             case END_ORPHAN_SESSIONS:
                 try {
+                    Logger.verbose("Ending orphaned sessions.");
                     // find left-over sessions that exist during startup and end them
                     String[] selectionArgs = new String[]{mMessageManagerCallbacks.getApiKey()};
-                    String[] sessionColumns = new String[]{SessionTable.SESSION_ID};
+                    String[] sessionColumns = new String[]{SessionTable.SESSION_ID, SessionTable.STATUS};
                     Cursor selectCursor = db.query(SessionTable.TABLE_NAME, sessionColumns,
-                            SessionTable.API_KEY + "=?",
+                            SessionTable.API_KEY + "=? and " + SessionTable.STATUS + " IS NULL",
                             selectionArgs, null, null, null);
                     // NOTE: there should be at most one orphan per api key - but
                     // process any that are found
@@ -589,6 +592,13 @@ import java.util.UUID;
         }
 
         db.insert(MessageTable.TABLE_NAME, null, contentValues);
+    }
+
+    private void dbUpdateSessionStatus(String sessionId, String status) {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(SessionTable.STATUS, status);
+        String[] whereArgs = {sessionId};
+        db.update(SessionTable.TABLE_NAME, contentValues, MessageTable.SESSION_ID + "=?", whereArgs);
     }
 
     private void dbUpdateMessageStatus(String sessionId, long status) {
