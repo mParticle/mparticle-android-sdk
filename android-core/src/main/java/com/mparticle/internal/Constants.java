@@ -497,6 +497,7 @@ public class Constants {
         String ETAG = "mp::etag";
         String IF_MODIFIED = "mp::ifmodified";
         String DISPLAY_PUSH_NOTIFICATIONS = "mp::displaypushnotifications";
+        String HAS_REBUILT_UPLOADS_TABLE = "mp::rebuilt:uploads";
     }
 
     public interface MiscStorageKeys {

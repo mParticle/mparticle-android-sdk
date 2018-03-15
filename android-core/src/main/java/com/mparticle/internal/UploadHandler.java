@@ -35,7 +35,7 @@ import javax.net.ssl.SSLHandshakeException;
 public class UploadHandler extends Handler implements BackgroundTaskHandler {
 
     private final Context mContext;
-    private final MParticleDatabase mDbHelper;
+    final MParticleDatabase mDbHelper;
     private final AppStateManager mAppStateManager;
     private final MessageManager mMessageManager;
     private ConfigManager mConfigManager;
@@ -183,7 +183,7 @@ public class UploadHandler extends Handler implements BackgroundTaskHandler {
      * - persist all of the resulting upload batch objects
      * - mark the messages as having been uploaded.
      */
-    private void prepareMessageUploads(boolean history) throws Exception {
+    protected void prepareMessageUploads(boolean history) throws Exception {
         Cursor readyMessagesCursor = null, reportingMessageCursor = null, sessionCursor = null;
         String currentSessionId = mAppStateManager.getSession().mSessionID;
         long remainingHeap = MPUtility.getRemainingHeapInBytes();
@@ -393,6 +393,9 @@ public class UploadHandler extends Handler implements BackgroundTaskHandler {
                     deleteUpload(id);
                 } else {
                     String message = readyUploadsCursor.getString(messageIndex);
+                    if (!mConfigManager.hasRebuiltUploadsTable()) {
+                        new JSONObject(message);
+                    }
                     if (!history) {
                         // if message is the MessageType.SESSION_END, then remember so the session history can be triggered
                         if (!processingSessionEnd && message.contains(containsClause)) {
@@ -407,6 +410,15 @@ public class UploadHandler extends Handler implements BackgroundTaskHandler {
             Logger.debug("SSL handshake failed while preparing uploads - possible MITM attack detected.");
         } catch (MParticleApiClientImpl.MPConfigException e) {
             Logger.error("Bad API request - is the correct API key and secret configured?");
+        } catch (JSONException ignore) {
+            //this means that the message cannot be converted into a JSONObject.
+            //All messages should be JSON, and this signifies that our uploads table may
+            //be corrupted, and should be rebuild and this request should be aborted
+            Logger.warning("Upload table corrupted, attempting to rebuild table. Upload will be retried");
+            if (readyUploadsCursor != null && !readyUploadsCursor.isClosed()){
+                readyUploadsCursor.close();
+            }
+            mDbHelper.rebuildUploadsTable();
         } catch (Exception e){
             Logger.error(e, "Error processing batch uploads in mParticle DB");
         } finally {
@@ -423,7 +435,7 @@ public class UploadHandler extends Handler implements BackgroundTaskHandler {
         boolean sampling = false;
         try {
             responseCode = mApiClient.sendMessageBatch(message);
-        } catch (MParticleApiClientImpl.MPRampException e) {
+        } catch (MParticleApiClientImpl.MPRampException ignore) {
             sampling = true;
             Logger.debug("This device is being sampled.");
         } catch (AssertionError e) {

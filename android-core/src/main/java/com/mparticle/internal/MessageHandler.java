@@ -562,7 +562,7 @@ import java.util.UUID;
         }
     }
 
-    private void dbInsertMessage(MPMessage message) throws JSONException {
+    protected void dbInsertMessage(MPMessage message) throws JSONException {
 
         ContentValues contentValues = new ContentValues();
         try {

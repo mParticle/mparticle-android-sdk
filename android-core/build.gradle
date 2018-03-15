@@ -45,6 +45,8 @@ android {
         buildConfigField "String", "MP_URL", url
         buildConfigField "String", "MP_CONFIG_URL", configurationUrl
         buildConfigField "Boolean", "MP_DEBUG", "false"
+
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
 
     buildTypes {
@@ -87,6 +89,11 @@ dependencies {
     testCompile "org.powermock:powermock-module-junit4:1.6.2"
     testCompile "org.powermock:powermock-api-mockito:1.6.2"
     testCompile "org.powermock:powermock-core:1.6.2"
+
+    androidTestCompile 'com.android.installreferrer:installreferrer:1.0'
+    androidTestCompile 'com.android.support:support-annotations:24.0.0'
+    androidTestCompile 'com.android.support.test:runner:1.0.1'
+    androidTestCompile 'com.android.support.test:rules:1.0.1'
 }
 
 configurations {

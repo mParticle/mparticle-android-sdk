@@ -392,4 +392,20 @@ import java.util.Iterator;
             sharedPreferences.edit().remove(Constants.PrefKeys.DEPRECATED_USER_ATTRS + MParticle.getInstance().getConfigManager().getApiKey()).apply();
         }
     }
+
+    void rebuildUploadsTable() {
+        if (MParticle.getInstance() != null && !MParticle.getInstance().getConfigManager().hasRebuiltUploadsTable()) {
+            MParticle.getInstance().getConfigManager().setRebuiltUploadTable(true);
+            SQLiteDatabase db = getWritableDatabase();
+            db.beginTransaction();
+            try {
+                db.execSQL("DROP TABLE IF EXISTS " + UploadTable.TABLE_NAME);
+                db.execSQL(CREATE_UPLOADS_DDL);
+                db.setTransactionSuccessful();
+            } catch (Exception ignore) {
+                // in case this crashes, don't do this again
+            }
+            db.endTransaction();
+        }
+    }
 }

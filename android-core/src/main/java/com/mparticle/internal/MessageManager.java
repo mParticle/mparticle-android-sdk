@@ -73,7 +73,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
     /**
      * These are the handlers which manage the queues and threads mentioned above.
      */
-    private MessageHandler mMessageHandler;
+    MessageHandler mMessageHandler;
     public UploadHandler mUploadHandler;
     /**
      * Ideally these threads would not be started in a static initializer
@@ -145,7 +145,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
         mConfigManager = configManager;
         mAppStateManager = appStateManager;
         mAppStateManager.setMessageManager(this);
-        MParticleDatabase database = new MParticleDatabase(appContext);
+        MParticleDatabase database = new MParticleDatabase(mContext);
         mMessageHandler = new MessageHandler(sMessageHandlerThread.getLooper(), this, database, appContext);
         mUploadHandler = new UploadHandler(appContext, sUploadHandlerThread.getLooper(), configManager, database, appStateManager, this);
         mPreferences = appContext.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);

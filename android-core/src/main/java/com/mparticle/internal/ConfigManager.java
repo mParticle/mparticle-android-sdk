@@ -5,7 +5,6 @@ import android.content.SharedPreferences;
 
 import com.mparticle.ExceptionHandler;
 import com.mparticle.MParticle;
-import com.mparticle.MParticle.LogLevel;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -63,7 +62,7 @@ public class ConfigManager {
 
     public ConfigManager(Context context, MParticle.Environment environment, String apiKey, String apiSecret) {
         mContext = context.getApplicationContext();
-        mPreferences = getSharedPreferences();
+        mPreferences = getPreferences(context);
         sLocalPrefs = new AppConfig(mContext, environment, mPreferences, apiKey, apiSecret);
         restoreOldConfig();
     }
@@ -387,10 +386,6 @@ public class ConfigManager {
         return getPreferences(context).getBoolean(Constants.PrefKeys.DISPLAY_PUSH_NOTIFICATIONS, false);
     }
 
-    private static SharedPreferences getPreferences(Context context){
-        return context.getSharedPreferences(PREFERENCES_FILE, Context.MODE_PRIVATE);
-    }
-
     public static JSONArray getPushKeys(Context context){
         if (sPushKeys == null){
             String arrayString = getPreferences(context).getString(KEY_PUSH_MESSAGES, null);
@@ -590,7 +585,18 @@ public class ConfigManager {
         return jsonAttributes;
     }
 
-    private SharedPreferences getSharedPreferences() {
-        return mContext.getSharedPreferences(PREFERENCES_FILE, Context.MODE_PRIVATE);
+    private static SharedPreferences getPreferences(Context context){
+        return context.getSharedPreferences(PREFERENCES_FILE, Context.MODE_PRIVATE);
     }
+
+    void setRebuiltUploadTable(boolean rebuilt) {
+        mPreferences.edit().putBoolean(Constants.PrefKeys.HAS_REBUILT_UPLOADS_TABLE, rebuilt).apply();
+    }
+
+    boolean hasRebuiltUploadsTable() {
+        return mPreferences.getBoolean(Constants.PrefKeys.HAS_REBUILT_UPLOADS_TABLE, false);
+    }
+
+
+
 }

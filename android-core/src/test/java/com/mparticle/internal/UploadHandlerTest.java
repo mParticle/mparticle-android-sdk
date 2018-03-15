@@ -195,7 +195,8 @@ public class UploadHandlerTest {
         Cursor mockCursor = Mockito.mock(Cursor.class);
         Mockito.when(mockCursor.moveToNext()).thenReturn(true, false);
         Mockito.when(mockCursor.getInt(Mockito.anyInt())).thenReturn(123);
-        Mockito.when(mockCursor.getString(Mockito.anyInt())).thenReturn("cool message batch!");
+        String message = new JSONObject("{message:cool message batch}").toString();
+        Mockito.when(mockCursor.getString(Mockito.anyInt())).thenReturn(message);
         Mockito.when(mockDatabase.query(MParticleDatabase.UploadTable.TABLE_NAME, handler.uploadColumns,
                 null, null, null, null, MParticleDatabase.UploadTable.CREATED_AT)).thenReturn(mockCursor);
         MParticleApiClient mockApiClient = Mockito.mock(MParticleApiClient.class);
@@ -203,6 +204,6 @@ public class UploadHandlerTest {
         Mockito.when(mConfigManager.getIncludeSessionHistory()).thenReturn(true);
         Mockito.when(mockCursor.moveToNext()).thenReturn(true, false);
         handler.upload(true);
-        Mockito.verify(mockApiClient).sendMessageBatch(Mockito.eq("cool message batch!"));
+        Mockito.verify(mockApiClient).sendMessageBatch(Mockito.eq(message));
     }
 }
