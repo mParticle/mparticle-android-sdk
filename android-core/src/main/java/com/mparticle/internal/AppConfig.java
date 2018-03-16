@@ -19,8 +19,6 @@ class AppConfig {
     private static final String PREFKEY_AUTOTRACKING = "mp_enableAutoTracking";
     private static final String PREFKEY_FORCE_ENVIRONMENT= "mp_environment";
 
-    public static final int DEFAULT_SESSION_TIMEOUT = 60;
-    public static final int DEFAULT_UPLOAD_INTERVAL = 600;
     public static final boolean DEFAULT_ENABLE_PUSH = false;
     public static final boolean DEFAULT_REPORT_UNCAUGHT_EXCEPTIONS = false;
     public static final boolean DEFAULT_ENABLE_LICENSING = false;
@@ -34,8 +32,8 @@ class AppConfig {
     public String mSecret = null;
 
     public boolean reportUncaughtExceptions;
-    public int sessionTimeout = DEFAULT_SESSION_TIMEOUT;
-    public int uploadInterval = DEFAULT_UPLOAD_INTERVAL;
+    public int sessionTimeout = ConfigManager.DEFAULT_SESSION_TIMEOUT_SECONDS;
+    public int uploadInterval = ConfigManager.DEFAULT_UPLOAD_INTERVAL;
     public boolean isPushEnabled = DEFAULT_ENABLE_PUSH;
     private String pushSenderId = null;
     public String licenseKey = null;
@@ -81,11 +79,11 @@ class AppConfig {
             }
         }
         autoTrackingEnabled = getBoolean(PREFKEY_AUTOTRACKING, DEFAULT_ENABLE_AUTO_TRACKING);
-        sessionTimeout = getInteger(PREFKEY_SESSION_TIMEOUT, DEFAULT_SESSION_TIMEOUT);
+        sessionTimeout = getInteger(PREFKEY_SESSION_TIMEOUT, ConfigManager.DEFAULT_SESSION_TIMEOUT_SECONDS);
     }
 
     public void delayedInit() {
-        uploadInterval = getInteger(PREFKEY_PROD_UPLOAD_INTERVAL, DEFAULT_UPLOAD_INTERVAL);
+        uploadInterval = getInteger(PREFKEY_PROD_UPLOAD_INTERVAL, ConfigManager.DEFAULT_UPLOAD_INTERVAL);
         isPushEnabled = getBoolean(PREFKEY_PUSH_ENABLED, DEFAULT_ENABLE_PUSH);
         if (isPushEnabled){
             pushSenderId = getString(PREFKEY_PUSH_SENDER_ID, null);

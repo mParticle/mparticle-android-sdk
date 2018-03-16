@@ -238,8 +238,8 @@ import java.util.UUID;
             url = getUrl(mpId, endpoint);
         }
         HttpURLConnection connection = (HttpURLConnection)url.openConnection();
-        connection.setConnectTimeout(2000);
-        connection.setReadTimeout(10000);
+        connection.setConnectTimeout(mConfigManager.getIdentityConnectionTimeout());
+        connection.setReadTimeout(mConfigManager.getIdentityConnectionTimeout());
         connection.setRequestMethod("POST");
         connection.setDoOutput(true);
         connection.setRequestProperty("Content-Encoding", "gzip");

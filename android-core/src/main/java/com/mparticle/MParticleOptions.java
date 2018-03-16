@@ -2,7 +2,6 @@ package com.mparticle;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
-import android.webkit.WebView;
 
 import com.mparticle.identity.BaseIdentityTask;
 import com.mparticle.identity.IdentityApiRequest;
@@ -11,9 +10,6 @@ import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.Logger;
 import com.mparticle.internal.MPUtility;
 import com.mparticle.internal.PushRegistrationHelper;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * class used for passing optional settings to the SDK when it is started
@@ -31,13 +27,14 @@ public class MParticleOptions {
     private IdentityApiRequest mIdentifyRequest;
     private Boolean mDevicePerformanceMetricsDisabled = false;
     private Boolean mAndroidIdDisabled = false;
-    private Integer mUploadInterval = 600;  //seconds
-    private Integer mSessionTimeout = 60; //seconds
+    private Integer mUploadInterval = ConfigManager.DEFAULT_UPLOAD_INTERVAL;  //seconds
+    private Integer mSessionTimeout = ConfigManager.DEFAULT_SESSION_TIMEOUT_SECONDS; //seconds
     private Boolean mUnCaughtExceptionLogging = false;
     private MParticle.LogLevel mLogLevel = MParticle.LogLevel.DEBUG;
     private AttributionListener mAttributionListener;
     private LocationTracking mLocationTracking;
     private PushRegistrationHelper.PushRegistration mPushRegistration;
+    private Integer mIdentityConnectionTimeout = ConfigManager.DEFAULT_CONNECTION_TIMEOUT_SECONDS;
 
     private MParticleOptions() {
     }
@@ -96,6 +93,11 @@ public class MParticleOptions {
         }
         if (builder.pushRegistration != null) {
             this.mPushRegistration = builder.pushRegistration;
+        }
+        if (builder.identityConnectionTimeout != null && builder.identityConnectionTimeout >= ConfigManager.MINIMUM_CONNECTION_TIMEOUT_SECONDS) {
+            this.mIdentityConnectionTimeout = builder.identityConnectionTimeout;
+        } else if (builder.identityConnectionTimeout != null) {
+            Logger.warning(String.format("Connection Timeout milliseconds must be a positive number, greater than %s second. Defaulting to %s seconds", String.valueOf(ConfigManager.MINIMUM_CONNECTION_TIMEOUT_SECONDS), String.valueOf(ConfigManager.DEFAULT_CONNECTION_TIMEOUT_SECONDS)));
         }
     }
 
@@ -211,6 +213,10 @@ public class MParticleOptions {
         return mPushRegistration;
     }
 
+    public int getConnectionTimeout() {
+        return mIdentityConnectionTimeout;
+    }
+
     public static class Builder {
         private Context context;
         private String apiKey;
@@ -229,6 +235,7 @@ public class MParticleOptions {
         private ConfigManager configManager;
         private LocationTracking locationTracking;
         private PushRegistrationHelper.PushRegistration pushRegistration;
+        private Integer identityConnectionTimeout = null;
 
         private Builder(Context context) {
             this.context = context;
@@ -434,6 +441,20 @@ public class MParticleOptions {
          */
         public Builder pushRegistration(String instanceId, String senderId) {
             this.pushRegistration = new PushRegistrationHelper.PushRegistration(instanceId, senderId);
+            return this;
+        }
+
+        /**
+         * Set the user connection timeout interval.
+         * <p></p>
+         * A connection to the server closes after this timeout expires, for each call
+         *
+         * @param  identityConnectionTimeout the connection timeout for Identity server calls, in seconds
+         *
+         * @return the instance of the builder, for chaining calls
+         */
+        public Builder identityConnectionTimeout(int identityConnectionTimeout) {
+            this.identityConnectionTimeout = identityConnectionTimeout;
             return this;
         }
 

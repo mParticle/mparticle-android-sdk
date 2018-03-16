@@ -148,8 +148,8 @@ public class MParticleApiClientImpl extends MParticleBaseClientImpl implements M
                 mConfigUrl = new URL(uri.toString());
             }
             HttpURLConnection connection = (HttpURLConnection) mConfigUrl.openConnection();
-            connection.setConnectTimeout(2000);
-            connection.setReadTimeout(10000);
+            connection.setConnectTimeout(mConfigManager.getConnectionTimeout());
+            connection.setReadTimeout(mConfigManager.getConnectionTimeout());
             connection.setRequestProperty(HEADER_ENVIRONMENT, Integer.toString(mConfigManager.getEnvironment().getValue()));
 
             String supportedKits = getSupportedKitString();
@@ -227,8 +227,8 @@ public class MParticleApiClientImpl extends MParticleBaseClientImpl implements M
         try {
             Logger.debug("Starting Segment Network request");
             HttpURLConnection connection = (HttpURLConnection) getAudienceUrl().openConnection();
-            connection.setConnectTimeout(2000);
-            connection.setReadTimeout(10000);
+            connection.setConnectTimeout(mConfigManager.getConnectionTimeout());
+            connection.setReadTimeout(mConfigManager.getConnectionTimeout());
             connection.setRequestProperty("User-Agent", mUserAgent);
 
             addMessageSignature(connection, null);
@@ -267,8 +267,8 @@ public class MParticleApiClientImpl extends MParticleBaseClientImpl implements M
             mEventUrl = new URL(uri.toString());
         }
         HttpURLConnection connection = (HttpURLConnection) mEventUrl.openConnection();
-        connection.setConnectTimeout(2000);
-        connection.setReadTimeout(10000);
+        connection.setConnectTimeout(mConfigManager.getConnectionTimeout());
+        connection.setReadTimeout(mConfigManager.getConnectionTimeout());
         connection.setDoOutput(true);
         connection.setRequestMethod("POST");
         connection.setRequestProperty("Content-Type", "application/json");

@@ -69,6 +69,10 @@ public class ConfigManager {
     private ExceptionHandler mExHandler;
     private boolean mIncludeSessionHistory = false;
     private JSONObject mCurrentCookies;
+    public static final int DEFAULT_CONNECTION_TIMEOUT_SECONDS = 30;
+    public static final int MINIMUM_CONNECTION_TIMEOUT_SECONDS = 1;
+    public static final int DEFAULT_SESSION_TIMEOUT_SECONDS = 60;
+    public static final int DEFAULT_UPLOAD_INTERVAL = 600;
 
     private ConfigManager() {
 
@@ -906,6 +910,20 @@ public class ConfigManager {
             currentAdId = adInfo.id;
         }
         sPreferences.edit().putString(Constants.PrefKeys.PREVIOUS_ANDROID_ID, currentAdId).apply();
+    }
+
+    public int getIdentityConnectionTimeout() {
+        return sPreferences.getInt(Constants.PrefKeys.IDENTITY_CONNECTION_TIMEOUT, DEFAULT_CONNECTION_TIMEOUT_SECONDS) * 1000;
+    }
+
+    public int getConnectionTimeout() {
+        return DEFAULT_CONNECTION_TIMEOUT_SECONDS * 1000;
+    }
+
+    public void setIdentityConnectionTimeout(int connectionTimeout) {
+        if (connectionTimeout >= MINIMUM_CONNECTION_TIMEOUT_SECONDS) {
+            sPreferences.edit().putInt(Constants.PrefKeys.IDENTITY_CONNECTION_TIMEOUT, connectionTimeout).apply();
+        }
     }
 
     private static Set<IdentityApi.MpIdChangeListener> mpIdChangeListeners = new HashSet<IdentityApi.MpIdChangeListener>();

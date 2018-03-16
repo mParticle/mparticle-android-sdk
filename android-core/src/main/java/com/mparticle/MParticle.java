@@ -94,6 +94,7 @@ public class MParticle {
         ConfigManager configManager = new ConfigManager(options.getContext(), options.getEnvironment(), options.getApiKey(), options.getApiSecret());
         configManager.setUploadInterval(options.getUploadInterval());
         configManager.setSessionTimeout(options.getSessionTimeout());
+        configManager.setIdentityConnectionTimeout(options.getConnectionTimeout());
         AppStateManager appStateManager = new AppStateManager(options.getContext());
         appStateManager.setConfigManager(configManager);
         
