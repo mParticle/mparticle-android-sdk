@@ -121,7 +121,7 @@ import java.util.Iterator;
                 ReportingTable._ID + " asc");
     }
 
-    private static final int DB_VERSION = 6;
+    static int DB_VERSION = 6;
     public static final String DB_NAME = "mparticle.db";
 
 
@@ -350,6 +350,17 @@ import java.util.Iterator;
             upgradeSessionTable(db);
             upgradeReportingTable(db);
         }
+    }
+
+    @Override
+    public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        if (MParticle.getInstance() != null) {
+            MParticle.getInstance().getConfigManager().deleteConfigManager();
+        }
+        for (String tableName: new String[]{BreadcrumbTable.TABLE_NAME, CommandTable.TABLE_NAME, GcmMessageTable.TABLE_NAME, MessageTable.TABLE_NAME, ReportingTable.TABLE_NAME, SessionTable.TABLE_NAME, UploadTable.TABLE_NAME, UserAttributesTable.TABLE_NAME}) {
+            db.execSQL(String.format("DROP TABLE IF EXISTS %s", tableName));
+        }
+        onCreate(db);
     }
 
     private void upgradeSessionTable(SQLiteDatabase db) {

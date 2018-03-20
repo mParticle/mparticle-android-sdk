@@ -2,6 +2,7 @@ package com.mparticle.internal;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.os.Build;
 
 import com.mparticle.ExceptionHandler;
 import com.mparticle.MParticle;
@@ -583,6 +584,18 @@ public class ConfigManager {
             }
         }
         return jsonAttributes;
+    }
+
+    void deleteConfigManager() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            mContext.deleteSharedPreferences(PREFERENCES_FILE);
+            mPreferences = mContext.getSharedPreferences(PREFERENCES_FILE, Context.MODE_PRIVATE);
+        } else {
+            if (mPreferences == null) {
+                mPreferences = mContext.getSharedPreferences(PREFERENCES_FILE, Context.MODE_PRIVATE);
+            }
+            mPreferences.edit().clear().commit();
+        }
     }
 
     private static SharedPreferences getPreferences(Context context){

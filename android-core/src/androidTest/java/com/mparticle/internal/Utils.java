@@ -1,6 +1,7 @@
 package com.mparticle.internal;
 
 import android.content.Context;
+import android.database.Cursor;
 import android.os.Handler;
 import android.support.test.InstrumentationRegistry;
 
@@ -8,9 +9,13 @@ import com.mparticle.AccessUtils;
 import com.mparticle.MPEvent;
 import com.mparticle.MParticle;
 
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.junit.Test;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
@@ -169,6 +174,29 @@ public class Utils {
         context.deleteDatabase(MParticleDatabase.DB_NAME);
         com.mparticle.internal.AccessUtils.deleteConfigManager(context);
         context.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE).edit().clear().commit();
+    }
+
+    static List<JSONObject> getTableEntries(String tableName) throws JSONException {
+        List<JSONObject> entries = new ArrayList<JSONObject>();
+        Cursor cursor = null;
+        try {
+            cursor = AccessUtils.getMessageManager().mUploadHandler.mDbHelper.getReadableDatabase()
+                    .query(tableName, null, null, null, null, null, null);
+            cursor.moveToFirst();
+            while(!cursor.isAfterLast()) {
+                JSONObject jsonObject = new JSONObject();
+                for (int i = 0; i < cursor.getColumnCount(); i++) {
+                    jsonObject.put(cursor.getColumnName(i), cursor.getString(i));
+                }
+                entries.add(jsonObject);
+                cursor.moveToNext();
+            }
+        }
+        finally {
+            if (cursor != null && !cursor.isClosed())
+                cursor.close();
+        }
+        return entries;
     }
 
     public static void checkAllBool(boolean[] array, int everyNDeciseconds, int forDeciseconds) {

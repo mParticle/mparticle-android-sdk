@@ -64,7 +64,7 @@ public class MParticleDatabaseTest extends BaseCleanInstallEachTest {
                 return 429;
             }
         });
-        assertEquals(getTableEntries(MParticleDatabase.UploadTable.TABLE_NAME).size(), 0);
+        assertEquals(Utils.getTableEntries(MParticleDatabase.UploadTable.TABLE_NAME).size(), 0);
         assertFalse(MParticle.getInstance().getConfigManager().hasRebuiltUploadsTable());
 
         //load test data into the database, wait for it all to go through the MessageHandler (and into the "messages" database),
@@ -85,11 +85,11 @@ public class MParticleDatabaseTest extends BaseCleanInstallEachTest {
         mMessageManager.mUploadHandler.upload(false);
 
         //this copy of the uploads table should basically include no
-        List<JSONObject> uploadsTableEntries = getTableEntries(MParticleDatabase.UploadTable.TABLE_NAME);
+        List<JSONObject> uploadsTableEntries = Utils.getTableEntries(MParticleDatabase.UploadTable.TABLE_NAME);
 
         assertTrue(MParticle.getInstance().getConfigManager().hasRebuiltUploadsTable());
 
-        assertEquals(getTableEntries(MParticleDatabase.UploadTable.TABLE_NAME).size(), 0);
+        assertEquals(Utils.getTableEntries(MParticleDatabase.UploadTable.TABLE_NAME).size(), 0);
 
         //load more data, just make sure the database is writeable
         for (int i = 0; i < 10; i++) {
@@ -102,31 +102,8 @@ public class MParticleDatabaseTest extends BaseCleanInstallEachTest {
             mMessageManager.mUploadHandler.prepareMessageUploads(false);
         }
 
-        assertEquals(getTableEntries(MParticleDatabase.UploadTable.TABLE_NAME).size(), 10);
+        assertEquals(Utils.getTableEntries(MParticleDatabase.UploadTable.TABLE_NAME).size(), 10);
         assertTrue(MParticle.getInstance().getConfigManager().hasRebuiltUploadsTable());
-    }
-
-    private List<JSONObject> getTableEntries(String tableName) throws JSONException {
-        List<JSONObject> entries = new ArrayList<JSONObject>();
-        Cursor cursor = null;
-        try {
-            cursor = mMessageManager.mUploadHandler.mDbHelper.getReadableDatabase()
-                    .query(tableName, null, null, null, null, null, null);
-            cursor.moveToFirst();
-            while(!cursor.isAfterLast()) {
-                JSONObject jsonObject = new JSONObject();
-                for (int i = 0; i < cursor.getColumnCount(); i++) {
-                    jsonObject.put(cursor.getColumnName(i), cursor.getString(i));
-                }
-                entries.add(jsonObject);
-                cursor.moveToNext();
-            }
-        }
-        finally {
-            if (cursor != null && !cursor.isClosed())
-            cursor.close();
-        }
-        return entries;
     }
 
     class NaughtyUploadHandler extends UploadHandler {
