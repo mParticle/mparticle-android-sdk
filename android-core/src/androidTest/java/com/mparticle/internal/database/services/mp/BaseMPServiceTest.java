@@ -11,6 +11,7 @@ import com.mparticle.internal.networking.BaseMPMessage;
 import com.mparticle.internal.Session;
 import com.mparticle.internal.database.BaseDatabase;
 import com.mparticle.internal.database.tables.mp.MParticleDatabaseHelper;
+import com.mparticle.mock.utils.RandomUtils;
 
 import org.json.JSONException;
 
@@ -36,8 +37,13 @@ abstract public class BaseMPServiceTest extends BaseCleanInstallEachTest {
     }
 
     BaseMPMessage getMpMessage(String sessionId) throws JSONException {
+        return getMpMessage(sessionId, RandomUtils.getInstance().randomLong(Long.MIN_VALUE, Long.MAX_VALUE));
+    }
+
+    BaseMPMessage getMpMessage(String sessionId, long mpid) throws JSONException {
+        RandomUtils random = RandomUtils.getInstance();
         Session session = new Session();
         session.mSessionID = sessionId;
-        return new BaseMPMessage.Builder("test", session, new Location("New York City"), 1).build();
+        return new BaseMPMessage.Builder(random.getAlphaNumericString(random.randomInt(1, 24)), session, new Location(random.getAlphaNumericString(random.randomInt(1, 55))), mpid).build();
     }
 }
