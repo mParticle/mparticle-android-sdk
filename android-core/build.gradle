@@ -6,8 +6,8 @@ apply plugin: 'com.android.library'
 apply from: '../scripts/maven.gradle'
 
 android {
-    compileSdkVersion 26
-    buildToolsVersion "26.0.2"
+    compileSdkVersion 27
+    buildToolsVersion "27.0.3"
     packagingOptions {
         exclude 'META-INF/LICENSE'
     }
@@ -56,7 +56,7 @@ android {
 
     defaultConfig {
         minSdkVersion 9
-        targetSdkVersion 26
+        targetSdkVersion 27
         versionName project.version.toString().replace("-SNAPSHOT", "")
         versionCode Integer.parseInt(new Date().format('yyyyMMdd'))
 
@@ -112,10 +112,10 @@ task coreSdkJavadocs(type: Javadoc) {
 }
 
 dependencies {
-    compileOnly 'com.google.android.gms:play-services-gcm:[7.0,)'
-    compileOnly 'com.google.android.gms:play-services-ads:[7.0,)'
-    compileOnly 'com.google.firebase:firebase-messaging:[7.0,)'
-    compileOnly 'com.android.support:support-v4:[26.0, )'
+    compileOnly 'com.google.android.gms:play-services-gcm:10.2.1'
+    compileOnly 'com.google.android.gms:play-services-ads:10.2.1'
+    compileOnly 'com.google.firebase:firebase-messaging:10.2.1'
+    compileOnly 'com.android.support:support-v4:27.1.0'
     compileOnly 'com.android.installreferrer:installreferrer:[1.0, )'
     compileOnly 'com.google.android.instantapps:instantapps:[1.0, )'
 
@@ -124,9 +124,9 @@ dependencies {
     testImplementation 'org.powermock:powermock-module-junit4:1.6.2'
     testImplementation 'org.powermock:powermock-api-mockito:1.6.2'
     testImplementation 'org.powermock:powermock-core:1.6.2'
-    testImplementation 'com.android.support:support-v4:26.0+'
+    testImplementation 'com.android.support:support-v4:27.1.0'
     androidTestImplementation 'com.android.installreferrer:installreferrer:1.0'
-    androidTestImplementation 'com.android.support:support-annotations:24.0.0'
+    androidTestImplementation 'com.android.support:support-annotations:27.1.0'
     androidTestImplementation 'com.android.support.test:runner:1.0.1'
     androidTestImplementation 'com.android.support.test:rules:1.0.1'
     androidTestImplementation 'org.apache.httpcomponents:httpclient-android:4.3.5.1'

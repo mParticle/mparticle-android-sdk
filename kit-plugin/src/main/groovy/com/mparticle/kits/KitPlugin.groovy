@@ -14,21 +14,23 @@ class KitPlugin implements Plugin<Project> {
         target.apply(plugin: 'com.android.library')
         target.group = 'com.mparticle'
         target.buildscript.repositories.add(target.repositories.mavenLocal())
-        target.repositories.add(target.repositories.mavenLocal())
-        target.configurations.create('deployerJars')
         target.buildscript.repositories.add(target.repositories.jcenter())
+        target.buildscript.repositories.add(target.repositories.google())
+        target.repositories.add(target.repositories.mavenLocal())
         target.repositories.add(target.repositories.jcenter())
+        target.repositories.add(target.repositories.google())
+        target.configurations.create('deployerJars')
         target.dependencies.add('compile', 'com.mparticle:android-kit-base:'+target.version)
         target.dependencies.add('testCompile', 'junit:junit:4.12')
         target.dependencies.add('testCompile', 'org.mockito:mockito-core:1.10.19')
         target.dependencies.add('deployerJars', 'org.kuali.maven.wagons:maven-s3-wagon:1.2.1')
         target.extensions.create("mparticle", MParticlePluginExtension)
         LibraryExtension androidLib = target.android
-        androidLib.compileSdkVersion(26)
-        androidLib.buildToolsVersion('26.0.2')
+        androidLib.compileSdkVersion(27)
+        androidLib.buildToolsVersion('27.0.3')
         androidLib.defaultConfig.versionCode = Integer.parseInt(new Date().format('yyyyMMdd'))
         androidLib.defaultConfig.minSdkVersion 9
-        androidLib.defaultConfig.targetSdkVersion 25
+        androidLib.defaultConfig.targetSdkVersion 27
         androidLib.buildTypes.release.minifyEnabled false
         androidLib.buildTypes.release.consumerProguardFiles 'consumer-proguard.pro'
 

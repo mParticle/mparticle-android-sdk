@@ -6,14 +6,14 @@ apply plugin: 'com.android.library'
 apply from: '../scripts/maven.gradle'
 
 android {
-    compileSdkVersion 26
-    buildToolsVersion "26.0.2"
+    compileSdkVersion 27
+    buildToolsVersion "27.0.3"
 
     testBuildType "instrumented"
 
     defaultConfig {
         minSdkVersion 9
-        targetSdkVersion 26
+        targetSdkVersion 27
     }
     buildTypes {
         release {
