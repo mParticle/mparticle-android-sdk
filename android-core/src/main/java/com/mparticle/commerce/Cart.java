@@ -17,24 +17,19 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
- * The Cart is a utility singleton that abstracts the creation of {@link com.mparticle.commerce.CommerceEvent} objects and maintains
- * a state, containing a list of {@link com.mparticle.commerce.Product} objects.
+ * The Cart has a one-to-one relationship with MParticleUsers.
  * <p></p>
  * The Cart will persist state across app-restarts.
  * <p></p>
- * You may access the cart via the {@link MParticle#Commerce()} object:
+ * You may access the cart via the {@link MParticleUser} object:
  * <p></p>
  * <pre>
  * {@code
- * MParticle.getInstance().Commerce().cart()}
+ * MParticle.getInstance().Identity().getCurrentUser().cart()}
  * </pre>
  * <p></p>
- * You can also access the Cart directly:
+ * You should not instantiate this class directly
  * <p></p>
- * <pre>
- * {@code
- * Cart.getInstance(context)}
- * </pre>
  */
 public final class Cart {
 
@@ -63,7 +58,7 @@ public final class Cart {
 
     /**
      * Reset the cart and re-populate it from a String representation. This method allows you to support
-     * logout/multiple-user or other multiple-cart use-cases.
+     * multiple carts per user.
      *
      * @param cartJson a JSON-encoded string acquired from {@link #toString()}
      */
