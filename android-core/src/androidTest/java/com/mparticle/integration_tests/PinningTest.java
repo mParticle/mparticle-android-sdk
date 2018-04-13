@@ -114,7 +114,7 @@ public class PinningTest extends BaseCleanStartedEachTest {
 
     private void prepareIdentityApiClient(String path, final boolean shouldPin) {
         MParticleUtils.getInstance().setDefaultIdentityClient(mContext);
-        com.mparticle.identity.AccessUtils.setIdentityApiClientProtocol("https");
+        com.mparticle.identity.AccessUtils.setIdentityApiClientScheme("https");
         MParticleIdentityClient apiClient = com.mparticle.identity.AccessUtils.getIdentityApiClient();
         setRequestClient(apiClient, path, shouldPin);
     }

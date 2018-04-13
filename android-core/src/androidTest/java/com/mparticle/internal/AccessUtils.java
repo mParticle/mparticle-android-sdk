@@ -7,6 +7,7 @@ import android.support.test.InstrumentationRegistry;
 import com.mparticle.MParticle;
 import com.mparticle.internal.database.tables.mp.MParticleDatabaseHelper;
 import com.mparticle.internal.networking.BaseNetworkConnection;
+import com.mparticle.internal.networking.MParticleBaseClientImpl;
 
 import org.json.JSONObject;
 
@@ -56,7 +57,7 @@ public class AccessUtils {
     }
 
     public static void setMParticleApiClientProtocol(String protocol) {
-        ((MParticleApiClientImpl)getApiClient()).overrideProtocol(protocol);
+        ((MParticleBaseClientImpl)getApiClient()).setScheme(protocol);
     }
 
     public static void setAppStateManagerHandler(Handler handler) {

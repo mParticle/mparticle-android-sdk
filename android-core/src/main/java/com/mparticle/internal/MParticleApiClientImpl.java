@@ -14,7 +14,6 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
@@ -30,8 +29,7 @@ import java.util.Iterator;
 import java.util.Set;
 
 /**
- * Class responsible for all network communication to the mParticle SDK server.
- *
+ * Class responsible for all network communication to the mParticle Events and Configuration APIs.
  */
 public class MParticleApiClientImpl extends MParticleBaseClientImpl implements MParticleApiClient {
 
@@ -51,20 +49,13 @@ public class MParticleApiClientImpl extends MParticleBaseClientImpl implements M
 
     private static final String API_HOST = MPUtility.isEmpty(BuildConfig.MP_URL) ? "nativesdks.mparticle.com" : BuildConfig.MP_URL;
     private static final String CONFIG_HOST = MPUtility.isEmpty(BuildConfig.MP_CONFIG_URL) ? "config2.mparticle.com" : BuildConfig.MP_CONFIG_URL;
-
     private static final String SERVICE_VERSION_1 = "/v2";
     private static final String SERVICE_VERSION_4 = "/v4";
 
     /**
-     * Crucial LTV value key used to sync LTV between the SDK and the SDK server whenever LTV has changed.
-     */
-    private static final String LTV = "iltv";
-    /**
      * Wrapper around cookies, MPID, and other server-response info that requires parsing.
      */
     private static final String CONSUMER_INFO = "ci";
-
-
 
     private final ConfigManager mConfigManager;
     private final String mApiSecret;
@@ -139,7 +130,7 @@ public class MParticleApiClientImpl extends MParticleBaseClientImpl implements M
         try {
             if (mConfigUrl == null){
                 Uri uri = new Uri.Builder()
-                        .scheme(getProtocol())
+                        .scheme(getScheme())
                         .encodedAuthority(CONFIG_HOST)
                         .path(SERVICE_VERSION_4 + "/" + mApiKey + "/config")
                         .appendQueryParameter("av", MPUtility.getAppVersionName(mContext))
@@ -214,7 +205,7 @@ public class MParticleApiClientImpl extends MParticleBaseClientImpl implements M
 
     private URL getAudienceUrl() throws MalformedURLException {
         Uri uri = new Uri.Builder()
-                .scheme(getProtocol())
+                .scheme(getScheme())
                 .encodedAuthority(API_HOST)
                 .path(SERVICE_VERSION_1 + "/" + mApiKey + "/audience?mpID=" + mConfigManager.getMpid())
                 .build();
@@ -260,7 +251,7 @@ public class MParticleApiClientImpl extends MParticleBaseClientImpl implements M
         checkRampValue();
         if (mEventUrl == null){
             Uri uri = new Uri.Builder()
-                    .scheme(getProtocol())
+                    .scheme(getScheme())
                     .encodedAuthority(API_HOST)
                     .path(SERVICE_VERSION_1 + "/" + mApiKey + "/events")
                     .build();
@@ -359,25 +350,25 @@ public class MParticleApiClientImpl extends MParticleBaseClientImpl implements M
     }
 
     public final class MPThrottleException extends Exception {
-        public MPThrottleException() {
-            super("mP servers are busy, API connections have been throttled.");
+        MPThrottleException() {
+            super("mParticle servers are busy, API connections have been throttled.");
         }
     }
 
     public final class MPConfigException extends Exception {
-        public MPConfigException() {
-            super("mP configuration request failed, deferring next batch.");
+        MPConfigException() {
+            super("mParticle configuration request failed.");
         }
     }
 
     public static final class MPRampException extends Exception {
-        public MPRampException() {
+        MPRampException() {
             super("This device is being sampled.");
         }
     }
 
     public static final class MPNoConfigException extends Exception {
-        public MPNoConfigException() {super("No API key and/or API secret"); }
+        MPNoConfigException() {super("No API key and/or API secret"); }
     }
 
     void checkThrottleTime() throws MPThrottleException {
@@ -486,10 +477,5 @@ public class MParticleApiClientImpl extends MParticleBaseClientImpl implements M
         }else{
             return mCurrentCookies;
         }
-    }
-
-    @Override
-    protected void overrideProtocol(String value) {
-        super.overrideProtocol(value);
     }
 }

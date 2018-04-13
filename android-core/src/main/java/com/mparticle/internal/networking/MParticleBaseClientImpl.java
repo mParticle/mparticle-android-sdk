@@ -21,6 +21,7 @@ import javax.net.ssl.HttpsURLConnection;
 public class MParticleBaseClientImpl implements MParticleBaseClient {
     private BaseNetworkConnection mRequestHandler;
     private SharedPreferences mPreferences;
+    private String customScheme = null;
 
     public MParticleBaseClientImpl(SharedPreferences sharedPreferences) {
         mPreferences = sharedPreferences;
@@ -75,19 +76,14 @@ public class MParticleBaseClientImpl implements MParticleBaseClient {
         return mPreferences.getLong(Constants.PrefKeys.NEXT_REQUEST_TIME, 0);
     }
 
-    //This method should be used only for testing
-    private String overrideProtocol = null;
-    protected void overrideProtocol(String value) {
-        overrideProtocol = value;
+    public void setScheme(String customScheme) {
+        this.customScheme = customScheme;
     }
 
-    //We should be using https for the development sever, but, not when we are using a local mock server
-    protected String getProtocol() {
-        if (!MPUtility.isEmpty(overrideProtocol)) {
-            String protocol = overrideProtocol;
-            overrideProtocol = null;
-            return protocol;
+    protected String getScheme() {
+        if (!MPUtility.isEmpty(customScheme)) {
+            return customScheme;
         }
-        return BuildConfig.SCHEMA;
+        return BuildConfig.SCHEME;
     }
 }

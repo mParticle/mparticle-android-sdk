@@ -281,7 +281,7 @@ import java.util.UUID;
         }
         stringBuilder.append(endpoint);
         Uri uri = new Uri.Builder()
-                .scheme(getProtocol())
+                .scheme(getScheme())
                 .encodedAuthority(API_HOST)
                 .path(stringBuilder.toString())
                 .build();
@@ -370,10 +370,5 @@ import java.util.UUID;
             default:
                 return "";
         }
-    }
-
-    @Override
-    protected void overrideProtocol(String value) {
-        super.overrideProtocol(value);
     }
 }

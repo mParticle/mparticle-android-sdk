@@ -4,10 +4,10 @@ import android.content.Context;
 
 import com.mparticle.MParticle;
 import com.mparticle.internal.networking.BaseNetworkConnection;
+import com.mparticle.internal.networking.MParticleBaseClientImpl;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.CountDownLatch;
 
 public class AccessUtils {
 
@@ -15,8 +15,8 @@ public class AccessUtils {
         return MParticle.getInstance().Identity().getApiClient();
     }
 
-    public static void setIdentityApiClientProtocol(String https) {
-        ((MParticleIdentityClientImpl)MParticle.getInstance().Identity().getApiClient()).overrideProtocol(https);
+    public static void setIdentityApiClientScheme(String scheme) {
+        ((MParticleBaseClientImpl)MParticle.getInstance().Identity().getApiClient()).setScheme(scheme);
     }
 
     public static void setIdentityApiClient(MParticleIdentityClient identityClient) {
