@@ -11,6 +11,8 @@ import com.mparticle.AttributionResult;
 import com.mparticle.MPEvent;
 import com.mparticle.MParticle;
 import com.mparticle.commerce.CommerceEvent;
+import com.mparticle.identity.IdentityApiRequest;
+import com.mparticle.identity.MParticleUser;
 
 import org.json.JSONArray;
 
@@ -41,11 +43,15 @@ public interface KitManager {
 
     void logout();
 
-    void setUserAttribute(String key, String value);
+    void setUserAttribute(String key, String value, long mpid);
 
-    void setUserAttributeList(String key, List<String> value);
+    void setUserAttributeList(String key, List<String> value, long mpid);
 
-    void removeUserAttribute(String key);
+    void removeUserAttribute(String key, long mpid);
+
+    void setUserTag(String tag, long mpid);
+
+    void incrementUserAttribute(String key, String value, long mpid);
 
     void setUserIdentity(String id, MParticle.IdentityType identityType);
 
@@ -94,4 +100,12 @@ public interface KitManager {
     void onApplicationBackground();
 
     Map<Integer, AttributionResult> getAttributionResults();
+
+    void onIdentifyCompleted(MParticleUser user, IdentityApiRequest request);
+
+    void onLoginCompleted(MParticleUser user, IdentityApiRequest request);
+
+    void onLogoutCompleted(MParticleUser user, IdentityApiRequest request);
+
+    void onModifyCompleted(MParticleUser user, IdentityApiRequest request);
 }

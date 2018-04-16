@@ -396,7 +396,7 @@ public class KitConfiguration {
                 && attributes.size() > 0) {
             Map newAttributes = new HashMap(attributes.size());
             for (Map.Entry<String, ?> attribute : attributes.entrySet()) {
-                if (shouldForwardAttribute(attributeFilters, attribute.getKey())) {
+                if ( shouldForwardAttribute(attributeFilters, attribute.getKey())) {
                     newAttributes.put(attribute.getKey(), attribute.getValue());
                 }
             }

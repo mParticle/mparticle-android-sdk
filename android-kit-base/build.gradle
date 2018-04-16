@@ -14,13 +14,20 @@ android {
     defaultConfig {
         minSdkVersion 9
         targetSdkVersion 27
+
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
-        instrumented{}
+        instrumented {
+            minifyEnabled false
+            debuggable true
+            signingConfig signingConfigs.debug
+            multiDexEnabled true
+        }
     }
 }
 
@@ -40,9 +47,27 @@ task kitSdkJavadocs(type: Javadoc) {
 
 dependencies {
     implementation project(':android-core')
+
     testImplementation 'junit:junit:4.12'
     testImplementation  files('libs/java-json.jar')
     testImplementation "org.powermock:powermock-module-junit4:1.6.2"
     testImplementation "org.powermock:powermock-api-mockito:1.6.2"
     testImplementation "org.powermock:powermock-core:1.6.2"
+
+    androidTestImplementation project (':android-core')
+    androidTestImplementation project (path: ':android-core', configuration: 'testArtifacts')
+    androidTestImplementation 'com.android.support.test:runner:1.0.1'
+    androidTestImplementation 'org.apache.httpcomponents:httpclient-android:4.3.5.1'
+    androidTestImplementation 'org.slf4j:slf4j-api:1.7.12'
+    androidTestImplementation('org.mockito:mockito-core:1+'){
+        exclude group: 'junit' exclude group: 'org.hamcrest', module: 'hamcrest-core'
+    }
+    androidTestImplementation("com.github.tomakehurst:wiremock:2.8.0") {
+
+        exclude group: 'org.apache.httpcomponents', module: 'httpclient'
+        exclude group: 'org.slf4j', module: 'slf4j-api'
+        exclude group: 'org.ow2.asm', module: 'asm'
+        exclude group: 'org.json', module: 'json'
+    }
+    androidTestImplementation 'org.hamcrest:hamcrest-library:1.3'
 }

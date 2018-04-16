@@ -50,7 +50,7 @@ public class MParticleUserTest {
         Mockito.when(id.mMessageManager.logUserIdentityChangeMessage(Mockito.any(JSONObject.class), Mockito.any(JSONObject.class), Mockito.any(JSONArray.class), eq(defaultMpId))).thenThrow(new AssertionError("Should not log redundent User Identity"));
         Map<MParticle.IdentityType, String> ids = new HashMap<MParticle.IdentityType, String >();
         ids.put(MParticle.IdentityType.Alias, "alias test");
-        id.getCurrentUser().setUserIdentities(ids);
+        ((MParticleUserImpl)id.getCurrentUser()).setUserIdentities(ids);
     }
 
     @Test
@@ -58,7 +58,7 @@ public class MParticleUserTest {
         JSONArray identities = new JSONArray();
         identities.put(new JSONObject("{ \"n\": 7, \"i\": \"email value 1\", \"dfs\": 1473869816521, \"f\": true }"));
         Mockito.when(id.mMessageManager.getUserIdentityJson(1)).thenReturn(identities);
-        id.getCurrentUser().setUserIdentity(MParticle.IdentityType.Email, "email value 2");
+        ((MParticleUserImpl)id.getCurrentUser()).setUserIdentity(MParticle.IdentityType.Email, "email value 2");
         ArgumentCaptor<JSONObject> argument1 = ArgumentCaptor.forClass(JSONObject.class);
         ArgumentCaptor<JSONObject> argument2 = ArgumentCaptor.forClass(JSONObject.class);
         ArgumentCaptor<JSONArray> argument3 = ArgumentCaptor.forClass(JSONArray.class);
@@ -93,7 +93,7 @@ public class MParticleUserTest {
         assertFalse(mp.getCurrentUser().removeUserAttribute(""));
         assertTrue(mp.getCurrentUser().removeUserAttribute("test"));
         Mockito.verify(mp.mMessageManager, Mockito.times(1)).removeUserAttribute("test", 1);
-        Mockito.verify(MParticle.getInstance().getKitManager(), Mockito.times(1)).removeUserAttribute("test");
+        Mockito.verify(MParticle.getInstance().getKitManager(), Mockito.times(1)).removeUserAttribute("test", 1);
     }
 
     @Test
@@ -102,7 +102,7 @@ public class MParticleUserTest {
         assertFalse(id.getCurrentUser().removeUserAttribute(""));
         assertTrue(id.getCurrentUser().removeUserAttribute("test"));
         Mockito.verify(id.mMessageManager, Mockito.times(1)).removeUserAttribute("test", 1);
-        Mockito.verify(mp.getKitManager(), Mockito.times(1)).removeUserAttribute("test");
+        Mockito.verify(mp.getKitManager(), Mockito.times(1)).removeUserAttribute("test", 1);
     }
 
 
@@ -118,7 +118,7 @@ public class MParticleUserTest {
     public void testRemoveUserIdentityWhenNoneExist() throws Exception {
         JSONArray identities = new JSONArray();
         Mockito.when(mp.Identity().mMessageManager.getUserIdentityJson(defaultMpId)).thenReturn(identities);
-        mp.Identity().getCurrentUser().setUserIdentity(MParticle.IdentityType.Alias, null);
+        ((MParticleUserImpl)id.getCurrentUser()).setUserIdentity(MParticle.IdentityType.Alias, null);
         Mockito.verify(mp.Identity().mMessageManager,
                 Mockito.times(0)).
                 logUserIdentityChangeMessage(
@@ -135,7 +135,7 @@ public class MParticleUserTest {
         JSONArray identities = new JSONArray();
         identities.put(new JSONObject("{ \"n\": 7, \"i\": \"email value 1\", \"dfs\": 1473869816521, \"f\": true }"));
         Mockito.when(mp.Identity().mMessageManager.getUserIdentityJson(defaultMpId)).thenReturn(identities);
-        mp.Identity().getCurrentUser().setUserIdentity(MParticle.IdentityType.Email, null);
+        ((MParticleUserImpl)id.getCurrentUser()).setUserIdentity(MParticle.IdentityType.Email, null);
         ArgumentCaptor<JSONObject> argument2 = ArgumentCaptor.forClass(JSONObject.class);
         ArgumentCaptor<JSONArray> argument3 = ArgumentCaptor.forClass(JSONArray.class);
         ArgumentCaptor<Long> argument4 = ArgumentCaptor.forClass(Long.class);
@@ -163,7 +163,7 @@ public class MParticleUserTest {
         JSONArray identities = new JSONArray();
         identities.put(new JSONObject("{ \"n\": 7, \"i\": \"email value 1\", \"dfs\": 1473869816521, \"f\": true }"));
         Mockito.when(mp.Identity().mMessageManager.getUserIdentityJson(Mockito.anyInt())).thenReturn(identities);
-        mp.Identity().getCurrentUser().setUserIdentity(MParticle.IdentityType.Alias, "alias test");
+        ((MParticleUserImpl)id.getCurrentUser()).setUserIdentity(MParticle.IdentityType.Alias, "alias test");
         ArgumentCaptor<JSONObject> argument2 = ArgumentCaptor.forClass(JSONObject.class);
         ArgumentCaptor<JSONArray> argument3 = ArgumentCaptor.forClass(JSONArray.class);
         ArgumentCaptor<Long> argument4 = ArgumentCaptor.forClass(Long.class);

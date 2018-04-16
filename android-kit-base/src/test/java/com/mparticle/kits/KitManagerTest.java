@@ -101,15 +101,15 @@ public class KitManagerTest  {
 
     @Test
     public void testSetUserAttribute() throws Exception {
-        manager.setUserAttribute("key", "value");
-        manager.setUserAttribute("key", null);
-        manager.setUserAttribute(null, null);
+        manager.setUserAttribute("key", "value", 1);
+        manager.setUserAttribute("key", null, 1);
+        manager.setUserAttribute(null, null, 1);
     }
 
     @Test
     public void testRemoveUserAttribute() throws Exception {
-        manager.removeUserAttribute(null);
-        manager.removeUserAttribute("");
+        manager.removeUserAttribute(null, 1);
+        manager.removeUserAttribute("", 1);
     }
 
     @Test

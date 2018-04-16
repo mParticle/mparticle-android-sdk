@@ -49,10 +49,10 @@ public class MParticleUtils {
 
     public static void awaitRemoveUserAttribute() throws InterruptedException {
         Handler messageHandler = AccessUtils.getMessageHandler();
-        while (messageHandler.hasMessages(AccessUtils.REMOVE_USER_ATTRIBUTE)) {
+        do {
             Thread.sleep(500);
-            //do nothing, just block
         }
+        while (messageHandler.hasMessages(AccessUtils.REMOVE_USER_ATTRIBUTE));
         return;
     }
 

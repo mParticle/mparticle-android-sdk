@@ -60,7 +60,7 @@ public class KitFrameworkWrapperTest {
         MPEvent event = new MPEvent.Builder("example").build();
 
         wrapper.logEvent(event);
-        wrapper.setUserAttribute("a key", "a value");
+        wrapper.setUserAttribute("a key", "a value", 1);
         assertEquals(event, wrapper.getEventQueue().peek());
         assertEquals("a key", wrapper.getAttributeQueue().peek().key);
         assertEquals("a value", wrapper.getAttributeQueue().peek().value);
@@ -109,7 +109,7 @@ public class KitFrameworkWrapperTest {
         Mockito.when(screenEvent.isScreenEvent()).thenReturn(true);
         wrapper.logEvent(event);
         wrapper.logEvent(screenEvent);
-        wrapper.setUserAttribute("a key", "a value");
+        wrapper.setUserAttribute("a key", "a value", 1);
         wrapper.logCommerceEvent(commerceEvent);
         Mockito.verify(
                 mockKitManager, Mockito.times(0)
@@ -122,7 +122,7 @@ public class KitFrameworkWrapperTest {
         ).logCommerceEvent(Mockito.any(CommerceEvent.class));
         Mockito.verify(
                 mockKitManager, Mockito.times(0)
-        ).setUserAttribute(Mockito.anyString(), Mockito.anyString());
+        ).setUserAttribute(Mockito.anyString(), Mockito.anyString(), Mockito.anyLong());
 
         wrapper.replayEvents();
 
@@ -137,7 +137,7 @@ public class KitFrameworkWrapperTest {
         ).logCommerceEvent(Mockito.any(CommerceEvent.class));
         Mockito.verify(
                 mockKitManager, Mockito.times(1)
-        ).setUserAttribute(Mockito.eq("a key"), Mockito.eq("a value"));
+        ).setUserAttribute(Mockito.eq("a key"), Mockito.eq("a value"), Mockito.anyLong());
     }
 
     @Test
@@ -163,10 +163,10 @@ public class KitFrameworkWrapperTest {
                 true);
         assertNull(wrapper.getAttributeQueue());
         wrapper.setKitsLoaded(false);
-        wrapper.queueAttribute("a key", "a value");
+        wrapper.queueAttributeSet("a key", "a value", 1);
         assertEquals(wrapper.getAttributeQueue().peek().key, "a key");
         assertEquals(wrapper.getAttributeQueue().peek().value, "a value");
-        assertFalse(wrapper.getAttributeQueue().peek().removal);
+        assertEquals(wrapper.getAttributeQueue().peek().type, KitFrameworkWrapper.AttributeChange.SET_ATTRIBUTE);
     }
 
     @Test
@@ -179,10 +179,10 @@ public class KitFrameworkWrapperTest {
                 true);
         assertNull(wrapper.getAttributeQueue());
         wrapper.setKitsLoaded(false);
-        wrapper.queueAttribute("a key", null);
+        wrapper.queueAttributeTag("a key", 1);
         assertEquals(wrapper.getAttributeQueue().peek().key, "a key");
         assertNull(wrapper.getAttributeQueue().peek().value);
-        assertFalse(wrapper.getAttributeQueue().peek().removal);
+        assertEquals(wrapper.getAttributeQueue().peek().type, KitFrameworkWrapper.AttributeChange.TAG);
     }
 
     @Test
@@ -195,10 +195,10 @@ public class KitFrameworkWrapperTest {
                 true);
         assertNull(wrapper.getAttributeQueue());
         wrapper.setKitsLoaded(false);
-        wrapper.queueAttribute("a key", new ArrayList<String>());
+        wrapper.queueAttributeSet("a key", new ArrayList<String>(), 1);
         assertEquals(wrapper.getAttributeQueue().peek().key, "a key");
         assertEquals(wrapper.getAttributeQueue().peek().value, new ArrayList<String>());
-        assertFalse(wrapper.getAttributeQueue().peek().removal);
+        assertEquals(wrapper.getAttributeQueue().peek().type, KitFrameworkWrapper.AttributeChange.SET_ATTRIBUTE);
     }
 
     @Test
@@ -211,10 +211,26 @@ public class KitFrameworkWrapperTest {
                 true);
         assertNull(wrapper.getAttributeQueue());
         wrapper.setKitsLoaded(false);
-        wrapper.queueAttribute("a key");
+        wrapper.queueAttributeRemove("a key", 1);
         assertEquals(wrapper.getAttributeQueue().peek().key, "a key");
         assertEquals(wrapper.getAttributeQueue().peek().value, null);
-        assertTrue(wrapper.getAttributeQueue().peek().removal);
+        assertEquals(wrapper.getAttributeQueue().peek().type, KitFrameworkWrapper.AttributeChange.REMOVE_ATTRIBUTE);
+    }
+
+    @Test
+    public void testQueueAttributeIncrement() throws Exception {
+        KitFrameworkWrapper wrapper = new KitFrameworkWrapper(Mockito.mock(Context.class),
+                Mockito.mock(ReportingManager.class),
+                Mockito.mock(ConfigManager.class),
+                Mockito.mock(AppStateManager.class),
+                mockBackgroundTaskHandler,
+                true);
+        assertNull(wrapper.getAttributeQueue());
+        wrapper.setKitsLoaded(false);
+        wrapper.queueAttributeIncrement("a key", "3", 1);
+        assertEquals(wrapper.getAttributeQueue().peek().key, "a key");
+        assertEquals(wrapper.getAttributeQueue().peek().value, "3");
+        assertEquals(wrapper.getAttributeQueue().peek().type, KitFrameworkWrapper.AttributeChange.INCREMENT_ATTRIBUTE);
     }
 
     @Test
@@ -248,25 +264,25 @@ public class KitFrameworkWrapperTest {
         assertNull(wrapper.getAttributeQueue());
         wrapper.setKitsLoaded(false);
 
-        wrapper.setUserAttribute("a key", "a value");
+        wrapper.setUserAttribute("a key", "a value", 1);
         assertEquals(wrapper.getAttributeQueue().peek().key, "a key");
         assertEquals(wrapper.getAttributeQueue().peek().value, "a value");
 
         wrapper.setKitsLoaded(true);
-        wrapper.setUserAttribute("a key", "a value");
+        wrapper.setUserAttribute("a key", "a value", 1);
 
         KitManager mockKitManager = Mockito.mock(KitManager.class);
         wrapper.setKitManager(mockKitManager);
 
         Mockito.verify(
                 mockKitManager, Mockito.times(0)
-        ).setUserAttribute(Mockito.anyString(), Mockito.anyString());
+        ).setUserAttribute(Mockito.anyString(), Mockito.anyString(), Mockito.anyLong());
 
-        wrapper.setUserAttribute("a key", "a value");
+        wrapper.setUserAttribute("a key", "a value", 1);
 
         Mockito.verify(
                 mockKitManager, Mockito.times(1)
-        ).setUserAttribute(Mockito.eq("a key"), Mockito.eq("a value"));
+        ).setUserAttribute(Mockito.eq("a key"), Mockito.eq("a value"), Mockito.eq(1L));
     }
 
     @Test

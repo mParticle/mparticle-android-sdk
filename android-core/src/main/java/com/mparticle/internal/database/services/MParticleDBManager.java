@@ -555,7 +555,7 @@ public class MParticleDBManager extends BaseDBManager {
             Map<String, String> userAttributes = getUserAttributeSingles(mpId);
             Map<String, List<String>> userAttributeLists = getUserAttributeLists(mpId);
             if (listener != null) {
-                listener.onUserAttributesReceived(userAttributes, userAttributeLists);
+                listener.onUserAttributesReceived(userAttributes, userAttributeLists, mpId);
             }
             if (userAttributes != null) {
                 allUserAttributes.putAll(userAttributes);
@@ -577,7 +577,7 @@ public class MParticleDBManager extends BaseDBManager {
                 @Override
                 protected void onPostExecute(UserAttributeResponse attributes) {
                     if (listener != null) {
-                        listener.onUserAttributesReceived(attributes.attributeSingles, attributes.attributeLists);
+                        listener.onUserAttributesReceived(attributes.attributeSingles, attributes.attributeLists, mpId);
                     }
                 }
             }.execute();

@@ -8,6 +8,7 @@ import com.github.tomakehurst.wiremock.common.Notifier;
 import com.github.tomakehurst.wiremock.matching.RequestPatternBuilder;
 import com.github.tomakehurst.wiremock.matching.UrlPathPattern;
 import com.github.tomakehurst.wiremock.stubbing.ServeEvent;
+import com.github.tomakehurst.wiremock.stubbing.StubMapping;
 import com.mparticle.MParticle;
 import com.mparticle.internal.ConfigManager;
 
@@ -29,6 +30,7 @@ import static junit.framework.Assert.fail;
 
 public class Server {
     private WireMockServer mWireMockServer;
+    StubMapping mConfigMapping;
 
     public Server() {
         mWireMockServer = new WireMockServer(wireMockConfig().port(8080).notifier(new Notifier() {
@@ -78,11 +80,23 @@ public class Server {
     }
 
     public Server setUpHappyConfig() {
-        mWireMockServer.stubFor(get(urlPathMatching("/v([0-9]*)/([0-9a-zA-Z]*)/config"))
+        return setupConfigResponse("{response:\"hello\"}");
+    }
+
+    public Server setupConfigResponse(String response) {
+        return setupConfigResponse(response, 0);
+    }
+
+
+    public Server setupConfigResponse(String response, int delay) {
+        if (mConfigMapping != null) {
+            mWireMockServer.removeStub(mConfigMapping);
+        }
+        mConfigMapping = mWireMockServer.stubFor(get(urlPathMatching("/v([0-9]*)/([0-9a-zA-Z]*)/config"))
                 .willReturn(aResponse()
                         .withStatus(200)
                         .withHeader("Content-Type", "text/xml")
-                        .withBody("{response:\"hello\"}")));
+                        .withBody(response)));
         return this;
     }
 
@@ -102,9 +116,14 @@ public class Server {
     }
 
     public Server setupHappyIdentify(long mpid) {
+       return setupHappyIdentify(mpid, 0);
+    }
+
+    public Server setupHappyIdentify(long mpid, int delay) {
         mWireMockServer.stubFor(post(urlPathMatching("/v([0-9]*)/identify"))
                 .willReturn(aResponse()
                         .withStatus(200)
+                        .withFixedDelay(delay)
                         .withBody(getIdentityResponse(mpid))
                 ));
         return this;
@@ -167,7 +186,7 @@ public class Server {
     }
 
     public Server addConditionalLogoutResponse(long ifMpid, long thenMpid, int delay) {
-        mWireMockServer.stubFor(post(urlPathMatching("/v([0-9]*)/login")).withRequestBody(matchingJsonPath(String.format("$.[?(@.previous_mpid == '%s')]", String.valueOf(ifMpid))))
+        mWireMockServer.stubFor(post(urlPathMatching("/v([0-9]*)/logout")).withRequestBody(matchingJsonPath(String.format("$.[?(@.previous_mpid == '%s')]", String.valueOf(ifMpid))))
                 .willReturn(aResponse()
                         .withStatus(200)
                         .withFixedDelay(delay)

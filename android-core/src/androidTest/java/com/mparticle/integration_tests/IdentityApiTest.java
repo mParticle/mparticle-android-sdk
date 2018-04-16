@@ -240,7 +240,7 @@ public class IdentityApiTest extends BaseCleanStartedEachTest {
             }
         });
 
-        IdentityApiRequest request = IdentityApiRequest.withUser(AccessUtils.getUserInstance(mContext, mpid1)).build();
+        IdentityApiRequest request = IdentityApiRequest.withUser(MParticle.getInstance().Identity().getUser(mpid1)).build();
         MParticleTask<IdentityApiResult> result = MParticle.getInstance().Identity().identify(request);
 
         result.addSuccessListener(new TaskSuccessListener() {
@@ -253,7 +253,7 @@ public class IdentityApiTest extends BaseCleanStartedEachTest {
 
         MParticleUtils.awaitUploadRunnables();
 
-        request = IdentityApiRequest.withUser(AccessUtils.getUserInstance(mContext, mpid2)).build();
+        request = IdentityApiRequest.withUser(MParticle.getInstance().Identity().getUser(mpid2)).build();
         result = MParticle.getInstance().Identity().identify(request);
 
         result.addSuccessListener(new TaskSuccessListener() {
@@ -268,7 +268,7 @@ public class IdentityApiTest extends BaseCleanStartedEachTest {
 
         MParticleUtils.awaitUploadRunnables();
 
-        request = IdentityApiRequest.withUser(AccessUtils.getUserInstance(mContext, mpid3)).build();
+        request = IdentityApiRequest.withUser(MParticle.getInstance().Identity().getUser(mpid3)).build();
         result = MParticle.getInstance().Identity().identify(request);
 
         MParticle.getInstance().Identity().addIdentityStateListener(new IdentityStateListener() {
@@ -323,7 +323,7 @@ public class IdentityApiTest extends BaseCleanStartedEachTest {
         MParticle.getInstance().Identity().addIdentityStateListener(identityStateListener);
         MParticle.getInstance().Identity().addIdentityStateListener(identityStateListener2);
 
-        IdentityApiRequest request = IdentityApiRequest.withUser(AccessUtils.getUserInstance(mContext, mpid1)).build();
+        IdentityApiRequest request = IdentityApiRequest.withUser(MParticle.getInstance().Identity().getUser(mpid1)).build();
         MParticleTask<IdentityApiResult> result = MParticle.getInstance().Identity().identify(request);
 
         //test that change actually took place
@@ -340,7 +340,7 @@ public class IdentityApiTest extends BaseCleanStartedEachTest {
 
         MParticle.getInstance().Identity().removeIdentityStateListener(identityStateListener2);
 
-        request = IdentityApiRequest.withUser(AccessUtils.getUserInstance(mContext, mpid2)).build();
+        request = IdentityApiRequest.withUser(MParticle.getInstance().Identity().getUser(mpid2)).build();
         result = MParticle.getInstance().Identity().identify(request);
 
         //test that change actually took place
@@ -366,7 +366,7 @@ public class IdentityApiTest extends BaseCleanStartedEachTest {
         });
 
 
-        request = IdentityApiRequest.withUser(AccessUtils.getUserInstance(mContext, mpid3)).build();
+        request = IdentityApiRequest.withUser(MParticle.getInstance().Identity().getUser(mpid3)).build();
         MParticle.getInstance().Identity().identify(request);
 
         MParticleUtils.awaitUploadRunnables();

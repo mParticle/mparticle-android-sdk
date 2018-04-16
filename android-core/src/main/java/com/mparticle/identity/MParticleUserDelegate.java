@@ -171,7 +171,7 @@ import java.util.Map;
                     }
                     Logger.warning("Set user attribute list: " + key + " with values: " + values.toString());
                     mMessageManager.setUserAttribute(key, clonedList, userMpId, synchronously);
-                    mKitManager.setUserAttributeList(key, clonedList);
+                    mKitManager.setUserAttributeList(key, clonedList, userMpId);
                 } catch (Exception e) {
                     Logger.warning("Error while setting attribute list: " + e.toString());
                     return false;
@@ -185,11 +185,13 @@ import java.util.Map;
                         return false;
                     }
                     Logger.debug("Set user attribute: " + key + " with value: " + stringValue);
+                    mMessageManager.setUserAttribute(key, stringValue, userMpId, synchronously);
+                    mKitManager.setUserAttribute(key, stringValue, userMpId);
                 } else {
                     Logger.debug("Set user tag: " + key);
+                    mMessageManager.setUserAttribute(key, stringValue, userMpId, synchronously);
+                    mKitManager.setUserTag(key, userMpId);
                 }
-                mMessageManager.setUserAttribute(key, stringValue, userMpId, synchronously);
-                mKitManager.setUserAttribute(key, stringValue);
             }
             return true;
         }
@@ -221,7 +223,7 @@ import java.util.Map;
         }
         Logger.debug("Removing user attribute: \"" + key + "\" for mpId: " + userMpId);
         mMessageManager.removeUserAttribute(key, userMpId);
-        mKitManager.removeUserAttribute(key);
+        mKitManager.removeUserAttribute(key, userMpId);
         return true;
     }
 
@@ -251,8 +253,8 @@ import java.util.Map;
         if (userAliasHandler != null && previousMpid != newMpid) {
             try {
                 userAliasHandler.onUserAlias(
-                        MParticleUser.getInstance(context, previousMpid, this),
-                        MParticleUser.getInstance(context, newMpid, this)
+                        MParticleUserImpl.getInstance(context, previousMpid, this),
+                        MParticleUserImpl.getInstance(context, newMpid, this)
                 );
             }catch (Exception e) {
                 Logger.error("Error while executing UserAliasHandler: " + e.toString());

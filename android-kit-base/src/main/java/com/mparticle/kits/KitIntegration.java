@@ -93,15 +93,9 @@ public abstract class KitIntegration {
     public boolean isDisabled(boolean isOptOutEvent) {
         return !getConfiguration().passesBracketing(kitManager.getUserBucket()) ||
                 (getConfiguration().shouldHonorOptOut() && kitManager.isOptedOut() && !isOptOutEvent);
-
     }
 
-    /**
-     * Retrieve filtered user identities. User this method to retrieve user identities at any time.
-     * To ensure that filtering is respected, kits must use this method rather than the public API.
-     *
-     * @return a Map of identity-types and identity-values
-     */
+    @Deprecated
     public final Map<MParticle.IdentityType, String> getUserIdentities() {
        MParticleUser user = MParticle.getInstance().Identity().getCurrentUser();
        if (user == null) {
@@ -129,6 +123,7 @@ public abstract class KitIntegration {
      *
      * @return a Map of attributes according to the logic above.
      */
+    @Deprecated
     public final Map<String, Object> getAllUserAttributes() {
         MParticleUser user = MParticle.getInstance().Identity().getCurrentUser();
         if (user == null) {
@@ -148,6 +143,16 @@ public abstract class KitIntegration {
             }
             return attributes;
         }
+    }
+
+    public final MParticleUser getCurrentUser() {
+        MParticleUser user = MParticle.getInstance().Identity().getCurrentUser();
+        return FilteredMParticleUser.getInstance(user, this);
+    }
+
+    public final MParticleUser getUser(Long mpid) {
+        MParticleUser user = MParticle.getInstance().Identity().getUser(mpid);
+        return FilteredMParticleUser.getInstance(user, this);
     }
 
     /**
@@ -347,6 +352,7 @@ public abstract class KitIntegration {
      * Kits should implement this interface when their underlying service has the notion
      * of a user with attributes.
      */
+    @Deprecated
     public interface AttributeListener {
 
         void setUserAttribute(String attributeKey, String attributeValue);
@@ -515,5 +521,36 @@ public abstract class KitIntegration {
          */
         void onApplicationBackground();
 
+    }
+
+    public interface IdentityListener {
+
+        void onIdentifyCompleted(MParticleUser mParticleUser, FilteredIdentityApiRequest identityApiRequest);
+
+        void onLoginCompleted(MParticleUser mParticleUser, FilteredIdentityApiRequest identityApiRequest);
+
+        void onLogoutCompleted(MParticleUser mParticleUser, FilteredIdentityApiRequest identityApiRequest);
+
+        void onModifyCompleted(MParticleUser mParticleUser, FilteredIdentityApiRequest identityApiRequest);
+
+        void onUserIdentified(MParticleUser mParticleUser);
+
+    }
+
+    public interface UserAttributeListener {
+
+        void onIncrementUserAttribute (String key, String value, FilteredMParticleUser user);
+
+        void onRemoveUserAttribute(String key, FilteredMParticleUser user);
+
+        void onSetUserAttribute(String key, Object value, FilteredMParticleUser user);
+
+        void onSetUserTag(String key, FilteredMParticleUser user);
+
+        void onSetUserAttributeList(String attributeKey, List<String> attributeValueList, FilteredMParticleUser user);
+
+        void onSetAllUserAttributes(Map<String, String> userAttributes, Map<String, List<String>> userAttributeLists, FilteredMParticleUser user);
+
+        boolean supportsAttributeLists();
     }
 }

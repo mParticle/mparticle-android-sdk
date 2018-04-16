@@ -11,6 +11,8 @@ import com.mparticle.AttributionResult;
 import com.mparticle.MPEvent;
 import com.mparticle.MParticle;
 import com.mparticle.commerce.CommerceEvent;
+import com.mparticle.identity.IdentityApiRequest;
+import com.mparticle.identity.MParticleUser;
 
 import org.json.JSONArray;
 
@@ -155,14 +157,27 @@ public class KitFrameworkWrapper implements KitManager {
         if (attributeQueue != null && attributeQueue.size() > 0) {
             Logger.debug("Replaying user attributes after receiving first kit configuration.");
             for (AttributeChange attributeChange : attributeQueue) {
-                if (attributeChange.removal) {
-                    mKitManager.removeUserAttribute(attributeChange.key);
-                } else if (attributeChange.value == null) {
-                    mKitManager.setUserAttribute(attributeChange.key, null);
-                } else if (attributeChange.value instanceof String) {
-                    mKitManager.setUserAttribute(attributeChange.key, (String) attributeChange.value);
-                } else if (attributeChange.value instanceof List) {
-                    mKitManager.setUserAttributeList(attributeChange.key, (List<String>) attributeChange.value);
+                switch (attributeChange.type) {
+                    case AttributeChange.SET_ATTRIBUTE:
+                        if (attributeChange.value == null) {
+                            mKitManager.setUserAttribute(attributeChange.key, null, attributeChange.mpid);
+                        } else if (attributeChange.value instanceof String) {
+                            mKitManager.setUserAttribute(attributeChange.key, (String) attributeChange.value, attributeChange.mpid);
+                        } else if (attributeChange.value instanceof List) {
+                            mKitManager.setUserAttributeList(attributeChange.key, (List<String>) attributeChange.value, attributeChange.mpid);
+                        }
+                        break;
+                    case AttributeChange.REMOVE_ATTRIBUTE:
+                        mKitManager.removeUserAttribute(attributeChange.key, attributeChange.mpid);
+                        break;
+                    case AttributeChange.INCREMENT_ATTRIBUTE:
+                        if (attributeChange.value instanceof String) {
+                            mKitManager.incrementUserAttribute(attributeChange.key, (String)attributeChange.value, attributeChange.mpid);
+                        }
+                        break;
+                    case AttributeChange.TAG:
+                        mKitManager.setUserTag(attributeChange.key, attributeChange.mpid);
+                        break;
                 }
             }
         }
@@ -191,12 +206,20 @@ public class KitFrameworkWrapper implements KitManager {
         return true;
     }
 
-    boolean queueAttribute(String key, Object value) {
-        return queueAttribute(new AttributeChange(key, value));
+    boolean queueAttributeRemove(String key, long mpid) {
+        return queueAttribute(new AttributeChange(key, mpid));
     }
 
-    boolean queueAttribute(String key) {
-        return queueAttribute(new AttributeChange(key));
+    boolean queueAttributeSet(String key, Object value, long mpid) {
+        return queueAttribute(new AttributeChange(key, value, mpid, AttributeChange.SET_ATTRIBUTE));
+    }
+
+    boolean queueAttributeTag(String key, long mpid) {
+        return queueAttribute(new AttributeChange(key, mpid, AttributeChange.TAG));
+    }
+
+    boolean queueAttributeIncrement(String key, String value, long mpid) {
+        return queueAttribute(new AttributeChange(key, value, mpid, AttributeChange.INCREMENT_ATTRIBUTE));
     }
 
     synchronized boolean queueAttribute(AttributeChange change) {
@@ -214,18 +237,33 @@ public class KitFrameworkWrapper implements KitManager {
     static class AttributeChange {
         final String key;
         final Object value;
-        final boolean removal;
+        final long mpid;
+        final int type;
 
-        AttributeChange(String key, Object value) {
-            this.key = key;
-            this.value = value;
-            this.removal = false;
-        }
+        static final int REMOVE_ATTRIBUTE = 1;
+        static final int SET_ATTRIBUTE = 2;
+        static final int INCREMENT_ATTRIBUTE = 3;
+        static final int TAG = 4;
 
-        AttributeChange(String key) {
+        AttributeChange(String key, long mpid) {
             this.key = key;
             this.value = null;
-            this.removal = true;
+            this.mpid = mpid;
+            this.type = REMOVE_ATTRIBUTE;
+        }
+
+        AttributeChange(String key, Object value, long mpid, int type) {
+            this.key = key;
+            this.value = value;
+            this.mpid = mpid;
+            this.type = type;
+        }
+
+        AttributeChange(String key, long mpid, int type) {
+            this.key = key;
+            this.value = null;
+            this.mpid = mpid;
+            this.type = type;
         }
     }
 
@@ -297,23 +335,37 @@ public class KitFrameworkWrapper implements KitManager {
     }
 
     @Override
-    public void setUserAttribute(String key, String value) {
-        if (!queueAttribute(key, value) && mKitManager != null) {
-            mKitManager.setUserAttribute(key, value);
+    public void setUserAttribute(String key, String value, long mpid) {
+        if (!queueAttributeSet(key, value, mpid) && mKitManager != null) {
+            mKitManager.setUserAttribute(key, value, mpid);
         }
     }
 
     @Override
-    public void setUserAttributeList(String key, List<String> value) {
-        if (!queueAttribute(key, value) && mKitManager != null) {
-            mKitManager.setUserAttributeList(key, value);
+    public void setUserAttributeList(String key, List<String> value, long mpid) {
+        if (!queueAttributeSet(key, value, mpid) && mKitManager != null) {
+            mKitManager.setUserAttributeList(key, value, mpid);
         }
     }
 
     @Override
-    public void removeUserAttribute(String key) {
-        if (!queueAttribute(key) && mKitManager != null) {
-            mKitManager.removeUserAttribute(key);
+    public void removeUserAttribute(String key, long mpid) {
+        if (!queueAttributeRemove(key, mpid) && mKitManager != null) {
+            mKitManager.removeUserAttribute(key, mpid);
+        }
+    }
+
+    @Override
+    public void setUserTag(String tag, long mpid) {
+        if (!queueAttributeTag(tag, mpid) && mKitManager != null) {
+            mKitManager.setUserTag(tag, mpid);
+        }
+    }
+
+    @Override
+    public void incrementUserAttribute(String key, String value, long mpid) {
+        if (!queueAttributeIncrement(key, value, mpid) && mKitManager != null) {
+            mKitManager.incrementUserAttribute(key, value, mpid);
         }
     }
 
@@ -493,5 +545,33 @@ public class KitFrameworkWrapper implements KitManager {
             return mKitManager.getAttributionResults();
         }
         return new TreeMap<Integer, AttributionResult>();
+    }
+
+    @Override
+    public void onIdentifyCompleted(MParticleUser user, IdentityApiRequest request) {
+        if (mKitManager != null) {
+            mKitManager.onIdentifyCompleted(user, request);
+        }
+    }
+
+    @Override
+    public void onLoginCompleted(MParticleUser user, IdentityApiRequest request) {
+        if (mKitManager != null) {
+            mKitManager.onLoginCompleted(user, request);
+        }
+    }
+
+    @Override
+    public void onLogoutCompleted(MParticleUser user, IdentityApiRequest request) {
+        if (mKitManager != null) {
+            mKitManager.onLogoutCompleted(user, request);
+        }
+    }
+
+    @Override
+    public void onModifyCompleted(MParticleUser user, IdentityApiRequest request) {
+        if (mKitManager != null) {
+            mKitManager.onModifyCompleted(user, request);
+        }
     }
 }

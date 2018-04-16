@@ -23,7 +23,8 @@ android {
             java.srcDir sharedTestDir
         }
         androidTest {
-            java.srcDir sharedTestDir
+            java.srcDirs += sharedTestDir
+            java.srcDirs += 'src/androidTest/java'
         }
     }
 
@@ -93,6 +94,17 @@ android {
             buildConfigField "Boolean", "MP_DEBUG", "false"
             signingConfig signingConfigs.debug
             multiDexEnabled true
+
+            configurations {
+                testArtifacts.extendsFrom testRuntime
+            }
+            task testJar(type: Jar, dependsOn: ":android-core:assembleAndroidTest") {
+                classifier 'androidTest'
+                from "$buildDir/intermediates/classes/androidTest/instrumented"
+            }
+            artifacts {
+                testArtifacts testJar
+            }
         }
     }
 }

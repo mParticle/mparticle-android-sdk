@@ -59,7 +59,7 @@ public class KitManagerImplTest {
         attributeList.add("2");
         attributeList.add("3");
         userAttributeLists.put("test 3", attributeList);
-        manager.onUserAttributesReceived(userAttributeSingles, userAttributeLists);
+        manager.onUserAttributesReceived(userAttributeSingles, userAttributeLists, 1L);
         Mockito.verify(((KitIntegration.AttributeListener)integration), Mockito.times(1)).setAllUserAttributes(userAttributeSingles, userAttributeLists);
 
         Map<String, String> userAttributesCombined = new HashMap<>();
@@ -98,7 +98,7 @@ public class KitManagerImplTest {
         attributeList.add("1");
         attributeList.add("2");
         attributeList.add("3");
-        manager.setUserAttributeList("test key", attributeList);
+        manager.setUserAttributeList("test key", attributeList, 1);
         Mockito.verify(((KitIntegration.AttributeListener)integration), Mockito.times(1)).setUserAttributeList("test key", attributeList);
         Mockito.verify(((KitIntegration.AttributeListener)integration2), Mockito.times(1)).setUserAttribute("test key", "1,2,3");
     }

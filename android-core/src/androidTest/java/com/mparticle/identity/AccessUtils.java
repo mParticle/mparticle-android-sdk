@@ -37,10 +37,6 @@ public class AccessUtils {
         }
     }
 
-    public static MParticleUser getUserInstance(Context context, long mpid) {
-        return MParticleUser.getInstance(context, mpid, MParticle.getInstance().Identity().mUserDelegate);
-    }
-
     public static class IdentityApiClient implements MParticleIdentityClient {
 
         @Override public IdentityHttpResponse login(IdentityApiRequest request) throws Exception { return null; }
@@ -56,7 +52,7 @@ public class AccessUtils {
         @Override public void setRequestHandler(BaseNetworkConnection handler) {}
     }
 
-    public static void clearUserIdentities(MParticleUser user) {
+    public static void clearUserIdentities(MParticleUserImpl user) {
         Map<MParticle.IdentityType, String> nullUserIdentities = new HashMap<MParticle.IdentityType, String>();
         for (MParticle.IdentityType identityType : MParticle.IdentityType.values()) {
             nullUserIdentities.put(identityType, null);

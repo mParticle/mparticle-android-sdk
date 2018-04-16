@@ -35,6 +35,7 @@ public class IdentityApi {
     private Handler mBackgroundHandler;
     ConfigManager mConfigManager;
     MessageManager mMessageManager;
+    KitManager mKitManager;
 
     MParticleUserDelegate mUserDelegate;
     private MParticleIdentityClient mApiClient;
@@ -50,6 +51,7 @@ public class IdentityApi {
         this.mUserDelegate = new MParticleUserDelegate(appStateManager, configManager, messageManager, kitManager, new MParticleDBManager(context, DatabaseTables.getInstance(context)));
         this.mConfigManager = configManager;
         this.mMessageManager = messageManager;
+        this.mKitManager = kitManager;
         configManager.addMpIdChangeListener(new IdentityStateListenerManager());
         setApiClient(new MParticleIdentityClientImpl(configManager, context));
     }
@@ -66,7 +68,7 @@ public class IdentityApi {
         if (Constants.TEMPORARY_MPID == mpid) {
             return null;
         } else {
-            return MParticleUser.getInstance(mContext, mpid, mUserDelegate);
+            return MParticleUserImpl.getInstance(mContext, mpid, mUserDelegate);
         }
     }
 
@@ -79,7 +81,7 @@ public class IdentityApi {
     @Nullable
     public MParticleUser getUser(Long mpid) {
             if (mConfigManager.mpidExists(mpid)) {
-                return MParticleUser.getInstance(mContext, mpid, mUserDelegate);
+                return MParticleUserImpl.getInstance(mContext, mpid, mUserDelegate);
             } else {
             return null;
         }
@@ -134,6 +136,11 @@ public class IdentityApi {
             public IdentityHttpResponse request(IdentityApiRequest request) throws Exception {
                 return getApiClient().logout(request);
             }
+
+            @Override
+            public void onPostExecute(IdentityApiResult result) {
+                mKitManager.onLogoutCompleted(result.getUser(), logoutRequest);
+            }
         });
     }
 
@@ -165,6 +172,11 @@ public class IdentityApi {
             public IdentityHttpResponse request(IdentityApiRequest request) throws Exception {
                 return getApiClient().login(request);
             }
+
+            @Override
+            public void onPostExecute(IdentityApiResult result) {
+                mKitManager.onLoginCompleted(result.getUser(), loginRequest);
+            }
         });
     }
 
@@ -183,6 +195,11 @@ public class IdentityApi {
             @Override
             public IdentityHttpResponse request(IdentityApiRequest request) throws Exception {
                 return getApiClient().identify(request);
+            }
+
+            @Override
+            public void onPostExecute(IdentityApiResult result) {
+                mKitManager.onIdentifyCompleted(result.getUser(), identifyRequest);
             }
         });
     }
@@ -224,6 +241,12 @@ public class IdentityApi {
                                     mUserDelegate.setUserIdentity(entry.getValue(), entry.getKey(), mConfigManager.getMpid());
                                 }
                             }
+                            new Handler(Looper.getMainLooper()).post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    mKitManager.onModifyCompleted(getCurrentUser(), updateRequest);
+                                }
+                            });
                         }
                     } catch (Exception ex) {
                         task.setFailed(new IdentityHttpResponse(IdentityApi.UNKNOWN_ERROR, ex.toString()));
@@ -258,6 +281,12 @@ public class IdentityApi {
                             ConfigManager.setIdentityRequestInProgress(false);
                             mUserDelegate.setUser(mContext, startingMpid, newMpid, identityApiRequest.getUserIdentities(), identityApiRequest.getUserAliasHandler());
                             task.setSuccessful(new IdentityApiResult(getCurrentUser()));
+                            new Handler(Looper.getMainLooper()).post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    networkRequest.onPostExecute(new IdentityApiResult(getCurrentUser()));
+                                }
+                            });
                         }
                     } catch (Exception ex) {
                         ConfigManager.setIdentityRequestInProgress(false);
@@ -285,6 +314,7 @@ public class IdentityApi {
 
     interface IdentityNetworkRequestRunnable {
         IdentityHttpResponse request(IdentityApiRequest request) throws Exception;
+        void onPostExecute(IdentityApiResult result);
     }
 
     public interface MpIdChangeListener {
@@ -295,7 +325,7 @@ public class IdentityApi {
 
         @Override
         public void onMpIdChanged(long mpid) {
-            final MParticleUser user = MParticleUser.getInstance(mContext, mpid, mUserDelegate);
+            final MParticleUser user = MParticleUserImpl.getInstance(mContext, mpid, mUserDelegate);
             if (identityStateListeners != null && identityStateListeners.size() > 0) {
                 new Handler(Looper.getMainLooper()).post(new Runnable() {
 

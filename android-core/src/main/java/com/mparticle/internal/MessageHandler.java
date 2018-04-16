@@ -257,7 +257,9 @@ import java.util.UUID;
         for (AttributionChange attributeChange: attributionChanges) {
             logUserAttributeChanged(attributeChange);
         }
-        MParticle.getInstance().getKitManager().setUserAttribute(key, newValue);
+        if (MParticle.getInstance() != null && MParticle.getInstance().getKitManager() != null) {
+            MParticle.getInstance().getKitManager().incrementUserAttribute(key, newValue, mpId);
+        }
     }
 
     private void dbInsertSession(BaseMPMessage message) throws JSONException {

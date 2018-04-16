@@ -166,8 +166,8 @@ public class MParticleIdentityClientImplTest extends BaseCleanStartedEachTest {
             final Map<MParticle.IdentityType, String> oldUserIdentities = mRandomUtils.getRandomUserIdentities();
             final Map<MParticle.IdentityType, String> newUserIdentities = mRandomUtils.getRandomUserIdentities();
 
-            AccessUtils.clearUserIdentities(MParticle.getInstance().Identity().getCurrentUser());
-            MParticle.getInstance().Identity().getCurrentUser().setUserIdentities(oldUserIdentities);
+            AccessUtils.clearUserIdentities((MParticleUserImpl)MParticle.getInstance().Identity().getCurrentUser());
+            ((MParticleUserImpl)MParticle.getInstance().Identity().getCurrentUser()).setUserIdentities(oldUserIdentities);
 
             final int finalI = i;
             setApiClient(new MockIdentityApiClient() {

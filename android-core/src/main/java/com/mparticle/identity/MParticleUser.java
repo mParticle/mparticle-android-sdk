@@ -1,42 +1,19 @@
 package com.mparticle.identity;
 
-
-import android.content.Context;
-
 import com.mparticle.MParticle;
 import com.mparticle.UserAttributeListener;
 import com.mparticle.commerce.Cart;
-import com.mparticle.consent.ConsentState;
-import com.mparticle.segmentation.SegmentListener;
 
 import java.util.Map;
 
-/**
- * a class which represents a User
- */
-public class MParticleUser {
-    private long mMpId;
-    MParticleUserDelegate mUserDelegate;
-    Cart cart;
-
-    private MParticleUser(Context context, long mpId, MParticleUserDelegate userDelegate) {
-        this.mMpId = mpId;
-        this.mUserDelegate = userDelegate;
-        this.cart = new Cart(context, mMpId);
-    }
-
-    static MParticleUser getInstance(Context context, long mpId, MParticleUserDelegate userDelegate) {
-        return new MParticleUser(context, mpId, userDelegate);
-    }
+public interface MParticleUser {
 
     /**
      * query the MPID of the User
      *
      * @return the mpid
      */
-    public long getId() {
-        return mMpId;
-    }
+    long getId();
 
     /**
      * query the Cart of the User
@@ -45,18 +22,14 @@ public class MParticleUser {
      *
      * @see Cart
      */
-    public Cart getCart() {
-        return cart;
-    }
+    Cart getCart();
 
     /**
      * query the attributes of the User
      *
      * @return the User's attributes
      */
-    public Map<String, Object> getUserAttributes() {
-        return mUserDelegate.getUserAttributes(getId());
-    }
+    Map<String, Object> getUserAttributes();
 
     /**
      * query the attributes of the User asynchronously
@@ -65,9 +38,7 @@ public class MParticleUser {
      *
      * @return
      */
-    public Map<String, Object> getUserAttributes(final UserAttributeListener listener) {
-        return mUserDelegate.getUserAttributes(listener, getId());
-    }
+    Map<String, Object> getUserAttributes(final UserAttributeListener listener);
 
     /**
      * assign attributes to the User in bulk
@@ -76,15 +47,7 @@ public class MParticleUser {
      *
      * @return whether the attributes where successfully set
      */
-    public boolean setUserAttributes(Map<String, Object> userAttributes) {
-        boolean success = true;
-        for(Map.Entry<String, Object> entry: userAttributes.entrySet()) {
-            if (!setUserAttribute(entry.getKey(), entry.getValue())) {
-                success = false;
-            }
-        }
-        return success;
-    }
+    boolean setUserAttributes(Map<String, Object> userAttributes);
 
     /**
      * query the Identities of the User
@@ -92,19 +55,7 @@ public class MParticleUser {
      * @return the User's Identities
      *
      */
-    public Map<MParticle.IdentityType, String> getUserIdentities() {
-        return mUserDelegate.getUserIdentities(getId());
-    }
-
-    void setUserIdentities(Map<MParticle.IdentityType, String> userIdentities) {
-        for(Map.Entry<MParticle.IdentityType, String> entry: userIdentities.entrySet()) {
-            mUserDelegate.setUserIdentity(entry.getValue(), entry.getKey(), getId());
-        }
-    }
-
-    void setUserIdentity(MParticle.IdentityType identity, String value) {
-        mUserDelegate.setUserIdentity(value, identity, getId());
-    }
+    Map<MParticle.IdentityType, String> getUserIdentities();
 
     /**
      * set a single attribute for the user
@@ -114,9 +65,7 @@ public class MParticleUser {
      *
      * @return whether the attributes where successfully set
      */
-    public boolean setUserAttribute(String key, Object value) {
-        return mUserDelegate.setUserAttribute(key, value, getId());
-    }
+    boolean setUserAttribute(String key, Object value);
 
     /**
      * set a single attribute for the user whos value is an Object, not just a String
@@ -126,9 +75,7 @@ public class MParticleUser {
      *
      * @return whether the attributes where successfully set
      */
-    public boolean setUserAttributeList(String key, Object value) {
-        return mUserDelegate.setUserAttributeList(key, value, getId());
-    }
+    boolean setUserAttributeList(String key, Object value);
 
     /**
      * increment an attribute for the user
@@ -138,9 +85,7 @@ public class MParticleUser {
      *
      * @return whether the attributes where successfully set
      */
-    public boolean incrementUserAttribute(String key, int value) {
-        return mUserDelegate.incrementUserAttribute(key, value, getId());
-    }
+    boolean incrementUserAttribute(String key, int value);
 
     /**
      * remove an attribute for the user
@@ -149,9 +94,7 @@ public class MParticleUser {
      *
      * @return whether the attributes where successfully removed
      */
-    public boolean removeUserAttribute(String key) {
-        return mUserDelegate.removeUserAttribute(key, getId());
-    }
+    boolean removeUserAttribute(String key);
 
     /**
      * set a tag for a User. A tag is represented by a key and a value of "null"
@@ -160,24 +103,5 @@ public class MParticleUser {
      *
      * @return whether the tag was successfully set
      */
-    public boolean setUserTag(String tag) {
-        return setUserAttribute(tag, null);
-    }
-
-    public void getSegments(long timeout, String endpointId, SegmentListener listener) {
-        mUserDelegate.getSegments(timeout, endpointId, listener);
-    }
-
-    MParticleUser setUserDelegate(MParticleUserDelegate mParticleUserDelegate) {
-        mUserDelegate = mParticleUserDelegate;
-        return this;
-    }
-
-    public ConsentState getConsentState() {
-        return mUserDelegate.getConsentState(getId());
-    }
-
-    public void setConsentState(ConsentState state) {
-        mUserDelegate.setConsentState(state, getId());
-    }
+    boolean setUserTag(String tag);
 }

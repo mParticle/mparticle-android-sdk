@@ -9,6 +9,7 @@ import com.mparticle.internal.database.tables.mp.MParticleDatabaseHelper;
 import com.mparticle.internal.networking.BaseNetworkConnection;
 import com.mparticle.internal.networking.MParticleBaseClientImpl;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.IOException;
@@ -109,5 +110,17 @@ public class AccessUtils {
 
     public static MParticleApiClient getApiClient() {
         return com.mparticle.AccessUtils.getMessageManager().mUploadHandler.mApiClient;
+    }
+
+    public static void setKitManager(KitManager kitManager) {
+        KitFrameworkWrapper kitFrameworkWrapper = (KitFrameworkWrapper)MParticle.getInstance().getKitManager();
+        kitFrameworkWrapper.loadKitLibrary();
+        kitFrameworkWrapper.setKitManager(kitManager);
+        JSONArray configuration = MParticle.getInstance().getConfigManager().getLatestKitConfiguration();
+        Logger.debug("Kit Framework loaded.");
+        if (configuration != null) {
+            Logger.debug("Restoring previous Kit configuration.");
+            kitManager.updateKits(configuration);
+        }
     }
 }

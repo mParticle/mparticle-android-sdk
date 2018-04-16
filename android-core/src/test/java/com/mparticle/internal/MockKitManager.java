@@ -11,6 +11,8 @@ import com.mparticle.AttributionResult;
 import com.mparticle.MPEvent;
 import com.mparticle.MParticle;
 import com.mparticle.commerce.CommerceEvent;
+import com.mparticle.identity.IdentityApiRequest;
+import com.mparticle.identity.MParticleUser;
 
 import org.json.JSONArray;
 
@@ -77,17 +79,27 @@ public class MockKitManager implements KitManager {
     }
 
     @Override
-    public void setUserAttribute(String key, String value) {
+    public void setUserAttribute(String key, String value, long mpid) {
 
     }
 
     @Override
-    public void setUserAttributeList(String key, List<String> value) {
+    public void setUserAttributeList(String key, List<String> value, long mpid) {
 
     }
 
     @Override
-    public void removeUserAttribute(String key) {
+    public void removeUserAttribute(String key, long mpid) {
+
+    }
+
+    @Override
+    public void setUserTag(String tag, long mpid) {
+
+    }
+
+    @Override
+    public void incrementUserAttribute(String key, String value, long mpid) {
 
     }
 
@@ -209,5 +221,25 @@ public class MockKitManager implements KitManager {
     @Override
     public Map<Integer, AttributionResult> getAttributionResults() {
         return new TreeMap<Integer, AttributionResult>();
+    }
+
+    @Override
+    public void onIdentifyCompleted(MParticleUser user, IdentityApiRequest request) {
+        
+    }
+
+    @Override
+    public void onLoginCompleted(MParticleUser user, IdentityApiRequest request) {
+
+    }
+
+    @Override
+    public void onLogoutCompleted(MParticleUser user, IdentityApiRequest request) {
+
+    }
+
+    @Override
+    public void onModifyCompleted(MParticleUser user, IdentityApiRequest request) {
+
     }
 }
