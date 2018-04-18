@@ -34,6 +34,7 @@ public class UserStorage {
     private String TOTAL_SINCE_UPGRADE = "mp::launch_since_upgrade";
     private String USER_IDENTITIES = "mp::user_ids::";
     private String CART = "mp::cart::";
+    private String CONSENT_STATE = "mp::consent_state::";
 
     static final int DEFAULT_BREADCRUMB_LIMIT = 50;
 
@@ -269,6 +270,18 @@ public class UserStorage {
         mPreferences.edit().putString(USER_IDENTITIES, userIdentities).apply();
     }
 
+    void setSerializedConsentState(String consentState) {
+        mPreferences.edit().putString(CONSENT_STATE, consentState).apply();
+    }
+
+    String getSerializedConsentState() {
+        return mPreferences.getString(CONSENT_STATE, null);
+    }
+
+    private boolean hasConsent() {
+        return mPreferences.contains(CONSENT_STATE);
+    }
+
     private boolean hasUserIdentities() {
         return mPreferences.contains(USER_IDENTITIES);
     }
@@ -368,6 +381,9 @@ public class UserStorage {
         }
         if (userStorage.hasCart()) {
             setSerializedCart(userStorage.getSerializedCart());
+        }
+        if (userStorage.hasConsent()) {
+            setSerializedConsentState(userStorage.getSerializedConsentState());
         }
     }
 

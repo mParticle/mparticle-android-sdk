@@ -147,7 +147,6 @@ public class Constants {
         String PROFILE = "pro";
         String USER_ATTRIBUTE_CHANGE = "uac";
         String USER_IDENTITY_CHANGE = "uic";
-        String CONSENT_EVENT = "co";
     }
 
     public interface MessageKey {
@@ -355,20 +354,14 @@ public class Constants {
         String DEVICE_IS_IN_DST = "idst";
         String DEVICE_APPLICATION_STAMP = "das";
 
-
-        interface Consent {
-            //consent events
-            String TYPE = "co";
-            String CONSENTED = "cnd";
-            String HARDWARE_ID = "chid";
-            String REGULATION = "crg";
-            String DOCUMENT = "cdo";
-            String LOCATION = "clc";
-            String CATEGORY = "cca";
-            String PURPOSE = "cpu";
-            String ATTRIBUTES = "attrs";
-        }
-
+        //consent state
+        String CONSENT_STATE = "con";
+        String CONSENT_STATE_GDPR = "gdpr";
+        String CONSENT_STATE_GDPR_DOCUMENT = "d";
+        String CONSENT_STATE_GDPR_CONSENTED = "c";
+        String CONSENT_STATE_GDPR_TIMESTAMP = "ts";
+        String CONSENT_STATE_GDPR_LOCATION = "l";
+        String CONSENT_STATE_GDPR_HARDWARE_ID = "h";
     }
 
     public interface Commerce {

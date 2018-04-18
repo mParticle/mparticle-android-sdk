@@ -17,7 +17,6 @@ import android.os.Message;
 import android.os.Process;
 import android.telephony.TelephonyManager;
 
-import com.mparticle.ConsentEvent;
 import com.mparticle.MPEvent;
 import com.mparticle.MParticle;
 import com.mparticle.UserAttributeListener;
@@ -31,7 +30,6 @@ import com.mparticle.internal.dto.UserAttributeRemoval;
 import com.mparticle.internal.dto.UserAttributeResponse;
 import com.mparticle.internal.networking.BaseMPMessage;
 import com.mparticle.internal.networking.MPCommerceMessage;
-import com.mparticle.internal.networking.MPConsentEventMessage;
 import com.mparticle.internal.networking.MPEventMessage;
 import com.mparticle.messaging.ProviderCloudMessage;
 
@@ -400,21 +398,6 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
             } catch (JSONException e) {
                 Logger.warning("Failed to create mParticle breadcrumb message");
 
-            }
-        }
-        return null;
-    }
-
-    public BaseMPMessage logConsentEvent(ConsentEvent consentEvent) {
-        if (consentEvent != null) {
-            try {
-                BaseMPMessage message = new MPConsentEventMessage.Builder(consentEvent, mAppStateManager.getSession(), mLocation, mConfigManager.getMpid())
-                        .build();
-                mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
-                return message;
-            }
-            catch (JSONException jse) {
-                Logger.warning("Failed to create mParticle consent message");
             }
         }
         return null;

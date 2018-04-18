@@ -15,7 +15,6 @@ import com.mparticle.internal.DatabaseTables;
 import com.mparticle.internal.DeviceAttributes;
 import com.mparticle.internal.JsonReportingMessage;
 import com.mparticle.internal.Logger;
-import com.mparticle.internal.networking.BaseMPMessage;
 import com.mparticle.internal.MPUtility;
 import com.mparticle.internal.MessageBatch;
 import com.mparticle.internal.MessageManager;
@@ -31,6 +30,7 @@ import com.mparticle.internal.dto.AttributionChange;
 import com.mparticle.internal.dto.ReadyUpload;
 import com.mparticle.internal.dto.UserAttributeRemoval;
 import com.mparticle.internal.dto.UserAttributeResponse;
+import com.mparticle.internal.networking.BaseMPMessage;
 
 import org.json.JSONArray;
 import org.json.JSONException;

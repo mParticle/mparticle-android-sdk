@@ -6,6 +6,7 @@ import android.os.Build;
 
 import com.mparticle.ExceptionHandler;
 import com.mparticle.MParticle;
+import com.mparticle.consent.ConsentState;
 import com.mparticle.identity.IdentityApi;
 import com.mparticle.internal.networking.BaseMPMessage;
 
@@ -941,5 +942,18 @@ public class ConfigManager {
                 listenerRef.onMpIdChanged(mpid);
             }
         }
+    }
+
+    public ConsentState getConsentState(long mpid) {
+        String serializedConsent = getUserStorage(mpid).getSerializedConsentState();
+        return ConsentState.withConsentState(serializedConsent).build();
+    }
+
+    public void setConsentState(ConsentState state, long mpid) {
+        String serializedConsent = null;
+        if (state != null) {
+            serializedConsent = state.toString();
+        }
+        getUserStorage(mpid).setSerializedConsentState(serializedConsent);
     }
 }

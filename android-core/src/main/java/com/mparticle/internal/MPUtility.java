@@ -92,10 +92,7 @@ public class MPUtility {
     }
 
     public static boolean isEmpty(CharSequence str) {
-        if (str == null || str.length() == 0)
-            return true;
-        else
-            return false;
+        return str == null || str.length() == 0;
     }
 
     public static boolean isEmpty(JSONArray jsonArray) {

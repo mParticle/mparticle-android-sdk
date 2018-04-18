@@ -5,6 +5,7 @@ import android.os.Build;
 
 import com.mparticle.MParticle;
 import com.mparticle.UserAttributeListener;
+import com.mparticle.consent.ConsentState;
 import com.mparticle.internal.AppStateManager;
 import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.Constants;
@@ -260,5 +261,13 @@ import java.util.Map;
         mConfigManager.setMpid(newMpid);
         return true;
 
+    }
+
+    public ConsentState getConsentState(long mpid) {
+        return mConfigManager.getConsentState(mpid);
+    }
+
+    public void setConsentState(ConsentState state, long mpid) {
+        mConfigManager.setConsentState(state, mpid);
     }
 }

@@ -6,6 +6,7 @@ import android.content.Context;
 import com.mparticle.MParticle;
 import com.mparticle.UserAttributeListener;
 import com.mparticle.commerce.Cart;
+import com.mparticle.consent.ConsentState;
 import com.mparticle.segmentation.SegmentListener;
 
 import java.util.Map;
@@ -157,7 +158,7 @@ public class MParticleUser {
      *
      * @param tag the tag to be set for the user
      *
-     * @return whether the tag was sucessfully set
+     * @return whether the tag was successfully set
      */
     public boolean setUserTag(String tag) {
         return setUserAttribute(tag, null);
@@ -170,5 +171,13 @@ public class MParticleUser {
     MParticleUser setUserDelegate(MParticleUserDelegate mParticleUserDelegate) {
         mUserDelegate = mParticleUserDelegate;
         return this;
+    }
+
+    public ConsentState getConsentState() {
+        return mUserDelegate.getConsentState(getId());
+    }
+
+    public void setConsentState(ConsentState state) {
+        mUserDelegate.setConsentState(state, getId());
     }
 }

@@ -4,7 +4,6 @@ import android.content.SharedPreferences;
 import android.location.Location;
 import android.os.Message;
 
-import com.mparticle.ConsentEvent;
 import com.mparticle.MPEvent;
 import com.mparticle.MParticle;
 import com.mparticle.MockMParticle;
@@ -13,10 +12,8 @@ import com.mparticle.commerce.Product;
 import com.mparticle.identity.IdentityApi;
 import com.mparticle.internal.database.services.MParticleDBManager;
 import com.mparticle.internal.networking.BaseMPMessage;
-import com.mparticle.internal.networking.MPConsentEventMessage;
 import com.mparticle.mock.MockContext;
 import com.mparticle.mock.MockSharedPreferences;
-import com.mparticle.mock.utils.RandomUtils;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -38,7 +35,6 @@ import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicLong;
 
-import static com.mparticle.internal.Constants.MessageKey.Consent;
 import static com.mparticle.internal.Constants.MessageKey.TIMESTAMP;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -564,55 +560,6 @@ public class MessageManagerTest {
         assertEquals(message.get("ni"), JSONObject.NULL);
         assertEquals(message.get("oi"), oldIdentity);
         assertEquals(message.get("ui"), identities);
-    }
-
-    @Test
-    public void testLogConsentEvent() throws Exception {
-        MPConsentEventMessageAccessor accessor = new MPConsentEventMessageAccessor();
-        List<ConsentEvent> consentEvents = new ArrayList<ConsentEvent>();
-        for (int i = 0; i < 100; i++) {
-            consentEvents.add(RandomUtils.getInstance().getRandomMPConsentEvent());
-        }
-        for (ConsentEvent consentEvent: consentEvents) {
-            BaseMPMessage json = manager.logConsentEvent(consentEvent);
-            if (json.has(TIMESTAMP)) {
-                assertEquals(json.getLong(TIMESTAMP), consentEvent.getTimestamp().longValue());
-            } else {
-                assertEquals(consentEvent.getTimestamp(), 0, 1);
-            }
-            try {
-                assertEquals(json.optString(Consent.REGULATION, null), accessor.getRegulationString(consentEvent.getRegulation()));
-                assertEquals(json.optString(Consent.DOCUMENT, null), consentEvent.getDocument());
-                assertEquals(json.optString(Consent.LOCATION, null), consentEvent.getConsentLocation());
-                assertEquals(json.optString(Consent.HARDWARE_ID, null), consentEvent.getHardwareId());
-                assertEquals(json.optString(Consent.PURPOSE, null), consentEvent.getPurpose());
-                assertEquals(json.optString(Consent.CONSENTED, null), String.valueOf(consentEvent.hasConsent()));
-                assertEquals(json.optString(Consent.CATEGORY, null), accessor.getConsentCategoryString(consentEvent.getConsentCategory()));
-            }
-            catch (NullPointerException npe) {
-                npe.printStackTrace();
-            }
-            catch (AssertionError ape) {
-                ape.printStackTrace();
-            }
-        }
-    }
-
-    class MPConsentEventMessageAccessor extends MPConsentEventMessage {
-
-        private MPConsentEventMessageAccessor() {
-            super();
-        }
-
-        @Override
-        protected String getConsentCategoryString(ConsentEvent.ConsentCategory consentCategory) {
-            return super.getConsentCategoryString(consentCategory);
-        }
-
-        @Override
-        protected String getRegulationString(ConsentEvent.Regulation regulation) {
-            return super.getRegulationString(regulation);
-        }
     }
 
 }

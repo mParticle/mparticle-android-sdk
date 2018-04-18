@@ -1,6 +1,5 @@
 package com.mparticle.mock.utils;
 
-import com.mparticle.ConsentEvent;
 import com.mparticle.MParticle;
 
 import org.junit.Test;
@@ -11,7 +10,6 @@ import java.util.Random;
 import java.util.Set;
 import java.util.TreeSet;
 
-import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertTrue;
 
 /**
@@ -61,58 +59,6 @@ public class RandomUtils {
             attributes.put(key, value);
         }
         return attributes;
-    }
-
-    public ConsentEvent getRandomMPConsentEvent() {
-        Random random = new Random();
-        ConsentEvent.Builder builder = ConsentEvent.builder(random.nextBoolean());
-        //occasionally return the most basic version
-        if (randomInt(0, 5) % 5 == 0) {
-            return  builder.build();
-        }
-        if (random.nextBoolean()) {
-            builder.consentCategory(ConsentEvent.ConsentCategory.values()[randomInt(0, ConsentEvent.ConsentCategory.values().length)]);
-        }
-        if (random.nextBoolean()) {
-            builder.consentLocation(getAlphaNumericString(randomInt(0, 255)));
-        }
-        if (random.nextBoolean()) {
-            builder.document(getAlphaNumericString(randomInt(0, 255)));
-        }
-        if (random.nextBoolean()) {
-            builder.regulation(ConsentEvent.Regulation.values()[randomInt(0, ConsentEvent.Regulation.values().length)]);
-        }
-        if (random.nextBoolean()) {
-            builder.timestamp(System.currentTimeMillis() + randomInt(-100000, 100000));
-        }
-        if (random.nextBoolean()) {
-            builder.hardwareId(getAlphaNumericString(randomInt(0, 255)));
-        }
-        if (random.nextBoolean()) {
-            builder.purpose(getAlphaNumericString(randomInt(0, 255)));
-        }
-        if (random.nextBoolean()) {
-            int count = randomInt(0, 10);
-            for (int i = 0; i < count; i++) {
-                String key = "";
-                String value = "";
-                if (randomInt(0, 5) % 5 == 0) {
-                    key = null;
-                } else {
-                    key = getAlphaNumericString(20);
-                }
-                if (randomInt(0, 5) % 5 == 0) {
-                    value = null;
-                } else {
-                    value = getAlphaNumericString(20);
-                }
-                builder.customAttribute(key, value);
-            }
-        }
-        if (random.nextBoolean()) {
-            builder.customAttributes(getRandomAttributes(randomInt(0, 10)));
-        }
-        return builder.build();
     }
 
     public String getAlphaNumericString(int length) {

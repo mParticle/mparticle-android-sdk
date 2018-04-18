@@ -6,6 +6,8 @@ import android.util.Log;
 
 import com.mparticle.BaseCleanStartedEachTest;
 import com.mparticle.MParticle;
+import com.mparticle.consent.ConsentState;
+import com.mparticle.consent.GDPRConsent;
 import com.mparticle.utils.MParticleUtils;
 import com.mparticle.mock.utils.RandomUtils;
 
@@ -16,6 +18,7 @@ import java.util.Map;
 import java.util.Random;
 
 import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertTrue;
 
@@ -108,5 +111,47 @@ public class MParticleUserDelegateTest extends BaseCleanStartedEachTest {
                 assertNull(storedUserAttributes.get(attribute.getKey()));
             }
         }
+    }
+
+    @Test
+    public void testSetConsentState() throws Exception {
+        Long mpid = new Random().nextLong();
+        Long mpid2 = new Random().nextLong();
+        ConsentState state = mUserDelegate.getConsentState(mpid);
+        assertNotNull(state);
+        assertNotNull(state.getGDPRConsentState());
+        assertEquals(0, state.getGDPRConsentState().size());
+
+        ConsentState.Builder builder = ConsentState.builder();
+        builder.addGDPRConsentState("foo", GDPRConsent.builder(true).build());
+        mUserDelegate.setConsentState(builder.build(), mpid);
+        builder.addGDPRConsentState("foo2", GDPRConsent.builder(true).build());
+        mUserDelegate.setConsentState(builder.build(), mpid2);
+
+        assertEquals(1, mUserDelegate.getConsentState(mpid).getGDPRConsentState().size());
+        assertTrue(mUserDelegate.getConsentState(mpid).getGDPRConsentState().containsKey("foo"));
+
+        assertEquals(2, mUserDelegate.getConsentState(mpid2).getGDPRConsentState().size());
+        assertTrue(mUserDelegate.getConsentState(mpid2).getGDPRConsentState().containsKey("foo"));
+        assertTrue(mUserDelegate.getConsentState(mpid2).getGDPRConsentState().containsKey("foo2"));
+    }
+
+    @Test
+    public void testRemoveConsentState() throws Exception {
+        Long mpid = new Random().nextLong();
+        ConsentState state = mUserDelegate.getConsentState(mpid);
+        assertNotNull(state);
+        assertNotNull(state.getGDPRConsentState());
+        assertEquals(0, state.getGDPRConsentState().size());
+
+        ConsentState.Builder builder = ConsentState.builder();
+        builder.addGDPRConsentState("foo", GDPRConsent.builder(true).build());
+        mUserDelegate.setConsentState(builder.build(), mpid);
+
+        assertEquals(1, mUserDelegate.getConsentState(mpid).getGDPRConsentState().size());
+        assertTrue(mUserDelegate.getConsentState(mpid).getGDPRConsentState().containsKey("foo"));
+        mUserDelegate.setConsentState(null, mpid);
+        assertEquals(0, mUserDelegate.getConsentState(mpid).getGDPRConsentState().size());
+
     }
 }

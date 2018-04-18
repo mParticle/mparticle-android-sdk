@@ -216,6 +216,7 @@ import java.util.UUID;
                 break;
             case CLEAR_MESSAGES_FOR_UPLOAD:
                 mMessageManagerCallbacks.messagesClearedForUpload();
+                break;
         }
     }
 

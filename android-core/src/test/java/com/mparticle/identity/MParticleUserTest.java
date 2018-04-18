@@ -3,6 +3,9 @@ package com.mparticle.identity;
 import com.mparticle.MParticle;
 import com.mparticle.MockMParticle;
 import com.mparticle.UserAttributeListener;
+import com.mparticle.consent.ConsentState;
+
+import junit.framework.Assert;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -16,6 +19,8 @@ import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.eq;
 
@@ -32,7 +37,6 @@ public class MParticleUserTest {
         Mockito.when(mp.Identity().mConfigManager.getMpid()).thenReturn(defaultMpId);
 
     }
-
 
     /**
      * this tests that when you add a call setUserIdentity, with a user name and id that already exists,

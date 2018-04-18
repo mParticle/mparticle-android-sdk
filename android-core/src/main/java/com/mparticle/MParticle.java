@@ -349,16 +349,6 @@ public class MParticle {
     }
 
     /**
-     * Logs a Consent events in compliance with GDPR
-     *
-     * @see ConsentEvent
-     */
-    void logEvent(ConsentEvent consentEvent) {
-        mAppStateManager.ensureActiveSession();
-        mMessageManager.logConsentEvent(consentEvent);
-    }
-
-    /**
      * Logs an increase in the lifetime value of a user. This will signify an increase
      * in the revenue assigned to this user for service providers that support revenue tracking.
      *

@@ -2,6 +2,8 @@ package com.mparticle.internal;
 
 import com.mparticle.MParticle;
 import com.mparticle.commerce.CommerceApi;
+import com.mparticle.consent.ConsentState;
+import com.mparticle.consent.GDPRConsent;
 import com.mparticle.mock.MockContext;
 import com.mparticle.mock.MockSharedPreferences;
 
@@ -24,7 +26,6 @@ public class MessageBatchTest {
         Mockito.when(mockMp.Commerce()).thenReturn(mockCommerce);
         MParticle.setInstance(mockMp);
         ConfigManager manager = new ConfigManager(new MockContext(), MParticle.Environment.Production, "some api key", "some api secret");
-        MockSharedPreferences sharedPrefs = new MockSharedPreferences();
         boolean sessionHistory = true;
         MessageBatch batch = MessageBatch.create( sessionHistory, manager,new JSONObject(), manager.getMpid());
         assertNotNull(batch.getString("dt"));
@@ -54,5 +55,42 @@ public class MessageBatchTest {
 
         batch = MessageBatch.create( sessionHistory, manager,new JSONObject(), manager.getMpid());
         assertFalse(batch.has("pb"));
+    }
+
+    @Test
+    public void testAddConsentState() throws Exception {
+        MParticle mockMp = Mockito.mock(MParticle.class);
+        Mockito.when(mockMp.getEnvironment()).thenReturn(MParticle.Environment.Development);
+        CommerceApi mockCommerce = Mockito.mock(CommerceApi.class);
+        Mockito.when(mockMp.Commerce()).thenReturn(mockCommerce);
+        MParticle.setInstance(mockMp);
+        ConfigManager manager = new ConfigManager(new MockContext(), MParticle.Environment.Production, "some api key", "some api secret");
+        boolean sessionHistory = true;
+        MessageBatch batch = MessageBatch.create( sessionHistory, manager,new JSONObject(), manager.getMpid());
+        batch.addConsentState(null);
+        batch.addConsentState(ConsentState.builder().build());
+        JSONObject consent = batch.optJSONObject("con");
+        assertNotNull(consent);
+        batch.addConsentState(
+                ConsentState.builder().addGDPRConsentState("foo purpose",
+                        GDPRConsent.builder(true)
+                                .timestamp(10L)
+                                .location("foo location")
+                                .hardwareId("foo hardware id")
+                                .document("foo document")
+                                .build())
+                        .build()
+        );
+        consent = batch.optJSONObject(Constants.MessageKey.CONSENT_STATE);
+        assertNotNull(consent);
+        consent = consent.optJSONObject(Constants.MessageKey.CONSENT_STATE_GDPR);
+        assertNotNull(consent);
+        consent = consent.getJSONObject("foo purpose");
+        assertNotNull(consent);
+        assertEquals(true, consent.getBoolean(Constants.MessageKey.CONSENT_STATE_GDPR_CONSENTED));
+        assertEquals((long)10, consent.getLong(Constants.MessageKey.CONSENT_STATE_GDPR_TIMESTAMP));
+        assertEquals("foo location", consent.getString(Constants.MessageKey.CONSENT_STATE_GDPR_LOCATION));
+        assertEquals("foo hardware id", consent.getString(Constants.MessageKey.CONSENT_STATE_GDPR_HARDWARE_ID));
+        assertEquals("foo document", consent.getString(Constants.MessageKey.CONSENT_STATE_GDPR_DOCUMENT));
     }
 }
