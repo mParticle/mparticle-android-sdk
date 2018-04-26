@@ -86,8 +86,12 @@ public abstract class KitIntegration {
     }
 
     public boolean isDisabled() {
+        return isDisabled(false);
+    }
+
+    public boolean isDisabled(boolean isOptOutEvent) {
         return !getConfiguration().passesBracketing(kitManager.getUserBucket()) ||
-                (getConfiguration().shouldHonorOptOut() && kitManager.isOptedOut());
+                (getConfiguration().shouldHonorOptOut() && kitManager.isOptedOut() && !isOptOutEvent);
 
     }
 

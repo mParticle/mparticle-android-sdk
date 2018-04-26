@@ -297,7 +297,7 @@ public class KitManagerImpl implements KitManager, DeepLinkListener, UserAttribu
     public void setOptOut(boolean optOutStatus) {
         for (KitIntegration provider : providers.values()) {
             try {
-                if (!provider.isDisabled()) {
+                if (!provider.isDisabled(true)) {
                     List<ReportingMessage> messages = provider.setOptOut(optOutStatus);
                     getReportingManager().logAll(messages);
                 }
