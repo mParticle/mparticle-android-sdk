@@ -167,16 +167,17 @@ public final class ConsentState {
          *
          * @param purpose
          */
-        public void removeGDPRConsentState(@NonNull String purpose) {
+        public Builder removeGDPRConsentState(@NonNull String purpose) {
             String normalizedPurpose = ConsentState.canonicalizeForDeduplication(purpose);
             if (MPUtility.isEmpty(normalizedPurpose)) {
                 Logger.error("Cannot remove GDPR Consent with null or empty purpose");
-                return;
+                return this;
             }
             if (gdprConsentState == null) {
-                return;
+                return this;
             }
             gdprConsentState.remove(normalizedPurpose);
+            return this;
         }
 
         public ConsentState build() {
