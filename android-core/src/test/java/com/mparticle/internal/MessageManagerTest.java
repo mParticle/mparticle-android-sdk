@@ -388,6 +388,14 @@ public class MessageManagerTest {
     }
 
     @Test
+    public void testTriggerMessages() throws Exception {
+        Mockito.when(configManager.shouldTrigger(Mockito.any(MPMessage.class))).thenReturn(true);
+        manager.checkForTrigger(Mockito.mock(MPMessage.class));
+        Mockito.verify(uploadHandler, Mockito.times(1)).removeMessages(Mockito.eq(UploadHandler.UPLOAD_TRIGGER_MESSAGES));
+        Mockito.verify(uploadHandler, Mockito.times(1)).sendEmptyMessageDelayed(Mockito.eq(UploadHandler.UPLOAD_TRIGGER_MESSAGES), Mockito.eq(Constants.TRIGGER_MESSAGE_DELAY));
+    }
+
+    @Test
     public void testLogStateTransition() throws Exception {
         appStateManager.getSession().start();
         manager.mInstallType = MParticle.InstallType.KnownInstall;

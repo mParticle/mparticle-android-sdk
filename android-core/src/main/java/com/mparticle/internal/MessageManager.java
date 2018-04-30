@@ -826,7 +826,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
     public void checkForTrigger(MPMessage message) {
         if (mConfigManager.shouldTrigger(message)){
             mUploadHandler.removeMessages(UploadHandler.UPLOAD_TRIGGER_MESSAGES);
-            mUploadHandler.sendMessageDelayed(mUploadHandler.obtainMessage(UploadHandler.UPLOAD_TRIGGER_MESSAGES, 1, 0), Constants.TRIGGER_MESSAGE_DELAY);
+            mUploadHandler.sendEmptyMessageDelayed(UploadHandler.UPLOAD_TRIGGER_MESSAGES, Constants.TRIGGER_MESSAGE_DELAY);
         }
     }
 
