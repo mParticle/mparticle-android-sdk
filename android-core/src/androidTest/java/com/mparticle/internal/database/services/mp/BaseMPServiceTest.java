@@ -44,6 +44,6 @@ abstract public class BaseMPServiceTest extends BaseCleanInstallEachTest {
         RandomUtils random = RandomUtils.getInstance();
         Session session = new Session();
         session.mSessionID = sessionId;
-        return new BaseMPMessage.Builder(random.getAlphaNumericString(random.randomInt(1, 24)), session, new Location(random.getAlphaNumericString(random.randomInt(1, 55))), mpid).build();
+        return new BaseMPMessage.Builder(random.getAlphaNumericString(random.randomInt(20, 48)), session, new Location(random.getAlphaNumericString(random.randomInt(1, 55))), mpid).build();
     }
 }

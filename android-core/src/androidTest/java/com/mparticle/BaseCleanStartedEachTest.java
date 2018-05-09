@@ -5,6 +5,12 @@ import android.util.Log;
 
 import com.mparticle.identity.AccessUtils;
 import com.mparticle.identity.AccessUtils.IdentityApiClient;
+import com.mparticle.identity.BaseIdentityTask;
+import com.mparticle.identity.IdentityApiRequest;
+import com.mparticle.identity.IdentityApiResult;
+import com.mparticle.identity.IdentityHttpResponse;
+import com.mparticle.identity.TaskFailureListener;
+import com.mparticle.identity.TaskSuccessListener;
 import com.mparticle.internal.AppStateManager;
 import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.Constants;
@@ -41,13 +47,27 @@ public abstract class BaseCleanStartedEachTest extends BaseAbstractTest {
         new ConfigManager(mContext, null, null, null).setMpid(mStartingMpid);
         mServer.setupHappyIdentify(mStartingMpid);
         MParticle.setInstance(null);
+        final CountDownLatch latch = new CountDownLatch(1);
         MParticleOptions options = MParticleOptions
                 .builder(mContext)
                 .credentials("key", "value")
+                .identify(IdentityApiRequest.withEmptyUser().build())
+                .identifyTask(new BaseIdentityTask().addSuccessListener(new TaskSuccessListener() {
+                    @Override
+                    public void onSuccess(IdentityApiResult result) {
+                        latch.countDown();
+                    }
+                })
+                .addFailureListener(new TaskFailureListener() {
+                    @Override
+                    public void onFailure(IdentityHttpResponse result) {
+                        latch.countDown();
+                    }
+                }))
                 .build();
         MParticle.start(options);
         AppStateManager.mInitialized = false;
-        Thread.sleep(3000);
+        latch.await();
     }
 
     protected void setMpidAfterInitialIdentityCall(long mpid) {
