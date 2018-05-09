@@ -600,7 +600,7 @@ public class MParticleDBManager extends BaseDBManager {
                     String key = entry.getKey();
                     List<String> attributeValues = entry.getValue();
                     Object oldValue = currentValues.get(key);
-                    if (oldValue != null && oldValue instanceof List && ((List) oldValue).containsAll(attributeValues)) {
+                    if (oldValue != null && oldValue instanceof List && oldValue.equals(attributeValues)) {
                         continue;
                     }
                     int deleted = UserAttributesService.deleteAttributes(db, key, userAttribute.mpId);
