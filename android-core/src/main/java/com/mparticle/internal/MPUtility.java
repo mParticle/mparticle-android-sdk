@@ -222,8 +222,10 @@ public class MPUtility {
         try {
             //Some Android 8 devices crash here for no clear reason
             return TimeZone.getDefault().getDisplayName(false, 0);
-        } catch (Exception ignored){ }
-            return null;
+        }
+        catch (Exception ignored){ }
+        catch (AssertionError e){ }
+        return null;
     }
 
     public static int getOrientation(Context context) {
