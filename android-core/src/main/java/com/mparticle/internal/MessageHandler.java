@@ -63,7 +63,7 @@ import java.util.UUID;
     }
 
 
-    private boolean prepareDatabase() {
+    boolean prepareDatabase() {
         if (db == null){
             try {
                 db = mDbHelper.getWritableDatabase();
@@ -288,7 +288,7 @@ import java.util.UUID;
         MParticle.getInstance().getKitManager().setUserAttribute(key, newValue);
     }
 
-    private void removeUserAttribute(MessageManager.UserAttributeRemoval container, MessageManagerCallbacks callbacks) {
+    void removeUserAttribute(MessageManager.UserAttributeRemoval container, MessageManagerCallbacks callbacks) {
         Map<String, Object> currentValues = MParticle.getInstance().getAllUserAttributes();
         String[] deleteWhereArgs = {container.key};
         try {
@@ -704,7 +704,7 @@ import java.util.UUID;
                     String key = entry.getKey();
                     List<String> attributeValues = entry.getValue();
                     Object oldValue = currentValues.get(key);
-                    if (oldValue != null && oldValue instanceof List && ((List) oldValue).containsAll(attributeValues)) {
+                    if (oldValue != null && oldValue instanceof List && oldValue.equals(attributeValues)) {
                         continue;
                     }
                     String[] deleteWhereArgs = {key};
