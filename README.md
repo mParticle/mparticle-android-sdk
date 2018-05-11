@@ -1,4 +1,4 @@
-<img src="http://static.mparticle.com/sdk/logo.svg" width="280">
+<img src="https://static.mparticle.com/sdk/mp_logo_black.svg" width="280">
 
 ## Android SDK
 
@@ -16,7 +16,7 @@ You can grab the Core SDK via Maven Central. Please reference the badge above an
 
 ```groovy
 dependencies {
-    compile 'com.mparticle:android-core:4.17.10'
+    compile 'com.mparticle:android-core:4.17.12'
 }
 ```
 
@@ -27,8 +27,8 @@ Several integrations require additional client-side add-on libraries called "kit
 ```groovy
 dependencies {
     compile (
-        'com.mparticle:android-example-kit:4.17.10',
-        'com.mparticle:android-another-kit:4.17.10'
+        'com.mparticle:android-example-kit:4.17.12',
+        'com.mparticle:android-another-kit:4.17.12'
     )
 }
 ```
