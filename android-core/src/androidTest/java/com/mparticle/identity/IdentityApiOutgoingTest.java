@@ -1,10 +1,11 @@
 package com.mparticle.identity;
 
-import com.mparticle.testutils.BaseCleanStartedEachTest;
 import com.mparticle.MParticle;
-import com.mparticle.identity.IdentityApiRequest;
+import com.mparticle.testutils.BaseCleanStartedEachTest;
 
 import org.junit.Test;
+
+import java.util.Random;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.matchingJsonPath;
 import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
@@ -38,7 +39,7 @@ public final class IdentityApiOutgoingTest extends BaseCleanStartedEachTest {
 
     @Test
     public void testModify() throws Exception {
-        MParticle.getInstance().Identity().modify(IdentityApiRequest.withEmptyUser().build());
+        MParticle.getInstance().Identity().modify(IdentityApiRequest.withEmptyUser().customerId(new Random().nextLong() + "").build());
         mServer.waitForVerify(postRequestedFor(urlPathMatching(String.format("/v([0-9]*)/%s/modify", mStartingMpid))), 5000);
     }
 

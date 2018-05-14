@@ -99,6 +99,10 @@ import java.util.UUID;
     public IdentityHttpResponse modify(IdentityApiRequest request) throws JSONException, IOException {
         JSONObject jsonObject = getChangeJson(request);
         Logger.verbose("Identity modify request: \n" + jsonObject.toString());
+        JSONArray identityChanges = jsonObject.optJSONArray("identity_changes");
+        if (identityChanges != null && identityChanges.length() == 0) {
+            return new IdentityHttpResponse(200, mConfigManager.getMpid(), "", null);
+        }
         HttpURLConnection connection = getPostConnection(request.mpid, MODIFY_PATH, jsonObject.toString());
         connection = makeUrlRequest(Endpoint.IDENTITY, connection, jsonObject.toString(), false);
         int responseCode = connection.getResponseCode();

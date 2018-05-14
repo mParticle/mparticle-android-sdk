@@ -1,6 +1,7 @@
 package com.mparticle.identity;
 
 import android.content.Context;
+import android.os.Handler;
 import android.support.test.InstrumentationRegistry;
 
 import com.mparticle.testutils.BaseCleanStartedEachTest;
@@ -48,6 +49,54 @@ public class MParticleIdentityClientImplTest extends BaseCleanStartedEachTest {
     public void before() throws Exception {
         mContext = InstrumentationRegistry.getContext();
         mConfigManager = MParticle.getInstance().getConfigManager();
+    }
+
+
+    @Test
+    public void testModifySameData() throws Exception {
+        final int startingModifyRequestCount = mServer.getRequests().Identity().modify().size();
+        final CountDownLatch latch = new CountDownLatch(2);
+        final Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                fail("modify did not complete");
+            }
+        }, 10 * 1000);
+
+       MParticle.getInstance().Identity().modify(IdentityApiRequest.withEmptyUser().build())
+               .addSuccessListener(new TaskSuccessListener() {
+                   @Override
+                   public void onSuccess(IdentityApiResult result) {
+                        latch.countDown();
+                        MParticle.getInstance().Identity().modify(IdentityApiRequest.withEmptyUser().build())
+                                .addSuccessListener(new TaskSuccessListener() {
+                                    @Override
+                                    public void onSuccess(IdentityApiResult result) {
+                                        latch.countDown();
+                                        int currentModifyRequestCount = mServer.getRequests().Identity().modify().size();
+                                        //make sure we made 1 or 0 modify requests. It could go either way for the first modify request,
+                                        //it may have changes, it may not depending on state. The second request though, should not have
+                                        //changes, and therefore it should not take place, so less than 2 requests is a good condition
+                                        assertTrue(startingModifyRequestCount + 2 > currentModifyRequestCount);
+                                        handler.removeCallbacks(null);
+                                    }
+                                })
+                                .addFailureListener(new TaskFailureListener() {
+                                    @Override
+                                    public void onFailure(IdentityHttpResponse result) {
+                                        fail("task failed");
+                                    }
+                                });
+                   }
+               })
+               .addFailureListener(new TaskFailureListener() {
+                   @Override
+                   public void onFailure(IdentityHttpResponse result) {
+                        fail("task failed");
+                   }
+               });
+        latch.await();
     }
 
     @Test

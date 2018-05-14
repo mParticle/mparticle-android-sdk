@@ -17,11 +17,11 @@ public final class IdentityHttpResponse {
 
     private IdentityHttpResponse() {}
 
-    IdentityHttpResponse(int code, long mpid, String context, ArrayList<Error> errors) {
+    public IdentityHttpResponse(int code, long mpid, String context, ArrayList<Error> errors) {
         this.httpCode = code;
         this.mpId = mpid;
         this.context = context;
-        this.errors = errors;
+        this.errors = errors == null ? new ArrayList<Error>() : new ArrayList<Error>(errors);
     }
 
     public IdentityHttpResponse(int code, String errorString) {

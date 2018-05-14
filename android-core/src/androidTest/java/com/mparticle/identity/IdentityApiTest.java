@@ -459,7 +459,7 @@ public final class IdentityApiTest extends BaseCleanStartedEachTest {
         for (MParticle.IdentityType identity: userIdentities.keySet()) {
             AccessUtils.setUserIdentity(userIdentities.get(identity), identity, mStartingMpid);
         }
-        IdentityApiRequest request = IdentityApiRequest.withUser(MParticle.getInstance().Identity().getCurrentUser()).build();
+        IdentityApiRequest request = IdentityApiRequest.withUser(MParticle.getInstance().Identity().getCurrentUser()).customerId(RandomUtils.getInstance().getAlphaNumericString(24)).build();
 
         MParticle.getInstance().Identity().modify(request);
         //change the mpid;
@@ -473,7 +473,7 @@ public final class IdentityApiTest extends BaseCleanStartedEachTest {
             public boolean isMatch(JSONObject jsonObject) {
                 if (jsonObject.has("identity_changes")) {
                     try {
-                        return jsonObject.getJSONArray("identity_changes").length() == 0;
+                        return jsonObject.getJSONArray("identity_changes").length() == 1;
                     } catch (JSONException jse) {
                         jse.toString();
                     }
