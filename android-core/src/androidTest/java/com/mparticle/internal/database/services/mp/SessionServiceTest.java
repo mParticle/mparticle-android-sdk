@@ -1,11 +1,9 @@
 package com.mparticle.internal.database.services.mp;
 
-import android.content.Context;
 import android.database.Cursor;
-import android.support.test.InstrumentationRegistry;
 
-import com.mparticle.internal.networking.BaseMPMessage;
 import com.mparticle.internal.database.tables.mp.SessionTable;
+import com.mparticle.internal.networking.BaseMPMessage;
 
 import junit.framework.Assert;
 
@@ -15,17 +13,8 @@ import org.junit.Test;
 import java.util.UUID;
 
 import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertTrue;
 
 public class SessionServiceTest extends BaseMPServiceTest {
-
-    private static Context context;
-
-    @Override
-    public void before() throws Exception {
-        super.before();
-        context = InstrumentationRegistry.getContext();
-    }
 
     @Test
     public void testUpdateSessionInstallReferrer() throws Exception {

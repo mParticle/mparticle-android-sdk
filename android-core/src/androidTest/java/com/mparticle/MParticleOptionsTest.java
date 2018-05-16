@@ -11,8 +11,10 @@ import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.Constants;
 import com.mparticle.internal.Logger;
 import com.mparticle.internal.MPUtility;
-import com.mparticle.utils.AndroidUtils;
+import com.mparticle.testutils.AndroidUtils;
+import com.mparticle.testutils.BaseAbstractTest;
 
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -25,21 +27,17 @@ import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertTrue;
 import static junit.framework.Assert.fail;
 
-public class MParticleOptionsTest extends BaseTest {
+public class MParticleOptionsTest extends BaseAbstractTest {
     Context mContext;
     Context mProductionContext;
 
-    @Override
-    public void beforeClass() {
+    @Before
+    public void before() {
         if (Looper.myLooper() == null) {
             Looper.prepare();
         }
-    }
-
-    @Override
-    public void before() {
         mContext = InstrumentationRegistry.getContext();
-        mProductionContext = AndroidUtils.getInstance().getProductionContext(mContext);
+        mProductionContext = new AndroidUtils().getProductionContext(mContext);
         MParticle.setInstance(null);
         assertNull(MParticle.getInstance());
     }

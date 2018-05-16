@@ -9,6 +9,7 @@ import com.mparticle.internal.networking.BaseMPMessage;
 import com.mparticle.internal.Session;
 
 import org.json.JSONException;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -23,9 +24,8 @@ public class BreadcrumbServiceTest extends BaseMPServiceTest {
     private static int breadCrumbLimit;
     private static Context context;
 
-    @Override
+    @Before
     public void before() throws Exception {
-        super.before();
         message = new BaseMPMessage.Builder("test", new Session(), new Location("New York City"), 1).build();
         context = InstrumentationRegistry.getContext();
         breadCrumbLimit = ConfigManager.getBreadcrumbLimit(context);

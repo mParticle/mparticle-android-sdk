@@ -47,7 +47,7 @@ import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 
 
-public class KitManagerImpl implements KitManager, AttributionListener, UserAttributeListener {
+public class KitManagerImpl implements KitManager, AttributionListener, UserAttributeListener, IdentityStateListener {
     private final ReportingManager mReportingManager;
     private final AppStateManager mAppStateManager;
     private final ConfigManager mConfigManager;
@@ -71,13 +71,7 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
         mAppStateManager = appStateManager;
         mBackgroundTaskHandler = backgroundTaskHandler;
         mKitIntegrationFactory = new KitIntegrationFactory();
-        MParticle.getInstance().Identity().addIdentityStateListener(new IdentityStateListener() {
-            @Override
-            public void onUserIdentified(MParticleUser user) {
-                user.getUserAttributes(KitManagerImpl.this);
-                KitManagerImpl.this.onUserIdentified(user);
-            }
-        });
+        MParticle.getInstance().Identity().addIdentityStateListener(this);
     }
 
     /**
@@ -1022,7 +1016,9 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
     // IdentityListener forwarding
     //================================================================================
 
-    private void onUserIdentified(MParticleUser mParticleUser) {
+    @Override
+    public void onUserIdentified(MParticleUser mParticleUser) {
+        mParticleUser.getUserAttributes(this);
         for (KitIntegration provider : providers.values()) {
             if (provider instanceof KitIntegration.IdentityListener && !provider.isDisabled()) {
                 ((KitIntegration.IdentityListener) provider).onUserIdentified(FilteredMParticleUser.getInstance(mParticleUser, provider));

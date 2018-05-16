@@ -8,9 +8,7 @@ import android.os.Looper;
 
 import com.mparticle.MPEvent;
 import com.mparticle.MParticle;
-import com.mparticle.identity.IdentityApi;
 import com.mparticle.internal.ConfigManager;
-import com.mparticle.internal.KitFrameworkWrapper;
 import com.mparticle.mock.MockContext;
 import com.mparticle.mock.MockKitConfiguration;
 import com.mparticle.mock.MockKitIntegrationFactory;
@@ -29,7 +27,6 @@ import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;

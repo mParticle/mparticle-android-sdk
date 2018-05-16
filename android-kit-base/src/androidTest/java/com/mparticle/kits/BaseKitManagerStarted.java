@@ -1,48 +1,35 @@
 package com.mparticle.kits;
 
 import android.content.Context;
-import android.os.Handler;
-import android.os.HandlerThread;
-import android.os.Looper;
 
-import com.mparticle.BaseCleanInstallEachTest;
+import com.mparticle.testutils.BaseCleanInstallEachTest;
 import com.mparticle.MParticle;
 import com.mparticle.MParticleOptions;
 import com.mparticle.internal.AccessUtils;
 import com.mparticle.internal.AppStateManager;
 import com.mparticle.internal.BackgroundTaskHandler;
 import com.mparticle.internal.ConfigManager;
-import com.mparticle.internal.KitManager;
 import com.mparticle.internal.ReportingManager;
-import com.mparticle.utils.MParticleUtils;
-import com.mparticle.utils.TestingUtils;
+import com.mparticle.testutils.MParticleUtils;
+import com.mparticle.testutils.TestingUtils;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.Before;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
-import java.util.Set;
-
-import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
-import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching;
 
 public abstract class BaseKitManagerStarted extends BaseCleanInstallEachTest {
     private static Map<Integer, String> mCustomTestKits;
     protected Long mStartingMpid;
     protected KitManagerImpl mKitManager;
 
-    @Override
-    protected void beforeClass() throws Exception {
-
-    }
-
-    @Override
-    protected void before() throws Exception {
+    @Before
+    public void before() throws Exception {
         mStartingMpid = new Random().nextLong();
-        MParticleUtils.clear();
         setupConfigMessageForKits(registerCustomKits());
         new ConfigManager(mContext, null, null, null).setMpid(mStartingMpid);
         mServer.setupHappyIdentify(mStartingMpid);
@@ -79,7 +66,7 @@ public abstract class BaseKitManagerStarted extends BaseCleanInstallEachTest {
         }
         try {
             JSONObject configObject = new JSONObject().put("eks", eks);
-            mServer.setupConfigResponse(configObject.toString(), 2000);
+            mServer.setupConfigResponse(configObject.toString());
         } catch (JSONException e) {
             throw new RuntimeException("Error sending custom eks to config");
         }
@@ -88,8 +75,31 @@ public abstract class BaseKitManagerStarted extends BaseCleanInstallEachTest {
     //this is a non-anonymous class only for the purpose of debugging
     class CustomKitManagerImpl extends KitManagerImpl {
 
+        private Runnable kitsStartedListener;
+        private boolean started;
+        public void setOnKitsStartedListener(Runnable runnable) {
+            if (started) {
+                if (kitsStartedListener != null) {
+                    kitsStartedListener.run();
+                }
+            } else {
+                kitsStartedListener = runnable;
+            }
+        }
+
         public CustomKitManagerImpl(Context context, ReportingManager reportingManager, ConfigManager configManager, AppStateManager appStateManager, BackgroundTaskHandler backgroundTaskHandler) {
             super(context, reportingManager, configManager, appStateManager, backgroundTaskHandler);
+        }
+
+        @Override
+        public void updateKits(JSONArray kitConfigs) {
+            super.updateKits(kitConfigs);
+            started = true;
+            if (kitsStartedListener != null) {
+                kitsStartedListener.run();
+                kitsStartedListener = null;
+            }
+
         }
     }
 

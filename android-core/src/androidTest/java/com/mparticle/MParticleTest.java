@@ -4,8 +4,9 @@ import android.support.test.InstrumentationRegistry;
 
 import com.mparticle.internal.KitFrameworkWrapper;
 import com.mparticle.internal.MessageManager;
-import com.mparticle.mock.utils.RandomUtils;
-import com.mparticle.utils.MParticleUtils;
+import com.mparticle.testutils.BaseCleanStartedEachTest;
+import com.mparticle.testutils.RandomUtils;
+import com.mparticle.testutils.MParticleUtils;
 
 import junit.framework.Assert;
 
@@ -14,20 +15,9 @@ import org.junit.Test;
 import java.util.Arrays;
 
 import static junit.framework.Assert.assertFalse;
-import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertTrue;
 
 public class MParticleTest extends BaseCleanStartedEachTest {
-
-    @Override
-    protected void beforeClass() throws Exception {
-
-    }
-
-    @Override
-    protected void before() throws Exception {
-
-    }
 
     @Test
     public void testAndroidIdDisabled() throws Exception {

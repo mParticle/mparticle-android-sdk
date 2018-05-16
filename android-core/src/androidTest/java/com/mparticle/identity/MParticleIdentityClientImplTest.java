@@ -3,16 +3,17 @@ package com.mparticle.identity;
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;
 
-import com.mparticle.BaseCleanStartedEachTest;
+import com.mparticle.testutils.BaseCleanStartedEachTest;
 import com.mparticle.MParticle;
 import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.MPUtility;
-import com.mparticle.mock.utils.RandomUtils;
-import com.mparticle.utils.TestingUtils;
+import com.mparticle.testutils.RandomUtils;
+import com.mparticle.testutils.TestingUtils;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -43,13 +44,8 @@ public class MParticleIdentityClientImplTest extends BaseCleanStartedEachTest {
 
     private RandomUtils mRandomUtils = RandomUtils.getInstance();
 
-    @Override
-    protected void beforeClass() throws Exception {
-
-    }
-
-    @Override
-    protected void before() throws Exception {
+    @Before
+    public void before() throws Exception {
         mContext = InstrumentationRegistry.getContext();
         mConfigManager = MParticle.getInstance().getConfigManager();
     }

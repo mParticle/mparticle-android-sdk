@@ -1,8 +1,5 @@
 package com.mparticle.internal.database.services.mp;
 
-import com.mparticle.MParticle;
-
-import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Random;

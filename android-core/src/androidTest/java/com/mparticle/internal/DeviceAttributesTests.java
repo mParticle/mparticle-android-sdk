@@ -1,24 +1,19 @@
 package com.mparticle.internal;
 
 import android.content.Context;
-import android.os.Looper;
 import android.support.test.InstrumentationRegistry;
 
-import com.mparticle.BaseCleanInstallEachTest;
+import com.mparticle.testutils.BaseCleanInstallEachTest;
 import com.mparticle.MParticle;
 import com.mparticle.MParticleOptions;
 
 import org.json.JSONObject;
-import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 public class DeviceAttributesTests extends BaseCleanInstallEachTest {
-
-
 
     @Test
     public void testAndroidIDCollection() throws Exception {
@@ -38,15 +33,5 @@ public class DeviceAttributesTests extends BaseCleanInstallEachTest {
         JSONObject newAttributes = new JSONObject();
         DeviceAttributes.addAndroidId(attributes, context);
         assertTrue(newAttributes.length() == 0);
-    }
-
-    @Override
-    protected void beforeClass() throws Exception {
-
-    }
-
-    @Override
-    protected void before() throws Exception {
-
     }
 }

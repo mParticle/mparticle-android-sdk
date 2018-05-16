@@ -11,8 +11,6 @@ import org.json.JSONObject;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import java.math.BigDecimal;
-
 import static org.junit.Assert.*;
 
 public class MessageBatchTest {

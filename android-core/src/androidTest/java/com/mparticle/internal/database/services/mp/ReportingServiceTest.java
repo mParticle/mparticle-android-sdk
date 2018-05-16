@@ -1,14 +1,12 @@
 package com.mparticle.internal.database.services.mp;
 
 
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.junit.Before;
-import org.junit.Test;
-
-import com.mparticle.MParticle;
 import com.mparticle.internal.Constants;
 import com.mparticle.internal.JsonReportingMessage;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -18,7 +16,6 @@ import java.util.Random;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertTrue;
-import static junit.framework.Assert.fail;
 
 public class ReportingServiceTest extends BaseMPServiceTest {
 

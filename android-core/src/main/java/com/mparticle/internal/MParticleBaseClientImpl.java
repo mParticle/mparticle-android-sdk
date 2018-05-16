@@ -68,7 +68,7 @@ public class MParticleBaseClientImpl {
             mListener.onSend(connection, payload);
 
             //gingerbread seems to dislike pinning w/ godaddy. Being that GB is near-dead anyway, just disable pinning for it.
-            if (!isDebug() && isPostGingerBread() && connection instanceof HttpsURLConnection) {
+            if (isPostGingerBread() && connection instanceof HttpsURLConnection) {
                 try {
                     ((HttpsURLConnection) connection).setSSLSocketFactory(getSocketFactory());
                 } catch (Exception e) {

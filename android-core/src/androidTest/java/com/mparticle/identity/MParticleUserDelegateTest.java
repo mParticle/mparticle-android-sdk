@@ -4,13 +4,14 @@ import android.content.Context;
 import android.support.test.InstrumentationRegistry;
 import android.util.Log;
 
-import com.mparticle.BaseCleanStartedEachTest;
+import com.mparticle.testutils.BaseCleanStartedEachTest;
 import com.mparticle.MParticle;
 import com.mparticle.consent.ConsentState;
 import com.mparticle.consent.GDPRConsent;
-import com.mparticle.utils.MParticleUtils;
-import com.mparticle.mock.utils.RandomUtils;
+import com.mparticle.testutils.MParticleUtils;
+import com.mparticle.testutils.RandomUtils;
 
+import org.junit.Before;
 import org.junit.Test;
 
 import java.util.HashMap;
@@ -27,12 +28,8 @@ public class MParticleUserDelegateTest extends BaseCleanStartedEachTest {
     MParticleUserDelegate mUserDelegate;
     RandomUtils mRandom;
 
-    @Override
-    protected void beforeClass() throws Exception {
-    }
-
-    @Override
-    protected void before() throws Exception {
+    @Before
+    public void before() throws Exception {
         mContext = InstrumentationRegistry.getContext();
         mUserDelegate = MParticle.getInstance().Identity().mUserDelegate;
         mRandom = RandomUtils.getInstance();

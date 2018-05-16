@@ -5,9 +5,10 @@ import android.location.Location;
 import com.mparticle.internal.Constants;
 import com.mparticle.internal.Session;
 import com.mparticle.internal.networking.BaseMPMessage;
-import com.mparticle.mock.utils.RandomUtils;
+import com.mparticle.testutils.RandomUtils;
 
 import org.json.JSONException;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.util.HashMap;
@@ -22,10 +23,8 @@ import static junit.framework.Assert.assertNotNull;
 public class MessageServiceTest extends BaseMPServiceTest {
     Long mpid1, mpid2, mpid3;
 
-
-    @Override
-    protected void before() throws Exception {
-        super.before();
+    @Before
+    public void before() throws Exception {
         mpid1 = new Random().nextLong();
         mpid2 = new Random().nextLong();
         mpid3 = new Random().nextLong();

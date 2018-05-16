@@ -11,21 +11,9 @@ android {
     packagingOptions {
         exclude 'META-INF/LICENSE'
     }
-
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_6
         targetCompatibility JavaVersion.VERSION_1_6
-    }
-
-    sourceSets {
-        String sharedTestDir = 'src/sharedTest/java'
-        test {
-            java.srcDir sharedTestDir
-        }
-        androidTest {
-            java.srcDirs += sharedTestDir
-            java.srcDirs += 'src/androidTest/java'
-        }
     }
 
     String url = "\"\"";
@@ -52,8 +40,6 @@ android {
     if (gitHash == null || gitHash.length() == 0) {
         gitHash = System.getenv("MP_GIT_SHA").substring(0, 7)
     }
-    
-    testBuildType obtainTestBuildType()
 
     defaultConfig {
         minSdkVersion 9
@@ -74,37 +60,19 @@ android {
     buildTypes {
         debug {
             minifyEnabled false
-            buildConfigField "Boolean", "MP_DEBUG", "true"
+            //multidex is required for instrumented test builds
             multiDexEnabled true
-        }
-        release {
-            minifyEnabled true
-            proguardFiles 'proguard.pro'
-
-            consumerProguardFiles 'consumer-proguard.pro'
-//            buildConfigField "Boolean", "MP_DEBUG", "true"
-        }
-        instrumented {
-            minifyEnabled false
-            debuggable true
+            buildConfigField "Boolean", "MP_DEBUG", "true"
             buildConfigField "String", "MP_URL", "\"localhost:8080\""
             buildConfigField "String", "MP_CONFIG_URL", "\"localhost:8080\""
             buildConfigField "String", "MP_IDENTITY_URL", "\"localhost:8080\""
             buildConfigField "String", "SCHEME", "\"http\""
-            buildConfigField "Boolean", "MP_DEBUG", "false"
-            signingConfig signingConfigs.debug
-            multiDexEnabled true
-
-            configurations {
-                testArtifacts.extendsFrom testRuntime
-            }
-            task testJar(type: Jar, dependsOn: ":android-core:assembleAndroidTest") {
-                classifier 'androidTest'
-                from "$buildDir/intermediates/classes/androidTest/instrumented"
-            }
-            artifacts {
-                testArtifacts testJar
-            }
+        }
+        release {
+            minifyEnabled true
+            proguardFiles 'proguard.pro'
+            consumerProguardFiles 'consumer-proguard.pro'
+            //buildConfigField "Boolean", "MP_DEBUG", "true"
         }
     }
 }
@@ -131,29 +99,17 @@ dependencies {
     compileOnly 'com.android.installreferrer:installreferrer:[1.0, )'
     compileOnly 'com.google.android.instantapps:instantapps:[1.0, )'
 
+    //the junit tests seem to explicitly need this dependency while
+    //working in Android studio, but from the command line it's not necessary
+    testImplementation project(':android-core')
     testImplementation 'junit:junit:4.12'
     testImplementation  files('libs/java-json.jar')
     testImplementation 'org.powermock:powermock-module-junit4:1.6.2'
     testImplementation 'org.powermock:powermock-api-mockito:1.6.2'
     testImplementation 'org.powermock:powermock-core:1.6.2'
-    testImplementation 'com.android.support:support-v4:27.1.0'
-    androidTestImplementation 'com.android.installreferrer:installreferrer:1.0'
-    androidTestImplementation 'com.android.support:support-annotations:27.1.0'
-    androidTestImplementation 'com.android.support.test:runner:1.0.1'
-    androidTestImplementation 'com.android.support.test:rules:1.0.1'
-    androidTestImplementation 'org.apache.httpcomponents:httpclient-android:4.3.5.1'
-    androidTestImplementation 'org.slf4j:slf4j-api:1.7.12'
-    androidTestImplementation('org.mockito:mockito-core:1+'){
-        exclude group: 'junit' exclude group: 'org.hamcrest', module: 'hamcrest-core'
-    }
-    androidTestImplementation("com.github.tomakehurst:wiremock:2.8.0") {
+    testImplementation 'com.android.support:support-v4:27.1.1'
 
-        exclude group: 'org.apache.httpcomponents', module: 'httpclient'
-        exclude group: 'org.slf4j', module: 'slf4j-api'
-        exclude group: 'org.ow2.asm', module: 'asm'
-        exclude group: 'org.json', module: 'json'
-    }
-    androidTestImplementation 'org.hamcrest:hamcrest-library:1.3'
+    androidTestImplementation project(':testutils')
 }
 
 configurations {
@@ -180,15 +136,4 @@ task copyLintJar(type: Copy) {
 project.afterEvaluate {
     def compileLintTask = project.tasks.find { it.name == 'compileLint' }
     compileLintTask.dependsOn(copyLintJar)
-}
-
-
-def obtainTestBuildType() {
-    def result = "instrumented";
-
-    if (project.hasProperty("testBuildType")) {
-        result = project.getProperties().get("testBuildType")
-    }
-
-    result
 }

@@ -1,15 +1,15 @@
 package com.mparticle.internal;
 
-import android.content.Context;
-
-import com.mparticle.*;
-import com.mparticle.internal.database.services.MParticleDBManager;
+import com.mparticle.testutils.BaseCleanStartedEachTest;
+import com.mparticle.MParticle;
 import com.mparticle.internal.database.services.AccessUtils;
+import com.mparticle.internal.database.services.MParticleDBManager;
 import com.mparticle.internal.networking.BaseMPMessage;
-import com.mparticle.utils.TestingUtils;
+import com.mparticle.testutils.TestingUtils;
 
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.util.HashSet;
@@ -19,18 +19,11 @@ import java.util.Set;
 import static junit.framework.Assert.assertEquals;
 
 public class AppStateManagerInstrumentedTest extends BaseCleanStartedEachTest {
-    Context mContext;
     AppStateManager mAppStateManager;
 
-    @Override
-    protected void beforeClass() throws Exception {
-
-    }
-
-    @Override
-    protected void before() throws Exception {
+    @Before
+    public void before() throws Exception {
         mAppStateManager = MParticle.getInstance().getAppStateManager();
-
         MParticle.getInstance().getConfigManager().setMpid(Constants.TEMPORARY_MPID);
     }
 

@@ -1,11 +1,7 @@
 package com.mparticle.internal;
 
-import android.content.Context;
-import android.support.test.InstrumentationRegistry;
-
-import com.mparticle.BaseCleanStartedEachTest;
-import com.mparticle.MParticle;
-import com.mparticle.mock.utils.RandomUtils;
+import com.mparticle.testutils.BaseCleanStartedEachTest;
+import com.mparticle.testutils.RandomUtils;
 
 import org.junit.Test;
 
@@ -16,19 +12,6 @@ import java.util.Set;
 import static junit.framework.Assert.assertEquals;
 
 public class UserStorageTest extends BaseCleanStartedEachTest {
-
-    MParticle instance;
-    Context mContext;
-
-    @Override
-    protected void beforeClass() throws Exception {
-    }
-
-    @Override
-    protected void before() throws Exception {
-        mContext = InstrumentationRegistry.getContext();
-        instance = MParticle.getInstance();
-    }
 
     @Test
     public void testMigrate() {

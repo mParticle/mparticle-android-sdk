@@ -4,12 +4,12 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 import com.mparticle.AccessUtils;
-import com.mparticle.BaseCleanInstallEachTest;
+import com.mparticle.testutils.BaseCleanInstallEachTest;
 import com.mparticle.MParticle;
 import com.mparticle.MParticleOptions;
 import com.mparticle.internal.database.tables.mp.SessionTable;
 import com.mparticle.internal.networking.BaseMPMessage;
-import com.mparticle.mock.MockContext;
+import com.mparticle.testutils.mock.MockContext;
 
 import junit.framework.Assert;
 
@@ -20,16 +20,6 @@ import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertTrue;
 
 public class MessageManagerTests extends BaseCleanInstallEachTest {
-
-    @Override
-    protected void beforeClass() throws Exception {
-
-    }
-
-    @Override
-    protected void before() throws Exception {
-
-    }
 
     @Test
     public void testInstallReferrerMigration() throws Exception {

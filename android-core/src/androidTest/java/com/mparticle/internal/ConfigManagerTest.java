@@ -4,36 +4,28 @@ import android.content.Context;
 import android.os.Looper;
 import android.support.test.InstrumentationRegistry;
 
-import com.mparticle.BaseTest;
+import com.mparticle.testutils.BaseAbstractTest;
 import com.mparticle.MParticle;
 import com.mparticle.MParticleOptions;
 
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.util.Random;
 import java.util.UUID;
 
 import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertFalse;
-import static junit.framework.Assert.assertNotNull;
-import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertTrue;
 
-public class ConfigManagerTest extends BaseTest {
+public class ConfigManagerTest extends BaseAbstractTest {
     MParticle instance;
     Context mContext;
 
-    @Override
-    public void beforeClass() {
+    @Before
+    public void before() {
         if (Looper.myLooper() == null) {
             Looper.prepare();
         }
-    }
-
-    @Override
-    public void before() {
         mContext = InstrumentationRegistry.getContext();
         MParticle.setInstance(null);
         ConfigManager.clearMpid(mContext);

@@ -3,9 +3,11 @@ package com.mparticle.internal.database.tables.mp;
 import android.database.sqlite.SQLiteDatabase;
 import android.support.test.InstrumentationRegistry;
 
-import com.mparticle.BaseCleanInstallEachTest;
+import com.mparticle.testutils.BaseCleanInstallEachTest;
 import com.mparticle.internal.database.BaseDatabase;
 import com.mparticle.internal.database.services.SQLiteOpenHelperWrapper;
+
+import org.junit.Before;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -27,13 +29,8 @@ public class BaseTableTest extends BaseCleanInstallEachTest {
         InstrumentationRegistry.getTargetContext().deleteDatabase(DB_NAME);
     }
 
-    @Override
-    protected void beforeClass() throws Exception {
-
-    }
-
-    @Override
-    protected void before() throws Exception {
+    @Before
+    public final void before() throws Exception {
         deleteTestingDatabase();
     }
 

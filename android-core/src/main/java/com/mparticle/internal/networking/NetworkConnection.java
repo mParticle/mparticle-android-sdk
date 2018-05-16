@@ -47,7 +47,7 @@ public class NetworkConnection extends BaseNetworkConnection {
         try {
 
             //gingerbread seems to dislike pinning w/ godaddy. Being that GB is near-dead anyway, just disable pinning for it.
-            if (!isDebug() && isPostGingerBread() && connection instanceof HttpsURLConnection) {
+            if (isPostGingerBread() && connection instanceof HttpsURLConnection) {
                 try {
                     ((HttpsURLConnection) connection).setSSLSocketFactory(getSocketFactory());
                 } catch (Exception e) {
@@ -79,10 +79,6 @@ public class NetworkConnection extends BaseNetworkConnection {
             throw ex;
         }
         return connection;
-    }
-
-    boolean isDebug() {
-        return BuildConfig.MP_DEBUG;
     }
 
     boolean isPostGingerBread() {

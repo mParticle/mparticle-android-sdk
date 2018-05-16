@@ -3,14 +3,9 @@ package com.mparticle.internal.database;
 import android.database.sqlite.SQLiteDatabase;
 import android.support.test.InstrumentationRegistry;
 
-import com.mparticle.MParticle;
 import com.mparticle.internal.database.services.SQLiteOpenHelperWrapper;
 import com.mparticle.internal.database.tables.mp.BaseTableTest;
 import com.mparticle.internal.database.tables.mp.MParticleDatabaseHelper;
-import com.mparticle.internal.database.tables.mp.SessionTable;
-import com.mparticle.utils.AndroidUtils;
-import com.mparticle.utils.MParticleUtils;
-import com.mparticle.utils.TestingUtils;
 
 import org.junit.Test;
 
