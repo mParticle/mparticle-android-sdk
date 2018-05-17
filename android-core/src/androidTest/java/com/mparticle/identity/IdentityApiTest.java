@@ -2,20 +2,12 @@ package com.mparticle.identity;
 
 import android.os.Handler;
 
-import com.mparticle.testutils.BaseCleanStartedEachTest;
 import com.mparticle.MParticle;
 import com.mparticle.MParticleTask;
-import com.mparticle.identity.AccessUtils;
-import com.mparticle.identity.IdentityApi;
-import com.mparticle.identity.IdentityApiRequest;
-import com.mparticle.identity.IdentityApiResult;
-import com.mparticle.identity.IdentityStateListener;
-import com.mparticle.identity.MParticleUser;
-import com.mparticle.identity.TaskSuccessListener;
-import com.mparticle.identity.UserAliasHandler;
 import com.mparticle.internal.ConfigManager;
-import com.mparticle.testutils.RandomUtils;
+import com.mparticle.testutils.BaseCleanStartedEachTest;
 import com.mparticle.testutils.MParticleUtils;
+import com.mparticle.testutils.RandomUtils;
 import com.mparticle.testutils.Server;
 import com.mparticle.testutils.TestingUtils;
 
@@ -24,8 +16,10 @@ import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
@@ -481,6 +475,46 @@ public final class IdentityApiTest extends BaseCleanStartedEachTest {
                 return false;
             }
         }, 20000);
+    }
+
+    @Test
+    public void testGetUsersApi() {
+        //test that by default there is only the starting user
+        assertEquals(MParticle.getInstance().Identity().getUsers().size(), 1);
+        assertEquals((Long)MParticle.getInstance().Identity().getUsers().get(0).getId(), mStartingMpid);
+
+        //add 5 Users
+        Random random = new Random();
+        List<Long> mpids = new ArrayList<Long>();
+        mpids.add(mStartingMpid);
+        for (int i = 0; i < 5; i++) {
+            mpids.add(random.nextLong());
+        }
+
+        for (Long mpid: mpids) {
+            MParticle.getInstance().getConfigManager().setMpid(mpid);
+        }
+
+        //test that there are now 6 users present in the getUsers() endpoint
+        assertEquals(MParticle.getInstance().Identity().getUsers().size(), mpids.size());
+
+        //test that they are the same users we added before
+        for (MParticleUser mParticleUser: MParticle.getInstance().Identity().getUsers()) {
+            assertTrue(mpids.contains(mParticleUser.getId()));
+        }
+
+        //remove 2 users
+        for (int i = 0; i < 2; i++) {
+            MParticle.getInstance().getConfigManager().deleteUserStorage(mpids.remove(i));
+        }
+
+        //test that there are now 4 remaining users
+        assertEquals(MParticle.getInstance().Identity().getUsers().size(), 4);
+
+        //test that they are the correct users
+        for (MParticleUser mParticleUser: MParticle.getInstance().Identity().getUsers()) {
+            assertTrue(mpids.contains(mParticleUser.getId()));
+        }
     }
 }
 

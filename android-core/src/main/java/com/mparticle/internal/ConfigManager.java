@@ -565,6 +565,10 @@ public class ConfigManager {
         return UserStorage.getMpIdSet(mContext).contains(mpid);
     }
 
+    public Set<Long> getMpids() {
+        return UserStorage.getMpIdSet(mContext);
+    }
+
     private static boolean sInProgress;
     public static void setIdentityRequestInProgress(boolean inProgress) {
         sInProgress = inProgress;

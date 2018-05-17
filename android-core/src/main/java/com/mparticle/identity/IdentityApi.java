@@ -18,7 +18,9 @@ import com.mparticle.internal.MPUtility;
 import com.mparticle.internal.MessageManager;
 import com.mparticle.internal.database.services.MParticleDBManager;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -85,6 +87,16 @@ public class IdentityApi {
             } else {
             return null;
         }
+    }
+
+    public List<MParticleUser> getUsers() {
+        List<MParticleUser> users = new ArrayList<MParticleUser>();
+        Set<Long> mpids = mConfigManager.getMpids();
+        mpids.remove(0L);
+        for (Long mpid: mpids) {
+            users.add(MParticleUserImpl.getInstance(mContext, mpid, mUserDelegate));
+        }
+        return users;
     }
 
     /**
