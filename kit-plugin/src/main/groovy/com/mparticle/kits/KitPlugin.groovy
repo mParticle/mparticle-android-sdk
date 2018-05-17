@@ -20,9 +20,9 @@ class KitPlugin implements Plugin<Project> {
         target.repositories.add(target.repositories.jcenter())
         target.repositories.add(target.repositories.google())
         target.configurations.create('deployerJars')
-        target.dependencies.add('compile', 'com.mparticle:android-kit-base:'+target.version)
-        target.dependencies.add('testCompile', 'junit:junit:4.12')
-        target.dependencies.add('testCompile', 'org.mockito:mockito-core:1.10.19')
+        target.dependencies.add('api', 'com.mparticle:android-kit-base:'+target.version)
+        target.dependencies.add('testImplementation', 'junit:junit:4.12')
+        target.dependencies.add('testImplementation', 'org.mockito:mockito-core:1.10.19')
         target.dependencies.add('deployerJars', 'org.kuali.maven.wagons:maven-s3-wagon:1.2.1')
         target.extensions.create("mparticle", MParticlePluginExtension)
         LibraryExtension androidLib = target.android
