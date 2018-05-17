@@ -6,6 +6,8 @@ import com.mparticle.commerce.Impression;
 import com.mparticle.commerce.Product;
 import com.mparticle.commerce.Promotion;
 import com.mparticle.commerce.TransactionAttributes;
+import com.mparticle.consent.ConsentState;
+import com.mparticle.consent.GDPRConsent;
 import com.mparticle.mock.MockKitConfiguration;
 
 import org.json.JSONArray;
@@ -273,5 +275,175 @@ public class KitConfigurationTest {
         assertFalse(configuration.shouldForwardAttribute(configuration.getUserAttributeFilters(), "test key in config as false"));
         assertTrue(configuration.shouldForwardAttribute(configuration.getUserAttributeFilters(), "test key in config as true"));
         assertTrue(configuration.shouldForwardAttribute(configuration.getUserAttributeFilters(), "test key not in config"));
+    }
+
+    @Test
+    public void testConsentForwardingRules() throws Exception {
+        KitConfiguration configuration = MockKitConfiguration.createKitConfiguration(
+                new JSONObject("{\"id\":56,\"crvf\":{\"i\": true, \"v\":[{\"c\":true, \"h\":123}, {\"c\":false, \"h\":456}]}}"));
+        assertEquals(2, configuration.mConsentForwardingRules.size());
+        assertEquals(true, configuration.consentForwardingIncludeMatches);
+        assertEquals(true, configuration.mConsentForwardingRules.get(123));
+        assertEquals(false, configuration.mConsentForwardingRules.get(456));
+
+        configuration = configuration.parseConfiguration(
+                new JSONObject("{\"id\":56,\"crvf\":{\"i\": false, \"v\":[{\"c\":false, \"h\":123}, {\"c\":true, \"h\":456}]}}"));
+        assertEquals(2, configuration.mConsentForwardingRules.size());
+        assertEquals(false, configuration.consentForwardingIncludeMatches);
+        assertEquals(false, configuration.mConsentForwardingRules.get(123));
+        assertEquals(true, configuration.mConsentForwardingRules.get(456));
+
+        configuration.parseConfiguration(new JSONObject("{\"id\":\"1\"}"));
+        assertEquals(0, configuration.mConsentForwardingRules.size());
+    }
+
+    @Test
+    public void testConsentStateShouldFilterFromForwardingRulesEmptyConsent() throws Exception {
+        JSONObject jsonConfiguration = new JSONObject("{\"id\":56}");
+        JSONObject consentForwardingRule = new JSONObject();
+        jsonConfiguration.put("crvf", consentForwardingRule);
+        consentForwardingRule.put("i", false);
+        JSONArray ruleArray = new JSONArray();
+        consentForwardingRule.put("v", ruleArray);
+        JSONObject rule1 = new JSONObject();
+        ruleArray.put(rule1);
+        rule1.put("h", KitUtils.hashForFiltering("1" + "foo purpose"));
+        rule1.put("c", false);
+        KitConfiguration configuration = MockKitConfiguration.createKitConfiguration(
+                new JSONObject("{\"id\":56,\"crvf\":{\"i\": true, \"v\":[{\"c\":true, \"h\":123}, {\"c\":false, \"h\":456}]}}"));
+
+        assertFalse(configuration.isConsentStateFilterMatch(ConsentState.builder().build()));
+    }
+
+    @Test
+    public void testConsentStateShouldFilterFromMultipleForwardingRulesAndStates() throws Exception {
+        JSONObject jsonConfiguration = new JSONObject("{\"id\":56}");
+        JSONObject consentForwardingRule = new JSONObject();
+        jsonConfiguration.put("crvf", consentForwardingRule);
+        consentForwardingRule.put("i", false);
+        JSONArray ruleArray = new JSONArray();
+        consentForwardingRule.put("v", ruleArray);
+        JSONObject rule1 = new JSONObject();
+        ruleArray.put(rule1);
+        rule1.put("h", KitUtils.hashForFiltering("1" + "foo purpose 1"));
+        rule1.put("c", false);
+
+        JSONObject rule2 = new JSONObject();
+        ruleArray.put(rule2);
+        rule2.put("h", KitUtils.hashForFiltering("1" + "foo purpose 2"));
+        rule2.put("c", false);
+
+        JSONObject rule3 = new JSONObject();
+        ruleArray.put(rule3);
+        rule3.put("h", KitUtils.hashForFiltering("1" + "foo purpose 3"));
+        rule3.put("c", false);
+
+        KitConfiguration configuration = MockKitConfiguration.createKitConfiguration(jsonConfiguration);
+
+        assertTrue(
+                configuration.isConsentStateFilterMatch(
+                        ConsentState.builder()
+                                .addGDPRConsentState(
+                                        "foo purpose 1",
+                                        GDPRConsent.builder(false).build())
+                                .addGDPRConsentState(
+                                        "foo purpose 2",
+                                        GDPRConsent.builder(true).build())
+                                .addGDPRConsentState(
+                                        "foo purpose 3",
+                                        GDPRConsent.builder(true).build())
+                                .build()
+                )
+        );
+
+        assertTrue(
+                configuration.isConsentStateFilterMatch(
+                        ConsentState.builder()
+                                .addGDPRConsentState(
+                                        "foo purpose 1",
+                                        GDPRConsent.builder(true).build())
+                                .addGDPRConsentState(
+                                        "foo purpose 2",
+                                        GDPRConsent.builder(false).build())
+                                .addGDPRConsentState(
+                                        "foo purpose 3",
+                                        GDPRConsent.builder(true).build())
+                                .build()
+                )
+        );
+
+        assertTrue(
+                configuration.isConsentStateFilterMatch(
+                        ConsentState.builder()
+                                .addGDPRConsentState(
+                                        "foo purpose 1",
+                                        GDPRConsent.builder(true).build())
+                                .addGDPRConsentState(
+                                        "foo purpose 2",
+                                        GDPRConsent.builder(true).build())
+                                .addGDPRConsentState(
+                                        "foo purpose 3",
+                                        GDPRConsent.builder(false).build())
+                                .build()
+                )
+        );
+    }
+
+    @Test
+    public void testConsentStateShouldFilterFromForwardingRules() throws Exception {
+        JSONObject jsonConfiguration = new JSONObject("{\"id\":56}");
+        JSONObject consentForwardingRule = new JSONObject();
+        jsonConfiguration.put("crvf", consentForwardingRule);
+        consentForwardingRule.put("i", false);
+        JSONArray ruleArray = new JSONArray();
+        consentForwardingRule.put("v", ruleArray);
+        JSONObject rule1 = new JSONObject();
+        ruleArray.put(rule1);
+        rule1.put("h", KitUtils.hashForFiltering("1" + "foo purpose"));
+        rule1.put("c", false);
+        KitConfiguration configuration = MockKitConfiguration.createKitConfiguration(jsonConfiguration);
+
+        assertTrue(
+                configuration.isConsentStateFilterMatch(
+                    ConsentState.builder()
+                            .addGDPRConsentState(
+                                    "foo purpose",
+                                    GDPRConsent.builder(false).build())
+                            .build()
+                    )
+        );
+
+        assertFalse(
+                configuration.isConsentStateFilterMatch(
+                        ConsentState.builder()
+                                .addGDPRConsentState(
+                                        "foo purpose",
+                                        GDPRConsent.builder(true).build())
+                                .build()
+                )
+        );
+
+        ruleArray.getJSONObject(0).put("c", true);
+        configuration.parseConfiguration(jsonConfiguration);
+
+        assertTrue(
+                configuration.isConsentStateFilterMatch(
+                        ConsentState.builder()
+                                .addGDPRConsentState(
+                                        "foo purpose",
+                                        GDPRConsent.builder(true).build())
+                                .build()
+                )
+        );
+
+        assertFalse(
+                configuration.isConsentStateFilterMatch(
+                        ConsentState.builder()
+                                .addGDPRConsentState(
+                                        "foo purpose",
+                                        GDPRConsent.builder(false).build())
+                                .build()
+                )
+        );
     }
 }

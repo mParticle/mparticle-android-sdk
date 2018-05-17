@@ -11,6 +11,7 @@ import android.os.Bundle;
 import com.mparticle.MPEvent;
 import com.mparticle.MParticle;
 import com.mparticle.commerce.CommerceEvent;
+import com.mparticle.consent.ConsentState;
 import com.mparticle.identity.MParticleUser;
 
 import java.lang.ref.WeakReference;
@@ -552,5 +553,7 @@ public abstract class KitIntegration {
         void onSetAllUserAttributes(Map<String, String> userAttributes, Map<String, List<String>> userAttributeLists, FilteredMParticleUser user);
 
         boolean supportsAttributeLists();
+
+        void onConsentStateUpdated(ConsentState oldState, ConsentState newState, FilteredMParticleUser user);
     }
 }

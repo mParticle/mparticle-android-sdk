@@ -11,8 +11,10 @@ import com.mparticle.AttributionResult;
 import com.mparticle.MPEvent;
 import com.mparticle.MParticle;
 import com.mparticle.commerce.CommerceEvent;
+import com.mparticle.consent.ConsentState;
 import com.mparticle.identity.IdentityApiRequest;
 import com.mparticle.identity.MParticleUser;
+import com.mparticle.identity.MParticleUserImpl;
 
 import org.json.JSONArray;
 
@@ -52,6 +54,8 @@ public interface KitManager {
     void setUserTag(String tag, long mpid);
 
     void incrementUserAttribute(String key, String value, long mpid);
+
+    void onConsentStateUpdated(ConsentState oldState, ConsentState newState, long mpid);
 
     void setUserIdentity(String id, MParticle.IdentityType identityType);
 
@@ -108,4 +112,5 @@ public interface KitManager {
     void onLogoutCompleted(MParticleUser user, IdentityApiRequest request);
 
     void onModifyCompleted(MParticleUser user, IdentityApiRequest request);
+
 }

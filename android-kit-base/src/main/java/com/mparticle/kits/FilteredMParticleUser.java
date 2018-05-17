@@ -3,6 +3,7 @@ package com.mparticle.kits;
 import com.mparticle.MParticle;
 import com.mparticle.UserAttributeListener;
 import com.mparticle.commerce.Cart;
+import com.mparticle.consent.ConsentState;
 import com.mparticle.identity.MParticleUser;
 
 import java.util.HashMap;
@@ -112,5 +113,15 @@ public class FilteredMParticleUser implements MParticleUser {
     @Override
     public boolean setUserTag(String tag) {
         return false;
+    }
+
+    @Override
+    public ConsentState getConsentState() {
+        return null;
+    }
+
+    @Override
+    public void setConsentState(ConsentState state) {
+
     }
 }

@@ -17,6 +17,7 @@ import com.mparticle.MParticle;
 import com.mparticle.ReferrerReceiver;
 import com.mparticle.UserAttributeListener;
 import com.mparticle.commerce.CommerceEvent;
+import com.mparticle.consent.ConsentState;
 import com.mparticle.identity.IdentityApiRequest;
 import com.mparticle.identity.IdentityStateListener;
 import com.mparticle.identity.MParticleUser;
@@ -36,6 +37,7 @@ import org.json.JSONObject;
 
 import java.lang.ref.WeakReference;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -61,7 +63,7 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
     private Map<Integer, AttributionResult> mAttributionResultsMap = new TreeMap<>();
 
 
-    ConcurrentHashMap<Integer, KitIntegration> providers = new ConcurrentHashMap<Integer, KitIntegration>(0);
+    ConcurrentHashMap<Integer, KitIntegration> providers = new ConcurrentHashMap<Integer, KitIntegration>();
     private final Context mContext;
 
     public KitManagerImpl(Context context, ReportingManager reportingManager, ConfigManager configManager, AppStateManager appStateManager, BackgroundTaskHandler backgroundTaskHandler) {
@@ -83,16 +85,6 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
 
     public void setKitFactory(KitIntegrationFactory kitIntegrationFactory) {
         mKitIntegrationFactory = kitIntegrationFactory;
-    }
-
-    @Override
-    public void updateKits(final JSONArray kitConfigs) {
-        Runnable runnable = new UpdateKitRunnable(kitConfigs);
-        if (Looper.getMainLooper() != Looper.myLooper()) {
-            new Handler(Looper.getMainLooper()).post(runnable);
-        }else{
-            runnable.run();
-        }
     }
 
     private ReportingManager getReportingManager() {
@@ -127,101 +119,137 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
 
         private final JSONArray kitConfigs;
 
-        public UpdateKitRunnable(JSONArray kitConfigs) {
+        UpdateKitRunnable(JSONArray kitConfigs) {
             super();
             this.kitConfigs = kitConfigs;
         }
 
         @Override
         public void run() {
-            PushRegistrationHelper.PushRegistration pushRegistration = PushRegistrationHelper.getLatestPushRegistration(getContext());
-            Intent mockInstallReferrer = ReferrerReceiver.getMockInstallReferrerIntent(MParticle.getInstance().getInstallReferrer());
-            int currentId = 0;
-            HashSet<Integer> activeIds = new HashSet<Integer>();
-            if (kitConfigs != null) {
-                for (int i = 0; i < kitConfigs.length(); i++) {
-                    try {
-                        JSONObject current = kitConfigs.getJSONObject(i);
-                        currentId = current.getInt(KitConfiguration.KEY_ID);
-                        activeIds.add(currentId);
-                        if (mKitIntegrationFactory.isSupported(currentId)) {
-                            KitConfiguration configuration = createKitConfiguration(current);
-                            if (providers.containsKey(currentId)) {
-                                providers.get(currentId).setConfiguration(configuration);
-                                providers.get(currentId).onSettingsUpdated(configuration.getSettings());
-                            }else {
-                                KitIntegration provider = mKitIntegrationFactory.createInstance(KitManagerImpl.this, configuration);
-                                providers.put(currentId, provider);
-                                if (provider.isDisabled()) {
-                                    continue;
-                                }
-                                provider.onKitCreate(configuration.getSettings(), getContext());
-                                Logger.debug("OnKitCreate called: " + provider.getName());
-                                if (provider instanceof KitIntegration.ActivityListener) {
-                                    WeakReference<Activity> activityWeakReference = getCurrentActivity();
-                                    if (activityWeakReference != null) {
-                                        Activity activity = activityWeakReference.get();
-                                        if (activity != null) {
-                                            KitIntegration.ActivityListener listener = (KitIntegration.ActivityListener)provider;
-                                            getReportingManager().logAll(
-                                                    listener.onActivityCreated(activity, null)
-                                            );
-                                            getReportingManager().logAll(
-                                                    listener.onActivityStarted(activity)
-                                            );
-                                            getReportingManager().logAll(
-                                                    listener.onActivityResumed(activity)
-                                            );
-                                        }
-                                    }
-                                }
-
-                                Intent intent = new Intent(MParticle.ServiceProviders.BROADCAST_ACTIVE + currentId);
-                                getContext().sendBroadcast(intent);
-
-                                if (provider instanceof KitIntegration.AttributeListener) {
-                                    syncUserIdentities((KitIntegration.AttributeListener) provider, provider.getConfiguration());
-                                }
-
-                                if (mockInstallReferrer != null) {
-                                    provider.setInstallReferrer(mockInstallReferrer);
-                                }
-
-                                if (pushRegistration != null && !MPUtility.isEmpty(pushRegistration.instanceId) && provider instanceof KitIntegration.PushListener) {
-                                    if (((KitIntegration.PushListener) provider).onPushRegistration(pushRegistration.instanceId, pushRegistration.senderId)) {
-                                        ReportingMessage message = ReportingMessage.fromPushRegistrationMessage(provider);
-                                        getReportingManager().log(message);
-                                    }
-                                }
-                            }
-
-
-                        }
-                    } catch (JSONException jse) {
-                        Logger.error("Exception while parsing configuration for id " + currentId + ": " + jse.getMessage());
-                    } catch (Exception e) {
-                        Logger.error("Exception while starting kit id " + currentId + ": " + e.getMessage());
-                    }
-                }
-            }
-
-            Iterator<Integer> ids = providers.keySet().iterator();
-            while (ids.hasNext()) {
-                Integer id = ids.next();
-                if (!activeIds.contains(id)) {
-                    KitIntegration integration = providers.get(id);
-                    if (integration != null) {
-                        clearIntegrationAttributes(integration);
-                        integration.onKitDestroy();
-                        integration.onKitCleanup();
-                    }
-                    ids.remove();
-                    Intent intent = new Intent(MParticle.ServiceProviders.BROADCAST_DISABLED + id);
-                    getContext().sendBroadcast(intent);
-                }
-            }
-            MParticle.getInstance().getKitManager().replayAndDisableQueue();
+            configureKits(kitConfigs);
         }
+
+    }
+
+    @Override
+    public void updateKits(final JSONArray kitConfigs) {
+        if (Looper.getMainLooper() != Looper.myLooper()) {
+            Runnable runnable = new UpdateKitRunnable(kitConfigs);
+            new Handler(Looper.getMainLooper()).post(runnable);
+        } else{
+            configureKits(kitConfigs);
+        }
+    }
+
+    /**
+     * Update the current list of active kits based on server (or cached) configuration.
+     *
+     * Note: This method is meant to always be run on the main thread
+     *
+     */
+    void configureKits(JSONArray kitConfigs) {
+        MParticleUser user = MParticle.getInstance().Identity().getCurrentUser();
+        HashSet<Integer> activeIds = new HashSet<Integer>();
+
+        if (kitConfigs != null) {
+            for (int i = 0; i < kitConfigs.length(); i++) {
+                try {
+                    JSONObject current = kitConfigs.getJSONObject(i);
+                    KitConfiguration configuration = createKitConfiguration(current);
+                    int currentModuleID = configuration.getKitId();
+                    if (!mKitIntegrationFactory.isSupported(configuration.getKitId())) {
+                        Logger.debug("Kit id configured but is not bundled: " + currentModuleID);
+                        continue;
+                    }
+                    KitIntegration activeKit = providers.get(currentModuleID);
+                    if (activeKit == null) {
+                        activeKit = mKitIntegrationFactory.createInstance(KitManagerImpl.this, configuration);
+                        if (activeKit.isDisabled() ||
+                                !configuration.shouldIncludeFromConsentRules(user)) {
+                            Logger.debug("Kit id configured but is filtered or disabled: " + currentModuleID);
+                            continue;
+                        }
+                        activeIds.add(currentModuleID);
+                        initializeKit(activeKit);
+                        providers.put(currentModuleID, activeKit);
+                     }else {
+                        activeKit.setConfiguration(configuration);
+                        if (activeKit.isDisabled() ||
+                                !configuration.shouldIncludeFromConsentRules(user)) {
+                            continue;
+                        }
+                        activeIds.add(currentModuleID);
+                        activeKit.onSettingsUpdated(configuration.getSettings());
+                    }
+                } catch (Exception e) {
+                    Logger.error("Exception while starting kit: " + e.getMessage());
+                }
+            }
+        }
+
+        Iterator<Integer> ids = providers.keySet().iterator();
+        while (ids.hasNext()) {
+            Integer id = ids.next();
+            if (!activeIds.contains(id)) {
+                KitIntegration integration = providers.get(id);
+                if (integration != null) {
+                    Logger.debug("De-initializing kit: " + integration.getName());
+                    clearIntegrationAttributes(integration);
+                    integration.onKitDestroy();
+                    integration.onKitCleanup();
+                }
+                ids.remove();
+                Intent intent = new Intent(MParticle.ServiceProviders.BROADCAST_DISABLED + id);
+                getContext().sendBroadcast(intent);
+            }
+        }
+        MParticle.getInstance().getKitManager().replayAndDisableQueue();
+    }
+
+    private void initializeKit(KitIntegration activeKit) {
+        Logger.debug("Initializing kit: " + activeKit.getName());
+        activeKit.onKitCreate(activeKit.getConfiguration().getSettings(), getContext());
+
+        if (activeKit instanceof KitIntegration.ActivityListener) {
+            WeakReference<Activity> activityWeakReference = getCurrentActivity();
+            if (activityWeakReference != null) {
+                Activity activity = activityWeakReference.get();
+                if (activity != null) {
+                    KitIntegration.ActivityListener listener = (KitIntegration.ActivityListener) activeKit;
+                    getReportingManager().logAll(
+                            listener.onActivityCreated(activity, null)
+                    );
+                    getReportingManager().logAll(
+                            listener.onActivityStarted(activity)
+                    );
+                    getReportingManager().logAll(
+                            listener.onActivityResumed(activity)
+                    );
+                }
+            }
+        }
+
+        if (activeKit instanceof KitIntegration.AttributeListener) {
+            syncUserIdentities((KitIntegration.AttributeListener) activeKit, activeKit.getConfiguration());
+        }
+
+        Intent mockInstallReferrer = ReferrerReceiver.getMockInstallReferrerIntent(MParticle.getInstance().getInstallReferrer());
+        if (mockInstallReferrer != null) {
+            activeKit.setInstallReferrer(mockInstallReferrer);
+        }
+
+        if (activeKit instanceof KitIntegration.PushListener) {
+            PushRegistrationHelper.PushRegistration pushRegistration = PushRegistrationHelper.getLatestPushRegistration(getContext());
+            if (pushRegistration != null && !MPUtility.isEmpty(pushRegistration.instanceId)) {
+                if (((KitIntegration.PushListener) activeKit).onPushRegistration(pushRegistration.instanceId, pushRegistration.senderId)) {
+                    ReportingMessage message = ReportingMessage.fromPushRegistrationMessage(activeKit);
+                    getReportingManager().log(message);
+                }
+            }
+        }
+
+        Intent intent = new Intent(MParticle.ServiceProviders.BROADCAST_ACTIVE + activeKit.getConfiguration().getKitId());
+        getContext().sendBroadcast(intent);
     }
 
     @Override
@@ -977,7 +1005,6 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
     //================================================================================
     // AttributionListener forwarding
     //================================================================================
-
     @Override
     public void onResult(AttributionResult result) {
         mAttributionResultsMap.put(result.getServiceProviderId(), result);
@@ -1015,15 +1042,16 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
     //================================================================================
     // IdentityListener forwarding
     //================================================================================
-
     @Override
     public void onUserIdentified(MParticleUser mParticleUser) {
-        mParticleUser.getUserAttributes(this);
+        //due to consent forwarding rules we need to re-verify kits whenever the user changes
+        updateKits(mConfigManager.getLatestKitConfiguration());
         for (KitIntegration provider : providers.values()) {
             if (provider instanceof KitIntegration.IdentityListener && !provider.isDisabled()) {
                 ((KitIntegration.IdentityListener) provider).onUserIdentified(FilteredMParticleUser.getInstance(mParticleUser, provider));
             }
         }
+        mParticleUser.getUserAttributes(this);
     }
 
     @Override
@@ -1060,6 +1088,30 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
                 ((KitIntegration.IdentityListener) provider).onModifyCompleted(FilteredMParticleUser.getInstance(mParticleUser, provider), new FilteredIdentityApiRequest(identityApiRequest, provider));
             }
         }
+    }
+
+    @Override
+    public void onConsentStateUpdated(final ConsentState oldState, final ConsentState newState, final long mpid) {
+        //due to consent forwarding rules we need to re-initialize kits whenever the user changes
+        updateKits(mConfigManager.getLatestKitConfiguration());
+        Runnable runnable = new Runnable() {
+            @Override
+            public void run() {
+                for (KitIntegration provider : providers.values()) {
+                    if (provider instanceof KitIntegration.UserAttributeListener && !provider.isDisabled()) {
+                        ((KitIntegration.UserAttributeListener) provider).onConsentStateUpdated(oldState, newState, FilteredMParticleUser.getInstance(mpid, provider));
+                    }
+                }
+            }
+        };
+        //this needs to be run on the main thread, after kit configuration/consent forwarding rules, which also happen on the main thread.
+        if (Looper.getMainLooper() != Looper.myLooper()) {
+            Handler handler = new Handler(getContext().getMainLooper());
+            handler.post(runnable);
+        } else {
+            runnable.run();
+        }
+
     }
 
     public void executeNetworkRequest(Runnable runnable) {

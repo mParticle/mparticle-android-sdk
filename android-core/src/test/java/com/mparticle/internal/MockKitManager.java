@@ -11,6 +11,7 @@ import com.mparticle.AttributionResult;
 import com.mparticle.MPEvent;
 import com.mparticle.MParticle;
 import com.mparticle.commerce.CommerceEvent;
+import com.mparticle.consent.ConsentState;
 import com.mparticle.identity.IdentityApiRequest;
 import com.mparticle.identity.MParticleUser;
 
@@ -100,6 +101,11 @@ public class MockKitManager implements KitManager {
 
     @Override
     public void incrementUserAttribute(String key, String value, long mpid) {
+
+    }
+
+    @Override
+    public void onConsentStateUpdated(ConsentState oldState, ConsentState newState, long mpid) {
 
     }
 

@@ -9,6 +9,9 @@ import com.mparticle.commerce.Impression;
 import com.mparticle.commerce.Product;
 import com.mparticle.commerce.Promotion;
 import com.mparticle.commerce.TransactionAttributes;
+import com.mparticle.consent.ConsentState;
+import com.mparticle.consent.GDPRConsent;
+import com.mparticle.identity.MParticleUser;
 import com.mparticle.internal.Logger;
 import com.mparticle.internal.MPUtility;
 import com.mparticle.kits.mappings.CustomMapping;
@@ -47,12 +50,18 @@ public class KitConfiguration {
     private final static String KEY_COMMERCE_ATTRIBUTE_FILTER = "cea";
     private final static String KEY_COMMERCE_ENTITY_FILTERS = "ent";
     private final static String KEY_COMMERCE_ENTITY_ATTRIBUTE_FILTERS = "afa";
+    private final static String KEY_CONSENT_FORWARDING_RULES = "crvf";
+    private final static String KEY_CONSENT_FORWARDING_RULES_SHOULD_INCLUDE_MATCHES = "i";
+    private final static String KEY_CONSENT_FORWARDING_RULES_ARRAY = "v";
+    private final static String KEY_CONSENT_FORWARDING_RULES_VALUE_CONSENTED = "c";
+    private final static String KEY_CONSENT_FORWARDING_RULES_VALUE_HASH = "h";
 
     //If set to true, our sdk honor user's optout wish. If false, we still collect data on opt-ed out users, but only for reporting
     private final static String HONOR_OPT_OUT = "honorOptOut";
     private final static String KEY_PROJECTIONS = "pr";
     private boolean avfIsActive = false;
     private boolean avfShouldIncludeMatches = false;
+    protected boolean consentForwardingIncludeMatches = false;
     private int avfHashedAttribute = 0;
     private int avfHashedValue = 0;
     private HashMap<String, String> settings = new HashMap<String, String>(0);
@@ -66,6 +75,7 @@ public class KitConfiguration {
     protected SparseBooleanArray mCommerceAttributeFilters = new SparseBooleanArray(0);
     protected SparseBooleanArray mCommerceEntityFilters = new SparseBooleanArray(0);
     private Map<Integer, SparseBooleanArray> mCommerceEntityAttributeFilters = new HashMap<Integer, SparseBooleanArray>(0);
+    protected Map<Integer, Boolean> mConsentForwardingRules = new HashMap<Integer, Boolean>();
     private int lowBracket = 0;
     private int highBracket = 101;
     private LinkedList<CustomMapping> customMappingList;
@@ -212,6 +222,18 @@ public class KitConfiguration {
                 }
             }
         }
+        mConsentForwardingRules.clear();
+        if (json.has(KEY_CONSENT_FORWARDING_RULES)) {
+            JSONObject consentForwardingRule = json.getJSONObject(KEY_CONSENT_FORWARDING_RULES);
+            consentForwardingIncludeMatches = consentForwardingRule.optBoolean(KEY_CONSENT_FORWARDING_RULES_SHOULD_INCLUDE_MATCHES);
+            JSONArray rules = consentForwardingRule.getJSONArray(KEY_CONSENT_FORWARDING_RULES_ARRAY);
+            for (int i = 0; i < rules.length(); i++) {
+                mConsentForwardingRules.put(
+                        rules.getJSONObject(i).getInt(KEY_CONSENT_FORWARDING_RULES_VALUE_HASH),
+                        rules.getJSONObject(i).getBoolean(KEY_CONSENT_FORWARDING_RULES_VALUE_CONSENTED)
+                );
+            }
+        }
         return this;
     }
 
@@ -238,6 +260,44 @@ public class KitConfiguration {
             shouldInclude = avfShouldIncludeMatches ? isMatch : !isMatch;
         }
         return shouldInclude;
+    }
+
+
+    boolean shouldIncludeFromConsentRules(MParticleUser user) {
+        if (mConsentForwardingRules.size() == 0) {
+            return true;
+        }
+        //if we don't have a user, but there are rules, be safe and exclude
+        if (user == null) {
+            return false;
+        }
+        boolean isMatch = isConsentStateFilterMatch(user.getConsentState());
+        return consentForwardingIncludeMatches == isMatch;
+    }
+
+    /**
+     * This method indicates if the given consent state matches any of the Consent
+     * forwarding rules
+     *
+     * @param consentState
+     * @return
+     */
+    public boolean isConsentStateFilterMatch(ConsentState consentState) {
+        if (mConsentForwardingRules.size() == 0
+                || consentState == null
+                || consentState.getGDPRConsentState() == null
+                || consentState.getGDPRConsentState().size() == 0) {
+            return false;
+        }
+        Map<String, GDPRConsent> gdprConsentState = consentState.getGDPRConsentState();
+        for (Map.Entry<String, GDPRConsent> gdprConsent : gdprConsentState.entrySet()) {
+            int consentPurposeHash = KitUtils.hashForFiltering("1" + gdprConsent.getKey());
+            Boolean consented = mConsentForwardingRules.get(consentPurposeHash);
+            if (consented != null && consented == gdprConsent.getValue().isConsented()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     protected CommerceEvent filterCommerceEvent(CommerceEvent event) {

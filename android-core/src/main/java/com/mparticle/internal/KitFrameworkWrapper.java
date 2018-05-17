@@ -11,6 +11,7 @@ import com.mparticle.AttributionResult;
 import com.mparticle.MPEvent;
 import com.mparticle.MParticle;
 import com.mparticle.commerce.CommerceEvent;
+import com.mparticle.consent.ConsentState;
 import com.mparticle.identity.IdentityApiRequest;
 import com.mparticle.identity.MParticleUser;
 
@@ -572,6 +573,13 @@ public class KitFrameworkWrapper implements KitManager {
     public void onModifyCompleted(MParticleUser user, IdentityApiRequest request) {
         if (mKitManager != null) {
             mKitManager.onModifyCompleted(user, request);
+        }
+    }
+
+    @Override
+    public void onConsentStateUpdated(ConsentState oldState, ConsentState newState, long mpid) {
+        if (mKitManager != null) {
+            mKitManager.onConsentStateUpdated(oldState, newState, mpid);
         }
     }
 }

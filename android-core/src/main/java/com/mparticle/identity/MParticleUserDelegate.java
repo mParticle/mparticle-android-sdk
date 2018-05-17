@@ -270,6 +270,8 @@ import java.util.Map;
     }
 
     public void setConsentState(ConsentState state, long mpid) {
+        ConsentState oldState = getConsentState(mpid);
         mConfigManager.setConsentState(state, mpid);
+        mKitManager.onConsentStateUpdated(oldState, state, mpid);
     }
 }

@@ -121,10 +121,12 @@ public class MParticleUserImpl implements MParticleUser {
         return this;
     }
 
+    @Override
     public ConsentState getConsentState() {
         return mUserDelegate.getConsentState(getId());
     }
 
+    @Override
     public void setConsentState(ConsentState state) {
         mUserDelegate.setConsentState(state, getId());
     }
