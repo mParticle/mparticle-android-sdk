@@ -44,7 +44,7 @@ public class NetworkOptionsManager {
                 .addDomainMapping(DomainMapping.configMapping(getDefaultUrl(Endpoint.CONFIG))
                         .setCertificates(defaultCertificates)
                         .build())
-                .addDomainMapping(DomainMapping.eventsMapping(getDefaultUrl(Endpoint.IDENTITY))
+                .addDomainMapping(DomainMapping.eventsMapping(getDefaultUrl(Endpoint.EVENTS))
                         .setCertificates(defaultCertificates)
                         .build())
                 .addDomainMapping(DomainMapping.audienceMapping(getDefaultUrl(Endpoint.AUDIENCE))
