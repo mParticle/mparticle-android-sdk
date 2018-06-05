@@ -1,6 +1,11 @@
 package com.mparticle.commerce;
 
 
+import com.mparticle.internal.MPUtility;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
 /**
  * Class representing an internal promotions within an app, such as banners.
  *
@@ -140,4 +145,25 @@ public class Promotion {
         return this;
     }
 
+    @Override
+    public String toString() {
+        JSONObject json = new JSONObject();
+        try {
+            if (!MPUtility.isEmpty(getId())) {
+                json.put("id", getId());
+            }
+            if (!MPUtility.isEmpty(getName())) {
+                json.put("nm", getName());
+            }
+            if (!MPUtility.isEmpty(getCreative())) {
+                json.put("cr", getCreative());
+            }
+            if (!MPUtility.isEmpty(getPosition())) {
+                json.put("ps", getPosition());
+            }
+        } catch (JSONException jse) {
+
+        }
+        return json.toString();
+    }
 }
