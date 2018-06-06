@@ -22,22 +22,25 @@ public class StreamAssert<T> {
         this.strict = strict;
     }
 
-    public void startTimer(long millis, boolean block) {
+    public void startTimer(final long millis, boolean block) {
         handler = new Handler(Looper.getMainLooper());
-        handler.postDelayed(
-                new Runnable() {
-                    @Override
-                    public void run() {
-                        check(true);
-                    }
-                }, millis);
-        if (block) {
-            try {
-                Thread.sleep(millis);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+        check(millis > 0);
+        final long startTime = System.currentTimeMillis();
+        final long delay = 100;
+
+
+        while (System.currentTimeMillis() > startTime + millis) {
+            if (!check()) {
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            } else {
+                return;
             }
         }
+        check(true);
     }
 
     private StreamAssert() {

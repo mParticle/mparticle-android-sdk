@@ -51,7 +51,7 @@ import java.util.concurrent.atomic.AtomicLong;
      * starts again, so use this handler and ACTIVITY_DELAY to determine when we're *really" in the background
      */
     Handler delayedBackgroundCheckHandler = new Handler();
-    private static final long ACTIVITY_DELAY = 1000;
+    static final long ACTIVITY_DELAY = 1000;
 
 
     /**
@@ -167,9 +167,11 @@ import java.util.concurrent.atomic.AtomicLong;
 
             mCurrentSession.updateBackgroundTime(mLastStoppedTime, getTime());
 
+            boolean isBackToForeground = false;
             if (!mInitialized) {
                 initialize(mCurrentActivityName, previousSessionUri, previousSessionParameters, previousSessionPackage);
             } else if (isBackgrounded() && mLastStoppedTime.get() > 0) {
+                isBackToForeground = true;
                 checkGoogleAdIdChanged();
                 logStateTransition(Constants.StateTransitionType.STATE_TRANS_FORE,
                         mCurrentActivityName,
@@ -179,8 +181,6 @@ import java.util.concurrent.atomic.AtomicLong;
                         previousSessionParameters,
                         previousSessionPackage,
                         interruptions);
-                MParticle.getInstance().getKitManager().onApplicationForeground();
-                Logger.debug("App foregrounded.");
             }
             mLastForegroundTime = getTime();
 
@@ -193,7 +193,10 @@ import java.util.concurrent.atomic.AtomicLong;
             if (MParticle.getInstance().isAutoTrackingEnabled()) {
                 MParticle.getInstance().logScreen(mCurrentActivityName);
             }
-
+            if (isBackToForeground) {
+                MParticle.getInstance().getKitManager().onApplicationForeground();
+                Logger.debug("App foregrounded.");
+            }
             MParticle.getInstance().getKitManager().onActivityResumed(activity);
         }catch (Exception e){
                 Logger.verbose("Failed while trying to track activity resume: " + e.getMessage());

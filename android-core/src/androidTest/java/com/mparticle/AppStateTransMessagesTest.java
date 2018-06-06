@@ -84,14 +84,14 @@ public final class AppStateTransMessagesTest extends BaseCleanStartedEachTest {
 
         goToForeground();
         initTime.value = System.currentTimeMillis();
-        Thread.sleep(mRandom.randomLong(100,500));
+        Thread.sleep(AccessUtils.getActivityDelay() + 100);
         goToBackground();
         backgroundTime.value = System.currentTimeMillis();
-        Thread.sleep(mRandom.randomLong(2000, 4000));
+        Thread.sleep(mRandom.randomLong(1000, 1250));
         goToForeground();
         foregroundTime.value = System.currentTimeMillis();
         MParticle.getInstance().getAppStateManager().ensureActiveSession();
-        Thread.sleep(mRandom.randomLong(2000, 5000));
+        Thread.sleep(AccessUtils.getActivityDelay() + 100);
         MParticleUtils.awaitStoreMessage();
         Thread.sleep(500);
         MParticle.getInstance().upload();

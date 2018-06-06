@@ -123,4 +123,8 @@ public class AccessUtils {
             kitManager.updateKits(configuration);
         }
     }
+
+    public static long getActivityDelay() {
+        return AppStateManager.ACTIVITY_DELAY;
+    }
 }

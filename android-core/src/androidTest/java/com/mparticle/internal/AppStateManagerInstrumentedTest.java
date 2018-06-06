@@ -1,5 +1,7 @@
 package com.mparticle.internal;
 
+import android.content.Context;
+
 import com.mparticle.testutils.BaseCleanStartedEachTest;
 import com.mparticle.MParticle;
 import com.mparticle.internal.database.services.AccessUtils;
@@ -13,10 +15,14 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
 import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertNotNull;
+import static junit.framework.Assert.assertNull;
+import static junit.framework.Assert.fail;
 
 public class AppStateManagerInstrumentedTest extends BaseCleanStartedEachTest {
     AppStateManager mAppStateManager;
@@ -97,6 +103,53 @@ public class AppStateManagerInstrumentedTest extends BaseCleanStartedEachTest {
         mAppStateManager.endSession();
 
         TestingUtils.checkAllBool(checked, 1, 10);
+    }
+
+    @Test
+    public void testOnApplicationForeground() throws InterruptedException {
+        boolean[] checked = new boolean[2];
+        com.mparticle.AccessUtils.setKitManager(new KitManagerTester(mContext, checked));
+        goToBackground();
+        assertNull(mAppStateManager.getCurrentActivity());
+        Thread.sleep(AppStateManager.ACTIVITY_DELAY + 100);
+        goToForeground();
+        assertNotNull(mAppStateManager.getCurrentActivity().get());
+        TestingUtils.checkAllBool(checked);
+    }
+
+    class KitManagerTester extends KitFrameworkWrapper {
+        boolean[] checked;
+
+        public KitManagerTester(Context context, boolean[] checked) {
+            super(context,
+                    new ReportingManager() {
+                        @Override
+                        public void log(JsonReportingMessage message) {
+                            //do nothing
+                        }
+
+                        @Override
+                        public void logAll(List<? extends JsonReportingMessage> messageList) {
+                            //do nothing
+                        }
+                    },
+                    MParticle.getInstance().getConfigManager(),
+                    MParticle.getInstance().getAppStateManager(),
+                    com.mparticle.internal.AccessUtils.getUploadHandler());
+            this.checked = checked;
+        }
+
+        @Override
+        public void onApplicationBackground() {
+            assertNull(getCurrentActivity());
+            checked[0] = true;
+        }
+
+        @Override
+        public void onApplicationForeground() {
+            assertNotNull(getCurrentActivity().get());
+            checked[1] = true;
+        }
     }
 
 }
