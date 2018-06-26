@@ -1,23 +1,46 @@
 package com.mparticle;
 
+import android.content.Context;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.support.test.InstrumentationRegistry;
 
+import com.mparticle.identity.IdentityApi;
+import com.mparticle.identity.IdentityApiRequest;
+import com.mparticle.identity.IdentityStateListener;
+import com.mparticle.identity.MParticleUser;
+import com.mparticle.internal.Constants;
+import com.mparticle.internal.DatabaseTables;
 import com.mparticle.internal.KitFrameworkWrapper;
 import com.mparticle.internal.MessageManager;
 import com.mparticle.testutils.BaseCleanStartedEachTest;
-import com.mparticle.testutils.RandomUtils;
 import com.mparticle.testutils.MParticleUtils;
+import com.mparticle.testutils.RandomUtils;
 
 import junit.framework.Assert;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.junit.Test;
 
+import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+import java.util.Random;
+import java.util.concurrent.CountDownLatch;
 
+import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching;
+import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
+import static junit.framework.Assert.fail;
 
 public class MParticleTest extends BaseCleanStartedEachTest {
+
+    private String configResponse = "{\"dt\":\"ac\", \"id\":\"fddf1f96-560e-41f6-8f9b-ddd070be0765\", \"ct\":1434392412994, \"dbg\":false, \"cue\":\"appdefined\", \"pmk\":[\"mp_message\", \"com.urbanairship.push.ALERT\", \"alert\", \"a\", \"message\"], \"cnp\":\"appdefined\", \"soc\":0, \"oo\":false, \"eks\":[] }, \"pio\":30 }";
 
     @Test
     public void testAndroidIdDisabled() throws Exception {
@@ -142,4 +165,208 @@ public class MParticleTest extends BaseCleanStartedEachTest {
             assertTrue(MParticle.getInstance().isSessionActive());
         }
     }
+
+    @Test
+    public void testResetSync() throws JSONException, InterruptedException {
+        testReset(new Runnable() {
+            @Override
+            public void run() {
+                MParticle.reset(mContext);
+            }
+        });
+    }
+
+    @Test
+    public void testResetAsync() throws JSONException, InterruptedException {
+        testReset(new Runnable() {
+            @Override
+            public void run() {
+                final CountDownLatch latch = new CountDownLatch(1);
+                MParticle.reset(mContext, new MParticle.ResetListener() {
+                    @Override
+                    public void onReset() {
+                        latch.countDown();
+                    }
+                });
+                try {
+                    latch.await();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+    }
+
+    @Test
+    public void testResetIdentitySync() throws JSONException, InterruptedException {
+        testResetIdentityCall(new Runnable() {
+            @Override
+            public void run() {
+                MParticle.reset(mContext);
+            }
+        });
+    }
+
+    @Test
+    public void testResetIdentityAsync() throws JSONException, InterruptedException {
+        testResetIdentityCall(new Runnable() {
+            @Override
+            public void run() {
+                final CountDownLatch latch = new CountDownLatch(1);
+                MParticle.reset(mContext, new MParticle.ResetListener() {
+                    @Override
+                    public void onReset() {
+                        latch.countDown();
+                    }
+                });
+                try {
+                    latch.await();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+    }
+
+    @Test
+    public void testResetConfigCall() throws InterruptedException {
+        mServer.setupConfigResponse(configResponse, 100);
+        MParticle.getInstance().refreshConfiguration();
+        MParticle.reset(mContext);
+        Thread.sleep(100);
+        assertSDKGone();
+    }
+
+
+    /**
+     * Test that Identity calls in progress will exit gracefully, and not trigger any callbacks
+     */
+    public void testResetIdentityCall(Runnable resetRunnable) throws InterruptedException {
+        final boolean[] called = new boolean[2];
+        IdentityStateListener crashListener = new IdentityStateListener() {
+            @Override
+            public void onUserIdentified(MParticleUser user) {
+                assertTrue(called[0]);
+                throw new IllegalStateException("Should not be getting callbacks after reset");
+            }
+        };
+
+        mServer.setupHappyIdentify(new Random().nextLong(), 100);
+        MParticle.getInstance().Identity().addIdentityStateListener(crashListener);
+        MParticle.getInstance().Identity().identify(IdentityApiRequest.withEmptyUser().build());
+
+        resetRunnable.run();
+        called[0] = true;
+        mServer.waitForVerify(postRequestedFor(urlPathMatching("/v([0-9]*)/identify")), 2000);
+
+        assertSDKGone();
+    }
+
+    private void testReset(Runnable resetRunnable) throws JSONException, InterruptedException {
+        for (int i = 0; i < 10; i++) {
+            MParticle.getInstance().logEvent(MParticleUtils.getInstance().getRandomMPEventRich());
+        }
+        Random ran = new Random();
+        for (int i = 0; i < 10; i++) {
+            MParticle.getInstance().getConfigManager().setMpid(ran.nextLong());
+        }
+        assertTrue(getData(DatabaseTables.getInstance(mContext).getMParticleDatabase().query("messages", null, null, null, null, null, null)).length() > 0);
+        assertEquals(6, getAllTables().size());
+        assertTrue(10 < MParticle.getInstance().getConfigManager().getMpids().size());
+
+        //Set strict mode, so if we get any warning or error messages during the reset/restart phase,
+        //it will throw an exception
+        MParticleUtils.setStrictMode(MParticle.LogLevel.WARNING);
+
+        resetRunnable.run();
+
+        assertSDKGone();
+
+        //restart the SDK, to the point where the initial Identity call returns, make sure there are no errors on startup
+        MParticleUtils.setStrictMode(MParticle.LogLevel.WARNING, "Failed to get MParticle instance, getInstance() called prior to start().");
+        beforeBase();
+    }
+
+    private void assertSDKGone() {
+        //check post-reset state
+        //should be 2 entries in default SharedPreferences (the install boolean and the original install time)
+        //and 0 other SharedPreferences tables
+        //make sure the 2 entries in default SharedPreferences are the correct values
+        //0 tables should exist
+        //then we call DatabaseTables.getInstance(Context).getMParticleDatabase, which should create the database,
+        //and make sure it is created without an error message, and that all the tables are empty
+        String sharedPrefsDirectory = mContext.getFilesDir().getPath().replace("files", "shared_prefs/");
+        File[] files = new File(sharedPrefsDirectory).listFiles();
+        for (File file : files) {
+            String sharedPreferenceName = file.getPath().replace(sharedPrefsDirectory, "").replace(".xml", "");
+            if (!sharedPreferenceName.equals("WebViewChromiumPrefs")) {
+                fail();
+            }
+        }
+        assertEquals(0, mContext.databaseList().length);
+        try {
+            for (String tableName: getAllTables()) {
+                JSONArray data = getData(DatabaseTables.getInstance(mContext).getMParticleDatabase().query(tableName, null, null, null, null, null, null));
+                if (data.length() > 0) {
+                    assertEquals(0, data.length());
+                }
+            }
+        } catch (JSONException e) {
+            fail(e.getMessage());
+        }
+    }
+
+    private List<String> getAllTables() throws JSONException {
+        SQLiteDatabase database = DatabaseTables.getInstance(mContext).getMParticleDatabase();
+        Cursor cursor = database.query("sqlite_master", null, "type = ?", new String[]{"table"}, null, null, null);
+        cursor.moveToFirst();
+        List<String> tableNames = new ArrayList<String>();
+        try {
+            while (!cursor.isAfterLast()) {
+                String tableName = cursor.getString(cursor.getColumnIndex("name"));
+                if (!"android_metadata".equals(tableName) && !"sqlite_sequence".equals(tableName)) {
+                    tableNames.add(cursor.getString(cursor.getColumnIndex("name")));
+                }
+                cursor.moveToNext();
+            }
+        }
+        finally {
+            if (cursor != null && !cursor.isClosed()) {
+                cursor.close();
+            }
+        }
+        return tableNames;
+    }
+
+    private JSONArray getData(Cursor cursor) throws JSONException {
+        cursor.moveToFirst();
+        JSONArray jsonArray = new JSONArray();
+        try {
+            while (!cursor.isAfterLast()) {
+                JSONObject jsonObject = new JSONObject();
+                for (int i = 0; i < cursor.getColumnCount(); i++) {
+                    String columnName = cursor.getColumnName(i);
+                    switch (cursor.getType(i)) {
+                        case Cursor.FIELD_TYPE_FLOAT:
+                            jsonObject.put(columnName, cursor.getFloat(i));
+                            break;
+                        case Cursor.FIELD_TYPE_INTEGER:
+                            jsonObject.put(columnName, cursor.getInt(i));
+                            break;
+                        case Cursor.FIELD_TYPE_STRING:
+                            jsonObject.put(columnName, cursor.getString(i));
+                    }
+                }
+                jsonArray.put(jsonObject);
+                cursor.moveToNext();
+            }
+        }
+        finally {
+            if (cursor != null && !cursor.isClosed()) {
+                cursor.close();
+            }
+        }
+        return jsonArray;
+    }
+
 }

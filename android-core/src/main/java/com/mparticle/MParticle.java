@@ -10,6 +10,8 @@ import android.location.Location;
 import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Handler;
+import android.os.HandlerThread;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
@@ -31,14 +33,15 @@ import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.Constants;
 import com.mparticle.internal.Constants.MessageKey;
 import com.mparticle.internal.Constants.PrefKeys;
+import com.mparticle.internal.DatabaseTables;
 import com.mparticle.internal.KitFrameworkWrapper;
 import com.mparticle.internal.Logger;
-import com.mparticle.internal.KitManager;
 import com.mparticle.internal.MPLocationListener;
 import com.mparticle.internal.MPUtility;
 import com.mparticle.internal.MParticleJSInterface;
 import com.mparticle.internal.MessageManager;
 import com.mparticle.internal.PushRegistrationHelper;
+import com.mparticle.internal.database.tables.mp.MParticleDatabaseHelper;
 import com.mparticle.media.MPMediaAPI;
 import com.mparticle.media.MediaCallbacks;
 import com.mparticle.messaging.MPMessagingAPI;
@@ -47,10 +50,13 @@ import com.mparticle.segmentation.SegmentListener;
 
 import org.json.JSONObject;
 
+import java.io.File;
 import java.math.BigDecimal;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * The primary access point to the mParticle SDK. In order to use this class, you must first call {@link #start(MParticleOptions)}. You can then retrieve a reference
@@ -1056,7 +1062,94 @@ public class MParticle {
     public IdentityApi Identity() {
         return mIdentityApi;
     }
-    
+
+    /**
+     * This method will permanently remove ALL MParticle data from the device, included SharedPreferences and Database,
+     * and halt any upload or download behavior that may be in process
+     *
+     * If you have any reference to the MParticle instance, you must remove your reference by setting it to "null",
+     * in order to avoid any unexpected behavior
+     *
+     * The SDK will be shut down and MParticle.getInstance() will return null. MParticle can be restarted by
+     * calling MParticle.start()
+     *
+     * @param context
+     */
+    public static void reset(Context context) {
+        synchronized (MParticle.class) {
+            //"commit" will force all async writes stemming from an "apply" call to finish. We need to do this
+            //because we need to ensure that the "getMpids()" call is returning all calls that have been made
+            // up to this point, otherwise we will miss deleting some files
+            context.getSharedPreferences(ConfigManager.PREFERENCES_FILE, Context.MODE_PRIVATE).edit().commit();
+            if (instance != null) {
+                if (instance.isLocationTrackingEnabled()) {
+                    instance.disableLocationTracking();
+                }
+                instance.mMessageManager.disableHandlers();
+                instance.mIdentityApi.reset();
+                MParticle.setInstance(null);
+            }
+
+            //delete all SharedPreferences files
+            Set<String> prefFiles = new HashSet<String>();
+            prefFiles.add(ConfigManager.PREFERENCES_FILE);
+            prefFiles.add(Constants.PREFS_FILE);
+            //urban airship kit shared preference file
+            prefFiles.add("com.mparticle.kits.urbanairship");
+
+            String sharedPrefsDirectory = context.getFilesDir().getPath().replace("files", "shared_prefs/");
+            File[] files = new File(sharedPrefsDirectory).listFiles();
+            for (File file : files) {
+                String sharedPreferenceName = file.getPath().replace(sharedPrefsDirectory, "").replace(".xml", "");
+                // it is going to be difficult/impossible to come up with a finite list of Kit SharedPreference files, with the custom kits
+                // coming, so we will look for any kit shared preference files by their prefix "mp::kit::"
+                if (sharedPreferenceName.startsWith("mp::kit::")
+                        || sharedPreferenceName.startsWith(ConfigManager.PREFERENCES_FILE + ":")
+                        || prefFiles.contains(sharedPreferenceName)) {
+                    SharedPreferences sharedPreferences = context.getSharedPreferences(sharedPreferenceName, Context.MODE_PRIVATE);
+                    sharedPreferences.edit().commit();
+                    if (sharedPreferences != null) {
+                        sharedPreferences.edit()
+                                .clear()
+                                .commit();
+                    }
+                    file.delete();
+                }
+            }
+
+            //remove our static database reference
+            DatabaseTables.clearInstance();
+            context.getApplicationContext().deleteDatabase(MParticleDatabaseHelper.DB_NAME);
+
+            Logger.debug("MParticle destroyed");
+        }
+    }
+
+    /**
+     *  This method will permanently remove ALL MParticle data from the device, included SharedPreferences and Database,
+     * and halt any upload or download behavior that may be in process
+     *
+     * If you have any reference to the MParticle instance, you must remove your reference by setting it to "null",
+     * in order to avoid any unexpected behavior
+     *
+     * The SDK will be shut down and MParticle.getInstance() will return null. MParticle can be restarted by
+     * calling MParticle.start()
+     *
+     * @param context
+     * @param callback A callback that will trigger when the SDK has been fully reset
+     */
+    public static void reset(final Context context, final ResetListener callback) {
+        final HandlerThread handlerThread = new HandlerThread("mParticleShutdownHandler");
+            handlerThread.start();
+            new Handler(handlerThread.getLooper()).post(new Runnable() {
+                @Override
+                public void run() {
+                    reset(context);
+                    callback.onReset();
+                    handlerThread.quit();
+                }
+            });
+    }
     /**
      * Event type to use when logging events.
      *
@@ -1351,5 +1444,9 @@ public class MParticle {
          * A special attribute string to specify the user's last name.
          */
         String LASTNAME = "$LastName";
+    }
+
+    public interface ResetListener {
+        void onReset();
     }
 }

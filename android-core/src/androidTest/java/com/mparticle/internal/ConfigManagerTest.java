@@ -36,7 +36,7 @@ public class ConfigManagerTest extends BaseAbstractTest {
         instance = MParticle.getInstance();
 
         for(UserStorage userStorage : UserStorage.getAllUsers(mContext)) {
-            assertTrue(UserStorage.deleteUserConfig(mContext, userStorage.getMpid()));
+            assertTrue(userStorage.deleteUserConfig(mContext, userStorage.getMpid()));
         }
         assertEquals(UserStorage.getAllUsers(mContext).size(), 0);
 

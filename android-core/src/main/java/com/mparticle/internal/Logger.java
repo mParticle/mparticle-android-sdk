@@ -9,18 +9,18 @@ public class Logger {
     public static final LogLevel DEFAULT_MIN_LOG_LEVEL = LogLevel.DEBUG;
     private static LogLevel sMinLogLevel = DEFAULT_MIN_LOG_LEVEL;
     private static boolean sExplicitlySet = false;
+    private static AbstractLogHandler logHandler = new DefaultLogHandler();
 
     public static void setMinLogLevel(LogLevel minLogLevel) {
-        setMinLogLevel(minLogLevel, false);
+        setMinLogLevel(minLogLevel, null);
     }
 
-    public static void setMinLogLevel(LogLevel minLogLevel, boolean explicit) {
-        if (explicit) {
-            sExplicitlySet = true;
-        } else {
-            if (sExplicitlySet) {
-                return;
-            }
+    public static void setMinLogLevel(LogLevel minLogLevel, Boolean explicit) {
+        if (explicit != null) {
+            sExplicitlySet = explicit;
+        }
+        if (sExplicitlySet && explicit == null) {
+            return;
         }
         Logger.sMinLogLevel = minLogLevel;
     }
@@ -34,7 +34,7 @@ public class Logger {
     }
 
     public static void verbose(Throwable error, String... messages) {
-        log(LogLevel.VERBOSE, error, messages);
+        getLogHandler().log(LogLevel.VERBOSE, error, getMessage(messages));
     }
 
     public static void info(String... messages) {
@@ -42,7 +42,7 @@ public class Logger {
     }
 
     public static void info(Throwable error, String... messages) {
-        log(LogLevel.INFO, error, messages);
+        getLogHandler().log(LogLevel.INFO, error, getMessage(messages));
     }
 
     public static void debug(String... messages) {
@@ -50,7 +50,7 @@ public class Logger {
     }
 
     public static void debug(Throwable error, String... messages) {
-        log(LogLevel.DEBUG, error, messages);
+        getLogHandler().log(LogLevel.DEBUG, error, getMessage(messages));
     }
 
     public static void warning(String... messages) {
@@ -58,7 +58,7 @@ public class Logger {
     }
 
     public static void warning(Throwable error, String... messages) {
-        log(LogLevel.WARNING, error, messages);
+        getLogHandler().log(LogLevel.WARNING, error, getMessage(messages));
     }
 
     public static void error(String... messages) {
@@ -66,72 +66,132 @@ public class Logger {
     }
 
     public static void error(Throwable error, String... messages) {
-        log(LogLevel.ERROR, error, messages);
+        getLogHandler().log(LogLevel.ERROR, error, getMessage(messages));
     }
 
-    private static void log(LogLevel priority, String... messages) {
-        log(priority, null, messages);
+    private static String getMessage(String... messages) {
+        StringBuilder logMessage = new StringBuilder();
+        for (String m : messages){
+            logMessage.append(m);
+        }
+        return logMessage.toString();
     }
 
-    private static void log(LogLevel priority, Throwable error, String... messages){
-        if (messages != null && isLoggable(priority.logLevel)) {
-            StringBuilder logMessage = new StringBuilder();
-            for (String m : messages){
-                logMessage.append(m);
+
+    /**
+     * Testing method. Use this method to intercept Logs, or customize what happens when something is logged,
+     * for example you can use this method to throw an exception everytime an "error" log is called
+     * @param logListener
+     */
+    public static void setLogHandler(AbstractLogHandler logListener) {
+        Logger.logHandler = logListener;
+    }
+
+    public static AbstractLogHandler getLogHandler() {
+        if (logHandler == null) {
+            logHandler = new DefaultLogHandler();
+        }
+        return logHandler;
+    }
+
+    public abstract static class AbstractLogHandler {
+
+        public void log(LogLevel priority, Throwable error, String messages) {
+            if (messages != null && isLoggable(priority.logLevel)) {
+                switch (priority){
+                    case ERROR:
+                        error(error, messages);
+                        break;
+                    case WARNING:
+                        warning(error, messages);
+                        break;
+                    case DEBUG:
+                        debug(error, messages);
+                        break;
+                    case VERBOSE:
+                        verbose(error, messages);
+                        break;
+                    case INFO:
+                        info(error, messages);
+                }
             }
-            switch (priority){
-                case ERROR:
-                    if (error != null){
-                        Log.e(Constants.LOG_TAG, logMessage.toString(), error);
-                    } else {
-                        Log.e(Constants.LOG_TAG, logMessage.toString());
-                    }
-                    break;
-                case WARNING:
-                    if (error != null){
-                        Log.w(Constants.LOG_TAG, logMessage.toString(), error);
-                    } else {
-                        Log.w(Constants.LOG_TAG, logMessage.toString());
-                    }
-                    break;
-                case DEBUG:
-                    if (error != null){
-                        Log.d(Constants.LOG_TAG, logMessage.toString(), error);
-                    } else {
-                        Log.d(Constants.LOG_TAG, logMessage.toString());
-                    }
-                    break;
-                case VERBOSE:
-                    if (error != null){
-                        Log.v(Constants.LOG_TAG, logMessage.toString(), error);
-                    } else {
-                        Log.v(Constants.LOG_TAG, logMessage.toString());
-                    }
-                    break;
-                case INFO:
-                    if (error != null) {
-                        Log.i(Constants.LOG_TAG, logMessage.toString(), error);
-                    } else {
-                        Log.i(Constants.LOG_TAG, logMessage.toString());
-                    }
+        }
+
+        private boolean isLoggable(int logLevel) {
+            boolean isAPILoggable = logLevel >= Logger.sMinLogLevel.logLevel;
+            boolean isADBLoggable;
+
+            //this block will catch the exception that is thrown during testing
+            try {
+                isADBLoggable = isADBLoggable(Constants.LOG_TAG, logLevel);
+            }
+            catch (UnsatisfiedLinkError ex) {
+                return false;
+            }
+            catch (RuntimeException ignored) {
+                return false;
+            }
+            return isADBLoggable || (isAPILoggable && MPUtility.isDevEnv());
+        }
+
+        //Override this method during testing, otherwise this will throw an error and logs will not be printed.
+        protected boolean isADBLoggable(String tag, int logLevel) {
+            return Log.isLoggable(tag, logLevel);
+        }
+
+        abstract void verbose(Throwable error, String message);
+        abstract void info(Throwable error, String message);
+        abstract void debug(Throwable error, String message);
+        abstract void warning(Throwable error, String message);
+        abstract void error(Throwable error, String message);
+    }
+    
+    public static class DefaultLogHandler extends AbstractLogHandler {
+
+        @Override
+        public void verbose(Throwable error, String messages) {
+            if (error != null){
+                Log.v(Constants.LOG_TAG, messages, error);
+            } else {
+                Log.v(Constants.LOG_TAG, messages);
+            }
+        }
+
+        @Override
+        public void info(Throwable error, String messages) {
+            if (error != null) {
+                Log.i(Constants.LOG_TAG, messages, error);
+            } else {
+                Log.i(Constants.LOG_TAG, messages);
+            }
+        }
+
+        @Override
+        public void debug(Throwable error, String messages) {
+            if (error != null){
+                Log.d(Constants.LOG_TAG, messages, error);
+            } else {
+                Log.d(Constants.LOG_TAG, messages);
+            }
+        }
+
+        @Override
+        public void warning(Throwable error, String messages) {
+            if (error != null){
+                Log.w(Constants.LOG_TAG, messages, error);
+            } else {
+                Log.w(Constants.LOG_TAG, messages);
+            }
+        }
+
+        @Override
+        public void error(Throwable error, String messages) {
+            if (error != null){
+                Log.e(Constants.LOG_TAG, messages, error);
+            } else {
+                Log.e(Constants.LOG_TAG, messages);
             }
         }
     }
 
-    private static boolean isLoggable(int logLevel) {
-        boolean isAPILoggable = logLevel >= Logger.sMinLogLevel.logLevel;
-        boolean isADBLoggable;
-
-        //this block will catch the exception that is thrown during testing
-        try {
-            isADBLoggable = Log.isLoggable(Constants.LOG_TAG, logLevel);
-        }
-        catch (UnsatisfiedLinkError ex) {
-            return false;
-        }
-        catch (RuntimeException ignored) {
-            return false;
-        }
-        return isADBLoggable || (isAPILoggable && MPUtility.isDevEnv());
-    }
 }

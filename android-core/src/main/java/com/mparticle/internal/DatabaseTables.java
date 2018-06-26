@@ -20,6 +20,10 @@ public class DatabaseTables {
         return instance;
     }
 
+    public static void clearInstance() {
+        instance = null;
+    }
+
     static void setInstance(DatabaseTables tables) {
         instance = tables;
     }

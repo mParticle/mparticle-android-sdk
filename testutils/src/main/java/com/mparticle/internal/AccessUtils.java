@@ -66,7 +66,7 @@ public class AccessUtils {
             MParticle.getInstance().getAppStateManager().delayedBackgroundCheckHandler = handler;
         }
     }
-
+    
     public static class EmptyMParticleApiClient implements MParticleApiClient {
         @Override
         public void fetchConfig() throws IOException, MParticleApiClientImpl.MPConfigException {

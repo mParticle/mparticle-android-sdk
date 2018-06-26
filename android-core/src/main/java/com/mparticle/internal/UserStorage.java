@@ -51,7 +51,7 @@ public class UserStorage {
         return userStorages;
     }
 
-    static boolean deleteUserConfig(Context context, long mpId) {
+    boolean deleteUserConfig(Context context, long mpId) {
         if (Build.VERSION.SDK_INT >= 24) {
             context.deleteSharedPreferences(getFileName(mpId));
         } else {
@@ -327,7 +327,7 @@ public class UserStorage {
         getMParticleSharedPrefs(context).edit().putString(USER_CONFIG_COLLECTION, jsonArray.toString()).apply();
     }
 
-    static private String getFileName(long mpId) {
+    private static String getFileName(long mpId) {
         return PREFERENCES_FILE + ":" + mpId;
     }
 

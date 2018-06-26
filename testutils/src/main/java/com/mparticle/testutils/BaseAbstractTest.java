@@ -10,6 +10,7 @@ import com.mparticle.MParticle;
 import com.mparticle.internal.AccessUtils;
 import com.mparticle.internal.AppStateManager;
 
+import com.mparticle.internal.Logger;
 import com.mparticle.testutils.Server;
 
 import org.junit.After;
@@ -35,6 +36,7 @@ public abstract class BaseAbstractTest {
 
     @Before
     public void beforeImpl() throws Exception {
+        Logger.setLogHandler(null);
         if (mServer == null) {
             mServer = new Server();
         } else {

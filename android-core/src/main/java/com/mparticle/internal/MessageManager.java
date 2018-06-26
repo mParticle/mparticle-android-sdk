@@ -32,13 +32,18 @@ import com.mparticle.internal.networking.BaseMPMessage;
 import com.mparticle.internal.networking.MPCommerceMessage;
 import com.mparticle.internal.networking.MPEventMessage;
 import com.mparticle.messaging.ProviderCloudMessage;
+import com.mparticle.networking.*;
+import com.mparticle.networking.MParticleBaseClientImpl;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -984,6 +989,15 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
 
     public MParticleDBManager getMParticleDBManager() {
         return mMParticleDBManager;
+    }
+
+    public void disableHandlers(){
+        if (mMessageHandler != null) {
+            mMessageHandler.disable(true);
+        }
+        if (mUploadHandler != null) {
+            mUploadHandler.disable(true);
+        }
     }
 
     public class InfluenceOpenMessage {

@@ -26,7 +26,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.UUID;
 
-/* package-private */ class MessageHandler extends Handler {
+/* package-private */ class MessageHandler extends BaseHandler {
 
     private final Context mContext;
 
@@ -58,7 +58,7 @@ import java.util.UUID;
         return mMParticleDBManager.isAvailable();
     }
     @Override
-    public void handleMessage(Message msg) {
+    public void handleMessageImpl(Message msg) {
         try {
             if (!databaseAvailable()) {
                 return;

@@ -1,7 +1,5 @@
 package com.mparticle.testutils;
 
-import android.support.annotation.CallSuper;
-
 import com.mparticle.MParticle;
 import com.mparticle.MParticleOptions;
 import com.mparticle.identity.BaseIdentityTask;
@@ -29,12 +27,12 @@ import java.util.concurrent.CountDownLatch;
  * If you want to test the behavior that occures during initialization, you should either invoke
  * MParticle.setInstance(null), or use BaseCleanInstallEachTest as your base class
  */
-public abstract class BaseCleanStartedEachTest extends BaseAbstractTest {
+public class BaseCleanStartedEachTest extends BaseAbstractTest {
     protected static Long mStartingMpid;
 
     @Before
     public final void beforeBase() throws InterruptedException {
-        MParticleUtils.clear();
+        MParticle.reset(mContext);
         mStartingMpid = new Random().nextLong();
         new ConfigManager(mContext, null, null, null).setMpid(mStartingMpid);
         mServer.setupHappyIdentify(mStartingMpid);

@@ -23,7 +23,7 @@ import static com.mparticle.networking.NetworkConnection.HTTP_TOO_MANY_REQUESTS;
 /**
  * Primary queue handler which is responsible for querying, packaging, and uploading data.
  */
-public class UploadHandler extends Handler implements BackgroundTaskHandler {
+public class UploadHandler extends BaseHandler implements BackgroundTaskHandler {
 
     private final Context mContext;
     MParticleDBManager mParticleDBManager;
@@ -111,7 +111,7 @@ public class UploadHandler extends Handler implements BackgroundTaskHandler {
     }
 
     @Override
-    public void handleMessage(Message msg) {
+    public void handleMessageImpl(Message msg) {
         try {
             if (mParticleDBManager == null) {
                 mParticleDBManager = new MParticleDBManager(mContext, DatabaseTables.getInstance(mContext));

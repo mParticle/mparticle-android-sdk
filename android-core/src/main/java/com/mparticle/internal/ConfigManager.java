@@ -42,7 +42,7 @@ public class ConfigManager {
     public static final String KEY_AAID_LAT = "rdlat";
     public static final String VALUE_APP_DEFINED = "appdefined";
     public static final String VALUE_CUE_CATCH = "forcecatch";
-    static final String PREFERENCES_FILE = "mp_preferences";
+    public static final String PREFERENCES_FILE = "mp_preferences";
     private static final String KEY_INCLUDE_SESSION_HISTORY = "inhd";
     private static final String KEY_DEVICE_PERFORMANCE_METRICS_DISABLED = "dpmd";
     static final String KEY_RAMP = "rp";
@@ -55,7 +55,7 @@ public class ConfigManager {
     AppConfig mLocalPrefs;
 
     private static JSONArray sPushKeys;
-    private static UserStorage sUserStorage;
+    private UserStorage mUserStorage;
     private String mLogUnhandledExceptions = VALUE_APP_DEFINED;
 
     private boolean mSendOoEvents;
@@ -88,7 +88,7 @@ public class ConfigManager {
         mContext = context.getApplicationContext();
         sPreferences = getPreferences(mContext);
         mLocalPrefs = new AppConfig(mContext, environment, sPreferences, apiKey, apiSecret);
-        sUserStorage = UserStorage.create(mContext, getMpid());
+        mUserStorage = UserStorage.create(mContext, getMpid());
         restoreOldConfig();
     }
 
@@ -121,35 +121,28 @@ public class ConfigManager {
     }
 
     UserStorage getUserStorage() {
-        return sUserStorage;
+        return mUserStorage;
     }
 
     UserStorage getUserStorage(long mpId) {
-        if (sUserStorage == null || sUserStorage.getMpid() != mpId) {
-            sUserStorage = UserStorage.create(mContext, mpId);
+        if (mUserStorage == null || mUserStorage.getMpid() != mpId) {
+            mUserStorage = UserStorage.create(mContext, mpId);
         }
-        return sUserStorage;
+        return mUserStorage;
     }
 
     public static UserStorage getUserStorage(Context context) {
-        if (sUserStorage == null) {
-            sUserStorage = UserStorage.create(context, getMpid(context));
-        }
-        return sUserStorage;
+        return UserStorage.create(context, getMpid(context));
     }
 
     public static UserStorage getUserStorage(Context context, long mpid) {
-        if (sUserStorage == null || sUserStorage.getMpid() != mpid) {
-            sUserStorage = UserStorage.create(context, mpid);
-        }
-        return sUserStorage;
+        return UserStorage.create(context, mpid);
     }
 
-    public static void deleteUserStorage(Context context, long mpid) {
-        if (sUserStorage != null && sUserStorage.getMpid() == mpid) {
-            sUserStorage = null;
+    public void deleteUserStorage(Context context, long mpid) {
+        if (mUserStorage != null) {
+            mUserStorage.deleteUserConfig(context, mpid);
         }
-        UserStorage.deleteUserConfig(context, mpid);
     }
 
     public void deleteUserStorage(long mpId) {
@@ -521,8 +514,8 @@ public class ConfigManager {
             triggerMpidChangeListenerCallbacks(mpid);
         }
         sPreferences.edit().putLong(Constants.PrefKeys.MPID, mpid).apply();
-        if (sUserStorage == null || sUserStorage.getMpid() != mpid) {
-            sUserStorage = UserStorage.create(mContext, mpid);
+        if (mUserStorage == null || mUserStorage.getMpid() != mpid) {
+            mUserStorage = UserStorage.create(mContext, mpid);
         }
     }
 

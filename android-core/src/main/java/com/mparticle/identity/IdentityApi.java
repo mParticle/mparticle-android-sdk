@@ -9,6 +9,7 @@ import android.support.annotation.Nullable;
 import com.mparticle.MParticle;
 import com.mparticle.MParticleTask;
 import com.mparticle.internal.AppStateManager;
+import com.mparticle.internal.BaseHandler;
 import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.Constants;
 import com.mparticle.internal.DatabaseTables;
@@ -34,7 +35,8 @@ public class IdentityApi {
     public static int SERVER_ERROR = 500;
 
     private Context mContext;
-    private Handler mBackgroundHandler;
+    private BaseHandler mBackgroundHandler;
+    private BaseHandler mMainHandler;
     ConfigManager mConfigManager;
     MessageManager mMessageManager;
     KitManager mKitManager;
@@ -269,6 +271,15 @@ public class IdentityApi {
         return task;
     }
 
+    public void reset() {
+        identityStateListeners = new HashSet<IdentityStateListener>();
+        mBackgroundHandler.removeCallbacksAndMessages(null);
+        mBackgroundHandler.disable(true);
+        if (mMainHandler != null) {
+            mMainHandler.disable(true);
+            mMainHandler.removeCallbacksAndMessages(null);
+        }
+    }
 
     private BaseIdentityTask makeIdentityRequest(IdentityApiRequest request, final IdentityNetworkRequestRunnable networkRequest) {
         if (request == null) {
@@ -339,7 +350,10 @@ public class IdentityApi {
         public void onMpIdChanged(long mpid) {
             final MParticleUser user = MParticleUserImpl.getInstance(mContext, mpid, mUserDelegate);
             if (identityStateListeners != null && identityStateListeners.size() > 0) {
-                new Handler(Looper.getMainLooper()).post(new Runnable() {
+                if (mMainHandler == null) {
+                    mMainHandler = new BaseHandler(Looper.getMainLooper());
+                }
+                mMainHandler.post(new Runnable() {
 
                     @Override
                     public void run() {

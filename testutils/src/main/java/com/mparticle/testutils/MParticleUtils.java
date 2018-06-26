@@ -2,12 +2,13 @@ package com.mparticle.testutils;
 
 import android.content.Context;
 import android.os.Handler;
-import android.support.test.InstrumentationRegistry;
+import android.support.annotation.Nullable;
 
 import com.mparticle.MPEvent;
 import com.mparticle.MParticle;
 import com.mparticle.internal.AccessUtils;
 import com.mparticle.internal.Constants;
+import com.mparticle.internal.Logger;
 import com.mparticle.internal.MParticleApiClientImpl;
 
 import java.net.MalformedURLException;
@@ -24,6 +25,34 @@ public class MParticleUtils {
             instance = new MParticleUtils();
         }
         return instance;
+    }
+
+    public static void setStrictMode(MParticle.LogLevel logLevel) {
+        setStrictMode(logLevel, "");
+    }
+
+    public static void setStrictMode(final MParticle.LogLevel logLevelLimit, final String... exclusions) {
+        Logger.DefaultLogHandler logListener;
+        if (logLevelLimit != null) {
+            logListener = new Logger.DefaultLogHandler() {
+
+                @Override
+                public void log(MParticle.LogLevel logLevel, Throwable error, String messages) {
+                    super.log(logLevel, error, messages);
+                    if (logLevel.ordinal() <= logLevelLimit.ordinal()) {
+                        for (String exclude: exclusions) {
+                            if (messages.equals(exclude)) {
+                                return;
+                            }
+                            throw new RuntimeException(String.format("Unacceptable Log of level \"%s\" : \n\"%s\" ", logLevel.name(), messages));
+                        }
+                    }
+                }
+            };
+        } else {
+            logListener = null;
+        }
+        Logger.setLogHandler(logListener);
     }
 
     public static void awaitStoreMessage() throws InterruptedException {
@@ -60,14 +89,6 @@ public class MParticleUtils {
         }
         while (uploadHandler.hasMessages(0));
         return;
-    }
-
-    public static void clear() {
-        Context context = InstrumentationRegistry.getContext();
-        MParticle.setInstance(null);
-        AccessUtils.deleteDatabase();
-        AccessUtils.deleteConfigManager(InstrumentationRegistry.getContext());
-        context.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE).edit().clear().commit();
     }
 
     /**

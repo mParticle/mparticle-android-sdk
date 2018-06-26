@@ -1,5 +1,7 @@
 package com.mparticle.testutils;
 
+import com.mparticle.MParticle;
+
 import org.junit.Before;
 
 /**
@@ -10,6 +12,6 @@ abstract public class BaseCleanInstallEachTest extends BaseAbstractTest {
 
     @Before
     public void beforeBase() throws Exception {
-        MParticleUtils.clear();
+        MParticle.reset(mContext);
     }
 }
