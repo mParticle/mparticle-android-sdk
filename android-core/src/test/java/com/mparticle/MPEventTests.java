@@ -54,13 +54,15 @@ public class MPEventTests  {
         MPEvent.Builder eventBuilder = new MPEvent.Builder("test name", MParticle.EventType.Navigation);
 
         eventBuilder.startTime();
+        Long startTime = System.currentTimeMillis();
         try {
-            Thread.sleep(1000);
+            Thread.sleep(20);
         } catch (InterruptedException e) {
             fail(e.toString());
         }
         eventBuilder.endTime();
-        assertTrue(eventBuilder.build().getLength() >= 1000);
+        Long duration = System.currentTimeMillis() - startTime;
+        assertEquals(duration, eventBuilder.build().getLength(), 5);
     }
 
     @Test

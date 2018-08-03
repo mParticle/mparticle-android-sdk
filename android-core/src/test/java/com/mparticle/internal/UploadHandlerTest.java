@@ -41,7 +41,7 @@ public class UploadHandlerTest {
         AppStateManager stateManager = Mockito.mock(AppStateManager.class);
         mConfigManager = Mockito.mock(ConfigManager.class);
         Mockito.when(MParticle.getInstance().getConfigManager()).thenReturn(mConfigManager);
-        handler = new UploadHandler(new MockContext(), mConfigManager, stateManager, Mockito.mock(MessageManager.class));
+        handler = new UploadHandler(new MockContext(), mConfigManager, stateManager, Mockito.mock(MessageManager.class), Mockito.mock(MParticleDBManager.class));
         handler.mParticleDBManager = Mockito.mock(MParticleDBManager.class);
     }
 
@@ -180,11 +180,11 @@ public class UploadHandlerTest {
         Mockito.when(mockCursor.moveToNext()).thenReturn(true, false);
         Mockito.when(mockCursor.getInt(Mockito.anyInt())).thenReturn(123);
         Mockito.when(mockCursor.getString(Mockito.anyInt())).thenReturn("cool message batch!");
-//        Mockito.when(mockDatabase.query(MParticleDatabase.UploadTable.TABLE_NAME, handler.uploadColumns,
-//                null, null, null, null, MParticleDatabase.UploadTable.CREATED_AT)).thenReturn(mockCursor);
+//        Mockito.when(mockDatabase.query(MParticleSQLiteOpenHelper.UploadTable.TABLE_NAME, handler.uploadColumns,
+//                null, null, null, null, MParticleSQLiteOpenHelper.UploadTable.CREATED_AT)).thenReturn(mockCursor);
         String[] whereArgs = {Long.toString(123)};
         handler.upload(true);
-//        Mockito.verify(mockDatabase).delete(Mockito.eq(MParticleDatabase.UploadTable.TABLE_NAME),
+//        Mockito.verify(mockDatabase).delete(Mockito.eq(MParticleSQLiteOpenHelper.UploadTable.TABLE_NAME),
 //                Mockito.eq( "_id=?"), Mockito.eq(whereArgs));
     }
 

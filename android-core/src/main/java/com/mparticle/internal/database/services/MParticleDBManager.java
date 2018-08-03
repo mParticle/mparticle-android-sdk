@@ -11,7 +11,7 @@ import android.os.Looper;
 import com.mparticle.UserAttributeListener;
 import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.Constants;
-import com.mparticle.internal.DatabaseTables;
+import com.mparticle.internal.DatabaseHelper;
 import com.mparticle.internal.DeviceAttributes;
 import com.mparticle.internal.JsonReportingMessage;
 import com.mparticle.internal.Logger;
@@ -44,29 +44,28 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.UUID;
 
-public class MParticleDBManager extends BaseDBManager {
+public class MParticleDBManager {
     private SharedPreferences mPreferences;
+    private Context mContext;
+    private DatabaseHelper mDatabaseHelper;
 
-    public MParticleDBManager(Context context, DatabaseTables databaseTables) {
-        super(context, databaseTables);
+    public MParticleDBManager(Context context) {
+        this.mContext = context;
         mPreferences = context.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
+        mDatabaseHelper = new DatabaseHelper(context);
     }
 
-    private long getMpid() {
-        return ConfigManager.getMpid(mContext);
-    }
-
-    public boolean isAvailable() {
-        try {
-            return getMParticleDatabase() != null;
-        }catch (Exception e) {
-            Logger.verbose(e.toString());
-            return false;
-        }
+    /**
+     * Creates a new SQLiteDatabase instance, if the Database has not been opened yet, and returns
+     * an instance. Each instance is a singleton, per thread.
+     * @return
+     */
+    public SQLiteDatabase getDatabase() {
+        return mDatabaseHelper.getWritableDatabase();
     }
 
     public void updateMpId(long oldMpId, long newMpId) {
-        SQLiteDatabase db = getMParticleDatabase();
+        SQLiteDatabase db = getDatabase();
         db.beginTransaction();
         new BreadcrumbService().updateMpId(db, oldMpId, newMpId);
         new MessageService().updateMpId(db, oldMpId, newMpId);
@@ -87,11 +86,11 @@ public class MParticleDBManager extends BaseDBManager {
 
 
     public void insertBreadcrumb(BaseMPMessage message, String apiKey) throws JSONException {
-        BreadcrumbService.insertBreadcrumb(getMParticleDatabase(), mContext, message, apiKey, message.getMpId());
+        BreadcrumbService.insertBreadcrumb(getDatabase(), mContext, message, apiKey, message.getMpId());
     }
 
     public void appendBreadcrumbs(BaseMPMessage message) throws JSONException {
-        JSONArray breadcrumbs = BreadcrumbService.getBreadcrumbs(getMParticleDatabase(), mContext, message.getMpId());
+        JSONArray breadcrumbs = BreadcrumbService.getBreadcrumbs(getDatabase(), mContext, message.getMpId());
         if (!MPUtility.isEmpty(breadcrumbs)) {
             message.put(Constants.MessageType.BREADCRUMB, breadcrumbs);
         }
@@ -106,11 +105,11 @@ public class MParticleDBManager extends BaseDBManager {
      */
 
     public void cleanupMessages() {
-        MessageService.cleanupMessages(getMParticleDatabase());
+        MessageService.cleanupMessages(getDatabase());
     }
 
     public void insertMessage(String apiKey, BaseMPMessage message) throws JSONException {
-        MessageService.insertMessage(getMParticleDatabase(), apiKey, message, message.getMpId());
+        MessageService.insertMessage(getDatabase(), apiKey, message, message.getMpId());
         if (sMessageListener != null) {
             sMessageListener.onMessageStored(message);
         }
@@ -123,7 +122,7 @@ public class MParticleDBManager extends BaseDBManager {
     }
 
     public void updateSessionInstallReferrer(String sessionId, JSONObject appInfo) {
-        SessionService.updateSessionInstallReferrer(getMParticleDatabase(), appInfo, sessionId);
+        SessionService.updateSessionInstallReferrer(getDatabase(), appInfo, sessionId);
     }
 
     public interface MessageListener {
@@ -139,7 +138,7 @@ public class MParticleDBManager extends BaseDBManager {
      */
 
     public void createSessionHistoryUploadMessage(ConfigManager configManager, DeviceAttributes deviceAttributes, String currentSessionId) throws JSONException {
-        SQLiteDatabase db = getMParticleDatabase();
+        SQLiteDatabase db = getDatabase();
         db.beginTransaction();
         try {
             List<MessageService.ReadyMessage> readyMessages = MessageService.getSessionHistory(db, currentSessionId);
@@ -163,7 +162,7 @@ public class MParticleDBManager extends BaseDBManager {
     }
 
     public void createMessagesForUploadMessage(ConfigManager configManager, DeviceAttributes deviceAttributes, String currentSessionId, boolean sessionHistoryEnabled) throws JSONException {
-        SQLiteDatabase db = getMParticleDatabase();
+        SQLiteDatabase db = getDatabase();
         db.beginTransaction();
         try {
             List<MessageService.ReadyMessage> readyMessages = MessageService.getMessagesForUpload(db);
@@ -202,7 +201,7 @@ public class MParticleDBManager extends BaseDBManager {
     }
 
     public void deleteMessagesAndSessions(String currentSessionId) {
-        SQLiteDatabase db = getMParticleDatabase();
+        SQLiteDatabase db = getDatabase();
         db.beginTransaction();
         MessageService.deleteOldMessages(db, currentSessionId);
         SessionService.deleteSessions(db, currentSessionId);
@@ -359,21 +358,21 @@ public class MParticleDBManager extends BaseDBManager {
     }
 
     public void updateSessionEndTime(String sessionId, long endTime, long sessionLength) {
-        SessionService.updateSessionEndTime(getMParticleDatabase(), sessionId, endTime, sessionLength);
+        SessionService.updateSessionEndTime(getDatabase(), sessionId, endTime, sessionLength);
     }
 
     public void updateSessionAttributes(String sessionId, String attributes) {
-        SessionService.updateSessionAttributes(getMParticleDatabase(), sessionId, attributes);
+        SessionService.updateSessionAttributes(getDatabase(), sessionId, attributes);
     }
 
     public void updateSessionStatus(String sessionId, String status) {
-        SessionService.updateSessionStatus(getMParticleDatabase(), sessionId, status);
+        SessionService.updateSessionStatus(getDatabase(), sessionId, status);
     }
 
     public BaseMPMessage getSessionForSessionEndMessage(String sessionId, Location location, Set<Long> mpIds) throws JSONException {
         Cursor selectCursor = null;
         try {
-            selectCursor = SessionService.getSessionForSessionEndMessage(getMParticleDatabase(), sessionId);
+            selectCursor = SessionService.getSessionForSessionEndMessage(getDatabase(), sessionId);
             BaseMPMessage endMessage = null;
             if (selectCursor.moveToFirst()) {
                 long start = selectCursor.getLong(0);
@@ -432,14 +431,14 @@ public class MParticleDBManager extends BaseDBManager {
 
 
     public List<String> getOrphanSessionIds(String apiKey) {
-        return SessionService.getOrphanSessionIds(getMParticleDatabase(), apiKey);
+        return SessionService.getOrphanSessionIds(getDatabase(), apiKey);
     }
 
 
     public void insertSession(BaseMPMessage message, String apiKey, JSONObject appInfo, JSONObject deviceInfo) throws JSONException {
         String appInfoString = appInfo.toString();
         String deviceInfoString = deviceInfo.toString();
-        SessionService.insertSession(getMParticleDatabase(), message, apiKey, appInfoString, deviceInfoString, message.getMpId());
+        SessionService.insertSession(getDatabase(), message, apiKey, appInfoString, deviceInfoString, message.getMpId());
     }
 
 
@@ -452,7 +451,7 @@ public class MParticleDBManager extends BaseDBManager {
      */
 
     public void insertReportingMessages(List<JsonReportingMessage> reportingMessages, long mpId) {
-        SQLiteDatabase db = getMParticleDatabase();
+        SQLiteDatabase db = getDatabase();
         try {
             db.beginTransaction();
             for (int i = 0; i < reportingMessages.size(); i++) {
@@ -478,15 +477,15 @@ public class MParticleDBManager extends BaseDBManager {
 
 
     public void cleanupUploadMessages() {
-        UploadService.cleanupUploadMessages(getMParticleDatabase());
+        UploadService.cleanupUploadMessages(getDatabase());
     }
 
     public List<ReadyUpload> getReadyUploads() {
-        return UploadService.getReadyUploads(getMParticleDatabase());
+        return UploadService.getReadyUploads(getDatabase());
     }
 
     public int deleteUpload(int id) {
-        return UploadService.deleteUpload(getMParticleDatabase(), id);
+        return UploadService.deleteUpload(getDatabase(), id);
     }
 
 
@@ -500,15 +499,15 @@ public class MParticleDBManager extends BaseDBManager {
      */
 
     public TreeMap<String, String> getUserAttributeSingles(long mpId) {
-        if (getMParticleDatabase() != null) {
-            return UserAttributesService.getUserAttributesSingles(getMParticleDatabase(), mpId);
+        if (getDatabase() != null) {
+            return UserAttributesService.getUserAttributesSingles(getDatabase(), mpId);
         }
         return null;
     }
 
     public TreeMap<String, List<String>> getUserAttributeLists(long mpId) {
-        if (getMParticleDatabase() != null) {
-            return UserAttributesService.getUserAttributesLists(getMParticleDatabase(), mpId);
+        if (getDatabase() != null) {
+            return UserAttributesService.getUserAttributesLists(getDatabase(), mpId);
         }
         return null;
     }
@@ -587,11 +586,11 @@ public class MParticleDBManager extends BaseDBManager {
 
     public List<AttributionChange> setUserAttribute(UserAttributeResponse userAttribute) {
         List<AttributionChange> attributionChanges = new ArrayList<AttributionChange>();
-        if (getMParticleDatabase() == null){
+        if (getDatabase() == null){
             return attributionChanges;
         }
         Map<String, Object> currentValues = getUserAttributes(null, userAttribute.mpId);
-        SQLiteDatabase db = getMParticleDatabase();
+        SQLiteDatabase db = getDatabase();
         try {
             db.beginTransaction();
             long time = System.currentTimeMillis();
@@ -637,7 +636,7 @@ public class MParticleDBManager extends BaseDBManager {
 
     public void removeUserAttribute(UserAttributeRemoval container, MessageManagerCallbacks callbacks) {
         Map<String, Object> currentValues = getUserAttributes(null, container.mpId);
-        SQLiteDatabase db = getMParticleDatabase();
+        SQLiteDatabase db = getDatabase();
         try {
             db.beginTransaction();
             int deleted = UserAttributesService.deleteAttributes(db, container.key, container.mpId);

@@ -27,18 +27,16 @@ import java.util.List;
 import java.util.Map;
 
 /** package-private **/class MParticleUserDelegate {
-    private MParticleDBManager mMParticleDBManager;
     private AppStateManager mAppStateManager;
     private ConfigManager mConfigManager;
     private MessageManager mMessageManager;
     private KitManager mKitManager;
 
-    MParticleUserDelegate(AppStateManager appStateManager, ConfigManager configManager, MessageManager messageManager, KitManager kitManager, MParticleDBManager dbManager) {
+    MParticleUserDelegate(AppStateManager appStateManager, ConfigManager configManager, MessageManager messageManager, KitManager kitManager) {
         mAppStateManager = appStateManager;
         mConfigManager = configManager;
         mMessageManager = messageManager;
         mKitManager = kitManager;
-        mMParticleDBManager = dbManager;
     }
 
     public Map<String, Object> getUserAttributes(long mpId) {

@@ -3,7 +3,7 @@ package com.mparticle.internal.database.services;
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;
 
-import com.mparticle.internal.DatabaseTables;
+import com.mparticle.internal.DatabaseHelper;
 import com.mparticle.internal.dto.UserAttributeRemoval;
 import com.mparticle.internal.dto.UserAttributeResponse;
 
@@ -16,14 +16,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.Assert.*;
-
 public class MParticleDBManagerTest {
 
     @Test
     public void testRemoveUserAttributes() throws Exception {
         Context context = InstrumentationRegistry.getContext();
-        MParticleDBManager manager = new MParticleDBManager(context, DatabaseTables.getInstance(context));
+        MParticleDBManager manager = new MParticleDBManager(context);
         UserAttributeRemoval removal = new UserAttributeRemoval();
         removal.key = "foo";
         removal.mpId = 10L;
@@ -48,7 +46,7 @@ public class MParticleDBManagerTest {
     @Test
     public void testUserUserAttributeLists() throws Exception {
         Context context = InstrumentationRegistry.getContext();
-        MParticleDBManager manager = new MParticleDBManager(context, DatabaseTables.getInstance(context));
+        MParticleDBManager manager = new MParticleDBManager(context);
         UserAttributeRemoval removal = new UserAttributeRemoval();
         removal.key = "foo";
         removal.mpId = 10L;

@@ -33,7 +33,6 @@ import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.Constants;
 import com.mparticle.internal.Constants.MessageKey;
 import com.mparticle.internal.Constants.PrefKeys;
-import com.mparticle.internal.DatabaseTables;
 import com.mparticle.internal.InternalSession;
 import com.mparticle.internal.KitFrameworkWrapper;
 import com.mparticle.internal.Logger;
@@ -42,6 +41,7 @@ import com.mparticle.internal.MPUtility;
 import com.mparticle.internal.MParticleJSInterface;
 import com.mparticle.internal.MessageManager;
 import com.mparticle.internal.PushRegistrationHelper;
+import com.mparticle.internal.database.services.MParticleDBManager;
 import com.mparticle.internal.database.tables.mp.MParticleDatabaseHelper;
 import com.mparticle.media.MPMediaAPI;
 import com.mparticle.media.MediaCallbacks;
@@ -90,6 +90,7 @@ public class MParticle {
     protected MPMessagingAPI mMessaging;
     protected MPMediaAPI mMedia;
     protected CommerceApi mCommerce;
+    protected MParticleDBManager mDatabaseManager;
     protected volatile AttributionListener mAttributionListener;
     protected IdentityApi mIdentityApi;
     static volatile boolean sAndroidIdDisabled;
@@ -112,13 +113,14 @@ public class MParticle {
         mAppContext = options.getContext();
         mConfigManager = configManager;
         mAppStateManager = appStateManager;
+        mDatabaseManager = new MParticleDBManager(mAppContext);
         if (options.isUncaughtExceptionLoggingEnabled()) {
             enableUncaughtExceptionLogging();
         } else {
             disableUncaughtExceptionLogging();
         }
         mCommerce = new CommerceApi(options.getContext());
-        mMessageManager = new MessageManager(options.getContext(), configManager, options.getInstallType(), appStateManager, sDevicePerformanceMetricsDisabled);
+        mMessageManager = new MessageManager(options.getContext(), configManager, options.getInstallType(), appStateManager, sDevicePerformanceMetricsDisabled, mDatabaseManager);
         mPreferences = options.getContext().getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
     }
 
@@ -1130,11 +1132,7 @@ public class MParticle {
                     file.delete();
                 }
             }
-
-            //remove our static database reference
-            DatabaseTables.clearInstance();
             context.getApplicationContext().deleteDatabase(MParticleDatabaseHelper.DB_NAME);
-
             Logger.debug("MParticle destroyed");
         }
     }

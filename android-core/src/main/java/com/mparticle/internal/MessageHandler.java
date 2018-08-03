@@ -46,16 +46,22 @@ import java.util.UUID;
 
     private final MessageManagerCallbacks mMessageManagerCallbacks;
 
-    public MessageHandler(Looper looper, MessageManagerCallbacks messageManager, Context context) {
+    public MessageHandler(Looper looper, MessageManagerCallbacks messageManager, Context context, MParticleDBManager dbManager) {
         super(looper);
         mMessageManagerCallbacks = messageManager;
         mContext = context;
-        mMParticleDBManager = new MParticleDBManager(context, DatabaseTables.getInstance(context));
+        mMParticleDBManager = dbManager;
     }
 
     private boolean databaseAvailable() {
-        return mMParticleDBManager.isAvailable();
+        try {
+            return mMParticleDBManager.getDatabase() != null;
+        } catch (Exception ex) {
+            Logger.error("Database unavailable");
+            return false;
+        }
     }
+
     @Override
     public void handleMessageImpl(Message msg) {
         try {

@@ -142,16 +142,16 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
         mInstallType = installType;
     }
 
-    public MessageManager(Context appContext, ConfigManager configManager, MParticle.InstallType installType, AppStateManager appStateManager, boolean devicePerformanceMetricsDisabled) {
+    public MessageManager(Context appContext, ConfigManager configManager, MParticle.InstallType installType, AppStateManager appStateManager, boolean devicePerformanceMetricsDisabled, MParticleDBManager dbManager) {
         this.devicePerformanceMetricsDisabled = devicePerformanceMetricsDisabled;
         mDeviceAttributes = new DeviceAttributes();
         sContext = appContext.getApplicationContext();
         mConfigManager = configManager;
         mAppStateManager = appStateManager;
         mAppStateManager.setMessageManager(this);
-        mMParticleDBManager = new MParticleDBManager(appContext, DatabaseTables.getInstance(appContext));
-        mMessageHandler = new MessageHandler(sMessageHandlerThread.getLooper(), this, appContext);
-        mUploadHandler = new UploadHandler(appContext, sUploadHandlerThread.getLooper(), configManager, appStateManager, this);
+        mMParticleDBManager = dbManager;
+        mMessageHandler = new MessageHandler(sMessageHandlerThread.getLooper(), this, appContext, dbManager);
+        mUploadHandler = new UploadHandler(appContext, sUploadHandlerThread.getLooper(), configManager, appStateManager, this, dbManager);
         sPreferences = appContext.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
         mInstallType = installType;
     }

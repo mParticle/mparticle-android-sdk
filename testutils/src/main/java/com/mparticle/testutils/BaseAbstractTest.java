@@ -53,6 +53,7 @@ public abstract class BaseAbstractTest {
         if (mServer != null) {
             mServer.stop();
         }
+        MParticle.getInstance().reset(mContext);
     }
 
     protected void startMParticle() throws InterruptedException {

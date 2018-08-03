@@ -6,23 +6,19 @@ import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-import com.mparticle.MParticle;
 import com.mparticle.MParticleTask;
 import com.mparticle.internal.AppStateManager;
 import com.mparticle.internal.BaseHandler;
 import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.Constants;
-import com.mparticle.internal.DatabaseTables;
 import com.mparticle.internal.KitManager;
 import com.mparticle.internal.Logger;
 import com.mparticle.internal.MPUtility;
 import com.mparticle.internal.MessageManager;
-import com.mparticle.internal.database.services.MParticleDBManager;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -52,7 +48,7 @@ public class IdentityApi {
     public IdentityApi(Context context, AppStateManager appStateManager, MessageManager messageManager, ConfigManager configManager, KitManager kitManager) {
         this.mContext = context;
         this.mBackgroundHandler = messageManager.mUploadHandler;
-        this.mUserDelegate = new MParticleUserDelegate(appStateManager, configManager, messageManager, kitManager, new MParticleDBManager(context, DatabaseTables.getInstance(context)));
+        this.mUserDelegate = new MParticleUserDelegate(appStateManager, configManager, messageManager, kitManager);
         this.mConfigManager = configManager;
         this.mMessageManager = messageManager;
         this.mKitManager = kitManager;

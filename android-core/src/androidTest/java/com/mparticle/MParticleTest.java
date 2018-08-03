@@ -6,13 +6,13 @@ import android.database.sqlite.SQLiteDatabase;
 import com.mparticle.identity.IdentityApiRequest;
 import com.mparticle.identity.IdentityStateListener;
 import com.mparticle.identity.MParticleUser;
-import com.mparticle.internal.DatabaseTables;
 import com.mparticle.internal.KitFrameworkWrapper;
 import com.mparticle.internal.MessageManager;
+import com.mparticle.internal.database.services.MParticleDBManager;
 import com.mparticle.testutils.BaseCleanStartedEachTest;
 import com.mparticle.testutils.MPLatch;
-import com.mparticle.testutils.TestingUtils;
 import com.mparticle.testutils.RandomUtils;
+import com.mparticle.testutils.TestingUtils;
 
 import junit.framework.Assert;
 
@@ -249,7 +249,7 @@ public class MParticleTest extends BaseCleanStartedEachTest {
         for (int i = 0; i < 10; i++) {
             MParticle.getInstance().getConfigManager().setMpid(ran.nextLong());
         }
-        assertTrue(getData(DatabaseTables.getInstance(mContext).getMParticleDatabase().query("messages", null, null, null, null, null, null)).length() > 0);
+        assertTrue(getData(new MParticleDBManager(mContext).getDatabase().query("messages", null, null, null, null, null, null)).length() > 0);
         assertEquals(6, getAllTables().size());
         assertTrue(10 < MParticle.getInstance().getConfigManager().getMpids().size());
 
@@ -272,7 +272,7 @@ public class MParticleTest extends BaseCleanStartedEachTest {
         //and 0 other SharedPreferences tables
         //make sure the 2 entries in default SharedPreferences are the correct values
         //0 tables should exist
-        //then we call DatabaseTables.getInstance(Context).getMParticleDatabase, which should create the database,
+        //then we call DatabaseHelper.getInstance(Context).openDatabase, which should create the database,
         //and make sure it is created without an error message, and that all the tables are empty
         String sharedPrefsDirectory = mContext.getFilesDir().getPath().replace("files", "shared_prefs/");
         File[] files = new File(sharedPrefsDirectory).listFiles();
@@ -285,7 +285,7 @@ public class MParticleTest extends BaseCleanStartedEachTest {
         assertEquals(0, mContext.databaseList().length);
         try {
             for (String tableName: getAllTables()) {
-                JSONArray data = getData(DatabaseTables.getInstance(mContext).getMParticleDatabase().query(tableName, null, null, null, null, null, null));
+                JSONArray data = getData(new MParticleDBManager(mContext).getDatabase().query(tableName, null, null, null, null, null, null));
                 if (data.length() > 0) {
                     assertEquals(0, data.length());
                 }
@@ -296,7 +296,7 @@ public class MParticleTest extends BaseCleanStartedEachTest {
     }
 
     private List<String> getAllTables() throws JSONException {
-        SQLiteDatabase database = DatabaseTables.getInstance(mContext).getMParticleDatabase();
+        SQLiteDatabase database = new MParticleDBManager(mContext).getDatabase();
         Cursor cursor = database.query("sqlite_master", null, "type = ?", new String[]{"table"}, null, null, null);
         cursor.moveToFirst();
         List<String> tableNames = new ArrayList<String>();

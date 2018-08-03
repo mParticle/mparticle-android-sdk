@@ -45,7 +45,6 @@ public class AccessUtils {
 
     public static void deleteDatabase() {
         InstrumentationRegistry.getTargetContext().deleteDatabase(MParticleDatabaseHelper.DB_NAME);
-        DatabaseTables.setInstance(null);
     }
 
     public static MessageHandler getMessageHandler() {

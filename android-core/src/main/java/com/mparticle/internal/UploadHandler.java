@@ -2,7 +2,6 @@ package com.mparticle.internal;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 
@@ -74,12 +73,12 @@ public class UploadHandler extends BaseHandler implements BackgroundTaskHandler 
      *
      * Only used for unit testing
      */
-    UploadHandler(Context context, ConfigManager configManager, AppStateManager appStateManager, MessageManager messageManager) {
+    UploadHandler(Context context, ConfigManager configManager, AppStateManager appStateManager, MessageManager messageManager, MParticleDBManager mparticleDBManager) {
         mConfigManager = configManager;
         mContext = context;
         mAppStateManager = appStateManager;
         audienceDB = new SegmentDatabase(mContext);
-        mParticleDBManager = new MParticleDBManager(context, DatabaseTables.getInstance(context));
+        mParticleDBManager = mparticleDBManager;
         mPreferences = mContext.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
         mMessageManager = messageManager;
         try {
@@ -92,13 +91,13 @@ public class UploadHandler extends BaseHandler implements BackgroundTaskHandler 
     }
 
 
-    public UploadHandler(Context context, Looper looper, ConfigManager configManager, AppStateManager appStateManager, MessageManager messageManager) {
+    public UploadHandler(Context context, Looper looper, ConfigManager configManager, AppStateManager appStateManager, MessageManager messageManager, MParticleDBManager mparticleDBManager) {
         super(looper);
         mConfigManager = configManager;
         mContext = context;
         mAppStateManager = appStateManager;
         audienceDB = new SegmentDatabase(mContext);
-        mParticleDBManager = new MParticleDBManager(context, DatabaseTables.getInstance(context));
+        mParticleDBManager = mparticleDBManager;
         mPreferences = mContext.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
         mMessageManager = messageManager;
         try {
@@ -113,9 +112,7 @@ public class UploadHandler extends BaseHandler implements BackgroundTaskHandler 
     @Override
     public void handleMessageImpl(Message msg) {
         try {
-            if (mParticleDBManager == null) {
-                mParticleDBManager = new MParticleDBManager(mContext, DatabaseTables.getInstance(mContext));
-            }
+            mParticleDBManager.getDatabase();
             switch (msg.what) {
                 case UPDATE_CONFIG:
                     MParticle.getInstance().getKitManager().loadKitLibrary();

@@ -33,7 +33,9 @@ public class BaseCleanStartedEachTest extends BaseAbstractTest {
 
     @Before
     public final void beforeBase() throws InterruptedException {
-        MParticle.reset(mContext);
+        if (MParticle.getInstance() != null) {
+            MParticle.reset(mContext);
+        }
         mStartingMpid = new Random().nextLong();
         new ConfigManager(mContext, null, null, null).setMpid(mStartingMpid);
         mServer.setupHappyIdentify(mStartingMpid);
