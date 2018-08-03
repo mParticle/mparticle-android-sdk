@@ -6,6 +6,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.rule.ActivityTestRule;
+import android.util.MutableBoolean;
 import android.webkit.CookieManager;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebResourceRequest;
@@ -48,8 +49,12 @@ import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.concurrent.CountDownLatch;
+
+import com.mparticle.testutils.MPLatch;
 
 import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertTrue;
 import static junit.framework.Assert.fail;
 
 public class MParticleJSInterfaceTest extends BaseCleanStartedEachTest {
@@ -199,7 +204,8 @@ public class MParticleJSInterfaceTest extends BaseCleanStartedEachTest {
         final String key =  mRandomUtils.getAlphaNumericString(25);
         final String value =  mRandomUtils.getAlphaNumericString(25);
         String testJavascript = String.format("mParticle.Identity.getCurrentUser().setUserAttribute(\"%s\", \"%s\");\n", key, value);
-        final boolean[] called = new boolean[1];
+        final MutableBoolean called = new MutableBoolean(false);
+        final CountDownLatch latch = new MPLatch(1);
         runJavascriptTest(testJavascript, new MParticleJSInterface(){
             @Override
             @JavascriptInterface
@@ -209,7 +215,8 @@ public class MParticleJSInterfaceTest extends BaseCleanStartedEachTest {
                     JSONObject jsonObject = new JSONObject(json);
                     assertEquals(key, jsonObject.getString("key"));
                     assertEquals(value, jsonObject.getString("value"));
-                    called[0] = true;
+                    called.value = true;
+                    latch.countDown();
                 }
                 catch (JSONException jse) {
                     jse.printStackTrace();
@@ -217,14 +224,16 @@ public class MParticleJSInterfaceTest extends BaseCleanStartedEachTest {
 
             }
         });
-        TestingUtils.checkAllBool(called, 1, 20);
+        latch.await();
+        assertTrue(called.value);
     }
 
     @Test
     public void testRemoveUserAttribute() throws Exception {
-        final String key = mRandomUtils.getAlphaNumericString(255);
+        final String key = mRandomUtils.getAlphaNumericString(20);
         String testJavascript = String.format("mParticle.Identity.getCurrentUser().removeUserAttribute(\"%s\");\n", key);
-        final boolean[] called = new boolean[1];
+        final MutableBoolean called = new MutableBoolean(false);
+        final CountDownLatch latch = new MPLatch(1);
         runJavascriptTest(testJavascript, new MParticleJSInterface(){
             @Override
             @JavascriptInterface
@@ -233,21 +242,24 @@ public class MParticleJSInterfaceTest extends BaseCleanStartedEachTest {
                 try {
                     JSONObject jsonObject = new JSONObject(json);
                     assertEquals(key, jsonObject.getString("key"));
-                    called[0] = true;
+                    called.value = true;
+                    latch.countDown();
                 }
                 catch (JSONException jse) {
                     jse.printStackTrace();
                 }
             }
         });
-        TestingUtils.checkAllBool(called, 1, 20);
+        latch.await();
+        assertTrue(called.value);
     }
 
     @Test
     public void testSetUserTag() throws Exception {
         final String tag = mRandomUtils.getAlphaNumericString(25);
         String testJavascript = String.format("mParticle.Identity.getCurrentUser().setUserTag(\"%s\");\n", tag);
-        final boolean[] called = new boolean[1];
+        final MutableBoolean called = new MutableBoolean(false);
+        final CountDownLatch latch = new MPLatch(1);
         //This is acceptable if the JS SDK calls either setUserTag, or setUserAttribute with a null value
         runJavascriptTest(testJavascript, new MParticleJSInterface(){
             @Override
@@ -257,7 +269,8 @@ public class MParticleJSInterfaceTest extends BaseCleanStartedEachTest {
                 try {
                     JSONObject jsonObject = new JSONObject(json);
                     assertEquals(tag, jsonObject.getString("key"));
-                    called[0] = true;
+                    called.value = true;
+                    latch.countDown();
                 }
                 catch (JSONException jse) {
                     jse.printStackTrace();
@@ -272,14 +285,16 @@ public class MParticleJSInterfaceTest extends BaseCleanStartedEachTest {
                     JSONObject jsonObject = new JSONObject(json);
                     assertEquals(tag, jsonObject.getString("key"));
                     assertEquals(jsonObject.optString("value", "null"), "null");
-                    called[0] = true;
+                    called.value = true;
+                    latch.countDown();
                 }
                 catch (JSONException jse) {
                     jse.printStackTrace();
                 }
             }
         });
-        TestingUtils.checkAllBool(called, 1, 2000);
+        latch.await();
+        assertTrue(called.value);
     }
 
     @Test
@@ -289,7 +304,8 @@ public class MParticleJSInterfaceTest extends BaseCleanStartedEachTest {
                 "                         mParticle.EventType.Navigation,\n" +
                 "                         %s\n" +
                 "                         );", customAttributes.toString(4));
-        final boolean[] called = new boolean[1];
+        final MutableBoolean called = new MutableBoolean(false);
+        final CountDownLatch latch = new MPLatch(1);
         runJavascriptTest(testJavascript, new MParticleJSInterface() {
             @Override
             @JavascriptInterface
@@ -301,7 +317,8 @@ public class MParticleJSInterfaceTest extends BaseCleanStartedEachTest {
                         assertEquals(jsonObject.getInt(JS_KEY_EVENT_CATEGORY), MParticle.EventType.Navigation.ordinal());
                         JSONObject receivedCustomAttributes = jsonObject.getJSONObject(JS_KEY_EVENT_ATTRIBUTES);
                         assertUnorderedJsonEqual(customAttributes, receivedCustomAttributes);
-                        called[0] = true;
+                        called.value = true;
+                        latch.countDown();
                     }
                     Logger.error(new JSONObject(json).toString(4));
                 } catch (JSONException e) {
@@ -309,7 +326,8 @@ public class MParticleJSInterfaceTest extends BaseCleanStartedEachTest {
                 }
             }
         });
-        TestingUtils.checkAllBool(called, 1, 20);
+        latch.await();
+        assertTrue(called.value);
     }
 
     @Test
@@ -318,7 +336,8 @@ public class MParticleJSInterfaceTest extends BaseCleanStartedEachTest {
         JSONObject jsonObject = userIdentityMapToJson(userIdentityMap);
         String testJavascript = String.format("mParticle.Identity.logout(%s , null);", jsonObject.toString(4));
 
-        final boolean[] called = new boolean[1];
+        final MutableBoolean called = new MutableBoolean(false);
+        final CountDownLatch latch = new MPLatch(1);
         runJavascriptTest(testJavascript, new MParticleJSInterface() {
             @Override
             @JavascriptInterface
@@ -326,20 +345,23 @@ public class MParticleJSInterfaceTest extends BaseCleanStartedEachTest {
                 super.logout(json);
                 try {
                     assertUnorderedJsonEqual(new JSONObject(json), userIdentityMapToJsonJsSdkStyle(userIdentityMap));
-                    called[0] = true;
+                    called.value = true;
+                    latch.countDown();
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
             }
         });
-        TestingUtils.checkAllBool(called, 1, 20);
+        latch.await();
+        assertTrue(called.value);
     }
 
     @Test
     public void testLogoutEmpty() throws Exception {
         String testJavascript = "mParticle.Identity.logout();";
 
-        final boolean[] called = new boolean[1];
+        final MutableBoolean called = new MutableBoolean(false);
+        final CountDownLatch latch = new MPLatch(1);
         runJavascriptTest(testJavascript, new MParticleJSInterface() {
             @Override
             @JavascriptInterface
@@ -352,10 +374,12 @@ public class MParticleJSInterfaceTest extends BaseCleanStartedEachTest {
             @Override
             @JavascriptInterface
             public void logout() {
-                called[0] = true;
+                called.value = true;
+                latch.countDown();
             }
         });
-        TestingUtils.checkAllBool(called, 1, 20);
+        latch.await();
+        assertTrue(called.value);
     }
 
     @Test
@@ -364,7 +388,8 @@ public class MParticleJSInterfaceTest extends BaseCleanStartedEachTest {
         JSONObject jsonObject = userIdentityMapToJson(userIdentityMap);
         String testJavascript = String.format("mParticle.Identity.login(%s , null);", jsonObject.toString(4));
 
-        final boolean[] called = new boolean[1];
+        final MutableBoolean called = new MutableBoolean(false);
+        final CountDownLatch latch = new MPLatch(1);
         runJavascriptTest(testJavascript, new MParticleJSInterface() {
             @Override
             @JavascriptInterface
@@ -372,20 +397,23 @@ public class MParticleJSInterfaceTest extends BaseCleanStartedEachTest {
                 super.login(json);
                 try {
                     assertUnorderedJsonEqual(new JSONObject(json), userIdentityMapToJsonJsSdkStyle(userIdentityMap));
-                    called[0] = true;
+                    called.value = true;
+                    latch.countDown();
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
             }
         });
-        TestingUtils.checkAllBool(called, 1, 20);
+        latch.await();
+        assertTrue(called.value);
     }
 
     @Test
     public void testLoginEmpty() throws Exception {
         String testJavascript = "mParticle.Identity.login();";
 
-        final boolean[] called = new boolean[1];
+        final MutableBoolean called = new MutableBoolean(false);
+        final CountDownLatch latch = new MPLatch(1);
         runJavascriptTest(testJavascript, new MParticleJSInterface() {
             @Override
             @JavascriptInterface
@@ -398,10 +426,12 @@ public class MParticleJSInterfaceTest extends BaseCleanStartedEachTest {
             @Override
             @JavascriptInterface
             public void login() {
-                called[0] = true;
+                called.value = true;
+                latch.countDown();
             }
         });
-        TestingUtils.checkAllBool(called, 1, 20);
+        latch.await();
+        assertTrue(called.value);
     }
 
     @Test
@@ -410,7 +440,8 @@ public class MParticleJSInterfaceTest extends BaseCleanStartedEachTest {
         JSONObject jsonObject = userIdentityMapToJson(userIdentities);
         String testJavascript = String.format("mParticle.Identity.modify(%s , null);", jsonObject.toString(4));
 
-        final boolean[] called = new boolean[1];
+        final MutableBoolean called = new MutableBoolean(false);
+        final CountDownLatch latch = new MPLatch(1);
         runJavascriptTest(testJavascript, new MParticleJSInterface() {
             @Override
             @JavascriptInterface
@@ -418,13 +449,15 @@ public class MParticleJSInterfaceTest extends BaseCleanStartedEachTest {
                 super.modify(json);
                 try {
                     assertUnorderedJsonEqual(new JSONObject(json), userIdentityMapToJsonJsSdkStyle(userIdentities));
-                    called[0] = true;
+                    called.value = true;
+                    latch.countDown();
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
             }
         });
-        TestingUtils.checkAllBool(called, 1, 20);
+        latch.await();
+        assertTrue(called.value);
     }
 
     private String getJavascriptWrappedinHtml(String testJavascript) {

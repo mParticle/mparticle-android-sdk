@@ -138,60 +138,37 @@ public class MParticleOptionsTest extends BaseAbstractTest {
     public void testSetCredentials() throws Exception {
         String key = UUID.randomUUID().toString();
         String secret = UUID.randomUUID().toString();
-        MParticleOptions options = MParticleOptions.builder(mProductionContext)
-                .credentials(key, secret)
-                .build();
-        MParticle.start(options);
+        startMParticle(MParticleOptions.builder(mProductionContext)
+                .credentials(key, secret));
         assertEquals(MParticle.getInstance().getConfigManager().getApiKey(), key);
         assertEquals(MParticle.getInstance().getConfigManager().getApiSecret(), secret);
     }
 
     @Test
     public void testAndroidIdDisabled() throws Exception {
-        assertFalse(MParticle.isAndroidIdDisabled());
-
-        MParticleOptions options = MParticleOptions.builder(InstrumentationRegistry.getContext())
-                .androidIdDisabled(true)
-                .credentials("key", "secret")
-                .build();
-        try {
-            MParticle.start(options);
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-        }
+        MParticle.setInstance(null);
+        startMParticle(MParticleOptions.builder(mContext)
+                .androidIdDisabled(true));
         assertTrue(MParticle.isAndroidIdDisabled());
         MParticle.setInstance(null);
-        options = MParticleOptions.builder(InstrumentationRegistry.getContext())
-                .androidIdDisabled(false)
-                .credentials("key", "secret")
-                .build();
-        MParticle.start(options);
+        startMParticle(MParticleOptions.builder(mContext)
+                .androidIdDisabled(false));
         assertFalse(MParticle.isAndroidIdDisabled());
     }
 
     @Test
     public void testDevicePerformanceMetricsDisabled() throws Exception {
-        MParticleOptions options = MParticleOptions.builder(InstrumentationRegistry.getContext())
-                .credentials("key", "secret")
-                .build();
-        MParticle.start(options);
+        startMParticle();
         assertFalse(MParticle.getInstance().isDevicePerformanceMetricsDisabled());
         MParticle.setInstance(null);
 
-        options = MParticleOptions.builder(InstrumentationRegistry.getContext())
-                .credentials("key", "secret")
-                .devicePerformanceMetricsDisabled(false)
-                .build();
-        MParticle.start(options);
+        startMParticle(MParticleOptions.builder(mContext)
+                .devicePerformanceMetricsDisabled(false));
         assertFalse(MParticle.getInstance().isDevicePerformanceMetricsDisabled());
         MParticle.setInstance(null);
 
-        options = MParticleOptions.builder(InstrumentationRegistry.getContext())
-                .credentials("key", "secret")
-                .devicePerformanceMetricsDisabled(true)
-                .build();
-        MParticle.start(options);
+        startMParticle(MParticleOptions.builder(mContext)
+                .devicePerformanceMetricsDisabled(true));
         assertTrue(MParticle.getInstance().isDevicePerformanceMetricsDisabled());
         MParticle.setInstance(null);
 
@@ -200,43 +177,24 @@ public class MParticleOptionsTest extends BaseAbstractTest {
 
     @Test
     public void testLogLevel() throws Exception {
-        MParticleOptions options = MParticleOptions.builder(mProductionContext)
-                .credentials("key", "secret")
-                .build();
-        MParticle.start(options);
+        startMParticle();
         assertEquals(Logger.getMinLogLevel(), Logger.DEFAULT_MIN_LOG_LEVEL);
 
-        options = MParticleOptions.builder(mProductionContext)
-                .credentials("key", "secret")
-                .logLevel(MParticle.LogLevel.VERBOSE)
-                .build();
-        MParticle.setInstance(null);
-        MParticle.start(options);
+        startMParticle(MParticleOptions.builder(mProductionContext)
+                .logLevel(MParticle.LogLevel.VERBOSE));
         assertEquals(Logger.getMinLogLevel(), MParticle.LogLevel.VERBOSE);
 
-        options = MParticleOptions.builder(mProductionContext)
-                .credentials("key", "secret")
-                .logLevel(MParticle.LogLevel.ERROR)
-                .build();
-        MParticle.setInstance(null);
-        MParticle.start(options);
+        startMParticle(MParticleOptions.builder(mProductionContext).logLevel(MParticle.LogLevel.ERROR));
+
         assertEquals(Logger.getMinLogLevel(), MParticle.LogLevel.ERROR);
     }
 
     @Test
     public void testEnvironment() throws Exception {
-        MParticleOptions options = MParticleOptions.builder(mContext)
-                .credentials("key", "secret")
-                .build();
-        MParticle.start(options);
+        startMParticle();
         assertEquals(MParticle.getInstance().getEnvironment(), MParticle.Environment.Development);
-        MParticle.setInstance(null);
 
-        options = MParticleOptions.builder(mProductionContext)
-                .credentials("key", "secret")
-                .environment(MParticle.Environment.Production)
-                .build();
-        MParticle.start(options);
+        startMParticle(MParticleOptions.builder(mProductionContext).environment(MParticle.Environment.Production));
         assertEquals(MParticle.getInstance().getEnvironment(), MParticle.Environment.Production);
         MParticle.setInstance(null);
 
@@ -247,12 +205,9 @@ public class MParticleOptionsTest extends BaseAbstractTest {
         Boolean debuggable = MPUtility.isAppDebuggable(productionContext);
         assertFalse(debuggable);
 
-        options = MParticleOptions.builder(productionContext)
-                .credentials("key", "secret")
-                .environment(MParticle.Environment.AutoDetect)
-                .build();
+        startMParticle(MParticleOptions.builder(productionContext)
+                .environment(MParticle.Environment.AutoDetect));
 
-        MParticle.start(options);
         assertEquals(MParticle.getInstance().getEnvironment(), MParticle.Environment.Production);
         MParticle.setInstance(null);
     }
@@ -266,60 +221,32 @@ public class MParticleOptionsTest extends BaseAbstractTest {
         assertFalse(MParticle.getInstance().getConfigManager().getLogUnhandledExceptions());
         MParticle.setInstance(null);
 
-        options = MParticleOptions.builder(mProductionContext)
-                .credentials("key", "secret")
-                .enableUncaughtExceptionLogging(true)
-                .build();
-        MParticle.start(options);
+        startMParticle(MParticleOptions.builder(mProductionContext)
+                .enableUncaughtExceptionLogging(true));
         assertTrue(MParticle.getInstance().getConfigManager().getLogUnhandledExceptions());
-        MParticle.setInstance(null);
 
-        options = MParticleOptions.builder(mProductionContext)
-                .credentials("key", "secret")
-                .enableUncaughtExceptionLogging(false)
-                .build();
-        MParticle.start(options);
+        startMParticle(MParticleOptions.builder(mProductionContext)
+                .enableUncaughtExceptionLogging(false));
         assertFalse(MParticle.getInstance().getConfigManager().getLogUnhandledExceptions());
         MParticle.setInstance(null);
     }
 
     @Test
     public void testSessionTimeout() throws Exception {
-        MParticleOptions options = MParticleOptions.builder(mProductionContext)
-                .credentials("key", "secret")
-                .build();
-        MParticle.start(options);
+        startMParticle();
+        assertEquals(MParticle.getInstance().getConfigManager().getSessionTimeout(), 60000);
+
+        startMParticle(MParticleOptions.builder(mProductionContext)
+                .sessionTimeout(-123));
         assertEquals(MParticle.getInstance().getConfigManager().getSessionTimeout(), 60000);
         MParticle.setInstance(null);
 
-        options = MParticleOptions.builder(mProductionContext)
-                .credentials("key", "secret")
-                .build();
-        MParticle.start(options);
-        assertEquals(MParticle.getInstance().getConfigManager().getSessionTimeout(), 60000);
-        MParticle.setInstance(null);
-
-        options = MParticleOptions.builder(mProductionContext)
-                .credentials("key", "secret")
-                .sessionTimeout(-123)
-                .build();
-        MParticle.start(options);
-        assertEquals(MParticle.getInstance().getConfigManager().getSessionTimeout(), 60000);
-        MParticle.setInstance(null);
-
-        options = MParticleOptions.builder(mProductionContext)
-                .credentials("key", "secret")
-                .sessionTimeout(123)
-                .build();
-        MParticle.start(options);
+        startMParticle(MParticleOptions.builder(mProductionContext)
+                .sessionTimeout(123));
         assertEquals(MParticle.getInstance().getConfigManager().getSessionTimeout(), 123000);
-        MParticle.setInstance(null);
 
         //make sure it resets if the session timeout is not specified
-        options = MParticleOptions.builder(mProductionContext)
-                .credentials("key", "secret")
-                .build();
-        MParticle.start(options);
+        startMParticle();
         assertEquals(MParticle.getInstance().getConfigManager().getSessionTimeout(), 60000);
         MParticle.setInstance(null);
 
@@ -327,34 +254,17 @@ public class MParticleOptionsTest extends BaseAbstractTest {
 
     @Test
     public void testInstallType() throws Exception {
-        MParticleOptions options = MParticleOptions.builder(mProductionContext)
-                .credentials("key", "secret")
-                .build();
-        MParticle.start(options);
+        startMParticle();
         assertEquals(AccessUtils.getInstallType(MParticle.getInstance().mMessageManager), MParticle.InstallType.AutoDetect);
         MParticle.setInstance(null);
-
-        options = MParticleOptions.builder(mProductionContext)
-                .credentials("key", "secret")
-                .installType(MParticle.InstallType.KnownInstall)
-                .build();
-        MParticle.start(options);
+        startMParticle(MParticleOptions.builder(mProductionContext)
+                .installType(MParticle.InstallType.KnownInstall));
         assertEquals(AccessUtils.getInstallType(MParticle.getInstance().mMessageManager), MParticle.InstallType.KnownInstall);
-        MParticle.setInstance(null);
-
-        options = MParticleOptions.builder(mProductionContext)
-                .credentials("key", "secret")
-                .installType(MParticle.InstallType.KnownUpgrade)
-                .build();
-        MParticle.start(options);
+        startMParticle(MParticleOptions.builder(mProductionContext)
+                .installType(MParticle.InstallType.KnownUpgrade));
         assertEquals(AccessUtils.getInstallType(MParticle.getInstance().mMessageManager), MParticle.InstallType.KnownUpgrade);
-        MParticle.setInstance(null);
-
-        options = MParticleOptions.builder(mProductionContext)
-                .credentials("key", "secret")
-                .installType(MParticle.InstallType.AutoDetect)
-                .build();
-        MParticle.start(options);
+        startMParticle(MParticleOptions.builder(mProductionContext)
+                .installType(MParticle.InstallType.AutoDetect));
         assertEquals(AccessUtils.getInstallType(MParticle.getInstance().mMessageManager), MParticle.InstallType.AutoDetect);
         MParticle.setInstance(null);
     }
@@ -362,49 +272,33 @@ public class MParticleOptionsTest extends BaseAbstractTest {
     @Test
     public void testUploadInterval() throws Exception {
         //default upload interval for production
-        MParticleOptions options = MParticleOptions.builder(mContext)
-                .credentials("key", "secret")
-                .build();
-        MParticle.start(options);
+        startMParticle();
         assertEquals(MParticle.getInstance().getConfigManager().getUploadInterval(), 10000);
         MParticle.setInstance(null);
 
 
         //default upload interval for production
-        options = MParticleOptions.builder(mProductionContext)
-                .build();
-        MParticle.start(options);
+        startMParticle(MParticleOptions.builder(mProductionContext));
         assertEquals(MParticle.getInstance().getConfigManager().getUploadInterval(), 600000);
         MParticle.setInstance(null);
 
-        options = MParticleOptions.builder(mProductionContext)
-                .credentials("key", "secret")
-                .uploadInterval(123)
-                .build();
-        MParticle.start(options);
+        startMParticle(MParticleOptions.builder(mProductionContext)
+                .uploadInterval(123));
         assertEquals(MParticle.getInstance().getConfigManager().getUploadInterval(), 123000);
         MParticle.setInstance(null);
 
-        options = MParticleOptions.builder(mProductionContext)
-                .credentials("key", "secret")
-                .uploadInterval(-123)
-                .build();
-        MParticle.start(options);
+        startMParticle(MParticleOptions.builder(mProductionContext)
+                .uploadInterval(-123));
         assertEquals(MParticle.getInstance().getConfigManager().getUploadInterval(), 600000);
         MParticle.setInstance(null);
     }
 
     @Test
     public void testAttributionListener() throws Exception {
-        MParticleOptions options = MParticleOptions.builder(mContext)
-                .credentials("key", "secret")
-                .build();
-        MParticle.start(options);
+        startMParticle();
         assertNull(MParticle.getInstance().getAttributionListener());
-        MParticle.setInstance(null);
 
-        options = MParticleOptions.builder(mContext)
-                .credentials("key", "secret")
+        startMParticle(MParticleOptions.builder(mContext)
                 .attributionListener(new AttributionListener() {
                     @Override
                     public void onResult(AttributionResult result) {
@@ -415,17 +309,12 @@ public class MParticleOptionsTest extends BaseAbstractTest {
                     public void onError(AttributionError error) {
 
                     }
-                })
-                .build();
-        MParticle.start(options);
+                }));
         assertNotNull(MParticle.getInstance().getAttributionListener());
         MParticle.setInstance(null);
 
-        options = MParticleOptions.builder(mContext)
-                .credentials("key", "secret")
-                .attributionListener(null)
-                .build();
-        MParticle.start(options);
+        startMParticle(MParticleOptions.builder(mContext)
+                .attributionListener(null));
         assertNull(MParticle.getInstance().getAttributionListener());
     }
 
@@ -433,83 +322,48 @@ public class MParticleOptionsTest extends BaseAbstractTest {
     public GrantPermissionRule mRuntimePermissionRule = GrantPermissionRule.grant(android.Manifest.permission.ACCESS_FINE_LOCATION);
 
     @Test
-    public void testLocationTracking() {
-        MParticleOptions options = MParticleOptions.builder(mContext)
-                .credentials("key", "secret")
-                .locationTrackingDisabled()
-                .build();
-        MParticle.start(options);
+    public void testLocationTracking() throws InterruptedException {
+        startMParticle(MParticleOptions.builder(mContext)
+                .locationTrackingDisabled());
         assertFalse(MParticle.getInstance().isLocationTrackingEnabled());
 
         MParticle.setInstance(null);
         assertNull(MParticle.getInstance());
 
 
-        options = MParticleOptions.builder(mContext)
-                .locationTrackingEnabled("passive", 100, 20)
-                .build();
-        MParticle.start(options);
+        startMParticle(MParticleOptions.builder(mContext)
+                .locationTrackingEnabled("passive", 100, 20));
         assertTrue(MParticle.getInstance().isLocationTrackingEnabled());
 
         MParticle.setInstance(null);
         assertNull(MParticle.getInstance());
 
-        options = MParticleOptions.builder(mContext)
-                .build();
-        MParticle.start(options);
+        startMParticle();
         assertFalse(MParticle.getInstance().isLocationTrackingEnabled());
     }
 
     @Test
-    public void testTimeout() {
-        MParticleOptions options = MParticleOptions.builder(mProductionContext)
-                .credentials("key", "secret")
-                .build();
-        MParticle.start(options);
+    public void testTimeout() throws InterruptedException {
+
+        startMParticle(MParticleOptions.builder(mProductionContext)
+                .identityConnectionTimeout(-123));
         assertEquals(MParticle.getInstance().getConfigManager().getIdentityConnectionTimeout(), ConfigManager.DEFAULT_CONNECTION_TIMEOUT_SECONDS * 1000);
         assertEquals(MParticle.getInstance().getConfigManager().getConnectionTimeout(), ConfigManager.DEFAULT_CONNECTION_TIMEOUT_SECONDS * 1000);
         MParticle.setInstance(null);
 
-        options = MParticleOptions.builder(mProductionContext)
-                .credentials("key", "secret")
-                .identityConnectionTimeout(-123)
-                .build();
-        MParticle.start(options);
+        startMParticle(MParticleOptions.builder(mProductionContext)
+                .identityConnectionTimeout(0));
         assertEquals(MParticle.getInstance().getConfigManager().getIdentityConnectionTimeout(), ConfigManager.DEFAULT_CONNECTION_TIMEOUT_SECONDS * 1000);
         assertEquals(MParticle.getInstance().getConfigManager().getConnectionTimeout(), ConfigManager.DEFAULT_CONNECTION_TIMEOUT_SECONDS * 1000);
         MParticle.setInstance(null);
 
-        options = MParticleOptions.builder(mProductionContext)
-                .credentials("key", "secret")
-                .identityConnectionTimeout(0)
-                .build();
-        MParticle.start(options);
-        assertEquals(MParticle.getInstance().getConfigManager().getIdentityConnectionTimeout(), ConfigManager.DEFAULT_CONNECTION_TIMEOUT_SECONDS * 1000);
-        assertEquals(MParticle.getInstance().getConfigManager().getConnectionTimeout(), ConfigManager.DEFAULT_CONNECTION_TIMEOUT_SECONDS * 1000);
-        MParticle.setInstance(null);
-
-        options = MParticleOptions.builder(mProductionContext)
-                .credentials("key", "secret")
-                .identityConnectionTimeout(1)
-                .build();
-        MParticle.start(options);
-        assertEquals(MParticle.getInstance().getConfigManager().getIdentityConnectionTimeout(), 1000);
-        assertEquals(MParticle.getInstance().getConfigManager().getConnectionTimeout(), ConfigManager.DEFAULT_CONNECTION_TIMEOUT_SECONDS * 1000);
-        MParticle.setInstance(null);
-
-        options = MParticleOptions.builder(mProductionContext)
-                .credentials("key", "secret")
-                .identityConnectionTimeout(123)
-                .build();
-        MParticle.start(options);
+        startMParticle(MParticleOptions.builder(mProductionContext)
+                .identityConnectionTimeout(123));
         assertEquals(MParticle.getInstance().getConfigManager().getIdentityConnectionTimeout(), 123000);
         assertEquals(MParticle.getInstance().getConfigManager().getConnectionTimeout(), ConfigManager.DEFAULT_CONNECTION_TIMEOUT_SECONDS * 1000);
         MParticle.setInstance(null);
 
-        options = MParticleOptions.builder(mProductionContext)
-                .credentials("key", "secret")
-                .build();
-        MParticle.start(options);
+        startMParticle(MParticleOptions.builder(mProductionContext));
         assertEquals(MParticle.getInstance().getConfigManager().getIdentityConnectionTimeout(), ConfigManager.DEFAULT_CONNECTION_TIMEOUT_SECONDS * 1000);
         assertEquals(MParticle.getInstance().getConfigManager().getConnectionTimeout(), ConfigManager.DEFAULT_CONNECTION_TIMEOUT_SECONDS * 1000);
     }

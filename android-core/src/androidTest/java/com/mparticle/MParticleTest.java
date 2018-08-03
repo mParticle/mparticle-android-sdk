@@ -1,20 +1,17 @@
 package com.mparticle;
 
-import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.support.test.InstrumentationRegistry;
 
-import com.mparticle.identity.IdentityApi;
 import com.mparticle.identity.IdentityApiRequest;
 import com.mparticle.identity.IdentityStateListener;
 import com.mparticle.identity.MParticleUser;
-import com.mparticle.internal.Constants;
 import com.mparticle.internal.DatabaseTables;
 import com.mparticle.internal.KitFrameworkWrapper;
 import com.mparticle.internal.MessageManager;
 import com.mparticle.testutils.BaseCleanStartedEachTest;
-import com.mparticle.testutils.MParticleUtils;
+import com.mparticle.testutils.MPLatch;
+import com.mparticle.testutils.TestingUtils;
 import com.mparticle.testutils.RandomUtils;
 
 import junit.framework.Assert;
@@ -39,26 +36,7 @@ import static junit.framework.Assert.assertTrue;
 import static junit.framework.Assert.fail;
 
 public class MParticleTest extends BaseCleanStartedEachTest {
-
     private String configResponse = "{\"dt\":\"ac\", \"id\":\"fddf1f96-560e-41f6-8f9b-ddd070be0765\", \"ct\":1434392412994, \"dbg\":false, \"cue\":\"appdefined\", \"pmk\":[\"mp_message\", \"com.urbanairship.push.ALERT\", \"alert\", \"a\", \"message\"], \"cnp\":\"appdefined\", \"soc\":0, \"oo\":false, \"eks\":[] }, \"pio\":30 }";
-
-    @Test
-    public void testAndroidIdDisabled() throws Exception {
-        MParticle.setInstance(null);
-        MParticleOptions options = MParticleOptions.builder(InstrumentationRegistry.getContext())
-                .androidIdDisabled(true)
-                .credentials("key", "secret")
-                .build();
-        MParticle.start(options);
-        assertTrue(MParticle.isAndroidIdDisabled());
-        MParticle.setInstance(null);
-        options = MParticleOptions.builder(InstrumentationRegistry.getContext())
-                .androidIdDisabled(false)
-                .credentials("key", "secret")
-                .build();
-        MParticle.start(options);
-        assertFalse(MParticle.isAndroidIdDisabled());
-    }
 
     @Test
     public void testEnsureSessionActive() {
@@ -161,7 +139,7 @@ public class MParticleTest extends BaseCleanStartedEachTest {
 
     private void ensureSessionActive() {
         if (!MParticle.getInstance().isSessionActive()) {
-            MParticle.getInstance().logEvent(MParticleUtils.getInstance().getRandomMPEventSimple());
+            MParticle.getInstance().logEvent(TestingUtils.getInstance().getRandomMPEventSimple());
             assertTrue(MParticle.getInstance().isSessionActive());
         }
     }
@@ -181,7 +159,7 @@ public class MParticleTest extends BaseCleanStartedEachTest {
         testReset(new Runnable() {
             @Override
             public void run() {
-                final CountDownLatch latch = new CountDownLatch(1);
+                final CountDownLatch latch = new MPLatch(1);
                 MParticle.reset(mContext, new MParticle.ResetListener() {
                     @Override
                     public void onReset() {
@@ -212,7 +190,7 @@ public class MParticleTest extends BaseCleanStartedEachTest {
         testResetIdentityCall(new Runnable() {
             @Override
             public void run() {
-                final CountDownLatch latch = new CountDownLatch(1);
+                final CountDownLatch latch = new MPLatch(1);
                 MParticle.reset(mContext, new MParticle.ResetListener() {
                     @Override
                     public void onReset() {
@@ -233,6 +211,7 @@ public class MParticleTest extends BaseCleanStartedEachTest {
         mServer.setupConfigResponse(configResponse, 100);
         MParticle.getInstance().refreshConfiguration();
         MParticle.reset(mContext);
+        //This sleep is here just to
         Thread.sleep(100);
         assertSDKGone();
     }
@@ -257,14 +236,14 @@ public class MParticleTest extends BaseCleanStartedEachTest {
 
         resetRunnable.run();
         called[0] = true;
-        mServer.waitForVerify(postRequestedFor(urlPathMatching("/v([0-9]*)/identify")), 2000);
+        mServer.waitForVerify(postRequestedFor(urlPathMatching("/v([0-9]*)/identify")));
 
         assertSDKGone();
     }
 
     private void testReset(Runnable resetRunnable) throws JSONException, InterruptedException {
         for (int i = 0; i < 10; i++) {
-            MParticle.getInstance().logEvent(MParticleUtils.getInstance().getRandomMPEventRich());
+            MParticle.getInstance().logEvent(TestingUtils.getInstance().getRandomMPEventRich());
         }
         Random ran = new Random();
         for (int i = 0; i < 10; i++) {
@@ -276,14 +255,14 @@ public class MParticleTest extends BaseCleanStartedEachTest {
 
         //Set strict mode, so if we get any warning or error messages during the reset/restart phase,
         //it will throw an exception
-        MParticleUtils.setStrictMode(MParticle.LogLevel.WARNING);
+        TestingUtils.setStrictMode(MParticle.LogLevel.WARNING);
 
         resetRunnable.run();
 
         assertSDKGone();
 
         //restart the SDK, to the point where the initial Identity call returns, make sure there are no errors on startup
-        MParticleUtils.setStrictMode(MParticle.LogLevel.WARNING, "Failed to get MParticle instance, getInstance() called prior to start().");
+        TestingUtils.setStrictMode(MParticle.LogLevel.WARNING, "Failed to get MParticle instance, getInstance() called prior to start().");
         beforeBase();
     }
 

@@ -105,13 +105,4 @@ public class RandomUtils {
         long range = random % (to - from);
         return range + from;
     }
-
-    @Test
-    public void testRandomInt() throws Exception {
-        for (int i = 0; i < 50; i++) {
-            int random = randomInt(-10, 10);
-            assertTrue(random >= -10);
-            assertTrue(random <= 10);
-        }
-    }
 }

@@ -115,13 +115,5 @@ public class BreadcrumbServiceTest extends BaseMPServiceTest {
         assertEquals(deleted.size(), 10);
 
         assertEquals(BreadcrumbService.getBreadcrumbs(database, context, 10L).length(), breadCrumbLimit);
-
-        for (int i = 0; i < breadCrumbLimit + 10; i++) {
-            BreadcrumbService.insertBreadcrumb(database, context, message, "apiKey", 20L);
-            BreadcrumbService.insertBreadcrumb(database, context, message, "apiKey", 10L);
-        }
-
-        assertEquals(BreadcrumbService.getBreadcrumbCount(database, 10L), breadCrumbLimit);
-        assertEquals(BreadcrumbService.getBreadcrumbCount(database, 20L), breadCrumbLimit);
     }
 }

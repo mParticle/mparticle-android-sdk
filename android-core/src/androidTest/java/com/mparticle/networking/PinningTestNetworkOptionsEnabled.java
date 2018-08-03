@@ -18,7 +18,7 @@ import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.concurrent.CountDownLatch;
+import com.mparticle.testutils.MPLatch;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;

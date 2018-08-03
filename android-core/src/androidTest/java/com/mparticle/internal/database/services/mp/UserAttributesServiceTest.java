@@ -46,41 +46,41 @@ public class UserAttributesServiceTest extends BaseMPServiceTest {
     }
 
     private void testDeleteByMpid(boolean repeat) {
-        for (int i = 0; i < 15; i++) {
+        for (int i = 0; i < 3; i++) {
             UserAttributesService.insertAttribute(database, "key" + i, String.valueOf(new Random().nextInt()), System.currentTimeMillis(), false, 2L);
         }
-        for (int i = 0; i < 15; i++) {
+        for (int i = 0; i < 3; i++) {
             UserAttributesService.insertAttribute(database, "key" + i, String.valueOf(new Random().nextInt()), System.currentTimeMillis(), false, 3L);
         }
-        for (int i = 15; i < 30; i++) {
+        for (int i = 3; i < 6; i++) {
             UserAttributesService.insertAttribute(database, "key" + i, String.valueOf(new Random().nextInt()), System.currentTimeMillis(), true, 2L);
         }
-        for (int i = 15; i < 30; i++) {
+        for (int i = 3; i < 6; i++) {
             UserAttributesService.insertAttribute(database, "key" + i, String.valueOf(new Random().nextInt()), System.currentTimeMillis(), true, 3L);
         }
-        assertEquals(UserAttributesService.getUserAttributesSingles(database, 2L).size(), 15);
-        assertEquals(UserAttributesService.getUserAttributesSingles(database, 3L).size(), 15);
-        assertEquals(UserAttributesService.getUserAttributesLists(database, 2L).size(), 15);
-        assertEquals(UserAttributesService.getUserAttributesLists(database, 3L).size(), 15);
+        assertEquals(UserAttributesService.getUserAttributesSingles(database, 2L).size(), 3);
+        assertEquals(UserAttributesService.getUserAttributesSingles(database, 3L).size(), 3);
+        assertEquals(UserAttributesService.getUserAttributesLists(database, 2L).size(), 3);
+        assertEquals(UserAttributesService.getUserAttributesLists(database, 3L).size(), 3);
 
         UserAttributesService.deleteAttributes(database, "key1", 2L);
-        UserAttributesService.deleteAttributes(database, "key16", 3L);
+        UserAttributesService.deleteAttributes(database, "key4", 3L);
 
-        assertEquals(UserAttributesService.getUserAttributesSingles(database, 2L).size(), 14);
-        assertEquals(UserAttributesService.getUserAttributesSingles(database, 3L).size(), 15);
-        assertEquals(UserAttributesService.getUserAttributesLists(database, 2L).size(), 15);
-        assertEquals(UserAttributesService.getUserAttributesLists(database, 3L).size(), 14);
+        assertEquals(UserAttributesService.getUserAttributesSingles(database, 2L).size(), 2);
+        assertEquals(UserAttributesService.getUserAttributesSingles(database, 3L).size(), 3);
+        assertEquals(UserAttributesService.getUserAttributesLists(database, 2L).size(), 3);
+        assertEquals(UserAttributesService.getUserAttributesLists(database, 3L).size(), 2);
 
-        for (int i = 0; i < 30; i++) {
+        for (int i = 0; i < 6; i++) {
             UserAttributesService.deleteAttributes(database, "key" + i, 2L);
         }
 
         assertEquals(UserAttributesService.getUserAttributesSingles(database, 2L).size(), 0);
-        assertEquals(UserAttributesService.getUserAttributesSingles(database, 3L).size(), 15);
+        assertEquals(UserAttributesService.getUserAttributesSingles(database, 3L).size(), 3);
         assertEquals(UserAttributesService.getUserAttributesLists(database, 2L).size(), 0);
-        assertEquals(UserAttributesService.getUserAttributesLists(database, 3L).size(), 14);
+        assertEquals(UserAttributesService.getUserAttributesLists(database, 3L).size(), 2);
 
-        for (int i = 0; i < 30; i++) {
+        for (int i = 0; i < 6; i++) {
             UserAttributesService.deleteAttributes(database, "key" + i, 3L);
         }
 

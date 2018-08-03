@@ -3,13 +3,9 @@ package com.mparticle;
 import android.os.Handler;
 import android.os.Looper;
 
+import com.mparticle.internal.*;
 import com.mparticle.testutils.BaseCleanStartedEachTest;
-import com.mparticle.MPEvent;
-import com.mparticle.MParticle;
-import com.mparticle.internal.Constants;
-import com.mparticle.internal.MPUtility;
-import com.mparticle.internal.MParticleApiClientImpl;
-import com.mparticle.testutils.MParticleUtils;
+import com.mparticle.testutils.TestingUtils;
 import com.mparticle.testutils.RandomUtils;
 
 import org.json.JSONArray;
@@ -26,6 +22,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.concurrent.CountDownLatch;
+
+import com.mparticle.testutils.MPLatch;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
@@ -47,10 +46,12 @@ public final class UploadMessageTest extends BaseCleanStartedEachTest {
      */
     @Test
     public void testCorrectlyAttributeEventsToMpid() throws Exception {
+        int numberOfEvents = 3;
         final Handler handler = new Handler(Looper.getMainLooper());
         long mpid = new Random().nextLong();
         MParticle.getInstance().getConfigManager().setMpid(mpid);
         final Map<String, MPEvent> events = new HashMap<String, MPEvent>();
+        final CountDownLatch latch = new MPLatch(numberOfEvents);
 
         final Map<Long, Map<String, JSONObject>> matchingJSONEvents = new HashMap<Long, Map<String, JSONObject>>();
         com.mparticle.internal.AccessUtils.setMParticleApiClient(new com.mparticle.internal.AccessUtils.EmptyMParticleApiClient() {
@@ -88,6 +89,7 @@ public final class UploadMessageTest extends BaseCleanStartedEachTest {
                                         } else {
                                             fail("Unknown Event");
                                         }
+                                        latch.countDown();
                                     }
                                 }
                             }
@@ -102,8 +104,8 @@ public final class UploadMessageTest extends BaseCleanStartedEachTest {
             }
         });
 
-        for (int j = 0; j < mRandom.randomInt(0, 20); j++) {
-            MPEvent event = MParticleUtils.getInstance().getRandomMPEventRich();
+        for (int j = 0; j < 3; j++) {
+            MPEvent event = TestingUtils.getInstance().getRandomMPEventRich();
             if (events.containsKey(event.getEventName())) {
                 j--;
             } else {
@@ -112,12 +114,8 @@ public final class UploadMessageTest extends BaseCleanStartedEachTest {
             }
         }
 
-        MParticleUtils.awaitStoreMessage();
-
         MParticle.getInstance().upload();
-
-        MParticleUtils.awaitUploadMessages(mpid);
-        Thread.sleep(1000);
+        latch.await();
 
         Map<String, JSONObject> jsonMap = matchingJSONEvents.get(mpid);
         if (events.size() > 0) {
@@ -133,6 +131,7 @@ public final class UploadMessageTest extends BaseCleanStartedEachTest {
         final Handler handler = new Handler(Looper.getMainLooper());
         final Map<String, MPEvent> events = new HashMap<String, MPEvent>();
         final Map<String, JSONObject> sentEvents = new HashMap<String, JSONObject>();
+        final CountDownLatch latch = new MPLatch(1);
         com.mparticle.internal.AccessUtils.setMParticleApiClient(new com.mparticle.internal.AccessUtils.EmptyMParticleApiClient() {
             @Override
             public int sendMessageBatch(final String message) throws IOException, MParticleApiClientImpl.MPThrottleException, MParticleApiClientImpl.MPRampException {
@@ -160,14 +159,15 @@ public final class UploadMessageTest extends BaseCleanStartedEachTest {
                             e.printStackTrace();
                             fail(e.toString());
                         }
+                        latch.countDown();
                     }
                 });
                 return 202;
             }
         });
 
-        for (int j = 0; j < mRandom.randomInt(0, 20); j++) {
-            MPEvent event = MParticleUtils.getInstance().getRandomMPEventRich();
+        for (int j = 0; j < 3; j++) {
+            MPEvent event = TestingUtils.getInstance().getRandomMPEventRich();
             if (events.containsKey(event.getEventName())) {
                 j--;
             } else {
@@ -176,13 +176,8 @@ public final class UploadMessageTest extends BaseCleanStartedEachTest {
             }
         }
 
-        MParticleUtils.awaitStoreMessage();
-
         MParticle.getInstance().upload();
-
-        MParticleUtils.awaitUploadMessages(MParticle.getInstance().getConfigManager().getMpid());
-
-        Thread.sleep(1000);
+        latch.await();
         for (Map.Entry<String, MPEvent> entry : events.entrySet()) {
             if (!sentEvents.containsKey(entry.getKey())) {
                 assertTrue(false);

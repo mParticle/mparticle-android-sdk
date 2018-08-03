@@ -9,11 +9,11 @@ import com.mparticle.MParticle;
 import com.mparticle.MParticleOptions;
 import com.mparticle.internal.database.tables.mp.SessionTable;
 import com.mparticle.internal.networking.BaseMPMessage;
-import com.mparticle.testutils.MParticleUtils;
 import com.mparticle.testutils.mock.MockContext;
 
 import junit.framework.Assert;
 
+import org.junit.Before;
 import org.junit.Test;
 
 import static junit.framework.Assert.assertFalse;
@@ -22,22 +22,21 @@ import static junit.framework.Assert.assertTrue;
 
 public class MessageManagerTests extends BaseCleanInstallEachTest {
 
+
     @Test
     public void testInstallReferrerMigration() throws Exception {
         //test previously installed
         setFirstRunLegacy(true, "key");
         assertNull(MParticle.getInstance());
-        MParticle.start(MParticleOptions.builder(mContext)
-                .credentials("key", "secret")
-                .build());
+        startMParticle();
+        getMessageManager().setFirstRunForAST(true);
+
         assertTrue(getMessageManager().isFirstRunForMessage());
         assertTrue(getMessageManager().isFirstRunForAST());
 
         setFirstRunLegacy(false, "key");
         MParticle.setInstance(null);
-        MParticle.start(MParticleOptions.builder(mContext)
-                .credentials("key", "secret")
-                .build());
+        startMParticle();
         assertFalse(getMessageManager().isFirstRunForMessage());
         assertFalse(getMessageManager().isFirstRunForAST());
     }
@@ -48,9 +47,9 @@ public class MessageManagerTests extends BaseCleanInstallEachTest {
         // corresponding setters get called
         setFirstRunLegacy(true, "key");
         assertNull(MParticle.getInstance());
-        MParticle.start(MParticleOptions.builder(mContext)
-                .credentials("key", "secret")
-                .build());
+        startMParticle();
+        getMessageManager().setFirstRunForAST(true);
+
         assertTrue(getMessageManager().isFirstRunForAST());
         getMessageManager().setFirstRunForAST(false);
         assertFalse(getMessageManager().isFirstRunForAST());
@@ -64,9 +63,7 @@ public class MessageManagerTests extends BaseCleanInstallEachTest {
         MParticle.setInstance(null);
         setFirstRunLegacy(true, "key");
         assertNull(MParticle.getInstance());
-        MParticle.start(MParticleOptions.builder(mContext)
-                .credentials("key", "secret")
-                .build());
+        startMParticle();
 
         assertTrue(getMessageManager().isFirstRunForMessage());
         getMessageManager().setFirstRunForMessage(false);
@@ -79,9 +76,7 @@ public class MessageManagerTests extends BaseCleanInstallEachTest {
         // test that the flags remain persisted when the application restarts
         MParticle.setInstance(null);
         assertNull(MParticle.getInstance());
-        MParticle.start(MParticleOptions.builder(mContext)
-                .credentials("key", "secret")
-                .build());
+        startMParticle();
 
         assertFalse(getMessageManager().isFirstRunForMessage());
         assertFalse(getMessageManager().isFirstRunForAST());
@@ -90,13 +85,11 @@ public class MessageManagerTests extends BaseCleanInstallEachTest {
 
     @Test
     public void testDuplicateSessionEnds() throws Exception {
-        MParticle.start(MParticleOptions.builder(mContext)
-                .credentials("key", "secret")
-                .build());
+        startMParticle();
         Session session = new Session();
         session.start(new MockContext());
         getMessageManager().startSession(session);
-        MParticleUtils.awaitStoreMessage();
+        com.mparticle.internal.AccessUtils.awaitMessageHandler();
         BaseMPMessage message = getMessageManager().getMParticleDBManager().getSessionForSessionEndMessage(session.mSessionID, null, session.getMpids());
         Assert.assertNotNull(message);
         getMessageManager().getMParticleDBManager().updateSessionStatus(session.mSessionID, SessionTable.SessionTableColumns.STATUS);
@@ -110,9 +103,9 @@ public class MessageManagerTests extends BaseCleanInstallEachTest {
 
         //start SDK, and send only AST, but not First Run message
         assertNull(MParticle.getInstance());
-        MParticle.start(MParticleOptions.builder(mContext)
-                .credentials("key", "secret")
-                .build());
+        startMParticle();
+        getMessageManager().setFirstRunForAST(true);
+
         assertTrue(getMessageManager().isFirstRunForAST());
         getMessageManager().setFirstRunForAST(false);
         assertFalse(getMessageManager().isFirstRunForAST());
@@ -120,9 +113,7 @@ public class MessageManagerTests extends BaseCleanInstallEachTest {
         //restart SDK, and assert that AST message has been flagged, but First Run message has not
         MParticle.setInstance(null);
         assertNull(MParticle.getInstance());
-        MParticle.start(MParticleOptions.builder(mContext)
-                .credentials("key", "secret")
-                .build());
+        startMParticle();
 
         assertTrue(getMessageManager().isFirstRunForMessage());
         assertFalse(getMessageManager().isFirstRunForAST());
@@ -133,9 +124,7 @@ public class MessageManagerTests extends BaseCleanInstallEachTest {
         //start SDK, and send only First Run message, but not AST
         MParticle.setInstance(null);
         assertNull(MParticle.getInstance());
-        MParticle.start(MParticleOptions.builder(mContext)
-                .credentials("key", "secret")
-                .build());
+        startMParticle();
         assertTrue(getMessageManager().isFirstRunForMessage());
         getMessageManager().setFirstRunForMessage(false);
         assertFalse(getMessageManager().isFirstRunForMessage());
@@ -143,9 +132,7 @@ public class MessageManagerTests extends BaseCleanInstallEachTest {
         //restart SDK, and assert that First Run message has been flagged as sent, but AST has not
         MParticle.setInstance(null);
         assertNull(MParticle.getInstance());
-        MParticle.start(MParticleOptions.builder(mContext)
-                .credentials("key", "secret")
-                .build());
+        startMParticle();
 
         assertFalse(getMessageManager().isFirstRunForMessage());
         assertTrue(getMessageManager().isFirstRunForAST());

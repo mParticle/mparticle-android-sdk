@@ -227,8 +227,8 @@ public class MParticleOptions {
 
     public static class Builder {
         private Context context;
-        private String apiKey;
-        private String apiSecret;
+        String apiKey;
+        String apiSecret;
         private MParticle.InstallType installType;
         private MParticle.Environment environment;
         private IdentityApiRequest identifyRequest;
@@ -238,7 +238,7 @@ public class MParticleOptions {
         private Integer sessionTimeout = null;
         private Boolean unCaughtExceptionLogging = null;
         private MParticle.LogLevel logLevel = null;
-        private BaseIdentityTask identityTask;
+        BaseIdentityTask identityTask;
         private AttributionListener attributionListener;
         private ConfigManager configManager;
         private LocationTracking locationTracking;

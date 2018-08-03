@@ -4,11 +4,11 @@ import android.content.Context;
 import android.support.test.InstrumentationRegistry;
 import android.util.Log;
 
+import com.mparticle.internal.AccessUtils;
 import com.mparticle.testutils.BaseCleanStartedEachTest;
 import com.mparticle.MParticle;
 import com.mparticle.consent.ConsentState;
 import com.mparticle.consent.GDPRConsent;
-import com.mparticle.testutils.MParticleUtils;
 import com.mparticle.testutils.RandomUtils;
 
 import org.junit.Before;
@@ -17,6 +17,7 @@ import org.junit.Test;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
+import com.mparticle.testutils.MPLatch;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
@@ -38,19 +39,19 @@ public class MParticleUserDelegateTest extends BaseCleanStartedEachTest {
     @Test
     public void testSetGetUserIdentities() throws Exception {
         Map<Long, Map<MParticle.IdentityType, String>> attributes = new HashMap<Long, Map<MParticle.IdentityType, String>>();
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 13; i++) {
             Long mpid = new Random().nextLong();
             Map<MParticle.IdentityType, String> pairs = new HashMap<MParticle.IdentityType, String>();
             attributes.put(mpid, pairs);
-            for (int j = 0; j < mRandom.randomInt(1, 10); j++) {
+            for (int j = 0; j < 3; j++) {
                 MParticle.IdentityType identityType = MParticle.IdentityType.parseInt(mRandom.randomInt(0, MParticle.IdentityType.values().length));
-                String value = mRandom.getAlphaNumericString(mRandom.randomInt(1, 255));
+                String value = mRandom.getAlphaNumericString(mRandom.randomInt(1, 25));
                 assertTrue(mUserDelegate.setUserIdentity(value, identityType, mpid));
                 pairs.put(identityType, value);
             }
         }
 
-        MParticleUtils.awaitStoreMessage();
+        com.mparticle.internal.AccessUtils.awaitMessageHandler();
 
         Map<Long, Map<MParticle.IdentityType, String>> storedUsersTemp = new HashMap<Long, Map<MParticle.IdentityType, String>>();
 
@@ -71,19 +72,19 @@ public class MParticleUserDelegateTest extends BaseCleanStartedEachTest {
     public void testInsertRetrieveDeleteUserAttributes() throws Exception {
         // create and store
         Map<Long, Map<String, String>> attributes = new HashMap<Long, Map<String, String>>();
-        for (int i = 0; i < mRandom.randomInt(1, 10); i++) {
+        for (int i = 0; i < 5; i++) {
             Long mpid = new Random().nextLong();
             Map<String, String> pairs = new HashMap<String, String>();
             attributes.put(mpid, pairs);
-            for (int j = 0; j < mRandom.randomInt(1, 20); j++) {
-                String key = mRandom.getAlphaNumericString(mRandom.randomInt(1, 255)).toUpperCase();
-                String value = mRandom.getAlphaNumericString(mRandom.randomInt(1, 255));
+            for (int j = 0; j < 3; j++) {
+                String key = mRandom.getAlphaNumericString(mRandom.randomInt(1, 55)).toUpperCase();
+                String value = mRandom.getAlphaNumericString(mRandom.randomInt(1, 55));
                 assertTrue(mUserDelegate.setUserAttribute(key, value, mpid, false));
                 pairs.put(key, value);
             }
         }
 
-        MParticleUtils.awaitSetUserAttribute();
+        AccessUtils.awaitMessageHandler();
 
         // retrieve and compare
         for (Map.Entry<Long, Map<String, String>> user : attributes.entrySet()) {
@@ -100,8 +101,8 @@ public class MParticleUserDelegateTest extends BaseCleanStartedEachTest {
             }
         }
 
-        MParticleUtils.awaitRemoveUserAttribute();
-        
+        AccessUtils.awaitMessageHandler();
+
         for (Map.Entry<Long, Map<String, String>> userAttributes : attributes.entrySet()) {
             Map<String, Object> storedUserAttributes = mUserDelegate.getUserAttributes(userAttributes.getKey());
             for (Map.Entry<String, String> attribute : userAttributes.getValue().entrySet()) {

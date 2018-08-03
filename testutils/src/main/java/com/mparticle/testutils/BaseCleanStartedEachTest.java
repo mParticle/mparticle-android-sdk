@@ -1,5 +1,6 @@
 package com.mparticle.testutils;
 
+import com.mparticle.AccessUtils;
 import com.mparticle.MParticle;
 import com.mparticle.MParticleOptions;
 import com.mparticle.identity.BaseIdentityTask;
@@ -14,7 +15,7 @@ import com.mparticle.internal.ConfigManager;
 import org.junit.Before;
 
 import java.util.Random;
-import java.util.concurrent.CountDownLatch;
+import com.mparticle.testutils.MPLatch;
 
 
 /**
@@ -37,29 +38,13 @@ public class BaseCleanStartedEachTest extends BaseAbstractTest {
         new ConfigManager(mContext, null, null, null).setMpid(mStartingMpid);
         mServer.setupHappyIdentify(mStartingMpid);
         MParticle.setInstance(null);
-        final CountDownLatch latch = new CountDownLatch(1);
         MParticleOptions.Builder builder = MParticleOptions
                 .builder(mContext)
                 .credentials("key", "value")
                 .identify(IdentityApiRequest.withEmptyUser().build())
-                .identifyTask(new BaseIdentityTask()
-                        .addSuccessListener(new TaskSuccessListener() {
-                            @Override
-                            public void onSuccess(IdentityApiResult result) {
-                                latch.countDown();
-                            }
-                        })
-                        .addFailureListener(new TaskFailureListener() {
-                            @Override
-                            public void onFailure(IdentityHttpResponse result) {
-                                latch.countDown();
-                            }
-                        }))
                 .environment(MParticle.Environment.Production);
-        MParticleOptions options = transformMParticleOptions(builder).build();
-        MParticle.start(options);
+        startMParticle(transformMParticleOptions(builder));
         AppStateManager.mInitialized = false;
-        latch.await();
     }
 
     //Override this if you need to do something simple like add or remove a network options before.

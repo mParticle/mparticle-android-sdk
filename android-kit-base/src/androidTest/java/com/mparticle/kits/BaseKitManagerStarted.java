@@ -10,8 +10,6 @@ import com.mparticle.internal.AppStateManager;
 import com.mparticle.internal.BackgroundTaskHandler;
 import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.ReportingManager;
-import com.mparticle.testutils.MParticleUtils;
-import com.mparticle.testutils.TestingUtils;
 
 import org.json.JSONArray;
 import org.json.JSONException;

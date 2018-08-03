@@ -1,12 +1,12 @@
 package com.mparticle.identity;
 
 import android.os.Handler;
+import android.util.MutableBoolean;
 
 import com.mparticle.MParticle;
 import com.mparticle.MParticleTask;
 import com.mparticle.internal.ConfigManager;
 import com.mparticle.testutils.BaseCleanStartedEachTest;
-import com.mparticle.testutils.MParticleUtils;
 import com.mparticle.testutils.RandomUtils;
 import com.mparticle.testutils.Server;
 import com.mparticle.testutils.TestingUtils;
@@ -22,6 +22,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.concurrent.CountDownLatch;
+
+import com.mparticle.testutils.MPLatch;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching;
 import static junit.framework.Assert.assertEquals;
@@ -65,32 +68,21 @@ public final class IdentityApiTest extends BaseCleanStartedEachTest {
         userAttributes.put("number2", "HelloWorld");
         userAttributes.put("third", 123);
 
-        mServer
-                .addConditionalLoginResponse(mStartingMpid, mpid1)
-                .addConditionalLoginResponse(mpid1, mpid2);
+        mServer.addConditionalLoginResponse(mStartingMpid, mpid1);
 
-        final boolean[] checked = new boolean[4];
+        final CountDownLatch latch = new MPLatch(2);
 
         MParticle.getInstance().Identity().addIdentityStateListener(new IdentityStateListener() {
             @Override
             public void onUserIdentified(MParticleUser user) {
                 if (user.getId() == mpid1) {
                     try {
-                        MParticleUtils.awaitSetUserAttribute();
+                        com.mparticle.internal.AccessUtils.awaitMessageHandler();
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
                     assertMParticleUserEquals(user, mpid1, identities, null);
-                    checked[0] = true;
-                }
-                if (checked[0] && user.getId() == mpid2) {
-                    try {
-                        MParticleUtils.awaitSetUserAttribute();
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                    assertMParticleUserEquals(user, mpid2, identities2, userAttributes);
-                    checked[1] = true;
+                    latch.countDown();
                 }
             }
         });
@@ -103,37 +95,10 @@ public final class IdentityApiTest extends BaseCleanStartedEachTest {
             @Override
             public void onSuccess(IdentityApiResult identityApiResult) {
                 assertMParticleUserEquals(identityApiResult.getUser(), mpid1, identities, null);
-                checked[2] = true;
-                for (Map.Entry<String, Object> entry: userAttributes.entrySet()) {
-                    MParticle.getInstance().Identity().getCurrentUser().setUserAttribute(entry.getKey(), entry.getValue());
-                }
-//                assertTrue(identityApiResult.getUser().setUserAttributes());
-                try {
-                    MParticleUtils.awaitSetUserAttribute();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-
-                IdentityApiRequest request1 = IdentityApiRequest.withEmptyUser().userIdentities(identities2).userAliasHandler(new UserAliasHandler() {
-                    @Override
-                    public void onUserAlias(MParticleUser previousUser, MParticleUser newUser) {
-                        newUser.setUserAttributes(previousUser.getUserAttributes());
-                    }
-                }).build();
-                MParticleTask<IdentityApiResult> result1 = MParticle.getInstance().Identity().login(request1);
-
-                //test that change actually took place
-                result1.addSuccessListener(new TaskSuccessListener() {
-                    @Override
-                    public void onSuccess(IdentityApiResult identityApiResult) {
-                        assertMParticleUserEquals(identityApiResult.getUser(), mpid2, identities2, userAttributes);
-                        checked[3] = true;
-                    }
-                });
+                latch.countDown();
             }
         });
-
-        TestingUtils.checkAllBool(checked, 1, 20);
+        latch.await();
     }
 
 
@@ -148,17 +113,20 @@ public final class IdentityApiTest extends BaseCleanStartedEachTest {
                 .addConditionalIdentityResponse(mStartingMpid, mpid1)
                 .addConditionalIdentityResponse(mpid1, mpid2);
 
-        final boolean[] called = new boolean[2];
-        Arrays.fill(called, false);
+        final MutableBoolean user1Called = new MutableBoolean(false);
+        final MutableBoolean user2Called = new MutableBoolean(false);
+        final CountDownLatch latch = new MPLatch(2);
 
         MParticle.getInstance().Identity().addIdentityStateListener(new IdentityStateListener() {
             @Override
             public void onUserIdentified(final MParticleUser user) {
                 if (user != null && user.getId() == mpid1) {
-                    called[0] = true;
+                    user1Called.value = true;
+                    latch.countDown();
                 }
-                if (called[0] && user.getId() == mpid2) {
-                    called[1] = true;
+                if (user1Called.value && user.getId() == mpid2) {
+                    user2Called.value = true;
+                    latch.countDown();
                 }
             }
         });
@@ -174,7 +142,7 @@ public final class IdentityApiTest extends BaseCleanStartedEachTest {
             }
         });
 
-        MParticleUtils.awaitUploadRunnables();
+        com.mparticle.internal.AccessUtils.awaitUploadHandler();
 
         request = IdentityApiRequest.withEmptyUser().build();
         result = MParticle.getInstance().Identity().identify(request);
@@ -186,46 +154,35 @@ public final class IdentityApiTest extends BaseCleanStartedEachTest {
             }
         });
 
-        TestingUtils.checkAllBool(called, 1, 10);
+        latch.await();
+        assertTrue(user1Called.value);
+        assertTrue(user2Called.value);
     }
 
     @Test
     public void testAddMultipleIdentityStateListeners() throws Exception {
-        mServer
-                .addConditionalIdentityResponse(mStartingMpid, mpid1)
-                .addConditionalIdentityResponse(mpid1, mpid2)
-                .addConditionalIdentityResponse(mpid2, mpid3);
+        mServer.addConditionalIdentityResponse(mStartingMpid, mpid1);
 
-        final boolean[] called = new boolean[9];
-        Arrays.fill(called, false);
+        final CountDownLatch latch = new MPLatch(6);
 
         MParticle.getInstance().Identity().addIdentityStateListener(new IdentityStateListener() {
             @Override
             public void onUserIdentified(final MParticleUser user) {
-                if (user != null && mpid1 == user.getId()) {
-                    called[0] = true;
-                }
-                if (called[0] && mpid2 == user.getId()) {
-                    called[1] = true;
-                }
-                if (called[1] && mpid3 == user.getId()) {
-                    called[2] = true;
-                }
+                latch.countDown();
             }
         });
 
         MParticle.getInstance().Identity().addIdentityStateListener(new IdentityStateListener() {
             @Override
             public void onUserIdentified(final MParticleUser user) {
-                if (user != null && mpid1 == user.getId()) {
-                    called[3] = true;
-                }
-                if (called[3] && mpid2 == user.getId()) {
-                    called[4] = true;
-                }
-                if (called[4] && mpid3 == user.getId()) {
-                    called[5] = true;
-                }
+                latch.countDown();
+            }
+        });
+
+        MParticle.getInstance().Identity().addIdentityStateListener(new IdentityStateListener() {
+            @Override
+            public void onUserIdentified(MParticleUser user) {
+                latch.countDown();
             }
         });
 
@@ -235,144 +192,84 @@ public final class IdentityApiTest extends BaseCleanStartedEachTest {
         result.addSuccessListener(new TaskSuccessListener() {
             @Override
             public void onSuccess(IdentityApiResult identityApiResult) {
-                assertEquals(identityApiResult.getUser().getId(), mpid1);
-                called[6] = true;
+                latch.countDown();
             }
-        });
-
-        MParticleUtils.awaitUploadRunnables();
-
-        request = IdentityApiRequest.withUser(MParticle.getInstance().Identity().getUser(mpid2)).build();
-        result = MParticle.getInstance().Identity().identify(request);
-
-        result.addSuccessListener(new TaskSuccessListener() {
+        }).addSuccessListener(new TaskSuccessListener() {
             @Override
-            public void onSuccess(IdentityApiResult identityApiResult) {
-                assertEquals(identityApiResult.getUser().getId(), mpid2);
-                called[7] = true;
+            public void onSuccess(IdentityApiResult result) {
+                latch.countDown();
             }
-        });
-
-
-
-        MParticleUtils.awaitUploadRunnables();
-
-        request = IdentityApiRequest.withUser(MParticle.getInstance().Identity().getUser(mpid3)).build();
-        result = MParticle.getInstance().Identity().identify(request);
-
-        MParticle.getInstance().Identity().addIdentityStateListener(new IdentityStateListener() {
+        }).addSuccessListener(new TaskSuccessListener() {
             @Override
-            public void onUserIdentified(MParticleUser user) {
-                if (user.getId() == mpid3) {
-                    called[8] = true;
-                }
+            public void onSuccess(IdentityApiResult result) {
+                latch.countDown();
             }
         });
 
-        MParticleUtils.awaitUploadRunnables();
-
-        TestingUtils.checkAllBool(called, 1, 10);
+      latch.await();
     }
 
     @Test
     public void testRemoveIdentityStateListeners() throws Exception {
-        mServer
-                .addConditionalIdentityResponse(mStartingMpid, mpid1)
-                .addConditionalIdentityResponse(mpid1, mpid2)
-                .addConditionalIdentityResponse(mpid2, mpid3);
+        mServer.addConditionalIdentityResponse(mStartingMpid, mpid1)
+                .addConditionalIdentityResponse(mpid1, mpid2);
 
-        final boolean[] called = new boolean[5];
-        Arrays.fill(called, false);
+        final CountDownLatch mpid1Latch = new MPLatch(1);
+        final CountDownLatch mpid2Latch = new MPLatch(1);
 
-        IdentityStateListener identityStateListener = new IdentityStateListener() {
+        IdentityStateListener keptIdStateListener = new IdentityStateListener() {
             @Override
             public void onUserIdentified(final MParticleUser user) {
-                if (mpid1 == user.getId()) {
-                    called[0] = true;
-                    return;
+                if (user.getId() == mpid1) {
+                    mpid1Latch.countDown();
                 }
-                if (called[0] && mpid2 == user.getId()) {
-                    called[1] = true;
-                    return;
+                if (user.getId() == mpid2) {
+                    mpid2Latch.countDown();
                 }
-                fail("IdentityStateListener failed to be removed");
             }
         };
 
-        IdentityStateListener identityStateListener2 = new IdentityStateListener() {
+        IdentityStateListener removeIdStateListener1 = new IdentityStateListener() {
             @Override
             public void onUserIdentified(final MParticleUser user) {
-                if (mpid1 == user.getId()) {
-                    called[2] = true;
-                    return;
+                if (user.getId() != mpid1) {
+                    fail("IdentityStateListener failed to be removed");
                 }
-                fail("IdentityStateListener failed to be removed");
             }
         };
-        MParticle.getInstance().Identity().addIdentityStateListener(identityStateListener);
-        MParticle.getInstance().Identity().addIdentityStateListener(identityStateListener2);
-
-        IdentityApiRequest request = IdentityApiRequest.withUser(MParticle.getInstance().Identity().getUser(mpid1)).build();
-        MParticleTask<IdentityApiResult> result = MParticle.getInstance().Identity().identify(request);
-
-        //test that change actually took place
-        result.addSuccessListener(new TaskSuccessListener() {
+        IdentityStateListener removeIdStateListener2 = new IdentityStateListener() {
             @Override
-            public void onSuccess(IdentityApiResult identityApiResult) {
-                assertEquals(identityApiResult.getUser().getId(), mpid1);
-                called[3] = true;
-            }
-        });
-
-        MParticleUtils.awaitUploadRunnables();
-        MParticleUtils.awaitStoreMessage();
-
-        MParticle.getInstance().Identity().removeIdentityStateListener(identityStateListener2);
-
-        request = IdentityApiRequest.withUser(MParticle.getInstance().Identity().getUser(mpid2)).build();
-        result = MParticle.getInstance().Identity().identify(request);
-
-        //test that change actually took place
-        result.addSuccessListener(new TaskSuccessListener() {
+            public void onUserIdentified(final MParticleUser user) {
+                if (user.getId() != mpid1) {
+                    fail("IdentityStateListener failed to be removed");
+                }            }
+        };
+        IdentityStateListener removeIdStateListener3 = new IdentityStateListener() {
             @Override
-            public void onSuccess(IdentityApiResult identityApiResult) {
-                assertEquals(identityApiResult.getUser().getId(), mpid2);
-            }
-        });
-
-        MParticleUtils.awaitUploadRunnables();
-        MParticleUtils.awaitStoreMessage();
-
-
-        MParticle.getInstance().Identity().removeIdentityStateListener(identityStateListener);
-        MParticle.getInstance().Identity().addIdentityStateListener(new IdentityStateListener() {
-            @Override
-            public void onUserIdentified(MParticleUser user) {
-                if (user.getId() == mpid3) {
-                    called[4] = true;
+            public void onUserIdentified(final MParticleUser user) {
+                if (user.getId() != mpid1) {
+                    fail("IdentityStateListener failed to be removed");
                 }
             }
-        });
+        };
+        MParticle.getInstance().Identity().addIdentityStateListener(keptIdStateListener);
+        MParticle.getInstance().Identity().addIdentityStateListener(removeIdStateListener1);
+        MParticle.getInstance().Identity().addIdentityStateListener(removeIdStateListener2);
+        MParticle.getInstance().Identity().addIdentityStateListener(removeIdStateListener3);
 
+        MParticle.getInstance().Identity().identify(IdentityApiRequest.withEmptyUser().build());
 
-        request = IdentityApiRequest.withUser(MParticle.getInstance().Identity().getUser(mpid3)).build();
-        MParticle.getInstance().Identity().identify(request);
+        mpid1Latch.await();
 
-        MParticleUtils.awaitUploadRunnables();
-        MParticleUtils.awaitStoreMessage();
+        MParticle.getInstance().Identity().removeIdentityStateListener(removeIdStateListener1);
+        MParticle.getInstance().Identity().removeIdentityStateListener(removeIdStateListener2);
+        MParticle.getInstance().Identity().removeIdentityStateListener(removeIdStateListener3);
 
-        TestingUtils.checkAllBool(called, 1, 10);
+        MParticle.getInstance().Identity().identify(IdentityApiRequest.withEmptyUser().build());
+
+        mpid2Latch.await();
     }
 
-
-    /**
-     *
-     * @throws Exception
-     */
-    @Test
-    public void testMigrationOfSameMpidOnRequest() throws Exception {
-
-    }
 
     private void assertMParticleUserEquals(MParticleUser dto1, Long mpid, Map<MParticle.IdentityType, String> identityTypes, Map<String, Object> userAttributes) {
         assertTrue(dto1.getId() == mpid);
@@ -424,7 +321,7 @@ public final class IdentityApiTest extends BaseCleanStartedEachTest {
         mpid2UserAttributes.remove(null);
         mpid3UserAttributes.remove(null);
 
-        MParticleUtils.awaitSetUserAttribute();
+        com.mparticle.internal.AccessUtils.awaitMessageHandler();
 
         //should return null for mpid = 0
         assertNull(identity.getUser(0L));
@@ -474,7 +371,7 @@ public final class IdentityApiTest extends BaseCleanStartedEachTest {
                 }
                 return false;
             }
-        }, 20000);
+        });
     }
 
     @Test

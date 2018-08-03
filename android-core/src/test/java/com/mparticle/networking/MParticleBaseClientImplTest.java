@@ -1,5 +1,6 @@
 package com.mparticle.networking;
 
+import android.net.Network;
 import android.support.annotation.NonNull;
 
 import com.mparticle.internal.ConfigManager;
@@ -27,6 +28,9 @@ public class MParticleBaseClientImplTest {
         ConfigManager mockConfigManager = Mockito.mock(ConfigManager.class);
         Mockito.when(mockConfigManager.getApiKey()).thenReturn("foo");
         Mockito.when(mockConfigManager.getApiSecret()).thenReturn("bar");
+        NetworkOptions mockNetworkOptions = Mockito.mock(NetworkOptions.class);
+        Mockito.when(mockNetworkOptions.isPinningDisabledInDevelopment()).thenReturn(false);
+        Mockito.when(mockConfigManager.getNetworkOptions()).thenReturn(mockNetworkOptions);
         final boolean[] writeCalled = {false};
         final boolean[] getSocketFactoruCalled = {false};
         final BaseNetworkConnection client = new NetworkConnection(mockConfigManager, new MockSharedPreferences()) {

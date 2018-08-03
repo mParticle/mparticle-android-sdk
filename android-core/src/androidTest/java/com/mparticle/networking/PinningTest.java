@@ -1,5 +1,7 @@
 package com.mparticle.networking;
 
+import android.util.MutableBoolean;
+
 import com.mparticle.MParticle;
 import com.mparticle.identity.IdentityApiRequest;
 import com.mparticle.testutils.BaseCleanStartedEachTest;
@@ -10,11 +12,16 @@ import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.mparticle.testutils.MPLatch;
+
+import java.util.concurrent.CountDownLatch;
+
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertTrue;
 
 public class PinningTest extends BaseCleanStartedEachTest {
-    boolean[] called;
+    MutableBoolean called;
+    CountDownLatch latch;
 
     protected boolean shouldPin() {
         return true;
@@ -22,7 +29,8 @@ public class PinningTest extends BaseCleanStartedEachTest {
 
     @Before
     public void before() {
-        called = new boolean[1];
+        called = new MutableBoolean(false);
+        latch = new MPLatch(1);
     }
 
     @Test
@@ -31,11 +39,13 @@ public class PinningTest extends BaseCleanStartedEachTest {
             @Override
             public void onPinningApplied(boolean pinned) {
                 assertEquals(shouldPin(), pinned);
-                called[0] = true;
+                called.value = true;
+                latch.countDown();
             }
         });
         MParticle.getInstance().Identity().login(IdentityApiRequest.withEmptyUser().build());
-        TestingUtils.checkAllBool(called);
+        latch.await();
+        assertTrue(called.value);
     }
 
     @Test
@@ -44,11 +54,13 @@ public class PinningTest extends BaseCleanStartedEachTest {
             @Override
             public void onPinningApplied(boolean pinned) {
                 assertEquals(shouldPin(), pinned);
-                called[0] = true;
+                called.value = true;
+                latch.countDown();
             }
         });
         MParticle.getInstance().Identity().logout(IdentityApiRequest.withEmptyUser().build());
-        TestingUtils.checkAllBool(called);
+        latch.await();
+        assertTrue(called.value);
     }
 
     @Test
@@ -57,11 +69,13 @@ public class PinningTest extends BaseCleanStartedEachTest {
             @Override
             public void onPinningApplied(boolean pinned) {
                 assertEquals(shouldPin(), pinned);
-                called[0] = true;
+                called.value = true;
+                latch.countDown();
             }
         });
         MParticle.getInstance().Identity().identify(IdentityApiRequest.withEmptyUser().build());
-        TestingUtils.checkAllBool(called);
+        latch.await();
+        assertTrue(called.value);
     }
 
     @Test
@@ -70,11 +84,13 @@ public class PinningTest extends BaseCleanStartedEachTest {
             @Override
             public void onPinningApplied(boolean pinned) {
                 assertEquals(shouldPin(), pinned);
-                called[0] = true;
+                called.value = true;
+                latch.countDown();
             }
         });
         MParticle.getInstance().Identity().modify(IdentityApiRequest.withEmptyUser().customerId(RandomUtils.getInstance().getAlphaNumericString(25)).build());
-        TestingUtils.checkAllBool(called);
+        latch.await();
+        assertTrue(called.value);
     }
 
     @Test
@@ -84,14 +100,15 @@ public class PinningTest extends BaseCleanStartedEachTest {
                 @Override
                 public void onPinningApplied(boolean pinned) {
                     assertEquals(shouldPin(), pinned);
-                    called[0] = true;
+                    called.value = true;
+                    latch.countDown();
                 }
             });
             com.mparticle.internal.AccessUtils.getApiClient().fetchConfig(true);
+        } catch (Exception e) {
         }
-        catch (Exception e) {
-            TestingUtils.checkAllBool(called);
-        }
+        latch.await();
+        assertTrue(called.value);
     }
 
     @Test
@@ -100,14 +117,16 @@ public class PinningTest extends BaseCleanStartedEachTest {
             @Override
             public void onPinningApplied(boolean pinned) {
                 assertEquals(shouldPin(), pinned);
-                called[0] = true;
+                called.value = true;
+                latch.countDown();
             }
         });
         try {
             com.mparticle.internal.AccessUtils.getApiClient().sendMessageBatch(new JSONObject().toString());
         }
         catch (Exception e) {}
-        TestingUtils.checkAllBool(called);
+        latch.await();
+        assertTrue(called.value);
     }
 
     @Test
@@ -116,10 +135,12 @@ public class PinningTest extends BaseCleanStartedEachTest {
             @Override
             public void onPinningApplied(boolean pinned) {
                 assertEquals(shouldPin(), pinned);
-                called[0] = true;
+                called.value = true;
+                latch.countDown();
             }
         });
         com.mparticle.internal.AccessUtils.getApiClient().fetchAudiences();
-        TestingUtils.checkAllBool(called);
+        latch.await();
+        assertTrue(called.value);
     }
 }

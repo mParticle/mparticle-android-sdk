@@ -32,67 +32,64 @@ public class ReportingServiceTest extends BaseMPServiceTest {
 
      @Test
      public void testInsertReportingMessageMpIdSpecific() throws JSONException {
-         for (JsonReportingMessage reportingMessage: getNReportingMessages(20, "123")) {
+         for (JsonReportingMessage reportingMessage: getNReportingMessages(2, "123")) {
              ReportingService.insertReportingMessage(database, reportingMessage, 2L);
          }
-         assertEquals(ReportingService.getReportingMessagesForUpload(database, true, 2L).size(), 20);
+         assertEquals(ReportingService.getReportingMessagesForUpload(database, true, 2L).size(), 2);
          assertEquals(ReportingService.getReportingMessagesForUpload(database, true, 3L).size(), 0);
          assertEquals(ReportingService.getReportingMessagesForUpload(database, true, 4L).size(), 0);
-         assertEquals(ReportingService.getReportingMessagesForUpload(database).size(), 20);
-         for (JsonReportingMessage reportingMessage: getNReportingMessages(30, "123")) {
+         assertEquals(ReportingService.getReportingMessagesForUpload(database).size(), 2);
+         for (JsonReportingMessage reportingMessage: getNReportingMessages(3, "123")) {
              ReportingService.insertReportingMessage(database, reportingMessage, 3L);
          }
-         assertEquals(ReportingService.getReportingMessagesForUpload(database, true, 2L).size(), 20);
-         assertEquals(ReportingService.getReportingMessagesForUpload(database, true, 3L).size(), 30);
-         assertEquals(ReportingService.getReportingMessagesForUpload(database, false, 4L).size(), 50);
+         assertEquals(ReportingService.getReportingMessagesForUpload(database, true, 2L).size(), 2);
+         assertEquals(ReportingService.getReportingMessagesForUpload(database, true, 3L).size(), 3);
+         assertEquals(ReportingService.getReportingMessagesForUpload(database, false, 4L).size(), 5);
          assertEquals(ReportingService.getReportingMessagesForUpload(database, true, 4L).size(), 0);
-         assertEquals(ReportingService.getReportingMessagesForUpload(database).size(), 50);
-         for (JsonReportingMessage reportingMessage: getNReportingMessages(30, "123")) {
+         assertEquals(ReportingService.getReportingMessagesForUpload(database).size(), 5);
+         for (JsonReportingMessage reportingMessage: getNReportingMessages(3, "123")) {
              ReportingService.insertReportingMessage(database, reportingMessage, Constants.TEMPORARY_MPID);
          }
-         assertEquals(ReportingService.getReportingMessagesForUpload(database, true, 2L).size(), 20);
-         assertEquals(ReportingService.getReportingMessagesForUpload(database, true, 3L).size(), 30);
-         assertEquals(ReportingService.getReportingMessagesForUpload(database, true, Constants.TEMPORARY_MPID).size(), 30);
-         assertEquals(ReportingService.getReportingMessagesForUpload(database, false, 4L).size(), 80);
-         assertEquals(ReportingService.getReportingMessagesForUpload(database).size(), 50);
+         assertEquals(ReportingService.getReportingMessagesForUpload(database, true, 2L).size(), 2);
+         assertEquals(ReportingService.getReportingMessagesForUpload(database, true, 3L).size(), 3);
+         assertEquals(ReportingService.getReportingMessagesForUpload(database, true, Constants.TEMPORARY_MPID).size(), 3);
+         assertEquals(ReportingService.getReportingMessagesForUpload(database, false, 4L).size(), 8);
+         assertEquals(ReportingService.getReportingMessagesForUpload(database).size(), 5);
      }
 
      @Test
      public void testDeleteReportingMessages() throws JSONException {
-         for (JsonReportingMessage reportingMessage: getNReportingMessages(20)) {
+         for (JsonReportingMessage reportingMessage: getNReportingMessages(2)) {
              ReportingService.insertReportingMessage(database, reportingMessage, 2L);
          }
-         for (JsonReportingMessage reportingMessage: getNReportingMessages(10)) {
+         for (JsonReportingMessage reportingMessage: getNReportingMessages(1)) {
              ReportingService.insertReportingMessage(database, reportingMessage, 3L);
          }
          List<ReportingService.ReportingMessage> messagesFor2 = ReportingService.getReportingMessagesForUpload(database, true, 2L);
          List<ReportingService.ReportingMessage> messagesFor3 = ReportingService.getReportingMessagesForUpload(database, true, 3L);
-         assertEquals(messagesFor2.size(), 20);
-         assertEquals(messagesFor3.size(), 10);
+         assertEquals(messagesFor2.size(), 2);
+         assertEquals(messagesFor3.size(), 1);
 
-         for (int i = 0; i < 5; i++) {
-             ReportingService.deleteReportingMessage(database, messagesFor2.get(i).getReportingMessageId());
-         }
+         ReportingService.deleteReportingMessage(database, messagesFor2.get(0).getReportingMessageId());
 
          messagesFor2 = ReportingService.getReportingMessagesForUpload(database, true, 2L);
          messagesFor3 = ReportingService.getReportingMessagesForUpload(database, true, 3L);
-         assertEquals(messagesFor2.size(), 15);
-         assertEquals(messagesFor3.size(), 10);
+         assertEquals(messagesFor2.size(), 1);
+         assertEquals(messagesFor3.size(), 1);
 
-         for (int i = 0; i < 10; i++) {
-             ReportingService.deleteReportingMessage(database, messagesFor3.get(i).getReportingMessageId());
-         }
+         ReportingService.deleteReportingMessage(database, messagesFor3.get(0).getReportingMessageId());
+
 
          messagesFor2 = ReportingService.getReportingMessagesForUpload(database, true, 2L);
          messagesFor3 = ReportingService.getReportingMessagesForUpload(database, true, 3L);
-         assertEquals(messagesFor2.size(), 15);
+         assertEquals(messagesFor2.size(), 1);
          assertEquals(messagesFor3.size(), 0);
      }
 
 
      @Test
      public void testEntryIntegrity() throws JSONException {
-         List<JsonReportingMessage> jsonReportingMessages = getNReportingMessages(10);
+         List<JsonReportingMessage> jsonReportingMessages = getNReportingMessages(2);
          for (JsonReportingMessage reportingMessage: jsonReportingMessages) {
              ReportingService.insertReportingMessage(database, reportingMessage, 1L);
          }

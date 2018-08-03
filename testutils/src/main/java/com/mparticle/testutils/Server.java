@@ -1,14 +1,19 @@
 package com.mparticle.testutils;
 
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
-import com.github.tomakehurst.wiremock.client.VerificationException;
 import com.github.tomakehurst.wiremock.common.Notifier;
+import com.github.tomakehurst.wiremock.http.Request;
+import com.github.tomakehurst.wiremock.http.RequestListener;
+import com.github.tomakehurst.wiremock.http.Response;
 import com.github.tomakehurst.wiremock.matching.RequestPatternBuilder;
 import com.github.tomakehurst.wiremock.matching.UrlPathPattern;
 import com.github.tomakehurst.wiremock.stubbing.ServeEvent;
 import com.github.tomakehurst.wiremock.stubbing.StubMapping;
+import com.github.tomakehurst.wiremock.verification.LoggedRequest;
 import com.mparticle.MParticle;
 
 import org.json.JSONException;
@@ -16,6 +21,7 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
@@ -28,6 +34,7 @@ import static junit.framework.Assert.fail;
 public class Server {
     private WireMockServer mWireMockServer;
     StubMapping mConfigMapping;
+    List<RequestListener> requestListeners = new ArrayList<>();
 
     public Server() {
         mWireMockServer = new WireMockServer(wireMockConfig().port(8080).notifier(new Notifier() {
@@ -46,6 +53,18 @@ public class Server {
                 Log.e("WIREMOCK", s, throwable);
             }
         }));
+        mWireMockServer.addMockServiceRequestListener(new RequestListener() {
+            @Override
+            public void requestReceived(Request request, Response response) {
+                //need to copy the Request to a logged request, since Request has some weird, mutable properties
+                //which seem to change unexpectedly when you hang onto the reference
+                for (RequestListener requestListener : requestListeners) {
+                    if (requestListener != null) {
+                        requestListener.requestReceived(request, response);
+                    }
+                }
+            }
+        });
         reset();
     }
 
@@ -66,6 +85,7 @@ public class Server {
         setupHappyLogout(currentMpid);
         setupHappyModify();
         mWireMockServer.start();
+        requestListeners = new ArrayList<>();
     }
 
     public void stop() {
@@ -114,7 +134,7 @@ public class Server {
     }
 
     public Server setupHappyIdentify(long mpid) {
-       return setupHappyIdentify(mpid, 0);
+        return setupHappyIdentify(mpid, 0);
     }
 
     public Server setupHappyIdentify(long mpid, int delay) {
@@ -211,90 +231,123 @@ public class Server {
      * an implementation of WireMockServer.verify(), except this method will wait until either the call
      * is verified, or the timeout is reached
      */
-    public void waitForVerify(RequestPatternBuilder request, long millis) throws VerificationException {
-        long endTime = System.currentTimeMillis() + millis;
-        if (verify(request, millis <= 0)) {
-            return;
-        } else {
-            while (endTime > System.currentTimeMillis()) {
-                if (verify(request, false)) {
-                    return;
-                }
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                Log.e("Try","l");
-            }
-            verify(request, true);
-        }
+    public void waitForVerify(RequestPatternBuilder requestPattern) {
+        waitForVerify(requestPattern, null);
     }
 
-    private boolean verify(RequestPatternBuilder request, boolean throwException) throws  VerificationException {
+    public void waitForVerify(final RequestPatternBuilder requestPattern, final RequestReceivedCallback callback) {
+        final CountDownLatch latch = new MPLatch(1);
+        final Handler handler = new Handler(Looper.getMainLooper());
+        requestListeners.add(new RequestListener() {
+            @Override
+            public void requestReceived(final Request request, Response response) {
+                final Request loggedRequest = LoggedRequest.createFrom(request);
+                if (requestPattern.build().match(loggedRequest).isExactMatch()) {
+                    handler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            latch.countDown();
+                            if (callback != null) {
+                                callback.onRequestReceived(loggedRequest);
+                            }
+                        }
+                    });
+                }
+            }
+        });
+        for (final ServeEvent serveEvent : mWireMockServer.getAllServeEvents()) {
+            if (requestPattern.build().match(serveEvent.getRequest()).isExactMatch()) {
+                latch.countDown();
+                if (callback != null) {
+                    callback.onRequestReceived(serveEvent.getRequest());
+                }
+            }
+        }
         try {
-            mWireMockServer.verify(request);
-            return true;
-        }
-        catch (VerificationException ex) {
-            if (throwException) {
-                throw ex;
-            }
-            return false;
+            latch.await();
+        } catch (InterruptedException e) {
+            fail(e.toString());
         }
     }
 
-    public void waitForVerify(UrlPathPattern pattern, JSONMatch jsonMatch, long millis) {
-        long endTime = System.currentTimeMillis() + millis;
-        if (verify(pattern, jsonMatch, millis == 0)) {
-            return;
-        } else {
-            while (endTime > System.currentTimeMillis()) {
-                if (verify(pattern, jsonMatch, false)) {
-                    return;
-                }
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                Log.e("Try","l");
-            }
-            verify(pattern, jsonMatch, true);
-        }
+    public void waitForVerify(UrlPathPattern requestPattern, JSONMatch jsonMatch) throws InterruptedException {
+        waitForVerify(requestPattern, jsonMatch, null);
     }
 
-    private boolean verify(UrlPathPattern pattern, JSONMatch jsonMatch, boolean throwException) {
-        List<ServeEvent> misses = new ArrayList<ServeEvent>();
-        for (ServeEvent event: mWireMockServer.getAllServeEvents()) {
-            if (pattern.match(event.getRequest().getUrl()).getDistance() < 1) {
-                try {
-                    if (jsonMatch.isMatch(new JSONObject(event.getRequest().getBodyAsString()))) {
-                        return true;
-                    } else if (throwException) {
-                        misses.add(event);
+    public void waitForVerify(final UrlPathPattern pattern, final JSONMatch jsonMatch, final RequestReceivedCallback callback) throws InterruptedException {
+        final CountDownLatch latch = new MPLatch(1);
+        final Handler handler = new Handler(Looper.getMainLooper());
+        requestListeners.add(new RequestListener() {
+            @Override
+            public void requestReceived(final Request request, Response response) {
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        LoggedRequest loggedRequest = LoggedRequest.createFrom(request);
+                        if (isMatch(loggedRequest, pattern, jsonMatch)) {
+                            if (loggedRequest != null) {
+                                latch.countDown();
+                                if (callback != null) {
+                                    callback.onRequestReceived(loggedRequest);
+                                }
+                            }
+                        }
                     }
-                }
-                catch (JSONException ignore) {
+                });
+            }
+        });
+        Request request = verify(pattern, jsonMatch, false);
+        if (request != null) {
+            if (callback != null) {
+                callback.onRequestReceived(request);
+            }
+            return;
+        }
+        latch.await();
+    }
 
-                }
+    private Request verify(UrlPathPattern pattern, JSONMatch jsonMatch, boolean throwException) {
+        List<ServeEvent> misses = new ArrayList<ServeEvent>();
+        for (ServeEvent event : mWireMockServer.getAllServeEvents()) {
+            if (isMatch(event.getRequest(), pattern, jsonMatch)) {
+                return event.getRequest();
             }
         }
         if (throwException) {
             StringBuilder builder = new StringBuilder();
-            for(ServeEvent event: misses) {
+            for (ServeEvent event : misses) {
                 builder.append(event.getRequest().getBodyAsString() + ",\n");
             }
             fail("No matching Requests found. Matching URLs found that did not match JSON: " + misses.size() + ": " + builder.toString());
         }
-        return false;
+        return null;
     }
 
+
+    //IMPORTANT: this only returns FINISHED requests. If you call this just after a "waitForVerify()" call
+    //finishes, the request you were waiting for will not reliably be included in the ReceivedRequests, since
+    //the call has likely been received, but not finish. 
     public ReceivedRequests getRequests() {
         return new ReceivedRequests(mWireMockServer.getAllServeEvents());
+    }
+
+    private boolean isMatch(Request request, UrlPathPattern pattern, JSONMatch jsonMatch) {
+        if (pattern.match(request.getUrl()).getDistance() < 1) {
+            try {
+                return jsonMatch.isMatch(new JSONObject(request.getBodyAsString()));
+            } catch (JSONException ignore) {
+
+            }
+        }
+        return false;
     }
 
     public interface JSONMatch {
         boolean isMatch(JSONObject jsonObject);
     }
+
+    public interface RequestReceivedCallback {
+        void onRequestReceived(Request request);
+    }
+
 }

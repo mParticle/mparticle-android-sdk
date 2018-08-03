@@ -128,7 +128,7 @@ public class MessageServiceTest extends BaseMPServiceTest {
 
     @Test
     public void testMessageFlowMax() throws JSONException {
-        for (int i = 0; i < 210; i++) {
+        for (int i = 0; i < 110; i++) {
             MessageService.insertMessage(database, "apiKey", getMpMessage(), 1);
         }
         List<MessageService.ReadyMessage> messages = MessageService.getMessagesForUpload(database);
@@ -143,13 +143,7 @@ public class MessageServiceTest extends BaseMPServiceTest {
         messages = MessageService.getMessagesForUpload(database);
         max = getMaxId(messages);
         numUpdated = MessageService.markMessagesAsUploaded(database, max);
-        assertEquals(numUpdated, 200);
-        assertEquals(MessageService.getSessionHistory(database, "").size(), 100);
-
-        messages = MessageService.getMessagesForUpload(database);
-        max = getMaxId(messages);
-        numUpdated = MessageService.markMessagesAsUploaded(database, max);
-        assertEquals(numUpdated, 210);
+        assertEquals(numUpdated, 110);
         assertEquals(MessageService.getSessionHistory(database, "").size(), 100);
     }
 

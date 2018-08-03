@@ -22,6 +22,8 @@ import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.util.ArrayList;
 import java.util.UUID;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -46,14 +48,16 @@ public class UploadHandlerTest {
     @Test
     public void testSetConnected() throws Exception {
         handler.isNetworkConnected = true;
+        final CountDownLatch latch = new CountDownLatch(1);
         new Thread(new Runnable() {
             @Override
             public void run() {
                 assertTrue(handler.isNetworkConnected);
                 handler.setConnected(false);
+                latch.countDown();
             }
         }).start();
-        Thread.sleep(1000);
+        latch.await(1000, TimeUnit.MILLISECONDS);
         assertFalse(handler.isNetworkConnected);
         handler.isNetworkConnected = true;
         new Thread(new Runnable() {

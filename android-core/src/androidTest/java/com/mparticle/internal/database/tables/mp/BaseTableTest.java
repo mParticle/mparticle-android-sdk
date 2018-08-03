@@ -9,12 +9,14 @@ import com.mparticle.internal.database.services.SQLiteOpenHelperWrapper;
 
 import org.junit.Before;
 
+import com.mparticle.testutils.MPLatch;
+
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 public class BaseTableTest extends BaseCleanInstallEachTest {
     public static final String DB_NAME = "test_database";
-    CountDownLatch timer = new CountDownLatch(1);
+    CountDownLatch timer = new MPLatch(1);
 
     protected void runTest(SQLiteOpenHelperWrapper helper) throws InterruptedException {
         runTest(helper, 6);

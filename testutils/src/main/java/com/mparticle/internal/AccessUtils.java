@@ -13,6 +13,9 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.util.concurrent.CountDownLatch;
+
+import com.mparticle.testutils.MPLatch;
 
 public class AccessUtils {
 
@@ -66,7 +69,34 @@ public class AccessUtils {
             MParticle.getInstance().getAppStateManager().delayedBackgroundCheckHandler = handler;
         }
     }
-    
+
+    public static void awaitMessageHandler() throws InterruptedException {
+        BaseHandler messageHandler = getMessageHandler();
+        CountDownLatch latch = new MPLatch(1);
+        messageHandler.await(latch);
+        latch.await();
+        return;
+    }
+
+    /**
+     * This method will block the current thread until Upload messages, which are tied to the mpid parameter,
+     * or are UploadTriggerMessages, are cleared from the Handler's queue
+     *
+     * Upload essages which are tied to an MPID, are ones originating from MParticle.getInstance().upload() calls,
+     * and initial upload messages
+     *
+     * the fact that these messages are tied into an MPID is an artifact from a defunct implementation
+     * of the UploadHandler, but it is really useful for this use case,
+     * @throws InterruptedException
+     */
+    public static void awaitUploadHandler() throws InterruptedException {
+        BaseHandler uploadHandler = getUploadHandler();
+        CountDownLatch latch = new MPLatch(1);
+        uploadHandler.await(latch);
+        latch.await();
+        return;
+    }
+
     public static class EmptyMParticleApiClient implements MParticleApiClient {
         @Override
         public void fetchConfig() throws IOException, MParticleApiClientImpl.MPConfigException {

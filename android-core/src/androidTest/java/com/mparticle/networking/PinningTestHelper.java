@@ -6,7 +6,7 @@ import android.os.Looper;
 
 import com.mparticle.identity.MParticleIdentityClient;
 import com.mparticle.internal.MParticleApiClient;
-import com.mparticle.testutils.MParticleUtils;
+import com.mparticle.testutils.TestingUtils;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -26,14 +26,14 @@ public class PinningTestHelper {
     }
 
     private void prepareIdentityApiClient(String path) {
-        MParticleUtils.getInstance().setDefaultIdentityClient(mContext);
+        TestingUtils.getInstance().setDefaultIdentityClient(mContext);
         com.mparticle.identity.AccessUtils.setIdentityApiClientScheme("https");
         MParticleIdentityClient apiClient = com.mparticle.identity.AccessUtils.getIdentityApiClient();
         setRequestClient(apiClient, path);
     }
 
     private void prepareMParticleApiClient(String path) {
-        MParticleUtils.getInstance().setDefaultClient(mContext);
+        TestingUtils.getInstance().setDefaultClient(mContext);
         com.mparticle.internal.AccessUtils.setMParticleApiClientProtocol("https");
         MParticleApiClient apiClient = com.mparticle.internal.AccessUtils.getApiClient();
         setRequestClient(apiClient, path);

@@ -7,20 +7,23 @@ import android.os.Looper;
 import android.support.test.InstrumentationRegistry;
 
 import com.mparticle.MParticle;
+import com.mparticle.MParticleOptions;
+import com.mparticle.identity.BaseIdentityTask;
+import com.mparticle.identity.IdentityApiResult;
+import com.mparticle.identity.IdentityHttpResponse;
+import com.mparticle.identity.TaskFailureListener;
+import com.mparticle.identity.TaskSuccessListener;
 import com.mparticle.internal.AccessUtils;
 import com.mparticle.internal.AppStateManager;
-
 import com.mparticle.internal.Logger;
-import com.mparticle.testutils.Server;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.equalToJson;
-import static com.github.tomakehurst.wiremock.client.WireMock.get;
-import static com.github.tomakehurst.wiremock.client.WireMock.matchingJsonPath;
-import static com.github.tomakehurst.wiremock.client.WireMock.post;
+import com.mparticle.testutils.MPLatch;
+
+import java.util.concurrent.CountDownLatch;
 
 public abstract class BaseAbstractTest {
     protected Server mServer;
@@ -47,7 +50,37 @@ public abstract class BaseAbstractTest {
 
     @After
     public void tearDown() {
-        mServer.stop();
+        if (mServer != null) {
+            mServer.stop();
+        }
+    }
+
+    protected void startMParticle() throws InterruptedException {
+        startMParticle(MParticleOptions.builder(mContext));
+    }
+
+    protected void startMParticle(MParticleOptions.Builder options) throws InterruptedException {
+        MParticle.setInstance(null);
+        final CountDownLatch latch = new MPLatch(1);
+        BaseIdentityTask identityTask = com.mparticle.AccessUtils.getIdentityTask(options);
+        if (identityTask == null) {
+            identityTask = new BaseIdentityTask();
+        }
+        identityTask.addFailureListener(new TaskFailureListener() {
+            @Override
+            public void onFailure(IdentityHttpResponse result) {
+                latch.countDown();
+            }
+        }).addSuccessListener(new TaskSuccessListener() {
+            @Override
+            public void onSuccess(IdentityApiResult result) {
+                latch.countDown();
+            }
+        });
+
+        options.identifyTask(identityTask);
+        MParticle.start(com.mparticle.AccessUtils.setCredentialsIfEmpty(options).build());
+        latch.await();
     }
 
     protected void goToBackground() {

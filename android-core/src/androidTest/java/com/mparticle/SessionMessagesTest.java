@@ -4,29 +4,24 @@ import android.os.Handler;
 import android.os.Looper;
 
 import com.mparticle.testutils.BaseCleanStartedEachTest;
-import com.mparticle.MParticle;
 import com.mparticle.internal.AccessUtils;
 import com.mparticle.internal.AppStateManager;
 import com.mparticle.internal.Constants;
 import com.mparticle.internal.MParticleApiClientImpl;
-import com.mparticle.internal.Session;
-import com.mparticle.testutils.AssertObject;
-import com.mparticle.testutils.AssertTrue;
-import com.mparticle.testutils.MParticleUtils;
 import com.mparticle.testutils.RandomUtils;
-import com.mparticle.testutils.StreamAssert;
 
 import junit.framework.Assert;
 
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.util.concurrent.CountDownLatch;
 
-import static com.mparticle.testutils.AndroidUtils.*;
+import com.mparticle.testutils.MPLatch;
+
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNotNull;
@@ -51,7 +46,7 @@ public final class SessionMessagesTest extends BaseCleanStartedEachTest {
         final boolean[] sessionStartReceived = new boolean[1];
         sessionStartReceived[0] = false;
         assertFalse(mAppStateManager.getSession().isActive());
-
+        final CountDownLatch latch = new MPLatch(1);
         AccessUtils.setMParticleApiClient(new AccessUtils.EmptyMParticleApiClient() {
             @Override
             public int sendMessageBatch(final String message) throws IOException, MParticleApiClientImpl.MPThrottleException, MParticleApiClientImpl.MPRampException {
@@ -70,6 +65,7 @@ public final class SessionMessagesTest extends BaseCleanStartedEachTest {
                                     assertEquals(eventObject.getLong("ct"), mAppStateManager.getSession().mSessionStartTime, 1000);
                                     assertEquals(eventObject.getString("id"), mAppStateManager.getSession().mSessionID);
                                     sessionStartReceived[0] = true;
+                                    latch.countDown();
                                 }
                             }
                         } catch (Exception e) {
@@ -85,12 +81,9 @@ public final class SessionMessagesTest extends BaseCleanStartedEachTest {
 
         mAppStateManager.ensureActiveSession();
 
-        MParticleUtils.awaitStoreMessage();
+        AccessUtils.awaitMessageHandler();
         MParticle.getInstance().upload();
-        MParticleUtils.awaitUploadMessages(MParticle.getInstance().getConfigManager().getMpid());
-        if (!sessionStartReceived[0]) {
-            Thread.sleep(1000);
-        }
+        latch.await();
         Assert.assertTrue(sessionStartReceived[0]);
     }
 }

@@ -7,6 +7,8 @@ import android.util.Log;
 
 import com.mparticle.internal.database.services.SQLiteOpenHelperWrapper;
 
+import com.mparticle.testutils.MPLatch;
+
 import java.util.concurrent.CountDownLatch;
 
 public class BaseDatabase extends SQLiteOpenHelper {
@@ -14,7 +16,7 @@ public class BaseDatabase extends SQLiteOpenHelper {
     CountDownLatch timer;
 
     public BaseDatabase(SQLiteOpenHelperWrapper helper, String databaseName) {
-        this(helper, databaseName, new CountDownLatch(1), 1);
+        this(helper, databaseName, new MPLatch(1), 1);
     }
 
     public BaseDatabase(SQLiteOpenHelperWrapper helper, String databaseName, CountDownLatch timer, int version) {

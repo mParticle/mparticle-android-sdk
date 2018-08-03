@@ -58,7 +58,7 @@ import java.util.Set;
  */
 public class MessageManager implements MessageManagerCallbacks, ReportingManager {
     private static Context sContext = null;
-    private static SharedPreferences sPreferences = null;
+    static SharedPreferences sPreferences = null;
     static volatile boolean devicePerformanceMetricsDisabled;
     private final DeviceAttributes mDeviceAttributes;
     private AppStateManager mAppStateManager;

@@ -4,6 +4,9 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 
+
+import java.util.concurrent.CountDownLatch;
+
 public class BaseHandler extends Handler {
     private volatile boolean disabled;
     private volatile boolean handling;
@@ -20,6 +23,10 @@ public class BaseHandler extends Handler {
         while (handling) {}
     }
 
+    void await(CountDownLatch latch) {
+        this.sendMessage(obtainMessage(-1, latch));
+    }
+
     @Override
     public final void handleMessage(Message msg) {
         if (disabled) {
@@ -27,7 +34,11 @@ public class BaseHandler extends Handler {
         }
         handling = true;
         try {
-            handleMessageImpl(msg);
+            if (msg != null && msg.what == -1 && msg.obj instanceof CountDownLatch) {
+                ((CountDownLatch)msg.obj).countDown();
+            } else {
+                handleMessageImpl(msg);
+            }
         }
         finally {
             handling = false;

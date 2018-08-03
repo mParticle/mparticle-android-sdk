@@ -3,6 +3,7 @@ package com.mparticle.identity;
 import android.content.Context;
 import android.os.Handler;
 import android.support.test.InstrumentationRegistry;
+import android.util.MutableBoolean;
 
 import com.mparticle.testutils.BaseCleanStartedEachTest;
 import com.mparticle.MParticle;
@@ -23,6 +24,8 @@ import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.CountDownLatch;
 
+import com.mparticle.testutils.MPLatch;
+
 import static com.mparticle.identity.MParticleIdentityClientImpl.ANDROID_AAID;
 import static com.mparticle.identity.MParticleIdentityClientImpl.ANDROID_UUID;
 import static com.mparticle.identity.MParticleIdentityClientImpl.DEVICE_APPLICATION_STAMP;
@@ -41,7 +44,7 @@ public class MParticleIdentityClientImplTest extends BaseCleanStartedEachTest {
     private Context mContext;
     private ConfigManager mConfigManager;
     private MParticleIdentityClientImpl mApiClient;
-    protected CountDownLatch lock = new CountDownLatch(1);
+    protected CountDownLatch lock = new MPLatch(1);
 
     private RandomUtils mRandomUtils = RandomUtils.getInstance();
 
@@ -55,7 +58,7 @@ public class MParticleIdentityClientImplTest extends BaseCleanStartedEachTest {
     @Test
     public void testModifySameData() throws Exception {
         final int startingModifyRequestCount = mServer.getRequests().Identity().modify().size();
-        final CountDownLatch latch = new CountDownLatch(2);
+        final CountDownLatch latch = new MPLatch(2);
         final Handler handler = new Handler();
         handler.postDelayed(new Runnable() {
             @Override
@@ -78,7 +81,7 @@ public class MParticleIdentityClientImplTest extends BaseCleanStartedEachTest {
                                         //make sure we made 1 or 0 modify requests. It could go either way for the first modify request,
                                         //it may have changes, it may not depending on state. The second request though, should not have
                                         //changes, and therefore it should not take place, so less than 2 requests is a good condition
-                                        assertTrue(startingModifyRequestCount + 2 > currentModifyRequestCount);
+                                        assertTrue(2 > currentModifyRequestCount);
                                         handler.removeCallbacks(null);
                                     }
                                 })
@@ -101,11 +104,10 @@ public class MParticleIdentityClientImplTest extends BaseCleanStartedEachTest {
 
     @Test
     public void testIdentifyMessage() throws Exception {
-        int iterations = 20;
-        final boolean[]checked = new boolean[iterations];
+        int iterations = 5;
         for (int i = 0; i < iterations; i++) {
             final Map<MParticle.IdentityType, String> userIdentities = mRandomUtils.getRandomUserIdentities();
-
+            final MutableBoolean checked = new MutableBoolean(false);
             final int finalI = i;
             setApiClient(new MockIdentityApiClient() {
                 @Override
@@ -122,7 +124,7 @@ public class MParticleIdentityClientImplTest extends BaseCleanStartedEachTest {
                             String value = knownIdentities.getString(mApiClient.getStringValue(identity.getKey()));
                             assertEquals(value, identity.getValue());
                         }
-                        checked[finalI] = true;
+                        checked.value = true;
                         setApiClient(null);
                         lock.countDown();
                     }
@@ -133,18 +135,19 @@ public class MParticleIdentityClientImplTest extends BaseCleanStartedEachTest {
                     .userIdentities(userIdentities)
                     .build());
             lock.await();
+            assertTrue(checked.value);
         }
-        TestingUtils.checkAllBool(checked, 1, 10);
+
     }
 
     @Test
     public void testLoginMessage() throws Exception {
-        int iterations = 20;
-        final boolean[]checked = new boolean[iterations];
+        int iterations = 5;
         for (int i = 0; i < iterations; i++) {
+            final CountDownLatch latch = new MPLatch(1);
+            final MutableBoolean checked = new MutableBoolean(false);
             final Map<MParticle.IdentityType, String> userIdentities = mRandomUtils.getRandomUserIdentities();
 
-            final int finalI = i;
             setApiClient(new MockIdentityApiClient() {
                 @Override
                 public void makeUrlRequest(HttpURLConnection connection, String payload, boolean mparticle) throws IOException, JSONException {
@@ -158,25 +161,26 @@ public class MParticleIdentityClientImplTest extends BaseCleanStartedEachTest {
                             String value = knownIdentities.getString(mApiClient.getStringValue(identity.getKey()));
                             assertEquals(value, identity.getValue());
                         }
-                        checked[finalI] = true;
+                        checked.value = true;
+                        latch.countDown();
                     }
                 }
             });
             mApiClient.login(IdentityApiRequest.withEmptyUser()
                     .userIdentities(userIdentities)
                     .build());
+            latch.await();
+            assertTrue(checked.value);
         }
-        TestingUtils.checkAllBool(checked, 1, 10);
     }
 
     @Test
     public void testLogoutMessage() throws Exception {
-        int iterations = 20;
-        final boolean[]checked = new boolean[iterations];
+        int iterations = 5;
         for (int i = 0; i < iterations; i++) {
             final Map<MParticle.IdentityType, String> userIdentities = mRandomUtils.getRandomUserIdentities();
-
-            final int finalI = i;
+            final CountDownLatch latch = new MPLatch(1);
+            final MutableBoolean checked = new MutableBoolean(false);
             setApiClient(new MockIdentityApiClient() {
                 @Override
                 public void makeUrlRequest(HttpURLConnection connection, String payload, boolean mparticle) throws IOException, JSONException {
@@ -190,7 +194,8 @@ public class MParticleIdentityClientImplTest extends BaseCleanStartedEachTest {
                             String value = knownIdentities.getString(mApiClient.getStringValue(identity.getKey()));
                             assertEquals(value, identity.getValue());
                         }
-                        checked[finalI] = true;
+                        checked.value = true;
+                        latch.countDown();
                     }
                 }
             });
@@ -198,15 +203,15 @@ public class MParticleIdentityClientImplTest extends BaseCleanStartedEachTest {
             mApiClient.logout(IdentityApiRequest.withEmptyUser()
                     .userIdentities(userIdentities)
                     .build());
+            latch.await();
+            assertTrue(checked.value);
         }
-        TestingUtils.checkAllBool(checked, 1, 10);
     }
 
     @Test
     public void testModifyMessage() throws Exception {
         mConfigManager.setMpid(new Random().nextLong());
-        int iterations = 20;
-        final boolean[]checked = new boolean[iterations];
+        int iterations = 5;
         for (int i = 0; i < iterations; i++) {
             final Map<MParticle.IdentityType, String> oldUserIdentities = mRandomUtils.getRandomUserIdentities();
             final Map<MParticle.IdentityType, String> newUserIdentities = mRandomUtils.getRandomUserIdentities();
@@ -214,7 +219,8 @@ public class MParticleIdentityClientImplTest extends BaseCleanStartedEachTest {
             AccessUtils.clearUserIdentities((MParticleUserImpl)MParticle.getInstance().Identity().getCurrentUser());
             ((MParticleUserImpl)MParticle.getInstance().Identity().getCurrentUser()).setUserIdentities(oldUserIdentities);
 
-            final int finalI = i;
+            final CountDownLatch latch = new MPLatch(1);
+            final MutableBoolean checked = new MutableBoolean(false);
             setApiClient(new MockIdentityApiClient() {
                 @Override
                 public void makeUrlRequest(HttpURLConnection connection, String payload, boolean mparticle) throws IOException, JSONException {
@@ -242,7 +248,8 @@ public class MParticleIdentityClientImplTest extends BaseCleanStartedEachTest {
                                     assertEquals(newValue, newUserIdentities.get(identityType));
                                 }
                             }
-                            checked[finalI] = true;
+                            checked.value = true;
+                            latch.countDown();
                             setApiClient(null);
                         }
                 }
@@ -251,8 +258,9 @@ public class MParticleIdentityClientImplTest extends BaseCleanStartedEachTest {
             mApiClient.modify(IdentityApiRequest.withEmptyUser()
                     .userIdentities(newUserIdentities)
                     .build());
+            latch.await();
+            assertTrue(checked.value);
         }
-        TestingUtils.checkAllBool(checked, 1, 10);
     }
 
     private void setApiClient(final MockIdentityApiClient identityClient) {
