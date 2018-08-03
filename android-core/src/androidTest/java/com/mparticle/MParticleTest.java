@@ -299,7 +299,7 @@ public class MParticleTest extends BaseCleanStartedEachTest {
         File[] files = new File(sharedPrefsDirectory).listFiles();
         for (File file : files) {
             String sharedPreferenceName = file.getPath().replace(sharedPrefsDirectory, "").replace(".xml", "");
-            if (!sharedPreferenceName.equals("WebViewChromiumPrefs")) {
+            if (!sharedPreferenceName.equals("WebViewChromiumPrefs") && !sharedPreferenceName.equals("com.mparticle.test_preferences")) {
                 fail();
             }
         }

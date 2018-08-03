@@ -57,10 +57,10 @@ public class MParticleUtils {
 
     public static void awaitStoreMessage() throws InterruptedException {
         Handler messageHandler = AccessUtils.getMessageHandler();
-        while(messageHandler.hasMessages(AccessUtils.STORE_MESSAGE)) {
+        do {
             Thread.sleep(500);
-            //do nothing, just block
         }
+        while(messageHandler.hasMessages(AccessUtils.STORE_MESSAGE));
         return;
     }
 
