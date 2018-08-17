@@ -233,14 +233,29 @@ import java.util.Map;
         }
     }
 
-    boolean setUser(Context context, long previousMpid, long newMpid, Map<MParticle.IdentityType, String> identities, UserAliasHandler userAliasHandler) {
+    static void setUserIdentities(MParticleUserDelegate userDelegate, Map<MParticle.IdentityType, String> identities, long mpid) {
         if (identities != null) {
+            //some legacy consumers of Identity (kits) require customer ID first
+            //this is a mitigation for those that have not adopted the new Identity API interfaces.
+            if (identities.containsKey(MParticle.IdentityType.CustomerId)) {
+                userDelegate.setUserIdentity(identities.get(MParticle.IdentityType.CustomerId), MParticle.IdentityType.CustomerId, mpid);
+            }
+            if (identities.containsKey(MParticle.IdentityType.Email)) {
+                userDelegate.setUserIdentity(identities.get(MParticle.IdentityType.Email), MParticle.IdentityType.Email, mpid);
+            }
+
             for (Map.Entry<MParticle.IdentityType, String> entry : identities.entrySet()) {
-                if (!MPUtility.isEmpty(entry.getValue())) {
-                    setUserIdentity(entry.getValue(), entry.getKey(), newMpid);
+                MParticle.IdentityType identityType = entry.getKey();
+                if (identityType != MParticle.IdentityType.CustomerId && identityType != MParticle.IdentityType.Email) {
+                    String value = entry.getValue();
+                    userDelegate.setUserIdentity(value, identityType, mpid);
                 }
             }
         }
+    }
+
+    boolean setUser(Context context, long previousMpid, long newMpid, Map<MParticle.IdentityType, String> identities, UserAliasHandler userAliasHandler) {
+        setUserIdentities(this, identities, newMpid);
         // if the mpid remains equal to the temporary_mpid, as the case could be when a network request fails
         // or on startup, then there is no reason to do anything
         if (newMpid == Constants.TEMPORARY_MPID) {

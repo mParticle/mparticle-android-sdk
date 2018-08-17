@@ -250,11 +250,7 @@ public class IdentityApi {
                             task.setFailed(result);
                         } else {
                             task.setSuccessful(new IdentityApiResult(getCurrentUser()));
-                            if (updateRequest.getUserIdentities() != null) {
-                                for (Map.Entry<MParticle.IdentityType, String> entry : updateRequest.getUserIdentities().entrySet()) {
-                                    mUserDelegate.setUserIdentity(entry.getValue(), entry.getKey(), mConfigManager.getMpid());
-                                }
-                            }
+                            MParticleUserDelegate.setUserIdentities(mUserDelegate, updateRequest.getUserIdentities(), mConfigManager.getMpid());
                             new Handler(Looper.getMainLooper()).post(new Runnable() {
                                 @Override
                                 public void run() {
