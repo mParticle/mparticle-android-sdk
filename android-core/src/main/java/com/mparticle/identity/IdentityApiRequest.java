@@ -27,7 +27,7 @@ public final class IdentityApiRequest {
     private UserAliasHandler userAliasHandler = null;
     private Map<MParticle.IdentityType, String> userIdentities = new HashMap<MParticle.IdentityType, String>();
     // for /modify requests
-    private Map<MParticle.IdentityType, String> oldUserIdentities = new HashMap<MParticle.IdentityType, String>();
+    private Map<MParticle.IdentityType, String> oldUserIdentities;
     private Map<String, String> otherOldIdentities = new HashMap<String, String>();
     private Map<String, String> otherNewIdentities = new HashMap<String, String>();
     Long mpid;
@@ -42,15 +42,6 @@ public final class IdentityApiRequest {
         if (builder.otherOldIdentities.size() == builder.otherNewIdentities.size()) {
             this.otherNewIdentities = builder.otherNewIdentities;
             this.otherOldIdentities = builder.otherOldIdentities;
-        }
-        if (MParticle.getInstance() != null) {
-            ConfigManager configManager = MParticle.getInstance().getConfigManager();
-            if (builder.mpid != null) {
-                oldUserIdentities = configManager.getUserIdentities(builder.mpid);
-                mpid = builder.mpid;
-            } else {
-                oldUserIdentities = configManager.getUserIdentities(configManager.getMpid());
-            }
         }
     }
 
@@ -96,6 +87,10 @@ public final class IdentityApiRequest {
 
     public UserAliasHandler getUserAliasHandler() {
         return userAliasHandler;
+    }
+
+    void setOldUserIdentities(Map<MParticle.IdentityType, String> identities) {
+        this.oldUserIdentities = identities;
     }
 
     /**

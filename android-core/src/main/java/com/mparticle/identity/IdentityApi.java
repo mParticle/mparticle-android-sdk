@@ -232,6 +232,12 @@ public class IdentityApi {
         boolean devMode = MPUtility.isDevEnv() || MPUtility.isAppDebuggable(mContext);
         final BaseIdentityTask task = new BaseIdentityTask();
 
+        if (updateRequest.mpid != null) {
+            updateRequest.setOldUserIdentities(mConfigManager.getUserIdentities(updateRequest.mpid));
+        } else {
+            updateRequest.setOldUserIdentities(mConfigManager.getUserIdentities(mConfigManager.getMpid()));
+        }
+
         if (updateRequest == null) {
             String message = "modify() requires a valid IdentityApiRequest";
             if (devMode) {
