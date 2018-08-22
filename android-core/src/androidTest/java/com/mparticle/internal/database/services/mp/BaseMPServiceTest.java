@@ -7,7 +7,7 @@ import android.support.test.InstrumentationRegistry;
 
 import com.mparticle.testutils.BaseCleanInstallEachTest;
 import com.mparticle.internal.networking.BaseMPMessage;
-import com.mparticle.internal.Session;
+import com.mparticle.internal.InternalSession;
 import com.mparticle.internal.database.BaseDatabase;
 import com.mparticle.internal.database.tables.mp.MParticleDatabaseHelper;
 import com.mparticle.testutils.RandomUtils;
@@ -36,7 +36,7 @@ abstract public class BaseMPServiceTest extends BaseCleanInstallEachTest {
 
     BaseMPMessage getMpMessage(String sessionId, long mpid) throws JSONException {
         RandomUtils random = RandomUtils.getInstance();
-        Session session = new Session();
+        InternalSession session = new InternalSession();
         session.mSessionID = sessionId;
         return new BaseMPMessage.Builder(random.getAlphaNumericString(random.randomInt(20, 48)), session, new Location(random.getAlphaNumericString(random.randomInt(1, 55))), mpid).build();
     }

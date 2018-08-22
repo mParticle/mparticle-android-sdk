@@ -11,7 +11,7 @@ import com.mparticle.commerce.Promotion;
 import com.mparticle.commerce.TransactionAttributes;
 import com.mparticle.internal.Constants;
 import com.mparticle.internal.MPUtility;
-import com.mparticle.internal.Session;
+import com.mparticle.internal.InternalSession;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -162,7 +162,7 @@ public class MPCommerceMessage extends BaseMPMessage {
         private CommerceEvent commerceEvent;
         private Cart cart;
 
-        public Builder(CommerceEvent commerceEvent, Session session, Location location, long mpId, Cart cart) {
+        public Builder(CommerceEvent commerceEvent, InternalSession session, Location location, long mpId, Cart cart) {
             super(Constants.MessageType.COMMERCE_EVENT, session, location, mpId);
             this.commerceEvent = commerceEvent;
             this.cart = cart;

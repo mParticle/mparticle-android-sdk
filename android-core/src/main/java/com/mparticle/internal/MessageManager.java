@@ -32,18 +32,13 @@ import com.mparticle.internal.networking.BaseMPMessage;
 import com.mparticle.internal.networking.MPCommerceMessage;
 import com.mparticle.internal.networking.MPEventMessage;
 import com.mparticle.messaging.ProviderCloudMessage;
-import com.mparticle.networking.*;
-import com.mparticle.networking.MParticleBaseClientImpl;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -234,7 +229,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
                 .build();
     }
 
-    public BaseMPMessage startSession(Session session) {
+    public BaseMPMessage startSession(InternalSession session) {
         try {
             BaseMPMessage message = new BaseMPMessage.Builder(MessageType.SESSION_START, session, mLocation, mConfigManager.getMpid())
                     .timestamp(mAppStateManager.getSession().mSessionStartTime)
@@ -284,7 +279,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
         }
     }
 
-    public void updateSessionEnd(Session session) {
+    public void updateSessionEnd(InternalSession session) {
         try {
             mConfigManager.getUserStorage().setPreviousSessionForeground(session.getForegroundTime());
             mMessageHandler
@@ -294,7 +289,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
         }
     }
 
-    public void endSession(Session session) {
+    public void endSession(InternalSession session) {
         updateSessionEnd(session);
         Map.Entry<String, Set<Long>> entry = new HashMap.SimpleEntry<String, Set<Long>>(session.mSessionID, session.getMpids());
         mMessageHandler
@@ -499,7 +494,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
     }
 
     public void setSessionAttributes() {
-        Session session = mAppStateManager.getSession();
+        InternalSession session = mAppStateManager.getSession();
         if (session.mSessionAttributes != null) {
             try {
                 JSONObject sessionAttributes = new JSONObject();

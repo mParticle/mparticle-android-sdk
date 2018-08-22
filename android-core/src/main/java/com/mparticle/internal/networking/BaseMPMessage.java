@@ -4,7 +4,7 @@ import android.location.Location;
 
 import com.mparticle.internal.Constants;
 import com.mparticle.internal.MPUtility;
-import com.mparticle.internal.Session;
+import com.mparticle.internal.InternalSession;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -22,7 +22,7 @@ public class BaseMPMessage extends JSONObject{
         mpId = builder.mpid;
         put(Constants.MessageKey.TYPE, builder.mMessageType);
         put(Constants.MessageKey.TIMESTAMP, builder.mTimestamp);
-        if (Constants.MessageType.SESSION_START == builder.mMessageType) {
+        if (Constants.MessageType.SESSION_START.equals(builder.mMessageType)) {
             put(Constants.MessageKey.ID, builder.mSession.mSessionID);
         } else {
             put(Constants.MessageKey.SESSION_ID, builder.mSession.mSessionID);
@@ -116,7 +116,7 @@ public class BaseMPMessage extends JSONObject{
 
     public static class Builder extends BaseMPMessageBuilder {
 
-        public Builder(String messageType, Session session, Location location, long mpId) {
+        public Builder(String messageType, InternalSession session, Location location, long mpId) {
             super(messageType, session, location, mpId);
         }
     }

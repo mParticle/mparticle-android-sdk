@@ -23,7 +23,7 @@ public class BaseMPMessageTest {
     @Test
     public void testEventLength() throws Exception {
         MPEvent event = new MPEvent.Builder("test name", MParticle.EventType.Navigation).build();
-        Session session = new Session();
+        InternalSession session = new InternalSession();
         BaseMPMessage message = new BaseMPMessage.Builder(Constants.MessageType.EVENT, session, null, 1)
                 .name(event.getEventName())
                 .timestamp(1235)
@@ -63,7 +63,7 @@ public class BaseMPMessageTest {
         MParticle.setInstance(new MockMParticle());
         CommerceEvent event = new CommerceEvent.Builder(Product.ADD_TO_CART, new Product.Builder("foo", "bar", 10).build()).build();
         Cart cart = null;
-        BaseMPMessage message = new MPCommerceMessage.Builder(event, new Session(), null, 0, cart)
+        BaseMPMessage message = new MPCommerceMessage.Builder(event, new InternalSession(), null, 0, cart)
                 .timestamp(12345)
                 .build();
         assertNotNull(message);

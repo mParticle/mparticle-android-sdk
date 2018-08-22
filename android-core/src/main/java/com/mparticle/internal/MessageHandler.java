@@ -1,7 +1,6 @@
 package com.mparticle.internal;
 
 import android.content.Context;
-import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 
@@ -116,7 +115,7 @@ import java.util.UUID;
                 break;
             case UPDATE_SESSION_END:
                 try {
-                    Session session = (Session) msg.obj;
+                    InternalSession session = (InternalSession) msg.obj;
                     mMParticleDBManager.updateSessionEndTime(session.mSessionID, session.mLastEventTime, session.getForegroundTime());
                 } catch (Exception e) {
                     Logger.error(e, "Error updating session end time in mParticle DB");

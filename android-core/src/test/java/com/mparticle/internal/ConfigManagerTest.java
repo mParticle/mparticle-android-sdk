@@ -291,9 +291,9 @@ public class ConfigManagerTest {
 
     @Test
     public void testShouldTrigger() throws Exception {
-        BaseMPMessage message = new BaseMPMessage.Builder(Constants.MessageType.COMMERCE_EVENT, new Session(), null, 1).build();
+        BaseMPMessage message = new BaseMPMessage.Builder(Constants.MessageType.COMMERCE_EVENT, new InternalSession(), null, 1).build();
         assertTrue(manager.shouldTrigger(message));
-        message = new BaseMPMessage.Builder(Constants.MessageType.PUSH_RECEIVED, new Session(), null, 1).build();
+        message = new BaseMPMessage.Builder(Constants.MessageType.PUSH_RECEIVED, new InternalSession(), null, 1).build();
         assertTrue(manager.shouldTrigger(message));
     }
 

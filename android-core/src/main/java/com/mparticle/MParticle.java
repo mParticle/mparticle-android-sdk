@@ -34,6 +34,7 @@ import com.mparticle.internal.Constants;
 import com.mparticle.internal.Constants.MessageKey;
 import com.mparticle.internal.Constants.PrefKeys;
 import com.mparticle.internal.DatabaseTables;
+import com.mparticle.internal.InternalSession;
 import com.mparticle.internal.KitFrameworkWrapper;
 import com.mparticle.internal.Logger;
 import com.mparticle.internal.MPLocationListener;
@@ -277,6 +278,19 @@ public class MParticle {
         if (mConfigManager.isEnabled()) {
             mAppStateManager.getSession().mLastEventTime = System.currentTimeMillis();
             mAppStateManager.endSession();
+        }
+    }
+
+    /**
+     * Query for a read-only Session API object.
+     *
+     */
+    public Session getCurrentSession() {
+        InternalSession session = mAppStateManager.getSession();
+        if (session == null || !session.isActive() || session.isTimedOut(mConfigManager.getSessionTimeout())) {
+            return null;
+        } else {
+            return new Session(session.mSessionID);
         }
     }
 

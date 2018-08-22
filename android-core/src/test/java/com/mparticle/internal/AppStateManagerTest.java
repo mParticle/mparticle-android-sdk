@@ -161,7 +161,7 @@ public class AppStateManagerTest {
 
     @Test
     public void testStartSession() throws Exception {
-        Session session = manager.getSession();
+        InternalSession session = manager.getSession();
         assertTrue(session.mSessionID.equals("NO-SESSION"));
         manager.startSession();
         assertNotEquals(manager.getSession().mSessionID, session.mSessionID);

@@ -1,10 +1,7 @@
 package com.mparticle;
 
 
-import com.mparticle.internal.AppStateManager;
-import com.mparticle.internal.ConfigManager;
-import com.mparticle.internal.Session;
-import com.mparticle.mock.MockContext;
+import com.mparticle.internal.InternalSession;
 
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -30,7 +27,7 @@ public class MParticleTest {
         //mp.mConfigManager = Mockito.mock(ConfigManager.class);
 //        mp.mAppStateManager = Mockito.mock(AppStateManager.class);
         //mp.mIdentity = new IdentityApi();
-        Session mockSession = Mockito.mock(Session.class);
+        InternalSession mockSession = Mockito.mock(InternalSession.class);
         Mockito.when(mockSession.checkEventLimit()).thenReturn(true);
         Mockito.when(mp.mAppStateManager.getSession()).thenReturn(mockSession);
         Mockito.when(mp.mConfigManager.isEnabled()).thenReturn(true);
@@ -89,7 +86,7 @@ public class MParticleTest {
     @Test
     public void testSetUserAttributeList() throws Exception {
         MParticle mp = new MockMParticle();
-        Session mockSession = Mockito.mock(Session.class);
+        InternalSession mockSession = Mockito.mock(InternalSession.class);
         Mockito.when(mockSession.checkEventLimit()).thenReturn(true);
         Mockito.when(mp.mAppStateManager.getSession()).thenReturn(mockSession);
         Mockito.when(mp.mConfigManager.isEnabled()).thenReturn(true);
@@ -155,7 +152,7 @@ public class MParticleTest {
     public void testSetUserTag() throws Exception {
         MParticle mp = new MockMParticle();
         Mockito.when(mp.mConfigManager.getMpid()).thenReturn(1L);
-        Session mockSession = Mockito.mock(Session.class);
+        InternalSession mockSession = Mockito.mock(InternalSession.class);
         Mockito.when(mockSession.checkEventLimit()).thenReturn(true);
         Mockito.when(mp.mAppStateManager.getSession()).thenReturn(mockSession);
         Mockito.when(mp.mConfigManager.isEnabled()).thenReturn(true);

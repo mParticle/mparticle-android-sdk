@@ -2,7 +2,7 @@ package com.mparticle.internal.networking;
 
 import android.location.Location;
 
-import com.mparticle.internal.Session;
+import com.mparticle.internal.InternalSession;
 
 import org.json.JSONException;
 
@@ -14,7 +14,7 @@ public class MPEventMessage extends BaseMPMessage {
 
     public static class Builder extends BaseMPMessageBuilder {
 
-        public Builder(String messageType, Session session, Location location, long mpId) {
+        public Builder(String messageType, InternalSession session, Location location, long mpId) {
             super(messageType, session, location, mpId);
         }
 

@@ -168,7 +168,7 @@ public class MessageManagerTest {
     @Test
     public void testUpdateSessionEnd() throws Exception {
         manager.updateSessionEnd(null);
-        Session session = new Session().start(context);
+        InternalSession session = new InternalSession().start(context);
         long currentTime = System.currentTimeMillis();
         session.mSessionStartTime = currentTime - 10000;
         AtomicLong stoppedTime = new AtomicLong(currentTime - 5000);
@@ -182,7 +182,7 @@ public class MessageManagerTest {
 
     @Test
     public void testEndSession() throws Exception {
-        Session session = appStateManager.getSession().start(context);
+        InternalSession session = appStateManager.getSession().start(context);
         assertNotEquals(Constants.NO_SESSION_ID, session.mSessionID);
         manager.endSession(session);
     }

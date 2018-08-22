@@ -2,7 +2,7 @@ package com.mparticle.internal.networking;
 
 import android.location.Location;
 
-import com.mparticle.internal.Session;
+import com.mparticle.internal.InternalSession;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -12,7 +12,7 @@ import java.util.Map;
 
 public class BaseMPMessageBuilder {
     final String mMessageType;
-    final Session mSession;
+    final InternalSession mSession;
     long mTimestamp;
     String mName;
     JSONObject mAttributes;
@@ -22,9 +22,9 @@ public class BaseMPMessageBuilder {
     Map<String, List<String>> mCustomFlags;
     long mpid;
 
-    protected BaseMPMessageBuilder(String messageType, Session session, Location location, long mpId) {
+    protected BaseMPMessageBuilder(String messageType, InternalSession session, Location location, long mpId) {
         mMessageType = messageType;
-        mSession = new Session(session);
+        mSession = new InternalSession(session);
         mLocation = location;
         mpid = mpId;
     }

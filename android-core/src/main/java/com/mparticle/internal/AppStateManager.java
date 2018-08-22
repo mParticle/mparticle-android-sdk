@@ -26,16 +26,14 @@ import java.util.concurrent.atomic.AtomicLong;
 
 
 /**
- *
- * This class is responsible for managing sessions, by detecting how many
- *
+ * This class is responsible for maintaining the session state by listening to the Activity lifecycle.
  */
- public class  AppStateManager {
+public class  AppStateManager {
 
     private ConfigManager mConfigManager;
     Context mContext;
     private final SharedPreferences mPreferences;
-    private Session mCurrentSession = new Session();
+    private InternalSession mCurrentSession = new InternalSession();
     private WeakReference<Activity> mCurrentActivityReference = null;
 
     private String mCurrentActivityName;
@@ -244,7 +242,7 @@ import java.util.concurrent.atomic.AtomicLong;
         if (!mInitialized) {
             initialize(null, null, null, null);
         }
-        Session session = getSession();
+        InternalSession session = getSession();
         session.mLastEventTime = System.currentTimeMillis();
         if (!session.isActive()) {
             newSession();
@@ -299,7 +297,7 @@ import java.util.concurrent.atomic.AtomicLong;
         delayedBackgroundCheckHandler.postDelayed( new Runnable() {
             @Override
             public void run() {
-                Session session = getSession();
+                InternalSession session = getSession();
                 if (0 != session.mSessionStartTime &&
                         isBackgrounded()
                         && session.isTimedOut(mConfigManager.getSessionTimeout())
@@ -366,7 +364,7 @@ import java.util.concurrent.atomic.AtomicLong;
         return mCurrentActivityName;
     }
 
-    public Session getSession() {
+    public InternalSession getSession() {
         return mCurrentSession;
     }
 
@@ -374,7 +372,7 @@ import java.util.concurrent.atomic.AtomicLong;
         Logger.debug("Ended session");
         mMessageManager.endSession(mCurrentSession);
         disableLocationTracking();
-        mCurrentSession = new Session();
+        mCurrentSession = new InternalSession();
         MParticle.getInstance().getKitManager().onSessionEnd();
     }
 
@@ -388,7 +386,7 @@ import java.util.concurrent.atomic.AtomicLong;
     }
 
     public void startSession() {
-        mCurrentSession = new Session().start(mContext);
+        mCurrentSession = new InternalSession().start(mContext);
         mLastStoppedTime = new AtomicLong(getTime());
         enableLocationTracking();
         MParticle.getInstance().getKitManager().onSessionStart();

@@ -19,7 +19,7 @@ import com.mparticle.internal.MPUtility;
 import com.mparticle.internal.MessageBatch;
 import com.mparticle.internal.MessageManager;
 import com.mparticle.internal.MessageManagerCallbacks;
-import com.mparticle.internal.Session;
+import com.mparticle.internal.InternalSession;
 import com.mparticle.internal.database.services.mp.BreadcrumbService;
 import com.mparticle.internal.database.services.mp.MessageService;
 import com.mparticle.internal.database.services.mp.ReportingService;
@@ -402,7 +402,7 @@ public class MParticleDBManager extends BaseDBManager {
     BaseMPMessage createMessageSessionEnd(String sessionId, long start, long end, long foregroundLength, JSONObject sessionAttributes, Location location, Set<Long> mpIds) throws JSONException{
         int eventCounter = mPreferences.getInt(Constants.PrefKeys.EVENT_COUNTER, 0);
         resetEventCounter();
-        Session session = new Session();
+        InternalSession session = new InternalSession();
         session.mSessionID = sessionId;
         session.mSessionStartTime = start;
         JSONArray spanningMpids = new JSONArray();

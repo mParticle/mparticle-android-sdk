@@ -6,7 +6,7 @@ import android.support.test.InstrumentationRegistry;
 
 import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.networking.BaseMPMessage;
-import com.mparticle.internal.Session;
+import com.mparticle.internal.InternalSession;
 
 import org.json.JSONException;
 import org.junit.Before;
@@ -26,7 +26,7 @@ public class BreadcrumbServiceTest extends BaseMPServiceTest {
 
     @Before
     public void before() throws Exception {
-        message = new BaseMPMessage.Builder("test", new Session(), new Location("New York City"), 1).build();
+        message = new BaseMPMessage.Builder("test", new InternalSession(), new Location("New York City"), 1).build();
         context = InstrumentationRegistry.getContext();
         breadCrumbLimit = ConfigManager.getBreadcrumbLimit(context);
     }

@@ -5,12 +5,16 @@ import android.content.Context;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.Locale;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
 
-public class Session {
+/**
+ * This is the internal classes used to hold session state.
+ */
+public class InternalSession {
     public int mEventCount = 0;
     public String mSessionID = Constants.NO_SESSION_ID;
     public long mSessionStartTime = 0;
@@ -19,12 +23,12 @@ public class Session {
     public JSONObject mSessionAttributes = new JSONObject();
     private Set<Long> mpids = new TreeSet<Long>();
 
-    public Session() {
+    public InternalSession() {
         super();
     }
 
 
-    public Session(Session session) {
+    public InternalSession(InternalSession session) {
         super();
         mEventCount = session.mEventCount;
         mSessionID = session.mSessionID;
@@ -42,9 +46,9 @@ public class Session {
         return mSessionStartTime > 0 && !Constants.NO_SESSION_ID.equals(mSessionID);
     }
 
-    public Session start(Context context) {
+    public InternalSession start(Context context) {
         mLastEventTime = mSessionStartTime = System.currentTimeMillis();
-        mSessionID = UUID.randomUUID().toString();
+        mSessionID = UUID.randomUUID().toString().toUpperCase(Locale.US);
         mSessionAttributes = new JSONObject();
         mEventCount = 0;
         mTimeInBackground = 0;
