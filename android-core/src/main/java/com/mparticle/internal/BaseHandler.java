@@ -23,6 +23,10 @@ public class BaseHandler extends Handler {
         while (handling) {}
     }
 
+    public boolean isDisabled() {
+        return disabled;
+    }
+
     void await(CountDownLatch latch) {
         this.sendMessage(obtainMessage(-1, latch));
     }

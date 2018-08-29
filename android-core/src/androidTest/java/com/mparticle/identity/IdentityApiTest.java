@@ -3,9 +3,11 @@ package com.mparticle.identity;
 import android.os.Handler;
 import android.util.MutableBoolean;
 
+import com.github.tomakehurst.wiremock.http.Request;
 import com.mparticle.MParticle;
 import com.mparticle.MParticleTask;
 import com.mparticle.internal.ConfigManager;
+import com.mparticle.testutils.AndroidUtils;
 import com.mparticle.testutils.BaseCleanStartedEachTest;
 import com.mparticle.testutils.RandomUtils;
 import com.mparticle.testutils.Server;
@@ -359,7 +361,8 @@ public final class IdentityApiTest extends BaseCleanStartedEachTest {
         //the modify request will be passed to a background thread before it is executed
         MParticle.getInstance().getConfigManager().setMpid(mpid2);
 
-
+        final CountDownLatch latch = new MPLatch(1);
+        final AndroidUtils.Mutable<Boolean> received = new AndroidUtils.Mutable<Boolean>(false);
         mServer.waitForVerify(urlPathMatching(String.format("/v([0-9]*)/%s/modify", mStartingMpid)), new Server.JSONMatch() {
             @Override
             public boolean isMatch(JSONObject jsonObject) {
@@ -372,7 +375,15 @@ public final class IdentityApiTest extends BaseCleanStartedEachTest {
                 }
                 return false;
             }
+        }, new Server.RequestReceivedCallback() {
+            @Override
+            public void onRequestReceived(Request request) {
+                latch.countDown();
+                received.value = true;
+            }
         });
+        latch.await();
+        assertTrue(received.value);
     }
 
     @Test

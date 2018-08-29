@@ -4,11 +4,10 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 import com.mparticle.AccessUtils;
-import com.mparticle.testutils.BaseCleanInstallEachTest;
 import com.mparticle.MParticle;
 import com.mparticle.internal.database.tables.mp.SessionTable;
 import com.mparticle.internal.networking.BaseMPMessage;
-import com.mparticle.testutils.mock.MockContext;
+import com.mparticle.testutils.BaseCleanInstallEachTest;
 
 import junit.framework.Assert;
 
@@ -85,7 +84,7 @@ public class MessageManagerTests extends BaseCleanInstallEachTest {
     public void testDuplicateSessionEnds() throws Exception {
         startMParticle();
         InternalSession session = new InternalSession();
-        session.start(new MockContext());
+        session.start(mContext);
         getMessageManager().startSession(session);
         com.mparticle.internal.AccessUtils.awaitMessageHandler();
         BaseMPMessage message = getMessageManager().getMParticleDBManager().getSessionForSessionEndMessage(session.mSessionID, null, session.getMpids());

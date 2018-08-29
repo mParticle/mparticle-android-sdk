@@ -298,6 +298,9 @@ public class IdentityApi {
             @Override
             public void run() {
                 synchronized (lock) {
+                    if (mBackgroundHandler.isDisabled()) {
+                        return;
+                    }
                     try {
                         long startingMpid = mConfigManager.getMpid();
                         final IdentityHttpResponse result = networkRequest.request(identityApiRequest);

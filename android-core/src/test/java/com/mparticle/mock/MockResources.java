@@ -1,11 +1,22 @@
 package com.mparticle.mock;
 
+import android.content.Context;
+import android.content.res.AssetManager;
+import android.content.res.Configuration;
+import android.content.res.Resources;
+import android.util.DisplayMetrics;
+
 /**
  * Created by sdozor on 3/23/15.
  */
-public class MockResources extends android.test.mock.MockResources {
+public class MockResources extends Resources {
     public static String TEST_APP_KEY = "the app key";
     public static String TEST_APP_SECRET = "the app secret";
+
+
+    public MockResources() {
+        super(null, null, null);
+    }
 
     @Override
     public int getIdentifier(String name, String defType, String defPackage) {

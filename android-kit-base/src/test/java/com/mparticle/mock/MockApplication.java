@@ -1,5 +1,6 @@
 package com.mparticle.mock;
 
+import android.app.Application;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
@@ -9,9 +10,9 @@ import android.content.res.Resources;
 /**
  * Created by sdozor on 4/10/15.
  */
-public class MockApplication extends android.test.mock.MockApplication {
+public class MockApplication extends Application {
     MockContext mContext;
-    public ActivityLifecycleCallbacks mCallbacks;
+    public Application.ActivityLifecycleCallbacks mCallbacks;
 
     public MockApplication(MockContext context) {
         super();

@@ -23,7 +23,7 @@ public class CommerceApiTest {
     @BeforeClass
     public static void setupAll() {
         mockMp = Mockito.mock(MParticle.class);
-        cart = new Cart(new MockContext(), 2);
+        cart = new Cart(new MockContext(), 2L);
         mockCurrentUser = Mockito.mock(MParticleUser.class);
         mockIdentity = Mockito.mock(IdentityApi.class);
         Mockito.when(mockCurrentUser.getCart()).thenReturn(cart);

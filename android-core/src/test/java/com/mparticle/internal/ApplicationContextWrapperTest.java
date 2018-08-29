@@ -10,17 +10,7 @@ import android.os.Bundle;
 import com.mparticle.MParticle;
 import com.mparticle.MockMParticle;
 import com.mparticle.internal.ApplicationContextWrapper.ActivityLifecycleCallbackRecorder;
-import com.mparticle.mock.MockApplication;
-import com.mparticle.mock.MockContext;
 import com.mparticle.internal.ApplicationContextWrapper.LifeCycleEvent;
-
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.mock;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -29,6 +19,10 @@ import org.mockito.Mockito;
 import java.lang.ref.WeakReference;
 import java.util.LinkedList;
 import java.util.List;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
 
 /**
  * Created by wpassidomo on 2/21/17.

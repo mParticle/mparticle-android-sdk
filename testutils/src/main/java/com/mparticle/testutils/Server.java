@@ -15,6 +15,7 @@ import com.github.tomakehurst.wiremock.stubbing.ServeEvent;
 import com.github.tomakehurst.wiremock.stubbing.StubMapping;
 import com.github.tomakehurst.wiremock.verification.LoggedRequest;
 import com.mparticle.MParticle;
+import com.mparticle.internal.MPUtility;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -63,6 +64,12 @@ public class Server {
                         requestListener.requestReceived(request, response);
                     }
                 }
+            }
+        });
+        mWireMockServer.addMockServiceRequestListener(new RequestListener() {
+            @Override
+            public void requestReceived(Request request, Response response) {
+                request.getUrl();
             }
         });
         reset();
@@ -301,6 +308,7 @@ public class Server {
             if (callback != null) {
                 callback.onRequestReceived(request);
             }
+            latch.countDown();
             return;
         }
         latch.await();
