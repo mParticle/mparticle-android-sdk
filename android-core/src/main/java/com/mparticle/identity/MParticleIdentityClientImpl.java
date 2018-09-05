@@ -178,7 +178,8 @@ import java.util.UUID;
         JSONArray changesJson = new JSONArray();
         Map<MParticle.IdentityType, String> newIdentities = request.getUserIdentities();
         Map<MParticle.IdentityType, String> oldIdentities = request.getOldIdentities();
-        if (oldIdentities == null) {
+
+        if (oldIdentities.size() == 0) {
             oldIdentities = mConfigManager.getUserIdentities(request.mpid);
         }
 

@@ -598,7 +598,7 @@ public class KitConfiguration {
         return true;
     }
 
-    public final boolean shouldSetIdentity(MParticle.IdentityType identityType) {
+    boolean shouldSetIdentity(MParticle.IdentityType identityType) {
         SparseBooleanArray userIdentityFilters = getUserIdentityFilters();
         return  userIdentityFilters == null ||
                 userIdentityFilters.size() == 0 ||

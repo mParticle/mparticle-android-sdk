@@ -1,12 +1,7 @@
 package com.mparticle.identity;
 
 import com.mparticle.MParticle;
-import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.Logger;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -27,7 +22,7 @@ public final class IdentityApiRequest {
     private UserAliasHandler userAliasHandler = null;
     private Map<MParticle.IdentityType, String> userIdentities = new HashMap<MParticle.IdentityType, String>();
     // for /modify requests
-    private Map<MParticle.IdentityType, String> oldUserIdentities;
+    private Map<MParticle.IdentityType, String> oldUserIdentities = new HashMap<MParticle.IdentityType, String>();
     private Map<String, String> otherOldIdentities = new HashMap<String, String>();
     private Map<String, String> otherNewIdentities = new HashMap<String, String>();
     Long mpid;
@@ -42,6 +37,9 @@ public final class IdentityApiRequest {
         if (builder.otherOldIdentities.size() == builder.otherNewIdentities.size()) {
             this.otherNewIdentities = builder.otherNewIdentities;
             this.otherOldIdentities = builder.otherOldIdentities;
+        }
+        if (builder.mpid != null) {
+            this.mpid = builder.mpid;
         }
     }
 
