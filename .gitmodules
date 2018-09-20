@@ -73,3 +73,6 @@
 [submodule "kits/instabot-kit"]
     path = kits/instabot-kit
     url = git@github.com:mparticle-integrations/mparticle-android-integration-instabot.git
+[submodule "kits/appsee-kit"]
+	path = kits/appsee-kit
+	url = git@github.com:mparticle-integrations/mparticle-android-integration-appsee.git

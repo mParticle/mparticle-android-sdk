@@ -1393,7 +1393,6 @@ public class MParticle {
         int WOOTRIC = 90;
         int APPSFLYER = 92;
         int APPTENTIVE = 97;
-        int CARNIVAL = 99;
         int APPTIMIZE = 105;
         int BUTTON = 1022;
         int LEANPLUM = 98;
@@ -1404,6 +1403,7 @@ public class MParticle {
         int SINGULAR = 119;
         int ADOBE = 124;
         int INSTABOT = 123;
+        int APPSEE = 126;
         String BROADCAST_ACTIVE = "MPARTICLE_SERVICE_PROVIDER_ACTIVE_";
         String BROADCAST_DISABLED = "MPARTICLE_SERVICE_PROVIDER_DISABLED_";
     }
