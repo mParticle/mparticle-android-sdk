@@ -3,6 +3,7 @@ package com.mparticle.identity;
 import android.content.Context;
 
 import com.mparticle.MParticle;
+import com.mparticle.internal.KitManager;
 import com.mparticle.networking.BaseNetworkConnection;
 import com.mparticle.networking.MParticleBaseClientImpl;
 
@@ -62,5 +63,9 @@ public class AccessUtils {
 
     public static String getIdentityTypeString(MParticle.IdentityType identityType) {
         return MParticleIdentityClientImpl.getStringValue(identityType);
+    }
+
+    public static void setKitManager(KitManager kitManager) {
+        MParticle.getInstance().Identity().mKitManager = kitManager;
     }
 }

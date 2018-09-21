@@ -101,7 +101,7 @@ import java.util.UUID;
         Logger.verbose("Identity modify request: \n" + jsonObject.toString());
         JSONArray identityChanges = jsonObject.optJSONArray("identity_changes");
         if (identityChanges != null && identityChanges.length() == 0) {
-            return new IdentityHttpResponse(200, mConfigManager.getMpid(), "", null);
+            return new IdentityHttpResponse(200, request.mpid, "", null);
         }
         HttpURLConnection connection = getPostConnection(request.mpid, MODIFY_PATH, jsonObject.toString());
         connection = makeUrlRequest(Endpoint.IDENTITY, connection, jsonObject.toString(), false);

@@ -80,7 +80,7 @@ public class IdentityApi {
      */
     @Nullable
     public MParticleUser getUser(Long mpid) {
-            if (mConfigManager.mpidExists(mpid)) {
+            if (!Constants.TEMPORARY_MPID.equals(mpid) && mConfigManager.mpidExists(mpid)) {
                 return MParticleUserImpl.getInstance(mContext, mpid, mUserDelegate);
             } else {
             return null;
@@ -90,7 +90,7 @@ public class IdentityApi {
     public List<MParticleUser> getUsers() {
         List<MParticleUser> users = new ArrayList<MParticleUser>();
         Set<Long> mpids = mConfigManager.getMpids();
-        mpids.remove(0L);
+        mpids.remove(Constants.TEMPORARY_MPID);
         for (Long mpid: mpids) {
             users.add(MParticleUserImpl.getInstance(mContext, mpid, mUserDelegate));
         }
@@ -228,12 +228,6 @@ public class IdentityApi {
         boolean devMode = MPUtility.isDevEnv() || MPUtility.isAppDebuggable(mContext);
         final BaseIdentityTask task = new BaseIdentityTask();
 
-        if (updateRequest.mpid != null) {
-            updateRequest.setOldUserIdentities(mConfigManager.getUserIdentities(updateRequest.mpid));
-        } else {
-            updateRequest.setOldUserIdentities(mConfigManager.getUserIdentities(mConfigManager.getMpid()));
-        }
-
         if (updateRequest == null) {
             String message = "modify() requires a valid IdentityApiRequest";
             if (devMode) {
@@ -242,30 +236,44 @@ public class IdentityApi {
                 Logger.error(message);
             }
             task.setFailed(new IdentityHttpResponse(IdentityApi.UNKNOWN_ERROR, message));
-        } else {
-            mBackgroundHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        final IdentityHttpResponse result = getApiClient().modify(updateRequest);
-                        if (!result.isSuccessful()) {
-                            task.setFailed(result);
-                        } else {
-                            task.setSuccessful(new IdentityApiResult(getCurrentUser()));
-                            MParticleUserDelegate.setUserIdentities(mUserDelegate, updateRequest.getUserIdentities(), mConfigManager.getMpid());
-                            new Handler(Looper.getMainLooper()).post(new Runnable() {
-                                @Override
-                                public void run() {
-                                    mKitManager.onModifyCompleted(getCurrentUser(), updateRequest);
-                                }
-                            });
-                        }
-                    } catch (Exception ex) {
-                        task.setFailed(new IdentityHttpResponse(IdentityApi.UNKNOWN_ERROR, ex.toString()));
-                    }
-                }
-            });
+            return task;
         }
+        if (updateRequest.mpid == null) {
+            updateRequest.mpid = mConfigManager.getMpid();
+        }
+        if (Constants.TEMPORARY_MPID.equals(updateRequest.mpid)) {
+            String message = "modify() requires a non-zero MPID, please make sure a MParticleUser is present before making a modify request";
+            if (devMode) {
+                throw new IllegalArgumentException(message);
+            } else {
+                Logger.error(message);
+            }
+            task.setFailed(new IdentityHttpResponse(IdentityApi.UNKNOWN_ERROR, message));
+            return task;
+        }
+        updateRequest.setOldUserIdentities(mConfigManager.getUserIdentities(updateRequest.mpid));
+        mBackgroundHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    final IdentityHttpResponse result = getApiClient().modify(updateRequest);
+                    if (!result.isSuccessful()) {
+                        task.setFailed(result);
+                    } else {
+                        task.setSuccessful(new IdentityApiResult(getUser(updateRequest.mpid)));
+                        MParticleUserDelegate.setUserIdentities(mUserDelegate, updateRequest.getUserIdentities(), updateRequest.mpid);
+                        new Handler(Looper.getMainLooper()).post(new Runnable() {
+                            @Override
+                            public void run() {
+                                mKitManager.onModifyCompleted(getUser(updateRequest.mpid), updateRequest);
+                            }
+                        });
+                    }
+                } catch (Exception ex) {
+                    task.setFailed(new IdentityHttpResponse(IdentityApi.UNKNOWN_ERROR, ex.toString()));
+                }
+            }
+        });
         return task;
     }
 

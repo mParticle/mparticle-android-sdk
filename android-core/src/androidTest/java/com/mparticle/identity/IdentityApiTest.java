@@ -29,6 +29,7 @@ import com.mparticle.testutils.MPLatch;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
+import static junit.framework.Assert.assertNotSame;
 import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertTrue;
 import static junit.framework.Assert.fail;
@@ -411,6 +412,23 @@ public final class IdentityApiTest extends BaseCleanStartedEachTest {
         //test that they are the correct users
         for (MParticleUser mParticleUser: MParticle.getInstance().Identity().getUsers()) {
             assertTrue(mpids.contains(mParticleUser.getId()));
+        }
+    }
+
+    /**
+     * make sure that there is no way for an MParticleUser with MPID == 0 to be returned from the
+     * IdentityAPI
+     */
+    @Test
+    public void testNoZeroMpidUser() {
+        assertNull(MParticle.getInstance().Identity().getUser(0L));
+        for (MParticleUser user: MParticle.getInstance().Identity().getUsers()) {
+            assertNotSame(0, user.getId());
+        }
+        MParticle.getInstance().getConfigManager().setMpid(0L);
+        assertNull(MParticle.getInstance().Identity().getUser(0L));
+        for (MParticleUser user: MParticle.getInstance().Identity().getUsers()) {
+            assertNotSame(0, user.getId());
         }
     }
 }

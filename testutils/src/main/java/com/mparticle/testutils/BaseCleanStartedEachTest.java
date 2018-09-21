@@ -25,7 +25,7 @@ import com.mparticle.testutils.MPLatch;
  * That being said, there is no need to call MParticle.start() in your before or beforeClass methods,
  * or in your tests.
  *
- * If you want to test the behavior that occures during initialization, you should either invoke
+ * If you want to test the behavior that occurs during initialization, you should either invoke
  * MParticle.setInstance(null), or use BaseCleanInstallEachTest as your base class
  */
 public class BaseCleanStartedEachTest extends BaseAbstractTest {
@@ -37,7 +37,6 @@ public class BaseCleanStartedEachTest extends BaseAbstractTest {
             MParticle.reset(mContext);
         }
         mStartingMpid = new Random().nextLong();
-        new ConfigManager(mContext, null, null, null).setMpid(mStartingMpid);
         mServer.setupHappyIdentify(mStartingMpid);
         MParticle.setInstance(null);
         MParticleOptions.Builder builder = MParticleOptions

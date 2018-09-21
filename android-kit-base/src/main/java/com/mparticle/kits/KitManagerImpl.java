@@ -1046,8 +1046,12 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
         //due to consent forwarding rules we need to re-verify kits whenever the user changes
         updateKits(mConfigManager.getLatestKitConfiguration());
         for (KitIntegration provider : providers.values()) {
-            if (provider instanceof KitIntegration.IdentityListener && !provider.isDisabled()) {
-                ((KitIntegration.IdentityListener) provider).onUserIdentified(FilteredMParticleUser.getInstance(mParticleUser, provider));
+            try {
+                if (provider instanceof KitIntegration.IdentityListener && !provider.isDisabled()) {
+                    ((KitIntegration.IdentityListener) provider).onUserIdentified(FilteredMParticleUser.getInstance(mParticleUser, provider));
+                }
+            } catch (Exception e) {
+                Logger.warning("Failed to call onUserIdentified for kit: " + provider.getName() + ": " + e.getMessage());
             }
         }
         mParticleUser.getUserAttributes(this);
@@ -1056,8 +1060,12 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
     @Override
     public void onIdentifyCompleted(MParticleUser mParticleUser, IdentityApiRequest identityApiRequest) {
         for (KitIntegration provider : providers.values()) {
-            if (provider instanceof KitIntegration.IdentityListener && !provider.isDisabled()) {
-                ((KitIntegration.IdentityListener) provider).onIdentifyCompleted(FilteredMParticleUser.getInstance(mParticleUser, provider), new FilteredIdentityApiRequest(identityApiRequest, provider));
+            try {
+                if (provider instanceof KitIntegration.IdentityListener && !provider.isDisabled()) {
+                    ((KitIntegration.IdentityListener) provider).onIdentifyCompleted(FilteredMParticleUser.getInstance(mParticleUser, provider), new FilteredIdentityApiRequest(identityApiRequest, provider));
+                }
+            } catch (Exception e) {
+                Logger.warning("Failed to call onIdentifyCompleted for kit: " + provider.getName() + ": " + e.getMessage());
             }
         }
     }
@@ -1065,8 +1073,12 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
     @Override
     public void onLoginCompleted(MParticleUser mParticleUser, IdentityApiRequest identityApiRequest) {
         for (KitIntegration provider : providers.values()) {
-            if (provider instanceof KitIntegration.IdentityListener && !provider.isDisabled()) {
-                ((KitIntegration.IdentityListener) provider).onLoginCompleted(FilteredMParticleUser.getInstance(mParticleUser, provider), new FilteredIdentityApiRequest(identityApiRequest, provider));
+            try {
+                if (provider instanceof KitIntegration.IdentityListener && !provider.isDisabled()) {
+                    ((KitIntegration.IdentityListener) provider).onLoginCompleted(FilteredMParticleUser.getInstance(mParticleUser, provider), new FilteredIdentityApiRequest(identityApiRequest, provider));
+                }
+            } catch (Exception e) {
+                Logger.warning("Failed to call onLoginCompleted for kit: " + provider.getName() + ": " + e.getMessage());
             }
         }
     }
@@ -1074,8 +1086,12 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
     @Override
     public void onLogoutCompleted(MParticleUser mParticleUser, IdentityApiRequest identityApiRequest) {
         for (KitIntegration provider : providers.values()) {
-            if (provider instanceof KitIntegration.IdentityListener && !provider.isDisabled()) {
-                ((KitIntegration.IdentityListener) provider).onLogoutCompleted(FilteredMParticleUser.getInstance(mParticleUser, provider), new FilteredIdentityApiRequest(identityApiRequest, provider));
+            try {
+                if (provider instanceof KitIntegration.IdentityListener && !provider.isDisabled()) {
+                    ((KitIntegration.IdentityListener) provider).onLogoutCompleted(FilteredMParticleUser.getInstance(mParticleUser, provider), new FilteredIdentityApiRequest(identityApiRequest, provider));
+                }
+            } catch (Exception e) {
+                Logger.warning("Failed to call onLogoutCompleted for kit: " + provider.getName() + ": " + e.getMessage());
             }
         }
     }
@@ -1083,8 +1099,12 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
     @Override
     public void onModifyCompleted(MParticleUser mParticleUser, IdentityApiRequest identityApiRequest) {
         for (KitIntegration provider : providers.values()) {
-            if (provider instanceof KitIntegration.IdentityListener && !provider.isDisabled()) {
-                ((KitIntegration.IdentityListener) provider).onModifyCompleted(FilteredMParticleUser.getInstance(mParticleUser, provider), new FilteredIdentityApiRequest(identityApiRequest, provider));
+            try {
+                if (provider instanceof KitIntegration.IdentityListener && !provider.isDisabled()) {
+                    ((KitIntegration.IdentityListener) provider).onModifyCompleted(FilteredMParticleUser.getInstance(mParticleUser, provider), new FilteredIdentityApiRequest(identityApiRequest, provider));
+                }
+            } catch (Exception e) {
+                Logger.warning("Failed to call onModifyCompleted for kit: " + provider.getName() + ": " + e.getMessage());
             }
         }
     }
@@ -1098,7 +1118,11 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
             public void run() {
                 for (KitIntegration provider : providers.values()) {
                     if (provider instanceof KitIntegration.UserAttributeListener && !provider.isDisabled()) {
-                        ((KitIntegration.UserAttributeListener) provider).onConsentStateUpdated(oldState, newState, FilteredMParticleUser.getInstance(mpid, provider));
+                        try {
+                            ((KitIntegration.UserAttributeListener) provider).onConsentStateUpdated(oldState, newState, FilteredMParticleUser.getInstance(mpid, provider));
+                        } catch (Exception e) {
+                            Logger.warning("Failed to call onConsentStateUpdated for kit: " + provider.getName() + ": " + e.getMessage());
+                        }
                     }
                 }
             }

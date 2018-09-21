@@ -280,10 +280,10 @@ public class Server {
         requestListeners.add(new RequestListener() {
             @Override
             public void requestReceived(final Request request, Response response) {
+                final LoggedRequest loggedRequest = LoggedRequest.createFrom(request);
                 handler.post(new Runnable() {
                     @Override
                     public void run() {
-                        LoggedRequest loggedRequest = LoggedRequest.createFrom(request);
                         if (isMatch(loggedRequest, pattern, jsonMatch)) {
                             if (loggedRequest != null) {
                                 latch.countDown();
