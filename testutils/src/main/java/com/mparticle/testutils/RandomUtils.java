@@ -12,8 +12,9 @@ import java.util.TreeSet;
  * Utilities for generating tests with Randomness
  */
 public class RandomUtils {
-    private static final String sAlpha = "abcdefghijklmnopqrstuvwxyzABC ,.";
+    private static final String sAlpha = "abcdefghijklmnopqrstuvwxyzABC";
     private static final String sNumbers = "0123456789";
+    private static final String sCharacters = " ,.";
 
     public Map<MParticle.IdentityType, String> getRandomUserIdentities() {
         Map<MParticle.IdentityType, String> randomIdentities = new HashMap<MParticle.IdentityType, String>();
@@ -48,8 +49,16 @@ public class RandomUtils {
         return attributes;
     }
 
+    public String getAlphaString(int length) {
+        return getRandomString(length, sAlpha);
+    }
+
     public String getAlphaNumericString(int length) {
-        String characters = getAlphNumeric();
+        return getRandomString(length, sAlpha + sNumbers + sCharacters);
+
+    }
+
+    private String getRandomString(int length, String characters) {
         StringBuilder builder = new StringBuilder();
         for (int i = 0; i < length; i++){
             builder.append(characters.charAt(randomInt(0, characters.length() - 1)));
@@ -81,10 +90,6 @@ public class RandomUtils {
             }
         }
         return set;
-    }
-
-    private String getAlphNumeric() {
-        return sAlpha + sNumbers;
     }
 
     public long randomLong(long from, long to) {

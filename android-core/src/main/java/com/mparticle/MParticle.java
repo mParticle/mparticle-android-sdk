@@ -101,7 +101,6 @@ public class MParticle {
         configManager.setUploadInterval(options.getUploadInterval());
         configManager.setSessionTimeout(options.getSessionTimeout());
         configManager.setIdentityConnectionTimeout(options.getConnectionTimeout());
-        configManager.setNetworkOptions(options.getNetworkOptions());
         AppStateManager appStateManager = new AppStateManager(options.getContext());
         appStateManager.setConfigManager(configManager);
         
@@ -117,6 +116,7 @@ public class MParticle {
         }
         mCommerce = new CommerceApi(options.getContext());
         mMessageManager = new MessageManager(options.getContext(), configManager, options.getInstallType(), appStateManager, sDevicePerformanceMetricsDisabled, mDatabaseManager);
+        mInternal.mConfigManager.setNetworkOptions(options.getNetworkOptions());
         mPreferences = options.getContext().getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
     }
 
@@ -187,20 +187,6 @@ public class MParticle {
                         PushRegistrationHelper.PushRegistration pushRegistration = options.getPushRegistration();
                         instance.logPushRegistration(pushRegistration.instanceId, pushRegistration.senderId);
                     }
-                    InstallReferrerHelper.fetchInstallReferrer(context, new InstallReferrerHelper.InstallReferrerCallback() {
-                        @Override
-                        public void onReceived(String installReferrer) {
-                            if (MParticle.getInstance() != null) {
-                                InstallReferrerHelper.setInstallReferrer(MParticle.getInstance().mAppContext, installReferrer);
-                            }
-                        }
-
-                        @Override
-                        public void onFailed() {
-                            //do nothing, it very may well be the case that the InstallReferrer API
-                            //is not available, and the user will have to rely upon the ReferrerReceiver
-                        }
-                    });
                 }
             }
         }
@@ -1119,7 +1105,6 @@ public class MParticle {
                         || sharedPreferenceName.startsWith(ConfigManager.PREFERENCES_FILE + ":")
                         || prefFiles.contains(sharedPreferenceName)) {
                     SharedPreferences sharedPreferences = context.getSharedPreferences(sharedPreferenceName, Context.MODE_PRIVATE);
-                    sharedPreferences.edit().commit();
                     if (sharedPreferences != null) {
                         sharedPreferences.edit()
                                 .clear()

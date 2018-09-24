@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 
 import com.mparticle.AccessUtils;
 import com.mparticle.MParticle;
+import com.mparticle.MParticleOptions;
 import com.mparticle.internal.database.tables.mp.SessionTable;
 import com.mparticle.internal.networking.BaseMPMessage;
 import com.mparticle.testutils.BaseCleanInstallEachTest;
@@ -133,6 +134,19 @@ public class MessageManagerTests extends BaseCleanInstallEachTest {
 
         assertFalse(getMessageManager().isFirstRunForMessage());
         assertTrue(getMessageManager().isFirstRunForAST());
+
+    }
+
+    @Test
+    public void testDelayedStartInvoked() throws InterruptedException {
+        MParticleOptions options = MParticleOptions.builder(mContext).credentials("key", "secret").build();
+        MParticle.start(options);
+        MessageManager messageManager = AccessUtils.getMessageManager();
+        assertFalse(messageManager.hasDelayedStartOccurred());
+        MessageHandler handler = com.mparticle.internal.AccessUtils.getMessageHandler();
+        handler.sendMessage(handler.obtainMessage());
+        com.mparticle.internal.AccessUtils.awaitMessageHandler();
+        assertTrue(messageManager.hasDelayedStartOccurred());
 
     }
 

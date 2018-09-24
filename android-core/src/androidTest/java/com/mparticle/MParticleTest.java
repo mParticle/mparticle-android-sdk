@@ -1,5 +1,7 @@
 package com.mparticle;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
@@ -255,7 +257,6 @@ public class MParticleTest extends BaseCleanStartedEachTest {
         TestingUtils.setStrictMode(MParticle.LogLevel.WARNING);
 
         resetRunnable.run();
-
         assertSDKGone();
 
         //restart the SDK, to the point where the initial Identity call returns, make sure there are no errors on startup
@@ -276,7 +277,7 @@ public class MParticleTest extends BaseCleanStartedEachTest {
         for (File file : files) {
             String sharedPreferenceName = file.getPath().replace(sharedPrefsDirectory, "").replace(".xml", "");
             if (!sharedPreferenceName.equals("WebViewChromiumPrefs") && !sharedPreferenceName.equals("com.mparticle.test_preferences")) {
-                fail(sharedPreferenceName + " should not exist");
+                fail("SharedPreference file failed to clear:\n" + getSharedPrefsContents(sharedPreferenceName));
             }
         }
         assertEquals(0, mContext.databaseList().length);
@@ -289,6 +290,15 @@ public class MParticleTest extends BaseCleanStartedEachTest {
             }
         } catch (JSONException e) {
             fail(e.getMessage());
+        }
+    }
+
+    private String getSharedPrefsContents(String name) {
+        try {
+            SharedPreferences prefs = mContext.getSharedPreferences(name, Context.MODE_PRIVATE);
+            return name + ":\n" + new JSONObject(prefs.getAll()).toString(4);
+        } catch (JSONException e) {
+            return "error printing SharedPrefs :/";
         }
     }
 

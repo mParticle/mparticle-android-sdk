@@ -17,6 +17,7 @@ import android.os.Message;
 import android.os.Process;
 import android.telephony.TelephonyManager;
 
+import com.mparticle.InstallReferrerHelper;
 import com.mparticle.MPEvent;
 import com.mparticle.MParticle;
 import com.mparticle.UserAttributeListener;
@@ -118,6 +119,8 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
      * Batches/messages need to communicate the current telephony status when available.
      */
     private static TelephonyManager sTelephonyManager;
+
+    private boolean delayedStartOccurred = false;
 
     /**
      * Used solely for unit testing
@@ -763,8 +766,8 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
     @Override
     public void delayedStart() {
         try {
-            if (sStatusBroadcastReceiver == null) {
-
+            if (!delayedStartOccurred) {
+                delayedStartOccurred = true;
                 //get the previous Intent otherwise the first few messages will have 0 for battery level
                 Intent batteryIntent = sContext.getApplicationContext().registerReceiver(null,
                         new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
@@ -784,6 +787,21 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
                     filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
                 }
                 sContext.registerReceiver(sStatusBroadcastReceiver, filter);
+
+                InstallReferrerHelper.fetchInstallReferrer(sContext, new InstallReferrerHelper.InstallReferrerCallback() {
+                    @Override
+                    public void onReceived(String installReferrer) {
+                        if (sContext != null) {
+                            InstallReferrerHelper.setInstallReferrer(sContext.getApplicationContext(), installReferrer);
+                        }
+                    }
+
+                    @Override
+                    public void onFailed() {
+                        //do nothing, it very may well be the case that the InstallReferrer API
+                        //is not available, and the user will have to rely upon the ReferrerReceiver
+                    }
+                });
             }
         }catch (Exception e){
             //this can sometimes fail due to wonky-device reasons.
@@ -1013,5 +1031,9 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
             this.mpid = mpid;
             this.reportingMessages = reportingMessages;
         }
+    }
+
+    boolean hasDelayedStartOccurred() {
+        return delayedStartOccurred;
     }
 }

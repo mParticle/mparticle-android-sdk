@@ -10,6 +10,7 @@ import com.mparticle.consent.ConsentState;
 import com.mparticle.identity.IdentityApi;
 import com.mparticle.internal.networking.BaseMPMessage;
 import com.mparticle.networking.NetworkOptions;
+import com.mparticle.networking.NetworkOptionsManager;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -49,6 +50,7 @@ public class ConfigManager {
 
     private static final int DEVMODE_UPLOAD_INTERVAL_MILLISECONDS = 10 * 1000;
     private Context mContext;
+    private static NetworkOptions sNetworkOptions;
 
     static SharedPreferences sPreferences;
 
@@ -961,25 +963,15 @@ public class ConfigManager {
         getUserStorage(mpid).setSerializedConsentState(serializedConsent);
     }
 
-    NetworkOptions mNetworkOptions;
     public NetworkOptions getNetworkOptions() {
-        return getNetworkOptions(false);
-    }
-
-    public synchronized NetworkOptions getNetworkOptions(boolean force) {
-        if (mNetworkOptions == null || force) {
-            String serializedOptions = sPreferences.getString(Constants.PrefKeys.NETWORK_OPTIONS, "");
-            return mNetworkOptions = NetworkOptions.withNetworkOptions(serializedOptions);
+        if (sNetworkOptions == null) {
+            sNetworkOptions = NetworkOptionsManager.validateAndResolve(null);
         }
-        return mNetworkOptions;
+        return sNetworkOptions;
     }
 
     public synchronized void setNetworkOptions(NetworkOptions networkOptions) {
-        mNetworkOptions = networkOptions;
-        String serializedOptions = "";
-        if (networkOptions != null) {
-            serializedOptions = networkOptions.toString();
-        }
-        sPreferences.edit().putString(Constants.PrefKeys.NETWORK_OPTIONS, serializedOptions).apply();
+        sNetworkOptions = networkOptions;
+        sPreferences.edit().remove(Constants.PrefKeys.NETWORK_OPTIONS).apply();
     }
 }
