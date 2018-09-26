@@ -86,7 +86,16 @@
 -keep class com.mparticle.messaging.InstanceIdService { *; }
 -keep class com.mparticle.MPEvent$* { *; }
 -keep, includedescriptorclasses class com.mparticle.MParticle { *; }
--keep class com.mparticle.MParticle$* { *; }
+-keep class com.mparticle.MParticle$EventType { *; }
+-keep class com.mparticle.MParticle$InstallType { *; }
+-keep class com.mparticle.MParticle$IdentityType { *; }
+-keep class com.mparticle.MParticle$Environment { *; }
+-keep class com.mparticle.MParticle$LogLevel { *; }
+-keep class com.mparticle.MParticle$Builder { *; }
+-keep class com.mparticle.MParticle$ServiceProviders { *; }
+-keep class com.mparticle.MParticle$UserAttributes { *; }
+-keep class com.mparticle.MParticle$ResetListener { *; }
+
 -keep class com.mparticle.BuildConfig { *; }
 -keep class com.mparticle.MPReceiver { *; }
 -keep class com.mparticle.MPService { *; }
@@ -102,7 +111,7 @@
 -keep class com.mparticle.internal.ApplicationContextWrapper { *; }
 -keep class com.mparticle.internal.KitManager { *; }
 -keep class com.mparticle.internal.KitFrameworkWrapper { *; }
--keep class com.mparticle.internal.ConfigManager { *; }
+-keep class com.mparticle.internal.KitFrameworkWrapper$CoreCallbacks { *; }
 -keep class com.mparticle.internal.ReportingManager { *; }
 -keep class com.mparticle.internal.JsonReportingMessage { *; }
 -keep class com.mparticle.internal.MPUtility { *; }

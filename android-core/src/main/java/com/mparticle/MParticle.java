@@ -65,11 +65,6 @@ import java.util.Set;
  *
  */
 public class MParticle {
-    /**
-     * The ConfigManager is tasked with incorporating server-based, run-time, and XML configuration,
-     * and surfacing the result/winner.
-     */
-    protected ConfigManager mConfigManager;
 
     /**
      * Used to delegate messages, events, user actions, etc on to embedded kits.
@@ -96,6 +91,7 @@ public class MParticle {
     static volatile boolean sAndroidIdDisabled;
     static volatile boolean sDevicePerformanceMetricsDisabled;
     protected boolean locationTrackingEnabled = false;
+    protected Internal mInternal;
 
 
     protected MParticle() { }
@@ -111,7 +107,7 @@ public class MParticle {
         
         
         mAppContext = options.getContext();
-        mConfigManager = configManager;
+        mInternal = new Internal(configManager);
         mAppStateManager = appStateManager;
         mDatabaseManager = new MParticleDBManager(mAppContext);
         if (options.isUncaughtExceptionLoggingEnabled()) {
@@ -156,8 +152,8 @@ public class MParticle {
                     }
 
                     instance = new MParticle(options);
-                    instance.mKitManager = new KitFrameworkWrapper(options.getContext(), instance.mMessageManager, instance.getConfigManager(), instance.getAppStateManager(), instance.mMessageManager.getTaskHandler());
-                    instance.mIdentityApi = new IdentityApi(options.getContext(), instance.mAppStateManager, instance.mMessageManager, instance.mConfigManager, instance.mKitManager);
+                    instance.mKitManager = new KitFrameworkWrapper(options.getContext(), instance.mMessageManager, instance.Internal().getConfigManager(), instance.getAppStateManager(), instance.mMessageManager.getTaskHandler());
+                    instance.mIdentityApi = new IdentityApi(options.getContext(), instance.mAppStateManager, instance.mMessageManager, instance.Internal().mConfigManager, instance.mKitManager);
                     instance.mMessageManager.refreshConfiguration();
                     instance.identify(options);
                     if (options.hasLocationTracking()) {
@@ -169,7 +165,7 @@ public class MParticle {
                         }
                     }
 
-                    if (instance.getConfigManager().getLogUnhandledExceptions()) {
+                    if (instance.Internal().getConfigManager().getLogUnhandledExceptions()) {
                         instance.enableUncaughtExceptionLogging();
                     }
 
@@ -213,10 +209,6 @@ public class MParticle {
 
     public KitFrameworkWrapper getKitManager() {
         return mKitManager;
-    }
-
-    public ConfigManager getConfigManager() {
-        return mConfigManager;
     }
 
     public AppStateManager getAppStateManager() {
@@ -277,7 +269,7 @@ public class MParticle {
      * Explicitly terminate the current user's session.
      */
     private void endSession() {
-        if (mConfigManager.isEnabled()) {
+        if (mInternal.getConfigManager().isEnabled()) {
             mAppStateManager.getSession().mLastEventTime = System.currentTimeMillis();
             mAppStateManager.endSession();
         }
@@ -289,7 +281,7 @@ public class MParticle {
      */
     public Session getCurrentSession() {
         InternalSession session = mAppStateManager.getSession();
-        if (session == null || !session.isActive() || session.isTimedOut(mConfigManager.getSessionTimeout())) {
+        if (session == null || !session.isActive() || session.isTimedOut(mInternal.getConfigManager().getSessionTimeout())) {
             return null;
         } else {
             return new Session(session.mSessionID);
@@ -330,7 +322,7 @@ public class MParticle {
      * @param event the event object to log
      */
     public void logEvent(MPEvent event) {
-        if (mConfigManager.isEnabled() && checkEventLimit()) {
+        if (mInternal.getConfigManager().isEnabled() && checkEventLimit()) {
             mAppStateManager.ensureActiveSession();
             mMessageManager.logEvent(event, mAppStateManager.getCurrentActivityName());
             Logger.debug("Logged event - \n", event.toString());
@@ -347,7 +339,7 @@ public class MParticle {
      * @see CommerceEvent
      */
     public void logEvent(CommerceEvent event) {
-        if (mConfigManager.isEnabled() && checkEventLimit()) {
+        if (mInternal.getConfigManager().isEnabled() && checkEventLimit()) {
             MParticleUser user = MParticle.getInstance().Identity().getCurrentUser();
             if (user != null) {
                 Cart cart = user.getCart();
@@ -435,7 +427,7 @@ public class MParticle {
         }
         if (checkEventLimit()) {
             mAppStateManager.ensureActiveSession();
-            if (mConfigManager.isEnabled()) {
+            if (mInternal.getConfigManager().isEnabled()) {
                 mMessageManager.logScreen(screenEvent, screenEvent.getNavigationDirection());
 
                 if (null == screenEvent.getInfo()) {
@@ -456,7 +448,7 @@ public class MParticle {
      * @param breadcrumb
      */
     public void leaveBreadcrumb(String breadcrumb) {
-        if (mConfigManager.isEnabled()) {
+        if (mInternal.getConfigManager().isEnabled()) {
             if (MPUtility.isEmpty(breadcrumb)) {
                 Logger.error( "breadcrumb is required for leaveBreadcrumb");
                 return;
@@ -488,7 +480,7 @@ public class MParticle {
      * @param errorAttributes a Map of data attributes to associate with this error
      */
     public void logError(String message, Map<String, String> errorAttributes) {
-        if (mConfigManager.isEnabled()) {
+        if (mInternal.getConfigManager().isEnabled()) {
             if (MPUtility.isEmpty(message)) {
                 Logger.error( "message is required for logErrorEvent");
                 return;
@@ -506,7 +498,7 @@ public class MParticle {
     }
 
     public void logNetworkPerformance(String url, long startTime, String method, long length, long bytesSent, long bytesReceived, String requestString, int responseCode) {
-        if (mConfigManager.isEnabled()) {
+        if (mInternal.getConfigManager().isEnabled()) {
             mAppStateManager.ensureActiveSession();
             if (checkEventLimit()) {
                 mMessageManager.logNetworkPerformanceEvent(startTime, method, url, length, bytesSent, bytesReceived, requestString);
@@ -568,7 +560,7 @@ public class MParticle {
      * @param message   the name of the error event to be tracked
      */
     public void logException(Exception exception, Map<String, String> eventData, String message) {
-        if (mConfigManager.isEnabled()) {
+        if (mInternal.getConfigManager().isEnabled()) {
             mAppStateManager.ensureActiveSession();
             if (checkEventLimit()) {
                 JSONObject eventDataJSON = MPUtility.enforceAttributeConstraints(eventData);
@@ -594,7 +586,7 @@ public class MParticle {
      */
     @SuppressLint("MissingPermission")
     public void enableLocationTracking(String provider, long minTime, long minDistance) {
-        if (mConfigManager.isEnabled()) {
+        if (mInternal.getConfigManager().isEnabled()) {
             try {
                 LocationManager locationManager = (LocationManager) mAppContext.getSystemService(Context.LOCATION_SERVICE);
                 if (!locationManager.isProviderEnabled(provider)) {
@@ -692,7 +684,7 @@ public class MParticle {
         if (value != null){
             value = value.toString();
         }
-        if (mConfigManager.isEnabled()) {
+        if (mInternal.getConfigManager().isEnabled()) {
             mAppStateManager.ensureActiveSession();
             Logger.debug("Set session attribute: " + key + "=" + value);
 
@@ -713,7 +705,7 @@ public class MParticle {
             Logger.warning("incrementSessionAttribute called with null key. Ignoring...");
             return;
         }
-        if (mConfigManager.isEnabled()) {
+        if (mInternal.getConfigManager().isEnabled()) {
             mAppStateManager.ensureActiveSession();
             Logger.debug("Incrementing session attribute: " + key + "=" + value);
 
@@ -729,7 +721,7 @@ public class MParticle {
      * @return the opt-out status
      */
     public Boolean getOptOut() {
-        return mConfigManager.getOptedOut();
+        return mInternal.getConfigManager().getOptedOut();
     }
 
     /**
@@ -739,7 +731,7 @@ public class MParticle {
      */
     public void setOptOut(Boolean optOutStatus) {
         if (optOutStatus != null) {
-            if (optOutStatus != mConfigManager.getOptedOut()) {
+            if (optOutStatus != mInternal.getConfigManager().getOptedOut()) {
                 if (!optOutStatus) {
                     mAppStateManager.ensureActiveSession();
                 }
@@ -748,7 +740,7 @@ public class MParticle {
                     endSession();
                 }
 
-                mConfigManager.setOptOut(optOutStatus);
+                mInternal.getConfigManager().setOptOut(optOutStatus);
 
                 Logger.debug("Set opt-out: " + optOutStatus);
             }
@@ -782,14 +774,14 @@ public class MParticle {
      * Enable mParticle exception handling to automatically log events on uncaught exceptions
      */
     public void enableUncaughtExceptionLogging() {
-        mConfigManager.enableUncaughtExceptionLogging(true);
+        mInternal.getConfigManager().enableUncaughtExceptionLogging(true);
     }
 
     /**
      * Disables mParticle exception handling and restores the original UncaughtExceptionHandler
      */
     public void disableUncaughtExceptionLogging() {
-        mConfigManager.disableUncaughtExceptionLogging(true);
+        mInternal.getConfigManager().disableUncaughtExceptionLogging(true);
     }
 
     /**
@@ -809,7 +801,7 @@ public class MParticle {
      */
 
     public Boolean isAutoTrackingEnabled() {
-        return mConfigManager.isAutoTrackingEnabled();
+        return mInternal.getConfigManager().isAutoTrackingEnabled();
     }
 
     /**
@@ -818,7 +810,7 @@ public class MParticle {
      * @return The current session timeout setting in seconds
      */
     public int getSessionTimeout() {
-        return mConfigManager.getSessionTimeout() / 1000;
+        return mInternal.getConfigManager().getSessionTimeout() / 1000;
     }
 
     public void getUserSegments(long timeout, String endpointId, SegmentListener listener) {
@@ -980,7 +972,7 @@ public class MParticle {
         mAppStateManager.ensureActiveSession();
         PushRegistrationHelper.PushRegistration registration = new PushRegistrationHelper.PushRegistration(instanceId, senderId);
         PushRegistrationHelper.setInstanceId(mAppContext, registration);
-        String oldInstanceId = mConfigManager.getPushToken();
+        String oldInstanceId = mInternal.getConfigManager().getPushToken();
         mMessageManager.setPushRegistrationId(instanceId, true);
         mKitManager.onPushRegistration(instanceId, senderId);
 
@@ -1001,7 +993,7 @@ public class MParticle {
      * @param intent
      */
     public void logNotification(Intent intent) {
-        if (mConfigManager.isEnabled()) {
+        if (mInternal.getConfigManager().isEnabled()) {
             try {
                 ProviderCloudMessage message = ProviderCloudMessage.createMessage(intent, ConfigManager.getPushKeys(mAppContext));
                 mMessageManager.logNotification(message, getAppState());
@@ -1012,7 +1004,7 @@ public class MParticle {
     }
 
     void logNotification(ProviderCloudMessage cloudMessage, boolean startSession, String appState, int behavior) {
-        if (mConfigManager.isEnabled()) {
+        if (mInternal.getConfigManager().isEnabled()) {
             if (startSession){
                 mAppStateManager.ensureActiveSession();
             }
@@ -1021,7 +1013,7 @@ public class MParticle {
     }
 
     void logNotification(ProviderCloudMessage cloudMessage, boolean startSession, String appState) {
-        if (mConfigManager.isEnabled()) {
+        if (mInternal.getConfigManager().isEnabled()) {
             if (startSession){
                 mAppStateManager.ensureActiveSession();
             }
@@ -1040,6 +1032,10 @@ public class MParticle {
         } catch (ProviderCloudMessage.InvalidGcmMessageException e) {
             e.printStackTrace();
         }
+    }
+
+    public Internal Internal() {
+        return mInternal;
     }
 
     void refreshConfiguration() {
@@ -1344,7 +1340,7 @@ public class MParticle {
     }
 
     void logUnhandledError(Throwable t) {
-        if (mConfigManager.isEnabled()) {
+        if (mInternal.getConfigManager().isEnabled()) {
             mMessageManager.logErrorEvent(t != null ? t.getMessage() : null, t, null, false);
             //we know that the app is about to crash and therefore exit
             mAppStateManager.logStateTransition(Constants.StateTransitionType.STATE_TRANS_EXIT, mAppStateManager.getCurrentActivityName());
@@ -1461,5 +1457,23 @@ public class MParticle {
 
     public interface ResetListener {
         void onReset();
+    }
+
+    public class Internal {
+
+
+        protected ConfigManager mConfigManager;
+
+        protected Internal(ConfigManager configManager) {
+            mConfigManager = configManager;
+        }
+
+        /**
+         * The ConfigManager is tasked with incorporating server-based, run-time, and XML configuration,
+         * and surfacing the result/winner.
+         */
+        public ConfigManager getConfigManager() {
+            return mConfigManager;
+        }
     }
 }

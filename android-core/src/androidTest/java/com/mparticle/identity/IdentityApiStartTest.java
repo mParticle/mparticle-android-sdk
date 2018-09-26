@@ -1,14 +1,10 @@
 package com.mparticle.identity;
 
 import com.github.tomakehurst.wiremock.http.Request;
-import com.github.tomakehurst.wiremock.verification.LoggedRequest;
 import com.mparticle.MParticle;
 import com.mparticle.MParticleOptions;
 import com.mparticle.testutils.BaseCleanInstallEachTest;
-import com.mparticle.testutils.MPLatch;
 import com.mparticle.testutils.RandomUtils;
-import com.mparticle.testutils.Server;
-import com.mparticle.testutils.TestingUtils;
 
 import org.json.JSONObject;
 import org.junit.Test;
@@ -17,7 +13,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Random;
-import java.util.concurrent.CountDownLatch;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching;
@@ -62,7 +57,7 @@ public final class IdentityApiStartTest extends BaseCleanInstallEachTest {
 
         startMParticle();
 
-        MParticle.getInstance().getConfigManager().setMpid(currentMpid);
+        MParticle.getInstance().Internal().getConfigManager().setMpid(currentMpid);
 
 
         for (Map.Entry<MParticle.IdentityType, String> entry : identities.entrySet()) {

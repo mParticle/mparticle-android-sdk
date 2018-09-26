@@ -9,6 +9,7 @@ import android.os.Looper;
 import com.mparticle.MPEvent;
 import com.mparticle.MParticle;
 import com.mparticle.internal.ConfigManager;
+import com.mparticle.internal.KitFrameworkWrapper;
 import com.mparticle.mock.MockContext;
 import com.mparticle.mock.MockKitConfiguration;
 import com.mparticle.mock.MockKitIntegrationFactory;
@@ -21,6 +22,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
+import org.mockito.internal.matchers.Any;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
@@ -45,8 +47,7 @@ public class KitManagerTest  {
     public void setUp() throws Exception {
         MParticle mockMp = new MockMParticle();
         MParticle.setInstance(mockMp);
-
-        manager = new MockKitManagerImpl(new MockContext(), null, Mockito.mock(ConfigManager.class), null);
+        manager = new MockKitManagerImpl(new MockContext(), null,  Mockito.mock(KitFrameworkWrapper.CoreCallbacks.class));
         assertNotNull(manager.providers);
         MockKitIntegrationFactory mockKitFactory = new MockKitIntegrationFactory();
         manager.setKitFactory(mockKitFactory);

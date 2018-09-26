@@ -247,11 +247,11 @@ public class MParticleTest extends BaseCleanStartedEachTest {
         }
         Random ran = new Random();
         for (int i = 0; i < 10; i++) {
-            MParticle.getInstance().getConfigManager().setMpid(ran.nextLong());
+            MParticle.getInstance().Internal().getConfigManager().setMpid(ran.nextLong());
         }
         assertTrue(getData(new MParticleDBManager(mContext).getDatabase().query("messages", null, null, null, null, null, null)).length() > 0);
         assertEquals(6, getAllTables().size());
-        assertTrue(10 < MParticle.getInstance().getConfigManager().getMpids().size());
+        assertTrue(10 < MParticle.getInstance().Internal().getConfigManager().getMpids().size());
 
         //Set strict mode, so if we get any warning or error messages during the reset/restart phase,
         //it will throw an exception

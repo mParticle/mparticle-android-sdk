@@ -140,8 +140,8 @@ public class MParticleOptionsTest extends BaseAbstractTest {
         String secret = UUID.randomUUID().toString();
         startMParticle(MParticleOptions.builder(mProductionContext)
                 .credentials(key, secret));
-        assertEquals(MParticle.getInstance().getConfigManager().getApiKey(), key);
-        assertEquals(MParticle.getInstance().getConfigManager().getApiSecret(), secret);
+        assertEquals(MParticle.getInstance().Internal().getConfigManager().getApiKey(), key);
+        assertEquals(MParticle.getInstance().Internal().getConfigManager().getApiSecret(), secret);
     }
 
     @Test
@@ -218,36 +218,36 @@ public class MParticleOptionsTest extends BaseAbstractTest {
                 .credentials("key", "secret")
                 .build();
         MParticle.start(options);
-        assertFalse(MParticle.getInstance().getConfigManager().getLogUnhandledExceptions());
+        assertFalse(MParticle.getInstance().Internal().getConfigManager().getLogUnhandledExceptions());
         MParticle.setInstance(null);
 
         startMParticle(MParticleOptions.builder(mProductionContext)
                 .enableUncaughtExceptionLogging(true));
-        assertTrue(MParticle.getInstance().getConfigManager().getLogUnhandledExceptions());
+        assertTrue(MParticle.getInstance().Internal().getConfigManager().getLogUnhandledExceptions());
 
         startMParticle(MParticleOptions.builder(mProductionContext)
                 .enableUncaughtExceptionLogging(false));
-        assertFalse(MParticle.getInstance().getConfigManager().getLogUnhandledExceptions());
+        assertFalse(MParticle.getInstance().Internal().getConfigManager().getLogUnhandledExceptions());
         MParticle.setInstance(null);
     }
 
     @Test
     public void testSessionTimeout() throws Exception {
         startMParticle();
-        assertEquals(MParticle.getInstance().getConfigManager().getSessionTimeout(), 60000);
+        assertEquals(MParticle.getInstance().Internal().getConfigManager().getSessionTimeout(), 60000);
 
         startMParticle(MParticleOptions.builder(mProductionContext)
                 .sessionTimeout(-123));
-        assertEquals(MParticle.getInstance().getConfigManager().getSessionTimeout(), 60000);
+        assertEquals(MParticle.getInstance().Internal().getConfigManager().getSessionTimeout(), 60000);
         MParticle.setInstance(null);
 
         startMParticle(MParticleOptions.builder(mProductionContext)
                 .sessionTimeout(123));
-        assertEquals(MParticle.getInstance().getConfigManager().getSessionTimeout(), 123000);
+        assertEquals(MParticle.getInstance().Internal().getConfigManager().getSessionTimeout(), 123000);
 
         //make sure it resets if the session timeout is not specified
         startMParticle();
-        assertEquals(MParticle.getInstance().getConfigManager().getSessionTimeout(), 60000);
+        assertEquals(MParticle.getInstance().Internal().getConfigManager().getSessionTimeout(), 60000);
         MParticle.setInstance(null);
 
     }
@@ -273,23 +273,23 @@ public class MParticleOptionsTest extends BaseAbstractTest {
     public void testUploadInterval() throws Exception {
         //default upload interval for production
         startMParticle();
-        assertEquals(MParticle.getInstance().getConfigManager().getUploadInterval(), 10000);
+        assertEquals(MParticle.getInstance().Internal().getConfigManager().getUploadInterval(), 10000);
         MParticle.setInstance(null);
 
 
         //default upload interval for production
         startMParticle(MParticleOptions.builder(mProductionContext));
-        assertEquals(MParticle.getInstance().getConfigManager().getUploadInterval(), 600000);
+        assertEquals(MParticle.getInstance().Internal().getConfigManager().getUploadInterval(), 600000);
         MParticle.setInstance(null);
 
         startMParticle(MParticleOptions.builder(mProductionContext)
                 .uploadInterval(123));
-        assertEquals(MParticle.getInstance().getConfigManager().getUploadInterval(), 123000);
+        assertEquals(MParticle.getInstance().Internal().getConfigManager().getUploadInterval(), 123000);
         MParticle.setInstance(null);
 
         startMParticle(MParticleOptions.builder(mProductionContext)
                 .uploadInterval(-123));
-        assertEquals(MParticle.getInstance().getConfigManager().getUploadInterval(), 600000);
+        assertEquals(MParticle.getInstance().Internal().getConfigManager().getUploadInterval(), 600000);
         MParticle.setInstance(null);
     }
 
@@ -347,25 +347,25 @@ public class MParticleOptionsTest extends BaseAbstractTest {
 
         startMParticle(MParticleOptions.builder(mProductionContext)
                 .identityConnectionTimeout(-123));
-        assertEquals(MParticle.getInstance().getConfigManager().getIdentityConnectionTimeout(), ConfigManager.DEFAULT_CONNECTION_TIMEOUT_SECONDS * 1000);
-        assertEquals(MParticle.getInstance().getConfigManager().getConnectionTimeout(), ConfigManager.DEFAULT_CONNECTION_TIMEOUT_SECONDS * 1000);
+        assertEquals(MParticle.getInstance().Internal().getConfigManager().getIdentityConnectionTimeout(), ConfigManager.DEFAULT_CONNECTION_TIMEOUT_SECONDS * 1000);
+        assertEquals(MParticle.getInstance().Internal().getConfigManager().getConnectionTimeout(), ConfigManager.DEFAULT_CONNECTION_TIMEOUT_SECONDS * 1000);
         MParticle.setInstance(null);
 
         startMParticle(MParticleOptions.builder(mProductionContext)
                 .identityConnectionTimeout(0));
-        assertEquals(MParticle.getInstance().getConfigManager().getIdentityConnectionTimeout(), ConfigManager.DEFAULT_CONNECTION_TIMEOUT_SECONDS * 1000);
-        assertEquals(MParticle.getInstance().getConfigManager().getConnectionTimeout(), ConfigManager.DEFAULT_CONNECTION_TIMEOUT_SECONDS * 1000);
+        assertEquals(MParticle.getInstance().Internal().getConfigManager().getIdentityConnectionTimeout(), ConfigManager.DEFAULT_CONNECTION_TIMEOUT_SECONDS * 1000);
+        assertEquals(MParticle.getInstance().Internal().getConfigManager().getConnectionTimeout(), ConfigManager.DEFAULT_CONNECTION_TIMEOUT_SECONDS * 1000);
         MParticle.setInstance(null);
 
         startMParticle(MParticleOptions.builder(mProductionContext)
                 .identityConnectionTimeout(123));
-        assertEquals(MParticle.getInstance().getConfigManager().getIdentityConnectionTimeout(), 123000);
-        assertEquals(MParticle.getInstance().getConfigManager().getConnectionTimeout(), ConfigManager.DEFAULT_CONNECTION_TIMEOUT_SECONDS * 1000);
+        assertEquals(MParticle.getInstance().Internal().getConfigManager().getIdentityConnectionTimeout(), 123000);
+        assertEquals(MParticle.getInstance().Internal().getConfigManager().getConnectionTimeout(), ConfigManager.DEFAULT_CONNECTION_TIMEOUT_SECONDS * 1000);
         MParticle.setInstance(null);
 
         startMParticle(MParticleOptions.builder(mProductionContext));
-        assertEquals(MParticle.getInstance().getConfigManager().getIdentityConnectionTimeout(), ConfigManager.DEFAULT_CONNECTION_TIMEOUT_SECONDS * 1000);
-        assertEquals(MParticle.getInstance().getConfigManager().getConnectionTimeout(), ConfigManager.DEFAULT_CONNECTION_TIMEOUT_SECONDS * 1000);
+        assertEquals(MParticle.getInstance().Internal().getConfigManager().getIdentityConnectionTimeout(), ConfigManager.DEFAULT_CONNECTION_TIMEOUT_SECONDS * 1000);
+        assertEquals(MParticle.getInstance().Internal().getConfigManager().getConnectionTimeout(), ConfigManager.DEFAULT_CONNECTION_TIMEOUT_SECONDS * 1000);
     }
 
     @Test

@@ -77,7 +77,7 @@ public class Server {
 
     public void reset() {
         if (MParticle.getInstance() != null) {
-            reset(MParticle.getInstance().getConfigManager().getMpid());
+            reset(MParticle.getInstance().Internal().getConfigManager().getMpid());
         } else {
             reset(0);
         }

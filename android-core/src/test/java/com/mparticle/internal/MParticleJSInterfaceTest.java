@@ -61,7 +61,8 @@ public class MParticleJSInterfaceTest extends MParticleJSInterface {
     @Before
     public void setup() throws Exception {
         MParticle mockMp = Mockito.mock(MParticle.class);
-        Mockito.when(mockMp.getConfigManager()).thenReturn(new ConfigManager(new MockContext()));
+        Mockito.when(mockMp.Internal()).thenReturn(Mockito.mock(MParticle.Internal.class));
+        Mockito.when(mockMp.Internal().getConfigManager()).thenReturn(new ConfigManager(new MockContext()));
         cart = new Cart(new MockContext(), 2);
         MParticleUser mockCurrentUser = Mockito.mock(MParticleUser.class);
         IdentityApi mockIdentity = Mockito.mock(IdentityApi.class);

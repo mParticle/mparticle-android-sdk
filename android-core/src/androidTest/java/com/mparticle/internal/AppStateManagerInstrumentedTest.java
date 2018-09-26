@@ -8,7 +8,6 @@ import com.mparticle.MParticle;
 import com.mparticle.internal.database.services.AccessUtils;
 import com.mparticle.internal.database.services.MParticleDBManager;
 import com.mparticle.internal.networking.BaseMPMessage;
-import com.mparticle.testutils.TestingUtils;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -35,7 +34,7 @@ public class AppStateManagerInstrumentedTest extends BaseCleanStartedEachTest {
     @Before
     public void before() throws Exception {
         mAppStateManager = MParticle.getInstance().getAppStateManager();
-        MParticle.getInstance().getConfigManager().setMpid(Constants.TEMPORARY_MPID);
+        MParticle.getInstance().Internal().getConfigManager().setMpid(Constants.TEMPORARY_MPID);
     }
 
     @Test
@@ -147,7 +146,7 @@ public class AppStateManagerInstrumentedTest extends BaseCleanStartedEachTest {
                             //do nothing
                         }
                     },
-                    MParticle.getInstance().getConfigManager(),
+                    MParticle.getInstance().Internal().getConfigManager(),
                     MParticle.getInstance().getAppStateManager(),
                     com.mparticle.internal.AccessUtils.getUploadHandler());
             this.latch = latch;

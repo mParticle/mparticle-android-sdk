@@ -1,7 +1,10 @@
 package com.mparticle.kits;
 
+import android.app.Activity;
 import android.content.Context;
+import android.net.Uri;
 
+import com.mparticle.internal.KitFrameworkWrapper;
 import com.mparticle.testutils.BaseCleanInstallEachTest;
 import com.mparticle.MParticle;
 import com.mparticle.MParticleOptions;
@@ -16,6 +19,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Before;
 
+import java.lang.ref.WeakReference;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
@@ -35,7 +39,7 @@ public abstract class BaseKitManagerStarted extends BaseCleanInstallEachTest {
         MParticle.start(MParticleOptions.builder(mContext)
                 .credentials("key", "value")
                 .build());
-        mKitManager = new CustomKitManagerImpl(mContext, com.mparticle.AccessUtils.getMessageManager(), MParticle.getInstance().getConfigManager(), MParticle.getInstance().getAppStateManager(), AccessUtils.getUploadHandler());
+        mKitManager = new CustomKitManagerImpl(mContext, com.mparticle.AccessUtils.getMessageManager(), new CoreCallbackImpl(MParticle.getInstance().Internal().getConfigManager(), MParticle.getInstance().getAppStateManager()), AccessUtils.getUploadHandler());
         mKitManager.setKitFactory(new CustomKitFactory());
         AccessUtils.setKitManager(mKitManager);
     }
@@ -85,8 +89,8 @@ public abstract class BaseKitManagerStarted extends BaseCleanInstallEachTest {
             }
         }
 
-        public CustomKitManagerImpl(Context context, ReportingManager reportingManager, ConfigManager configManager, AppStateManager appStateManager, BackgroundTaskHandler backgroundTaskHandler) {
-            super(context, reportingManager, configManager, appStateManager, backgroundTaskHandler);
+        public CustomKitManagerImpl(Context context, ReportingManager reportingManager, KitFrameworkWrapper.CoreCallbacks coreCallbacks, BackgroundTaskHandler backgroundTaskHandler) {
+            super(context, reportingManager, coreCallbacks, backgroundTaskHandler);
         }
 
         @Override
@@ -115,6 +119,66 @@ public abstract class BaseKitManagerStarted extends BaseCleanInstallEachTest {
                 kitIntegration.putAll(mCustomTestKits);
             }
             return kitIntegration;
+        }
+    }
+
+    class CoreCallbackImpl implements KitFrameworkWrapper.CoreCallbacks {
+        ConfigManager configManager;
+        AppStateManager appStateManager;
+
+        CoreCallbackImpl(ConfigManager configManager, AppStateManager appStateManager) {
+            this.configManager = configManager;
+            this.appStateManager = appStateManager;
+        }
+
+        @Override
+        public boolean isBackgrounded() {
+            return appStateManager.isBackgrounded();
+        }
+
+        @Override
+        public int getUserBucket() {
+            return configManager.getUserBucket();
+        }
+
+        @Override
+        public boolean isEnabled() {
+            return configManager.isEnabled();
+        }
+
+        @Override
+        public void setIntegrationAttributes(int kitId, Map<String, String> integrationAttributes) {
+            configManager.setIntegrationAttributes(kitId, integrationAttributes);
+        }
+
+        @Override
+        public Map<String, String> getIntegrationAttributes(int kitId) {
+            return configManager.getIntegrationAttributes(kitId);
+        }
+
+        @Override
+        public WeakReference<Activity> getCurrentActivity() {
+            return appStateManager.getCurrentActivity();
+        }
+
+        @Override
+        public JSONArray getLatestKitConfiguration() {
+            return configManager.getLatestKitConfiguration();
+        }
+
+        @Override
+        public boolean isPushEnabled() {
+            return configManager.isPushEnabled();
+        }
+
+        @Override
+        public String getPushSenderId() {
+            return configManager.getPushSenderId();
+        }
+
+        @Override
+        public Uri getLaunchUri() {
+            return appStateManager.getLaunchUri();
         }
     }
 }

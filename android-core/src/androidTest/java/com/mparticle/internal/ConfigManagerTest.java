@@ -53,7 +53,7 @@ public class ConfigManagerTest extends BaseAbstractTest {
      */
     @Test
     public void testUserConfigMigrateFullSubject() throws Exception {
-        ConfigManager configManager = instance.getConfigManager();
+        ConfigManager configManager = instance.Internal().getConfigManager();
         assertTrue(configManager.getMpid() == Constants.TEMPORARY_MPID);
 
         long oldMpid = new Random().nextLong();

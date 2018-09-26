@@ -46,8 +46,7 @@ public class KitManagerImplTest {
         KitManagerImpl manager = new KitManagerImpl(
                 Mockito.mock(Context.class),
                 null,
-                Mockito.mock(ConfigManager.class),
-                Mockito.mock(AppStateManager.class),
+                Mockito.mock(KitFrameworkWrapper.CoreCallbacks.class),
                 Mockito.mock(BackgroundTaskHandler.class)
         );
         Assert.assertNotNull(manager.mKitIntegrationFactory);
@@ -70,8 +69,7 @@ public class KitManagerImplTest {
         KitManagerImpl manager = new KitManagerImpl(
                 Mockito.mock(Context.class),
                 null,
-                Mockito.mock(ConfigManager.class),
-                Mockito.mock(AppStateManager.class),
+                Mockito.mock(KitFrameworkWrapper.CoreCallbacks.class),
                 Mockito.mock(BackgroundTaskHandler.class)
         );
         JSONArray kitConfiguration = new JSONArray();
@@ -101,8 +99,7 @@ public class KitManagerImplTest {
         KitManagerImpl manager = new KitManagerImpl(
                 Mockito.mock(Context.class),
                 null,
-                Mockito.mock(ConfigManager.class),
-                Mockito.mock(AppStateManager.class),
+                Mockito.mock(KitFrameworkWrapper.CoreCallbacks.class),
                 Mockito.mock(BackgroundTaskHandler.class)
         );
         ConsentState state = ConsentState.builder()
@@ -136,8 +133,7 @@ public class KitManagerImplTest {
         KitManagerImpl manager = new KitManagerImpl(
                 Mockito.mock(Context.class),
                 null,
-                Mockito.mock(ConfigManager.class),
-                Mockito.mock(AppStateManager.class),
+                Mockito.mock(KitFrameworkWrapper.CoreCallbacks.class),
                 Mockito.mock(BackgroundTaskHandler.class)
         );
         ConsentState state = ConsentState.builder()
@@ -170,8 +166,7 @@ public class KitManagerImplTest {
         KitManagerImpl manager = new KitManagerImpl(
                 Mockito.mock(Context.class),
                 null,
-                Mockito.mock(ConfigManager.class),
-                Mockito.mock(AppStateManager.class),
+                Mockito.mock(KitFrameworkWrapper.CoreCallbacks.class),
                 Mockito.mock(BackgroundTaskHandler.class)
         );
         ConsentState state = ConsentState.builder()
@@ -204,8 +199,7 @@ public class KitManagerImplTest {
         KitManagerImpl manager  = new KitManagerImpl(
                 new MockContext(),
                 Mockito.mock(ReportingManager.class),
-                Mockito.mock(ConfigManager.class),
-                Mockito.mock(AppStateManager.class),
+                Mockito.mock(KitFrameworkWrapper.CoreCallbacks.class),
                 mockBackgroundTaskHandler
                 );
         KitIntegration integration = Mockito.mock(
@@ -248,8 +242,7 @@ public class KitManagerImplTest {
         KitManagerImpl manager  = new KitManagerImpl(
                 new MockContext(),
                 Mockito.mock(ReportingManager.class),
-                Mockito.mock(ConfigManager.class),
-                Mockito.mock(AppStateManager.class),
+                Mockito.mock(KitFrameworkWrapper.CoreCallbacks.class),
                 mockBackgroundTaskHandler);
         KitIntegration integration = Mockito.mock(
                 KitIntegration.class,

@@ -169,7 +169,7 @@ public class UploadHandler extends BaseHandler implements BackgroundTaskHandler 
         if (remainingHeap < Constants.LIMIT_MAX_UPLOAD_SIZE) {
             throw new Exception("Low remaining heap space, deferring uploads.");
         }
-        final boolean sessionHistoryEnabled = MParticle.getInstance().getConfigManager().getIncludeSessionHistory();
+        final boolean sessionHistoryEnabled = MParticle.getInstance().Internal().getConfigManager().getIncludeSessionHistory();
         try {
             mParticleDBManager.cleanupMessages();
             if (history && !sessionHistoryEnabled) {

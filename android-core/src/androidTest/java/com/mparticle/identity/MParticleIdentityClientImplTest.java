@@ -10,7 +10,6 @@ import com.mparticle.MParticle;
 import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.MPUtility;
 import com.mparticle.testutils.RandomUtils;
-import com.mparticle.testutils.TestingUtils;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -51,7 +50,7 @@ public class MParticleIdentityClientImplTest extends BaseCleanStartedEachTest {
     @Before
     public void before() throws Exception {
         mContext = InstrumentationRegistry.getContext();
-        mConfigManager = MParticle.getInstance().getConfigManager();
+        mConfigManager = MParticle.getInstance().Internal().getConfigManager();
     }
 
 

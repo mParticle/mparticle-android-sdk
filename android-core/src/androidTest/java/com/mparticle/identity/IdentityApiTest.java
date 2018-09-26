@@ -11,7 +11,6 @@ import com.mparticle.testutils.AndroidUtils;
 import com.mparticle.testutils.BaseCleanStartedEachTest;
 import com.mparticle.testutils.RandomUtils;
 import com.mparticle.testutils.Server;
-import com.mparticle.testutils.TestingUtils;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -19,7 +18,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -43,7 +41,7 @@ public final class IdentityApiTest extends BaseCleanStartedEachTest {
 
     @Before
     public void before() {
-        mConfigManager = MParticle.getInstance().getConfigManager();
+        mConfigManager = MParticle.getInstance().Internal().getConfigManager();
         handler = new Handler();
         mpid1 = new Random().nextLong();
         mpid2 = new Random().nextLong();
@@ -300,20 +298,20 @@ public final class IdentityApiTest extends BaseCleanStartedEachTest {
     public void testGetUser() throws Exception {
         IdentityApi identity = MParticle.getInstance().Identity();
         assertNotNull(identity.getCurrentUser());
-        MParticle.getInstance().getConfigManager().setMpid(mpid1);
+        MParticle.getInstance().Internal().getConfigManager().setMpid(mpid1);
         assertEquals(identity.getCurrentUser().getId(), mpid1);
         Map<String, Object> mpid1UserAttributes = new HashMap<String, Object>(RandomUtils.getInstance().getRandomAttributes(10));
         Map<MParticle.IdentityType, String> mpid1UserIdentites = RandomUtils.getInstance().getRandomUserIdentities();
         identity.getCurrentUser().setUserAttributes(mpid1UserAttributes);
         AccessUtils.setUserIdentities(mpid1UserIdentites, identity.getCurrentUser().getId());
 
-        MParticle.getInstance().getConfigManager().setMpid(mpid2);
+        MParticle.getInstance().Internal().getConfigManager().setMpid(mpid2);
         Map<String, Object> mpid2UserAttributes = new HashMap<String, Object>(RandomUtils.getInstance().getRandomAttributes(10));
         Map<MParticle.IdentityType, String> mpid2UserIdentites = RandomUtils.getInstance().getRandomUserIdentities();
         identity.getCurrentUser().setUserAttributes(mpid2UserAttributes);
         AccessUtils.setUserIdentities(mpid2UserIdentites, identity.getCurrentUser().getId());
 
-        MParticle.getInstance().getConfigManager().setMpid(mpid3);
+        MParticle.getInstance().Internal().getConfigManager().setMpid(mpid3);
         Map<String, Object> mpid3UserAttributes = new HashMap<String, Object>(RandomUtils.getInstance().getRandomAttributes(10));
         Map<MParticle.IdentityType, String> mpid3UserIdentities = RandomUtils.getInstance().getRandomUserIdentities();
         identity.getCurrentUser().setUserAttributes(mpid3UserAttributes);
@@ -359,7 +357,7 @@ public final class IdentityApiTest extends BaseCleanStartedEachTest {
         //change the mpid;
         //behind the scenes, this call will take place before the (above) modfy request goes out, since
         //the modify request will be passed to a background thread before it is executed
-        MParticle.getInstance().getConfigManager().setMpid(mpid2);
+        MParticle.getInstance().Internal().getConfigManager().setMpid(mpid2);
 
         final CountDownLatch latch = new MPLatch(1);
         final AndroidUtils.Mutable<Boolean> received = new AndroidUtils.Mutable<Boolean>(false);
@@ -401,7 +399,7 @@ public final class IdentityApiTest extends BaseCleanStartedEachTest {
         }
 
         for (Long mpid: mpids) {
-            MParticle.getInstance().getConfigManager().setMpid(mpid);
+            MParticle.getInstance().Internal().getConfigManager().setMpid(mpid);
         }
 
         //test that there are now 6 users present in the getUsers() endpoint
@@ -414,7 +412,7 @@ public final class IdentityApiTest extends BaseCleanStartedEachTest {
 
         //remove 2 users
         for (int i = 0; i < 2; i++) {
-            MParticle.getInstance().getConfigManager().deleteUserStorage(mpids.remove(i));
+            MParticle.getInstance().Internal().getConfigManager().deleteUserStorage(mpids.remove(i));
         }
 
         //test that there are now 4 remaining users
@@ -436,7 +434,7 @@ public final class IdentityApiTest extends BaseCleanStartedEachTest {
         for (MParticleUser user: MParticle.getInstance().Identity().getUsers()) {
             assertNotSame(0, user.getId());
         }
-        MParticle.getInstance().getConfigManager().setMpid(0L);
+        MParticle.getInstance().Internal().getConfigManager().setMpid(0L);
         assertNull(MParticle.getInstance().Identity().getUser(0L));
         for (MParticleUser user: MParticle.getInstance().Identity().getUsers()) {
             assertNotSame(0, user.getId());

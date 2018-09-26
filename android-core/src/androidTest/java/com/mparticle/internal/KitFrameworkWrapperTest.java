@@ -122,11 +122,11 @@ public class KitFrameworkWrapperTest extends BaseCleanStartedEachTest {
             }
         });
         MParticle.getInstance().Identity().modify(IdentityApiRequest.withEmptyUser().build());
-        MParticle.getInstance().getConfigManager().setMpid(0);
+        MParticle.getInstance().Internal().getConfigManager().setMpid(0);
         latch.await();
         final CountDownLatch latch2 = new MPLatch(1);
         final Long mpid2 = new Random().nextLong();
-        MParticle.getInstance().getConfigManager().setMpid(mpid2);
+        MParticle.getInstance().Internal().getConfigManager().setMpid(mpid2);
         assertTrue(called.value);
         called.value = false;
         setKitManager(new StubKitManager(mContext) {
@@ -138,7 +138,7 @@ public class KitFrameworkWrapperTest extends BaseCleanStartedEachTest {
             }
         });
         MParticle.getInstance().Identity().modify(IdentityApiRequest.withUser(MParticle.getInstance().Identity().getCurrentUser()).build());
-        MParticle.getInstance().getConfigManager().setMpid(new Random().nextLong());
+        MParticle.getInstance().Internal().getConfigManager().setMpid(new Random().nextLong());
         latch2.await();
         assertTrue(called.value);
     }

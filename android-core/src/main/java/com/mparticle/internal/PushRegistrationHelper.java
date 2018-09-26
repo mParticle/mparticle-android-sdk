@@ -47,7 +47,7 @@ public class PushRegistrationHelper {
     }
 
     public static void requestInstanceId(Context context) {
-        requestInstanceId(context, MParticle.getInstance().getConfigManager().getPushSenderId());
+        requestInstanceId(context, MParticle.getInstance().Internal().getConfigManager().getPushSenderId());
     }
 
     public static class PushRegistration {

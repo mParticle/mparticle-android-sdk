@@ -62,7 +62,7 @@ public class MessageManagerTest {
         configManager = Mockito.mock(ConfigManager.class);
         Mockito.when(configManager.getApiKey()).thenReturn("123456789");
         Mockito.when(configManager.getUserStorage()).thenReturn(UserStorage.create(context, new Random().nextInt()));
-        Mockito.when(MParticle.getInstance().getConfigManager().getMpid()).thenReturn(defaultId);
+        Mockito.when(MParticle.getInstance().Internal().getConfigManager().getMpid()).thenReturn(defaultId);
         Mockito.when(configManager.getMpid()).thenReturn(defaultId);
         appStateManager = new AppStateManager(context, true);
         messageHandler = Mockito.mock(MessageHandler.class);

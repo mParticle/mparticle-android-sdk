@@ -49,7 +49,7 @@ public final class UploadMessageTest extends BaseCleanStartedEachTest {
         int numberOfEvents = 3;
         final Handler handler = new Handler(Looper.getMainLooper());
         long mpid = new Random().nextLong();
-        MParticle.getInstance().getConfigManager().setMpid(mpid);
+        MParticle.getInstance().Internal().getConfigManager().setMpid(mpid);
         final Map<String, MPEvent> events = new HashMap<String, MPEvent>();
         final CountDownLatch latch = new MPLatch(numberOfEvents);
 

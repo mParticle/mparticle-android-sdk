@@ -145,7 +145,7 @@ public class AccessUtils {
         KitFrameworkWrapper kitFrameworkWrapper = (KitFrameworkWrapper)MParticle.getInstance().getKitManager();
         kitFrameworkWrapper.loadKitLibrary();
         kitFrameworkWrapper.setKitManager(kitManager);
-        JSONArray configuration = MParticle.getInstance().getConfigManager().getLatestKitConfiguration();
+        JSONArray configuration = MParticle.getInstance().Internal().getConfigManager().getLatestKitConfiguration();
         Logger.debug("Kit Framework loaded.");
         if (configuration != null) {
             Logger.debug("Restoring previous Kit configuration.");

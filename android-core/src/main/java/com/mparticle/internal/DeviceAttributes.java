@@ -104,7 +104,7 @@ public class DeviceAttributes {
                 // ignore missing data
             }
 
-            attributes.put(MessageKey.ENVIRONMENT, MParticle.getInstance().getConfigManager().getEnvironment().getValue());
+            attributes.put(MessageKey.ENVIRONMENT, MParticle.getInstance().Internal().getConfigManager().getEnvironment().getValue());
             attributes.put(MessageKey.INSTALL_REFERRER, preferences.getString(Constants.PrefKeys.INSTALL_REFERRER, null));
 
             boolean install = preferences.getBoolean(PrefKeys.FIRST_RUN_INSTALL, true);
@@ -234,7 +234,7 @@ public class DeviceAttributes {
         if (adIdInfo != null) {
             try {
                 deviceInfo.put(MessageKey.LIMIT_AD_TRACKING, adIdInfo.isLimitAdTrackingEnabled);
-                if (adIdInfo.isLimitAdTrackingEnabled && MParticle.getInstance().getConfigManager().getRestrictAAIDBasedOnLAT()) {
+                if (adIdInfo.isLimitAdTrackingEnabled && MParticle.getInstance().Internal().getConfigManager().getRestrictAAIDBasedOnLAT()) {
                     message = "Google Play Advertising ID available but ad tracking is disabled on this device.";
                 } else {
                     deviceInfo.put(MessageKey.GOOGLE_ADV_ID, adIdInfo.id);
@@ -256,8 +256,8 @@ public class DeviceAttributes {
                 deviceInfo.put(Constants.MessageKey.PUSH_TOKEN_TYPE, Constants.GOOGLE_GCM);
             }
 
-            deviceInfo.put(Constants.MessageKey.PUSH_SOUND_ENABLED, MParticle.getInstance().getConfigManager().isPushSoundEnabled());
-            deviceInfo.put(Constants.MessageKey.PUSH_VIBRATION_ENABLED, MParticle.getInstance().getConfigManager().isPushVibrationEnabled());
+            deviceInfo.put(Constants.MessageKey.PUSH_SOUND_ENABLED, MParticle.getInstance().Internal().getConfigManager().isPushSoundEnabled());
+            deviceInfo.put(Constants.MessageKey.PUSH_VIBRATION_ENABLED, MParticle.getInstance().Internal().getConfigManager().isPushVibrationEnabled());
         } catch (JSONException jse) {
             Logger.debug("Failed while building device-info object: ", jse.toString());
         }

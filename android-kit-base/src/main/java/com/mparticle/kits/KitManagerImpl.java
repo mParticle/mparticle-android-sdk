@@ -25,6 +25,7 @@ import com.mparticle.identity.MParticleUser;
 import com.mparticle.internal.AppStateManager;
 import com.mparticle.internal.BackgroundTaskHandler;
 import com.mparticle.internal.ConfigManager;
+import com.mparticle.internal.KitFrameworkWrapper;
 import com.mparticle.internal.KitManager;
 import com.mparticle.internal.Logger;
 import com.mparticle.internal.MPUtility;
@@ -53,8 +54,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class KitManagerImpl implements KitManager, AttributionListener, UserAttributeListener, IdentityStateListener {
     private final ReportingManager mReportingManager;
-    private final AppStateManager mAppStateManager;
-    private final ConfigManager mConfigManager;
+    private final KitFrameworkWrapper.CoreCallbacks mCoreCallbacks;
     private final BackgroundTaskHandler mBackgroundTaskHandler;
     KitIntegrationFactory mKitIntegrationFactory;
 
@@ -68,11 +68,10 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
     ConcurrentHashMap<Integer, KitIntegration> providers = new ConcurrentHashMap<Integer, KitIntegration>();
     private final Context mContext;
 
-    public KitManagerImpl(Context context, ReportingManager reportingManager, ConfigManager configManager, AppStateManager appStateManager, BackgroundTaskHandler backgroundTaskHandler) {
+    public KitManagerImpl(Context context, ReportingManager reportingManager, KitFrameworkWrapper.CoreCallbacks coreCallbacks, BackgroundTaskHandler backgroundTaskHandler) {
         mContext = context;
         mReportingManager = reportingManager;
-        mConfigManager = configManager;
-        mAppStateManager = appStateManager;
+        mCoreCallbacks = coreCallbacks;
         mBackgroundTaskHandler = backgroundTaskHandler;
         mKitIntegrationFactory = new KitIntegrationFactory();
         MParticle.getInstance().Identity().addIdentityStateListener(this);
@@ -94,27 +93,27 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
     }
 
     public boolean isBackgrounded() {
-        return mAppStateManager.isBackgrounded();
+        return mCoreCallbacks.isBackgrounded();
     }
 
     public int getUserBucket() {
-        return mConfigManager.getUserBucket();
+        return mCoreCallbacks.getUserBucket();
     }
 
     public boolean isOptedOut() {
-        return !mConfigManager.isEnabled();
+        return !mCoreCallbacks.isEnabled();
     }
 
     public Uri getLaunchUri() {
-        return mAppStateManager.getLaunchUri();
+        return mCoreCallbacks.getLaunchUri();
     }
 
     void setIntegrationAttributes(KitIntegration kitIntegration, Map<String, String> integrationAttributes) {
-        mConfigManager.setIntegrationAttributes(kitIntegration.getConfiguration().getKitId(), integrationAttributes);
+        mCoreCallbacks.setIntegrationAttributes(kitIntegration.getConfiguration().getKitId(), integrationAttributes);
     }
 
     Map<String, String> getIntegrationAttributes(KitIntegration kitIntegration) {
-        return mConfigManager.getIntegrationAttributes(kitIntegration.getConfiguration().getKitId());
+        return mCoreCallbacks.getIntegrationAttributes(kitIntegration.getConfiguration().getKitId());
     }
 
     void clearIntegrationAttributes(KitIntegration kitIntegration) {
@@ -682,7 +681,7 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
 
     @Override
     public WeakReference<Activity> getCurrentActivity() {
-        return mAppStateManager.getCurrentActivity();
+        return mCoreCallbacks.getCurrentActivity();
     }
 
     @Override
@@ -1048,7 +1047,7 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
     @Override
     public void onUserIdentified(MParticleUser mParticleUser) {
         //due to consent forwarding rules we need to re-verify kits whenever the user changes
-        updateKits(mConfigManager.getLatestKitConfiguration());
+        updateKits(mCoreCallbacks.getLatestKitConfiguration());
         for (KitIntegration provider : providers.values()) {
             try {
                 if (provider instanceof KitIntegration.IdentityListener && !provider.isDisabled()) {
@@ -1116,7 +1115,7 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
     @Override
     public void onConsentStateUpdated(final ConsentState oldState, final ConsentState newState, final long mpid) {
         //due to consent forwarding rules we need to re-initialize kits whenever the user changes
-        updateKits(mConfigManager.getLatestKitConfiguration());
+        updateKits(mCoreCallbacks.getLatestKitConfiguration());
         Runnable runnable = new Runnable() {
             @Override
             public void run() {
@@ -1143,5 +1142,13 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
 
     public void executeNetworkRequest(Runnable runnable) {
         mBackgroundTaskHandler.executeNetworkRequest(runnable);
+    }
+
+    public boolean isPushEnabled() {
+        return mCoreCallbacks.isPushEnabled();
+    }
+
+    public String getPushSenderId() {
+        return mCoreCallbacks.getPushSenderId();
     }
 }

@@ -29,8 +29,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class KitFrameworkWrapper implements KitManager {
     private final Context mContext;
-    private final AppStateManager mAppStateManager;
-    private final ConfigManager mConfigManager;
+    private final CoreCallbacks mCoreCallbacks;
     private final ReportingManager mReportingManager;
     private final BackgroundTaskHandler mBackgroundTaskHandler;
     private KitManager mKitManager;
@@ -49,8 +48,7 @@ public class KitFrameworkWrapper implements KitManager {
     public KitFrameworkWrapper(Context context, ReportingManager reportingManager, ConfigManager configManager, AppStateManager appStateManager, BackgroundTaskHandler backgroundTaskHandler, boolean testing) {
         this.mContext = testing ? context : new KitContext(context);
         this.mReportingManager = reportingManager;
-        this.mConfigManager = configManager;
-        this.mAppStateManager = appStateManager;
+        this.mCoreCallbacks = new CoreCallbacksImpl(configManager, appStateManager);
         this.mBackgroundTaskHandler = backgroundTaskHandler;
         kitsLoaded = false;
     }
@@ -61,9 +59,9 @@ public class KitFrameworkWrapper implements KitManager {
             frameworkLoadAttempted = true;
             try {
                 Class clazz = Class.forName("com.mparticle.kits.KitManagerImpl");
-                Constructor<KitFrameworkWrapper> constructor = clazz.getConstructor(Context.class, ReportingManager.class, ConfigManager.class, AppStateManager.class, BackgroundTaskHandler.class);
-                mKitManager = constructor.newInstance(mContext, mReportingManager, mConfigManager, mAppStateManager, mBackgroundTaskHandler);
-                JSONArray configuration = mConfigManager.getLatestKitConfiguration();
+                Constructor<KitFrameworkWrapper> constructor = clazz.getConstructor(Context.class, ReportingManager.class, CoreCallbacks.class, BackgroundTaskHandler.class);
+                mKitManager = constructor.newInstance(mContext, mReportingManager, mCoreCallbacks, mBackgroundTaskHandler);
+                JSONArray configuration = mCoreCallbacks.getLatestKitConfiguration();
                 Logger.debug("Kit Framework loaded.");
                 if (configuration != null) {
                     Logger.debug("Restoring previous Kit configuration.");
@@ -270,7 +268,7 @@ public class KitFrameworkWrapper implements KitManager {
     }
 
     public WeakReference<Activity> getCurrentActivity() {
-        return mAppStateManager.getCurrentActivity();
+        return mCoreCallbacks.getCurrentActivity();
     }
 
     @Override
@@ -581,6 +579,80 @@ public class KitFrameworkWrapper implements KitManager {
     public void onConsentStateUpdated(ConsentState oldState, ConsentState newState, long mpid) {
         if (mKitManager != null) {
             mKitManager.onConsentStateUpdated(oldState, newState, mpid);
+        }
+    }
+
+    public interface CoreCallbacks {
+        boolean isBackgrounded();
+        int getUserBucket();
+        boolean isEnabled();
+        void setIntegrationAttributes(int kitId, Map<String, String> integrationAttributes);
+        Map<String, String> getIntegrationAttributes(int kitId);
+        WeakReference<Activity> getCurrentActivity();
+        JSONArray getLatestKitConfiguration();
+        boolean isPushEnabled();
+        String getPushSenderId();
+        Uri getLaunchUri();
+    }
+
+    class CoreCallbacksImpl implements CoreCallbacks {
+        ConfigManager mConfigManager;
+        AppStateManager mAppStateManager;
+
+        public CoreCallbacksImpl(ConfigManager configManager, AppStateManager appStateManager) {
+            mConfigManager = configManager;
+            mAppStateManager = appStateManager;
+        }
+
+
+        @Override
+        public boolean isBackgrounded() {
+            return mAppStateManager.isBackgrounded();
+        }
+
+        @Override
+        public int getUserBucket() {
+            return mConfigManager.getUserBucket();
+        }
+
+        @Override
+        public boolean isEnabled() {
+            return mConfigManager.isEnabled();
+        }
+
+        @Override
+        public void setIntegrationAttributes(int kitId, Map<String, String> integrationAttributes) {
+            mConfigManager.setIntegrationAttributes(kitId, integrationAttributes);
+        }
+
+        @Override
+        public Map<String, String> getIntegrationAttributes(int kitId) {
+            return mConfigManager.getIntegrationAttributes(kitId);
+        }
+
+        @Override
+        public WeakReference<Activity> getCurrentActivity() {
+            return mAppStateManager.getCurrentActivity();
+        }
+
+        @Override
+        public JSONArray getLatestKitConfiguration() {
+            return mConfigManager.getLatestKitConfiguration();
+        }
+
+        @Override
+        public boolean isPushEnabled() {
+            return mConfigManager.isPushEnabled();
+        }
+
+        @Override
+        public String getPushSenderId() {
+            return mConfigManager.getPushSenderId();
+        }
+
+        @Override
+        public Uri getLaunchUri() {
+            return mAppStateManager.getLaunchUri();
         }
     }
 }

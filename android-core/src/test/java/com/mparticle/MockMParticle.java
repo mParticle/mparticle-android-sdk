@@ -15,14 +15,14 @@ import org.mockito.Mockito;
 public class MockMParticle extends MParticle {
 
     public MockMParticle() {
-        mConfigManager = Mockito.mock(ConfigManager.class);
+        mInternal = new Internal(Mockito.mock(ConfigManager.class));
         mKitManager = Mockito.mock(KitFrameworkWrapper.class);
         mAppStateManager = Mockito.mock(AppStateManager.class);
         mMessageManager = Mockito.mock(MessageManager.class);
         mMessaging = Mockito.mock(MPMessagingAPI.class);
         mMedia = Mockito.mock(MPMediaAPI.class);
         mCommerce = Mockito.mock(CommerceApi.class);
-        mIdentityApi = new IdentityApi(new MockContext(), mAppStateManager, mMessageManager, mConfigManager, mKitManager);
+        mIdentityApi = new IdentityApi(new MockContext(), mAppStateManager, mMessageManager, mInternal.getConfigManager(), mKitManager);
     }
 
 }

@@ -40,7 +40,8 @@ public class UploadHandlerTest {
         MParticle.setInstance(Mockito.mock(MParticle.class));
         AppStateManager stateManager = Mockito.mock(AppStateManager.class);
         mConfigManager = Mockito.mock(ConfigManager.class);
-        Mockito.when(MParticle.getInstance().getConfigManager()).thenReturn(mConfigManager);
+        Mockito.when(MParticle.getInstance().Internal()).thenReturn(Mockito.mock(MParticle.Internal.class));
+        Mockito.when(MParticle.getInstance().Internal().getConfigManager()).thenReturn(mConfigManager);
         handler = new UploadHandler(new MockContext(), mConfigManager, stateManager, Mockito.mock(MessageManager.class), Mockito.mock(MParticleDBManager.class));
         handler.mParticleDBManager = Mockito.mock(MParticleDBManager.class);
     }
