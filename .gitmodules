@@ -76,3 +76,6 @@
 [submodule "kits/appsee-kit"]
 	path = kits/appsee-kit
 	url = git@github.com:mparticle-integrations/mparticle-android-integration-appsee.git
+[submodule "kits/taplytics-kit"]
+	path = kits/taplytics-kit
+	url = git@github.com:mparticle-integrations/mparticle-android-integration-taplytics.git
