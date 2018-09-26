@@ -81,6 +81,7 @@
 -renamesourcefileattribute SourceFile
 -keepattributes Exceptions,InnerClasses,Signature,Deprecated,SourceFile,LineNumberTable,*Annotation*,EnclosingMethod
 
+-keep class com.mparticle.Session { *; }
 -keep class com.mparticle.MPEvent { *; }
 -keep class com.mparticle.messaging.InstanceIdService { *; }
 -keep class com.mparticle.MPEvent$* { *; }

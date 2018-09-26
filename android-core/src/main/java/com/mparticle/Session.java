@@ -38,7 +38,7 @@ public class Session {
      *
      * @return returns the fnv1a 64-bit hash of the session ID utf-16le bytes.
      */
-    long getSessionID() {
+    public long getSessionID() {
         String sessionUuid = getSessionUUID();
         if (sessionUuid == null) {
             return 0;
