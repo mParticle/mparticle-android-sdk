@@ -140,8 +140,8 @@ import java.util.Map;
      *
      */
     boolean setUserAttribute(String key, Object value, long userMpId, boolean synchronously) {
-        if (mConfigManager.isEnabled() && mAppStateManager.getSession().checkEventLimit()) {
-            MParticle.getInstance().getAppStateManager().ensureActiveSession();
+        if (mConfigManager.isEnabled()) {
+            mAppStateManager.ensureActiveSession();
             if (MPUtility.isEmpty(key)) {
                 Logger.warning("setUserAttribute called with null key. This is a noop.");
                 return false;

@@ -1,16 +1,20 @@
 package com.mparticle.identity;
 
 import com.mparticle.MParticle;
+import com.mparticle.internal.AppStateManager;
+import com.mparticle.internal.ConfigManager;
+import com.mparticle.internal.InternalSession;
+import com.mparticle.internal.KitManager;
+import com.mparticle.internal.MessageManager;
 
 import org.junit.Test;
 import org.mockito.InOrder;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 public class MParticleUserDelegateTest {
 
@@ -75,6 +79,30 @@ public class MParticleUserDelegateTest {
                                 Mockito.eq(123L));
             }
         }
+    }
+
+    @Test
+    public void setUserAttributeEventCounter() {
+        InternalSession session = new InternalSession();
+
+        AppStateManager appStateManager = Mockito.mock(AppStateManager.class);
+        Mockito.when(appStateManager.getSession()).thenReturn(session);
+
+        ConfigManager configManager = Mockito.mock(ConfigManager.class);
+        MessageManager messageManager = Mockito.mock(MessageManager.class);
+        KitManager kitManager = Mockito.mock(KitManager.class);
+
+        Mockito.when(configManager.isEnabled()).thenReturn(true);
+
+        MParticleUserDelegate delegate = new MParticleUserDelegate(appStateManager, configManager, messageManager, kitManager);
+
+        for (int i = 0; i < 1000; i++) {
+            delegate.setUserAttribute("key", "value", 1L);
+        }
+
+
+
+        assertEquals(0, session.mEventCount);
     }
 
 }
