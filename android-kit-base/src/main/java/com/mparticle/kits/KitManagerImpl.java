@@ -105,6 +105,10 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
         return !mConfigManager.isEnabled();
     }
 
+    public Uri getLaunchUri() {
+        return mAppStateManager.getLaunchUri();
+    }
+
     void setIntegrationAttributes(KitIntegration kitIntegration, Map<String, String> integrationAttributes) {
         mConfigManager.setIntegrationAttributes(kitIntegration.getConfiguration().getKitId(), integrationAttributes);
     }
