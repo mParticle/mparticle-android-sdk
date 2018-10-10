@@ -21,14 +21,15 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 
-import com.mparticle.testutils.MPLatch;
-
+import java.util.Random;
 import java.util.concurrent.CountDownLatch;
 
 public abstract class BaseAbstractTest {
     protected Server mServer;
     Activity activity = new Activity();
     protected Context mContext;
+    protected Random ran = new Random();
+    protected RandomUtils mRandomUtils = new RandomUtils();
 
     @BeforeClass
     public static void beforeClassImpl() {

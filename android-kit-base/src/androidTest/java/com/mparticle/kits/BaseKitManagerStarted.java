@@ -5,6 +5,11 @@ import android.content.Context;
 import android.net.Uri;
 
 import com.mparticle.internal.KitFrameworkWrapper;
+import com.mparticle.identity.BaseIdentityTask;
+import com.mparticle.identity.IdentityApiResult;
+import com.mparticle.identity.IdentityHttpResponse;
+import com.mparticle.identity.TaskFailureListener;
+import com.mparticle.identity.TaskSuccessListener;
 import com.mparticle.testutils.BaseCleanInstallEachTest;
 import com.mparticle.MParticle;
 import com.mparticle.MParticleOptions;
@@ -13,6 +18,7 @@ import com.mparticle.internal.AppStateManager;
 import com.mparticle.internal.BackgroundTaskHandler;
 import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.ReportingManager;
+import com.mparticle.testutils.MPLatch;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -23,30 +29,48 @@ import java.lang.ref.WeakReference;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
+import java.util.concurrent.CountDownLatch;
 
 public abstract class BaseKitManagerStarted extends BaseCleanInstallEachTest {
     private static Map<Integer, String> mCustomTestKits;
     protected Long mStartingMpid;
-    protected KitManagerImpl mKitManager;
+    protected CustomKitManagerImpl mKitManager;
 
     @Before
     public void before() throws Exception {
         mStartingMpid = new Random().nextLong();
         setupConfigMessageForKits(registerCustomKits());
-        new ConfigManager(mContext, null, null, null).setMpid(mStartingMpid);
         mServer.setupHappyIdentify(mStartingMpid);
-        MParticle.setInstance(null);
+        final CountDownLatch latch = new MPLatch(1);
         MParticle.start(MParticleOptions.builder(mContext)
                 .credentials("key", "value")
+                .identifyTask(new BaseIdentityTask()
+                .addFailureListener(new TaskFailureListener() {
+                    @Override
+                    public void onFailure(IdentityHttpResponse result) {
+                        latch.countDown();
+                    }
+                })
+                .addSuccessListener(new TaskSuccessListener() {
+                    @Override
+                    public void onSuccess(IdentityApiResult result) {
+                        latch.countDown();
+                    }
+                }))
                 .build());
         mKitManager = new CustomKitManagerImpl(mContext, com.mparticle.AccessUtils.getMessageManager(), new CoreCallbackImpl(MParticle.getInstance().Internal().getConfigManager(), MParticle.getInstance().getAppStateManager()), AccessUtils.getUploadHandler());
         mKitManager.setKitFactory(new CustomKitFactory());
         AccessUtils.setKitManager(mKitManager);
+        latch.await();
     }
 
     //implementing this method will both register your custom kit, and start it via modifying the
     //config response to contains an "eks" message with the kit's id
     protected abstract Map<String, JSONObject> registerCustomKits();
+
+    protected void setKitStartedListener(KitStartedListener kitStartedListener) {
+        mKitManager.kitsStartedListener = kitStartedListener;
+    }
 
     private void setupConfigMessageForKits(Map<String, JSONObject> kitIds) {
         JSONArray eks = new JSONArray();
@@ -77,28 +101,17 @@ public abstract class BaseKitManagerStarted extends BaseCleanInstallEachTest {
     //this is a non-anonymous class only for the purpose of debugging
     class CustomKitManagerImpl extends KitManagerImpl {
 
-        private Runnable kitsStartedListener;
-        private boolean started;
-        public void setOnKitsStartedListener(Runnable runnable) {
-            if (started) {
-                if (kitsStartedListener != null) {
-                    kitsStartedListener.run();
-                }
-            } else {
-                kitsStartedListener = runnable;
-            }
-        }
+        private KitStartedListener kitsStartedListener;
 
         public CustomKitManagerImpl(Context context, ReportingManager reportingManager, KitFrameworkWrapper.CoreCallbacks coreCallbacks, BackgroundTaskHandler backgroundTaskHandler) {
             super(context, reportingManager, coreCallbacks, backgroundTaskHandler);
         }
 
         @Override
-        public void updateKits(JSONArray kitConfigs) {
-            super.updateKits(kitConfigs);
-            started = true;
+        public void configureKits(JSONArray kitConfigs) {
+            super.configureKits(kitConfigs);
             if (kitsStartedListener != null) {
-                kitsStartedListener.run();
+                kitsStartedListener.onKitStarted(kitConfigs);
                 kitsStartedListener = null;
             }
 
@@ -180,5 +193,10 @@ public abstract class BaseKitManagerStarted extends BaseCleanInstallEachTest {
         public Uri getLaunchUri() {
             return appStateManager.getLaunchUri();
         }
+
+    }
+
+    interface KitStartedListener {
+        void onKitStarted(JSONArray jsonArray);
     }
 }

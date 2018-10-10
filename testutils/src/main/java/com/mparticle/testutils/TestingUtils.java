@@ -15,7 +15,7 @@ import java.util.Map;
 import java.util.Random;
 
 public class TestingUtils {
-    private RandomUtils mRandom = RandomUtils.getInstance();
+    private RandomUtils mRandom = new RandomUtils();
     private static TestingUtils instance;
 
     public static TestingUtils getInstance() {

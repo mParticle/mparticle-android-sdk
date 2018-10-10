@@ -3,15 +3,16 @@ package com.mparticle;
 import android.os.Handler;
 import android.os.Looper;
 
-import com.mparticle.internal.*;
+import com.mparticle.internal.Constants;
+import com.mparticle.internal.MPUtility;
+import com.mparticle.internal.MParticleApiClientImpl;
 import com.mparticle.testutils.BaseCleanStartedEachTest;
+import com.mparticle.testutils.MPLatch;
 import com.mparticle.testutils.TestingUtils;
-import com.mparticle.testutils.RandomUtils;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -21,10 +22,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.concurrent.CountDownLatch;
-
-import com.mparticle.testutils.MPLatch;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
@@ -32,13 +30,6 @@ import static junit.framework.Assert.assertTrue;
 import static junit.framework.Assert.fail;
 
 public final class UploadMessageTest extends BaseCleanStartedEachTest {
-
-    RandomUtils mRandom;
-
-    @Before
-    public void before() throws Exception {
-        mRandom = RandomUtils.getInstance();
-    }
 
     /**
      * set MPID, log between 0 and 20 random MPEvents, and check to make sure each one is properly
@@ -48,8 +39,8 @@ public final class UploadMessageTest extends BaseCleanStartedEachTest {
     public void testCorrectlyAttributeEventsToMpid() throws Exception {
         int numberOfEvents = 3;
         final Handler handler = new Handler(Looper.getMainLooper());
-        long mpid = new Random().nextLong();
-        MParticle.getInstance().Internal().getConfigManager().setMpid(mpid);
+        long mpid = ran.nextLong();
+        MParticle.getInstance().Internal().getConfigManager().setMpid(mpid, ran.nextBoolean());
         final Map<String, MPEvent> events = new HashMap<String, MPEvent>();
         final CountDownLatch latch = new MPLatch(numberOfEvents);
 

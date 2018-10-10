@@ -15,13 +15,14 @@ import com.github.tomakehurst.wiremock.stubbing.ServeEvent;
 import com.github.tomakehurst.wiremock.stubbing.StubMapping;
 import com.github.tomakehurst.wiremock.verification.LoggedRequest;
 import com.mparticle.MParticle;
-import com.mparticle.internal.MPUtility;
+import com.mparticle.identity.IdentityHttpResponse;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.CountDownLatch;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
@@ -36,6 +37,7 @@ public class Server {
     private WireMockServer mWireMockServer;
     StubMapping mConfigMapping;
     List<RequestListener> requestListeners = new ArrayList<>();
+    Random random = new Random();
 
     public Server() {
         mWireMockServer = new WireMockServer(wireMockConfig().port(8080).notifier(new Notifier() {
@@ -87,9 +89,9 @@ public class Server {
         mWireMockServer.resetAll();
         setUpHappyConfig();
         setupHappyEvents();
-        setupHappyIdentify(currentMpid);
-        setupHappyLogin(currentMpid);
-        setupHappyLogout(currentMpid);
+        setupHappyIdentify(currentMpid, true);
+        setupHappyLogin(currentMpid, true);
+        setupHappyLogout(currentMpid, true);
         setupHappyModify();
         mWireMockServer.start();
         requestListeners = new ArrayList<>();
@@ -141,35 +143,51 @@ public class Server {
     }
 
     public Server setupHappyIdentify(long mpid) {
-        return setupHappyIdentify(mpid, 0);
+        return setupHappyIdentify(mpid, random.nextBoolean());
+    }
+
+    public Server setupHappyIdentify(long mpid, boolean loggedIn) {
+        return setupHappyIdentify(mpid, loggedIn, 0);
     }
 
     public Server setupHappyIdentify(long mpid, int delay) {
+        return setupHappyIdentify(mpid, random.nextBoolean(), delay);
+    }
+
+    public Server setupHappyIdentify(long mpid, boolean loggedIn, int delay) {
         mWireMockServer.stubFor(post(urlPathMatching("/v([0-9]*)/identify"))
                 .willReturn(aResponse()
                         .withStatus(200)
                         .withFixedDelay(delay)
                         .withHeader("Access-Control-Allow-Origin", "*")
-                        .withBody(getIdentityResponse(mpid))
+                        .withBody(getIdentityResponse(mpid, loggedIn))
                 ));
         return this;
     }
 
     public Server setupHappyLogin(long mpid) {
+        return setupHappyLogin(mpid, random.nextBoolean());
+    }
+
+    public Server setupHappyLogin(long mpid, boolean loggedIn) {
         mWireMockServer.stubFor(post(urlPathMatching("/v([0-9]*)/login"))
                 .willReturn(aResponse()
                         .withStatus(200)
-                        .withBody(getIdentityResponse(mpid))
+                        .withBody(getIdentityResponse(mpid, loggedIn))
                         .withHeader("Access-Control-Allow-Origin", "*")
                 ));
         return this;
     }
 
     public Server setupHappyLogout(long mpid) {
+        return setupHappyLogout(mpid, random.nextBoolean());
+    }
+
+    public Server setupHappyLogout(long mpid, boolean loggedIn) {
         mWireMockServer.stubFor(post(urlPathMatching("/v([0-9]*)/logout"))
                 .willReturn(aResponse()
                         .withStatus(200)
-                        .withBody(getIdentityResponse(mpid))
+                        .withBody(getIdentityResponse(mpid, loggedIn))
                         .withHeader("Access-Control-Allow-Origin", "*")
                 ));
         return this;
@@ -185,48 +203,61 @@ public class Server {
     }
 
     public Server addConditionalIdentityResponse(long ifMpid, long thenMpid) {
-        return addConditionalIdentityResponse(ifMpid, thenMpid, 0);
+        return addConditionalIdentityResponse(ifMpid, thenMpid, random.nextBoolean());
     }
 
-    public Server addConditionalIdentityResponse(long ifMpid, long thenMpid, int delay) {
+    public Server addConditionalIdentityResponse(long ifMpid, long thenMpid, boolean loggedIn) {
+        return addConditionalIdentityResponse(ifMpid, thenMpid, loggedIn, 0);
+    }
+
+    public Server addConditionalIdentityResponse(long ifMpid, long thenMpid, boolean loggedIn, int delay) {
         mWireMockServer.stubFor(post(urlPathMatching("/v([0-9]*)/identify")).withRequestBody(matchingJsonPath(String.format("$.[?(@.previous_mpid == '%s')]", String.valueOf(ifMpid))))
                 .willReturn(aResponse()
                         .withStatus(200)
                         .withFixedDelay(delay)
-                        .withBody(getIdentityResponse(thenMpid))));
+                        .withBody(getIdentityResponse(thenMpid, loggedIn))));
         return this;
     }
 
     public Server addConditionalLoginResponse(long ifMpid, long thenMpid) {
-        return addConditionalLoginResponse(ifMpid, thenMpid, 0);
+        return addConditionalLoginResponse(ifMpid, thenMpid, random.nextBoolean());
     }
 
-    public Server addConditionalLoginResponse(long ifMpid, long thenMpid, int delay) {
+    public Server addConditionalLoginResponse(long ifMpid, long thenMpid, boolean loggedIn) {
+        return addConditionalLoginResponse(ifMpid, thenMpid, loggedIn, 0);
+    }
+
+    public Server addConditionalLoginResponse(long ifMpid, long thenMpid, boolean loggedIn, int delay) {
         mWireMockServer.stubFor(post(urlPathMatching("/v([0-9]*)/login")).withRequestBody(matchingJsonPath(String.format("$.[?(@.previous_mpid == '%s')]", String.valueOf(ifMpid))))
                 .willReturn(aResponse()
                         .withStatus(200)
                         .withFixedDelay(delay)
-                        .withBody(getIdentityResponse(thenMpid))));
+                        .withBody(getIdentityResponse(thenMpid, loggedIn))));
         return this;
     }
 
     public Server addConditionalLogoutResponse(long ifMpid, long thenMpid) {
-        return addConditionalLogoutResponse(ifMpid, thenMpid, 0);
+        return addConditionalLogoutResponse(ifMpid, thenMpid, random.nextBoolean());
     }
 
-    public Server addConditionalLogoutResponse(long ifMpid, long thenMpid, int delay) {
+    public Server addConditionalLogoutResponse(long ifMpid, long thenMpid, boolean loggedIn) {
+        return addConditionalLogoutResponse(ifMpid, thenMpid, loggedIn, 0);
+    }
+
+    public Server addConditionalLogoutResponse(long ifMpid, long thenMpid, boolean loggedIn, int delay) {
         mWireMockServer.stubFor(post(urlPathMatching("/v([0-9]*)/logout")).withRequestBody(matchingJsonPath(String.format("$.[?(@.previous_mpid == '%s')]", String.valueOf(ifMpid))))
                 .willReturn(aResponse()
                         .withStatus(200)
                         .withFixedDelay(delay)
-                        .withBody(getIdentityResponse(thenMpid))));
+                        .withBody(getIdentityResponse(thenMpid, loggedIn))));
         return this;
     }
 
-    private String getIdentityResponse(long mpid) {
+    private String getIdentityResponse(long mpid, boolean loggedIn) {
         try {
-            return new JSONObject().put("mpid", String.valueOf(mpid))
-                    .put("context", "randomContext")
+            return new JSONObject().put(IdentityHttpResponse.MPID, String.valueOf(mpid))
+                    .put(IdentityHttpResponse.CONTEXT, "randomContext")
+                    .put(IdentityHttpResponse.LOGGED_IN, loggedIn)
                     .toString();
         } catch (JSONException e) {
             e.printStackTrace();

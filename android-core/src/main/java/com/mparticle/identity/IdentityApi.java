@@ -98,8 +98,7 @@ public class IdentityApi {
     }
 
     /**
-     * adds a global listener for any changes in Identity State. This will give you a callback when
-     * a user is identified
+     * adds a global listener which will be invoked when the MPID or "logged in" status changes for the current user
      * @param listener callback for Identity State changes
      *
      * @see IdentityStateListener
@@ -310,9 +309,10 @@ public class IdentityApi {
                             task.setFailed(result);
                         } else {
                             long newMpid = result.getMpId();
+                            boolean isLoggedIn = result.isLoggedIn();
                             ConfigManager.setIdentityRequestInProgress(false);
-                            mUserDelegate.setUser(mContext, startingMpid, newMpid, identityApiRequest.getUserIdentities(), identityApiRequest.getUserAliasHandler());
-                            task.setSuccessful(new IdentityApiResult(getCurrentUser()));
+                            mUserDelegate.setUser(mContext, startingMpid, newMpid, identityApiRequest.getUserIdentities(), identityApiRequest.getUserAliasHandler(), isLoggedIn);
+                            task.setSuccessful(new IdentityApiResult(getUser(newMpid)));
                             new Handler(Looper.getMainLooper()).post(new Runnable() {
                                 @Override
                                 public void run() {

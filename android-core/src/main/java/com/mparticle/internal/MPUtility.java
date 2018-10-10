@@ -99,6 +99,10 @@ public class MPUtility {
         return jsonArray == null || jsonArray.length() == 0;
     }
 
+    public static boolean isEmpty(JSONObject jsonObject) {
+        return jsonObject == null || jsonObject.length() == 0;
+    }
+
     public static boolean isEmpty(Map map) {
         return map == null || map.size() == 0;
     }

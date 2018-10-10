@@ -130,4 +130,9 @@ public class MParticleUserImpl implements MParticleUser {
     public void setConsentState(ConsentState state) {
         mUserDelegate.setConsentState(state, getId());
     }
+
+    @Override
+    public boolean isLoggedIn() {
+        return mUserDelegate.isLoggedIn(getId());
+    }
 }

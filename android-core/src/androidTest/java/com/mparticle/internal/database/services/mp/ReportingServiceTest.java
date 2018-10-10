@@ -134,7 +134,7 @@ public class ReportingServiceTest extends BaseMPServiceTest {
      private List<JsonReportingMessage> getNReportingMessages(int n, String sessionId) {
          List<JsonReportingMessage> reportingMessages = new ArrayList<JsonReportingMessage>();
          for (int i = 0; i < n; i++) {
-             reportingMessages.add(getRandomReportingMessage(sessionId != null ? sessionId : String.valueOf(new Random().nextInt())));
+             reportingMessages.add(getRandomReportingMessage(sessionId != null ? sessionId : String.valueOf(ran.nextInt())));
          }
          return reportingMessages;
      }
@@ -164,7 +164,7 @@ public class ReportingServiceTest extends BaseMPServiceTest {
                  try {
                      jsonObject.put("fieldOne", "a value");
                      jsonObject.put("fieldTwo", "another value");
-                     jsonObject.put("a random Number", randomNumber == -1 ? randomNumber = new Random().nextInt() : randomNumber);
+                     jsonObject.put("a random Number", randomNumber == -1 ? randomNumber = ran.nextInt() : randomNumber);
                  }
                  catch (JSONException ignore) {}
                  return jsonObject;

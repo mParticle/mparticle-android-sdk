@@ -1,12 +1,10 @@
 package com.mparticle.internal;
 
-import android.content.Context;
 import android.os.Looper;
-import android.support.test.InstrumentationRegistry;
 
-import com.mparticle.testutils.BaseAbstractTest;
 import com.mparticle.MParticle;
 import com.mparticle.MParticleOptions;
+import com.mparticle.testutils.BaseAbstractTest;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -17,16 +15,14 @@ import java.util.UUID;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertTrue;
 
-public class ConfigManagerTest extends BaseAbstractTest {
+public class ConfigManagerMigrationTest extends BaseAbstractTest {
     MParticle instance;
-    Context mContext;
 
     @Before
     public void before() {
         if (Looper.myLooper() == null) {
             Looper.prepare();
         }
-        mContext = InstrumentationRegistry.getContext();
         MParticle.setInstance(null);
         ConfigManager.clearMpid(mContext);
         MParticleOptions options = MParticleOptions.builder(mContext)
@@ -43,8 +39,6 @@ public class ConfigManagerTest extends BaseAbstractTest {
         refreshProfile1();
         refreshProfile2();
         refreshProfile3();
-
-
     }
 
     /**
@@ -56,22 +50,21 @@ public class ConfigManagerTest extends BaseAbstractTest {
         ConfigManager configManager = instance.Internal().getConfigManager();
         assertTrue(configManager.getMpid() == Constants.TEMPORARY_MPID);
 
-        long oldMpid = new Random().nextLong();
-        long newMpid = new Random().nextLong();
-
+        long oldMpid = ran.nextLong();
+        long newMpid = ran.nextLong();
 
         //test that every field was set in the subject UserConfig
-        configManager.setMpid(newMpid);
+        configManager.setMpid(newMpid, ran.nextBoolean());
         assertTrue(configManager.getUserStorage().getMpid() == newMpid);
         setProfile2(configManager.getUserStorage());
         assertMatchesProfile2(configManager.getUserStorage());
 
-        configManager.setMpid(oldMpid);
+        configManager.setMpid(oldMpid, ran.nextBoolean());
         assertTrue(configManager.getUserStorage().getMpid() == oldMpid);
         setProfile3(configManager.getUserStorage());
         assertMatchesProfile3(configManager.getUserStorage());
 
-        configManager.setMpid(newMpid);
+        configManager.setMpid(newMpid, ran.nextBoolean());
         configManager.mergeUserConfigs(oldMpid, newMpid);
         assertTrue(configManager.getUserStorage().getMpid() == newMpid);
         assertMatchesProfile3(configManager.getUserStorage());
@@ -88,21 +81,23 @@ public class ConfigManagerTest extends BaseAbstractTest {
     static String cookies;
     static int launchesSinceUpgrade;
     static String userIdentities;
+    static boolean knownIdentity;
+    static Random ran = new Random();
 
     static void refreshProfile1() {
-        breadcrumbLimit = new Random().nextInt();
-        previousForeground = new Random().nextLong();
+        breadcrumbLimit = ran.nextInt();
+        previousForeground = ran.nextLong();
         deletedUserAttributes = UUID.randomUUID().toString();
-        lastUseDate = new Random().nextLong();
+        lastUseDate = ran.nextLong();
         previousSessionId = UUID.randomUUID().toString();
-        previousStart = new Random().nextLong();
-        ltv = String.valueOf(new Random().nextInt());
-        totalRuns = new Random().nextInt();
+        previousStart = ran.nextLong();
+        ltv = String.valueOf(ran.nextInt());
+        totalRuns = ran.nextInt();
         cookies = UUID.randomUUID().toString();
-        launchesSinceUpgrade = new Random().nextInt();
+        launchesSinceUpgrade = ran.nextInt();
         userIdentities = UUID.randomUUID().toString();
     }
-    
+
     void setProfile1(UserStorage userStorage) {
         userStorage.setBreadcrumbLimit(breadcrumbLimit);
         userStorage.setDeletedUserAttributes(deletedUserAttributes);
@@ -143,16 +138,16 @@ public class ConfigManagerTest extends BaseAbstractTest {
     static String userIdentities2;
 
     static void refreshProfile2() {
-        breadcrumbLimit2 = new Random().nextInt();
-        previousForeground2 = new Random().nextLong();
+        breadcrumbLimit2 = ran.nextInt();
+        previousForeground2 = ran.nextLong();
         deletedUserAttributes2 = UUID.randomUUID().toString();
-        lastUseDate2 = new Random().nextLong();
+        lastUseDate2 = ran.nextLong();
         previousSessionId2 = UUID.randomUUID().toString();
-        previousStart2 = new Random().nextLong();
-        ltv2 = String.valueOf(new Random().nextInt());
-        totalRuns2 = new Random().nextInt();
+        previousStart2 = ran.nextLong();
+        ltv2 = String.valueOf(ran.nextInt());
+        totalRuns2 = ran.nextInt();
         cookies2 = UUID.randomUUID().toString();
-        launchesSinceUpgrade2 = new Random().nextInt();
+        launchesSinceUpgrade2 = ran.nextInt();
         userIdentities2 = UUID.randomUUID().toString();
     }
 
@@ -196,16 +191,16 @@ public class ConfigManagerTest extends BaseAbstractTest {
     String userIdentities3;
 
     void refreshProfile3() {
-        breadcrumbLimit3 = new Random().nextInt();
-        previousForeground3 = new Random().nextLong();
+        breadcrumbLimit3 = ran.nextInt();
+        previousForeground3 = ran.nextLong();
         deletedUserAttributes3 = UUID.randomUUID().toString();
-        lastUseDate3 = new Random().nextLong();
+        lastUseDate3 = ran.nextLong();
         previousSessionId3 = UUID.randomUUID().toString();
-        previousStart3 = new Random().nextLong();
-        ltv3 = String.valueOf(new Random().nextInt());
-        totalRuns3 = new Random().nextInt();
+        previousStart3 = ran.nextLong();
+        ltv3 = String.valueOf(ran.nextInt());
+        totalRuns3 = ran.nextInt();
         cookies3 = UUID.randomUUID().toString();
-        launchesSinceUpgrade3 = new Random().nextInt();
+        launchesSinceUpgrade3 = ran.nextInt();
         userIdentities3 = UUID.randomUUID().toString();
     }
 

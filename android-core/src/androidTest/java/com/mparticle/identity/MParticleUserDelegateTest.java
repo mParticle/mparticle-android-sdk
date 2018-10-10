@@ -1,23 +1,18 @@
 package com.mparticle.identity;
 
-import android.content.Context;
-import android.support.test.InstrumentationRegistry;
 import android.util.Log;
 
-import com.mparticle.internal.AccessUtils;
-import com.mparticle.testutils.BaseCleanStartedEachTest;
 import com.mparticle.MParticle;
 import com.mparticle.consent.ConsentState;
 import com.mparticle.consent.GDPRConsent;
-import com.mparticle.testutils.RandomUtils;
+import com.mparticle.internal.AccessUtils;
+import com.mparticle.testutils.BaseCleanStartedEachTest;
 
 import org.junit.Before;
 import org.junit.Test;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Random;
-import com.mparticle.testutils.MPLatch;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
@@ -25,27 +20,23 @@ import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertTrue;
 
 public class MParticleUserDelegateTest extends BaseCleanStartedEachTest {
-    Context mContext;
     MParticleUserDelegate mUserDelegate;
-    RandomUtils mRandom;
 
     @Before
     public void before() throws Exception {
-        mContext = InstrumentationRegistry.getContext();
         mUserDelegate = MParticle.getInstance().Identity().mUserDelegate;
-        mRandom = RandomUtils.getInstance();
     }
 
     @Test
     public void testSetGetUserIdentities() throws Exception {
         Map<Long, Map<MParticle.IdentityType, String>> attributes = new HashMap<Long, Map<MParticle.IdentityType, String>>();
         for (int i = 0; i < 13; i++) {
-            Long mpid = new Random().nextLong();
+            Long mpid = ran.nextLong();
             Map<MParticle.IdentityType, String> pairs = new HashMap<MParticle.IdentityType, String>();
             attributes.put(mpid, pairs);
             for (int j = 0; j < 3; j++) {
-                MParticle.IdentityType identityType = MParticle.IdentityType.parseInt(mRandom.randomInt(0, MParticle.IdentityType.values().length));
-                String value = mRandom.getAlphaNumericString(mRandom.randomInt(1, 25));
+                MParticle.IdentityType identityType = MParticle.IdentityType.parseInt(mRandomUtils.randomInt(0, MParticle.IdentityType.values().length));
+                String value = mRandomUtils.getAlphaNumericString(mRandomUtils.randomInt(1, 25));
                 assertTrue(mUserDelegate.setUserIdentity(value, identityType, mpid));
                 pairs.put(identityType, value);
             }
@@ -73,12 +64,12 @@ public class MParticleUserDelegateTest extends BaseCleanStartedEachTest {
         // create and store
         Map<Long, Map<String, String>> attributes = new HashMap<Long, Map<String, String>>();
         for (int i = 0; i < 5; i++) {
-            Long mpid = new Random().nextLong();
+            Long mpid = ran.nextLong();
             Map<String, String> pairs = new HashMap<String, String>();
             attributes.put(mpid, pairs);
             for (int j = 0; j < 3; j++) {
-                String key = mRandom.getAlphaNumericString(mRandom.randomInt(1, 55)).toUpperCase();
-                String value = mRandom.getAlphaNumericString(mRandom.randomInt(1, 55));
+                String key = mRandomUtils.getAlphaNumericString(mRandomUtils.randomInt(1, 55)).toUpperCase();
+                String value = mRandomUtils.getAlphaNumericString(mRandomUtils.randomInt(1, 55));
                 assertTrue(mUserDelegate.setUserAttribute(key, value, mpid, false));
                 pairs.put(key, value);
             }
@@ -113,8 +104,8 @@ public class MParticleUserDelegateTest extends BaseCleanStartedEachTest {
 
     @Test
     public void testSetConsentState() throws Exception {
-        Long mpid = new Random().nextLong();
-        Long mpid2 = new Random().nextLong();
+        Long mpid = ran.nextLong();
+        Long mpid2 = ran.nextLong();
         ConsentState state = mUserDelegate.getConsentState(mpid);
         assertNotNull(state);
         assertNotNull(state.getGDPRConsentState());
@@ -136,7 +127,7 @@ public class MParticleUserDelegateTest extends BaseCleanStartedEachTest {
 
     @Test
     public void testRemoveConsentState() throws Exception {
-        Long mpid = new Random().nextLong();
+        Long mpid = ran.nextLong();
         ConsentState state = mUserDelegate.getConsentState(mpid);
         assertNotNull(state);
         assertNotNull(state.getGDPRConsentState());

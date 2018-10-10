@@ -15,7 +15,6 @@ import com.mparticle.internal.KitManager;
 import com.mparticle.internal.Logger;
 import com.mparticle.internal.MPUtility;
 import com.mparticle.internal.MessageManager;
-import com.mparticle.internal.database.services.MParticleDBManager;
 import com.mparticle.segmentation.SegmentListener;
 
 import org.json.JSONArray;
@@ -252,7 +251,7 @@ import java.util.Map;
         }
     }
 
-    boolean setUser(Context context, long previousMpid, long newMpid, Map<MParticle.IdentityType, String> identities, UserAliasHandler userAliasHandler) {
+    boolean setUser(Context context, long previousMpid, long newMpid, Map<MParticle.IdentityType, String> identities, UserAliasHandler userAliasHandler, boolean isLoggedIn) {
         setUserIdentities(this, identities, newMpid);
         // if the mpid remains equal to the temporary_mpid, as the case could be when a network request fails
         // or on startup, then there is no reason to do anything
@@ -273,7 +272,7 @@ import java.util.Map;
                 Logger.error("Error while executing UserAliasHandler: " + e.toString());
             }
         }
-        mConfigManager.setMpid(newMpid);
+        mConfigManager.setMpid(newMpid, isLoggedIn);
         return true;
 
     }
@@ -286,5 +285,9 @@ import java.util.Map;
         ConsentState oldState = getConsentState(mpid);
         mConfigManager.setConsentState(state, mpid);
         mKitManager.onConsentStateUpdated(oldState, state, mpid);
+    }
+
+    public boolean isLoggedIn(Long mpid) {
+        return mConfigManager.getUserStorage(mpid).isLoggedIn();
     }
 }

@@ -28,7 +28,7 @@ public class KitFrameworkWrapperTest extends BaseCleanStartedEachTest {
 
     @Test
     public void testIdentify() throws InterruptedException {
-        final Long mpid = new Random().nextLong();
+        final Long mpid = ran.nextLong();
         final CountDownLatch latch = new MPLatch(1);
         final MutableBoolean called = new MutableBoolean(false);
         setKitManager(new StubKitManager(mContext) {
@@ -50,7 +50,7 @@ public class KitFrameworkWrapperTest extends BaseCleanStartedEachTest {
 
     @Test
     public void testLogin() throws InterruptedException {
-        final Long mpid = new Random().nextLong();
+        final Long mpid = ran.nextLong();
         final CountDownLatch latch = new MPLatch(1);
         final MutableBoolean called = new MutableBoolean(false);
         setKitManager(new StubKitManager(mContext) {
@@ -72,7 +72,7 @@ public class KitFrameworkWrapperTest extends BaseCleanStartedEachTest {
 
     @Test
     public void testLogout() throws InterruptedException {
-        final Long mpid = new Random().nextLong();
+        final Long mpid = ran.nextLong();
         final CountDownLatch latch = new MPLatch(1);
         final MutableBoolean called = new MutableBoolean(false);
         setKitManager(new StubKitManager(mContext) {
@@ -122,11 +122,11 @@ public class KitFrameworkWrapperTest extends BaseCleanStartedEachTest {
             }
         });
         MParticle.getInstance().Identity().modify(IdentityApiRequest.withEmptyUser().build());
-        MParticle.getInstance().Internal().getConfigManager().setMpid(0);
+        MParticle.getInstance().Internal().getConfigManager().setMpid(0, ran.nextBoolean());
         latch.await();
         final CountDownLatch latch2 = new MPLatch(1);
-        final Long mpid2 = new Random().nextLong();
-        MParticle.getInstance().Internal().getConfigManager().setMpid(mpid2);
+        final Long mpid2 = ran.nextLong();
+        MParticle.getInstance().Internal().getConfigManager().setMpid(mpid2, ran.nextBoolean());
         assertTrue(called.value);
         called.value = false;
         setKitManager(new StubKitManager(mContext) {
@@ -138,7 +138,7 @@ public class KitFrameworkWrapperTest extends BaseCleanStartedEachTest {
             }
         });
         MParticle.getInstance().Identity().modify(IdentityApiRequest.withUser(MParticle.getInstance().Identity().getCurrentUser()).build());
-        MParticle.getInstance().Internal().getConfigManager().setMpid(new Random().nextLong());
+        MParticle.getInstance().Internal().getConfigManager().setMpid(ran.nextLong(), ran.nextBoolean());
         latch2.await();
         assertTrue(called.value);
     }

@@ -19,6 +19,7 @@ import com.mparticle.mock.MockKitConfiguration;
 import junit.framework.Assert;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -27,6 +28,10 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+
+import static junit.framework.TestCase.assertEquals;
+import static junit.framework.TestCase.assertFalse;
+import static junit.framework.TestCase.assertTrue;
 
 public class KitManagerImplTest {
     BackgroundTaskHandler mockBackgroundTaskHandler = new BackgroundTaskHandler(){
@@ -191,6 +196,170 @@ public class KitManagerImplTest {
         manager.configureKits(kitConfiguration);
         Assert.assertEquals(1, manager.providers.size());
 
+    }
+
+    @Test
+    public void testShouldEnableKitBasedOnActiveUser() throws JSONException, ClassNotFoundException {
+        MParticle mparticle = Mockito.mock(MParticle.class);
+        Mockito.when(mparticle.getKitManager()).thenReturn(Mockito.mock(KitFrameworkWrapper.class));
+        IdentityApi mockIdentity = Mockito.mock(IdentityApi.class);
+        MParticleUser mockUser = Mockito.mock(MParticleUser.class);
+        Mockito.when(mockIdentity.getCurrentUser()).thenReturn(mockUser);
+        Mockito.when(mockUser.isLoggedIn()).thenReturn(true);
+        Mockito.when(mparticle.Identity()).thenReturn(mockIdentity);
+        MParticle.setInstance(mparticle);
+        KitManagerImpl manager = new KitManagerImpl(
+                Mockito.mock(Context.class),
+                null,
+                Mockito.mock(KitFrameworkWrapper.CoreCallbacks.class),
+                Mockito.mock(BackgroundTaskHandler.class)
+        );
+        ConsentState state = ConsentState.builder()
+                .addGDPRConsentState("Blah", GDPRConsent.builder(true).build())
+                .build();
+        Mockito.when(mockUser.getConsentState()).thenReturn(state);
+        JSONArray kitConfiguration = new JSONArray();
+        kitConfiguration.put(new JSONObject("{ \"id\":1, \"eau\": true, \"as\":{ \"foo\":\"bar\" }, \"crvf\":{ \"i\":true, \"v\":[ { \"c\":true, \"h\":48278946 }, { \"c\":true, \"h\":1556641 } ] } }"));
+        kitConfiguration.put(new JSONObject("{ \"id\":2, \"eau\": true, \"as\":{ \"foo\":\"bar\" } }"));
+        kitConfiguration.put(new JSONObject("{ \"id\":3, \"eau\": false, \"as\":{ \"foo\":\"bar\" } }"));
+
+        KitIntegrationFactory factory = Mockito.mock(KitIntegrationFactory.class);
+        manager.setKitFactory(factory);
+        Mockito.when(factory.isSupported(Mockito.anyInt())).thenReturn(true);
+        KitIntegration mockKit  = Mockito.mock(KitIntegration.class);
+        Mockito.when(mockKit.getConfiguration()).thenReturn(Mockito.mock(KitConfiguration.class));
+        Mockito.when(factory.createInstance(Mockito.any(KitManagerImpl.class), Mockito.any(KitConfiguration.class))).thenReturn(mockKit);
+        manager.configureKits(kitConfiguration);
+        Assert.assertEquals(3, manager.providers.size());
+    }
+
+    @Test
+    public void testShouldNotEnableKitBasedOnActiveUser() throws JSONException, ClassNotFoundException {
+        MParticle mparticle = Mockito.mock(MParticle.class);
+        Mockito.when(mparticle.getKitManager()).thenReturn(Mockito.mock(KitFrameworkWrapper.class));
+        IdentityApi mockIdentity = Mockito.mock(IdentityApi.class);
+        MParticleUser mockUser = Mockito.mock(MParticleUser.class);
+        Mockito.when(mockIdentity.getCurrentUser()).thenReturn(mockUser);
+        Mockito.when(mockUser.isLoggedIn()).thenReturn(false);
+        Mockito.when(mparticle.Identity()).thenReturn(mockIdentity);
+        MParticle.setInstance(mparticle);
+        KitManagerImpl manager = new KitManagerImpl(
+                Mockito.mock(Context.class),
+                null,
+                Mockito.mock(KitFrameworkWrapper.CoreCallbacks.class),
+                Mockito.mock(BackgroundTaskHandler.class)
+        );
+        ConsentState state = ConsentState.builder()
+                .addGDPRConsentState("Blah", GDPRConsent.builder(true).build())
+                .build();
+        Mockito.when(mockUser.getConsentState()).thenReturn(state);
+        JSONArray kitConfiguration = new JSONArray();
+        kitConfiguration.put(new JSONObject("{ \"id\":1, \"eau\": true, \"as\":{ \"foo\":\"bar\" }, \"crvf\":{ \"i\":true, \"v\":[ { \"c\":true, \"h\":48278946 }, { \"c\":true, \"h\":1556641 } ] } }"));
+        kitConfiguration.put(new JSONObject("{ \"id\":2, \"eau\": false, \"as\":{ \"foo\":\"bar\" } }"));
+        kitConfiguration.put(new JSONObject("{ \"id\":3, \"eau\": true, \"as\":{ \"foo\":\"bar\" } }"));
+        KitIntegrationFactory factory = Mockito.mock(KitIntegrationFactory.class);
+        manager.setKitFactory(factory);
+        Mockito.when(factory.isSupported(Mockito.anyInt())).thenReturn(true);
+        KitIntegration mockKit  = Mockito.mock(KitIntegration.class);
+        Mockito.when(mockKit.getConfiguration()).thenReturn(Mockito.mock(KitConfiguration.class));
+        Mockito.when(factory.createInstance(Mockito.any(KitManagerImpl.class), Mockito.any(KitConfiguration.class))).thenReturn(mockKit);
+        manager.configureKits(kitConfiguration);
+        Assert.assertEquals(1, manager.providers.size());
+        assertTrue(manager.isKitActive(2));
+        assertFalse(manager.isKitActive(1));
+        assertFalse(manager.isKitActive(3));
+    }
+
+    @Test
+    public void testShouldEnableDisabledKitBasedOnActiveUser() throws JSONException, ClassNotFoundException {
+        MParticle mparticle = Mockito.mock(MParticle.class);
+        Mockito.when(mparticle.getKitManager()).thenReturn(Mockito.mock(KitFrameworkWrapper.class));
+        IdentityApi mockIdentity = Mockito.mock(IdentityApi.class);
+        MParticleUser mockUser = Mockito.mock(MParticleUser.class);
+        Mockito.when(mockIdentity.getCurrentUser()).thenReturn(mockUser);
+        Mockito.when(mockUser.isLoggedIn()).thenReturn(false);
+        Mockito.when(mparticle.Identity()).thenReturn(mockIdentity);
+        MParticle.setInstance(mparticle);
+
+        KitFrameworkWrapper.CoreCallbacks mockCoreCallbacks = Mockito.mock(KitFrameworkWrapper.CoreCallbacks.class);
+        KitManagerImpl manager = new KitManagerImpl(
+                Mockito.mock(Context.class),
+                null,
+                mockCoreCallbacks,
+                Mockito.mock(BackgroundTaskHandler.class)
+        ) {
+            @Override
+            public void updateKits(JSONArray kitConfigs) {
+                configureKits(kitConfigs);
+            }
+        };
+        ConsentState state = ConsentState.builder()
+                .addGDPRConsentState("Blah", GDPRConsent.builder(true).build())
+                .build();
+        Mockito.when(mockUser.getConsentState()).thenReturn(state);
+        JSONArray kitConfiguration = new JSONArray();
+        kitConfiguration.put(new JSONObject("{ \"id\":1, \"eau\": true, \"as\":{ \"foo\":\"bar\" }, \"crvf\":{ \"i\":true, \"v\":[ { \"c\":true, \"h\":48278946 }, { \"c\":true, \"h\":1556641 } ] } }"));
+        kitConfiguration.put(new JSONObject("{ \"id\":2, \"eau\": true, \"as\":{ \"foo\":\"bar\" } }"));
+        kitConfiguration.put(new JSONObject("{ \"id\":3, \"eau\": true, \"as\":{ \"foo\":\"bar\" } }"));
+        KitIntegrationFactory factory = Mockito.mock(KitIntegrationFactory.class);
+        manager.setKitFactory(factory);
+        Mockito.when(factory.isSupported(Mockito.anyInt())).thenReturn(true);
+        KitIntegration mockKit  = Mockito.mock(KitIntegration.class);
+        Mockito.when(mockKit.getConfiguration()).thenReturn(Mockito.mock(KitConfiguration.class));
+        Mockito.when(factory.createInstance(Mockito.any(KitManagerImpl.class), Mockito.any(KitConfiguration.class))).thenReturn(mockKit);
+        manager.configureKits(kitConfiguration);
+        Assert.assertEquals(0, manager.providers.size());
+
+        Mockito.when(mockUser.isLoggedIn()).thenReturn(true);
+        Mockito.when(mockCoreCallbacks.getLatestKitConfiguration()).thenReturn(kitConfiguration);
+        manager.onUserIdentified(mockUser);
+        assertEquals(3, manager.providers.size());
+    }
+
+    @Test
+    public void testShouldDisableEnabledKitBasedOnActiveUser() throws JSONException, ClassNotFoundException {
+        MParticle mparticle = Mockito.mock(MParticle.class);
+        Mockito.when(mparticle.getKitManager()).thenReturn(Mockito.mock(KitFrameworkWrapper.class));
+        IdentityApi mockIdentity = Mockito.mock(IdentityApi.class);
+        MParticleUser mockUser = Mockito.mock(MParticleUser.class);
+        Mockito.when(mockIdentity.getCurrentUser()).thenReturn(mockUser);
+        Mockito.when(mockUser.isLoggedIn()).thenReturn(true);
+        Mockito.when(mparticle.Identity()).thenReturn(mockIdentity);
+        MParticle.setInstance(mparticle);
+
+        KitFrameworkWrapper.CoreCallbacks mockCoreCallbacks = Mockito.mock(KitFrameworkWrapper.CoreCallbacks.class);
+        KitManagerImpl manager = new KitManagerImpl(
+                Mockito.mock(Context.class),
+                null,
+                mockCoreCallbacks,
+                Mockito.mock(BackgroundTaskHandler.class)
+        ) {
+            @Override
+            public void updateKits(JSONArray kitConfigs) {
+                configureKits(kitConfigs);
+            }
+        };
+        ConsentState state = ConsentState.builder()
+                .addGDPRConsentState("Blah", GDPRConsent.builder(true).build())
+                .build();
+        Mockito.when(mockUser.getConsentState()).thenReturn(state);
+        JSONArray kitConfiguration = new JSONArray();
+        kitConfiguration.put(new JSONObject("{ \"id\":1, \"eau\": true, \"as\":{ \"foo\":\"bar\" }, \"crvf\":{ \"i\":true, \"v\":[ { \"c\":true, \"h\":48278946 }, { \"c\":true, \"h\":1556641 } ] } }"));
+        kitConfiguration.put(new JSONObject("{ \"id\":2, \"eau\": true, \"as\":{ \"foo\":\"bar\" } }"));
+        kitConfiguration.put(new JSONObject("{ \"id\":3, \"eau\": true, \"as\":{ \"foo\":\"bar\" } }"));
+        KitIntegrationFactory factory = Mockito.mock(KitIntegrationFactory.class);
+        manager.setKitFactory(factory);
+        Mockito.when(factory.isSupported(Mockito.anyInt())).thenReturn(true);
+        KitIntegration mockKit  = Mockito.mock(KitIntegration.class);
+        Mockito.when(mockKit.getConfiguration()).thenReturn(Mockito.mock(KitConfiguration.class));
+        Mockito.when(factory.createInstance(Mockito.any(KitManagerImpl.class), Mockito.any(KitConfiguration.class))).thenReturn(mockKit);
+        manager.configureKits(kitConfiguration);
+        Assert.assertEquals(3, manager.providers.size());
+
+        Mockito.when(mockUser.isLoggedIn()).thenReturn(false);
+        Mockito.when(mockCoreCallbacks.getLatestKitConfiguration()).thenReturn(kitConfiguration);
+        manager.onUserIdentified(mockUser);
+        assertEquals(0, manager.providers.size());
     }
     
     @Test

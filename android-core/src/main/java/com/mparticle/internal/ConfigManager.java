@@ -120,11 +120,11 @@ public class ConfigManager {
         return null;
     }
 
-    UserStorage getUserStorage() {
+    public UserStorage getUserStorage() {
         return mUserStorage;
     }
 
-    UserStorage getUserStorage(long mpId) {
+    public UserStorage getUserStorage(long mpId) {
         if (mUserStorage == null || mUserStorage.getMpid() != mpId) {
             mUserStorage = UserStorage.create(mContext, mpId);
         }
@@ -509,13 +509,19 @@ public class ConfigManager {
         return mProviderPersistence;
     }
 
-    public void setMpid(long mpid) {
-        if (getMpid() != mpid && mpIdChangeListeners != null) {
-            triggerMpidChangeListenerCallbacks(mpid);
-        }
+    public void setMpid(long mpid, boolean isLoggedInUser) {
+        long currentMpid = getMpid();
+        boolean currentLoggedInUser = (mUserStorage != null) && mUserStorage.isLoggedIn();
+        UserStorage userStorage = UserStorage.create(mContext, mpid);
+        userStorage.setLoggedInUser(isLoggedInUser);
+
         sPreferences.edit().putLong(Constants.PrefKeys.MPID, mpid).apply();
         if (mUserStorage == null || mUserStorage.getMpid() != mpid) {
-            mUserStorage = UserStorage.create(mContext, mpid);
+            mUserStorage = userStorage;
+        }
+
+        if ((currentMpid != mpid || currentLoggedInUser != isLoggedInUser)) {
+            triggerMpidChangeListenerCallbacks(mpid);
         }
     }
 
@@ -935,7 +941,7 @@ public class ConfigManager {
         if (MPUtility.isEmpty(mpIdChangeListeners)) {
             return;
         }
-        for (IdentityApi.MpIdChangeListener listenerRef: mpIdChangeListeners) {
+        for (IdentityApi.MpIdChangeListener listenerRef: new ArrayList<IdentityApi.MpIdChangeListener>(mpIdChangeListeners)) {
             if (listenerRef != null) {
                 listenerRef.onMpIdChanged(mpid);
             }

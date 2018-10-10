@@ -115,4 +115,11 @@ public interface MParticleUser {
      * Set the ConsentState for this user
      */
     void setConsentState(ConsentState state);
+
+    /**
+     * Query the "Logged In" status for this user. A user is considered Logged In based on the presence of one or more {@link com.mparticle.MParticle.IdentityType}, such as IdentityType.CustomerId, defined by a workspace's IDSync strategy.
+     *
+     * @return whether the user is "Logged In"
+     */
+    boolean isLoggedIn();
 }

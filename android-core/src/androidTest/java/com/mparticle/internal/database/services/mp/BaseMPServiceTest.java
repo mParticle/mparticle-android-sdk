@@ -5,12 +5,11 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.location.Location;
 import android.support.test.InstrumentationRegistry;
 
-import com.mparticle.testutils.BaseCleanInstallEachTest;
-import com.mparticle.internal.networking.BaseMPMessage;
 import com.mparticle.internal.InternalSession;
 import com.mparticle.internal.database.BaseDatabase;
 import com.mparticle.internal.database.tables.mp.MParticleDatabaseHelper;
-import com.mparticle.testutils.RandomUtils;
+import com.mparticle.internal.networking.BaseMPMessage;
+import com.mparticle.testutils.BaseCleanInstallEachTest;
 
 import org.json.JSONException;
 import org.junit.Before;
@@ -31,13 +30,12 @@ abstract public class BaseMPServiceTest extends BaseCleanInstallEachTest {
     }
 
     BaseMPMessage getMpMessage(String sessionId) throws JSONException {
-        return getMpMessage(sessionId, RandomUtils.getInstance().randomLong(Long.MIN_VALUE, Long.MAX_VALUE));
+        return getMpMessage(sessionId, mRandomUtils.randomLong(Long.MIN_VALUE, Long.MAX_VALUE));
     }
 
     BaseMPMessage getMpMessage(String sessionId, long mpid) throws JSONException {
-        RandomUtils random = RandomUtils.getInstance();
         InternalSession session = new InternalSession();
         session.mSessionID = sessionId;
-        return new BaseMPMessage.Builder(random.getAlphaNumericString(random.randomInt(20, 48)), session, new Location(random.getAlphaNumericString(random.randomInt(1, 55))), mpid).build();
+        return new BaseMPMessage.Builder(mRandomUtils.getAlphaNumericString(mRandomUtils.randomInt(20, 48)), session, new Location(mRandomUtils.getAlphaNumericString(mRandomUtils.randomInt(1, 55))), mpid).build();
     }
 }

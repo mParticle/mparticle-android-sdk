@@ -14,6 +14,16 @@ public final class IdentityHttpResponse {
     private long mpId;
     private String context;
     private int httpCode;
+    private boolean loggedIn;
+
+    public static final String MPID = "mpid";
+    public static final String CONTEXT = "context";
+    public static final String ERRORS = "errors";
+    public static final String LOGGED_IN = "is_logged_in";
+    public static final String CODE = "code";
+    public static final String MESSAGE = "message";
+
+    public static final String UNKNOWN = "UNKNOWN";
 
     private IdentityHttpResponse() {}
 
@@ -26,23 +36,24 @@ public final class IdentityHttpResponse {
 
     public IdentityHttpResponse(int code, String errorString) {
         this.httpCode = code;
-        this.errors.add(new Error("UNKNOWN", errorString));
+        this.errors.add(new Error(UNKNOWN, errorString));
     }
 
     public IdentityHttpResponse(int httpCode, JSONObject jsonObject) throws JSONException {
         this.httpCode = httpCode;
-        if (jsonObject != null) {
-            if (jsonObject.has("mpid")) {
-                this.mpId = Long.valueOf(jsonObject.getString("mpid"));
-                this.context = jsonObject.optString("context");
-            } else if (jsonObject.has("errors")) {
-                JSONArray errorsArray = jsonObject.optJSONArray("errors");
+        if (!MPUtility.isEmpty(jsonObject)) {
+            if (jsonObject.has(MPID)) {
+                this.mpId = Long.valueOf(jsonObject.getString(MPID));
+                this.context = jsonObject.optString(CONTEXT);
+                this.loggedIn = jsonObject.optBoolean(LOGGED_IN);
+            } else if (jsonObject.has(ERRORS)) {
+                JSONArray errorsArray = jsonObject.optJSONArray(ERRORS);
                 if (!MPUtility.isEmpty(errorsArray)) {
                     for (int i = 0; i < errorsArray.length(); i++) {
                         try {
                             JSONObject object = errorsArray.getJSONObject(i);
-                            String code = object.optString("code");
-                            String message = object.optString("message");
+                            String code = object.optString(CODE);
+                            String message = object.optString(MESSAGE);
                             this.errors.add(new Error(code, message));
                         } catch (JSONException ignore) {
                         }
@@ -77,6 +88,10 @@ public final class IdentityHttpResponse {
         return httpCode;
     }
 
+    public boolean isLoggedIn() {
+        return loggedIn;
+    }
+
     public static class Error {
         public final String message;
         public final String code;
@@ -95,6 +110,7 @@ public final class IdentityHttpResponse {
         if (isSuccessful()) {
             builder.append("MPID: " + mpId + "\n");
             builder.append("Context: " + context + "\n");
+            builder.append("Is Logged In: " + loggedIn + "\n");
         } else {
             for (Error error : errors) {
                 builder.append("Code: " + error.code + "\n");

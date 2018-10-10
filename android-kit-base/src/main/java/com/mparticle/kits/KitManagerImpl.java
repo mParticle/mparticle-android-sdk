@@ -8,7 +8,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.util.SparseArray;
 
 import com.mparticle.AttributionError;
 import com.mparticle.AttributionListener;
@@ -39,9 +38,7 @@ import org.json.JSONObject;
 
 import java.lang.ref.WeakReference;
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -161,6 +158,9 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
                     JSONObject current = kitConfigs.getJSONObject(i);
                     KitConfiguration configuration = createKitConfiguration(current);
                     int currentModuleID = configuration.getKitId();
+                    if (configuration.shouldExcludeUser(user)) {
+                        continue;
+                    }
                     if (!mKitIntegrationFactory.isSupported(configuration.getKitId())) {
                         Logger.debug("Kit id configured but is not bundled: " + currentModuleID);
                         continue;

@@ -39,7 +39,7 @@ public final class IdentityApiOutgoingTest extends BaseCleanStartedEachTest {
 
     @Test
     public void testModify() throws Exception {
-        MParticle.getInstance().Identity().modify(IdentityApiRequest.withEmptyUser().customerId(new Random().nextLong() + "").build());
+        MParticle.getInstance().Identity().modify(IdentityApiRequest.withEmptyUser().customerId(ran.nextLong() + "").build());
         mServer.waitForVerify(postRequestedFor(urlPathMatching(String.format("/v([0-9]*)/%s/modify", mStartingMpid))));
     }
 

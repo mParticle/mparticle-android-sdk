@@ -4,15 +4,12 @@ import com.github.tomakehurst.wiremock.http.Request;
 import com.mparticle.MParticle;
 import com.mparticle.MParticleOptions;
 import com.mparticle.testutils.BaseCleanInstallEachTest;
-import com.mparticle.testutils.RandomUtils;
-
 import org.json.JSONObject;
 import org.junit.Test;
 
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Random;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching;
@@ -22,7 +19,6 @@ import static junit.framework.Assert.assertTrue;
 import static junit.framework.Assert.fail;
 
 public final class IdentityApiStartTest extends BaseCleanInstallEachTest {
-    RandomUtils mRandomUtils = RandomUtils.getInstance();
 
     @Test
     public void testInitialIdentitiesPresent() throws Exception {
@@ -52,13 +48,12 @@ public final class IdentityApiStartTest extends BaseCleanInstallEachTest {
     @Test
     public void testNoInitialIdentity() throws Exception {
 
-        final Long currentMpid = new Random().nextLong();
+        final Long currentMpid = ran.nextLong();
         final Map<MParticle.IdentityType, String> identities = mRandomUtils.getRandomUserIdentities();
 
         startMParticle();
 
-        MParticle.getInstance().Internal().getConfigManager().setMpid(currentMpid);
-
+        MParticle.getInstance().Internal().getConfigManager().setMpid(currentMpid, ran.nextBoolean());
 
         for (Map.Entry<MParticle.IdentityType, String> entry : identities.entrySet()) {
             AccessUtils.setUserIdentity(entry.getValue(), entry.getKey(), currentMpid);

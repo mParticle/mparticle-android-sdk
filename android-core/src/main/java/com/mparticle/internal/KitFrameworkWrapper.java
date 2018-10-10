@@ -19,7 +19,6 @@ import org.json.JSONArray;
 
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Constructor;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
@@ -32,7 +31,7 @@ public class KitFrameworkWrapper implements KitManager {
     private final CoreCallbacks mCoreCallbacks;
     private final ReportingManager mReportingManager;
     private final BackgroundTaskHandler mBackgroundTaskHandler;
-    private KitManager mKitManager;
+    KitManager mKitManager;
     private volatile boolean frameworkLoadAttempted = false;
     private static volatile boolean kitsLoaded = false;
 

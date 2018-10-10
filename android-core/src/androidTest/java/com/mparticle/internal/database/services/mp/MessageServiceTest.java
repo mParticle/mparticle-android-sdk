@@ -25,9 +25,9 @@ public class MessageServiceTest extends BaseMPServiceTest {
 
     @Before
     public void before() throws Exception {
-        mpid1 = new Random().nextLong();
-        mpid2 = new Random().nextLong();
-        mpid3 = new Random().nextLong();
+        mpid1 = ran.nextLong();
+        mpid2 = ran.nextLong();
+        mpid3 = ran.nextLong();
     }
 
     @Test
@@ -92,7 +92,7 @@ public class MessageServiceTest extends BaseMPServiceTest {
         Long testMpid;
         Map<String, BaseMPMessage> testMessages = new HashMap<String, BaseMPMessage>();
         for (int i = 0; i < 100; i++) {
-            testMpid = mpids[RandomUtils.getInstance().randomInt(0, 3)];
+            testMpid = mpids[mRandomUtils.randomInt(0, 3)];
             testMessage = getMpMessage(currentSession, testMpid);
             testMessages.put(testMessage.toString(), testMessage);
             MessageService.insertMessage(database, "apiKey",testMessage , testMpid);

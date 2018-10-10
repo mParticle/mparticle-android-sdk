@@ -4,7 +4,6 @@ import android.annotation.TargetApi;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
-import android.support.test.InstrumentationRegistry;
 import android.support.test.rule.ActivityTestRule;
 import android.util.MutableBoolean;
 import android.webkit.CookieManager;
@@ -17,15 +16,10 @@ import android.webkit.WebViewClient;
 import com.mparticle.MParticle;
 import com.mparticle.WebViewActivity;
 import com.mparticle.identity.AccessUtils;
-import com.mparticle.internal.Logger;
-import com.mparticle.internal.MPUtility;
-import com.mparticle.internal.MParticleJSInterface;
 import com.mparticle.test.R;
 import com.mparticle.testutils.BaseCleanStartedEachTest;
-import com.mparticle.testutils.RandomUtils;
-import com.mparticle.testutils.TestingUtils;
+import com.mparticle.testutils.MPLatch;
 
-import org.eclipse.jetty.server.HttpConnection;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -36,9 +30,6 @@ import org.junit.Rule;
 import org.junit.Test;
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
@@ -48,10 +39,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Scanner;
 import java.util.concurrent.CountDownLatch;
-
-import com.mparticle.testutils.MPLatch;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertTrue;
@@ -157,8 +145,6 @@ public class MParticleJSInterfaceTest extends BaseCleanStartedEachTest {
             "\n</script>" +
             "</body>\n" +
             "</html>";
-    
-    private RandomUtils mRandomUtils;
 
     @BeforeClass
     public static void beforeClass() throws Exception {
@@ -188,7 +174,6 @@ public class MParticleJSInterfaceTest extends BaseCleanStartedEachTest {
     @Before
     public void before() throws Exception {
         Assume.assumeTrue(sdkFetchedSuccessfully);
-        mRandomUtils =  RandomUtils.getInstance();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             new Handler(Looper.getMainLooper()).post(new Runnable() {
                 @Override

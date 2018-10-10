@@ -3,11 +3,12 @@ package com.mparticle.internal;
 import android.content.Context;
 import android.util.MutableBoolean;
 
-import com.mparticle.testutils.BaseCleanStartedEachTest;
 import com.mparticle.MParticle;
 import com.mparticle.internal.database.services.AccessUtils;
 import com.mparticle.internal.database.services.MParticleDBManager;
 import com.mparticle.internal.networking.BaseMPMessage;
+import com.mparticle.testutils.BaseCleanStartedEachTest;
+import com.mparticle.testutils.MPLatch;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -16,17 +17,13 @@ import org.junit.Test;
 
 import java.util.HashSet;
 import java.util.List;
-import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
-
-import com.mparticle.testutils.MPLatch;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertTrue;
-import static junit.framework.Assert.fail;
 
 public class AppStateManagerInstrumentedTest extends BaseCleanStartedEachTest {
     AppStateManager mAppStateManager;
@@ -34,14 +31,14 @@ public class AppStateManagerInstrumentedTest extends BaseCleanStartedEachTest {
     @Before
     public void before() throws Exception {
         mAppStateManager = MParticle.getInstance().getAppStateManager();
-        MParticle.getInstance().Internal().getConfigManager().setMpid(Constants.TEMPORARY_MPID);
+        MParticle.getInstance().Internal().getConfigManager().setMpid(Constants.TEMPORARY_MPID, false);
     }
 
     @Test
     public void testEndSessionMultipleMpids() throws Exception {
         final Set<Long> mpids = new HashSet<Long>();
         for (int i = 0; i < 5; i++) {
-            mpids.add(new Random().nextLong());
+            mpids.add(ran.nextLong());
         }
         mAppStateManager.ensureActiveSession();
         for (Long mpid: mpids) {
@@ -78,7 +75,7 @@ public class AppStateManagerInstrumentedTest extends BaseCleanStartedEachTest {
     public void testDontIncludeDefaultMpidSessionEnd() throws Exception {
         final Set<Long> mpids = new HashSet<Long>();
         for (int i = 0; i < 5; i++) {
-            mpids.add(new Random().nextLong());
+            mpids.add(ran.nextLong());
         }
         mpids.add(Constants.TEMPORARY_MPID);
         mAppStateManager.ensureActiveSession();

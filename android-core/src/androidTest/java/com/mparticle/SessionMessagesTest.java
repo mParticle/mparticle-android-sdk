@@ -3,12 +3,12 @@ package com.mparticle;
 import android.os.Handler;
 import android.os.Looper;
 
-import com.mparticle.testutils.BaseCleanStartedEachTest;
 import com.mparticle.internal.AccessUtils;
 import com.mparticle.internal.AppStateManager;
 import com.mparticle.internal.Constants;
 import com.mparticle.internal.MParticleApiClientImpl;
-import com.mparticle.testutils.RandomUtils;
+import com.mparticle.testutils.BaseCleanStartedEachTest;
+import com.mparticle.testutils.MPLatch;
 
 import junit.framework.Assert;
 
@@ -20,25 +20,19 @@ import org.junit.Test;
 import java.io.IOException;
 import java.util.concurrent.CountDownLatch;
 
-import com.mparticle.testutils.MPLatch;
-
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
-import static junit.framework.Assert.assertNotNull;
-import static junit.framework.Assert.assertTrue;
 import static junit.framework.Assert.fail;
 
 
 public final class SessionMessagesTest extends BaseCleanStartedEachTest {
     AppStateManager mAppStateManager;
     Handler mHandler;
-    RandomUtils mRandom;
 
     @Before
     public void before() throws Exception {
         mAppStateManager = MParticle.getInstance().getAppStateManager();
         mHandler = new Handler(Looper.getMainLooper());
-        mRandom = RandomUtils.getInstance();
     }
 
     @Test

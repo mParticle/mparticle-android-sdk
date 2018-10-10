@@ -5,17 +5,17 @@ import android.os.Handler;
 import android.support.test.InstrumentationRegistry;
 
 import com.mparticle.MParticle;
+import com.mparticle.identity.IdentityStateListener;
 import com.mparticle.internal.database.tables.mp.MParticleDatabaseHelper;
 import com.mparticle.networking.BaseNetworkConnection;
 import com.mparticle.networking.MParticleBaseClientImpl;
+import com.mparticle.testutils.MPLatch;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.concurrent.CountDownLatch;
-
-import com.mparticle.testutils.MPLatch;
 
 public class AccessUtils {
 
@@ -141,10 +141,28 @@ public class AccessUtils {
         return com.mparticle.AccessUtils.getMessageManager().mUploadHandler.mApiClient;
     }
 
-    public static void setKitManager(KitManager kitManager) {
-        KitFrameworkWrapper kitFrameworkWrapper = (KitFrameworkWrapper)MParticle.getInstance().getKitManager();
+    public static void setKitManager(final KitManager kitManager) {
+        final KitFrameworkWrapper kitFrameworkWrapper = MParticle.getInstance().getKitManager();
         kitFrameworkWrapper.loadKitLibrary();
-        kitFrameworkWrapper.setKitManager(kitManager);
+        MParticle.getInstance().Identity().removeIdentityStateListener((IdentityStateListener)kitFrameworkWrapper.mKitManager);
+        final CountDownLatch latch = new MPLatch(1);
+        //Need to do this since the KitManager instance in KitFrameworkWrapper is not threadsafe. If
+        //it is in mid-loadKitLibrary, then the instance you set could be overwritten
+        getUploadHandler().post(new Runnable() {
+            @Override
+            public void run() {
+                if (!kitFrameworkWrapper.getFrameworkLoadAttempted()) {
+                    kitFrameworkWrapper.loadKitLibrary();
+                }
+                kitFrameworkWrapper.setKitManager(kitManager);
+                latch.countDown();
+            }
+        });
+        try {
+            latch.await();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         JSONArray configuration = MParticle.getInstance().Internal().getConfigManager().getLatestKitConfiguration();
         Logger.debug("Kit Framework loaded.");
         if (configuration != null) {

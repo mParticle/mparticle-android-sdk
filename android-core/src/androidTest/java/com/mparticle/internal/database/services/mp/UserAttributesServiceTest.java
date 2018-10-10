@@ -10,28 +10,28 @@ public class UserAttributesServiceTest extends BaseMPServiceTest {
     @Test
     public void testStoreByMpid() {
         for (int i = 0; i < 20; i++) {
-            UserAttributesService.insertAttribute(database, String.valueOf(new Random().nextInt()), String.valueOf(new Random().nextInt()), System.currentTimeMillis(), false, 3L);
+            UserAttributesService.insertAttribute(database, String.valueOf(ran.nextInt()), String.valueOf(ran.nextInt()), System.currentTimeMillis(), false, 3L);
         }
         assertEquals(UserAttributesService.getUserAttributesSingles(database, 3L).size(), 20);
         assertEquals(UserAttributesService.getUserAttributesSingles(database, 4L).size(), 0);
         assertEquals(UserAttributesService.getUserAttributesLists(database, 3L).size(), 0);
         assertEquals(UserAttributesService.getUserAttributesLists(database, 4L).size(), 0);
         for (int i = 0; i < 30; i++) {
-            UserAttributesService.insertAttribute(database, String.valueOf(new Random().nextInt()), String.valueOf(new Random().nextInt()), System.currentTimeMillis(), false, 4L);
+            UserAttributesService.insertAttribute(database, String.valueOf(ran.nextInt()), String.valueOf(ran.nextInt()), System.currentTimeMillis(), false, 4L);
         }
         assertEquals(UserAttributesService.getUserAttributesSingles(database, 3L).size(), 20);
         assertEquals(UserAttributesService.getUserAttributesSingles(database, 4L).size(), 30);
         assertEquals(UserAttributesService.getUserAttributesLists(database, 3L).size(), 0);
         assertEquals(UserAttributesService.getUserAttributesLists(database, 4L).size(), 0);
         for (int i = 0; i < 15; i++) {
-            UserAttributesService.insertAttribute(database, String.valueOf(new Random().nextInt()), String.valueOf(new Random().nextInt()), System.currentTimeMillis(), true, 3L);
+            UserAttributesService.insertAttribute(database, String.valueOf(ran.nextInt()), String.valueOf(ran.nextInt()), System.currentTimeMillis(), true, 3L);
         }
         assertEquals(UserAttributesService.getUserAttributesSingles(database, 3L).size(), 20);
         assertEquals(UserAttributesService.getUserAttributesSingles(database, 4L).size(), 30);
         assertEquals(UserAttributesService.getUserAttributesLists(database, 3L).size(), 15);
         assertEquals(UserAttributesService.getUserAttributesLists(database, 4L).size(), 0);
         for (int i = 0; i < 30; i++) {
-            UserAttributesService.insertAttribute(database, String.valueOf(new Random().nextInt()), String.valueOf(new Random().nextInt()), System.currentTimeMillis(), true, 5L);
+            UserAttributesService.insertAttribute(database, String.valueOf(ran.nextInt()), String.valueOf(ran.nextInt()), System.currentTimeMillis(), true, 5L);
         }
         assertEquals(UserAttributesService.getUserAttributesSingles(database, 3L).size(), 20);
         assertEquals(UserAttributesService.getUserAttributesSingles(database, 4L).size(), 30);
@@ -47,16 +47,16 @@ public class UserAttributesServiceTest extends BaseMPServiceTest {
 
     private void testDeleteByMpid(boolean repeat) {
         for (int i = 0; i < 3; i++) {
-            UserAttributesService.insertAttribute(database, "key" + i, String.valueOf(new Random().nextInt()), System.currentTimeMillis(), false, 2L);
+            UserAttributesService.insertAttribute(database, "key" + i, String.valueOf(ran.nextInt()), System.currentTimeMillis(), false, 2L);
         }
         for (int i = 0; i < 3; i++) {
-            UserAttributesService.insertAttribute(database, "key" + i, String.valueOf(new Random().nextInt()), System.currentTimeMillis(), false, 3L);
+            UserAttributesService.insertAttribute(database, "key" + i, String.valueOf(ran.nextInt()), System.currentTimeMillis(), false, 3L);
         }
         for (int i = 3; i < 6; i++) {
-            UserAttributesService.insertAttribute(database, "key" + i, String.valueOf(new Random().nextInt()), System.currentTimeMillis(), true, 2L);
+            UserAttributesService.insertAttribute(database, "key" + i, String.valueOf(ran.nextInt()), System.currentTimeMillis(), true, 2L);
         }
         for (int i = 3; i < 6; i++) {
-            UserAttributesService.insertAttribute(database, "key" + i, String.valueOf(new Random().nextInt()), System.currentTimeMillis(), true, 3L);
+            UserAttributesService.insertAttribute(database, "key" + i, String.valueOf(ran.nextInt()), System.currentTimeMillis(), true, 3L);
         }
         assertEquals(UserAttributesService.getUserAttributesSingles(database, 2L).size(), 3);
         assertEquals(UserAttributesService.getUserAttributesSingles(database, 3L).size(), 3);

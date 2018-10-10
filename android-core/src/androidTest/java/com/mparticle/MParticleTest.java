@@ -11,7 +11,6 @@ import com.mparticle.internal.MessageManager;
 import com.mparticle.internal.database.services.MParticleDBManager;
 import com.mparticle.testutils.BaseCleanStartedEachTest;
 import com.mparticle.testutils.MPLatch;
-import com.mparticle.testutils.RandomUtils;
 import com.mparticle.testutils.TestingUtils;
 
 import junit.framework.Assert;
@@ -25,7 +24,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Random;
 import java.util.concurrent.CountDownLatch;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
@@ -65,7 +63,7 @@ public class MParticleTest extends BaseCleanStartedEachTest {
 
     @Test
     public void testInstallReferrerUpdate() {
-        String randomName = RandomUtils.getInstance().getAlphaNumericString(RandomUtils.getInstance().randomInt(4, 64));
+        String randomName = mRandomUtils.getAlphaNumericString(mRandomUtils.randomInt(4, 64));
         MParticle.getInstance().setInstallReferrer(randomName);
         assertTrue(MParticle.getInstance().getInstallReferrer().equals(randomName));
     }
@@ -94,7 +92,7 @@ public class MParticleTest extends BaseCleanStartedEachTest {
         };
 
         //test when the InstallReferrer is set directly on the InstallReferrerHelper
-        String installReferrer = RandomUtils.getInstance().getAlphaNumericString(10);
+        String installReferrer = mRandomUtils.getAlphaNumericString(10);
         InstallReferrerHelper.setInstallReferrer(mContext, installReferrer);
 
         assertTrue(called[0]);
@@ -103,7 +101,7 @@ public class MParticleTest extends BaseCleanStartedEachTest {
         Arrays.fill(called, false);
 
         //test when it is set through the MParticle object in the public API
-        installReferrer = RandomUtils.getInstance().getAlphaNumericString(10);
+        installReferrer = mRandomUtils.getAlphaNumericString(10);
         MParticle.getInstance().setInstallReferrer(installReferrer);
 
         assertTrue(called[0]);
@@ -112,7 +110,7 @@ public class MParticleTest extends BaseCleanStartedEachTest {
         Arrays.fill(called, false);
 
         //test when it is received via the ReferrerReceiver Receiver
-        installReferrer = RandomUtils.getInstance().getAlphaNumericString(10);
+        installReferrer = mRandomUtils.getAlphaNumericString(10);
         ReferrerReceiver.setInstallReferrer(mContext, ReferrerReceiver.getMockInstallReferrerIntent(installReferrer));
 
         assertTrue(called[0]);
@@ -121,7 +119,7 @@ public class MParticleTest extends BaseCleanStartedEachTest {
         Arrays.fill(called, false);
 
         //test when it is received through the MPReceiver Receiver
-        installReferrer = RandomUtils.getInstance().getAlphaNumericString(10);
+        installReferrer = mRandomUtils.getAlphaNumericString(10);
         new MPReceiver().onReceive(mContext, ReferrerReceiver.getMockInstallReferrerIntent(installReferrer));
 
         assertTrue(called[1]);
@@ -130,7 +128,7 @@ public class MParticleTest extends BaseCleanStartedEachTest {
         Arrays.fill(called, false);
 
         //just a sanity check, if Context is null, it should not set mark the InstallReferrer as updated
-        installReferrer = RandomUtils.getInstance().getAlphaNumericString(10);
+        installReferrer = mRandomUtils.getAlphaNumericString(10);
         InstallReferrerHelper.setInstallReferrer(null, installReferrer);
 
         org.junit.Assert.assertFalse(called[0]);
@@ -230,7 +228,7 @@ public class MParticleTest extends BaseCleanStartedEachTest {
             }
         };
 
-        mServer.setupHappyIdentify(new Random().nextLong(), 100);
+        mServer.setupHappyIdentify(ran.nextLong(), 100);
         MParticle.getInstance().Identity().addIdentityStateListener(crashListener);
         MParticle.getInstance().Identity().identify(IdentityApiRequest.withEmptyUser().build());
 
@@ -245,9 +243,8 @@ public class MParticleTest extends BaseCleanStartedEachTest {
         for (int i = 0; i < 10; i++) {
             MParticle.getInstance().logEvent(TestingUtils.getInstance().getRandomMPEventRich());
         }
-        Random ran = new Random();
         for (int i = 0; i < 10; i++) {
-            MParticle.getInstance().Internal().getConfigManager().setMpid(ran.nextLong());
+            MParticle.getInstance().Internal().getConfigManager().setMpid(ran.nextLong(), ran.nextBoolean());
         }
         assertTrue(getData(new MParticleDBManager(mContext).getDatabase().query("messages", null, null, null, null, null, null)).length() > 0);
         assertEquals(6, getAllTables().size());

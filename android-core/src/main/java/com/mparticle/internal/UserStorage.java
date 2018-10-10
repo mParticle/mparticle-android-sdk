@@ -21,20 +21,21 @@ import static com.mparticle.internal.ConfigManager.PREFERENCES_FILE;
 public class UserStorage {
     private static final String USER_CONFIG_COLLECTION = "mp::user_config_collection";
 
-    private String SESSION_COUNTER = "mp::breadcrumbs::sessioncount";
-    private String DELETED_USER_ATTRS = "mp::deleted_user_attrs::";
-    private String BREADCRUMB_LIMIT = "mp::breadcrumbs::limit";
-    private String LAST_USE = "mp::lastusedate";
-    private String PREVIOUS_SESSION_FOREGROUND = "mp::time_in_fg";
-    private String PREVIOUS_SESSION_ID = "mp::session::previous_id";
-    private String PREVIOUS_SESSION_START = "mp::session::previous_start";
-    private String LTV = "mp::ltv";
-    private String TOTAL_RUNS = "mp::totalruns";
-    private String COOKIES = "mp::cookies";
-    private String TOTAL_SINCE_UPGRADE = "mp::launch_since_upgrade";
-    private String USER_IDENTITIES = "mp::user_ids::";
-    private String CART = "mp::cart::";
-    private String CONSENT_STATE = "mp::consent_state::";
+    private static final String SESSION_COUNTER = "mp::breadcrumbs::sessioncount";
+    private static final String DELETED_USER_ATTRS = "mp::deleted_user_attrs::";
+    private static final String BREADCRUMB_LIMIT = "mp::breadcrumbs::limit";
+    private static final String LAST_USE = "mp::lastusedate";
+    private static final String PREVIOUS_SESSION_FOREGROUND = "mp::time_in_fg";
+    private static final String PREVIOUS_SESSION_ID = "mp::session::previous_id";
+    private static final String PREVIOUS_SESSION_START = "mp::session::previous_start";
+    private static final String LTV = "mp::ltv";
+    private static final String TOTAL_RUNS = "mp::totalruns";
+    private static final String COOKIES = "mp::cookies";
+    private static final String TOTAL_SINCE_UPGRADE = "mp::launch_since_upgrade";
+    private static final String USER_IDENTITIES = "mp::user_ids::";
+    private static final String CART = "mp::cart::";
+    private static final String CONSENT_STATE = "mp::consent_state::";
+    private static final String KNOWN_USER = "mp::known_user";
 
     static final int DEFAULT_BREADCRUMB_LIMIT = 50;
 
@@ -280,6 +281,14 @@ public class UserStorage {
 
     private boolean hasConsent() {
         return mPreferences.contains(CONSENT_STATE);
+    }
+
+    public boolean isLoggedIn() {
+        return mPreferences.getBoolean(KNOWN_USER, false);
+    }
+
+    void setLoggedInUser(boolean knownUser) {
+        mPreferences.edit().putBoolean(KNOWN_USER, knownUser).apply();
     }
 
     private boolean hasUserIdentities() {

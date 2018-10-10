@@ -55,6 +55,7 @@ public class KitConfiguration {
     private final static String KEY_CONSENT_FORWARDING_RULES_ARRAY = "v";
     private final static String KEY_CONSENT_FORWARDING_RULES_VALUE_CONSENTED = "c";
     private final static String KEY_CONSENT_FORWARDING_RULES_VALUE_HASH = "h";
+    private final static String KEY_EXCLUDE_ANONYMOUS_USERS = "eau";
 
     //If set to true, our sdk honor user's optout wish. If false, we still collect data on opt-ed out users, but only for reporting
     private final static String HONOR_OPT_OUT = "honorOptOut";
@@ -83,6 +84,7 @@ public class KitConfiguration {
     private CustomMapping defaultScreenCustomMapping = null;
     private CustomMapping defaultCommerceCustomMapping = null;
     private int kitId;
+    protected boolean mExcludeAnonymousUsers;
 
     public SparseBooleanArray getEventTypeFilters() {
         return mTypeFilters;
@@ -234,6 +236,7 @@ public class KitConfiguration {
                 );
             }
         }
+        mExcludeAnonymousUsers = json.optBoolean(KEY_EXCLUDE_ANONYMOUS_USERS, false);
         return this;
     }
 
@@ -643,5 +646,13 @@ public class KitConfiguration {
 
     public int getHighBracket() {
         return highBracket;
+    }
+
+    boolean excludeAnonymousUsers() {
+        return mExcludeAnonymousUsers;
+    }
+
+    public boolean shouldExcludeUser(MParticleUser user) {
+        return mExcludeAnonymousUsers && (user == null || !user.isLoggedIn());
     }
 }

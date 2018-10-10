@@ -124,4 +124,9 @@ public class FilteredMParticleUser implements MParticleUser {
     public void setConsentState(ConsentState state) {
 
     }
+
+    @Override
+    public boolean isLoggedIn() {
+        return mpUser.isLoggedIn();
+    }
 }

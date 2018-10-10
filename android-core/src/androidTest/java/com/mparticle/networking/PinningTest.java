@@ -88,7 +88,7 @@ public class PinningTest extends BaseCleanStartedEachTest {
                 latch.countDown();
             }
         });
-        MParticle.getInstance().Identity().modify(IdentityApiRequest.withEmptyUser().customerId(RandomUtils.getInstance().getAlphaNumericString(25)).build());
+        MParticle.getInstance().Identity().modify(IdentityApiRequest.withEmptyUser().customerId(mRandomUtils.getAlphaNumericString(25)).build());
         latch.await();
         assertTrue(called.value);
     }

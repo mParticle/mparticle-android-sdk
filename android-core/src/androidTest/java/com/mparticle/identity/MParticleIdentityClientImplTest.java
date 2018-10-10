@@ -5,11 +5,11 @@ import android.os.Handler;
 import android.support.test.InstrumentationRegistry;
 import android.util.MutableBoolean;
 
-import com.mparticle.testutils.BaseCleanStartedEachTest;
 import com.mparticle.MParticle;
 import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.MPUtility;
-import com.mparticle.testutils.RandomUtils;
+import com.mparticle.testutils.BaseCleanStartedEachTest;
+import com.mparticle.testutils.MPLatch;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -20,10 +20,7 @@ import org.junit.Test;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.util.Map;
-import java.util.Random;
 import java.util.concurrent.CountDownLatch;
-
-import com.mparticle.testutils.MPLatch;
 
 import static com.mparticle.identity.MParticleIdentityClientImpl.ANDROID_AAID;
 import static com.mparticle.identity.MParticleIdentityClientImpl.ANDROID_UUID;
@@ -44,8 +41,6 @@ public class MParticleIdentityClientImplTest extends BaseCleanStartedEachTest {
     private ConfigManager mConfigManager;
     private MParticleIdentityClientImpl mApiClient;
     protected CountDownLatch lock = new MPLatch(1);
-
-    private RandomUtils mRandomUtils = RandomUtils.getInstance();
 
     @Before
     public void before() throws Exception {
@@ -209,7 +204,7 @@ public class MParticleIdentityClientImplTest extends BaseCleanStartedEachTest {
 
     @Test
     public void testModifyMessage() throws Exception {
-        mConfigManager.setMpid(new Random().nextLong());
+        mConfigManager.setMpid(ran.nextLong(), ran.nextBoolean());
         int iterations = 5;
         for (int i = 0; i < iterations; i++) {
             final Map<MParticle.IdentityType, String> oldUserIdentities = mRandomUtils.getRandomUserIdentities();

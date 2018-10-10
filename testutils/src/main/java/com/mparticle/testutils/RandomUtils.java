@@ -2,15 +2,11 @@ package com.mparticle.testutils;
 
 import com.mparticle.MParticle;
 
-import org.junit.Test;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.TreeSet;
-
-import static junit.framework.Assert.assertTrue;
 
 /**
  * Utilities for generating tests with Randomness
@@ -18,15 +14,6 @@ import static junit.framework.Assert.assertTrue;
 public class RandomUtils {
     private static final String sAlpha = "abcdefghijklmnopqrstuvwxyzABC ,.";
     private static final String sNumbers = "0123456789";
-
-    private static RandomUtils instance;
-
-    public static RandomUtils getInstance() {
-        if  (instance == null) {
-            instance = new RandomUtils();
-        }
-        return instance;
-    }
 
     public Map<MParticle.IdentityType, String> getRandomUserIdentities() {
         Map<MParticle.IdentityType, String> randomIdentities = new HashMap<MParticle.IdentityType, String>();
