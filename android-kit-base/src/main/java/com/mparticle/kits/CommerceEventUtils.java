@@ -7,7 +7,7 @@ import com.mparticle.commerce.Impression;
 import com.mparticle.commerce.Product;
 import com.mparticle.commerce.Promotion;
 import com.mparticle.commerce.TransactionAttributes;
-import com.mparticle.internal.*;
+import com.mparticle.internal.MPUtility;
 
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -24,7 +24,11 @@ public final class CommerceEventUtils {
     }
 
     public static List<MPEvent> expand(CommerceEvent event) {
-        List<MPEvent> eventList = expandProductAction(event);
+        List<MPEvent> eventList = new LinkedList<MPEvent>();
+        if (event == null) {
+            return eventList;
+        }
+        eventList.addAll(expandProductAction(event));
         eventList.addAll(expandPromotionAction(event));
         eventList.addAll(expandProductImpression(event));
         return eventList;
