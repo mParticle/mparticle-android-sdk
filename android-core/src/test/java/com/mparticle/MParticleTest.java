@@ -3,6 +3,7 @@ package com.mparticle;
 
 import com.mparticle.internal.InternalSession;
 
+import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
@@ -198,6 +199,16 @@ public class MParticleTest {
     @Test
     public void testAttributeListener() throws Exception {
         MParticle.setInstance(new MockMParticle());
+    }
+
+    @Test
+    public void testSetGetImei() throws Exception {
+        MParticle.setDeviceImei(null);
+        Assert.assertNull(MParticle.getDeviceImei());
+        MParticle.setDeviceImei("foo imei");
+        Assert.assertEquals("foo imei", MParticle.getDeviceImei());
+        MParticle.setDeviceImei(null);
+        Assert.assertNull(MParticle.getDeviceImei());
     }
 
 }

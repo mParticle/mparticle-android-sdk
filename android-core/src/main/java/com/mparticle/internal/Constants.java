@@ -239,6 +239,7 @@ public class Constants {
         String DEVICE_BLUETOOTH_VERSION = "dbv";
         String GOOGLE_ADV_ID = "gaid";
         String LIMIT_AD_TRACKING = "lat";
+        String DEVICE_IMEI = "imei";
 
         // state info
         String STATE_INFO_KEY = "cs";

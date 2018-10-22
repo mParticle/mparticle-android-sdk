@@ -24,11 +24,20 @@ public class DeviceAttributes {
 
     //re-use this whenever an attribute can't be determined
     static final String UNKNOWN = "unknown";
+    private static volatile String deviceImei;
     private JSONObject deviceInfo;
     private JSONObject appInfo;
     private boolean firstCollection = true;
 
     /** package-private **/ DeviceAttributes() {}
+
+    public static void setDeviceImei(String deviceImei) {
+        DeviceAttributes.deviceImei = deviceImei;
+    }
+
+    public static String getDeviceImei() {
+        return deviceImei;
+    }
 
     /**
      * Generates a collection of application attributes that will not change during an app's process.
@@ -214,6 +223,10 @@ public class DeviceAttributes {
             }
             attributes.put(MessageKey.DEVICE_IS_TABLET, MPUtility.isTablet(appContext));
             attributes.put(MessageKey.DEVICE_IS_IN_DST, MPUtility.isInDaylightSavings());
+
+            if (!MPUtility.isEmpty(DeviceAttributes.deviceImei)) {
+                attributes.put(MessageKey.DEVICE_IMEI, DeviceAttributes.deviceImei);
+            }
 
         } catch (Exception e) {
             //believe it or not, difference devices can be missing build.prop fields, or have otherwise

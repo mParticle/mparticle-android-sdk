@@ -33,6 +33,7 @@ import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.Constants;
 import com.mparticle.internal.Constants.MessageKey;
 import com.mparticle.internal.Constants.PrefKeys;
+import com.mparticle.internal.DeviceAttributes;
 import com.mparticle.internal.InternalSession;
 import com.mparticle.internal.KitFrameworkWrapper;
 import com.mparticle.internal.Logger;
@@ -240,6 +241,36 @@ public class MParticle {
      */
     public static boolean isAndroidIdDisabled() {
         return sAndroidIdDisabled;
+    }
+
+    /**
+     * Set the device's current IMEI.
+     *
+     * The mParticle SDK does not collect IMEI but you may use this API to provide it.
+     *  Collecting the IMEI is generally unnecessary and discouraged for apps in Google Play. For
+     *  apps distributed outside of Google Play, IMEI may be necessary for accurate install attribution.
+     *
+     *  The mParticle SDK does not persist this value - it must be set whenever the SDK is initialized.
+     *
+     * @param deviceImei a string representing the device's current IMEI, or null to remove clear it.
+     */
+    public static void setDeviceImei(String deviceImei) {
+        DeviceAttributes.setDeviceImei(deviceImei);
+    }
+
+    /**
+     * Get the device's current IMEI.
+     *
+     * The mParticle SDK does not collect IMEI but you may use the {@link #setDeviceImei(String)} API to provide it..
+     *  Collecting the IMEI is generally unnecessary and discouraged for apps in Google Play. For
+     *  apps distributed outside of Google Play, IMEI may be necessary for accurate install attribution.
+     *
+     *  The mParticle SDK does not persist this value - it must be set whenever the SDK is initialized.
+     *
+     * @return a string representing the device's current IMEI, or null if not set.
+     */
+    public static String getDeviceImei() {
+        return DeviceAttributes.getDeviceImei();
     }
 
     /**
