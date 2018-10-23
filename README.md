@@ -167,7 +167,7 @@ public class MyApplication extends Application {
 
 #### Proguard
 
-Proguard is a minification/optimization/obfuscation tool that's extremely useful, and it can also cause some sticky bugs. The mParticle SDK is already minified so there's no need to...double-minify it. If you're using Gradle there's nothing to do - we include a `consumer-proguard` rules file inside our `AAR` which Gradle will automatically include in your build. If you're not using Gradle, please add those same rules manually - [see here for the latest](https://github.com/mParticle/mparticle-android-sdk/blob/master/android-core/consumer-proguard.pro). 
+Proguard is a minification/optimization/obfuscation tool that's extremely useful, and it can also cause some sticky bugs. The mParticle SDK is already minified. If you're using Gradle there's nothing to do - we include a `consumer-proguard` rules file inside our `AAR` which Gradle will automatically include in your build. If you're not using Gradle, please add those same rules manually - [see here for the latest](https://github.com/mParticle/mparticle-android-sdk/blob/master/android-core/consumer-proguard.pro). 
 
 ## Read More
 
