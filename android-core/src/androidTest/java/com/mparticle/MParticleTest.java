@@ -144,6 +144,7 @@ public class MParticleTest extends BaseCleanStartedEachTest {
         }
     }
 
+    @OrchestratorOnly
     @Test
     public void testResetSync() throws JSONException, InterruptedException {
         testReset(new Runnable() {
@@ -154,6 +155,7 @@ public class MParticleTest extends BaseCleanStartedEachTest {
         });
     }
 
+    @OrchestratorOnly
     @Test
     public void testResetAsync() throws JSONException, InterruptedException {
         testReset(new Runnable() {
@@ -175,6 +177,7 @@ public class MParticleTest extends BaseCleanStartedEachTest {
         });
     }
 
+    @OrchestratorOnly
     @Test
     public void testResetIdentitySync() throws JSONException, InterruptedException {
         testResetIdentityCall(new Runnable() {
@@ -185,6 +188,7 @@ public class MParticleTest extends BaseCleanStartedEachTest {
         });
     }
 
+    @OrchestratorOnly
     @Test
     public void testResetIdentityAsync() throws JSONException, InterruptedException {
         testResetIdentityCall(new Runnable() {
@@ -206,6 +210,7 @@ public class MParticleTest extends BaseCleanStartedEachTest {
         });
     }
 
+    @OrchestratorOnly
     @Test
     public void testResetConfigCall() throws InterruptedException {
         mServer.setupConfigResponse(configResponse, 100);

@@ -55,6 +55,11 @@ android {
         buildConfigField "String", "SCHEME", "\"https\""
 
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        if (useOrchestrator()) {
+            testInstrumentationRunnerArgument 'annotation', 'com.mparticle.OrchestratorOnly'
+        } else {
+            testInstrumentationRunnerArgument 'notAnnotation', 'com.mparticle.OrchestratorOnly'
+        }
     }
 
     buildTypes {
@@ -71,7 +76,15 @@ android {
             //buildConfigField "Boolean", "MP_DEBUG", "true"
         }
     }
+    testOptions {
+        if (useOrchestrator()) {
+            execution 'ANDROID_TEST_ORCHESTRATOR'
+            reportDir buildDir.absolutePath + '/orchestrator-reports'
+            resultsDir buildDir.absolutePath + '/orchestrator-results'
+        }
+    }
 }
+
 
 task coreSdkJavadocs(type: Javadoc) {
         source = android.sourceSets.main.java.srcDirs
@@ -99,7 +112,7 @@ dependencies {
     //working in Android studio, but from the command line it's not necessary
     testImplementation project(':android-core')
     testImplementation 'junit:junit:4.12'
-    testImplementation  files('libs/java-json.jar')
+    testImplementation files('libs/java-json.jar')
     testImplementation 'org.powermock:powermock-module-junit4:1.6.2'
     testImplementation 'org.powermock:powermock-api-mockito:1.6.2'
     testImplementation 'org.powermock:powermock-core:1.6.2'
@@ -107,6 +120,9 @@ dependencies {
     testImplementation project(':testutils')
 
     androidTestImplementation project(':testutils')
+    if (useOrchestrator()) {
+        androidTestUtil 'com.android.support.test:orchestrator:1.0.2'
+    }
 }
 
 configurations {
@@ -128,5 +144,9 @@ task copyLintJar(type: Copy) {
 project.afterEvaluate {
     def compileLintTask = project.tasks.find { it.name == 'compileLint' }
     compileLintTask.dependsOn(copyLintJar)
+}
+
+boolean useOrchestrator() {
+    return project.hasProperty('orchestrator') ? project.property('orchestrator') : false
 }
 

@@ -1,13 +1,9 @@
 package com.mparticle.networking;
 
-import android.net.Uri;
-
-import com.mparticle.BuildConfig;
 import com.mparticle.MParticle;
 import com.mparticle.MParticleOptions;
 import com.mparticle.internal.AccessUtils;
 import com.mparticle.testutils.BaseCleanInstallEachTest;
-import com.mparticle.testutils.RandomUtils;
 
 import org.junit.Test;
 
@@ -44,10 +40,10 @@ public class NetworkOptionsTest extends BaseCleanInstallEachTest {
 
     @Test
     public void testRandomEndpoint() throws MalformedURLException {
-        String identityUrl = mRandomUtils.getAlphaNumericString(20);
-        String configUrl = mRandomUtils.getAlphaNumericString(20);
-        String audienceUrl = mRandomUtils.getAlphaNumericString(20);
-        String eventsUrl = mRandomUtils.getAlphaNumericString(20);
+        String identityUrl = mRandomUtils.getAlphaString(20);
+        String configUrl = mRandomUtils.getAlphaString(20);
+        String audienceUrl = mRandomUtils.getAlphaString(20);
+        String eventsUrl = mRandomUtils.getAlphaString(20);
 
         MParticleOptions options = MParticleOptions.builder(mContext)
                 .credentials("key", "secret")

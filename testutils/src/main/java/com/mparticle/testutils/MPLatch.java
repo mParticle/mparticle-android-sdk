@@ -40,10 +40,11 @@ public class MPLatch extends CountDownLatch {
 
     @Override
     public void await() throws InterruptedException {
+        int timeoutTimeMs = 2 * 1000;
         if (count == countDowned) {
             return;
         }
-        mHandler.postDelayed(timeoutRunnable, 500 * 1000);
-        this.await(200, TimeUnit.SECONDS);
+        mHandler.postDelayed(timeoutRunnable, timeoutTimeMs);
+        this.await(timeoutTimeMs, TimeUnit.MILLISECONDS);
     }
 }

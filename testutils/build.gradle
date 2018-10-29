@@ -11,6 +11,12 @@ android {
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+
+        if (legacyTest()) {
+            testInstrumentationRunnerArgument 'annotation', 'com.mparticle.LegacyOnly'
+        } else {
+            testInstrumentationRunnerArgument 'notAnnotation', 'com.mparticle.LegacyOnly'
+        }
     }
 
     buildTypes {
@@ -18,6 +24,9 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
+    }
+    testOptions {
+        execution 'ANDROID_TEST_ORCHESTRATOR'
     }
 }
 
@@ -33,4 +42,20 @@ dependencies {
     api 'com.android.support.test:rules:1.0.2'
     api 'org.apache.httpcomponents:httpclient-android:4.3.5.1'
     api 'org.slf4j:slf4j-api:1.7.25'
+
+    androidTestCompileOnly project(':android-core')
+
+    if (legacyTest()) {
+        androidTestImplementation 'com.mparticle:android-core:4.17.1'
+    } else {
+        androidTestImplementation project(':android-core')
+
+    }
+    androidTestImplementation 'com.android.support.test:runner:1.0.2'
+    androidTestImplementation 'com.android.support.test:rules:1.0.2'
+    androidTestUtil 'com.android.support.test:orchestrator:1.0.1'
+}
+
+boolean legacyTest() {
+    return project.hasProperty('legacy') ? project.property('legacy') : false
 }

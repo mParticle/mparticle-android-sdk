@@ -8,6 +8,7 @@ import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.MPUtility;
 import com.mparticle.networking.MPConnection;
 import com.mparticle.networking.MPConnectionTestImpl;
+import com.mparticle.testutils.AndroidUtils;
 import com.mparticle.testutils.BaseCleanStartedEachTest;
 import com.mparticle.testutils.MPLatch;
 
@@ -38,7 +39,6 @@ import static junit.framework.Assert.fail;
 public class MParticleIdentityClientImplTest extends BaseCleanStartedEachTest {
     private ConfigManager mConfigManager;
     private MParticleIdentityClientImpl mApiClient;
-    protected CountDownLatch lock = new MPLatch(1);
 
     @Before
     public void before() throws Exception {
@@ -48,7 +48,6 @@ public class MParticleIdentityClientImplTest extends BaseCleanStartedEachTest {
 
     @Test
     public void testModifySameData() throws Exception {
-        final int startingModifyRequestCount = mServer.Requests().getModify().size();
         final CountDownLatch latch = new MPLatch(2);
         final Handler handler = new Handler();
         handler.postDelayed(new Runnable() {
@@ -58,6 +57,7 @@ public class MParticleIdentityClientImplTest extends BaseCleanStartedEachTest {
             }
         }, 10 * 1000);
 
+        final AndroidUtils.Mutable<Boolean> called = new AndroidUtils.Mutable<Boolean>(false);
        MParticle.getInstance().Identity().modify(IdentityApiRequest.withEmptyUser().build())
                .addSuccessListener(new TaskSuccessListener() {
                    @Override
@@ -67,13 +67,14 @@ public class MParticleIdentityClientImplTest extends BaseCleanStartedEachTest {
                                 .addSuccessListener(new TaskSuccessListener() {
                                     @Override
                                     public void onSuccess(IdentityApiResult result) {
-                                        latch.countDown();
                                         int currentModifyRequestCount = mServer.Requests().getModify().size();
                                         //make sure we made 1 or 0 modify requests. It could go either way for the first modify request,
                                         //it may have changes, it may not depending on state. The second request though, should not have
                                         //changes, and therefore it should not take place, so less than 2 requests is a good condition
                                         assertTrue(2 > currentModifyRequestCount);
                                         handler.removeCallbacks(null);
+                                        called.value = true;
+                                        latch.countDown();
                                     }
                                 })
                                 .addFailureListener(new TaskFailureListener() {
@@ -91,6 +92,7 @@ public class MParticleIdentityClientImplTest extends BaseCleanStartedEachTest {
                    }
                });
         latch.await();
+        assertTrue(called.value);
     }
 
     @Test
@@ -99,7 +101,7 @@ public class MParticleIdentityClientImplTest extends BaseCleanStartedEachTest {
         for (int i = 0; i < iterations; i++) {
             final Map<MParticle.IdentityType, String> userIdentities = mRandomUtils.getRandomUserIdentities();
             final MutableBoolean checked = new MutableBoolean(false);
-            final int finalI = i;
+            final CountDownLatch latch = new CountDownLatch(1);
             setApiClient(new MockIdentityApiClient() {
                 @Override
                 public void makeUrlRequest(MPConnection connection, String payload, boolean mparticle) throws IOException, JSONException {
@@ -117,7 +119,7 @@ public class MParticleIdentityClientImplTest extends BaseCleanStartedEachTest {
                         }
                         checked.value = true;
                         setApiClient(null);
-                        lock.countDown();
+                        latch.countDown();
                     }
                 }
             });
@@ -125,7 +127,7 @@ public class MParticleIdentityClientImplTest extends BaseCleanStartedEachTest {
             mApiClient.identify(IdentityApiRequest.withEmptyUser()
                     .userIdentities(userIdentities)
                     .build());
-            lock.await();
+            latch.await();
             assertTrue(checked.value);
         }
 

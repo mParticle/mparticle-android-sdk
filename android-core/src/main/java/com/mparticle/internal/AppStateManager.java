@@ -298,10 +298,12 @@ public class  AppStateManager {
             @Override
             public void run() {
                 InternalSession session = getSession();
+                MParticle instance = MParticle.getInstance();
                 if (0 != session.mSessionStartTime &&
                         isBackgrounded()
                         && session.isTimedOut(mConfigManager.getSessionTimeout())
-                        && !MParticle.getInstance().Media().getAudioPlaying()) {
+                        && instance!= null
+                        && instance.Media().getAudioPlaying()) {
                     Logger.debug("Session timed out");
                     endSession();
                 }

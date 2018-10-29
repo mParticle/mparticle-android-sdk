@@ -373,7 +373,7 @@ public final class IdentityApiTest extends BaseCleanStartedEachTest {
         MParticle.getInstance().Internal().getConfigManager().setMpid(mpid1, true);
         assertEquals(identity.getCurrentUser().getId(), mpid1);
         Map<String, Object> mpid1UserAttributes = new HashMap<String, Object>(mRandomUtils.getRandomAttributes(3));
-        Map<MParticle.IdentityType, String> mpid1UserIdentites = mRandomUtils.getRandomUserIdentities(3);
+        Map<MParticle.IdentityType, String> mpid1UserIdentites = mRandomUtils.getRandomUserIdentities(2);
         identity.getCurrentUser().setUserAttributes(mpid1UserAttributes);
         AccessUtils.setUserIdentities(mpid1UserIdentites, identity.getCurrentUser().getId());
 
@@ -383,12 +383,10 @@ public final class IdentityApiTest extends BaseCleanStartedEachTest {
         identity.getCurrentUser().setUserAttributes(mpid2UserAttributes);
         AccessUtils.setUserIdentities(mpid2UserIdentites, identity.getCurrentUser().getId());
 
-
         MParticle.getInstance().Internal().getConfigManager().setMpid(mpid3, true);
         Map<String, Object> mpid3UserAttributes = new HashMap<String, Object>(mRandomUtils.getRandomAttributes(3));
-        Map<MParticle.IdentityType, String> mpid3UserIdentities = mRandomUtils.getRandomUserIdentities(3);
+        Map<MParticle.IdentityType, String> mpid3UserIdentities = mRandomUtils.getRandomUserIdentities(2);
         identity.getCurrentUser().setUserAttributes(mpid3UserAttributes);
-
         AccessUtils.setUserIdentities(mpid3UserIdentities, identity.getCurrentUser().getId());
 
         mpid1UserAttributes.remove(null);

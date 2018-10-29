@@ -14,6 +14,7 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
 import com.mparticle.MParticle;
+import com.mparticle.OrchestratorOnly;
 import com.mparticle.WebViewActivity;
 import com.mparticle.identity.AccessUtils;
 import com.mparticle.test.R;

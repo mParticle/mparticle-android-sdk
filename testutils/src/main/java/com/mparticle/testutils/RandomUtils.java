@@ -24,7 +24,7 @@ public class RandomUtils {
         Map<MParticle.IdentityType, String> randomIdentities = new HashMap<MParticle.IdentityType, String>();
 
         int identityTypeLength = MParticle.IdentityType.values().length;
-        int numIdentities = randomInt(1, max != null ? max : identityTypeLength);
+        int numIdentities = randomInt(1, (max != null && max < identityTypeLength) ? max : identityTypeLength);
         Set<Integer> identityIndices = randomIntSet(0, identityTypeLength, numIdentities);
         for (Integer identityIndex: identityIndices) {
             randomIdentities.put(MParticle.IdentityType.values()[identityIndex], getAlphaNumericString(randomInt(1, 55)));
