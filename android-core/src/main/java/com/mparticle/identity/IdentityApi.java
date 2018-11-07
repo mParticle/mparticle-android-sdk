@@ -42,7 +42,7 @@ public class IdentityApi {
     MParticleUserDelegate mUserDelegate;
     private MParticleIdentityClient mApiClient;
 
-    private Set<IdentityStateListener> identityStateListeners = new HashSet<IdentityStateListener>();
+    Set<IdentityStateListener> identityStateListeners = new HashSet<IdentityStateListener>();
     private static Object lock = new Object();
 
     IdentityApi() {}

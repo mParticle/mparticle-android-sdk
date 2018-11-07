@@ -15,6 +15,10 @@ import org.mockito.Mockito;
 public class MockMParticle extends MParticle {
 
     public MockMParticle() {
+        mAppContext = new MockContext();
+        mInternal = new Internal();
+        mConfigManager = Mockito.mock(ConfigManager.class);
+        mKitManager = Mockito.mock(KitFrameworkWrapper.class);
         mAppStateManager = Mockito.mock(AppStateManager.class);
 
         mConfigManager = Mockito.mock(ConfigManager.class);

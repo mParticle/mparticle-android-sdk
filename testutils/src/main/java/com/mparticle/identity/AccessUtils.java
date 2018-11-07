@@ -9,11 +9,11 @@ import com.mparticle.internal.KitManager;
 import com.mparticle.networking.BaseNetworkConnection;
 import com.mparticle.networking.MPUrl;
 import com.mparticle.networking.MParticleBaseClient;
-import com.mparticle.networking.MParticleBaseClientImpl;
 
 import java.net.MalformedURLException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 public class AccessUtils {
 
@@ -110,5 +110,9 @@ public class AccessUtils {
 
     public static void setKitManager(KitManager kitManager) {
         MParticle.getInstance().Identity().mKitManager = kitManager;
+    }
+
+    public static Set<IdentityStateListener> getIdentityStateListeners() {
+        return MParticle.getInstance().Identity().identityStateListeners;
     }
 }

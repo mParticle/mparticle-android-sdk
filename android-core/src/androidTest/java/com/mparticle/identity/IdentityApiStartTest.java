@@ -1,8 +1,11 @@
 package com.mparticle.identity;
 
+import android.os.Handler;
+
 import com.mparticle.MParticle;
 import com.mparticle.MParticleOptions;
 import com.mparticle.internal.ConfigManager;
+import com.mparticle.internal.MPUtility;
 import com.mparticle.networking.IdentityRequest;
 import com.mparticle.networking.Matcher;
 import com.mparticle.networking.MockServer;
@@ -18,6 +21,7 @@ import org.junit.Test;
 
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 
@@ -188,6 +192,77 @@ public final class IdentityApiStartTest extends BaseCleanInstallEachTest {
             String key = keys.next();
             assertEquals(copy.get(getIdentityTypeIgnoreCase(key)), knownIdentities.getString(key));
         }
+    }
+
+    /**
+     * In this scenario, a logPushRegistration's modify request is made when the current MPID is 0. Previously
+     * the method's modify request would failed when a valid MPID wasn't present, but currently we will
+     * defer the request until a valid MPID is present.
+     *
+     * Additionally, this tests that if the logPushRegistration method is called multiple times (for whatever reason)
+     * before a valid MPID is present, we will ignore the previous values, and only send the most recent request.
+     * This would be good in a case where the device is offline for a period of time, and logPushNotification
+     * request back up.
+     * @throws InterruptedException
+     */
+    @Test
+    public void testPushRegistrationModifyRequest() throws InterruptedException, JSONException {
+        final Long startingMpid = ran.nextLong();
+        mServer.setupHappyIdentify(startingMpid, 200);
+        final Mutable<Boolean> logPushRegistrationCalled = new Mutable<Boolean>(false);
+        final CountDownLatch latch = new MPLatch(1);
+
+
+        MParticle.start(MParticleOptions.builder(mContext).credentials("key", "value").build());
+
+        MParticle.getInstance().Identity().addIdentityStateListener(new IdentityStateListener() {
+            @Override
+            public void onUserIdentified(MParticleUser user) {
+                assertTrue(logPushRegistrationCalled.value);
+                latch.countDown();
+                MParticle.getInstance().Identity().removeIdentityStateListener(this);
+            }
+        });
+
+        String pushRegistration = null;
+        for (int i = 0; i < 5; i++) {
+            MParticle.getInstance().logPushRegistration(pushRegistration = mRandomUtils.getAlphaString(12),  "senderId");
+        }
+        logPushRegistrationCalled.value = true;
+
+        latch.await();
+        mServer.waitForVerify(new Matcher(mServer.Endpoints().getModifyUrl(startingMpid)));
+        List<Request> modifyRequests = mServer.Requests().getModify();
+        assertEquals(1, modifyRequests.size());
+        JSONObject body = modifyRequests.get(0).getBodyJson();
+        JSONArray identityChanges = body.getJSONArray("identity_changes");
+        assertEquals(1, identityChanges.length());
+        JSONObject identityChange = identityChanges.getJSONObject(0);
+        assertEquals(pushRegistration, identityChange.getString("new_value"));
+        assertEquals("push_token", identityChange.getString("identity_type"));
+
+        //make sure the mDeferredModifyPushRegistrationListener was successfully removed from the IdentityApi
+        assertEquals(0, AccessUtils.getIdentityStateListeners().size());
+    }
+
+    /**
+     * This builds on the previous test. The common scenario where we send a modify() request
+     * when a valid MPID is not present, is when a client sets a pushRegistration in MParticleOptions
+     * on the applications initial install
+     */
+    @Test
+    public void testPushRegistrationInMParticleOptions() throws InterruptedException {
+        Exception ex = null;
+        try {
+            startMParticle(MParticleOptions
+                    .builder(mContext)
+                    .pushRegistration("instanceId", "senderId")
+                    .environment(MParticle.Environment.Development));
+            assertTrue(MPUtility.isDevEnv());
+        } catch (Exception e) {
+            ex = e;
+        }
+        assertNull(ex);
     }
 
     private MParticle.IdentityType getIdentityTypeIgnoreCase(String value) {

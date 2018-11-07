@@ -26,6 +26,7 @@ import com.mparticle.identity.IdentityApi;
 import com.mparticle.identity.IdentityApiRequest;
 import com.mparticle.identity.IdentityApiResult;
 import com.mparticle.identity.IdentityHttpResponse;
+import com.mparticle.identity.IdentityStateListener;
 import com.mparticle.identity.MParticleUser;
 import com.mparticle.identity.TaskFailureListener;
 import com.mparticle.identity.TaskSuccessListener;
@@ -84,7 +85,7 @@ public class MParticle {
     @NonNull private static volatile MParticle instance;
     @NonNull protected SharedPreferences mPreferences;
     @NonNull protected MPLocationListener mLocationListener;
-    @NonNull private Context mAppContext;
+    @NonNull protected Context mAppContext;
     @NonNull protected MPMessagingAPI mMessaging;
     @NonNull protected MPMediaAPI mMedia;
     @NonNull protected CommerceApi mCommerce;
@@ -95,7 +96,7 @@ public class MParticle {
     static volatile boolean sDevicePerformanceMetricsDisabled;
     @NonNull protected boolean locationTrackingEnabled = false;
     @NonNull protected Internal mInternal = new Internal();
-
+    private IdentityStateListener mDeferredModifyPushRegistrationListener;
 
     protected MParticle() { }
     
@@ -1016,7 +1017,7 @@ public class MParticle {
         return mKitManager.getKitInstance(kitId);
     }
 
-    public void logPushRegistration(@NonNull String instanceId, @NonNull String senderId) {
+    public void logPushRegistration(final @NonNull String instanceId, @NonNull String senderId) {
         mAppStateManager.ensureActiveSession();
         PushRegistrationHelper.PushRegistration registration = new PushRegistrationHelper.PushRegistration(instanceId, senderId);
         String oldInstanceId = mConfigManager.getPushInstanceId();
@@ -1400,16 +1401,33 @@ public class MParticle {
         mKitManager.installReferrerUpdated();
     }
 
-    private void updatePushToken(String newInstanceId, String oldInstanceId) {
+    private void updatePushToken(final String newInstanceId, final String oldInstanceId) {
         MParticleUser user = MParticle.getInstance().Identity().getCurrentUser();
-        Builder builder;
         if (user != null) {
-            builder = new Builder(user);
+            sendPushTokenModifyRequest(user, newInstanceId, oldInstanceId);
         } else {
-            builder = new Builder();
+            if (mDeferredModifyPushRegistrationListener != null) {
+                Identity().removeIdentityStateListener(mDeferredModifyPushRegistrationListener);
+                Logger.verbose("Removed deferred logPushRegistration Modify request");
+            }
+            mDeferredModifyPushRegistrationListener = new IdentityStateListener() {
+                @Override
+                public void onUserIdentified(MParticleUser user) {
+                    if (user != null) {
+                        Identity().removeIdentityStateListener(this);
+                        Logger.verbose("Sending previously deferred logPushRegistration Modify request");
+                        sendPushTokenModifyRequest(user, newInstanceId, oldInstanceId);
+                    }
+                }
+            };
+            Identity().addIdentityStateListener(mDeferredModifyPushRegistrationListener);
+            Logger.verbose("Deferred logPushRegistration Modify request, MParticleUser not present");
         }
-        Identity().modify(builder
-                .pushToken(newInstanceId, oldInstanceId)
+    }
+
+    private void sendPushTokenModifyRequest(MParticleUser user, String instanceId, String oldInstanceId) {
+        Identity().modify(new Builder(user)
+                .pushToken(instanceId, oldInstanceId)
                 .build());
     }
 
@@ -1417,9 +1435,7 @@ public class MParticle {
         Builder(MParticleUser user) {
             super(user);
         }
-        Builder() {
-            super();
-        }
+        Builder() { super(); }
 
         @Override
         protected IdentityApiRequest.Builder pushToken(String newPushToken, String oldPushToken) {

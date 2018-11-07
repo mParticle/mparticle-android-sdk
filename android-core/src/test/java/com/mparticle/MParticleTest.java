@@ -3,6 +3,9 @@ package com.mparticle;
 
 import android.webkit.WebView;
 
+import com.mparticle.identity.IdentityApi;
+import com.mparticle.identity.IdentityApiRequest;
+import com.mparticle.identity.MParticleUser;
 import com.mparticle.internal.Constants;
 import com.mparticle.internal.InternalSession;
 import com.mparticle.internal.MParticleJSInterface;
@@ -19,7 +22,9 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.eq;
 
 
@@ -250,5 +255,25 @@ public class MParticleTest {
             mp.registerWebView(webView, "hardcode");
             assertTrue(called.value);
         }
+    }
+
+    @Test
+    public void testDeferPushRegistrationModifyRequest() {
+        MParticle instance = new MockMParticle();
+        instance.mIdentityApi = Mockito.mock(IdentityApi.class);
+        Mockito.when(instance.Identity().getCurrentUser()).thenReturn(null);
+        Mockito.when(instance.Identity().modify(Mockito.any(IdentityApiRequest.class))).thenThrow(new RuntimeException("Unexpected Modify Request"));
+        MParticle.setInstance(instance);
+        MParticle.getInstance().logPushRegistration("instanceId", "senderId");
+
+
+        Mockito.when(instance.Identity().getCurrentUser()).thenReturn(Mockito.mock(MParticleUser.class));
+        Exception ex = null;
+        try {
+            MParticle.getInstance().logPushRegistration("instanceId", "senderId");
+        } catch (Exception e) {
+            ex = e;
+        }
+        assertEquals("Unexpected Modify Request", ex.getMessage());
     }
 }
