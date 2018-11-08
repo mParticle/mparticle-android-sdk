@@ -49,10 +49,12 @@ public class MPEvent {
         if (builder.eventName == null){
             Logger.error("MPEvent created with no event name!");
         }else{
-            if (builder.eventName.length() > Constants.LIMIT_EVENT_NAME){
-                Logger.error("MPEvent created with too long of a name, the limit is: " + Constants.LIMIT_EVENT_NAME);
+            if (builder.eventName.length() > Constants.LIMIT_ATTR_KEY){
+                Logger.error("MPEvent created with too long of a name and will be truncated, the limit is: " + Constants.LIMIT_ATTR_KEY);
+                eventName = builder.eventName.substring(0, Constants.LIMIT_ATTR_KEY);
+            } else {
+                eventName = builder.eventName;
             }
-            eventName = builder.eventName;
         }
 
         entering = builder.entering;
@@ -61,7 +63,7 @@ public class MPEvent {
         if (builder.category != null){
             category = builder.category;
             if (info == null){
-                info = new HashMap<String, String>(1);
+                info = new HashMap<String, String>();
             }
             info.put(Constants.MessageKey.EVENT_CATEGORY, builder.category);
         }

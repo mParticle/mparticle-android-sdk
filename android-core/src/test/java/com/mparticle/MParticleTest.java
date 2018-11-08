@@ -1,6 +1,7 @@
 package com.mparticle;
 
 
+import com.mparticle.internal.Constants;
 import com.mparticle.internal.InternalSession;
 
 import org.junit.Assert;
@@ -20,14 +21,10 @@ import static org.mockito.Matchers.eq;
 
 public class MParticleTest {
 
-    ExecutorService executorService = Executors.newFixedThreadPool(2);
-
     @Test
     public void testSetUserAttribute() throws Exception {
         MParticle mp = new MockMParticle();
-        //mp.mConfigManager = Mockito.mock(ConfigManager.class);
-//        mp.mAppStateManager = Mockito.mock(AppStateManager.class);
-        //mp.mIdentity = new IdentityApi();
+
         InternalSession mockSession = Mockito.mock(InternalSession.class);
         Mockito.when(mockSession.checkEventLimit()).thenReturn(true);
         Mockito.when(mp.mAppStateManager.getSession()).thenReturn(mockSession);
@@ -43,7 +40,7 @@ public class MParticleTest {
         ArgumentCaptor<String> stringCaptor = ArgumentCaptor.forClass(String.class);
         ArgumentCaptor<Long> longCaptor = ArgumentCaptor.forClass(Long.class);
 
-        String legalString = new String(new char[256]);
+        String legalString = new String(new char[Constants.LIMIT_ATTR_KEY]);
         assertTrue(mp.Identity().getCurrentUser().setUserAttribute(legalString, null));
         Mockito.verify(mp.mMessageManager, Mockito.times(1)).setUserAttribute(legalString, null, 1, false);
 
@@ -58,8 +55,8 @@ public class MParticleTest {
         assertTrue(capturedStringList.get(0).equals("203948"));
         assertTrue(longCaptor.getValue() == 1);
         List<String> longStringList = new ArrayList<String>();
-        for (int i = 0; i < 1000; i++){
-            longStringList.add("whatever");
+        for (int i = 0; i < Constants.LIMIT_ATTR_VALUE; i++){
+            longStringList.add("a");
         }
         assertTrue(mp.Identity().getCurrentUser().setUserAttribute("test3", longStringList));
 
@@ -72,9 +69,9 @@ public class MParticleTest {
         assertFalse(mp.Identity().getCurrentUser().setUserAttribute("test", longStringList));
 
         List<String> stringList = new LinkedList<String>();
-        stringList.add(new String(new char[512]));
+        stringList.add(new String(new char[Constants.LIMIT_ATTR_VALUE]));
         assertTrue(mp.Identity().getCurrentUser().setUserAttribute("test", stringList));
-        stringList.add(new String(new char[513]));
+        stringList.add(new String(new char[Constants.LIMIT_ATTR_VALUE+1]));
         assertFalse(mp.Identity().getCurrentUser().setUserAttribute("test", stringList));
 
 
@@ -115,8 +112,8 @@ public class MParticleTest {
         assertTrue(capturedStringList.get(0).equals("203948"));
         assertTrue(longCaptor.getValue() == 2);
         List<String> longStringList = new ArrayList<String>();
-        for (int i = 0; i < 1000; i++){
-            longStringList.add("whatever");
+        for (int i = 0; i < Constants.LIMIT_ATTR_VALUE; i++){
+            longStringList.add("a");
         }
         assertTrue(mp.Identity().getCurrentUser().setUserAttributeList("test3", longStringList));
 
@@ -130,9 +127,9 @@ public class MParticleTest {
 
 
         List<String> stringList = new LinkedList<String>();
-        stringList.add(new String(new char[512]));
+        stringList.add(new String(new char[Constants.LIMIT_ATTR_VALUE]));
         assertTrue(mp.Identity().getCurrentUser().setUserAttributeList("test", stringList));
-        stringList.add(new String(new char[513]));
+        stringList.add(new String(new char[Constants.LIMIT_ATTR_VALUE+1]));
         assertFalse(mp.Identity().getCurrentUser().setUserAttributeList("test", stringList));
         assertFalse(mp.Identity().getCurrentUser().setUserAttributeList("test", null));
     }

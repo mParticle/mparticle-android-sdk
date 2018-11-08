@@ -2,7 +2,10 @@ package com.mparticle;
 
 
 
+import com.mparticle.internal.Constants;
+
 import org.junit.Test;
+import org.mockito.Mockito;
 
 import java.util.HashMap;
 import java.util.List;
@@ -63,6 +66,17 @@ public class MPEventTests  {
         eventBuilder.endTime();
         Long duration = System.currentTimeMillis() - startTime;
         assertEquals(duration, eventBuilder.build().getLength(), 5);
+    }
+
+    @Test
+    public void testEventNameLength() {
+        StringBuilder nameBuilder = new StringBuilder(Constants.LIMIT_ATTR_KEY+10);
+        for (int i = 0; i < Constants.LIMIT_ATTR_KEY+10; i++){
+            nameBuilder.append("0");
+        }
+
+        MPEvent eventBuilder = new MPEvent.Builder(nameBuilder.toString(), MParticle.EventType.Navigation).build();
+        assertEquals(Constants.LIMIT_ATTR_KEY, eventBuilder.getEventName().length());
     }
 
     @Test

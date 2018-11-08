@@ -57,7 +57,7 @@ public class MPUtilityTest {
     public void testSetValueThatsTooLong() throws Exception {
         JSONObject attributes = new JSONObject();
         StringBuilder builder = new StringBuilder();
-        for (int i = 0; i < 257; i++) {
+        for (int i = 0; i < Constants.LIMIT_ATTR_VALUE + 1; i++) {
             builder.append("a");
         }
         String valueThatsTooLong = builder.toString();
@@ -71,7 +71,7 @@ public class MPUtilityTest {
     public void testSetUserValueThatsTooLong() throws Exception {
         JSONObject attributes = new JSONObject();
         StringBuilder builder = new StringBuilder();
-        for (int i = 0; i < 4097; i++) {
+        for (int i = 0; i < Constants.LIMIT_ATTR_VALUE + 1; i++) {
             builder.append("a");
         }
         String valueThatsTooLong = builder.toString();

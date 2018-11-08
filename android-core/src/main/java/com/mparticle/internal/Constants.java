@@ -24,12 +24,8 @@ public class Constants {
     public static final String PREFS_FILE = "mParticlePrefs";
 
     public static final int LIMIT_ATTR_COUNT = 100;
-    public static final int LIMIT_ATTR_NAME = 256;
-    public static final int LIMIT_ATTR_VALUE = 256;
-    public static final int LIMIT_USER_ATTR_VALUE = 4096;
-    public static final int LIMIT_EVENT_NAME = 256;
-    public static final int LIMIT_USER_ATTR_LIST_LENGTH = 1000;
-    public static final int LIMIT_USER_ATTR_LIST_ITEM_LENGTH = 512;
+    public static final int LIMIT_ATTR_KEY = 256;
+    public static final int LIMIT_ATTR_VALUE = 4096;
     public static final int LIMIT_MAX_MESSAGE_SIZE = 100 * 1024;
     public static final int LIMIT_MAX_UPLOAD_SIZE = 2 * LIMIT_MAX_MESSAGE_SIZE;
 

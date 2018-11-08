@@ -438,7 +438,7 @@ public class MParticle {
             Logger.error( "screenName is required for logScreen");
             return;
         }
-        if (screenEvent.getEventName().length() > Constants.LIMIT_EVENT_NAME) {
+        if (screenEvent.getEventName().length() > Constants.LIMIT_ATTR_KEY) {
             Logger.error( "The screen name was too long. Discarding event.");
             return;
         }
@@ -470,7 +470,7 @@ public class MParticle {
                 Logger.error( "breadcrumb is required for leaveBreadcrumb");
                 return;
             }
-            if (breadcrumb.length() > Constants.LIMIT_EVENT_NAME) {
+            if (breadcrumb.length() > Constants.LIMIT_ATTR_KEY) {
                 Logger.error( "The breadcrumb name was too long. Discarding event.");
                 return;
             }

@@ -142,50 +142,49 @@ import java.util.Map;
         if (mConfigManager.isEnabled()) {
             mAppStateManager.ensureActiveSession();
             if (MPUtility.isEmpty(key)) {
-                Logger.warning("setUserAttribute called with null key. This is a noop.");
+                Logger.warning("Error while setting user attribute - called with null key. This is a no-op.");
                 return false;
             }
-            if (key.length() > Constants.LIMIT_ATTR_NAME) {
-                Logger.warning("User attribute keys cannot be longer than " + Constants.LIMIT_ATTR_NAME + " characters, attribute not set: " + key);
+            if (key.length() > Constants.LIMIT_ATTR_KEY) {
+                Logger.warning("Error while setting user attribute - attribute keys cannot be longer than " + Constants.LIMIT_ATTR_KEY + " characters. Attribute not set: " + key);
                 return false;
             }
 
-            if (value != null && value instanceof List) {
+            if (value instanceof List) {
                 List<Object> values = (List<Object>) value;
-                if (values.size() > Constants.LIMIT_USER_ATTR_LIST_LENGTH) {
-                    Logger.warning("setUserAttribute called with list longer than " + Constants.LIMIT_USER_ATTR_LIST_LENGTH + " elements, list not set.");
-                    return false;
-                }
+
                 List<String> clonedList = new ArrayList<String>();
                 try {
+                    int totalLength = 0;
                     for (int i = 0; i < values.size(); i++) {
-                        if (values.get(i).toString().length() > Constants.LIMIT_USER_ATTR_LIST_ITEM_LENGTH) {
-                            Logger.warning("setUserAttribute called with list containing element longer than " + Constants.LIMIT_USER_ATTR_LIST_ITEM_LENGTH + " characters, dropping entire list.");
+                        totalLength += values.get(i).toString().length();
+                        if (totalLength > Constants.LIMIT_ATTR_VALUE) {
+                            Logger.warning("Error while setting user attribute - attribute lists cannot contain values of combined length greater than " + Constants.LIMIT_ATTR_VALUE + " characters. Attribute not set." );
                             return false;
                         } else {
                             clonedList.add(values.get(i).toString());
                         }
                     }
-                    Logger.warning("Set user attribute list: " + key + " with values: " + values.toString());
+                    Logger.debug("Setting user attribute list: " + key + " with values: " + values.toString());
                     mMessageManager.setUserAttribute(key, clonedList, userMpId, synchronously);
                     mKitManager.setUserAttributeList(key, clonedList, userMpId);
                 } catch (Exception e) {
-                    Logger.warning("Error while setting attribute list: " + e.toString());
+                    Logger.warning("Error while setting user attribute - " + e.toString());
                     return false;
                 }
             } else {
                 String stringValue = null;
                 if (value != null) {
                     stringValue = value.toString();
-                    if (stringValue.length() > Constants.LIMIT_USER_ATTR_VALUE) {
-                        Logger.warning("setUserAttribute called with stringvalue longer than " + Constants.LIMIT_USER_ATTR_VALUE + " characters. Attribute not set.");
+                    if (stringValue.length() > Constants.LIMIT_ATTR_VALUE) {
+                        Logger.warning("Error while setting user attribute - attribute values cannot be longer than " + Constants.LIMIT_ATTR_VALUE + " characters. Attribute not set.");
                         return false;
                     }
-                    Logger.debug("Set user attribute: " + key + " with value: " + stringValue);
+                    Logger.debug("Setting user attribute: " + key + " with value: " + stringValue);
                     mMessageManager.setUserAttribute(key, stringValue, userMpId, synchronously);
                     mKitManager.setUserAttribute(key, stringValue, userMpId);
                 } else {
-                    Logger.debug("Set user tag: " + key);
+                    Logger.debug("Setting user tag: " + key);
                     mMessageManager.setUserAttribute(key, stringValue, userMpId, synchronously);
                     mKitManager.setUserTag(key, userMpId);
                 }

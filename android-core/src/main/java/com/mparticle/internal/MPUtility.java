@@ -634,12 +634,12 @@ public class MPUtility {
             }
             if (value != null) {
                 String stringValue = value.toString();
-                if ((userAttribute && stringValue.length() > Constants.LIMIT_USER_ATTR_VALUE) || (!userAttribute && stringValue.length() > Constants.LIMIT_ATTR_VALUE) ){
+                if (stringValue.length() > Constants.LIMIT_ATTR_VALUE){
                     Logger.error( "Attribute value length exceeds limit. Discarding attribute: " + key);
                     return false;
                 }
             }
-            if (key.length() > Constants.LIMIT_ATTR_NAME) {
+            if (key.length() > Constants.LIMIT_ATTR_KEY) {
                 Logger.error( "Attribute name length exceeds limit. Discarding attribute: " + key);
                 return false;
             }
@@ -674,16 +674,6 @@ public class MPUtility {
             }
         }
         return key;
-    }
-
-    public static long generateMpid() {
-        while (true)
-        {
-            long id = hashFnv1A(UUID.randomUUID().toString().getBytes()).longValue();
-            if (id != 0) {
-                return id;
-            }
-        }
     }
 
     public static boolean isInstantApp(final Context context) {
