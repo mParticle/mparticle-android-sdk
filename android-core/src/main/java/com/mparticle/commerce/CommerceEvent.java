@@ -35,6 +35,7 @@ public final class CommerceEvent {
     private String mProductAction;
     private String mPromotionAction;
     private Map<String, String> customAttributes;
+    private Map<String, String> customFlags;
     private List<Promotion> promotionList;
     private List<Product> productList;
     private Integer mCheckoutStep;
@@ -69,6 +70,9 @@ public final class CommerceEvent {
         mImpressions = builder.mImpressions;
         mNonIteraction = builder.mNonIteraction;
         mEventName = builder.mEventName;
+        if (builder.customFlags != null) {
+            setCustomFlags(builder.customFlags);
+        }
 
         boolean devMode = MParticle.Environment.Development.equals(MParticle.getInstance().getEnvironment());
 
@@ -280,6 +284,20 @@ public final class CommerceEvent {
     }
 
     /**
+     * Retrieve the custom flags set on this event. Custom Flags are used to send data or trigger behavior
+     * to individual 3rd party services that you have enabled for your app. By default, flags are not forwarded
+     * to any providers.
+     *
+     * @see com.mparticle.MPEvent.Builder#addCustomFlag(String, String)
+     *
+     * @return returns the map of custom flags, or null if none are set
+     */
+    public Map<String,String> getCustomFlags() {
+        return customFlags;
+    }
+
+
+    /**
      * Retrieve the Screen where the event occurred
      *
      * @return the String descriptor/name of the Screen where this event occurred, or null if this is not set
@@ -411,6 +429,14 @@ public final class CommerceEvent {
         return Collections.unmodifiableList(promotionList);
     }
 
+    private void setCustomFlags(Map<String, String> flags) {
+        if (flags != null && MPUtility.containsNullKey(flags)) {
+            Logger.warning(String.format("disregarding \"MPEvent.customFlag\" value of %s. Key was found to be null", flags.get(null)));
+            flags.remove(null);
+        }
+        customFlags = flags;
+    }
+
     @Override
     public boolean equals(Object o) {
         return o != null && o.toString().equals(toString());
@@ -516,6 +542,7 @@ public final class CommerceEvent {
         private Boolean mNonIteraction;
         private List<Impression> mImpressions;
         private String mEventName;
+        private Map<String, String> customFlags = null;
 
         private Builder() {
             mProductAction = mPromotionAction = null;
@@ -684,6 +711,22 @@ public final class CommerceEvent {
          */
         public Builder customAttributes(Map<String, String> attributes) {
             customAttributes = attributes;
+            return this;
+        }
+
+        /**
+         * Add a custom flag to this event. Flag keys can have multiple values - if the provided flag key already has an associated
+         * value, the value will be appended.
+         *
+         * @param key (required) a flag key, retrieve this from the mParticle docs or solution team for your intended services(s)
+         * @param value (required) a flag value to be send to the service indicated by the flag key
+         * @return returns this builder for easy method chaining
+         */
+        public Builder addCustomFlag(String key, String value) {
+            if (customFlags == null) {
+                customFlags = new HashMap<String, String>();
+            }
+            customFlags.put(key, value);
             return this;
         }
 

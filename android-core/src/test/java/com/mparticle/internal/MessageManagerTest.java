@@ -14,6 +14,7 @@ import com.mparticle.internal.database.services.MParticleDBManager;
 import com.mparticle.internal.networking.BaseMPMessage;
 import com.mparticle.mock.MockContext;
 import com.mparticle.mock.MockSharedPreferences;
+import com.mparticle.mock.utils.RandomUtils;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -56,7 +57,7 @@ public class MessageManagerTest {
     private long defaultId = 1L;
 
     @Before
-    public void setup() throws Exception {
+    public void setup() {
         MParticle.setInstance(new MockMParticle());
         context = new MockContext();
         configManager = Mockito.mock(ConfigManager.class);
@@ -562,4 +563,16 @@ public class MessageManagerTest {
         assertEquals(message.get("ui"), identities);
     }
 
+    @Test
+    public void testToListMan() {
+        Map<String, String> map = RandomUtils.getInstance().getRandomAttributes(10);
+        Map<String, List<String>> listMap = new MessageManager().toStringListMap(map);
+        assertEquals(map.size(), listMap.size());
+        for (Map.Entry<String, String> entry: map.entrySet()) {
+            assertEquals(1, listMap.get(entry.getKey()).size());
+            assertEquals(entry.getValue(), listMap.get(entry.getKey()).get(0));
+        }
+
+        assertEquals(null, new MessageManager().toStringListMap(null));
+    }
 }

@@ -1,6 +1,7 @@
 package com.mparticle.commerce;
 
 import com.mparticle.MParticle;
+import com.mparticle.mock.utils.RandomUtils;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -140,5 +141,22 @@ public class CommerceEventTest {
         Product product = new Product.Builder("name", "sku", 0).build();
         CommerceEvent event = new CommerceEvent.Builder("promo", new Promotion().setId("promo id")).productListSource("the list source").nonInteraction(true).build();
         assertEquals("the list source", event.getProductListSource());
+    }
+
+    @Test
+    public void testCustomFlags() throws Exception {
+        Product product = new Product.Builder("name", "sku", 0).build();
+        CommerceEvent.Builder builder = new CommerceEvent.Builder(Product.CLICK, product);
+
+        CommerceEvent event = builder.build();
+        assertEquals(null, event.getCustomFlags());
+
+        Map<String, String> attributes = RandomUtils.getInstance().getRandomAttributes(RandomUtils.getInstance().randomInt(1, 10));
+        for (Map.Entry<String, String> attribute: attributes.entrySet()) {
+            builder.addCustomFlag(attribute.getKey(), attribute.getValue());
+        }
+        event = builder.build();
+        attributes.remove(null);
+        assertEquals(attributes, event.getCustomFlags());
     }
 }

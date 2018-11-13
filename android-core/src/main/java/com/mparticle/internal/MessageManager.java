@@ -41,6 +41,7 @@ import org.json.JSONObject;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -353,6 +354,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
                 }
                 BaseMPMessage message = new MPCommerceMessage.Builder(event, mAppStateManager.getSession(), mLocation, mConfigManager.getMpid(), cart)
                         .timestamp(mAppStateManager.getSession().mLastEventTime)
+                        .flags(toStringListMap(event.getCustomFlags()))
                         .build();
                 mMessageHandler.sendMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
                 return message;
@@ -930,6 +932,17 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
         response.attributeSingles = mMParticleDBManager.getUserAttributeSingles(mpId);
         response.attributeLists = mMParticleDBManager.getUserAttributeLists(mpId);
         return response;
+    }
+
+    Map<String, List<String>> toStringListMap(Map<String, String> map) {
+        if (map == null) {
+            return null;
+        }
+        Map<String, List<String>> listMap = new HashMap<String, List<String>>();
+        for (Map.Entry<String, String> entry: map.entrySet()) {
+            listMap.put(entry.getKey(), Collections.singletonList(entry.getValue()));
+        }
+        return listMap;
     }
 
     //this return valuable is significant if it is false. That means that a legacy SDK has on record
