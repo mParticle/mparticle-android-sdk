@@ -11,7 +11,6 @@ import com.mparticle.testutils.BaseCleanStartedEachTest;
 import com.mparticle.testutils.MPLatch;
 
 import org.junit.Test;
-import org.mockito.Mockito;
 
 import java.util.Random;
 import java.util.concurrent.CountDownLatch;
@@ -147,9 +146,7 @@ public class KitFrameworkWrapperTest extends BaseCleanStartedEachTest {
 
         public StubKitManager(Context context) {
             super(context, null, null, null, null, true);
-            //using a Mockito instance for KitManager means that whenever a call is made to it, it will crash
-            //this way we can override the methods we expect to be called, and if an unexpected one gets called, we will know about it
-            setKitManager(Mockito.mock(KitManager.class));
+            setKitManager(null);
         }
 
         @Override

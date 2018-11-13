@@ -12,7 +12,7 @@ import android.content.res.Resources;
  */
 public class MockApplication extends Application {
     MockContext mContext;
-    public Application.ActivityLifecycleCallbacks mCallbacks;
+    public ActivityLifecycleCallbacks mCallbacks;
 
     public MockApplication(MockContext context) {
         super();

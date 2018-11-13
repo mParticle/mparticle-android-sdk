@@ -16,7 +16,7 @@ import java.util.Map;
 
 public final class CommerceEventUtils {
 
-    private static final String PLUSONE_NAME = "eCommerce - %s - Total";
+    static final String PLUSONE_NAME = "eCommerce - %s - Total";
     private static final String ITEM_NAME = "eCommerce - %s - Item";
     private static final String IMPRESSION_NAME = "eCommerce - Impression - Item";
 

@@ -1,10 +1,6 @@
 package com.mparticle.mock;
 
-import android.content.Context;
-import android.content.res.AssetManager;
-import android.content.res.Configuration;
 import android.content.res.Resources;
-import android.util.DisplayMetrics;
 
 /**
  * Created by sdozor on 3/23/15.

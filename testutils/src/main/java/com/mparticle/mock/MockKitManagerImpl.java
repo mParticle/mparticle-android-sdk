@@ -2,9 +2,7 @@ package com.mparticle.mock;
 
 import android.content.Context;
 
-import com.mparticle.internal.AppStateManager;
 import com.mparticle.internal.BackgroundTaskHandler;
-import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.KitFrameworkWrapper;
 import com.mparticle.internal.ReportingManager;
 import com.mparticle.kits.KitConfiguration;

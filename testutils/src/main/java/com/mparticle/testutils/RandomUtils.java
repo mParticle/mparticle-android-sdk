@@ -49,6 +49,14 @@ public class RandomUtils {
         return attributes;
     }
 
+    public Map<String, Object> getRandomUserAttributes(int count) {
+        Map<String, Object> attributes = new HashMap<>();
+        for (Map.Entry<String, String> entry: getRandomAttributes(count).entrySet()) {
+            attributes.put(entry.getKey(), entry.getValue());
+        }
+        return attributes;
+    }
+
     public String getAlphaString(int length) {
         return getRandomString(length, sAlpha);
     }

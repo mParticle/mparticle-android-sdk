@@ -29,7 +29,7 @@ public class MockMParticle extends MParticle {
         mPreferences = new MockSharedPreferences();
     }
 
-    class MockInternal extends MParticle.Internal {
+    class MockInternal extends Internal {
 
         MockInternal(ConfigManager configManager) {
             super(configManager);
