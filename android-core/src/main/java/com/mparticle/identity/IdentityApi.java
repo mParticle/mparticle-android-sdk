@@ -97,6 +97,10 @@ public class IdentityApi {
         return users;
     }
 
+    public String getDeviceApplicationStamp() {
+        return mConfigManager.getDeviceApplicationStamp();
+    }
+
     /**
      * adds a global listener which will be invoked when the MPID or "logged in" status changes for the current user
      * @param listener callback for Identity State changes

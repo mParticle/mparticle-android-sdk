@@ -123,6 +123,9 @@
 -keep class com.mparticle.UserAttributeListener { *; }
 -keep class com.mparticle.internal.MParticleJSInterface { *; }
 -keep class com.mparticle.internal.Logger { *; }
+-keep class com.mparticle.internal.Logger$* { *; }
+-keep class com.mparticle.internal.MParticleApiClient { *; }
+-keep class com.mparticle.internal.MParticleApiClient$*  { *; }
 -keep, includedescriptorclasses class com.mparticle.identity.IdentityApi { *; }
 -keep, includedescriptorclasses class com.mparticle.identity.IdentityApiRequest { *; }
 -keep, includedescriptorclasses class com.mparticle.identity.IdentityApiRequest$* { *; }

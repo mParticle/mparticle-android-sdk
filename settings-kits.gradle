@@ -25,7 +25,11 @@ include (
         ':kits:adobe-kit',
         ':kits:instabot-kit',
         ':kits:appsee-kit',
-        ':kits:taplytics-kit'
+        ':kits:taplytics-kit',
+        ':kits:optimizely-kit',
+        ':testutils',
+        ':android-core',
+        ':android-kit-base'
 )
 project(':kits').getChildren().each {
     proj -> proj.name = 'android-' + proj.name

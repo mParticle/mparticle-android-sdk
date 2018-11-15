@@ -108,9 +108,7 @@ public class TestingUtils {
     public void setDefaultClient(Context context) {
         try {
             AccessUtils.setMParticleApiClient(new MParticleApiClientImpl(MParticle.getInstance().Internal().getConfigManager(), context.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE), context));
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        } catch (MParticleApiClientImpl.MPNoConfigException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }

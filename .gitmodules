@@ -79,3 +79,6 @@
 [submodule "kits/taplytics-kit"]
 	path = kits/taplytics-kit
 	url = git@github.com:mparticle-integrations/mparticle-android-integration-taplytics.git
+[submodule "kits/optimizely-kit"]
+    path = kits/optimizely-kit
+    url = git@github.com:mparticle-integrations/mparticle-android-integration-optimizely.git

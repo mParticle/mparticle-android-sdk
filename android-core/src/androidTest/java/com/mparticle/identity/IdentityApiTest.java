@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching;
@@ -508,6 +509,19 @@ public final class IdentityApiTest extends BaseCleanStartedEachTest {
         for (MParticleUser user: MParticle.getInstance().Identity().getUsers()) {
             assertNotSame(0, user.getId());
         }
+    }
+
+    @Test
+    public void testGetDeviceApplicationStamp() throws InterruptedException {
+        int dasLength = UUID.randomUUID().toString().length();
+        String currentDas = MParticle.getInstance().Identity().getDeviceApplicationStamp();
+        assertEquals(dasLength, currentDas.length());
+        assertEquals(currentDas, MParticle.getInstance().Identity().getDeviceApplicationStamp());
+        MParticle.reset(mContext);
+        startMParticle();
+        String newDas = MParticle.getInstance().Identity().getDeviceApplicationStamp();
+        assertNotNull(newDas);
+        assertNotSame(currentDas, newDas);
     }
 }
 

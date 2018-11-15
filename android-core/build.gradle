@@ -117,11 +117,6 @@ configurations {
     lintJarImport
 }
 
-dependencies {
-    lintJarImport project(path: ":custom-lint-rules", configuration: "lintChecks")
-}
-
-
 task copyLintJar(type: Copy) {
 
     from(configurations.lintJarImport) {

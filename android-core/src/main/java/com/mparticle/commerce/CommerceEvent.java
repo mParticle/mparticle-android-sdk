@@ -70,8 +70,8 @@ public final class CommerceEvent {
         mImpressions = builder.mImpressions;
         mNonIteraction = builder.mNonIteraction;
         mEventName = builder.mEventName;
-        if (builder.customFlags != null) {
-            setCustomFlags(builder.customFlags);
+        if (builder.mCustomFlags != null) {
+            setCustomFlags(builder.mCustomFlags);
         }
 
         boolean devMode = MParticle.Environment.Development.equals(MParticle.getInstance().getEnvironment());
@@ -542,7 +542,7 @@ public final class CommerceEvent {
         private Boolean mNonIteraction;
         private List<Impression> mImpressions;
         private String mEventName;
-        private Map<String, String> customFlags = null;
+        private Map<String, String> mCustomFlags = null;
 
         private Builder() {
             mProductAction = mPromotionAction = null;
@@ -638,7 +638,7 @@ public final class CommerceEvent {
                 }
             }
             mEventName = event.getEventName();
-
+            mCustomFlags = event.getCustomFlags();
         }
 
         /**
@@ -723,10 +723,10 @@ public final class CommerceEvent {
          * @return returns this builder for easy method chaining
          */
         public Builder addCustomFlag(String key, String value) {
-            if (customFlags == null) {
-                customFlags = new HashMap<String, String>();
+            if (mCustomFlags == null) {
+                mCustomFlags = new HashMap<String, String>();
             }
-            customFlags.put(key, value);
+            mCustomFlags.put(key, value);
             return this;
         }
 
