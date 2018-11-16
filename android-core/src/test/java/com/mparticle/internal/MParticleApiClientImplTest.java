@@ -90,7 +90,8 @@ public class MParticleApiClientImplTest {
         int test = MPUtility.hashFnv1A(MPUtility.getRampUdid(context).getBytes())
                 .mod(BigInteger.valueOf(100))
                 .intValue();
-        assertTrue(test > 0 && test < 100);
+
+        assertTrue("Ramp should be between 0 and 100: " + test, test >= 0 && test < 100);
         int test2 = MPUtility.hashFnv1A(MPUtility.getRampUdid(context).getBytes())
                 .mod(BigInteger.valueOf(100))
                 .intValue();
