@@ -13,6 +13,7 @@ import android.view.WindowManager;
 import com.mparticle.MParticle;
 import com.mparticle.internal.Constants.MessageKey;
 import com.mparticle.internal.Constants.PrefKeys;
+import com.mparticle.internal.PushRegistrationHelper.PushRegistration;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -263,7 +264,7 @@ public class DeviceAttributes {
         }
 
         try {
-            PushRegistrationHelper.PushRegistration registration = PushRegistrationHelper.getLatestPushRegistration(context);
+            PushRegistration registration = MParticle.getInstance().Internal().getConfigManager().getPushRegistration();
             if (registration != null && !MPUtility.isEmpty(registration.instanceId)) {
                 deviceInfo.put(Constants.MessageKey.PUSH_TOKEN, registration.instanceId);
                 deviceInfo.put(Constants.MessageKey.PUSH_TOKEN_TYPE, Constants.GOOGLE_GCM);

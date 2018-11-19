@@ -455,8 +455,6 @@ public class Constants {
     public interface PrefKeys {
         // common
         String INSTALL_TIME = "mp::ict";
-        String PUSH_REGISTRATION_INSTANCE_ID = "mp::push_reg_id";
-        String PUSH_REGISTRATION_SENDER_ID = "mp::push_reg_sender_id";
         String INSTALL_REFERRER = "mp::install_referrer";
         String OPEN_UDID = "mp::openudid";
         String DEVICE_RAMP_UDID = "mp::rampudid";
@@ -472,6 +470,9 @@ public class Constants {
         String PROPERTY_OS_VERSION = "mp::osversion";
         String PUSH_ENABLED = "mp::push_enabled";
         String PUSH_SENDER_ID = "mp::push_sender_id";
+        String PUSH_INSTANCE_ID = "mp::push_reg_id";
+        String PUSH_INSTANCE_ID_BACKGROUND = "mp::push_reg_id_bckgrnd";
+
         String PIRATED = "mp::pirated";
         String PUSH_ENABLE_SOUND = "mp::push::sound";
         String PUSH_ENABLE_VIBRATION = "mp::push::vibration";
@@ -493,7 +494,6 @@ public class Constants {
         String ETAG = "mp::etag";
         String IF_MODIFIED = "mp::ifmodified";
         String IDENTITY_API_CONTEXT = "mp::identity::api::context";
-        String PUSH_TOKEN = "mp::pushtoken";
         String DEVICE_APPLICATION_STAMP = "mp::device-app-stamp";
         String PREVIOUS_ANDROID_ID = "mp::previous::android::id";
         String DISPLAY_PUSH_NOTIFICATIONS = "mp::displaypushnotifications";

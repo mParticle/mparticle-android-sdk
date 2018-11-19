@@ -2,12 +2,16 @@ package com.mparticle.internal;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.os.Build;
+import android.support.annotation.Nullable;
 
 import com.mparticle.ExceptionHandler;
 import com.mparticle.MParticle;
 import com.mparticle.consent.ConsentState;
 import com.mparticle.identity.IdentityApi;
+import com.mparticle.internal.PushRegistrationHelper.PushRegistration;
 import com.mparticle.internal.networking.BaseMPMessage;
 import com.mparticle.networking.NetworkOptions;
 import com.mparticle.networking.NetworkOptionsManager;
@@ -80,6 +84,18 @@ public class ConfigManager {
 
     private ConfigManager() {
 
+    }
+
+    public static ConfigManager getInstance(Context context) {
+        ConfigManager configManager = null;
+        MParticle mParticle = MParticle.getInstance();
+        if (mParticle != null) {
+            configManager = MParticle.getInstance().Internal().getConfigManager();
+        }
+        if (configManager == null) {
+            configManager = new ConfigManager(context);
+        }
+        return configManager;
     }
 
     public ConfigManager(Context context) {
@@ -267,7 +283,7 @@ public class ConfigManager {
      */
     public void delayedStart() {
         mLocalPrefs.delayedInit();
-        if (isPushEnabled() && PushRegistrationHelper.getLatestPushRegistration(mContext) == null) {
+        if (isPushEnabled() && getPushRegistration() == null) {
             MParticle.getInstance().Messaging().enablePushNotifications(getPushSenderId());
         }
     }
@@ -372,16 +388,91 @@ public class ConfigManager {
     }
 
     public String getPushSenderId() {
-        String senderId = mLocalPrefs.getPushSenderId();
-        if (!MPUtility.isEmpty(senderId))
-            return senderId;
-        else return sPreferences.getString(Constants.PrefKeys.PUSH_SENDER_ID, null);
+        PushRegistration pushRegistration = getPushRegistration();
+        if (pushRegistration != null) {
+            return pushRegistration.senderId;
+        } else {
+            return null;
+        }
+    }
+
+    public String getPushInstanceId() {
+        PushRegistration pushRegistration = getPushRegistration();
+        if (pushRegistration != null) {
+            return pushRegistration.instanceId;
+        } else {
+            return null;
+        }
+    }
+
+    public PushRegistration getPushRegistration() {
+        String senderId = sPreferences.getString(Constants.PrefKeys.PUSH_SENDER_ID, null);
+        String instanceId = sPreferences.getString(Constants.PrefKeys.PUSH_INSTANCE_ID, null);
+
+        // Check if app was updated; if so, it must clear the registration ID
+        // since the existing regID is not guaranteed to work with the new
+        // app version.
+        int registeredVersion = sPreferences.getInt(Constants.PrefKeys.PROPERTY_APP_VERSION, Integer.MIN_VALUE);
+        int currentVersion = getAppVersion();
+        int osVersion = sPreferences.getInt(Constants.PrefKeys.PROPERTY_OS_VERSION, Integer.MIN_VALUE);
+        if (registeredVersion != currentVersion || osVersion != Build.VERSION.SDK_INT) {
+            clearPushRegistration();
+            Logger.debug("App or OS version changed, clearing instance ID.");
+            return null;
+        } else {
+            return new PushRegistration(instanceId, senderId);
+        }
+    }
+
+    @Nullable
+    public String getPushInstanceIdBackground() {
+        return sPreferences.getString(Constants.PrefKeys.PUSH_INSTANCE_ID_BACKGROUND, null);
     }
 
     public void setPushSenderId(String senderId) {
-        sPreferences.edit()
-                .putString(Constants.PrefKeys.PUSH_SENDER_ID, senderId)
+        int appVersion = getAppVersion();
+        sPreferences.edit().putString(Constants.PrefKeys.PUSH_SENDER_ID, senderId)
                 .putBoolean(Constants.PrefKeys.PUSH_ENABLED, true)
+                .putInt(Constants.PrefKeys.PROPERTY_APP_VERSION, appVersion)
+                .putInt(Constants.PrefKeys.PROPERTY_OS_VERSION, Build.VERSION.SDK_INT)
+                .apply();
+    }
+
+    public void setPushInstanceId(String token) {
+        sPreferences.edit().putString(Constants.PrefKeys.PUSH_INSTANCE_ID, token).apply();
+    }
+
+    public void setPushRegistration(PushRegistration pushRegistration) {
+        if (pushRegistration == null || MPUtility.isEmpty(pushRegistration.senderId)) {
+            clearPushRegistration();
+        } else {
+            setPushSenderId(pushRegistration.senderId);
+            setPushInstanceId(pushRegistration.instanceId);
+        }
+    }
+
+    public void setPushRegistrationInBackground(PushRegistration pushRegistration) {
+        String oldInstanceId = getPushInstanceId();
+        if (oldInstanceId == null) {
+            oldInstanceId = "";
+        }
+        sPreferences.edit()
+                .putString(Constants.PrefKeys.PUSH_INSTANCE_ID_BACKGROUND, oldInstanceId)
+                .apply();
+        setPushRegistration(pushRegistration);
+    }
+
+    public void clearPushRegistration() {
+        sPreferences.edit()
+                .remove(Constants.PrefKeys.PUSH_SENDER_ID)
+                .remove(Constants.PrefKeys.PUSH_INSTANCE_ID)
+                .remove(Constants.PrefKeys.PUSH_ENABLED)
+                .apply();
+    }
+
+    public void clearPushRegistrationBackground() {
+        sPreferences.edit()
+                .remove(Constants.PrefKeys.PUSH_INSTANCE_ID_BACKGROUND)
                 .apply();
     }
 
@@ -893,14 +984,6 @@ public class ConfigManager {
         sPreferences.edit().putString(Constants.PrefKeys.IDENTITY_API_CONTEXT, context).apply();
     }
 
-    public String getPushToken() {
-        return sPreferences.getString(Constants.PrefKeys.PUSH_TOKEN, null);
-    }
-
-    public void setPushToken(String token) {
-        sPreferences.edit().putString(Constants.PrefKeys.PUSH_TOKEN, token).apply();
-    }
-
     public String getPreviousGoogleAdId() {
         MPUtility.AndroidAdIdInfo adInfo = MPUtility.getGoogleAdIdInfo(mContext);
         String currentAdId = null;
@@ -973,5 +1056,16 @@ public class ConfigManager {
     public synchronized void setNetworkOptions(NetworkOptions networkOptions) {
         sNetworkOptions = networkOptions;
         sPreferences.edit().remove(Constants.PrefKeys.NETWORK_OPTIONS).apply();
+    }
+
+    private int getAppVersion() {
+        try {
+            PackageInfo packageInfo = mContext.getPackageManager()
+                    .getPackageInfo(mContext.getPackageName(), 0);
+            return packageInfo.versionCode;
+        } catch (PackageManager.NameNotFoundException e) {
+            // should never happen
+            throw new RuntimeException("Could not get package name: " + e);
+        }
     }
 }

@@ -116,8 +116,6 @@
 -keep class com.mparticle.internal.JsonReportingMessage { *; }
 -keep class com.mparticle.internal.MPUtility { *; }
 -keep class com.mparticle.internal.MPUtility$* { *; }
--keep class com.mparticle.internal.PushRegistrationHelper { *; }
--keep class com.mparticle.internal.PushRegistrationHelper* { *; }
 -keep class com.mparticle.ReferrerReceiver { *; }
 -keep class com.mparticle.kits.ForeseeKit { *; }
 -keep class com.mparticle.UserAttributeListener { *; }

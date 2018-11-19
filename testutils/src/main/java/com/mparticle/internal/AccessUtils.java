@@ -167,6 +167,10 @@ public class AccessUtils {
         }
     }
 
+    public static void setPushInPushRegistrationHelper(Context context, String instanceId, String senderId) {
+        PushRegistrationHelper.setPushRegistration(context, instanceId, senderId);
+    }
+
     public static long getActivityDelay() {
         return AppStateManager.ACTIVITY_DELAY;
     }

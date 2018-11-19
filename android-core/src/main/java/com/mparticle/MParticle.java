@@ -188,6 +188,14 @@ public class MParticle {
                     if (options.hasPushRegistration()) {
                         PushRegistrationHelper.PushRegistration pushRegistration = options.getPushRegistration();
                         instance.logPushRegistration(pushRegistration.instanceId, pushRegistration.senderId);
+                    } else {
+                        //check if Push InstanceId was updated since we last started the SDK and send corresponding modify() request
+                        String oldInstanceId = instance.mInternal.mConfigManager.getPushInstanceIdBackground();
+                        if (oldInstanceId != null) {
+                            String newInstanceId = instance.mInternal.mConfigManager.getPushInstanceId();
+                            instance.updatePushToken(newInstanceId, oldInstanceId);
+                            instance.mInternal.mConfigManager.clearPushRegistrationBackground();
+                        }
                     }
                 }
             }
@@ -990,21 +998,11 @@ public class MParticle {
     public void logPushRegistration(String instanceId, String senderId) {
         mAppStateManager.ensureActiveSession();
         PushRegistrationHelper.PushRegistration registration = new PushRegistrationHelper.PushRegistration(instanceId, senderId);
-        PushRegistrationHelper.setInstanceId(mAppContext, registration);
-        String oldInstanceId = mInternal.getConfigManager().getPushToken();
+        String oldInstanceId = mInternal.getConfigManager().getPushInstanceId();
+        mInternal.getConfigManager().setPushRegistration(registration);
         mMessageManager.setPushRegistrationId(instanceId, true);
         mKitManager.onPushRegistration(instanceId, senderId);
-
-        MParticleUser user = MParticle.getInstance().Identity().getCurrentUser();
-        Builder builder;
-        if (user != null) {
-            builder = new Builder(user);
-        } else {
-            builder = new Builder();
-        }
-        Identity().modify(builder
-                .pushToken(instanceId, oldInstanceId)
-                .build());
+        updatePushToken(instanceId, oldInstanceId);
     }
 
     /**
@@ -1370,6 +1368,19 @@ public class MParticle {
     void installReferrerUpdated() {
         mMessageManager.installReferrerUpdated();
         mKitManager.installReferrerUpdated();
+    }
+
+    private void updatePushToken(String newInstanceId, String oldInstanceId) {
+        MParticleUser user = MParticle.getInstance().Identity().getCurrentUser();
+        Builder builder;
+        if (user != null) {
+            builder = new Builder(user);
+        } else {
+            builder = new Builder();
+        }
+        Identity().modify(builder
+                .pushToken(newInstanceId, oldInstanceId)
+                .build());
     }
 
     class Builder extends IdentityApiRequest.Builder {

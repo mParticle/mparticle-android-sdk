@@ -70,7 +70,7 @@ public class MPMessagingAPI {
      * Unregister the application for GCM notifications
      */
     public void disablePushNotifications() {
-        PushRegistrationHelper.disablePushNotifications(mContext);
+        MParticle.getInstance().Internal().getConfigManager().clearPushRegistration();
     }
 
     public void displayPushNotificationByDefault(Boolean enabled) {

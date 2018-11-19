@@ -139,7 +139,7 @@ import java.util.UUID;
         if (adIdInfo != null) {
             identitiesJson.put(ANDROID_AAID, adIdInfo.id);
         }
-        String pushToken = mConfigManager.getPushToken();
+        String pushToken = mConfigManager.getPushInstanceId();
         if (!MPUtility.isEmpty(pushToken)) {
             identitiesJson.put(PUSH_TOKEN, pushToken);
         }

@@ -264,7 +264,7 @@ public class UploadHandler extends BaseHandler implements BackgroundTaskHandler 
     public void setConnected(boolean connected){
 
         try {
-            if (!isNetworkConnected && connected && mConfigManager.isPushEnabled() && PushRegistrationHelper.getLatestPushRegistration(mContext) == null) {
+            if (!isNetworkConnected && connected && mConfigManager.isPushEnabled()) {
                 MParticle.getInstance().Messaging().enablePushNotifications(mConfigManager.getPushSenderId());
             }
         }catch (Exception e) {

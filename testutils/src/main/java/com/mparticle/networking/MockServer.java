@@ -56,7 +56,7 @@ public class MockServer {
         return instance;
     }
 
-    static MockServer getInstance() {
+    public static MockServer getInstance() {
         return instance;
     }
 
@@ -318,14 +318,28 @@ public class MockServer {
         return this;
     }
 
-    
+
+    /**
+     * This WILL block
+     */
     public void waitForVerify(Matcher matcher) throws InterruptedException {
         CountDownLatch latch = new MPLatch(1);
-        blockers.put(matcher, latch);
+        waitForVerify(matcher, latch);
         latch.await();
     }
 
-    
+    /**
+     * These WILL NOT block
+     */
+    public void waitForVerify(Matcher matcher, final CountDownLatch latch) {
+        waitForVerify(matcher, new RequestReceivedCallback() {
+            @Override
+            public void onRequestReceived(Request request) {
+                latch.countDown();
+            }
+        });
+    }
+
     public void waitForVerify(Matcher matcher, final RequestReceivedCallback callback) {
         Response response = new Response();
         response.onRequestCallback = new OnRequestCallback() {

@@ -81,12 +81,10 @@ public abstract class BaseAbstractTest {
 
         options.identifyTask(identityTask);
         MParticle.start(com.mparticle.AccessUtils.setCredentialsIfEmpty(options).build());
-        Long start = System.currentTimeMillis();
         if (mServer == null) {
             mServer = MockServer.getNewInstance(mContext);
         }
         mServer.setupHappyIdentify(mStartingMpid);
-        Long elapsed = System.currentTimeMillis() - start;
         latch.await();
         assertTrue(called.value);
     }

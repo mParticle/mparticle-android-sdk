@@ -5,6 +5,7 @@ import com.mparticle.MParticleOptions;
 import com.mparticle.internal.AccessUtils;
 import com.mparticle.testutils.BaseCleanInstallEachTest;
 
+import org.junit.After;
 import org.junit.Test;
 
 import java.net.MalformedURLException;
@@ -15,13 +16,14 @@ public class NetworkOptionsTest extends BaseCleanInstallEachTest {
     private MParticleBaseClientImpl mpClient;
     private MParticleBaseClientImpl identityClient;
 
+    @After
+    public void after() {
+        MParticle.setInstance(null);
+    }
 
     @Test
-    public void testDefaultEndpoints() throws MalformedURLException {
-        MParticleOptions options = MParticleOptions.builder(mContext)
-                .credentials("key", "secret")
-                .build();
-        MParticle.start(options);
+    public void testDefaultEndpoints() throws MalformedURLException, InterruptedException {
+        MParticle.start(MParticleOptions.builder(mContext).credentials("s", "s").build());
         setClients();
         assertEquals(NetworkOptionsManager.MP_URL, mpClient.getUrl(MParticleBaseClientImpl.Endpoint.AUDIENCE).getAuthority());
         assertEquals(NetworkOptionsManager.MP_CONFIG_URL, mpClient.getUrl(MParticleBaseClientImpl.Endpoint.CONFIG).getAuthority());

@@ -6,14 +6,17 @@ import android.os.Looper;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
+import static junit.framework.TestCase.fail;
+
 public class MPLatch extends CountDownLatch {
     int countDowned = 0;
     int count;
     Handler mHandler = new Handler(Looper.getMainLooper());
+    AndroidUtils.Mutable<Boolean> timedOut = new AndroidUtils.Mutable<>(false);
     Runnable timeoutRunnable = new Runnable() {
         @Override
         public void run() {
-            throw new RuntimeException("Timed Out");
+            timedOut.value = true;
         }
     };
 
@@ -46,5 +49,8 @@ public class MPLatch extends CountDownLatch {
         }
         mHandler.postDelayed(timeoutRunnable, timeoutTimeMs);
         this.await(timeoutTimeMs, TimeUnit.MILLISECONDS);
+        if (timedOut.value) {
+            fail("timed out");
+        }
     }
 }

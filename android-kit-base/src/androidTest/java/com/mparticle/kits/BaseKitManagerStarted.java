@@ -190,6 +190,11 @@ public abstract class BaseKitManagerStarted extends BaseCleanInstallEachTest {
         }
 
         @Override
+        public String getPushInstanceId() {
+            return configManager.getPushInstanceId();
+        }
+
+        @Override
         public Uri getLaunchUri() {
             return appStateManager.getLaunchUri();
         }

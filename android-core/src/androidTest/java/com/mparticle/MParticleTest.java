@@ -10,9 +10,12 @@ import com.mparticle.identity.IdentityStateListener;
 import com.mparticle.identity.MParticleUser;
 import com.mparticle.internal.KitFrameworkWrapper;
 import com.mparticle.internal.MessageManager;
+import com.mparticle.internal.PushRegistrationHelper.PushRegistration;
 import com.mparticle.internal.database.services.MParticleDBManager;
 import com.mparticle.networking.Matcher;
 import com.mparticle.networking.MockServer;
+import com.mparticle.networking.Request;
+import com.mparticle.testutils.AndroidUtils;
 import com.mparticle.testutils.BaseCleanStartedEachTest;
 import com.mparticle.testutils.MPLatch;
 import com.mparticle.testutils.TestingUtils;
@@ -34,6 +37,7 @@ import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 import static junit.framework.Assert.fail;
+import static junit.framework.TestCase.assertNull;
 
 public class MParticleTest extends BaseCleanStartedEachTest {
     private String configResponse = "{\"dt\":\"ac\", \"id\":\"fddf1f96-560e-41f6-8f9b-ddd070be0765\", \"ct\":1434392412994, \"dbg\":false, \"cue\":\"appdefined\", \"pmk\":[\"mp_message\", \"com.urbanairship.push.ALERT\", \"alert\", \"a\", \"message\"], \"cnp\":\"appdefined\", \"soc\":0, \"oo\":false, \"eks\":[] }, \"pio\":30 }";
@@ -245,6 +249,74 @@ public class MParticleTest extends BaseCleanStartedEachTest {
         resetRunnable.run();
 
         assertSDKGone();
+    }
+
+    @Test
+    public void testPushEnabledApi() throws InterruptedException {
+        String senderId = "senderId";
+        startMParticle();
+        MParticle.getInstance().Messaging().enablePushNotifications(senderId);
+        String fetchedSenderId = MParticle.getInstance().Internal().getConfigManager().getPushSenderId();
+        assertTrue(MParticle.getInstance().Internal().getConfigManager().isPushEnabled());
+
+        assertEquals(senderId, fetchedSenderId);
+
+        String otherSenderId = "senderIdLogPushRegistration";
+        MParticle.getInstance().logPushRegistration("instanceId", otherSenderId);
+        fetchedSenderId = MParticle.getInstance().Internal().getConfigManager().getPushSenderId();
+        assertEquals(otherSenderId, fetchedSenderId);
+
+        MParticle.getInstance().Messaging().disablePushNotifications();
+        fetchedSenderId = MParticle.getInstance().Internal().getConfigManager().getPushSenderId();
+        assertFalse(MParticle.getInstance().Internal().getConfigManager().isPushEnabled());
+        assertNull(fetchedSenderId);
+    }
+
+    @Test
+    public void testLogPushRegistrationModifyMessages() throws InterruptedException {
+        PushRegistrationTest pushRegistrationTest = new PushRegistrationTest().setServer(mServer);
+        pushRegistrationTest.setContext(mContext);
+        for (final PushRegistrationTest.SetPush setPush: pushRegistrationTest.setPushes) {
+            final PushRegistration oldRegistration = new PushRegistration(mRandomUtils.getAlphaNumericString(10), mRandomUtils.getAlphaNumericString(15));
+            setPush.setPushRegistration(oldRegistration);
+            final PushRegistration newPushRegistration = new PushRegistration(mRandomUtils.getAlphaNumericString(10), mRandomUtils.getAlphaNumericString(15));
+            final CountDownLatch latch = new MPLatch(1);
+            final AndroidUtils.Mutable<Boolean> received = new AndroidUtils.Mutable<Boolean>(false);
+            mServer.waitForVerify(new Matcher(mServer.Endpoints().getModifyUrl(mStartingMpid)).bodyMatch(new MockServer.JSONMatch() {
+                @Override
+                public boolean isMatch(JSONObject jsonObject) {
+                    if (jsonObject.has("identity_changes")) {
+                        try {
+                            JSONArray identityChanges = jsonObject.getJSONArray("identity_changes");
+                            assertEquals(1, identityChanges.length());
+                            JSONObject identityChange = identityChanges.getJSONObject(0);
+                            String failureMessage = "When " + oldRegistration + " set with: " + setPush.getName();
+
+                            //this is a wierd case. We might be setting the old pushRegistration with "logPushRegistration()",
+                            //which will kick of it's own modify request. We want to ignore this if this is the case :)
+                            if (identityChange.getString("new_value").equals(oldRegistration.instanceId)) {
+                                return false;
+                            }
+                            assertEquals(failureMessage, oldRegistration.instanceId, identityChange.getString("old_value"));
+                            assertEquals(failureMessage, newPushRegistration.instanceId, identityChange.getString("new_value"));
+                            assertEquals(failureMessage, "push_token", identityChange.getString("identity_type"));
+                        } catch (JSONException jse) {
+                            jse.toString();
+                        }
+                        return true;
+                    }
+                    return false;
+                }
+            }), new MockServer.RequestReceivedCallback() {
+                @Override
+                public void onRequestReceived(Request request) {
+                    received.value = true;
+                    latch.countDown();
+                }
+            });
+            MParticle.getInstance().logPushRegistration(newPushRegistration.instanceId, newPushRegistration.senderId);
+            latch.await();
+        }
     }
 
     private void testReset(Runnable resetRunnable) throws JSONException, InterruptedException {

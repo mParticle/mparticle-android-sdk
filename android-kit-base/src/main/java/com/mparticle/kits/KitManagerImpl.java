@@ -27,6 +27,7 @@ import com.mparticle.internal.KitManager;
 import com.mparticle.internal.Logger;
 import com.mparticle.internal.MPUtility;
 import com.mparticle.internal.PushRegistrationHelper;
+import com.mparticle.internal.PushRegistrationHelper.PushRegistration;
 import com.mparticle.internal.ReportingManager;
 import com.mparticle.kits.mappings.CustomMapping;
 
@@ -240,9 +241,10 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
         }
 
         if (activeKit instanceof KitIntegration.PushListener) {
-            PushRegistrationHelper.PushRegistration pushRegistration = PushRegistrationHelper.getLatestPushRegistration(getContext());
-            if (pushRegistration != null && !MPUtility.isEmpty(pushRegistration.instanceId)) {
-                if (((KitIntegration.PushListener) activeKit).onPushRegistration(pushRegistration.instanceId, pushRegistration.senderId)) {
+            String senderId = mCoreCallbacks.getPushSenderId();
+            String instanceId = mCoreCallbacks.getPushInstanceId();
+            if (!MPUtility.isEmpty(instanceId)) {
+                if (((KitIntegration.PushListener) activeKit).onPushRegistration(instanceId, senderId)) {
                     ReportingMessage message = ReportingMessage.fromPushRegistrationMessage(activeKit);
                     getReportingManager().log(message);
                 }
@@ -1159,5 +1161,9 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
 
     public String getPushSenderId() {
         return mCoreCallbacks.getPushSenderId();
+    }
+
+    public String getPushInstanceId() {
+        return mCoreCallbacks.getPushInstanceId();
     }
 }

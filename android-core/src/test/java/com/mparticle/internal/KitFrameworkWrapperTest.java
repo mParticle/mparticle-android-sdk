@@ -1,10 +1,16 @@
 package com.mparticle.internal;
 
+import android.app.Activity;
 import android.content.Context;
+import android.net.Uri;
 
 import com.mparticle.MPEvent;
+import com.mparticle.MParticle;
+import com.mparticle.MockMParticle;
 import com.mparticle.commerce.CommerceEvent;
+import com.mparticle.testutils.RandomUtils;
 
+import org.json.JSONArray;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -12,8 +18,11 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 
 import static org.junit.Assert.*;
@@ -71,7 +80,7 @@ public class KitFrameworkWrapperTest {
     }
 
     @Test
-    @PrepareForTest({PushRegistrationHelper.class, CommerceEvent.class})
+    @PrepareForTest({CommerceEvent.class})
     public void testReplayEvents() throws Exception {
         KitFrameworkWrapper wrapper = new KitFrameworkWrapper(Mockito.mock(Context.class),
                 Mockito.mock(ReportingManager.class),
@@ -79,13 +88,14 @@ public class KitFrameworkWrapperTest {
                 Mockito.mock(AppStateManager.class),
                 mockBackgroundTaskHandler,
                 true);
+        Mockito.when(wrapper.mCoreCallbacks.getPushInstanceId()).thenReturn("instanceId");
+        MParticle.setInstance(new MockMParticle());
         wrapper.replayEvents();
         KitManager mockKitManager = Mockito.mock(KitManager.class);
         wrapper.setKitManager(mockKitManager);
-        PowerMockito.mockStatic(PushRegistrationHelper.class);
         PushRegistrationHelper.PushRegistration registration = new PushRegistrationHelper.PushRegistration("instance id", "1234545");
         Mockito.when(
-                PushRegistrationHelper.getLatestPushRegistration(Mockito.any(Context.class))
+                MParticle.getInstance().Internal().getConfigManager().getPushRegistration()
         ).thenReturn(registration);
 
         wrapper.replayEvents();
@@ -435,5 +445,54 @@ public class KitFrameworkWrapperTest {
         supportedKits.add(3);
         Mockito.when(mockKitManager.getSupportedKits()).thenReturn(supportedKits);
         assertEquals(wrapper.getSupportedKits(), supportedKits);
+    }
+
+    @Test
+    public void testCoreCallbacksImpl() {
+        RandomUtils randomUtils = new RandomUtils();
+        Random ran = new Random();
+
+        ConfigManager mockConfigManager = Mockito.mock(ConfigManager.class);
+        AppStateManager mockAppStateManager = Mockito.mock(AppStateManager.class);
+        Activity mockActivity = Mockito.mock(Activity.class);
+        JSONArray mockKitConfiguration = new JSONArray();
+        for (int i = 0; i < randomUtils.randomInt(1, 10); i++) {
+            mockKitConfiguration.put(randomUtils.getAlphaNumericString(randomUtils.randomInt(1, 30)));
+        }
+        Uri mockLaunchUri = Mockito.mock(Uri.class);
+        String mockPushInstanceId = randomUtils.getAlphaNumericString(15);
+        String mockPushSenderId = randomUtils.getAlphaNumericString(10);
+        int mockUserBucket = randomUtils.randomInt(-100, 100);
+        boolean isBackground = ran.nextBoolean();
+        boolean isEnabled = ran.nextBoolean();
+        boolean isPushEnabled = ran.nextBoolean();
+        Map<String, String> mockIntegrationAttributes1 = randomUtils.getRandomAttributes(4);
+        Map<String, String> mockIntegrationAttributes2 = randomUtils.getRandomAttributes(5);
+
+        Mockito.when(mockAppStateManager.getLaunchUri()).thenReturn(mockLaunchUri);
+        Mockito.when(mockAppStateManager.getCurrentActivity()).thenReturn(new WeakReference<Activity>(mockActivity));
+        Mockito.when(mockAppStateManager.isBackgrounded()).thenReturn(isBackground);
+        Mockito.when(mockConfigManager.getLatestKitConfiguration()).thenReturn(mockKitConfiguration);
+        Mockito.when(mockConfigManager.getPushInstanceId()).thenReturn(mockPushInstanceId);
+        Mockito.when(mockConfigManager.getPushSenderId()).thenReturn(mockPushSenderId);
+        Mockito.when(mockConfigManager.getUserBucket()).thenReturn(mockUserBucket);
+        Mockito.when(mockConfigManager.isEnabled()).thenReturn(isEnabled);
+        Mockito.when(mockConfigManager.isPushEnabled()).thenReturn(isPushEnabled);
+        Mockito.when(mockConfigManager.getIntegrationAttributes(1)).thenReturn(mockIntegrationAttributes1);
+        Mockito.when(mockConfigManager.getIntegrationAttributes(2)).thenReturn(mockIntegrationAttributes2);
+
+        KitFrameworkWrapper.CoreCallbacks coreCallbacks = new KitFrameworkWrapper.CoreCallbacksImpl(mockConfigManager, mockAppStateManager);
+
+        assertEquals(mockActivity, coreCallbacks.getCurrentActivity().get());
+        assertEquals(mockKitConfiguration, coreCallbacks.getLatestKitConfiguration());
+        assertEquals(mockLaunchUri, coreCallbacks.getLaunchUri());
+        assertEquals(mockPushInstanceId, coreCallbacks.getPushInstanceId());
+        assertEquals(mockPushSenderId, coreCallbacks.getPushSenderId());
+        assertEquals(mockUserBucket, coreCallbacks.getUserBucket());
+        assertEquals(isBackground, coreCallbacks.isBackgrounded());
+        assertEquals(isEnabled, coreCallbacks.isEnabled());
+        assertEquals(isPushEnabled, coreCallbacks.isPushEnabled());
+        assertEquals(mockIntegrationAttributes1, coreCallbacks.getIntegrationAttributes(1));
+        assertEquals(mockIntegrationAttributes2, coreCallbacks.getIntegrationAttributes(2));
     }
 }

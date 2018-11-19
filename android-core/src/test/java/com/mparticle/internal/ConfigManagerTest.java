@@ -566,6 +566,22 @@ public class ConfigManagerTest {
         assertEquals(mpid1, getCallbackResult());
     }
 
+    @Test
+    public void testPushInstanceIdBackground() {
+        assertNull(manager.getPushInstanceIdBackground());
+        assertNull(manager.getPushInstanceId());
+        manager.setPushRegistrationInBackground(new PushRegistrationHelper.PushRegistration("instanceId", "senderId"));
+        assertNotNull(manager.getPushInstanceIdBackground());
+        assertEquals("", manager.getPushInstanceIdBackground());
+        assertEquals(manager.getPushInstanceId(), "instanceId");
+        manager.setPushRegistrationInBackground(new PushRegistrationHelper.PushRegistration("instanceId2", "senderId2"));
+        assertEquals("instanceId", manager.getPushInstanceIdBackground());
+        assertEquals("instanceId2", manager.getPushInstanceId());
+        manager.clearPushRegistrationBackground();
+        assertNull(manager.getPushInstanceIdBackground());
+        assertEquals("instanceId2", manager.getPushInstanceId());
+    }
+
     private Mutable<Long> callbackResult = new Mutable<Long>(null);
     private Long getCallbackResult() {
         Long result = callbackResult.value;

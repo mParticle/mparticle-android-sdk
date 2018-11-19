@@ -28,7 +28,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class KitFrameworkWrapper implements KitManager {
     private final Context mContext;
-    private final CoreCallbacks mCoreCallbacks;
+    final CoreCallbacks mCoreCallbacks;
     private final ReportingManager mReportingManager;
     private final BackgroundTaskHandler mBackgroundTaskHandler;
     KitManager mKitManager;
@@ -131,9 +131,10 @@ public class KitFrameworkWrapper implements KitManager {
         mKitManager.onSessionStart();
 
         if (registerForPush) {
-            PushRegistrationHelper.PushRegistration registration = PushRegistrationHelper.getLatestPushRegistration(mContext);
-            if (registration != null) {
-                mKitManager.onPushRegistration(registration.instanceId, registration.senderId);
+            String instanceId = mCoreCallbacks.getPushInstanceId();
+            String senderId = mCoreCallbacks.getPushSenderId();
+            if (!MPUtility.isEmpty(instanceId)) {
+                mKitManager.onPushRegistration(instanceId, senderId);
             }
         }
 
@@ -598,10 +599,11 @@ public class KitFrameworkWrapper implements KitManager {
         JSONArray getLatestKitConfiguration();
         boolean isPushEnabled();
         String getPushSenderId();
+        String getPushInstanceId();
         Uri getLaunchUri();
     }
 
-    class CoreCallbacksImpl implements CoreCallbacks {
+    static class CoreCallbacksImpl implements CoreCallbacks {
         ConfigManager mConfigManager;
         AppStateManager mAppStateManager;
 
@@ -654,6 +656,11 @@ public class KitFrameworkWrapper implements KitManager {
         @Override
         public String getPushSenderId() {
             return mConfigManager.getPushSenderId();
+        }
+
+        @Override
+        public String getPushInstanceId() {
+            return mConfigManager.getPushInstanceId();
         }
 
         @Override

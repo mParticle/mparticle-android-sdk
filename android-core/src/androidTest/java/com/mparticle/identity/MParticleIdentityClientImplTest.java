@@ -287,10 +287,10 @@ public class MParticleIdentityClientImplTest extends BaseCleanStartedEachTest {
             assertTrue(MPUtility.isEmpty(MPUtility.getAndroidID(mContext)));
         }
         if (knowIdentites.has(PUSH_TOKEN)) {
-            assertEquals(mConfigManager.getPushToken(), knowIdentites.getString(PUSH_TOKEN));
+            assertEquals(mConfigManager.getPushInstanceId(), knowIdentites.getString(PUSH_TOKEN));
             knowIdentites.remove(PUSH_TOKEN);
         } else {
-            assertNull(mConfigManager.getPushToken());
+            assertNull(mConfigManager.getPushInstanceId());
         }
         assertTrue(knowIdentites.has(DEVICE_APPLICATION_STAMP));
         assertEquals(mConfigManager.getDeviceApplicationStamp(), knowIdentites.get(DEVICE_APPLICATION_STAMP));

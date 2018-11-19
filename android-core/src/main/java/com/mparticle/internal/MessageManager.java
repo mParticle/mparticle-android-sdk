@@ -26,6 +26,7 @@ import com.mparticle.commerce.CommerceEvent;
 import com.mparticle.identity.MParticleUser;
 import com.mparticle.internal.Constants.MessageKey;
 import com.mparticle.internal.Constants.MessageType;
+import com.mparticle.internal.PushRegistrationHelper.PushRegistration;
 import com.mparticle.internal.database.services.MParticleDBManager;
 import com.mparticle.internal.dto.UserAttributeRemoval;
 import com.mparticle.internal.dto.UserAttributeResponse;
@@ -481,7 +482,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
     public BaseMPMessage setPushRegistrationId(String token, boolean registeringFlag) {
         if (!MPUtility.isEmpty(token)) {
             try {
-                mConfigManager.setPushToken(token);
+                mConfigManager.setPushInstanceId(token);
                 BaseMPMessage message = new BaseMPMessage.Builder(MessageType.PUSH_REGISTRATION, mAppStateManager.getSession(), mLocation, mConfigManager.getMpid())
                         .timestamp(System.currentTimeMillis())
                         .build();
@@ -629,7 +630,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
             message.put(MessageKey.PAYLOAD, cloudMessage.getRedactedJsonPayload().toString());
             message.put(MessageKey.PUSH_TYPE, Constants.Push.MESSAGE_TYPE_RECEIVED);
 
-            PushRegistrationHelper.PushRegistration registration = PushRegistrationHelper.getLatestPushRegistration(sContext);
+            PushRegistration registration = mConfigManager.getPushRegistration();
             if ((registration != null) && (registration.instanceId != null) && (registration.instanceId.length() > 0)) {
                 message.put(MessageKey.PUSH_TOKEN, registration.instanceId);
             }
@@ -654,7 +655,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
             message.put(MessageKey.CONTENT_ID, contentId);
             message.put(MessageKey.PUSH_TYPE, Constants.Push.MESSAGE_TYPE_RECEIVED);
 
-            PushRegistrationHelper.PushRegistration registration = PushRegistrationHelper.getLatestPushRegistration(sContext);
+            PushRegistration registration = mConfigManager.getPushRegistration();
             if ((registration != null) && (registration.instanceId != null) && (registration.instanceId.length() > 0)) {
                 message.put(MessageKey.PUSH_TOKEN, registration.instanceId);
             }

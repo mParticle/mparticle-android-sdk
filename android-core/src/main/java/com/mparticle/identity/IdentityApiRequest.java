@@ -2,6 +2,7 @@ package com.mparticle.identity;
 
 import com.mparticle.MParticle;
 import com.mparticle.internal.Logger;
+import com.mparticle.internal.MPUtility;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -135,6 +136,9 @@ public final class IdentityApiRequest {
         }
 
         protected Builder pushToken(String newPushToken, String oldPushToken) {
+            if (MPUtility.isEmpty(oldPushToken)) {
+                oldPushToken = null;
+            }
             otherOldIdentities.put("push_token", oldPushToken);
             otherNewIdentities.put("push_token", newPushToken);
             return this;
