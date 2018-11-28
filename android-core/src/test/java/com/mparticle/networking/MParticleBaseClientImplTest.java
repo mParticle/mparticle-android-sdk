@@ -32,11 +32,11 @@ public class MParticleBaseClientImplTest {
         Mockito.when(mockNetworkOptions.isPinningDisabledInDevelopment()).thenReturn(false);
         Mockito.when(mockConfigManager.getNetworkOptions()).thenReturn(mockNetworkOptions);
         final boolean[] writeCalled = {false};
-        final boolean[] getSocketFactoruCalled = {false};
+        final boolean[] getSocketFactoryCalled = {false};
         final BaseNetworkConnection client = new NetworkConnection(mockConfigManager, new MockSharedPreferences()) {
             @Override
             protected SSLSocketFactory getSocketFactory(MParticleBaseClientImpl.Endpoint endpoint) throws Exception {
-                getSocketFactoruCalled[0] = true;
+                getSocketFactoryCalled[0] = true;
                 assertFalse(writeCalled[0]);
                 return Mockito.mock(SSLSocketFactory.class);
             }
@@ -47,7 +47,7 @@ public class MParticleBaseClientImplTest {
             }
 
             @Override
-            protected GZIPOutputStream getOutputStream(HttpURLConnection connection) throws IOException {
+            protected GZIPOutputStream getOutputStream(MPConnection connection) throws IOException {
                 return new GZIPOutputStream(Mockito.mock(BufferedOutputStream.class)) {
                     @Override
                     public void close() throws IOException {
@@ -57,16 +57,17 @@ public class MParticleBaseClientImplTest {
                     @Override
                     public void write(@NonNull byte[] b) throws IOException {
                         writeCalled[0] = true;
-                        assertTrue(getSocketFactoruCalled[0]);
+                        assertTrue(getSocketFactoryCalled[0]);
 
                     }
                 };
             }
         };
 
-        HttpURLConnection mockConnection = Mockito.mock(HttpsURLConnection.class);
+        MPConnection mockConnection = Mockito.mock(MPConnection.class);
+        Mockito.when(mockConnection.isHttps()).thenReturn(true);
         client.makeUrlRequest(null, mockConnection, "message" , true);
-        assertTrue(getSocketFactoruCalled[0]);
+        assertTrue(getSocketFactoryCalled[0]);
         assertTrue(writeCalled[0]);
     }
 }

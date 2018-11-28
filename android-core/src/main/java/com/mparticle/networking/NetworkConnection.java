@@ -1,7 +1,6 @@
 package com.mparticle.networking;
 
 import android.content.SharedPreferences;
-import android.net.Network;
 import android.os.Build;
 
 import com.mparticle.BuildConfig;
@@ -14,14 +13,12 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.HttpURLConnection;
 import java.security.KeyStore;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.util.zip.GZIPOutputStream;
 
-import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManagerFactory;
@@ -46,13 +43,13 @@ public class NetworkConnection extends BaseNetworkConnection {
     }
 
     @Override
-    public HttpURLConnection makeUrlRequest(MParticleBaseClientImpl.Endpoint endpoint, HttpURLConnection connection, String payload, boolean identity) throws IOException {
+    public MPConnection makeUrlRequest(MParticleBaseClientImpl.Endpoint endpoint, MPConnection connection, String payload, boolean identity) throws IOException {
         try {
 
             //gingerbread seems to dislike pinning w/ godaddy. Being that GB is near-dead anyway, just disable pinning for it.
-            if (isPostGingerBread() && connection instanceof HttpsURLConnection && !shouldDisablePinning()) {
+            if (isPostGingerBread() && connection.isHttps() && !shouldDisablePinning()) {
                 try {
-                    ((HttpsURLConnection) connection).setSSLSocketFactory(getSocketFactory(endpoint));
+                    connection.setSSLSocketFactory(getSocketFactory(endpoint));
                 } catch (Exception e) {
 
                 }
@@ -88,7 +85,7 @@ public class NetworkConnection extends BaseNetworkConnection {
         return Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH;
     }
 
-    protected OutputStream getOutputStream(HttpURLConnection connection) throws IOException {
+    protected OutputStream getOutputStream(MPConnection connection) throws IOException {
         return new GZIPOutputStream(new BufferedOutputStream(connection.getOutputStream()));
     }
 

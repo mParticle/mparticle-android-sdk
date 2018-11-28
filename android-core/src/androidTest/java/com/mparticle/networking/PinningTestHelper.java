@@ -9,7 +9,6 @@ import com.mparticle.internal.MParticleApiClient;
 import com.mparticle.testutils.TestingUtils;
 
 import java.io.IOException;
-import java.net.HttpURLConnection;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLSocketFactory;
@@ -27,14 +26,14 @@ public class PinningTestHelper {
 
     private void prepareIdentityApiClient(String path) {
         TestingUtils.getInstance().setDefaultIdentityClient(mContext);
-        com.mparticle.identity.AccessUtils.setIdentityApiClientScheme("https");
+//        com.mparticle.identity.AccessUtils.setIdentityApiClientScheme("https");
         MParticleIdentityClient apiClient = com.mparticle.identity.AccessUtils.getIdentityApiClient();
         setRequestClient(apiClient, path);
     }
 
     private void prepareMParticleApiClient(String path) {
         TestingUtils.getInstance().setDefaultClient(mContext);
-        com.mparticle.internal.AccessUtils.setMParticleApiClientProtocol("https");
+//        com.mparticle.internal.AccessUtils.setMParticleApiClientProtocol("https");
         MParticleApiClient apiClient = com.mparticle.internal.AccessUtils.getApiClient();
         setRequestClient(apiClient, path);
     }
@@ -43,22 +42,17 @@ public class PinningTestHelper {
         final BaseNetworkConnection requestHandler = client.getRequestHandler();
         client.setRequestHandler(new BaseNetworkConnection(mContext) {
             @Override
-            public HttpURLConnection makeUrlRequest(MParticleBaseClientImpl.Endpoint endpoint, HttpURLConnection connection, String payload, boolean identity) throws IOException {
+            public MPConnection makeUrlRequest(MParticleBaseClientImpl.Endpoint endpoint, MPConnection connection, String payload, boolean identity) throws IOException {
                 try {
                     connection = requestHandler.makeUrlRequest(endpoint, connection, null, identity);
                 }
                 finally {
                     if (connection.getURL().toString().contains(path)) {
-                        final HttpURLConnection finalConnection = connection;
+                        final MPConnection finalConnection = connection;
                         new Handler(Looper.getMainLooper()).post(new Runnable() {
                             @Override
                             public void run() {
-                                if (finalConnection instanceof HttpsURLConnection) {
-                                    HttpsURLConnection sslConnection = (HttpsURLConnection) finalConnection;
-                                    mCallback.onPinningApplied(isPinned(sslConnection));
-                                } else {
-                                    mCallback.onPinningApplied(false);
-                                }
+                                mCallback.onPinningApplied(finalConnection.isHttps() && finalConnection.getSSLSocketFactory() != null);
                             }
                         });
                     }

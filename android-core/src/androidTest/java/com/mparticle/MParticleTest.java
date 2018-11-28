@@ -11,6 +11,8 @@ import com.mparticle.identity.MParticleUser;
 import com.mparticle.internal.KitFrameworkWrapper;
 import com.mparticle.internal.MessageManager;
 import com.mparticle.internal.database.services.MParticleDBManager;
+import com.mparticle.networking.Matcher;
+import com.mparticle.networking.MockServer;
 import com.mparticle.testutils.BaseCleanStartedEachTest;
 import com.mparticle.testutils.MPLatch;
 import com.mparticle.testutils.TestingUtils;
@@ -28,8 +30,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
-import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
@@ -234,9 +234,10 @@ public class MParticleTest extends BaseCleanStartedEachTest {
         MParticle.getInstance().Identity().addIdentityStateListener(crashListener);
         MParticle.getInstance().Identity().identify(IdentityApiRequest.withEmptyUser().build());
 
-        resetRunnable.run();
         called[0] = true;
-        mServer.waitForVerify(postRequestedFor(urlPathMatching("/v([0-9]*)/identify")));
+        mServer.waitForVerify(new Matcher(mServer.Endpoints().getIdentifyUrl()));
+
+        resetRunnable.run();
 
         assertSDKGone();
     }

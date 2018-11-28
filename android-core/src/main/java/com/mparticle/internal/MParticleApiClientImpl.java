@@ -4,6 +4,8 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 import com.mparticle.MParticle;
+import com.mparticle.networking.MPConnection;
+import com.mparticle.networking.MPUrl;
 import com.mparticle.networking.MParticleBaseClientImpl;
 
 import org.json.JSONArray;
@@ -15,7 +17,6 @@ import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
-import java.net.URL;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.text.ParseException;
@@ -52,8 +53,8 @@ public class MParticleApiClientImpl extends MParticleBaseClientImpl implements M
 
     private final ConfigManager mConfigManager;
     private final String mApiSecret;
-    private URL mConfigUrl;
-    private URL mEventUrl;
+    private MPUrl mConfigUrl;
+    private MPUrl mEventUrl;
     private final String mUserAgent;
     private final SharedPreferences mPreferences;
     private final String mApiKey;
@@ -91,7 +92,7 @@ public class MParticleApiClientImpl extends MParticleBaseClientImpl implements M
     /**
      * Only used for unit testing.
      */
-    void setConfigUrl(URL configUrl) {
+    void setConfigUrl(MPUrl configUrl) {
         mConfigUrl = configUrl;
     }
 
@@ -124,7 +125,7 @@ public class MParticleApiClientImpl extends MParticleBaseClientImpl implements M
             if (mConfigUrl == null){
                 mConfigUrl = getUrl(Endpoint.CONFIG);
             }
-            HttpURLConnection connection = (HttpURLConnection) mConfigUrl.openConnection();
+            MPConnection connection = mConfigUrl.openConnection();
             connection.setConnectTimeout(mConfigManager.getConnectionTimeout());
             connection.setReadTimeout(mConfigManager.getConnectionTimeout());
             connection.setRequestProperty(HEADER_ENVIRONMENT, Integer.toString(mConfigManager.getEnvironment().getValue()));
@@ -194,7 +195,7 @@ public class MParticleApiClientImpl extends MParticleBaseClientImpl implements M
         JSONObject response = null;
         try {
             Logger.debug("Starting Segment Network request");
-            HttpURLConnection connection = (HttpURLConnection) getUrl(Endpoint.AUDIENCE).openConnection();
+            MPConnection connection = getUrl(Endpoint.AUDIENCE).openConnection();
             connection.setConnectTimeout(mConfigManager.getConnectionTimeout());
             connection.setReadTimeout(mConfigManager.getConnectionTimeout());
             connection.setRequestProperty("User-Agent", mUserAgent);
@@ -229,7 +230,7 @@ public class MParticleApiClientImpl extends MParticleBaseClientImpl implements M
         if (mEventUrl == null){
             mEventUrl = getUrl(Endpoint.EVENTS);
         }
-        HttpURLConnection connection = (HttpURLConnection) mEventUrl.openConnection();
+        MPConnection connection = mEventUrl.openConnection();
         connection.setConnectTimeout(mConfigManager.getConnectionTimeout());
         connection.setReadTimeout(mConfigManager.getConnectionTimeout());
         connection.setDoOutput(true);
@@ -298,7 +299,7 @@ public class MParticleApiClientImpl extends MParticleBaseClientImpl implements M
         }
     }
 
-    void addMessageSignature(HttpURLConnection request, String message) {
+    void addMessageSignature(MPConnection request, String message) {
         try {
             String date = getHeaderDateString();
             request.setRequestProperty("Date", date);

@@ -1,8 +1,7 @@
 package com.mparticle.testutils;
 
-import android.support.test.InstrumentationRegistry;
-
 import com.mparticle.MParticle;
+import com.mparticle.networking.MockServer;
 
 import org.junit.Before;
 
@@ -14,8 +13,7 @@ abstract public class BaseCleanInstallEachTest extends BaseAbstractTest {
 
     @Before
     public void beforeBase() throws Exception {
-        if (MParticle.getInstance() != null) {
-            MParticle.reset(mContext);
-        }
+        MParticle.reset(mContext);
+        mServer = MockServer.getNewInstance(mContext);
     }
 }

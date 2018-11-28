@@ -4,6 +4,8 @@ import android.content.SharedPreferences;
 
 import com.mparticle.mock.MockContext;
 import com.mparticle.mock.MockSharedPreferences;
+import com.mparticle.networking.MPConnection;
+import com.mparticle.networking.MPUrl;
 
 import org.json.JSONObject;
 import org.junit.Test;
@@ -29,7 +31,7 @@ import static org.junit.Assert.assertTrue;
 public class MParticleApiClientImplTest {
 
     MParticleApiClientImpl client;
-    private HttpURLConnection mockConnection;
+    private MPConnection mockConnection;
     private ConfigManager configManager;
     private MockSharedPreferences sharedPrefs;
 
@@ -45,9 +47,9 @@ public class MParticleApiClientImplTest {
         );
         client.mDeviceRampNumber = 50;
         client.setSupportedKitString("");
-        URL mockUrl = PowerMockito.mock(URL.class);
+        MPUrl mockUrl = PowerMockito.mock(MPUrl.class);
 
-        mockConnection = PowerMockito.mock(HttpURLConnection.class);
+        mockConnection = PowerMockito.mock(MPConnection.class);
         Mockito.when(mockUrl.openConnection()).thenReturn(mockConnection);
         Mockito.when(mockConnection.getURL()).thenReturn(mockUrl);
         Mockito.when(mockUrl.getFile()).thenReturn("/config");

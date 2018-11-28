@@ -17,10 +17,14 @@ public class RandomUtils {
     private static final String sCharacters = " ,.";
 
     public Map<MParticle.IdentityType, String> getRandomUserIdentities() {
+        return getRandomUserIdentities(null);
+    }
+
+    public Map<MParticle.IdentityType, String> getRandomUserIdentities(Integer max) {
         Map<MParticle.IdentityType, String> randomIdentities = new HashMap<MParticle.IdentityType, String>();
 
         int identityTypeLength = MParticle.IdentityType.values().length;
-        int numIdentities = randomInt(1, identityTypeLength);
+        int numIdentities = randomInt(1, max != null ? max : identityTypeLength);
         Set<Integer> identityIndices = randomIntSet(0, identityTypeLength, numIdentities);
         for (Integer identityIndex: identityIndices) {
             randomIdentities.put(MParticle.IdentityType.values()[identityIndex], getAlphaNumericString(randomInt(1, 55)));

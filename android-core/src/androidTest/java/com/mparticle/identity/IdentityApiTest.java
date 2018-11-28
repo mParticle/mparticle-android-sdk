@@ -4,14 +4,15 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
 
-import com.github.tomakehurst.wiremock.http.Request;
 import com.mparticle.MParticle;
 import com.mparticle.MParticleTask;
 import com.mparticle.internal.ConfigManager;
+import com.mparticle.networking.Matcher;
+import com.mparticle.networking.MockServer;
+import com.mparticle.networking.Request;
 import com.mparticle.testutils.AndroidUtils.Mutable;
 import com.mparticle.testutils.BaseCleanStartedEachTest;
 import com.mparticle.testutils.MPLatch;
-import com.mparticle.testutils.Server;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -25,7 +26,6 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertNotSame;
@@ -313,7 +313,7 @@ public final class IdentityApiTest extends BaseCleanStartedEachTest {
     public void testCallbacksVsCurrentUser() throws InterruptedException {
         mServer.addConditionalLoginResponse(mStartingMpid, mpid1);
 
-        CountDownLatch latch = new MPLatch(2);
+        final CountDownLatch latch = new MPLatch(2);
         final Mutable<Boolean> called1 = new Mutable<Boolean>(false);
         final Mutable<Boolean> called2 = new Mutable<Boolean>(false);
 
@@ -323,6 +323,7 @@ public final class IdentityApiTest extends BaseCleanStartedEachTest {
                 assertEquals(mpid1, MParticle.getInstance().Identity().getCurrentUser().getId());
                 assertEquals(mpid1, user.getId());
                 called1.value = true;
+                latch.countDown();
             }
         });
 
@@ -333,6 +334,7 @@ public final class IdentityApiTest extends BaseCleanStartedEachTest {
                         assertEquals(mpid1, MParticle.getInstance().Identity().getCurrentUser().getId());
                         assertEquals(mpid1, result.getUser().getId());
                         called2.value = true;
+                        latch.countDown();
                     }
                 });
         latch.await();
@@ -370,21 +372,21 @@ public final class IdentityApiTest extends BaseCleanStartedEachTest {
         assertNotNull(identity.getCurrentUser());
         MParticle.getInstance().Internal().getConfigManager().setMpid(mpid1, true);
         assertEquals(identity.getCurrentUser().getId(), mpid1);
-        Map<String, Object> mpid1UserAttributes = new HashMap<String, Object>(mRandomUtils.getRandomAttributes(10));
-        Map<MParticle.IdentityType, String> mpid1UserIdentites = mRandomUtils.getRandomUserIdentities();
+        Map<String, Object> mpid1UserAttributes = new HashMap<String, Object>(mRandomUtils.getRandomAttributes(3));
+        Map<MParticle.IdentityType, String> mpid1UserIdentites = mRandomUtils.getRandomUserIdentities(3);
         identity.getCurrentUser().setUserAttributes(mpid1UserAttributes);
         AccessUtils.setUserIdentities(mpid1UserIdentites, identity.getCurrentUser().getId());
 
         MParticle.getInstance().Internal().getConfigManager().setMpid(mpid2, false);
-        Map<String, Object> mpid2UserAttributes = new HashMap<String, Object>(mRandomUtils.getRandomAttributes(10));
-        Map<MParticle.IdentityType, String> mpid2UserIdentites = mRandomUtils.getRandomUserIdentities();
+        Map<String, Object> mpid2UserAttributes = new HashMap<String, Object>(mRandomUtils.getRandomAttributes(3));
+        Map<MParticle.IdentityType, String> mpid2UserIdentites = mRandomUtils.getRandomUserIdentities(3);
         identity.getCurrentUser().setUserAttributes(mpid2UserAttributes);
         AccessUtils.setUserIdentities(mpid2UserIdentites, identity.getCurrentUser().getId());
 
 
         MParticle.getInstance().Internal().getConfigManager().setMpid(mpid3, true);
-        Map<String, Object> mpid3UserAttributes = new HashMap<String, Object>(mRandomUtils.getRandomAttributes(10));
-        Map<MParticle.IdentityType, String> mpid3UserIdentities = mRandomUtils.getRandomUserIdentities();
+        Map<String, Object> mpid3UserAttributes = new HashMap<String, Object>(mRandomUtils.getRandomAttributes(3));
+        Map<MParticle.IdentityType, String> mpid3UserIdentities = mRandomUtils.getRandomUserIdentities(3);
         identity.getCurrentUser().setUserAttributes(mpid3UserAttributes);
 
         AccessUtils.setUserIdentities(mpid3UserIdentities, identity.getCurrentUser().getId());
@@ -417,42 +419,28 @@ public final class IdentityApiTest extends BaseCleanStartedEachTest {
     @Test
     public void testModifyConcurrentCalls() throws Exception {
         assertEquals(mStartingMpid, MParticle.getInstance().Identity().getCurrentUser().getId(), 0);
-
         Map<MParticle.IdentityType, String> userIdentities = mRandomUtils.getRandomUserIdentities();
-        for (MParticle.IdentityType identity: userIdentities.keySet()) {
+        for (MParticle.IdentityType identity : userIdentities.keySet()) {
             AccessUtils.setUserIdentity(userIdentities.get(identity), identity, mStartingMpid);
         }
+
         IdentityApiRequest request = IdentityApiRequest.withUser(MParticle.getInstance().Identity().getCurrentUser()).customerId(mRandomUtils.getAlphaNumericString(24)).build();
 
+        final CountDownLatch latch = new MPLatch(1);
+
+        mServer.waitForVerify(new Matcher(mServer.Endpoints().getModifyUrl(mStartingMpid)), new MockServer.RequestReceivedCallback() {
+            @Override
+            public void onRequestReceived(Request request) {
+                assertEquals(1, request.asIdentityRequest().getBody().identity_changes.length());
+                latch.countDown();
+            }
+        });
         MParticle.getInstance().Identity().modify(request);
         //change the mpid;
         //behind the scenes, this call will take place before the (above) modify request goes out, since
         //the modify request will be passed to a background thread before it is executed
         MParticle.getInstance().Internal().getConfigManager().setMpid(mpid2, ran.nextBoolean());
-
-        final CountDownLatch latch = new MPLatch(1);
-        final Mutable<Boolean> received = new Mutable<Boolean>(false);
-        mServer.waitForVerify(urlPathMatching(String.format("/v([0-9]*)/%s/modify", mStartingMpid)), new Server.JSONMatch() {
-            @Override
-            public boolean isMatch(JSONObject jsonObject) {
-                if (jsonObject.has("identity_changes")) {
-                    try {
-                        return jsonObject.getJSONArray("identity_changes").length() == 1;
-                    } catch (JSONException jse) {
-                        jse.toString();
-                    }
-                }
-                return false;
-            }
-        }, new Server.RequestReceivedCallback() {
-            @Override
-            public void onRequestReceived(Request request) {
-                received.value = true;
-                latch.countDown();
-            }
-        });
         latch.await();
-        assertTrue(received.value);
     }
 
     @Test

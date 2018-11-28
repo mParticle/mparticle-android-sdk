@@ -23,7 +23,7 @@ public class ConfigManagerMigrationTest extends BaseAbstractTest {
         if (Looper.myLooper() == null) {
             Looper.prepare();
         }
-        MParticle.setInstance(null);
+        MParticle.reset(mContext);
         ConfigManager.clearMpid(mContext);
         MParticleOptions options = MParticleOptions.builder(mContext)
                 .credentials("key", "value")

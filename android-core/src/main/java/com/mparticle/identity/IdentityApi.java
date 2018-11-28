@@ -263,8 +263,8 @@ public class IdentityApi {
                     if (!result.isSuccessful()) {
                         task.setFailed(result);
                     } else {
-                        task.setSuccessful(new IdentityApiResult(getUser(updateRequest.mpid)));
                         MParticleUserDelegate.setUserIdentities(mUserDelegate, updateRequest.getUserIdentities(), updateRequest.mpid);
+                        task.setSuccessful(new IdentityApiResult(getUser(updateRequest.mpid)));
                         new Handler(Looper.getMainLooper()).post(new Runnable() {
                             @Override
                             public void run() {

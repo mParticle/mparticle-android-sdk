@@ -1,21 +1,11 @@
 package com.mparticle.testutils;
 
-import com.mparticle.AccessUtils;
 import com.mparticle.MParticle;
 import com.mparticle.MParticleOptions;
-import com.mparticle.identity.BaseIdentityTask;
 import com.mparticle.identity.IdentityApiRequest;
-import com.mparticle.identity.IdentityApiResult;
-import com.mparticle.identity.IdentityHttpResponse;
-import com.mparticle.identity.TaskFailureListener;
-import com.mparticle.identity.TaskSuccessListener;
 import com.mparticle.internal.AppStateManager;
-import com.mparticle.internal.ConfigManager;
 
 import org.junit.Before;
-
-import java.util.Random;
-import com.mparticle.testutils.MPLatch;
 
 
 /**
@@ -29,15 +19,12 @@ import com.mparticle.testutils.MPLatch;
  * MParticle.setInstance(null), or use BaseCleanInstallEachTest as your base class
  */
 public class BaseCleanStartedEachTest extends BaseAbstractTest {
-    protected static Long mStartingMpid;
 
     @Before
     public final void beforeBase() throws InterruptedException {
         if (MParticle.getInstance() != null) {
             MParticle.reset(mContext);
         }
-        mStartingMpid = new Random().nextLong();
-        mServer.setupHappyIdentify(mStartingMpid);
         MParticle.setInstance(null);
         MParticleOptions.Builder builder = MParticleOptions
                 .builder(mContext)
@@ -52,5 +39,10 @@ public class BaseCleanStartedEachTest extends BaseAbstractTest {
     //Just don't mess with the "identitfyTask" that will break things
     protected MParticleOptions.Builder transformMParticleOptions(MParticleOptions.Builder builder) {
         return builder;
+    }
+
+    @Override
+    protected boolean autoStartServer() {
+        return false;
     }
 }

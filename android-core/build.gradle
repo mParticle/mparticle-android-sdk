@@ -63,10 +63,6 @@ android {
             //multidex is required for instrumented test builds
             multiDexEnabled true
             buildConfigField "Boolean", "MP_DEBUG", "true"
-            buildConfigField "String", "MP_URL", "\"localhost:8080\""
-            buildConfigField "String", "MP_CONFIG_URL", "\"localhost:8080\""
-            buildConfigField "String", "MP_IDENTITY_URL", "\"localhost:8080\""
-            buildConfigField "String", "SCHEME", "\"http\""
         }
         release {
             minifyEnabled true

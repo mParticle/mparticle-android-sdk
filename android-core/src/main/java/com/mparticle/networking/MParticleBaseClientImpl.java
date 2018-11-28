@@ -12,9 +12,7 @@ import com.mparticle.internal.MPUtility;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
-import java.net.URL;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
@@ -49,19 +47,19 @@ public class MParticleBaseClientImpl implements MParticleBaseClient {
         mRequestHandler = handler;
     }
 
-    protected HttpURLConnection makeUrlRequest(Endpoint endpoint, HttpURLConnection connection) throws IOException {
+    protected MPConnection makeUrlRequest(Endpoint endpoint, MPConnection connection) throws IOException {
         return makeUrlRequest(endpoint, connection, null);
     }
 
-    protected HttpURLConnection makeUrlRequest(Endpoint endpoint, HttpURLConnection connection, String payload) throws IOException {
+    protected MPConnection makeUrlRequest(Endpoint endpoint, MPConnection connection, String payload) throws IOException {
         return makeUrlRequest(endpoint, connection, payload, true);
     }
 
-    protected HttpURLConnection makeUrlRequest(Endpoint endpoint, HttpURLConnection connection, boolean identity) throws IOException {
+    protected MPConnection makeUrlRequest(Endpoint endpoint, MPConnection connection, boolean identity) throws IOException {
         return makeUrlRequest(endpoint, connection, null, identity);
     }
 
-    public HttpURLConnection makeUrlRequest(Endpoint endpoint, HttpURLConnection connection, String payload, boolean identity) throws IOException {
+    public MPConnection makeUrlRequest(Endpoint endpoint, MPConnection connection, String payload, boolean identity) throws IOException {
         return mRequestHandler.makeUrlRequest(endpoint, connection, payload, identity);
     }
 
@@ -70,7 +68,7 @@ public class MParticleBaseClientImpl implements MParticleBaseClient {
         return format.format(new Date());
     }
 
-    protected String getHeaderHashString(HttpURLConnection request, String date, String message, String apiSecret) throws NoSuchAlgorithmException, InvalidKeyException, UnsupportedEncodingException {
+    protected String getHeaderHashString(MPConnection request, String date, String message, String apiSecret) throws NoSuchAlgorithmException, InvalidKeyException, UnsupportedEncodingException {
         String method = request.getRequestMethod();
         String path = request.getURL().getFile();
         StringBuilder hashString = new StringBuilder()
@@ -100,11 +98,11 @@ public class MParticleBaseClientImpl implements MParticleBaseClient {
         return BuildConfig.SCHEME;
     }
 
-    protected URL getUrl(Endpoint endpoint) throws MalformedURLException {
+    protected MPUrl getUrl(Endpoint endpoint) throws MalformedURLException {
         return getUrl(endpoint, null);
     }
 
-    protected URL getUrl(Endpoint endpoint, @Nullable String identityPath) throws MalformedURLException {
+    protected MPUrl getUrl(Endpoint endpoint, @Nullable String identityPath) throws MalformedURLException {
         NetworkOptions networkOptions = mConfigManager.getNetworkOptions();
         DomainMapping domainMapping = networkOptions.getDomain(endpoint);
         String url = NetworkOptionsManager.getDefaultUrl(endpoint);
@@ -121,28 +119,28 @@ public class MParticleBaseClientImpl implements MParticleBaseClient {
                         .appendQueryParameter("av", MPUtility.getAppVersionName(mContext))
                         .appendQueryParameter("sv", Constants.MPARTICLE_VERSION)
                         .build();
-                return new URL(uri.toString());
+                return MPUrl.getUrl(uri.toString());
             case EVENTS:
                 uri = new Uri.Builder()
                         .scheme(getScheme())
                         .encodedAuthority(url)
                         .path(SERVICE_VERSION_1 + "/" + mApiKey + "/events")
                         .build();
-                return new URL(uri.toString());
+                return MPUrl.getUrl(uri.toString());
             case IDENTITY:
                 uri = new Uri.Builder()
                         .scheme(getScheme())
                         .encodedAuthority(url)
                         .path(identityPath)
                         .build();
-                return new URL(uri.toString());
+                return MPUrl.getUrl(uri.toString());
             case AUDIENCE:
                 uri = new Uri.Builder()
                         .scheme(getScheme())
                         .encodedAuthority(url)
                         .path(SERVICE_VERSION_1 + "/" + mApiKey + "/audience?mpID=" + mConfigManager.getMpid())
                         .build();
-                return new URL(uri.toString());
+                return MPUrl.getUrl(uri.toString());
             default:
                 return null;
         }

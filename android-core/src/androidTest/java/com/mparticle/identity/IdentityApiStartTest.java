@@ -1,9 +1,12 @@
 package com.mparticle.identity;
 
-import com.github.tomakehurst.wiremock.http.Request;
 import com.mparticle.MParticle;
 import com.mparticle.MParticleOptions;
+import com.mparticle.networking.IdentityRequest;
+import com.mparticle.networking.MockServer;
+import com.mparticle.networking.Request;
 import com.mparticle.testutils.BaseCleanInstallEachTest;
+
 import org.json.JSONObject;
 import org.junit.Test;
 
@@ -11,12 +14,10 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
-import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching;
-import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertTrue;
 import static junit.framework.Assert.fail;
+import static junit.framework.TestCase.assertEquals;
 
 public final class IdentityApiStartTest extends BaseCleanInstallEachTest {
 
@@ -30,8 +31,8 @@ public final class IdentityApiStartTest extends BaseCleanInstallEachTest {
         startMParticle(MParticleOptions.builder(mContext)
                 .identify(request));
 
-        assertTrue(mServer.getRequests().Identity().identify().size() == 1);
-        assertIdentitiesMatch(mServer.getRequests().Identity().identify().get(0).getRequest(), identities);
+        assertTrue(mServer.Requests().getIdentify().size() == 1);
+        assertIdentitiesMatch(mServer.Requests().getIdentify().get(0), identities);
 
         MParticle.setInstance(null);
     }
@@ -41,8 +42,8 @@ public final class IdentityApiStartTest extends BaseCleanInstallEachTest {
     public void testNoInitialIdentityNoStoredIdentity() throws Exception {
         startMParticle();
 
-        assertEquals(mServer.getRequests().Identity().identify().size(), 1);
-        assertIdentitiesMatch(mServer.getRequests().Identity().identify().get(0).getRequest(), new HashMap<MParticle.IdentityType, String>());
+        assertEquals(mServer.Requests().getIdentify().size(), 1);
+        assertIdentitiesMatch(mServer.Requests().getIdentify().get(0), new HashMap<MParticle.IdentityType, String>());
     }
 
     @Test
@@ -58,22 +59,21 @@ public final class IdentityApiStartTest extends BaseCleanInstallEachTest {
         for (Map.Entry<MParticle.IdentityType, String> entry : identities.entrySet()) {
             AccessUtils.setUserIdentity(entry.getValue(), entry.getKey(), currentMpid);
         }
+        com.mparticle.internal.AccessUtils.awaitMessageHandler();
 
-        mServer.waitForVerify(postRequestedFor(urlPathMatching("/v([0-9]*)/identify")));
-        mServer.reset(currentMpid);
-
+        mServer = MockServer.getNewInstance(mContext);
         startMParticle();
 
-        assertEquals(mServer.getRequests().Identity().identify().size(), 1);
-        assertIdentitiesMatch(mServer.getRequests().Identity().identify().get(0).getRequest(), identities);
+        assertEquals(mServer.Requests().getIdentify().size(), 1);
+        assertIdentitiesMatch(mServer.Requests().getIdentify().get(0), identities);
     }
 
     private void assertIdentitiesMatch(Request request, Map<MParticle.IdentityType, String> identities) throws Exception {
-        JSONObject json = new JSONObject(request.getBodyAsString());
+        assertTrue(request instanceof IdentityRequest);
+        IdentityRequest identityRequest = request.asIdentityRequest();
+        assertNotNull(identityRequest);
 
-        assertNotNull(json);
-
-        JSONObject knownIdentities = json.getJSONObject("known_identities");
+        JSONObject knownIdentities = identityRequest.getBody().known_identities;
         assertNotNull(knownIdentities);
 
         assertNotNull(knownIdentities.remove("android_uuid"));

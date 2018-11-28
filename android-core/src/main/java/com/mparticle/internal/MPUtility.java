@@ -22,6 +22,7 @@ import android.view.WindowManager;
 
 import com.google.android.instantapps.InstantApps;
 import com.mparticle.MParticle;
+import com.mparticle.networking.MPConnection;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -192,16 +193,26 @@ public class MPUtility {
         return new String(chars);
     }
 
+    public static JSONObject getJsonResponse(MPConnection connection) {
+        try {
+            return getJsonResponse(connection.getInputStream());
+        } catch (IOException ex) {
+            return getJsonResponse(connection.getErrorStream());
+        }
+    }
+
     public static JSONObject getJsonResponse(HttpURLConnection connection) {
         try {
+            return getJsonResponse(connection.getInputStream());
+        } catch (IOException ex) {
+            return getJsonResponse(connection.getErrorStream());
+        }
+    }
+
+
+    public static JSONObject getJsonResponse(InputStream is) {
+        try {
             StringBuilder responseBuilder = new StringBuilder();
-            InputStream is;
-            try {
-                is = connection.getInputStream();
-            }
-            catch (IOException ex) {
-                is = connection.getErrorStream();
-            }
             if (is == null) {
                 return null;
             }

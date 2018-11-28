@@ -8,6 +8,8 @@ import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.Constants;
 import com.mparticle.internal.Logger;
 import com.mparticle.internal.MPUtility;
+import com.mparticle.networking.MPConnection;
+import com.mparticle.networking.MPUrl;
 import com.mparticle.networking.MParticleBaseClientImpl;
 
 import org.json.JSONArray;
@@ -15,9 +17,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
-import java.net.URL;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashSet;
@@ -69,7 +69,7 @@ import java.util.UUID;
     public IdentityHttpResponse login(IdentityApiRequest request) throws JSONException, IOException {
         JSONObject jsonObject = getStateJson(request);
         Logger.verbose("Identity login request: " + jsonObject.toString());
-        HttpURLConnection connection = getPostConnection(LOGIN_PATH, jsonObject.toString());
+        MPConnection connection = getPostConnection(LOGIN_PATH, jsonObject.toString());
         connection = makeUrlRequest(Endpoint.IDENTITY, connection, jsonObject.toString(), false);
         int responseCode = connection.getResponseCode();
         JSONObject response = MPUtility.getJsonResponse(connection);
@@ -79,7 +79,7 @@ import java.util.UUID;
     public IdentityHttpResponse logout(IdentityApiRequest request) throws JSONException, IOException {
         JSONObject jsonObject = getStateJson(request);
         Logger.verbose("Identity logout request: \n" + jsonObject.toString());
-        HttpURLConnection connection = getPostConnection(LOGOUT_PATH, jsonObject.toString());
+        MPConnection connection = getPostConnection(LOGOUT_PATH, jsonObject.toString());
         connection = makeUrlRequest(Endpoint.IDENTITY, connection, jsonObject.toString(), false);
         int responseCode = connection.getResponseCode();
         JSONObject response = MPUtility.getJsonResponse(connection);
@@ -89,7 +89,7 @@ import java.util.UUID;
     public IdentityHttpResponse identify(IdentityApiRequest request) throws JSONException, IOException {
         JSONObject jsonObject = getStateJson(request);
         Logger.verbose("Identity identify request: \n" + jsonObject.toString());
-        HttpURLConnection connection = getPostConnection(IDENTIFY_PATH, jsonObject.toString());
+        MPConnection connection = getPostConnection(IDENTIFY_PATH, jsonObject.toString());
         connection = makeUrlRequest(Endpoint.IDENTITY, connection, jsonObject.toString(), false);
         int responseCode = connection.getResponseCode();
         JSONObject response = MPUtility.getJsonResponse(connection);
@@ -103,7 +103,7 @@ import java.util.UUID;
         if (identityChanges != null && identityChanges.length() == 0) {
             return new IdentityHttpResponse(200, request.mpid, "", null);
         }
-        HttpURLConnection connection = getPostConnection(request.mpid, MODIFY_PATH, jsonObject.toString());
+        MPConnection connection = getPostConnection(request.mpid, MODIFY_PATH, jsonObject.toString());
         connection = makeUrlRequest(Endpoint.IDENTITY, connection, jsonObject.toString(), false);
         int responseCode = connection.getResponseCode();
         JSONObject response = MPUtility.getJsonResponse(connection);
@@ -232,14 +232,14 @@ import java.util.UUID;
         }
     }
 
-    private HttpURLConnection getPostConnection(Long mpId, String endpoint, String message) throws IOException {
-        URL url;
+    private MPConnection getPostConnection(Long mpId, String endpoint, String message) throws IOException {
+        MPUrl url;
         if (mpId == null) {
             url = getUrl(endpoint);
         } else {
             url = getUrl(mpId, endpoint);
         }
-        HttpURLConnection connection = (HttpURLConnection)url.openConnection();
+        MPConnection connection = url.openConnection();
         connection.setConnectTimeout(mConfigManager.getIdentityConnectionTimeout());
         connection.setReadTimeout(mConfigManager.getIdentityConnectionTimeout());
         connection.setRequestMethod("POST");
@@ -259,13 +259,13 @@ import java.util.UUID;
         return connection;
     }
 
-    private HttpURLConnection getPostConnection(String endpoint, String message) throws IOException {
+    private MPConnection getPostConnection(String endpoint, String message) throws IOException {
         return getPostConnection(null, endpoint, message);
     }
 
 
 
-    private URL getUrl(long mpId, String endpoint) throws MalformedURLException {
+    MPUrl getUrl(long mpId, String endpoint) throws MalformedURLException {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append(mpId);
         if (endpoint.indexOf("/") != 0) {
@@ -275,7 +275,7 @@ import java.util.UUID;
         return getUrl(stringBuilder.toString());
     }
 
-    private URL getUrl(String endpoint) throws MalformedURLException {
+    MPUrl getUrl(String endpoint) throws MalformedURLException {
 
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append(SERVICE_VERSION_1);

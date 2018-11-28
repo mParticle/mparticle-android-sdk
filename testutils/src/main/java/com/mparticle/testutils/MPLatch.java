@@ -1,9 +1,22 @@
 package com.mparticle.testutils;
 
+import android.os.Handler;
+import android.os.Looper;
+
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 public class MPLatch extends CountDownLatch {
+    int countDowned = 0;
+    int count;
+    Handler mHandler = new Handler(Looper.getMainLooper());
+    Runnable timeoutRunnable = new Runnable() {
+        @Override
+        public void run() {
+            throw new RuntimeException("Timed Out");
+        }
+    };
+
     /**
      * Constructs a {@code CountDownLatch} initialized with the given count.
      *
@@ -13,10 +26,24 @@ public class MPLatch extends CountDownLatch {
      */
     public MPLatch(int count) {
         super(count);
+        this.count = count;
+    }
+
+    @Override
+    public void countDown() {
+        countDowned++;
+        if (countDowned == count) {
+            mHandler.removeCallbacks(timeoutRunnable);
+        }
+        super.countDown();
     }
 
     @Override
     public void await() throws InterruptedException {
-        this.await(1000, TimeUnit.MILLISECONDS);
+        if (count == countDowned) {
+            return;
+        }
+        mHandler.postDelayed(timeoutRunnable, 500 * 1000);
+        this.await(200, TimeUnit.SECONDS);
     }
 }

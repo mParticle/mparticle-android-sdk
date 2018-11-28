@@ -1,13 +1,13 @@
 package com.mparticle.identity;
 
-import android.content.Context;
 import android.os.Handler;
-import android.support.test.InstrumentationRegistry;
 import android.util.MutableBoolean;
 
 import com.mparticle.MParticle;
 import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.MPUtility;
+import com.mparticle.networking.MPConnection;
+import com.mparticle.networking.MPConnectionTestImpl;
 import com.mparticle.testutils.BaseCleanStartedEachTest;
 import com.mparticle.testutils.MPLatch;
 
@@ -18,7 +18,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.net.HttpURLConnection;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 
@@ -37,21 +36,19 @@ import static junit.framework.Assert.assertTrue;
 import static junit.framework.Assert.fail;
 
 public class MParticleIdentityClientImplTest extends BaseCleanStartedEachTest {
-    private Context mContext;
     private ConfigManager mConfigManager;
     private MParticleIdentityClientImpl mApiClient;
     protected CountDownLatch lock = new MPLatch(1);
 
     @Before
     public void before() throws Exception {
-        mContext = InstrumentationRegistry.getContext();
         mConfigManager = MParticle.getInstance().Internal().getConfigManager();
     }
 
 
     @Test
     public void testModifySameData() throws Exception {
-        final int startingModifyRequestCount = mServer.getRequests().Identity().modify().size();
+        final int startingModifyRequestCount = mServer.Requests().getModify().size();
         final CountDownLatch latch = new MPLatch(2);
         final Handler handler = new Handler();
         handler.postDelayed(new Runnable() {
@@ -71,7 +68,7 @@ public class MParticleIdentityClientImplTest extends BaseCleanStartedEachTest {
                                     @Override
                                     public void onSuccess(IdentityApiResult result) {
                                         latch.countDown();
-                                        int currentModifyRequestCount = mServer.getRequests().Identity().modify().size();
+                                        int currentModifyRequestCount = mServer.Requests().getModify().size();
                                         //make sure we made 1 or 0 modify requests. It could go either way for the first modify request,
                                         //it may have changes, it may not depending on state. The second request though, should not have
                                         //changes, and therefore it should not take place, so less than 2 requests is a good condition
@@ -105,7 +102,7 @@ public class MParticleIdentityClientImplTest extends BaseCleanStartedEachTest {
             final int finalI = i;
             setApiClient(new MockIdentityApiClient() {
                 @Override
-                public void makeUrlRequest(HttpURLConnection connection, String payload, boolean mparticle) throws IOException, JSONException {
+                public void makeUrlRequest(MPConnection connection, String payload, boolean mparticle) throws IOException, JSONException {
                     if (connection.getURL().toString().contains("/identify")) {
                         JSONObject jsonObject = new JSONObject(payload);
                         JSONObject knownIdentities = jsonObject.getJSONObject(MParticleIdentityClientImpl.KNOWN_IDENTITIES);
@@ -144,7 +141,7 @@ public class MParticleIdentityClientImplTest extends BaseCleanStartedEachTest {
 
             setApiClient(new MockIdentityApiClient() {
                 @Override
-                public void makeUrlRequest(HttpURLConnection connection, String payload, boolean mparticle) throws IOException, JSONException {
+                public void makeUrlRequest(MPConnection connection, String payload, boolean mparticle) throws IOException, JSONException {
                     if (connection.getURL().toString().contains("/login")) {
                         JSONObject jsonObject = new JSONObject(payload);
                         JSONObject knownIdentities = jsonObject.getJSONObject(MParticleIdentityClientImpl.KNOWN_IDENTITIES);
@@ -177,7 +174,7 @@ public class MParticleIdentityClientImplTest extends BaseCleanStartedEachTest {
             final MutableBoolean checked = new MutableBoolean(false);
             setApiClient(new MockIdentityApiClient() {
                 @Override
-                public void makeUrlRequest(HttpURLConnection connection, String payload, boolean mparticle) throws IOException, JSONException {
+                public void makeUrlRequest(MPConnection connection, String payload, boolean mparticle) throws IOException, JSONException {
                     if (connection.getURL().toString().contains("/logout")) {
                         JSONObject jsonObject = new JSONObject(payload);
                         JSONObject knownIdentities = jsonObject.getJSONObject(MParticleIdentityClientImpl.KNOWN_IDENTITIES);
@@ -217,8 +214,8 @@ public class MParticleIdentityClientImplTest extends BaseCleanStartedEachTest {
             final MutableBoolean checked = new MutableBoolean(false);
             setApiClient(new MockIdentityApiClient() {
                 @Override
-                public void makeUrlRequest(HttpURLConnection connection, String payload, boolean mparticle) throws IOException, JSONException {
-                        if (connection.getURL().toString().contains("/modify")) {
+                public void makeUrlRequest(MPConnection connection, String payload, boolean mparticle) throws IOException, JSONException {
+                        if (connection.getURL().toString().contains(MParticleIdentityClientImpl.MODIFY_PATH)) {
                             JSONObject jsonObject = new JSONObject(payload);
                             JSONArray changedIdentities = jsonObject.getJSONArray(IDENTITY_CHANGES);
                             for (int i = 0; i < changedIdentities.length(); i++) {
@@ -260,31 +257,15 @@ public class MParticleIdentityClientImplTest extends BaseCleanStartedEachTest {
     private void setApiClient(final MockIdentityApiClient identityClient) {
         mApiClient = new MParticleIdentityClientImpl(mContext, mConfigManager) {
             @Override
-            public HttpURLConnection makeUrlRequest(Endpoint endpoint, final HttpURLConnection connection, String payload, boolean identity) throws IOException {
+            public MPConnection makeUrlRequest(Endpoint endpoint, final MPConnection connection, String payload, boolean identity) throws IOException {
                 try {
                     identityClient.makeUrlRequest(connection, payload, identity);
                 } catch (JSONException e) {
                     e.printStackTrace();
                     fail(e.getMessage());
                 }
-                return new HttpURLConnection(null) {
-
-                    @Override
-                    public void connect() throws IOException {}
-
-                    @Override
-                    public void disconnect() {}
-
-                    @Override
-                    public boolean usingProxy() {
-                        return false;
-                    }
-
-                    @Override
-                    public int getResponseCode() throws IOException {
-                        return 202;
-                    }
-                };
+                ((MPConnectionTestImpl)connection).setResponseCode(202);
+                return connection;
             }
         };
         MParticle.getInstance().Identity().setApiClient(mApiClient);
@@ -315,6 +296,6 @@ public class MParticleIdentityClientImplTest extends BaseCleanStartedEachTest {
     }
 
     interface MockIdentityApiClient {
-        void makeUrlRequest(HttpURLConnection connection, String payload, boolean mparticle) throws IOException, JSONException;
+        void makeUrlRequest(MPConnection connection, String payload, boolean mparticle) throws IOException, JSONException;
     }
 }

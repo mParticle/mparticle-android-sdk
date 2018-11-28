@@ -16,20 +16,26 @@ import com.mparticle.identity.TaskSuccessListener;
 import com.mparticle.internal.AccessUtils;
 import com.mparticle.internal.AppStateManager;
 import com.mparticle.internal.Logger;
+import com.mparticle.networking.MockServer;
+import com.mparticle.testutils.AndroidUtils.Mutable;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 
 import java.util.Random;
 import java.util.concurrent.CountDownLatch;
 
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 public abstract class BaseAbstractTest {
-    protected Server mServer;
+    protected MockServer mServer;
     Activity activity = new Activity();
     protected Context mContext;
     protected Random ran = new Random();
     protected RandomUtils mRandomUtils = new RandomUtils();
+    protected static Long mStartingMpid;
+
 
     @BeforeClass
     public static void beforeClassImpl() {
@@ -41,20 +47,11 @@ public abstract class BaseAbstractTest {
     @Before
     public void beforeImpl() throws Exception {
         Logger.setLogHandler(null);
-        if (mServer == null) {
-            mServer = new Server();
-        } else {
-            mServer.reset();
-        }
         mContext = InstrumentationRegistry.getContext();
-    }
-
-    @After
-    public void tearDown() {
-        if (mServer != null) {
-            mServer.stop();
+        mStartingMpid = new Random().nextLong();
+        if (autoStartServer()) {
+            mServer = MockServer.getNewInstance(mContext);
         }
-        MParticle.getInstance().reset(mContext);
     }
 
     protected void startMParticle() throws InterruptedException {
@@ -65,24 +62,33 @@ public abstract class BaseAbstractTest {
         MParticle.setInstance(null);
         final CountDownLatch latch = new MPLatch(1);
         BaseIdentityTask identityTask = com.mparticle.AccessUtils.getIdentityTask(options);
+        final Mutable<Boolean> called = new Mutable<>(false);
         if (identityTask == null) {
             identityTask = new BaseIdentityTask();
         }
         identityTask.addFailureListener(new TaskFailureListener() {
             @Override
             public void onFailure(IdentityHttpResponse result) {
-                latch.countDown();
+                fail(result.toString());
             }
         }).addSuccessListener(new TaskSuccessListener() {
             @Override
             public void onSuccess(IdentityApiResult result) {
+                called.value = true;
                 latch.countDown();
             }
         });
 
         options.identifyTask(identityTask);
         MParticle.start(com.mparticle.AccessUtils.setCredentialsIfEmpty(options).build());
+        Long start = System.currentTimeMillis();
+        if (mServer == null) {
+            mServer = MockServer.getNewInstance(mContext);
+        }
+        mServer.setupHappyIdentify(mStartingMpid);
+        Long elapsed = System.currentTimeMillis() - start;
         latch.await();
+        assertTrue(called.value);
     }
 
     protected void goToBackground() {
@@ -103,5 +109,9 @@ public abstract class BaseAbstractTest {
             AppStateManager appStateManager = MParticle.getInstance().getAppStateManager();
             appStateManager.onActivityResumed(activity);
         }
+    }
+
+    protected boolean autoStartServer() {
+        return true;
     }
 }

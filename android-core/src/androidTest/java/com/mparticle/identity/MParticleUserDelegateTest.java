@@ -30,7 +30,7 @@ public class MParticleUserDelegateTest extends BaseCleanStartedEachTest {
     @Test
     public void testSetGetUserIdentities() throws Exception {
         Map<Long, Map<MParticle.IdentityType, String>> attributes = new HashMap<Long, Map<MParticle.IdentityType, String>>();
-        for (int i = 0; i < 13; i++) {
+        for (int i = 0; i < 5; i++) {
             Long mpid = ran.nextLong();
             Map<MParticle.IdentityType, String> pairs = new HashMap<MParticle.IdentityType, String>();
             attributes.put(mpid, pairs);

@@ -27,17 +27,17 @@ public class NetworkOptionsTest extends BaseCleanInstallEachTest {
                 .build();
         MParticle.start(options);
         setClients();
-        assertEquals(BuildConfig.MP_URL, mpClient.getUrl(MParticleBaseClientImpl.Endpoint.AUDIENCE).getAuthority());
-        assertEquals(BuildConfig.MP_CONFIG_URL, mpClient.getUrl(MParticleBaseClientImpl.Endpoint.CONFIG).getAuthority());
-        assertEquals(BuildConfig.MP_URL, mpClient.getUrl(MParticleBaseClientImpl.Endpoint.EVENTS).getAuthority());
-        assertEquals(BuildConfig.MP_IDENTITY_URL, mpClient.getUrl(MParticleBaseClientImpl.Endpoint.IDENTITY).getAuthority());
+        assertEquals(NetworkOptionsManager.MP_URL, mpClient.getUrl(MParticleBaseClientImpl.Endpoint.AUDIENCE).getAuthority());
+        assertEquals(NetworkOptionsManager.MP_CONFIG_URL, mpClient.getUrl(MParticleBaseClientImpl.Endpoint.CONFIG).getAuthority());
+        assertEquals(NetworkOptionsManager.MP_URL, mpClient.getUrl(MParticleBaseClientImpl.Endpoint.EVENTS).getAuthority());
+        assertEquals(NetworkOptionsManager.MP_IDENTITY_URL, mpClient.getUrl(MParticleBaseClientImpl.Endpoint.IDENTITY).getAuthority());
         String randIdentityPath = mRandomUtils.getAlphaString(10);
         assertEquals("/" + randIdentityPath, mpClient.getUrl(MParticleBaseClientImpl.Endpoint.IDENTITY, randIdentityPath).getPath());
 
-        assertEquals(BuildConfig.MP_URL, identityClient.getUrl(MParticleBaseClientImpl.Endpoint.AUDIENCE).getAuthority());
-        assertEquals(BuildConfig.MP_CONFIG_URL, identityClient.getUrl(MParticleBaseClientImpl.Endpoint.CONFIG).getAuthority());
-        assertEquals(BuildConfig.MP_URL, identityClient.getUrl(MParticleBaseClientImpl.Endpoint.EVENTS).getAuthority());
-        assertEquals(BuildConfig.MP_IDENTITY_URL, identityClient.getUrl(MParticleBaseClientImpl.Endpoint.IDENTITY).getAuthority());
+        assertEquals(NetworkOptionsManager.MP_URL, identityClient.getUrl(MParticleBaseClientImpl.Endpoint.AUDIENCE).getAuthority());
+        assertEquals(NetworkOptionsManager.MP_CONFIG_URL, identityClient.getUrl(MParticleBaseClientImpl.Endpoint.CONFIG).getAuthority());
+        assertEquals(NetworkOptionsManager.MP_URL, identityClient.getUrl(MParticleBaseClientImpl.Endpoint.EVENTS).getAuthority());
+        assertEquals(NetworkOptionsManager.MP_IDENTITY_URL, identityClient.getUrl(MParticleBaseClientImpl.Endpoint.IDENTITY).getAuthority());
         randIdentityPath = mRandomUtils.getAlphaString(10);
         assertEquals("/" + randIdentityPath, identityClient.getUrl(MParticleBaseClientImpl.Endpoint.IDENTITY, randIdentityPath).getPath());
     }

@@ -8,12 +8,11 @@ import com.mparticle.internal.Logger;
 import com.mparticle.internal.MPUtility;
 
 import java.io.IOException;
-import java.net.HttpURLConnection;
 
 public abstract class BaseNetworkConnection {
     private SharedPreferences mPreferences;
 
-    public abstract HttpURLConnection makeUrlRequest(MParticleBaseClientImpl.Endpoint endpoint, HttpURLConnection connection, String payload, boolean identity) throws IOException;
+    public abstract MPConnection makeUrlRequest(MParticleBaseClientImpl.Endpoint endpoint, MPConnection connection, String payload, boolean identity) throws IOException;
 
     protected BaseNetworkConnection(Context context) {
         this.mPreferences = context.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
@@ -23,7 +22,7 @@ public abstract class BaseNetworkConnection {
         this.mPreferences = sharedPreferences;
     }
 
-    public void setNextAllowedRequestTime(HttpURLConnection connection) {
+    public void setNextAllowedRequestTime(MPConnection connection) {
         long throttle = NetworkConnection.DEFAULT_THROTTLE_MILLIS;
         if (connection != null) {
             //most HttpUrlConnectionImpl's are case insensitive, but the interface

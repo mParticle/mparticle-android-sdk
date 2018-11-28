@@ -33,12 +33,4 @@ dependencies {
     api 'com.android.support.test:rules:1.0.2'
     api 'org.apache.httpcomponents:httpclient-android:4.3.5.1'
     api 'org.slf4j:slf4j-api:1.7.25'
-    api("com.github.tomakehurst:wiremock:2.8.0") {
-        exclude group: 'com.flipkart.zjsonpatch'
-        exclude group: 'org.xmlunit'
-        exclude group: 'org.apache.httpcomponents', module: 'httpclient'
-        exclude group: 'org.slf4j', module: 'slf4j-api'
-        exclude group: 'org.ow2.asm', module: 'asm'
-        exclude group: 'org.json', module: 'json'
-    }
 }

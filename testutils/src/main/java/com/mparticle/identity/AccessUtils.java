@@ -1,19 +1,66 @@
 package com.mparticle.identity;
 
 import android.content.Context;
+import android.support.test.InstrumentationRegistry;
 
 import com.mparticle.MParticle;
+import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.KitManager;
 import com.mparticle.networking.BaseNetworkConnection;
+import com.mparticle.networking.MPUrl;
+import com.mparticle.networking.MParticleBaseClient;
 import com.mparticle.networking.MParticleBaseClientImpl;
 
+import java.net.MalformedURLException;
 import java.util.HashMap;
 import java.util.Map;
 
 public class AccessUtils {
 
-    public static MParticleIdentityClient getIdentityApiClient() {
-        return MParticle.getInstance().Identity().getApiClient();
+    public static String IDENTIFY_PATH = MParticleIdentityClientImpl.IDENTIFY_PATH;
+    public static String LOGIN_PATH = MParticleIdentityClientImpl.LOGIN_PATH;
+    public static String LOGOUT_PATH = MParticleIdentityClientImpl.LOGOUT_PATH;
+    public static  String MODIFY_PATH = MParticleIdentityClientImpl.MODIFY_PATH;
+
+    public static MPUrl getUrl(String endpoint) {
+        MParticleIdentityClientImpl identityClient = getIdentityApiClient();
+        try {
+            return identityClient.getUrl(endpoint);
+        } catch (MalformedURLException e) {
+            return null;
+        }
+    }
+
+    public static MPUrl getUrl(String endpoint, Long mpid) {
+        MParticleIdentityClientImpl identityClient = getIdentityApiClient();
+        try {
+            return identityClient.getUrl(mpid, endpoint);
+        } catch (MalformedURLException e) {
+            return null;
+        }
+    }
+
+    public static MParticleIdentityClientImpl getIdentityApiClient() {
+        MParticleBaseClient identityClient = null;
+        if (MParticle.getInstance() != null) {
+            identityClient = MParticle.getInstance().Identity().getApiClient();
+        }
+        if (identityClient == null) {
+            Context context = InstrumentationRegistry.getContext();
+            ConfigManager configManager = null;
+            if (MParticle.getInstance() != null) {
+                MParticle.getInstance().Internal().getConfigManager();
+            }
+            if (configManager == null) {
+                configManager = new ConfigManager(context);
+            }
+            return getIdentityClient(context, configManager);
+        }
+        return (MParticleIdentityClientImpl)identityClient;
+    }
+
+    private static MParticleIdentityClientImpl getIdentityClient(Context context, ConfigManager configManager) {
+        return new MParticleIdentityClientImpl(context, configManager);
     }
 
     public static void setIdentityApiClientScheme(String scheme) {

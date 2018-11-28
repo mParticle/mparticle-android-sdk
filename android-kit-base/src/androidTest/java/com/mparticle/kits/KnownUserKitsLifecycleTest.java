@@ -80,7 +80,7 @@ public class KnownUserKitsLifecycleTest extends BaseKitManagerStarted {
         setKitStartedListener(new KitStartedListener() {
             @Override
             public void onKitStarted(JSONArray jsonArray) {
-                if (jsonArray.length() == 3) {
+                if (jsonArray != null && jsonArray.length() == 3) {
                     latch.countDown();
                     Logger.error("kits started: " + mKitManager.providers.size());
                 }
