@@ -298,10 +298,18 @@ public abstract class KitIntegration {
     }
 
     /**
-     * Queues and groupd network requests on the MParticle Core network handler
+     * Queues and groups network requests on the MParticle Core network handler
      */
     public void executeNetworkRequest(Runnable runnable) {
         getKitManager().executeNetworkRequest(runnable);
+    }
+
+    /**
+     * Indicates that the user wishes to remove personal data and shutdown a Kit and/or underlying 3rd
+     * party SDK
+     */
+    protected void reset() {
+
     }
 
     /**

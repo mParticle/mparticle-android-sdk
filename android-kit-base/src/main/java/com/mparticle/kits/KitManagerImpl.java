@@ -1138,6 +1138,17 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
 
     }
 
+    @Override
+    public void reset() {
+        for (KitIntegration provider : providers.values()) {
+            try {
+                provider.reset();
+            } catch (Exception e) {
+                Logger.warning("Failed to call reset for kit: " + provider.getName() + ": " + e.getMessage());
+            }
+        }
+    }
+
     public void executeNetworkRequest(Runnable runnable) {
         mBackgroundTaskHandler.executeNetworkRequest(runnable);
     }

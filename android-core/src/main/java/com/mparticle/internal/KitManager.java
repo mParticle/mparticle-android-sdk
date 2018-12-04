@@ -113,4 +113,6 @@ public interface KitManager {
 
     void onModifyCompleted(MParticleUser user, IdentityApiRequest request);
 
+    void reset();
+
 }

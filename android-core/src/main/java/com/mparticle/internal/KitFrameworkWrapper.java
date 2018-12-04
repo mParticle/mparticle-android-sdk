@@ -581,6 +581,13 @@ public class KitFrameworkWrapper implements KitManager {
         }
     }
 
+    @Override
+    public void reset() {
+        if (mKitManager != null) {
+            mKitManager.reset();
+        }
+    }
+
     public interface CoreCallbacks {
         boolean isBackgrounded();
         int getUserBucket();
