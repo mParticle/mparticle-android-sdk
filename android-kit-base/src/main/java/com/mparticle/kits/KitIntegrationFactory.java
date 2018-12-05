@@ -53,6 +53,7 @@ public class KitIntegrationFactory {
         kits.put(MParticle.ServiceProviders.APPSEE,           "com.mparticle.kits.AppseeKit");
         kits.put(MParticle.ServiceProviders.TAPLYTICS,        "com.mparticle.kits.TaplyticsKit");
         kits.put(MParticle.ServiceProviders.OPTIMIZELY,       "com.mparticle.kits.OptimizelyKit");
+        kits.put(MParticle.ServiceProviders.RESPONSYS,        "com.mparticle.kits.ResponsysKit");
         return kits;
     }
 

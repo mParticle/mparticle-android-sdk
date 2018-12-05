@@ -82,3 +82,6 @@
 [submodule "kits/optimizely-kit"]
     path = kits/optimizely-kit
     url = git@github.com:mparticle-integrations/mparticle-android-integration-optimizely.git
+[submodule "kits/responsys-kit"]
+	path = kits/responsys-kit
+        url = git@github.com:mparticle-integrations/mparticle-android-integration-responsys.git

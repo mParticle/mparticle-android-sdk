@@ -27,7 +27,8 @@ include (
         ':kits:appsee-kit',
         ':kits:taplytics-kit',
         ':kits:optimizely-kit',
-        ':testutils',
+        ':kits:responsys-kit',
+	':testutils',
         ':android-core',
         ':android-kit-base'
 )
