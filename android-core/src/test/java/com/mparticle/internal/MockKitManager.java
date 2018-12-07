@@ -248,4 +248,9 @@ public class MockKitManager implements KitManager {
     public void onModifyCompleted(MParticleUser user, IdentityApiRequest request) {
 
     }
+
+    @Override
+    public void reset() {
+
+    }
 }
