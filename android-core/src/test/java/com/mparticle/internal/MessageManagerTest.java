@@ -227,7 +227,8 @@ public class MessageManagerTest {
     @Test
     public void testLogCommerceEventWithNullUser() throws Exception {
         MParticle mparticle = Mockito.mock(MParticle.class);
-        Mockito.when(mparticle.getAppStateManager()).thenReturn(Mockito.mock(AppStateManager.class));
+        Mockito.when(mparticle.Internal()).thenReturn(Mockito.mock(MParticle.Internal.class));
+        Mockito.when(mparticle.Internal().getAppStateManager()).thenReturn(Mockito.mock(AppStateManager.class));
         IdentityApi mockIdentity = Mockito.mock(IdentityApi.class);
         Mockito.when(mparticle.Identity()).thenReturn(mockIdentity);
 

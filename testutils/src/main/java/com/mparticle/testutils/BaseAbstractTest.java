@@ -91,7 +91,7 @@ public abstract class BaseAbstractTest {
 
     protected void goToBackground() {
         if (MParticle.getInstance() != null) {
-            AppStateManager appStateManager = MParticle.getInstance().getAppStateManager();
+            AppStateManager appStateManager = MParticle.getInstance().Internal().getAppStateManager();
             //need to set AppStateManager's Handler to be on the main looper, otherwise, it will not put the app in the background
             AccessUtils.setAppStateManagerHandler(new Handler(Looper.getMainLooper()));
             if (appStateManager.isBackgrounded()) {
@@ -104,7 +104,7 @@ public abstract class BaseAbstractTest {
     protected void goToForeground() {
         activity = new Activity();
         if (MParticle.getInstance() != null) {
-            AppStateManager appStateManager = MParticle.getInstance().getAppStateManager();
+            AppStateManager appStateManager = MParticle.getInstance().Internal().getAppStateManager();
             appStateManager.onActivityResumed(activity);
         }
     }

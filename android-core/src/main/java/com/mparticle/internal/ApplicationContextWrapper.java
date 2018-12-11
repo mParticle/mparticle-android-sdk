@@ -98,7 +98,7 @@ public class ApplicationContextWrapper extends Application {
     public void registerActivityLifecycleCallbacks(ActivityLifecycleCallbacks callback) {
         mBaseApplication.registerActivityLifecycleCallbacks(callback);
         if (callback != null && mActivityLifecycleCallbackRecorder != null && mReplay) {
-            WeakReference<Activity> reference = MParticle.getInstance().getKitManager() == null ? null : MParticle.getInstance().getKitManager().getCurrentActivity();
+            WeakReference<Activity> reference = MParticle.getInstance().Internal().getKitManager() == null ? null : MParticle.getInstance().Internal().getKitManager().getCurrentActivity();
             if (reference != null) {
                 Activity currentActivity = reference.get();
                 if (currentActivity != null) {

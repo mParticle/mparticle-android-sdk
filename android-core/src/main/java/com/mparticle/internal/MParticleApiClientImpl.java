@@ -365,7 +365,7 @@ public class MParticleApiClientImpl extends MParticleBaseClientImpl implements M
 
     private String getSupportedKitString(){
         if (sSupportedKits == null) {
-            Set<Integer> supportedKitIds = MParticle.getInstance().getKitManager().getSupportedKits();
+            Set<Integer> supportedKitIds = MParticle.getInstance().Internal().getKitManager().getSupportedKits();
             if (supportedKitIds != null && supportedKitIds.size() > 0) {
                 StringBuilder buffer = new StringBuilder(supportedKitIds.size() * 3);
                 Iterator<Integer> it = supportedKitIds.iterator();

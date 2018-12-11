@@ -31,7 +31,6 @@ import com.mparticle.commerce.TransactionAttributes;
 import com.mparticle.identity.MParticleUser;
 import com.mparticle.internal.Constants.MessageKey;
 import com.mparticle.internal.Constants.MessageType;
-import com.mparticle.internal.PushRegistrationHelper.PushRegistration;
 import com.mparticle.internal.database.services.MParticleDBManager;
 import com.mparticle.messaging.ProviderCloudMessage;
 
@@ -630,7 +629,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
             message.put(MessageKey.PAYLOAD, cloudMessage.getRedactedJsonPayload().toString());
             message.put(MessageKey.PUSH_TYPE, Constants.Push.MESSAGE_TYPE_RECEIVED);
 
-            PushRegistration registration = mConfigManager.getPushRegistration();
+            PushRegistrationHelper.PushRegistration registration = mConfigManager.getPushRegistration();
             if ((registration != null) && (registration.instanceId != null) && (registration.instanceId.length() > 0)) {
                 message.put(MessageKey.PUSH_TOKEN, registration.instanceId);
             }
@@ -655,7 +654,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
             message.put(MessageKey.CONTENT_ID, contentId);
             message.put(MessageKey.PUSH_TYPE, Constants.Push.MESSAGE_TYPE_RECEIVED);
 
-            PushRegistration registration = mConfigManager.getPushRegistration();
+            PushRegistrationHelper.PushRegistration registration = mConfigManager.getPushRegistration();
             if ((registration != null) && (registration.instanceId != null) && (registration.instanceId.length() > 0)) {
                 message.put(MessageKey.PUSH_TOKEN, registration.instanceId);
             }

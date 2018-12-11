@@ -42,13 +42,13 @@ public class MPEvent {
     private MPEvent(Builder builder){
         if (builder.eventType == null){
             Logger.error("MPEvent created with no event type!");
-        }else{
+        } else {
             eventType = builder.eventType;
         }
 
         if (builder.eventName == null){
             Logger.error("MPEvent created with no event name!");
-        }else{
+        } else {
             if (builder.eventName.length() > Constants.LIMIT_ATTR_KEY){
                 Logger.error("MPEvent created with too long of a name and will be truncated, the limit is: " + Constants.LIMIT_ATTR_KEY);
                 eventName = builder.eventName.substring(0, Constants.LIMIT_ATTR_KEY);

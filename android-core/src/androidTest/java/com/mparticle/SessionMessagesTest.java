@@ -31,7 +31,7 @@ public final class SessionMessagesTest extends BaseCleanStartedEachTest {
 
     @Before
     public void before() throws Exception {
-        mAppStateManager = MParticle.getInstance().getAppStateManager();
+        mAppStateManager = MParticle.getInstance().Internal().getAppStateManager();
         mHandler = new Handler(Looper.getMainLooper());
     }
 

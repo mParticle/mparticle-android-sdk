@@ -41,7 +41,8 @@ public class ConfigManagerTest {
         mockMp = Mockito.mock(MParticle.class);
         MParticle.setInstance(mockMp);
         kitManager = Mockito.mock(KitFrameworkWrapper.class);
-        Mockito.when(mockMp.getKitManager()).thenReturn(kitManager);
+        Mockito.when(mockMp.Internal()).thenReturn(Mockito.mock(MParticle.Internal.class));
+        Mockito.when(mockMp.Internal().getKitManager()).thenReturn(kitManager);
         manager.updateConfig(new JSONObject(sampleConfig));
     }
 

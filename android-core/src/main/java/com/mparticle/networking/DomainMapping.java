@@ -52,7 +52,7 @@ public class DomainMapping {
         return Builder.withJson(jsonObject);
     }
 
-    public Endpoint getType() {
+    Endpoint getType() {
         return mType;
     }
 

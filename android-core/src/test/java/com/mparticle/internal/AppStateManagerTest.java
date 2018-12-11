@@ -41,7 +41,8 @@ public class AppStateManagerTest {
         messageManager = Mockito.mock(MessageManager.class);
         manager.setMessageManager(messageManager);
         MParticle mp = Mockito.mock(MParticle.class);
-        Mockito.when(mp.getKitManager()).thenReturn(Mockito.mock(KitFrameworkWrapper.class));
+        Mockito.when(mp.Internal()).thenReturn(Mockito.mock(MParticle.Internal.class));
+        Mockito.when(mp.Internal().getKitManager()).thenReturn(Mockito.mock(KitFrameworkWrapper.class));
         MParticle.setInstance(mp);
 
         manager.delayedBackgroundCheckHandler = Mockito.mock(Handler.class);
@@ -60,7 +61,7 @@ public class AppStateManagerTest {
     public void testOnActivityStarted() throws Exception {
         assertEquals(true, manager.isBackgrounded());
         manager.onActivityStarted(activity);
-        Mockito.verify(MParticle.getInstance().getKitManager(), Mockito.times(1)).onActivityStarted(activity);
+        Mockito.verify(MParticle.getInstance().Internal().getKitManager(), Mockito.times(1)).onActivityStarted(activity);
     }
 
     @Test

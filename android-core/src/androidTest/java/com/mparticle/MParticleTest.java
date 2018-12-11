@@ -10,7 +10,7 @@ import com.mparticle.identity.IdentityStateListener;
 import com.mparticle.identity.MParticleUser;
 import com.mparticle.internal.KitFrameworkWrapper;
 import com.mparticle.internal.MessageManager;
-import com.mparticle.internal.PushRegistrationHelper.PushRegistration;
+import com.mparticle.internal.PushRegistrationHelper;
 import com.mparticle.internal.database.services.MParticleDBManager;
 import com.mparticle.networking.Matcher;
 import com.mparticle.networking.MockServer;
@@ -277,9 +277,9 @@ public class MParticleTest extends BaseCleanStartedEachTest {
         PushRegistrationTest pushRegistrationTest = new PushRegistrationTest().setServer(mServer);
         pushRegistrationTest.setContext(mContext);
         for (final PushRegistrationTest.SetPush setPush: pushRegistrationTest.setPushes) {
-            final PushRegistration oldRegistration = new PushRegistration(mRandomUtils.getAlphaNumericString(10), mRandomUtils.getAlphaNumericString(15));
+            final PushRegistrationHelper.PushRegistration oldRegistration = new PushRegistrationHelper.PushRegistration(mRandomUtils.getAlphaNumericString(10), mRandomUtils.getAlphaNumericString(15));
             setPush.setPushRegistration(oldRegistration);
-            final PushRegistration newPushRegistration = new PushRegistration(mRandomUtils.getAlphaNumericString(10), mRandomUtils.getAlphaNumericString(15));
+            final PushRegistrationHelper.PushRegistration newPushRegistration = new PushRegistrationHelper.PushRegistration(mRandomUtils.getAlphaNumericString(10), mRandomUtils.getAlphaNumericString(15));
             final CountDownLatch latch = new MPLatch(1);
             final AndroidUtils.Mutable<Boolean> received = new AndroidUtils.Mutable<Boolean>(false);
             mServer.waitForVerify(new Matcher(mServer.Endpoints().getModifyUrl(mStartingMpid)).bodyMatch(new MockServer.JSONMatch() {

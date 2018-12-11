@@ -81,11 +81,8 @@
 -renamesourcefileattribute SourceFile
 -keepattributes Exceptions,InnerClasses,Signature,Deprecated,SourceFile,LineNumberTable,*Annotation*,EnclosingMethod
 
--keep class com.mparticle.Session { *; }
--keep class com.mparticle.MPEvent { *; }
--keep class com.mparticle.messaging.InstanceIdService { *; }
 -keep class com.mparticle.MPEvent$* { *; }
--keep, includedescriptorclasses class com.mparticle.MParticle { *; }
+-keep class com.mparticle.MParticle { *; }
 -keep class com.mparticle.MParticle$EventType { *; }
 -keep class com.mparticle.MParticle$InstallType { *; }
 -keep class com.mparticle.MParticle$IdentityType { *; }
@@ -96,6 +93,9 @@
 -keep class com.mparticle.MParticle$UserAttributes { *; }
 -keep class com.mparticle.MParticle$ResetListener { *; }
 
+
+-keep class com.mparticle.Session { *; }
+-keep class com.mparticle.MPEvent { *; }
 -keep class com.mparticle.BuildConfig { *; }
 -keep class com.mparticle.MPReceiver { *; }
 -keep class com.mparticle.MPService { *; }
@@ -104,42 +104,54 @@
 -keep class com.mparticle.AttributionError { *; }
 -keep class com.mparticle.AttributionListener { *; }
 -keep class com.mparticle.AttributionResult { *; }
--keep class com.mparticle.identity.TaskSuccessListener { *; }
--keep class com.mparticle.identity.TaskFailureListener { *; }
--keep, includedescriptorclasses class com.mparticle.MParticleTask { *; }
--keep, includedescriptorclasses class com.mparticle.internal.AppStateManager { *; }
--keep class com.mparticle.internal.ApplicationContextWrapper { *; }
+-keep class com.mparticle.MParticleTask { *; }
+-keep class com.mparticle.ReferrerReceiver { *; }
+-keep class com.mparticle.kits.ForeseeKit { *; }
+-keep class com.mparticle.UserAttributeListener { *; }
+
+-keep class com.mparticle.consent.ConsentState { *; }
+-keep class com.mparticle.consent.ConsentState$Builder { *; }
+-keep class com.mparticle.consent.GDPRConsent { *; }
+-keep class com.mparticle.consent.GDPRConsent$Builder { *; }
+
+
 -keep class com.mparticle.internal.KitManager { *; }
--keep class com.mparticle.internal.KitFrameworkWrapper { *; }
--keep class com.mparticle.internal.KitFrameworkWrapper$CoreCallbacks { *; }
+-keep class com.mparticle.internal.CoreCallbacks { *; }
 -keep class com.mparticle.internal.ReportingManager { *; }
 -keep class com.mparticle.internal.JsonReportingMessage { *; }
 -keep class com.mparticle.internal.MPUtility { *; }
 -keep class com.mparticle.internal.MPUtility$* { *; }
 -keep class com.mparticle.ReferrerReceiver { *; }
--keep class com.mparticle.kits.ForeseeKit { *; }
 -keep class com.mparticle.UserAttributeListener { *; }
+-keep class com.mparticle.internal.PushRegistrationHelper { *; }
+-keep class com.mparticle.internal.PushRegistrationHelper$PushRegistration { *; }
 -keep class com.mparticle.internal.MParticleJSInterface { *; }
 -keep class com.mparticle.internal.Logger { *; }
 -keep class com.mparticle.internal.Logger$* { *; }
--keep class com.mparticle.internal.MParticleApiClient { *; }
--keep class com.mparticle.internal.MParticleApiClient$*  { *; }
--keep, includedescriptorclasses class com.mparticle.identity.IdentityApi { *; }
--keep, includedescriptorclasses class com.mparticle.identity.IdentityApiRequest { *; }
--keep, includedescriptorclasses class com.mparticle.identity.IdentityApiRequest$* { *; }
--keep, includedescriptorclasses class com.mparticle.identity.IdentityApiResult { *; }
--keep, includedescriptorclasses class com.mparticle.identity.MParticleUser { *; }
--keep, includedescriptorclasses class com.mparticle.identity.IdentityStateListener { *; }
--keep, includedescriptorclasses public class com.mparticle.identity.* { *; }
 -keep class com.mparticle.internal.BackgroundTaskHandler { *; }
--keep, includedescriptorclasses public class com.mparticle.consent.* { *; }
--keep, includedescriptorclasses class com.mparticle.consent.ConsentState { *; }
--keep, includedescriptorclasses class com.mparticle.consent.GDPRConsent { *; }
--keep, includedescriptorclasses class com.mparticle.networking.NetworkOptions { *;}
--keep, includedescriptorclasses class com.mparticle.networking.NetworkOptions$Builder { *; }
--keep, includedescriptorclasses class com.mparticle.networking.DomainMapping { *; }
--keep, includedescriptorclasses class com.mparticle.networking.DomainMapping$Builder { *; }
--keep, includedescriptorclasses class com.mparticle.networking.Certificate { *; }
+
+
+-keep class com.mparticle.identity.IdentityApi { *; }
+-keep class com.mparticle.identity.IdentityApiRequest { *; }
+-keep class com.mparticle.identity.IdentityApiRequest$* { *; }
+-keep class com.mparticle.identity.IdentityApiResult { *; }
+-keep class com.mparticle.identity.MParticleUser { *; }
+-keep class com.mparticle.identity.IdentityStateListener { *; }
+-keep class com.mparticle.identity.UserAliasHandler { *; }
+-keep class com.mparticle.identity.IdentityHttpResponse { *; }
+-keep class com.mparticle.identity.IdentityHttpResponse$Error { *; }
+-keep class com.mparticle.identity.TaskSuccessListener { *; }
+-keep class com.mparticle.identity.TaskFailureListener { *; }
+-keep class com.mparticle.identity.BaseIdentityTask { *; }
+
+-keep class com.mparticle.messaging.InstanceIdService { *; }
+
+-keep class com.mparticle.networking.NetworkOptions { *;}
+-keep class com.mparticle.networking.NetworkOptions$Builder { *; }
+-keep class com.mparticle.networking.DomainMapping { *; }
+-keep class com.mparticle.networking.DomainMapping$Builder { *; }
+-keep class com.mparticle.networking.Certificate { *; }
+
 
 -keep public class com.mparticle.messaging.* {
      *;
@@ -183,5 +195,3 @@
 -keepnames class * implements android.os.Parcelable {
     public static final ** CREATOR;
 }
-
--keep class com.mparticle.internal.PushRegistrationHelper

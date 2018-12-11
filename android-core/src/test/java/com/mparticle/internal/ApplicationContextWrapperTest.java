@@ -63,7 +63,7 @@ public class ApplicationContextWrapperTest {
 
     @Test
     public void testRegisterActivityLifecycleCallbacksActivity1() {
-        Mockito.when(instance.getKitManager().getCurrentActivity()).thenReturn(activity1Ref);
+        Mockito.when(instance.Internal().getKitManager().getCurrentActivity()).thenReturn(activity1Ref);
         recorder = getMixedActivityCallbacks();
         tester = new ActivityLifecycleCallbackRecordTester();
         applicationContextWrapper.setActivityLifecycleCallbackRecorder(recorder);
@@ -73,7 +73,7 @@ public class ApplicationContextWrapperTest {
 
     @Test
     public void testRegisterActivityLifecycleCallbacksActivity2() {
-        Mockito.when(instance.getKitManager().getCurrentActivity()).thenReturn(activity2Ref);
+        Mockito.when(instance.Internal().getKitManager().getCurrentActivity()).thenReturn(activity2Ref);
         recorder = getMixedActivityCallbacks();
         tester = new ActivityLifecycleCallbackRecordTester();
         applicationContextWrapper.setActivityLifecycleCallbackRecorder(recorder);
@@ -83,7 +83,7 @@ public class ApplicationContextWrapperTest {
 
     @Test
     public void testRegisterActivityLifecycleCallbacksActivity3() {
-        Mockito.when(instance.getKitManager().getCurrentActivity()).thenReturn(activity3Ref);
+        Mockito.when(instance.Internal().getKitManager().getCurrentActivity()).thenReturn(activity3Ref);
         recorder = getMixedActivityCallbacks();
         tester = new ActivityLifecycleCallbackRecordTester();
         applicationContextWrapper.setActivityLifecycleCallbackRecorder(recorder);
@@ -93,7 +93,7 @@ public class ApplicationContextWrapperTest {
 
     @Test
     public void testRegisterActivityLifecycleCallbacksEmpty() {
-        Mockito.when(instance.getKitManager().getCurrentActivity()).thenReturn(activity1Ref);
+        Mockito.when(instance.Internal().getKitManager().getCurrentActivity()).thenReturn(activity1Ref);
         recorder = getEmptyActivityCallbacks();
         tester = new ActivityLifecycleCallbackRecordTester();
         applicationContextWrapper.setActivityLifecycleCallbackRecorder(recorder);
@@ -103,7 +103,7 @@ public class ApplicationContextWrapperTest {
 
     @Test
     public void testStopReplaying() {
-        Mockito.when(instance.getKitManager().getCurrentActivity()).thenReturn(activity1Ref);
+        Mockito.when(instance.Internal().getKitManager().getCurrentActivity()).thenReturn(activity1Ref);
         recorder = getMixedActivityCallbacks();
         tester = new ActivityLifecycleCallbackRecordTester();
         applicationContextWrapper.setReplayActivityLifecycle(false);

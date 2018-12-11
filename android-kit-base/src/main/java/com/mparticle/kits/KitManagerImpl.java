@@ -22,12 +22,10 @@ import com.mparticle.identity.IdentityApiRequest;
 import com.mparticle.identity.IdentityStateListener;
 import com.mparticle.identity.MParticleUser;
 import com.mparticle.internal.BackgroundTaskHandler;
-import com.mparticle.internal.KitFrameworkWrapper;
+import com.mparticle.internal.CoreCallbacks;
 import com.mparticle.internal.KitManager;
 import com.mparticle.internal.Logger;
 import com.mparticle.internal.MPUtility;
-import com.mparticle.internal.PushRegistrationHelper;
-import com.mparticle.internal.PushRegistrationHelper.PushRegistration;
 import com.mparticle.internal.ReportingManager;
 import com.mparticle.kits.mappings.CustomMapping;
 
@@ -50,7 +48,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class KitManagerImpl implements KitManager, AttributionListener, UserAttributeListener, IdentityStateListener {
     private final ReportingManager mReportingManager;
-    private final KitFrameworkWrapper.CoreCallbacks mCoreCallbacks;
+    private final CoreCallbacks mCoreCallbacks;
     private final BackgroundTaskHandler mBackgroundTaskHandler;
     KitIntegrationFactory mKitIntegrationFactory;
 
@@ -64,7 +62,7 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
     ConcurrentHashMap<Integer, KitIntegration> providers = new ConcurrentHashMap<Integer, KitIntegration>();
     private final Context mContext;
 
-    public KitManagerImpl(Context context, ReportingManager reportingManager, KitFrameworkWrapper.CoreCallbacks coreCallbacks, BackgroundTaskHandler backgroundTaskHandler) {
+    public KitManagerImpl(Context context, ReportingManager reportingManager, CoreCallbacks coreCallbacks, BackgroundTaskHandler backgroundTaskHandler) {
         mContext = context;
         mReportingManager = reportingManager;
         mCoreCallbacks = coreCallbacks;
@@ -102,6 +100,10 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
 
     public Uri getLaunchUri() {
         return mCoreCallbacks.getLaunchUri();
+    }
+
+    public String getLaunchAction() {
+        return mCoreCallbacks.getLaunchAction();
     }
 
     void setIntegrationAttributes(KitIntegration kitIntegration, Map<String, String> integrationAttributes) {
@@ -206,7 +208,7 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
                 getContext().sendBroadcast(intent);
             }
         }
-        MParticle.getInstance().getKitManager().replayAndDisableQueue();
+        MParticle.getInstance().Internal().getKitManager().replayAndDisableQueue();
     }
 
     private void initializeKit(KitIntegration activeKit) {

@@ -192,10 +192,10 @@ public class  AppStateManager {
                 MParticle.getInstance().logScreen(mCurrentActivityName);
             }
             if (isBackToForeground) {
-                MParticle.getInstance().getKitManager().onApplicationForeground();
+                MParticle.getInstance().Internal().getKitManager().onApplicationForeground();
                 Logger.debug("App foregrounded.");
             }
-            MParticle.getInstance().getKitManager().onActivityResumed(activity);
+            MParticle.getInstance().Internal().getKitManager().onActivityResumed(activity);
         }catch (Exception e){
                 Logger.verbose("Failed while trying to track activity resume: " + e.getMessage());
         }
@@ -232,7 +232,7 @@ public class  AppStateManager {
                                 .build()
                 );
             }
-            MParticle.getInstance().getKitManager().onActivityPaused(activity);
+            MParticle.getInstance().Internal().getKitManager().onActivityPaused(activity);
         }catch (Exception e) {
             Logger.verbose("Failed while trying to track activity pause: " + e.getMessage());
         }
@@ -325,25 +325,25 @@ public class  AppStateManager {
 
     public void onActivityCreated(Activity activity, Bundle savedInstanceState){
         if (MParticle.getInstance() != null) {
-            MParticle.getInstance().getKitManager().onActivityCreated(activity, savedInstanceState);
+            MParticle.getInstance().Internal().getKitManager().onActivityCreated(activity, savedInstanceState);
         }
     }
 
     public void onActivityStarted(Activity activity){
         if (MParticle.getInstance() != null) {
-            MParticle.getInstance().getKitManager().onActivityStarted(activity);
+            MParticle.getInstance().Internal().getKitManager().onActivityStarted(activity);
         }
     }
 
     public void onActivityStopped(Activity activity) {
         if (MParticle.getInstance() != null) {
-            MParticle.getInstance().getKitManager().onActivityStopped(activity);
+            MParticle.getInstance().Internal().getKitManager().onActivityStopped(activity);
         }
     }
 
     private void logBackgrounded(){
         logStateTransition(Constants.StateTransitionType.STATE_TRANS_BG, mCurrentActivityName);
-        MParticle.getInstance().getKitManager().onApplicationBackground();
+        MParticle.getInstance().Internal().getKitManager().onApplicationBackground();
         mCurrentActivityName = null;
         Logger.debug("App backgrounded.");
         mInterruptionCount.incrementAndGet();
@@ -375,7 +375,7 @@ public class  AppStateManager {
         mMessageManager.endSession(mCurrentSession);
         disableLocationTracking();
         mCurrentSession = new InternalSession();
-        MParticle.getInstance().getKitManager().onSessionEnd();
+        MParticle.getInstance().Internal().getKitManager().onSessionEnd();
     }
 
     private void disableLocationTracking() {
@@ -391,18 +391,18 @@ public class  AppStateManager {
         mCurrentSession = new InternalSession().start(mContext);
         mLastStoppedTime = new AtomicLong(getTime());
         enableLocationTracking();
-        MParticle.getInstance().getKitManager().onSessionStart();
+        MParticle.getInstance().Internal().getKitManager().onSessionStart();
     }
 
     public void onActivitySaveInstanceState(Activity activity, Bundle outState) {
         if (MParticle.getInstance() != null) {
-            MParticle.getInstance().getKitManager().onActivitySaveInstanceState(activity, outState);
+            MParticle.getInstance().Internal().getKitManager().onActivitySaveInstanceState(activity, outState);
         }
     }
 
     public void onActivityDestroyed(Activity activity) {
         if (MParticle.getInstance() != null) {
-            MParticle.getInstance().getKitManager().onActivityDestroyed(activity);
+            MParticle.getInstance().Internal().getKitManager().onActivityDestroyed(activity);
         }
     }
 

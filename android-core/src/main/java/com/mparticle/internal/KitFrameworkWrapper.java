@@ -589,20 +589,6 @@ public class KitFrameworkWrapper implements KitManager {
         }
     }
 
-    public interface CoreCallbacks {
-        boolean isBackgrounded();
-        int getUserBucket();
-        boolean isEnabled();
-        void setIntegrationAttributes(int kitId, Map<String, String> integrationAttributes);
-        Map<String, String> getIntegrationAttributes(int kitId);
-        WeakReference<Activity> getCurrentActivity();
-        JSONArray getLatestKitConfiguration();
-        boolean isPushEnabled();
-        String getPushSenderId();
-        String getPushInstanceId();
-        Uri getLaunchUri();
-    }
-
     static class CoreCallbacksImpl implements CoreCallbacks {
         ConfigManager mConfigManager;
         AppStateManager mAppStateManager;
@@ -666,6 +652,11 @@ public class KitFrameworkWrapper implements KitManager {
         @Override
         public Uri getLaunchUri() {
             return mAppStateManager.getLaunchUri();
+        }
+
+        @Override
+        public String getLaunchAction() {
+            return mAppStateManager.getLaunchAction();
         }
     }
 }

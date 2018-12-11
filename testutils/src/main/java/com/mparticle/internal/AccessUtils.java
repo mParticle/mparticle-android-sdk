@@ -61,7 +61,7 @@ public class AccessUtils {
 
     public static void setAppStateManagerHandler(Handler handler) {
         if (MParticle.getInstance() != null) {
-            MParticle.getInstance().getAppStateManager().delayedBackgroundCheckHandler = handler;
+            MParticle.getInstance().Internal().getAppStateManager().delayedBackgroundCheckHandler = handler;
         }
     }
 
@@ -138,7 +138,7 @@ public class AccessUtils {
     }
 
     public static void setKitManager(final KitManager kitManager) {
-        final KitFrameworkWrapper kitFrameworkWrapper = MParticle.getInstance().getKitManager();
+        final KitFrameworkWrapper kitFrameworkWrapper = MParticle.getInstance().Internal().getKitManager();
         kitFrameworkWrapper.loadKitLibrary();
         MParticle.getInstance().Identity().removeIdentityStateListener((IdentityStateListener)kitFrameworkWrapper.mKitManager);
         final CountDownLatch latch = new MPLatch(1);

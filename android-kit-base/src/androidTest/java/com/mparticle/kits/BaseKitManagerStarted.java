@@ -4,7 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.net.Uri;
 
-import com.mparticle.internal.KitFrameworkWrapper;
+import com.mparticle.internal.CoreCallbacks;
 import com.mparticle.identity.BaseIdentityTask;
 import com.mparticle.identity.IdentityApiResult;
 import com.mparticle.identity.IdentityHttpResponse;
@@ -58,7 +58,7 @@ public abstract class BaseKitManagerStarted extends BaseCleanInstallEachTest {
                     }
                 }))
                 .build());
-        mKitManager = new CustomKitManagerImpl(mContext, com.mparticle.AccessUtils.getMessageManager(), new CoreCallbackImpl(MParticle.getInstance().Internal().getConfigManager(), MParticle.getInstance().getAppStateManager()), AccessUtils.getUploadHandler());
+        mKitManager = new CustomKitManagerImpl(mContext, com.mparticle.AccessUtils.getMessageManager(), new CoreCallbackImpl(MParticle.getInstance().Internal().getConfigManager(), MParticle.getInstance().Internal().getAppStateManager()), AccessUtils.getUploadHandler());
         mKitManager.setKitFactory(new CustomKitFactory());
         AccessUtils.setKitManager(mKitManager);
         latch.await();
@@ -103,7 +103,7 @@ public abstract class BaseKitManagerStarted extends BaseCleanInstallEachTest {
 
         private KitStartedListener kitsStartedListener;
 
-        public CustomKitManagerImpl(Context context, ReportingManager reportingManager, KitFrameworkWrapper.CoreCallbacks coreCallbacks, BackgroundTaskHandler backgroundTaskHandler) {
+        public CustomKitManagerImpl(Context context, ReportingManager reportingManager, CoreCallbacks coreCallbacks, BackgroundTaskHandler backgroundTaskHandler) {
             super(context, reportingManager, coreCallbacks, backgroundTaskHandler);
         }
 
@@ -135,7 +135,7 @@ public abstract class BaseKitManagerStarted extends BaseCleanInstallEachTest {
         }
     }
 
-    class CoreCallbackImpl implements KitFrameworkWrapper.CoreCallbacks {
+    class CoreCallbackImpl implements CoreCallbacks {
         ConfigManager configManager;
         AppStateManager appStateManager;
 
@@ -199,6 +199,10 @@ public abstract class BaseKitManagerStarted extends BaseCleanInstallEachTest {
             return appStateManager.getLaunchUri();
         }
 
+        @Override
+        public String getLaunchAction() {
+            return appStateManager.getLaunchAction();
+        }
     }
 
     interface KitStartedListener {

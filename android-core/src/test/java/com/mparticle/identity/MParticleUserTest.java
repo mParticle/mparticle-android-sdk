@@ -80,7 +80,7 @@ public class MParticleUserTest {
         assertEquals(newIdentity.get("n"), 7);
         assertEquals(newIdentity.getDouble("dfs"), 1473869816521d, 100);
         assertEquals(newIdentity.get("f"), false);
-        Mockito.verify(MParticle.getInstance().getKitManager(), Mockito.times(1)).setUserIdentity(eq("email value 2"), eq(MParticle.IdentityType.Email));
+        Mockito.verify(MParticle.getInstance().Internal().getKitManager(), Mockito.times(1)).setUserIdentity(eq("email value 2"), eq(MParticle.IdentityType.Email));
         JSONArray allIdentities = argument3.getValue();
         assertEquals(1, allIdentities.length());
     }
@@ -93,7 +93,7 @@ public class MParticleUserTest {
         assertFalse(mp.getCurrentUser().removeUserAttribute(""));
         assertTrue(mp.getCurrentUser().removeUserAttribute("test"));
         Mockito.verify(mp.mMessageManager, Mockito.times(1)).removeUserAttribute("test", 1);
-        Mockito.verify(MParticle.getInstance().getKitManager(), Mockito.times(1)).removeUserAttribute("test", 1);
+        Mockito.verify(MParticle.getInstance().Internal().getKitManager(), Mockito.times(1)).removeUserAttribute("test", 1);
     }
 
     @Test
@@ -102,7 +102,7 @@ public class MParticleUserTest {
         assertFalse(id.getCurrentUser().removeUserAttribute(""));
         assertTrue(id.getCurrentUser().removeUserAttribute("test"));
         Mockito.verify(id.mMessageManager, Mockito.times(1)).removeUserAttribute("test", 1);
-        Mockito.verify(mp.getKitManager(), Mockito.times(1)).removeUserAttribute("test", 1);
+        Mockito.verify(mp.Internal().getKitManager(), Mockito.times(1)).removeUserAttribute("test", 1);
     }
 
 
@@ -127,7 +127,7 @@ public class MParticleUserTest {
                         Mockito.any(JSONArray.class),
                         eq(defaultMpId)
                 );
-        Mockito.verify(mp.getKitManager(), Mockito.times(0)).removeUserIdentity(Mockito.any(MParticle.IdentityType.class));
+        Mockito.verify(mp.Internal().getKitManager(), Mockito.times(0)).removeUserIdentity(Mockito.any(MParticle.IdentityType.class));
     }
 
     @Test
@@ -153,7 +153,7 @@ public class MParticleUserTest {
         assertEquals(oldIdentity.getDouble("dfs"), 1473869816521d, 100);
         assertEquals(oldIdentity.get("f"), true);
         assertTrue(argument4.getValue().equals(defaultMpId));
-        Mockito.verify(mp.getKitManager(), Mockito.times(1)).removeUserIdentity(MParticle.IdentityType.Email);
+        Mockito.verify(mp.Internal().getKitManager(), Mockito.times(1)).removeUserIdentity(MParticle.IdentityType.Email);
         JSONArray allIdentities = argument3.getValue();
         assertEquals(0, allIdentities.length());
     }
@@ -181,7 +181,7 @@ public class MParticleUserTest {
         assertEquals(oldIdentity.getDouble("dfs"), System.currentTimeMillis(), 1000);
         assertEquals(oldIdentity.get("f"), true);
         assertTrue(argument4.getValue().equals(defaultMpId));
-        Mockito.verify(mp.getKitManager(), Mockito.times(1)).setUserIdentity(eq("alias test"), eq(MParticle.IdentityType.Alias));
+        Mockito.verify(mp.Internal().getKitManager(), Mockito.times(1)).setUserIdentity(eq("alias test"), eq(MParticle.IdentityType.Alias));
 
         JSONArray allIdentities = argument3.getValue();
         assertEquals(2, allIdentities.length());

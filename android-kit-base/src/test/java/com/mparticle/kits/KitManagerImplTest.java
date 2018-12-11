@@ -7,10 +7,9 @@ import com.mparticle.consent.ConsentState;
 import com.mparticle.consent.GDPRConsent;
 import com.mparticle.identity.IdentityApi;
 import com.mparticle.identity.MParticleUser;
+import com.mparticle.internal.CoreCallbacks;
 import com.mparticle.internal.KitFrameworkWrapper;
 import com.mparticle.mock.MockMParticle;
-import com.mparticle.internal.AppStateManager;
-import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.ReportingManager;
 import com.mparticle.internal.BackgroundTaskHandler;
 import com.mparticle.mock.MockContext;
@@ -21,6 +20,7 @@ import junit.framework.Assert;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
@@ -41,17 +41,25 @@ public class KitManagerImplTest {
             //do nothing
         }
     };
+    MParticle mparticle;
+    IdentityApi mockIdentity;
 
+    @Before
+    public void before() {
+        MParticle mparticle = Mockito.mock(MParticle.class);
+        Mockito.when(mparticle.Internal()).thenReturn(Mockito.mock(MParticle.Internal.class));
+        Mockito.when(mparticle.Internal().getKitManager()).thenReturn(Mockito.mock(KitFrameworkWrapper.class));
+        mockIdentity = Mockito.mock(IdentityApi.class);
+        Mockito.when(mparticle.Identity()).thenReturn(mockIdentity);
+        MParticle.setInstance(mparticle);
+    }
 
     @Test
     public void testSetKitFactory() {
-        MParticle mparticle = Mockito.mock(MParticle.class);
-        Mockito.when(mparticle.Identity()).thenReturn(Mockito.mock(IdentityApi.class));
-        MParticle.setInstance(mparticle);
         KitManagerImpl manager = new KitManagerImpl(
                 Mockito.mock(Context.class),
                 null,
-                Mockito.mock(KitFrameworkWrapper.CoreCallbacks.class),
+                Mockito.mock(CoreCallbacks.class),
                 Mockito.mock(BackgroundTaskHandler.class)
         );
         Assert.assertNotNull(manager.mKitIntegrationFactory);
@@ -62,19 +70,14 @@ public class KitManagerImplTest {
 
     @Test
     public void testShouldEnableKit() throws Exception {
-        MParticle mparticle = Mockito.mock(MParticle.class);
-        Mockito.when(mparticle.getKitManager()).thenReturn(Mockito.mock(KitFrameworkWrapper.class));
-        IdentityApi mockIdentity = Mockito.mock(IdentityApi.class);
         MParticleUser mockUser = Mockito.mock(MParticleUser.class);
         ConsentState state = ConsentState.builder().build();
         Mockito.when(mockUser.getConsentState()).thenReturn(state);
         Mockito.when(mockIdentity.getCurrentUser()).thenReturn(mockUser);
-        Mockito.when(mparticle.Identity()).thenReturn(mockIdentity);
-        MParticle.setInstance(mparticle);
         KitManagerImpl manager = new KitManagerImpl(
                 Mockito.mock(Context.class),
                 null,
-                Mockito.mock(KitFrameworkWrapper.CoreCallbacks.class),
+                Mockito.mock(CoreCallbacks.class),
                 Mockito.mock(BackgroundTaskHandler.class)
         );
         JSONArray kitConfiguration = new JSONArray();
@@ -94,17 +97,12 @@ public class KitManagerImplTest {
 
     @Test
     public void testShouldNotEnableKitBasedOnConsent() throws Exception {
-        MParticle mparticle = Mockito.mock(MParticle.class);
-        Mockito.when(mparticle.getKitManager()).thenReturn(Mockito.mock(KitFrameworkWrapper.class));
-        IdentityApi mockIdentity = Mockito.mock(IdentityApi.class);
         MParticleUser mockUser = Mockito.mock(MParticleUser.class);
         Mockito.when(mockIdentity.getCurrentUser()).thenReturn(mockUser);
-        Mockito.when(mparticle.Identity()).thenReturn(mockIdentity);
-        MParticle.setInstance(mparticle);
         KitManagerImpl manager = new KitManagerImpl(
                 Mockito.mock(Context.class),
                 null,
-                Mockito.mock(KitFrameworkWrapper.CoreCallbacks.class),
+                Mockito.mock(CoreCallbacks.class),
                 Mockito.mock(BackgroundTaskHandler.class)
         );
         ConsentState state = ConsentState.builder()
@@ -128,17 +126,12 @@ public class KitManagerImplTest {
 
     @Test
     public void testShouldEnableKitBasedOnConsent() throws Exception {
-        MParticle mparticle = Mockito.mock(MParticle.class);
-        Mockito.when(mparticle.getKitManager()).thenReturn(Mockito.mock(KitFrameworkWrapper.class));
-        IdentityApi mockIdentity = Mockito.mock(IdentityApi.class);
         MParticleUser mockUser = Mockito.mock(MParticleUser.class);
         Mockito.when(mockIdentity.getCurrentUser()).thenReturn(mockUser);
-        Mockito.when(mparticle.Identity()).thenReturn(mockIdentity);
-        MParticle.setInstance(mparticle);
         KitManagerImpl manager = new KitManagerImpl(
                 Mockito.mock(Context.class),
                 null,
-                Mockito.mock(KitFrameworkWrapper.CoreCallbacks.class),
+                Mockito.mock(CoreCallbacks.class),
                 Mockito.mock(BackgroundTaskHandler.class)
         );
         ConsentState state = ConsentState.builder()
@@ -161,17 +154,12 @@ public class KitManagerImplTest {
 
     @Test
     public void testShouldDisableActiveKitBasedOnConsent() throws Exception {
-        MParticle mparticle = Mockito.mock(MParticle.class);
-        Mockito.when(mparticle.getKitManager()).thenReturn(Mockito.mock(KitFrameworkWrapper.class));
-        IdentityApi mockIdentity = Mockito.mock(IdentityApi.class);
         MParticleUser mockUser = Mockito.mock(MParticleUser.class);
         Mockito.when(mockIdentity.getCurrentUser()).thenReturn(mockUser);
-        Mockito.when(mparticle.Identity()).thenReturn(mockIdentity);
-        MParticle.setInstance(mparticle);
         KitManagerImpl manager = new KitManagerImpl(
                 Mockito.mock(Context.class),
                 null,
-                Mockito.mock(KitFrameworkWrapper.CoreCallbacks.class),
+                Mockito.mock(CoreCallbacks.class),
                 Mockito.mock(BackgroundTaskHandler.class)
         );
         ConsentState state = ConsentState.builder()
@@ -200,18 +188,13 @@ public class KitManagerImplTest {
 
     @Test
     public void testShouldEnableKitBasedOnActiveUser() throws JSONException, ClassNotFoundException {
-        MParticle mparticle = Mockito.mock(MParticle.class);
-        Mockito.when(mparticle.getKitManager()).thenReturn(Mockito.mock(KitFrameworkWrapper.class));
-        IdentityApi mockIdentity = Mockito.mock(IdentityApi.class);
-        MParticleUser mockUser = Mockito.mock(MParticleUser.class);
+       MParticleUser mockUser = Mockito.mock(MParticleUser.class);
         Mockito.when(mockIdentity.getCurrentUser()).thenReturn(mockUser);
         Mockito.when(mockUser.isLoggedIn()).thenReturn(true);
-        Mockito.when(mparticle.Identity()).thenReturn(mockIdentity);
-        MParticle.setInstance(mparticle);
         KitManagerImpl manager = new KitManagerImpl(
                 Mockito.mock(Context.class),
                 null,
-                Mockito.mock(KitFrameworkWrapper.CoreCallbacks.class),
+                Mockito.mock(CoreCallbacks.class),
                 Mockito.mock(BackgroundTaskHandler.class)
         );
         ConsentState state = ConsentState.builder()
@@ -235,18 +218,13 @@ public class KitManagerImplTest {
 
     @Test
     public void testShouldNotEnableKitBasedOnActiveUser() throws JSONException, ClassNotFoundException {
-        MParticle mparticle = Mockito.mock(MParticle.class);
-        Mockito.when(mparticle.getKitManager()).thenReturn(Mockito.mock(KitFrameworkWrapper.class));
-        IdentityApi mockIdentity = Mockito.mock(IdentityApi.class);
         MParticleUser mockUser = Mockito.mock(MParticleUser.class);
         Mockito.when(mockIdentity.getCurrentUser()).thenReturn(mockUser);
         Mockito.when(mockUser.isLoggedIn()).thenReturn(false);
-        Mockito.when(mparticle.Identity()).thenReturn(mockIdentity);
-        MParticle.setInstance(mparticle);
         KitManagerImpl manager = new KitManagerImpl(
                 Mockito.mock(Context.class),
                 null,
-                Mockito.mock(KitFrameworkWrapper.CoreCallbacks.class),
+                Mockito.mock(CoreCallbacks.class),
                 Mockito.mock(BackgroundTaskHandler.class)
         );
         ConsentState state = ConsentState.builder()
@@ -272,22 +250,16 @@ public class KitManagerImplTest {
 
     @Test
     public void testShouldEnableDisabledKitBasedOnActiveUser() throws JSONException, ClassNotFoundException {
-        MParticle mparticle = Mockito.mock(MParticle.class);
-        Mockito.when(mparticle.getKitManager()).thenReturn(Mockito.mock(KitFrameworkWrapper.class));
-        IdentityApi mockIdentity = Mockito.mock(IdentityApi.class);
         MParticleUser mockUser = Mockito.mock(MParticleUser.class);
         Mockito.when(mockIdentity.getCurrentUser()).thenReturn(mockUser);
         Mockito.when(mockUser.isLoggedIn()).thenReturn(false);
-        Mockito.when(mparticle.Identity()).thenReturn(mockIdentity);
-        MParticle.setInstance(mparticle);
 
-        KitFrameworkWrapper.CoreCallbacks mockCoreCallbacks = Mockito.mock(KitFrameworkWrapper.CoreCallbacks.class);
+        CoreCallbacks mockCoreCallbacks = Mockito.mock(CoreCallbacks.class);
         KitManagerImpl manager = new KitManagerImpl(
                 Mockito.mock(Context.class),
                 null,
                 mockCoreCallbacks,
-                Mockito.mock(BackgroundTaskHandler.class)
-        ) {
+                Mockito.mock(BackgroundTaskHandler.class)) {
             @Override
             public void updateKits(JSONArray kitConfigs) {
                 configureKits(kitConfigs);
@@ -318,16 +290,11 @@ public class KitManagerImplTest {
 
     @Test
     public void testShouldDisableEnabledKitBasedOnActiveUser() throws JSONException, ClassNotFoundException {
-        MParticle mparticle = Mockito.mock(MParticle.class);
-        Mockito.when(mparticle.getKitManager()).thenReturn(Mockito.mock(KitFrameworkWrapper.class));
-        IdentityApi mockIdentity = Mockito.mock(IdentityApi.class);
         MParticleUser mockUser = Mockito.mock(MParticleUser.class);
         Mockito.when(mockIdentity.getCurrentUser()).thenReturn(mockUser);
         Mockito.when(mockUser.isLoggedIn()).thenReturn(true);
-        Mockito.when(mparticle.Identity()).thenReturn(mockIdentity);
-        MParticle.setInstance(mparticle);
 
-        KitFrameworkWrapper.CoreCallbacks mockCoreCallbacks = Mockito.mock(KitFrameworkWrapper.CoreCallbacks.class);
+        CoreCallbacks mockCoreCallbacks = Mockito.mock(CoreCallbacks.class);
         KitManagerImpl manager = new KitManagerImpl(
                 Mockito.mock(Context.class),
                 null,
@@ -368,7 +335,7 @@ public class KitManagerImplTest {
         KitManagerImpl manager  = new KitManagerImpl(
                 new MockContext(),
                 Mockito.mock(ReportingManager.class),
-                Mockito.mock(KitFrameworkWrapper.CoreCallbacks.class),
+                Mockito.mock(CoreCallbacks.class),
                 mockBackgroundTaskHandler
                 );
         KitIntegration integration = Mockito.mock(
@@ -411,7 +378,7 @@ public class KitManagerImplTest {
         KitManagerImpl manager  = new KitManagerImpl(
                 new MockContext(),
                 Mockito.mock(ReportingManager.class),
-                Mockito.mock(KitFrameworkWrapper.CoreCallbacks.class),
+                Mockito.mock(CoreCallbacks.class),
                 mockBackgroundTaskHandler);
         KitIntegration integration = Mockito.mock(
                 KitIntegration.class,

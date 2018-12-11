@@ -258,8 +258,8 @@ import java.util.UUID;
         for (MParticleDBManager.AttributionChange attributeChange: attributionChanges) {
             logUserAttributeChanged(attributeChange);
         }
-        if (MParticle.getInstance() != null && MParticle.getInstance().getKitManager() != null) {
-            MParticle.getInstance().getKitManager().incrementUserAttribute(key, newValue, mpId);
+        if (MParticle.getInstance() != null && MParticle.getInstance().Internal().getKitManager() != null) {
+            MParticle.getInstance().Internal().getKitManager().incrementUserAttribute(key, newValue, mpId);
         }
     }
 

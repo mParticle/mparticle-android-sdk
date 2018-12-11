@@ -153,9 +153,9 @@ public class MPServiceUtil {
                 @Override
                 public void onKitsLoaded() {
                     try {
-                        MParticle.getInstance().getKitManager().loadKitLibrary();
+                        MParticle.getInstance().Internal().getKitManager().loadKitLibrary();
                         ProviderCloudMessage cloudMessage = ProviderCloudMessage.createMessage(intent, ConfigManager.getPushKeys(mContext));
-                        boolean handled = MParticle.getInstance().getKitManager().onMessageReceived(mContext.getApplicationContext(), intent);
+                        boolean handled = MParticle.getInstance().Internal().getKitManager().onMessageReceived(mContext.getApplicationContext(), intent);
                         cloudMessage.setDisplayed(handled);
                         broadcastNotificationReceived(cloudMessage);
                     } catch (Exception e) {

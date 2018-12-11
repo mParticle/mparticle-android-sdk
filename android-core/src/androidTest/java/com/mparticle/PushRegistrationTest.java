@@ -3,7 +3,6 @@ package com.mparticle;
 import android.content.Context;
 
 import com.mparticle.internal.PushRegistrationHelper;
-import com.mparticle.internal.PushRegistrationHelper.PushRegistration;
 import com.mparticle.networking.MockServer;
 import com.mparticle.testutils.BaseCleanStartedEachTest;
 
@@ -23,11 +22,11 @@ public class PushRegistrationTest extends BaseCleanStartedEachTest {
     public void testPushRegistrationSet() {
         assertEquals(mStartingMpid.longValue(), MParticle.getInstance().Identity().getCurrentUser().getId());
         for (SetPush setPush : setPushes) {
-            PushRegistration pushRegistration = new PushRegistration(mRandomUtils.getAlphaNumericString(10), mRandomUtils.getAlphaNumericString(15));
+            PushRegistrationHelper.PushRegistration pushRegistration = new PushRegistrationHelper.PushRegistration(mRandomUtils.getAlphaNumericString(10), mRandomUtils.getAlphaNumericString(15));
             setPush.setPushRegistration(pushRegistration);
 
             for (GetPush getPush : getPushes) {
-                PushRegistration fetchedPushValue = getPush.getPushRegistration();
+                PushRegistrationHelper.PushRegistration fetchedPushValue = getPush.getPushRegistration();
                 String fetchedSenderId = fetchedPushValue.senderId;
                 String fetchedInstanceId = fetchedPushValue.instanceId;
                 if (!pushRegistration.senderId.equals(fetchedSenderId)) {
@@ -43,14 +42,14 @@ public class PushRegistrationTest extends BaseCleanStartedEachTest {
     @Test
     public void testPushRegistrationCleared() {
         for (SetPush setPush : setPushes) {
-            PushRegistration pushRegistration = new PushRegistration(mRandomUtils.getAlphaNumericString(10), mRandomUtils.getAlphaNumericString(15));
+            PushRegistrationHelper.PushRegistration pushRegistration = new PushRegistrationHelper.PushRegistration(mRandomUtils.getAlphaNumericString(10), mRandomUtils.getAlphaNumericString(15));
             setPush.setPushRegistration(pushRegistration);
 
             for (ClearPush clearPush : clearPushes) {
                 clearPush.clearPush();
 
                 for (GetPush getPush : getPushes) {
-                    PushRegistration fetchedPushRegistration = getPush.getPushRegistration();
+                    PushRegistrationHelper.PushRegistration fetchedPushRegistration = getPush.getPushRegistration();
                     if (fetchedPushRegistration != null && fetchedPushRegistration.instanceId != null && fetchedPushRegistration.senderId != null) {
                         fail("Mismatch! When push value of \"" + pushRegistration + "\" is set with: " + setPush.getName() + ", and cleared with: " + clearPush.getName() + ", the value is not null when fetched with:" + getPush.getName());
                     }
@@ -63,7 +62,7 @@ public class PushRegistrationTest extends BaseCleanStartedEachTest {
     public void testPushRegistrationEnabledDisabled() {
 
         for (SetPush setPush: setPushes) {
-            PushRegistration pushRegistration = new PushRegistration(mRandomUtils.getAlphaNumericString(10), mRandomUtils.getAlphaNumericString(15));
+            PushRegistrationHelper.PushRegistration pushRegistration = new PushRegistrationHelper.PushRegistration(mRandomUtils.getAlphaNumericString(10), mRandomUtils.getAlphaNumericString(15));
             setPush.setPushRegistration(pushRegistration);
 
             for (PushEnabled pushEnabled: pushEnableds) {
@@ -89,7 +88,7 @@ public class PushRegistrationTest extends BaseCleanStartedEachTest {
     public SetPush[] setPushes = new SetPush[]{
             new SetPush() {
                 @Override
-                public void setPushRegistration(PushRegistration pushRegistration) {
+                public void setPushRegistration(PushRegistrationHelper.PushRegistration pushRegistration) {
                     MParticle.getInstance().logPushRegistration(pushRegistration.instanceId, pushRegistration.senderId);
                 }
 
@@ -100,7 +99,7 @@ public class PushRegistrationTest extends BaseCleanStartedEachTest {
             },
             new SetPush() {
                 @Override
-                public void setPushRegistration(PushRegistration pushRegistration) {
+                public void setPushRegistration(PushRegistrationHelper.PushRegistration pushRegistration) {
                     MParticle.getInstance().Internal().getConfigManager().setPushRegistration(pushRegistration);
                 }
 
@@ -111,7 +110,7 @@ public class PushRegistrationTest extends BaseCleanStartedEachTest {
             },
             new SetPush() {
                 @Override
-                public void setPushRegistration(PushRegistration pushRegistration) {
+                public void setPushRegistration(PushRegistrationHelper.PushRegistration pushRegistration) {
                     MParticle.getInstance().Internal().getConfigManager().setPushSenderId(pushRegistration.senderId);
                     MParticle.getInstance().Internal().getConfigManager().setPushInstanceId(pushRegistration.instanceId);
                 }
@@ -123,7 +122,7 @@ public class PushRegistrationTest extends BaseCleanStartedEachTest {
             },
             new SetPush() {
                 @Override
-                public void setPushRegistration(PushRegistration pushRegistration) {
+                public void setPushRegistration(PushRegistrationHelper.PushRegistration pushRegistration) {
                     MParticle.getInstance().Messaging().enablePushNotifications(pushRegistration.senderId);
 
                     //This is mimicking us fetching an instance. Calling PushRegistrationHelper.setInstance() is what would really be called,
@@ -138,7 +137,7 @@ public class PushRegistrationTest extends BaseCleanStartedEachTest {
             },
             new SetPush() {
                 @Override
-                public void setPushRegistration(PushRegistration pushRegistration) {
+                public void setPushRegistration(PushRegistrationHelper.PushRegistration pushRegistration) {
                     MParticle.setInstance(null);
                     try {
                         startMParticle(MParticleOptions.builder(mContext).pushRegistration(pushRegistration.instanceId, pushRegistration.senderId));
@@ -191,7 +190,7 @@ public class PushRegistrationTest extends BaseCleanStartedEachTest {
             new ClearPush() {
                 @Override
                 public void clearPush() {
-                    MParticle.getInstance().Internal().getConfigManager().setPushRegistration(new PushRegistration("instanceId", null));
+                    MParticle.getInstance().Internal().getConfigManager().setPushRegistration(new PushRegistrationHelper.PushRegistration("instanceId", null));
                 }
 
                 @Override
@@ -220,10 +219,10 @@ public class PushRegistrationTest extends BaseCleanStartedEachTest {
     public GetPush[] getPushes = new GetPush[] {
             new GetPush() {
                 @Override
-                public PushRegistration getPushRegistration() {
+                public PushRegistrationHelper.PushRegistration getPushRegistration() {
                     String senderId = MParticle.getInstance().Internal().getConfigManager().getPushSenderId();
                     String instanceId = MParticle.getInstance().Internal().getConfigManager().getPushInstanceId();
-                    return new PushRegistration(instanceId, senderId);
+                    return new PushRegistrationHelper.PushRegistration(instanceId, senderId);
                 }
 
                 @Override
@@ -233,7 +232,7 @@ public class PushRegistrationTest extends BaseCleanStartedEachTest {
             },
             new GetPush() {
                 @Override
-                public PushRegistration getPushRegistration() {
+                public PushRegistrationHelper.PushRegistration getPushRegistration() {
                     return PushRegistrationHelper.getLatestPushRegistration(mContext);
                 }
 
@@ -244,7 +243,7 @@ public class PushRegistrationTest extends BaseCleanStartedEachTest {
             },
             new GetPush() {
                 @Override
-                public PushRegistration getPushRegistration() {
+                public PushRegistrationHelper.PushRegistration getPushRegistration() {
                     return MParticle.getInstance().Internal().getConfigManager().getPushRegistration();
                 }
 
@@ -275,7 +274,7 @@ public class PushRegistrationTest extends BaseCleanStartedEachTest {
     }
 
     public interface SetPush extends SynonymousMethod {
-        void setPushRegistration(PushRegistration pushRegistration);
+        void setPushRegistration(PushRegistrationHelper.PushRegistration pushRegistration);
     }
 
     public interface ClearPush extends SynonymousMethod {
@@ -283,7 +282,7 @@ public class PushRegistrationTest extends BaseCleanStartedEachTest {
     }
 
     public interface GetPush extends SynonymousMethod {
-        PushRegistration getPushRegistration();
+        PushRegistrationHelper.PushRegistration getPushRegistration();
     }
 
     public interface PushEnabled extends SynonymousMethod {

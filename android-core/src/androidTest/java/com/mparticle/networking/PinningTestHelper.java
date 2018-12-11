@@ -4,11 +4,16 @@ import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
 
+import com.mparticle.MParticle;
 import com.mparticle.identity.MParticleIdentityClient;
+import com.mparticle.internal.AccessUtils;
+import com.mparticle.internal.Constants;
 import com.mparticle.internal.MParticleApiClient;
+import com.mparticle.internal.MParticleApiClientImpl;
 import com.mparticle.testutils.TestingUtils;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLSocketFactory;
@@ -25,14 +30,20 @@ public class PinningTestHelper {
     }
 
     private void prepareIdentityApiClient(String path) {
-        TestingUtils.getInstance().setDefaultIdentityClient(mContext);
+        com.mparticle.identity.AccessUtils.setDefaultIdentityApiClient(mContext);
 //        com.mparticle.identity.AccessUtils.setIdentityApiClientScheme("https");
         MParticleIdentityClient apiClient = com.mparticle.identity.AccessUtils.getIdentityApiClient();
         setRequestClient(apiClient, path);
     }
 
     private void prepareMParticleApiClient(String path) {
-        TestingUtils.getInstance().setDefaultClient(mContext);
+        try {
+            AccessUtils.setMParticleApiClient(new MParticleApiClientImpl(MParticle.getInstance().Internal().getConfigManager(), mContext.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE), mContext));
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        } catch (MParticleApiClientImpl.MPNoConfigException e) {
+            e.printStackTrace();
+        }
 //        com.mparticle.internal.AccessUtils.setMParticleApiClientProtocol("https");
         MParticleApiClient apiClient = com.mparticle.internal.AccessUtils.getApiClient();
         setRequestClient(apiClient, path);

@@ -114,7 +114,7 @@ public class UploadHandler extends BaseHandler implements BackgroundTaskHandler 
             mParticleDBManager.getDatabase();
             switch (msg.what) {
                 case UPDATE_CONFIG:
-                    MParticle.getInstance().getKitManager().loadKitLibrary();
+                    MParticle.getInstance().Internal().getKitManager().loadKitLibrary();
                     mApiClient.fetchConfig(true);
                     break;
                 case INIT_CONFIG:

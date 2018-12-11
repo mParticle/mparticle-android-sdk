@@ -29,7 +29,7 @@ public class AppStateManagerInstrumentedTest extends BaseCleanStartedEachTest {
 
     @Before
     public void before() throws Exception {
-        mAppStateManager = MParticle.getInstance().getAppStateManager();
+        mAppStateManager = MParticle.getInstance().Internal().getAppStateManager();
         MParticle.getInstance().Internal().getConfigManager().setMpid(Constants.TEMPORARY_MPID, false);
     }
 
@@ -143,7 +143,7 @@ public class AppStateManagerInstrumentedTest extends BaseCleanStartedEachTest {
                         }
                     },
                     MParticle.getInstance().Internal().getConfigManager(),
-                    MParticle.getInstance().getAppStateManager(),
+                    MParticle.getInstance().Internal().getAppStateManager(),
                     com.mparticle.internal.AccessUtils.getUploadHandler());
             this.latch = latch;
         }

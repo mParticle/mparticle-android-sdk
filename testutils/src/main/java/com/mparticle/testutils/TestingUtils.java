@@ -104,17 +104,4 @@ public class TestingUtils {
         }
         return builder.build();
     }
-
-    public void setDefaultClient(Context context) {
-        try {
-            AccessUtils.setMParticleApiClient(new MParticleApiClientImpl(MParticle.getInstance().Internal().getConfigManager(), context.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE), context));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void setDefaultIdentityClient(Context context) {
-        com.mparticle.identity.AccessUtils.setDefaultIdentityApiClient(context);
-    }
-
 }

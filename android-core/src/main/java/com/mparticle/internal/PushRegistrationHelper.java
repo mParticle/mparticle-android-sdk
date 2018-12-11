@@ -19,21 +19,6 @@ public class PushRegistrationHelper {
         requestInstanceId(context, ConfigManager.getInstance(context).getPushSenderId());
     }
 
-    public static class PushRegistration {
-        public String senderId;
-        public String instanceId;
-
-        public PushRegistration(String instanceId, String senderId) {
-            this.instanceId = instanceId;
-            this.senderId = senderId;
-        }
-
-        @Override
-        public String toString() {
-            return "[" + senderId + ", " + instanceId + "]";
-        }
-    }
-
     public static void requestInstanceId(final Context context, final String senderId) {
         if (getLatestPushRegistration(context) == null && MPUtility.isInstanceIdAvailable()) {
             final Runnable instanceRunnable = new Runnable() {
@@ -75,6 +60,21 @@ public class PushRegistrationHelper {
                 //so we will know to send a IdentityApi.modify() call when it starts up
                 ConfigManager.getInstance(context).setPushRegistrationInBackground(new PushRegistration(instanceId, senderId));
             }
+        }
+    }
+
+    public static class PushRegistration {
+        public String senderId;
+        public String instanceId;
+
+        public PushRegistration(String instanceId, String senderId) {
+            this.instanceId = instanceId;
+            this.senderId = senderId;
+        }
+
+        @Override
+        public String toString() {
+            return "[" + senderId + ", " + instanceId + "]";
         }
     }
 }

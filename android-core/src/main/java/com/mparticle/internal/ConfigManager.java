@@ -11,7 +11,6 @@ import com.mparticle.ExceptionHandler;
 import com.mparticle.MParticle;
 import com.mparticle.consent.ConsentState;
 import com.mparticle.identity.IdentityApi;
-import com.mparticle.internal.PushRegistrationHelper.PushRegistration;
 import com.mparticle.networking.NetworkOptions;
 import com.mparticle.networking.NetworkOptionsManager;
 
@@ -252,12 +251,12 @@ public class ConfigManager {
         editor.apply();
         applyConfig();
         if (newConfig) {
-            MParticle.getInstance().getKitManager().updateKits(responseJSON.optJSONArray(KEY_EMBEDDED_KITS));
+            MParticle.getInstance().Internal().getKitManager().updateKits(responseJSON.optJSONArray(KEY_EMBEDDED_KITS));
         }
     }
 
     public String getActiveModuleIds() {
-        return MParticle.getInstance().getKitManager().getActiveModuleIds();
+        return MParticle.getInstance().Internal().getKitManager().getActiveModuleIds();
     }
 
     public boolean getIncludeSessionHistory() {
@@ -387,7 +386,7 @@ public class ConfigManager {
     }
 
     public String getPushSenderId() {
-        PushRegistration pushRegistration = getPushRegistration();
+        PushRegistrationHelper.PushRegistration pushRegistration = getPushRegistration();
         if (pushRegistration != null) {
             return pushRegistration.senderId;
         } else {
@@ -396,7 +395,7 @@ public class ConfigManager {
     }
 
     public String getPushInstanceId() {
-        PushRegistration pushRegistration = getPushRegistration();
+        PushRegistrationHelper.PushRegistration pushRegistration = getPushRegistration();
         if (pushRegistration != null) {
             return pushRegistration.instanceId;
         } else {
@@ -404,7 +403,7 @@ public class ConfigManager {
         }
     }
 
-    public PushRegistration getPushRegistration() {
+    public PushRegistrationHelper.PushRegistration getPushRegistration() {
         String senderId = sPreferences.getString(Constants.PrefKeys.PUSH_SENDER_ID, null);
         String instanceId = sPreferences.getString(Constants.PrefKeys.PUSH_INSTANCE_ID, null);
 
@@ -419,7 +418,7 @@ public class ConfigManager {
             Logger.debug("App or OS version changed, clearing instance ID.");
             return null;
         } else {
-            return new PushRegistration(instanceId, senderId);
+            return new PushRegistrationHelper.PushRegistration(instanceId, senderId);
         }
     }
 
@@ -441,7 +440,7 @@ public class ConfigManager {
         sPreferences.edit().putString(Constants.PrefKeys.PUSH_INSTANCE_ID, token).apply();
     }
 
-    public void setPushRegistration(PushRegistration pushRegistration) {
+    public void setPushRegistration(PushRegistrationHelper.PushRegistration pushRegistration) {
         if (pushRegistration == null || MPUtility.isEmpty(pushRegistration.senderId)) {
             clearPushRegistration();
         } else {
@@ -450,7 +449,7 @@ public class ConfigManager {
         }
     }
 
-    public void setPushRegistrationInBackground(PushRegistration pushRegistration) {
+    public void setPushRegistrationInBackground(PushRegistrationHelper.PushRegistration pushRegistration) {
         String oldInstanceId = getPushInstanceId();
         if (oldInstanceId == null) {
             oldInstanceId = "";
