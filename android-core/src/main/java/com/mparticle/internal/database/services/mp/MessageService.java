@@ -166,7 +166,7 @@ public class MessageService extends MessageTable {
         }
         contentValues.put(MessageTableColumns.MESSAGE, messageString);
 
-        if (message.getString(Constants.MessageKey.TYPE) == Constants.MessageType.FIRST_RUN) {
+        if (Constants.MessageType.FIRST_RUN.equals(message.getString(Constants.MessageKey.TYPE))) {
             // Force the first run message to be parsed immediately
             contentValues.put(MessageTableColumns.STATUS, Constants.Status.BATCH_READY);
         } else {

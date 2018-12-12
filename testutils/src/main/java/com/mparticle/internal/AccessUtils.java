@@ -59,10 +59,6 @@ public class AccessUtils {
         getUploadHandler().setApiClient(client);
     }
 
-    public static void setMParticleApiClientProtocol(String protocol) {
-        ((MParticleBaseClientImpl)getApiClient()).setScheme(protocol);
-    }
-
     public static void setAppStateManagerHandler(Handler handler) {
         if (MParticle.getInstance() != null) {
             MParticle.getInstance().getAppStateManager().delayedBackgroundCheckHandler = handler;

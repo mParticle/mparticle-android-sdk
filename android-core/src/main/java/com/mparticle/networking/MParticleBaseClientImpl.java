@@ -25,7 +25,6 @@ public class MParticleBaseClientImpl implements MParticleBaseClient {
     private ConfigManager mConfigManager;
     private BaseNetworkConnection mRequestHandler;
     private SharedPreferences mPreferences;
-    private String customScheme = null;
     private String mApiKey;
 
     private static final String SERVICE_VERSION_1 = "/v2";
@@ -87,17 +86,6 @@ public class MParticleBaseClientImpl implements MParticleBaseClient {
         return mPreferences.getLong(Constants.PrefKeys.NEXT_REQUEST_TIME, 0);
     }
 
-    public void setScheme(String customScheme) {
-        this.customScheme = customScheme;
-    }
-
-    protected String getScheme() {
-        if (!MPUtility.isEmpty(customScheme)) {
-            return customScheme;
-        }
-        return BuildConfig.SCHEME;
-    }
-
     protected MPUrl getUrl(Endpoint endpoint) throws MalformedURLException {
         return getUrl(endpoint, null);
     }
@@ -113,7 +101,7 @@ public class MParticleBaseClientImpl implements MParticleBaseClient {
         switch (endpoint) {
             case CONFIG:
                 uri = new Uri.Builder()
-                        .scheme(getScheme())
+                        .scheme(BuildConfig.SCHEME)
                         .encodedAuthority(url)
                         .path(SERVICE_VERSION_4 + "/" + mApiKey + "/config")
                         .appendQueryParameter("av", MPUtility.getAppVersionName(mContext))
@@ -122,21 +110,21 @@ public class MParticleBaseClientImpl implements MParticleBaseClient {
                 return MPUrl.getUrl(uri.toString());
             case EVENTS:
                 uri = new Uri.Builder()
-                        .scheme(getScheme())
+                        .scheme(BuildConfig.SCHEME)
                         .encodedAuthority(url)
                         .path(SERVICE_VERSION_1 + "/" + mApiKey + "/events")
                         .build();
                 return MPUrl.getUrl(uri.toString());
             case IDENTITY:
                 uri = new Uri.Builder()
-                        .scheme(getScheme())
+                        .scheme(BuildConfig.SCHEME)
                         .encodedAuthority(url)
                         .path(identityPath)
                         .build();
                 return MPUrl.getUrl(uri.toString());
             case AUDIENCE:
                 uri = new Uri.Builder()
-                        .scheme(getScheme())
+                        .scheme(BuildConfig.SCHEME)
                         .encodedAuthority(url)
                         .path(SERVICE_VERSION_1 + "/" + mApiKey + "/audience?mpID=" + mConfigManager.getMpid())
                         .build();

@@ -63,10 +63,6 @@ public class AccessUtils {
         return new MParticleIdentityClientImpl(context, configManager);
     }
 
-    public static void setIdentityApiClientScheme(String scheme) {
-        ((MParticleBaseClientImpl)MParticle.getInstance().Identity().getApiClient()).setScheme(scheme);
-    }
-
     public static void setIdentityApiClient(MParticleIdentityClient identityClient) {
         MParticle.getInstance().Identity().setApiClient(identityClient);
     }
