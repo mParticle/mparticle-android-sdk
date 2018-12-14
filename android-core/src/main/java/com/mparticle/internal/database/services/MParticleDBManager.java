@@ -20,17 +20,6 @@ import com.mparticle.internal.MessageBatch;
 import com.mparticle.internal.MessageManager;
 import com.mparticle.internal.MessageManagerCallbacks;
 import com.mparticle.internal.InternalSession;
-import com.mparticle.internal.database.services.mp.BreadcrumbService;
-import com.mparticle.internal.database.services.mp.MessageService;
-import com.mparticle.internal.database.services.mp.ReportingService;
-import com.mparticle.internal.database.services.mp.SessionService;
-import com.mparticle.internal.database.services.mp.UploadService;
-import com.mparticle.internal.database.services.mp.UserAttributesService;
-import com.mparticle.internal.dto.AttributionChange;
-import com.mparticle.internal.dto.ReadyUpload;
-import com.mparticle.internal.dto.UserAttributeRemoval;
-import com.mparticle.internal.dto.UserAttributeResponse;
-import com.mparticle.internal.networking.BaseMPMessage;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -85,11 +74,11 @@ public class MParticleDBManager {
      */
 
 
-    public void insertBreadcrumb(BaseMPMessage message, String apiKey) throws JSONException {
+    public void insertBreadcrumb(MessageManager.BaseMPMessage message, String apiKey) throws JSONException {
         BreadcrumbService.insertBreadcrumb(getDatabase(), mContext, message, apiKey, message.getMpId());
     }
 
-    public void appendBreadcrumbs(BaseMPMessage message) throws JSONException {
+    public void appendBreadcrumbs(MessageManager.BaseMPMessage message) throws JSONException {
         JSONArray breadcrumbs = BreadcrumbService.getBreadcrumbs(getDatabase(), mContext, message.getMpId());
         if (!MPUtility.isEmpty(breadcrumbs)) {
             message.put(Constants.MessageType.BREADCRUMB, breadcrumbs);
@@ -108,7 +97,7 @@ public class MParticleDBManager {
         MessageService.cleanupMessages(getDatabase());
     }
 
-    public void insertMessage(String apiKey, BaseMPMessage message) throws JSONException {
+    public void insertMessage(String apiKey, MessageManager.BaseMPMessage message) throws JSONException {
         MessageService.insertMessage(getDatabase(), apiKey, message, message.getMpId());
         if (sMessageListener != null) {
             sMessageListener.onMessageStored(message);
@@ -126,7 +115,7 @@ public class MParticleDBManager {
     }
 
     public interface MessageListener {
-        void onMessageStored(BaseMPMessage message);
+        void onMessageStored(MessageManager.BaseMPMessage message);
     }
 
     /**
@@ -369,11 +358,11 @@ public class MParticleDBManager {
         SessionService.updateSessionStatus(getDatabase(), sessionId, status);
     }
 
-    public BaseMPMessage getSessionForSessionEndMessage(String sessionId, Location location, Set<Long> mpIds) throws JSONException {
+    public MessageManager.BaseMPMessage getSessionForSessionEndMessage(String sessionId, Location location, Set<Long> mpIds) throws JSONException {
         Cursor selectCursor = null;
         try {
             selectCursor = SessionService.getSessionForSessionEndMessage(getDatabase(), sessionId);
-            BaseMPMessage endMessage = null;
+            MessageManager.BaseMPMessage endMessage = null;
             if (selectCursor.moveToFirst()) {
                 long start = selectCursor.getLong(0);
                 long end = selectCursor.getLong(1);
@@ -398,7 +387,7 @@ public class MParticleDBManager {
         }
     }
 
-    BaseMPMessage createMessageSessionEnd(String sessionId, long start, long end, long foregroundLength, JSONObject sessionAttributes, Location location, Set<Long> mpIds) throws JSONException{
+    MessageManager.BaseMPMessage createMessageSessionEnd(String sessionId, long start, long end, long foregroundLength, JSONObject sessionAttributes, Location location, Set<Long> mpIds) throws JSONException{
         int eventCounter = mPreferences.getInt(Constants.PrefKeys.EVENT_COUNTER, 0);
         resetEventCounter();
         InternalSession session = new InternalSession();
@@ -413,7 +402,7 @@ public class MParticleDBManager {
                 storageMpid = mpid;
             }
         }
-        BaseMPMessage message = new BaseMPMessage.Builder(Constants.MessageType.SESSION_END, session, location, storageMpid)
+        MessageManager.BaseMPMessage message = new MessageManager.BaseMPMessage.Builder(Constants.MessageType.SESSION_END, session, location, storageMpid)
                 .timestamp(end)
                 .attributes(sessionAttributes)
                 .build();
@@ -435,7 +424,7 @@ public class MParticleDBManager {
     }
 
 
-    public void insertSession(BaseMPMessage message, String apiKey, JSONObject appInfo, JSONObject deviceInfo) throws JSONException {
+    public void insertSession(MessageManager.BaseMPMessage message, String apiKey, JSONObject appInfo, JSONObject deviceInfo) throws JSONException {
         String appInfoString = appInfo.toString();
         String deviceInfoString = deviceInfo.toString();
         SessionService.insertSession(getDatabase(), message, apiKey, appInfoString, deviceInfoString, message.getMpId());
@@ -650,5 +639,85 @@ public class MParticleDBManager {
         } finally {
             db.endTransaction();
         }
+    }
+
+    public static class AttributionChange {
+        private String key;
+        private Object newValue;
+        private Object oldValue;
+        private boolean deleted;
+        private boolean isNewAttribute;
+        private long time;
+        private long mpId;
+
+        public AttributionChange(String key, Object newValue, Object oldValue, boolean deleted, boolean isNewAttribute, long time, long mpId) {
+            this.key = key;
+            this.newValue = newValue;
+            this.oldValue = oldValue;
+            this.deleted = deleted;
+            this.isNewAttribute = isNewAttribute;
+            this.time = time;
+            this.mpId = mpId;
+        }
+
+        public String getKey() {
+            return key;
+        }
+
+        public Object getNewValue() {
+            return newValue;
+        }
+
+        public Object getOldValue() {
+            return oldValue;
+        }
+
+        public boolean isDeleted() {
+            return deleted;
+        }
+
+        public boolean isNewAttribute() {
+            return isNewAttribute;
+        }
+
+        public long getTime() {
+            return time;
+        }
+
+        public long getMpId() {
+            return mpId;
+        }
+    }
+
+    public static class ReadyUpload {
+        private int id;
+        private String message;
+
+        public ReadyUpload(int id, String message) {
+            this.id = id;
+            this.message = message;
+        }
+
+
+        public int getId() {
+            return id;
+        }
+
+        public String getMessage() {
+            return message;
+        }
+    }
+
+    public static class UserAttributeRemoval {
+        public String key;
+        public long time;
+        public long mpId;
+    }
+
+    public static class UserAttributeResponse {
+        public Map<String, String> attributeSingles;
+        public Map<String, List<String>> attributeLists;
+        public long time;
+        public long mpId;
     }
 }

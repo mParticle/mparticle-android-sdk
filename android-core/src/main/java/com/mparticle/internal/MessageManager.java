@@ -15,6 +15,7 @@ import android.os.BatteryManager;
 import android.os.HandlerThread;
 import android.os.Message;
 import android.os.Process;
+import android.support.annotation.Nullable;
 import android.telephony.TelephonyManager;
 
 import com.mparticle.InstallReferrerHelper;
@@ -23,16 +24,15 @@ import com.mparticle.MParticle;
 import com.mparticle.UserAttributeListener;
 import com.mparticle.commerce.Cart;
 import com.mparticle.commerce.CommerceEvent;
+import com.mparticle.commerce.Impression;
+import com.mparticle.commerce.Product;
+import com.mparticle.commerce.Promotion;
+import com.mparticle.commerce.TransactionAttributes;
 import com.mparticle.identity.MParticleUser;
 import com.mparticle.internal.Constants.MessageKey;
 import com.mparticle.internal.Constants.MessageType;
 import com.mparticle.internal.PushRegistrationHelper.PushRegistration;
 import com.mparticle.internal.database.services.MParticleDBManager;
-import com.mparticle.internal.dto.UserAttributeRemoval;
-import com.mparticle.internal.dto.UserAttributeResponse;
-import com.mparticle.internal.networking.BaseMPMessage;
-import com.mparticle.internal.networking.MPCommerceMessage;
-import com.mparticle.internal.networking.MPEventMessage;
 import com.mparticle.messaging.ProviderCloudMessage;
 
 import org.json.JSONArray;
@@ -861,7 +861,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
     }
 
     public void removeUserAttribute(String key, long mpId) {
-        UserAttributeRemoval container = new UserAttributeRemoval();
+        MParticleDBManager.UserAttributeRemoval container = new MParticleDBManager.UserAttributeRemoval();
         container.key = key;
         container.time = System.currentTimeMillis();
         container.mpId = mpId;
@@ -891,7 +891,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
      * really sure you really need to.
      */
     public void setUserAttribute(String key, Object value, long mpId, boolean synchronously) {
-        UserAttributeResponse container = new UserAttributeResponse();
+        MParticleDBManager.UserAttributeResponse container = new MParticleDBManager.UserAttributeResponse();
         container.time = System.currentTimeMillis();
         container.mpId = mpId;
         if (value instanceof List) {
@@ -928,8 +928,8 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
         return mConfigManager.getUserIdentityJson(mpId);
     }
 
-    private UserAttributeResponse getUserAttributes(long mpId) {
-        UserAttributeResponse response = new UserAttributeResponse();
+    private MParticleDBManager.UserAttributeResponse getUserAttributes(long mpId) {
+        MParticleDBManager.UserAttributeResponse response = new MParticleDBManager.UserAttributeResponse();
         response.attributeSingles = mMParticleDBManager.getUserAttributeSingles(mpId);
         response.attributeLists = mMParticleDBManager.getUserAttributeLists(mpId);
         return response;
@@ -1049,5 +1049,345 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
 
     boolean hasDelayedStartOccurred() {
         return delayedStartOccurred;
+    }
+
+    public static class BaseMPMessage extends JSONObject{
+        private long mpId;
+
+        protected BaseMPMessage(){}
+
+        protected BaseMPMessage(BaseMPMessageBuilder builder) throws JSONException{
+            mpId = builder.mpid;
+            put(MessageKey.TYPE, builder.mMessageType);
+            put(MessageKey.TIMESTAMP, builder.mTimestamp);
+            if (MessageType.SESSION_START.equals(builder.mMessageType)) {
+                put(MessageKey.ID, builder.mSession.mSessionID);
+            } else {
+                put(MessageKey.SESSION_ID, builder.mSession.mSessionID);
+
+                if (builder.mSession.mSessionStartTime > 0) {
+                    put(MessageKey.SESSION_START_TIMESTAMP, builder.mSession.mSessionStartTime);
+                }
+            }
+
+            if (builder.mName != null) {
+                put(MessageKey.NAME, builder.mName);
+            }
+
+            if (builder.mCustomFlags != null) {
+                JSONObject flagsObject = new JSONObject();
+                for (Map.Entry<String, List<String>> entry : builder.mCustomFlags.entrySet()) {
+                    List<String> values = entry.getValue();
+                    JSONArray valueArray = new JSONArray(values);
+                    flagsObject.put(entry.getKey(), valueArray);
+                }
+                put(MessageKey.EVENT_FLAGS, flagsObject);
+            }
+
+            if (builder.mLength != null){
+                put(MessageKey.EVENT_DURATION, builder.mLength);
+                if (builder.mAttributes == null){
+                    builder.mAttributes = new JSONObject();
+                }
+                if (!builder.mAttributes.has("EventLength")) {
+                    //can't be longer than max int milliseconds
+                    builder.mAttributes.put("EventLength", Integer.toString(builder.mLength.intValue()));
+                }
+            }
+
+            if (builder.mAttributes != null) {
+                put(MessageKey.ATTRIBUTES, builder.mAttributes);
+            }
+
+            if (builder.mDataConnection != null) {
+                put(MessageKey.STATE_INFO_DATA_CONNECTION, builder.mDataConnection);
+            }
+
+            if (!(MessageType.ERROR.equals(builder.mMessageType) &&
+                    !(MessageType.OPT_OUT.equals(builder.mMessageType)))) {
+                if (builder.mLocation != null) {
+                    JSONObject locJSON = new JSONObject();
+                    locJSON.put(MessageKey.LATITUDE, builder.mLocation .getLatitude());
+                    locJSON.put(MessageKey.LONGITUDE, builder.mLocation .getLongitude());
+                    locJSON.put(MessageKey.ACCURACY, builder.mLocation .getAccuracy());
+                    put(MessageKey.LOCATION, locJSON);
+                }
+            }
+        }
+
+        public JSONObject getAttributes(){
+            return optJSONObject(MessageKey.ATTRIBUTES);
+        }
+
+        public long getTimestamp(){
+            try {
+                return getLong(MessageKey.TIMESTAMP);
+            }catch (JSONException jse){
+
+            }
+            return 0;
+        }
+
+        public String getSessionId() {
+            if (MessageType.SESSION_START.equals(getMessageType())) {
+                return optString(MessageKey.ID, Constants.NO_SESSION_ID);
+            } else {
+                return optString(MessageKey.SESSION_ID, Constants.NO_SESSION_ID);
+            }
+        }
+
+        public String getMessageType() {
+            return optString(MessageKey.TYPE);
+        }
+
+        public int getTypeNameHash() {
+            return MPUtility.mpHash(getMessageType() + getName());
+        }
+
+        public String getName() {
+            return optString(MessageKey.NAME);
+        }
+
+        public long getMpId() {
+            return mpId;
+        }
+
+        public static class Builder extends BaseMPMessageBuilder {
+
+            public Builder(String messageType, InternalSession session, Location location, long mpId) {
+                super(messageType, session, location, mpId);
+            }
+        }
+    }
+
+    public static class BaseMPMessageBuilder {
+        final String mMessageType;
+        final InternalSession mSession;
+        long mTimestamp;
+        String mName;
+        JSONObject mAttributes;
+        Location mLocation;
+        String mDataConnection;
+        Double mLength = null;
+        Map<String, List<String>> mCustomFlags;
+        long mpid;
+
+        protected BaseMPMessageBuilder(String messageType, InternalSession session, Location location, long mpId) {
+            mMessageType = messageType;
+            mSession = new InternalSession(session);
+            mLocation = location;
+            mpid = mpId;
+        }
+
+        public BaseMPMessageBuilder timestamp(long timestamp) {
+            mTimestamp = timestamp;
+            return this;
+        }
+
+        public BaseMPMessageBuilder name(String name) {
+            mName = name;
+            return this;
+        }
+
+        public BaseMPMessageBuilder attributes(JSONObject attributes) {
+            mAttributes = attributes;
+            return this;
+        }
+
+        public BaseMPMessage build() throws JSONException {
+            return new BaseMPMessage(this);
+        }
+
+        public BaseMPMessageBuilder dataConnection(String dataConnection) {
+            mDataConnection = dataConnection;
+            return this;
+        }
+
+        public BaseMPMessageBuilder length(Double length) {
+            mLength = length;
+            return this;
+        }
+
+        public BaseMPMessageBuilder flags(Map<String, List<String>> customFlags) {
+            mCustomFlags = customFlags;
+            return this;
+        }
+    }
+
+    public static class MPCommerceMessage extends BaseMPMessage {
+
+        protected MPCommerceMessage(Builder builder) throws JSONException {
+            super(builder);
+            addCommerceEventInfo(this, builder.commerceEvent, builder.cart);
+        }
+
+        private static void addCommerceEventInfo(BaseMPMessage message, CommerceEvent event, @Nullable Cart cart) {
+            try {
+
+                if (event.getScreen() != null) {
+                    message.put(Constants.Commerce.SCREEN_NAME, event.getScreen());
+                }
+                if (event.getNonInteraction() != null) {
+                    message.put(Constants.Commerce.NON_INTERACTION, event.getNonInteraction().booleanValue());
+                }
+                if (event.getCurrency() != null) {
+                    message.put(Constants.Commerce.CURRENCY, event.getCurrency());
+                }
+                if (event.getCustomAttributes() != null) {
+                    message.put(Constants.Commerce.ATTRIBUTES, MPUtility.mapToJson(event.getCustomAttributes()));
+                }
+                if (event.getProductAction() != null) {
+                    JSONObject productAction = new JSONObject();
+                    message.put(Constants.Commerce.PRODUCT_ACTION_OBJECT, productAction);
+                    productAction.put(Constants.Commerce.PRODUCT_ACTION, event.getProductAction());
+                    if (event.getCheckoutStep() != null) {
+                        productAction.put(Constants.Commerce.CHECKOUT_STEP, event.getCheckoutStep());
+                    }
+                    if (event.getCheckoutOptions() != null) {
+                        productAction.put(Constants.Commerce.CHECKOUT_OPTIONS, event.getCheckoutOptions());
+                    }
+                    if (event.getProductListName() != null) {
+                        productAction.put(Constants.Commerce.PRODUCT_LIST_NAME, event.getProductListName());
+                    }
+                    if (event.getProductListSource() != null) {
+                        productAction.put(Constants.Commerce.PRODUCT_LIST_SOURCE, event.getProductListSource());
+                    }
+                    if (event.getTransactionAttributes() != null) {
+                        TransactionAttributes transactionAttributes = event.getTransactionAttributes();
+                        if (transactionAttributes.getId() != null) {
+                            productAction.put(Constants.Commerce.TRANSACTION_ID, transactionAttributes.getId());
+                        }
+                        if (transactionAttributes.getAffiliation() != null) {
+                            productAction.put(Constants.Commerce.TRANSACTION_AFFILIATION, transactionAttributes.getAffiliation());
+                        }
+                        if (transactionAttributes.getRevenue() != null) {
+                            productAction.put(Constants.Commerce.TRANSACTION_REVENUE, transactionAttributes.getRevenue());
+                        }
+                        if (transactionAttributes.getTax() != null) {
+                            productAction.put(Constants.Commerce.TRANSACTION_TAX, transactionAttributes.getTax());
+                        }
+                        if (transactionAttributes.getShipping() != null) {
+                            productAction.put(Constants.Commerce.TRANSACTION_SHIPPING, transactionAttributes.getShipping());
+                        }
+                        if (transactionAttributes.getCouponCode() != null) {
+                            productAction.put(Constants.Commerce.TRANSACTION_COUPON_CODE, transactionAttributes.getCouponCode());
+                        }
+                    }
+                    if (event.getProducts() != null && event.getProducts().size() > 0) {
+                        JSONArray products = new JSONArray();
+                        for (int i = 0; i < event.getProducts().size(); i++) {
+                            products.put(new JSONObject(event.getProducts().get(i).toString()));
+                        }
+                        productAction.put(Constants.Commerce.PRODUCT_LIST, products);
+                    }
+                    if (event.getProductAction().equals(Product.PURCHASE)) {
+                        if (cart != null) {
+                            cart.clear();
+                        }
+
+                    }
+                    if (cart != null) {
+                        JSONObject cartJsonObject = new JSONObject(cart.toString());
+                        if (cartJsonObject.length() > 0) {
+                            message.put("sc", cartJsonObject);
+                        }
+                    }
+                }
+                if (event.getPromotionAction() != null) {
+                    JSONObject promotionAction = new JSONObject();
+                    message.put(Constants.Commerce.PROMOTION_ACTION_OBJECT, promotionAction);
+                    promotionAction.put(Constants.Commerce.PROMOTION_ACTION, event.getPromotionAction());
+                    if (event.getPromotions() != null && event.getPromotions().size() > 0) {
+                        JSONArray promotions = new JSONArray();
+                        for (int i = 0; i < event.getPromotions().size(); i++) {
+                            promotions.put(getPromotionJson(event.getPromotions().get(i)));
+                        }
+                        promotionAction.put(Constants.Commerce.PROMOTION_LIST, promotions);
+                    }
+                }
+                if (event.getImpressions() != null && event.getImpressions().size() > 0) {
+                    JSONArray impressions = new JSONArray();
+                    for (Impression impression : event.getImpressions()) {
+                        JSONObject impressionJson = new JSONObject();
+                        if (impression.getListName() != null) {
+                            impressionJson.put(Constants.Commerce.IMPRESSION_LOCATION, impression.getListName());
+                        }
+                        if (impression.getProducts() != null && impression.getProducts().size() > 0) {
+                            JSONArray productsJson = new JSONArray();
+                            impressionJson.put(Constants.Commerce.IMPRESSION_PRODUCT_LIST, productsJson);
+                            for (Product product : impression.getProducts()) {
+                                productsJson.put(new JSONObject(product.toString()));
+                            }
+                        }
+                        if (impressionJson.length() > 0) {
+                            impressions.put(impressionJson);
+                        }
+                    }
+                    if (impressions.length() > 0) {
+                        message.put(Constants.Commerce.IMPRESSION_OBJECT, impressions);
+                    }
+                }
+
+
+            } catch (Exception jse) {
+
+            }
+        }
+
+        private static JSONObject getPromotionJson(Promotion promotion) {
+            JSONObject json = new JSONObject();
+            try {
+                if (!MPUtility.isEmpty(promotion.getId())) {
+                    json.put("id", promotion.getId());
+                }
+                if (!MPUtility.isEmpty(promotion.getName())) {
+                    json.put("nm", promotion.getName());
+                }
+                if (!MPUtility.isEmpty(promotion.getCreative())) {
+                    json.put("cr", promotion.getCreative());
+                }
+                if (!MPUtility.isEmpty(promotion.getPosition())) {
+                    json.put("ps", promotion.getPosition());
+                }
+            } catch (JSONException jse) {
+
+            }
+            return json;
+        }
+
+        public static class Builder extends BaseMPMessageBuilder {
+            private CommerceEvent commerceEvent;
+            private Cart cart;
+
+            public Builder(CommerceEvent commerceEvent, InternalSession session, Location location, long mpId, Cart cart) {
+                super(MessageType.COMMERCE_EVENT, session, location, mpId);
+                this.commerceEvent = commerceEvent;
+                this.cart = cart;
+            }
+
+            @Override
+            public BaseMPMessage build() throws JSONException {
+                return new MPCommerceMessage(this);
+            }
+        }
+    }
+
+    public static class MPEventMessage extends BaseMPMessage {
+
+        protected MPEventMessage(Builder builder) throws JSONException {
+            super(builder);
+        }
+
+        public static class Builder extends BaseMPMessageBuilder {
+
+            public Builder(String messageType, InternalSession session, Location location, long mpId) {
+                super(messageType, session, location, mpId);
+            }
+
+            @Override
+            public BaseMPMessage build() throws JSONException {
+                return new MPEventMessage(this);
+            }
+        }
     }
 }

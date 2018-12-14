@@ -4,8 +4,8 @@ import android.database.sqlite.SQLiteDatabase;
 import android.support.test.InstrumentationRegistry;
 
 import com.mparticle.internal.database.services.SQLiteOpenHelperWrapper;
-import com.mparticle.internal.database.tables.mp.BaseTableTest;
-import com.mparticle.internal.database.tables.mp.MParticleDatabaseHelper;
+import com.mparticle.internal.database.tables.BaseTableTest;
+import com.mparticle.internal.database.tables.MParticleDatabaseHelper;
 
 import org.junit.Test;
 

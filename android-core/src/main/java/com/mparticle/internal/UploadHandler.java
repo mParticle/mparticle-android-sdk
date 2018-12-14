@@ -7,7 +7,6 @@ import android.os.Message;
 
 import com.mparticle.MParticle;
 import com.mparticle.internal.database.services.MParticleDBManager;
-import com.mparticle.internal.dto.ReadyUpload;
 import com.mparticle.segmentation.SegmentListener;
 
 import java.io.IOException;
@@ -195,12 +194,12 @@ public class UploadHandler extends BaseHandler implements BackgroundTaskHandler 
         mParticleDBManager.cleanupUploadMessages();
         boolean processingSessionEnd = false;
         try {
-            List<ReadyUpload> readyUploads = mParticleDBManager.getReadyUploads();
+            List<MParticleDBManager.ReadyUpload> readyUploads = mParticleDBManager.getReadyUploads();
             if (readyUploads.size() > 0) {
                 mApiClient.fetchConfig();
             }
             final boolean includeSessionHistory = mConfigManager.getIncludeSessionHistory();
-            for (ReadyUpload readyUpload : readyUploads) {
+            for (MParticleDBManager.ReadyUpload readyUpload : readyUploads) {
                 //this case actually shouldn't be needed anymore except for upgrade scenarios.
                 //as of version 4.9.0, upload batches for session history shouldn't even be created.
                 if (history && !includeSessionHistory) {

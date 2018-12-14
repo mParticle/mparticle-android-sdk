@@ -44,7 +44,7 @@ import com.mparticle.internal.MParticleJSInterface;
 import com.mparticle.internal.MessageManager;
 import com.mparticle.internal.PushRegistrationHelper;
 import com.mparticle.internal.database.services.MParticleDBManager;
-import com.mparticle.internal.database.tables.mp.MParticleDatabaseHelper;
+import com.mparticle.internal.database.tables.MParticleDatabaseHelper;
 import com.mparticle.media.MPMediaAPI;
 import com.mparticle.media.MediaCallbacks;
 import com.mparticle.messaging.MPMessagingAPI;

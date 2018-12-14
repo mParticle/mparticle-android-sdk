@@ -1,11 +1,6 @@
 package com.mparticle.internal.database.services;
 
-import android.content.Context;
-import android.support.test.InstrumentationRegistry;
-
-import com.mparticle.internal.DatabaseHelper;
-import com.mparticle.internal.dto.UserAttributeRemoval;
-import com.mparticle.internal.dto.UserAttributeResponse;
+import com.mparticle.testutils.BaseCleanInstallEachTest;
 
 import junit.framework.Assert;
 
@@ -16,19 +11,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class MParticleDBManagerTest {
+public class MParticleDBManagerTest extends BaseCleanInstallEachTest{
 
     @Test
     public void testRemoveUserAttributes() throws Exception {
-        Context context = InstrumentationRegistry.getContext();
-        MParticleDBManager manager = new MParticleDBManager(context);
-        UserAttributeRemoval removal = new UserAttributeRemoval();
+        MParticleDBManager manager = new MParticleDBManager(mContext);
+        MParticleDBManager.UserAttributeRemoval removal = new MParticleDBManager.UserAttributeRemoval();
         removal.key = "foo";
         removal.mpId = 10L;
         manager.removeUserAttribute(removal, null);
         Map<String, Object> attributes = manager.getUserAttributes(10);
         Assert.assertNull(attributes.get("foo"));
-        UserAttributeResponse newAttributes = new UserAttributeResponse();
+        MParticleDBManager.UserAttributeResponse newAttributes = new MParticleDBManager.UserAttributeResponse();
         newAttributes.mpId = 10L;
         newAttributes.attributeLists = new HashMap<String, List<String>>();
         List attributeList = new ArrayList<String>();
@@ -45,15 +39,14 @@ public class MParticleDBManagerTest {
 
     @Test
     public void testUserUserAttributeLists() throws Exception {
-        Context context = InstrumentationRegistry.getContext();
-        MParticleDBManager manager = new MParticleDBManager(context);
-        UserAttributeRemoval removal = new UserAttributeRemoval();
+        MParticleDBManager manager = new MParticleDBManager(mContext);
+        MParticleDBManager.UserAttributeRemoval removal = new MParticleDBManager.UserAttributeRemoval();
         removal.key = "foo";
         removal.mpId = 10L;
         manager.removeUserAttribute(removal, null);
         Map<String, Object> attributes = manager.getUserAttributes(10);
         Assert.assertNull(attributes.get("foo"));
-        UserAttributeResponse newAttributes = new UserAttributeResponse();
+        MParticleDBManager.UserAttributeResponse newAttributes = new MParticleDBManager.UserAttributeResponse();
         newAttributes.mpId = 10L;
         newAttributes.attributeLists = new HashMap<String, List<String>>();
         List attributeList = new ArrayList<String>();

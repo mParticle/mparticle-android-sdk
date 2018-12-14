@@ -8,7 +8,6 @@ import android.os.Message;
 
 import com.mparticle.MParticle;
 import com.mparticle.internal.database.services.MParticleDBManager;
-import com.mparticle.internal.dto.ReadyUpload;
 import com.mparticle.mock.MockContext;
 
 import org.json.JSONObject;
@@ -193,7 +192,7 @@ public class UploadHandlerTest {
     public void testUploadSessionHistory() throws Exception {
         handler.handleMessage(null);
         Cursor mockCursor = Mockito.mock(Cursor.class);
-        Mockito.when(handler.mParticleDBManager.getReadyUploads()).thenReturn(new ArrayList<ReadyUpload>(){{add(new ReadyUpload(123, "cool message batch!"));}});
+        Mockito.when(handler.mParticleDBManager.getReadyUploads()).thenReturn(new ArrayList<MParticleDBManager.ReadyUpload>(){{add(new MParticleDBManager.ReadyUpload(123, "cool message batch!"));}});
         MParticleApiClient mockApiClient = Mockito.mock(MParticleApiClient.class);
         handler.setApiClient(mockApiClient);
         Mockito.when(mConfigManager.getIncludeSessionHistory()).thenReturn(true);

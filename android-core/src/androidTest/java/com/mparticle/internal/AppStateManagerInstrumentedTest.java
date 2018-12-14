@@ -6,7 +6,6 @@ import android.util.MutableBoolean;
 import com.mparticle.MParticle;
 import com.mparticle.internal.database.services.AccessUtils;
 import com.mparticle.internal.database.services.MParticleDBManager;
-import com.mparticle.internal.networking.BaseMPMessage;
 import com.mparticle.testutils.BaseCleanStartedEachTest;
 import com.mparticle.testutils.MPLatch;
 
@@ -48,7 +47,7 @@ public class AppStateManagerInstrumentedTest extends BaseCleanStartedEachTest {
         final CountDownLatch latch = new MPLatch(1);
         AccessUtils.setMessageStoredListener(new MParticleDBManager.MessageListener() {
             @Override
-            public void onMessageStored(BaseMPMessage message) {
+            public void onMessageStored(MessageManager.BaseMPMessage message) {
                 if (message.getMessageType().equals(Constants.MessageType.SESSION_END)) {
                     try {
                         JSONArray mpidsArray = message.getJSONArray(Constants.MessageKey.SESSION_SPANNING_MPIDS);
@@ -86,7 +85,7 @@ public class AppStateManagerInstrumentedTest extends BaseCleanStartedEachTest {
         final MutableBoolean checked = new MutableBoolean(false);
         AccessUtils.setMessageStoredListener(new MParticleDBManager.MessageListener() {
             @Override
-            public void onMessageStored(BaseMPMessage message) {
+            public void onMessageStored(MessageManager.BaseMPMessage message) {
                 if (message.getMessageType().equals(Constants.MessageType.SESSION_END)) {
                     try {
                         JSONArray mpidsArray = message.getJSONArray(Constants.MessageKey.SESSION_SPANNING_MPIDS);

@@ -8,11 +8,7 @@ import com.mparticle.MParticle;
 import com.mparticle.internal.Constants.MessageKey;
 import com.mparticle.internal.Constants.MessageType;
 import com.mparticle.internal.database.services.MParticleDBManager;
-import com.mparticle.internal.database.tables.mp.SessionTable;
-import com.mparticle.internal.dto.AttributionChange;
-import com.mparticle.internal.dto.UserAttributeRemoval;
-import com.mparticle.internal.dto.UserAttributeResponse;
-import com.mparticle.internal.networking.BaseMPMessage;
+import com.mparticle.internal.database.tables.SessionTable;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -76,7 +72,7 @@ import java.util.UUID;
             case STORE_MESSAGE:
                 try {
 
-                    BaseMPMessage message = (BaseMPMessage) msg.obj;
+                    MessageManager.BaseMPMessage message = (MessageManager.BaseMPMessage) msg.obj;
                     message.put(MessageKey.STATE_INFO_KEY, MessageManager.getStateInfo());
                     String messageType = message.getString(MessageKey.TYPE);
                     // handle the special case of session-start by creating the
@@ -130,7 +126,7 @@ import java.util.UUID;
             case CREATE_SESSION_END_MESSAGE:
                 try {
                     Map.Entry<String, Set<Long>> entry = (Map.Entry<String, Set<Long>>) msg.obj;
-                    BaseMPMessage endMessage = null;
+                    MessageManager.BaseMPMessage endMessage = null;
                     String sessionId = entry.getKey();
                    try {
                        endMessage = mMParticleDBManager.getSessionForSessionEndMessage(sessionId, ((MessageManager)mMessageManagerCallbacks).getLocation(), entry.getValue());
@@ -178,7 +174,7 @@ import java.util.UUID;
                 break;
             case STORE_BREADCRUMB:
                 try {
-                    BaseMPMessage message = (BaseMPMessage) msg.obj;
+                    MessageManager.BaseMPMessage message = (MessageManager.BaseMPMessage) msg.obj;
                     message.put(Constants.MessageKey.ID, UUID.randomUUID().toString());
                     try {
                         mMParticleDBManager.insertBreadcrumb(message, mMessageManagerCallbacks.getApiKey());
@@ -199,14 +195,14 @@ import java.util.UUID;
                 break;
             case REMOVE_USER_ATTRIBUTE:
                 try {
-                    mMParticleDBManager.removeUserAttribute((UserAttributeRemoval)msg.obj, mMessageManagerCallbacks);
+                    mMParticleDBManager.removeUserAttribute((MParticleDBManager.UserAttributeRemoval)msg.obj, mMessageManagerCallbacks);
                 }catch (Exception e) {
                     Logger.error(e, "Error while removing user attribute: ", e.toString());
                 }
                 break;
             case SET_USER_ATTRIBUTE:
                 try {
-                    setUserAttributes((UserAttributeResponse)msg.obj);
+                    setUserAttributes((MParticleDBManager.UserAttributeResponse)msg.obj);
                 } catch (Exception e) {
                     Logger.error(e, "Error while setting user attribute: ", e.toString());
                 }
@@ -225,9 +221,9 @@ import java.util.UUID;
         }
     }
 
-    void setUserAttributes(UserAttributeResponse response) {
-        List<AttributionChange> attributionChanges = mMParticleDBManager.setUserAttribute(response);
-        for (AttributionChange attributionChange : attributionChanges) {
+    void setUserAttributes(MParticleDBManager.UserAttributeResponse response) {
+        List<MParticleDBManager.AttributionChange> attributionChanges = mMParticleDBManager.setUserAttribute(response);
+        for (MParticleDBManager.AttributionChange attributionChange : attributionChanges) {
             logUserAttributeChanged(attributionChange);
         }
     }
@@ -254,12 +250,12 @@ import java.util.UUID;
                 return;
             }
         }
-        UserAttributeResponse wrapper = new UserAttributeResponse();
+        MParticleDBManager.UserAttributeResponse wrapper = new MParticleDBManager.UserAttributeResponse();
         wrapper.attributeSingles = new HashMap<String, String>(1);
         wrapper.attributeSingles.put(key, newValue);
         wrapper.mpId = mpId;
-        List<AttributionChange> attributionChanges = mMParticleDBManager.setUserAttribute(wrapper);
-        for (AttributionChange attributeChange: attributionChanges) {
+        List<MParticleDBManager.AttributionChange> attributionChanges = mMParticleDBManager.setUserAttribute(wrapper);
+        for (MParticleDBManager.AttributionChange attributeChange: attributionChanges) {
             logUserAttributeChanged(attributeChange);
         }
         if (MParticle.getInstance() != null && MParticle.getInstance().getKitManager() != null) {
@@ -267,7 +263,7 @@ import java.util.UUID;
         }
     }
 
-    private void dbInsertSession(BaseMPMessage message) throws JSONException {
+    private void dbInsertSession(MessageManager.BaseMPMessage message) throws JSONException {
         try {
             DeviceAttributes deviceAttributes =  mMessageManagerCallbacks.getDeviceAttributes();
             mMParticleDBManager.insertSession(message, mMessageManagerCallbacks.getApiKey(), deviceAttributes.getAppInfo(mContext), deviceAttributes.getDeviceInfo(mContext));
@@ -276,7 +272,7 @@ import java.util.UUID;
         }
     }
 
-    private void logUserAttributeChanged(AttributionChange attributionChange) {
+    private void logUserAttributeChanged(MParticleDBManager.AttributionChange attributionChange) {
         mMessageManagerCallbacks.logUserAttributeChangeMessage(
                 attributionChange.getKey(),
                 attributionChange.getNewValue(),

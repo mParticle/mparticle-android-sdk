@@ -5,7 +5,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
 import com.mparticle.internal.database.services.SQLiteOpenHelperWrapper;
-import com.mparticle.internal.database.tables.mp.MParticleDatabaseHelper;
+import com.mparticle.internal.database.tables.MParticleDatabaseHelper;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
     Context mContext;

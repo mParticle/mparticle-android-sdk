@@ -6,7 +6,7 @@ import android.support.test.InstrumentationRegistry;
 
 import com.mparticle.MParticle;
 import com.mparticle.identity.IdentityStateListener;
-import com.mparticle.internal.database.tables.mp.MParticleDatabaseHelper;
+import com.mparticle.internal.database.tables.MParticleDatabaseHelper;
 import com.mparticle.networking.BaseNetworkConnection;
 import com.mparticle.networking.MParticleBaseClientImpl;
 import com.mparticle.testutils.MPLatch;

@@ -6,8 +6,7 @@ import android.content.SharedPreferences;
 import com.mparticle.AccessUtils;
 import com.mparticle.MParticle;
 import com.mparticle.MParticleOptions;
-import com.mparticle.internal.database.tables.mp.SessionTable;
-import com.mparticle.internal.networking.BaseMPMessage;
+import com.mparticle.internal.database.tables.SessionTable;
 import com.mparticle.testutils.BaseCleanInstallEachTest;
 
 import junit.framework.Assert;
@@ -88,7 +87,7 @@ public class MessageManagerTests extends BaseCleanInstallEachTest {
         session.start(mContext);
         getMessageManager().startSession(session);
         com.mparticle.internal.AccessUtils.awaitMessageHandler();
-        BaseMPMessage message = getMessageManager().getMParticleDBManager().getSessionForSessionEndMessage(session.mSessionID, null, session.getMpids());
+        MessageManager.BaseMPMessage message = getMessageManager().getMParticleDBManager().getSessionForSessionEndMessage(session.mSessionID, null, session.getMpids());
         Assert.assertNotNull(message);
         getMessageManager().getMParticleDBManager().updateSessionStatus(session.mSessionID, SessionTable.SessionTableColumns.STATUS);
         message = getMessageManager().getMParticleDBManager().getSessionForSessionEndMessage(session.mSessionID, null , session.getMpids());
