@@ -1385,6 +1385,41 @@ public class MParticle {
     }
 
     /**
+     * Set or remove the integration attributes for a given integration ID.
+     *
+     * Integration attributes are keys and values specific to a given integration. For example,
+     * many integrations have their own internal user/device ID. mParticle will store integration attributes
+     * for a given device, and will be able to use these values for server-to-server communication to services.
+     * This is often useful when used in combination with a server-to-server feed, allowing the feed to be enriched
+     * with the necessary integration attributes to be properly forwarded to the given integration.
+     *
+     * @param integrationId mParticle integration ID. This may be a {@link ServiceProviders} value if it's a kit, or
+     *                      it could be any mParticle integration.
+     * @param attributes a map of attributes that will replace any current attributes. The keys are predefined by mParticle.
+     *                   Please consult with the mParticle docs or your solutions consultant for the correct value. You may
+     *                   also pass a null or empty map here to remove all of the attributes.
+     */
+    public void setIntegrationAttributes(int integrationId, @Nullable Map<String, String> attributes) {
+        this.Internal().getConfigManager().setIntegrationAttributes(integrationId, attributes);
+    }
+
+    /**
+     * Queries the current integration attributes for a given integration ID.
+     *
+     * Integration attributes are keys and values specific to a given integration. For example,
+     * many integrations have their own internal user/device ID. mParticle will store integration attributes
+     * for a given device, and will be able to use these values for server-to-server communication to services.
+     * This is often useful when used in combination with a server-to-server feed, allowing the feed to be enriched
+     * with the necessary integration attributes to be properly forwarded to the given integration.
+     *
+     * @param integrationId mParticle integration ID. This may be a {@link ServiceProviders} value if it's a kit, or
+     *                      it could be any mParticle integration.
+     */
+    @NonNull public Map<String, String> getIntegrationAttributes(int integrationId) {
+        return this.Internal().getConfigManager().getIntegrationAttributes(integrationId);
+    }
+
+    /**
      * This interface defines constants that can be used to interact with specific 3rd-party services.
      *
      * @see #getSurveyUrl(int)

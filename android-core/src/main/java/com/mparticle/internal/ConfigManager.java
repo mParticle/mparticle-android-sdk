@@ -660,7 +660,7 @@ public class ConfigManager {
         return mUserBucket;
     }
 
-    public void setIntegrationAttributes(int kitId, Map<String, String> newAttributes) {
+    public void setIntegrationAttributes(int integrationId, Map<String, String> newAttributes) {
         try {
             JSONObject newJsonAttributes = null;
             if (newAttributes != null && !newAttributes.isEmpty()) {
@@ -673,7 +673,7 @@ public class ConfigManager {
             if (currentJsonAttributes == null) {
                 currentJsonAttributes = new JSONObject();
             }
-            currentJsonAttributes.put(Integer.toString(kitId), newJsonAttributes);
+            currentJsonAttributes.put(Integer.toString(integrationId), newJsonAttributes);
             if (currentJsonAttributes.length() > 0) {
                 sPreferences.edit()
                         .putString(Constants.PrefKeys.INTEGRATION_ATTRIBUTES, currentJsonAttributes.toString())
@@ -688,11 +688,11 @@ public class ConfigManager {
         }
     }
 
-    public Map<String, String> getIntegrationAttributes(int kitId) {
+    public Map<String, String> getIntegrationAttributes(int integrationId) {
         Map<String, String> integrationAttributes = new HashMap<String, String>();
         JSONObject jsonAttributes = getIntegrationAttributes();
         if (jsonAttributes != null) {
-            JSONObject kitAttributes = jsonAttributes.optJSONObject(Integer.toString(kitId));
+            JSONObject kitAttributes = jsonAttributes.optJSONObject(Integer.toString(integrationId));
             if (kitAttributes != null) {
                 try {
                     Iterator<String> keys = kitAttributes.keys();
