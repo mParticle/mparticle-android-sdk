@@ -85,3 +85,6 @@
 [submodule "kits/responsys-kit"]
 	path = kits/responsys-kit
         url = git@github.com:mparticle-integrations/mparticle-android-integration-responsys.git
+[submodule "kits/clevertap-kit"]
+	path = kits/clevertap-kit
+	url = git@github.com:mparticle-integrations/mparticle-android-integration-clevertap.git

@@ -1454,6 +1454,7 @@ public class MParticle {
         int TAPLYTICS = 129;
         int OPTIMIZELY = 54;
         int RESPONSYS = 102;
+        int CLEVERTAP = 135;
         String BROADCAST_ACTIVE = "MPARTICLE_SERVICE_PROVIDER_ACTIVE_";
         String BROADCAST_DISABLED = "MPARTICLE_SERVICE_PROVIDER_DISABLED_";
     }

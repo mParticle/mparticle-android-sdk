@@ -54,6 +54,7 @@ public class KitIntegrationFactory {
         kits.put(MParticle.ServiceProviders.TAPLYTICS,        "com.mparticle.kits.TaplyticsKit");
         kits.put(MParticle.ServiceProviders.OPTIMIZELY,       "com.mparticle.kits.OptimizelyKit");
         kits.put(MParticle.ServiceProviders.RESPONSYS,        "com.mparticle.kits.ResponsysKit");
+        kits.put(MParticle.ServiceProviders.CLEVERTAP,        "com.mparticle.kits.CleverTapKit");
         return kits;
     }
 

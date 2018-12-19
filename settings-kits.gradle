@@ -28,7 +28,8 @@ include (
         ':kits:taplytics-kit',
         ':kits:optimizely-kit',
         ':kits:responsys-kit',
-	':testutils',
+        ':kits:clevertap-kit',
+	    ':testutils',
         ':android-core',
         ':android-kit-base'
 )
