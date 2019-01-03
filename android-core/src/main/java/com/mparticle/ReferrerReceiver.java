@@ -3,6 +3,8 @@ package com.mparticle;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import com.mparticle.internal.Constants;
 import com.mparticle.internal.Logger;
@@ -35,7 +37,7 @@ import com.mparticle.internal.MPUtility;
 public class ReferrerReceiver extends BroadcastReceiver {
     
     @Override
-    public final void onReceive(final Context context, final Intent intent) {
+    public final void onReceive(@NonNull final Context context, @NonNull final Intent intent) {
         setInstallReferrer(context, intent);
     }
 
@@ -54,7 +56,8 @@ public class ReferrerReceiver extends BroadcastReceiver {
         }
     }
 
-    public static Intent getMockInstallReferrerIntent(String referrer) {
+    @Nullable
+    public static Intent getMockInstallReferrerIntent(@NonNull String referrer) {
         if (!MPUtility.isEmpty(referrer)) {
             Intent fakeReferralIntent = new Intent("com.android.vending.INSTALL_REFERRER");
             fakeReferralIntent.putExtra(com.mparticle.internal.Constants.REFERRER, referrer);

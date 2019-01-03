@@ -2,6 +2,7 @@ package com.mparticle.identity;
 
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 
 import com.mparticle.MParticle;
 import com.mparticle.UserAttributeListener;
@@ -108,7 +109,7 @@ public class MParticleUserImpl implements MParticleUser {
     }
 
     @Override
-    public boolean setUserTag(String tag) {
+    public boolean setUserTag(@NonNull String tag) {
         return setUserAttribute(tag, null);
     }
 

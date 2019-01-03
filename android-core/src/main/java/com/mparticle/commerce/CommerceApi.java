@@ -2,6 +2,8 @@ package com.mparticle.commerce;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import com.mparticle.MParticle;
 import com.mparticle.identity.MParticleUser;
@@ -20,10 +22,11 @@ public class CommerceApi {
     private CommerceApi(){}
 
     Context mContext;
-    public CommerceApi(Context context) {
+    public CommerceApi(@NonNull Context context) {
         mContext = context;
     }
 
+    @Nullable
     private Cart cart() {
         MParticleUser user = MParticle.getInstance().Identity().getCurrentUser();
         if (user != null) {
@@ -42,7 +45,7 @@ public class CommerceApi {
      * @param step the checkout progress/step for apps that have a multi-step checkout process
      * @param options a label to associate with the checkout event
      */
-    public synchronized void checkout(int step, String options) {
+    public synchronized void checkout(int step, @Nullable String options) {
         Cart cart = cart();
         if (cart == null) {
             Logger.error("Unable to log checkout event - no mParticle user identified.");
@@ -95,7 +98,7 @@ public class CommerceApi {
      *
      * @param attributes the attributes to associate with this purchase
      */
-    public void purchase(TransactionAttributes attributes) {
+    public void purchase(@NonNull TransactionAttributes attributes) {
         purchase(attributes, false);
     }
 
@@ -108,7 +111,7 @@ public class CommerceApi {
      * @param attributes the attributes to associate with this purchase
      * @param clearCart boolean determining if the cart should remove its contents after the purchase
      */
-    public synchronized void purchase(TransactionAttributes attributes, boolean clearCart) {
+    public synchronized void purchase(@NonNull TransactionAttributes attributes, boolean clearCart) {
         Cart cart = cart();
         if (cart == null) {
             Logger.error("Unable to log purchase event - no mParticle user identified.");
@@ -135,7 +138,7 @@ public class CommerceApi {
      *
      * @param attributes the attributes to associate with this refund. Typically at least the transaction ID is required.
      */
-    public void refund(TransactionAttributes attributes, boolean clearCart) {
+    public void refund(@NonNull TransactionAttributes attributes, boolean clearCart) {
         Cart cart = cart();
         if (cart == null) {
             Logger.error("Unable to log refund event - no mParticle user identified.");

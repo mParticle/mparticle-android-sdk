@@ -72,29 +72,29 @@ public class MParticle {
      * Used to delegate messages, events, user actions, etc on to embedded kits.
      */
 
-    protected KitFrameworkWrapper mKitManager;
+    @NonNull protected KitFrameworkWrapper mKitManager;
     /**
      * The state manager is primarily concerned with Activity lifecycle and app visibility in order to manage sessions,
      * automatically log screen views, and pass lifecycle information on top embedded kits.
      */
-    protected AppStateManager mAppStateManager;
+    @NonNull protected AppStateManager mAppStateManager;
 
-    protected ConfigManager mConfigManager;
-    protected MessageManager mMessageManager;
-    private static volatile MParticle instance;
-    protected SharedPreferences mPreferences;
-    protected MPLocationListener mLocationListener;
-    private Context mAppContext;
-    protected MPMessagingAPI mMessaging;
-    protected MPMediaAPI mMedia;
-    protected CommerceApi mCommerce;
-    protected MParticleDBManager mDatabaseManager;
-    protected volatile AttributionListener mAttributionListener;
-    protected IdentityApi mIdentityApi;
+    @NonNull protected ConfigManager mConfigManager;
+    @NonNull protected MessageManager mMessageManager;
+    @NonNull private static volatile MParticle instance;
+    @NonNull protected SharedPreferences mPreferences;
+    @NonNull protected MPLocationListener mLocationListener;
+    @NonNull private Context mAppContext;
+    @NonNull protected MPMessagingAPI mMessaging;
+    @NonNull protected MPMediaAPI mMedia;
+    @NonNull protected CommerceApi mCommerce;
+    @NonNull protected MParticleDBManager mDatabaseManager;
+    @NonNull protected volatile AttributionListener mAttributionListener;
+    @NonNull protected IdentityApi mIdentityApi;
     static volatile boolean sAndroidIdDisabled;
     static volatile boolean sDevicePerformanceMetricsDisabled;
-    protected boolean locationTrackingEnabled = false;
-    protected Internal mInternal = new Internal();
+    @NonNull protected boolean locationTrackingEnabled = false;
+    @NonNull protected Internal mInternal = new Internal();
 
 
     protected MParticle() { }
@@ -140,7 +140,8 @@ public class MParticle {
      * @param context the Activity that is creating the instance
      * @return An instance of the mParticle SDK configured with your API key
      */
-    private static MParticle getInstance(Context context, MParticleOptions options) {
+    @NonNull
+    private static MParticle getInstance(@NonNull Context context, @NonNull MParticleOptions options) {
         if (instance == null) {
             synchronized (MParticle.class) {
                 if (instance == null) {
@@ -210,6 +211,7 @@ public class MParticle {
      *
      * @return An instance of the mParticle SDK configured with your API key
      */
+    @Nullable
     public static MParticle getInstance() {
         if (instance == null) {
             Logger.error("Failed to get MParticle instance, getInstance() called prior to start().");
@@ -225,7 +227,7 @@ public class MParticle {
      *
      * @param instance
      */
-    public static void setInstance(MParticle instance) {
+    public static void setInstance(@Nullable MParticle instance) {
         MParticle.instance = instance;
     }
 
@@ -256,7 +258,7 @@ public class MParticle {
      *
      * @param deviceImei a string representing the device's current IMEI, or null to remove clear it.
      */
-    public static void setDeviceImei(String deviceImei) {
+    public static void setDeviceImei(@Nullable String deviceImei) {
         DeviceAttributes.setDeviceImei(deviceImei);
     }
 
@@ -271,6 +273,7 @@ public class MParticle {
      *
      * @return a string representing the device's current IMEI, or null if not set.
      */
+    @Nullable
     public static String getDeviceImei() {
         return DeviceAttributes.getDeviceImei();
     }
@@ -298,6 +301,7 @@ public class MParticle {
      * Query for a read-only Session API object.
      *
      */
+    @Nullable
     public Session getCurrentSession() {
         InternalSession session = mAppStateManager.getSession();
         if (session == null || !session.isActive() || session.isTimedOut(mConfigManager.getSessionTimeout())) {
@@ -322,7 +326,7 @@ public class MParticle {
      * Manually set the install referrer. This will replace any install referrer that was
      * automatically retrieved upon installation from Google Play.
      */
-    public void setInstallReferrer(String referrer) {
+    public void setInstallReferrer(@Nullable String referrer) {
         InstallReferrerHelper.setInstallReferrer(mAppContext, referrer);
     }
 
@@ -331,6 +335,7 @@ public class MParticle {
      *
      * @return The current Install Referrer
      */
+    @Nullable
     public String getInstallReferrer() {
         return InstallReferrerHelper.getInstallReferrer(mAppContext);
     }
@@ -340,7 +345,7 @@ public class MParticle {
      *
      * @param event the event object to log
      */
-    public void logEvent(MPEvent event) {
+    public void logEvent(@NonNull MPEvent event) {
         if (mConfigManager.isEnabled() && checkEventLimit()) {
             mAppStateManager.ensureActiveSession();
             mMessageManager.logEvent(event, mAppStateManager.getCurrentActivityName());
@@ -357,7 +362,7 @@ public class MParticle {
      *
      * @see CommerceEvent
      */
-    public void logEvent(CommerceEvent event) {
+    public void logEvent(@NonNull CommerceEvent event) {
         if (mConfigManager.isEnabled() && checkEventLimit()) {
             MParticleUser user = MParticle.getInstance().Identity().getCurrentUser();
             if (user != null) {
@@ -392,7 +397,7 @@ public class MParticle {
      * @param eventName      An event name to be associated with this increase in LTV (optional)
      * @param contextInfo    An MPProduct or any set of data to associate with this increase in LTV (optional)
      */
-    public void logLtvIncrease(BigDecimal valueIncreased, String eventName, Map<String, String> contextInfo) {
+    public void logLtvIncrease(@NonNull BigDecimal valueIncreased, @Nullable String eventName, @Nullable Map<String, String> contextInfo) {
         if (valueIncreased == null) {
             Logger.error( "ValueIncreased must not be null.");
             return;
@@ -414,7 +419,7 @@ public class MParticle {
      *
      * @param screenName the name of the screen to be tracked
      */
-    public void logScreen(String screenName) {
+    public void logScreen(@NonNull String screenName) {
         logScreen(screenName, null);
     }
 
@@ -424,7 +429,7 @@ public class MParticle {
      * @param screenName the name of the screen to be tracked
      * @param eventData  a Map of data attributes to associate with this screen view
      */
-    public void logScreen(String screenName, Map<String, String> eventData) {
+    public void logScreen(@NonNull String screenName, @Nullable Map<String, String> eventData) {
         logScreen(new MPEvent.Builder(screenName).info(eventData).build().setScreenEvent(true));
     }
 
@@ -434,7 +439,7 @@ public class MParticle {
      *
      * @param screenEvent an event object, the name of the event will be used as the screen name
      */
-    public void logScreen(MPEvent screenEvent) {
+    public void logScreen(@NonNull MPEvent screenEvent) {
         screenEvent.setScreenEvent(true);
         if (MPUtility.isEmpty(screenEvent.getEventName())) {
             Logger.error( "screenName is required for logScreen");
@@ -466,7 +471,7 @@ public class MParticle {
      *
      * @param breadcrumb
      */
-    public void leaveBreadcrumb(String breadcrumb) {
+    public void leaveBreadcrumb(@NonNull String breadcrumb) {
         if (mConfigManager.isEnabled()) {
             if (MPUtility.isEmpty(breadcrumb)) {
                 Logger.error( "breadcrumb is required for leaveBreadcrumb");
@@ -488,7 +493,7 @@ public class MParticle {
      *
      * @param message the name of the error event to be tracked
      */
-    public void logError(String message) {
+    public void logError(@NonNull String message) {
         logError(message, null);
     }
 
@@ -498,7 +503,7 @@ public class MParticle {
      * @param message   the name of the error event to be tracked
      * @param errorAttributes a Map of data attributes to associate with this error
      */
-    public void logError(String message, Map<String, String> errorAttributes) {
+    public void logError(@NonNull String message, @Nullable Map<String, String> errorAttributes) {
         if (mConfigManager.isEnabled()) {
             if (MPUtility.isEmpty(message)) {
                 Logger.error( "message is required for logErrorEvent");
@@ -516,7 +521,7 @@ public class MParticle {
         }
     }
 
-    public void logNetworkPerformance(String url, long startTime, String method, long length, long bytesSent, long bytesReceived, String requestString, int responseCode) {
+    public void logNetworkPerformance(@NonNull String url, long startTime, @NonNull String method, long length, long bytesSent, long bytesReceived, @Nullable String requestString, int responseCode) {
         if (mConfigManager.isEnabled()) {
             mAppStateManager.ensureActiveSession();
             if (checkEventLimit()) {
@@ -532,7 +537,7 @@ public class MParticle {
      *
      * @param exception an Exception
      */
-    public void logException(Exception exception) {
+    public void logException(@NonNull Exception exception) {
         logException(exception, null, null);
     }
 
@@ -542,7 +547,7 @@ public class MParticle {
      * @param exception an Exception
      * @param eventData a Map of data attributes
      */
-    public void logException(Exception exception, Map<String, String> eventData) {
+    public void logException(@NonNull Exception exception, @Nullable Map<String, String> eventData) {
         logException(exception, eventData, null);
     }
 
@@ -557,6 +562,7 @@ public class MParticle {
      * Retrieve the current attribution listener
      *
      */
+    @Nullable
     public AttributionListener getAttributionListener() {
         return mAttributionListener;
     }
@@ -566,6 +572,7 @@ public class MParticle {
      *
      * @return the current attribution results
      */
+    @NonNull
     public Map<Integer, AttributionResult> getAttributionResults() {
         return mKitManager.getAttributionResults();
     }
@@ -578,7 +585,7 @@ public class MParticle {
      * @param eventData a Map of data attributes
      * @param message   the name of the error event to be tracked
      */
-    public void logException(Exception exception, Map<String, String> eventData, String message) {
+    public void logException(@NonNull Exception exception, @Nullable Map<String, String> eventData, @Nullable String message) {
         if (mConfigManager.isEnabled()) {
             mAppStateManager.ensureActiveSession();
             if (checkEventLimit()) {
@@ -604,7 +611,7 @@ public class MParticle {
      * @param minDistance the minimum distance (in meters) to trigger an update
      */
     @SuppressLint("MissingPermission")
-    public void enableLocationTracking(String provider, long minTime, long minDistance) {
+    public void enableLocationTracking(@NonNull String provider, long minTime, long minDistance) {
         if (mConfigManager.isEnabled()) {
             try {
                 LocationManager locationManager = (LocationManager) mAppContext.getSystemService(Context.LOCATION_SERVICE);
@@ -683,7 +690,7 @@ public class MParticle {
      *
      * @param location
      */
-    public void setLocation(Location location) {
+    public void setLocation(@NonNull Location location) {
         mMessageManager.setLocation(location);
         mKitManager.setLocation(location);
 
@@ -695,7 +702,7 @@ public class MParticle {
      * @param key   the attribute key
      * @param value the attribute value. This value will be converted to its String representation as dictated by its <code>toString()</code> method.
      */
-    public void setSessionAttribute(String key, Object value) {
+    public void setSessionAttribute(@NonNull String key, @Nullable Object value) {
         if (key == null){
             Logger.warning("setSessionAttribute called with null key. Ignoring...");
             return;
@@ -719,7 +726,7 @@ public class MParticle {
      * @param key   the attribute key
      * @param value the attribute value
      */
-    public void incrementSessionAttribute(String key, int value) {
+    public void incrementSessionAttribute(@NonNull String key, int value) {
         if (key == null){
             Logger.warning("incrementSessionAttribute called with null key. Ignoring...");
             return;
@@ -739,6 +746,7 @@ public class MParticle {
      *
      * @return the opt-out status
      */
+    @NonNull
     public Boolean getOptOut() {
         return mConfigManager.getOptedOut();
     }
@@ -748,7 +756,7 @@ public class MParticle {
      *
      * @param optOutStatus set to <code>true</code> to opt out of event tracking
      */
-    public void setOptOut(Boolean optOutStatus) {
+    public void setOptOut(@NonNull Boolean optOutStatus) {
         if (optOutStatus != null) {
             if (optOutStatus != mConfigManager.getOptedOut()) {
                 if (!optOutStatus) {
@@ -776,6 +784,7 @@ public class MParticle {
      *
      * @see MParticle.ServiceProviders
      */
+    @Nullable
     public Uri getSurveyUrl(final int kitId) {
         return mKitManager.getSurveyUrl(kitId, null, null);
     }
@@ -785,6 +794,7 @@ public class MParticle {
      *
      * @return the current environment, either production or development
      */
+    @NonNull
     public Environment getEnvironment() {
         return ConfigManager.getEnvironment();
     }
@@ -809,6 +819,7 @@ public class MParticle {
      *
      * @return true if event count is below limit
      */
+    @NonNull
     private Boolean checkEventLimit() {
         return mAppStateManager.getSession().checkEventLimit();
     }
@@ -818,7 +829,7 @@ public class MParticle {
      *
      * @return The current setting of automatic screen tracking.
      */
-
+    @NonNull
     public Boolean isAutoTrackingEnabled() {
         return mConfigManager.isAutoTrackingEnabled();
     }
@@ -832,7 +843,7 @@ public class MParticle {
         return mConfigManager.getSessionTimeout() / 1000;
     }
 
-    public void getUserSegments(long timeout, String endpointId, SegmentListener listener) {
+    public void getUserSegments(long timeout, @NonNull String endpointId, @NonNull SegmentListener listener) {
         if (mMessageManager != null && mMessageManager.mUploadHandler != null) {
             mMessageManager.mUploadHandler.fetchSegments(timeout, endpointId, listener);
         }
@@ -845,7 +856,7 @@ public class MParticle {
      */
     @SuppressLint("AddJavascriptInterface")
     @RequiresApi(17)
-    public void registerWebView(WebView webView) {
+    public void registerWebView(@NonNull WebView webView) {
         if (webView != null) {
             webView.addJavascriptInterface(
                     new MParticleJSInterface(),
@@ -864,7 +875,7 @@ public class MParticle {
      *
      * @param level
      */
-    public static void setLogLevel(LogLevel level) {
+    public static void setLogLevel(@NonNull LogLevel level) {
         if (level != null) {
             Logger.setMinLogLevel(level, true);
         }
@@ -875,6 +886,7 @@ public class MParticle {
      *
      * @return a helper object that allows for interaction with the Messaging APIs
      */
+    @NonNull
     public MPMessagingAPI Messaging() {
         if (mMessaging == null){
             mMessaging = new MPMessagingAPI(mAppContext);
@@ -900,6 +912,7 @@ public class MParticle {
      *
      * @return returns a global CommerceApi instance.
      */
+    @NonNull
     public CommerceApi Commerce() {
         return mCommerce;
     }
@@ -909,6 +922,7 @@ public class MParticle {
      *
      * @return a helper object that allows for interaction with the Media APIs
      */
+    @NonNull
     public MPMediaAPI Media() {
         if (mMedia == null){
             mMedia = new MPMediaAPI(mAppContext, new MediaCallbacks() {
@@ -988,7 +1002,7 @@ public class MParticle {
         return mKitManager.getKitInstance(kitId);
     }
 
-    public void logPushRegistration(String instanceId, String senderId) {
+    public void logPushRegistration(@NonNull String instanceId, @NonNull String senderId) {
         mAppStateManager.ensureActiveSession();
         PushRegistrationHelper.PushRegistration registration = new PushRegistrationHelper.PushRegistration(instanceId, senderId);
         String oldInstanceId = mConfigManager.getPushInstanceId();
@@ -1002,7 +1016,7 @@ public class MParticle {
      * Logs a Push Notification displayed to the User
      * @param intent
      */
-    public void logNotification(Intent intent) {
+    public void logNotification(@NonNull Intent intent) {
         if (mConfigManager.isEnabled()) {
             try {
                 ProviderCloudMessage message = ProviderCloudMessage.createMessage(intent, ConfigManager.getPushKeys(mAppContext));
@@ -1013,7 +1027,7 @@ public class MParticle {
         }
     }
 
-    void logNotification(ProviderCloudMessage cloudMessage, boolean startSession, String appState, int behavior) {
+    void logNotification(@NonNull ProviderCloudMessage cloudMessage, boolean startSession, @NonNull String appState, int behavior) {
         if (mConfigManager.isEnabled()) {
             if (startSession){
                 mAppStateManager.ensureActiveSession();
@@ -1022,7 +1036,7 @@ public class MParticle {
         }
     }
 
-    void logNotification(ProviderCloudMessage cloudMessage, boolean startSession, String appState) {
+    void logNotification(@NonNull ProviderCloudMessage cloudMessage, boolean startSession, @NonNull String appState) {
         if (mConfigManager.isEnabled()) {
             if (startSession){
                 mAppStateManager.ensureActiveSession();
@@ -1035,7 +1049,7 @@ public class MParticle {
      * Logs a Push Notification has been tapped or opened
      * @param intent
      */
-    public void logNotificationOpened(Intent intent) {
+    public void logNotificationOpened(@NonNull Intent intent) {
         try {
             logNotification(ProviderCloudMessage.createMessage(intent, ConfigManager.getPushKeys(mAppContext)),
                     true, MParticle.getAppState(), ProviderCloudMessage.FLAG_READ | ProviderCloudMessage.FLAG_DIRECT_OPEN);
@@ -1044,6 +1058,7 @@ public class MParticle {
         }
     }
 
+    @NonNull
     public Internal Internal() {
         return mInternal;
     }
@@ -1097,7 +1112,7 @@ public class MParticle {
      *
      * @param context
      */
-    public static void reset(Context context) {
+    public static void reset(@NonNull Context context) {
         synchronized (MParticle.class) {
             //"commit" will force all async writes stemming from an "apply" call to finish. We need to do this
             //because we need to ensure that the "getMpids()" call is returning all calls that have been made
@@ -1108,7 +1123,7 @@ public class MParticle {
                     instance.disableLocationTracking();
                 }
                 instance.mMessageManager.disableHandlers();
-                instance.mIdentityApi.reset();
+                instance.mIdentityApi.Internal().reset();
                 MParticle.setInstance(null);
             }
 
@@ -1155,14 +1170,19 @@ public class MParticle {
      * @param context
      * @param callback A callback that will trigger when the SDK has been fully reset
      */
-    public static void reset(final Context context, final ResetListener callback) {
+    public static void reset(@NonNull final Context context, @Nullable final ResetListener callback) {
         final HandlerThread handlerThread = new HandlerThread("mParticleShutdownHandler");
             handlerThread.start();
             new Handler(handlerThread.getLooper()).post(new Runnable() {
                 @Override
                 public void run() {
                     reset(context);
-                    callback.onReset();
+                    if (callback != null) {
+                        try {
+                            callback.onReset();
+                        } catch (Exception e) {
+                        }
+                    }
                     handlerThread.quit();
                 }
             });
@@ -1175,6 +1195,7 @@ public class MParticle {
     public enum EventType {
         Unknown, Navigation, Location, Search, Transaction, UserContent, UserPreference, Social, Other;
 
+        @NonNull
         public String toString() {
             return name();
         }
@@ -1199,6 +1220,7 @@ public class MParticle {
          */
         KnownUpgrade;
 
+        @NonNull
         public String toString() {
             return name();
         }
@@ -1231,6 +1253,7 @@ public class MParticle {
             this.value = value;
         }
 
+        @NonNull
         public static IdentityType parseInt(int val) {
             switch (val) {
                 case 1:
@@ -1461,8 +1484,8 @@ public class MParticle {
         int OPTIMIZELY = 54;
         int RESPONSYS = 102;
         int CLEVERTAP = 135;
-        String BROADCAST_ACTIVE = "MPARTICLE_SERVICE_PROVIDER_ACTIVE_";
-        String BROADCAST_DISABLED = "MPARTICLE_SERVICE_PROVIDER_DISABLED_";
+        @NonNull String BROADCAST_ACTIVE = "MPARTICLE_SERVICE_PROVIDER_ACTIVE_";
+        @NonNull String BROADCAST_DISABLED = "MPARTICLE_SERVICE_PROVIDER_DISABLED_";
     }
 
     /**
@@ -1476,43 +1499,43 @@ public class MParticle {
         /**
          * A special attribute string to specify the mobile number of the consumer's device
          */
-        String MOBILE_NUMBER = "$Mobile";
+        @NonNull String MOBILE_NUMBER = "$Mobile";
         /**
          * A special attribute string to specify the user's gender.
          */
-        String GENDER = "$Gender";
+        @NonNull String GENDER = "$Gender";
         /**
          * A special attribute string to specify the user's age.
          */
-        String AGE = "$Age";
+        @NonNull String AGE = "$Age";
         /**
          * A special attribute string to specify the user's country.
          */
-        String COUNTRY = "$Country";
+        @NonNull String COUNTRY = "$Country";
         /**
          * A special attribute string to specify the user's zip code.
          */
-        String ZIPCODE = "$Zip";
+        @NonNull String ZIPCODE = "$Zip";
         /**
          * A special attribute string to specify the user's city.
          */
-        String CITY = "$City";
+        @NonNull String CITY = "$City";
         /**
          * A special attribute string to specify the user's state or region.
          */
-        String STATE = "$State";
+        @NonNull String STATE = "$State";
         /**
          * A special attribute string to specify the user's street address and apartment number.
          */
-        String ADDRESS = "$Address";
+        @NonNull String ADDRESS = "$Address";
         /**
          * A special attribute string to specify the user's first name.
          */
-        String FIRSTNAME = "$FirstName";
+        @NonNull String FIRSTNAME = "$FirstName";
         /**
          * A special attribute string to specify the user's last name.
          */
-        String LASTNAME = "$LastName";
+        @NonNull String LASTNAME = "$LastName";
     }
 
     public interface ResetListener {
@@ -1526,14 +1549,17 @@ public class MParticle {
          * The ConfigManager is tasked with incorporating server-based, run-time, and XML configuration,
          * and surfacing the result/winner.
          */
+        @NonNull
         public ConfigManager getConfigManager() {
             return mConfigManager;
         }
 
+        @NonNull
         public AppStateManager getAppStateManager() {
             return MParticle.this.mAppStateManager;
         }
 
+        @NonNull
         public KitFrameworkWrapper getKitManager() {
             return mKitManager;
         }

@@ -1,5 +1,6 @@
 package com.mparticle.identity;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
@@ -36,6 +37,7 @@ public class IdentityApi {
     ConfigManager mConfigManager;
     MessageManager mMessageManager;
     KitManager mKitManager;
+    private Internal mInternal = new Internal();
 
     MParticleUserDelegate mUserDelegate;
     private MParticleIdentityClient mApiClient;
@@ -45,6 +47,7 @@ public class IdentityApi {
 
     IdentityApi() {}
 
+    @SuppressLint("UnknownNullness")
     public IdentityApi(Context context, AppStateManager appStateManager, MessageManager messageManager, ConfigManager configManager, KitManager kitManager) {
         this.mContext = context;
         this.mBackgroundHandler = messageManager.mUploadHandler;
@@ -79,7 +82,7 @@ public class IdentityApi {
      * @param mpid the desired MParticleUser's MPID
      */
     @Nullable
-    public MParticleUser getUser(Long mpid) {
+    public MParticleUser getUser(@NonNull Long mpid) {
             if (!Constants.TEMPORARY_MPID.equals(mpid) && mConfigManager.mpidExists(mpid)) {
                 return MParticleUserImpl.getInstance(mContext, mpid, mUserDelegate);
             } else {
@@ -87,6 +90,7 @@ public class IdentityApi {
         }
     }
 
+    @NonNull
     public List<MParticleUser> getUsers() {
         List<MParticleUser> users = new ArrayList<MParticleUser>();
         Set<Long> mpids = mConfigManager.getMpids();
@@ -97,6 +101,7 @@ public class IdentityApi {
         return users;
     }
 
+    @NonNull
     public String getDeviceApplicationStamp() {
         return mConfigManager.getDeviceApplicationStamp();
     }
@@ -107,7 +112,7 @@ public class IdentityApi {
      *
      * @see IdentityStateListener
      */
-    public void addIdentityStateListener(IdentityStateListener listener) {
+    public void addIdentityStateListener(@NonNull IdentityStateListener listener) {
         identityStateListeners.add(listener);
     }
 
@@ -117,7 +122,7 @@ public class IdentityApi {
      *
      * @see IdentityStateListener
      */
-    public void removeIdentityStateListener(IdentityStateListener listener) {
+    public void removeIdentityStateListener(@NonNull IdentityStateListener listener) {
         identityStateListeners.remove(listener);
     }
 
@@ -129,6 +134,7 @@ public class IdentityApi {
      * @see MParticleTask and
      * @see IdentityApiResult
      */
+    @NonNull
     public MParticleTask<IdentityApiResult> logout() {
         return logout(null);
     }
@@ -143,7 +149,8 @@ public class IdentityApi {
      * @see MParticleTask and
      * @see IdentityApiResult
      */
-    public MParticleTask<IdentityApiResult> logout(final IdentityApiRequest logoutRequest) {
+    @NonNull
+    public MParticleTask<IdentityApiResult> logout(@Nullable final IdentityApiRequest logoutRequest) {
         return makeIdentityRequest(logoutRequest, new IdentityNetworkRequestRunnable() {
             @Override
             public IdentityHttpResponse request(IdentityApiRequest request) throws Exception {
@@ -165,6 +172,7 @@ public class IdentityApi {
      * @see MParticleTask and
      * @see IdentityApiResult
      */
+    @NonNull
     public MParticleTask<IdentityApiResult> login() {
         return login(null);
     }
@@ -179,6 +187,7 @@ public class IdentityApi {
      * @see MParticleTask and
      * @see IdentityApiResult
      */
+    @NonNull
     public MParticleTask<IdentityApiResult> login(@Nullable final IdentityApiRequest loginRequest) {
         return makeIdentityRequest(loginRequest, new IdentityNetworkRequestRunnable() {
             @Override
@@ -203,7 +212,8 @@ public class IdentityApi {
      * @see MParticleTask and
      * @see IdentityApiResult
      */
-    public MParticleTask<IdentityApiResult> identify(final IdentityApiRequest identifyRequest) {
+    @NonNull
+    public MParticleTask<IdentityApiResult> identify(@Nullable final IdentityApiRequest identifyRequest) {
         return makeIdentityRequest(identifyRequest, new IdentityNetworkRequestRunnable() {
             @Override
             public IdentityHttpResponse request(IdentityApiRequest request) throws Exception {
@@ -227,6 +237,7 @@ public class IdentityApi {
      *
      * @see BaseIdentityTask
      */
+    @NonNull
     public BaseIdentityTask modify(@NonNull final IdentityApiRequest updateRequest) {
         boolean devMode = MPUtility.isDevEnv() || MPUtility.isAppDebuggable(mContext);
         final BaseIdentityTask task = new BaseIdentityTask();
@@ -280,7 +291,12 @@ public class IdentityApi {
         return task;
     }
 
-    public void reset() {
+    @NonNull
+    public Internal Internal() {
+        return mInternal;
+    }
+
+    private void reset() {
         identityStateListeners = new HashSet<IdentityStateListener>();
         mBackgroundHandler.removeCallbacksAndMessages(null);
         mBackgroundHandler.disable(true);
@@ -382,6 +398,12 @@ public class IdentityApi {
                     }
                 });
             }
+        }
+    }
+
+    public class Internal {
+        public void reset() {
+            IdentityApi.this.reset();
         }
     }
 }

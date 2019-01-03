@@ -1,5 +1,8 @@
 package com.mparticle.identity;
 
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+
 import com.mparticle.internal.MPUtility;
 
 import org.json.JSONArray;
@@ -16,30 +19,30 @@ public final class IdentityHttpResponse {
     private int httpCode;
     private boolean loggedIn;
 
-    public static final String MPID = "mpid";
-    public static final String CONTEXT = "context";
-    public static final String ERRORS = "errors";
-    public static final String LOGGED_IN = "is_logged_in";
-    public static final String CODE = "code";
-    public static final String MESSAGE = "message";
+    @NonNull public static final String MPID = "mpid";
+    @NonNull public static final String CONTEXT = "context";
+    @NonNull public static final String ERRORS = "errors";
+    @NonNull public static final String LOGGED_IN = "is_logged_in";
+    @NonNull public static final String CODE = "code";
+    @NonNull public static final String MESSAGE = "message";
 
-    public static final String UNKNOWN = "UNKNOWN";
+    @NonNull public static final String UNKNOWN = "UNKNOWN";
 
     private IdentityHttpResponse() {}
 
-    public IdentityHttpResponse(int code, long mpid, String context, ArrayList<Error> errors) {
+    public IdentityHttpResponse(int code, long mpid, @Nullable String context, @Nullable ArrayList<Error> errors) {
         this.httpCode = code;
         this.mpId = mpid;
         this.context = context;
         this.errors = errors == null ? new ArrayList<Error>() : new ArrayList<Error>(errors);
     }
 
-    public IdentityHttpResponse(int code, String errorString) {
+    public IdentityHttpResponse(int code, @NonNull String errorString) {
         this.httpCode = code;
         this.errors.add(new Error(UNKNOWN, errorString));
     }
 
-    public IdentityHttpResponse(int httpCode, JSONObject jsonObject) throws JSONException {
+    public IdentityHttpResponse(int httpCode, @Nullable JSONObject jsonObject) throws JSONException {
         this.httpCode = httpCode;
         if (!MPUtility.isEmpty(jsonObject)) {
             if (jsonObject.has(MPID)) {
@@ -72,6 +75,7 @@ public final class IdentityHttpResponse {
         return httpCode == 200;
     }
 
+    @NonNull
     public List<Error> getErrors() {
         return errors;
     }
@@ -80,6 +84,7 @@ public final class IdentityHttpResponse {
         return mpId;
     }
 
+    @Nullable
     public String getContext() {
         return context;
     }
@@ -93,16 +98,17 @@ public final class IdentityHttpResponse {
     }
 
     public static class Error {
-        public final String message;
-        public final String code;
+        @NonNull public final String message;
+        @NonNull public final String code;
 
-        public Error(String errorCode, String message) {
+        public Error(@NonNull String errorCode, @NonNull String message) {
             this.code = errorCode;
             this.message = message;
         }
     }
 
     @Override
+    @NonNull
     public String toString() {
         StringBuilder builder = new StringBuilder();
         builder.append("Identity Response:\n");

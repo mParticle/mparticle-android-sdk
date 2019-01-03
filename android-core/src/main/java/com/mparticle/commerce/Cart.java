@@ -2,6 +2,8 @@ package com.mparticle.commerce;
 
 
 import android.content.Context;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import com.mparticle.MParticle;
 import com.mparticle.identity.MParticleUser;
@@ -39,7 +41,7 @@ public final class Cart {
     private long userId;
     private Context mContext;
 
-    public Cart(Context context, long userId) {
+    public Cart(@NonNull Context context, long userId) {
         mContext = context;
         productList = new LinkedList<Product>();
         this.userId = userId;
@@ -62,7 +64,7 @@ public final class Cart {
      *
      * @param cartJson a JSON-encoded string acquired from {@link #toString()}
      */
-    public synchronized void loadFromString(String cartJson) {
+    public synchronized void loadFromString(@NonNull String cartJson) {
         if (cartJson != null) {
             try {
                 JSONObject cartJsonObject = new JSONObject(cartJson);
@@ -87,6 +89,7 @@ public final class Cart {
      * @see #loadFromString(String)
      */
     @Override
+    @NonNull
     public synchronized String toString() {
         JSONObject cartJsonObject = new JSONObject();
         JSONArray products = new JSONArray();
@@ -108,6 +111,7 @@ public final class Cart {
      *
      * @return the Cart object for method chaining
      */
+    @NonNull
     public synchronized Cart clear() {
         productList.clear();
         save();
@@ -125,7 +129,8 @@ public final class Cart {
      * @param name the product name
      * @return a Product object, or null if no matching Products were found.
      */
-    public synchronized Product getProduct(String name) {
+    @Nullable
+    public synchronized Product getProduct(@Nullable String name) {
         for (int i = 0; i < productList.size(); i++) {
             if (productList.get(i).getName() != null && productList.get(i).getName().equalsIgnoreCase(name)) {
                 return productList.get(i);
@@ -142,6 +147,7 @@ public final class Cart {
      *
      * @return an {@code UnmodifiableCollection} of Products in the Cart
      */
+    @NonNull
     public List<Product> products() {
         return Collections.unmodifiableList(productList);
     }
@@ -157,7 +163,8 @@ public final class Cart {
      * @return the Cart object, useful for chaining several commands
      *
      */
-    public synchronized Cart remove(Product product) {
+    @NonNull
+    public synchronized Cart remove(@NonNull Product product) {
         return remove(product, true);
     }
 
@@ -172,7 +179,8 @@ public final class Cart {
      * @return the Cart object, useful for chaining several commands
      *
      */
-    public synchronized Cart remove(Product product, boolean logEvent) {
+    @NonNull
+    public synchronized Cart remove(@NonNull Product product, boolean logEvent) {
         if (product != null && productList.remove(product)) {
             save();
         }
@@ -216,7 +224,8 @@ public final class Cart {
      * @return the Cart object, useful for chaining several commands
      *
      */
-    public synchronized Cart addAll(List<Product> newProducts, boolean logEvent) {
+    @NonNull
+    public synchronized Cart addAll(@NonNull List<Product> newProducts, boolean logEvent) {
         if (newProducts != null && newProducts.size() > 0 && productList.size() < MAXIMUM_PRODUCT_COUNT) {
             for (Product product : newProducts) {
                 if (product != null && !productList.contains(product)){
@@ -248,7 +257,8 @@ public final class Cart {
      * @return the Cart object, useful for chaining several commands
      *
      */
-    public synchronized Cart add(Product product) {
+    @NonNull
+    public synchronized Cart add(@NonNull Product product) {
         return add(product, true);
     }
 
@@ -265,7 +275,8 @@ public final class Cart {
      * @return the Cart object, useful for chaining several commands
      *
      */
-    public synchronized Cart add(Product product, boolean logEvent) {
+    @NonNull
+    public synchronized Cart add(@NonNull Product product, boolean logEvent) {
         if (product != null && productList.size() < MAXIMUM_PRODUCT_COUNT && !productList.contains(product)) {
             product.updateTimeAdded();
             productList.add(product);
@@ -288,7 +299,7 @@ public final class Cart {
      * @param step the checkout progress/step for apps that have a multi-step checkout process
      * @param options a label to associate with the checkout event
      */
-    public synchronized void checkout(int step, String options) {
+    public synchronized void checkout(int step, @Nullable String options) {
         if (productList != null && productList.size() > 0) {
             CommerceEvent event = new CommerceEvent.Builder(Product.CHECKOUT, productList.get(0))
                     .checkoutStep(step)
@@ -329,7 +340,7 @@ public final class Cart {
      *
      * @param attributes the attributes to associate with this purchase
      */
-    public void purchase(TransactionAttributes attributes) {
+    public void purchase(@NonNull TransactionAttributes attributes) {
         purchase(attributes, false);
     }
 
@@ -342,7 +353,7 @@ public final class Cart {
      * @param attributes the attributes to associate with this purchase
      * @param clearCart boolean determining if the cart should remove its contents after the purchase
      */
-    public synchronized void purchase(TransactionAttributes attributes, boolean clearCart) {
+    public synchronized void purchase(@NonNull TransactionAttributes attributes, boolean clearCart) {
         if (productList != null && productList.size() > 0) {
             CommerceEvent event = new CommerceEvent.Builder(Product.PURCHASE, productList.get(0))
                     .products(productList)
@@ -363,7 +374,7 @@ public final class Cart {
      *
      * @param attributes the attributes to associate with this refund. Typically at least the transaction ID is required.
      */
-    public void refund(TransactionAttributes attributes, boolean clearCart) {
+    public void refund(@NonNull TransactionAttributes attributes, boolean clearCart) {
         if (productList != null && productList.size() > 0) {
             CommerceEvent event = new CommerceEvent.Builder(Product.REFUND, productList.get(0))
                     .products(productList)

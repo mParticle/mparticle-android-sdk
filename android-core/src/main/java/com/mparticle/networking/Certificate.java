@@ -1,5 +1,7 @@
 package com.mparticle.networking;
 
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.util.Base64;
 
 import com.mparticle.internal.Logger;
@@ -17,7 +19,8 @@ public final class Certificate{
         this.certificate = certificate;
     }
 
-    public static Certificate with(String alias, String certificate) {
+    @Nullable
+    public static Certificate with(@NonNull String alias, @NonNull String certificate) {
         if (MPUtility.isEmpty(alias) || MPUtility.isEmpty(certificate)) {
             Logger.warning(String.format("Alias and Certificate values must both be non-empty strings. Unable to build certificate with Alias = %s and Certificate = %s.", alias, certificate));
             return null;
@@ -25,10 +28,12 @@ public final class Certificate{
         return new Certificate(alias, certificate);
     }
 
+    @NonNull
     public String getAlias() {
         return alias;
     }
 
+    @NonNull
     public String getCertificate() {
         return certificate;
     }
@@ -45,6 +50,7 @@ public final class Certificate{
     }
 
     @Override
+    @NonNull
     public String toString() {
         return toJson().toString();
     }

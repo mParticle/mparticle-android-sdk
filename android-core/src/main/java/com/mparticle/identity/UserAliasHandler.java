@@ -1,5 +1,7 @@
 package com.mparticle.identity;
 
+import android.support.annotation.NonNull;
+
 /**
  * Interface which will handle the transition between Users
  */
@@ -10,5 +12,5 @@ public interface UserAliasHandler {
      * @param previousUser the outgoing User
      * @param newUser the incoming User
      */
-    void onUserAlias(MParticleUser previousUser, MParticleUser newUser);
+    void onUserAlias(@NonNull MParticleUser previousUser, @NonNull MParticleUser newUser);
 }

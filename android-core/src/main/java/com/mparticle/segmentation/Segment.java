@@ -1,5 +1,8 @@
 package com.mparticle.segmentation;
 
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 
@@ -13,7 +16,7 @@ public class Segment {
     String name;
     String[] endpoints;
 
-    public Segment(int id, String name, String endpointBlob) {
+    public Segment(int id, @NonNull String name, @NonNull String endpointBlob) {
         this.id = id;
         this.name = name;
         try {
@@ -42,6 +45,7 @@ public class Segment {
      *
      * @return
      */
+    @Nullable
     public String getName(){
         return name;
     }
@@ -51,6 +55,7 @@ public class Segment {
      *
      * @return an array of IDs
      */
+    @NonNull
     public String[] getEndpoints(){
         if (endpoints != null) {
             return endpoints;
@@ -65,6 +70,7 @@ public class Segment {
      * @return Segment summary
      */
     @Override
+    @NonNull
     public String toString() {
         return "Segment ID:  " + id + ", " +
                "Name: " + name + ", " +

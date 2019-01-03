@@ -1,5 +1,8 @@
 package com.mparticle.commerce;
 
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+
 import com.mparticle.MParticle;
 import com.mparticle.internal.Logger;
 import com.mparticle.internal.MPUtility;
@@ -21,16 +24,16 @@ import java.util.Map;
  */
 public final class Product {
 
-    public static final String ADD_TO_CART = "add_to_cart";
-    public static final String REMOVE_FROM_CART = "remove_from_cart";
-    public static final String ADD_TO_WISHLIST = "add_to_wishlist";
-    public static final String REMOVE_FROM_WISHLIST = "remove_from_wishlist";
-    public static final String CHECKOUT = "checkout";
-    public static final String CLICK = "click";
-    public static final String DETAIL = "view_detail";
-    public static final String PURCHASE = "purchase";
-    public static final String REFUND = "refund";
-    public static final String CHECKOUT_OPTION = "checkout_option";
+    @NonNull public static final String ADD_TO_CART = "add_to_cart";
+    @NonNull public static final String REMOVE_FROM_CART = "remove_from_cart";
+    @NonNull public static final String ADD_TO_WISHLIST = "add_to_wishlist";
+    @NonNull public static final String REMOVE_FROM_WISHLIST = "remove_from_wishlist";
+    @NonNull public static final String CHECKOUT = "checkout";
+    @NonNull public static final String CLICK = "click";
+    @NonNull public static final String DETAIL = "view_detail";
+    @NonNull public static final String PURCHASE = "purchase";
+    @NonNull public static final String REFUND = "refund";
+    @NonNull public static final String CHECKOUT_OPTION = "checkout_option";
     private static EqualityComparator mComparator = null;
     private Map<String, String> mCustomAttributes;
     private String mName = null;
@@ -52,6 +55,7 @@ public final class Product {
      *
      * @see com.mparticle.commerce.Product.Builder#customAttributes(Map)
      */
+    @Nullable
     public Map<String, String> getCustomAttributes() {
         return mCustomAttributes;
     }
@@ -67,7 +71,7 @@ public final class Product {
      * @see Cart#remove(Product)
      */
     public interface EqualityComparator {
-        boolean equals(Product product1, Product product2);
+        boolean equals(@Nullable Product product1, @Nullable Product product2);
     }
 
     /**
@@ -75,7 +79,7 @@ public final class Product {
      *
      * @param comparator
      */
-    public static void setEqualityComparator(EqualityComparator comparator) {
+    public static void setEqualityComparator(@Nullable EqualityComparator comparator) {
         mComparator = comparator;
     }
 
@@ -124,6 +128,7 @@ public final class Product {
      *
      * @return the name description of the Product
      */
+    @NonNull
     public String getName() {
         return mName;
     }
@@ -132,6 +137,7 @@ public final class Product {
      *
      * @return the category description of the Product
      */
+    @Nullable
     public String getCategory() {
         return mCategory;
     }
@@ -141,6 +147,7 @@ public final class Product {
      *
      * @return the coupon code associated with the Product
      */
+    @Nullable
     public String getCouponCode() {
         return mCouponCode;
     }
@@ -149,6 +156,7 @@ public final class Product {
      *
      * @return the SKU/ID associated with the Product
      */
+    @NonNull
     public String getSku() {
         return mSku;
     }
@@ -157,6 +165,7 @@ public final class Product {
      *
      * @return the position of the product on the page/product impression list
      */
+    @Nullable
     public Integer getPosition() {
         return mPosition;
     }
@@ -181,7 +190,7 @@ public final class Product {
     }
 
     @Override
-    public boolean equals(Object object) {
+    public boolean equals(@Nullable Object object) {
         if (object == null) {
             return false;
         }
@@ -203,6 +212,7 @@ public final class Product {
      *
      * @return the brand of the Product
      */
+    @Nullable
     public String getBrand() {
         return mBrand;
     }
@@ -212,16 +222,19 @@ public final class Product {
      *
      * @return the variant or version of the Product
      */
+    @Nullable
     public String getVariant() {
         return mVariant;
     }
 
+    @NonNull
     @Override
     public String toString() {
         return toJson().toString();
     }
 
-    public static Product fromString(String json) {
+    @Nullable
+    public static Product fromString(@NonNull String json) {
         try {
             JSONObject jsonObject = new JSONObject(json);
             return fromJson(jsonObject);
@@ -231,6 +244,7 @@ public final class Product {
         return null;
     }
 
+    @Nullable
     static Product fromJson(JSONObject jsonObject) {
         try {
             Product.Builder builder = new Product.Builder(jsonObject.getString("nm"), jsonObject.optString("id", null), jsonObject.optDouble("pr", 0));
@@ -266,6 +280,7 @@ public final class Product {
         return null;
     }
 
+    @NonNull
     JSONObject toJson() {
         try {
             JSONObject productJson = new JSONObject();
@@ -344,7 +359,7 @@ public final class Product {
          * @param sku a SKU or ID that unique identifies this Product
          * @param unitPrice the cost of a single Product
          */
-        public Builder(String name, String sku, double unitPrice) {
+        public Builder(@NonNull String name, @NonNull String sku, double unitPrice) {
             mName = name;
             mSku = sku;
             mPrice = unitPrice;
@@ -356,7 +371,7 @@ public final class Product {
          *
          * @param product an existing Product object
          */
-        public Builder(Product product) {
+        public Builder(@NonNull Product product) {
             this(product.getName(), product.getSku(), product.getUnitPrice());
             mCategory = product.mCategory;
             mCouponCode = product.mCouponCode;
@@ -380,7 +395,8 @@ public final class Product {
          * @param attributes a Map of custom keys and values
          * @return returns this Builder object for use in method chaining
          */
-        public Builder customAttributes(Map<String, String> attributes) {
+        @NonNull
+        public Builder customAttributes(@Nullable Map<String, String> attributes) {
             mCustomAttributes = attributes;
             return this;
         }
@@ -391,7 +407,8 @@ public final class Product {
          * @param category the Product's category
          * @return returns this Builder object for use in method chaining
          */
-        public Builder category(String category) {
+        @NonNull
+        public Builder category(@Nullable String category) {
             mCategory = category;
             return this;
         }
@@ -403,7 +420,8 @@ public final class Product {
          * @param couponCode the Product's coupon code
          * @return returns this Builder object for use in method chaining
          */
-        public Builder couponCode(String couponCode) {
+        @NonNull
+        public Builder couponCode(@Nullable String couponCode) {
             mCouponCode = couponCode;
             return this;
         }
@@ -414,7 +432,8 @@ public final class Product {
          * @param sku the Product's SKU or ID
          * @return returns this Builder object for use in method chaining
          */
-        public Builder sku(String sku) {
+        @NonNull
+        public Builder sku(@NonNull String sku) {
             mSku = sku;
             return this;
         }
@@ -425,7 +444,8 @@ public final class Product {
          * @param name the Product's name
          * @return returns this Builder object for use in method chaining
          */
-        public Builder name(String name) {
+        @NonNull
+        public Builder name(@NonNull String name) {
             mName = name;
             return this;
         }
@@ -436,7 +456,8 @@ public final class Product {
          * @param position the Products position
          * @return returns this Builder object for use in method chaining
          */
-        public Builder position(Integer position) {
+        @NonNull
+        public Builder position(@Nullable Integer position) {
             mPosition = position;
             return this;
         }
@@ -447,6 +468,7 @@ public final class Product {
          * @param price the Product's price
          * @return returns this Builder object for use in method chaining
          */
+        @NonNull
         public Builder unitPrice(double price) {
             mPrice = price;
             return this;
@@ -460,6 +482,7 @@ public final class Product {
          * @param quantity the Product's quantity
          * @return returns this Builder object for use in method chaining
          */
+        @NonNull
         public Builder quantity(double quantity) {
             mQuantity = quantity;
             return this;
@@ -471,7 +494,8 @@ public final class Product {
          * @param brand the Product's brand
          * @return returns this Builder object for use in method chaining
          */
-        public Builder brand(String brand) {
+        @NonNull
+        public Builder brand(@Nullable String brand) {
             mBrand = brand;
             return this;
         }
@@ -482,7 +506,8 @@ public final class Product {
          * @param variant the Product's variant
          * @return returns this Builder object for use in method chaining
          */
-        public Builder variant(String variant) {
+        @NonNull
+        public Builder variant(@Nullable String variant) {
             mVariant = variant;
             return this;
         }
@@ -492,6 +517,7 @@ public final class Product {
          *
          * @return a Product object to be added to a {@link CommerceEvent} or to the {@link Cart}
          */
+        @NonNull
         public Product build() {
             return new Product(this);
         }

@@ -11,6 +11,8 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 
 import com.mparticle.MPService;
@@ -41,21 +43,22 @@ public class ProviderCloudMessage implements Parcelable {
     private boolean mDisplayed;
 
 
-    public ProviderCloudMessage(Bundle extras, JSONArray pushKeys) {
+    public ProviderCloudMessage(@Nullable Bundle extras, @Nullable JSONArray pushKeys) {
         if (extras != null) {
             mExtras = new Bundle(extras);
         }
         mPrimaryText = findProviderMessage(pushKeys);
     }
 
-    public ProviderCloudMessage(Parcel pc) {
+    public ProviderCloudMessage(@NonNull Parcel pc) {
         mExtras = pc.readBundle();
         mActualDeliveryTime = pc.readLong();
         mDisplayed = pc.readInt() == 1;
         mPrimaryText = pc.readString();
     }
 
-    public Notification buildNotification(Context context, long time) {
+    @NonNull
+    public Notification buildNotification(@NonNull Context context, long time) {
         setActualDeliveryTime(time);
         return buildNotification(context);
     }
@@ -86,12 +89,13 @@ public class ProviderCloudMessage implements Parcelable {
         }
     };
 
-
+    @NonNull
     public int getId() {
         return mPrimaryText.hashCode();
     }
 
-    public String getPrimaryMessage(Context context) {
+    @NonNull
+    public String getPrimaryMessage(@NonNull Context context) {
         return mPrimaryText;
     }
 
@@ -100,6 +104,7 @@ public class ProviderCloudMessage implements Parcelable {
      *
      * @return
      */
+    @NonNull
     public JSONObject getRedactedJsonPayload() {
         JSONObject json = new JSONObject();
         Set<String> keys = mExtras.keySet();
@@ -116,7 +121,8 @@ public class ProviderCloudMessage implements Parcelable {
         return json;
     }
 
-    public Notification buildNotification(Context context) {
+    @NonNull
+    public Notification buildNotification(@NonNull Context context) {
         NotificationCompat.Builder builder;
         if (oreoNotificationCompatAvailable()) {
             builder = new NotificationCompat.Builder(context, NOTIFICATION_CHANNEL);
@@ -133,7 +139,8 @@ public class ProviderCloudMessage implements Parcelable {
         return notification;
     }
 
-    public static ProviderCloudMessage createMessage(Intent intent, JSONArray keys) throws InvalidGcmMessageException {
+    @NonNull
+    public static ProviderCloudMessage createMessage(@NonNull Intent intent, @Nullable JSONArray keys) throws InvalidGcmMessageException {
         return new ProviderCloudMessage(intent.getExtras(), keys);
     }
 
@@ -152,7 +159,8 @@ public class ProviderCloudMessage implements Parcelable {
         }
     }
 
-    protected static String getFallbackTitle(Context context) {
+    @Nullable
+    protected static String getFallbackTitle(@NonNull Context context) {
         String fallbackTitle = null;
         int titleResId = ConfigManager.getPushTitle(context);
         if (titleResId > 0) {
@@ -172,7 +180,7 @@ public class ProviderCloudMessage implements Parcelable {
         return fallbackTitle;
     }
 
-    protected static int getFallbackIcon(Context context) {
+    protected static int getFallbackIcon(@NonNull Context context) {
         int smallIcon = ConfigManager.getPushIcon(context);
         try {
             Drawable draw = context.getResources().getDrawable(smallIcon);
@@ -213,6 +221,7 @@ public class ProviderCloudMessage implements Parcelable {
         return mDisplayed;
     }
 
+    @NonNull
     public Intent getDefaultOpenIntent(Context context, ProviderCloudMessage message) {
         PackageManager pm = context.getPackageManager();
         Intent intent = pm.getLaunchIntentForPackage(context.getPackageName());

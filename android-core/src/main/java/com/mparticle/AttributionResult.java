@@ -1,5 +1,8 @@
 package com.mparticle;
 
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+
 import org.json.JSONObject;
 
 /**
@@ -10,7 +13,8 @@ public class AttributionResult {
     private int serviceProviderId;
     private String linkUrl = null;
 
-    public AttributionResult setParameters(JSONObject parameters) {
+    @NonNull
+    public AttributionResult setParameters(@Nullable JSONObject parameters) {
         this.parameters = parameters;
         return this;
     }
@@ -21,20 +25,23 @@ public class AttributionResult {
      *
      * @return returns a JSONObject, may be null if the integration does not support attribution parameters.
      */
+    @Nullable
     public JSONObject getParameters() {
         return parameters;
     }
 
-
-    public AttributionResult setLink(String linkUrl) {
+    @NonNull
+    public AttributionResult setLink(@Nullable String linkUrl) {
         this.linkUrl = linkUrl;
         return this;
     }
 
+    @Nullable
     public String getLink() {
         return this.linkUrl;
     }
 
+    @NonNull
     public AttributionResult setServiceProviderId(int id) {
         serviceProviderId = id;
         return this;
@@ -52,6 +59,7 @@ public class AttributionResult {
     }
 
     @Override
+    @NonNull
     public String toString() {
         StringBuilder builder = new StringBuilder("Attribution Result:\n");
         boolean empty = true;

@@ -1,5 +1,8 @@
 package com.mparticle;
 
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+
 /**
  * Class representing the result of an attribution query to an integration partner.
  */
@@ -7,11 +10,13 @@ public class AttributionError {
     private String message;
     private int serviceProviderId;
 
-    public AttributionError setMessage(String message) {
+    @NonNull
+    public AttributionError setMessage(@Nullable String message) {
         this.message = message;
         return this;
     }
 
+    @NonNull
     public AttributionError setServiceProviderId(int id) {
         serviceProviderId = id;
         return this;
@@ -28,11 +33,13 @@ public class AttributionError {
         return serviceProviderId;
     }
 
+    @Nullable
     public String getMessage() {
         return this.message;
     }
 
     @Override
+    @NonNull
     public String toString() {
         StringBuilder builder = new StringBuilder("Attribution Error:\n");
         boolean empty = true;

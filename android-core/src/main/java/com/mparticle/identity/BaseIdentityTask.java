@@ -3,6 +3,7 @@ package com.mparticle.identity;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import com.mparticle.MParticleTask;
 
@@ -16,7 +17,7 @@ public final class BaseIdentityTask extends MParticleTask<IdentityApiResult> {
     Set<TaskSuccessListener> successListeners = new HashSet<TaskSuccessListener>();
     Set<TaskFailureListener> failureListeners = new HashSet<TaskFailureListener>();
 
-    public void setFailed(final IdentityHttpResponse errorResponse) {
+    public void setFailed(@Nullable final IdentityHttpResponse errorResponse) {
         isCompleted = true;
         isSuccessful = false;
         new Handler(Looper.getMainLooper()).post(new Runnable() {
@@ -29,7 +30,8 @@ public final class BaseIdentityTask extends MParticleTask<IdentityApiResult> {
         });
     }
 
-    public void setSuccessful(final IdentityApiResult result) {
+
+    public void setSuccessful(@NonNull final IdentityApiResult result) {
         isCompleted = true;
         isSuccessful = true;
         this.result = result;
@@ -54,6 +56,7 @@ public final class BaseIdentityTask extends MParticleTask<IdentityApiResult> {
     }
 
     @Override
+    @Nullable
     public IdentityApiResult getResult() {
         return result;
     }

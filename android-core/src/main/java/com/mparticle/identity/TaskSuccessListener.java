@@ -1,5 +1,7 @@
 package com.mparticle.identity;
 
+import android.support.annotation.NonNull;
+
 public interface TaskSuccessListener {
-    void onSuccess(IdentityApiResult result);
+    void onSuccess(@NonNull IdentityApiResult result);
 }

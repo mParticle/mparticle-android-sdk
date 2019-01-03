@@ -4,6 +4,8 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Looper;
 import android.os.RemoteException;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import com.android.installreferrer.api.InstallReferrerClient;
 import com.android.installreferrer.api.InstallReferrerStateListener;
@@ -14,14 +16,16 @@ import com.mparticle.internal.MPUtility;
 
 public class InstallReferrerHelper {
 
-    public static String getInstallReferrer(Context context) {
+    @Nullable
+    public static String getInstallReferrer(@NonNull Context context) {
         if (context == null) {
             return null;
         }
         return context.getSharedPreferences(Constants.PREFS_FILE, 0).getString(Constants.PrefKeys.INSTALL_REFERRER, null);
     }
 
-    public static void setInstallReferrer(Context context, String referrer) {
+
+    public static void setInstallReferrer(@NonNull Context context, @Nullable String referrer) {
         if (context != null) {
             SharedPreferences preferences = context.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
             preferences.edit().putString(Constants.PrefKeys.INSTALL_REFERRER, referrer).apply();
@@ -32,7 +36,7 @@ public class InstallReferrerHelper {
         }
     }
 
-    public static void fetchInstallReferrer(final Context context, final InstallReferrerCallback callback) {
+    public static void fetchInstallReferrer(@NonNull final Context context, @NonNull final InstallReferrerCallback callback) {
         if (MPUtility.isInstallRefApiAvailable()) {
             Runnable runnable = new Runnable() {
                 @Override
@@ -100,7 +104,7 @@ public class InstallReferrerHelper {
     }
 
     public interface InstallReferrerCallback {
-        void onReceived(String installReferrer);
+        void onReceived(@Nullable String installReferrer);
         void onFailed();
     }
 

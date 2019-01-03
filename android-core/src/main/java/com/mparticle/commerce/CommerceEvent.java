@@ -1,6 +1,9 @@
 package com.mparticle.commerce;
 
 
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+
 import com.mparticle.MParticle;
 import com.mparticle.internal.Logger;
 import com.mparticle.internal.MPUtility;
@@ -117,7 +120,7 @@ public final class CommerceEvent {
                     && !mProductAction.equals(Product.REMOVE_FROM_WISHLIST)) {
                 Logger.error("CommerceEvent created with unrecognized Product action: " + mProductAction);
             }
-        }else if (mPromotionAction != null ) {
+        } else if (mPromotionAction != null ) {
             if (productList != null && productList.size() > 0) {
                 if (devMode) {
                     throw new IllegalStateException("Promotion CommerceEvent should not contain Products.");
@@ -129,7 +132,7 @@ public final class CommerceEvent {
                     && !mPromotionAction.equals(Promotion.CLICK)) {
                 Logger.error("CommerceEvent created with unrecognized Promotion action: " + mProductAction);
             }
-        }else {
+        } else {
             if (productList != null && productList.size() > 0) {
                 if (devMode) {
                     throw new IllegalStateException("Impression CommerceEvent should not contain Products.");
@@ -175,6 +178,7 @@ public final class CommerceEvent {
     }
 
     @Override
+    @NonNull
     public String toString() {
         try {
             JSONObject eventJson = new JSONObject();
@@ -279,6 +283,7 @@ public final class CommerceEvent {
      *
      * @see com.mparticle.commerce.CommerceEvent.Builder#customAttributes(Map)
      */
+    @Nullable
     public Map<String, String> getCustomAttributes() {
         return customAttributes;
     }
@@ -292,6 +297,7 @@ public final class CommerceEvent {
      *
      * @return returns the map of custom flags, or null if none are set
      */
+    @Nullable
     public Map<String,String> getCustomFlags() {
         return customFlags;
     }
@@ -304,6 +310,7 @@ public final class CommerceEvent {
      *
      * @see com.mparticle.commerce.CommerceEvent.Builder#screen(String)
      */
+    @Nullable
     public String getScreen() {
         return mScreen;
     }
@@ -316,6 +323,7 @@ public final class CommerceEvent {
      * @see com.mparticle.commerce.CommerceEvent.Builder#nonInteraction(boolean)
      *
      */
+    @Nullable
     public Boolean getNonInteraction() {
         return mNonIteraction;
     }
@@ -329,6 +337,7 @@ public final class CommerceEvent {
      * @see <code><a href="CommerceEvent.Builder.html#CommerceEvent.Builder(java.lang.String,%20com.mparticle.commerce.Product)">Builder(java.lang.String, com.mparticle.commerce.Product)</a></code>
      * @see Product
      */
+    @Nullable
     public String getProductAction() {
         return mProductAction;
     }
@@ -338,6 +347,7 @@ public final class CommerceEvent {
      *
      * @return an Integer representing the step, or null if none is set
      */
+    @Nullable
     public Integer getCheckoutStep() {
         return mCheckoutStep;
     }
@@ -347,6 +357,7 @@ public final class CommerceEvent {
      *
      * @return a String describing any checkout options, or null if none are set
      */
+    @Nullable
     public String getCheckoutOptions() {
         return mCheckoutOptions;
     }
@@ -358,6 +369,7 @@ public final class CommerceEvent {
      *
      * @see com.mparticle.commerce.CommerceEvent.Builder#productListName(String)
      */
+    @Nullable
     public String getProductListName() {
         return mProductListName;
     }
@@ -369,6 +381,7 @@ public final class CommerceEvent {
      *
      * @see com.mparticle.commerce.CommerceEvent.Builder#productListSource(String)
      */
+    @Nullable
     public String getProductListSource() {
         return mProductListSource;
     }
@@ -380,6 +393,7 @@ public final class CommerceEvent {
      *
      * @see com.mparticle.commerce.CommerceEvent.Builder#transactionAttributes(TransactionAttributes)
      */
+    @Nullable
     public TransactionAttributes getTransactionAttributes() {
         return mTransactionAttributes;
     }
@@ -393,6 +407,7 @@ public final class CommerceEvent {
      * @see com.mparticle.commerce.CommerceEvent.Builder#addProduct(Product)
      * @see com.mparticle.commerce.CommerceEvent.Builder#products(List)
      */
+    @Nullable
     public List<Product> getProducts() {
         if (productList == null) {
             return null;
@@ -409,6 +424,7 @@ public final class CommerceEvent {
      * @see <code><a href="CommerceEvent.Builder.html#CommerceEvent.Builder(java.lang.String,%20com.mparticle.commerce.Promotion)">Builder(java.lang.String, com.mparticle.commerce.Promotion)</a></code>
      * @see Promotion for supported product actions
      */
+    @Nullable
     public String getPromotionAction() {
         return mPromotionAction;
     }
@@ -422,6 +438,7 @@ public final class CommerceEvent {
      * @see com.mparticle.commerce.CommerceEvent.Builder#addPromotion(Promotion)
      * @see com.mparticle.commerce.CommerceEvent.Builder#promotions(List)
      */
+    @Nullable
     public List<Promotion> getPromotions() {
         if (promotionList == null) {
             return null;
@@ -438,7 +455,7 @@ public final class CommerceEvent {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         return o != null && o.toString().equals(toString());
     }
 
@@ -451,6 +468,7 @@ public final class CommerceEvent {
      * @see com.mparticle.commerce.CommerceEvent.Builder#addImpression(Impression)
      * @see com.mparticle.commerce.CommerceEvent.Builder#impressions(List)
      */
+    @Nullable
     public List<Impression> getImpressions() {
         if (mImpressions == null) {
             return null;
@@ -463,6 +481,7 @@ public final class CommerceEvent {
      *
      * @return returns a String representing the currency code, or null if not set.
      */
+    @Nullable
     public String getCurrency() {
         return mCurrency;
     }
@@ -472,6 +491,7 @@ public final class CommerceEvent {
      *
      * @return the name associated with the CommerceEvent, or null if not set.
      */
+    @Nullable
     public String getEventName() {
         return mEventName;
     }
@@ -567,7 +587,7 @@ public final class CommerceEvent {
          * @see Product#PURCHASE
          *
          */
-        public Builder(String productAction, Product product) {
+        public Builder(@NonNull String productAction, @NonNull Product product) {
             mProductAction = productAction;
             mPromotionAction = null;
             addProduct(product);
@@ -582,7 +602,7 @@ public final class CommerceEvent {
          * @see Promotion#CLICK
          * @see Promotion#VIEW
          */
-        public Builder(String promotionAction, Promotion promotion) {
+        public Builder(@NonNull String promotionAction, @NonNull Promotion promotion) {
             mProductAction = null;
             mPromotionAction = promotionAction;
             addPromotion(promotion);
@@ -593,7 +613,7 @@ public final class CommerceEvent {
          *
          * @param impression the impression to associate with this event. Must not be null.
          */
-        public Builder(Impression impression) {
+        public Builder(@NonNull Impression impression) {
             addImpression(impression);
             mPromotionAction = null;
             mProductAction = null;
@@ -604,7 +624,7 @@ public final class CommerceEvent {
          *
          * @param event an existing CommerceEvent. Must not be null.
          */
-        public Builder(CommerceEvent event) {
+        public Builder(@NonNull CommerceEvent event) {
             mProductAction = event.getProductAction();
             mPromotionAction = event.getPromotionAction();
             if (event.getCustomAttributes() != null) {
@@ -647,7 +667,8 @@ public final class CommerceEvent {
          * @param screenName a String name or description of the screen where this event occurred.
          * @return returns this Builder for easy method chaining.
          */
-        public Builder screen(String screenName) {
+        @NonNull
+        public Builder screen(@Nullable String screenName) {
             mScreen = screenName;
             return this;
         }
@@ -660,7 +681,8 @@ public final class CommerceEvent {
          * @param product the {@link Product} to add to this CommerceEvent.
          * @return returns this Builder for easy method chaining.
          */
-        public Builder addProduct(Product product) {
+        @NonNull
+        public Builder addProduct(@NonNull Product product) {
             if (productList == null) {
                 productList = new LinkedList<Product>();
             }
@@ -676,7 +698,8 @@ public final class CommerceEvent {
          * @param attributes the {@link TransactionAttributes} object
          * @return returns this Builder for easy method chaining.
          */
-        public Builder transactionAttributes(TransactionAttributes attributes) {
+        @NonNull
+        public Builder transactionAttributes(@NonNull TransactionAttributes attributes) {
             mTransactionAttributes = attributes;
             return this;
         }
@@ -687,7 +710,8 @@ public final class CommerceEvent {
          * @param currency an ISO 4217 String
          * @return returns this Builder for easy method chaining.
          */
-        public Builder currency(String currency) {
+        @NonNull
+        public Builder currency(@Nullable String currency) {
             mCurrency = currency;
             return this;
         }
@@ -698,6 +722,7 @@ public final class CommerceEvent {
          * @param userTriggered a Boolean indicating if a user actually performed this event
          * @return returns this Builder for easy method chaining.
          */
+        @NonNull
         public Builder nonInteraction(boolean userTriggered) {
             mNonIteraction = userTriggered;
             return this;
@@ -709,7 +734,8 @@ public final class CommerceEvent {
          * @param attributes the Map of attributes
          * @return returns this Builder for easy method chaining.
          */
-        public Builder customAttributes(Map<String, String> attributes) {
+        @NonNull
+        public Builder customAttributes(@Nullable Map<String, String> attributes) {
             customAttributes = attributes;
             return this;
         }
@@ -722,7 +748,8 @@ public final class CommerceEvent {
          * @param value (required) a flag value to be send to the service indicated by the flag key
          * @return returns this builder for easy method chaining
          */
-        public Builder addCustomFlag(String key, String value) {
+        @NonNull
+        public Builder addCustomFlag(@Nullable String key, @Nullable String value) {
             if (mCustomFlags == null) {
                 mCustomFlags = new HashMap<String, String>();
             }
@@ -738,7 +765,8 @@ public final class CommerceEvent {
          * @param promotion the {@link Promotion} to add to this CommerceEvent.
          * @return returns this Builder for easy method chaining.
          */
-        public Builder addPromotion(Promotion promotion) {
+        @NonNull
+        public Builder addPromotion(@NonNull Promotion promotion) {
             if (promotionList == null) {
                 promotionList = new LinkedList<Promotion>();
             }
@@ -752,7 +780,8 @@ public final class CommerceEvent {
          * @param step the Integer step
          * @return returns this Builder for easy method chaining.
          */
-        public Builder checkoutStep(Integer step) {
+        @NonNull
+        public Builder checkoutStep(@Nullable Integer step) {
             if (step == null || step >= 0) {
                 mCheckoutStep = step;
             }
@@ -767,7 +796,8 @@ public final class CommerceEvent {
          * @param impression the {@link Impression} to add to the CommerceEvent.
          * @return returns this Builder for easy method chaining.
          */
-        public Builder addImpression(Impression impression) {
+        @NonNull
+        public Builder addImpression(@NonNull Impression impression) {
             if (impression != null) {
                 if (mImpressions == null) {
                     mImpressions = new LinkedList<Impression>();
@@ -784,7 +814,8 @@ public final class CommerceEvent {
          * @param options a String describing this checkout step
          * @return returns this Builder for easy method chaining.
          */
-        public Builder checkoutOptions(String options) {
+        @NonNull
+        public Builder checkoutOptions(@Nullable String options) {
             mCheckoutOptions = options;
             return this;
         }
@@ -799,6 +830,7 @@ public final class CommerceEvent {
          *
          * @see <code><a href="../MParticle.html#logEvent(com.mparticle.commerce.CommerceEvent)">MParticle.logEvent(com.mparticle.commerce.CommerceEvent)</a></code>
          */
+        @NonNull
         public CommerceEvent build() {
             return new CommerceEvent(this);
         }
@@ -809,7 +841,8 @@ public final class CommerceEvent {
          * @param listName a String name identifying the product list
          * @return returns this Builder for easy method chaining.
          */
-        public Builder productListName(String listName) {
+        @NonNull
+        public Builder productListName(@Nullable String listName) {
             mProductListName = listName;
             return this;
         }
@@ -820,7 +853,8 @@ public final class CommerceEvent {
          * @param listSource a String name identifying the product's list source
          * @return returns this Builder for easy method chaining.
          */
-        public Builder productListSource(String listSource) {
+        @NonNull
+        public Builder productListSource(@Nullable String listSource) {
             mProductListSource = listSource;
             return this;
         }
@@ -831,7 +865,8 @@ public final class CommerceEvent {
          * @param products the List of products to associate with the CommerceEvent
          * @return returns this Builder for easy method chaining.
          */
-        public Builder products(List<Product> products) {
+        @NonNull
+        public Builder products(@NonNull List<Product> products) {
             productList = products;
             return this;
         }
@@ -842,7 +877,8 @@ public final class CommerceEvent {
          * @param impressions the List of products to associate with the CommerceEvent
          * @return returns this Builder for easy method chaining.
          */
-        public Builder impressions(List<Impression> impressions) {
+        @NonNull
+        public Builder impressions(@NonNull List<Impression> impressions) {
             mImpressions = impressions;
             return this;
         }
@@ -853,7 +889,8 @@ public final class CommerceEvent {
          * @param promotions the List of products to associate with the CommerceEvent
          * @return returns this Builder for easy method chaining.
          */
-        public Builder promotions(List<Promotion> promotions) {
+        @NonNull
+        public Builder promotions(@NonNull List<Promotion> promotions) {
             promotionList = promotions;
             return this;
         }
@@ -862,7 +899,8 @@ public final class CommerceEvent {
          * Private API used internally by the SDK.
          *
          */
-        public Builder internalEventName(String eventName) {
+        @NonNull
+        public Builder internalEventName(@Nullable String eventName) {
             mEventName = eventName;
             return this;
         }

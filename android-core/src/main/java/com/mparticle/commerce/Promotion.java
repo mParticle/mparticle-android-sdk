@@ -1,6 +1,9 @@
 package com.mparticle.commerce;
 
 
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+
 import com.mparticle.internal.MPUtility;
 
 import org.json.JSONException;
@@ -31,12 +34,12 @@ public class Promotion {
      * The Promotion action constant used to track when a user taps or clicks on a Promotion
      *
      */
-    public static final String CLICK = "click";
+    @NonNull public static final String CLICK = "click";
     /**
      * The Promotion action constant used to track when a user views a Promotion
      *
      */
-    public static final String VIEW = "view";
+    @NonNull public static final String VIEW = "view";
 
     private String mCreative = null;
     private String mId = null;
@@ -56,7 +59,7 @@ public class Promotion {
      *
      * @param promotion return the duplicated Promotion object
      */
-    public Promotion(Promotion promotion) {
+    public Promotion(@NonNull Promotion promotion) {
         if (promotion != null) {
             mCreative = promotion.getCreative();
             mId = promotion.getId();
@@ -70,6 +73,7 @@ public class Promotion {
      *
      * @return returns the name of the creative associated with this Promotion
      */
+    @Nullable
     public String getCreative() {
         return mCreative;
     }
@@ -80,7 +84,8 @@ public class Promotion {
      * @param creative
      * @return returns this Promotion object for easy method chaining
      */
-    public Promotion setCreative(String creative) {
+    @NonNull
+    public Promotion setCreative(@Nullable String creative) {
         mCreative = creative;
         return this;
     }
@@ -90,6 +95,7 @@ public class Promotion {
      *
      * @return
      */
+    @Nullable
     public String getId() {
         return mId;
     }
@@ -100,7 +106,8 @@ public class Promotion {
      * @param id
      * @return returns this Promotion object for easy method chaining
      */
-    public Promotion setId(String id) {
+    @NonNull
+    public Promotion setId(@Nullable String id) {
         mId = id;
         return this;
     }
@@ -110,6 +117,7 @@ public class Promotion {
      *
      * @return
      */
+    @Nullable
     public String getName() {
         return mName;
     }
@@ -120,7 +128,8 @@ public class Promotion {
      * @param name
      * @return returns this Promotion object for easy method chaining
      */
-    public Promotion setName(String name) {
+    @NonNull
+    public Promotion setName(@Nullable String name) {
         mName = name;
         return this;
     }
@@ -130,6 +139,7 @@ public class Promotion {
      *
      * @return
      */
+    @Nullable
     public String getPosition() {
         return mPosition;
     }
@@ -140,12 +150,14 @@ public class Promotion {
      * @param position
      * @return returns this Promotion object for easy method chaining
      */
-    public Promotion setPosition(String position) {
+    @NonNull
+    public Promotion setPosition(@Nullable String position) {
         mPosition = position;
         return this;
     }
 
     @Override
+    @NonNull
     public String toString() {
         JSONObject json = new JSONObject();
         try {

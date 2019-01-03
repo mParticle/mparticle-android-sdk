@@ -83,6 +83,11 @@ android {
             resultsDir buildDir.absolutePath + '/orchestrator-results'
         }
     }
+    lintOptions {
+        abortOnError false
+        enable 'UnknownNullness'
+        lintConfig file('lint.xml')
+    }
 }
 
 
@@ -104,7 +109,7 @@ dependencies {
     compileOnly 'com.google.android.gms:play-services-gcm:10.2.1'
     compileOnly 'com.google.android.gms:play-services-ads:10.2.1'
     compileOnly 'com.google.firebase:firebase-messaging:10.2.1'
-    compileOnly 'com.android.support:support-v4:27.1.0'
+    compileOnly 'com.android.support:support-v4:27.1.1'
     compileOnly 'com.android.installreferrer:installreferrer:[1.0, )'
     compileOnly 'com.google.android.instantapps:instantapps:[1.0, )'
 

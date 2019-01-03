@@ -1,6 +1,9 @@
 package com.mparticle.commerce;
 
 
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+
 /**
  * Class encaspulating the parameters of a given Product CommerceEvent
  *
@@ -13,7 +16,7 @@ public class TransactionAttributes {
     private String mCouponCode = null;
     private String mId = null;
 
-    public TransactionAttributes(TransactionAttributes transactionAttributes) {
+    public TransactionAttributes(@NonNull TransactionAttributes transactionAttributes) {
         mAffiliation = transactionAttributes.mAffiliation;
         mRevenue = transactionAttributes.mRevenue;
         mShipping = transactionAttributes.mShipping;
@@ -22,6 +25,7 @@ public class TransactionAttributes {
         mId = transactionAttributes.mId;
     }
 
+    @NonNull
     public String getId() {
         return mId;
     }
@@ -43,58 +47,68 @@ public class TransactionAttributes {
      *
      * @param transactionId a unique ID for this transaction
      */
-    public TransactionAttributes(String transactionId) {
+    public TransactionAttributes(@NonNull String transactionId) {
         super();
         setId(transactionId);
     }
 
-
-    public TransactionAttributes setId(String id) {
+    @NonNull
+    public TransactionAttributes setId(@NonNull String id) {
         mId = id;
         return this;
     }
 
+    @Nullable
     public String getCouponCode() {
         return mCouponCode;
     }
 
-    public TransactionAttributes setCouponCode(String couponCode) {
+    @NonNull
+    public TransactionAttributes setCouponCode(@Nullable String couponCode) {
         this.mCouponCode = couponCode;
         return this;
     }
 
+    @Nullable
     public Double getTax() {
         return mTax;
     }
 
-    public TransactionAttributes setTax(Double tax) {
+    @NonNull
+    public TransactionAttributes setTax(@Nullable Double tax) {
         this.mTax = tax;
         return this;
     }
 
+    @Nullable
     public Double getShipping() {
         return mShipping;
     }
 
-    public TransactionAttributes setShipping(Double shipping) {
+    @NonNull
+    public TransactionAttributes setShipping(@Nullable Double shipping) {
         this.mShipping = shipping;
         return this;
     }
 
+    @Nullable
     public Double getRevenue() {
         return mRevenue;
     }
 
-    public TransactionAttributes setRevenue(Double revenue) {
+    @NonNull
+    public TransactionAttributes setRevenue(@Nullable Double revenue) {
         this.mRevenue = revenue;
         return this;
     }
 
+    @Nullable
     public String getAffiliation() {
         return mAffiliation;
     }
 
-    public TransactionAttributes setAffiliation(String affiliation) {
+    @NonNull
+    public TransactionAttributes setAffiliation(@Nullable String affiliation) {
         this.mAffiliation = affiliation;
         return this;
     }

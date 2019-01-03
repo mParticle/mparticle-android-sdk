@@ -1,5 +1,8 @@
 package com.mparticle.identity;
 
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+
 import com.mparticle.MParticle;
 import com.mparticle.UserAttributeListener;
 import com.mparticle.commerce.Cart;
@@ -14,6 +17,7 @@ public interface MParticleUser {
      *
      * @return the mpid
      */
+    @NonNull
     long getId();
 
     /**
@@ -23,6 +27,7 @@ public interface MParticleUser {
      *
      * @see Cart
      */
+    @NonNull
     Cart getCart();
 
     /**
@@ -30,6 +35,7 @@ public interface MParticleUser {
      *
      * @return the User's attributes
      */
+    @NonNull
     Map<String, Object> getUserAttributes();
 
     /**
@@ -39,7 +45,8 @@ public interface MParticleUser {
      *
      * @return
      */
-    Map<String, Object> getUserAttributes(final UserAttributeListener listener);
+    @Nullable
+    Map<String, Object> getUserAttributes(@Nullable final UserAttributeListener listener);
 
     /**
      * assign attributes to the User in bulk
@@ -48,7 +55,7 @@ public interface MParticleUser {
      *
      * @return whether the attributes where successfully set
      */
-    boolean setUserAttributes(Map<String, Object> userAttributes);
+    boolean setUserAttributes(@NonNull Map<String, Object> userAttributes);
 
     /**
      * query the Identities of the User
@@ -56,6 +63,7 @@ public interface MParticleUser {
      * @return the User's Identities
      *
      */
+    @NonNull
     Map<MParticle.IdentityType, String> getUserIdentities();
 
     /**
@@ -66,7 +74,7 @@ public interface MParticleUser {
      *
      * @return whether the attributes where successfully set
      */
-    boolean setUserAttribute(String key, Object value);
+    boolean setUserAttribute(@NonNull String key, @NonNull Object value);
 
     /**
      * set a single attribute for the user whos value is an Object, not just a String
@@ -76,7 +84,7 @@ public interface MParticleUser {
      *
      * @return whether the attributes where successfully set
      */
-    boolean setUserAttributeList(String key, Object value);
+    boolean setUserAttributeList(@NonNull String key, @NonNull Object value);
 
     /**
      * increment an attribute for the user
@@ -86,7 +94,7 @@ public interface MParticleUser {
      *
      * @return whether the attributes where successfully set
      */
-    boolean incrementUserAttribute(String key, int value);
+    boolean incrementUserAttribute(@NonNull String key, int value);
 
     /**
      * remove an attribute for the user
@@ -95,7 +103,7 @@ public interface MParticleUser {
      *
      * @return whether the attributes where successfully removed
      */
-    boolean removeUserAttribute(String key);
+    boolean removeUserAttribute(@NonNull String key);
 
     /**
      * set a tag for a User. A tag is represented by a key and a value of "null"
@@ -104,17 +112,18 @@ public interface MParticleUser {
      *
      * @return whether the tag was successfully set
      */
-    boolean setUserTag(String tag);
+    boolean setUserTag(@NonNull String tag);
 
     /**
      * Query the ConsentState of this user
      */
+    @NonNull
     ConsentState getConsentState();
 
     /**
      * Set the ConsentState for this user
      */
-    void setConsentState(ConsentState state);
+    void setConsentState(@Nullable ConsentState state);
 
     /**
      * Query the "Logged In" status for this user. A user is considered Logged In based on the presence of one or more {@link com.mparticle.MParticle.IdentityType}, such as IdentityType.CustomerId, defined by a workspace's IDSync strategy.

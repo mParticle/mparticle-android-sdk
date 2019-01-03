@@ -1,5 +1,6 @@
 package com.mparticle.consent;
 
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import com.mparticle.internal.MPUtility;
@@ -37,11 +38,13 @@ public final class GDPRConsent {
         this.mHardwareId = builder.mHardwareId;
     }
 
+    @NonNull
     public static Builder builder(boolean consented) {
         return new Builder(consented);
     }
 
-    public static Builder withGDPRConsent(GDPRConsent gdprConsent) {
+    @NonNull
+    public static Builder withGDPRConsent(@NonNull GDPRConsent gdprConsent) {
         return new Builder(gdprConsent);
     }
 
@@ -58,6 +61,7 @@ public final class GDPRConsent {
         return mDocument;
     }
 
+    @NonNull
     public Long getTimestamp() {
         return mTimestamp;
     }
@@ -73,6 +77,7 @@ public final class GDPRConsent {
     }
 
     @Override
+    @NonNull
     public String toString() {
         JSONObject gdprConsentJsonObject = new JSONObject();
         try {
@@ -136,36 +141,43 @@ public final class GDPRConsent {
             return builder;
         }
 
-        public Builder hardwareId(String hardwareId) {
+        @NonNull
+        public Builder hardwareId(@Nullable String hardwareId) {
             this.mHardwareId = hardwareId;
             return this;
         }
 
-        public Builder location(String location) {
+        @NonNull
+        public Builder location(@Nullable String location) {
             this.mLocation = location;
             return this;
         }
 
-        public Builder timestamp(Long timestamp) {
+        @NonNull
+        public Builder timestamp(@Nullable Long timestamp) {
             this.mTimestamp = timestamp;
             return this;
         }
 
-        public Builder document(String document) {
+        @NonNull
+        public Builder document(@Nullable String document) {
             this.mDocument = document;
             return this;
         }
 
+        @NonNull
         public Builder consented(boolean consented) {
             this.mConsented = consented;
             return this;
         }
 
+        @NonNull
         public GDPRConsent build() {
             return new GDPRConsent(this);
         }
 
         @Override
+        @NonNull
         public String toString() {
             return build().toString();
         }

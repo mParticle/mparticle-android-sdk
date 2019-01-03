@@ -1,5 +1,7 @@
 package com.mparticle.segmentation;
 
+import android.support.annotation.NonNull;
+
 import java.util.ArrayList;
 
 /**
@@ -9,7 +11,7 @@ public class SegmentMembership {
     private ArrayList<Segment> segments;
     StringBuilder list;
 
-    public SegmentMembership(ArrayList<Segment> ids) {
+    public SegmentMembership(@NonNull ArrayList<Segment> ids) {
         super();
         segments = ids;
     }
@@ -17,6 +19,7 @@ public class SegmentMembership {
     /**
      The list of user segment ids
      */
+    @NonNull
     public ArrayList<Segment> getSegments() {
         return segments;
     }
@@ -25,6 +28,7 @@ public class SegmentMembership {
      Returns a String with a comma separated list of user segment ids.
      */
     @Override
+    @NonNull
     public String toString(){
         return getCommaSeparatedIds();
     }
@@ -32,6 +36,7 @@ public class SegmentMembership {
     /**
      Returns a String with a comma separated list of user segment ids.
      */
+    @NonNull
     public String getCommaSeparatedIds() {
         if (list == null) {
             list = new StringBuilder();

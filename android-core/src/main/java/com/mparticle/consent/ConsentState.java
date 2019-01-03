@@ -31,15 +31,18 @@ public final class ConsentState {
         gdprConsentState = builder.gdprConsentState;
     }
 
+    @NonNull
     public static Builder builder() {
         return new Builder();
     }
 
-    public static Builder withConsentState(ConsentState consentState) {
+    @NonNull
+    public static Builder withConsentState(@NonNull ConsentState consentState) {
         return new Builder(consentState);
     }
 
-    public static Builder withConsentState(String consentState) {
+    @NonNull
+    public static Builder withConsentState(@NonNull String consentState) {
         return new Builder(consentState);
     }
 
@@ -71,6 +74,7 @@ public final class ConsentState {
     }
 
     @Override
+    @NonNull
     public String toString() {
         JSONObject consentJsonObject = new JSONObject();
         try {
@@ -122,6 +126,7 @@ public final class ConsentState {
          *
          * @param consentState
          */
+        @NonNull
         public Builder setGDPRConsentState(@Nullable Map<String, GDPRConsent> consentState) {
             if (consentState == null) {
                 gdprConsentState = new HashMap<String, GDPRConsent>();
@@ -143,6 +148,7 @@ public final class ConsentState {
          * @param purpose
          * @param consent
          */
+        @NonNull
         public Builder addGDPRConsentState(@NonNull String purpose, @NonNull GDPRConsent consent) {
             String normalizedPurpose = ConsentState.canonicalizeForDeduplication(purpose);
             if (MPUtility.isEmpty(normalizedPurpose)) {
@@ -167,6 +173,7 @@ public final class ConsentState {
          *
          * @param purpose
          */
+        @NonNull
         public Builder removeGDPRConsentState(@NonNull String purpose) {
             String normalizedPurpose = ConsentState.canonicalizeForDeduplication(purpose);
             if (MPUtility.isEmpty(normalizedPurpose)) {
@@ -180,11 +187,13 @@ public final class ConsentState {
             return this;
         }
 
+        @NonNull
         public ConsentState build() {
             return new ConsentState(this);
         }
 
         @Override
+        @NonNull
         public String toString() {
             return build().toString();
         }

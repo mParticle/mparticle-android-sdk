@@ -16,6 +16,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.PowerManager;
+import android.support.annotation.NonNull;
 
 import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.Constants;
@@ -50,7 +51,7 @@ public class MPService extends IntentService {
      *
      */
     @Override
-    public final void onHandleIntent(final Intent intent) {
+    public final void onHandleIntent(@NonNull final Intent intent) {
         new MPServiceUtil(this).onHandleIntent(intent);
     }
 

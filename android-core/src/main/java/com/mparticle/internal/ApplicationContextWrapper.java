@@ -1,5 +1,6 @@
 package com.mparticle.internal;
 
+import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.Application;
@@ -55,26 +56,31 @@ public class ApplicationContextWrapper extends Application {
         return mRecord;
     }
 
+    @SuppressLint("MissingSuperCall")
     @Override
     public void onCreate() {
         mBaseApplication.onCreate();
     }
 
+    @SuppressLint("MissingSuperCall")
     @Override
     public void onTerminate() {
         mBaseApplication.onTerminate();
     }
 
+    @SuppressLint("MissingSuperCall")
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         mBaseApplication.onConfigurationChanged(newConfig);
     }
 
+    @SuppressLint("MissingSuperCall")
     @Override
     public void onLowMemory() {
         mBaseApplication.onLowMemory();
     }
 
+    @SuppressLint("MissingSuperCall")
     @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
     @Override
     public void onTrimMemory(int level) {

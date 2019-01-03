@@ -1,5 +1,7 @@
 package com.mparticle;
 
+import android.support.annotation.Nullable;
+
 import com.mparticle.internal.MPUtility;
 
 import java.io.UnsupportedEncodingException;
@@ -25,6 +27,7 @@ public class Session {
      *
      * @return returns a UUID v4 capitalized string representing the unique session ID.
      */
+    @Nullable
     public String getSessionUUID() {
         if (this.mUUID == null) {
             return null;
@@ -52,7 +55,7 @@ public class Session {
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(@Nullable Object obj) {
         if (obj == null) {
             return false;
         }

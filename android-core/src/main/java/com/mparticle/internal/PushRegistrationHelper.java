@@ -2,6 +2,7 @@ package com.mparticle.internal;
 
 import android.content.Context;
 import android.os.Looper;
+import android.support.annotation.NonNull;
 
 import com.google.android.gms.iid.InstanceID;
 import com.google.firebase.iid.FirebaseInstanceId;
@@ -64,15 +65,16 @@ public class PushRegistrationHelper {
     }
 
     public static class PushRegistration {
-        public String senderId;
-        public String instanceId;
+        @NonNull public String senderId;
+        @NonNull public String instanceId;
 
-        public PushRegistration(String instanceId, String senderId) {
+        public PushRegistration(@NonNull String instanceId, @NonNull String senderId) {
             this.instanceId = instanceId;
             this.senderId = senderId;
         }
 
         @Override
+        @NonNull
         public String toString() {
             return "[" + senderId + ", " + instanceId + "]";
         }

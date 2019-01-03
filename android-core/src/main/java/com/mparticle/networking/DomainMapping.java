@@ -1,5 +1,8 @@
 package com.mparticle.networking;
 
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+
 import com.mparticle.internal.Logger;
 import com.mparticle.internal.MPUtility;
 
@@ -28,19 +31,23 @@ public class DomainMapping {
         }
     }
 
-    public static Builder configMapping(String newUrl) {
+    @NonNull
+    public static Builder configMapping(@Nullable String newUrl) {
         return new Builder(Endpoint.CONFIG, newUrl);
     }
 
-    public static Builder eventsMapping(String newUrl) {
+    @NonNull
+    public static Builder eventsMapping(@Nullable String newUrl) {
         return new Builder(Endpoint.EVENTS, newUrl);
     }
 
-    public static Builder identityMapping(String newUrl) {
+    @NonNull
+    public static Builder identityMapping(@Nullable String newUrl) {
         return new Builder(Endpoint.IDENTITY, newUrl);
     }
 
-    public static Builder audienceMapping(String newUrl) {
+    @NonNull
+    public static Builder audienceMapping(@Nullable String newUrl) {
         return new Builder(Endpoint.AUDIENCE, newUrl);
     }
 
@@ -56,6 +63,7 @@ public class DomainMapping {
         return mType;
     }
 
+    @Nullable
     public String getUrl() {
         return mUrl;
     }
@@ -64,6 +72,7 @@ public class DomainMapping {
         this.mUrl = url;
     }
 
+    @NonNull
     public List<Certificate> getCertificates() {
         return new LinkedList<Certificate>(mCertificates);
     }
@@ -77,6 +86,7 @@ public class DomainMapping {
     }
 
     @Override
+    @NonNull
     public String toString() {
         return toJson().toString();
     }
@@ -117,11 +127,13 @@ public class DomainMapping {
             this.newUrl = newUrl;
         }
 
-        public Builder addCertificate(Certificate certificate) {
+        @NonNull
+        public Builder addCertificate(@NonNull Certificate certificate) {
             return addCertificate(certificate, null);
         }
 
-        public Builder addCertificate(String alias, String pin) {
+        @NonNull
+        public Builder addCertificate(@NonNull String alias, @NonNull String pin) {
             Certificate certificate = Certificate.with(alias, pin);
             if (certificate != null) {
                 certificates.add(certificate);
@@ -129,7 +141,8 @@ public class DomainMapping {
             return this;
         }
 
-        public Builder addCertificate(Certificate certificate, Integer position) {
+        @NonNull
+        public Builder addCertificate(@NonNull Certificate certificate, @Nullable Integer position) {
             if (certificate != null) {
                 if (certificates == null) {
                     certificates = new LinkedList<Certificate>();
@@ -150,16 +163,19 @@ public class DomainMapping {
             return this;
         }
 
-        public Builder addCertificate(String alias, String pin, Integer position) {
+        @NonNull
+        public Builder addCertificate(@NonNull String alias, @NonNull String pin, @Nullable Integer position) {
             addCertificate(Certificate.with(alias, pin), position);
             return this;
         }
 
-        public Builder setCertificates(List<Certificate> certificates) {
+        @NonNull
+        public Builder setCertificates(@Nullable List<Certificate> certificates) {
             this.certificates = certificates;
             return this;
         }
 
+        @NonNull
         public DomainMapping build() {
             return new DomainMapping(this);
         }

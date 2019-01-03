@@ -1,5 +1,8 @@
 package com.mparticle.identity;
 
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+
 import com.mparticle.MParticle;
 import com.mparticle.internal.Logger;
 import com.mparticle.internal.MPUtility;
@@ -51,6 +54,7 @@ public final class IdentityApiRequest {
      *
      * @see IdentityApiRequest.Builder
      */
+    @NonNull
     public static Builder withEmptyUser() {
         return new IdentityApiRequest.Builder();
     }
@@ -64,26 +68,32 @@ public final class IdentityApiRequest {
      *
      * @see IdentityApiRequest.Builder
      */
-    public static Builder withUser(MParticleUser currentUser) {
+    @NonNull
+    public static Builder withUser(@Nullable MParticleUser currentUser) {
         return new IdentityApiRequest.Builder(currentUser);
     }
 
+    @NonNull
     public Map<MParticle.IdentityType, String> getUserIdentities() {
         return userIdentities;
     }
 
+    @NonNull
     public Map<MParticle.IdentityType, String> getOldIdentities() {
         return oldUserIdentities;
     }
 
+    @NonNull
     protected Map<String, String> getOtherOldIdentities() {
         return otherOldIdentities;
     }
 
+    @NonNull
     protected Map<String, String> getOtherNewIdentities() {
         return otherNewIdentities;
     }
 
+    @Nullable
     public UserAliasHandler getUserAliasHandler() {
         return userAliasHandler;
     }
@@ -102,7 +112,7 @@ public final class IdentityApiRequest {
         private Map<String, String> otherNewIdentities = new HashMap<String, String>();
         private UserAliasHandler userAliasHandler;
 
-        protected Builder(MParticleUser currentUser) {
+        protected Builder(@Nullable MParticleUser currentUser) {
             if (currentUser != null) {
                 userIdentities = currentUser.getUserIdentities();
                 mpid = currentUser.getId();
@@ -120,7 +130,8 @@ public final class IdentityApiRequest {
          *
          * @return the instance of the builder, for chaining calls
          */
-        public Builder email(String email) {
+        @NonNull
+        public Builder email(@Nullable String email) {
             return userIdentity(MParticle.IdentityType.Email, email);
         }
 
@@ -131,11 +142,13 @@ public final class IdentityApiRequest {
          *
          * @return the instance of the builder, for chaining calls
          */
-        public Builder customerId(String customerId) {
+        @NonNull
+        public Builder customerId(@Nullable String customerId) {
             return userIdentity(MParticle.IdentityType.CustomerId, customerId);
         }
 
-        protected Builder pushToken(String newPushToken, String oldPushToken) {
+        @NonNull
+        protected Builder pushToken(@Nullable String newPushToken, @Nullable String oldPushToken) {
             if (MPUtility.isEmpty(oldPushToken)) {
                 oldPushToken = null;
             }
@@ -144,7 +157,8 @@ public final class IdentityApiRequest {
             return this;
         }
 
-        protected Builder googleAdId(String newGoogleAdId, String oldGoogleAdId) {
+        @NonNull
+        protected Builder googleAdId(@Nullable String newGoogleAdId, @Nullable String oldGoogleAdId) {
             otherOldIdentities.put("android_aaid", oldGoogleAdId);
             otherNewIdentities.put("android_aaid", newGoogleAdId);
             return this;
@@ -160,7 +174,8 @@ public final class IdentityApiRequest {
          *
          * @see MParticle.IdentityType
          */
-        public Builder userIdentity(MParticle.IdentityType identityType, String identityValue) {
+        @NonNull
+        public Builder userIdentity(@NonNull MParticle.IdentityType identityType, @Nullable String identityValue) {
             if (userIdentities.containsKey(identityType)) {
                 Logger.warning("IdentityApiRequest already contains field with IdentityType of:" + identityType + ". It will be overwritten");
             }
@@ -177,7 +192,8 @@ public final class IdentityApiRequest {
          *
          * @see MParticle.IdentityType
          */
-        public Builder userIdentities(Map<MParticle.IdentityType, String> userIdentities) {
+        @NonNull
+        public Builder userIdentities(@NonNull Map<MParticle.IdentityType, String> userIdentities) {
             for (Map.Entry<MParticle.IdentityType, String> entry: userIdentities.entrySet()) {
                 userIdentity(entry.getKey(), entry.getValue());
             }
@@ -189,11 +205,13 @@ public final class IdentityApiRequest {
          *
          * @return an IdentityApiRequest
          */
+        @NonNull
         public IdentityApiRequest build() {
             return new IdentityApiRequest(this);
         }
 
-        public Builder userAliasHandler(UserAliasHandler userAliasHandler) {
+        @NonNull
+        public Builder userAliasHandler(@Nullable UserAliasHandler userAliasHandler) {
             this.userAliasHandler = userAliasHandler;
             return this;
         }

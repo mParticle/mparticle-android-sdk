@@ -1,5 +1,7 @@
 package com.mparticle.identity;
 
+import android.support.annotation.Nullable;
+
 public interface TaskFailureListener {
-    void onFailure(IdentityHttpResponse result);
+    void onFailure(@Nullable IdentityHttpResponse result);
 }

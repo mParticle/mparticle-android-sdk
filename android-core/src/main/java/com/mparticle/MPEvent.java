@@ -1,6 +1,9 @@
 package com.mparticle;
 
 
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+
 import com.mparticle.internal.Constants;
 import com.mparticle.internal.Logger;
 import com.mparticle.internal.MPUtility;
@@ -83,11 +86,11 @@ public class MPEvent {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         return super.equals(o) || (o != null && this.toString().equals(o.toString()));
     }
 
-    public void setInfo(Map<String, String> info){
+    public void setInfo(@Nullable Map<String, String> info){
         if (info != null && MPUtility.containsNullKey(info)) {
             Logger.warning(String.format("disregarding \"MPEvent.customFlag\" value of \"%s\". Key was found to be null", info.get(null)));
             info.remove(null);
@@ -95,7 +98,7 @@ public class MPEvent {
         this.info = info;
     }
 
-    public MPEvent(MPEvent mpEvent) {
+    public MPEvent(@NonNull MPEvent mpEvent) {
         eventType = mpEvent.eventType;
         eventName = mpEvent.eventName;
         if (mpEvent.info != null) {
@@ -115,6 +118,7 @@ public class MPEvent {
     }
 
     @Override
+    @NonNull
     public String toString() {
         StringBuilder builder = new StringBuilder();
         if (eventName != null) {
@@ -152,6 +156,8 @@ public class MPEvent {
         return builder.toString();
     }
 
+
+    @NonNull
     public String getEventName() {
         return eventName;
     }
@@ -172,18 +178,22 @@ public class MPEvent {
         return eventHash;
     }
 
+    @Nullable
     public String getCategory() {
         return category;
     }
 
+    @Nullable
     public Map<String, String> getInfo() {
         return info;
     }
 
+    @NonNull
     public MParticle.EventType getEventType() {
         return eventType;
     }
 
+    @Nullable
     public Double getLength() {
         if (duration != null) {
             return duration;
@@ -204,6 +214,7 @@ public class MPEvent {
      *
      * @return returns the map of custom flags, or null if none are set
      */
+    @Nullable
     public Map<String,List<String>> getCustomFlags() {
         return customFlags;
     }
@@ -246,7 +257,7 @@ public class MPEvent {
          * @param eventName the name of the event to be tracked (required)
          * @param eventType the type of the event to be tracked (required)
          */
-        public Builder(String eventName, MParticle.EventType eventType){
+        public Builder(@NonNull String eventName,@NonNull MParticle.EventType eventType){
             this.eventName = eventName;
             this.eventType = eventType;
         }
@@ -259,7 +270,7 @@ public class MPEvent {
          *
          * @param eventName the name of the event to be tracked (required)
          */
-        public Builder(String eventName){
+        public Builder(@NonNull String eventName){
             this.eventName = eventName;
             this.eventType = MParticle.EventType.Other;
         }
@@ -271,7 +282,7 @@ public class MPEvent {
          *
          * @param event
          */
-        public Builder(MPEvent event) {
+        public Builder(@NonNull MPEvent event) {
             this.eventName = event.getEventName();
             this.eventType = event.getEventType();
             this.category = event.getCategory();
@@ -290,7 +301,8 @@ public class MPEvent {
          * @param eventName
          * @return returns this builder for easy method chaining
          */
-        public Builder eventName(String eventName){
+        @NonNull
+        public Builder eventName(@NonNull String eventName){
             if (eventName != null) {
                 this.eventName = eventName;
             }
@@ -305,7 +317,8 @@ public class MPEvent {
          *
          * @see com.mparticle.MParticle.EventType
          */
-        public Builder eventType(MParticle.EventType eventType){
+        @NonNull
+        public Builder eventType(@NonNull MParticle.EventType eventType){
             if (eventType != null) {
                 this.eventType = eventType;
             }
@@ -320,7 +333,8 @@ public class MPEvent {
          * @param value (required) a flag value to be send to the service indicated by the flag key
          * @return returns this builder for easy method chaining
          */
-        public Builder addCustomFlag(String key, String value) {
+        @NonNull
+        public Builder addCustomFlag(@Nullable String key, @Nullable String value) {
             if (customFlags == null) {
                 customFlags = new HashMap<String, List<String>>();
             }
@@ -338,7 +352,8 @@ public class MPEvent {
          * @param category
          * @return returns this builder for easy method chaining
          */
-        public Builder category(String category){
+        @NonNull
+        public Builder category(@Nullable String category){
             this.category = category;
             return this;
         }
@@ -351,6 +366,7 @@ public class MPEvent {
          * @param durationMillis
          * @return returns this builder for easy method chaining
          */
+        @NonNull
         public Builder duration(double durationMillis){
             this.duration = durationMillis;
             return this;
@@ -362,7 +378,8 @@ public class MPEvent {
          * @param info
          * @return returns this builder for easy method chaining
          */
-        public Builder info(Map<String, String> info){
+        @NonNull
+        public Builder info(@Nullable Map<String, String> info){
             this.info = info;
             return this;
         }
@@ -377,6 +394,7 @@ public class MPEvent {
          * @param startTimeMillis
          * @return returns this builder for easy method chaining
          */
+        @NonNull
         private Builder startTime(double startTimeMillis){
             this.startTime = startTimeMillis;
             return this;
@@ -389,6 +407,7 @@ public class MPEvent {
          *
          * @return returns this builder for easy method chaining
          */
+        @NonNull
         public Builder startTime(){
             return startTime(System.currentTimeMillis());
         }
@@ -400,6 +419,7 @@ public class MPEvent {
          *
          * @return returns this builder for easy method chaining
          */
+        @NonNull
         public Builder endTime(){
             return endTime(System.currentTimeMillis());
         }
@@ -426,6 +446,7 @@ public class MPEvent {
          * @param entering True if a user is navigating to a screen, False when navigating away
          * @return returns this builder for easy method chaining
          */
+        @NonNull
         public Builder internalNavigationDirection(boolean entering){
             this.entering = entering;
             return this;
@@ -439,6 +460,7 @@ public class MPEvent {
          *
          * @see MParticle#logEvent(MPEvent)
          */
+        @NonNull
         public MPEvent build(){
             return new MPEvent(this);
         }
@@ -449,7 +471,8 @@ public class MPEvent {
          * @param builderString a string originally acquired by calling {@link #toString()}
          * @return returns this builder for easy method chaining
          */
-        public static Builder parseString(String builderString){
+        @Nullable
+        public static Builder parseString(@NonNull String builderString){
             Builder builder = null;
             try{
                 JSONObject json = new JSONObject(builderString);
@@ -514,6 +537,7 @@ public class MPEvent {
          * @return a JSON object describing this builder
          */
         @Override
+        @NonNull
         public String toString() {
             try{
                 JSONObject jsonObject = new JSONObject();

@@ -1,5 +1,7 @@
 package com.mparticle.commerce;
 
+import android.support.annotation.NonNull;
+
 import java.util.LinkedList;
 import java.util.List;
 
@@ -17,16 +19,18 @@ public class Impression {
      * @param listName a string name given to the list where the given Products displayed
      * @param product a Product to associate with the Impression
      */
-    public Impression(String listName, Product product) {
+    public Impression(@NonNull String listName, @NonNull Product product) {
         super();
         mListName = listName;
         addProduct(product);
     }
 
+    @NonNull
     public String getListName() {
         return mListName;
     }
 
+    @NonNull
     public List<Product> getProducts() {
         return mProducts;
     }
@@ -37,7 +41,8 @@ public class Impression {
      * @param product
      * @return
      */
-    public Impression addProduct(Product product) {
+    @NonNull
+    public Impression addProduct(@NonNull Product product) {
         if (mProducts == null) {
             mProducts = new LinkedList<Product>();
         }
@@ -47,7 +52,7 @@ public class Impression {
         return this;
     }
 
-    public Impression(Impression impression) {
+    public Impression(@NonNull Impression impression) {
         mListName = impression.mListName;
         if (impression.mProducts != null) {
             mProducts = impression.mProducts;

@@ -2,6 +2,7 @@ package com.mparticle;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import com.mparticle.identity.BaseIdentityTask;
 import com.mparticle.identity.IdentityApiRequest;
@@ -23,7 +24,7 @@ public class MParticleOptions {
 
     private Context mContext;
     private MParticle.InstallType mInstallType = MParticle.InstallType.AutoDetect;
-    private MParticle.Environment mEnvironment;
+    private MParticle.Environment mEnvironment = MParticle.Environment.AutoDetect;
     private String mApiKey;
     private String mApiSecret;
     private IdentityApiRequest mIdentifyRequest;
@@ -42,7 +43,7 @@ public class MParticleOptions {
     private MParticleOptions() {
     }
 
-    public MParticleOptions(Builder builder) {
+    public MParticleOptions(@NonNull Builder builder) {
         this.mContext = builder.context;
         if (builder.apiKey != null) {
             this.mApiKey = builder.apiKey;
@@ -109,7 +110,8 @@ public class MParticleOptions {
      * @param context
      * @return
      */
-    public static MParticleOptions.Builder builder(Context context) {
+    @NonNull
+    public static MParticleOptions.Builder builder(@NonNull Context context) {
         return new Builder(context);
     }
 
@@ -120,6 +122,7 @@ public class MParticleOptions {
     /**
      * query the InstallType
      */
+    @NonNull
     public MParticle.InstallType getInstallType() {
         return mInstallType;
     }
@@ -128,6 +131,7 @@ public class MParticleOptions {
      * query the Environment
      * @return
      */
+    @NonNull
     public MParticle.Environment getEnvironment() {
         return mEnvironment;
     }
@@ -136,6 +140,7 @@ public class MParticleOptions {
      * query the Api Key
      * @return
      */
+    @NonNull
     public String getApiKey() {
         return mApiKey;
     }
@@ -144,6 +149,7 @@ public class MParticleOptions {
      * query the Api Secret
      * @return
      */
+    @NonNull
     public String getApiSecret() {
         return mApiSecret;
     }
@@ -152,6 +158,7 @@ public class MParticleOptions {
      * query the Identify Request
      * @return
      */
+    @Nullable
     public IdentityApiRequest getIdentifyRequest() {
         return mIdentifyRequest;
     }
@@ -160,6 +167,7 @@ public class MParticleOptions {
      * query whether device performance metrics are enabled or disabled
      * @return true if the are disabled, false if they are enabled
      */
+    @NonNull
     public Boolean isDevicePerformanceMetricsDisabled() {
         return mDevicePerformanceMetricsDisabled;
     }
@@ -168,6 +176,7 @@ public class MParticleOptions {
      * query whether Android Id collection is enabled or disabled
      * @return true if collection is disabled, false if it is enabled
      */
+    @NonNull
     public Boolean isAndroidIdDisabled() {
         return mAndroidIdDisabled;
     }
@@ -177,26 +186,32 @@ public class MParticleOptions {
      * @return the upload interval, in seconds
      * @return the upload interval, in seconds
      */
+    @NonNull
     public Integer getUploadInterval() {
         return mUploadInterval;
     }
 
+    @NonNull
     public Integer getSessionTimeout() {
         return mSessionTimeout;
     }
 
+    @NonNull
     public Boolean isUncaughtExceptionLoggingEnabled() {
         return mUnCaughtExceptionLogging;
     }
 
+    @NonNull
     public MParticle.LogLevel getLogLevel() {
         return mLogLevel;
     }
 
+    @Nullable
     public BaseIdentityTask getIdentityTask() {
         return mIdentityTask;
     }
 
+    @Nullable
     public AttributionListener getAttributionListener() {
         return mAttributionListener;
     }
@@ -205,6 +220,7 @@ public class MParticleOptions {
         return mLocationTracking != null;
     }
 
+    @Nullable
     public LocationTracking getLocationTracking() {
         return mLocationTracking;
     }
@@ -213,6 +229,7 @@ public class MParticleOptions {
         return mPushRegistration != null;
     }
 
+    @Nullable
     public PushRegistrationHelper.PushRegistration getPushRegistration() {
         return mPushRegistration;
     }
@@ -221,6 +238,7 @@ public class MParticleOptions {
         return mIdentityConnectionTimeout;
     }
 
+    @NonNull
     public NetworkOptions getNetworkOptions() {
         return mNetworkOptions;
     }
@@ -258,6 +276,7 @@ public class MParticleOptions {
          *
          * @return the instance of the builder, for chaining calls
          */
+        @NonNull
         public Builder credentials(@NonNull String apiKey, @NonNull String apiSecret) {
             this.apiKey = apiKey;
             this.apiSecret = apiSecret;
@@ -274,6 +293,7 @@ public class MParticleOptions {
          *
          * @see com.mparticle.MParticle.InstallType
          */
+        @NonNull
         public Builder installType(@NonNull MParticle.InstallType installType) {
             this.installType = installType;
             return this;
@@ -285,6 +305,7 @@ public class MParticleOptions {
          * @param environment
          * @return
          */
+        @NonNull
         public Builder environment(@NonNull MParticle.Environment environment) {
             this.environment = environment;
             return this;
@@ -304,6 +325,7 @@ public class MParticleOptions {
          *
          * @see IdentityApiRequest
          */
+        @NonNull
         public Builder identify(@NonNull IdentityApiRequest identifyRequest) {
             this.identifyRequest = identifyRequest;
             return this;
@@ -319,6 +341,7 @@ public class MParticleOptions {
          *
          * @see BaseIdentityTask
          */
+        @NonNull
         public Builder identifyTask(@NonNull BaseIdentityTask task) {
             this.identityTask = task;
             return this;
@@ -331,6 +354,7 @@ public class MParticleOptions {
          *
          * @return the instance of the builder, for chaining calls
          */
+        @NonNull
         public Builder devicePerformanceMetricsDisabled(boolean disabled) {
             this.devicePerformanceMetricsDisabled = disabled;
             return this;
@@ -345,6 +369,7 @@ public class MParticleOptions {
          *
          * @return the instance of the builder, for chaining calls
          */
+        @NonNull
         public Builder androidIdDisabled(boolean disabled) {
             this.androidIdDisabled = disabled;
             return this;
@@ -357,6 +382,7 @@ public class MParticleOptions {
          *
          * @return the instance of the builder, for chaining calls
          */
+        @NonNull
         public Builder uploadInterval(int uploadInterval) {
             this.uploadInterval = uploadInterval;
             return this;
@@ -371,6 +397,7 @@ public class MParticleOptions {
          *
          * @return the instance of the builder, for chaining calls
          */
+        @NonNull
         public Builder sessionTimeout(int sessionTimeout) {
             this.sessionTimeout = sessionTimeout;
             return this;
@@ -381,6 +408,7 @@ public class MParticleOptions {
          *
          * @return the instance of the builder, for chaining calls
          */
+        @NonNull
         public Builder enableUncaughtExceptionLogging(boolean enable) {
             this.unCaughtExceptionLogging = enable;
             return this;
@@ -398,7 +426,8 @@ public class MParticleOptions {
          *
          * @see MParticle.LogLevel
          */
-        public Builder logLevel(MParticle.LogLevel logLevel) {
+        @NonNull
+        public Builder logLevel(@NonNull MParticle.LogLevel logLevel) {
             this.logLevel = logLevel;
             return this;
         }
@@ -411,7 +440,8 @@ public class MParticleOptions {
          *
          * @see AttributionListener
          */
-        public Builder attributionListener(AttributionListener attributionListener) {
+        @NonNull
+        public Builder attributionListener(@Nullable AttributionListener attributionListener) {
             this.attributionListener = attributionListener;
             return this;
         }
@@ -421,6 +451,7 @@ public class MParticleOptions {
          *
          * @return the instance of the builder, for chaining calls
          */
+        @NonNull
         public Builder locationTrackingDisabled() {
             this.locationTracking = new LocationTracking(false);
             return this;
@@ -436,7 +467,8 @@ public class MParticleOptions {
          *
          * @return the instance of the builder, for chaining calls
          */
-        public Builder locationTrackingEnabled(String provider, long minTime, long minDistance) {
+        @NonNull
+        public Builder locationTrackingEnabled(@NonNull String provider, long minTime, long minDistance) {
             this.locationTracking = new LocationTracking(provider, minTime, minDistance);
             return this;
         }
@@ -448,7 +480,8 @@ public class MParticleOptions {
          *
          * @return the instance of the builder, for chaining calls
          */
-        public Builder pushRegistration(String instanceId, String senderId) {
+        @NonNull
+        public Builder pushRegistration(@NonNull String instanceId, @NonNull String senderId) {
             this.pushRegistration = new PushRegistrationHelper.PushRegistration(instanceId, senderId);
             return this;
         }
@@ -462,12 +495,14 @@ public class MParticleOptions {
          *
          * @return the instance of the builder, for chaining calls
          */
+        @NonNull
         public Builder identityConnectionTimeout(int identityConnectionTimeout) {
             this.identityConnectionTimeout = identityConnectionTimeout;
             return this;
         }
 
-        public Builder networkOptions(NetworkOptions networkOptions) {
+        @NonNull
+        public Builder networkOptions(@Nullable NetworkOptions networkOptions) {
             this.networkOptions = networkOptions;
             return this;
         }
@@ -477,6 +512,7 @@ public class MParticleOptions {
          *
          * @return MParticleOptions instance
          */
+        @NonNull
         public MParticleOptions build() {
             boolean devMode = MParticle.Environment.Development.equals(environment) || MPUtility.isAppDebuggable(context);
             String message;

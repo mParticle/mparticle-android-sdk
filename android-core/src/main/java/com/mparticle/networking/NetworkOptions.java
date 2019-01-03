@@ -1,5 +1,8 @@
 package com.mparticle.networking;
 
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+
 import com.mparticle.internal.Logger;
 import com.mparticle.internal.MPUtility;
 
@@ -33,11 +36,13 @@ public class NetworkOptions {
         }
     }
 
+    @NonNull
     public static Builder builder() {
         return new Builder();
     }
 
-    public static NetworkOptions withNetworkOptions(String jsonString) {
+    @Nullable
+    public static NetworkOptions withNetworkOptions(@Nullable String jsonString) {
         if (MPUtility.isEmpty(jsonString)) {
             return null;
         }
@@ -57,18 +62,22 @@ public class NetworkOptions {
         return builder.build();
     }
 
+    @Nullable
     public DomainMapping getConfigDomain() {
         return domainMappings.get(CONFIG);
     }
 
+    @Nullable
     public DomainMapping getEventsDomain() {
         return domainMappings.get(EVENTS);
     }
 
+    @Nullable
     public DomainMapping getIdentityDomain() {
         return domainMappings.get(IDENTITY);
     }
 
+    @NonNull
     public List<DomainMapping> getDomainMappings() {
         return new ArrayList<DomainMapping>(domainMappings.values());
     }
@@ -82,6 +91,7 @@ public class NetworkOptions {
     }
 
     @Override
+    @NonNull
     public String toString() {
         return toJson().toString();
     }
@@ -110,7 +120,8 @@ public class NetworkOptions {
         private Builder() {
         }
 
-        public Builder addDomainMapping(DomainMapping domain) {
+        @NonNull
+        public Builder addDomainMapping(@Nullable DomainMapping domain) {
             if (domainMappings == null) {
                 domainMappings = new HashMap<Endpoint, DomainMapping>();
             }
@@ -125,7 +136,8 @@ public class NetworkOptions {
             return this;
         }
 
-        public Builder setDomainMappings(List<DomainMapping> domainMappingsList) {
+        @NonNull
+        public Builder setDomainMappings(@Nullable List<DomainMapping> domainMappingsList) {
             if (domainMappingsList == null) {
                 domainMappings = new HashMap<Endpoint, DomainMapping>();
                 return this;
@@ -136,11 +148,13 @@ public class NetworkOptions {
             return this;
         }
 
+        @NonNull
         public Builder setPinningDisabledInDevelopment(boolean disabledInDevelopment) {
             this.pinningDisabledInDevelopment = disabledInDevelopment;
             return this;
         }
 
+        @NonNull
         public NetworkOptions build() {
             return new NetworkOptions(this);
         }

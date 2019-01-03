@@ -1,6 +1,8 @@
 package com.mparticle.media;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -20,7 +22,7 @@ public class MPMediaAPI {
         mCallbacks = null;
     }
 
-    public MPMediaAPI(Context context, MediaCallbacks callbacks) {
+    public MPMediaAPI(@Nullable Context context, @NonNull MediaCallbacks callbacks) {
         mContext = context;
         mCallbacks = callbacks;
     }

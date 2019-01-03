@@ -2,6 +2,8 @@ package com.mparticle.messaging;
 
 import android.content.Context;
 import android.content.IntentFilter;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
 
 import com.mparticle.MPService;
@@ -19,14 +21,14 @@ import com.mparticle.internal.PushRegistrationHelper;
 public class MPMessagingAPI {
     private final Context mContext;
 
-    public static final String CLOUD_MESSAGE_EXTRA = "mp-push-message";
+    @NonNull public static final String CLOUD_MESSAGE_EXTRA = "mp-push-message";
 
     /**
      * Listen for this broadcast (as an Intent action) to detect when the device received a push.
      *
      * In the received Intent, you will have access to the entire payload of the push notification.
      */
-    public static final String BROADCAST_NOTIFICATION_RECEIVED = "com.mparticle.push.RECEIVE";
+    @NonNull public static final String BROADCAST_NOTIFICATION_RECEIVED = "com.mparticle.push.RECEIVE";
     /**
      * Listen for this broadcast (as an Intent action) to detect when a user taps a push message in the
      * notification bar of their device. You may then navigate or otherwise adjust the user experience based on
@@ -34,7 +36,7 @@ public class MPMessagingAPI {
      *
      * In the received Intent, you will have access to the entire payload of the push notification.
      */
-    public static final String BROADCAST_NOTIFICATION_TAPPED = "com.mparticle.push.TAP";
+    @NonNull public static final String BROADCAST_NOTIFICATION_TAPPED = "com.mparticle.push.TAP";
 
     private MPMessagingAPI(){
         mContext = null;
@@ -43,7 +45,7 @@ public class MPMessagingAPI {
     /**
      *
      */
-    public MPMessagingAPI(Context context) {
+    public MPMessagingAPI(@NonNull Context context) {
         super();
         mContext = context;
     }
@@ -53,7 +55,7 @@ public class MPMessagingAPI {
      *
      * @param senderId the SENDER_ID for the application
      */
-    public void enablePushNotifications(String senderId) {
+    public void enablePushNotifications(@NonNull String senderId) {
         MParticle.getInstance().Internal().getConfigManager().setPushSenderId(senderId);
         if (!MPUtility.isInstanceIdAvailable()) {
             Logger.error("Push is enabled but Google Cloud Messaging or Firebase Cloud Messaging library not found - you must add com.google.android.gms:play-services-gcm:7.5 or later, or com.google.firebase:firebase-messaging:7.5 or later to your application.");
@@ -73,7 +75,7 @@ public class MPMessagingAPI {
         MParticle.getInstance().Internal().getConfigManager().clearPushRegistration();
     }
 
-    public void displayPushNotificationByDefault(Boolean enabled) {
+    public void displayPushNotificationByDefault(@Nullable Boolean enabled) {
         MParticle.getInstance().Internal().getConfigManager().setDisplayPushNotifications(enabled);
     }
 
@@ -84,7 +86,7 @@ public class MPMessagingAPI {
      *
      * @see PushAnalyticsReceiver
      */
-    public void registerPushAnalyticsReceiver(PushAnalyticsReceiver receiver) {
+    public void registerPushAnalyticsReceiver(@NonNull PushAnalyticsReceiver receiver) {
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(BROADCAST_NOTIFICATION_RECEIVED);
         intentFilter.addAction(BROADCAST_NOTIFICATION_TAPPED);
@@ -99,7 +101,7 @@ public class MPMessagingAPI {
      *
      * @see PushAnalyticsReceiver
      */
-    public void unregisterPushAnalyticsReceiver(PushAnalyticsReceiver receiver) {
+    public void unregisterPushAnalyticsReceiver(@Nullable PushAnalyticsReceiver receiver) {
         LocalBroadcastManager.getInstance(mContext).unregisterReceiver(receiver);
     }
 }
