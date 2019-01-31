@@ -47,7 +47,7 @@ public class KitFrameworkWrapper implements KitManager {
     public KitFrameworkWrapper(Context context, ReportingManager reportingManager, ConfigManager configManager, AppStateManager appStateManager, BackgroundTaskHandler backgroundTaskHandler, boolean testing) {
         this.mContext = testing ? context : new KitContext(context);
         this.mReportingManager = reportingManager;
-        this.mCoreCallbacks = new CoreCallbacksImpl(configManager, appStateManager);
+        this.mCoreCallbacks = new CoreCallbacksImpl(this, configManager, appStateManager);
         this.mBackgroundTaskHandler = backgroundTaskHandler;
         kitsLoaded = false;
     }
@@ -590,10 +590,12 @@ public class KitFrameworkWrapper implements KitManager {
     }
 
     static class CoreCallbacksImpl implements CoreCallbacks {
+        KitFrameworkWrapper mKitFrameworkWrapper;
         ConfigManager mConfigManager;
         AppStateManager mAppStateManager;
 
-        public CoreCallbacksImpl(ConfigManager configManager, AppStateManager appStateManager) {
+        public CoreCallbacksImpl(KitFrameworkWrapper kitFrameworkWrapper, ConfigManager configManager, AppStateManager appStateManager) {
+            mKitFrameworkWrapper = kitFrameworkWrapper;
             mConfigManager = configManager;
             mAppStateManager = appStateManager;
         }
@@ -657,6 +659,11 @@ public class KitFrameworkWrapper implements KitManager {
         @Override
         public String getLaunchAction() {
             return mAppStateManager.getLaunchAction();
+        }
+
+        @Override
+        public void replayAndDisableQueue() {
+            mKitFrameworkWrapper.replayAndDisableQueue();
         }
     }
 }

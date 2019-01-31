@@ -208,7 +208,7 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
                 getContext().sendBroadcast(intent);
             }
         }
-        MParticle.getInstance().Internal().getKitManager().replayAndDisableQueue();
+        mCoreCallbacks.replayAndDisableQueue();
     }
 
     private void initializeKit(KitIntegration activeKit) {

@@ -21,4 +21,5 @@ public interface CoreCallbacks {
     String getPushInstanceId();
     Uri getLaunchUri();
     String getLaunchAction();
+    void replayAndDisableQueue();
 }

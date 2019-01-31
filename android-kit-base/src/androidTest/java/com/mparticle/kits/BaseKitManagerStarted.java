@@ -203,6 +203,11 @@ public abstract class BaseKitManagerStarted extends BaseCleanInstallEachTest {
         public String getLaunchAction() {
             return appStateManager.getLaunchAction();
         }
+
+        @Override
+        public void replayAndDisableQueue() {
+
+        }
     }
 
     interface KitStartedListener {

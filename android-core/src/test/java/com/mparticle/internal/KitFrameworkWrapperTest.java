@@ -481,7 +481,7 @@ public class KitFrameworkWrapperTest {
         Mockito.when(mockConfigManager.getIntegrationAttributes(1)).thenReturn(mockIntegrationAttributes1);
         Mockito.when(mockConfigManager.getIntegrationAttributes(2)).thenReturn(mockIntegrationAttributes2);
 
-        CoreCallbacks coreCallbacks = new KitFrameworkWrapper.CoreCallbacksImpl(mockConfigManager, mockAppStateManager);
+        CoreCallbacks coreCallbacks = new KitFrameworkWrapper.CoreCallbacksImpl(Mockito.mock(KitFrameworkWrapper.class), mockConfigManager, mockAppStateManager);
 
         assertEquals(mockActivity, coreCallbacks.getCurrentActivity().get());
         assertEquals(mockKitConfiguration, coreCallbacks.getLatestKitConfiguration());
