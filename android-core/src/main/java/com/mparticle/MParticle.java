@@ -1515,6 +1515,7 @@ public class MParticle {
         int RESPONSYS = 102;
         int CLEVERTAP = 135;
         int GOOGLE_ANALYTICS_FIREBASE = 136;
+        int PILGRIM_SDK = 211;
         @NonNull String BROADCAST_ACTIVE = "MPARTICLE_SERVICE_PROVIDER_ACTIVE_";
         @NonNull String BROADCAST_DISABLED = "MPARTICLE_SERVICE_PROVIDER_DISABLED_";
     }
