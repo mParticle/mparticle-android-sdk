@@ -606,12 +606,15 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
     }
 
     @Override
-    public void incrementUserAttribute(String key, String value, long mpid) {
+    public void incrementUserAttribute(String key, int incrementedBy, String newValue, long mpid) {
         for (KitIntegration provider : providers.values()) {
             try {
-                if (provider instanceof KitIntegration.UserAttributeListener && !provider.isDisabled()
-                        && KitConfiguration.shouldForwardAttribute(provider.getConfiguration().getUserAttributeFilters(), key)) {
-                    ((KitIntegration.UserAttributeListener) provider).onIncrementUserAttribute(key, value, FilteredMParticleUser.getInstance(mpid, provider));
+                if (!provider.isDisabled() && KitConfiguration.shouldForwardAttribute(provider.getConfiguration().getUserAttributeFilters(), key))
+                if (provider instanceof KitIntegration.UserAttributeListener) {
+                    ((KitIntegration.UserAttributeListener) provider).onIncrementUserAttribute(key, incrementedBy, newValue, FilteredMParticleUser.getInstance(mpid, provider));
+                }
+                if (provider instanceof KitIntegration.AttributeListener) {
+                    ((KitIntegration.AttributeListener) provider).setUserAttribute(key, newValue);
                 }
             } catch (Exception e) {
                 Logger.warning("Failed to call onIncrementUserAttribute for kit: " + provider.getName() + ": " + e.getMessage());

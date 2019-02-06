@@ -100,7 +100,7 @@ public class MockKitManager implements KitManager {
     }
 
     @Override
-    public void incrementUserAttribute(String key, String value, long mpid) {
+    public void incrementUserAttribute(String key, int increasedBy, String value, long mpid) {
 
     }
 

@@ -172,7 +172,7 @@ public class KitFrameworkWrapper implements KitManager {
                         break;
                     case AttributeChange.INCREMENT_ATTRIBUTE:
                         if (attributeChange.value instanceof String) {
-                            mKitManager.incrementUserAttribute(attributeChange.key, (String)attributeChange.value, attributeChange.mpid);
+                            mKitManager.incrementUserAttribute(attributeChange.key, attributeChange.incrementedBy, (String)attributeChange.value, attributeChange.mpid);
                         }
                         break;
                     case AttributeChange.TAG:
@@ -218,8 +218,8 @@ public class KitFrameworkWrapper implements KitManager {
         return queueAttribute(new AttributeChange(key, mpid, AttributeChange.TAG));
     }
 
-    boolean queueAttributeIncrement(String key, String value, long mpid) {
-        return queueAttribute(new AttributeChange(key, value, mpid, AttributeChange.INCREMENT_ATTRIBUTE));
+    boolean queueAttributeIncrement(String key, int incrementedBy, String newValue, long mpid) {
+        return queueAttribute(new AttributeChange(key, incrementedBy, newValue, mpid));
     }
 
     synchronized boolean queueAttribute(AttributeChange change) {
@@ -239,6 +239,7 @@ public class KitFrameworkWrapper implements KitManager {
         final Object value;
         final long mpid;
         final int type;
+        int incrementedBy;
 
         static final int REMOVE_ATTRIBUTE = 1;
         static final int SET_ATTRIBUTE = 2;
@@ -264,6 +265,14 @@ public class KitFrameworkWrapper implements KitManager {
             this.value = null;
             this.mpid = mpid;
             this.type = type;
+        }
+
+        AttributeChange(String key, int incrementedBy, String newValue, long mpid) {
+            this.key = key;
+            this.value = newValue;
+            this.incrementedBy = incrementedBy;
+            this.mpid = mpid;
+            this.type = INCREMENT_ATTRIBUTE;
         }
     }
 
@@ -363,9 +372,9 @@ public class KitFrameworkWrapper implements KitManager {
     }
 
     @Override
-    public void incrementUserAttribute(String key, String value, long mpid) {
-        if (!queueAttributeIncrement(key, value, mpid) && mKitManager != null) {
-            mKitManager.incrementUserAttribute(key, value, mpid);
+    public void incrementUserAttribute(String key, int incrementValue, String newValue, long mpid) {
+        if (!queueAttributeIncrement(key, incrementValue, newValue, mpid) && mKitManager != null) {
+            mKitManager.incrementUserAttribute(key, incrementValue, newValue, mpid);
         }
     }
 

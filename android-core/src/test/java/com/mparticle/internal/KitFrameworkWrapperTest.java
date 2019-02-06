@@ -237,7 +237,7 @@ public class KitFrameworkWrapperTest {
                 true);
         assertNull(wrapper.getAttributeQueue());
         wrapper.setKitsLoaded(false);
-        wrapper.queueAttributeIncrement("a key", "3", 1);
+        wrapper.queueAttributeIncrement("a key", 3, "3", 1);
         assertEquals(wrapper.getAttributeQueue().peek().key, "a key");
         assertEquals(wrapper.getAttributeQueue().peek().value, "3");
         assertEquals(wrapper.getAttributeQueue().peek().type, KitFrameworkWrapper.AttributeChange.INCREMENT_ATTRIBUTE);

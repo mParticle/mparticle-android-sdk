@@ -53,7 +53,7 @@ public interface KitManager {
 
     void setUserTag(String tag, long mpid);
 
-    void incrementUserAttribute(String key, String value, long mpid);
+    void incrementUserAttribute(String key, int incrementValue, String newValue, long mpid);
 
     void onConsentStateUpdated(ConsentState oldState, ConsentState newState, long mpid);
 

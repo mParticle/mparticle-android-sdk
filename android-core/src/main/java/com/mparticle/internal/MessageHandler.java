@@ -259,7 +259,7 @@ import java.util.UUID;
             logUserAttributeChanged(attributeChange);
         }
         if (MParticle.getInstance() != null && MParticle.getInstance().Internal().getKitManager() != null) {
-            MParticle.getInstance().Internal().getKitManager().incrementUserAttribute(key, newValue, mpId);
+            MParticle.getInstance().Internal().getKitManager().incrementUserAttribute(key, incrementValue, newValue, mpId);
         }
     }
 
