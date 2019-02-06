@@ -84,7 +84,10 @@
     url = git@github.com:mparticle-integrations/mparticle-android-integration-optimizely.git
 [submodule "kits/responsys-kit"]
 	path = kits/responsys-kit
-        url = git@github.com:mparticle-integrations/mparticle-android-integration-responsys.git
+    url = git@github.com:mparticle-integrations/mparticle-android-integration-responsys.git
 [submodule "kits/clevertap-kit"]
 	path = kits/clevertap-kit
 	url = git@github.com:mparticle-integrations/mparticle-android-integration-clevertap.git
+[submodule "kits/googleanalyticsfirebase-kit"]
+	path = kits/googleanalyticsfirebase-kit
+	url = git@github.com:mparticle-integrations/mparticle-android-integration-google-analytics-firebase.git
