@@ -8,18 +8,19 @@ import android.support.test.rule.ActivityTestRule;
 import android.util.MutableBoolean;
 import android.webkit.CookieManager;
 import android.webkit.JavascriptInterface;
+import android.webkit.WebChromeClient;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceResponse;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
 import com.mparticle.MParticle;
-import com.mparticle.OrchestratorOnly;
 import com.mparticle.WebViewActivity;
 import com.mparticle.identity.AccessUtils;
 import com.mparticle.test.R;
 import com.mparticle.testutils.BaseCleanStartedEachTest;
 import com.mparticle.testutils.MPLatch;
+import com.mparticle.testutils.RandomUtils;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -53,14 +54,18 @@ public class MParticleJSInterfaceTest extends BaseCleanStartedEachTest {
 
     private static String jsSdk;
     private static boolean sdkFetchedSuccessfully = false;
+    private static String bridgeToken = new RandomUtils().getAlphaString(5);
+    private static String bridgeVersion = "2";
 
     private static final String jsStartupMParticle = "window.mParticle = {\n" +
             "            config: {\n" +
             "                isDevelopmentMode: true,\n" +
             "                useCookieStorage: true,\n" +
             "                identifyRequest: {\n" +
-            "                userIdentities: { email: 'email@example.com', customerid: '123456' }\n" +
-            "               } " +
+            "                   userIdentities: { email: 'email@example.com', customerid: '123456' }\n" +
+            "                   },\n " +
+            "                requiredWebviewBridgeName: \"" + bridgeToken + "\",\n" +
+            "                minWebviewBridgeVersion:\"" + bridgeVersion + "\"\n" +
             "            }\n" +
             "        };" +
             "    window.mParticle = window.mParticle || {};\n" +
@@ -73,7 +78,6 @@ public class MParticleJSInterfaceTest extends BaseCleanStartedEachTest {
 
     private static final String jsTestWrapper =
             "   mParticle.init();\n" +
-                    "   mParticle.useNativeSdk = true;\n" +
                     "   mParticle.isDebug = true;\n" +
                     " console.log(\"testing started\")\n " +
                     "       window.mParticle.ready(function () {\n" +
@@ -129,7 +133,7 @@ public class MParticleJSInterfaceTest extends BaseCleanStartedEachTest {
             "        //  +\n" +
             "        // ';path=/' + domain;\n" +
             "            console.log(\"SETTNG COOKIE: \" + cookie);\n" +
-            "    window.document.cookie = cookie;" +
+            "    window.document.cookie = cookie;\n" +
             "   console.log(\"RETRIEVING cookie: \" + window.document.cookie);\n" +
             "}";
 
@@ -165,7 +169,8 @@ public class MParticleJSInterfaceTest extends BaseCleanStartedEachTest {
                     .replace("jssdks.mparticle.com/v1/JS/", "http://localhost:8080/v1")//; console.log(\"replaced url V1 plural\");")
                     .replace("jssdk.mparticle.com/v1/JS/", "http://localhost:8080/v1")//; console.log(\"replaced url V1 single\");")
                     .replace("https://identity.mparticle.com/v1/", "http://localhost:8080/v1/")//; console.log(\"replaced url Identity\");")
-                    .replace("//  jQuery v1.10.2 | (c) 2005, 2013 jQuery Foundation, Inc. | jquery.org/license", "console.log(\"starting sdk\")");
+                    .replace("//  jQuery v1.10.2 | (c) 2005, 2013 jQuery Foundation, Inc. | jquery.org/license", "console.log(\"starting sdk\")")
+                    .replace("window.mParticle.config.minWebviewBridgeVersion = 1", "window.mParticle.config.minWebviewBridgeVersion = " + bridgeVersion);
             sdkFetchedSuccessfully = true;
         } catch (Exception ex) {
             sdkFetchedSuccessfully = false;
@@ -484,13 +489,20 @@ public class MParticleJSInterfaceTest extends BaseCleanStartedEachTest {
                         cookieManager.setAcceptThirdPartyCookies(wv, true);
                         wv.getSettings().setDomStorageEnabled(true);
                         wv.getSettings().setJavaScriptEnabled(true);
-                        wv.removeJavascriptInterface(MParticleJSInterface.INTERFACE_NAME);
-                        wv.addJavascriptInterface(
-                                jsInterface,
-                                MParticleJSInterface.INTERFACE_NAME);
+                        String bridgeName = MParticleJSInterface.getBridgeName(bridgeToken);
+                        wv.removeJavascriptInterface(bridgeName);
+                        wv.addJavascriptInterface(jsInterface, bridgeName);
+                        wv.setWebChromeClient(new WebChromeClient() {
+                            public void onConsoleMessage(String message, int lineNumber, String sourceID) {
+                                Logger.warning("MParticle JS sdk", message + " -- From line "
+                                        + lineNumber);
+                            }
+                        });
 
+                        String jsString = getJavascriptWrappedinHtml(testJavascript);
+                        Logger.error(jsString);
                         wv.loadDataWithBaseURL("http://localhost/",
-                                getJavascriptWrappedinHtml(testJavascript),
+                                jsString,
                                 "text/html", "utf-8",
                                 null);
                     }

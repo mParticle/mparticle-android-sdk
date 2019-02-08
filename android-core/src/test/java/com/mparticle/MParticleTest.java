@@ -1,8 +1,14 @@
 package com.mparticle;
 
 
+import android.webkit.WebView;
+
 import com.mparticle.internal.Constants;
 import com.mparticle.internal.InternalSession;
+import com.mparticle.internal.MParticleJSInterface;
+import com.mparticle.mock.MockContext;
+import com.mparticle.testutils.AndroidUtils.Mutable;
+import com.mparticle.testutils.RandomUtils;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -12,8 +18,6 @@ import org.mockito.Mockito;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import static org.junit.Assert.*;
 import static org.mockito.Matchers.eq;
@@ -208,4 +212,43 @@ public class MParticleTest {
         Assert.assertNull(MParticle.getDeviceImei());
     }
 
+    @Test
+    public void testAddWebView() {
+        MParticle mp = new MockMParticle();
+        MParticle.setInstance(mp);
+        RandomUtils ran = new RandomUtils();
+        String[] values = new String[]{"", "123", ran.getAlphaNumericString(5), ran.getAlphaNumericString(20), ran.getAlphaNumericString(100)};
+
+        //test that we apply the token stored in the ConfigManager
+        for (final String value: values) {
+            Mockito.when(mp.Internal().getConfigManager().getWorkspaceToken()).thenReturn(value);
+            final Mutable<Boolean> called = new Mutable<Boolean>(false);
+            WebView webView = new WebView(new MockContext()) {
+                @Override
+                public void addJavascriptInterface(Object object, String name) {
+                    assertEquals(MParticleJSInterface.INTERFACE_BASE_NAME + "_" + value + "_v2", name);
+                    called.value = true;
+                }
+            };
+
+            mp.registerWebView(webView);
+            assertTrue(called.value);
+        }
+
+        //test that we override the token stored in the ConfigManager, if the Client provides a token
+        for (final String value: values) {
+            Mockito.when(mp.Internal().getConfigManager().getWorkspaceToken()).thenReturn(value);
+            final Mutable<Boolean> called = new Mutable<Boolean>(false);
+            WebView webView = new WebView(new MockContext()) {
+                @Override
+                public void addJavascriptInterface(Object object, String name) {
+                    assertEquals(MParticleJSInterface.INTERFACE_BASE_NAME + "_" + "hardcode" + "_v2", name);
+                    called.value = true;
+                }
+            };
+
+            mp.registerWebView(webView, "hardcode");
+            assertTrue(called.value);
+        }
+    }
 }

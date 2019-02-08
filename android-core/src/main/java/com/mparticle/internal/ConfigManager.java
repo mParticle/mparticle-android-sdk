@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.Build;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import com.mparticle.ExceptionHandler;
@@ -48,6 +49,7 @@ public class ConfigManager {
     public static final String PREFERENCES_FILE = "mp_preferences";
     private static final String KEY_INCLUDE_SESSION_HISTORY = "inhd";
     private static final String KEY_DEVICE_PERFORMANCE_METRICS_DISABLED = "dpmd";
+    public static final String WORKSPACE_TOKEN = "wst";
     static final String KEY_RAMP = "rp";
 
     private static final int DEVMODE_UPLOAD_INTERVAL_MILLISECONDS = 10 * 1000;
@@ -247,7 +249,11 @@ public class ConfigManager {
         if (responseJSON.has(KEY_DEVICE_PERFORMANCE_METRICS_DISABLED)) {
             MessageManager.devicePerformanceMetricsDisabled = responseJSON.optBoolean(KEY_DEVICE_PERFORMANCE_METRICS_DISABLED, false);
         }
-
+        if (responseJSON.has(WORKSPACE_TOKEN)) {
+            editor.putString(WORKSPACE_TOKEN, responseJSON.getString(WORKSPACE_TOKEN));
+        } else {
+            editor.remove(WORKSPACE_TOKEN);
+        }
         editor.apply();
         applyConfig();
         if (newConfig) {
@@ -1064,6 +1070,11 @@ public class ConfigManager {
     public synchronized void setNetworkOptions(NetworkOptions networkOptions) {
         sNetworkOptions = networkOptions;
         sPreferences.edit().remove(Constants.PrefKeys.NETWORK_OPTIONS).apply();
+    }
+
+    @NonNull
+    public String getWorkspaceToken() {
+        return sPreferences.getString(WORKSPACE_TOKEN, "");
     }
 
     private int getAppVersion() {

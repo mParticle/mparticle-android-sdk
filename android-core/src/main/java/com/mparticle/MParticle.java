@@ -850,19 +850,33 @@ public class MParticle {
     }
 
     /**
-     * Instrument a WebView so that the mParticle Javascript SDK may be used within the given website or web app
+     * Instrument a WebView so that communication can be facilitated between this Native SDK instance and any
+     * instance of the mParticle Javascript SDK is loaded within the provided WebView.
      *
      * @param webView
      */
     @SuppressLint("AddJavascriptInterface")
     @RequiresApi(17)
     public void registerWebView(@NonNull WebView webView) {
-        if (webView != null) {
-            webView.addJavascriptInterface(
-                    new MParticleJSInterface(),
-                    MParticleJSInterface.INTERFACE_NAME
-            );
-        }
+        registerWebView(webView, null);
+    }
+
+    /**
+     * Instrument a WebView so that communication can be facilitated between this Native SDK instance and any
+     * instance of the mParticle Javascript SDK is loaded within the provided WebView. Additionally,
+     * the "reqiredBridgeName" value will override the generated token which is used by the Javascript SDK
+     * to ensure communication only happens across matching Workspaces.
+     *
+     * Make sure you know what you are doing when you provide a requiredBridgeName, since a mismatch
+     * with the Javascript SDK's bridgeName will result in a failure for it to forward calls to the Native SDK
+     *
+     * @param webView
+     * @param requiredBridgeName
+     */
+    @SuppressLint("AddJavascriptInterface")
+    @RequiresApi(17)
+    public void registerWebView(@NonNull WebView webView, String requiredBridgeName) {
+        MParticleJSInterface.registerWebView(webView, requiredBridgeName);
     }
 
     /**

@@ -1,7 +1,9 @@
 package com.mparticle.internal;
 
 
+import android.os.Build;
 import android.webkit.JavascriptInterface;
+import android.webkit.WebView;
 
 import com.mparticle.MPEvent;
 import com.mparticle.MParticle;
@@ -33,7 +35,7 @@ import java.util.Map;
  *
  */
 public class MParticleJSInterface {
-    public static final String INTERFACE_NAME = "mParticleAndroid";
+    public static final String INTERFACE_BASE_NAME = "mParticleAndroid";
 
     //the following keys are sent from the JS library as a part of each event
     protected static final String JS_KEY_EVENT_NAME = "EventName";
@@ -734,5 +736,27 @@ public class MParticleJSInterface {
 
         abstract void onUserFound(MParticleUser user);
 
+    }
+
+    public static void registerWebView(WebView webView, String workspaceToken) {
+        if (webView != null) {
+            String bridgeName = getBridgeName(workspaceToken);
+            webView.addJavascriptInterface(
+                    new MParticleJSInterface(),
+                    bridgeName
+            );
+        }
+    }
+    
+    static String getBridgeName(String workspaceToken) {
+        StringBuilder bridgeName = new StringBuilder(MParticleJSInterface.INTERFACE_BASE_NAME);
+        bridgeName.append("_");
+        if (!MPUtility.isEmpty(workspaceToken)) {
+            bridgeName.append(workspaceToken);
+        } else {
+            bridgeName.append(MParticle.getInstance().Internal().getConfigManager().getWorkspaceToken());
+        }
+        bridgeName.append("_v2");
+        return bridgeName.toString();
     }
 }

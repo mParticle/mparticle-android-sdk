@@ -1,21 +1,25 @@
 package com.mparticle.internal;
 
 import com.mparticle.MParticle;
-import com.mparticle.testutils.BaseCleanStartedEachTest;
+import com.mparticle.testutils.BaseAbstractTest;
 
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.junit.Test;
 
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertFalse;
 import static junit.framework.TestCase.assertTrue;
 
-public class ConfigManagerInstrumentedTest extends BaseCleanStartedEachTest {
+public class ConfigManagerInstrumentedTest extends BaseAbstractTest {
 
     @Test
-    public void testSetMpidCurrentUserState() {
+    public void testSetMpidCurrentUserState() throws InterruptedException {
         final Long mpid1 = ran.nextLong();
         final Long mpid2 = ran.nextLong();
         final Long mpid3 = ran.nextLong();
+
+        startMParticle();
 
         ConfigManager configManager = MParticle.getInstance().Internal().getConfigManager();
 
@@ -42,5 +46,18 @@ public class ConfigManagerInstrumentedTest extends BaseCleanStartedEachTest {
         configManager.setMpid(mpid3, true);
         assertEquals(mpid3.longValue(), MParticle.getInstance().Identity().getCurrentUser().getId());
         assertTrue(MParticle.getInstance().Identity().getCurrentUser().isLoggedIn());
+    }
+
+    @Test
+    public void testParseWebViewBridgeToken() throws JSONException, InterruptedException {
+        String token = mRandomUtils.getAlphaNumericString(20);
+        mServer.setupConfigResponse(new JSONObject().put("wst", token).toString());
+        startMParticle();
+        assertEquals(token, MParticle.getInstance().Internal().getConfigManager().getWorkspaceToken());
+
+        MParticle.setInstance(null);
+        mServer.setupConfigResponse(new JSONObject().toString());
+        startMParticle();
+        assertEquals("", MParticle.getInstance().Internal().getConfigManager().getWorkspaceToken());
     }
 }

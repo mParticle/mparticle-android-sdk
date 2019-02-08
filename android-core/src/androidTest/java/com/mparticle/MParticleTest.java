@@ -4,11 +4,16 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.os.Handler;
+import android.os.Looper;
+import android.webkit.WebView;
 
 import com.mparticle.identity.IdentityApiRequest;
 import com.mparticle.identity.IdentityStateListener;
 import com.mparticle.identity.MParticleUser;
+import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.KitFrameworkWrapper;
+import com.mparticle.internal.MParticleJSInterface;
 import com.mparticle.internal.MessageManager;
 import com.mparticle.internal.PushRegistrationHelper;
 import com.mparticle.internal.database.services.MParticleDBManager;
@@ -30,7 +35,9 @@ import org.junit.Test;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 
 import static junit.framework.Assert.assertEquals;
@@ -139,6 +146,38 @@ public class MParticleTest extends BaseCleanStartedEachTest {
 
         org.junit.Assert.assertFalse(called[0]);
         org.junit.Assert.assertFalse(called[1]);
+    }
+
+    @Test
+    public void testRegisterWebView() throws JSONException, InterruptedException {
+        MParticle.setInstance(null);
+        final String token = mRandomUtils.getAlphaNumericString(15);
+        mServer.setupConfigResponse(new JSONObject().put(ConfigManager.WORKSPACE_TOKEN, token).toString());
+        startMParticle();
+        final Map<String, Object> jsInterfaces = new HashMap<String, Object>();
+        final MPLatch latch = new MPLatch(1);
+        new Handler(Looper.getMainLooper()).post(new Runnable() {
+            @Override
+            public void run() {
+                WebView webView = new WebView(mContext) {
+
+                    @Override
+                    public void addJavascriptInterface(Object object, String name) {
+                        jsInterfaces.put(name, object);
+                    }
+                };
+
+                MParticle.getInstance().registerWebView(webView);
+                assertTrue(jsInterfaces.get(MParticleJSInterface.INTERFACE_BASE_NAME + "_" + token+ "_v2") instanceof MParticleJSInterface);
+
+                String clientToken = mRandomUtils.getAlphaNumericString(15);
+                MParticle.getInstance().registerWebView(webView, clientToken);
+                assertTrue(jsInterfaces.get(MParticleJSInterface.INTERFACE_BASE_NAME + "_" + clientToken + "_v2") instanceof MParticleJSInterface);
+                latch.countDown();
+            }
+        });
+        latch.await();
+        assertEquals(2, jsInterfaces.size());
     }
 
     private void ensureSessionActive() {
