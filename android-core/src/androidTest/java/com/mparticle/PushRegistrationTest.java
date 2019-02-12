@@ -2,11 +2,20 @@ package com.mparticle;
 
 import android.content.Context;
 
+import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.PushRegistrationHelper;
+import com.mparticle.networking.Matcher;
 import com.mparticle.networking.MockServer;
+import com.mparticle.networking.Request;
 import com.mparticle.testutils.BaseCleanStartedEachTest;
+import com.mparticle.testutils.MPLatch;
+import com.mparticle.testutils.TestingUtils;
 
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.junit.Test;
+
+import java.util.concurrent.CountDownLatch;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
@@ -16,6 +25,32 @@ public class PushRegistrationTest extends BaseCleanStartedEachTest {
     //So other classes can use the test fields
     public void setContext(Context context) {
         mContext = context;
+    }
+
+    @Test
+    public void testPushEnabledOnStartup() throws InterruptedException {
+        MParticle.reset(mContext);
+        final String newToken = mRandomUtils.getAlphaNumericString(30);
+        startMParticle();
+        TestingUtils.setFirebasePresent(true, newToken);
+        final CountDownLatch latch = new MPLatch(1);
+        mServer.waitForVerify(new Matcher(mServer.Endpoints().getModifyUrl(mStartingMpid)), new MockServer.RequestReceivedCallback() {
+            @Override
+            public void onRequestReceived(Request request) {
+                JSONArray identitChanges = request.asIdentityRequest().getBody().identity_changes;
+                assertEquals(1, identitChanges.length());
+                try {
+                    assertEquals(newToken, identitChanges.getJSONObject(0).getString("new_value"));
+                    latch.countDown();
+                } catch (JSONException e) {
+                    new RuntimeException(e);
+                }
+            }
+        });
+        MParticle.getInstance().Messaging().enablePushNotifications("12345");
+        latch.await();
+        TestingUtils.setFirebasePresent(false, null);
+
     }
 
     @Test
@@ -123,11 +158,12 @@ public class PushRegistrationTest extends BaseCleanStartedEachTest {
             new SetPush() {
                 @Override
                 public void setPushRegistration(PushRegistrationHelper.PushRegistration pushRegistration) {
-                    MParticle.getInstance().Messaging().enablePushNotifications(pushRegistration.senderId);
+                    //For enablePushNotifications() to set the push registration, we need to mimic
+                    //the Firebase dependency, and clear the push-fetched flags
+                    TestingUtils.setFirebasePresent(true, pushRegistration.instanceId);
+                    ConfigManager.getInstance(mContext).clearPushRegistration();
 
-                    //This is mimicking us fetching an instance. Calling PushRegistrationHelper.setInstance() is what would really be called,
-                    //but it would override the senderId write in the previous method call, which is what we are really testing
-                    MParticle.getInstance().Internal().getConfigManager().setPushInstanceId(pushRegistration.instanceId);
+                    MParticle.getInstance().Messaging().enablePushNotifications(pushRegistration.senderId);
                 }
 
                 @Override

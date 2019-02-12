@@ -21,7 +21,7 @@ public class PushRegistrationHelper {
     }
 
     public static void requestInstanceId(final Context context, final String senderId) {
-        if (getLatestPushRegistration(context) == null && MPUtility.isInstanceIdAvailable()) {
+        if (!ConfigManager.getInstance(context).isPushRegistrationFetched() && MPUtility.isInstanceIdAvailable()) {
             final Runnable instanceRunnable = new Runnable() {
                 @Override
                 public void run() {
@@ -32,7 +32,7 @@ public class PushRegistrationHelper {
                                 instanceId =  InstanceID.getInstance(context).getToken(senderId, "GCM");
                                 break;
                             case FCM:
-                                instanceId = FirebaseInstanceId.getInstance().getToken();
+                                instanceId = FirebaseInstanceId.getInstance().getToken(senderId, "FCM");
                                 break;
                         }
                         setPushRegistration(context, instanceId, senderId);
@@ -54,6 +54,7 @@ public class PushRegistrationHelper {
     static void setPushRegistration(Context context, String instanceId, String senderId) {
         if (!MPUtility.isEmpty(instanceId)) {
             MParticle mParticle = MParticle.getInstance();
+            ConfigManager.getInstance(context).setPushRegistrationFetched();
             if (mParticle != null) {
                 MParticle.getInstance().logPushRegistration(instanceId, senderId);
             } else {

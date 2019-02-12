@@ -406,7 +406,18 @@ public class ConfigManager {
     public PushRegistrationHelper.PushRegistration getPushRegistration() {
         String senderId = sPreferences.getString(Constants.PrefKeys.PUSH_SENDER_ID, null);
         String instanceId = sPreferences.getString(Constants.PrefKeys.PUSH_INSTANCE_ID, null);
+        return new PushRegistrationHelper.PushRegistration(instanceId, senderId);
+    }
 
+    public void setPushRegistrationFetched() {
+        int appVersion = getAppVersion();
+        sPreferences.edit()
+                .putInt(Constants.PrefKeys.PROPERTY_APP_VERSION, appVersion)
+                .putInt(Constants.PrefKeys.PROPERTY_OS_VERSION, Build.VERSION.SDK_INT)
+                .apply();
+    }
+
+    public boolean isPushRegistrationFetched() {
         // Check if app was updated; if so, it must clear the registration ID
         // since the existing regID is not guaranteed to work with the new
         // app version.
@@ -416,9 +427,9 @@ public class ConfigManager {
         if (registeredVersion != currentVersion || osVersion != Build.VERSION.SDK_INT) {
             clearPushRegistration();
             Logger.debug("App or OS version changed, clearing instance ID.");
-            return null;
+            return false;
         } else {
-            return new PushRegistrationHelper.PushRegistration(instanceId, senderId);
+            return true;
         }
     }
 
@@ -428,11 +439,8 @@ public class ConfigManager {
     }
 
     public void setPushSenderId(String senderId) {
-        int appVersion = getAppVersion();
         sPreferences.edit().putString(Constants.PrefKeys.PUSH_SENDER_ID, senderId)
                 .putBoolean(Constants.PrefKeys.PUSH_ENABLED, true)
-                .putInt(Constants.PrefKeys.PROPERTY_APP_VERSION, appVersion)
-                .putInt(Constants.PrefKeys.PROPERTY_OS_VERSION, Build.VERSION.SDK_INT)
                 .apply();
     }
 
@@ -465,6 +473,8 @@ public class ConfigManager {
                 .remove(Constants.PrefKeys.PUSH_SENDER_ID)
                 .remove(Constants.PrefKeys.PUSH_INSTANCE_ID)
                 .remove(Constants.PrefKeys.PUSH_ENABLED)
+                .remove(Constants.PrefKeys.PROPERTY_APP_VERSION)
+                .remove(Constants.PrefKeys.PROPERTY_OS_VERSION)
                 .apply();
     }
 

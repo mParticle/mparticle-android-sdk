@@ -2,6 +2,7 @@ package com.mparticle.testutils;
 
 import android.content.Context;
 
+import com.google.firebase.iid.FirebaseInstanceId;
 import com.mparticle.MPEvent;
 import com.mparticle.MParticle;
 import com.mparticle.internal.AccessUtils;
@@ -17,6 +18,7 @@ import java.util.Random;
 public class TestingUtils {
     private RandomUtils mRandom = new RandomUtils();
     private static TestingUtils instance;
+    private static boolean firebasePresent = false;
 
     public static TestingUtils getInstance() {
         if (instance == null) {
@@ -51,6 +53,15 @@ public class TestingUtils {
             logListener = null;
         }
         Logger.setLogHandler(logListener);
+    }
+
+    public static void setFirebasePresent(boolean present, String token) {
+        firebasePresent = present;
+        FirebaseInstanceId.setToken(token);
+    }
+
+    public static boolean isFirebasePresent() {
+        return firebasePresent;
     }
 
 
