@@ -6,15 +6,19 @@ import android.content.Intent;
 import android.os.Handler;
 
 import com.mparticle.MParticle;
+import com.mparticle.media.MPMediaAPI;
 import com.mparticle.mock.MockApplication;
 import com.mparticle.mock.MockContext;
 import com.mparticle.mock.MockSharedPreferences;
+import com.mparticle.testutils.AndroidUtils;
+import com.mparticle.testutils.AndroidUtils.Mutable;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -166,5 +170,63 @@ public class AppStateManagerTest {
         assertTrue(session.mSessionID.equals("NO-SESSION"));
         manager.startSession();
         assertNotEquals(manager.getSession().mSessionID, session.mSessionID);
+    }
+
+    @Test
+    public void testShouldEndSession() {
+        final Mutable<Boolean> isTimedOut = new Mutable(false);
+        final Mutable<Boolean> isBackground = new Mutable(false);
+        final Mutable<InternalSession> session = new Mutable(new InternalSession() {
+            @Override
+            public boolean isTimedOut(int sessionTimeout) {
+                return isTimedOut.value;
+            }
+        });
+        session.value.mSessionStartTime = 1;
+
+        manager = new AppStateManager(new MockContext(), true) {
+            @Override
+            public boolean isBackgrounded() {
+                return isBackground.value;
+            }
+
+            @Override
+            public InternalSession getSession() {
+                return session.value;
+            }
+        };
+
+        ConfigManager configManager = Mockito.mock(ConfigManager.class);
+        manager.setConfigManager(configManager);
+        MPMediaAPI mediaAPI = Mockito.mock(MPMediaAPI.class);
+        Mockito.when(MParticle.getInstance().Media()).thenReturn(mediaAPI);
+        Mockito.when(mediaAPI.getAudioPlaying()).thenReturn(false);
+
+        isTimedOut.value = true;
+        isBackground.value = true;
+        assertTrue(manager.shouldEndSession());
+
+        isTimedOut.value = false;
+        isBackground.value = true;
+
+        assertFalse(manager.shouldEndSession());
+
+        isTimedOut.value = true;
+        isBackground.value = false;
+
+        assertFalse(manager.shouldEndSession());
+
+        isTimedOut.value = true;
+        isBackground.value = true;
+        assertTrue(manager.shouldEndSession());
+
+        Mockito.when(mediaAPI.getAudioPlaying()).thenReturn(true);
+
+        assertFalse(manager.shouldEndSession());
+
+        MParticle.setInstance(null);
+        //make sure it doesn't crash
+        assertTrue(manager.shouldEndSession());
+
     }
 }

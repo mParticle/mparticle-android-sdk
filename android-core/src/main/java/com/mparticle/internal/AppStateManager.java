@@ -293,17 +293,20 @@ public class  AppStateManager {
         }
     }
 
+    boolean shouldEndSession() {
+        InternalSession session = getSession();
+        MParticle instance = MParticle.getInstance();
+        return 0 != session.mSessionStartTime &&
+                isBackgrounded()
+                && session.isTimedOut(mConfigManager.getSessionTimeout())
+                && (instance == null || !instance.Media().getAudioPlaying());
+    }
+
     private void checkSessionTimeout() {
         delayedBackgroundCheckHandler.postDelayed( new Runnable() {
             @Override
             public void run() {
-                InternalSession session = getSession();
-                MParticle instance = MParticle.getInstance();
-                if (0 != session.mSessionStartTime &&
-                        isBackgrounded()
-                        && session.isTimedOut(mConfigManager.getSessionTimeout())
-                        && instance!= null
-                        && instance.Media().getAudioPlaying()) {
+                if (shouldEndSession()) {
                     Logger.debug("Session timed out");
                     endSession();
                 }
@@ -375,7 +378,9 @@ public class  AppStateManager {
         mMessageManager.endSession(mCurrentSession);
         disableLocationTracking();
         mCurrentSession = new InternalSession();
-        MParticle.getInstance().Internal().getKitManager().onSessionEnd();
+        if (MParticle.getInstance() != null) {
+            MParticle.getInstance().Internal().getKitManager().onSessionEnd();
+        }
     }
 
     private void disableLocationTracking() {
