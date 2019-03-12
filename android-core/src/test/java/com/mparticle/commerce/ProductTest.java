@@ -18,6 +18,20 @@ public class ProductTest {
     }
 
     @Test
+    public void testDefaultEqualityComparator() {
+        Product product1 = new Product.Builder("name", "sku",2).brand("cool brand!").build();
+        Product product2 = new Product.Builder("cool brand!", "sku",2).brand("cool brand!adsflkjh").build();
+        Product product2Copy = new Product.Builder(product2).build();
+        product2Copy.mTimeAdded = product2.mTimeAdded;
+        assertNotEquals(product2, product1);
+        assertEquals(product1, product1);
+        assertEquals(product2, product2Copy);
+
+        assertNotEquals(product1, null);
+        assertNotEquals(null, product1);
+    }
+
+    @Test
     public void testEqualityComparator() {
         Product.setEqualityComparator(new Product.EqualityComparator() {
             @Override

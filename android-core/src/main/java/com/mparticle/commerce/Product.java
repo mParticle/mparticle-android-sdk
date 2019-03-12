@@ -34,13 +34,13 @@ public final class Product {
     @NonNull public static final String PURCHASE = "purchase";
     @NonNull public static final String REFUND = "refund";
     @NonNull public static final String CHECKOUT_OPTION = "checkout_option";
-    private static EqualityComparator mComparator = null;
+    private static EqualityComparator mComparator = new DefaultComparator();
     private Map<String, String> mCustomAttributes;
     private String mName = null;
     private String mCategory;
     private String mCouponCode;
     private String mSku;
-    private long mTimeAdded;
+    protected long mTimeAdded;
     private Integer mPosition;
     private double mPrice;
     private double mQuantity;
@@ -65,7 +65,7 @@ public final class Product {
     }
 
     /**
-     * A simple interface that you can implement in order to customize Product equality comparisons
+     * A simple interface that you can implement in order to customize Product equality comparisons.
      *
      * @see #setEqualityComparator(EqualityComparator)
      * @see Cart#remove(Product)
@@ -75,12 +75,17 @@ public final class Product {
     }
 
     /**
-     * Optionally customize the EqualityComparator
+     * Optionally customize the EqualityComparator. If the comparator is null, the default comparator
+     * will be restored. The default comparator compares Products by their toString() value
      *
      * @param comparator
      */
     public static void setEqualityComparator(@Nullable EqualityComparator comparator) {
-        mComparator = comparator;
+        if (comparator == null) {
+            mComparator = new DefaultComparator();
+        } else {
+            mComparator = comparator;
+        }
     }
 
     private Product() {
@@ -329,6 +334,16 @@ public final class Product {
 
     void setQuantity(double quantity) {
         mQuantity = quantity;
+    }
+
+    static class DefaultComparator implements EqualityComparator {
+        @Override
+        public boolean equals(@Nullable Product product1, @Nullable Product product2) {
+            if (product1 == null || product2 == null) {
+                return false;
+            }
+            return product1.toString().equals(product2.toString());
+        }
     }
 
     /**
