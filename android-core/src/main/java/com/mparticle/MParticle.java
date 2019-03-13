@@ -1498,6 +1498,7 @@ public class MParticle {
         int OPTIMIZELY = 54;
         int RESPONSYS = 102;
         int CLEVERTAP = 135;
+        int ONETRUST = 134;
         int GOOGLE_ANALYTICS_FIREBASE = 136;
         @NonNull String BROADCAST_ACTIVE = "MPARTICLE_SERVICE_PROVIDER_ACTIVE_";
         @NonNull String BROADCAST_DISABLED = "MPARTICLE_SERVICE_PROVIDER_DISABLED_";

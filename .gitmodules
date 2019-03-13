@@ -91,3 +91,6 @@
 [submodule "kits/googleanalyticsfirebase-kit"]
 	path = kits/googleanalyticsfirebase-kit
 	url = git@github.com:mparticle-integrations/mparticle-android-integration-google-analytics-firebase.git
+[submodule "kits/onetrust-kit"]
+	path = kits/onetrust-kit
+	url = git@github.com:Zentrust/mparticle-android-integration-example.git
