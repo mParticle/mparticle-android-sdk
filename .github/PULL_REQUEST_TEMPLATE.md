@@ -5,4 +5,4 @@
 {explain how this has been tested, and what additional testing should be done}
 
 ## Master Issue
-Closes mParticle/issues#
+Closes https://go.mparticle.com/work/REPLACEME
