@@ -30,6 +30,7 @@ include (
         ':kits:responsys-kit',
         ':kits:clevertap-kit',
         ':kits:googleanalyticsfirebase-kit',
+        ':kits:pilgrim-kit',
 	    ':testutils',
         ':android-core',
         ':android-kit-base'
