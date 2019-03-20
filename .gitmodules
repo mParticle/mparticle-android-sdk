@@ -94,3 +94,6 @@
 [submodule "kits/pilgrim-kit"]
 	path = kits/pilgrim-kit
 	url = git@github.com:mparticle-integrations/mparticle-android-integration-pilgrim.git
+[submodule "kits/onetrust-kit"]
+	path = kits/onetrust-kit
+	url = git@github.com:mparticle-integrations/mparticle-android-integration-onetrust.git

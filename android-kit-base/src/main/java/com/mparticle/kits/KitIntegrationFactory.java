@@ -57,6 +57,7 @@ public class KitIntegrationFactory {
         kits.put(MParticle.ServiceProviders.CLEVERTAP,                  "com.mparticle.kits.CleverTapKit");
         kits.put(MParticle.ServiceProviders.GOOGLE_ANALYTICS_FIREBASE,  "com.mparticle.kits.GoogleAnalyticsFirebaseKit");
         kits.put(MParticle.ServiceProviders.PILGRIM,                    "com.mparticle.kits.PilgrimKit");
+        kits.put(MParticle.ServiceProviders.ONETRUST,                   "com.mparticle.kits.OneTrustKit");
         return kits;
     }
 
