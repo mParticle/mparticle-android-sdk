@@ -587,7 +587,7 @@ public final class CommerceEvent {
          * @see Product#PURCHASE
          *
          */
-        public Builder(@NonNull String productAction, @NonNull Product product) {
+        public Builder(@NonNull String productAction, Product product) {
             mProductAction = productAction;
             mPromotionAction = null;
             addProduct(product);
@@ -682,7 +682,7 @@ public final class CommerceEvent {
          * @return returns this Builder for easy method chaining.
          */
         @NonNull
-        public Builder addProduct(@NonNull Product product) {
+        public Builder addProduct(Product product) {
             if (productList == null) {
                 productList = new LinkedList<Product>();
             }
