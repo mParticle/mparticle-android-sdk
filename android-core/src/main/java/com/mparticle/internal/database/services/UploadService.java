@@ -2,18 +2,18 @@ package com.mparticle.internal.database.services;
 
 import android.content.ContentValues;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 
 import com.mparticle.internal.Constants;
 import com.mparticle.internal.MessageBatch;
-import com.mparticle.internal.database.services.MParticleDBManager;
+import com.mparticle.internal.database.MPDatabase;
 import com.mparticle.internal.database.tables.UploadTable;
+import com.mparticle.internal.listeners.InternalListenerManager;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class UploadService extends UploadTable {
-    public static int cleanupUploadMessages(SQLiteDatabase database) {
+    public static int cleanupUploadMessages(MPDatabase database) {
         return database.delete(UploadTableColumns.TABLE_NAME, "length(" + UploadTableColumns.MESSAGE + ") > " + Constants.LIMIT_MAX_UPLOAD_SIZE, null);
     }
 
@@ -23,15 +23,16 @@ public class UploadService extends UploadTable {
      *
      * @param message
      */
-    public static void insertUpload(SQLiteDatabase database, MessageBatch message, String apiKey) {
+    public static void insertUpload(MPDatabase database, MessageBatch message, String apiKey) {
         ContentValues contentValues = new ContentValues();
         contentValues.put(UploadTableColumns.API_KEY, apiKey);
         contentValues.put(UploadTableColumns.CREATED_AT, message.optLong(Constants.MessageKey.TIMESTAMP, System.currentTimeMillis()));
         contentValues.put(UploadTableColumns.MESSAGE, message.toString());
+        InternalListenerManager.getListener().onCompositeObjects(message, contentValues);
         database.insert(UploadTableColumns.TABLE_NAME, null, contentValues);
     }
 
-    public static List<MParticleDBManager.ReadyUpload> getReadyUploads(SQLiteDatabase database) {
+    public static List<MParticleDBManager.ReadyUpload> getReadyUploads(MPDatabase database) {
         List<MParticleDBManager.ReadyUpload> readyUploads = new ArrayList<MParticleDBManager.ReadyUpload>();
         Cursor readyUploadsCursor = null;
         try {
@@ -40,8 +41,9 @@ public class UploadService extends UploadTable {
             int messageIdIndex = readyUploadsCursor.getColumnIndex(UploadTableColumns._ID);
             int messageIndex = readyUploadsCursor.getColumnIndex(UploadTableColumns.MESSAGE);
             while (readyUploadsCursor.moveToNext()) {
-                readyUploads.add(new MParticleDBManager.ReadyUpload(readyUploadsCursor.getInt(messageIdIndex), readyUploadsCursor.getString(messageIndex)));
-                readyUploadsCursor.moveToNext();
+                MParticleDBManager.ReadyUpload readyUpload = new MParticleDBManager.ReadyUpload(readyUploadsCursor.getInt(messageIdIndex), readyUploadsCursor.getString(messageIndex));
+                readyUploads.add(readyUpload);
+                InternalListenerManager.getListener().onCompositeObjects(readyUploadsCursor, readyUpload);
             }
         }
         finally {
@@ -59,7 +61,7 @@ public class UploadService extends UploadTable {
      * @param id
      * @return number of rows deleted (should be 1)
      */
-    public static int deleteUpload(SQLiteDatabase database, int id) {
+    public static int deleteUpload(MPDatabase database, int id) {
         String[] whereArgs = {Long.toString(id)};
         return database.delete(UploadTableColumns.TABLE_NAME, "_id=?", whereArgs);
     }

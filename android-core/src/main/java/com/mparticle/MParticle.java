@@ -46,6 +46,7 @@ import com.mparticle.internal.MessageManager;
 import com.mparticle.internal.PushRegistrationHelper;
 import com.mparticle.internal.database.services.MParticleDBManager;
 import com.mparticle.internal.database.tables.MParticleDatabaseHelper;
+import com.mparticle.internal.listeners.InternalListenerManager;
 import com.mparticle.media.MPMediaAPI;
 import com.mparticle.media.MediaCallbacks;
 import com.mparticle.messaging.MPMessagingAPI;
@@ -130,6 +131,7 @@ public class MParticle {
      * @param options Required to initialize the SDK properly
      */
     public static void start(@NonNull MParticleOptions options) {
+        InternalListenerManager.getListener().onApiCalled(options);
         MParticle.getInstance(options.getContext(), options);
     }
 
@@ -229,6 +231,7 @@ public class MParticle {
      * @param instance
      */
     public static void setInstance(@Nullable MParticle instance) {
+        InternalListenerManager.getListener().onApiCalled(instance);
         MParticle.instance = instance;
     }
 
@@ -260,6 +263,7 @@ public class MParticle {
      * @param deviceImei a string representing the device's current IMEI, or null to remove clear it.
      */
     public static void setDeviceImei(@Nullable String deviceImei) {
+        InternalListenerManager.getListener().onApiCalled(deviceImei);
         DeviceAttributes.setDeviceImei(deviceImei);
     }
 
@@ -320,6 +324,7 @@ public class MParticle {
      * Force upload all queued messages to the mParticle server.
      */
     public void upload() {
+        InternalListenerManager.getListener().onApiCalled();
         mMessageManager.doUpload();
     }
 
@@ -328,6 +333,7 @@ public class MParticle {
      * automatically retrieved upon installation from Google Play.
      */
     public void setInstallReferrer(@Nullable String referrer) {
+        InternalListenerManager.getListener().onApiCalled(referrer);
         InstallReferrerHelper.setInstallReferrer(mAppContext, referrer);
     }
 
@@ -347,6 +353,7 @@ public class MParticle {
      * @param event the event object to log
      */
     public void logEvent(@NonNull MPEvent event) {
+        InternalListenerManager.getListener().onApiCalled(event);
         if (mConfigManager.isEnabled() && checkEventLimit()) {
             mAppStateManager.ensureActiveSession();
             mMessageManager.logEvent(event, mAppStateManager.getCurrentActivityName());
@@ -364,6 +371,7 @@ public class MParticle {
      * @see CommerceEvent
      */
     public void logEvent(@NonNull CommerceEvent event) {
+        InternalListenerManager.getListener().onApiCalled(event);
         if (mConfigManager.isEnabled() && checkEventLimit()) {
             MParticleUser user = MParticle.getInstance().Identity().getCurrentUser();
             if (user != null) {
@@ -399,6 +407,7 @@ public class MParticle {
      * @param contextInfo    An MPProduct or any set of data to associate with this increase in LTV (optional)
      */
     public void logLtvIncrease(@NonNull BigDecimal valueIncreased, @Nullable String eventName, @Nullable Map<String, String> contextInfo) {
+        InternalListenerManager.getListener().onApiCalled(valueIncreased, eventName, contextInfo);
         if (valueIncreased == null) {
             Logger.error( "ValueIncreased must not be null.");
             return;
@@ -421,6 +430,7 @@ public class MParticle {
      * @param screenName the name of the screen to be tracked
      */
     public void logScreen(@NonNull String screenName) {
+        InternalListenerManager.getListener().onApiCalled(screenName);
         logScreen(screenName, null);
     }
 
@@ -431,6 +441,7 @@ public class MParticle {
      * @param eventData  a Map of data attributes to associate with this screen view
      */
     public void logScreen(@NonNull String screenName, @Nullable Map<String, String> eventData) {
+        InternalListenerManager.getListener().onApiCalled(screenName, eventData);
         logScreen(new MPEvent.Builder(screenName).info(eventData).build().setScreenEvent(true));
     }
 
@@ -441,6 +452,7 @@ public class MParticle {
      * @param screenEvent an event object, the name of the event will be used as the screen name
      */
     public void logScreen(@NonNull MPEvent screenEvent) {
+        InternalListenerManager.getListener().onApiCalled(screenEvent);
         screenEvent.setScreenEvent(true);
         if (MPUtility.isEmpty(screenEvent.getEventName())) {
             Logger.error( "screenName is required for logScreen");
@@ -473,6 +485,7 @@ public class MParticle {
      * @param breadcrumb
      */
     public void leaveBreadcrumb(@NonNull String breadcrumb) {
+        InternalListenerManager.getListener().onApiCalled(breadcrumb);
         if (mConfigManager.isEnabled()) {
             if (MPUtility.isEmpty(breadcrumb)) {
                 Logger.error( "breadcrumb is required for leaveBreadcrumb");
@@ -505,6 +518,7 @@ public class MParticle {
      * @param errorAttributes a Map of data attributes to associate with this error
      */
     public void logError(@NonNull String message, @Nullable Map<String, String> errorAttributes) {
+        InternalListenerManager.getListener().onApiCalled(message, errorAttributes);
         if (mConfigManager.isEnabled()) {
             if (MPUtility.isEmpty(message)) {
                 Logger.error( "message is required for logErrorEvent");
@@ -523,6 +537,7 @@ public class MParticle {
     }
 
     public void logNetworkPerformance(@NonNull String url, long startTime, @NonNull String method, long length, long bytesSent, long bytesReceived, @Nullable String requestString, int responseCode) {
+        InternalListenerManager.getListener().onApiCalled(url, startTime, method, length, bytesSent, bytesReceived, requestString, responseCode);
         if (mConfigManager.isEnabled()) {
             mAppStateManager.ensureActiveSession();
             if (checkEventLimit()) {
@@ -539,6 +554,7 @@ public class MParticle {
      * @param exception an Exception
      */
     public void logException(@NonNull Exception exception) {
+        InternalListenerManager.getListener().onApiCalled(exception);
         logException(exception, null, null);
     }
 
@@ -549,6 +565,7 @@ public class MParticle {
      * @param eventData a Map of data attributes
      */
     public void logException(@NonNull Exception exception, @Nullable Map<String, String> eventData) {
+        InternalListenerManager.getListener().onApiCalled(exception, eventData);
         logException(exception, eventData, null);
     }
 
@@ -692,6 +709,7 @@ public class MParticle {
      * @param location
      */
     public void setLocation(@NonNull Location location) {
+        InternalListenerManager.getListener().onApiCalled(location);
         mMessageManager.setLocation(location);
         mKitManager.setLocation(location);
 
@@ -704,7 +722,8 @@ public class MParticle {
      * @param value the attribute value. This value will be converted to its String representation as dictated by its <code>toString()</code> method.
      */
     public void setSessionAttribute(@NonNull String key, @Nullable Object value) {
-        if (key == null){
+        InternalListenerManager.getListener().onApiCalled(key, value);
+        if (key == null) {
             Logger.warning("setSessionAttribute called with null key. Ignoring...");
             return;
         }
@@ -728,7 +747,8 @@ public class MParticle {
      * @param value the attribute value
      */
     public void incrementSessionAttribute(@NonNull String key, int value) {
-        if (key == null){
+        InternalListenerManager.getListener().onApiCalled(key, value);
+        if (key == null) {
             Logger.warning("incrementSessionAttribute called with null key. Ignoring...");
             return;
         }
@@ -758,6 +778,7 @@ public class MParticle {
      * @param optOutStatus set to <code>true</code> to opt out of event tracking
      */
     public void setOptOut(@NonNull Boolean optOutStatus) {
+        InternalListenerManager.getListener().onApiCalled(optOutStatus);
         if (optOutStatus != null) {
             if (optOutStatus != mConfigManager.getOptedOut()) {
                 if (!optOutStatus) {
@@ -804,6 +825,7 @@ public class MParticle {
      * Enable mParticle exception handling to automatically log events on uncaught exceptions
      */
     public void enableUncaughtExceptionLogging() {
+        InternalListenerManager.getListener().onApiCalled();
         mConfigManager.enableUncaughtExceptionLogging(true);
     }
 
@@ -811,6 +833,7 @@ public class MParticle {
      * Disables mParticle exception handling and restores the original UncaughtExceptionHandler
      */
     public void disableUncaughtExceptionLogging() {
+        InternalListenerManager.getListener().onApiCalled();
         mConfigManager.disableUncaughtExceptionLogging(true);
     }
 
@@ -859,6 +882,7 @@ public class MParticle {
     @SuppressLint("AddJavascriptInterface")
     @RequiresApi(17)
     public void registerWebView(@NonNull WebView webView) {
+        InternalListenerManager.getListener().onApiCalled(webView);
         registerWebView(webView, null);
     }
 
@@ -877,6 +901,7 @@ public class MParticle {
     @SuppressLint("AddJavascriptInterface")
     @RequiresApi(17)
     public void registerWebView(@NonNull WebView webView, String requiredBridgeName) {
+        InternalListenerManager.getListener().onApiCalled(webView);
         MParticleJSInterface.registerWebView(webView, requiredBridgeName);
     }
 
@@ -891,6 +916,7 @@ public class MParticle {
      * @param level
      */
     public static void setLogLevel(@NonNull LogLevel level) {
+        InternalListenerManager.getListener().onApiCalled(level);
         if (level != null) {
             Logger.setMinLogLevel(level, true);
         }
@@ -1017,7 +1043,8 @@ public class MParticle {
         return mKitManager.getKitInstance(kitId);
     }
 
-    public void logPushRegistration(final @NonNull String instanceId, @NonNull String senderId) {
+    public void logPushRegistration(@NonNull String instanceId, @NonNull String senderId) {
+        InternalListenerManager.getListener().onApiCalled(instanceId, senderId);
         mAppStateManager.ensureActiveSession();
         PushRegistrationHelper.PushRegistration registration = new PushRegistrationHelper.PushRegistration(instanceId, senderId);
         String oldInstanceId = mConfigManager.getPushInstanceId();
@@ -1032,6 +1059,7 @@ public class MParticle {
      * @param intent
      */
     public void logNotification(@NonNull Intent intent) {
+        InternalListenerManager.getListener().onApiCalled(intent);
         if (mConfigManager.isEnabled()) {
             try {
                 ProviderCloudMessage message = ProviderCloudMessage.createMessage(intent, ConfigManager.getPushKeys(mAppContext));
@@ -1065,6 +1093,7 @@ public class MParticle {
      * @param intent
      */
     public void logNotificationOpened(@NonNull Intent intent) {
+        InternalListenerManager.getListener().onApiCalled(intent);
         try {
             logNotification(ProviderCloudMessage.createMessage(intent, ConfigManager.getPushKeys(mAppContext)),
                     true, MParticle.getAppState(), ProviderCloudMessage.FLAG_READ | ProviderCloudMessage.FLAG_DIRECT_OPEN);
@@ -1079,6 +1108,7 @@ public class MParticle {
     }
 
     void refreshConfiguration() {
+        InternalListenerManager.getListener().onApiCalled();
         Logger.debug("Refreshing configuration...");
         mMessageManager.refreshConfiguration();
     }
@@ -1128,6 +1158,7 @@ public class MParticle {
      * @param context
      */
     public static void reset(@NonNull Context context) {
+        InternalListenerManager.getListener().onApiCalled(context);
         synchronized (MParticle.class) {
             //"commit" will force all async writes stemming from an "apply" call to finish. We need to do this
             //because we need to ensure that the "getMpids()" call is returning all calls that have been made
@@ -1186,6 +1217,7 @@ public class MParticle {
      * @param callback A callback that will trigger when the SDK has been fully reset
      */
     public static void reset(@NonNull final Context context, @Nullable final ResetListener callback) {
+        InternalListenerManager.getListener().onApiCalled(context, callback);
         final HandlerThread handlerThread = new HandlerThread("mParticleShutdownHandler");
             handlerThread.start();
             new Handler(handlerThread.getLooper()).post(new Runnable() {

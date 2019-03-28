@@ -28,6 +28,10 @@ public class MockMParticle extends MParticle {
         mPreferences = new MockSharedPreferences();
     }
 
+    public void setIdentityApi(IdentityApi identityApi) {
+        this.mIdentityApi = identityApi;
+    }
+
     class MockInternal extends Internal {
 
         MockInternal() {

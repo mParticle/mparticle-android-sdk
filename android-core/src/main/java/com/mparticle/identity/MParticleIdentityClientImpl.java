@@ -4,10 +4,12 @@ import android.content.Context;
 
 import com.mparticle.BuildConfig;
 import com.mparticle.MParticle;
+import com.mparticle.SdkListener;
 import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.Constants;
 import com.mparticle.internal.Logger;
 import com.mparticle.internal.MPUtility;
+import com.mparticle.internal.listeners.InternalListenerManager;
 import com.mparticle.networking.MPConnection;
 import com.mparticle.networking.MPUrl;
 import com.mparticle.networking.MParticleBaseClientImpl;
@@ -70,9 +72,12 @@ import java.util.UUID;
         JSONObject jsonObject = getStateJson(request);
         Logger.verbose("Identity login request: " + jsonObject.toString());
         MPConnection connection = getPostConnection(LOGIN_PATH, jsonObject.toString());
+        String url = connection.getURL().getFile();
+        InternalListenerManager.getListener().onNetworkRequestStarted(SdkListener.Endpoint.IDENTITY_LOGIN, url, jsonObject, request);
         connection = makeUrlRequest(Endpoint.IDENTITY, connection, jsonObject.toString(), false);
         int responseCode = connection.getResponseCode();
         JSONObject response = MPUtility.getJsonResponse(connection);
+        InternalListenerManager.getListener().onNetworkRequestFinished(SdkListener.Endpoint.IDENTITY_LOGIN, url, response, responseCode);
         return parseIdentityResponse(responseCode, response);
     }
 
@@ -80,9 +85,12 @@ import java.util.UUID;
         JSONObject jsonObject = getStateJson(request);
         Logger.verbose("Identity logout request: \n" + jsonObject.toString());
         MPConnection connection = getPostConnection(LOGOUT_PATH, jsonObject.toString());
+        String url = connection.getURL().getFile();
+        InternalListenerManager.getListener().onNetworkRequestStarted(SdkListener.Endpoint.IDENTITY_LOGOUT, url, jsonObject, request);
         connection = makeUrlRequest(Endpoint.IDENTITY, connection, jsonObject.toString(), false);
         int responseCode = connection.getResponseCode();
         JSONObject response = MPUtility.getJsonResponse(connection);
+        InternalListenerManager.getListener().onNetworkRequestFinished(SdkListener.Endpoint.IDENTITY_LOGOUT, url, response, responseCode);
         return parseIdentityResponse(responseCode, response);
     }
 
@@ -90,9 +98,12 @@ import java.util.UUID;
         JSONObject jsonObject = getStateJson(request);
         Logger.verbose("Identity identify request: \n" + jsonObject.toString());
         MPConnection connection = getPostConnection(IDENTIFY_PATH, jsonObject.toString());
+        String url = connection.getURL().getFile();
+        InternalListenerManager.getListener().onNetworkRequestStarted(SdkListener.Endpoint.IDENTITY_IDENTIFY, url, jsonObject, request);
         connection = makeUrlRequest(Endpoint.IDENTITY, connection, jsonObject.toString(), false);
         int responseCode = connection.getResponseCode();
         JSONObject response = MPUtility.getJsonResponse(connection);
+        InternalListenerManager.getListener().onNetworkRequestFinished(SdkListener.Endpoint.IDENTITY_IDENTIFY, url, response, responseCode);
         return parseIdentityResponse(responseCode, response);
     }
 
@@ -104,9 +115,12 @@ import java.util.UUID;
             return new IdentityHttpResponse(200, request.mpid, "", null);
         }
         MPConnection connection = getPostConnection(request.mpid, MODIFY_PATH, jsonObject.toString());
+        String url = connection.getURL().getFile();
+        InternalListenerManager.getListener().onNetworkRequestStarted(SdkListener.Endpoint.IDENTITY_MODIFY, url, jsonObject, request);
         connection = makeUrlRequest(Endpoint.IDENTITY, connection, jsonObject.toString(), false);
         int responseCode = connection.getResponseCode();
         JSONObject response = MPUtility.getJsonResponse(connection);
+        InternalListenerManager.getListener().onNetworkRequestFinished(SdkListener.Endpoint.IDENTITY_MODIFY, url, response, responseCode);
         return parseIdentityResponse(responseCode, response);
     }
 

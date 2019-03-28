@@ -226,14 +226,6 @@ public class MessageManagerTest {
 
     @Test
     public void testLogCommerceEventWithNullUser() throws Exception {
-        MParticle mparticle = Mockito.mock(MParticle.class);
-        Mockito.when(mparticle.Internal()).thenReturn(Mockito.mock(MParticle.Internal.class));
-        Mockito.when(mparticle.Internal().getAppStateManager()).thenReturn(Mockito.mock(AppStateManager.class));
-        IdentityApi mockIdentity = Mockito.mock(IdentityApi.class);
-        Mockito.when(mparticle.Identity()).thenReturn(mockIdentity);
-
-        MParticle.setInstance(mparticle);
-
         CommerceEvent event = new CommerceEvent.Builder(Product.ADD_TO_CART, new Product.Builder("foo", "bar", 10).build()).build();
         MessageManager.BaseMPMessage message = manager.logEvent(event);
         assertNotNull(message);

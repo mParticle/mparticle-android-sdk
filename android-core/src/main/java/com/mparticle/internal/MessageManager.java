@@ -747,7 +747,7 @@ public class MessageManager implements MessageManagerCallbacks, ReportingManager
             message.put(MessageKey.ATTRIBUTE_DELETED, deleted);
             message.put(MessageKey.IS_NEW_ATTRIBUTE, isNewAttribute);
             message.put(MessageKey.USER_ATTRIBUTES, mMParticleDBManager.getAllUserAttributesJson(mpId));
-            mMessageHandler.handleMessage(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
+            mMessageHandler.handleMessageImpl(mMessageHandler.obtainMessage(MessageHandler.STORE_MESSAGE, message));
             return message;
         } catch (JSONException e) {
             Logger.warning("Failed to create mParticle user-attribute-change message");

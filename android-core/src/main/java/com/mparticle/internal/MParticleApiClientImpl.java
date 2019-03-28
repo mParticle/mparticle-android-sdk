@@ -4,6 +4,8 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 import com.mparticle.MParticle;
+import com.mparticle.SdkListener;
+import com.mparticle.internal.listeners.InternalListenerManager;
 import com.mparticle.networking.MPConnection;
 import com.mparticle.networking.MPUrl;
 import com.mparticle.networking.MParticleBaseClientImpl;
@@ -150,10 +152,20 @@ public class MParticleApiClientImpl extends MParticleBaseClientImpl implements M
             Logger.verbose("Config request attempt:\n" +
                     "URL- " + mConfigUrl.toString());
 
+            if (InternalListenerManager.isEnabled()) {
+                InternalListenerManager.getListener().onNetworkRequestStarted(SdkListener.Endpoint.CONFIG, connection.getURL().getFile(), new JSONObject());
+            }
+
             makeUrlRequest(Endpoint.CONFIG, connection, true);
 
-            if (connection.getResponseCode() >= 200 && connection.getResponseCode() < 300) {
-                JSONObject response = MPUtility.getJsonResponse(connection);
+            JSONObject response = new JSONObject();
+            int responseCode = connection.getResponseCode();
+            try {
+                response = MPUtility.getJsonResponse(connection);
+                InternalListenerManager.getListener().onNetworkRequestFinished(SdkListener.Endpoint.CONFIG, connection.getURL().getFile(), response, responseCode);
+            }
+            catch (Exception ex) {}
+            if (responseCode >= 200 && responseCode < 300) {
                 parseCookies(response);
 
                 Logger.verbose("Config result: \n " +
@@ -252,6 +264,10 @@ public class MParticleApiClientImpl extends MParticleBaseClientImpl implements M
 
         logUpload(message);
 
+        try {
+            InternalListenerManager.getListener().onNetworkRequestStarted(SdkListener.Endpoint.EVENTS, connection.getURL().getFile(), new JSONObject(message), message);
+        } catch (Exception e) { }
+
         makeUrlRequest(Endpoint.EVENTS, connection, message, true);
 
         Logger.verbose("Upload request attempt:\n" +
@@ -263,8 +279,8 @@ public class MParticleApiClientImpl extends MParticleBaseClientImpl implements M
 
         if (responseCode >= 200 && responseCode < 300) {
             JSONObject response = MPUtility.getJsonResponse(connection);
-            if (response == null) {
-                response = new JSONObject();
+            if (InternalListenerManager.isEnabled()) {
+                InternalListenerManager.getListener().onNetworkRequestFinished(SdkListener.Endpoint.EVENTS, connection.getURL().getFile(), response, responseCode);
             }
 
             Logger.verbose("Upload result response: \n" +
@@ -273,7 +289,10 @@ public class MParticleApiClientImpl extends MParticleBaseClientImpl implements M
                         "response:\n" + response.toString());
             parseCookies(response);
         } else {
-            Logger.error("Upload request failed- " + connection.getResponseCode() + ": " + connection.getResponseMessage());
+            Logger.error("Upload request failed- " + responseCode + ": " + connection.getResponseMessage());
+            try {
+                InternalListenerManager.getListener().onNetworkRequestFinished(SdkListener.Endpoint.EVENTS, connection.getURL().getFile(), new JSONObject().put("message", connection.getResponseMessage()), responseCode);
+            } catch (Exception e) { }
         }
         return connection.getResponseCode();
     }

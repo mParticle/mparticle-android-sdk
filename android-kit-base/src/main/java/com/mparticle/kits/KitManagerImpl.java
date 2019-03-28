@@ -48,7 +48,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class KitManagerImpl implements KitManager, AttributionListener, UserAttributeListener, IdentityStateListener {
     private final ReportingManager mReportingManager;
-    private final CoreCallbacks mCoreCallbacks;
+    protected final CoreCallbacks mCoreCallbacks;
     private final BackgroundTaskHandler mBackgroundTaskHandler;
     KitIntegrationFactory mKitIntegrationFactory;
 
@@ -68,6 +68,11 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
         mCoreCallbacks = coreCallbacks;
         mBackgroundTaskHandler = backgroundTaskHandler;
         mKitIntegrationFactory = new KitIntegrationFactory();
+        if (mKitIntegrationFactory.supportedKits != null) {
+            for (Integer kitId : mKitIntegrationFactory.supportedKits.keySet()) {
+                mCoreCallbacks.getKitListener().kitFound(kitId);
+            }
+        }
         MParticle.getInstance().Identity().addIdentityStateListener(this);
     }
 
@@ -149,7 +154,7 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
      * <p>
      * Note: This method is meant to always be run on the main thread
      */
-    void configureKits(JSONArray kitConfigs) {
+    protected void configureKits(JSONArray kitConfigs) {
         MParticleUser user = MParticle.getInstance().Identity().getCurrentUser();
         HashSet<Integer> activeIds = new HashSet<Integer>();
 
@@ -159,7 +164,9 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
                     JSONObject current = kitConfigs.getJSONObject(i);
                     KitConfiguration configuration = createKitConfiguration(current);
                     int currentModuleID = configuration.getKitId();
+                    mCoreCallbacks.getKitListener().kitConfigReceived(currentModuleID, configuration.toString());
                     if (configuration.shouldExcludeUser(user)) {
+                        mCoreCallbacks.getKitListener().kitExcluded(currentModuleID, "User was required to be known, but was not");
                         continue;
                     }
                     if (!mKitIntegrationFactory.isSupported(configuration.getKitId())) {
@@ -177,6 +184,7 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
                         activeIds.add(currentModuleID);
                         initializeKit(activeKit);
                         providers.put(currentModuleID, activeKit);
+                        mCoreCallbacks.getKitListener().kitStarted(currentModuleID);
                     } else {
                         activeKit.setConfiguration(configuration);
                         if (activeKit.isDisabled() ||
@@ -187,6 +195,11 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
                         activeKit.onSettingsUpdated(configuration.getSettings());
                     }
                 } catch (Exception e) {
+                    try {
+                        mCoreCallbacks.getKitListener().kitExcluded(kitConfigs.getJSONObject(i).optInt("id", -1), "exception while starting. Exception: " + e.getMessage());
+                    } catch (JSONException e1) {
+                        mCoreCallbacks.getKitListener().kitExcluded(-1, "exception while starting. Exception: " + e.getMessage());
+                    }
                     Logger.error("Exception while starting kit: " + e.getMessage());
                 }
             }
@@ -301,6 +314,7 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
             try {
                 if (!provider.isDisabled()) {
                     provider.setLocation(location);
+                    mCoreCallbacks.getKitListener().onKitApiCalled(provider.getConfiguration().getKitId(), true, location);
                 }
             } catch (Exception e) {
                 Logger.warning("Failed to call setLocation for kit: " + provider.getName() + ": " + e.getMessage());
@@ -315,6 +329,7 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
                 if (!provider.isDisabled()) {
                     List<ReportingMessage> report = provider.logNetworkPerformance(url, startTime, method, length, bytesSent, bytesReceived, requestString, responseCode);
                     getReportingManager().logAll(report);
+                    mCoreCallbacks.getKitListener().onKitApiCalled(provider.getConfiguration().getKitId(), !MPUtility.isEmpty(report), url, startTime, method, length, bytesSent, bytesReceived, requestString, responseCode);
                 }
             } catch (Exception e) {
                 Logger.warning("Failed to call logNetworkPerformance for kit: " + provider.getName() + ": " + e.getMessage());
@@ -340,6 +355,7 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
                 if (!provider.isDisabled(true)) {
                     List<ReportingMessage> messages = provider.setOptOut(optOutStatus);
                     getReportingManager().logAll(messages);
+                    mCoreCallbacks.getKitListener().onKitApiCalled(provider.getConfiguration().getKitId(), !MPUtility.isEmpty(messages), optOutStatus);
                 }
             } catch (Exception e) {
                 Logger.warning("Failed to call setOptOut for kit: " + provider.getName() + ": " + e.getMessage());
@@ -377,10 +393,14 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
                                     List<ReportingMessage> report = null;
                                     String messageType = null;
                                     if (result.getMPEvent() != null) {
-                                        report = ((KitIntegration.EventListener) provider).logEvent(projectedEvents.get(i).getMPEvent());
+                                        MPEvent projectedEvent = projectedEvents.get(i).getMPEvent();
+                                        report = ((KitIntegration.EventListener) provider).logEvent(projectedEvent);
+                                        mCoreCallbacks.getKitListener().onKitApiCalled("logEvent()", provider.getConfiguration().getKitId(), !MPUtility.isEmpty(report), projectedEvent);
                                         messageType = ReportingMessage.MessageType.EVENT;
                                     } else {
-                                        report = ((KitIntegration.CommerceListener) provider).logEvent(projectedEvents.get(i).getCommerceEvent());
+                                        CommerceEvent projectedEvent = projectedEvents.get(i).getCommerceEvent();
+                                        report = ((KitIntegration.CommerceListener) provider).logEvent(projectedEvent);
+                                        mCoreCallbacks.getKitListener().onKitApiCalled("logEvent()", provider.getConfiguration().getKitId(), !MPUtility.isEmpty(report), projectedEvent);
                                         messageType = ReportingMessage.MessageType.COMMERCE_EVENT;
                                     }
                                     if (report != null && report.size() > 0) {
@@ -400,6 +420,7 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
                                 }
                             } else {
                                 List<ReportingMessage> reporting = ((KitIntegration.CommerceListener) provider).logEvent(filteredEvent);
+                                mCoreCallbacks.getKitListener().onKitApiCalled("logEvent()", provider.getConfiguration().getKitId(), !MPUtility.isEmpty(reporting), filteredEvent);
                                 if (reporting != null && reporting.size() > 0) {
                                     getReportingManager().log(
                                             ReportingMessage.fromEvent(provider, filteredEvent)
@@ -410,8 +431,9 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
                             List<MPEvent> events = CommerceEventUtils.expand(filteredEvent);
                             boolean forwarded = false;
                             if (events != null) {
-                                for (int i = 0; i < events.size(); i++) {
-                                    List<ReportingMessage> reporting = ((KitIntegration.EventListener) provider).logEvent(events.get(i));
+                                for (MPEvent expandedEvent: events) {
+                                    List<ReportingMessage> reporting = ((KitIntegration.EventListener) provider).logEvent(expandedEvent);
+                                    mCoreCallbacks.getKitListener().onKitApiCalled("logEvent()", provider.getConfiguration().getKitId(), !MPUtility.isEmpty(reporting), expandedEvent);
                                     forwarded = forwarded || (reporting != null && reporting.size() > 0);
                                 }
                             }
@@ -438,11 +460,16 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
         for (KitIntegration provider : providers.values()) {
             if (provider instanceof KitIntegration.PushListener) {
                 try {
-                    if (!provider.isDisabled() && ((KitIntegration.PushListener) provider).willHandlePushMessage(intent)) {
-                        ((KitIntegration.PushListener) provider).onPushMessageReceived(context, intent);
-                        ReportingMessage message = ReportingMessage.fromPushMessage(provider, intent);
-                        getReportingManager().log(message);
-                        return true;
+                    if (!provider.isDisabled()) {
+                        boolean willHandlePush = ((KitIntegration.PushListener) provider).willHandlePushMessage(intent);
+                        mCoreCallbacks.getKitListener().onKitApiCalled("willHandlePushMessage()", provider.getConfiguration().getKitId(), willHandlePush, intent);
+                        if (willHandlePush) {
+                            ((KitIntegration.PushListener) provider).onPushMessageReceived(context, intent);
+                            mCoreCallbacks.getKitListener().onKitApiCalled("onPushMessageReceived()", provider.getConfiguration().getKitId(), null, context, intent);
+                            ReportingMessage message = ReportingMessage.fromPushMessage(provider, intent);
+                            getReportingManager().log(message);
+                            return true;
+                        }
                     }
                 } catch (Exception e) {
                     Logger.warning("Failed to call onPushMessageReceived for kit: " + provider.getName() + ": " + e.getMessage());
@@ -458,7 +485,9 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
             if (provider instanceof KitIntegration.PushListener) {
                 try {
                     if (!provider.isDisabled()) {
-                        if (((KitIntegration.PushListener) provider).onPushRegistration(token, senderId)) {
+                        boolean onPushRegistration = ((KitIntegration.PushListener) provider).onPushRegistration(token, senderId);
+                        mCoreCallbacks.getKitListener().onKitApiCalled(provider.getConfiguration().getKitId(),onPushRegistration, token, senderId);
+                        if (onPushRegistration) {
                             ReportingMessage message = ReportingMessage.fromPushRegistrationMessage(provider);
                             getReportingManager().log(message);
                         }
@@ -716,6 +745,7 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
                                     eventCopy.getInfo());
                         } else {
                             messages = ((KitIntegration.EventListener) provider).logEvent(eventCopy);
+                            mCoreCallbacks.getKitListener().onKitApiCalled(provider.getConfiguration().getKitId(), !MPUtility.isEmpty(messages), eventCopy);
                         }
                         if (messages != null && messages.size() > 0) {
                             reportingMessages.addAll(messages);
@@ -724,7 +754,10 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
                         ReportingMessage masterMessage = ReportingMessage.fromEvent(provider, eventCopy);
                         boolean forwarded = false;
                         for (int i = 0; i < projectedEvents.size(); i++) {
-                            List<ReportingMessage> messages = ((KitIntegration.EventListener) provider).logEvent(projectedEvents.get(i).getMPEvent());
+                            MPEvent projectedEvent = projectedEvents.get(i).getMPEvent();
+                            List<ReportingMessage> messages = ((KitIntegration.EventListener) provider).logEvent(projectedEvent);
+                            mCoreCallbacks.getKitListener().onKitApiCalled(provider.getConfiguration().getKitId(), !MPUtility.isEmpty(messages), projectedEvent);
+
                             if (messages != null && messages.size() > 0) {
                                 forwarded = true;
                                 for (ReportingMessage message : messages) {
@@ -758,6 +791,7 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
                 if (provider instanceof KitIntegration.EventListener && !provider.isDisabled()) {
                     List<ReportingMessage> report = ((KitIntegration.EventListener) provider).leaveBreadcrumb(breadcrumb);
                     getReportingManager().logAll(report);
+                    mCoreCallbacks.getKitListener().onKitApiCalled(provider.getConfiguration().getKitId(), !MPUtility.isEmpty(report), breadcrumb);
                 }
             } catch (Exception e) {
                 Logger.warning("Failed to call leaveBreadcrumb for kit: " + provider.getName() + ": " + e.getMessage());
@@ -772,6 +806,7 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
                 if (provider instanceof KitIntegration.EventListener && !provider.isDisabled()) {
                     List<ReportingMessage> report = ((KitIntegration.EventListener) provider).logError(message, eventData);
                     getReportingManager().logAll(report);
+                    mCoreCallbacks.getKitListener().onKitApiCalled(provider.getConfiguration().getKitId(), !MPUtility.isEmpty(report), message, eventData);
                 }
             } catch (Exception e) {
                 Logger.warning("Failed to call logError for kit: " + provider.getName() + ": " + e.getMessage());
@@ -786,6 +821,7 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
                 if (provider instanceof KitIntegration.EventListener && !provider.isDisabled()) {
                     List<ReportingMessage> report = ((KitIntegration.EventListener) provider).logException(exception, eventData, message);
                     getReportingManager().logAll(report);
+                    mCoreCallbacks.getKitListener().onKitApiCalled(provider.getConfiguration().getKitId(), !MPUtility.isEmpty(report), exception, message, eventData);
                 }
             } catch (Exception e) {
                 Logger.warning("Failed to call logException for kit: " + provider.getName() + ": " + e.getMessage());
@@ -809,7 +845,10 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
                             provider.getConfiguration().getDefaultEventProjection(),
                             provider.getConfiguration().getDefaultScreenCustomMapping());
                     if (projectedEvents == null) {
-                        List<ReportingMessage> report = ((KitIntegration.EventListener) provider).logScreen(filteredEvent.getEventName(), filteredEvent.getInfo());
+                        String eventName = filteredEvent.getEventName();
+                        Map<String, String> eventInfo = filteredEvent.getInfo();
+                        List<ReportingMessage> report = ((KitIntegration.EventListener) provider).logScreen(eventName, eventInfo);
+                        mCoreCallbacks.getKitListener().onKitApiCalled(provider.getConfiguration().getKitId(), !MPUtility.isEmpty(report), eventName, eventInfo);
                         if (report != null && report.size() > 0) {
                             for (ReportingMessage message : report) {
                                 message.setMessageType(ReportingMessage.MessageType.SCREEN_VIEW);
@@ -823,13 +862,14 @@ public class KitManagerImpl implements KitManager, AttributionListener, UserAttr
                                 System.currentTimeMillis(),
                                 filteredEvent.getInfo());
                         boolean forwarded = false;
-                        for (int i = 0; i < projectedEvents.size(); i++) {
-                            List<ReportingMessage> report = ((KitIntegration.EventListener) provider).logEvent(projectedEvents.get(i).getMPEvent());
+                        for (CustomMapping.ProjectionResult projectedEvent: projectedEvents) {
+                            List<ReportingMessage> report = ((KitIntegration.EventListener) provider).logEvent(projectedEvent.getMPEvent());
+                            mCoreCallbacks.getKitListener().onKitApiCalled("logEvent()", provider.getConfiguration().getKitId(), !MPUtility.isEmpty(report), projectedEvent);
                             if (report != null && report.size() > 0) {
                                 forwarded = true;
                                 for (ReportingMessage message : report) {
                                     ReportingMessage.ProjectionReport projectionReport = new ReportingMessage.ProjectionReport(
-                                            projectedEvents.get(i).getProjectionId(),
+                                            projectedEvent.getProjectionId(),
                                             ReportingMessage.MessageType.EVENT,
                                             message.getEventName(),
                                             message.getEventTypeString()

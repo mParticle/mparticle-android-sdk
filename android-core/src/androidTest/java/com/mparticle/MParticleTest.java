@@ -16,6 +16,7 @@ import com.mparticle.internal.KitFrameworkWrapper;
 import com.mparticle.internal.MParticleJSInterface;
 import com.mparticle.internal.MessageManager;
 import com.mparticle.internal.PushRegistrationHelper;
+import com.mparticle.internal.database.MPDatabase;
 import com.mparticle.internal.database.services.MParticleDBManager;
 import com.mparticle.networking.Matcher;
 import com.mparticle.networking.MockServer;
@@ -420,7 +421,7 @@ public class MParticleTest extends BaseCleanStartedEachTest {
     }
 
     private List<String> getAllTables() throws JSONException {
-        SQLiteDatabase database = new MParticleDBManager(mContext).getDatabase();
+        MPDatabase database = new MParticleDBManager(mContext).getDatabase();
         Cursor cursor = database.query("sqlite_master", null, "type = ?", new String[]{"table"}, null, null, null);
         cursor.moveToFirst();
         List<String> tableNames = new ArrayList<String>();

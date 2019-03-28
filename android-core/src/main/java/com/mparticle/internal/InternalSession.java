@@ -2,6 +2,8 @@ package com.mparticle.internal;
 
 import android.content.Context;
 
+import com.mparticle.internal.listeners.InternalListenerManager;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -53,6 +55,7 @@ public class InternalSession {
         mEventCount = 0;
         mTimeInBackground = 0;
         addMpid(ConfigManager.getMpid(context));
+        InternalListenerManager.getListener().onSessionUpdated(this);
         return this;
     }
 
@@ -95,7 +98,9 @@ public class InternalSession {
         if (newMpid != Constants.TEMPORARY_MPID) {
             mpids.add(newMpid);
         }
+        InternalListenerManager.getListener().onSessionUpdated(this);
     }
+
 
     public Set<Long> getMpids() {
         return mpids;

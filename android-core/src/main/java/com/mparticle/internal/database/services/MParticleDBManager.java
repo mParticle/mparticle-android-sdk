@@ -3,7 +3,6 @@ package com.mparticle.internal.database.services;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Looper;
@@ -20,6 +19,9 @@ import com.mparticle.internal.MessageBatch;
 import com.mparticle.internal.MessageManager;
 import com.mparticle.internal.MessageManagerCallbacks;
 import com.mparticle.internal.InternalSession;
+import com.mparticle.internal.database.MPDatabase;
+import com.mparticle.internal.database.MPDatabaseImpl;
+import com.mparticle.internal.listeners.InternalListenerManager;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -49,12 +51,12 @@ public class MParticleDBManager {
      * an instance. Each instance is a singleton, per thread.
      * @return
      */
-    public SQLiteDatabase getDatabase() {
-        return mDatabaseHelper.getWritableDatabase();
+    public MPDatabase getDatabase() {
+        return new MPDatabaseImpl(mDatabaseHelper.getWritableDatabase());
     }
 
     public void updateMpId(long oldMpId, long newMpId) {
-        SQLiteDatabase db = getDatabase();
+        MPDatabase db = getDatabase();
         db.beginTransaction();
         new BreadcrumbService().updateMpId(db, oldMpId, newMpId);
         new MessageService().updateMpId(db, oldMpId, newMpId);
@@ -127,7 +129,7 @@ public class MParticleDBManager {
      */
 
     public void createSessionHistoryUploadMessage(ConfigManager configManager, DeviceAttributes deviceAttributes, String currentSessionId) throws JSONException {
-        SQLiteDatabase db = getDatabase();
+       MPDatabase db = getDatabase();
         db.beginTransaction();
         try {
             List<MessageService.ReadyMessage> readyMessages = MessageService.getSessionHistory(db, currentSessionId);
@@ -151,7 +153,7 @@ public class MParticleDBManager {
     }
 
     public void createMessagesForUploadMessage(ConfigManager configManager, DeviceAttributes deviceAttributes, String currentSessionId, boolean sessionHistoryEnabled) throws JSONException {
-        SQLiteDatabase db = getDatabase();
+       MPDatabase db = getDatabase();
         db.beginTransaction();
         try {
             List<MessageService.ReadyMessage> readyMessages = MessageService.getMessagesForUpload(db);
@@ -175,6 +177,7 @@ public class MParticleDBManager {
                 if (batch != null) {
                     batch.addReportingMessage(reportingMessage.getMsgObject());
                 }
+                InternalListenerManager.getListener().onCompositeObjects(reportingMessage, batch);
                 ReportingService.deleteReportingMessage(db, reportingMessage.getReportingMessageId());
             }
             List<JSONObject> deviceInfos = SessionService.processSessions(db, uploadMessagesBySessionMpid);
@@ -190,18 +193,18 @@ public class MParticleDBManager {
     }
 
     public void deleteMessagesAndSessions(String currentSessionId) {
-        SQLiteDatabase db = getDatabase();
+       MPDatabase db = getDatabase();
         db.beginTransaction();
         MessageService.deleteOldMessages(db, currentSessionId);
         SessionService.deleteSessions(db, currentSessionId);
         db.endTransaction();
     }
 
-    private HashMap<String, Map<Long, MessageBatch>> getUploadMessageBySessionMpidMap(List<MessageService.ReadyMessage> readyMessages, SQLiteDatabase db, ConfigManager configManager, boolean isHistory) throws JSONException {
+    private HashMap<String, Map<Long, MessageBatch>> getUploadMessageBySessionMpidMap(List<MessageService.ReadyMessage> readyMessages,MPDatabase db, ConfigManager configManager, boolean isHistory) throws JSONException {
         return getUploadMessageBySessionMpidMap(readyMessages, db, configManager, isHistory, false);
     }
 
-    private HashMap<String, Map<Long, MessageBatch>> getUploadMessageBySessionMpidMap(List<MessageService.ReadyMessage> readyMessages, SQLiteDatabase db, ConfigManager configManager, boolean isHistory, boolean markAsUpload) throws JSONException {
+    private HashMap<String, Map<Long, MessageBatch>> getUploadMessageBySessionMpidMap(List<MessageService.ReadyMessage> readyMessages,MPDatabase db, ConfigManager configManager, boolean isHistory, boolean markAsUpload) throws JSONException {
         HashMap<String, Map<Long, MessageBatch>> uploadMessagesBySessionMpid = new HashMap<String, Map<Long, MessageBatch>>(2);
         int highestUploadedMessageId = -1;
         for (MessageService.ReadyMessage readyMessage : readyMessages) {
@@ -230,6 +233,7 @@ public class MParticleDBManager {
             } else {
                 uploadMessage.addMessage(msgObject);
             }
+            InternalListenerManager.getListener().onCompositeObjects(readyMessage, uploadMessage);
             uploadMessage.incrementMessageLengthBytes(messageLength);
             highestUploadedMessageId = readyMessage.getMessageId();
         }
@@ -243,11 +247,11 @@ public class MParticleDBManager {
         return uploadMessagesBySessionMpid;
     }
 
-    private void createUploads(Map<String, Map<Long, MessageBatch>> uploadMessagesBySessionMpid, SQLiteDatabase db, DeviceAttributes deviceAttributes, ConfigManager configManager, String currentSessionId, boolean historyMessages) {
+    private void createUploads(Map<String, Map<Long, MessageBatch>> uploadMessagesBySessionMpid, MPDatabase db, DeviceAttributes deviceAttributes, ConfigManager configManager, String currentSessionId, boolean historyMessages) {
         createUploads(uploadMessagesBySessionMpid, db, deviceAttributes, configManager, currentSessionId, historyMessages, false);
     }
 
-    private void createUploads(Map<String, Map<Long, MessageBatch>> uploadMessagesBySessionMpid, SQLiteDatabase db, DeviceAttributes deviceAttributes, ConfigManager configManager, String currentSessionId, boolean historyMessages, boolean sessionHistoryEnabled) {
+    private void createUploads(Map<String, Map<Long, MessageBatch>> uploadMessagesBySessionMpid, MPDatabase db, DeviceAttributes deviceAttributes, ConfigManager configManager, String currentSessionId, boolean historyMessages, boolean sessionHistoryEnabled) {
         for (Map.Entry<String, Map<Long, MessageBatch>> session : uploadMessagesBySessionMpid.entrySet()) {
             for (Map.Entry<Long, MessageBatch> mpidMessage : session.getValue().entrySet()) {
                 MessageBatch uploadMessage = mpidMessage.getValue();
@@ -440,7 +444,7 @@ public class MParticleDBManager {
      */
 
     public void insertReportingMessages(List<JsonReportingMessage> reportingMessages, long mpId) {
-        SQLiteDatabase db = getDatabase();
+        MPDatabase db = getDatabase();
         try {
             db.beginTransaction();
             for (int i = 0; i < reportingMessages.size(); i++) {
@@ -579,7 +583,7 @@ public class MParticleDBManager {
             return attributionChanges;
         }
         Map<String, Object> currentValues = getUserAttributes(null, userAttribute.mpId);
-        SQLiteDatabase db = getDatabase();
+        MPDatabase db = getDatabase();
         try {
             db.beginTransaction();
             long time = System.currentTimeMillis();
@@ -625,7 +629,7 @@ public class MParticleDBManager {
 
     public void removeUserAttribute(UserAttributeRemoval container, MessageManagerCallbacks callbacks) {
         Map<String, Object> currentValues = getUserAttributes(null, container.mpId);
-        SQLiteDatabase db = getDatabase();
+        MPDatabase db = getDatabase();
         try {
             db.beginTransaction();
             int deleted = UserAttributesService.deleteAttributes(db, container.key, container.mpId);

@@ -8,6 +8,7 @@ import android.support.test.InstrumentationRegistry;
 import com.mparticle.internal.InternalSession;
 import com.mparticle.internal.MessageManager;
 import com.mparticle.internal.database.BaseDatabase;
+import com.mparticle.internal.database.MPDatabaseImpl;
 import com.mparticle.internal.database.tables.MParticleDatabaseHelper;
 import com.mparticle.testutils.BaseCleanInstallEachTest;
 
@@ -17,12 +18,12 @@ import org.junit.Before;
 import java.util.UUID;
 
 abstract public class BaseMPServiceTest extends BaseCleanInstallEachTest {
-    protected static SQLiteDatabase database;
+    protected static MPDatabaseImpl database;
 
     @Before
     public final void beforeBaseMPService() throws Exception {
         SQLiteOpenHelper openHelper = new BaseDatabase(new MParticleDatabaseHelper(InstrumentationRegistry.getContext()), MParticleDatabaseHelper.DB_NAME);
-        database = openHelper.getWritableDatabase();
+        database = new MPDatabaseImpl(openHelper.getWritableDatabase());
     }
 
     MessageManager.BaseMPMessage getMpMessage() throws JSONException {

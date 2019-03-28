@@ -2,12 +2,13 @@ package com.mparticle.internal.database.services;
 
 import android.content.ContentValues;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 
 import com.mparticle.internal.Constants;
 import com.mparticle.internal.Logger;
 import com.mparticle.internal.MessageManager;
+import com.mparticle.internal.database.MPDatabase;
 import com.mparticle.internal.database.tables.MessageTable;
+import com.mparticle.internal.listeners.InternalListenerManager;
 
 import org.json.JSONException;
 
@@ -31,11 +32,11 @@ public class MessageService extends MessageTable {
     public MessageService() {
     }
 
-    public static List<ReadyMessage> getSessionHistory(SQLiteDatabase database, String currentSessionId) {
+    public static List<ReadyMessage> getSessionHistory(MPDatabase database, String currentSessionId) {
         return getSessionHistory(database, currentSessionId, false, Constants.TEMPORARY_MPID);
     }
 
-    static List<ReadyMessage> getSessionHistory(SQLiteDatabase database, String currentSessionId, boolean includes, long mpid){
+    static List<ReadyMessage> getSessionHistory(MPDatabase database, String currentSessionId, boolean includes, long mpid){
         String[] selectionArgs = new String[]{currentSessionId, String.valueOf(mpid)};
         Cursor readyMessagesCursor = null;
         List<ReadyMessage> readyMessages = new ArrayList<ReadyMessage>();
@@ -57,7 +58,9 @@ public class MessageService extends MessageTable {
                 int messageId = readyMessagesCursor.getInt(messageIdIndex);
                 String message = readyMessagesCursor.getString(messageIndex);
                 long messageMpid = readyMessagesCursor.getLong(messageMpidIndex);
-                readyMessages.add(new ReadyMessage(messageMpid, sessionId, messageId, message));
+                ReadyMessage readyMessage = new ReadyMessage(messageMpid, sessionId, messageId, message);
+                InternalListenerManager.getListener().onCompositeObjects(readyMessagesCursor, readyMessage);
+                readyMessages.add(readyMessage);
             }
         }
         finally {
@@ -68,7 +71,7 @@ public class MessageService extends MessageTable {
         return readyMessages;
     }
 
-    public static int deleteOldMessages(SQLiteDatabase database, String currentSessionId){
+    public static int deleteOldMessages(MPDatabase database, String currentSessionId){
         String[] selectionArgs = new String[]{currentSessionId, String.valueOf(Constants.TEMPORARY_MPID)};
         return database.delete(
                 MessageTableColumns.TABLE_NAME,
@@ -80,11 +83,11 @@ public class MessageService extends MessageTable {
      * will return all Messages for upload, except for those with MP_ID == Constants.TEMPORARY_MPID,
      * useful in non-testing context;
      */
-    public static List<ReadyMessage> getMessagesForUpload(SQLiteDatabase database) {
+    public static List<ReadyMessage> getMessagesForUpload(MPDatabase database) {
         return getMessagesForUpload(database, false, Constants.TEMPORARY_MPID);
     }
 
-    static List<ReadyMessage> getMessagesForUpload(SQLiteDatabase database, boolean includes, long mpid){
+    static List<ReadyMessage> getMessagesForUpload(MPDatabase database, boolean includes, long mpid){
         Cursor readyMessagesCursor = null;
         List<ReadyMessage> readyMessages = new ArrayList<ReadyMessage>();
         try {
@@ -105,7 +108,9 @@ public class MessageService extends MessageTable {
                 int messageId = readyMessagesCursor.getInt(messageIdIndex);
                 String message = readyMessagesCursor.getString(messageIndex);
                 long messageMpid = readyMessagesCursor.getLong(messageMpidIndex);
-                readyMessages.add(new ReadyMessage(messageMpid, sessionId, messageId, message));
+                ReadyMessage readyMessage  = new ReadyMessage(messageMpid, sessionId, messageId, message);
+                InternalListenerManager.getListener().onCompositeObjects(readyMessagesCursor, readyMessage);
+                readyMessages.add(readyMessage);
             }
         }
         finally {
@@ -116,7 +121,7 @@ public class MessageService extends MessageTable {
         return readyMessages;
     }
 
-    public static int cleanupMessages(SQLiteDatabase database) {
+    public static int cleanupMessages(MPDatabase database) {
         return database.delete(MessageTableColumns.TABLE_NAME, "length(" + MessageTableColumns.MESSAGE + ") > " + Constants.LIMIT_MAX_MESSAGE_SIZE, null);
     }
 
@@ -134,7 +139,7 @@ public class MessageService extends MessageTable {
                 MessageTableColumns.SESSION_ID);
     }
 
-    public static int markMessagesAsUploaded(SQLiteDatabase database, int messageId) {
+    public static int markMessagesAsUploaded(MPDatabase database, int messageId) {
         String[] whereArgs = new String[]{Integer.toString(messageId), String.valueOf(Constants.TEMPORARY_MPID)};
         ContentValues contentValues = new ContentValues();
         contentValues.put(MessageTableColumns.STATUS, Constants.Status.UPLOADED);
@@ -144,12 +149,12 @@ public class MessageService extends MessageTable {
     /**
      * Delete a message that has been uploaded in session history
      */
-    public static int deleteMessages(SQLiteDatabase database, int messageId) {
+    public static int deleteMessages(MPDatabase database, int messageId) {
         String[] whereArgs = new String[]{Integer.toString(messageId), String.valueOf(Constants.TEMPORARY_MPID)};
         return database.delete(MessageTableColumns.TABLE_NAME, MessageTableColumns._ID + " <= ? and " + MessageTableColumns.MP_ID + " != ?", whereArgs);
     }
 
-    public static void insertMessage(SQLiteDatabase db, String apiKey, MessageManager.BaseMPMessage message, long mpId) throws JSONException {
+    public static void insertMessage(MPDatabase db, String apiKey, MessageManager.BaseMPMessage message, long mpId) throws JSONException {
         ContentValues contentValues = new ContentValues();
         contentValues.put(MessageTableColumns.API_KEY, apiKey);
         contentValues.put(MessageTableColumns.CREATED_AT, message.getLong(Constants.MessageKey.TIMESTAMP));
@@ -172,7 +177,7 @@ public class MessageService extends MessageTable {
         } else {
             contentValues.put(MessageTableColumns.STATUS, Constants.Status.READY);
         }
-
+        InternalListenerManager.getListener().onCompositeObjects(message, contentValues);
         db.insert(MessageTableColumns.TABLE_NAME, null, contentValues);
     }
 

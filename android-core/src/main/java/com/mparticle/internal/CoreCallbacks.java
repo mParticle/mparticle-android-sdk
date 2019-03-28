@@ -22,4 +22,24 @@ public interface CoreCallbacks {
     Uri getLaunchUri();
     String getLaunchAction();
     void replayAndDisableQueue();
+    KitListener getKitListener();
+
+    interface KitListener {
+
+        void kitFound(int kitId);
+        void kitConfigReceived(int kitId, String configuration);
+        void kitExcluded(int kitId, String reason);
+        void kitStarted(int kitId);
+        void onKitApiCalled(int kitId, Boolean used, Object... objects);
+        void onKitApiCalled(String methodName, int kitId, Boolean used, Object... objects);
+
+        KitListener EMPTY = new KitListener() {
+            public void kitFound(int kitId) {}
+            public void kitConfigReceived(int kitId, String configuration) { }
+            public void kitExcluded(int kitId, String reason) { }
+            public void kitStarted(int kitId) { }
+            public void onKitApiCalled(int kitId, Boolean used, Object... objects) { }
+            public void onKitApiCalled(String methodName, int kitId, Boolean used, Object... objects) { }
+        };
+    }
 }

@@ -16,7 +16,7 @@ class Response {
     MockServer.OnRequestCallback onRequestCallback;
 
     int responseCode = 200;
-    String responseBody;
+    String responseBody = "";
     long delay;
 
     void setRequest(MPConnectionTestImpl connection) {

@@ -7,6 +7,7 @@ import android.database.Cursor;
 import android.os.Message;
 
 import com.mparticle.MParticle;
+import com.mparticle.MockMParticle;
 import com.mparticle.internal.database.services.MParticleDBManager;
 import com.mparticle.mock.MockContext;
 
@@ -36,11 +37,9 @@ public class UploadHandlerTest {
 
     @Before
     public void setUp() throws Exception {
-        MParticle.setInstance(Mockito.mock(MParticle.class));
+        MParticle.setInstance(new MockMParticle());
         AppStateManager stateManager = Mockito.mock(AppStateManager.class);
-        mConfigManager = Mockito.mock(ConfigManager.class);
-        Mockito.when(MParticle.getInstance().Internal()).thenReturn(Mockito.mock(MParticle.Internal.class));
-        Mockito.when(MParticle.getInstance().Internal().getConfigManager()).thenReturn(mConfigManager);
+        mConfigManager = MParticle.getInstance().Internal().getConfigManager();
         handler = new UploadHandler(new MockContext(), mConfigManager, stateManager, Mockito.mock(MessageManager.class), Mockito.mock(MParticleDBManager.class));
         handler.mParticleDBManager = Mockito.mock(MParticleDBManager.class);
     }
@@ -192,12 +191,17 @@ public class UploadHandlerTest {
     public void testUploadSessionHistory() throws Exception {
         handler.handleMessage(null);
         Cursor mockCursor = Mockito.mock(Cursor.class);
-        Mockito.when(handler.mParticleDBManager.getReadyUploads()).thenReturn(new ArrayList<MParticleDBManager.ReadyUpload>(){{add(new MParticleDBManager.ReadyUpload(123, "cool message batch!"));}});
+        Mockito.when(handler.mParticleDBManager.getReadyUploads())
+                .thenReturn(new ArrayList<MParticleDBManager.ReadyUpload>(){
+                    {
+                        add(new MParticleDBManager.ReadyUpload(123, "a message batch"));
+                    }
+                });
         MParticleApiClient mockApiClient = Mockito.mock(MParticleApiClient.class);
         handler.setApiClient(mockApiClient);
         Mockito.when(mConfigManager.getIncludeSessionHistory()).thenReturn(true);
         Mockito.when(mockCursor.moveToNext()).thenReturn(true, false);
         handler.upload(true);
-        Mockito.verify(mockApiClient).sendMessageBatch(Mockito.eq("cool message batch!"));
+        Mockito.verify(mockApiClient).sendMessageBatch(Mockito.eq("a message batch"));
     }
 }

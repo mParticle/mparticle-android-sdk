@@ -7,6 +7,7 @@ import android.support.annotation.Nullable;
 import com.mparticle.internal.Constants;
 import com.mparticle.internal.Logger;
 import com.mparticle.internal.MPUtility;
+import com.mparticle.internal.listeners.InternalListenerManager;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -115,6 +116,7 @@ public class MPEvent {
         setCustomFlags(mpEvent.customFlags);
         entering = mpEvent.entering;
         screenEvent = mpEvent.screenEvent;
+        InternalListenerManager.getListener().onCompositeObjects(mpEvent, this);
     }
 
     @Override

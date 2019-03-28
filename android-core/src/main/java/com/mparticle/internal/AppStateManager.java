@@ -17,6 +17,7 @@ import com.mparticle.MParticle;
 import com.mparticle.identity.IdentityApi;
 import com.mparticle.identity.IdentityApiRequest;
 import com.mparticle.identity.MParticleUser;
+import com.mparticle.internal.listeners.InternalListenerManager;
 
 import org.json.JSONObject;
 
@@ -381,6 +382,7 @@ public class  AppStateManager {
         if (MParticle.getInstance() != null) {
             MParticle.getInstance().Internal().getKitManager().onSessionEnd();
         }
+        InternalListenerManager.getListener().onSessionUpdated(mCurrentSession);
     }
 
     private void disableLocationTracking() {

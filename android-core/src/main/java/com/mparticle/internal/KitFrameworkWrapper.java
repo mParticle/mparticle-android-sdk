@@ -14,6 +14,7 @@ import com.mparticle.commerce.CommerceEvent;
 import com.mparticle.consent.ConsentState;
 import com.mparticle.identity.IdentityApiRequest;
 import com.mparticle.identity.MParticleUser;
+import com.mparticle.internal.listeners.InternalListenerManager;
 
 import org.json.JSONArray;
 
@@ -674,5 +675,42 @@ public class KitFrameworkWrapper implements KitManager {
         public void replayAndDisableQueue() {
             mKitFrameworkWrapper.replayAndDisableQueue();
         }
+
+        @Override
+        public KitListener getKitListener() {
+            return kitListener;
+        }
+
+        private KitListener kitListener = new KitListener() {
+            @Override
+            public void kitFound(int kitId) {
+                InternalListenerManager.getListener().onKitDetected(kitId);
+            }
+
+            @Override
+            public void kitConfigReceived(int kitId, String configuration) {
+                InternalListenerManager.getListener().onKitConfigReceived(kitId, configuration);
+            }
+
+            @Override
+            public void kitExcluded(int kitId, String reason) {
+                InternalListenerManager.getListener().onKitExcluded(kitId, reason);
+            }
+
+            @Override
+            public void kitStarted(int kitId) {
+                InternalListenerManager.getListener().onKitStarted(kitId);
+            }
+
+            @Override
+            public void onKitApiCalled(int kitId, Boolean used, Object... objects) {
+                InternalListenerManager.getListener().onKitApiCalled(kitId, used, objects);
+            }
+
+            @Override
+            public void onKitApiCalled(String methodName, int kitId, Boolean used, Object... objects) {
+                InternalListenerManager.getListener().onKitApiCalled(methodName, kitId, used, objects);
+            }
+        };
     }
 }

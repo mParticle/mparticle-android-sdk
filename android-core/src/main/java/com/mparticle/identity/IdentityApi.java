@@ -16,6 +16,7 @@ import com.mparticle.internal.KitManager;
 import com.mparticle.internal.Logger;
 import com.mparticle.internal.MPUtility;
 import com.mparticle.internal.MessageManager;
+import com.mparticle.internal.listeners.InternalListenerManager;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -113,6 +114,7 @@ public class IdentityApi {
      * @see IdentityStateListener
      */
     public void addIdentityStateListener(@NonNull IdentityStateListener listener) {
+        InternalListenerManager.getListener().onApiCalled(listener);
         identityStateListeners.add(listener);
     }
 
@@ -123,6 +125,7 @@ public class IdentityApi {
      * @see IdentityStateListener
      */
     public void removeIdentityStateListener(@NonNull IdentityStateListener listener) {
+        InternalListenerManager.getListener().onApiCalled(listener);
         identityStateListeners.remove(listener);
     }
 
@@ -136,6 +139,7 @@ public class IdentityApi {
      */
     @NonNull
     public MParticleTask<IdentityApiResult> logout() {
+        InternalListenerManager.getListener().onApiCalled();
         return logout(null);
     }
 
@@ -151,6 +155,7 @@ public class IdentityApi {
      */
     @NonNull
     public MParticleTask<IdentityApiResult> logout(@Nullable final IdentityApiRequest logoutRequest) {
+        InternalListenerManager.getListener().onApiCalled(logoutRequest);
         return makeIdentityRequest(logoutRequest, new IdentityNetworkRequestRunnable() {
             @Override
             public IdentityHttpResponse request(IdentityApiRequest request) throws Exception {
@@ -174,6 +179,7 @@ public class IdentityApi {
      */
     @NonNull
     public MParticleTask<IdentityApiResult> login() {
+        InternalListenerManager.getListener().onApiCalled();
         return login(null);
     }
 
@@ -189,6 +195,7 @@ public class IdentityApi {
      */
     @NonNull
     public MParticleTask<IdentityApiResult> login(@Nullable final IdentityApiRequest loginRequest) {
+        InternalListenerManager.getListener().onApiCalled(loginRequest);
         return makeIdentityRequest(loginRequest, new IdentityNetworkRequestRunnable() {
             @Override
             public IdentityHttpResponse request(IdentityApiRequest request) throws Exception {
@@ -214,6 +221,7 @@ public class IdentityApi {
      */
     @NonNull
     public MParticleTask<IdentityApiResult> identify(@Nullable final IdentityApiRequest identifyRequest) {
+        InternalListenerManager.getListener().onApiCalled(identifyRequest);
         return makeIdentityRequest(identifyRequest, new IdentityNetworkRequestRunnable() {
             @Override
             public IdentityHttpResponse request(IdentityApiRequest request) throws Exception {
@@ -239,6 +247,7 @@ public class IdentityApi {
      */
     @NonNull
     public BaseIdentityTask modify(@NonNull final IdentityApiRequest updateRequest) {
+        InternalListenerManager.getListener().onApiCalled(updateRequest);
         boolean devMode = MPUtility.isDevEnv() || MPUtility.isAppDebuggable(mContext);
         final BaseIdentityTask task = new BaseIdentityTask();
 

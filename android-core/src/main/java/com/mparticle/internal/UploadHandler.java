@@ -7,6 +7,7 @@ import android.os.Message;
 
 import com.mparticle.MParticle;
 import com.mparticle.internal.database.services.MParticleDBManager;
+import com.mparticle.internal.listeners.InternalListenerManager;
 import com.mparticle.segmentation.SegmentListener;
 
 import java.io.IOException;
@@ -211,7 +212,9 @@ public class UploadHandler extends BaseHandler implements BackgroundTaskHandler 
                             processingSessionEnd = true;
                         }
                     }
-                    uploadMessage(readyUpload.getId(), readyUpload.getMessage());
+                    String message = readyUpload.getMessage();
+                    InternalListenerManager.getListener().onCompositeObjects(readyUpload, message);
+                    uploadMessage(readyUpload.getId(), message);
                 }
             }
         } catch (MParticleApiClientImpl.MPThrottleException e) {

@@ -2,9 +2,10 @@ package com.mparticle.internal.database.services;
 
 import android.content.ContentValues;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 
+import com.mparticle.MParticle;
 import com.mparticle.internal.Logger;
+import com.mparticle.internal.database.MPDatabase;
 import com.mparticle.internal.database.tables.UserAttributesTable;
 
 import java.util.ArrayList;
@@ -13,7 +14,7 @@ import java.util.TreeMap;
 
 public class UserAttributesService extends UserAttributesTable {
 
-    public static void insertAttribute(SQLiteDatabase db, String key, String attributeValue, long time, boolean isList, long mpId) {
+    public static void insertAttribute(MPDatabase db, String key, String attributeValue, long time, boolean isList, long mpId) {
         ContentValues values = new ContentValues();
         values.put(UserAttributesTableColumns.MP_ID, mpId);
         values.put(UserAttributesTableColumns.ATTRIBUTE_KEY, key);
@@ -23,12 +24,12 @@ public class UserAttributesService extends UserAttributesTable {
         db.insert(UserAttributesTableColumns.TABLE_NAME, null, values);
     }
 
-    public static int deleteAttributes(SQLiteDatabase db, String key, long mpId) {
+    public static int deleteAttributes(MPDatabase db, String key, long mpId) {
         String[] deleteWhereArgs = {key, String.valueOf(mpId)};
         return db.delete(UserAttributesTableColumns.TABLE_NAME, UserAttributesTableColumns.ATTRIBUTE_KEY + " = ? and " + UserAttributesTableColumns.MP_ID + " = ?", deleteWhereArgs);
     }
 
-    public static TreeMap<String, String> getUserAttributesSingles(SQLiteDatabase db, long mpId) {
+    public static TreeMap<String, String> getUserAttributesSingles(MPDatabase db, long mpId) {
         TreeMap<String, String> attributes = new TreeMap<String, String>(String.CASE_INSENSITIVE_ORDER);
         Cursor cursor = null;
         try {
@@ -50,7 +51,7 @@ public class UserAttributesService extends UserAttributesTable {
         return attributes;
     }
 
-    public static TreeMap<String, List<String>> getUserAttributesLists(SQLiteDatabase db, long mpId) {
+    public static TreeMap<String, List<String>> getUserAttributesLists(MPDatabase db, long mpId) {
         TreeMap<String, List<String>> attributes = new TreeMap<String, List<String>>(String.CASE_INSENSITIVE_ORDER);
         Cursor cursor = null;
         try {

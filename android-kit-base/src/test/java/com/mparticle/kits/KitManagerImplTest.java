@@ -9,6 +9,8 @@ import com.mparticle.identity.IdentityApi;
 import com.mparticle.identity.MParticleUser;
 import com.mparticle.internal.CoreCallbacks;
 import com.mparticle.internal.KitFrameworkWrapper;
+import com.mparticle.mock.MockCoreCallbacks;
+import com.mparticle.mock.MockKitManagerImpl;
 import com.mparticle.mock.MockMParticle;
 import com.mparticle.internal.ReportingManager;
 import com.mparticle.internal.BackgroundTaskHandler;
@@ -46,22 +48,15 @@ public class KitManagerImplTest {
 
     @Before
     public void before() {
-        MParticle mparticle = Mockito.mock(MParticle.class);
-        Mockito.when(mparticle.Internal()).thenReturn(Mockito.mock(MParticle.Internal.class));
-        Mockito.when(mparticle.Internal().getKitManager()).thenReturn(Mockito.mock(KitFrameworkWrapper.class));
         mockIdentity = Mockito.mock(IdentityApi.class);
-        Mockito.when(mparticle.Identity()).thenReturn(mockIdentity);
-        MParticle.setInstance(mparticle);
-    }
+        MockMParticle instance = new MockMParticle();
+        instance.setIdentityApi(mockIdentity);
+        MParticle.setInstance(instance);
+        }
 
     @Test
     public void testSetKitFactory() {
-        KitManagerImpl manager = new KitManagerImpl(
-                Mockito.mock(Context.class),
-                null,
-                Mockito.mock(CoreCallbacks.class),
-                Mockito.mock(BackgroundTaskHandler.class)
-        );
+        KitManagerImpl manager = new MockKitManagerImpl();
         Assert.assertNotNull(manager.mKitIntegrationFactory);
         KitIntegrationFactory factory = Mockito.mock(KitIntegrationFactory.class);
         manager.setKitFactory(factory);
@@ -74,12 +69,7 @@ public class KitManagerImplTest {
         ConsentState state = ConsentState.builder().build();
         Mockito.when(mockUser.getConsentState()).thenReturn(state);
         Mockito.when(mockIdentity.getCurrentUser()).thenReturn(mockUser);
-        KitManagerImpl manager = new KitManagerImpl(
-                Mockito.mock(Context.class),
-                null,
-                Mockito.mock(CoreCallbacks.class),
-                Mockito.mock(BackgroundTaskHandler.class)
-        );
+        KitManagerImpl manager = new MockKitManagerImpl();
         JSONArray kitConfiguration = new JSONArray();
         kitConfiguration.put(new JSONObject("{\"id\":1}"));
         kitConfiguration.put(new JSONObject("{\"id\":2}"));
@@ -99,12 +89,7 @@ public class KitManagerImplTest {
     public void testShouldNotEnableKitBasedOnConsent() throws Exception {
         MParticleUser mockUser = Mockito.mock(MParticleUser.class);
         Mockito.when(mockIdentity.getCurrentUser()).thenReturn(mockUser);
-        KitManagerImpl manager = new KitManagerImpl(
-                Mockito.mock(Context.class),
-                null,
-                Mockito.mock(CoreCallbacks.class),
-                Mockito.mock(BackgroundTaskHandler.class)
-        );
+        KitManagerImpl manager = new MockKitManagerImpl();
         ConsentState state = ConsentState.builder()
                 .addGDPRConsentState("Blah", GDPRConsent.builder(true).build())
                 .build();
@@ -128,12 +113,7 @@ public class KitManagerImplTest {
     public void testShouldEnableKitBasedOnConsent() throws Exception {
         MParticleUser mockUser = Mockito.mock(MParticleUser.class);
         Mockito.when(mockIdentity.getCurrentUser()).thenReturn(mockUser);
-        KitManagerImpl manager = new KitManagerImpl(
-                Mockito.mock(Context.class),
-                null,
-                Mockito.mock(CoreCallbacks.class),
-                Mockito.mock(BackgroundTaskHandler.class)
-        );
+        KitManagerImpl manager = new MockKitManagerImpl();
         ConsentState state = ConsentState.builder()
                 .addGDPRConsentState("Blah", GDPRConsent.builder(true).build())
                 .build();
@@ -156,12 +136,7 @@ public class KitManagerImplTest {
     public void testShouldDisableActiveKitBasedOnConsent() throws Exception {
         MParticleUser mockUser = Mockito.mock(MParticleUser.class);
         Mockito.when(mockIdentity.getCurrentUser()).thenReturn(mockUser);
-        KitManagerImpl manager = new KitManagerImpl(
-                Mockito.mock(Context.class),
-                null,
-                Mockito.mock(CoreCallbacks.class),
-                Mockito.mock(BackgroundTaskHandler.class)
-        );
+        KitManagerImpl manager = new MockKitManagerImpl();
         ConsentState state = ConsentState.builder()
                 .addGDPRConsentState("Blah", GDPRConsent.builder(true).build())
                 .build();
@@ -191,12 +166,7 @@ public class KitManagerImplTest {
        MParticleUser mockUser = Mockito.mock(MParticleUser.class);
         Mockito.when(mockIdentity.getCurrentUser()).thenReturn(mockUser);
         Mockito.when(mockUser.isLoggedIn()).thenReturn(true);
-        KitManagerImpl manager = new KitManagerImpl(
-                Mockito.mock(Context.class),
-                null,
-                Mockito.mock(CoreCallbacks.class),
-                Mockito.mock(BackgroundTaskHandler.class)
-        );
+        KitManagerImpl manager = new MockKitManagerImpl();
         ConsentState state = ConsentState.builder()
                 .addGDPRConsentState("Blah", GDPRConsent.builder(true).build())
                 .build();
@@ -221,12 +191,7 @@ public class KitManagerImplTest {
         MParticleUser mockUser = Mockito.mock(MParticleUser.class);
         Mockito.when(mockIdentity.getCurrentUser()).thenReturn(mockUser);
         Mockito.when(mockUser.isLoggedIn()).thenReturn(false);
-        KitManagerImpl manager = new KitManagerImpl(
-                Mockito.mock(Context.class),
-                null,
-                Mockito.mock(CoreCallbacks.class),
-                Mockito.mock(BackgroundTaskHandler.class)
-        );
+        KitManagerImpl manager = new MockKitManagerImpl();
         ConsentState state = ConsentState.builder()
                 .addGDPRConsentState("Blah", GDPRConsent.builder(true).build())
                 .build();
@@ -254,12 +219,7 @@ public class KitManagerImplTest {
         Mockito.when(mockIdentity.getCurrentUser()).thenReturn(mockUser);
         Mockito.when(mockUser.isLoggedIn()).thenReturn(false);
 
-        CoreCallbacks mockCoreCallbacks = Mockito.mock(CoreCallbacks.class);
-        KitManagerImpl manager = new KitManagerImpl(
-                Mockito.mock(Context.class),
-                null,
-                mockCoreCallbacks,
-                Mockito.mock(BackgroundTaskHandler.class)) {
+        KitManagerImpl manager = new MockKitManagerImpl() {
             @Override
             public void updateKits(JSONArray kitConfigs) {
                 configureKits(kitConfigs);
@@ -283,7 +243,7 @@ public class KitManagerImplTest {
         Assert.assertEquals(0, manager.providers.size());
 
         Mockito.when(mockUser.isLoggedIn()).thenReturn(true);
-        Mockito.when(mockCoreCallbacks.getLatestKitConfiguration()).thenReturn(kitConfiguration);
+        Mockito.when(manager.mCoreCallbacks.getLatestKitConfiguration()).thenReturn(kitConfiguration);
         manager.onUserIdentified(mockUser);
         assertEquals(3, manager.providers.size());
     }
@@ -295,12 +255,7 @@ public class KitManagerImplTest {
         Mockito.when(mockUser.isLoggedIn()).thenReturn(true);
 
         CoreCallbacks mockCoreCallbacks = Mockito.mock(CoreCallbacks.class);
-        KitManagerImpl manager = new KitManagerImpl(
-                Mockito.mock(Context.class),
-                null,
-                mockCoreCallbacks,
-                Mockito.mock(BackgroundTaskHandler.class)
-        ) {
+        KitManagerImpl manager = new MockKitManagerImpl() {
             @Override
             public void updateKits(JSONArray kitConfigs) {
                 configureKits(kitConfigs);
@@ -332,12 +287,7 @@ public class KitManagerImplTest {
     @Test
     public void testOnUserAttributesReceived() throws Exception {
         MParticle.setInstance(new MockMParticle());
-        KitManagerImpl manager  = new KitManagerImpl(
-                new MockContext(),
-                Mockito.mock(ReportingManager.class),
-                Mockito.mock(CoreCallbacks.class),
-                mockBackgroundTaskHandler
-                );
+        KitManagerImpl manager  = new MockKitManagerImpl();
         KitIntegration integration = Mockito.mock(
                 KitIntegration.class,
                 Mockito.withSettings().extraInterfaces(KitIntegration.AttributeListener.class)
@@ -375,11 +325,7 @@ public class KitManagerImplTest {
 
     @Test
     public void testSetUserAttributeList() throws Exception {
-        KitManagerImpl manager  = new KitManagerImpl(
-                new MockContext(),
-                Mockito.mock(ReportingManager.class),
-                Mockito.mock(CoreCallbacks.class),
-                mockBackgroundTaskHandler);
+        KitManagerImpl manager  = new MockKitManagerImpl();
         KitIntegration integration = Mockito.mock(
                 KitIntegration.class,
                 Mockito.withSettings().extraInterfaces(KitIntegration.AttributeListener.class)

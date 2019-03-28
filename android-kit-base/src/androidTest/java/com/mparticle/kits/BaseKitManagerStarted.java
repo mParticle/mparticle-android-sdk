@@ -205,8 +205,11 @@ public abstract class BaseKitManagerStarted extends BaseCleanInstallEachTest {
         }
 
         @Override
-        public void replayAndDisableQueue() {
+        public void replayAndDisableQueue() { }
 
+        @Override
+        public KitListener getKitListener() {
+            return KitListener.EMPTY;
         }
     }
 

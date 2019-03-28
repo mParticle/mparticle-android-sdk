@@ -497,7 +497,7 @@ public final class CommerceEvent {
     }
 
     /**
-     * The Builder class for {@link CommerceEvent}. Use this class to create immutable CommerceEvents than can then be logged.
+     * The Builder class for {@link CommerceEvent}. Use this class to create immutable CommerceEvents that can then be logged.
      *
      * There are 3 types of {@link CommerceEvent}:
      * <ul>

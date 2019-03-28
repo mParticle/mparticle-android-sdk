@@ -8,6 +8,7 @@ import com.mparticle.MParticle;
 import com.mparticle.UserAttributeListener;
 import com.mparticle.commerce.Cart;
 import com.mparticle.consent.ConsentState;
+import com.mparticle.internal.listeners.InternalListenerManager;
 import com.mparticle.segmentation.SegmentListener;
 
 import java.util.Map;
@@ -90,26 +91,31 @@ public class MParticleUserImpl implements MParticleUser {
 
     @Override
     public boolean setUserAttribute(String key, Object value) {
+        InternalListenerManager.getListener().onApiCalled(key, value);
         return mUserDelegate.setUserAttribute(key, value, getId());
     }
 
     @Override
     public boolean setUserAttributeList(String key, Object value) {
+        InternalListenerManager.getListener().onApiCalled(key, value);
         return mUserDelegate.setUserAttributeList(key, value, getId());
     }
 
     @Override
     public boolean incrementUserAttribute(String key, int value) {
+        InternalListenerManager.getListener().onApiCalled(key, value);
         return mUserDelegate.incrementUserAttribute(key, value, getId());
     }
 
     @Override
     public boolean removeUserAttribute(String key) {
+        InternalListenerManager.getListener().onApiCalled(key);
         return mUserDelegate.removeUserAttribute(key, getId());
     }
 
     @Override
     public boolean setUserTag(@NonNull String tag) {
+        InternalListenerManager.getListener().onApiCalled(tag);
         return setUserAttribute(tag, null);
     }
 
@@ -129,6 +135,7 @@ public class MParticleUserImpl implements MParticleUser {
 
     @Override
     public void setConsentState(ConsentState state) {
+        InternalListenerManager.getListener().onApiCalled(state);
         mUserDelegate.setConsentState(state, getId());
     }
 

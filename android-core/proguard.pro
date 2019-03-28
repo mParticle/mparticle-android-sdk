@@ -117,6 +117,7 @@
 
 -keep class com.mparticle.internal.KitManager { *; }
 -keep class com.mparticle.internal.CoreCallbacks { *; }
+-keep class com.mparticle.internal.CoreCallbacks$KitListener { *; }
 -keep class com.mparticle.internal.ReportingManager { *; }
 -keep class com.mparticle.internal.JsonReportingMessage { *; }
 -keep class com.mparticle.internal.MPUtility { *; }

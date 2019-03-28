@@ -27,7 +27,7 @@ public class MPConnectionTestImpl implements MPConnection {
 
     SSLSocketFactory sslSocketFactory;
 
-    String response;
+    String response = "";
 
     MPConnectionTestImpl(MPUrl url) {
         this.url = url;
@@ -112,8 +112,8 @@ public class MPConnectionTestImpl implements MPConnection {
     @Override
     public InputStream getInputStream() throws IOException {
         if (inputStream == null) {
-            if (response == null) {
-                response = "";
+            if (responseCode == null) {
+                MockServer.getInstance().onRequestMade(this);
             }
             inputStream = new ByteArrayInputStream(response.getBytes());
         }

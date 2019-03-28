@@ -11,6 +11,7 @@ import com.mparticle.MParticle;
 import com.mparticle.internal.ConfigManager;
 import com.mparticle.internal.CoreCallbacks;
 import com.mparticle.mock.MockContext;
+import com.mparticle.mock.MockCoreCallbacks;
 import com.mparticle.mock.MockKitConfiguration;
 import com.mparticle.mock.MockKitIntegrationFactory;
 import com.mparticle.mock.MockKitManagerImpl;
@@ -46,7 +47,7 @@ public class KitManagerTest  {
     public void setUp() throws Exception {
         MParticle mockMp = new MockMParticle();
         MParticle.setInstance(mockMp);
-        manager = new MockKitManagerImpl(new MockContext(), null,  Mockito.mock(CoreCallbacks.class));
+        manager = new MockKitManagerImpl(new MockContext(), null,  new MockCoreCallbacks());
         assertNotNull(manager.providers);
         MockKitIntegrationFactory mockKitFactory = new MockKitIntegrationFactory();
         manager.setKitFactory(mockKitFactory);

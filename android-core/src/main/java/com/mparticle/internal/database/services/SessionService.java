@@ -2,11 +2,12 @@ package com.mparticle.internal.database.services;
 
 import android.content.ContentValues;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 
+import com.mparticle.MParticle;
 import com.mparticle.internal.Constants;
 import com.mparticle.internal.MessageManager;
 import com.mparticle.internal.MessageBatch;
+import com.mparticle.internal.database.MPDatabase;
 import com.mparticle.internal.database.tables.SessionTable;
 
 import org.json.JSONException;
@@ -23,12 +24,12 @@ import static com.mparticle.internal.database.tables.SessionTable.SessionTableCo
 public class SessionService extends SessionTable {
     public static String[] readyMessages = new String[]{Integer.toString(Constants.Status.UPLOADED)};
 
-    public static int deleteSessions(SQLiteDatabase database, String currentSessionId){
+    public static int deleteSessions(MPDatabase database, String currentSessionId){
         String[] selectionArgs = new String[]{currentSessionId};
         return database.delete(TABLE_NAME, SessionTableColumns.SESSION_ID + "!=? ", selectionArgs);
     }
 
-    public static Cursor getSessions(SQLiteDatabase db) {
+    public static Cursor getSessions(MPDatabase db) {
         return db.query(TABLE_NAME,
                 null,
                 null,
@@ -38,7 +39,7 @@ public class SessionService extends SessionTable {
                 null);
     }
 
-    public static void updateSessionEndTime(SQLiteDatabase db, String sessionId, long endTime, long sessionLength) {
+    public static void updateSessionEndTime(MPDatabase db, String sessionId, long endTime, long sessionLength) {
         ContentValues sessionValues = new ContentValues();
         sessionValues.put(SessionTableColumns.END_TIME, endTime);
         if (sessionLength > 0) {
@@ -48,21 +49,21 @@ public class SessionService extends SessionTable {
         db.update(TABLE_NAME, sessionValues, SessionTableColumns.SESSION_ID + "=?", whereArgs);
     }
 
-    public static void updateSessionAttributes(SQLiteDatabase db, String sessionId, String attributes) {
+    public static void updateSessionAttributes(MPDatabase db, String sessionId, String attributes) {
         ContentValues sessionValues = new ContentValues();
         sessionValues.put(SessionTableColumns.ATTRIBUTES, attributes);
         String[] whereArgs = {sessionId};
         db.update(TABLE_NAME, sessionValues, SessionTableColumns.SESSION_ID + "=?", whereArgs);
     }
 
-    public static void updateSessionStatus(SQLiteDatabase db, String sessionId, String status) {
+    public static void updateSessionStatus(MPDatabase db, String sessionId, String status) {
         ContentValues contentValues = new ContentValues();
         contentValues.put(SessionTableColumns.STATUS, status);
         String[] whereArgs = {sessionId};
         db.update(SessionTableColumns.TABLE_NAME, contentValues, SessionTableColumns.SESSION_ID + "=?", whereArgs);
     }
 
-    public static Cursor getSessionForSessionEndMessage(SQLiteDatabase db, String sessionId) throws JSONException {
+    public static Cursor getSessionForSessionEndMessage(MPDatabase db, String sessionId) throws JSONException {
         String[] selectionArgs = new String[]{sessionId};
         String[] sessionColumns = new String[]{SessionTableColumns.START_TIME, SessionTableColumns.END_TIME,
                 SessionTableColumns.SESSION_FOREGROUND_LENGTH, SessionTableColumns.ATTRIBUTES};
@@ -71,7 +72,7 @@ public class SessionService extends SessionTable {
         return selectCursor;
     }
 
-    public static List<String> getOrphanSessionIds(SQLiteDatabase db, String apiKey) {
+    public static List<String> getOrphanSessionIds(MPDatabase db, String apiKey) {
         List<String> sessionIds = new ArrayList<String>();
         String[] selectionArgs = new String[]{apiKey};
         String[] sessionColumns = new String[]{SessionTableColumns.SESSION_ID};
@@ -94,7 +95,7 @@ public class SessionService extends SessionTable {
         }
     }
 
-    public static void insertSession(SQLiteDatabase db, MessageManager.BaseMPMessage message, String apiKey, String appInfo, String deviceInfo, long mpId) throws JSONException {
+    public static void insertSession(MPDatabase db, MessageManager.BaseMPMessage message, String apiKey, String appInfo, String deviceInfo, long mpId) throws JSONException {
         ContentValues contentValues = new ContentValues();
         contentValues.put(SessionTableColumns.MP_ID, mpId);
         contentValues.put(SessionTableColumns.API_KEY, apiKey);
@@ -107,7 +108,7 @@ public class SessionService extends SessionTable {
         db.insert(TABLE_NAME, null, contentValues);
     }
 
-    public static List<JSONObject> processSessions(SQLiteDatabase database, HashMap<String, Map<Long, MessageBatch>> uploadMessagesBySession) {
+    public static List<JSONObject> processSessions(MPDatabase database, HashMap<String, Map<Long, MessageBatch>> uploadMessagesBySession) {
         Cursor sessionCursor = null;
         List<JSONObject> deviceInfos = new ArrayList<JSONObject>();
         try {
@@ -141,7 +142,7 @@ public class SessionService extends SessionTable {
         return deviceInfos;
     }
 
-    public static void updateSessionInstallReferrer(SQLiteDatabase db, JSONObject appInfo, String sessionId) {
+    public static void updateSessionInstallReferrer(MPDatabase db, JSONObject appInfo, String sessionId) {
         ContentValues contentValues = new ContentValues();
                 contentValues.put(APP_INFO, appInfo.toString());
                 String[] whereArgs = {sessionId};

@@ -2,11 +2,12 @@ package com.mparticle.internal.database.services;
 
 import android.content.ContentValues;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 
 import com.mparticle.internal.Constants;
 import com.mparticle.internal.JsonReportingMessage;
+import com.mparticle.internal.database.MPDatabase;
 import com.mparticle.internal.database.tables.ReportingTable;
+import com.mparticle.internal.listeners.InternalListenerManager;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -16,7 +17,7 @@ import java.util.List;
 
 public class ReportingService extends ReportingTable {
 
-    public static void insertReportingMessage(SQLiteDatabase db, JsonReportingMessage message, long mpId) {
+    public static void insertReportingMessage(MPDatabase db, JsonReportingMessage message, long mpId) {
         ContentValues values = new ContentValues();
         values.put(ReportingTableColumns.MP_ID, mpId);
         values.put(ReportingTableColumns.CREATED_AT, message.getTimestamp());
@@ -30,11 +31,11 @@ public class ReportingService extends ReportingTable {
      * will return all ReportingMessages, except for those with MP_ID == Constants.TEMPORARY_MPID,
      * useful in non-testing context;
      */
-    public static List<ReportingMessage> getReportingMessagesForUpload(SQLiteDatabase database) throws JSONException {
+    public static List<ReportingMessage> getReportingMessagesForUpload(MPDatabase database) throws JSONException {
         return getReportingMessagesForUpload(database, false, Constants.TEMPORARY_MPID);
     }
 
-    static List<ReportingMessage> getReportingMessagesForUpload(SQLiteDatabase database, boolean include, long mpid) throws JSONException {
+    static List<ReportingMessage> getReportingMessagesForUpload(MPDatabase database, boolean include, long mpid) throws JSONException {
         List<ReportingMessage> reportingMessages = new ArrayList<ReportingMessage>();
         Cursor reportingMessageCursor = null;
         try {
@@ -58,7 +59,9 @@ public class ReportingService extends ReportingTable {
                 );
                 int reportingMessageId = reportingMessageCursor.getInt(reportingMessageIdIndex);
                 long reportingMessageMpid = reportingMessageCursor.getLong(reportingMessageCursor.getColumnIndex(ReportingTableColumns.MP_ID));
-                reportingMessages.add(new ReportingMessage(msgObject, sessionId, reportingMessageId, reportingMessageMpid));
+                ReportingMessage reportingMessage = new ReportingMessage(msgObject, sessionId, reportingMessageId, reportingMessageMpid);
+                InternalListenerManager.getListener().onCompositeObjects(reportingMessageCursor, reportingMessage);
+                reportingMessages.add(reportingMessage);
             }
         } finally {
             if (reportingMessageCursor != null && !reportingMessageCursor.isClosed()) {
@@ -71,7 +74,7 @@ public class ReportingService extends ReportingTable {
     /**
      * Delete reporting messages after they've been included in an upload message.
      */
-    public static void deleteReportingMessage(SQLiteDatabase database, int messageId) {
+    public static void deleteReportingMessage(MPDatabase database, int messageId) {
         String[] whereArgs = new String[]{Long.toString(messageId)};
         String whereClause = "_id =?";
         database.delete(ReportingTableColumns.TABLE_NAME, whereClause, whereArgs);
