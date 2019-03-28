@@ -152,7 +152,11 @@
 -keep class com.mparticle.networking.DomainMapping { *; }
 -keep class com.mparticle.networking.DomainMapping$Builder { *; }
 -keep class com.mparticle.networking.Certificate { *; }
+-keep class com.mparticle.SdkListener { *; }
+-keep class com.mparticle.SdkListener$* { *; }
+-keep class com.mparticle.internal.listeners.GraphListener { *; }
 
+-keep class com.mparticle.internal.InternalSession { *; }
 
 -keep public class com.mparticle.messaging.* {
      *;

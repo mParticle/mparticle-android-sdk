@@ -17,6 +17,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.StatFs;
 import android.provider.Settings;
+import android.support.annotation.Nullable;
 import android.view.Display;
 import android.view.WindowManager;
 
@@ -35,6 +36,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.math.BigInteger;
 import java.net.HttpURLConnection;
@@ -725,6 +727,24 @@ public class MPUtility {
             }
         }
         return false;
+    }
+
+    @Nullable
+    public static String getProp(String key) {
+        try {
+            Class SystemProperties = Class.forName("android.os.SystemProperties");
+            Method get = SystemProperties.getMethod("get", new Class[]{String.class});
+            return get.invoke(SystemProperties, new Object[]{key}).toString();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     private interface SyncRunnable<T> {

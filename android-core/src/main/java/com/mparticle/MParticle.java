@@ -83,7 +83,7 @@ public class MParticle {
 
     @NonNull protected ConfigManager mConfigManager;
     @NonNull protected MessageManager mMessageManager;
-    @NonNull private static volatile MParticle instance;
+    private static volatile MParticle instance;
     @NonNull protected SharedPreferences mPreferences;
     @NonNull protected MPLocationListener mLocationListener;
     @NonNull protected Context mAppContext;
@@ -1234,6 +1234,35 @@ public class MParticle {
                 }
             });
     }
+
+    /**
+     * note: Experimental feature, adding a Listener will slow down the SDK, and should be used only
+     * for development purposes. By default, InternalListeners will automatically disable in release builds.
+     * In order to override this behavior, use the following adb shell command:
+     *
+     * {@code `adb shell setprop debug.mparticle.listener {YOUR.PACKAGE.NAME}`}
+     *
+     * Register an instance of {@link SdkListener} to receive callbacks about SDK events
+     * @param context
+     * @param listener the SdkListener implementation
+     */
+    public static void addListener(@NonNull Context context, @NonNull SdkListener listener) {
+        InternalListenerManager manager = InternalListenerManager.start(context);
+        if (manager != null) {
+            manager.addListener(listener);
+        }
+    }
+
+    /**
+     * Remove an instance of {@link SdkListener}
+     */
+    public static void removeListener(SdkListener listener) {
+        InternalListenerManager manager = InternalListenerManager.start(null);
+        if (manager != null) {
+            manager.removeListener(listener);
+        }
+    }
+
     /**
      * Event type to use when logging events.
      *
