@@ -1,3 +1,7 @@
+plugins {
+    id 'org.sonarqube' version '2.7'
+}
+
 ext {
     kitDescription = 'Core mParticle SDK supporting only server-side integrations.'
 }
@@ -5,9 +9,10 @@ ext {
 apply plugin: 'com.android.library'
 apply from: '../scripts/maven.gradle'
 
+
 android {
     compileSdkVersion 28
-    buildToolsVersion "28.0.3"
+    buildToolsVersion '28.0.3'
     packagingOptions {
         exclude 'META-INF/LICENSE'
     }
@@ -16,9 +21,9 @@ android {
         targetCompatibility JavaVersion.VERSION_1_6
     }
 
-    String url = "\"\"";
-    String identityUrl = "\"\""
-    String configurationUrl = "\"\"";
+    String url = '\"\"'
+    String identityUrl = '\"\"'
+    String configurationUrl = '\"\"'
     try {
         Properties properties = new Properties()
         properties.load(project.rootProject.file('local.properties').newDataInputStream())
@@ -26,7 +31,7 @@ android {
             url = properties.getProperty('mp.url')
         }
         if (properties.stringPropertyNames().contains('mp.identityurl')) {
-            identityUrl = properties.getProperty('mp.identityurl');
+            identityUrl = properties.getProperty('mp.identityurl')
         }
         if (properties.stringPropertyNames().contains('mp.configurl')) {
             configurationUrl = properties.getProperty('mp.configurl')
@@ -35,26 +40,26 @@ android {
 
     }
 
-    def gitHash = "git rev-parse --short HEAD".execute().text.trim()
+    def gitHash = 'git rev-parse --short HEAD'.execute().text.trim()
 
     if (gitHash == null || gitHash.length() == 0) {
-        gitHash = System.getenv("MP_GIT_SHA").substring(0, 7)
+        gitHash = System.getenv('MP_GIT_SHA').substring(0, 7)
     }
 
     defaultConfig {
         minSdkVersion 9
         targetSdkVersion 28
-        versionName project.version.toString().replace("-SNAPSHOT", "")
+        versionName project.version.toString().replace('-SNAPSHOT', '')
         versionCode Integer.parseInt(new Date().format('yyyyMMdd'))
 
-        buildConfigField "String", "GIT_SHA", "\"$gitHash\""
-        buildConfigField "String", "MP_URL", url
-        buildConfigField "String", "MP_IDENTITY_URL", identityUrl
-        buildConfigField "String", "MP_CONFIG_URL", configurationUrl
-        buildConfigField "Boolean", "MP_DEBUG", "false"
-        buildConfigField "String", "SCHEME", "\"https\""
+        buildConfigField 'String', 'GIT_SHA', '\"$gitHash\"'
+        buildConfigField 'String', 'MP_URL', url
+        buildConfigField 'String', 'MP_IDENTITY_URL', identityUrl
+        buildConfigField 'String', 'MP_CONFIG_URL', configurationUrl
+        buildConfigField 'Boolean', 'MP_DEBUG', 'false'
+        buildConfigField 'String', 'SCHEME', '\"https\"'
 
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner 'android.support.test.runner.AndroidJUnitRunner'
         if (useOrchestrator()) {
             testInstrumentationRunnerArgument 'annotation', 'com.mparticle.OrchestratorOnly'
         } else {
@@ -67,13 +72,13 @@ android {
             minifyEnabled false
             //multidex is required for instrumented test builds
             multiDexEnabled true
-            buildConfigField "Boolean", "MP_DEBUG", "true"
+            buildConfigField 'Boolean', 'MP_DEBUG', 'true'
         }
         release {
             minifyEnabled true
             proguardFiles 'proguard.pro'
             consumerProguardFiles 'consumer-proguard.pro'
-            //buildConfigField "Boolean", "MP_DEBUG", "true"
+            //buildConfigField 'Boolean', 'MP_DEBUG', 'true'
         }
     }
     testOptions {

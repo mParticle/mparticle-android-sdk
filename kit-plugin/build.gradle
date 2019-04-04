@@ -1,3 +1,7 @@
+plugins {
+    id 'org.sonarqube' version '2.7'
+}
+
 apply plugin: 'groovy'
 
 ext {
@@ -9,7 +13,7 @@ apply from: '../scripts/maven.gradle'
 dependencies {
     compile gradleApi()
     compile localGroovy()
-    compile 'com.android.tools.build:gradle:3.1.0'
+    compile 'com.android.tools.build:gradle:3.3.2'
 }
 
 compileGroovy {

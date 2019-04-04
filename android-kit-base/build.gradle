@@ -1,3 +1,7 @@
+plugins {
+    id 'org.sonarqube' version '2.7'
+}
+
 ext {
     kitDescription = 'mParticle Kit library for extending the Core mParticle SDK.'
 }
@@ -7,15 +11,15 @@ apply from: '../scripts/maven.gradle'
 
 android {
     compileSdkVersion 28
-    buildToolsVersion "28.0.3"
+    buildToolsVersion '28.0.3'
 
-    testBuildType "debug"
+    testBuildType 'debug'
 
     defaultConfig {
         minSdkVersion 9
         targetSdkVersion 28
 
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner 'android.support.test.runner.AndroidJUnitRunner'
     }
 
     buildTypes {
@@ -24,7 +28,7 @@ android {
             minifyEnabled false
             //multidex is required for instrumented test builds
             multiDexEnabled true
-            buildConfigField "Boolean", "MP_DEBUG", "true"
+            buildConfigField 'Boolean', 'MP_DEBUG', 'true'
         }
 
         release {
