@@ -52,7 +52,7 @@ android {
         versionName project.version.toString().replace('-SNAPSHOT', '')
         versionCode Integer.parseInt(new Date().format('yyyyMMdd'))
 
-        buildConfigField 'String', 'GIT_SHA', '\"$gitHash\"'
+        buildConfigField 'String', 'GIT_SHA', "\"$gitHash\""
         buildConfigField 'String', 'MP_URL', url
         buildConfigField 'String', 'MP_IDENTITY_URL', identityUrl
         buildConfigField 'String', 'MP_CONFIG_URL', configurationUrl
@@ -113,7 +113,7 @@ task coreSdkJavadocs(type: Javadoc) {
 dependencies {
     compileOnly 'com.google.android.gms:play-services-gcm:10.2.1'
     compileOnly 'com.google.android.gms:play-services-ads:10.2.1'
-    compileOnly 'com.google.firebase:firebase-messaging:[9.4.0, )'
+    compileOnly 'com.google.firebase:firebase-messaging:[9.4.0, 17.6.0)'
     compileOnly 'com.android.support:support-v4:27.1.1'
     compileOnly 'com.android.installreferrer:installreferrer:[1.0, )'
     compileOnly 'com.google.android.instantapps:instantapps:[1.0, )'
