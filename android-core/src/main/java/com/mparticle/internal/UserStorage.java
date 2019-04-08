@@ -10,7 +10,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -36,12 +35,17 @@ public class UserStorage {
     private static final String CART = "mp::cart::";
     private static final String CONSENT_STATE = "mp::consent_state::";
     private static final String KNOWN_USER = "mp::known_user";
+    private static final String FIRST_SEEN_TIME = "mp::first_seen";
+    private static final String LAST_SEEN_TIME = "mp::last_seen";
+    private static final String DEFAULT_SEEN_TIME = "mp::default_seen_time";
 
     static final int DEFAULT_BREADCRUMB_LIMIT = 50;
 
     private long mpId;
     private SharedPreferences mPreferences;
     private Context mContext;
+
+    SharedPreferences messageManagerSharedPreferences;
 
     static List<UserStorage> getAllUsers(Context context) {
         Set<Long> userMpIds = getMpIdSet(context);
@@ -77,6 +81,11 @@ public class UserStorage {
             SharedPreferencesMigrator.setNeedsToMigrate(context, false);
             new SharedPreferencesMigrator(context).migrate(this);
         }
+        this.messageManagerSharedPreferences = mContext.getSharedPreferences(Constants.PREFS_FILE, Context.MODE_PRIVATE);
+        if (!hasBeenSeen()) {
+            setFirstSeenTime(System.currentTimeMillis());
+        }
+        setDefaultSeenTime();
     }
 
     public String getSerializedCart() {
@@ -285,6 +294,47 @@ public class UserStorage {
 
     public boolean isLoggedIn() {
         return mPreferences.getBoolean(KNOWN_USER, false);
+    }
+
+    public long getFirstSeenTime() {
+        if (!mPreferences.contains(FIRST_SEEN_TIME)) {
+            mPreferences.edit().putLong(FIRST_SEEN_TIME, messageManagerSharedPreferences.getLong(Constants.PrefKeys.INSTALL_TIME, getDefaultSeenTime())).apply();
+        }
+        return mPreferences.getLong(FIRST_SEEN_TIME, getDefaultSeenTime());
+    }
+
+    public boolean hasBeenSeen() {
+        return mPreferences.contains(FIRST_SEEN_TIME);
+    }
+
+    public void setFirstSeenTime(Long time) {
+        if (!hasBeenSeen()) {
+            mPreferences.edit().putLong(FIRST_SEEN_TIME, time).apply();
+        }
+    }
+
+    public long getLastSeenTime() {
+        if (!mPreferences.contains(LAST_SEEN_TIME)) {
+            mPreferences.edit().putLong(LAST_SEEN_TIME, getDefaultSeenTime()).apply();
+        }
+        return mPreferences.getLong(LAST_SEEN_TIME, getDefaultSeenTime());
+    }
+
+    public void setLastSeenTime(Long time) {
+        mPreferences.edit().putLong(LAST_SEEN_TIME, time).apply();
+    }
+
+    //set a default "lastSeenTime" for migration to SDK versions with MParticleUser.getLastSeenTime(),
+    //where some users will not have a value for the field
+    private void setDefaultSeenTime() {
+        SharedPreferences preferences = getMParticleSharedPrefs(mContext);
+        if (!preferences.contains(DEFAULT_SEEN_TIME)) {
+            preferences.edit().putLong(DEFAULT_SEEN_TIME, System.currentTimeMillis());
+        }
+    }
+
+    private Long getDefaultSeenTime() {
+        return getMParticleSharedPrefs(mContext).getLong(DEFAULT_SEEN_TIME, System.currentTimeMillis());
     }
 
     void setLoggedInUser(boolean knownUser) {

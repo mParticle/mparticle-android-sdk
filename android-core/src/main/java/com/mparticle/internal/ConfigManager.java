@@ -618,7 +618,11 @@ public class ConfigManager {
 
     public void setMpid(long mpid, boolean isLoggedInUser) {
         long currentMpid = getMpid();
-        boolean currentLoggedInUser = (mUserStorage != null) && mUserStorage.isLoggedIn();
+        boolean currentLoggedInUser = false;
+        if (mUserStorage != null) {
+            mUserStorage.setLastSeenTime(System.currentTimeMillis());
+            currentLoggedInUser = mUserStorage.isLoggedIn();
+        }
         UserStorage userStorage = UserStorage.create(mContext, mpid);
         userStorage.setLoggedInUser(isLoggedInUser);
 

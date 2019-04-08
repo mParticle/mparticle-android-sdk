@@ -143,4 +143,15 @@ public class MParticleUserImpl implements MParticleUser {
     public boolean isLoggedIn() {
         return mUserDelegate.isLoggedIn(getId());
     }
+
+    @Override
+    public long getFirstSeenTime() {
+        return mUserDelegate.getFirstSeenTime(getId());
+    }
+
+    @Override
+    public long getLastSeenTime() {
+        return mUserDelegate.getLastSeenTime(getId());
+    }
+
 }

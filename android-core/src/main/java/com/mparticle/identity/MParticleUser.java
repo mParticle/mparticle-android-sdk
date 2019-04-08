@@ -131,4 +131,17 @@ public interface MParticleUser {
      * @return whether the user is "Logged In"
      */
     boolean isLoggedIn();
+
+    /**
+     * The timestamp representing the first time this user was observed on this device
+     * @return
+     */
+    long getFirstSeenTime();
+
+    /**
+     * The timestamp representing the last time this user was the "currentUser" on this device
+     * @return the time, in milliseconds
+     */
+    long getLastSeenTime();
+
 }

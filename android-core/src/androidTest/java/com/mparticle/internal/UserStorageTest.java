@@ -1,15 +1,45 @@
 package com.mparticle.internal;
 
+import com.mparticle.MParticle;
 import com.mparticle.testutils.BaseCleanStartedEachTest;
 
+import org.junit.Before;
 import org.junit.Test;
 
 import java.util.HashSet;
 import java.util.Set;
 
 import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertTrue;
 
 public class UserStorageTest extends BaseCleanStartedEachTest {
+
+    @Before
+    public void before() {
+        MParticle.reset(mContext);
+    }
+
+    @Test
+    public void testSetFirstSeenTime() throws InterruptedException {
+        UserStorage storage = UserStorage.create(mContext, 1);
+        long firstSeen = System.currentTimeMillis();
+        storage.setFirstSeenTime(firstSeen);
+
+
+        assertEquals(storage.getFirstSeenTime(), firstSeen);
+
+        //make sure that the firstSeenTime does not update if it has already been set
+        storage.setFirstSeenTime(10L);
+        assertEquals(firstSeen, storage.getFirstSeenTime());
+    }
+
+    @Test
+    public void testSetLastSeenTime() throws InterruptedException {
+        UserStorage storage = UserStorage.create(mContext, 2);
+        long time = System.currentTimeMillis();
+        storage.setLastSeenTime(time);
+        assertEquals(time, storage.getLastSeenTime());
+    }
 
     @Test
     public void testMigrate() {

@@ -6,6 +6,7 @@ import com.mparticle.MParticle;
 import com.mparticle.consent.ConsentState;
 import com.mparticle.consent.GDPRConsent;
 import com.mparticle.internal.AccessUtils;
+import com.mparticle.internal.ConfigManager;
 import com.mparticle.testutils.BaseCleanStartedEachTest;
 
 import org.junit.Before;
@@ -141,6 +142,5 @@ public class MParticleUserDelegateTest extends BaseCleanStartedEachTest {
         assertTrue(mUserDelegate.getConsentState(mpid).getGDPRConsentState().containsKey("foo"));
         mUserDelegate.setConsentState(null, mpid);
         assertEquals(0, mUserDelegate.getConsentState(mpid).getGDPRConsentState().size());
-
     }
 }

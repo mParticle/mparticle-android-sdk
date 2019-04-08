@@ -129,4 +129,14 @@ public class FilteredMParticleUser implements MParticleUser {
     public boolean isLoggedIn() {
         return mpUser.isLoggedIn();
     }
+
+    @Override
+    public long getFirstSeenTime() {
+        return mpUser.getFirstSeenTime();
+    }
+
+    @Override
+    public long getLastSeenTime() {
+        return mpUser.getLastSeenTime();
+    }
 }

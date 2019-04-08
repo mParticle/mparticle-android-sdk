@@ -289,4 +289,16 @@ import java.util.Map;
     public boolean isLoggedIn(Long mpid) {
         return mConfigManager.getUserStorage(mpid).isLoggedIn();
     }
+
+    public long getFirstSeenTime(Long mpid) {
+        return mConfigManager.getUserStorage(mpid).getFirstSeenTime();
+    }
+
+    public long getLastSeenTime(Long mpid) {
+        if (mpid == mConfigManager.getMpid()) {
+            return System.currentTimeMillis();
+        } else {
+            return mConfigManager.getUserStorage(mpid).getLastSeenTime();
+        }
+    }
 }

@@ -19,6 +19,8 @@ import com.mparticle.internal.MessageManager;
 import com.mparticle.internal.listeners.InternalListenerManager;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -99,6 +101,20 @@ public class IdentityApi {
         for (Long mpid: mpids) {
             users.add(MParticleUserImpl.getInstance(mContext, mpid, mUserDelegate));
         }
+        Collections.sort(users, new Comparator<MParticleUser>() {
+            @Override
+            public int compare(MParticleUser user1, MParticleUser user2) {
+                long lst1 = user1.getLastSeenTime();
+                long lst2 = user2.getLastSeenTime();
+                if (lst1 < lst2) {
+                    return -1;
+                } else if (lst1 > lst2) {
+                    return 1;
+                } else {
+                    return 0;
+                }
+            }
+        });
         return users;
     }
 
