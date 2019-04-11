@@ -8,12 +8,25 @@ buildscript {
     }
 }
 
+plugins {
+    id 'org.sonarqube' version '2.7'
+}
+
+sonarqube {
+    properties {
+        property 'sonar.projectName', 'Android'
+        property 'sonar.projectKey', 'Android'
+        property 'sonar.modules', 'android-core,android-kit-base'
+    }
+}
+
 allprojects {
     group = 'com.mparticle'
     version = '5.8.0-SNAPSHOT'
     if (project.hasProperty('isRelease') && project.isRelease) {
         version = version.toString().replace("-SNAPSHOT", "")
     }
+
     repositories {
         mavenLocal()
         google()

@@ -149,53 +149,6 @@ public class MpApiDetectorTest extends LintDetectorTest {
     }
 
     @Test
-    public void testStartCalledProperyNestedInSeperateClass() throws Exception {
-        @Language("JAVA") String source =
-                "package com.mparticle.lints;\n" +
-                        "import android.util.Log;\n" +
-                        "import com.mparticle.MParticle;\n" +
-                        "import android.app.Application;\n" +
-                        "import com.mparticle.lints.Initializer;\n" +
-                        "public class HasProperCall extends Application {\n" +
-                        "    Initializer initializer = new Initializer();\n" +
-                        "    public void onCreate() {\n" +
-                        "       super.onCreate();\n" +
-                        "       initializer.init();\n" +
-                        "       int a = random(4);\n" +
-                        "    }\n" +
-                        "    public int random(int number) {\n" +
-                        "       return 5 + number;\n" +
-                        "    }\n" +
-                        "    public void anotherMethod() {}\n" +
-                        "}";
-        assertEquals(NO_WARNINGS, lintProject(java(source), mInitializerClass, mParticleStub, mApplicationStub));
-    }
-
-    @Test
-    public void testStartCalledProperyNestedInSeperateSubClass() throws Exception {
-        @Language("JAVA") String source =
-                "package com.mparticle.lints;\n" +
-                        "import android.util.Log;\n" +
-                        "import com.mparticle.MParticle;\n" +
-                        "import android.app.Application;\n" +
-                        "import com.mparticle.lints.Initializer;\n" +
-                        "import com.mparticle.lints.InitializerChild;\n" +
-                        "public class HasProperCall extends Application {\n" +
-                        "    InitializerChild initializer = new InitializerChild();\n" +
-                        "    public void onCreate() {\n" +
-                        "       super.onCreate();\n" +
-                        "       initializer.init();\n" +
-                        "       int a = random(4);\n" +
-                        "    }\n" +
-                        "    public int random(int number) {\n" +
-                        "       return 5 + number;\n" +
-                        "    }\n" +
-                        "    public void anotherMethod() {}\n" +
-                        "}";
-        assertEquals(NO_WARNINGS, lintProject(java(source), mInitializerClass, mInitializerSubClass, mParticleStub, mApplicationStub));
-    }
-
-    @Test
     public void testStartCalledNestedMultipleCalls() throws Exception {
         @Language("JAVA") String source =
                 "package com.mparticle.lints;\n" +
